@@ -10,6 +10,7 @@ jobs:
 
     - stage: services
       env: TASK=goobi_reader-test
+    - env: TASK=reindex_worker-test
 
 script:
   - ./run_travis.sh
@@ -27,6 +28,7 @@ cache:
     - common/internal_model/target
 
     - goobi_adapter/goobi_reader/target
+    - reindexer/reindex_worker/target
 
 stages:
   - preflight

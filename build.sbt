@@ -49,3 +49,7 @@ lazy val elasticsearch_typesafe = setupProject(project, "common/elasticsearch_ty
 lazy val goobi_reader = setupProject(project, "goobi_adapter/goobi_reader",
   externalDependencies = CatalogueDependencies.goobiReaderDependencies
 )
+
+lazy val reindex_worker = setupProject(project, "reindexer/reindex_worker",
+  externalDependencies = WellcomeDependencies.messagingTypesafeLibrary
+)
