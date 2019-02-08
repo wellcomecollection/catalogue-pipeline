@@ -1,7 +1,7 @@
 ROOT = $(shell git rev-parse --show-toplevel)
 include $(ROOT)/makefiles/functions.Makefile
 
-STACK_ROOT  = libraries
+STACK_ROOT  = common
 
 SBT_APPS 	 =
 SBT_SSM_APPS =

@@ -1,10 +1,10 @@
 jobs:
   include:
-    - stage: quicktest
+    - stage: preflight
       env: TASK=travis-format
 
     - stage: libraries
-    - env: TASK=internal_model-test
+      env: TASK=internal_model-test
 
 script:
   >
