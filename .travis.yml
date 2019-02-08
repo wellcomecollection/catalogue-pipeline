@@ -7,11 +7,7 @@ jobs:
       env: TASK=internal_model-test
 
 script:
-  - make "$TASK";
-  - if [[ "$TRAVIS_EVENT_TYPE" == "push" && "$TRAVIS_BUILD_STAGE_NAME" == "Services" ]];
-    then
-      make "${TASK/test/publish}";
-    fi
+  - ./run_travis.sh
 
 cache:
   directories:
@@ -30,6 +26,7 @@ stages:
 before_install:
   - openssl aes-256-cbc -K $encrypted_83630750896a_key -iv $encrypted_83630750896a_iv -in secrets.zip.enc -out secrets.zip -d
   - unzip secrets.zip
+  - chmod 600 id_rsa
   - mkdir -p ~/.aws
   - cp config ~/.aws/config
   - cp credentials ~/.aws/credentials
