@@ -10,7 +10,16 @@ jobs:
 
     - stage: services
       env: TASK=goobi_reader-test
+
     - env: TASK=reindex_worker-test
+
+    - env: TASK=id_minter-test
+    - env: TASK=ingestor-test
+    - env: TASK=matcher-test
+    - env: TASK=merger-test
+    - env: TASK=recorder-test
+    - env: TASK=transformer_miro-test
+    - env: TASK=transformer_sierra-test
 
 script:
   - ./run_travis.sh
@@ -28,6 +37,15 @@ cache:
     - common/internal_model/target
 
     - goobi_adapter/goobi_reader/target
+
+    - pipeline/id_minter/target
+    - pipeline/ingestor/target
+    - pipeline/matcher/target
+    - pipeline/merger/target
+    - pipeline/recorder/target
+    - pipeline/transformer/transformer_miro/target
+    - pipeline/transformer/transformer_sierra/target
+
     - reindexer/reindex_worker/target
 
 stages:
