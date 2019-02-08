@@ -2,9 +2,10 @@ import sbt._
 
 object WellcomeDependencies {
   lazy val versions = new {
-    val fixtures = "1.0.0"
-    val json     = "1.1.1"
-    val typesafe = "1.0.0"
+    val fixtures  = "1.0.0"
+    val json      = "1.1.1"
+    val messaging = "1.2.0"
+    val typesafe  = "1.0.0"
   }
 
   val jsonLibrary: Seq[ModuleID] = library(
@@ -15,6 +16,11 @@ object WellcomeDependencies {
   val fixturesLibrary: Seq[ModuleID] = library(
     name = "fixtures",
     version = versions.fixtures
+  )
+
+  val messagingTypesafeLibrary: Seq[ModuleID] = library(
+    name = "messaging_typesafe",
+    version = versions.messaging
   )
 
   val typesafeLibrary: Seq[ModuleID] = library(
@@ -92,4 +98,8 @@ object CatalogueDependencies {
 
   val elasticsearchTypesafeDependencies: Seq[ModuleID] =
     WellcomeDependencies.typesafeLibrary
+
+  val goobiReaderDependencies: Seq[ModuleID] =
+    WellcomeDependencies.jsonLibrary ++
+    WellcomeDependencies.messagingTypesafeLibrary
 }

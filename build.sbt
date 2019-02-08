@@ -45,3 +45,7 @@ lazy val elasticsearch_typesafe = setupProject(project, "common/elasticsearch_ty
   localDependencies = Seq(elasticsearch),
   externalDependencies = CatalogueDependencies.elasticsearchTypesafeDependencies
 )
+
+lazy val goobi_reader = setupProject(project, "goobi_adapter/goobi_reader",
+  externalDependencies = CatalogueDependencies.goobiReaderDependencies
+)

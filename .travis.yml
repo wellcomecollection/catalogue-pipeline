@@ -8,6 +8,9 @@ jobs:
     - env: TASK=display-test
     - env: TASK=elasticsearch-test
 
+    - stage: services
+      env: TASK=goobi_reader-test
+
 script:
   - ./run_travis.sh
 
@@ -22,6 +25,8 @@ cache:
     - common/elasticsearch/target
     - common/elasticsearch_typesafe/target
     - common/internal_model/target
+
+    - goobi_adapter/goobi_reader/target
 
 stages:
   - preflight
