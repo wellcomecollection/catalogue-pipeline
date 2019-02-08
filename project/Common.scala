@@ -26,6 +26,7 @@ object Common {
       "-Xcheckinit"
 
     ),
-    parallelExecution in Test := false
+    parallelExecution in Test := false,
+    libraryDependencies ++= Dependencies.sharedDependencies
   )
 }

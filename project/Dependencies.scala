@@ -19,7 +19,12 @@ object WellcomeDependencies {
 object Dependencies {
   lazy val versions = new {
     val scalaCsv = "1.3.5"
+    val scalatest = "3.0.1"
   }
+
+  val sharedDependencies = Seq(
+    "org.scalatest" %% "scalatest" % versions.scalatest % "test"
+  )
 
   val internalModelDependencies = Seq(
     "com.github.tototoshi" %% "scala-csv" % versions.scalaCsv
