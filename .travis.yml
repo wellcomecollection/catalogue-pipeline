@@ -30,6 +30,10 @@ stages:
 
 before_install:
   - openssl aes-256-cbc -K $encrypted_83630750896a_key -iv $encrypted_83630750896a_iv -in secrets.zip.enc -out secrets.zip -d
+  - unzip secrets.zip
+  - mkdir -p ~/.aws
+  - cp config ~/.aws/config
+  - cp credentials ~/.aws/credentials
 
 install:
   # We need this for the Elasticsearch Docker container to start
