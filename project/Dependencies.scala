@@ -4,6 +4,7 @@ object WellcomeDependencies {
   lazy val versions = new {
     val fixtures = "1.0.0"
     val json     = "1.1.1"
+    val typesafe = "1.0.0"
   }
 
   val jsonLibrary: Seq[ModuleID] = library(
@@ -14,6 +15,11 @@ object WellcomeDependencies {
   val fixturesLibrary: Seq[ModuleID] = library(
     name = "fixtures",
     version = versions.fixtures
+  )
+
+  val typesafeLibrary: Seq[ModuleID] = library(
+    name = "typesafe-app",
+    version = versions.typesafe
   )
 
   private def library(name: String, version: String): Seq[ModuleID] = Seq(
@@ -83,4 +89,7 @@ object CatalogueDependencies {
     ExternalDependencies.elasticsearchDependencies ++
     ExternalDependencies.scalacheckDependencies ++
     WellcomeDependencies.fixturesLibrary
+
+  val elasticsearchTypesafeDependencies: Seq[ModuleID] =
+    WellcomeDependencies.typesafeLibrary
 }

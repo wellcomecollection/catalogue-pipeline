@@ -41,3 +41,7 @@ lazy val elasticsearch = setupProject(project, "common/elasticsearch",
   externalDependencies = CatalogueDependencies.elasticsearchDependencies
 )
 
+lazy val elasticsearch_typesafe = setupProject(project, "common/elasticsearch_typesafe",
+  localDependencies = Seq(elasticsearch),
+  externalDependencies = CatalogueDependencies.elasticsearchTypesafeDependencies
+)

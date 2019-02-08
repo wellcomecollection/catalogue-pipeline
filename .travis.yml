@@ -20,6 +20,7 @@ cache:
 
     - common/display/target
     - common/elasticsearch/target
+    - common/elasticsearch_typesafe/target
     - common/internal_model/target
 
 stages:
