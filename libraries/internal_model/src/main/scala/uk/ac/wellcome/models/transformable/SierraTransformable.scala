@@ -9,7 +9,7 @@ import uk.ac.wellcome.models.transformable.sierra.{
 }
 
 case class SierraTransformable(
-  sierraId: SierraBibNumber,
+        sierraId: SierraBibNumber,
   maybeBibRecord: Option[SierraBibRecord] = None,
   itemRecords: Map[SierraItemNumber, SierraItemRecord] = Map()
 )
