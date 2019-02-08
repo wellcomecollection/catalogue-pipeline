@@ -61,8 +61,7 @@ def get_changed_paths(*args):
 
 if __name__ == "__main__":
 
-    for fmt_task in ["terraform", "scala", "python"]:
-        make("format-%s" % fmt_task)
+    make("format")
 
     # If there are any changes, push to GitHub immediately and fail the
     # build.  This will abort the remaining jobs, and trigger a new build
@@ -91,8 +90,7 @@ if __name__ == "__main__":
     else:
         print("*** There were no changes from auto-formatting")
 
-    # Finally, run the 'lint' tasks.  A failure in these tasks requires
-    # manual intervention, so we run them last to get any automatic fixes
+    # Run the 'lint' tasks.  A failure in these tasks requires
+    # manual intervention, so we run them second to get any automatic fixes
     # out of the way.
-    for lint_task in ["python",]:
-        make("lint-%s" % lint_task)
+    make("lint")
