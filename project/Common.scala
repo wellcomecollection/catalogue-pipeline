@@ -27,6 +27,6 @@ object Common {
 
     ),
     parallelExecution in Test := false,
-    libraryDependencies ++= Dependencies.sharedDependencies
+    libraryDependencies ++= CatalogueDependencies.sharedDependencies
   )
 }
