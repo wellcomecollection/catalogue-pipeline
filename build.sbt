@@ -27,6 +27,6 @@ def setupProject(
     .settings(libraryDependencies ++= externalDependencies)
 }
 
-lazy val internal_model = setupProject(project, "libraries/internal_model",
+lazy val internal_model = setupProject(project, "common/internal_model",
   externalDependencies = Dependencies.internalModelDependencies
 )
