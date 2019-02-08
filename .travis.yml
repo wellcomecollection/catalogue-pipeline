@@ -5,6 +5,7 @@ jobs:
 
     - stage: libraries
       env: TASK=internal_model-test
+    - env: TASK=display-test
 
 script:
   - ./run_travis.sh
@@ -16,7 +17,8 @@ cache:
     - project/target
     - target
 
-    - internal_model/target
+    - common/display/target
+    - common/internal_model/target
 
 stages:
   - preflight
