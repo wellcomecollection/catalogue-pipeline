@@ -1,0 +1,68 @@
+jobs:
+  include:
+    - stage: preflight
+      env: TASK=travis-format
+
+    - stage: libraries
+      env: TASK=internal_model-test
+
+script:
+  - ./run_travis.sh
+
+cache:
+  directories:
+    - $HOME/.sbt
+    - $HOME/.ivy2/cache
+    - project/target
+    - target
+
+    - internal_model/target
+
+stages:
+  - preflight
+  - libraries
+  - services
+
+before_install:
+  - openssl aes-256-cbc -K $encrypted_83630750896a_key -iv $encrypted_83630750896a_iv -in secrets.zip.enc -out secrets.zip -d
+  - unzip secrets.zip
+  - chmod 600 id_rsa
+  - mkdir -p ~/.aws
+  - cp config ~/.aws/config
+  - cp credentials ~/.aws/credentials
+
+install:
+  # We need this for the Elasticsearch Docker container to start
+  # See https://github.com/travis-ci/travis-ci/issues/6534
+  - sudo sysctl -w vm.max_map_count=262144
+
+language: sh
+
+services:
+  - docker
+
+dist: trusty
+
+branches:
+  only:
+    - master
+
+# Based on instructions from
+# https://www.scala-sbt.org/1.0/docs/Travis-CI-with-sbt.html#Caching
+before_cache:
+  - sudo find $HOME/.ivy2/cache -name "ivydata-*.properties" -print -delete
+  - sudo find $HOME/.sbt        -name "*.lock"               -print -delete
+
+env:
+  global:
+    - AWS_ECR_REPO=760097843905.dkr.ecr.eu-west-1.amazonaws.com
+
+    # This forces Python to print everything to stdout/stderr immediately.
+    # Otherwise, we've seen issues where all the output from our Travis scripts
+    # gets buffered, and only gets printed at the end of the test...
+    #
+    # ... out of order from the rest of the rest of the output!
+    #
+    # See also: https://docs.python.org/3/using/cmdline.html#cmdoption-u
+    #
+    - PYTHONUNBUFFERED=x
