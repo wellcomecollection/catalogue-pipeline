@@ -7,11 +7,10 @@ jobs:
       env: TASK=internal_model-test
 
 script:
-  >
-    make "$TASK"
-    if [[ "$TRAVIS_EVENT_TYPE" == "push" && "$TRAVIS_BUILD_STAGE_NAME" == "Services" ]]
+  - make "$TASK";
+  - if [[ "$TRAVIS_EVENT_TYPE" == "push" && "$TRAVIS_BUILD_STAGE_NAME" == "Services" ]];
     then
-      make "${TASK/test/publish}"
+      make "${TASK/test/publish}";
     fi
 
 cache:
