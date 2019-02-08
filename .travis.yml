@@ -6,6 +6,7 @@ jobs:
     - stage: libraries
       env: TASK=internal_model-test
     - env: TASK=display-test
+    - env: TASK=elasticsearch-test
 
 script:
   - ./run_travis.sh
@@ -18,6 +19,7 @@ cache:
     - target
 
     - common/display/target
+    - common/elasticsearch/target
     - common/internal_model/target
 
 stages:

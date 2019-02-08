@@ -35,3 +35,9 @@ lazy val display = setupProject(project, "common/display",
   localDependencies = Seq(internal_model),
   externalDependencies = CatalogueDependencies.displayModelDependencies
 )
+
+lazy val elasticsearch = setupProject(project, "common/elasticsearch",
+  localDependencies = Seq(internal_model),
+  externalDependencies = CatalogueDependencies.elasticsearchDependencies
+)
+

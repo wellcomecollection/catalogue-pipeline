@@ -2,12 +2,18 @@ import sbt._
 
 object WellcomeDependencies {
   lazy val versions = new {
-    val json = "1.1.1"
+    val fixtures = "1.0.0"
+    val json     = "1.1.1"
   }
 
   val jsonLibrary: Seq[ModuleID] = library(
     name    = "json",
     version = versions.json
+  )
+
+  val fixturesLibrary: Seq[ModuleID] = library(
+    name = "fixtures",
+    version = versions.fixtures
   )
 
   private def library(name: String, version: String): Seq[ModuleID] = Seq(
@@ -18,6 +24,8 @@ object WellcomeDependencies {
 
 object ExternalDependencies {
   lazy val versions = new {
+    val apacheLogging       = "2.8.2"
+    val elastic4s           = "6.5.0"
     val finatra             = "18.11.0"
     val guice               = "4.2.0"
     val scalacheck          = "1.13.4"
@@ -25,6 +33,15 @@ object ExternalDependencies {
     val scalacsv            = "1.3.5"
     val scalatest           = "3.0.1"
   }
+
+  val elasticsearchDependencies = Seq(
+    "org.apache.logging.log4j" % "log4j-core" %            versions.apacheLogging,
+    "org.apache.logging.log4j" % "log4j-api" %             versions.apacheLogging,
+    "com.sksamuel.elastic4s" %% "elastic4s-core" %         versions.elastic4s,
+    "com.sksamuel.elastic4s" %% "elastic4s-http" %         versions.elastic4s,
+    "com.sksamuel.elastic4s" %% "elastic4s-http-streams" % versions.elastic4s,
+    "com.sksamuel.elastic4s" %% "elastic4s-testkit" %      versions.elastic4s % "test"
+  )
 
   val guiceDependencies = Seq(
     "com.google.inject" % "guice" % versions.guice,
@@ -61,4 +78,9 @@ object CatalogueDependencies {
     ExternalDependencies.swaggerDependencies ++
     ExternalDependencies.guiceDependencies ++
     ExternalDependencies.scalacheckDependencies
+
+  val elasticsearchDependencies: Seq[ModuleID] =
+    ExternalDependencies.elasticsearchDependencies ++
+    ExternalDependencies.scalacheckDependencies ++
+    WellcomeDependencies.fixturesLibrary
 }
