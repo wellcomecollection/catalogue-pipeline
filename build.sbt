@@ -60,7 +60,7 @@ lazy val ingestor = setupProject(project, "pipeline/ingestor",
   externalDependencies = WellcomeDependencies.messagingTypesafeLibrary
 )
 
-lazy val matcher = setupProject(project, "catalogue_pipeline/matcher",
+lazy val matcher = setupProject(project, "pipeline/matcher",
   localDependencies = Seq(internal_model),
   externalDependencies = CatalogueDependencies.matcherDependencies
 )
