@@ -1,5 +1,7 @@
 package uk.ac.wellcome.platform.reindex.reindex_worker.fixtures
 
+import uk.ac.wellcome.akka.fixtures.Akka
+import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS
@@ -12,8 +14,6 @@ import uk.ac.wellcome.platform.reindex.reindex_worker.models.{
 }
 import uk.ac.wellcome.platform.reindex.reindex_worker.services.ReindexWorkerService
 import uk.ac.wellcome.storage.fixtures.LocalDynamoDb.Table
-import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.test.fixtures.Akka
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

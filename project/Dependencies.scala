@@ -2,10 +2,12 @@ import sbt._
 
 object WellcomeDependencies {
   lazy val versions = new {
-    val fixtures  = "1.0.0"
-    val json      = "1.1.1"
-    val messaging = "1.2.0"
-    val typesafe  = "1.0.0"
+    val fixtures   = "1.0.0"
+    val json       = "1.1.1"
+    val messaging  = "1.2.0"
+    val monitoring = "1.3.0"
+    val storage    = "3.3.0"
+    val typesafe   = "1.0.0"
   }
 
   val jsonLibrary: Seq[ModuleID] = library(
@@ -18,15 +20,30 @@ object WellcomeDependencies {
     version = versions.fixtures
   )
 
-  val messagingTypesafeLibrary: Seq[ModuleID] = library(
-    name = "messaging_typesafe",
+  val messagingLibrary: Seq[ModuleID] = library(
+    name = "messaging",
     version = versions.messaging
+  )
+
+  val monitoringLibrary: Seq[ModuleID] = library(
+    name = "monitoring",
+    version = versions.monitoring
+  )
+
+  val storageLibrary: Seq[ModuleID] = library(
+    name = "storage",
+    version = versions.storage
   )
 
   val typesafeLibrary: Seq[ModuleID] = library(
     name = "typesafe-app",
     version = versions.typesafe
-  )
+  ) ++ fixturesLibrary
+
+  val messagingTypesafeLibrary: Seq[ModuleID] = library(
+    name = "messaging_typesafe",
+    version = versions.messaging
+  ) ++ messagingLibrary ++ monitoringLibrary ++ storageLibrary ++ typesafeLibrary
 
   private def library(name: String, version: String): Seq[ModuleID] = Seq(
     "uk.ac.wellcome" %% name % version,
@@ -36,18 +53,24 @@ object WellcomeDependencies {
 
 object ExternalDependencies {
   lazy val versions = new {
+    val apacheCommons       = "3.1"
     val apacheLogging       = "2.8.2"
     val aws                 = "1.11.95"
     val circe               = "0.9.0"
     val elastic4s           = "6.5.0"
     val finatra             = "18.11.0"
     val guice               = "4.2.0"
+    val mockito             = "1.9.5"
     val scalacheck          = "1.13.4"
     val scalacheckShapeless = "1.1.6"
     val scalacsv            = "1.3.5"
     val scalaGraph          = "1.12.5"
     val scalatest           = "3.0.1"
   }
+
+  val apacheCommonsDependencies = Seq(
+    "org.apache.commons" % "commons-lang3" % versions.apacheCommons
+  )
 
   val circeOpticsDependencies = Seq(
     "io.circe" %% "circe-optics" % versions.circe
@@ -65,6 +88,10 @@ object ExternalDependencies {
   val guiceDependencies = Seq(
     "com.google.inject" % "guice" % versions.guice,
     "com.google.inject.extensions" % "guice-testlib" % versions.guice % "test"
+  )
+
+  val mockitoDependencies: Seq[ModuleID] = Seq(
+    "org.mockito" % "mockito-core" % versions.mockito % "test"
   )
 
   val mySqlDependencies = Seq(
@@ -118,19 +145,39 @@ object CatalogueDependencies {
     WellcomeDependencies.typesafeLibrary
 
   val goobiReaderDependencies: Seq[ModuleID] =
+    ExternalDependencies.mockitoDependencies ++
     WellcomeDependencies.jsonLibrary ++
     WellcomeDependencies.messagingTypesafeLibrary
 
   val idminterDependencies: Seq[ModuleID] =
+    ExternalDependencies.mockitoDependencies ++
     ExternalDependencies.mySqlDependencies ++
     ExternalDependencies.circeOpticsDependencies ++
     WellcomeDependencies.messagingTypesafeLibrary
 
   val matcherDependencies: Seq[ModuleID] =
+    ExternalDependencies.mockitoDependencies ++
     ExternalDependencies.scalaGraphDependencies ++
     WellcomeDependencies.messagingTypesafeLibrary
 
-  val miroTransformerDependencies: Seq[ModuleID] = Seq(
-    "org.apache.commons" % "commons-lang3" % "3.1"
-  ) ++ WellcomeDependencies.messagingTypesafeLibrary
+  val mergerDependencies: Seq[ModuleID] =
+    ExternalDependencies.mockitoDependencies ++
+    WellcomeDependencies.messagingTypesafeLibrary
+
+  val miroTransformerDependencies: Seq[ModuleID] =
+     ExternalDependencies.apacheCommonsDependencies ++
+     ExternalDependencies.mockitoDependencies ++
+     WellcomeDependencies.messagingTypesafeLibrary
+
+  val recorderDependencies: Seq[ModuleID] =
+    ExternalDependencies.mockitoDependencies ++
+    WellcomeDependencies.messagingTypesafeLibrary
+
+  val reindexWorkerDependencies: Seq[ModuleID] =
+    ExternalDependencies.mockitoDependencies ++
+    WellcomeDependencies.messagingTypesafeLibrary
+
+  val sierraTransformerDependencies: Seq[ModuleID] =
+    ExternalDependencies.mockitoDependencies ++
+    WellcomeDependencies.messagingTypesafeLibrary
 }

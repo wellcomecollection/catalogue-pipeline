@@ -5,6 +5,8 @@ import java.time.Instant
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.gu.scanamo.{DynamoFormat, Scanamo}
 import org.apache.commons.codec.digest.DigestUtils
+import uk.ac.wellcome.akka.fixtures.Akka
+import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.{Messaging, SNS, SQS}
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
@@ -22,8 +24,6 @@ import uk.ac.wellcome.storage.ObjectStore
 import uk.ac.wellcome.storage.dynamo._
 import uk.ac.wellcome.storage.fixtures.LocalDynamoDb.Table
 import uk.ac.wellcome.storage.fixtures.{LocalDynamoDb, S3}
-import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.test.fixtures.Akka
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

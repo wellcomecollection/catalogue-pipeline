@@ -1,5 +1,7 @@
 package uk.ac.wellcome.platform.merger.fixtures
 
+import uk.ac.wellcome.akka.fixtures.Akka
+import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.fixtures.Messaging
@@ -9,8 +11,6 @@ import uk.ac.wellcome.models.work.internal.BaseWork
 import uk.ac.wellcome.monitoring.MetricsSender
 import uk.ac.wellcome.platform.merger.services._
 import uk.ac.wellcome.storage.fixtures.S3
-import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.test.fixtures.Akka
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
