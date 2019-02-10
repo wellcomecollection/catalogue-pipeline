@@ -21,6 +21,13 @@ jobs:
     - env: TASK=transformer_miro-test
     - env: TASK=transformer_sierra-test
 
+    - env: TASK=sierra_reader-test
+    - env: TASK=sierra_bib_merger-test
+    - env: TASK=sierra_item_merger-test
+    - env: TASK=sierra_items_to_dynamo-test
+
+    # TODO: Add a task for the Sierra adapter Lambdas
+
 script:
   # Wait 45 minutes for the entire build to finish.  Primarily this stops the
   # build timing out if we're taking a really long time to compile something.
@@ -50,6 +57,12 @@ cache:
     - pipeline/transformer/transformer_sierra/target
 
     - reindexer/reindex_worker/target
+
+    - sierra_adapter/common/target
+    - sierra_adapter/sierra_reader/target
+    - sierra_adapter/sierra_bib_merger/target
+    - sierra_adapter/sierra_item_merger/target
+    - sierra_adapter/sierra_items_to_dynamo/target
 
 stages:
   - preflight

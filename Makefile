@@ -8,3 +8,4 @@ include common/Makefile
 include goobi_adapter/Makefile
 include pipeline/Makefile
 include reindexer/Makefile
+include sierra_adapter/Makefile

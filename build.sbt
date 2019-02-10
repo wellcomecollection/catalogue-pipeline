@@ -90,3 +90,28 @@ lazy val transformer_sierra = setupProject(project,
   localDependencies = Seq(internal_model),
   externalDependencies = CatalogueDependencies.sierraTransformerDependencies
 )
+
+// Sierra adapter
+
+lazy val sierra_adapter_common = setupProject(project, "sierra_adapter/common",
+  localDependencies = Seq(internal_model),
+  externalDependencies = WellcomeDependencies.storageTypesafeLibrary
+)
+
+lazy val sierra_reader = setupProject(project, "sierra_adapter/sierra_reader",
+  localDependencies = Seq(sierra_adapter_common),
+  externalDependencies = CatalogueDependencies.sierraReaderDependencies
+)
+
+lazy val sierra_bib_merger = setupProject(project, "sierra_adapter/sierra_bib_merger",
+  localDependencies = Seq(sierra_adapter_common)
+)
+
+lazy val sierra_item_merger = setupProject(project, "sierra_adapter/sierra_item_merger",
+  localDependencies = Seq(sierra_adapter_common)
+)
+
+lazy val sierra_items_to_dynamo = setupProject(project,
+  folder = "sierra_adapter/sierra_items_to_dynamo",
+  localDependencies = Seq(sierra_adapter_common)
+)
