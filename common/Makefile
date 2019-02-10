@@ -9,8 +9,8 @@ SBT_SSM_APPS =
 ECR_BASE_URI =
 REGISTRY_ID  =
 
-SBT_DOCKER_LIBRARIES    =
-SBT_NO_DOCKER_LIBRARIES = display internal_model
+SBT_DOCKER_LIBRARIES    = elasticsearch
+SBT_NO_DOCKER_LIBRARIES = display elasticsearch_typesafe internal_model
 
 PYTHON_APPS     =
 PYTHON_SSM_APPS =

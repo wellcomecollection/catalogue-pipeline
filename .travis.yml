@@ -6,9 +6,26 @@ jobs:
     - stage: libraries
       env: TASK=internal_model-test
     - env: TASK=display-test
+    - env: TASK=elasticsearch-test
+
+    - stage: services
+      env: TASK=goobi_reader-test
+
+    - env: TASK=reindex_worker-test
+
+    - env: TASK=id_minter-test
+    - env: TASK=ingestor-test
+    - env: TASK=matcher-test
+    - env: TASK=merger-test
+    - env: TASK=recorder-test
+    - env: TASK=transformer_miro-test
+    - env: TASK=transformer_sierra-test
 
 script:
-  - ./run_travis.sh
+  # Wait 45 minutes for the entire build to finish.  Primarily this stops the
+  # build timing out if we're taking a really long time to compile something.
+  # See https://docs.travis-ci.com/user/common-build-problems/#build-times-out-because-no-output-was-received
+  - travis_wait 45 ./run_travis.sh
 
 cache:
   directories:
@@ -18,7 +35,21 @@ cache:
     - target
 
     - common/display/target
+    - common/elasticsearch/target
+    - common/elasticsearch_typesafe/target
     - common/internal_model/target
+
+    - goobi_adapter/goobi_reader/target
+
+    - pipeline/id_minter/target
+    - pipeline/ingestor/target
+    - pipeline/matcher/target
+    - pipeline/merger/target
+    - pipeline/recorder/target
+    - pipeline/transformer/transformer_miro/target
+    - pipeline/transformer/transformer_sierra/target
+
+    - reindexer/reindex_worker/target
 
 stages:
   - preflight

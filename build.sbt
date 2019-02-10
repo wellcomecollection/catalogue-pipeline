@@ -35,3 +35,58 @@ lazy val display = setupProject(project, "common/display",
   localDependencies = Seq(internal_model),
   externalDependencies = CatalogueDependencies.displayModelDependencies
 )
+
+lazy val elasticsearch = setupProject(project, "common/elasticsearch",
+  localDependencies = Seq(internal_model),
+  externalDependencies = CatalogueDependencies.elasticsearchDependencies
+)
+
+lazy val elasticsearch_typesafe = setupProject(project, "common/elasticsearch_typesafe",
+  localDependencies = Seq(elasticsearch),
+  externalDependencies = CatalogueDependencies.elasticsearchTypesafeDependencies
+)
+
+lazy val goobi_reader = setupProject(project, "goobi_adapter/goobi_reader",
+  externalDependencies = CatalogueDependencies.goobiReaderDependencies
+)
+
+lazy val id_minter = setupProject(project, "pipeline/id_minter",
+  localDependencies = Seq(internal_model),
+  externalDependencies = CatalogueDependencies.idminterDependencies
+)
+
+lazy val ingestor = setupProject(project, "pipeline/ingestor",
+  localDependencies = Seq(elasticsearch_typesafe),
+  externalDependencies = CatalogueDependencies.ingestorDependencies
+)
+
+lazy val matcher = setupProject(project, "pipeline/matcher",
+  localDependencies = Seq(internal_model),
+  externalDependencies = CatalogueDependencies.matcherDependencies
+)
+
+lazy val merger = setupProject(project, "pipeline/merger",
+  localDependencies = Seq(internal_model),
+  externalDependencies = CatalogueDependencies.mergerDependencies
+)
+
+lazy val recorder = setupProject(project, "pipeline/recorder",
+  localDependencies = Seq(internal_model),
+  externalDependencies = CatalogueDependencies.recorderDependencies
+)
+
+lazy val reindex_worker = setupProject(project, "reindexer/reindex_worker",
+  externalDependencies = CatalogueDependencies.reindexWorkerDependencies
+)
+
+lazy val transformer_miro = setupProject(project,
+  folder = "pipeline/transformer/transformer_miro",
+  localDependencies = Seq(internal_model),
+  externalDependencies = CatalogueDependencies.miroTransformerDependencies
+)
+
+lazy val transformer_sierra = setupProject(project,
+  folder = "pipeline/transformer/transformer_sierra",
+  localDependencies = Seq(internal_model),
+  externalDependencies = CatalogueDependencies.sierraTransformerDependencies
+)
