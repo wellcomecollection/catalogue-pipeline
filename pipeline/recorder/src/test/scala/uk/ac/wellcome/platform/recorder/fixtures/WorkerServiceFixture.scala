@@ -1,5 +1,7 @@
 package uk.ac.wellcome.platform.recorder.fixtures
 
+import uk.ac.wellcome.akka.fixtures.Akka
+import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.{Messaging, SNS}
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
@@ -11,8 +13,6 @@ import uk.ac.wellcome.storage.fixtures.LocalDynamoDb.Table
 import uk.ac.wellcome.storage.fixtures.LocalVersionedHybridStore
 import uk.ac.wellcome.storage.fixtures.S3.Bucket
 import uk.ac.wellcome.storage.vhs.EmptyMetadata
-import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.test.fixtures.Akka
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
