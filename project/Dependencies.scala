@@ -40,10 +40,10 @@ object WellcomeDependencies {
     version = versions.typesafe
   ) ++ fixturesLibrary
 
-  val messagingTypesafeLibrary: Seq[ModuleID] = library(
+  val messagingTypesafeLibrary: Seq[ModuleID] = messagingLibrary ++ library(
     name = "messaging_typesafe",
     version = versions.messaging
-  ) ++ messagingLibrary ++ monitoringLibrary ++ storageLibrary ++ typesafeLibrary
+  ) ++ monitoringLibrary ++ storageLibrary ++ typesafeLibrary
 
   private def library(name: String, version: String): Seq[ModuleID] = Seq(
     "uk.ac.wellcome" %% name % version,
@@ -153,6 +153,10 @@ object CatalogueDependencies {
     ExternalDependencies.mockitoDependencies ++
     ExternalDependencies.mySqlDependencies ++
     ExternalDependencies.circeOpticsDependencies ++
+    WellcomeDependencies.messagingTypesafeLibrary
+
+  val ingestorDependencies: Seq[ModuleID] =
+    ExternalDependencies.mockitoDependencies ++
     WellcomeDependencies.messagingTypesafeLibrary
 
   val matcherDependencies: Seq[ModuleID] =

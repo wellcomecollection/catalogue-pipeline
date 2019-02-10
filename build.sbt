@@ -57,7 +57,7 @@ lazy val id_minter = setupProject(project, "pipeline/id_minter",
 
 lazy val ingestor = setupProject(project, "pipeline/ingestor",
   localDependencies = Seq(elasticsearch_typesafe),
-  externalDependencies = WellcomeDependencies.messagingTypesafeLibrary
+  externalDependencies = CatalogueDependencies.ingestorDependencies
 )
 
 lazy val matcher = setupProject(project, "pipeline/matcher",
