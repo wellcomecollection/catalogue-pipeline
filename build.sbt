@@ -115,3 +115,10 @@ lazy val sierra_items_to_dynamo = setupProject(project,
   folder = "sierra_adapter/sierra_items_to_dynamo",
   localDependencies = Seq(sierra_adapter_common)
 )
+
+// Snapshots
+
+lazy val snapshot_generator = setupProject(project, "snapshots/snapshot_generator",
+  localDependencies = Seq(internal_model, display, elasticsearch_typesafe),
+  externalDependencies = CatalogueDependencies.snapshotGeneratorDependencies
+)

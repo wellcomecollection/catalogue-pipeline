@@ -59,6 +59,7 @@ object WellcomeDependencies {
 
 object ExternalDependencies {
   lazy val versions = new {
+    val akkaStreamAlpakka   = "0.20"
     val apacheCommons       = "3.1"
     val apacheLogging       = "2.8.2"
     val aws                 = "1.11.95"
@@ -73,6 +74,10 @@ object ExternalDependencies {
     val scalaGraph          = "1.12.5"
     val scalatest           = "3.0.1"
   }
+
+  val alpakkaS3Dependencies = Seq(
+    "com.lightbend.akka" %% "akka-stream-alpakka-s3" % versions.akkaStreamAlpakka
+  )
 
   val apacheCommonsDependencies = Seq(
     "org.apache.commons" % "commons-lang3" % versions.apacheCommons
@@ -201,4 +206,10 @@ object CatalogueDependencies {
     WellcomeDependencies.sierraStreamsSourceLibrary ++
     ExternalDependencies.circeOpticsDependencies ++
     WellcomeDependencies.messagingTypesafeLibrary
+
+  // Snapshots stack
+
+  val snapshotGeneratorDependencies: Seq[ModuleID] =
+    WellcomeDependencies.messagingTypesafeLibrary ++
+    ExternalDependencies.alpakkaS3Dependencies
 }

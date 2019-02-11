@@ -26,7 +26,10 @@ jobs:
     - env: TASK=sierra_item_merger-test
     - env: TASK=sierra_items_to_dynamo-test
 
+    - env: TASK=snapshot_generator-test
+
     # TODO: Add a task for the Sierra adapter Lambdas
+    # TODO: Add a task for the snapshot Lambdas
 
 script:
   # Wait 45 minutes for the entire build to finish.  Primarily this stops the
@@ -63,6 +66,8 @@ cache:
     - sierra_adapter/sierra_bib_merger/target
     - sierra_adapter/sierra_item_merger/target
     - sierra_adapter/sierra_items_to_dynamo/target
+
+    - snapshots/snapshot_generator/target
 
 stages:
   - preflight
