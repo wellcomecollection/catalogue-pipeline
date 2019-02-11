@@ -4,7 +4,7 @@ module "reindex_worker" {
   reindexer_jobs            = "${local.reindexer_jobs}"
   reindexer_job_config_json = "${local.reindex_job_config_json}"
 
-  reindex_worker_container_image = "${local.reindex_worker_container_image}"
+  reindex_worker_container_image = "${local.reindex_worker_image}"
 
   ecs_cluster_name = "${aws_ecs_cluster.cluster.name}"
   ecs_cluster_id   = "${aws_ecs_cluster.cluster.id}"
