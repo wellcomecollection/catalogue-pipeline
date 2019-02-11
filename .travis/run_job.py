@@ -44,7 +44,7 @@ def should_run_sbt_project(project_name, changed_paths):
         return True
 
     for path in interesting_paths:
-        if path.startswith(".travis"):
+        if path.startswith((".travis", "docs/")):
             continue
 
         if path.endswith("Makefile"):
