@@ -9,7 +9,7 @@ jobs:
     - env: TASK=elasticsearch-test
 
     - stage: services
-      env: TASK=api-test
+      env: TASK=api-build
 
     - env: TASK=goobi_reader-test
 
