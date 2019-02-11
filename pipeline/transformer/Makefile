@@ -1,13 +1,10 @@
 ROOT = $(shell git rev-parse --show-toplevel)
 include $(ROOT)/makefiles/functions.Makefile
 
-STACK_ROOT 	= catalogue_pipeline/transformer
+STACK_ROOT 	= pipeline/transformer
 
 SBT_APPS 	 =
 SBT_SSM_APPS = transformer_miro transformer_sierra
-
-ACCOUNT_ID = 760097843905
-PROJECT_ID = catalogue_pipeline
 
 SBT_DOCKER_LIBRARIES    =
 SBT_NO_DOCKER_LIBRARIES =
