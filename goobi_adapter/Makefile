@@ -7,9 +7,6 @@ STACK_ROOT  = goobi_adapter
 SBT_APPS 	 = goobi_reader
 SBT_SSM_APPS =
 
-ACCOUNT_ID  =
-PROJECT_ID =
-
 SBT_DOCKER_LIBRARIES    =
 SBT_NO_DOCKER_LIBRARIES =
 

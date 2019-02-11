@@ -6,9 +6,6 @@ STACK_ROOT  = common
 SBT_APPS 	 =
 SBT_SSM_APPS =
 
-ECR_BASE_URI =
-REGISTRY_ID  =
-
 SBT_DOCKER_LIBRARIES    = elasticsearch
 SBT_NO_DOCKER_LIBRARIES = display elasticsearch_typesafe internal_model
 

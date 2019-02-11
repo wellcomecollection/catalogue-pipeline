@@ -6,10 +6,6 @@ include $(ROOT)/makefiles/functions.Makefile
 SBT_APPS 	 =
 SBT_SSM_APPS = id_minter ingestor recorder matcher merger
 
-
-ACCOUNT_ID = 760097843905
-PROJECT_ID = catalogue_pipeline
-
 SBT_DOCKER_LIBRARIES    =
 SBT_NO_DOCKER_LIBRARIES =
 
