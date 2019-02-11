@@ -47,6 +47,9 @@ def should_run_sbt_project(project_name, changed_paths):
         if path.startswith((".travis", "docs/")):
             continue
 
+        if path.endswith(".tf"):
+            continue
+
         if path.endswith("Makefile"):
             return os.path.dirname(project.folder) == os.path.dirname(path)
 
