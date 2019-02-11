@@ -59,6 +59,7 @@ object WellcomeDependencies {
 
 object ExternalDependencies {
   lazy val versions = new {
+    val akka                = "2.5.9"
     val akkaStreamAlpakka   = "0.20"
     val apacheCommons       = "3.1"
     val apacheLogging       = "2.8.2"
@@ -67,6 +68,7 @@ object ExternalDependencies {
     val elastic4s           = "6.5.0"
     val finatra             = "18.11.0"
     val guice               = "4.2.0"
+    val logback             = "1.1.8"
     val mockito             = "1.9.5"
     val scalacheck          = "1.13.4"
     val scalacheckShapeless = "1.1.6"
@@ -74,6 +76,10 @@ object ExternalDependencies {
     val scalaGraph          = "1.12.5"
     val scalatest           = "3.0.1"
   }
+
+  val akkaActorDependencies = Seq(
+    "com.typesafe.akka" %% "akka-actor" % versions.akka,
+  )
 
   val alpakkaS3Dependencies = Seq(
     "com.lightbend.akka" %% "akka-stream-alpakka-s3" % versions.akkaStreamAlpakka
@@ -94,6 +100,23 @@ object ExternalDependencies {
     "com.sksamuel.elastic4s" %% "elastic4s-http" %         versions.elastic4s,
     "com.sksamuel.elastic4s" %% "elastic4s-http-streams" % versions.elastic4s,
     "com.sksamuel.elastic4s" %% "elastic4s-testkit" %      versions.elastic4s % "test"
+  )
+
+  val finatraDependencies = Seq(
+    "ch.qos.logback" % "logback-classic"  % versions.logback,
+    "com.twitter" %% "finatra-http"       % versions.finatra % "test" classifier "tests",
+    "com.twitter" %% "finatra-http"       % versions.finatra,
+    "com.twitter" %% "finatra-httpclient" % versions.finatra,
+    "com.twitter" %% "finatra-jackson"    % versions.finatra % "test",
+    "com.twitter" %% "finatra-jackson"    % versions.finatra % "test" classifier "tests",
+    "com.twitter" %% "inject-app"         % versions.finatra % "test" classifier "tests",
+    "com.twitter" %% "inject-app"         % versions.finatra % "test",
+    "com.twitter" %% "inject-core"        % versions.finatra,
+    "com.twitter" %% "inject-core"        % versions.finatra % "test" classifier "tests",
+    "com.twitter" %% "inject-modules"     % versions.finatra % "test",
+    "com.twitter" %% "inject-modules"     % versions.finatra % "test" classifier "tests",
+    "com.twitter" %% "inject-server"      % versions.finatra % "test" classifier "tests",
+    "com.twitter" %% "inject-server"      % versions.finatra % "test"
   )
 
   val guiceDependencies = Seq(
@@ -154,6 +177,12 @@ object CatalogueDependencies {
 
   val elasticsearchTypesafeDependencies: Seq[ModuleID] =
     WellcomeDependencies.typesafeLibrary
+
+  val apiDependencies: Seq[ModuleID] =
+    ExternalDependencies.akkaActorDependencies ++
+    ExternalDependencies.finatraDependencies ++
+    ExternalDependencies.guiceDependencies ++
+    WellcomeDependencies.fixturesLibrary
 
   val goobiReaderDependencies: Seq[ModuleID] =
     ExternalDependencies.mockitoDependencies ++

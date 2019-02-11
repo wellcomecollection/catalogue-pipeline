@@ -9,7 +9,9 @@ jobs:
     - env: TASK=elasticsearch-test
 
     - stage: services
-      env: TASK=goobi_reader-test
+      env: TASK=api-test
+
+    - env: TASK=goobi_reader-test
 
     - env: TASK=reindex_worker-test
 
@@ -43,6 +45,8 @@ cache:
     - $HOME/.ivy2/cache
     - project/target
     - target
+
+    - api/api/target
 
     - common/display/target
     - common/elasticsearch/target
