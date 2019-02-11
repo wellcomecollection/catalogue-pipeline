@@ -16,6 +16,6 @@ module "goobi_adapter" {
   vhs_goobi_bucketname         = "${local.vhs_goobi_bucket_name}"
   vhs_goobi_full_access_policy = "${local.vhs_goobi_full_access_policy}"
 
-  container_image = "${local.goobi_reader_container_image}"
+  container_image = "${local.goobi_reader_image}"
   subnets         = "${local.private_subnets}"
 }
