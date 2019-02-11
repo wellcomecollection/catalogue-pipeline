@@ -11,24 +11,24 @@ jobs:
     - stage: services
       env: TASK=api-build
 
-    - env: TASK=goobi_reader-test
+    - env: SBT_PROJECT=goobi_reader
 
-    - env: TASK=reindex_worker-test
+    - env: SBT_PROJECT=reindex_worker
 
-    - env: TASK=id_minter-test
-    - env: TASK=ingestor-test
-    - env: TASK=matcher-test
-    - env: TASK=merger-test
-    - env: TASK=recorder-test
-    - env: TASK=transformer_miro-test
-    - env: TASK=transformer_sierra-test
+    - env: SBT_PROJECT=id_minter
+    - env: SBT_PROJECT=ingestor
+    - env: SBT_PROJECT=matcher
+    - env: SBT_PROJECT=merger
+    - env: SBT_PROJECT=recorder
+    - env: SBT_PROJECT=transformer_miro
+    - env: SBT_PROJECT=transformer_sierra
 
-    - env: TASK=sierra_reader-test
-    - env: TASK=sierra_bib_merger-test
-    - env: TASK=sierra_item_merger-test
-    - env: TASK=sierra_items_to_dynamo-test
+    - env: SBT_PROJECT=sierra_reader
+    - env: SBT_PROJECT=sierra_bib_merger
+    - env: SBT_PROJECT=sierra_item_merger
+    - env: SBT_PROJECT=sierra_items_to_dynamo
 
-    - env: TASK=snapshot_generator-test
+    - env: SBT_PROJECT=snapshot_generator
 
     # TODO: Add a task for the Sierra adapter Lambdas
     # TODO: Add a task for the snapshot Lambdas
