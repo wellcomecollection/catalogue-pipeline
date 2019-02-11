@@ -7,10 +7,10 @@ import io.circe.parser._
 import org.scalatest.compatible.Assertion
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{BeforeAndAfterAll, FunSpec, Matchers}
+import uk.ac.wellcome.akka.fixtures.Akka
+import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.storage.fixtures.S3
 import uk.ac.wellcome.storage.fixtures.S3.Bucket
-import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.test.fixtures.Akka
 
 import scala.concurrent.Future
 

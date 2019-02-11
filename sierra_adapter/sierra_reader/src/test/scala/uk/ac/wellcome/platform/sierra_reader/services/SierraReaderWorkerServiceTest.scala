@@ -3,10 +3,8 @@ package uk.ac.wellcome.platform.sierra_reader.services
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatest.Matchers
 import org.scalatest.FunSpec
-import uk.ac.wellcome.test.fixtures.Akka
+import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.storage.fixtures.S3
-import uk.ac.wellcome.storage.fixtures.S3.Bucket
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.models.transformable.sierra.{
   SierraBibRecord,
@@ -14,6 +12,8 @@ import uk.ac.wellcome.models.transformable.sierra.{
 }
 import uk.ac.wellcome.platform.sierra_reader.exceptions.SierraReaderException
 import uk.ac.wellcome.platform.sierra_reader.fixtures.WorkerServiceFixture
+import uk.ac.wellcome.storage.fixtures.S3
+import uk.ac.wellcome.storage.fixtures.S3.Bucket
 
 class SierraReaderWorkerServiceTest
     extends FunSpec

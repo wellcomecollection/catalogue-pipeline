@@ -1,5 +1,7 @@
 package uk.ac.wellcome.platform.sierra_items_to_dynamo.fixtures
 
+import uk.ac.wellcome.akka.fixtures.Akka
+import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
@@ -8,8 +10,6 @@ import uk.ac.wellcome.monitoring.MetricsSender
 import uk.ac.wellcome.platform.sierra_items_to_dynamo.services.SierraItemsToDynamoWorkerService
 import uk.ac.wellcome.storage.fixtures.LocalDynamoDb.Table
 import uk.ac.wellcome.storage.fixtures.S3.Bucket
-import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.test.fixtures.Akka
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

@@ -9,16 +9,16 @@ import io.circe.parser._
 import org.scalatest.compatible.Assertion
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FunSpec, Matchers}
+import uk.ac.wellcome.akka.fixtures.Akka
+import uk.ac.wellcome.fixtures.TestWith
+import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.transformable.sierra.{
   AbstractSierraRecord,
   SierraBibRecord,
   SierraItemRecord
 }
 import uk.ac.wellcome.models.transformable.sierra.test.utils.SierraGenerators
-import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.test.fixtures.Akka
-import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.json.utils.JsonAssertions
 
 class SierraRecordWrapperFlowTest
     extends FunSpec

@@ -47,11 +47,6 @@ object WellcomeDependencies {
     version = versions.messaging
   ) ++ monitoringLibrary ++ storageLibrary ++ typesafeLibrary
 
-  val storageTypesafeLibrary: Seq[ModuleID] = storageLibrary ++ library(
-    name = "storage_typesafe",
-    version = versions.storage
-  )
-
   val sierraStreamsSourceLibrary: Seq[ModuleID] = Seq(
     "uk.ac.wellcome" %% "sierra-streams-source" % versions.sierraStreamsSource
   )
@@ -198,7 +193,12 @@ object CatalogueDependencies {
 
   // Sierra adapter stack
 
+  val sierraAdapterCommonDependencies: Seq[ModuleID] =
+    ExternalDependencies.mockitoDependencies ++
+    WellcomeDependencies.messagingTypesafeLibrary
+
   val sierraReaderDependencies: Seq[ModuleID] =
     WellcomeDependencies.sierraStreamsSourceLibrary ++
-    ExternalDependencies.circeOpticsDependencies
+    ExternalDependencies.circeOpticsDependencies ++
+    WellcomeDependencies.messagingTypesafeLibrary
 }

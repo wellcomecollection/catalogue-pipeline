@@ -1,18 +1,18 @@
 package uk.ac.wellcome.sierra_adapter.config.builders
 
 import com.typesafe.config.Config
-import uk.ac.wellcome.config.core.builders.AkkaBuilder
-import uk.ac.wellcome.config.storage.builders.{
-  DynamoBuilder,
-  S3Builder,
-  VHSBuilder
-}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.transformable.SierraTransformable
 import uk.ac.wellcome.models.transformable.SierraTransformable._
 import uk.ac.wellcome.storage.ObjectStore
 import uk.ac.wellcome.storage.s3.S3StorageBackend
+import uk.ac.wellcome.storage.typesafe.{
+  DynamoBuilder,
+  S3Builder,
+  VHSBuilder
+}
 import uk.ac.wellcome.storage.vhs.{EmptyMetadata, VersionedHybridStore}
+import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 
 import scala.concurrent.ExecutionContext
 

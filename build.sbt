@@ -95,7 +95,7 @@ lazy val transformer_sierra = setupProject(project,
 
 lazy val sierra_adapter_common = setupProject(project, "sierra_adapter/common",
   localDependencies = Seq(internal_model),
-  externalDependencies = WellcomeDependencies.storageTypesafeLibrary
+  externalDependencies = CatalogueDependencies.sierraAdapterCommonDependencies
 )
 
 lazy val sierra_reader = setupProject(project, "sierra_adapter/sierra_reader",
