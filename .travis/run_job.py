@@ -31,10 +31,7 @@ def should_run_sbt_project(project_name, changed_paths):
     repo = Repository(".sbt_metadata")
     project = repo.get_project(project_name)
 
-    interesting_paths = [
-        p for p in changed_paths
-        if not p.startswith(".sbt_metadata")
-    ]
+    interesting_paths = [p for p in changed_paths if not p.startswith(".sbt_metadata")]
 
     if ".travis.yml" in interesting_paths:
         return True
