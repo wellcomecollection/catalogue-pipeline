@@ -46,6 +46,11 @@ lazy val elasticsearch_typesafe = setupProject(project, "common/elasticsearch_ty
   externalDependencies = CatalogueDependencies.elasticsearchTypesafeDependencies
 )
 
+lazy val api = setupProject(project, "api/api",
+  localDependencies = Seq(internal_model, display, elasticsearch),
+  externalDependencies = CatalogueDependencies.apiDependencies
+)
+
 lazy val goobi_reader = setupProject(project, "goobi_adapter/goobi_reader",
   externalDependencies = CatalogueDependencies.goobiReaderDependencies
 )
@@ -89,4 +94,36 @@ lazy val transformer_sierra = setupProject(project,
   folder = "pipeline/transformer/transformer_sierra",
   localDependencies = Seq(internal_model),
   externalDependencies = CatalogueDependencies.sierraTransformerDependencies
+)
+
+// Sierra adapter
+
+lazy val sierra_adapter_common = setupProject(project, "sierra_adapter/common",
+  localDependencies = Seq(internal_model),
+  externalDependencies = CatalogueDependencies.sierraAdapterCommonDependencies
+)
+
+lazy val sierra_reader = setupProject(project, "sierra_adapter/sierra_reader",
+  localDependencies = Seq(sierra_adapter_common),
+  externalDependencies = CatalogueDependencies.sierraReaderDependencies
+)
+
+lazy val sierra_bib_merger = setupProject(project, "sierra_adapter/sierra_bib_merger",
+  localDependencies = Seq(sierra_adapter_common)
+)
+
+lazy val sierra_item_merger = setupProject(project, "sierra_adapter/sierra_item_merger",
+  localDependencies = Seq(sierra_adapter_common)
+)
+
+lazy val sierra_items_to_dynamo = setupProject(project,
+  folder = "sierra_adapter/sierra_items_to_dynamo",
+  localDependencies = Seq(sierra_adapter_common)
+)
+
+// Snapshots
+
+lazy val snapshot_generator = setupProject(project, "snapshots/snapshot_generator",
+  localDependencies = Seq(internal_model, display, elasticsearch_typesafe),
+  externalDependencies = CatalogueDependencies.snapshotGeneratorDependencies
 )

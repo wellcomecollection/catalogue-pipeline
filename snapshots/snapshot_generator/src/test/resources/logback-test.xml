@@ -1,0 +1,5 @@
+<configuration>
+  <include resource="base-logback-test.xml"/>
+
+  <logger name="uk.ac.wellcome.platform.snapshot_generator.Server" level="INFO"/>
+</configuration>
