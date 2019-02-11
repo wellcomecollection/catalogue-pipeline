@@ -5,7 +5,7 @@ import os
 import subprocess
 import sys
 
-from git_utils import get_changed_paths
+from git_utils import get_changed_paths, git
 from sbt_dependency_tree import Repository
 
 
