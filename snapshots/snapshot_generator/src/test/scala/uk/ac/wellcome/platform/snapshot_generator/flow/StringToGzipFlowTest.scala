@@ -8,8 +8,8 @@ import akka.stream.{ActorMaterializer, IOResult, Materializer}
 import akka.util.ByteString
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FunSpec, Matchers}
+import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.platform.snapshot_generator.test.utils.GzipUtils
-import uk.ac.wellcome.test.fixtures.Akka
 
 import scala.concurrent.Future
 

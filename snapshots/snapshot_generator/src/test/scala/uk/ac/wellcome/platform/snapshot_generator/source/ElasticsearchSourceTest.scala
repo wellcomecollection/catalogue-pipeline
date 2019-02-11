@@ -6,11 +6,11 @@ import akka.stream.scaladsl.{Sink, Source}
 import com.sksamuel.elastic4s.Index
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FunSpec, Matchers}
+import uk.ac.wellcome.akka.fixtures.Akka
+import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.IdentifiedWork
-import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.test.fixtures.Akka
 
 class ElasticsearchSourceTest
     extends FunSpec

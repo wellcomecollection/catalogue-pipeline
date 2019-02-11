@@ -6,11 +6,16 @@ import com.amazonaws.services.s3.model.GetObjectRequest
 import com.sksamuel.elastic4s.Index
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.{FunSpec, Matchers}
+import uk.ac.wellcome.akka.fixtures.Akka
+import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.display.models.ApiVersions
 import uk.ac.wellcome.display.models.v1.DisplayV1SerialisationTestBase
+import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
+import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.platform.snapshot_generator.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.platform.snapshot_generator.models.{
   CompletedSnapshotJob,
@@ -19,11 +24,6 @@ import uk.ac.wellcome.platform.snapshot_generator.models.{
 import uk.ac.wellcome.platform.snapshot_generator.test.utils.GzipUtils
 import uk.ac.wellcome.storage.fixtures.S3
 import uk.ac.wellcome.storage.fixtures.S3.Bucket
-import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.test.fixtures.Akka
-import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.json.utils.JsonAssertions
-import uk.ac.wellcome.models.work.generators.WorksGenerators
 
 class SnapshotGeneratorFeatureTest
     extends FunSpec
