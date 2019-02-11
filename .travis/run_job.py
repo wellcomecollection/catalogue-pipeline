@@ -80,7 +80,7 @@ if __name__ == "__main__":
             changed_paths = get_changed_paths(os.environ["TRAVIS_COMMIT_RANGE"])
 
         if should_run_sbt_project(sbt_project_name, changed_paths=changed_paths):
-            task = "%s-test"
+            task = "%s-test" % sbt_project_name
         else:
             print("Nothing in this patch affects %s, so skipping tests")
             sys.exit(0)
