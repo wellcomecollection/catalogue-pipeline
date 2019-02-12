@@ -10,19 +10,21 @@ sealed trait License {
 }
 
 object License {
-  implicit val licenseEncoder = Encoder.instance[License](
+  implicit val licenseEncoder: Encoder[License] = Encoder.instance[License] {
     license =>
       Json.obj(
         ("id", Json.fromString(license.id))
-    )
-  )
+      )
+  }
 
-  implicit val licenseDecoder = Decoder.instance[License](cursor =>
-    for {
-      id <- cursor.downField("id").as[String]
-    } yield {
-      createLicense(id)
-  })
+  implicit val licenseDecoder: Decoder[License] = Decoder.instance[License] {
+    cursor =>
+      for {
+        id <- cursor.downField("id").as[String]
+      } yield {
+        createLicense(id)
+      }
+  }
 
   def createLicense(id: String): License = {
     id match {
