@@ -1,9 +1,10 @@
 variable "resource_type" {}
-variable "release_id" {}
 variable "merged_dynamo_table_name" {}
 variable "updates_topic_name" {}
 variable "cluster_name" {}
 variable "vpc_id" {}
+
+variable "container_image" {}
 
 variable "dlq_alarm_arn" {}
 

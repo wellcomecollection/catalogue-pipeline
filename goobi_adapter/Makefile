@@ -3,9 +3,8 @@ include $(ROOT)/makefiles/functions.Makefile
 
 STACK_ROOT  = goobi_adapter
 
-
-SBT_APPS 	 = goobi_reader
-SBT_SSM_APPS =
+SBT_APPS 	 =
+SBT_SSM_APPS = goobi_reader
 
 SBT_DOCKER_LIBRARIES    =
 SBT_NO_DOCKER_LIBRARIES =

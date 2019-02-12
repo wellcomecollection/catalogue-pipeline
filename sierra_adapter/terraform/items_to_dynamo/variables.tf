@@ -1,4 +1,5 @@
-variable "release_id" {}
+variable "container_image" {}
+
 variable "demultiplexer_topic_name" {}
 
 variable "cluster_name" {}

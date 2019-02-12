@@ -13,8 +13,6 @@ locals {
   catalogue_sierra_hybrid_records_topic_arn         = "${data.terraform_remote_state.shared_infra.catalogue_sierra_reindex_topic_arn}"
   catalogue_sierra_items_hybrid_records_topic_arn   = "${data.terraform_remote_state.shared_infra.catalogue_sierra_items_reindex_topic_arn}"
 
-  reindex_worker_container_image = "${module.ecr_repository_reindex_worker.repository_url}:${var.release_ids["reindex_worker"]}"
-
   vpc_id          = "${data.terraform_remote_state.shared_infra.catalogue_vpc_delta_id}"
   private_subnets = "${data.terraform_remote_state.shared_infra.catalogue_vpc_delta_private_subnets}"
 

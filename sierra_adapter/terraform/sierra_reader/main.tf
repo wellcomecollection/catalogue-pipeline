@@ -8,7 +8,7 @@ module "sierra_reader_service" {
   service_name       = "${local.service_name}"
   task_desired_count = "0"
 
-  container_image = "${local.container_image}"
+  container_image = "${var.container_image}"
 
   security_group_ids = [
     "${var.interservice_security_group_id}",

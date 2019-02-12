@@ -3,10 +3,6 @@ variable "aws_region" {
   default     = "eu-west-1"
 }
 
-variable "release_ids" {
-  type = "map"
-}
-
 variable "sierra_api_url" {}
 variable "sierra_oauth_key" {}
 variable "sierra_oauth_secret" {}

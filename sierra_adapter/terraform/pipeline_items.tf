@@ -24,7 +24,7 @@ module "items_reader" {
   sierra_oauth_key    = "${var.sierra_oauth_key}"
   sierra_oauth_secret = "${var.sierra_oauth_secret}"
 
-  release_id = "${var.release_ids["sierra_reader"]}"
+  container_image = "${local.sierra_reader_image}"
 
   cluster_name = "${aws_ecs_cluster.cluster.name}"
   vpc_id       = "${local.vpc_id}"
@@ -41,15 +41,14 @@ module "items_reader" {
 
   service_egress_security_group_id = "${module.egress_security_group.sg_id}"
   interservice_security_group_id   = "${aws_security_group.interservice_security_group.id}"
-
-  sierra_reader_ecr_repository_url = "${module.ecr_repository_sierra_reader.repository_url}"
 }
 
 module "items_to_dynamo" {
   source = "items_to_dynamo"
 
   demultiplexer_topic_name = "${module.items_reader.topic_name}"
-  release_id               = "${var.release_ids["sierra_items_to_dynamo"]}"
+
+  container_image = "${local.sierra_items_to_dynamo_image}"
 
   cluster_name = "${aws_ecs_cluster.cluster.name}"
   vpc_id       = "${local.vpc_id}"
@@ -69,7 +68,8 @@ module "items_merger" {
   source = "item_merger"
 
   resource_type = "items"
-  release_id    = "${var.release_ids["sierra_item_merger"]}"
+
+  container_image = "${local.sierra_item_merger_image}"
 
   merged_dynamo_table_name = "${local.vhs_table_name}"
 

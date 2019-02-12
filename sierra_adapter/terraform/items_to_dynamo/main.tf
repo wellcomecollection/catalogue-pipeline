@@ -8,7 +8,7 @@ module "sierra_to_dynamo_service" {
   service_name       = "sierra_items_to_dynamo"
   task_desired_count = "0"
 
-  container_image = "${local.container_image}"
+  container_image = "${var.container_image}"
 
   security_group_ids = [
     "${var.interservice_security_group_id}",
