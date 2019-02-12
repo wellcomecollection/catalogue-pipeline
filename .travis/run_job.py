@@ -90,7 +90,9 @@ if __name__ == "__main__":
         if should_run_sbt_project(sbt_project_name, changed_paths=changed_paths):
             task = "%s-test" % sbt_project_name
         else:
-            print("Nothing in this patch affects %s, so skipping tests")
+            print(
+                "Nothing in this patch affects %s, so skipping tests" %
+                sbt_project_name)
             sys.exit(0)
 
     make(task)
