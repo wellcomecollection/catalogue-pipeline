@@ -29,9 +29,7 @@ jobs:
     - env: SBT_PROJECT=sierra_items_to_dynamo
 
     - env: SBT_PROJECT=snapshot_generator
-
-    # TODO: Add a task for the Sierra adapter Lambdas
-    # TODO: Add a task for the snapshot Lambdas
+    - env: TASK=lambda-test
 
 script:
   # Wait 45 minutes for the entire build to finish.  Primarily this stops the

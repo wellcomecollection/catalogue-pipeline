@@ -10,3 +10,17 @@ include pipeline/Makefile
 include reindexer/Makefile
 include sierra_adapter/Makefile
 include snapshots/Makefile
+
+lambda-test: snapshot-scheduler-test \
+             snapshot_slack_alarms-test \
+			 update_api_docs-test \
+			 s3_demultiplexer-test \
+			 sierra_progress_reporter-test \
+			 sierra_window_generator-test
+
+lambda-publish: snapshot-scheduler-publish \
+                snapshot_slack_alarms-publish \
+			    update_api_docs-publish \
+			    s3_demultiplexer-publish \
+			    sierra_progress_reporter-publish \
+			    sierra_window_generator-publish
