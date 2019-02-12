@@ -2,10 +2,6 @@ ROOT = $(shell git rev-parse --show-toplevel)
 INFRA_BUCKET = wellcomecollection-platform-infra
 
 
-export TFVARS_BUCKET = wellcomecollection-platform-infra
-export TFVARS_KEY = terraform.tfvars
-export TFPLAN_BUCKET = wellcomecollection-platform-monitoring
-
 include $(ROOT)/makefiles/terraform.Makefile
 
 
