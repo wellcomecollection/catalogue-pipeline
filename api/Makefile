@@ -10,9 +10,8 @@ SBT_APPS = api
 SBT_DOCKER_LIBRARIES    =
 SBT_NO_DOCKER_LIBRARIES =
 
-PYTHON_APPS     =
-PYTHON_SSM_APPS = update_api_docs
-LAMBDAS 	    =
+PYTHON_APPS = update_api_docs
+LAMBDAS 	=
 
 TF_NAME = catalogue_api
 TF_PATH = $(STACK_ROOT)/terraform

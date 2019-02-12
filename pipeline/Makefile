@@ -10,9 +10,8 @@ SBT_APPS = id_minter ingestor recorder matcher merger
 SBT_DOCKER_LIBRARIES    =
 SBT_NO_DOCKER_LIBRARIES =
 
-PYTHON_APPS     =
-PYTHON_SSM_APPS =
-LAMBDAS 	    =
+PYTHON_APPS =
+LAMBDAS     =
 
 TF_NAME = catalogue_pipeline
 TF_PATH = $(STACK_ROOT)/terraform

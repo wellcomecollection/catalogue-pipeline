@@ -259,14 +259,6 @@ endef
 #   $4 - ECS Base URI
 #   $5 - Registry ID
 #
-define __python_target
-$(1)-build:
-	$(call build_image,$(1),$(2))
-
-$(1)-test:
-	$(call test_python,$(STACK_ROOT)/$(1))
-endef
-
 define __python_ssm_target
 $(1)-build:
 	$(call build_image,$(1),$(2))
@@ -309,8 +301,7 @@ define stack_setup
 $(foreach proj,$(SBT_APPS),$(eval $(call __sbt_ssm_target_template,$(proj),$(STACK_ROOT)/$(proj),$(PROJECT_ID),$(ACCOUNT_ID))))
 $(foreach library,$(SBT_DOCKER_LIBRARIES),$(eval $(call __sbt_library_docker_template,$(library),$(STACK_ROOT)/$(library))))
 $(foreach library,$(SBT_NO_DOCKER_LIBRARIES),$(eval $(call __sbt_library_template,$(library))))
-$(foreach task,$(PYTHON_APPS),$(eval $(call __python_target,$(task),$(STACK_ROOT)/$(task)/Dockerfile)))
-$(foreach task,$(PYTHON_SSM_APPS),$(eval $(call __python_ssm_target,$(task),$(STACK_ROOT)/$(task)/Dockerfile,$(PROJECT_ID),$(ACCOUNT_ID))))
+$(foreach task,$(PYTHON_APPS),$(eval $(call __python_ssm_target,$(task),$(STACK_ROOT)/$(task)/Dockerfile,$(PROJECT_ID),$(ACCOUNT_ID))))
 $(foreach lamb,$(LAMBDAS),$(eval $(call __lambda_target_template,$(lamb),$(STACK_ROOT)/$(lamb))))
 $(foreach name,$(TF_NAME),$(eval $(call __terraform_target_template,$(TF_NAME),$(TF_PATH))))
 endef

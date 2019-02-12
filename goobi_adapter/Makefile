@@ -8,9 +8,8 @@ SBT_APPS = goobi_reader
 SBT_DOCKER_LIBRARIES    =
 SBT_NO_DOCKER_LIBRARIES =
 
-PYTHON_APPS     =
-PYTHON_SSM_APPS =
-LAMBDAS 	    =
+PYTHON_APPS =
+LAMBDAS 	=
 
 TF_NAME = goobi_adapter
 TF_PATH = $(STACK_ROOT)/terraform

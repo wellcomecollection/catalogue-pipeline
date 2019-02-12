@@ -8,9 +8,8 @@ SBT_APPS = snapshot_generator
 SBT_DOCKER_LIBRARIES    =
 SBT_NO_DOCKER_LIBRARIES =
 
-PYTHON_APPS     =
-PYTHON_SSM_APPS =
-LAMBDAS 	    = snapshot_scheduler snapshot_slack_alarms
+PYTHON_APPS =
+LAMBDAS     = snapshot_scheduler snapshot_slack_alarms
 
 TF_NAME =
 TF_PATH =
