@@ -16,6 +16,4 @@ LAMBDAS 	    =
 TF_NAME = goobi_adapter
 TF_PATH = $(STACK_ROOT)/terraform
 
-TF_IS_PUBLIC_FACING = false
-
 $(val $(call stack_setup))

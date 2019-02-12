@@ -16,6 +16,4 @@ LAMBDAS 	    = snapshot_scheduler snapshot_slack_alarms
 TF_NAME =
 TF_PATH =
 
-TF_IS_PUBLIC_FACING = false
-
 $(val $(call stack_setup))

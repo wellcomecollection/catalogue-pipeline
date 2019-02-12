@@ -16,6 +16,4 @@ LAMBDAS 	    =
 TF_NAME = reindexer
 TF_PATH = $(STACK_ROOT)/terraform
 
-TF_IS_PUBLIC_FACING = true
-
 $(val $(call stack_setup))

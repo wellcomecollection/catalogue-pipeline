@@ -244,49 +244,6 @@ $(1)-publish:
 endef
 
 
-# Define a series of Make tasks (plan, apply) for a Terraform stack.
-#
-# Args:
-#	$1 - Name of the stack.
-#	$2 - Root to the Terraform directory.
-#	$3 - Is this a public-facing stack?  (true/false)
-#
-define __terraform_target_template
-$(1)-terraform-plan:
-	$(call terraform_plan,$(2),$(3))
-
-$(1)-terraform-apply:
-	$(call terraform_apply,$(2))
-
-# These are a pair of dodgy hacks to allow us to run something like:
-#
-#	$ make stack-terraform-import aws_s3_bucket.bucket my-bucket-name
-#
-#	$ make stack-terraform-state-rm aws_s3_bucket.bucket
-#
-# In practice it slightly breaks the conventions of Make (you're not meant to
-# read command-line arguments), but since this is only for one-offs I think
-# it's okay.
-#
-# This is slightly easier than using terraform on the command line, as paths
-# are different in/outside Docker, so you have to reload all your modules,
-# which is slow and boring.
-#
-$(1)-terraform-import:
-	$(ROOT)/docker_run.py --aws -- \
-		--volume $(ROOT):$(ROOT) \
-		--workdir $(ROOT)/$(2) \
-		hashicorp/terraform:0.11.11 import $(filter-out $(1)-terraform-import,$(MAKECMDGOALS))
-
-$(1)-terraform-state-rm:
-	$(ROOT)/docker_run.py --aws -- \
-		--volume $(ROOT):$(ROOT) \
-		--workdir $(ROOT)/$(2) \
-		hashicorp/terraform:0.11.11 state rm $(filter-out $(1)-terraform-state-rm,$(MAKECMDGOALS))
-
-endef
-
-
 # Define a series of Make tasks (test, publish) for a Python Lambda.
 #
 # Args:
@@ -354,7 +311,6 @@ endef
 #
 #	$TF_NAME                Name of the associated Terraform stack
 #	$TF_PATH                Path to the associated Terraform stack
-#	$TF_IS_PUBLIC_FACING    Is this a public-facing stack?  (true/false)
 #
 define stack_setup
 
@@ -376,5 +332,5 @@ $(foreach library,$(SBT_NO_DOCKER_LIBRARIES),$(eval $(call __sbt_library_templat
 $(foreach task,$(PYTHON_APPS),$(eval $(call __python_target,$(task),$(STACK_ROOT)/$(task)/Dockerfile)))
 $(foreach task,$(PYTHON_SSM_APPS),$(eval $(call __python_ssm_target,$(task),$(STACK_ROOT)/$(task)/Dockerfile,$(TF_NAME),$(ACCOUNT_ID))))
 $(foreach lamb,$(LAMBDAS),$(eval $(call __lambda_target_template,$(lamb),$(STACK_ROOT)/$(lamb))))
-$(foreach name,$(TF_NAME),$(eval $(call __terraform_target_template,$(TF_NAME),$(TF_PATH),$(TF_IS_PUBLIC_FACING))))
+$(foreach name,$(TF_NAME),$(eval $(call __terraform_target_template,$(TF_NAME),$(TF_PATH))))
 endef

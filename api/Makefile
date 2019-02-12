@@ -16,6 +16,4 @@ LAMBDAS 	    =
 TF_NAME = catalogue_api
 TF_PATH = $(STACK_ROOT)/terraform
 
-TF_IS_PUBLIC_FACING = true
-
 $(val $(call stack_setup))

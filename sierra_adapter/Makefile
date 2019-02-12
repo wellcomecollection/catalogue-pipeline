@@ -23,8 +23,6 @@ LAMBDAS 	    = s3_demultiplexer \
 TF_NAME = sierra_adapter
 TF_PATH = $(STACK_ROOT)/terraform
 
-TF_IS_PUBLIC_FACING = true
-
 $(val $(call stack_setup))
 
 
