@@ -24,7 +24,7 @@ module "bibs_reader" {
   sierra_oauth_key    = "${var.sierra_oauth_key}"
   sierra_oauth_secret = "${var.sierra_oauth_secret}"
 
-  release_id = "${var.release_ids["sierra_reader"]}"
+  container_image = "${local.sierra_reader_image}"
 
   cluster_name = "${aws_ecs_cluster.cluster.name}"
   vpc_id       = "${local.vpc_id}"
@@ -41,8 +41,6 @@ module "bibs_reader" {
 
   service_egress_security_group_id = "${module.egress_security_group.sg_id}"
   interservice_security_group_id   = "${aws_security_group.interservice_security_group.id}"
-
-  sierra_reader_ecr_repository_url = "${module.ecr_repository_sierra_reader.repository_url}"
 }
 
 module "bibs_merger" {
@@ -50,7 +48,7 @@ module "bibs_merger" {
 
   resource_type = "bibs"
 
-  release_id = "${var.release_ids["sierra_bib_merger"]}"
+  container_image = "${local.sierra_bib_merger_image}"
 
   merged_dynamo_table_name = "${local.vhs_table_name}"
 

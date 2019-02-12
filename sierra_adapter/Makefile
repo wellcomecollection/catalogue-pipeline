@@ -3,11 +3,11 @@ include $(ROOT)/makefiles/functions.Makefile
 
 STACK_ROOT  = sierra_adapter
 
-SBT_APPS 	 = sierra_bib_merger \
+SBT_APPS 	 =
+SBT_SSM_APPS = sierra_bib_merger \
                sierra_item_merger \
                sierra_items_to_dynamo \
                sierra_reader
-SBT_SSM_APPS =
 
 ECR_BASE_URI =
 

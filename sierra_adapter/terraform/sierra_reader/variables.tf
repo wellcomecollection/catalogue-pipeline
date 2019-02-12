@@ -9,7 +9,7 @@ variable "sierra_api_url" {}
 variable "sierra_oauth_key" {}
 variable "sierra_oauth_secret" {}
 
-variable "release_id" {}
+variable "container_image" {}
 
 variable "cluster_name" {}
 variable "vpc_id" {}
@@ -31,5 +31,3 @@ variable "subnets" {
 variable "namespace_id" {}
 variable "interservice_security_group_id" {}
 variable "service_egress_security_group_id" {}
-
-variable "sierra_reader_ecr_repository_url" {}
