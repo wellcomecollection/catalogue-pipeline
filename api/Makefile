@@ -3,6 +3,8 @@ include $(ROOT)/makefiles/functions.Makefile
 
 STACK_ROOT 	= api
 
+PROJECT_ID = api
+
 SBT_APPS 	 =
 SBT_SSM_APPS = api
 

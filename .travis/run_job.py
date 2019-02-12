@@ -91,8 +91,8 @@ if __name__ == "__main__":
             task = "%s-test" % sbt_project_name
         else:
             print(
-                "Nothing in this patch affects %s, so skipping tests" %
-                sbt_project_name)
+                "Nothing in this patch affects %s, so skipping tests" % sbt_project_name
+            )
             sys.exit(0)
 
     make(task)

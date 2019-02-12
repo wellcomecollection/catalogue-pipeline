@@ -3,6 +3,8 @@ include $(ROOT)/makefiles/functions.Makefile
 
 STACK_ROOT 	= reindexer
 
+PROJECT_ID = reindexer
+
 SBT_APPS 	 =
 SBT_SSM_APPS = reindex_worker
 

@@ -1,7 +1,9 @@
 ROOT = $(shell git rev-parse --show-toplevel)
-STACK_ROOT 	= pipeline
-
 include $(ROOT)/makefiles/functions.Makefile
+
+STACK_ROOT = pipeline
+
+PROJECT_ID = catalogue_pipeline
 
 SBT_APPS 	 =
 SBT_SSM_APPS = id_minter ingestor recorder matcher merger

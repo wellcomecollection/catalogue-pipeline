@@ -3,6 +3,8 @@ include $(ROOT)/makefiles/functions.Makefile
 
 STACK_ROOT 	= pipeline/transformer
 
+PROJECT_ID = catalogue_pipeline
+
 SBT_APPS 	 =
 SBT_SSM_APPS = transformer_miro transformer_sierra
 
