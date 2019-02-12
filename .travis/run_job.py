@@ -27,10 +27,7 @@ def make(*args):
     check_call(["make"] + list(args))
 
 
-def should_run_sbt_project(project_name, changed_paths):
-    repo = Repository(".sbt_metadata")
-    project = repo.get_project(project_name)
-
+def should_run_sbt_project(project, changed_paths):
     interesting_paths = [p for p in changed_paths if not p.startswith(".sbt_metadata")]
 
     print("*** Affected paths:")
@@ -81,13 +78,16 @@ if __name__ == "__main__":
     except KeyError:
         sbt_project_name = os.environ["SBT_PROJECT"]
 
+        repo = Repository(".sbt_metadata")
+        project = repo.get_project(project_name)
+
         if travis_event_type == "pull_request":
             changed_paths = get_changed_paths("HEAD", "master")
         else:
             git("fetch", "origin")
             changed_paths = get_changed_paths(os.environ["TRAVIS_COMMIT_RANGE"])
 
-        if should_run_sbt_project(sbt_project_name, changed_paths=changed_paths):
+        if should_run_sbt_project(project, changed_paths=changed_paths):
             task = "%s-test" % sbt_project_name
         else:
             print(
