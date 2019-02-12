@@ -2,7 +2,6 @@ package uk.ac.wellcome.platform.sierra_bib_merger.services
 
 import org.mockito.Mockito.{never, verify}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.fixtures.{Messaging, SQS}
@@ -16,7 +15,6 @@ import uk.ac.wellcome.fixtures.TestWith
 
 class SierraBibMergerWorkerServiceTest
     extends FunSpec
-    with MockitoSugar
     with ScalaFutures
     with Matchers
     with SQS

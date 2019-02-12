@@ -2,7 +2,6 @@ package uk.ac.wellcome.platform.sierra_items_to_dynamo.services
 
 import com.amazonaws.services.dynamodbv2.model.ResourceNotFoundException
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{Assertion, FunSpec, Matchers}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.transformable.sierra.SierraItemRecord
@@ -17,7 +16,6 @@ class DynamoInserterTest
     extends FunSpec
     with Matchers
     with ScalaFutures
-    with MockitoSugar
     with DynamoInserterFixture
     with IntegrationPatience
     with SierraGenerators {

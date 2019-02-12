@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.matcher.matcher
 
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.models.matcher.MatcherResult
 import uk.ac.wellcome.models.work.generators.WorksGenerators
@@ -17,7 +16,6 @@ class WorkMatcherConcurrencyTest
     with Matchers
     with MatcherFixtures
     with ScalaFutures
-    with MockitoSugar
     with WorksGenerators {
 
   it("processes one of two conflicting concurrent updates and locks the other") {

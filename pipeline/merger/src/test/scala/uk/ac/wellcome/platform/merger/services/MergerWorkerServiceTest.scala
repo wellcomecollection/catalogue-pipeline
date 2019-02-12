@@ -3,7 +3,6 @@ package uk.ac.wellcome.platform.merger.services
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{atLeastOnce, times, verify}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
@@ -33,7 +32,6 @@ class MergerWorkerServiceTest
     with LocalWorksVhs
     with MatcherResultFixture
     with Matchers
-    with MockitoSugar
     with WorkerServiceFixture {
 
   it(

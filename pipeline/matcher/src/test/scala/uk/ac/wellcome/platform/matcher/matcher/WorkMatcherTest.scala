@@ -5,7 +5,6 @@ import com.gu.scanamo.syntax._
 import org.mockito.Matchers.any
 import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.models.matcher.{
   MatchedIdentifiers,
@@ -33,7 +32,6 @@ class WorkMatcherTest
     with Matchers
     with MatcherFixtures
     with ScalaFutures
-    with MockitoSugar
     with WorksGenerators {
 
   private val identifierA = createSierraSystemSourceIdentifierWith(value = "A")

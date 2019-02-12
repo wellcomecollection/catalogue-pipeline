@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.transformer.miro.services
 
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
-import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
@@ -31,7 +30,6 @@ class MiroVHSRecordReceiverTest
     with Eventually
     with MiroVHSRecordReceiverFixture
     with IntegrationPatience
-    with MockitoSugar
     with ScalaFutures
     with MiroRecordGenerators
     with WorksGenerators {

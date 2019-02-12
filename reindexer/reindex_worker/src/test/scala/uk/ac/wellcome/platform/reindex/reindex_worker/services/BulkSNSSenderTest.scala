@@ -2,7 +2,6 @@ package uk.ac.wellcome.platform.reindex.reindex_worker.services
 
 import com.amazonaws.SdkClientException
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.messaging.fixtures.SNS
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
@@ -13,7 +12,6 @@ import scala.util.Random
 class BulkSNSSenderTest
     extends FunSpec
     with Matchers
-    with MockitoSugar
     with ScalaFutures
     with BulkSNSSenderFixture
     with IntegrationPatience

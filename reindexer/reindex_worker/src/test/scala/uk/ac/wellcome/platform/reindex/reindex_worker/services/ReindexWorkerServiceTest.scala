@@ -2,7 +2,6 @@ package uk.ac.wellcome.platform.reindex.reindex_worker.services
 
 import com.gu.scanamo.Scanamo
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
@@ -22,7 +21,6 @@ import uk.ac.wellcome.storage.vhs.HybridRecord
 class ReindexWorkerServiceTest
     extends FunSpec
     with Matchers
-    with MockitoSugar
     with Akka
     with DynamoFixtures
     with ReindexableTable
