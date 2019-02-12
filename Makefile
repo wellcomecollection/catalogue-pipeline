@@ -11,14 +11,12 @@ include reindexer/Makefile
 include sierra_adapter/Makefile
 include snapshots/Makefile
 
-lambda-test: snapshot-scheduler-test \
-             snapshot_slack_alarms-test \
-			 update_api_docs-test \
+lambda-test: snapshot_scheduler-test \
 			 s3_demultiplexer-test \
 			 sierra_progress_reporter-test \
 			 sierra_window_generator-test
 
-lambda-publish: snapshot-scheduler-publish \
+lambda-publish: snapshot_scheduler-publish \
                 snapshot_slack_alarms-publish \
 			    update_api_docs-publish \
 			    s3_demultiplexer-publish \
