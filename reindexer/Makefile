@@ -5,8 +5,7 @@ STACK_ROOT 	= reindexer
 
 PROJECT_ID = reindexer
 
-SBT_APPS 	 =
-SBT_SSM_APPS = reindex_worker
+SBT_APPS = reindex_worker
 
 SBT_DOCKER_LIBRARIES    =
 SBT_NO_DOCKER_LIBRARIES =

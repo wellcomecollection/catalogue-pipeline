@@ -3,8 +3,7 @@ include $(ROOT)/makefiles/functions.Makefile
 
 STACK_ROOT  = common
 
-SBT_APPS 	 =
-SBT_SSM_APPS =
+SBT_APPS =
 
 SBT_DOCKER_LIBRARIES    = elasticsearch
 SBT_NO_DOCKER_LIBRARIES = display elasticsearch_typesafe internal_model

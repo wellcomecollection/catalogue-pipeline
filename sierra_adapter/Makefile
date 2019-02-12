@@ -5,8 +5,7 @@ STACK_ROOT  = sierra_adapter
 
 PROJECT_ID = sierra_adapter
 
-SBT_APPS 	 =
-SBT_SSM_APPS = sierra_bib_merger \
+SBT_APPS = sierra_bib_merger \
                sierra_item_merger \
                sierra_items_to_dynamo \
                sierra_reader

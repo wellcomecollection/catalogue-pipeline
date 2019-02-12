@@ -3,8 +3,7 @@ include $(ROOT)/makefiles/functions.Makefile
 
 STACK_ROOT  = snapshots
 
-SBT_APPS 	 =
-SBT_SSM_APPS = snapshot_generator
+SBT_APPS = snapshot_generator
 
 SBT_DOCKER_LIBRARIES    =
 SBT_NO_DOCKER_LIBRARIES =
