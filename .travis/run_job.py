@@ -79,7 +79,7 @@ if __name__ == "__main__":
         sbt_project_name = os.environ["SBT_PROJECT"]
 
         repo = Repository(".sbt_metadata")
-        project = repo.get_project(project_name)
+        project = repo.get_project(sbt_project_name)
 
         if travis_event_type == "pull_request":
             changed_paths = get_changed_paths("HEAD", "master")
