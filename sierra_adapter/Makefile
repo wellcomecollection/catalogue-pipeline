@@ -5,8 +5,7 @@ STACK_ROOT  = sierra_adapter
 
 PROJECT_ID = sierra_adapter
 
-SBT_APPS 	 =
-SBT_SSM_APPS = sierra_bib_merger \
+SBT_APPS = sierra_bib_merger \
                sierra_item_merger \
                sierra_items_to_dynamo \
                sierra_reader
@@ -16,11 +15,10 @@ ECR_BASE_URI =
 SBT_DOCKER_LIBRARIES    =
 SBT_NO_DOCKER_LIBRARIES = sierra_adapter_common
 
-PYTHON_APPS     =
-PYTHON_SSM_APPS =
-LAMBDAS 	    = s3_demultiplexer \
-                  sierra_progress_reporter \
-                  sierra_window_generator
+PYTHON_APPS =
+LAMBDAS     = s3_demultiplexer \
+              sierra_progress_reporter \
+              sierra_window_generator
 
 TF_NAME = sierra_adapter
 TF_PATH = $(STACK_ROOT)/terraform
