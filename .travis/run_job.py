@@ -33,11 +33,17 @@ def should_run_sbt_project(project_name, changed_paths):
 
     interesting_paths = [p for p in changed_paths if not p.startswith(".sbt_metadata")]
 
+    print("*** Affected paths:")
+    print("\n".join(interesting_paths) + "\n")
+
     if ".travis.yml" in interesting_paths:
+        print("*** Relevant: .travis.yml")
         return True
     if "build.sbt" in interesting_paths:
+        print("*** Relevant: build.sbt")
         return True
     if any(p.startswith("project/") for p in interesting_paths):
+        print("*** Relevant: project/")
         return True
 
     for path in interesting_paths:
@@ -54,9 +60,11 @@ def should_run_sbt_project(project_name, changed_paths):
             project_for_path = repo.lookup_path(path)
         except KeyError:
             # This path isn't associated with a project!
+            print("*** Unrecognised path: %s" % path)
             return True
         else:
             if project.depends_on(project_for_path):
+                print("*** %s depends on %s" % (project, project_for_path))
                 return True
 
     return False
