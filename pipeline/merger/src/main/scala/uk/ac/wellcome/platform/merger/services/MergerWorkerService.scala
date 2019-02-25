@@ -20,13 +20,16 @@ class MergerWorkerService(
     extends Runnable {
 
   def run(): Future[Done] =
-    notificationStream.run {
-      matcherResult: MatcherResult =>
-        Future.sequence {
+    notificationStream.run { matcherResult: MatcherResult =>
+      Future
+        .sequence {
           matcherResult.works.map {
             applyMerge
           }
-        }.map { _ => () }
+        }
+        .map { _ =>
+          ()
+        }
     }
 
   private def applyMerge(matchedIdentifiers: MatchedIdentifiers): Future[Unit] =
@@ -37,7 +40,8 @@ class MergerWorkerService(
       _ <- sendWorks(works)
     } yield ()
 
-  private def sendWorks(mergedWorks: Seq[BaseWork]): Future[Seq[PublishAttempt]] =
+  private def sendWorks(
+    mergedWorks: Seq[BaseWork]): Future[Seq[PublishAttempt]] =
     Future
       .sequence(
         mergedWorks.map(

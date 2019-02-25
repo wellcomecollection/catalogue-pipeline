@@ -28,17 +28,18 @@ trait WorkerServiceFixture
     withLocalS3Bucket { messageBucket =>
       withMessageWriter[BaseWork, R](messageBucket, topic) { messageWriter =>
         withActorSystem { implicit actorSystem =>
-          withNotificationStream[MatcherResult, R](queue) { notificationStream =>
-            val workerService = new MergerWorkerService(
-              notificationStream = notificationStream,
-              playbackService = new RecorderPlaybackService(vhs),
-              mergerManager = new MergerManager(PlatformMerger),
-              messageWriter = messageWriter
-            )
+          withNotificationStream[MatcherResult, R](queue) {
+            notificationStream =>
+              val workerService = new MergerWorkerService(
+                notificationStream = notificationStream,
+                playbackService = new RecorderPlaybackService(vhs),
+                mergerManager = new MergerManager(PlatformMerger),
+                messageWriter = messageWriter
+              )
 
-            workerService.run()
+              workerService.run()
 
-            testWith(workerService)
+              testWith(workerService)
           }
         }
       }

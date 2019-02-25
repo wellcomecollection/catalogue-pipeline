@@ -5,7 +5,10 @@ import com.typesafe.config.Config
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.typesafe.{NotificationStreamBuilder, SNSBuilder}
 import uk.ac.wellcome.models.transformable.sierra.SierraItemRecord
-import uk.ac.wellcome.platform.sierra_item_merger.services.{SierraItemMergerUpdaterService, SierraItemMergerWorkerService}
+import uk.ac.wellcome.platform.sierra_item_merger.services.{
+  SierraItemMergerUpdaterService,
+  SierraItemMergerWorkerService
+}
 import uk.ac.wellcome.sierra_adapter.config.builders.SierraTransformableVHSBuilder
 import uk.ac.wellcome.storage.typesafe.S3Builder
 import uk.ac.wellcome.storage.vhs.HybridRecord
@@ -28,7 +31,8 @@ object Main extends WellcomeTypesafeApp {
     )
 
     new SierraItemMergerWorkerService(
-      notificationStream = NotificationStreamBuilder.buildStream[HybridRecord](config),
+      notificationStream =
+        NotificationStreamBuilder.buildStream[HybridRecord](config),
       sierraItemMergerUpdaterService = updaterService,
       objectStore = S3Builder.buildObjectStore[SierraItemRecord](config),
       snsWriter = SNSBuilder.buildSNSWriter(config)

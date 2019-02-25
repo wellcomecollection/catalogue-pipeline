@@ -6,7 +6,10 @@ import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.fixtures.{NotificationStreamFixture, SNS}
 import uk.ac.wellcome.models.transformable.sierra.SierraBibRecord
-import uk.ac.wellcome.platform.sierra_bib_merger.services.{SierraBibMergerUpdaterService, SierraBibMergerWorkerService}
+import uk.ac.wellcome.platform.sierra_bib_merger.services.{
+  SierraBibMergerUpdaterService,
+  SierraBibMergerWorkerService
+}
 import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
 import uk.ac.wellcome.storage.fixtures.LocalDynamoDb.Table
 import uk.ac.wellcome.storage.fixtures.S3.Bucket
@@ -29,18 +32,19 @@ trait WorkerServiceFixture
           versionedHybridStore = versionedHybridStore
         )
 
-        withNotificationStream[SierraBibRecord, R](queue) { notificationStream =>
-          withSNSWriter(topic) { snsWriter =>
-            val workerService = new SierraBibMergerWorkerService(
-              notificationStream = notificationStream,
-              snsWriter = snsWriter,
-              sierraBibMergerUpdaterService = updaterService
-            )
+        withNotificationStream[SierraBibRecord, R](queue) {
+          notificationStream =>
+            withSNSWriter(topic) { snsWriter =>
+              val workerService = new SierraBibMergerWorkerService(
+                notificationStream = notificationStream,
+                snsWriter = snsWriter,
+                sierraBibMergerUpdaterService = updaterService
+              )
 
-            workerService.run()
+              workerService.run()
 
-            testWith(workerService)
-          }
+              testWith(workerService)
+            }
         }
       }
     }

@@ -6,7 +6,12 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.{NotificationStreamFixture, SQS}
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
-import uk.ac.wellcome.platform.reindex.reindex_worker.models.{CompleteReindexParameters, ReindexJobConfig, ReindexParameters, ReindexRequest}
+import uk.ac.wellcome.platform.reindex.reindex_worker.models.{
+  CompleteReindexParameters,
+  ReindexJobConfig,
+  ReindexParameters,
+  ReindexRequest
+}
 import uk.ac.wellcome.platform.reindex.reindex_worker.services.ReindexWorkerService
 import uk.ac.wellcome.storage.fixtures.LocalDynamoDb.Table
 

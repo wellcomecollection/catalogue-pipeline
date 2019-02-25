@@ -16,8 +16,7 @@ class SierraTransformerWorkerService(
 ) extends Runnable {
 
   def run(): Future[Done] =
-    notificationStream.run {
-      hybridRecord: HybridRecord =>
-        messageReceiver.receiveMessage(hybridRecord, sierraTransformer.transform)
+    notificationStream.run { hybridRecord: HybridRecord =>
+      messageReceiver.receiveMessage(hybridRecord, sierraTransformer.transform)
     }
 }

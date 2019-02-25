@@ -106,7 +106,6 @@ class ReindexWorkerServiceTest
     withLocalSqsQueueAndDlq {
       case QueuePair(queue, dlq) =>
         withWorkerService(queue, badTable, badTopic) { service =>
-
           val future = service.processMessage(
             reindexRequest = createReindexRequest
           )

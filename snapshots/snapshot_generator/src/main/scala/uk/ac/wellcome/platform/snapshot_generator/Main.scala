@@ -5,9 +5,16 @@ import akka.stream.ActorMaterializer
 import com.typesafe.config.Config
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.typesafe.{NotificationStreamBuilder, SNSBuilder, SQSBuilder}
+import uk.ac.wellcome.messaging.typesafe.{
+  NotificationStreamBuilder,
+  SNSBuilder,
+  SQSBuilder
+}
 import uk.ac.wellcome.platform.snapshot_generator.config.builders.AkkaS3Builder
-import uk.ac.wellcome.platform.snapshot_generator.services.{SnapshotGeneratorWorkerService, SnapshotService}
+import uk.ac.wellcome.platform.snapshot_generator.services.{
+  SnapshotGeneratorWorkerService,
+  SnapshotService
+}
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 
@@ -28,7 +35,8 @@ object Main extends WellcomeTypesafeApp {
     )
 
     new SnapshotGeneratorWorkerService(
-      notificationStream = NotificationStreamBuilder.buildStream[SnapshotJob](config),
+      notificationStream =
+        NotificationStreamBuilder.buildStream[SnapshotJob](config),
       snapshotService = snapshotService,
       snsWriter = SNSBuilder.buildSNSWriter(config)
     )
