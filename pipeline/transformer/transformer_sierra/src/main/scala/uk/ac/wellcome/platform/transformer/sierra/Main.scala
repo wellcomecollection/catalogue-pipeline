@@ -3,11 +3,17 @@ package uk.ac.wellcome.platform.transformer.sierra
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.messaging.typesafe.{MessagingBuilder, NotificationStreamBuilder}
+import uk.ac.wellcome.messaging.typesafe.{
+  MessagingBuilder,
+  NotificationStreamBuilder
+}
 import uk.ac.wellcome.models.transformable.SierraTransformable
 import uk.ac.wellcome.models.transformable.SierraTransformable._
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
-import uk.ac.wellcome.platform.transformer.sierra.services.{HybridRecordReceiver, SierraTransformerWorkerService}
+import uk.ac.wellcome.platform.transformer.sierra.services.{
+  HybridRecordReceiver,
+  SierraTransformerWorkerService
+}
 import uk.ac.wellcome.storage.typesafe.S3Builder
 import uk.ac.wellcome.storage.vhs.HybridRecord
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
@@ -29,7 +35,8 @@ object Main extends WellcomeTypesafeApp {
     )
 
     new SierraTransformerWorkerService(
-      notificationStream = NotificationStreamBuilder.buildStream[HybridRecord](config),
+      notificationStream =
+        NotificationStreamBuilder.buildStream[HybridRecord](config),
       messageReceiver = messageReceiver,
       sierraTransformer = new SierraTransformableTransformer()
     )
