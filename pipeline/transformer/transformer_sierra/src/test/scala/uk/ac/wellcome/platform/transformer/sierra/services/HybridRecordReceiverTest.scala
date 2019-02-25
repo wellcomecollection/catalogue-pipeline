@@ -48,17 +48,16 @@ class HybridRecordReceiverTest
   it("receives a message and sends it to SNS client") {
     withLocalSnsTopic { topic =>
       withLocalS3Bucket { bucket =>
-        val sqsMessage = createHybridRecordNotificationWith(
+        val hybridRecord = createHybridRecordWith(
           TestTransformable(),
-          s3Client = s3Client,
-          bucket = bucket
+`          bucket = bucket
         )
 
         withHybridRecordReceiver[TestTransformable, List[Assertion]](
           topic,
           bucket) { recordReceiver =>
           val future =
-            recordReceiver.receiveMessage(sqsMessage, transformToWork)
+            recordReceiver.receiveMessage(hybridRecord, transformToWork)
 
           whenReady(future) { _ =>
             val works = getMessages[TransformedBaseWork](topic)
@@ -78,10 +77,9 @@ class HybridRecordReceiverTest
 
     withLocalSnsTopic { topic =>
       withLocalS3Bucket { bucket =>
-        val notification = createHybridRecordNotificationWith(
+        val hybridRecord = createHybridRecordWith(
           TestTransformable(),
           version = version,
-          s3Client = s3Client,
           bucket = bucket
         )
 
@@ -89,7 +87,7 @@ class HybridRecordReceiverTest
           topic,
           bucket) { recordReceiver =>
           val future =
-            recordReceiver.receiveMessage(notification, transformToWork)
+            recordReceiver.receiveMessage(hybridRecord, transformToWork)
 
           whenReady(future) { _ =>
             val works = getMessages[TransformedBaseWork](topic)
@@ -117,14 +115,11 @@ class HybridRecordReceiverTest
           version = 1,
           location = ObjectLocation(namespace = bucket.name, key = key)
         )
-        val invalidSqsMessage = createNotificationMessageWith(
-          message = hybridRecord
-        )
 
         withHybridRecordReceiver[TestTransformable, Assertion](topic, bucket) {
           recordReceiver =>
             val future =
-              recordReceiver.receiveMessage(invalidSqsMessage, transformToWork)
+              recordReceiver.receiveMessage(hybridRecord, transformToWork)
 
             whenReady(future.failed) { x =>
               x shouldBe a[SierraTransformerException]
@@ -134,32 +129,11 @@ class HybridRecordReceiverTest
     }
   }
 
-  it("fails if it can't parse a HybridRecord from SNS") {
-    withLocalSnsTopic { topic =>
-      withLocalS3Bucket { bucket =>
-        val invalidSqsMessage = createNotificationMessageWith(
-          message = Random.alphanumeric take 50 mkString
-        )
-
-        withHybridRecordReceiver[TestTransformable, Assertion](topic, bucket) {
-          recordReceiver =>
-            val future =
-              recordReceiver.receiveMessage(invalidSqsMessage, transformToWork)
-
-            whenReady(future.failed) {
-              _ shouldBe a[JsonDecodingError]
-            }
-        }
-      }
-    }
-  }
-
   it("fails if it's unable to perform a transformation") {
     withLocalSnsTopic { topic =>
       withLocalS3Bucket { bucket =>
-        val failingSqsMessage = createHybridRecordNotificationWith(
+        val hybridRecord = createHybridRecordWith(
           TestTransformable(),
-          s3Client = s3Client,
           bucket = bucket
         )
 
@@ -167,7 +141,7 @@ class HybridRecordReceiverTest
           recordReceiver =>
             val future =
               recordReceiver.receiveMessage(
-                failingSqsMessage,
+                hybridRecord,
                 failingTransformToWork)
 
             whenReady(future.failed) {
@@ -181,9 +155,8 @@ class HybridRecordReceiverTest
   it("fails if it's unable to publish the work") {
     withLocalSnsTopic { topic =>
       withLocalS3Bucket { bucket =>
-        val message = createHybridRecordNotificationWith(
+        val hybridRecord = createHybridRecordWith(
           TestTransformable(),
-          s3Client = s3Client,
           bucket = bucket
         )
 
@@ -191,7 +164,7 @@ class HybridRecordReceiverTest
           topic,
           bucket,
           mockSnsClientFailPublishMessage) { recordReceiver =>
-          val future = recordReceiver.receiveMessage(message, transformToWork)
+          val future = recordReceiver.receiveMessage(hybridRecord, transformToWork)
 
           whenReady(future.failed) {
             _.getMessage should be("Failed publishing message")

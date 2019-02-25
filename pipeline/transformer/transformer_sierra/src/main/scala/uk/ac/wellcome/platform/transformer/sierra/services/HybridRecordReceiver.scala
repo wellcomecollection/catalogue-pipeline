@@ -19,12 +19,11 @@ class HybridRecordReceiver[T](
     extends Logging {
 
   def receiveMessage(
-    message: NotificationMessage,
+    hybridRecord: HybridRecord,
     transformToWork: (T, Int) => Try[TransformedBaseWork]): Future[Unit] = {
-    debug(s"Starting to process message $message")
+    debug(s"Starting to process message $hybridRecord")
 
     val futurePublishAttempt = for {
-      hybridRecord <- Future.fromTry(fromJson[HybridRecord](message.body))
       transformableRecord <- getTransformable(hybridRecord)
       work <- Future.fromTry(
         transformToWork(transformableRecord, hybridRecord.version))
