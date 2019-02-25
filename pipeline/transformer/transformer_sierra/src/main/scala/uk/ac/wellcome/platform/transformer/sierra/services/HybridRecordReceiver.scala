@@ -24,7 +24,7 @@ class HybridRecordReceiver[T](
     debug(s"Starting to process message $hybridRecord")
 
     val futurePublishAttempt = for {
-      transformableRecord <- getTransformable(hybridRecord)
+      transformableRecord <- objectStore.get(hybridRecord.location)
       work <- Future.fromTry(
         transformToWork(transformableRecord, hybridRecord.version))
       publishResult <- publishMessage(work)
@@ -41,9 +41,6 @@ class HybridRecordReceiver[T](
       .map(_ => ())
 
   }
-
-  private def getTransformable(hybridRecord: HybridRecord): Future[T] =
-    objectStore.get(hybridRecord.location)
 
   private def publishMessage(
     work: TransformedBaseWork): Future[PublishAttempt] =
