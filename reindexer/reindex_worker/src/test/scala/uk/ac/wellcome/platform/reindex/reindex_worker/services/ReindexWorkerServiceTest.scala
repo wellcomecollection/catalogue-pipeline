@@ -45,7 +45,7 @@ class ReindexWorkerServiceTest
       withLocalSnsTopic { topic =>
         withLocalSqsQueueAndDlq {
           case QueuePair(queue, dlq) =>
-            withWorkerService(queue, table, topic) { _ =>
+            withWorkerService(queue, table, topic) { service =>
               val reindexParameters = CompleteReindexParameters(
                 segment = 0,
                 totalSegments = 1
@@ -53,13 +53,11 @@ class ReindexWorkerServiceTest
 
               Scanamo.put(dynamoDbClient)(table.name)(exampleRecord)
 
-              sendNotificationToSQS(
-                queue = queue,
-                message =
-                  createReindexRequestWith(parameters = reindexParameters)
+              val future = service.processMessage(
+                createReindexRequestWith(parameters = reindexParameters)
               )
 
-              eventually {
+              whenReady(future) { _ =>
                 val actualRecords: Seq[HybridRecord] =
                   listMessagesReceivedFromSNS(topic)
                     .map {
@@ -107,12 +105,14 @@ class ReindexWorkerServiceTest
 
     withLocalSqsQueueAndDlq {
       case QueuePair(queue, dlq) =>
-        withWorkerService(queue, badTable, badTopic) { _ =>
-          sendNotificationToSQS(queue = queue, message = createReindexRequest)
+        withWorkerService(queue, badTable, badTopic) { service =>
 
-          eventually {
-            assertQueueEmpty(queue)
-            assertQueueHasSize(dlq, 1)
+          val future = service.processMessage(
+            reindexRequest = createReindexRequest
+          )
+
+          whenReady(future.failed) { err =>
+            err shouldBe a[RuntimeException]
           }
         }
     }
@@ -124,15 +124,13 @@ class ReindexWorkerServiceTest
         withLocalSqsQueueAndDlq {
           case QueuePair(queue, dlq) =>
             withWorkerService(queue, configMap = Map("foo" -> ((table, topic)))) {
-              _ =>
-                sendNotificationToSQS(
-                  queue = queue,
-                  message = createReindexRequestWith(jobConfigId = "bar")
+              service =>
+                val future = service.processMessage(
+                  reindexRequest = createReindexRequestWith(jobConfigId = "bar")
                 )
 
-                eventually {
-                  assertQueueEmpty(queue)
-                  assertQueueHasSize(dlq, 1)
+                whenReady(future.failed) { err =>
+                  err shouldBe a[RuntimeException]
                 }
             }
         }
@@ -157,13 +155,12 @@ class ReindexWorkerServiceTest
                   "1" -> ((table1, topic1)),
                   "2" -> ((table2, topic2))
                 )
-                withWorkerService(queue, configMap = configMap) { _ =>
-                  sendNotificationToSQS(
-                    queue = queue,
-                    message = createReindexRequestWith(jobConfigId = "1")
+                withWorkerService(queue, configMap = configMap) { service =>
+                  val future1 = service.processMessage(
+                    reindexRequest = createReindexRequestWith(jobConfigId = "1")
                   )
 
-                  eventually {
+                  whenReady(future1) { _ =>
                     val actualRecords: Seq[HybridRecord] =
                       listMessagesReceivedFromSNS(topic1)
                         .map {
@@ -182,12 +179,11 @@ class ReindexWorkerServiceTest
                     assertQueueEmpty(dlq)
                   }
 
-                  sendNotificationToSQS(
-                    queue = queue,
-                    message = createReindexRequestWith(jobConfigId = "2")
+                  val future2 = service.processMessage(
+                    reindexRequest = createReindexRequestWith(jobConfigId = "2")
                   )
 
-                  eventually {
+                  whenReady(future2) { _ =>
                     val actualRecords: Seq[HybridRecord] =
                       listMessagesReceivedFromSNS(topic2)
                         .map {

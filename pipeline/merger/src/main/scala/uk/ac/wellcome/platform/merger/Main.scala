@@ -3,8 +3,8 @@ package uk.ac.wellcome.platform.merger
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.typesafe.{MessagingBuilder, SQSBuilder}
+import uk.ac.wellcome.messaging.typesafe.{MessagingBuilder, NotificationStreamBuilder}
+import uk.ac.wellcome.models.matcher.MatcherResult
 import uk.ac.wellcome.models.work.internal.{BaseWork, TransformedBaseWork}
 import uk.ac.wellcome.platform.merger.services._
 import uk.ac.wellcome.storage.typesafe.VHSBuilder
@@ -31,7 +31,7 @@ object Main extends WellcomeTypesafeApp {
     )
 
     new MergerWorkerService(
-      sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
+      notificationStream = NotificationStreamBuilder.buildStream[MatcherResult](config),
       playbackService = playbackService,
       mergerManager = mergerManager,
       messageWriter = MessagingBuilder.buildMessageWriter[BaseWork](config)

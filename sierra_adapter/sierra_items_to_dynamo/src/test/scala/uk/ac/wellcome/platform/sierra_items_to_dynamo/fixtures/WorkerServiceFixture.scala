@@ -4,8 +4,9 @@ import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
-import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
+import uk.ac.wellcome.messaging.fixtures.{NotificationStreamFixture, SNS, SQS}
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
+import uk.ac.wellcome.models.transformable.sierra.SierraItemRecord
 import uk.ac.wellcome.monitoring.MetricsSender
 import uk.ac.wellcome.platform.sierra_items_to_dynamo.services.SierraItemsToDynamoWorkerService
 import uk.ac.wellcome.storage.fixtures.LocalDynamoDb.Table
@@ -15,8 +16,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 trait WorkerServiceFixture
     extends Akka
+    with NotificationStreamFixture
     with SNS
-    with SQS
     with DynamoInserterFixture {
   def withWorkerService[R](
     queue: Queue,
@@ -39,11 +40,11 @@ trait WorkerServiceFixture
                            metricsSender: MetricsSender)(
     testWith: TestWith[SierraItemsToDynamoWorkerService, R]): R =
     withActorSystem { implicit actorSystem =>
-      withSQSStream[NotificationMessage, R](queue, metricsSender) { sqsStream =>
+      withNotificationStream[SierraItemRecord, R](queue) { notificationStream =>
         withDynamoInserter(table, bucket) { dynamoInserter =>
           withSNSWriter(topic) { snsWriter =>
             val workerService = new SierraItemsToDynamoWorkerService(
-              sqsStream = sqsStream,
+              notificationStream = notificationStream,
               dynamoInserter = dynamoInserter,
               snsWriter = snsWriter
             )

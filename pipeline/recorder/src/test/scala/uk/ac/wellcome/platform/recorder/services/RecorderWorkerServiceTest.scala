@@ -12,7 +12,6 @@ import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.fixtures.{Messaging, SQS}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.monitoring.fixtures.MetricsSenderFixture
 import uk.ac.wellcome.platform.recorder.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.storage.fixtures.LocalDynamoDb.Table
 import uk.ac.wellcome.storage.fixtures.LocalVersionedHybridStore
@@ -28,7 +27,6 @@ class RecorderWorkerServiceTest
     with SQS
     with ScalaFutures
     with Messaging
-    with MetricsSenderFixture
     with IntegrationPatience
     with WorkerServiceFixture
     with WorksGenerators {

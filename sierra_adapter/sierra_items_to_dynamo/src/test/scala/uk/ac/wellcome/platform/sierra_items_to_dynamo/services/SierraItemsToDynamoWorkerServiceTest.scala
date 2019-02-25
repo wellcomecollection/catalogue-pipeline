@@ -62,10 +62,10 @@ class SierraItemsToDynamoWorkerServiceTest
 
           withLocalSqsQueue { queue =>
             withLocalSnsTopic { topic =>
-              withWorkerService(queue, table, bucket, topic) { _ =>
-                sendNotificationToSQS(queue = queue, message = record2)
+              withWorkerService(queue, table, bucket, topic) { service =>
+                val future = service.processMessage(record2)
 
-                eventually {
+                whenReady(future) { _ =>
                   assertStored[SierraItemRecord](
                     table = table,
                     id = record1.id.withoutCheckDigit,

@@ -2,8 +2,8 @@ package uk.ac.wellcome.platform.sierra_item_merger.services
 
 import akka.Done
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSWriter}
-import uk.ac.wellcome.messaging.sqs.SQSStream
+import uk.ac.wellcome.messaging.sns.SNSWriter
+import uk.ac.wellcome.messaging.sqs.NotificationStream
 import uk.ac.wellcome.models.transformable.sierra.SierraItemRecord
 import uk.ac.wellcome.storage.ObjectStore
 import uk.ac.wellcome.storage.vhs.{EmptyMetadata, HybridRecord, VHSIndexEntry}
@@ -12,16 +12,15 @@ import uk.ac.wellcome.typesafe.Runnable
 import scala.concurrent.{ExecutionContext, Future}
 
 class SierraItemMergerWorkerService(
-  sqsStream: SQSStream[NotificationMessage],
+  notificationStream: NotificationStream[HybridRecord],
   sierraItemMergerUpdaterService: SierraItemMergerUpdaterService,
   objectStore: ObjectStore[SierraItemRecord],
   snsWriter: SNSWriter
 )(implicit ec: ExecutionContext)
     extends Runnable {
 
-  private def process(message: NotificationMessage): Future[Unit] =
+  def processMessage(hybridRecord: HybridRecord): Future[Unit] =
     for {
-      hybridRecord <- Future.fromTry(fromJson[HybridRecord](message.body))
       itemRecord <- objectStore.get(hybridRecord.location)
       vhsIndexEntries: Seq[VHSIndexEntry[EmptyMetadata]] <- sierraItemMergerUpdaterService
         .update(itemRecord)
@@ -37,5 +36,5 @@ class SierraItemMergerWorkerService(
     } yield ()
 
   def run(): Future[Done] =
-    sqsStream.foreach(this.getClass.getSimpleName, process)
+    notificationStream.run(processMessage)
 }

@@ -3,13 +3,9 @@ package uk.ac.wellcome.platform.sierra_items_to_dynamo
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
+import uk.ac.wellcome.messaging.typesafe.{NotificationStreamBuilder, SNSBuilder}
 import uk.ac.wellcome.models.transformable.sierra.SierraItemRecord
-import uk.ac.wellcome.platform.sierra_items_to_dynamo.services.{
-  DynamoInserter,
-  SierraItemsToDynamoWorkerService
-}
+import uk.ac.wellcome.platform.sierra_items_to_dynamo.services.{DynamoInserter, SierraItemsToDynamoWorkerService}
 import uk.ac.wellcome.storage.typesafe.VHSBuilder
 import uk.ac.wellcome.storage.vhs.EmptyMetadata
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
@@ -31,7 +27,7 @@ object Main extends WellcomeTypesafeApp {
     )
 
     new SierraItemsToDynamoWorkerService(
-      sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
+      notificationStream = NotificationStreamBuilder.buildStream[SierraItemRecord](config),
       dynamoInserter = dynamoInserter,
       snsWriter = SNSBuilder.buildSNSWriter(config)
     )

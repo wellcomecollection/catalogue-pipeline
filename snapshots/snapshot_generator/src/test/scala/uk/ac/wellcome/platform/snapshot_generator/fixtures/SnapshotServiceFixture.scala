@@ -7,15 +7,14 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.http.ElasticClient
-import org.scalatest.Suite
 import uk.ac.wellcome.elasticsearch.DisplayElasticConfig
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
-import uk.ac.wellcome.platform.snapshot_generator.services.SnapshotService
 import uk.ac.wellcome.fixtures.TestWith
+import uk.ac.wellcome.platform.snapshot_generator.services.SnapshotService
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-trait SnapshotServiceFixture extends ElasticsearchFixtures { this: Suite =>
+trait SnapshotServiceFixture extends ElasticsearchFixtures {
 
   val mapper = new ObjectMapper with ScalaObjectMapper
 

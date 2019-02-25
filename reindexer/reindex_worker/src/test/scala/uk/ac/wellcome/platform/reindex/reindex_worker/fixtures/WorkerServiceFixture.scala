@@ -4,14 +4,9 @@ import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
-import uk.ac.wellcome.messaging.fixtures.SQS
+import uk.ac.wellcome.messaging.fixtures.{NotificationStreamFixture, SQS}
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
-import uk.ac.wellcome.platform.reindex.reindex_worker.models.{
-  CompleteReindexParameters,
-  ReindexJobConfig,
-  ReindexParameters,
-  ReindexRequest
-}
+import uk.ac.wellcome.platform.reindex.reindex_worker.models.{CompleteReindexParameters, ReindexJobConfig, ReindexParameters, ReindexRequest}
 import uk.ac.wellcome.platform.reindex.reindex_worker.services.ReindexWorkerService
 import uk.ac.wellcome.storage.fixtures.LocalDynamoDb.Table
 
@@ -20,21 +15,21 @@ import scala.concurrent.ExecutionContext.Implicits.global
 trait WorkerServiceFixture
     extends Akka
     with BulkSNSSenderFixture
-    with RecordReaderFixture
-    with SQS {
+    with NotificationStreamFixture
+    with RecordReaderFixture {
   val defaultJobConfigId = "testing"
 
   def withWorkerService[R](queue: Queue,
                            configMap: Map[String, (Table, Topic)])(
     testWith: TestWith[ReindexWorkerService, R]): R =
     withActorSystem { implicit actorSystem =>
-      withSQSStream[NotificationMessage, R](queue) { sqsStream =>
+      withNotificationStream[ReindexRequest, R] { notificationStream =>
         withRecordReader { recordReader =>
           withBulkSNSSender { bulkSNSSender =>
             val workerService = new ReindexWorkerService(
+              notificationStream = notificationStream,
               recordReader = recordReader,
               bulkSNSSender = bulkSNSSender,
-              sqsStream = sqsStream,
               reindexJobConfigMap = configMap.map {
                 case (key: String, (table: Table, topic: Topic)) =>
                   key -> ReindexJobConfig(
