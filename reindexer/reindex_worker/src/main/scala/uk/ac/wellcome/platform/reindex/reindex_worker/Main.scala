@@ -3,18 +3,11 @@ package uk.ac.wellcome.platform.reindex.reindex_worker
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
+import uk.ac.wellcome.messaging.typesafe.{NotificationStreamBuilder, SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.platform.reindex.reindex_worker.config.ReindexJobConfigBuilder
-import uk.ac.wellcome.platform.reindex.reindex_worker.dynamo.{
-  MaxRecordsScanner,
-  ParallelScanner,
-  ScanSpecScanner
-}
-import uk.ac.wellcome.platform.reindex.reindex_worker.services.{
-  BulkSNSSender,
-  RecordReader,
-  ReindexWorkerService
-}
+import uk.ac.wellcome.platform.reindex.reindex_worker.dynamo.{MaxRecordsScanner, ParallelScanner, ScanSpecScanner}
+import uk.ac.wellcome.platform.reindex.reindex_worker.models.ReindexRequest
+import uk.ac.wellcome.platform.reindex.reindex_worker.services.{BulkSNSSender, RecordReader, ReindexWorkerService}
 import uk.ac.wellcome.storage.typesafe.DynamoBuilder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
@@ -46,9 +39,9 @@ object Main extends WellcomeTypesafeApp {
     )
 
     new ReindexWorkerService(
+      notificationStream = NotificationStreamBuilder.buildStream[ReindexRequest](config),
       recordReader = recordReader,
       bulkSNSSender = hybridRecordSender,
-      sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
       reindexJobConfigMap =
         ReindexJobConfigBuilder.buildReindexJobConfigMap(config)
     )

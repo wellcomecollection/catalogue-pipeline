@@ -5,10 +5,9 @@ import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
-import uk.ac.wellcome.messaging.fixtures.{Messaging, SNS, SQS}
+import uk.ac.wellcome.messaging.fixtures.{Messaging, NotificationStreamFixture, SNS}
 import uk.ac.wellcome.models.transformable.SierraTransformable
 import uk.ac.wellcome.models.transformable.SierraTransformable._
 import uk.ac.wellcome.models.transformable.sierra.test.utils.SierraGenerators
@@ -17,6 +16,7 @@ import uk.ac.wellcome.platform.transformer.sierra.fixtures.HybridRecordReceiverF
 import uk.ac.wellcome.platform.transformer.sierra.services.SierraTransformerWorkerService
 import uk.ac.wellcome.storage.fixtures.S3
 import uk.ac.wellcome.storage.fixtures.S3.Bucket
+import uk.ac.wellcome.storage.vhs.HybridRecord
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -24,13 +24,13 @@ class SierraTransformerFeatureTest
     extends FunSpec
     with Matchers
     with Akka
-    with SQS
     with SNS
     with S3
     with Messaging
     with Eventually
     with HybridRecordReceiverFixture
     with IntegrationPatience
+    with NotificationStreamFixture
     with SierraGenerators {
 
   it("transforms sierra records and publishes the result to the given topic") {
@@ -105,11 +105,11 @@ class SierraTransformerFeatureTest
     withHybridRecordReceiver[SierraTransformable, R](topic, bucket) {
       messageReceiver =>
         withActorSystem { implicit actorSystem =>
-          withSQSStream[NotificationMessage, R](queue) { sqsStream =>
+          withNotificationStream[HybridRecord, R] { notificationStream =>
             val workerService = new SierraTransformerWorkerService(
+              notificationStream = notificationStream,
               messageReceiver = messageReceiver,
-              sierraTransformer = new SierraTransformableTransformer,
-              sqsStream = sqsStream
+              sierraTransformer = new SierraTransformableTransformer
             )
 
             workerService.run()

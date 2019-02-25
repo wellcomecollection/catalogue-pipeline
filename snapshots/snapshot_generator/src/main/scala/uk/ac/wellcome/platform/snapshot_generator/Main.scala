@@ -4,17 +4,10 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import com.typesafe.config.Config
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.typesafe.{
-  NotificationStreamBuilder,
-  SNSBuilder,
-  SQSBuilder
-}
+import uk.ac.wellcome.messaging.typesafe.{NotificationStreamBuilder, SNSBuilder}
 import uk.ac.wellcome.platform.snapshot_generator.config.builders.AkkaS3Builder
-import uk.ac.wellcome.platform.snapshot_generator.services.{
-  SnapshotGeneratorWorkerService,
-  SnapshotService
-}
+import uk.ac.wellcome.platform.snapshot_generator.models.SnapshotJob
+import uk.ac.wellcome.platform.snapshot_generator.services.{SnapshotGeneratorWorkerService, SnapshotService}
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 
