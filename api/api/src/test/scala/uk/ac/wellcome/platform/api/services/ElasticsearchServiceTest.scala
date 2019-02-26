@@ -7,11 +7,18 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Assertion, FunSpec, Matchers}
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.models.work.generators.WorksGenerators
+import uk.ac.wellcome.models.work.generators.{
+  ContributorGenerators,
+  GenreGenerators,
+  SubjectGenerators,
+  WorksGenerators
+}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
+import uk.ac.wellcome.platform.api.models.WorkQuery._
 import uk.ac.wellcome.platform.api.models.{
   ItemLocationTypeFilter,
+  WorkQuery,
   WorkTypeFilter
 }
 
@@ -24,7 +31,10 @@ class ElasticsearchServiceTest
     with ElasticsearchFixtures
     with ScalaFutures
     with SearchOptionsGenerators
-    with WorksGenerators {
+    with SubjectGenerators
+    with GenreGenerators
+    with WorksGenerators
+    with ContributorGenerators {
 
   val searchService = new ElasticsearchService(
     elasticClient = elasticClient
@@ -44,9 +54,8 @@ class ElasticsearchServiceTest
 
         assertSearchResultsAreCorrect(
           index = index,
-          queryString = "Aegean",
-          expectedWorks = List(work1)
-        )
+          workQuery = SimpleQuery("Aegean"),
+          expectedWorks = List(work1))
       }
     }
 
@@ -73,7 +82,7 @@ class ElasticsearchServiceTest
 
         assertSearchResultsAreCorrect(
           index = index,
-          queryString = "artichokes",
+          workQuery = SimpleQuery("artichokes"),
           queryOptions = createElasticsearchQueryOptionsWith(
             filters = List(WorkTypeFilter(workTypeId = "b"))
           ),
@@ -110,7 +119,7 @@ class ElasticsearchServiceTest
 
         assertSearchResultsAreCorrect(
           index = index,
-          queryString = "artichokes",
+          workQuery = SimpleQuery("artichokes"),
           queryOptions = createElasticsearchQueryOptionsWith(
             filters = List(WorkTypeFilter(List("b", "m")))
           ),
@@ -140,7 +149,7 @@ class ElasticsearchServiceTest
 
         assertSearchResultsAreCorrect(
           index = index,
-          queryString = "tangerines",
+          workQuery = SimpleQuery("tangerines"),
           queryOptions = createElasticsearchQueryOptionsWith(
             filters =
               List(ItemLocationTypeFilter(locationTypeId = "iiif-image"))
@@ -178,7 +187,7 @@ class ElasticsearchServiceTest
 
         assertSearchResultsAreCorrect(
           index = index,
-          queryString = "tangerines",
+          workQuery = SimpleQuery("tangerines"),
           queryOptions = createElasticsearchQueryOptionsWith(
             filters = List(
               ItemLocationTypeFilter(
@@ -207,7 +216,9 @@ class ElasticsearchServiceTest
 
         (1 to 10).foreach { _ =>
           val searchResponseFuture = searchService
-            .simpleStringQueryResults("A")(index, defaultQueryOptions)
+            .simpleStringQueryResults(SimpleQuery("A"))(
+              index,
+              defaultQueryOptions)
 
           whenReady(searchResponseFuture) { response =>
             searchResponseToWorks(response) shouldBe works
@@ -218,13 +229,158 @@ class ElasticsearchServiceTest
 
     it("returns a Left[ElasticError] if Elasticsearch returns an error") {
       val future = searchService
-        .simpleStringQueryResults("cat")(
+        .simpleStringQueryResults(SimpleQuery("cat"))(
           Index("doesnotexist"),
           defaultQueryOptions)
 
       whenReady(future) { response =>
         response.isLeft shouldBe true
         response.left.get shouldBe a[ElasticError]
+      }
+    }
+  }
+
+  describe("searches using JustBoostQuery") {
+    it("finds results for a JustBoostQuery search") {
+      withLocalWorksIndex { index =>
+        // Longer text used to ensure signal in TF/IDF
+        val text = "Text that contains Aegean"
+
+        val work = createIdentifiedWorkWith()
+        val matchingTitle =
+          createIdentifiedWorkFrom(work)(title = f"$text title")
+        val exactMatchingTitle =
+          createIdentifiedWorkFrom(work)(title = f"Aegean title")
+        val matchingSubject = createIdentifiedWorkFrom(work)(
+          subjects = List(createSubjectWith(f"$text subject")))
+        val matchingGenre = createIdentifiedWorkFrom(work)(
+          genres = List(createGenreWith(f"$text genre")))
+        val matchingDescription = createIdentifiedWorkFrom(work)(
+          description = Some(f"$text description"))
+        val noMatch = createIdentifiedWorkFrom(work)(title = "Before a Bengal")
+
+        insertIntoElasticsearch(
+          index,
+          matchingTitle,
+          noMatch,
+          matchingSubject,
+          exactMatchingTitle,
+          matchingDescription,
+          matchingGenre)
+
+        val results =
+          searchResults(index = index, workQuery = JustBoostQuery("Aegean"))
+
+        results should have length 5
+
+        results.head shouldBe exactMatchingTitle
+        results.slice(1, 3) should contain theSameElementsAs List(
+          matchingSubject,
+          matchingGenre)
+        results(3) shouldBe matchingTitle
+        results(4) shouldBe matchingDescription
+      }
+    }
+  }
+
+  describe("searches using BroaderBoostQuery") {
+    it("finds results for a BroaderBoostQuery search") {
+      withLocalWorksIndex { index =>
+        // Longer text used to ensure signal in TF/IDF
+        val text = "Text that contains Aegean"
+
+        val work = createIdentifiedWorkWith()
+        val matchingTitle =
+          createIdentifiedWorkFrom(work)(title = f"$text title")
+        val matchingSubject = createIdentifiedWorkFrom(work)(
+          subjects = List(createSubjectWith(f"$text subject")))
+        val matchingGenre = createIdentifiedWorkFrom(work)(
+          genres = List(createGenreWith(f"$text genre")))
+        val matchingDescription = createIdentifiedWorkFrom(work)(
+          description = Some(f"$text description"))
+        val matchingLettering =
+          createIdentifiedWorkFrom(work)(lettering = Some(f"$text lettering"))
+        val matchingContributor =
+          createIdentifiedWorkFrom(work)(
+            contributors =
+              List(createPersonContributorWith(f"$text contributor")))
+        val noMatch = createIdentifiedWorkFrom(work)(title = "Before a Bengal")
+
+        insertIntoElasticsearch(
+          index,
+          noMatch,
+          matchingTitle,
+          matchingSubject,
+          matchingGenre,
+          matchingDescription,
+          matchingLettering,
+          matchingContributor)
+
+        val results =
+          searchResults(index = index, workQuery = BroaderBoostQuery("Aegean"))
+
+        results should have length 6
+
+        results.slice(0, 2) should contain theSameElementsAs List(
+          matchingSubject,
+          matchingGenre)
+
+        results(2) shouldBe matchingTitle
+
+        results.slice(3, 6) should contain theSameElementsAs List(
+          matchingDescription,
+          matchingLettering,
+          matchingContributor
+        )
+
+      }
+    }
+  }
+
+  describe("searches using SlopQuery") {
+    it("finds results for a SlopQuery search") {
+      withLocalWorksIndex { index =>
+        val exactMatch = createIdentifiedWorkWith(title = "Text Aegean")
+        val matchingSlop =
+          createIdentifiedWorkWith(title = "Text that contains Aegean")
+        val notMatchingSlop = createIdentifiedWorkWith(
+          title = "Text that has too much slop but contains Aegean")
+
+        insertIntoElasticsearch(
+          index,
+          matchingSlop,
+          exactMatch,
+          notMatchingSlop)
+
+        val results =
+          searchResults(index = index, workQuery = SlopQuery("Text Aegean"))
+
+        results shouldBe List(
+          exactMatch,
+          matchingSlop)
+      }
+    }
+  }
+
+  describe("searches using MinimumMatchQuery") {
+    it("finds results for a MinimumMatchQuery search") {
+      withLocalWorksIndex { index =>
+        val matching100 =
+          createIdentifiedWorkWith(title = "Title text contains Aegean")
+        val matching75 =
+          createIdentifiedWorkWith(title = "Title text contains")
+        val matching25 =
+          createIdentifiedWorkWith(title = "Title")
+
+        insertIntoElasticsearch(index, matching25, matching100, matching75)
+
+        val results = searchResults(
+          index = index,
+          workQuery = MinimumMatchQuery("Title text contains Aegean"))
+
+        results shouldBe List(
+          matching100,
+          matching75)
       }
     }
   }
@@ -468,18 +624,23 @@ class ElasticsearchServiceTest
     works.sortBy(_.canonicalId).toList
   }
 
+  private def searchResults(index: Index,
+                            workQuery: WorkQuery,
+                            queryOptions: ElasticsearchQueryOptions =
+                              createElasticsearchQueryOptions) = {
+    val searchResponseFuture =
+      searchService.simpleStringQueryResults(workQuery)(index, queryOptions)
+    whenReady(searchResponseFuture) { response =>
+      searchResponseToWorks(response)
+    }
+  }
+
   private def assertSearchResultsAreCorrect(
     index: Index,
-    queryString: String,
+    workQuery: WorkQuery,
     queryOptions: ElasticsearchQueryOptions = createElasticsearchQueryOptions,
-    expectedWorks: List[IdentifiedWork]
-  ): Assertion = {
-    val searchResponseFuture = searchService
-      .simpleStringQueryResults(queryString)(index, queryOptions)
-
-    whenReady(searchResponseFuture) { response =>
-      searchResponseToWorks(response) should contain theSameElementsAs expectedWorks
-    }
+    expectedWorks: List[IdentifiedWork]) = {
+    searchResults(index, workQuery, queryOptions) should contain theSameElementsAs expectedWorks
   }
 
   private def assertListResultsAreCorrect(
@@ -497,8 +658,8 @@ class ElasticsearchServiceTest
 
   private def searchResponseToWorks(
     response: Either[ElasticError, SearchResponse]): List[IdentifiedBaseWork] =
-    response.right.get.hits.hits.map { h: SearchHit =>
-      jsonToIdentifiedBaseWork(h.sourceAsString)
+    response.right.get.hits.hits.map { searchHit: SearchHit =>
+      jsonToIdentifiedBaseWork(searchHit.sourceAsString)
     }.toList
 
   private def jsonToIdentifiedBaseWork(document: String): IdentifiedBaseWork =

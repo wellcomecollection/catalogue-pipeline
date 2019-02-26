@@ -8,7 +8,7 @@ import com.sksamuel.elastic4s.http.search.{SearchHit, SearchResponse}
 import io.circe.Decoder
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.internal.{IdentifiedBaseWork, IdentifiedWork}
-import uk.ac.wellcome.platform.api.models.{ResultList, WorkFilter}
+import uk.ac.wellcome.platform.api.models.{ResultList, WorkFilter, WorkQuery}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -43,11 +43,11 @@ class WorksService @Inject()(searchService: ElasticsearchService)(
         result.map { createResultList }
       }
 
-  def searchWorks(query: String)(index: Index,
-                                 worksSearchOptions: WorksSearchOptions)
+  def searchWorks(workQuery: WorkQuery)(index: Index,
+                                        worksSearchOptions: WorksSearchOptions)
     : Future[Either[ElasticError, ResultList]] =
     searchService
-      .simpleStringQueryResults(query)(
+      .simpleStringQueryResults(workQuery)(
         index,
         toElasticsearchQueryOptions(worksSearchOptions))
       .map { result: Either[ElasticError, SearchResponse] =>

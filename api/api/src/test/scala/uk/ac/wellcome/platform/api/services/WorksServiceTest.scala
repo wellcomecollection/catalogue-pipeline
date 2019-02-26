@@ -8,6 +8,7 @@ import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.{IdentifiedBaseWork, WorkType}
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
+import uk.ac.wellcome.platform.api.models.WorkQuery.SimpleQuery
 import uk.ac.wellcome.platform.api.models.{ResultList, WorkTypeFilter}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -263,7 +264,7 @@ class WorksServiceTest
 
     it("returns a Left[ElasticError] if there's an Elasticsearch error") {
       val future = worksService.searchWorks(
-        query = "cat"
+        workQuery = SimpleQuery("cat")
       )(
         index = Index("doesnotexist"),
         worksSearchOptions = defaultWorksSearchOptions
@@ -293,7 +294,7 @@ class WorksServiceTest
     worksSearchOptions: WorksSearchOptions = createWorksSearchOptions
   ): Assertion =
     assertResultIsCorrect(
-      worksService.searchWorks(query = query)
+      worksService.searchWorks(SimpleQuery(query))
     )(allWorks, expectedWorks, expectedTotalResults, worksSearchOptions)
 
   private def assertResultIsCorrect(

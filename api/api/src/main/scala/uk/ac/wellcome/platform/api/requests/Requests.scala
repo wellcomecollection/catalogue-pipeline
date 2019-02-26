@@ -19,6 +19,7 @@ trait MultipleResultsRequest[W <: WorksIncludes] extends ApiRequest {
   val include: Option[W]
   val query: Option[String]
   val _index: Option[String]
+  val _queryType: Option[String]
   val request: Request
 }
 
@@ -28,6 +29,7 @@ case class V1MultipleResultsRequest(
   @QueryParam includes: Option[V1WorksIncludes],
   @QueryParam query: Option[String],
   @QueryParam _index: Option[String],
+  @QueryParam _queryType: Option[String],
   request: Request
 ) extends MultipleResultsRequest[V1WorksIncludes] {
   val include: Option[V1WorksIncludes] = includes
@@ -41,6 +43,7 @@ case class V2MultipleResultsRequest(
   @QueryParam workType: Option[String],
   @QueryParam("items.locations.locationType") itemLocationType: Option[String],
   @QueryParam _index: Option[String],
+  @QueryParam _queryType: Option[String],
   request: Request
 ) extends MultipleResultsRequest[V2WorksIncludes]
 

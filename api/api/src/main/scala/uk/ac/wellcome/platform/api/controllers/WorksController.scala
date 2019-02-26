@@ -12,6 +12,7 @@ import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.ContextHelper.buildContextUri
 import uk.ac.wellcome.platform.api.elasticsearch.ElasticErrorHandler
+import uk.ac.wellcome.platform.api.models.WorkQuery._
 import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.platform.api.requests._
 import uk.ac.wellcome.platform.api.responses.{
@@ -129,11 +130,25 @@ abstract class WorksController[M <: MultipleResultsRequest[W],
     def searchFunction: (Index, WorksSearchOptions) => Future[
       Either[ElasticError, ResultList]] =
       request.query match {
-        case Some(queryString) => worksService.searchWorks(queryString)
-        case None              => worksService.listWorks
+        case Some(queryString) =>
+          worksService.searchWorks(
+            queryTypeToWorkQuery(queryString, request._queryType))
+        case None =>
+          worksService.listWorks
       }
 
     searchFunction(index, worksSearchOptions)
+  }
+
+  private def queryTypeToWorkQuery(queryString: String,
+                                   maybeQueryType: Option[String]): WorkQuery = {
+    maybeQueryType.map(_.toUpperCase) match {
+      case Some("JB") => JustBoostQuery(queryString)
+      case Some("BB") => BroaderBoostQuery(queryString)
+      case Some("SP") => SlopQuery(queryString)
+      case Some("MM") => MinimumMatchQuery(queryString)
+      case _          => SimpleQuery(queryString)
+    }
   }
 
   private def handleWorksServiceResult[T](maybeResult: Either[ElasticError, T],

@@ -169,6 +169,56 @@ trait WorksGenerators extends ItemsGenerators {
       createIdentifiedWork
     }
 
+  def createIdentifiedWorkFrom(identifiedWork: IdentifiedWork)(
+    canonicalId: String = createCanonicalId,
+    sourceIdentifier: SourceIdentifier = identifiedWork.sourceIdentifier,
+    otherIdentifiers: List[SourceIdentifier] = identifiedWork.otherIdentifiers,
+    title: String = identifiedWork.title,
+    workType: Option[WorkType] = identifiedWork.workType,
+    description: Option[String] = identifiedWork.description,
+    physicalDescription: Option[String] = identifiedWork.physicalDescription,
+    extent: Option[String] = identifiedWork.extent,
+    lettering: Option[String] = identifiedWork.lettering,
+    createdDate: Option[Period] = identifiedWork.createdDate,
+    subjects: List[Displayable[Subject[Displayable[AbstractRootConcept]]]] =
+      identifiedWork.subjects,
+    genres: List[Genre[Displayable[AbstractConcept]]] = identifiedWork.genres,
+    contributors: List[Contributor[Displayable[AbstractAgent]]] =
+      identifiedWork.contributors,
+    thumbnail: Option[Location] = identifiedWork.thumbnail,
+    production: List[ProductionEvent[Displayable[AbstractAgent]]] =
+      identifiedWork.production,
+    language: Option[Language] = identifiedWork.language,
+    dimensions: Option[String] = identifiedWork.dimensions,
+    items: List[Displayable[Item]] = identifiedWork.items,
+    itemsV1: List[Identified[Item]] = identifiedWork.itemsV1,
+    version: Int = identifiedWork.version,
+    merged: Boolean = identifiedWork.merged): IdentifiedWork = {
+    IdentifiedWork(
+      canonicalId = canonicalId,
+      sourceIdentifier = sourceIdentifier,
+      otherIdentifiers = otherIdentifiers,
+      title = title,
+      workType = workType,
+      description = description,
+      physicalDescription = physicalDescription,
+      extent = extent,
+      lettering = lettering,
+      createdDate = createdDate,
+      subjects = subjects,
+      genres = genres,
+      contributors = contributors,
+      thumbnail = thumbnail,
+      production = production,
+      language = language,
+      dimensions = dimensions,
+      items = items,
+      itemsV1 = itemsV1,
+      version = version,
+      merged = merged
+    )
+  }
+
   def createUnidentifiedSierraWorkWith(workType: Option[WorkType] = None,
                                        items: List[MaybeDisplayable[Item]] =
                                          List()): UnidentifiedWork =
