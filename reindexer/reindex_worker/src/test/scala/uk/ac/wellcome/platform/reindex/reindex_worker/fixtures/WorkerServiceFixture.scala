@@ -2,6 +2,7 @@ package uk.ac.wellcome.platform.reindex.reindex_worker.fixtures
 
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
+import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.NotificationStreamFixture
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
@@ -27,7 +28,7 @@ trait WorkerServiceFixture
                            configMap: Map[String, (Table, Topic)])(
     testWith: TestWith[ReindexWorkerService, R]): R =
     withActorSystem { implicit actorSystem =>
-      withNotificationStream[ReindexRequest, R] { notificationStream =>
+      withNotificationStream[ReindexRequest, R](queue) { notificationStream =>
         withRecordReader { recordReader =>
           withBulkSNSSender { bulkSNSSender =>
             val workerService = new ReindexWorkerService(
