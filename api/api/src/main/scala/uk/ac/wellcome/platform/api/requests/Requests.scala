@@ -29,7 +29,7 @@ case class V1MultipleResultsRequest(
   @QueryParam includes: Option[V1WorksIncludes],
   @QueryParam query: Option[String],
   @QueryParam _index: Option[String],
-  @QueryParam _queryType: Option[String],
+  @QueryParam _queryType: Option[String] = None,
   request: Request
 ) extends MultipleResultsRequest[V1WorksIncludes] {
   val include: Option[V1WorksIncludes] = includes
