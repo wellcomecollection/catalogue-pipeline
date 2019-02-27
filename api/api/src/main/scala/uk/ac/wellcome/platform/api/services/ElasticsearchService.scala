@@ -39,7 +39,7 @@ class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
       sortDefinitions = List(fieldSort("canonicalId").order(SortOrder.ASC))
     )
 
-  def simpleStringQueryResults(
+  def queryResults(
     workQuery: WorkQuery): (Index, ElasticsearchQueryOptions) => Future[
     Either[ElasticError, SearchResponse]] =
     executeSearch(

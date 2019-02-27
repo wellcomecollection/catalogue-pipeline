@@ -370,7 +370,7 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
     }
   }
 
-  it("supports the query _type parameter") {
+  it("supports the _queryType parameter") {
     withV2Api {
       case (indexV2, server: EmbeddedHttpServer) =>
         val work1 = createIdentifiedWorkWith(

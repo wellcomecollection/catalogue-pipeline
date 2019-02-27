@@ -216,7 +216,7 @@ class ElasticsearchServiceTest
 
         (1 to 10).foreach { _ =>
           val searchResponseFuture = searchService
-            .simpleStringQueryResults(SimpleQuery("A"))(
+            .queryResults(SimpleQuery("A"))(
               index,
               defaultQueryOptions)
 
@@ -229,7 +229,7 @@ class ElasticsearchServiceTest
 
     it("returns a Left[ElasticError] if Elasticsearch returns an error") {
       val future = searchService
-        .simpleStringQueryResults(SimpleQuery("cat"))(
+        .queryResults(SimpleQuery("cat"))(
           Index("doesnotexist"),
           defaultQueryOptions)
 
@@ -240,24 +240,26 @@ class ElasticsearchServiceTest
     }
   }
 
-  describe("searches using JustBoostQuery") {
+
+  describe("searches using Selectable queries") {
+    val noMatch =
+      createIdentifiedWorkWith(title = "Before a Bengal")
+
     it("finds results for a JustBoostQuery search") {
       withLocalWorksIndex { index =>
         // Longer text used to ensure signal in TF/IDF
         val text = "Text that contains Aegean"
 
-        val work = createIdentifiedWorkWith()
         val matchingTitle =
-          createIdentifiedWorkFrom(work)(title = f"$text title")
+          createIdentifiedWorkWith(title = s"$text title")
         val exactMatchingTitle =
-          createIdentifiedWorkFrom(work)(title = f"Aegean title")
-        val matchingSubject = createIdentifiedWorkFrom(work)(
-          subjects = List(createSubjectWith(f"$text subject")))
-        val matchingGenre = createIdentifiedWorkFrom(work)(
-          genres = List(createGenreWith(f"$text genre")))
-        val matchingDescription = createIdentifiedWorkFrom(work)(
-          description = Some(f"$text description"))
-        val noMatch = createIdentifiedWorkFrom(work)(title = "Before a Bengal")
+          createIdentifiedWorkWith(title = s"Aegean title")
+        val matchingSubject =
+          createIdentifiedWorkWith(subjects = List(createSubjectWith(s"$text subject")))
+        val matchingGenre =
+          createIdentifiedWorkWith(genres = List(createGenreWith(s"$text genre")))
+        val matchingDescription =
+          createIdentifiedWorkWith(description = Some(s"$text description"))
 
         insertIntoElasticsearch(
           index,
@@ -281,30 +283,26 @@ class ElasticsearchServiceTest
         results(4) shouldBe matchingDescription
       }
     }
-  }
 
-  describe("searches using BroaderBoostQuery") {
     it("finds results for a BroaderBoostQuery search") {
       withLocalWorksIndex { index =>
         // Longer text used to ensure signal in TF/IDF
         val text = "Text that contains Aegean"
 
-        val work = createIdentifiedWorkWith()
         val matchingTitle =
-          createIdentifiedWorkFrom(work)(title = f"$text title")
-        val matchingSubject = createIdentifiedWorkFrom(work)(
-          subjects = List(createSubjectWith(f"$text subject")))
-        val matchingGenre = createIdentifiedWorkFrom(work)(
-          genres = List(createGenreWith(f"$text genre")))
-        val matchingDescription = createIdentifiedWorkFrom(work)(
-          description = Some(f"$text description"))
+          createIdentifiedWorkWith(title = s"$text title")
+        val matchingSubject =
+          createIdentifiedWorkWith(subjects = List(createSubjectWith(s"$text subject")))
+        val matchingGenre =
+          createIdentifiedWorkWith(genres = List(createGenreWith(s"$text genre")))
+        val matchingDescription =
+          createIdentifiedWorkWith(description = Some(s"$text description"))
         val matchingLettering =
-          createIdentifiedWorkFrom(work)(lettering = Some(f"$text lettering"))
+          createIdentifiedWorkWith(lettering = Some(s"$text lettering"))
         val matchingContributor =
-          createIdentifiedWorkFrom(work)(
+          createIdentifiedWorkWith(
             contributors =
-              List(createPersonContributorWith(f"$text contributor")))
-        val noMatch = createIdentifiedWorkFrom(work)(title = "Before a Bengal")
+              List(createPersonContributorWith(s"$text contributor")))
 
         insertIntoElasticsearch(
           index,
@@ -335,9 +333,7 @@ class ElasticsearchServiceTest
 
       }
     }
-  }
 
-  describe("searches using SlopQuery") {
     it("finds results for a SlopQuery search") {
       withLocalWorksIndex { index =>
         val exactMatch = createIdentifiedWorkWith(title = "Text Aegean")
@@ -360,9 +356,7 @@ class ElasticsearchServiceTest
           matchingSlop)
       }
     }
-  }
 
-  describe("searches using MinimumMatchQuery") {
     it("finds results for a MinimumMatchQuery search") {
       withLocalWorksIndex { index =>
         val matching100 =
@@ -629,7 +623,7 @@ class ElasticsearchServiceTest
                             queryOptions: ElasticsearchQueryOptions =
                               createElasticsearchQueryOptions) = {
     val searchResponseFuture =
-      searchService.simpleStringQueryResults(workQuery)(index, queryOptions)
+      searchService.queryResults(workQuery)(index, queryOptions)
     whenReady(searchResponseFuture) { response =>
       searchResponseToWorks(response)
     }

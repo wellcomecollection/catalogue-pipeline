@@ -47,7 +47,7 @@ class WorksService @Inject()(searchService: ElasticsearchService)(
                                         worksSearchOptions: WorksSearchOptions)
     : Future[Either[ElasticError, ResultList]] =
     searchService
-      .simpleStringQueryResults(workQuery)(
+      .queryResults(workQuery)(
         index,
         toElasticsearchQueryOptions(worksSearchOptions))
       .map { result: Either[ElasticError, SearchResponse] =>
