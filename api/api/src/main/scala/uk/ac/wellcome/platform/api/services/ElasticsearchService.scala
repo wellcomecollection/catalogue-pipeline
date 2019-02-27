@@ -6,24 +6,18 @@ import com.sksamuel.elastic4s.http.ElasticDsl._
 import com.sksamuel.elastic4s.http.get.GetResponse
 import com.sksamuel.elastic4s.http.search.SearchResponse
 import com.sksamuel.elastic4s.http.{ElasticClient, ElasticError, Response}
-import com.sksamuel.elastic4s.searches.queries.term.TermsQuery
-import com.sksamuel.elastic4s.searches.queries.{BoolQuery, Query}
-import com.sksamuel.elastic4s.searches.sort.{FieldSort, SortOrder}
 import com.sksamuel.elastic4s.searches.SearchRequest
+import com.sksamuel.elastic4s.searches.queries.Query
+import com.sksamuel.elastic4s.searches.queries.term.TermsQuery
+import com.sksamuel.elastic4s.searches.sort.{FieldSort, SortOrder}
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.platform.api.models.{
-  ItemLocationTypeFilter,
-  WorkFilter,
-  WorkTypeFilter
-}
+import uk.ac.wellcome.platform.api.models._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-case class ElasticsearchQueryOptions(
-  filters: List[WorkFilter],
-  limit: Int,
-  from: Int
-)
+case class ElasticsearchQueryOptions(filters: List[WorkFilter],
+                                     limit: Int,
+                                     from: Int)
 
 @Singleton
 class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
@@ -41,15 +35,15 @@ class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
   def listResults: (Index, ElasticsearchQueryOptions) => Future[
     Either[ElasticError, SearchResponse]] =
     executeSearch(
-      maybeQueryString = None,
+      maybeWorkQuery = None,
       sortDefinitions = List(fieldSort("canonicalId").order(SortOrder.ASC))
     )
 
-  def simpleStringQueryResults(
-    queryString: String): (Index, ElasticsearchQueryOptions) => Future[
+  def queryResults(
+    workQuery: WorkQuery): (Index, ElasticsearchQueryOptions) => Future[
     Either[ElasticError, SearchResponse]] =
     executeSearch(
-      maybeQueryString = Some(queryString),
+      maybeWorkQuery = Some(workQuery),
       sortDefinitions = List(
         fieldSort("_score").order(SortOrder.DESC),
         fieldSort("canonicalId").order(SortOrder.ASC))
@@ -59,27 +53,35 @@ class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
     * using the elastic4s query DSL, then execute the search.
     */
   private def executeSearch(
-    maybeQueryString: Option[String],
+    maybeWorkQuery: Option[WorkQuery],
     sortDefinitions: List[FieldSort]
   )(index: Index, queryOptions: ElasticsearchQueryOptions)
     : Future[Either[ElasticError, SearchResponse]] = {
-    val queryDefinition: BoolQuery = buildQuery(
-      maybeQueryString = maybeQueryString,
-      filters = queryOptions.filters
-    )
 
     val searchRequest: SearchRequest =
-      search(index)
-        .query(queryDefinition)
-        .sortBy(sortDefinitions)
-        .limit(queryOptions.limit)
-        .from(queryOptions.from)
+      buildSearchRequest(index, maybeWorkQuery, sortDefinitions, queryOptions)
 
     debug(s"Sending ES request: $searchRequest")
 
     elasticClient
       .execute { searchRequest }
       .map { toEither }
+  }
+
+  private def buildSearchRequest(index: Index,
+                                 maybeWorkQuery: Option[WorkQuery],
+                                 sortDefinitions: List[FieldSort],
+                                 queryOptions: ElasticsearchQueryOptions) = {
+    val queryDefinition: Query = buildFilteredQuery(
+      maybeWorkQuery = maybeWorkQuery,
+      filters = queryOptions.filters
+    )
+
+    search(index)
+      .query(queryDefinition)
+      .sortBy(sortDefinitions)
+      .limit(queryOptions.limit)
+      .from(queryOptions.from)
   }
 
   private def toTermQuery(workFilter: WorkFilter): TermsQuery[String] =
@@ -92,18 +94,21 @@ class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
         termsQuery(field = "workType.id", values = workTypeIds)
     }
 
-  private def buildQuery(maybeQueryString: Option[String],
-                         filters: List[WorkFilter]): BoolQuery = {
-    val queries = List(
-      maybeQueryString.map { simpleStringQuery }
-    ).flatten
+  private def buildFilteredQuery(maybeWorkQuery: Option[WorkQuery],
+                                 filters: List[WorkFilter]): Query = {
+    val query = maybeWorkQuery match {
+      case Some(workQuery) =>
+        must(workQuery.query())
+      case None =>
+        boolQuery()
+    }
 
     val filterDefinitions: List[Query] =
       filters.map { toTermQuery } :+ termQuery(
         field = "type",
         value = "IdentifiedWork")
 
-    must(queries).filter(filterDefinitions)
+    query.filter(filterDefinitions)
   }
 
   private def toEither[T](response: Response[T]): Either[ElasticError, T] =

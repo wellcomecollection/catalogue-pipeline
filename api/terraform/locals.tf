@@ -13,7 +13,7 @@ locals {
   production_api     = "remus"
   pinned_nginx       = "760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/nginx_api-gw:bad0dbfa548874938d16496e313b05adb71268b7"
   pinned_remus_api   = "760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/api:dd9a66fa8727cd23486a8306b8946d3a38ada4a1"
-  pinned_romulus_api = "760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/api:bc67ea53369f7255ffca55e72f04d19102e8c419"
+  pinned_romulus_api = "760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/api:41f52261f4250f180366bbe140bbc224c4e86ba1"
   romulus_es_config = {
     index_v1 = "v1-2019-01-24-production-changes"
     index_v2 = "v2-2019-01-24-production-changes"

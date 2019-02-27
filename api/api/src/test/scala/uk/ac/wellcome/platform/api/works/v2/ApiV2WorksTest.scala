@@ -369,4 +369,36 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
         }
     }
   }
+
+  it("supports the _queryType parameter") {
+    withV2Api {
+      case (indexV2, server: EmbeddedHttpServer) =>
+        val work1 = createIdentifiedWorkWith(
+          canonicalId = "1",
+          title = "Working with wombats")
+        val work2 = createIdentifiedWorkWith(
+          canonicalId = "2",
+          title = "Working with much too sloppy wombats")
+        insertIntoElasticsearch(indexV2, work1, work2)
+
+        eventually {
+          server.httpGet(
+            path = s"/$apiPrefix/works?query=Working+wombats&_queryType=slop",
+            andExpect = Status.Ok,
+            withJsonBody = s"""
+                              |{
+                              |  ${resultList(apiPrefix)},
+                              |  "results": [
+                              |   {
+                              |     "type": "Work",
+                              |     "id": "${work1.canonicalId}",
+                              |     "title": "${work1.title}"
+                              |   }
+                              |  ]
+                              |}
+          """.stripMargin
+          )
+        }
+    }
+  }
 }
