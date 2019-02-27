@@ -351,9 +351,7 @@ class ElasticsearchServiceTest
         val results =
           searchResults(index = index, workQuery = SlopQuery("Text Aegean"))
 
-        results shouldBe List(
-          exactMatch,
-          matchingSlop)
+        results shouldBe List(exactMatch, matchingSlop)
       }
     }
 
@@ -372,9 +370,7 @@ class ElasticsearchServiceTest
           index = index,
           workQuery = MinimumMatchQuery("Title text contains Aegean"))
 
-        results shouldBe List(
-          matching100,
-          matching75)
+        results shouldBe List(matching100, matching75)
       }
     }
   }

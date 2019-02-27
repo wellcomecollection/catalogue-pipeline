@@ -140,8 +140,9 @@ abstract class WorksController[M <: MultipleResultsRequest[W],
     searchFunction(index, worksSearchOptions)
   }
 
-  private def queryTypeToWorkQuery(queryString: String,
-                                   maybeQueryType: Option[String]): WorkQuery = {
+  private def queryTypeToWorkQuery(
+    queryString: String,
+    maybeQueryType: Option[String]): WorkQuery = {
     maybeQueryType.map(_.toUpperCase) match {
       case Some("JB") => JustBoostQuery(queryString)
       case Some("BB") => BroaderBoostQuery(queryString)
