@@ -216,9 +216,7 @@ class ElasticsearchServiceTest
 
         (1 to 10).foreach { _ =>
           val searchResponseFuture = searchService
-            .queryResults(SimpleQuery("A"))(
-              index,
-              defaultQueryOptions)
+            .queryResults(SimpleQuery("A"))(index, defaultQueryOptions)
 
           whenReady(searchResponseFuture) { response =>
             searchResponseToWorks(response) shouldBe works
@@ -240,7 +238,6 @@ class ElasticsearchServiceTest
     }
   }
 
-
   describe("searches using Selectable queries") {
     val noMatch =
       createIdentifiedWorkWith(title = "Before a Bengal")
@@ -255,9 +252,11 @@ class ElasticsearchServiceTest
         val exactMatchingTitle =
           createIdentifiedWorkWith(title = s"Aegean title")
         val matchingSubject =
-          createIdentifiedWorkWith(subjects = List(createSubjectWith(s"$text subject")))
+          createIdentifiedWorkWith(
+            subjects = List(createSubjectWith(s"$text subject")))
         val matchingGenre =
-          createIdentifiedWorkWith(genres = List(createGenreWith(s"$text genre")))
+          createIdentifiedWorkWith(
+            genres = List(createGenreWith(s"$text genre")))
         val matchingDescription =
           createIdentifiedWorkWith(description = Some(s"$text description"))
 
@@ -292,9 +291,11 @@ class ElasticsearchServiceTest
         val matchingTitle =
           createIdentifiedWorkWith(title = s"$text title")
         val matchingSubject =
-          createIdentifiedWorkWith(subjects = List(createSubjectWith(s"$text subject")))
+          createIdentifiedWorkWith(
+            subjects = List(createSubjectWith(s"$text subject")))
         val matchingGenre =
-          createIdentifiedWorkWith(genres = List(createGenreWith(s"$text genre")))
+          createIdentifiedWorkWith(
+            genres = List(createGenreWith(s"$text genre")))
         val matchingDescription =
           createIdentifiedWorkWith(description = Some(s"$text description"))
         val matchingLettering =
