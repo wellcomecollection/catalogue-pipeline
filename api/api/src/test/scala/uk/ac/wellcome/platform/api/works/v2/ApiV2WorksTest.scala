@@ -383,7 +383,7 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
 
         eventually {
           server.httpGet(
-            path = s"/$apiPrefix/works?query=Working+wombats&_queryType=SP",
+            path = s"/$apiPrefix/works?query=Working+wombats&_queryType=slop",
             andExpect = Status.Ok,
             withJsonBody = s"""
                               |{
