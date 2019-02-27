@@ -31,7 +31,8 @@ class WorkQueryTest extends FunSpec with ElasticsearchFixtures {
   it("creates a SlopQuery") {
     assertQuery(
       SlopQuery("the query").query(),
-      """{"multi_match":{"query":"the query","fields":["subjects","genres","title","description","lettering","contributors"],"type":"phrase","slop":3}}""")
+      """{"multi_match":{"query":"the query","fields":["subjects","genres","title","description","lettering","contributors"],"type":"phrase","slop":3}}"""
+    )
   }
 
   it("creates a MinimumMatchQuery") {

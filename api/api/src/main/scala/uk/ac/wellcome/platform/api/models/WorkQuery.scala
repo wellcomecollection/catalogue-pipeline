@@ -23,11 +23,7 @@ object WorkQuery {
   case class JustBoostQuery(queryString: String) extends WorkQuery {
     override def query(): MultiMatchQuery = {
       multiMatchQuery(queryString)
-        .fields(
-          "*",
-          "subjects*^4",
-          "genres*^4",
-          "title^3")
+        .fields("*", "subjects*^4", "genres*^4", "title^3")
         .matchType(MultiMatchQueryBuilderType.CROSS_FIELDS)
     }
   }
