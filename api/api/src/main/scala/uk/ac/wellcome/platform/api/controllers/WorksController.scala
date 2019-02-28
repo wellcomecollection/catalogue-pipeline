@@ -3,6 +3,7 @@ package uk.ac.wellcome.platform.api.controllers
 import com.jakehschwartz.finatra.swagger.SwaggerController
 import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.http.ElasticError
+import com.twitter.finagle.http.Request
 import com.twitter.finatra.http.Controller
 import com.twitter.finatra.http.response.ResponseBuilder
 import io.swagger.models.parameters.QueryParameter
@@ -15,10 +16,7 @@ import uk.ac.wellcome.platform.api.elasticsearch.ElasticErrorHandler
 import uk.ac.wellcome.platform.api.models.WorkQuery._
 import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.platform.api.requests._
-import uk.ac.wellcome.platform.api.responses.{
-  ResultListResponse,
-  ResultResponse
-}
+import uk.ac.wellcome.platform.api.responses.{ResultListResponse, ResultResponse}
 import uk.ac.wellcome.platform.api.services.{WorksSearchOptions, WorksService}
 
 import scala.collection.JavaConverters._
@@ -184,7 +182,7 @@ abstract class WorksController[M <: MultipleResultsRequest[W],
         respondWithWork[T](toDisplayWork(work, includes), contextUri: String)
       case Some(work: IdentifiedRedirectedWork) =>
         respondWithRedirect(
-          originalUri = request.request.uri,
+          originalRequest = request.request,
           work = work,
           contextUri: String)
       case Some(_) => respondWithGoneError(contextUri: String)
@@ -232,17 +230,38 @@ abstract class WorksController[M <: MultipleResultsRequest[W],
     * of the form /works/{id}.
     *
     */
-  private def respondWithRedirect(originalUri: String,
+  private def respondWithRedirect(originalRequest: Request,
                                   work: IdentifiedRedirectedWork,
-                                  contextUri: String) =
+                                  contextUri: String) = {
+
+    val path = originalRequest.path.replaceAll(
+      s"/${work.canonicalId}",
+      s"/${work.redirect.canonicalId}"
+    )
+
+    val params = originalRequest.params.toMap
+      .filterNot {
+        case (k,_) => k == "id"
+      }
+      .map {
+        case (k,v) => s"$k=$v"
+      }
+
+    val paramString =
+      params.reduce((a: String, b: String) => s"${a}&${b}")
+
+    val appendToPath = if(!paramString.isEmpty) {
+      s"?${paramString}"
+    } else {
+      ""
+    }
+
     response.found
       .body("")
       .location(
-        uri = originalUri.replaceAll(
-          s"/${work.canonicalId}",
-          s"/${work.redirect.canonicalId}"
-        )
+        uri = s"${path}${appendToPath}"
       )
+  }
 
   private def respondWithGoneError(contextUri: String) = {
     val result = Error(
