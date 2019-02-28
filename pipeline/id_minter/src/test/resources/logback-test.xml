@@ -1,5 +1,7 @@
 <configuration>
-  <include resource="base-logback-test.xml"/>
+  <root level="DEBUG">
+    <appender-ref ref="STDOUT" />
+  </root>
 
   <logger name="org.flywaydb.core" level="WARN"/>
   <logger name="scalikejdbc" level="INFO"/>

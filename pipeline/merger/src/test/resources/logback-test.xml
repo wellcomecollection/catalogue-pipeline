@@ -1,3 +1,5 @@
 <configuration>
-  <include resource="base-logback-test.xml"/>
+  <root level="DEBUG">
+    <appender-ref ref="STDOUT" />
+  </root>
 </configuration>
