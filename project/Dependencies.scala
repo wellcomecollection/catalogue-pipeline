@@ -77,6 +77,10 @@ object ExternalDependencies {
     val scalatest           = "3.0.1"
   }
 
+  val logbackDependencies = Seq(
+    "ch.qos.logback" % "logback-classic"  % versions.logback
+  )
+
   val akkaActorDependencies = Seq(
     "com.typesafe.akka" %% "akka-actor" % versions.akka,
   )
@@ -103,7 +107,6 @@ object ExternalDependencies {
   )
 
   val finatraDependencies = Seq(
-    "ch.qos.logback" % "logback-classic"  % versions.logback,
     "com.twitter" %% "finatra-http"       % versions.finatra % "test" classifier "tests",
     "com.twitter" %% "finatra-http"       % versions.finatra,
     "com.twitter" %% "finatra-httpclient" % versions.finatra,
@@ -158,8 +161,9 @@ object ExternalDependencies {
 }
 
 object CatalogueDependencies {
-  val sharedDependencies =
-    ExternalDependencies.scalatestDependencies
+  val commmonDependencies =
+    ExternalDependencies.scalatestDependencies ++
+    ExternalDependencies.logbackDependencies
 
   val internalModelDependencies =
     ExternalDependencies.scalacsvDependencies ++
