@@ -250,11 +250,11 @@ abstract class WorksController[M <: MultipleResultsRequest[W],
         case (k, v) => s"$k=$v"
       }
 
-    val paramString =
-      params.reduce((a: String, b: String) => s"${a}&${b}")
 
-    val appendToPath = if (!paramString.isEmpty) {
-      s"?${paramString}"
+    val appendToPath = if (params.nonEmpty) {
+      val paramString =
+        params.reduce((a: String, b: String) => s"${a}&${b}")
+      s"?$paramString"
     } else {
       ""
     }
