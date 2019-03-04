@@ -9,7 +9,7 @@ jobs:
     - env: SBT_PROJECT=elasticsearch
 
     - stage: services
-      env: TASK=api-build
+      env: SBT_PROJECT=api
 
     - env: SBT_PROJECT=goobi_reader
 
