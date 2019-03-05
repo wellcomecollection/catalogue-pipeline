@@ -149,6 +149,7 @@ abstract class WorksController[M <: MultipleResultsRequest[W],
       case Some("broaderboost") => BroaderBoostQuery(queryString)
       case Some("slop")         => SlopQuery(queryString)
       case Some("minimummatch") => MinimumMatchQuery(queryString)
+      case Some("querystring")  => QueryString(queryString)
       case _                    => SimpleQuery(queryString)
     }
   }

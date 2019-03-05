@@ -44,7 +44,7 @@ class ElasticsearchServiceTest
     createElasticsearchQueryOptions
 
   describe("simpleStringQueryResults") {
-    it("finds results for a simpleStringQuery search") {
+    it("finds results for a SimpleStringQuery search") {
       withLocalWorksIndex { index =>
         val work1 = createIdentifiedWorkWith(title = "Amid an Aegean")
         val work2 = createIdentifiedWorkWith(title = "Before a Bengal")
@@ -241,6 +241,21 @@ class ElasticsearchServiceTest
   describe("searches using Selectable queries") {
     val noMatch =
       createIdentifiedWorkWith(title = "Before a Bengal")
+
+    it("finds results for a QueryStringQuery search") {
+      withLocalWorksIndex { index =>
+        val work1 = createIdentifiedWorkWith(title = "Amid an Aegean")
+        val work2 = createIdentifiedWorkWith(title = "Before a Bengal")
+        val work3 = createIdentifiedWorkWith(title = "Circling a Cheetah")
+
+        insertIntoElasticsearch(index, work1, work2, work3)
+
+        assertSearchResultsAreCorrect(
+          index = index,
+          workQuery = SimpleQuery("Aegean"),
+          expectedWorks = List(work1))
+      }
+    }
 
     it("finds results for a JustBoostQuery search") {
       withLocalWorksIndex { index =>

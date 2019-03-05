@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.api.models
 
 import com.sksamuel.elastic4s.http.ElasticDsl._
-import com.sksamuel.elastic4s.searches.queries.{Query, SimpleStringQuery}
+import com.sksamuel.elastic4s.searches.queries.{Query, SimpleStringQuery, QueryStringQuery}
 import com.sksamuel.elastic4s.searches.queries.matches.{
   MultiMatchQuery,
   MultiMatchQueryBuilderType
@@ -17,6 +17,12 @@ object WorkQuery {
   case class SimpleQuery(queryString: String) extends WorkQuery {
     override def query(): SimpleStringQuery = {
       simpleStringQuery(queryString)
+    }
+  }
+
+  case class QueryString(queryString: String) extends WorkQuery {
+    override def query(): QueryStringQuery = {
+      queryStringQuery(queryString)
     }
   }
 
@@ -53,7 +59,7 @@ object WorkQuery {
       "lettering",
       "contributors"
     )
-    override def query() = {
+    override def query(): MultiMatchQuery = {
       multiMatchQuery(queryString)
         .fields(all_fields)
         .matchType(MultiMatchQueryBuilderType.PHRASE)

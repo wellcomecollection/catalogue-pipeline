@@ -14,6 +14,12 @@ class WorkQueryTest extends FunSpec with ElasticsearchFixtures {
       """{"simple_query_string":{"query":"the query"}}""")
   }
 
+  it("creates a QueryStringQuery") {
+    assertQuery(
+      SimpleQuery("the query").query(),
+      """{"query_string":{"query":"the query"}}""")
+  }
+
   it("creates a JustBoostQuery") {
     assertQuery(
       JustBoostQuery("the query").query(),
