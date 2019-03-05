@@ -31,7 +31,8 @@ class ApiV2RedirectsTest extends ApiV2WorksTestBase {
           andExpect = Status.Found
         )
 
-        resp.headerMap.getOrNull("Location") should startWith(s"$apiScheme://$apiHost")
+        resp.headerMap.getOrNull("Location") should startWith(
+          s"$apiScheme://$apiHost")
     }
   }
 

@@ -4,7 +4,10 @@ import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.IdentifiedRedirectedWork
 
-class RedirectedWorkControllerTest extends FunSpec with Matchers with WorksGenerators {
+class RedirectedWorkControllerTest
+    extends FunSpec
+    with Matchers
+    with WorksGenerators {
   val canonicalId: String = createCanonicalId
 
   val controller: RedirectedWorkController = new RedirectedWorkController {}
@@ -12,9 +15,10 @@ class RedirectedWorkControllerTest extends FunSpec with Matchers with WorksGener
   val apiScheme = "https"
   val apiHost = "api.wellcomecollection.org"
 
-  val redirectedWork: IdentifiedRedirectedWork = createIdentifiedRedirectedWorkWith(
-    canonicalId = canonicalId
-  )
+  val redirectedWork: IdentifiedRedirectedWork =
+    createIdentifiedRedirectedWorkWith(
+      canonicalId = canonicalId
+    )
 
   it("creates a redirect URI") {
     val redirectURI = createRedirectResponseUri(
@@ -35,11 +39,13 @@ class RedirectedWorkControllerTest extends FunSpec with Matchers with WorksGener
   private def createRedirectResponseUri(uri: String): String = {
     val controller = new RedirectedWorkController {}
 
-    controller.createRedirectResponseURI(
-      originalUri = uri,
-      work = redirectedWork,
-      apiScheme = apiScheme,
-      apiHost = apiHost
-    ).toString
+    controller
+      .createRedirectResponseURI(
+        originalUri = uri,
+        work = redirectedWork,
+        apiScheme = apiScheme,
+        apiHost = apiHost
+      )
+      .toString
   }
 }

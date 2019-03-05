@@ -228,9 +228,10 @@ abstract class WorksController[M <: MultipleResultsRequest[W],
     contextUri: String): ResponseBuilder#EnrichedResponse =
     response.ok.json(ResultResponse(context = contextUri, result = result))
 
-  private def respondWithRedirect(originalRequest: Request,
-                                  work: IdentifiedRedirectedWork,
-                                  contextUri: String): ResponseBuilder#EnrichedResponse =
+  private def respondWithRedirect(
+    originalRequest: Request,
+    work: IdentifiedRedirectedWork,
+    contextUri: String): ResponseBuilder#EnrichedResponse =
     response.found
       .body("")
       .location(
