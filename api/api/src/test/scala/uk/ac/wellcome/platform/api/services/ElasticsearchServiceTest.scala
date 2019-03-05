@@ -7,20 +7,11 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Assertion, FunSpec, Matchers}
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.models.work.generators.{
-  ContributorGenerators,
-  GenreGenerators,
-  SubjectGenerators,
-  WorksGenerators
-}
+import uk.ac.wellcome.models.work.generators.{ContributorGenerators, GenreGenerators, SubjectGenerators, WorksGenerators}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
 import uk.ac.wellcome.platform.api.models.WorkQuery._
-import uk.ac.wellcome.platform.api.models.{
-  ItemLocationTypeFilter,
-  WorkQuery,
-  WorkTypeFilter
-}
+import uk.ac.wellcome.platform.api.models.{ItemLocationTypeFilter, WorkQuery, WorkTypeFilter}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Random
@@ -244,16 +235,23 @@ class ElasticsearchServiceTest
 
     it("finds results for a QueryStringQuery search") {
       withLocalWorksIndex { index =>
-        val work1 = createIdentifiedWorkWith(title = "Amid an Aegean")
-        val work2 = createIdentifiedWorkWith(title = "Before a Bengal")
-        val work3 = createIdentifiedWorkWith(title = "Circling a Cheetah")
+        val workWithoutContributors = createIdentifiedWorkWith(title = "Before a Bengal", description = Some("Contributors agent label Abigail Armstrong"))
+        val workWithContributors = createIdentifiedWorkWith(title = "Amid an Aegean", contributors = List(createPersonContributorWith(s"Abigail Armstrong")))
+        val workWithoutSubjects = createIdentifiedWorkWith(title = "Circling a Cheetah", description = Some("Subjects concept label Egging on an elephant"))
+        val workWithSubjects = createIdentifiedWorkWith(title = "Dodging a dog", subjects = List(createSubjectWith(s"Egging on an elephant")))
 
-        insertIntoElasticsearch(index, work1, work2, work3)
+
+        insertIntoElasticsearch(index, workWithoutContributors, workWithContributors, workWithoutSubjects, workWithSubjects)
 
         assertSearchResultsAreCorrect(
           index = index,
-          workQuery = SimpleQuery("Aegean"),
-          expectedWorks = List(work1))
+          workQuery = QueryString("contributors.agent.label:\"Abigail Armstrong\""),
+          expectedWorks = List(workWithContributors))
+
+        assertSearchResultsAreCorrect(
+          index = index,
+          workQuery = QueryString("subjects.label:\"Egging on an elephant\""),
+          expectedWorks = List(workWithSubjects))
       }
     }
 
