@@ -24,6 +24,9 @@ trait ApiWorksTestBase
       toJson(t).get
   }
 
+  val apiScheme: String = "https"
+  val apiHost: String = "api-testing.local"
+
   def withServer[R](indexV1: Index, indexV2: Index)(
     testWith: TestWith[EmbeddedHttpServer, R]): R = {
 
@@ -32,6 +35,9 @@ trait ApiWorksTestBase
       flags = displayEsLocalFlags(
         indexV1 = indexV1,
         indexV2 = indexV2
+      ) ++ Map(
+        "api.scheme" -> apiScheme,
+        "api.host" -> apiHost
       )
     )
 
