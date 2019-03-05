@@ -20,7 +20,7 @@ class ApiV1RedirectsTest extends ApiV1WorksTestBase {
     }
   }
 
-  it("returns a relative URL in the Location header") {
+  it("uses the configured host/scheme for the Location header") {
     val redirectedWork = createIdentifiedRedirectedWork
 
     withV1Api {
@@ -31,7 +31,7 @@ class ApiV1RedirectsTest extends ApiV1WorksTestBase {
           andExpect = Status.Found
         )
 
-        resp.headerMap.getOrNull("Location") should startWith(s"/$apiPrefix/works")
+        resp.headerMap.getOrNull("Location") should startWith("https://")
     }
   }
 

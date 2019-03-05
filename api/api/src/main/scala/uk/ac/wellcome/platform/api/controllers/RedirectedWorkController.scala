@@ -1,8 +1,8 @@
 package uk.ac.wellcome.platform.api.controllers
 
-import com.twitter.finagle.http.Request
+import java.net.URI
+
 import uk.ac.wellcome.models.work.internal.IdentifiedRedirectedWork
-import uk.ac.wellcome.platform.api.models.ApiConfig
 
 trait RedirectedWorkController {
 
@@ -12,26 +12,21 @@ trait RedirectedWorkController {
     * of the form /works/{id}.
     *
     */
-  def createRedirectResponseURI(originalRequest: Request,
+  def createRedirectResponseURI(originalUri: String,
                                 work: IdentifiedRedirectedWork,
-                                apiConfig: ApiConfig): String = {
-    val path = originalRequest.path.replaceAll(
-      s"/${work.canonicalId}",
-      s"/${work.redirect.canonicalId}"
+                                apiScheme: String,
+                                apiHost: String): URI = {
+    val original = new URI(originalUri)
+
+    new URI(
+      apiScheme,
+      apiHost,
+      original.getPath.replaceAll(
+        s"/works/${work.canonicalId}",
+        s"/works/${work.redirect.canonicalId}"
+      ),
+      original.getQuery,
+      original.getFragment
     )
-
-    val params = originalRequest.params
-      .filterNot { case (k, _) => k == "id" }
-      .map { case (k, v) => s"$k=$v" }
-
-    val appendToPath = if (params.nonEmpty) {
-      val paramString =
-        params.reduce((a: String, b: String) => s"$a&$b")
-      s"?$paramString"
-    } else {
-      ""
-    }
-
-    s"$path$appendToPath"
   }
 }

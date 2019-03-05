@@ -234,7 +234,12 @@ abstract class WorksController[M <: MultipleResultsRequest[W],
     response.found
       .body("")
       .location(
-        uri = createRedirectResponseURI(originalRequest, work, apiConfig)
+        uri = createRedirectResponseURI(
+          originalUri = originalRequest.uri,
+          work = work,
+          apiScheme = apiConfig.scheme,
+          apiHost = apiConfig.host
+        )
       )
 
   private def respondWithGoneError(contextUri: String) = {
