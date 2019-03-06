@@ -74,8 +74,7 @@ class ApiV2WorksIncludesTest
             withJsonBody =
               s"""
                               |{
-                              | "@context": "https://localhost:8888/$apiPrefix/context.json",
-                              | "type": "Work",
+                              | ${singleWorkResult(apiPrefix)},
                               | "id": "${work.canonicalId}",
                               | "title": "${work.title}",
                               | "identifiers": [ ${identifier(
@@ -102,8 +101,7 @@ class ApiV2WorksIncludesTest
             andExpect = Status.Ok,
             withJsonBody = s"""
                               |{
-                              | "@context": "https://localhost:8888/$apiPrefix/context.json",
-                              | "type": "Work",
+                              | ${singleWorkResult(apiPrefix)},
                               | "id": "${work.canonicalId}",
                               | "title": "${work.title}",
                               | "items": [ ${items(work.items)} ]
@@ -170,8 +168,7 @@ class ApiV2WorksIncludesTest
             andExpect = Status.Ok,
             withJsonBody = s"""
                  |{
-                 |  "@context": "https://localhost:8888/$apiPrefix/context.json",
-                 |  "type": "Work",
+                 |  ${singleWorkResult(apiPrefix)},
                  |  "id": "${work.canonicalId}",
                  |  "title": "${work.title}",
                  |  "subjects": [ ${subjects(subject)}]
@@ -240,8 +237,7 @@ class ApiV2WorksIncludesTest
             andExpect = Status.Ok,
             withJsonBody = s"""
                  |{
-                 |  "@context": "https://localhost:8888/$apiPrefix/context.json",
-                 |  "type": "Work",
+                 |  ${singleWorkResult(apiPrefix)},
                  |  "id": "${work.canonicalId}",
                  |  "title": "${work.title}",
                  |  "genres": [ ${genres(genre)}]
@@ -311,8 +307,7 @@ class ApiV2WorksIncludesTest
             andExpect = Status.Ok,
             withJsonBody = s"""
                  |{
-                 |  "@context": "https://localhost:8888/$apiPrefix/context.json",
-                 |  "type": "Work",
+                 |  ${singleWorkResult(apiPrefix)},
                  |  "id": "${work.canonicalId}",
                  |  "title": "${work.title}",
                  |  "contributors": [ ${contributors(contributor)}]
@@ -381,8 +376,7 @@ class ApiV2WorksIncludesTest
             andExpect = Status.Ok,
             withJsonBody = s"""
                  |{
-                 |  "@context": "https://localhost:8888/$apiPrefix/context.json",
-                 |  "type": "Work",
+                 |  ${singleWorkResult(apiPrefix)},
                  |  "id": "${work.canonicalId}",
                  |  "title": "${work.title}",
                  |  "production": [ ${production(productionEventList)}]

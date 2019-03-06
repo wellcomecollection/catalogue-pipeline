@@ -169,7 +169,7 @@ trait ApiErrorsTestBase { this: ApiWorksTestBase =>
           andExpect = Status.InternalServerError,
           withJsonBody = s"""
                |{
-               |  "@context": "https://localhost:8888/${getApiPrefix()}/context.json",
+               |  "@context": "${contextUrl(getApiPrefix())}",
                |  "type": "Error",
                |  "errorType": "http",
                |  "httpStatus": 500,
