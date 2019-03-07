@@ -33,6 +33,7 @@ abstract class WorksController[M <: MultipleResultsRequest[W],
   defaultIndex: Index,
   worksService: WorksService)(implicit ec: ExecutionContext)
     extends Controller
+    with RedirectedWorkController
     with SwaggerController {
 
   protected val includeParameterName: String
@@ -227,43 +228,20 @@ abstract class WorksController[M <: MultipleResultsRequest[W],
     contextUri: String): ResponseBuilder#EnrichedResponse =
     response.ok.json(ResultResponse(context = contextUri, result = result))
 
-  /** Create a 302 Redirect to a new Work.
-    *
-    * Assumes the original URI requested was for a single work, i.e. a request
-    * of the form /works/{id}.
-    *
-    */
-  private def respondWithRedirect(originalRequest: Request,
-                                  work: IdentifiedRedirectedWork,
-                                  contextUri: String) = {
-
-    val path = originalRequest.path.replaceAll(
-      s"/${work.canonicalId}",
-      s"/${work.redirect.canonicalId}"
-    )
-
-    val params = originalRequest.params.toMap
-      .filterNot {
-        case (k, _) => k == "id"
-      }
-      .map {
-        case (k, v) => s"$k=$v"
-      }
-
-    val appendToPath = if (params.nonEmpty) {
-      val paramString =
-        params.reduce((a: String, b: String) => s"${a}&${b}")
-      s"?$paramString"
-    } else {
-      ""
-    }
-
+  private def respondWithRedirect(
+    originalRequest: Request,
+    work: IdentifiedRedirectedWork,
+    contextUri: String): ResponseBuilder#EnrichedResponse =
     response.found
       .body("")
       .location(
-        uri = s"${path}${appendToPath}"
+        uri = createRedirectResponseURI(
+          originalUri = originalRequest.uri,
+          work = work,
+          apiScheme = apiConfig.scheme,
+          apiHost = apiConfig.host
+        )
       )
-  }
 
   private def respondWithGoneError(contextUri: String) = {
     val result = Error(

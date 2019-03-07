@@ -73,8 +73,7 @@ class ApiV1WorksTest extends ApiV1WorksTestBase {
             andExpect = Status.Ok,
             withJsonBody = s"""
                  |{
-                 | "@context": "https://localhost:8888/$apiPrefix/context.json",
-                 | "type": "Work",
+                 | ${singleWorkResult(apiPrefix)},
                  | "id": "${work.canonicalId}",
                  | "title": "${work.title}",
                  | "creators": [ ],
@@ -104,8 +103,7 @@ class ApiV1WorksTest extends ApiV1WorksTestBase {
             andExpect = Status.Ok,
             withJsonBody = s"""
                  |{
-                 | "@context": "https://localhost:8888/$apiPrefix/context.json",
-                 | "type": "Work",
+                 | ${singleWorkResult(apiPrefix)},
                  | "id": "${work.canonicalId}",
                  | "title": "${work.title}",
                  | "creators": [ ],
@@ -140,8 +138,8 @@ class ApiV1WorksTest extends ApiV1WorksTestBase {
                                 pageSize = 1,
                                 totalPages = 3,
                                 totalResults = 3)},
-                 |  "prevPage": "https://localhost:8888/$apiPrefix/works?page=1&pageSize=1",
-                 |  "nextPage": "https://localhost:8888/$apiPrefix/works?page=3&pageSize=1",
+                 |  "prevPage": "$apiScheme://$apiHost/$apiPrefix/works?page=1&pageSize=1",
+                 |  "nextPage": "$apiScheme://$apiHost/$apiPrefix/works?page=3&pageSize=1",
                  |  "results": [
                  |   {
                  |     "type": "Work",
@@ -169,7 +167,7 @@ class ApiV1WorksTest extends ApiV1WorksTestBase {
                                 pageSize = 1,
                                 totalPages = 3,
                                 totalResults = 3)},
-                 |  "nextPage": "https://localhost:8888/$apiPrefix/works?page=2&pageSize=1",
+                 |  "nextPage": "$apiScheme://$apiHost/$apiPrefix/works?page=2&pageSize=1",
                  |  "results": [
                  |   {
                  |     "type": "Work",
@@ -197,7 +195,7 @@ class ApiV1WorksTest extends ApiV1WorksTestBase {
                                 pageSize = 1,
                                 totalPages = 3,
                                 totalResults = 3)},
-                 |  "prevPage": "https://localhost:8888/$apiPrefix/works?page=2&pageSize=1",
+                 |  "prevPage": "$apiScheme://$apiHost/$apiPrefix/works?page=2&pageSize=1",
                  |  "results": [
                  |   {
                  |     "type": "Work",
@@ -343,8 +341,7 @@ class ApiV1WorksTest extends ApiV1WorksTestBase {
             andExpect = Status.Ok,
             withJsonBody = s"""
                  |{
-                 | "@context": "https://localhost:8888/$apiPrefix/context.json",
-                 | "type": "Work",
+                 | ${singleWorkResult(apiPrefix)},
                  | "id": "${work.canonicalId}",
                  | "title": "${work.title}",
                  | "creators": [ ],
@@ -377,8 +374,7 @@ class ApiV1WorksTest extends ApiV1WorksTestBase {
               andExpect = Status.Ok,
               withJsonBody = s"""
                    |{
-                   | "@context": "https://localhost:8888/$apiPrefix/context.json",
-                   | "type": "Work",
+                   | ${singleWorkResult(apiPrefix)},
                    | "id": "${work.canonicalId}",
                    | "title": "${work.title}",
                    | "creators": [ ],
@@ -398,8 +394,7 @@ class ApiV1WorksTest extends ApiV1WorksTestBase {
               andExpect = Status.Ok,
               withJsonBody = s"""
                    |{
-                   | "@context": "https://localhost:8888/$apiPrefix/context.json",
-                   | "type": "Work",
+                   | ${singleWorkResult(apiPrefix)},
                    | "id": "${altWork.canonicalId}",
                    | "title": "${altWork.title}",
                    | "creators": [ ],

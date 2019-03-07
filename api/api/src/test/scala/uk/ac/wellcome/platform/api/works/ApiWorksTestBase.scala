@@ -24,6 +24,9 @@ trait ApiWorksTestBase
       toJson(t).get
   }
 
+  val apiScheme: String = "https"
+  val apiHost: String = "api-testing.local"
+
   def withServer[R](indexV1: Index, indexV2: Index)(
     testWith: TestWith[EmbeddedHttpServer, R]): R = {
 
@@ -32,6 +35,9 @@ trait ApiWorksTestBase
       flags = displayEsLocalFlags(
         indexV1 = indexV1,
         indexV2 = indexV2
+      ) ++ Map(
+        "api.scheme" -> apiScheme,
+        "api.host" -> apiHost
       )
     )
 
@@ -64,6 +70,9 @@ trait ApiWorksTestBase
       testWith(server)
     }
 
+  def contextUrl(apiPrefix: String): String =
+    s"$apiScheme://$apiHost/$apiPrefix/context.json"
+
   def emptyJsonResult(apiPrefix: String): String = s"""
     |{
     |  ${resultList(apiPrefix, totalPages = 0, totalResults = 0)},
@@ -72,7 +81,7 @@ trait ApiWorksTestBase
 
   def badRequest(apiPrefix: String, description: String) =
     s"""{
-      "@context": "https://localhost:8888/$apiPrefix/context.json",
+      "@context": "${contextUrl(apiPrefix)}",
       "type": "Error",
       "errorType": "http",
       "httpStatus": 400,
@@ -85,16 +94,22 @@ trait ApiWorksTestBase
                  totalPages: Int = 1,
                  totalResults: Int = 1) =
     s"""
-      "@context": "https://localhost:8888/$apiPrefix/context.json",
+      "@context": "${contextUrl(apiPrefix)}",
       "type": "ResultList",
       "pageSize": $pageSize,
       "totalPages": $totalPages,
       "totalResults": $totalResults
     """
 
+  def singleWorkResult(apiPrefix: String): String =
+    s"""
+        "@context": "${contextUrl(apiPrefix)}",
+        "type": "Work"
+     """.stripMargin
+
   def notFound(apiPrefix: String, description: String) =
     s"""{
-      "@context": "https://localhost:8888/$apiPrefix/context.json",
+      "@context": "${contextUrl(apiPrefix)}",
       "type": "Error",
       "errorType": "http",
       "httpStatus": 404,
@@ -104,7 +119,7 @@ trait ApiWorksTestBase
 
   def gone(apiPrefix: String) =
     s"""{
-      "@context": "https://localhost:8888/$apiPrefix/context.json",
+      "@context": "${contextUrl(apiPrefix)}",
       "type": "Error",
       "errorType": "http",
       "httpStatus": 410,
