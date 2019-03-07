@@ -2,10 +2,7 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.transformer.sierra.exceptions.{
-  CataloguingException,
-  SierraTransformerException
-}
+import uk.ac.wellcome.platform.transformer.sierra.exceptions.CataloguingException
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
   VarField
@@ -292,11 +289,16 @@ class SierraProductionTest
           )
         )
 
-        val caught = intercept[SierraTransformerException] {
-          transformToProduction(varFields)
+        val bibData = createSierraBibDataWith(varFields = varFields)
+        val bibId = createSierraBibNumber
+
+        val caught = intercept[CataloguingException] {
+          transformer.getProduction(bibId, bibData)
         }
 
-        caught.e.getMessage shouldBe "Unrecognised second indicator for production function: [Some(x)]"
+        caught.getMessage should startWith("Problem in the Sierra data")
+        caught.getMessage should include(bibId.withoutCheckDigit)
+        caught.getMessage should include("Unrecognised second indicator for production function")
       }
     }
 

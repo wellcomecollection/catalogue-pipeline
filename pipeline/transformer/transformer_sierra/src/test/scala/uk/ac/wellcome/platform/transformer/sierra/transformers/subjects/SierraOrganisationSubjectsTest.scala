@@ -1,14 +1,11 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers.subjects
 
 import org.scalatest.{FunSpec, Matchers}
+import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.transformer.sierra.exceptions.SierraTransformerException
+import uk.ac.wellcome.platform.transformer.sierra.exceptions.CataloguingException
 import uk.ac.wellcome.platform.transformer.sierra.generators.SierraDataGenerators
-import uk.ac.wellcome.platform.transformer.sierra.source.{
-  MarcSubfield,
-  SierraBibData,
-  VarField
-}
+import uk.ac.wellcome.platform.transformer.sierra.source.{MarcSubfield, SierraBibData, VarField}
 
 class SierraOrganisationSubjectsTest
     extends FunSpec
@@ -16,7 +13,7 @@ class SierraOrganisationSubjectsTest
     with SierraDataGenerators {
   it("returns an empty list if there are no instances of MARC tag 610") {
     val bibData = createSierraBibDataWith(varFields = List())
-    transformer.getSubjectsWithOrganisation(bibData) shouldBe List()
+    transformer.getSubjectsWithOrganisation(bibId = createSierraBibNumber, bibData) shouldBe List()
   }
 
   describe("label") {
@@ -31,7 +28,7 @@ class SierraOrganisationSubjectsTest
         )
       )
 
-      val subjects = transformer.getSubjectsWithOrganisation(bibData)
+      val subjects = getOrganisationSubjects(bibData)
       subjects should have size 1
 
       subjects.head.agent.label shouldBe "United States. Supreme Court, Washington, DC. September 29, 2005, pictured."
@@ -49,7 +46,7 @@ class SierraOrganisationSubjectsTest
         )
       )
 
-      val subjects = transformer.getSubjectsWithOrganisation(bibData)
+      val subjects = getOrganisationSubjects(bibData)
       subjects should have size 1
 
       subjects.head.agent.label shouldBe "United States. Army. Cavalry, 7th. Company E, depicted."
@@ -64,7 +61,7 @@ class SierraOrganisationSubjectsTest
         )
       )
 
-      val subjects = transformer.getSubjectsWithOrganisation(bibData)
+      val subjects = getOrganisationSubjects(bibData)
       val concepts = subjects.head.agent.concepts
       concepts should have size 1
 
@@ -82,7 +79,7 @@ class SierraOrganisationSubjectsTest
         )
       )
 
-      val subjects = transformer.getSubjectsWithOrganisation(bibData)
+      val subjects = getOrganisationSubjects(bibData)
       val concepts = subjects.head.agent.concepts
       val organisation = concepts.head.agent
       organisation.label shouldBe "Wellcome Trust. Facilities, Health & Safety"
@@ -98,7 +95,7 @@ class SierraOrganisationSubjectsTest
         )
       )
 
-      val subjects = transformer.getSubjectsWithOrganisation(bibData)
+      val subjects = getOrganisationSubjects(bibData)
 
       val subject = subjects.head
       val identifiableSubject = subject
@@ -122,7 +119,7 @@ class SierraOrganisationSubjectsTest
         )
       )
 
-      val subjects = transformer.getSubjectsWithOrganisation(bibData)
+      val subjects = getOrganisationSubjects(bibData)
 
       val subject = subjects.head
       val identifiableSubject = subject
@@ -145,7 +142,7 @@ class SierraOrganisationSubjectsTest
         )
       )
 
-      val subjects = transformer.getSubjectsWithOrganisation(bibData)
+      val subjects = getOrganisationSubjects(bibData)
       val concepts = subjects.head.agent.concepts
       val maybeDisplayableOrganisation = concepts.head
       maybeDisplayableOrganisation shouldBe a[Unidentifiable[_]]
@@ -160,7 +157,7 @@ class SierraOrganisationSubjectsTest
         )
       )
 
-      val subjects = transformer.getSubjectsWithOrganisation(bibData)
+      val subjects = getOrganisationSubjects(bibData)
       val concepts = subjects.head.agent.concepts
       val maybeDisplayableOrganisation = concepts.head
       maybeDisplayableOrganisation shouldBe a[Unidentifiable[_]]
@@ -177,10 +174,15 @@ class SierraOrganisationSubjectsTest
       val varField = createMarc610VarField(subfields = List())
       val bibData = createSierraBibDataWith(varFields = List(varField))
 
-      val err = intercept[SierraTransformerException] {
-        transformer.getSubjectsWithOrganisation(bibData)
+      val bibId = createSierraBibNumber
+
+      val caught = intercept[CataloguingException] {
+        getOrganisationSubjects(bibId = bibId, bibData = bibData)
       }
-      err.e.getMessage shouldBe s"Not enough information to build a label on $varField"
+
+      caught.getMessage should startWith("Problem in the Sierra data")
+      caught.getMessage should include(bibId.withoutCheckDigit)
+      caught.getMessage should include("Not enough information to build a label")
     }
   }
 
@@ -205,11 +207,9 @@ class SierraOrganisationSubjectsTest
       )
     )
 
-    val subjects = transformer.getSubjectsWithOrganisation(bibData)
+    val subjects = getOrganisationSubjects(bibData)
     subjects should have size 3
   }
-
-  val transformer = new SierraOrganisationSubjects {}
 
   private def create610bibDataWith(subfields: List[MarcSubfield],
                                    indicator2: String = ""): SierraBibData =
@@ -227,4 +227,11 @@ class SierraOrganisationSubjectsTest
       indicator2 = indicator2,
       subfields = subfields
     )
+
+  val transformer = new SierraOrganisationSubjects {}
+
+  private def getOrganisationSubjects(
+    bibData: SierraBibData,
+    bibId: SierraBibNumber = createSierraBibNumber) =
+    transformer.getSubjectsWithOrganisation(bibId = bibId, bibData = bibData)
 }

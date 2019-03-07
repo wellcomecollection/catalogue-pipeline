@@ -2,10 +2,7 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.transformer.sierra.exceptions.{
-  CataloguingException,
-  SierraTransformerException
-}
+import uk.ac.wellcome.platform.transformer.sierra.exceptions.CataloguingException
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
   SierraBibData,
@@ -36,7 +33,7 @@ trait SierraProduction {
     (maybeMarc260fields, maybeMarc264fields) match {
       case (Nil, Nil)           => List()
       case (marc260fields, Nil) => getProductionFrom260Fields(marc260fields)
-      case (Nil, marc264fields) => getProductionFrom264Fields(marc264fields)
+      case (Nil, marc264fields) => getProductionFrom264Fields(bibId, marc264fields)
       case (marc260fields, marc264fields) =>
         getProductionFromBothFields(bibId, marc260fields, marc264fields)
     }
@@ -122,7 +119,7 @@ trait SierraProduction {
   //
   // https://www.loc.gov/marc/bibliographic/bd264.html
   //
-  private def getProductionFrom264Fields(varFields: List[VarField]) =
+  private def getProductionFrom264Fields(bibId: SierraBibNumber, varFields: List[VarField]) =
     varFields
       .filterNot { vf =>
         vf.indicator2.contains("4") || vf.indicator2.contains(" ")
@@ -139,8 +136,8 @@ trait SierraProduction {
           case Some("2") => "Distribution"
           case Some("3") => "Manufacture"
           case other =>
-            throw SierraTransformerException(
-              s"Unrecognised second indicator for production function: [$other]"
+            throw CataloguingException(
+              bibId, message = s"Unrecognised second indicator for production function: [$other]"
             )
         }
 

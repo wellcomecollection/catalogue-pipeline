@@ -47,13 +47,11 @@ object SierraMaterialTypes {
         workTypeMap.get(c) match {
           case Some(workType) => workType
           case None =>
-            throw SierraTransformerException(
-              new IllegalArgumentException(s"Unrecognised work type code: $c"))
+            throw SierraTransformerException(s"Unrecognised work type code: $c")
         }
       case _ =>
         throw SierraTransformerException(
-          new IllegalArgumentException(
-            s"Work type code is not a single character: <<$code>>"))
+          s"Work type code is not a single character: <<$code>>")
     }
   }
 }
