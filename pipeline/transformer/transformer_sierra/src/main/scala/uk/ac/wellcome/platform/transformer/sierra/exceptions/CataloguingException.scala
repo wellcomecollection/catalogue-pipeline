@@ -8,4 +8,11 @@ import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 // These errors are reported to a separate queue.
 //
 class CataloguingException(bibId: SierraBibNumber, message: String)
-  extends SierraTransformerException(new RuntimeException(s"${bibId.withCheckDigit}: $message"))
+  extends SierraTransformerException(new RuntimeException(
+    s"Problem in the Sierra data for ${bibId.withCheckDigit}: $message"
+  ))
+
+case object CataloguingException {
+  def apply(bibId: SierraBibNumber, message: String): CataloguingException =
+    new CataloguingException(bibId = bibId, message = message)
+}

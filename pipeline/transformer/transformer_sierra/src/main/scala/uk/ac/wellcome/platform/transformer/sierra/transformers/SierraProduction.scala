@@ -1,7 +1,11 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
+import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.transformer.sierra.exceptions.SierraTransformerException
+import uk.ac.wellcome.platform.transformer.sierra.exceptions.{
+  CataloguingException,
+  SierraTransformerException
+}
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
   SierraBibData,
@@ -20,7 +24,7 @@ trait SierraProduction {
   // but it would be a cataloguing error -- we should reject it, and flag it
   // to the librarians.
   //
-  def getProduction(bibData: SierraBibData)
+  def getProduction(bibId: SierraBibNumber, bibData: SierraBibData)
     : List[ProductionEvent[MaybeDisplayable[AbstractAgent]]] = {
     val maybeMarc260fields = bibData.varFields.filter {
       _.marcTag.contains("260")
@@ -34,7 +38,7 @@ trait SierraProduction {
       case (marc260fields, Nil) => getProductionFrom260Fields(marc260fields)
       case (Nil, marc264fields) => getProductionFrom264Fields(marc264fields)
       case (marc260fields, marc264fields) =>
-        getProductionFromBothFields(marc260fields, marc264fields)
+        getProductionFromBothFields(bibId, marc260fields, marc264fields)
     }
   }
 
@@ -165,8 +169,10 @@ trait SierraProduction {
     * In general, this is a cataloguing error, but sometimes we can do
     * something more sensible depending on if/how they're duplicated.
     */
-  private def getProductionFromBothFields(marc260fields: List[VarField],
-                                          marc264fields: List[VarField]) = {
+  private def getProductionFromBothFields(
+    bibId: SierraBibNumber,
+    marc260fields: List[VarField],
+    marc264fields: List[VarField]) = {
 
     // We've seen cases where the 264 field only has the following subfields:
     //
@@ -189,8 +195,8 @@ trait SierraProduction {
     // Otherwise this is some sort of cataloguing error.  This is fairly
     // rare, so let it bubble on to a DLQ.
     else {
-      throw SierraTransformerException(
-        "Record has both 260 and 264 fields; this is a cataloguing error."
+      throw CataloguingException(
+        bibId, message = "Record has both 260 and 264 fields."
       )
     }
   }

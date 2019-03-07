@@ -90,7 +90,7 @@ class SierraTransformableTransformer
                 genres = getGenres(sierraBibData),
                 contributors = getContributors(sierraBibData),
                 thumbnail = None,
-                production = getProduction(sierraBibData),
+                production = getProduction(bibId, sierraBibData),
                 language = getLanguage(sierraBibData),
                 dimensions = getDimensions(sierraBibData),
                 items = getItems(

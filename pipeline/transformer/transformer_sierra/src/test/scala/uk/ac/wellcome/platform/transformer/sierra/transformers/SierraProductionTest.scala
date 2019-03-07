@@ -563,14 +563,14 @@ class SierraProductionTest
     val bibData = createSierraBibDataWith(varFields = varFields)
 
     intercept[SierraTransformerException] {
-      transformer.getProduction(bibData)
+      transformer.getProduction(bibId = createSierraBibNumber, bibData)
     }
   }
 
   private def transformToProduction(varFields: List[VarField])
     : List[ProductionEvent[MaybeDisplayable[AbstractAgent]]] = {
     val bibData = createSierraBibDataWith(varFields = varFields)
-    transformer.getProduction(bibData)
+    transformer.getProduction(bibId = createSierraBibNumber, bibData)
   }
 
   val transformer = new SierraProduction {}
