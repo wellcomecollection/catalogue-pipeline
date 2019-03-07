@@ -1,13 +1,11 @@
 package uk.ac.wellcome.platform.transformer.sierra.services
 
 import grizzled.slf4j.Logging
-import io.circe.ParsingFailure
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.message.MessageWriter
 import uk.ac.wellcome.messaging.sns.{NotificationMessage, PublishAttempt}
 import uk.ac.wellcome.models.transformable.SierraTransformable
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
-import uk.ac.wellcome.platform.transformer.sierra.exceptions.SierraTransformerException
 import uk.ac.wellcome.storage.ObjectStore
 import uk.ac.wellcome.storage.vhs.HybridRecord
 
@@ -24,7 +22,7 @@ class HybridRecordReceiver(
     transformToWork: (SierraTransformable, Int) => Try[TransformedBaseWork]): Future[Unit] = {
     debug(s"Starting to process message $message")
 
-    val futurePublishAttempt = for {
+    for {
       hybridRecord <- Future.fromTry(fromJson[HybridRecord](message.body))
       transformable <- getTransformable(hybridRecord)
       work <- Future.fromTry(
@@ -32,15 +30,7 @@ class HybridRecordReceiver(
       publishResult <- publishMessage(work)
       _ = debug(
         s"Published work: ${work.sourceIdentifier} with message $publishResult")
-    } yield publishResult
-
-    futurePublishAttempt
-      .recover {
-        case e: ParsingFailure =>
-          info("Recoverable failure parsing HybridRecord from message", e)
-          throw SierraTransformerException(e)
-      }
-      .map(_ => ())
+    } yield ()
   }
 
   private def getTransformable(hybridRecord: HybridRecord): Future[SierraTransformable] =

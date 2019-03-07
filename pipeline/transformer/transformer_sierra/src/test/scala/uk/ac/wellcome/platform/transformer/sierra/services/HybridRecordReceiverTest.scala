@@ -2,6 +2,7 @@ package uk.ac.wellcome.platform.transformer.sierra.services
 
 import com.amazonaws.services.sns.AmazonSNS
 import com.amazonaws.services.sns.model.PublishRequest
+import io.circe.ParsingFailure
 import org.mockito.Matchers.any
 import org.mockito.Mockito.when
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
@@ -18,7 +19,6 @@ import uk.ac.wellcome.models.work.internal.{
   TransformedBaseWork,
   UnidentifiedWork
 }
-import uk.ac.wellcome.platform.transformer.sierra.exceptions.SierraTransformerException
 import uk.ac.wellcome.platform.transformer.sierra.fixtures.HybridRecordReceiverFixture
 import uk.ac.wellcome.storage.ObjectLocation
 import uk.ac.wellcome.storage.vhs.HybridRecord
@@ -125,7 +125,7 @@ class HybridRecordReceiverTest
               recordReceiver.receiveMessage(invalidSqsMessage, transformToWork)
 
             whenReady(future.failed) { x =>
-              x shouldBe a[SierraTransformerException]
+              x shouldBe a[ParsingFailure]
             }
         }
       }
