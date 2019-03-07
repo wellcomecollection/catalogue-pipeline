@@ -33,7 +33,8 @@ trait SierraProduction {
     (maybeMarc260fields, maybeMarc264fields) match {
       case (Nil, Nil)           => List()
       case (marc260fields, Nil) => getProductionFrom260Fields(marc260fields)
-      case (Nil, marc264fields) => getProductionFrom264Fields(bibId, marc264fields)
+      case (Nil, marc264fields) =>
+        getProductionFrom264Fields(bibId, marc264fields)
       case (marc260fields, marc264fields) =>
         getProductionFromBothFields(bibId, marc260fields, marc264fields)
     }
@@ -119,7 +120,8 @@ trait SierraProduction {
   //
   // https://www.loc.gov/marc/bibliographic/bd264.html
   //
-  private def getProductionFrom264Fields(bibId: SierraBibNumber, varFields: List[VarField]) =
+  private def getProductionFrom264Fields(bibId: SierraBibNumber,
+                                         varFields: List[VarField]) =
     varFields
       .filterNot { vf =>
         vf.indicator2.contains("4") || vf.indicator2.contains(" ")
@@ -137,7 +139,9 @@ trait SierraProduction {
           case Some("3") => "Manufacture"
           case other =>
             throw CataloguingException(
-              bibId, message = s"Unrecognised second indicator for production function: [$other]"
+              bibId,
+              message =
+                s"Unrecognised second indicator for production function: [$other]"
             )
         }
 
@@ -166,10 +170,9 @@ trait SierraProduction {
     * In general, this is a cataloguing error, but sometimes we can do
     * something more sensible depending on if/how they're duplicated.
     */
-  private def getProductionFromBothFields(
-    bibId: SierraBibNumber,
-    marc260fields: List[VarField],
-    marc264fields: List[VarField]) = {
+  private def getProductionFromBothFields(bibId: SierraBibNumber,
+                                          marc260fields: List[VarField],
+                                          marc264fields: List[VarField]) = {
 
     // We've seen cases where the 264 field only has the following subfields:
     //
@@ -193,7 +196,8 @@ trait SierraProduction {
     // rare, so let it bubble on to a DLQ.
     else {
       throw CataloguingException(
-        bibId, message = "Record has both 260 and 264 fields."
+        bibId,
+        message = "Record has both 260 and 264 fields."
       )
     }
   }

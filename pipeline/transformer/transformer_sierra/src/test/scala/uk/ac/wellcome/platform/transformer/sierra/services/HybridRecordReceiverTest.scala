@@ -53,9 +53,7 @@ class HybridRecordReceiverTest
           bucket = bucket
         )
 
-        withHybridRecordReceiver(
-          topic,
-          bucket) { recordReceiver =>
+        withHybridRecordReceiver(topic, bucket) { recordReceiver =>
           val future =
             recordReceiver.receiveMessage(sqsMessage, transformToWork)
 
@@ -83,9 +81,7 @@ class HybridRecordReceiverTest
           bucket = bucket
         )
 
-        withHybridRecordReceiver(
-          topic,
-          bucket) { recordReceiver =>
+        withHybridRecordReceiver(topic, bucket) { recordReceiver =>
           val future =
             recordReceiver.receiveMessage(notification, transformToWork)
 
@@ -119,14 +115,13 @@ class HybridRecordReceiverTest
           message = hybridRecord
         )
 
-        withHybridRecordReceiver(topic, bucket) {
-          recordReceiver =>
-            val future =
-              recordReceiver.receiveMessage(invalidSqsMessage, transformToWork)
+        withHybridRecordReceiver(topic, bucket) { recordReceiver =>
+          val future =
+            recordReceiver.receiveMessage(invalidSqsMessage, transformToWork)
 
-            whenReady(future.failed) { x =>
-              x shouldBe a[ParsingFailure]
-            }
+          whenReady(future.failed) { x =>
+            x shouldBe a[ParsingFailure]
+          }
         }
       }
     }
@@ -139,14 +134,13 @@ class HybridRecordReceiverTest
           message = Random.alphanumeric take 50 mkString
         )
 
-        withHybridRecordReceiver(topic, bucket) {
-          recordReceiver =>
-            val future =
-              recordReceiver.receiveMessage(invalidSqsMessage, transformToWork)
+        withHybridRecordReceiver(topic, bucket) { recordReceiver =>
+          val future =
+            recordReceiver.receiveMessage(invalidSqsMessage, transformToWork)
 
-            whenReady(future.failed) {
-              _ shouldBe a[JsonDecodingError]
-            }
+          whenReady(future.failed) {
+            _ shouldBe a[JsonDecodingError]
+          }
         }
       }
     }
@@ -160,16 +154,15 @@ class HybridRecordReceiverTest
           bucket = bucket
         )
 
-        withHybridRecordReceiver(topic, bucket) {
-          recordReceiver =>
-            val future =
-              recordReceiver.receiveMessage(
-                failingSqsMessage,
-                failingTransformToWork)
+        withHybridRecordReceiver(topic, bucket) { recordReceiver =>
+          val future =
+            recordReceiver.receiveMessage(
+              failingSqsMessage,
+              failingTransformToWork)
 
-            whenReady(future.failed) {
-              _ shouldBe a[TestException]
-            }
+          whenReady(future.failed) {
+            _ shouldBe a[TestException]
+          }
         }
       }
     }
@@ -183,15 +176,13 @@ class HybridRecordReceiverTest
           bucket = bucket
         )
 
-        withHybridRecordReceiver(
-          topic,
-          bucket,
-          mockSnsClientFailPublishMessage) { recordReceiver =>
-          val future = recordReceiver.receiveMessage(message, transformToWork)
+        withHybridRecordReceiver(topic, bucket, mockSnsClientFailPublishMessage) {
+          recordReceiver =>
+            val future = recordReceiver.receiveMessage(message, transformToWork)
 
-          whenReady(future.failed) {
-            _.getMessage should be("Failed publishing message")
-          }
+            whenReady(future.failed) {
+              _.getMessage should be("Failed publishing message")
+            }
         }
       }
     }

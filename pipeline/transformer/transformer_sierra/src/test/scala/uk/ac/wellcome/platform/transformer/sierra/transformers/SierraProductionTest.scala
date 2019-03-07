@@ -298,7 +298,8 @@ class SierraProductionTest
 
         caught.getMessage should startWith("Problem in the Sierra data")
         caught.getMessage should include(bibId.withoutCheckDigit)
-        caught.getMessage should include("Unrecognised second indicator for production function")
+        caught.getMessage should include(
+          "Unrecognised second indicator for production function")
       }
     }
 

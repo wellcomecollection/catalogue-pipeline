@@ -17,9 +17,10 @@ class HybridRecordReceiver(
   objectStore: ObjectStore[SierraTransformable])(implicit ec: ExecutionContext)
     extends Logging {
 
-  def receiveMessage(
-    message: NotificationMessage,
-    transformToWork: (SierraTransformable, Int) => Try[TransformedBaseWork]): Future[Unit] = {
+  def receiveMessage(message: NotificationMessage,
+                     transformToWork: (
+                       SierraTransformable,
+                       Int) => Try[TransformedBaseWork]): Future[Unit] = {
     debug(s"Starting to process message $message")
 
     for {
@@ -33,7 +34,8 @@ class HybridRecordReceiver(
     } yield ()
   }
 
-  private def getTransformable(hybridRecord: HybridRecord): Future[SierraTransformable] =
+  private def getTransformable(
+    hybridRecord: HybridRecord): Future[SierraTransformable] =
     objectStore.get(hybridRecord.location)
 
   private def publishMessage(

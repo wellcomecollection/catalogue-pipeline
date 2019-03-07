@@ -5,7 +5,11 @@ import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.sierra.exceptions.CataloguingException
 import uk.ac.wellcome.platform.transformer.sierra.generators.SierraDataGenerators
-import uk.ac.wellcome.platform.transformer.sierra.source.{MarcSubfield, SierraBibData, VarField}
+import uk.ac.wellcome.platform.transformer.sierra.source.{
+  MarcSubfield,
+  SierraBibData,
+  VarField
+}
 
 class SierraOrganisationSubjectsTest
     extends FunSpec
@@ -13,7 +17,9 @@ class SierraOrganisationSubjectsTest
     with SierraDataGenerators {
   it("returns an empty list if there are no instances of MARC tag 610") {
     val bibData = createSierraBibDataWith(varFields = List())
-    transformer.getSubjectsWithOrganisation(bibId = createSierraBibNumber, bibData) shouldBe List()
+    transformer.getSubjectsWithOrganisation(
+      bibId = createSierraBibNumber,
+      bibData) shouldBe List()
   }
 
   describe("label") {
@@ -182,7 +188,8 @@ class SierraOrganisationSubjectsTest
 
       caught.getMessage should startWith("Problem in the Sierra data")
       caught.getMessage should include(bibId.withoutCheckDigit)
-      caught.getMessage should include("Not enough information to build a label")
+      caught.getMessage should include(
+        "Not enough information to build a label")
     }
   }
 
@@ -230,8 +237,8 @@ class SierraOrganisationSubjectsTest
 
   val transformer = new SierraOrganisationSubjects {}
 
-  private def getOrganisationSubjects(
-    bibData: SierraBibData,
-    bibId: SierraBibNumber = createSierraBibNumber) =
+  private def getOrganisationSubjects(bibData: SierraBibData,
+                                      bibId: SierraBibNumber =
+                                        createSierraBibNumber) =
     transformer.getSubjectsWithOrganisation(bibId = bibId, bibData = bibData)
 }

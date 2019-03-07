@@ -97,20 +97,19 @@ class SierraTransformerFeatureTest
 
   def withWorkerService[R](topic: Topic, bucket: Bucket, queue: Queue)(
     testWith: TestWith[SierraTransformerWorkerService, R]): R =
-    withHybridRecordReceiver(topic, bucket) {
-      messageReceiver =>
-        withActorSystem { implicit actorSystem =>
-          withSQSStream[NotificationMessage, R](queue) { sqsStream =>
-            val workerService = new SierraTransformerWorkerService(
-              messageReceiver = messageReceiver,
-              sierraTransformer = new SierraTransformableTransformer,
-              sqsStream = sqsStream
-            )
+    withHybridRecordReceiver(topic, bucket) { messageReceiver =>
+      withActorSystem { implicit actorSystem =>
+        withSQSStream[NotificationMessage, R](queue) { sqsStream =>
+          val workerService = new SierraTransformerWorkerService(
+            messageReceiver = messageReceiver,
+            sierraTransformer = new SierraTransformableTransformer,
+            sqsStream = sqsStream
+          )
 
-            workerService.run()
+          workerService.run()
 
-            testWith(workerService)
-          }
+          testWith(workerService)
         }
+      }
     }
 }

@@ -30,7 +30,8 @@ trait SierraOrganisationSubjects extends SierraAgents with MarcUtils {
   //
   // https://www.loc.gov/marc/bibliographic/bd610.html
   //
-  def getSubjectsWithOrganisation(bibId: SierraBibNumber, bibData: SierraBibData)
+  def getSubjectsWithOrganisation(bibId: SierraBibNumber,
+                                  bibData: SierraBibData)
     : List[MaybeDisplayable[Subject[MaybeDisplayable[Organisation]]]] =
     getMatchingVarFields(bibData, marcTag = "610").map { varField =>
       val label =
@@ -59,7 +60,8 @@ trait SierraOrganisationSubjects extends SierraAgents with MarcUtils {
     // the best we can do for now.
     if (label == "") {
       throw CataloguingException(
-        bibId, s"Not enough information to build a label on $varField")
+        bibId,
+        s"Not enough information to build a label on $varField")
     }
 
     Unidentifiable(Organisation(label = label))
