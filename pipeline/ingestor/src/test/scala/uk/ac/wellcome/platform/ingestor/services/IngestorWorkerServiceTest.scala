@@ -132,7 +132,7 @@ class IngestorWorkerServiceTest
     withLocalWorksIndex { index =>
       withLocalSqsQueue { queue =>
         withActorSystem { implicit actorSystem =>
-          withMetricsSender(actorSystem) { metricsSender =>
+          withMetricsSender() { metricsSender =>
             withMessageStream[IdentifiedBaseWork, Any](
               queue = queue,
               metricsSender = metricsSender
