@@ -101,7 +101,7 @@ trait MatcherFixtures
     testWith: TestWith[DynamoRowLockDao, R]): R = {
     val rowLockDaoConfig = DynamoRowLockDaoConfig(
       dynamoConfig = createDynamoConfigWith(lockTable),
-      duration = Duration.ofSeconds(10)
+      duration = Duration.ofSeconds(180)
     )
 
     val dynamoRowLockDao = new DynamoRowLockDao(
