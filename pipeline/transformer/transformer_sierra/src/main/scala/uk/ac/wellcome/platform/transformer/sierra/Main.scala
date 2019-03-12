@@ -1,6 +1,7 @@
 package uk.ac.wellcome.platform.transformer.sierra
 
 import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
 import com.typesafe.config.Config
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
@@ -24,6 +25,8 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildActorSystem()
     implicit val executionContext: ExecutionContext =
       AkkaBuilder.buildExecutionContext()
+    implicit val materializer: ActorMaterializer =
+      AkkaBuilder.buildActorMaterializer()
 
     val messageReceiver = new HybridRecordReceiver[SierraTransformable](
       messageWriter =

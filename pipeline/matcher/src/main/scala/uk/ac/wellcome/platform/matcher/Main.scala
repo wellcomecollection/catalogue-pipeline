@@ -1,11 +1,12 @@
 package uk.ac.wellcome.platform.matcher
 
 import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
 import com.typesafe.config.Config
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.typesafe.{MessagingBuilder, SNSBuilder}
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
-import uk.ac.wellcome.monitoring.typesafe.MetricsSenderBuilder
+import uk.ac.wellcome.monitoring.typesafe.MetricsBuilder
 import uk.ac.wellcome.platform.matcher.locking.{
   DynamoLockingService,
   DynamoRowLockDao
@@ -25,6 +26,8 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildActorSystem()
     implicit val executionContext: ExecutionContext =
       AkkaBuilder.buildExecutionContext()
+    implicit val materializer: ActorMaterializer =
+      AkkaBuilder.buildActorMaterializer()
 
     val dynamoClient = DynamoBuilder.buildDynamoClient(config)
 
@@ -41,7 +44,7 @@ object Main extends WellcomeTypesafeApp {
         dynamoConfig =
           DynamoBuilder.buildDynamoConfig(config, namespace = "locking.service")
       ),
-      metricsSender = MetricsSenderBuilder.buildMetricsSender(config)
+      metricsSender = MetricsBuilder.buildMetricsSender(config)
     )
 
     val workMatcher = new WorkMatcher(
