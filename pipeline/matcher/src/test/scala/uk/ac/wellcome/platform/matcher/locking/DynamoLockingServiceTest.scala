@@ -22,7 +22,7 @@ class DynamoLockingServiceTest
     with ScalaFutures {
 
   it("locks around a callback") {
-    withMockMetricSender { mockMetricsSender =>
+    withMockMetricsSender { mockMetricsSender =>
       withSpecifiedLocalDynamoDbTable(createLockTable) { lockTable =>
         withDynamoRowLockDao(lockTable) { dynamoRowLockDao =>
           withLockingService(dynamoRowLockDao, mockMetricsSender) {
@@ -44,7 +44,7 @@ class DynamoLockingServiceTest
   }
 
   it("doesn't call lock if lockIds is empty") {
-    withMockMetricSender { mockMetricsSender =>
+    withMockMetricsSender { mockMetricsSender =>
       withSpecifiedLocalDynamoDbTable(createLockTable) { lockTable =>
         val mockDynamoRowLockDao = mock[DynamoRowLockDao]
         withLockingService(mockDynamoRowLockDao, mockMetricsSender) {
@@ -66,7 +66,7 @@ class DynamoLockingServiceTest
   }
 
   it("throws a FailedLockException and releases locks when a row lock fails") {
-    withMockMetricSender { mockMetricsSender =>
+    withMockMetricsSender { mockMetricsSender =>
       withSpecifiedLocalDynamoDbTable(createLockTable) { lockTable =>
         withDynamoRowLockDao(lockTable) { dynamoRowLockDao =>
           withLockingService(dynamoRowLockDao, mockMetricsSender) {
@@ -94,7 +94,7 @@ class DynamoLockingServiceTest
 
   it(
     "throws a FailedLockException and releases locks when a nested row lock fails") {
-    withMockMetricSender { mockMetricsSender =>
+    withMockMetricsSender { mockMetricsSender =>
       withSpecifiedLocalDynamoDbTable(createLockTable) { lockTable =>
         withDynamoRowLockDao(lockTable) { dynamoRowLockDao =>
           withLockingService(dynamoRowLockDao, mockMetricsSender) {
@@ -123,7 +123,7 @@ class DynamoLockingServiceTest
   }
 
   it("throws a FailedUnlockException and releases locks when unlocking fails") {
-    withMockMetricSender { mockMetricsSender =>
+    withMockMetricsSender { mockMetricsSender =>
       withSpecifiedLocalDynamoDbTable(createLockTable) { lockTable =>
         val mockDynamoRowLockDao = mock[DynamoRowLockDao]
         withLockingService(mockDynamoRowLockDao, mockMetricsSender) {
@@ -146,7 +146,7 @@ class DynamoLockingServiceTest
   }
 
   it("releases locks when the callback fails") {
-    withMockMetricSender { mockMetricsSender =>
+    withMockMetricsSender { mockMetricsSender =>
       withSpecifiedLocalDynamoDbTable(createLockTable) { lockTable =>
         withDynamoRowLockDao(lockTable) { dynamoRowLockDao =>
           withLockingService(dynamoRowLockDao, mockMetricsSender) {
