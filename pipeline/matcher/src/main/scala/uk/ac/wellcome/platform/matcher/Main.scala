@@ -1,5 +1,7 @@
 package uk.ac.wellcome.platform.matcher
 
+import java.time.Duration
+
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import com.typesafe.config.Config
@@ -9,7 +11,8 @@ import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.monitoring.typesafe.MetricsBuilder
 import uk.ac.wellcome.platform.matcher.locking.{
   DynamoLockingService,
-  DynamoRowLockDao
+  DynamoRowLockDao,
+  DynamoRowLockDaoConfig
 }
 import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher
 import uk.ac.wellcome.platform.matcher.services.MatcherWorkerService
@@ -38,11 +41,17 @@ object Main extends WellcomeTypesafeApp {
       )
     )
 
+    val rowLockDaoConfig = DynamoRowLockDaoConfig(
+      dynamoConfig =
+        DynamoBuilder.buildDynamoConfig(config, namespace = "locking.service"),
+      duration = Duration.ofSeconds(180)
+    )
+
     val lockingService = new DynamoLockingService(
+      lockNamePrefix = "WorkMatcher",
       dynamoRowLockDao = new DynamoRowLockDao(
-        dynamoDBClient = dynamoClient,
-        dynamoConfig =
-          DynamoBuilder.buildDynamoConfig(config, namespace = "locking.service")
+        dynamoDbClient = dynamoClient,
+        rowLockDaoConfig = rowLockDaoConfig
       ),
       metricsSender = MetricsBuilder.buildMetricsSender(config)
     )

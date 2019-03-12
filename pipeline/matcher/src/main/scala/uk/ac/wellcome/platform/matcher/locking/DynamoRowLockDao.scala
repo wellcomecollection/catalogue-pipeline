@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.matcher.locking
 
-import java.time.{Duration, Instant}
+import java.time.Instant
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.gu.scanamo.error.DynamoReadError
@@ -8,14 +8,13 @@ import com.gu.scanamo.query.Condition
 import com.gu.scanamo.syntax._
 import com.gu.scanamo.{DynamoFormat, Scanamo, Table}
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.storage.dynamo.DynamoConfig
 
 import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
 
 class DynamoRowLockDao(
-  dynamoDBClient: AmazonDynamoDB,
-  dynamoConfig: DynamoConfig)(implicit ec: ExecutionContext)
+  dynamoDbClient: AmazonDynamoDB,
+  rowLockDaoConfig: DynamoRowLockDaoConfig)(implicit ec: ExecutionContext)
     extends Logging {
 
   implicit val instantLongFormat: AnyRef with DynamoFormat[Instant] =
@@ -25,13 +24,12 @@ class DynamoRowLockDao(
       _.getEpochSecond
     )
 
-  private val defaultDuration = Duration.ofSeconds(180)
-  private val table = Table[RowLock](dynamoConfig.table)
-  private val index = dynamoConfig.index
+  private val table = Table[RowLock](rowLockDaoConfig.dynamoConfig.table)
+  private val index = rowLockDaoConfig.dynamoConfig.index
 
   private def getExpiry: (Instant, Instant) = {
     val created = Instant.now()
-    val expires = created.plus(defaultDuration)
+    val expires = created.plus(rowLockDaoConfig.duration)
 
     (created, expires)
   }
@@ -46,7 +44,7 @@ class DynamoRowLockDao(
         .given(not(attributeExists('id)) or Condition(
           'expires < rowLock.created.getEpochSecond))
         .put(rowLock)
-      val result = Scanamo.exec(dynamoDBClient)(scanamoOps)
+      val result = Scanamo.exec(dynamoDbClient)(scanamoOps)
       trace(s"Got $result for $rowLock")
 
       result match {
@@ -81,7 +79,7 @@ class DynamoRowLockDao(
     debug(s"Unlocking rows: $rowLockIds")
     Future.sequence(rowLockIds.map { rowLockId =>
       Future {
-        Scanamo.delete(dynamoDBClient)(table.name)('id -> rowLockId)
+        Scanamo.delete(dynamoDbClient)(table.name)('id -> rowLockId)
       }
     })
   }
@@ -90,7 +88,7 @@ class DynamoRowLockDao(
     Future {
       debug(s"Trying to unlock context: $contextId")
       val maybeRowLocks: immutable.Seq[Either[DynamoReadError, RowLock]] =
-        Scanamo.queryIndex[RowLock](dynamoDBClient)(table.name, index)(
+        Scanamo.queryIndex[RowLock](dynamoDbClient)(table.name, index)(
           'contextId -> contextId)
 
       debug("maybeRowLocks: " + maybeRowLocks)

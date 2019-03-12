@@ -9,12 +9,13 @@ import scala.collection.Set
 import scala.concurrent.{ExecutionContext, Future}
 
 class DynamoLockingService(
+  lockNamePrefix: String,
   dynamoRowLockDao: DynamoRowLockDao,
   metricsSender: MetricsSender)(implicit ec: ExecutionContext)
     extends Logging {
 
-  private val failedLockMetricName: String = "WorkMatcher_FailedLock"
-  private val failedUnlockMetricName: String = "WorkMatcher_FailedUnlock"
+  private val failedLockMetricName: String = s"${lockNamePrefix}_FailedLock"
+  private val failedUnlockMetricName: String = s"${lockNamePrefix}_FailedUnlock"
 
   def withLocks[T](ids: Set[String])(callback: => Future[T]): Future[T] = {
     if (ids.isEmpty) {
