@@ -9,7 +9,7 @@ import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{Assertion, FunSpec, Matchers}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.exceptions.JsonDecodingError
-import uk.ac.wellcome.messaging.fixtures.{Messaging, SNS, SQS}
+import uk.ac.wellcome.messaging.fixtures.Messaging
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.{
   TransformedBaseWork,
@@ -18,7 +18,6 @@ import uk.ac.wellcome.models.work.internal.{
 import uk.ac.wellcome.platform.transformer.sierra.exceptions.SierraTransformerException
 import uk.ac.wellcome.platform.transformer.sierra.fixtures.HybridRecordReceiverFixture
 import uk.ac.wellcome.storage.ObjectLocation
-import uk.ac.wellcome.storage.fixtures.S3
 import uk.ac.wellcome.storage.vhs.HybridRecord
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -27,9 +26,6 @@ import scala.util.{Random, Try}
 class HybridRecordReceiverTest
     extends FunSpec
     with Matchers
-    with SQS
-    with SNS
-    with S3
     with Messaging
     with Eventually
     with HybridRecordReceiverFixture
@@ -50,7 +46,6 @@ class HybridRecordReceiverTest
       withLocalS3Bucket { bucket =>
         val sqsMessage = createHybridRecordNotificationWith(
           TestTransformable(),
-          s3Client = s3Client,
           bucket = bucket
         )
 
@@ -81,7 +76,6 @@ class HybridRecordReceiverTest
         val notification = createHybridRecordNotificationWith(
           TestTransformable(),
           version = version,
-          s3Client = s3Client,
           bucket = bucket
         )
 
@@ -159,7 +153,6 @@ class HybridRecordReceiverTest
       withLocalS3Bucket { bucket =>
         val failingSqsMessage = createHybridRecordNotificationWith(
           TestTransformable(),
-          s3Client = s3Client,
           bucket = bucket
         )
 
@@ -183,7 +176,6 @@ class HybridRecordReceiverTest
       withLocalS3Bucket { bucket =>
         val message = createHybridRecordNotificationWith(
           TestTransformable(),
-          s3Client = s3Client,
           bucket = bucket
         )
 

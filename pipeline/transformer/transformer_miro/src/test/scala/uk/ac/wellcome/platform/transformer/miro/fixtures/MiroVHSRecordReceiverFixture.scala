@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.transformer.miro.fixtures
 
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.fixtures.{Messaging, SNS}
+import uk.ac.wellcome.messaging.fixtures.Messaging
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
@@ -17,7 +17,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 trait MiroVHSRecordReceiverFixture
     extends Messaging
-    with SNS
     with MiroRecordGenerators {
   def withMiroVHSRecordReceiver[R](topic: Topic, bucket: Bucket)(
     testWith: TestWith[MiroVHSRecordReceiver, R])(
@@ -42,7 +41,6 @@ trait MiroVHSRecordReceiverFixture
     val hybridRecord = createHybridRecordWith(
       miroRecord,
       version = version,
-      s3Client = s3Client,
       bucket = bucket
     )
 
