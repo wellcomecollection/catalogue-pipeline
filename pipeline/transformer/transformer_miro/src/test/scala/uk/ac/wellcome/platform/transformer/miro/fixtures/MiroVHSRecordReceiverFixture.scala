@@ -15,9 +15,7 @@ import uk.ac.wellcome.fixtures.TestWith
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-trait MiroVHSRecordReceiverFixture
-    extends Messaging
-    with MiroRecordGenerators {
+trait MiroVHSRecordReceiverFixture extends Messaging with MiroRecordGenerators {
   def withMiroVHSRecordReceiver[R](topic: Topic, bucket: Bucket)(
     testWith: TestWith[MiroVHSRecordReceiver, R])(
     implicit objectStore: ObjectStore[MiroRecord]): R =
