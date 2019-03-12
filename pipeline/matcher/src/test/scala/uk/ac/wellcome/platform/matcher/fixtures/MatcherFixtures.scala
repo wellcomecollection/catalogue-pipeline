@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.matcher.fixtures
 
-import java.time.Instant
+import java.time.{Duration, Instant}
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.gu.scanamo.{DynamoFormat, Scanamo}
@@ -14,6 +14,7 @@ import uk.ac.wellcome.monitoring.MetricsSender
 import uk.ac.wellcome.monitoring.fixtures.MetricsSenderFixture
 import uk.ac.wellcome.platform.matcher.locking.{
   DynamoLockingService,
+  DynamoRowLockDaoConfig,
   DynamoRowLockDao,
   RowLock
 }
@@ -98,10 +99,16 @@ trait MatcherFixtures
 
   def withDynamoRowLockDao[R](dynamoDbClient: AmazonDynamoDB, lockTable: Table)(
     testWith: TestWith[DynamoRowLockDao, R]): R = {
-    val dynamoRowLockDao = new DynamoRowLockDao(
-      dynamoDBClient = dynamoDbClient,
-      dynamoConfig = createDynamoConfigWith(lockTable)
+    val rowLockDaoConfig = DynamoRowLockDaoConfig(
+      dynamoConfig = createDynamoConfigWith(lockTable),
+      duration = Duration.ofSeconds(10)
     )
+
+    val dynamoRowLockDao = new DynamoRowLockDao(
+      dynamoDbClient = dynamoDbClient,
+      rowLockDaoConfig = rowLockDaoConfig
+    )
+
     testWith(dynamoRowLockDao)
   }
 
