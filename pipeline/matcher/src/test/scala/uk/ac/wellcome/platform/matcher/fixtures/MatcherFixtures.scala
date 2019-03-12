@@ -14,8 +14,8 @@ import uk.ac.wellcome.monitoring.MetricsSender
 import uk.ac.wellcome.monitoring.fixtures.MetricsSenderFixture
 import uk.ac.wellcome.platform.matcher.locking.{
   DynamoLockingService,
-  DynamoRowLockDaoConfig,
   DynamoRowLockDao,
+  DynamoRowLockDaoConfig,
   RowLock
 }
 import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher
