@@ -12,9 +12,7 @@ import uk.ac.wellcome.platform.merger.services._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-trait WorkerServiceFixture
-    extends LocalWorksVhs
-    with Messaging {
+trait WorkerServiceFixture extends LocalWorksVhs with Messaging {
   def withWorkerService[R](vhs: TransformedBaseWorkVHS,
                            topic: Topic,
                            queue: Queue,

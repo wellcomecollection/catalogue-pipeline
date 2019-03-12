@@ -12,10 +12,7 @@ import uk.ac.wellcome.storage.fixtures.S3.Bucket
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-trait WorkerServiceFixture
-    extends SNS
-    with SQS
-    with DynamoInserterFixture {
+trait WorkerServiceFixture extends SNS with SQS with DynamoInserterFixture {
   def withWorkerService[R](
     queue: Queue,
     table: Table,

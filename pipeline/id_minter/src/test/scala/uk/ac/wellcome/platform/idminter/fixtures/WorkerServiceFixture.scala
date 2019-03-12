@@ -15,9 +15,7 @@ import uk.ac.wellcome.storage.fixtures.S3.Bucket
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-trait WorkerServiceFixture
-    extends IdentifiersDatabase
-    with Messaging {
+trait WorkerServiceFixture extends IdentifiersDatabase with Messaging {
   def withWorkerService[R](bucket: Bucket,
                            topic: Topic,
                            queue: Queue,

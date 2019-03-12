@@ -14,9 +14,7 @@ import uk.ac.wellcome.storage.vhs.EmptyMetadata
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-trait WorkerServiceFixture
-    extends LocalVersionedHybridStore
-    with Messaging {
+trait WorkerServiceFixture extends LocalVersionedHybridStore with Messaging {
   def withWorkerService[R](
     table: Table,
     storageBucket: Bucket,
