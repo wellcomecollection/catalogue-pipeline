@@ -121,8 +121,11 @@ trait MatcherFixtures
   def withLockingService[R](dynamoRowLockDao: DynamoRowLockDao,
                             metricsSender: MetricsSender)(
     testWith: TestWith[DynamoLockingService, R]): R = {
-    val lockingService =
-      new DynamoLockingService(dynamoRowLockDao, metricsSender)
+    val lockingService = new DynamoLockingService(
+      lockNamePrefix = "WorkMatcher",
+      dynamoRowLockDao = dynamoRowLockDao,
+      metricsSender = metricsSender
+    )
     testWith(lockingService)
   }
 

@@ -48,6 +48,7 @@ object Main extends WellcomeTypesafeApp {
     )
 
     val lockingService = new DynamoLockingService(
+      lockNamePrefix = "WorkMatcher",
       dynamoRowLockDao = new DynamoRowLockDao(
         dynamoDbClient = dynamoClient,
         rowLockDaoConfig = rowLockDaoConfig
