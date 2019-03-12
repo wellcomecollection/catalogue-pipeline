@@ -1,6 +1,5 @@
 package uk.ac.wellcome.platform.sierra_items_to_dynamo.fixtures
 
-import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
@@ -13,22 +12,16 @@ import uk.ac.wellcome.storage.fixtures.S3.Bucket
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-trait WorkerServiceFixture
-    extends Akka
-    with SNS
-    with SQS
-    with DynamoInserterFixture {
+trait WorkerServiceFixture extends SNS with SQS with DynamoInserterFixture {
   def withWorkerService[R](
     queue: Queue,
     table: Table,
     bucket: Bucket,
     topic: Topic)(testWith: TestWith[SierraItemsToDynamoWorkerService, R]): R =
-    withActorSystem { actorSystem =>
-      withMetricsSender(actorSystem) { metricsSender =>
-        withWorkerService(queue, table, bucket, topic, metricsSender) {
-          workerService =>
-            testWith(workerService)
-        }
+    withMetricsSender() { metricsSender =>
+      withWorkerService(queue, table, bucket, topic, metricsSender) {
+        workerService =>
+          testWith(workerService)
       }
     }
 

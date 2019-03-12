@@ -21,7 +21,7 @@ class WorkMatcherConcurrencyTest
     with WorksGenerators {
 
   it("processes one of two conflicting concurrent updates and locks the other") {
-    withMockMetricSender { metricsSender =>
+    withMockMetricsSender { metricsSender =>
       withSpecifiedLocalDynamoDbTable(createLockTable) { lockTable =>
         withSpecifiedLocalDynamoDbTable(createWorkGraphTable) { graphTable =>
           withWorkGraphStore(graphTable) { workGraphStore =>

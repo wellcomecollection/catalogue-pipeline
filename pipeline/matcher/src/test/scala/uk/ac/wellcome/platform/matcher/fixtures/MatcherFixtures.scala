@@ -47,7 +47,7 @@ trait MatcherFixtures
     implicit objectStore: ObjectStore[TransformedBaseWork]): R =
     withSNSWriter(topic) { snsWriter =>
       withActorSystem { implicit actorSystem =>
-        withMockMetricSender { metricsSender =>
+        withMockMetricsSender { metricsSender =>
           withSpecifiedLocalDynamoDbTable(createLockTable) { lockTable =>
             withWorkGraphStore(graphTable) { workGraphStore =>
               withWorkMatcher(workGraphStore, lockTable, metricsSender) {

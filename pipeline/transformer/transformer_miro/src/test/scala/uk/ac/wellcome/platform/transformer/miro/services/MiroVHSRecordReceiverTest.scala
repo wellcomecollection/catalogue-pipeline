@@ -5,7 +5,7 @@ import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
-import uk.ac.wellcome.messaging.fixtures.{Messaging, SNS, SQS}
+import uk.ac.wellcome.messaging.fixtures.Messaging
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.{
   TransformedBaseWork,
@@ -16,7 +16,6 @@ import uk.ac.wellcome.platform.transformer.miro.fixtures.MiroVHSRecordReceiverFi
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
-import uk.ac.wellcome.storage.fixtures.S3
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Try
@@ -24,9 +23,6 @@ import scala.util.Try
 class MiroVHSRecordReceiverTest
     extends FunSpec
     with Matchers
-    with SQS
-    with SNS
-    with S3
     with Messaging
     with Eventually
     with MiroVHSRecordReceiverFixture
@@ -103,7 +99,6 @@ class MiroVHSRecordReceiverTest
       withLocalS3Bucket { bucket =>
         val incompleteMessage = createHybridRecordNotificationWith(
           createMiroRecord,
-          s3Client = s3Client,
           bucket = bucket
         )
 

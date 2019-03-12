@@ -42,7 +42,7 @@ class WorkMatcherTest
 
   it(
     "matches a work with no linked identifiers to itself only A and saves the updated graph A") {
-    withMockMetricSender { mockMetricsSender =>
+    withMockMetricsSender { mockMetricsSender =>
       withSpecifiedLocalDynamoDbTable(createLockTable) { lockTable =>
         withSpecifiedLocalDynamoDbTable(createWorkGraphTable) { graphTable =>
           withWorkGraphStore(graphTable) { workGraphStore =>
@@ -72,7 +72,7 @@ class WorkMatcherTest
   }
 
   it("doesn't store an invisible work and sends the work id") {
-    withMockMetricSender { mockMetricsSender =>
+    withMockMetricsSender { mockMetricsSender =>
       withSpecifiedLocalDynamoDbTable(createLockTable) { lockTable =>
         withSpecifiedLocalDynamoDbTable(createWorkGraphTable) { graphTable =>
           withWorkGraphStore(graphTable) { workGraphStore =>
@@ -99,7 +99,7 @@ class WorkMatcherTest
 
   it(
     "matches a work with a single linked identifier A->B and saves the graph A->B") {
-    withMockMetricSender { mockMetricsSender =>
+    withMockMetricsSender { mockMetricsSender =>
       withSpecifiedLocalDynamoDbTable(createLockTable) { lockTable =>
         withSpecifiedLocalDynamoDbTable(createWorkGraphTable) { graphTable =>
           withWorkGraphStore(graphTable) { workGraphStore =>
@@ -142,7 +142,7 @@ class WorkMatcherTest
 
   it(
     "matches a previously stored work A->B with an update B->C and saves the graph A->B->C") {
-    withMockMetricSender { mockMetricsSender =>
+    withMockMetricsSender { mockMetricsSender =>
       withSpecifiedLocalDynamoDbTable(createLockTable) { lockTable =>
         withSpecifiedLocalDynamoDbTable(createWorkGraphTable) { graphTable =>
           withWorkGraphStore(graphTable) { workGraphStore =>
@@ -214,7 +214,7 @@ class WorkMatcherTest
   }
 
   it("throws MatcherException if it fails to lock primary works") {
-    withMockMetricSender { mockMetricsSender =>
+    withMockMetricsSender { mockMetricsSender =>
       withSpecifiedLocalDynamoDbTable(createLockTable) { lockTable =>
         withSpecifiedLocalDynamoDbTable(createWorkGraphTable) { graphTable =>
           withWorkGraphStore(graphTable) { workGraphStore =>
@@ -246,7 +246,7 @@ class WorkMatcherTest
   }
 
   it("throws MatcherException if it fails to lock secondary works") {
-    withMockMetricSender { mockMetricsSender =>
+    withMockMetricsSender { mockMetricsSender =>
       withSpecifiedLocalDynamoDbTable(createLockTable) { lockTable =>
         withSpecifiedLocalDynamoDbTable(createWorkGraphTable) { graphTable =>
           withWorkGraphStore(graphTable) { workGraphStore =>
@@ -295,7 +295,7 @@ class WorkMatcherTest
   }
 
   it("throws MatcherException if it fails to unlock") {
-    withMockMetricSender { mockMetricsSender =>
+    withMockMetricsSender { mockMetricsSender =>
       withSpecifiedLocalDynamoDbTable(createLockTable) { lockTable =>
         withSpecifiedLocalDynamoDbTable(createWorkGraphTable) { graphTable =>
           withWorkGraphStore(graphTable) { workGraphStore =>
@@ -328,7 +328,7 @@ class WorkMatcherTest
   }
 
   it("fails if saving the updated links fails") {
-    withMockMetricSender { mockMetricsSender =>
+    withMockMetricsSender { mockMetricsSender =>
       withSpecifiedLocalDynamoDbTable(createLockTable) { lockTable =>
         val mockWorkGraphStore = mock[WorkGraphStore]
         withWorkMatcher(mockWorkGraphStore, lockTable, mockMetricsSender) {
