@@ -245,12 +245,12 @@ class ElasticsearchServiceTest
 
         assertSearchResultsAreCorrect(
           index = index,
-          workQuery = QueryString("contributors.agent.label:\"Abigail Armstrong\""),
+          workQuery = QueryString("contributors.agent.agent.label:\"Abigail Armstrong\""),
           expectedWorks = List(workWithContributors))
 
         assertSearchResultsAreCorrect(
           index = index,
-          workQuery = QueryString("subjects.label:\"Egging on an elephant\""),
+          workQuery = QueryString("subjects.agent.label:\"Egging on an elephant\""),
           expectedWorks = List(workWithSubjects))
       }
     }
