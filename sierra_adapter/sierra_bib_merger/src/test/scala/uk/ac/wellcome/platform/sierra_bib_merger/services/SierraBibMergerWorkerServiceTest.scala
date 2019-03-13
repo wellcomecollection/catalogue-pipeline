@@ -49,7 +49,7 @@ class SierraBibMergerWorkerServiceTest
 
   private def withWorkerServiceFixtures[R](
     testWith: TestWith[(MetricsSender, QueuePair), R]) =
-    withMockMetricSender { metricsSender =>
+    withMockMetricsSender { metricsSender =>
       withLocalSnsTopic { topic =>
         withLocalSqsQueueAndDlq {
           case queuePair @ QueuePair(queue, _) =>

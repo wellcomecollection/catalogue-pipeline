@@ -20,6 +20,22 @@ class ApiV2RedirectsTest extends ApiV2WorksTestBase {
     }
   }
 
+  it("uses the configured host/scheme for the Location header") {
+    val redirectedWork = createIdentifiedRedirectedWork
+
+    withV2Api {
+      case (indexV2, server: EmbeddedHttpServer) =>
+        insertIntoElasticsearch(indexV2, redirectedWork)
+        val resp = server.httpGet(
+          path = s"/$apiPrefix/works/${redirectedWork.canonicalId}",
+          andExpect = Status.Found
+        )
+
+        resp.headerMap.getOrNull("Location") should startWith(
+          s"$apiScheme://$apiHost")
+    }
+  }
+
   it("preserves query parameters on a 302 Redirect") {
     val redirectedWork = createIdentifiedRedirectedWork
 

@@ -85,7 +85,7 @@ class SierraItemsToDynamoWorkerServiceTest
       withLocalS3Bucket { bucket =>
         withLocalSqsQueueAndDlq {
           case QueuePair(queue, dlq) =>
-            withMockMetricSender { mockMetricsSender =>
+            withMockMetricsSender { mockMetricsSender =>
               withLocalSnsTopic { topic =>
                 withWorkerService(
                   queue,

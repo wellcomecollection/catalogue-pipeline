@@ -4,7 +4,7 @@ import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.models.transformable.sierra.test.utils.SierraGenerators
-import uk.ac.wellcome.storage.fixtures.{LocalVersionedHybridStore, S3}
+import uk.ac.wellcome.storage.fixtures.LocalVersionedHybridStore
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.platform.sierra_item_merger.fixtures.SierraItemMergerFixtures
 import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
@@ -15,7 +15,6 @@ class SierraItemMergerFeatureTest
     with Eventually
     with IntegrationPatience
     with SQS
-    with S3
     with LocalVersionedHybridStore
     with SierraGenerators
     with SierraAdapterHelpers
@@ -39,7 +38,6 @@ class SierraItemMergerFeatureTest
 
                   val notification = createHybridRecordNotificationWith(
                     itemRecord,
-                    s3Client = s3Client,
                     bucket = sierraItemsToDynamoBucket
                   )
 
@@ -84,7 +82,6 @@ class SierraItemMergerFeatureTest
 
                   val notification1 = createHybridRecordNotificationWith(
                     itemRecord1,
-                    s3Client = s3Client,
                     bucket = sierraItemsToDynamoBucket
                   )
 
@@ -97,7 +94,6 @@ class SierraItemMergerFeatureTest
 
                   val notification2 = createHybridRecordNotificationWith(
                     itemRecord2,
-                    s3Client = s3Client,
                     bucket = sierraItemsToDynamoBucket
                   )
 
@@ -154,7 +150,6 @@ class SierraItemMergerFeatureTest
 
                   val notification = createHybridRecordNotificationWith(
                     itemRecord,
-                    s3Client = s3Client,
                     bucket = sierraItemsToDynamoBucket
                   )
 

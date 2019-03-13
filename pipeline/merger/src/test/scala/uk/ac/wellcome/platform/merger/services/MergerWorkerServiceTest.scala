@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.merger.services
 
-import org.mockito.Matchers.any
+import org.mockito.Matchers.endsWith
 import org.mockito.Mockito.{atLeastOnce, times, verify}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.mockito.MockitoSugar
@@ -8,7 +8,7 @@ import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
-import uk.ac.wellcome.messaging.fixtures.{Messaging, SNS, SQS}
+import uk.ac.wellcome.messaging.fixtures.Messaging
 import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
@@ -24,10 +24,8 @@ import uk.ac.wellcome.fixtures.TestWith
 class MergerWorkerServiceTest
     extends FunSpec
     with ScalaFutures
-    with SQS
     with IntegrationPatience
     with MetricsSenderFixture
-    with SNS
     with Messaging
     with WorksGenerators
     with LocalWorksVhs
@@ -62,7 +60,7 @@ class MergerWorkerServiceTest
           worksSent should contain only (work1, work2, work3)
 
           verify(metricsSender, atLeastOnce)
-            .countSuccess(any[String])
+            .incrementCount(endsWith("_success"))
         }
     }
   }
@@ -89,7 +87,7 @@ class MergerWorkerServiceTest
           worksSent should contain only work
 
           verify(metricsSender, times(1))
-            .countSuccess(any[String])
+            .incrementCount(endsWith("_success"))
         }
     }
   }
@@ -112,7 +110,7 @@ class MergerWorkerServiceTest
           listMessagesReceivedFromSNS(topic) shouldBe empty
 
           verify(metricsSender, times(3))
-            .countFailure(any[String])
+            .incrementCount(endsWith("_failure"))
         }
     }
   }
@@ -166,7 +164,7 @@ class MergerWorkerServiceTest
           worksSent should contain only work
 
           verify(metricsSender, times(1))
-            .countSuccess(any[String])
+            .incrementCount(endsWith("_success"))
         }
     }
   }
@@ -260,7 +258,7 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueHasSize(dlq, 1)
           verify(metricsSender, times(3))
-            .countRecognisedFailure(any[String])
+            .incrementCount(endsWith("_recognisedFailure"))
         }
     }
   }
@@ -273,7 +271,7 @@ class MergerWorkerServiceTest
       withLocalSqsQueueAndDlq {
         case queuePair @ QueuePair(queue, _) =>
           withLocalSnsTopic { topic =>
-            withMockMetricSender { mockMetricsSender =>
+            withMockMetricsSender { mockMetricsSender =>
               withWorkerService(
                 vhs = vhs,
                 topic = topic,

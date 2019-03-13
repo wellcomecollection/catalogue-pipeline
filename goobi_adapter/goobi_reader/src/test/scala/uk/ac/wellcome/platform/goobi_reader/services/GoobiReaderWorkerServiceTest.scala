@@ -6,7 +6,7 @@ import java.time.temporal.ChronoUnit
 
 import com.amazonaws.services.s3.{AmazonS3, AmazonS3Client}
 import com.gu.scanamo.Scanamo
-import org.mockito.Matchers.any
+import org.mockito.Matchers.{any, endsWith}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.{Assertion, FunSpec, Inside}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
@@ -103,7 +103,7 @@ class GoobiReaderWorkerServiceTest
 
   it("doesn't overwrite a newer work with an older work") {
     withGoobiReaderWorkerService(s3Client) {
-      case (bucket, QueuePair(queue, dlq), _, table, vhs) =>
+      case (bucket, QueuePair(queue, _), _, table, vhs) =>
         val contentStream = new ByteArrayInputStream(contents.getBytes)
         vhs.updateRecord(id = id)(
           ifNotExisting = (contentStream, GoobiRecordMetadata(eventTime)))(
@@ -144,7 +144,7 @@ class GoobiReaderWorkerServiceTest
 
   it("overwrites an older work with an newer work") {
     withGoobiReaderWorkerService(s3Client) {
-      case (bucket, QueuePair(queue, dlq), _, table, vhs) =>
+      case (bucket, QueuePair(queue, _), _, table, vhs) =>
         val contentStream = new ByteArrayInputStream(contents.getBytes)
         vhs.updateRecord(id = id)(
           ifNotExisting = (contentStream, GoobiRecordMetadata(eventTime)))(
@@ -193,7 +193,7 @@ class GoobiReaderWorkerServiceTest
           assertMessageSentToDlq(queue, dlq)
           assertUpdateNotSaved(bucket, table)
           verify(metricsSender, times(3))
-            .countRecognisedFailure(any[String])
+            .incrementCount(endsWith("_recognisedFailure"))
         }
     }
   }
@@ -212,7 +212,7 @@ class GoobiReaderWorkerServiceTest
           assertMessageSentToDlq(queue, dlq)
           assertUpdateNotSaved(bucket, table)
           verify(metricsSender, times(3))
-            .countFailure(any[String])
+            .incrementCount(endsWith("_failure"))
         }
     }
   }
@@ -234,7 +234,7 @@ class GoobiReaderWorkerServiceTest
           assertMessageSentToDlq(queue, dlq)
           assertUpdateNotSaved(bucket, table)
           verify(metricsSender, times(3))
-            .countFailure(any[String])
+            .incrementCount(endsWith("_failure"))
         }
     }
   }
@@ -300,7 +300,7 @@ class GoobiReaderWorkerServiceTest
     withActorSystem { implicit actorSystem =>
       withLocalSqsQueueAndDlq {
         case queuePair @ QueuePair(queue, dlq) =>
-          withMockMetricSender { mockMetricsSender =>
+          withMockMetricsSender { mockMetricsSender =>
             withSQSStream[NotificationMessage, R](
               queue = queue,
               metricsSender = mockMetricsSender) { sqsStream =>

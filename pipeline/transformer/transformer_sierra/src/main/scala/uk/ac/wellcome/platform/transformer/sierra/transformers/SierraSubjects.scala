@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
+import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 import uk.ac.wellcome.models.work.internal.{
   AbstractRootConcept,
   MaybeDisplayable,
@@ -16,9 +17,9 @@ trait SierraSubjects
     extends SierraConceptSubjects
     with SierraPersonSubjects
     with SierraOrganisationSubjects {
-  def getSubjects(bibData: SierraBibData)
+  def getSubjects(bibId: SierraBibNumber, bibData: SierraBibData)
     : List[MaybeDisplayable[Subject[MaybeDisplayable[AbstractRootConcept]]]] =
     getSubjectswithAbstractConcepts(bibData) ++
       getSubjectsWithPerson(bibData) ++
-      getSubjectsWithOrganisation(bibData)
+      getSubjectsWithOrganisation(bibId, bibData)
 }
