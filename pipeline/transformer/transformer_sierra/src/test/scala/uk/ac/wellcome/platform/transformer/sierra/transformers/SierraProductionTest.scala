@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.transformer.sierra.exceptions.SierraTransformerException
+import uk.ac.wellcome.platform.transformer.sierra.exceptions.CataloguingException
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
   VarField
@@ -289,11 +289,17 @@ class SierraProductionTest
           )
         )
 
-        val caught = intercept[SierraTransformerException] {
-          transformToProduction(varFields)
+        val bibData = createSierraBibDataWith(varFields = varFields)
+        val bibId = createSierraBibNumber
+
+        val caught = intercept[CataloguingException] {
+          transformer.getProduction(bibId, bibData)
         }
 
-        caught.e.getMessage shouldBe "Unrecognised second indicator for production function: [Some(x)]"
+        caught.getMessage should startWith("Problem in the Sierra data")
+        caught.getMessage should include(bibId.withoutCheckDigit)
+        caught.getMessage should include(
+          "Unrecognised second indicator for production function")
       }
     }
 
@@ -433,23 +439,32 @@ class SierraProductionTest
   }
 
   describe("Both MARC field 260 and 264") {
-    it("throws an error if both 260 and 264 are present") {
-      transformVarFieldsAndAssertIsError(
-        varFields = List(
-          createVarFieldWith(
-            marcTag = "260",
-            subfields = List(
-              MarcSubfield(tag = "a", content = "Paris")
-            )
-          ),
-          createVarFieldWith(
-            marcTag = "264",
-            subfields = List(
-              MarcSubfield(tag = "a", content = "London")
-            )
+    it("throws a cataloguing error if both 260 and 264 are present") {
+      val varFields = List(
+        createVarFieldWith(
+          marcTag = "260",
+          subfields = List(
+            MarcSubfield(tag = "a", content = "Paris")
+          )
+        ),
+        createVarFieldWith(
+          marcTag = "264",
+          subfields = List(
+            MarcSubfield(tag = "a", content = "London")
           )
         )
       )
+
+      val bibData = createSierraBibDataWith(varFields = varFields)
+      val bibId = createSierraBibNumber
+
+      val caught = intercept[CataloguingException] {
+        transformer.getProduction(bibId, bibData)
+      }
+
+      caught.getMessage should startWith("Problem in the Sierra data")
+      caught.getMessage should include(bibId.withoutCheckDigit)
+      caught.getMessage should include("Record has both 260 and 264 fields")
     }
 
     it(
@@ -559,18 +574,10 @@ class SierraProductionTest
     production.function shouldBe Some(Concept(expectedFunction))
   }
 
-  private def transformVarFieldsAndAssertIsError(varFields: List[VarField]) = {
-    val bibData = createSierraBibDataWith(varFields = varFields)
-
-    intercept[SierraTransformerException] {
-      transformer.getProduction(bibData)
-    }
-  }
-
   private def transformToProduction(varFields: List[VarField])
     : List[ProductionEvent[MaybeDisplayable[AbstractAgent]]] = {
     val bibData = createSierraBibDataWith(varFields = varFields)
-    transformer.getProduction(bibData)
+    transformer.getProduction(bibId = createSierraBibNumber, bibData)
   }
 
   val transformer = new SierraProduction {}

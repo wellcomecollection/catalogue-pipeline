@@ -86,11 +86,11 @@ class SierraTransformableTransformer
                 extent = getExtent(sierraBibData),
                 lettering = getLettering(sierraBibData),
                 createdDate = None,
-                subjects = getSubjects(sierraBibData),
+                subjects = getSubjects(bibId, sierraBibData),
                 genres = getGenres(sierraBibData),
                 contributors = getContributors(sierraBibData),
                 thumbnail = None,
-                production = getProduction(sierraBibData),
+                production = getProduction(bibId, sierraBibData),
                 language = getLanguage(sierraBibData),
                 dimensions = getDimensions(sierraBibData),
                 items = getItems(

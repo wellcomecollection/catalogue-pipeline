@@ -1,7 +1,8 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers.subjects
 
+import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.transformer.sierra.exceptions.SierraTransformerException
+import uk.ac.wellcome.platform.transformer.sierra.exceptions.CataloguingException
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData,
   VarField
@@ -29,13 +30,14 @@ trait SierraOrganisationSubjects extends SierraAgents with MarcUtils {
   //
   // https://www.loc.gov/marc/bibliographic/bd610.html
   //
-  def getSubjectsWithOrganisation(bibData: SierraBibData)
+  def getSubjectsWithOrganisation(bibId: SierraBibNumber,
+                                  bibData: SierraBibData)
     : List[MaybeDisplayable[Subject[MaybeDisplayable[Organisation]]]] =
     getMatchingVarFields(bibData, marcTag = "610").map { varField =>
       val label =
         createLabel(varField, subfieldTags = List("a", "b", "c", "d", "e"))
 
-      val organisation = createOrganisation(varField)
+      val organisation = createOrganisation(bibId, varField)
 
       val subject = Subject(
         label = label,
@@ -49,6 +51,7 @@ trait SierraOrganisationSubjects extends SierraAgents with MarcUtils {
     }
 
   private def createOrganisation(
+    bibId: SierraBibNumber,
     varField: VarField): MaybeDisplayable[Organisation] = {
     val label = createLabel(varField, subfieldTags = List("a", "b"))
 
@@ -56,7 +59,8 @@ trait SierraOrganisationSubjects extends SierraAgents with MarcUtils {
     // enough information to build the Organisation, so erroring out here is
     // the best we can do for now.
     if (label == "") {
-      throw SierraTransformerException(
+      throw CataloguingException(
+        bibId,
         s"Not enough information to build a label on $varField")
     }
 

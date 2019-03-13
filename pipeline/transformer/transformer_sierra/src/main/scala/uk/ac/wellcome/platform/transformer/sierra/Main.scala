@@ -28,7 +28,7 @@ object Main extends WellcomeTypesafeApp {
     implicit val materializer: ActorMaterializer =
       AkkaBuilder.buildActorMaterializer()
 
-    val messageReceiver = new HybridRecordReceiver[SierraTransformable](
+    val messageReceiver = new HybridRecordReceiver(
       messageWriter =
         MessagingBuilder.buildMessageWriter[TransformedBaseWork](config),
       objectStore = S3Builder.buildObjectStore[SierraTransformable](config)
