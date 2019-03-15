@@ -9,14 +9,10 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.typesafe.{MessagingBuilder, SNSBuilder}
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.monitoring.typesafe.MetricsBuilder
-import uk.ac.wellcome.platform.matcher.locking.{
-  DynamoLockingService,
-  DynamoRowLockDao,
-  DynamoRowLockDaoConfig
-}
 import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher
 import uk.ac.wellcome.platform.matcher.services.MatcherWorkerService
 import uk.ac.wellcome.platform.matcher.storage.{WorkGraphStore, WorkNodeDao}
+import uk.ac.wellcome.storage.locking.{DynamoLockingService, DynamoRowLockDao, DynamoRowLockDaoConfig}
 import uk.ac.wellcome.storage.typesafe.DynamoBuilder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder

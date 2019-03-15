@@ -1,5 +1,7 @@
 package uk.ac.wellcome.platform.matcher.matcher
 
+import java.time.Instant
+
 import com.gu.scanamo.Scanamo
 import com.gu.scanamo.syntax._
 import org.mockito.Matchers.any
@@ -7,23 +9,14 @@ import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSpec, Matchers}
-import uk.ac.wellcome.models.matcher.{
-  MatchedIdentifiers,
-  MatcherResult,
-  WorkIdentifier,
-  WorkNode
-}
+import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult, WorkIdentifier, WorkNode}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.MergeCandidate
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
-import uk.ac.wellcome.platform.matcher.locking.{
-  DynamoRowLockDao,
-  FailedUnlockException,
-  Identifier
-}
 import uk.ac.wellcome.platform.matcher.models.{WorkGraph, WorkUpdate}
 import uk.ac.wellcome.platform.matcher.storage.WorkGraphStore
+import uk.ac.wellcome.storage.locking.{DynamoRowLockDao, FailedUnlockException, Identifier, RowLock}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -43,8 +36,8 @@ class WorkMatcherTest
   it(
     "matches a work with no linked identifiers to itself only A and saves the updated graph A") {
     withMockMetricsSender { mockMetricsSender =>
-      withSpecifiedLocalDynamoDbTable(createLockTable) { lockTable =>
-        withSpecifiedLocalDynamoDbTable(createWorkGraphTable) { graphTable =>
+      withLockTable { lockTable =>
+        withWorkGraphTable { graphTable =>
           withWorkGraphStore(graphTable) { workGraphStore =>
             withWorkMatcher(workGraphStore, lockTable, mockMetricsSender) {
               workMatcher =>
@@ -73,8 +66,8 @@ class WorkMatcherTest
 
   it("doesn't store an invisible work and sends the work id") {
     withMockMetricsSender { mockMetricsSender =>
-      withSpecifiedLocalDynamoDbTable(createLockTable) { lockTable =>
-        withSpecifiedLocalDynamoDbTable(createWorkGraphTable) { graphTable =>
+      withLockTable { lockTable =>
+        withWorkGraphTable { graphTable =>
           withWorkGraphStore(graphTable) { workGraphStore =>
             withWorkMatcher(workGraphStore, lockTable, mockMetricsSender) {
               workMatcher =>
@@ -100,8 +93,8 @@ class WorkMatcherTest
   it(
     "matches a work with a single linked identifier A->B and saves the graph A->B") {
     withMockMetricsSender { mockMetricsSender =>
-      withSpecifiedLocalDynamoDbTable(createLockTable) { lockTable =>
-        withSpecifiedLocalDynamoDbTable(createWorkGraphTable) { graphTable =>
+      withLockTable { lockTable =>
+        withWorkGraphTable { graphTable =>
           withWorkGraphStore(graphTable) { workGraphStore =>
             withWorkMatcher(workGraphStore, lockTable, mockMetricsSender) {
               workMatcher =>
@@ -143,8 +136,8 @@ class WorkMatcherTest
   it(
     "matches a previously stored work A->B with an update B->C and saves the graph A->B->C") {
     withMockMetricsSender { mockMetricsSender =>
-      withSpecifiedLocalDynamoDbTable(createLockTable) { lockTable =>
-        withSpecifiedLocalDynamoDbTable(createWorkGraphTable) { graphTable =>
+      withLockTable { lockTable =>
+        withWorkGraphTable { graphTable =>
           withWorkGraphStore(graphTable) { workGraphStore =>
             withWorkMatcher(workGraphStore, lockTable, mockMetricsSender) {
               workMatcher =>
@@ -215,8 +208,8 @@ class WorkMatcherTest
 
   it("throws MatcherException if it fails to lock primary works") {
     withMockMetricsSender { mockMetricsSender =>
-      withSpecifiedLocalDynamoDbTable(createLockTable) { lockTable =>
-        withSpecifiedLocalDynamoDbTable(createWorkGraphTable) { graphTable =>
+      withLockTable { lockTable =>
+        withWorkGraphTable { graphTable =>
           withWorkGraphStore(graphTable) { workGraphStore =>
             withDynamoRowLockDao(dynamoDbClient, lockTable) { rowLockDao =>
               withLockingService(rowLockDao, mockMetricsSender) {
@@ -247,8 +240,8 @@ class WorkMatcherTest
 
   it("throws MatcherException if it fails to lock secondary works") {
     withMockMetricsSender { mockMetricsSender =>
-      withSpecifiedLocalDynamoDbTable(createLockTable) { lockTable =>
-        withSpecifiedLocalDynamoDbTable(createWorkGraphTable) { graphTable =>
+      withLockTable { lockTable =>
+        withWorkGraphTable { graphTable =>
           withWorkGraphStore(graphTable) { workGraphStore =>
             withDynamoRowLockDao(dynamoDbClient, lockTable) { rowLockDao =>
               withLockingService(rowLockDao, mockMetricsSender) {
@@ -296,31 +289,31 @@ class WorkMatcherTest
 
   it("throws MatcherException if it fails to unlock") {
     withMockMetricsSender { mockMetricsSender =>
-      withSpecifiedLocalDynamoDbTable(createLockTable) { lockTable =>
-        withSpecifiedLocalDynamoDbTable(createWorkGraphTable) { graphTable =>
-          withWorkGraphStore(graphTable) { workGraphStore =>
-            val mockDynamoRowLockDao = mock[DynamoRowLockDao]
-            withLockingService(mockDynamoRowLockDao, mockMetricsSender) {
-              dynamoLockingService =>
-                withWorkMatcherAndLockingService(
-                  workGraphStore,
-                  dynamoLockingService) { workMatcher =>
-                  when(
-                    mockDynamoRowLockDao.lockRow(any[Identifier], any[String]))
-                    .thenReturn(Future { aRowLock("id", "contextId") })
+      withWorkGraphTable { graphTable =>
+        withWorkGraphStore(graphTable) { workGraphStore =>
+          val mockDynamoRowLockDao = mock[DynamoRowLockDao]
+          withLockingService(mockDynamoRowLockDao, mockMetricsSender) {
+            dynamoLockingService =>
+              withWorkMatcherAndLockingService(
+                workGraphStore,
+                dynamoLockingService) { workMatcher =>
+                when(
+                  mockDynamoRowLockDao.lockRow(any[Identifier], any[String]))
+                  .thenReturn(Future.successful(
+                    RowLock(id = "id", contextId = "contextId", created = Instant.now, expires = Instant.now.plusSeconds(100))
+                  ))
 
-                  when(mockDynamoRowLockDao.unlockRows(any[String])).thenReturn(
-                    Future.failed(
-                      FailedUnlockException("test", new RuntimeException)))
+                when(mockDynamoRowLockDao.unlockRows(any[String])).thenReturn(
+                  Future.failed(
+                    FailedUnlockException("test", new RuntimeException)))
 
-                  whenReady(
-                    workMatcher
-                      .matchWork(createUnidentifiedSierraWork)
-                      .failed) { failedMatch =>
-                    failedMatch shouldBe a[MatcherException]
-                  }
+                whenReady(
+                  workMatcher
+                    .matchWork(createUnidentifiedSierraWork)
+                    .failed) { failedMatch =>
+                  failedMatch shouldBe a[MatcherException]
                 }
-            }
+              }
           }
         }
       }
@@ -329,7 +322,7 @@ class WorkMatcherTest
 
   it("fails if saving the updated links fails") {
     withMockMetricsSender { mockMetricsSender =>
-      withSpecifiedLocalDynamoDbTable(createLockTable) { lockTable =>
+      withLockTable { lockTable =>
         val mockWorkGraphStore = mock[WorkGraphStore]
         withWorkMatcher(mockWorkGraphStore, lockTable, mockMetricsSender) {
           workMatcher =>

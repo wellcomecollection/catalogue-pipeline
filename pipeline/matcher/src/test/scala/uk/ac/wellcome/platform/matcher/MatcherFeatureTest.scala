@@ -56,7 +56,7 @@ class MatcherFeatureTest
     "does not process a message if the work version is older than that already stored") {
     withLocalSnsTopic { topic =>
       withLocalSqsQueueAndDlq { queuePair =>
-        withSpecifiedLocalDynamoDbTable(createWorkGraphTable) { graphTable =>
+        withWorkGraphTable { graphTable =>
           withWorkerService(queuePair.queue, topic, graphTable) { _ =>
             val existingWorkVersion = 2
             val updatedWorkVersion = 1

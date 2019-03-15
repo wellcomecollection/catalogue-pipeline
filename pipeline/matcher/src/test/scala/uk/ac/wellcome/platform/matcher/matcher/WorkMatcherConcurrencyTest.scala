@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.matcher.matcher
 
+import com.gu.scanamo.Scanamo
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSpec, Matchers}
@@ -8,6 +9,7 @@ import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.MergeCandidate
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
+import uk.ac.wellcome.storage.locking.RowLock
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -22,8 +24,8 @@ class WorkMatcherConcurrencyTest
 
   it("processes one of two conflicting concurrent updates and locks the other") {
     withMockMetricsSender { metricsSender =>
-      withSpecifiedLocalDynamoDbTable(createLockTable) { lockTable =>
-        withSpecifiedLocalDynamoDbTable(createWorkGraphTable) { graphTable =>
+      withLockTable { lockTable =>
+        withWorkGraphTable { graphTable =>
           withWorkGraphStore(graphTable) { workGraphStore =>
             withDynamoRowLockDao(dynamoDbClient, lockTable) { rowLockDao =>
               withLockingService(rowLockDao, metricsSender) {
@@ -71,7 +73,7 @@ class WorkMatcherConcurrencyTest
                       failure.size shouldBe 1
                       result.size shouldBe 1
 
-                      assertNoRowLocks(lockTable)
+                      Scanamo.scan[RowLock](dynamoDbClient)(lockTable.name) shouldBe empty
                     }
                   }
               }
@@ -81,5 +83,4 @@ class WorkMatcherConcurrencyTest
       }
     }
   }
-
 }
