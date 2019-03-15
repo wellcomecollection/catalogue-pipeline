@@ -5,7 +5,6 @@ import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.{Messaging, SQS}
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
-import uk.ac.wellcome.monitoring.MetricsSender
 import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher
 import uk.ac.wellcome.platform.matcher.services.MatcherWorkerService
 import uk.ac.wellcome.platform.matcher.storage.{WorkGraphStore, WorkNodeDao}
@@ -41,7 +40,7 @@ trait MatcherFixtures
         withMockMetricsSender { metricsSender =>
           withLockTable { lockTable =>
             withWorkGraphStore(graphTable) { workGraphStore =>
-              withWorkMatcher(workGraphStore, lockTable, metricsSender) {
+              withWorkMatcher(workGraphStore, lockTable) {
                 workMatcher =>
                   withMessageStream[TransformedBaseWork, R](
                     queue = queue,
@@ -75,15 +74,16 @@ trait MatcherFixtures
 
   def withWorkMatcher[R](
     workGraphStore: WorkGraphStore,
-    lockTable: Table,
-    metricsSender: MetricsSender)(testWith: TestWith[WorkMatcher, R]): R =
-    withDynamoRowLockDao(lockTable) { dynamoRowLockDao =>
-      withLockingService(dynamoRowLockDao, metricsSender) { lockingService =>
-        val workMatcher = new WorkMatcher(
-          workGraphStore = workGraphStore,
-          lockingService = lockingService
-        )
-        testWith(workMatcher)
+    lockTable: Table)(testWith: TestWith[WorkMatcher, R]): R =
+    withMockMetricsSender { metricsSender =>
+      withDynamoRowLockDao(lockTable) { dynamoRowLockDao =>
+        withLockingService(dynamoRowLockDao, metricsSender) { lockingService =>
+          val workMatcher = new WorkMatcher(
+            workGraphStore = workGraphStore,
+            lockingService = lockingService
+          )
+          testWith(workMatcher)
+        }
       }
     }
 
