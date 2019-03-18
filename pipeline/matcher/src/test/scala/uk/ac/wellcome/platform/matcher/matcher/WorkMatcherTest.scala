@@ -9,14 +9,24 @@ import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSpec, Matchers}
-import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult, WorkIdentifier, WorkNode}
+import uk.ac.wellcome.models.matcher.{
+  MatchedIdentifiers,
+  MatcherResult,
+  WorkIdentifier,
+  WorkNode
+}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.MergeCandidate
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
 import uk.ac.wellcome.platform.matcher.models.{WorkGraph, WorkUpdate}
 import uk.ac.wellcome.platform.matcher.storage.WorkGraphStore
-import uk.ac.wellcome.storage.locking.{DynamoRowLockDao, FailedUnlockException, Identifier, RowLock}
+import uk.ac.wellcome.storage.locking.{
+  DynamoRowLockDao,
+  FailedUnlockException,
+  Identifier,
+  RowLock
+}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -38,24 +48,22 @@ class WorkMatcherTest
     withLockTable { lockTable =>
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
-          withWorkMatcher(workGraphStore, lockTable) {
-            workMatcher =>
-              val work = createUnidentifiedSierraWork
-              val workId = work.sourceIdentifier.toString
+          withWorkMatcher(workGraphStore, lockTable) { workMatcher =>
+            val work = createUnidentifiedSierraWork
+            val workId = work.sourceIdentifier.toString
 
-              whenReady(workMatcher.matchWork(work)) { matcherResult =>
-                matcherResult shouldBe
-                  MatcherResult(
-                    Set(MatchedIdentifiers(Set(WorkIdentifier(workId, 1)))))
+            whenReady(workMatcher.matchWork(work)) { matcherResult =>
+              matcherResult shouldBe
+                MatcherResult(
+                  Set(MatchedIdentifiers(Set(WorkIdentifier(workId, 1)))))
 
-                val savedLinkedWork = Scanamo
-                  .get[WorkNode](dynamoDbClient)(graphTable.name)(
-                  'id -> workId)
-                  .map(_.right.get)
+              val savedLinkedWork = Scanamo
+                .get[WorkNode](dynamoDbClient)(graphTable.name)('id -> workId)
+                .map(_.right.get)
 
-                savedLinkedWork shouldBe Some(
-                  WorkNode(workId, 1, Nil, ciHash(workId)))
-              }
+              savedLinkedWork shouldBe Some(
+                WorkNode(workId, 1, Nil, ciHash(workId)))
+            }
           }
         }
       }
@@ -66,20 +74,17 @@ class WorkMatcherTest
     withLockTable { lockTable =>
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
-          withWorkMatcher(workGraphStore, lockTable) {
-            workMatcher =>
-              val invisibleWork = createUnidentifiedInvisibleWork
-              val workId = invisibleWork.sourceIdentifier.toString
-              whenReady(workMatcher.matchWork(invisibleWork)) {
-                matcherResult =>
-                  matcherResult shouldBe
-                    MatcherResult(
-                      Set(MatchedIdentifiers(Set(WorkIdentifier(workId, 1)))))
+          withWorkMatcher(workGraphStore, lockTable) { workMatcher =>
+            val invisibleWork = createUnidentifiedInvisibleWork
+            val workId = invisibleWork.sourceIdentifier.toString
+            whenReady(workMatcher.matchWork(invisibleWork)) { matcherResult =>
+              matcherResult shouldBe
+                MatcherResult(
+                  Set(MatchedIdentifiers(Set(WorkIdentifier(workId, 1)))))
 
-                  Scanamo
-                    .get[WorkNode](dynamoDbClient)(graphTable.name)(
-                    'id -> workId) shouldBe None
-              }
+              Scanamo
+                .get[WorkNode](dynamoDbClient)(graphTable.name)('id -> workId) shouldBe None
+            }
           }
         }
       }
@@ -91,36 +96,35 @@ class WorkMatcherTest
     withLockTable { lockTable =>
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
-          withWorkMatcher(workGraphStore, lockTable) {
-            workMatcher =>
-              val work = createUnidentifiedWorkWith(
-                sourceIdentifier = identifierA,
-                mergeCandidates = List(MergeCandidate(identifierB))
+          withWorkMatcher(workGraphStore, lockTable) { workMatcher =>
+            val work = createUnidentifiedWorkWith(
+              sourceIdentifier = identifierA,
+              mergeCandidates = List(MergeCandidate(identifierB))
+            )
+            whenReady(workMatcher.matchWork(work)) { identifiersList =>
+              identifiersList shouldBe
+                MatcherResult(
+                  Set(MatchedIdentifiers(Set(
+                    WorkIdentifier("sierra-system-number/A", 1),
+                    WorkIdentifier("sierra-system-number/B", 0)))))
+
+              val savedWorkNodes = Scanamo
+                .scan[WorkNode](dynamoDbClient)(graphTable.name)
+                .map(_.right.get)
+
+              savedWorkNodes should contain theSameElementsAs List(
+                WorkNode(
+                  "sierra-system-number/A",
+                  1,
+                  List("sierra-system-number/B"),
+                  ciHash("sierra-system-number/A+sierra-system-number/B")),
+                WorkNode(
+                  "sierra-system-number/B",
+                  0,
+                  Nil,
+                  ciHash("sierra-system-number/A+sierra-system-number/B"))
               )
-              whenReady(workMatcher.matchWork(work)) { identifiersList =>
-                identifiersList shouldBe
-                  MatcherResult(
-                    Set(MatchedIdentifiers(Set(
-                      WorkIdentifier("sierra-system-number/A", 1),
-                      WorkIdentifier("sierra-system-number/B", 0)))))
-
-                val savedWorkNodes = Scanamo
-                  .scan[WorkNode](dynamoDbClient)(graphTable.name)
-                  .map(_.right.get)
-
-                savedWorkNodes should contain theSameElementsAs List(
-                  WorkNode(
-                    "sierra-system-number/A",
-                    1,
-                    List("sierra-system-number/B"),
-                    ciHash("sierra-system-number/A+sierra-system-number/B")),
-                  WorkNode(
-                    "sierra-system-number/B",
-                    0,
-                    Nil,
-                    ciHash("sierra-system-number/A+sierra-system-number/B"))
-                )
-              }
+            }
           }
         }
       }
@@ -132,66 +136,66 @@ class WorkMatcherTest
     withLockTable { lockTable =>
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
-          withWorkMatcher(workGraphStore, lockTable) {
-            workMatcher =>
-              val existingWorkA = WorkNode(
-                "sierra-system-number/A",
-                1,
-                List("sierra-system-number/B"),
-                "sierra-system-number/A+sierra-system-number/B")
-              val existingWorkB = WorkNode(
-                "sierra-system-number/B",
-                1,
-                Nil,
-                "sierra-system-number/A+sierra-system-number/B")
-              val existingWorkC = WorkNode(
-                "sierra-system-number/C",
-                1,
-                Nil,
-                "sierra-system-number/C")
-              Scanamo.put(dynamoDbClient)(graphTable.name)(existingWorkA)
-              Scanamo.put(dynamoDbClient)(graphTable.name)(existingWorkB)
-              Scanamo.put(dynamoDbClient)(graphTable.name)(existingWorkC)
+          withWorkMatcher(workGraphStore, lockTable) { workMatcher =>
+            val existingWorkA = WorkNode(
+              "sierra-system-number/A",
+              1,
+              List("sierra-system-number/B"),
+              "sierra-system-number/A+sierra-system-number/B")
+            val existingWorkB = WorkNode(
+              "sierra-system-number/B",
+              1,
+              Nil,
+              "sierra-system-number/A+sierra-system-number/B")
+            val existingWorkC = WorkNode(
+              "sierra-system-number/C",
+              1,
+              Nil,
+              "sierra-system-number/C")
+            Scanamo.put(dynamoDbClient)(graphTable.name)(existingWorkA)
+            Scanamo.put(dynamoDbClient)(graphTable.name)(existingWorkB)
+            Scanamo.put(dynamoDbClient)(graphTable.name)(existingWorkC)
 
-              val work = createUnidentifiedWorkWith(
-                sourceIdentifier = identifierB,
-                version = 2,
-                mergeCandidates = List(MergeCandidate(identifierC)))
+            val work = createUnidentifiedWorkWith(
+              sourceIdentifier = identifierB,
+              version = 2,
+              mergeCandidates = List(MergeCandidate(identifierC)))
 
-              whenReady(workMatcher.matchWork(work)) { identifiersList =>
-                identifiersList shouldBe
-                  MatcherResult(
-                    Set(
-                      MatchedIdentifiers(Set(
+            whenReady(workMatcher.matchWork(work)) { identifiersList =>
+              identifiersList shouldBe
+                MatcherResult(
+                  Set(
+                    MatchedIdentifiers(
+                      Set(
                         WorkIdentifier("sierra-system-number/A", 1),
                         WorkIdentifier("sierra-system-number/B", 2),
                         WorkIdentifier("sierra-system-number/C", 1)))))
 
-                val savedNodes = Scanamo
-                  .scan[WorkNode](dynamoDbClient)(graphTable.name)
-                  .map(_.right.get)
+              val savedNodes = Scanamo
+                .scan[WorkNode](dynamoDbClient)(graphTable.name)
+                .map(_.right.get)
 
-                savedNodes should contain theSameElementsAs List(
-                  WorkNode(
-                    "sierra-system-number/A",
-                    1,
-                    List("sierra-system-number/B"),
-                    ciHash(
-                      "sierra-system-number/A+sierra-system-number/B+sierra-system-number/C")),
-                  WorkNode(
-                    "sierra-system-number/B",
-                    2,
-                    List("sierra-system-number/C"),
-                    ciHash(
-                      "sierra-system-number/A+sierra-system-number/B+sierra-system-number/C")),
-                  WorkNode(
-                    "sierra-system-number/C",
-                    1,
-                    Nil,
-                    ciHash(
-                      "sierra-system-number/A+sierra-system-number/B+sierra-system-number/C"))
-                )
-              }
+              savedNodes should contain theSameElementsAs List(
+                WorkNode(
+                  "sierra-system-number/A",
+                  1,
+                  List("sierra-system-number/B"),
+                  ciHash(
+                    "sierra-system-number/A+sierra-system-number/B+sierra-system-number/C")),
+                WorkNode(
+                  "sierra-system-number/B",
+                  2,
+                  List("sierra-system-number/C"),
+                  ciHash(
+                    "sierra-system-number/A+sierra-system-number/B+sierra-system-number/C")),
+                WorkNode(
+                  "sierra-system-number/C",
+                  1,
+                  Nil,
+                  ciHash(
+                    "sierra-system-number/A+sierra-system-number/B+sierra-system-number/C"))
+              )
+            }
           }
         }
       }
@@ -289,11 +293,15 @@ class WorkMatcherTest
               withWorkMatcherAndLockingService(
                 workGraphStore,
                 dynamoLockingService) { workMatcher =>
-                when(
-                  mockDynamoRowLockDao.lockRow(any[Identifier], any[String]))
-                  .thenReturn(Future.successful(
-                    RowLock(id = "id", contextId = "contextId", created = Instant.now, expires = Instant.now.plusSeconds(100))
-                  ))
+                when(mockDynamoRowLockDao.lockRow(any[Identifier], any[String]))
+                  .thenReturn(
+                    Future.successful(
+                      RowLock(
+                        id = "id",
+                        contextId = "contextId",
+                        created = Instant.now,
+                        expires = Instant.now.plusSeconds(100))
+                    ))
 
                 when(mockDynamoRowLockDao.unlockRows(any[String])).thenReturn(
                   Future.failed(
@@ -315,19 +323,17 @@ class WorkMatcherTest
   it("fails if saving the updated links fails") {
     withLockTable { lockTable =>
       val mockWorkGraphStore = mock[WorkGraphStore]
-      withWorkMatcher(mockWorkGraphStore, lockTable) {
-        workMatcher =>
-          val expectedException = new RuntimeException("Failed to put")
-          when(mockWorkGraphStore.findAffectedWorks(any[WorkUpdate]))
-            .thenReturn(Future.successful(WorkGraph(Set.empty)))
-          when(mockWorkGraphStore.put(any[WorkGraph]))
-            .thenThrow(expectedException)
+      withWorkMatcher(mockWorkGraphStore, lockTable) { workMatcher =>
+        val expectedException = new RuntimeException("Failed to put")
+        when(mockWorkGraphStore.findAffectedWorks(any[WorkUpdate]))
+          .thenReturn(Future.successful(WorkGraph(Set.empty)))
+        when(mockWorkGraphStore.put(any[WorkGraph]))
+          .thenThrow(expectedException)
 
-          whenReady(
-            workMatcher.matchWork(createUnidentifiedSierraWork).failed) {
-            actualException =>
-              actualException shouldBe expectedException
-          }
+        whenReady(workMatcher.matchWork(createUnidentifiedSierraWork).failed) {
+          actualException =>
+            actualException shouldBe expectedException
+        }
       }
     }
   }

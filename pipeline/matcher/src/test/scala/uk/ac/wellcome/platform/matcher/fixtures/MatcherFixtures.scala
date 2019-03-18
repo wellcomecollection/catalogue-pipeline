@@ -40,22 +40,21 @@ trait MatcherFixtures
         withMockMetricsSender { metricsSender =>
           withLockTable { lockTable =>
             withWorkGraphStore(graphTable) { workGraphStore =>
-              withWorkMatcher(workGraphStore, lockTable) {
-                workMatcher =>
-                  withMessageStream[TransformedBaseWork, R](
-                    queue = queue,
-                    metricsSender = metricsSender
-                  ) { messageStream =>
-                    val workerService = new MatcherWorkerService(
-                      messageStream = messageStream,
-                      snsWriter = snsWriter,
-                      workMatcher = workMatcher
-                    )
+              withWorkMatcher(workGraphStore, lockTable) { workMatcher =>
+                withMessageStream[TransformedBaseWork, R](
+                  queue = queue,
+                  metricsSender = metricsSender
+                ) { messageStream =>
+                  val workerService = new MatcherWorkerService(
+                    messageStream = messageStream,
+                    snsWriter = snsWriter,
+                    workMatcher = workMatcher
+                  )
 
-                    workerService.run()
+                  workerService.run()
 
-                    testWith(workerService)
-                  }
+                  testWith(workerService)
+                }
               }
             }
           }
@@ -72,9 +71,8 @@ trait MatcherFixtures
       }
     }
 
-  def withWorkMatcher[R](
-    workGraphStore: WorkGraphStore,
-    lockTable: Table)(testWith: TestWith[WorkMatcher, R]): R =
+  def withWorkMatcher[R](workGraphStore: WorkGraphStore, lockTable: Table)(
+    testWith: TestWith[WorkMatcher, R]): R =
     withMockMetricsSender { metricsSender =>
       withDynamoRowLockDao(lockTable) { dynamoRowLockDao =>
         withLockingService(dynamoRowLockDao, metricsSender) { lockingService =>
