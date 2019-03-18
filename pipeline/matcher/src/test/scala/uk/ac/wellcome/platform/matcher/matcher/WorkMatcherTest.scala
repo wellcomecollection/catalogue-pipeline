@@ -231,45 +231,47 @@ class WorkMatcherTest
   }
 
   it("throws MatcherException if it fails to lock secondary works") {
-    withLockTable { lockTable =>
-      withWorkGraphTable { graphTable =>
-        withWorkGraphStore(graphTable) { workGraphStore =>
-          withDynamoRowLockDao(dynamoDbClient, lockTable) { rowLockDao =>
-            withLockingService(rowLockDao) {
-              dynamoLockingService =>
-                withWorkMatcherAndLockingService(
-                  workGraphStore,
-                  dynamoLockingService) { workMatcher =>
-                  // A->B->C
-                  workGraphStore.put(WorkGraph(Set(
-                    WorkNode(
-                      "sierra-system-number/A",
-                      0,
-                      List("sierra-system-number/B"),
-                      "sierra-system-number/A+sierra-system-number/B+sierra-system-number/C"),
-                    WorkNode(
-                      "sierra-system-number/B",
-                      0,
-                      List("sierra-system-number/C"),
-                      "sierra-system-number/A+sierra-system-number/B+sierra-system-number/C"),
-                    WorkNode("sierra-system-number/C", 0, Nil, "sierra-system-number/A+sierra-system-number/B+sierra-system-number/C")
-                  )))
+    withMockMetricsSender { mockMetricsSender =>
+      withLockTable { lockTable =>
+        withWorkGraphTable { graphTable =>
+          withWorkGraphStore(graphTable) { workGraphStore =>
+            withDynamoRowLockDao(dynamoDbClient, lockTable) { rowLockDao =>
+              withLockingService(rowLockDao, mockMetricsSender) {
+                dynamoLockingService =>
+                  withWorkMatcherAndLockingService(
+                    workGraphStore,
+                    dynamoLockingService) { workMatcher =>
+                    // A->B->C
+                    workGraphStore.put(WorkGraph(Set(
+                      WorkNode(
+                        "sierra-system-number/A",
+                        0,
+                        List("sierra-system-number/B"),
+                        "sierra-system-number/A+sierra-system-number/B+sierra-system-number/C"),
+                      WorkNode(
+                        "sierra-system-number/B",
+                        0,
+                        List("sierra-system-number/C"),
+                        "sierra-system-number/A+sierra-system-number/B+sierra-system-number/C"),
+                      WorkNode("sierra-system-number/C", 0, Nil, "sierra-system-number/A+sierra-system-number/B+sierra-system-number/C")
+                    )))
 
-                  val work = createUnidentifiedWorkWith(
-                    sourceIdentifier = identifierA,
-                    mergeCandidates = List(MergeCandidate(identifierB))
-                  )
-                  val failedLock = for {
-                    _ <- rowLockDao.lockRow(
-                      Identifier("sierra-system-number/C"),
-                      "processId")
-                    result <- workMatcher.matchWork(work)
-                  } yield result
+                    val work = createUnidentifiedWorkWith(
+                      sourceIdentifier = identifierA,
+                      mergeCandidates = List(MergeCandidate(identifierB))
+                    )
+                    val failedLock = for {
+                      _ <- rowLockDao.lockRow(
+                        Identifier("sierra-system-number/C"),
+                        "processId")
+                      result <- workMatcher.matchWork(work)
+                    } yield result
 
-                  whenReady(failedLock.failed) { failedMatch =>
-                    failedMatch shouldBe a[MatcherException]
+                    whenReady(failedLock.failed) { failedMatch =>
+                      failedMatch shouldBe a[MatcherException]
+                    }
                   }
-                }
+              }
             }
           }
         }
