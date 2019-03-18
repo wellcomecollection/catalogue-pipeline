@@ -38,7 +38,9 @@ class HybridRecordReceiver(
       .recover {
         case t: Throwable => throw SierraTransformerException(t)
       }
-      .map { _ => () }
+      .map { _ =>
+        ()
+      }
   }
 
   private def publishMessage(
