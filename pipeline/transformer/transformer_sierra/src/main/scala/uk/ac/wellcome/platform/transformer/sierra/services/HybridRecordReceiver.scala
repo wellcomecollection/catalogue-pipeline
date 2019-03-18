@@ -6,6 +6,7 @@ import uk.ac.wellcome.messaging.message.MessageWriter
 import uk.ac.wellcome.messaging.sns.{NotificationMessage, PublishAttempt}
 import uk.ac.wellcome.models.transformable.SierraTransformable
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
+import uk.ac.wellcome.platform.transformer.sierra.exceptions.SierraTransformerException
 import uk.ac.wellcome.storage.ObjectStore
 import uk.ac.wellcome.storage.vhs.HybridRecord
 
@@ -23,20 +24,22 @@ class HybridRecordReceiver(
                        Int) => Try[TransformedBaseWork]): Future[Unit] = {
     debug(s"Starting to process message $message")
 
-    for {
+    val futurePublishAttempt = for {
       hybridRecord <- Future.fromTry(fromJson[HybridRecord](message.body))
-      transformable <- getTransformable(hybridRecord)
+      transformable <- objectStore.get(hybridRecord.location)
       work <- Future.fromTry(
         transformToWork(transformable, hybridRecord.version))
       publishResult <- publishMessage(work)
       _ = debug(
         s"Published work: ${work.sourceIdentifier} with message $publishResult")
-    } yield ()
-  }
+    } yield publishResult
 
-  private def getTransformable(
-    hybridRecord: HybridRecord): Future[SierraTransformable] =
-    objectStore.get(hybridRecord.location)
+    futurePublishAttempt
+      .recover {
+        case t: Throwable => throw SierraTransformerException(t)
+      }
+      .map { _ => () }
+  }
 
   private def publishMessage(
     work: TransformedBaseWork): Future[PublishAttempt] =

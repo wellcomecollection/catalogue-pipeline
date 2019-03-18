@@ -42,16 +42,17 @@ class SierraTransformableTransformer
   def transform(
     transformable: SierraTransformable,
     version: Int
-  ): Try[TransformedBaseWork] = {
-    doTransform(transformable, version) map { transformed =>
-      debug(s"Transformed record to $transformed")
-      transformed
-    } recover {
-      case e: Throwable =>
-        error("Failed to perform transform to unified item", e)
-        throw e
-    }
-  }
+  ): Try[TransformedBaseWork] =
+    doTransform(transformable, version)
+      .map { transformed =>
+        debug(s"Transformed record to $transformed")
+        transformed
+      }
+      .recover {
+        case e: Throwable =>
+          error("Failed to perform transform to unified item", e)
+          throw e
+      }
 
   private def doTransform(sierraTransformable: SierraTransformable,
                           version: Int): Try[TransformedBaseWork] = {

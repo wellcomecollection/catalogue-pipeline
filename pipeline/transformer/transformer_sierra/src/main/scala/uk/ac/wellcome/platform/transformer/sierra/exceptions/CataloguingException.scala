@@ -11,7 +11,8 @@ class CataloguingException(bibId: SierraBibNumber, message: String)
     extends SierraTransformerException(
       new RuntimeException(
         s"Problem in the Sierra data for ${bibId.withCheckDigit}: $message"
-      ))
+      )
+    )
 
 case object CataloguingException {
   def apply(bibId: SierraBibNumber, message: String): CataloguingException =
