@@ -165,6 +165,14 @@ trait SierraProduction {
       case _ => false
     }
 
+  private def marc264IsOnlyPunctuation(
+    marc264fields: List[VarField]): Boolean =
+    marc264fields
+      .map { vf: VarField =>
+        vf.subfields.map { _.content }.mkString("")
+      }
+      .forall { _.matches("^[:,]*$") }
+
   /** Populate the production data if both 260 and 264 are present.
     *
     * In general, this is a cataloguing error, but sometimes we can do
@@ -189,6 +197,18 @@ trait SierraProduction {
     // going to throw an exception about unrecognised second indicator.
     else if (marc260fields.map { _.subfields } ==
                marc264fields.map { _.subfields }) {
+      getProductionFrom260Fields(marc260fields)
+    }
+
+    // We've seen cases where the 264 field only contains punctuation,
+    // for example (MARC record 3150001, retrieved 28 March 2019):
+    //
+    //      260    2019
+    //      264  1 :|b,|c
+    //
+    // If these subfields are entirely punctuation, we discard 264 and
+    // just use 260.
+    else if (marc264IsOnlyPunctuation(marc264fields)) {
       getProductionFrom260Fields(marc260fields)
     }
 
