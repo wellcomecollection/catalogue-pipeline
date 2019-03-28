@@ -467,8 +467,7 @@ class SierraProductionTest
       caught.getMessage should include("Record has both 260 and 264 fields")
     }
 
-    it(
-      "uses field 260 if field 264 only contains a copyright statement in subfield c") {
+    it("uses 260 if 264 only contains a copyright statement in subfield c") {
       val varFields = List(
         createVarFieldWith(
           marcTag = "260",
@@ -532,6 +531,36 @@ class SierraProductionTest
       )
 
       transformToProduction(varFields) shouldBe expectedProductions
+    }
+
+    // Based on b31500018, as retrieved on 28 March 2019
+    it("returns correctly if the 264 subfields only contain punctuation") {
+      val varFields = List(
+        createVarFieldWith(
+          marcTag = "260",
+          subfields = List(
+            MarcSubfield(tag = "c", content = "2019")
+          )
+        ),
+        createVarFieldWith(
+          marcTag = "264",
+          subfields = List(
+            MarcSubfield(tag = "a", content = ":"),
+            MarcSubfield(tag = "b", content = ","),
+            MarcSubfield(tag = "c", content = "")
+          )
+        )
+      )
+
+      transformToProduction(varFields) shouldBe List(
+        ProductionEvent(
+          label = "2019",
+          places = List(),
+          agents = List(),
+          dates = List(Period("2019")),
+          function = None
+        )
+      )
     }
   }
 
