@@ -165,8 +165,7 @@ trait SierraProduction {
       case _ => false
     }
 
-  private def marc264IsOnlyPunctuation(
-    marc264fields: List[VarField]): Boolean =
+  private def marc264IsOnlyPunctuation(marc264fields: List[VarField]): Boolean =
     marc264fields
       .map { vf: VarField =>
         vf.subfields.map { _.content }.mkString("")
