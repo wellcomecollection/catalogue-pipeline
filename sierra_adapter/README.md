@@ -93,6 +93,11 @@ Rather than replaying the entire window, it can read the last batch from S3, and
 
 As before, we run two copies of this step: one for bibs, one for items.
 
-### Saving item records in DynamoDB
+### Creating the Sierra API credentials
 
-### Merging bibs/items into unified records
+At time of writing (2 April 2019), the API credentials for the Sierra adapter are owned by <wellcomedigitalplatform@wellcome.ac.uk>.
+To create new credentials, or revoke an existing API key:
+
+1.  Log in to Sierra API console (you need an admin account; contact Library Systems Support)
+2.  Select "Sierra API keys"
+3.  Create a new key with the **bibs read** and **items read** permissions

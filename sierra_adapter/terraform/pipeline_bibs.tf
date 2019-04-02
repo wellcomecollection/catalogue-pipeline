@@ -15,14 +15,14 @@ module "bibs_reader" {
 
   resource_type = "bibs"
 
-  bucket_name        = "wellcomecollection-platform-adapters-sierra" //${aws_s3_bucket.sierra_adapter.id}
+  bucket_name        = "wellcomecollection-platform-adapters-sierra"
   windows_topic_name = "${module.bibs_window_generator.topic_name}"
 
-  sierra_fields = "${var.sierra_bibs_fields}"
+  sierra_fields = "local.sierra_bibs_fields}"
 
-  sierra_api_url      = "${var.sierra_api_url}"
-  sierra_oauth_key    = "${var.sierra_oauth_key}"
-  sierra_oauth_secret = "${var.sierra_oauth_secret}"
+  sierra_api_url      = "${local.sierra_api_url}"
+  sierra_oauth_key    = "${local.sierra_api_key}"
+  sierra_oauth_secret = "${local.sierra_api_client_secret}"
 
   container_image = "${local.sierra_reader_image}"
 

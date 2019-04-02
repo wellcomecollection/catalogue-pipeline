@@ -18,11 +18,11 @@ module "items_reader" {
   bucket_name        = "${aws_s3_bucket.sierra_adapter.id}"
   windows_topic_name = "${module.items_window_generator.topic_name}"
 
-  sierra_fields = "${var.sierra_items_fields}"
+  sierra_fields = "${local.sierra_items_fields}"
 
-  sierra_api_url      = "${var.sierra_api_url}"
-  sierra_oauth_key    = "${var.sierra_oauth_key}"
-  sierra_oauth_secret = "${var.sierra_oauth_secret}"
+  sierra_api_url      = "${local.sierra_api_url}"
+  sierra_oauth_key    = "${local.sierra_api_key}"
+  sierra_oauth_secret = "${local.sierra_api_client_secret}"
 
   container_image = "${local.sierra_reader_image}"
 
