@@ -3,17 +3,10 @@ variable "aws_region" {
   default     = "eu-west-1"
 }
 
-variable "sierra_api_url" {}
-variable "sierra_oauth_key" {}
-variable "sierra_oauth_secret" {}
-
-variable "sierra_bibs_fields" {}
-variable "sierra_items_fields" {}
-
-variable "infra_bucket" {}
+variable "infra_bucket" {
+  default = "wellcomecollection-platform-infra"
+}
 
 variable "namespace" {
   default = "sierra-adapter"
 }
-
-variable "critical_slack_webhook" {}

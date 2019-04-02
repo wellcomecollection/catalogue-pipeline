@@ -1,6 +1,4 @@
 locals {
-  infra_bucket = "${data.aws_ssm_parameter.infra_bucket.value}"
-
   # Release URIs
 
   api_release_uri                = "${data.aws_ssm_parameter.api_release_uri.value}"
