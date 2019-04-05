@@ -3,10 +3,9 @@ data "aws_ecs_cluster" "cluster" {
 }
 
 module "sierra_to_dynamo_service" {
-  source = "git::https://github.com/wellcometrust/terraform.git//ecs/modules/service/prebuilt/sqs_scaling?ref=v11.4.1"
+  source = "git::https://github.com/wellcometrust/terraform.git//ecs/prebuilt/scaling?ref=v19.12.0"
 
   service_name       = "sierra_items_to_dynamo"
-  task_desired_count = "0"
 
   container_image = "${var.container_image}"
 
@@ -15,11 +14,8 @@ module "sierra_to_dynamo_service" {
     "${var.service_egress_security_group_id}",
   ]
 
-  source_queue_name = "${module.demultiplexer_queue.name}"
-  source_queue_arn  = "${module.demultiplexer_queue.arn}"
-
-  ecs_cluster_id   = "${data.aws_ecs_cluster.cluster.id}"
-  ecs_cluster_name = "${var.cluster_name}"
+  cluster_id   = "${data.aws_ecs_cluster.cluster.id}"
+  cluster_name = "${var.cluster_name}"
 
   cpu    = 256
   memory = 512
@@ -37,7 +33,6 @@ module "sierra_to_dynamo_service" {
   env_vars_length = 5
 
   aws_region = "${var.aws_region}"
-  vpc_id     = "${var.vpc_id}"
 
   subnets = [
     "${var.subnets}",
@@ -45,5 +40,6 @@ module "sierra_to_dynamo_service" {
 
   namespace_id = "${var.namespace_id}"
 
-  launch_type = "FARGATE"
+  secret_env_vars = {}
+  secret_env_vars_length = 0
 }

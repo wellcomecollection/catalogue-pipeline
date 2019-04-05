@@ -3,10 +3,9 @@ data "aws_ecs_cluster" "cluster" {
 }
 
 module "sierra_merger_service" {
-  source = "git::https://github.com/wellcometrust/terraform.git//ecs/modules/service/prebuilt/sqs_scaling?ref=v11.4.1"
+  source = "git::https://github.com/wellcometrust/terraform.git//ecs/prebuilt/scaling?ref=v19.12.0"
 
   service_name       = "sierra_${local.resource_type_singular}_merger"
-  task_desired_count = "0"
 
   container_image = "${var.container_image}"
 
@@ -15,14 +14,14 @@ module "sierra_merger_service" {
     "${var.service_egress_security_group_id}",
   ]
 
-  source_queue_name = "${module.updates_queue.name}"
-  source_queue_arn  = "${module.updates_queue.arn}"
-
-  ecs_cluster_id   = "${data.aws_ecs_cluster.cluster.id}"
-  ecs_cluster_name = "${var.cluster_name}"
+  cluster_id   = "${data.aws_ecs_cluster.cluster.id}"
+  cluster_name = "${var.cluster_name}"
 
   cpu    = 256
   memory = 512
+
+  min_capacity = 0
+  max_capacity = 3
 
   env_vars = {
     windows_queue_url   = "${module.updates_queue.id}"
@@ -42,10 +41,11 @@ module "sierra_merger_service" {
   env_vars_length = 7
 
   aws_region = "${var.aws_region}"
-  vpc_id     = "${var.vpc_id}"
   subnets    = ["${var.subnets}"]
 
   namespace_id = "${var.namespace_id}"
 
-  launch_type = "FARGATE"
+  secret_env_vars = {}
+  secret_env_vars_length = 0
 }
+
