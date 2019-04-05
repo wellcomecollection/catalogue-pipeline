@@ -20,7 +20,7 @@ module "bibs_reader" {
 
   sierra_fields = "${local.sierra_bibs_fields}"
 
-  sierra_api_url      = "${local.sierra_api_url}"
+  sierra_api_url = "${local.sierra_api_url}"
 
   container_image = "${local.sierra_reader_image}"
 

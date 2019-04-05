@@ -5,7 +5,7 @@ data "aws_ecs_cluster" "cluster" {
 module "sierra_merger_service" {
   source = "git::https://github.com/wellcometrust/terraform.git//ecs/prebuilt/scaling?ref=v19.12.0"
 
-  service_name       = "sierra_${local.resource_type_singular}_merger"
+  service_name = "sierra_${local.resource_type_singular}_merger"
 
   container_image = "${var.container_image}"
 
@@ -45,7 +45,6 @@ module "sierra_merger_service" {
 
   namespace_id = "${var.namespace_id}"
 
-  secret_env_vars = {}
+  secret_env_vars        = {}
   secret_env_vars_length = 0
 }
-

@@ -37,12 +37,13 @@ module "sierra_reader_service" {
     sierra_fields     = "${var.sierra_fields}"
     batch_size        = 50
   }
+
   env_vars_length = 7
 
   secret_env_vars = {
     sierra_oauth_secret = "sierra_adapter/sierra_api_client_secret"
     sierra_oauth_key    = "sierra_adapter/sierra_api_key"
   }
+
   secret_env_vars_length = 2
 }
-

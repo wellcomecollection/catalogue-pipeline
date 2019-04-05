@@ -5,7 +5,7 @@ data "aws_ecs_cluster" "cluster" {
 module "sierra_to_dynamo_service" {
   source = "git::https://github.com/wellcometrust/terraform.git//ecs/prebuilt/scaling?ref=v19.12.0"
 
-  service_name       = "sierra_items_to_dynamo"
+  service_name = "sierra_items_to_dynamo"
 
   container_image = "${var.container_image}"
 
@@ -40,6 +40,6 @@ module "sierra_to_dynamo_service" {
 
   namespace_id = "${var.namespace_id}"
 
-  secret_env_vars = {}
+  secret_env_vars        = {}
   secret_env_vars_length = 0
 }
