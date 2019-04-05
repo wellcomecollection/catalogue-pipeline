@@ -22,7 +22,7 @@ class WindowManager(
 
   def getCurrentStatus(window: String): Future[WindowStatus] = Future {
     info(
-      s"Searching for existing records in prefix ${buildWindowShard(window)}")
+      s"Searching for records from previous invocation of the reader in prefix ${buildWindowShard(window)}")
 
     val lastExistingKey = s3client
       .listObjects(s3Config.bucketName, buildWindowShard(window))
@@ -32,10 +32,9 @@ class WindowManager(
       .sorted
       .lastOption
 
-    info(s"Found latest JSON file in S3: $lastExistingKey")
-
     lastExistingKey match {
       case Some(key) => {
+        debug(s"Found JSON file from previous run in S3: $key")
 
         // Our SequentialS3Sink creates filenames that end 0000.json, 0001.json, ..., with an optional prefix.
         // Find the number on the end of the last file.
@@ -66,7 +65,10 @@ class WindowManager(
               s"JSON <<$lastBody>> did not contain an id")
         }
       }
-      case None => WindowStatus(id = None, offset = 0)
+      case None => {
+        debug(s"No existing records found in S3; starting from scratch")
+        WindowStatus(id = None, offset = 0)
+      }
     }
   }
 
