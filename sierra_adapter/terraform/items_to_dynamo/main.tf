@@ -20,6 +20,9 @@ module "sierra_to_dynamo_service" {
   cpu    = 256
   memory = 512
 
+  min_capacity = 0
+  max_capacity = 3
+
   env_vars = {
     demultiplexer_queue_url = "${module.demultiplexer_queue.id}"
     metrics_namespace       = "sierra_items_to_dynamo"
