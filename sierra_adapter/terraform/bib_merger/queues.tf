@@ -16,3 +16,11 @@ module "updates_queue" {
 
   alarm_topic_arn = "${var.dlq_alarm_arn}"
 }
+
+module "scaling_alarm" {
+  source     = "git::https://github.com/wellcometrust/terraform-modules.git//autoscaling/alarms/queue?ref=v19.12.0"
+  queue_name = "sierra_${var.resource_type}_merger_queue"
+
+  queue_high_actions = ["${module.sierra_merger_service.scale_up_arn}"]
+  queue_low_actions  = ["${module.sierra_merger_service.scale_down_arn}"]
+}

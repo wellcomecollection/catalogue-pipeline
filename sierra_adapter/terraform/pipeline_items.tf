@@ -20,9 +20,7 @@ module "items_reader" {
 
   sierra_fields = "${local.sierra_items_fields}"
 
-  sierra_api_url      = "${local.sierra_api_url}"
-  sierra_oauth_key    = "${local.sierra_api_key}"
-  sierra_oauth_secret = "${local.sierra_api_client_secret}"
+  sierra_api_url = "${local.sierra_api_url}"
 
   container_image = "${local.sierra_reader_image}"
 

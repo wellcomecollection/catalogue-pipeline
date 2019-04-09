@@ -12,6 +12,6 @@ set -o nounset
 WINDOW="$1"
 
 pushd $(mktemp -d)
-  aws s3 cp --recursive s3://wellcomecollection-sierra-adapter-data/$WINDOW .
-  aws s3 cp --recursive . s3://wellcomecollection-sierra-adapter-data/$WINDOW
+  aws s3 cp --recursive s3://wellcomecollection-platform-adapters-sierra/$WINDOW .
+  aws s3 cp --recursive . s3://wellcomecollection-platform-adapters-sierra/$WINDOW
 popd
