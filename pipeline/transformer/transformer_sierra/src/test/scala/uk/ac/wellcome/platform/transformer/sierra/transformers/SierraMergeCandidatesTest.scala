@@ -281,7 +281,8 @@ class SierraMergeCandidatesTest
   private def create3DObjectWith(varFields: List[VarField]): SierraBibData =
     createBibDataWith(varFields = varFields, materialTypeCode = 'r')
 
-  private def createBibDataWith(varFields: List[VarField], materialTypeCode: Char) = {
+  private def createBibDataWith(varFields: List[VarField],
+                                materialTypeCode: Char) = {
     createSierraBibDataWith(
       materialType = Some(SierraMaterialType(code = materialTypeCode.toString)),
       varFields = varFields

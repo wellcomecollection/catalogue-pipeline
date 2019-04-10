@@ -87,9 +87,8 @@ trait SierraMergeCandidates
       //    k   Pictures
       //    q   Digital Images
       //
-      case Some(SierraMaterialType("k")) |
-           Some(SierraMaterialType("q")) |
-           Some(SierraMaterialType("r")) =>
+      case Some(SierraMaterialType("k")) | Some(SierraMaterialType("q")) | Some(
+            SierraMaterialType("r")) =>
         val matching962Subfields: List[MarcSubfield] = getMatchingSubfields(
           sierraBibData,
           marcTag = "962",
