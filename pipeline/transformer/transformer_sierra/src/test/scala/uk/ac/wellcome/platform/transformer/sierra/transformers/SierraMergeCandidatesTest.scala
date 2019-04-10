@@ -160,7 +160,8 @@ class SierraMergeCandidatesTest
     }
 
     // - - - - - - -  089 fields - - - - - - -
-    it("merges a MIRO ID for a picture with MARC tag 089 subfield a if there is no 962 tag") {
+    it(
+      "merges a MIRO ID for a picture with MARC tag 089 subfield a if there is no 962 tag") {
       val bibData = createMiroPictureWith(
         varFields = create089subfieldsWith(List("V 13889"))
       )
@@ -171,7 +172,8 @@ class SierraMergeCandidatesTest
           reason = "Single page Miro/Sierra work (secondary source)")
     }
 
-    it("merges a MIRO ID for a digital image with MARC tag 089 subfield a if there is no 962 tag") {
+    it(
+      "merges a MIRO ID for a digital image with MARC tag 089 subfield a if there is no 962 tag") {
       val bibData = createMiroDigitalImageWith(
         varFields = create089subfieldsWith(List("V 13889"))
       )
@@ -201,7 +203,8 @@ class SierraMergeCandidatesTest
         singleMiroMergeCandidate(miroID)
     }
 
-    it("does not merge if there are multiple tag 962 ids even if there is a 089 tag") {
+    it(
+      "does not merge if there are multiple tag 962 ids even if there is a 089 tag") {
       val bibData = createMiroPictureWith(
         varFields =
           create962subfieldsForWellcomeImageUrl("A0123456")
@@ -236,8 +239,7 @@ class SierraMergeCandidatesTest
     it(
       "creates merge candidates for both physical/digital Sierra works and Miro works") {
       val varFields =
-        create776subfieldsWith(ids =
-          List(s"(UkLW)$mergeCandidateBibNumber")) ++
+        create776subfieldsWith(ids = List(s"(UkLW)$mergeCandidateBibNumber")) ++
           create962subfieldsForWellcomeImageUrl(miroID)
 
       val sierraData = createSierraBibDataWith(
@@ -267,7 +269,8 @@ class SierraMergeCandidatesTest
       varFields = varFields
     )
 
-  private def createMiroDigitalImageWith(varFields: List[VarField]): SierraBibData =
+  private def createMiroDigitalImageWith(
+    varFields: List[VarField]): SierraBibData =
     createSierraBibDataWith(
       materialType = Some(SierraMaterialType(code = "q")),
       varFields = varFields
@@ -309,7 +312,7 @@ class SierraMergeCandidatesTest
     }
 
   private def physicalAndDigitalSierraMergeCandidate(
-                                                      bibNumber: String): List[MergeCandidate] =
+    bibNumber: String): List[MergeCandidate] =
     List(
       MergeCandidate(
         identifier = SourceIdentifier(
@@ -321,8 +324,9 @@ class SierraMergeCandidatesTest
       )
     )
 
-  private def singleMiroMergeCandidate(miroID: String,
-                                       reason:String = "Single page Miro/Sierra work"): List[MergeCandidate] =
+  private def singleMiroMergeCandidate(
+    miroID: String,
+    reason: String = "Single page Miro/Sierra work"): List[MergeCandidate] =
     List(
       MergeCandidate(
         identifier = SourceIdentifier(

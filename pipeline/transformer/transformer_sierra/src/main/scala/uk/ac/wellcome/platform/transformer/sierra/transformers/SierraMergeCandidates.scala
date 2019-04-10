@@ -1,13 +1,24 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
-import uk.ac.wellcome.models.work.internal.{IdentifierType, MergeCandidate, SourceIdentifier}
-import uk.ac.wellcome.platform.transformer.sierra.source.{MarcSubfield, SierraBibData, SierraMaterialType}
-import uk.ac.wellcome.platform.transformer.sierra.transformers.parsers.{MiroIdParser, WellcomeImagesURLParser}
+import uk.ac.wellcome.models.work.internal.{
+  IdentifierType,
+  MergeCandidate,
+  SourceIdentifier
+}
+import uk.ac.wellcome.platform.transformer.sierra.source.{
+  MarcSubfield,
+  SierraBibData,
+  SierraMaterialType
+}
+import uk.ac.wellcome.platform.transformer.sierra.transformers.parsers.{
+  MiroIdParser,
+  WellcomeImagesURLParser
+}
 
 import scala.util.matching.Regex
 
 trait SierraMergeCandidates
-  extends MarcUtils
+    extends MarcUtils
     with WellcomeImagesURLParser
     with MiroIdParser {
 
@@ -28,7 +39,7 @@ trait SierraMergeCandidates
     *
     */
   private def get776mergeCandidates(
-                                     sierraBibData: SierraBibData): List[MergeCandidate] = {
+    sierraBibData: SierraBibData): List[MergeCandidate] = {
     val matchingSubfields: List[MarcSubfield] = getMatchingSubfields(
       sierraBibData,
       marcTag = "776",
@@ -69,7 +80,7 @@ trait SierraMergeCandidates
     *
     */
   private def getSinglePageMiroMergeCandidates(
-                                                sierraBibData: SierraBibData): List[MergeCandidate] = {
+    sierraBibData: SierraBibData): List[MergeCandidate] = {
     sierraBibData.materialType match {
       // The Sierra material type codes we care about are:
       //
@@ -101,9 +112,7 @@ trait SierraMergeCandidates
         (miroIdsFrom962, miroIdsFrom089) match {
           case (List(miroId), _) =>
             List(
-              miroMergeCandidate(
-                miroId,
-                "Single page Miro/Sierra work")
+              miroMergeCandidate(miroId, "Single page Miro/Sierra work")
             )
           case (List(), List(miroId)) =>
             List(
@@ -118,8 +127,7 @@ trait SierraMergeCandidates
     }
   }
 
-  private def miroMergeCandidate(miroId: String,
-                                 reason: String) = {
+  private def miroMergeCandidate(miroId: String, reason: String) = {
     MergeCandidate(
       identifier = SourceIdentifier(
         identifierType = IdentifierType("miro-image-number"),

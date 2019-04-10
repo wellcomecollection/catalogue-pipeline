@@ -11,7 +11,7 @@ trait MiroIdParser {
     val strippedMiroId: String = miroId.replace(" ", "")
     strippedMiroId.toList match {
       case (head: Char) :: (tail: List[Char])
-        if isLetter(head) && tail.forall(isDigit) =>
+          if isLetter(head) && tail.forall(isDigit) =>
         Some(formatMiroId(head, tail))
       case _ =>
         None
