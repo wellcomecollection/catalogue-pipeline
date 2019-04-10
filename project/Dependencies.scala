@@ -61,7 +61,7 @@ object ExternalDependencies {
   lazy val versions = new {
     val akka                = "2.5.9"
     val akkaStreamAlpakka   = "0.20"
-    val apacheCommons       = "3.1"
+    val apacheCommons       = "3.7"
     val apacheLogging       = "2.8.2"
     val aws                 = "1.11.95"
     val circe               = "0.9.0"
@@ -226,6 +226,7 @@ object CatalogueDependencies {
     WellcomeDependencies.messagingTypesafeLibrary
 
   val sierraTransformerDependencies: Seq[ModuleID] =
+    ExternalDependencies.apacheCommonsDependencies ++
     ExternalDependencies.mockitoDependencies ++
     WellcomeDependencies.messagingTypesafeLibrary
 

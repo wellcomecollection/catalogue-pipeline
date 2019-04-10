@@ -106,7 +106,7 @@ class SierraMergeCandidatesTest
 
   describe("single-page Miro/Sierra work") {
     it("extracts a MIRO ID from a URL in MARC tag 962 subfield u") {
-      val bibData = createMiroPictureWith(
+      val bibData = createMiroPictureWithUrls(
         urls = List(s"http://wellcomeimages.org/indexplus/image/$miroID.html")
       )
 
@@ -116,7 +116,7 @@ class SierraMergeCandidatesTest
 
     it(
       "does not put a merge candidate for multiple distinct instances of 962 subfield u") {
-      val bibData = createMiroPictureWith(
+      val bibData = createMiroPictureWithUrls(
         urls = List(
           s"http://wellcomeimages.org/indexplus/image/$miroID.html",
           "http://wellcomeimages.org/ixbin/hixclient?MIROPAC=B0000001"
@@ -127,7 +127,7 @@ class SierraMergeCandidatesTest
     }
 
     it("creates a merge candidate if multiple URLs point to the same Miro ID") {
-      val bibData = createMiroPictureWith(
+      val bibData = createMiroPictureWithUrls(
         urls = List(
           s"http://wellcomeimages.org/indexplus/image/$miroID.html",
           s"http://wellcomeimages.org/ixbin/hixclient?MIROPAC=$miroID"
@@ -139,7 +139,7 @@ class SierraMergeCandidatesTest
     }
 
     it("does not create a merge candidate if the URL is unrecognised") {
-      val bibData = createMiroPictureWith(
+      val bibData = createMiroPictureWithUrls(
         urls = List(
           "http://film.wellcome.ac.uk:15151/mediaplayer.html?fug_7340-1&pw=524ph=600.html")
       )
@@ -155,82 +155,122 @@ class SierraMergeCandidatesTest
         )
       )
 
-      transformer.getMergeCandidates(bibData) shouldBe singleMiroMergeCandidate(
-        miroID)
+      transformer.getMergeCandidates(bibData) shouldBe
+        singleMiroMergeCandidate(miroID)
+    }
+
+    // - - - - - - -  089 fields - - - - - - -
+    it("merges a MIRO ID for a picture with MARC tag 089 subfield a if there is no 962 tag") {
+      val bibData = createMiroPictureWith(
+        varFields = create089subfieldsWith(List("V 13889"))
+      )
+
+      transformer.getMergeCandidates(bibData) shouldBe
+        singleMiroMergeCandidate(
+          miroID = "V0013889",
+          reason = "Single page Miro/Sierra work (secondary source)")
+    }
+
+    it("merges a MIRO ID for a digital image with MARC tag 089 subfield a if there is no 962 tag") {
+      val bibData = createMiroDigitalImageWith(
+        varFields = create089subfieldsWith(List("V 13889"))
+      )
+
+      transformer.getMergeCandidates(bibData) shouldBe
+        singleMiroMergeCandidate(
+          miroID = "V0013889",
+          reason = "Single page Miro/Sierra work (secondary source)")
+    }
+
+    it("does not merge if there are multiple ids in MARC tag 089") {
+      val bibData = createMiroPictureWith(
+        varFields = create089subfieldsWith(List("V 13889", "V 12"))
+      )
+
+      transformer.getMergeCandidates(bibData) shouldBe List()
+    }
+
+    it("prefers to merge from tag 962 even if there is a 089 tag") {
+      val bibData = createMiroPictureWith(
+        varFields =
+          create962subfieldsForWellcomeImageUrl(miroID)
+            ++ create089subfieldsWith(List("V 13889"))
+      )
+
+      transformer.getMergeCandidates(bibData) shouldBe
+        singleMiroMergeCandidate(miroID)
+    }
+
+    it("does not merge if there are multiple tag 962 ids even if there is a 089 tag") {
+      val bibData = createMiroPictureWith(
+        varFields =
+          create962subfieldsForWellcomeImageUrl("A0123456")
+            ++ create962subfieldsForWellcomeImageUrl("V1234567")
+            ++ create089subfieldsWith(List("V 13889"))
+      )
+
+      transformer.getMergeCandidates(bibData) shouldBe List()
     }
 
     it("creates a merge candidate if the material type is 'Digital Images'") {
-      val bibData = createSierraBibDataWith(
-        materialType = Some(SierraMaterialType(code = "q")),
-        varFields = create962subfieldsWith(
-          urls = List(s"http://wellcomeimages.org/indexplus/image/$miroID.html")
-        )
+      val bibData = createMiroPictureWith(
+        varFields = create962subfieldsForWellcomeImageUrl(miroID)
       )
 
-      transformer.getMergeCandidates(bibData) shouldBe singleMiroMergeCandidate(
-        miroID)
+      transformer.getMergeCandidates(bibData) shouldBe
+        singleMiroMergeCandidate(miroID)
     }
 
     it(
       "does not create a merge candidate if the material type is neither 'Picture' nor 'Digital Images'") {
       val bibData = createSierraBibDataWith(
         materialType = Some(SierraMaterialType(code = "x")),
-        varFields = create962subfieldsWith(
-          urls = List(s"http://wellcomeimages.org/indexplus/image/$miroID.html")
-        )
+        varFields = create962subfieldsForWellcomeImageUrl(miroID)
       )
 
       transformer.getMergeCandidates(bibData) shouldBe List()
     }
   }
 
-  it(
-    "creates merge candidates for both physical/digital Sierra works and Miro works") {
-    val varFields =
-      create776subfieldsWith(ids = List(s"(UkLW)$mergeCandidateBibNumber")) ++
-        create962subfieldsWith(urls =
-          List(s"http://wellcomeimages.org/indexplus/image/$miroID.html"))
+  describe("physical/digital and single-page merges across works") {
+    it(
+      "creates merge candidates for both physical/digital Sierra works and Miro works") {
+      val varFields =
+        create776subfieldsWith(ids =
+          List(s"(UkLW)$mergeCandidateBibNumber")) ++
+          create962subfieldsForWellcomeImageUrl(miroID)
 
-    val sierraData = createSierraBibDataWith(
-      materialType = Some(SierraMaterialType("k")),
+      val sierraData = createSierraBibDataWith(
+        materialType = Some(SierraMaterialType("k")),
+        varFields = varFields
+      )
+
+      val expectedMergeCandidates =
+        physicalAndDigitalSierraMergeCandidate(mergeCandidateBibNumber) ++
+          singleMiroMergeCandidate(miroID)
+
+      transformer.getMergeCandidates(sierraData) shouldBe expectedMergeCandidates
+    }
+
+    it("returns an empty list if there is no MARC tag 776 or 962") {
+      val sierraData = createSierraBibDataWith(varFields = List())
+      transformer.getMergeCandidates(sierraData) shouldBe Nil
+    }
+  }
+
+  private def createMiroPictureWithUrls(urls: List[String]): SierraBibData =
+    createMiroPictureWith(varFields = create962subfieldsWith(urls = urls))
+
+  private def createMiroPictureWith(varFields: List[VarField]): SierraBibData =
+    createSierraBibDataWith(
+      materialType = Some(SierraMaterialType(code = "k")),
       varFields = varFields
     )
 
-    val expectedMergeCandidates =
-      physicalAndDigitalSierraMergeCandidate(mergeCandidateBibNumber) ++
-        singleMiroMergeCandidate(miroID)
-
-    transformer.getMergeCandidates(sierraData) shouldBe expectedMergeCandidates
-  }
-
-  it("returns an empty list if there is no MARC tag 776 or 962") {
-    val sierraData = createSierraBibDataWith(varFields = List())
-    transformer.getMergeCandidates(sierraData) shouldBe Nil
-  }
-
-  private def physicalAndDigitalSierraMergeCandidate(
-    bibNumber: String): List[MergeCandidate] =
-    List(
-      MergeCandidate(
-        identifier = SourceIdentifier(
-          identifierType = IdentifierType("sierra-system-number"),
-          ontologyType = "Work",
-          value = bibNumber
-        ),
-        reason = Some("Physical/digitised Sierra work")
-      )
-    )
-
-  private def singleMiroMergeCandidate(miroID: String): List[MergeCandidate] =
-    List(
-      MergeCandidate(
-        identifier = SourceIdentifier(
-          identifierType = IdentifierType("miro-image-number"),
-          ontologyType = "Work",
-          value = miroID
-        ),
-        reason = Some("Single page Miro/Sierra work")
-      )
+  private def createMiroDigitalImageWith(varFields: List[VarField]): SierraBibData =
+    createSierraBibDataWith(
+      materialType = Some(SierraMaterialType(code = "q")),
+      varFields = varFields
     )
 
   private def create776subfieldsWith(ids: List[String]): List[VarField] =
@@ -243,12 +283,6 @@ class SierraMergeCandidatesTest
       )
     }
 
-  private def createMiroPictureWith(urls: List[String]): SierraBibData =
-    createSierraBibDataWith(
-      materialType = Some(SierraMaterialType(code = "k")),
-      varFields = create962subfieldsWith(urls = urls)
-    )
-
   private def create962subfieldsWith(urls: List[String]): List[VarField] =
     urls.map { url =>
       createVarFieldWith(
@@ -258,4 +292,45 @@ class SierraMergeCandidatesTest
         )
       )
     }
+
+  private def create962subfieldsForWellcomeImageUrl(miroId: String) =
+    create962subfieldsWith(
+      urls = List(s"http://wellcomeimages.org/indexplus/image/$miroId.html")
+    )
+
+  private def create089subfieldsWith(miroIds: List[String]): List[VarField] =
+    miroIds.map { miroId =>
+      createVarFieldWith(
+        marcTag = "089",
+        subfields = List(
+          MarcSubfield(tag = "a", content = miroId)
+        )
+      )
+    }
+
+  private def physicalAndDigitalSierraMergeCandidate(
+                                                      bibNumber: String): List[MergeCandidate] =
+    List(
+      MergeCandidate(
+        identifier = SourceIdentifier(
+          identifierType = IdentifierType("sierra-system-number"),
+          ontologyType = "Work",
+          value = bibNumber
+        ),
+        reason = Some("Physical/digitised Sierra work")
+      )
+    )
+
+  private def singleMiroMergeCandidate(miroID: String,
+                                       reason:String = "Single page Miro/Sierra work"): List[MergeCandidate] =
+    List(
+      MergeCandidate(
+        identifier = SourceIdentifier(
+          identifierType = IdentifierType("miro-image-number"),
+          ontologyType = "Work",
+          value = miroID
+        ),
+        reason = Some(reason)
+      )
+    )
 }
