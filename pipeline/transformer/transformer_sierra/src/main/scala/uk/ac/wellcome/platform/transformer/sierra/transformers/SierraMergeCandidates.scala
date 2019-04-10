@@ -10,10 +10,17 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData,
   SierraMaterialType
 }
+import uk.ac.wellcome.platform.transformer.sierra.transformers.parsers.{
+  MiroIdParser,
+  WellcomeImagesURLParser
+}
 
 import scala.util.matching.Regex
 
-trait SierraMergeCandidates extends MarcUtils with WellcomeImagesURLParser {
+trait SierraMergeCandidates
+    extends MarcUtils
+    with WellcomeImagesURLParser
+    with MiroIdParser {
 
   def getMergeCandidates(sierraBibData: SierraBibData): List[MergeCandidate] =
     get776mergeCandidates(sierraBibData) ++
@@ -81,33 +88,53 @@ trait SierraMergeCandidates extends MarcUtils with WellcomeImagesURLParser {
       //    q   Digital Images
       //
       case Some(SierraMaterialType("k")) | Some(SierraMaterialType("q")) => {
-        val matchingSubfields: List[MarcSubfield] = getMatchingSubfields(
+        val matching962Subfields: List[MarcSubfield] = getMatchingSubfields(
           sierraBibData,
           marcTag = "962",
           marcSubfieldTag = "u"
         ).flatten
 
-        val maybeMiroIDs: List[String] = matchingSubfields
+        val miroIdsFrom962: List[String] = matching962Subfields
           .map { _.content }
           .flatMap { maybeGetMiroID }
           .distinct
 
-        maybeMiroIDs match {
-          case List(miroID) =>
+        val matching089Subfields: List[MarcSubfield] = getMatchingSubfields(
+          sierraBibData,
+          marcTag = "089",
+          marcSubfieldTag = "a"
+        ).flatten
+
+        val miroIdsFrom089: List[String] = matching089Subfields
+          .map { _.content }
+          .flatMap { parse089MiroId }
+
+        (miroIdsFrom962, miroIdsFrom089) match {
+          case (List(miroId), _) =>
             List(
-              MergeCandidate(
-                identifier = SourceIdentifier(
-                  identifierType = IdentifierType("miro-image-number"),
-                  ontologyType = "Work",
-                  value = miroID
-                ),
-                reason = Some("Single page Miro/Sierra work")
-              )
+              miroMergeCandidate(miroId, "Single page Miro/Sierra work")
+            )
+          case (List(), List(miroId)) =>
+            List(
+              miroMergeCandidate(
+                miroId,
+                "Single page Miro/Sierra work (secondary source)")
             )
           case _ => List()
         }
       }
       case _ => List()
     }
+  }
+
+  private def miroMergeCandidate(miroId: String, reason: String) = {
+    MergeCandidate(
+      identifier = SourceIdentifier(
+        identifierType = IdentifierType("miro-image-number"),
+        ontologyType = "Work",
+        value = miroId
+      ),
+      reason = Some(reason)
+    )
   }
 }

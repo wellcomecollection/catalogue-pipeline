@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.transformer.sierra.transformers
+package uk.ac.wellcome.platform.transformer.sierra.transformers.parsers
 
 import scala.util.matching.Regex
 
