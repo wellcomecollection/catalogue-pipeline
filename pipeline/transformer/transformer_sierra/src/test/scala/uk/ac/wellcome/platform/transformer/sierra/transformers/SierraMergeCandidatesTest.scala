@@ -273,13 +273,13 @@ class SierraMergeCandidatesTest
     createPictureWith(varFields = create962subfieldsWith(urls = urls))
 
   private def createPictureWith(varFields: List[VarField]): SierraBibData =
-    createBibDataWith(varFields, 'q')
+    createBibDataWith(varFields = varFields, materialTypeCode = 'q')
 
   private def createDigitalImageWith(varFields: List[VarField]): SierraBibData =
-    createBibDataWith(varFields, 'q')
+    createBibDataWith(varFields = varFields, materialTypeCode = 'q')
 
   private def create3DObjectWith(varFields: List[VarField]): SierraBibData =
-    createBibDataWith(varFields, 'r')
+    createBibDataWith(varFields = varFields, materialTypeCode = 'r')
 
   private def createBibDataWith(varFields: List[VarField], materialTypeCode: Char) = {
     createSierraBibDataWith(
