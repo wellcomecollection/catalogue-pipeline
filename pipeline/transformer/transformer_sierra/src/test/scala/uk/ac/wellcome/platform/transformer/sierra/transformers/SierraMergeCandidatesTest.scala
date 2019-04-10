@@ -106,7 +106,7 @@ class SierraMergeCandidatesTest
 
   describe("single-page Miro/Sierra work") {
     it("extracts a MIRO ID from a URL in MARC tag 962 subfield u") {
-      val bibData = createMiroPictureWithUrls(
+      val bibData = createPictureWithUrls(
         urls = List(s"http://wellcomeimages.org/indexplus/image/$miroID.html")
       )
 
@@ -116,7 +116,7 @@ class SierraMergeCandidatesTest
 
     it(
       "does not put a merge candidate for multiple distinct instances of 962 subfield u") {
-      val bibData = createMiroPictureWithUrls(
+      val bibData = createPictureWithUrls(
         urls = List(
           s"http://wellcomeimages.org/indexplus/image/$miroID.html",
           "http://wellcomeimages.org/ixbin/hixclient?MIROPAC=B0000001"
@@ -127,7 +127,7 @@ class SierraMergeCandidatesTest
     }
 
     it("creates a merge candidate if multiple URLs point to the same Miro ID") {
-      val bibData = createMiroPictureWithUrls(
+      val bibData = createPictureWithUrls(
         urls = List(
           s"http://wellcomeimages.org/indexplus/image/$miroID.html",
           s"http://wellcomeimages.org/ixbin/hixclient?MIROPAC=$miroID"
@@ -139,7 +139,7 @@ class SierraMergeCandidatesTest
     }
 
     it("does not create a merge candidate if the URL is unrecognised") {
-      val bibData = createMiroPictureWithUrls(
+      val bibData = createPictureWithUrls(
         urls = List(
           "http://film.wellcome.ac.uk:15151/mediaplayer.html?fug_7340-1&pw=524ph=600.html")
       )
@@ -162,7 +162,7 @@ class SierraMergeCandidatesTest
     // - - - - - - -  089 fields - - - - - - -
     it(
       "merges a MIRO ID for a picture with MARC tag 089 subfield a if there is no 962 tag") {
-      val bibData = createMiroPictureWith(
+      val bibData = createPictureWith(
         varFields = create089subfieldsWith(List("V 13889"))
       )
 
@@ -174,7 +174,7 @@ class SierraMergeCandidatesTest
 
     it(
       "merges a MIRO ID for a digital image with MARC tag 089 subfield a if there is no 962 tag") {
-      val bibData = createMiroDigitalImageWith(
+      val bibData = createDigitalImageWith(
         varFields = create089subfieldsWith(List("V 13889"))
       )
 
@@ -185,7 +185,7 @@ class SierraMergeCandidatesTest
     }
 
     it("does not merge if there are multiple ids in MARC tag 089") {
-      val bibData = createMiroPictureWith(
+      val bibData = createPictureWith(
         varFields = create089subfieldsWith(List("V 13889", "V 12"))
       )
 
@@ -193,7 +193,7 @@ class SierraMergeCandidatesTest
     }
 
     it("prefers to merge from tag 962 even if there is a 089 tag") {
-      val bibData = createMiroPictureWith(
+      val bibData = createPictureWith(
         varFields =
           create962subfieldsForWellcomeImageUrl(miroID)
             ++ create089subfieldsWith(List("V 13889"))
@@ -205,7 +205,7 @@ class SierraMergeCandidatesTest
 
     it(
       "does not merge if there are multiple tag 962 ids even if there is a 089 tag") {
-      val bibData = createMiroPictureWith(
+      val bibData = createPictureWith(
         varFields =
           create962subfieldsForWellcomeImageUrl("A0123456")
             ++ create962subfieldsForWellcomeImageUrl("V1234567")
@@ -215,8 +215,18 @@ class SierraMergeCandidatesTest
       transformer.getMergeCandidates(bibData) shouldBe List()
     }
 
+    // - - - - - - -  Material type - - - - - - -
+    it("creates a merge candidate if the material type is '3D objects'") {
+      val bibData = create3DObjectWith(
+        varFields = create962subfieldsForWellcomeImageUrl(miroID)
+      )
+
+      transformer.getMergeCandidates(bibData) shouldBe
+        singleMiroMergeCandidate(miroID)
+    }
+
     it("creates a merge candidate if the material type is 'Digital Images'") {
-      val bibData = createMiroPictureWith(
+      val bibData = createPictureWith(
         varFields = create962subfieldsForWellcomeImageUrl(miroID)
       )
 
@@ -225,11 +235,10 @@ class SierraMergeCandidatesTest
     }
 
     it(
-      "does not create a merge candidate if the material type is neither 'Picture' nor 'Digital Images'") {
-      val bibData = createSierraBibDataWith(
-        materialType = Some(SierraMaterialType(code = "x")),
-        varFields = create962subfieldsForWellcomeImageUrl(miroID)
-      )
+      "does not create a merge candidate if the material type is neither 'Picture', 'Digital Image', nor '3DObject'") {
+      val bibData = createBibDataWith(
+        varFields = create962subfieldsForWellcomeImageUrl(miroID),
+        materialTypeCode = 'x')
 
       transformer.getMergeCandidates(bibData) shouldBe List()
     }
@@ -260,21 +269,25 @@ class SierraMergeCandidatesTest
     }
   }
 
-  private def createMiroPictureWithUrls(urls: List[String]): SierraBibData =
-    createMiroPictureWith(varFields = create962subfieldsWith(urls = urls))
+  private def createPictureWithUrls(urls: List[String]): SierraBibData =
+    createPictureWith(varFields = create962subfieldsWith(urls = urls))
 
-  private def createMiroPictureWith(varFields: List[VarField]): SierraBibData =
+  private def createPictureWith(varFields: List[VarField]): SierraBibData =
+    createBibDataWith(varFields = varFields, materialTypeCode = 'q')
+
+  private def createDigitalImageWith(varFields: List[VarField]): SierraBibData =
+    createBibDataWith(varFields = varFields, materialTypeCode = 'q')
+
+  private def create3DObjectWith(varFields: List[VarField]): SierraBibData =
+    createBibDataWith(varFields = varFields, materialTypeCode = 'r')
+
+  private def createBibDataWith(varFields: List[VarField],
+                                materialTypeCode: Char) = {
     createSierraBibDataWith(
-      materialType = Some(SierraMaterialType(code = "k")),
+      materialType = Some(SierraMaterialType(code = materialTypeCode.toString)),
       varFields = varFields
     )
-
-  private def createMiroDigitalImageWith(
-    varFields: List[VarField]): SierraBibData =
-    createSierraBibDataWith(
-      materialType = Some(SierraMaterialType(code = "q")),
-      varFields = varFields
-    )
+  }
 
   private def create776subfieldsWith(ids: List[String]): List[VarField] =
     ids.map { idString =>
