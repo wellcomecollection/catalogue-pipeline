@@ -1,0 +1,233 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "",
+    "description" : "",
+    "termsOfService" : "",
+    "version" : "1.0"
+  },
+  "externalDocs" : {
+    "description" : "Core Docs",
+    "url" : "http://acme.com/docs"
+  },
+  "servers" : [ {
+    "url" : "http://localhost:12345"
+  } ],
+  "security" : [ ],
+  "paths" : {
+    "/add" : {
+      "post" : {
+        "summary" : "Add integers",
+        "description" : "Add integers",
+        "operationId" : "add",
+        "requestBody" : {
+          "content" : {
+            "*/*" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AddRequest"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Add response",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AddResponse"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error"
+          }
+        }
+      }
+    },
+    "/addOption" : {
+      "post" : {
+        "summary" : "Add integers",
+        "description" : "Add integers",
+        "operationId" : "addOption",
+        "requestBody" : {
+          "content" : {
+            "*/*" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AddOptionRequest"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Add response",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AddOptionResponse"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error"
+          }
+        }
+      }
+    },
+    "/echoenum" : {
+      "get" : {
+        "summary" : "Echo Enum",
+        "description" : "Echo Enum",
+        "operationId" : "echo",
+        "requestBody" : {
+          "content" : {
+            "*/*" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/EchoEnum"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Echo Enum",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EchoEnum"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request"
+          }
+        }
+      }
+    },
+    "/hello" : {
+      "get" : {
+        "summary" : "Return Hello greeting (anonymous)",
+        "description" : "Return Hello greeting for anonymous request",
+        "operationId" : "getHello",
+        "responses" : {
+          "200" : {
+            "description" : "Hello response",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Greeting"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error"
+          }
+        }
+      },
+      "post" : {
+        "summary" : "Return Hello greeting",
+        "description" : "Return Hello greeting for named user",
+        "operationId" : "getHelloSegment",
+        "parameters" : [ {
+          "name" : "name",
+          "in" : "path",
+          "description" : "user name",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Hello response",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Greeting"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error"
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "Greeting" : {
+        "required" : [ "greeting" ],
+        "type" : "object",
+        "properties" : {
+          "greeting" : {
+            "type" : "string"
+          }
+        }
+      },
+      "AddOptionResponse" : {
+        "required" : [ "sum" ],
+        "type" : "object",
+        "properties" : {
+          "sum" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "AddOptionRequest" : {
+        "required" : [ "number" ],
+        "type" : "object",
+        "properties" : {
+          "number" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "number2" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "AddResponse" : {
+        "required" : [ "sum" ],
+        "type" : "object",
+        "properties" : {
+          "sum" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "EchoEnum" : {
+        "required" : [ "enumValue" ],
+        "type" : "object",
+        "properties" : {
+          "enumValue" : {
+            "type" : "string",
+            "enum" : [ "TALL", "GRANDE", "VENTI" ]
+          }
+        }
+      },
+      "AddRequest" : {
+        "required" : [ "numbers" ],
+        "type" : "object",
+        "properties" : {
+          "numbers" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "format" : "int32"
+            }
+          }
+        }
+      }
+    }
+  }
+}
