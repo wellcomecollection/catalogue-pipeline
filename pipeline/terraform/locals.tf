@@ -14,7 +14,7 @@ locals {
 
   vhs_miro_read_policy = "${data.terraform_remote_state.catalogue_pipeline_data.vhs_miro_read_policy}"
 
-  rds_access_security_group_id = "${data.terraform_remote_state.catalogue_pipeline_data.rds_access_security_group_id}"
+  rds_access_security_group_id = "${data.terraform_remote_state.catalogue_infra_critical.rds_access_security_group_id}"
 
   miro_reindexer_topic_name   = "${data.terraform_remote_state.shared_infra.catalogue_miro_reindex_topic_name}"
   sierra_reindexer_topic_name = "${data.terraform_remote_state.shared_infra.catalogue_sierra_reindex_topic_name}"
