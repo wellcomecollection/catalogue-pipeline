@@ -1,8 +1,8 @@
 locals {
-  vhs_sierra_table_name         = "${data.terraform_remote_state.infra_crtical.vhs_sierra_table_name}"
-  vhs_miro_table_name           = "${data.terraform_remote_state.infra_crtical.vhs_miro_table_name}"
-  vhs_miro_inventory_table_name = "${data.terraform_remote_state.infra_crtical.vhs_miro_inventory_table_name}"
-  vhs_sierra_items_table_name   = "${data.terraform_remote_state.infra_crtical.vhs_sierra_items_table_name}"
+  vhs_sierra_table_name         = "${data.terraform_remote_state.catalogue_infra_critical.vhs_sierra_table_name}"
+  vhs_miro_table_name           = "${data.terraform_remote_state.catalogue_infra_critical.vhs_miro_table_name}"
+  vhs_miro_inventory_table_name = "${data.terraform_remote_state.catalogue_infra_critical.vhs_miro_inventory_table_name}"
+  vhs_sierra_items_table_name   = "${data.terraform_remote_state.catalogue_infra_critical.vhs_sierra_items_table_name}"
 
   dlq_alarm_arn = "${data.terraform_remote_state.shared_infra.dlq_alarm_arn}"
 

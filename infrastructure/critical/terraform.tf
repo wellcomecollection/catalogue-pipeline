@@ -5,7 +5,7 @@ terraform {
     role_arn = "arn:aws:iam::760097843905:role/developer"
 
     bucket         = "wellcomecollection-platform-infra"
-    key            = "terraform/goobi_adapter.tfstate"
+    key            = "terraform/catalogue/infrastructure/critical.tfstate"
     dynamodb_table = "terraform-locktable"
     region         = "eu-west-1"
   }
@@ -23,14 +23,4 @@ data "terraform_remote_state" "shared_infra" {
   }
 }
 
-data "terraform_remote_state" "catalogue_infra_critical" {
-  backend = "s3"
-
-  config {
-    role_arn = "arn:aws:iam::760097843905:role/developer"
-
-    bucket = "wellcomecollection-platform-infra"
-    key    = "terraform/catalogue/infrastructure/critical.tfstate"
-    region = "eu-west-1"
-  }
-}
+data "aws_caller_identity" "current" {}

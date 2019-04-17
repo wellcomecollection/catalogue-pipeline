@@ -23,14 +23,14 @@ data "terraform_remote_state" "shared_infra" {
   }
 }
 
-data "terraform_remote_state" "infra_crtical" {
+data "terraform_remote_state" "catalogue_infra_critical" {
   backend = "s3"
 
   config {
     role_arn = "arn:aws:iam::760097843905:role/developer"
 
     bucket = "wellcomecollection-platform-infra"
-    key    = "terraform/catalogue_pipeline_data.tfstate"
+    key    = "terraform/catalogue/infrastructure/critical.tfstate"
     region = "eu-west-1"
   }
 }
