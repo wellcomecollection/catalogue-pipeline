@@ -1,5 +1,5 @@
 module "service" {
-  source = "git::https://github.com/wellcometrust/terraform.git//ecs/prebuilt/scaling?ref=v19.7.2"
+  source = "git::https://github.com/wellcometrust/terraform.git//ecs/prebuilt/scaling?ref=v19.12.0"
 
   service_name = "${var.service_name}"
 
@@ -17,15 +17,13 @@ module "service" {
   memory = "512"
 
   security_group_ids               = ["${var.security_group_ids}"]
-  service_egress_security_group_id = ""
+
+  min_capacity = 0
+  max_capacity = 10
 
   env_vars        = "${var.env_vars}"
   env_vars_length = "${var.env_vars_length}"
 
   secret_env_vars        = "${var.secret_env_vars}"
   secret_env_vars_length = "${var.secret_env_vars_length}"
-
-  metric_namespace = "AWS/SQS"
-  high_metric_name = "foo"
-  low_metric_name  = "bar"
 }

@@ -70,3 +70,11 @@ module "id_minter_topic" {
 
   messages_bucket_arn = "${aws_s3_bucket.messages.arn}"
 }
+
+module "id_minter_scaling_alarm" {
+  source     = "git::https://github.com/wellcometrust/terraform-modules.git//autoscaling/alarms/queue?ref=v19.12.0"
+  queue_name = "${module.id_minter_queue.name}"
+
+  queue_high_actions = ["${module.id_minter.scale_up_arn}"]
+  queue_low_actions  = ["${module.id_minter.scale_down_arn}"]
+}

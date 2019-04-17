@@ -74,3 +74,11 @@ module "recorder_topic" {
 
   messages_bucket_arn = "${aws_s3_bucket.messages.arn}"
 }
+
+module "recorder_scaling_alarm" {
+  source     = "git::https://github.com/wellcometrust/terraform-modules.git//autoscaling/alarms/queue?ref=v19.12.0"
+  queue_name = "${module.recorder_queue.name}"
+
+  queue_high_actions = ["${module.recorder.scale_up_arn}"]
+  queue_low_actions  = ["${module.recorder.scale_down_arn}"]
+}
