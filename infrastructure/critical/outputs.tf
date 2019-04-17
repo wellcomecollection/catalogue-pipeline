@@ -65,3 +65,16 @@ output "vhs_goobi_table_name" {
 output "vhs_goobi_bucket_name" {
   value = "${module.vhs_goobi_mets.bucket_name}"
 }
+
+# Calm Hybrid Store
+output "vhs_calm_read_policy" {
+  value = "${module.vhs_calm_sourcedata.read_policy}"
+}
+
+output "vhs_calm_table_name" {
+  value = "${module.vhs_calm_sourcedata.table_name}"
+}
+
+output "vhs_calm_bucket_name" {
+  value = "${module.vhs_calm_sourcedata.bucket_name}"
+}
