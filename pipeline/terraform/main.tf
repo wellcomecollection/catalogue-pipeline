@@ -26,13 +26,10 @@ module "catalogue_pipeline_20190416" {
     "${local.miro_reindexer_topic_name}",
     "${local.miro_updates_topic_name}",
   ]
-
   # Elasticsearch
   es_works_index = "v2-2019-04-16-secondary-miro-merge-candidates"
-
   # RDS
   rds_ids_access_security_group_id = "${local.rds_access_security_group_id}"
-
   # Adapter VHS
   vhs_sierra_read_policy = "${local.vhs_sierra_read_policy}"
   vhs_miro_read_policy   = "${local.vhs_miro_read_policy}"
