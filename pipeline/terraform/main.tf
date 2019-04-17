@@ -15,7 +15,7 @@ module "catalogue_pipeline_20190416" {
   # Transformer config
   #
   # If this pipeline is meant to be reindexed, remember to uncomment the
-  # reindexer topic names_qs.
+  # reindexer topic names.
 
   sierra_adapter_topic_names = [
     "${local.sierra_reindexer_topic_name}",
