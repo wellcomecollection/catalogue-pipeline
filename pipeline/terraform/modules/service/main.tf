@@ -16,7 +16,7 @@ module "service" {
   cpu    = "256"
   memory = "512"
 
-  security_group_ids               = ["${var.security_group_ids}"]
+  security_group_ids = ["${var.security_group_ids}"]
 
   min_capacity = 0
   max_capacity = 10
