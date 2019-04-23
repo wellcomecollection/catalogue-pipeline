@@ -36,7 +36,7 @@ class SierraContributorsTest
       createVarFieldWith(
         marcTag = "100",
         subfields = List(
-          MarcSubfield(tag = "a", content = "Sam the squash"),
+          MarcSubfield(tag = "a", content = "Sam the squash,"),
           MarcSubfield(tag = "c", content = "Sir")
         )
       ),
@@ -62,8 +62,7 @@ class SierraContributorsTest
 
     val expectedContributors = List(
       Contributor(agent = Unidentifiable(Person("Sarah the soybean"))),
-      Contributor(
-        agent = Unidentifiable(Person("Sam the squash", Some("Sir")))),
+      Contributor(agent = Unidentifiable(Person("Sam the squash, Sir"))),
       Contributor(agent = Unidentifiable(Organisation("Spinach Solicitors"))),
       Contributor(agent = Unidentifiable(Person("Sebastian the sugarsnap"))),
       Contributor(agent = Unidentifiable(Organisation("Shallot Swimmers")))
@@ -74,18 +73,34 @@ class SierraContributorsTest
   }
 
   describe("Person") {
-    it("gets the name from MARC tag 100 subfield $$a") {
-      val name = "Carol the Carrot"
+    it(
+      "combines only subfields $$a $$b $$c with spaces from MARC field 100 / 700") {
+      // Based on https://search.wellcomelibrary.org/iii/encore/record/C__Rb1795764?lang=eng
+      // as retrieved on 25 April 2019.
 
-      val varFields = List(
-        createVarFieldWith(
-          marcTag = "100",
-          subfields = List(MarcSubfield(tag = "a", content = name))
+      val name = "Charles Emmanuel"
+      val numeration = "III,"
+      val titlesAndOtherWords = "King of Sardinia,"
+      val dates = "1701-1773,"
+      val varField100 = createVarFieldWith(
+        marcTag = "100",
+        subfields = List(
+          MarcSubfield(tag = "a", content = name),
+          MarcSubfield(tag = "b", content = numeration),
+          MarcSubfield(tag = "c", content = titlesAndOtherWords),
+          MarcSubfield(tag = "d", content = dates),
         )
       )
+      val varField700 = varField100.copy(marcTag = Some("700"))
+      val varFields = List(varField100, varField700)
 
       val expectedContributors = List(
-        Contributor(agent = Unidentifiable(Person(label = name)))
+        Contributor(
+          agent = Unidentifiable(
+            Person(label = "Charles Emmanuel III, King of Sardinia"))),
+        Contributor(
+          agent = Unidentifiable(
+            Person(label = "Charles Emmanuel III, King of Sardinia")))
       )
 
       transformAndCheckContributors(
@@ -93,23 +108,28 @@ class SierraContributorsTest
         expectedContributors = expectedContributors)
     }
 
-    it("gets the name from MARC tag 700 subfield $$a") {
-      val name = "Bertrand the Beetroot"
-
+    it(
+      "combines subfield $$t with $$a $$b $$c and creates an Agent, not a Person from MARC field 100 / 700") {
+      // Based on https://search.wellcomelibrary.org/iii/encore/record/C__Rb1159639?marcData=Y
+      // as retrieved on 4 February 2019.
       val varFields = List(
         createVarFieldWith(
           marcTag = "700",
-          subfields = List(MarcSubfield(tag = "a", content = name))
+          subfields = List(
+            MarcSubfield(tag = "a", content = "Shakespeare, William,"),
+            MarcSubfield(tag = "d", content = "1564-1616."),
+            MarcSubfield(tag = "t", content = "Hamlet.")
+          )
         )
       )
 
-      val expectedContributors = List(
-        Contributor(agent = Unidentifiable(Person(label = name)))
-      )
+      val bibData = createSierraBibDataWith(varFields = varFields)
+      val contributors = transformer.getContributors(bibData)
+      contributors should have size 1
+      val contributor = contributors.head
 
-      transformAndCheckContributors(
-        varFields = varFields,
-        expectedContributors = expectedContributors)
+      contributor.agent shouldBe Unidentifiable(
+        Agent(label = "Shakespeare, William, Hamlet."))
     }
 
     it(
@@ -140,121 +160,6 @@ class SierraContributorsTest
         Contributor(agent = Unidentifiable(Person(label = name1))),
         Contributor(agent = Unidentifiable(Person(label = name2))),
         Contributor(agent = Unidentifiable(Person(label = name3)))
-      )
-
-      transformAndCheckContributors(
-        varFields = varFields,
-        expectedContributors = expectedContributors)
-    }
-
-    it("gets the creator prefix from MARC tag 100 subfield $$c") {
-      val name = "Darla the Dandelion"
-      val prefix = "Dr"
-
-      val varFields = List(
-        createVarFieldWith(
-          marcTag = "100",
-          subfields = List(
-            MarcSubfield(tag = "a", content = name),
-            MarcSubfield(tag = "c", content = prefix)
-          )
-        )
-      )
-
-      val expectedContributors = List(
-        Contributor(
-          agent = Unidentifiable(
-            Person(
-              label = name,
-              prefix = Some(prefix)
-            ))
-        )
-      )
-
-      transformAndCheckContributors(
-        varFields = varFields,
-        expectedContributors = expectedContributors)
-    }
-
-    it("gets the creator prefix from MARC tag 700 subfield $$c") {
-      val name = "Roland the Radish"
-      val prefix = "Rev"
-
-      val varFields = List(
-        createVarFieldWith(
-          marcTag = "100",
-          subfields = List(
-            MarcSubfield(tag = "a", content = name),
-            MarcSubfield(tag = "c", content = prefix)
-          )
-        )
-      )
-
-      val expectedContributors = List(
-        Contributor(
-          agent = Unidentifiable(
-            Person(
-              label = name,
-              prefix = Some(prefix)
-            ))
-        )
-      )
-
-      transformAndCheckContributors(
-        varFields = varFields,
-        expectedContributors = expectedContributors)
-    }
-
-    it("joins multiple instances of subfield $$c into a single prefix") {
-      val name = "Mick the Mallow"
-      val prefix1 = "Mx"
-      val prefix2 = "Mr"
-
-      val varFields = List(
-        createVarFieldWith(
-          marcTag = "100",
-          subfields = List(
-            MarcSubfield(tag = "a", content = name),
-            MarcSubfield(tag = "c", content = prefix1),
-            MarcSubfield(tag = "c", content = prefix2)
-          )
-        )
-      )
-
-      val expectedContributors = List(
-        Contributor(
-          agent = Unidentifiable(
-            Person(
-              label = name,
-              prefix = Some(s"${prefix1} ${prefix2}")
-            ))
-        )
-      )
-
-      transformAndCheckContributors(
-        varFields = varFields,
-        expectedContributors = expectedContributors)
-    }
-
-    it("gets the numeration from subfield $$b") {
-      val name = "Leopold the Lettuce"
-      val numeration = "LX"
-
-      val varFields = List(
-        createVarFieldWith(
-          marcTag = "100",
-          subfields = List(
-            MarcSubfield(tag = "a", content = name),
-            MarcSubfield(tag = "b", content = numeration)
-          )
-        )
-      )
-
-      val expectedContributors = List(
-        Contributor(
-          agent = Unidentifiable(
-            Person(label = name, numeration = Some(numeration))
-          ))
       )
 
       transformAndCheckContributors(
@@ -413,31 +318,6 @@ class SierraContributorsTest
       transformAndCheckContributors(
         varFields = varFields,
         expectedContributors = expectedContributors)
-    }
-  }
-
-  describe("MARC tag 700 with subfield t") {
-    // Based on https://search.wellcomelibrary.org/iii/encore/record/C__Rb1159639?marcData=Y
-    // as retrieved on 4 February 2019.
-    val varFields = List(
-      createVarFieldWith(
-        marcTag = "700",
-        subfields = List(
-          MarcSubfield(tag = "a", content = "Shakespeare, William,"),
-          MarcSubfield(tag = "d", content = "1564-1616."),
-          MarcSubfield(tag = "t", content = "Hamlet.")
-        )
-      )
-    )
-
-    val bibData = createSierraBibDataWith(varFields = varFields)
-    val contributors = transformer.getContributors(bibData)
-    contributors should have size 1
-    val contributor = contributors.head
-
-    it("creates an Agent, not a Person") {
-      contributor.agent shouldBe Unidentifiable(
-        Agent(label = "Shakespeare, William,"))
     }
   }
 

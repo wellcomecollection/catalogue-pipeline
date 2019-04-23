@@ -13,20 +13,6 @@ trait SierraAgents {
   def getPerson(subfields: List[MarcSubfield],
                 normalisePerson: Boolean = false): Option[Person] =
     getLabel(subfields).map { label =>
-      // Extract the numeration from subfield $b.  This is also non-repeatable
-      // in the MARC spec.
-      val numeration = subfields.collectFirst {
-        case MarcSubfield("b", content) => content
-      }
-
-      // Extract the prefix from subfield $c.  This is a repeatable field, so
-      // we take all instances and join them.
-      val prefixes = subfields.collect {
-        case MarcSubfield("c", content) => content
-      }
-      val prefixString =
-        if (prefixes.isEmpty) None else Some(prefixes.mkString(" "))
-
       // The rule is to only normalise the 'Person' label when a contributor.  Strictly a 'Person' within
       // 'Subjects' (sourced from Marc 600) should not be normalised -- however, as these labels
       // are not expected to have punctuation normalisation should not change the 'Person' label for 'Subjects'
@@ -35,14 +21,14 @@ trait SierraAgents {
       if (normalisePerson) {
         Person.normalised(
           label = label,
-          prefix = prefixString,
-          numeration = numeration
+          prefix = None,
+          numeration = None
         )
       } else {
         Person(
           label = label,
-          prefix = prefixString,
-          numeration = numeration
+          prefix = None,
+          numeration = None
         )
       }
     }
@@ -102,10 +88,10 @@ trait SierraAgents {
   }
 
   def getLabel(subfields: List[MarcSubfield]): Option[String] =
-    // Extract the label from subfield $a.  This is a non-repeatable
-    // field in the MARC spec, but we have seen records where it
-    // doesn't appear.  In that case, we discard the entire agent.
-    subfields.collectFirst {
-      case MarcSubfield("a", content) => content
+    subfields.filter { s =>
+      List("a", "b", "c", "t").contains(s.tag)
+    } map (_.content) match {
+      case Nil          => None
+      case nonEmptyList => Some(nonEmptyList mkString " ")
     }
 }

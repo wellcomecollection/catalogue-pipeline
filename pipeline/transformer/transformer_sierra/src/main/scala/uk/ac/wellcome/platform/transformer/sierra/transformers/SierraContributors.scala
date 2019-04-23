@@ -32,61 +32,43 @@ trait SierraContributors extends MarcUtils with SierraAgents {
    */
   def getContributors(bibData: SierraBibData)
     : List[Contributor[MaybeDisplayable[AbstractAgent]]] =
-    getMarcTag100Contributors(bibData) ++
+    getPersonContributors(bibData, marcTag = "100") ++
       getOrganisationContributors(bibData, marcTag = "110") ++
-      getMarcTag700Contributors(bibData) ++
+      getPersonContributors(bibData, marcTag = "700") ++
       getOrganisationContributors(bibData, marcTag = "710")
 
-  private def getMarcTag100Contributors(
-    bibData: SierraBibData): List[Contributor[MaybeDisplayable[Person]]] = {
+  private def getPersonContributors(
+    bibData: SierraBibData,
+    marcTag: String): List[Contributor[MaybeDisplayable[AbstractAgent]]] = {
     val persons = getMatchingSubfields(
       bibData,
-      marcTag = "100",
-      marcSubfieldTags = List("a", "b", "c", "e", "0")
+      marcTag = marcTag,
+      marcSubfieldTags = List("a", "b", "c", "e", "t", "0")
     )
 
     persons
       .flatMap { subfields: List[MarcSubfield] =>
-        val roles = getContributionRoles(subfields)
-        val maybePerson = getPerson(subfields, normalisePerson = true)
-
-        maybePerson.map { person =>
-          Contributor(
-            agent = identify(subfields, person, "Person"),
-            roles = roles
-          )
+        val hasSubfieldT = subfields.exists {
+          _.tag == "t"
         }
-      }
-  }
-
-  private def getMarcTag700Contributors(bibData: SierraBibData)
-    : List[Contributor[MaybeDisplayable[AbstractAgent]]] = {
-    val agents = getMatchingSubfields(
-      bibData,
-      marcTag = "700",
-      marcSubfieldTags = List("a", "b", "c", "e", "t", "0")
-    )
-
-    agents
-      .flatMap { subfields: List[MarcSubfield] =>
         val roles = getContributionRoles(subfields)
-        val hasSubfieldT = subfields.exists { _.tag == "t" }
 
-        val maybeAgent: Option[MaybeDisplayable[AbstractAgent]] =
-          if (hasSubfieldT) {
-            getLabel(subfields)
-              .map { Agent(_) }
-              .map { agent =>
-                identify(subfields, agent, "Agent")
-              }
-          } else {
-            getPerson(subfields, normalisePerson = true)
-              .map { person =>
-                identify(subfields, person, "Person")
-              }
-          }
+        val maybeAgent = if (hasSubfieldT) {
+          getLabel(subfields)
+            .map {
+              Agent(_)
+            }
+            .map { agent =>
+              identify(subfields, agent, "Agent")
+            }
+        } else {
+          getPerson(subfields, normalisePerson = true)
+            .map { person =>
+              identify(subfields, person, "Person")
+            }
+        }
 
-        maybeAgent.map { agent =>
+        maybeAgent map { agent =>
           Contributor(
             agent = agent,
             roles = roles
