@@ -355,7 +355,8 @@ class SierraContributorsTest
             MarcSubfield(tag = "a", content = name),
             MarcSubfield(tag = "b", content = subordinateUnit),
             MarcSubfield(tag = "d", content = date),
-            MarcSubfield(tag = "c", content = place)
+            MarcSubfield(tag = "c", content = place),
+            MarcSubfield(tag = "n", content = "  79125097")
           )
         )
       )
