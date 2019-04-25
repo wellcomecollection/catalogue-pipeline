@@ -341,18 +341,28 @@ class SierraContributorsTest
         expectedContributors = expectedContributors)
     }
 
-    it("gets the name from MARC tag 710 subfield $$a") {
-      val name = "Karl the kale"
+    it(
+      "combines only multiple subfields $$a $$b $$c with spaces from MARC field 110 / 710") {
+      // Based on https://search.wellcomelibrary.org/iii/encore/record/C__Rb1563778?lang=eng
+      // as retrieved from 25 April 2019
+      val name = "United States."
+      val subordinateUnit1 = "Office of the Assistant Secretary for Health."
+      val subordinateUnit2 = "Office of Research Integrity."
 
       val varFields = List(
         createVarFieldWith(
-          marcTag = "710",
-          subfields = List(MarcSubfield(tag = "a", content = name))
+          marcTag = "110",
+          subfields = List(
+            MarcSubfield(tag = "a", content = name),
+            MarcSubfield(tag = "b", content = subordinateUnit1),
+            MarcSubfield(tag = "b", content = subordinateUnit2)
+          )
         )
       )
 
       val expectedContributors = List(
-        Contributor(agent = Unidentifiable(Organisation(label = name)))
+        Contributor(agent = Unidentifiable(Organisation(label =
+          "United States. Office of the Assistant Secretary for Health. Office of Research Integrity.")))
       )
 
       transformAndCheckContributors(
