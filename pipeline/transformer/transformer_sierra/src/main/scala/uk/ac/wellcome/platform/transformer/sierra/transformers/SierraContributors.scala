@@ -43,7 +43,7 @@ trait SierraContributors extends MarcUtils with SierraAgents {
     val persons = getMatchingSubfields(
       bibData,
       marcTag = marcTag,
-      marcSubfieldTags = List("a", "b", "c", "e", "t", "0")
+      marcSubfieldTags = List("a", "b", "c", "d", "e", "t", "0")
     )
 
     persons
@@ -86,7 +86,7 @@ trait SierraContributors extends MarcUtils with SierraAgents {
     val organisations = getMatchingSubfields(
       bibData,
       marcTag = marcTag,
-      marcSubfieldTags = List("a", "b", "c", "e", "0")
+      marcSubfieldTags = List("a", "b", "c", "d", "e", "0")
     )
 
     organisations

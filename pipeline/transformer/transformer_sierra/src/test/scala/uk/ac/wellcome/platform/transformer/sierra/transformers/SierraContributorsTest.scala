@@ -73,8 +73,7 @@ class SierraContributorsTest
   }
 
   describe("Person") {
-    it(
-      "combines only subfields $$a $$b $$c with spaces from MARC field 100 / 700") {
+    it("extracts and combines only subfields $$a $$b $$c $$d for the label") {
       // Based on https://search.wellcomelibrary.org/iii/encore/record/C__Rb1795764?lang=eng
       // as retrieved on 25 April 2019.
 
@@ -95,12 +94,10 @@ class SierraContributorsTest
       val varFields = List(varField100, varField700)
 
       val expectedContributors = List(
-        Contributor(
-          agent = Unidentifiable(
-            Person(label = "Charles Emmanuel III, King of Sardinia"))),
-        Contributor(
-          agent = Unidentifiable(
-            Person(label = "Charles Emmanuel III, King of Sardinia")))
+        Contributor(agent = Unidentifiable(
+          Person(label = "Charles Emmanuel III, King of Sardinia, 1701-1773"))),
+        Contributor(agent = Unidentifiable(
+          Person(label = "Charles Emmanuel III, King of Sardinia, 1701-1773")))
       )
 
       transformAndCheckContributors(
@@ -109,7 +106,7 @@ class SierraContributorsTest
     }
 
     it(
-      "combines subfield $$t with $$a $$b $$c and creates an Agent, not a Person from MARC field 100 / 700") {
+      "combines subfield $$t with $$a $$b $$c $$d and creates an Agent, not a Person from MARC field 100 / 700") {
       // Based on https://search.wellcomelibrary.org/iii/encore/record/C__Rb1159639?marcData=Y
       // as retrieved on 4 February 2019.
       val varFields = List(
@@ -129,7 +126,7 @@ class SierraContributorsTest
       val contributor = contributors.head
 
       contributor.agent shouldBe Unidentifiable(
-        Agent(label = "Shakespeare, William, Hamlet."))
+        Agent(label = "Shakespeare, William, 1564-1616. Hamlet."))
     }
 
     it(
@@ -342,27 +339,30 @@ class SierraContributorsTest
     }
 
     it(
-      "combines only multiple subfields $$a $$b $$c with spaces from MARC field 110 / 710") {
-      // Based on https://search.wellcomelibrary.org/iii/encore/record/C__Rb1563778?lang=eng
+      "combines only subfields $$a $$b $$c $$d (multiples of) with spaces from MARC field 110 / 710") {
+      // Based on https://search.wellcomelibrary.org/iii/encore/record/C__Rb1000984
       // as retrieved from 25 April 2019
-      val name = "United States."
-      val subordinateUnit1 = "Office of the Assistant Secretary for Health."
-      val subordinateUnit2 = "Office of Research Integrity."
+      val name =
+        "IARC Working Group on the Evaluation of the Carcinogenic Risk of Chemicals to Man."
+      val subordinateUnit = "Meeting"
+      val date = "1972 :"
+      val place = "Lyon, France"
 
       val varFields = List(
         createVarFieldWith(
           marcTag = "110",
           subfields = List(
             MarcSubfield(tag = "a", content = name),
-            MarcSubfield(tag = "b", content = subordinateUnit1),
-            MarcSubfield(tag = "b", content = subordinateUnit2)
+            MarcSubfield(tag = "b", content = subordinateUnit),
+            MarcSubfield(tag = "d", content = date),
+            MarcSubfield(tag = "c", content = place)
           )
         )
       )
 
       val expectedContributors = List(
         Contributor(agent = Unidentifiable(Organisation(label =
-          "United States. Office of the Assistant Secretary for Health. Office of Research Integrity.")))
+          "IARC Working Group on the Evaluation of the Carcinogenic Risk of Chemicals to Man. Meeting 1972 : Lyon, France")))
       )
 
       transformAndCheckContributors(
