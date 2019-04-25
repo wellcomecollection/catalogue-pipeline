@@ -43,11 +43,11 @@ trait SierraPersonSubjects extends MarcUtils with SierraAgents {
       .filterNot { _.indicator2.contains("7") }
       .flatMap { varField: VarField =>
         val subfields = varField.subfields
-        val maybePerson = getPerson(subfields)
+        val maybePerson =
+          getPerson(subfields)
         val generalSubdivisions =
           varField.subfields
             .collect {
-              case MarcSubfield("t", content) => content
               case MarcSubfield("x", content) => content
             }
 
@@ -76,7 +76,7 @@ trait SierraPersonSubjects extends MarcUtils with SierraAgents {
                                     roles: List[String],
                                     dates: Option[String],
                                     generalSubdivisions: List[String]): String =
-    (List(person.label) ++ person.numeration ++ person.prefix ++ dates ++ roles ++ generalSubdivisions)
+    (List(person.label) ++ roles ++ generalSubdivisions)
       .mkString(" ")
 
   private def getConcepts(person: Person, generalSubdivisions: List[String])
