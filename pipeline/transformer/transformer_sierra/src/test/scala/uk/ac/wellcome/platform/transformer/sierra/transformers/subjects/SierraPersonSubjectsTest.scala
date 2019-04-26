@@ -61,7 +61,7 @@ class SierraPersonSubjectsTest
           label = "Larrey, D. J. baron",
           concepts = List(
             Unidentifiable(
-              Person(label = "Larrey, D. J.", prefix = Some("baron"))
+              Person(label = "Larrey, D. J. baron")
             ))
         )
       )
@@ -86,8 +86,8 @@ class SierraPersonSubjectsTest
       Unidentifiable(
         Subject(
           label = "David Attenborough sir doctor",
-          concepts = List(Unidentifiable(
-            Person(label = "David Attenborough", prefix = Some("sir doctor"))))
+          concepts = List(
+            Unidentifiable(Person(label = "David Attenborough sir doctor")))
         )
       )
     )
@@ -110,9 +110,8 @@ class SierraPersonSubjectsTest
       Unidentifiable(
         Subject(
           label = "David Attenborough II",
-          concepts = List(
-            Unidentifiable(
-              Person(label = "David Attenborough", numeration = Some("II"))))
+          concepts =
+            List(Unidentifiable(Person(label = "David Attenborough II")))
         )
       )
     )
@@ -160,8 +159,8 @@ class SierraPersonSubjectsTest
       Unidentifiable(
         Subject(
           label = "Rita Levi Montalcini, 22 April 1909 – 30 December 2012",
-          concepts =
-            List(Unidentifiable(Person(label = "Rita Levi Montalcini,")))
+          concepts = List(Unidentifiable(Person(
+            label = "Rita Levi Montalcini, 22 April 1909 – 30 December 2012")))
         )
       )
     )
@@ -323,8 +322,7 @@ class SierraPersonSubjectsTest
 
     it("in the concepts") {
       subject.agent.concepts shouldBe List(
-        Unidentifiable(Person("Aristophanes.")),
-        Unidentifiable(Concept("Birds."))
+        Unidentifiable(Person("Aristophanes. Birds.")),
       )
     }
 
