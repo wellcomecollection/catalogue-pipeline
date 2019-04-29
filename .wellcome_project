@@ -1,0 +1,39 @@
+[{
+		"environments": [{
+				"id": "latest",
+				"name": "Latest"
+			},
+			{
+				"id": "stage",
+				"name": "Staging"
+			},
+			{
+				"id": "prod",
+				"name": "Production"
+			}
+		],
+		"id": "catalogue_api",
+		"name": "Catalogue API",
+		"profile": "platform-dev",
+		"github_repository": "wellcometrust/catalogue"
+	},
+	{
+		"environments": [{
+				"id": "latest",
+				"name": "Latest"
+			},
+			{
+				"id": "stage",
+				"name": "Staging"
+			},
+			{
+				"id": "prod",
+				"name": "Production"
+			}
+		],
+		"id": "catalogue_pipeline",
+		"name": "Catalogue pipeline",
+		"profile": "platform-dev",
+		"github_repository": "wellcometrust/catalogue"
+	}
+]
