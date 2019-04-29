@@ -3,7 +3,7 @@ module "catalogue_pipeline_20190426" {
 
   namespace = "catalogue-20190426"
 
-  release_label = "latest"
+  release_label = "stage"
 
   account_id = "${data.aws_caller_identity.current.account_id}"
   aws_region = "${local.aws_region}"
