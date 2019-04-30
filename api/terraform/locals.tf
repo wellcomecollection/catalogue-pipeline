@@ -19,7 +19,7 @@ locals {
   }
   remus_es_config = {
     index_v1 = "v1-2019-01-24-production-changes"
-    index_v2 = "v2-2019-02-05-extra-subject-labels"
+    index_v2 = "v2-2019-04-26-contributors-label-from-multiple-subfields"
     doc_type = "work"
   }
 
