@@ -21,7 +21,7 @@ class GeneralExceptionMapper @Inject()(response: ResponseBuilder,
     val context = buildContextUri(apiConfig = apiConfig, version = version)
 
     error(
-      s"Sending HTTP 500 from GeneralExceptionMapper. Context: $context.",
+      s"Sending HTTP 500 from GeneralExceptionMapper. URI: ${request.uri}.",
       exception)
     val result = DisplayError(
       Error(
