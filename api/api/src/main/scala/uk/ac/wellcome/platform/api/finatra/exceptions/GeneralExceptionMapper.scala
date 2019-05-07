@@ -18,16 +18,17 @@ class GeneralExceptionMapper @Inject()(response: ResponseBuilder,
   override def toResponse(request: Request, exception: Exception): Response = {
 
     val version = getVersion(request, apiPrefix = apiConfig.pathPrefix)
+    val context = buildContextUri(apiConfig = apiConfig, version = version)
 
-    error(s"Sending HTTP 500 from GeneralExceptionMapper", exception)
+    error(
+      s"Sending HTTP 500 from GeneralExceptionMapper. Context: $context.",
+      exception)
     val result = DisplayError(
       Error(
         variant = "http-500",
         description = None
       ))
-    val errorResponse = ResultResponse(
-      context = buildContextUri(apiConfig = apiConfig, version = version),
-      result = result)
+    val errorResponse = ResultResponse(context = context, result = result)
     response.internalServerError.json(errorResponse)
   }
 }
