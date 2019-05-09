@@ -54,6 +54,8 @@ data "aws_iam_policy_document" "sns-topic-policy" {
       "SNS:Subscribe",
       "SNS:ListSubscriptionsByTopic",
       "SNS:Receive",
+      "SNS:GetTopicAttributes",
+      "SNS:SetTopicAttributes",
     ]
 
     principals {
