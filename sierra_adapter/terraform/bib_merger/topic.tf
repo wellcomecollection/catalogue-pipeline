@@ -4,7 +4,7 @@ module "sierra_bib_merger_results" {
 }
 
 resource "aws_sns_topic_policy" "allow_reporting_subscription" {
-  arn = "${module.sierra_bib_merger_results.arn}"
+  arn    = "${module.sierra_bib_merger_results.arn}"
   policy = "${data.aws_iam_policy_document.sns-topic-policy.json}"
 }
 
@@ -41,7 +41,7 @@ data "aws_iam_policy_document" "sns-topic-policy" {
     }
 
     resources = [
-      "${module.sierra_bib_merger_results.arn}"
+      "${module.sierra_bib_merger_results.arn}",
     ]
 
     sid = "__default_statement_ID"
@@ -64,7 +64,7 @@ data "aws_iam_policy_document" "sns-topic-policy" {
     }
 
     resources = [
-      "${module.sierra_bib_merger_results.arn}"
+      "${module.sierra_bib_merger_results.arn}",
     ]
 
     sid = "ReportingAccess"
