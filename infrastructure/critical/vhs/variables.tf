@@ -34,3 +34,9 @@ variable "bucket_name" {
 }
 
 variable "account_id" {}
+
+variable "s3_cross_account_access_accounts" {
+  description = "The account numbers of any accounts that can access the VHS objects in S3"
+  type        = "list"
+  default     = []
+}
