@@ -10,8 +10,8 @@ locals {
 
   production_api     = "romulus"
   pinned_nginx       = "760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/nginx_api-gw:bad0dbfa548874938d16496e313b05adb71268b7"
-  pinned_remus_api   = "760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/api:e90551b8fd022682cb542ef425ccc263a3661c49"
-  pinned_romulus_api = "760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/api:e90551b8fd022682cb542ef425ccc263a3661c49"
+  pinned_remus_api   = "760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/api:851c6a60d574ef1d272375e07e7d6ffd4b6294ff"
+  pinned_romulus_api = "760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/api:851c6a60d574ef1d272375e07e7d6ffd4b6294ff"
   romulus_es_config = {
     index_v1 = "v1-2019-01-24-production-changes"
     index_v2 = "v2-2019-04-16-secondary-miro-merge-candidates"
