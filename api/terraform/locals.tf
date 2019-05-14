@@ -14,7 +14,7 @@ locals {
   pinned_romulus_api = "760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/api:851c6a60d574ef1d272375e07e7d6ffd4b6294ff"
   romulus_es_config = {
     index_v1 = "v1-2019-01-24-production-changes"
-    index_v2 = "v2-2019-04-16-secondary-miro-merge-candidates"
+    index_v2 = "v2-2019-04-26-contributors-label-from-multiple-subfields"
     doc_type = "work"
   }
   remus_es_config = {
