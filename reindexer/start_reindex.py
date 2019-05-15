@@ -12,7 +12,7 @@ import requests
 import tqdm
 
 
-SOURCES = ["miro", "sierra", "sierra_items"]
+SOURCES = ["miro", "sierra", "sierra-items"]
 
 DESTINATIONS = ["catalogue", "reporting"]
 
