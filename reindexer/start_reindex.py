@@ -16,7 +16,6 @@ SOURCES = ["miro", "sierra", "sierra-items"]
 
 DESTINATIONS = ["catalogue", "reporting"]
 
-
 def how_many_segments(table_name):
     """
     When we do a complete reindex, we need to tell the reindexer how many segments
@@ -27,7 +26,7 @@ def how_many_segments(table_name):
     large segment sizes causes it to fall over.)
 
     """
-    dynamodb = boto3.client("dynamodb")
+    dynamodb = session.client("dynamodb")
     resp = dynamodb.describe_table(TableName=table_name)
 
     # The item count isn't real-time; it gets updated every six hours or so.
@@ -55,7 +54,7 @@ def partial_reindex_parameters(max_records):
 
 
 def read_from_s3(bucket, key):
-    s3 = boto3.client("s3")
+    s3 = session.client("s3")
     obj = s3.get_object(Bucket=bucket, Key=key)
     return obj["Body"].read()
 
@@ -118,7 +117,7 @@ def get_reindexer_topic_arn():
 
 def publish_messages(job_config_id, topic_arn, parameters):
     """Publish a sequence of messages to an SNS topic."""
-    sns = boto3.client("sns")
+    sns = session.client("sns")
     for params in tqdm.tqdm(list(parameters)):
         to_publish = {"jobConfigId": job_config_id, "parameters": params}
         resp = sns.publish(
@@ -185,6 +184,11 @@ def start_reindex(src, dst, mode, reason):
         job_config_id=f"{src}--{dst}", topic_arn=topic_arn, parameters=parameters
     )
 
-
 if __name__ == "__main__":
+    sts = boto3.client('sts')
+    response = sts.assume_role(RoleArn='arn:aws:iam::760097843905:role/developer', RoleSessionName='platform')
+    session = boto3.Session(
+        aws_access_key_id=response['Credentials']['AccessKeyId'],
+        aws_secret_access_key=response['Credentials']['SecretAccessKey'],
+        aws_session_token=response['Credentials']['SessionToken'])
     start_reindex()
