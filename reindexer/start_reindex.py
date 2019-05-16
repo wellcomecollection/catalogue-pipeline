@@ -16,6 +16,7 @@ SOURCES = ["miro", "sierra", "sierra-items"]
 
 DESTINATIONS = ["catalogue", "reporting"]
 
+
 def how_many_segments(table_name):
     """
     When we do a complete reindex, we need to tell the reindexer how many segments
@@ -184,11 +185,15 @@ def start_reindex(src, dst, mode, reason):
         job_config_id=f"{src}--{dst}", topic_arn=topic_arn, parameters=parameters
     )
 
+
 if __name__ == "__main__":
-    sts = boto3.client('sts')
-    response = sts.assume_role(RoleArn='arn:aws:iam::760097843905:role/developer', RoleSessionName='platform')
+    sts = boto3.client("sts")
+    response = sts.assume_role(
+        RoleArn="arn:aws:iam::760097843905:role/developer", RoleSessionName="platform"
+    )
     session = boto3.Session(
-        aws_access_key_id=response['Credentials']['AccessKeyId'],
-        aws_secret_access_key=response['Credentials']['SecretAccessKey'],
-        aws_session_token=response['Credentials']['SessionToken'])
+        aws_access_key_id=response["Credentials"]["AccessKeyId"],
+        aws_secret_access_key=response["Credentials"]["SecretAccessKey"],
+        aws_session_token=response["Credentials"]["SessionToken"],
+    )
     start_reindex()
