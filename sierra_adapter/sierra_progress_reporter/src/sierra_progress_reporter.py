@@ -168,7 +168,7 @@ def main(event=None, _ctxt=None):
         error_lines.insert(0, message)
 
         error_lines.append(
-            "You can fix this by running `$ python sierra_adapter/send_missing_windows.py` in the root of the platform repo."
+            "You can fix this by running `$ python sierra_adapter/build_missing_windows.py` in the root of the catalogue repo."
         )
 
         slack_data = {
