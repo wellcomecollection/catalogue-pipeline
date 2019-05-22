@@ -5,7 +5,6 @@ import com.amazonaws.services.sqs.model.Message
 import com.sksamuel.elastic4s.http.ElasticClient
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.elasticsearch.{ElasticsearchIndexCreator, WorksIndex}
-import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.message.MessageStream
 import uk.ac.wellcome.models.work.internal.IdentifiedBaseWork
 import uk.ac.wellcome.platform.ingestor.config.models.IngestorConfig
