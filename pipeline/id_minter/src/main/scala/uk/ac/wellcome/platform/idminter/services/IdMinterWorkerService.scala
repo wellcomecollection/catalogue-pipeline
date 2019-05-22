@@ -38,9 +38,6 @@ class IdMinterWorkerService(
   def processMessage(json: Json): Future[Unit] =
     for {
       identifiedJson <- idEmbedder.embedId(json)
-      _ <- writer.write(
-        message = identifiedJson,
-        subject = s"source: ${this.getClass.getSimpleName}.processMessage"
-      )
+      _ <- writer.write(identifiedJson)
     } yield ()
 }
