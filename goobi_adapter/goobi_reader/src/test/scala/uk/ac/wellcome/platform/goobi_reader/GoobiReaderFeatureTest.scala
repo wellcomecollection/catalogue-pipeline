@@ -62,7 +62,10 @@ class GoobiReaderFeatureTest
     }
   }
 
-  private def withWorkerService[R](queue: Queue, bucket: Bucket, dao: MemoryVersionedDao[String, Entry[String, GoobiRecordMetadata]])(
+  private def withWorkerService[R](
+    queue: Queue,
+    bucket: Bucket,
+    dao: MemoryVersionedDao[String, Entry[String, GoobiRecordMetadata]])(
     testWith: TestWith[GoobiReaderWorkerService, R]): R =
     withActorSystem { implicit actorSystem =>
       withSQSStream[NotificationMessage, R](queue) { sqsStream =>

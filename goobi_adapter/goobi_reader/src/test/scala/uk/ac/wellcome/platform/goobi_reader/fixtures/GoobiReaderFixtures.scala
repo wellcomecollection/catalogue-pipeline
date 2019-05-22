@@ -65,7 +65,8 @@ trait GoobiReaderFixtures extends S3 {
 
   def createVHS(bucket: Bucket, dao: GoobiDao): GoobiVHS =
     new VersionedHybridStore[String, InputStream, GoobiRecordMetadata] {
-      override protected val versionedDao: VersionedDao[String, Entry[String, GoobiRecordMetadata]] = dao
+      override protected val versionedDao
+        : VersionedDao[String, Entry[String, GoobiRecordMetadata]] = dao
       override protected val objectStore: ObjectStore[InputStream] =
         ObjectStore[InputStream]
 

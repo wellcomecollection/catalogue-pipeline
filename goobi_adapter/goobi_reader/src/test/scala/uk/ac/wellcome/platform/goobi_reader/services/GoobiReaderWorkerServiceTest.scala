@@ -72,7 +72,8 @@ class GoobiReaderWorkerServiceTest
 
         sendNotificationToSQS(
           queue = queue,
-          body = createS3Notification(urlEncodedSourceKey, bucket.name, eventTime)
+          body =
+            createS3Notification(urlEncodedSourceKey, bucket.name, eventTime)
         )
 
         eventually {
@@ -250,21 +251,23 @@ class GoobiReaderWorkerServiceTest
   }
 
   private def withGoobiReaderWorkerService[R](s3Client: AmazonS3)(
-    testWith: TestWith[(Bucket,
-                        QueuePair,
-                        MetricsSender,
-                        MemoryVersionedDao[String, Entry[String, GoobiRecordMetadata]],
-                        GoobiVHS),
-                       R]): R =
+    testWith: TestWith[
+      (Bucket,
+       QueuePair,
+       MetricsSender,
+       MemoryVersionedDao[String, Entry[String, GoobiRecordMetadata]],
+       GoobiVHS),
+      R]): R =
     withActorSystem { implicit actorSystem =>
       withLocalSqsQueueAndDlq {
-        case queuePair@QueuePair(queue, dlq) =>
+        case queuePair @ QueuePair(queue, dlq) =>
           withMockMetricsSender { mockMetricsSender =>
             withSQSStream[NotificationMessage, R](
               queue = queue,
               metricsSender = mockMetricsSender) { sqsStream =>
               withLocalS3Bucket[R] { bucket =>
-                val dao = MemoryVersionedDao[String, Entry[String, GoobiRecordMetadata]]
+                val dao =
+                  MemoryVersionedDao[String, Entry[String, GoobiRecordMetadata]]
                 val vhs = createVHS(bucket, dao)
 
                 val service = new GoobiReaderWorkerService(

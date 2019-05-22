@@ -8,7 +8,11 @@ import grizzled.slf4j.Logging
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs._
-import uk.ac.wellcome.platform.goobi_reader.models.{GoobiRecordMetadata, S3Event, S3Record}
+import uk.ac.wellcome.platform.goobi_reader.models.{
+  GoobiRecordMetadata,
+  S3Event,
+  S3Record
+}
 import uk.ac.wellcome.storage.vhs.VersionedHybridStore
 import uk.ac.wellcome.typesafe.Runnable
 
@@ -60,15 +64,15 @@ class GoobiReaderWorkerService(
       debug(s"trying to retrieve object s3://$bucketName/$objectKey")
       s3Client.getObject(bucketName, objectKey).getObjectContent
     }
-    eventuallyContent.flatMap(updatedContent =>
-      vhs.update(id = id)(
-        ifNotExisting = (updatedContent, GoobiRecordMetadata(updateEventTime)))(
-        ifExisting = (existingContent, existingMetadata) => {
-          if (existingMetadata.eventTime.isBefore(updateEventTime))
-            (updatedContent, GoobiRecordMetadata(updateEventTime))
-          else
-            (existingContent, existingMetadata)
-        })
-    )
+    eventuallyContent.flatMap(
+      updatedContent =>
+        vhs.update(id = id)(ifNotExisting =
+          (updatedContent, GoobiRecordMetadata(updateEventTime)))(
+          ifExisting = (existingContent, existingMetadata) => {
+            if (existingMetadata.eventTime.isBefore(updateEventTime))
+              (updatedContent, GoobiRecordMetadata(updateEventTime))
+            else
+              (existingContent, existingMetadata)
+          }))
   }
 }

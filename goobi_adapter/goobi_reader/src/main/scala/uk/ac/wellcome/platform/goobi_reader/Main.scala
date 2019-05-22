@@ -27,7 +27,8 @@ object Main extends WellcomeTypesafeApp {
     new GoobiReaderWorkerService(
       s3Client = S3Builder.buildS3Client(config),
       sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
-      vhs = VHSBuilder.buildVHS[String, InputStream, GoobiRecordMetadata](config)
+      vhs =
+        VHSBuilder.buildVHS[String, InputStream, GoobiRecordMetadata](config)
     )
   }
 }
