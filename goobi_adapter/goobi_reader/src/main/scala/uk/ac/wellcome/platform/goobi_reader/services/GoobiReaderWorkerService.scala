@@ -5,17 +5,11 @@ import java.io.InputStream
 import akka.Done
 import com.amazonaws.services.s3.AmazonS3
 import grizzled.slf4j.Logging
+import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs._
-import uk.ac.wellcome.platform.goobi_reader.models.{
-  GoobiRecordMetadata,
-  S3Event,
-  S3Record
-}
-import uk.ac.wellcome.storage.ObjectStore
-import uk.ac.wellcome.storage.dynamo._
-import uk.ac.wellcome.storage.vhs.{VHSIndexEntry, VersionedHybridStore}
-import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.platform.goobi_reader.models.{GoobiRecordMetadata, S3Event, S3Record}
+import uk.ac.wellcome.storage.vhs.VersionedHybridStore
 import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -24,9 +18,7 @@ import scala.util.Try
 class GoobiReaderWorkerService(
   s3Client: AmazonS3,
   sqsStream: SQSStream[NotificationMessage],
-  versionedHybridStore: VersionedHybridStore[InputStream,
-                                             GoobiRecordMetadata,
-                                             ObjectStore[InputStream]]
+  vhs: VersionedHybridStore[String, InputStream, GoobiRecordMetadata]
 )(implicit ec: ExecutionContext)
     extends Logging
     with Runnable {
@@ -45,7 +37,11 @@ class GoobiReaderWorkerService(
       urlDecodedMessage <- Future.fromTry(
         Try(java.net.URLDecoder.decode(snsNotification.body, "utf-8")))
       eventNotification <- Future.fromTry(fromJson[S3Event](urlDecodedMessage))
-      _ <- Future.sequence(eventNotification.Records.map(updateRecord))
+      _ <- Future.sequence(
+        eventNotification.Records
+          .map(updateRecord)
+          .map(Future.fromTry)
+      )
     } yield ()
     eventuallyProcessedMessages.failed.foreach { e: Throwable =>
       error(
@@ -54,19 +50,18 @@ class GoobiReaderWorkerService(
     eventuallyProcessedMessages
   }
 
-  private def updateRecord(
-    r: S3Record): Future[VHSIndexEntry[GoobiRecordMetadata]] = {
+  private def updateRecord(r: S3Record): Try[vhs.VHSEntry] = {
     val bucketName = r.s3.bucket.name
     val objectKey = r.s3.`object`.key
     val id = objectKey.replaceAll(".xml", "")
     val updateEventTime = r.eventTime
 
-    val eventuallyContent = Future {
+    val eventuallyContent = Try {
       debug(s"trying to retrieve object s3://$bucketName/$objectKey")
       s3Client.getObject(bucketName, objectKey).getObjectContent
     }
-    eventuallyContent.flatMap(updatedContent => {
-      versionedHybridStore.updateRecord(id = id)(
+    eventuallyContent.flatMap(updatedContent =>
+      vhs.update(id = id)(
         ifNotExisting = (updatedContent, GoobiRecordMetadata(updateEventTime)))(
         ifExisting = (existingContent, existingMetadata) => {
           if (existingMetadata.eventTime.isBefore(updateEventTime))
@@ -74,6 +69,6 @@ class GoobiReaderWorkerService(
           else
             (existingContent, existingMetadata)
         })
-    })
+    )
   }
 }

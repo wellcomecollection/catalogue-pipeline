@@ -6,7 +6,3 @@ sqs:
   image: s12v/elasticmq
   ports:
     - "9324:9324"
-dynamodb:
-  image: peopleperhour/dynamodb
-  ports:
-    - "45678:8000"
