@@ -5,7 +5,7 @@ import com.amazonaws.services.dynamodbv2.document._
 import com.amazonaws.services.dynamodbv2.document.spec.ScanSpec
 
 import scala.collection.JavaConverters._
-import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
 /** Implements a wrapper for DynamoDB Scan operations using a ScanSpec.
   *
@@ -15,8 +15,7 @@ import scala.concurrent.{ExecutionContext, Future}
   * For the options allowed by ScanSpec, see:
   * https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/services/dynamodbv2/document/spec/ScanSpec.html
   */
-class ScanSpecScanner(dynamoDBClient: AmazonDynamoDB)(
-  implicit ec: ExecutionContext) {
+class ScanSpecScanner(dynamoDBClient: AmazonDynamoDB) {
 
   val dynamoDB = new DynamoDB(dynamoDBClient)
 
@@ -25,10 +24,10 @@ class ScanSpecScanner(dynamoDBClient: AmazonDynamoDB)(
     * Note that this returns a Future[List], so results will be cached in-memory.
     * Design your spec accordingly.
     */
-  def scan(scanSpec: ScanSpec, tableName: String): Future[List[String]] = {
+  def scan(scanSpec: ScanSpec, tableName: String): Try[Seq[String]] = {
     for {
-      table <- Future.successful { dynamoDB.getTable(tableName) }
-      scanResult: ItemCollection[ScanOutcome] <- Future { table.scan(scanSpec) }
+      table <- Try { dynamoDB.getTable(tableName) }
+      scanResult: ItemCollection[ScanOutcome] <- Try { table.scan(scanSpec) }
       items: List[Item] = scanResult.asScala.toList
       jsonStrings = items.map { _.toJSON }
     } yield jsonStrings

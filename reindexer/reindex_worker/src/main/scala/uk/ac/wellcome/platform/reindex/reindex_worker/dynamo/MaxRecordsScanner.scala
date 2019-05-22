@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.reindex.reindex_worker.dynamo
 
 import com.amazonaws.services.dynamodbv2.document.spec.ScanSpec
 
-import scala.concurrent.Future
+import scala.util.Try
 
 class MaxRecordsScanner(scanSpecScanner: ScanSpecScanner) {
 
@@ -11,8 +11,7 @@ class MaxRecordsScanner(scanSpecScanner: ScanSpecScanner) {
     * It may return less if there aren't enough results in the table, or if
     * `maxResults` is larger than the maximum page size.
     */
-  def scan(maxRecords: Int)(tableName: String): Future[List[String]] = {
-
+  def scan(maxRecords: Int)(tableName: String): Try[Seq[String]] = {
     val scanSpec = new ScanSpec()
       .withMaxResultSize(maxRecords)
 

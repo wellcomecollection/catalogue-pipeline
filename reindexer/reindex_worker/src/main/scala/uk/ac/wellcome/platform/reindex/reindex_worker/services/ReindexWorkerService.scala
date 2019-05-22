@@ -12,11 +12,11 @@ import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class ReindexWorkerService(
+class ReindexWorkerService[DestinationConfig](
   recordReader: RecordReader,
-  bulkSNSSender: BulkSNSSender,
+  bulkMessageSender: BulkMessageSender[DestinationConfig],
   sqsStream: SQSStream[NotificationMessage],
-  reindexJobConfigMap: Map[String, ReindexJobConfig]
+  reindexJobConfigMap: Map[String, ReindexJobConfig[DestinationConfig]]
 )(implicit ec: ExecutionContext)
     extends Runnable {
 
@@ -24,19 +24,25 @@ class ReindexWorkerService(
     for {
       reindexRequest: ReindexRequest <- Future.fromTry(
         fromJson[ReindexRequest](message.body))
+
+      // @@AWLC: This throw isn't wrapped in a Future or a Try -- will it be
+      // handled correctly, or would it crash the app?
       reindexJobConfig = reindexJobConfigMap.getOrElse(
         reindexRequest.jobConfigId,
         throw new RuntimeException(
           s"No such job config: ${reindexRequest.jobConfigId}")
       )
-      recordsToSend: List[String] <- recordReader
-        .findRecordsForReindexing(
-          reindexParameters = reindexRequest.parameters,
-          dynamoConfig = reindexJobConfig.dynamoConfig
-        )
-      _ <- bulkSNSSender.sendToSNS(
-        messages = recordsToSend,
-        snsConfig = reindexJobConfig.snsConfig
+
+      recordsToSend <- Future.fromTry {
+        recordReader
+          .findRecordsForReindexing(
+            reindexParameters = reindexRequest.parameters,
+            dynamoConfig = reindexJobConfig.dynamoConfig
+          )
+      }
+      _ <- bulkMessageSender.send(
+        recordsToSend,
+        destination = reindexJobConfig.destination
       )
     } yield ()
 

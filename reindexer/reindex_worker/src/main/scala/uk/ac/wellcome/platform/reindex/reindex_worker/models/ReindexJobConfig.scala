@@ -1,9 +1,8 @@
 package uk.ac.wellcome.platform.reindex.reindex_worker.models
 
-import uk.ac.wellcome.messaging.sns.SNSConfig
 import uk.ac.wellcome.storage.dynamo.DynamoConfig
 
-case class ReindexJobConfig(
+case class ReindexJobConfig[DestinationConfig](
   dynamoConfig: DynamoConfig,
-  snsConfig: SNSConfig
+  destination: DestinationConfig
 )

@@ -4,8 +4,19 @@ import com.amazonaws.services.dynamodbv2.model._
 import com.amazonaws.services.dynamodbv2.util.TableUtils.waitUntilActive
 import uk.ac.wellcome.storage.fixtures.LocalDynamoDb
 import uk.ac.wellcome.storage.fixtures.LocalDynamoDb.Table
+import uk.ac.wellcome.storage.vhs.Entry
 
 trait ReindexableTable extends LocalDynamoDb {
+  case class VersionedRecord(
+    id: String,
+    data: String,
+    version: Int
+  )
+
+  case class ReindexerMetadata(name: String)
+
+  type ReindexerEntry = Entry[String, ReindexerMetadata]
+
   override def createTable(table: Table): Table = {
     dynamoDbClient.createTable(
       new CreateTableRequest()
