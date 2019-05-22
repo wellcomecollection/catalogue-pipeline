@@ -3,32 +3,27 @@ package uk.ac.wellcome.platform.matcher.storage
 import com.gu.scanamo.Scanamo
 import org.mockito.Matchers.any
 import org.mockito.Mockito.when
-import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.models.matcher.WorkNode
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
 import uk.ac.wellcome.platform.matcher.models.{WorkGraph, WorkUpdate}
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.util.{Failure, Success}
+
 class WorkGraphStoreTest
     extends FunSpec
     with Matchers
     with MockitoSugar
-    with ScalaFutures
     with MatcherFixtures {
 
   describe("Get graph of linked works") {
     it("returns nothing if there are no matching graphs") {
-      withWorkGraphTable { graphTable =>
-        withWorkGraphStore(graphTable) { workGraphStore =>
-          whenReady(
-            workGraphStore.findAffectedWorks(
-              WorkUpdate("Not-there", 0, Set.empty))) { workGraph =>
-            workGraph shouldBe WorkGraph(Set.empty)
-          }
-        }
+      withWorkGraphStore { workGraphStore =>
+        val result = workGraphStore.findAffectedWorks(
+          WorkUpdate("Not-there", 0, Set.empty))
+
+        result shouldBe Success(WorkGraph(Set.empty))
       }
     }
 
@@ -40,11 +35,8 @@ class WorkGraphStoreTest
             WorkNode(id = "A", version = 0, linkedIds = Nil, componentId = "A")
           Scanamo.put(dynamoDbClient)(graphTable.name)(work)
 
-          whenReady(
-            workGraphStore.findAffectedWorks(WorkUpdate("A", 0, Set.empty))) {
-            workGraph =>
-              workGraph shouldBe WorkGraph(Set(work))
-          }
+          val result = workGraphStore.findAffectedWorks(WorkUpdate("A", 0, Set.empty))
+          result shouldBe Success(WorkGraph(Set(work)))
         }
       }
     }
@@ -59,11 +51,8 @@ class WorkGraphStoreTest
           Scanamo.put(dynamoDbClient)(graphTable.name)(workA)
           Scanamo.put(dynamoDbClient)(graphTable.name)(workB)
 
-          whenReady(
-            workGraphStore.findAffectedWorks(WorkUpdate("A", 0, Set("B")))) {
-            workGraph =>
-              workGraph.nodes shouldBe Set(workA, workB)
-          }
+          val result = workGraphStore.findAffectedWorks(WorkUpdate("A", 0, Set("B")))
+          result shouldBe Success(WorkGraph(Set(workA, workB)))
         }
       }
     }
@@ -83,11 +72,8 @@ class WorkGraphStoreTest
           Scanamo.put(dynamoDbClient)(graphTable.name)(workA)
           Scanamo.put(dynamoDbClient)(graphTable.name)(workB)
 
-          whenReady(
-            workGraphStore.findAffectedWorks(WorkUpdate("A", 0, Set.empty))) {
-            workGraph =>
-              workGraph.nodes shouldBe Set(workA, workB)
-          }
+          val result = workGraphStore.findAffectedWorks(WorkUpdate("A", 0, Set.empty))
+          result shouldBe Success(WorkGraph(Set(workA, workB)))
         }
       }
     }
@@ -118,11 +104,8 @@ class WorkGraphStoreTest
           Scanamo.put(dynamoDbClient)(graphTable.name)(workB)
           Scanamo.put(dynamoDbClient)(graphTable.name)(workC)
 
-          whenReady(
-            workGraphStore.findAffectedWorks(WorkUpdate("A", 0, Set.empty))) {
-            workGraph =>
-              workGraph.nodes shouldBe Set(workA, workB, workC)
-          }
+          val result = workGraphStore.findAffectedWorks(WorkUpdate("A", 0, Set.empty))
+          result shouldBe Success(WorkGraph(Set(workA, workB, workC)))
         }
       }
     }
@@ -146,11 +129,8 @@ class WorkGraphStoreTest
           Scanamo.put(dynamoDbClient)(graphTable.name)(workB)
           Scanamo.put(dynamoDbClient)(graphTable.name)(workC)
 
-          whenReady(
-            workGraphStore.findAffectedWorks(WorkUpdate("B", 0, Set("C")))) {
-            workGraph =>
-              workGraph.nodes shouldBe Set(workA, workB, workC)
-          }
+          val result = workGraphStore.findAffectedWorks(WorkUpdate("B", 0, Set("C")))
+          result shouldBe Success(WorkGraph(Set(workA, workB, workC)))
         }
       }
     }
@@ -163,15 +143,14 @@ class WorkGraphStoreTest
           val workNodeA = WorkNode("A", version = 0, List("B"), "A+B")
           val workNodeB = WorkNode("B", version = 0, Nil, "A+B")
 
-          whenReady(workGraphStore.put(WorkGraph(Set(workNodeA, workNodeB)))) {
-            _ =>
-              val savedWorks = Scanamo
-                .scan[WorkNode](dynamoDbClient)(graphTable.name)
-                .map(_.right.get)
-              savedWorks should contain theSameElementsAs List(
-                workNodeA,
-                workNodeB)
-          }
+          val result = workGraphStore.put(WorkGraph(Set(workNodeA, workNodeB)))
+          result shouldBe a[Success[_]]
+
+          val savedWorks = Scanamo
+            .scan[WorkNode](dynamoDbClient)(graphTable.name)
+            .map(_.right.get)
+
+          savedWorks should contain theSameElementsAs Seq(workNodeA, workNodeB)
         }
       }
     }
@@ -181,14 +160,10 @@ class WorkGraphStoreTest
     val mockWorkNodeDao = mock[WorkNodeDao]
     val expectedException = new RuntimeException("FAILED")
     when(mockWorkNodeDao.put(any[WorkNode]))
-      .thenReturn(Future.failed(expectedException))
+      .thenReturn(Failure(expectedException))
     val workGraphStore = new WorkGraphStore(mockWorkNodeDao)
 
-    whenReady(
-      workGraphStore
-        .put(WorkGraph(Set(WorkNode("A", version = 0, Nil, "A+B"))))
-        .failed) { failedException =>
-      failedException shouldBe expectedException
-    }
+    val result = workGraphStore.put(WorkGraph(Set(WorkNode("A", version = 0, Nil, "A+B"))))
+    result shouldBe Failure(expectedException)
   }
 }

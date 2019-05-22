@@ -7,21 +7,19 @@ import akka.stream.ActorMaterializer
 import com.typesafe.config.Config
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.typesafe.{MessagingBuilder, SNSBuilder}
+import uk.ac.wellcome.models.matcher.MatchedIdentifiers
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
-import uk.ac.wellcome.monitoring.typesafe.MetricsBuilder
 import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher
 import uk.ac.wellcome.platform.matcher.services.MatcherWorkerService
-import uk.ac.wellcome.platform.matcher.storage.{WorkGraphStore, WorkNodeDao}
-import uk.ac.wellcome.storage.locking.{
-  DynamoLockingService,
-  DynamoRowLockDao,
-  DynamoRowLockDaoConfig
-}
+import uk.ac.wellcome.platform.matcher.storage.{DynamoWorkNodeDao, WorkGraphStore}
+import uk.ac.wellcome.storage.dynamo._
+import uk.ac.wellcome.storage.locking.{DynamoLockDao, DynamoLockDaoConfig, DynamoLockingService}
 import uk.ac.wellcome.storage.typesafe.DynamoBuilder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 
 import scala.concurrent.ExecutionContext
+import scala.util.Try
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
@@ -35,26 +33,24 @@ object Main extends WellcomeTypesafeApp {
     val dynamoClient = DynamoBuilder.buildDynamoClient(config)
 
     val workGraphStore = new WorkGraphStore(
-      workNodeDao = new WorkNodeDao(
+      workNodeDao = new DynamoWorkNodeDao(
         dynamoDbClient = dynamoClient,
         dynamoConfig = DynamoBuilder.buildDynamoConfig(config)
       )
     )
 
-    val rowLockDaoConfig = DynamoRowLockDaoConfig(
+    val lockDaoConfig = DynamoLockDaoConfig(
       dynamoConfig =
         DynamoBuilder.buildDynamoConfig(config, namespace = "locking.service"),
-      duration = Duration.ofSeconds(180)
+      expiryTime = Duration.ofSeconds(180)
     )
 
-    val lockingService = new DynamoLockingService(
-      lockNamePrefix = "WorkMatcher",
-      dynamoRowLockDao = new DynamoRowLockDao(
-        dynamoDbClient = dynamoClient,
-        rowLockDaoConfig = rowLockDaoConfig
-      ),
-      metricsSender = MetricsBuilder.buildMetricsSender(config)
+    implicit val dynamoLockDao: DynamoLockDao = new DynamoLockDao(
+      client = DynamoBuilder.buildDynamoClient(config),
+      config = lockDaoConfig
     )
+
+    val lockingService = new DynamoLockingService[Set[MatchedIdentifiers], Try]()
 
     val workMatcher = new WorkMatcher(
       workGraphStore = workGraphStore,
@@ -64,7 +60,7 @@ object Main extends WellcomeTypesafeApp {
     new MatcherWorkerService(
       messageStream =
         MessagingBuilder.buildMessageStream[TransformedBaseWork](config),
-      snsWriter = SNSBuilder.buildSNSWriter(config),
+      messageSender = SNSBuilder.buildSNSMessageSender(config, subject = "Sent from the matcher"),
       workMatcher = workMatcher
     )
   }

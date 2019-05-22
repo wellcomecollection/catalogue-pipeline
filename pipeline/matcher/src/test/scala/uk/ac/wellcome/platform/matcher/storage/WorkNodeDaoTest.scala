@@ -16,21 +16,18 @@ import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
 import uk.ac.wellcome.storage.dynamo.DynamoConfig
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.{Failure, Success}
+
 class WorkNodeDaoTest
     extends FunSpec
     with Matchers
     with MockitoSugar
-    with ScalaFutures
     with MatcherFixtures {
 
   describe("Get from dynamo") {
     it("returns nothing if ids are not in dynamo") {
-      withWorkGraphTable { table =>
-        withWorkNodeDao(table) { workNodeDao =>
-          whenReady(workNodeDao.get(Set("Not-there"))) { workNodeSet =>
-            workNodeSet shouldBe Set.empty
-          }
-        }
+      withWorkNodeDao { workNodeDao =>
+        workNodeDao.get(Set("Not-there")) shouldBe Success(Set.empty)
       }
     }
 
@@ -44,9 +41,8 @@ class WorkNodeDaoTest
           Scanamo.put(dynamoDbClient)(table.name)(existingWorkA)
           Scanamo.put(dynamoDbClient)(table.name)(existingWorkB)
 
-          whenReady(workNodeDao.get(Set("A", "B"))) { work =>
-            work shouldBe Set(existingWorkA, existingWorkB)
-          }
+          val result = workNodeDao.get(Set("A", "B"))
+          result shouldBe Success(Set(existingWorkA, existingWorkB))
         }
       }
     }
@@ -64,9 +60,8 @@ class WorkNodeDaoTest
           DynamoConfig(table = table.name, index = table.index)
         )
 
-        whenReady(matcherGraphDao.get(Set("A")).failed) { failedException =>
-          failedException shouldBe expectedException
-        }
+        val result = matcherGraphDao.get(Set("A"))
+        result shouldBe Failure(expectedException)
       }
     }
 

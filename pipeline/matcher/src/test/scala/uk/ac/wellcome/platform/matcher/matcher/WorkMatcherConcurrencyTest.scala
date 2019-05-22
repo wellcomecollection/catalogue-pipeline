@@ -1,86 +1,46 @@
 package uk.ac.wellcome.platform.matcher.matcher
 
-import com.gu.scanamo.Scanamo
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSpec, Matchers}
-import uk.ac.wellcome.models.matcher.MatcherResult
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.MergeCandidate
-import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
-import uk.ac.wellcome.storage.locking.RowLock
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 class WorkMatcherConcurrencyTest
     extends FunSpec
     with Matchers
     with MatcherFixtures
-    with ScalaFutures
-    with MockitoSugar
     with WorksGenerators {
 
   it("processes one of two conflicting concurrent updates and locks the other") {
-    withMockMetricsSender { metricsSender =>
-      withLockTable { lockTable =>
-        withWorkGraphTable { graphTable =>
-          withWorkGraphStore(graphTable) { workGraphStore =>
-            withDynamoRowLockDao(dynamoDbClient, lockTable) { rowLockDao =>
-              withLockingService(rowLockDao, metricsSender) {
-                dynamoLockingService =>
-                  withWorkMatcherAndLockingService(
-                    workGraphStore,
-                    dynamoLockingService) { workMatcher =>
-                    val identifierA =
-                      createSierraSystemSourceIdentifierWith(value = "A")
-                    val identifierB =
-                      createSierraSystemSourceIdentifierWith(value = "B")
+    withWorkGraphTable { graphTable =>
+      val lockDao = createLockDao
 
-                    val workA = createUnidentifiedWorkWith(
-                      sourceIdentifier = identifierA,
-                      mergeCandidates = List(MergeCandidate(identifierB))
-                    )
+      val workMatcher = createWorkMatcher(
+        graphTable = graphTable,
+        lockingService = createLockingService(lockDao)
+      )
 
-                    val workB = createUnidentifiedWorkWith(
-                      sourceIdentifier = identifierB
-                    )
+      val identifierA = createSierraSystemSourceIdentifierWith(value = "A")
+      val identifierB = createSierraSystemSourceIdentifierWith(value = "B")
 
-                    val eventualResultA = workMatcher.matchWork(workA)
-                    val eventualResultB = workMatcher.matchWork(workB)
+      val workA = createUnidentifiedWorkWith(
+        sourceIdentifier = identifierA,
+        mergeCandidates = List(MergeCandidate(identifierB))
+      )
 
-                    val eventualResults = for {
-                      resultA <- eventualResultA recoverWith {
-                        case e: MatcherException =>
-                          Future.successful(e)
-                      }
-                      resultB <- eventualResultB recoverWith {
-                        case e: MatcherException =>
-                          Future.successful(e)
-                      }
-                    } yield (resultA, resultB)
+      val workB = createUnidentifiedWorkWith(
+        sourceIdentifier = identifierB
+      )
 
-                    whenReady(eventualResults) { results =>
-                      val resultsList = results.productIterator.toList
-                      val failure = resultsList.collect({
-                        case e: MatcherException => e
-                      })
-                      val result = resultsList.collect({
-                        case r: MatcherResult => r
-                      })
+      val results = Seq(
+        workMatcher.matchWork(workA),
+        workMatcher.matchWork(workB)
+      )
 
-                      failure.size shouldBe 1
-                      result.size shouldBe 1
+      results.count { _.isFailure } shouldBe 1
+      results.count { _.isSuccess } shouldBe 1
 
-                      Scanamo.scan[RowLock](dynamoDbClient)(lockTable.name) shouldBe empty
-                    }
-                  }
-              }
-            }
-          }
-        }
-      }
+      lockDao.getCurrentLocks shouldBe empty
+      lockDao.history should have size 1
     }
-  }
 }
