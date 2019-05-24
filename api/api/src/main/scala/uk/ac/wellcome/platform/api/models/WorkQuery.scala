@@ -20,51 +20,39 @@ object WorkQuery {
     }
   }
 
-  case class JustBoostQuery(queryString: String) extends WorkQuery {
+  case class MSMQuery(queryString: String) extends WorkQuery {
     override def query(): MultiMatchQuery = {
       multiMatchQuery(queryString)
-        .fields("*", "subjects*^4", "genres*^4", "title^3")
+        .fields("*")
         .matchType(MultiMatchQueryBuilderType.CROSS_FIELDS)
+        .minimumShouldMatch("70%")
     }
   }
 
-  case class BroaderBoostQuery(queryString: String) extends WorkQuery {
+  case class BoostQuery(queryString: String) extends WorkQuery {
     override def query(): MultiMatchQuery = {
       multiMatchQuery(queryString)
         .fields(
           "*",
+          "title^9",
           "subjects*^8",
           "genres*^8",
-          "title^5",
-          "description*^2",
-          "lettering*^2",
+          "description*^5",
           "contributors*^2")
         .matchType(MultiMatchQueryBuilderType.CROSS_FIELDS)
     }
   }
 
-  case class SlopQuery(queryString: String) extends WorkQuery {
-    // TODO: 'phrase_match' rather than 'cross_fields' seems to reject fields("*") as used elsewhere, why?
-    private val all_fields = List(
-      "subjects",
-      "genres",
-      "title",
-      "description",
-      "lettering",
-      "contributors"
-    )
-    override def query() = {
-      multiMatchQuery(queryString)
-        .fields(all_fields)
-        .matchType(MultiMatchQueryBuilderType.PHRASE)
-        .slop(3)
-    }
-  }
-
-  case class MinimumMatchQuery(queryString: String) extends WorkQuery {
+  case class MSMBoostQuery(queryString: String) extends WorkQuery {
     override def query(): MultiMatchQuery = {
       multiMatchQuery(queryString)
-        .fields("*")
+        .fields(
+          "*",
+          "title^9",
+          "subjects*^8",
+          "genres*^8",
+          "description*^5",
+          "contributors*^2")
         .matchType(MultiMatchQueryBuilderType.CROSS_FIELDS)
         .minimumShouldMatch("70%")
     }
