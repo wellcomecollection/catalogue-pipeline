@@ -314,7 +314,8 @@ class ElasticsearchServiceTest
 
         val matchingSubject100 =
           createIdentifiedWorkWith(
-            subjects = List(createSubjectWith(s"Subject text that contains Aegean")))
+            subjects =
+              List(createSubjectWith(s"Subject text that contains Aegean")))
         val matchingSubject75 =
           createIdentifiedWorkWith(
             subjects = List(createSubjectWith(s"Subject text that contains")))
@@ -333,11 +334,13 @@ class ElasticsearchServiceTest
             genres = List(createGenreWith(s"Genre text")))
 
         val matchingDescription100 =
-          createIdentifiedWorkWith(description = Some(s"Description text that contains Aegean"))
+          createIdentifiedWorkWith(
+            description = Some(s"Description text that contains Aegean"))
         val matchingDescription75 =
-          createIdentifiedWorkWith(description = Some(s"Description text that contains"))
+          createIdentifiedWorkWith(
+            description = Some(s"Description text that contains"))
         val matchingDescription25 =
-        createIdentifiedWorkWith(description = Some(s"Description text"))
+          createIdentifiedWorkWith(description = Some(s"Description text"))
 
         insertIntoElasticsearch(
           index,
@@ -353,18 +356,26 @@ class ElasticsearchServiceTest
           matchingGenre25,
           matchingDescription100,
           matchingDescription75,
-          matchingDescription25)
+          matchingDescription25
+        )
 
         val results =
-          searchResults(index = index, workQuery = MSMBoostQuery("Text that contains Aegean"))
+          searchResults(
+            index = index,
+            workQuery = MSMBoostQuery("Text that contains Aegean"))
 
         results should have length 8
 
         results.slice(0, 2) shouldBe List(matchingTitle100, matchingTitle75)
-        results.slice(2, 4) should contain theSameElementsAs List(matchingGenre100, matchingSubject100)
-        results.slice(4, 6) should contain theSameElementsAs List(matchingGenre75, matchingSubject75)
-        results.slice(6, 8) shouldBe List(matchingDescription100, matchingDescription75)
-
+        results.slice(2, 4) should contain theSameElementsAs List(
+          matchingGenre100,
+          matchingSubject100)
+        results.slice(4, 6) should contain theSameElementsAs List(
+          matchingGenre75,
+          matchingSubject75)
+        results.slice(6, 8) shouldBe List(
+          matchingDescription100,
+          matchingDescription75)
 
       }
     }

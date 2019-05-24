@@ -26,11 +26,12 @@ class WorkQueryTest extends FunSpec with ElasticsearchFixtures {
       MSMQuery("the query").query(),
       """{"multi_match":{"query":"the query","fields":["*"],"type":"cross_fields","minimum_should_match":"60%"}}""")
   }
-  
+
   it("creates a MSMBoostQuery") {
     assertQuery(
       MSMBoostQuery("the query").query(),
-      """{"multi_match":{"query":"the query","fields":["*","subjects*^8","genres*^8","title^9","description*^5","contributors*^2"],"type":"cross_fields","minimum_should_match":"60%"}}""")
+      """{"multi_match":{"query":"the query","fields":["*","subjects*^8","genres*^8","title^9","description*^5","contributors*^2"],"type":"cross_fields","minimum_should_match":"60%"}}"""
+    )
   }
 
   private def assertQuery(query: Query, expectedJsonQuery: String): Any = {
