@@ -358,13 +358,13 @@ class ElasticsearchServiceTest
         val results =
           searchResults(index = index, workQuery = MSMBoostQuery("Text that contains Aegean"))
 
-        results should have length 8
+        results should have length 10
 
         results.slice(0, 2) shouldBe List(matchingTitle100, matchingTitle75)
         results.slice(2, 4) should contain theSameElementsAs List(matchingGenre100, matchingSubject100)
         results.slice(4, 6) should contain theSameElementsAs List(matchingGenre75, matchingSubject75)
         results.slice(6, 8) shouldBe List(matchingDescription100, matchingDescription75)
-
+        results.slice(8, 10) should contain theSameElementsAs List(matchingDescription25, matchingTitle25)
 
       }
     }

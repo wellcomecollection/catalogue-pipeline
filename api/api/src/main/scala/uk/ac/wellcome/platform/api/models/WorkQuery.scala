@@ -25,7 +25,7 @@ object WorkQuery {
       multiMatchQuery(queryString)
         .fields("*")
         .matchType(MultiMatchQueryBuilderType.CROSS_FIELDS)
-        .minimumShouldMatch("70%")
+        .minimumShouldMatch("60%")
     }
   }
 
@@ -54,7 +54,7 @@ object WorkQuery {
           "description*^5",
           "contributors*^2")
         .matchType(MultiMatchQueryBuilderType.CROSS_FIELDS)
-        .minimumShouldMatch("70%")
+        .minimumShouldMatch("60%")
     }
   }
 }
