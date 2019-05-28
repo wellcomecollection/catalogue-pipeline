@@ -380,17 +380,12 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
 
         eventually {
           server.httpGet(
-            path = s"/$apiPrefix/works?query=boosting+wombats&_queryType=boost",
+            path = s"/$apiPrefix/works?query=boosted&_queryType=boost",
             andExpect = Status.Ok,
             withJsonBody = s"""
                               |{
                               |  ${resultList(apiPrefix)},
                               |  "results": [
-                              |   {
-                              |     "type": "Work",
-                              |     "id": "${work1.canonicalId}",
-                              |     "title": "${work1.title}"
-                              |   },
                               |   {
                               |     "type": "Work",
                               |     "id": "${work2.canonicalId}",
