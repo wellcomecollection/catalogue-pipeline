@@ -14,31 +14,24 @@ class WorkQueryTest extends FunSpec with ElasticsearchFixtures {
       """{"simple_query_string":{"query":"the query"}}""")
   }
 
-  it("creates a JustBoostQuery") {
+  it("creates a BoostQuery") {
     assertQuery(
-      JustBoostQuery("the query").query(),
-      """{"multi_match":{"query":"the query","fields":["*","subjects*^4","genres*^4","title^3"],"type":"cross_fields"}}"""
+      BoostQuery("the query").query(),
+      """{"query":{"multi_match":{"query":"the query","fields":["*","title^9","subjects*^8","genres*^8","description*^5","contributors*^2"],"type":"cross_fields"}}}"""
     )
   }
 
-  it("creates a BroaderBoostQuery") {
+  it("creates a MSMQuery") {
     assertQuery(
-      BroaderBoostQuery("the query").query(),
-      """{"multi_match":{"query":"the query","fields":["*","subjects*^8","genres*^8","title^5","description*^2","lettering*^2","contributors*^2"],"type":"cross_fields"}}"""
-    )
+      MSMQuery("the query").query(),
+      """{"query":{"multi_match":{"query":"the query","fields":["*"],"type":"cross_fields","minimum_should_match":"60%"}}}""")
   }
 
-  it("creates a SlopQuery") {
+  it("creates a MSMBoostQuery") {
     assertQuery(
-      SlopQuery("the query").query(),
-      """{"multi_match":{"query":"the query","fields":["subjects","genres","title","description","lettering","contributors"],"type":"phrase","slop":3}}"""
+      MSMBoostQuery("the query").query(),
+      """{"query":{"multi_match":{"query":"the query","fields":["*","title^9","subjects*^8","genres*^8","description*^5","contributors*^2"],"type":"cross_fields","minimum_should_match":"60%"}}}"""
     )
-  }
-
-  it("creates a MinimumMatchQuery") {
-    assertQuery(
-      MinimumMatchQuery("the query").query(),
-      """{"multi_match":{"query":"the query","fields":["*"],"type":"cross_fields","minimum_should_match":"70%"}}""")
   }
 
   private def assertQuery(query: Query, expectedJsonQuery: String): Any = {
