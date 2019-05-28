@@ -24,7 +24,7 @@ class WorkQueryTest extends FunSpec with ElasticsearchFixtures {
   it("creates a MSMQuery") {
     assertQuery(
       MSMQuery("the query").query(),
-      """{"query":{"multi_match":{"query":"the query","fields":["*"],"type":"cross_fields","minimum_should_match":"70%"}}},Some(application/json))" did not include substring "{"multi_match":{"query":"the query","fields":["*"],"type":"cross_fields","minimum_should_match":"60%"}}""")
+      """{"query":{"multi_match":{"query":"the query","fields":["*"],"type":"cross_fields","minimum_should_match":"60%"}}}""")
   }
 
   it("creates a MSMBoostQuery") {
