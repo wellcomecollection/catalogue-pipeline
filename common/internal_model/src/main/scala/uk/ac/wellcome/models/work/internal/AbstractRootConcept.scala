@@ -1,6 +1,12 @@
 package uk.ac.wellcome.models.work.internal
 
+import java.time.{LocalDateTime, Year}
+import java.time.format.{DateTimeFormatter, DateTimeFormatterBuilder}
+import java.time.temporal.ChronoField
+
 import uk.ac.wellcome.models.work.text.TextNormalisation._
+
+import scala.util.Try
 
 sealed trait AbstractRootConcept {
   val label: String
@@ -12,6 +18,61 @@ case class Concept(label: String) extends AbstractConcept
 object Concept {
   def normalised(label: String): Concept = {
     Concept(trimTrailing(label, '.'))
+  }
+}
+
+case class DateRange(label: String,
+                     start: LocalDateTime,
+                     end: LocalDateTime,
+                     inferred: Boolean)
+    extends AbstractConcept
+object DateRange {
+  type GetDateRange = (String, LocalDateTime) => DateRange
+  type DateRangeParser = (DateTimeFormatter, GetDateRange)
+
+//  private val iso8601DateTimeFormatter =
+//    DateTimeFormatter.ISO_LOCAL_DATE_TIME
+
+  private def formatterWithDefaults(pattern: String): DateTimeFormatter =
+    new DateTimeFormatterBuilder()
+      .appendPattern(pattern)
+      .parseDefaulting(ChronoField.NANO_OF_SECOND, 0)
+      .parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0)
+      .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
+      .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
+      .parseDefaulting(ChronoField.DAY_OF_MONTH, 1)
+      .parseDefaulting(ChronoField.MONTH_OF_YEAR, 1)
+      .parseDefaulting(ChronoField.YEAR_OF_ERA, Year.now().getValue())
+      .toFormatter()
+
+  private val parseYear = (
+    formatterWithDefaults("yyyy"),
+    (label: String, start: LocalDateTime) =>
+      DateRange(
+        label,
+        start,
+        end = start.plusYears(1).minusNanos(1),
+        inferred = false)
+  )
+
+  private val parseInferredYear = (
+    formatterWithDefaults("'['yyyy']'"),
+    (label: String, start: LocalDateTime) =>
+      DateRange(
+        label,
+        start,
+        end = start.plusYears(1).minusNanos(1),
+        inferred = true)
+  )
+
+  def parse(label: String): Option[DateRange] = {
+    val fmts: List[DateRangeParser] =
+      List(parseYear, parseInferredYear)
+
+    fmts map {
+      case (fmt, getDateRange) =>
+        Try(LocalDateTime.parse(label, fmt)) map (getDateRange(label, _))
+    } find (_.isSuccess) map (_.get)
   }
 }
 
@@ -28,7 +89,6 @@ object Place {
     Place(trimTrailing(label, ':'))
   }
 }
-
 sealed trait AbstractAgent extends AbstractRootConcept
 
 case class Agent(
