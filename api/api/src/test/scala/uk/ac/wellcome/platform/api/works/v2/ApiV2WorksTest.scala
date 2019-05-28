@@ -390,6 +390,11 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
                               |     "type": "Work",
                               |     "id": "${work1.canonicalId}",
                               |     "title": "${work1.title}"
+                              |   },
+                              |   {
+                              |     "type": "Work",
+                              |     "id": "${work2.canonicalId}",
+                              |     "title": "${work2.title}"
                               |   }
                               |  ]
                               |}
