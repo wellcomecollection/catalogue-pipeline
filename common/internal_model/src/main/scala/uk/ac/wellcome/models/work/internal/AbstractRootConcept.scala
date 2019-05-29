@@ -64,7 +64,7 @@ object DateRange {
       .toFormatter()
 
   def parse(label: String): Option[DateRange] = {
-    parsers map {
+    parsers.toStream.map {
       case (pattern, getDateRange) =>
         Try(LocalDateTime.parse(label, formatterWithDefaults(pattern)))
           .map(getDateRange(label, _))
