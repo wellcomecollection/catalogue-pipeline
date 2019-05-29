@@ -30,8 +30,26 @@ object DateRange {
   type GetDateRange = (String, LocalDateTime) => DateRange
   type DateRangeParser = (DateTimeFormatter, GetDateRange)
 
-//  private val iso8601DateTimeFormatter =
-//    DateTimeFormatter.ISO_LOCAL_DATE_TIME
+  val parsers: List[(String, GetDateRange)] = List(
+    (
+      "yyyy",
+      (label: String, start: LocalDateTime) =>
+        DateRange(
+          label,
+          start,
+          end = start.plusYears(1).minusNanos(1),
+          inferred = false)
+    ),
+    (
+      "'['yyyy']'",
+      (label: String, start: LocalDateTime) =>
+        DateRange(
+          label,
+          start,
+          end = start.plusYears(1).minusNanos(1),
+          inferred = true)
+    )
+  )
 
   private def formatterWithDefaults(pattern: String): DateTimeFormatter =
     new DateTimeFormatterBuilder()
@@ -45,33 +63,11 @@ object DateRange {
       .parseDefaulting(ChronoField.YEAR_OF_ERA, Year.now().getValue())
       .toFormatter()
 
-  private val parseYear = (
-    formatterWithDefaults("yyyy"),
-    (label: String, start: LocalDateTime) =>
-      DateRange(
-        label,
-        start,
-        end = start.plusYears(1).minusNanos(1),
-        inferred = false)
-  )
-
-  private val parseInferredYear = (
-    formatterWithDefaults("'['yyyy']'"),
-    (label: String, start: LocalDateTime) =>
-      DateRange(
-        label,
-        start,
-        end = start.plusYears(1).minusNanos(1),
-        inferred = true)
-  )
-
   def parse(label: String): Option[DateRange] = {
-    val fmts: List[DateRangeParser] =
-      List(parseYear, parseInferredYear)
-
-    fmts map {
-      case (fmt, getDateRange) =>
-        Try(LocalDateTime.parse(label, fmt)) map (getDateRange(label, _))
+    parsers map {
+      case (pattern, getDateRange) =>
+        Try(LocalDateTime.parse(label, formatterWithDefaults(pattern)))
+          .map(getDateRange(label, _))
     } find (_.isSuccess) map (_.get)
   }
 }

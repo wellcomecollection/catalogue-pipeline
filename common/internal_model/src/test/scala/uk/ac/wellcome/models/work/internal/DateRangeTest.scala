@@ -26,8 +26,8 @@ class DateRangeTest extends FunSpec with Matchers {
       val label = "[1918]"
       val expected = DateRange(
         label = "[1918]",
-        start = LocalDateTime.parse("1909-01-01T00:00"),
-        end = LocalDateTime.parse("1909-12-31T23:59:59.999999999"),
+        start = LocalDateTime.parse("1918-01-01T00:00"),
+        end = LocalDateTime.parse("1918-12-31T23:59:59.999999999"),
         inferred = true
       )
 
