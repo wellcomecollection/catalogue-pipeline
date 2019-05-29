@@ -3,13 +3,16 @@ package uk.ac.wellcome.platform.sierra_bib_merger
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import com.typesafe.config.Config
+import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import uk.ac.wellcome.platform.sierra_bib_merger.services.{
-  SierraBibMergerUpdaterService,
-  SierraBibMergerWorkerService
-}
-import uk.ac.wellcome.sierra_adapter.config.builders.SierraTransformableVHSBuilder
+import uk.ac.wellcome.models.transformable.SierraTransformable
+import uk.ac.wellcome.models.transformable.SierraTransformable._
+import uk.ac.wellcome.platform.sierra_bib_merger.services.{SierraBibMergerUpdaterService, SierraBibMergerWorkerService}
+import uk.ac.wellcome.storage.dynamo._
+import uk.ac.wellcome.storage.streaming.CodecInstances._
+import uk.ac.wellcome.storage.typesafe.VHSBuilder
+import uk.ac.wellcome.storage.vhs.EmptyMetadata
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 
@@ -23,16 +26,17 @@ object Main extends WellcomeTypesafeApp {
     implicit val materializer: ActorMaterializer =
       AkkaBuilder.buildActorMaterializer()
 
-    val versionedHybridStore =
-      SierraTransformableVHSBuilder.buildSierraVHS(config)
+    val versionedHybridStore = VHSBuilder.buildVHS[String, SierraTransformable, EmptyMetadata](config)
 
     val updaterService = new SierraBibMergerUpdaterService(
-      versionedHybridStore = versionedHybridStore
+      vhs = versionedHybridStore
     )
 
     new SierraBibMergerWorkerService(
       sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
-      snsWriter = SNSBuilder.buildSNSWriter(config),
+      messageSender = SNSBuilder.buildSNSMessageSender(
+        config, subject = "Sent from sierra_bib_merger"
+      ),
       sierraBibMergerUpdaterService = updaterService
     )
   }
