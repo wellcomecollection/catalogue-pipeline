@@ -20,7 +20,6 @@ class DateRangeTest extends FunSpec with Matchers {
       )
 
       DateRange.parse(label) shouldBe Some(expected)
-
     }
 
     it(
@@ -36,7 +35,11 @@ class DateRangeTest extends FunSpec with Matchers {
       )
 
       DateRange.parse(label) shouldBe Some(expected)
+    }
 
+    it("Should return None if we don't understand the label") {
+      val label = "nineteen sixty what, nineteen sixty who"
+      DateRange.parse(label) shouldBe None
     }
   }
 }
