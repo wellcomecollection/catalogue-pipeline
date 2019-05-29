@@ -22,8 +22,8 @@ object Concept {
 }
 
 case class DateRange(label: String,
-                     start: LocalDateTime,
-                     end: LocalDateTime,
+                     from: LocalDateTime,
+                     to: LocalDateTime,
                      inferred: Boolean)
     extends AbstractConcept
 object DateRange {
@@ -33,20 +33,20 @@ object DateRange {
   val parsers: List[(String, GetDateRange)] = List(
     (
       "yyyy",
-      (label: String, start: LocalDateTime) =>
+      (label: String, from: LocalDateTime) =>
         DateRange(
           label,
-          start,
-          end = start.plusYears(1).minusNanos(1),
+          from,
+          to = from.plusYears(1).minusNanos(1),
           inferred = false)
     ),
     (
       "'['yyyy']'",
-      (label: String, start: LocalDateTime) =>
+      (label: String, from: LocalDateTime) =>
         DateRange(
           label,
-          start,
-          end = start.plusYears(1).minusNanos(1),
+          from,
+          to = from.plusYears(1).minusNanos(1),
           inferred = true)
     )
   )
