@@ -6,6 +6,7 @@ import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.models.transformable.sierra.test.utils.SierraGenerators
 import uk.ac.wellcome.storage.fixtures.LocalVersionedHybridStore
 import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.platform.sierra_item_merger.fixtures.SierraItemMergerFixtures
 import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
 
@@ -14,19 +15,19 @@ class SierraItemMergerFeatureTest
     with Matchers
     with Eventually
     with IntegrationPatience
-    with SQS
-    with LocalVersionedHybridStore
     with SierraGenerators
-    with SierraAdapterHelpers
     with SierraItemMergerFixtures {
 
   it("stores an item from SQS") {
+    val vhs = createVhs()
+    val itemStore = createItemStore
+    val messageSender = new MemoryMessageSender()
     withLocalSqsQueue { queue =>
       withLocalS3Bucket { sierraDataBucket =>
         withLocalS3Bucket { sierraItemsToDynamoBucket =>
           withLocalSnsTopic { topic =>
             withLocalDynamoDbTable { table =>
-              withSierraWorkerService(queue, topic, sierraDataBucket, table) {
+              withSierraWorkerService(queue, messageSender, itemStore, vhs) {
                 service =>
                   service.run()
 
