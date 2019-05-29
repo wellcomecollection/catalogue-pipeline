@@ -21,31 +21,31 @@ object Concept {
   }
 }
 
-case class DateRange(label: String,
-                     from: Instant,
-                     to: Instant,
-                     inferred: Boolean)
+case class InstantRange(label: String,
+                        from: Instant,
+                        to: Instant,
+                        inferred: Boolean)
     extends AbstractConcept
-object DateRange {
+object InstantRange {
   // We use this apply as it's easier to work with date math on LocalDateTime than it is on Instant
   def apply(label: String,
             from: LocalDateTime,
             to: LocalDateTime,
-            inferred: Boolean): DateRange =
-    DateRange(
+            inferred: Boolean): InstantRange =
+    InstantRange(
       label = label,
       from = from.toInstant(ZoneOffset.UTC),
       to = to.toInstant(ZoneOffset.UTC),
       inferred = inferred)
 
-  type GetDateRange = (String, LocalDateTime) => DateRange
-  type DateRangeParser = (DateTimeFormatter, GetDateRange)
+  type GetInstantRange = (String, LocalDateTime) => InstantRange
+  type InstantRangeParser = (DateTimeFormatter, GetInstantRange)
 
-  val parsers: List[(String, GetDateRange)] = List(
+  val parsers: List[(String, GetInstantRange)] = List(
     (
       "yyyy",
       (label: String, from: LocalDateTime) =>
-        DateRange(
+        InstantRange(
           label,
           from,
           to = from.plusYears(1).minusNanos(1),
@@ -54,7 +54,7 @@ object DateRange {
     (
       "'['yyyy']'",
       (label: String, from: LocalDateTime) =>
-        DateRange(
+        InstantRange(
           label,
           from = from,
           to = from.plusYears(1).minusNanos(1),
@@ -75,7 +75,7 @@ object DateRange {
       .parseDefaulting(ChronoField.YEAR_OF_ERA, Year.now().getValue())
       .toFormatter()
 
-  def parse(label: String): Option[DateRange] = {
+  def parse(label: String): Option[InstantRange] = {
     parsers.toStream.map {
       case (pattern, getDateRange) => {
         Try(
