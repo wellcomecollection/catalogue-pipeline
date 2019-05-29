@@ -1,6 +1,6 @@
 package uk.ac.wellcome.models.work.internal
 
-import java.time.{LocalDateTime, Year}
+import java.time.{Instant, LocalDateTime, Year, ZoneOffset}
 import java.time.format.{DateTimeFormatter, DateTimeFormatterBuilder}
 import java.time.temporal.ChronoField
 
@@ -22,11 +22,22 @@ object Concept {
 }
 
 case class DateRange(label: String,
-                     from: LocalDateTime,
-                     to: LocalDateTime,
+                     from: Instant,
+                     to: Instant,
                      inferred: Boolean)
     extends AbstractConcept
 object DateRange {
+  // We use this apply as it's easier to work with date math on LocalDateTime than it is on Instant
+  def apply(label: String,
+            from: LocalDateTime,
+            to: LocalDateTime,
+            inferred: Boolean): DateRange =
+    DateRange(
+      label = label,
+      from = from.toInstant(ZoneOffset.UTC),
+      to = to.toInstant(ZoneOffset.UTC),
+      inferred = inferred)
+
   type GetDateRange = (String, LocalDateTime) => DateRange
   type DateRangeParser = (DateTimeFormatter, GetDateRange)
 
@@ -45,13 +56,14 @@ object DateRange {
       (label: String, from: LocalDateTime) =>
         DateRange(
           label,
-          from,
+          from = from,
           to = from.plusYears(1).minusNanos(1),
           inferred = true)
     )
   )
 
-  private def formatterWithDefaults(pattern: String): DateTimeFormatter =
+  private def formatterWithDefaultingFallbacks(
+    pattern: String): DateTimeFormatter =
     new DateTimeFormatterBuilder()
       .appendPattern(pattern)
       .parseDefaulting(ChronoField.NANO_OF_SECOND, 0)
@@ -65,9 +77,11 @@ object DateRange {
 
   def parse(label: String): Option[DateRange] = {
     parsers.toStream.map {
-      case (pattern, getDateRange) =>
-        Try(LocalDateTime.parse(label, formatterWithDefaults(pattern)))
+      case (pattern, getDateRange) => {
+        Try(
+          LocalDateTime.parse(label, formatterWithDefaultingFallbacks(pattern)))
           .map(getDateRange(label, _))
+      }
     } find (_.isSuccess) map (_.get)
   }
 }
