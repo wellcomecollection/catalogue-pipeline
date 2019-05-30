@@ -1,49 +1,24 @@
 package uk.ac.wellcome.platform.reindex.reindex_worker.services
 
 import com.amazonaws.services.dynamodbv2.model._
-import com.gu.scanamo.Scanamo
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.platform.reindex.reindex_worker.fixtures.{
-  RecordReaderFixture,
-  ReindexableTable
-}
-import uk.ac.wellcome.platform.reindex.reindex_worker.models.{
-  CompleteReindexParameters,
-  PartialReindexParameters
-}
-import uk.ac.wellcome.storage.ObjectLocation
+import uk.ac.wellcome.platform.reindex.reindex_worker.fixtures.RecordReaderFixture
+import uk.ac.wellcome.platform.reindex.reindex_worker.models.{CompleteReindexParameters, PartialReindexParameters}
 import uk.ac.wellcome.storage.fixtures.LocalDynamoDb.Table
-import uk.ac.wellcome.storage.vhs.HybridRecord
 
 class RecordReaderTest
     extends FunSpec
     with ScalaFutures
     with Matchers
     with RecordReaderFixture
-    with ReindexableTable
     with IntegrationPatience {
-
-  val exampleRecord = HybridRecord(
-    id = "id",
-    version = 1,
-    location = ObjectLocation(
-      namespace = "s3://example-bukkit",
-      key = "key.json.gz"
-    )
-  )
 
   it("finds records in the table with a complete reindex") {
     withLocalDynamoDbTable { table =>
       withRecordReader { reader =>
-        val records = List(
-          exampleRecord.copy(id = "id1"),
-          exampleRecord.copy(id = "id2")
-        )
-
-        records.foreach(record =>
-          Scanamo.put(dynamoDbClient)(table.name)(record))
+        val records = createTableRecords(table, count = 2)
 
         val reindexParameters = CompleteReindexParameters(
           segment = 0,
@@ -56,7 +31,7 @@ class RecordReaderTest
         )
 
         whenReady(future) { actualRecords =>
-          actualRecords.map { fromJson[HybridRecord](_).get } should contain theSameElementsAs records
+          actualRecords.map { fromJson[Record](_).get } should contain theSameElementsAs records
         }
       }
     }
@@ -65,10 +40,7 @@ class RecordReaderTest
   it("finds records in the table with a maxResults reindex") {
     withLocalDynamoDbTable { table =>
       withRecordReader { reader =>
-        (1 to 15).foreach { id =>
-          val record = exampleRecord.copy(id = id.toString)
-          Scanamo.put(dynamoDbClient)(table.name)(record)
-        }
+        createTableRecords(table, count = 15)
 
         val reindexParameters = PartialReindexParameters(maxRecords = 5)
 

@@ -1,62 +1,58 @@
 package uk.ac.wellcome.platform.reindex.reindex_worker.fixtures
 
-import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
-import uk.ac.wellcome.platform.reindex.reindex_worker.models.{
-  CompleteReindexParameters,
-  ReindexJobConfig,
-  ReindexParameters,
-  ReindexRequest
-}
-import uk.ac.wellcome.platform.reindex.reindex_worker.services.ReindexWorkerService
+import uk.ac.wellcome.messaging.memory.MemoryIndividualMessageSender
+import uk.ac.wellcome.messaging.sns.NotificationMessage
+import uk.ac.wellcome.platform.reindex.reindex_worker.models.{CompleteReindexParameters, ReindexJobConfig, ReindexParameters, ReindexRequest}
+import uk.ac.wellcome.platform.reindex.reindex_worker.services.{BulkMessageSender, ReindexWorkerService}
 import uk.ac.wellcome.storage.fixtures.LocalDynamoDb.Table
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.Random
 
-trait WorkerServiceFixture
-    extends Akka
-    with BulkSNSSenderFixture
-    with RecordReaderFixture
-    with SQS {
+trait WorkerServiceFixture extends RecordReaderFixture with SQS {
+
   val defaultJobConfigId = "testing"
 
+  type Destination = String
+
   def withWorkerService[R](queue: Queue,
-                           configMap: Map[String, (Table, Topic)])(
-    testWith: TestWith[ReindexWorkerService, R]): R =
+                           messageSender: MemoryIndividualMessageSender,
+                           configMap: Map[String, (Table, Destination)])(
+    testWith: TestWith[ReindexWorkerService[Destination], R]): R =
     withActorSystem { implicit actorSystem =>
       withSQSStream[NotificationMessage, R](queue) { sqsStream =>
         withRecordReader { recordReader =>
-          withBulkSNSSender { bulkSNSSender =>
-            val workerService = new ReindexWorkerService(
-              recordReader = recordReader,
-              bulkSNSSender = bulkSNSSender,
-              sqsStream = sqsStream,
-              reindexJobConfigMap = configMap.map {
-                case (key: String, (table: Table, topic: Topic)) =>
-                  key -> ReindexJobConfig(
-                    dynamoConfig = createDynamoConfigWith(table),
-                    snsConfig = createSNSConfigWith(topic)
-                  )
-              }
-            )
+          val bulkMessageSender = new BulkMessageSender(messageSender)
 
-            workerService.run()
+          val workerService = new ReindexWorkerService(
+            recordReader = recordReader,
+            bulkMessageSender = bulkMessageSender,
+            sqsStream = sqsStream,
+            reindexJobConfigMap = configMap.map {
+              case (key: String, (table: Table, dst: Destination)) =>
+                key -> ReindexJobConfig(
+                  dynamoConfig = createDynamoConfigWith(table),
+                  destinationConfig = dst
+                )
+            }
+          )
 
-            testWith(workerService)
-          }
+          workerService.run()
+
+          testWith(workerService)
         }
       }
     }
 
-  def withWorkerService[R](queue: Queue, table: Table, topic: Topic)(
-    testWith: TestWith[ReindexWorkerService, R]): R =
+  def withWorkerService[R](queue: Queue, messageSender: MemoryIndividualMessageSender, table: Table, destination: String = Random.alphanumeric.take(10) mkString)(
+    testWith: TestWith[ReindexWorkerService[String], R]): R =
     withWorkerService(
       queue,
-      configMap = Map(defaultJobConfigId -> ((table, topic)))) { service =>
+      messageSender = messageSender,
+      configMap = Map(defaultJobConfigId -> ((table, destination)))) { service =>
       testWith(service)
     }
 
