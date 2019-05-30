@@ -6,16 +6,16 @@ import java.util.Date
 import grizzled.slf4j.Logging
 import io.circe.Encoder
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.messaging.message.{
-  InlineNotification,
-  MessageNotification,
-  RemoteNotification
-}
-import uk.ac.wellcome.storage.{KeyPrefix, ObjectStore}
+import uk.ac.wellcome.messaging.message.{InlineNotification, MessageNotification, RemoteNotification}
+import uk.ac.wellcome.storage.{KeyPrefix, ObjectStore, StorageBackend}
 
 import scala.util.{Failure, Success, Try}
 
-trait BigMessageSender[Destination, T] extends Logging {
+trait BigIndividualMessageSender[Destination] extends IndividualMessageSender[Destination] {
+  override def send(send(body: _root_.scala.Predef.String)(subject: _root_.scala.Predef.String, destination: Destination): _root_.scala.util.Try[Unit] = ???)
+}
+
+trait BigMessageSender[Destination, T] extends Logging with MessageSender[Destination] {
   val messageSender: MessageSender[Destination]
   val objectStore: ObjectStore[T]
 

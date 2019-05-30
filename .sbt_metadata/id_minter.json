@@ -1,1 +1,1 @@
-{"id" : "id_minter", "folder" : "pipeline\/id_minter", "dependencyIds" : ["internal_model"]}
+{"id" : "id_minter", "folder" : "pipeline\/id_minter", "dependencyIds" : ["internal_model", "big_messaging_typesafe"]}

@@ -4,11 +4,8 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import com.typesafe.config.Config
 import io.circe.Json
-import uk.ac.wellcome.messaging.typesafe.MessagingBuilder
-import uk.ac.wellcome.platform.idminter.config.builders.{
-  IdentifiersTableBuilder,
-  RDSBuilder
-}
+import uk.ac.wellcome.messaging.typesafe.{BigMessagingBuilder, MessagingBuilder}
+import uk.ac.wellcome.platform.idminter.config.builders.{IdentifiersTableBuilder, RDSBuilder}
 import uk.ac.wellcome.platform.idminter.database.IdentifiersDao
 import uk.ac.wellcome.platform.idminter.models.IdentifiersTable
 import uk.ac.wellcome.platform.idminter.services.IdMinterWorkerService
@@ -44,8 +41,8 @@ object Main extends WellcomeTypesafeApp {
 
     new IdMinterWorkerService(
       idEmbedder = idEmbedder,
-      writer = MessagingBuilder.buildMessageWriter[Json](config),
-      messageStream = MessagingBuilder.buildMessageStream[Json](config),
+      messageSender = BigMessagingBuilder.buildBigMessageSender[Json](config),
+      messageStream = BigMessagingBuilder.buildMessageStream[Json](config),
       rdsClientConfig = RDSBuilder.buildRDSClientConfig(config),
       identifiersTableConfig = identifiersTableConfig
     )

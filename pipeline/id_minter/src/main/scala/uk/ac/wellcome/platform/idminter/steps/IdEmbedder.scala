@@ -1,21 +1,18 @@
 package uk.ac.wellcome.platform.idminter.steps
 
 import grizzled.slf4j.Logging
+import io.circe._
 import io.circe.optics.JsonPath.root
 import io.circe.optics.JsonTraversalPath
-import io.circe._
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.internal.SourceIdentifier
 
 import scala.annotation.tailrec
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 
-class IdEmbedder(identifierGenerator: IdentifierGenerator)(
-  implicit ec: ExecutionContext)
-    extends Logging {
+class IdEmbedder(identifierGenerator: IdentifierGenerator) extends Logging {
 
-  def embedId(json: Json): Future[Json] = Future {
+  def embedId(json: Json): Try[Json] = Try {
     iterate(root.each, addIdentifierToJson(json))
   }
 
