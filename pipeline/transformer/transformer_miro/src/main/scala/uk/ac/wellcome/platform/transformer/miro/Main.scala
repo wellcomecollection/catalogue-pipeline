@@ -12,6 +12,7 @@ import uk.ac.wellcome.platform.transformer.miro.services.{
   MiroVHSRecordReceiver
 }
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
+import uk.ac.wellcome.storage.streaming.CodecInstances._
 import uk.ac.wellcome.storage.typesafe.S3Builder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
