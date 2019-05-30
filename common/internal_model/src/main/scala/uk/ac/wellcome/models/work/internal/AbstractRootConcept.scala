@@ -2,10 +2,11 @@ package uk.ac.wellcome.models.work.internal
 
 import java.time.{Instant, LocalDateTime, Year, ZoneOffset}
 import java.time.format.{DateTimeFormatter, DateTimeFormatterBuilder}
-import java.time.temporal.ChronoField
+import java.time.temporal.{ChronoField, TemporalAccessor}
 
 import uk.ac.wellcome.models.work.text.TextNormalisation._
 
+import scala.annotation.tailrec
 import scala.util.Try
 
 sealed trait AbstractRootConcept {
@@ -75,15 +76,22 @@ object InstantRange {
       .parseDefaulting(ChronoField.YEAR_OF_ERA, Year.now().getValue())
       .toFormatter()
 
-  def parse(label: String): Option[InstantRange] = {
-    parsers.toStream.map {
-      case (pattern, getDateRange) => {
-        Try(
+  @tailrec
+  def findParser(label: String,
+                 ps: List[(String, GetInstantRange)]): Option[InstantRange] = {
+
+    ps match {
+      case (pattern: String, getInstantRange: GetInstantRange) :: tail =>
+        val tryLocalDateTime = Try(
           LocalDateTime.parse(label, formatterWithDefaultingFallbacks(pattern)))
-          .map(getDateRange(label, _))
-      }
-    } find (_.isSuccess) map (_.get)
+
+        if (tryLocalDateTime.isSuccess)
+          tryLocalDateTime.toOption.map(ldt => getInstantRange(label, ldt))
+        else findParser(label, tail)
+    }
   }
+
+  def parse(label: String): Option[InstantRange] = findParser(label, parsers)
 }
 
 case class Period(label: String) extends AbstractConcept
