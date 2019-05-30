@@ -5,7 +5,6 @@ import java.time.{LocalDateTime, ZoneOffset}
 import uk.ac.wellcome.models.work.internal._
 
 trait InstantRangeGenerators {
-  // This is used to make the tests more readable.
   def createInstantRangeWith(label: String,
                              from: String,
                              to: String,
