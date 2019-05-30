@@ -39,11 +39,10 @@ object InstantRange {
       to = to.toInstant(ZoneOffset.UTC),
       inferred = inferred)
 
-  type GetInstantRange = (String, LocalDateTime) => InstantRange
-  type InstantRangeParser = (DateTimeFormatter, GetInstantRange)
+  type ParseDateTimeToInstantRange = (String, LocalDateTime) => InstantRange
   type DatePattern = String
 
-  val parsers: List[(DatePattern, GetInstantRange)] = List(
+  val parsers: List[(DatePattern, ParseDateTimeToInstantRange)] = List(
     (
       "yyyy",
       (label: String, from: LocalDateTime) =>
@@ -81,10 +80,11 @@ object InstantRange {
   @tailrec
   private def findParser(
     label: String,
-    parsers: List[(DatePattern, GetInstantRange)]): Option[InstantRange] = {
+    parsers: List[(DatePattern, ParseDateTimeToInstantRange)])
+    : Option[InstantRange] = {
 
     parsers match {
-      case (pattern: DatePattern, getInstantRange: GetInstantRange) :: tail =>
+      case (pattern: DatePattern, getInstantRange: ParseDateTimeToInstantRange) :: tail =>
         val tryLocalDateTime = Try(
           LocalDateTime.parse(label, formatterWithDefaults(pattern)))
 
