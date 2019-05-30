@@ -7,7 +7,7 @@ import java.time.temporal.ChronoField
 import uk.ac.wellcome.models.work.text.TextNormalisation._
 
 import scala.annotation.tailrec
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 sealed trait AbstractRootConcept {
   val label: String
@@ -88,9 +88,11 @@ object InstantRange {
         val tryLocalDateTime = Try(
           LocalDateTime.parse(label, formatterWithDefaults(pattern)))
 
-        if (tryLocalDateTime.isSuccess)
-          tryLocalDateTime.toOption.map(ldt => getInstantRange(label, ldt))
-        else findParser(label, tail)
+        tryLocalDateTime match {
+          case Success(localDateTime) =>
+            Some(getInstantRange(label, localDateTime))
+          case Failure(_) => findParser(label, tail)
+        }
 
       case _ => None
     }
