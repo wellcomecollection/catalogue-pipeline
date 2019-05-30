@@ -37,7 +37,12 @@ class InstantRangeTest
       Table(
         "label",
         "nineteen sixty what, nineteen sixty who",
+        "123",
+        "23Y5",
         "[21233]",
+        "[21u6]",
+        "[^216]",
+        "[216]",
       )) { label =>
       InstantRange.parse(label) shouldBe None
     }
