@@ -101,10 +101,13 @@ object InstantRange {
   def parse(label: String): Option[InstantRange] = findParser(label, parsers)
 }
 
-case class Period(label: String) extends AbstractConcept
+case class Period(label: String, instantRange: Option[InstantRange] = None)
+    extends AbstractConcept
 object Period {
   def normalised(label: String): Period = {
-    Period(trimTrailing(label, '.'))
+    val normalisedLabel = trimTrailing(label, '.')
+    val instantRange = InstantRange.parse(normalisedLabel)
+    Period(normalisedLabel, instantRange)
   }
 }
 
