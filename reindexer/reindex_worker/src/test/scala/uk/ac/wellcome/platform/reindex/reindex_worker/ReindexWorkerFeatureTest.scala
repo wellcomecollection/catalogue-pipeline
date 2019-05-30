@@ -64,10 +64,7 @@ class ReindexWorkerFeatureTest
 
           eventually {
             val actualRecords = messageSender.getMessages[Record]
-
-            actualRecords should have length 1
-            actualRecords should contain theSameElementsAs Seq(
-              testRecords.head)
+            actualRecords should contain theSameElementsAs testRecords
           }
         }
       }

@@ -12,7 +12,7 @@ class BulkMessageSenderTest
     with Matchers
     with ScalaFutures {
 
-  val messages: List[String] = (1 to 3).map { _ =>
+  val messages: List[String] = (1 to 20).map { _ =>
     Random.alphanumeric take 15 mkString
   }.toList
 

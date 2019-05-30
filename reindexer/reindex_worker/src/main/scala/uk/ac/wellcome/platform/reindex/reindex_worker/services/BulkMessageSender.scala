@@ -12,12 +12,11 @@ class BulkMessageSender[Destination](
     Future.sequence {
       messages
         .map {
-          Future(_).flatMap { body =>
+          body =>
             Future.fromTry { messageSender.send(body)(
               subject = "Sent from reindex_worker",
               destination = destination
             ) }
-          }
         }
     }
   }

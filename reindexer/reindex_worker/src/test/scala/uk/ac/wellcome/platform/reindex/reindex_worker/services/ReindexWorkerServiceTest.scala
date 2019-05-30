@@ -39,7 +39,7 @@ class ReindexWorkerServiceTest
             eventually {
               val actualRecords = messageSender.getMessages[Record]
 
-              actualRecords shouldBe records
+              actualRecords should contain theSameElementsAs records
               assertQueueEmpty(queue)
               assertQueueEmpty(dlq)
             }
