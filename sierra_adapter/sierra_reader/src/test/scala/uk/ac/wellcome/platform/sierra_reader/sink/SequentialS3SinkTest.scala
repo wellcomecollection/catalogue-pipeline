@@ -5,7 +5,7 @@ import akka.stream.scaladsl.{Sink, Source}
 import io.circe.Json
 import io.circe.parser._
 import org.scalatest.compatible.Assertion
-import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{BeforeAndAfterAll, FunSpec, Matchers}
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
@@ -20,11 +20,10 @@ class SequentialS3SinkTest
     with S3
     with Akka
     with BeforeAndAfterAll
-    with ScalaFutures
-    with IntegrationPatience {
+    with ScalaFutures {
 
   private def withSink(bucket: Bucket, keyPrefix: String, offset: Int = 0)(
-    testWith: TestWith[Sink[(Json, Long), Future[Done]], Assertion]) = {
+    testWith: TestWith[Sink[(Json, Long), Future[Done]], Assertion]): Assertion = {
     val sink = SequentialS3Sink(
       s3Client,
       bucketName = bucket.name,
@@ -112,4 +111,7 @@ class SequentialS3SinkTest
       }
     }
   }
+
+  def getJsonFromS3(bucket: Bucket, key: String): Json =
+    getJsonFromS3(createObjectLocationWith(bucket, key))
 }

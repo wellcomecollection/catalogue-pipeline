@@ -158,11 +158,15 @@ class SierraReaderWorkerServiceTest
 
   private def getBibRecordsFromS3(bucket: Bucket,
                                   key: String): List[SierraBibRecord] =
-    getObjectFromS3[List[SierraBibRecord]](bucket, key)
+    getObjectFromS3[List[SierraBibRecord]](
+      createObjectLocationWith(bucket, key)
+    )
 
   private def getItemRecordsFromS3(bucket: Bucket,
                                    key: String): List[SierraItemRecord] =
-    getObjectFromS3[List[SierraItemRecord]](bucket, key)
+    getObjectFromS3[List[SierraItemRecord]](
+      createObjectLocationWith(bucket, key)
+    )
 
   it("returns a SierraReaderException if it receives an invalid message") {
     val body =
