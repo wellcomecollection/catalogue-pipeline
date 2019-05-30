@@ -2,7 +2,7 @@ package uk.ac.wellcome.models.work.internal
 
 import java.time.{Instant, LocalDateTime, Year, ZoneOffset}
 import java.time.format.{DateTimeFormatter, DateTimeFormatterBuilder}
-import java.time.temporal.{ChronoField, TemporalAccessor}
+import java.time.temporal.ChronoField
 
 import uk.ac.wellcome.models.work.text.TextNormalisation._
 
@@ -41,8 +41,9 @@ object InstantRange {
 
   type GetInstantRange = (String, LocalDateTime) => InstantRange
   type InstantRangeParser = (DateTimeFormatter, GetInstantRange)
+  type DatePattern = String
 
-  val parsers: List[(String, GetInstantRange)] = List(
+  val parsers: List[(DatePattern, GetInstantRange)] = List(
     (
       "yyyy",
       (label: String, from: LocalDateTime) =>
@@ -63,8 +64,9 @@ object InstantRange {
     )
   )
 
-  private def formatterWithDefaultingFallbacks(
-    pattern: String): DateTimeFormatter =
+  // This explicitly defaults missing pieces to incomplete dates such as "1909" to
+  // then return 1909-01-01 to allow us to format it to the complete ISO8601 standard
+  private def formatterWithDefaults(pattern: String): DateTimeFormatter =
     new DateTimeFormatterBuilder()
       .appendPattern(pattern)
       .parseDefaulting(ChronoField.NANO_OF_SECOND, 0)
@@ -77,17 +79,20 @@ object InstantRange {
       .toFormatter()
 
   @tailrec
-  def findParser(label: String,
-                 ps: List[(String, GetInstantRange)]): Option[InstantRange] = {
+  private def findParser(
+    label: String,
+    parsers: List[(DatePattern, GetInstantRange)]): Option[InstantRange] = {
 
-    ps match {
-      case (pattern: String, getInstantRange: GetInstantRange) :: tail =>
+    parsers match {
+      case (pattern: DatePattern, getInstantRange: GetInstantRange) :: tail =>
         val tryLocalDateTime = Try(
-          LocalDateTime.parse(label, formatterWithDefaultingFallbacks(pattern)))
+          LocalDateTime.parse(label, formatterWithDefaults(pattern)))
 
         if (tryLocalDateTime.isSuccess)
           tryLocalDateTime.toOption.map(ldt => getInstantRange(label, ldt))
         else findParser(label, tail)
+
+      case _ => None
     }
   }
 
