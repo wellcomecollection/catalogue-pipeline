@@ -1,8 +1,7 @@
 package uk.ac.wellcome.sierra_adapter.utils
 
-import org.scalatest.{Assertion, EitherValues}
+import org.scalatest.{Assertion, EitherValues, Matchers}
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.messaging.fixtures.Messaging
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.transformable.SierraTransformable
 import uk.ac.wellcome.models.transformable.SierraTransformable._
@@ -10,7 +9,7 @@ import uk.ac.wellcome.storage.memory.{MemoryObjectStore, MemoryVersionedDao}
 import uk.ac.wellcome.storage.streaming.CodecInstances._
 import uk.ac.wellcome.storage.vhs.{EmptyMetadata, Entry, VersionedHybridStore}
 
-trait SierraAdapterHelpers extends Messaging with EitherValues {
+trait SierraAdapterHelpers extends EitherValues with Matchers {
   type SierraDao = MemoryVersionedDao[String, Entry[String, EmptyMetadata]]
   type SierraStore = MemoryObjectStore[SierraTransformable]
   type SierraVHS = VersionedHybridStore[String, SierraTransformable, EmptyMetadata]

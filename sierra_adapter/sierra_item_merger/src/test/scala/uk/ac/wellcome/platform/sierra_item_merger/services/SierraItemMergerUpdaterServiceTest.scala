@@ -1,476 +1,381 @@
 package uk.ac.wellcome.platform.sierra_item_merger.services
 
-import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.FunSpec
+import org.scalatest.concurrent.ScalaFutures
+import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS
+import uk.ac.wellcome.models.transformable.SierraTransformable
+import uk.ac.wellcome.models.transformable.SierraTransformable._
 import uk.ac.wellcome.models.transformable.sierra.test.utils.SierraGenerators
 import uk.ac.wellcome.platform.sierra_item_merger.fixtures.SierraItemMergerFixtures
-import uk.ac.wellcome.storage.fixtures.LocalDynamoDb.Table
-import uk.ac.wellcome.storage.fixtures.LocalVersionedHybridStore
 import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
+import uk.ac.wellcome.storage._
+import uk.ac.wellcome.storage.streaming.CodecInstances._
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class SierraItemMergerUpdaterServiceTest
     extends FunSpec
-    with IntegrationPatience
     with ScalaFutures
-    with LocalVersionedHybridStore
     with SQS
     with SierraAdapterHelpers
     with SierraGenerators
     with SierraItemMergerFixtures {
 
   it("creates a record if it receives an item with a bibId that doesn't exist") {
-    withLocalS3Bucket { bucket =>
-      withLocalDynamoDbTable { table =>
-        withSierraVHS(bucket, table) { hybridStore =>
-          withSierraUpdaterService(hybridStore) { sierraUpdaterService =>
-            val bibId = createSierraBibNumber
-            val newItemRecord = createSierraItemRecordWith(
-              bibIds = List(bibId)
-            )
+    val vhs = createVhs()
 
-            whenReady(sierraUpdaterService.update(newItemRecord)) { _ =>
-              val expectedSierraTransformable =
-                createSierraTransformableWith(
-                  sierraId = bibId,
-                  maybeBibRecord = None,
-                  itemRecords = List(newItemRecord)
-                )
+    val updaterService = new SierraItemMergerUpdaterService(vhs)
 
-              assertStored(
-                transformable = expectedSierraTransformable,
-                table = table
-              )
-            }
-          }
-        }
-      }
+    val bibId = createSierraBibNumber
+    val newItemRecord = createSierraItemRecordWith(
+      bibIds = List(bibId)
+    )
+
+    whenReady(updaterService.update(newItemRecord)) { _ =>
+      val expectedSierraTransformable =
+        createSierraTransformableWith(
+          sierraId = bibId,
+          maybeBibRecord = None,
+          itemRecords = List(newItemRecord)
+        )
+
+      assertStored(expectedSierraTransformable, vhs = vhs)
     }
   }
 
   it("updates multiple merged records if the item contains multiple bibIds") {
-    withLocalS3Bucket { bucket =>
-      withLocalDynamoDbTable { table =>
-        withSierraVHS(bucket, table) { hybridStore =>
-          withSierraUpdaterService(hybridStore) { sierraUpdaterService =>
-            val bibIdNotExisting = createSierraBibNumber
-            val bibIdWithOldData = createSierraBibNumber
-            val bibIdWithNewerData = createSierraBibNumber
+    val vhs = createVhs()
 
-            val bibIds = List(
-              bibIdNotExisting,
-              bibIdWithOldData,
-              bibIdWithNewerData
-            )
+    val updaterService = new SierraItemMergerUpdaterService(vhs)
 
-            val itemRecord = createSierraItemRecordWith(
-              bibIds = bibIds
-            )
+    val bibIdNotExisting = createSierraBibNumber
+    val bibIdWithOldData = createSierraBibNumber
+    val bibIdWithNewerData = createSierraBibNumber
 
-            val otherItemRecord = createSierraItemRecordWith(
-              bibIds = bibIds
-            )
+    val bibIds = List(
+      bibIdNotExisting,
+      bibIdWithOldData,
+      bibIdWithNewerData
+    )
 
-            val oldTransformable = createSierraTransformableWith(
-              sierraId = bibIdWithOldData,
-              maybeBibRecord = None,
-              itemRecords = List(itemRecord, otherItemRecord)
-            )
+    val itemRecord = createSierraItemRecordWith(
+      bibIds = bibIds
+    )
 
-            val anotherItemRecord = createSierraItemRecordWith(
-              bibIds = bibIds
-            )
+    val otherItemRecord = createSierraItemRecordWith(
+      bibIds = bibIds
+    )
 
-            val newTransformable = createSierraTransformableWith(
-              sierraId = bibIdWithNewerData,
-              maybeBibRecord = None,
-              itemRecords = List(itemRecord, anotherItemRecord)
-            )
+    val oldTransformable = createSierraTransformableWith(
+      sierraId = bibIdWithOldData,
+      maybeBibRecord = None,
+      itemRecords = List(itemRecord, otherItemRecord)
+    )
 
-            val expectedNewSierraTransformable =
-              createSierraTransformableWith(
-                sierraId = bibIdNotExisting,
-                maybeBibRecord = None,
-                itemRecords = List(itemRecord)
-              )
+    val anotherItemRecord = createSierraItemRecordWith(
+      bibIds = bibIds
+    )
 
-            val expectedUpdatedSierraTransformable =
-              createSierraTransformableWith(
-                sierraId = oldTransformable.sierraId,
-                maybeBibRecord = None,
-                itemRecords = List(itemRecord, otherItemRecord)
-              )
+    val newTransformable = createSierraTransformableWith(
+      sierraId = bibIdWithNewerData,
+      maybeBibRecord = None,
+      itemRecords = List(itemRecord, anotherItemRecord)
+    )
 
-            val future = storeInVHS(
-              transformables = List(oldTransformable, newTransformable),
-              hybridStore = hybridStore
-            )
+    val expectedNewSierraTransformable =
+      createSierraTransformableWith(
+        sierraId = bibIdNotExisting,
+        maybeBibRecord = None,
+        itemRecords = List(itemRecord)
+      )
 
-            whenReady(future) { _ =>
-              whenReady(sierraUpdaterService.update(itemRecord)) { _ =>
-                assertStored(
-                  transformable = expectedNewSierraTransformable,
-                  table = table
-                )
-                assertStored(
-                  transformable = expectedUpdatedSierraTransformable,
-                  table = table
-                )
-                assertStored(
-                  transformable = newTransformable,
-                  table = table
-                )
-              }
-            }
-          }
-        }
-      }
+    val expectedUpdatedSierraTransformable =
+      createSierraTransformableWith(
+        sierraId = oldTransformable.sierraId,
+        maybeBibRecord = None,
+        itemRecords = List(itemRecord, otherItemRecord)
+      )
+
+    storeInVHS(Seq(oldTransformable, newTransformable), vhs = vhs)
+
+    whenReady(updaterService.update(itemRecord)) { _ =>
+      assertStored(expectedNewSierraTransformable, vhs = vhs)
+      assertStored(expectedUpdatedSierraTransformable, vhs = vhs)
+      assertStored(newTransformable, vhs = vhs)
     }
   }
 
   it("updates an item if it receives an update with a newer date") {
-    withLocalS3Bucket { bucket =>
-      withLocalDynamoDbTable { table =>
-        withSierraVHS(bucket, table) { hybridStore =>
-          withSierraUpdaterService(hybridStore) { sierraUpdaterService =>
-            val bibId = createSierraBibNumber
+    val vhs = createVhs()
 
-            val itemRecord = createSierraItemRecordWith(
-              modifiedDate = olderDate,
-              bibIds = List(bibId)
-            )
+    val updaterService = new SierraItemMergerUpdaterService(vhs)
 
-            val oldTransformable = createSierraTransformableWith(
-              sierraId = bibId,
-              maybeBibRecord = None,
-              itemRecords = List(itemRecord)
-            )
+    val bibId = createSierraBibNumber
 
-            val future = storeInVHS(
-              transformable = oldTransformable,
-              hybridStore = hybridStore
-            )
+    val itemRecord = createSierraItemRecordWith(
+      modifiedDate = olderDate,
+      bibIds = List(bibId)
+    )
 
-            whenReady(future) { _ =>
-              val newItemRecord = itemRecord.copy(
-                data = """{"data": "newer"}""",
-                modifiedDate = newerDate
-              )
+    val oldTransformable = createSierraTransformableWith(
+      sierraId = bibId,
+      maybeBibRecord = None,
+      itemRecords = List(itemRecord)
+    )
 
-              whenReady(sierraUpdaterService.update(newItemRecord)) { _ =>
-                val expectedTransformable = oldTransformable.copy(
-                  itemRecords = Map(itemRecord.id -> newItemRecord)
-                )
+    storeInVHS(oldTransformable, vhs = vhs)
 
-                assertStored(
-                  transformable = expectedTransformable,
-                  table = table
-                )
-              }
-            }
-          }
-        }
-      }
+    val newItemRecord = itemRecord.copy(
+      data = """{"data": "newer"}""",
+      modifiedDate = newerDate
+    )
+
+    whenReady(updaterService.update(newItemRecord)) { _ =>
+      val expectedTransformable = oldTransformable.copy(
+        itemRecords = Map(itemRecord.id -> newItemRecord)
+      )
+
+      assertStored(expectedTransformable, vhs = vhs)
     }
   }
 
   it("unlinks an item if it is updated with an unlinked item") {
-    withLocalS3Bucket { bucket =>
-      withLocalDynamoDbTable { table =>
-        withSierraVHS(bucket, table) { hybridStore =>
-          withSierraUpdaterService(hybridStore) { sierraUpdaterService =>
-            val bibId1 = createSierraBibNumber
-            val bibId2 = createSierraBibNumber
+    val vhs = createVhs()
 
-            val itemRecord = createSierraItemRecordWith(
-              bibIds = List(bibId1)
-            )
+    val updaterService = new SierraItemMergerUpdaterService(vhs)
 
-            val sierraTransformable1 = createSierraTransformableWith(
-              sierraId = bibId1,
-              maybeBibRecord = None,
-              itemRecords = List(itemRecord)
-            )
+    val bibId1 = createSierraBibNumber
+    val bibId2 = createSierraBibNumber
 
-            val sierraTransformable2 = createSierraTransformableWith(
-              sierraId = bibId2,
-              maybeBibRecord = None
-            )
+    val itemRecord = createSierraItemRecordWith(
+      bibIds = List(bibId1)
+    )
 
-            val unlinkItemRecord = itemRecord.copy(
-              bibIds = List(bibId2),
-              unlinkedBibIds = List(bibId1),
-              modifiedDate = itemRecord.modifiedDate.plusSeconds(1)
-            )
+    val sierraTransformable1 = createSierraTransformableWith(
+      sierraId = bibId1,
+      maybeBibRecord = None,
+      itemRecords = List(itemRecord)
+    )
 
-            val expectedTransformable1 = sierraTransformable1.copy(
-              itemRecords = Map.empty
-            )
+    val sierraTransformable2 = createSierraTransformableWith(
+      sierraId = bibId2,
+      maybeBibRecord = None
+    )
 
-            val expectedItemRecords = Map(
-              itemRecord.id -> itemRecord.copy(
-                bibIds = List(bibId2),
-                unlinkedBibIds = List(bibId1),
-                modifiedDate = unlinkItemRecord.modifiedDate
-              )
-            )
-            val expectedTransformable2 = sierraTransformable2.copy(
-              itemRecords = expectedItemRecords
-            )
+    val unlinkItemRecord = itemRecord.copy(
+      bibIds = List(bibId2),
+      unlinkedBibIds = List(bibId1),
+      modifiedDate = itemRecord.modifiedDate.plusSeconds(1)
+    )
 
-            val future = storeInVHS(
-              transformables = List(sierraTransformable1, sierraTransformable2),
-              hybridStore = hybridStore
-            )
+    val expectedTransformable1 = sierraTransformable1.copy(
+      itemRecords = Map.empty
+    )
 
-            whenReady(future) { _ =>
-              whenReady(sierraUpdaterService.update(unlinkItemRecord)) { _ =>
-                assertStored(
-                  transformable = expectedTransformable1,
-                  table = table
-                )
-                assertStored(
-                  transformable = expectedTransformable2,
-                  table = table
-                )
-              }
-            }
-          }
-        }
-      }
+    val expectedItemRecords = Map(
+      itemRecord.id -> itemRecord.copy(
+        bibIds = List(bibId2),
+        unlinkedBibIds = List(bibId1),
+        modifiedDate = unlinkItemRecord.modifiedDate
+      )
+    )
+    val expectedTransformable2 = sierraTransformable2.copy(
+      itemRecords = expectedItemRecords
+    )
+
+    storeInVHS(Seq(sierraTransformable1, sierraTransformable2), vhs = vhs)
+
+    whenReady(updaterService.update(unlinkItemRecord)) { _ =>
+      assertStored(expectedTransformable1, vhs = vhs)
+      assertStored(expectedTransformable2, vhs = vhs)
     }
   }
 
   it("unlinks and updates a bib from a single call") {
-    withLocalS3Bucket { bucket =>
-      withLocalDynamoDbTable { table =>
-        withSierraVHS(bucket, table) { hybridStore =>
-          withSierraUpdaterService(hybridStore) { sierraUpdaterService =>
-            val bibId1 = createSierraBibNumber
-            val bibId2 = createSierraBibNumber
+    val vhs = createVhs()
 
-            val itemRecord = createSierraItemRecordWith(
-              bibIds = List(bibId1)
-            )
+    val updaterService = new SierraItemMergerUpdaterService(vhs)
 
-            val sierraTransformable1 = createSierraTransformableWith(
-              sierraId = bibId1,
-              maybeBibRecord = None,
-              itemRecords = List(itemRecord)
-            )
+    val bibId1 = createSierraBibNumber
+    val bibId2 = createSierraBibNumber
 
-            val sierraTransformable2 = createSierraTransformableWith(
-              sierraId = bibId2,
-              maybeBibRecord = None,
-              itemRecords = List(itemRecord)
-            )
+    val itemRecord = createSierraItemRecordWith(
+      bibIds = List(bibId1)
+    )
 
-            val unlinkItemRecord = itemRecord.copy(
-              bibIds = List(bibId2),
-              unlinkedBibIds = List(bibId1),
-              modifiedDate = itemRecord.modifiedDate.plusSeconds(1)
-            )
+    val sierraTransformable1 = createSierraTransformableWith(
+      sierraId = bibId1,
+      maybeBibRecord = None,
+      itemRecords = List(itemRecord)
+    )
 
-            val expectedItemData = Map(
-              itemRecord.id -> unlinkItemRecord
-            )
+    val sierraTransformable2 = createSierraTransformableWith(
+      sierraId = bibId2,
+      maybeBibRecord = None,
+      itemRecords = List(itemRecord)
+    )
 
-            val expectedTransformable1 = sierraTransformable1.copy(
-              itemRecords = Map.empty
-            )
+    val unlinkItemRecord = itemRecord.copy(
+      bibIds = List(bibId2),
+      unlinkedBibIds = List(bibId1),
+      modifiedDate = itemRecord.modifiedDate.plusSeconds(1)
+    )
 
-            // In this situation the item was already linked to sierraTransformable2
-            // but the modified date is updated in line with the item update
-            val expectedTransformable2 = sierraTransformable2.copy(
-              itemRecords = expectedItemData
-            )
+    val expectedItemData = Map(
+      itemRecord.id -> unlinkItemRecord
+    )
 
-            val future = storeInVHS(
-              transformables = List(sierraTransformable1, sierraTransformable2),
-              hybridStore = hybridStore
-            )
+    val expectedTransformable1 = sierraTransformable1.copy(
+      itemRecords = Map.empty
+    )
 
-            whenReady(future) { _ =>
-              whenReady(sierraUpdaterService.update(unlinkItemRecord)) { _ =>
-                assertStored(
-                  transformable = expectedTransformable1,
-                  table = table
-                )
-                assertStored(
-                  transformable = expectedTransformable2,
-                  table = table
-                )
-              }
-            }
-          }
-        }
-      }
+    // In this situation the item was already linked to sierraTransformable2
+    // but the modified date is updated in line with the item update
+    val expectedTransformable2 = sierraTransformable2.copy(
+      itemRecords = expectedItemData
+    )
+
+    storeInVHS(Seq(sierraTransformable1, sierraTransformable2), vhs = vhs)
+
+    whenReady(updaterService.update(unlinkItemRecord)) { _ =>
+      assertStored(expectedTransformable1, vhs = vhs)
+      assertStored(expectedTransformable2, vhs = vhs)
     }
   }
 
   it("does not unlink an item if it receives an out of date unlink update") {
-    withLocalS3Bucket { bucket =>
-      withLocalDynamoDbTable { table =>
-        withSierraVHS(bucket, table) { hybridStore =>
-          withSierraUpdaterService(hybridStore) { sierraUpdaterService =>
-            val bibId1 = createSierraBibNumber
-            val bibId2 = createSierraBibNumber
+    val vhs = createVhs()
 
-            val itemRecord = createSierraItemRecordWith(
-              bibIds = List(bibId1)
-            )
+    val updaterService = new SierraItemMergerUpdaterService(vhs)
 
-            val sierraTransformable1 = createSierraTransformableWith(
-              sierraId = bibId1,
-              maybeBibRecord = None,
-              itemRecords = List(itemRecord)
-            )
+    val bibId1 = createSierraBibNumber
+    val bibId2 = createSierraBibNumber
 
-            val sierraTransformable2 = createSierraTransformableWith(
-              sierraId = bibId2,
-              maybeBibRecord = None
-            )
+    val itemRecord = createSierraItemRecordWith(
+      bibIds = List(bibId1)
+    )
 
-            val unlinkItemRecord = itemRecord.copy(
-              bibIds = List(bibId2),
-              unlinkedBibIds = List(bibId1),
-              modifiedDate = itemRecord.modifiedDate.minusSeconds(1)
-            )
+    val sierraTransformable1 = createSierraTransformableWith(
+      sierraId = bibId1,
+      maybeBibRecord = None,
+      itemRecords = List(itemRecord)
+    )
 
-            val expectedItemRecords = Map(
-              itemRecord.id -> itemRecord.copy(
-                bibIds = List(bibId2),
-                unlinkedBibIds = List(bibId1),
-                modifiedDate = unlinkItemRecord.modifiedDate
-              )
-            )
+    val sierraTransformable2 = createSierraTransformableWith(
+      sierraId = bibId2,
+      maybeBibRecord = None
+    )
 
-            // In this situation the item will _not_ be unlinked from the original
-            // record but will be linked to the new record (as this is the first
-            // time we've seen the link so it is valid for that bib.
-            val expectedTransformable1 = sierraTransformable1
-            val expectedTransformable2 = sierraTransformable2.copy(
-              itemRecords = expectedItemRecords
-            )
+    val unlinkItemRecord = itemRecord.copy(
+      bibIds = List(bibId2),
+      unlinkedBibIds = List(bibId1),
+      modifiedDate = itemRecord.modifiedDate.minusSeconds(1)
+    )
 
-            val future = storeInVHS(
-              transformables = List(sierraTransformable1, sierraTransformable2),
-              hybridStore = hybridStore
-            )
+    val expectedItemRecords = Map(
+      itemRecord.id -> itemRecord.copy(
+        bibIds = List(bibId2),
+        unlinkedBibIds = List(bibId1),
+        modifiedDate = unlinkItemRecord.modifiedDate
+      )
+    )
 
-            whenReady(future) { _ =>
-              whenReady(sierraUpdaterService.update(unlinkItemRecord)) { _ =>
-                assertStored(
-                  transformable = expectedTransformable1,
-                  table = table
-                )
-                assertStored(
-                  transformable = expectedTransformable2,
-                  table = table
-                )
-              }
-            }
-          }
-        }
-      }
+    // In this situation the item will _not_ be unlinked from the original
+    // record but will be linked to the new record (as this is the first
+    // time we've seen the link so it is valid for that bib.
+    val expectedTransformable1 = sierraTransformable1
+    val expectedTransformable2 = sierraTransformable2.copy(
+      itemRecords = expectedItemRecords
+    )
+
+    storeInVHS(Seq(sierraTransformable1, sierraTransformable2), vhs = vhs)
+
+    whenReady(updaterService.update(unlinkItemRecord)) { _ =>
+      assertStored(expectedTransformable1, vhs = vhs)
+      assertStored(expectedTransformable2, vhs = vhs)
     }
   }
 
   it("does not update an item if it receives an update with an older date") {
-    withLocalS3Bucket { bucket =>
-      withLocalDynamoDbTable { table =>
-        withSierraVHS(bucket, table) { hybridStore =>
-          withSierraUpdaterService(hybridStore) { sierraUpdaterService =>
-            val bibId = createSierraBibNumber
+    val vhs = createVhs()
 
-            val itemRecord = createSierraItemRecordWith(
-              modifiedDate = newerDate,
-              bibIds = List(bibId)
-            )
+    val updaterService = new SierraItemMergerUpdaterService(vhs)
 
-            val transformable = createSierraTransformableWith(
-              sierraId = bibId,
-              maybeBibRecord = None,
-              itemRecords = List(itemRecord)
-            )
+    val bibId = createSierraBibNumber
 
-            val oldItemRecord = itemRecord.copy(
-              modifiedDate = olderDate
-            )
+    val itemRecord = createSierraItemRecordWith(
+      modifiedDate = newerDate,
+      bibIds = List(bibId)
+    )
 
-            val future = storeInVHS(
-              transformable = transformable,
-              hybridStore = hybridStore
-            )
+    val transformable = createSierraTransformableWith(
+      sierraId = bibId,
+      maybeBibRecord = None,
+      itemRecords = List(itemRecord)
+    )
 
-            whenReady(future) { _ =>
-              whenReady(sierraUpdaterService.update(oldItemRecord)) { _ =>
-                assertStored(
-                  transformable = transformable,
-                  table = table
-                )
-              }
-            }
-          }
-        }
-      }
+    val oldItemRecord = itemRecord.copy(
+      modifiedDate = olderDate
+    )
+
+    storeInVHS(transformable, vhs = vhs)
+
+    whenReady(updaterService.update(oldItemRecord)) { _ =>
+      assertStored(transformable, vhs = vhs)
     }
   }
 
   it("adds an item to the record if the bibId exists but has no itemData") {
-    withLocalS3Bucket { bucket =>
-      withLocalDynamoDbTable { table =>
-        withSierraVHS(bucket, table) { hybridStore =>
-          withSierraUpdaterService(hybridStore) { sierraUpdaterService =>
-            val bibId = createSierraBibNumber
-            val transformable = createSierraTransformableWith(
-              sierraId = bibId,
-              maybeBibRecord = None
-            )
+    val vhs = createVhs()
 
-            val itemRecord = createSierraItemRecordWith(
-              bibIds = List(bibId)
-            )
+    val updaterService = new SierraItemMergerUpdaterService(vhs)
 
-            val expectedTransformable = createSierraTransformableWith(
-              sierraId = bibId,
-              maybeBibRecord = None,
-              itemRecords = List(itemRecord)
-            )
+    val bibId = createSierraBibNumber
+    val transformable = createSierraTransformableWith(
+      sierraId = bibId,
+      maybeBibRecord = None
+    )
 
-            val future = storeInVHS(
-              transformable = transformable,
-              hybridStore = hybridStore
-            )
+    val itemRecord = createSierraItemRecordWith(
+      bibIds = List(bibId)
+    )
 
-            whenReady(future) { _ =>
-              whenReady(sierraUpdaterService.update(itemRecord)) { _ =>
-                assertStored(
-                  transformable = expectedTransformable,
-                  table = table
-                )
-              }
-            }
-          }
-        }
-      }
+    val expectedTransformable = createSierraTransformableWith(
+      sierraId = bibId,
+      maybeBibRecord = None,
+      itemRecords = List(itemRecord)
+    )
+
+    storeInVHS(transformable, vhs = vhs)
+
+    whenReady(updaterService.update(itemRecord)) { _ =>
+      assertStored(expectedTransformable, vhs = vhs)
     }
   }
 
   it("returns a failed future if putting an item fails") {
-    withLocalS3Bucket { bucket =>
-      val table = Table(name = "doesnotexist", index = "missing")
-      withSierraVHS(bucket, table) { brokenStore =>
-        withSierraUpdaterService(brokenStore) { brokenService =>
-          val itemRecord = createSierraItemRecordWith(
-            bibIds = List(createSierraBibNumber)
-          )
+    val exception = new Throwable("BOOM!")
 
-          whenReady(brokenService.update(itemRecord).failed) { ex =>
-            ex shouldBe a[RuntimeException]
-          }
-        }
-      }
+    val brokenStore = new SierraStore() {
+      override def put(namespace: String)(
+        input: SierraTransformable,
+        keyPrefix: KeyPrefix,
+        keySuffix: KeySuffix,
+        userMetadata: Map[String, String]): Either[WriteError, ObjectLocation] =
+        Left(BackendWriteError(exception))
+    }
+
+    val vhs = createVhs(store = brokenStore)
+
+    val updaterService = new SierraItemMergerUpdaterService(vhs)
+
+    val itemRecord = createSierraItemRecordWith(
+      bibIds = List(createSierraBibNumber)
+    )
+
+    whenReady(updaterService.update(itemRecord).failed) {
+      _ shouldBe exception
     }
   }
 }
