@@ -1,31 +1,23 @@
 package uk.ac.wellcome.messaging.fixtures
 
 import akka.actor.ActorSystem
-import com.amazonaws.services.sns.AmazonSNS
-import com.amazonaws.services.sns.model.{
-  SubscribeRequest,
-  SubscribeResult,
-  UnsubscribeRequest
-}
+import com.amazonaws.services.sns.model.{SubscribeRequest, SubscribeResult, UnsubscribeRequest}
 import com.amazonaws.services.sqs.model.SendMessageResult
 import io.circe.{Decoder, Encoder}
 import org.scalatest.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
-import uk.ac.wellcome.fixtures.{fixture, Fixture, TestWith}
-import uk.ac.wellcome.messaging.message._
+import uk.ac.wellcome.fixtures.{Fixture, TestWith, fixture}
+import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.{Queue, QueuePair}
+import uk.ac.wellcome.messaging.message._
 import uk.ac.wellcome.monitoring.MetricsSender
 import uk.ac.wellcome.monitoring.fixtures.MetricsSenderFixture
 import uk.ac.wellcome.storage.ObjectStore
 import uk.ac.wellcome.storage.fixtures.S3
-import uk.ac.wellcome.storage.fixtures.S3.Bucket
-import uk.ac.wellcome.storage.streaming.CodecInstances._
-
-import scala.util.Success
-import uk.ac.wellcome.json.JsonUtil._
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.Success
 
 trait Messaging
     extends Akka
