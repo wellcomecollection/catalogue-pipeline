@@ -1,51 +1,47 @@
 package uk.ac.wellcome.platform.sierra_items_to_dynamo.fixtures
 
 import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.fixtures.SNS.Topic
-import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
+import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
+import uk.ac.wellcome.messaging.memory.MemoryMessageSender
+import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.monitoring.MetricsSender
-import uk.ac.wellcome.platform.sierra_items_to_dynamo.services.SierraItemsToDynamoWorkerService
-import uk.ac.wellcome.storage.fixtures.LocalDynamoDb.Table
-import uk.ac.wellcome.storage.fixtures.S3.Bucket
+import uk.ac.wellcome.platform.sierra_items_to_dynamo.services.{VHSInserter, SierraItemsToDynamoWorkerService}
+import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
 
-import scala.concurrent.ExecutionContext.Implicits.global
-
-trait WorkerServiceFixture extends SNS with SQS with DynamoInserterFixture {
+trait WorkerServiceFixture extends SQS with SierraAdapterHelpers {
   def withWorkerService[R](
     queue: Queue,
-    table: Table,
-    bucket: Bucket,
-    topic: Topic)(testWith: TestWith[SierraItemsToDynamoWorkerService, R]): R =
+    dao: SierraDao,
+    store: SierraItemStore,
+    messageSender: MemoryMessageSender)(testWith: TestWith[SierraItemsToDynamoWorkerService[String], R]): R =
     withMetricsSender() { metricsSender =>
-      withWorkerService(queue, table, bucket, topic, metricsSender) {
+      withWorkerService(queue, dao, store, messageSender, metricsSender) {
         workerService =>
           testWith(workerService)
       }
     }
 
   def withWorkerService[R](queue: Queue,
-                           table: Table,
-                           bucket: Bucket,
-                           topic: Topic,
+                           dao: SierraDao,
+                           store: SierraItemStore,
+                           messageSender: MemoryMessageSender,
                            metricsSender: MetricsSender)(
-    testWith: TestWith[SierraItemsToDynamoWorkerService, R]): R =
+    testWith: TestWith[SierraItemsToDynamoWorkerService[String], R]): R =
     withActorSystem { implicit actorSystem =>
       withSQSStream[NotificationMessage, R](queue, metricsSender) { sqsStream =>
-        withDynamoInserter(table, bucket) { dynamoInserter =>
-          withSNSWriter(topic) { snsWriter =>
-            val workerService = new SierraItemsToDynamoWorkerService(
-              sqsStream = sqsStream,
-              dynamoInserter = dynamoInserter,
-              snsWriter = snsWriter
-            )
+        val vhs = createItemVhs(dao, store)
+        val vhsInserter = new VHSInserter(vhs)
 
-            workerService.run()
+        val workerService = new SierraItemsToDynamoWorkerService(
+          sqsStream = sqsStream,
+          vhsInserter = vhsInserter,
+          messageSender = messageSender
+        )
 
-            testWith(workerService)
-          }
-        }
+        workerService.run()
+
+        testWith(workerService)
       }
     }
 }

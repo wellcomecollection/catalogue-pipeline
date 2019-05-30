@@ -2,24 +2,15 @@ package uk.ac.wellcome.platform.sierra_items_to_dynamo.services
 
 import uk.ac.wellcome.models.transformable.sierra.SierraItemRecord
 import uk.ac.wellcome.platform.sierra_items_to_dynamo.merger.SierraItemRecordMerger
-import uk.ac.wellcome.storage.ObjectStore
-import uk.ac.wellcome.storage.dynamo._
-import uk.ac.wellcome.storage.vhs.{
-  EmptyMetadata,
-  VHSIndexEntry,
-  VersionedHybridStore
-}
+import uk.ac.wellcome.storage.StorageError
+import uk.ac.wellcome.storage.vhs.{EmptyMetadata, Entry, VersionedHybridStore}
 
-import scala.concurrent.Future
-
-class DynamoInserter(
-  versionedHybridStore: VersionedHybridStore[SierraItemRecord,
-                                             EmptyMetadata,
-                                             ObjectStore[SierraItemRecord]]) {
-  def insertIntoDynamo(
-    record: SierraItemRecord): Future[VHSIndexEntry[EmptyMetadata]] =
-    versionedHybridStore
-      .updateRecord(
+class VHSInserter(
+  vhs: VersionedHybridStore[String, SierraItemRecord, EmptyMetadata]) {
+  def insertIntoVhs(
+    record: SierraItemRecord): Either[StorageError, Entry[String, EmptyMetadata]] =
+    vhs
+      .update(
         id = record.id.withoutCheckDigit
       )(
         ifNotExisting = (record, EmptyMetadata())

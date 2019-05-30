@@ -5,6 +5,7 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.transformable.SierraTransformable
 import uk.ac.wellcome.models.transformable.SierraTransformable._
+import uk.ac.wellcome.models.transformable.sierra.SierraItemRecord
 import uk.ac.wellcome.storage.memory.{MemoryObjectStore, MemoryVersionedDao}
 import uk.ac.wellcome.storage.streaming.CodecInstances._
 import uk.ac.wellcome.storage.vhs.{EmptyMetadata, Entry, VersionedHybridStore}
@@ -21,6 +22,17 @@ trait SierraAdapterHelpers extends EitherValues with Matchers {
     new SierraVHS {
       override protected val versionedDao: SierraDao = dao
       override protected val objectStore: SierraStore = store
+    }
+
+  type SierraItemStore = MemoryObjectStore[SierraItemRecord]
+  type SierraItemVHS = VersionedHybridStore[String, SierraItemRecord, EmptyMetadata]
+
+  def createItemStore: SierraItemStore = new SierraItemStore()
+
+  def createItemVhs(dao: SierraDao = createDao, store: SierraItemStore = createItemStore): SierraItemVHS =
+    new SierraItemVHS {
+      override protected val versionedDao: SierraDao = dao
+      override protected val objectStore: SierraItemStore = store
     }
 
   def storeInVHS(transformable: SierraTransformable,
@@ -44,10 +56,21 @@ trait SierraAdapterHelpers extends EitherValues with Matchers {
                    vhs: SierraVHS): Assertion =
     vhs.get(id = transformable.sierraId.withoutCheckDigit).right.value shouldBe transformable
 
+  def assertStored(itemRecord: SierraItemRecord,
+                   vhs: SierraItemVHS): Assertion =
+    vhs.get(id = itemRecord.id.withoutCheckDigit).right.value shouldBe itemRecord
+
   def assertStoredAndSent(transformable: SierraTransformable, messageSender: MemoryMessageSender, dao: SierraDao, vhs: SierraVHS): Assertion = {
     assertStored(transformable, vhs = vhs)
 
     val entry = dao.entries(transformable.sierraId.withoutCheckDigit)
+    messageSender.getMessages[Entry[String, EmptyMetadata]].contains(entry) shouldBe true
+  }
+
+  def assertStoredAndSent(itemRecord: SierraItemRecord, messageSender: MemoryMessageSender, dao: SierraDao, vhs: SierraItemVHS): Assertion = {
+    assertStored(itemRecord, vhs = vhs)
+
+    val entry = dao.entries(itemRecord.id.withoutCheckDigit)
     messageSender.getMessages[Entry[String, EmptyMetadata]].contains(entry) shouldBe true
   }
 }

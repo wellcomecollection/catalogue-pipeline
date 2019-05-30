@@ -8,9 +8,11 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.models.transformable.sierra.SierraItemRecord
 import uk.ac.wellcome.platform.sierra_items_to_dynamo.services.{
-  DynamoInserter,
+  VHSInserter,
   SierraItemsToDynamoWorkerService
 }
+import uk.ac.wellcome.storage.dynamo._
+import uk.ac.wellcome.storage.streaming.CodecInstances._
 import uk.ac.wellcome.storage.typesafe.VHSBuilder
 import uk.ac.wellcome.storage.vhs.EmptyMetadata
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
@@ -26,17 +28,14 @@ object Main extends WellcomeTypesafeApp {
     implicit val materializer: ActorMaterializer =
       AkkaBuilder.buildActorMaterializer()
 
-    val versionedHybridStore =
-      VHSBuilder.buildVHS[SierraItemRecord, EmptyMetadata](config)
-
-    val dynamoInserter = new DynamoInserter(
-      versionedHybridStore = versionedHybridStore
+    val dynamoInserter = new VHSInserter(
+      vhs = VHSBuilder.buildVHS[String, SierraItemRecord, EmptyMetadata](config)
     )
 
     new SierraItemsToDynamoWorkerService(
       sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
-      dynamoInserter = dynamoInserter,
-      snsWriter = SNSBuilder.buildSNSWriter(config)
+      vhsInserter = dynamoInserter,
+      messageSender = SNSBuilder.buildSNSMessageSender(config, subject = "Sent from sierra_items_to_dynamo")
     )
   }
 }

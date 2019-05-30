@@ -1,36 +1,28 @@
 package uk.ac.wellcome.platform.sierra_items_to_dynamo.services
 
 import org.mockito.Mockito.{never, verify}
-import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.{Assertion, FunSpec, Matchers}
 import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
-import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
+import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.transformable.sierra.SierraItemRecord
 import uk.ac.wellcome.models.transformable.sierra.test.utils.SierraGenerators
-import uk.ac.wellcome.monitoring.fixtures.MetricsSenderFixture
-import uk.ac.wellcome.platform.sierra_items_to_dynamo.fixtures.{
-  SierraItemRecordVHSFixture,
-  WorkerServiceFixture
-}
+import uk.ac.wellcome.platform.sierra_items_to_dynamo.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.platform.sierra_items_to_dynamo.merger.SierraItemRecordMerger
-import uk.ac.wellcome.storage.dynamo._
 import uk.ac.wellcome.storage.vhs.EmptyMetadata
 
 class SierraItemsToDynamoWorkerServiceTest
     extends FunSpec
-    with SNS
     with SQS
     with Matchers
     with Eventually
-    with IntegrationPatience
-    with MetricsSenderFixture
-    with ScalaFutures
     with SierraGenerators
-    with SierraItemRecordVHSFixture
-    with WorkerServiceFixture {
+    with WorkerServiceFixture
+    with IntegrationPatience {
 
-  it("reads a sierra record from SQS and inserts it into DynamoDB") {
+  it("reads a sierra record from SQS and inserts it into VHS") {
     val bibIds = createSierraBibNumbers(count = 5)
 
     val bibIds1 = List(bibIds(0), bibIds(1), bibIds(2))
@@ -53,64 +45,49 @@ class SierraItemsToDynamoWorkerServiceTest
       updatedRecord = record2
     )
 
-    withLocalDynamoDbTable { table =>
-      withLocalS3Bucket { bucket =>
-        withItemRecordVHS(table, bucket) { versionedHybridStore =>
-          storeSingleRecord(
-            record1,
-            versionedHybridStore = versionedHybridStore)
+    val dao = createDao
+    val store = createItemStore
+    val vhs = createItemVhs(dao, store)
 
-          withLocalSqsQueue { queue =>
-            withLocalSnsTopic { topic =>
-              withWorkerService(queue, table, bucket, topic) { _ =>
-                sendNotificationToSQS(queue = queue, message = record2)
+    val messageSender = new MemoryMessageSender()
 
-                eventually {
-                  assertStored[SierraItemRecord](
-                    table = table,
-                    id = record1.id.withoutCheckDigit,
-                    record = expectedRecord
-                  )
-                }
-              }
-            }
-          }
+    storeSingleRecord(record1, vhs = vhs)
+
+    withLocalSqsQueue { queue =>
+      withWorkerService(queue, dao, store, messageSender) { _ =>
+        sendNotificationToSQS(queue = queue, message = record2)
+
+        eventually {
+          assertStored(expectedRecord, vhs = vhs)
         }
       }
     }
   }
 
   it("records a failure if it receives an invalid message") {
-    withLocalDynamoDbTable { table =>
-      withLocalS3Bucket { bucket =>
-        withLocalSqsQueueAndDlq {
-          case QueuePair(queue, dlq) =>
-            withMockMetricsSender { mockMetricsSender =>
-              withLocalSnsTopic { topic =>
-                withWorkerService(
-                  queue,
-                  table,
-                  bucket,
-                  topic,
-                  mockMetricsSender) { _ =>
-                  val body =
-                    """
-                    |{
-                    | "something": "something"
-                    |}
-                  """.stripMargin
+    val dao = createDao
+    val store = createItemStore
 
-                  sendNotificationToSQS(queue = queue, body = body)
+    val messageSender = new MemoryMessageSender()
 
-                  eventually {
-                    assertQueueEmpty(queue)
-                    assertQueueHasSize(dlq, size = 1)
-                    verify(mockMetricsSender, never()).incrementCount(
-                      "SierraItemsToDynamoWorkerService_ProcessMessage_failure")
-                  }
-                }
-              }
-            }
+    withLocalSqsQueueAndDlq { case QueuePair(queue, dlq) =>
+      withMockMetricsSender { mockMetricsSender =>
+        withWorkerService(queue, dao, store, messageSender, mockMetricsSender) { _ =>
+          val body =
+            """
+              |{
+              | "something": "something"
+              |}
+            """.stripMargin
+
+          sendNotificationToSQS(queue = queue, body = body)
+
+          eventually {
+            assertQueueEmpty(queue)
+            assertQueueHasSize(dlq, size = 1)
+            verify(mockMetricsSender, never()).incrementCount(
+              "SierraItemsToDynamoWorkerService_ProcessMessage_failure")
+          }
         }
       }
     }
@@ -118,10 +95,10 @@ class SierraItemsToDynamoWorkerServiceTest
 
   def storeSingleRecord(
     itemRecord: SierraItemRecord,
-    versionedHybridStore: SierraItemsVHS
+    vhs: SierraItemVHS
   ): Assertion = {
-    val putFuture =
-      versionedHybridStore.updateRecord(id = itemRecord.id.withoutCheckDigit)(
+    val result =
+      vhs.update(id = itemRecord.id.withoutCheckDigit)(
         ifNotExisting = (itemRecord, EmptyMetadata())
       )(
         ifExisting = (existingRecord, existingMetadata) =>
@@ -129,12 +106,6 @@ class SierraItemsToDynamoWorkerServiceTest
             s"VHS should be empty; got ($existingRecord, $existingMetadata)!")
       )
 
-    whenReady(putFuture) { _ =>
-      val getFuture =
-        versionedHybridStore.getRecord(id = itemRecord.id.withoutCheckDigit)
-      whenReady(getFuture) { result =>
-        result.get shouldBe itemRecord
-      }
-    }
+    result shouldBe a[Right[_, _]]
   }
 }
