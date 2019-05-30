@@ -9,10 +9,7 @@ import uk.ac.wellcome.messaging.typesafe.{MessagingBuilder, SQSBuilder}
 import uk.ac.wellcome.models.transformable.SierraTransformable
 import uk.ac.wellcome.models.transformable.SierraTransformable._
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
-import uk.ac.wellcome.platform.transformer.sierra.services.{
-  HybridRecordReceiver,
-  SierraTransformerWorkerService
-}
+import uk.ac.wellcome.platform.transformer.sierra.services.{RecordReceiver, SierraTransformerWorkerService}
 import uk.ac.wellcome.storage.typesafe.S3Builder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
@@ -28,8 +25,8 @@ object Main extends WellcomeTypesafeApp {
     implicit val materializer: ActorMaterializer =
       AkkaBuilder.buildActorMaterializer()
 
-    val messageReceiver = new HybridRecordReceiver(
-      messageWriter =
+    val messageReceiver = new RecordReceiver(
+      messageSender =
         MessagingBuilder.buildMessageWriter[TransformedBaseWork](config),
       objectStore = S3Builder.buildObjectStore[SierraTransformable](config)
     )

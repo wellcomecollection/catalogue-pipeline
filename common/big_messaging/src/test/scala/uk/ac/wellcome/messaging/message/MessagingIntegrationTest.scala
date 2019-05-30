@@ -60,27 +60,6 @@ class MessagingIntegrationTest
         }
     }
 
-  private def withLocalStackMessageWriterMessageStream[R](
-    testWith: TestWith[(MessageStream[ExampleObject],
-                        MessageWriter[ExampleObject]),
-                       R]): R = {
-    withLocalStackMessageStreamFixtures[R] {
-      case (queue, messageStream) =>
-        withLocalS3Bucket { bucket =>
-          withLocalStackSnsTopic { topic =>
-            withLocalStackSubscription(queue, topic) { _ =>
-              withExampleObjectMessageWriter(
-                bucket,
-                topic,
-                localStackSnsClient) { messageWriter =>
-                testWith((messageStream, messageWriter))
-              }
-            }
-          }
-        }
-    }
-  }
-
   def withLocalStackMessageStreamFixtures[R](
     testWith: TestWith[(Queue, MessageStream[ExampleObject]), R]): R =
     withActorSystem { implicit actorSystem =>

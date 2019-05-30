@@ -26,7 +26,7 @@ import uk.ac.wellcome.storage.vhs.HybridRecord
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Random, Try}
 
-class HybridRecordReceiverTest
+class RecordReceiverTest
     extends FunSpec
     with Matchers
     with Messaging

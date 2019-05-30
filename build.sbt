@@ -118,7 +118,7 @@ lazy val transformer_miro = setupProject(project,
 
 lazy val transformer_sierra = setupProject(project,
   folder = "pipeline/transformer/transformer_sierra",
-  localDependencies = Seq(internal_model),
+  localDependencies = Seq(internal_model, big_messaging_typesafe),
   externalDependencies = CatalogueDependencies.sierraTransformerDependencies
 )
 

@@ -54,34 +54,6 @@ trait Messaging
       }
     )
 
-  def withExampleObjectMessageWriter[R](
-    bucket: Bucket,
-    topic: Topic,
-    writerSnsClient: AmazonSNS = snsClient)(
-    testWith: TestWith[MessageWriter[ExampleObject], R]): R =
-    withMessageWriter[ExampleObject, R](bucket, topic, writerSnsClient) {
-      messageWriter =>
-        testWith(messageWriter)
-    }
-
-  def withMessageWriter[T, R](bucket: Bucket,
-                              topic: Topic,
-                              writerSnsClient: AmazonSNS = snsClient)(
-    testWith: TestWith[MessageWriter[T], R])(
-    implicit store: ObjectStore[T], encoder: Encoder[T]): R = {
-    val messageConfig = MessageWriterConfig(
-      s3Config = createS3ConfigWith(bucket),
-      snsConfig = createSNSConfigWith(topic)
-    )
-
-    val messageWriter = new MessageWriter[T](
-      messageConfig = messageConfig,
-      snsClient = writerSnsClient
-    )
-
-    testWith(messageWriter)
-  }
-
   def withMessageStream[T, R](queue: SQS.Queue, metricsSender: MetricsSender)(
     testWith: TestWith[MessageStream[T], R])(
     implicit

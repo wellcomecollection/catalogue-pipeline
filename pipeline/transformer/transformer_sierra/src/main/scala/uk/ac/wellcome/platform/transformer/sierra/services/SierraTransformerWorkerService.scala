@@ -9,15 +9,17 @@ import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.Future
 
-class SierraTransformerWorkerService(
-  messageReceiver: HybridRecordReceiver,
+class SierraTransformerWorkerService[Destination](
+  messageReceiver: RecordReceiver[Destination],
   sierraTransformer: SierraTransformableTransformer,
   sqsStream: SQSStream[NotificationMessage]
 ) extends Runnable {
 
   def run(): Future[Done] =
-    sqsStream.foreach(this.getClass.getSimpleName, processMessage)
-
-  private def processMessage(message: NotificationMessage): Future[Unit] =
-    messageReceiver.receiveMessage(message, sierraTransformer.transform)
+    sqsStream.foreach(
+      this.getClass.getSimpleName,
+      message => Future.fromTry {
+        messageReceiver.receiveMessage(message, sierraTransformer.transform)
+      }
+    )
 }

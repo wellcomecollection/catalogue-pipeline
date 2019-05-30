@@ -16,7 +16,7 @@ import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 
 import scala.concurrent.ExecutionContext
 
-object MessagingBuilder {
+object BigMessagingBuilder {
   def buildMessageStream[T](config: Config)(
     implicit actorSystem: ActorSystem,
     decoderT: Decoder[T],
