@@ -37,6 +37,11 @@ object WellcomeDependencies {
     version = versions.storage
   )
 
+  val storageTypesafeLibrary: Seq[ModuleID] = library(
+    name = "storage_typesafe",
+    version = versions.storage
+  )
+
   val typesafeLibrary: Seq[ModuleID] = library(
     name = "typesafe-app",
     version = versions.typesafe
@@ -181,6 +186,18 @@ object CatalogueDependencies {
 
   val elasticsearchTypesafeDependencies: Seq[ModuleID] =
     WellcomeDependencies.typesafeLibrary
+
+  val bigMessagingDependencies: Seq[ModuleID] =
+    ExternalDependencies.scalatestDependencies ++
+    ExternalDependencies.mockitoDependencies ++
+    WellcomeDependencies.typesafeLibrary ++
+    WellcomeDependencies.monitoringLibrary ++
+    WellcomeDependencies.messagingLibrary ++
+    WellcomeDependencies.storageLibrary ++
+    WellcomeDependencies.fixturesLibrary
+
+  val bigMessagingTypesafeDependencies: Seq[ModuleID] =
+    WellcomeDependencies.storageTypesafeLibrary
 
   val apiDependencies: Seq[ModuleID] =
     ExternalDependencies.akkaActorDependencies ++

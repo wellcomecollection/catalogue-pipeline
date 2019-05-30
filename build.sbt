@@ -63,6 +63,15 @@ lazy val elasticsearch_typesafe = setupProject(project, "common/elasticsearch_ty
   externalDependencies = CatalogueDependencies.elasticsearchTypesafeDependencies
 )
 
+lazy val big_messaging = setupProject(project, "common/big_messaging",
+  externalDependencies = CatalogueDependencies.bigMessagingDependencies
+)
+
+lazy val big_messaging_typesafe = setupProject(project, "common/big_messaging_typesafe",
+  localDependencies = Seq(big_messaging),
+  externalDependencies = CatalogueDependencies.bigMessagingTypesafeDependencies
+)
+
 lazy val api = setupProject(project, "api/api",
   localDependencies = Seq(internal_model, display, elasticsearch),
   externalDependencies = CatalogueDependencies.apiDependencies
