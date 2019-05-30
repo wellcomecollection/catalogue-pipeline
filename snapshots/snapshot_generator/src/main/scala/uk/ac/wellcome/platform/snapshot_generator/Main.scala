@@ -33,7 +33,7 @@ object Main extends WellcomeTypesafeApp {
     new SnapshotGeneratorWorkerService(
       snapshotService = snapshotService,
       sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
-      snsWriter = SNSBuilder.buildSNSWriter(config)
+      messageSender = SNSBuilder.buildSNSMessageSender(config, subject = "Sent from the snapshot generator")
     )
   }
 }

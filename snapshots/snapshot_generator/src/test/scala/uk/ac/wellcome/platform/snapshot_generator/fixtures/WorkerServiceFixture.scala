@@ -4,41 +4,38 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import com.sksamuel.elastic4s.Index
 import org.scalatest.Suite
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.fixtures.SNS.Topic
-import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
-import uk.ac.wellcome.messaging.fixtures.SQS.Queue
-import uk.ac.wellcome.platform.snapshot_generator.services.SnapshotGeneratorWorkerService
 import uk.ac.wellcome.fixtures.TestWith
+import uk.ac.wellcome.messaging.fixtures.SQS
+import uk.ac.wellcome.messaging.fixtures.SQS.Queue
+import uk.ac.wellcome.messaging.memory.MemoryMessageSender
+import uk.ac.wellcome.messaging.sns.NotificationMessage
+import uk.ac.wellcome.platform.snapshot_generator.services.SnapshotGeneratorWorkerService
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 trait WorkerServiceFixture
     extends AkkaS3
     with SnapshotServiceFixture
-    with SNS
     with SQS { this: Suite =>
   def withWorkerService[R](
     queue: Queue,
-    topic: Topic,
+    messageSender: MemoryMessageSender,
     indexV1: Index,
-    indexV2: Index)(testWith: TestWith[SnapshotGeneratorWorkerService, R])(
+    indexV2: Index)(testWith: TestWith[SnapshotGeneratorWorkerService[String], R])(
     implicit actorSystem: ActorSystem,
     materializer: ActorMaterializer): R =
     withS3AkkaClient { s3AkkaClient =>
       withSnapshotService(s3AkkaClient, indexV1, indexV2) { snapshotService =>
         withSQSStream[NotificationMessage, R](queue) { sqsStream =>
-          withSNSWriter(topic) { snsWriter =>
-            val workerService = new SnapshotGeneratorWorkerService(
-              snapshotService = snapshotService,
-              sqsStream = sqsStream,
-              snsWriter = snsWriter
-            )
+          val workerService = new SnapshotGeneratorWorkerService(
+            snapshotService = snapshotService,
+            sqsStream = sqsStream,
+            messageSender = messageSender
+          )
 
-            workerService.run()
+          workerService.run()
 
-            testWith(workerService)
-          }
+          testWith(workerService)
         }
       }
     }

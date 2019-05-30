@@ -6,33 +6,23 @@ import com.amazonaws.services.s3.model.GetObjectRequest
 import com.sksamuel.elastic4s.Index
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.{FunSpec, Matchers}
-import uk.ac.wellcome.akka.fixtures.Akka
-import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.display.models.ApiVersions
 import uk.ac.wellcome.display.models.v1.DisplayV1SerialisationTestBase
+import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.utils.JsonAssertions
-import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
-import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
+import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.platform.snapshot_generator.fixtures.WorkerServiceFixture
-import uk.ac.wellcome.platform.snapshot_generator.models.{
-  CompletedSnapshotJob,
-  SnapshotJob
-}
+import uk.ac.wellcome.platform.snapshot_generator.models.{CompletedSnapshotJob, SnapshotJob}
 import uk.ac.wellcome.platform.snapshot_generator.test.utils.GzipUtils
-import uk.ac.wellcome.storage.fixtures.S3
 import uk.ac.wellcome.storage.fixtures.S3.Bucket
 
 class SnapshotGeneratorFeatureTest
     extends FunSpec
     with Eventually
     with Matchers
-    with Akka
-    with S3
-    with SNS
-    with SQS
     with GzipUtils
     with JsonAssertions
     with IntegrationPatience
@@ -42,7 +32,7 @@ class SnapshotGeneratorFeatureTest
 
   it("completes a snapshot generation") {
     withFixtures {
-      case (queue, topic, indexV1, _, publicBucket: Bucket) =>
+      case (queue, messageSender, indexV1, _, publicBucket: Bucket) =>
         val works = createIdentifiedWorks(count = 3)
 
         insertIntoElasticsearch(indexV1, works: _*)
@@ -89,34 +79,31 @@ class SnapshotGeneratorFeatureTest
               assertJsonStringsAreEqual(actualLine, expectedLine)
           }
 
-          val receivedMessages = listMessagesReceivedFromSNS(topic)
-          receivedMessages.size should be >= 1
+          val receivedMessages = messageSender.getMessages[CompletedSnapshotJob]
 
           val expectedJob = CompletedSnapshotJob(
             snapshotJob = snapshotJob,
             targetLocation =
               s"http://localhost:33333/${publicBucket.name}/$publicObjectKey"
           )
-          val actualJob =
-            fromJson[CompletedSnapshotJob](receivedMessages.head.message).get
-          actualJob shouldBe expectedJob
+
+          receivedMessages shouldBe Seq(expectedJob)
         }
     }
 
   }
 
   def withFixtures[R](
-    testWith: TestWith[(Queue, Topic, Index, Index, Bucket), R]) =
+    testWith: TestWith[(Queue, MemoryMessageSender, Index, Index, Bucket), R]) =
     withActorSystem { implicit actorSystem =>
       withMaterializer(actorSystem) { implicit materializer =>
         withLocalSqsQueue { queue =>
-          withLocalSnsTopic { topic =>
-            withLocalWorksIndex { indexV1 =>
-              withLocalWorksIndex { indexV2 =>
-                withLocalS3Bucket { bucket =>
-                  withWorkerService(queue, topic, indexV1, indexV2) { _ =>
-                    testWith((queue, topic, indexV1, indexV2, bucket))
-                  }
+          val messageSender = new MemoryMessageSender()
+          withLocalWorksIndex { indexV1 =>
+            withLocalWorksIndex { indexV2 =>
+              withLocalS3Bucket { bucket =>
+                withWorkerService(queue, messageSender, indexV1, indexV2) { _ =>
+                  testWith((queue, messageSender, indexV1, indexV2, bucket))
                 }
               }
             }
