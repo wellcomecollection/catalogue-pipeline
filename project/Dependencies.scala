@@ -197,7 +197,8 @@ object CatalogueDependencies {
     WellcomeDependencies.fixturesLibrary
 
   val bigMessagingTypesafeDependencies: Seq[ModuleID] =
-    WellcomeDependencies.storageTypesafeLibrary
+    WellcomeDependencies.storageTypesafeLibrary ++
+    WellcomeDependencies.messagingTypesafeLibrary
 
   val apiDependencies: Seq[ModuleID] =
     ExternalDependencies.akkaActorDependencies ++
