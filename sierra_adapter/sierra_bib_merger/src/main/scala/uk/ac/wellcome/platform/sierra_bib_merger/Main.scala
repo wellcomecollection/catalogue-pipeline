@@ -8,7 +8,10 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.models.transformable.SierraTransformable
 import uk.ac.wellcome.models.transformable.SierraTransformable._
-import uk.ac.wellcome.platform.sierra_bib_merger.services.{SierraBibMergerUpdaterService, SierraBibMergerWorkerService}
+import uk.ac.wellcome.platform.sierra_bib_merger.services.{
+  SierraBibMergerUpdaterService,
+  SierraBibMergerWorkerService
+}
 import uk.ac.wellcome.storage.dynamo._
 import uk.ac.wellcome.storage.streaming.CodecInstances._
 import uk.ac.wellcome.storage.typesafe.VHSBuilder
@@ -26,7 +29,8 @@ object Main extends WellcomeTypesafeApp {
     implicit val materializer: ActorMaterializer =
       AkkaBuilder.buildActorMaterializer()
 
-    val versionedHybridStore = VHSBuilder.buildVHS[String, SierraTransformable, EmptyMetadata](config)
+    val versionedHybridStore =
+      VHSBuilder.buildVHS[String, SierraTransformable, EmptyMetadata](config)
 
     val updaterService = new SierraBibMergerUpdaterService(
       vhs = versionedHybridStore
@@ -35,7 +39,8 @@ object Main extends WellcomeTypesafeApp {
     new SierraBibMergerWorkerService(
       sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
       messageSender = SNSBuilder.buildSNSMessageSender(
-        config, subject = "Sent from sierra_bib_merger"
+        config,
+        subject = "Sent from sierra_bib_merger"
       ),
       sierraBibMergerUpdaterService = updaterService
     )

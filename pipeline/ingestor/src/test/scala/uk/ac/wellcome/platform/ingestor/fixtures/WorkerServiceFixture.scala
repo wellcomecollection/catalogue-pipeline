@@ -25,15 +25,17 @@ trait WorkerServiceFixture extends ElasticsearchFixtures with Messaging {
                            elasticClient: ElasticClient = elasticClient)(
     testWith: TestWith[IngestorWorkerService, R]): R =
     withActorSystem { implicit actorSystem =>
-
       // TODO: It's not clear why I have to declare this explicitly;
       // normally the imports and extending from S3 are enough for
       // it to get picked up.  Find out why the implicits are
       // misbehaving in this case!
-      implicit val objectStore: ObjectStore[IdentifiedBaseWork] = new ObjectStore[IdentifiedBaseWork] {
-        override implicit val codec: Codec[IdentifiedBaseWork] = typeCodec[IdentifiedBaseWork]
-        override implicit val storageBackend: StorageBackend = s3StorageBackend
-      }
+      implicit val objectStore: ObjectStore[IdentifiedBaseWork] =
+        new ObjectStore[IdentifiedBaseWork] {
+          override implicit val codec: Codec[IdentifiedBaseWork] =
+            typeCodec[IdentifiedBaseWork]
+          override implicit val storageBackend: StorageBackend =
+            s3StorageBackend
+        }
 
       withMetricsSender() { metricsSender =>
         withMessageStream[IdentifiedBaseWork, R](

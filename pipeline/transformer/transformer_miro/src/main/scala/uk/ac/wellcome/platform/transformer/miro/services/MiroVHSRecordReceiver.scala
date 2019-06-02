@@ -22,9 +22,11 @@ class MiroVHSRecordReceiver(objectStore: ObjectStore[MiroRecord],
 
   type MiroEntry = Entry[String, MiroMetadata]
 
-  def receiveMessage(
-    message: NotificationMessage,
-    transformToWork: (MiroRecord, MiroMetadata, Int) => Try[TransformedBaseWork]): Future[Unit] = {
+  def receiveMessage(message: NotificationMessage,
+                     transformToWork: (
+                       MiroRecord,
+                       MiroMetadata,
+                       Int) => Try[TransformedBaseWork]): Future[Unit] = {
     debug(s"Starting to process message $message")
 
     val futureNotification = for {
@@ -43,9 +45,7 @@ class MiroVHSRecordReceiver(objectStore: ObjectStore[MiroRecord],
     futureNotification
       .recover {
         case e: JsonDecodingError =>
-          info(
-            "Recoverable failure parsing Entry/MiroMetadata from JSON",
-            e)
+          info("Recoverable failure parsing Entry/MiroMetadata from JSON", e)
           throw MiroTransformerException(e)
       }
       .map(_ => ())
@@ -54,10 +54,11 @@ class MiroVHSRecordReceiver(objectStore: ObjectStore[MiroRecord],
 
   private def getTransformable(entry: MiroEntry): Future[MiroRecord] =
     objectStore.get(entry.location) match {
-      case Right(record) => Future.successful(record)
+      case Right(record)      => Future.successful(record)
       case Left(storageError) => Future.failed(storageError.e)
     }
 
-  private def publishMessage(work: TransformedBaseWork): Future[MessageNotification] =
+  private def publishMessage(
+    work: TransformedBaseWork): Future[MessageNotification] =
     messageWriter.write(work)
 }

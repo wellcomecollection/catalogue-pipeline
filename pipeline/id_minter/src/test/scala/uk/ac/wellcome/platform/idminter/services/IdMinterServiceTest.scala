@@ -6,7 +6,11 @@ import org.scalatest.{FunSpec, Matchers}
 import scalikejdbc._
 import uk.ac.wellcome.messaging.memory.MemoryBigMessageSender
 import uk.ac.wellcome.platform.idminter.database.MemoryIdentifiersDao
-import uk.ac.wellcome.platform.idminter.fixtures.{FieldDescription, IdentifiersDatabase, WorkerServiceFixture}
+import uk.ac.wellcome.platform.idminter.fixtures.{
+  FieldDescription,
+  IdentifiersDatabase,
+  WorkerServiceFixture
+}
 import uk.ac.wellcome.storage.streaming.CodecInstances._
 
 class IdMinterServiceTest
@@ -22,36 +26,37 @@ class IdMinterServiceTest
       withIdentifiersDatabase { identifiersTableConfig =>
         val identifiersDao = new MemoryIdentifiersDao()
         val messageSender = new MemoryBigMessageSender[Json]()
-        withWorkerService(messageSender, queue, identifiersDao) { workerService =>
-          val database: SQLSyntax =
-            SQLSyntax.createUnsafely(identifiersTableConfig.database)
-          val table: SQLSyntax =
-            SQLSyntax.createUnsafely(identifiersTableConfig.tableName)
+        withWorkerService(messageSender, queue, identifiersDao) {
+          workerService =>
+            val database: SQLSyntax =
+              SQLSyntax.createUnsafely(identifiersTableConfig.database)
+            val table: SQLSyntax =
+              SQLSyntax.createUnsafely(identifiersTableConfig.tableName)
 
-          val service = new IdMinterService[String](
-            workerService = workerService,
-            rdsClientConfig = rdsClientConfig,
-            identifiersTableConfig = identifiersTableConfig
-          )
+            val service = new IdMinterService[String](
+              workerService = workerService,
+              rdsClientConfig = rdsClientConfig,
+              identifiersTableConfig = identifiersTableConfig
+            )
 
-          service.run()
+            service.run()
 
-          eventually {
-            val fields = DB readOnly { implicit session =>
-              sql"DESCRIBE $database.$table"
-                .map(
-                  rs =>
-                    FieldDescription(
-                      rs.string("Field"),
-                      rs.string("Type"),
-                      rs.string("Null"),
-                      rs.string("Key")))
-                .list()
-                .apply()
+            eventually {
+              val fields = DB readOnly { implicit session =>
+                sql"DESCRIBE $database.$table"
+                  .map(
+                    rs =>
+                      FieldDescription(
+                        rs.string("Field"),
+                        rs.string("Type"),
+                        rs.string("Null"),
+                        rs.string("Key")))
+                  .list()
+                  .apply()
+              }
+
+              fields.length should be > 0
             }
-
-            fields.length should be > 0
-          }
         }
       }
     }

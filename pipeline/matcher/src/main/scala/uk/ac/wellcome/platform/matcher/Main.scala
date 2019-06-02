@@ -11,7 +11,10 @@ import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.monitoring.typesafe.MetricsBuilder
 import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher
 import uk.ac.wellcome.platform.matcher.services.MatcherWorkerService
-import uk.ac.wellcome.platform.matcher.storage.{WorkGraphStore, DynamoWorkNodeDao}
+import uk.ac.wellcome.platform.matcher.storage.{
+  DynamoWorkNodeDao,
+  WorkGraphStore
+}
 import uk.ac.wellcome.storage.locking.{
   DynamoLockingService,
   DynamoRowLockDao,

@@ -7,10 +7,7 @@ import uk.ac.wellcome.messaging.memory.MemoryIndividualMessageSender
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Random, Try}
 
-class BulkMessageSenderTest
-    extends FunSpec
-    with Matchers
-    with ScalaFutures {
+class BulkMessageSenderTest extends FunSpec with Matchers with ScalaFutures {
 
   val messages: List[String] = (1 to 20).map { _ =>
     Random.alphanumeric take 15 mkString
@@ -30,8 +27,7 @@ class BulkMessageSenderTest
     )
 
     whenReady(future) { _ =>
-      val receivedMessages = messageSender
-        .messages
+      val receivedMessages = messageSender.messages
         .filter { _.destination == destination }
         .map { _.body }
 
@@ -43,7 +39,8 @@ class BulkMessageSenderTest
     val exception = new Throwable("BOOM!")
 
     val messageSender = new MemoryIndividualMessageSender() {
-      override def send(body: String)(subject: String, destination: String): Try[Unit] =
+      override def send(body: String)(subject: String,
+                                      destination: String): Try[Unit] =
         if (messages.size > 5)
           Failure(exception)
         else

@@ -38,7 +38,8 @@ object Main extends WellcomeTypesafeApp {
       sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
       playbackService = playbackService,
       mergerManager = mergerManager,
-      messageSender = BigMessagingBuilder.buildBigMessageSender[BaseWork](config)
+      messageSender =
+        BigMessagingBuilder.buildBigMessageSender[BaseWork](config)
     )
   }
 }

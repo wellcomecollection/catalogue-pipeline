@@ -41,7 +41,7 @@ class IdEmbedder(identifierGenerator: IdentifierGenerator) extends Logging {
           )
 
         val canonicalId = result match {
-          case Right(value) => value
+          case Right(value)       => value
           case Left(storageError) => throw storageError.e
         }
 

@@ -61,7 +61,10 @@ class SQLIdentifiersDaoTest
             value = "not_an_existing_value"
           )
 
-          identifiersDao.get(sourceIdentifier).left.value shouldBe a[DoesNotExistError]
+          identifiersDao
+            .get(sourceIdentifier)
+            .left
+            .value shouldBe a[DoesNotExistError]
       }
     }
 
@@ -80,7 +83,10 @@ class SQLIdentifiersDaoTest
             identifierType = IdentifierType("sierra-system-number")
           )
 
-          identifiersDao.get(sourceIdentifier).left.value shouldBe a[DoesNotExistError]
+          identifiersDao
+            .get(sourceIdentifier)
+            .left
+            .value shouldBe a[DoesNotExistError]
       }
     }
 
@@ -99,7 +105,10 @@ class SQLIdentifiersDaoTest
             ontologyType = "Item"
           )
 
-          identifiersDao.get(sourceIdentifier).left.value shouldBe a[DoesNotExistError]
+          identifiersDao
+            .get(sourceIdentifier)
+            .left
+            .value shouldBe a[DoesNotExistError]
       }
     }
   }

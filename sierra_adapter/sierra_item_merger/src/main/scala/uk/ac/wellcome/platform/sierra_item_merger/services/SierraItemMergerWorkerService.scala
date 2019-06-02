@@ -13,20 +13,21 @@ import uk.ac.wellcome.typesafe.Runnable
 import scala.concurrent.{ExecutionContext, Future}
 
 class SierraItemMergerWorkerService[Destination](
-                                                  sqsStream: SQSStream[NotificationMessage],
-                                                  sierraItemMergerUpdaterService: SierraItemMergerUpdaterService,
-                                                  itemStore: ObjectStore[SierraItemRecord],
-                                                  messageSender: MessageSender[Destination]
+  sqsStream: SQSStream[NotificationMessage],
+  sierraItemMergerUpdaterService: SierraItemMergerUpdaterService,
+  itemStore: ObjectStore[SierraItemRecord],
+  messageSender: MessageSender[Destination]
 )(implicit ec: ExecutionContext)
     extends Runnable {
 
   private def process(message: NotificationMessage): Future[Unit] =
     for {
-      entry <- Future.fromTry(fromJson[Entry[String, EmptyMetadata]](message.body))
+      entry <- Future.fromTry(
+        fromJson[Entry[String, EmptyMetadata]](message.body))
 
       // TODO: A bit of a hack to get the Either-based storage libraries working
       itemRecord <- itemStore.get(entry.location) match {
-        case Right(value) => Future.successful(value)
+        case Right(value)       => Future.successful(value)
         case Left(storageError) => Future.failed(storageError.e)
       }
 

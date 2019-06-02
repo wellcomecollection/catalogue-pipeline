@@ -70,17 +70,16 @@ class MessagingIntegrationTest
 
   private def withLocalStackBigMessageSenderMessageStream[R](
     testWith: TestWith[(MessageStream[ExampleObject],
-      BigMessageSender[SNSConfig, ExampleObject]), R]): R = {
+                        BigMessageSender[SNSConfig, ExampleObject]),
+                       R]): R = {
     withLocalStackMessageStreamFixtures[R] {
       case (queue, messageStream) =>
         withLocalS3Bucket { bucket =>
           withLocalStackSnsTopic { topic =>
             withLocalStackSubscription(queue, topic) { _ =>
-              withBigMessageSender(
-                bucket,
-                topic,
-                localStackSnsClient) { messageWriter =>
-                testWith((messageStream, messageWriter))
+              withBigMessageSender(bucket, topic, localStackSnsClient) {
+                messageWriter =>
+                  testWith((messageStream, messageWriter))
               }
             }
           }
@@ -88,25 +87,27 @@ class MessagingIntegrationTest
     }
   }
 
-  def withBigMessageSender[R](
-    bucket: Bucket,
-    topic: Topic,
-    senderSnsClient: AmazonSNS = snsClient)(
+  def withBigMessageSender[R](bucket: Bucket,
+                              topic: Topic,
+                              senderSnsClient: AmazonSNS = snsClient)(
     testWith: TestWith[BigMessageSender[SNSConfig, ExampleObject], R])(
     implicit
     circeEncoder: Encoder[ExampleObject],
     objectCodec: Codec[ExampleObject]
   ): R = {
     val sender = new BigMessageSender[SNSConfig, ExampleObject] {
-      override val messageSender: MessageSender[SNSConfig] = new SNSMessageSender(
-        snsClient = senderSnsClient,
-        snsConfig = createSNSConfigWith(topic),
-        subject = "Sent in MessagingIntegrationTest"
-      )
-      override val objectStore: ObjectStore[ExampleObject] = new ObjectStore[ExampleObject] {
-        override implicit val codec: Codec[ExampleObject] = objectCodec
-        override implicit val storageBackend: StorageBackend = s3StorageBackend
-      }
+      override val messageSender: MessageSender[SNSConfig] =
+        new SNSMessageSender(
+          snsClient = senderSnsClient,
+          snsConfig = createSNSConfigWith(topic),
+          subject = "Sent in MessagingIntegrationTest"
+        )
+      override val objectStore: ObjectStore[ExampleObject] =
+        new ObjectStore[ExampleObject] {
+          override implicit val codec: Codec[ExampleObject] = objectCodec
+          override implicit val storageBackend: StorageBackend =
+            s3StorageBackend
+        }
       override val namespace: String = bucket.name
       override implicit val encoder: Encoder[ExampleObject] = circeEncoder
       override val maxMessageSize: Int = 10000

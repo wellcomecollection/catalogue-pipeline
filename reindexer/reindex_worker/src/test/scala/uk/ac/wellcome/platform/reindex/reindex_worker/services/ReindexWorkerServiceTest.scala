@@ -32,8 +32,7 @@ class ReindexWorkerServiceTest
 
             sendNotificationToSQS(
               queue = queue,
-              message =
-                createReindexRequestWith(parameters = reindexParameters)
+              message = createReindexRequestWith(parameters = reindexParameters)
             )
 
             eventually {
@@ -90,17 +89,19 @@ class ReindexWorkerServiceTest
       val messageSender = new MemoryIndividualMessageSender()
       withLocalSqsQueueAndDlq {
         case QueuePair(queue, dlq) =>
-          withWorkerService(queue, messageSender, configMap = Map("abc" -> ((table, "xyz")))) {
-            _ =>
-              sendNotificationToSQS(
-                queue = queue,
-                message = createReindexRequestWith(jobConfigId = "123")
-              )
+          withWorkerService(
+            queue,
+            messageSender,
+            configMap = Map("abc" -> ((table, "xyz")))) { _ =>
+            sendNotificationToSQS(
+              queue = queue,
+              message = createReindexRequestWith(jobConfigId = "123")
+            )
 
-              eventually {
-                assertQueueEmpty(queue)
-                assertQueueHasSize(dlq, 1)
-              }
+            eventually {
+              assertQueueEmpty(queue)
+              assertQueueHasSize(dlq, 1)
+            }
           }
       }
     }
@@ -123,42 +124,45 @@ class ReindexWorkerServiceTest
               "1" -> ((table1, destination1)),
               "2" -> ((table2, destination2))
             )
-            withWorkerService(queue, messageSender, configMap = configMap) { _ =>
-              sendNotificationToSQS(
-                queue = queue,
-                message = createReindexRequestWith(jobConfigId = "1")
-              )
+            withWorkerService(queue, messageSender, configMap = configMap) {
+              _ =>
+                sendNotificationToSQS(
+                  queue = queue,
+                  message = createReindexRequestWith(jobConfigId = "1")
+                )
 
-              eventually {
-                val actualRecords = messageSender.messages
-                  .filter { _.destination == destination1 }
-                  .map { _.body }
-                  .map { fromJson[Record](_).get }
+                eventually {
+                  val actualRecords = messageSender.messages
+                    .filter { _.destination == destination1 }
+                    .map { _.body }
+                    .map { fromJson[Record](_).get }
 
-                actualRecords should contain theSameElementsAs records1
+                  actualRecords should contain theSameElementsAs records1
 
-                messageSender.messages.filter { _.destination == destination2 } shouldBe empty
+                  messageSender.messages.filter {
+                    _.destination == destination2
+                  } shouldBe empty
 
-                assertQueueEmpty(queue)
-                assertQueueEmpty(dlq)
-              }
+                  assertQueueEmpty(queue)
+                  assertQueueEmpty(dlq)
+                }
 
-              sendNotificationToSQS(
-                queue = queue,
-                message = createReindexRequestWith(jobConfigId = "2")
-              )
+                sendNotificationToSQS(
+                  queue = queue,
+                  message = createReindexRequestWith(jobConfigId = "2")
+                )
 
-              eventually {
-                val actualRecords = messageSender.messages
-                  .filter { _.destination == destination2 }
-                  .map { _.body }
-                  .map { fromJson[Record](_).get }
+                eventually {
+                  val actualRecords = messageSender.messages
+                    .filter { _.destination == destination2 }
+                    .map { _.body }
+                    .map { fromJson[Record](_).get }
 
-                actualRecords should contain theSameElementsAs records2
+                  actualRecords should contain theSameElementsAs records2
 
-                assertQueueEmpty(queue)
-                assertQueueEmpty(dlq)
-              }
+                  assertQueueEmpty(queue)
+                  assertQueueEmpty(dlq)
+                }
             }
         }
       }

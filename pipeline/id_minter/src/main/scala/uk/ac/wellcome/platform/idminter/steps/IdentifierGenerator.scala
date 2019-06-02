@@ -4,7 +4,12 @@ import uk.ac.wellcome.models.work.internal.SourceIdentifier
 import uk.ac.wellcome.platform.idminter.database.IdentifiersDao
 import uk.ac.wellcome.platform.idminter.models.Identifier
 import uk.ac.wellcome.platform.idminter.utils.Identifiable
-import uk.ac.wellcome.storage.{DaoError, DoesNotExistError, StorageError, WriteError}
+import uk.ac.wellcome.storage.{
+  DaoError,
+  DoesNotExistError,
+  StorageError,
+  WriteError
+}
 
 class IdentifierGenerator(identifiersDao: IdentifiersDao) {
 
@@ -13,7 +18,8 @@ class IdentifierGenerator(identifiersDao: IdentifiersDao) {
   ): Either[StorageError, String] =
     identifiersDao.get(sourceIdentifier) match {
       case Right(value) => Right(value.CanonicalId)
-      case Left(_: DoesNotExistError) => generateAndSaveCanonicalId(sourceIdentifier)
+      case Left(_: DoesNotExistError) =>
+        generateAndSaveCanonicalId(sourceIdentifier)
       case Left(err) => Left(err)
     }
 

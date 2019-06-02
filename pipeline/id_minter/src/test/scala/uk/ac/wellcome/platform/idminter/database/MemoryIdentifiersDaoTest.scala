@@ -8,14 +8,19 @@ import uk.ac.wellcome.platform.idminter.fixtures.IdMinterGenerators
 import uk.ac.wellcome.platform.idminter.models.Identifier
 import uk.ac.wellcome.storage.{DaoWriteError, DoesNotExistError}
 
-class MemoryIdentifiersDaoTest extends FunSpec with Matchers with IdentifiersGenerators with IdMinterGenerators with EitherValues {
+class MemoryIdentifiersDaoTest
+    extends FunSpec
+    with Matchers
+    with IdentifiersGenerators
+    with IdMinterGenerators
+    with EitherValues {
   describe("get") {
     it("gets an Identifier if it finds a matching SourceSystem and SourceId") {
       val sourceIdentifier = createSourceIdentifier
       val identifier = createIdentifierWith(
         sourceIdentifier = sourceIdentifier
       )
-      
+
       val dao = new MemoryIdentifiersDao()
 
       dao.put(identifier) shouldBe a[Right[_, _]]

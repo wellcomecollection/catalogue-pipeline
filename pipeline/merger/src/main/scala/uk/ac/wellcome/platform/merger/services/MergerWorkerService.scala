@@ -37,10 +37,9 @@ class MergerWorkerService[Destination](
       _ <- sendWorks(works)
     } yield ()
 
-  private def sendWorks(mergedWorks: Seq[BaseWork]): Future[Seq[MessageNotification]] =
+  private def sendWorks(
+    mergedWorks: Seq[BaseWork]): Future[Seq[MessageNotification]] =
     Future
       .sequence(
-        mergedWorks.map( work =>
-          Future.fromTry { messageSender.sendT(work) }
-        ))
+        mergedWorks.map(work => Future.fromTry { messageSender.sendT(work) }))
 }

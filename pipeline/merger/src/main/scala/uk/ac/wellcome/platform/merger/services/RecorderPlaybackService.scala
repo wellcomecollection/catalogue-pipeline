@@ -27,7 +27,9 @@ class RecorderPlaybackService(
     : Future[Seq[Option[TransformedBaseWork]]] =
     Future.sequence(
       workIdentifiers
-        .map { id => Future.fromTry { getWorkForIdentifier(id) } }
+        .map { id =>
+          Future.fromTry { getWorkForIdentifier(id) }
+        }
     )
 
   private def getWorkForIdentifier(

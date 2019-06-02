@@ -8,7 +8,10 @@ import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryBigMessageSender
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.{BaseWork, TransformedBaseWork}
-import uk.ac.wellcome.platform.merger.fixtures.{MatcherResultFixture, WorkerServiceFixture}
+import uk.ac.wellcome.platform.merger.fixtures.{
+  MatcherResultFixture,
+  WorkerServiceFixture
+}
 import uk.ac.wellcome.storage.streaming.CodecInstances._
 
 class MergerFeatureTest

@@ -88,9 +88,7 @@ class VHSInserterTest
 
     vhsInserter.insertIntoVhs(newRecord) shouldBe a[Right[_, _]]
 
-    assertStored(
-      newRecord.copy(unlinkedBibIds = List(bibIds(2))),
-      vhs = vhs)
+    assertStored(newRecord.copy(unlinkedBibIds = List(bibIds(2))), vhs = vhs)
   }
 
   it("adds new bibIds and records unlinked bibIds in the same update") {
@@ -113,9 +111,7 @@ class VHSInserterTest
 
     vhsInserter.insertIntoVhs(newRecord) shouldBe a[Right[_, _]]
 
-    assertStored(
-      newRecord.copy(unlinkedBibIds = List(bibIds(0))),
-      vhs = vhs)
+    assertStored(newRecord.copy(unlinkedBibIds = List(bibIds(0))), vhs = vhs)
   }
 
   it("preserves existing unlinked bibIds in DynamoDB") {

@@ -3,7 +3,10 @@ package uk.ac.wellcome.platform.sierra_item_merger.services
 import uk.ac.wellcome.models.transformable.SierraTransformable
 import uk.ac.wellcome.models.transformable.sierra.SierraItemRecord
 import uk.ac.wellcome.platform.sierra_item_merger.exceptions.SierraItemMergerException
-import uk.ac.wellcome.platform.sierra_item_merger.links.{ItemLinker, ItemUnlinker}
+import uk.ac.wellcome.platform.sierra_item_merger.links.{
+  ItemLinker,
+  ItemUnlinker
+}
 import uk.ac.wellcome.storage.vhs.{EmptyMetadata, Entry, VersionedHybridStore}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -12,7 +15,8 @@ class SierraItemMergerUpdaterService(
   vhs: VersionedHybridStore[String, SierraTransformable, EmptyMetadata]
 )(implicit ec: ExecutionContext) {
 
-  def update(itemRecord: SierraItemRecord): Future[Seq[Entry[String, EmptyMetadata]]] = {
+  def update(
+    itemRecord: SierraItemRecord): Future[Seq[Entry[String, EmptyMetadata]]] = {
     val mergeUpdates = itemRecord.bibIds.map { bibId =>
       vhs
         .update(id = bibId.withoutCheckDigit)(
@@ -44,7 +48,7 @@ class SierraItemMergerUpdaterService(
       }
 
     val futures = (mergeUpdates ++ unlinkUpdates).map {
-      case Right(entry) => Future.successful(entry)
+      case Right(entry)       => Future.successful(entry)
       case Left(storageError) => Future.failed(storageError.e)
     }
 

@@ -200,7 +200,8 @@ class IdEmbedderTests
           locations = originalItem2.agent.locations
         )
 
-        val actualWork = fromJson[IdentifiedWork](eventualWork.success.value.toString()).get
+        val actualWork =
+          fromJson[IdentifiedWork](eventualWork.success.value.toString()).get
 
         val actualItem1 = actualWork.items.head
         val actualItem2 = actualWork.items.tail.head

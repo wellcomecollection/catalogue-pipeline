@@ -12,8 +12,9 @@ import uk.ac.wellcome.storage.dynamo.{DynamoConfig, DynamoDao}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class DynamoWorkNodeDao(dynamoClient: AmazonDynamoDB, dynamoConfig: DynamoConfig)(
-  implicit ec: ExecutionContext)
+class DynamoWorkNodeDao(
+  dynamoClient: AmazonDynamoDB,
+  dynamoConfig: DynamoConfig)(implicit ec: ExecutionContext)
     extends Logging {
 
   private val index = dynamoConfig.index

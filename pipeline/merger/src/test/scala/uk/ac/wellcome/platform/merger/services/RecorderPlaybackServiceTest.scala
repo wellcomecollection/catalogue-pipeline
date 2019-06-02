@@ -89,7 +89,9 @@ class RecorderPlaybackServiceTest
     storeInVhs(vhs, storedWorks: _*)
 
     whenReady(fetchAllWorks(vhs = vhs, lookupWorks: _*)) { result =>
-      result shouldBe (unchangedWorks.map { Some(_) } ++ (4 to 7).map { _ => None })
+      result shouldBe (unchangedWorks.map { Some(_) } ++ (4 to 7).map { _ =>
+        None
+      })
     }
   }
 

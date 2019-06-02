@@ -6,15 +6,18 @@ import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.monitoring.MetricsSender
-import uk.ac.wellcome.platform.sierra_items_to_dynamo.services.{VHSInserter, SierraItemsToDynamoWorkerService}
+import uk.ac.wellcome.platform.sierra_items_to_dynamo.services.{
+  SierraItemsToDynamoWorkerService,
+  VHSInserter
+}
 import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
 
 trait WorkerServiceFixture extends SQS with SierraAdapterHelpers {
-  def withWorkerService[R](
-    queue: Queue,
-    dao: SierraDao,
-    store: SierraItemStore,
-    messageSender: MemoryMessageSender)(testWith: TestWith[SierraItemsToDynamoWorkerService[String], R]): R =
+  def withWorkerService[R](queue: Queue,
+                           dao: SierraDao,
+                           store: SierraItemStore,
+                           messageSender: MemoryMessageSender)(
+    testWith: TestWith[SierraItemsToDynamoWorkerService[String], R]): R =
     withMetricsSender() { metricsSender =>
       withWorkerService(queue, dao, store, messageSender, metricsSender) {
         workerService =>

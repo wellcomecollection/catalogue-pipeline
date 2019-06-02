@@ -3,7 +3,11 @@ package uk.ac.wellcome.platform.recorder.services
 import akka.Done
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.MessageSender
-import uk.ac.wellcome.messaging.message.{MessageNotification, MessageStream, RemoteNotification}
+import uk.ac.wellcome.messaging.message.{
+  MessageNotification,
+  MessageStream,
+  RemoteNotification
+}
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.storage.vhs.{EmptyMetadata, VersionedHybridStore}
 import uk.ac.wellcome.typesafe.Runnable
@@ -16,7 +20,8 @@ class RecorderWorkerService[Destination](
                                              TransformedBaseWork,
                                              EmptyMetadata],
   messageStream: MessageStream[TransformedBaseWork],
-  messageSender: MessageSender[Destination]) extends Runnable {
+  messageSender: MessageSender[Destination])
+    extends Runnable {
 
   def run(): Future[Done] =
     messageStream.foreach(
@@ -43,7 +48,7 @@ class RecorderWorkerService[Destination](
           (work, EmptyMetadata())
       }
     ) match {
-      case Right(value) => Success(value)
+      case Right(value)       => Success(value)
       case Left(storageError) => Failure(storageError.e)
     }
 }

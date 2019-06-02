@@ -1,7 +1,11 @@
 package uk.ac.wellcome.platform.reindex.reindex_worker.fixtures
 
 import com.gu.scanamo.Scanamo
-import uk.ac.wellcome.platform.reindex.reindex_worker.dynamo.{MaxRecordsScanner, ParallelScanner, ScanSpecScanner}
+import uk.ac.wellcome.platform.reindex.reindex_worker.dynamo.{
+  MaxRecordsScanner,
+  ParallelScanner,
+  ScanSpecScanner
+}
 import uk.ac.wellcome.storage.fixtures.LocalDynamoDb
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.storage.fixtures.LocalDynamoDb.Table

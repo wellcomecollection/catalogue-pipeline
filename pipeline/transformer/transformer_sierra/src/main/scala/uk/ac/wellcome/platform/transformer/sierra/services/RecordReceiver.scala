@@ -11,9 +11,9 @@ import uk.ac.wellcome.storage.vhs.{EmptyMetadata, Entry}
 
 import scala.util.Try
 
-class RecordReceiver[Destination](
-  bigMessageSender: MessageSender[Destination],
-  objectStore: ObjectStore[SierraTransformable]) extends Logging {
+class RecordReceiver[Destination](bigMessageSender: MessageSender[Destination],
+                                  objectStore: ObjectStore[SierraTransformable])
+    extends Logging {
 
   def receiveMessage(message: NotificationMessage,
                      transformToWork: (

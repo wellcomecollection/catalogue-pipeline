@@ -9,7 +9,10 @@ import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.models.transformable.SierraTransformable
 import uk.ac.wellcome.models.transformable.SierraTransformable._
 import uk.ac.wellcome.models.transformable.sierra.SierraItemRecord
-import uk.ac.wellcome.platform.sierra_item_merger.services.{SierraItemMergerUpdaterService, SierraItemMergerWorkerService}
+import uk.ac.wellcome.platform.sierra_item_merger.services.{
+  SierraItemMergerUpdaterService,
+  SierraItemMergerWorkerService
+}
 import uk.ac.wellcome.storage.dynamo._
 import uk.ac.wellcome.storage.typesafe.{S3Builder, VHSBuilder}
 import uk.ac.wellcome.storage.vhs.EmptyMetadata
@@ -36,7 +39,9 @@ object Main extends WellcomeTypesafeApp {
       sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
       sierraItemMergerUpdaterService = updaterService,
       itemStore = S3Builder.buildObjectStore[SierraItemRecord](config),
-      messageSender = SNSBuilder.buildSNSMessageSender(config, subject = "Sent from the sierra item merger")
+      messageSender = SNSBuilder.buildSNSMessageSender(
+        config,
+        subject = "Sent from the sierra item merger")
     )
   }
 }

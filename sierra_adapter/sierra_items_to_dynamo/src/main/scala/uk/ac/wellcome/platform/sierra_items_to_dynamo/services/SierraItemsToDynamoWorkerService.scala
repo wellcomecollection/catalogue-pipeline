@@ -22,7 +22,7 @@ class SierraItemsToDynamoWorkerService[Destination](
       itemRecord <- fromJson[SierraItemRecord](message.body)
 
       entry <- vhsInserter.insertIntoVhs(itemRecord) match {
-        case Right(value) => Success(value)
+        case Right(value)       => Success(value)
         case Left(storageError) => Failure(storageError.e)
       }
 

@@ -10,16 +10,21 @@ import uk.ac.wellcome.storage.streaming.CodecInstances._
 trait RecorderVhsFixture extends EitherValues with Matchers {
   type RecorderDao = MemoryVersionedDao[String, Entry[String, EmptyMetadata]]
   type RecorderStore = MemoryObjectStore[TransformedBaseWork]
-  type RecorderVhs = VersionedHybridStore[String, TransformedBaseWork, EmptyMetadata]
+  type RecorderVhs =
+    VersionedHybridStore[String, TransformedBaseWork, EmptyMetadata]
 
-  def createDao: RecorderDao = MemoryVersionedDao[String, Entry[String, EmptyMetadata]]()
+  def createDao: RecorderDao =
+    MemoryVersionedDao[String, Entry[String, EmptyMetadata]]()
   def createStore: RecorderStore = new RecorderStore()
-  def createVhs(dao: RecorderDao = createDao, store: RecorderStore = createStore): RecorderVhs = new RecorderVhs {
-    override protected val versionedDao: RecorderDao = dao
-    override protected val objectStore: RecorderStore = store
-  }
+  def createVhs(dao: RecorderDao = createDao,
+                store: RecorderStore = createStore): RecorderVhs =
+    new RecorderVhs {
+      override protected val versionedDao: RecorderDao = dao
+      override protected val objectStore: RecorderStore = store
+    }
 
-  def storeInVhs(vhs: RecorderVhs, works: TransformedBaseWork*): Seq[Assertion] =
+  def storeInVhs(vhs: RecorderVhs,
+                 works: TransformedBaseWork*): Seq[Assertion] =
     works.map { work =>
       val result = vhs.update(work.sourceIdentifier.toString)(
         ifNotExisting = (work, EmptyMetadata()))((_, _) =>

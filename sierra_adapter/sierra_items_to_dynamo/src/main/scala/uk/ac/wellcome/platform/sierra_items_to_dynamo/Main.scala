@@ -8,8 +8,8 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.models.transformable.sierra.SierraItemRecord
 import uk.ac.wellcome.platform.sierra_items_to_dynamo.services.{
-  VHSInserter,
-  SierraItemsToDynamoWorkerService
+  SierraItemsToDynamoWorkerService,
+  VHSInserter
 }
 import uk.ac.wellcome.storage.dynamo._
 import uk.ac.wellcome.storage.streaming.CodecInstances._
@@ -35,7 +35,9 @@ object Main extends WellcomeTypesafeApp {
     new SierraItemsToDynamoWorkerService(
       sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
       vhsInserter = dynamoInserter,
-      messageSender = SNSBuilder.buildSNSMessageSender(config, subject = "Sent from sierra_items_to_dynamo")
+      messageSender = SNSBuilder.buildSNSMessageSender(
+        config,
+        subject = "Sent from sierra_items_to_dynamo")
     )
   }
 }

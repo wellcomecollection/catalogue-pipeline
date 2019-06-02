@@ -16,7 +16,8 @@ class BigMessageReaderTest extends FunSpec with Matchers with EitherValues {
 
   val blueTriangle = Shape(colour = "blue", sides = 3)
 
-  def createReader(store: ObjectStore[Shape] = new MemoryObjectStore[Shape]())(implicit decoderS: Decoder[Shape]): BigMessageReader[Shape] =
+  def createReader(store: ObjectStore[Shape] = new MemoryObjectStore[Shape]())(
+    implicit decoderS: Decoder[Shape]): BigMessageReader[Shape] =
     new BigMessageReader[Shape] {
       override val objectStore: ObjectStore[Shape] = store
       override implicit val decoder: Decoder[Shape] = decoderS

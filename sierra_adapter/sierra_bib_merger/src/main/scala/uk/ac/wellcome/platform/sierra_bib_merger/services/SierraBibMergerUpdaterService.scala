@@ -10,7 +10,8 @@ class SierraBibMergerUpdaterService(
   vhs: VersionedHybridStore[String, SierraTransformable, EmptyMetadata]
 ) {
 
-  def update(bibRecord: SierraBibRecord): Either[StorageError, Entry[String, EmptyMetadata]] =
+  def update(bibRecord: SierraBibRecord)
+    : Either[StorageError, Entry[String, EmptyMetadata]] =
     vhs
       .update(id = bibRecord.id.withoutCheckDigit)(
         ifNotExisting = (SierraTransformable(bibRecord), EmptyMetadata()))(

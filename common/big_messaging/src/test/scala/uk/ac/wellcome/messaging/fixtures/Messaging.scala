@@ -1,12 +1,16 @@
 package uk.ac.wellcome.messaging.fixtures
 
 import akka.actor.ActorSystem
-import com.amazonaws.services.sns.model.{SubscribeRequest, SubscribeResult, UnsubscribeRequest}
+import com.amazonaws.services.sns.model.{
+  SubscribeRequest,
+  SubscribeResult,
+  UnsubscribeRequest
+}
 import com.amazonaws.services.sqs.model.SendMessageResult
 import io.circe.{Decoder, Encoder}
 import org.scalatest.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
-import uk.ac.wellcome.fixtures.{Fixture, TestWith, fixture}
+import uk.ac.wellcome.fixtures.{fixture, Fixture, TestWith}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.{Queue, QueuePair}
@@ -29,9 +33,8 @@ trait Messaging
 
   case class ExampleObject(name: String)
 
-  def withLocalStackSubscription[R](
-    queue: Queue,
-    topic: Topic): Fixture[SubscribeResult, R] =
+  def withLocalStackSubscription[R](queue: Queue,
+                                    topic: Topic): Fixture[SubscribeResult, R] =
     fixture[SubscribeResult, R](
       create = {
         val subRequest = new SubscribeRequest(topic.arn, "sqs", queue.arn)

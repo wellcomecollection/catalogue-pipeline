@@ -24,7 +24,7 @@ class SierraBibMergerWorkerService[Destination](
       // TODO: This is a bit nasty, and was added as a way to get the newer
       // storage libraries working in the catalogue.  Revisit and improve!
       vhsEntry <- sierraBibMergerUpdaterService.update(bibRecord) match {
-        case Right(value) => Success(value)
+        case Right(value)       => Success(value)
         case Left(storageError) => Failure(storageError.e)
       }
 

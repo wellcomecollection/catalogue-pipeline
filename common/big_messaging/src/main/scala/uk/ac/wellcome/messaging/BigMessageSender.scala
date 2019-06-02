@@ -6,7 +6,11 @@ import java.util.Date
 import grizzled.slf4j.Logging
 import io.circe.Encoder
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.messaging.message.{InlineNotification, MessageNotification, RemoteNotification}
+import uk.ac.wellcome.messaging.message.{
+  InlineNotification,
+  MessageNotification,
+  RemoteNotification
+}
 import uk.ac.wellcome.storage.{KeyPrefix, ObjectStore}
 
 import scala.util.{Failure, Success, Try}

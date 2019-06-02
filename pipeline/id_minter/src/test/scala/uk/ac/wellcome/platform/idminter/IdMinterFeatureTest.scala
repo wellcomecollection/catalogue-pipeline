@@ -145,8 +145,10 @@ class IdMinterFeatureTest
       .get("ApproximateNumberOfMessagesNotVisible") shouldBe "1"
   }
 
-  private def getWorks(messageSender: MemoryBigMessageSender[Json]): Seq[IdentifiedBaseWork] =
-    messageSender.getMessages[RemoteNotification]
+  private def getWorks(
+    messageSender: MemoryBigMessageSender[Json]): Seq[IdentifiedBaseWork] =
+    messageSender
+      .getMessages[RemoteNotification]
       .map { _.location }
       .map { messageSender.objectStore.get(_).right.value }
       .map { _.as[IdentifiedBaseWork].right.value }

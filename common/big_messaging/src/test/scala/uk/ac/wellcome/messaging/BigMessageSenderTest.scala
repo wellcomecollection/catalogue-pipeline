@@ -3,8 +3,15 @@ package uk.ac.wellcome.messaging
 import io.circe.Encoder
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.messaging.memory.{MemoryBigMessageSender, MemoryMessageSender}
-import uk.ac.wellcome.messaging.message.{InlineNotification, MessageNotification, RemoteNotification}
+import uk.ac.wellcome.messaging.memory.{
+  MemoryBigMessageSender,
+  MemoryMessageSender
+}
+import uk.ac.wellcome.messaging.message.{
+  InlineNotification,
+  MessageNotification,
+  RemoteNotification
+}
 import uk.ac.wellcome.storage._
 import uk.ac.wellcome.storage.memory.MemoryObjectStore
 import uk.ac.wellcome.storage.streaming.CodecInstances._
@@ -24,7 +31,8 @@ class BigMessageSenderTest extends FunSpec with Matchers {
     sender.sendT(redSquare) shouldBe a[Success[_]]
 
     sender.messages should have size 1
-    val notification = fromJson[MessageNotification](sender.messages.head.body).get
+    val notification =
+      fromJson[MessageNotification](sender.messages.head.body).get
     notification shouldBe a[InlineNotification]
     val body = notification.asInstanceOf[InlineNotification]
     fromJson[Shape](body.jsonString).get shouldBe redSquare
@@ -38,7 +46,8 @@ class BigMessageSenderTest extends FunSpec with Matchers {
     sender.sendT(redSquare) shouldBe a[Success[_]]
 
     sender.messages should have size 1
-    val notification = fromJson[MessageNotification](sender.messages.head.body).get
+    val notification =
+      fromJson[MessageNotification](sender.messages.head.body).get
     notification shouldBe a[RemoteNotification]
     val location = notification.asInstanceOf[RemoteNotification].location
 
@@ -58,7 +67,9 @@ class BigMessageSenderTest extends FunSpec with Matchers {
 
     val locations =
       sender.messages
-        .map { msg => fromJson[MessageNotification](msg.body).get }
+        .map { msg =>
+          fromJson[MessageNotification](msg.body).get
+        }
         .map { _.asInstanceOf[RemoteNotification].location }
 
     locations.distinct should have size 2
@@ -73,7 +84,8 @@ class BigMessageSenderTest extends FunSpec with Matchers {
     sender.sendT(redSquare) shouldBe a[Success[_]]
 
     sender.messages should have size 1
-    val notification = fromJson[MessageNotification](sender.messages.head.body).get
+    val notification =
+      fromJson[MessageNotification](sender.messages.head.body).get
     notification shouldBe a[RemoteNotification]
     val location = notification.asInstanceOf[RemoteNotification].location
 
@@ -89,7 +101,8 @@ class BigMessageSenderTest extends FunSpec with Matchers {
     sender.sendT(redSquare) shouldBe a[Success[_]]
 
     sender.messages should have size 1
-    val notification = fromJson[MessageNotification](sender.messages.head.body).get
+    val notification =
+      fromJson[MessageNotification](sender.messages.head.body).get
     notification shouldBe a[RemoteNotification]
     val location = notification.asInstanceOf[RemoteNotification].location
 
@@ -118,9 +131,15 @@ class BigMessageSenderTest extends FunSpec with Matchers {
     val sender = new MemoryBigMessageSender[Shape](
       maxSize = 1
     ) {
-      override val objectStore: ObjectStore[Shape] = new MemoryObjectStore[Shape]() {
-        override def put(namespace: String)(input: Shape, keyPrefix: KeyPrefix, keySuffix: KeySuffix, userMetadata: Map[String, String]): Either[BackendWriteError, ObjectLocation] = Left(BackendWriteError(new Throwable("BOOM!")))
-      }
+      override val objectStore: ObjectStore[Shape] =
+        new MemoryObjectStore[Shape]() {
+          override def put(namespace: String)(input: Shape,
+                                              keyPrefix: KeyPrefix,
+                                              keySuffix: KeySuffix,
+                                              userMetadata: Map[String, String])
+            : Either[BackendWriteError, ObjectLocation] =
+            Left(BackendWriteError(new Throwable("BOOM!")))
+        }
     }
 
     val result = sender.sendT(redSquare)

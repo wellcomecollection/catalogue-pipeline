@@ -5,10 +5,16 @@ import akka.stream.ActorMaterializer
 import com.typesafe.config.Config
 import io.circe.Json
 import uk.ac.wellcome.messaging.typesafe.BigMessagingBuilder
-import uk.ac.wellcome.platform.idminter.config.builders.{IdentifiersTableBuilder, RDSBuilder}
+import uk.ac.wellcome.platform.idminter.config.builders.{
+  IdentifiersTableBuilder,
+  RDSBuilder
+}
 import uk.ac.wellcome.platform.idminter.database.SQLIdentifiersDao
 import uk.ac.wellcome.platform.idminter.models.IdentifiersTable
-import uk.ac.wellcome.platform.idminter.services.{IdMinterService, IdMinterWorkerService}
+import uk.ac.wellcome.platform.idminter.services.{
+  IdMinterService,
+  IdMinterWorkerService
+}
 import uk.ac.wellcome.platform.idminter.steps.{IdEmbedder, IdentifierGenerator}
 import uk.ac.wellcome.storage.streaming.CodecInstances._
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp

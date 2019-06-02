@@ -12,11 +12,10 @@ import uk.ac.wellcome.platform.merger.services._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 trait WorkerServiceFixture extends RecorderVhsFixture with Messaging {
-  def withWorkerService[R](
-    vhs: RecorderVhs,
-    messageSender: MemoryBigMessageSender[BaseWork],
-    queue: Queue,
-    metricsSender: MetricsSender)(
+  def withWorkerService[R](vhs: RecorderVhs,
+                           messageSender: MemoryBigMessageSender[BaseWork],
+                           queue: Queue,
+                           metricsSender: MetricsSender)(
     testWith: TestWith[MergerWorkerService[String], R]): R =
     withActorSystem { implicit actorSystem =>
       withSQSStream[NotificationMessage, R](
@@ -40,8 +39,9 @@ trait WorkerServiceFixture extends RecorderVhsFixture with Messaging {
     messageSender: MemoryBigMessageSender[BaseWork],
     queue: Queue)(testWith: TestWith[MergerWorkerService[String], R]): R =
     withMetricsSender() { metricsSender =>
-      withWorkerService(vhs, messageSender, queue, metricsSender) { workerService =>
-        testWith(workerService)
+      withWorkerService(vhs, messageSender, queue, metricsSender) {
+        workerService =>
+          testWith(workerService)
       }
     }
 }

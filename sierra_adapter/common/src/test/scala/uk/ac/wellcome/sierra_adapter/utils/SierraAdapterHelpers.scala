@@ -13,23 +13,28 @@ import uk.ac.wellcome.storage.vhs.{EmptyMetadata, Entry, VersionedHybridStore}
 trait SierraAdapterHelpers extends EitherValues with Matchers {
   type SierraDao = MemoryVersionedDao[String, Entry[String, EmptyMetadata]]
   type SierraStore = MemoryObjectStore[SierraTransformable]
-  type SierraVHS = VersionedHybridStore[String, SierraTransformable, EmptyMetadata]
+  type SierraVHS =
+    VersionedHybridStore[String, SierraTransformable, EmptyMetadata]
 
-  def createDao: SierraDao = MemoryVersionedDao[String, Entry[String, EmptyMetadata]]()
+  def createDao: SierraDao =
+    MemoryVersionedDao[String, Entry[String, EmptyMetadata]]()
   def createStore: SierraStore = new SierraStore()
 
-  def createVhs(dao: SierraDao = createDao, store: SierraStore = createStore): SierraVHS =
+  def createVhs(dao: SierraDao = createDao,
+                store: SierraStore = createStore): SierraVHS =
     new SierraVHS {
       override protected val versionedDao: SierraDao = dao
       override protected val objectStore: SierraStore = store
     }
 
   type SierraItemStore = MemoryObjectStore[SierraItemRecord]
-  type SierraItemVHS = VersionedHybridStore[String, SierraItemRecord, EmptyMetadata]
+  type SierraItemVHS =
+    VersionedHybridStore[String, SierraItemRecord, EmptyMetadata]
 
   def createItemStore: SierraItemStore = new SierraItemStore()
 
-  def createItemVhs(dao: SierraDao = createDao, store: SierraItemStore = createItemStore): SierraItemVHS =
+  def createItemVhs(dao: SierraDao = createDao,
+                    store: SierraItemStore = createItemStore): SierraItemVHS =
     new SierraItemVHS {
       override protected val versionedDao: SierraDao = dao
       override protected val objectStore: SierraItemStore = store
@@ -44,7 +49,8 @@ trait SierraAdapterHelpers extends EitherValues with Matchers {
           throw new RuntimeException(
             s"Found record ${transformable.sierraId}, but VHS should be empty")
       )
-      .right.value
+      .right
+      .value
 
   def storeInVHS(transformables: Seq[SierraTransformable],
                  vhs: SierraVHS): Seq[vhs.VHSEntry] =
@@ -54,23 +60,39 @@ trait SierraAdapterHelpers extends EitherValues with Matchers {
 
   def assertStored(transformable: SierraTransformable,
                    vhs: SierraVHS): Assertion =
-    vhs.get(id = transformable.sierraId.withoutCheckDigit).right.value shouldBe transformable
+    vhs
+      .get(id = transformable.sierraId.withoutCheckDigit)
+      .right
+      .value shouldBe transformable
 
   def assertStored(itemRecord: SierraItemRecord,
                    vhs: SierraItemVHS): Assertion =
-    vhs.get(id = itemRecord.id.withoutCheckDigit).right.value shouldBe itemRecord
+    vhs
+      .get(id = itemRecord.id.withoutCheckDigit)
+      .right
+      .value shouldBe itemRecord
 
-  def assertStoredAndSent(transformable: SierraTransformable, messageSender: MemoryMessageSender, dao: SierraDao, vhs: SierraVHS): Assertion = {
+  def assertStoredAndSent(transformable: SierraTransformable,
+                          messageSender: MemoryMessageSender,
+                          dao: SierraDao,
+                          vhs: SierraVHS): Assertion = {
     assertStored(transformable, vhs = vhs)
 
     val entry = dao.entries(transformable.sierraId.withoutCheckDigit)
-    messageSender.getMessages[Entry[String, EmptyMetadata]].contains(entry) shouldBe true
+    messageSender
+      .getMessages[Entry[String, EmptyMetadata]]
+      .contains(entry) shouldBe true
   }
 
-  def assertStoredAndSent(itemRecord: SierraItemRecord, messageSender: MemoryMessageSender, dao: SierraDao, vhs: SierraItemVHS): Assertion = {
+  def assertStoredAndSent(itemRecord: SierraItemRecord,
+                          messageSender: MemoryMessageSender,
+                          dao: SierraDao,
+                          vhs: SierraItemVHS): Assertion = {
     assertStored(itemRecord, vhs = vhs)
 
     val entry = dao.entries(itemRecord.id.withoutCheckDigit)
-    messageSender.getMessages[Entry[String, EmptyMetadata]].contains(entry) shouldBe true
+    messageSender
+      .getMessages[Entry[String, EmptyMetadata]]
+      .contains(entry) shouldBe true
   }
 }

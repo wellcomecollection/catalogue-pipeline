@@ -40,9 +40,7 @@ class MessageStreamTest
           val messages = createMessages(count = 3)
 
           messages.foreach { exampleObject =>
-            sendInlineNotification(
-              queue = queue,
-              exampleObject = exampleObject)
+            sendInlineNotification(queue = queue, exampleObject = exampleObject)
           }
 
           val received = new ConcurrentLinkedQueue[ExampleObject]()

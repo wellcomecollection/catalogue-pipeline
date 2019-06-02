@@ -6,7 +6,8 @@ import uk.ac.wellcome.platform.matcher.models.{WorkGraph, WorkUpdate}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class WorkGraphStore(workNodeDao: DynamoWorkNodeDao)(implicit ec: ExecutionContext) {
+class WorkGraphStore(workNodeDao: DynamoWorkNodeDao)(
+  implicit ec: ExecutionContext) {
 
   def findAffectedWorks(workUpdate: WorkUpdate): Future[WorkGraph] = {
     val directlyAffectedWorkIds = workUpdate.referencedWorkIds + workUpdate.workId
@@ -19,8 +20,8 @@ class WorkGraphStore(workNodeDao: DynamoWorkNodeDao)(implicit ec: ExecutionConte
     } yield WorkGraph(affectedWorks)
   }
 
-  def put(graph: WorkGraph)
-    : Future[Set[Option[Either[DynamoReadError, WorkNode]]]] =
+  def put(
+    graph: WorkGraph): Future[Set[Option[Either[DynamoReadError, WorkNode]]]] =
     Future.sequence(
       graph.nodes.map { workNodeDao.put }
     )

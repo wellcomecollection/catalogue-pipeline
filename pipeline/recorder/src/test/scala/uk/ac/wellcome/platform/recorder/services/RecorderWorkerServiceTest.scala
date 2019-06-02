@@ -9,7 +9,11 @@ import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.recorder.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.storage._
-import uk.ac.wellcome.storage.memory.{MemoryConditionalUpdateDao, MemoryDao, MemoryVersionedDao}
+import uk.ac.wellcome.storage.memory.{
+  MemoryConditionalUpdateDao,
+  MemoryDao,
+  MemoryVersionedDao
+}
 import uk.ac.wellcome.storage.streaming.CodecInstances._
 import uk.ac.wellcome.storage.vhs.{EmptyMetadata, Entry}
 
@@ -72,9 +76,7 @@ class RecorderWorkerServiceTest
         sendMessage[TransformedBaseWork](queue = queue, newerWork)
         eventually {
           assertStoredSingleWork(messageSender, dao, store, newerWork)
-          sendMessage[TransformedBaseWork](
-            queue = queue,
-            obj = olderWork)
+          sendMessage[TransformedBaseWork](queue = queue, obj = olderWork)
           eventually {
             assertStoredSingleWork(messageSender, dao, store, newerWork)
           }
@@ -144,12 +146,13 @@ class RecorderWorkerServiceTest
   it("fails if saving to the dao fails") {
     val exception = new Throwable("BOOM!")
 
-    val brokenConditionalDao = new MemoryConditionalUpdateDao[String, Entry[String, EmptyMetadata]](
-      underlying = new MemoryDao[String, Entry[String, EmptyMetadata]]()
-    ) {
-      override def put(t: Entry[String, EmptyMetadata]): PutResult =
-        Left(new DaoWriteError(exception))
-    }
+    val brokenConditionalDao =
+      new MemoryConditionalUpdateDao[String, Entry[String, EmptyMetadata]](
+        underlying = new MemoryDao[String, Entry[String, EmptyMetadata]]()
+      ) {
+        override def put(t: Entry[String, EmptyMetadata]): PutResult =
+          Left(new DaoWriteError(exception))
+      }
 
     val brokenDao = new MemoryVersionedDao(brokenConditionalDao)
 

@@ -45,14 +45,16 @@ object BigMessagingBuilder {
       s3Client = S3Builder.buildS3Client(config)
     )
 
-    val s3Config: S3Config = S3Builder.buildS3Config(config, namespace = "message.writer")
+    val s3Config: S3Config =
+      S3Builder.buildS3Config(config, namespace = "message.writer")
 
     new BigMessageSender[SNSConfig, T] {
-      override val messageSender: MessageSender[SNSConfig] = SNSBuilder.buildSNSMessageSender(
-        config,
-        namespace = "message.writer",
-        subject = "Sent from MessageWriter"
-      )
+      override val messageSender: MessageSender[SNSConfig] =
+        SNSBuilder.buildSNSMessageSender(
+          config,
+          namespace = "message.writer",
+          subject = "Sent from MessageWriter"
+        )
 
       override val objectStore: ObjectStore[T] = ObjectStore[T]
       override val namespace: String = s3Config.bucketName

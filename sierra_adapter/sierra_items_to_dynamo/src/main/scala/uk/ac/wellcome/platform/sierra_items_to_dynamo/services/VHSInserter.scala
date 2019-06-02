@@ -7,8 +7,8 @@ import uk.ac.wellcome.storage.vhs.{EmptyMetadata, Entry, VersionedHybridStore}
 
 class VHSInserter(
   vhs: VersionedHybridStore[String, SierraItemRecord, EmptyMetadata]) {
-  def insertIntoVhs(
-    record: SierraItemRecord): Either[StorageError, Entry[String, EmptyMetadata]] =
+  def insertIntoVhs(record: SierraItemRecord)
+    : Either[StorageError, Entry[String, EmptyMetadata]] =
     vhs
       .update(
         id = record.id.withoutCheckDigit

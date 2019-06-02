@@ -44,7 +44,7 @@ class SierraBibMergerWorkerServiceTest
     testWith: TestWith[(MetricsSender, QueuePair), R]): R =
     withMockMetricsSender { metricsSender =>
       withLocalSqsQueueAndDlq {
-        case queuePair@QueuePair(queue, _) =>
+        case queuePair @ QueuePair(queue, _) =>
           val vhs = createVhs()
           val messageSender = new MemoryMessageSender
           withWorkerService(vhs, queue, messageSender) { _ =>

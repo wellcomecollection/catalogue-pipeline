@@ -9,7 +9,10 @@ import uk.ac.wellcome.messaging.typesafe.{MessagingBuilder, SQSBuilder}
 import uk.ac.wellcome.models.transformable.SierraTransformable
 import uk.ac.wellcome.models.transformable.SierraTransformable._
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
-import uk.ac.wellcome.platform.transformer.sierra.services.{RecordReceiver, SierraTransformerWorkerService}
+import uk.ac.wellcome.platform.transformer.sierra.services.{
+  RecordReceiver,
+  SierraTransformerWorkerService
+}
 import uk.ac.wellcome.storage.typesafe.S3Builder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder

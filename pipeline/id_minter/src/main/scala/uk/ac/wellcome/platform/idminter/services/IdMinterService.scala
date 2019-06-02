@@ -1,7 +1,10 @@
 package uk.ac.wellcome.platform.idminter.services
 
 import akka.Done
-import uk.ac.wellcome.platform.idminter.config.models.{IdentifiersTableConfig, RDSClientConfig}
+import uk.ac.wellcome.platform.idminter.config.models.{
+  IdentifiersTableConfig,
+  RDSClientConfig
+}
 import uk.ac.wellcome.platform.idminter.database.TableProvisioner
 import uk.ac.wellcome.typesafe.Runnable
 

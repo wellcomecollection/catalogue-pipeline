@@ -15,9 +15,9 @@ class MemoryIdentifiersDao extends IdentifiersDao {
 
     candidates match {
       case Seq(identifier) => Right(identifier)
-      case _ => Left(DoesNotExistError(
-        new Throwable(s"Nothing matches $sourceIdentifier"))
-      )
+      case _ =>
+        Left(DoesNotExistError(
+          new Throwable(s"Nothing matches $sourceIdentifier")))
     }
   }
 
@@ -35,9 +35,11 @@ class MemoryIdentifiersDao extends IdentifiersDao {
         identifiers = identifiers :+ newIdentifier
         Right(())
       case _ =>
-        Left(DaoWriteError(
-          new Throwable(s"New identifier $newIdentifier has conflicts: $conflicts")
-        ))
+        Left(
+          DaoWriteError(
+            new Throwable(
+              s"New identifier $newIdentifier has conflicts: $conflicts")
+          ))
     }
   }
 }

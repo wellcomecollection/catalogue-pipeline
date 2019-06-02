@@ -70,26 +70,28 @@ class SierraItemsToDynamoWorkerServiceTest
 
     val messageSender = new MemoryMessageSender()
 
-    withLocalSqsQueueAndDlq { case QueuePair(queue, dlq) =>
-      withMockMetricsSender { mockMetricsSender =>
-        withWorkerService(queue, dao, store, messageSender, mockMetricsSender) { _ =>
-          val body =
-            """
+    withLocalSqsQueueAndDlq {
+      case QueuePair(queue, dlq) =>
+        withMockMetricsSender { mockMetricsSender =>
+          withWorkerService(queue, dao, store, messageSender, mockMetricsSender) {
+            _ =>
+              val body =
+                """
               |{
               | "something": "something"
               |}
             """.stripMargin
 
-          sendNotificationToSQS(queue = queue, body = body)
+              sendNotificationToSQS(queue = queue, body = body)
 
-          eventually {
-            assertQueueEmpty(queue)
-            assertQueueHasSize(dlq, size = 1)
-            verify(mockMetricsSender, never()).incrementCount(
-              "SierraItemsToDynamoWorkerService_ProcessMessage_failure")
+              eventually {
+                assertQueueEmpty(queue)
+                assertQueueHasSize(dlq, size = 1)
+                verify(mockMetricsSender, never()).incrementCount(
+                  "SierraItemsToDynamoWorkerService_ProcessMessage_failure")
+              }
           }
         }
-      }
     }
   }
 

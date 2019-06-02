@@ -12,7 +12,10 @@ import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.monitoring.MetricsSender
-import uk.ac.wellcome.platform.merger.fixtures.{MatcherResultFixture, WorkerServiceFixture}
+import uk.ac.wellcome.platform.merger.fixtures.{
+  MatcherResultFixture,
+  WorkerServiceFixture
+}
 import uk.ac.wellcome.storage.streaming.CodecInstances._
 
 class MergerWorkerServiceTest
@@ -97,7 +100,7 @@ class MergerWorkerServiceTest
         eventually {
           assertQueueEmpty(queue)
           assertQueueHasSize(dlq, 1)
-          
+
           messageSender.messages shouldBe empty
 
           verify(metricsSender, times(3))
@@ -256,21 +259,23 @@ class MergerWorkerServiceTest
   }
 
   def withMergerWorkerServiceFixtures[R](
-    testWith: TestWith[
-      (RecorderVhs, QueuePair, MemoryBigMessageSender[BaseWork], MetricsSender),
-      R]): R =
-      withLocalSqsQueueAndDlq {
-        case queuePair@QueuePair(queue, _) =>
-          withMockMetricsSender { mockMetricsSender =>
-            val vhs = createVhs()
-            val messageSender = new MemoryBigMessageSender[BaseWork]()
-            withWorkerService(
-              vhs = vhs,
-              messageSender = messageSender,
-              queue = queue,
-              metricsSender = mockMetricsSender) { _ =>
-              testWith((vhs, queuePair, messageSender, mockMetricsSender))
-            }
+    testWith: TestWith[(RecorderVhs,
+                        QueuePair,
+                        MemoryBigMessageSender[BaseWork],
+                        MetricsSender),
+                       R]): R =
+    withLocalSqsQueueAndDlq {
+      case queuePair @ QueuePair(queue, _) =>
+        withMockMetricsSender { mockMetricsSender =>
+          val vhs = createVhs()
+          val messageSender = new MemoryBigMessageSender[BaseWork]()
+          withWorkerService(
+            vhs = vhs,
+            messageSender = messageSender,
+            queue = queue,
+            metricsSender = mockMetricsSender) { _ =>
+            testWith((vhs, queuePair, messageSender, mockMetricsSender))
           }
-      }
+        }
+    }
 }

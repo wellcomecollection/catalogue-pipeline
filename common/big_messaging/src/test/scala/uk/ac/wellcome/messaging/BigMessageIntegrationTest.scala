@@ -15,7 +15,8 @@ class BigMessageIntegrationTest extends FunSpec with Matchers {
 
   val yellowPentagon = Shape(colour = "yellow", sides = 5)
 
-  def createPair(maxSize: Int)(implicit decoderS: Decoder[Shape]): (MemoryBigMessageSender[Shape], BigMessageReader[Shape]) = {
+  def createPair(maxSize: Int)(implicit decoderS: Decoder[Shape])
+    : (MemoryBigMessageSender[Shape], BigMessageReader[Shape]) = {
     val sender = new MemoryBigMessageSender[Shape](maxSize = maxSize)
     val reader = new BigMessageReader[Shape] {
       override val objectStore: ObjectStore[Shape] = sender.objectStore

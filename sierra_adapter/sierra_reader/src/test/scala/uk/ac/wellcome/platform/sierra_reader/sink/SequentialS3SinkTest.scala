@@ -23,7 +23,8 @@ class SequentialS3SinkTest
     with ScalaFutures {
 
   private def withSink(bucket: Bucket, keyPrefix: String, offset: Int = 0)(
-    testWith: TestWith[Sink[(Json, Long), Future[Done]], Assertion]): Assertion = {
+    testWith: TestWith[Sink[(Json, Long), Future[Done]], Assertion])
+    : Assertion = {
     val sink = SequentialS3Sink(
       s3Client,
       bucketName = bucket.name,

@@ -7,7 +7,10 @@ import org.scalatest.{EitherValues, FunSpec, Matchers}
 import scalikejdbc._
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
-import uk.ac.wellcome.platform.idminter.database.{SQLIdentifiersDao, TableProvisioner}
+import uk.ac.wellcome.platform.idminter.database.{
+  SQLIdentifiersDao,
+  TableProvisioner
+}
 import uk.ac.wellcome.platform.idminter.fixtures
 import uk.ac.wellcome.platform.idminter.models.{Identifier, IdentifiersTable}
 import uk.ac.wellcome.storage.{DaoWriteError, DoesNotExistError}
@@ -20,8 +23,8 @@ class IdentifierGeneratorTest
     with IdentifiersGenerators
     with EitherValues {
 
-  def withIdentifierGenerator[R](maybeIdentifiersDao: Option[SQLIdentifiersDao] =
-                                   None)(
+  def withIdentifierGenerator[R](
+    maybeIdentifiersDao: Option[SQLIdentifiersDao] = None)(
     testWith: TestWith[(IdentifierGenerator, IdentifiersTable), R]) =
     withIdentifiersDatabase[R] { identifiersTableConfig =>
       val identifiersTable = new IdentifiersTable(identifiersTableConfig)

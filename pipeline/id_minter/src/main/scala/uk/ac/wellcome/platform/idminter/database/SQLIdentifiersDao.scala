@@ -12,40 +12,46 @@ import uk.ac.wellcome.storage.{DaoReadError, DaoWriteError, DoesNotExistError}
 import scala.concurrent.blocking
 import scala.util.{Failure, Success, Try}
 
-class SQLIdentifiersDao(db: DB, identifiers: IdentifiersTable) extends Logging with IdentifiersDao {
+class SQLIdentifiersDao(db: DB, identifiers: IdentifiersTable)
+    extends Logging
+    with IdentifiersDao {
 
   implicit val session = AutoSession(db.settingsProvider)
 
-  override def get(sourceIdentifier: SourceIdentifier): GetResult = Try {
-    val sourceSystem = sourceIdentifier.identifierType.id
-    val sourceId = sourceIdentifier.value
+  override def get(sourceIdentifier: SourceIdentifier): GetResult =
+    Try {
+      val sourceSystem = sourceIdentifier.identifierType.id
+      val sourceId = sourceIdentifier.value
 
-    // TODO: handle gracefully, don't TryBackoff ad infinitum
-    blocking {
-      debug(s"Matching ($sourceIdentifier)")
+      // TODO: handle gracefully, don't TryBackoff ad infinitum
+      blocking {
+        debug(s"Matching ($sourceIdentifier)")
 
-      val i = identifiers.i
-      val query = withSQL {
-        select
-          .from(identifiers as i)
-          .where
-          .eq(i.OntologyType, sourceIdentifier.ontologyType)
-          .and
-          .eq(i.SourceSystem, sourceSystem)
-          .and
-          .eq(i.SourceId, sourceId)
+        val i = identifiers.i
+        val query = withSQL {
+          select
+            .from(identifiers as i)
+            .where
+            .eq(i.OntologyType, sourceIdentifier.ontologyType)
+            .and
+            .eq(i.SourceSystem, sourceSystem)
+            .and
+            .eq(i.SourceId, sourceId)
 
-      }.map(Identifier(i)).single
-      debug(s"Executing:'${query.statement}'")
-      query.apply()
+        }.map(Identifier(i)).single
+        debug(s"Executing:'${query.statement}'")
+        query.apply()
+      }
+    } match {
+      case Success(None) =>
+        Left(
+          DoesNotExistError(
+            new Throwable(
+              s"No entry stored for source identifier $sourceIdentifier")
+          ))
+      case Success(Some(identifier)) => Right(identifier)
+      case Failure(err)              => Left(DaoReadError(err))
     }
-  } match {
-    case Success(None) => Left(DoesNotExistError(
-      new Throwable(s"No entry stored for source identifier $sourceIdentifier")
-    ))
-    case Success(Some(identifier)) => Right(identifier)
-    case Failure(err) => Left(DaoReadError(err))
-  }
 
   override def put(identifier: Identifier): PutResult = {
     Try {
@@ -72,7 +78,7 @@ class SQLIdentifiersDao(db: DB, identifiers: IdentifiersTable) extends Logging w
         throw e
     }
   } match {
-    case Success(_) => Right(())
+    case Success(_)   => Right(())
     case Failure(err) => Left(DaoWriteError(err))
   }
 }

@@ -36,7 +36,8 @@ class ReindexWorkerFeatureTest
           )
 
           eventually {
-            messageSender.getMessages[Record] should contain theSameElementsAs testRecords
+            messageSender
+              .getMessages[Record] should contain theSameElementsAs testRecords
           }
         }
       }
