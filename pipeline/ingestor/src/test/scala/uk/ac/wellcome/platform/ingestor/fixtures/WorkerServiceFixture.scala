@@ -11,6 +11,9 @@ import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.models.work.internal.IdentifiedBaseWork
 import uk.ac.wellcome.platform.ingestor.config.models.IngestorConfig
 import uk.ac.wellcome.platform.ingestor.services.IngestorWorkerService
+import uk.ac.wellcome.storage.streaming.Codec
+import uk.ac.wellcome.storage.{ObjectStore, StorageBackend}
+import uk.ac.wellcome.storage.streaming.CodecInstances._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
@@ -22,6 +25,16 @@ trait WorkerServiceFixture extends ElasticsearchFixtures with Messaging {
                            elasticClient: ElasticClient = elasticClient)(
     testWith: TestWith[IngestorWorkerService, R]): R =
     withActorSystem { implicit actorSystem =>
+
+      // TODO: It's not clear why I have to declare this explicitly;
+      // normally the imports and extending from S3 are enough for
+      // it to get picked up.  Find out why the implicits are
+      // misbehaving in this case!
+      implicit val objectStore: ObjectStore[IdentifiedBaseWork] = new ObjectStore[IdentifiedBaseWork] {
+        override implicit val codec: Codec[IdentifiedBaseWork] = typeCodec[IdentifiedBaseWork]
+        override implicit val storageBackend: StorageBackend = s3StorageBackend
+      }
+
       withMetricsSender() { metricsSender =>
         withMessageStream[IdentifiedBaseWork, R](
           queue = queue,

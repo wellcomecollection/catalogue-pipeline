@@ -1,12 +1,11 @@
 package uk.ac.wellcome.platform.ingestor
 
-import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.concurrent.Eventually
 import org.scalatest.{FunSpec, Matchers}
-import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
-import uk.ac.wellcome.models.work.internal.IdentifiedBaseWork
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.work.generators.WorksGenerators
+import uk.ac.wellcome.models.work.internal.IdentifiedBaseWork
 import uk.ac.wellcome.platform.ingestor.fixtures.WorkerServiceFixture
 
 import scala.collection.JavaConverters._
@@ -15,9 +14,8 @@ class IngestorFeatureTest
     extends FunSpec
     with Matchers
     with JsonAssertions
-    with ScalaFutures
+    with Eventually
     with WorkerServiceFixture
-    with ElasticsearchFixtures
     with WorksGenerators {
 
   it("ingests a Miro work") {
