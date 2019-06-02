@@ -6,7 +6,7 @@ import com.typesafe.config.Config
 import io.circe.Json
 import uk.ac.wellcome.messaging.typesafe.BigMessagingBuilder
 import uk.ac.wellcome.platform.idminter.config.builders.{IdentifiersTableBuilder, RDSBuilder}
-import uk.ac.wellcome.platform.idminter.database.IdentifiersDao
+import uk.ac.wellcome.platform.idminter.database.SQLIdentifiersDao
 import uk.ac.wellcome.platform.idminter.models.IdentifiersTable
 import uk.ac.wellcome.platform.idminter.services.IdMinterWorkerService
 import uk.ac.wellcome.platform.idminter.steps.{IdEmbedder, IdentifierGenerator}
@@ -24,7 +24,7 @@ object Main extends WellcomeTypesafeApp {
     val identifiersTableConfig = IdentifiersTableBuilder.buildConfig(config)
 
     val identifierGenerator = new IdentifierGenerator(
-      identifiersDao = new IdentifiersDao(
+      identifiersDao = new SQLIdentifiersDao(
         db = RDSBuilder.buildDB(config),
         identifiers = new IdentifiersTable(
           identifiersTableConfig = identifiersTableConfig

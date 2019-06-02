@@ -7,7 +7,7 @@ import org.scalatest.{FunSpec, Matchers}
 import scalikejdbc._
 import uk.ac.wellcome.messaging.fixtures.Messaging
 import uk.ac.wellcome.messaging.memory.MemoryBigMessageSender
-import uk.ac.wellcome.platform.idminter.database.{FieldDescription, IdentifiersDao}
+import uk.ac.wellcome.platform.idminter.database.{FieldDescription, SQLIdentifiersDao}
 import uk.ac.wellcome.platform.idminter.fixtures.{IdentifiersDatabase, WorkerServiceFixture}
 import uk.ac.wellcome.storage.streaming.CodecInstances._
 
@@ -26,7 +26,7 @@ class IdMinterWorkerServiceTest
       withLocalSnsTopic { topic =>
         withIdentifiersDatabase { identifiersTableConfig =>
           withLocalS3Bucket { bucket =>
-            val identifiersDao = mock[IdentifiersDao]
+            val identifiersDao = mock[SQLIdentifiersDao]
             val messageSender = new MemoryBigMessageSender[Json]()
             withWorkerService(
               bucket,

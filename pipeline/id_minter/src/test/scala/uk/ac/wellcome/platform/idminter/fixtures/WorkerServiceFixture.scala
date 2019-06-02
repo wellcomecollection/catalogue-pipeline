@@ -7,7 +7,7 @@ import uk.ac.wellcome.messaging.fixtures.Messaging
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryBigMessageSender
 import uk.ac.wellcome.platform.idminter.config.models.IdentifiersTableConfig
-import uk.ac.wellcome.platform.idminter.database.IdentifiersDao
+import uk.ac.wellcome.platform.idminter.database.SQLIdentifiersDao
 import uk.ac.wellcome.platform.idminter.models.IdentifiersTable
 import uk.ac.wellcome.platform.idminter.services.IdMinterWorkerService
 import uk.ac.wellcome.platform.idminter.steps.{IdEmbedder, IdentifierGenerator}
@@ -18,7 +18,7 @@ trait WorkerServiceFixture extends IdentifiersDatabase with Messaging {
   def withWorkerService[R](bucket: Bucket,
                            messageSender: MemoryBigMessageSender[Json],
                            queue: Queue,
-                           identifiersDao: IdentifiersDao,
+                           identifiersDao: SQLIdentifiersDao,
                            identifiersTableConfig: IdentifiersTableConfig)(
     testWith: TestWith[IdMinterWorkerService[String], R]): R =
     withActorSystem { implicit actorSystem =>
@@ -51,7 +51,7 @@ trait WorkerServiceFixture extends IdentifiersDatabase with Messaging {
     Class.forName("com.mysql.jdbc.Driver")
     ConnectionPool.singleton(s"jdbc:mysql://$host:$port", username, password)
 
-    val identifiersDao = new IdentifiersDao(
+    val identifiersDao = new SQLIdentifiersDao(
       db = DB.connect(),
       identifiers = new IdentifiersTable(
         identifiersTableConfig = identifiersTableConfig

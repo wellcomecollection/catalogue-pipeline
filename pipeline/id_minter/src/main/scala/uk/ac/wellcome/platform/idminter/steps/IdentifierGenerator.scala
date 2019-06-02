@@ -1,13 +1,13 @@
 package uk.ac.wellcome.platform.idminter.steps
 
 import uk.ac.wellcome.models.work.internal.SourceIdentifier
-import uk.ac.wellcome.platform.idminter.database.IdentifiersDao
+import uk.ac.wellcome.platform.idminter.database.SQLIdentifiersDao
 import uk.ac.wellcome.platform.idminter.models.Identifier
 import uk.ac.wellcome.platform.idminter.utils.Identifiable
 
 import scala.util.Try
 
-class IdentifierGenerator(identifiersDao: IdentifiersDao) {
+class IdentifierGenerator(identifiersDao: SQLIdentifiersDao) {
 
   def retrieveOrGenerateCanonicalId(
     identifier: SourceIdentifier

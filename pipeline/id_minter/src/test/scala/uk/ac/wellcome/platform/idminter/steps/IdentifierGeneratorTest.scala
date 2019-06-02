@@ -7,7 +7,7 @@ import org.scalatest.{FunSpec, Matchers}
 import scalikejdbc._
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
 import uk.ac.wellcome.platform.idminter.database.{
-  IdentifiersDao,
+  SQLIdentifiersDao,
   TableProvisioner
 }
 import uk.ac.wellcome.platform.idminter.fixtures
@@ -23,7 +23,7 @@ class IdentifierGeneratorTest
     with MockitoSugar
     with IdentifiersGenerators {
 
-  def withIdentifierGenerator[R](maybeIdentifiersDao: Option[IdentifiersDao] =
+  def withIdentifierGenerator[R](maybeIdentifiersDao: Option[SQLIdentifiersDao] =
                                    None)(
     testWith: TestWith[(IdentifierGenerator, IdentifiersTable), R]) =
     withIdentifiersDatabase[R] { identifiersTableConfig =>
@@ -36,7 +36,7 @@ class IdentifierGeneratorTest
         )
 
       val identifiersDao = maybeIdentifiersDao.getOrElse(
-        new IdentifiersDao(DB.connect(), identifiersTable)
+        new SQLIdentifiersDao(DB.connect(), identifiersTable)
       )
 
       val identifierGenerator = new IdentifierGenerator(identifiersDao)
@@ -108,7 +108,7 @@ class IdentifierGeneratorTest
   }
 
   it("returns a failure if it fails registering a new identifier") {
-    val identifiersDao = mock[IdentifiersDao]
+    val identifiersDao = mock[SQLIdentifiersDao]
 
     val sourceIdentifier = createSourceIdentifier
 
