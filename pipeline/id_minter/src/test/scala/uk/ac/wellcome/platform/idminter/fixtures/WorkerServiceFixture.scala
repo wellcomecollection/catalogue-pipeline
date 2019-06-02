@@ -1,25 +1,19 @@
 package uk.ac.wellcome.platform.idminter.fixtures
 
 import io.circe.Json
-import scalikejdbc.{ConnectionPool, DB}
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.Messaging
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryBigMessageSender
-import uk.ac.wellcome.platform.idminter.config.models.IdentifiersTableConfig
-import uk.ac.wellcome.platform.idminter.database.SQLIdentifiersDao
-import uk.ac.wellcome.platform.idminter.models.IdentifiersTable
+import uk.ac.wellcome.platform.idminter.database.MemoryIdentifiersDao
 import uk.ac.wellcome.platform.idminter.services.IdMinterWorkerService
 import uk.ac.wellcome.platform.idminter.steps.{IdEmbedder, IdentifierGenerator}
-import uk.ac.wellcome.storage.fixtures.S3.Bucket
 import uk.ac.wellcome.storage.streaming.CodecInstances._
 
-trait WorkerServiceFixture extends IdentifiersDatabase with Messaging {
-  def withWorkerService[R](bucket: Bucket,
-                           messageSender: MemoryBigMessageSender[Json],
+trait WorkerServiceFixture extends Messaging {
+  def withWorkerService[R](messageSender: MemoryBigMessageSender[Json],
                            queue: Queue,
-                           identifiersDao: SQLIdentifiersDao,
-                           identifiersTableConfig: IdentifiersTableConfig)(
+                           identifiersDao: MemoryIdentifiersDao)(
     testWith: TestWith[IdMinterWorkerService[String], R]): R =
     withActorSystem { implicit actorSystem =>
       withMetricsSender() { metricsSender =>
@@ -31,9 +25,7 @@ trait WorkerServiceFixture extends IdentifiersDatabase with Messaging {
               )
             ),
             messageSender = messageSender,
-            messageStream = messageStream,
-            rdsClientConfig = rdsClientConfig,
-            identifiersTableConfig = identifiersTableConfig
+            messageStream = messageStream
           )
 
           workerService.run()
@@ -42,28 +34,4 @@ trait WorkerServiceFixture extends IdentifiersDatabase with Messaging {
         }
       }
     }
-
-  def withWorkerService[R](bucket: Bucket,
-                           messageSender: MemoryBigMessageSender[Json],
-                           queue: Queue,
-                           identifiersTableConfig: IdentifiersTableConfig)(
-    testWith: TestWith[IdMinterWorkerService[String], R]): R = {
-    Class.forName("com.mysql.jdbc.Driver")
-    ConnectionPool.singleton(s"jdbc:mysql://$host:$port", username, password)
-
-    val identifiersDao = new SQLIdentifiersDao(
-      db = DB.connect(),
-      identifiers = new IdentifiersTable(
-        identifiersTableConfig = identifiersTableConfig
-      )
-    )
-    withWorkerService(
-      bucket,
-      messageSender,
-      queue,
-      identifiersDao,
-      identifiersTableConfig) { service =>
-      testWith(service)
-    }
-  }
 }

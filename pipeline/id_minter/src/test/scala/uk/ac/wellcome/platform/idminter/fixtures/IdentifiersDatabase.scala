@@ -9,9 +9,15 @@ import uk.ac.wellcome.platform.idminter.config.models.{
   IdentifiersTableConfig,
   RDSClientConfig
 }
-import uk.ac.wellcome.platform.idminter.database.FieldDescription
 
 import scala.util.Random
+
+case class FieldDescription(
+  field: String,
+  dataType: String,
+  nullable: String,
+  key: String
+)
 
 trait IdentifiersDatabase
     extends Eventually

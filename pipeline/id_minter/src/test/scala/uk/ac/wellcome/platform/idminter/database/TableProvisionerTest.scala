@@ -1,16 +1,11 @@
 package uk.ac.wellcome.platform.idminter.database
 
 import org.scalatest.{FunSpec, Matchers}
-import uk.ac.wellcome.platform.idminter.fixtures
-
-case class FieldDescription(field: String,
-                            dataType: String,
-                            nullable: String,
-                            key: String)
+import uk.ac.wellcome.platform.idminter.fixtures.IdentifiersDatabase
 
 class TableProvisionerTest
     extends FunSpec
-    with fixtures.IdentifiersDatabase
+    with IdentifiersDatabase
     with Matchers {
 
   it("creates the Identifiers table") {

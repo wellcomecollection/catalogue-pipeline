@@ -8,7 +8,7 @@ import uk.ac.wellcome.messaging.typesafe.BigMessagingBuilder
 import uk.ac.wellcome.platform.idminter.config.builders.{IdentifiersTableBuilder, RDSBuilder}
 import uk.ac.wellcome.platform.idminter.database.SQLIdentifiersDao
 import uk.ac.wellcome.platform.idminter.models.IdentifiersTable
-import uk.ac.wellcome.platform.idminter.services.IdMinterWorkerService
+import uk.ac.wellcome.platform.idminter.services.{IdMinterService, IdMinterWorkerService}
 import uk.ac.wellcome.platform.idminter.steps.{IdEmbedder, IdentifierGenerator}
 import uk.ac.wellcome.storage.streaming.CodecInstances._
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
@@ -36,10 +36,14 @@ object Main extends WellcomeTypesafeApp {
       identifierGenerator = identifierGenerator
     )
 
-    new IdMinterWorkerService(
+    val workerService = new IdMinterWorkerService(
       idEmbedder = idEmbedder,
       messageSender = BigMessagingBuilder.buildBigMessageSender[Json](config),
-      messageStream = BigMessagingBuilder.buildMessageStream[Json](config),
+      messageStream = BigMessagingBuilder.buildMessageStream[Json](config)
+    )
+
+    new IdMinterService(
+      workerService = workerService,
       rdsClientConfig = RDSBuilder.buildRDSClientConfig(config),
       identifiersTableConfig = identifiersTableConfig
     )

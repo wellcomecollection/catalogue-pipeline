@@ -1,12 +1,12 @@
 package uk.ac.wellcome.platform.idminter.steps
 
 import uk.ac.wellcome.models.work.internal.SourceIdentifier
-import uk.ac.wellcome.platform.idminter.database.SQLIdentifiersDao
+import uk.ac.wellcome.platform.idminter.database.IdentifiersDao
 import uk.ac.wellcome.platform.idminter.models.Identifier
 import uk.ac.wellcome.platform.idminter.utils.Identifiable
 import uk.ac.wellcome.storage.{DaoError, DoesNotExistError, StorageError, WriteError}
 
-class IdentifierGenerator(identifiersDao: SQLIdentifiersDao) {
+class IdentifierGenerator(identifiersDao: IdentifiersDao) {
 
   def retrieveOrGenerateCanonicalId(
     sourceIdentifier: SourceIdentifier

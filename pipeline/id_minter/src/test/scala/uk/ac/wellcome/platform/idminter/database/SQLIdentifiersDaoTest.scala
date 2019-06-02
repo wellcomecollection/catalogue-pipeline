@@ -3,10 +3,10 @@ package uk.ac.wellcome.platform.idminter.database
 import org.scalatest.{EitherValues, FunSpec, Matchers}
 import scalikejdbc._
 import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
-import uk.ac.wellcome.models.work.internal.{IdentifierType, SourceIdentifier}
+import uk.ac.wellcome.models.work.internal.IdentifierType
 import uk.ac.wellcome.platform.idminter.exceptions.IdMinterException
 import uk.ac.wellcome.platform.idminter.fixtures
+import uk.ac.wellcome.platform.idminter.fixtures.IdMinterGenerators
 import uk.ac.wellcome.platform.idminter.models.{Identifier, IdentifiersTable}
 import uk.ac.wellcome.storage.{DaoWriteError, DoesNotExistError}
 
@@ -14,7 +14,7 @@ class SQLIdentifiersDaoTest
     extends FunSpec
     with fixtures.IdentifiersDatabase
     with Matchers
-    with IdentifiersGenerators
+    with IdMinterGenerators
     with EitherValues {
 
   def withIdentifiersDao[R](
@@ -38,7 +38,7 @@ class SQLIdentifiersDaoTest
   describe("get") {
     it("gets an Identifier if it finds a matching SourceSystem and SourceId") {
       val sourceIdentifier = createSourceIdentifier
-      val identifier = createSQLIdentifierWith(
+      val identifier = createIdentifierWith(
         sourceIdentifier = sourceIdentifier
       )
 
@@ -51,7 +51,7 @@ class SQLIdentifiersDaoTest
     }
 
     it("finds no identifier if the source identifier value is different") {
-      val identifier = createSQLIdentifier
+      val identifier = createIdentifier
 
       withIdentifiersDao {
         case (identifiersDao, _) =>
@@ -66,7 +66,7 @@ class SQLIdentifiersDaoTest
     }
 
     it("finds no identifier if the source identifier type is different") {
-      val identifier = createSQLIdentifierWith(
+      val identifier = createIdentifierWith(
         sourceIdentifier = createSourceIdentifierWith(
           identifierType = IdentifierType("miro-image-number")
         )
@@ -85,7 +85,7 @@ class SQLIdentifiersDaoTest
     }
 
     it("finds no identifier if the ontology type is different") {
-      val identifier = createSQLIdentifierWith(
+      val identifier = createIdentifierWith(
         sourceIdentifier = createSourceIdentifierWith(
           ontologyType = "Agent"
         )
@@ -106,7 +106,7 @@ class SQLIdentifiersDaoTest
 
   describe("put") {
     it("inserts the provided identifier into the database") {
-      val identifier = createSQLIdentifier
+      val identifier = createIdentifier
 
       withIdentifiersDao {
         case (identifiersDao, identifiersTable) =>
@@ -128,8 +128,8 @@ class SQLIdentifiersDaoTest
     }
 
     it("fails to insert a record with a duplicate CanonicalId") {
-      val identifier = createSQLIdentifier
-      val duplicateIdentifier = createSQLIdentifierWith(
+      val identifier = createIdentifier
+      val duplicateIdentifier = createIdentifierWith(
         canonicalId = identifier.CanonicalId
       )
 
@@ -152,11 +152,11 @@ class SQLIdentifiersDaoTest
         ontologyType = "Bar"
       )
 
-      val identifier1 = createSQLIdentifierWith(
+      val identifier1 = createIdentifierWith(
         sourceIdentifier = sourceIdentifier1
       )
 
-      val identifier2 = createSQLIdentifierWith(
+      val identifier2 = createIdentifierWith(
         sourceIdentifier = sourceIdentifier2
       )
 
@@ -176,11 +176,11 @@ class SQLIdentifiersDaoTest
         value = "5678"
       )
 
-      val identifier1 = createSQLIdentifierWith(
+      val identifier1 = createIdentifierWith(
         sourceIdentifier = sourceIdentifier1
       )
 
-      val identifier2 = createSQLIdentifierWith(
+      val identifier2 = createIdentifierWith(
         sourceIdentifier = sourceIdentifier2
       )
 
@@ -195,10 +195,10 @@ class SQLIdentifiersDaoTest
       "does not insert records with the same SourceId, SourceSystem and OntologyType") {
       val sourceIdentifier = createSourceIdentifier
 
-      val identifier1 = createSQLIdentifierWith(
+      val identifier1 = createIdentifierWith(
         sourceIdentifier = sourceIdentifier
       )
-      val identifier2 = createSQLIdentifierWith(
+      val identifier2 = createIdentifierWith(
         sourceIdentifier = sourceIdentifier
       )
 
@@ -212,22 +212,4 @@ class SQLIdentifiersDaoTest
       }
     }
   }
-
-  def createSQLIdentifierWith(
-    canonicalId: String = createCanonicalId,
-    sourceIdentifier: SourceIdentifier = createSourceIdentifier
-  ): Identifier =
-    Identifier(
-      canonicalId = canonicalId,
-      sourceIdentifier = sourceIdentifier
-    )
-
-  def createSQLIdentifier: Identifier = createSQLIdentifierWith()
-
-  def toSourceIdentifier(identifier: Identifier): SourceIdentifier =
-    SourceIdentifier(
-      identifierType = IdentifierType(identifier.SourceSystem),
-      ontologyType = identifier.OntologyType,
-      value = identifier.SourceId
-    )
 }

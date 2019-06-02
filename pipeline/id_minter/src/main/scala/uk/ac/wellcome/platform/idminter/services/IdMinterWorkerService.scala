@@ -4,8 +4,6 @@ import akka.Done
 import io.circe.Json
 import uk.ac.wellcome.messaging.BigMessageSender
 import uk.ac.wellcome.messaging.message.MessageStream
-import uk.ac.wellcome.platform.idminter.config.models.{IdentifiersTableConfig, RDSClientConfig}
-import uk.ac.wellcome.platform.idminter.database.TableProvisioner
 import uk.ac.wellcome.platform.idminter.steps.IdEmbedder
 import uk.ac.wellcome.typesafe.Runnable
 
@@ -15,26 +13,14 @@ import scala.util.Try
 class IdMinterWorkerService[Destination](
   idEmbedder: IdEmbedder,
   messageSender: BigMessageSender[Destination, Json],
-  messageStream: MessageStream[Json],
-  rdsClientConfig: RDSClientConfig,
-  identifiersTableConfig: IdentifiersTableConfig
-)
-    extends Runnable {
+  messageStream: MessageStream[Json]
+) extends Runnable {
 
-  def run(): Future[Done] = {
-    val tableProvisioner = new TableProvisioner(
-      rdsClientConfig = rdsClientConfig
-    )
-
-    tableProvisioner.provision(
-      database = identifiersTableConfig.database,
-      tableName = identifiersTableConfig.tableName
-    )
-
-    messageStream.foreach(this.getClass.getSimpleName,
+  def run(): Future[Done] =
+    messageStream.foreach(
+      this.getClass.getSimpleName,
       message => Future.fromTry { processMessage(message) }
     )
-  }
 
   def processMessage(json: Json): Try[Unit] =
     for {
