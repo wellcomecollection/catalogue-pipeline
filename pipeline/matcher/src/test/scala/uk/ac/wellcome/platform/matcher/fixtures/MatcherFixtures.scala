@@ -7,7 +7,7 @@ import uk.ac.wellcome.messaging.fixtures.{Messaging, SQS}
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher
 import uk.ac.wellcome.platform.matcher.services.MatcherWorkerService
-import uk.ac.wellcome.platform.matcher.storage.{WorkGraphStore, WorkNodeDao}
+import uk.ac.wellcome.platform.matcher.storage.{WorkGraphStore, DynamoWorkNodeDao}
 import uk.ac.wellcome.storage.ObjectStore
 import uk.ac.wellcome.storage.dynamo._
 import uk.ac.wellcome.storage.fixtures.LocalDynamoDb.Table
@@ -101,8 +101,8 @@ trait MatcherFixtures
   }
 
   def withWorkNodeDao[R](table: Table)(
-    testWith: TestWith[WorkNodeDao, R]): R = {
-    val workNodeDao = new WorkNodeDao(
+    testWith: TestWith[DynamoWorkNodeDao, R]): R = {
+    val workNodeDao = new DynamoWorkNodeDao(
       dynamoDbClient,
       DynamoConfig(table = table.name, index = table.index)
     )

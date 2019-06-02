@@ -11,7 +11,7 @@ import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.monitoring.typesafe.MetricsBuilder
 import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher
 import uk.ac.wellcome.platform.matcher.services.MatcherWorkerService
-import uk.ac.wellcome.platform.matcher.storage.{WorkGraphStore, WorkNodeDao}
+import uk.ac.wellcome.platform.matcher.storage.{WorkGraphStore, DynamoWorkNodeDao}
 import uk.ac.wellcome.storage.locking.{
   DynamoLockingService,
   DynamoRowLockDao,
@@ -35,8 +35,8 @@ object Main extends WellcomeTypesafeApp {
     val dynamoClient = DynamoBuilder.buildDynamoClient(config)
 
     val workGraphStore = new WorkGraphStore(
-      workNodeDao = new WorkNodeDao(
-        dynamoDbClient = dynamoClient,
+      workNodeDao = new DynamoWorkNodeDao(
+        dynamoClient = dynamoClient,
         dynamoConfig = DynamoBuilder.buildDynamoConfig(config)
       )
     )

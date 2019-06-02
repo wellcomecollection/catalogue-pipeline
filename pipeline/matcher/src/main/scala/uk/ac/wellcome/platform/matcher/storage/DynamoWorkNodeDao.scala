@@ -8,50 +8,36 @@ import com.gu.scanamo.syntax._
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.models.matcher.WorkNode
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
-import uk.ac.wellcome.storage.dynamo.DynamoConfig
+import uk.ac.wellcome.storage.dynamo.{DynamoConfig, DynamoDao}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class WorkNodeDao(dynamoDbClient: AmazonDynamoDB, dynamoConfig: DynamoConfig)(
+class DynamoWorkNodeDao(dynamoClient: AmazonDynamoDB, dynamoConfig: DynamoConfig)(
   implicit ec: ExecutionContext)
     extends Logging {
 
   private val index = dynamoConfig.index
 
-  def put(work: WorkNode): Future[Option[Either[DynamoReadError, WorkNode]]] =
-    Future {
-      Scanamo.put(dynamoDbClient)(dynamoConfig.table)(work)
-    }.recover {
-      case exception: ProvisionedThroughputExceededException =>
-        throw MatcherException(exception)
-    }
+  val dynamoDao = new DynamoDao[String, WorkNode](
+    dynamoClient = dynamoClient,
+    dynamoConfig = dynamoConfig
+  )
 
-  def get(ids: Set[String]): Future[Set[WorkNode]] =
-    Future {
-      Scanamo
-        .getAll[WorkNode](dynamoDbClient)(dynamoConfig.table)('id -> ids)
-        .map {
-          case Right(works) => works
-          case Left(scanamoError) => {
-            val exception = new RuntimeException(scanamoError.toString)
-            error(
-              s"An error occurred while retrieving all workIds=$ids from DynamoDB",
-              exception)
-            throw exception
-          }
-        }
-    }.recover {
-      case exception: ProvisionedThroughputExceededException =>
-        throw MatcherException(exception)
-    }
+  def put(workNode: WorkNode): dynamoDao.PutResult = dynamoDao.put(workNode)
+
+  def get(ids: Set[String]): dynamoDao.GetResult =
+    dynamoDao.executeReadOps(
+      id = ids.toString(),
+      ops = dynamoDao.table.getAll('id -> ids)
+    )
 
   def getByComponentIds(setIds: Set[String]): Future[Set[WorkNode]] =
     Future.sequence(setIds.map(getByComponentId)).map(_.flatten)
 
-  private def getByComponentId(componentId: String) =
+  private def getByComponentId(componentId: String): Future[List[WorkNode]] =
     Future {
       Scanamo
-        .queryIndex[WorkNode](dynamoDbClient)(dynamoConfig.table, index)(
+        .queryIndex[WorkNode](dynamoClient)(dynamoConfig.table, index)(
           'componentId -> componentId)
         .map {
           case Right(record) => {

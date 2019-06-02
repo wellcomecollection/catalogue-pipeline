@@ -16,7 +16,7 @@ import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
 import uk.ac.wellcome.storage.dynamo.DynamoConfig
 
 import scala.concurrent.ExecutionContext.Implicits.global
-class WorkNodeDaoTest
+class DynamoWorkNodeDaoTest
     extends FunSpec
     with Matchers
     with MockitoSugar
@@ -59,7 +59,7 @@ class WorkNodeDaoTest
         when(dynamoDbClient.batchGetItem(any[BatchGetItemRequest]))
           .thenThrow(expectedException)
 
-        val matcherGraphDao = new WorkNodeDao(
+        val matcherGraphDao = new DynamoWorkNodeDao(
           dynamoDbClient,
           DynamoConfig(table = table.name, index = table.index)
         )
@@ -76,7 +76,7 @@ class WorkNodeDaoTest
         val dynamoDbClient = mock[AmazonDynamoDB]
         when(dynamoDbClient.batchGetItem(any[BatchGetItemRequest]))
           .thenThrow(new ProvisionedThroughputExceededException("test"))
-        val workNodeDao = new WorkNodeDao(
+        val workNodeDao = new DynamoWorkNodeDao(
           dynamoDbClient,
           DynamoConfig(table.name, table.index)
         )
@@ -125,7 +125,7 @@ class WorkNodeDaoTest
         val expectedException = new RuntimeException("FAILED")
         when(dynamoDbClient.query(any[QueryRequest]))
           .thenThrow(expectedException)
-        val workNodeDao = new WorkNodeDao(
+        val workNodeDao = new DynamoWorkNodeDao(
           dynamoDbClient,
           DynamoConfig(table = table.name, index = table.index)
         )
@@ -143,7 +143,7 @@ class WorkNodeDaoTest
         val dynamoDbClient = mock[AmazonDynamoDB]
         when(dynamoDbClient.query(any[QueryRequest]))
           .thenThrow(new ProvisionedThroughputExceededException("test"))
-        val workNodeDao = new WorkNodeDao(
+        val workNodeDao = new DynamoWorkNodeDao(
           dynamoDbClient,
           DynamoConfig(table.name, table.index)
         )
@@ -205,7 +205,7 @@ class WorkNodeDaoTest
         val expectedException = new RuntimeException("FAILED")
         when(dynamoDbClient.putItem(any[PutItemRequest]))
           .thenThrow(expectedException)
-        val workNodeDao = new WorkNodeDao(
+        val workNodeDao = new DynamoWorkNodeDao(
           dynamoDbClient,
           DynamoConfig(table = table.name, index = table.index)
         )
@@ -223,7 +223,7 @@ class WorkNodeDaoTest
         val dynamoDbClient = mock[AmazonDynamoDB]
         when(dynamoDbClient.putItem(any[PutItemRequest]))
           .thenThrow(new ProvisionedThroughputExceededException("test"))
-        val workNodeDao = new WorkNodeDao(
+        val workNodeDao = new DynamoWorkNodeDao(
           dynamoDbClient,
           DynamoConfig(table.name, table.index)
         )
@@ -237,8 +237,8 @@ class WorkNodeDaoTest
 
     it("cannot be instantiated if dynamoConfig.maybeIndex is None") {
       intercept[ConfigurationException] {
-        new WorkNodeDao(
-          dynamoDbClient = dynamoDbClient,
+        new DynamoWorkNodeDao(
+          dynamoClient = dynamoDbClient,
           dynamoConfig = DynamoConfig(table = "something", maybeIndex = None)
         )
       }

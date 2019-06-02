@@ -178,7 +178,7 @@ class WorkGraphStoreTest
   }
 
   it("throws a RuntimeException if workGraphStore fails to put") {
-    val mockWorkNodeDao = mock[WorkNodeDao]
+    val mockWorkNodeDao = mock[DynamoWorkNodeDao]
     val expectedException = new RuntimeException("FAILED")
     when(mockWorkNodeDao.put(any[WorkNode]))
       .thenReturn(Future.failed(expectedException))
