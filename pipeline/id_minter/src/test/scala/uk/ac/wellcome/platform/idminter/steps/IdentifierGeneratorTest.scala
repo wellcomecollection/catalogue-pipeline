@@ -3,25 +3,22 @@ package uk.ac.wellcome.platform.idminter.steps
 import org.mockito.Matchers.any
 import org.mockito.Mockito.when
 import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.{EitherValues, FunSpec, Matchers}
 import scalikejdbc._
+import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
-import uk.ac.wellcome.platform.idminter.database.{
-  SQLIdentifiersDao,
-  TableProvisioner
-}
+import uk.ac.wellcome.platform.idminter.database.{SQLIdentifiersDao, TableProvisioner}
 import uk.ac.wellcome.platform.idminter.fixtures
 import uk.ac.wellcome.platform.idminter.models.{Identifier, IdentifiersTable}
-import uk.ac.wellcome.fixtures.TestWith
-
-import scala.util.{Failure, Success}
+import uk.ac.wellcome.storage.{DaoWriteError, DoesNotExistError}
 
 class IdentifierGeneratorTest
     extends FunSpec
     with fixtures.IdentifiersDatabase
     with Matchers
     with MockitoSugar
-    with IdentifiersGenerators {
+    with IdentifiersGenerators
+    with EitherValues {
 
   def withIdentifierGenerator[R](maybeIdentifiersDao: Option[SQLIdentifiersDao] =
                                    None)(
@@ -64,11 +61,11 @@ class IdentifierGeneratorTest
             )
         }.update().apply()
 
-        val triedId = identifierGenerator.retrieveOrGenerateCanonicalId(
+        val result = identifierGenerator.retrieveOrGenerateCanonicalId(
           sourceIdentifier
         )
 
-        triedId shouldBe Success(canonicalId)
+        result.right.value shouldBe canonicalId
     }
   }
 
@@ -79,14 +76,11 @@ class IdentifierGeneratorTest
       case (identifierGenerator, identifiersTable) =>
         implicit val session = AutoSession
 
-        val triedId = identifierGenerator.retrieveOrGenerateCanonicalId(
+        val result = identifierGenerator.retrieveOrGenerateCanonicalId(
           sourceIdentifier
         )
 
-        triedId shouldBe a[Success[_]]
-
-        val id = triedId.get
-        id should not be empty
+        val id = result.right.value
 
         val i = identifiersTable.i
 
@@ -112,27 +106,24 @@ class IdentifierGeneratorTest
 
     val sourceIdentifier = createSourceIdentifier
 
-    val triedLookup = identifiersDao.lookupId(
-      sourceIdentifier = sourceIdentifier
-    )
+    val result = identifiersDao.get(sourceIdentifier)
 
-    when(triedLookup)
-      .thenReturn(Success(None))
+    when(result)
+      .thenReturn(Left(DoesNotExistError(new Throwable("Does not exist!"))))
 
     val expectedException = new Exception("Noooo")
 
-    when(identifiersDao.saveIdentifier(any[Identifier]()))
-      .thenReturn(Failure(expectedException))
+    when(identifiersDao.put(any[Identifier]()))
+      .thenReturn(Left(DaoWriteError(expectedException)))
 
     withIdentifierGenerator(Some(identifiersDao)) {
       case (identifierGenerator, identifiersTable) =>
-        val triedGeneratingId =
+        val result =
           identifierGenerator.retrieveOrGenerateCanonicalId(
             sourceIdentifier
           )
 
-        triedGeneratingId shouldBe a[Failure[_]]
-        triedGeneratingId.failed.get shouldBe expectedException
+        result.left.value.e shouldBe expectedException
     }
   }
 
@@ -145,12 +136,11 @@ class IdentifierGeneratorTest
           ontologyType = "Item"
         )
 
-        val triedId = identifierGenerator.retrieveOrGenerateCanonicalId(
+        val result = identifierGenerator.retrieveOrGenerateCanonicalId(
           sourceIdentifier
         )
 
-        val id = triedId.get
-        id should not be (empty)
+        val id = result.right.value
 
         val i = identifiersTable.i
         val maybeIdentifier = withSQL {

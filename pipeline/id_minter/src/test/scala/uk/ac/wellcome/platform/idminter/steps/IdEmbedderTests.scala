@@ -9,8 +9,9 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
+import uk.ac.wellcome.storage.DaoReadError
 
-import scala.util.{Failure, Try}
+import scala.util.Failure
 
 class IdEmbedderTests
     extends FunSpec
@@ -125,7 +126,7 @@ class IdEmbedderTests
     }
   }
 
-  it("returns a failed future if the call to IdentifierGenerator fails") {
+  it("fails if the call to IdentifierGenerator fails") {
     val originalWork = createUnidentifiedWork
 
     val expectedException = new Exception("Aaaaah something happened!")
@@ -137,7 +138,7 @@ class IdEmbedderTests
             .retrieveOrGenerateCanonicalId(
               originalWork.sourceIdentifier
             )
-        ).thenReturn(Try(throw expectedException))
+        ).thenReturn(Left(DaoReadError(expectedException)))
 
         val newWork =
           idEmbedder.embedId(json = parse(toJson(originalWork).get).right.get)
@@ -444,7 +445,7 @@ class IdEmbedderTests
         .retrieveOrGenerateCanonicalId(
           sourceIdentifier
         )
-    ).thenReturn(Try(newCanonicalId))
+    ).thenReturn(Right(newCanonicalId))
   }
 
   private def assertIdEmbedderDoesNothing(jsonString: String): Assertion = {

@@ -35,11 +35,16 @@ class IdEmbedder(identifierGenerator: IdentifierGenerator) extends Logging {
     root.sourceIdentifier.json.getOption(json) match {
       case Some(sourceIdentifierJson) =>
         val sourceIdentifier = parseSourceIdentifier(sourceIdentifierJson)
-        val canonicalId = identifierGenerator
+        val result = identifierGenerator
           .retrieveOrGenerateCanonicalId(
-            identifier = sourceIdentifier
+            sourceIdentifier = sourceIdentifier
           )
-          .get
+
+        val canonicalId = result match {
+          case Right(value) => value
+          case Left(storageError) => throw storageError.e
+        }
+
         addCanonicalId(json, canonicalId)
 
       case None => json
