@@ -16,8 +16,9 @@ class MemoryIdentifiersDao extends IdentifiersDao {
     candidates match {
       case Seq(identifier) => Right(identifier)
       case _ =>
-        Left(DoesNotExistError(
-          new Throwable(s"Nothing matches $sourceIdentifier")))
+        Left(
+          DoesNotExistError(
+            new Throwable(s"Nothing matches $sourceIdentifier")))
     }
   }
 
