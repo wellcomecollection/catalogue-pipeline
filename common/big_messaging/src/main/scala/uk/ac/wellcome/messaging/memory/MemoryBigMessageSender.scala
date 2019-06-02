@@ -1,6 +1,6 @@
 package uk.ac.wellcome.messaging.memory
 
-import io.circe.Encoder
+import io.circe.{Decoder, Encoder}
 import uk.ac.wellcome.messaging.BigMessageSender
 import uk.ac.wellcome.storage.ObjectStore
 import uk.ac.wellcome.storage.memory.MemoryObjectStore
@@ -26,4 +26,7 @@ class MemoryBigMessageSender[T](
 
   def messages: List[messageSender.underlying.MemoryMessage] =
     messageSender.messages
+
+  def getMessages[S]()(implicit decoder: Decoder[S]): Seq[S] =
+    messageSender.getMessages[S]()
 }

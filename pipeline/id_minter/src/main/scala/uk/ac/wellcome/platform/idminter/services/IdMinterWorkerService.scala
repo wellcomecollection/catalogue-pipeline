@@ -2,23 +2,23 @@ package uk.ac.wellcome.platform.idminter.services
 
 import akka.Done
 import io.circe.Json
-import uk.ac.wellcome.messaging.MessageSender
+import uk.ac.wellcome.messaging.BigMessageSender
 import uk.ac.wellcome.messaging.message.MessageStream
 import uk.ac.wellcome.platform.idminter.config.models.{IdentifiersTableConfig, RDSClientConfig}
 import uk.ac.wellcome.platform.idminter.database.TableProvisioner
 import uk.ac.wellcome.platform.idminter.steps.IdEmbedder
 import uk.ac.wellcome.typesafe.Runnable
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.util.Try
 
 class IdMinterWorkerService[Destination](
   idEmbedder: IdEmbedder,
-  messageSender: MessageSender[Destination],
+  messageSender: BigMessageSender[Destination, Json],
   messageStream: MessageStream[Json],
   rdsClientConfig: RDSClientConfig,
   identifiersTableConfig: IdentifiersTableConfig
-)(implicit ec: ExecutionContext)
+)
     extends Runnable {
 
   def run(): Future[Done] = {

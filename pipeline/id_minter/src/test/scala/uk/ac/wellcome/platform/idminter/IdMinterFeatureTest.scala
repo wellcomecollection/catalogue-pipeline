@@ -1,24 +1,23 @@
 package uk.ac.wellcome.platform.idminter
 
+import io.circe.Json
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.{FunSpec, Matchers}
-import uk.ac.wellcome.messaging.fixtures.{Messaging, SNS, SQS}
-import uk.ac.wellcome.messaging.fixtures.SQS.Queue
-import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.storage.fixtures.S3
 import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.messaging.fixtures.Messaging
+import uk.ac.wellcome.messaging.fixtures.SQS.Queue
+import uk.ac.wellcome.messaging.memory.MemoryBigMessageSender
 import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.platform.idminter.fixtures.WorkerServiceFixture
+import uk.ac.wellcome.models.work.internal._
+import uk.ac.wellcome.platform.idminter.fixtures.{IdentifiersDatabase, WorkerServiceFixture}
+import uk.ac.wellcome.storage.streaming.CodecInstances._
 
 import scala.collection.JavaConverters._
 
 class IdMinterFeatureTest
     extends FunSpec
-    with SQS
-    with SNS
-    with S3
     with Messaging
-    with fixtures.IdentifiersDatabase
+    with IdentifiersDatabase
     with IntegrationPatience
     with Eventually
     with Matchers
@@ -27,35 +26,34 @@ class IdMinterFeatureTest
 
   it("mints the same IDs where source identifiers match") {
     withLocalSqsQueue { queue =>
-      withLocalSnsTopic { topic =>
-        withLocalS3Bucket { bucket =>
-          withIdentifiersDatabase { identifiersTableConfig =>
-            withWorkerService(bucket, topic, queue, identifiersTableConfig) {
-              _ =>
-                eventuallyTableExists(identifiersTableConfig)
-                val work = createUnidentifiedWork
+      withLocalS3Bucket { bucket =>
+        withIdentifiersDatabase { identifiersTableConfig =>
+          val messageSender = new MemoryBigMessageSender[Json]()
+          withWorkerService(bucket, messageSender, queue, identifiersTableConfig) {
+            _ =>
+              eventuallyTableExists(identifiersTableConfig)
+              val work = createUnidentifiedWork
 
-                val messageCount = 5
+              val messageCount = 5
 
-                (1 to messageCount).foreach { _ =>
-                  sendMessage(queue = queue, obj = work)
+              (1 to messageCount).foreach { _ =>
+                sendMessage(queue = queue, obj = work)
+              }
+
+              eventually {
+                val works = messageSender.getMessages[IdentifiedBaseWork]
+                works.length shouldBe >=(messageCount)
+
+                works.map(_.canonicalId).distinct should have size 1
+                works.foreach { receivedWork =>
+                  receivedWork
+                    .asInstanceOf[IdentifiedWork]
+                    .sourceIdentifier shouldBe work.sourceIdentifier
+                  receivedWork
+                    .asInstanceOf[IdentifiedWork]
+                    .title shouldBe work.title
                 }
-
-                eventually {
-                  val works = getMessages[IdentifiedBaseWork](topic)
-                  works.length shouldBe >=(messageCount)
-
-                  works.map(_.canonicalId).distinct should have size 1
-                  works.foreach { receivedWork =>
-                    receivedWork
-                      .asInstanceOf[IdentifiedWork]
-                      .sourceIdentifier shouldBe work.sourceIdentifier
-                    receivedWork
-                      .asInstanceOf[IdentifiedWork]
-                      .title shouldBe work.title
-                  }
-                }
-            }
+              }
           }
         }
       }
@@ -64,27 +62,26 @@ class IdMinterFeatureTest
 
   it("mints an identifier for a UnidentifiedInvisibleWork") {
     withLocalSqsQueue { queue =>
-      withLocalSnsTopic { topic =>
-        withLocalS3Bucket { bucket =>
-          withIdentifiersDatabase { identifiersTableConfig =>
-            withWorkerService(bucket, topic, queue, identifiersTableConfig) {
-              _ =>
-                eventuallyTableExists(identifiersTableConfig)
-                val work = createUnidentifiedInvisibleWork
+      withLocalS3Bucket { bucket =>
+        withIdentifiersDatabase { identifiersTableConfig =>
+          val messageSender = new MemoryBigMessageSender[Json]()
+          withWorkerService(bucket, messageSender, queue, identifiersTableConfig) {
+            _ =>
+              eventuallyTableExists(identifiersTableConfig)
+              val work = createUnidentifiedInvisibleWork
 
-                sendMessage(queue = queue, obj = work)
+              sendMessage(queue = queue, obj = work)
 
-                eventually {
-                  val works = getMessages[IdentifiedBaseWork](topic)
-                  works.length shouldBe >=(1)
+              eventually {
+                val works = messageSender.getMessages[IdentifiedBaseWork]
+                works.length shouldBe >=(1)
 
-                  val receivedWork = works.head
-                  val invisibleWork =
-                    receivedWork.asInstanceOf[IdentifiedInvisibleWork]
-                  invisibleWork.sourceIdentifier shouldBe work.sourceIdentifier
-                  invisibleWork.canonicalId shouldNot be(empty)
-                }
-            }
+                val receivedWork = works.head
+                val invisibleWork =
+                  receivedWork.asInstanceOf[IdentifiedInvisibleWork]
+                invisibleWork.sourceIdentifier shouldBe work.sourceIdentifier
+                invisibleWork.canonicalId shouldNot be(empty)
+              }
           }
         }
       }
@@ -93,29 +90,28 @@ class IdMinterFeatureTest
 
   it("mints an identifier for a UnidentifiedRedirectedWork") {
     withLocalSqsQueue { queue =>
-      withLocalSnsTopic { topic =>
-        withLocalS3Bucket { bucket =>
-          withIdentifiersDatabase { identifiersTableConfig =>
-            withWorkerService(bucket, topic, queue, identifiersTableConfig) {
-              _ =>
-                eventuallyTableExists(identifiersTableConfig)
+      withLocalS3Bucket { bucket =>
+        withIdentifiersDatabase { identifiersTableConfig =>
+          val messageSender = new MemoryBigMessageSender[Json]()
+          withWorkerService(bucket, messageSender, queue, identifiersTableConfig) {
+            _ =>
+              eventuallyTableExists(identifiersTableConfig)
 
-                val work = createUnidentifiedRedirectedWork
+              val work = createUnidentifiedRedirectedWork
 
-                sendMessage(queue = queue, obj = work)
+              sendMessage(queue = queue, obj = work)
 
-                eventually {
-                  val works = getMessages[IdentifiedBaseWork](topic)
-                  works.length shouldBe >=(1)
+              eventually {
+                val works = messageSender.getMessages[IdentifiedBaseWork]
+                works.length shouldBe >=(1)
 
-                  val receivedWork = works.head
-                  val redirectedWork =
-                    receivedWork.asInstanceOf[IdentifiedRedirectedWork]
-                  redirectedWork.sourceIdentifier shouldBe work.sourceIdentifier
-                  redirectedWork.canonicalId shouldNot be(empty)
-                  redirectedWork.redirect.canonicalId shouldNot be(empty)
-                }
-            }
+                val receivedWork = works.head
+                val redirectedWork =
+                  receivedWork.asInstanceOf[IdentifiedRedirectedWork]
+                redirectedWork.sourceIdentifier shouldBe work.sourceIdentifier
+                redirectedWork.canonicalId shouldNot be(empty)
+                redirectedWork.redirect.canonicalId shouldNot be(empty)
+              }
           }
         }
       }
@@ -124,24 +120,22 @@ class IdMinterFeatureTest
 
   it("continues if something fails processing a message") {
     withLocalSqsQueue { queue =>
-      withLocalSnsTopic { topic =>
-        withIdentifiersDatabase { identifiersTableConfig =>
-          withLocalS3Bucket { bucket =>
-            withWorkerService(bucket, topic, queue, identifiersTableConfig) {
-              _ =>
-                sendInvalidJSONto(queue)
+      withIdentifiersDatabase { identifiersTableConfig =>
+        withLocalS3Bucket { bucket =>
+          val messageSender = new MemoryBigMessageSender[Json]()
+          withWorkerService(bucket, messageSender, queue, identifiersTableConfig) {
+            _ =>
+              sendInvalidJSONto(queue)
 
-                val work = createUnidentifiedWork
+              val work = createUnidentifiedWork
 
-                sendMessage(queue = queue, obj = work)
+              sendMessage(queue = queue, obj = work)
 
-                eventually {
-                  val snsMessages = listMessagesReceivedFromSNS(topic)
-                  snsMessages.size should be >= 1
+              eventually {
+                messageSender.messages should not be empty
 
-                  assertMessageIsNotDeleted(queue)
-                }
-            }
+                assertMessageIsNotDeleted(queue)
+              }
           }
         }
       }

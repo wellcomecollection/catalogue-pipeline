@@ -2,41 +2,34 @@ package uk.ac.wellcome.platform.idminter.steps
 
 import io.circe.parser._
 import org.mockito.Mockito.when
-import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{Assertion, FunSpec, Matchers}
-import uk.ac.wellcome.akka.fixtures.Akka
+import org.scalatest.{Assertion, FunSpec, Matchers, TryValues}
 import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.work.generators.WorksGenerators
+import uk.ac.wellcome.models.work.internal._
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.Try
+import scala.util.{Failure, Try}
 
 class IdEmbedderTests
     extends FunSpec
-    with ScalaFutures
     with Matchers
     with MockitoSugar
-    with Akka
     with JsonAssertions
-    with IntegrationPatience
+    with TryValues
     with WorksGenerators {
 
-  private def withIdEmbedder(
-    testWith: TestWith[(IdentifierGenerator, IdEmbedder), Assertion]) = {
-    withActorSystem { actorSystem =>
-      val identifierGenerator: IdentifierGenerator =
-        mock[IdentifierGenerator]
+  private def withIdEmbedder[R](
+    testWith: TestWith[(IdentifierGenerator, IdEmbedder), R]): R = {
+    val identifierGenerator: IdentifierGenerator =
+      mock[IdentifierGenerator]
 
-      val idEmbedder = new IdEmbedder(
-        identifierGenerator = identifierGenerator
-      )
+    val idEmbedder = new IdEmbedder(
+      identifierGenerator = identifierGenerator
+    )
 
-      testWith((identifierGenerator, idEmbedder))
-    }
+    testWith((identifierGenerator, idEmbedder))
   }
 
   it("sets the canonicalId given by the IdentifierGenerator on the work") {
@@ -52,7 +45,7 @@ class IdEmbedderTests
           newCanonicalId = newCanonicalId
         )
 
-        val newWorkFuture = idEmbedder.embedId(
+        val newWork = idEmbedder.embedId(
           json = parse(
             toJson(originalWork).get
           ).right.get
@@ -65,12 +58,10 @@ class IdEmbedderTests
           version = originalWork.version
         )
 
-        whenReady(newWorkFuture) { newWorkJson =>
-          assertJsonStringsAreEqual(
-            newWorkJson.toString(),
-            toJson[IdentifiedBaseWork](expectedWork).get
-          )
-        }
+        assertJsonStringsAreEqual(
+          newWork.success.value.toString(),
+          toJson[IdentifiedBaseWork](expectedWork).get
+        )
     }
   }
 
@@ -107,7 +98,7 @@ class IdEmbedderTests
           newCanonicalId = newCreatorCanonicalId
         )
 
-        val newWorkFuture = idEmbedder.embedId(
+        val newWork = idEmbedder.embedId(
           json = parse(
             toJson(originalWork).get
           ).right.get
@@ -127,12 +118,10 @@ class IdEmbedderTests
           version = originalWork.version
         )
 
-        whenReady(newWorkFuture) { newWorkJson =>
-          assertJsonStringsAreEqual(
-            newWorkJson.toString(),
-            toJson[IdentifiedBaseWork](expectedWork).get
-          )
-        }
+        assertJsonStringsAreEqual(
+          newWork.success.value.toString(),
+          toJson[IdentifiedBaseWork](expectedWork).get
+        )
     }
   }
 
@@ -150,12 +139,10 @@ class IdEmbedderTests
             )
         ).thenReturn(Try(throw expectedException))
 
-        val newWorkFuture =
+        val newWork =
           idEmbedder.embedId(json = parse(toJson(originalWork).get).right.get)
 
-        whenReady(newWorkFuture.failed) { exception =>
-          exception shouldBe expectedException
-        }
+        newWork shouldBe Failure(expectedException)
     }
   }
 
@@ -212,22 +199,20 @@ class IdEmbedderTests
           locations = originalItem2.agent.locations
         )
 
-        whenReady(eventualWork) { json =>
-          val work = fromJson[IdentifiedWork](json.toString()).get
+        val actualWork = fromJson[IdentifiedWork](eventualWork.success.value.toString()).get
 
-          val actualItem1 = work.items.head
-          val actualItem2 = work.items.tail.head
+        val actualItem1 = actualWork.items.head
+        val actualItem2 = actualWork.items.tail.head
 
-          assertJsonStringsAreEqual(
-            toJson(actualItem1).get,
-            toJson(expectedItem1).get
-          )
+        assertJsonStringsAreEqual(
+          toJson(actualItem1).get,
+          toJson(expectedItem1).get
+        )
 
-          assertJsonStringsAreEqual(
-            toJson(actualItem2).get,
-            toJson(expectedItem2).get
-          )
-        }
+        assertJsonStringsAreEqual(
+          toJson(actualItem2).get,
+          toJson(expectedItem2).get
+        )
     }
   }
 
@@ -326,11 +311,9 @@ class IdEmbedderTests
         }
         """
 
-          val eventualJson = idEmbedder.embedId(parse(inputJson).right.get)
+          val json = idEmbedder.embedId(parse(inputJson).right.get)
 
-          whenReady(eventualJson) { json =>
-            assertJsonStringsAreEqual(json.toString, outputJson)
-          }
+          assertJsonStringsAreEqual(json.success.value.toString, outputJson)
       }
     }
 
@@ -389,11 +372,9 @@ class IdEmbedderTests
         }
         """
 
-          val eventualJson = idEmbedder.embedId(parse(inputJson).right.get)
+          val json = idEmbedder.embedId(parse(inputJson).right.get)
 
-          whenReady(eventualJson) { json =>
-            assertJsonStringsAreEqual(json.toString, outputJson)
-          }
+          assertJsonStringsAreEqual(json.success.value.toString, outputJson)
       }
     }
   }
@@ -447,11 +428,9 @@ class IdEmbedderTests
         }
         """
 
-        val eventualJson = idEmbedder.embedId(parse(inputJson).right.get)
+        val json = idEmbedder.embedId(parse(inputJson).right.get)
 
-        whenReady(eventualJson) { json =>
-          assertJsonStringsAreEqual(json.toString, outputJson)
-        }
+        assertJsonStringsAreEqual(json.success.value.toString, outputJson)
     }
   }
 
@@ -468,14 +447,11 @@ class IdEmbedderTests
     ).thenReturn(Try(newCanonicalId))
   }
 
-  private def assertIdEmbedderDoesNothing(jsonString: String) = {
+  private def assertIdEmbedderDoesNothing(jsonString: String): Assertion = {
     withIdEmbedder {
       case (_, idEmbedder) =>
-        val eventualJson = idEmbedder.embedId(parse(jsonString).right.get)
-        whenReady(eventualJson) { json =>
-          assertJsonStringsAreEqual(json.toString(), jsonString)
-        }
+        val json = idEmbedder.embedId(parse(jsonString).right.get)
+        assertJsonStringsAreEqual(json.success.value.toString(), jsonString)
     }
   }
-
 }

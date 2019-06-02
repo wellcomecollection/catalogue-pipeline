@@ -1,25 +1,20 @@
 package uk.ac.wellcome.platform.idminter.services
 
+import io.circe.Json
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSpec, Matchers}
 import scalikejdbc._
-import uk.ac.wellcome.messaging.fixtures.{Messaging, SNS, SQS}
-import uk.ac.wellcome.platform.idminter.database.{
-  FieldDescription,
-  IdentifiersDao
-}
-import uk.ac.wellcome.platform.idminter.fixtures
-import uk.ac.wellcome.platform.idminter.fixtures.WorkerServiceFixture
-import uk.ac.wellcome.storage.fixtures.S3
+import uk.ac.wellcome.messaging.fixtures.Messaging
+import uk.ac.wellcome.messaging.memory.MemoryBigMessageSender
+import uk.ac.wellcome.platform.idminter.database.{FieldDescription, IdentifiersDao}
+import uk.ac.wellcome.platform.idminter.fixtures.{IdentifiersDatabase, WorkerServiceFixture}
+import uk.ac.wellcome.storage.streaming.CodecInstances._
 
 class IdMinterWorkerServiceTest
     extends FunSpec
-    with SQS
-    with SNS
-    with S3
     with Messaging
-    with fixtures.IdentifiersDatabase
+    with IdentifiersDatabase
     with Eventually
     with IntegrationPatience
     with Matchers
@@ -32,9 +27,10 @@ class IdMinterWorkerServiceTest
         withIdentifiersDatabase { identifiersTableConfig =>
           withLocalS3Bucket { bucket =>
             val identifiersDao = mock[IdentifiersDao]
+            val messageSender = new MemoryBigMessageSender[Json]()
             withWorkerService(
               bucket,
-              topic,
+              messageSender,
               queue,
               identifiersDao,
               identifiersTableConfig) { _ =>

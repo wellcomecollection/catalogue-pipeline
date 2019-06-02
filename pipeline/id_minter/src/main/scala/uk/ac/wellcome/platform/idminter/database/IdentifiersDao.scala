@@ -11,6 +11,7 @@ import uk.ac.wellcome.platform.idminter.models.{Identifier, IdentifiersTable}
 import scala.concurrent.blocking
 import scala.util.Try
 
+// TODO: Make this a trait which can be memory-ised
 class IdentifiersDao(db: DB, identifiers: IdentifiersTable) extends Logging {
 
   implicit val session = AutoSession(db.settingsProvider)
