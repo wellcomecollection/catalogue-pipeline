@@ -7,6 +7,7 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.Messaging
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryBigMessageSender
+import uk.ac.wellcome.messaging.message.RemoteNotification
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.idminter.fixtures.{IdentifiersDatabase, WorkerServiceFixture}
@@ -41,7 +42,7 @@ class IdMinterFeatureTest
               }
 
               eventually {
-                val works = messageSender.getMessages[IdentifiedBaseWork]
+                val works = getWorks(messageSender)
                 works.length shouldBe >=(messageCount)
 
                 works.map(_.canonicalId).distinct should have size 1
@@ -73,7 +74,7 @@ class IdMinterFeatureTest
               sendMessage(queue = queue, obj = work)
 
               eventually {
-                val works = messageSender.getMessages[IdentifiedBaseWork]
+                val works = getWorks(messageSender)
                 works.length shouldBe >=(1)
 
                 val receivedWork = works.head
@@ -102,7 +103,7 @@ class IdMinterFeatureTest
               sendMessage(queue = queue, obj = work)
 
               eventually {
-                val works = messageSender.getMessages[IdentifiedBaseWork]
+                val works = getWorks(messageSender)
                 works.length shouldBe >=(1)
 
                 val receivedWork = works.head
@@ -158,4 +159,10 @@ class IdMinterFeatureTest
       .getAttributes
       .get("ApproximateNumberOfMessagesNotVisible") shouldBe "1"
   }
+
+  private def getWorks(messageSender: MemoryBigMessageSender[Json]): Seq[IdentifiedBaseWork] =
+    messageSender.getMessages[RemoteNotification]
+      .map { _.location }
+      .map { messageSender.objectStore.get(_).right.value }
+      .map { _.as[IdentifiedBaseWork].right.value }
 }
