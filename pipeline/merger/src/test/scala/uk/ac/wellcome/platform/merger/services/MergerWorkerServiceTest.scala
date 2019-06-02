@@ -3,41 +3,31 @@ package uk.ac.wellcome.platform.merger.services
 import org.mockito.Matchers.endsWith
 import org.mockito.Mockito.{atLeastOnce, times, verify}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSpec, Matchers}
+import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
-import uk.ac.wellcome.messaging.fixtures.Messaging
+import uk.ac.wellcome.messaging.memory.MemoryBigMessageSender
 import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.monitoring.MetricsSender
-import uk.ac.wellcome.monitoring.fixtures.MetricsSenderFixture
-import uk.ac.wellcome.platform.merger.fixtures.{
-  LocalWorksVhs,
-  MatcherResultFixture,
-  WorkerServiceFixture
-}
-import uk.ac.wellcome.fixtures.TestWith
+import uk.ac.wellcome.platform.merger.fixtures.{MatcherResultFixture, WorkerServiceFixture}
+import uk.ac.wellcome.storage.streaming.CodecInstances._
 
 class MergerWorkerServiceTest
     extends FunSpec
     with ScalaFutures
     with IntegrationPatience
-    with MetricsSenderFixture
-    with Messaging
     with WorksGenerators
-    with LocalWorksVhs
     with MatcherResultFixture
     with Matchers
-    with MockitoSugar
     with WorkerServiceFixture {
 
   it(
     "reads matcher result messages, retrieves the works from vhs and sends them to sns") {
     withMergerWorkerServiceFixtures {
-      case (vhs, QueuePair(queue, dlq), topic, metricsSender) =>
+      case (vhs, QueuePair(queue, dlq), messageSender, metricsSender) =>
         val work1 = createUnidentifiedWork
         val work2 = createUnidentifiedWork
         val work3 = createUnidentifiedWork
@@ -45,7 +35,7 @@ class MergerWorkerServiceTest
         val matcherResult =
           matcherResultWith(Set(Set(work3), Set(work1, work2)))
 
-        givenStoredInVhs(vhs, work1, work2, work3)
+        storeInVhs(vhs, work1, work2, work3)
 
         sendNotificationToSQS(
           queue = queue,
@@ -56,7 +46,7 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          val worksSent = getMessages[BaseWork](topic)
+          val worksSent = messageSender.getMessages[BaseWork]
           worksSent should contain only (work1, work2, work3)
 
           verify(metricsSender, atLeastOnce)
@@ -67,12 +57,12 @@ class MergerWorkerServiceTest
 
   it("sends InvisibleWorks unmerged") {
     withMergerWorkerServiceFixtures {
-      case (vhs, QueuePair(queue, dlq), topic, metricsSender) =>
+      case (vhs, QueuePair(queue, dlq), messageSender, metricsSender) =>
         val work = createUnidentifiedInvisibleWork
 
         val matcherResult = matcherResultWith(Set(Set(work)))
 
-        givenStoredInVhs(vhs, work)
+        storeInVhs(vhs, work)
 
         sendNotificationToSQS(
           queue = queue,
@@ -83,7 +73,7 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          val worksSent = getMessages[BaseWork](topic)
+          val worksSent = messageSender.getMessages[BaseWork]
           worksSent should contain only work
 
           verify(metricsSender, times(1))
@@ -94,7 +84,7 @@ class MergerWorkerServiceTest
 
   it("fails if the work is not in vhs") {
     withMergerWorkerServiceFixtures {
-      case (_, QueuePair(queue, dlq), topic, metricsSender) =>
+      case (_, QueuePair(queue, dlq), messageSender, metricsSender) =>
         val work = createUnidentifiedWork
 
         val matcherResult = matcherResultWith(Set(Set(work)))
@@ -107,7 +97,8 @@ class MergerWorkerServiceTest
         eventually {
           assertQueueEmpty(queue)
           assertQueueHasSize(dlq, 1)
-          listMessagesReceivedFromSNS(topic) shouldBe empty
+          
+          messageSender.messages shouldBe empty
 
           verify(metricsSender, times(3))
             .incrementCount(endsWith("_failure"))
@@ -117,14 +108,14 @@ class MergerWorkerServiceTest
 
   it("discards works with newer versions in vhs, sends along the others") {
     withMergerWorkerServiceFixtures {
-      case (vhs, QueuePair(queue, dlq), topic, _) =>
+      case (vhs, QueuePair(queue, dlq), messageSender, _) =>
         val work = createUnidentifiedWork
         val olderWork = createUnidentifiedWork
         val newerWork = olderWork.copy(version = 2)
 
         val matcherResult = matcherResultWith(Set(Set(work, olderWork)))
 
-        givenStoredInVhs(vhs, work, newerWork)
+        storeInVhs(vhs, work, newerWork)
 
         sendNotificationToSQS(
           queue = queue,
@@ -134,7 +125,8 @@ class MergerWorkerServiceTest
         eventually {
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
-          val worksSent = getMessages[BaseWork](topic)
+
+          val worksSent = messageSender.getMessages[BaseWork]
           worksSent should contain only work
         }
     }
@@ -142,14 +134,14 @@ class MergerWorkerServiceTest
 
   it("discards works with version 0 and sends along the others") {
     withMergerWorkerServiceFixtures {
-      case (vhs, QueuePair(queue, dlq), topic, metricsSender) =>
+      case (vhs, QueuePair(queue, dlq), messageSender, metricsSender) =>
         val versionZeroWork = createUnidentifiedWorkWith(version = 0)
         val work = versionZeroWork
           .copy(version = 1)
 
         val matcherResult = matcherResultWith(Set(Set(work, versionZeroWork)))
 
-        givenStoredInVhs(vhs, work)
+        storeInVhs(vhs, work)
 
         sendNotificationToSQS(
           queue = queue,
@@ -160,7 +152,7 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          val worksSent = getMessages[BaseWork](topic)
+          val worksSent = messageSender.getMessages[BaseWork]
           worksSent should contain only work
 
           verify(metricsSender, times(1))
@@ -176,8 +168,8 @@ class MergerWorkerServiceTest
     val works = List(physicalWork, digitalWork)
 
     withMergerWorkerServiceFixtures {
-      case (vhs, QueuePair(queue, dlq), topic, _) =>
-        givenStoredInVhs(vhs, works: _*)
+      case (vhs, QueuePair(queue, dlq), messageSender, _) =>
+        storeInVhs(vhs, works: _*)
 
         val matcherResult = MatcherResult(
           Set(
@@ -191,7 +183,7 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          val worksSent = getMessages[BaseWork](topic).distinct
+          val worksSent = messageSender.getMessages[BaseWork]
           worksSent should have size 2
 
           val redirectedWorks = worksSent.collect {
@@ -218,8 +210,8 @@ class MergerWorkerServiceTest
     val works = workPair1 ++ workPair2
 
     withMergerWorkerServiceFixtures {
-      case (vhs, QueuePair(queue, dlq), topic, _) =>
-        givenStoredInVhs(vhs, works: _*)
+      case (vhs, QueuePair(queue, dlq), messageSender, _) =>
+        storeInVhs(vhs, works: _*)
 
         val matcherResult = MatcherResult(
           Set(
@@ -233,7 +225,7 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          val worksSent = getMessages[BaseWork](topic).distinct
+          val worksSent = messageSender.getMessages[BaseWork]
           worksSent should have size 4
 
           val redirectedWorks = worksSent.collect {
@@ -265,22 +257,20 @@ class MergerWorkerServiceTest
 
   def withMergerWorkerServiceFixtures[R](
     testWith: TestWith[
-      (TransformedBaseWorkVHS, QueuePair, Topic, MetricsSender),
+      (RecorderVhs, QueuePair, MemoryBigMessageSender[BaseWork], MetricsSender),
       R]): R =
-    withTransformedBaseWorkVHS { vhs =>
       withLocalSqsQueueAndDlq {
-        case queuePair @ QueuePair(queue, _) =>
-          withLocalSnsTopic { topic =>
-            withMockMetricsSender { mockMetricsSender =>
-              withWorkerService(
-                vhs = vhs,
-                topic = topic,
-                queue = queue,
-                metricsSender = mockMetricsSender) { _ =>
-                testWith((vhs, queuePair, topic, mockMetricsSender))
-              }
+        case queuePair@QueuePair(queue, _) =>
+          withMockMetricsSender { mockMetricsSender =>
+            val vhs = createVhs()
+            val messageSender = new MemoryBigMessageSender[BaseWork]()
+            withWorkerService(
+              vhs = vhs,
+              messageSender = messageSender,
+              queue = queue,
+              metricsSender = mockMetricsSender) { _ =>
+              testWith((vhs, queuePair, messageSender, mockMetricsSender))
             }
           }
       }
-    }
 }

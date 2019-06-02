@@ -1,1 +1,1 @@
-{"id" : "matcher", "folder" : "pipeline\/matcher", "dependencyIds" : ["internal_model"]}
+{"id" : "matcher", "folder" : "pipeline\/matcher", "dependencyIds" : ["internal_model", "big_messaging_typesafe"]}

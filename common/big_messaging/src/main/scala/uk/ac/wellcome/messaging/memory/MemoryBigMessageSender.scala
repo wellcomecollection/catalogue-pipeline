@@ -7,7 +7,7 @@ import uk.ac.wellcome.storage.memory.MemoryObjectStore
 import uk.ac.wellcome.storage.streaming.Codec
 
 class MemoryBigMessageSender[T](
-  maxSize: Int = 100,
+  maxSize: Int = 100000,
   storeNamespace: String = "MemoryBigMessageSender",
   messageDestination: String = "MemoryBigMessageSender"
 )(

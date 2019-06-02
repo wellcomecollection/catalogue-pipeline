@@ -1,50 +1,46 @@
 package uk.ac.wellcome.platform.merger.fixtures
 
 import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.fixtures.Messaging
-import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
+import uk.ac.wellcome.messaging.memory.MemoryBigMessageSender
+import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.work.internal.BaseWork
 import uk.ac.wellcome.monitoring.MetricsSender
 import uk.ac.wellcome.platform.merger.services._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-trait WorkerServiceFixture extends LocalWorksVhs with Messaging {
-  def withWorkerService[R](vhs: TransformedBaseWorkVHS,
-                           topic: Topic,
-                           queue: Queue,
-                           metricsSender: MetricsSender)(
-    testWith: TestWith[MergerWorkerService, R]): R =
-    withLocalS3Bucket { messageBucket =>
-      withMessageWriter[BaseWork, R](messageBucket, topic) { messageWriter =>
-        withActorSystem { implicit actorSystem =>
-          withSQSStream[NotificationMessage, R](
-            queue = queue,
-            metricsSender = metricsSender) { sqsStream =>
-            val workerService = new MergerWorkerService(
-              sqsStream = sqsStream,
-              playbackService = new RecorderPlaybackService(vhs),
-              mergerManager = new MergerManager(PlatformMerger),
-              messageWriter = messageWriter
-            )
+trait WorkerServiceFixture extends RecorderVhsFixture with Messaging {
+  def withWorkerService[R](
+    vhs: RecorderVhs,
+    messageSender: MemoryBigMessageSender[BaseWork],
+    queue: Queue,
+    metricsSender: MetricsSender)(
+    testWith: TestWith[MergerWorkerService[String], R]): R =
+    withActorSystem { implicit actorSystem =>
+      withSQSStream[NotificationMessage, R](
+        queue = queue,
+        metricsSender = metricsSender) { sqsStream =>
+        val workerService = new MergerWorkerService(
+          sqsStream = sqsStream,
+          playbackService = new RecorderPlaybackService(vhs),
+          mergerManager = new MergerManager(PlatformMerger),
+          messageSender = messageSender
+        )
 
-            workerService.run()
+        workerService.run()
 
-            testWith(workerService)
-          }
-        }
+        testWith(workerService)
       }
     }
 
   def withWorkerService[R](
-    vhs: TransformedBaseWorkVHS,
-    topic: Topic,
-    queue: Queue)(testWith: TestWith[MergerWorkerService, R]): R =
+    vhs: RecorderVhs,
+    messageSender: MemoryBigMessageSender[BaseWork],
+    queue: Queue)(testWith: TestWith[MergerWorkerService[String], R]): R =
     withMetricsSender() { metricsSender =>
-      withWorkerService(vhs, topic, queue, metricsSender) { workerService =>
+      withWorkerService(vhs, messageSender, queue, metricsSender) { workerService =>
         testWith(workerService)
       }
     }

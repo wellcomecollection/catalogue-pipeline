@@ -2,13 +2,10 @@ package uk.ac.wellcome.platform.merger.services
 
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{FunSpec, Matchers}
-import uk.ac.wellcome.fixtures._
-import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.matcher.WorkIdentifier
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
-import uk.ac.wellcome.platform.merger.fixtures.LocalWorksVhs
-import uk.ac.wellcome.storage.vhs.EmptyMetadata
+import uk.ac.wellcome.platform.merger.fixtures.RecorderVhsFixture
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -17,39 +14,39 @@ class RecorderPlaybackServiceTest
     extends FunSpec
     with Matchers
     with ScalaFutures
-    with LocalWorksVhs
+    with RecorderVhsFixture
     with WorksGenerators {
 
   it("fetches a single Work") {
     val work = createUnidentifiedWork
 
-    withRecorderVHS { vhs =>
-      givenStoredInVhs(vhs, work)
+    val vhs = createVhs()
 
-      whenReady(fetchAllWorks(vhs = vhs, work)) { result =>
-        result shouldBe Seq(Some(work))
-      }
+    storeInVhs(vhs, work)
+
+    whenReady(fetchAllWorks(vhs = vhs, work)) { result =>
+      result shouldBe Seq(Some(work))
     }
   }
 
   it("throws an error if asked to fetch a missing entry") {
     val work = createUnidentifiedWork
 
-    withRecorderVHS { vhs =>
-      whenReady(fetchAllWorks(vhs = vhs, work).failed) { result =>
-        result shouldBe a[NoSuchElementException]
-        result.getMessage shouldBe s"Work ${work.sourceIdentifier} is not in VHS!"
-      }
+    val vhs = createVhs()
+
+    whenReady(fetchAllWorks(vhs = vhs, work).failed) { result =>
+      result shouldBe a[NoSuchElementException]
+      result.getMessage shouldBe s"Work ${work.sourceIdentifier} is not in VHS!"
     }
   }
 
   it("returns None if asked to fetch a Work with version 0") {
     val work = createUnidentifiedWorkWith(version = 0)
 
-    withRecorderVHS { vhs =>
-      whenReady(fetchAllWorks(vhs = vhs, work)) { result =>
-        result shouldBe Seq(None)
-      }
+    val vhs = createVhs()
+
+    whenReady(fetchAllWorks(vhs = vhs, work)) { result =>
+      result shouldBe Seq(None)
     }
   }
 
@@ -61,12 +58,12 @@ class RecorderPlaybackServiceTest
       version = work.version + 1
     )
 
-    withRecorderVHS { vhs =>
-      givenStoredInVhs(vhs, workToStore)
+    val vhs = createVhs()
 
-      whenReady(fetchAllWorks(vhs = vhs, work)) { result =>
-        result shouldBe Seq(None)
-      }
+    storeInVhs(vhs, workToStore)
+
+    whenReady(fetchAllWorks(vhs = vhs, work)) { result =>
+      result shouldBe Seq(None)
     }
   }
 
@@ -87,19 +84,17 @@ class RecorderPlaybackServiceTest
     val lookupWorks = (unchangedWorks ++ outdatedWorks ++ zeroWorks).toList
     val storedWorks = (unchangedWorks ++ updatedWorks ++ zeroWorks).toList
 
-    withRecorderVHS { vhs =>
-      givenStoredInVhs(vhs, storedWorks: _*)
+    val vhs = createVhs()
 
-      whenReady(fetchAllWorks(vhs = vhs, lookupWorks: _*)) { result =>
-        result shouldBe (unchangedWorks.map { Some(_) } ++ (4 to 7).map { _ =>
-          None
-        })
-      }
+    storeInVhs(vhs, storedWorks: _*)
+
+    whenReady(fetchAllWorks(vhs = vhs, lookupWorks: _*)) { result =>
+      result shouldBe (unchangedWorks.map { Some(_) } ++ (4 to 7).map { _ => None })
     }
   }
 
   private def fetchAllWorks(
-    vhs: TransformedBaseWorkVHS,
+    vhs: RecorderVhs,
     works: TransformedBaseWork*): Future[Seq[Option[TransformedBaseWork]]] = {
     val service = new RecorderPlaybackService(vhs)
 
@@ -109,17 +104,5 @@ class RecorderPlaybackServiceTest
       }
 
     service.fetchAllWorks(workIdentifiers)
-  }
-
-  private def withRecorderVHS[R](
-    testWith: TestWith[TransformedBaseWorkVHS, R]): R = {
-    withLocalS3Bucket { bucket =>
-      withLocalDynamoDbTable { table =>
-        withTypeVHS[TransformedBaseWork, EmptyMetadata, R](bucket, table) {
-          vhs =>
-            testWith(vhs)
-        }
-      }
-    }
   }
 }
