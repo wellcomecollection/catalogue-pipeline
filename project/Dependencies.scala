@@ -274,7 +274,8 @@ object CatalogueDependencies {
 
   val sierraItemsToDynamoDependencies: Seq[ModuleID] =
     WellcomeDependencies.messagingTypesafeLibrary ++
-    WellcomeDependencies.storageTypesafeLibrary
+    WellcomeDependencies.storageTypesafeLibrary ++
+    ExternalDependencies.mockitoDependencies
 
   // Snapshots stack
 
