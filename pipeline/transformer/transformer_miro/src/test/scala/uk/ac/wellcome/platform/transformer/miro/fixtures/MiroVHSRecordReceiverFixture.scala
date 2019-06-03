@@ -10,7 +10,6 @@ import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
 import uk.ac.wellcome.platform.transformer.miro.services.MiroVHSRecordReceiver
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
-import uk.ac.wellcome.storage.ObjectStore
 import uk.ac.wellcome.storage.memory.MemoryObjectStore
 import uk.ac.wellcome.storage.streaming.CodecInstances._
 import uk.ac.wellcome.storage.vhs.Entry
