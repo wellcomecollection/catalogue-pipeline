@@ -255,6 +255,7 @@ object CatalogueDependencies {
   // Sierra adapter stack
 
   val sierraAdapterCommonDependencies: Seq[ModuleID] =
+    WellcomeDependencies.messagingLibrary ++
     WellcomeDependencies.storageLibrary
 
   val sierraReaderDependencies: Seq[ModuleID] =

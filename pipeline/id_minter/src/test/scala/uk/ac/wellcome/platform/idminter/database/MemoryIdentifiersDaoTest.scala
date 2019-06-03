@@ -3,7 +3,6 @@ package uk.ac.wellcome.platform.idminter.database
 import org.scalatest.{EitherValues, FunSpec, Matchers}
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
 import uk.ac.wellcome.models.work.internal.IdentifierType
-import uk.ac.wellcome.platform.idminter.exceptions.IdMinterException
 import uk.ac.wellcome.platform.idminter.fixtures.IdMinterGenerators
 import uk.ac.wellcome.platform.idminter.models.Identifier
 import uk.ac.wellcome.storage.{DaoWriteError, DoesNotExistError}
@@ -92,7 +91,7 @@ class MemoryIdentifiersDaoTest
 
       val putResult = dao.put(duplicateIdentifier)
       putResult.left.value shouldBe a[DaoWriteError]
-      putResult.left.value.e shouldBe a[IdMinterException]
+      putResult.left.value.e shouldBe a[Throwable]
     }
 
     it(
@@ -158,7 +157,7 @@ class MemoryIdentifiersDaoTest
 
       val triedSave = dao.put(identifier2)
       triedSave.left.value shouldBe a[DaoWriteError]
-      triedSave.left.value.e shouldBe a[IdMinterException]
+      triedSave.left.value.e shouldBe a[Throwable]
     }
   }
 }

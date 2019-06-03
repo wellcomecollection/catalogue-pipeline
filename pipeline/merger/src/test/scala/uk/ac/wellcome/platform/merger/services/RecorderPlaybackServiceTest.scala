@@ -35,8 +35,8 @@ class RecorderPlaybackServiceTest
     val vhs = createVhs()
 
     whenReady(fetchAllWorks(vhs = vhs, work).failed) { result =>
-      result shouldBe a[NoSuchElementException]
-      result.getMessage shouldBe s"Work ${work.sourceIdentifier} is not in VHS!"
+      result shouldBe a[Throwable]
+      result.getMessage shouldBe s"No such entry: ${work.sourceIdentifier}"
     }
   }
 
