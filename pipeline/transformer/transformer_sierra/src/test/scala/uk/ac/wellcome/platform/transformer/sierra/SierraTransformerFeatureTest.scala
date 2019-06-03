@@ -2,6 +2,7 @@ package uk.ac.wellcome.platform.transformer.sierra
 
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.{FunSpec, Matchers}
+import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS
@@ -18,6 +19,7 @@ import uk.ac.wellcome.storage.streaming.CodecInstances._
 class SierraTransformerFeatureTest
     extends FunSpec
     with Matchers
+    with Akka
     with SQS
     with Eventually
     with RecordReceiverFixture

@@ -2,6 +2,7 @@ package uk.ac.wellcome.platform.transformer.miro
 
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.{FunSpec, Matchers}
+import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
@@ -20,7 +21,8 @@ class MiroTransformerFeatureTest
     with IntegrationPatience
     with MiroRecordGenerators
     with MiroTransformableWrapper
-    with MiroVHSRecordReceiverFixture {
+    with MiroVHSRecordReceiverFixture
+    with Akka {
 
   it("transforms miro records and publishes the result to the given topic") {
     val miroID = "M0000001"

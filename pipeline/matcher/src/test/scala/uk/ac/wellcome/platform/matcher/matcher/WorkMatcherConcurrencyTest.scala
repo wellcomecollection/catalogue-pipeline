@@ -1,15 +1,12 @@
 package uk.ac.wellcome.platform.matcher.matcher
 
-import com.gu.scanamo.Scanamo
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.models.matcher.MatcherResult
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.MergeCandidate
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
-import uk.ac.wellcome.storage.locking.RowLock
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -19,66 +16,59 @@ class WorkMatcherConcurrencyTest
     with Matchers
     with MatcherFixtures
     with ScalaFutures
-    with MockitoSugar
     with WorksGenerators {
 
   it("processes one of two conflicting concurrent updates and locks the other") {
-    withMockMetricsSender { metricsSender =>
-      withLockTable { lockTable =>
-        withWorkGraphTable { graphTable =>
-          withWorkGraphStore(graphTable) { workGraphStore =>
-            withDynamoRowLockDao(dynamoDbClient, lockTable) { rowLockDao =>
-              withLockingService(rowLockDao, metricsSender) {
-                dynamoLockingService =>
-                  withWorkMatcherAndLockingService(
-                    workGraphStore,
-                    dynamoLockingService) { workMatcher =>
-                    val identifierA =
-                      createSierraSystemSourceIdentifierWith(value = "A")
-                    val identifierB =
-                      createSierraSystemSourceIdentifierWith(value = "B")
+    val lockDao = createLockDao
 
-                    val workA = createUnidentifiedWorkWith(
-                      sourceIdentifier = identifierA,
-                      mergeCandidates = List(MergeCandidate(identifierB))
-                    )
+    val lockingService = createLockingService(lockDao)
 
-                    val workB = createUnidentifiedWorkWith(
-                      sourceIdentifier = identifierB
-                    )
+    withWorkGraphTable { graphTable =>
+      withWorkGraphStore(graphTable) { workGraphStore =>
+        val workMatcher = new WorkMatcher(workGraphStore, lockingService)
 
-                    val eventualResultA = workMatcher.matchWork(workA)
-                    val eventualResultB = workMatcher.matchWork(workB)
+        val identifierA =
+          createSierraSystemSourceIdentifierWith(value = "A")
+        val identifierB =
+          createSierraSystemSourceIdentifierWith(value = "B")
 
-                    val eventualResults = for {
-                      resultA <- eventualResultA recoverWith {
-                        case e: MatcherException =>
-                          Future.successful(e)
-                      }
-                      resultB <- eventualResultB recoverWith {
-                        case e: MatcherException =>
-                          Future.successful(e)
-                      }
-                    } yield (resultA, resultB)
+        val workA = createUnidentifiedWorkWith(
+          sourceIdentifier = identifierA,
+          mergeCandidates = List(MergeCandidate(identifierB))
+        )
 
-                    whenReady(eventualResults) { results =>
-                      val resultsList = results.productIterator.toList
-                      val failure = resultsList.collect({
-                        case e: MatcherException => e
-                      })
-                      val result = resultsList.collect({
-                        case r: MatcherResult => r
-                      })
+        val workB = createUnidentifiedWorkWith(
+          sourceIdentifier = identifierB
+        )
 
-                      failure.size shouldBe 1
-                      result.size shouldBe 1
+        val eventualResultA = workMatcher.matchWork(workA)
+        val eventualResultB = workMatcher.matchWork(workB)
 
-                      Scanamo.scan[RowLock](dynamoDbClient)(lockTable.name) shouldBe empty
-                    }
-                  }
-              }
-            }
+        val eventualResults = for {
+          resultA <- eventualResultA recoverWith {
+            case e: MatcherException =>
+              Future.successful(e)
           }
+          resultB <- eventualResultB recoverWith {
+            case e: MatcherException =>
+              Future.successful(e)
+          }
+        } yield (resultA, resultB)
+
+        whenReady(eventualResults) { results =>
+          val resultsList = results.productIterator.toList
+          val failure = resultsList.collect({
+            case e: MatcherException => e
+          })
+          val result = resultsList.collect({
+            case r: MatcherResult => r
+          })
+
+          failure.size shouldBe 1
+          result.size shouldBe 1
+
+          lockDao.getCurrentLocks shouldBe empty
+          lockDao.history should have size 1
         }
       }
     }
