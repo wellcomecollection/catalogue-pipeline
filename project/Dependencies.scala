@@ -4,9 +4,9 @@ object WellcomeDependencies {
   lazy val versions = new {
     val fixtures   = "1.0.0"
     val json       = "1.1.1"
-    val messaging  = "5.3.0"
-    val monitoring = "2.2.0"
-    val storage    = "6.1.0"
+    val messaging  = "5.3.1"
+    val monitoring = "2.3.0"
+    val storage    = "6.1.3"
     val typesafe   = "1.0.0"
 
     val sierraStreamsSource = "0.4"
