@@ -11,7 +11,7 @@ import uk.ac.wellcome.storage.vhs.{EmptyMetadata, Entry}
 
 import scala.util.Try
 
-class RecordReceiver[Destination](bigMessageSender: MessageSender[Destination],
+class RecordReceiver[Destination](messageSender: BigMessageSender[Destination, TransformedBaseWork],
                                   objectStore: ObjectStore[SierraTransformable])
     extends Logging {
 
@@ -25,7 +25,7 @@ class RecordReceiver[Destination](bigMessageSender: MessageSender[Destination],
       entry <- fromJson[Entry[String, EmptyMetadata]](message.body)
       transformable <- objectStore.get(entry.location)
       work <- transformToWork(transformable, entry.version)
-      publishResult <- bigMessageSender.sendT(work)
+      publishResult <- bigMessagmessageSendereSender.sendT(work)
       _ = debug(
         s"Published work: ${work.sourceIdentifier} with message $publishResult")
     } yield ()
