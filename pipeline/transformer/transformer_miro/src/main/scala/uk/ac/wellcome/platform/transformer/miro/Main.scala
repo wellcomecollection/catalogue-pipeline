@@ -5,12 +5,9 @@ import akka.stream.ActorMaterializer
 import com.typesafe.config.Config
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.typesafe.{MessagingBuilder, SQSBuilder}
+import uk.ac.wellcome.messaging.typesafe.{BigMessagingBuilder, SQSBuilder}
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
-import uk.ac.wellcome.platform.transformer.miro.services.{
-  MiroTransformerWorkerService,
-  MiroVHSRecordReceiver
-}
+import uk.ac.wellcome.platform.transformer.miro.services.{MiroTransformerWorkerService, MiroVHSRecordReceiver}
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 import uk.ac.wellcome.storage.streaming.CodecInstances._
 import uk.ac.wellcome.storage.typesafe.S3Builder
@@ -29,8 +26,8 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildActorMaterializer()
 
     val vhsRecordReceiver = new MiroVHSRecordReceiver(
-      messageWriter =
-        MessagingBuilder.buildMessageWriter[TransformedBaseWork](config),
+      messageSender =
+        BigMessagingBuilder.buildBigMessageSender[TransformedBaseWork](config),
       objectStore = S3Builder.buildObjectStore[MiroRecord](config)
     )
 

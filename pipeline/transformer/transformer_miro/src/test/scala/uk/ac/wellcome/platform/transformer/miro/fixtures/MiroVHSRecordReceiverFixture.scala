@@ -1,61 +1,50 @@
 package uk.ac.wellcome.platform.transformer.miro.fixtures
 
+import org.scalatest.EitherValues
 import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.messaging.fixtures.SQS
+import uk.ac.wellcome.messaging.memory.MemoryBigMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.fixtures.Messaging
-import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
 import uk.ac.wellcome.platform.transformer.miro.services.MiroVHSRecordReceiver
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 import uk.ac.wellcome.storage.ObjectStore
-import uk.ac.wellcome.storage.fixtures.S3.Bucket
-import uk.ac.wellcome.fixtures.TestWith
+import uk.ac.wellcome.storage.memory.MemoryObjectStore
+import uk.ac.wellcome.storage.streaming.CodecInstances._
+import uk.ac.wellcome.storage.vhs.Entry
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.Random
 
-trait MiroVHSRecordReceiverFixture extends Messaging with MiroRecordGenerators {
-  def withMiroVHSRecordReceiver[R](topic: Topic, bucket: Bucket)(
-    testWith: TestWith[MiroVHSRecordReceiver, R])(
-    implicit objectStore: ObjectStore[MiroRecord]): R =
-    withMessageWriter[TransformedBaseWork, R](
-      bucket,
-      topic,
-      writerSnsClient = snsClient) { messageWriter =>
-      val recordReceiver = new MiroVHSRecordReceiver(
-        objectStore = objectStore,
-        messageWriter = messageWriter
-      )
+trait MiroVHSRecordReceiverFixture extends SQS with MiroRecordGenerators with EitherValues {
+  type MiroRecordStore = MemoryObjectStore[MiroRecord]
+  type WorkSender = MemoryBigMessageSender[TransformedBaseWork]
 
-      testWith(recordReceiver)
-    }
+  def createRecordReceiver(
+    store: MiroRecordStore = new MiroRecordStore(),
+    sender: WorkSender = new WorkSender()
+  ): MiroVHSRecordReceiver[String] =
+    new MiroVHSRecordReceiver(store, sender)
 
   def createMiroVHSRecordNotificationMessageWith(
+    store: MiroRecordStore,
     miroRecord: MiroRecord = createMiroRecord,
-    bucket: Bucket,
     version: Int = 1
   ): NotificationMessage = {
-    val hybridRecord = createHybridRecordWith(
-      miroRecord,
+    val location = store.put(
+      namespace = Random.alphanumeric.take(8) mkString
+    )(
+      input = miroRecord
+    ).right.value
+
+    val entry = Entry(
+      id = Random.alphanumeric.take(8) mkString,
       version = version,
-      bucket = bucket
+      location = location,
+      metadata = MiroMetadata(isClearedForCatalogueAPI = true)
     )
 
-    val miroMetadata = MiroMetadata(isClearedForCatalogueAPI = true)
-
-    // Yes creating the JSON here manually is a bit icky, but it means this is
-    // a fixed, easy-to-read output, and saves us mucking around with Circe encoders.
-    createNotificationMessageWith(
-      s"""
-         |{
-         |  "id": "${hybridRecord.id}",
-         |  "location": ${toJson(hybridRecord.location).get},
-         |  "version": ${hybridRecord.version},
-         |  "isClearedForCatalogueAPI": ${toJson(
-           miroMetadata.isClearedForCatalogueAPI).get}
-         |}
-       """.stripMargin
-    )
+    createNotificationMessageWith(entry)
   }
 }

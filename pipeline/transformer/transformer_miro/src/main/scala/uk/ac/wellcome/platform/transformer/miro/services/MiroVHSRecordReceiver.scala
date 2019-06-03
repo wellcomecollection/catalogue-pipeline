@@ -2,22 +2,19 @@ package uk.ac.wellcome.platform.transformer.miro.services
 
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.json.exceptions.JsonDecodingError
-import uk.ac.wellcome.messaging.message.{MessageNotification, MessageWriter}
+import uk.ac.wellcome.messaging.BigMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
-import uk.ac.wellcome.platform.transformer.miro.exceptions.MiroTransformerException
 import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 import uk.ac.wellcome.storage.ObjectStore
 import uk.ac.wellcome.storage.vhs.Entry
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
-class MiroVHSRecordReceiver(objectStore: ObjectStore[MiroRecord],
-                            messageWriter: MessageWriter[TransformedBaseWork])(
-  implicit ec: ExecutionContext)
+class MiroVHSRecordReceiver[Destination](
+  objectStore: ObjectStore[MiroRecord],
+  messageSender: BigMessageSender[Destination, TransformedBaseWork])
     extends Logging {
 
   type MiroEntry = Entry[String, MiroMetadata]
@@ -26,39 +23,19 @@ class MiroVHSRecordReceiver(objectStore: ObjectStore[MiroRecord],
                      transformToWork: (
                        MiroRecord,
                        MiroMetadata,
-                       Int) => Try[TransformedBaseWork]): Future[Unit] = {
-    debug(s"Starting to process message $message")
-
-    val futureNotification = for {
-      entry <- Future.fromTry {
-        fromJson[MiroEntry](message.body)
-      }
+                       Int) => Try[TransformedBaseWork]): Try[Unit] =
+    for {
+      entry <- fromJson[MiroEntry](message.body)
       miroRecord <- getTransformable(entry)
-      work <- Future.fromTry(
-        transformToWork(miroRecord, entry.metadata, entry.version)
-      )
-      notification <- publishMessage(work)
+      work <- transformToWork(miroRecord, entry.metadata, entry.version)
+      notification <- messageSender.sendT(work)
       _ = debug(
         s"Published work: ${work.sourceIdentifier} with message $notification")
-    } yield notification
+    } yield ()
 
-    futureNotification
-      .recover {
-        case e: JsonDecodingError =>
-          info("Recoverable failure parsing Entry/MiroMetadata from JSON", e)
-          throw MiroTransformerException(e)
-      }
-      .map(_ => ())
-
-  }
-
-  private def getTransformable(entry: MiroEntry): Future[MiroRecord] =
+  private def getTransformable(entry: MiroEntry): Try[MiroRecord] =
     objectStore.get(entry.location) match {
-      case Right(record)      => Future.successful(record)
-      case Left(storageError) => Future.failed(storageError.e)
+      case Right(record)      => Success(record)
+      case Left(storageError) => Failure(storageError.e)
     }
-
-  private def publishMessage(
-    work: TransformedBaseWork): Future[MessageNotification] =
-    messageWriter.write(work)
 }
