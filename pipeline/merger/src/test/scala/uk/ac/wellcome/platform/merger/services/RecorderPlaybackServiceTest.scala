@@ -101,9 +101,7 @@ class RecorderPlaybackServiceTest
     val service = new RecorderPlaybackService(vhs)
 
     val workIdentifiers = works
-      .map { w =>
-        WorkIdentifier(w)
-      }
+      .map { w => WorkIdentifier(w) }
 
     service.fetchAllWorks(workIdentifiers)
   }

@@ -50,7 +50,7 @@ object WellcomeDependencies {
   val messagingTypesafeLibrary: Seq[ModuleID] = messagingLibrary ++ library(
     name = "messaging_typesafe",
     version = versions.messaging
-  ) ++ monitoringLibrary ++ storageLibrary ++ typesafeLibrary
+  ) ++ monitoringLibrary ++ storageLibrary ++ storageTypesafeLibrary ++ typesafeLibrary
 
   val sierraStreamsSourceLibrary: Seq[ModuleID] = Seq(
     "uk.ac.wellcome" %% "sierra-streams-source" % versions.sierraStreamsSource
@@ -209,7 +209,8 @@ object CatalogueDependencies {
   val goobiReaderDependencies: Seq[ModuleID] =
     ExternalDependencies.mockitoDependencies ++
     WellcomeDependencies.jsonLibrary ++
-    WellcomeDependencies.messagingTypesafeLibrary
+    WellcomeDependencies.messagingTypesafeLibrary ++
+    WellcomeDependencies.storageTypesafeLibrary
 
   val idminterDependencies: Seq[ModuleID] =
     ExternalDependencies.mockitoDependencies ++
@@ -233,7 +234,8 @@ object CatalogueDependencies {
   val miroTransformerDependencies: Seq[ModuleID] =
      ExternalDependencies.apacheCommonsDependencies ++
      ExternalDependencies.mockitoDependencies ++
-     WellcomeDependencies.messagingTypesafeLibrary
+     WellcomeDependencies.messagingTypesafeLibrary ++
+     WellcomeDependencies.storageTypesafeLibrary
 
   val recorderDependencies: Seq[ModuleID] =
     ExternalDependencies.mockitoDependencies ++
@@ -241,23 +243,37 @@ object CatalogueDependencies {
 
   val reindexWorkerDependencies: Seq[ModuleID] =
     ExternalDependencies.mockitoDependencies ++
-    WellcomeDependencies.messagingTypesafeLibrary
+    WellcomeDependencies.messagingTypesafeLibrary ++
+    WellcomeDependencies.storageTypesafeLibrary
 
   val sierraTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies ++
     ExternalDependencies.mockitoDependencies ++
-    WellcomeDependencies.messagingTypesafeLibrary
+    WellcomeDependencies.messagingTypesafeLibrary ++
+    WellcomeDependencies.storageTypesafeLibrary
 
   // Sierra adapter stack
 
   val sierraAdapterCommonDependencies: Seq[ModuleID] =
-    ExternalDependencies.mockitoDependencies ++
-    WellcomeDependencies.messagingTypesafeLibrary
+    WellcomeDependencies.storageLibrary
 
   val sierraReaderDependencies: Seq[ModuleID] =
     WellcomeDependencies.sierraStreamsSourceLibrary ++
     ExternalDependencies.circeOpticsDependencies ++
-    WellcomeDependencies.messagingTypesafeLibrary
+    WellcomeDependencies.messagingTypesafeLibrary ++
+    WellcomeDependencies.storageTypesafeLibrary
+
+  val sierraBibMergerDependencies: Seq[ModuleID] =
+    WellcomeDependencies.messagingTypesafeLibrary ++
+    WellcomeDependencies.storageTypesafeLibrary
+
+  val sierraItemMergerDependencies: Seq[ModuleID] =
+    WellcomeDependencies.messagingTypesafeLibrary ++
+    WellcomeDependencies.storageTypesafeLibrary
+
+  val sierraItemsToDynamoDependencies: Seq[ModuleID] =
+    WellcomeDependencies.messagingTypesafeLibrary ++
+    WellcomeDependencies.storageTypesafeLibrary
 
   // Snapshots stack
 

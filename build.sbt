@@ -112,7 +112,7 @@ lazy val reindex_worker = setupProject(project, "reindexer/reindex_worker",
 
 lazy val transformer_miro = setupProject(project,
   folder = "pipeline/transformer/transformer_miro",
-  localDependencies = Seq(internal_model),
+  localDependencies = Seq(internal_model, big_messaging_typesafe),
   externalDependencies = CatalogueDependencies.miroTransformerDependencies
 )
 
@@ -135,16 +135,19 @@ lazy val sierra_reader = setupProject(project, "sierra_adapter/sierra_reader",
 )
 
 lazy val sierra_bib_merger = setupProject(project, "sierra_adapter/sierra_bib_merger",
-  localDependencies = Seq(sierra_adapter_common)
+  localDependencies = Seq(sierra_adapter_common),
+  externalDependencies = CatalogueDependencies.sierraBibMergerDependencies
 )
 
 lazy val sierra_item_merger = setupProject(project, "sierra_adapter/sierra_item_merger",
-  localDependencies = Seq(sierra_adapter_common)
+  localDependencies = Seq(sierra_adapter_common),
+  externalDependencies = CatalogueDependencies.sierraItemMergerDependencies
 )
 
 lazy val sierra_items_to_dynamo = setupProject(project,
   folder = "sierra_adapter/sierra_items_to_dynamo",
-  localDependencies = Seq(sierra_adapter_common)
+  localDependencies = Seq(sierra_adapter_common),
+  externalDependencies = CatalogueDependencies.sierraItemsToDynamoDependencies
 )
 
 // Snapshots

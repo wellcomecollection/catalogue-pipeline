@@ -30,6 +30,6 @@ trait RecorderVhsFixture extends EitherValues with Matchers {
         ifNotExisting = (work, EmptyMetadata()))((_, _) =>
         throw new RuntimeException("Not possible, VHS is empty!"))
 
-      result.right.value shouldBe Unit
+      result shouldBe a[Right[_, _]]
     }
 }
