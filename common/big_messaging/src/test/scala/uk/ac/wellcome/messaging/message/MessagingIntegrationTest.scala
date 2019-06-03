@@ -2,17 +2,20 @@ package uk.ac.wellcome.messaging.message
 
 import java.util.concurrent.ConcurrentLinkedDeque
 
+import com.amazonaws.services.cloudwatch.model.StandardUnit
 import com.amazonaws.services.sns.AmazonSNS
+import com.amazonaws.services.sns.model.{SubscribeRequest, SubscribeResult, UnsubscribeRequest}
 import io.circe.Encoder
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.{Assertion, FunSpec, Matchers}
-import uk.ac.wellcome.fixtures.TestWith
+import uk.ac.wellcome.fixtures.{Fixture, TestWith, fixture}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.{BigMessageSender, MessageSender}
 import uk.ac.wellcome.messaging.fixtures.Messaging
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.sns.{SNSConfig, SNSMessageSender}
+import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 import uk.ac.wellcome.storage.{ObjectStore, StorageBackend}
 import uk.ac.wellcome.storage.fixtures.S3.Bucket
 import uk.ac.wellcome.storage.streaming.Codec
@@ -68,6 +71,22 @@ class MessagingIntegrationTest
         }
     }
 
+  def withLocalStackSubscription[R](queue: Queue,
+                                    topic: Topic): Fixture[SubscribeResult, R] =
+    fixture[SubscribeResult, R](
+      create = {
+        val subRequest = new SubscribeRequest(topic.arn, "sqs", queue.arn)
+        info(s"Subscribing queue ${queue.arn} to topic ${topic.arn}")
+
+        localStackSnsClient.subscribe(subRequest)
+      },
+      destroy = { subscribeResult =>
+        val unsubscribeRequest =
+          new UnsubscribeRequest(subscribeResult.getSubscriptionArn)
+        localStackSnsClient.unsubscribe(unsubscribeRequest)
+      }
+    )
+
   private def withLocalStackBigMessageSenderMessageStream[R](
     testWith: TestWith[(MessageStream[ExampleObject],
                         BigMessageSender[SNSConfig, ExampleObject]),
@@ -119,12 +138,11 @@ class MessagingIntegrationTest
   def withLocalStackMessageStreamFixtures[R](
     testWith: TestWith[(Queue, MessageStream[ExampleObject]), R]): R =
     withActorSystem { implicit actorSystem =>
-      withMetricsSender() { metricsSender =>
-        withLocalStackSqsQueue { queue =>
-          withMessageStream[ExampleObject, R](queue, metricsSender) {
-            messageStream =>
-              testWith((queue, messageStream))
-          }
+      val metrics = new MemoryMetrics[StandardUnit]()
+      withLocalStackSqsQueue { queue =>
+        withMessageStream[ExampleObject, R](queue, metrics) {
+          messageStream =>
+            testWith((queue, messageStream))
         }
       }
     }

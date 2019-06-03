@@ -2,49 +2,28 @@ package uk.ac.wellcome.messaging.fixtures
 
 import akka.actor.ActorSystem
 import com.amazonaws.services.cloudwatch.model.StandardUnit
-import com.amazonaws.services.sns.model.{SubscribeRequest, SubscribeResult, UnsubscribeRequest}
 import com.amazonaws.services.sqs.model.SendMessageResult
 import io.circe.{Decoder, Encoder}
 import org.scalatest.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
-import uk.ac.wellcome.fixtures.{Fixture, TestWith, fixture}
+import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.{Queue, QueuePair}
 import uk.ac.wellcome.messaging.message._
-import uk.ac.wellcome.monitoring.fixtures.MetricsSenderFixture
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 import uk.ac.wellcome.storage.ObjectStore
 import uk.ac.wellcome.storage.fixtures.S3
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.Success
 
 trait Messaging
     extends Akka
-    with MetricsSenderFixture
     with SQS
     with SNS
     with S3
     with Matchers {
 
   case class ExampleObject(name: String)
-
-  def withLocalStackSubscription[R](queue: Queue,
-                                    topic: Topic): Fixture[SubscribeResult, R] =
-    fixture[SubscribeResult, R](
-      create = {
-        val subRequest = new SubscribeRequest(topic.arn, "sqs", queue.arn)
-        info(s"Subscribing queue ${queue.arn} to topic ${topic.arn}")
-
-        localStackSnsClient.subscribe(subRequest)
-      },
-      destroy = { subscribeResult =>
-        val unsubscribeRequest =
-          new UnsubscribeRequest(subscribeResult.getSubscriptionArn)
-        localStackSnsClient.unsubscribe(unsubscribeRequest)
-      }
-    )
 
   def withMessageStream[T, R](queue: SQS.Queue, metrics: MemoryMetrics[StandardUnit])(
     testWith: TestWith[MessageStream[T], R])(
@@ -74,23 +53,6 @@ trait Messaging
           }
       }
     }
-
-  /** Given a topic ARN which has received notifications containing pointers
-    * to objects in S3, return the unpacked objects.
-    */
-  def getMessages[T](topic: Topic)(implicit decoder: Decoder[T]): List[T] =
-    listMessagesReceivedFromSNS(topic).map { messageInfo =>
-      fromJson[MessageNotification](messageInfo.message) match {
-        case Success(RemoteNotification(location)) =>
-          getObjectFromS3[T](location)
-        case Success(InlineNotification(jsonString)) =>
-          fromJson[T](jsonString).get
-        case _ =>
-          throw new RuntimeException(
-            s"Unrecognised message: ${messageInfo.message}"
-          )
-      }
-    }.toList
 
   /** Send a MessageNotification to SQS.
     *
