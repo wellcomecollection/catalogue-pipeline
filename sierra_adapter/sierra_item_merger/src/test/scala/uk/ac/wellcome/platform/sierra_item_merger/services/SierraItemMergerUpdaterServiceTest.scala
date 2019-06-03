@@ -3,7 +3,6 @@ package uk.ac.wellcome.platform.sierra_item_merger.services
 import org.scalatest.FunSpec
 import org.scalatest.concurrent.ScalaFutures
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.models.transformable.SierraTransformable
 import uk.ac.wellcome.models.transformable.SierraTransformable._
 import uk.ac.wellcome.models.transformable.sierra.test.utils.SierraGenerators
@@ -17,7 +16,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class SierraItemMergerUpdaterServiceTest
     extends FunSpec
     with ScalaFutures
-    with SQS
     with SierraAdapterHelpers
     with SierraGenerators
     with SierraItemMergerFixtures {
