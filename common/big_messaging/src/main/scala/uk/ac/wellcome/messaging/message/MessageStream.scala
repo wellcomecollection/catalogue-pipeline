@@ -3,22 +3,23 @@ package uk.ac.wellcome.messaging.message
 import akka.actor.ActorSystem
 import akka.stream.scaladsl.Source
 import akka.{Done, NotUsed}
+import com.amazonaws.services.cloudwatch.model.StandardUnit
 import com.amazonaws.services.sqs.AmazonSQSAsync
 import com.amazonaws.services.sqs.model.Message
 import io.circe.Decoder
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.sqs.{SQSConfig, SQSStream}
-import uk.ac.wellcome.monitoring.MetricsSender
-import uk.ac.wellcome.storage.ObjectStore
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.BigMessageReader
+import uk.ac.wellcome.messaging.sns.NotificationMessage
+import uk.ac.wellcome.messaging.sqs.{SQSConfig, SQSStream}
+import uk.ac.wellcome.monitoring.Metrics
+import uk.ac.wellcome.storage.ObjectStore
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
 class MessageStream[T](sqsClient: AmazonSQSAsync,
                        sqsConfig: SQSConfig,
-                       metricsSender: MetricsSender)(
+                       metrics: Metrics[Future, StandardUnit])(
   implicit
   actorSystem: ActorSystem,
   decoderT: Decoder[T],
@@ -33,7 +34,7 @@ class MessageStream[T](sqsClient: AmazonSQSAsync,
   private val sqsStream = new SQSStream[NotificationMessage](
     sqsClient = sqsClient,
     sqsConfig = sqsConfig,
-    metricsSender = metricsSender
+    metricsSender = metrics
   )
 
   def runStream(

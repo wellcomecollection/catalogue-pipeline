@@ -1,22 +1,19 @@
 package uk.ac.wellcome.messaging.fixtures
 
 import akka.actor.ActorSystem
-import com.amazonaws.services.sns.model.{
-  SubscribeRequest,
-  SubscribeResult,
-  UnsubscribeRequest
-}
+import com.amazonaws.services.cloudwatch.model.StandardUnit
+import com.amazonaws.services.sns.model.{SubscribeRequest, SubscribeResult, UnsubscribeRequest}
 import com.amazonaws.services.sqs.model.SendMessageResult
 import io.circe.{Decoder, Encoder}
 import org.scalatest.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
-import uk.ac.wellcome.fixtures.{fixture, Fixture, TestWith}
+import uk.ac.wellcome.fixtures.{Fixture, TestWith, fixture}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.{Queue, QueuePair}
 import uk.ac.wellcome.messaging.message._
-import uk.ac.wellcome.monitoring.MetricsSender
 import uk.ac.wellcome.monitoring.fixtures.MetricsSenderFixture
+import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 import uk.ac.wellcome.storage.ObjectStore
 import uk.ac.wellcome.storage.fixtures.S3
 
@@ -49,7 +46,7 @@ trait Messaging
       }
     )
 
-  def withMessageStream[T, R](queue: SQS.Queue, metricsSender: MetricsSender)(
+  def withMessageStream[T, R](queue: SQS.Queue, metrics: MemoryMetrics[StandardUnit])(
     testWith: TestWith[MessageStream[T], R])(
     implicit
     actorSystem: ActorSystem,
@@ -58,23 +55,22 @@ trait Messaging
     val stream = new MessageStream[T](
       sqsClient = asyncSqsClient,
       sqsConfig = createSQSConfigWith(queue),
-      metricsSender = metricsSender
+      metrics = metrics
     )
     testWith(stream)
   }
 
   def withMessageStreamFixtures[T, R](
-    testWith: TestWith[(MessageStream[T], QueuePair, MetricsSender), R]
+    testWith: TestWith[(MessageStream[T], QueuePair, MemoryMetrics[StandardUnit]), R]
   )(implicit
     decoderT: Decoder[T],
     objectStore: ObjectStore[T]): R =
     withActorSystem { implicit actorSystem =>
       withLocalSqsQueueAndDlq {
-        case queuePair @ QueuePair(queue, _) =>
-          withMockMetricsSender { metricsSender =>
-            withMessageStream[T, R](queue, metricsSender) { stream =>
-              testWith((stream, queuePair, metricsSender))
-            }
+        case queuePair@QueuePair(queue, _) =>
+          val metrics = new MemoryMetrics[StandardUnit]()
+          withMessageStream[T, R](queue, metrics) { stream =>
+            testWith((stream, queuePair, metrics))
           }
       }
     }

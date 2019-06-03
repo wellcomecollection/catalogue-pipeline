@@ -35,7 +35,7 @@ class MiroVHSRecordReceiverTest
                              version: Int) =
     Try(throw TestException("BOOOM!"))
 
-  it("receives a message and sends it to SNS client") {
+  it("receives a message and sends it onwards") {
     val store = new MiroRecordStore()
     val workMessageSender = new WorkSender()
 

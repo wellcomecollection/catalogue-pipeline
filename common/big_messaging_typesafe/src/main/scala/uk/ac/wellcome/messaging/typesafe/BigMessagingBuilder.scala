@@ -33,7 +33,7 @@ object BigMessagingBuilder {
       sqsClient = SQSBuilder.buildSQSAsyncClient(config),
       sqsConfig =
         SQSBuilder.buildSQSConfig(config, namespace = "message.reader"),
-      metricsSender = MetricsBuilder.buildMetricsSender(config)
+      metrics = MetricsBuilder.buildMetricsSender(config)
     )
   }
 
