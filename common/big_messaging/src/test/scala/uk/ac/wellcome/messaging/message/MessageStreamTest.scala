@@ -3,9 +3,7 @@ package uk.ac.wellcome.messaging.message
 import java.util.concurrent.ConcurrentLinkedQueue
 
 import akka.stream.scaladsl.Flow
-import org.mockito.Matchers.{endsWith, eq => equalTo}
-import org.mockito.Mockito.{never, times, verify}
-import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
+import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatest.{Assertion, FunSpec, Matchers}
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.json.JsonUtil._
@@ -25,6 +23,7 @@ class MessageStreamTest
     with Messaging
     with Akka
     with ScalaFutures
+    with Eventually
     with IntegrationPatience
     with MetricsSenderFixture {
 
@@ -121,7 +120,7 @@ class MessageStreamTest
 
   it("increments *_ProcessMessage metric when successful") {
     withMessageStreamFixtures[ExampleObject, Future[Unit]] {
-      case (messageStream, QueuePair(queue, _), metricsSender) =>
+      case (messageStream, QueuePair(queue, _), metrics) =>
         val exampleObject = ExampleObject("some value")
         sendInlineNotification(queue = queue, exampleObject = exampleObject)
 
@@ -131,15 +130,14 @@ class MessageStreamTest
           process = process(received))
 
         eventually {
-          verify(metricsSender, times(1))
-            .incrementCount(equalTo("test-stream_ProcessMessage_success"))
+          metrics.incrementedCounts shouldBe Seq("test-stream_ProcessMessage_success")
         }
     }
   }
 
   it("fails gracefully when NotificationMessage cannot be deserialised") {
     withMessageStreamFixtures[ExampleObject, Assertion] {
-      case (messageStream, QueuePair(queue, dlq), metricsSender) =>
+      case (messageStream, QueuePair(queue, dlq), metrics) =>
         sendInvalidJSONto(queue)
 
         val received = new ConcurrentLinkedQueue[ExampleObject]()
@@ -149,9 +147,9 @@ class MessageStreamTest
           process = process(received))
 
         eventually {
-          verify(metricsSender, never())
-            .incrementCount(endsWith("_ProcessMessage_failure"))
-          received shouldBe empty
+          metrics.incrementedCounts.foreach { entry =>
+            entry should not endWith "_ProcessMessage_failure"
+          }
 
           assertQueueEmpty(queue)
           assertQueueHasSize(dlq, size = 1)
@@ -161,7 +159,7 @@ class MessageStreamTest
 
   it("does not fail gracefully when the s3 object cannot be retrieved") {
     withMessageStreamFixtures[ExampleObject, Assertion] {
-      case (messageStream, QueuePair(queue, dlq), metricsSender) =>
+      case (messageStream, QueuePair(queue, dlq), metrics) =>
         val streamName = "test-stream"
 
         // Do NOT put S3 object here
@@ -182,8 +180,11 @@ class MessageStreamTest
           process = process(received))
 
         eventually {
-          verify(metricsSender, times(3))
-            .incrementCount(metricName = "test-stream_ProcessMessage_failure")
+          metrics.incrementedCounts shouldBe Seq(
+            "test-stream_ProcessMessage_failure",
+            "test-stream_ProcessMessage_failure",
+            "test-stream_ProcessMessage_failure"
+          )
 
           received shouldBe empty
 
@@ -224,7 +225,7 @@ class MessageStreamTest
   describe("runStream") {
     it("processes messages off a queue") {
       withMessageStreamFixtures[ExampleObject, Future[Unit]] {
-        case (messageStream, QueuePair(queue, dlq), metricsSender) =>
+        case (messageStream, QueuePair(queue, dlq), metrics) =>
           val exampleObject1 = ExampleObject("some value 1")
           sendInlineNotification(queue = queue, exampleObject = exampleObject1)
           val exampleObject2 = ExampleObject("some value 2")
@@ -242,21 +243,24 @@ class MessageStreamTest
               }))
 
           eventually {
+            metrics.incrementedCounts shouldBe Seq(
+              "test-stream_ProcessMessage_success",
+              "test-stream_ProcessMessage_success"
+            )
+
             received should contain theSameElementsAs List(
               exampleObject1,
               exampleObject2)
 
             assertQueueEmpty(queue)
             assertQueueEmpty(dlq)
-            verify(metricsSender, times(2))
-              .incrementCount("test-stream_ProcessMessage_success")
           }
       }
     }
 
     it("does not delete failed messages and sends a failure metric") {
       withMessageStreamFixtures[ExampleObject, Future[Unit]] {
-        case (messageStream, QueuePair(queue, dlq), metricsSender) =>
+        case (messageStream, QueuePair(queue, dlq), metrics) =>
           val exampleObject = ExampleObject("some value")
           sendInlineNotification(queue = queue, exampleObject = exampleObject)
 
@@ -267,11 +271,14 @@ class MessageStreamTest
                 Flow.fromFunction(_ => throw new RuntimeException("BOOOM!"))))
 
           eventually {
+            metrics.incrementedCounts shouldBe Seq(
+              "test-stream_ProcessMessage_failure",
+              "test-stream_ProcessMessage_failure",
+              "test-stream_ProcessMessage_failure"
+            )
+
             assertQueueEmpty(queue)
             assertQueueHasSize(dlq, 1)
-
-            verify(metricsSender, times(3))
-              .incrementCount("test-stream_ProcessMessage_failure")
           }
       }
     }
