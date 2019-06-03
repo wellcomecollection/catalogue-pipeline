@@ -30,15 +30,17 @@ object Main extends WellcomeTypesafeApp {
 
     val s3ObjectStore = new ObjectStore[InputStream] {
       override implicit val codec: Codec[InputStream] = streamCodec
-      override implicit val storageBackend: StorageBackend = new S3StorageBackend(
-        s3Client = S3Builder.buildS3Client(config)
-      )
+      override implicit val storageBackend: StorageBackend =
+        new S3StorageBackend(
+          s3Client = S3Builder.buildS3Client(config)
+        )
     }
 
     new GoobiReaderWorkerService(
       s3ObjectStore = s3ObjectStore,
       sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
-      vhs = VHSBuilder.buildVHS[String, InputStream, GoobiRecordMetadata](config)
+      vhs =
+        VHSBuilder.buildVHS[String, InputStream, GoobiRecordMetadata](config)
     )
   }
 }

@@ -7,7 +7,11 @@ import grizzled.slf4j.Logging
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs._
-import uk.ac.wellcome.platform.goobi_reader.models.{GoobiRecordMetadata, S3Event, S3Record}
+import uk.ac.wellcome.platform.goobi_reader.models.{
+  GoobiRecordMetadata,
+  S3Event,
+  S3Record
+}
 import uk.ac.wellcome.storage.vhs.VersionedHybridStore
 import uk.ac.wellcome.storage.{ObjectStore, StorageError}
 import uk.ac.wellcome.typesafe.Runnable
@@ -29,7 +33,8 @@ class GoobiReaderWorkerService(
       process = processMessage
     )
 
-  private def processMessage(snsNotification: NotificationMessage): Future[Unit] = {
+  private def processMessage(
+    snsNotification: NotificationMessage): Future[Unit] = {
     debug(s"Received notification: $snsNotification")
     val eventuallyProcessedMessages = for {
       // AWS events are URL encoded, which means that the object key is URL encoded
@@ -40,7 +45,7 @@ class GoobiReaderWorkerService(
       _ <- Future.sequence(
         eventNotification.Records.map { r =>
           updateRecord(r) match {
-            case Right(value) => Future.successful(value)
+            case Right(value)       => Future.successful(value)
             case Left(storageError) => Future.failed(storageError.e)
           }
         }
@@ -53,7 +58,8 @@ class GoobiReaderWorkerService(
     eventuallyProcessedMessages
   }
 
-  private def updateRecord(record: S3Record): Either[StorageError, vhs.VHSEntry] = {
+  private def updateRecord(
+    record: S3Record): Either[StorageError, vhs.VHSEntry] = {
     val objectLocation = record.s3.objectLocation
     val id = objectLocation.key.replaceAll(".xml", "")
     val updateEventTime = record.eventTime

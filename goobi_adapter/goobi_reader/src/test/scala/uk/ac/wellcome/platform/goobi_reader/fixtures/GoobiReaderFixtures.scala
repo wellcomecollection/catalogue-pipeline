@@ -13,7 +13,11 @@ import uk.ac.wellcome.monitoring.MetricsSender
 import uk.ac.wellcome.platform.goobi_reader.models.GoobiRecordMetadata
 import uk.ac.wellcome.platform.goobi_reader.services.GoobiReaderWorkerService
 import uk.ac.wellcome.storage.{KeyPrefix, KeySuffix, ObjectLocation, WriteError}
-import uk.ac.wellcome.storage.memory.{MemoryObjectStore, MemoryStorageBackend, MemoryVersionedDao}
+import uk.ac.wellcome.storage.memory.{
+  MemoryObjectStore,
+  MemoryStorageBackend,
+  MemoryVersionedDao
+}
 import uk.ac.wellcome.storage.streaming.CodecInstances._
 import uk.ac.wellcome.storage.vhs.{Entry, VersionedHybridStore}
 
@@ -81,10 +85,17 @@ trait GoobiReaderFixtures extends Matchers with SQS with EitherValues {
       keyPrefix: KeyPrefix,
       keySuffix: KeySuffix,
       userMetadata: Map[String, String]): Either[WriteError, ObjectLocation] = {
-      val location = ObjectLocation(namespace, key = keyPrefix.value + keySuffix.value)
-      storageBackend.put(
-        location, inputStream = input, metadata = Map.empty
-      ).map { _ => location }
+      val location =
+        ObjectLocation(namespace, key = keyPrefix.value + keySuffix.value)
+      storageBackend
+        .put(
+          location,
+          inputStream = input,
+          metadata = Map.empty
+        )
+        .map { _ =>
+          location
+        }
     }
   }
 
@@ -108,15 +119,18 @@ trait GoobiReaderFixtures extends Matchers with SQS with EitherValues {
     storedEntry.version shouldBe version
     storedEntry.metadata shouldBe expectedMetadata
 
-    val storedObject = store
-      .storageBackend.asInstanceOf[MemoryStorageBackend]
+    val storedObject = store.storageBackend
+      .asInstanceOf[MemoryStorageBackend]
       .storage(storedEntry.location)
 
     storedObject.s shouldBe expectedContents
   }
 
-  def withGoobiReaderWorkerService[R](s3ObjectStore: MemoryObjectStore[InputStream] = new MemoryObjectStore[InputStream]())(
-    testWith: TestWith[(QueuePair, MetricsSender, GoobiDao, GoobiStore), R]): R =
+  def withGoobiReaderWorkerService[R](
+    s3ObjectStore: MemoryObjectStore[InputStream] =
+      new MemoryObjectStore[InputStream]())(
+    testWith: TestWith[(QueuePair, MetricsSender, GoobiDao, GoobiStore), R])
+    : R =
     withActorSystem { implicit actorSystem =>
       withLocalSqsQueueAndDlq {
         case queuePair @ QueuePair(queue, dlq) =>
@@ -124,7 +138,6 @@ trait GoobiReaderFixtures extends Matchers with SQS with EitherValues {
             withSQSStream[NotificationMessage, R](
               queue = queue,
               metricsSender = mockMetricsSender) { sqsStream =>
-
               val dao = createDao
               val store = createStore
 
@@ -146,17 +159,19 @@ trait GoobiReaderFixtures extends Matchers with SQS with EitherValues {
   def stringStream(s: String): InputStream =
     stringCodec.toStream(s).right.value
 
-  def putString(
-    s3Store: MemoryObjectStore[InputStream],
-    id: String,
-    s: String): ObjectLocation = {
+  def putString(s3Store: MemoryObjectStore[InputStream],
+                id: String,
+                s: String): ObjectLocation = {
     val namespace = Random.alphanumeric.take(10) mkString
 
     val input = stringStream(s)
 
-    s3Store.put(namespace)(
-      input,
-      keySuffix = KeySuffix(s"$id.xml")
-    ).right.value
+    s3Store
+      .put(namespace)(
+        input,
+        keySuffix = KeySuffix(s"$id.xml")
+      )
+      .right
+      .value
   }
 }

@@ -16,7 +16,10 @@ import uk.ac.wellcome.storage.vhs.Entry
 
 import scala.util.Random
 
-trait MiroVHSRecordReceiverFixture extends SQS with MiroRecordGenerators with EitherValues {
+trait MiroVHSRecordReceiverFixture
+    extends SQS
+    with MiroRecordGenerators
+    with EitherValues {
   type MiroRecordStore = MemoryObjectStore[MiroRecord]
   type WorkSender = MemoryBigMessageSender[TransformedBaseWork]
 
@@ -31,11 +34,14 @@ trait MiroVHSRecordReceiverFixture extends SQS with MiroRecordGenerators with Ei
     miroRecord: MiroRecord = createMiroRecord,
     version: Int = 1
   ): NotificationMessage = {
-    val location = store.put(
-      namespace = Random.alphanumeric.take(8) mkString
-    )(
-      input = miroRecord
-    ).right.value
+    val location = store
+      .put(
+        namespace = Random.alphanumeric.take(8) mkString
+      )(
+        input = miroRecord
+      )
+      .right
+      .value
 
     val entry = Entry(
       id = Random.alphanumeric.take(8) mkString,

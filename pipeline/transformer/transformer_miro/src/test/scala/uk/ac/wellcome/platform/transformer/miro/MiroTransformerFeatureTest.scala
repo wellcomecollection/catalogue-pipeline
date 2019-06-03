@@ -82,8 +82,8 @@ class MiroTransformerFeatureTest
         createMiroVHSRecordNotificationMessageWith(
           store,
           miroRecord = createMiroRecordWith(
-            title = Some(
-              "Greenfield Sluder, Tonsillectomy..., use of guillotine"),
+            title =
+              Some("Greenfield Sluder, Tonsillectomy..., use of guillotine"),
             description = Some("Use of the guillotine"),
             copyrightCleared = Some("Y"),
             imageNumber = "L0023034",
@@ -105,7 +105,9 @@ class MiroTransformerFeatureTest
     }
   }
 
-  def withWorkerService[R](workSender: WorkSender, miroRecordStore: MiroRecordStore, queue: Queue)(
+  def withWorkerService[R](workSender: WorkSender,
+                           miroRecordStore: MiroRecordStore,
+                           queue: Queue)(
     testWith: TestWith[MiroTransformerWorkerService[String], R]): R =
     withActorSystem { implicit actorSystem =>
       withSQSStream[NotificationMessage, R](queue) { sqsStream =>

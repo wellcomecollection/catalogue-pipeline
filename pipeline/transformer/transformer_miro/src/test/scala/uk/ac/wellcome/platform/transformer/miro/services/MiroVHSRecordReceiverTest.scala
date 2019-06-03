@@ -4,7 +4,10 @@ import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.message.MessageNotification
 import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.models.work.internal.{TransformedBaseWork, UnidentifiedWork}
+import uk.ac.wellcome.models.work.internal.{
+  TransformedBaseWork,
+  UnidentifiedWork
+}
 import uk.ac.wellcome.platform.transformer.miro.fixtures.MiroVHSRecordReceiverFixture
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
@@ -40,7 +43,8 @@ class MiroVHSRecordReceiverTest
 
     val message = createMiroVHSRecordNotificationMessageWith(store)
 
-    recordReceiver.receiveMessage(message, transformToWork) shouldBe a[Success[_]]
+    recordReceiver.receiveMessage(message, transformToWork) shouldBe a[
+      Success[_]]
 
     val works = workMessageSender.getMessages[TransformedBaseWork]
     works.size should be >= 1
@@ -58,9 +62,11 @@ class MiroVHSRecordReceiverTest
 
     val recordReceiver = createRecordReceiver(store, workMessageSender)
 
-    val message = createMiroVHSRecordNotificationMessageWith(store, version = version)
+    val message =
+      createMiroVHSRecordNotificationMessageWith(store, version = version)
 
-    recordReceiver.receiveMessage(message, transformToWork) shouldBe a[Success[_]]
+    recordReceiver.receiveMessage(message, transformToWork) shouldBe a[
+      Success[_]]
 
     val works = workMessageSender.getMessages[TransformedBaseWork]
     works.size should be >= 1

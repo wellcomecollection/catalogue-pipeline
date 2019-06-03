@@ -91,7 +91,8 @@ class GoobiReaderWorkerServiceTest
       case (QueuePair(queue, _), _, dao, store) =>
         val vhs = createVhs(dao, store)
         vhs.update(id)(
-          ifNotExisting = (stringStream(contents), GoobiRecordMetadata(newerEventTime))
+          ifNotExisting =
+            (stringStream(contents), GoobiRecordMetadata(newerEventTime))
         )(
           ifExisting = (t, m) => (t, m)
         ) shouldBe a[Right[_, _]]
@@ -126,7 +127,8 @@ class GoobiReaderWorkerServiceTest
       case (QueuePair(queue, _), _, dao, store) =>
         val vhs = createVhs(dao, store)
         vhs.update(id)(
-          ifNotExisting = (stringStream(contents), GoobiRecordMetadata(olderEventTime))
+          ifNotExisting =
+            (stringStream(contents), GoobiRecordMetadata(olderEventTime))
         )(
           ifExisting = (t, m) => (t, m)
         ) shouldBe a[Right[_, _]]
@@ -154,7 +156,7 @@ class GoobiReaderWorkerServiceTest
   it("fails gracefully if Json cannot be parsed") {
     withGoobiReaderWorkerService() {
       case (QueuePair(queue, dlq), metricsSender, dao, store) =>
-      sendNotificationToSQS(
+        sendNotificationToSQS(
           queue = queue,
           body = "NotJson"
         )
@@ -187,7 +189,8 @@ class GoobiReaderWorkerServiceTest
 
   it("does not fail gracefully when there is an unexpected failure") {
     val s3Store = new MemoryObjectStore[InputStream]() {
-      override def get(objectLocation: ObjectLocation): Either[ReadError, InputStream] =
+      override def get(
+        objectLocation: ObjectLocation): Either[ReadError, InputStream] =
         Left(BackendReadError(new Throwable("BOOM!")))
     }
 
@@ -214,6 +217,8 @@ class GoobiReaderWorkerServiceTest
 
   private def assertUpdateNotSaved(store: GoobiStore, dao: GoobiDao) = {
     dao.entries shouldBe empty
-    store.storageBackend.asInstanceOf[MemoryStorageBackend].storage shouldBe empty
+    store.storageBackend
+      .asInstanceOf[MemoryStorageBackend]
+      .storage shouldBe empty
   }
 }
