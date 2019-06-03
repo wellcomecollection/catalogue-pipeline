@@ -112,7 +112,6 @@ trait GoobiReaderFixtures extends Matchers with SQS with EitherValues {
                          expectedContents: String,
                          dao: GoobiDao,
                          store: GoobiStore): Assertion = {
-    println(s"@@AWLC entries=${dao.entries}")
     val storedEntry: Entry[String, GoobiRecordMetadata] = dao.entries(id)
 
     storedEntry.id shouldBe id
