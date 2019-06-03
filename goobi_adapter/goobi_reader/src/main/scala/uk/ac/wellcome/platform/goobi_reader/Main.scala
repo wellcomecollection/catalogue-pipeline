@@ -9,9 +9,10 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.SQSBuilder
 import uk.ac.wellcome.platform.goobi_reader.models.GoobiRecordMetadata
 import uk.ac.wellcome.platform.goobi_reader.services.GoobiReaderWorkerService
+import uk.ac.wellcome.storage.{ObjectStore, StorageBackend}
+import uk.ac.wellcome.storage.dynamo._
 import uk.ac.wellcome.storage.s3.S3StorageBackend
 import uk.ac.wellcome.storage.streaming.Codec
-import uk.ac.wellcome.storage.{ObjectStore, StorageBackend}
 import uk.ac.wellcome.storage.streaming.CodecInstances._
 import uk.ac.wellcome.storage.typesafe.{S3Builder, VHSBuilder}
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp

@@ -23,8 +23,6 @@ class GoobiReaderWorkerServiceTest
     with ObjectLocationGenerators {
 
   private val id = "mets-0001"
-  private val goobiS3Prefix = "goobi"
-  private val sourceKey = s"$id.xml"
   private val contents = "muddling the machinations of morose METS"
   private val updatedContents = "Updated contents"
   private val eventTime = Instant.parse("2018-01-01T01:00:00.000Z")
@@ -132,7 +130,6 @@ class GoobiReaderWorkerServiceTest
           ifExisting = (t, m) => (t, m)
         ) shouldBe a[Right[_, _]]
 
-        val updatedContents = "an updated string"
         val location = putString(s3Store, id, updatedContents)
 
         sendNotificationToSQS(
