@@ -1,33 +1,22 @@
 package uk.ac.wellcome.platform.matcher.matcher
 
+import java.util.UUID
+
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.models.matcher.{
-  MatchedIdentifiers,
-  MatcherResult,
-  WorkIdentifier,
-  WorkNode
-}
-import uk.ac.wellcome.models.work.internal.{
-  TransformedBaseWork,
-  UnidentifiedInvisibleWork,
-  UnidentifiedWork
-}
+import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult, WorkIdentifier, WorkNode}
+import uk.ac.wellcome.models.work.internal.{TransformedBaseWork, UnidentifiedInvisibleWork, UnidentifiedWork}
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.models._
 import uk.ac.wellcome.platform.matcher.storage.WorkGraphStore
 import uk.ac.wellcome.platform.matcher.workgraph.WorkGraphUpdater
-import uk.ac.wellcome.storage.LockingService
-import uk.ac.wellcome.storage.locking.{
-  DynamoLockingService,
-  FailedLockException,
-  FailedUnlockException
-}
+import uk.ac.wellcome.storage.{LockDao, LockingService}
+import uk.ac.wellcome.storage.locking.{DynamoLockingService, FailedLockException, FailedUnlockException}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class WorkMatcher(
   workGraphStore: WorkGraphStore,
-  lockingService: LockingService[String])(implicit ec: ExecutionContext)
+  lockingService: LockingService[Set[MatchedIdentifiers], Future, LockDao[String, UUID]])(implicit ec: ExecutionContext)
     extends Logging {
 
   type FutureMatched = Future[Set[MatchedIdentifiers]]
