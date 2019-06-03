@@ -7,7 +7,7 @@ import java.time.temporal.ChronoUnit
 import org.mockito.Matchers.endsWith
 import org.mockito.Mockito.{times, verify}
 import org.scalatest.FunSpec
-import org.scalatest.concurrent.Eventually
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import uk.ac.wellcome.messaging.fixtures.SQS.{Queue, QueuePair}
 import uk.ac.wellcome.platform.goobi_reader.fixtures.GoobiReaderFixtures
 import uk.ac.wellcome.platform.goobi_reader.models.GoobiRecordMetadata
@@ -20,7 +20,8 @@ class GoobiReaderWorkerServiceTest
     extends FunSpec
     with Eventually
     with GoobiReaderFixtures
-    with ObjectLocationGenerators {
+    with ObjectLocationGenerators
+    with IntegrationPatience {
 
   private val id = "mets-0001"
   private val contents = "muddling the machinations of morose METS"
@@ -31,7 +32,7 @@ class GoobiReaderWorkerServiceTest
   val newerEventTime: Instant = eventTime.plus(1, ChronoUnit.HOURS)
 
   it("processes a notification") {
-    val s3Store = new MemoryObjectStore[InputStream]()
+    val s3Store = createStore
 
     withGoobiReaderWorkerService(s3Store) {
       case (QueuePair(queue, _), _, dao, store) =>
@@ -56,11 +57,11 @@ class GoobiReaderWorkerServiceTest
   }
 
   it("ingests an object with a space in the s3Key") {
-    val s3Store = new MemoryObjectStore[InputStream]()
+    val s3Store = createStore
 
     withGoobiReaderWorkerService(s3Store) {
       case (QueuePair(queue, _), _, dao, store) =>
-        val location = putString(s3Store, id, contents, keyPrefix = s"$id work.xml")
+        val location = putString(s3Store, id = s"$id work", contents)
 
         val encodedLocation = location.copy(
           key = java.net.URLEncoder.encode(location.key, "utf-8")
@@ -84,7 +85,7 @@ class GoobiReaderWorkerServiceTest
   }
 
   it("doesn't overwrite a newer input stream with an older input stream") {
-    val s3Store = new MemoryObjectStore[InputStream]()
+    val s3Store = createStore
 
     withGoobiReaderWorkerService(s3Store) {
       case (QueuePair(queue, _), _, dao, store) =>
@@ -119,7 +120,7 @@ class GoobiReaderWorkerServiceTest
   }
 
   it("overwrites an older input stream with an newer input stream") {
-    val s3Store = new MemoryObjectStore[InputStream]()
+    val s3Store = createStore
 
     withGoobiReaderWorkerService(s3Store) {
       case (QueuePair(queue, _), _, dao, store) =>

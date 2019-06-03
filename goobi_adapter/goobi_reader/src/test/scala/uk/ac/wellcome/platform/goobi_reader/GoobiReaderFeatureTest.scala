@@ -1,6 +1,5 @@
 package uk.ac.wellcome.platform.goobi_reader
 
-import java.io.InputStream
 import java.time.Instant
 
 import org.scalatest.concurrent.Eventually
@@ -8,8 +7,6 @@ import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.platform.goobi_reader.fixtures.GoobiReaderFixtures
 import uk.ac.wellcome.platform.goobi_reader.models.GoobiRecordMetadata
-import uk.ac.wellcome.storage.memory.MemoryObjectStore
-import uk.ac.wellcome.storage.streaming.CodecInstances._
 
 class GoobiReaderFeatureTest
     extends FunSpec
@@ -19,10 +16,10 @@ class GoobiReaderFeatureTest
   private val eventTime = Instant.parse("2018-01-01T01:00:00.000Z")
 
   it("gets an S3 notification and puts the new record in VHS") {
-    val s3Store = new MemoryObjectStore[InputStream]()
+    val s3Store = createStore
 
     withGoobiReaderWorkerService(s3Store) {
-      case (QueuePair(queue, _), metricsSender, dao, store) =>
+      case (QueuePair(queue, _), _, dao, store) =>
         val id = "mets-0001"
         val contents = "muddling the machinations of morose METS"
 

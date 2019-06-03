@@ -12,7 +12,7 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.monitoring.MetricsSender
 import uk.ac.wellcome.platform.goobi_reader.models.GoobiRecordMetadata
 import uk.ac.wellcome.platform.goobi_reader.services.GoobiReaderWorkerService
-import uk.ac.wellcome.storage.{KeyPrefix, KeySuffix, ObjectLocation}
+import uk.ac.wellcome.storage.{KeyPrefix, KeySuffix, ObjectLocation, WriteError}
 import uk.ac.wellcome.storage.memory.{MemoryObjectStore, MemoryStorageBackend, MemoryVersionedDao}
 import uk.ac.wellcome.storage.streaming.CodecInstances._
 import uk.ac.wellcome.storage.vhs.{Entry, VersionedHybridStore}
@@ -75,7 +75,18 @@ trait GoobiReaderFixtures extends Matchers with SQS with EitherValues {
   def createDao: GoobiDao =
     MemoryVersionedDao[String, Entry[String, GoobiRecordMetadata]]()
 
-  def createStore: GoobiStore = new GoobiStore()
+  def createStore: GoobiStore = new GoobiStore() {
+    override def put(namespace: String)(
+      input: InputStream,
+      keyPrefix: KeyPrefix,
+      keySuffix: KeySuffix,
+      userMetadata: Map[String, String]): Either[WriteError, ObjectLocation] = {
+      val location = ObjectLocation(namespace, key = keyPrefix.value + keySuffix.value)
+      storageBackend.put(
+        location, inputStream = input, metadata = Map.empty
+      ).map { _ => location }
+    }
+  }
 
   def createVhs(dao: GoobiDao = createDao,
                 store: GoobiStore = createStore): GoobiVhs =
@@ -90,6 +101,7 @@ trait GoobiReaderFixtures extends Matchers with SQS with EitherValues {
                          expectedContents: String,
                          dao: GoobiDao,
                          store: GoobiStore): Assertion = {
+    println(s"@@AWLC entries=${dao.entries}")
     val storedEntry: Entry[String, GoobiRecordMetadata] = dao.entries(id)
 
     storedEntry.id shouldBe id
@@ -137,15 +149,13 @@ trait GoobiReaderFixtures extends Matchers with SQS with EitherValues {
   def putString(
     s3Store: MemoryObjectStore[InputStream],
     id: String,
-    s: String,
-    keyPrefix: String = ""): ObjectLocation = {
+    s: String): ObjectLocation = {
     val namespace = Random.alphanumeric.take(10) mkString
 
     val input = stringStream(s)
 
     s3Store.put(namespace)(
       input,
-      keyPrefix = KeyPrefix(keyPrefix),
       keySuffix = KeySuffix(s"$id.xml")
     ).right.value
   }
