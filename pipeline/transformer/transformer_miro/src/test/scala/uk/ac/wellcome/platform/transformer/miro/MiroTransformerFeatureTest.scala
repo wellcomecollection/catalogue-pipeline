@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.transformer.miro
 
-import org.scalatest.concurrent.Eventually
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
@@ -17,6 +17,7 @@ class MiroTransformerFeatureTest
     extends FunSpec
     with Matchers
     with Eventually
+    with IntegrationPatience
     with MiroRecordGenerators
     with MiroTransformableWrapper
     with MiroVHSRecordReceiverFixture {

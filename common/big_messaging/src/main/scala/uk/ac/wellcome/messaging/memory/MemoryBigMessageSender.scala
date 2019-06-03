@@ -1,13 +1,15 @@
 package uk.ac.wellcome.messaging.memory
 
 import io.circe.{Decoder, Encoder}
+import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.BigMessageSender
+import uk.ac.wellcome.messaging.message.InlineNotification
 import uk.ac.wellcome.storage.ObjectStore
 import uk.ac.wellcome.storage.memory.MemoryObjectStore
 import uk.ac.wellcome.storage.streaming.Codec
 
 class MemoryBigMessageSender[T](
-  maxSize: Int = 100000,
+  maxSize: Int = Int.MaxValue,
   storeNamespace: String = "MemoryBigMessageSender",
   messageDestination: String = "MemoryBigMessageSender"
 )(
@@ -28,5 +30,8 @@ class MemoryBigMessageSender[T](
     messageSender.messages
 
   def getMessages[S]()(implicit decoder: Decoder[S]): Seq[S] =
-    messageSender.getMessages[S]()
+    messageSender
+      .getMessages[InlineNotification]()
+      .map { _.jsonString }
+      .map { fromJson[S](_).get }
 }
