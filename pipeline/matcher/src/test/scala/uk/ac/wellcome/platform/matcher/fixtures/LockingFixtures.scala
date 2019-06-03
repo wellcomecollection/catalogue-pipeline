@@ -10,15 +10,18 @@ import scala.concurrent.Future
 
 trait LockingFixtures {
   type MatcherLockDao = MemoryLockDao[String, UUID]
-  type MatcherLockingService = LockingService[Set[MatchedIdentifiers], Future, LockDao[String, UUID]]
+  type MatcherLockingService =
+    LockingService[Set[MatchedIdentifiers], Future, LockDao[String, UUID]]
 
   def createLockDao: MatcherLockDao =
     new MatcherLockDao {}
 
-  def createLockingService(dao: MatcherLockDao = createLockDao): MatcherLockingService =
+  def createLockingService(
+    dao: MatcherLockDao = createLockDao): MatcherLockingService =
     new MatcherLockingService {
       override implicit val lockDao: LockDao[String, UUID] = dao
 
-      override protected def createContextId(): lockDao.ContextId = UUID.randomUUID()
+      override protected def createContextId(): lockDao.ContextId =
+        UUID.randomUUID()
     }
 }

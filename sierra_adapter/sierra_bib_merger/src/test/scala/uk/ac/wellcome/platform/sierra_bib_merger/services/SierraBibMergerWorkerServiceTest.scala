@@ -38,12 +38,13 @@ class SierraBibMergerWorkerServiceTest
 
   private def withWorkerServiceFixtures[R](
     testWith: TestWith[(MemoryMetrics[StandardUnit], QueuePair), R]): R =
-    withLocalSqsQueueAndDlq { case queuePair @ QueuePair(queue, _) =>
-      val metrics = new MemoryMetrics[StandardUnit]()
-      val vhs = createVhs()
-      val messageSender = new MemoryMessageSender
-      withWorkerService(vhs, queue, messageSender, metrics) { _ =>
-        testWith((metrics, queuePair))
-      }
+    withLocalSqsQueueAndDlq {
+      case queuePair @ QueuePair(queue, _) =>
+        val metrics = new MemoryMetrics[StandardUnit]()
+        val vhs = createVhs()
+        val messageSender = new MemoryMessageSender
+        withWorkerService(vhs, queue, messageSender, metrics) { _ =>
+          testWith((metrics, queuePair))
+        }
     }
 }

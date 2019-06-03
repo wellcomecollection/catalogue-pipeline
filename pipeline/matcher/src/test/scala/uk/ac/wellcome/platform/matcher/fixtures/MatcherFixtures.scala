@@ -14,7 +14,10 @@ import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher
 import uk.ac.wellcome.platform.matcher.services.MatcherWorkerService
-import uk.ac.wellcome.platform.matcher.storage.{DynamoWorkNodeDao, WorkGraphStore}
+import uk.ac.wellcome.platform.matcher.storage.{
+  DynamoWorkNodeDao,
+  WorkGraphStore
+}
 import uk.ac.wellcome.storage.{LockDao, LockingService, ObjectStore}
 import uk.ac.wellcome.storage.dynamo._
 import uk.ac.wellcome.storage.fixtures.LocalDynamoDb.Table
@@ -41,15 +44,18 @@ trait MatcherFixtures
       testWith(table)
     }
 
-  def withWorkerService[R](queue: Queue, messageSender: MemoryMessageSender, graphTable: Table)(
-    testWith: TestWith[MatcherWorkerService[String], R])(
+  def withWorkerService[R](
+    queue: Queue,
+    messageSender: MemoryMessageSender,
+    graphTable: Table)(testWith: TestWith[MatcherWorkerService[String], R])(
     implicit objectStore: ObjectStore[TransformedBaseWork]): R =
-      withActorSystem { implicit actorSystem =>
-        val metrics = new MemoryMetrics[StandardUnit]()
-        withLockTable { lockTable =>
-          withWorkGraphStore(graphTable) { workGraphStore =>
-            withWorkMatcher(workGraphStore, lockTable) { workMatcher =>
-              withMessageStream[TransformedBaseWork, R](queue, metrics) { messageStream =>
+    withActorSystem { implicit actorSystem =>
+      val metrics = new MemoryMetrics[StandardUnit]()
+      withLockTable { lockTable =>
+        withWorkGraphStore(graphTable) { workGraphStore =>
+          withWorkMatcher(workGraphStore, lockTable) { workMatcher =>
+            withMessageStream[TransformedBaseWork, R](queue, metrics) {
+              messageStream =>
                 val workerService = new MatcherWorkerService(
                   messageStream = messageStream,
                   messageSender = messageSender,
@@ -59,11 +65,11 @@ trait MatcherFixtures
                 workerService.run()
 
                 testWith(workerService)
-              }
             }
           }
         }
       }
+    }
 
   def withWorkerService[R](queue: Queue, messageSender: MemoryMessageSender)(
     testWith: TestWith[MatcherWorkerService[String], R])(

@@ -32,7 +32,8 @@ class RecordReceiver[Destination](
     } yield ()
   }
 
-  private def getTransformable(entry: Entry[String, EmptyMetadata]): Try[SierraTransformable] =
+  private def getTransformable(
+    entry: Entry[String, EmptyMetadata]): Try[SierraTransformable] =
     objectStore.get(entry.location) match {
       case Right(record)      => Success(record)
       case Left(storageError) => Failure(storageError.e)

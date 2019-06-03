@@ -16,7 +16,10 @@ import uk.ac.wellcome.storage.vhs.{EmptyMetadata, Entry}
 
 import scala.util.Random
 
-trait RecordReceiverFixture extends SierraGenerators with EitherValues with SQS {
+trait RecordReceiverFixture
+    extends SierraGenerators
+    with EitherValues
+    with SQS {
   type SierraTransformableStore = MemoryObjectStore[SierraTransformable]
   type WorkSender = MemoryBigMessageSender[TransformedBaseWork]
 

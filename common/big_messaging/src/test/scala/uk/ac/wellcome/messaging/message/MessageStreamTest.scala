@@ -130,7 +130,8 @@ class MessageStreamTest
           process = process(received))
 
         eventually {
-          metrics.incrementedCounts shouldBe Seq("test-stream_ProcessMessage_success")
+          metrics.incrementedCounts shouldBe Seq(
+            "test-stream_ProcessMessage_success")
         }
     }
   }

@@ -12,7 +12,10 @@ import uk.ac.wellcome.models.matcher.MatchedIdentifiers
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher
 import uk.ac.wellcome.platform.matcher.services.MatcherWorkerService
-import uk.ac.wellcome.platform.matcher.storage.{DynamoWorkNodeDao, WorkGraphStore}
+import uk.ac.wellcome.platform.matcher.storage.{
+  DynamoWorkNodeDao,
+  WorkGraphStore
+}
 import uk.ac.wellcome.storage.locking._
 import uk.ac.wellcome.storage.typesafe.DynamoBuilder
 import uk.ac.wellcome.storage.{LockDao, LockingService}
@@ -42,15 +45,20 @@ object Main extends WellcomeTypesafeApp {
     val dynamoLockDao = new DynamoLockDao(
       client = dynamoClient,
       config = DynamoLockDaoConfig(
-        dynamoConfig = DynamoBuilder.buildDynamoConfig(config, namespace = "locking.service"),
+        dynamoConfig = DynamoBuilder
+          .buildDynamoConfig(config, namespace = "locking.service"),
         expiryTime = Duration.ofSeconds(30)
       )
     )
 
-    val lockingService = new LockingService[Set[MatchedIdentifiers], Future, LockDao[String, UUID]] {
+    val lockingService = new LockingService[
+      Set[MatchedIdentifiers],
+      Future,
+      LockDao[String, UUID]] {
       override implicit val lockDao: LockDao[String, UUID] = dynamoLockDao
 
-      override protected def createContextId(): lockDao.ContextId = UUID.randomUUID()
+      override protected def createContextId(): lockDao.ContextId =
+        UUID.randomUUID()
     }
 
     val workMatcher = new WorkMatcher(
@@ -61,7 +69,8 @@ object Main extends WellcomeTypesafeApp {
     new MatcherWorkerService(
       messageStream =
         BigMessagingBuilder.buildMessageStream[TransformedBaseWork](config),
-      messageSender = SNSBuilder.buildSNSMessageSender(config, subject = "Sent by the matcher"),
+      messageSender = SNSBuilder
+        .buildSNSMessageSender(config, subject = "Sent by the matcher"),
       workMatcher = workMatcher
     )
   }

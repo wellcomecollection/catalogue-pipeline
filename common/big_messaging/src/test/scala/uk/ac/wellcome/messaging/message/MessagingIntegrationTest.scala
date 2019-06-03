@@ -4,11 +4,15 @@ import java.util.concurrent.ConcurrentLinkedDeque
 
 import com.amazonaws.services.cloudwatch.model.StandardUnit
 import com.amazonaws.services.sns.AmazonSNS
-import com.amazonaws.services.sns.model.{SubscribeRequest, SubscribeResult, UnsubscribeRequest}
+import com.amazonaws.services.sns.model.{
+  SubscribeRequest,
+  SubscribeResult,
+  UnsubscribeRequest
+}
 import io.circe.Encoder
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.{Assertion, FunSpec, Matchers}
-import uk.ac.wellcome.fixtures.{Fixture, TestWith, fixture}
+import uk.ac.wellcome.fixtures.{fixture, Fixture, TestWith}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.{BigMessageSender, MessageSender}
 import uk.ac.wellcome.messaging.fixtures.Messaging
@@ -140,9 +144,8 @@ class MessagingIntegrationTest
     withActorSystem { implicit actorSystem =>
       val metrics = new MemoryMetrics[StandardUnit]()
       withLocalStackSqsQueue { queue =>
-        withMessageStream[ExampleObject, R](queue, metrics) {
-          messageStream =>
-            testWith((queue, messageStream))
+        withMessageStream[ExampleObject, R](queue, metrics) { messageStream =>
+          testWith((queue, messageStream))
         }
       }
     }

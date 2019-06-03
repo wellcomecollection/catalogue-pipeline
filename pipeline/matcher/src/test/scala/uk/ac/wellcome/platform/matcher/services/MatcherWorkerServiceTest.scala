@@ -6,7 +6,11 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult, WorkIdentifier}
+import uk.ac.wellcome.models.matcher.{
+  MatchedIdentifiers,
+  MatcherResult,
+  WorkIdentifier
+}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
@@ -25,7 +29,7 @@ class MatcherWorkerServiceTest
 
   it("creates a work without identifiers") {
     val messageSender = new MemoryMessageSender()
-    
+
     withLocalSqsQueue { queue =>
       withWorkerService(queue, messageSender) { _ =>
         // Work Av1 created without any matched works
@@ -261,9 +265,8 @@ class MatcherWorkerServiceTest
           version = 2
         )
 
-        val expectedMatchedWorkAv2 = MatcherResult(
-          Set(MatchedIdentifiers(
-            Set(WorkIdentifier("sierra-system-number/A", 2)))))
+        val expectedMatchedWorkAv2 = MatcherResult(Set(
+          MatchedIdentifiers(Set(WorkIdentifier("sierra-system-number/A", 2)))))
 
         processAndAssertMatchedWorkIs(
           workAv2,
@@ -325,10 +328,11 @@ class MatcherWorkerServiceTest
     }
   }
 
-  private def processAndAssertMatchedWorkIs(workToMatch: TransformedBaseWork,
-                                            expectedMatchedWorks: MatcherResult,
-                                            queue: SQS.Queue,
-                                            messageSender: MemoryMessageSender): Any = {
+  private def processAndAssertMatchedWorkIs(
+    workToMatch: TransformedBaseWork,
+    expectedMatchedWorks: MatcherResult,
+    queue: SQS.Queue,
+    messageSender: MemoryMessageSender): Any = {
     sendMessage(queue = queue, workToMatch)
     eventually {
       assertLastMatchedResultIs(
@@ -342,7 +346,7 @@ class MatcherWorkerServiceTest
     messageSender: MemoryMessageSender,
     expectedMatcherResult: MatcherResult): Assertion = {
     val results = messageSender.getMessages[MatcherResult]
-    
+
     results.size should be >= 1
     results.last shouldBe expectedMatcherResult
   }

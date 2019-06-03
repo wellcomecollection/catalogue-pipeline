@@ -10,7 +10,10 @@ import uk.ac.wellcome.models.transformable.SierraTransformable
 import uk.ac.wellcome.models.transformable.SierraTransformable._
 import uk.ac.wellcome.models.transformable.sierra.test.utils.SierraGenerators
 import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.models.work.internal.{TransformedBaseWork, UnidentifiedWork}
+import uk.ac.wellcome.models.work.internal.{
+  TransformedBaseWork,
+  UnidentifiedWork
+}
 import uk.ac.wellcome.platform.transformer.sierra.fixtures.RecordReceiverFixture
 import uk.ac.wellcome.storage.streaming.CodecInstances._
 
@@ -39,7 +42,8 @@ class RecordReceiverTest
 
     val message = createSierraNotificationMessageWith(store)
 
-    recordReceiver.receiveMessage(message, transformToWork) shouldBe a[Success[_]]
+    recordReceiver.receiveMessage(message, transformToWork) shouldBe a[
+      Success[_]]
 
     val works = workMessageSender.getMessages[TransformedBaseWork]
     works.size should be >= 1
@@ -59,7 +63,8 @@ class RecordReceiverTest
 
     val message = createSierraNotificationMessageWith(store, version = version)
 
-    recordReceiver.receiveMessage(message, transformToWork) shouldBe a[Success[_]]
+    recordReceiver.receiveMessage(message, transformToWork) shouldBe a[
+      Success[_]]
 
     val works = workMessageSender.getMessages[TransformedBaseWork]
     works.size should be >= 1
@@ -74,7 +79,9 @@ class RecordReceiverTest
   it("fails if it's unable to parse the SQS message") {
     val recordReceiver = createRecordReceiver()
 
-    val result = recordReceiver.receiveMessage(NotificationMessage("not a JSON string"), transformToWork)
+    val result = recordReceiver.receiveMessage(
+      NotificationMessage("not a JSON string"),
+      transformToWork)
     result shouldBe a[Failure[_]]
     result.failed.get shouldBe a[ParsingFailure]
   }

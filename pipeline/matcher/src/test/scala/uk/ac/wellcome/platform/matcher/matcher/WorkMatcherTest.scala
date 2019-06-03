@@ -10,14 +10,24 @@ import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSpec, Matchers}
-import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult, WorkIdentifier, WorkNode}
+import uk.ac.wellcome.models.matcher.{
+  MatchedIdentifiers,
+  MatcherResult,
+  WorkIdentifier,
+  WorkNode
+}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.MergeCandidate
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
 import uk.ac.wellcome.platform.matcher.models.{WorkGraph, WorkUpdate}
 import uk.ac.wellcome.platform.matcher.storage.WorkGraphStore
-import uk.ac.wellcome.storage.locking.{DynamoRowLockDao, FailedUnlockException, Identifier, RowLock}
+import uk.ac.wellcome.storage.locking.{
+  DynamoRowLockDao,
+  FailedUnlockException,
+  Identifier,
+  RowLock
+}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -97,9 +107,10 @@ class WorkMatcherTest
         whenReady(workMatcher.matchWork(work)) { identifiersList =>
           identifiersList shouldBe
             MatcherResult(
-              Set(MatchedIdentifiers(Set(
-                WorkIdentifier("sierra-system-number/A", 1),
-                WorkIdentifier("sierra-system-number/B", 0)))))
+              Set(
+                MatchedIdentifiers(Set(
+                  WorkIdentifier("sierra-system-number/A", 1),
+                  WorkIdentifier("sierra-system-number/B", 0)))))
 
           val savedWorkNodes = Scanamo
             .scan[WorkNode](dynamoDbClient)(graphTable.name)
@@ -140,11 +151,8 @@ class WorkMatcherTest
           1,
           Nil,
           "sierra-system-number/A+sierra-system-number/B")
-        val existingWorkC = WorkNode(
-          "sierra-system-number/C",
-          1,
-          Nil,
-          "sierra-system-number/C")
+        val existingWorkC =
+          WorkNode("sierra-system-number/C", 1, Nil, "sierra-system-number/C")
         Scanamo.put(dynamoDbClient)(graphTable.name)(existingWorkA)
         Scanamo.put(dynamoDbClient)(graphTable.name)(existingWorkB)
         Scanamo.put(dynamoDbClient)(graphTable.name)(existingWorkC)
@@ -204,7 +212,8 @@ class WorkMatcherTest
         val work = createUnidentifiedSierraWork
         val workId = work.sourceIdentifier.toString
 
-        lockDao.lock(workId, contextId = UUID.randomUUID) shouldBe a[Right[_, _]]
+        lockDao.lock(workId, contextId = UUID.randomUUID) shouldBe a[Right[_,
+                                                                           _]]
 
         whenReady(workMatcher.matchWork(work).failed) { failedMatch =>
           failedMatch shouldBe a[MatcherException]
@@ -222,26 +231,32 @@ class WorkMatcherTest
         val workMatcher = new WorkMatcher(workGraphStore, lockingService)
 
         // A->B->C
-        workGraphStore.put(WorkGraph(Set(
-          WorkNode(
-            "sierra-system-number/A",
-            0,
-            List("sierra-system-number/B"),
-            "sierra-system-number/A+sierra-system-number/B+sierra-system-number/C"),
-          WorkNode(
-            "sierra-system-number/B",
-            0,
-            List("sierra-system-number/C"),
-            "sierra-system-number/A+sierra-system-number/B+sierra-system-number/C"),
-          WorkNode("sierra-system-number/C", 0, Nil, "sierra-system-number/A+sierra-system-number/B+sierra-system-number/C")
-        )))
+        workGraphStore.put(
+          WorkGraph(Set(
+            WorkNode(
+              "sierra-system-number/A",
+              0,
+              List("sierra-system-number/B"),
+              "sierra-system-number/A+sierra-system-number/B+sierra-system-number/C"),
+            WorkNode(
+              "sierra-system-number/B",
+              0,
+              List("sierra-system-number/C"),
+              "sierra-system-number/A+sierra-system-number/B+sierra-system-number/C"),
+            WorkNode(
+              "sierra-system-number/C",
+              0,
+              Nil,
+              "sierra-system-number/A+sierra-system-number/B+sierra-system-number/C")
+          )))
 
         val work = createUnidentifiedWorkWith(
           sourceIdentifier = identifierA,
           mergeCandidates = List(MergeCandidate(identifierB))
         )
 
-        lockDao.lock("sierra-system-number/C", contextId = UUID.randomUUID) shouldBe a[Right[_, _]]
+        lockDao.lock("sierra-system-number/C", contextId = UUID.randomUUID) shouldBe a[
+          Right[_, _]]
 
         whenReady(workMatcher.matchWork(work).failed) { failedMatch =>
           failedMatch shouldBe a[MatcherException]

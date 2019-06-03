@@ -50,7 +50,8 @@ class SierraTransformerFeatureTest
         )
       )
 
-      val message = createSierraNotificationMessageWith(store, sierraTransformable)
+      val message =
+        createSierraNotificationMessageWith(store, sierraTransformable)
 
       sendSqsMessage(queue, message)
 
@@ -63,12 +64,10 @@ class SierraTransformerFeatureTest
           value = id.withoutCheckDigit
         )
 
-
       withWorkerService(workSender, store, queue) { _ =>
         eventually {
           val works = workSender.getMessages[UnidentifiedWork]
           works.size should be >= 1
-
 
           works.map { actualWork =>
             actualWork.sourceIdentifier shouldBe sourceIdentifier
@@ -82,7 +81,9 @@ class SierraTransformerFeatureTest
     }
   }
 
-  def withWorkerService[R](messageSender: WorkSender, store: SierraTransformableStore, queue: Queue)(
+  def withWorkerService[R](messageSender: WorkSender,
+                           store: SierraTransformableStore,
+                           queue: Queue)(
     testWith: TestWith[SierraTransformerWorkerService[String], R]): R =
     withActorSystem { implicit actorSystem =>
       withSQSStream[NotificationMessage, R](queue) { sqsStream =>
