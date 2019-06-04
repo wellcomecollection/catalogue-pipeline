@@ -1,6 +1,5 @@
 package uk.ac.wellcome.platform.ingestor.fixtures
 
-import com.amazonaws.services.cloudwatch.model.StandardUnit
 import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.http.ElasticClient
 import org.scalatest.Suite
@@ -10,9 +9,9 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.Messaging
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.models.work.internal.IdentifiedBaseWork
-import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 import uk.ac.wellcome.platform.ingestor.config.models.IngestorConfig
 import uk.ac.wellcome.platform.ingestor.services.IngestorWorkerService
+import uk.ac.wellcome.storage.streaming.CodecInstances._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._

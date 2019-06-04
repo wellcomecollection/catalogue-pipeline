@@ -14,6 +14,7 @@ import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.{IdentifiedBaseWork, IdentifierType}
 import uk.ac.wellcome.platform.ingestor.config.models.IngestorConfig
 import uk.ac.wellcome.platform.ingestor.fixtures.WorkerServiceFixture
+import uk.ac.wellcome.storage.streaming.CodecInstances._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
