@@ -132,44 +132,39 @@ class IngestorWorkerServiceTest
     withLocalWorksIndex { index =>
       withLocalSqsQueue { queue =>
         withActorSystem { implicit actorSystem =>
-          withMetricsSender() { metricsSender =>
-            withMessageStream[IdentifiedBaseWork, Any](
-              queue = queue,
-              metricsSender = metricsSender
-            ) { messageStream =>
-              import scala.concurrent.duration._
+          withMessageStream[IdentifiedBaseWork, Assertion](queue) { messageStream =>
+            import scala.concurrent.duration._
 
-              val brokenRestClient: RestClient = RestClient
-                .builder(
-                  new HttpHost(
-                    "localhost",
-                    9800,
-                    "http"
-                  )
+            val brokenRestClient: RestClient = RestClient
+              .builder(
+                new HttpHost(
+                  "localhost",
+                  9800,
+                  "http"
                 )
-                .setHttpClientConfigCallback(
-                  new ElasticCredentials("elastic", "changeme")
-                )
-                .build()
-
-              val brokenClient: ElasticClient =
-                ElasticClient.fromRestClient(brokenRestClient)
-
-              val config = IngestorConfig(
-                batchSize = 100,
-                flushInterval = 5.seconds,
-                index = index
               )
-
-              val service = new IngestorWorkerService(
-                elasticClient = brokenClient,
-                ingestorConfig = config,
-                messageStream = messageStream
+              .setHttpClientConfigCallback(
+                new ElasticCredentials("elastic", "changeme")
               )
+              .build()
 
-              whenReady(service.run.failed) { e =>
-                e shouldBe a[RuntimeException]
-              }
+            val brokenClient: ElasticClient =
+              ElasticClient.fromRestClient(brokenRestClient)
+
+            val config = IngestorConfig(
+              batchSize = 100,
+              flushInterval = 5.seconds,
+              index = index
+            )
+
+            val service = new IngestorWorkerService(
+              elasticClient = brokenClient,
+              ingestorConfig = config,
+              messageStream = messageStream
+            )
+
+            whenReady(service.run.failed) { e =>
+              e shouldBe a[RuntimeException]
             }
           }
         }
