@@ -8,7 +8,7 @@ import org.scalatest.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.messaging.fixtures.SQS.{Queue, QueuePair}
+import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.message._
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 import uk.ac.wellcome.storage.ObjectStore
@@ -34,24 +34,6 @@ trait Messaging extends Akka with Matchers with SQS with SNS with S3 {
     )
     testWith(stream)
   }
-
-  def withMessageStreamFixtures[T, R](
-    testWith: TestWith[(MessageStream[T],
-                        QueuePair,
-                        MemoryMetrics[StandardUnit]),
-                       R]
-  )(implicit
-    decoderT: Decoder[T],
-    objectStore: ObjectStore[T]): R =
-    withActorSystem { implicit actorSystem =>
-      withLocalSqsQueueAndDlq {
-        case queuePair @ QueuePair(queue, _) =>
-          val metrics = new MemoryMetrics[StandardUnit]()
-          withMessageStream[T, R](queue, metrics) { stream =>
-            testWith((stream, queuePair, metrics))
-          }
-      }
-    }
 
   /** Send a MessageNotification to SQS.
     *

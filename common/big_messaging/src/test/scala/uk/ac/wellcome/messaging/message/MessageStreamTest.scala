@@ -3,16 +3,17 @@ package uk.ac.wellcome.messaging.message
 import java.util.concurrent.ConcurrentLinkedQueue
 
 import akka.stream.scaladsl.Flow
-import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
-import org.scalatest.{Assertion, FunSpec, Matchers}
-import uk.ac.wellcome.akka.fixtures.Akka
+import com.amazonaws.services.cloudwatch.model.StandardUnit
+import io.circe.Decoder
+import org.scalatest.{FunSpec, Matchers}
+import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.Messaging
 import uk.ac.wellcome.messaging.fixtures.SQS.{Queue, QueuePair}
-import uk.ac.wellcome.monitoring.fixtures.MetricsSenderFixture
-import uk.ac.wellcome.storage.ObjectLocation
+import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 import uk.ac.wellcome.storage.fixtures.S3.Bucket
 import uk.ac.wellcome.storage.streaming.CodecInstances._
+import uk.ac.wellcome.storage.{ObjectLocation, ObjectStore}
 
 import scala.concurrent.Future
 import scala.util.Random
@@ -29,7 +30,7 @@ class MessageStreamTest
 
   describe("small messages (<256KB)") {
     it("reads messages off a queue, processes them and deletes them") {
-      withMessageStreamFixtures[ExampleObject, Assertion] {
+      withMessageStreamFixtures {
         case (messageStream, QueuePair(queue, dlq), _) =>
           val messages = createMessages(count = 3)
 
@@ -55,7 +56,7 @@ class MessageStreamTest
 
   describe("large messages (>256KB)") {
     it("reads messages off a queue, processes them and deletes them") {
-      withMessageStreamFixtures[ExampleObject, Assertion] {
+      withMessageStreamFixtures {
         case (messageStream, QueuePair(queue, dlq), _) =>
           withLocalS3Bucket { bucket =>
             val messages = createMessages(count = 3)
@@ -114,7 +115,7 @@ class MessageStreamTest
     }.toList
 
   it("increments *_ProcessMessage metric when successful") {
-    withMessageStreamFixtures[ExampleObject, Future[Unit]] {
+    withMessageStreamFixtures {
       case (messageStream, QueuePair(queue, _), metrics) =>
         val exampleObject = ExampleObject("some value")
         sendInlineNotification(queue = queue, exampleObject = exampleObject)
@@ -125,15 +126,15 @@ class MessageStreamTest
           process = process(received)
         )
 
-        eventually(
+        eventually {
           metrics.incrementedCounts shouldBe Seq(
             "test-stream_ProcessMessage_success")
-        )
+        }
     }
   }
 
   it("fails gracefully when NotificationMessage cannot be deserialised") {
-    withMessageStreamFixtures[ExampleObject, Assertion] {
+    withMessageStreamFixtures {
       case (messageStream, QueuePair(queue, dlq), metrics) =>
         sendInvalidJSONto(queue)
 
@@ -155,7 +156,7 @@ class MessageStreamTest
   }
 
   it("does not fail gracefully when the s3 object cannot be retrieved") {
-    withMessageStreamFixtures[ExampleObject, Assertion] {
+    withMessageStreamFixtures {
       case (messageStream, QueuePair(queue, dlq), metrics) =>
         val streamName = "test-stream"
 
@@ -192,7 +193,7 @@ class MessageStreamTest
   }
 
   it("continues reading if processing of some messages fails ") {
-    withMessageStreamFixtures[ExampleObject, Assertion] {
+    withMessageStreamFixtures {
       case (messageStream, QueuePair(queue, dlq), _) =>
         val exampleObject1 = ExampleObject("some value 1")
         val exampleObject2 = ExampleObject("some value 2")
@@ -221,7 +222,7 @@ class MessageStreamTest
 
   describe("runStream") {
     it("processes messages off a queue") {
-      withMessageStreamFixtures[ExampleObject, Future[Unit]] {
+      withMessageStreamFixtures {
         case (messageStream, QueuePair(queue, dlq), metrics) =>
           val exampleObject1 = ExampleObject("some value 1")
           sendInlineNotification(queue = queue, exampleObject = exampleObject1)
@@ -256,7 +257,7 @@ class MessageStreamTest
     }
 
     it("does not delete failed messages and sends a failure metric") {
-      withMessageStreamFixtures[ExampleObject, Future[Unit]] {
+      withMessageStreamFixtures {
         case (messageStream, QueuePair(queue, dlq), metrics) =>
           val exampleObject = ExampleObject("some value")
           sendInlineNotification(queue = queue, exampleObject = exampleObject)
@@ -281,7 +282,7 @@ class MessageStreamTest
     }
 
     it("continues reading if processing of some messages fails") {
-      withMessageStreamFixtures[ExampleObject, Assertion] {
+      withMessageStreamFixtures {
         case (messageStream, QueuePair(queue, dlq), _) =>
           val exampleObject1 = ExampleObject("some value 1")
           val exampleObject2 = ExampleObject("some value 2")
@@ -313,4 +314,19 @@ class MessageStreamTest
       }
     }
   }
+
+  private def withMessageStreamFixtures[R](
+    testWith: TestWith[(MessageStream[ExampleObject], QueuePair, MemoryMetrics[StandardUnit]), R]
+  )(implicit
+    decoderT: Decoder[ExampleObject],
+    objectStore: ObjectStore[ExampleObject]): R =
+    withActorSystem { implicit actorSystem =>
+      withLocalSqsQueueAndDlq {
+        case queuePair@QueuePair(queue, _) =>
+          val metrics = new MemoryMetrics[StandardUnit]()
+          withMessageStream[ExampleObject, R](queue, metrics) { stream =>
+            testWith((stream, queuePair, metrics))
+          }
+      }
+    }
 }
