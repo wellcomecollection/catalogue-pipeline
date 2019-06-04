@@ -21,7 +21,8 @@ trait Messaging extends Akka with Matchers with SQS with SNS with S3 {
   case class ExampleObject(name: String)
 
   def withMessageStream[T, R](queue: SQS.Queue,
-                              metrics: MemoryMetrics[StandardUnit] = new MemoryMetrics[StandardUnit]())(
+                              metrics: MemoryMetrics[StandardUnit] =
+                                new MemoryMetrics[StandardUnit]())(
     testWith: TestWith[MessageStream[T], R])(
     implicit
     actorSystem: ActorSystem,

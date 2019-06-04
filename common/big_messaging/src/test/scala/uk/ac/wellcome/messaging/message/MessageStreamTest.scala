@@ -18,10 +18,7 @@ import uk.ac.wellcome.storage.{ObjectLocation, ObjectStore}
 import scala.concurrent.Future
 import scala.util.Random
 
-class MessageStreamTest
-    extends FunSpec
-    with Matchers
-    with Messaging {
+class MessageStreamTest extends FunSpec with Matchers with Messaging {
 
   def process(list: ConcurrentLinkedQueue[ExampleObject])(o: ExampleObject) = {
     list.add(o)
@@ -316,13 +313,16 @@ class MessageStreamTest
   }
 
   private def withMessageStreamFixtures[R](
-    testWith: TestWith[(MessageStream[ExampleObject], QueuePair, MemoryMetrics[StandardUnit]), R]
+    testWith: TestWith[(MessageStream[ExampleObject],
+                        QueuePair,
+                        MemoryMetrics[StandardUnit]),
+                       R]
   )(implicit
     decoderT: Decoder[ExampleObject],
     objectStore: ObjectStore[ExampleObject]): R =
     withActorSystem { implicit actorSystem =>
       withLocalSqsQueueAndDlq {
-        case queuePair@QueuePair(queue, _) =>
+        case queuePair @ QueuePair(queue, _) =>
           val metrics = new MemoryMetrics[StandardUnit]()
           withMessageStream[ExampleObject, R](queue, metrics) { stream =>
             testWith((stream, queuePair, metrics))
