@@ -1,14 +1,18 @@
 package uk.ac.wellcome.elasticsearch
 
+import java.time.Instant
+
 import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.http.ElasticDsl.{indexInto, search, _}
 import com.sksamuel.elastic4s.http.index.IndexResponse
 import com.sksamuel.elastic4s.http.search.SearchResponse
 import com.sksamuel.elastic4s.http.{ElasticError, Response}
 import io.circe.Encoder
-import org.scalacheck.Shrink
+import org.scalacheck.{Arbitrary, Shrink}
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
 import org.scalatest.prop.PropertyChecks
+import org.scalacheck.Gen.chooseNum
+
 import org.scalatest.{Assertion, FunSpec, Matchers}
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.json.JsonUtil._
@@ -38,6 +42,23 @@ class WorksIndexTest
   // On failure, scalacheck tries to shrink to the smallest input that causes a failure.
   // With IdentifiedWork, that means that it never actually completes.
   implicit val noShrink = Shrink.shrinkAny[IdentifiedBaseWork]
+
+  // We use this for the scalacheck of the java.time.Instant type
+  // We could just import the library, but I might wait until we need more
+  // Taken from here:
+  // https://github.com/rallyhealth/scalacheck-ops/blob/master/core/src/main/scala/org/scalacheck/ops/time/ImplicitJavaTimeGenerators.scala
+  implicit val arbInstant: Arbitrary[Instant] = {
+    Arbitrary {
+      for {
+        millis <- chooseNum(
+          Instant.MIN.getEpochSecond,
+          Instant.MAX.getEpochSecond)
+        nanos <- chooseNum(Instant.MIN.getNano, Instant.MAX.getNano)
+      } yield {
+        Instant.ofEpochMilli(millis).plusNanos(nanos)
+      }
+    }
+  }
 
   it("puts a valid work") {
     forAll { sampleWork: IdentifiedBaseWork =>
