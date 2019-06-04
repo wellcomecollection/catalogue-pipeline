@@ -9,6 +9,7 @@ import uk.ac.wellcome.messaging.typesafe.BigMessagingBuilder
 import uk.ac.wellcome.models.work.internal.IdentifiedBaseWork
 import uk.ac.wellcome.platform.ingestor.config.builders.IngestorConfigBuilder
 import uk.ac.wellcome.platform.ingestor.services.IngestorWorkerService
+import uk.ac.wellcome.storage.streaming.CodecInstances._
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 
