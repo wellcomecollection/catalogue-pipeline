@@ -39,10 +39,11 @@ object InstantRange {
       to = to.toInstant(ZoneOffset.UTC),
       inferred = inferred)
 
-  type ParseDateTimeToInstantRange = (String, LocalDateTime) => InstantRange
-  type DatePattern = String
+  private type ParseDateTimeToInstantRange =
+    (String, LocalDateTime) => InstantRange
+  private type DatePattern = String
 
-  val parsers: List[(DatePattern, ParseDateTimeToInstantRange)] = List(
+  private val parsers: List[(DatePattern, ParseDateTimeToInstantRange)] = List(
     (
       "yyyy",
       (label: String, from: LocalDateTime) =>
