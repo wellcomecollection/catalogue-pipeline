@@ -49,6 +49,10 @@ object WorksIndex {
 
   def date(fieldName: String) = objectField(fieldName).fields(
     textField("label"),
+    objectField("range").fields(
+      dateField("from"),
+      dateField("to")
+    ),
     keywordField("ontologyType")
   )
 
