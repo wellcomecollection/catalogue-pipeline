@@ -9,7 +9,10 @@ import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.recorder.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.storage._
-import uk.ac.wellcome.storage.memory.{MemoryConditionalUpdateDao, MemoryVersionedDao}
+import uk.ac.wellcome.storage.memory.{
+  MemoryConditionalUpdateDao,
+  MemoryVersionedDao
+}
 import uk.ac.wellcome.storage.streaming.CodecInstances._
 
 class RecorderWorkerServiceTest
@@ -101,7 +104,12 @@ class RecorderWorkerServiceTest
         sendMessage[TransformedBaseWork](queue, newerWork)
 
         eventually {
-          assertStoredSingleWork(dao, store, messageSender, newerWork, expectedVhsVersion = 2)
+          assertStoredSingleWork(
+            dao,
+            store,
+            messageSender,
+            newerWork,
+            expectedVhsVersion = 2)
         }
       }
     }
@@ -123,16 +131,17 @@ class RecorderWorkerServiceTest
 
     val work = createUnidentifiedWork
 
-    withLocalSqsQueueAndDlq { case QueuePair(queue, dlq) =>
-      withWorkerService(dao, brokenStore, messageSender, queue) { _ =>
-        sendMessage[TransformedBaseWork](queue = queue, obj = work)
-        eventually {
-          assertQueueEmpty(queue)
-          assertQueueHasSize(dlq, 1)
+    withLocalSqsQueueAndDlq {
+      case QueuePair(queue, dlq) =>
+        withWorkerService(dao, brokenStore, messageSender, queue) { _ =>
+          sendMessage[TransformedBaseWork](queue = queue, obj = work)
+          eventually {
+            assertQueueEmpty(queue)
+            assertQueueHasSize(dlq, 1)
 
-          messageSender.messages shouldBe empty
+            messageSender.messages shouldBe empty
+          }
         }
-      }
     }
   }
 
@@ -140,7 +149,8 @@ class RecorderWorkerServiceTest
     val brokenDao = new MemoryVersionedDao[String, RecorderEntry](
       underlying = MemoryConditionalUpdateDao[String, RecorderEntry]()
     ) {
-      override def put(value: RecorderEntry): Either[WriteError, RecorderEntry] =
+      override def put(
+        value: RecorderEntry): Either[WriteError, RecorderEntry] =
         Left(DaoWriteError(new Throwable("BOOM!")))
     }
 
@@ -150,17 +160,18 @@ class RecorderWorkerServiceTest
 
     val work = createUnidentifiedWork
 
-    withLocalSqsQueueAndDlq { case QueuePair(queue, dlq) =>
-      withWorkerService(brokenDao, store, messageSender, queue) { _ =>
-        sendMessage[TransformedBaseWork](queue = queue, obj = work)
+    withLocalSqsQueueAndDlq {
+      case QueuePair(queue, dlq) =>
+        withWorkerService(brokenDao, store, messageSender, queue) { _ =>
+          sendMessage[TransformedBaseWork](queue = queue, obj = work)
 
-        eventually {
-          assertQueueEmpty(queue)
-          assertQueueHasSize(dlq, 1)
+          eventually {
+            assertQueueEmpty(queue)
+            assertQueueHasSize(dlq, 1)
 
-          messageSender.messages shouldBe empty
+            messageSender.messages shouldBe empty
+          }
         }
-      }
     }
   }
 }
