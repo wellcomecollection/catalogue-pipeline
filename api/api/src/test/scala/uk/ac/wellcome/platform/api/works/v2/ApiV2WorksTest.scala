@@ -375,12 +375,12 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
           title = "Working with wombats")
         val work2 = createIdentifiedWorkWith(
           canonicalId = "2",
-          title = "Working with much too sloppy wombats")
+          title = "Working with boosted wombats")
         insertIntoElasticsearch(indexV2, work1, work2)
 
         eventually {
           server.httpGet(
-            path = s"/$apiPrefix/works?query=Working+wombats&_queryType=slop",
+            path = s"/$apiPrefix/works?query=boosted&_queryType=boost",
             andExpect = Status.Ok,
             withJsonBody = s"""
                               |{
@@ -388,8 +388,8 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
                               |  "results": [
                               |   {
                               |     "type": "Work",
-                              |     "id": "${work1.canonicalId}",
-                              |     "title": "${work1.title}"
+                              |     "id": "${work2.canonicalId}",
+                              |     "title": "${work2.title}"
                               |   }
                               |  ]
                               |}

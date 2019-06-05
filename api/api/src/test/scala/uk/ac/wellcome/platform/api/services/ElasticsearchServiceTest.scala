@@ -242,7 +242,26 @@ class ElasticsearchServiceTest
     val noMatch =
       createIdentifiedWorkWith(title = "Before a Bengal")
 
-    it("finds results for a JustBoostQuery search") {
+    it("finds results for a MSMQuery search") {
+      withLocalWorksIndex { index =>
+        val matching100 =
+          createIdentifiedWorkWith(title = "Title text contains Aegean")
+        val matching75 =
+          createIdentifiedWorkWith(title = "Title text contains")
+        val matching25 =
+          createIdentifiedWorkWith(title = "Title")
+
+        insertIntoElasticsearch(index, matching25, matching100, matching75)
+
+        val results = searchResults(
+          index = index,
+          workQuery = MSMQuery("Title text contains Aegean"))
+
+        results shouldBe List(matching100, matching75)
+      }
+    }
+
+    it("finds results for a BoostQuery search") {
       withLocalWorksIndex { index =>
         // Longer text used to ensure signal in TF/IDF
         val text = "Text that contains Aegean"
@@ -270,108 +289,96 @@ class ElasticsearchServiceTest
           matchingGenre)
 
         val results =
-          searchResults(index = index, workQuery = JustBoostQuery("Aegean"))
+          searchResults(index = index, workQuery = BoostQuery("Aegean"))
 
         results should have length 5
 
         results.head shouldBe exactMatchingTitle
-        results.slice(1, 3) should contain theSameElementsAs List(
+        results(1) shouldBe matchingTitle
+        results.slice(2, 4) should contain theSameElementsAs List(
           matchingSubject,
           matchingGenre)
-        results(3) shouldBe matchingTitle
         results(4) shouldBe matchingDescription
       }
     }
 
-    it("finds results for a BroaderBoostQuery search") {
+    it("finds results for a MSMBoostQuery search") {
       withLocalWorksIndex { index =>
         // Longer text used to ensure signal in TF/IDF
-        val text = "Text that contains Aegean"
+        val matchingTitle100 =
+          createIdentifiedWorkWith(title = "Title text that contains Aegean")
+        val matchingTitle75 =
+          createIdentifiedWorkWith(title = "Title text that contains")
+        val matchingTitle25 =
+          createIdentifiedWorkWith(title = "Title text")
 
-        val matchingTitle =
-          createIdentifiedWorkWith(title = s"$text title")
-        val matchingSubject =
+        val matchingSubject100 =
           createIdentifiedWorkWith(
-            subjects = List(createSubjectWith(s"$text subject")))
-        val matchingGenre =
+            subjects =
+              List(createSubjectWith(s"Subject text that contains Aegean")))
+        val matchingSubject75 =
           createIdentifiedWorkWith(
-            genres = List(createGenreWith(s"$text genre")))
-        val matchingDescription =
-          createIdentifiedWorkWith(description = Some(s"$text description"))
-        val matchingLettering =
-          createIdentifiedWorkWith(lettering = Some(s"$text lettering"))
-        val matchingContributor =
+            subjects = List(createSubjectWith(s"Subject text that contains")))
+        val matchingSubject25 =
           createIdentifiedWorkWith(
-            contributors =
-              List(createPersonContributorWith(s"$text contributor")))
+            subjects = List(createSubjectWith(s"Subject text")))
+
+        val matchingGenre100 =
+          createIdentifiedWorkWith(
+            genres = List(createGenreWith(s"Genre text that contains Aegean")))
+        val matchingGenre75 =
+          createIdentifiedWorkWith(
+            genres = List(createGenreWith(s"Genre text that contains")))
+        val matchingGenre25 =
+          createIdentifiedWorkWith(
+            genres = List(createGenreWith(s"Genre text")))
+
+        val matchingDescription100 =
+          createIdentifiedWorkWith(
+            description = Some(s"Description text that contains Aegean"))
+        val matchingDescription75 =
+          createIdentifiedWorkWith(
+            description = Some(s"Description text that contains"))
+        val matchingDescription25 =
+          createIdentifiedWorkWith(description = Some(s"Description text"))
 
         insertIntoElasticsearch(
           index,
           noMatch,
-          matchingTitle,
-          matchingSubject,
-          matchingGenre,
-          matchingDescription,
-          matchingLettering,
-          matchingContributor)
-
-        val results =
-          searchResults(index = index, workQuery = BroaderBoostQuery("Aegean"))
-
-        results should have length 6
-
-        results.slice(0, 2) should contain theSameElementsAs List(
-          matchingSubject,
-          matchingGenre)
-
-        results(2) shouldBe matchingTitle
-
-        results.slice(3, 6) should contain theSameElementsAs List(
-          matchingDescription,
-          matchingLettering,
-          matchingContributor
+          matchingTitle100,
+          matchingTitle75,
+          matchingTitle25,
+          matchingSubject100,
+          matchingSubject75,
+          matchingSubject25,
+          matchingGenre100,
+          matchingGenre75,
+          matchingGenre25,
+          matchingDescription100,
+          matchingDescription75,
+          matchingDescription25
         )
 
-      }
-    }
-
-    it("finds results for a SlopQuery search") {
-      withLocalWorksIndex { index =>
-        val exactMatch = createIdentifiedWorkWith(title = "Text Aegean")
-        val matchingSlop =
-          createIdentifiedWorkWith(title = "Text that contains Aegean")
-        val notMatchingSlop = createIdentifiedWorkWith(
-          title = "Text that has too much slop but contains Aegean")
-
-        insertIntoElasticsearch(
-          index,
-          matchingSlop,
-          exactMatch,
-          notMatchingSlop)
-
         val results =
-          searchResults(index = index, workQuery = SlopQuery("Text Aegean"))
+          searchResults(
+            index = index,
+            workQuery = MSMBoostQuery("Text that contains Aegean"))
 
-        results shouldBe List(exactMatch, matchingSlop)
-      }
-    }
+        results should have length 10
 
-    it("finds results for a MinimumMatchQuery search") {
-      withLocalWorksIndex { index =>
-        val matching100 =
-          createIdentifiedWorkWith(title = "Title text contains Aegean")
-        val matching75 =
-          createIdentifiedWorkWith(title = "Title text contains")
-        val matching25 =
-          createIdentifiedWorkWith(title = "Title")
-
-        insertIntoElasticsearch(index, matching25, matching100, matching75)
-
-        val results = searchResults(
-          index = index,
-          workQuery = MinimumMatchQuery("Title text contains Aegean"))
-
-        results shouldBe List(matching100, matching75)
+        results.slice(0, 2) shouldBe List(matchingTitle100, matchingTitle75)
+        results.slice(2, 4) should contain theSameElementsAs List(
+          matchingGenre100,
+          matchingSubject100)
+        results.slice(4, 6) should contain theSameElementsAs List(
+          matchingGenre75,
+          matchingSubject75)
+        results.slice(6, 8) shouldBe List(
+          matchingDescription100,
+          matchingDescription75)
+        results.slice(8, 10) should contain theSameElementsAs List(
+          matchingDescription25,
+          matchingTitle25)
       }
     }
   }
