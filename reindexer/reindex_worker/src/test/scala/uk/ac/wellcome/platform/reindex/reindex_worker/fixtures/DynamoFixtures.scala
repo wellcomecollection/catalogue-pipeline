@@ -1,7 +1,11 @@
 package uk.ac.wellcome.platform.reindex.reindex_worker.fixtures
 
 import com.gu.scanamo.Scanamo
-import uk.ac.wellcome.platform.reindex.reindex_worker.dynamo.{MaxRecordsScanner, ParallelScanner, ScanSpecScanner}
+import uk.ac.wellcome.platform.reindex.reindex_worker.dynamo.{
+  MaxRecordsScanner,
+  ParallelScanner,
+  ScanSpecScanner
+}
 import uk.ac.wellcome.storage.fixtures.LocalDynamoDb.Table
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -19,10 +23,11 @@ trait DynamoFixtures extends ReindexableTable {
   )
 
   def createRecords(table: Table, count: Int): Seq[NamedRecord] = {
-    val records = (1 to count).map { _ => createRecord() }
+    val records = (1 to count).map { _ =>
+      createRecord()
+    }
 
-    records.foreach(record =>
-      Scanamo.put(dynamoDbClient)(table.name)(record))
+    records.foreach(record => Scanamo.put(dynamoDbClient)(table.name)(record))
 
     records
   }

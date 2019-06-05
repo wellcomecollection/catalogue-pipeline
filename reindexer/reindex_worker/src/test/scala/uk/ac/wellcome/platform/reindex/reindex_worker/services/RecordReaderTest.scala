@@ -4,8 +4,14 @@ import com.amazonaws.services.dynamodbv2.model._
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.platform.reindex.reindex_worker.fixtures.{RecordReaderFixture, ReindexableTable}
-import uk.ac.wellcome.platform.reindex.reindex_worker.models.{CompleteReindexParameters, PartialReindexParameters}
+import uk.ac.wellcome.platform.reindex.reindex_worker.fixtures.{
+  RecordReaderFixture,
+  ReindexableTable
+}
+import uk.ac.wellcome.platform.reindex.reindex_worker.models.{
+  CompleteReindexParameters,
+  PartialReindexParameters
+}
 import uk.ac.wellcome.storage.fixtures.LocalDynamoDb.Table
 
 class RecordReaderTest

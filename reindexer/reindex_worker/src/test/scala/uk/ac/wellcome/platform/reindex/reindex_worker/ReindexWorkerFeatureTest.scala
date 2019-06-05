@@ -5,7 +5,10 @@ import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.memory.MemoryIndividualMessageSender
 import uk.ac.wellcome.platform.reindex.reindex_worker.fixtures.WorkerServiceFixture
-import uk.ac.wellcome.platform.reindex.reindex_worker.models.{CompleteReindexParameters, PartialReindexParameters}
+import uk.ac.wellcome.platform.reindex.reindex_worker.models.{
+  CompleteReindexParameters,
+  PartialReindexParameters
+}
 
 class ReindexWorkerFeatureTest
     extends FunSpec
@@ -33,7 +36,8 @@ class ReindexWorkerFeatureTest
           )
 
           eventually {
-            messageSender.getMessages[NamedRecord] should contain theSameElementsAs records
+            messageSender
+              .getMessages[NamedRecord] should contain theSameElementsAs records
           }
         }
       }

@@ -20,28 +20,29 @@ class ReindexWorkerServiceTest
       val messageSender = new MemoryIndividualMessageSender()
       val destination = createDestination
 
-      withLocalSqsQueueAndDlq { case QueuePair(queue, dlq) =>
-        withWorkerService(messageSender, queue, table, destination) { _ =>
-          val reindexParameters = CompleteReindexParameters(
-            segment = 0,
-            totalSegments = 1
-          )
+      withLocalSqsQueueAndDlq {
+        case QueuePair(queue, dlq) =>
+          withWorkerService(messageSender, queue, table, destination) { _ =>
+            val reindexParameters = CompleteReindexParameters(
+              segment = 0,
+              totalSegments = 1
+            )
 
-          val records = createRecords(table, count = 3)
+            val records = createRecords(table, count = 3)
 
-          sendNotificationToSQS(
-            queue = queue,
-            message =
-              createReindexRequestWith(parameters = reindexParameters)
-          )
+            sendNotificationToSQS(
+              queue = queue,
+              message = createReindexRequestWith(parameters = reindexParameters)
+            )
 
-          eventually {
-            messageSender.getMessages[NamedRecord] should contain theSameElementsAs records
+            eventually {
+              messageSender
+                .getMessages[NamedRecord] should contain theSameElementsAs records
 
-            assertQueueEmpty(queue)
-            assertQueueEmpty(dlq)
+              assertQueueEmpty(queue)
+              assertQueueEmpty(dlq)
+            }
           }
-        }
       }
     }
   }
@@ -51,18 +52,19 @@ class ReindexWorkerServiceTest
       val messageSender = new MemoryIndividualMessageSender()
       val destination = createDestination
 
-      withLocalSqsQueueAndDlq { case QueuePair(queue, dlq) =>
-        withWorkerService(messageSender, queue, table, destination) { _ =>
-          sendNotificationToSQS(
-            queue = queue,
-            body = "<xml>What is JSON.</xl?>"
-          )
+      withLocalSqsQueueAndDlq {
+        case QueuePair(queue, dlq) =>
+          withWorkerService(messageSender, queue, table, destination) { _ =>
+            sendNotificationToSQS(
+              queue = queue,
+              body = "<xml>What is JSON.</xl?>"
+            )
 
-          eventually {
-            assertQueueEmpty(queue)
-            assertQueueHasSize(dlq, 1)
+            eventually {
+              assertQueueEmpty(queue)
+              assertQueueHasSize(dlq, 1)
+            }
           }
-        }
       }
     }
   }
@@ -95,19 +97,21 @@ class ReindexWorkerServiceTest
 
       withLocalSqsQueueAndDlq {
         case QueuePair(queue, dlq) =>
-          withWorkerService(messageSender, queue, configMap = Map("xyz" -> ((table, destination)))) {
-            _ =>
-              sendNotificationToSQS(
-                queue = queue,
-                message = createReindexRequestWith(jobConfigId = "abc")
-              )
+          withWorkerService(
+            messageSender,
+            queue,
+            configMap = Map("xyz" -> ((table, destination)))) { _ =>
+            sendNotificationToSQS(
+              queue = queue,
+              message = createReindexRequestWith(jobConfigId = "abc")
+            )
 
-              eventually {
-                messageSender.messages shouldBe empty
+            eventually {
+              messageSender.messages shouldBe empty
 
-                assertQueueEmpty(queue)
-                assertQueueHasSize(dlq, 1)
-              }
+              assertQueueEmpty(queue)
+              assertQueueHasSize(dlq, 1)
+            }
           }
       }
     }
@@ -115,9 +119,7 @@ class ReindexWorkerServiceTest
 
   it("selects the correct job config") {
     withLocalDynamoDbTable { table1 =>
-
       withLocalDynamoDbTable { table2 =>
-
         val messageSender = new MemoryIndividualMessageSender()
         val destination1 = createDestination
         val destination2 = createDestination
@@ -140,7 +142,9 @@ class ReindexWorkerServiceTest
               eventually {
                 messageSender.messages
                   .filter { _.destination == destination1 }
-                  .map { msg => fromJson[NamedRecord](msg.body).get } should contain theSameElementsAs records1
+                  .map { msg =>
+                    fromJson[NamedRecord](msg.body).get
+                  } should contain theSameElementsAs records1
 
                 messageSender.messages
                   .filter { _.destination == destination2 } shouldBe empty
@@ -157,7 +161,9 @@ class ReindexWorkerServiceTest
               eventually {
                 messageSender.messages
                   .filter { _.destination == destination2 }
-                  .map { msg => fromJson[NamedRecord](msg.body).get } should contain theSameElementsAs records2
+                  .map { msg =>
+                    fromJson[NamedRecord](msg.body).get
+                  } should contain theSameElementsAs records2
 
                 assertQueueEmpty(queue)
                 assertQueueEmpty(dlq)

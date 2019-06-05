@@ -6,17 +6,22 @@ import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryIndividualMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.platform.reindex.reindex_worker.models.{CompleteReindexParameters, ReindexJobConfig, ReindexParameters, ReindexRequest}
-import uk.ac.wellcome.platform.reindex.reindex_worker.services.{BulkMessageSender, ReindexWorkerService}
+import uk.ac.wellcome.platform.reindex.reindex_worker.models.{
+  CompleteReindexParameters,
+  ReindexJobConfig,
+  ReindexParameters,
+  ReindexRequest
+}
+import uk.ac.wellcome.platform.reindex.reindex_worker.services.{
+  BulkMessageSender,
+  ReindexWorkerService
+}
 import uk.ac.wellcome.storage.fixtures.LocalDynamoDb.Table
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Random
 
-trait WorkerServiceFixture
-    extends Akka
-    with RecordReaderFixture
-    with SQS {
+trait WorkerServiceFixture extends Akka with RecordReaderFixture with SQS {
   val defaultJobConfigId = "testing"
 
   type Destination = String
@@ -49,13 +54,17 @@ trait WorkerServiceFixture
       }
     }
 
-  def withWorkerService[R](messageSender: MemoryIndividualMessageSender, queue: Queue, table: Table, destination: Destination)(
+  def withWorkerService[R](messageSender: MemoryIndividualMessageSender,
+                           queue: Queue,
+                           table: Table,
+                           destination: Destination)(
     testWith: TestWith[ReindexWorkerService[Destination], R]): R =
     withWorkerService(
       messageSender,
       queue,
-      configMap = Map(defaultJobConfigId -> ((table, destination)))) { service =>
-      testWith(service)
+      configMap = Map(defaultJobConfigId -> ((table, destination)))) {
+      service =>
+        testWith(service)
     }
 
   private val defaultParameters = CompleteReindexParameters(

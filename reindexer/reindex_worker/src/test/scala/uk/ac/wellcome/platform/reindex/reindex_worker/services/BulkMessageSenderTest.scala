@@ -8,10 +8,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Random, Try}
 
-class BulkMessageSenderTest
-    extends FunSpec
-    with Matchers
-    with ScalaFutures {
+class BulkMessageSenderTest extends FunSpec with Matchers with ScalaFutures {
 
   def createMessages(count: Int = 5): Seq[String] =
     (1 to count).map { _ =>
@@ -56,7 +53,8 @@ class BulkMessageSenderTest
     val exception = new Throwable("BOOM!")
 
     val brokenSender = new MemoryIndividualMessageSender() {
-      override def send(body: String)(subject: String, destination: String): Try[Unit] =
+      override def send(body: String)(subject: String,
+                                      destination: String): Try[Unit] =
         if (messages.size > 5) {
           Failure(exception)
         } else {
