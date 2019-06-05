@@ -26,7 +26,10 @@ case class InstantRange(label: String,
                         from: Instant,
                         to: Instant,
                         inferred: Boolean)
-    extends AbstractConcept
+// We're not extending this yet, as we don't
+// actually want it to be part of the Display
+// model as yet before we've started testing.
+// extends AbstractConcept
 object InstantRange {
   // We use this apply as it's easier to work with date math on LocalDateTime than it is on Instant
   def apply(label: String,
