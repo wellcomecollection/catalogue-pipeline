@@ -3,7 +3,6 @@ package uk.ac.wellcome.platform.recorder.services
 import com.gu.scanamo.Scanamo
 import io.circe.Decoder
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.json.JsonUtil._
@@ -22,7 +21,6 @@ import uk.ac.wellcome.storage.vhs.HybridRecord
 class RecorderWorkerServiceTest
     extends FunSpec
     with Matchers
-    with MockitoSugar
     with Akka
     with LocalVersionedHybridStore
     with SQS
