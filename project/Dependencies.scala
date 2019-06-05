@@ -280,7 +280,8 @@ object CatalogueDependencies {
 
   val reindexWorkerDependencies: Seq[ModuleID] =
     ExternalDependencies.mockitoDependencies ++
-      WellcomeDependencies.messagingTypesafeLibrary
+    WellcomeDependencies.newStorageTypesafeLibrary ++
+    WellcomeDependencies.newMessagingTypesafeLibrary
 
   val sierraTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies ++

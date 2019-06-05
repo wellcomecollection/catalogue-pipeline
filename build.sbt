@@ -107,6 +107,7 @@ lazy val recorder = setupProject(project, "pipeline/recorder",
 )
 
 lazy val reindex_worker = setupProject(project, "reindexer/reindex_worker",
+  localDependencies = Seq(big_messaging_typesafe),
   externalDependencies = CatalogueDependencies.reindexWorkerDependencies
 )
 

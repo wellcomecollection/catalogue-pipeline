@@ -5,11 +5,11 @@
 #     {
 #       "id1": {
 #         "dynamoConfig": {"table": "mytable1"},
-#         "snsConfig": {"topicArn": "mytopic1"}
+#         "destinationConfig": {"topicArn": "mytopic1"}
 #       },
 #       "id2": {
 #         "dynamoConfig": {"table": "mytable2"},
-#         "snsConfig": {"topicArn": "mytopic2"}
+#         "destinationConfig": {"topicArn": "mytopic2"}
 #       }
 #     }
 #
@@ -28,7 +28,7 @@ data "template_file" "single_reindex_job_config" {
     "dynamoConfig": {
       "table": "$${table}"
     },
-    "snsConfig": {
+    "destinationConfig": {
       "topicArn": "$${topicArn}"
     }
   }

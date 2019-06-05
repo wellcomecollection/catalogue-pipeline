@@ -1,33 +1,42 @@
 package uk.ac.wellcome.platform.reindex.reindex_worker.fixtures
 
-import uk.ac.wellcome.platform.reindex.reindex_worker.dynamo.{
-  MaxRecordsScanner,
-  ParallelScanner,
-  ScanSpecScanner
-}
-import uk.ac.wellcome.storage.fixtures.LocalDynamoDb
-import uk.ac.wellcome.fixtures.TestWith
+import com.gu.scanamo.Scanamo
+import uk.ac.wellcome.platform.reindex.reindex_worker.dynamo.{MaxRecordsScanner, ParallelScanner, ScanSpecScanner}
+import uk.ac.wellcome.storage.fixtures.LocalDynamoDb.Table
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.Random
 
-trait DynamoFixtures extends LocalDynamoDb {
-  def withScanSpecScanner[R](testWith: TestWith[ScanSpecScanner, R]): R = {
-    val scanner = new ScanSpecScanner(dynamoDbClient)
+trait DynamoFixtures extends ReindexableTable {
+  case class NamedRecord(
+    id: String,
+    name: String
+  )
 
-    testWith(scanner)
+  private def createRecord(): NamedRecord = NamedRecord(
+    id = Random.alphanumeric.take(5) mkString,
+    name = Random.alphanumeric.take(15) mkString
+  )
+
+  def createRecords(table: Table, count: Int): Seq[NamedRecord] = {
+    val records = (1 to count).map { _ => createRecord() }
+
+    records.foreach(record =>
+      Scanamo.put(dynamoDbClient)(table.name)(record))
+
+    records
   }
 
-  def withParallelScanner[R](testWith: TestWith[ParallelScanner, R]): R =
-    withScanSpecScanner { scanSpecScanner =>
-      val scanner = new ParallelScanner(scanSpecScanner = scanSpecScanner)
+  def createScanSpecScanner: ScanSpecScanner =
+    new ScanSpecScanner(dynamoDbClient)
 
-      testWith(scanner)
-    }
+  def createParallelScanner: ParallelScanner =
+    new ParallelScanner(
+      scanSpecScanner = createScanSpecScanner
+    )
 
-  def withMaxRecordsScanner[R](testWith: TestWith[MaxRecordsScanner, R]): R =
-    withScanSpecScanner { scanSpecScanner =>
-      val scanner = new MaxRecordsScanner(scanSpecScanner = scanSpecScanner)
-
-      testWith(scanner)
-    }
+  def createMaxRecordsScanner: MaxRecordsScanner =
+    new MaxRecordsScanner(
+      scanSpecScanner = createScanSpecScanner
+    )
 }
