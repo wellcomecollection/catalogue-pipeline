@@ -1,16 +1,17 @@
 package uk.ac.wellcome.platform.recorder.fixtures
 
+import org.scalatest.Assertion
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.Messaging
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
+import uk.ac.wellcome.messaging.message.RemoteNotification
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.recorder.services.RecorderWorkerService
 import uk.ac.wellcome.storage.memory.{MemoryObjectStore, MemoryVersionedDao}
+import uk.ac.wellcome.storage.streaming.CodecInstances._
 import uk.ac.wellcome.storage.vhs.{EmptyMetadata, Entry, VersionedHybridStore}
-
-import scala.concurrent.ExecutionContext.Implicits.global
 
 trait WorkerServiceFixture extends Messaging {
   type RecorderEntry = Entry[String, EmptyMetadata]
@@ -50,4 +51,20 @@ trait WorkerServiceFixture extends Messaging {
         testWith(workerService)
       }
     }
+
+  def assertStoredSingleWork(
+    dao: RecorderDao,
+    store: RecorderStore,
+    messageSender: MemoryMessageSender,
+    expectedWork: TransformedBaseWork,
+    expectedVhsVersion: Int = 1): Assertion = {
+    val actualNotifications = messageSender.getMessages[RemoteNotification]
+
+    actualNotifications should have size 1
+    store.get(actualNotifications.head.location).right.value shouldBe expectedWork
+
+    dao.entries should have size 1
+    println(dao.entries)
+    dao.entries(expectedWork.sourceIdentifier.toString).version shouldBe expectedVhsVersion
+  }
 }

@@ -1,8 +1,7 @@
 package uk.ac.wellcome.platform.recorder.services
 
-import io.circe.Decoder
 import org.scalatest.concurrent.Eventually
-import org.scalatest.{Assertion, FunSpec, Matchers}
+import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
@@ -11,6 +10,7 @@ import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.recorder.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.storage._
 import uk.ac.wellcome.storage.memory.{MemoryConditionalUpdateDao, MemoryVersionedDao}
+import uk.ac.wellcome.storage.streaming.CodecInstances._
 
 class RecorderWorkerServiceTest
     extends FunSpec
@@ -162,21 +162,5 @@ class RecorderWorkerServiceTest
         }
       }
     }
-  }
-
-  private def assertStoredSingleWork[T <: TransformedBaseWork](
-    dao: RecorderDao,
-    store: RecorderStore,
-    messageSender: MemoryMessageSender,
-    expectedWork: T,
-    expectedVhsVersion: Int = 1)(implicit decoder: Decoder[T]): Assertion = {
-    val actualEntries = messageSender.getMessages[RecorderEntry]
-
-    actualEntries.size shouldBe 1
-
-    actualEntries.head.id shouldBe expectedWork.sourceIdentifier.toString
-    actualEntries.head.version shouldBe expectedVhsVersion
-
-    store.get(actualEntries.head.location).right.value shouldBe expectedWork
   }
 }
