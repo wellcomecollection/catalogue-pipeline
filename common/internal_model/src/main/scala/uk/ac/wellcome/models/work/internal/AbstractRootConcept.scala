@@ -42,10 +42,11 @@ object InstantRange {
       to = to.toInstant(ZoneOffset.UTC),
       inferred = inferred)
 
-  type ParseDateTimeToInstantRange = (String, LocalDateTime) => InstantRange
-  type DatePattern = String
+  private type ParseDateTimeToInstantRange =
+    (String, LocalDateTime) => InstantRange
+  private type DatePattern = String
 
-  val parsers: List[(DatePattern, ParseDateTimeToInstantRange)] = List(
+  private val parsers: List[(DatePattern, ParseDateTimeToInstantRange)] = List(
     (
       "yyyy",
       (label: String, from: LocalDateTime) =>
@@ -104,10 +105,18 @@ object InstantRange {
   def parse(label: String): Option[InstantRange] = findParser(label, parsers)
 }
 
-case class Period(label: String) extends AbstractConcept
+case class Period(label: String, range: Option[InstantRange])
+    extends AbstractConcept
 object Period {
+  def apply(label: String): Period = {
+    val normalisedLabel = trimTrailing(label, '.')
+    val range = InstantRange.parse(normalisedLabel)
+    Period(normalisedLabel, range)
+  }
+
   def normalised(label: String): Period = {
-    Period(trimTrailing(label, '.'))
+    val normalisedLabel = trimTrailing(label, '.')
+    Period(normalisedLabel)
   }
 }
 
