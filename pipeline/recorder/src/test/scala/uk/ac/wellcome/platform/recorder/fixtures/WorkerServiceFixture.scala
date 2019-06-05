@@ -18,7 +18,8 @@ trait WorkerServiceFixture extends Messaging {
 
   type RecorderDao = MemoryVersionedDao[String, RecorderEntry]
   type RecorderStore = MemoryObjectStore[TransformedBaseWork]
-  type RecorderVhs = VersionedHybridStore[String, TransformedBaseWork, EmptyMetadata]
+  type RecorderVhs =
+    VersionedHybridStore[String, TransformedBaseWork, EmptyMetadata]
 
   def createDao: RecorderDao =
     MemoryVersionedDao[String, RecorderEntry]()
@@ -52,19 +53,23 @@ trait WorkerServiceFixture extends Messaging {
       }
     }
 
-  def assertStoredSingleWork(
-    dao: RecorderDao,
-    store: RecorderStore,
-    messageSender: MemoryMessageSender,
-    expectedWork: TransformedBaseWork,
-    expectedVhsVersion: Int = 1): Assertion = {
+  def assertStoredSingleWork(dao: RecorderDao,
+                             store: RecorderStore,
+                             messageSender: MemoryMessageSender,
+                             expectedWork: TransformedBaseWork,
+                             expectedVhsVersion: Int = 1): Assertion = {
     val actualNotifications = messageSender.getMessages[RemoteNotification]
 
     actualNotifications should have size 1
-    store.get(actualNotifications.head.location).right.value shouldBe expectedWork
+    store
+      .get(actualNotifications.head.location)
+      .right
+      .value shouldBe expectedWork
 
     dao.entries should have size 1
     println(dao.entries)
-    dao.entries(expectedWork.sourceIdentifier.toString).version shouldBe expectedVhsVersion
+    dao
+      .entries(expectedWork.sourceIdentifier.toString)
+      .version shouldBe expectedVhsVersion
   }
 }
