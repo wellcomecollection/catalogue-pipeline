@@ -9,6 +9,10 @@ object WellcomeDependencies {
     val storage    = "3.6.0"
     val typesafe   = "1.0.0"
 
+    val newMessaging  = "5.3.1"
+    val newMonitoring = "2.3.0"
+    val newStorage    = "6.1.3"
+
     val sierraStreamsSource = "0.4"
   }
 
@@ -27,9 +31,19 @@ object WellcomeDependencies {
     version = versions.messaging
   )
 
+  val newMessagingLibrary: Seq[ModuleID] = library(
+    name = "messaging",
+    version = versions.newMessaging
+  )
+
   val monitoringLibrary: Seq[ModuleID] = library(
     name = "monitoring",
     version = versions.monitoring
+  )
+
+  val newMonitoringLibrary: Seq[ModuleID] = library(
+    name = "monitoring",
+    version = versions.newMonitoring
   )
 
   val storageLibrary: Seq[ModuleID] = library(
@@ -37,10 +51,25 @@ object WellcomeDependencies {
     version = versions.storage
   )
 
+  val newStorageLibrary: Seq[ModuleID] = library(
+    name = "storage",
+    version = versions.newStorage
+  )
+
   val typesafeLibrary: Seq[ModuleID] = library(
     name = "typesafe-app",
     version = versions.typesafe
   ) ++ fixturesLibrary
+
+  val newStorageTypesafeLibrary: Seq[ModuleID] = newStorageLibrary ++ library(
+    name = "storage_typesafe",
+    version = versions.newStorage
+  )
+
+  val newMessagingTypesafeLibrary: Seq[ModuleID] = newMessagingLibrary ++ library(
+    name = "messaging_typesafe",
+    version = versions.newMessaging
+  ) ++ newMonitoringLibrary
 
   val messagingTypesafeLibrary: Seq[ModuleID] = messagingLibrary ++ library(
     name = "messaging_typesafe",
@@ -178,6 +207,18 @@ object CatalogueDependencies {
     ExternalDependencies.elasticsearchDependencies ++
     ExternalDependencies.scalacheckDependencies ++
     WellcomeDependencies.fixturesLibrary
+
+  val bigMessagingDependencies: Seq[ModuleID] =
+    ExternalDependencies.scalatestDependencies ++
+      WellcomeDependencies.typesafeLibrary ++
+      WellcomeDependencies.newMonitoringLibrary ++
+      WellcomeDependencies.newMessagingLibrary ++
+      WellcomeDependencies.newStorageLibrary ++
+      WellcomeDependencies.fixturesLibrary
+
+  val bigMessagingTypesafeDependencies: Seq[ModuleID] =
+    WellcomeDependencies.newStorageTypesafeLibrary ++
+      WellcomeDependencies.newMessagingTypesafeLibrary
 
   val elasticsearchTypesafeDependencies: Seq[ModuleID] =
     WellcomeDependencies.typesafeLibrary
