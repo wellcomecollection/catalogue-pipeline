@@ -279,7 +279,6 @@ object CatalogueDependencies {
       WellcomeDependencies.messagingTypesafeLibrary
 
   val reindexWorkerDependencies: Seq[ModuleID] =
-    ExternalDependencies.mockitoDependencies ++
     WellcomeDependencies.newStorageTypesafeLibrary ++
     WellcomeDependencies.newMessagingTypesafeLibrary
 
