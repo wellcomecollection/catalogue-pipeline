@@ -275,8 +275,8 @@ object CatalogueDependencies {
       WellcomeDependencies.messagingTypesafeLibrary
 
   val recorderDependencies: Seq[ModuleID] =
-    ExternalDependencies.mockitoDependencies ++
-      WellcomeDependencies.messagingTypesafeLibrary
+    WellcomeDependencies.newMessagingTypesafeLibrary ++
+    WellcomeDependencies.newStorageTypesafeLibrary
 
   val reindexWorkerDependencies: Seq[ModuleID] =
     ExternalDependencies.mockitoDependencies ++
