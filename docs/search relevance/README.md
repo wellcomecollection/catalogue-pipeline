@@ -31,8 +31,12 @@ We can collect lots of this data (100,000s of actions logged so far), but it lac
 
 ### Metrics
 We're using multiple complementary metrics to measure search relevance:
+
+#### Explicit
 - **Normalised Discounted Cumulative Gain (NDCG)** is well explained in [this post](https://www.ebayinc.com/stories/blogs/tech/measuring-search-relevance/) by ebay. It relies on explicitly collected data from users who know that the data they give us will be used to measure algorithmic performance. It compares the actual performance of a query-type (the order of a set of rated results) to the _ideal_ performance (the same results, sorted from most to least relevant).
 - **Strict, loose, and permissive precision** use the same data as NDCG. For strict precision, the percentage of results rated 4+ is counted. Loose precision counts the percentage of 3+ ratings, and permissive precision counts 2+. Explained in the book [_Search Analytics For Your Site_](https://rosenfeldmedia.com/books/search-analytics-for-your-site/) by Louis Rosenfeld.
+
+#### Implicit
 - **Click through rate (CTR)** is measured passively by tracking users' behaviour while they use the search function. This version of CTR is different to the usual definition; we take the ratio of the number of distinct searches to the number of items clicked on for each anonymised session id.
 - **Top 5 click through rate (CTR5)** is almost exactly the same as the above, but only counts the clicks on works which appear in the top 5 results.
 
