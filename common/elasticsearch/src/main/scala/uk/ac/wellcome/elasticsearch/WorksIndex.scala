@@ -1,8 +1,8 @@
 package uk.ac.wellcome.elasticsearch
 
-import com.sksamuel.elastic4s.analyzers._
-import com.sksamuel.elastic4s.http.ElasticDsl._
-import com.sksamuel.elastic4s.mappings.{FieldDefinition, ObjectField}
+import com.sksamuel.elastic4s.requests.analyzers._
+import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.requests.mappings.{FieldDefinition, ObjectField}
 
 object WorksIndex {
   val license = objectField("license").fields(

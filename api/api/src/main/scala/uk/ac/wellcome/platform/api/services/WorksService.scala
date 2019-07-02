@@ -2,9 +2,9 @@ package uk.ac.wellcome.platform.api.services
 
 import com.google.inject.{Inject, Singleton}
 import com.sksamuel.elastic4s.Index
-import com.sksamuel.elastic4s.http.ElasticError
-import com.sksamuel.elastic4s.http.get.GetResponse
-import com.sksamuel.elastic4s.http.search.{SearchHit, SearchResponse}
+import com.sksamuel.elastic4s.ElasticError
+import com.sksamuel.elastic4s.requests.get.GetResponse
+import com.sksamuel.elastic4s.requests.searches.{SearchHit, SearchResponse}
 import io.circe.Decoder
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.internal.{IdentifiedBaseWork, IdentifiedWork}

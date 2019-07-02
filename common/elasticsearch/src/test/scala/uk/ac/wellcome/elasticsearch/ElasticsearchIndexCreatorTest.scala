@@ -1,9 +1,9 @@
 package uk.ac.wellcome.elasticsearch
 
-import com.sksamuel.elastic4s.http.ElasticDsl._
-import com.sksamuel.elastic4s.http.{RequestFailure, Response}
-import com.sksamuel.elastic4s.http.index.IndexResponse
-import com.sksamuel.elastic4s.http.search.SearchResponse
+import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.{RequestFailure, Response}
+import com.sksamuel.elastic4s.requests.indexes.IndexResponse
+import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
 import org.scalatest.{BeforeAndAfterEach, FunSpec, Matchers}
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
@@ -54,7 +54,7 @@ class ElasticsearchIndexCreatorTest
       eventually {
         for {
           _ <- elasticClient.execute(
-            indexInto(index.name / index.name).doc(testObjectJson))
+            indexInto(index.name).doc(testObjectJson))
           response: Response[SearchResponse] <- elasticClient
             .execute {
               search(index).matchAllQuery()
@@ -80,7 +80,7 @@ class ElasticsearchIndexCreatorTest
       val future: Future[Response[IndexResponse]] =
         elasticClient
           .execute {
-            indexInto(index.name / index.name)
+            indexInto(index.name)
               .doc(badTestObjectJson)
           }
 
@@ -108,7 +108,7 @@ class ElasticsearchIndexCreatorTest
         val futureInsert: Future[Response[IndexResponse]] =
           elasticClient
             .execute {
-              indexInto(index.name / index.name)
+              indexInto(index.name)
                 .doc(compatibleTestObjectJson)
             }
 

@@ -1,12 +1,12 @@
 package uk.ac.wellcome.platform.ingestor.services
 
 import com.sksamuel.elastic4s.Index
-import com.sksamuel.elastic4s.http.ElasticDsl.{
+import com.sksamuel.elastic4s.ElasticDsl.{
   intField,
   keywordField,
   objectField
 }
-import com.sksamuel.elastic4s.mappings.FieldDefinition
+import com.sksamuel.elastic4s.requests.mappings.FieldDefinition
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Assertion, FunSpec, Matchers}
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures

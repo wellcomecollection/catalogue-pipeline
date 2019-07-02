@@ -1,10 +1,10 @@
 package uk.ac.wellcome.platform.ingestor.services
 
 import com.sksamuel.elastic4s.{Index, Indexable}
-import com.sksamuel.elastic4s.VersionType.ExternalGte
-import com.sksamuel.elastic4s.http.ElasticDsl._
-import com.sksamuel.elastic4s.http.bulk.{BulkResponse, BulkResponseItem}
-import com.sksamuel.elastic4s.http.{ElasticClient, Response}
+import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.requests.bulk.{BulkResponse, BulkResponseItem}
+import com.sksamuel.elastic4s.{ElasticClient, Response}
+import com.sksamuel.elastic4s.requests.common.VersionType.ExternalGte
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.internal.{
@@ -39,7 +39,7 @@ class WorkIndexer(
       //
       // Our prod cluster is already creating a single "type" with the same name
       // as the index, so do the same here.
-      indexInto(index.name / index.name)
+      indexInto(index.name)
         .version(calculateEsVersion(work))
         .versionType(ExternalGte)
         .id(work.canonicalId)

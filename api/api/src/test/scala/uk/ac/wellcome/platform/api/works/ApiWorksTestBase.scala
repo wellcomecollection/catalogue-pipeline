@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.api.works
 
 import com.sksamuel.elastic4s.{Index, Indexable}
-import com.sksamuel.elastic4s.http.ElasticDsl._
+import com.sksamuel.elastic4s.ElasticDsl._
 import com.twitter.finatra.http.EmbeddedHttpServer
 import org.scalatest.FunSpec
 import uk.ac.wellcome.display.models.ApiVersions

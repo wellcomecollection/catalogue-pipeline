@@ -94,7 +94,7 @@ object ExternalDependencies {
     val apacheLogging       = "2.8.2"
     val aws                 = "1.11.95"
     val circe               = "0.9.0"
-    val elastic4s           = "6.5.0"
+    val elastic4s           = "7.1.0"
     val finatra             = "18.11.0"
     val guice               = "4.2.0"
     val logback             = "1.1.8"
@@ -127,12 +127,12 @@ object ExternalDependencies {
   )
 
   val elasticsearchDependencies = Seq(
-    "org.apache.logging.log4j" % "log4j-core" %            versions.apacheLogging,
-    "org.apache.logging.log4j" % "log4j-api" %             versions.apacheLogging,
-    "com.sksamuel.elastic4s" %% "elastic4s-core" %         versions.elastic4s,
-    "com.sksamuel.elastic4s" %% "elastic4s-http" %         versions.elastic4s,
-    "com.sksamuel.elastic4s" %% "elastic4s-http-streams" % versions.elastic4s,
-    "com.sksamuel.elastic4s" %% "elastic4s-testkit" %      versions.elastic4s % "test"
+    "org.apache.logging.log4j" % "log4j-core"             % versions.apacheLogging,
+    "org.apache.logging.log4j" % "log4j-api"              % versions.apacheLogging,
+    "com.sksamuel.elastic4s" %% "elastic4s-core"          % versions.elastic4s,
+    "com.sksamuel.elastic4s" %% "elastic4s-client-esjava" % versions.elastic4s,
+    "com.sksamuel.elastic4s" %% "elastic4s-http-streams"  % versions.elastic4s,
+    "com.sksamuel.elastic4s" %% "elastic4s-testkit"       % versions.elastic4s % "test"
   )
 
   val finatraDependencies = Seq(

@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.ingestor.fixtures
 
 import com.sksamuel.elastic4s.Index
-import com.sksamuel.elastic4s.http.ElasticClient
+import com.sksamuel.elastic4s.ElasticClient
 import org.scalatest.Suite
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures

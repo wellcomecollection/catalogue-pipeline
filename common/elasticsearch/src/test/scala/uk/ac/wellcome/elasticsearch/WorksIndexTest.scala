@@ -3,10 +3,10 @@ package uk.ac.wellcome.elasticsearch
 import java.time.Instant
 
 import com.sksamuel.elastic4s.Index
-import com.sksamuel.elastic4s.http.ElasticDsl.{indexInto, search, _}
-import com.sksamuel.elastic4s.http.index.IndexResponse
-import com.sksamuel.elastic4s.http.search.SearchResponse
-import com.sksamuel.elastic4s.http.{ElasticError, Response}
+import com.sksamuel.elastic4s.ElasticDsl.{indexInto, search, _}
+import com.sksamuel.elastic4s.requests.indexes.IndexResponse
+import com.sksamuel.elastic4s.requests.searches.SearchResponse
+import com.sksamuel.elastic4s.{ElasticError, Response}
 import io.circe.Encoder
 import org.scalacheck.{Arbitrary, Shrink}
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
@@ -116,7 +116,7 @@ class WorksIndexTest
     implicit encoder: Encoder[T]): Future[Response[IndexResponse]] =
     elasticClient
       .execute {
-        indexInto(index.name / index.name).doc(toJson(t).get)
+        indexInto(index.name).doc(toJson(t).get)
       }
 
   private def assertObjectIndexed[T](index: Index, t: T)(

@@ -1,8 +1,8 @@
 package uk.ac.wellcome.platform.api.models
 
-import com.sksamuel.elastic4s.http.ElasticDsl._
-import com.sksamuel.elastic4s.searches.queries.{Query, SimpleStringQuery}
-import com.sksamuel.elastic4s.searches.queries.matches.{
+import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.requests.searches.queries.{Query, SimpleStringQuery}
+import com.sksamuel.elastic4s.requests.searches.queries.matches.{
   MultiMatchQuery,
   MultiMatchQueryBuilderType
 }
