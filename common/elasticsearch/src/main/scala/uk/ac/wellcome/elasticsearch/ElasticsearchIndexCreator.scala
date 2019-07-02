@@ -6,7 +6,10 @@ import com.sksamuel.elastic4s.requests.indexes.CreateIndexResponse
 import com.sksamuel.elastic4s.requests.indexes.PutMappingResponse
 import com.sksamuel.elastic4s.{ElasticClient, Response}
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
-import com.sksamuel.elastic4s.requests.mappings.{FieldDefinition, MappingDefinition}
+import com.sksamuel.elastic4s.requests.mappings.{
+  FieldDefinition,
+  MappingDefinition
+}
 import grizzled.slf4j.Logging
 
 import scala.concurrent.{ExecutionContext, Future}

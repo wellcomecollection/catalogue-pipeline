@@ -53,8 +53,7 @@ class ElasticsearchIndexCreatorTest
 
       eventually {
         for {
-          _ <- elasticClient.execute(
-            indexInto(index.name).doc(testObjectJson))
+          _ <- elasticClient.execute(indexInto(index.name).doc(testObjectJson))
           response: Response[SearchResponse] <- elasticClient
             .execute {
               search(index).matchAllQuery()
