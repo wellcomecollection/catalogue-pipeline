@@ -7,7 +7,7 @@ import com.sksamuel.elastic4s.http.get.GetResponse
 import com.sksamuel.elastic4s.http.search.SearchResponse
 import com.sksamuel.elastic4s.http.{ElasticClient, ElasticError, Response}
 import com.sksamuel.elastic4s.searches.SearchRequest
-import com.sksamuel.elastic4s.searches.queries.Query
+import com.sksamuel.elastic4s.searches.queries.{NoopQuery, Query}
 import com.sksamuel.elastic4s.searches.sort.{FieldSort, SortOrder}
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.platform.api.models._
@@ -91,6 +91,7 @@ class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
           values = itemLocationTypeIds)
       case WorkTypeFilter(workTypeIds) =>
         termsQuery(field = "workType.id", values = workTypeIds)
+      case DateRangeFilter(_, _) => NoopQuery // TODO: return date range query
     }
 
   private def buildFilteredQuery(maybeWorkQuery: Option[WorkQuery],

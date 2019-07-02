@@ -1,5 +1,7 @@
 package uk.ac.wellcome.platform.api.models
 
+import java.time.LocalDate
+
 sealed trait WorkFilter
 
 case class ItemLocationTypeFilter(locationTypeIds: Seq[String])
@@ -16,3 +18,6 @@ case object WorkTypeFilter {
   def apply(workTypeId: String): WorkTypeFilter =
     WorkTypeFilter(workTypeIds = Seq(workTypeId))
 }
+
+case class DateRangeFilter(fromDate: Option[LocalDate], toDate: Option[LocalDate])
+    extends WorkFilter
