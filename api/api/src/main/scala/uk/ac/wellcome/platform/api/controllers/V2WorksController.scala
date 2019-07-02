@@ -60,7 +60,13 @@ class V2WorksController @Inject()(
           WorkTypeFilter(workTypeIds)
         }
 
-    List(maybeItemLocationTypeFilter, maybeWorkTypeFilter).flatten
+    val maybeDateRangeFilter : Option[DateRangeFilter] =
+      (request._dateFrom, request._dateTo) match {
+        case (None, None) => None
+        case (dateFrom, dateTo) => Some(DateRangeFilter(dateFrom, dateTo))
+      }
+
+    List(maybeItemLocationTypeFilter, maybeWorkTypeFilter, maybeDateRangeFilter).flatten
   }
 
   override def setupResultListSwaggerDocs[T <: DisplayWork](
