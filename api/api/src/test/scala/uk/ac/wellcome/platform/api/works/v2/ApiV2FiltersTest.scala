@@ -181,6 +181,117 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
     }
   }
 
+  describe("filtering works by date") {
+
+    val (work1, work2, work3) = (
+      createDatedWork("1709", canonicalId="a"),
+      createDatedWork("1950", canonicalId="b"),
+      createDatedWork("2000", canonicalId="c")
+    )
+
+    it("filters by date range") {
+      withV2Api {
+        case (indexV2, server: EmbeddedHttpServer) =>
+          insertIntoElasticsearch(indexV2, work1, work2, work3)
+          eventually {
+            server.httpGet(
+              path =
+                s"/$apiPrefix/works?_dateFrom=1900-01-01&_dateTo=1960-01-01",
+              andExpect = Status.Ok,
+              withJsonBody = s"""
+                                |{
+                                |  ${resultList(apiPrefix, totalResults = 1)},
+                                |  "results": [
+                                |    {
+                                |      "type": "Work",
+                                |      "id": "${work2.canonicalId}",
+                                |      "title": "${work2.title}"
+                                |    }
+                                |  ]
+                                |}
+          """.stripMargin
+            )
+          }
+      }
+    }
+
+    it("filters by from date") {
+      withV2Api {
+        case (indexV2, server: EmbeddedHttpServer) =>
+          insertIntoElasticsearch(indexV2, work1, work2, work3)
+          eventually {
+            server.httpGet(
+              path =
+                s"/$apiPrefix/works?_dateFrom=1900-01-01",
+              andExpect = Status.Ok,
+              withJsonBody = s"""
+                                |{
+                                |  ${resultList(apiPrefix, totalResults = 2)},
+                                |  "results": [
+                                |    {
+                                |      "type": "Work",
+                                |      "id": "${work2.canonicalId}",
+                                |      "title": "${work2.title}"
+                                |    },
+                                |    {
+                                |      "type": "Work",
+                                |      "id": "${work3.canonicalId}",
+                                |      "title": "${work3.title}"
+                                |    }
+                                |  ]
+                                |}
+          """.stripMargin
+            )
+          }
+      }
+    }
+
+    it("filters by to date") {
+      withV2Api {
+        case (indexV2, server: EmbeddedHttpServer) =>
+          insertIntoElasticsearch(indexV2, work1, work2, work3)
+          eventually {
+            server.httpGet(
+              path =
+                s"/$apiPrefix/works?_dateTo=1960-01-01",
+              andExpect = Status.Ok,
+              withJsonBody = s"""
+                                |{
+                                |  ${resultList(apiPrefix, totalResults = 2)},
+                                |  "results": [
+                                |    {
+                                |      "type": "Work",
+                                |      "id": "${work1.canonicalId}",
+                                |      "title": "${work1.title}"
+                                |    },
+                                |    {
+                                |      "type": "Work",
+                                |      "id": "${work2.canonicalId}",
+                                |      "title": "${work2.title}"
+                                |    }
+                                |  ]
+                                |}
+          """.stripMargin
+            )
+          }
+      }
+    }
+
+    it("errors on invalid date") {
+      withV2Api {
+        case (indexV2, server: EmbeddedHttpServer) =>
+          insertIntoElasticsearch(indexV2, work1, work2, work3)
+          eventually {
+            server.httpGet(
+              path =
+                s"/$apiPrefix/works?_dateFrom=1900-01-01&_dateTo=INVALID",
+              andExpect = Status.BadRequest,
+            )
+          }
+      }
+    }
+  }
+
   describe("searching works") {
     it("ignores works with no workType") {
       withV2Api {

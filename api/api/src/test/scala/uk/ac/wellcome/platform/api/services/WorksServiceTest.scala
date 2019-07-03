@@ -10,7 +10,6 @@ import uk.ac.wellcome.models.work.internal.{IdentifiedBaseWork, WorkType}
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
 import uk.ac.wellcome.platform.api.models.WorkQuery.SimpleQuery
 import uk.ac.wellcome.platform.api.models.{DateRangeFilter, ResultList, WorkTypeFilter}
-import uk.ac.wellcome.models.work.internal.IdentifiedWork
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -332,11 +331,6 @@ class WorksServiceTest
       }
     }
   }
-
-  private def createDatedWork(dateLabel: String): IdentifiedWork =
-    createIdentifiedWorkWith(
-      production = List(createProductionEventWith(dateLabel = Some(dateLabel)))
-    )
 
   private def assertListResultIsCorrect(
     allWorks: Seq[IdentifiedBaseWork],
