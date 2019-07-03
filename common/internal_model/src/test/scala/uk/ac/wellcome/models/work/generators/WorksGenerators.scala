@@ -2,9 +2,7 @@ package uk.ac.wellcome.models.work.generators
 
 import uk.ac.wellcome.models.work.internal._
 
-trait WorksGenerators
-    extends ItemsGenerators
-    with ProductionEventGenerators {
+trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
 
   private def createTitle: String = randomAlphanumeric(length = 100)
 
@@ -225,9 +223,9 @@ trait WorksGenerators
     List.fill(count)(createIsbnWork)
 
   def createDatedWork(
-      dateLabel: String,
-      canonicalId: String = createCanonicalId
-    ): IdentifiedWork =
+    dateLabel: String,
+    canonicalId: String = createCanonicalId
+  ): IdentifiedWork =
     createIdentifiedWorkWith(
       canonicalId = canonicalId,
       production = List(createProductionEventWith(dateLabel = Some(dateLabel)))

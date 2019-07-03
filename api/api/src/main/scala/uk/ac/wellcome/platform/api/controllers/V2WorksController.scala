@@ -60,9 +60,9 @@ class V2WorksController @Inject()(
           WorkTypeFilter(workTypeIds)
         }
 
-    val maybeDateRangeFilter : Option[DateRangeFilter] =
+    val maybeDateRangeFilter: Option[DateRangeFilter] =
       (request._dateFrom, request._dateTo) match {
-        case (None, None) => None
+        case (None, None)       => None
         case (dateFrom, dateTo) => Some(DateRangeFilter(dateFrom, dateTo))
       }
 

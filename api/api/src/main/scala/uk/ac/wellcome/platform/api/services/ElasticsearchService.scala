@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.api.services
 
 import com.google.inject.{Inject, Singleton}
-import com.sksamuel.elastic4s.{Index, ElasticDate}
+import com.sksamuel.elastic4s.{ElasticDate, Index}
 import com.sksamuel.elastic4s.http.ElasticDsl._
 import com.sksamuel.elastic4s.http.get.GetResponse
 import com.sksamuel.elastic4s.http.search.SearchResponse
@@ -92,8 +92,8 @@ class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
       case WorkTypeFilter(workTypeIds) =>
         termsQuery(field = "workType.id", values = workTypeIds)
       case DateRangeFilter(fromDate, toDate) =>
-        val (gte, lte) = (fromDate map ElasticDate.apply,
-                          toDate map ElasticDate.apply)
+        val (gte, lte) =
+          (fromDate map ElasticDate.apply, toDate map ElasticDate.apply)
         boolQuery should (
           RangeQuery("production.dates.range.from", lte = lte, gte = gte),
           RangeQuery("production.dates.range.to", lte = lte, gte = gte)

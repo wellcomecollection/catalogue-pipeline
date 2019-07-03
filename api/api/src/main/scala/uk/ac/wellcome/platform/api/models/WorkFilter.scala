@@ -19,5 +19,6 @@ case object WorkTypeFilter {
     WorkTypeFilter(workTypeIds = Seq(workTypeId))
 }
 
-case class DateRangeFilter(fromDate: Option[LocalDate], toDate: Option[LocalDate])
+case class DateRangeFilter(fromDate: Option[LocalDate],
+                           toDate: Option[LocalDate])
     extends WorkFilter

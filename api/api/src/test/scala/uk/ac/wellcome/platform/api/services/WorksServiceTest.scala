@@ -5,11 +5,18 @@ import com.sksamuel.elastic4s.http.ElasticError
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Assertion, FunSpec, Matchers}
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
-import uk.ac.wellcome.models.work.generators.{ProductionEventGenerators, WorksGenerators}
+import uk.ac.wellcome.models.work.generators.{
+  ProductionEventGenerators,
+  WorksGenerators
+}
 import uk.ac.wellcome.models.work.internal.{IdentifiedBaseWork, WorkType}
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
 import uk.ac.wellcome.platform.api.models.WorkQuery.SimpleQuery
-import uk.ac.wellcome.platform.api.models.{DateRangeFilter, ResultList, WorkTypeFilter}
+import uk.ac.wellcome.platform.api.models.{
+  DateRangeFilter,
+  ResultList,
+  WorkTypeFilter
+}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

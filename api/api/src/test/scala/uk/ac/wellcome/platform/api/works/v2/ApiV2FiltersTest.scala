@@ -184,9 +184,9 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
   describe("filtering works by date") {
 
     val (work1, work2, work3) = (
-      createDatedWork("1709", canonicalId="a"),
-      createDatedWork("1950", canonicalId="b"),
-      createDatedWork("2000", canonicalId="c")
+      createDatedWork("1709", canonicalId = "a"),
+      createDatedWork("1950", canonicalId = "b"),
+      createDatedWork("2000", canonicalId = "c")
     )
 
     it("filters by date range") {
@@ -221,8 +221,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
           insertIntoElasticsearch(indexV2, work1, work2, work3)
           eventually {
             server.httpGet(
-              path =
-                s"/$apiPrefix/works?_dateFrom=1900-01-01",
+              path = s"/$apiPrefix/works?_dateFrom=1900-01-01",
               andExpect = Status.Ok,
               withJsonBody = s"""
                                 |{
@@ -252,8 +251,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
           insertIntoElasticsearch(indexV2, work1, work2, work3)
           eventually {
             server.httpGet(
-              path =
-                s"/$apiPrefix/works?_dateTo=1960-01-01",
+              path = s"/$apiPrefix/works?_dateTo=1960-01-01",
               andExpect = Status.Ok,
               withJsonBody = s"""
                                 |{
@@ -283,8 +281,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
           insertIntoElasticsearch(indexV2, work1, work2, work3)
           eventually {
             server.httpGet(
-              path =
-                s"/$apiPrefix/works?_dateFrom=1900-01-01&_dateTo=INVALID",
+              path = s"/$apiPrefix/works?_dateFrom=1900-01-01&_dateTo=INVALID",
               andExpect = Status.BadRequest,
             )
           }
