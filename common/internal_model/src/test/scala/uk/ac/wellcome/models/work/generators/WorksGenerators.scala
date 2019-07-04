@@ -2,7 +2,8 @@ package uk.ac.wellcome.models.work.generators
 
 import uk.ac.wellcome.models.work.internal._
 
-trait WorksGenerators extends ItemsGenerators {
+trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
+
   private def createTitle: String = randomAlphanumeric(length = 100)
 
   def createUnidentifiedRedirectedWork: UnidentifiedRedirectedWork =
@@ -220,4 +221,13 @@ trait WorksGenerators extends ItemsGenerators {
 
   def createIsbnWorks(count: Int): List[UnidentifiedWork] =
     List.fill(count)(createIsbnWork)
+
+  def createDatedWork(
+    dateLabel: String,
+    canonicalId: String = createCanonicalId
+  ): IdentifiedWork =
+    createIdentifiedWorkWith(
+      canonicalId = canonicalId,
+      production = List(createProductionEventWith(dateLabel = Some(dateLabel)))
+    )
 }

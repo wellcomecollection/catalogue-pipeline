@@ -4,13 +4,15 @@ import uk.ac.wellcome.models.generators.RandomStrings
 import uk.ac.wellcome.models.work.internal._
 
 trait ProductionEventGenerators extends RandomStrings {
-  def createProductionEventWith(function: Option[Concept] = None)
-    : ProductionEvent[Displayable[AbstractAgent]] =
+  def createProductionEventWith(
+    function: Option[Concept] = None,
+    dateLabel: Option[String] = None
+  ): ProductionEvent[Displayable[AbstractAgent]] =
     ProductionEvent(
       label = randomAlphanumeric(25),
       places = List(Place(randomAlphanumeric(10))),
       agents = List(Unidentifiable(Person(randomAlphanumeric(10)))),
-      dates = List(Period(randomAlphanumeric(5))),
+      dates = List(Period(dateLabel.getOrElse(randomAlphanumeric(5)))),
       function = function
     )
 

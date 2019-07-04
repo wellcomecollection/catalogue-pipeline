@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.api.requests
 
+import java.time.LocalDate
 import com.twitter.finagle.http.Request
 import com.twitter.finatra.request.{QueryParam, RouteParam}
 import com.twitter.finatra.validation.{Max, Min}
@@ -44,6 +45,8 @@ case class V2MultipleResultsRequest(
   @QueryParam("items.locations.locationType") itemLocationType: Option[String],
   @QueryParam _index: Option[String],
   @QueryParam _queryType: Option[String],
+  @QueryParam _dateFrom: Option[LocalDate],
+  @QueryParam _dateTo: Option[LocalDate],
   request: Request
 ) extends MultipleResultsRequest[V2WorksIncludes]
 
