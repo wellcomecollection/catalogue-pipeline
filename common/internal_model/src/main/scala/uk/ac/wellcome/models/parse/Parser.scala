@@ -26,3 +26,17 @@ trait Parser[T] {
       case Parsed.Failure(_, _, _) => None
     }
 }
+
+/**
+ *  Parser implementations intended to be used as implicit parameters
+ */
+package object parsers {
+
+  implicit object DateParser extends Parser[InstantRange] {
+    def parser[_ : P] =
+      FreeformDateParser.parser
+        .map(_.instantRange)
+        .filter(_.nonEmpty)
+        .map(_.get)
+  }
+}
