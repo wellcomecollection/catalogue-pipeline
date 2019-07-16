@@ -260,6 +260,6 @@ trait SierraProduction {
     vf.subfields
       .filter { _.tag == subfieldTag }
       .map { sf: MarcSubfield =>
-        Period.normalised(label = sf.content)
+        Period(label = sf.content)
       }
 }
