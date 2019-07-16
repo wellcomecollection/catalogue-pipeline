@@ -95,6 +95,7 @@ object ExternalDependencies {
     val aws                 = "1.11.95"
     val circe               = "0.9.0"
     val elastic4s           = "6.5.0"
+    val fastparse           = "2.1.3"
     val finatra             = "18.11.0"
     val guice               = "4.2.0"
     val logback             = "1.1.8"
@@ -187,6 +188,10 @@ object ExternalDependencies {
   val swaggerDependencies = Seq(
     "com.jakehschwartz" %% "finatra-swagger" % versions.finatra
   )
+
+  val parseDependencies = Seq(
+    "com.lihaoyi" %% "fastparse" % versions.fastparse
+  )
 }
 
 object CatalogueDependencies {
@@ -196,7 +201,8 @@ object CatalogueDependencies {
 
   val internalModelDependencies =
     ExternalDependencies.scalacsvDependencies ++
-    WellcomeDependencies.jsonLibrary
+    WellcomeDependencies.jsonLibrary ++
+    ExternalDependencies.parseDependencies
 
   val displayModelDependencies =
     ExternalDependencies.swaggerDependencies ++
