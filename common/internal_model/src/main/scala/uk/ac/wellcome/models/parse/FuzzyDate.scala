@@ -70,7 +70,7 @@ object ToInstantRange extends DateHelpers {
                      monthEnd(value.to.month, value.to.year))
     }
 
-  implicit val dayRangeWithinAMonth =
+  implicit val convertDayRangeWithinAMonth =
     new ToInstantRange[DateRange[Day, ExactDate]] {
       def apply(value: DateRange[Day, ExactDate]): InstantRange =
         InstantRange(localDate(value.from.day, value.to.month, value.to.year),
