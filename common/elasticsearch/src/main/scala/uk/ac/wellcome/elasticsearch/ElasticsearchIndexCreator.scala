@@ -19,9 +19,8 @@ class ElasticsearchIndexCreator(elasticClient: ElasticClient)(
     extends Logging {
   def create(index: Index, fields: Seq[FieldDefinition]): Future[Unit] = {
     val mappingDefinition: MappingDefinition =
-      mapping(index.name)
+      properties(fields)
         .dynamic(DynamicMapping.Strict)
-        .as(fields)
 
     create(index = index, mappingDefinition = mappingDefinition)
   }
@@ -31,7 +30,7 @@ class ElasticsearchIndexCreator(elasticClient: ElasticClient)(
     elasticClient
       .execute {
         createIndex(index.name)
-          .mappings { mappingDefinition }
+          .mapping { mappingDefinition }
 
           // Because we have a relatively small number of records (compared
           // to what Elasticsearch usually expects), we can get weird results
