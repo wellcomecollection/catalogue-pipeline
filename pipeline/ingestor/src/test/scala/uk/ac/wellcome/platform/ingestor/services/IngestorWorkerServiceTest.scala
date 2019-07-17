@@ -1,6 +1,7 @@
 package uk.ac.wellcome.platform.ingestor.services
 
 import com.sksamuel.elastic4s.ElasticClient
+import com.sksamuel.elastic4s.http.JavaClient
 import org.apache.http.HttpHost
 import org.elasticsearch.client.RestClient
 import org.scalatest.concurrent.ScalaFutures
@@ -151,7 +152,7 @@ class IngestorWorkerServiceTest
                 .build()
 
               val brokenClient: ElasticClient =
-                ElasticClient.fromRestClient(brokenRestClient)
+                ElasticClient(JavaClient.fromRestClient(brokenRestClient))
 
               val config = IngestorConfig(
                 batchSize = 100,
