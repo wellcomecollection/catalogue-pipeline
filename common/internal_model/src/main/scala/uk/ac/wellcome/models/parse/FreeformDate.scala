@@ -24,7 +24,7 @@ case class FreeformDate(date: Either[FuzzyDate, FuzzyDateRange],
 }
 
 /**
- *  A exact or ambigous date
+ *  An exact or ambigous date
  */
 sealed trait FuzzyDate extends DateHelpers {
 
@@ -47,11 +47,11 @@ sealed trait FuzzyDate extends DateHelpers {
 case class ExactDate(date: LocalDate) extends FuzzyDate
 case class Year(year: Int) extends FuzzyDate
 case class MonthAndYear(month: Int, year: Int) extends FuzzyDate
-case class Month(day: Int) extends FuzzyDate
+case class Month(month: Int) extends FuzzyDate
 case class Day(day: Int) extends FuzzyDate
 
 /**
- *  A continuos period over some days / months / years
+ *  A continuous period over some days / months / years
  *
  *  @param from The start date
  *  @param to The end date
