@@ -18,7 +18,12 @@ import org.scalacheck.ScalacheckShapeless._
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.models.work.internal.{IdentifiedBaseWork, Person, Subject, Unidentifiable}
+import uk.ac.wellcome.models.work.internal.{
+  IdentifiedBaseWork,
+  Person,
+  Subject,
+  Unidentifiable
+}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

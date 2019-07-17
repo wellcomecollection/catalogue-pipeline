@@ -39,7 +39,7 @@ class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
     )
 
   def queryResults(
-                    workQuery: WorkQuery): (Index, ElasticsearchQueryOptions) => Future[
+    workQuery: WorkQuery): (Index, ElasticsearchQueryOptions) => Future[
     Either[ElasticError, SearchResponse]] =
     executeSearch(
       maybeWorkQuery = Some(workQuery),
@@ -52,10 +52,10 @@ class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
     * using the elastic4s query DSL, then execute the search.
     */
   private def executeSearch(
-                             maybeWorkQuery: Option[WorkQuery],
-                             sortDefinitions: List[FieldSort]
-                           )(index: Index, queryOptions: ElasticsearchQueryOptions)
-  : Future[Either[ElasticError, SearchResponse]] = {
+    maybeWorkQuery: Option[WorkQuery],
+    sortDefinitions: List[FieldSort]
+  )(index: Index, queryOptions: ElasticsearchQueryOptions)
+    : Future[Either[ElasticError, SearchResponse]] = {
 
     val searchRequest: SearchRequest =
       buildSearchRequest(index, maybeWorkQuery, sortDefinitions, queryOptions)
