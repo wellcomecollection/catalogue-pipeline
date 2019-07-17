@@ -10,25 +10,25 @@ import fastparse._, NoWhitespace._
 object FreeformDateParser extends Parser[FreeformDate] with DateParsingUtils {
 
   def parser[_ : P] =
-    Start ~ (inferredDate | knownDate) ~ End
+    Start ~ (inferredDate | date) ~ End
 
-  def knownDate[_ : P] =
-    (dateRange | fuzzyDate) map { FreeformDate(_) }
+  def date[_ : P] =
+    (fuzzyDateRange | fuzzyDate) map { FreeformDate(_) }
 
   def inferredDate[_ : P] =
-    ("[".? ~ knownDate ~ "]") map (_ withInferred true)
+    ("[".? ~ date ~ "]") map (_ withInferred true)
 
   def fuzzyDate[_ : P] =
     FuzzyDateParser.parser map { Left(_) }
 
-  def dateRange[_ : P] =
-    DateRangeParser.parser map { Right(_) }
+  def fuzzyDateRange[_ : P] =
+    FuzzyDateRangeParser.parser map { Right(_) }
 }
 
 /**
  *  Attempts to parse freeform text into a date range
  */
-object DateRangeParser extends Parser[DateRange] with DateParsingUtils {
+object FuzzyDateRangeParser extends Parser[FuzzyDateRange] with DateParsingUtils {
 
   def parser[_ : P] =
     (monthRangeWithinAYear | monthRangeAcrossYears | yearRange | exactRange |
@@ -36,23 +36,23 @@ object DateRangeParser extends Parser[DateRange] with DateParsingUtils {
 
   def yearRange[_ : P] =
     (FuzzyDateParser.year ~ range ~ FuzzyDateParser.year)
-      .map { case (y1, y2) => DateRange(y1, y2) }
+      .map { case (y1, y2) => FuzzyDateRange(y1, y2) }
 
   def exactRange[_ : P] =
     (FuzzyDateParser.exactDate ~ range ~ FuzzyDateParser.exactDate)
-      .map { case (d1, d2) => DateRange(d1, d2) }
+      .map { case (d1, d2) => FuzzyDateRange(d1, d2) }
 
   def monthRangeAcrossYears[_ : P] =
     (FuzzyDateParser.monthAndYear ~ range ~ FuzzyDateParser.monthAndYear)
-      .map { case (my1, my2) => DateRange(my1, my2) }
+      .map { case (my1, my2) => FuzzyDateRange(my1, my2) }
 
   def monthRangeWithinAYear[_ : P] =
     (FuzzyDateParser.month ~ range ~ FuzzyDateParser.monthAndYear)
-      .map { case (m, my) => DateRange(m, my) }
+      .map { case (m, my) => FuzzyDateRange(m, my) }
 
   def  dayRangeWithinAMonth[_ : P] =
     (FuzzyDateParser.day ~ range ~ FuzzyDateParser.exactDate)
-      .map { case (a, b) => DateRange(a, b) }
+      .map { case (a, b) => FuzzyDateRange(a, b) }
 
   def range[_ : P] = ws.? ~ "-" ~ ws.?
 }

@@ -10,7 +10,7 @@ import uk.ac.wellcome.models.work.internal.InstantRange
  *  @param date The date or date range
  *  @param inferred Whether the date is known exactly or inferred
  */
-case class FreeformDate(date: Either[FuzzyDate, DateRange],
+case class FreeformDate(date: Either[FuzzyDate, FuzzyDateRange],
                         inferred: Boolean = false) {
 
   def instantRange : Option[InstantRange] =
@@ -56,7 +56,7 @@ case class Day(day: Int) extends FuzzyDate
  *  @param from The start date
  *  @param to The end date
  */
-case class DateRange(from: FuzzyDate, to: FuzzyDate) extends DateHelpers {
+case class FuzzyDateRange(from: FuzzyDate, to: FuzzyDate) extends DateHelpers {
 
   def instantRange : Option[InstantRange] =
     (from, to) match {
