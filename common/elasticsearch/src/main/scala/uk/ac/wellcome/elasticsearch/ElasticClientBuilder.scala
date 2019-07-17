@@ -30,9 +30,6 @@ object ElasticClientBuilder {
     val restClient = RestClient
       .builder(new HttpHost(hostname, port, protocol))
       .setHttpClientConfigCallback(new ElasticCredentials(username, password))
-      // Needed for the snapshot_generator.
-      // TODO Make this a flag
-//      .setMaxRetryTimeoutMillis(2000)
       .build()
 
     ElasticClient(JavaClient.fromRestClient(restClient))
