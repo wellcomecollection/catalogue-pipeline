@@ -29,3 +29,7 @@ variable "lb_arn" {}
 variable "listener_port" {}
 
 variable "task_desired_count" {}
+
+variable "es_host_parameter_name" {
+  default = "catalogue/api/es_host"
+}
