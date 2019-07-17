@@ -111,8 +111,8 @@ object WorksIndex {
     objectField("agent").fields(location(), keywordField("ontologyType"))
   )
 
-  def englishTextField(name: String) = textField(name).fields(
-    textField("english").analyzer("english"))
+  def englishTextField(name: String) =
+    textField(name).fields(textField("english").analyzer("english"))
 
   val language = objectField("language").fields(
     keywordField("id"),
