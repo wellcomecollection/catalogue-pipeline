@@ -1,69 +1,52 @@
 package uk.ac.wellcome.models.parse
 
-import java.time.LocalDate
-
+import uk.ac.wellcome.models.work.internal.InstantRange
 import fastparse._, NoWhitespace._
+import ToInstantRange._
 
 /**
  *  Attempts to parse freeform text into a date or date range
  */
-object FreeformDateParser extends Parser[FreeformDate] with DateParsingUtils {
+object FuzzyDateParser extends Parser[InstantRange] {
 
   def parser[_ : P] =
     Start ~ (inferredDate | date) ~ End
 
-  def date[_ : P] =
-    (fuzzyDateRange | fuzzyDate) map { FreeformDate(_) }
-
   def inferredDate[_ : P] =
     ("[".? ~ date ~ "]") map (_ withInferred true)
 
-  def fuzzyDate[_ : P] =
-    FuzzyDateParser.parser map { Left(_) }
+  def date[_ : P] =
+    dateRange |
+    toInstantRange(year) |
+    toInstantRange(exactDate) |
+    toInstantRange(monthAndYear)
 
-  def fuzzyDateRange[_ : P] =
-    FuzzyDateRangeParser.parser map { Right(_) }
-}
-
-/**
- *  Attempts to parse freeform text into a date range
- */
-object FuzzyDateRangeParser extends Parser[FuzzyDateRange] with DateParsingUtils {
-
-  def parser[_ : P] =
-    (monthRangeWithinAYear | monthRangeAcrossYears | yearRange | exactRange |
-      dayRangeWithinAMonth)
+  def dateRange[_ : P] =
+    toInstantRange(monthRangeWithinAYear) |
+    toInstantRange(monthRangeAcrossYears) |
+    toInstantRange(yearRange) |
+    toInstantRange(exactRange) |
+    toInstantRange(dayRangeWithinAMonth)
 
   def yearRange[_ : P] =
-    (FuzzyDateParser.year ~ range ~ FuzzyDateParser.year)
-      .map { case (y1, y2) => FuzzyDateRange(y1, y2) }
+    (year ~ range ~ year)
+      .map { case (y1, y2) => DateRange(y1, y2) }
 
   def exactRange[_ : P] =
-    (FuzzyDateParser.exactDate ~ range ~ FuzzyDateParser.exactDate)
-      .map { case (d1, d2) => FuzzyDateRange(d1, d2) }
+    (exactDate ~ range ~ exactDate)
+      .map { case (d1, d2) => DateRange(d1, d2) }
 
   def monthRangeAcrossYears[_ : P] =
-    (FuzzyDateParser.monthAndYear ~ range ~ FuzzyDateParser.monthAndYear)
-      .map { case (my1, my2) => FuzzyDateRange(my1, my2) }
+    (monthAndYear ~ range ~ monthAndYear)
+      .map { case (my1, my2) => DateRange(my1, my2) }
 
   def monthRangeWithinAYear[_ : P] =
-    (FuzzyDateParser.month ~ range ~ FuzzyDateParser.monthAndYear)
-      .map { case (m, my) => FuzzyDateRange(m, my) }
+    (month ~ range ~ monthAndYear)
+      .map { case (m, my) => DateRange(m, my) }
 
   def  dayRangeWithinAMonth[_ : P] =
-    (FuzzyDateParser.day ~ range ~ FuzzyDateParser.exactDate)
-      .map { case (a, b) => FuzzyDateRange(a, b) }
-
-  def range[_ : P] = ws.? ~ "-" ~ ws.?
-}
-
-/**
- *  Attempts to parse freeform text into a (potentially ambiguous) date
- */
-object FuzzyDateParser extends Parser[FuzzyDate] with DateParsingUtils {
-
-  def parser[_ : P] =
-    year | exactDate | monthAndYear | month | day
+    (day ~ range ~ exactDate)
+      .map { case (a, b) => DateRange(a, b) }
 
   def year[_ : P] =
     yearDigits.map(Year(_))
@@ -73,15 +56,15 @@ object FuzzyDateParser extends Parser[FuzzyDate] with DateParsingUtils {
 
   def numericDate[_ : P] =
     (dayDigits ~ "/" ~ monthDigits ~ "/" ~ yearDigits)
-      .map { case (d, m, y) => ExactDate(LocalDate of (y, m, d)) }
+      .map { case (d, m, y) => ExactDate(d, m, y) }
 
   def dayMonthYear[_ : P] =
     (writtenDay ~ ws ~ writtenMonth ~ ws ~ yearDigits)
-      .map { case (d, m, y) => ExactDate(LocalDate of (y, m, d)) }
+      .map { case (d, m, y) => ExactDate(d, m, y) }
 
   def monthDayYear[_ : P] =
     (writtenMonth ~ ws ~ writtenDay ~ ws ~ yearDigits)
-      .map { case (m, d, y) => ExactDate(LocalDate of (y, m, d)) }
+      .map { case (m, d, y) => ExactDate(d, m, y) }
 
   def monthAndYear[_ : P] =
     (monthFollowedByYear | yearFollowedByMonth)
@@ -92,15 +75,9 @@ object FuzzyDateParser extends Parser[FuzzyDate] with DateParsingUtils {
 
   def day[_ : P] =
     dayDigits.map(Day(_))
-}
-
-/**
- *  Parsers for extracting various date info from a string
- */
-protected trait DateParsingUtils {
 
   def monthFollowedByYear[_ : P] =
-    (writtenMonth ~ ws ~ yearDigits) map { case (m, y) => (m, y) }
+    (writtenMonth ~ ws ~ yearDigits)
 
   def yearFollowedByMonth[_ : P] =
     (yearDigits ~ ws ~ writtenMonth) map { case (y, m) => (m, y) }
@@ -143,4 +120,10 @@ protected trait DateParsingUtils {
   def digit[_ : P] = CharPred(_.isDigit)
 
   def ws[_ : P] = " ".rep
+
+  def range[_ : P] = ws.? ~ "-" ~ ws.?
+
+  def toInstantRange[_ : P, T <: FuzzyDate : ToInstantRange](parser: P[T])
+      : P[InstantRange] = 
+    parser map (value => implicitly[ToInstantRange[T]].apply(value))
 }

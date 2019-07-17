@@ -1,87 +1,80 @@
 package uk.ac.wellcome.models.parse
 
 import java.time.LocalDate
-
 import uk.ac.wellcome.models.work.internal.InstantRange
-
-/**
- *  Models freeform text representing some date or period
- *
- *  @param date The date or date range
- *  @param inferred Whether the date is known exactly or inferred
- */
-case class FreeformDate(date: Either[FuzzyDate, FuzzyDateRange],
-                        inferred: Boolean = false) {
-
-  def instantRange : Option[InstantRange] =
-    (date match {
-      case Left(date) => date.instantRange
-      case Right(dateRange) => dateRange.instantRange
-    }) map { _ withInferred inferred }
-
-  def withInferred(inferred : Boolean) : FreeformDate =
-    FreeformDate(date, inferred)
-}
 
 /**
  *  An exact or ambigous date
  */
-sealed trait FuzzyDate extends DateHelpers {
-
-  def instantRange : Option[InstantRange] =
-    this match {
-
-      case ExactDate(date) =>
-        Some(InstantRange(date))
-
-      case Year(year) =>
-        Some(InstantRange(yearStart(year), yearEnd(year)))
-
-      case MonthAndYear(month, year) =>
-        Some(InstantRange(monthStart(month, year), monthEnd(month, year)))
-
-      case _ => None
-    }
-}
-
-case class ExactDate(date: LocalDate) extends FuzzyDate
+sealed trait FuzzyDate
+case class ExactDate(day: Int, month: Int, year: Int) extends FuzzyDate
 case class Year(year: Int) extends FuzzyDate
 case class MonthAndYear(month: Int, year: Int) extends FuzzyDate
 case class Month(month: Int) extends FuzzyDate
 case class Day(day: Int) extends FuzzyDate
+case class DateRange[F <: FuzzyDate, T <: FuzzyDate](from: F, to: T)
+  extends FuzzyDate
 
 /**
- *  A continuous period over some days / months / years
- *
- *  @param from The start date
- *  @param to The end date
+ *  Type class for conversion of FuzzyDate types to InstantRange
  */
-case class FuzzyDateRange(from: FuzzyDate, to: FuzzyDate) extends DateHelpers {
+trait ToInstantRange[T <: FuzzyDate] {
 
-  def instantRange : Option[InstantRange] =
-    (from, to) match {
+  def apply(value: T): InstantRange
+}
 
-      case (ExactDate(fromDate), ExactDate(toDate)) =>
-        Some(InstantRange(fromDate, toDate))
+object ToInstantRange extends DateHelpers {
 
-      case (Year(fromYear), Year(toYear)) =>
-        Some(InstantRange(yearStart(fromYear), yearEnd(toYear)))
+  implicit val convertExactDate =
+    new ToInstantRange[ExactDate] {
+      def apply(value: ExactDate): InstantRange =
+        InstantRange(localDate(value))
+    }
 
-      case (MonthAndYear(fromMonth, fromYear),
-            MonthAndYear(toMonth, toYear)) =>
-        Some(InstantRange(monthStart(fromMonth, fromYear),
-                          monthEnd(toMonth, toYear)))
+  implicit val convertYear =
+    new ToInstantRange[Year] {
+      def apply(value: Year): InstantRange =
+        InstantRange(yearStart(value.year), yearEnd(value.year))
+    }
 
-      case (Month(fromMonth),
-            MonthAndYear(toMonth, year)) =>
-        Some(InstantRange(monthStart(fromMonth, year),
-                          monthEnd(toMonth, year)))
+  implicit val convertMonthAndYear =
+    new ToInstantRange[MonthAndYear] {
+      def apply(value: MonthAndYear): InstantRange =
+        InstantRange(monthStart(value.month, value.year),
+                     monthEnd(value.month, value.year))
+    }
 
-      case (Day(day), ExactDate(date)) =>
-        Some(InstantRange(LocalDate of (date.getYear, date.getMonth, day),
-                          date))
+  implicit val convertYearRange =
+    new ToInstantRange[DateRange[Year, Year]] {
+      def apply(value: DateRange[Year, Year]): InstantRange =
+        InstantRange(yearStart(value.from.year), yearEnd(value.to.year))
+    }
 
-      case _ => None
+  implicit val convertExactDateRange =
+    new ToInstantRange[DateRange[ExactDate, ExactDate]] {
+      def apply(value: DateRange[ExactDate, ExactDate]): InstantRange =
+        InstantRange(localDate(value.from), localDate(value.to))
+    }
+
+  implicit val convertMonthRangeAcrossYears =
+    new ToInstantRange[DateRange[MonthAndYear, MonthAndYear]] {
+      def apply(value: DateRange[MonthAndYear, MonthAndYear]): InstantRange =
+        InstantRange(monthStart(value.from.month, value.from.year),
+                     monthEnd(value.to.month, value.to.year))
+    }
+
+  implicit val convertMonthRangeWithinAYear =
+    new ToInstantRange[DateRange[Month, MonthAndYear]] {
+      def apply(value: DateRange[Month, MonthAndYear]): InstantRange =
+        InstantRange(monthStart(value.from.month, value.to.year),
+                     monthEnd(value.to.month, value.to.year))
+    }
+
+  implicit val dayRangeWithinAMonth =
+    new ToInstantRange[DateRange[Day, ExactDate]] {
+      def apply(value: DateRange[Day, ExactDate]): InstantRange =
+        InstantRange(localDate(value.from.day, value.to.month, value.to.year),
+                     localDate(value.to))
     }
 }
 
@@ -89,6 +82,12 @@ case class FuzzyDateRange(from: FuzzyDate, to: FuzzyDate) extends DateHelpers {
  *  Mixin containing helper functions for generating LocalDate objects
  */
 trait DateHelpers {
+  
+  protected def localDate(exactDate: ExactDate) : LocalDate =
+    LocalDate.of(exactDate.year, exactDate.month, exactDate.day)
+  
+  protected def localDate(day: Int, month: Int, year: Int) : LocalDate =
+    LocalDate.of(year, month, day)
 
   protected def monthStart(month: Int, year: Int) : LocalDate =
     LocalDate.of(year, month, 1)

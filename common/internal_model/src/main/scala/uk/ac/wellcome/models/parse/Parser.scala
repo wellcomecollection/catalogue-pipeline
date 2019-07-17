@@ -2,8 +2,6 @@ package uk.ac.wellcome.models.parse
 
 import fastparse._
 
-import uk.ac.wellcome.models.work.internal.InstantRange
-
 /**
  *  Trait for parsing some input into T with the FastParse library
  */
@@ -32,11 +30,5 @@ trait Parser[T] {
  */
 package object parsers {
 
-  implicit object DateParser extends Parser[InstantRange] {
-    def parser[_ : P] =
-      FreeformDateParser.parser
-        .map(_.instantRange)
-        .filter(_.nonEmpty)
-        .map(_.get)
-  }
+  implicit val DateParser = FuzzyDateParser
 }
