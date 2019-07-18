@@ -3,11 +3,12 @@ package uk.ac.wellcome.models.parse
 import uk.ac.wellcome.models.work.internal.InstantRange
 import fastparse._, NoWhitespace._
 import ToInstantRange._
+import DateParserImplicits._
 
 /**
  *  Attempts to parse freeform text into a date or date range
  */
-object FreeformDateParser extends Parser[InstantRange] {
+object FreeformDateParser extends Parser[InstantRange] with DateParserUtils {
 
   def parser[_ : P] =
     Start ~ (inferredTimePeriod | timePeriod) ~ End
@@ -22,23 +23,13 @@ object FreeformDateParser extends Parser[InstantRange] {
       monthAndYear.toInstantRange
 
   def dateRange[_ : P] =
-    monthRangeWithinAYear.toInstantRange |
-      monthRangeAcrossYears.toInstantRange |
-      yearRange.toInstantRange |
-      calendarDateRange.toInstantRange |
-      dayRangeWithinAMonth.toInstantRange
+    (year to year).toInstantRange |
+      (calendarDate to calendarDate).toInstantRange |
+      (monthAndYear to monthAndYear).toInstantRange |
+      (month to monthAndYear).toInstantRange |
+      (day to calendarDate).toInstantRange
 
-  def yearRange[_ : P] = range(year, year)
-
-  def calendarDateRange[_ : P] = range(calendarDate, calendarDate)
-
-  def monthRangeAcrossYears[_ : P] = range(monthAndYear, monthAndYear)
-
-  def monthRangeWithinAYear[_ : P] = range(month, monthAndYear)
-
-  def dayRangeWithinAMonth[_ : P] = range(day, calendarDate)
-
-  def year[_ : P] = yearDigits.map(Year(_))
+  def year[_ : P] = yearDigits map (Year(_))
 
   def calendarDate[_ : P] = numericDate | dayMonthYear | monthDayYear
 
@@ -58,9 +49,15 @@ object FreeformDateParser extends Parser[InstantRange] {
     (monthFollowedByYear | yearFollowedByMonth)
       .map { case (m, y) => MonthAndYear(m, y) }
 
-  def month[_ : P] = writtenMonth.map(Month(_))
+  def month[_ : P] = writtenMonth map (Month(_))
 
-  def day[_ : P] = dayDigits.map(Day(_))
+  def day[_ : P] = dayDigits map (Day(_))
+}
+
+/**
+ *  Date parsing utilities
+ */
+trait DateParserUtils extends ParserUtils {
 
   def monthFollowedByYear[_ : P] =
     (writtenMonth ~ ws ~ yearDigits)
@@ -102,15 +99,28 @@ object FreeformDateParser extends Parser[InstantRange] {
       .map(_.toInt)
 
   def ordinalIndicator[_ : P] = StringIn("st", "nd", "rd", "th")
+}
+
+/**
+ *  General parsing utilities
+ */
+trait ParserUtils {
 
   def digit[_ : P] = CharPred(_.isDigit)
 
   def ws[_ : P] = " ".rep
+}
 
-  def range[_ : P, F <: FuzzyDate, T <: FuzzyDate](from: => P[F], to: => P[T])
-      : P[FuzzyDateRange[F, T]] =
-    (from ~ ws.? ~ "-" ~ ws.? ~ to)
-      .map { case (f, t) => FuzzyDateRange(f, t) }
+/**
+ *  Implicit classes used for conversion of P[A] to P[B] for some A / B
+ */
+object DateParserImplicits extends ParserUtils {
+
+  implicit class ToDateRangeParser[F <: FuzzyDate](from: => P[F]) {
+    def to[_ : P, T <: FuzzyDate](to: => P[T]): P[FuzzyDateRange[F, T]] =
+      (from ~ ws.? ~ "-" ~ ws.? ~ to)
+        .map { case (f, t) => FuzzyDateRange(f, t) }
+  }
 
   implicit class ToInstantRangeParser[T <: TimePeriod : ToInstantRange]
       (parser: P[T]) {
