@@ -36,8 +36,6 @@ case class InstantRange(from: Instant,
 
 object InstantRange {
 
-  def apply(date: LocalDate): InstantRange = InstantRange(date, date)
-
   def apply(from: LocalDate, to: LocalDate): InstantRange =
     InstantRange(
       from.atStartOfDay(),

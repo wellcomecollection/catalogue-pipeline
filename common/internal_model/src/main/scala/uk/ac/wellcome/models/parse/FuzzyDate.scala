@@ -37,7 +37,7 @@ object ToInstantRange extends DateHelpers {
   implicit val convertExactDate =
     new ToInstantRange[ExactDate] {
       def apply(value: ExactDate): InstantRange =
-        InstantRange(localDate(value))
+        InstantRange(localDate(value), localDate(value))
     }
 
   implicit val convertYear =
