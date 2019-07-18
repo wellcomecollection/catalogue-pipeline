@@ -30,23 +30,23 @@ object FreeformDateParser extends Parser[InstantRange] {
 
   def yearRange[_ : P] =
     (year ~ range ~ year)
-      .map { case (y1, y2) => DateRange(y1, y2) }
+      .map { case (y1, y2) => FuzzyDateRange(y1, y2) }
 
   def exactRange[_ : P] =
     (exactDate ~ range ~ exactDate)
-      .map { case (d1, d2) => DateRange(d1, d2) }
+      .map { case (d1, d2) => FuzzyDateRange(d1, d2) }
 
   def monthRangeAcrossYears[_ : P] =
     (monthAndYear ~ range ~ monthAndYear)
-      .map { case (my1, my2) => DateRange(my1, my2) }
+      .map { case (my1, my2) => FuzzyDateRange(my1, my2) }
 
   def monthRangeWithinAYear[_ : P] =
     (month ~ range ~ monthAndYear)
-      .map { case (m, my) => DateRange(m, my) }
+      .map { case (m, my) => FuzzyDateRange(m, my) }
 
   def  dayRangeWithinAMonth[_ : P] =
     (day ~ range ~ exactDate)
-      .map { case (a, b) => DateRange(a, b) }
+      .map { case (a, b) => FuzzyDateRange(a, b) }
 
   def year[_ : P] =
     yearDigits.map(Year(_))
@@ -123,7 +123,7 @@ object FreeformDateParser extends Parser[InstantRange] {
 
   def range[_ : P] = ws.? ~ "-" ~ ws.?
 
-  def toInstantRange[_ : P, T <: FuzzyDate : ToInstantRange](parser: P[T])
+  def toInstantRange[_ : P, T <: TimePeriod : ToInstantRange](parser: P[T])
       : P[InstantRange] = 
     parser map (value => implicitly[ToInstantRange[T]].apply(value))
 }
