@@ -9,7 +9,7 @@ sealed trait TimePeriod
  *  An exact or ambigous date
  */
 sealed trait FuzzyDate extends TimePeriod
-case class ExactDate(day: Int, month: Int, year: Int) extends FuzzyDate
+case class CalendarDate(day: Int, month: Int, year: Int) extends FuzzyDate
 case class Year(year: Int) extends FuzzyDate
 case class MonthAndYear(month: Int, year: Int) extends FuzzyDate
 case class Month(month: Int) extends FuzzyDate
@@ -34,9 +34,9 @@ trait ToInstantRange[T <: TimePeriod] {
 
 object ToInstantRange extends DateHelpers {
 
-  implicit val convertExactDate =
-    new ToInstantRange[ExactDate] {
-      def apply(value: ExactDate): InstantRange =
+  implicit val convertCalendarDate =
+    new ToInstantRange[CalendarDate] {
+      def apply(value: CalendarDate): InstantRange =
         InstantRange(localDate(value), localDate(value))
     }
 
@@ -59,9 +59,9 @@ object ToInstantRange extends DateHelpers {
         InstantRange(yearStart(value.from.year), yearEnd(value.to.year))
     }
 
-  implicit val convertExactFuzzyDateRange =
-    new ToInstantRange[FuzzyDateRange[ExactDate, ExactDate]] {
-      def apply(value: FuzzyDateRange[ExactDate, ExactDate]): InstantRange =
+  implicit val convertCalendarDateRange =
+    new ToInstantRange[FuzzyDateRange[CalendarDate, CalendarDate]] {
+      def apply(value: FuzzyDateRange[CalendarDate, CalendarDate]): InstantRange =
         InstantRange(localDate(value.from), localDate(value.to))
     }
 
@@ -80,8 +80,8 @@ object ToInstantRange extends DateHelpers {
     }
 
   implicit val convertDayRangeWithinAMonth =
-    new ToInstantRange[FuzzyDateRange[Day, ExactDate]] {
-      def apply(value: FuzzyDateRange[Day, ExactDate]): InstantRange =
+    new ToInstantRange[FuzzyDateRange[Day, CalendarDate]] {
+      def apply(value: FuzzyDateRange[Day, CalendarDate]): InstantRange =
         InstantRange(localDate(value.from.day, value.to.month, value.to.year),
                      localDate(value.to))
     }
@@ -92,8 +92,8 @@ object ToInstantRange extends DateHelpers {
  */
 trait DateHelpers {
   
-  protected def localDate(exactDate: ExactDate) : LocalDate =
-    LocalDate.of(exactDate.year, exactDate.month, exactDate.day)
+  protected def localDate(calendarDate: CalendarDate) : LocalDate =
+    LocalDate.of(calendarDate.year, calendarDate.month, calendarDate.day)
   
   protected def localDate(day: Int, month: Int, year: Int) : LocalDate =
     LocalDate.of(year, month, day)

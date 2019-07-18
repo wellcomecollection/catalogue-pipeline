@@ -18,7 +18,7 @@ object FreeformDateParser extends Parser[InstantRange] {
   def date[_ : P] =
     dateRange |
     toInstantRange(year) |
-    toInstantRange(exactDate) |
+    toInstantRange(calendarDate) |
     toInstantRange(monthAndYear)
 
   def dateRange[_ : P] =
@@ -33,7 +33,7 @@ object FreeformDateParser extends Parser[InstantRange] {
       .map { case (y1, y2) => FuzzyDateRange(y1, y2) }
 
   def exactRange[_ : P] =
-    (exactDate ~ range ~ exactDate)
+    (calendarDate ~ range ~ calendarDate)
       .map { case (d1, d2) => FuzzyDateRange(d1, d2) }
 
   def monthRangeAcrossYears[_ : P] =
@@ -45,26 +45,26 @@ object FreeformDateParser extends Parser[InstantRange] {
       .map { case (m, my) => FuzzyDateRange(m, my) }
 
   def  dayRangeWithinAMonth[_ : P] =
-    (day ~ range ~ exactDate)
+    (day ~ range ~ calendarDate)
       .map { case (a, b) => FuzzyDateRange(a, b) }
 
   def year[_ : P] =
     yearDigits.map(Year(_))
 
-  def exactDate[_ : P] =
+  def calendarDate[_ : P] =
     numericDate | dayMonthYear | monthDayYear
 
   def numericDate[_ : P] =
     (dayDigits ~ "/" ~ monthDigits ~ "/" ~ yearDigits)
-      .map { case (d, m, y) => ExactDate(d, m, y) }
+      .map { case (d, m, y) => CalendarDate(d, m, y) }
 
   def dayMonthYear[_ : P] =
     (writtenDay ~ ws ~ writtenMonth ~ ws ~ yearDigits)
-      .map { case (d, m, y) => ExactDate(d, m, y) }
+      .map { case (d, m, y) => CalendarDate(d, m, y) }
 
   def monthDayYear[_ : P] =
     (writtenMonth ~ ws ~ writtenDay ~ ws ~ yearDigits)
-      .map { case (m, d, y) => ExactDate(d, m, y) }
+      .map { case (m, d, y) => CalendarDate(d, m, y) }
 
   def monthAndYear[_ : P] =
     (monthFollowedByYear | yearFollowedByMonth)
