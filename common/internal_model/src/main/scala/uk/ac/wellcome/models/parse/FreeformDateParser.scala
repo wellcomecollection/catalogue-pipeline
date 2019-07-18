@@ -17,16 +17,16 @@ object FreeformDateParser extends Parser[InstantRange] {
 
   def date[_ : P] =
     dateRange |
-    toInstantRange(year) |
-    toInstantRange(calendarDate) |
-    toInstantRange(monthAndYear)
+      year.toInstantRange |
+      calendarDate.toInstantRange |
+      monthAndYear.toInstantRange
 
   def dateRange[_ : P] =
-    toInstantRange(monthRangeWithinAYear) |
-    toInstantRange(monthRangeAcrossYears) |
-    toInstantRange(yearRange) |
-    toInstantRange(exactRange) |
-    toInstantRange(dayRangeWithinAMonth)
+    monthRangeWithinAYear.toInstantRange |
+      monthRangeAcrossYears.toInstantRange |
+      yearRange.toInstantRange |
+      exactRange.toInstantRange |
+      dayRangeWithinAMonth.toInstantRange
 
   def yearRange[_ : P] =
     (year ~ range ~ year)
@@ -123,7 +123,10 @@ object FreeformDateParser extends Parser[InstantRange] {
 
   def range[_ : P] = ws.? ~ "-" ~ ws.?
 
-  def toInstantRange[_ : P, T <: TimePeriod : ToInstantRange](parser: P[T])
-      : P[InstantRange] = 
-    parser map (value => implicitly[ToInstantRange[T]].apply(value))
+  implicit class ToInstantRangeParser[T <: TimePeriod : ToInstantRange]
+      (parser: P[T]) {
+    def toInstantRange(implicit toInstantRange: ToInstantRange[T]):
+        P[InstantRange] =
+      parser map { toInstantRange.apply(_) }
+  }
 }
