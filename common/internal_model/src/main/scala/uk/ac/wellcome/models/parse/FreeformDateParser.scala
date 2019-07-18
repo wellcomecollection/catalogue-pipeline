@@ -7,7 +7,7 @@ import ToInstantRange._
 /**
  *  Attempts to parse freeform text into a date or date range
  */
-object FuzzyDateParser extends Parser[InstantRange] {
+object FreeformDateParser extends Parser[InstantRange] {
 
   def parser[_ : P] =
     Start ~ (inferredDate | date) ~ End

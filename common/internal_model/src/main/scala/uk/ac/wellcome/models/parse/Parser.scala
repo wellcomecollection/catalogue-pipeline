@@ -30,5 +30,5 @@ trait Parser[T] {
  */
 package object parsers {
 
-  implicit val DateParser = FuzzyDateParser
+  implicit val DateParser = FreeformDateParser
 }
