@@ -1,0 +1,25 @@
+Worker ID, File, Total Time (ms), lateFile?, totalSpans, parser nodes, typer nodes, LoC, LoC/s
+1, common/internal_model/src/test/scala/uk/ac/wellcome/models/work/internal/WorkTest.scala, 74439, false, 29758, 91, 54252, 49, 1
+0, common/internal_model/src/test/scala/uk/ac/wellcome/models/transformable/sierra/SierraItemRecordTest.scala, 10690, false, 523, 209, 4468, 69, 6
+1, common/internal_model/src/test/scala/uk/ac/wellcome/models/transformable/sierra/SierraBibRecordTest.scala, 6476, false, 390, 61, 2691, 12, 2
+3, common/internal_model/src/test/scala/uk/ac/wellcome/models/transformable/sierra/test/utils/SierraGenerators.scala, 4752, false, 150, 284, 868, 86, 18
+0, common/internal_model/src/test/scala/uk/ac/wellcome/models/work/internal/LicenseTest.scala, 4251, false, 1011, 78, 181, 20, 5
+3, common/internal_model/src/test/scala/uk/ac/wellcome/models/work/internal/ConceptTest.scala, 2731, false, 217, 78, 1069, 19, 7
+2, common/internal_model/src/test/scala/uk/ac/wellcome/models/work/internal/IdentifierTypeTest.scala, 1509, false, 36, 57, 139, 16, 11
+2, common/internal_model/src/test/scala/uk/ac/wellcome/models/work/generators/ItemsGenerators.scala, 1375, false, 67, 212, 542, 56, 41
+0, common/internal_model/src/test/scala/uk/ac/wellcome/models/work/internal/text/textNormalisationTest.scala, 1365, false, 46, 307, 683, 68, 50
+1, common/internal_model/src/test/scala/uk/ac/wellcome/models/work/internal/SourceIdentifierTest.scala, 1175, false, 36, 44, 84, 12, 10
+3, common/internal_model/src/test/scala/uk/ac/wellcome/models/work/internal/PeriodTypeTest.scala, 1163, false, 38, 77, 208, 30, 26
+2, common/internal_model/src/test/scala/uk/ac/wellcome/models/work/internal/LocationTypeTest.scala, 990, false, 36, 57, 139, 16, 16
+2, common/internal_model/src/test/scala/uk/ac/wellcome/models/work/generators/WorksGenerators.scala, 802, false, 149, 704, 1374, 206, 257
+0, common/internal_model/src/test/scala/uk/ac/wellcome/models/work/internal/InstantRangeTest.scala, 651, false, 42, 121, 263, 44, 68
+2, common/internal_model/src/test/scala/uk/ac/wellcome/models/work/internal/UnidentifiedRedirectedWorkTest.scala, 632, false, 41, 80, 154, 24, 38
+3, common/internal_model/src/test/scala/uk/ac/wellcome/models/transformable/SierraTransformableTest.scala, 450, false, 43, 123, 288, 29, 64
+0, common/internal_model/src/test/scala/uk/ac/wellcome/models/transformable/sierra/SierraRecordNumberTest.scala, 311, false, 38, 131, 387, 38, 122
+0, common/internal_model/src/test/scala/uk/ac/wellcome/models/work/generators/ProductionEventGenerators.scala, 299, false, 38, 116, 210, 23, 77
+1, common/internal_model/src/test/scala/uk/ac/wellcome/models/work/generators/GenreGenerators.scala, 234, false, 36, 92, 135, 21, 90
+3, common/internal_model/src/test/scala/uk/ac/wellcome/models/work/generators/InstantRangeGenerators.scala, 145, false, 33, 65, 74, 15, 103
+1, common/internal_model/src/test/scala/uk/ac/wellcome/models/work/generators/IdentifiersGenerators.scala, 102, false, 56, 162, 300, 53, 520
+1, common/internal_model/src/test/scala/uk/ac/wellcome/models/work/generators/SubjectGenerators.scala, 83, false, 43, 138, 245, 35, 422
+3, common/internal_model/src/test/scala/uk/ac/wellcome/models/generators/RandomStrings.scala, 83, false, 29, 29, 32, 6, 72
+2, common/internal_model/src/test/scala/uk/ac/wellcome/models/work/generators/ContributorGenerators.scala, 42, false, 31, 47, 98, 10, 238

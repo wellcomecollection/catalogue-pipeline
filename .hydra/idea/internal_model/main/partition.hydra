@@ -1,0 +1,36 @@
+# worker 0
+common/internal_model/src/main/scala/uk/ac/wellcome/models/transformable/sierra/SierraItemRecord.scala
+common/internal_model/src/main/scala/uk/ac/wellcome/models/work/internal/IdentityState.scala
+common/internal_model/src/main/scala/uk/ac/wellcome/models/work/internal/Language.scala
+common/internal_model/src/main/scala/uk/ac/wellcome/models/work/internal/Location.scala
+common/internal_model/src/main/scala/uk/ac/wellcome/models/work/internal/ProductionEvent.scala
+common/internal_model/src/main/scala/uk/ac/wellcome/models/work/text/TextNormalisation.scala
+
+# worker 1
+common/internal_model/src/main/scala/uk/ac/wellcome/models/matcher/WorkNode.scala
+common/internal_model/src/main/scala/uk/ac/wellcome/models/transformable/sierra/AbstractSierraRecord.scala
+common/internal_model/src/main/scala/uk/ac/wellcome/models/transformable/sierra/SierraRecordNumber.scala
+common/internal_model/src/main/scala/uk/ac/wellcome/models/work/internal/AbstractRootConcept.scala
+common/internal_model/src/main/scala/uk/ac/wellcome/models/work/internal/Contributor.scala
+common/internal_model/src/main/scala/uk/ac/wellcome/models/work/internal/MergeCandidate.scala
+common/internal_model/src/main/scala/uk/ac/wellcome/models/work/internal/SourceIdentifier.scala
+common/internal_model/src/main/scala/uk/ac/wellcome/models/work/internal/WorkType.scala
+
+# worker 2
+common/internal_model/src/main/scala/uk/ac/wellcome/models/transformable/SierraTransformable.scala
+common/internal_model/src/main/scala/uk/ac/wellcome/models/transformable/sierra/SierraBibRecord.scala
+common/internal_model/src/main/scala/uk/ac/wellcome/models/work/internal/ContributionRole.scala
+common/internal_model/src/main/scala/uk/ac/wellcome/models/work/internal/Item.scala
+common/internal_model/src/main/scala/uk/ac/wellcome/models/work/internal/LocationType.scala
+common/internal_model/src/main/scala/uk/ac/wellcome/models/work/internal/Subject.scala
+common/internal_model/src/main/scala/uk/ac/wellcome/models/work/internal/Work.scala
+
+# worker 3
+common/internal_model/src/main/scala/uk/ac/wellcome/models/matcher/MatchedIdentifiers.scala
+common/internal_model/src/main/scala/uk/ac/wellcome/models/matcher/MatcherResult.scala
+common/internal_model/src/main/scala/uk/ac/wellcome/models/matcher/WorkIdentifier.scala
+common/internal_model/src/main/scala/uk/ac/wellcome/models/work/internal/Genre.scala
+common/internal_model/src/main/scala/uk/ac/wellcome/models/work/internal/IdentifierType.scala
+common/internal_model/src/main/scala/uk/ac/wellcome/models/work/internal/License.scala
+common/internal_model/src/main/scala/uk/ac/wellcome/models/work/internal/MultipleSourceIdentifiers.scala
+common/internal_model/src/main/scala/uk/ac/wellcome/models/work/internal/Redirect.scala

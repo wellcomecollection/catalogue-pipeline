@@ -170,8 +170,7 @@ trait ElasticsearchFixtures
         val response: Response[SearchResponse] = elasticClient.execute {
           search(index.name).matchAllQuery()
         }.await
-
-        response.result.hits.total shouldBe works.size
+        response.result.totalHits shouldBe works.size
       }
     }
   }
