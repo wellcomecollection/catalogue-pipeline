@@ -1,5 +1,0 @@
-Worker ID, File, Total Time (ms), lateFile?, totalSpans, parser nodes, typer nodes, LoC, LoC/s
-3, common/elasticsearch/src/main/scala/uk/ac/wellcome/elasticsearch/ElasticsearchIndexCreator.scala, 1697, false, 54, 282, 483, 72, 42
-0, common/elasticsearch/src/main/scala/uk/ac/wellcome/elasticsearch/WorksIndex.scala, 1687, false, 74, 512, 980, 151, 90
-1, common/elasticsearch/src/main/scala/uk/ac/wellcome/elasticsearch/DisplayElasticConfig.scala, 1267, false, 46, 32, 253, 6, 5
-2, common/elasticsearch/src/main/scala/uk/ac/wellcome/elasticsearch/ElasticClientBuilder.scala, 1123, false, 53, 149, 196, 32, 28

@@ -1,8 +1,0 @@
-# worker 0
-common/elasticsearch/src/test/scala/uk/ac/wellcome/elasticsearch/WorksIndexTest.scala
-
-# worker 1
-common/elasticsearch/src/test/scala/uk/ac/wellcome/elasticsearch/test/fixtures/ElasticsearchFixtures.scala
-
-# worker 2
-common/elasticsearch/src/test/scala/uk/ac/wellcome/elasticsearch/ElasticsearchIndexCreatorTest.scala

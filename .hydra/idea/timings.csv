@@ -1,7 +1,0 @@
-Time, Tag, Workers, Files, Compilation Duration (ms), GC Duration (ms)
-2019/07/18 10:54:44,       internal_model/main,   4,    29,     21651,       738
-2019/07/18 10:57:49,       internal_model/main,   4,    29,      6684,       247
-2019/07/18 10:57:59,       internal_model/test,   4,    24,     82722,      2443
-2019/07/18 10:59:23,        elasticsearch/main,   4,     4,      1970,       647
-2019/07/18 10:59:26,        elasticsearch/test,   3,     3,    138914,      7168
-2019/07/18 11:01:48,                  api/main,   4,    31,    104612,      5221
