@@ -14,12 +14,17 @@ sealed trait WorkQuery {
 object WorkQuery {
   val defaultMSM = "60%"
   val defaultBoostedFields = Seq(
-    ("*", Some(1.0)),
+    ("*.*", None),
     ("title", Some(9.0)),
-    ("subjects*", Some(8.0)),
-    ("genres*", Some(8.0)),
-    ("description*", Some(5.0)),
-    ("contributors*", Some(2.0))
+    // Because subjects and genres have been indexed differently
+    // We need to query them slightly differently
+    // TODO: (jamesgorrie) think of a more sustainable way of doing this
+    // maybe having a just a list of terms that we use terms queries to query against,
+    // and then have more structured data underlying
+    ("subjects.*", Some(8.0)),
+    ("genres.label", Some(8.0)),
+    ("description", Some(3.0)),
+    ("contributors.*", Some(2.0))
   )
 
   case class SimpleQuery(queryString: String) extends WorkQuery {
@@ -32,7 +37,8 @@ object WorkQuery {
     override def query(): SimpleStringQuery = {
       SimpleStringQuery(
         queryString,
-        fields = Seq(("*", Some(1.0))),
+        fields = Seq(("*.*", Some(1.0))),
+        lenient = Some(true),
         minimumShouldMatch = Some(defaultMSM))
     }
   }
