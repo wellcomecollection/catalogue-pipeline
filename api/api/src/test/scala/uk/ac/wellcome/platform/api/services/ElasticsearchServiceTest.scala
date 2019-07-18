@@ -293,8 +293,6 @@ class ElasticsearchServiceTest
         val results =
           searchResults(index = index, workQuery = BoostQuery("Aegean"))
 
-        println(Json prettifier toJson(results))
-
         withClue("Results size should be 5") { results should have length 5 }
 
         withClue("(0) should be exact matching title") {
