@@ -94,8 +94,8 @@ class DateParserTest extends FunSpec with Matchers {
   }
 
   // TODO : this is not matched correctly, needs some investigation
-  ignore("parses month ranges within a single year") {
-    DateParser("Jan-Mar 1940 ") shouldBe Some(
+  it("parses month ranges within a single year") {
+    DateParser("Jan-Mar 1940") shouldBe Some(
       InstantRange ( LocalDate.of(1940, 1, 1), LocalDate.of(1940, 3, 31) )
     )
   }
