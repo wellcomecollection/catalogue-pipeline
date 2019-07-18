@@ -10,12 +10,12 @@ import ToInstantRange._
 object FreeformDateParser extends Parser[InstantRange] {
 
   def parser[_ : P] =
-    Start ~ (inferredDate | date) ~ End
+    Start ~ (inferredTimePeriod | timePeriod) ~ End
 
-  def inferredDate[_ : P] =
-    ("[".? ~ date ~ "]") map (_ withInferred true)
+  def inferredTimePeriod[_ : P] =
+    ("[".? ~ timePeriod ~ "]") map (_ withInferred true)
 
-  def date[_ : P] =
+  def timePeriod[_ : P] =
     dateRange |
       year.toInstantRange |
       calendarDate.toInstantRange |
