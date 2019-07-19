@@ -1,6 +1,8 @@
 package uk.ac.wellcome.models.parse
 
+import scala.util.control.Exception
 import java.time.LocalDate
+import java.time.DateTimeException
 import uk.ac.wellcome.models.work.internal.InstantRange
 
 sealed trait TimePeriod
@@ -25,11 +27,14 @@ case class FuzzyDateRange[F <: FuzzyDate, T <: FuzzyDate](from: F, to: T)
   extends TimePeriod
 
 /**
- *  Type class for conversion of FuzzyDate types to InstantRange
+ *  Type class for conversion of TimePeriod types to InstantRange
  */
 trait ToInstantRange[T <: TimePeriod] {
 
   def apply(value: T): InstantRange
+
+  def safeConvert(value: T) : Option[InstantRange] =
+    Exception.catching(classOf[DateTimeException]) opt apply(value)
 }
 
 object ToInstantRange extends DateHelpers {

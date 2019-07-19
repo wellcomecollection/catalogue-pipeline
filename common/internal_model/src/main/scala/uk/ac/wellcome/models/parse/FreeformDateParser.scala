@@ -124,8 +124,11 @@ object DateParserImplicits extends ParserUtils {
 
   implicit class ToInstantRangeParser[T <: TimePeriod : ToInstantRange]
       (parser: P[T]) {
-    def toInstantRange(implicit toInstantRange: ToInstantRange[T]):
+    def toInstantRange[_ : P](implicit toInstantRange: ToInstantRange[T]):
         P[InstantRange] =
-      parser map { toInstantRange.apply(_) }
+      parser
+        .map(toInstantRange.safeConvert(_))
+        .filter(_.nonEmpty)
+        .map(_.get)
   }
 }

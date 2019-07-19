@@ -100,4 +100,12 @@ class DateParserTest extends FunSpec with Matchers {
       InstantRange ( LocalDate of (1940, 1, 1), LocalDate of (1940, 3, 31) )
     )
   }
+
+  it("fails when day is not valid for a particular month") {
+    DateParser("31 June 2000") shouldBe None
+  }
+
+  it("fails when day in a range is not valid for a particular month") {
+    DateParser("31-30 Jun 2020") shouldBe None
+  }
 }
