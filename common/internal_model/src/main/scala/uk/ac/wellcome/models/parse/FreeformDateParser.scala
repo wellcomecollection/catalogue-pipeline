@@ -5,13 +5,13 @@ import org.parboiled2._
 import org.parboiled2.{Parser => ParboiledParser}
 
 class FreeformDateParser(val input: ParserInput)
-  extends ParboiledParser with DateHelpers {
+    extends ParboiledParser
+    with DateHelpers {
 
   def parser = rule(inferredTimePeriod | timePeriod ~ EOI)
 
   def inferredTimePeriod =
-    rule(
-      ("[".? ~ timePeriod ~ "]") ~> (_ withInferred true))
+    rule(("[".? ~ timePeriod ~ "]") ~> (_ withInferred true))
 
   def timePeriod =
     rule(
@@ -53,32 +53,35 @@ class FreeformDateParser(val input: ParserInput)
 
   def monthAndYear = () => rule(monthFollowedByYear | yearFollowedByMonth)
 
-  def monthFollowedByYear = rule((writtenMonth ~ ws ~ yearDigits) ~> (MonthAndYear(_, _)))
+  def monthFollowedByYear =
+    rule((writtenMonth ~ ws ~ yearDigits) ~> (MonthAndYear(_, _)))
 
   def yearFollowedByMonth =
     rule(
-      (yearDigits ~ ws ~ writtenMonth) ~> ((year, month) => MonthAndYear(month, year)))
+      (yearDigits ~ ws ~ writtenMonth) ~> ((year,
+                                            month) =>
+                                             MonthAndYear(month, year)))
 
-  def writtenMonth = rule(valueMap(monthMapping, ignoreCase=true))
+  def writtenMonth = rule(valueMap(monthMapping, ignoreCase = true))
 
   def writtenDay = rule(dayDigits ~ ordinalIndicator.?)
 
-  def yearDigits = rule(digits(from=4, to=4))
+  def yearDigits = rule(digits(from = 4, to = 4))
 
   def monthDigits =
     rule(
-      digits(from=1, to=2)
+      digits(from = 1, to = 2)
         ~> (month => test(month >= 1 && month <= 12) ~ push(month)))
 
   def dayDigits =
     rule(
-      digits(from=1, to=2)
+      digits(from = 1, to = 2)
         ~> (day => test(day >= 1 && day <= 31) ~ push(day)))
 
-  def digits(from: Int, to: Int) : Rule1[Int] =
+  def digits(from: Int, to: Int): Rule1[Int] =
     rule(
       capture(from.to(to).times(CharPredicate.Digit))
-        ~> ((_ : String).toInt))
+        ~> ((_: String).toInt))
 
   def ws = rule(oneOrMore(" "))
 
@@ -94,11 +97,11 @@ class FreeformDateParser(val input: ParserInput)
   implicit class ToInstantRangeParser[T <: TimePeriod](parser: Rule1[T]) {
     def toInstantRange(
       implicit toInstantRange: ToInstantRange[T]): Rule1[InstantRange] =
-        rule(
-          parser
-            ~> (toInstantRange.safeConvert(_))
-            ~> (instantRange => test(instantRange.nonEmpty) ~ push(instantRange))
-            ~> ((instantRange: Option[InstantRange]) => instantRange.get))
+      rule(
+        parser
+          ~> (toInstantRange.safeConvert(_))
+          ~> (instantRange => test(instantRange.nonEmpty) ~ push(instantRange))
+          ~> ((instantRange: Option[InstantRange]) => instantRange.get))
   }
 
   def monthMapping =
@@ -125,5 +128,6 @@ class FreeformDateParser(val input: ParserInput)
       "nov" -> 11,
       "november" -> 11,
       "dec" -> 12,
-      "december" -> 12)
+      "december" -> 12
+    )
 }
