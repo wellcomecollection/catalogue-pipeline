@@ -1,163 +1,129 @@
 package uk.ac.wellcome.models.parse
 
 import uk.ac.wellcome.models.work.internal.InstantRange
-import fastparse._, NoWhitespace._
-import ToInstantRange._
-import DateParserImplicits._
+import org.parboiled2._
+import org.parboiled2.{Parser => ParboiledParser}
 
-/**
-  *  Attempts to parse freeform text into a date or date range
-  */
-object FreeformDateParser extends Parser[InstantRange] with DateParserUtils {
+class FreeformDateParser(val input: ParserInput)
+  extends ParboiledParser with DateHelpers {
 
-  def parser[_: P] =
-    Start ~ (inferredTimePeriod | timePeriod) ~ End
+  def parser = rule(inferredTimePeriod | timePeriod ~ EOI)
 
-  def inferredTimePeriod[_: P] =
-    ("[".? ~ timePeriod ~ "]") map (_ withInferred true)
+  def inferredTimePeriod =
+    rule(
+      ("[".? ~ timePeriod ~ "]") ~> (_ withInferred true))
 
-  def timePeriod[_: P] =
-    dateRange |
-      year.toInstantRange |
-      calendarDate.toInstantRange |
-      monthAndYear.toInstantRange
+  def timePeriod =
+    rule(
+      dateRange |
+        year().toInstantRange |
+        calendarDate().toInstantRange |
+        monthAndYear().toInstantRange)
 
-  def dateRange[_: P] =
-    (year to year).toInstantRange |
-      (calendarDate to calendarDate).toInstantRange |
-      (monthAndYear to monthAndYear).toInstantRange |
-      (month to monthAndYear).toInstantRange |
-      (day to calendarDate).toInstantRange
+  def dateRange =
+    rule(
+      (year to year).toInstantRange |
+        (calendarDate to calendarDate).toInstantRange |
+        (monthAndYear to monthAndYear).toInstantRange |
+        (month to monthAndYear).toInstantRange |
+        (day to calendarDate).toInstantRange)
 
-  def year[_: P] = yearDigits map (Year(_))
+  def calendarDate = () => rule(numericDate | dayMonthYear | monthDayYear)
 
-  def calendarDate[_: P] = numericDate | dayMonthYear | monthDayYear
+  def numericDate =
+    rule(
+      (dayDigits ~ "/" ~ monthDigits ~ "/" ~ yearDigits)
+        ~> ((day, month, year) => CalendarDate(day, month, year)))
 
-  def numericDate[_: P] =
-    (dayDigits ~ "/" ~ monthDigits ~ "/" ~ yearDigits)
-      .map { case (d, m, y) => CalendarDate(d, m, y) }
+  def dayMonthYear =
+    rule(
+      (writtenDay ~ ws ~ writtenMonth ~ ws ~ yearDigits)
+        ~> ((day, month, year) => CalendarDate(day, month, year)))
 
-  def dayMonthYear[_: P] =
-    (writtenDay ~ ws ~ writtenMonth ~ ws ~ yearDigits)
-      .map { case (d, m, y) => CalendarDate(d, m, y) }
+  def monthDayYear =
+    rule(
+      (writtenMonth ~ ws ~ writtenDay ~ ws ~ yearDigits)
+        ~> ((month, day, year) => CalendarDate(day, month, year)))
 
-  def monthDayYear[_: P] =
-    (writtenMonth ~ ws ~ writtenDay ~ ws ~ yearDigits)
-      .map { case (m, d, y) => CalendarDate(d, m, y) }
+  def year = () => rule(yearDigits ~> (Year(_)))
 
-  def monthAndYear[_: P] =
-    (monthFollowedByYear | yearFollowedByMonth)
-      .map { case (m, y) => MonthAndYear(m, y) }
+  def month = () => rule(writtenMonth ~> (Month(_)))
 
-  def month[_: P] = writtenMonth map (Month(_))
+  def day = () => rule(writtenDay ~> (Day(_)))
 
-  def day[_: P] = dayDigits map (Day(_))
-}
+  def monthAndYear = () => rule(monthFollowedByYear | yearFollowedByMonth)
 
-trait DateParserUtils extends ParserUtils {
+  def monthFollowedByYear = rule((writtenMonth ~ ws ~ yearDigits) ~> (MonthAndYear(_, _)))
 
-  def monthFollowedByYear[_: P] =
-    (writtenMonth ~ ws ~ yearDigits)
+  def yearFollowedByMonth =
+    rule(
+      (yearDigits ~ ws ~ writtenMonth) ~> ((year, month) => MonthAndYear(month, year)))
 
-  def yearFollowedByMonth[_: P] =
-    (yearDigits ~ ws ~ writtenMonth) map { case (y, m) => (m, y) }
+  def writtenMonth = rule(valueMap(monthMapping, ignoreCase=true))
 
-  def writtenDay[_: P] = dayDigits ~ ordinalIndicator.?
+  def writtenDay = rule(dayDigits ~ ordinalIndicator.?)
 
-  def writtenMonth[_: P] =
-    StringInIgnoreCase(
-      "january",
-      "febuary",
-      "march",
-      "april",
-      "may",
-      "june",
-      "july",
-      "august",
-      "september",
-      "october",
-      "november",
-      "december",
-      "jan",
-      "feb",
-      "mar",
-      "apr",
-      "may",
-      "jun",
-      "jul",
-      "aug",
-      "sep",
-      "oct",
-      "nov",
-      "dec"
-    ).!.map { name =>
-      monthMapping.get(name.toLowerCase.substring(0, 3)).get
-    }
+  def yearDigits = rule(digits(from=4, to=4))
 
-  val monthMapping = Map(
-    "jan" -> 1,
-    "feb" -> 2,
-    "mar" -> 3,
-    "apr" -> 4,
-    "may" -> 5,
-    "jun" -> 6,
-    "jul" -> 7,
-    "aug" -> 8,
-    "sep" -> 9,
-    "oct" -> 10,
-    "nov" -> 11,
-    "dec" -> 12,
-  )
+  def monthDigits =
+    rule(
+      digits(from=1, to=2)
+        ~> (month => test(month >= 1 && month <= 12) ~ push(month)))
 
-  def dayDigits[_: P] =
-    digit
-      .rep(min = 1, max = 2)
-      .!
-      .map(_.toInt)
-      .filter(value => value >= 1 && value <= 31)
+  def dayDigits =
+    rule(
+      digits(from=1, to=2)
+        ~> (day => test(day >= 1 && day <= 31) ~ push(day)))
 
-  def monthDigits[_: P] =
-    digit
-      .rep(min = 1, max = 2)
-      .!
-      .map(_.toInt)
-      .filter(value => value >= 1 && value <= 12)
+  def digits(from: Int, to: Int) : Rule1[Int] =
+    rule(
+      capture(from.to(to).times(CharPredicate.Digit))
+        ~> ((_ : String).toInt))
 
-  def yearDigits[_: P] =
-    digit
-      .rep(exactly = 4)
-      .!
-      .map(_.toInt)
+  def ws = rule(oneOrMore(" "))
 
-  def ordinalIndicator[_: P] = StringIn("st", "nd", "rd", "th")
-}
+  def ordinalIndicator = rule("st" | "nd" | "rd" | "th")
 
-trait ParserUtils {
-
-  def digit[_: P] = CharPred(_.isDigit)
-
-  def ws[_: P] = " ".rep
-}
-
-/**
-  *  Implicit classes used for conversion of P[A] to P[B] for some A / B
-  */
-object DateParserImplicits extends ParserUtils {
-
-  implicit class ToDateRangeParser[F <: FuzzyDate](from: => P[F]) {
-
-    def to[_: P, T <: FuzzyDate](to: => P[T]): P[FuzzyDateRange[F, T]] =
-      (from ~ ws.? ~ "-" ~ ws.? ~ to)
-        .map { case (f, t) => FuzzyDateRange(f, t) }
+  implicit class ToDateRangeParser[F <: FuzzyDate](from: () => Rule1[F]) {
+    def to[T <: FuzzyDate](to: () => Rule1[T]): Rule1[FuzzyDateRange[F, T]] =
+      rule(
+        (from() ~ ws.? ~ "-" ~ ws.? ~ to())
+          ~> ((f: F, t: T) => FuzzyDateRange(f, t)))
   }
 
-  implicit class ToInstantRangeParser[T <: TimePeriod](parser: P[T]) {
-
-    def toInstantRange[_: P](
-      implicit toInstantRange: ToInstantRange[T]): P[InstantRange] =
-      parser
-        .map(toInstantRange.safeConvert(_))
-        .filter(_.nonEmpty)
-        .map(_.get)
+  implicit class ToInstantRangeParser[T <: TimePeriod](parser: Rule1[T]) {
+    def toInstantRange(
+      implicit toInstantRange: ToInstantRange[T]): Rule1[InstantRange] =
+        rule(
+          parser
+            ~> (toInstantRange.safeConvert(_))
+            ~> (instantRange => test(instantRange.nonEmpty) ~ push(instantRange))
+            ~> ((instantRange: Option[InstantRange]) => instantRange.get))
   }
+
+  def monthMapping =
+    Map(
+      "jan" -> 1,
+      "january" -> 1,
+      "feb" -> 2,
+      "february" -> 2,
+      "mar" -> 3,
+      "march" -> 3,
+      "apr" -> 4,
+      "april" -> 4,
+      "may" -> 5,
+      "jun" -> 6,
+      "june" -> 6,
+      "jul" -> 7,
+      "july" -> 7,
+      "aug" -> 8,
+      "august" -> 8,
+      "sep" -> 9,
+      "september" -> 9,
+      "oct" -> 10,
+      "october" -> 10,
+      "nov" -> 11,
+      "november" -> 11,
+      "dec" -> 12,
+      "december" -> 12)
 }

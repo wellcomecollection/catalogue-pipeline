@@ -190,7 +190,7 @@ object ExternalDependencies {
   )
 
   val parseDependencies = Seq(
-    "com.lihaoyi" %% "fastparse" % versions.fastparse
+    "org.parboiled" %% "parboiled" % "2.1.7"
   )
 }
 
