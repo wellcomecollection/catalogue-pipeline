@@ -51,7 +51,7 @@ object FreeformDateParser extends Parser[InstantRange] with DateParserUtils {
 
   def month[_: P] = writtenMonth map (Month(_))
 
-  def day[_: P] = dayDigits map (Day(_))
+  def day[_: P] = writtenDay map (Day(_))
 }
 
 trait DateParserUtils extends ParserUtils {
