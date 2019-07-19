@@ -168,7 +168,7 @@ trait ElasticsearchFixtures
     whenReady(result) { _ =>
       eventually {
         val response: Response[SearchResponse] = elasticClient.execute {
-          search(index.name).matchAllQuery()
+          search(index.name).matchAllQuery().trackTotalHits(true)
         }.await
         response.result.totalHits shouldBe works.size
       }

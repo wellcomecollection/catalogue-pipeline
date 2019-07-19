@@ -63,7 +63,7 @@ class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
     debug(s"Sending ES request: $searchRequest")
 
     elasticClient
-      .execute { searchRequest }
+      .execute { searchRequest.trackTotalHits(true) }
       .map { toEither }
   }
 
