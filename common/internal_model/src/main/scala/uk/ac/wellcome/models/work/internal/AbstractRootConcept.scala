@@ -26,11 +26,11 @@ case class InstantRange(from: Instant,
                         label: String = "",
                         inferred: Boolean = false) {
 
-  def withInferred(inferred : Boolean) : InstantRange =
+  def withInferred(inferred: Boolean): InstantRange =
     InstantRange(from, to, label, inferred)
 
   // TODO: is label necessary? appears to always be same as Period.label
-  def withLabel(label : String) : InstantRange =
+  def withLabel(label: String): InstantRange =
     InstantRange(from, to, label, inferred)
 }
 
@@ -48,8 +48,8 @@ object InstantRange {
       to.toInstant(ZoneOffset.UTC)
     )
 
-  def parse(label: String)(implicit parser: Parser[InstantRange])
-      : Option[InstantRange] =
+  def parse(label: String)(
+    implicit parser: Parser[InstantRange]): Option[InstantRange] =
     parser(label).map(_.withLabel(label))
 }
 
