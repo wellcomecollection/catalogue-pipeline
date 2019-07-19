@@ -54,9 +54,6 @@ object FreeformDateParser extends Parser[InstantRange] with DateParserUtils {
   def day[_ : P] = dayDigits map (Day(_))
 }
 
-/**
- *  Date parsing utilities
- */
 trait DateParserUtils extends ParserUtils {
 
   def monthFollowedByYear[_ : P] =
@@ -101,9 +98,6 @@ trait DateParserUtils extends ParserUtils {
   def ordinalIndicator[_ : P] = StringIn("st", "nd", "rd", "th")
 }
 
-/**
- *  General parsing utilities
- */
 trait ParserUtils {
 
   def digit[_ : P] = CharPred(_.isDigit)
@@ -117,13 +111,14 @@ trait ParserUtils {
 object DateParserImplicits extends ParserUtils {
 
   implicit class ToDateRangeParser[F <: FuzzyDate](from: => P[F]) {
+
     def to[_ : P, T <: FuzzyDate](to: => P[T]): P[FuzzyDateRange[F, T]] =
       (from ~ ws.? ~ "-" ~ ws.? ~ to)
         .map { case (f, t) => FuzzyDateRange(f, t) }
   }
 
-  implicit class ToInstantRangeParser[T <: TimePeriod : ToInstantRange]
-      (parser: P[T]) {
+  implicit class ToInstantRangeParser[T <: TimePeriod](parser: P[T]) {
+
     def toInstantRange[_ : P](implicit toInstantRange: ToInstantRange[T]):
         P[InstantRange] =
       parser
