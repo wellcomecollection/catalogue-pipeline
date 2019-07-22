@@ -3,20 +3,19 @@ package uk.ac.wellcome.elasticsearch
 import java.time.Instant
 
 import com.sksamuel.elastic4s.Index
-import com.sksamuel.elastic4s.http.ElasticDsl.{indexInto, search, _}
-import com.sksamuel.elastic4s.http.index.IndexResponse
-import com.sksamuel.elastic4s.http.search.SearchResponse
-import com.sksamuel.elastic4s.http.{ElasticError, Response}
+import com.sksamuel.elastic4s.ElasticDsl.{indexInto, search, _}
+import com.sksamuel.elastic4s.requests.indexes.IndexResponse
+import com.sksamuel.elastic4s.requests.searches.SearchResponse
+import com.sksamuel.elastic4s.{ElasticError, Response}
 import io.circe.Encoder
 import org.scalacheck.{Arbitrary, Shrink}
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
-import org.scalatest.prop.PropertyChecks
 import org.scalacheck.Gen.chooseNum
-
 import org.scalatest.{Assertion, FunSpec, Matchers}
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.json.JsonUtil._
 import org.scalacheck.ScalacheckShapeless._
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.{
@@ -36,7 +35,7 @@ class WorksIndexTest
     with Eventually
     with Matchers
     with JsonAssertions
-    with PropertyChecks
+    with ScalaCheckPropertyChecks
     with WorksGenerators {
 
   // On failure, scalacheck tries to shrink to the smallest input that causes a failure.
@@ -116,7 +115,7 @@ class WorksIndexTest
     implicit encoder: Encoder[T]): Future[Response[IndexResponse]] =
     elasticClient
       .execute {
-        indexInto(index.name / index.name).doc(toJson(t).get)
+        indexInto(index.name).doc(toJson(t).get)
       }
 
   private def assertObjectIndexed[T](index: Index, t: T)(

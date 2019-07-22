@@ -389,3 +389,5 @@ update_task_for_config_change/src/jmespath/
 update_task_for_config_change/src/s3transfer/
 update_task_for_config_change/src/simplejson/
 update_task_for_config_change/src/structlog/
+
+.hydra/

@@ -1,6 +1,7 @@
 package uk.ac.wellcome.elasticsearch
 
-import com.sksamuel.elastic4s.http.ElasticClient
+import com.sksamuel.elastic4s.ElasticClient
+import com.sksamuel.elastic4s.http.JavaClient
 import org.apache.http.HttpHost
 import org.apache.http.auth.{AuthScope, UsernamePasswordCredentials}
 import org.apache.http.impl.client.BasicCredentialsProvider
@@ -29,11 +30,8 @@ object ElasticClientBuilder {
     val restClient = RestClient
       .builder(new HttpHost(hostname, port, protocol))
       .setHttpClientConfigCallback(new ElasticCredentials(username, password))
-      // Needed for the snapshot_generator.
-      // TODO Make this a flag
-      .setMaxRetryTimeoutMillis(2000)
       .build()
 
-    ElasticClient.fromRestClient(restClient)
+    ElasticClient(JavaClient.fromRestClient(restClient))
   }
 }

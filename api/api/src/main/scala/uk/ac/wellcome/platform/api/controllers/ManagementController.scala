@@ -1,8 +1,8 @@
 package uk.ac.wellcome.platform.api.controllers
 
 import com.google.inject.{Inject, Singleton}
-import com.sksamuel.elastic4s.http.ElasticClient
-import com.sksamuel.elastic4s.http.ElasticDsl._
+import com.sksamuel.elastic4s.ElasticClient
+import com.sksamuel.elastic4s.ElasticDsl._
 import com.twitter.finagle.http.Request
 import com.twitter.finatra.http.Controller
 

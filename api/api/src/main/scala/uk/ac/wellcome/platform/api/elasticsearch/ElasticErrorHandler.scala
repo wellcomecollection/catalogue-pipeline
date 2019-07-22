@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.api.elasticsearch
 
-import com.sksamuel.elastic4s.http.ElasticError
+import com.sksamuel.elastic4s.ElasticError
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.platform.api.models.{DisplayError, Error}
 

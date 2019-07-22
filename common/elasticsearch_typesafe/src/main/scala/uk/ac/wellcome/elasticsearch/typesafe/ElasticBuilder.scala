@@ -1,7 +1,7 @@
 package uk.ac.wellcome.elasticsearch.typesafe
 
 import com.sksamuel.elastic4s.Index
-import com.sksamuel.elastic4s.http.ElasticClient
+import com.sksamuel.elastic4s.ElasticClient
 import com.typesafe.config.Config
 import uk.ac.wellcome.elasticsearch.{DisplayElasticConfig, ElasticClientBuilder}
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
