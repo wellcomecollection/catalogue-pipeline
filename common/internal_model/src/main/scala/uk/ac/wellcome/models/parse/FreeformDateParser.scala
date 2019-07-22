@@ -2,7 +2,6 @@ package uk.ac.wellcome.models.parse
 
 import uk.ac.wellcome.models.work.internal.InstantRange
 import fastparse._, NoWhitespace._
-import ToInstantRange._
 import DateParserImplicits._
 
 /**
