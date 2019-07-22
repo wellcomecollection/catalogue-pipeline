@@ -58,6 +58,8 @@ trait DateParserUtils extends ParserUtils {
     "dec" -> 12,
   )
 
+  def year[_: P] = yearDigits map (Year(_))
+
   def dayDigits[_: P] =
     digit
       .rep(min = 1, max = 2)

@@ -23,15 +23,13 @@ object Marc008Parser extends Parser[InstantRange] with DateParserUtils {
       detailedDate.toInstantRange
 
   def singleKnownDate[_ : P] =
-    ("s" ~ yearDigits ~ emptyDate) map (Year(_))
+    ("s" ~ year ~ emptyDate)
 
   def multipleDates[_ : P] =
-    ("m" ~ yearDigits ~ yearDigits)
-      .map { case (from, to) => FuzzyDateRange(Year(from), Year(to)) }
+    ("m" ~ year ~ year) map { case (from, to) => FuzzyDateRange(from, to) }
 
   def publicationDateAndCopyrightDate[_ : P] =
-    ("t" ~ yearDigits ~ yearDigits)
-      .map { case (publicationDate, copyrightDate) => Year(publicationDate) }
+    ("t" ~ year ~ year)  map { case (pubYear, copyYear) => pubYear }
 
   def detailedDate[_ : P] =
     ("e" ~ yearDigits ~ detailedDateMonth ~ detailedDateDay)
@@ -40,7 +38,15 @@ object Marc008Parser extends Parser[InstantRange] with DateParserUtils {
   def emptyDate[_ : P] = 
     " ".rep(exactly=4) | "u".rep(exactly=4) | "|".rep(exactly=4)
 
-  def detailedDateMonth[_ : P] = digit.rep(exactly = 2).!.map(_.toInt)
+  def detailedDateMonth[_ : P] =
+    digit
+      .rep(exactly = 2)
+      .!
+      .map(_.toInt)
 
-  def detailedDateDay[_ : P] = digit.rep(exactly = 2).!.map(_.toInt)
+  def detailedDateDay[_ : P] =
+    digit
+      .rep(exactly = 2)
+      .!
+      .map(_.toInt)
 }

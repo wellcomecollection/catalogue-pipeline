@@ -28,8 +28,6 @@ object FreeformDateParser extends Parser[InstantRange] with DateParserUtils {
       (month to monthAndYear).toInstantRange |
       (day to calendarDate).toInstantRange
 
-  def year[_: P] = yearDigits map (Year(_))
-
   def calendarDate[_: P] = numericDate | dayMonthYear | monthDayYear
 
   def numericDate[_: P] =
