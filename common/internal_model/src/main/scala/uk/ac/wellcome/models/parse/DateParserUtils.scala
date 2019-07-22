@@ -76,13 +76,13 @@ trait ParserUtils {
 
   def digit[_: P] = CharPred(_.isDigit)
 
-  def digitRep[_ : P](min: Int, max: Int) =
+  def digitRep[_: P](min: Int, max: Int) =
     digit
       .rep(min = min, max = max)
       .!
       .map(_.toInt)
 
-  def digitRep[_ : P](exactly: Int) =
+  def digitRep[_: P](exactly: Int) =
     digit
       .rep(exactly = exactly)
       .!
