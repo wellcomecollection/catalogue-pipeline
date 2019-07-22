@@ -279,6 +279,10 @@ Session.vim
 .netrwhist
 # auto-generated tag files
 tags
+# metals scala language server
+.metals
+# bloop scala build server
+.bloop
 
 # End of https://www.gitignore.io/api/osx,vim,java,linux,scala,python,textmate,intellij
 drain_ecs_container_instance/src/boto3/
@@ -385,3 +389,5 @@ update_task_for_config_change/src/jmespath/
 update_task_for_config_change/src/s3transfer/
 update_task_for_config_change/src/simplejson/
 update_task_for_config_change/src/structlog/
+
+.hydra/

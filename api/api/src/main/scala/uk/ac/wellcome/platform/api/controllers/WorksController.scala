@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.api.controllers
 
 import com.jakehschwartz.finatra.swagger.SwaggerController
 import com.sksamuel.elastic4s.Index
-import com.sksamuel.elastic4s.http.ElasticError
+import com.sksamuel.elastic4s.ElasticError
 import com.twitter.finagle.http.Request
 import com.twitter.finatra.http.Controller
 import com.twitter.finatra.http.response.ResponseBuilder

@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.ingestor.services
 
 import akka.Done
 import com.amazonaws.services.sqs.model.Message
-import com.sksamuel.elastic4s.http.ElasticClient
+import com.sksamuel.elastic4s.ElasticClient
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.elasticsearch.{ElasticsearchIndexCreator, WorksIndex}
 import uk.ac.wellcome.messaging.message.MessageStream

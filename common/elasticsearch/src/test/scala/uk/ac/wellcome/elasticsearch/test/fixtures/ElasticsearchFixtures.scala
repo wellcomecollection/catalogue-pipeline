@@ -1,14 +1,14 @@
 package uk.ac.wellcome.elasticsearch.test.fixtures
 
 import com.sksamuel.elastic4s.Index
-import com.sksamuel.elastic4s.VersionType.ExternalGte
-import com.sksamuel.elastic4s.http.ElasticDsl._
-import com.sksamuel.elastic4s.http.cluster.ClusterHealthResponse
-import com.sksamuel.elastic4s.http.get.GetResponse
-import com.sksamuel.elastic4s.http.index.admin.IndexExistsResponse
-import com.sksamuel.elastic4s.http.search.SearchResponse
-import com.sksamuel.elastic4s.http.{ElasticClient, Response}
-import com.sksamuel.elastic4s.mappings.FieldDefinition
+import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.requests.cluster.ClusterHealthResponse
+import com.sksamuel.elastic4s.requests.common.VersionType.ExternalGte
+import com.sksamuel.elastic4s.requests.get.GetResponse
+import com.sksamuel.elastic4s.requests.indexes.admin.IndexExistsResponse
+import com.sksamuel.elastic4s.requests.searches.SearchResponse
+import com.sksamuel.elastic4s.{ElasticClient, Response}
+import com.sksamuel.elastic4s.requests.mappings.FieldDefinition
 import org.scalactic.source.Position
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatest.time.{Millis, Seconds, Span}
@@ -156,7 +156,7 @@ trait ElasticsearchFixtures
         works.map { work =>
           val jsonDoc = toJson(work).get
 
-          indexInto(index.name / index.name)
+          indexInto(index.name)
             .version(work.version)
             .versionType(ExternalGte)
             .id(work.canonicalId)
@@ -168,10 +168,9 @@ trait ElasticsearchFixtures
     whenReady(result) { _ =>
       eventually {
         val response: Response[SearchResponse] = elasticClient.execute {
-          search(index.name).matchAllQuery()
+          search(index.name).matchAllQuery().trackTotalHits(true)
         }.await
-
-        response.result.hits.total shouldBe works.size
+        response.result.totalHits shouldBe works.size
       }
     }
   }

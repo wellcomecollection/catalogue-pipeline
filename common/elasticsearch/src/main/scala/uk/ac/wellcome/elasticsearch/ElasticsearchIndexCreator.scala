@@ -1,12 +1,15 @@
 package uk.ac.wellcome.elasticsearch
 
 import com.sksamuel.elastic4s.Index
-import com.sksamuel.elastic4s.http.ElasticDsl.{createIndex, _}
-import com.sksamuel.elastic4s.http.index.CreateIndexResponse
-import com.sksamuel.elastic4s.http.index.mappings.PutMappingResponse
-import com.sksamuel.elastic4s.http.{ElasticClient, Response}
-import com.sksamuel.elastic4s.mappings.dynamictemplate.DynamicMapping
-import com.sksamuel.elastic4s.mappings.{FieldDefinition, MappingDefinition}
+import com.sksamuel.elastic4s.ElasticDsl.{createIndex, _}
+import com.sksamuel.elastic4s.requests.indexes.CreateIndexResponse
+import com.sksamuel.elastic4s.requests.indexes.PutMappingResponse
+import com.sksamuel.elastic4s.{ElasticClient, Response}
+import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
+import com.sksamuel.elastic4s.requests.mappings.{
+  FieldDefinition,
+  MappingDefinition
+}
 import grizzled.slf4j.Logging
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -16,9 +19,8 @@ class ElasticsearchIndexCreator(elasticClient: ElasticClient)(
     extends Logging {
   def create(index: Index, fields: Seq[FieldDefinition]): Future[Unit] = {
     val mappingDefinition: MappingDefinition =
-      mapping(index.name)
+      properties(fields)
         .dynamic(DynamicMapping.Strict)
-        .as(fields)
 
     create(index = index, mappingDefinition = mappingDefinition)
   }
@@ -28,7 +30,7 @@ class ElasticsearchIndexCreator(elasticClient: ElasticClient)(
     elasticClient
       .execute {
         createIndex(index.name)
-          .mappings { mappingDefinition }
+          .mapping { mappingDefinition }
 
           // Because we have a relatively small number of records (compared
           // to what Elasticsearch usually expects), we can get weird results
@@ -67,7 +69,7 @@ class ElasticsearchIndexCreator(elasticClient: ElasticClient)(
                      mappingDefinition: MappingDefinition): Future[Unit] =
     elasticClient
       .execute {
-        putMapping(index.name / index.name)
+        putMapping(index.name)
           .dynamic(mappingDefinition.dynamic.getOrElse(DynamicMapping.Strict))
           .as(mappingDefinition.fields)
       }

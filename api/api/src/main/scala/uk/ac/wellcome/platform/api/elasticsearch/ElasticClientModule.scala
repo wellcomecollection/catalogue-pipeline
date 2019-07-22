@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.api.elasticsearch
 
 import com.google.inject.{Provides, Singleton}
-import com.sksamuel.elastic4s.http.ElasticClient
+import com.sksamuel.elastic4s.ElasticClient
 import com.twitter.inject.TwitterModule
 import uk.ac.wellcome.elasticsearch.ElasticClientBuilder
 

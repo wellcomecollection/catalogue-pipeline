@@ -4,9 +4,9 @@ import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import com.sksamuel.elastic4s.Index
-import com.sksamuel.elastic4s.http.ElasticClient
-import com.sksamuel.elastic4s.http.ElasticDsl.{search, termQuery}
-import com.sksamuel.elastic4s.http.search.SearchHit
+import com.sksamuel.elastic4s.ElasticClient
+import com.sksamuel.elastic4s.ElasticDsl.{search, termQuery}
+import com.sksamuel.elastic4s.requests.searches.SearchHit
 import com.sksamuel.elastic4s.streams.ReactiveElastic._
 import com.twitter.inject.Logging
 import uk.ac.wellcome.json.JsonUtil._
