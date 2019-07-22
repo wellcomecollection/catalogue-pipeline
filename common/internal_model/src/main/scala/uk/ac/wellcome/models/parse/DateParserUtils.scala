@@ -61,24 +61,12 @@ trait DateParserUtils extends ParserUtils {
   def year[_: P] = yearDigits map (Year(_))
 
   def dayDigits[_: P] =
-    digit
-      .rep(min = 1, max = 2)
-      .!
-      .map(_.toInt)
-      .filter(value => value >= 1 && value <= 31)
+    digitRep(min = 1, max = 2).filter(value => value >= 1 && value <= 31)
 
   def monthDigits[_: P] =
-    digit
-      .rep(min = 1, max = 2)
-      .!
-      .map(_.toInt)
-      .filter(value => value >= 1 && value <= 12)
+    digitRep(min = 1, max = 2).filter(value => value >= 1 && value <= 12)
 
-  def yearDigits[_: P] =
-    digit
-      .rep(exactly = 4)
-      .!
-      .map(_.toInt)
+  def yearDigits[_: P] = digitRep(exactly = 4)
 
   def ordinalIndicator[_: P] = StringIn("st", "nd", "rd", "th")
 
@@ -87,6 +75,18 @@ trait DateParserUtils extends ParserUtils {
 trait ParserUtils {
 
   def digit[_: P] = CharPred(_.isDigit)
+
+  def digitRep[_ : P](min: Int, max: Int) =
+    digit
+      .rep(min = min, max = max)
+      .!
+      .map(_.toInt)
+
+  def digitRep[_ : P](exactly: Int) =
+    digit
+      .rep(exactly = exactly)
+      .!
+      .map(_.toInt)
 
   def ws[_: P] = " ".rep
 }

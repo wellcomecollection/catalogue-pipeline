@@ -17,36 +17,37 @@ object Marc008Parser extends Parser[InstantRange] with DateParserUtils {
   def createdDate[_ : P] = CharPred(_.isDigit).rep(exactly=6)
 
   def timePeriod[_ : P] =
-    singleKnownDate.toInstantRange |
+    singleKnownDate |
       multipleDates.toInstantRange |
-      publicationDateAndCopyrightDate.toInstantRange |
+      publicationDateAndCopyrightDate |
       detailedDate.toInstantRange
 
   def singleKnownDate[_ : P] =
-    ("s" ~ year ~ emptyDate)
+    ("s" ~ partialYear ~ emptyDate)
 
   def multipleDates[_ : P] =
     ("m" ~ year ~ year) map { case (from, to) => FuzzyDateRange(from, to) }
 
   def publicationDateAndCopyrightDate[_ : P] =
-    ("t" ~ year ~ year)  map { case (pubYear, copyYear) => pubYear }
+    ("t" ~ partialYear ~ partialYear)
+      .map { case (pubYear, copyYear) => pubYear }
 
   def detailedDate[_ : P] =
-    ("e" ~ yearDigits ~ detailedDateMonth ~ detailedDateDay)
+    ("e" ~ yearDigits ~ digitRep(exactly = 2) ~ digitRep(exactly = 2))
       .map { case (year, month, day) => CalendarDate(year, month, day) }
+
+  def partialYear[_ : P] =
+    year.toInstantRange |
+      century.toInstantRange |
+      centuryAndDecade.toInstantRange
+
+  def century[_ : P] =
+    (digitRep(exactly = 2) ~ "u".rep(exactly=2)) map (Century(_))
+
+  def centuryAndDecade[_ : P] = 
+    (digitRep(exactly = 2) ~ digitRep(exactly = 1) ~ "u")
+      .map { case  (century, decade) => CenturyAndDecade(century, decade) }
 
   def emptyDate[_ : P] = 
     " ".rep(exactly=4) | "u".rep(exactly=4) | "|".rep(exactly=4)
-
-  def detailedDateMonth[_ : P] =
-    digit
-      .rep(exactly = 2)
-      .!
-      .map(_.toInt)
-
-  def detailedDateDay[_ : P] =
-    digit
-      .rep(exactly = 2)
-      .!
-      .map(_.toInt)
 }
