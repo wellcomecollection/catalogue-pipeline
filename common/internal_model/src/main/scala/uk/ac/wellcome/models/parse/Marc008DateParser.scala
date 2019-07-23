@@ -6,11 +6,11 @@ import uk.ac.wellcome.models.work.internal.InstantRange
 import DateParserImplicits._
 
 /**
-  *  Parsed Marc 008 fields into InstantRange
+  *  Parses Marc 008 date information into InstantRange
   *
   *  Spec: https://www.loc.gov/marc/bibliographic/bd008a.html
   */
-object Marc008Parser extends Parser[InstantRange] with DateParserUtils {
+object Marc008DateParser extends Parser[InstantRange] with DateParserUtils {
 
   def parser[_: P] = (Start ~ createdDate ~ timePeriod)
 
