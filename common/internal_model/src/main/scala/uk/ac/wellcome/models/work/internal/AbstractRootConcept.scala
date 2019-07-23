@@ -37,15 +37,21 @@ case class InstantRange(from: Instant,
 object InstantRange {
 
   def apply(from: LocalDate, to: LocalDate): InstantRange =
+      InstantRange(from, to, "")
+
+  def apply(from: LocalDate, to: LocalDate, label: String): InstantRange =
     InstantRange(
       from.atStartOfDay(),
-      to.atStartOfDay().plusDays(1).minusNanos(1)
+      to.atStartOfDay().plusDays(1).minusNanos(1),
+      label
     )
 
-  def apply(from: LocalDateTime, to: LocalDateTime): InstantRange =
+  def apply(
+    from: LocalDateTime, to: LocalDateTime, label: String): InstantRange =
     InstantRange(
       from.toInstant(ZoneOffset.UTC),
-      to.toInstant(ZoneOffset.UTC)
+      to.toInstant(ZoneOffset.UTC),
+      label
     )
 
   def parse(label: String)(

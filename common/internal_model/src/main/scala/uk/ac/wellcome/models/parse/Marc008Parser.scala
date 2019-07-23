@@ -19,9 +19,9 @@ object Marc008Parser
     (Start ~ createdDate ~ Marc008DateParser.parser ~ MarcPlaceParser.parser.?)
       .map { case (instantRange, place) =>
         ProductionEvent(
-          label = "",
+          label = instantRange.label,
           agents = Nil,
-          dates = List(Period("", Some(instantRange))),
+          dates = Period(instantRange.label, Some(instantRange)) :: Nil,
           places = place.toList,
           function = None)}
 
