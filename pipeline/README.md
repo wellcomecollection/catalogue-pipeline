@@ -31,11 +31,6 @@ Each transformed work is stored into a
 [VHS store](https://stacks.wellcomecollection.org/creating-a-data-store-from-s3-and-dynamodb-8bb9ecce8fc1).
 
 
-## [ID Minter](./id_minter)
-
-Each Unidentified Work has an ID minted for it, using a source ID and avoiding dupes. 
-
-
 ## [Matcher](./matcher)
 
 Searches for potential merge candidates, and records them on the Work. 
@@ -45,6 +40,11 @@ Searches for potential merge candidates, and records them on the Work.
 
 Runs some [rules](./merger/src/test/scala/uk/ac/wellcome/platform/merger/rules) on the merge candidates
 and decides if it is a valid merge.
+
+
+## [ID Minter](./id_minter)
+
+Each Unidentified Work has an ID minted for it, using a source ID and avoiding dupes. 
 
 
 ## [Ingestor](./ingestor)
