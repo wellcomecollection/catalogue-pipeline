@@ -65,16 +65,16 @@ object ToInstantRange extends DateHelpers {
     new ToInstantRange[Century] {
       def apply(value: Century): InstantRange =
         InstantRange(
-          yearStart(100 * value.century),
-          yearEnd(100 * value.century + 99))
+          centuryAndDecadeStart(value.century, 0),
+          centuryAndDecadeEnd(value.century, 9))
     }
 
   implicit val convertCenturyAndDecade =
     new ToInstantRange[CenturyAndDecade] {
       def apply(value: CenturyAndDecade): InstantRange =
         InstantRange(
-          yearStart(100 * value.century + 10 * value.decade),
-          yearEnd(100 * value.century + 10 * value.decade + 9))
+          centuryAndDecadeStart(value.century, value.decade),
+          centuryAndDecadeEnd(value.century, value.decade))
     }
 
   implicit val convertYearRange =
@@ -138,4 +138,10 @@ trait DateHelpers {
 
   protected def yearEnd(year: Int): LocalDate =
     LocalDate.of(year, 12, 31)
+
+  protected def centuryAndDecadeStart(century: Int, decade: Int): LocalDate =
+    yearStart(century * 100 + decade * 10)
+
+  protected def centuryAndDecadeEnd(century: Int, decade: Int): LocalDate =
+    yearEnd(century * 100 + decade * 10 + 9)
 }
