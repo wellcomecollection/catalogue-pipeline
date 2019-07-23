@@ -8,7 +8,7 @@ The flow of data is as follows:
 ```
 (Data source queue) => Transformer => Recorder => ID Minter => Matcher => Merger => Ingestor
 ```
-Each service in the pipeline is topped with reading SNS topic, and tailed with pushing to queue.
+Each service in the pipeline has an input of an SNS topic that it subscribes to and after it has worked on that message, pushes its result to a SQS queue.
 
 We use AWS SNS / SQS for this, there are talks of abstracting that out.  
 
