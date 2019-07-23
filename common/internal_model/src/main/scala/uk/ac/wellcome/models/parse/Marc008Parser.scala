@@ -38,12 +38,10 @@ object Marc008Parser extends Parser[InstantRange] with DateParserUtils {
     ("e" ~ yearDigits ~ digitRep(exactly = 2) ~ digitRep(exactly = 2))
       .map { case (year, month, day) => CalendarDate(day, month, year) }
 
-  // TODO : should we store the publication date or copyright date?
   def publicationDateAndCopyrightDate[_ : P] =
     ("t" ~ partialYear ~ partialYear)
       .map { case (pubYear, copyYear) => pubYear }
 
-  // TODO : should we store the reprint date or original date?
   def reprintDate[_ : P] =
     ("r" ~ partialYear ~ partialYear)
       .map { case (reprintYear, originalYear) => reprintYear }
@@ -51,11 +49,11 @@ object Marc008Parser extends Parser[InstantRange] with DateParserUtils {
   def continuingResourceCeasedPublication[_ : P] =
     ("d" ~ year ~ year) map { case (from, to) => FuzzyDateRange(from, to) }
 
-  // TODO : should we be using final year 9999 here?
+  // TODO : InstantRange should have optional start / end rather than 9999
   def continuingResourceCurrentlyPublished[_ : P] =
     ("c" ~ year ~ "9999") map (FuzzyDateRange(_, Year(9999)))
 
-  // TODO : should we be using final year 9999 here?
+  // TODO : InstantRange should have optional start / end rather than 9999
   def continuingResourceStatusUnknown[_ : P] =
     ("u" ~ year ~ "uuuu") map (FuzzyDateRange(_, Year(9999)))
 
@@ -63,7 +61,6 @@ object Marc008Parser extends Parser[InstantRange] with DateParserUtils {
   def questionableDate[_ : P] =
     ("q" ~ year ~ year) map { case (from, to) => FuzzyDateRange(from, to) }
 
-  // TODO : should we be using release or production date?
   def differingReleaseAndProduction[_ : P] =
     ("p" ~ year ~ year) map { case (release, production) => release }
 
