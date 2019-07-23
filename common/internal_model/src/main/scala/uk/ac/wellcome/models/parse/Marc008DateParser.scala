@@ -12,11 +12,7 @@ import DateParserImplicits._
   */
 object Marc008DateParser extends Parser[InstantRange] with DateParserUtils {
 
-  def parser[_: P] = (Start ~ createdDate ~ timePeriod)
-
-  def createdDate[_: P] = AnyChar.rep(exactly = 6)
-
-  def timePeriod[_: P] =
+  def parser[_: P] =
     singleKnownDate |
       multipleDates.toInstantRange |
       detailedDate.toInstantRange |
