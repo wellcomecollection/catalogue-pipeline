@@ -8,14 +8,22 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData,
   VarField
 }
+import uk.ac.wellcome.models.parse.Marc008Parser
 
 trait SierraProduction {
 
   // Populate wwork:production.
   //
-  // Information about production can come from two fields in MARC: 260 & 264.
+  // Information about production can come from three fields in MARC: 260, 264
+  // and 008.
+  //
   // At Wellcome, 260 is what was used historically -- 264 is what we're moving
-  // towards, using RDA rules.
+  // towards, using RDA rules. If neither of these  fields are available, we
+  // fallback to 008.
+  //
+  // If 260/264 are available but don't contain any date information, we fill in
+  // the first ProductionEvent with date information from 008 (which is what the
+  // 008 field should refer to according to the cataloguing rules).
   //
   // It is theoretically possible for a bib record to have both 260 and 264,
   // but it would be a cataloguing error -- we should reject it, and flag it
@@ -30,13 +38,19 @@ trait SierraProduction {
       _.marcTag.contains("264")
     }
 
-    (maybeMarc260fields, maybeMarc264fields) match {
+    val productions = (maybeMarc260fields, maybeMarc264fields) match {
       case (Nil, Nil)           => List()
       case (marc260fields, Nil) => getProductionFrom260Fields(marc260fields)
       case (Nil, marc264fields) =>
         getProductionFrom264Fields(bibId, marc264fields)
       case (marc260fields, marc264fields) =>
         getProductionFromBothFields(bibId, marc260fields, marc264fields)
+    }
+
+    (productions, getProductionFrom008(bibData)) match {
+      case (head :: tail, production :: _) => head.withDates(
+        if (head.dates.isEmpty) production.dates else head.dates) :: tail
+      case (maybe260or264, maybe008)       => maybe260or264 ++ maybe008
     }
   }
 
@@ -220,6 +234,14 @@ trait SierraProduction {
       )
     }
   }
+
+  def getProductionFrom008(bibData: SierraBibData)
+    : List[ProductionEvent[MaybeDisplayable[AbstractAgent]]] =
+    bibData
+      .varFields
+      .filter(_.marcTag.contains("008"))
+      .flatMap(_.content)
+      .flatMap(Marc008Parser(_))
 
   // @@AWLC: I'm joining these with a space because that seems more appropriate
   // given our catalogue, but the MARC spec isn't entirely clear on what to do.

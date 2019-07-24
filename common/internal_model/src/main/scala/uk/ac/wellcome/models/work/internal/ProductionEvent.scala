@@ -7,4 +7,8 @@ case class ProductionEvent[+T <: IdentityState[AbstractAgent]](
   dates: List[Period],
   function: Option[Concept],
   ontologyType: String = "ProductionEvent"
-)
+) {
+
+  def withDates(dates: List[Period]): ProductionEvent[T] = 
+    ProductionEvent(label, places, agents, dates, function, ontologyType)
+}

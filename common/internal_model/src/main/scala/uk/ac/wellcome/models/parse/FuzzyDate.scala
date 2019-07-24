@@ -1,7 +1,7 @@
 package uk.ac.wellcome.models.parse
 
 import scala.util.control.Exception
-import java.time.{LocalDate, LocalDateTime, Instant, DateTimeException, ZoneId}
+import java.time.{LocalDate, DateTimeException}
 import uk.ac.wellcome.models.work.internal.InstantRange
 
 /**
