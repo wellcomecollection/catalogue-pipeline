@@ -46,7 +46,9 @@ object WorksIndex {
       license
     )
 
-  def date(fieldName: String) = objectField(fieldName).fields(
+  def date(fieldName: String) = objectField(fieldName).fields(period)
+
+  val period = Seq(
     textField("label"),
     objectField("range").fields(
       textField("label"),
@@ -71,7 +73,7 @@ object WorksIndex {
     keywordField("ontologyType")
   )
 
-  val rootConcept = concept ++ agent
+  val rootConcept = concept ++ agent ++ period
 
   def identified(fieldName: String, fields: Seq[FieldDefinition]): ObjectField =
     objectField(fieldName).fields(
