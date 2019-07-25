@@ -56,4 +56,4 @@ Inserts a work into our query index - Elasticsearch.
 
 ## Releasing
 We use the [Wellcome Release Tooling](https://github.com/wellcometrust/dockerfiles/tree/master/release_tooling),
-which has it's config defined in [`.wellcome_project`](../.wellcome_project).
+which has its config defined in [`.wellcome_project`](../.wellcome_project).
