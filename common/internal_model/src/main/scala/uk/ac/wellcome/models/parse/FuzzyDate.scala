@@ -16,6 +16,8 @@ case class Year(year: Int) extends FuzzyDate
 case class MonthAndYear(month: Int, year: Int) extends FuzzyDate
 case class Month(month: Int) extends FuzzyDate
 case class Day(day: Int) extends FuzzyDate
+case class Century(century: Int) extends FuzzyDate
+case class CenturyAndDecade(century: Int, decade: Int) extends FuzzyDate
 
 /**
   *  A continuous period over some days / months / years
@@ -57,6 +59,22 @@ object ToInstantRange extends DateHelpers {
         InstantRange(
           monthStart(value.month, value.year),
           monthEnd(value.month, value.year))
+    }
+
+  implicit val convertCentury =
+    new ToInstantRange[Century] {
+      def apply(value: Century): InstantRange =
+        InstantRange(
+          centuryAndDecadeStart(value.century, 0),
+          centuryAndDecadeEnd(value.century, 9))
+    }
+
+  implicit val convertCenturyAndDecade =
+    new ToInstantRange[CenturyAndDecade] {
+      def apply(value: CenturyAndDecade): InstantRange =
+        InstantRange(
+          centuryAndDecadeStart(value.century, value.decade),
+          centuryAndDecadeEnd(value.century, value.decade))
     }
 
   implicit val convertYearRange =
@@ -120,4 +138,10 @@ trait DateHelpers {
 
   protected def yearEnd(year: Int): LocalDate =
     LocalDate.of(year, 12, 31)
+
+  protected def centuryAndDecadeStart(century: Int, decade: Int): LocalDate =
+    yearStart(century * 100 + decade * 10)
+
+  protected def centuryAndDecadeEnd(century: Int, decade: Int): LocalDate =
+    yearEnd(century * 100 + decade * 10 + 9)
 }
