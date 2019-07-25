@@ -182,10 +182,8 @@ trait SierraProduction {
 
   private def marc264IsOnlyPunctuation(marc264fields: List[VarField]): Boolean =
     marc264fields
-      .map { vf: VarField =>
-        vf.subfields.map { _.content }.mkString("")
-      }
-      .forall { _.matches("^[:,]*$") }
+      .map { getSubfieldContents(_) mkString "" }
+      .forall { _ matches "^[:,]*$" }
 
   /** Populate the production data if both 260 and 264 are present.
     *
@@ -259,30 +257,26 @@ trait SierraProduction {
   //    Website     [Netherne, Surrey], [ca. 1966]
   //
   private def labelFromSubFields(vf: VarField): String =
-    vf.subfields.map { _.content }.mkString(" ")
+    getSubfieldContents(vf) mkString " "
 
-  private def placesFromSubfields(vf: VarField,
-                                  subfieldTag: String): List[Place] =
-    vf.subfields
-      .filter { _.tag == subfieldTag }
-      .map { sf: MarcSubfield =>
-        Place.normalised(label = sf.content)
-      }
+  private def placesFromSubfields(
+    vf: VarField, subfieldTag: String): List[Place] =
+    getSubfieldContents(vf, Some(subfieldTag)) map Place.normalised
 
   private def agentsFromSubfields(
-    vf: VarField,
-    subfieldTag: String): List[Unidentifiable[Agent]] =
-    vf.subfields
-      .filter { _.tag == subfieldTag }
-      .map { sf: MarcSubfield =>
-        Unidentifiable(Agent.normalised(label = sf.content))
-      }
+    vf: VarField, subfieldTag: String): List[Unidentifiable[Agent]] =
+    getSubfieldContents(vf, Some(subfieldTag))
+      .map { content => Unidentifiable(Agent.normalised(content)) }
 
-  private def datesFromSubfields(vf: VarField,
-                                 subfieldTag: String): List[Period] =
-    vf.subfields
-      .filter { _.tag == subfieldTag }
-      .map { sf: MarcSubfield =>
-        Period(label = sf.content)
-      }
+  private def datesFromSubfields(
+    vf: VarField, subfieldTag: String): List[Period] =
+    getSubfieldContents(vf, Some(subfieldTag)) map Period.apply
+
+  private def getSubfieldContents(
+    varField: VarField, tag: Option[String] = None): List[String] =
+    varField.subfields
+      .filter { subfield => tag match {
+          case Some(tag) => subfield.tag == tag
+          case None => true}}
+      .map { case MarcSubfield(_, content) => content }
 }
