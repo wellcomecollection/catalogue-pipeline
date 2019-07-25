@@ -31,6 +31,7 @@ trait SierraProduction {
   //
   def getProduction(bibId: SierraBibNumber, bibData: SierraBibData)
     : List[ProductionEvent[MaybeDisplayable[AbstractAgent]]] = {
+
     val maybeMarc260fields = bibData.varFields.filter {
       _.marcTag.contains("260")
     }
