@@ -9,6 +9,6 @@ case class ProductionEvent[+T <: IdentityState[AbstractAgent]](
   ontologyType: String = "ProductionEvent"
 ) {
 
-  def withDates(dates: List[Period]): ProductionEvent[T] = 
+  def withDates(dates: List[Period]): ProductionEvent[T] =
     ProductionEvent(label, places, agents, dates, function, ontologyType)
 }
