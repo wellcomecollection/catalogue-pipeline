@@ -162,12 +162,6 @@ trait DateHelpers {
   protected def yearEnd(year: Int): LocalDate =
     LocalDate.of(year, 12, 31)
 
-  protected def centuryAndDecadeStart(century: Int, decade: Int): LocalDate =
-    yearStart(century * 100 + decade * 10)
-
-  protected def centuryAndDecadeEnd(century: Int, decade: Int): LocalDate =
-    yearEnd(century * 100 + decade * 10 + 9)
-
   protected def centuryToFuzzyDateRange(
     century: Int): FuzzyDateRange[Year, Year] =
     FuzzyDateRange(Year(century * 100), Year(century * 100 + 99))
