@@ -1,7 +1,7 @@
 package uk.ac.wellcome.models.parse
 
 import scala.util.control.Exception
-import java.time.{LocalDate, DateTimeException}
+import java.time.{DateTimeException, LocalDate}
 import uk.ac.wellcome.models.work.internal.InstantRange
 
 /**
@@ -51,51 +51,58 @@ object ToInstantRange extends DateHelpers {
       InstantRange(yearStart(value.year), yearEnd(value.year), value.label))
 
   implicit val convertMonthAndYear =
-    convert[MonthAndYear](value =>
-      InstantRange(
-        monthStart(value.month, value.year),
-        monthEnd(value.month, value.year),
-        value.label))
+    convert[MonthAndYear](
+      value =>
+        InstantRange(
+          monthStart(value.month, value.year),
+          monthEnd(value.month, value.year),
+          value.label))
 
   implicit val convertCentury =
     convert[Century](value =>
       convertYearRange(centuryToFuzzyDateRange(value.century)))
 
   implicit val convertCenturyAndDecade =
-    convert[CenturyAndDecade](value =>
-      convertYearRange(centuryAndDecadeToFuzzyDateRange(value.century,
-                                                        value.decade)))
+    convert[CenturyAndDecade](
+      value =>
+        convertYearRange(
+          centuryAndDecadeToFuzzyDateRange(value.century, value.decade)))
 
   implicit val convertYearRange =
-    convert[FuzzyDateRange[Year, Year]](value =>
-      InstantRange(yearStart(value.from.year),
-                   yearEnd(value.to.year),
-                   value.label))
+    convert[FuzzyDateRange[Year, Year]](
+      value =>
+        InstantRange(
+          yearStart(value.from.year),
+          yearEnd(value.to.year),
+          value.label))
 
   implicit val convertCalendarDateRange =
     convert[FuzzyDateRange[CalendarDate, CalendarDate]](value =>
       InstantRange(localDate(value.from), localDate(value.to), value.label))
 
   implicit val convertMonthRangeAcrossYears =
-    convert[FuzzyDateRange[MonthAndYear, MonthAndYear]](value =>
-      InstantRange(
-        monthStart(value.from.month, value.from.year),
-        monthEnd(value.to.month, value.to.year),
-        value.label))
+    convert[FuzzyDateRange[MonthAndYear, MonthAndYear]](
+      value =>
+        InstantRange(
+          monthStart(value.from.month, value.from.year),
+          monthEnd(value.to.month, value.to.year),
+          value.label))
 
   implicit val convertMonthRangeWithinAYear =
-    convert[FuzzyDateRange[Month, MonthAndYear]](value =>
-      InstantRange(
-        monthStart(value.from.month, value.to.year),
-        monthEnd(value.to.month, value.to.year),
-        value.label))
+    convert[FuzzyDateRange[Month, MonthAndYear]](
+      value =>
+        InstantRange(
+          monthStart(value.from.month, value.to.year),
+          monthEnd(value.to.month, value.to.year),
+          value.label))
 
   implicit val convertDayRangeWithinAMonth =
-    convert[FuzzyDateRange[Day, CalendarDate]](value =>
-      InstantRange(
-        localDate(value.from.day, value.to.month, value.to.year),
-        localDate(value.to),
-        value.label))
+    convert[FuzzyDateRange[Day, CalendarDate]](
+      value =>
+        InstantRange(
+          localDate(value.from.day, value.to.month, value.to.year),
+          localDate(value.to),
+          value.label))
 }
 
 sealed trait TimePeriod extends DateHelpers {
@@ -149,7 +156,9 @@ trait DateHelpers {
     FuzzyDateRange(Year(century * 100), Year(century * 100 + 99))
 
   protected def centuryAndDecadeToFuzzyDateRange(
-    century: Int, decade: Int): FuzzyDateRange[Year, Year] =
-    FuzzyDateRange(Year(century * 100 + decade * 10),
-                   Year(century * 100 + decade * 10 + 9))
+    century: Int,
+    decade: Int): FuzzyDateRange[Year, Year] =
+    FuzzyDateRange(
+      Year(century * 100 + decade * 10),
+      Year(century * 100 + decade * 10 + 9))
 }

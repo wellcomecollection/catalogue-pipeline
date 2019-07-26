@@ -49,9 +49,9 @@ trait SierraProduction {
     }
 
     (productions, getProductionFrom008(bibData)) match {
-      case (head :: tail, production :: _) => head.withDates(
-        if (head.dates.isEmpty) production.dates else head.dates) :: tail
-      case (maybe260or264, maybe008)       => maybe260or264 ++ maybe008
+      case (head :: tail, production :: _) =>
+        head.withDates(if (head.dates.isEmpty) production.dates else head.dates) :: tail
+      case (maybe260or264, maybe008) => maybe260or264 ++ maybe008
     }
   }
 
@@ -236,8 +236,7 @@ trait SierraProduction {
 
   def getProductionFrom008(bibData: SierraBibData)
     : List[ProductionEvent[MaybeDisplayable[AbstractAgent]]] =
-    bibData
-      .varFields
+    bibData.varFields
       .filter(_.marcTag.contains("008"))
       .flatMap(_.content)
       .flatMap(Marc008Parser(_))
@@ -259,24 +258,30 @@ trait SierraProduction {
   private def labelFromSubFields(vf: VarField): String =
     getSubfieldContents(vf) mkString " "
 
-  private def placesFromSubfields(
-    vf: VarField, subfieldTag: String): List[Place] =
+  private def placesFromSubfields(vf: VarField,
+                                  subfieldTag: String): List[Place] =
     getSubfieldContents(vf, Some(subfieldTag)) map Place.normalised
 
   private def agentsFromSubfields(
-    vf: VarField, subfieldTag: String): List[Unidentifiable[Agent]] =
+    vf: VarField,
+    subfieldTag: String): List[Unidentifiable[Agent]] =
     getSubfieldContents(vf, Some(subfieldTag))
-      .map { content => Unidentifiable(Agent.normalised(content)) }
+      .map { content =>
+        Unidentifiable(Agent.normalised(content))
+      }
 
-  private def datesFromSubfields(
-    vf: VarField, subfieldTag: String): List[Period] =
+  private def datesFromSubfields(vf: VarField,
+                                 subfieldTag: String): List[Period] =
     getSubfieldContents(vf, Some(subfieldTag)) map Period.apply
 
-  private def getSubfieldContents(
-    varField: VarField, tag: Option[String] = None): List[String] =
+  private def getSubfieldContents(varField: VarField,
+                                  tag: Option[String] = None): List[String] =
     varField.subfields
-      .filter { subfield => tag match {
+      .filter { subfield =>
+        tag match {
           case Some(tag) => subfield.tag == tag
-          case None => true}}
+          case None      => true
+        }
+      }
       .map { case MarcSubfield(_, content) => content }
 }

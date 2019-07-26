@@ -593,7 +593,6 @@ class SierraProductionTest
             MarcSubfield(tag = "c", content = "2002"),
             MarcSubfield(tag = "a", content = "London"))))
 
-
       transformToProduction(varFields) shouldBe List(
         ProductionEvent(
           label = "2002 London",
@@ -614,7 +613,6 @@ class SierraProductionTest
             MarcSubfield(tag = "c", content = "2002"),
             MarcSubfield(tag = "a", content = "London"))))
 
-
       transformToProduction(varFields) shouldBe List(
         ProductionEvent(
           label = "2002 London",
@@ -632,7 +630,6 @@ class SierraProductionTest
           marcTag = "260",
           indicator2 = "1",
           subfields = List(MarcSubfield(tag = "a", content = "London"))))
-
 
       transformToProduction(varFields) shouldBe List(
         ProductionEvent(

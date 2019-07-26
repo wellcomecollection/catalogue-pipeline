@@ -43,8 +43,9 @@ object InstantRange {
       label
     )
 
-  def apply(
-    from: LocalDateTime, to: LocalDateTime, label: String): InstantRange =
+  def apply(from: LocalDateTime,
+            to: LocalDateTime,
+            label: String): InstantRange =
     InstantRange(
       from.toInstant(ZoneOffset.UTC),
       to.toInstant(ZoneOffset.UTC),

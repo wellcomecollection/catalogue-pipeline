@@ -11,7 +11,9 @@ import uk.ac.wellcome.models.work.internal.Place
 object MarcPlaceParser extends Parser[Place] {
 
   def parser[_: P] =
-    AnyChar.rep(exactly = 3).!
+    AnyChar
+      .rep(exactly = 3)
+      .!
       .map(placeMap.get)
       .filter(_.nonEmpty)
       .map(_.get)
