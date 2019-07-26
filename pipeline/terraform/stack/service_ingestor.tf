@@ -46,7 +46,7 @@ module "ingestor" {
   env_vars_length = 4
 
   secret_env_vars = {
-    es_host     = "${var.es_host_parameter_name}"
+    es_host     = "catalogue/ingestor/es_host"
     es_port     = "catalogue/ingestor/es_port"
     es_username = "catalogue/ingestor/es_username"
     es_password = "catalogue/ingestor/es_password"

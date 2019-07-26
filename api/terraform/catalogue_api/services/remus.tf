@@ -28,6 +28,4 @@ module "remus" {
   listener_port = "${var.remus_listener_port}"
 
   task_desired_count = "${var.remus_task_number}"
-
-  es_host_parameter_name = "catalogue/api/es_host_v7"
 }
