@@ -1,5 +1,7 @@
 # Catalogue pipeline
 
+## Structure
+
 All data comes from an external data source, e.g. [Sierra and it's adapter](../sierra_adapter),
 onto a queue for entering the pipeline, and finally makes it into out query index,
 [Elasticsearch](https://www.elastic.co/products/elasticsearch).
@@ -16,7 +18,7 @@ We use AWS SNS / SQS for this, there are talks of abstracting that out.
 SNS => Service => SQS
 ``` 
 
-## [Transformer](./transformer)
+### [Transformer](./transformer)
 
 Each data source will have their own transformer e.g. 
 * [Miro](./transformer/transformer_miro)
@@ -25,28 +27,33 @@ Each data source will have their own transformer e.g.
 These take the original source data from an adapter, and transform them into a Work (Unidentified).
 
 
-## [Recorder](./recorder)
+### [Recorder](./recorder)
 
 Each transformed work is stored into a
 [VHS store](https://stacks.wellcomecollection.org/creating-a-data-store-from-s3-and-dynamodb-8bb9ecce8fc1).
 
 
-## [Matcher](./matcher)
+### [Matcher](./matcher)
 
 Searches for potential merge candidates, and records them on the Work. 
 
 
-## [Merger](./merger)
+### [Merger](./merger)
 
 Runs some [rules](./merger/src/test/scala/uk/ac/wellcome/platform/merger/rules) on the merge candidates
 and decides if it is a valid merge.
 
 
-## [ID Minter](./id_minter)
+### [ID Minter](./id_minter)
 
 Each Unidentified Work has an ID minted for it, using a source ID and avoiding dupes. 
 
 
-## [Ingestor](./ingestor)
+### [Ingestor](./ingestor)
 
 Inserts a work into our query index - Elasticsearch.
+
+
+## Releasing
+We use the [Wellcome Release Tooling](https://github.com/wellcometrust/dockerfiles/tree/master/release_tooling),
+which has its config defined in [`.wellcome_project`](../.wellcome_project).

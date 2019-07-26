@@ -1,5 +1,5 @@
 {
-    "catalogue_api": {
+    "catalogue_pipeline": {
 		"environments": [{
 				"id": "latest",
 				"name": "Latest"
@@ -9,30 +9,16 @@
 				"name": "Staging"
 			},
 			{
-				"id": "prod",
-				"name": "Production"
-			}
-		],
-		"name": "Catalogue API",
-		"profile": "platform-dev",
-		"github_repository": "wellcometrust/catalogue"
-	},
-	"catalogue_pipeline": {
-		"environments": [{
-				"id": "latest",
-				"name": "Latest"
-			},
-			{
-				"id": "stage",
-				"name": "Staging"
-			},
+                "id": "prod_es7",
+                "name": "Prod ES7"
+            },
 			{
 				"id": "prod",
 				"name": "Production"
 			}
 		],
 		"name": "Catalogue pipeline",
-		"profile": "platform-dev",
+		"profile": "default",
 		"github_repository": "wellcometrust/catalogue"
 	}
 }
