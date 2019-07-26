@@ -9,10 +9,6 @@
 				"name": "Staging"
 			},
 			{
-                "id": "prod_es7",
-                "name": "Prod ES7"
-            },
-			{
 				"id": "prod",
 				"name": "Production"
 			}
