@@ -17,6 +17,7 @@ sealed trait Work extends BaseWork with MultipleSourceIdentifiers {
   val mergeCandidates: List[MergeCandidate]
 
   val title: String
+  val uniformTitle: Option[String]
   val workType: Option[WorkType]
   val description: Option[String]
   val physicalDescription: Option[String]
@@ -44,6 +45,7 @@ case class UnidentifiedWork(
   otherIdentifiers: List[SourceIdentifier],
   mergeCandidates: List[MergeCandidate],
   title: String,
+  uniformTitle: Option[String],
   workType: Option[WorkType],
   description: Option[String],
   physicalDescription: Option[String],
@@ -73,6 +75,7 @@ case class IdentifiedWork(
   otherIdentifiers: List[SourceIdentifier] = List(),
   mergeCandidates: List[MergeCandidate] = List(),
   title: String,
+  uniformTitle: Option[String],
   workType: Option[WorkType],
   description: Option[String],
   physicalDescription: Option[String],
