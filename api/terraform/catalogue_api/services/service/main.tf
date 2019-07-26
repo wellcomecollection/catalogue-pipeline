@@ -59,7 +59,7 @@ module "task" {
   sidecar_env_vars_length = 2
 
   secret_app_env_vars = {
-    es_host     = "${var.es_host_parameter_name}"
+    es_host     = "catalogue/api/es_host"
     es_port     = "catalogue/api/es_port"
     es_protocol = "catalogue/api/es_protocol"
     es_username = "catalogue/api/es_username"
