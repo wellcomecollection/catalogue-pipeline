@@ -12,26 +12,34 @@ class DateParserTest extends FunSpec with Matchers {
   it("parses year") {
     DateParser("1972") shouldBe Some(
       InstantRange(
-        LocalDate of (1972, 1, 1), LocalDate of (1972, 12, 31), "1972"))
+        LocalDate of (1972, 1, 1),
+        LocalDate of (1972, 12, 31),
+        "1972"))
   }
 
   it("parses inferred year") {
     DateParser("[1240]") shouldBe Some(
       InstantRange(
-        LocalDate of (1240, 1, 1), LocalDate of (1240, 12, 31), "[1240]")
-          withInferred true)
+        LocalDate of (1240, 1, 1),
+        LocalDate of (1240, 12, 31),
+        "[1240]")
+        withInferred true)
   }
 
   it("parses written dates with day first") {
     DateParser("31 July 1980") shouldBe Some(
       InstantRange(
-        LocalDate of (1980, 7, 31), LocalDate of (1980, 7, 31), "31 July 1980"))
+        LocalDate of (1980, 7, 31),
+        LocalDate of (1980, 7, 31),
+        "31 July 1980"))
   }
 
   it("parses written dates with month first") {
     DateParser("July 31 1980") shouldBe Some(
       InstantRange(
-        LocalDate of (1980, 7, 31), LocalDate of (1980, 7, 31), "July 31 1980"))
+        LocalDate of (1980, 7, 31),
+        LocalDate of (1980, 7, 31),
+        "July 31 1980"))
   }
 
   it("parses written dates with ordinal suffix") {
@@ -40,7 +48,7 @@ class DateParserTest extends FunSpec with Matchers {
         LocalDate of (1980, 7, 31),
         LocalDate of (1980, 7, 31),
         "July 31st 1980"))
-}
+  }
 
   it("parses inferred written dates") {
     DateParser("[July 31st 1980]") shouldBe Some(
@@ -48,33 +56,41 @@ class DateParserTest extends FunSpec with Matchers {
         LocalDate of (1980, 7, 31),
         LocalDate of (1980, 7, 31),
         "[July 31st 1980]")
-          withInferred true
+        withInferred true
     )
   }
 
   it("parses numeric dates") {
     DateParser("10/02/1913") shouldBe Some(
       InstantRange(
-        LocalDate of (1913, 2, 10), LocalDate of (1913, 2, 10), "10/02/1913"))
+        LocalDate of (1913, 2, 10),
+        LocalDate of (1913, 2, 10),
+        "10/02/1913"))
   }
 
   it("parses inferred dates when only closing parentheses") {
     DateParser("10/02/1913]") shouldBe Some(
       InstantRange(
-        LocalDate of (1913, 2, 10), LocalDate of (1913, 2, 10), "10/02/1913]")
-          withInferred true)
+        LocalDate of (1913, 2, 10),
+        LocalDate of (1913, 2, 10),
+        "10/02/1913]")
+        withInferred true)
   }
 
   it("parses written month and year") {
     DateParser("Apr 1920") shouldBe Some(
       InstantRange(
-        LocalDate of (1920, 4, 1), LocalDate of (1920, 4, 30), "Apr 1920"))
+        LocalDate of (1920, 4, 1),
+        LocalDate of (1920, 4, 30),
+        "Apr 1920"))
   }
 
   it("parses year ranges") {
     DateParser("1870-1873") shouldBe Some(
       InstantRange(
-        LocalDate of (1870, 1, 1), LocalDate of (1873, 12, 31), "1870-1873"))
+        LocalDate of (1870, 1, 1),
+        LocalDate of (1873, 12, 31),
+        "1870-1873"))
   }
 
   it("parses written date ranges spanning multiple years") {
@@ -112,7 +128,9 @@ class DateParserTest extends FunSpec with Matchers {
   it("parses month ranges within a single year") {
     DateParser("Jan-Mar 1940") shouldBe Some(
       InstantRange(
-        LocalDate of (1940, 1, 1), LocalDate of (1940, 3, 31), "Jan-Mar 1940"))
+        LocalDate of (1940, 1, 1),
+        LocalDate of (1940, 3, 31),
+        "Jan-Mar 1940"))
   }
 
   it("fails when day is not valid for a particular month") {
