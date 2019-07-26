@@ -10,7 +10,10 @@ import DateParserImplicits._
 object FreeformDateParser extends Parser[InstantRange] with DateParserUtils {
 
   def parser[_: P] =
-    (Start ~ inferredTimePeriod | timePeriod ~ End) map(_ withLabel "")
+    Start ~ inferredTimePeriod | timePeriod ~ End
+
+  override def apply(input: String): Option[InstantRange] =
+    super.apply(input) map (_ withLabel input)
 
   def inferredTimePeriod[_: P] =
     ("[".? ~ timePeriod ~ "]") map (_ withInferred true)

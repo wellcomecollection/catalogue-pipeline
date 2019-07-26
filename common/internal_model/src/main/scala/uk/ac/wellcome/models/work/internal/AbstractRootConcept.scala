@@ -36,9 +36,6 @@ case class InstantRange(from: Instant,
 
 object InstantRange {
 
-  def apply(from: LocalDate, to: LocalDate): InstantRange =
-      InstantRange(from, to, "")
-
   def apply(from: LocalDate, to: LocalDate, label: String): InstantRange =
     InstantRange(
       from.atStartOfDay(),
@@ -56,7 +53,7 @@ object InstantRange {
 
   def parse(label: String)(
     implicit parser: Parser[InstantRange]): Option[InstantRange] =
-    parser(label).map(_.withLabel(label))
+    parser(label)
 }
 
 case class Period(label: String, range: Option[InstantRange])
