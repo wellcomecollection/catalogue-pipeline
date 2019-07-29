@@ -10,7 +10,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
 }
 import uk.ac.wellcome.models.parse.Marc008Parser
 
-trait SierraProduction {
+trait SierraProduction extends MarcUtils {
 
   // Populate wwork:production.
   //
@@ -32,12 +32,8 @@ trait SierraProduction {
   def getProduction(bibId: SierraBibNumber, bibData: SierraBibData)
     : List[ProductionEvent[MaybeDisplayable[AbstractAgent]]] = {
 
-    val maybeMarc260fields = bibData.varFields.filter {
-      _.marcTag.contains("260")
-    }
-    val maybeMarc264fields = bibData.varFields.filter {
-      _.marcTag.contains("264")
-    }
+    val maybeMarc260fields = getMatchingVarFields(bibData, "260")
+    val maybeMarc264fields = getMatchingVarFields(bibData, "264")
 
     val productions = (maybeMarc260fields, maybeMarc264fields) match {
       case (Nil, Nil)           => List()
@@ -236,10 +232,7 @@ trait SierraProduction {
 
   def getProductionFrom008(bibData: SierraBibData)
     : List[ProductionEvent[MaybeDisplayable[AbstractAgent]]] =
-    bibData.varFields
-      .filter(_.marcTag.contains("008"))
-      .flatMap(_.content)
-      .flatMap(Marc008Parser(_))
+    getVarFieldContents(bibData, "008") flatMap (Marc008Parser(_))
 
   // @@AWLC: I'm joining these with a space because that seems more appropriate
   // given our catalogue, but the MARC spec isn't entirely clear on what to do.
@@ -273,15 +266,4 @@ trait SierraProduction {
   private def datesFromSubfields(vf: VarField,
                                  subfieldTag: String): List[Period] =
     getSubfieldContents(vf, Some(subfieldTag)) map Period.apply
-
-  private def getSubfieldContents(varField: VarField,
-                                  tag: Option[String] = None): List[String] =
-    varField.subfields
-      .filter { subfield =>
-        tag match {
-          case Some(tag) => subfield.tag == tag
-          case None      => true
-        }
-      }
-      .map { case MarcSubfield(_, content) => content }
 }
