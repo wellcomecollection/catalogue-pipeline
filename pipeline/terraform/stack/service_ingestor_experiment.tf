@@ -1,12 +1,12 @@
 # Input queue
 
-module "ingestor_queue" {
+module "ingestor_experiment_queue" {
   source = "../modules/queue"
 
   topic_names = ["${module.id_minter_topic.name}"]
   role_names  = ["${module.ingestor.task_role_name}"]
 
-  namespace = "${var.namespace}_ingestor"
+  namespace = "${var.namespace}_ingestor_experiment"
 
   visibility_timeout_seconds = 30
   max_receive_count          = 6
@@ -23,7 +23,7 @@ module "ingestor_queue" {
 module "ingestor" {
   source = "../modules/service"
 
-  service_name = "${var.namespace}_ingestor"
+  service_name = "${var.namespace}_ingestor_experiment"
 
   container_image = "${local.ingestor_image}"
 
@@ -40,7 +40,7 @@ module "ingestor" {
   env_vars = {
     metrics_namespace = "${var.namespace}_ingestor"
     es_index          = "${var.es_works_index}"
-    ingest_queue_id   = "${module.ingestor_queue.url}"
+    ingest_queue_id   = "${module.ingestor_experiment_queue.url}"
     logstash_host     = "${local.logstash_transit_service_name}.${var.namespace}"
   }
 
@@ -57,9 +57,9 @@ module "ingestor" {
   secret_env_vars_length = "5"
 }
 
-module "ingestor_scaling_alarm" {
+module "ingestor_experiment_scaling_alarm" {
   source     = "git::https://github.com/wellcometrust/terraform-modules.git//autoscaling/alarms/queue?ref=v19.12.0"
-  queue_name = "${module.ingestor_queue.name}"
+  queue_name = "${module.ingestor_experiment_queue.name}"
 
   queue_high_actions = ["${module.ingestor.scale_up_arn}"]
   queue_low_actions  = ["${module.ingestor.scale_down_arn}"]

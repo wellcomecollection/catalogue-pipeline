@@ -34,4 +34,7 @@ module "catalogue_pipeline_20190723" {
   # Adapter VHS
   vhs_sierra_read_policy = "${local.vhs_sierra_read_policy}"
   vhs_miro_read_policy   = "${local.vhs_miro_read_policy}"
+
+  # Logstash junk
+  private_subnets = "${local.private_subnets}"
 }

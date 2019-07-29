@@ -106,10 +106,15 @@ object ExternalDependencies {
     val scalacsv = "1.3.5"
     val scalaGraph = "1.12.5"
     val scalatest = "3.0.1"
+    val logstashLogback ="6.1"
   }
 
   val logbackDependencies = Seq(
-    "ch.qos.logback" % "logback-classic" % versions.logback
+    "ch.qos.logback" % "logback-classic" % versions.logback,
+    "ch.qos.logback" % "logback-core" % versions.logback,
+    "ch.qos.logback" % "logback-access" % versions.logback,
+
+    "net.logstash.logback" % "logstash-logback-encoder" % versions.logstashLogback
   )
 
   val akkaActorDependencies = Seq(
