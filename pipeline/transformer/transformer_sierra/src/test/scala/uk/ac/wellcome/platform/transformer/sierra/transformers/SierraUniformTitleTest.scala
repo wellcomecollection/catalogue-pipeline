@@ -11,32 +11,32 @@ import uk.ac.wellcome.platform.transformer.sierra.generators.{
 }
 
 class SierraUniformTitleTest
-  extends FunSpec
-  with Matchers 
-  with MarcGenerators
-  with SierraDataGenerators {
+    extends FunSpec
+    with Matchers
+    with MarcGenerators
+    with SierraDataGenerators {
 
   val title = "Shepherd of Salisbury-Plain."
 
   val altTitle = "Basic documents."
 
   it("should extract uniform title when there is 240") {
-    val varFields =  createVarField(title) :: Nil
+    val varFields = createVarField(title) :: Nil
     uniformTitle(varFields) shouldBe Some(title)
   }
 
   it("should ignore uniform title when there no 240") {
-    val varFields =  createVarField(title, tag = "253") :: Nil
+    val varFields = createVarField(title, tag = "253") :: Nil
     uniformTitle(varFields) shouldBe None
   }
 
   it("should ignore uniform title when there no 'a' subfield") {
-    val varFields =  createVarField(title, contentTag = "b") :: Nil
+    val varFields = createVarField(title, contentTag = "b") :: Nil
     uniformTitle(varFields) shouldBe None
   }
 
   it("should use first content varfield when multiple 240s defined") {
-    val varFields =  List(createVarField(title), createVarField("x"))
+    val varFields = List(createVarField(title), createVarField("x"))
     uniformTitle(varFields) shouldBe Some(title)
   }
 
