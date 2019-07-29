@@ -10,7 +10,6 @@ trait InstantRangeGenerators {
                              to: String,
                              inferred: Boolean = false,
                              label: String = "") =
-    InstantRange(LocalDateTime.parse(from), LocalDateTime.parse(to))
-      .withLabel(label)
+    InstantRange(LocalDateTime.parse(from), LocalDateTime.parse(to), label)
       .withInferred(inferred)
 }
