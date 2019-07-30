@@ -146,10 +146,7 @@ abstract class WorksController[M <: MultipleResultsRequest[W],
     queryString: String,
     maybeQueryType: Option[String]): WorkQuery = {
     maybeQueryType.map(_.toLowerCase) match {
-      case Some("boost")    => BoostQuery(queryString)
-      case Some("msm")      => MSMQuery(queryString)
-      case Some("msmboost") => MSMBoostQuery(queryString)
-      case _                => SimpleQuery(queryString)
+      case _ => MSMBoostQuery(queryString)
     }
   }
 
