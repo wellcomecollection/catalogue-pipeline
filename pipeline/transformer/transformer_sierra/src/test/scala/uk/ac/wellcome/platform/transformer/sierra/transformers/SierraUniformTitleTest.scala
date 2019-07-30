@@ -40,6 +40,16 @@ class SierraUniformTitleTest
     uniformTitle(varFields) shouldBe Some(title)
   }
 
+  it("should extract uniform title from 130 when no 240") {
+    val varFields = List(createVarField(title, "130"))
+    uniformTitle(varFields) shouldBe Some(title)
+  }
+
+  it("should extract uniform title from 240 when both 130 and 240") {
+    val varFields = List(createVarField(altTitle, "130"), createVarField(title, "240"))
+    uniformTitle(varFields) shouldBe Some(title)
+  }
+
   val transformer = new SierraUniformTitle {}
 
   private def uniformTitle(varFields: List[VarField]) =
