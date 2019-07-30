@@ -11,7 +11,6 @@ import uk.ac.wellcome.models.work.generators.{
 }
 import uk.ac.wellcome.models.work.internal.{IdentifiedBaseWork, WorkType}
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
-import uk.ac.wellcome.platform.api.models.WorkQuery.SimpleQuery
 import uk.ac.wellcome.platform.api.models.{
   DateRangeFilter,
   ResultList,
@@ -22,6 +21,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+
+import uk.ac.wellcome.platform.api.models.WorkQuery.MSMBoostQuery
 
 class WorksServiceTest
     extends FunSpec
@@ -258,9 +259,9 @@ class WorksServiceTest
         title = "An etching of an emu"
       )
 
+      // unmatched quotes are a lexical error in the Elasticsearch parser
       assertSearchResultIsCorrect(
-        query =
-          "emu \"unmatched quotes are a lexical error in the Elasticsearch parser"
+        query = "emu \""
       )(
         allWorks = List(workEmu),
         expectedWorks = List(workEmu),
@@ -326,7 +327,7 @@ class WorksServiceTest
 
     it("returns a Left[ElasticError] if there's an Elasticsearch error") {
       val future = worksService.searchWorks(
-        workQuery = SimpleQuery("cat")
+        workQuery = MSMBoostQuery("cat")
       )(
         index = Index("doesnotexist"),
         worksSearchOptions = defaultWorksSearchOptions
@@ -356,7 +357,7 @@ class WorksServiceTest
     worksSearchOptions: WorksSearchOptions = createWorksSearchOptions
   ): Assertion =
     assertResultIsCorrect(
-      worksService.searchWorks(SimpleQuery(query))
+      worksService.searchWorks(MSMBoostQuery(query))
     )(allWorks, expectedWorks, expectedTotalResults, worksSearchOptions)
 
   private def assertResultIsCorrect(
