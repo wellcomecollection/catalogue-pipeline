@@ -258,11 +258,10 @@ class WorksServiceTest
       val workEmu = createIdentifiedWorkWith(
         title = "An etching of an emu"
       )
-      
+
       // unmatched quotes are a lexical error in the Elasticsearch parser
       assertSearchResultIsCorrect(
-        query =
-          "emu \""
+        query = "emu \""
       )(
         allWorks = List(workEmu),
         expectedWorks = List(workEmu),
