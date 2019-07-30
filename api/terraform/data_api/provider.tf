@@ -5,6 +5,6 @@ provider "aws" {
   alias  = "us_east_1"
 
   assume_role {
-    role_arn = "arn:aws:iam::760097843905:role/developer"
+    role_arn = "arn:aws:iam::760097843905:role/platform-developer"
   }
 }
