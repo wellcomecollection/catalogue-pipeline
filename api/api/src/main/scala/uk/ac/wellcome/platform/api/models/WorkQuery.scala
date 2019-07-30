@@ -1,6 +1,5 @@
 package uk.ac.wellcome.platform.api.models
 
-import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.searches.queries.{
   Query,
   SimpleStringQuery
@@ -26,32 +25,6 @@ object WorkQuery {
     ("description", Some(3.0)),
     ("contributors.*", Some(2.0))
   )
-
-  case class SimpleQuery(queryString: String) extends WorkQuery {
-    override def query(): SimpleStringQuery = {
-      simpleStringQuery(queryString)
-    }
-  }
-
-  case class MSMQuery(queryString: String) extends WorkQuery {
-    override def query(): SimpleStringQuery = {
-      SimpleStringQuery(
-        queryString,
-        fields = Seq(("*.*", Some(1.0))),
-        lenient = Some(true),
-        minimumShouldMatch = Some(defaultMSM))
-    }
-  }
-
-  case class BoostQuery(queryString: String) extends WorkQuery {
-    override def query(): SimpleStringQuery = {
-      SimpleStringQuery(
-        queryString,
-        fields = defaultBoostedFields,
-        lenient = Some(true)
-      )
-    }
-  }
 
   case class MSMBoostQuery(queryString: String) extends WorkQuery {
     override def query(): SimpleStringQuery = {
