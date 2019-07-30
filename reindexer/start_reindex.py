@@ -189,7 +189,7 @@ def start_reindex(src, dst, mode, reason):
 if __name__ == "__main__":
     sts = boto3.client("sts")
     response = sts.assume_role(
-        RoleArn="arn:aws:iam::760097843905:role/developer", RoleSessionName="platform"
+        RoleArn="arn:aws:iam::760097843905:role/platform-developer", RoleSessionName="platform"
     )
     session = boto3.Session(
         aws_access_key_id=response["Credentials"]["AccessKeyId"],
