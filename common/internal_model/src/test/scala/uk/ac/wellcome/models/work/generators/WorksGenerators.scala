@@ -104,6 +104,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
       production = production,
       language = None,
       dimensions = None,
+      edition = None,
       items = items,
       itemsV1 = itemsV1,
       version = version
@@ -159,6 +160,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
       production = production,
       language = language,
       dimensions = None,
+      edition = None,
       items = items,
       itemsV1 = itemsV1,
       version = version,
