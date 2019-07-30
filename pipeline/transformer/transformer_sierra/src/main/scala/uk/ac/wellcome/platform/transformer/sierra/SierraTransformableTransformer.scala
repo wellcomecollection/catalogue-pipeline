@@ -36,6 +36,7 @@ class SierraTransformableTransformer
     with SierraLocation
     with SierraProduction
     with SierraDimensions
+    with SierraEdition
     with SierraGenres
     with SierraMergeCandidates
     with SierraSubjects {
@@ -96,7 +97,7 @@ class SierraTransformableTransformer
                 production = getProduction(bibId, sierraBibData),
                 language = getLanguage(sierraBibData),
                 dimensions = getDimensions(sierraBibData),
-                edition = None,
+                edition = getEdition(sierraBibData),
                 items = getItems(
                   bibId = bibId,
                   bibData = sierraBibData,
