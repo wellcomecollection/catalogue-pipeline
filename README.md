@@ -12,6 +12,16 @@ The catalogue consits of three main parts with supporting services. These are:
 
 ---
 
+## Dependencies
+* Java 1.8
+* Scala 2.12
+* SBT
+* Terraform 0.11
+* Docker
+* Make
+
+---
+
 Documentation for using our API can be found at <https://developers.wellcomecollection.org/catalogue>,
 and the API itself is published at <https://api.wellcomecollection.org/catalogue>.
 
