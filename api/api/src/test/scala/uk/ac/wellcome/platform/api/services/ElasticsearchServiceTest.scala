@@ -590,7 +590,7 @@ class ElasticsearchServiceTest
   private def assertSearchResultsAreCorrect(
     index: Index,
     workQuery: WorkQuery,
-    queryOptions: ElasticsearchQueryOptions = createElasticsearchQueryOptions,
+    queryOptions: ElasticsearchQueryOptions,
     expectedWorks: List[IdentifiedWork]) = {
     searchResults(index, workQuery, queryOptions) should contain theSameElementsAs expectedWorks
   }
