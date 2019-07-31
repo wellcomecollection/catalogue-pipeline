@@ -33,6 +33,7 @@ class SierraTransformableTransformer
     with SierraLettering
     with SierraTitle
     with SierraUniformTitle
+    with SierraAlternativeTitle
     with SierraLocation
     with SierraProduction
     with SierraDimensions
@@ -83,7 +84,7 @@ class SierraTransformableTransformer
                 mergeCandidates = getMergeCandidates(sierraBibData),
                 title = getTitle(sierraBibData),
                 uniformTitle = getUniformTitle(sierraBibData),
-                alternativeTitle = None,
+                alternativeTitle = getAlternativeTitle(sierraBibData),
                 workType = getWorkType(sierraBibData),
                 description = getDescription(sierraBibData),
                 physicalDescription = getPhysicalDescription(sierraBibData),
