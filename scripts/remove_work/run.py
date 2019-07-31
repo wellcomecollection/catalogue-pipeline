@@ -151,14 +151,14 @@ def remove_image_from_es_indexes(catalogue_id):
             }
             print("··· Replacing work with an IdentifiedInvisibleWork")
             resp = requests.put(
-                "%s%s/%s/%s" % (es_host, index_name, index_name, catalogue_id),
+                f"{es_host}{index_name}/_doc/{catalogue_id}",
                 auth=es_auth,
                 json=new_work,
             )
             resp.raise_for_status()
 
             resp = requests.get(
-                "%s%s/%s/%s" % (es_host, index_name, index_name, catalogue_id),
+                f"{es_host}{index_name}/_doc/{catalogue_id}",
                 auth=es_auth,
             )
             assert resp.json()["_source"]["type"] == "IdentifiedInvisibleWork"
@@ -197,7 +197,7 @@ def remove_image_from_loris_s3_bucket(miro_id):
     s3_client = platform_client("s3")
 
     shard = miro_id[:-3] + "000"
-    prefix = "%s/%s" % (shard, miro_id)
+    prefix = f"{shard}/{miro_id}"
     bucket = "wellcomecollection-miro-images-public"
     print("··· Looking up objects under prefix s3://%s/%s" % (bucket, prefix))
 
