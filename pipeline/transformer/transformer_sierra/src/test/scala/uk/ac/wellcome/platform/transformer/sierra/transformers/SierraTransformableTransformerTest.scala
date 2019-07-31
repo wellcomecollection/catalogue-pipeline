@@ -432,6 +432,36 @@ class SierraTransformableTransformerTest
     work.uniformTitle shouldBe Some(uniformTitle)
   }
 
+  it("includes the alternativeTitle, if present") {
+    val id = createSierraBibNumber
+    val alternativeTitle = "Alt title"
+
+    val data =
+      s"""
+        | {
+        |   "id": "$id",
+        |   "title": "Title",
+        |   "varFields": [
+        |     {
+        |       "fieldTag": "a",
+        |       "marcTag": "246",
+        |       "ind1": " ",
+        |       "ind2": " ",
+        |       "subfields": [
+        |         {
+        |           "tag": "a",
+        |           "content": "$alternativeTitle"
+        |         }
+        |       ]
+        |     }
+        |   ]
+        | }
+      """.stripMargin
+
+    val work = transformDataToUnidentifiedWork(id = id, data = data)
+    work.alternativeTitle shouldBe Some(alternativeTitle)
+  }
+
   it("uses the full Sierra system number as the source identifier") {
     val id = createSierraBibNumber
     val data = s"""{"id": "$id", "title": "A title"}"""
