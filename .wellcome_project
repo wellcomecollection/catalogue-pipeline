@@ -14,7 +14,8 @@
 			}
 		],
 		"name": "Catalogue pipeline",
-		"profile": "default",
+		"role_arn": "arn:aws:iam::760097843905:role/platform-developer",
+		"aws_region_name": "eu-west-1",
 		"github_repository": "wellcometrust/catalogue"
 	}
 }
