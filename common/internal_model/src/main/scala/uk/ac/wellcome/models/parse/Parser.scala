@@ -1,7 +1,6 @@
 package uk.ac.wellcome.models.parse
 
 import fastparse._
-import fastparse.internal.Instrument
 import grizzled.slf4j.Logging
 
 
