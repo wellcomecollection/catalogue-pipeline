@@ -61,7 +61,6 @@ data "terraform_remote_state" "sierra_adapter" {
 
   config {
     role_arn = "arn:aws:iam::760097843905:role/platform-developer"
-    role_arn = "arn:aws:iam::760097843905:role/platform-developer"
 
     bucket = "wellcomecollection-platform-infra"
     key    = "terraform/sierra_adapter.tfstate"
