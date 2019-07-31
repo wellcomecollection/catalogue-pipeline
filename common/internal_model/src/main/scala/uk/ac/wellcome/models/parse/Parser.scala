@@ -1,12 +1,15 @@
 package uk.ac.wellcome.models.parse
 
 import fastparse._
+import fastparse.internal.Instrument
+import grizzled.slf4j.Logging
+
+
 
 /**
   *  Trait for parsing some input into T with the FastParse library
   */
-trait Parser[T] {
-
+trait Parser[T] extends Logging {
   /**
     *  The FastParse parser combinator applied to the input
     */
@@ -20,7 +23,10 @@ trait Parser[T] {
     */
   def apply(input: String): Option[T] =
     parse(input, parser(_)) match {
-      case Parsed.Success(value, _) => Some(value)
+      case Parsed.Success(value, _) => {
+        info(s"Parsed value: `${value}` to ${value} with ${this.getClass.getName}")
+        Some(value)
+      }
       case Parsed.Failure(_, _, _)  => None
     }
 }

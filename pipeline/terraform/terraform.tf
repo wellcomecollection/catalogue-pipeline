@@ -3,7 +3,7 @@ provider "aws" {
   version = "1.60"
 
   assume_role {
-    role_arn = "arn:aws:iam::760097843905:role/admin"
+    role_arn = "arn:aws:iam::760097843905:role/platform-admin"
   }
 }
 
@@ -36,7 +36,7 @@ data "terraform_remote_state" "catalogue_pipeline_data" {
   backend = "s3"
 
   config {
-    role_arn = "arn:aws:iam::760097843905:role/developer"
+    role_arn = "arn:aws:iam::760097843905:role/platform-developer"
 
     bucket = "wellcomecollection-platform-infra"
     key    = "terraform/catalogue_pipeline_data.tfstate"
@@ -48,7 +48,7 @@ data "terraform_remote_state" "shared_infra" {
   backend = "s3"
 
   config {
-    role_arn = "arn:aws:iam::760097843905:role/developer"
+    role_arn = "arn:aws:iam::760097843905:role/platform-developer"
 
     bucket = "wellcomecollection-platform-infra"
     key    = "terraform/shared_infra.tfstate"
@@ -60,7 +60,8 @@ data "terraform_remote_state" "sierra_adapter" {
   backend = "s3"
 
   config {
-    role_arn = "arn:aws:iam::760097843905:role/developer"
+    role_arn = "arn:aws:iam::760097843905:role/platform-developer"
+    role_arn = "arn:aws:iam::760097843905:role/platform-developer"
 
     bucket = "wellcomecollection-platform-infra"
     key    = "terraform/sierra_adapter.tfstate"
