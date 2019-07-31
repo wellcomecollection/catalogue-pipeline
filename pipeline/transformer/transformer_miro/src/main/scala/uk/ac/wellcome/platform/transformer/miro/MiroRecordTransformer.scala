@@ -73,6 +73,7 @@ class MiroRecordTransformer
         mergeCandidates = List(),
         title = title,
         uniformTitle = None,
+        alternativeTitle = None,
         workType = getWorkType,
         description = description,
         physicalDescription = None,
