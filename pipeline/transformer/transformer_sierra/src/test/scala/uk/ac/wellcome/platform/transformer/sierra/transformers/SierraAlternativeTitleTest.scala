@@ -28,6 +28,11 @@ class SierraAlternativeTitleTest
     getAlternativeTitle(varFields) shouldBe None
   }
 
+  it("should not extract alternativeTitle when indicator2 is 6") {
+    val varFields = createVarField(alternativeTitle, indicator2 = "6") :: Nil
+    getAlternativeTitle(varFields) shouldBe None
+  }
+
   it("should not extract alternativeTitle when there no 'a' subfield in 246") {
     val varFields = createVarField(alternativeTitle, contentTag = "b") :: Nil
     getAlternativeTitle(varFields) shouldBe None
@@ -46,10 +51,11 @@ class SierraAlternativeTitleTest
   private def createVarField(
     content: String,
     tag: String = "246",
-    contentTag: String = "a"
+    indicator2: String = "1",
+    contentTag: String = "a",
   ) =
     createVarFieldWith(
       tag,
-      "1",
+      indicator2,
       MarcSubfield(tag = contentTag, content = content) :: Nil)
 }
