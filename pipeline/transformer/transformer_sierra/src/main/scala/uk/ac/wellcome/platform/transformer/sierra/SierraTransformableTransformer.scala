@@ -81,6 +81,7 @@ class SierraTransformableTransformer
                 ),
                 mergeCandidates = getMergeCandidates(sierraBibData),
                 title = getTitle(sierraBibData),
+                alternativeTitles = Nil,
                 workType = getWorkType(sierraBibData),
                 description = getDescription(sierraBibData),
                 physicalDescription = getPhysicalDescription(sierraBibData),

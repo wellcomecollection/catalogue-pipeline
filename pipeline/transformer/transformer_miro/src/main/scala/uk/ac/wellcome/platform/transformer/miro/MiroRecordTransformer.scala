@@ -72,6 +72,7 @@ class MiroRecordTransformer
         otherIdentifiers = getOtherIdentifiers(miroRecord),
         mergeCandidates = List(),
         title = title,
+        alternativeTitles = Nil,
         workType = getWorkType,
         description = description,
         physicalDescription = None,
