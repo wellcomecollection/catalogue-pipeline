@@ -156,6 +156,7 @@ object WorksIndex {
       workType,
       englishTextField("title"),
       englishTextField("uniformTitle"),
+      englishTextField("alternativeTitle"),
       englishTextField("description"),
       englishTextField("physicalDescription"),
       englishTextField("extent"),
