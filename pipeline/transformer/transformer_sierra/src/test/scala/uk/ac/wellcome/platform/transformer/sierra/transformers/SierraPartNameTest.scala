@@ -36,8 +36,7 @@ class SierraPartNameTest
   val transformer = new SierraPartName {}
 
   private def getPartName(varFields: List[VarField]) =
-    transformer getPartName (createSierraBibDataWith(
-      varFields = varFields))
+    transformer getPartName (createSierraBibDataWith(varFields = varFields))
 
   private def createVarField(
     content: String,
