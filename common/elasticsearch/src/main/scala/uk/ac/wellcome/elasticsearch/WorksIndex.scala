@@ -155,6 +155,7 @@ object WorksIndex {
       mergeCandidates,
       workType,
       englishTextField("title"),
+      englishTextField("alternativeTitles"),
       englishTextField("description"),
       englishTextField("physicalDescription"),
       englishTextField("extent"),
