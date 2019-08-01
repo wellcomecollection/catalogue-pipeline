@@ -37,6 +37,8 @@ class SierraTransformableTransformer
     with SierraProduction
     with SierraDimensions
     with SierraEdition
+    with SierraPartNumber
+    with SierraPartName
     with SierraGenres
     with SierraMergeCandidates
     with SierraSubjects {
@@ -100,6 +102,8 @@ class SierraTransformableTransformer
                 edition = getEdition(sierraBibData),
                 partNumber = None,
                 partName = None,
+                partNumber = getPartNumber(sierraBibData),
+                partName = getPartName(sierraBibData),
                 items = getItems(
                   bibId = bibId,
                   bibData = sierraBibData,
