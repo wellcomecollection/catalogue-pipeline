@@ -53,7 +53,7 @@ class SierraAlternativeTitlesTest
   }
 
   it("should not any extract alternative titles when incorrect contentTag") {
-    val varFields = List(createVarField("X", "240", contentTag ="x"))
+    val varFields = List(createVarField("X", "240", contentTag = "x"))
     getAlternativeTitles(varFields) shouldBe Nil
   }
 
@@ -73,7 +73,8 @@ class SierraAlternativeTitlesTest
   val transformer = new SierraAlternativeTitles {}
 
   private def getAlternativeTitles(varFields: List[VarField]) =
-    transformer getAlternativeTitles (createSierraBibDataWith(varFields = varFields))
+    transformer getAlternativeTitles (createSierraBibDataWith(
+      varFields = varFields))
 
   private def createVarField(
     content: String,

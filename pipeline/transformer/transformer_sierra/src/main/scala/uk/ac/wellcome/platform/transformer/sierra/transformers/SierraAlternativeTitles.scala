@@ -11,7 +11,7 @@ trait SierraAlternativeTitles extends MarcUtils {
     }
 
   def getAlternativeTitleFields(bibData: SierraBibData): List[VarField] =
-     getMatchingVarFields(bibData, "240") ++
+    getMatchingVarFields(bibData, "240") ++
       getMatchingVarFields(bibData, "130") ++
       getMatchingVarFields(bibData, "246").filterNot {
         _.indicator2.contains("6")
