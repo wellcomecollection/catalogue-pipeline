@@ -462,6 +462,42 @@ class SierraTransformableTransformerTest
     work.edition shouldBe Some(edition)
   }
 
+  it("includes the part number and part name if present") {
+    val id = createSierraBibNumber
+    val partNumber = "Part Number"
+    val partName = "Part Name"
+
+    val data =
+      s"""
+        | {
+        |   "id": "$id",
+        |   "title": "Title",
+        |   "varFields": [
+        |     {
+        |       "fieldTag": "a",
+        |       "marcTag": "250",
+        |       "ind1": " ",
+        |       "ind2": " ",
+        |       "subfields": [
+        |         {
+        |           "tag": "n",
+        |           "content": "$partNumber"
+        |         },
+        |         {
+        |           "tag": "p",
+        |           "content": "$partName"
+        |         }
+        |       ]
+        |     }
+        |   ]
+        | }
+      """.stripMargin
+
+    val work = transformDataToUnidentifiedWork(id = id, data = data)
+    work.partNumber shouldBe Some(partNumber)
+    work.partName shouldBe Some(partName)
+  }
+
   it("uses the full Sierra system number as the source identifier") {
     val id = createSierraBibNumber
     val data = s"""{"id": "$id", "title": "A title"}"""
