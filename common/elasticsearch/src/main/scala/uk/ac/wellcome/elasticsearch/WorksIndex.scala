@@ -171,6 +171,8 @@ object WorksIndex {
       location("thumbnail"),
       textField("dimensions"),
       textField("edition"),
+      textField("partNumber"),
+      textField("partName"),
       objectField("redirect")
         .fields(sourceIdentifier, keywordField("canonicalId")),
       keywordField("type"),
