@@ -98,6 +98,8 @@ class SierraTransformableTransformer
                 language = getLanguage(sierraBibData),
                 dimensions = getDimensions(sierraBibData),
                 edition = getEdition(sierraBibData),
+                partNumber = None,
+                partName = None,
                 items = getItems(
                   bibId = bibId,
                   bibData = sierraBibData,

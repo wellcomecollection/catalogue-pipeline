@@ -87,6 +87,8 @@ class MiroRecordTransformer
         language = None,
         dimensions = None,
         edition = None,
+        partNumber = None,
+        partName = None,
         items = getItems(miroRecord),
         itemsV1 = getItemsV1(miroRecord),
         version = version
