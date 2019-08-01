@@ -41,10 +41,9 @@ module "ingestor" {
     metrics_namespace = "${var.namespace}_ingestor"
     es_index          = "${var.es_works_index}"
     ingest_queue_id   = "${module.ingestor_queue.url}"
-    logstash_host     = "${local.logstash_transit_service_name}.${var.namespace}"
   }
 
-  env_vars_length = 4
+  env_vars_length = 3
 
   secret_env_vars = {
     es_host     = "catalogue/ingestor/es_host"

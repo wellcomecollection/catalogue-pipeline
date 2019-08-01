@@ -23,7 +23,7 @@ trait Parser[T] extends Logging {
     parse(input, parser(_)) match {
       case Parsed.Success(value, _) => {
         info(
-          s"Parsed value: `${value}` to ${value} with ${this.getClass.getName}")
+          s"Parsed value: `${input}` to ${value} with ${this.getClass.getName}")
         Some(value)
       }
       case Parsed.Failure(_, _, _) => None

@@ -26,7 +26,7 @@ module "sierra_transformer" {
 
   service_name = "${var.namespace}_sierra_transformer"
 
-  container_image = "760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/transformer_sierra:458203040673bfe0c8244e0c04c321bb839d00e4"
+  container_image = "760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/transformer_sierra:cfebfc442359cc57ee2c0d2d83e3aaefdbc9c2d7"
 
   security_group_ids = [
     "${module.egress_security_group.sg_id}",
@@ -42,9 +42,10 @@ module "sierra_transformer" {
     transformer_queue_id = "${module.sierra_transformer_queue.url}"
     metrics_namespace    = "sierra_transformer"
     messages_bucket_name = "${aws_s3_bucket.messages.id}"
+    logstash_host        = "${local.logstash_transit_service_name}.${var.namespace}"
   }
 
-  env_vars_length = 4
+  env_vars_length = 5
 
   secret_env_vars        = {}
   secret_env_vars_length = 0
