@@ -60,14 +60,16 @@ def remove_image_from_es_indexes(catalogue_id):
         Name="/aws/reference/secretsmanager/catalogue/ingestor/es_password",
         WithDecryption=True,
     )
-    es_auth = (es_username["Parameter"]["Value"], es_password["Parameter"]["Value"])
+    es_auth = (es_username["Parameter"]["Value"],
+               es_password["Parameter"]["Value"])
 
     print("··· Getting the task definitions for the catalogue API")
     resp = ecs_client.list_services(cluster="catalogue-api")
     service_arns = resp["serviceArns"]
     assert len(service_arns) == 2
 
-    resp = ecs_client.describe_services(cluster="catalogue-api", services=service_arns)
+    resp = ecs_client.describe_services(
+        cluster="catalogue-api", services=service_arns)
     services = resp["services"]
     assert len(services) == 2
     task_definitions = [service["taskDefinition"] for service in services]
@@ -80,15 +82,19 @@ def remove_image_from_es_indexes(catalogue_id):
         container_definitions = resp["taskDefinition"]["containerDefinitions"]
         assert len(container_definitions) == 2
 
-        app_containers = [cd for cd in container_definitions if cd["name"] == "app"]
+        app_containers = [
+            cd for cd in container_definitions if cd["name"] == "app"]
         assert len(app_containers) == 1
 
-        app_env_vars = {e["name"]: e["value"] for e in app_containers[0]["environment"]}
+        app_env_vars = {e["name"]: e["value"]
+                        for e in app_containers[0]["environment"]}
 
-        app_secrets = {s["name"]: s["valueFrom"] for s in app_containers[0]["secrets"]}
+        app_secrets = {s["name"]: s["valueFrom"]
+                       for s in app_containers[0]["secrets"]}
 
         for name, value_from in app_secrets.items():
-            resp = ssm_client.get_parameter(Name=value_from, WithDecryption=True)
+            resp = ssm_client.get_parameter(
+                Name=value_from, WithDecryption=True)
             app_secrets[name] = resp["Parameter"]["Value"]
 
         # 3. Once we have the config and password, we can remove the work from
@@ -257,7 +263,8 @@ def update_miro_inventory(miro_id):
 
     s3_bucket = item["location"]["M"]["namespace"]["S"]
     s3_key = item["location"]["M"]["key"]["S"]
-    print("··· Detected VHS inventory entry as s3://%s/%s" % (s3_bucket, s3_key))
+    print("··· Detected VHS inventory entry as s3://%s/%s" %
+          (s3_bucket, s3_key))
 
     inventory_obj = s3_client.get_object(Bucket=s3_bucket, Key=s3_key)
     inventory_entry = json.load(inventory_obj["Body"])
@@ -266,7 +273,8 @@ def update_miro_inventory(miro_id):
     inventory_entry["catalogue_api_derivative_bucket"] = None
     inventory_entry["catalogue_api_derivative_key"] = None
 
-    new_entry = json.dumps(inventory_entry, separators=(",", ":")).encode("utf8")
+    new_entry = json.dumps(
+        inventory_entry, separators=(",", ":")).encode("utf8")
     new_key = "%s/%s.json" % (miro_id, sha256(new_entry))
     if new_key == s3_key:
         print("··· Inventory is already up to date, skipping")
