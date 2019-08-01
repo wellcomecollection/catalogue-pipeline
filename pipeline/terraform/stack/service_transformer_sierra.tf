@@ -26,7 +26,7 @@ module "sierra_transformer" {
 
   service_name = "${var.namespace}_sierra_transformer"
 
-  container_image = "760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/transformer_sierra:e82a3766e9cee5536935827a01fd498c341410ab"
+  container_image = "760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/transformer_sierra:58672c5bcc84021f0a22d381e9958b07e94db893"
 
   security_group_ids = [
     "${module.egress_security_group.sg_id}",
@@ -47,7 +47,7 @@ module "sierra_transformer" {
   env_vars_length = 4
 
   secret_env_vars        = {}
-  secret_env_vars_length = "0"
+  secret_env_vars_length = 0
 
   subnets    = ["${var.subnets}"]
   aws_region = "${var.aws_region}"
