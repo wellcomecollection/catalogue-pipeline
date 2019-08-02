@@ -13,7 +13,7 @@ trait SierraEdition extends MarcUtils {
       getSubfieldContents(_, Some("a"))
     }
     editions match {
-      case Nil => None
+      case Nil      => None
       case editions => Some(editions.mkString(" "))
     }
   }
