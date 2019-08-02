@@ -73,7 +73,7 @@ trait SierraContributors extends MarcUtils with SierraAgents {
           Contributor(
             agent = agent,
             roles = roles,
-            date  = date
+            date = date
           )
         }
       }
@@ -101,7 +101,7 @@ trait SierraContributors extends MarcUtils with SierraAgents {
           Contributor(
             agent = identify(subfields, agent, "Organisation"),
             roles = roles,
-            date  = date
+            date = date
           )
         }
       }
