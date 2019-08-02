@@ -52,6 +52,7 @@ trait SierraContributors extends MarcUtils with SierraAgents {
           _.tag == "t"
         }
         val roles = getContributionRoles(subfields)
+        val date = getContributorDate(subfields)
 
         val maybeAgent = if (hasSubfieldT) {
           getLabel(subfields)
@@ -71,7 +72,8 @@ trait SierraContributors extends MarcUtils with SierraAgents {
         maybeAgent map { agent =>
           Contributor(
             agent = agent,
-            roles = roles
+            roles = roles,
+            date  = date
           )
         }
       }
@@ -93,11 +95,13 @@ trait SierraContributors extends MarcUtils with SierraAgents {
       .flatMap { subfields: List[MarcSubfield] =>
         val roles = getContributionRoles(subfields)
         val maybeAgent = getOrganisation(subfields)
+        val date = getContributorDate(subfields)
 
         maybeAgent.map { agent =>
           Contributor(
             agent = identify(subfields, agent, "Organisation"),
-            roles = roles
+            roles = roles,
+            date  = date
           )
         }
       }
@@ -109,5 +113,12 @@ trait SierraContributors extends MarcUtils with SierraAgents {
     subfields.collect {
       case MarcSubfield("e", content) => ContributionRole(content)
     }
+  }
+
+  private def getContributorDate(
+    subfields: List[MarcSubfield]): Option[Period] = {
+    subfields.collect {
+      case MarcSubfield("d", label) => Period(label)
+    }.headOption
   }
 }
