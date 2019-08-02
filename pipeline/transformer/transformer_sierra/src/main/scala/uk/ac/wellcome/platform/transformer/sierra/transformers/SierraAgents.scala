@@ -89,7 +89,7 @@ trait SierraAgents {
 
   def getLabel(subfields: List[MarcSubfield]): Option[String] =
     subfields.filter { s =>
-      List("a", "b", "c", "d", "t").contains(s.tag)
+      List("a", "b", "c", "t").contains(s.tag)
     } map (_.content) match {
       case Nil          => None
       case nonEmptyList => Some(nonEmptyList mkString " ")
