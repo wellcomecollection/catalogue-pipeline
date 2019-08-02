@@ -16,9 +16,9 @@ class SierraEditionTest
     with MarcGenerators
     with SierraDataGenerators {
 
-  val edition = "1st edition"
+  val edition = "1st edition."
 
-  val altEdition = "2nd edition"
+  val altEdition = "2nd edition."
 
   it("should extract edition when there is 250 data") {
     val varFields = createVarField(edition) :: Nil
@@ -35,9 +35,9 @@ class SierraEditionTest
     getEdition(varFields) shouldBe None
   }
 
-  it("should use first varfields content when multiple 250s defined") {
+  it("should combine varfields contents when multiple 250s defined") {
     val varFields = List(createVarField(edition), createVarField(altEdition))
-    getEdition(varFields) shouldBe Some(edition)
+    getEdition(varFields) shouldBe Some("1st edition. 2nd edition.")
   }
 
   val transformer = new SierraEdition {}
