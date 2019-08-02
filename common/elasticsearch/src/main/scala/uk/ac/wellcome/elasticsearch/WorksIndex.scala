@@ -128,7 +128,8 @@ object WorksIndex {
       textField("label"),
       keywordField("ontologyType")
     ),
-    keywordField("ontologyType")
+    keywordField("ontologyType"),
+    period("date")
   )
 
   val production: ObjectField = objectField("production").fields(
