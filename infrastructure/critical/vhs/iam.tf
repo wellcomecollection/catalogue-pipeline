@@ -1,6 +1,7 @@
 # Assumable role
 
 resource "aws_iam_role" "assumable_read_role" {
+  name = "${var.name}-assumable_read_role"
   assume_role_policy = "${data.aws_iam_policy_document.assume_read_role.json}"
 }
 
