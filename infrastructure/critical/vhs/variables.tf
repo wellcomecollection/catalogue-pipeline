@@ -12,31 +12,11 @@ variable "table_name_prefix" {
   default = "vhs-"
 }
 
-variable "table_read_max_capacity" {
-  default = 80
-}
-
-variable "table_write_max_capacity" {
-  default = 300
-}
-
-variable "prevent_destroy" {
-  default = "true"
-}
-
 variable "aws_region" {
-  description = "The AWS region to create things in."
-  default     = "eu-west-1"
+  default = "eu-west-1"
 }
 
-variable "bucket_name" {
-  default = ""
-}
-
-variable "account_id" {}
-
-variable "s3_cross_account_access_accounts" {
-  description = "The account numbers of any accounts that can access the VHS objects in S3"
-  type        = "list"
-  default     = []
+variable "read_principals" {
+  default = []
+  type = "list"
 }
