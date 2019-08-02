@@ -14,14 +14,14 @@ data "aws_iam_policy_document" "bucket_policy" {
       type        = "AWS"
     }
 
-    actions   = [
+    actions = [
       "s3:Get*",
-      "s3:List*"
+      "s3:List*",
     ]
 
     resources = [
       "arn:aws:s3:::${local.bucket_name}/*",
-      "arn:aws:s3:::${local.bucket_name}"
+      "arn:aws:s3:::${local.bucket_name}",
     ]
   }
 }

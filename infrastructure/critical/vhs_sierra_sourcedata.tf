@@ -3,6 +3,6 @@ module "vhs_sierra" {
   name   = "sourcedata-sierra"
 
   read_principals = [
-    "arn:aws:iam::269807742353:root"
+    "arn:aws:iam::269807742353:root",
   ]
 }

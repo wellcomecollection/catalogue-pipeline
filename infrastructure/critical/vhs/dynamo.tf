@@ -14,4 +14,3 @@ resource "aws_dynamodb_table" "table" {
     prevent_destroy = true
   }
 }
-

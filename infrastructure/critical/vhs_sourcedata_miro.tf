@@ -3,6 +3,6 @@ module "vhs_miro" {
   name   = "sourcedata-miro"
 
   read_principals = [
-    "arn:aws:iam::269807742353:root"
+    "arn:aws:iam::269807742353:root",
   ]
 }

@@ -18,5 +18,5 @@ variable "aws_region" {
 
 variable "read_principals" {
   default = []
-  type = "list"
+  type    = "list"
 }
