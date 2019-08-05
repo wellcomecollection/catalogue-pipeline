@@ -158,9 +158,9 @@ class SierraPersonSubjectsTest
     transformer.getSubjectsWithPerson(sierraBibData) shouldBe List(
       Unidentifiable(
         Subject(
-          label = "Rita Levi Montalcini, 22 April 1909 – 30 December 2012",
+          label = "Rita Levi Montalcini,",
           concepts = List(Unidentifiable(Person(
-            label = "Rita Levi Montalcini, 22 April 1909 – 30 December 2012")))
+            label = "Rita Levi Montalcini,")))
         )
       )
     )

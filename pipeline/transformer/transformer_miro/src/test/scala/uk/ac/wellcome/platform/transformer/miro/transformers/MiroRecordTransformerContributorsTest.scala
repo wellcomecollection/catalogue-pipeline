@@ -120,9 +120,7 @@ class MiroRecordTransformerContributorsTest
     val transformedWork = transformWork(miroRecord)
     transformedWork.contributors shouldBe expectedContributors.map {
       contributor =>
-        Contributor(
-          agent = Unidentifiable(Agent(contributor))
-        )
+        Contributor(Unidentifiable(Agent(contributor)))
     }
   }
 }
