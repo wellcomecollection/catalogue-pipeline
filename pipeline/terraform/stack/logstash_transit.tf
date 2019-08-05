@@ -1,14 +1,13 @@
 # logstash_transit
 
 module "logstash_transit" {
-  source = "../modules/worker"
+  source = "git::https://github.com/wellcometrust/terraform.git//ecs/prebuilt/default?ref=4ceb43fb9c08f5ac8ec3bc43b03f8c3c81621b97"
 
   security_group_ids = [
     "${aws_security_group.interservice.id}",
     "${aws_security_group.service_egress.id}",
   ]
 
-  cluster_name = "${aws_ecs_cluster.cluster.name}"
   cluster_id   = "${aws_ecs_cluster.cluster.id}"
   namespace_id = "${aws_service_discovery_private_dns_namespace.namespace.id}"
   subnets      = "${var.private_subnets}"
@@ -30,9 +29,6 @@ module "logstash_transit" {
 
   cpu    = 1024
   memory = 2048
-
-  min_capacity = "0"
-  max_capacity = "1"
 
   container_image = "${local.logstash_transit_image}"
 }
