@@ -133,6 +133,34 @@ class SierraContributorsTest
             "1564-1616"))))
     }
 
+    it("uses first $$d subfield for the date if multiple defined") {
+      // Based on https://search.wellcomelibrary.org/iii/encore/record/C__Rb1159639?marcData=Y
+      // as retrieved on 4 February 2019.
+      val varFields = List(
+        createVarFieldWith(
+          marcTag = "700",
+          subfields = List(
+            MarcSubfield(tag = "a", content = "Shakespeare, William,"),
+            MarcSubfield(tag = "d", content = "1564-1616."),
+            MarcSubfield(tag = "d", content = "1564"),
+            MarcSubfield(tag = "t", content = "Hamlet.")
+          )
+        )
+      )
+
+      val bibData = createSierraBibDataWith(varFields = varFields)
+      val contributors = transformer.getContributors(bibData)
+      contributors should have size 1
+      val contributor = contributors.head
+
+      contributor.date shouldBe Some(
+        Period(label = "1564-1616", range =
+          Some(InstantRange(
+            LocalDate of (1564, 1, 1),
+            LocalDate of (1616, 12, 31),
+            "1564-1616"))))
+    }
+
 
     it(
       "combines subfield $$t with $$a $$b $$c $$d and creates an Agent, not a Person from MARC field 100 / 700") {
