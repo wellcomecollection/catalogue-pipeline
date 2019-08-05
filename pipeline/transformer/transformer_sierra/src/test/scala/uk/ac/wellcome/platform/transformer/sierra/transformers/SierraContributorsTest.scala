@@ -95,10 +95,12 @@ class SierraContributorsTest
       val varFields = List(varField100, varField700)
 
       val expectedContributors = List(
-        Contributor(agent = Unidentifiable(
-          Person(label = "Charles Emmanuel III, King of Sardinia"))),
-        Contributor(agent = Unidentifiable(
-          Person(label = "Charles Emmanuel III, King of Sardinia")))
+        Contributor(
+          agent = Unidentifiable(
+            Person(label = "Charles Emmanuel III, King of Sardinia"))),
+        Contributor(
+          agent = Unidentifiable(
+            Person(label = "Charles Emmanuel III, King of Sardinia")))
       )
 
       transformAndCheckContributors(
@@ -126,13 +128,14 @@ class SierraContributorsTest
       val contributor = contributors.head
 
       contributor.date shouldBe Some(
-        Period(label = "1564-1616", range =
-          Some(InstantRange(
-            LocalDate of (1564, 1, 1),
-            LocalDate of (1616, 12, 31),
-            "1564-1616"))))
+        Period(
+          label = "1564-1616",
+          range = Some(
+            InstantRange(
+              LocalDate of (1564, 1, 1),
+              LocalDate of (1616, 12, 31),
+              "1564-1616"))))
     }
-
 
     it(
       "combines subfield $$t with $$a $$b $$c $$d and creates an Agent, not a Person from MARC field 100 / 700") {
