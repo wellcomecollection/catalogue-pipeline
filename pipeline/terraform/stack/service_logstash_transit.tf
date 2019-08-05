@@ -29,5 +29,5 @@ module "logstash_transit" {
   cpu    = 1024
   memory = 2048
 
-  container_image = "wellcome/logstash_transit:100"
+  container_image = "wellcome/logstash_transit:104"
 }
