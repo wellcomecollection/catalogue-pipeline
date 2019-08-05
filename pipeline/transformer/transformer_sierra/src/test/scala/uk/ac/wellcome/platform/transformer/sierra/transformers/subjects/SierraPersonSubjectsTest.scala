@@ -159,8 +159,8 @@ class SierraPersonSubjectsTest
       Unidentifiable(
         Subject(
           label = "Rita Levi Montalcini,",
-          concepts = List(Unidentifiable(Person(
-            label = "Rita Levi Montalcini,")))
+          concepts =
+            List(Unidentifiable(Person(label = "Rita Levi Montalcini,")))
         )
       )
     )
