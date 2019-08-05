@@ -16,7 +16,7 @@
       </customFields>
     </layout>
 
-    <host>${logstash_host}</host>
+    <host>catalogue-20190723-logstash-transit.catalogue-20190723</host>
     <port>514</port>
   </appender>
 
