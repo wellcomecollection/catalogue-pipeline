@@ -48,6 +48,8 @@ trait MiroContributors extends MiroContributorCodes {
 
     val creators = primaryCreators ++ secondaryCreators ++ contributorCreators
 
-    creators.map { agent: Unidentifiable[Agent] => Contributor(agent) }
+    creators.map { agent: Unidentifiable[Agent] =>
+      Contributor(agent)
+    }
   }
 }
