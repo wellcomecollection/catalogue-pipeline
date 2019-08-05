@@ -1,6 +1,9 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import org.scalatest.{FunSpec, Matchers}
+
+import java.time.LocalDate
+
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
@@ -73,21 +76,19 @@ class SierraContributorsTest
   }
 
   describe("Person") {
-    it("extracts and combines only subfields $$a $$b $$c $$d for the label") {
+    it("extracts and combines only subfields $$a $$b $$c for the label") {
       // Based on https://search.wellcomelibrary.org/iii/encore/record/C__Rb1795764?lang=eng
       // as retrieved on 25 April 2019.
 
       val name = "Charles Emmanuel"
       val numeration = "III,"
       val titlesAndOtherWords = "King of Sardinia,"
-      val dates = "1701-1773,"
       val varField100 = createVarFieldWith(
         marcTag = "100",
         subfields = List(
           MarcSubfield(tag = "a", content = name),
           MarcSubfield(tag = "b", content = numeration),
           MarcSubfield(tag = "c", content = titlesAndOtherWords),
-          MarcSubfield(tag = "d", content = dates),
         )
       )
       val varField700 = varField100.copy(marcTag = Some("700"))
@@ -95,15 +96,43 @@ class SierraContributorsTest
 
       val expectedContributors = List(
         Contributor(agent = Unidentifiable(
-          Person(label = "Charles Emmanuel III, King of Sardinia, 1701-1773"))),
+          Person(label = "Charles Emmanuel III, King of Sardinia"))),
         Contributor(agent = Unidentifiable(
-          Person(label = "Charles Emmanuel III, King of Sardinia, 1701-1773")))
+          Person(label = "Charles Emmanuel III, King of Sardinia")))
       )
 
       transformAndCheckContributors(
         varFields = varFields,
         expectedContributors = expectedContributors)
     }
+
+    it("uses subfields $$d for the date") {
+      // Based on https://search.wellcomelibrary.org/iii/encore/record/C__Rb1159639?marcData=Y
+      // as retrieved on 4 February 2019.
+      val varFields = List(
+        createVarFieldWith(
+          marcTag = "700",
+          subfields = List(
+            MarcSubfield(tag = "a", content = "Shakespeare, William,"),
+            MarcSubfield(tag = "d", content = "1564-1616."),
+            MarcSubfield(tag = "t", content = "Hamlet.")
+          )
+        )
+      )
+
+      val bibData = createSierraBibDataWith(varFields = varFields)
+      val contributors = transformer.getContributors(bibData)
+      contributors should have size 1
+      val contributor = contributors.head
+
+      contributor.date shouldBe Some(
+        Period(label = "1564-1616", range =
+          Some(InstantRange(
+            LocalDate of (1564, 1, 1),
+            LocalDate of (1616, 12, 31),
+            "1564-1616"))))
+    }
+
 
     it(
       "combines subfield $$t with $$a $$b $$c $$d and creates an Agent, not a Person from MARC field 100 / 700") {
@@ -126,7 +155,7 @@ class SierraContributorsTest
       val contributor = contributors.head
 
       contributor.agent shouldBe Unidentifiable(
-        Agent(label = "Shakespeare, William, 1564-1616. Hamlet."))
+        Agent(label = "Shakespeare, William, Hamlet."))
     }
 
     it(
@@ -339,13 +368,12 @@ class SierraContributorsTest
     }
 
     it(
-      "combines only subfields $$a $$b $$c $$d (multiples of) with spaces from MARC field 110 / 710") {
+      "combines only subfields $$a $$b $$c (multiples of) with spaces from MARC field 110 / 710") {
       // Based on https://search.wellcomelibrary.org/iii/encore/record/C__Rb1000984
       // as retrieved from 25 April 2019
       val name =
         "IARC Working Group on the Evaluation of the Carcinogenic Risk of Chemicals to Man."
       val subordinateUnit = "Meeting"
-      val date = "1972 :"
       val place = "Lyon, France"
 
       val varFields = List(
@@ -354,7 +382,6 @@ class SierraContributorsTest
           subfields = List(
             MarcSubfield(tag = "a", content = name),
             MarcSubfield(tag = "b", content = subordinateUnit),
-            MarcSubfield(tag = "d", content = date),
             MarcSubfield(tag = "c", content = place),
             MarcSubfield(tag = "n", content = "  79125097")
           )
@@ -363,7 +390,7 @@ class SierraContributorsTest
 
       val expectedContributors = List(
         Contributor(agent = Unidentifiable(Organisation(label =
-          "IARC Working Group on the Evaluation of the Carcinogenic Risk of Chemicals to Man. Meeting 1972 : Lyon, France")))
+          "IARC Working Group on the Evaluation of the Carcinogenic Risk of Chemicals to Man. Meeting Lyon, France")))
       )
 
       transformAndCheckContributors(
