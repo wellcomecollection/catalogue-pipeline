@@ -15,9 +15,10 @@ module "logstash_transit" {
 
   env_vars = {
     XPACK_MONITORING_ENABLED = "false"
+    NAMESPACE = "Bloop_${var.namespace}"
   }
 
-  env_vars_length = 1
+  env_vars_length = 2
 
   secret_env_vars = {
     ES_HOST     = "catalogue/logstash/es_host"

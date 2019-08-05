@@ -26,7 +26,7 @@ module "sierra_transformer" {
 
   service_name = "${var.namespace}_sierra_transformer"
 
-  container_image = "760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/transformer_sierra:c5ac23da7621c4df25a8b6d51e812289f4f6cebb"
+  container_image = "760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/transformer_sierra:36d5931856191bfd563304dc5082b8e8f64f9f21"
 
   security_group_ids = [
     "${module.egress_security_group.sg_id}",
