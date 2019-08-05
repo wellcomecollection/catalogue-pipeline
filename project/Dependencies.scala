@@ -99,7 +99,7 @@ object ExternalDependencies {
     val fastparse = "2.1.3"
     val finatra = "18.11.0"
     val guice = "4.2.0"
-    val logback = "1.1.8"
+    val logback = "1.2.3"
     val mockito = "1.9.5"
     val scalacheck = "1.13.4"
     val scalacheckShapeless = "1.1.6"
