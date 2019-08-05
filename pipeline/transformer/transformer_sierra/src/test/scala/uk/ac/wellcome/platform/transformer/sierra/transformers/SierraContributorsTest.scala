@@ -158,11 +158,13 @@ class SierraContributorsTest
       val contributor = contributors.head
 
       contributor.date shouldBe Some(
-        Period(label = "1564-1616", range =
-          Some(InstantRange(
-            LocalDate of (1564, 1, 1),
-            LocalDate of (1616, 12, 31),
-            "1564-1616"))))
+        Period(
+          label = "1564-1616",
+          range = Some(
+            InstantRange(
+              LocalDate of (1564, 1, 1),
+              LocalDate of (1616, 12, 31),
+              "1564-1616"))))
     }
 
     it(
