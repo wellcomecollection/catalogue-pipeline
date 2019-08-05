@@ -50,7 +50,7 @@ module "id_minter" {
     max_connections = 8
   }
 
-  env_vars_length = 6
+  env_vars_length = 5
 
   secret_env_vars = {
     cluster_url = "catalogue/id_minter/rds_host"
