@@ -21,8 +21,8 @@ module "service" {
   min_capacity = 0
   max_capacity = 10
 
-  env_vars        = "${var.env_vars}"
-  env_vars_length = "${var.env_vars_length}"
+  env_vars        = "${merge(var.env_vars, map("logstash_host", "${local.logstash_host}"))}"
+  env_vars_length = "${var.env_vars_length + 1}"
 
   secret_env_vars        = "${var.secret_env_vars}"
   secret_env_vars_length = "${var.secret_env_vars_length}"

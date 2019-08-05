@@ -5,10 +5,11 @@ module "catalogue_pipeline_20190723" {
 
   release_label = "prod"
 
-  account_id = "${data.aws_caller_identity.current.account_id}"
-  aws_region = "${local.aws_region}"
-  vpc_id     = "${local.vpc_id}"
-  subnets    = ["${local.private_subnets}"]
+  account_id      = "${data.aws_caller_identity.current.account_id}"
+  aws_region      = "${local.aws_region}"
+  vpc_id          = "${local.vpc_id}"
+  subnets         = ["${local.private_subnets}"]
+  private_subnets = ["${local.private_subnets}"]
 
   dlq_alarm_arn = "${local.dlq_alarm_arn}"
 
@@ -20,7 +21,6 @@ module "catalogue_pipeline_20190723" {
   sierra_adapter_topic_names = [
     "${local.sierra_reindexer_topic_name}",
     "${local.sierra_merged_bibs_topic_name}",
-
     "${local.sierra_merged_items_topic_name}",
   ]
   miro_adapter_topic_names = [

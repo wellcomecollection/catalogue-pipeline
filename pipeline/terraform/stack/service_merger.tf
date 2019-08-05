@@ -26,6 +26,7 @@ module "merger" {
 
   security_group_ids = [
     "${module.egress_security_group.sg_id}",
+    "${aws_security_group.interservice.id}",
   ]
 
   cluster_name = "${aws_ecs_cluster.cluster.name}"

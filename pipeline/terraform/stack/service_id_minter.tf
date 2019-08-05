@@ -31,6 +31,7 @@ module "id_minter" {
   security_group_ids = [
     "${module.egress_security_group.sg_id}",
     "${var.rds_ids_access_security_group_id}",
+    "${aws_security_group.interservice.id}",
   ]
 
   cluster_name = "${aws_ecs_cluster.cluster.name}"
@@ -48,7 +49,7 @@ module "id_minter" {
     max_connections = 8
   }
 
-  env_vars_length = 5
+  env_vars_length = 6
 
   secret_env_vars = {
     cluster_url = "catalogue/id_minter/rds_host"
