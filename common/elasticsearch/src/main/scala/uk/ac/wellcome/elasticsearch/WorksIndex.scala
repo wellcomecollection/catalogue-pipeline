@@ -170,6 +170,7 @@ object WorksIndex {
       language,
       location("thumbnail"),
       textField("dimensions"),
+      textField("edition"),
       objectField("redirect")
         .fields(sourceIdentifier, keywordField("canonicalId")),
       keywordField("type"),

@@ -432,6 +432,36 @@ class SierraTransformableTransformerTest
     work.alternativeTitles shouldBe List(alternativeTitle)
   }
 
+  it("includes the edition, if present") {
+    val id = createSierraBibNumber
+    val edition = "3rd edition"
+
+    val data =
+      s"""
+        | {
+        |   "id": "$id",
+        |   "title": "Title",
+        |   "varFields": [
+        |     {
+        |       "fieldTag": "a",
+        |       "marcTag": "250",
+        |       "ind1": " ",
+        |       "ind2": " ",
+        |       "subfields": [
+        |         {
+        |           "tag": "a",
+        |           "content": "$edition"
+        |         }
+        |       ]
+        |     }
+        |   ]
+        | }
+      """.stripMargin
+
+    val work = transformDataToUnidentifiedWork(id = id, data = data)
+    work.edition shouldBe Some(edition)
+  }
+
   it("uses the full Sierra system number as the source identifier") {
     val id = createSierraBibNumber
     val data = s"""{"id": "$id", "title": "A title"}"""
