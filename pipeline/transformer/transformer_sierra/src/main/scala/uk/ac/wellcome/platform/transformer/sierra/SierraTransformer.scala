@@ -32,5 +32,6 @@ trait SierraTransformer extends Logging {
     output
   }
 
-  def transform(bibId: SierraBibNumber, bibData: SierraBibData): (Output, TransformInfo)
+  def transform(bibId: SierraBibNumber,
+                bibData: SierraBibData): (Output, TransformInfo)
 }

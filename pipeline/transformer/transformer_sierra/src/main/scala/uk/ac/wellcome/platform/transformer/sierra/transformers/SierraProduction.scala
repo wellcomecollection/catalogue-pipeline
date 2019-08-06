@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.sierra.exceptions.CataloguingException
-import uk.ac.wellcome.platform.transformer.sierra.{SierraTransformer, Info}
+import uk.ac.wellcome.platform.transformer.sierra.{Info, SierraTransformer}
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
   SierraBibData,
@@ -15,7 +15,9 @@ object SierraProduction extends SierraTransformer with MarcUtils {
 
   type Output = List[ProductionEvent[MaybeDisplayable[AbstractAgent]]]
 
-  case class TransformInfo(primaryMarcField: Option[String], dateMarcField: Option[String]) extends Info {
+  case class TransformInfo(primaryMarcField: Option[String],
+                           dateMarcField: Option[String])
+      extends Info {
     def info = (primaryMarcField, dateMarcField) match {
       case (None, _) =>
         "No production events extracted"
@@ -44,20 +46,22 @@ object SierraProduction extends SierraTransformer with MarcUtils {
   // but it would be a cataloguing error -- we should reject it, and flag it
   // to the librarians.
   //
-  def transform(bibId: SierraBibNumber, bibData: SierraBibData): (Output, TransformInfo) = {
+  def transform(bibId: SierraBibNumber,
+                bibData: SierraBibData): (Output, TransformInfo) = {
 
     val maybeMarc260fields = getMatchingVarFields(bibData, "260")
     val maybeMarc264fields = getMatchingVarFields(bibData, "264")
 
-    val (productions, marcField) = (maybeMarc260fields, maybeMarc264fields) match {
-      case (Nil, Nil)           => (Nil, None)
-      case (marc260fields, Nil) =>
-        (getProductionFrom260Fields(marc260fields), Some("260"))
-      case (Nil, marc264fields) =>
-        (getProductionFrom264Fields(bibId, marc264fields), Some("264"))
-      case (marc260fields, marc264fields) =>
-        getProductionFromBothFields(bibId, marc260fields, marc264fields)
-    }
+    val (productions, marcField) =
+      (maybeMarc260fields, maybeMarc264fields) match {
+        case (Nil, Nil) => (Nil, None)
+        case (marc260fields, Nil) =>
+          (getProductionFrom260Fields(marc260fields), Some("260"))
+        case (Nil, marc264fields) =>
+          (getProductionFrom264Fields(bibId, marc264fields), Some("264"))
+        case (marc260fields, marc264fields) =>
+          getProductionFromBothFields(bibId, marc260fields, marc264fields)
+      }
 
     (productions, getProductionFrom008(bibData)) match {
       case (Nil, Nil) =>
@@ -65,7 +69,9 @@ object SierraProduction extends SierraTransformer with MarcUtils {
       case (Nil, productions) =>
         (productions, TransformInfo(Some("008"), None))
       case (head :: tail, production :: _) if head.dates.isEmpty =>
-        (head.withDates(production.dates) :: tail, TransformInfo(marcField, Some("008")))
+        (
+          head.withDates(production.dates) :: tail,
+          TransformInfo(marcField, Some("008")))
       case (productions, _) =>
         (productions, TransformInfo(marcField, None))
     }
@@ -210,30 +216,28 @@ object SierraProduction extends SierraTransformer with MarcUtils {
                                           marc260fields: List[VarField],
                                           marc264fields: List[VarField]) = {
 
-    
-    if (
-      // We've seen cases where the 264 field only has the following subfields:
-      //
-      //      [('tag', 'c'), ('content', '©2012')]
-      //
-      // or similar, and the 260 field is populated.  In that case, we can
-      // discard the 264 and just use the 260 fields.
-      marc264OnlyContainsCopyright(marc264fields) ||
+    if (// We've seen cases where the 264 field only has the following subfields:
+        //
+        //      [('tag', 'c'), ('content', '©2012')]
+        //
+        // or similar, and the 260 field is populated.  In that case, we can
+        // discard the 264 and just use the 260 fields.
+        marc264OnlyContainsCopyright(marc264fields) ||
 
-      // We've also seen cases where the 260 and 264 field are both present,
-      // and they have matching subfields!  We use the 260 field as it's not
-      // going to throw an exception about unrecognised second indicator.
-      marc260fields.map(_.subfields) == marc264fields.map(_.subfields) ||
+        // We've also seen cases where the 260 and 264 field are both present,
+        // and they have matching subfields!  We use the 260 field as it's not
+        // going to throw an exception about unrecognised second indicator.
+        marc260fields.map(_.subfields) == marc264fields.map(_.subfields) ||
 
-      // We've seen cases where the 264 field only contains punctuation,
-      // for example (MARC record 3150001, retrieved 28 March 2019):
-      //
-      //      260    2019
-      //      264  1 :|b,|c
-      //
-      // If these subfields are entirely punctuation, we discard 264 and
-      // just use 260.
-      marc264IsOnlyPunctuation(marc264fields)) {
+        // We've seen cases where the 264 field only contains punctuation,
+        // for example (MARC record 3150001, retrieved 28 March 2019):
+        //
+        //      260    2019
+        //      264  1 :|b,|c
+        //
+        // If these subfields are entirely punctuation, we discard 264 and
+        // just use 260.
+        marc264IsOnlyPunctuation(marc264fields)) {
 
       (getProductionFrom260Fields(marc260fields), Some("260"))
     }
