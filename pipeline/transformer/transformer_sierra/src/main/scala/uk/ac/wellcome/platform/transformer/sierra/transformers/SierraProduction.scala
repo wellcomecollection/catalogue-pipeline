@@ -3,6 +3,7 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.sierra.exceptions.CataloguingException
+import uk.ac.wellcome.platform.transformer.sierra.SierraTransformer
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
   SierraBibData,
@@ -10,7 +11,9 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
 }
 import uk.ac.wellcome.models.parse.Marc008Parser
 
-trait SierraProduction extends MarcUtils {
+object SierraProduction extends SierraTransformer with MarcUtils {
+
+  type Output = List[ProductionEvent[MaybeDisplayable[AbstractAgent]]]
 
   // Populate wwork:production.
   //
@@ -29,8 +32,7 @@ trait SierraProduction extends MarcUtils {
   // but it would be a cataloguing error -- we should reject it, and flag it
   // to the librarians.
   //
-  def getProduction(bibId: SierraBibNumber, bibData: SierraBibData)
-    : List[ProductionEvent[MaybeDisplayable[AbstractAgent]]] = {
+  def transform(bibId: SierraBibNumber, bibData: SierraBibData): Output = {
 
     val maybeMarc260fields = getMatchingVarFields(bibData, "260")
     val maybeMarc264fields = getMatchingVarFields(bibData, "264")
