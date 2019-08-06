@@ -8,7 +8,7 @@ s3:
   ports:
     - "33333:8000"
 localstack:
-  image: "localstack/localstack"
+  image: "localstack/localstack:0.9.6"
   ports:
     - "4567-4583:4567-4583"
     - "8080:8080"
