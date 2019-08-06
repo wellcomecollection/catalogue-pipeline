@@ -46,9 +46,9 @@ class MessagingIntegrationTest
 //    assertMessagesCanBeSentAndReceived(List(smallMessage))
 //  }
 
-  it("sends and receives a message >256KB") {
-    assertMessagesCanBeSentAndReceived(List(largeMessage))
-  }
+//  it("sends and receives a message >256KB") {
+//    assertMessagesCanBeSentAndReceived(List(largeMessage))
+//  }
 
   it("sends and receives messages with a mixture of sizes") {
     val sizes = List(10, 50, 100, 280000, 20, 290000)
