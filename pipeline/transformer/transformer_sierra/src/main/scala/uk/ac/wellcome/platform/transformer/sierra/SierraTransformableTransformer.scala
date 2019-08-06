@@ -32,9 +32,11 @@ class SierraTransformableTransformer
     with SierraLanguage
     with SierraLettering
     with SierraTitle
+    with SierraAlternativeTitles
     with SierraLocation
     with SierraProduction
     with SierraDimensions
+    with SierraEdition
     with SierraGenres
     with SierraMergeCandidates
     with SierraSubjects {
@@ -81,6 +83,7 @@ class SierraTransformableTransformer
                 ),
                 mergeCandidates = getMergeCandidates(sierraBibData),
                 title = getTitle(sierraBibData),
+                alternativeTitles = getAlternativeTitles(sierraBibData),
                 workType = getWorkType(sierraBibData),
                 description = getDescription(sierraBibData),
                 physicalDescription = getPhysicalDescription(sierraBibData),
@@ -94,6 +97,7 @@ class SierraTransformableTransformer
                 production = getProduction(bibId, sierraBibData),
                 language = getLanguage(sierraBibData),
                 dimensions = getDimensions(sierraBibData),
+                edition = getEdition(sierraBibData),
                 items = getItems(
                   bibId = bibId,
                   bibData = sierraBibData,

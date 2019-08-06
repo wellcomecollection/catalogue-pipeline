@@ -17,6 +17,7 @@ sealed trait Work extends BaseWork with MultipleSourceIdentifiers {
   val mergeCandidates: List[MergeCandidate]
 
   val title: String
+  val alternativeTitles: List[String]
   val workType: Option[WorkType]
   val description: Option[String]
   val physicalDescription: Option[String]
@@ -30,6 +31,7 @@ sealed trait Work extends BaseWork with MultipleSourceIdentifiers {
   val production: List[ProductionEvent[IdentityState[AbstractAgent]]]
   val language: Option[Language]
   val dimensions: Option[String]
+  val edition: Option[String]
 
   val items: List[IdentityState[Item]]
   val itemsV1: List[IdentityState[Item]]
@@ -44,6 +46,7 @@ case class UnidentifiedWork(
   otherIdentifiers: List[SourceIdentifier],
   mergeCandidates: List[MergeCandidate],
   title: String,
+  alternativeTitles: List[String],
   workType: Option[WorkType],
   description: Option[String],
   physicalDescription: Option[String],
@@ -58,6 +61,7 @@ case class UnidentifiedWork(
   production: List[ProductionEvent[MaybeDisplayable[AbstractAgent]]],
   language: Option[Language],
   dimensions: Option[String],
+  edition: Option[String],
   items: List[MaybeDisplayable[Item]],
   itemsV1: List[Identifiable[Item]],
   version: Int,
@@ -73,6 +77,7 @@ case class IdentifiedWork(
   otherIdentifiers: List[SourceIdentifier] = List(),
   mergeCandidates: List[MergeCandidate] = List(),
   title: String,
+  alternativeTitles: List[String],
   workType: Option[WorkType],
   description: Option[String],
   physicalDescription: Option[String],
@@ -86,6 +91,7 @@ case class IdentifiedWork(
   production: List[ProductionEvent[Displayable[AbstractAgent]]],
   language: Option[Language],
   dimensions: Option[String],
+  edition: Option[String],
   items: List[Displayable[Item]],
   itemsV1: List[Identified[Item]],
   version: Int,

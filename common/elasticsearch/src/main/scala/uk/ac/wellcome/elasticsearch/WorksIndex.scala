@@ -155,6 +155,7 @@ object WorksIndex {
       mergeCandidates,
       workType,
       englishTextField("title"),
+      englishTextField("alternativeTitles"),
       englishTextField("description"),
       englishTextField("physicalDescription"),
       englishTextField("extent"),
@@ -169,6 +170,7 @@ object WorksIndex {
       language,
       location("thumbnail"),
       textField("dimensions"),
+      textField("edition"),
       objectField("redirect")
         .fields(sourceIdentifier, keywordField("canonicalId")),
       keywordField("type"),

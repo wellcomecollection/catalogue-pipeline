@@ -196,39 +196,33 @@ class SierraTransformableTransformerTest
     val title = "Hi Diddle Dee Dee"
     val lettering = "An actor's life for me"
 
-    val productionFields = List(
-      createVarFieldWith(
-        marcTag = "260",
-        subfields = List(
-          MarcSubfield(tag = "b", content = "Peaceful Poetry"),
-          MarcSubfield(tag = "c", content = "1923")
-        )
+    val productionField = createVarFieldWith(
+      marcTag = "260",
+      subfields = List(
+        MarcSubfield(tag = "b", content = "Peaceful Poetry"),
+        MarcSubfield(tag = "c", content = "1923")
       )
     )
 
-    val descriptionFields = List(
-      createVarFieldWith(
-        marcTag = "520",
-        subfields = List(
-          MarcSubfield(
-            tag = "a",
-            content = "A delightful description of a dead daisy."),
-          MarcSubfield(tag = "c", content = "1923")
-        )
+    val descriptionField = createVarFieldWith(
+      marcTag = "520",
+      subfields = List(
+        MarcSubfield(
+          tag = "a",
+          content = "A delightful description of a dead daisy."),
+        MarcSubfield(tag = "c", content = "1923")
       )
     )
 
-    val letteringFields = List(
-      createVarFieldWith(
-        marcTag = "246",
-        indicator2 = "6",
-        subfields = List(
-          MarcSubfield(tag = "a", content = lettering)
-        )
+    val letteringField = createVarFieldWith(
+      marcTag = "246",
+      indicator2 = "6",
+      subfields = List(
+        MarcSubfield(tag = "a", content = lettering)
       )
     )
 
-    val marcFields = productionFields ++ descriptionFields ++ letteringFields
+    val marcFields = List(productionField, descriptionField, letteringField)
 
     val data =
       s"""
@@ -406,6 +400,66 @@ class SierraTransformableTransformerTest
 
     val work = transformDataToUnidentifiedWork(id = id, data = data)
     work.workType shouldBe Some(expectedWorkType)
+  }
+
+  it("includes the alternative title, if present") {
+    val id = createSierraBibNumber
+    val alternativeTitle = "English Earwigs"
+
+    val data =
+      s"""
+        | {
+        |   "id": "$id",
+        |   "title": "English earwigs earn evidence of evil",
+        |   "varFields": [
+        |     {
+        |       "fieldTag": "a",
+        |       "marcTag": "240",
+        |       "ind1": " ",
+        |       "ind2": " ",
+        |       "subfields": [
+        |         {
+        |           "tag": "a",
+        |           "content": "$alternativeTitle"
+        |         }
+        |       ]
+        |     }
+        |   ]
+        | }
+      """.stripMargin
+
+    val work = transformDataToUnidentifiedWork(id = id, data = data)
+    work.alternativeTitles shouldBe List(alternativeTitle)
+  }
+
+  it("includes the edition, if present") {
+    val id = createSierraBibNumber
+    val edition = "3rd edition"
+
+    val data =
+      s"""
+        | {
+        |   "id": "$id",
+        |   "title": "Title",
+        |   "varFields": [
+        |     {
+        |       "fieldTag": "a",
+        |       "marcTag": "250",
+        |       "ind1": " ",
+        |       "ind2": " ",
+        |       "subfields": [
+        |         {
+        |           "tag": "a",
+        |           "content": "$edition"
+        |         }
+        |       ]
+        |     }
+        |   ]
+        | }
+      """.stripMargin
+
+    val work = transformDataToUnidentifiedWork(id = id, data = data)
+    work.edition shouldBe Some(edition)
   }
 
   it("uses the full Sierra system number as the source identifier") {
