@@ -42,9 +42,9 @@ class MessagingIntegrationTest
 
   val subject = "message-integration-test-subject"
 
-  it("sends and receives a message <256KB") {
-    assertMessagesCanBeSentAndReceived(List(smallMessage))
-  }
+//  it("sends and receives a message <256KB") {
+//    assertMessagesCanBeSentAndReceived(List(smallMessage))
+//  }
 
   it("sends and receives a message >256KB") {
     assertMessagesCanBeSentAndReceived(List(largeMessage))
