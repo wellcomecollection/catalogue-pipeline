@@ -27,6 +27,7 @@ class MessageStreamTest extends FunSpec with Matchers with Messaging {
 
   describe("small messages (<256KB)") {
     it("reads messages off a queue, processes them and deletes them") {
+      println("Sparticus")
       withMessageStreamFixtures {
         case (messageStream, QueuePair(queue, dlq), _) =>
           val messages = createMessages(count = 3)
