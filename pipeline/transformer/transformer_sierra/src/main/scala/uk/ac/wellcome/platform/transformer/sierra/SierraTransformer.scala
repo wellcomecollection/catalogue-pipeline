@@ -15,16 +15,20 @@ trait SierraTransformer extends Logging {
 
   type TransformInfo <: Info
 
-  lazy val transformerName = this.getClass.getSimpleName.dropRight(1)
-
-  def apply(bibId: SierraBibNumber, bibData: SierraBibData): Output = {
-    val (output, transformInfo) = transform(bibId, bibData)
-    info(
+  case class Log(bibId: SierraBibNumber, transformerName: String, transformInfo: TransformInfo, output: Output) {
+    override def toString: String =
       "DATA TRANSFORMED: " +
         s"BibID=${bibId}, " +
         s"Transformer=${transformerName}, " +
         s"Info=${transformInfo.info}, " +
-        s"Output=${output}")
+        s"Output=${output}"
+  }
+
+  lazy val transformerName = this.getClass.getSimpleName.dropRight(1)
+
+  def apply(bibId: SierraBibNumber, bibData: SierraBibData): Output = {
+    val (output, transformInfo) = transform(bibId, bibData)
+    info(Log(bibId, transformerName, transformInfo, output))
     output
   }
 
