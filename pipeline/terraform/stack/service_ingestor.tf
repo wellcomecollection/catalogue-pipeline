@@ -45,7 +45,7 @@ module "ingestor" {
     ingest_queue_id   = "${module.ingestor_queue.url}"
   }
 
-  env_vars_length = 4
+  env_vars_length = 3
 
   secret_env_vars = {
     es_host     = "catalogue/ingestor/es_host"
