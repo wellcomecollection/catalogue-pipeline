@@ -29,14 +29,16 @@ module "recorder" {
 
   security_group_ids = [
     "${module.egress_security_group.sg_id}",
+    "${aws_security_group.interservice.id}",
   ]
 
-  cluster_name = "${aws_ecs_cluster.cluster.name}"
-  cluster_id   = "${aws_ecs_cluster.cluster.id}"
-  namespace_id = "${aws_service_discovery_private_dns_namespace.namespace.id}"
-  subnets      = "${var.subnets}"
-  service_name = "${var.namespace}_recorder"
-  aws_region   = "${var.aws_region}"
+  cluster_name  = "${aws_ecs_cluster.cluster.name}"
+  cluster_id    = "${aws_ecs_cluster.cluster.id}"
+  namespace_id  = "${aws_service_discovery_private_dns_namespace.namespace.id}"
+  subnets       = "${var.subnets}"
+  service_name  = "${var.namespace}_recorder"
+  aws_region    = "${var.aws_region}"
+  logstash_host = "${local.logstash_host}"
 
   env_vars = {
     recorder_queue_url = "${module.recorder_queue.url}"

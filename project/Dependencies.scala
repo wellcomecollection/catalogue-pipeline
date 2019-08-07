@@ -99,17 +99,21 @@ object ExternalDependencies {
     val fastparse = "2.1.3"
     val finatra = "18.11.0"
     val guice = "4.2.0"
-    val logback = "1.1.8"
+    val logback = "1.2.3"
     val mockito = "1.9.5"
     val scalacheck = "1.13.4"
     val scalacheckShapeless = "1.1.6"
     val scalacsv = "1.3.5"
     val scalaGraph = "1.12.5"
     val scalatest = "3.0.1"
+    val logstashLogback ="6.1"
   }
 
   val logbackDependencies = Seq(
-    "ch.qos.logback" % "logback-classic" % versions.logback
+    "ch.qos.logback" % "logback-classic" % versions.logback,
+    "ch.qos.logback" % "logback-core" % versions.logback,
+    "ch.qos.logback" % "logback-access" % versions.logback,
+    "net.logstash.logback" % "logstash-logback-encoder" % versions.logstashLogback
   )
 
   val akkaActorDependencies = Seq(
