@@ -50,7 +50,7 @@ module "recorder" {
     sns_topic = "${module.recorder_topic.arn}"
   }
 
-  env_vars_length = 6
+  env_vars_length = 5
 
   secret_env_vars = {}
 
