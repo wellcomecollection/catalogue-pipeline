@@ -6,6 +6,7 @@ import akka.{Done, NotUsed}
 import com.amazonaws.services.cloudwatch.model.StandardUnit
 import com.amazonaws.services.sqs.AmazonSQSAsync
 import com.amazonaws.services.sqs.model.Message
+import grizzled.slf4j.Logging
 import io.circe.Decoder
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.BigMessageReader
@@ -15,7 +16,7 @@ import uk.ac.wellcome.monitoring.Metrics
 import uk.ac.wellcome.storage.ObjectStore
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 class MessageStream[T](sqsClient: AmazonSQSAsync,
                        sqsConfig: SQSConfig,
@@ -24,7 +25,7 @@ class MessageStream[T](sqsClient: AmazonSQSAsync,
   actorSystem: ActorSystem,
   decoderT: Decoder[T],
   objectStoreT: ObjectStore[T],
-  ec: ExecutionContext) {
+  ec: ExecutionContext) extends Logging {
 
   private val bigMessageReader = new BigMessageReader[T] {
     override val objectStore: ObjectStore[T] = objectStoreT
@@ -70,8 +71,15 @@ class MessageStream[T](sqsClient: AmazonSQSAsync,
     }
   }
 
-  private def getBody(messageString: String): Try[T] =
+  private def getBody(messageString: String): Try[T] = {
     fromJson[MessageNotification](messageString).flatMap {
       bigMessageReader.read
+    } match {
+      case f: Failure[T] => {
+        logger.error(f.exception)
+        f
+      }
+      case s: Success[T] => s
     }
+  }
 }
