@@ -1,8 +1,7 @@
 package uk.ac.wellcome.elasticsearch
 
-import com.sksamuel.elastic4s.analyzers._
-import com.sksamuel.elastic4s.http.ElasticDsl._
-import com.sksamuel.elastic4s.mappings.{FieldDefinition, ObjectField}
+import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.requests.mappings.{FieldDefinition, ObjectField}
 
 object WorksIndex {
   val license = objectField("license").fields(
@@ -47,8 +46,16 @@ object WorksIndex {
       license
     )
 
-  def date(fieldName: String) = objectField(fieldName).fields(
+  def date(fieldName: String) = objectField(fieldName).fields(period)
+
+  val period = Seq(
     textField("label"),
+    objectField("range").fields(
+      textField("label"),
+      dateField("from"),
+      dateField("to"),
+      booleanField("inferred")
+    ),
     keywordField("ontologyType")
   )
 
@@ -66,7 +73,7 @@ object WorksIndex {
     keywordField("ontologyType")
   )
 
-  val rootConcept = concept ++ agent
+  val rootConcept = concept ++ agent ++ period
 
   def identified(fieldName: String, fields: Seq[FieldDefinition]): ObjectField =
     objectField(fieldName).fields(
@@ -106,6 +113,9 @@ object WorksIndex {
     objectField("agent").fields(location(), keywordField("ontologyType"))
   )
 
+  def englishTextField(name: String) =
+    textField(name).fields(textField("english").analyzer("english"))
+
   val language = objectField("language").fields(
     keywordField("id"),
     textField("label"),
@@ -144,16 +154,12 @@ object WorksIndex {
       otherIdentifiers,
       mergeCandidates,
       workType,
-      textField("title").fields(
-        textField("english").analyzer(EnglishLanguageAnalyzer)),
-      textField("description").fields(
-        textField("english").analyzer(EnglishLanguageAnalyzer)),
-      textField("physicalDescription").fields(
-        textField("english").analyzer(EnglishLanguageAnalyzer)),
-      textField("extent").fields(
-        textField("english").analyzer(EnglishLanguageAnalyzer)),
-      textField("lettering").fields(
-        textField("english").analyzer(EnglishLanguageAnalyzer)),
+      englishTextField("title"),
+      englishTextField("alternativeTitles"),
+      englishTextField("description"),
+      englishTextField("physicalDescription"),
+      englishTextField("extent"),
+      englishTextField("lettering"),
       date("createdDate"),
       contributors,
       subjects,
@@ -164,6 +170,7 @@ object WorksIndex {
       language,
       location("thumbnail"),
       textField("dimensions"),
+      textField("edition"),
       objectField("redirect")
         .fields(sourceIdentifier, keywordField("canonicalId")),
       keywordField("type"),

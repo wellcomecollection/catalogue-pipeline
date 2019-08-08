@@ -29,13 +29,15 @@ module "ingestor" {
 
   security_group_ids = [
     "${module.egress_security_group.sg_id}",
+    "${aws_security_group.interservice.id}",
   ]
 
-  cluster_name = "${aws_ecs_cluster.cluster.name}"
-  cluster_id   = "${aws_ecs_cluster.cluster.id}"
-  namespace_id = "${aws_service_discovery_private_dns_namespace.namespace.id}"
-  subnets      = "${var.subnets}"
-  aws_region   = "${var.aws_region}"
+  cluster_name  = "${aws_ecs_cluster.cluster.name}"
+  cluster_id    = "${aws_ecs_cluster.cluster.id}"
+  namespace_id  = "${aws_service_discovery_private_dns_namespace.namespace.id}"
+  subnets       = "${var.subnets}"
+  aws_region    = "${var.aws_region}"
+  logstash_host = "${local.logstash_host}"
 
   env_vars = {
     metrics_namespace = "${var.namespace}_ingestor"
@@ -43,7 +45,7 @@ module "ingestor" {
     ingest_queue_id   = "${module.ingestor_queue.url}"
   }
 
-  env_vars_length = 4
+  env_vars_length = 3
 
   secret_env_vars = {
     es_host     = "catalogue/ingestor/es_host"

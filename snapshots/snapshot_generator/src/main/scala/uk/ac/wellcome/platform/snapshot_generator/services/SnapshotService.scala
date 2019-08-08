@@ -9,7 +9,7 @@ import akka.util.ByteString
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 import com.sksamuel.elastic4s.Index
-import com.sksamuel.elastic4s.http.ElasticClient
+import com.sksamuel.elastic4s.ElasticClient
 import com.twitter.inject.Logging
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.display.models.v1.DisplayWorkV1

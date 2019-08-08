@@ -1,15 +1,14 @@
 package uk.ac.wellcome.platform.api.services
 
 import com.google.inject.{Inject, Singleton}
-import com.sksamuel.elastic4s.Index
-import com.sksamuel.elastic4s.http.ElasticDsl._
-import com.sksamuel.elastic4s.http.get.GetResponse
-import com.sksamuel.elastic4s.http.search.SearchResponse
-import com.sksamuel.elastic4s.http.{ElasticClient, ElasticError, Response}
-import com.sksamuel.elastic4s.searches.SearchRequest
-import com.sksamuel.elastic4s.searches.queries.Query
-import com.sksamuel.elastic4s.searches.queries.term.TermsQuery
-import com.sksamuel.elastic4s.searches.sort.{FieldSort, SortOrder}
+import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.requests.get.GetResponse
+import com.sksamuel.elastic4s.requests.searches.SearchResponse
+import com.sksamuel.elastic4s.{ElasticClient, ElasticError, Response}
+import com.sksamuel.elastic4s.requests.searches.SearchRequest
+import com.sksamuel.elastic4s.requests.searches.queries.{Query, RangeQuery}
+import com.sksamuel.elastic4s.requests.searches.sort.{FieldSort, SortOrder}
+import com.sksamuel.elastic4s.{ElasticDate, Index}
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.platform.api.models._
 
@@ -28,7 +27,7 @@ class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
     index: Index): Future[Either[ElasticError, GetResponse]] =
     elasticClient
       .execute {
-        get(canonicalId).from(index.name, index.name)
+        get(canonicalId).from(index.name)
       }
       .map { toEither }
 
@@ -64,7 +63,7 @@ class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
     debug(s"Sending ES request: $searchRequest")
 
     elasticClient
-      .execute { searchRequest }
+      .execute { searchRequest.trackTotalHits(true) }
       .map { toEither }
   }
 
@@ -84,7 +83,7 @@ class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
       .from(queryOptions.from)
   }
 
-  private def toTermQuery(workFilter: WorkFilter): TermsQuery[String] =
+  private def toQuery(workFilter: WorkFilter): Query =
     workFilter match {
       case ItemLocationTypeFilter(itemLocationTypeIds) =>
         termsQuery(
@@ -92,6 +91,13 @@ class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
           values = itemLocationTypeIds)
       case WorkTypeFilter(workTypeIds) =>
         termsQuery(field = "workType.id", values = workTypeIds)
+      case DateRangeFilter(fromDate, toDate) =>
+        val (gte, lte) =
+          (fromDate map ElasticDate.apply, toDate map ElasticDate.apply)
+        boolQuery should (
+          RangeQuery("production.dates.range.from", lte = lte, gte = gte),
+          RangeQuery("production.dates.range.to", lte = lte, gte = gte)
+        )
     }
 
   private def buildFilteredQuery(maybeWorkQuery: Option[WorkQuery],
@@ -104,7 +110,7 @@ class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
     }
 
     val filterDefinitions: List[Query] =
-      filters.map { toTermQuery } :+ termQuery(
+      filters.map { toQuery } :+ termQuery(
         field = "type",
         value = "IdentifiedWork")
 

@@ -1,5 +1,9 @@
 package uk.ac.wellcome.display.models.v2
 
+import java.time.Instant
+
+import org.scalacheck.Arbitrary
+import org.scalacheck.Gen.chooseNum
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.display.models._
@@ -16,6 +20,23 @@ class DisplayWorkV2Test
     with ProductionEventGenerators
     with WorksGenerators
     with PropertyChecks {
+
+  // We use this for the scalacheck of the java.time.Instant type
+  // We could just import the library, but I might wait until we need more
+  // Taken from here:
+  // https://github.com/rallyhealth/scalacheck-ops/blob/master/core/src/main/scala/org/scalacheck/ops/time/ImplicitJavaTimeGenerators.scala
+  implicit val arbInstant: Arbitrary[Instant] = {
+    Arbitrary {
+      for {
+        millis <- chooseNum(
+          Instant.MIN.getEpochSecond,
+          Instant.MAX.getEpochSecond)
+        nanos <- chooseNum(Instant.MIN.getNano, Instant.MAX.getNano)
+      } yield {
+        Instant.ofEpochMilli(millis).plusNanos(nanos)
+      }
+    }
+  }
 
   it("parses a Work without any items") {
     val work = createIdentifiedWorkWith(

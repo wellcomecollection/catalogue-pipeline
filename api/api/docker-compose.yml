@@ -1,5 +1,5 @@
 elasticsearch:
-  image: "docker.elastic.co/elasticsearch/elasticsearch:6.4.0"
+  image: "docker.elastic.co/elasticsearch/elasticsearch:7.2.0"
   ports:
     - "9200:9200"
     - "9300:9300"
@@ -8,3 +8,4 @@ elasticsearch:
     - "transport.host=0.0.0.0"
     - "cluster.name=wellcome"
     - "logger.level=DEBUG"
+    - "discovery.type=single-node"

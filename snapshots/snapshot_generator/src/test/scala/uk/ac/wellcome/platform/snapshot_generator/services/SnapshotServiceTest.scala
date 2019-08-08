@@ -6,7 +6,8 @@ import akka.http.scaladsl.model.Uri
 import akka.stream.alpakka.s3.S3Exception
 import com.amazonaws.services.s3.model.GetObjectRequest
 import com.sksamuel.elastic4s.Index
-import com.sksamuel.elastic4s.http.{ElasticClient, JavaClientExceptionWrapper}
+import com.sksamuel.elastic4s.ElasticClient
+import com.sksamuel.elastic4s.http.JavaClientExceptionWrapper
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.akka.fixtures.Akka

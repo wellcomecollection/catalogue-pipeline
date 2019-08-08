@@ -1,18 +1,28 @@
 package uk.ac.wellcome.platform.api.services
 
 import com.sksamuel.elastic4s.Index
-import com.sksamuel.elastic4s.http.ElasticError
+import com.sksamuel.elastic4s.ElasticError
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Assertion, FunSpec, Matchers}
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
-import uk.ac.wellcome.models.work.generators.WorksGenerators
+import uk.ac.wellcome.models.work.generators.{
+  ProductionEventGenerators,
+  WorksGenerators
+}
 import uk.ac.wellcome.models.work.internal.{IdentifiedBaseWork, WorkType}
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
-import uk.ac.wellcome.platform.api.models.WorkQuery.SimpleQuery
-import uk.ac.wellcome.platform.api.models.{ResultList, WorkTypeFilter}
+import uk.ac.wellcome.platform.api.models.{
+  DateRangeFilter,
+  ResultList,
+  WorkTypeFilter
+}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+
+import uk.ac.wellcome.platform.api.models.WorkQuery.MSMBoostQuery
 
 class WorksServiceTest
     extends FunSpec
@@ -20,7 +30,8 @@ class WorksServiceTest
     with Matchers
     with ScalaFutures
     with SearchOptionsGenerators
-    with WorksGenerators {
+    with WorksGenerators
+    with ProductionEventGenerators {
 
   val elasticsearchService = new ElasticsearchService(
     elasticClient = elasticClient
@@ -118,6 +129,58 @@ class WorksServiceTest
     }
   }
 
+  describe("filter works by date") {
+
+    val (work1, work2, work3) = (
+      createDatedWork("1709"),
+      createDatedWork("1950"),
+      createDatedWork("2000")
+    )
+    val allWorks = Seq(work1, work2, work3)
+
+    val (fromDate, toDate) = {
+      val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+      (
+        LocalDate.parse("01/01/1900", formatter),
+        LocalDate.parse("01/01/1962", formatter)
+      )
+    }
+
+    it("filters records by date range") {
+
+      assertListResultIsCorrect(
+        allWorks = allWorks,
+        expectedWorks = Seq(work2),
+        expectedTotalResults = 1,
+        worksSearchOptions = createWorksSearchOptionsWith(
+          filters = DateRangeFilter(Some(fromDate), Some(toDate)) :: Nil
+        )
+      )
+    }
+
+    it("filters records by from date") {
+      assertListResultIsCorrect(
+        allWorks = allWorks,
+        expectedWorks = Seq(work2, work3),
+        expectedTotalResults = 2,
+        worksSearchOptions = createWorksSearchOptionsWith(
+          filters = DateRangeFilter(Some(fromDate), None) :: Nil
+        )
+      )
+    }
+
+    it("filters records by to date") {
+      assertListResultIsCorrect(
+        allWorks = allWorks,
+        expectedWorks = Seq(work1, work2),
+        expectedTotalResults = 2,
+        worksSearchOptions = createWorksSearchOptionsWith(
+          filters = DateRangeFilter(None, Some(toDate)) :: Nil
+        )
+      )
+    }
+  }
+
   describe("findWorkById") {
     it("gets a DisplayWork by id") {
       withLocalWorksIndex { index =>
@@ -196,9 +259,9 @@ class WorksServiceTest
         title = "An etching of an emu"
       )
 
+      // unmatched quotes are a lexical error in the Elasticsearch parser
       assertSearchResultIsCorrect(
-        query =
-          "emu \"unmatched quotes are a lexical error in the Elasticsearch parser"
+        query = "emu \""
       )(
         allWorks = List(workEmu),
         expectedWorks = List(workEmu),
@@ -264,7 +327,7 @@ class WorksServiceTest
 
     it("returns a Left[ElasticError] if there's an Elasticsearch error") {
       val future = worksService.searchWorks(
-        workQuery = SimpleQuery("cat")
+        workQuery = MSMBoostQuery("cat")
       )(
         index = Index("doesnotexist"),
         worksSearchOptions = defaultWorksSearchOptions
@@ -294,7 +357,7 @@ class WorksServiceTest
     worksSearchOptions: WorksSearchOptions = createWorksSearchOptions
   ): Assertion =
     assertResultIsCorrect(
-      worksService.searchWorks(SimpleQuery(query))
+      worksService.searchWorks(MSMBoostQuery(query))
     )(allWorks, expectedWorks, expectedTotalResults, worksSearchOptions)
 
   private def assertResultIsCorrect(

@@ -1,10 +1,8 @@
 package uk.ac.wellcome.platform.api.models
 
-import com.sksamuel.elastic4s.http.ElasticDsl._
-import com.sksamuel.elastic4s.searches.queries.{Query, SimpleStringQuery}
-import com.sksamuel.elastic4s.searches.queries.matches.{
-  MultiMatchQuery,
-  MultiMatchQueryBuilderType
+import com.sksamuel.elastic4s.requests.searches.queries.{
+  Query,
+  SimpleStringQuery
 }
 
 sealed trait WorkQuery {
@@ -13,48 +11,29 @@ sealed trait WorkQuery {
 }
 
 object WorkQuery {
-
-  case class SimpleQuery(queryString: String) extends WorkQuery {
-    override def query(): SimpleStringQuery = {
-      simpleStringQuery(queryString)
-    }
-  }
-
-  case class MSMQuery(queryString: String) extends WorkQuery {
-    override def query(): MultiMatchQuery = {
-      multiMatchQuery(queryString)
-        .fields("*")
-        .matchType(MultiMatchQueryBuilderType.CROSS_FIELDS)
-        .minimumShouldMatch("60%")
-    }
-  }
-
-  case class BoostQuery(queryString: String) extends WorkQuery {
-    override def query(): MultiMatchQuery = {
-      multiMatchQuery(queryString)
-        .fields(
-          "*",
-          "title^9",
-          "subjects*^8",
-          "genres*^8",
-          "description*^5",
-          "contributors*^2")
-        .matchType(MultiMatchQueryBuilderType.CROSS_FIELDS)
-    }
-  }
+  val defaultMSM = "60%"
+  val defaultBoostedFields = Seq(
+    ("*.*", None),
+    ("title", Some(9.0)),
+    // Because subjects and genres have been indexed differently
+    // We need to query them slightly differently
+    // TODO: (jamesgorrie) think of a more sustainable way of doing this
+    // maybe having a just a list of terms that we use terms queries to query against,
+    // and then have more structured data underlying
+    ("subjects.*", Some(8.0)),
+    ("genres.label", Some(8.0)),
+    ("description", Some(3.0)),
+    ("contributors.*", Some(2.0))
+  )
 
   case class MSMBoostQuery(queryString: String) extends WorkQuery {
-    override def query(): MultiMatchQuery = {
-      multiMatchQuery(queryString)
-        .fields(
-          "*",
-          "title^9",
-          "subjects*^8",
-          "genres*^8",
-          "description*^5",
-          "contributors*^2")
-        .matchType(MultiMatchQueryBuilderType.CROSS_FIELDS)
-        .minimumShouldMatch("60%")
+    override def query(): SimpleStringQuery = {
+      SimpleStringQuery(
+        queryString,
+        fields = defaultBoostedFields,
+        lenient = Some(true),
+        minimumShouldMatch = Some(defaultMSM)
+      )
     }
   }
 }

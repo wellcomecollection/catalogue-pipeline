@@ -26,3 +26,5 @@ variable "security_group_ids" {
   default = []
   type    = "list"
 }
+
+variable "logstash_host" {}

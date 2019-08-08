@@ -6,6 +6,10 @@ output "bucket_name" {
   value = "${local.bucket_name}"
 }
 
+output "assumable_read_role" {
+  value = "${aws_iam_role.assumable_read_role.arn}"
+}
+
 output "read_policy" {
   value = "${data.aws_iam_policy_document.read_policy.json}"
 }

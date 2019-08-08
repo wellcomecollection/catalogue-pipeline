@@ -8,14 +8,22 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData,
   VarField
 }
+import uk.ac.wellcome.models.parse.Marc008Parser
 
-trait SierraProduction {
+trait SierraProduction extends MarcUtils {
 
   // Populate wwork:production.
   //
-  // Information about production can come from two fields in MARC: 260 & 264.
+  // Information about production can come from three fields in MARC: 260, 264
+  // and 008.
+  //
   // At Wellcome, 260 is what was used historically -- 264 is what we're moving
-  // towards, using RDA rules.
+  // towards, using RDA rules. If neither of these  fields are available, we
+  // fallback to 008.
+  //
+  // If 260/264 are available but don't contain any date information, we fill in
+  // the first ProductionEvent with date information from 008 (which is what the
+  // 008 field should refer to according to the cataloguing rules).
   //
   // It is theoretically possible for a bib record to have both 260 and 264,
   // but it would be a cataloguing error -- we should reject it, and flag it
@@ -23,20 +31,23 @@ trait SierraProduction {
   //
   def getProduction(bibId: SierraBibNumber, bibData: SierraBibData)
     : List[ProductionEvent[MaybeDisplayable[AbstractAgent]]] = {
-    val maybeMarc260fields = bibData.varFields.filter {
-      _.marcTag.contains("260")
-    }
-    val maybeMarc264fields = bibData.varFields.filter {
-      _.marcTag.contains("264")
-    }
 
-    (maybeMarc260fields, maybeMarc264fields) match {
+    val maybeMarc260fields = getMatchingVarFields(bibData, "260")
+    val maybeMarc264fields = getMatchingVarFields(bibData, "264")
+
+    val productions = (maybeMarc260fields, maybeMarc264fields) match {
       case (Nil, Nil)           => List()
       case (marc260fields, Nil) => getProductionFrom260Fields(marc260fields)
       case (Nil, marc264fields) =>
         getProductionFrom264Fields(bibId, marc264fields)
       case (marc260fields, marc264fields) =>
         getProductionFromBothFields(bibId, marc260fields, marc264fields)
+    }
+
+    (productions, getProductionFrom008(bibData)) match {
+      case (head :: tail, production :: _) =>
+        head.withDates(if (head.dates.isEmpty) production.dates else head.dates) :: tail
+      case (maybe260or264, maybe008) => maybe260or264 ++ maybe008
     }
   }
 
@@ -167,10 +178,8 @@ trait SierraProduction {
 
   private def marc264IsOnlyPunctuation(marc264fields: List[VarField]): Boolean =
     marc264fields
-      .map { vf: VarField =>
-        vf.subfields.map { _.content }.mkString("")
-      }
-      .forall { _.matches("^[:,]*$") }
+      .map { getSubfieldContents(_) mkString "" }
+      .forall { _ matches "^[:,]*$" }
 
   /** Populate the production data if both 260 and 264 are present.
     *
@@ -221,6 +230,10 @@ trait SierraProduction {
     }
   }
 
+  def getProductionFrom008(bibData: SierraBibData)
+    : List[ProductionEvent[MaybeDisplayable[AbstractAgent]]] =
+    getVarFieldContents(bibData, "008") flatMap (Marc008Parser(_))
+
   // @@AWLC: I'm joining these with a space because that seems more appropriate
   // given our catalogue, but the MARC spec isn't entirely clear on what to do.
   //
@@ -236,30 +249,21 @@ trait SierraProduction {
   //    Website     [Netherne, Surrey], [ca. 1966]
   //
   private def labelFromSubFields(vf: VarField): String =
-    vf.subfields.map { _.content }.mkString(" ")
+    getSubfieldContents(vf) mkString " "
 
   private def placesFromSubfields(vf: VarField,
                                   subfieldTag: String): List[Place] =
-    vf.subfields
-      .filter { _.tag == subfieldTag }
-      .map { sf: MarcSubfield =>
-        Place.normalised(label = sf.content)
-      }
+    getSubfieldContents(vf, Some(subfieldTag)) map Place.normalised
 
   private def agentsFromSubfields(
     vf: VarField,
     subfieldTag: String): List[Unidentifiable[Agent]] =
-    vf.subfields
-      .filter { _.tag == subfieldTag }
-      .map { sf: MarcSubfield =>
-        Unidentifiable(Agent.normalised(label = sf.content))
+    getSubfieldContents(vf, Some(subfieldTag))
+      .map { content =>
+        Unidentifiable(Agent.normalised(content))
       }
 
   private def datesFromSubfields(vf: VarField,
                                  subfieldTag: String): List[Period] =
-    vf.subfields
-      .filter { _.tag == subfieldTag }
-      .map { sf: MarcSubfield =>
-        Period.normalised(label = sf.content)
-      }
+    getSubfieldContents(vf, Some(subfieldTag)) map Period.apply
 }

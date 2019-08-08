@@ -1,23 +1,5 @@
 {
-    "catalogue_api": {
-		"environments": [{
-				"id": "latest",
-				"name": "Latest"
-			},
-			{
-				"id": "stage",
-				"name": "Staging"
-			},
-			{
-				"id": "prod",
-				"name": "Production"
-			}
-		],
-		"name": "Catalogue API",
-		"profile": "platform-dev",
-		"github_repository": "wellcometrust/catalogue"
-	},
-	"catalogue_pipeline": {
+    "catalogue_pipeline": {
 		"environments": [{
 				"id": "latest",
 				"name": "Latest"
@@ -32,7 +14,8 @@
 			}
 		],
 		"name": "Catalogue pipeline",
-		"profile": "platform-dev",
+		"role_arn": "arn:aws:iam::760097843905:role/platform-developer",
+        "aws_region_name": "eu-west-1",
 		"github_repository": "wellcometrust/catalogue"
 	}
 }

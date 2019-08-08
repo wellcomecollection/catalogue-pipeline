@@ -1,8 +1,8 @@
 package uk.ac.wellcome.platform.api.services
 
 import com.sksamuel.elastic4s.Index
-import com.sksamuel.elastic4s.http.ElasticError
-import com.sksamuel.elastic4s.http.search.{SearchHit, SearchResponse}
+import com.sksamuel.elastic4s.ElasticError
+import com.sksamuel.elastic4s.requests.searches.{SearchHit, SearchResponse}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Assertion, FunSpec, Matchers}
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
@@ -44,21 +44,6 @@ class ElasticsearchServiceTest
     createElasticsearchQueryOptions
 
   describe("simpleStringQueryResults") {
-    it("finds results for a simpleStringQuery search") {
-      withLocalWorksIndex { index =>
-        val work1 = createIdentifiedWorkWith(title = "Amid an Aegean")
-        val work2 = createIdentifiedWorkWith(title = "Before a Bengal")
-        val work3 = createIdentifiedWorkWith(title = "Circling a Cheetah")
-
-        insertIntoElasticsearch(index, work1, work2, work3)
-
-        assertSearchResultsAreCorrect(
-          index = index,
-          workQuery = SimpleQuery("Aegean"),
-          expectedWorks = List(work1))
-      }
-    }
-
     it("filters search results by workType") {
       withLocalWorksIndex { index =>
         val workWithCorrectWorkType = createIdentifiedWorkWith(
@@ -82,7 +67,7 @@ class ElasticsearchServiceTest
 
         assertSearchResultsAreCorrect(
           index = index,
-          workQuery = SimpleQuery("artichokes"),
+          workQuery = MSMBoostQuery("artichokes"),
           queryOptions = createElasticsearchQueryOptionsWith(
             filters = List(WorkTypeFilter(workTypeId = "b"))
           ),
@@ -119,7 +104,7 @@ class ElasticsearchServiceTest
 
         assertSearchResultsAreCorrect(
           index = index,
-          workQuery = SimpleQuery("artichokes"),
+          workQuery = MSMBoostQuery("artichokes"),
           queryOptions = createElasticsearchQueryOptionsWith(
             filters = List(WorkTypeFilter(List("b", "m")))
           ),
@@ -149,7 +134,7 @@ class ElasticsearchServiceTest
 
         assertSearchResultsAreCorrect(
           index = index,
-          workQuery = SimpleQuery("tangerines"),
+          workQuery = MSMBoostQuery("tangerines"),
           queryOptions = createElasticsearchQueryOptionsWith(
             filters =
               List(ItemLocationTypeFilter(locationTypeId = "iiif-image"))
@@ -187,7 +172,7 @@ class ElasticsearchServiceTest
 
         assertSearchResultsAreCorrect(
           index = index,
-          workQuery = SimpleQuery("tangerines"),
+          workQuery = MSMBoostQuery("tangerines"),
           queryOptions = createElasticsearchQueryOptionsWith(
             filters = List(
               ItemLocationTypeFilter(
@@ -216,7 +201,7 @@ class ElasticsearchServiceTest
 
         (1 to 10).foreach { _ =>
           val searchResponseFuture = searchService
-            .queryResults(SimpleQuery("A"))(index, defaultQueryOptions)
+            .queryResults(MSMBoostQuery("A"))(index, defaultQueryOptions)
 
           whenReady(searchResponseFuture) { response =>
             searchResponseToWorks(response) shouldBe works
@@ -227,7 +212,7 @@ class ElasticsearchServiceTest
 
     it("returns a Left[ElasticError] if Elasticsearch returns an error") {
       val future = searchService
-        .queryResults(SimpleQuery("cat"))(
+        .queryResults(MSMBoostQuery("cat"))(
           Index("doesnotexist"),
           defaultQueryOptions)
 
@@ -242,105 +227,61 @@ class ElasticsearchServiceTest
     val noMatch =
       createIdentifiedWorkWith(title = "Before a Bengal")
 
-    it("finds results for a MSMQuery search") {
-      withLocalWorksIndex { index =>
-        val matching100 =
-          createIdentifiedWorkWith(title = "Title text contains Aegean")
-        val matching75 =
-          createIdentifiedWorkWith(title = "Title text contains")
-        val matching25 =
-          createIdentifiedWorkWith(title = "Title")
-
-        insertIntoElasticsearch(index, matching25, matching100, matching75)
-
-        val results = searchResults(
-          index = index,
-          workQuery = MSMQuery("Title text contains Aegean"))
-
-        results shouldBe List(matching100, matching75)
-      }
-    }
-
-    it("finds results for a BoostQuery search") {
-      withLocalWorksIndex { index =>
-        // Longer text used to ensure signal in TF/IDF
-        val text = "Text that contains Aegean"
-
-        val matchingTitle =
-          createIdentifiedWorkWith(title = s"$text title")
-        val exactMatchingTitle =
-          createIdentifiedWorkWith(title = s"Aegean title")
-        val matchingSubject =
-          createIdentifiedWorkWith(
-            subjects = List(createSubjectWith(s"$text subject")))
-        val matchingGenre =
-          createIdentifiedWorkWith(
-            genres = List(createGenreWith(s"$text genre")))
-        val matchingDescription =
-          createIdentifiedWorkWith(description = Some(s"$text description"))
-
-        insertIntoElasticsearch(
-          index,
-          matchingTitle,
-          noMatch,
-          matchingSubject,
-          exactMatchingTitle,
-          matchingDescription,
-          matchingGenre)
-
-        val results =
-          searchResults(index = index, workQuery = BoostQuery("Aegean"))
-
-        results should have length 5
-
-        results.head shouldBe exactMatchingTitle
-        results(1) shouldBe matchingTitle
-        results.slice(2, 4) should contain theSameElementsAs List(
-          matchingSubject,
-          matchingGenre)
-        results(4) shouldBe matchingDescription
-      }
-    }
-
     it("finds results for a MSMBoostQuery search") {
       withLocalWorksIndex { index =>
         // Longer text used to ensure signal in TF/IDF
         val matchingTitle100 =
-          createIdentifiedWorkWith(title = "Title text that contains Aegean")
+          createIdentifiedWorkWith(
+            canonicalId = "matchingTitle100",
+            title = "Title text that contains Aegean")
         val matchingTitle75 =
-          createIdentifiedWorkWith(title = "Title text that contains")
+          createIdentifiedWorkWith(
+            canonicalId = "matchingTitle75",
+            title = "Title text that contains")
         val matchingTitle25 =
-          createIdentifiedWorkWith(title = "Title text")
+          createIdentifiedWorkWith(
+            canonicalId = "matchingTitle25",
+            title = "Title text")
 
         val matchingSubject100 =
           createIdentifiedWorkWith(
+            canonicalId = "matchingSubject100",
             subjects =
               List(createSubjectWith(s"Subject text that contains Aegean")))
         val matchingSubject75 =
           createIdentifiedWorkWith(
+            canonicalId = "matchingSubject75",
             subjects = List(createSubjectWith(s"Subject text that contains")))
         val matchingSubject25 =
           createIdentifiedWorkWith(
+            canonicalId = "matchingSubject25",
             subjects = List(createSubjectWith(s"Subject text")))
 
         val matchingGenre100 =
           createIdentifiedWorkWith(
-            genres = List(createGenreWith(s"Genre text that contains Aegean")))
+            canonicalId = "matchingGenre100",
+            genres = List(createGenreWith(s"Subject text that contains Aegean")))
         val matchingGenre75 =
           createIdentifiedWorkWith(
-            genres = List(createGenreWith(s"Genre text that contains")))
+            canonicalId = "matchingGenre75",
+            genres = List(createGenreWith(s"Subject text that contains")))
         val matchingGenre25 =
           createIdentifiedWorkWith(
-            genres = List(createGenreWith(s"Genre text")))
+            canonicalId = "matchingGenre25",
+            genres = List(createGenreWith(s"Subject text")))
 
         val matchingDescription100 =
           createIdentifiedWorkWith(
+            canonicalId = "matchingDescription100",
             description = Some(s"Description text that contains Aegean"))
         val matchingDescription75 =
           createIdentifiedWorkWith(
+            canonicalId = "matchingDescription75",
             description = Some(s"Description text that contains"))
         val matchingDescription25 =
-          createIdentifiedWorkWith(description = Some(s"Description text"))
+          createIdentifiedWorkWith(
+            canonicalId = "matchingDescription25",
+            description = Some(s"Description text"))
 
         insertIntoElasticsearch(
           index,
@@ -364,21 +305,32 @@ class ElasticsearchServiceTest
             index = index,
             workQuery = MSMBoostQuery("Text that contains Aegean"))
 
-        results should have length 10
+        results should have length 8
 
-        results.slice(0, 2) shouldBe List(matchingTitle100, matchingTitle75)
-        results.slice(2, 4) should contain theSameElementsAs List(
-          matchingGenre100,
-          matchingSubject100)
-        results.slice(4, 6) should contain theSameElementsAs List(
-          matchingGenre75,
-          matchingSubject75)
-        results.slice(6, 8) shouldBe List(
-          matchingDescription100,
-          matchingDescription75)
-        results.slice(8, 10) should contain theSameElementsAs List(
-          matchingDescription25,
-          matchingTitle25)
+        results.foreach(r => println(r.canonicalId))
+
+        withClue("(0, 1) should be title matches") {
+          results.slice(0, 2) shouldBe List(matchingTitle100, matchingTitle75)
+        }
+
+        withClue("(2, 3) should be 100 genre / subject matches") {
+          results.slice(2, 4) should contain theSameElementsAs List(
+            matchingGenre100,
+            matchingSubject100)
+        }
+
+        withClue("(4,5) should be 75 genre / subject matches") {
+          results.slice(4, 6) should contain theSameElementsAs List(
+            matchingGenre75,
+            matchingSubject75)
+        }
+
+        withClue("(6, 7) should be 100 / 75 description matches") {
+          results.slice(6, 8) shouldBe List(
+            matchingDescription100,
+            matchingDescription75)
+        }
+
       }
     }
   }
@@ -629,6 +581,8 @@ class ElasticsearchServiceTest
     val searchResponseFuture =
       searchService.queryResults(workQuery)(index, queryOptions)
     whenReady(searchResponseFuture) { response =>
+      response.right.map(r =>
+        r.hits.hits.foreach(h => println(s"${h.id}/${h.score}")))
       searchResponseToWorks(response)
     }
   }
@@ -636,7 +590,7 @@ class ElasticsearchServiceTest
   private def assertSearchResultsAreCorrect(
     index: Index,
     workQuery: WorkQuery,
-    queryOptions: ElasticsearchQueryOptions = createElasticsearchQueryOptions,
+    queryOptions: ElasticsearchQueryOptions,
     expectedWorks: List[IdentifiedWork]) = {
     searchResults(index, workQuery, queryOptions) should contain theSameElementsAs expectedWorks
   }

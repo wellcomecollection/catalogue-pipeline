@@ -8,9 +8,11 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
 trait MarcGenerators {
   def createVarFieldWith(marcTag: String,
                          indicator2: Option[String] = None,
-                         subfields: List[MarcSubfield] = List()): VarField =
+                         subfields: List[MarcSubfield] = List(),
+                         content: Option[String] = None): VarField =
     VarField(
       marcTag = Some(marcTag),
+      content = content,
       indicator1 = None,
       indicator2 = indicator2,
       subfields = subfields

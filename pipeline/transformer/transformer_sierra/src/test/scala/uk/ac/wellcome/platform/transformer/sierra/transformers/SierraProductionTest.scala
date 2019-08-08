@@ -564,6 +564,83 @@ class SierraProductionTest
     }
   }
 
+  describe("MARC field 008") {
+
+    val varField = createVarFieldWith(
+      marcTag = "008",
+      content = Some("790922s1757    enk||||      o00||||eng ccam   ")
+    )
+
+    it("uses field 008 if neither 260 or 264 are present") {
+
+      transformToProduction(List(varField)) shouldBe List(
+        ProductionEvent(
+          label = "1757",
+          places = List(Place("England")),
+          agents = List(),
+          dates = List(Period("1757")),
+          function = None))
+    }
+
+    it("ignores field 008 if 264 is present") {
+
+      val varFields = List(
+        varField,
+        createVarFieldWith(
+          marcTag = "264",
+          indicator2 = "1",
+          subfields = List(
+            MarcSubfield(tag = "c", content = "2002"),
+            MarcSubfield(tag = "a", content = "London"))))
+
+      transformToProduction(varFields) shouldBe List(
+        ProductionEvent(
+          label = "2002 London",
+          places = List(Place("London")),
+          agents = List(),
+          dates = List(Period("2002")),
+          function = Some(Concept("Publication"))))
+    }
+
+    it("ignores field 008 if 260 is present") {
+
+      val varFields = List(
+        varField,
+        createVarFieldWith(
+          marcTag = "260",
+          indicator2 = "1",
+          subfields = List(
+            MarcSubfield(tag = "c", content = "2002"),
+            MarcSubfield(tag = "a", content = "London"))))
+
+      transformToProduction(varFields) shouldBe List(
+        ProductionEvent(
+          label = "2002 London",
+          places = List(Place("London")),
+          agents = List(),
+          dates = List(Period("2002")),
+          function = None))
+    }
+
+    it("uses date information from 008 if not present in 260/264") {
+
+      val varFields = List(
+        varField,
+        createVarFieldWith(
+          marcTag = "260",
+          indicator2 = "1",
+          subfields = List(MarcSubfield(tag = "a", content = "London"))))
+
+      transformToProduction(varFields) shouldBe List(
+        ProductionEvent(
+          label = "London",
+          places = List(Place("London")),
+          agents = List(),
+          dates = List(Period("1757")),
+          function = None))
+    }
+  }
+
   // Test helpers
 
   private def transform260ToProduction(subfields: List[MarcSubfield]) = {
