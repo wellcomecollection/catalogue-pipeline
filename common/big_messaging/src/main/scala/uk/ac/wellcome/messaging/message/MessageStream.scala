@@ -25,7 +25,8 @@ class MessageStream[T](sqsClient: AmazonSQSAsync,
   actorSystem: ActorSystem,
   decoderT: Decoder[T],
   objectStoreT: ObjectStore[T],
-  ec: ExecutionContext) extends Logging {
+  ec: ExecutionContext)
+    extends Logging {
 
   private val bigMessageReader = new BigMessageReader[T] {
     override val objectStore: ObjectStore[T] = objectStoreT
