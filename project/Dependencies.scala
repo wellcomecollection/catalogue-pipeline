@@ -93,7 +93,7 @@ object ExternalDependencies {
     val akkaStreamAlpakka = "0.20"
     val apacheCommons = "3.7"
     val apacheLogging = "2.8.2"
-    val aws = "1.11.95"
+    val aws = "1.11.504"
     val circe = "0.9.0"
     val elastic4s = "7.1.0"
     val fastparse = "2.1.3"

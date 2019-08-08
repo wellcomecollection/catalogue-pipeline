@@ -1,7 +1,7 @@
-module "catalogue_pipeline_20190723" {
+module "catalogue_pipeline_20190808" {
   source = "stack"
 
-  namespace = "catalogue-20190723"
+  namespace = "catalogue-20190808"
 
   release_label = "prod"
 
@@ -35,3 +35,4 @@ module "catalogue_pipeline_20190723" {
   vhs_sierra_read_policy = "${local.vhs_sierra_read_policy}"
   vhs_miro_read_policy   = "${local.vhs_miro_read_policy}"
 }
+
