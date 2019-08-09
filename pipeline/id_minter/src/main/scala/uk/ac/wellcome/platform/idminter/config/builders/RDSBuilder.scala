@@ -7,7 +7,10 @@ import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 
 object RDSBuilder {
   def buildDB(config: Config): DB = {
-    val maxSize = config.required[Int]("aws.rds.maxConnections")
+
+    // Previously this used the config.required[Int] helper, but was found to
+    // be broken. See https://github.com/wellcometrust/platform/issues/3824
+    val maxSize = getMaxConnections(config)
 
     val rdsClientConfig = buildRDSClientConfig(config)
 
@@ -19,6 +22,18 @@ object RDSBuilder {
       settings = ConnectionPoolSettings(maxSize = maxSize)
     )
     DB.connect()
+  }
+
+  def getMaxConnections(config: Config): Int = {
+    val path = "aws.rds.maxConnections"
+    if (!config.hasPath(path)) {
+      throw new RuntimeException(s"${path} not defined in Config")
+    }
+    config.getAnyRef(path) match {
+      case value: String => value.toInt
+      case value: Integer => value
+      case _ => throw new RuntimeException(s"${path} is invalid type")
+    }
   }
 
   def buildRDSClientConfig(config: Config): RDSClientConfig = {
