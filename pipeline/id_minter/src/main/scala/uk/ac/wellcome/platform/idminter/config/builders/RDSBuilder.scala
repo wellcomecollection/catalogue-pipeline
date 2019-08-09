@@ -42,20 +42,24 @@ object RDSBuilder {
     )
   }
 
-  def intFromConfig(config: Config, path: String, default: Option[Int] = None): Int =
+  def intFromConfig(config: Config,
+                    path: String,
+                    default: Option[Int] = None): Int =
     Try(config.getAnyRef(path))
       .map {
         _ match {
           case value: String  => value.toInt
           case value: Integer => value.asInstanceOf[Int]
-          case obj => throw new RuntimeException(
-            s"$path is invalid type: got $obj (type ${obj.getClass}), expected Int")
+          case obj =>
+            throw new RuntimeException(
+              s"$path is invalid type: got $obj (type ${obj.getClass}), expected Int")
         }
       }
       .recover {
-        case exc: ConfigException.Missing => default getOrElse {
-          throw new RuntimeException(s"${path} not defined in Config")
-        }
+        case exc: ConfigException.Missing =>
+          default getOrElse {
+            throw new RuntimeException(s"${path} not defined in Config")
+          }
       }
       .get
 }
