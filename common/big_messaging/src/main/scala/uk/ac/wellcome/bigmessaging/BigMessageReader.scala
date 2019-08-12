@@ -1,11 +1,15 @@
-package uk.ac.wellcome.messaging
+package uk.ac.wellcome.bigmessaging
 
 import grizzled.slf4j.Logging
 import io.circe.Decoder
-import uk.ac.wellcome.json.JsonUtil.fromJson
-import uk.ac.wellcome.messaging.message.{
+import uk.ac.wellcome.bigmessaging.message.{
   InlineNotification,
   MessageNotification,
+  RemoteNotification
+}
+import uk.ac.wellcome.json.JsonUtil.fromJson
+import uk.ac.wellcome.bigmessaging.message.{
+  InlineNotification,
   RemoteNotification
 }
 import uk.ac.wellcome.storage.ObjectStore

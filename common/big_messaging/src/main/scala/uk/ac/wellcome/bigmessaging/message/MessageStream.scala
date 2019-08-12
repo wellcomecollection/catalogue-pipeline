@@ -1,4 +1,4 @@
-package uk.ac.wellcome.messaging.message
+package uk.ac.wellcome.bigmessaging.message
 
 import akka.actor.ActorSystem
 import akka.stream.scaladsl.Source
@@ -7,8 +7,8 @@ import com.amazonaws.services.cloudwatch.model.StandardUnit
 import com.amazonaws.services.sqs.AmazonSQSAsync
 import com.amazonaws.services.sqs.model.Message
 import io.circe.Decoder
+import uk.ac.wellcome.bigmessaging.BigMessageReader
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.messaging.BigMessageReader
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.{SQSConfig, SQSStream}
 import uk.ac.wellcome.monitoring.Metrics

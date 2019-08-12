@@ -1,4 +1,4 @@
-package uk.ac.wellcome.messaging
+package uk.ac.wellcome.bigmessaging
 
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -6,7 +6,8 @@ import java.util.Date
 import grizzled.slf4j.Logging
 import io.circe.Encoder
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.messaging.message.{
+import uk.ac.wellcome.messaging.MessageSender
+import uk.ac.wellcome.bigmessaging.message.{
   InlineNotification,
   MessageNotification,
   RemoteNotification
