@@ -106,7 +106,7 @@ object ExternalDependencies {
     val scalacsv = "1.3.5"
     val scalaGraph = "1.12.5"
     val scalatest = "3.0.1"
-    val logstashLogback ="6.1"
+    val logstashLogback = "6.1"
   }
 
   val logbackDependencies = Seq(
@@ -199,7 +199,8 @@ object ExternalDependencies {
   )
 
   val javaxDependencies = Seq(
-    "javax.xml.bind" % "jaxb-api" % "2.3.0", "com.sun.xml.bind" % "jaxb-ri" % "2.3.0"
+    "javax.xml.bind" % "jaxb-api" % "2.3.0",
+    "com.sun.xml.bind" % "jaxb-ri" % "2.3.0"
   )
 }
 
@@ -276,11 +277,7 @@ object CatalogueDependencies {
 
   val recorderDependencies: Seq[ModuleID] =
     WellcomeDependencies.newMessagingTypesafeLibrary ++
-<<<<<<< HEAD
       WellcomeDependencies.newStorageTypesafeLibrary
-=======
-    WellcomeDependencies.newStorageTypesafeLibrary
->>>>>>> 6e7452944d7aa7dd8cf761d286cdeab2532d7937
 
   val reindexWorkerDependencies: Seq[ModuleID] =
     ExternalDependencies.mockitoDependencies ++
