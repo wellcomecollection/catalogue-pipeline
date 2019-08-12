@@ -1,12 +1,14 @@
-package uk.ac.wellcome.messaging.typesafe
+package uk.ac.wellcome.bigmessaging.typesafe
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import com.typesafe.config.Config
 import io.circe.{Decoder, Encoder}
-import uk.ac.wellcome.messaging.message.MessageStream
+import uk.ac.wellcome.bigmessaging.BigMessageSender
+import uk.ac.wellcome.bigmessaging.message.MessageStream
 import uk.ac.wellcome.messaging.sns.SNSConfig
-import uk.ac.wellcome.messaging.{BigMessageSender, MessageSender}
+import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
+import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.monitoring.typesafe.MetricsBuilder
 import uk.ac.wellcome.storage.ObjectStore
 import uk.ac.wellcome.storage.s3.{S3Config, S3StorageBackend}

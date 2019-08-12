@@ -12,9 +12,11 @@ import com.amazonaws.services.sns.model.{
 import io.circe.Encoder
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.{Assertion, FunSpec, Matchers}
+import uk.ac.wellcome.bigmessaging.BigMessageSender
+import uk.ac.wellcome.bigmessaging.message.MessageStream
 import uk.ac.wellcome.fixtures.{fixture, Fixture, TestWith}
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.messaging.{BigMessageSender, MessageSender}
+import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.fixtures.Messaging
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
