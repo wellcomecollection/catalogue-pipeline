@@ -1,1 +1,7 @@
-{"id" : "transformer_sierra", "folder" : "pipeline\/transformer\/transformer_sierra", "dependencyIds" : ["internal_model"]}
+{
+  "id" : "transformer_sierra",
+  "folder" : "pipeline/transformer/transformer_sierra",
+  "dependencyIds" : [
+    "internal_model"
+  ]
+}

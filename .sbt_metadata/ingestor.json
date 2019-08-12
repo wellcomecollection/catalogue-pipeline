@@ -1,1 +1,8 @@
-{"id" : "ingestor", "folder" : "pipeline\/ingestor", "dependencyIds" : ["elasticsearch_typesafe", "big_messaging_typesafe"]}
+{
+  "id" : "ingestor",
+  "folder" : "pipeline/ingestor",
+  "dependencyIds" : [
+    "elasticsearch_typesafe",
+    "big_messaging_typesafe"
+  ]
+}
