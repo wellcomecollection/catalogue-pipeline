@@ -1,1 +1,7 @@
-{"id" : "recorder", "folder" : "pipeline\/recorder", "dependencyIds" : ["internal_model"]}
+{
+  "id" : "recorder",
+  "folder" : "pipeline/recorder",
+  "dependencyIds" : [
+    "internal_model"
+  ]
+}

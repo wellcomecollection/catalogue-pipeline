@@ -1,1 +1,7 @@
-{"id" : "transformer_miro", "folder" : "pipeline\/transformer\/transformer_miro", "dependencyIds" : ["internal_model"]}
+{
+  "id" : "transformer_miro",
+  "folder" : "pipeline/transformer/transformer_miro",
+  "dependencyIds" : [
+    "internal_model"
+  ]
+}
