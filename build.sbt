@@ -1,7 +1,5 @@
 import java.io.File
 
-import scala.util.parsing.json.{JSONArray, JSONObject}
-
 def setupProject(
   project: Project,
   folder: String,
@@ -9,22 +7,7 @@ def setupProject(
   externalDependencies: Seq[ModuleID] = Seq()
 ): Project = {
 
-  // Here we write a bit of metadata about the project, and the other
-  // local projects it depends on.  This can be used to determine whether
-  // to run tests based on the up-to-date project graph.
-  // See https://www.scala-sbt.org/release/docs/Howto-Generating-Files.html
-  val file = new File(s".sbt_metadata/${project.id}.json")
-  val dependencyIds: List[String] = localDependencies
-    .map { p: Project => p.id }
-    .toList
-
-  val metadata = Map(
-    "id" -> project.id,
-    "folder" -> folder,
-    "dependencyIds" -> JSONArray(dependencyIds)
-  )
-
-  IO.write(file, JSONObject(metadata).toString())
+  Metadata.write(project, folder, localDependencies)
 
   val dependsOn = localDependencies
     .map { project: Project =>

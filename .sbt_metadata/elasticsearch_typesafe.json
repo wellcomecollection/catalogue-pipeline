@@ -1,1 +1,7 @@
-{"id" : "elasticsearch_typesafe", "folder" : "common\/elasticsearch_typesafe", "dependencyIds" : ["elasticsearch"]}
+{
+  "id" : "elasticsearch_typesafe",
+  "folder" : "common/elasticsearch_typesafe",
+  "dependencyIds" : [
+    "elasticsearch"
+  ]
+}
