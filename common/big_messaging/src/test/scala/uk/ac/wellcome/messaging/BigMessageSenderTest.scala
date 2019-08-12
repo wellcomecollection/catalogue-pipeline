@@ -2,16 +2,14 @@ package uk.ac.wellcome.messaging
 
 import io.circe.Encoder
 import org.scalatest.{FunSpec, Matchers}
-import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.messaging.memory.{
-  MemoryBigMessageSender,
-  MemoryMessageSender
-}
-import uk.ac.wellcome.messaging.message.{
+import uk.ac.wellcome.bigmessaging.memory.MemoryBigMessageSender
+import uk.ac.wellcome.bigmessaging.message.{
   InlineNotification,
   MessageNotification,
   RemoteNotification
 }
+import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.storage._
 import uk.ac.wellcome.storage.memory.MemoryObjectStore
 import uk.ac.wellcome.storage.streaming.CodecInstances._

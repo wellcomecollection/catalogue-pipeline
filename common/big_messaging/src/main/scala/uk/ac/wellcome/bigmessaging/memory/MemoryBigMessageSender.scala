@@ -1,9 +1,10 @@
-package uk.ac.wellcome.messaging.memory
+package uk.ac.wellcome.bigmessaging.memory
 
 import io.circe.{Decoder, Encoder}
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.messaging.BigMessageSender
-import uk.ac.wellcome.messaging.message.InlineNotification
+import uk.ac.wellcome.bigmessaging.BigMessageSender
+import uk.ac.wellcome.messaging.memory.MemoryMessageSender
+import uk.ac.wellcome.bigmessaging.message.InlineNotification
 import uk.ac.wellcome.storage.ObjectStore
 import uk.ac.wellcome.storage.memory.MemoryObjectStore
 import uk.ac.wellcome.storage.streaming.Codec

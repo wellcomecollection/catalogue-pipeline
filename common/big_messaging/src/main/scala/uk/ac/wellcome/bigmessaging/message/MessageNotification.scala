@@ -1,4 +1,4 @@
-package uk.ac.wellcome.messaging.message
+package uk.ac.wellcome.bigmessaging.message
 
 import uk.ac.wellcome.storage.ObjectLocation
 

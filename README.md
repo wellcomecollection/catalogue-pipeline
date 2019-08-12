@@ -22,6 +22,11 @@ The catalogue consits of three main parts with supporting services. These are:
 
 ---
 
+## Things you might want to do
+Generally small things you might want to do irregularly involving the API & data are stored within [`./scripts`].
+
+---
+
 Documentation for using our API can be found at <https://developers.wellcomecollection.org/catalogue>,
 and the API itself is published at <https://api.wellcomecollection.org/catalogue>.
 

@@ -2,9 +2,13 @@ package uk.ac.wellcome.messaging
 
 import io.circe.Decoder
 import org.scalatest.{EitherValues, FunSpec, Matchers}
+import uk.ac.wellcome.bigmessaging.BigMessageReader
+import uk.ac.wellcome.bigmessaging.message.{
+  InlineNotification,
+  RemoteNotification
+}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.exceptions.JsonDecodingError
-import uk.ac.wellcome.messaging.message.{InlineNotification, RemoteNotification}
 import uk.ac.wellcome.storage.{ObjectLocation, ObjectStore}
 import uk.ac.wellcome.storage.memory.MemoryObjectStore
 import uk.ac.wellcome.storage.streaming.CodecInstances._
