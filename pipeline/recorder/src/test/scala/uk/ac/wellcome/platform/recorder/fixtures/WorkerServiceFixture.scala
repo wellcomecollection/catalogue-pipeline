@@ -6,7 +6,7 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.Messaging
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.messaging.message.RemoteNotification
+import uk.ac.wellcome.bigmessaging.message.RemoteNotification
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.recorder.services.RecorderWorkerService
 import uk.ac.wellcome.storage.memory.{MemoryObjectStore, MemoryVersionedDao}

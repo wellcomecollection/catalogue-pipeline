@@ -4,7 +4,8 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import com.typesafe.config.Config
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.messaging.typesafe.{BigMessagingBuilder, SNSBuilder}
+import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
+import uk.ac.wellcome.messaging.typesafe.SNSBuilder
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.recorder.services.RecorderWorkerService
 import uk.ac.wellcome.storage.streaming.CodecInstances._

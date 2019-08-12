@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.recorder.services
 import akka.Done
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.MessageSender
-import uk.ac.wellcome.messaging.message.{
+import uk.ac.wellcome.bigmessaging.message.{
   MessageNotification,
   MessageStream,
   RemoteNotification
