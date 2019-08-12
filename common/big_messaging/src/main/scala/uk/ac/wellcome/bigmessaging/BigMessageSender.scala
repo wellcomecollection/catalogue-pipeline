@@ -7,7 +7,11 @@ import grizzled.slf4j.Logging
 import io.circe.Encoder
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.MessageSender
-import uk.ac.wellcome.bigmessaging.message.{InlineNotification, MessageNotification, RemoteNotification}
+import uk.ac.wellcome.bigmessaging.message.{
+  InlineNotification,
+  MessageNotification,
+  RemoteNotification
+}
 import uk.ac.wellcome.storage.{KeyPrefix, ObjectStore}
 
 import scala.util.{Failure, Success, Try}
