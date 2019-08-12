@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import com.typesafe.config.Config
 import io.circe.Json
-import uk.ac.wellcome.messaging.typesafe.MessagingBuilder
+import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
 import uk.ac.wellcome.platform.idminter.config.builders.{
   IdentifiersTableBuilder,
   RDSBuilder
@@ -17,6 +17,9 @@ import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 
 import scala.concurrent.ExecutionContext
+
+// This chagnges from CodecInstances -> Codec with storage v7
+import uk.ac.wellcome.storage.streaming.CodecInstances._
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
@@ -44,8 +47,8 @@ object Main extends WellcomeTypesafeApp {
 
     new IdMinterWorkerService(
       idEmbedder = idEmbedder,
-      writer = MessagingBuilder.buildMessageWriter[Json](config),
-      messageStream = MessagingBuilder.buildMessageStream[Json](config),
+      sender = BigMessagingBuilder.buildBigMessageSender[Json](config),
+      messageStream = BigMessagingBuilder.buildMessageStream[Json](config),
       rdsClientConfig = RDSBuilder.buildRDSClientConfig(config),
       identifiersTableConfig = identifiersTableConfig
     )

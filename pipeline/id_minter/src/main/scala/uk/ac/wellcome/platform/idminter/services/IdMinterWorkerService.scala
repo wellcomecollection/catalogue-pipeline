@@ -2,7 +2,9 @@ package uk.ac.wellcome.platform.idminter.services
 
 import akka.Done
 import io.circe.Json
-import uk.ac.wellcome.messaging.message.{MessageStream, MessageWriter}
+import uk.ac.wellcome.messaging.sns.SNSConfig
+import uk.ac.wellcome.bigmessaging.BigMessageSender
+import uk.ac.wellcome.bigmessaging.message.MessageStream
 import uk.ac.wellcome.platform.idminter.config.models.{
   IdentifiersTableConfig,
   RDSClientConfig
@@ -15,7 +17,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class IdMinterWorkerService(
   idEmbedder: IdEmbedder,
-  writer: MessageWriter[Json],
+  sender: BigMessageSender[SNSConfig, Json],
   messageStream: MessageStream[Json],
   rdsClientConfig: RDSClientConfig,
   identifiersTableConfig: IdentifiersTableConfig
@@ -38,9 +40,6 @@ class IdMinterWorkerService(
   def processMessage(json: Json): Future[Unit] =
     for {
       identifiedJson <- idEmbedder.embedId(json)
-      _ <- writer.write(
-        message = identifiedJson,
-        subject = s"source: ${this.getClass.getSimpleName}.processMessage"
-      )
+      _ <- Future.fromTry { sender.sendT(identifiedJson) }
     } yield ()
 }
