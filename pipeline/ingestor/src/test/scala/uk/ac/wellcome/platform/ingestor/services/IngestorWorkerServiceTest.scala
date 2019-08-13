@@ -6,11 +6,12 @@ import org.apache.http.HttpHost
 import org.elasticsearch.client.RestClient
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Assertion, FunSpec, Matchers}
+import uk.ac.wellcome.bigmessaging.fixtures.MessagingFixtures
 import uk.ac.wellcome.elasticsearch.ElasticCredentials
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
-import uk.ac.wellcome.messaging.fixtures.{Messaging, SQS}
+import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.{IdentifiedBaseWork, IdentifierType}
 import uk.ac.wellcome.platform.ingestor.config.models.IngestorConfig
@@ -23,7 +24,7 @@ class IngestorWorkerServiceTest
     extends FunSpec
     with ScalaFutures
     with Matchers
-    with Messaging
+    with MessagingFixtures
     with ElasticsearchFixtures
     with SQS
     with WorkerServiceFixture

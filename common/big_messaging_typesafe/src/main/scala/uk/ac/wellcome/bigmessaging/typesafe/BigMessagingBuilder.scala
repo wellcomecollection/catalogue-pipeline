@@ -58,7 +58,7 @@ object BigMessagingBuilder {
           subject = "Sent from MessageWriter"
         )
 
-      override val objectStore: ObjectStore[T] = ObjectStore[T]
+      override val typedStore: ObjectStore[T] = ObjectStore[T]
       override val namespace: String = s3Config.bucketName
 
       implicit val encoder: Encoder[T] = encoderT

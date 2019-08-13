@@ -1,39 +1,47 @@
-package uk.ac.wellcome.messaging
+package uk.ac.wellcome.bigmessaging
 
 import io.circe.Decoder
 import org.scalatest.{EitherValues, FunSpec, Matchers}
-import uk.ac.wellcome.bigmessaging.BigMessageReader
+
+import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
 import uk.ac.wellcome.bigmessaging.message.{
   InlineNotification,
   RemoteNotification
 }
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.exceptions.JsonDecodingError
-import uk.ac.wellcome.storage.{ObjectLocation, ObjectStore}
-import uk.ac.wellcome.storage.memory.MemoryObjectStore
-import uk.ac.wellcome.storage.streaming.CodecInstances._
+import uk.ac.wellcome.storage.ObjectLocation
+import uk.ac.wellcome.storage.generators.ObjectLocationGenerators
+import uk.ac.wellcome.storage.store.{TypedStore, TypedStoreEntry}
 
 import scala.util.{Failure, Success}
 
-class BigMessageReaderTest extends FunSpec with Matchers with EitherValues {
+class BigMessageReaderTest
+    extends FunSpec
+    with Matchers
+    with EitherValues
+    with ObjectLocationGenerators {
   case class Shape(colour: String, sides: Int)
 
   val blueTriangle = Shape(colour = "blue", sides = 3)
 
-  def createReader(store: ObjectStore[Shape] = new MemoryObjectStore[Shape]())(
+  def createReader(typedStoreShape: TypedStore[ObjectLocation, Shape] =
+                     MemoryTypedStoreCompanion[ObjectLocation, Shape]())(
     implicit decoderS: Decoder[Shape]): BigMessageReader[Shape] =
     new BigMessageReader[Shape] {
-      override val objectStore: ObjectStore[Shape] = store
+      override val typedStore: TypedStore[ObjectLocation, Shape] =
+        typedStoreShape
       override implicit val decoder: Decoder[Shape] = decoderS
     }
 
   it("reads a large message from the object store") {
-    val store = new MemoryObjectStore[Shape]()
-
+    val store = MemoryTypedStoreCompanion[ObjectLocation, Shape]()
     val reader = createReader(store)
+    val objectLocation = createObjectLocation
 
-    val location = store.put(namespace = "shapes")(blueTriangle).right.get
-    val notification = RemoteNotification(location)
+    store.put(objectLocation)(TypedStoreEntry(blueTriangle, Map.empty))
+
+    val notification = RemoteNotification(objectLocation)
 
     reader.read(notification) shouldBe Success(blueTriangle)
   }

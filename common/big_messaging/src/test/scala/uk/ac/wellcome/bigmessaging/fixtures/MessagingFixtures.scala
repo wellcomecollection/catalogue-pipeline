@@ -1,4 +1,4 @@
-package uk.ac.wellcome.messaging.fixtures
+package uk.ac.wellcome.bigmessaging.fixtures
 
 import akka.actor.ActorSystem
 import com.amazonaws.services.cloudwatch.model.StandardUnit
@@ -9,14 +9,32 @@ import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.bigmessaging.message._
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
-import uk.ac.wellcome.storage.ObjectStore
-import uk.ac.wellcome.storage.fixtures.S3
-
+import uk.ac.wellcome.storage.{
+  Identified,
+  ObjectLocation,
+  StoreWriteError,
+  WriteError
+}
+import uk.ac.wellcome.storage.fixtures.S3Fixtures
+import uk.ac.wellcome.storage.store.TypedStore
+import uk.ac.wellcome.storage.store.memory.{
+  MemoryStore,
+  MemoryStreamStore,
+  MemoryStreamStoreEntry,
+  MemoryTypedStore
+}
+import uk.ac.wellcome.storage.streaming.Codec
 import scala.concurrent.ExecutionContext.Implicits.global
 
-trait Messaging extends Akka with Matchers with SQS with SNS with S3 {
+trait MessagingFixtures
+    extends Akka
+    with Matchers
+    with SQS
+    with SNS
+    with S3Fixtures {
 
   case class ExampleObject(name: String)
 
@@ -27,7 +45,7 @@ trait Messaging extends Akka with Matchers with SQS with SNS with S3 {
     implicit
     actorSystem: ActorSystem,
     decoderT: Decoder[T],
-    objectStoreT: ObjectStore[T]): R = {
+    typedStoreT: TypedStore[ObjectLocation, T]): R = {
     val stream = new MessageStream[T](
       sqsClient = asyncSqsClient,
       sqsConfig = createSQSConfigWith(queue),
@@ -52,4 +70,23 @@ trait Messaging extends Akka with Matchers with SQS with SNS with S3 {
       queue = queue,
       message = InlineNotification(jsonString = toJson(obj).get)
     )
+
+  def createBrokenPutMemoryTypedStore[T]()(implicit codecT: Codec[T]) = {
+    val memoryStore =
+      new MemoryStore[ObjectLocation, MemoryStreamStoreEntry](Map.empty) {
+        override def put(id: ObjectLocation)(t: MemoryStreamStoreEntry)
+          : Either[WriteError,
+                   Identified[ObjectLocation, MemoryStreamStoreEntry]] = {
+          Left(StoreWriteError(new Throwable("BOOM!")))
+        }
+      }
+
+    implicit val memoryStreamStore =
+      new MemoryStreamStore[ObjectLocation](memoryStore)
+
+    val memoryTypedStore =
+      new MemoryTypedStore[ObjectLocation, T](Map.empty)
+
+    memoryTypedStore
+  }
 }
