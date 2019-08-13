@@ -14,7 +14,7 @@ import uk.ac.wellcome.bigmessaging.message.{
 }
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.messaging.fixtures.Messaging
+import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.messaging.fixtures.SQS.{Queue, QueuePair}
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 import uk.ac.wellcome.storage.fixtures.S3.Bucket
@@ -24,7 +24,7 @@ import uk.ac.wellcome.storage.{ObjectLocation, ObjectStore}
 import scala.concurrent.Future
 import scala.util.Random
 
-class MessageStreamTest extends FunSpec with Matchers with Messaging {
+class MessageStreamTest extends FunSpec with Matchers with BigMessagingFixture {
 
   def process(list: ConcurrentLinkedQueue[ExampleObject])(o: ExampleObject) = {
     list.add(o)

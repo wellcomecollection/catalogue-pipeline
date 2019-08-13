@@ -17,7 +17,7 @@ import uk.ac.wellcome.bigmessaging.message.MessageStream
 import uk.ac.wellcome.fixtures.{fixture, Fixture, TestWith}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.MessageSender
-import uk.ac.wellcome.messaging.fixtures.Messaging
+import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.sns.{SNSConfig, SNSMessageSender}
@@ -33,7 +33,7 @@ import scala.concurrent.Future
 class MessagingIntegrationTest
     extends FunSpec
     with Matchers
-    with Messaging
+    with BigMessagingFixture
     with Eventually
     with IntegrationPatience {
 

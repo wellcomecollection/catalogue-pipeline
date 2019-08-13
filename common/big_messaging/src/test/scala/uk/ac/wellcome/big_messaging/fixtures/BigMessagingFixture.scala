@@ -1,4 +1,4 @@
-package uk.ac.wellcome.messaging.fixtures
+package uk.ac.wellcome.bigmessaging.fixtures
 
 import akka.actor.ActorSystem
 import com.amazonaws.services.cloudwatch.model.StandardUnit
@@ -9,14 +9,23 @@ import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.bigmessaging.message._
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
+import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 import uk.ac.wellcome.storage.ObjectStore
 import uk.ac.wellcome.storage.fixtures.S3
+import uk.ac.wellcome.bigmessaging.BigMessageSender
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-trait Messaging extends Akka with Matchers with SQS with SNS with S3 {
+trait BigMessagingFixture
+    extends Akka
+    with MetricsSenderFixture
+    with SQS
+    with SNS
+    with S3
+    with Matchers {
 
   case class ExampleObject(name: String)
 

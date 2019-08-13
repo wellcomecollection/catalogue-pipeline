@@ -5,7 +5,7 @@ import scalikejdbc.{ConnectionPool, DB}
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
-import uk.ac.wellcome.messaging.fixtures.Messaging
+import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.platform.idminter.config.models.IdentifiersTableConfig
 import uk.ac.wellcome.platform.idminter.database.IdentifiersDao
 import uk.ac.wellcome.platform.idminter.models.IdentifiersTable
@@ -15,7 +15,7 @@ import uk.ac.wellcome.storage.fixtures.S3.Bucket
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-trait WorkerServiceFixture extends IdentifiersDatabase with Messaging {
+trait WorkerServiceFixture extends IdentifiersDatabase with BigMessagingFixture {
   def withWorkerService[R](bucket: Bucket,
                            topic: Topic,
                            queue: Queue,
