@@ -2,7 +2,6 @@ package uk.ac.wellcome.platform.idminter.services
 
 import akka.Done
 import io.circe.Json
-import uk.ac.wellcome.messaging.sns.SNSConfig
 import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.bigmessaging.message.MessageStream
 import uk.ac.wellcome.platform.idminter.config.models.{
@@ -15,9 +14,9 @@ import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class IdMinterWorkerService(
+class IdMinterWorkerService[Destination](
   idEmbedder: IdEmbedder,
-  sender: BigMessageSender[SNSConfig, Json],
+  sender: BigMessageSender[Destination, Json],
   messageStream: MessageStream[Json],
   rdsClientConfig: RDSClientConfig,
   identifiersTableConfig: IdentifiersTableConfig
