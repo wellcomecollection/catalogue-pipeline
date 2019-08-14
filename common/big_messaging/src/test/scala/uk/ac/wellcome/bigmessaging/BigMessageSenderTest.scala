@@ -14,8 +14,6 @@ import uk.ac.wellcome.storage.streaming.Codec._
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.storage.store.TypedStoreEntry
 import uk.ac.wellcome.storage.{Identified, ObjectLocation}
-//import uk.ac.wellcome.storage.store.TypedStoreEntry
-
 import scala.util.{Failure, Success}
 
 class BigMessageSenderTest
