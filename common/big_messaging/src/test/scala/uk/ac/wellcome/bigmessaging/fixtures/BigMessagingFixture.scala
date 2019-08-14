@@ -79,10 +79,11 @@ trait BigMessagingFixture
       message = InlineNotification(jsonString = toJson(obj).get)
     )
 
-  def withSqsBigMessageSender[T, R](bucket: Bucket,
-                                    topic: Topic,
-                                    senderSnsClient: AmazonSNS = snsClient,
-                                    store: Option[MemoryTypedStore[ObjectLocation, T]] = None)(
+  def withSqsBigMessageSender[T, R](
+    bucket: Bucket,
+    topic: Topic,
+    senderSnsClient: AmazonSNS = snsClient,
+    store: Option[MemoryTypedStore[ObjectLocation, T]] = None)(
     testWith: TestWith[BigMessageSender[SNSConfig, T], R])(
     implicit
     encoderT: Encoder[T],
@@ -95,7 +96,8 @@ trait BigMessagingFixture
           snsConfig = createSNSConfigWith(topic),
           subject = "Sent in MessagingIntegrationTest"
         )
-      override val typedStore: MemoryTypedStore[ObjectLocation, T] = store.getOrElse(MemoryTypedStoreCompanion[ObjectLocation, T]())
+      override val typedStore: MemoryTypedStore[ObjectLocation, T] =
+        store.getOrElse(MemoryTypedStoreCompanion[ObjectLocation, T]())
       override val namespace: String = bucket.name
       override implicit val encoder: Encoder[T] = encoderT
       override val maxMessageSize: Int = 10000
