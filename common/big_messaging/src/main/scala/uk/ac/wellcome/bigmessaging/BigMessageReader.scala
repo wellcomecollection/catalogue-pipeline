@@ -18,7 +18,8 @@ trait BigMessageReader[T] extends Logging {
 
   implicit val decoder: Decoder[T]
 
-  // TODO: Turn this into an Either[ReadError, T]
+  // TODO: Turn this into an Either[ReadError, T] to match the underlying pattern in TypedStore
+  // See: https://github.com/wellcometrust/scala-storage/blob/master/storage/src/main/scala/uk/ac/wellcome/storage/store/Store.scala#L8
   def read(notification: MessageNotification): Try[T] =
     notification match {
       case inlineNotification: InlineNotification =>

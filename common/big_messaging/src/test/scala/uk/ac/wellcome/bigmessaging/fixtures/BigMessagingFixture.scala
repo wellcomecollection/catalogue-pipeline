@@ -121,6 +121,9 @@ trait BigMessagingFixture
       }
     }.toList
 
+  /** The `.put` method on this store has been overriden to always
+    * return a `Left[StoreWriteError]`
+    */
   def createBrokenPutMemoryTypedStore[T]()(implicit codecT: Codec[T]) = {
     val memoryStore =
       new MemoryStore[ObjectLocation, MemoryStreamStoreEntry](Map.empty) {

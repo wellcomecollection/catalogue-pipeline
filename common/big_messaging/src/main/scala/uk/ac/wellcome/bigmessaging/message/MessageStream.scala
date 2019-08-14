@@ -50,7 +50,6 @@ class MessageStream[T](sqsClient: AmazonSQSAsync,
     sqsStream.foreach(
       streamName = streamName,
       process = (notification: NotificationMessage) => {
-        println(notification)
         for {
           body <- Future.fromTry {
             getBody(notification.body)
