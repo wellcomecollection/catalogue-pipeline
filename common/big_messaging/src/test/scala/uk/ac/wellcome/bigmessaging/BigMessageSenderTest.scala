@@ -2,7 +2,7 @@ package uk.ac.wellcome.bigmessaging
 
 import io.circe.Encoder
 import org.scalatest.{FunSpec, Matchers}
-import uk.ac.wellcome.bigmessaging.fixtures.MessagingFixtures
+import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixtures
 import uk.ac.wellcome.bigmessaging.memory.MemoryBigMessageSender
 import uk.ac.wellcome.bigmessaging.message.{
   InlineNotification,
@@ -21,7 +21,7 @@ import scala.util.{Failure, Success}
 class BigMessageSenderTest
     extends FunSpec
     with Matchers
-    with MessagingFixtures {
+    with BigMessagingFixtures {
   case class Shape(colour: String, sides: Int)
 
   val redSquare = Shape(colour = "red", sides = 4)

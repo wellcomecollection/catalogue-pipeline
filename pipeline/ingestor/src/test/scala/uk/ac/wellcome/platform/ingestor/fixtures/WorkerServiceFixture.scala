@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.ingestor.fixtures
 import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.ElasticClient
 import org.scalatest.Suite
-import uk.ac.wellcome.bigmessaging.fixtures.MessagingFixtures
+import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixtures
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.json.JsonUtil._
@@ -18,7 +18,7 @@ import scala.concurrent.duration._
 
 trait WorkerServiceFixture
     extends ElasticsearchFixtures
-    with MessagingFixtures {
+    with BigMessagingFixtures {
   this: Suite =>
   def withWorkerService[R](queue: Queue,
                            index: Index,
