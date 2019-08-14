@@ -3,16 +3,12 @@ package uk.ac.wellcome.bigmessaging.message
 import java.util.concurrent.ConcurrentLinkedDeque
 
 import com.amazonaws.services.cloudwatch.model.StandardUnit
-import com.amazonaws.services.sns.AmazonSNS
-import uk.ac.wellcome.messaging.MessageSender
-import uk.ac.wellcome.messaging.sns.{SNSConfig, SNSMessageSender}
-import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
+import uk.ac.wellcome.messaging.sns.{SNSConfig}
 import com.amazonaws.services.sns.model.{
   SubscribeRequest,
   SubscribeResult,
   UnsubscribeRequest
 }
-import io.circe.Encoder
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.{Assertion, FunSpec, Matchers}
 import uk.ac.wellcome.bigmessaging.BigMessageSender
