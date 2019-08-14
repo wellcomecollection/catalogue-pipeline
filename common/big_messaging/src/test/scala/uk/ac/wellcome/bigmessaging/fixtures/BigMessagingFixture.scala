@@ -2,15 +2,21 @@ package uk.ac.wellcome.bigmessaging.fixtures
 
 import akka.actor.ActorSystem
 import com.amazonaws.services.cloudwatch.model.StandardUnit
+import com.amazonaws.services.sns.AmazonSNS
 import com.amazonaws.services.sqs.model.SendMessageResult
 import io.circe.{Decoder, Encoder}
 import org.scalatest.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
+import uk.ac.wellcome.bigmessaging.BigMessageSender
+import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
 import uk.ac.wellcome.bigmessaging.message._
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.messaging.MessageSender
+import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
+import uk.ac.wellcome.messaging.sns.{SNSConfig, SNSMessageSender}
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 import uk.ac.wellcome.storage.{
   Identified,
@@ -19,6 +25,7 @@ import uk.ac.wellcome.storage.{
   WriteError
 }
 import uk.ac.wellcome.storage.fixtures.S3Fixtures
+import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import uk.ac.wellcome.storage.store.TypedStore
 import uk.ac.wellcome.storage.store.memory.{
   MemoryStore,
@@ -27,7 +34,9 @@ import uk.ac.wellcome.storage.store.memory.{
   MemoryTypedStore
 }
 import uk.ac.wellcome.storage.streaming.Codec
+
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.Success
 
 trait BigMessagingFixture
     extends Akka
@@ -70,6 +79,48 @@ trait BigMessagingFixture
       queue = queue,
       message = InlineNotification(jsonString = toJson(obj).get)
     )
+
+  def withSqsBigMessageSender[T, R](bucket: Bucket,
+                                    topic: Topic,
+                                    senderSnsClient: AmazonSNS = snsClient)(
+    testWith: TestWith[BigMessageSender[SNSConfig, T], R])(
+    implicit
+    encoderT: Encoder[T],
+    codecT: Codec[T]): R = {
+
+    val sender = new BigMessageSender[SNSConfig, T] {
+      override val messageSender: MessageSender[SNSConfig] =
+        new SNSMessageSender(
+          snsClient = senderSnsClient,
+          snsConfig = createSNSConfigWith(topic),
+          subject = "Sent in MessagingIntegrationTest"
+        )
+      override val typedStore: MemoryTypedStore[ObjectLocation, T] =
+        MemoryTypedStoreCompanion[ObjectLocation, T]
+      override val namespace: String = bucket.name
+      override implicit val encoder: Encoder[T] = encoderT
+      override val maxMessageSize: Int = 10000
+    }
+
+    testWith(sender)
+  }
+
+  /** Given a topic ARN which has received notifications containing pointers
+    * to objects in S3, return the unpacked objects.
+    */
+  def getMessages[T](topic: Topic)(implicit decoder: Decoder[T]): List[T] =
+    listMessagesReceivedFromSNS(topic).map { messageInfo =>
+      fromJson[MessageNotification](messageInfo.message) match {
+        case Success(RemoteNotification(location)) =>
+          getObjectFromS3[T](location)
+        case Success(InlineNotification(jsonString)) =>
+          fromJson[T](jsonString).get
+        case _ =>
+          throw new RuntimeException(
+            s"Unrecognised message: ${messageInfo.message}"
+          )
+      }
+    }.toList
 
   def createBrokenPutMemoryTypedStore[T]()(implicit codecT: Codec[T]) = {
     val memoryStore =

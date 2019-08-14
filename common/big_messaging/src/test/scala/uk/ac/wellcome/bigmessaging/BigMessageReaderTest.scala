@@ -2,7 +2,6 @@ package uk.ac.wellcome.bigmessaging
 
 import io.circe.Decoder
 import org.scalatest.{EitherValues, FunSpec, Matchers}
-
 import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
 import uk.ac.wellcome.bigmessaging.message.{
   InlineNotification,
@@ -13,7 +12,6 @@ import uk.ac.wellcome.json.exceptions.JsonDecodingError
 import uk.ac.wellcome.storage.ObjectLocation
 import uk.ac.wellcome.storage.generators.ObjectLocationGenerators
 import uk.ac.wellcome.storage.store.{TypedStore, TypedStoreEntry}
-
 import scala.util.{Failure, Success}
 
 class BigMessageReaderTest

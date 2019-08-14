@@ -46,8 +46,6 @@ object BigMessagingBuilder {
   def buildBigMessageSender[T](config: Config)(
     implicit
     encoderT: Encoder[T],
-    codecT: Codec[T],
-    s3Client: AmazonS3 = S3Builder.buildS3Client(config),
     s3TypedStore: S3TypedStore[T]
   ): BigMessageSender[SNSConfig, T] = {
 

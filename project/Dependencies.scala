@@ -254,8 +254,7 @@ object CatalogueDependencies {
   val idminterDependencies: Seq[ModuleID] =
     ExternalDependencies.mockitoDependencies ++
       ExternalDependencies.mySqlDependencies ++
-      ExternalDependencies.circeOpticsDependencies ++
-      WellcomeDependencies.messagingTypesafeLibrary
+      ExternalDependencies.circeOpticsDependencies
 
   val ingestorDependencies: Seq[ModuleID] =
     ExternalDependencies.mockitoDependencies ++

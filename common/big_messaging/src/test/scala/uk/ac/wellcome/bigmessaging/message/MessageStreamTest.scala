@@ -6,10 +6,10 @@ import akka.stream.scaladsl.Flow
 import com.amazonaws.services.cloudwatch.model.StandardUnit
 import io.circe.Decoder
 import org.scalatest.{FunSpec, Matchers}
-import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.messaging.fixtures.SQS.{Queue, QueuePair}
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 import uk.ac.wellcome.storage.streaming.Codec._

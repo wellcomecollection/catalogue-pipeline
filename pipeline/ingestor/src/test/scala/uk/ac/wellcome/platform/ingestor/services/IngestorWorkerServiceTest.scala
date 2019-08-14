@@ -6,17 +6,16 @@ import org.apache.http.HttpHost
 import org.elasticsearch.client.RestClient
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Assertion, FunSpec, Matchers}
-import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.elasticsearch.ElasticCredentials
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.fixtures.SQS
+import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.{IdentifiedBaseWork, IdentifierType}
 import uk.ac.wellcome.platform.ingestor.config.models.IngestorConfig
 import uk.ac.wellcome.platform.ingestor.fixtures.WorkerServiceFixture
-import uk.ac.wellcome.storage.streaming.CodecInstances._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
