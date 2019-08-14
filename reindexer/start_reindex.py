@@ -80,8 +80,7 @@ def post_to_slack(slack_message):
     }
 
     resp = requests.post(
-        webhook_url, json=slack_data, headers={
-            "Content-Type": "application/json"}
+        webhook_url, json=slack_data, headers={"Content-Type": "application/json"}
     )
     resp.raise_for_status()
 
@@ -165,8 +164,7 @@ def start_reindex(src, dst, mode, reason):
         total_segments = how_many_segments(table_name=f"vhs-sourcedata-{src}")
         parameters = complete_reindex_parameters(total_segments)
     elif mode == "partial":
-        max_records = click.prompt(
-            "How many records do you want to send?", default=10)
+        max_records = click.prompt("How many records do you want to send?", default=10)
         parameters = partial_reindex_parameters(max_records)
 
     # TODO: This was broken by the move to AssumeRole, because the GetUser call
