@@ -3,7 +3,7 @@ import sbt._
 
 object Common {
   val settings: Seq[Def.Setting[_]] = Seq(
-    scalaVersion := "2.12.6",
+    scalaVersion := "2.12.8",
     organization := "uk.ac.wellcome",
     resolvers ++= Seq(
       "S3 releases" at "s3://releases.mvn-repo.wellcomecollection.org/"),
