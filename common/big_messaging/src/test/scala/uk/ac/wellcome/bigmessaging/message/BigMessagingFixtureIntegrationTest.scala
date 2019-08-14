@@ -16,7 +16,7 @@ import io.circe.Encoder
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.{Assertion, FunSpec, Matchers}
 import uk.ac.wellcome.bigmessaging.BigMessageSender
-import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixtures
+import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
 import uk.ac.wellcome.fixtures.{fixture, Fixture, TestWith}
 import uk.ac.wellcome.json.JsonUtil._
@@ -30,10 +30,10 @@ import uk.ac.wellcome.storage.streaming.Codec._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class BigMessagingFixturesIntegrationTest
+class BigMessagingFixtureIntegrationTest
     extends FunSpec
     with Matchers
-    with BigMessagingFixtures
+    with BigMessagingFixture
     with Eventually
     with IntegrationPatience {
 

@@ -6,7 +6,7 @@ import akka.stream.scaladsl.Flow
 import com.amazonaws.services.cloudwatch.model.StandardUnit
 import io.circe.Decoder
 import org.scalatest.{FunSpec, Matchers}
-import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixtures
+import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
@@ -19,10 +19,7 @@ import scala.collection.immutable.Map
 import scala.concurrent.Future
 import scala.util.Random
 
-class MessageStreamTest
-    extends FunSpec
-    with Matchers
-    with BigMessagingFixtures {
+class MessageStreamTest extends FunSpec with Matchers with BigMessagingFixture {
 
   def process(list: ConcurrentLinkedQueue[ExampleObject])(o: ExampleObject) = {
     list.add(o)

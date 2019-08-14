@@ -29,7 +29,7 @@ import uk.ac.wellcome.storage.store.memory.{
 import uk.ac.wellcome.storage.streaming.Codec
 import scala.concurrent.ExecutionContext.Implicits.global
 
-trait BigMessagingFixtures
+trait BigMessagingFixture
     extends Akka
     with Matchers
     with SQS
