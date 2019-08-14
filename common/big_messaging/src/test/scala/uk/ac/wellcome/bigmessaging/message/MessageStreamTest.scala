@@ -6,15 +6,16 @@ import akka.stream.scaladsl.Flow
 import com.amazonaws.services.cloudwatch.model.StandardUnit
 import io.circe.Decoder
 import org.scalatest.{FunSpec, Matchers}
+import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.messaging.fixtures.SQS.{Queue, QueuePair}
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
-import uk.ac.wellcome.storage.fixtures.S3.Bucket
-import uk.ac.wellcome.storage.streaming.CodecInstances._
-import uk.ac.wellcome.storage.{ObjectLocation, ObjectStore}
-
+import uk.ac.wellcome.storage.streaming.Codec._
+import uk.ac.wellcome.storage.ObjectLocation
+import uk.ac.wellcome.storage.store.{TypedStore, TypedStoreEntry}
+import scala.collection.immutable.Map
 import scala.concurrent.Future
 import scala.util.Random
 
@@ -53,28 +54,30 @@ class MessageStreamTest extends FunSpec with Matchers with BigMessagingFixture {
 
   describe("large messages (>256KB)") {
     it("reads messages off a queue, processes them and deletes them") {
+      implicit val typedStore: TypedStore[ObjectLocation, ExampleObject] =
+        MemoryTypedStoreCompanion[ObjectLocation, ExampleObject]
+
       withMessageStreamFixtures {
-        case (messageStream, QueuePair(queue, dlq), _) =>
-          withLocalS3Bucket { bucket =>
-            val messages = createMessages(count = 3)
+        case (messageStream, QueuePair(queue, dlq), _) => {
+          val messages = createMessages(count = 3)
 
-            messages.foreach { exampleObject =>
-              sendRemoteNotification(bucket, queue, exampleObject)
-            }
-
-            val received = new ConcurrentLinkedQueue[ExampleObject]()
-
-            messageStream.foreach(
-              streamName = "test-stream",
-              process = process(received))
-
-            eventually {
-              received should contain theSameElementsAs messages
-
-              assertQueueEmpty(queue)
-              assertQueueEmpty(dlq)
-            }
+          messages.foreach { exampleObject =>
+            sendRemoteNotification(typedStore, queue, exampleObject)
           }
+
+          val received = new ConcurrentLinkedQueue[ExampleObject]()
+
+          messageStream.foreach(
+            streamName = "test-stream",
+            process = process(received))
+
+          eventually {
+            received should contain theSameElementsAs messages
+
+            assertQueueEmpty(queue)
+            assertQueueEmpty(dlq)
+          }
+        }
       }
     }
   }
@@ -86,19 +89,16 @@ class MessageStreamTest extends FunSpec with Matchers with BigMessagingFixture {
       message = InlineNotification(toJson(exampleObject).get)
     )
 
-  private def sendRemoteNotification(bucket: Bucket,
-                                     queue: Queue,
-                                     exampleObject: ExampleObject): Unit = {
+  private def sendRemoteNotification(
+    typedStore: TypedStore[ObjectLocation, ExampleObject],
+    queue: Queue,
+    exampleObject: ExampleObject,
+  ): Unit = {
     val s3key = Random.alphanumeric take 10 mkString
-    val location = ObjectLocation(namespace = bucket.name, key = s3key)
+    val location = ObjectLocation(namespace = randomAlphanumeric, path = s3key)
 
-    val serialisedObj = toJson[ExampleObject](exampleObject).get
-
-    s3Client.putObject(
-      location.namespace,
-      location.key,
-      serialisedObj
-    )
+    typedStore.put(location)(
+      TypedStoreEntry(exampleObject, metadata = Map.empty))
 
     sendNotificationToSQS[MessageNotification](
       queue = queue,
@@ -160,7 +160,7 @@ class MessageStreamTest extends FunSpec with Matchers with BigMessagingFixture {
         // Do NOT put S3 object here
         val objectLocation = ObjectLocation(
           namespace = "bukkit",
-          key = "key.json"
+          path = "path.json"
         )
 
         sendNotificationToSQS[MessageNotification](
@@ -319,7 +319,8 @@ class MessageStreamTest extends FunSpec with Matchers with BigMessagingFixture {
                        R]
   )(implicit
     decoderT: Decoder[ExampleObject],
-    objectStore: ObjectStore[ExampleObject]): R =
+    typedStore: TypedStore[ObjectLocation, ExampleObject] =
+      MemoryTypedStoreCompanion[ObjectLocation, ExampleObject]): R =
     withActorSystem { implicit actorSystem =>
       withLocalSqsQueueAndDlq {
         case queuePair @ QueuePair(queue, _) =>

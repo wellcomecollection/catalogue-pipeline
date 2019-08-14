@@ -6,7 +6,6 @@ import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.storage.fixtures.S3
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.platform.idminter.fixtures.WorkerServiceFixture
@@ -17,7 +16,6 @@ class IdMinterFeatureTest
     extends FunSpec
     with SQS
     with SNS
-    with S3
     with BigMessagingFixture
     with fixtures.IdentifiersDatabase
     with IntegrationPatience

@@ -12,11 +12,12 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
+import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.{IdentifiedBaseWork, IdentifierType}
 import uk.ac.wellcome.platform.ingestor.config.models.IngestorConfig
 import uk.ac.wellcome.platform.ingestor.fixtures.WorkerServiceFixture
-import uk.ac.wellcome.storage.streaming.CodecInstances._
+import uk.ac.wellcome.storage.ObjectLocation
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -135,41 +136,45 @@ class IngestorWorkerServiceTest
     withLocalWorksIndex { index =>
       withLocalSqsQueue { queue =>
         withActorSystem { implicit actorSystem =>
-          withMessageStream[IdentifiedBaseWork, Assertion](queue) {
-            messageStream =>
-              import scala.concurrent.duration._
+          {
+            implicit val typedStoreT =
+              MemoryTypedStoreCompanion[ObjectLocation, IdentifiedBaseWork]()
+            withMessageStream[IdentifiedBaseWork, Assertion](queue) {
+              messageStream =>
+                import scala.concurrent.duration._
 
-              val brokenRestClient: RestClient = RestClient
-                .builder(
-                  new HttpHost(
-                    "localhost",
-                    9800,
-                    "http"
+                val brokenRestClient: RestClient = RestClient
+                  .builder(
+                    new HttpHost(
+                      "localhost",
+                      9800,
+                      "http"
+                    )
                   )
+                  .setHttpClientConfigCallback(
+                    new ElasticCredentials("elastic", "changeme")
+                  )
+                  .build()
+
+                val brokenClient: ElasticClient =
+                  ElasticClient(JavaClient.fromRestClient(brokenRestClient))
+
+                val config = IngestorConfig(
+                  batchSize = 100,
+                  flushInterval = 5.seconds,
+                  index = index
                 )
-                .setHttpClientConfigCallback(
-                  new ElasticCredentials("elastic", "changeme")
+
+                val service = new IngestorWorkerService(
+                  elasticClient = brokenClient,
+                  ingestorConfig = config,
+                  messageStream = messageStream
                 )
-                .build()
 
-              val brokenClient: ElasticClient =
-                ElasticClient(JavaClient.fromRestClient(brokenRestClient))
-
-              val config = IngestorConfig(
-                batchSize = 100,
-                flushInterval = 5.seconds,
-                index = index
-              )
-
-              val service = new IngestorWorkerService(
-                elasticClient = brokenClient,
-                ingestorConfig = config,
-                messageStream = messageStream
-              )
-
-              whenReady(service.run.failed) { e =>
-                e shouldBe a[RuntimeException]
-              }
+                whenReady(service.run.failed) { e =>
+                  e shouldBe a[RuntimeException]
+                }
+            }
           }
         }
       }

@@ -12,7 +12,8 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.{SQSConfig, SQSStream}
 import uk.ac.wellcome.monitoring.Metrics
-import uk.ac.wellcome.storage.ObjectStore
+import uk.ac.wellcome.storage.ObjectLocation
+import uk.ac.wellcome.storage.store.TypedStore
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
@@ -23,11 +24,11 @@ class MessageStream[T](sqsClient: AmazonSQSAsync,
   implicit
   actorSystem: ActorSystem,
   decoderT: Decoder[T],
-  objectStoreT: ObjectStore[T],
+  typedStoreT: TypedStore[ObjectLocation, T],
   ec: ExecutionContext) {
 
   private val bigMessageReader = new BigMessageReader[T] {
-    override val objectStore: ObjectStore[T] = objectStoreT
+    override val typedStore: TypedStore[ObjectLocation, T] = typedStoreT
     override implicit val decoder: Decoder[T] = decoderT
   }
 
@@ -48,13 +49,14 @@ class MessageStream[T](sqsClient: AmazonSQSAsync,
   def foreach(streamName: String, process: T => Future[Unit]): Future[Done] =
     sqsStream.foreach(
       streamName = streamName,
-      process = (notification: NotificationMessage) =>
+      process = (notification: NotificationMessage) => {
         for {
           body <- Future.fromTry {
             getBody(notification.body)
           }
           result <- process(body)
         } yield result
+      }
     )
 
   private def messageFromS3Source(

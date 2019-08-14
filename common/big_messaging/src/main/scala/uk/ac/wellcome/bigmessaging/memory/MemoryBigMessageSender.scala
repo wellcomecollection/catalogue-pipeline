@@ -3,10 +3,10 @@ package uk.ac.wellcome.bigmessaging.memory
 import io.circe.{Decoder, Encoder}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.bigmessaging.BigMessageSender
-import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.bigmessaging.message.InlineNotification
-import uk.ac.wellcome.storage.ObjectStore
-import uk.ac.wellcome.storage.memory.MemoryObjectStore
+import uk.ac.wellcome.messaging.memory.MemoryMessageSender
+import uk.ac.wellcome.storage.ObjectLocation
+import uk.ac.wellcome.storage.store.memory.MemoryTypedStore
 import uk.ac.wellcome.storage.streaming.Codec
 
 class MemoryBigMessageSender[T](
@@ -23,7 +23,9 @@ class MemoryBigMessageSender[T](
     override val destination: String = messageDestination
   }
 
-  override val objectStore: ObjectStore[T] = new MemoryObjectStore[T]()
+  override val typedStore: MemoryTypedStore[ObjectLocation, T] =
+    MemoryTypedStoreCompanion[ObjectLocation, T]()
+
   override val namespace: String = storeNamespace
   override val maxMessageSize: Int = maxSize
 

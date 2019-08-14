@@ -8,8 +8,8 @@ import uk.ac.wellcome.bigmessaging.message.{
   RemoteNotification
 }
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.storage.ObjectStore
-import uk.ac.wellcome.storage.streaming.CodecInstances._
+import uk.ac.wellcome.storage.ObjectLocation
+import uk.ac.wellcome.storage.store.TypedStore
 
 import scala.util.Success
 
@@ -22,7 +22,8 @@ class BigMessageIntegrationTest extends FunSpec with Matchers {
     : (MemoryBigMessageSender[Shape], BigMessageReader[Shape]) = {
     val sender = new MemoryBigMessageSender[Shape](maxSize = maxSize)
     val reader = new BigMessageReader[Shape] {
-      override val objectStore: ObjectStore[Shape] = sender.objectStore
+      override val typedStore: TypedStore[ObjectLocation, Shape] =
+        sender.typedStore
       override implicit val decoder: Decoder[Shape] = decoderS
     }
 

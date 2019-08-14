@@ -12,13 +12,11 @@ import uk.ac.wellcome.platform.idminter.database.{
 }
 import uk.ac.wellcome.platform.idminter.fixtures
 import uk.ac.wellcome.platform.idminter.fixtures.WorkerServiceFixture
-import uk.ac.wellcome.storage.fixtures.S3
 
 class IdMinterWorkerServiceTest
     extends FunSpec
     with SQS
     with SNS
-    with S3
     with BigMessagingFixture
     with fixtures.IdentifiersDatabase
     with Eventually

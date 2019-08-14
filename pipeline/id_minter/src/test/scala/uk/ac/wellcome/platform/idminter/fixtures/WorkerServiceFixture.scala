@@ -7,13 +7,15 @@ import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
+import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
 import uk.ac.wellcome.platform.idminter.config.models.IdentifiersTableConfig
 import uk.ac.wellcome.platform.idminter.database.IdentifiersDao
 import uk.ac.wellcome.platform.idminter.models.IdentifiersTable
 import uk.ac.wellcome.platform.idminter.services.IdMinterWorkerService
 import uk.ac.wellcome.platform.idminter.steps.{IdEmbedder, IdentifierGenerator}
-import uk.ac.wellcome.storage.fixtures.S3.Bucket
-import uk.ac.wellcome.storage.streaming.CodecInstances._
+import uk.ac.wellcome.storage.ObjectLocation
+import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
+import uk.ac.wellcome.storage.streaming.Codec._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -28,22 +30,26 @@ trait WorkerServiceFixture
     testWith: TestWith[IdMinterWorkerService[SNSConfig], R]): R =
     withActorSystem { implicit actorSystem =>
       withSqsBigMessageSender[Json, R](bucket, topic) { bigMessageSender =>
-        withMessageStream[Json, R](queue) { messageStream =>
-          val workerService = new IdMinterWorkerService(
-            idEmbedder = new IdEmbedder(
-              identifierGenerator = new IdentifierGenerator(
-                identifiersDao = identifiersDao
-              )
-            ),
-            sender = bigMessageSender,
-            messageStream = messageStream,
-            rdsClientConfig = rdsClientConfig,
-            identifiersTableConfig = identifiersTableConfig
-          )
+        {
+          implicit val typedStoreT =
+            MemoryTypedStoreCompanion[ObjectLocation, Json]()
+          withMessageStream[Json, R](queue) { messageStream =>
+            val workerService = new IdMinterWorkerService(
+              idEmbedder = new IdEmbedder(
+                identifierGenerator = new IdentifierGenerator(
+                  identifiersDao = identifiersDao
+                )
+              ),
+              sender = bigMessageSender,
+              messageStream = messageStream,
+              rdsClientConfig = rdsClientConfig,
+              identifiersTableConfig = identifiersTableConfig
+            )
 
-          workerService.run()
+            workerService.run()
 
-          testWith(workerService)
+            testWith(workerService)
+          }
         }
       }
     }

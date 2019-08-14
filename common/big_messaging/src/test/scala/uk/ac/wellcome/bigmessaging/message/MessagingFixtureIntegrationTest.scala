@@ -3,6 +3,7 @@ package uk.ac.wellcome.bigmessaging.message
 import java.util.concurrent.ConcurrentLinkedDeque
 
 import com.amazonaws.services.cloudwatch.model.StandardUnit
+import uk.ac.wellcome.messaging.sns.{SNSConfig}
 import com.amazonaws.services.sns.model.{
   SubscribeRequest,
   SubscribeResult,
@@ -11,19 +12,21 @@ import com.amazonaws.services.sns.model.{
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.{Assertion, FunSpec, Matchers}
 import uk.ac.wellcome.bigmessaging.BigMessageSender
+import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
+import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
 import uk.ac.wellcome.fixtures.{fixture, Fixture, TestWith}
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
-import uk.ac.wellcome.messaging.sns.SNSConfig
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
-import uk.ac.wellcome.storage.streaming.CodecInstances._
+import uk.ac.wellcome.storage.ObjectLocation
+import uk.ac.wellcome.storage.store.memory.MemoryTypedStore
+import uk.ac.wellcome.storage.streaming.Codec._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class MessagingIntegrationTest
+class MessagingFixtureIntegrationTest
     extends FunSpec
     with Matchers
     with BigMessagingFixture
@@ -91,14 +94,15 @@ class MessagingIntegrationTest
                         BigMessageSender[SNSConfig, ExampleObject]),
                        R]): R = {
     withLocalStackMessageStreamFixtures[R] {
-      case (queue, messageStream) =>
+      case (queue, messageStream, store) =>
         withLocalS3Bucket { bucket =>
           withLocalStackSnsTopic { topic =>
             withLocalStackSubscription(queue, topic) { _ =>
-              withSqsBigMessageSender[ExampleObject, R](
+              withSqsBigMessageSender(
                 bucket,
                 topic,
-                localStackSnsClient) { messageWriter =>
+                localStackSnsClient,
+                Some(store)) { messageWriter =>
                 testWith((messageStream, messageWriter))
               }
             }
@@ -108,12 +112,18 @@ class MessagingIntegrationTest
   }
 
   def withLocalStackMessageStreamFixtures[R](
-    testWith: TestWith[(Queue, MessageStream[ExampleObject]), R]): R =
+    testWith: TestWith[(Queue,
+                        MessageStream[ExampleObject],
+                        MemoryTypedStore[ObjectLocation, ExampleObject]),
+                       R]): R =
     withActorSystem { implicit actorSystem =>
       val metrics = new MemoryMetrics[StandardUnit]()
+      implicit val typedStoreT =
+        MemoryTypedStoreCompanion[ObjectLocation, ExampleObject]()
+
       withLocalStackSqsQueue { queue =>
         withMessageStream[ExampleObject, R](queue, metrics) { messageStream =>
-          testWith((queue, messageStream))
+          testWith((queue, messageStream, typedStoreT))
         }
       }
     }
