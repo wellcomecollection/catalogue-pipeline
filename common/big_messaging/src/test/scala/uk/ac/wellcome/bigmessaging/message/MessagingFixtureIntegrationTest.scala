@@ -30,7 +30,7 @@ import uk.ac.wellcome.storage.streaming.Codec._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class BigMessagingFixtureIntegrationTest
+class MessagingFixtureIntegrationTest
     extends FunSpec
     with Matchers
     with BigMessagingFixture
