@@ -1,8 +1,7 @@
-package uk.ac.wellcome.messaging
+package uk.ac.wellcome.bigmessaging
 
 import io.circe.Decoder
 import org.scalatest.{EitherValues, FunSpec, Matchers}
-import uk.ac.wellcome.bigmessaging.BigMessageReader
 import uk.ac.wellcome.bigmessaging.message.{
   InlineNotification,
   RemoteNotification

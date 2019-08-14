@@ -1,4 +1,4 @@
-package uk.ac.wellcome.messaging.message
+package uk.ac.wellcome.bigmessaging.message
 
 import java.util.concurrent.ConcurrentLinkedDeque
 
@@ -11,7 +11,6 @@ import com.amazonaws.services.sns.model.{
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.{Assertion, FunSpec, Matchers}
 import uk.ac.wellcome.bigmessaging.BigMessageSender
-import uk.ac.wellcome.bigmessaging.message.MessageStream
 import uk.ac.wellcome.fixtures.{fixture, Fixture, TestWith}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture

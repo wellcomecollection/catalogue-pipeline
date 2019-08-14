@@ -1,4 +1,4 @@
-package uk.ac.wellcome.messaging
+package uk.ac.wellcome.bigmessaging
 
 import io.circe.Encoder
 import org.scalatest.{FunSpec, Matchers}
