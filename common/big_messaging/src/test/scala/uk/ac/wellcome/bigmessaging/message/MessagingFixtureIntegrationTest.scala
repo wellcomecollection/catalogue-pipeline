@@ -102,7 +102,7 @@ class MessagingFixtureIntegrationTest
         withLocalS3Bucket { bucket =>
           withLocalStackSnsTopic { topic =>
             withLocalStackSubscription(queue, topic) { _ =>
-              withBigMessageSender(bucket, topic, localStackSnsClient, store) {
+              withSqsBigMessageSender(bucket, topic, localStackSnsClient, Some(store)) {
                 messageWriter =>
                   testWith((messageStream, messageWriter))
               }
@@ -110,32 +110,6 @@ class MessagingFixtureIntegrationTest
           }
         }
     }
-  }
-
-  def withBigMessageSender[R](
-    bucket: Bucket,
-    topic: Topic,
-    senderSnsClient: AmazonSNS = snsClient,
-    store: MemoryTypedStore[ObjectLocation, ExampleObject])(
-    testWith: TestWith[BigMessageSender[SNSConfig, ExampleObject], R])(
-    implicit
-    circeEncoder: Encoder[ExampleObject]
-  ): R = {
-    val sender = new BigMessageSender[SNSConfig, ExampleObject] {
-      override val messageSender: MessageSender[SNSConfig] =
-        new SNSMessageSender(
-          snsClient = senderSnsClient,
-          snsConfig = createSNSConfigWith(topic),
-          subject = "Sent in MessagingIntegrationTest"
-        )
-      override val typedStore: MemoryTypedStore[ObjectLocation, ExampleObject] =
-        store
-      override val namespace: String = bucket.name
-      override implicit val encoder: Encoder[ExampleObject] = circeEncoder
-      override val maxMessageSize: Int = 10000
-    }
-
-    testWith(sender)
   }
 
   def withLocalStackMessageStreamFixtures[R](
