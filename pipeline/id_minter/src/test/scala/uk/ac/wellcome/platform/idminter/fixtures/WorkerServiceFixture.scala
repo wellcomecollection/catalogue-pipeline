@@ -17,7 +17,9 @@ import uk.ac.wellcome.storage.streaming.CodecInstances._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-trait WorkerServiceFixture extends IdentifiersDatabase with BigMessagingFixture {
+trait WorkerServiceFixture
+    extends IdentifiersDatabase
+    with BigMessagingFixture {
   def withWorkerService[R](bucket: Bucket,
                            topic: Topic,
                            queue: Queue,

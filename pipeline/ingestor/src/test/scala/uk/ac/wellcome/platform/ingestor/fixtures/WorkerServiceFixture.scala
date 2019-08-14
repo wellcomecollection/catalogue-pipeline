@@ -16,7 +16,9 @@ import uk.ac.wellcome.storage.streaming.CodecInstances._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
-trait WorkerServiceFixture extends ElasticsearchFixtures with BigMessagingFixture {
+trait WorkerServiceFixture
+    extends ElasticsearchFixtures
+    with BigMessagingFixture {
   this: Suite =>
   def withWorkerService[R](queue: Queue,
                            index: Index,
