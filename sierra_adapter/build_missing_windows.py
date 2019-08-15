@@ -51,11 +51,23 @@ def get_missing_windows(report):
 
 
 if __name__ == "__main__":
-    client = boto3.client("sns")
+    sts = boto3.client("sts")
+    response = sts.assume_role(
+        RoleArn="arn:aws:iam::760097843905:role/platform-developer",
+        RoleSessionName="platform",
+    )
+    session = boto3.Session(
+        aws_access_key_id=response["Credentials"]["AccessKeyId"],
+        aws_secret_access_key=response["Credentials"]["SecretAccessKey"],
+        aws_session_token=response["Credentials"]["SessionToken"],
+        region_name="eu-west-1",
+    )
+
+    client = session.client("sns")
 
     for resource_type in ("bibs", "items"):
         report = build_report(
-            s3_client=boto3.client("s3"), bucket=BUCKET, resource_type=resource_type
+            s3_client=session.client("s3"), bucket=BUCKET, resource_type=resource_type
         )
         for missing_window in get_missing_windows(report):
             print(missing_window)
