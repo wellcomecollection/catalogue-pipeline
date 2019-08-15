@@ -11,7 +11,7 @@ object WellcomeDependencies {
 
     val newMessaging = "5.3.1"
     val newMonitoring = "2.3.0"
-    val newStorage = "6.1.3"
+    val newStorage = "7.19.0"
 
     val sierraStreamsSource = "0.4"
   }
@@ -254,8 +254,7 @@ object CatalogueDependencies {
   val idminterDependencies: Seq[ModuleID] =
     ExternalDependencies.mockitoDependencies ++
       ExternalDependencies.mySqlDependencies ++
-      ExternalDependencies.circeOpticsDependencies ++
-      WellcomeDependencies.messagingTypesafeLibrary
+      ExternalDependencies.circeOpticsDependencies
 
   val ingestorDependencies: Seq[ModuleID] =
     ExternalDependencies.mockitoDependencies ++

@@ -1,7 +1,8 @@
-package uk.ac.wellcome.messaging
+package uk.ac.wellcome.bigmessaging
 
 import io.circe.Encoder
 import org.scalatest.{FunSpec, Matchers}
+import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.bigmessaging.memory.MemoryBigMessageSender
 import uk.ac.wellcome.bigmessaging.message.{
   InlineNotification,
@@ -9,14 +10,16 @@ import uk.ac.wellcome.bigmessaging.message.{
   RemoteNotification
 }
 import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.storage.streaming.Codec._
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.storage._
-import uk.ac.wellcome.storage.memory.MemoryObjectStore
-import uk.ac.wellcome.storage.streaming.CodecInstances._
-
+import uk.ac.wellcome.storage.store.TypedStoreEntry
+import uk.ac.wellcome.storage.{Identified, ObjectLocation}
 import scala.util.{Failure, Success}
 
-class BigMessageSenderTest extends FunSpec with Matchers {
+class BigMessageSenderTest
+    extends FunSpec
+    with Matchers
+    with BigMessagingFixture {
   case class Shape(colour: String, sides: Int)
 
   val redSquare = Shape(colour = "red", sides = 4)
@@ -49,7 +52,10 @@ class BigMessageSenderTest extends FunSpec with Matchers {
     notification shouldBe a[RemoteNotification]
     val location = notification.asInstanceOf[RemoteNotification].location
 
-    sender.objectStore.get(location) shouldBe Right(redSquare)
+    sender.typedStore.get(location) shouldBe Right(
+      Identified[ObjectLocation, TypedStoreEntry[Shape]](
+        location,
+        TypedStoreEntry(redSquare, Map.empty)))
   }
 
   it("gives distinct keys when sending the same message twice") {
@@ -104,7 +110,7 @@ class BigMessageSenderTest extends FunSpec with Matchers {
     notification shouldBe a[RemoteNotification]
     val location = notification.asInstanceOf[RemoteNotification].location
 
-    location.key should startWith("squares/")
+    location.path should startWith("squares/")
   }
 
   it("fails if it the message sender has a problem") {
@@ -129,15 +135,8 @@ class BigMessageSenderTest extends FunSpec with Matchers {
     val sender = new MemoryBigMessageSender[Shape](
       maxSize = 1
     ) {
-      override val objectStore: ObjectStore[Shape] =
-        new MemoryObjectStore[Shape]() {
-          override def put(namespace: String)(input: Shape,
-                                              keyPrefix: KeyPrefix,
-                                              keySuffix: KeySuffix,
-                                              userMetadata: Map[String, String])
-            : Either[BackendWriteError, ObjectLocation] =
-            Left(BackendWriteError(new Throwable("BOOM!")))
-        }
+      val memoryTypedStore = createBrokenPutMemoryTypedStore[Shape]
+      override val typedStore = memoryTypedStore
     }
 
     val result = sender.sendT(redSquare)

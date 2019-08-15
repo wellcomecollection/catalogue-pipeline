@@ -180,6 +180,7 @@ def start_reindex(src, dst, mode, reason):
     # post_to_slack(slack_message)
 
     topic_arn = get_reindexer_topic_arn()
+    print
 
     publish_messages(
         job_config_id=f"{src}--{dst}", topic_arn=topic_arn, parameters=parameters
