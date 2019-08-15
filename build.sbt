@@ -69,6 +69,10 @@ lazy val big_messaging_typesafe = setupProject(project, "common/big_messaging_ty
   externalDependencies = CatalogueDependencies.bigMessagingTypesafeDependencies
 )
 
+lazy val common_catalogue = setupProject(project, "common/catalogue",
+  externalDependencies = CatalogueDependencies.dynamoSingleVersionHybridStoreDependencies
+)
+
 lazy val api = setupProject(project, "api/api",
   localDependencies = Seq(internal_model, display, elasticsearch),
   externalDependencies = CatalogueDependencies.apiDependencies

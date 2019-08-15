@@ -237,6 +237,10 @@ object CatalogueDependencies {
     WellcomeDependencies.newStorageTypesafeLibrary ++
       WellcomeDependencies.newMessagingTypesafeLibrary
 
+  val dynamoSingleVersionHybridStoreDependencies: Seq[ModuleID] =
+    WellcomeDependencies.newStorageTypesafeLibrary ++
+      WellcomeDependencies.newMessagingTypesafeLibrary
+
   val elasticsearchTypesafeDependencies: Seq[ModuleID] =
     WellcomeDependencies.typesafeLibrary
 
