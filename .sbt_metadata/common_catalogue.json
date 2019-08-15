@@ -1,0 +1,6 @@
+{
+  "id" : "common_catalogue",
+  "folder" : "common/catalogue",
+  "dependencyIds" : [
+  ]
+}

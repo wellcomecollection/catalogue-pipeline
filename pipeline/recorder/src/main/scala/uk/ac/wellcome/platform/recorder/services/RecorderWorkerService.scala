@@ -9,16 +9,16 @@ import uk.ac.wellcome.bigmessaging.message.{
   RemoteNotification
 }
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
-import uk.ac.wellcome.storage.vhs.{EmptyMetadata, VersionedHybridStore}
+import uk.ac.wellcome.platform.recorder.EmptyMetadata
+import uk.ac.wellcome.storage.store.{HybridStore, HybridStoreEntry}
+import uk.ac.wellcome.storage.ObjectLocation
 import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 class RecorderWorkerService[Destination](
-  versionedHybridStore: VersionedHybridStore[String,
-                                             TransformedBaseWork,
-                                             EmptyMetadata],
+  vhs: HybridStore[ObjectLocation, String, TransformedBaseWork, EmptyMetadata],
   messageStream: MessageStream[TransformedBaseWork],
   messageSender: MessageSender[Destination])
     extends Runnable {
@@ -33,24 +33,18 @@ class RecorderWorkerService[Destination](
     for {
       entry <- storeInVhs(work)
       _ <- messageSender.sendT[MessageNotification](
-        RemoteNotification(entry.location)
+        RemoteNotification(entry)
       )
     } yield ()
 
-  private def storeInVhs(
-    work: TransformedBaseWork): Try[versionedHybridStore.VHSEntry] = {
-    val putResult = versionedHybridStore.update(work.sourceIdentifier.toString)(
-      (work, EmptyMetadata()))(
-      (existingWork, existingMetadata) =>
-        if (existingWork.version > work.version) {
-          (existingWork, existingMetadata)
-        } else {
-          (work, EmptyMetadata())
-      }
-    )
+  private def storeInVhs(work: TransformedBaseWork): Try[ObjectLocation] = {
+    val putResult =
+      vhs.put(ObjectLocation("namespace", work.sourceIdentifier.toString))(
+        HybridStoreEntry(work, EmptyMetadata))
 
     putResult match {
-      case Right(entry)       => Success(entry)
+      case Right(_) =>
+        Success(ObjectLocation("namespace", work.sourceIdentifier.toString))
       case Left(storageError) => Failure(storageError.e)
     }
   }

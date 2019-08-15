@@ -1,48 +1,64 @@
 package uk.ac.wellcome.platform.recorder.fixtures
 
 import org.scalatest.Assertion
+import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
+import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.messaging.fixtures.Messaging
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.bigmessaging.message.RemoteNotification
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
+import uk.ac.wellcome.platform.recorder.EmptyMetadata
 import uk.ac.wellcome.platform.recorder.services.RecorderWorkerService
-import uk.ac.wellcome.storage.memory.{MemoryObjectStore, MemoryVersionedDao}
-import uk.ac.wellcome.storage.streaming.CodecInstances._
-import uk.ac.wellcome.storage.vhs.{EmptyMetadata, Entry, VersionedHybridStore}
+import uk.ac.wellcome.storage.ObjectLocation
+import uk.ac.wellcome.storage.store.memory.{
+  MemoryHybridStore,
+  MemoryStore,
+  MemoryTypedStore
+}
+import uk.ac.wellcome.storage.store.{
+  HybridIndexedStoreEntry,
+  HybridStore,
+  HybridStoreEntry
+}
+import uk.ac.wellcome.storage.streaming.Codec._
 
-trait WorkerServiceFixture extends Messaging {
-  type RecorderEntry = Entry[String, EmptyMetadata]
+trait WorkerServiceFixture extends BigMessagingFixture {
 
-  type RecorderDao = MemoryVersionedDao[String, RecorderEntry]
-  type RecorderStore = MemoryObjectStore[TransformedBaseWork]
-  type RecorderVhs =
-    VersionedHybridStore[String, TransformedBaseWork, EmptyMetadata]
+  def withMemoryHybridStore[R](
+    testWith: TestWith[
+      MemoryHybridStore[ObjectLocation, TransformedBaseWork, EmptyMetadata],
+      R]): R = {
 
-  def createDao: RecorderDao =
-    MemoryVersionedDao[String, RecorderEntry]()
+    type RecorderEntry = HybridIndexedStoreEntry[String, EmptyMetadata]
+    type RecorderVhs =
+      HybridStore[ObjectLocation, Int, TransformedBaseWork, EmptyMetadata]
 
-  def createStore: RecorderStore = new RecorderStore()
+    implicit val typedStore: MemoryTypedStore[String, TransformedBaseWork] =
+      MemoryTypedStoreCompanion[String, TransformedBaseWork]()
 
-  def createVhs(dao: RecorderDao, store: RecorderStore): RecorderVhs =
-    new RecorderVhs {
-      override protected val versionedDao: RecorderDao = dao
-      override protected val objectStore: RecorderStore = store
-    }
+    implicit val indexedStore: MemoryStore[ObjectLocation, RecorderEntry] =
+      new MemoryStore[ObjectLocation, RecorderEntry](Map.empty)
+
+    val vhs =
+      new MemoryHybridStore[ObjectLocation, TransformedBaseWork, EmptyMetadata]
+
+    testWith(vhs)
+  }
 
   def withWorkerService[R](
-    dao: RecorderDao,
-    store: RecorderStore,
+    vhs: MemoryHybridStore[ObjectLocation, TransformedBaseWork, EmptyMetadata],
     messageSender: MemoryMessageSender,
     queue: Queue)(testWith: TestWith[RecorderWorkerService[String], R]): R =
     withActorSystem { implicit actorSystem =>
-      val vhs = createVhs(dao, store)
+      implicit val typedStoreT
+        : MemoryTypedStore[ObjectLocation, TransformedBaseWork] =
+        MemoryTypedStoreCompanion[ObjectLocation, TransformedBaseWork]()
 
       withMessageStream[TransformedBaseWork, R](queue) { messageStream =>
         val workerService = new RecorderWorkerService(
-          versionedHybridStore = vhs,
+          vhs = vhs,
           messageStream = messageStream,
           messageSender = messageSender
         )
@@ -53,23 +69,19 @@ trait WorkerServiceFixture extends Messaging {
       }
     }
 
-  def assertStoredSingleWork(dao: RecorderDao,
-                             store: RecorderStore,
+  def assertStoredSingleWork(vhs: HybridStore[ObjectLocation,
+                                              ObjectLocation,
+                                              TransformedBaseWork,
+                                              EmptyMetadata],
                              messageSender: MemoryMessageSender,
                              expectedWork: TransformedBaseWork,
                              expectedVhsVersion: Int = 1): Assertion = {
     val actualNotifications = messageSender.getMessages[RemoteNotification]
 
     actualNotifications should have size 1
-    store
+    vhs
       .get(actualNotifications.head.location)
       .right
       .value shouldBe expectedWork
-
-    dao.entries should have size 1
-    println(dao.entries)
-    dao
-      .entries(expectedWork.sourceIdentifier.toString)
-      .version shouldBe expectedVhsVersion
   }
 }

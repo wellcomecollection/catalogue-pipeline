@@ -23,36 +23,30 @@ class RecorderWorkerServiceTest
     with WorksGenerators {
 
   it("records an UnidentifiedWork") {
-    val dao = createDao
-    val store = createStore
-
     val messageSender = new MemoryMessageSender()
 
     val work = createUnidentifiedWork
 
     withLocalSqsQueue { queue =>
       sendMessage[TransformedBaseWork](queue, work)
-      withWorkerService(dao, store, messageSender, queue) { _ =>
+      withWorkerService(messageSender, queue) { _ =>
         eventually {
-          assertStoredSingleWork(dao, store, messageSender, work)
+          assertStoredSingleWork(messageSender, work)
         }
       }
     }
   }
 
   it("stores UnidentifiedInvisibleWorks") {
-    val dao = createDao
-    val store = createStore
-
     val messageSender = new MemoryMessageSender()
 
     val invisibleWork = createUnidentifiedInvisibleWork
 
     withLocalSqsQueue { queue =>
-      withWorkerService(dao, store, messageSender, queue) { service =>
+      withWorkerService(messageSender, queue) { service =>
         sendMessage[TransformedBaseWork](queue, invisibleWork)
         eventually {
-          assertStoredSingleWork(dao, store, messageSender, invisibleWork)
+          assertStoredSingleWork(messageSender, invisibleWork)
         }
       }
     }
@@ -62,23 +56,22 @@ class RecorderWorkerServiceTest
     val olderWork = createUnidentifiedWork
     val newerWork = olderWork.copy(version = 10, title = "A nice new thing")
 
-    val dao = createDao
-    val store = createStore
-
     val messageSender = new MemoryMessageSender()
 
     withLocalSqsQueue { queue =>
-      withWorkerService(dao, store, messageSender, queue) { _ =>
-        sendMessage[TransformedBaseWork](queue, newerWork)
+      withMemoryHybridStore { vhs =>
+        withWorkerService(vhs, messageSender, queue) { _ =>
+          sendMessage[TransformedBaseWork](queue, newerWork)
 
-        eventually {
-          assertStoredSingleWork(dao, store, messageSender, newerWork)
-        }
+          eventually {
+            assertStoredSingleWork(vhs, messageSender, newerWork)
+          }
 
-        sendMessage[TransformedBaseWork](queue, olderWork)
+          sendMessage[TransformedBaseWork](vhs, queue, olderWork)
 
-        eventually {
-          assertStoredSingleWork(dao, store, messageSender, newerWork)
+          eventually {
+            assertStoredSingleWork(vhs, messageSender, newerWork)
+          }
         }
       }
     }
@@ -88,25 +81,20 @@ class RecorderWorkerServiceTest
     val olderWork = createUnidentifiedWork
     val newerWork = olderWork.copy(version = 10, title = "A nice new thing")
 
-    val dao = createDao
-    val store = createStore
-
     val messageSender = new MemoryMessageSender()
 
     withLocalSqsQueue { queue =>
-      withWorkerService(dao, store, messageSender, queue) { _ =>
+      withWorkerService(messageSender, queue) { _ =>
         sendMessage[TransformedBaseWork](queue, olderWork)
 
         eventually {
-          assertStoredSingleWork(dao, store, messageSender, olderWork)
+          assertStoredSingleWork(messageSender, olderWork)
         }
 
         sendMessage[TransformedBaseWork](queue, newerWork)
 
         eventually {
           assertStoredSingleWork(
-            dao,
-            store,
             messageSender,
             newerWork,
             expectedVhsVersion = 2)
