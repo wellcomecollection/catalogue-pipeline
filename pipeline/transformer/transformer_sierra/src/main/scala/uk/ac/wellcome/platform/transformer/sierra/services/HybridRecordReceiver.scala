@@ -2,19 +2,29 @@ package uk.ac.wellcome.platform.transformer.sierra.services
 
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.messaging.message.MessageWriter
-import uk.ac.wellcome.messaging.sns.{NotificationMessage, PublishAttempt}
+import uk.ac.wellcome.bigmessaging.BigMessageSender
+import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.transformable.SierraTransformable
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
-import uk.ac.wellcome.storage.ObjectStore
-import uk.ac.wellcome.storage.vhs.HybridRecord
+
+import uk.ac.wellcome.storage.store.{HybridStore, HybridStoreEntry}
+import uk.ac.wellcome.storage.{ObjectLocation, Version, Identified}
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
+import scala.util.{Try, Success, Failure}
 
-class HybridRecordReceiver(
-  messageWriter: MessageWriter[TransformedBaseWork],
-  objectStore: ObjectStore[SierraTransformable])(implicit ec: ExecutionContext)
+case class EmptyMetadata()
+
+case class HybridRecord(
+  id: String,
+  version: Int,
+  location: ObjectLocation
+)
+
+class HybridRecordReceiver[MsgDestination](
+  msgSender: BigMessageSender[MsgDestination, TransformedBaseWork],
+  store: HybridStore[Version[String, Int], ObjectLocation, SierraTransformable, EmptyMetadata])(
+  implicit ec: ExecutionContext)
     extends Logging {
 
   def receiveMessage(message: NotificationMessage,
@@ -23,21 +33,21 @@ class HybridRecordReceiver(
                        Int) => Try[TransformedBaseWork]): Future[Unit] = {
     debug(s"Starting to process message $message")
 
-    for {
-      hybridRecord <- Future.fromTry(fromJson[HybridRecord](message.body))
-      transformable <- objectStore.get(hybridRecord.location)
-      work <- Future.fromTry(
-        transformToWork(transformable, hybridRecord.version))
-      publishResult <- publishMessage(work)
-      _ = debug(
-        s"Published work: ${work.sourceIdentifier} with message $publishResult")
-    } yield ()
+    Future {
+      for {
+        record <- fromJson[HybridRecord](message.body)
+        transformable <- getTransformable(Version(record.id, record.version))
+        work <- transformToWork(transformable, record.version)
+        msgNotification <- msgSender.sendT(work)
+        _ = debug(
+          s"Published work: ${work.sourceIdentifier} with message $msgNotification")
+      } yield ()
+    }
   }
 
-  private def publishMessage(
-    work: TransformedBaseWork): Future[PublishAttempt] =
-    messageWriter.write(
-      message = work,
-      subject = s"source: ${this.getClass.getSimpleName}.publishMessage"
-    )
+  private def getTransformable(key: Version[String, Int]) : Try[SierraTransformable] =
+    store.get(key) match {
+      case Right(Identified(_, HybridStoreEntry(transformable, _))) => Success(transformable)
+      case Left(error) => Failure(error.e)
+    }
 }
