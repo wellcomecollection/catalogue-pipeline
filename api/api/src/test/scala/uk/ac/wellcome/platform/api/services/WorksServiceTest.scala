@@ -376,12 +376,12 @@ class WorksServiceTest
         )
 
         val workLooseTitle = createIdentifiedWorkWith(
-          title = "An loose match of a title"
+          title = "A loose match of a title"
         )
 
         // Should return both
         assertSearchResultIsCorrect(
-          query = "A exact match of a title"
+          query = "An exact match of a title"
         )(
           allWorks = List(workExactTitle, workLooseTitle),
           expectedWorks = List(workExactTitle, workLooseTitle),
@@ -390,7 +390,7 @@ class WorksServiceTest
 
         // Should return only the exact match
         assertSearchResultIsCorrect(
-          query = "\"A exact match of a title\""
+          query = "\"An exact match of a title\""
         )(
           allWorks = List(workExactTitle, workLooseTitle),
           expectedWorks = List(workExactTitle),
