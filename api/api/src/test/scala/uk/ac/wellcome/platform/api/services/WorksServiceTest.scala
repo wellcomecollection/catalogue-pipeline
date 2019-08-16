@@ -269,6 +269,49 @@ class WorksServiceTest
       )
     }
 
+    it("Should simple_query_syntax into account and not fail when it's invalid") {
+      val workEmu = createIdentifiedWorkWith(
+        title = "a b c"
+      )
+
+      // This would land up with a too_many_clauses error due to the precedence syntax
+      assertSearchResultIsCorrect(
+        query = "(a b c d e) h"
+      )(
+        allWorks = List(workEmu),
+        expectedWorks = List(workEmu),
+        expectedTotalResults = 1
+      )
+    }
+
+    it("Should work with simple_query_syntax PHRASE syntax (\"term\")") {
+      val workExactTitle = createIdentifiedWorkWith(
+        title = "An exact match of a title"
+      )
+
+      val workLooseTitle = createIdentifiedWorkWith(
+        title = "An loose match of a title"
+      )
+
+      // Should return both
+      assertSearchResultIsCorrect(
+        query = "A exact match of a title"
+      )(
+        allWorks = List(workExactTitle, workLooseTitle),
+        expectedWorks = List(workExactTitle, workLooseTitle),
+        expectedTotalResults = 2
+      )
+
+      // Should return only the exact match
+      assertSearchResultIsCorrect(
+        query = "\"A exact match of a title\""
+      )(
+        allWorks = List(workExactTitle, workLooseTitle),
+        expectedWorks = List(workExactTitle),
+        expectedTotalResults = 1
+      )
+    }
+
     it("filters searches by workType") {
       val matchingWork = createIdentifiedWorkWith(
         title = "Animated artichokes",

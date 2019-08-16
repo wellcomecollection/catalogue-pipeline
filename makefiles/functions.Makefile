@@ -1,6 +1,11 @@
 ROOT = $(shell git rev-parse --show-toplevel)
 INFRA_BUCKET = wellcomecollection-platform-infra
 
+ifneq ($(TRAVIS),true)
+DEV_ROLE_ARN := arn:aws:iam::760097843905:role/platform-developer
+endif
+
+
 
 include $(ROOT)/makefiles/terraform.Makefile
 
@@ -76,15 +81,15 @@ endef
 #
 define publish_service_ssm
 	$(ROOT)/docker_run.py \
-	    --aws --dind -- \
-	    wellcome/publish_service:55 \
-	    	--service_id="$(1)" \
-	        --project_id=$(2) \
-	        --account_id=$(3) \
-	        --region_id=eu-west-1 \
-	        --namespace=uk.ac.wellcome \
-	        --label=latest \
-
+    	    --aws --dind -- \
+    	    wellcome/publish_service:86 \
+    	    	--service_id="$(1)" \
+    	        --project_id=$(2) \
+    	        --account_id=$(3) \
+    	        --region_id=eu-west-1 \
+    	        --namespace=uk.ac.wellcome \
+    	        --role_arn="$(DEV_ROLE_ARN)" \
+    	        --label=latest
 endef
 
 

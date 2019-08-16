@@ -2,6 +2,7 @@ package uk.ac.wellcome.platform.api.models
 
 import com.sksamuel.elastic4s.requests.searches.queries.{
   Query,
+  SimpleQueryStringFlag,
   SimpleStringQuery
 }
 
@@ -32,7 +33,8 @@ object WorkQuery {
         queryString,
         fields = defaultBoostedFields,
         lenient = Some(true),
-        minimumShouldMatch = Some(defaultMSM)
+        minimumShouldMatch = Some(defaultMSM),
+        flags = Seq(SimpleQueryStringFlag.PHRASE)
       )
     }
   }
