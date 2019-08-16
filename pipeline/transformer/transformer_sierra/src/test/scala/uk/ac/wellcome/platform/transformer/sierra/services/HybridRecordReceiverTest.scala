@@ -10,7 +10,7 @@ import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.exceptions.JsonDecodingError
-import uk.ac.wellcome.messaging.fixtures.Messaging
+import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.models.transformable.SierraTransformable
 import uk.ac.wellcome.models.transformable.SierraTransformable._
 import uk.ac.wellcome.models.transformable.sierra.test.utils.SierraGenerators
@@ -21,7 +21,6 @@ import uk.ac.wellcome.models.work.internal.{
 }
 import uk.ac.wellcome.platform.transformer.sierra.fixtures.HybridRecordReceiverFixture
 import uk.ac.wellcome.storage.ObjectLocation
-import uk.ac.wellcome.storage.vhs.HybridRecord
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Random, Try}
@@ -29,7 +28,7 @@ import scala.util.{Random, Try}
 class HybridRecordReceiverTest
     extends FunSpec
     with Matchers
-    with Messaging
+    with BigMessagingFixture
     with Eventually
     with HybridRecordReceiverFixture
     with IntegrationPatience
