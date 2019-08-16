@@ -284,7 +284,7 @@ class WorksServiceTest
       )
     }
 
-    it("Should work with simple_query_syntax PHRASE syntax (\"term\")") {
+    it("matches results with the PHRASE syntax (\"term\")") {
       val workExactTitle = createIdentifiedWorkWith(
         title = "An exact match of a title"
       )
