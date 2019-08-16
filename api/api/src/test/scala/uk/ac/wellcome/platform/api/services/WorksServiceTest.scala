@@ -269,49 +269,6 @@ class WorksServiceTest
       )
     }
 
-    it("Should simple_query_syntax into account and not fail when it's invalid") {
-      val workEmu = createIdentifiedWorkWith(
-        title = "a b c"
-      )
-
-      // This would land up with a too_many_clauses error due to the precedence syntax
-      assertSearchResultIsCorrect(
-        query = "(a b c d e) h"
-      )(
-        allWorks = List(workEmu),
-        expectedWorks = List(workEmu),
-        expectedTotalResults = 1
-      )
-    }
-
-    it("Should work with simple_query_syntax PHRASE syntax (\"term\")") {
-      val workExactTitle = createIdentifiedWorkWith(
-        title = "An exact match of a title"
-      )
-
-      val workLooseTitle = createIdentifiedWorkWith(
-        title = "An loose match of a title"
-      )
-
-      // Should return both
-      assertSearchResultIsCorrect(
-        query = "A exact match of a title"
-      )(
-        allWorks = List(workExactTitle, workLooseTitle),
-        expectedWorks = List(workExactTitle, workLooseTitle),
-        expectedTotalResults = 2
-      )
-
-      // Should return only the exact match
-      assertSearchResultIsCorrect(
-        query = "\"A exact match of a title\""
-      )(
-        allWorks = List(workExactTitle, workLooseTitle),
-        expectedWorks = List(workExactTitle),
-        expectedTotalResults = 1
-      )
-    }
-
     it("filters searches by workType") {
       val matchingWork = createIdentifiedWorkWith(
         title = "Animated artichokes",
@@ -379,6 +336,66 @@ class WorksServiceTest
       whenReady(future) { result =>
         result.isLeft shouldBe true
         result.left.get shouldBe a[ElasticError]
+      }
+    }
+
+    // See: https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html#simple-query-string-syntax
+    describe("simple query string syntax") {
+      it("uses none but PHRASE simple query syntax") {
+        val work = createIdentifiedWorkWith(
+          title =
+            "+a -title | with (all the simple) query~4 syntax operators in it*"
+        )
+
+        // prefix
+        assertSearchResultIsCorrect(query =
+          "+a -title | with (all the simple) query~4 syntax operators in it*")(
+          allWorks = List(work),
+          expectedWorks = List(work),
+          expectedTotalResults = 1
+        )
+      }
+
+      it("doesn't throw a too_many_clauses exception when passing an invalid simple query syntax query") {
+        val workEmu = createIdentifiedWorkWith(
+          title = "a b c"
+        )
+
+        assertSearchResultIsCorrect(
+          query = "(a b c d e) h"
+        )(
+          allWorks = List(workEmu),
+          expectedWorks = List(workEmu),
+          expectedTotalResults = 1
+        )
+      }
+
+      it("matches results with the PHRASE syntax (\"term\")") {
+        val workExactTitle = createIdentifiedWorkWith(
+          title = "An exact match of a title"
+        )
+
+        val workLooseTitle = createIdentifiedWorkWith(
+          title = "An loose match of a title"
+        )
+
+        // Should return both
+        assertSearchResultIsCorrect(
+          query = "A exact match of a title"
+        )(
+          allWorks = List(workExactTitle, workLooseTitle),
+          expectedWorks = List(workExactTitle, workLooseTitle),
+          expectedTotalResults = 2
+        )
+
+        // Should return only the exact match
+        assertSearchResultIsCorrect(
+          query = "\"A exact match of a title\""
+        )(
+          allWorks = List(workExactTitle, workLooseTitle),
+          expectedWorks = List(workExactTitle),
+          expectedTotalResults = 1
+        )
       }
     }
   }
