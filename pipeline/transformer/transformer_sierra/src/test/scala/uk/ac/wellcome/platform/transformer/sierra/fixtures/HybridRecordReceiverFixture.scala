@@ -16,9 +16,11 @@ import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.messaging.sns.{SNSConfig, NotificationMessage}
 
 import uk.ac.wellcome.storage.{ObjectLocation, Version}
-import uk.ac.wellcome.storage.store.{Store, HybridStoreEntry}
+import uk.ac.wellcome.storage.store.{Store, HybridStore, HybridStoreEntry, HybridIndexedStoreEntry}
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
-import uk.ac.wellcome.storage.store.memory.MemoryStore
+import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryTypedStore, MemoryStreamStore}
+import uk.ac.wellcome.models.transformable.SierraTransformable._
+import uk.ac.wellcome.storage.streaming.Codec._
 
 trait HybridRecordReceiverFixture extends BigMessagingFixture with SNS {
 
@@ -26,8 +28,22 @@ trait HybridRecordReceiverFixture extends BigMessagingFixture with SNS {
 
   type SierraTransformableStore = Store[Version[String, Int], StoreEntry]
 
-  implicit val sierraTransformableStore : SierraTransformableStore =
-    new MemoryStore[Version[String, Int], StoreEntry](Map.empty)
+  type IndexEntry = HybridIndexedStoreEntry[String, EmptyMetadata]
+
+  implicit val memoryStreamStore: MemoryStreamStore[String] =
+    MemoryStreamStore[String]()
+
+  implicit val hybridStore : SierraTransformableStore =
+    new HybridStore[Version[String, Int], String, SierraTransformable, EmptyMetadata] {
+      override implicit val indexedStore =
+        new MemoryStore[Version[String, Int], IndexEntry](
+          Map.empty)
+      override implicit val typedStore : MemoryTypedStore[String, SierraTransformable] =
+        new MemoryTypedStore[String, SierraTransformable](
+          Map.empty)
+      override def createTypeStoreId(id: Version[String, Int]): String =
+        s"${id.id}/${id.version}"
+    }
 
   def withHybridRecordReceiver[R](
     topic: Topic,
@@ -39,7 +55,7 @@ trait HybridRecordReceiverFixture extends BigMessagingFixture with SNS {
       topic) { msgSender =>
       val recordReceiver = new HybridRecordReceiver(
         msgSender = msgSender,
-        store = sierraTransformableStore
+        store = hybridStore
       )
 
       testWith(recordReceiver)
@@ -50,8 +66,9 @@ trait HybridRecordReceiverFixture extends BigMessagingFixture with SNS {
     version: Int = 1,
     id: String = Random.alphanumeric take 10 mkString): HybridRecord = {
 
-    sierraTransformableStore.put(Version(id, version))(
-                                 HybridStoreEntry(sierraTransformable, EmptyMetadata()))
+    hybridStore.put(
+      Version(id, version))(
+      HybridStoreEntry(sierraTransformable, EmptyMetadata()))
     HybridRecord(
       id = id,
       version = version,
