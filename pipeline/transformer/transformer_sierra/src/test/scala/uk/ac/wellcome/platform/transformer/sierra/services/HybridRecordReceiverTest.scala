@@ -2,7 +2,6 @@ package uk.ac.wellcome.platform.transformer.sierra.services
 
 import com.amazonaws.services.sns.AmazonSNS
 import com.amazonaws.services.sns.model.PublishRequest
-import io.circe.ParsingFailure
 import org.mockito.Matchers.any
 import org.mockito.Mockito.when
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
@@ -21,9 +20,6 @@ import uk.ac.wellcome.models.work.internal.{
 import uk.ac.wellcome.platform.transformer.sierra.fixtures.HybridRecordReceiverFixture
 
 import scala.util.{Random, Try}
-
-import uk.ac.wellcome.storage.ObjectLocation
-
 
 class HybridRecordReceiverTest
     extends FunSpec
@@ -97,17 +93,10 @@ class HybridRecordReceiverTest
     }
   }
 
-  it("returns a failed future if it's unable to parse the SQS message") {
+  it("returns a failed future if invalid SierraTransformable in the store") {
     withLocalSnsTopic { topic =>
       withLocalS3Bucket { bucket =>
-        val key = randomAlphanumeric(10)
-        s3Client.putObject(bucket.name, key, "not a JSON string")
-
-        val hybridRecord = HybridRecord(
-          id = "testId",
-          version = 1,
-          location = ObjectLocation(bucket.name, key)
-        )
+        val hybridRecord = createCorruptedHybridRecord()
         val invalidSqsMessage = createNotificationMessageWith(
           message = hybridRecord
         )
@@ -117,7 +106,7 @@ class HybridRecordReceiverTest
             recordReceiver.receiveMessage(invalidSqsMessage, transformToWork)
 
           whenReady(future.failed) { x =>
-            x shouldBe a[ParsingFailure]
+            x shouldBe a[JsonDecodingError]
           }
         }
       }

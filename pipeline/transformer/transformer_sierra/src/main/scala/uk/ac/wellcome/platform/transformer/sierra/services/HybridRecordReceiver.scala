@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.transformer.sierra.services
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.util.{Try, Success, Failure}
 import grizzled.slf4j.Logging
 
@@ -25,8 +25,7 @@ class HybridRecordReceiver[MsgDestination](
   msgSender: BigMessageSender[MsgDestination, TransformedBaseWork],
   store: Store[
     Version[String, Int],
-    HybridStoreEntry[SierraTransformable, EmptyMetadata]])(
-  implicit ec: ExecutionContext)
+    HybridStoreEntry[SierraTransformable, EmptyMetadata]])
     extends Logging {
 
   def receiveMessage(message: NotificationMessage,
@@ -35,7 +34,7 @@ class HybridRecordReceiver[MsgDestination](
                        Int) => Try[TransformedBaseWork]): Future[Unit] = {
     debug(s"Starting to process message $message")
 
-    Future {
+    Future.fromTry {
       for {
         record <- fromJson[HybridRecord](message.body)
         transformable <- getTransformable(Version(record.id, record.version))

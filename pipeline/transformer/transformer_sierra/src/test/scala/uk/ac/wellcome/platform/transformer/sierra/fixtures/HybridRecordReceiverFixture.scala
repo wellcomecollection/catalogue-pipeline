@@ -1,6 +1,5 @@
 package uk.ac.wellcome.platform.transformer.sierra.fixtures
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Random
 import com.amazonaws.services.sns.AmazonSNS
 
@@ -16,28 +15,26 @@ import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.messaging.sns.{SNSConfig, NotificationMessage}
 
 import uk.ac.wellcome.storage.{ObjectLocation, Version}
-import uk.ac.wellcome.storage.store.{Store, HybridStore, HybridStoreEntry, HybridIndexedStoreEntry}
+import uk.ac.wellcome.storage.store.{HybridStore, HybridStoreEntry, HybridIndexedStoreEntry}
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryTypedStore, MemoryStreamStore}
 import uk.ac.wellcome.models.transformable.SierraTransformable._
 import uk.ac.wellcome.storage.streaming.Codec._
+import uk.ac.wellcome.storage.streaming.InputStreamWithLengthAndMetadata
+import java.io.ByteArrayInputStream
 
 trait HybridRecordReceiverFixture extends BigMessagingFixture with SNS {
 
-  type StoreEntry = HybridStoreEntry[SierraTransformable, EmptyMetadata]
+  val memoryIndexedStore =
+    new MemoryStore[
+      Version[String, Int],
+      HybridIndexedStoreEntry[String, EmptyMetadata]](Map.empty)
 
-  type SierraTransformableStore = Store[Version[String, Int], StoreEntry]
+  implicit val memoryStreamStore = MemoryStreamStore[String]()
 
-  type IndexEntry = HybridIndexedStoreEntry[String, EmptyMetadata]
-
-  implicit val memoryStreamStore: MemoryStreamStore[String] =
-    MemoryStreamStore[String]()
-
-  implicit val hybridStore : SierraTransformableStore =
+  implicit val hybridStore =
     new HybridStore[Version[String, Int], String, SierraTransformable, EmptyMetadata] {
-      override implicit val indexedStore =
-        new MemoryStore[Version[String, Int], IndexEntry](
-          Map.empty)
+      override implicit val indexedStore = memoryIndexedStore
       override implicit val typedStore : MemoryTypedStore[String, SierraTransformable] =
         new MemoryTypedStore[String, SierraTransformable](
           Map.empty)
@@ -52,7 +49,8 @@ trait HybridRecordReceiverFixture extends BigMessagingFixture with SNS {
   )(testWith: TestWith[HybridRecordReceiver[SNSConfig], R]): R =
     withSqsBigMessageSender[TransformedBaseWork, R](
       bucket,
-      topic) { msgSender =>
+      topic,
+      snsClient) { msgSender =>
       val recordReceiver = new HybridRecordReceiver(
         msgSender = msgSender,
         store = hybridStore
@@ -60,6 +58,19 @@ trait HybridRecordReceiverFixture extends BigMessagingFixture with SNS {
 
       testWith(recordReceiver)
     }
+
+  def createHybridRecordNotificationWith(
+    sierraTransformable: SierraTransformable,
+    version: Int = 1): NotificationMessage = {
+
+    val hybridRecord = createHybridRecordWith(
+      sierraTransformable,
+      version = version
+    )
+    createNotificationMessageWith(
+      message = hybridRecord
+    )
+  }
 
   def createHybridRecordWith(
     sierraTransformable: SierraTransformable,
@@ -76,16 +87,22 @@ trait HybridRecordReceiverFixture extends BigMessagingFixture with SNS {
     )
   }
 
-  def createHybridRecordNotificationWith(
-    sierraTransformable: SierraTransformable,
-    version: Int = 1): NotificationMessage = {
+  def createCorruptedHybridRecord(
+    version: Int = 1,
+    id: String = Random.alphanumeric take 10 mkString): HybridRecord = {
 
-    val hybridRecord = createHybridRecordWith(
-      sierraTransformable,
-      version = version
-    )
-    createNotificationMessageWith(
-      message = hybridRecord
+    val typeId = s"${id}/${version}"
+    val stream = new ByteArrayInputStream("{\"x\": 1}".getBytes)
+    memoryIndexedStore.put(
+      Version(id, version))(
+        HybridIndexedStoreEntry(typeId, EmptyMetadata()))
+    memoryStreamStore.put(
+      typeId)(
+      new InputStreamWithLengthAndMetadata(stream, 8L, Map.empty))
+    HybridRecord(
+      id = id,
+      version = version,
+      location = ObjectLocation("namespace", "path")
     )
   }
 }
