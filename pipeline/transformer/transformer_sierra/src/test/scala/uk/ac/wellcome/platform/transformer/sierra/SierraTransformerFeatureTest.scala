@@ -11,13 +11,9 @@ import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.models.transformable.SierraTransformable
-import uk.ac.wellcome.models.transformable.SierraTransformable._
 import uk.ac.wellcome.models.transformable.sierra.test.utils.SierraGenerators
 import uk.ac.wellcome.models.work.internal.UnidentifiedWork
-import uk.ac.wellcome.platform.transformer.sierra.fixtures.{
-  HybridRecordReceiverFixture,
-  SierraTransformableStoreFixture
-}
+import uk.ac.wellcome.platform.transformer.sierra.fixtures.HybridRecordReceiverFixture
 import uk.ac.wellcome.platform.transformer.sierra.services.SierraTransformerWorkerService
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 
@@ -28,7 +24,6 @@ class SierraTransformerFeatureTest
     with BigMessagingFixture
     with Eventually
     with HybridRecordReceiverFixture
-    with SierraTransformableStoreFixture
     with IntegrationPatience
     with SierraGenerators {
 
@@ -57,8 +52,7 @@ class SierraTransformerFeatureTest
             )
 
             val sierraHybridRecordMessage = createHybridRecordNotificationWith(
-              sierraTransformable,
-              bucket = storageBucket
+              sierraTransformable
             )
 
             sendSqsMessage(

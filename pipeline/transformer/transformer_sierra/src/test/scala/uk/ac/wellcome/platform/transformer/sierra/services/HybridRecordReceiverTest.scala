@@ -12,17 +12,13 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.exceptions.JsonDecodingError
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.models.transformable.SierraTransformable
-import uk.ac.wellcome.models.transformable.SierraTransformable._
 import uk.ac.wellcome.models.transformable.sierra.test.utils.SierraGenerators
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.{
   TransformedBaseWork,
   UnidentifiedWork
 }
-import uk.ac.wellcome.platform.transformer.sierra.fixtures.{
-  HybridRecordReceiverFixture,
-  SierraTransformableStoreFixture
-}
+import uk.ac.wellcome.platform.transformer.sierra.fixtures.HybridRecordReceiverFixture
 
 import scala.util.{Random, Try}
 
@@ -39,7 +35,6 @@ class HybridRecordReceiverTest
     with MockitoSugar
     with ScalaFutures
     with SierraGenerators
-    with SierraTransformableStoreFixture
     with WorksGenerators {
 
   case class TestException(message: String) extends Exception(message)
@@ -54,7 +49,6 @@ class HybridRecordReceiverTest
       withLocalS3Bucket { bucket =>
         val sqsMessage = createHybridRecordNotificationWith(
           createSierraTransformable,
-          bucket = bucket
         )
 
         withHybridRecordReceiver(topic, bucket) { recordReceiver =>
@@ -82,7 +76,6 @@ class HybridRecordReceiverTest
         val notification = createHybridRecordNotificationWith(
           createSierraTransformable,
           version = version,
-          bucket = bucket
         )
 
         withHybridRecordReceiver(topic, bucket) { recordReceiver =>
@@ -154,8 +147,7 @@ class HybridRecordReceiverTest
     withLocalSnsTopic { topic =>
       withLocalS3Bucket { bucket =>
         val failingSqsMessage = createHybridRecordNotificationWith(
-          createSierraTransformable,
-          bucket = bucket
+          createSierraTransformable
         )
 
         withHybridRecordReceiver(topic, bucket) { recordReceiver =>
@@ -175,10 +167,7 @@ class HybridRecordReceiverTest
   it("fails if it's unable to publish the work") {
     withLocalSnsTopic { topic =>
       withLocalS3Bucket { bucket =>
-        val message = createHybridRecordNotificationWith(
-          createSierraTransformable,
-          bucket = bucket
-        )
+        val message = createHybridRecordNotificationWith(createSierraTransformable)
 
         withHybridRecordReceiver(topic, bucket, mockSnsClientFailPublishMessage) {
           recordReceiver =>

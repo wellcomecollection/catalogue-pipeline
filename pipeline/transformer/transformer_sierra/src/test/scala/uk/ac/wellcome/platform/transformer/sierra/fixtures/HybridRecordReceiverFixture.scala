@@ -2,9 +2,7 @@ package uk.ac.wellcome.platform.transformer.sierra.fixtures
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Random
-import io.circe.Encoder
 import com.amazonaws.services.sns.AmazonSNS
-import com.amazonaws.services.s3.AmazonS3
 
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.transformable.SierraTransformable
@@ -18,61 +16,57 @@ import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.messaging.sns.{SNSConfig, NotificationMessage}
 
 import uk.ac.wellcome.storage.{ObjectLocation, Version}
-import uk.ac.wellcome.storage.store.HybridStore
+import uk.ac.wellcome.storage.store.{Store, HybridStoreEntry}
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
+import uk.ac.wellcome.storage.store.memory.MemoryStore
 
 trait HybridRecordReceiverFixture extends BigMessagingFixture with SNS {
+
+  type StoreEntry = HybridStoreEntry[SierraTransformable, EmptyMetadata]
+
+  type SierraTransformableStore = Store[Version[String, Int], StoreEntry]
+
+  implicit val sierraTransformableStore : SierraTransformableStore =
+    new MemoryStore[Version[String, Int], StoreEntry](Map.empty)
 
   def withHybridRecordReceiver[R](
     topic: Topic,
     bucket: Bucket,
     snsClient: AmazonSNS = snsClient
-  )(testWith: TestWith[HybridRecordReceiver[SNSConfig], R])(
-    implicit store: HybridStore[
-      Version[String, Int],
-      ObjectLocation,
-      SierraTransformable,
-      EmptyMetadata]): R =
+  )(testWith: TestWith[HybridRecordReceiver[SNSConfig], R]): R =
     withSqsBigMessageSender[TransformedBaseWork, R](
       bucket,
       topic) { msgSender =>
       val recordReceiver = new HybridRecordReceiver(
         msgSender = msgSender,
-        store = store
+        store = sierraTransformableStore
       )
 
       testWith(recordReceiver)
     }
 
-  def createHybridRecordWith[T](
-    t: T,
+  def createHybridRecordWith(
+    sierraTransformable: SierraTransformable,
     version: Int = 1,
-    s3Client: AmazonS3 = s3Client,
-    bucket: Bucket)(implicit encoder: Encoder[T]): HybridRecord = {
-    val s3key = Random.alphanumeric take 10 mkString
-    val content = toJson(t).get
-    s3Client.putObject(bucket.name, s3key, content)
+    id: String = Random.alphanumeric take 10 mkString): HybridRecord = {
 
+    sierraTransformableStore.put(Version(id, version))(
+                                 HybridStoreEntry(sierraTransformable, EmptyMetadata()))
     HybridRecord(
-      id = Random.alphanumeric take 10 mkString,
+      id = id,
       version = version,
-      location = ObjectLocation(namespace = bucket.name, path = s3key)
+      location = ObjectLocation("namespace", "path")
     )
   }
 
-  /** Store an object in S3 and create the HybridRecordNotification that should be sent to SNS. */
-  def createHybridRecordNotificationWith[T](
-    t: T,
-    version: Int = 1,
-    s3Client: AmazonS3 = s3Client,
-    bucket: Bucket)(implicit encoder: Encoder[T]): NotificationMessage = {
-    val hybridRecord = createHybridRecordWith[T](
-      t,
-      version = version,
-      s3Client = s3Client,
-      bucket = bucket
-    )
+  def createHybridRecordNotificationWith(
+    sierraTransformable: SierraTransformable,
+    version: Int = 1): NotificationMessage = {
 
+    val hybridRecord = createHybridRecordWith(
+      sierraTransformable,
+      version = version
+    )
     createNotificationMessageWith(
       message = hybridRecord
     )

@@ -10,7 +10,7 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.transformable.SierraTransformable
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 
-import uk.ac.wellcome.storage.store.{HybridStore, HybridStoreEntry}
+import uk.ac.wellcome.storage.store.{Store, HybridStoreEntry}
 import uk.ac.wellcome.storage.{ObjectLocation, Version, Identified}
 
 case class EmptyMetadata()
@@ -23,11 +23,9 @@ case class HybridRecord(
 
 class HybridRecordReceiver[MsgDestination](
   msgSender: BigMessageSender[MsgDestination, TransformedBaseWork],
-  store: HybridStore[
+  store: Store[
     Version[String, Int],
-    ObjectLocation,
-    SierraTransformable,
-    EmptyMetadata])(
+    HybridStoreEntry[SierraTransformable, EmptyMetadata]])(
   implicit ec: ExecutionContext)
     extends Logging {
 
