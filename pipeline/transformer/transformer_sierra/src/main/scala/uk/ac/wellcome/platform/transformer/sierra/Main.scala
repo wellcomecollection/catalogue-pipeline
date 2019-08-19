@@ -13,8 +13,8 @@ import uk.ac.wellcome.models.transformable.SierraTransformable
 import uk.ac.wellcome.models.transformable.SierraTransformable._
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.transformer.sierra.services.{
-  HybridRecordReceiver,
   EmptyMetadata,
+  HybridRecordReceiver,
   SierraTransformerWorkerService
 }
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
@@ -25,11 +25,11 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.SQSBuilder
 import uk.ac.wellcome.messaging.sns.SNSConfig
 
-import uk.ac.wellcome.storage.store.dynamo.{DynamoHybridStore, DynamoHashStore}
+import uk.ac.wellcome.storage.store.dynamo.{DynamoHashStore, DynamoHybridStore}
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.store.HybridIndexedStoreEntry
 import uk.ac.wellcome.storage.{ObjectLocation, ObjectLocationPrefix}
-import uk.ac.wellcome.storage.typesafe.{S3Builder, DynamoBuilder}
+import uk.ac.wellcome.storage.typesafe.{DynamoBuilder, S3Builder}
 import uk.ac.wellcome.storage.dynamo.DynamoHashEntry
 import uk.ac.wellcome.storage.streaming.Codec._
 
@@ -40,10 +40,10 @@ object Main extends WellcomeTypesafeApp {
   type HashEntry = DynamoHashEntry[String, Int, IndexEntry]
 
   runWithConfig { config: Config =>
-
     // TODO: from where do we get the correct values for this?
     val objectLocationPrefix = ObjectLocationPrefix("namespace", "path")
-    val dynamoConfig = DynamoBuilder.buildDynamoConfig(config, namespace = "namespace")
+    val dynamoConfig =
+      DynamoBuilder.buildDynamoConfig(config, namespace = "namespace")
 
     // For some reason these dont get derived with scanamo auto derivation
     implicit def indexEntryFormat: DynamoFormat[IndexEntry] =
@@ -65,12 +65,14 @@ object Main extends WellcomeTypesafeApp {
       S3TypedStore[TransformedBaseWork]
     implicit val transformableStore =
       S3TypedStore[SierraTransformable]
-    implicit val dynamoIndexStore
-      = new DynamoHashStore[String, Int, IndexEntry](dynamoConfig)
+    implicit val dynamoIndexStore =
+      new DynamoHashStore[String, Int, IndexEntry](dynamoConfig)
 
     val messageReceiver = new HybridRecordReceiver[SNSConfig](
-      msgSender = BigMessagingBuilder.buildBigMessageSender[TransformedBaseWork](config),
-      store = new DynamoHybridStore[SierraTransformable, EmptyMetadata](objectLocationPrefix)
+      msgSender =
+        BigMessagingBuilder.buildBigMessageSender[TransformedBaseWork](config),
+      store = new DynamoHybridStore[SierraTransformable, EmptyMetadata](
+        objectLocationPrefix)
     )
 
     new SierraTransformerWorkerService(
