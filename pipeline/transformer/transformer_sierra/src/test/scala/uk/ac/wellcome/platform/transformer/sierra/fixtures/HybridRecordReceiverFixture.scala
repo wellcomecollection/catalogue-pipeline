@@ -17,11 +17,12 @@ import uk.ac.wellcome.messaging.fixtures.SNS
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.messaging.sns.{SNSConfig, NotificationMessage}
 
-import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
-import uk.ac.wellcome.storage.store.HybridStore
 import uk.ac.wellcome.storage.{ObjectLocation, Version}
+import uk.ac.wellcome.storage.store.HybridStore
+import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 
 trait HybridRecordReceiverFixture extends BigMessagingFixture with SNS {
+
   def withHybridRecordReceiver[R](
     topic: Topic,
     bucket: Bucket,

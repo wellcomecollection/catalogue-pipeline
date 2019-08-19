@@ -30,7 +30,7 @@ import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.store.HybridIndexedStoreEntry
 import uk.ac.wellcome.storage.{ObjectLocation, ObjectLocationPrefix}
 import uk.ac.wellcome.storage.typesafe.{S3Builder, DynamoBuilder}
-import uk.ac.wellcome.storage.dynamo.{DynamoConfig, DynamoHashEntry}
+import uk.ac.wellcome.storage.dynamo.DynamoHashEntry
 import uk.ac.wellcome.storage.streaming.Codec._
 
 object Main extends WellcomeTypesafeApp {
@@ -42,8 +42,8 @@ object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
 
     // TODO: from where do we get the correct values for this?
-    val dynamoConfig = DynamoConfig("table name")
     val objectLocationPrefix = ObjectLocationPrefix("namespace", "path")
+    val dynamoConfig = DynamoBuilder.buildDynamoConfig(config, namespace = "namespace")
 
     // For some reason these dont get derived with scanamo auto derivation
     implicit def indexEntryFormat: DynamoFormat[IndexEntry] =

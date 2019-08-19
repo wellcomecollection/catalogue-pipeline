@@ -19,11 +19,15 @@ import uk.ac.wellcome.models.work.internal.{
   TransformedBaseWork,
   UnidentifiedWork
 }
-import uk.ac.wellcome.platform.transformer.sierra.fixtures.HybridRecordReceiverFixture
+import uk.ac.wellcome.platform.transformer.sierra.fixtures.{
+  HybridRecordReceiverFixture,
+  SierraTransformableStoreFixture
+}
+
+import scala.util.{Random, Try}
+
 import uk.ac.wellcome.storage.ObjectLocation
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.{Random, Try}
 
 class HybridRecordReceiverTest
     extends FunSpec
@@ -35,6 +39,7 @@ class HybridRecordReceiverTest
     with MockitoSugar
     with ScalaFutures
     with SierraGenerators
+    with SierraTransformableStoreFixture
     with WorksGenerators {
 
   case class TestException(message: String) extends Exception(message)
@@ -108,7 +113,7 @@ class HybridRecordReceiverTest
         val hybridRecord = HybridRecord(
           id = "testId",
           version = 1,
-          location = ObjectLocation(namespace = bucket.name, key = key)
+          location = ObjectLocation(bucket.name, key)
         )
         val invalidSqsMessage = createNotificationMessageWith(
           message = hybridRecord
