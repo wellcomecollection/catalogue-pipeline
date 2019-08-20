@@ -341,13 +341,12 @@ class WorksServiceTest
 
     // See: https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html#simple-query-string-syntax
     describe("simple query string syntax") {
-      it("uses none but PHRASE simple query syntax") {
+      it("uses only PHRASE simple query syntax") {
         val work = createIdentifiedWorkWith(
           title =
             "+a -title | with (all the simple) query~4 syntax operators in it*"
         )
 
-        // prefix
         assertSearchResultIsCorrect(query =
           "+a -title | with (all the simple) query~4 syntax operators in it*")(
           allWorks = List(work),
@@ -356,11 +355,12 @@ class WorksServiceTest
         )
       }
 
-      it("doesn't throw a too_many_clauses exception when passing an invalid simple query syntax query") {
+      it("doesn't throw a too_many_clauses exception when passed a query that creates too many clauses") {
         val workEmu = createIdentifiedWorkWith(
           title = "a b c"
         )
 
+        // This query uses precedence and would exceed the default 1024 clauses
         assertSearchResultIsCorrect(
           query = "(a b c d e) h"
         )(
