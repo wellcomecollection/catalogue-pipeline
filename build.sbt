@@ -109,7 +109,7 @@ lazy val reindex_worker = setupProject(project, "reindexer/reindex_worker",
 
 lazy val transformer_miro = setupProject(project,
   folder = "pipeline/transformer/transformer_miro",
-  localDependencies = Seq(internal_model),
+  localDependencies = Seq(internal_model, big_messaging_typesafe),
   externalDependencies = CatalogueDependencies.miroTransformerDependencies
 )
 

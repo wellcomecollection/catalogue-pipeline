@@ -2,6 +2,7 @@
   "id" : "transformer_miro",
   "folder" : "pipeline/transformer/transformer_miro",
   "dependencyIds" : [
-    "internal_model"
+    "internal_model",
+    "big_messaging_typesafe"
   ]
 }
