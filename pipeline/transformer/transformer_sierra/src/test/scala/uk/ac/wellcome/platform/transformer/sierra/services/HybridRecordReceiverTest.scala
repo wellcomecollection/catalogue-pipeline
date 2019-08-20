@@ -156,7 +156,8 @@ class HybridRecordReceiverTest
   it("fails if it's unable to publish the work") {
     withLocalSnsTopic { topic =>
       withLocalS3Bucket { bucket =>
-        val message = createHybridRecordNotificationWith(createSierraTransformable)
+        val message =
+          createHybridRecordNotificationWith(createSierraTransformable)
 
         withHybridRecordReceiver(topic, bucket, mockSnsClientFailPublishMessage) {
           recordReceiver =>

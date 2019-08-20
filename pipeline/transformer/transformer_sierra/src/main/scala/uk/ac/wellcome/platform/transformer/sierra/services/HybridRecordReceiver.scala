@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.transformer.sierra.services
 
 import scala.concurrent.Future
-import scala.util.{Try, Success, Failure}
+import scala.util.{Failure, Success, Try}
 import grizzled.slf4j.Logging
 
 import uk.ac.wellcome.json.JsonUtil._
@@ -10,12 +10,12 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.transformable.SierraTransformable
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 
-import uk.ac.wellcome.storage.store.{Store, HybridStoreEntry}
-import uk.ac.wellcome.storage.{ObjectLocation, Version, Identified}
+import uk.ac.wellcome.storage.store.{HybridStoreEntry, Store}
+import uk.ac.wellcome.storage.{Identified, ObjectLocation, Version}
 
 case class EmptyMetadata()
 
-// In future we should just rerceive the ID and version from the adaptor as the
+// In future we should just receive the ID and version from the adaptor as the
 // S3 specific `location` field is an implementation detail we should not be
 // concerned with here.
 case class HybridRecord(
@@ -26,9 +26,8 @@ case class HybridRecord(
 
 class HybridRecordReceiver[MsgDestination](
   msgSender: BigMessageSender[MsgDestination, TransformedBaseWork],
-  store: Store[
-    Version[String, Int],
-    HybridStoreEntry[SierraTransformable, EmptyMetadata]])
+  store: Store[Version[String, Int],
+               HybridStoreEntry[SierraTransformable, EmptyMetadata]])
     extends Logging {
 
   def receiveMessage(message: NotificationMessage,
@@ -49,9 +48,11 @@ class HybridRecordReceiver[MsgDestination](
     }
   }
 
-  private def getTransformable(key: Version[String, Int]) : Try[SierraTransformable] =
+  private def getTransformable(
+    key: Version[String, Int]): Try[SierraTransformable] =
     store.get(key) match {
-      case Right(Identified(_, HybridStoreEntry(transformable, _))) => Success(transformable)
+      case Right(Identified(_, HybridStoreEntry(transformable, _))) =>
+        Success(transformable)
       case Left(error) => Failure(error.e)
     }
 }
