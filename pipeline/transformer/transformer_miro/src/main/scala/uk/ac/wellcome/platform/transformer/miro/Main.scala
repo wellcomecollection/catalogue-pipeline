@@ -71,8 +71,8 @@ object Main extends WellcomeTypesafeApp {
     val vhsRecordReceiver = new MiroVHSRecordReceiver[SNSConfig](
       msgSender =
         BigMessagingBuilder.buildBigMessageSender[TransformedBaseWork](config),
-      store = new DynamoHybridStore[MiroRecord, MiroMetadata](
-        objectLocationPrefix)
+      store =
+        new DynamoHybridStore[MiroRecord, MiroMetadata](objectLocationPrefix)
     )
 
     new MiroTransformerWorkerService(
