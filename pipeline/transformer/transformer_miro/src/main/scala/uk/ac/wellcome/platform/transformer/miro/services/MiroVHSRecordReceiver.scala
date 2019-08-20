@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.transformer.miro.services
 
-import scala.concurrent.{Future, ExecutionContext}
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 import grizzled.slf4j.Logging
@@ -44,7 +44,8 @@ class MiroVHSRecordReceiver[MsgDestination](
     val msgNotification = Future.fromTry {
       for {
         record <- fromJson[HybridRecord](message.body)
-        (miroRecord, miroMetadata) <- getRecordAndMetadata(Version(record.id, record.version))
+        (miroRecord, miroMetadata) <- getRecordAndMetadata(
+          Version(record.id, record.version))
         work <- transformToWork(miroRecord, miroMetadata, record.version)
         msgNotification <- msgSender.sendT(work)
         _ = debug(
