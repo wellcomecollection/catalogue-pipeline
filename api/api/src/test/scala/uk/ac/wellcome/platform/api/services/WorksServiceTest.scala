@@ -341,7 +341,7 @@ class WorksServiceTest
 
     // See: https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html#simple-query-string-syntax
     describe("simple query string syntax") {
-      it("uses none but PHRASE simple query syntax") {
+      it("uses only PHRASE simple query syntax") {
         val work = createIdentifiedWorkWith(
           title =
             "+a -title | with (all the simple) query~4 syntax operators in it*"
