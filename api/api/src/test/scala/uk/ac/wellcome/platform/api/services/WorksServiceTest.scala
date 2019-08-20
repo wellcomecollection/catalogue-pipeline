@@ -347,7 +347,6 @@ class WorksServiceTest
             "+a -title | with (all the simple) query~4 syntax operators in it*"
         )
 
-        // prefix
         assertSearchResultIsCorrect(query =
           "+a -title | with (all the simple) query~4 syntax operators in it*")(
           allWorks = List(work),
