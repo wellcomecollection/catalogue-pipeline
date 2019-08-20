@@ -338,6 +338,66 @@ class WorksServiceTest
         result.left.get shouldBe a[ElasticError]
       }
     }
+
+    // See: https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html#simple-query-string-syntax
+    describe("simple query string syntax") {
+      it("uses only PHRASE simple query syntax") {
+        val work = createIdentifiedWorkWith(
+          title =
+            "+a -title | with (all the simple) query~4 syntax operators in it*"
+        )
+
+        assertSearchResultIsCorrect(query =
+          "+a -title | with (all the simple) query~4 syntax operators in it*")(
+          allWorks = List(work),
+          expectedWorks = List(work),
+          expectedTotalResults = 1
+        )
+      }
+
+      it("doesn't throw a too_many_clauses exception when passed a query that creates too many clauses") {
+        val workEmu = createIdentifiedWorkWith(
+          title = "a b c"
+        )
+
+        // This query uses precedence and would exceed the default 1024 clauses
+        assertSearchResultIsCorrect(
+          query = "(a b c d e) h"
+        )(
+          allWorks = List(workEmu),
+          expectedWorks = List(workEmu),
+          expectedTotalResults = 1
+        )
+      }
+
+      it("matches results with the PHRASE syntax (\"term\")") {
+        val workExactTitle = createIdentifiedWorkWith(
+          title = "An exact match of a title"
+        )
+
+        val workLooseTitle = createIdentifiedWorkWith(
+          title = "A loose match of a title"
+        )
+
+        // Should return both
+        assertSearchResultIsCorrect(
+          query = "An exact match of a title"
+        )(
+          allWorks = List(workExactTitle, workLooseTitle),
+          expectedWorks = List(workExactTitle, workLooseTitle),
+          expectedTotalResults = 2
+        )
+
+        // Should return only the exact match
+        assertSearchResultIsCorrect(
+          query = "\"An exact match of a title\""
+        )(
+          allWorks = List(workExactTitle, workLooseTitle),
+          expectedWorks = List(workExactTitle),
+          expectedTotalResults = 1
+        )
+      }
+    }
   }
 
   private def assertListResultIsCorrect(
