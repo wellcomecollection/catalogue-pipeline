@@ -15,6 +15,9 @@ import uk.ac.wellcome.storage.{ObjectLocation, Version, Identified}
 
 case class EmptyMetadata()
 
+// In future we should just rerceive the ID and version from the adaptor as the
+// S3 specific `location` field is an implementation detail we should not be
+// concerned with here.
 case class HybridRecord(
   id: String,
   version: Int,
