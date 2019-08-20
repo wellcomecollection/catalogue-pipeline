@@ -356,11 +356,12 @@ class WorksServiceTest
         )
       }
 
-      it("doesn't throw a too_many_clauses exception when passing an invalid simple query syntax query") {
+      it("doesn't throw a too_many_clauses exception when passed a query that creates too many clauses") {
         val workEmu = createIdentifiedWorkWith(
           title = "a b c"
         )
 
+        // This query uses precedence and would exceed the default 1024 clauses
         assertSearchResultIsCorrect(
           query = "(a b c d e) h"
         )(
