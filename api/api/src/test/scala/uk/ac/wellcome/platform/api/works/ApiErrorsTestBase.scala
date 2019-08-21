@@ -9,6 +9,14 @@ trait ApiErrorsTestBase { this: ApiWorksTestBase =>
 
   def withServer[R](testWith: TestWith[EmbeddedHttpServer, R]): R
 
+  describe("always returns a Gone error") {
+    it("is a valid request") {
+      assertIsGoneRequest(
+        s"/works"
+      )
+    }
+  }
+
   describe("returns a 400 Bad Request for user errors") {
     describe("errors in the ?pageSize query") {
       it("not an integer") {
@@ -180,6 +188,19 @@ trait ApiErrorsTestBase { this: ApiWorksTestBase =>
       }
     }
   }
+
+  def assertIsGoneRequest(path: String): Response =
+    withServer { server: EmbeddedHttpServer =>
+      server.httpGet(
+        path = s"/$apiPrefix$path",
+        andExpect = Status.Gone,
+        withJsonBody = goneRequest(
+          apiPrefix = apiPrefix,
+          description =
+            "This API is now decommissioned. Please use https://api.wellcomecollection.org/catalogue/v2/works."
+        )
+      )
+    }
 
   def assertIsBadRequest(path: String, description: String): Response =
     withServer { server: EmbeddedHttpServer =>

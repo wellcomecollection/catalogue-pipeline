@@ -11,32 +11,16 @@ class ApiV1ErrorsTest extends ApiV1WorksTestBase with ApiErrorsTestBase {
         testWith(server)
     }
 
-  describe("returns a 400 Bad Request for errors in the ?includes parameter") {
-    it("a single invalid include") {
-      assertIsBadRequest(
-        "/works?includes=foo",
-        description = "includes: 'foo' is not a valid include"
+  describe("only returns Gone for V1") {
+    it("for valid requests") {
+      assertIsGoneRequest(
+        "/works"
       )
     }
 
-    it("multiple invalid includes") {
-      assertIsBadRequest(
-        "/works?includes=foo,bar",
-        description = "includes: 'foo', 'bar' are not valid includes"
-      )
-    }
-
-    it("a mixture of valid and invalid includes") {
-      assertIsBadRequest(
-        "/works?includes=foo,identifiers,bar",
-        description = "includes: 'foo', 'bar' are not valid includes"
-      )
-    }
-
-    it("an invalid include on an individual work") {
-      assertIsBadRequest(
-        "/works/nfdn7wac?includes=foo",
-        description = "includes: 'foo' is not a valid include"
+    it("for invalid requests") {
+      assertIsGoneRequest(
+        "/works?pageSize=horses"
       )
     }
   }
