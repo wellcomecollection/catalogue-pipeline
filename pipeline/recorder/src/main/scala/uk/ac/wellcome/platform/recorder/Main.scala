@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.recorder
 
+import java.util.UUID
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import com.typesafe.config.Config
@@ -14,23 +15,43 @@ import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.messaging.typesafe.SNSBuilder
 import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
 
-import uk.ac.wellcome.storage.store.dynamo.{
-  DynamoVersionedHybridStore,
-  DynamoHashRangeStore,
-  DynamoHybridStoreWithMaxima
-}
+import uk.ac.wellcome.storage.store.dynamo.DynamoHashStore
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
-import uk.ac.wellcome.storage.store.HybridIndexedStoreEntry
+import uk.ac.wellcome.storage.store.{HybridIndexedStoreEntry, HybridStoreWithMaxima, VersionedHybridStore}
 import uk.ac.wellcome.storage.{ObjectLocation, ObjectLocationPrefix}
 import uk.ac.wellcome.storage.typesafe.{DynamoBuilder, S3Builder}
-import uk.ac.wellcome.storage.dynamo.DynamoHashRangeEntry
+import uk.ac.wellcome.storage.dynamo.DynamoHashEntry
 import uk.ac.wellcome.storage.streaming.Codec._
+import uk.ac.wellcome.storage.Version
+
+
+class DynamoSingleVersionedHybridStore[Id, V, T, Metadata](
+  store: DynamoSingleVersionHybridStoreWithMaxima[Id, V, T, Metadata])(
+  implicit N: Numeric[V])
+    extends VersionedHybridStore[Id, V, ObjectLocation, T, Metadata](store)
+
+class DynamoSingleVersionHybridStoreWithMaxima[Id, V, T, Metadata](
+  prefix: ObjectLocationPrefix)(
+  implicit
+  val indexedStore: DynamoHashStore[
+    Id,
+    V,
+    HybridIndexedStoreEntry[ObjectLocation, Metadata]],
+  val typedStore: S3TypedStore[T]
+) extends HybridStoreWithMaxima[Id, V, ObjectLocation, T, Metadata] {
+
+  override protected def createTypeStoreId(id: Version[Id, V]): ObjectLocation =
+    prefix.asLocation(
+      id.id.toString,
+      id.version.toString,
+      UUID.randomUUID().toString)
+}
 
 object Main extends WellcomeTypesafeApp {
 
   type IndexEntry = HybridIndexedStoreEntry[ObjectLocation, EmptyMetadata]
 
-  type HashEntry = DynamoHashRangeEntry[String, Int, IndexEntry]
+  type HashEntry = DynamoHashEntry[String, Int, IndexEntry]
 
   runWithConfig { config: Config =>
     // TODO: from where do we get the correct values for this?
@@ -56,16 +77,14 @@ object Main extends WellcomeTypesafeApp {
     implicit val s3Store =
       S3TypedStore[TransformedBaseWork]
     implicit val dynamoIndexStore =
-      new DynamoHashRangeStore[String, Int, IndexEntry](dynamoConfig)
+      new DynamoHashStore[String, Int, IndexEntry](dynamoConfig)
     
     val dynamoHybridStore =
-      new DynamoHybridStoreWithMaxima[String, Int, TransformedBaseWork, EmptyMetadata](
+      new DynamoSingleVersionHybridStoreWithMaxima[String, Int, TransformedBaseWork, EmptyMetadata](
         objectLocationPrefix)
 
     new RecorderWorkerService(
-      // TODO: bad implementation as will keep old versions lying around (with
-      // hash range stores the product of both keys defines unqiquness)
-      store = new DynamoVersionedHybridStore(dynamoHybridStore),
+      store = new DynamoSingleVersionedHybridStore(dynamoHybridStore),
       messageStream =
         BigMessagingBuilder.buildMessageStream[TransformedBaseWork](config),
       msgSender = SNSBuilder.buildSNSMessageSender(
