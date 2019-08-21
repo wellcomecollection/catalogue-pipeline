@@ -25,10 +25,8 @@ object Main extends WellcomeTypesafeApp {
       store = RecorderVhs.build(config),
       messageStream =
         BigMessagingBuilder.buildMessageStream[TransformedBaseWork](config),
-      msgSender = SNSBuilder.buildSNSMessageSender(
-        config,
-        namespace = "dunno",
-        subject = "dunno")
+      msgSender = SNSBuilder
+        .buildSNSMessageSender(config, namespace = "dunno", subject = "dunno")
     )
   }
 }

@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.recorder.services
 
-import scala.util.{Try, Success, Failure}
+import scala.util.{Failure, Success, Try}
 import scala.concurrent.Future
 import akka.Done
 
@@ -12,8 +12,8 @@ import uk.ac.wellcome.platform.recorder.{EmptyMetadata, GetLocation}
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.bigmessaging.message.MessageStream
 
-import uk.ac.wellcome.storage.store.{VersionedStore, HybridStoreEntry}
-import uk.ac.wellcome.storage.{Version, Identified}
+import uk.ac.wellcome.storage.store.{HybridStoreEntry, VersionedStore}
+import uk.ac.wellcome.storage.{Identified, Version}
 
 class RecorderWorkerService[MsgDestination](
   store: VersionedStore[
@@ -36,19 +36,22 @@ class RecorderWorkerService[MsgDestination](
       } yield ()
     }
 
-  private def createEntry(work:  TransformedBaseWork) =
+  private def createEntry(work: TransformedBaseWork) =
     HybridStoreEntry(work, EmptyMetadata())
 
   private def storeWork(
     work: TransformedBaseWork): Try[Version[String, Int]] = {
-    val result = store.upsert(work.sourceIdentifier.toString)(createEntry(work)) {
-      case HybridStoreEntry(existingWork, _) => createEntry(
-        if (existingWork.version > work.version) { existingWork }
-        else { work })
-    }
+    val result =
+      store.upsert(work.sourceIdentifier.toString)(createEntry(work)) {
+        case HybridStoreEntry(existingWork, _) =>
+          createEntry(
+            if (existingWork.version > work.version) { existingWork } else {
+              work
+            })
+      }
     result match {
       case Right(Identified(key, _)) => Success(key)
-      case Left(error) => Failure(error.e)
+      case Left(error)               => Failure(error.e)
     }
   }
 }
