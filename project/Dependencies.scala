@@ -11,7 +11,7 @@ object WellcomeDependencies {
 
     val newMessaging = "5.3.1"
     val newMonitoring = "2.3.0"
-    val newStorage = "7.19.0"
+    val newStorage = "7.20.0"
 
     val sierraStreamsSource = "0.4"
   }
