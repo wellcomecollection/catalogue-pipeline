@@ -49,19 +49,22 @@ class RecorderVhs(hybridStore: RecorderHybridStore)
     }
 }
 
-class RecorderHybridStore(prefix: ObjectLocationPrefix)(
-  implicit
-  val indexedStore: DynamoHashStore[
+class RecorderHybridStore(
+  prefix: ObjectLocationPrefix,
+  dynamoIndexStore: DynamoHashStore[
     String,
     Int,
     HybridIndexedStoreEntry[ObjectLocation, EmptyMetadata]],
-  val typedStore: S3TypedStore[TransformedBaseWork]
+  s3TypedStore: S3TypedStore[TransformedBaseWork]
 ) extends HybridStoreWithMaxima[
       String,
       Int,
       ObjectLocation,
       TransformedBaseWork,
       EmptyMetadata] {
+
+  override val indexedStore = dynamoIndexStore;
+  override val typedStore = s3TypedStore;
 
   override protected def createTypeStoreId(
     id: Version[String, Int]): ObjectLocation =
@@ -93,13 +96,14 @@ object RecorderVhs {
       S3Builder.buildS3Client(config)
     implicit val dynamoClient =
       DynamoBuilder.buildDynamoClient(config)
-    implicit val s3Store =
+
+    val s3Store =
       S3TypedStore[TransformedBaseWork]
-    implicit val dynamoIndexStore =
+    val dynamoIndexStore =
       new DynamoHashStore[String, Int, IndexEntry](dynamoConfig)
 
     new RecorderVhs(
-      new RecorderHybridStore(objectLocationPrefix)
+      new RecorderHybridStore(objectLocationPrefix, dynamoIndexStore, s3Store)
     )
   }
 }
