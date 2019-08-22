@@ -2,7 +2,9 @@ package uk.ac.wellcome.platform.recorder
 
 import java.util.UUID
 import scala.util.{Failure, Success, Try}
-import org.scanamo.DynamoFormat
+import org.scanamo.{DynamoFormat, DynamoValue}
+import org.scanamo.error.DynamoReadError
+import org.scanamo.auto._
 import com.typesafe.config.Config
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
@@ -12,7 +14,7 @@ import uk.ac.wellcome.json.JsonUtil._
 
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.store.dynamo.DynamoHashStore
-import uk.ac.wellcome.storage.dynamo.{DynamoConfig, DynamoHashEntry}
+import uk.ac.wellcome.storage.dynamo.DynamoConfig 
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.store.{
   HybridIndexedStoreEntry,
@@ -78,6 +80,18 @@ class RecorderHybridStore(
 
 object RecorderVhs {
 
+  // Scanamo auto derivation cannot derive format for EmptyMetadata correctly.
+  // An underscore is used for variable name as the compiler thinks it is unused
+  // even though it isn't.
+  private implicit val _: DynamoFormat[EmptyMetadata] =
+    new DynamoFormat[EmptyMetadata] {
+      override def read(
+        av: DynamoValue): Either[DynamoReadError, EmptyMetadata] =
+        Right(EmptyMetadata())
+      override def write(t: EmptyMetadata): DynamoValue =
+        DynamoValue.fromMap(Map.empty)
+    }
+
   def build(config: Config): RecorderVhs = {
     // TODO: from where do we get the correct values for this?
     val objectLocationPrefix = ObjectLocationPrefix("namespace", "path")
@@ -107,12 +121,12 @@ object RecorderVhs {
 
   def buildIndexStore(dynamoClient: AmazonDynamoDB,
                       dynamoConfig: DynamoConfig) = {
-    type IndexEntry = HybridIndexedStoreEntry[ObjectLocation, EmptyMetadata]
-    type HashEntry = DynamoHashEntry[String, Int, IndexEntry]
     implicit val client = dynamoClient
-    implicit def idxFormat: DynamoFormat[IndexEntry] = DynamoFormat[IndexEntry]
-    implicit def hashFormat: DynamoFormat[HashEntry] = DynamoFormat[HashEntry]
-    new DynamoHashStore[String, Int, IndexEntry](dynamoConfig)
+    new DynamoHashStore[
+      String, 
+      Int,
+      HybridIndexedStoreEntry[ObjectLocation, EmptyMetadata]
+    ](dynamoConfig)
   }
 
   def buildTypedStore(s3Client: AmazonS3) = {
