@@ -13,13 +13,13 @@ import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.store.dynamo.DynamoHashStore
-import uk.ac.wellcome.storage.dynamo.DynamoConfig 
+import uk.ac.wellcome.storage.dynamo.DynamoConfig
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.store.{
-  Store,
-  TypedStore,
   HybridIndexedStoreEntry,
   HybridStoreWithMaxima,
+  Store,
+  TypedStore,
   VersionedHybridStore
 }
 import uk.ac.wellcome.storage.{
@@ -62,12 +62,7 @@ class VHSInternalStore[T](
     HybridIndexedStoreEntry[ObjectLocation, EmptyMetadata]
   ] with Maxima[String, Int],
   dataStore: TypedStore[ObjectLocation, T]
-) extends HybridStoreWithMaxima[
-      String,
-      Int,
-      ObjectLocation,
-      T,
-      EmptyMetadata] {
+) extends HybridStoreWithMaxima[String, Int, ObjectLocation, T, EmptyMetadata] {
 
   override val indexedStore = indexStore;
   override val typedStore = dataStore;
@@ -101,21 +96,20 @@ object VHSBuilder {
         namespace = "vhs"),
       DynamoBuilder.buildDynamoConfig(config, namespace = "vhs"),
       DynamoBuilder.buildDynamoClient(config),
-      S3Builder.buildS3Client(config))
+      S3Builder.buildS3Client(config)
+    )
 
-  def build[T](
-    objectLocationPrefix: ObjectLocationPrefix,
-    dynamoConfig: DynamoConfig,
-    dynamoClient: AmazonDynamoDB,
-    s3Client: AmazonS3)(
-    implicit codec: Codec[T]): VHS[T] = {
+  def build[T](objectLocationPrefix: ObjectLocationPrefix,
+               dynamoConfig: DynamoConfig,
+               dynamoClient: AmazonDynamoDB,
+               s3Client: AmazonS3)(implicit codec: Codec[T]): VHS[T] = {
     implicit val s3 = s3Client;
     implicit val dynamo = dynamoClient;
     new VHS(
       new VHSInternalStore(
         objectLocationPrefix,
         new DynamoHashStore[
-          String, 
+          String,
           Int,
           HybridIndexedStoreEntry[ObjectLocation, EmptyMetadata]
         ](dynamoConfig),
