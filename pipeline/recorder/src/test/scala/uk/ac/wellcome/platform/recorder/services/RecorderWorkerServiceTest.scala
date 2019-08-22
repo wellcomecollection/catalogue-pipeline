@@ -12,7 +12,7 @@ import uk.ac.wellcome.monitoring.fixtures.MetricsSenderFixture
 import uk.ac.wellcome.platform.recorder.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.platform.recorder.EmptyMetadata
 
-import uk.ac.wellcome.storage.{Version, Identified, ObjectLocation}
+import uk.ac.wellcome.storage.{Identified, ObjectLocation, Version}
 import uk.ac.wellcome.storage.store.HybridStoreEntry
 
 import uk.ac.wellcome.messaging.fixtures.SQS
@@ -34,7 +34,7 @@ class RecorderWorkerServiceTest
   it("records an UnidentifiedWork") {
     withLocalSqsQueue { queue =>
       withMemoryMessageSender { msgSender =>
-        withRecorderVhs { vhs => 
+        withRecorderVhs { vhs =>
           withWorkerService(queue, vhs, msgSender) { service =>
             val work = createUnidentifiedWork
             sendMessage[TransformedBaseWork](queue = queue, obj = work)
@@ -50,7 +50,7 @@ class RecorderWorkerServiceTest
   it("stores UnidentifiedInvisibleWorks") {
     withLocalSqsQueue { queue =>
       withMemoryMessageSender { msgSender =>
-        withRecorderVhs { vhs => 
+        withRecorderVhs { vhs =>
           withWorkerService(queue, vhs, msgSender) { service =>
             val invisibleWork = createUnidentifiedInvisibleWork
             sendMessage[TransformedBaseWork](queue = queue, invisibleWork)
@@ -66,16 +66,15 @@ class RecorderWorkerServiceTest
   it("doesn't overwrite a newer work with an older work") {
     withLocalSqsQueue { queue =>
       withMemoryMessageSender { msgSender =>
-        withRecorderVhs { vhs => 
+        withRecorderVhs { vhs =>
           withWorkerService(queue, vhs, msgSender) { service =>
             val olderWork = createUnidentifiedWork
-            val newerWork = olderWork.copy(version = 10, title = "A nice new thing")
+            val newerWork =
+              olderWork.copy(version = 10, title = "A nice new thing")
             sendMessage[TransformedBaseWork](queue = queue, newerWork)
             eventually {
               assertWorkStored(vhs, newerWork)
-              sendMessage[TransformedBaseWork](
-                queue = queue,
-                obj = olderWork)
+              sendMessage[TransformedBaseWork](queue = queue, obj = olderWork)
               eventually {
                 assertWorkStored(vhs, newerWork)
               }
@@ -89,19 +88,17 @@ class RecorderWorkerServiceTest
   it("overwrites an older work with an newer work") {
     withLocalSqsQueue { queue =>
       withMemoryMessageSender { msgSender =>
-        withRecorderVhs { vhs => 
+        withRecorderVhs { vhs =>
           withWorkerService(queue, vhs, msgSender) { service =>
             val olderWork = createUnidentifiedWork
-            val newerWork = olderWork.copy(version = 10, title = "A nice new thing")
+            val newerWork =
+              olderWork.copy(version = 10, title = "A nice new thing")
             sendMessage[TransformedBaseWork](queue = queue, obj = olderWork)
             eventually {
               assertWorkStored(vhs, olderWork)
               sendMessage[TransformedBaseWork](queue = queue, obj = newerWork)
               eventually {
-                assertWorkStored(
-                  vhs,
-                  newerWork,
-                  expectedVhsVersion = 1)
+                assertWorkStored(vhs, newerWork, expectedVhsVersion = 1)
               }
             }
           }
@@ -111,28 +108,29 @@ class RecorderWorkerServiceTest
   }
 
   it("fails if saving to the store fails") {
-    withLocalSqsQueueAndDlq { case SQS.QueuePair(queue, dlq) =>
-      withMemoryMessageSender { msgSender =>
-        withBrokenRecorderVhs { vhs => 
-          withWorkerService(queue, vhs, msgSender) { service =>
-            val work = createUnidentifiedWork
-            sendMessage[TransformedBaseWork](queue = queue, obj = work)
-            eventually {
-              assertQueueEmpty(queue)
-              assertQueueHasSize(dlq, 1)
-              assertWorkNotStored(vhs, work)
-              msgSender.getMessages[ObjectLocation].toList shouldBe Nil
+    withLocalSqsQueueAndDlq {
+      case SQS.QueuePair(queue, dlq) =>
+        withMemoryMessageSender { msgSender =>
+          withBrokenRecorderVhs { vhs =>
+            withWorkerService(queue, vhs, msgSender) { service =>
+              val work = createUnidentifiedWork
+              sendMessage[TransformedBaseWork](queue = queue, obj = work)
+              eventually {
+                assertQueueEmpty(queue)
+                assertQueueHasSize(dlq, 1)
+                assertWorkNotStored(vhs, work)
+                msgSender.getMessages[ObjectLocation].toList shouldBe Nil
+              }
             }
           }
         }
-      }
     }
   }
 
   it("sends the object location to the queue") {
     withLocalSqsQueue { queue =>
       withMemoryMessageSender { msgSender =>
-        withRecorderVhs { vhs => 
+        withRecorderVhs { vhs =>
           withWorkerService(queue, vhs, msgSender) { service =>
             val work = createUnidentifiedWork
             sendMessage[TransformedBaseWork](queue = queue, obj = work)
@@ -155,18 +153,18 @@ class RecorderWorkerServiceTest
 
     val id = work.sourceIdentifier.toString
     vhs.getLatest(id) shouldBe
-      Right(Identified(
-        Version(id, expectedVhsVersion),
-        HybridStoreEntry(work, EmptyMetadata())))
+      Right(
+        Identified(
+          Version(id, expectedVhsVersion),
+          HybridStoreEntry(work, EmptyMetadata())))
   }
 
-  private def assertWorkNotStored[T <: TransformedBaseWork](
-    vhs: RecorderVhs,
-    work: T) = {
+  private def assertWorkNotStored[T <: TransformedBaseWork](vhs: RecorderVhs,
+                                                            work: T) = {
 
     val id = work.sourceIdentifier.toString
     val workExists = vhs.getLatest(id) match {
-      case Left(_) => false
+      case Left(_)  => false
       case Right(_) => true
     }
     workExists shouldBe false

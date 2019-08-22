@@ -12,7 +12,7 @@ import uk.ac.wellcome.json.JsonUtil._
 
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.store.dynamo.DynamoHashStore
-import uk.ac.wellcome.storage.dynamo.{DynamoHashEntry, DynamoConfig}
+import uk.ac.wellcome.storage.dynamo.{DynamoConfig, DynamoHashEntry}
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.store.{
   HybridIndexedStoreEntry,
@@ -81,17 +81,21 @@ object RecorderVhs {
   def build(config: Config): RecorderVhs = {
     // TODO: from where do we get the correct values for this?
     val objectLocationPrefix = ObjectLocationPrefix("namespace", "path")
-    val dynamoConfig = DynamoBuilder.buildDynamoConfig(config, namespace = "namespace")
+    val dynamoConfig =
+      DynamoBuilder.buildDynamoConfig(config, namespace = "namespace")
     implicit val s3Client = S3Builder.buildS3Client(config)
     implicit val dynamoClient = DynamoBuilder.buildDynamoClient(config)
-    RecorderVhs.build(objectLocationPrefix, dynamoConfig, dynamoClient, s3Client)
+    RecorderVhs.build(
+      objectLocationPrefix,
+      dynamoConfig,
+      dynamoClient,
+      s3Client)
   }
 
-  def build(
-    objectLocationPrefix: ObjectLocationPrefix,
-    dynamoConfig: DynamoConfig,
-    dynamoClient: AmazonDynamoDB,
-    s3Client: AmazonS3): RecorderVhs = {
+  def build(objectLocationPrefix: ObjectLocationPrefix,
+            dynamoConfig: DynamoConfig,
+            dynamoClient: AmazonDynamoDB,
+            s3Client: AmazonS3): RecorderVhs = {
     new RecorderVhs(
       new RecorderHybridStore(
         objectLocationPrefix,
@@ -101,7 +105,8 @@ object RecorderVhs {
     )
   }
 
-  def buildIndexStore(dynamoClient: AmazonDynamoDB, dynamoConfig: DynamoConfig) = {
+  def buildIndexStore(dynamoClient: AmazonDynamoDB,
+                      dynamoConfig: DynamoConfig) = {
     type IndexEntry = HybridIndexedStoreEntry[ObjectLocation, EmptyMetadata]
     type HashEntry = DynamoHashEntry[String, Int, IndexEntry]
     implicit val client = dynamoClient

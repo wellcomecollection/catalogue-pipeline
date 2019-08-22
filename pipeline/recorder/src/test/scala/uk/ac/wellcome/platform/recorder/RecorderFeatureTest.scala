@@ -24,7 +24,8 @@ class RecorderIntegrationTest
     with WorkerServiceFixture
     with WorksGenerators {
 
-  override def createTable(table: DynamoFixtures.Table): DynamoFixtures.Table = {
+  override def createTable(
+    table: DynamoFixtures.Table): DynamoFixtures.Table = {
     createTableWithHashKey(
       table,
       keyName = "id",

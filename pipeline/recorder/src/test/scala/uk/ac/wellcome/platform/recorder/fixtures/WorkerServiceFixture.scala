@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.recorder.fixtures
 
-import scala.util.{Try, Success}
+import scala.util.{Success, Try}
 
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.Implicits._
@@ -13,9 +13,9 @@ import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 
-import uk.ac.wellcome.storage.store.memory.{MemoryVersionedStore, MemoryStore}
-import uk.ac.wellcome.storage.{Version, ObjectLocation, StoreWriteError}
-import uk.ac.wellcome.storage.store.{VersionedStore, HybridStoreEntry}
+import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryVersionedStore}
+import uk.ac.wellcome.storage.{ObjectLocation, StoreWriteError, Version}
+import uk.ac.wellcome.storage.store.{HybridStoreEntry, VersionedStore}
 import uk.ac.wellcome.storage.maxima.memory.MemoryMaxima
 
 trait WorkerServiceFixture extends BigMessagingFixture {
@@ -24,13 +24,15 @@ trait WorkerServiceFixture extends BigMessagingFixture {
 
   type RecorderVhs = VersionedStore[String, Int, Entry] with GetLocation
 
-  type InternalStore = MemoryStore[Version[String, Int], Entry] with MemoryMaxima[String, Entry]
+  type InternalStore =
+    MemoryStore[Version[String, Int], Entry] with MemoryMaxima[String, Entry]
 
   class MemoryRecorderVhs(
     internalStore: InternalStore =
       new MemoryStore[Version[String, Int], Entry](Map.empty)
-        with MemoryMaxima[String, Entry]
-  ) extends MemoryVersionedStore[String, Entry](internalStore) with GetLocation {
+      with MemoryMaxima[String, Entry]
+  ) extends MemoryVersionedStore[String, Entry](internalStore)
+      with GetLocation {
 
     def getLocation(key: Version[String, Int]): Try[ObjectLocation] =
       Success(ObjectLocation("test", s"${key.id}/${key.version}"))
@@ -49,14 +51,18 @@ trait WorkerServiceFixture extends BigMessagingFixture {
     testWith(new BrokenMemoryRecorderVhs())
   }
 
-  def withMemoryMessageSender[R](testWith: TestWith[MemoryMessageSender, R]): R = {
+  def withMemoryMessageSender[R](
+    testWith: TestWith[MemoryMessageSender, R]): R = {
     testWith(new MemoryMessageSender())
   }
 
-  def withWorkerService[R](queue: Queue, vhs: RecorderVhs, msgSender: MemoryMessageSender)(
+  def withWorkerService[R](queue: Queue,
+                           vhs: RecorderVhs,
+                           msgSender: MemoryMessageSender)(
     testWith: TestWith[RecorderWorkerService[String], R]): R =
     withActorSystem { implicit actorSystem =>
-      implicit val streamStore = MemoryTypedStoreCompanion[ObjectLocation, TransformedBaseWork]()
+      implicit val streamStore =
+        MemoryTypedStoreCompanion[ObjectLocation, TransformedBaseWork]()
       withMessageStream[TransformedBaseWork, R](queue = queue) { msgStream =>
         val workerService = new RecorderWorkerService(vhs, msgStream, msgSender)
         workerService.run()
