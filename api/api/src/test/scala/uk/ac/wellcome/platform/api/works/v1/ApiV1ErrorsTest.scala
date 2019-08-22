@@ -1,10 +1,10 @@
 package uk.ac.wellcome.platform.api.works.v1
 
+import com.twitter.finagle.http.{Response, Status}
 import com.twitter.finatra.http.EmbeddedHttpServer
-import uk.ac.wellcome.platform.api.works.ApiErrorsTestBase
 import uk.ac.wellcome.fixtures.TestWith
 
-class ApiV1ErrorsTest extends ApiV1WorksTestBase with ApiErrorsTestBase {
+class ApiV1ErrorsTest extends ApiV1WorksTestBase {
   def withServer[R](testWith: TestWith[EmbeddedHttpServer, R]): R =
     withV1Api {
       case (_, server: EmbeddedHttpServer) =>
@@ -24,4 +24,17 @@ class ApiV1ErrorsTest extends ApiV1WorksTestBase with ApiErrorsTestBase {
       )
     }
   }
+
+  def assertIsGoneRequest(path: String): Response =
+    withServer { server: EmbeddedHttpServer =>
+      server.httpGet(
+        path = s"/$apiPrefix$path",
+        andExpect = Status.Gone,
+        withJsonBody = goneRequest(
+          apiPrefix = apiPrefix,
+          description =
+            "This API is now decommissioned. Please use https://api.wellcomecollection.org/catalogue/v2/works."
+        )
+      )
+    }
 }
