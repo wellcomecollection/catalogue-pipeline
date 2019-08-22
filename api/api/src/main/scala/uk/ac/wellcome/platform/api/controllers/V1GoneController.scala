@@ -22,7 +22,7 @@ class V1GoneController @Inject()(apiConfig: ApiConfig) extends Controller {
           context = buildContextUri(apiConfig, version),
           result = DisplayError(Error(
             "http-410",
-            Some("This API is now decommissioned. Please use https://api.wellcomecollection.org/catalogue/v2/works.")))
+            Some("V1 of the API has now been set free. Please use https://api.wellcomecollection.org/catalogue/v2/works.")))
         ))
     }
   }
