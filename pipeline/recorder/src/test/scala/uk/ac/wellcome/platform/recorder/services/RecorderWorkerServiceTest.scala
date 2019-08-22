@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.recorder.services
 
-//import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSpec, Matchers}
 
@@ -13,11 +12,9 @@ import uk.ac.wellcome.monitoring.fixtures.MetricsSenderFixture
 import uk.ac.wellcome.platform.recorder.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.platform.recorder.EmptyMetadata
 
-import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
-import uk.ac.wellcome.storage.{Version, Identified}
+import uk.ac.wellcome.storage.{Version, Identified, ObjectLocation}
 import uk.ac.wellcome.storage.store.HybridStoreEntry
 
-import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 
@@ -30,21 +27,19 @@ class RecorderWorkerServiceTest
     with ScalaFutures
     with BigMessagingFixture
     with MetricsSenderFixture
-    //with IntegrationPatience
+    with IntegrationPatience
     with WorkerServiceFixture
     with WorksGenerators {
 
   it("records an UnidentifiedWork") {
-    withLocalSnsTopic { topic =>
-      withLocalS3Bucket { storageBucket =>
-        withLocalSqsQueue { queue =>
-          withLocalSnsTopic { topic =>
+    withLocalSqsQueue { queue =>
+      withMemoryMessageSender { msgSender =>
+        withRecorderVhs { vhs => 
+          withWorkerService(queue, vhs, msgSender) { service =>
             val work = createUnidentifiedWork
             sendMessage[TransformedBaseWork](queue = queue, obj = work)
-            withWorkerService(storageBucket, topic, queue) { case  (service, vhs) =>
-              eventually {
-                assertWorkStored(vhs, work)
-              }
+            eventually {
+              assertWorkStored(vhs, work)
             }
           }
         }
@@ -53,16 +48,14 @@ class RecorderWorkerServiceTest
   }
 
   it("stores UnidentifiedInvisibleWorks") {
-    withLocalSnsTopic { topic =>
-      withLocalS3Bucket { storageBucket =>
-        withLocalSqsQueue { queue =>
-          withLocalSnsTopic { topic =>
-            withWorkerService(storageBucket, topic, queue) { case (service, vhs) =>
-              val invisibleWork = createUnidentifiedInvisibleWork
-              sendMessage[TransformedBaseWork](queue = queue, invisibleWork)
-              eventually {
-                assertWorkStored(vhs, invisibleWork)
-              }
+    withLocalSqsQueue { queue =>
+      withMemoryMessageSender { msgSender =>
+        withRecorderVhs { vhs => 
+          withWorkerService(queue, vhs, msgSender) { service =>
+            val invisibleWork = createUnidentifiedInvisibleWork
+            sendMessage[TransformedBaseWork](queue = queue, invisibleWork)
+            eventually {
+              assertWorkStored(vhs, invisibleWork)
             }
           }
         }
@@ -71,22 +64,20 @@ class RecorderWorkerServiceTest
   }
 
   it("doesn't overwrite a newer work with an older work") {
-    val olderWork = createUnidentifiedWork
-    val newerWork = olderWork.copy(version = 10, title = "A nice new thing")
-    withLocalSnsTopic { topic =>
-      withLocalS3Bucket { storageBucket =>
-        withLocalSqsQueue { queue =>
-          withLocalSnsTopic { topic =>
-            withWorkerService(storageBucket, topic, queue) { case (service, vhs) =>
-              sendMessage[TransformedBaseWork](queue = queue, newerWork)
+    withLocalSqsQueue { queue =>
+      withMemoryMessageSender { msgSender =>
+        withRecorderVhs { vhs => 
+          withWorkerService(queue, vhs, msgSender) { service =>
+            val olderWork = createUnidentifiedWork
+            val newerWork = olderWork.copy(version = 10, title = "A nice new thing")
+            sendMessage[TransformedBaseWork](queue = queue, newerWork)
+            eventually {
+              assertWorkStored(vhs, newerWork)
+              sendMessage[TransformedBaseWork](
+                queue = queue,
+                obj = olderWork)
               eventually {
                 assertWorkStored(vhs, newerWork)
-                sendMessage[TransformedBaseWork](
-                  queue = queue,
-                  obj = olderWork)
-                eventually {
-                  assertWorkStored(vhs, newerWork)
-                }
               }
             }
           }
@@ -96,12 +87,12 @@ class RecorderWorkerServiceTest
   }
 
   it("overwrites an older work with an newer work") {
-    val olderWork = createUnidentifiedWork
-    val newerWork = olderWork.copy(version = 10, title = "A nice new thing")
-    withLocalS3Bucket { storageBucket =>
-      withLocalSqsQueue { queue =>
-        withLocalSnsTopic { topic =>
-          withWorkerService(storageBucket, topic, queue) { case (service, vhs) =>
+    withLocalSqsQueue { queue =>
+      withMemoryMessageSender { msgSender =>
+        withRecorderVhs { vhs => 
+          withWorkerService(queue, vhs, msgSender) { service =>
+            val olderWork = createUnidentifiedWork
+            val newerWork = olderWork.copy(version = 10, title = "A nice new thing")
             sendMessage[TransformedBaseWork](queue = queue, obj = olderWork)
             eventually {
               assertWorkStored(vhs, olderWork)
@@ -119,43 +110,43 @@ class RecorderWorkerServiceTest
     }
   }
 
-  /*
-  it("fails if saving to S3 fails") {
-    withLocalSnsTopic { topic =>
-      val badBucket = Bucket(name = "bad-bukkit")
-      withLocalSqsQueueAndDlq {
-        case QueuePair(queue, dlq) =>
-          withWorkerService(badBucket, topic, queue) { case (service, vhs) =>
+  it("fails if saving to the store fails") {
+    withLocalSqsQueueAndDlq { case SQS.QueuePair(queue, dlq) =>
+      withMemoryMessageSender { msgSender =>
+        withBrokenRecorderVhs { vhs => 
+          withWorkerService(queue, vhs, msgSender) { service =>
             val work = createUnidentifiedWork
             sendMessage[TransformedBaseWork](queue = queue, obj = work)
             eventually {
               assertQueueEmpty(queue)
               assertQueueHasSize(dlq, 1)
+              assertWorkNotStored(vhs, work)
+              msgSender.getMessages[ObjectLocation].toList shouldBe Nil
             }
           }
-      }
-    }
-  }
-
-  it("returns a failed Future if saving to DynamoDB fails") {
-    val badTable = Table(name = "bad-table", index = "bad-index")
-    withLocalSnsTopic { topic =>
-      withLocalS3Bucket { storageBucket =>
-        withLocalSqsQueueAndDlq {
-          case QueuePair(queue, dlq) =>
-            withWorkerService(badTable, storageBucket, topic, queue) { _ =>
-              val work = createUnidentifiedWork
-              sendMessage[TransformedBaseWork](queue = queue, obj = work)
-              eventually {
-                assertQueueEmpty(queue)
-                assertQueueHasSize(dlq, 1)
-              }
-            }
         }
       }
     }
   }
-  */
+
+  it("sends the object location to the queue") {
+    withLocalSqsQueue { queue =>
+      withMemoryMessageSender { msgSender =>
+        withRecorderVhs { vhs => 
+          withWorkerService(queue, vhs, msgSender) { service =>
+            val work = createUnidentifiedWork
+            sendMessage[TransformedBaseWork](queue = queue, obj = work)
+            eventually {
+              val id = work.sourceIdentifier.toString
+              msgSender.getMessages[ObjectLocation].toList shouldBe List(
+                ObjectLocation("test", s"${id}/${0}")
+              )
+            }
+          }
+        }
+      }
+    }
+  }
 
   private def assertWorkStored[T <: TransformedBaseWork](
     vhs: RecorderVhs,
@@ -167,5 +158,17 @@ class RecorderWorkerServiceTest
       Right(Identified(
         Version(id, expectedVhsVersion),
         HybridStoreEntry(work, EmptyMetadata())))
+  }
+
+  private def assertWorkNotStored[T <: TransformedBaseWork](
+    vhs: RecorderVhs,
+    work: T) = {
+
+    val id = work.sourceIdentifier.toString
+    val workExists = vhs.getLatest(id) match {
+      case Left(_) => false
+      case Right(_) => true
+    }
+    workExists shouldBe false
   }
 }
