@@ -127,7 +127,7 @@ trait ApiWorksTestBase
       "description": "$description"
     }"""
 
-  def gone(apiPrefix: String) =
+  def deleted(apiPrefix: String) =
     s"""{
       "@context": "${contextUrl(apiPrefix)}",
       "type": "Error",
