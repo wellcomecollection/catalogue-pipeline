@@ -11,6 +11,7 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.store.dynamo.DynamoHashStore
@@ -93,17 +94,13 @@ object RecorderVhs {
     }
 
   def build(config: Config): RecorderVhs = {
-    // TODO: from where do we get the correct values for this?
-    val objectLocationPrefix = ObjectLocationPrefix("namespace", "path")
-    val dynamoConfig =
-      DynamoBuilder.buildDynamoConfig(config, namespace = "namespace")
-    implicit val s3Client = S3Builder.buildS3Client(config)
-    implicit val dynamoClient = DynamoBuilder.buildDynamoClient(config)
     RecorderVhs.build(
-      objectLocationPrefix,
-      dynamoConfig,
-      dynamoClient,
-      s3Client)
+      ObjectLocationPrefix(
+        path = config.getOrElse("aws.vhs.s3.globalPrefix")(default = ""),
+        namespace = "vhs"),
+      DynamoBuilder.buildDynamoConfig(config, namespace = "vhs"),
+      DynamoBuilder.buildDynamoClient(config),
+      S3Builder.buildS3Client(config))
   }
 
   def build(objectLocationPrefix: ObjectLocationPrefix,
