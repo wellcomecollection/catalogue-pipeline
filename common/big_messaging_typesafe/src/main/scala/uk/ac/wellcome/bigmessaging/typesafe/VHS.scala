@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.recorder
+package uk.ac.wellcome.bigmessaging.typesafe
 
 import java.util.UUID
 import scala.util.{Failure, Success, Try}
@@ -9,8 +9,6 @@ import com.typesafe.config.Config
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 
-import uk.ac.wellcome.models.work.internal.TransformedBaseWork
-import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
@@ -18,6 +16,8 @@ import uk.ac.wellcome.storage.store.dynamo.DynamoHashStore
 import uk.ac.wellcome.storage.dynamo.DynamoConfig 
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.store.{
+  Store,
+  TypedStore,
   HybridIndexedStoreEntry,
   HybridStoreWithMaxima,
   VersionedHybridStore
@@ -29,7 +29,8 @@ import uk.ac.wellcome.storage.{
   Version
 }
 import uk.ac.wellcome.storage.typesafe.{DynamoBuilder, S3Builder}
-import uk.ac.wellcome.storage.streaming.Codec._
+import uk.ac.wellcome.storage.streaming.Codec
+import uk.ac.wellcome.storage.maxima.Maxima
 
 case class EmptyMetadata()
 
@@ -37,12 +38,12 @@ trait GetLocation {
   def getLocation(key: Version[String, Int]): Try[ObjectLocation]
 }
 
-class RecorderVhs(hybridStore: RecorderHybridStore)
+class VHS[T](hybridStore: VHSInternalStore[T])
     extends VersionedHybridStore[
       String,
       Int,
       ObjectLocation,
-      TransformedBaseWork,
+      T,
       EmptyMetadata
     ](hybridStore)
     with GetLocation {
@@ -54,22 +55,22 @@ class RecorderVhs(hybridStore: RecorderHybridStore)
     }
 }
 
-class RecorderHybridStore(
+class VHSInternalStore[T](
   prefix: ObjectLocationPrefix,
-  dynamoIndexStore: DynamoHashStore[
-    String,
-    Int,
-    HybridIndexedStoreEntry[ObjectLocation, EmptyMetadata]],
-  s3TypedStore: S3TypedStore[TransformedBaseWork]
+  indexStore: Store[
+    Version[String, Int],
+    HybridIndexedStoreEntry[ObjectLocation, EmptyMetadata]
+  ] with Maxima[String, Int],
+  dataStore: TypedStore[ObjectLocation, T]
 ) extends HybridStoreWithMaxima[
       String,
       Int,
       ObjectLocation,
-      TransformedBaseWork,
+      T,
       EmptyMetadata] {
 
-  override val indexedStore = dynamoIndexStore;
-  override val typedStore = s3TypedStore;
+  override val indexedStore = indexStore;
+  override val typedStore = dataStore;
 
   override protected def createTypeStoreId(
     id: Version[String, Int]): ObjectLocation =
@@ -79,7 +80,7 @@ class RecorderHybridStore(
       UUID.randomUUID().toString)
 }
 
-object RecorderVhs {
+object VHSBuilder {
 
   // Scanamo auto derivation cannot derive format for EmptyMetadata correctly.
   // An underscore is used for variable name as the compiler thinks it is unused
@@ -93,41 +94,33 @@ object RecorderVhs {
         DynamoValue.fromMap(Map.empty)
     }
 
-  def build(config: Config): RecorderVhs = {
-    RecorderVhs.build(
+  def build[T](config: Config)(implicit codec: Codec[T]): VHS[T] =
+    VHSBuilder.build(
       ObjectLocationPrefix(
         path = config.getOrElse("aws.vhs.s3.globalPrefix")(default = ""),
         namespace = "vhs"),
       DynamoBuilder.buildDynamoConfig(config, namespace = "vhs"),
       DynamoBuilder.buildDynamoClient(config),
       S3Builder.buildS3Client(config))
-  }
 
-  def build(objectLocationPrefix: ObjectLocationPrefix,
-            dynamoConfig: DynamoConfig,
-            dynamoClient: AmazonDynamoDB,
-            s3Client: AmazonS3): RecorderVhs = {
-    new RecorderVhs(
-      new RecorderHybridStore(
+  def build[T](
+    objectLocationPrefix: ObjectLocationPrefix,
+    dynamoConfig: DynamoConfig,
+    dynamoClient: AmazonDynamoDB,
+    s3Client: AmazonS3)(
+    implicit codec: Codec[T]): VHS[T] = {
+    implicit val s3 = s3Client;
+    implicit val dynamo = dynamoClient;
+    new VHS(
+      new VHSInternalStore(
         objectLocationPrefix,
-        RecorderVhs.buildIndexStore(dynamoClient, dynamoConfig),
-        RecorderVhs.buildTypedStore(s3Client)
+        new DynamoHashStore[
+          String, 
+          Int,
+          HybridIndexedStoreEntry[ObjectLocation, EmptyMetadata]
+        ](dynamoConfig),
+        S3TypedStore[T]
       )
     )
-  }
-
-  def buildIndexStore(dynamoClient: AmazonDynamoDB,
-                      dynamoConfig: DynamoConfig) = {
-    implicit val client = dynamoClient
-    new DynamoHashStore[
-      String, 
-      Int,
-      HybridIndexedStoreEntry[ObjectLocation, EmptyMetadata]
-    ](dynamoConfig)
-  }
-
-  def buildTypedStore(s3Client: AmazonS3) = {
-    implicit val client = s3Client
-    S3TypedStore[TransformedBaseWork]
   }
 }

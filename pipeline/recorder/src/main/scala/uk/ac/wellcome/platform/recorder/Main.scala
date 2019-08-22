@@ -11,7 +11,7 @@ import uk.ac.wellcome.platform.recorder.services.RecorderWorkerService
 import uk.ac.wellcome.models.Implicits._
 
 import uk.ac.wellcome.messaging.typesafe.SNSBuilder
-import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
+import uk.ac.wellcome.bigmessaging.typesafe.{BigMessagingBuilder, VHSBuilder}
 
 object Main extends WellcomeTypesafeApp {
 
@@ -22,7 +22,7 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildActorMaterializer()
 
     new RecorderWorkerService(
-      store = RecorderVhs.build(config),
+      store = VHSBuilder.build[TransformedBaseWork](config),
       messageStream =
         BigMessagingBuilder.buildMessageStream[TransformedBaseWork](config),
       msgSender = SNSBuilder

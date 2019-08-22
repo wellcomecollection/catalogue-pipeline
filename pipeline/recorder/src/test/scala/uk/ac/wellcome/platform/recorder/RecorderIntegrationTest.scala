@@ -11,6 +11,7 @@ import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.recorder.fixtures.WorkerServiceFixture
 
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
+import uk.ac.wellcome.bigmessaging.typesafe.VHSBuilder
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures
 import uk.ac.wellcome.storage.dynamo.DynamoConfig
 import uk.ac.wellcome.storage.ObjectLocationPrefix
@@ -39,7 +40,7 @@ class RecorderIntegrationTest
       withLocalS3Bucket { bucket =>
         withLocalDynamoDbTable { table =>
           withMemoryMessageSender { msgSender =>
-            val vhs = RecorderVhs.build(
+            val vhs = VHSBuilder.build[TransformedBaseWork](
               ObjectLocationPrefix("test", "root"),
               DynamoConfig(table.name, table.index),
               dynamoClient,

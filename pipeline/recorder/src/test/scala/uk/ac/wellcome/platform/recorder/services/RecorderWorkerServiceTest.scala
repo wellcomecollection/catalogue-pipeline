@@ -10,13 +10,13 @@ import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.monitoring.fixtures.MetricsSenderFixture
 import uk.ac.wellcome.platform.recorder.fixtures.WorkerServiceFixture
-import uk.ac.wellcome.platform.recorder.EmptyMetadata
 
 import uk.ac.wellcome.storage.{Identified, ObjectLocation, Version}
 import uk.ac.wellcome.storage.store.HybridStoreEntry
 
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
+import uk.ac.wellcome.bigmessaging.typesafe.EmptyMetadata
 
 class RecorderWorkerServiceTest
     extends FunSpec

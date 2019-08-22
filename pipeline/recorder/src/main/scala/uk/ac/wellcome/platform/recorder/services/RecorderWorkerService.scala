@@ -7,8 +7,8 @@ import akka.Done
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.typesafe.Runnable
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.platform.recorder.{EmptyMetadata, GetLocation}
 
+import uk.ac.wellcome.bigmessaging.typesafe.{EmptyMetadata, GetLocation}
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.bigmessaging.message.MessageStream
 

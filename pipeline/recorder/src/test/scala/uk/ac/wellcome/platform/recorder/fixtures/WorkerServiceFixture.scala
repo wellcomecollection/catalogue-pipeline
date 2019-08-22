@@ -6,7 +6,7 @@ import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.recorder.services.RecorderWorkerService
-import uk.ac.wellcome.platform.recorder.{EmptyMetadata, GetLocation}
+import uk.ac.wellcome.bigmessaging.typesafe.{EmptyMetadata, GetLocation}
 
 import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
