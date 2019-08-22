@@ -89,6 +89,16 @@ trait ApiWorksTestBase
       "description": "$description"
     }"""
 
+  def goneRequest(apiPrefix: String, description: String) =
+    s"""{
+      "@context": "${contextUrl(apiPrefix)}",
+      "type": "Error",
+      "errorType": "http",
+      "httpStatus": 410,
+      "label": "Gone",
+      "description": "$description"
+    }"""
+
   def resultList(apiPrefix: String,
                  pageSize: Int = 10,
                  totalPages: Int = 1,
@@ -117,7 +127,7 @@ trait ApiWorksTestBase
       "description": "$description"
     }"""
 
-  def gone(apiPrefix: String) =
+  def deleted(apiPrefix: String) =
     s"""{
       "@context": "${contextUrl(apiPrefix)}",
       "type": "Error",

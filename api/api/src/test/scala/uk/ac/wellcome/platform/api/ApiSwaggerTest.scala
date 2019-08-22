@@ -58,39 +58,6 @@ class ApiSwaggerTest extends FunSpec with Matchers with fixtures.Server {
     }
   }
 
-  describe("v1") {
-    it("shows the correct Work model") {
-      v1response.at("/definitions/Work").isObject shouldBe true
-      v1response
-        .at("/definitions/Work/properties/creators/type")
-        .toString shouldBe "\"array\""
-    }
-
-    it("shows the includes request parameter model") {
-      v1response.at("/definitions/Work").isObject shouldBe true
-      val parameters = v1response
-        .at("/paths")
-        .findPath(s"/catalogue/${ApiVersions.v1.toString}/works")
-        .at("/get/parameters")
-        .asScala
-        .map(_.findPath("name").asText())
-      parameters should contain("includes")
-      parameters should not contain "include"
-    }
-
-    it("doesn't include any filter parameters") {
-      val parameters = v1response
-        .at("/paths")
-        .findPath(s"/catalogue/${ApiVersions.v1.toString}/works")
-        .at("/get/parameters")
-        .asScala
-        .map(_.findPath("name").asText())
-
-      parameters should not contain "items.locations.locationType"
-      parameters should not contain "workType"
-    }
-  }
-
   describe("v2") {
     it("shows the correct Work model") {
       v2response.at("/definitions/Work").isObject shouldBe true
@@ -151,13 +118,10 @@ class ApiSwaggerTest extends FunSpec with Matchers with fixtures.Server {
     }
   }
 
-  val v1response: JsonNode = readTree(
-    s"/catalogue/${ApiVersions.v1.toString}/swagger.json")
   val v2response: JsonNode = readTree(
     s"/catalogue/${ApiVersions.v2.toString}/swagger.json")
 
   val allResponses = Map(
-    ApiVersions.v1 -> v1response,
     ApiVersions.v2 -> v2response,
   )
 
