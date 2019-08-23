@@ -89,7 +89,8 @@ object VHSBuilder {
         DynamoValue.fromMap(Map.empty)
     }
 
-  def build[T](config: Config, namespace: String = "vhs")(implicit codec: Codec[T]): VHS[T] =
+  def build[T](config: Config, namespace: String = "vhs")(
+    implicit codec: Codec[T]): VHS[T] =
     VHSBuilder.build(
       buildObjectLocationPrefix(config, namespace = namespace),
       DynamoBuilder.buildDynamoConfig(config, namespace = namespace),
