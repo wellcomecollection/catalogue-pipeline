@@ -89,10 +89,10 @@ object VHSBuilder {
         DynamoValue.fromMap(Map.empty)
     }
 
-  def build[T](config: Config)(implicit codec: Codec[T]): VHS[T] =
+  def build[T](config: Config, namespace: String = "vhs")(implicit codec: Codec[T]): VHS[T] =
     VHSBuilder.build(
-      buildObjectLocationPrefix(config),
-      DynamoBuilder.buildDynamoConfig(config, namespace = "vhs"),
+      buildObjectLocationPrefix(config, namespace = namespace),
+      DynamoBuilder.buildDynamoConfig(config, namespace = namespace),
       DynamoBuilder.buildDynamoClient(config),
       S3Builder.buildS3Client(config)
     )
@@ -116,8 +116,8 @@ object VHSBuilder {
     )
   }
 
-  private def buildObjectLocationPrefix(config: Config) =
+  private def buildObjectLocationPrefix(config: Config, namespace: String) =
     ObjectLocationPrefix(
-      path = config.getOrElse("aws.vhs.s3.globalPrefix")(default = ""),
-      namespace = config.getOrElse("aws.vhs.s3.bucketName")(default = ""))
+      namespace = config.required(s"aws.${namespace}.s3.bucketName"),
+      path = config.getOrElse(s"aws.${namespace}.s3.globalPrefix")(default = ""))
 }
