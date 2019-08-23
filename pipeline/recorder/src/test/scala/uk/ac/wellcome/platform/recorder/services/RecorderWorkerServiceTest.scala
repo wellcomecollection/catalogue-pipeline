@@ -1,14 +1,11 @@
 package uk.ac.wellcome.platform.recorder.services
 
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSpec, Matchers}
 
-import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.monitoring.fixtures.MetricsSenderFixture
 import uk.ac.wellcome.platform.recorder.fixtures.WorkerServiceFixture
 
 import uk.ac.wellcome.storage.ObjectLocation
@@ -19,12 +16,8 @@ import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 class RecorderWorkerServiceTest
     extends FunSpec
     with Matchers
-    with MockitoSugar
-    with Akka
-    with SQS
     with ScalaFutures
     with BigMessagingFixture
-    with MetricsSenderFixture
     with IntegrationPatience
     with WorkerServiceFixture
     with WorksGenerators {

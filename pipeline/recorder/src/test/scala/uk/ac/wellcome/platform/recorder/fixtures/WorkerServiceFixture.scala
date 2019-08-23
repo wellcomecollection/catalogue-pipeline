@@ -1,6 +1,8 @@
 package uk.ac.wellcome.platform.recorder.fixtures
 
 import scala.util.{Success, Try}
+import io.circe.generic.semiauto.{deriveEncoder, deriveDecoder}
+import io.circe.{Encoder, Decoder}
 
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.Implicits._
@@ -22,6 +24,7 @@ import uk.ac.wellcome.storage.{
 }
 import uk.ac.wellcome.storage.store.{HybridStoreEntry, VersionedStore}
 import uk.ac.wellcome.storage.maxima.memory.MemoryMaxima
+import uk.ac.wellcome.storage.streaming.Codec
 
 trait WorkerServiceFixture extends BigMessagingFixture {
 
@@ -43,10 +46,17 @@ trait WorkerServiceFixture extends BigMessagingFixture {
       Success(ObjectLocation("test", s"${key.id}/${key.version}"))
   }
 
+
   class BrokenMemoryRecorderVhs extends MemoryRecorderVhs() {
     override def put(id: Version[String, Int])(entry: Entry): WriteEither =
       Left(StoreWriteError(new Error("BOOM!")))
   }
+
+  // Cache these here to improve compilation times (otherwise they are
+  // re-derived every time they are required)
+  implicit val workEncoder: Encoder[TransformedBaseWork] = deriveEncoder
+  implicit val workDecoder: Decoder[TransformedBaseWork] = deriveDecoder
+  implicit val workCodec: Codec[TransformedBaseWork] = Codec.typeCodec
 
   def withRecorderVhs[R](testWith: TestWith[RecorderVhs, R]): R = {
     testWith(new MemoryRecorderVhs())
