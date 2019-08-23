@@ -11,12 +11,10 @@ import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.monitoring.fixtures.MetricsSenderFixture
 import uk.ac.wellcome.platform.recorder.fixtures.WorkerServiceFixture
 
-import uk.ac.wellcome.storage.{Identified, ObjectLocation, Version}
-import uk.ac.wellcome.storage.store.HybridStoreEntry
+import uk.ac.wellcome.storage.ObjectLocation
 
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
-import uk.ac.wellcome.bigmessaging.typesafe.EmptyMetadata
 
 class RecorderWorkerServiceTest
     extends FunSpec
@@ -144,29 +142,5 @@ class RecorderWorkerServiceTest
         }
       }
     }
-  }
-
-  private def assertWorkStored[T <: TransformedBaseWork](
-    vhs: RecorderVhs,
-    work: T,
-    expectedVhsVersion: Int = 0) = {
-
-    val id = work.sourceIdentifier.toString
-    vhs.getLatest(id) shouldBe
-      Right(
-        Identified(
-          Version(id, expectedVhsVersion),
-          HybridStoreEntry(work, EmptyMetadata())))
-  }
-
-  private def assertWorkNotStored[T <: TransformedBaseWork](vhs: RecorderVhs,
-                                                            work: T) = {
-
-    val id = work.sourceIdentifier.toString
-    val workExists = vhs.getLatest(id) match {
-      case Left(_)  => false
-      case Right(_) => true
-    }
-    workExists shouldBe false
   }
 }

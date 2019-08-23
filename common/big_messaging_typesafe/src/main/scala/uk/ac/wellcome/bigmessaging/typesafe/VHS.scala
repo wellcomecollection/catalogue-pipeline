@@ -38,7 +38,7 @@ trait GetLocation {
   def getLocation(key: Version[String, Int]): Try[ObjectLocation]
 }
 
-class VHS[T](hybridStore: VHSInternalStore[T])
+class VHS[T](val hybridStore: VHSInternalStore[T])
     extends VersionedHybridStore[
       String,
       Int,
@@ -91,9 +91,7 @@ object VHSBuilder {
 
   def build[T](config: Config)(implicit codec: Codec[T]): VHS[T] =
     VHSBuilder.build(
-      ObjectLocationPrefix(
-        path = config.getOrElse("aws.vhs.s3.globalPrefix")(default = ""),
-        namespace = "vhs"),
+      buildObjectLocationPrefix(config),
       DynamoBuilder.buildDynamoConfig(config, namespace = "vhs"),
       DynamoBuilder.buildDynamoClient(config),
       S3Builder.buildS3Client(config)
@@ -117,4 +115,9 @@ object VHSBuilder {
       )
     )
   }
+
+  private def buildObjectLocationPrefix(config: Config) =
+    ObjectLocationPrefix(
+      path = config.getOrElse("aws.vhs.s3.globalPrefix")(default = ""),
+      namespace = config.getOrElse("aws.vhs.s3.bucketName")(default = ""))
 }

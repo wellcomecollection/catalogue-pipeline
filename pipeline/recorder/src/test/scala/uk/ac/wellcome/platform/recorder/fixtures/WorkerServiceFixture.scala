@@ -14,7 +14,7 @@ import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 
 import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryVersionedStore}
-import uk.ac.wellcome.storage.{ObjectLocation, StoreWriteError, Version}
+import uk.ac.wellcome.storage.{ObjectLocation, Identified, StoreWriteError, Version}
 import uk.ac.wellcome.storage.store.{HybridStoreEntry, VersionedStore}
 import uk.ac.wellcome.storage.maxima.memory.MemoryMaxima
 
@@ -69,4 +69,29 @@ trait WorkerServiceFixture extends BigMessagingFixture {
         testWith(workerService)
       }
     }
+
+  def assertWorkStored[T <: TransformedBaseWork](
+    vhs: RecorderVhs,
+    work: T,
+    expectedVhsVersion: Int = 0): Version[String, Int] = {
+
+    val id = work.sourceIdentifier.toString
+    vhs.getLatest(id) shouldBe
+      Right(
+        Identified(
+          Version(id, expectedVhsVersion),
+          HybridStoreEntry(work, EmptyMetadata())))
+    Version(id, expectedVhsVersion)
+  }
+
+  def assertWorkNotStored[T <: TransformedBaseWork](vhs: RecorderVhs,
+                                                            work: T) = {
+
+    val id = work.sourceIdentifier.toString
+    val workExists = vhs.getLatest(id) match {
+      case Left(_)  => false
+      case Right(_) => true
+    }
+    workExists shouldBe false
+  }
 }
