@@ -11,14 +11,11 @@ import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.recorder.fixtures.WorkerServiceFixture
 
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
-import uk.ac.wellcome.bigmessaging.typesafe.{VHSBuilder, EmptyMetadata}
+import uk.ac.wellcome.bigmessaging.typesafe.{EmptyMetadata, VHSBuilder}
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures
 import uk.ac.wellcome.storage.dynamo.DynamoConfig
 import uk.ac.wellcome.storage.{Identified, ObjectLocation, ObjectLocationPrefix}
-import uk.ac.wellcome.storage.store.{
-  HybridIndexedStoreEntry,
-  TypedStoreEntry
-}
+import uk.ac.wellcome.storage.store.{HybridIndexedStoreEntry, TypedStoreEntry}
 
 class RecorderIntegrationTest
     extends FunSpec
@@ -38,7 +35,8 @@ class RecorderIntegrationTest
     )
   }
 
-  it("receives a transformed Work, saves it to the VHS, and sends off a message") {
+  it(
+    "receives a transformed Work, saves it to the VHS, and sends off a message") {
     withLocalSqsQueue { queue =>
       withLocalS3Bucket { bucket =>
         withLocalDynamoDbTable { table =>
@@ -67,10 +65,7 @@ class RecorderIntegrationTest
 
                 // Check typed entry stored correctly in S3
                 vhs.hybridStore.typedStore.get(location) shouldBe
-                  Right(
-                    Identified(
-                      location,
-                      TypedStoreEntry(work, Map.empty)))
+                  Right(Identified(location, TypedStoreEntry(work, Map.empty)))
 
                 // Check S3 location put on queue
                 msgSender.getMessages[ObjectLocation].toList shouldBe
