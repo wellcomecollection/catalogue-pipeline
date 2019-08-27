@@ -10,6 +10,7 @@ import uk.ac.wellcome.models.work.internal.{
   IdentifiedBaseWork,
   UnidentifiedWork,
   UnidentifiedInvisibleWork,
+  UnidentifiedRedirectedWork,
   IdentifiedWork,
   BaseWork,
   InstantRange,
@@ -31,6 +32,7 @@ import uk.ac.wellcome.models.work.internal.{
   SourceIdentifier,
   MergeCandidate,
   WorkType,
+  Displayable,
 }
 import uk.ac.wellcome.models.matcher.MatcherResult
 
@@ -63,12 +65,14 @@ object Implicits {
   implicit val _dec20: Decoder[MergeCandidate] = deriveDecoder
   implicit val _dec21: Decoder[WorkType] = deriveDecoder
   implicit val _dec22: Decoder[MatcherResult] = deriveDecoder
+  implicit val _dec23: Decoder[Displayable[Item]] = deriveDecoder
 
   implicit val transformedBaseWorkDecoder: Decoder[TransformedBaseWork] = deriveDecoder
   implicit val identifiedBaseWorkDecoder: Decoder[IdentifiedBaseWork] = deriveDecoder
   implicit val unidentifiedWorkDecoder: Decoder[UnidentifiedWork] = deriveDecoder
   implicit val unidentifiedInvisibleWorkDecoder: Decoder[UnidentifiedInvisibleWork] = deriveDecoder
   implicit val identifiedWorkDecoder: Decoder[IdentifiedWork] = deriveDecoder
+  implicit val unidentifiedRedirectedWorkDecoder: Decoder[UnidentifiedRedirectedWork] = deriveDecoder
   implicit val baseWorkDecoder: Decoder[BaseWork] = deriveDecoder
 
   implicit val _enc01: Encoder[Option[String]] = deriveEncoder
@@ -93,11 +97,13 @@ object Implicits {
   implicit val _enc20: Encoder[MergeCandidate] = deriveEncoder
   implicit val _enc21: Encoder[WorkType] = deriveEncoder
   implicit val _enc22: Encoder[MatcherResult] = deriveEncoder
+  implicit val _enc23: Encoder[Displayable[Item]] = deriveEncoder
 
   implicit val transformedBaseWorkEncoder: Encoder[TransformedBaseWork] = deriveEncoder
   implicit val identifiedBaseWorkEncoder: Encoder[IdentifiedBaseWork] = deriveEncoder
   implicit val unidentifiedWorkEncoder: Encoder[UnidentifiedWork] = deriveEncoder
   implicit val unidentifiedInvisibleWorkEncoder: Encoder[UnidentifiedInvisibleWork] = deriveEncoder
   implicit val identifiedWorkEncoder: Encoder[IdentifiedWork] = deriveEncoder
+  implicit val unidentifiedRedirectedWorkEncoder: Encoder[UnidentifiedRedirectedWork] = deriveEncoder
   implicit val baseWorkEncoder: Encoder[BaseWork] = deriveEncoder
 }
