@@ -7,6 +7,7 @@ import scala.collection.immutable.::
 
 import uk.ac.wellcome.models.work.internal.{
   TransformedBaseWork,
+  IdentifiedBaseWork,
   UnidentifiedWork,
   UnidentifiedInvisibleWork,
   IdentifiedWork,
@@ -63,6 +64,7 @@ object Implicits {
   implicit val _dec22: Decoder[MatcherResult] = deriveDecoder
 
   implicit val transformedBaseWorkDecoder: Decoder[TransformedBaseWork] = deriveDecoder
+  implicit val identifiedBaseWorkDecoder: Decoder[IdentifiedBaseWork] = deriveDecoder
   implicit val unidentifiedWorkDecoder: Decoder[UnidentifiedWork] = deriveDecoder
   implicit val unidentifiedInvisibleWorkDecoder: Decoder[UnidentifiedInvisibleWork] = deriveDecoder
   implicit val identifiedWorkDecoder: Decoder[IdentifiedWork] = deriveDecoder
@@ -91,6 +93,7 @@ object Implicits {
   implicit val _enc22: Encoder[MatcherResult] = deriveEncoder
 
   implicit val transformedBaseWorkEncoder: Encoder[TransformedBaseWork] = deriveEncoder
+  implicit val identifiedBaseWorkEncoder: Encoder[IdentifiedBaseWork] = deriveEncoder
   implicit val unidentifiedWorkEncoder: Encoder[UnidentifiedWork] = deriveEncoder
   implicit val unidentifiedInvisibleWorkEncoder: Encoder[UnidentifiedInvisibleWork] = deriveEncoder
   implicit val identifiedWorkEncoder: Encoder[IdentifiedWork] = deriveEncoder
