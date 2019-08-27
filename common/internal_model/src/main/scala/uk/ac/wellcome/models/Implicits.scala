@@ -11,6 +11,7 @@ import uk.ac.wellcome.models.work.internal.{
   UnidentifiedWork,
   UnidentifiedInvisibleWork,
   IdentifiedWork,
+  BaseWork,
   InstantRange,
   Period,
   ProductionEvent,
@@ -68,7 +69,8 @@ object Implicits {
   implicit val unidentifiedWorkDecoder: Decoder[UnidentifiedWork] = deriveDecoder
   implicit val unidentifiedInvisibleWorkDecoder: Decoder[UnidentifiedInvisibleWork] = deriveDecoder
   implicit val identifiedWorkDecoder: Decoder[IdentifiedWork] = deriveDecoder
-  
+  implicit val baseWorkDecoder: Decoder[BaseWork] = deriveDecoder
+
   implicit val _enc01: Encoder[Option[String]] = deriveEncoder
   implicit val _enc02: Encoder[SourceIdentifier] = deriveEncoder
   implicit val _enc03: Encoder[Identifiable[AbstractConcept]] = deriveEncoder
@@ -97,4 +99,5 @@ object Implicits {
   implicit val unidentifiedWorkEncoder: Encoder[UnidentifiedWork] = deriveEncoder
   implicit val unidentifiedInvisibleWorkEncoder: Encoder[UnidentifiedInvisibleWork] = deriveEncoder
   implicit val identifiedWorkEncoder: Encoder[IdentifiedWork] = deriveEncoder
+  implicit val baseWorkEncoder: Encoder[BaseWork] = deriveEncoder
 }

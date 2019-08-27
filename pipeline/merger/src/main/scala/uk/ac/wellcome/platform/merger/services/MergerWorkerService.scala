@@ -1,13 +1,14 @@
 package uk.ac.wellcome.platform.merger.services
 
 import akka.Done
-import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.message.MessageWriter
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult}
 import uk.ac.wellcome.models.work.internal.BaseWork
 import uk.ac.wellcome.typesafe.Runnable
+import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.models.Implicits._
 
 import scala.concurrent.{ExecutionContext, Future}
 
