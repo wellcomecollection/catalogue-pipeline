@@ -30,6 +30,7 @@ import uk.ac.wellcome.models.work.internal.{
   MergeCandidate,
   WorkType,
 }
+import uk.ac.wellcome.models.matcher.MatcherResult
 
 import uk.ac.wellcome.json.JsonUtil._
 
@@ -59,6 +60,7 @@ object Implicits {
   implicit val _dec19: Decoder[ProductionEvent[MaybeDisplayable[AbstractAgent]]] = deriveDecoder
   implicit val _dec20: Decoder[MergeCandidate] = deriveDecoder
   implicit val _dec21: Decoder[WorkType] = deriveDecoder
+  implicit val _dec22: Decoder[MatcherResult] = deriveDecoder
 
   implicit val transformedBaseWorkDecoder: Decoder[TransformedBaseWork] = deriveDecoder
   implicit val unidentifiedWorkDecoder: Decoder[UnidentifiedWork] = deriveDecoder
@@ -86,6 +88,7 @@ object Implicits {
   implicit val _enc19: Encoder[ProductionEvent[MaybeDisplayable[AbstractAgent]]] = deriveEncoder
   implicit val _enc20: Encoder[MergeCandidate] = deriveEncoder
   implicit val _enc21: Encoder[WorkType] = deriveEncoder
+  implicit val _enc22: Encoder[MatcherResult] = deriveEncoder
 
   implicit val transformedBaseWorkEncoder: Encoder[TransformedBaseWork] = deriveEncoder
   implicit val unidentifiedWorkEncoder: Encoder[UnidentifiedWork] = deriveEncoder

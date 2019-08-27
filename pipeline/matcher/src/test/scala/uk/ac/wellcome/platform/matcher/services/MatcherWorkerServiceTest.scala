@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.matcher.services
 
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.{FunSpec, Matchers}
-import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.json.JsonUtil.fromJson
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
@@ -14,6 +14,7 @@ import uk.ac.wellcome.models.matcher.{
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
+import uk.ac.wellcome.models.Implicits._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
