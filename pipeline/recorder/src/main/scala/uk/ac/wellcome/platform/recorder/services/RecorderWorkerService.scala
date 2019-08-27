@@ -17,6 +17,7 @@ import uk.ac.wellcome.storage.vhs.{
   VersionedHybridStore
 }
 import uk.ac.wellcome.typesafe.Runnable
+import uk.ac.wellcome.models.Implicits._
 
 import scala.concurrent.{ExecutionContext, Future}
 
