@@ -6,36 +6,36 @@ import io.circe._
 import scala.collection.immutable.::
 
 import uk.ac.wellcome.models.work.internal.{
-  TransformedBaseWork,
-  IdentifiedBaseWork,
-  UnidentifiedWork,
-  UnidentifiedInvisibleWork,
-  UnidentifiedRedirectedWork,
-  IdentifiedWork,
-  BaseWork,
-  InstantRange,
-  Period,
-  ProductionEvent,
-  Person,
-  Contributor,
-  Identifiable,
-  Unidentifiable,
-  Item,
-  Genre,
-  DigitalLocation,
-  PhysicalLocation,
-  Location,
-  Concept,
-  AbstractRootConcept,
-  MaybeDisplayable,
   AbstractAgent,
   AbstractConcept,
-  SourceIdentifier,
-  MergeCandidate,
-  WorkType,
+  AbstractRootConcept,
+  BaseWork,
+  Concept,
+  Contributor,
+  DigitalLocation,
   Displayable,
+  Genre,
+  Identifiable,
   Identified,
+  IdentifiedBaseWork,
+  IdentifiedWork,
+  InstantRange,
+  Item,
+  Location,
+  MaybeDisplayable,
+  MergeCandidate,
+  Period,
+  Person,
+  PhysicalLocation,
+  ProductionEvent,
+  SourceIdentifier,
   Subject,
+  TransformedBaseWork,
+  Unidentifiable,
+  UnidentifiedInvisibleWork,
+  UnidentifiedRedirectedWork,
+  UnidentifiedWork,
+  WorkType,
 }
 import uk.ac.wellcome.models.matcher.MatcherResult
 import uk.ac.wellcome.json.JsonUtil._
@@ -66,36 +66,54 @@ object Implicits {
   implicit val _dec15: Decoder[Concept] = deriveDecoder
   implicit val _dec16: Decoder[AbstractConcept] = deriveDecoder
   implicit val _dec17: Decoder[AbstractRootConcept] = deriveDecoder
-  implicit val _dec18: Decoder[MaybeDisplayable[AbstractConcept]] = deriveDecoder
-  implicit val _dec19: Decoder[MaybeDisplayable[AbstractRootConcept]] = deriveDecoder
+  implicit val _dec18: Decoder[MaybeDisplayable[AbstractConcept]] =
+    deriveDecoder
+  implicit val _dec19: Decoder[MaybeDisplayable[AbstractRootConcept]] =
+    deriveDecoder
   implicit val _dec20: Decoder[MaybeDisplayable[AbstractAgent]] = deriveDecoder
-  implicit val _dec21: Decoder[Genre[MaybeDisplayable[AbstractConcept]]] = deriveDecoder
-  implicit val _dec22: Decoder[Contributor[MaybeDisplayable[AbstractAgent]]] = deriveDecoder
-  implicit val _dec23: Decoder[ProductionEvent[MaybeDisplayable[AbstractAgent]]] = deriveDecoder
+  implicit val _dec21: Decoder[Genre[MaybeDisplayable[AbstractConcept]]] =
+    deriveDecoder
+  implicit val _dec22: Decoder[Contributor[MaybeDisplayable[AbstractAgent]]] =
+    deriveDecoder
+  implicit val _dec23
+    : Decoder[ProductionEvent[MaybeDisplayable[AbstractAgent]]] = deriveDecoder
   implicit val _dec24: Decoder[MaybeDisplayable[Item]] = deriveDecoder
-  implicit val _dec25: Decoder[::[MaybeDisplayable[AbstractRootConcept]]] = deriveDecoder
-  implicit val _dec26: Decoder[::[MaybeDisplayable[AbstractAgent]]] = deriveDecoder
-  implicit val _dec27: Decoder[Subject[MaybeDisplayable[AbstractRootConcept]]] = deriveDecoder
+  implicit val _dec25: Decoder[::[MaybeDisplayable[AbstractRootConcept]]] =
+    deriveDecoder
+  implicit val _dec26: Decoder[::[MaybeDisplayable[AbstractAgent]]] =
+    deriveDecoder
+  implicit val _dec27: Decoder[Subject[MaybeDisplayable[AbstractRootConcept]]] =
+    deriveDecoder
   implicit val _dec28: Decoder[Displayable[AbstractConcept]] = deriveDecoder
   implicit val _dec29: Decoder[Displayable[AbstractRootConcept]] = deriveDecoder
   implicit val _dec30: Decoder[Displayable[AbstractAgent]] = deriveDecoder
-  implicit val _dec31: Decoder[Genre[Displayable[AbstractConcept]]] = deriveDecoder
-  implicit val _dec32: Decoder[Contributor[Displayable[AbstractAgent]]] = deriveDecoder
-  implicit val _dec33: Decoder[ProductionEvent[Displayable[AbstractAgent]]] = deriveDecoder
+  implicit val _dec31: Decoder[Genre[Displayable[AbstractConcept]]] =
+    deriveDecoder
+  implicit val _dec32: Decoder[Contributor[Displayable[AbstractAgent]]] =
+    deriveDecoder
+  implicit val _dec33: Decoder[ProductionEvent[Displayable[AbstractAgent]]] =
+    deriveDecoder
   implicit val _dec34: Decoder[Displayable[Item]] = deriveDecoder
-  implicit val _dec35: Decoder[::[Displayable[AbstractRootConcept]]] = deriveDecoder
+  implicit val _dec35: Decoder[::[Displayable[AbstractRootConcept]]] =
+    deriveDecoder
   implicit val _dec36: Decoder[::[Displayable[AbstractAgent]]] = deriveDecoder
-  implicit val _dec37: Decoder[Subject[Displayable[AbstractRootConcept]]] = deriveDecoder
+  implicit val _dec37: Decoder[Subject[Displayable[AbstractRootConcept]]] =
+    deriveDecoder
   implicit val _dec38: Decoder[Identified[AbstractConcept]] = deriveDecoder
   implicit val _dec39: Decoder[Identified[AbstractRootConcept]] = deriveDecoder
   implicit val _dec40: Decoder[Identified[AbstractAgent]] = deriveDecoder
-  implicit val _dec41: Decoder[Genre[Identified[AbstractConcept]]] = deriveDecoder
-  implicit val _dec42: Decoder[Contributor[Identified[AbstractAgent]]] = deriveDecoder
-  implicit val _dec43: Decoder[ProductionEvent[Identified[AbstractAgent]]] = deriveDecoder
+  implicit val _dec41: Decoder[Genre[Identified[AbstractConcept]]] =
+    deriveDecoder
+  implicit val _dec42: Decoder[Contributor[Identified[AbstractAgent]]] =
+    deriveDecoder
+  implicit val _dec43: Decoder[ProductionEvent[Identified[AbstractAgent]]] =
+    deriveDecoder
   implicit val _dec44: Decoder[Identified[Item]] = deriveDecoder
-  implicit val _dec45: Decoder[::[Identified[AbstractRootConcept]]] = deriveDecoder
+  implicit val _dec45: Decoder[::[Identified[AbstractRootConcept]]] =
+    deriveDecoder
   implicit val _dec46: Decoder[::[Identified[AbstractAgent]]] = deriveDecoder
-  implicit val _dec47: Decoder[Subject[Identified[AbstractRootConcept]]] = deriveDecoder
+  implicit val _dec47: Decoder[Subject[Identified[AbstractRootConcept]]] =
+    deriveDecoder
   implicit val _dec48: Decoder[UnidentifiedWork] = deriveDecoder
   implicit val _dec49: Decoder[UnidentifiedInvisibleWork] = deriveDecoder
   implicit val _dec50: Decoder[IdentifiedWork] = deriveDecoder
@@ -121,36 +139,54 @@ object Implicits {
   implicit val _enc15: Encoder[Concept] = deriveEncoder
   implicit val _enc16: Encoder[AbstractConcept] = deriveEncoder
   implicit val _enc17: Encoder[AbstractRootConcept] = deriveEncoder
-  implicit val _enc18: Encoder[MaybeDisplayable[AbstractConcept]] = deriveEncoder
-  implicit val _enc19: Encoder[MaybeDisplayable[AbstractRootConcept]] = deriveEncoder
+  implicit val _enc18: Encoder[MaybeDisplayable[AbstractConcept]] =
+    deriveEncoder
+  implicit val _enc19: Encoder[MaybeDisplayable[AbstractRootConcept]] =
+    deriveEncoder
   implicit val _enc20: Encoder[MaybeDisplayable[AbstractAgent]] = deriveEncoder
-  implicit val _enc21: Encoder[Genre[MaybeDisplayable[AbstractConcept]]] = deriveEncoder
-  implicit val _enc22: Encoder[Contributor[MaybeDisplayable[AbstractAgent]]] = deriveEncoder
-  implicit val _enc23: Encoder[ProductionEvent[MaybeDisplayable[AbstractAgent]]] = deriveEncoder
+  implicit val _enc21: Encoder[Genre[MaybeDisplayable[AbstractConcept]]] =
+    deriveEncoder
+  implicit val _enc22: Encoder[Contributor[MaybeDisplayable[AbstractAgent]]] =
+    deriveEncoder
+  implicit val _enc23
+    : Encoder[ProductionEvent[MaybeDisplayable[AbstractAgent]]] = deriveEncoder
   implicit val _enc24: Encoder[MaybeDisplayable[Item]] = deriveEncoder
-  implicit val _enc25: Encoder[::[MaybeDisplayable[AbstractRootConcept]]] = deriveEncoder
-  implicit val _enc26: Encoder[::[MaybeDisplayable[AbstractAgent]]] = deriveEncoder
-  implicit val _enc27: Encoder[Subject[MaybeDisplayable[AbstractRootConcept]]] = deriveEncoder
+  implicit val _enc25: Encoder[::[MaybeDisplayable[AbstractRootConcept]]] =
+    deriveEncoder
+  implicit val _enc26: Encoder[::[MaybeDisplayable[AbstractAgent]]] =
+    deriveEncoder
+  implicit val _enc27: Encoder[Subject[MaybeDisplayable[AbstractRootConcept]]] =
+    deriveEncoder
   implicit val _enc28: Encoder[Displayable[AbstractConcept]] = deriveEncoder
   implicit val _enc29: Encoder[Displayable[AbstractRootConcept]] = deriveEncoder
   implicit val _enc30: Encoder[Displayable[AbstractAgent]] = deriveEncoder
-  implicit val _enc31: Encoder[Genre[Displayable[AbstractConcept]]] = deriveEncoder
-  implicit val _enc32: Encoder[Contributor[Displayable[AbstractAgent]]] = deriveEncoder
-  implicit val _enc33: Encoder[ProductionEvent[Displayable[AbstractAgent]]] = deriveEncoder
+  implicit val _enc31: Encoder[Genre[Displayable[AbstractConcept]]] =
+    deriveEncoder
+  implicit val _enc32: Encoder[Contributor[Displayable[AbstractAgent]]] =
+    deriveEncoder
+  implicit val _enc33: Encoder[ProductionEvent[Displayable[AbstractAgent]]] =
+    deriveEncoder
   implicit val _enc34: Encoder[Displayable[Item]] = deriveEncoder
-  implicit val _enc35: Encoder[::[Displayable[AbstractRootConcept]]] = deriveEncoder
+  implicit val _enc35: Encoder[::[Displayable[AbstractRootConcept]]] =
+    deriveEncoder
   implicit val _enc36: Encoder[::[Displayable[AbstractAgent]]] = deriveEncoder
-  implicit val _enc37: Encoder[Subject[Displayable[AbstractRootConcept]]] = deriveEncoder
+  implicit val _enc37: Encoder[Subject[Displayable[AbstractRootConcept]]] =
+    deriveEncoder
   implicit val _enc38: Encoder[Identified[AbstractConcept]] = deriveEncoder
   implicit val _enc39: Encoder[Identified[AbstractRootConcept]] = deriveEncoder
   implicit val _enc40: Encoder[Identified[AbstractAgent]] = deriveEncoder
-  implicit val _enc41: Encoder[Genre[Identified[AbstractConcept]]] = deriveEncoder
-  implicit val _enc42: Encoder[Contributor[Identified[AbstractAgent]]] = deriveEncoder
-  implicit val _enc43: Encoder[ProductionEvent[Identified[AbstractAgent]]] = deriveEncoder
+  implicit val _enc41: Encoder[Genre[Identified[AbstractConcept]]] =
+    deriveEncoder
+  implicit val _enc42: Encoder[Contributor[Identified[AbstractAgent]]] =
+    deriveEncoder
+  implicit val _enc43: Encoder[ProductionEvent[Identified[AbstractAgent]]] =
+    deriveEncoder
   implicit val _enc44: Encoder[Identified[Item]] = deriveEncoder
-  implicit val _enc45: Encoder[::[Identified[AbstractRootConcept]]] = deriveEncoder
+  implicit val _enc45: Encoder[::[Identified[AbstractRootConcept]]] =
+    deriveEncoder
   implicit val _enc46: Encoder[::[Identified[AbstractAgent]]] = deriveEncoder
-  implicit val _enc47: Encoder[Subject[Identified[AbstractRootConcept]]] = deriveEncoder
+  implicit val _enc47: Encoder[Subject[Identified[AbstractRootConcept]]] =
+    deriveEncoder
   implicit val _enc48: Encoder[UnidentifiedWork] = deriveEncoder
   implicit val _enc49: Encoder[UnidentifiedInvisibleWork] = deriveEncoder
   implicit val _enc50: Encoder[IdentifiedWork] = deriveEncoder
