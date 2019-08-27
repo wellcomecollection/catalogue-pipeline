@@ -7,6 +7,9 @@ import scala.collection.immutable.::
 
 import uk.ac.wellcome.models.work.internal.{
   TransformedBaseWork,
+  UnidentifiedWork,
+  UnidentifiedInvisibleWork,
+  IdentifiedWork,
   InstantRange,
   Period,
   ProductionEvent,
@@ -57,7 +60,10 @@ object Implicits {
   implicit val _dec20: Decoder[MergeCandidate] = deriveDecoder
   implicit val _dec21: Decoder[WorkType] = deriveDecoder
 
-  implicit val workDecoder: Decoder[TransformedBaseWork] = deriveDecoder
+  implicit val transformedBaseWorkDecoder: Decoder[TransformedBaseWork] = deriveDecoder
+  implicit val unidentifiedWorkDecoder: Decoder[UnidentifiedWork] = deriveDecoder
+  implicit val unidentifiedInvisibleWorkDecoder: Decoder[UnidentifiedInvisibleWork] = deriveDecoder
+  implicit val identifiedWorkDecoder: Decoder[IdentifiedWork] = deriveDecoder
   
   implicit val _enc01: Encoder[Option[String]] = deriveEncoder
   implicit val _enc02: Encoder[SourceIdentifier] = deriveEncoder
@@ -81,5 +87,8 @@ object Implicits {
   implicit val _enc20: Encoder[MergeCandidate] = deriveEncoder
   implicit val _enc21: Encoder[WorkType] = deriveEncoder
 
-  implicit val workEncoder: Encoder[TransformedBaseWork] = deriveEncoder
+  implicit val transformedBaseWorkEncoder: Encoder[TransformedBaseWork] = deriveEncoder
+  implicit val unidentifiedWorkEncoder: Encoder[UnidentifiedWork] = deriveEncoder
+  implicit val unidentifiedInvisibleWorkEncoder: Encoder[UnidentifiedInvisibleWork] = deriveEncoder
+  implicit val identifiedWorkEncoder: Encoder[IdentifiedWork] = deriveEncoder
 }
