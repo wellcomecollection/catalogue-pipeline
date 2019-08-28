@@ -5,6 +5,7 @@ import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType
 import org.scalatest.concurrent.IntegrationPatience
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.models.Implicits._
+import uk.ac.wellcome.json.JsonUtil._
 
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork

@@ -7,6 +7,7 @@ import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.recorder.fixtures.WorkerServiceFixture
+import uk.ac.wellcome.json.JsonUtil._
 
 import uk.ac.wellcome.storage.ObjectLocation
 
