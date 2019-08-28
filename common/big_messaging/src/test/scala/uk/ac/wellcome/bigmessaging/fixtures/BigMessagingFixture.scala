@@ -46,15 +46,15 @@ trait BigMessagingFixture
 
   case class ExampleObject(name: String)
 
-  def withMessageStream[T, R](queue: SQS.Queue,
+  def withBigMessageStream[T, R](queue: SQS.Queue,
                               metrics: MemoryMetrics[StandardUnit] =
                                 new MemoryMetrics[StandardUnit]())(
-    testWith: TestWith[MessageStream[T], R])(
+    testWith: TestWith[BigMessageStream[T], R])(
     implicit
     actorSystem: ActorSystem,
     decoderT: Decoder[T],
     typedStoreT: TypedStore[ObjectLocation, T]): R = {
-    val stream = new MessageStream[T](
+    val stream = new BigMessageStream[T](
       sqsClient = asyncSqsClient,
       sqsConfig = createSQSConfigWith(queue),
       metrics = metrics

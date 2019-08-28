@@ -69,7 +69,7 @@ trait WorkerServiceFixture extends BigMessagingFixture {
     withActorSystem { implicit actorSystem =>
       implicit val streamStore =
         MemoryTypedStoreCompanion[ObjectLocation, TransformedBaseWork]()
-      withMessageStream[TransformedBaseWork, R](queue = queue) { msgStream =>
+      withBigMessageStream[TransformedBaseWork, R](queue = queue) { msgStream =>
         val workerService = new RecorderWorkerService(vhs, msgStream, msgSender)
         workerService.run()
         testWith(workerService)

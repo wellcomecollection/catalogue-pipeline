@@ -26,7 +26,7 @@ import uk.ac.wellcome.storage.streaming.Codec._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class MessagingFixtureIntegrationTest
+class BigMessagingFixtureIntegrationTest
     extends FunSpec
     with Matchers
     with BigMessagingFixture
@@ -90,7 +90,7 @@ class MessagingFixtureIntegrationTest
     )
 
   private def withLocalStackBigMessageSenderMessageStream[R](
-    testWith: TestWith[(MessageStream[ExampleObject],
+    testWith: TestWith[(BigMessageStream[ExampleObject],
                         BigMessageSender[SNSConfig, ExampleObject]),
                        R]): R = {
     withLocalStackMessageStreamFixtures[R] {
@@ -113,7 +113,7 @@ class MessagingFixtureIntegrationTest
 
   def withLocalStackMessageStreamFixtures[R](
     testWith: TestWith[(Queue,
-                        MessageStream[ExampleObject],
+                        BigMessageStream[ExampleObject],
                         MemoryTypedStore[ObjectLocation, ExampleObject]),
                        R]): R =
     withActorSystem { implicit actorSystem =>
@@ -122,7 +122,7 @@ class MessagingFixtureIntegrationTest
         MemoryTypedStoreCompanion[ObjectLocation, ExampleObject]()
 
       withLocalStackSqsQueue { queue =>
-        withMessageStream[ExampleObject, R](queue, metrics) { messageStream =>
+        withBigMessageStream[ExampleObject, R](queue, metrics) { messageStream =>
           testWith((queue, messageStream, typedStoreT))
         }
       }

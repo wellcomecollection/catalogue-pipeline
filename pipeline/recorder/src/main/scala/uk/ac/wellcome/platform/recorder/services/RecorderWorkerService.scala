@@ -10,7 +10,7 @@ import uk.ac.wellcome.json.JsonUtil._
 
 import uk.ac.wellcome.bigmessaging.typesafe.{EmptyMetadata, GetLocation}
 import uk.ac.wellcome.messaging.MessageSender
-import uk.ac.wellcome.bigmessaging.message.MessageStream
+import uk.ac.wellcome.bigmessaging.message.BigMessageStream
 
 import uk.ac.wellcome.storage.store.{HybridStoreEntry, VersionedStore}
 import uk.ac.wellcome.storage.{Identified, Version}
@@ -20,7 +20,7 @@ class RecorderWorkerService[MsgDestination](
     String,
     Int,
     HybridStoreEntry[TransformedBaseWork, EmptyMetadata]] with GetLocation,
-  messageStream: MessageStream[TransformedBaseWork],
+  messageStream: BigMessageStream[TransformedBaseWork],
   msgSender: MessageSender[MsgDestination])
     extends Runnable {
 
