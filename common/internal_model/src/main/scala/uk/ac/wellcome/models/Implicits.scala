@@ -1,6 +1,7 @@
 package uk.ac.wellcome.models
 
-import io.circe.generic.semiauto._
+import io.circe.generic.extras.semiauto._
+import io.circe.generic.{semiauto => simple}
 import io.circe._
 
 import scala.collection.immutable.::
@@ -49,7 +50,6 @@ object Implicits {
   // flamegraphs using the scalac-profiling plugin. See this blog post for
   // info: https://www.scala-lang.org/blog/2018/06/04/scalac-profiling.html
 
-  implicit val _dec01: Decoder[Option[String]] = deriveDecoder
   implicit val _dec02: Decoder[SourceIdentifier] = deriveDecoder
   implicit val _dec03: Decoder[Identifiable[AbstractConcept]] = deriveDecoder
   implicit val _dec04: Decoder[Unidentifiable[AbstractConcept]] = deriveDecoder
@@ -79,9 +79,9 @@ object Implicits {
     : Decoder[ProductionEvent[MaybeDisplayable[AbstractAgent]]] = deriveDecoder
   implicit val _dec24: Decoder[MaybeDisplayable[Item]] = deriveDecoder
   implicit val _dec25: Decoder[::[MaybeDisplayable[AbstractRootConcept]]] =
-    deriveDecoder
+    simple.deriveDecoder
   implicit val _dec26: Decoder[::[MaybeDisplayable[AbstractAgent]]] =
-    deriveDecoder
+    simple.deriveDecoder
   implicit val _dec27: Decoder[Subject[MaybeDisplayable[AbstractRootConcept]]] =
     deriveDecoder
   implicit val _dec28: Decoder[Displayable[AbstractConcept]] = deriveDecoder
@@ -95,8 +95,9 @@ object Implicits {
     deriveDecoder
   implicit val _dec34: Decoder[Displayable[Item]] = deriveDecoder
   implicit val _dec35: Decoder[::[Displayable[AbstractRootConcept]]] =
-    deriveDecoder
-  implicit val _dec36: Decoder[::[Displayable[AbstractAgent]]] = deriveDecoder
+    simple.deriveDecoder
+  implicit val _dec36: Decoder[::[Displayable[AbstractAgent]]] =
+    simple.deriveDecoder
   implicit val _dec37: Decoder[Subject[Displayable[AbstractRootConcept]]] =
     deriveDecoder
   implicit val _dec38: Decoder[Identified[AbstractConcept]] = deriveDecoder
@@ -110,8 +111,9 @@ object Implicits {
     deriveDecoder
   implicit val _dec44: Decoder[Identified[Item]] = deriveDecoder
   implicit val _dec45: Decoder[::[Identified[AbstractRootConcept]]] =
-    deriveDecoder
-  implicit val _dec46: Decoder[::[Identified[AbstractAgent]]] = deriveDecoder
+    simple.deriveDecoder
+  implicit val _dec46: Decoder[::[Identified[AbstractAgent]]] =
+    simple.deriveDecoder
   implicit val _dec47: Decoder[Subject[Identified[AbstractRootConcept]]] =
     deriveDecoder
   implicit val _dec48: Decoder[UnidentifiedWork] = deriveDecoder
@@ -122,7 +124,6 @@ object Implicits {
   implicit val _dec53: Decoder[IdentifiedBaseWork] = deriveDecoder
   implicit val _dec54: Decoder[BaseWork] = deriveDecoder
 
-  implicit val _enc01: Encoder[Option[String]] = deriveEncoder
   implicit val _enc02: Encoder[SourceIdentifier] = deriveEncoder
   implicit val _enc03: Encoder[Identifiable[AbstractConcept]] = deriveEncoder
   implicit val _enc04: Encoder[Unidentifiable[AbstractConcept]] = deriveEncoder
@@ -152,9 +153,9 @@ object Implicits {
     : Encoder[ProductionEvent[MaybeDisplayable[AbstractAgent]]] = deriveEncoder
   implicit val _enc24: Encoder[MaybeDisplayable[Item]] = deriveEncoder
   implicit val _enc25: Encoder[::[MaybeDisplayable[AbstractRootConcept]]] =
-    deriveEncoder
+    simple.deriveEncoder
   implicit val _enc26: Encoder[::[MaybeDisplayable[AbstractAgent]]] =
-    deriveEncoder
+    simple.deriveEncoder
   implicit val _enc27: Encoder[Subject[MaybeDisplayable[AbstractRootConcept]]] =
     deriveEncoder
   implicit val _enc28: Encoder[Displayable[AbstractConcept]] = deriveEncoder
@@ -168,8 +169,9 @@ object Implicits {
     deriveEncoder
   implicit val _enc34: Encoder[Displayable[Item]] = deriveEncoder
   implicit val _enc35: Encoder[::[Displayable[AbstractRootConcept]]] =
-    deriveEncoder
-  implicit val _enc36: Encoder[::[Displayable[AbstractAgent]]] = deriveEncoder
+    simple.deriveEncoder
+  implicit val _enc36: Encoder[::[Displayable[AbstractAgent]]] =
+    simple.deriveEncoder
   implicit val _enc37: Encoder[Subject[Displayable[AbstractRootConcept]]] =
     deriveEncoder
   implicit val _enc38: Encoder[Identified[AbstractConcept]] = deriveEncoder
@@ -183,8 +185,9 @@ object Implicits {
     deriveEncoder
   implicit val _enc44: Encoder[Identified[Item]] = deriveEncoder
   implicit val _enc45: Encoder[::[Identified[AbstractRootConcept]]] =
-    deriveEncoder
-  implicit val _enc46: Encoder[::[Identified[AbstractAgent]]] = deriveEncoder
+    simple.deriveEncoder
+  implicit val _enc46: Encoder[::[Identified[AbstractAgent]]] =
+    simple.deriveEncoder
   implicit val _enc47: Encoder[Subject[Identified[AbstractRootConcept]]] =
     deriveEncoder
   implicit val _enc48: Encoder[UnidentifiedWork] = deriveEncoder
