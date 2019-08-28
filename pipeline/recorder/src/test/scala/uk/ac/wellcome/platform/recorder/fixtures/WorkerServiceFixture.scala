@@ -94,10 +94,6 @@ trait WorkerServiceFixture extends BigMessagingFixture {
                                                     work: T) = {
 
     val id = work.sourceIdentifier.toString
-    val workExists = vhs.getLatest(id) match {
-      case Left(_)  => false
-      case Right(_) => true
-    }
-    workExists shouldBe false
+    vhs.getLatest(id) shouldBe a[Left[_, _]]
   }
 }
