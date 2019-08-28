@@ -6,7 +6,7 @@ import akka.Done
 
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.typesafe.Runnable
-import uk.ac.wellcome.models.Implicits._
+import uk.ac.wellcome.json.JsonUtil._
 
 import uk.ac.wellcome.bigmessaging.typesafe.{EmptyMetadata, GetLocation}
 import uk.ac.wellcome.messaging.MessageSender
