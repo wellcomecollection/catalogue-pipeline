@@ -9,7 +9,12 @@ import io.circe.Decoder
 import uk.ac.wellcome.display.models.WorkAgg
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.internal.{IdentifiedBaseWork, IdentifiedWork}
-import uk.ac.wellcome.platform.api.models.{ResultList, WorkFilter, WorkQuery}
+import uk.ac.wellcome.platform.api.models.{
+  AggregationResults,
+  ResultList,
+  WorkFilter,
+  WorkQuery
+}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -116,17 +121,26 @@ class WorksService @Inject()(searchService: ElasticsearchService)(
     )
   }
 
-  private def createResultList(searchResponse: SearchResponse): ResultList =
+  private def createResultList(searchResponse: SearchResponse): ResultList = {
     ResultList(
       results = searchResponseToWorks(searchResponse),
-      totalResults = searchResponse.totalHits.toInt
+      totalResults = searchResponse.totalHits.toInt,
+      aggregations = searchResponseToAggregationResults(searchResponse)
     )
+  }
 
   private def searchResponseToWorks(
     searchResponse: SearchResponse): List[IdentifiedWork] =
     searchResponse.hits.hits.map { h: SearchHit =>
       jsonTo[IdentifiedWork](h.sourceAsString)
     }.toList
+
+  private def searchResponseToAggregationResults(
+    searchResponse: SearchResponse): Option[AggregationResults] = {
+    AggregationResults(
+      searchResponse.aggregationsAsMap,
+      searchResponse.aggregationsAsString)
+  }
 
   private def jsonTo[T <: IdentifiedBaseWork](document: String)(
     implicit decoder: Decoder[T]): T =

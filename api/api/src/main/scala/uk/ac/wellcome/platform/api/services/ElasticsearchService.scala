@@ -63,9 +63,7 @@ class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
     val searchRequest: SearchRequest =
       buildSearchRequest(index, maybeWorkQuery, sortDefinitions, queryOptions)
 
-    debug(s"====================================")
     debug(s"Sending ES request: ${searchRequest.show}...$queryOptions")
-    debug(s"====================================")
 
     elasticClient
       .execute { searchRequest.trackTotalHits(true) }
