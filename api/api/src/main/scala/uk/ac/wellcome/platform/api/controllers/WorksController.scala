@@ -123,10 +123,19 @@ abstract class WorksController[M <: MultipleResultsRequest[W],
       case None            => defaultIndex
     }
 
+    val aggs = request._aggs
+      .map { arg =>
+        arg.split(",").map { _.trim }
+      }
+      .map { aggs: Array[String] =>
+        WorksAggs(aggs)
+      } getOrElse List()
+
     val worksSearchOptions = WorksSearchOptions(
       filters = buildFilters(request),
       pageSize = pageSize,
-      pageNumber = request.page
+      pageNumber = request.page,
+      aggs = aggs
     )
 
     def searchFunction: (Index, WorksSearchOptions) => Future[

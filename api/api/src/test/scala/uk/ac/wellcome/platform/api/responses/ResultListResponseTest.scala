@@ -28,7 +28,8 @@ class ResultListResponseTest extends FunSpec with Matchers {
     query = None,
     _queryType = None,
     _index = None,
-    request = Request(method = Method.Get, uri = requestUri)
+    request = Request(method = Method.Get, uri = requestUri),
+    _aggs = None
   )
 
   it("inclues a nextPage and prevPage parameter where appropriate") {

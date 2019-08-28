@@ -1,6 +1,7 @@
 package uk.ac.wellcome.platform.api.requests
 
 import java.time.LocalDate
+
 import com.twitter.finagle.http.Request
 import com.twitter.finatra.request.{QueryParam, RouteParam}
 import com.twitter.finatra.validation.{Max, Min}
@@ -21,6 +22,7 @@ trait MultipleResultsRequest[W <: WorksIncludes] extends ApiRequest {
   val query: Option[String]
   val _index: Option[String]
   val _queryType: Option[String]
+  val _aggs: Option[String]
   val request: Request
 }
 
@@ -31,6 +33,7 @@ case class V1MultipleResultsRequest(
   @QueryParam query: Option[String],
   @QueryParam _index: Option[String],
   @QueryParam _queryType: Option[String] = None,
+  @QueryParam _aggs: Option[String],
   request: Request
 ) extends MultipleResultsRequest[V1WorksIncludes] {
   val include: Option[V1WorksIncludes] = includes
@@ -47,6 +50,7 @@ case class V2MultipleResultsRequest(
   @QueryParam _queryType: Option[String],
   @QueryParam _dateFrom: Option[LocalDate],
   @QueryParam _dateTo: Option[LocalDate],
+  @QueryParam _aggs: Option[String],
   request: Request
 ) extends MultipleResultsRequest[V2WorksIncludes]
 

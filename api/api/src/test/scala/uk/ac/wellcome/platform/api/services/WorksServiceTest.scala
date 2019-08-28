@@ -22,6 +22,7 @@ import scala.concurrent.Future
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+import uk.ac.wellcome.display.models.WorkTypeAgg
 import uk.ac.wellcome.platform.api.models.WorkQuery.MSMBoostQuery
 
 class WorksServiceTest
@@ -396,6 +397,33 @@ class WorksServiceTest
           expectedWorks = List(workExactTitle),
           expectedTotalResults = 1
         )
+      }
+
+      it("aggregates workTypes") {
+        withLocalWorksIndex { index =>
+          val work1 = createIdentifiedWorkWith(
+            workType = Some(WorkType(id = "b", label = "Books"))
+          )
+          val work2 = createIdentifiedWorkWith(
+            workType = Some(WorkType(id = "b", label = "Books"))
+          )
+          val work3 = createIdentifiedWorkWith(
+            workType = Some(WorkType(id = "a", label = "Archives"))
+          )
+          val work4 = createIdentifiedWorkWith(
+            workType = Some(WorkType(id = "m", label = "Manuscripts"))
+          )
+
+          val worksSearchOptions =
+            createWorksSearchOptionsWith(aggs = List(WorkTypeAgg()))
+
+          assertListResultIsCorrect(
+            allWorks = List(work1, work2, work3, work4),
+            expectedWorks = List(),
+            expectedTotalResults = 4,
+            worksSearchOptions = worksSearchOptions
+          )
+        }
       }
     }
   }
