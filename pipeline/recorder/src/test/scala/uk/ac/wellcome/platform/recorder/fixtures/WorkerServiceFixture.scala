@@ -12,6 +12,7 @@ import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
+import uk.ac.wellcome.messaging.MessageSender
 
 import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryVersionedStore}
 import uk.ac.wellcome.storage.{
@@ -61,10 +62,10 @@ trait WorkerServiceFixture extends BigMessagingFixture {
     testWith(new MemoryMessageSender())
   }
 
-  def withWorkerService[R](queue: Queue,
-                           vhs: RecorderVhs,
-                           msgSender: MemoryMessageSender)(
-    testWith: TestWith[RecorderWorkerService[String], R]): R =
+  def withWorkerService[R, D](queue: Queue,
+                              vhs: RecorderVhs,
+                              msgSender: MessageSender[D])(
+    testWith: TestWith[RecorderWorkerService[D], R]): R =
     withActorSystem { implicit actorSystem =>
       implicit val streamStore =
         MemoryTypedStoreCompanion[ObjectLocation, TransformedBaseWork]()

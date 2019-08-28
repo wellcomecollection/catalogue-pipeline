@@ -87,24 +87,29 @@ trait BigMessagingFixture
     testWith: TestWith[BigMessageSender[SNSConfig, T], R])(
     implicit
     encoderT: Encoder[T],
-    codecT: Codec[T]): R = {
-
-    val sender = new BigMessageSender[SNSConfig, T] {
-      override val messageSender: MessageSender[SNSConfig] =
-        new SNSMessageSender(
-          snsClient = senderSnsClient,
-          snsConfig = createSNSConfigWith(topic),
-          subject = "Sent in MessagingIntegrationTest"
-        )
-      override val typedStore: MemoryTypedStore[ObjectLocation, T] =
-        store.getOrElse(MemoryTypedStoreCompanion[ObjectLocation, T]())
-      override val namespace: String = bucket.name
-      override implicit val encoder: Encoder[T] = encoderT
-      override val maxMessageSize: Int = 10000
+    codecT: Codec[T]): R =
+    withSnsMessageSender(topic, senderSnsClient) { snsMessageSender =>
+      val sender = new BigMessageSender[SNSConfig, T] {
+        override val messageSender: MessageSender[SNSConfig] =
+          snsMessageSender
+        override val typedStore: MemoryTypedStore[ObjectLocation, T] =
+          store.getOrElse(MemoryTypedStoreCompanion[ObjectLocation, T]())
+        override val namespace: String = bucket.name
+        override implicit val encoder: Encoder[T] = encoderT
+        override val maxMessageSize: Int = 10000
+      }
+      testWith(sender)
     }
 
-    testWith(sender)
-  }
+  def withSnsMessageSender[R](topic: Topic, snsClient: AmazonSNS = snsClient)(
+    testWith: TestWith[MessageSender[SNSConfig], R]): R =
+    testWith(
+      new SNSMessageSender(
+        snsClient = snsClient,
+        snsConfig = createSNSConfigWith(topic),
+        subject = "Sent in BigMessagingFixture"
+      )
+    )
 
   /** Given a topic ARN which has received notifications containing pointers
     * to objects in S3, return the unpacked objects.

@@ -39,23 +39,27 @@ class RecorderIntegrationTest
     withLocalSqsQueue { queue =>
       withLocalS3Bucket { bucket =>
         withLocalDynamoDbTable { table =>
-          withMemoryMessageSender { msgSender =>
-            val vhs = VHSBuilder.build[TransformedBaseWork](
-              ObjectLocationPrefix(namespace = bucket.name, path = "recorder"),
-              DynamoConfig(table.name, table.index),
-              dynamoClient,
-              s3Client,
-            )
-            withWorkerService(queue, vhs, msgSender) { service =>
-              val work = createUnidentifiedWork
-              sendMessage[TransformedBaseWork](queue = queue, obj = work)
-              eventually {
-                val key = assertWorkStored(vhs, work)
-                val location = vhs.getLocation(key)
-                location.isSuccess shouldBe true
-                getObjectFromS3[TransformedBaseWork](location.get) shouldBe work
-                msgSender.getMessages[ObjectLocation].toList shouldBe
-                  List(location.get)
+          withLocalSnsTopic { topic =>
+            withSnsMessageSender(topic) { msgSender =>
+              val vhs = VHSBuilder.build[TransformedBaseWork](
+                ObjectLocationPrefix(namespace = bucket.name, path = "recorder"),
+                DynamoConfig(table.name, table.index),
+                dynamoClient,
+                s3Client,
+              )
+              withWorkerService(queue, vhs, msgSender) { service =>
+                val work = createUnidentifiedWork
+                sendMessage[TransformedBaseWork](queue = queue, obj = work)
+                eventually {
+                  val key = assertWorkStored(vhs, work)
+                  val location = vhs.getLocation(key)
+                  location.isSuccess shouldBe true
+                  getObjectFromS3[TransformedBaseWork](location.get) shouldBe work
+                  val messages = listMessagesReceivedFromSNS(topic)
+                    .map(_.message)
+                    .map(fromJson[ObjectLocation](_).get)
+                  messages.toList shouldBe List(location.get)
+                }
               }
             }
           }
