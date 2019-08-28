@@ -26,7 +26,7 @@ object Main extends WellcomeTypesafeApp {
       messageStream =
         BigMessagingBuilder.buildMessageStream[TransformedBaseWork](config),
       msgSender = SNSBuilder
-        .buildSNSMessageSender(config, namespace = "dunno", subject = "dunno")
+        .buildSNSMessageSender(config, subject = "Sent from the recorder")
     )
   }
 }
