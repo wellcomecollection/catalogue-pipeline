@@ -2,7 +2,6 @@ package uk.ac.wellcome.platform.merger
 
 import org.scalatest.FunSpec
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.Messaging
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.models.work.generators.WorksGenerators
@@ -13,6 +12,7 @@ import uk.ac.wellcome.platform.merger.fixtures.{
   WorkerServiceFixture
 }
 import uk.ac.wellcome.storage.fixtures.LocalVersionedHybridStore
+import uk.ac.wellcome.models.Implicits._
 
 class MergerFeatureTest
     extends FunSpec

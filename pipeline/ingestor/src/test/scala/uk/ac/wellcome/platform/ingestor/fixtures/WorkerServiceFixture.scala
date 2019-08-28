@@ -5,7 +5,7 @@ import com.sksamuel.elastic4s.ElasticClient
 import org.scalatest.Suite
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
-import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
