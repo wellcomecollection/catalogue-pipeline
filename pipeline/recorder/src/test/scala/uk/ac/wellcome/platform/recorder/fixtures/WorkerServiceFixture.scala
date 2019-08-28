@@ -43,7 +43,6 @@ trait WorkerServiceFixture extends BigMessagingFixture {
       Success(ObjectLocation("test", s"${key.id}/${key.version}"))
   }
 
-
   class BrokenMemoryRecorderVhs extends MemoryRecorderVhs() {
     override def put(id: Version[String, Int])(entry: Entry): WriteEither =
       Left(StoreWriteError(new Error("BOOM!")))

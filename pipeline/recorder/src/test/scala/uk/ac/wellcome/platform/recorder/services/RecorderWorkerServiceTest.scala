@@ -64,13 +64,10 @@ class RecorderWorkerServiceTest
             val newerWork =
               olderWork.copy(version = 10, title = "A nice new thing")
             sendMessage[TransformedBaseWork](queue = queue, newerWork)
-            eventually {
-              assertWorkStored(vhs, newerWork)
-              sendMessage[TransformedBaseWork](queue = queue, obj = olderWork)
-              eventually {
-                assertWorkStored(vhs, newerWork)
-              }
-            }
+            eventually { assertWorkStored(vhs, newerWork) }
+            sendMessage[TransformedBaseWork](queue = queue, obj = olderWork)
+            eventually { assertQueueEmpty(queue) }
+            assertWorkStored(vhs, newerWork, 1)
           }
         }
       }
