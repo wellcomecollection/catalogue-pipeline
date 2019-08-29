@@ -19,7 +19,10 @@ import scala.collection.immutable.Map
 import scala.concurrent.Future
 import scala.util.Random
 
-class BigMessageStreamTest extends FunSpec with Matchers with BigMessagingFixture {
+class BigMessageStreamTest
+    extends FunSpec
+    with Matchers
+    with BigMessagingFixture {
 
   def process(list: ConcurrentLinkedQueue[ExampleObject])(o: ExampleObject) = {
     list.add(o)

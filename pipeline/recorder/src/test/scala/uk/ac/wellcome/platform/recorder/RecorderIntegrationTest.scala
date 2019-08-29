@@ -42,7 +42,9 @@ class RecorderIntegrationTest
           withLocalSnsTopic { topic =>
             withSnsMessageSender(topic) { msgSender =>
               val vhs = VHSBuilder.build[TransformedBaseWork](
-                ObjectLocationPrefix(namespace = bucket.name, path = "recorder"),
+                ObjectLocationPrefix(
+                  namespace = bucket.name,
+                  path = "recorder"),
                 DynamoConfig(table.name, table.index),
                 dynamoClient,
                 s3Client,

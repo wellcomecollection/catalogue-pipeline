@@ -122,8 +122,9 @@ class BigMessagingFixtureIntegrationTest
         MemoryTypedStoreCompanion[ObjectLocation, ExampleObject]()
 
       withLocalStackSqsQueue { queue =>
-        withBigMessageStream[ExampleObject, R](queue, metrics) { messageStream =>
-          testWith((queue, messageStream, typedStoreT))
+        withBigMessageStream[ExampleObject, R](queue, metrics) {
+          messageStream =>
+            testWith((queue, messageStream, typedStoreT))
         }
       }
     }

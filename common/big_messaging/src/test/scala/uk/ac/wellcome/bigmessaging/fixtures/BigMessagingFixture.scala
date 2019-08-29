@@ -47,8 +47,8 @@ trait BigMessagingFixture
   case class ExampleObject(name: String)
 
   def withBigMessageStream[T, R](queue: SQS.Queue,
-                              metrics: MemoryMetrics[StandardUnit] =
-                                new MemoryMetrics[StandardUnit]())(
+                                 metrics: MemoryMetrics[StandardUnit] =
+                                   new MemoryMetrics[StandardUnit]())(
     testWith: TestWith[BigMessageStream[T], R])(
     implicit
     actorSystem: ActorSystem,

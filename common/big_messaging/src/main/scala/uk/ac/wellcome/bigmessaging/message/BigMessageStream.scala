@@ -18,10 +18,9 @@ import uk.ac.wellcome.storage.store.TypedStore
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
-class BigMessageStream[T](
-  sqsClient: AmazonSQSAsync,
-  sqsConfig: SQSConfig,
-  metrics: Metrics[Future, StandardUnit])(
+class BigMessageStream[T](sqsClient: AmazonSQSAsync,
+                          sqsConfig: SQSConfig,
+                          metrics: Metrics[Future, StandardUnit])(
   implicit
   actorSystem: ActorSystem,
   decoderT: Decoder[T],
