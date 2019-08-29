@@ -54,6 +54,9 @@ Each Unidentified Work has an ID minted for it, using a source ID and avoiding d
 Inserts a work into our query index - Elasticsearch.
 
 
-## Releasing
+## 🛳️ Shipping 🛳️
 We use the [Wellcome Release Tooling](https://github.com/wellcometrust/dockerfiles/tree/master/release_tooling),
 which has its config defined in [`.wellcome_project`](../.wellcome_project).
+
+On average it is easier and less error prone to spin up a whole new pipeline stack.
+You can 
