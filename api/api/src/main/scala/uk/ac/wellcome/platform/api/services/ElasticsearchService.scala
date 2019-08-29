@@ -11,7 +11,10 @@ import com.sksamuel.elastic4s.requests.searches.queries.{Query, RangeQuery}
 import com.sksamuel.elastic4s.requests.searches.sort.{FieldSort, SortOrder}
 import com.sksamuel.elastic4s.{ElasticDate, Index}
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.display.models.{WorkAgg, WorkTypeAgg}
+import uk.ac.wellcome.display.models.{
+  AggregationRequest,
+  WorkTypeAggregationRequest
+}
 import uk.ac.wellcome.platform.api.models._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -19,7 +22,8 @@ import scala.concurrent.{ExecutionContext, Future}
 case class ElasticsearchQueryOptions(filters: List[WorkFilter],
                                      limit: Int,
                                      from: Int,
-                                     aggs: List[WorkAgg] = List())
+                                     aggregations: List[AggregationRequest] =
+                                       List())
 
 @Singleton
 class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
@@ -79,16 +83,16 @@ class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
       filters = queryOptions.filters
     )
 
-    val aggs = queryOptions.aggs.map {
-      case _: WorkTypeAgg =>
+    val aggregations = queryOptions.aggregations.map {
+      case _: WorkTypeAggregationRequest =>
         TermsAggregation("workType", field = Some("workType.id"))
     }
 
     search(index)
-      .aggs(aggs)
+      .aggs(aggregations)
       .query(queryDefinition)
       .sortBy(sortDefinitions)
-      .limit(if (aggs.nonEmpty) 0 else queryOptions.limit)
+      .limit(if (aggregations.nonEmpty) 0 else queryOptions.limit)
       .from(queryOptions.from)
   }
 

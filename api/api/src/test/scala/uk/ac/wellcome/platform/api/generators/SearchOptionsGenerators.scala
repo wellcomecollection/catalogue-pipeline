@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.api.generators
 
-import uk.ac.wellcome.display.models.WorkAgg
+import uk.ac.wellcome.display.models.AggregationRequest
 import uk.ac.wellcome.platform.api.models.WorkFilter
 import uk.ac.wellcome.platform.api.services.{
   ElasticsearchQueryOptions,
@@ -12,13 +12,13 @@ trait SearchOptionsGenerators {
     filters: List[WorkFilter] = List(),
     limit: Int = 10,
     from: Int = 0,
-    aggs: List[WorkAgg] = List()
+    aggregations: List[AggregationRequest] = List()
   ): ElasticsearchQueryOptions =
     ElasticsearchQueryOptions(
       filters = filters,
       limit = limit,
       from = from,
-      aggs = aggs
+      aggregations = aggregations
     )
 
   def createElasticsearchQueryOptions: ElasticsearchQueryOptions =
@@ -28,13 +28,13 @@ trait SearchOptionsGenerators {
     filters: List[WorkFilter] = List(),
     pageSize: Int = 10,
     pageNumber: Int = 1,
-    aggs: List[WorkAgg] = List()
+    aggregations: List[AggregationRequest] = List()
   ): WorksSearchOptions =
     WorksSearchOptions(
       filters = filters,
       pageSize = pageSize,
       pageNumber = pageNumber,
-      aggs = aggs
+      aggregations = aggregations
     )
 
   def createWorksSearchOptions: WorksSearchOptions =

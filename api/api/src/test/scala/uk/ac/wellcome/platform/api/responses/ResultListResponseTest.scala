@@ -29,7 +29,7 @@ class ResultListResponseTest extends FunSpec with Matchers {
     _queryType = None,
     _index = None,
     request = Request(method = Method.Get, uri = requestUri),
-    _aggs = None
+    _aggregations = None
   )
 
   it("inclues a nextPage and prevPage parameter where appropriate") {

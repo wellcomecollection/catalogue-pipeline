@@ -123,7 +123,7 @@ abstract class WorksController[M <: MultipleResultsRequest[W],
       case None            => defaultIndex
     }
 
-    val aggs = request._aggs
+    val aggregations = request._aggregations
       .map { arg =>
         arg.split(",").map { _.trim }
       }
@@ -135,7 +135,7 @@ abstract class WorksController[M <: MultipleResultsRequest[W],
       filters = buildFilters(request),
       pageSize = pageSize,
       pageNumber = request.page,
-      aggs = aggs
+      aggregations = aggregations
     )
 
     def searchFunction: (Index, WorksSearchOptions) => Future[

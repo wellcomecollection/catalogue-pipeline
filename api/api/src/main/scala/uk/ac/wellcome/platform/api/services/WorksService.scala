@@ -6,7 +6,7 @@ import com.sksamuel.elastic4s.ElasticError
 import com.sksamuel.elastic4s.requests.get.GetResponse
 import com.sksamuel.elastic4s.requests.searches.{SearchHit, SearchResponse}
 import io.circe.Decoder
-import uk.ac.wellcome.display.models.WorkAgg
+import uk.ac.wellcome.display.models.AggregationRequest
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.internal.{IdentifiedBaseWork, IdentifiedWork}
 import uk.ac.wellcome.platform.api.models.{
@@ -23,7 +23,7 @@ case class WorksSearchOptions(
   filters: List[WorkFilter],
   pageSize: Int,
   pageNumber: Int,
-  aggs: List[WorkAgg] = List()
+  aggregations: List[AggregationRequest] = List()
 )
 
 @Singleton
@@ -116,7 +116,7 @@ class WorksService @Inject()(searchService: ElasticsearchService)(
     ElasticsearchQueryOptions(
       filters = worksSearchOptions.filters,
       limit = worksSearchOptions.pageSize,
-      aggs = worksSearchOptions.aggs,
+      aggregations = worksSearchOptions.aggregations,
       from = from
     )
   }
