@@ -5,7 +5,7 @@ import com.amazonaws.services.sqs.model.Message
 import com.sksamuel.elastic4s.ElasticClient
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.elasticsearch.{ElasticsearchIndexCreator, WorksIndex}
-import uk.ac.wellcome.bigmessaging.message.MessageStream
+import uk.ac.wellcome.bigmessaging.message.BigMessageStream
 import uk.ac.wellcome.models.work.internal.IdentifiedBaseWork
 import uk.ac.wellcome.platform.ingestor.config.models.IngestorConfig
 import uk.ac.wellcome.typesafe.Runnable
@@ -15,7 +15,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class IngestorWorkerService(
   elasticClient: ElasticClient,
   ingestorConfig: IngestorConfig,
-  messageStream: MessageStream[IdentifiedBaseWork]
+  messageStream: BigMessageStream[IdentifiedBaseWork]
 )(implicit
   ec: ExecutionContext)
     extends Runnable

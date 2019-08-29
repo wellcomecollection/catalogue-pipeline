@@ -6,7 +6,7 @@ import com.amazonaws.services.s3.AmazonS3
 import com.typesafe.config.Config
 import io.circe.{Decoder, Encoder}
 import uk.ac.wellcome.bigmessaging.BigMessageSender
-import uk.ac.wellcome.bigmessaging.message.MessageStream
+import uk.ac.wellcome.bigmessaging.message.BigMessageStream
 import uk.ac.wellcome.messaging.sns.SNSConfig
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.messaging.MessageSender
@@ -26,7 +26,7 @@ object BigMessagingBuilder {
     implicit actorSystem: ActorSystem,
     decoderT: Decoder[T],
     materializer: ActorMaterializer,
-    codecT: Codec[T]): MessageStream[T] = {
+    codecT: Codec[T]): BigMessageStream[T] = {
 
     implicit val executionContext: ExecutionContext =
       AkkaBuilder.buildExecutionContext()
@@ -35,7 +35,7 @@ object BigMessagingBuilder {
 
     implicit val typedStore: S3TypedStore[T] = S3TypedStore[T]
 
-    new MessageStream[T](
+    new BigMessageStream[T](
       sqsClient = SQSBuilder.buildSQSAsyncClient(config),
       sqsConfig =
         SQSBuilder.buildSQSConfig(config, namespace = "message.reader"),

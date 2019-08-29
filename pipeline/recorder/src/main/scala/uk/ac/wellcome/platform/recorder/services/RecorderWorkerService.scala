@@ -1,54 +1,57 @@
 package uk.ac.wellcome.platform.recorder.services
 
+import scala.util.{Failure, Success, Try}
+import scala.concurrent.Future
 import akka.Done
-import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.messaging.message.{
-  MessageNotification,
-  MessageStream,
-  RemoteNotification
-}
-import uk.ac.wellcome.messaging.sns.SNSWriter
+
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
-import uk.ac.wellcome.storage.ObjectStore
-import uk.ac.wellcome.storage.dynamo._
-import uk.ac.wellcome.storage.vhs.{
-  EmptyMetadata,
-  VHSIndexEntry,
-  VersionedHybridStore
-}
 import uk.ac.wellcome.typesafe.Runnable
-import uk.ac.wellcome.models.Implicits._
+import uk.ac.wellcome.json.JsonUtil._
 
-import scala.concurrent.{ExecutionContext, Future}
+import uk.ac.wellcome.bigmessaging.typesafe.{EmptyMetadata, GetLocation}
+import uk.ac.wellcome.messaging.MessageSender
+import uk.ac.wellcome.bigmessaging.message.BigMessageStream
 
-class RecorderWorkerService(
-  versionedHybridStore: VersionedHybridStore[TransformedBaseWork,
-                                             EmptyMetadata,
-                                             ObjectStore[TransformedBaseWork]],
-  messageStream: MessageStream[TransformedBaseWork],
-  snsWriter: SNSWriter)(implicit ec: ExecutionContext)
+import uk.ac.wellcome.storage.store.{HybridStoreEntry, VersionedStore}
+import uk.ac.wellcome.storage.{Identified, Version}
+
+class RecorderWorkerService[MsgDestination](
+  store: VersionedStore[
+    String,
+    Int,
+    HybridStoreEntry[TransformedBaseWork, EmptyMetadata]] with GetLocation,
+  messageStream: BigMessageStream[TransformedBaseWork],
+  msgSender: MessageSender[MsgDestination])
     extends Runnable {
 
   def run(): Future[Done] =
     messageStream.foreach(this.getClass.getSimpleName, processMessage)
 
   private def processMessage(work: TransformedBaseWork): Future[Unit] =
-    for {
-      vhsEntry <- storeInVhs(work)
-      _ <- snsWriter.writeMessage[MessageNotification](
-        message = RemoteNotification(vhsEntry.hybridRecord.location),
-        subject = s"Sent from ${this.getClass.getSimpleName}")
-    } yield ()
+    Future.fromTry {
+      for {
+        key <- storeWork(work)
+        location <- store.getLocation(key)
+        _ <- msgSender.sendT(location)
+      } yield ()
+    }
 
-  private def storeInVhs(
-    work: TransformedBaseWork): Future[VHSIndexEntry[EmptyMetadata]] =
-    versionedHybridStore.updateRecord(work.sourceIdentifier.toString)(
-      (work, EmptyMetadata()))(
-      (existingWork, existingMetadata) =>
-        if (existingWork.version > work.version) {
-          (existingWork, existingMetadata)
-        } else {
-          (work, EmptyMetadata())
+  private def createEntry(work: TransformedBaseWork) =
+    HybridStoreEntry(work, EmptyMetadata())
+
+  private def storeWork(
+    work: TransformedBaseWork): Try[Version[String, Int]] = {
+    val result =
+      store.upsert(work.sourceIdentifier.toString)(createEntry(work)) {
+        case HybridStoreEntry(existingWork, _) =>
+          createEntry(
+            if (existingWork.version > work.version) { existingWork } else {
+              work
+            })
       }
-    )
+    result match {
+      case Right(Identified(key, _)) => Success(key)
+      case Left(error)               => Failure(error.e)
+    }
+  }
 }

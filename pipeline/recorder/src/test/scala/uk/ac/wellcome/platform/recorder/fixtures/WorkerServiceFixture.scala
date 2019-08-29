@@ -1,46 +1,99 @@
 package uk.ac.wellcome.platform.recorder.fixtures
 
+import scala.util.{Success, Try}
+
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.messaging.fixtures.Messaging
-import uk.ac.wellcome.messaging.fixtures.SNS.Topic
-import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.recorder.services.RecorderWorkerService
-import uk.ac.wellcome.storage.fixtures.LocalDynamoDb.Table
-import uk.ac.wellcome.storage.fixtures.LocalVersionedHybridStore
-import uk.ac.wellcome.storage.fixtures.S3.Bucket
-import uk.ac.wellcome.storage.vhs.EmptyMetadata
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.ac.wellcome.bigmessaging.typesafe.{EmptyMetadata, GetLocation}
+import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
+import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
+import uk.ac.wellcome.messaging.fixtures.SQS.Queue
+import uk.ac.wellcome.messaging.memory.MemoryMessageSender
+import uk.ac.wellcome.messaging.MessageSender
 
-trait WorkerServiceFixture extends LocalVersionedHybridStore with Messaging {
-  def withWorkerService[R](
-    table: Table,
-    storageBucket: Bucket,
-    topic: Topic,
-    queue: Queue)(testWith: TestWith[RecorderWorkerService, R]): R =
+import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryVersionedStore}
+import uk.ac.wellcome.storage.{
+  Identified,
+  ObjectLocation,
+  StoreWriteError,
+  Version
+}
+import uk.ac.wellcome.storage.store.{HybridStoreEntry, VersionedStore}
+import uk.ac.wellcome.storage.maxima.memory.MemoryMaxima
+
+trait WorkerServiceFixture extends BigMessagingFixture {
+
+  type Entry = HybridStoreEntry[TransformedBaseWork, EmptyMetadata]
+
+  type RecorderVhs = VersionedStore[String, Int, Entry] with GetLocation
+
+  type InternalStore =
+    MemoryStore[Version[String, Int], Entry] with MemoryMaxima[String, Entry]
+
+  class MemoryRecorderVhs(
+    internalStore: InternalStore =
+      new MemoryStore[Version[String, Int], Entry](Map.empty)
+      with MemoryMaxima[String, Entry]
+  ) extends MemoryVersionedStore[String, Entry](internalStore)
+      with GetLocation {
+
+    def getLocation(key: Version[String, Int]): Try[ObjectLocation] =
+      Success(ObjectLocation("test", s"${key.id}/${key.version}"))
+  }
+
+  class BrokenMemoryRecorderVhs extends MemoryRecorderVhs() {
+    override def put(id: Version[String, Int])(entry: Entry): WriteEither =
+      Left(StoreWriteError(new Error("BOOM!")))
+  }
+
+  def withRecorderVhs[R](testWith: TestWith[RecorderVhs, R]): R = {
+    testWith(new MemoryRecorderVhs())
+  }
+
+  def withBrokenRecorderVhs[R](testWith: TestWith[RecorderVhs, R]): R = {
+    testWith(new BrokenMemoryRecorderVhs())
+  }
+
+  def withMemoryMessageSender[R](
+    testWith: TestWith[MemoryMessageSender, R]): R = {
+    testWith(new MemoryMessageSender())
+  }
+
+  def withWorkerService[R, D](queue: Queue,
+                              vhs: RecorderVhs,
+                              msgSender: MessageSender[D])(
+    testWith: TestWith[RecorderWorkerService[D], R]): R =
     withActorSystem { implicit actorSystem =>
-      withMetricsSender() { metricsSender =>
-        withSNSWriter(topic) { snsWriter =>
-          withTypeVHS[TransformedBaseWork, EmptyMetadata, R](
-            bucket = storageBucket,
-            table = table) { versionedHybridStore =>
-            withMessageStream[TransformedBaseWork, R](
-              queue = queue,
-              metricsSender = metricsSender) { messageStream =>
-              val workerService = new RecorderWorkerService(
-                versionedHybridStore = versionedHybridStore,
-                messageStream = messageStream,
-                snsWriter = snsWriter
-              )
-
-              workerService.run()
-
-              testWith(workerService)
-            }
-          }
-        }
+      implicit val streamStore =
+        MemoryTypedStoreCompanion[ObjectLocation, TransformedBaseWork]()
+      withBigMessageStream[TransformedBaseWork, R](queue = queue) { msgStream =>
+        val workerService = new RecorderWorkerService(vhs, msgStream, msgSender)
+        workerService.run()
+        testWith(workerService)
       }
     }
+
+  def assertWorkStored[T <: TransformedBaseWork](
+    vhs: RecorderVhs,
+    work: T,
+    expectedVhsVersion: Int = 0): Version[String, Int] = {
+
+    val id = work.sourceIdentifier.toString
+    vhs.getLatest(id) shouldBe
+      Right(
+        Identified(
+          Version(id, expectedVhsVersion),
+          HybridStoreEntry(work, EmptyMetadata())))
+    Version(id, expectedVhsVersion)
+  }
+
+  def assertWorkNotStored[T <: TransformedBaseWork](vhs: RecorderVhs,
+                                                    work: T) = {
+
+    val id = work.sourceIdentifier.toString
+    vhs.getLatest(id) shouldBe a[Left[_, _]]
+  }
 }

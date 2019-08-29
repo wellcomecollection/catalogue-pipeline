@@ -33,7 +33,7 @@ trait WorkerServiceFixture
         {
           implicit val typedStoreT =
             MemoryTypedStoreCompanion[ObjectLocation, Json]()
-          withMessageStream[Json, R](queue) { messageStream =>
+          withBigMessageStream[Json, R](queue) { messageStream =>
             val workerService = new IdMinterWorkerService(
               idEmbedder = new IdEmbedder(
                 identifierGenerator = new IdentifierGenerator(

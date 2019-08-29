@@ -2,6 +2,7 @@
   "id" : "recorder",
   "folder" : "pipeline/recorder",
   "dependencyIds" : [
-    "internal_model"
+    "internal_model",
+    "big_messaging_typesafe"
   ]
 }
