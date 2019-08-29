@@ -1,19 +1,22 @@
 package uk.ac.wellcome.platform.transformer.miro.fixtures
 
-import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.fixtures.Messaging
-import uk.ac.wellcome.messaging.fixtures.SNS.Topic
+import scala.concurrent.ExecutionContext.Implicits.global
+
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
 import uk.ac.wellcome.platform.transformer.miro.services.MiroVHSRecordReceiver
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
+import uk.ac.wellcome.fixtures.TestWith
+import uk.ac.wellcome.models.Implicits._
+import uk.ac.wellcome.json.JsonUtil._
+
+import uk.ac.wellcome.messaging.sns.NotificationMessage
+import uk.ac.wellcome.messaging.fixtures.Messaging
+import uk.ac.wellcome.messaging.fixtures.SNS.Topic
+
 import uk.ac.wellcome.storage.ObjectStore
 import uk.ac.wellcome.storage.fixtures.S3.Bucket
-import uk.ac.wellcome.fixtures.TestWith
-
-import scala.concurrent.ExecutionContext.Implicits.global
 
 trait MiroVHSRecordReceiverFixture extends Messaging with MiroRecordGenerators {
   def withMiroVHSRecordReceiver[R](topic: Topic, bucket: Bucket)(
