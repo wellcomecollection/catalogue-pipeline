@@ -4,8 +4,9 @@ import grizzled.slf4j.Logging
 import io.circe.optics.JsonPath.root
 import io.circe.optics.JsonTraversalPath
 import io.circe._
-import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.internal.SourceIdentifier
+import uk.ac.wellcome.json.JsonUtil.fromJson
+import uk.ac.wellcome.models.Implicits._
 
 import scala.annotation.tailrec
 import scala.concurrent.{ExecutionContext, Future}

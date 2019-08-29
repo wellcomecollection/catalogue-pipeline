@@ -3,7 +3,6 @@ package uk.ac.wellcome.platform.transformer.sierra
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import com.typesafe.config.Config
-import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{MessagingBuilder, SQSBuilder}
 import uk.ac.wellcome.models.transformable.SierraTransformable
@@ -16,6 +15,8 @@ import uk.ac.wellcome.platform.transformer.sierra.services.{
 import uk.ac.wellcome.storage.typesafe.S3Builder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
+import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.models.Implicits._
 
 import scala.concurrent.ExecutionContext
 

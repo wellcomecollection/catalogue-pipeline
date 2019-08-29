@@ -19,7 +19,10 @@ import scala.collection.immutable.Map
 import scala.concurrent.Future
 import scala.util.Random
 
-class MessageStreamTest extends FunSpec with Matchers with BigMessagingFixture {
+class BigMessageStreamTest
+    extends FunSpec
+    with Matchers
+    with BigMessagingFixture {
 
   def process(list: ConcurrentLinkedQueue[ExampleObject])(o: ExampleObject) = {
     list.add(o)
@@ -313,7 +316,7 @@ class MessageStreamTest extends FunSpec with Matchers with BigMessagingFixture {
   }
 
   private def withMessageStreamFixtures[R](
-    testWith: TestWith[(MessageStream[ExampleObject],
+    testWith: TestWith[(BigMessageStream[ExampleObject],
                         QueuePair,
                         MemoryMetrics[StandardUnit]),
                        R]
@@ -325,7 +328,7 @@ class MessageStreamTest extends FunSpec with Matchers with BigMessagingFixture {
       withLocalSqsQueueAndDlq {
         case queuePair @ QueuePair(queue, _) =>
           val metrics = new MemoryMetrics[StandardUnit]()
-          withMessageStream[ExampleObject, R](queue, metrics) { stream =>
+          withBigMessageStream[ExampleObject, R](queue, metrics) { stream =>
             testWith((stream, queuePair, metrics))
           }
       }
