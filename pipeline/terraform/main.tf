@@ -1,7 +1,7 @@
-module "catalogue_pipeline_20190808" {
+module "catalogue_pipeline_20190816" {
   source = "stack"
 
-  namespace = "catalogue-20190808"
+  namespace = "catalogue-20190816"
 
   release_label = "prod"
 
@@ -28,11 +28,10 @@ module "catalogue_pipeline_20190808" {
     "${local.miro_updates_topic_name}",
   ]
   # Elasticsearch
-  es_works_index = "v2-2019-04-26-contributors-label-from-multiple-subfields"
+  es_works_index = "v2-20190816-alternative-titles"
   # RDS
   rds_ids_access_security_group_id = "${local.rds_access_security_group_id}"
   # Adapter VHS
   vhs_sierra_read_policy = "${local.vhs_sierra_read_policy}"
   vhs_miro_read_policy   = "${local.vhs_miro_read_policy}"
 }
-

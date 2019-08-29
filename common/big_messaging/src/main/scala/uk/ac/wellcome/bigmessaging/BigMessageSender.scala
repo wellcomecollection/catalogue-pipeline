@@ -6,19 +6,20 @@ import java.util.Date
 import grizzled.slf4j.Logging
 import io.circe.Encoder
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.bigmessaging.message.{
   InlineNotification,
   MessageNotification,
   RemoteNotification
 }
-import uk.ac.wellcome.storage.{KeyPrefix, ObjectStore}
+import uk.ac.wellcome.messaging.MessageSender
+import uk.ac.wellcome.storage.ObjectLocation
+import uk.ac.wellcome.storage.store.{TypedStore, TypedStoreEntry}
 
 import scala.util.{Failure, Success, Try}
 
 trait BigMessageSender[Destination, T] extends Logging {
   val messageSender: MessageSender[Destination]
-  val objectStore: ObjectStore[T]
+  val typedStore: TypedStore[ObjectLocation, T]
 
   val namespace: String
 
@@ -28,7 +29,7 @@ trait BigMessageSender[Destination, T] extends Logging {
 
   private val dateFormat = new SimpleDateFormat("YYYY/MM/dd")
 
-  protected def getKeyPrefix: String = {
+  protected def getKey: String = {
     val currentTime = new Date()
     s"${messageSender.destination}/${dateFormat.format(currentTime)}/${currentTime.getTime.toString}"
   }
@@ -51,18 +52,19 @@ trait BigMessageSender[Destination, T] extends Logging {
       _ <- messageSender.sendT[MessageNotification](notification)
     } yield notification
 
-  private def createRemoteNotification(t: T): Try[RemoteNotification] =
+  private def createRemoteNotification(t: T): Try[RemoteNotification] = {
+    val id = ObjectLocation(namespace, getKey)
+    val entry = TypedStoreEntry(t, Map.empty)
+
     (for {
-      location <- objectStore.put(namespace)(
-        t,
-        keyPrefix = KeyPrefix(getKeyPrefix)
-      )
+      location <- typedStore.put(id)(entry)
       _ = info(s"Successfully stored message in location: $location")
-      notification = RemoteNotification(location = location)
+      notification = RemoteNotification(id)
     } yield notification) match {
       case Right(value) =>
         Success(value)
       case Left(writeError) =>
         Failure(writeError.e)
     }
+  }
 }

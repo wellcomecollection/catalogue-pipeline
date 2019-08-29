@@ -50,13 +50,13 @@ object WorksIndex {
 
   val period = Seq(
     textField("label"),
+    keywordField("ontologyType"),
     objectField("range").fields(
       textField("label"),
       dateField("from"),
       dateField("to"),
       booleanField("inferred")
-    ),
-    keywordField("ontologyType")
+    )
   )
 
   val concept = Seq(
@@ -95,7 +95,7 @@ object WorksIndex {
   def genre(fieldName: String) = objectField(fieldName).fields(
     textField("label"),
     keywordField("ontologyType"),
-    identified("concepts", concept)
+    identified("concepts", rootConcept)
   )
 
   def labelledTextField(fieldName: String) = objectField(fieldName).fields(

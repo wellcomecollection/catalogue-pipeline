@@ -6,7 +6,8 @@ import com.sksamuel.elastic4s.requests.bulk.{BulkResponse, BulkResponseItem}
 import com.sksamuel.elastic4s.{ElasticClient, Response}
 import com.sksamuel.elastic4s.requests.common.VersionType.ExternalGte
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.json.JsonUtil.toJson
+import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal.{
   IdentifiedBaseWork,
   IdentifiedInvisibleWork,

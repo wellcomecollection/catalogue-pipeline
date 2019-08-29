@@ -11,7 +11,7 @@ object WellcomeDependencies {
 
     val newMessaging = "5.3.1"
     val newMonitoring = "2.3.0"
-    val newStorage = "6.1.3"
+    val newStorage = "7.20.0"
 
     val sierraStreamsSource = "0.4"
   }
@@ -106,7 +106,7 @@ object ExternalDependencies {
     val scalacsv = "1.3.5"
     val scalaGraph = "1.12.5"
     val scalatest = "3.0.1"
-    val logstashLogback ="6.1"
+    val logstashLogback = "6.1"
   }
 
   val logbackDependencies = Seq(
@@ -199,7 +199,8 @@ object ExternalDependencies {
   )
 
   val javaxDependencies = Seq(
-    "javax.xml.bind" % "jaxb-api" % "2.3.0", "com.sun.xml.bind" % "jaxb-ri" % "2.3.0"
+    "javax.xml.bind" % "jaxb-api" % "2.3.0",
+    "com.sun.xml.bind" % "jaxb-ri" % "2.3.0"
   )
 }
 
@@ -253,8 +254,7 @@ object CatalogueDependencies {
   val idminterDependencies: Seq[ModuleID] =
     ExternalDependencies.mockitoDependencies ++
       ExternalDependencies.mySqlDependencies ++
-      ExternalDependencies.circeOpticsDependencies ++
-      WellcomeDependencies.messagingTypesafeLibrary
+      ExternalDependencies.circeOpticsDependencies
 
   val ingestorDependencies: Seq[ModuleID] =
     ExternalDependencies.mockitoDependencies ++

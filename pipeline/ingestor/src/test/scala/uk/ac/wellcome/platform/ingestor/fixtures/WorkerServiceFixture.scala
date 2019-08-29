@@ -5,40 +5,47 @@ import com.sksamuel.elastic4s.ElasticClient
 import org.scalatest.Suite
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
-import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.messaging.fixtures.Messaging
+import uk.ac.wellcome.models.Implicits._
+import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
+import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.models.work.internal.IdentifiedBaseWork
 import uk.ac.wellcome.platform.ingestor.config.models.IngestorConfig
 import uk.ac.wellcome.platform.ingestor.services.IngestorWorkerService
-import uk.ac.wellcome.storage.streaming.CodecInstances._
+import uk.ac.wellcome.storage.ObjectLocation
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
-trait WorkerServiceFixture extends ElasticsearchFixtures with Messaging {
+trait WorkerServiceFixture
+    extends ElasticsearchFixtures
+    with BigMessagingFixture {
   this: Suite =>
   def withWorkerService[R](queue: Queue,
                            index: Index,
                            elasticClient: ElasticClient = elasticClient)(
     testWith: TestWith[IngestorWorkerService, R]): R =
     withActorSystem { implicit actorSystem =>
-      withMessageStream[IdentifiedBaseWork, R](queue) { messageStream =>
-        val ingestorConfig = IngestorConfig(
-          batchSize = 100,
-          flushInterval = 5 seconds,
-          index = index
-        )
+      {
+        implicit val typedStoreT =
+          MemoryTypedStoreCompanion[ObjectLocation, IdentifiedBaseWork]()
+        withMessageStream[IdentifiedBaseWork, R](queue) { messageStream =>
+          val ingestorConfig = IngestorConfig(
+            batchSize = 100,
+            flushInterval = 5 seconds,
+            index = index
+          )
 
-        val workerService = new IngestorWorkerService(
-          elasticClient = elasticClient,
-          ingestorConfig = ingestorConfig,
-          messageStream = messageStream
-        )
+          val workerService = new IngestorWorkerService(
+            elasticClient = elasticClient,
+            ingestorConfig = ingestorConfig,
+            messageStream = messageStream
+          )
 
-        workerService.run()
+          workerService.run()
 
-        testWith(workerService)
+          testWith(workerService)
+        }
       }
     }
 }

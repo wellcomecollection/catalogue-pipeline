@@ -1,6 +1,6 @@
 import java.io.File
-
-import scala.util.parsing.json.{JSONArray, JSONObject}
+import java.util.UUID
+import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider
 
 def setupProject(
   project: Project,
@@ -9,22 +9,7 @@ def setupProject(
   externalDependencies: Seq[ModuleID] = Seq()
 ): Project = {
 
-  // Here we write a bit of metadata about the project, and the other
-  // local projects it depends on.  This can be used to determine whether
-  // to run tests based on the up-to-date project graph.
-  // See https://www.scala-sbt.org/release/docs/Howto-Generating-Files.html
-  val file = new File(s".sbt_metadata/${project.id}.json")
-  val dependencyIds: List[String] = localDependencies
-    .map { p: Project => p.id }
-    .toList
-
-  val metadata = Map(
-    "id" -> project.id,
-    "folder" -> folder,
-    "dependencyIds" -> JSONArray(dependencyIds)
-  )
-
-  IO.write(file, JSONObject(metadata).toString())
+  Metadata.write(project, folder, localDependencies)
 
   val dependsOn = localDependencies
     .map { project: Project =>
@@ -43,6 +28,18 @@ def setupProject(
     .dependsOn(dependsOn: _*)
     .settings(libraryDependencies ++= externalDependencies)
 }
+
+// Temporarily commented out until https://github.com/wellcometrust/platform/issues/3806
+// In order to access our libraries in S3 we need to set the following:
+
+//s3CredentialsProvider := { _ =>
+//  val builder = new STSAssumeRoleSessionCredentialsProvider.Builder(
+//    "arn:aws:iam::760097843905:role/platform-read_only",
+//    UUID.randomUUID().toString
+//  )
+//
+//  builder.build()
+//}
 
 lazy val internal_model = setupProject(project, "common/internal_model",
   externalDependencies = CatalogueDependencies.internalModelDependencies
@@ -82,7 +79,7 @@ lazy val goobi_reader = setupProject(project, "goobi_adapter/goobi_reader",
 )
 
 lazy val id_minter = setupProject(project, "pipeline/id_minter",
-  localDependencies = Seq(internal_model),
+  localDependencies = Seq(internal_model, big_messaging_typesafe),
   externalDependencies = CatalogueDependencies.idminterDependencies
 )
 
