@@ -10,6 +10,7 @@ import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 import uk.ac.wellcome.platform.transformer.miro.transformers.MiroTransformableWrapper
 import uk.ac.wellcome.platform.transformer.miro.services.MiroTransformerWorkerService
 import uk.ac.wellcome.models.Implicits._
+import uk.ac.wellcome.platform.transformer.miro.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
 
 import uk.ac.wellcome.messaging.sns.NotificationMessage

@@ -13,8 +13,8 @@ import uk.ac.wellcome.platform.transformer.miro.services.{
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
-import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.Implicits._
+import uk.ac.wellcome.platform.transformer.miro.Implicits._
 
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{MessagingBuilder, SQSBuilder}

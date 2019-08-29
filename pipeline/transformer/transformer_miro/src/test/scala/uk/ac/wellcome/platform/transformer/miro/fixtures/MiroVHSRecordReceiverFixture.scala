@@ -9,6 +9,7 @@ import uk.ac.wellcome.platform.transformer.miro.services.MiroVHSRecordReceiver
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.Implicits._
+import uk.ac.wellcome.platform.transformer.miro.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
 
 import uk.ac.wellcome.messaging.sns.NotificationMessage
