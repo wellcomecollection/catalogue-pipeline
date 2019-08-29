@@ -29,7 +29,7 @@ trait WorkerServiceFixture
       {
         implicit val typedStoreT =
           MemoryTypedStoreCompanion[ObjectLocation, IdentifiedBaseWork]()
-        withMessageStream[IdentifiedBaseWork, R](queue) { messageStream =>
+        withBigMessageStream[IdentifiedBaseWork, R](queue) { messageStream =>
           val ingestorConfig = IngestorConfig(
             batchSize = 100,
             flushInterval = 5 seconds,

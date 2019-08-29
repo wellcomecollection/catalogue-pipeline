@@ -139,7 +139,7 @@ class IngestorWorkerServiceTest
           {
             implicit val typedStoreT =
               MemoryTypedStoreCompanion[ObjectLocation, IdentifiedBaseWork]()
-            withMessageStream[IdentifiedBaseWork, Assertion](queue) {
+            withBigMessageStream[IdentifiedBaseWork, Assertion](queue) {
               messageStream =>
                 import scala.concurrent.duration._
 
