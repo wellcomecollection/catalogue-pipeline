@@ -6,6 +6,7 @@ import com.twitter.finagle.http.Request
 import com.twitter.finatra.request.{QueryParam, RouteParam}
 import com.twitter.finatra.validation.{Max, Min}
 import uk.ac.wellcome.display.models.{
+  AggregationRequest,
   V1WorksIncludes,
   V2WorksIncludes,
   WorksIncludes
@@ -22,7 +23,7 @@ trait MultipleResultsRequest[W <: WorksIncludes] extends ApiRequest {
   val query: Option[String]
   val _index: Option[String]
   val _queryType: Option[String]
-  val _aggregations: Option[String]
+  val _aggregations: List[AggregationRequest]
   val request: Request
 }
 
@@ -33,7 +34,7 @@ case class V1MultipleResultsRequest(
   @QueryParam query: Option[String],
   @QueryParam _index: Option[String],
   @QueryParam _queryType: Option[String] = None,
-  @QueryParam _aggregations: Option[String],
+  @QueryParam _aggregations: List[AggregationRequest],
   request: Request
 ) extends MultipleResultsRequest[V1WorksIncludes] {
   val include: Option[V1WorksIncludes] = includes
@@ -50,7 +51,7 @@ case class V2MultipleResultsRequest(
   @QueryParam _queryType: Option[String],
   @QueryParam _dateFrom: Option[LocalDate],
   @QueryParam _dateTo: Option[LocalDate],
-  @QueryParam _aggregations: Option[String],
+  @QueryParam _aggregations: List[AggregationRequest],
   request: Request
 ) extends MultipleResultsRequest[V2WorksIncludes]
 
