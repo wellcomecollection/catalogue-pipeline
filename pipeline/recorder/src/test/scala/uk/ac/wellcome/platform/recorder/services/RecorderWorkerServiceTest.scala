@@ -12,6 +12,10 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.storage.ObjectLocation
 
 import uk.ac.wellcome.messaging.fixtures.SQS
+import uk.ac.wellcome.bigmessaging.message.{
+  MessageNotification,
+  RemoteNotification
+}
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 
 class RecorderWorkerServiceTest
@@ -116,7 +120,7 @@ class RecorderWorkerServiceTest
     }
   }
 
-  it("sends the object location to the queue") {
+  it("sends the remote notification to the queue") {
     withLocalSqsQueue { queue =>
       withMemoryMessageSender { msgSender =>
         withRecorderVhs { vhs =>
@@ -125,8 +129,8 @@ class RecorderWorkerServiceTest
             sendMessage[TransformedBaseWork](queue = queue, obj = work)
             eventually {
               val id = work.sourceIdentifier.toString
-              msgSender.getMessages[ObjectLocation].toList shouldBe List(
-                ObjectLocation("test", s"${id}/${0}")
+              msgSender.getMessages[MessageNotification].toList shouldBe List(
+                RemoteNotification(ObjectLocation("test", s"${id}/${0}"))
               )
             }
           }
