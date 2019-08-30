@@ -123,13 +123,6 @@ abstract class WorksController[M <: MultipleResultsRequest[W],
       case None            => defaultIndex
     }
 
-//    val aggregations = request._aggregations.flatMap { s =>
-//      s match {
-//        case "workType" => Some(WorkTypeAggregationRequest())
-//        case _ => None
-//      }
-//    } toList
-//    val aggregations = List(request._aggregations)
     val aggregations = request._aggregations
 
     val worksSearchOptions = WorksSearchOptions(
