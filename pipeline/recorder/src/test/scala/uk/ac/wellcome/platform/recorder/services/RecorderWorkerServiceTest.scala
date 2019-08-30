@@ -2,6 +2,7 @@ package uk.ac.wellcome.platform.recorder.services
 
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FunSpec, Matchers}
+import io.circe.parser.parse
 
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.WorksGenerators
@@ -12,10 +13,6 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.storage.ObjectLocation
 
 import uk.ac.wellcome.messaging.fixtures.SQS
-import uk.ac.wellcome.bigmessaging.message.{
-  MessageNotification,
-  RemoteNotification
-}
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 
 class RecorderWorkerServiceTest
@@ -129,8 +126,21 @@ class RecorderWorkerServiceTest
             sendMessage[TransformedBaseWork](queue = queue, obj = work)
             eventually {
               val id = work.sourceIdentifier.toString
-              msgSender.getMessages[MessageNotification].toList shouldBe List(
-                RemoteNotification(ObjectLocation("test", s"${id}/${0}"))
+              val expected = parse(
+                s"""
+                |{
+                |  "type": "RemoteNotification",
+                |  "location": {
+                |    "namespace": "test",
+                |    "key": "${id}/0"
+                |  }
+                |}""".stripMargin
+              ).right
+              msgSender.messages
+                .map(_.body)
+                .map(parse(_).right)
+                .toList shouldBe List(
+                expected
               )
             }
           }
