@@ -20,27 +20,22 @@ class AggregationRequestDeserializer
     p.nextValue()
     val commaSeparatedString = p.getText()
 
-    // We create a (key: String, agg: Option[Aggregation]) tuple so we can error nicely telling people which values are invalid
-    val validations: Map[Boolean, List[(String, Option[AggregationRequest])]] =
-      commaSeparatedString
-        .split(",")
-        .toList
-        .map(_.trim)
-        .map(key => (key, AggregationRequest(key))) groupBy {
-        case (_, maybeAggregationRequest) => maybeAggregationRequest.isEmpty
-      }
+    // We create a (key: String, agg: Option[Aggregation]) tuple so we can error nicely
+    // telling people which values are invalid
 
-    val valid = validations.getOrElse(false, Nil)
-    val invalid = validations.getOrElse(true, Nil)
+    val validations = commaSeparatedString
+      .split(",")
+      .toList
+      .map(_.trim)
+      .map(AggregationRequest(_))
+
+    val valid = validations collect { case Right(r)  => r }
+    val invalid = validations collect { case Left(l) => l }
 
     if (invalid.isEmpty) {
-      valid.flatMap {
-        case (_, aggregation) => aggregation
-      }
+      valid
     } else {
-      val invalidKeys = invalid map {
-        case (key, _) => key
-      }
+      val invalidKeys = invalid map (_.key)
       val errorMessage = invalidKeys.size match {
         case 1 => s"'${invalidKeys.head}' is not a valid aggregation"
         case _ =>
