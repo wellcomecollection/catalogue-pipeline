@@ -57,52 +57,54 @@ class SierraTransformerIntegrationTest
                 dynamoClient,
                 s3Client,
               )
-              withWorkerService(vhs, topic, messagingBucket, queue) { workerService =>
-                val id = createSierraBibNumber
-                val title = "A pot of possums"
-                val sierraTransformable = SierraTransformable(
-                  bibRecord = createSierraBibRecordWith(
-                    id = id,
-                    data = s"""
+              withWorkerService(vhs, topic, messagingBucket, queue) {
+                workerService =>
+                  val id = createSierraBibNumber
+                  val title = "A pot of possums"
+                  val sierraTransformable = SierraTransformable(
+                    bibRecord = createSierraBibRecordWith(
+                      id = id,
+                      data = s"""
                      |{
                      | "id": "$id",
                      | "title": "$title",
                      | "varFields": []
                      |}
                       """.stripMargin
-                  )
-                )
-                sendSqsMessage(
-                  queue = queue,
-                  obj = createHybridRecordNotificationWith(
-                    sierraTransformable,
-                    vhs
-                  )
-                )
-                eventually {
-                  val snsMessages = listMessagesReceivedFromSNS(topic)
-                  snsMessages.size should be >= 1
-
-                  val sourceIdentifier = createSierraSystemSourceIdentifierWith(
-                    value = id.withCheckDigit
-                  )
-
-                  val sierraIdentifier =
-                    createSierraIdentifierSourceIdentifierWith(
-                      value = id.withoutCheckDigit
                     )
+                  )
+                  sendSqsMessage(
+                    queue = queue,
+                    obj = createHybridRecordNotificationWith(
+                      sierraTransformable,
+                      vhs
+                    )
+                  )
+                  eventually {
+                    val snsMessages = listMessagesReceivedFromSNS(topic)
+                    snsMessages.size should be >= 1
 
-                  val works = getMessages[UnidentifiedWork](topic)
-                  works.length shouldBe >=(1)
+                    val sourceIdentifier =
+                      createSierraSystemSourceIdentifierWith(
+                        value = id.withCheckDigit
+                      )
 
-                  works.map { actualWork =>
-                    actualWork.sourceIdentifier shouldBe sourceIdentifier
-                    actualWork.title shouldBe title
-                    actualWork.identifiers shouldBe List(
-                      sourceIdentifier,
-                      sierraIdentifier)
+                    val sierraIdentifier =
+                      createSierraIdentifierSourceIdentifierWith(
+                        value = id.withoutCheckDigit
+                      )
+
+                    val works = getMessages[UnidentifiedWork](topic)
+                    works.length shouldBe >=(1)
+
+                    works.map { actualWork =>
+                      actualWork.sourceIdentifier shouldBe sourceIdentifier
+                      actualWork.title shouldBe title
+                      actualWork.identifiers shouldBe List(
+                        sourceIdentifier,
+                        sierraIdentifier)
+                    }
                   }
-                }
               }
             }
           }
@@ -111,7 +113,10 @@ class SierraTransformerIntegrationTest
     }
   }
 
-  def withWorkerService[R](vhs: VHS, topic: Topic, bucket: Bucket, queue: Queue)(
+  def withWorkerService[R](vhs: VHS,
+                           topic: Topic,
+                           bucket: Bucket,
+                           queue: Queue)(
     testWith: TestWith[SierraTransformerWorkerService[SNSConfig], R]): R =
     withHybridRecordReceiver(vhs, topic, bucket) { messageReceiver =>
       withActorSystem { implicit actorSystem =>

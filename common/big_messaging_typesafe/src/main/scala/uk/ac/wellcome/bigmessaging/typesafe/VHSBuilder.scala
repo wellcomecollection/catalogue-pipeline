@@ -15,7 +15,7 @@ import uk.ac.wellcome.storage.store.HybridIndexedStoreEntry
 import uk.ac.wellcome.storage.{ObjectLocation, ObjectLocationPrefix}
 import uk.ac.wellcome.storage.typesafe.{DynamoBuilder, S3Builder}
 import uk.ac.wellcome.storage.streaming.Codec
-import uk.ac.wellcome.bigmessaging.{VHS, VHSInternalStore, EmptyMetadata}
+import uk.ac.wellcome.bigmessaging.{EmptyMetadata, VHS, VHSInternalStore}
 
 object VHSBuilder {
 

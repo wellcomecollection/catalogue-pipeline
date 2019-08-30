@@ -11,11 +11,7 @@ import uk.ac.wellcome.bigmessaging.fixtures.VHSFixture
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.MessageSender
 
-import uk.ac.wellcome.storage.{
-  Identified,
-  ObjectLocation,
-  Version
-}
+import uk.ac.wellcome.storage.{Identified, ObjectLocation, Version}
 import uk.ac.wellcome.storage.store.HybridStoreEntry
 
 trait WorkerServiceFixture extends VHSFixture[TransformedBaseWork] {
@@ -48,8 +44,7 @@ trait WorkerServiceFixture extends VHSFixture[TransformedBaseWork] {
     Version(id, expectedVhsVersion)
   }
 
-  def assertWorkNotStored[T <: TransformedBaseWork](vhs: VHS,
-                                                    work: T) = {
+  def assertWorkNotStored[T <: TransformedBaseWork](vhs: VHS, work: T) = {
 
     val id = work.sourceIdentifier.toString
     vhs.getLatest(id) shouldBe a[Left[_, _]]

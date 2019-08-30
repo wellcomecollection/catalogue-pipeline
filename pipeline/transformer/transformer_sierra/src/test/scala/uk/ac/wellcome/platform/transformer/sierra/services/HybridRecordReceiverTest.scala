@@ -134,7 +134,8 @@ class HybridRecordReceiverTest
             HybridRecord(
               id = "some-nonexistent-id",
               version = 1,
-              location = ObjectLocation(namespace = "some.namespace", path = "some/path")
+              location =
+                ObjectLocation(namespace = "some.namespace", path = "some/path")
             )
           )
           withHybridRecordReceiver(vhs, topic, bucket) { recordReceiver =>
@@ -203,13 +204,16 @@ class HybridRecordReceiverTest
             vhs
           )
 
-          withHybridRecordReceiver(vhs, topic, bucket, mockSnsClientFailPublishMessage) {
-            recordReceiver =>
-              val future = recordReceiver.receiveMessage(message, transformToWork)
+          withHybridRecordReceiver(
+            vhs,
+            topic,
+            bucket,
+            mockSnsClientFailPublishMessage) { recordReceiver =>
+            val future = recordReceiver.receiveMessage(message, transformToWork)
 
-              whenReady(future.failed) {
-                _.getMessage should be("Failed publishing message")
-              }
+            whenReady(future.failed) {
+              _.getMessage should be("Failed publishing message")
+            }
           }
         }
       }

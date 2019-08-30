@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.transformer.sierra.services
 
 import grizzled.slf4j.Logging
 import scala.concurrent.Future
-import scala.util.{Try, Success, Failure}
+import scala.util.{Failure, Success, Try}
 
 import uk.ac.wellcome.models.transformable.SierraTransformable
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
@@ -13,7 +13,7 @@ import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 
 import uk.ac.wellcome.storage.store.{HybridStoreEntry, VersionedStore}
-import uk.ac.wellcome.storage.{Identified, Version, ObjectLocation}
+import uk.ac.wellcome.storage.{Identified, ObjectLocation, Version}
 
 case class HybridRecord(
   id: String,
@@ -23,10 +23,9 @@ case class HybridRecord(
 
 class HybridRecordReceiver[MsgDestination](
   msgSender: BigMessageSender[MsgDestination, TransformedBaseWork],
-  store: VersionedStore[
-    String,
-    Int,
-    HybridStoreEntry[SierraTransformable, EmptyMetadata]])
+  store: VersionedStore[String,
+                        Int,
+                        HybridStoreEntry[SierraTransformable, EmptyMetadata]])
     extends Logging {
 
   def receiveMessage(message: NotificationMessage,
@@ -47,9 +46,11 @@ class HybridRecordReceiver[MsgDestination](
     }
   }
 
-  private def getTransformable(key: Version[String, Int]) : Try[SierraTransformable] =
+  private def getTransformable(
+    key: Version[String, Int]): Try[SierraTransformable] =
     store.get(key) match {
-      case Right(Identified(_, HybridStoreEntry(transformable, _))) => Success(transformable)
+      case Right(Identified(_, HybridStoreEntry(transformable, _))) =>
+        Success(transformable)
       case Left(error) => Failure(error.e)
     }
 }

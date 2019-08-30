@@ -8,8 +8,8 @@ import uk.ac.wellcome.bigmessaging.{EmptyMetadata, GetLocation}
 import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryVersionedStore}
 import uk.ac.wellcome.storage.{
   ObjectLocation,
-  StoreWriteError,
   StoreReadError,
+  StoreWriteError,
   Version
 }
 import uk.ac.wellcome.storage.store.{HybridStoreEntry, VersionedStore}
