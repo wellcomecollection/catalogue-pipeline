@@ -9,6 +9,7 @@ import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryVersionedStore}
 import uk.ac.wellcome.storage.{
   ObjectLocation,
   StoreWriteError,
+  StoreReadError,
   Version
 }
 import uk.ac.wellcome.storage.store.{HybridStoreEntry, VersionedStore}
@@ -38,6 +39,8 @@ trait VHSFixture[T] extends BigMessagingFixture {
   class BrokenMemoryVHS extends MemoryVHS() {
     override def put(id: Version[String, Int])(entry: Entry): WriteEither =
       Left(StoreWriteError(new Error("BOOM!")))
+    override def get(id: Version[String, Int]): ReadEither =
+      Left(StoreReadError(new Error("BOOM!")))
   }
 
   def withVHS[R](testWith: TestWith[VHS, R]): R =

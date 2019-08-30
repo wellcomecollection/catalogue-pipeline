@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.transformer.sierra.fixtures
 
 import scala.util.Random
-import scala.concurrent.ExecutionContext.Implicits.global
+import com.amazonaws.services.sns.AmazonSNS
 
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.transformer.sierra.services.{HybridRecordReceiver, HybridRecord}
@@ -26,9 +26,10 @@ trait HybridRecordReceiverFixture extends VHSFixture[SierraTransformable] {
   def withHybridRecordReceiver[R](
     vhs: VHS,
     topic: Topic,
-    bucket: Bucket)(
+    bucket: Bucket,
+    snsClient: AmazonSNS = snsClient)(
     testWith: TestWith[HybridRecordReceiver[SNSConfig], R]): R =
-    withSqsBigMessageSender[TransformedBaseWork, R](bucket, topic) { msgSender =>
+    withSqsBigMessageSender[TransformedBaseWork, R](bucket, topic, snsClient) { msgSender =>
       val recorderReciver = new HybridRecordReceiver(msgSender, vhs)
       testWith(recorderReciver)
   }
