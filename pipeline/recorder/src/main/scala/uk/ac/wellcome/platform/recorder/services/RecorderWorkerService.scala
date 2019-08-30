@@ -10,7 +10,7 @@ import uk.ac.wellcome.json.JsonUtil._
 
 import uk.ac.wellcome.bigmessaging.typesafe.{EmptyMetadata, GetLocation}
 import uk.ac.wellcome.messaging.MessageSender
-import uk.ac.wellcome.bigmessaging.message.BigMessageStream
+import uk.ac.wellcome.bigmessaging.message.{BigMessageStream, MessageNotification, RemoteNotification}
 
 import uk.ac.wellcome.storage.store.{HybridStoreEntry, VersionedStore}
 import uk.ac.wellcome.storage.{Identified, Version}
@@ -32,7 +32,7 @@ class RecorderWorkerService[MsgDestination](
       for {
         key <- storeWork(work)
         location <- store.getLocation(key)
-        _ <- msgSender.sendT(location)
+        _ <- msgSender.sendT[MessageNotification](RemoteNotification(location))
       } yield ()
     }
 
