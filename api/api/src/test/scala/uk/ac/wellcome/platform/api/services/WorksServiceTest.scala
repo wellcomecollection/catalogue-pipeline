@@ -12,6 +12,9 @@ import uk.ac.wellcome.models.work.generators.{
 import uk.ac.wellcome.models.work.internal.{IdentifiedBaseWork, WorkType}
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
 import uk.ac.wellcome.platform.api.models.{
+  AggregationBucket,
+  AggregationBuckets,
+  AggregationResults,
   DateRangeFilter,
   ResultList,
   WorkTypeFilter
@@ -22,6 +25,7 @@ import scala.concurrent.Future
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+import uk.ac.wellcome.display.models.WorkTypeAggregationRequest
 import uk.ac.wellcome.platform.api.models.WorkQuery.MSMBoostQuery
 
 class WorksServiceTest
@@ -385,7 +389,8 @@ class WorksServiceTest
         )(
           allWorks = List(workExactTitle, workLooseTitle),
           expectedWorks = List(workExactTitle, workLooseTitle),
-          expectedTotalResults = 2
+          expectedTotalResults = 2,
+          expectedAggregations = None
         )
 
         // Should return only the exact match
@@ -397,6 +402,45 @@ class WorksServiceTest
           expectedTotalResults = 1
         )
       }
+
+      it("aggregates workTypes") {
+        withLocalWorksIndex { index =>
+          val work1 = createIdentifiedWorkWith(
+            workType = Some(WorkType(id = "b", label = "Books"))
+          )
+          val work2 = createIdentifiedWorkWith(
+            workType = Some(WorkType(id = "b", label = "Books"))
+          )
+          val work3 = createIdentifiedWorkWith(
+            workType = Some(WorkType(id = "a", label = "Archives"))
+          )
+          val work4 = createIdentifiedWorkWith(
+            workType = Some(WorkType(id = "m", label = "Manuscripts"))
+          )
+
+          val worksSearchOptions =
+            createWorksSearchOptionsWith(
+              aggregations = List(WorkTypeAggregationRequest()))
+
+          val expectedAggregations = AggregationResults(
+            Some(
+              AggregationBuckets(
+                List(
+                  AggregationBucket("b", 2),
+                  AggregationBucket("a", 1),
+                  AggregationBucket("m", 1)))),
+            None
+          )
+
+          assertListResultIsCorrect(
+            allWorks = List(work1, work2, work3, work4),
+            expectedWorks = List(),
+            expectedTotalResults = 4,
+            expectedAggregations = Some(expectedAggregations),
+            worksSearchOptions = worksSearchOptions
+          )
+        }
+      }
     }
   }
 
@@ -404,21 +448,33 @@ class WorksServiceTest
     allWorks: Seq[IdentifiedBaseWork],
     expectedWorks: Seq[IdentifiedBaseWork],
     expectedTotalResults: Int,
+    expectedAggregations: Option[AggregationResults] = None,
     worksSearchOptions: WorksSearchOptions = createWorksSearchOptions
   ): Assertion =
     assertResultIsCorrect(
       worksService.listWorks
-    )(allWorks, expectedWorks, expectedTotalResults, worksSearchOptions)
+    )(
+      allWorks,
+      expectedWorks,
+      expectedTotalResults,
+      expectedAggregations,
+      worksSearchOptions)
 
   private def assertSearchResultIsCorrect(query: String)(
     allWorks: Seq[IdentifiedBaseWork],
     expectedWorks: Seq[IdentifiedBaseWork],
     expectedTotalResults: Int,
+    expectedAggregations: Option[AggregationResults] = None,
     worksSearchOptions: WorksSearchOptions = createWorksSearchOptions
   ): Assertion =
     assertResultIsCorrect(
       worksService.searchWorks(MSMBoostQuery(query))
-    )(allWorks, expectedWorks, expectedTotalResults, worksSearchOptions)
+    )(
+      allWorks,
+      expectedWorks,
+      expectedTotalResults,
+      expectedAggregations,
+      worksSearchOptions)
 
   private def assertResultIsCorrect(
     partialSearchFunction: (
@@ -428,6 +484,7 @@ class WorksServiceTest
     allWorks: Seq[IdentifiedBaseWork],
     expectedWorks: Seq[IdentifiedBaseWork],
     expectedTotalResults: Int,
+    expectedAggregations: Option[AggregationResults],
     worksSearchOptions: WorksSearchOptions
   ): Assertion =
     withLocalWorksIndex { index =>
@@ -443,6 +500,7 @@ class WorksServiceTest
         val works = result.right.get
         works.results should contain theSameElementsAs expectedWorks
         works.totalResults shouldBe expectedTotalResults
+        works.aggregations shouldBe expectedAggregations
       }
     }
 }

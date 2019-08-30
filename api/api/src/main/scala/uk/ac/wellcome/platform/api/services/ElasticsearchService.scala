@@ -6,17 +6,23 @@ import com.sksamuel.elastic4s.requests.get.GetResponse
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import com.sksamuel.elastic4s.{ElasticClient, ElasticError, Response}
 import com.sksamuel.elastic4s.requests.searches.SearchRequest
+import com.sksamuel.elastic4s.requests.searches.aggs.TermsAggregation
 import com.sksamuel.elastic4s.requests.searches.queries.{Query, RangeQuery}
 import com.sksamuel.elastic4s.requests.searches.sort.{FieldSort, SortOrder}
 import com.sksamuel.elastic4s.{ElasticDate, Index}
 import grizzled.slf4j.Logging
+import uk.ac.wellcome.display.models.{
+  AggregationRequest,
+  WorkTypeAggregationRequest
+}
 import uk.ac.wellcome.platform.api.models._
 
 import scala.concurrent.{ExecutionContext, Future}
 
 case class ElasticsearchQueryOptions(filters: List[WorkFilter],
                                      limit: Int,
-                                     from: Int)
+                                     from: Int,
+                                     aggregations: Seq[AggregationRequest])
 
 @Singleton
 class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
@@ -60,7 +66,7 @@ class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
     val searchRequest: SearchRequest =
       buildSearchRequest(index, maybeWorkQuery, sortDefinitions, queryOptions)
 
-    debug(s"Sending ES request: $searchRequest")
+    debug(s"Sending ES request: ${searchRequest.show}")
 
     elasticClient
       .execute { searchRequest.trackTotalHits(true) }
@@ -76,10 +82,17 @@ class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
       filters = queryOptions.filters
     )
 
+    val aggregations = queryOptions.aggregations flatMap {
+      case _: WorkTypeAggregationRequest =>
+        Some(TermsAggregation("workType", field = Some("workType.id")))
+      case _ => None
+    }
+
     search(index)
+      .aggs(aggregations)
       .query(queryDefinition)
       .sortBy(sortDefinitions)
-      .limit(queryOptions.limit)
+      .limit(if (aggregations.nonEmpty) 0 else queryOptions.limit)
       .from(queryOptions.from)
   }
 
