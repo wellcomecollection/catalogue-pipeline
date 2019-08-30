@@ -1,19 +1,22 @@
 package uk.ac.wellcome.platform.transformer.miro.services
 
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.json.JsonUtil._
+
 import uk.ac.wellcome.json.exceptions.JsonDecodingError
-import uk.ac.wellcome.messaging.message.MessageWriter
-import uk.ac.wellcome.messaging.sns.{NotificationMessage, PublishAttempt}
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.transformer.miro.exceptions.MiroTransformerException
 import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
+import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.models.Implicits._
+
+import uk.ac.wellcome.messaging.message.MessageWriter
+import uk.ac.wellcome.messaging.sns.{NotificationMessage, PublishAttempt}
+
 import uk.ac.wellcome.storage.ObjectStore
 import uk.ac.wellcome.storage.vhs.HybridRecord
-
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
 
 class MiroVHSRecordReceiver(objectStore: ObjectStore[MiroRecord],
                             messageWriter: MessageWriter[TransformedBaseWork])(

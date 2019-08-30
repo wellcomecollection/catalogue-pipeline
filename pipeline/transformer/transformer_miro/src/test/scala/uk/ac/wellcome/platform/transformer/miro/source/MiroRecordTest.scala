@@ -2,6 +2,7 @@ package uk.ac.wellcome.platform.transformer.miro.source
 
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.platform.transformer.miro.Implicits._
 
 class MiroRecordTest extends FunSpec with Matchers {
 
