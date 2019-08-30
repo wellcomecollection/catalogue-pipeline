@@ -136,7 +136,10 @@ class RecorderWorkerServiceTest
                 |  }
                 |}""".stripMargin
               ).right
-              msgSender.messages.map(_.body).map(parse(_).right).toList shouldBe List(
+              msgSender.messages
+                .map(_.body)
+                .map(parse(_).right)
+                .toList shouldBe List(
                 expected
               )
             }

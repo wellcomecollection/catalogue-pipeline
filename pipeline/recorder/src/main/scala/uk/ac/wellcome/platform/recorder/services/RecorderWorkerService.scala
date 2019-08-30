@@ -33,12 +33,12 @@ class RecorderWorkerService[MsgDestination](
     final def apply(value: MatcherNotification): Json =
       Json.obj(
         ("type", Json.fromString("RemoteNotification")),
-        ("location",
+        (
+          "location",
           Json.obj(
             ("namespace", Json.fromString(value.namespace)),
             ("key", Json.fromString(value.key))
-          )
-        )
+          ))
       )
   }
 
