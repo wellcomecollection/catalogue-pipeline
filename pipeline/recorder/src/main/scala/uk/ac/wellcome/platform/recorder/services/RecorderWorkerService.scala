@@ -10,7 +10,11 @@ import uk.ac.wellcome.json.JsonUtil._
 
 import uk.ac.wellcome.bigmessaging.typesafe.{EmptyMetadata, GetLocation}
 import uk.ac.wellcome.messaging.MessageSender
-import uk.ac.wellcome.bigmessaging.message.{BigMessageStream, MessageNotification, RemoteNotification}
+import uk.ac.wellcome.bigmessaging.message.{
+  BigMessageStream,
+  MessageNotification,
+  RemoteNotification
+}
 
 import uk.ac.wellcome.storage.store.{HybridStoreEntry, VersionedStore}
 import uk.ac.wellcome.storage.{Identified, Version}

@@ -13,7 +13,10 @@ import uk.ac.wellcome.platform.recorder.fixtures.WorkerServiceFixture
 
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.bigmessaging.typesafe.VHSBuilder
-import uk.ac.wellcome.bigmessaging.message.{MessageNotification, RemoteNotification}
+import uk.ac.wellcome.bigmessaging.message.{
+  MessageNotification,
+  RemoteNotification
+}
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures
 import uk.ac.wellcome.storage.dynamo.DynamoConfig
 import uk.ac.wellcome.storage.ObjectLocationPrefix
@@ -61,7 +64,8 @@ class RecorderIntegrationTest
                   val messages = listMessagesReceivedFromSNS(topic)
                     .map(_.message)
                     .map(fromJson[MessageNotification](_).get)
-                  messages.toList shouldBe List(RemoteNotification(location.get))
+                  messages.toList shouldBe List(
+                    RemoteNotification(location.get))
                 }
               }
             }

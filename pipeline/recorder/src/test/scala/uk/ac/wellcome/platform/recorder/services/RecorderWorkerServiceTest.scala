@@ -12,7 +12,10 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.storage.ObjectLocation
 
 import uk.ac.wellcome.messaging.fixtures.SQS
-import uk.ac.wellcome.bigmessaging.message.{MessageNotification, RemoteNotification}
+import uk.ac.wellcome.bigmessaging.message.{
+  MessageNotification,
+  RemoteNotification
+}
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 
 class RecorderWorkerServiceTest
