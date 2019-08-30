@@ -20,9 +20,6 @@ class AggregationRequestDeserializer
     p.nextValue()
     val commaSeparatedString = p.getText()
 
-    // We create a (key: String, agg: Option[Aggregation]) tuple so we can error nicely
-    // telling people which values are invalid
-
     val validations = commaSeparatedString
       .split(",")
       .toList
