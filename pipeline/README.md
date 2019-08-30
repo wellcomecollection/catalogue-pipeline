@@ -55,5 +55,42 @@ Inserts a work into our query index - Elasticsearch.
 
 
 ## Releasing
-We use the [Wellcome Release Tooling](https://github.com/wellcometrust/dockerfiles/tree/master/release_tooling),
-which has its config defined in [`.wellcome_project`](../.wellcome_project).
+
+1. Create a new release with the [Wellcome Release Tool](https://github.com/wellcometrust/dockerfiles/tree/master/release_tooling)
+  to `stage` 
+      ```BASH
+      wrt prepare
+      wrt deploy stage
+      ```
+2. Create a new stack by copying the current one in
+  [`./terraform/main.tf`](`./terraform/main.tf`).
+3. Change the namespace and index name
+4. Make sure the reindex topics are uncommented. You probably only need the Sierra one.
+      ```HCL
+      "${local.sierra_reindexer_topic_name}"
+      "${local.miro_reindexer_topic_name}"
+      ```
+5. Run
+      ```BASH
+      terraform init
+      terraform apply
+      ```
+6. Run the [`reindexer`](../reindexer)
+    ```
+    python3 ./start_reindex.py --src sierra --dst catalogue --reason "Great Good" --mode partial
+    ```
+7. Watch your new pipeline do it's magic and land up as expected in the new index 🔮
+
+### If there were no model changes
+1. Change the name of the index to the current index
+2. Comment out the reindex topics
+3. Remove the old stack
+4. Remove the test index
+5. ```terraform apply```
+
+### If there were model changes
+1. Do a complete reindex into the new index
+2. Once you're happy it's up to date, remove the old stack
+3. Change the index that the API is pointing to on the staging API
+4. Test
+5. Make the stage API the prod api
