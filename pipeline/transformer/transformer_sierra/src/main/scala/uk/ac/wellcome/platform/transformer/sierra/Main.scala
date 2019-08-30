@@ -6,7 +6,6 @@ import com.typesafe.config.Config
 import scala.concurrent.ExecutionContext
 
 import uk.ac.wellcome.models.transformable.SierraTransformable
-import uk.ac.wellcome.models.transformable.SierraTransformable._
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.transformer.sierra.services.{
   HybridRecordReceiver,
@@ -14,7 +13,6 @@ import uk.ac.wellcome.platform.transformer.sierra.services.{
 }
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
-import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.Implicits._
 
 import uk.ac.wellcome.bigmessaging.typesafe.{BigMessagingBuilder, VHSBuilder}
