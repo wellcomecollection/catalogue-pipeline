@@ -12,10 +12,25 @@ class AggregationResultsTest extends FunSpec with Matchers {
     //  And this mimics the searchResponse.aggregationsAsString
     val responseString =
       """
-        |{"workType":{"doc_count_error_upper_bound":0,"sum_other_doc_count":0,"buckets":[{"key":"b","doc_count":2},{"key":"a","doc_count":1},{"key":"m","doc_count":1}]}}
+        |{
+        |  "workType": {
+        |    "doc_count_error_upper_bound": 0,
+        |    "sum_other_doc_count": 0,
+        |    "buckets": [
+        |      {"key": "b", "doc_count": 2},
+        |      {"key": "a", "doc_count": 1},
+        |      {"key": "m","doc_count":1}
+        |    ]
+        |  }
+        |}
         |""".stripMargin
 
     val singleAgg = AggregationResults(singleAggregationsMap, responseString)
-    singleAgg.get.workType shouldBe 1
+    singleAgg.get.workType shouldBe Some(
+      AggregationBuckets(
+        List(
+          AggregationBucket("b", 2),
+          AggregationBucket("a", 1),
+          AggregationBucket("m", 1))))
   }
 }
