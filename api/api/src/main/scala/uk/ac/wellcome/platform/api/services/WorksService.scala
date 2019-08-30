@@ -23,7 +23,7 @@ case class WorksSearchOptions(
   filters: List[WorkFilter],
   pageSize: Int,
   pageNumber: Int,
-  aggregations: List[AggregationRequest] = List()
+  aggregations: List[AggregationRequest]
 )
 
 @Singleton

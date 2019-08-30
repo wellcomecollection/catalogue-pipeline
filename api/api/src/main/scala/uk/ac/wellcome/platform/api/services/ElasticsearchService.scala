@@ -22,8 +22,7 @@ import scala.concurrent.{ExecutionContext, Future}
 case class ElasticsearchQueryOptions(filters: List[WorkFilter],
                                      limit: Int,
                                      from: Int,
-                                     aggregations: List[AggregationRequest] =
-                                       List())
+                                     aggregations: Seq[AggregationRequest])
 
 @Singleton
 class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
@@ -83,9 +82,10 @@ class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
       filters = queryOptions.filters
     )
 
-    val aggregations = queryOptions.aggregations.map {
+    val aggregations = queryOptions.aggregations flatMap {
       case _: WorkTypeAggregationRequest =>
-        TermsAggregation("workType", field = Some("workType.id"))
+        Some(TermsAggregation("workType", field = Some("workType.id")))
+      case _ => None
     }
 
     search(index)
