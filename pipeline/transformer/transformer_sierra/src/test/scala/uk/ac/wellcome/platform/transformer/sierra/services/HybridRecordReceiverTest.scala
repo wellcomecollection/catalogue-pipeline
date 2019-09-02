@@ -1,17 +1,17 @@
 package uk.ac.wellcome.platform.transformer.sierra.services
 
-import com.amazonaws.services.sns.AmazonSNS
-import com.amazonaws.services.sns.model.PublishRequest
-import io.circe.ParsingFailure
-import org.mockito.Matchers.any
-import org.mockito.Mockito.when
+import scala.util.{Random, Try}
+import scala.concurrent.ExecutionException
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatest.mockito.MockitoSugar
+import org.mockito.Mockito.when
+import org.mockito.Matchers.any
+import com.amazonaws.services.sns.AmazonSNS
+import com.amazonaws.services.sns.model.PublishRequest
 import org.scalatest.{FunSpec, Matchers}
+
 import uk.ac.wellcome.json.exceptions.JsonDecodingError
-import uk.ac.wellcome.messaging.fixtures.Messaging
 import uk.ac.wellcome.models.transformable.SierraTransformable
-import uk.ac.wellcome.models.transformable.SierraTransformable._
 import uk.ac.wellcome.models.transformable.sierra.test.utils.SierraGenerators
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.{
@@ -19,18 +19,17 @@ import uk.ac.wellcome.models.work.internal.{
   UnidentifiedWork
 }
 import uk.ac.wellcome.platform.transformer.sierra.fixtures.HybridRecordReceiverFixture
-import uk.ac.wellcome.storage.ObjectLocation
-import uk.ac.wellcome.storage.vhs.HybridRecord
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.{Random, Try}
+import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
+
+import uk.ac.wellcome.storage.ObjectLocation
 
 class HybridRecordReceiverTest
     extends FunSpec
     with Matchers
-    with Messaging
+    with BigMessagingFixture
     with Eventually
     with HybridRecordReceiverFixture
     with IntegrationPatience
@@ -49,21 +48,23 @@ class HybridRecordReceiverTest
   it("receives a message and sends it to SNS client") {
     withLocalSnsTopic { topic =>
       withLocalS3Bucket { bucket =>
-        val sqsMessage = createHybridRecordNotificationWith(
-          createSierraTransformable,
-          bucket = bucket
-        )
+        withVHS { vhs =>
+          val sqsMessage = createHybridRecordNotificationWith(
+            createSierraTransformable,
+            vhs
+          )
 
-        withHybridRecordReceiver(topic, bucket) { recordReceiver =>
-          val future =
-            recordReceiver.receiveMessage(sqsMessage, transformToWork)
+          withHybridRecordReceiver(vhs, topic, bucket) { recordReceiver =>
+            val future =
+              recordReceiver.receiveMessage(sqsMessage, transformToWork)
 
-          whenReady(future) { _ =>
-            val works = getMessages[TransformedBaseWork](topic)
-            works.size should be >= 1
+            whenReady(future) { _ =>
+              val works = getMessages[TransformedBaseWork](topic)
+              works.size should be >= 1
 
-            works.map { work =>
-              work shouldBe a[UnidentifiedWork]
+              works.map { work =>
+                work shouldBe a[UnidentifiedWork]
+              }
             }
           }
         }
@@ -76,24 +77,26 @@ class HybridRecordReceiverTest
 
     withLocalSnsTopic { topic =>
       withLocalS3Bucket { bucket =>
-        val notification = createHybridRecordNotificationWith(
-          createSierraTransformable,
-          version = version,
-          bucket = bucket
-        )
+        withVHS { vhs =>
+          val notification = createHybridRecordNotificationWith(
+            createSierraTransformable,
+            vhs,
+            version = version
+          )
 
-        withHybridRecordReceiver(topic, bucket) { recordReceiver =>
-          val future =
-            recordReceiver.receiveMessage(notification, transformToWork)
+          withHybridRecordReceiver(vhs, topic, bucket) { recordReceiver =>
+            val future =
+              recordReceiver.receiveMessage(notification, transformToWork)
 
-          whenReady(future) { _ =>
-            val works = getMessages[TransformedBaseWork](topic)
-            works.size should be >= 1
+            whenReady(future) { _ =>
+              val works = getMessages[TransformedBaseWork](topic)
+              works.size should be >= 1
 
-            works.map { actualWork =>
-              actualWork shouldBe a[UnidentifiedWork]
-              val unidentifiedWork = actualWork.asInstanceOf[UnidentifiedWork]
-              unidentifiedWork.version shouldBe version
+              works.map { actualWork =>
+                actualWork shouldBe a[UnidentifiedWork]
+                val unidentifiedWork = actualWork.asInstanceOf[UnidentifiedWork]
+                unidentifiedWork.version shouldBe version
+              }
             }
           }
         }
@@ -101,27 +104,46 @@ class HybridRecordReceiverTest
     }
   }
 
-  it("returns a failed future if it's unable to parse the SQS message") {
+  it("fails if VHS errors when retrieving the record") {
     withLocalSnsTopic { topic =>
       withLocalS3Bucket { bucket =>
-        val key = randomAlphanumeric(10)
-        s3Client.putObject(bucket.name, key, "not a JSON string")
+        withBrokenVHS { vhs =>
+          val sqsMessage = createHybridRecordNotificationWith(
+            createSierraTransformable,
+            vhs
+          )
 
-        val hybridRecord = HybridRecord(
-          id = "testId",
-          version = 1,
-          location = ObjectLocation(namespace = bucket.name, key = key)
-        )
-        val invalidSqsMessage = createNotificationMessageWith(
-          message = hybridRecord
-        )
+          withHybridRecordReceiver(vhs, topic, bucket) { recordReceiver =>
+            val future =
+              recordReceiver.receiveMessage(sqsMessage, transformToWork)
 
-        withHybridRecordReceiver(topic, bucket) { recordReceiver =>
-          val future =
-            recordReceiver.receiveMessage(invalidSqsMessage, transformToWork)
+            whenReady(future.failed) {
+              _ shouldBe a[ExecutionException]
+            }
+          }
+        }
+      }
+    }
+  }
 
-          whenReady(future.failed) { x =>
-            x shouldBe a[ParsingFailure]
+  it("fails if the record does not exist in VHS") {
+    withLocalSnsTopic { topic =>
+      withLocalS3Bucket { bucket =>
+        withVHS { vhs =>
+          val sqsMessage = createNotificationMessageWith(
+            HybridRecord(
+              id = "some-nonexistent-id",
+              version = 1,
+              location =
+                ObjectLocation(namespace = "some.namespace", path = "some/path")
+            )
+          )
+          withHybridRecordReceiver(vhs, topic, bucket) { recordReceiver =>
+            val future =
+              recordReceiver.receiveMessage(sqsMessage, transformToWork)
+            whenReady(future.failed) {
+              _ shouldBe a[ExecutionException]
+            }
           }
         }
       }
@@ -131,16 +153,18 @@ class HybridRecordReceiverTest
   it("fails if it can't parse a HybridRecord from SNS") {
     withLocalSnsTopic { topic =>
       withLocalS3Bucket { bucket =>
-        val invalidSqsMessage = createNotificationMessageWith(
-          message = Random.alphanumeric take 50 mkString
-        )
+        withVHS { vhs =>
+          val invalidSqsMessage = createNotificationMessageWith(
+            message = Random.alphanumeric take 50 mkString
+          )
 
-        withHybridRecordReceiver(topic, bucket) { recordReceiver =>
-          val future =
-            recordReceiver.receiveMessage(invalidSqsMessage, transformToWork)
+          withHybridRecordReceiver(vhs, topic, bucket) { recordReceiver =>
+            val future =
+              recordReceiver.receiveMessage(invalidSqsMessage, transformToWork)
 
-          whenReady(future.failed) {
-            _ shouldBe a[JsonDecodingError]
+            whenReady(future.failed) {
+              _ shouldBe a[JsonDecodingError]
+            }
           }
         }
       }
@@ -150,19 +174,21 @@ class HybridRecordReceiverTest
   it("fails if it's unable to perform a transformation") {
     withLocalSnsTopic { topic =>
       withLocalS3Bucket { bucket =>
-        val failingSqsMessage = createHybridRecordNotificationWith(
-          createSierraTransformable,
-          bucket = bucket
-        )
+        withVHS { vhs =>
+          val failingSqsMessage = createHybridRecordNotificationWith(
+            createSierraTransformable,
+            vhs
+          )
 
-        withHybridRecordReceiver(topic, bucket) { recordReceiver =>
-          val future =
-            recordReceiver.receiveMessage(
-              failingSqsMessage,
-              failingTransformToWork)
+          withHybridRecordReceiver(vhs, topic, bucket) { recordReceiver =>
+            val future =
+              recordReceiver.receiveMessage(
+                failingSqsMessage,
+                failingTransformToWork)
 
-          whenReady(future.failed) {
-            _ shouldBe a[TestException]
+            whenReady(future.failed) {
+              _ shouldBe a[TestException]
+            }
           }
         }
       }
@@ -172,18 +198,23 @@ class HybridRecordReceiverTest
   it("fails if it's unable to publish the work") {
     withLocalSnsTopic { topic =>
       withLocalS3Bucket { bucket =>
-        val message = createHybridRecordNotificationWith(
-          createSierraTransformable,
-          bucket = bucket
-        )
+        withVHS { vhs =>
+          val message = createHybridRecordNotificationWith(
+            createSierraTransformable,
+            vhs
+          )
 
-        withHybridRecordReceiver(topic, bucket, mockSnsClientFailPublishMessage) {
-          recordReceiver =>
+          withHybridRecordReceiver(
+            vhs,
+            topic,
+            bucket,
+            mockSnsClientFailPublishMessage) { recordReceiver =>
             val future = recordReceiver.receiveMessage(message, transformToWork)
 
             whenReady(future.failed) {
               _.getMessage should be("Failed publishing message")
             }
+          }
         }
       }
     }

@@ -27,7 +27,7 @@ class RecorderWorkerServiceTest
   it("records an UnidentifiedWork") {
     withLocalSqsQueue { queue =>
       withMemoryMessageSender { msgSender =>
-        withRecorderVhs { vhs =>
+        withVHS { vhs =>
           withWorkerService(queue, vhs, msgSender) { service =>
             val work = createUnidentifiedWork
             sendMessage[TransformedBaseWork](queue = queue, obj = work)
@@ -43,7 +43,7 @@ class RecorderWorkerServiceTest
   it("stores UnidentifiedInvisibleWorks") {
     withLocalSqsQueue { queue =>
       withMemoryMessageSender { msgSender =>
-        withRecorderVhs { vhs =>
+        withVHS { vhs =>
           withWorkerService(queue, vhs, msgSender) { service =>
             val invisibleWork = createUnidentifiedInvisibleWork
             sendMessage[TransformedBaseWork](queue = queue, invisibleWork)
@@ -59,7 +59,7 @@ class RecorderWorkerServiceTest
   it("doesn't overwrite a newer work with an older work") {
     withLocalSqsQueue { queue =>
       withMemoryMessageSender { msgSender =>
-        withRecorderVhs { vhs =>
+        withVHS { vhs =>
           withWorkerService(queue, vhs, msgSender) { service =>
             val olderWork = createUnidentifiedWork
             val newerWork =
@@ -78,7 +78,7 @@ class RecorderWorkerServiceTest
   it("overwrites an older work with an newer work") {
     withLocalSqsQueue { queue =>
       withMemoryMessageSender { msgSender =>
-        withRecorderVhs { vhs =>
+        withVHS { vhs =>
           withWorkerService(queue, vhs, msgSender) { service =>
             val olderWork = createUnidentifiedWork
             val newerWork =
@@ -101,7 +101,7 @@ class RecorderWorkerServiceTest
     withLocalSqsQueueAndDlq {
       case SQS.QueuePair(queue, dlq) =>
         withMemoryMessageSender { msgSender =>
-          withBrokenRecorderVhs { vhs =>
+          withBrokenVHS { vhs =>
             withWorkerService(queue, vhs, msgSender) { service =>
               val work = createUnidentifiedWork
               sendMessage[TransformedBaseWork](queue = queue, obj = work)
@@ -120,7 +120,7 @@ class RecorderWorkerServiceTest
   it("sends the remote notification to the queue") {
     withLocalSqsQueue { queue =>
       withMemoryMessageSender { msgSender =>
-        withRecorderVhs { vhs =>
+        withVHS { vhs =>
           withWorkerService(queue, vhs, msgSender) { service =>
             val work = createUnidentifiedWork
             sendMessage[TransformedBaseWork](queue = queue, obj = work)

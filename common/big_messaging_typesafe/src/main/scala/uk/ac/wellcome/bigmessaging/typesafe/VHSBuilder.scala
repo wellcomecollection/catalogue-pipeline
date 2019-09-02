@@ -1,7 +1,5 @@
 package uk.ac.wellcome.bigmessaging.typesafe
 
-import java.util.UUID
-import scala.util.{Failure, Success, Try}
 import org.scanamo.{DynamoFormat, DynamoValue}
 import org.scanamo.error.DynamoReadError
 import org.scanamo.auto._
@@ -10,70 +8,14 @@ import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
-
-import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.store.dynamo.DynamoHashStore
 import uk.ac.wellcome.storage.dynamo.DynamoConfig
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
-import uk.ac.wellcome.storage.store.{
-  HybridIndexedStoreEntry,
-  HybridStoreWithMaxima,
-  Store,
-  TypedStore,
-  VersionedHybridStore
-}
-import uk.ac.wellcome.storage.{
-  Identified,
-  ObjectLocation,
-  ObjectLocationPrefix,
-  Version
-}
+import uk.ac.wellcome.storage.store.HybridIndexedStoreEntry
+import uk.ac.wellcome.storage.{ObjectLocation, ObjectLocationPrefix}
 import uk.ac.wellcome.storage.typesafe.{DynamoBuilder, S3Builder}
 import uk.ac.wellcome.storage.streaming.Codec
-import uk.ac.wellcome.storage.maxima.Maxima
-
-case class EmptyMetadata()
-
-trait GetLocation {
-  def getLocation(key: Version[String, Int]): Try[ObjectLocation]
-}
-
-class VHS[T](val hybridStore: VHSInternalStore[T])
-    extends VersionedHybridStore[
-      String,
-      Int,
-      ObjectLocation,
-      T,
-      EmptyMetadata
-    ](hybridStore)
-    with GetLocation {
-
-  def getLocation(key: Version[String, Int]): Try[ObjectLocation] =
-    hybridStore.indexedStore.get(key) match {
-      case Right(Identified(_, entry)) => Success(entry.typedStoreId)
-      case Left(error)                 => Failure(error.e)
-    }
-}
-
-class VHSInternalStore[T](
-  prefix: ObjectLocationPrefix,
-  indexStore: Store[
-    Version[String, Int],
-    HybridIndexedStoreEntry[ObjectLocation, EmptyMetadata]
-  ] with Maxima[String, Int],
-  dataStore: TypedStore[ObjectLocation, T]
-) extends HybridStoreWithMaxima[String, Int, ObjectLocation, T, EmptyMetadata] {
-
-  override val indexedStore = indexStore;
-  override val typedStore = dataStore;
-
-  override protected def createTypeStoreId(
-    id: Version[String, Int]): ObjectLocation =
-    prefix.asLocation(
-      id.id.toString,
-      id.version.toString,
-      UUID.randomUUID().toString)
-}
+import uk.ac.wellcome.bigmessaging.{EmptyMetadata, VHS, VHSInternalStore}
 
 object VHSBuilder {
 
