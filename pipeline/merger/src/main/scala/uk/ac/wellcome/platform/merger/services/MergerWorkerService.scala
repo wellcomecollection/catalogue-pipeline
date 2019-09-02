@@ -39,7 +39,7 @@ class MergerWorkerService[Destination](
     } yield ()
 
   private def sendWorks(mergedWorks: Seq[BaseWork]) =
-    Future.sequence(mergedWorks.map {
-      work => Future.fromTry(msgSender.sendT(work))
+    Future.sequence(mergedWorks.map { work =>
+      Future.fromTry(msgSender.sendT(work))
     })
 }

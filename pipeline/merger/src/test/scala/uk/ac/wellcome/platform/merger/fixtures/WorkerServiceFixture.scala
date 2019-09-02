@@ -13,7 +13,8 @@ import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 
 trait WorkerServiceFixture extends LocalWorksVhs {
 
-  def withWorkerService[R](vhs: VHS, queue: Queue, topic: Topic)(testWith: TestWith[MergerWorkerService[SNSConfig], R]): R =
+  def withWorkerService[R](vhs: VHS, queue: Queue, topic: Topic)(
+    testWith: TestWith[MergerWorkerService[SNSConfig], R]): R =
     withLocalS3Bucket { bucket =>
       withSqsBigMessageSender[BaseWork, R](bucket, topic) { msgSender =>
         withActorSystem { implicit actorSystem =>
@@ -26,17 +27,18 @@ trait WorkerServiceFixture extends LocalWorksVhs {
             )
             workerService.run()
             testWith(workerService)
-        }
-      }
-    }
-  }
-
-  def withWorkerService[R](vhs: VHS)(testWith: TestWith[MergerWorkerService[SNSConfig], R]): R =
-      withLocalSqsQueue { queue =>
-        withLocalSnsTopic { topic =>
-          withWorkerService(vhs, queue, topic) { workerService =>
-            testWith(workerService)
           }
         }
       }
+    }
+
+  def withWorkerService[R](vhs: VHS)(
+    testWith: TestWith[MergerWorkerService[SNSConfig], R]): R =
+    withLocalSqsQueue { queue =>
+      withLocalSnsTopic { topic =>
+        withWorkerService(vhs, queue, topic) { workerService =>
+          testWith(workerService)
+        }
+      }
+    }
 }

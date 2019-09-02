@@ -95,7 +95,9 @@ class RecorderPlaybackServiceTest
     }
   }
 
-  private def fetchAllWorks(vhs: VHS, works: TransformedBaseWork*): Future[Seq[Option[TransformedBaseWork]]] = {
+  private def fetchAllWorks(
+    vhs: VHS,
+    works: TransformedBaseWork*): Future[Seq[Option[TransformedBaseWork]]] = {
     val service = new RecorderPlaybackService(vhs)
 
     val workIdentifiers = works

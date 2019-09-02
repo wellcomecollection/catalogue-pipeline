@@ -266,15 +266,13 @@ class MergerWorkerServiceTest
   def withMergerWorkerServiceFixtures[R](
     testWith: TestWith[(VHS, QueuePair, Topic), R]): R =
     withVHS { vhs =>
-      withLocalSqsQueueAndDlq { case QueuePair(queue, dlq) =>
-        withLocalSnsTopic { topic =>
-          withWorkerService(
-            vhs = vhs,
-            topic = topic,
-            queue = queue) { _ =>
-            testWith((vhs, QueuePair(queue, dlq), topic))
+      withLocalSqsQueueAndDlq {
+        case QueuePair(queue, dlq) =>
+          withLocalSnsTopic { topic =>
+            withWorkerService(vhs = vhs, topic = topic, queue = queue) { _ =>
+              testWith((vhs, QueuePair(queue, dlq), topic))
+            }
           }
-        }
       }
     }
 }
