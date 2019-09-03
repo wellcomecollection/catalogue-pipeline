@@ -4,7 +4,6 @@ import io.swagger.annotations.ApiModelProperty.AccessMode
 import io.swagger.annotations.{ApiModel, ApiModelProperty}
 import uk.ac.wellcome.display.models.{DisplayWork, WorksIncludes}
 import uk.ac.wellcome.models.work.internal.IdentifiedWork
-import uk.ac.wellcome.json.JsonUtil._
 
 @ApiModel(
   value = "ResultList",
