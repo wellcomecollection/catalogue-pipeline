@@ -8,7 +8,10 @@ case class AggregationResults(workType: Option[AggregationBuckets],
                               dates: Option[AggregationBuckets])
 object AggregationResults {
   def apply(vals: Map[String, Any], json: String): Option[AggregationResults] =
-    fromJson[AggregationResults](json) toOption
+    vals.size match {
+      case 0 => None
+      case _ => fromJson[AggregationResults](json) toOption
+    }
 }
 case class AggregationBuckets(buckets: List[AggregationBucket])
 
