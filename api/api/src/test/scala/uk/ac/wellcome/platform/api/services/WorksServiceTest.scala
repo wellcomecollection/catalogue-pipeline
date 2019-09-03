@@ -12,11 +12,11 @@ import uk.ac.wellcome.models.work.generators.{
 import uk.ac.wellcome.models.work.internal.{IdentifiedBaseWork, WorkType}
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
 import uk.ac.wellcome.platform.api.models.{
-  AggregationBucket,
   AggregationBuckets,
   AggregationResults,
   DateRangeFilter,
   ResultList,
+  WorkTypeAggregationBucket,
   WorkTypeFilter
 }
 
@@ -424,12 +424,11 @@ class WorksServiceTest
 
           val expectedAggregations = AggregationResults(
             Some(
-              AggregationBuckets(
-                List(
-                  AggregationBucket("b", 2),
-                  AggregationBucket("a", 1),
-                  AggregationBucket("m", 1)))),
-            None
+              AggregationBuckets(List(
+                WorkTypeAggregationBucket(key = WorkType("b", "Books"), 2),
+                WorkTypeAggregationBucket(key = WorkType("a", "Archives"), 1),
+                WorkTypeAggregationBucket(key = WorkType("b", "Manuscripts"), 1)
+              )))
           )
 
           assertListResultIsCorrect(

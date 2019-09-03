@@ -1,6 +1,7 @@
 package uk.ac.wellcome.platform.api.models
 
 import org.scalatest.{FunSpec, Matchers}
+import uk.ac.wellcome.models.work.internal.WorkType
 
 class AggregationResultsTest extends FunSpec with Matchers {
   it("destructures a single aggregation result") {
@@ -17,9 +18,30 @@ class AggregationResultsTest extends FunSpec with Matchers {
         |    "doc_count_error_upper_bound": 0,
         |    "sum_other_doc_count": 0,
         |    "buckets": [
-        |      {"key": "b", "doc_count": 2},
-        |      {"key": "a", "doc_count": 1},
-        |      {"key": "m","doc_count":1}
+        |      {
+        |          "key" : {
+        |            "id" : "a",
+        |            "label" : "Books",
+        |            "type" : "WorkType"
+        |          },
+        |          "doc_count" : 393145
+        |        },
+        |        {
+        |          "key" : {
+        |            "id" : "b",
+        |            "label" : "Manuscripts, Asian",
+        |            "type" : "WorkType"
+        |          },
+        |          "doc_count" : 5696
+        |        },
+        |        {
+        |          "key" : {
+        |            "id" : "c",
+        |            "label" : "Music",
+        |            "type" : "WorkType"
+        |          },
+        |          "doc_count" : 9
+        |        }
         |    ]
         |  }
         |}
@@ -27,10 +49,14 @@ class AggregationResultsTest extends FunSpec with Matchers {
 
     val singleAgg = AggregationResults(singleAggregationsMap, responseString)
     singleAgg.get.workType shouldBe Some(
-      AggregationBuckets(
-        List(
-          AggregationBucket("b", 2),
-          AggregationBucket("a", 1),
-          AggregationBucket("m", 1))))
+      AggregationBuckets(List(
+        WorkTypeAggregationBucket(
+          key = WorkType("a", "Books"),
+          doc_count = 393145),
+        WorkTypeAggregationBucket(
+          key = WorkType("b", "Manuscripts, Asian"),
+          doc_count = 5696),
+        WorkTypeAggregationBucket(key = WorkType("c", "Music"), doc_count = 9)
+      )))
   }
 }

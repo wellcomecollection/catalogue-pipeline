@@ -6,7 +6,10 @@ import com.sksamuel.elastic4s.requests.get.GetResponse
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import com.sksamuel.elastic4s.{ElasticClient, ElasticError, Response}
 import com.sksamuel.elastic4s.requests.searches.SearchRequest
-import com.sksamuel.elastic4s.requests.searches.aggs.TermsAggregation
+import com.sksamuel.elastic4s.requests.searches.aggs.{
+  CompositeAggregation,
+  TermsValueSource
+}
 import com.sksamuel.elastic4s.requests.searches.queries.{Query, RangeQuery}
 import com.sksamuel.elastic4s.requests.searches.sort.{FieldSort, SortOrder}
 import com.sksamuel.elastic4s.{ElasticDate, Index}
@@ -84,7 +87,17 @@ class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
 
     val aggregations = queryOptions.aggregations flatMap {
       case _: WorkTypeAggregationRequest =>
-        Some(TermsAggregation("workType", field = Some("workType.id")))
+        Some(
+          CompositeAggregation(
+            "workType",
+            sources = List(
+              TermsValueSource(name = "id", field = Some("workType.id")),
+              TermsValueSource(name = "label", field = Some("workType.label")),
+              TermsValueSource(
+                name = "type",
+                field = Some("workType.ontologyType"))
+            )
+          ))
       case _ => None
     }
 
