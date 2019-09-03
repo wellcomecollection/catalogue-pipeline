@@ -10,8 +10,6 @@ import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.merger.fixtures.LocalWorksVhs
 
-// import uk.ac.wellcome.storage.NoVersionExistsError
-
 class RecorderPlaybackServiceTest
     extends FunSpec
     with Matchers
