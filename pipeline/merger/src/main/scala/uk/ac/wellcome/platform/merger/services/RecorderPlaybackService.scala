@@ -1,12 +1,12 @@
 package uk.ac.wellcome.platform.merger.services
 
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.models.matcher.WorkIdentifier
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 
 import uk.ac.wellcome.bigmessaging.EmptyMetadata
-import uk.ac.wellcome.storage.{Identified, Version}
+import uk.ac.wellcome.storage.{Identified, Version, NoVersionExistsError}
 import uk.ac.wellcome.storage.store.{HybridStoreEntry, VersionedStore}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -31,7 +31,7 @@ class RecorderPlaybackService(
   def fetchAllWorks(workIdentifiers: Seq[WorkIdentifier])
     : Future[Seq[Option[TransformedBaseWork]]] = {
     Future.sequence(
-      workIdentifiers.map(id => Future.fromTry(getWorkForIdentifier(id)))
+      workIdentifiers.map(id => Future.fromTry(Try(getWorkForIdentifier(id))))
     )
   }
 
@@ -43,14 +43,18 @@ class RecorderPlaybackService(
     * If the work is missing from VHS, it throws [[NoSuchElementException]].
     */
   private def getWorkForIdentifier(
-    workIdentifier: WorkIdentifier): Try[Option[TransformedBaseWork]] =
+    workIdentifier: WorkIdentifier): Option[TransformedBaseWork] =
     vhs.getLatest(workIdentifier.identifier) match {
-      case Left(readError) => Failure(new Error(s"${readError}"))
       case Right(Identified(Version(_, version), HybridStoreEntry(work, _))) =>
-        if (work.version == workIdentifier.version) { Success(Some(work)) } else {
+        if (work.version == workIdentifier.version) {
+          Some(work)
+        } else {
           debug(
             s"VHS version = ${work.version}, identifier version = ${workIdentifier.version}, so discarding work")
-          Success(None)
+          None
         }
+      case Left(NoVersionExistsError(_)) => throw new NoSuchElementException(
+        s"Work ${workIdentifier.identifier} is not in VHS!")
+      case Left(readError) => throw readError.e
     }
 }

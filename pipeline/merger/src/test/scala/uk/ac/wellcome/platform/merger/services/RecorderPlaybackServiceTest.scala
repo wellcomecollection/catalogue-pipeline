@@ -1,14 +1,16 @@
 package uk.ac.wellcome.platform.merger.services
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{FunSpec, Matchers}
+
 import uk.ac.wellcome.models.matcher.WorkIdentifier
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.merger.fixtures.LocalWorksVhs
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+// import uk.ac.wellcome.storage.NoVersionExistsError
 
 class RecorderPlaybackServiceTest
     extends FunSpec
@@ -40,16 +42,6 @@ class RecorderPlaybackServiceTest
     }
   }
 
-  it("returns None if asked to fetch a Work with version 0") {
-    val work = createUnidentifiedWorkWith(version = 0)
-
-    withVHS { vhs =>
-      whenReady(fetchAllWorks(vhs = vhs, work)) { result =>
-        result shouldBe Seq(None)
-      }
-    }
-  }
-
   it("returns None if the version in VHS has a higher version") {
     val work = createUnidentifiedWorkWith(version = 2)
 
@@ -77,18 +69,15 @@ class RecorderPlaybackServiceTest
     val updatedWorks = outdatedWorks.map { work =>
       work.copy(version = work.version + 1)
     }
-    val zeroWorks = (6 to 7).map { _ =>
-      createUnidentifiedWorkWith(version = 0)
-    }
 
-    val lookupWorks = (unchangedWorks ++ outdatedWorks ++ zeroWorks).toList
-    val storedWorks = (unchangedWorks ++ updatedWorks ++ zeroWorks).toList
+    val lookupWorks = (unchangedWorks ++ outdatedWorks).toList
+    val storedWorks = (unchangedWorks ++ updatedWorks).toList
 
     withVHS { vhs =>
       givenStoredInVhs(vhs, storedWorks: _*)
 
       whenReady(fetchAllWorks(vhs = vhs, lookupWorks: _*)) { result =>
-        result shouldBe (unchangedWorks.map { Some(_) } ++ (4 to 7).map { _ =>
+        result shouldBe (unchangedWorks.map { Some(_) } ++ (4 to 5).map { _ =>
           None
         })
       }
