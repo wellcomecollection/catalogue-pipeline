@@ -6,7 +6,7 @@ import uk.ac.wellcome.models.matcher.WorkIdentifier
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 
 import uk.ac.wellcome.bigmessaging.EmptyMetadata
-import uk.ac.wellcome.storage.{Identified, Version, NoVersionExistsError}
+import uk.ac.wellcome.storage.{Identified, NoVersionExistsError, Version}
 import uk.ac.wellcome.storage.store.{HybridStoreEntry, VersionedStore}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -53,8 +53,9 @@ class RecorderPlaybackService(
             s"VHS version = ${work.version}, identifier version = ${workIdentifier.version}, so discarding work")
           None
         }
-      case Left(NoVersionExistsError(_)) => throw new NoSuchElementException(
-        s"Work ${workIdentifier.identifier} is not in VHS!")
+      case Left(NoVersionExistsError(_)) =>
+        throw new NoSuchElementException(
+          s"Work ${workIdentifier.identifier} is not in VHS!")
       case Left(readError) => throw readError.e
     }
 }
