@@ -30,10 +30,7 @@ case object DisplayResultList {
     resultList: ResultList,
     toDisplayWork: (IdentifiedWork, W) => T,
     pageSize: Int,
-    includes: W): DisplayResultList[T] = {
-    println("-==================================")
-    println(toJson(resultList.aggregations))
-    println("-==================================")
+    includes: W): DisplayResultList[T] =
     DisplayResultList(
       results = resultList.results.map { toDisplayWork(_, includes) },
       pageSize = pageSize,
@@ -43,5 +40,4 @@ case object DisplayResultList {
       totalResults = resultList.totalResults,
       aggregations = resultList.aggregations
     )
-  }
 }
