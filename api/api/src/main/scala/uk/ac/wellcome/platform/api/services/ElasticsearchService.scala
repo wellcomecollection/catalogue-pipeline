@@ -22,7 +22,7 @@ import scala.concurrent.{ExecutionContext, Future}
 case class ElasticsearchQueryOptions(filters: List[WorkFilter],
                                      limit: Int,
                                      from: Int,
-                                     aggregations: Seq[AggregationRequest])
+                                     aggregations: List[AggregationRequest])
 
 @Singleton
 class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
