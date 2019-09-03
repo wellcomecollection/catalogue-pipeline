@@ -18,11 +18,11 @@ import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 
 trait WorkerServiceFixture extends LocalWorksVhs {
 
-  def withWorkerService[R](
-    vhs: VHS,
-    queue: Queue,
-    topic: Topic,
-    metrics: Metrics[Future, StandardUnit] = new MemoryMetrics[StandardUnit])(
+  def withWorkerService[R](vhs: VHS,
+                           queue: Queue,
+                           topic: Topic,
+                           metrics: Metrics[Future, StandardUnit] =
+                             new MemoryMetrics[StandardUnit])(
     testWith: TestWith[MergerWorkerService[SNSConfig], R]): R =
     withLocalS3Bucket { bucket =>
       withSqsBigMessageSender[BaseWork, R](bucket, topic) { msgSender =>
