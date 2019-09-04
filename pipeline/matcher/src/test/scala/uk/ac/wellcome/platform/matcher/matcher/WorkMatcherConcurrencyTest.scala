@@ -11,7 +11,10 @@ import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.MergeCandidate
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
-import uk.ac.wellcome.storage.locking.dynamo.{DynamoLockingService, ExpiringLock}
+import uk.ac.wellcome.storage.locking.dynamo.{
+  DynamoLockingService,
+  ExpiringLock
+}
 
 class WorkMatcherConcurrencyTest
     extends FunSpec

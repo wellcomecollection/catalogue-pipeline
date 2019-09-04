@@ -53,8 +53,7 @@ trait LocalWorkGraphDynamoDb extends DynamoFixtures {
     table
   }
 
-  def createWorkGraphTable(
-    dynamoDbClient: AmazonDynamoDB): Table = {
+  def createWorkGraphTable(dynamoDbClient: AmazonDynamoDB): Table = {
     val tableName = Random.alphanumeric.take(10).mkString
     val indexName = Random.alphanumeric.take(10).mkString
     val table = Table(tableName, indexName)

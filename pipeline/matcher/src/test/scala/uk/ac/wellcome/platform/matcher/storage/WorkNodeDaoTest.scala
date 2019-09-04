@@ -179,7 +179,8 @@ class WorkNodeDaoTest
         withWorkNodeDao(table) { workNodeDao =>
           val work = WorkNode("A", 1, List("B"), "A+B")
           whenReady(workNodeDao.put(work)) { _ =>
-            val savedLinkedWork = get[WorkNode](dynamoClient, table.name)('id -> "A")
+            val savedLinkedWork =
+              get[WorkNode](dynamoClient, table.name)('id -> "A")
             savedLinkedWork shouldBe Some(Right(work))
           }
         }

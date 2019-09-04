@@ -25,7 +25,11 @@ import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
 import uk.ac.wellcome.platform.matcher.models.{WorkGraph, WorkUpdate}
 import uk.ac.wellcome.platform.matcher.storage.WorkGraphStore
 import uk.ac.wellcome.storage.locking.UnlockFailure
-import uk.ac.wellcome.storage.locking.dynamo.{DynamoLockingService, DynamoLockDao, ExpiringLock}
+import uk.ac.wellcome.storage.locking.dynamo.{
+  DynamoLockDao,
+  DynamoLockingService,
+  ExpiringLock
+}
 
 class WorkMatcherTest
     extends FunSpec
@@ -54,7 +58,8 @@ class WorkMatcherTest
                   Set(MatchedIdentifiers(Set(WorkIdentifier(workId, 1)))))
 
               val savedLinkedWork =
-                get[WorkNode](dynamoClient, graphTable.name)('id -> workId).map(_.right.get)
+                get[WorkNode](dynamoClient, graphTable.name)('id -> workId)
+                  .map(_.right.get)
 
               savedLinkedWork shouldBe Some(
                 WorkNode(workId, 1, Nil, ciHash(workId)))
@@ -282,7 +287,10 @@ class WorkMatcherTest
                   expires = Instant.now.plusSeconds(100))
               ))
           when(lockDao.unlock(any[UUID])).thenReturn(
-            Left(UnlockFailure(UUID.randomUUID, new RuntimeException("i wont unlock"))))
+            Left(
+              UnlockFailure(
+                UUID.randomUUID,
+                new RuntimeException("i wont unlock"))))
           whenReady(
             workMatcher
               .matchWork(createUnidentifiedSierraWork)
