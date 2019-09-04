@@ -4,7 +4,7 @@ import com.twitter.finagle.http.{Method, Request}
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.display.models.V1WorksIncludes
 import uk.ac.wellcome.display.models.v1.DisplayWorkV1
-import uk.ac.wellcome.platform.api.models.DisplayResultList
+import uk.ac.wellcome.platform.api.models.{AggregationSet, DisplayResultList}
 import uk.ac.wellcome.platform.api.requests.V1MultipleResultsRequest
 
 class ResultListResponseTest extends FunSpec with Matchers {
@@ -18,7 +18,8 @@ class ResultListResponseTest extends FunSpec with Matchers {
     totalPages = 5,
     totalResults = 45,
     // Nothing checks that results is populated correctly!
-    results = List()
+    results = List(),
+    aggregations = AggregationSet(None, None)
   )
 
   val multipleResultsRequest = V1MultipleResultsRequest(

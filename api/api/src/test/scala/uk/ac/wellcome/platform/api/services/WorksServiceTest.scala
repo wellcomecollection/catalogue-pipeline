@@ -12,9 +12,9 @@ import uk.ac.wellcome.models.work.generators.{
 import uk.ac.wellcome.models.work.internal.{IdentifiedBaseWork, WorkType}
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
 import uk.ac.wellcome.platform.api.models.{
+  Aggregation,
   AggregationBucket,
-  AggregationBuckets,
-  AggregationResults,
+  AggregationSet,
   DateRangeFilter,
   ResultList,
   WorkTypeFilter
@@ -422,14 +422,16 @@ class WorksServiceTest
             createWorksSearchOptionsWith(
               aggregations = List(WorkTypeAggregationRequest()))
 
-          val expectedAggregations = AggregationResults(
+          val expectedAggregations = AggregationSet(
             Some(
-              AggregationBuckets(
-                List(
-                  AggregationBucket(key = WorkType("b", "Books"), 2),
-                  AggregationBucket(key = WorkType("a", "Archives"), 1),
-                  AggregationBucket(key = WorkType("b", "Manuscripts"), 1)
-                )))
+              Aggregation(List(
+                AggregationBucket(data = WorkType("b", "Books"), count = 2),
+                AggregationBucket(data = WorkType("a", "Archives"), count = 1),
+                AggregationBucket(
+                  data = WorkType("b", "Manuscripts"),
+                  count = 1)
+              ))),
+            None
           )
 
           assertListResultIsCorrect(
@@ -448,7 +450,7 @@ class WorksServiceTest
     allWorks: Seq[IdentifiedBaseWork],
     expectedWorks: Seq[IdentifiedBaseWork],
     expectedTotalResults: Int,
-    expectedAggregations: Option[AggregationResults] = None,
+    expectedAggregations: Option[AggregationSet] = None,
     worksSearchOptions: WorksSearchOptions = createWorksSearchOptions
   ): Assertion =
     assertResultIsCorrect(
@@ -464,7 +466,7 @@ class WorksServiceTest
     allWorks: Seq[IdentifiedBaseWork],
     expectedWorks: Seq[IdentifiedBaseWork],
     expectedTotalResults: Int,
-    expectedAggregations: Option[AggregationResults] = None,
+    expectedAggregations: Option[AggregationSet] = None,
     worksSearchOptions: WorksSearchOptions = createWorksSearchOptions
   ): Assertion =
     assertResultIsCorrect(
@@ -484,7 +486,7 @@ class WorksServiceTest
     allWorks: Seq[IdentifiedBaseWork],
     expectedWorks: Seq[IdentifiedBaseWork],
     expectedTotalResults: Int,
-    expectedAggregations: Option[AggregationResults],
+    expectedAggregations: Option[AggregationSet],
     worksSearchOptions: WorksSearchOptions
   ): Assertion =
     withLocalWorksIndex { index =>

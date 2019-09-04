@@ -6,11 +6,7 @@ import uk.ac.wellcome.models.work.internal.WorkType
 class AggregationResultsTest extends FunSpec with Matchers {
   it("destructures a single aggregation result") {
     // val searchResponse: com.sksamuel.elastic4s.requests.searches.SearchResponse
-
-    // This mimics the behaviour of searchResponse.aggregationsAsMap
-    val singleAggregationsMap = Map("workType" -> Map.empty)
-
-    //  And this mimics the searchResponse.aggregationsAsString
+    // This mimics the searchResponse.aggregationsAsString
     val responseString =
       """
         |{
@@ -47,14 +43,14 @@ class AggregationResultsTest extends FunSpec with Matchers {
         |}
         |""".stripMargin
 
-    val singleAgg = AggregationResults(singleAggregationsMap, responseString)
-    singleAgg.get.workType shouldBe Some(
-      AggregationBuckets(List(
-        AggregationBucket(key = WorkType("a", "Books"), doc_count = 393145),
+    val singleAgg = AggregationSet(responseString)
+    singleAgg.workType shouldBe Some(
+      Aggregation(List(
+        AggregationBucket(data = WorkType("a", "Books"), count = 393145),
         AggregationBucket(
-          key = WorkType("b", "Manuscripts, Asian"),
-          doc_count = 5696),
-        AggregationBucket(key = WorkType("c", "Music"), doc_count = 9)
+          data = WorkType("b", "Manuscripts, Asian"),
+          count = 5696),
+        AggregationBucket(data = WorkType("c", "Music"), count = 9)
       )))
   }
 }
