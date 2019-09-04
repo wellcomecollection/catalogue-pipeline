@@ -1,21 +1,23 @@
 package uk.ac.wellcome.platform.matcher.storage
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
-import com.amazonaws.services.dynamodbv2.model._
-import com.gu.scanamo.Scanamo
-import com.gu.scanamo.syntax._
-import javax.naming.ConfigurationException
-import org.mockito.Matchers.any
-import org.mockito.Mockito.when
+import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSpec, Matchers}
+import org.mockito.Matchers.any
+import org.mockito.Mockito.when
+import javax.naming.ConfigurationException
+
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
+import com.amazonaws.services.dynamodbv2.model._
+import org.scanamo.syntax._
+import org.scanamo.auto._
+
 import uk.ac.wellcome.models.matcher.WorkNode
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
 import uk.ac.wellcome.storage.dynamo.DynamoConfig
 
-import scala.concurrent.ExecutionContext.Implicits.global
 class WorkNodeDaoTest
     extends FunSpec
     with Matchers
@@ -41,8 +43,8 @@ class WorkNodeDaoTest
             WorkNode("A", 1, List("B"), "A+B")
           val existingWorkB: WorkNode = WorkNode("B", 0, Nil, "A+B")
 
-          Scanamo.put(dynamoDbClient)(table.name)(existingWorkA)
-          Scanamo.put(dynamoDbClient)(table.name)(existingWorkB)
+          put(dynamoClient, table.name)(existingWorkA)
+          put(dynamoClient, table.name)(existingWorkB)
 
           whenReady(workNodeDao.get(Set("A", "B"))) { work =>
             work shouldBe Set(existingWorkA, existingWorkB)
@@ -53,15 +55,15 @@ class WorkNodeDaoTest
 
     it("returns an error if fetching from dynamo fails") {
       withWorkGraphTable { table =>
-        val dynamoDbClient = mock[AmazonDynamoDB]
+        val dynamoClient = mock[AmazonDynamoDB]
         val expectedException = new RuntimeException("FAILED!")
 
-        when(dynamoDbClient.batchGetItem(any[BatchGetItemRequest]))
+        when(dynamoClient.batchGetItem(any[BatchGetItemRequest]))
           .thenThrow(expectedException)
 
         val matcherGraphDao = new WorkNodeDao(
-          dynamoDbClient,
-          DynamoConfig(table = table.name, index = table.index)
+          dynamoClient,
+          DynamoConfig(table.name, table.index)
         )
 
         whenReady(matcherGraphDao.get(Set("A")).failed) { failedException =>
@@ -73,11 +75,11 @@ class WorkNodeDaoTest
     it(
       "returns a GracefulFailure if ProvisionedThroughputExceededException occurs during get from dynamo") {
       withWorkGraphTable { table =>
-        val dynamoDbClient = mock[AmazonDynamoDB]
-        when(dynamoDbClient.batchGetItem(any[BatchGetItemRequest]))
+        val dynamoClient = mock[AmazonDynamoDB]
+        when(dynamoClient.batchGetItem(any[BatchGetItemRequest]))
           .thenThrow(new ProvisionedThroughputExceededException("test"))
         val workNodeDao = new WorkNodeDao(
-          dynamoDbClient,
+          dynamoClient,
           DynamoConfig(table.name, table.index)
         )
 
@@ -107,8 +109,8 @@ class WorkNodeDaoTest
           val existingWorkNodeA: WorkNode = WorkNode("A", 1, List("B"), "A+B")
           val existingWorkNodeB: WorkNode = WorkNode("B", 0, Nil, "A+B")
 
-          Scanamo.put(dynamoDbClient)(table.name)(existingWorkNodeA)
-          Scanamo.put(dynamoDbClient)(table.name)(existingWorkNodeB)
+          put(dynamoClient, table.name)(existingWorkNodeA)
+          put(dynamoClient, table.name)(existingWorkNodeB)
 
           whenReady(matcherGraphDao.getByComponentIds(Set("A+B"))) {
             linkedWorks =>
@@ -121,13 +123,13 @@ class WorkNodeDaoTest
     it(
       "returns an error if fetching from dynamo fails during a getByComponentIds") {
       withWorkGraphTable { table =>
-        val dynamoDbClient = mock[AmazonDynamoDB]
+        val dynamoClient = mock[AmazonDynamoDB]
         val expectedException = new RuntimeException("FAILED")
-        when(dynamoDbClient.query(any[QueryRequest]))
+        when(dynamoClient.query(any[QueryRequest]))
           .thenThrow(expectedException)
         val workNodeDao = new WorkNodeDao(
-          dynamoDbClient,
-          DynamoConfig(table = table.name, index = table.index)
+          dynamoClient,
+          DynamoConfig(table.name, table.index)
         )
 
         whenReady(workNodeDao.getByComponentIds(Set("A+B")).failed) {
@@ -140,11 +142,11 @@ class WorkNodeDaoTest
     it(
       "returns a GracefulFailure if ProvisionedThroughputExceededException occurs during a getByComponentIds") {
       withWorkGraphTable { table =>
-        val dynamoDbClient = mock[AmazonDynamoDB]
-        when(dynamoDbClient.query(any[QueryRequest]))
+        val dynamoClient = mock[AmazonDynamoDB]
+        when(dynamoClient.query(any[QueryRequest]))
           .thenThrow(new ProvisionedThroughputExceededException("test"))
         val workNodeDao = new WorkNodeDao(
-          dynamoDbClient,
+          dynamoClient,
           DynamoConfig(table.name, table.index)
         )
 
@@ -160,7 +162,7 @@ class WorkNodeDaoTest
         withWorkNodeDao(table) { workNodeDao =>
           case class BadRecord(id: String, componentId: String)
           val badRecord: BadRecord = BadRecord(id = "A", componentId = "A+B")
-          Scanamo.put(dynamoDbClient)(table.name)(badRecord)
+          put(dynamoClient, table.name)(badRecord)
 
           whenReady(workNodeDao.getByComponentIds(Set("A+B")).failed) {
             failedException =>
@@ -177,8 +179,7 @@ class WorkNodeDaoTest
         withWorkNodeDao(table) { workNodeDao =>
           val work = WorkNode("A", 1, List("B"), "A+B")
           whenReady(workNodeDao.put(work)) { _ =>
-            val savedLinkedWork =
-              Scanamo.get[WorkNode](dynamoDbClient)(table.name)('id -> "A")
+            val savedLinkedWork = get(dynamoClient, table.name)('id -> "A")
             savedLinkedWork shouldBe Some(Right(work))
           }
         }
@@ -190,7 +191,7 @@ class WorkNodeDaoTest
         withWorkNodeDao(table) { workNodeDao =>
           case class BadRecord(id: String)
           val badRecord: BadRecord = BadRecord(id = "A")
-          Scanamo.put(dynamoDbClient)(table.name)(badRecord)
+          put(dynamoClient, table.name)(badRecord)
 
           whenReady(workNodeDao.get(Set("A")).failed) { failedException =>
             failedException shouldBe a[RuntimeException]
@@ -201,13 +202,13 @@ class WorkNodeDaoTest
 
     it("returns an error if put to dynamo fails") {
       withWorkGraphTable { table =>
-        val dynamoDbClient = mock[AmazonDynamoDB]
+        val dynamoClient = mock[AmazonDynamoDB]
         val expectedException = new RuntimeException("FAILED")
-        when(dynamoDbClient.putItem(any[PutItemRequest]))
+        when(dynamoClient.putItem(any[PutItemRequest]))
           .thenThrow(expectedException)
         val workNodeDao = new WorkNodeDao(
-          dynamoDbClient,
-          DynamoConfig(table = table.name, index = table.index)
+          dynamoClient,
+          DynamoConfig(table.name, table.index)
         )
 
         whenReady(workNodeDao.put(WorkNode("A", 1, List("B"), "A+B")).failed) {
@@ -220,11 +221,11 @@ class WorkNodeDaoTest
     it(
       "returns a GracefulFailure if ProvisionedThroughputExceededException occurs during put to dynamo") {
       withWorkGraphTable { table =>
-        val dynamoDbClient = mock[AmazonDynamoDB]
-        when(dynamoDbClient.putItem(any[PutItemRequest]))
+        val dynamoClient = mock[AmazonDynamoDB]
+        when(dynamoClient.putItem(any[PutItemRequest]))
           .thenThrow(new ProvisionedThroughputExceededException("test"))
         val workNodeDao = new WorkNodeDao(
-          dynamoDbClient,
+          dynamoClient,
           DynamoConfig(table.name, table.index)
         )
 
@@ -238,8 +239,8 @@ class WorkNodeDaoTest
     it("cannot be instantiated if dynamoConfig.maybeIndex is None") {
       intercept[ConfigurationException] {
         new WorkNodeDao(
-          dynamoDbClient = dynamoDbClient,
-          dynamoConfig = DynamoConfig(table = "something", maybeIndex = None)
+          dynamoClient,
+          DynamoConfig("something", None)
         )
       }
     }
