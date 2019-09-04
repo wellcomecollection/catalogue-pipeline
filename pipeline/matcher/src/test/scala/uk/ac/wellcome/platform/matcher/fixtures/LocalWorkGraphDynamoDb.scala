@@ -1,13 +1,13 @@
 package uk.ac.wellcome.platform.matcher.fixtures
 
+import scala.util.Random
+
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.model._
 import com.amazonaws.services.dynamodbv2.util.TableUtils.waitUntilActive
 
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
-
-import scala.util.Random
 
 trait LocalWorkGraphDynamoDb extends DynamoFixtures {
   override def createTable(table: Table): Table = Table("table", "index")

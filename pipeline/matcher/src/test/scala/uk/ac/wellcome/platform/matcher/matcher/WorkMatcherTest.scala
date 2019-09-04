@@ -1,11 +1,12 @@
 package uk.ac.wellcome.platform.matcher.matcher
 
-// import java.time.Instant
+import java.time.Instant
+import java.util.UUID
 
-// import scala.concurrent.ExecutionContext.Implicits.global
-// import scala.concurrent.Future
-// import org.mockito.Matchers.any
-// import org.mockito.Mockito.when
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import org.mockito.Matchers.any
+import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSpec, Matchers}
@@ -19,10 +20,12 @@ import uk.ac.wellcome.models.matcher.{
 }
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.MergeCandidate
-// import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
+import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
-// import uk.ac.wellcome.platform.matcher.models.{WorkGraph, WorkUpdate}
-// import uk.ac.wellcome.platform.matcher.storage.WorkGraphStore
+import uk.ac.wellcome.platform.matcher.models.{WorkGraph, WorkUpdate}
+import uk.ac.wellcome.platform.matcher.storage.WorkGraphStore
+import uk.ac.wellcome.storage.locking.UnlockFailure
+import uk.ac.wellcome.storage.locking.dynamo.{DynamoLockingService, DynamoLockDao, ExpiringLock}
 
 class WorkMatcherTest
     extends FunSpec
@@ -194,25 +197,20 @@ class WorkMatcherTest
     withLockTable { lockTable =>
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
-          withDynamoRowLockDao(dynamoClient, lockTable) { rowLockDao =>
-            withLockingService(rowLockDao) {
-              dynamoLockingService =>
-                val work = createUnidentifiedSierraWork
-                val workId = work.sourceIdentifier.toString
+          withLockDao(dynamoClient, lockTable) { implicit lockDao =>
+            val work = createUnidentifiedSierraWork
+            val workId = work.sourceIdentifier.toString
+            withWorkMatcherAndLockingService(
+              workGraphStore,
+              new DynamoLockingService) { workMatcher =>
+              val failedLock = for {
+                _ <- Future.successful(lockDao.lock(workId, UUID.randomUUID))
+                result <- workMatcher.matchWork(work)
+              } yield result
+              whenReady(failedLock.failed) { failedMatch =>
+                failedMatch shouldBe a[MatcherException]
+              }
 
-                withWorkMatcherAndLockingService(
-                  workGraphStore,
-                  dynamoLockingService) { workMatcher =>
-                  val failedLock = for {
-                    _ <- rowLockDao.lockRow(Identifier(workId), "processId")
-                    result <- workMatcher.matchWork(work)
-                  } yield result
-
-                  whenReady(failedLock.failed) { failedMatch =>
-                    failedMatch shouldBe a[MatcherException]
-                  }
-
-                }
             }
           }
         }
@@ -220,103 +218,97 @@ class WorkMatcherTest
     }
   }
 
-//   it("throws MatcherException if it fails to lock secondary works") {
-//     withLockTable { lockTable =>
-//       withWorkGraphTable { graphTable =>
-//         withWorkGraphStore(graphTable) { workGraphStore =>
-//           withDynamoRowLockDao(dynamoClient, lockTable) { rowLockDao =>
-//             withLockingService(rowLockDao) {
-//               dynamoLockingService =>
-//                 withWorkMatcherAndLockingService(
-//                   workGraphStore,
-//                   dynamoLockingService) { workMatcher =>
-//                   // A->B->C
-//                   workGraphStore.put(WorkGraph(Set(
-//                     WorkNode(
-//                       "sierra-system-number/A",
-//                       0,
-//                       List("sierra-system-number/B"),
-//                       "sierra-system-number/A+sierra-system-number/B+sierra-system-number/C"),
-//                     WorkNode(
-//                       "sierra-system-number/B",
-//                       0,
-//                       List("sierra-system-number/C"),
-//                       "sierra-system-number/A+sierra-system-number/B+sierra-system-number/C"),
-//                     WorkNode("sierra-system-number/C", 0, Nil, "sierra-system-number/A+sierra-system-number/B+sierra-system-number/C")
-//                   )))
+  it("throws MatcherException if it fails to lock secondary works") {
+    withLockTable { lockTable =>
+      withWorkGraphTable { graphTable =>
+        withWorkGraphStore(graphTable) { workGraphStore =>
+          withLockDao(dynamoClient, lockTable) { implicit lockDao =>
+            withWorkMatcherAndLockingService(
+              workGraphStore,
+              new DynamoLockingService) { workMatcher =>
+              // A->B->C
+              workGraphStore.put(WorkGraph(Set(
+                WorkNode(
+                  "sierra-system-number/A",
+                  0,
+                  List("sierra-system-number/B"),
+                  "sierra-system-number/A+sierra-system-number/B+sierra-system-number/C"),
+                WorkNode(
+                  "sierra-system-number/B",
+                  0,
+                  List("sierra-system-number/C"),
+                  "sierra-system-number/A+sierra-system-number/B+sierra-system-number/C"),
+                WorkNode("sierra-system-number/C", 0, Nil, "sierra-system-number/A+sierra-system-number/B+sierra-system-number/C")
+              )))
 
-//                   val work = createUnidentifiedWorkWith(
-//                     sourceIdentifier = identifierA,
-//                     mergeCandidates = List(MergeCandidate(identifierB))
-//                   )
-//                   val failedLock = for {
-//                     _ <- rowLockDao.lockRow(
-//                       Identifier("sierra-system-number/C"),
-//                       "processId")
-//                     result <- workMatcher.matchWork(work)
-//                   } yield result
+              val work = createUnidentifiedWorkWith(
+                sourceIdentifier = identifierA,
+                mergeCandidates = List(MergeCandidate(identifierB))
+              )
+              val failedLock = for {
+                _ <- Future.successful(
+                  lockDao.lock(
+                    "sierra-system-number/C",
+                    UUID.randomUUID
+                  )
+                )
+                result <- workMatcher.matchWork(work)
+              } yield result
 
-//                   whenReady(failedLock.failed) { failedMatch =>
-//                     failedMatch shouldBe a[MatcherException]
-//                   }
-//                 }
-//             }
-//           }
-//         }
-//       }
-//     }
-//   }
+              whenReady(failedLock.failed) { failedMatch =>
+                failedMatch shouldBe a[MatcherException]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 
-//   it("throws MatcherException if it fails to unlock") {
-//     withWorkGraphTable { graphTable =>
-//       withWorkGraphStore(graphTable) { workGraphStore =>
-//         val mockDynamoRowLockDao = mock[DynamoRowLockDao]
-//         withLockingService(mockDynamoRowLockDao) {
-//           dynamoLockingService =>
-//             withWorkMatcherAndLockingService(
-//               workGraphStore,
-//               dynamoLockingService) { workMatcher =>
-//               when(mockDynamoRowLockDao.lockRow(any[Identifier], any[String]))
-//                 .thenReturn(
-//                   Future.successful(
-//                     RowLock(
-//                       id = "id",
-//                       contextId = "contextId",
-//                       created = Instant.now,
-//                       expires = Instant.now.plusSeconds(100))
-//                   ))
+  it("throws MatcherException if it fails to unlock") {
+    withWorkGraphTable { graphTable =>
+      withWorkGraphStore(graphTable) { workGraphStore =>
+        implicit val lockDao = mock[DynamoLockDao]
+        withWorkMatcherAndLockingService(
+          workGraphStore,
+          new DynamoLockingService) { workMatcher =>
+          when(lockDao.lock(any[String], any[UUID]))
+            .thenReturn(
+              Right(
+                ExpiringLock(
+                  id = "id",
+                  contextId = UUID.randomUUID,
+                  created = Instant.now,
+                  expires = Instant.now.plusSeconds(100))
+              ))
+          when(lockDao.unlock(any[UUID])).thenReturn(
+            Left(UnlockFailure(UUID.randomUUID, new RuntimeException("i wont unlock"))))
+          whenReady(
+            workMatcher
+              .matchWork(createUnidentifiedSierraWork)
+              .failed) { failedMatch =>
+            failedMatch shouldBe a[MatcherException]
+          }
+        }
+      }
+    }
+  }
 
-//               when(mockDynamoRowLockDao.unlockRows(any[String])).thenReturn(
-//                 Future.failed(
-//                   FailedUnlockException("test", new RuntimeException)))
+  it("fails if saving the updated links fails") {
+    withLockTable { lockTable =>
+      val mockWorkGraphStore = mock[WorkGraphStore]
+      withWorkMatcher(mockWorkGraphStore, lockTable) { workMatcher =>
+        val expectedException = new RuntimeException("Failed to put")
+        when(mockWorkGraphStore.findAffectedWorks(any[WorkUpdate]))
+          .thenReturn(Future.successful(WorkGraph(Set.empty)))
+        when(mockWorkGraphStore.put(any[WorkGraph]))
+          .thenThrow(expectedException)
 
-//               whenReady(
-//                 workMatcher
-//                   .matchWork(createUnidentifiedSierraWork)
-//                   .failed) { failedMatch =>
-//                 failedMatch shouldBe a[MatcherException]
-//               }
-//             }
-//         }
-//       }
-//     }
-//   }
-
-//   it("fails if saving the updated links fails") {
-//     withLockTable { lockTable =>
-//       val mockWorkGraphStore = mock[WorkGraphStore]
-//       withWorkMatcher(mockWorkGraphStore, lockTable) { workMatcher =>
-//         val expectedException = new RuntimeException("Failed to put")
-//         when(mockWorkGraphStore.findAffectedWorks(any[WorkUpdate]))
-//           .thenReturn(Future.successful(WorkGraph(Set.empty)))
-//         when(mockWorkGraphStore.put(any[WorkGraph]))
-//           .thenThrow(expectedException)
-
-//         whenReady(workMatcher.matchWork(createUnidentifiedSierraWork).failed) {
-//           actualException =>
-//             actualException shouldBe expectedException
-//         }
-//       }
-//     }
-//   }
+        whenReady(workMatcher.matchWork(createUnidentifiedSierraWork).failed) {
+          actualException =>
+            actualException shouldBe expectedException
+        }
+      }
+    }
+  }
 }

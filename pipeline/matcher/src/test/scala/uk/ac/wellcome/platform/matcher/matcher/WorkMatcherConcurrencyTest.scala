@@ -1,86 +1,80 @@
-// package uk.ac.wellcome.platform.matcher.matcher
+package uk.ac.wellcome.platform.matcher.matcher
 
-// import com.gu.scanamo.Scanamo
-// import org.scalatest.concurrent.ScalaFutures
-// import org.scalatest.mockito.MockitoSugar
-// import org.scalatest.{FunSpec, Matchers}
-// import uk.ac.wellcome.models.matcher.MatcherResult
-// import uk.ac.wellcome.models.work.generators.WorksGenerators
-// import uk.ac.wellcome.models.work.internal.MergeCandidate
-// import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
-// import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
-// import uk.ac.wellcome.storage.locking.RowLock
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.mockito.MockitoSugar
+import org.scalatest.{FunSpec, Matchers}
 
-// import scala.concurrent.ExecutionContext.Implicits.global
-// import scala.concurrent.Future
+import uk.ac.wellcome.models.matcher.MatcherResult
+import uk.ac.wellcome.models.work.generators.WorksGenerators
+import uk.ac.wellcome.models.work.internal.MergeCandidate
+import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
+import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
+import uk.ac.wellcome.storage.locking.dynamo.{DynamoLockingService, ExpiringLock}
 
-// class WorkMatcherConcurrencyTest
-//     extends FunSpec
-//     with Matchers
-//     with MatcherFixtures
-//     with ScalaFutures
-//     with MockitoSugar
-//     with WorksGenerators {
+class WorkMatcherConcurrencyTest
+    extends FunSpec
+    with Matchers
+    with MatcherFixtures
+    with ScalaFutures
+    with MockitoSugar
+    with WorksGenerators {
 
-//   it("processes one of two conflicting concurrent updates and locks the other") {
-//     withMockMetricsSender { metricsSender =>
-//       withLockTable { lockTable =>
-//         withWorkGraphTable { graphTable =>
-//           withWorkGraphStore(graphTable) { workGraphStore =>
-//             withDynamoRowLockDao(dynamoDbClient, lockTable) { rowLockDao =>
-//               withLockingService(rowLockDao, metricsSender) {
-//                 dynamoLockingService =>
-//                   withWorkMatcherAndLockingService(
-//                     workGraphStore,
-//                     dynamoLockingService) { workMatcher =>
-//                     val identifierA =
-//                       createSierraSystemSourceIdentifierWith(value = "A")
-//                     val identifierB =
-//                       createSierraSystemSourceIdentifierWith(value = "B")
+  it("processes one of two conflicting concurrent updates and locks the other") {
+    withLockTable { lockTable =>
+      withWorkGraphTable { graphTable =>
+        withWorkGraphStore(graphTable) { workGraphStore =>
+          withLockDao(dynamoClient, lockTable) { implicit lockDao =>
+            withWorkMatcherAndLockingService(
+              workGraphStore,
+              new DynamoLockingService) { workMatcher =>
+              val identifierA =
+                createSierraSystemSourceIdentifierWith(value = "A")
+              val identifierB =
+                createSierraSystemSourceIdentifierWith(value = "B")
 
-//                     val workA = createUnidentifiedWorkWith(
-//                       sourceIdentifier = identifierA,
-//                       mergeCandidates = List(MergeCandidate(identifierB))
-//                     )
+              val workA = createUnidentifiedWorkWith(
+                sourceIdentifier = identifierA,
+                mergeCandidates = List(MergeCandidate(identifierB))
+              )
 
-//                     val workB = createUnidentifiedWorkWith(
-//                       sourceIdentifier = identifierB
-//                     )
+              val workB = createUnidentifiedWorkWith(
+                sourceIdentifier = identifierB
+              )
 
-//                     val eventualResultA = workMatcher.matchWork(workA)
-//                     val eventualResultB = workMatcher.matchWork(workB)
+              val eventualResultA = workMatcher.matchWork(workA)
+              val eventualResultB = workMatcher.matchWork(workB)
 
-//                     val eventualResults = for {
-//                       resultA <- eventualResultA recoverWith {
-//                         case e: MatcherException =>
-//                           Future.successful(e)
-//                       }
-//                       resultB <- eventualResultB recoverWith {
-//                         case e: MatcherException =>
-//                           Future.successful(e)
-//                       }
-//                     } yield (resultA, resultB)
+              val eventualResults = for {
+                resultA <- eventualResultA recoverWith {
+                  case e: MatcherException =>
+                    Future.successful(e)
+                }
+                resultB <- eventualResultB recoverWith {
+                  case e: MatcherException =>
+                    Future.successful(e)
+                }
+              } yield (resultA, resultB)
 
-//                     whenReady(eventualResults) { results =>
-//                       val resultsList = results.productIterator.toList
-//                       val failure = resultsList.collect({
-//                         case e: MatcherException => e
-//                       })
-//                       val result = resultsList.collect({
-//                         case r: MatcherResult => r
-//                       })
+              whenReady(eventualResults) { results =>
+                val resultsList = results.productIterator.toList
+                val failure = resultsList.collect({
+                  case e: MatcherException => e
+                })
+                val result = resultsList.collect({
+                  case r: MatcherResult => r
+                })
 
-//                       failure.size shouldBe 1
-//                       result.size shouldBe 1
+                failure.size shouldBe 1
+                result.size shouldBe 1
 
-//                       Scanamo.scan[RowLock](dynamoDbClient)(lockTable.name) shouldBe empty
-//                     }
-//                   }
-//               }
-//             }
-//           }
-//         }
-//       }
-//     }
-//   }
-// }
+                scan[ExpiringLock](dynamoClient, lockTable.name) shouldBe empty
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

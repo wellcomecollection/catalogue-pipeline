@@ -5,11 +5,13 @@ import scala.concurrent.Future
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import org.apache.commons.codec.digest.DigestUtils
+
 import org.scanamo.{Scanamo, Table => ScanamoTable}
 import org.scanamo.DynamoFormat
 import org.scanamo.error.DynamoReadError
 import org.scanamo.query.UniqueKey
 import org.scanamo.semiauto._
+import org.scanamo.time.JavaTimeFormats._
 
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
@@ -31,7 +33,7 @@ import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
 import uk.ac.wellcome.storage.fixtures.{
   S3Fixtures,
 }
-import uk.ac.wellcome.storage.locking.dynamo.{DynamoLockingService, DynamoLockDaoFixtures}
+import uk.ac.wellcome.storage.locking.dynamo.{DynamoLockingService, DynamoLockDaoFixtures, ExpiringLock}
 
 trait MatcherFixtures
     extends BigMessagingFixture
@@ -40,6 +42,7 @@ trait MatcherFixtures
     with S3Fixtures {
 
   implicit val workNodeFormat: DynamoFormat[WorkNode] = deriveDynamoFormat
+  implicit val lockFormat: DynamoFormat[ExpiringLock] = deriveDynamoFormat
 
   def withLockTable[R](testWith: TestWith[Table, R]): R =
     withSpecifiedLocalDynamoDbTable(createLockTable) { table =>
