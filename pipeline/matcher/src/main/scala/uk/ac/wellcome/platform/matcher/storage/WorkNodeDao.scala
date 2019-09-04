@@ -1,11 +1,13 @@
 package uk.ac.wellcome.platform.matcher.storage
 
+import grizzled.slf4j.Logging
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughputExceededException
-import com.gu.scanamo.Scanamo
-import com.gu.scanamo.error.DynamoReadError
-import com.gu.scanamo.syntax._
-import grizzled.slf4j.Logging
+import org.scanamo.{Scanamo, Table}
+import org.scanamo.error.DynamoReadError
+import org.scanamo.syntax._
+import org.scanamo.auto._
+
 import uk.ac.wellcome.models.matcher.WorkNode
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.storage.dynamo.DynamoConfig
@@ -16,28 +18,29 @@ class WorkNodeDao(dynamoDbClient: AmazonDynamoDB, dynamoConfig: DynamoConfig)(
   implicit ec: ExecutionContext)
     extends Logging {
 
-  private val index = dynamoConfig.index
+  private val nodes = Table[WorkNode](dynamoConfig.tableName)
+  private val index = nodes.index(dynamoConfig.maybeIndexName.get)
+  private val scanamo = Scanamo(dynamoDbClient)
 
   def put(work: WorkNode): Future[Option[Either[DynamoReadError, WorkNode]]] =
-    Future {
-      Scanamo.put(dynamoDbClient)(dynamoConfig.table)(work)
-    }.recover {
-      case exception: ProvisionedThroughputExceededException =>
-        throw MatcherException(exception)
-    }
+    Future { scanamo.exec { nodes.put(work) } }
+      .recover {
+        case exception: ProvisionedThroughputExceededException =>
+          throw MatcherException(exception)
+      }
 
   def get(ids: Set[String]): Future[Set[WorkNode]] =
     Future {
-      Scanamo
-        .getAll[WorkNode](dynamoDbClient)(dynamoConfig.table)('id -> ids)
+      scanamo
+        .exec { nodes.getAll('id -> ids) }
         .map {
-          case Right(works) => works
-          case Left(scanamoError) => {
-            val exception = new RuntimeException(scanamoError.toString)
-            error(
-              s"An error occurred while retrieving all workIds=$ids from DynamoDB",
-              exception)
-            throw exception
+        case Right(works) => works
+        case Left(scanamoError) => {
+          val exception = new RuntimeException(scanamoError.toString)
+          error(
+            s"An error occurred while retrieving all workIds=$ids from DynamoDB",
+            exception)
+          throw exception
           }
         }
     }.recover {
@@ -50,13 +53,10 @@ class WorkNodeDao(dynamoDbClient: AmazonDynamoDB, dynamoConfig: DynamoConfig)(
 
   private def getByComponentId(componentId: String) =
     Future {
-      Scanamo
-        .queryIndex[WorkNode](dynamoDbClient)(dynamoConfig.table, index)(
-          'componentId -> componentId)
+      scanamo
+        .exec { index.query('componentId -> componentId) }
         .map {
-          case Right(record) => {
-            record
-          }
+          case Right(record) => { record }
           case Left(scanamoError) => {
             val exception = new RuntimeException(scanamoError.toString)
             error(
@@ -66,8 +66,5 @@ class WorkNodeDao(dynamoDbClient: AmazonDynamoDB, dynamoConfig: DynamoConfig)(
             throw exception
           }
         }
-    }.recover {
-      case exception: ProvisionedThroughputExceededException =>
-        throw MatcherException(exception)
     }
 }

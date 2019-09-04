@@ -5,21 +5,25 @@ import java.time.Duration
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import com.typesafe.config.Config
-import uk.ac.wellcome.messaging.typesafe.{MessagingBuilder, SNSBuilder}
+import org.scanamo.auto._
+import org.scanamo.time.JavaTimeFormats._
+
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
-import uk.ac.wellcome.monitoring.typesafe.MetricsBuilder
 import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher
 import uk.ac.wellcome.platform.matcher.services.MatcherWorkerService
 import uk.ac.wellcome.platform.matcher.storage.{WorkGraphStore, WorkNodeDao}
-import uk.ac.wellcome.storage.locking.{
-  DynamoLockingService,
-  DynamoRowLockDao,
-  DynamoRowLockDaoConfig
-}
-import uk.ac.wellcome.storage.typesafe.DynamoBuilder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.models.Implicits._
+
+import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
+import uk.ac.wellcome.messaging.typesafe.SNSBuilder
+import uk.ac.wellcome.storage.locking.dynamo.{
+  DynamoLockingService,
+  DynamoLockDao,
+  DynamoLockDaoConfig
+}
+import uk.ac.wellcome.storage.typesafe.DynamoBuilder
 
 import scala.concurrent.ExecutionContext
 
@@ -41,30 +45,21 @@ object Main extends WellcomeTypesafeApp {
       )
     )
 
-    val rowLockDaoConfig = DynamoRowLockDaoConfig(
-      dynamoConfig =
+    implicit val lockDao = new DynamoLockDao(
+      dynamoClient,
+      DynamoLockDaoConfig(
         DynamoBuilder.buildDynamoConfig(config, namespace = "locking.service"),
-      duration = Duration.ofSeconds(180)
+        Duration.ofSeconds(180)
+      )
     )
 
-    val lockingService = new DynamoLockingService(
-      lockNamePrefix = "WorkMatcher",
-      dynamoRowLockDao = new DynamoRowLockDao(
-        dynamoDbClient = dynamoClient,
-        rowLockDaoConfig = rowLockDaoConfig
-      ),
-      metricsSender = MetricsBuilder.buildMetricsSender(config)
-    )
-
-    val workMatcher = new WorkMatcher(
-      workGraphStore = workGraphStore,
-      lockingService = lockingService
-    )
+    val workMatcher = new WorkMatcher(workGraphStore, new DynamoLockingService)
 
     new MatcherWorkerService(
-      messageStream =
-        MessagingBuilder.buildMessageStream[TransformedBaseWork](config),
-      snsWriter = SNSBuilder.buildSNSWriter(config),
+      msgStream = BigMessagingBuilder
+        .buildMessageStream[TransformedBaseWork](config),
+      msgSender = SNSBuilder
+        .buildSNSMessageSender(config, subject = "Sent from the matcher"),
       workMatcher = workMatcher
     )
   }
