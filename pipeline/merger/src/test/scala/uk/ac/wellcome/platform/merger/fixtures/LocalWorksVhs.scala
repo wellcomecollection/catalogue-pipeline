@@ -22,10 +22,8 @@ trait LocalWorksVhs
       vhs.getLatest(work.sourceIdentifier.toString) match {
         case Left(error) => throw new Error(s"${error}")
         case Right(
-            Identified(
-              Version(_, version),
-              HybridStoreEntry(storedWork, _))) =>
+            Identified(Version(_, version), HybridStoreEntry(storedWork, _))) =>
           storedWork shouldBe work
       }
-  }
+    }
 }
