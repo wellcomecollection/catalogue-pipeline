@@ -34,13 +34,13 @@ class WorkNodeDao(dynamoDbClient: AmazonDynamoDB, dynamoConfig: DynamoConfig)(
       scanamo
         .exec { nodes.getAll('id -> ids) }
         .map {
-        case Right(works) => works
-        case Left(scanamoError) => {
-          val exception = new RuntimeException(scanamoError.toString)
-          error(
-            s"An error occurred while retrieving all workIds=$ids from DynamoDB",
-            exception)
-          throw exception
+          case Right(works) => works
+          case Left(scanamoError) => {
+            val exception = new RuntimeException(scanamoError.toString)
+            error(
+              s"An error occurred while retrieving all workIds=$ids from DynamoDB",
+              exception)
+            throw exception
           }
         }
     }.recover {

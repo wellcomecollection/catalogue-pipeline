@@ -19,9 +19,9 @@ import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
 import uk.ac.wellcome.messaging.typesafe.SNSBuilder
 import uk.ac.wellcome.storage.locking.dynamo.{
-  DynamoLockingService,
   DynamoLockDao,
-  DynamoLockDaoConfig
+  DynamoLockDaoConfig,
+  DynamoLockingService
 }
 import uk.ac.wellcome.storage.typesafe.DynamoBuilder
 

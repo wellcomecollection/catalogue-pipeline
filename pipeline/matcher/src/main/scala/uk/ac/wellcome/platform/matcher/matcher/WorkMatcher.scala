@@ -41,7 +41,8 @@ class WorkMatcher(
     val update = WorkUpdate(work)
     val updateAffectedIdentifiers = update.referencedWorkIds + update.workId
     lockingService
-      .withLocks(updateAffectedIdentifiers)(withUpdateLocked(update, updateAffectedIdentifiers))
+      .withLocks(updateAffectedIdentifiers)(
+        withUpdateLocked(update, updateAffectedIdentifiers))
       .map {
         case Left(failure) => {
           debug(
@@ -60,8 +61,9 @@ class WorkMatcher(
     )
   }
 
-  private def withUpdateLocked(update: WorkUpdate,
-                               updateAffectedIdentifiers: Set[String]): Future[Set[MatchedIdentifiers]] = {
+  private def withUpdateLocked(
+    update: WorkUpdate,
+    updateAffectedIdentifiers: Set[String]): Future[Set[MatchedIdentifiers]] = {
     for {
       graphBeforeUpdate <- workGraphStore.findAffectedWorks(update)
       updatedGraph = WorkGraphUpdater.update(update, graphBeforeUpdate)
@@ -72,7 +74,7 @@ class WorkMatcher(
           // We are returning empty set here, as LockingService is tied to a
           // single `Out` type, here set to `Set[MatchedIdentifiers]`.
           // See issue here: https://github.com/wellcometrust/platform/issues/3873
-          workGraphStore.put(updatedGraph).map(_ =>  Set.empty)
+          workGraphStore.put(updatedGraph).map(_ => Set.empty)
         }
       )
     } yield {

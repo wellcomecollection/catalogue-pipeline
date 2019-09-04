@@ -17,9 +17,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class MatcherWorkerService[MsgDestination](
   msgStream: BigMessageStream[TransformedBaseWork],
   msgSender: MessageSender[MsgDestination],
-  workMatcher: WorkMatcher)(
-  implicit val actorSystem: ActorSystem,
-  ec: ExecutionContext)
+  workMatcher: WorkMatcher)(implicit val actorSystem: ActorSystem,
+                            ec: ExecutionContext)
     extends Logging
     with Runnable {
 
