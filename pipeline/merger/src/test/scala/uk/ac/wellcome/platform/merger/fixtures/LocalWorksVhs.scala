@@ -6,7 +6,7 @@ import org.scalatest.concurrent.{Eventually, ScalaFutures}
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.bigmessaging.fixtures.VHSFixture
 import uk.ac.wellcome.bigmessaging.EmptyMetadata
-import uk.ac.wellcome.storage.{Identified, Version}
+import uk.ac.wellcome.storage.Identified
 import uk.ac.wellcome.storage.store.HybridStoreEntry
 
 trait LocalWorksVhs
@@ -21,8 +21,7 @@ trait LocalWorksVhs
 
       vhs.getLatest(work.sourceIdentifier.toString) match {
         case Left(error) => throw new Error(s"${error}")
-        case Right(
-            Identified(Version(_, version), HybridStoreEntry(storedWork, _))) =>
+        case Right(Identified(_, HybridStoreEntry(storedWork, _))) =>
           storedWork shouldBe work
       }
     }
