@@ -50,13 +50,11 @@ class AggregationResultsTest extends FunSpec with Matchers {
     val singleAgg = AggregationResults(singleAggregationsMap, responseString)
     singleAgg.get.workType shouldBe Some(
       AggregationBuckets(List(
-        WorkTypeAggregationBucket(
-          key = WorkType("a", "Books"),
-          doc_count = 393145),
-        WorkTypeAggregationBucket(
+        AggregationBucket(key = WorkType("a", "Books"), doc_count = 393145),
+        AggregationBucket(
           key = WorkType("b", "Manuscripts, Asian"),
           doc_count = 5696),
-        WorkTypeAggregationBucket(key = WorkType("c", "Music"), doc_count = 9)
+        AggregationBucket(key = WorkType("c", "Music"), doc_count = 9)
       )))
   }
 }

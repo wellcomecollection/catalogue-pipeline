@@ -9,7 +9,8 @@ import uk.ac.wellcome.json.JsonUtil._
 
 trait AggregationResult
 case class AggregationResults(
-  workType: Option[AggregationBuckets[WorkTypeAggregationBucket]])
+  workType: Option[AggregationBuckets[AggregationBucket[WorkType]]])
+
 object AggregationResults {
   def jsonToAgg[TypedAggregationBucket](json: Json, key: String)(
     implicit decoder: Decoder[TypedAggregationBucket])
@@ -30,22 +31,20 @@ object AggregationResults {
   def apply(vals: Map[String, Any], json: String): Option[AggregationResults] =
     parse(json) match {
       case Left(r) => None
-      case Right(json) => {
-        implicit val decoder: Decoder[WorkTypeAggregationBucket] =
-          deriveDecoder[WorkTypeAggregationBucket]
+      case Right(json) =>
+        implicit val decoder: Decoder[AggregationBucket[WorkType]] =
+          deriveDecoder[AggregationBucket[WorkType]]
 
         val workTypeBuckets =
-          jsonToAgg[WorkTypeAggregationBucket](json, "workType")
+          jsonToAgg[AggregationBucket[WorkType]](json, "workType")
 
         Some(
           AggregationResults(
             workType = Some(AggregationBuckets(buckets = workTypeBuckets))))
-      }
     }
 }
 case class AggregationBuckets[T](buckets: List[T])
-case class AggregationBucket[T](data: T, doc_count: Int)
-case class WorkTypeAggregationBucket(key: WorkType, doc_count: Int)
+case class AggregationBucket[T](key: T, doc_count: Int)
 
 // We use these semiauto derivations so we don't have to use the elastic naming of `doc_count`
 //object AggregationBucket {
