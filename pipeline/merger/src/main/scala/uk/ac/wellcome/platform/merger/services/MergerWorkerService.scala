@@ -1,22 +1,23 @@
 package uk.ac.wellcome.platform.merger.services
 
 import akka.Done
-import uk.ac.wellcome.messaging.message.MessageWriter
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.sqs.SQSStream
+import scala.concurrent.{ExecutionContext, Future}
+
 import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult}
 import uk.ac.wellcome.models.work.internal.BaseWork
 import uk.ac.wellcome.typesafe.Runnable
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.Implicits._
 
-import scala.concurrent.{ExecutionContext, Future}
+import uk.ac.wellcome.bigmessaging.BigMessageSender
+import uk.ac.wellcome.messaging.sns.NotificationMessage
+import uk.ac.wellcome.messaging.sqs.SQSStream
 
-class MergerWorkerService(
+class MergerWorkerService[Destination](
   sqsStream: SQSStream[NotificationMessage],
   playbackService: RecorderPlaybackService,
   mergerManager: MergerManager,
-  messageWriter: MessageWriter[BaseWork]
+  msgSender: BigMessageSender[Destination, BaseWork]
 )(implicit ec: ExecutionContext)
     extends Runnable {
 
@@ -37,11 +38,8 @@ class MergerWorkerService(
       _ <- sendWorks(works)
     } yield ()
 
-  private def sendWorks(mergedWorks: Seq[BaseWork]) = {
-    Future
-      .sequence(
-        mergedWorks.map(
-          messageWriter.write(_, "merged-work")
-        ))
-  }
+  private def sendWorks(mergedWorks: Seq[BaseWork]) =
+    Future.sequence(mergedWorks.map { work =>
+      Future.fromTry(msgSender.sendT(work))
+    })
 }

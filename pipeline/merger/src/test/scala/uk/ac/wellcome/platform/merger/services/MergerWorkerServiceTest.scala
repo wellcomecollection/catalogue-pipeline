@@ -1,34 +1,31 @@
 package uk.ac.wellcome.platform.merger.services
 
-import org.mockito.Matchers.endsWith
-import org.mockito.Mockito.{atLeastOnce, times, verify}
+import com.amazonaws.services.cloudwatch.model.StandardUnit
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSpec, Matchers}
-import uk.ac.wellcome.messaging.fixtures.SNS.Topic
-import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
-import uk.ac.wellcome.messaging.fixtures.Messaging
+
 import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.monitoring.MetricsSender
-import uk.ac.wellcome.monitoring.fixtures.MetricsSenderFixture
 import uk.ac.wellcome.platform.merger.fixtures.{
-  LocalWorksVhs,
   MatcherResultFixture,
   WorkerServiceFixture
 }
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.Implicits._
 
+import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
+import uk.ac.wellcome.messaging.fixtures.SNS.Topic
+import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
+import uk.ac.wellcome.monitoring.memory.MemoryMetrics
+
 class MergerWorkerServiceTest
     extends FunSpec
     with ScalaFutures
     with IntegrationPatience
-    with MetricsSenderFixture
-    with Messaging
+    with BigMessagingFixture
     with WorksGenerators
-    with LocalWorksVhs
     with MatcherResultFixture
     with Matchers
     with MockitoSugar
@@ -37,7 +34,7 @@ class MergerWorkerServiceTest
   it(
     "reads matcher result messages, retrieves the works from vhs and sends them to sns") {
     withMergerWorkerServiceFixtures {
-      case (vhs, QueuePair(queue, dlq), topic, metricsSender) =>
+      case (vhs, QueuePair(queue, dlq), topic, metrics) =>
         val work1 = createUnidentifiedWork
         val work2 = createUnidentifiedWork
         val work3 = createUnidentifiedWork
@@ -59,15 +56,15 @@ class MergerWorkerServiceTest
           val worksSent = getMessages[BaseWork](topic)
           worksSent should contain only (work1, work2, work3)
 
-          verify(metricsSender, atLeastOnce)
-            .incrementCount(endsWith("_success"))
+          metrics.incrementedCounts.length shouldBe 1
+          metrics.incrementedCounts.last should endWith("_success")
         }
     }
   }
 
   it("sends InvisibleWorks unmerged") {
     withMergerWorkerServiceFixtures {
-      case (vhs, QueuePair(queue, dlq), topic, metricsSender) =>
+      case (vhs, QueuePair(queue, dlq), topic, metrics) =>
         val work = createUnidentifiedInvisibleWork
 
         val matcherResult = matcherResultWith(Set(Set(work)))
@@ -86,15 +83,15 @@ class MergerWorkerServiceTest
           val worksSent = getMessages[BaseWork](topic)
           worksSent should contain only work
 
-          verify(metricsSender, times(1))
-            .incrementCount(endsWith("_success"))
+          metrics.incrementedCounts.length shouldBe 1
+          metrics.incrementedCounts.last should endWith("_success")
         }
     }
   }
 
   it("fails if the work is not in vhs") {
     withMergerWorkerServiceFixtures {
-      case (_, QueuePair(queue, dlq), topic, metricsSender) =>
+      case (_, QueuePair(queue, dlq), topic, metrics) =>
         val work = createUnidentifiedWork
 
         val matcherResult = matcherResultWith(Set(Set(work)))
@@ -109,8 +106,8 @@ class MergerWorkerServiceTest
           assertQueueHasSize(dlq, 1)
           listMessagesReceivedFromSNS(topic) shouldBe empty
 
-          verify(metricsSender, times(3))
-            .incrementCount(endsWith("_failure"))
+          metrics.incrementedCounts.length shouldBe 3
+          metrics.incrementedCounts.last should endWith("_failure")
         }
     }
   }
@@ -142,7 +139,7 @@ class MergerWorkerServiceTest
 
   it("discards works with version 0 and sends along the others") {
     withMergerWorkerServiceFixtures {
-      case (vhs, QueuePair(queue, dlq), topic, metricsSender) =>
+      case (vhs, QueuePair(queue, dlq), topic, metrics) =>
         val versionZeroWork = createUnidentifiedWorkWith(version = 0)
         val work = versionZeroWork
           .copy(version = 1)
@@ -163,8 +160,8 @@ class MergerWorkerServiceTest
           val worksSent = getMessages[BaseWork](topic)
           worksSent should contain only work
 
-          verify(metricsSender, times(1))
-            .incrementCount(endsWith("_success"))
+          metrics.incrementedCounts.length shouldBe 1
+          metrics.incrementedCounts.last should endWith("_success")
         }
     }
   }
@@ -251,34 +248,28 @@ class MergerWorkerServiceTest
 
   it("fails if the message sent is not a matcher result") {
     withMergerWorkerServiceFixtures {
-      case (_, QueuePair(queue, dlq), _, metricsSender) =>
+      case (_, QueuePair(queue, dlq), _, metrics) =>
         sendInvalidJSONto(queue)
 
         eventually {
           assertQueueEmpty(queue)
           assertQueueHasSize(dlq, 1)
-          verify(metricsSender, times(3))
-            .incrementCount(endsWith("_recognisedFailure"))
+          metrics.incrementedCounts.length shouldBe 3
+          metrics.incrementedCounts.last should endWith("_recognisedFailure")
         }
     }
   }
 
   def withMergerWorkerServiceFixtures[R](
-    testWith: TestWith[
-      (TransformedBaseWorkVHS, QueuePair, Topic, MetricsSender),
-      R]): R =
-    withTransformedBaseWorkVHS { vhs =>
+    testWith: TestWith[(VHS, QueuePair, Topic, MemoryMetrics[StandardUnit]), R])
+    : R =
+    withVHS { vhs =>
       withLocalSqsQueueAndDlq {
-        case queuePair @ QueuePair(queue, _) =>
+        case QueuePair(queue, dlq) =>
           withLocalSnsTopic { topic =>
-            withMockMetricsSender { mockMetricsSender =>
-              withWorkerService(
-                vhs = vhs,
-                topic = topic,
-                queue = queue,
-                metricsSender = mockMetricsSender) { _ =>
-                testWith((vhs, queuePair, topic, mockMetricsSender))
-              }
+            val metrics = new MemoryMetrics[StandardUnit]
+            withWorkerService(vhs, queue, topic, metrics) { _ =>
+              testWith((vhs, QueuePair(queue, dlq), topic, metrics))
             }
           }
       }

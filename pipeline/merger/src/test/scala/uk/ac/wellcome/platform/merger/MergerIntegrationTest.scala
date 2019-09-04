@@ -2,35 +2,32 @@ package uk.ac.wellcome.platform.merger
 
 import org.scalatest.FunSpec
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import uk.ac.wellcome.messaging.fixtures.Messaging
-import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.merger.fixtures.{
-  LocalWorksVhs,
   MatcherResultFixture,
   WorkerServiceFixture
 }
-import uk.ac.wellcome.storage.fixtures.LocalVersionedHybridStore
 import uk.ac.wellcome.models.Implicits._
 
-class MergerFeatureTest
+import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
+import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
+
+class MergerIntegrationTest
     extends FunSpec
-    with Messaging
+    with BigMessagingFixture
     with IntegrationPatience
-    with LocalVersionedHybridStore
     with ScalaFutures
-    with LocalWorksVhs
     with MatcherResultFixture
     with WorkerServiceFixture
     with WorksGenerators {
 
   it("reads matcher result messages off a queue and deletes them") {
     withLocalSnsTopic { topic =>
-      withTransformedBaseWorkVHS { vhs =>
+      withVHS { vhs =>
         withLocalSqsQueueAndDlq {
           case QueuePair(queue, dlq) =>
-            withWorkerService(vhs, topic, queue) { _ =>
+            withWorkerService(vhs, queue, topic) { _ =>
               val work = createUnidentifiedWork
 
               givenStoredInVhs(vhs, work)
