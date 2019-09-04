@@ -17,17 +17,15 @@ trait LocalWorksVhs
   def givenStoredInVhs(vhs: VHS, works: TransformedBaseWork*): Seq[Assertion] =
     works.map { work =>
       val entry = HybridStoreEntry(work, EmptyMetadata())
-      vhs.upsert(work.sourceIdentifier.toString)(entry)(_ => entry)
+      vhs.init(work.sourceIdentifier.toString)(entry)
 
-      eventually {
-        vhs.getLatest(work.sourceIdentifier.toString) match {
-          case Left(error) => throw new Error(s"${error}")
-          case Right(
-              Identified(
-                Version(_, version),
-                HybridStoreEntry(storedWork, _))) =>
-            storedWork shouldBe work
-        }
+      vhs.getLatest(work.sourceIdentifier.toString) match {
+        case Left(error) => throw new Error(s"${error}")
+        case Right(
+            Identified(
+              Version(_, version),
+              HybridStoreEntry(storedWork, _))) =>
+          storedWork shouldBe work
       }
-    }
+  }
 }

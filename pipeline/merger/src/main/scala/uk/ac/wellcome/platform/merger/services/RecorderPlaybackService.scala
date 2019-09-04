@@ -1,12 +1,11 @@
 package uk.ac.wellcome.platform.merger.services
 
-import scala.util.Try
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.models.matcher.WorkIdentifier
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 
 import uk.ac.wellcome.bigmessaging.EmptyMetadata
-import uk.ac.wellcome.storage.{Identified, NoVersionExistsError, Version}
+import uk.ac.wellcome.storage.{Identified, NoVersionExistsError}
 import uk.ac.wellcome.storage.store.{HybridStoreEntry, VersionedStore}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -31,7 +30,7 @@ class RecorderPlaybackService(
   def fetchAllWorks(workIdentifiers: Seq[WorkIdentifier])
     : Future[Seq[Option[TransformedBaseWork]]] = {
     Future.sequence(
-      workIdentifiers.map(id => Future.fromTry(Try(getWorkForIdentifier(id))))
+      workIdentifiers.map(id => Future { getWorkForIdentifier(id) })
     )
   }
 
@@ -45,7 +44,7 @@ class RecorderPlaybackService(
   private def getWorkForIdentifier(
     workIdentifier: WorkIdentifier): Option[TransformedBaseWork] =
     vhs.getLatest(workIdentifier.identifier) match {
-      case Right(Identified(Version(_, version), HybridStoreEntry(work, _))) =>
+      case Right(Identified(_, HybridStoreEntry(work, _))) =>
         if (work.version == workIdentifier.version) {
           Some(work)
         } else {
