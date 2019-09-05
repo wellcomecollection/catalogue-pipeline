@@ -257,8 +257,7 @@ object CatalogueDependencies {
       ExternalDependencies.circeOpticsDependencies
 
   val ingestorDependencies: Seq[ModuleID] =
-    ExternalDependencies.mockitoDependencies ++
-      WellcomeDependencies.messagingTypesafeLibrary
+    ExternalDependencies.mockitoDependencies
 
   val matcherDependencies: Seq[ModuleID] =
     ExternalDependencies.mockitoDependencies ++
