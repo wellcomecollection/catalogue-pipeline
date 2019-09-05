@@ -44,7 +44,7 @@ class AggregationResultsTest extends FunSpec with Matchers {
         |""".stripMargin
 
     val singleAgg = AggregationSet(responseString)
-    singleAgg.workType shouldBe Some(
+    singleAgg.get.workType shouldBe Some(
       Aggregation(List(
         AggregationBucket(data = WorkType("a", "Books"), count = 393145),
         AggregationBucket(

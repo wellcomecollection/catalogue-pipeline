@@ -31,19 +31,24 @@ object AggregationSet {
     })
   }
 
-  def apply(jsonString: String): AggregationSet = {
+  def apply(jsonString: String): Option[AggregationSet] = {
     val json = fromJson[Map[String, Json]](jsonString)
 
     json match {
-      case Failure(_) => AggregationSet(workType = None, genre = None)
-      case Success(jsonMap) => {
-        val workType =
-          jsonMap.get("workType").flatMap(json => getFromJson[WorkType](json))
-        val genre =
-          jsonMap.get("genre").flatMap(json => getFromJson[Genre](json))
+      case Failure(_) => None
+      case Success(jsonMap) =>
+        jsonMap.size match {
+          case 0 => None
+          case _ =>
+            val workType =
+              jsonMap
+                .get("workType")
+                .flatMap(json => getFromJson[WorkType](json))
+            val genre =
+              jsonMap.get("genre").flatMap(json => getFromJson[Genre](json))
 
-        AggregationSet(workType = workType, genre = genre)
-      }
+            Some(AggregationSet(workType = workType, genre = genre))
+        }
     }
   }
 }

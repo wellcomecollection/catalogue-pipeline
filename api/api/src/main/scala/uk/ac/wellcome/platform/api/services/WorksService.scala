@@ -136,7 +136,7 @@ class WorksService @Inject()(searchService: ElasticsearchService)(
     }.toList
 
   private def searchResponseToAggregationResults(
-    searchResponse: SearchResponse): AggregationSet = {
+    searchResponse: SearchResponse): Option[AggregationSet] = {
     AggregationSet(searchResponse.aggregationsAsString)
   }
 

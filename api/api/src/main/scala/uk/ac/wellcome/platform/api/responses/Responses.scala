@@ -54,10 +54,6 @@ object ResultListResponse {
       else None
 
     // We do this as we want to exclude the `aggregations` key for now, but might add it later.
-    val aggregations =
-      if (AggregationSet.isEmpty(displayResultList.aggregations)) None
-      else Some(displayResultList.aggregations)
-
     ResultListResponse(
       context = contextUri,
       ontologyType = displayResultList.ontologyType,
@@ -65,7 +61,7 @@ object ResultListResponse {
       pageSize = displayResultList.pageSize,
       totalPages = displayResultList.totalPages,
       totalResults = displayResultList.totalResults,
-      aggregations = aggregations,
+      aggregations = displayResultList.aggregations,
       prevPage = prevLink,
       nextPage = nextLink
     )
