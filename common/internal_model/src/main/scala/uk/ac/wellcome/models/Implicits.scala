@@ -38,6 +38,8 @@ import uk.ac.wellcome.models.work.internal.{
   UnidentifiedWork,
   WorkType,
 }
+import uk.ac.wellcome.models.transformable.SierraTransformable
+import uk.ac.wellcome.models.transformable.SierraTransformable._
 import uk.ac.wellcome.models.matcher.MatcherResult
 import uk.ac.wellcome.json.JsonUtil._
 
@@ -123,6 +125,7 @@ object Implicits {
   implicit val _dec52: Decoder[TransformedBaseWork] = deriveDecoder
   implicit val _dec53: Decoder[IdentifiedBaseWork] = deriveDecoder
   implicit val _dec54: Decoder[BaseWork] = deriveDecoder
+  implicit val _dec55: Decoder[SierraTransformable] = deriveDecoder
 
   implicit val _enc02: Encoder[SourceIdentifier] = deriveEncoder
   implicit val _enc03: Encoder[Identifiable[AbstractConcept]] = deriveEncoder
@@ -197,4 +200,5 @@ object Implicits {
   implicit val _enc52: Encoder[TransformedBaseWork] = deriveEncoder
   implicit val _enc53: Encoder[IdentifiedBaseWork] = deriveEncoder
   implicit val _enc54: Encoder[BaseWork] = deriveEncoder
+  implicit val _enc55: Encoder[SierraTransformable] = deriveEncoder
 }

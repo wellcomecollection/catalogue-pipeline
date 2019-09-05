@@ -1,7 +1,7 @@
-module "catalogue_pipeline_20190816" {
+module "catalogue_pipeline_20190829" {
   source = "stack"
 
-  namespace = "catalogue-20190816"
+  namespace = "catalogue-20190829"
 
   release_label = "prod"
 
@@ -19,12 +19,13 @@ module "catalogue_pipeline_20190816" {
   # reindexer topic names.
 
   sierra_adapter_topic_names = [
-    "${local.sierra_reindexer_topic_name}",
+    # "${local.sierra_reindexer_topic_name}",
     "${local.sierra_merged_bibs_topic_name}",
+
     "${local.sierra_merged_items_topic_name}",
   ]
   miro_adapter_topic_names = [
-    "${local.miro_reindexer_topic_name}",
+    # "${local.miro_reindexer_topic_name}",
     "${local.miro_updates_topic_name}",
   ]
   # Elasticsearch

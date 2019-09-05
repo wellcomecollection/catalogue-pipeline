@@ -2,9 +2,9 @@ resource "aws_s3_bucket" "messages" {
   bucket = "wellcomecollection-${var.namespace}-messages"
   acl    = "private"
 
-  lifecycle {
-    prevent_destroy = true
-  }
+  # Normally S3 buckets have prevent_destroy = true
+  # but these are transient between stacks, so we allow it.
+  force_destroy = true
 
   lifecycle_rule {
     id      = "expire_messages"

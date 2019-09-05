@@ -94,12 +94,12 @@ lazy val matcher = setupProject(project, "pipeline/matcher",
 )
 
 lazy val merger = setupProject(project, "pipeline/merger",
-  localDependencies = Seq(internal_model),
+  localDependencies = Seq(internal_model, big_messaging_typesafe),
   externalDependencies = CatalogueDependencies.mergerDependencies
 )
 
 lazy val recorder = setupProject(project, "pipeline/recorder",
-  localDependencies = Seq(internal_model),
+  localDependencies = Seq(internal_model, big_messaging_typesafe),
   externalDependencies = CatalogueDependencies.recorderDependencies
 )
 
@@ -110,13 +110,13 @@ lazy val reindex_worker = setupProject(project, "reindexer/reindex_worker",
 
 lazy val transformer_miro = setupProject(project,
   folder = "pipeline/transformer/transformer_miro",
-  localDependencies = Seq(internal_model),
+  localDependencies = Seq(internal_model, big_messaging_typesafe),
   externalDependencies = CatalogueDependencies.miroTransformerDependencies
 )
 
 lazy val transformer_sierra = setupProject(project,
   folder = "pipeline/transformer/transformer_sierra",
-  localDependencies = Seq(internal_model),
+  localDependencies = Seq(internal_model, big_messaging_typesafe),
   externalDependencies = CatalogueDependencies.sierraTransformerDependencies
 )
 

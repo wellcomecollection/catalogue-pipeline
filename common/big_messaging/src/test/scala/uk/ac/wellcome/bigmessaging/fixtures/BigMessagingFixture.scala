@@ -46,15 +46,15 @@ trait BigMessagingFixture
 
   case class ExampleObject(name: String)
 
-  def withMessageStream[T, R](queue: SQS.Queue,
-                              metrics: MemoryMetrics[StandardUnit] =
-                                new MemoryMetrics[StandardUnit]())(
-    testWith: TestWith[MessageStream[T], R])(
+  def withBigMessageStream[T, R](queue: SQS.Queue,
+                                 metrics: MemoryMetrics[StandardUnit] =
+                                   new MemoryMetrics[StandardUnit]())(
+    testWith: TestWith[BigMessageStream[T], R])(
     implicit
     actorSystem: ActorSystem,
     decoderT: Decoder[T],
     typedStoreT: TypedStore[ObjectLocation, T]): R = {
-    val stream = new MessageStream[T](
+    val stream = new BigMessageStream[T](
       sqsClient = asyncSqsClient,
       sqsConfig = createSQSConfigWith(queue),
       metrics = metrics
@@ -87,24 +87,29 @@ trait BigMessagingFixture
     testWith: TestWith[BigMessageSender[SNSConfig, T], R])(
     implicit
     encoderT: Encoder[T],
-    codecT: Codec[T]): R = {
-
-    val sender = new BigMessageSender[SNSConfig, T] {
-      override val messageSender: MessageSender[SNSConfig] =
-        new SNSMessageSender(
-          snsClient = senderSnsClient,
-          snsConfig = createSNSConfigWith(topic),
-          subject = "Sent in MessagingIntegrationTest"
-        )
-      override val typedStore: MemoryTypedStore[ObjectLocation, T] =
-        store.getOrElse(MemoryTypedStoreCompanion[ObjectLocation, T]())
-      override val namespace: String = bucket.name
-      override implicit val encoder: Encoder[T] = encoderT
-      override val maxMessageSize: Int = 10000
+    codecT: Codec[T]): R =
+    withSnsMessageSender(topic, senderSnsClient) { snsMessageSender =>
+      val sender = new BigMessageSender[SNSConfig, T] {
+        override val messageSender: MessageSender[SNSConfig] =
+          snsMessageSender
+        override val typedStore: MemoryTypedStore[ObjectLocation, T] =
+          store.getOrElse(MemoryTypedStoreCompanion[ObjectLocation, T]())
+        override val namespace: String = bucket.name
+        override implicit val encoder: Encoder[T] = encoderT
+        override val maxMessageSize: Int = 10000
+      }
+      testWith(sender)
     }
 
-    testWith(sender)
-  }
+  def withSnsMessageSender[R](topic: Topic, snsClient: AmazonSNS = snsClient)(
+    testWith: TestWith[MessageSender[SNSConfig], R]): R =
+    testWith(
+      new SNSMessageSender(
+        snsClient = snsClient,
+        snsConfig = createSNSConfigWith(topic),
+        subject = "Sent in BigMessagingFixture"
+      )
+    )
 
   /** Given a topic ARN which has received notifications containing pointers
     * to objects in S3, return the unpacked objects.

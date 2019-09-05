@@ -30,7 +30,7 @@ object WorksIncludesDeserializer {
 
 class V1WorksIncludesDeserializer extends JsonDeserializer[V1WorksIncludes] {
   override def deserialize(p: JsonParser,
-                           ctxt: DeserializationContext): V1WorksIncludes = {
+                           ctx: DeserializationContext): V1WorksIncludes = {
     WorksIncludesDeserializer(
       p.getText(),
       V1WorksIncludes.recognisedIncludes,
@@ -40,7 +40,7 @@ class V1WorksIncludesDeserializer extends JsonDeserializer[V1WorksIncludes] {
 
 class V2WorksIncludesDeserializer extends JsonDeserializer[V2WorksIncludes] {
   override def deserialize(p: JsonParser,
-                           ctxt: DeserializationContext): V2WorksIncludes = {
+                           ctx: DeserializationContext): V2WorksIncludes = {
     WorksIncludesDeserializer(
       p.getText(),
       V2WorksIncludes.recognisedIncludes,

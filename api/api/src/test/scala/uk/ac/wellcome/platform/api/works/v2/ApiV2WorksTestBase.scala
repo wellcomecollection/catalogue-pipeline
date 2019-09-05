@@ -14,7 +14,7 @@ trait ApiV2WorksTestBase
 
   def withV2Api[R](testWith: TestWith[(Index, EmbeddedHttpServer), R]): R =
     withLocalWorksIndex { indexV2 =>
-      withServer(Index("index-v1"), indexV2) { server =>
+      withServer(Index("index-v2"), indexV2) { server =>
         testWith((indexV2, server))
       }
     }

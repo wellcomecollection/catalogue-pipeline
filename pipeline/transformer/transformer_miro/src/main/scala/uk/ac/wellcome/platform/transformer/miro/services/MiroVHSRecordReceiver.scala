@@ -1,22 +1,36 @@
 package uk.ac.wellcome.platform.transformer.miro.services
 
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success, Try}
+
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.json.JsonUtil._
+
 import uk.ac.wellcome.json.exceptions.JsonDecodingError
-import uk.ac.wellcome.messaging.message.MessageWriter
-import uk.ac.wellcome.messaging.sns.{NotificationMessage, PublishAttempt}
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.transformer.miro.exceptions.MiroTransformerException
 import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
-import uk.ac.wellcome.storage.ObjectStore
-import uk.ac.wellcome.storage.vhs.HybridRecord
+import uk.ac.wellcome.json.JsonUtil._
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
+import uk.ac.wellcome.bigmessaging.BigMessageSender
+import uk.ac.wellcome.messaging.sns.NotificationMessage
 
-class MiroVHSRecordReceiver(objectStore: ObjectStore[MiroRecord],
-                            messageWriter: MessageWriter[TransformedBaseWork])(
+import uk.ac.wellcome.storage.store.{HybridStoreEntry, Store}
+import uk.ac.wellcome.storage.{Identified, ObjectLocation, Version}
+
+// In future we should just receive the ID and version from the adaptor as the
+// S3 specific `location` field is an implementation detail we should not be
+// concerned with here.
+case class HybridRecord(
+  id: String,
+  version: Int,
+  location: ObjectLocation
+)
+
+class MiroVHSRecordReceiver[MsgDestination](
+  msgSender: BigMessageSender[MsgDestination, TransformedBaseWork],
+  store: Store[Version[String, Int],
+               HybridStoreEntry[MiroRecord, MiroMetadata]])(
   implicit ec: ExecutionContext)
     extends Logging {
 
@@ -27,19 +41,18 @@ class MiroVHSRecordReceiver(objectStore: ObjectStore[MiroRecord],
                        Int) => Try[TransformedBaseWork]): Future[Unit] = {
     debug(s"Starting to process message $message")
 
-    val futurePublishAttempt = for {
-      hybridRecord <- Future.fromTry(fromJson[HybridRecord](message.body))
-      miroMetadata <- Future.fromTry(fromJson[MiroMetadata](message.body))
-      transformableRecord <- getTransformable(hybridRecord)
-      work <- Future.fromTry(
-        transformToWork(transformableRecord, miroMetadata, hybridRecord.version)
-      )
-      publishResult <- publishMessage(work)
-      _ = debug(
-        s"Published work: ${work.sourceIdentifier} with message $publishResult")
-    } yield publishResult
+    val msgNotification = Future.fromTry {
+      for {
+        record <- fromJson[HybridRecord](message.body)
+        (miroRecord, miroMetadata) <- getRecordAndMetadata(record)
+        work <- transformToWork(miroRecord, miroMetadata, record.version)
+        msgNotification <- msgSender.sendT(work)
+        _ = debug(
+          s"Published work: ${work.sourceIdentifier} with message $msgNotification")
+      } yield msgNotification
+    }
 
-    futurePublishAttempt
+    msgNotification
       .recover {
         case e: JsonDecodingError =>
           info(
@@ -48,16 +61,13 @@ class MiroVHSRecordReceiver(objectStore: ObjectStore[MiroRecord],
           throw MiroTransformerException(e)
       }
       .map(_ => ())
-
   }
 
-  private def getTransformable(hybridRecord: HybridRecord): Future[MiroRecord] =
-    objectStore.get(hybridRecord.location)
-
-  private def publishMessage(
-    work: TransformedBaseWork): Future[PublishAttempt] =
-    messageWriter.write(
-      message = work,
-      subject = s"source: ${this.getClass.getSimpleName}.publishMessage"
-    )
+  private def getRecordAndMetadata(
+    record: HybridRecord): Try[(MiroRecord, MiroMetadata)] =
+    store.get(Version(record.id, record.version)) match {
+      case Right(Identified(_, HybridStoreEntry(miroRecord, miroMetadata))) =>
+        Success((miroRecord, miroMetadata))
+      case Left(error) => Failure(error.e)
+    }
 }

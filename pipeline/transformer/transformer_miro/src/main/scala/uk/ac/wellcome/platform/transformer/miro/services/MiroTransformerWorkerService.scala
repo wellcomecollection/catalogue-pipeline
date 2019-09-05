@@ -9,8 +9,8 @@ import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.Future
 
-class MiroTransformerWorkerService(
-  vhsRecordReceiver: MiroVHSRecordReceiver,
+class MiroTransformerWorkerService[MsgDestination](
+  vhsRecordReceiver: MiroVHSRecordReceiver[MsgDestination],
   miroTransformer: MiroRecordTransformer,
   sqsStream: SQSStream[NotificationMessage]
 ) extends Runnable {
