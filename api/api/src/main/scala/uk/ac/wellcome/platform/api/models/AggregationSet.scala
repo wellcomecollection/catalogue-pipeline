@@ -16,15 +16,16 @@ object AggregationSet {
   def isEmpty(a: AggregationSet): Boolean =
     a.workType.isEmpty && a.genre.isEmpty
 
-  // Convert the JSON into Elasticsearch case classes (not supplied via elastic4s)
-  // and then convert them to our representations of aggregations.
-  // This is to get around things like having property names like `doc_count` and `key`
-  def getFromJson[ParsedType](json: Json)(
-    implicit decoder: Decoder[ParsedType]): Option[Aggregation[ParsedType]] = {
-    fromJson[EsAggregation](json.toString).toOption.map(esAggregation => {
+  def getFromJson[AggregationDataType](json: Json)(
+    implicit decoder: Decoder[AggregationDataType])
+    : Option[Aggregation[AggregationDataType]] = {
+    val maybeEsAggregation = fromJson[EsAggregation](json.toString).toOption
+
+    maybeEsAggregation.map(esAggregation => {
       val buckets = esAggregation.buckets.flatMap(esAggregationBucket =>
-        fromJson[ParsedType](esAggregationBucket.key.toString()) map (data =>
-          AggregationBucket(data, esAggregationBucket.doc_count)) toOption)
+        fromJson[AggregationDataType](esAggregationBucket.key.toString()) map (
+          data =>
+            AggregationBucket(data, esAggregationBucket.doc_count)) toOption)
 
       Aggregation(buckets = buckets)
     })
@@ -50,5 +51,32 @@ object AggregationSet {
 case class Aggregation[T](buckets: List[AggregationBucket[T]])
 case class AggregationBucket[T](data: T, count: Int)
 
+/**
+  * We use these to convert the JSON into Elasticsearch case classes (not supplied via elastic4s)
+  * and then convert them into our representations of aggregations.
+  * This is to get around things like having property names like `doc_count` and `key`
+  * The general format here is:
+  *
+  * {
+  *   "buckets": {
+  *     "key": {
+  *       "this": "is",
+  *       "structured": "content"
+  *     },
+  *     "doc_count" 1009
+  *   }
+  * }
+  *
+  * And we convert them to:
+  * {
+  *   "buckets": {
+  *     "data": {
+  *       "this": "is",
+  *       "structured": "content"
+  *     },
+  *     "count" 1009
+  *   }
+  * }
+  */
 case class EsAggregation(buckets: List[EsAggregationBucket])
 case class EsAggregationBucket(key: Json, doc_count: Int)
