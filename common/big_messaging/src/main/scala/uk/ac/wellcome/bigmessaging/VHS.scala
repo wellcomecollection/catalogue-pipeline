@@ -25,9 +25,10 @@ trait GetLocation {
 }
 
 class VHS[T](override val hybridStore: VHSInternalStore[T, EmptyMetadata])
-  extends VHSWithMetadata[T, EmptyMetadata](hybridStore)
+    extends VHSWithMetadata[T, EmptyMetadata](hybridStore)
 
-class VHSWithMetadata[T, Metadata](val hybridStore: VHSInternalStore[T, Metadata])
+class VHSWithMetadata[T, Metadata](
+  val hybridStore: VHSInternalStore[T, Metadata])
     extends VersionedHybridStore[
       String,
       Int,

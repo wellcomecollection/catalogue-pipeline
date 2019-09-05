@@ -15,7 +15,12 @@ import uk.ac.wellcome.storage.store.HybridIndexedStoreEntry
 import uk.ac.wellcome.storage.{ObjectLocation, ObjectLocationPrefix}
 import uk.ac.wellcome.storage.typesafe.{DynamoBuilder, S3Builder}
 import uk.ac.wellcome.storage.streaming.Codec
-import uk.ac.wellcome.bigmessaging.{EmptyMetadata, VHS, VHSInternalStore, VHSWithMetadata}
+import uk.ac.wellcome.bigmessaging.{
+  EmptyMetadata,
+  VHS,
+  VHSInternalStore,
+  VHSWithMetadata
+}
 
 object VHSBuilder {
 
@@ -79,11 +84,10 @@ object VHSBuilder {
       S3Builder.buildS3Client(config)
     )
 
-  def buildWithMetadata[T, Metadata](
-    objectLocationPrefix: ObjectLocationPrefix,
-    dynamoConfig: DynamoConfig,
-    dynamoClient: AmazonDynamoDB,
-    s3Client: AmazonS3)(
+  def buildWithMetadata[T, Metadata](objectLocationPrefix: ObjectLocationPrefix,
+                                     dynamoConfig: DynamoConfig,
+                                     dynamoClient: AmazonDynamoDB,
+                                     s3Client: AmazonS3)(
     implicit
     codec: Codec[T],
     format: WithMetaFormat[Metadata]): VHSWithMetadata[T, Metadata] = {
