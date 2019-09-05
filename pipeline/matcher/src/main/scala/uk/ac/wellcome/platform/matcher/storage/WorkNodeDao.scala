@@ -66,5 +66,8 @@ class WorkNodeDao(dynamoDbClient: AmazonDynamoDB, dynamoConfig: DynamoConfig)(
             throw exception
           }
         }
+    }.recover {
+      case exception: ProvisionedThroughputExceededException =>
+        throw MatcherException(exception)
     }
 }
