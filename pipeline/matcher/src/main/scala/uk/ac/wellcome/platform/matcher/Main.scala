@@ -40,8 +40,8 @@ object Main extends WellcomeTypesafeApp {
 
     val workGraphStore = new WorkGraphStore(
       workNodeDao = new WorkNodeDao(
-        dynamoDbClient = dynamoClient,
-        dynamoConfig = DynamoBuilder.buildDynamoConfig(config)
+        dynamoClient,
+        DynamoBuilder.buildDynamoConfig(config)
       )
     )
 
