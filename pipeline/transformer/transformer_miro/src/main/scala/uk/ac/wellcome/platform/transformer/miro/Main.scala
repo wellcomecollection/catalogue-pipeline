@@ -28,7 +28,6 @@ import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.typesafe.S3Builder
 import uk.ac.wellcome.storage.streaming.Codec._
 
-
 object Main extends WellcomeTypesafeApp {
 
   runWithConfig { config: Config =>
