@@ -6,6 +6,7 @@ import grizzled.slf4j.Logging
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher
 import uk.ac.wellcome.platform.matcher.models.VersionExpectedConflictException
+import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.typesafe.Runnable
 import uk.ac.wellcome.models.Implicits._
 
@@ -30,7 +31,7 @@ class MatcherWorkerService[MsgDestination](
       identifiersList <- workMatcher.matchWork(work)
       _ <- Future.fromTry(msgSender.sendT(identifiersList))
     } yield ()).recover {
-      case e: VersionExpectedConflictException =>
+      case MatcherException(e: VersionExpectedConflictException) =>
         debug(
           s"Not matching work due to version conflict exception: ${e.getMessage}")
     }
