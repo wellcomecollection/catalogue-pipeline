@@ -30,7 +30,7 @@ import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
 import uk.ac.wellcome.storage.dynamo._
 import uk.ac.wellcome.storage.ObjectLocation
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
-import uk.ac.wellcome.storage.fixtures.{S3Fixtures,}
+import uk.ac.wellcome.storage.fixtures.S3Fixtures
 import uk.ac.wellcome.storage.locking.dynamo.{
   DynamoLockDaoFixtures,
   DynamoLockingService,
