@@ -21,6 +21,11 @@ import uk.ac.wellcome.platform.matcher.storage.WorkGraphStore
 import uk.ac.wellcome.platform.matcher.workgraph.WorkGraphUpdater
 
 import uk.ac.wellcome.storage.locking.dynamo.DynamoLockingService
+import uk.ac.wellcome.storage.locking.{
+  FailedLockingServiceOp,
+  FailedUnlock,
+  FailedProcess
+}
 
 class WorkMatcher(
   workGraphStore: WorkGraphStore,
@@ -40,18 +45,29 @@ class WorkMatcher(
   private def doMatch(work: UnidentifiedWork): Future[Out] = {
     val update = WorkUpdate(work)
     val updateAffectedIdentifiers = update.referencedWorkIds + update.workId
+    withLocks(update, updateAffectedIdentifiers) {
+      withUpdateLocked(update, updateAffectedIdentifiers)
+    }
+  }
+
+  private def withLocks(update: WorkUpdate, ids: Set[String])(f: => Future[Out]): Future[Out] =
     lockingService
-      .withLocks(updateAffectedIdentifiers)(
-        withUpdateLocked(update, updateAffectedIdentifiers))
+      .withLocks(ids)(f)
       .map {
         case Left(failure) => {
           debug(
             s"Locking failed while matching work ${update.workId}: ${failure}")
-          throw MatcherException(new RuntimeException(s"${failure}"))
+          throw MatcherException(failureToException(failure))
         }
         case Right(out) => out
       }
-  }
+
+  private def failureToException(failure: FailedLockingServiceOp): Throwable =
+    failure match {
+      case FailedUnlock(_, _, e) => e
+      case FailedProcess(_, e) => e
+      case _ => new RuntimeException(failure.toString)
+    }
 
   private def singleMatchedIdentifier(work: UnidentifiedInvisibleWork) = {
     MatcherResult(
@@ -63,20 +79,16 @@ class WorkMatcher(
 
   private def withUpdateLocked(
     update: WorkUpdate,
-    updateAffectedIdentifiers: Set[String]): Future[Set[MatchedIdentifiers]] = {
+    updateAffectedIdentifiers: Set[String]): Future[Out] = {
     for {
       graphBeforeUpdate <- workGraphStore.findAffectedWorks(update)
       updatedGraph = WorkGraphUpdater.update(update, graphBeforeUpdate)
-      _ <- (
-        lockingService.withLocks(
-          graphBeforeUpdate.nodes.map(_.id) -- updateAffectedIdentifiers
-        ) {
-          // We are returning empty set here, as LockingService is tied to a
-          // single `Out` type, here set to `Set[MatchedIdentifiers]`.
-          // See issue here: https://github.com/wellcometrust/platform/issues/3873
-          workGraphStore.put(updatedGraph).map(_ => Set.empty)
-        }
-      )
+      _ <- withLocks(update, graphBeforeUpdate.nodes.map(_.id) -- updateAffectedIdentifiers) {
+        // We are returning empty set here, as LockingService is tied to a
+        // single `Out` type, here set to `Set[MatchedIdentifiers]`.
+        // See issue here: https://github.com/wellcometrust/platform/issues/3873
+        workGraphStore.put(updatedGraph).map(_ => Set.empty)
+      }
     } yield {
       convertToIdentifiersList(updatedGraph)
     }
