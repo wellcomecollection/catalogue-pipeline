@@ -425,10 +425,10 @@ class WorksServiceTest
           val expectedAggregations = AggregationSet(
             Some(
               Aggregation(List(
-                AggregationBucket(data = WorkType("b", "Books"), count = 2),
                 AggregationBucket(data = WorkType("a", "Archives"), count = 1),
+                AggregationBucket(data = WorkType("b", "Books"), count = 2),
                 AggregationBucket(
-                  data = WorkType("b", "Manuscripts"),
+                  data = WorkType("m", "Manuscripts"),
                   count = 1)
               ))),
             None
