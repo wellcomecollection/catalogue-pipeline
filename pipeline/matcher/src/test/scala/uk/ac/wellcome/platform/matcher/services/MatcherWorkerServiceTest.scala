@@ -16,8 +16,6 @@ import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
 import uk.ac.wellcome.models.Implicits._
 
-import scala.concurrent.ExecutionContext.Implicits.global
-
 class MatcherWorkerServiceTest
     extends FunSpec
     with Matchers
