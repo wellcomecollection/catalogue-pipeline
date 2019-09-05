@@ -24,7 +24,7 @@ import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
 import uk.ac.wellcome.platform.matcher.models.{WorkGraph, WorkUpdate}
 import uk.ac.wellcome.platform.matcher.storage.WorkGraphStore
- import uk.ac.wellcome.storage.locking.UnlockFailure
+import uk.ac.wellcome.storage.locking.UnlockFailure
 import uk.ac.wellcome.storage.locking.dynamo.{
   DynamoLockDao,
   DynamoLockingService,
@@ -236,11 +236,13 @@ class WorkMatcherTest
               val idA = "sierra-system-number/A"
               val idB = "sierra-system-number/B"
               val idC = "sierra-system-number/C"
-              workGraphStore.put(WorkGraph(Set(
-                WorkNode(idA, 0, List(idB), componentId),
-                WorkNode(idB, 0, List(idC), componentId),
-                WorkNode(idC, 0, Nil, componentId),
-              )))
+              workGraphStore.put(
+                WorkGraph(
+                  Set(
+                    WorkNode(idA, 0, List(idB), componentId),
+                    WorkNode(idB, 0, List(idC), componentId),
+                    WorkNode(idC, 0, Nil, componentId),
+                  )))
               val work = createUnidentifiedWorkWith(
                 sourceIdentifier = identifierA,
                 mergeCandidates = List(MergeCandidate(identifierB))
@@ -276,10 +278,11 @@ class WorkMatcherTest
                   created = Instant.now,
                   expires = Instant.now.plusSeconds(100))
               ))
-          when(lockDao.unlock(any[UUID])).thenReturn(
-            Left(UnlockFailure(UUID.randomUUID, error)))
+          when(lockDao.unlock(any[UUID]))
+            .thenReturn(Left(UnlockFailure(UUID.randomUUID, error)))
           whenReady(workMatcher.matchWork(createUnidentifiedSierraWork).failed) {
-            failedMatch => failedMatch shouldBe a[MatcherException]
+            failedMatch =>
+              failedMatch shouldBe a[MatcherException]
           }
         }
       }

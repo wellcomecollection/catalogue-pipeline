@@ -23,8 +23,8 @@ import uk.ac.wellcome.platform.matcher.workgraph.WorkGraphUpdater
 import uk.ac.wellcome.storage.locking.dynamo.DynamoLockingService
 import uk.ac.wellcome.storage.locking.{
   FailedLockingServiceOp,
-  FailedUnlock,
-  FailedProcess
+  FailedProcess,
+  FailedUnlock
 }
 
 class WorkMatcher(
@@ -50,7 +50,8 @@ class WorkMatcher(
     }
   }
 
-  private def withLocks(update: WorkUpdate, ids: Set[String])(f: => Future[Out]): Future[Out] =
+  private def withLocks(update: WorkUpdate, ids: Set[String])(
+    f: => Future[Out]): Future[Out] =
     lockingService
       .withLocks(ids)(f)
       .map {
@@ -65,8 +66,8 @@ class WorkMatcher(
   private def failureToException(failure: FailedLockingServiceOp): Throwable =
     failure match {
       case FailedUnlock(_, _, e) => e
-      case FailedProcess(_, e) => e
-      case _ => new RuntimeException(failure.toString)
+      case FailedProcess(_, e)   => e
+      case _                     => new RuntimeException(failure.toString)
     }
 
   private def singleMatchedIdentifier(work: UnidentifiedInvisibleWork) = {
@@ -83,7 +84,9 @@ class WorkMatcher(
     for {
       graphBeforeUpdate <- workGraphStore.findAffectedWorks(update)
       updatedGraph = WorkGraphUpdater.update(update, graphBeforeUpdate)
-      _ <- withLocks(update, graphBeforeUpdate.nodes.map(_.id) -- updateAffectedIdentifiers) {
+      _ <- withLocks(
+        update,
+        graphBeforeUpdate.nodes.map(_.id) -- updateAffectedIdentifiers) {
         // We are returning empty set here, as LockingService is tied to a
         // single `Out` type, here set to `Set[MatchedIdentifiers]`.
         // See issue here: https://github.com/wellcometrust/platform/issues/3873
