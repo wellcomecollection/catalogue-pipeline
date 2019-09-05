@@ -54,33 +54,34 @@ class MatcherFeatureTest
   it(
     "does not process a message if the work version is older than that already stored") {
     withLocalSnsTopic { topic =>
-      withLocalSqsQueueAndDlq { case QueuePair(queue, dlq) =>
-        withWorkGraphTable { graphTable =>
-          withWorkerService(queue, topic, graphTable) { _ =>
-            val existingWorkVersion = 2
-            val updatedWorkVersion = 1
+      withLocalSqsQueueAndDlq {
+        case QueuePair(queue, dlq) =>
+          withWorkGraphTable { graphTable =>
+            withWorkerService(queue, topic, graphTable) { _ =>
+              val existingWorkVersion = 2
+              val updatedWorkVersion = 1
 
-            val workAv1 = createUnidentifiedWorkWith(
-              version = updatedWorkVersion
-            )
+              val workAv1 = createUnidentifiedWorkWith(
+                version = updatedWorkVersion
+              )
 
-            val existingWorkAv2 = WorkNode(
-              id = workAv1.sourceIdentifier.toString,
-              version = existingWorkVersion,
-              linkedIds = Nil,
-              componentId = workAv1.sourceIdentifier.toString
-            )
-            put(dynamoClient, graphTable.name)(existingWorkAv2)
+              val existingWorkAv2 = WorkNode(
+                id = workAv1.sourceIdentifier.toString,
+                version = existingWorkVersion,
+                linkedIds = Nil,
+                componentId = workAv1.sourceIdentifier.toString
+              )
+              put(dynamoClient, graphTable.name)(existingWorkAv2)
 
-            sendMessage[TransformedBaseWork](queue = queue, workAv1)
+              sendMessage[TransformedBaseWork](queue = queue, workAv1)
 
-            eventually {
-              noMessagesAreWaitingIn(queue)
-              noMessagesAreWaitingIn(dlq)
+              eventually {
+                noMessagesAreWaitingIn(queue)
+                noMessagesAreWaitingIn(dlq)
+              }
+              listMessagesReceivedFromSNS(topic).size shouldBe 0
             }
-            listMessagesReceivedFromSNS(topic).size shouldBe 0
           }
-        }
       }
     }
   }
