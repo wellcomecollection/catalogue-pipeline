@@ -3,9 +3,10 @@ package uk.ac.wellcome.platform.merger.services
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.models.matcher.WorkIdentifier
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
-import uk.ac.wellcome.storage.ObjectStore
-import uk.ac.wellcome.storage.dynamo._
-import uk.ac.wellcome.storage.vhs.{EmptyMetadata, VersionedHybridStore}
+
+import uk.ac.wellcome.bigmessaging.EmptyMetadata
+import uk.ac.wellcome.storage.{Identified, NoVersionExistsError}
+import uk.ac.wellcome.storage.store.{HybridStoreEntry, VersionedStore}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -17,10 +18,10 @@ import scala.concurrent.{ExecutionContext, Future}
   *
   */
 class RecorderPlaybackService(
-  versionedHybridStore: VersionedHybridStore[TransformedBaseWork,
-                                             EmptyMetadata,
-                                             ObjectStore[TransformedBaseWork]],
-)(implicit ec: ExecutionContext)
+  vhs: VersionedStore[String,
+                      Int,
+                      HybridStoreEntry[TransformedBaseWork, EmptyMetadata]])(
+  implicit ec: ExecutionContext)
     extends Logging {
 
   /** Given a collection of matched identifiers, return all the
@@ -29,8 +30,7 @@ class RecorderPlaybackService(
   def fetchAllWorks(workIdentifiers: Seq[WorkIdentifier])
     : Future[Seq[Option[TransformedBaseWork]]] = {
     Future.sequence(
-      workIdentifiers
-        .map { getWorkForIdentifier }
+      workIdentifiers.map(id => Future { getWorkForIdentifier(id) })
     )
   }
 
@@ -42,21 +42,19 @@ class RecorderPlaybackService(
     * If the work is missing from VHS, it throws [[NoSuchElementException]].
     */
   private def getWorkForIdentifier(
-    workIdentifier: WorkIdentifier): Future[Option[TransformedBaseWork]] = {
-    workIdentifier.version match {
-      case 0 => Future.successful(None)
-      case _ =>
-        versionedHybridStore.getRecord(id = workIdentifier.identifier).map {
-          case None =>
-            throw new NoSuchElementException(
-              s"Work ${workIdentifier.identifier} is not in VHS!")
-          case Some(work) if work.version == workIdentifier.version =>
-            Some(work)
-          case Some(work) =>
-            debug(
-              s"VHS version = ${work.version}, identifier version = ${workIdentifier.version}, so discarding work")
-            None
+    workIdentifier: WorkIdentifier): Option[TransformedBaseWork] =
+    vhs.getLatest(workIdentifier.identifier) match {
+      case Right(Identified(_, HybridStoreEntry(work, _))) =>
+        if (work.version == workIdentifier.version) {
+          Some(work)
+        } else {
+          debug(
+            s"VHS version = ${work.version}, identifier version = ${workIdentifier.version}, so discarding work")
+          None
         }
+      case Left(NoVersionExistsError(_)) =>
+        throw new NoSuchElementException(
+          s"Work ${workIdentifier.identifier} is not in VHS!")
+      case Left(readError) => throw readError.e
     }
-  }
 }

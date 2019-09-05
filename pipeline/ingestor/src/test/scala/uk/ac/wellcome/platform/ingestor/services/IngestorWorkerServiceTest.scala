@@ -8,7 +8,7 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Assertion, FunSpec, Matchers}
 import uk.ac.wellcome.elasticsearch.ElasticCredentials
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
-import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
@@ -139,7 +139,7 @@ class IngestorWorkerServiceTest
           {
             implicit val typedStoreT =
               MemoryTypedStoreCompanion[ObjectLocation, IdentifiedBaseWork]()
-            withMessageStream[IdentifiedBaseWork, Assertion](queue) {
+            withBigMessageStream[IdentifiedBaseWork, Assertion](queue) {
               messageStream =>
                 import scala.concurrent.duration._
 

@@ -2,6 +2,7 @@ package uk.ac.wellcome.platform.api.models
 
 import com.sksamuel.elastic4s.requests.searches.queries.{
   Query,
+  SimpleQueryStringFlag,
   SimpleStringQuery
 }
 
@@ -32,7 +33,11 @@ object WorkQuery {
         queryString,
         fields = defaultBoostedFields,
         lenient = Some(true),
-        minimumShouldMatch = Some(defaultMSM)
+        minimumShouldMatch = Some(defaultMSM),
+        // PHRASE is the only syntax that researchers know and understand, so we use this exclusively
+        // so as not to have unexpected results returned when using simple query string syntax.
+        // See: https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html#simple-query-string-syntax
+        flags = Seq(SimpleQueryStringFlag.PHRASE)
       )
     }
   }

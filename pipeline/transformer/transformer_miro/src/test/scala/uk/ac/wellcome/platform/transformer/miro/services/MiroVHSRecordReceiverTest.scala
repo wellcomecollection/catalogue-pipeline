@@ -4,8 +4,8 @@ import scala.util.Try
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSpec, Matchers}
+import scala.util.Try
 
-import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.{
   TransformedBaseWork,
@@ -16,6 +16,8 @@ import uk.ac.wellcome.platform.transformer.miro.fixtures.MiroVHSRecordReceiverFi
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
+import uk.ac.wellcome.models.Implicits._
+import uk.ac.wellcome.json.JsonUtil._
 
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture

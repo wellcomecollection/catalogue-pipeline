@@ -2,49 +2,27 @@ package uk.ac.wellcome.platform.merger.fixtures
 
 import org.scalatest.Assertion
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
-import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.models.work.internal.TransformedBaseWork
-import uk.ac.wellcome.storage.ObjectStore
-import uk.ac.wellcome.storage.fixtures.LocalVersionedHybridStore
-import uk.ac.wellcome.storage.vhs.{EmptyMetadata, VersionedHybridStore}
-import uk.ac.wellcome.storage.dynamo._
-import uk.ac.wellcome.fixtures.TestWith
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.ac.wellcome.models.work.internal.TransformedBaseWork
+import uk.ac.wellcome.bigmessaging.fixtures.VHSFixture
+import uk.ac.wellcome.bigmessaging.EmptyMetadata
+import uk.ac.wellcome.storage.Identified
+import uk.ac.wellcome.storage.store.HybridStoreEntry
 
 trait LocalWorksVhs
-    extends LocalVersionedHybridStore
+    extends VHSFixture[TransformedBaseWork]
     with Eventually
     with ScalaFutures {
 
-  type TransformedBaseWorkVHS =
-    VersionedHybridStore[TransformedBaseWork,
-                         EmptyMetadata,
-                         ObjectStore[TransformedBaseWork]]
-
-  def withTransformedBaseWorkVHS[R](
-    testWith: TestWith[TransformedBaseWorkVHS, R]): R =
-    withLocalS3Bucket { storageBucket =>
-      withLocalDynamoDbTable { table =>
-        withTypeVHS[TransformedBaseWork, EmptyMetadata, R](storageBucket, table) {
-          vhs =>
-            testWith(vhs)
-        }
-      }
-    }
-
-  def givenStoredInVhs(vhs: TransformedBaseWorkVHS,
-                       works: TransformedBaseWork*): Seq[Assertion] =
+  def givenStoredInVhs(vhs: VHS, works: TransformedBaseWork*): Seq[Assertion] =
     works.map { work =>
-      vhs.updateRecord(work.sourceIdentifier.toString)(
-        ifNotExisting = (work, EmptyMetadata()))((_, _) =>
-        throw new RuntimeException("Not possible, VHS is empty!"))
+      val entry = HybridStoreEntry(work, EmptyMetadata())
+      vhs.init(work.sourceIdentifier.toString)(entry)
 
-      eventually {
-        whenReady(vhs.getRecord(id = work.sourceIdentifier.toString)) {
-          result =>
-            result.get shouldBe work
-        }
+      vhs.getLatest(work.sourceIdentifier.toString) match {
+        case Left(error) => throw new Error(s"${error}")
+        case Right(Identified(_, HybridStoreEntry(storedWork, _))) =>
+          storedWork shouldBe work
       }
     }
 }

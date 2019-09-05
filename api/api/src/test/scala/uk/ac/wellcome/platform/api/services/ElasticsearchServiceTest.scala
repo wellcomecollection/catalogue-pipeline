@@ -6,6 +6,7 @@ import com.sksamuel.elastic4s.requests.searches.{SearchHit, SearchResponse}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Assertion, FunSpec, Matchers}
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
+import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.generators.{
   ContributorGenerators,
@@ -305,9 +306,7 @@ class ElasticsearchServiceTest
             index = index,
             workQuery = MSMBoostQuery("Text that contains Aegean"))
 
-        results should have length 8
-
-        results.foreach(r => println(r.canonicalId))
+        results should have length 10
 
         withClue("(0, 1) should be title matches") {
           results.slice(0, 2) shouldBe List(matchingTitle100, matchingTitle75)
@@ -319,14 +318,19 @@ class ElasticsearchServiceTest
             matchingSubject100)
         }
 
-        withClue("(4,5) should be 75 genre / subject matches") {
-          results.slice(4, 6) should contain theSameElementsAs List(
+        withClue("(4) should be 25 title match matches") {
+          results.slice(4, 5) should contain theSameElementsAs List(
+            matchingTitle25)
+        }
+
+        withClue("(5, 6) should be 75 genre / subject matches") {
+          results.slice(5, 7) should contain theSameElementsAs List(
             matchingGenre75,
             matchingSubject75)
         }
 
-        withClue("(6, 7) should be 100 / 75 description matches") {
-          results.slice(6, 8) shouldBe List(
+        withClue("(7, 8) should be 100 / 75 description matches") {
+          results.slice(7, 9) shouldBe List(
             matchingDescription100,
             matchingDescription75)
         }
@@ -581,8 +585,6 @@ class ElasticsearchServiceTest
     val searchResponseFuture =
       searchService.queryResults(workQuery)(index, queryOptions)
     whenReady(searchResponseFuture) { response =>
-      response.right.map(r =>
-        r.hits.hits.foreach(h => println(s"${h.id}/${h.score}")))
       searchResponseToWorks(response)
     }
   }

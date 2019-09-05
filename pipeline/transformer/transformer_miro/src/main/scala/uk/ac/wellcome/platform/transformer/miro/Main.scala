@@ -8,7 +8,6 @@ import akka.stream.ActorMaterializer
 import org.scanamo.DynamoFormat
 
 import com.typesafe.config.Config
-import uk.ac.wellcome.json.JsonUtil._
 
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.transformer.miro.services.{
@@ -19,6 +18,8 @@ import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
+import uk.ac.wellcome.models.Implicits._
+import uk.ac.wellcome.platform.transformer.miro.Implicits._
 
 import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
 import uk.ac.wellcome.messaging.sns.NotificationMessage
@@ -32,6 +33,7 @@ import uk.ac.wellcome.storage.{ObjectLocation, ObjectLocationPrefix}
 import uk.ac.wellcome.storage.typesafe.{DynamoBuilder, S3Builder}
 import uk.ac.wellcome.storage.dynamo.DynamoHashEntry
 import uk.ac.wellcome.storage.streaming.Codec._
+
 
 object Main extends WellcomeTypesafeApp {
 

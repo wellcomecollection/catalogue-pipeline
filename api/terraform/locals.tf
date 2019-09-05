@@ -8,18 +8,18 @@ locals {
 
   # API pins
 
-  production_api     = "romulus"
+  production_api     = "remus"
   pinned_nginx       = "760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/nginx_api-gw:bad0dbfa548874938d16496e313b05adb71268b7"
-  pinned_remus_api   = "760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/api:31d558140f900af7c996f2b7062471b823768f33"
-  pinned_romulus_api = "760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/api:27dd3d98c61b247c56842639f9b3b2b31e1463e1"
+  pinned_remus_api   = "760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/api:ee9d07b6adaa161d5c272a420e7fa229b69a5e6b"
+  pinned_romulus_api = "760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/api:437a5fc8fa81bd24420e449e586b958b7aa59fca"
   romulus_es_config = {
     index_v1 = "v1-2019-01-24-production-changes"
-    index_v2 = "v2-2019-04-26-contributors-label-from-multiple-subfields"
+    index_v2 = "v2-20190816-alternative-titles"
     doc_type = "work"
   }
   remus_es_config = {
     index_v1 = "v1-2019-01-24-production-changes"
-    index_v2 = "v2-2019-04-26-contributors-label-from-multiple-subfields"
+    index_v2 = "v2-20190816-alternative-titles"
     doc_type = "work"
   }
 

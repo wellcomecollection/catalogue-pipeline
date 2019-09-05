@@ -367,31 +367,62 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
     }
   }
 
-  it("supports the _queryType parameter") {
+  it("supports fetching the workType aggregation") {
     withV2Api {
       case (indexV2, server: EmbeddedHttpServer) =>
         val work1 = createIdentifiedWorkWith(
           canonicalId = "1",
-          title = "Working with wombats")
+          title = "Working with wombats",
+          workType = Some(WorkType("a", "Books"))
+        )
         val work2 = createIdentifiedWorkWith(
           canonicalId = "2",
-          title = "Working with boosted wombats")
-        insertIntoElasticsearch(indexV2, work1, work2)
+          title = "Working with wombats",
+          workType = Some(WorkType("a", "Books"))
+        )
+        val work3 = createIdentifiedWorkWith(
+          canonicalId = "3",
+          title = "Working with wombats",
+          workType = Some(WorkType("k", "Pictures"))
+        )
+        val work4 = createIdentifiedWorkWith(
+          canonicalId = "4",
+          title = "Working with wombats",
+          workType = Some(WorkType("k", "Pictures"))
+        )
+        val work5 = createIdentifiedWorkWith(
+          canonicalId = "5",
+          title = "Working with wombats",
+          workType = Some(WorkType("d", "Journals"))
+        )
+        insertIntoElasticsearch(indexV2, work1, work2, work3, work4, work5)
 
         eventually {
           server.httpGet(
-            path = s"/$apiPrefix/works?query=boosted&_queryType=boost",
+            path = s"/$apiPrefix/works?_aggregations=workType",
             andExpect = Status.Ok,
             withJsonBody = s"""
                               |{
-                              |  ${resultList(apiPrefix)},
-                              |  "results": [
-                              |   {
-                              |     "type": "Work",
-                              |     "id": "${work2.canonicalId}",
-                              |     "title": "${work2.title}"
+                              |  ${resultList(apiPrefix, totalResults = 5)},
+                              |  "results": [],
+                              |  "aggregations": {
+                              |   "workType": {
+                              |     "buckets": [
+                              |       {
+                              |         "key": "a",
+                              |         "count": 2
+                              |       },
+                              |       {
+                              |         "key": "k",
+                              |         "count": 2
+                              |       },
+                              |       {
+                              |         "key": "d",
+                              |         "count": 1
+                              |       }
+                              |     ]
                               |   }
-                              |  ]
+                              |  }
                               |}
           """.stripMargin
           )

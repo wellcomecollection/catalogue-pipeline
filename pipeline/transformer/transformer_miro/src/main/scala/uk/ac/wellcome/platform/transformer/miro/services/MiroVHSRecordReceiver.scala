@@ -5,12 +5,12 @@ import scala.util.{Failure, Success, Try}
 
 import grizzled.slf4j.Logging
 
-import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.exceptions.JsonDecodingError
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.transformer.miro.exceptions.MiroTransformerException
 import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
+import uk.ac.wellcome.json.JsonUtil._
 
 import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
@@ -44,8 +44,7 @@ class MiroVHSRecordReceiver[MsgDestination](
     val msgNotification = Future.fromTry {
       for {
         record <- fromJson[HybridRecord](message.body)
-        (miroRecord, miroMetadata) <- getRecordAndMetadata(
-          Version(record.id, record.version))
+        (miroRecord, miroMetadata) <- getRecordAndMetadata(record)
         work <- transformToWork(miroRecord, miroMetadata, record.version)
         msgNotification <- msgSender.sendT(work)
         _ = debug(
@@ -65,8 +64,8 @@ class MiroVHSRecordReceiver[MsgDestination](
   }
 
   private def getRecordAndMetadata(
-    key: Version[String, Int]): Try[(MiroRecord, MiroMetadata)] =
-    store.get(key) match {
+    record: HybridRecord): Try[(MiroRecord, MiroMetadata)] =
+    store.get(Version(record.id, record.version)) match {
       case Right(Identified(_, HybridStoreEntry(miroRecord, miroMetadata))) =>
         Success((miroRecord, miroMetadata))
       case Left(error) => Failure(error.e)

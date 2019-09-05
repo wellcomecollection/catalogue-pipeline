@@ -4,5 +4,6 @@ import uk.ac.wellcome.models.work.internal.IdentifiedWork
 
 case class ResultList(
   results: List[IdentifiedWork],
-  totalResults: Int
+  totalResults: Int,
+  aggregations: Option[AggregationResults]
 )

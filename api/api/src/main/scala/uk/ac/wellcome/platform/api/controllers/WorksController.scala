@@ -123,10 +123,13 @@ abstract class WorksController[M <: MultipleResultsRequest[W],
       case None            => defaultIndex
     }
 
+    val aggregations = request._aggregations
+
     val worksSearchOptions = WorksSearchOptions(
       filters = buildFilters(request),
       pageSize = pageSize,
-      pageNumber = request.page
+      pageNumber = request.page,
+      aggregations = aggregations
     )
 
     def searchFunction: (Index, WorksSearchOptions) => Future[

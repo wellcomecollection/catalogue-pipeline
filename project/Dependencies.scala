@@ -11,7 +11,7 @@ object WellcomeDependencies {
 
     val newMessaging = "5.3.1"
     val newMonitoring = "2.3.0"
-    val newStorage = "7.19.0"
+    val newStorage = "7.20.0"
 
     val sierraStreamsSource = "0.4"
   }
@@ -97,7 +97,7 @@ object ExternalDependencies {
     val circe = "0.9.0"
     val elastic4s = "7.1.0"
     val fastparse = "2.1.3"
-    val finatra = "18.11.0"
+    val finatra = "19.8.0"
     val guice = "4.2.0"
     val logback = "1.2.3"
     val mockito = "1.9.5"
@@ -266,16 +266,14 @@ object CatalogueDependencies {
       WellcomeDependencies.messagingTypesafeLibrary
 
   val mergerDependencies: Seq[ModuleID] =
-    ExternalDependencies.mockitoDependencies ++
-      WellcomeDependencies.messagingTypesafeLibrary
+    ExternalDependencies.mockitoDependencies
 
   val miroTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies ++
       ExternalDependencies.mockitoDependencies
 
   val recorderDependencies: Seq[ModuleID] =
-    ExternalDependencies.mockitoDependencies ++
-      WellcomeDependencies.messagingTypesafeLibrary
+    ExternalDependencies.mockitoDependencies
 
   val reindexWorkerDependencies: Seq[ModuleID] =
     ExternalDependencies.mockitoDependencies ++
@@ -283,8 +281,7 @@ object CatalogueDependencies {
 
   val sierraTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies ++
-      ExternalDependencies.mockitoDependencies ++
-      WellcomeDependencies.messagingTypesafeLibrary
+      ExternalDependencies.mockitoDependencies
 
   // Sierra adapter stack
 
