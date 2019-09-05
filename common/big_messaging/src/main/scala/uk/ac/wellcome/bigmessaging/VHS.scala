@@ -24,13 +24,16 @@ trait GetLocation {
   def getLocation(key: Version[String, Int]): Try[ObjectLocation]
 }
 
-class VHS[T](val hybridStore: VHSInternalStore[T])
+class VHS[T](override val hybridStore: VHSInternalStore[T, EmptyMetadata])
+  extends VHSWithMetadata[T, EmptyMetadata](hybridStore)
+
+class VHSWithMetadata[T, Metadata](val hybridStore: VHSInternalStore[T, Metadata])
     extends VersionedHybridStore[
       String,
       Int,
       ObjectLocation,
       T,
-      EmptyMetadata
+      Metadata
     ](hybridStore)
     with GetLocation {
 
@@ -41,14 +44,14 @@ class VHS[T](val hybridStore: VHSInternalStore[T])
     }
 }
 
-class VHSInternalStore[T](
+class VHSInternalStore[T, Metadata](
   prefix: ObjectLocationPrefix,
   indexStore: Store[
     Version[String, Int],
-    HybridIndexedStoreEntry[ObjectLocation, EmptyMetadata]
+    HybridIndexedStoreEntry[ObjectLocation, Metadata]
   ] with Maxima[String, Int],
   dataStore: TypedStore[ObjectLocation, T]
-) extends HybridStoreWithMaxima[String, Int, ObjectLocation, T, EmptyMetadata] {
+) extends HybridStoreWithMaxima[String, Int, ObjectLocation, T, Metadata] {
 
   override val indexedStore = indexStore;
   override val typedStore = dataStore;
