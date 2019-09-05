@@ -34,7 +34,6 @@ import uk.ac.wellcome.storage.typesafe.{DynamoBuilder, S3Builder}
 import uk.ac.wellcome.storage.dynamo.DynamoHashEntry
 import uk.ac.wellcome.storage.streaming.Codec._
 
-
 object Main extends WellcomeTypesafeApp {
 
   type IndexEntry = HybridIndexedStoreEntry[ObjectLocation, MiroMetadata]
