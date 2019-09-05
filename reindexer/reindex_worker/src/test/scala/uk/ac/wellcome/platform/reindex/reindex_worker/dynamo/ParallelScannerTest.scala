@@ -4,7 +4,7 @@ import com.amazonaws.services.dynamodbv2.model.AmazonDynamoDBException
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Assertion, FunSpec, Matchers}
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.platform.reindex.reindex_worker.fixtures.DynamoFixtures
+import uk.ac.wellcome.platform.reindex.reindex_worker.fixtures.ReindexDynamoFixtures
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -13,7 +13,7 @@ class ParallelScannerTest
     extends FunSpec
     with Matchers
     with ScalaFutures
-    with DynamoFixtures {
+    with ReindexDynamoFixtures {
 
   it("reads a table with a single record") {
     withLocalDynamoDbTable { table =>

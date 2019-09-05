@@ -1,17 +1,19 @@
 package uk.ac.wellcome.platform.reindex.reindex_worker.fixtures
 
-import com.gu.scanamo.Scanamo
+import org.scanamo.{Scanamo, Table => ScanamoTable}
+import org.scanamo.auto._
+
 import uk.ac.wellcome.platform.reindex.reindex_worker.dynamo.{
   MaxRecordsScanner,
   ParallelScanner,
   ScanSpecScanner
 }
-import uk.ac.wellcome.storage.fixtures.LocalDynamoDb.Table
+import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Random
 
-trait DynamoFixtures extends ReindexableTable {
+trait ReindexDynamoFixtures extends ReindexableTable {
   case class NamedRecord(
     id: String,
     name: String
@@ -27,13 +29,16 @@ trait DynamoFixtures extends ReindexableTable {
       createRecord()
     }
 
-    records.foreach(record => Scanamo.put(dynamoDbClient)(table.name)(record))
+    records.foreach(record => {
+      val scanamoTable = ScanamoTable[NamedRecord](table.name)
+      Scanamo(dynamoClient).exec(scanamoTable.put(record))
+    })
 
     records
   }
 
   def createScanSpecScanner: ScanSpecScanner =
-    new ScanSpecScanner(dynamoDbClient)
+    new ScanSpecScanner(dynamoClient)
 
   def createParallelScanner: ParallelScanner =
     new ParallelScanner(

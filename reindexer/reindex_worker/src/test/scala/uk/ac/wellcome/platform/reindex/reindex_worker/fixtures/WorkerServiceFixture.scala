@@ -16,7 +16,7 @@ import uk.ac.wellcome.platform.reindex.reindex_worker.services.{
   BulkMessageSender,
   ReindexWorkerService
 }
-import uk.ac.wellcome.storage.fixtures.LocalDynamoDb.Table
+import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Random

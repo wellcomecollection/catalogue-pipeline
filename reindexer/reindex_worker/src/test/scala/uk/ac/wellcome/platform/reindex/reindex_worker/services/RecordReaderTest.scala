@@ -12,7 +12,7 @@ import uk.ac.wellcome.platform.reindex.reindex_worker.models.{
   CompleteReindexParameters,
   PartialReindexParameters
 }
-import uk.ac.wellcome.storage.fixtures.LocalDynamoDb.Table
+import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
 
 class RecordReaderTest
     extends FunSpec

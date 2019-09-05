@@ -3,13 +3,13 @@ package uk.ac.wellcome.platform.reindex.reindex_worker.dynamo
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.platform.reindex.reindex_worker.fixtures.DynamoFixtures
+import uk.ac.wellcome.platform.reindex.reindex_worker.fixtures.ReindexDynamoFixtures
 
 class MaxRecordsScannerTest
     extends FunSpec
     with Matchers
     with ScalaFutures
-    with DynamoFixtures {
+    with ReindexDynamoFixtures {
 
   it("reads a table with a single record") {
     withLocalDynamoDbTable { table =>

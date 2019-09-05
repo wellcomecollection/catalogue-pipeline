@@ -26,10 +26,10 @@ class RecordReader(
           .scan(
             segment = segment,
             totalSegments = totalSegments
-          )(tableName = dynamoConfig.table)
+          )(tableName = dynamoConfig.tableName)
       case PartialReindexParameters(maxRecords) =>
         maxRecordsScanner.scan(maxRecords = maxRecords)(
-          tableName = dynamoConfig.table)
+          tableName = dynamoConfig.tableName)
     }
   }
 }

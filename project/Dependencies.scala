@@ -278,9 +278,7 @@ object CatalogueDependencies {
     ExternalDependencies.mockitoDependencies ++
       WellcomeDependencies.messagingTypesafeLibrary
 
-  val reindexWorkerDependencies: Seq[ModuleID] =
-    WellcomeDependencies.newStorageTypesafeLibrary ++
-    WellcomeDependencies.newMessagingTypesafeLibrary
+  val reindexWorkerDependencies: Seq[ModuleID] = Nil
 
   val sierraTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies ++
