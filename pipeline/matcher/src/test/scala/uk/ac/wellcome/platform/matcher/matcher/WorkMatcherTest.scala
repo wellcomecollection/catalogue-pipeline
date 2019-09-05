@@ -261,7 +261,9 @@ class WorkMatcherTest
     }
   }
 
-  it("throws MatcherException if it fails to unlock") {
+  // The new LockingService never passes on the information that an unlock has
+  // been unsuccessful (whether as an exception or returned from a method).
+  ignore("throws MatcherException if it fails to unlock") {
     withWorkGraphTable { graphTable =>
       withWorkGraphStore(graphTable) { workGraphStore =>
         implicit val lockDao = mock[DynamoLockDao]
