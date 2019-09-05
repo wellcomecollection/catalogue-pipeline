@@ -1,27 +1,35 @@
 package uk.ac.wellcome.platform.transformer.miro
 
+import scala.concurrent.ExecutionContext
+
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
+import org.scanamo.auto._
 import com.typesafe.config.Config
-import scala.concurrent.ExecutionContext
 
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.transformer.miro.services.{
   MiroTransformerWorkerService,
   MiroVHSRecordReceiver
 }
-import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
+import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
+import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.platform.transformer.miro.Implicits._
 
+import uk.ac.wellcome.bigmessaging.typesafe.{BigMessagingBuilder, VHSBuilder}
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.typesafe.{MessagingBuilder, SQSBuilder}
+import uk.ac.wellcome.messaging.typesafe.SQSBuilder
+import uk.ac.wellcome.messaging.sns.SNSConfig
 
+import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.typesafe.S3Builder
+import uk.ac.wellcome.storage.streaming.Codec._
 
 object Main extends WellcomeTypesafeApp {
+
   runWithConfig { config: Config =>
     implicit val actorSystem: ActorSystem =
       AkkaBuilder.buildActorSystem()
@@ -29,11 +37,16 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildExecutionContext()
     implicit val materializer: ActorMaterializer =
       AkkaBuilder.buildActorMaterializer()
+    implicit val s3Client =
+      S3Builder.buildS3Client(config)
+    implicit val msgStore =
+      S3TypedStore[TransformedBaseWork]
 
-    val vhsRecordReceiver = new MiroVHSRecordReceiver(
-      messageWriter =
-        MessagingBuilder.buildMessageWriter[TransformedBaseWork](config),
-      objectStore = S3Builder.buildObjectStore[MiroRecord](config)
+    val vhsRecordReceiver = new MiroVHSRecordReceiver[SNSConfig](
+      msgSender = BigMessagingBuilder
+        .buildBigMessageSender[TransformedBaseWork](config),
+      store = VHSBuilder
+        .buildWithMetadata[MiroRecord, MiroMetadata](config)
     )
 
     new MiroTransformerWorkerService(

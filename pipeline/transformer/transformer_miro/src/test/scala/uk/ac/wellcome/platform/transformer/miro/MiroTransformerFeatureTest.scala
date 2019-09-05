@@ -9,29 +9,22 @@ import uk.ac.wellcome.platform.transformer.miro.fixtures.MiroVHSRecordReceiverFi
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 import uk.ac.wellcome.platform.transformer.miro.transformers.MiroTransformableWrapper
 import uk.ac.wellcome.platform.transformer.miro.services.MiroTransformerWorkerService
+import uk.ac.wellcome.models.work.internal.UnidentifiedWork
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.platform.transformer.miro.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
 
-import uk.ac.wellcome.messaging.sns.NotificationMessage
+import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
+
+import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig}
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
-import uk.ac.wellcome.messaging.fixtures.{Messaging, SNS, SQS}
-import uk.ac.wellcome.models.work.internal.UnidentifiedWork
-
-import uk.ac.wellcome.storage.fixtures.S3
-import uk.ac.wellcome.storage.fixtures.S3.Bucket
-
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 
 class MiroTransformerFeatureTest
     extends FunSpec
     with Matchers
     with Akka
-    with SQS
-    with SNS
-    with S3
-    with Messaging
+    with BigMessagingFixture
     with Eventually
     with IntegrationPatience
     with MiroRecordGenerators
@@ -47,12 +40,8 @@ class MiroTransformerFeatureTest
         withLocalS3Bucket { storageBucket =>
           withLocalS3Bucket { messageBucket =>
             val miroHybridRecordMessage =
-              createMiroVHSRecordNotificationMessageWith(
-                miroRecord = createMiroRecordWith(
-                  title = Some(title),
-                  imageNumber = miroID
-                ),
-                bucket = storageBucket
+              createHybridRecordNotificationWith(
+                createMiroRecordWith(title = Some(title), imageNumber = miroID)
               )
 
             sendSqsMessage(
@@ -84,8 +73,8 @@ class MiroTransformerFeatureTest
       withLocalSqsQueue { queue =>
         withLocalS3Bucket { storageBucket =>
           val miroHybridRecordMessage1 =
-            createMiroVHSRecordNotificationMessageWith(
-              miroRecord = createMiroRecordWith(
+            createHybridRecordNotificationWith(
+              createMiroRecordWith(
                 title = Some("Antonio Dionisi"),
                 description = Some("Antonio Dionisi"),
                 physFormat = Some("Book"),
@@ -94,12 +83,11 @@ class MiroTransformerFeatureTest
                 useRestrictions = Some("CC-BY"),
                 innopacID = Some("12917175"),
                 creditLine = Some("Wellcome Library, London")
-              ),
-              bucket = storageBucket
+              )
             )
           val miroHybridRecordMessage2 =
-            createMiroVHSRecordNotificationMessageWith(
-              miroRecord = createMiroRecordWith(
+            createHybridRecordNotificationWith(
+              createMiroRecordWith(
                 title = Some(
                   "Greenfield Sluder, Tonsillectomy..., use of guillotine"),
                 description = Some("Use of the guillotine"),
@@ -108,8 +96,7 @@ class MiroTransformerFeatureTest
                 useRestrictions = Some("CC-BY"),
                 innopacID = Some("12074536"),
                 creditLine = Some("Wellcome Library, London")
-              ),
-              bucket = storageBucket
+              )
             )
 
           withLocalS3Bucket { messageBucket =>
@@ -129,7 +116,7 @@ class MiroTransformerFeatureTest
   }
 
   def withWorkerService[R](topic: Topic, bucket: Bucket, queue: Queue)(
-    testWith: TestWith[MiroTransformerWorkerService, R]): R =
+    testWith: TestWith[MiroTransformerWorkerService[SNSConfig], R]): R =
     withMiroVHSRecordReceiver(topic, bucket) { recordReceiver =>
       withActorSystem { implicit actorSystem =>
         withSQSStream[NotificationMessage, R](queue) { sqsStream =>
