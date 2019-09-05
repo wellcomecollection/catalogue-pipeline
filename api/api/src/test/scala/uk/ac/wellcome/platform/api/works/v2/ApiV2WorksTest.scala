@@ -409,16 +409,28 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
                               |   "workType": {
                               |     "buckets": [
                               |       {
-                              |         "key": "a",
-                              |         "count": 2
+                              |         "data" : {
+                              |           "id" : "a",
+                              |           "label" : "Books",
+                              |           "ontologyType" : "WorkType"
+                              |         },
+                              |         "count" : 2
                               |       },
                               |       {
-                              |         "key": "k",
-                              |         "count": 2
+                              |         "data" : {
+                              |           "id" : "d",
+                              |           "label" : "Journals",
+                              |           "ontologyType" : "WorkType"
+                              |         },
+                              |         "count" : 1
                               |       },
                               |       {
-                              |         "key": "d",
-                              |         "count": 1
+                              |         "data" : {
+                              |           "id" : "k",
+                              |           "label" : "Pictures",
+                              |           "ontologyType" : "WorkType"
+                              |         },
+                              |         "count" : 2
                               |       }
                               |     ]
                               |   }
