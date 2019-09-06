@@ -4,11 +4,11 @@ import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FunSpec, Matchers}
 import io.circe.parser.parse
 
-import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.recorder.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.models.Implicits._
 
 import uk.ac.wellcome.storage.ObjectLocation
 
@@ -132,7 +132,7 @@ class RecorderWorkerServiceTest
                 |  "type": "RemoteNotification",
                 |  "location": {
                 |    "namespace": "test",
-                |    "key": "${id}/0"
+                |    "path": "${id}/0"
                 |  }
                 |}""".stripMargin
               ).right

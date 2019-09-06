@@ -1,17 +1,22 @@
 package uk.ac.wellcome.platform.recorder
 
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType
+
 import org.scalatest.concurrent.IntegrationPatience
 import org.scalatest.{FunSpec, Matchers}
-import io.circe.parser.parse
-
 import uk.ac.wellcome.models.Implicits._
+import uk.ac.wellcome.json.JsonUtil._
+
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.recorder.fixtures.WorkerServiceFixture
 
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.bigmessaging.typesafe.VHSBuilder
+import uk.ac.wellcome.bigmessaging.message.{
+  MessageNotification,
+  RemoteNotification
+}
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures
 import uk.ac.wellcome.storage.dynamo.DynamoConfig
 import uk.ac.wellcome.storage.ObjectLocationPrefix
@@ -58,18 +63,9 @@ class RecorderIntegrationTest
                   getObjectFromS3[TransformedBaseWork](location.get) shouldBe work
                   val messages = listMessagesReceivedFromSNS(topic)
                     .map(_.message)
-                    .map(parse(_).right)
-                  val expected = parse(
-                    s"""
-                    |{
-                    |  "type": "RemoteNotification",
-                    |  "location": {
-                    |    "namespace": "${location.get.namespace}",
-                    |    "key": "${location.get.path}"
-                    |  }
-                    |}""".stripMargin
-                  ).right
-                  messages.toList shouldBe List(expected)
+                    .map(fromJson[MessageNotification](_).get)
+                  messages.toList shouldBe List(
+                    RemoteNotification(location.get))
                 }
               }
             }
