@@ -18,8 +18,7 @@ import uk.ac.wellcome.storage.streaming.Codec
 import uk.ac.wellcome.bigmessaging.{
   EmptyMetadata,
   VHS,
-  VHSInternalStore,
-  VHSWithMetadata
+  VHSInternalStore
 }
 
 object VHSBuilder {
@@ -46,37 +45,22 @@ object VHSBuilder {
     ]
 
   def build[T](config: Config, namespace: String = "vhs")(
-    implicit codec: Codec[T]): VHS[T] =
-    VHSBuilder.build(
-      buildObjectLocationPrefix(config, namespace = namespace),
-      DynamoBuilder.buildDynamoConfig(config, namespace = namespace),
-      DynamoBuilder.buildDynamoClient(config),
-      S3Builder.buildS3Client(config)
-    )
+    implicit codec: Codec[T]): VHS[T, EmptyMetadata] =
+    VHSBuilder.buildWithMetadata[T, EmptyMetadata](config, namespace)
 
   def build[T](objectLocationPrefix: ObjectLocationPrefix,
                dynamoConfig: DynamoConfig,
                dynamoClient: AmazonDynamoDB,
-               s3Client: AmazonS3)(implicit codec: Codec[T]): VHS[T] = {
-    implicit val s3 = s3Client;
-    implicit val dynamo = dynamoClient;
-    new VHS(
-      new VHSInternalStore(
-        objectLocationPrefix,
-        new DynamoHashStore[
-          String,
-          Int,
-          HybridIndexedStoreEntry[ObjectLocation, EmptyMetadata]
-        ](dynamoConfig),
-        S3TypedStore[T]
-      )
-    )
-  }
+               s3Client: AmazonS3)(implicit codec: Codec[T]): VHS[T, EmptyMetadata] =
+    VHSBuilder.buildWithMetadata[T, EmptyMetadata](objectLocationPrefix,
+                                                   dynamoConfig,
+                                                   dynamoClient,
+                                                   s3Client)
 
   def buildWithMetadata[T, Metadata](config: Config, namespace: String = "vhs")(
     implicit
     codec: Codec[T],
-    format: WithMetaFormat[Metadata]): VHSWithMetadata[T, Metadata] =
+    format: WithMetaFormat[Metadata]): VHS[T, Metadata] =
     VHSBuilder.buildWithMetadata(
       buildObjectLocationPrefix(config, namespace = namespace),
       DynamoBuilder.buildDynamoConfig(config, namespace = namespace),
@@ -90,10 +74,10 @@ object VHSBuilder {
                                      s3Client: AmazonS3)(
     implicit
     codec: Codec[T],
-    format: WithMetaFormat[Metadata]): VHSWithMetadata[T, Metadata] = {
+    format: WithMetaFormat[Metadata]): VHS[T, Metadata] = {
     implicit val s3 = s3Client;
     implicit val dynamo = dynamoClient;
-    new VHSWithMetadata(
+    new VHS(
       new VHSInternalStore(
         objectLocationPrefix,
         new DynamoHashStore[
