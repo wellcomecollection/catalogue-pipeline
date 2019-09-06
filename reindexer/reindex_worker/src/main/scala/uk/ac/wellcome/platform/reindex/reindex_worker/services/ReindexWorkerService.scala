@@ -12,11 +12,11 @@ import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class ReindexWorkerService(
+class ReindexWorkerService[Destination](
   recordReader: RecordReader,
-  bulkSNSSender: BulkSNSSender,
+  bulkMessageSender: BulkMessageSender[Destination],
   sqsStream: SQSStream[NotificationMessage],
-  reindexJobConfigMap: Map[String, ReindexJobConfig]
+  reindexJobConfigMap: Map[String, ReindexJobConfig[Destination]]
 )(implicit ec: ExecutionContext)
     extends Runnable {
 
@@ -29,14 +29,14 @@ class ReindexWorkerService(
         throw new RuntimeException(
           s"No such job config: ${reindexRequest.jobConfigId}")
       )
-      recordsToSend: List[String] <- recordReader
+      recordsToSend <- recordReader
         .findRecordsForReindexing(
           reindexParameters = reindexRequest.parameters,
           dynamoConfig = reindexJobConfig.dynamoConfig
         )
-      _ <- bulkSNSSender.sendToSNS(
-        messages = recordsToSend,
-        snsConfig = reindexJobConfig.snsConfig
+      _ <- bulkMessageSender.send(
+        recordsToSend,
+        destination = reindexJobConfig.destinationConfig
       )
     } yield ()
 
