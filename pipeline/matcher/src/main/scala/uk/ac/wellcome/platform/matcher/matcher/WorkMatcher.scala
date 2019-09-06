@@ -1,6 +1,9 @@
 package uk.ac.wellcome.platform.matcher.matcher
 
+import scala.concurrent.{ExecutionContext, Future}
 import grizzled.slf4j.Logging
+import cats.implicits._
+
 import uk.ac.wellcome.models.matcher.{
   MatchedIdentifiers,
   MatcherResult,
@@ -16,20 +19,21 @@ import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.models._
 import uk.ac.wellcome.platform.matcher.storage.WorkGraphStore
 import uk.ac.wellcome.platform.matcher.workgraph.WorkGraphUpdater
-import uk.ac.wellcome.storage.locking.{
-  DynamoLockingService,
-  FailedLockException,
-  FailedUnlockException
-}
 
-import scala.concurrent.{ExecutionContext, Future}
+import uk.ac.wellcome.storage.locking.dynamo.DynamoLockingService
+import uk.ac.wellcome.storage.locking.{
+  FailedLockingServiceOp,
+  FailedProcess,
+  FailedUnlock
+}
 
 class WorkMatcher(
   workGraphStore: WorkGraphStore,
-  lockingService: DynamoLockingService)(implicit ec: ExecutionContext)
+  lockingService: DynamoLockingService[Set[MatchedIdentifiers], Future])(
+  implicit ec: ExecutionContext)
     extends Logging {
 
-  type FutureMatched = Future[Set[MatchedIdentifiers]]
+  type Out = Set[MatchedIdentifiers]
 
   def matchWork(work: TransformedBaseWork): Future[MatcherResult] = work match {
     case w: UnidentifiedWork =>
@@ -38,21 +42,33 @@ class WorkMatcher(
       Future.successful(singleMatchedIdentifier(w))
   }
 
-  private def doMatch(work: UnidentifiedWork): FutureMatched = {
+  private def doMatch(work: UnidentifiedWork): Future[Out] = {
     val update = WorkUpdate(work)
-
     val updateAffectedIdentifiers = update.referencedWorkIds + update.workId
-    lockingService
-      .withLocks(updateAffectedIdentifiers)(
-        withUpdateLocked(update, updateAffectedIdentifiers)
-      )
-      .recover {
-        case e @ (_: FailedLockException | _: FailedUnlockException) =>
-          debug(
-            s"Locking failed while matching work ${work.sourceIdentifier} ${e.getClass.getSimpleName} ${e.getMessage}")
-          throw MatcherException(e)
-      }
+    withLocks(update, updateAffectedIdentifiers) {
+      withUpdateLocked(update, updateAffectedIdentifiers)
+    }
   }
+
+  private def withLocks(update: WorkUpdate, ids: Set[String])(
+    f: => Future[Out]): Future[Out] =
+    lockingService
+      .withLocks(ids)(f)
+      .map {
+        case Left(failure) => {
+          debug(
+            s"Locking failed while matching work ${update.workId}: ${failure}")
+          throw MatcherException(failureToException(failure))
+        }
+        case Right(out) => out
+      }
+
+  private def failureToException(failure: FailedLockingServiceOp): Throwable =
+    failure match {
+      case FailedUnlock(_, _, e) => e
+      case FailedProcess(_, e)   => e
+      case _                     => new RuntimeException(failure.toString)
+    }
 
   private def singleMatchedIdentifier(work: UnidentifiedInvisibleWork) = {
     MatcherResult(
@@ -62,15 +78,20 @@ class WorkMatcher(
     )
   }
 
-  private def withUpdateLocked(update: WorkUpdate,
-                               updateAffectedIdentifiers: Set[String]) = {
+  private def withUpdateLocked(
+    update: WorkUpdate,
+    updateAffectedIdentifiers: Set[String]): Future[Out] = {
     for {
       graphBeforeUpdate <- workGraphStore.findAffectedWorks(update)
       updatedGraph = WorkGraphUpdater.update(update, graphBeforeUpdate)
-      _ <- lockingService.withLocks(
-        graphBeforeUpdate.nodes.map(_.id) -- updateAffectedIdentifiers)(
-        workGraphStore.put(updatedGraph)
-      )
+      _ <- withLocks(
+        update,
+        graphBeforeUpdate.nodes.map(_.id) -- updateAffectedIdentifiers) {
+        // We are returning empty set here, as LockingService is tied to a
+        // single `Out` type, here set to `Set[MatchedIdentifiers]`.
+        // See issue here: https://github.com/wellcometrust/platform/issues/3873
+        workGraphStore.put(updatedGraph).map(_ => Set.empty)
+      }
     } yield {
       convertToIdentifiersList(updatedGraph)
     }

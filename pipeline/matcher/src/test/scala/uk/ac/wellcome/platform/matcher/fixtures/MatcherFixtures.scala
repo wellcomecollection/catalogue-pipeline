@@ -1,26 +1,50 @@
 package uk.ac.wellcome.platform.matcher.fixtures
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import org.apache.commons.codec.digest.DigestUtils
+
+import org.scanamo.{Scanamo, Table => ScanamoTable}
+import org.scanamo.DynamoFormat
+import org.scanamo.error.DynamoReadError
+import org.scanamo.query.UniqueKey
+import org.scanamo.semiauto._
+import org.scanamo.time.JavaTimeFormats._
+
 import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.messaging.fixtures.SNS.Topic
-import uk.ac.wellcome.messaging.fixtures.{Messaging, SQS}
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher
+import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, WorkNode}
 import uk.ac.wellcome.platform.matcher.services.MatcherWorkerService
 import uk.ac.wellcome.platform.matcher.storage.{WorkGraphStore, WorkNodeDao}
-import uk.ac.wellcome.storage.ObjectStore
-import uk.ac.wellcome.storage.dynamo._
-import uk.ac.wellcome.storage.fixtures.LocalDynamoDb.Table
-import uk.ac.wellcome.storage.fixtures.{LockingFixtures, S3}
-import uk.ac.wellcome.storage.locking.DynamoLockingService
+import uk.ac.wellcome.models.Implicits._
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.ac.wellcome.messaging.sns.SNSConfig
+import uk.ac.wellcome.messaging.fixtures.SNS.Topic
+import uk.ac.wellcome.messaging.fixtures.SQS
+import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
+import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
+
+import uk.ac.wellcome.storage.dynamo._
+import uk.ac.wellcome.storage.ObjectLocation
+import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
+import uk.ac.wellcome.storage.fixtures.S3Fixtures
+import uk.ac.wellcome.storage.locking.dynamo.{
+  DynamoLockDaoFixtures,
+  DynamoLockingService,
+  ExpiringLock
+}
 
 trait MatcherFixtures
-    extends Messaging
-    with LockingFixtures
+    extends BigMessagingFixture
+    with DynamoLockDaoFixtures
     with LocalWorkGraphDynamoDb
-    with S3 {
+    with S3Fixtures {
+
+  implicit val workNodeFormat: DynamoFormat[WorkNode] = deriveDynamoFormat
+  implicit val lockFormat: DynamoFormat[ExpiringLock] = deriveDynamoFormat
 
   def withLockTable[R](testWith: TestWith[Table, R]): R =
     withSpecifiedLocalDynamoDbTable(createLockTable) { table =>
@@ -33,28 +57,19 @@ trait MatcherFixtures
     }
 
   def withWorkerService[R](queue: SQS.Queue, topic: Topic, graphTable: Table)(
-    testWith: TestWith[MatcherWorkerService, R])(
-    implicit objectStore: ObjectStore[TransformedBaseWork]): R =
-    withSNSWriter(topic) { snsWriter =>
+    testWith: TestWith[MatcherWorkerService[SNSConfig], R]): R =
+    withSnsMessageSender(topic) { msgSender =>
       withActorSystem { implicit actorSystem =>
-        withMockMetricsSender { metricsSender =>
-          withLockTable { lockTable =>
-            withWorkGraphStore(graphTable) { workGraphStore =>
-              withWorkMatcher(workGraphStore, lockTable) { workMatcher =>
-                withMessageStream[TransformedBaseWork, R](
-                  queue = queue,
-                  metricsSender = metricsSender
-                ) { messageStream =>
-                  val workerService = new MatcherWorkerService(
-                    messageStream = messageStream,
-                    snsWriter = snsWriter,
-                    workMatcher = workMatcher
-                  )
-
-                  workerService.run()
-
-                  testWith(workerService)
-                }
+        withLockTable { lockTable =>
+          withWorkGraphStore(graphTable) { workGraphStore =>
+            withWorkMatcher(workGraphStore, lockTable) { workMatcher =>
+              implicit val streamStore =
+                MemoryTypedStoreCompanion[ObjectLocation, TransformedBaseWork]()
+              withBigMessageStream[TransformedBaseWork, R](queue) { msgStream =>
+                val workerService =
+                  new MatcherWorkerService(msgStream, msgSender, workMatcher)
+                workerService.run()
+                testWith(workerService)
               }
             }
           }
@@ -63,8 +78,7 @@ trait MatcherFixtures
     }
 
   def withWorkerService[R](queue: SQS.Queue, topic: Topic)(
-    testWith: TestWith[MatcherWorkerService, R])(
-    implicit objectStore: ObjectStore[TransformedBaseWork]): R =
+    testWith: TestWith[MatcherWorkerService[SNSConfig], R]): R =
     withWorkGraphTable { graphTable =>
       withWorkerService(queue, topic, graphTable) { service =>
         testWith(service)
@@ -73,20 +87,17 @@ trait MatcherFixtures
 
   def withWorkMatcher[R](workGraphStore: WorkGraphStore, lockTable: Table)(
     testWith: TestWith[WorkMatcher, R]): R =
-    withMockMetricsSender { metricsSender =>
-      withDynamoRowLockDao(lockTable) { dynamoRowLockDao =>
-        withLockingService(dynamoRowLockDao, metricsSender) { lockingService =>
-          val workMatcher = new WorkMatcher(
-            workGraphStore = workGraphStore,
-            lockingService = lockingService
-          )
-          testWith(workMatcher)
-        }
-      }
+    withLockDao(dynamoClient, lockTable) { implicit lockDao =>
+      val workMatcher = new WorkMatcher(
+        workGraphStore = workGraphStore,
+        lockingService = new DynamoLockingService
+      )
+      testWith(workMatcher)
     }
 
-  def withWorkMatcherAndLockingService[R](workGraphStore: WorkGraphStore,
-                                          lockingService: DynamoLockingService)(
+  def withWorkMatcherAndLockingService[R](
+    workGraphStore: WorkGraphStore,
+    lockingService: DynamoLockingService[Set[MatchedIdentifiers], Future])(
     testWith: TestWith[WorkMatcher, R]): R = {
     val workMatcher = new WorkMatcher(workGraphStore, lockingService)
     testWith(workMatcher)
@@ -103,12 +114,25 @@ trait MatcherFixtures
   def withWorkNodeDao[R](table: Table)(
     testWith: TestWith[WorkNodeDao, R]): R = {
     val workNodeDao = new WorkNodeDao(
-      dynamoDbClient,
-      DynamoConfig(table = table.name, index = table.index)
+      dynamoClient,
+      DynamoConfig(table.name, table.index)
     )
     testWith(workNodeDao)
   }
 
   def ciHash(str: String): String =
     DigestUtils.sha256Hex(str)
+
+  def get[T](dynamoClient: AmazonDynamoDB, tableName: String)(
+    key: UniqueKey[_])(
+    implicit format: DynamoFormat[T]): Option[Either[DynamoReadError, T]] =
+    Scanamo(dynamoClient).exec { ScanamoTable[T](tableName).get(key) }
+
+  def put[T](dynamoClient: AmazonDynamoDB, tableName: String)(obj: T)(
+    implicit format: DynamoFormat[T]) =
+    Scanamo(dynamoClient).exec { ScanamoTable[T](tableName).put(obj) }
+
+  def scan[T](dynamoClient: AmazonDynamoDB, tableName: String)(
+    implicit format: DynamoFormat[T]): List[Either[DynamoReadError, T]] =
+    Scanamo(dynamoClient).exec { ScanamoTable[T](tableName).scan() }
 }

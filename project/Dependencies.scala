@@ -261,8 +261,7 @@ object CatalogueDependencies {
 
   val matcherDependencies: Seq[ModuleID] =
     ExternalDependencies.mockitoDependencies ++
-      ExternalDependencies.scalaGraphDependencies ++
-      WellcomeDependencies.messagingTypesafeLibrary
+      ExternalDependencies.scalaGraphDependencies
 
   val mergerDependencies: Seq[ModuleID] =
     ExternalDependencies.mockitoDependencies

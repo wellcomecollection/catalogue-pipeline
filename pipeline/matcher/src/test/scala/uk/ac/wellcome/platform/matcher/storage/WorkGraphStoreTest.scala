@@ -1,17 +1,17 @@
 package uk.ac.wellcome.platform.matcher.storage
 
-import com.gu.scanamo.Scanamo
-import org.mockito.Matchers.any
-import org.mockito.Mockito.when
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSpec, Matchers}
+import org.mockito.Matchers.any
+import org.mockito.Mockito.when
+
 import uk.ac.wellcome.models.matcher.WorkNode
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
 import uk.ac.wellcome.platform.matcher.models.{WorkGraph, WorkUpdate}
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 class WorkGraphStoreTest
     extends FunSpec
     with Matchers
@@ -38,7 +38,7 @@ class WorkGraphStoreTest
         withWorkGraphStore(graphTable) { workGraphStore =>
           val work =
             WorkNode(id = "A", version = 0, linkedIds = Nil, componentId = "A")
-          Scanamo.put(dynamoDbClient)(graphTable.name)(work)
+          put(dynamoClient, graphTable.name)(work)
 
           whenReady(
             workGraphStore.findAffectedWorks(WorkUpdate("A", 0, Set.empty))) {
@@ -56,8 +56,8 @@ class WorkGraphStoreTest
             WorkNode(id = "A", version = 0, linkedIds = Nil, componentId = "A")
           val workB =
             WorkNode(id = "B", version = 0, linkedIds = Nil, componentId = "B")
-          Scanamo.put(dynamoDbClient)(graphTable.name)(workA)
-          Scanamo.put(dynamoDbClient)(graphTable.name)(workB)
+          put(dynamoClient, graphTable.name)(workA)
+          put(dynamoClient, graphTable.name)(workB)
 
           whenReady(
             workGraphStore.findAffectedWorks(WorkUpdate("A", 0, Set("B")))) {
@@ -80,8 +80,8 @@ class WorkGraphStoreTest
           val workB =
             WorkNode(id = "B", version = 0, linkedIds = Nil, componentId = "AB")
 
-          Scanamo.put(dynamoDbClient)(graphTable.name)(workA)
-          Scanamo.put(dynamoDbClient)(graphTable.name)(workB)
+          put(dynamoClient, graphTable.name)(workA)
+          put(dynamoClient, graphTable.name)(workB)
 
           whenReady(
             workGraphStore.findAffectedWorks(WorkUpdate("A", 0, Set.empty))) {
@@ -114,9 +114,9 @@ class WorkGraphStoreTest
             linkedIds = Nil,
             componentId = "ABC")
 
-          Scanamo.put(dynamoDbClient)(graphTable.name)(workA)
-          Scanamo.put(dynamoDbClient)(graphTable.name)(workB)
-          Scanamo.put(dynamoDbClient)(graphTable.name)(workC)
+          put(dynamoClient, graphTable.name)(workA)
+          put(dynamoClient, graphTable.name)(workB)
+          put(dynamoClient, graphTable.name)(workC)
 
           whenReady(
             workGraphStore.findAffectedWorks(WorkUpdate("A", 0, Set.empty))) {
@@ -142,9 +142,9 @@ class WorkGraphStoreTest
           val workC =
             WorkNode(id = "C", version = 0, linkedIds = Nil, componentId = "C")
 
-          Scanamo.put(dynamoDbClient)(graphTable.name)(workA)
-          Scanamo.put(dynamoDbClient)(graphTable.name)(workB)
-          Scanamo.put(dynamoDbClient)(graphTable.name)(workC)
+          put(dynamoClient, graphTable.name)(workA)
+          put(dynamoClient, graphTable.name)(workB)
+          put(dynamoClient, graphTable.name)(workC)
 
           whenReady(
             workGraphStore.findAffectedWorks(WorkUpdate("B", 0, Set("C")))) {
@@ -165,8 +165,7 @@ class WorkGraphStoreTest
 
           whenReady(workGraphStore.put(WorkGraph(Set(workNodeA, workNodeB)))) {
             _ =>
-              val savedWorks = Scanamo
-                .scan[WorkNode](dynamoDbClient)(graphTable.name)
+              val savedWorks = scan[WorkNode](dynamoClient, graphTable.name)
                 .map(_.right.get)
               savedWorks should contain theSameElementsAs List(
                 workNodeA,
