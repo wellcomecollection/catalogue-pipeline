@@ -11,17 +11,17 @@ import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 import uk.ac.wellcome.storage.store.dynamo.DynamoHashStore
 import uk.ac.wellcome.storage.dynamo.{DynamoConfig, DynamoHashEntry}
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
-import uk.ac.wellcome.storage.store.{Store, HybridIndexedStoreEntry}
+import uk.ac.wellcome.storage.store.{HybridIndexedStoreEntry, Store}
 import uk.ac.wellcome.storage.maxima.Maxima
 import uk.ac.wellcome.storage.{ObjectLocation, ObjectLocationPrefix, Version}
 import uk.ac.wellcome.storage.typesafe.{DynamoBuilder, S3Builder}
 import uk.ac.wellcome.storage.streaming.Codec
 import uk.ac.wellcome.bigmessaging.{
+  BackwardsCompatIndexStore,
+  BackwardsCompatObjectLocation,
   EmptyMetadata,
   VHS,
-  VHSInternalStore,
-  BackwardsCompatObjectLocation,
-  BackwardsCompatIndexStore
+  VHSInternalStore
 }
 
 object VHSBuilder {
@@ -56,14 +56,16 @@ object VHSBuilder {
     implicit codec: Codec[T]): VHS[T, EmptyMetadata] =
     VHSBuilder.buildWithMetadata[T, EmptyMetadata](config, namespace)
 
-  def build[T](objectLocationPrefix: ObjectLocationPrefix,
-               dynamoConfig: DynamoConfig,
-               dynamoClient: AmazonDynamoDB,
-               s3Client: AmazonS3)(implicit codec: Codec[T]): VHS[T, EmptyMetadata] =
-    VHSBuilder.buildWithMetadata[T, EmptyMetadata](objectLocationPrefix,
-                                                   dynamoConfig,
-                                                   dynamoClient,
-                                                   s3Client)
+  def build[T](
+    objectLocationPrefix: ObjectLocationPrefix,
+    dynamoConfig: DynamoConfig,
+    dynamoClient: AmazonDynamoDB,
+    s3Client: AmazonS3)(implicit codec: Codec[T]): VHS[T, EmptyMetadata] =
+    VHSBuilder.buildWithMetadata[T, EmptyMetadata](
+      objectLocationPrefix,
+      dynamoConfig,
+      dynamoClient,
+      s3Client)
 
   def buildWithMetadata[T, Metadata](config: Config, namespace: String = "vhs")(
     implicit
@@ -94,21 +96,26 @@ object VHSBuilder {
 
   def buildBackwardsCompat[T](config: Config, namespace: String = "vhs")(
     implicit codec: Codec[T]): VHS[T, EmptyMetadata] =
-    VHSBuilder.buildBackwardsCompatWithMetadata[T, EmptyMetadata](config, namespace)
+    VHSBuilder
+      .buildBackwardsCompatWithMetadata[T, EmptyMetadata](config, namespace)
 
-  def buildBackwardsCompat[T](objectLocationPrefix: ObjectLocationPrefix,
-               dynamoConfig: DynamoConfig,
-               dynamoClient: AmazonDynamoDB,
-               s3Client: AmazonS3)(implicit codec: Codec[T]): VHS[T, EmptyMetadata] =
-    VHSBuilder.buildBackwardsCompatWithMetadata[T, EmptyMetadata](objectLocationPrefix,
-                                                   dynamoConfig,
-                                                   dynamoClient,
-                                                   s3Client)
+  def buildBackwardsCompat[T](
+    objectLocationPrefix: ObjectLocationPrefix,
+    dynamoConfig: DynamoConfig,
+    dynamoClient: AmazonDynamoDB,
+    s3Client: AmazonS3)(implicit codec: Codec[T]): VHS[T, EmptyMetadata] =
+    VHSBuilder.buildBackwardsCompatWithMetadata[T, EmptyMetadata](
+      objectLocationPrefix,
+      dynamoConfig,
+      dynamoClient,
+      s3Client)
 
-  def buildBackwardsCompatWithMetadata[T, Metadata](config: Config, namespace: String = "vhs")(
+  def buildBackwardsCompatWithMetadata[T, Metadata](config: Config,
+                                                    namespace: String = "vhs")(
     implicit
     codec: Codec[T],
-    format: IndexFormat[Metadata, BackwardsCompatObjectLocation]): VHS[T, Metadata] =
+    format: IndexFormat[Metadata, BackwardsCompatObjectLocation])
+    : VHS[T, Metadata] =
     VHSBuilder.buildBackwardsCompatWithMetadata(
       buildObjectLocationPrefix(config, namespace = namespace),
       DynamoBuilder.buildDynamoConfig(config, namespace = namespace),
@@ -116,13 +123,15 @@ object VHSBuilder {
       S3Builder.buildS3Client(config)
     )
 
-  def buildBackwardsCompatWithMetadata[T, Metadata](objectLocationPrefix: ObjectLocationPrefix,
-                                        dynamoConfig: DynamoConfig,
-                                        dynamoClient: AmazonDynamoDB,
-                                        s3Client: AmazonS3)(
+  def buildBackwardsCompatWithMetadata[T, Metadata](
+    objectLocationPrefix: ObjectLocationPrefix,
+    dynamoConfig: DynamoConfig,
+    dynamoClient: AmazonDynamoDB,
+    s3Client: AmazonS3)(
     implicit
     codec: Codec[T],
-    format: IndexFormat[Metadata, BackwardsCompatObjectLocation]): VHS[T, Metadata] = {
+    format: IndexFormat[Metadata, BackwardsCompatObjectLocation])
+    : VHS[T, Metadata] = {
     implicit val s3 = s3Client;
     new VHS(
       new VHSInternalStore(
@@ -137,23 +146,26 @@ object VHSBuilder {
       namespace = config.required(s"aws.${namespace}.s3.bucketName"),
       path = config.getOrElse(s"aws.${namespace}.s3.globalPrefix")(default = ""))
 
-  private def createIndexStore[Metadata, Location](
-    dynamoClient: AmazonDynamoDB,
-    dynamoConfig: DynamoConfig)(
-    implicit format: IndexFormat[Metadata, Location]): IndexStore[Metadata, Location] = {
+  private def createIndexStore[Metadata, Location](dynamoClient: AmazonDynamoDB,
+                                                   dynamoConfig: DynamoConfig)(
+    implicit format: IndexFormat[Metadata, Location])
+    : IndexStore[Metadata, Location] = {
     implicit val dynamo = dynamoClient;
-      new DynamoHashStore[
-        String,
-        Int,
-        HybridIndexedStoreEntry[Location, Metadata]
-      ](dynamoConfig)
+    new DynamoHashStore[
+      String,
+      Int,
+      HybridIndexedStoreEntry[Location, Metadata]
+    ](dynamoConfig)
   }
 
   private def createBackwardsCompatIndexStore[Metadata](
     dynamoClient: AmazonDynamoDB,
     dynamoConfig: DynamoConfig)(
-    implicit format: IndexFormat[Metadata, BackwardsCompatObjectLocation]): IndexStore[Metadata, ObjectLocation] =
+    implicit format: IndexFormat[Metadata, BackwardsCompatObjectLocation])
+    : IndexStore[Metadata, ObjectLocation] =
     new BackwardsCompatIndexStore(
-      createIndexStore[Metadata, BackwardsCompatObjectLocation](dynamoClient, dynamoConfig)
+      createIndexStore[Metadata, BackwardsCompatObjectLocation](
+        dynamoClient,
+        dynamoConfig)
     )
 }
