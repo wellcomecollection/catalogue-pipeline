@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.transformer.miro.services
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
-
+import io.circe.Json
 import grizzled.slf4j.Logging
 
 import uk.ac.wellcome.json.exceptions.JsonDecodingError
@@ -16,7 +16,7 @@ import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 
 import uk.ac.wellcome.storage.store.{HybridStoreEntry, Store}
-import uk.ac.wellcome.storage.{Identified, ObjectLocation, Version}
+import uk.ac.wellcome.storage.{Identified, Version}
 
 // In future we should just receive the ID and version from the adaptor as the
 // S3 specific `location` field is an implementation detail we should not be
@@ -24,7 +24,7 @@ import uk.ac.wellcome.storage.{Identified, ObjectLocation, Version}
 case class HybridRecord(
   id: String,
   version: Int,
-  location: ObjectLocation
+  location: Json
 )
 
 class MiroVHSRecordReceiver[MsgDestination](

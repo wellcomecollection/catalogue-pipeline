@@ -9,6 +9,7 @@ import org.mockito.Matchers.any
 import com.amazonaws.services.sns.AmazonSNS
 import com.amazonaws.services.sns.model.PublishRequest
 import org.scalatest.{FunSpec, Matchers}
+import io.circe.Json
 
 import uk.ac.wellcome.json.exceptions.JsonDecodingError
 import uk.ac.wellcome.models.transformable.SierraTransformable
@@ -23,8 +24,6 @@ import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
 
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
-
-import uk.ac.wellcome.storage.ObjectLocation
 
 class HybridRecordReceiverTest
     extends FunSpec
@@ -134,8 +133,10 @@ class HybridRecordReceiverTest
             HybridRecord(
               id = "some-nonexistent-id",
               version = 1,
-              location =
-                ObjectLocation(namespace = "some.namespace", path = "some/path")
+              location = Json.obj(
+                ("namespace", Json.fromString("some.namespace")),
+                ("key", Json.fromString("some/path"))
+              )
             )
           )
           withHybridRecordReceiver(vhs, topic, bucket) { recordReceiver =>

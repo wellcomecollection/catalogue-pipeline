@@ -2,6 +2,7 @@ package uk.ac.wellcome.platform.transformer.miro.fixtures
 
 import scala.util.Random
 import scala.concurrent.ExecutionContext.Implicits.global
+import io.circe.Json
 
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
@@ -22,7 +23,7 @@ import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig}
 
-import uk.ac.wellcome.storage.{ObjectLocation, Version}
+import uk.ac.wellcome.storage.Version
 import uk.ac.wellcome.storage.store.{HybridStoreEntry, Store}
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import uk.ac.wellcome.storage.store.memory.MemoryStore
@@ -67,7 +68,10 @@ trait MiroVHSRecordReceiverFixture
     HybridRecord(
       id = id,
       version = version,
-      location = ObjectLocation("namespace", "path")
+      location = Json.obj(
+        ("namespace", Json.fromString("namespace.doesnt.matter")),
+        ("key", Json.fromString("path/is/irrelevant"))
+      )
     )
   }
 }

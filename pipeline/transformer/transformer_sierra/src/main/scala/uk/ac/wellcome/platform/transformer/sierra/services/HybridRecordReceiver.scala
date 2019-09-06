@@ -3,6 +3,7 @@ package uk.ac.wellcome.platform.transformer.sierra.services
 import grizzled.slf4j.Logging
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
+import io.circe.Json
 
 import uk.ac.wellcome.models.transformable.SierraTransformable
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
@@ -13,12 +14,12 @@ import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 
 import uk.ac.wellcome.storage.store.{HybridStoreEntry, VersionedStore}
-import uk.ac.wellcome.storage.{Identified, ObjectLocation, Version}
+import uk.ac.wellcome.storage.{Identified, Version}
 
 case class HybridRecord(
   id: String,
   version: Int,
-  location: ObjectLocation
+  location: Json
 )
 
 class HybridRecordReceiver[MsgDestination](
