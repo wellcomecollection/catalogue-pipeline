@@ -1,6 +1,5 @@
 package uk.ac.wellcome.platform.matcher.matcher
 
-import java.time.Instant
 import java.util.UUID
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -24,12 +23,7 @@ import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
 import uk.ac.wellcome.platform.matcher.models.{WorkGraph, WorkUpdate}
 import uk.ac.wellcome.platform.matcher.storage.WorkGraphStore
-import uk.ac.wellcome.storage.locking.UnlockFailure
-import uk.ac.wellcome.storage.locking.dynamo.{
-  DynamoLockDao,
-  DynamoLockingService,
-  ExpiringLock
-}
+import uk.ac.wellcome.storage.locking.dynamo.DynamoLockingService
 
 class WorkMatcherTest
     extends FunSpec
@@ -255,36 +249,6 @@ class WorkMatcherTest
                 failedMatch shouldBe a[MatcherException]
               }
             }
-          }
-        }
-      }
-    }
-  }
-
-  // The new LockingService never passes on the information that an unlock has
-  // been unsuccessful (whether as an exception or returned from a method).
-  ignore("throws MatcherException if it fails to unlock") {
-    withWorkGraphTable { graphTable =>
-      withWorkGraphStore(graphTable) { workGraphStore =>
-        implicit val lockDao = mock[DynamoLockDao]
-        val error = new RuntimeException("i wont unlock")
-        withWorkMatcherAndLockingService(
-          workGraphStore,
-          new DynamoLockingService) { workMatcher =>
-          when(lockDao.lock(any[String], any[UUID]))
-            .thenReturn(
-              Right(
-                ExpiringLock(
-                  id = "id",
-                  contextId = UUID.randomUUID,
-                  created = Instant.now,
-                  expires = Instant.now.plusSeconds(100))
-              ))
-          when(lockDao.unlock(any[UUID]))
-            .thenReturn(Left(UnlockFailure(UUID.randomUUID, error)))
-          whenReady(workMatcher.matchWork(createUnidentifiedSierraWork).failed) {
-            failedMatch =>
-              failedMatch shouldBe a[MatcherException]
           }
         }
       }
