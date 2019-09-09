@@ -97,15 +97,22 @@ class BackwardsCompatIndexStore[T, Metadata](
   def max(q: String): Either[ReadError, Int] =
     indexStore.max(q)
 
-  private def fromBackwardsCompat(entry: IndexEntry[BackwardsCompatObjectLocation]): IndexEntry[ObjectLocation] =
+  private def fromBackwardsCompat(
+    entry: IndexEntry[BackwardsCompatObjectLocation])
+    : IndexEntry[ObjectLocation] =
     entry match {
-      case HybridIndexedStoreEntry(BackwardsCompatObjectLocation(namespace, path), metadata) =>
+      case HybridIndexedStoreEntry(
+          BackwardsCompatObjectLocation(namespace, path),
+          metadata) =>
         HybridIndexedStoreEntry(ObjectLocation(namespace, path), metadata)
     }
 
-  private def toBackwardsCompat(entry: IndexEntry[ObjectLocation]): IndexEntry[BackwardsCompatObjectLocation] =
+  private def toBackwardsCompat(entry: IndexEntry[ObjectLocation])
+    : IndexEntry[BackwardsCompatObjectLocation] =
     entry match {
       case HybridIndexedStoreEntry(ObjectLocation(namespace, path), metadata) =>
-        HybridIndexedStoreEntry(BackwardsCompatObjectLocation(namespace, path), metadata)
+        HybridIndexedStoreEntry(
+          BackwardsCompatObjectLocation(namespace, path),
+          metadata)
     }
 }
