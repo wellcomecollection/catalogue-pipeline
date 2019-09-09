@@ -18,7 +18,8 @@ class ResultListResponseTest extends FunSpec with Matchers {
     totalPages = 5,
     totalResults = 45,
     // Nothing checks that results is populated correctly!
-    results = List()
+    results = List(),
+    aggregations = None
   )
 
   val multipleResultsRequest = V1MultipleResultsRequest(

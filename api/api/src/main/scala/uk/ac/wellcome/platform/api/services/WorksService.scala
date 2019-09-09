@@ -11,7 +11,7 @@ import com.sksamuel.elastic4s.requests.searches.{SearchHit, SearchResponse}
 import uk.ac.wellcome.display.models.AggregationRequest
 import uk.ac.wellcome.models.work.internal.{IdentifiedBaseWork, IdentifiedWork}
 import uk.ac.wellcome.platform.api.models.{
-  AggregationResults,
+  AggregationSet,
   ResultList,
   WorkFilter,
   WorkQuery
@@ -136,10 +136,8 @@ class WorksService @Inject()(searchService: ElasticsearchService)(
     }.toList
 
   private def searchResponseToAggregationResults(
-    searchResponse: SearchResponse): Option[AggregationResults] = {
-    AggregationResults(
-      searchResponse.aggregationsAsMap,
-      searchResponse.aggregationsAsString)
+    searchResponse: SearchResponse): Option[AggregationSet] = {
+    AggregationSet(searchResponse.aggregationsAsString)
   }
 
   private def jsonTo[T <: IdentifiedBaseWork](document: String)(

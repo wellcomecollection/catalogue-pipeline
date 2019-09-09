@@ -2,10 +2,7 @@ package uk.ac.wellcome.platform.api.responses
 
 import com.fasterxml.jackson.annotation.{JsonProperty, JsonUnwrapped}
 import uk.ac.wellcome.display.models.{DisplayWork, WorksIncludes}
-import uk.ac.wellcome.platform.api.models.{
-  AggregationResults,
-  DisplayResultList
-}
+import uk.ac.wellcome.platform.api.models.{AggregationSet, DisplayResultList}
 import uk.ac.wellcome.platform.api.requests.{ApiRequest, MultipleResultsRequest}
 
 case class ResultResponse(
@@ -22,7 +19,7 @@ case class ResultListResponse(
   results: List[_ <: Any],
   prevPage: Option[String] = None,
   nextPage: Option[String] = None,
-  aggregations: Option[AggregationResults] = None
+  aggregations: Option[AggregationSet] = None
 )
 
 object ResultListResponse {
@@ -56,6 +53,7 @@ object ResultListResponse {
         Some(apiLink(Map("page" -> (currentPage + 1))))
       else None
 
+    // We do this as we want to exclude the `aggregations` key for now, but might add it later.
     ResultListResponse(
       context = contextUri,
       ontologyType = displayResultList.ontologyType,

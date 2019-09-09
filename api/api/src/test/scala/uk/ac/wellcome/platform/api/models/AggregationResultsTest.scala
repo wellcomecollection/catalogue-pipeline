@@ -1,15 +1,12 @@
 package uk.ac.wellcome.platform.api.models
 
 import org.scalatest.{FunSpec, Matchers}
+import uk.ac.wellcome.models.work.internal.WorkType
 
 class AggregationResultsTest extends FunSpec with Matchers {
   it("destructures a single aggregation result") {
     // val searchResponse: com.sksamuel.elastic4s.requests.searches.SearchResponse
-
-    // This mimics the behaviour of searchResponse.aggregationsAsMap
-    val singleAggregationsMap = Map("workType" -> Map.empty)
-
-    //  And this mimics the searchResponse.aggregationsAsString
+    // This mimics the searchResponse.aggregationsAsString
     val responseString =
       """
         |{
@@ -17,20 +14,43 @@ class AggregationResultsTest extends FunSpec with Matchers {
         |    "doc_count_error_upper_bound": 0,
         |    "sum_other_doc_count": 0,
         |    "buckets": [
-        |      {"key": "b", "doc_count": 2},
-        |      {"key": "a", "doc_count": 1},
-        |      {"key": "m","doc_count":1}
+        |      {
+        |          "key" : {
+        |            "id" : "a",
+        |            "label" : "Books",
+        |            "type" : "WorkType"
+        |          },
+        |          "doc_count" : 393145
+        |        },
+        |        {
+        |          "key" : {
+        |            "id" : "b",
+        |            "label" : "Manuscripts, Asian",
+        |            "type" : "WorkType"
+        |          },
+        |          "doc_count" : 5696
+        |        },
+        |        {
+        |          "key" : {
+        |            "id" : "c",
+        |            "label" : "Music",
+        |            "type" : "WorkType"
+        |          },
+        |          "doc_count" : 9
+        |        }
         |    ]
         |  }
         |}
         |""".stripMargin
 
-    val singleAgg = AggregationResults(singleAggregationsMap, responseString)
+    val singleAgg = AggregationSet(responseString)
     singleAgg.get.workType shouldBe Some(
-      AggregationBuckets(
-        List(
-          AggregationBucket("b", 2),
-          AggregationBucket("a", 1),
-          AggregationBucket("m", 1))))
+      Aggregation(List(
+        AggregationBucket(data = WorkType("a", "Books"), count = 393145),
+        AggregationBucket(
+          data = WorkType("b", "Manuscripts, Asian"),
+          count = 5696),
+        AggregationBucket(data = WorkType("c", "Music"), count = 9)
+      )))
   }
 }

@@ -14,7 +14,7 @@ case class DisplayResultList[T <: DisplayWork](
   @ApiModelProperty(value = "Total number of pages in the result list") totalPages: Int,
   @ApiModelProperty(value = "Total number of results in the result list") totalResults: Int,
   @ApiModelProperty(value = "Aggregations included about the results list") aggregations: Option[
-    AggregationResults] = None,
+    AggregationSet],
   @ApiModelProperty(value = "List of things in the current page") results: List[
     T]) {
   @ApiModelProperty(
