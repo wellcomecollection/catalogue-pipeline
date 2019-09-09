@@ -74,25 +74,35 @@ class BackwardsCompatIndexStore[T, Metadata](
       HybridIndexedStoreEntry[ObjectLocation, Metadata]]
     with Maxima[String, Int] {
 
+  type IndexEntry[Location] = HybridIndexedStoreEntry[Location, Metadata]
+
   def get(id: Version[String, Int]): ReadEither =
     indexStore.get(id) match {
       case Left(error) => Left(error)
-      case Right(
-          Identified(
-            id,
-            HybridIndexedStoreEntry(
-              BackwardsCompatObjectLocation(namespace, path),
-              metadata))) =>
-        Right(
-          Identified(
-            id,
-            HybridIndexedStoreEntry(ObjectLocation(namespace, path), metadata)))
+      case Right(Identified(id, entry)) =>
+        Right(Identified(id, fromBackwardsCompat(entry)))
     }
 
   def put(id: Version[String, Int])(
-    item: HybridIndexedStoreEntry[ObjectLocation, Metadata]): WriteEither =
-    throw new Exception("BackwardsCompatIndexStore is read only")
+    entry: HybridIndexedStoreEntry[ObjectLocation, Metadata]): WriteEither =
+    indexStore.put(id)(toBackwardsCompat(entry)) match {
+      case Left(error) => Left(error)
+      case Right(Identified(id, entry)) =>
+        Right(Identified(id, fromBackwardsCompat(entry)))
+    }
 
   def max(q: String): Either[ReadError, Int] =
     indexStore.max(q)
+
+  private def fromBackwardsCompat(entry: IndexEntry[BackwardsCompatObjectLocation]): IndexEntry[ObjectLocation] =
+    entry match {
+      case HybridIndexedStoreEntry(BackwardsCompatObjectLocation(namespace, path), metadata) =>
+        HybridIndexedStoreEntry(ObjectLocation(namespace, path), metadata)
+    }
+
+  private def toBackwardsCompat(entry: IndexEntry[ObjectLocation]): IndexEntry[BackwardsCompatObjectLocation] =
+    entry match {
+      case HybridIndexedStoreEntry(ObjectLocation(namespace, path), metadata) =>
+        HybridIndexedStoreEntry(BackwardsCompatObjectLocation(namespace, path), metadata)
+    }
 }
