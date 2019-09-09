@@ -40,10 +40,11 @@ module "sierra_transformer" {
   logstash_host = "${local.logstash_host}"
 
   env_vars = {
-    sns_arn              = "${module.sierra_transformer_topic.arn}"
-    transformer_queue_id = "${module.sierra_transformer_queue.url}"
-    metrics_namespace    = "sierra_transformer"
-    messages_bucket_name = "${aws_s3_bucket.messages.id}"
+    sns_arn                = "${module.sierra_transformer_topic.arn}"
+    transformer_queue_id   = "${module.sierra_transformer_queue.url}"
+    metrics_namespace      = "sierra_transformer"
+    messages_bucket_name   = "${aws_s3_bucket.messages.id}"
+    vhs_sierra_bucket_name = "${local.vhs_sierra_sourcedata_bucket_name}"
   }
 
   env_vars_length = 4
