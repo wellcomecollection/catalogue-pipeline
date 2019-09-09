@@ -64,6 +64,9 @@ class VHSInternalStore[T, Metadata](
 
 case class BackwardsCompatObjectLocation(namespace: String, key: String)
 
+// The adaptor stores ObjectLocation with an older format to what is used by the
+// recent storage libs: namely the `path` is stored as `key`. This store uses
+// the old format internally whilst exposing the modern API
 class BackwardsCompatIndexStore[T, Metadata](
   indexStore: Store[
     Version[String, Int],
@@ -84,7 +87,7 @@ class BackwardsCompatIndexStore[T, Metadata](
     }
 
   def put(id: Version[String, Int])(
-    entry: HybridIndexedStoreEntry[ObjectLocation, Metadata]): WriteEither =
+    entry: IndexEntry[ObjectLocation]): WriteEither =
     indexStore.put(id)(toBackwardsCompat(entry)) match {
       case Left(error) => Left(error)
       case Right(Identified(id, entry)) =>
