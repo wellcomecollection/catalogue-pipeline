@@ -44,6 +44,7 @@ module "sierra_transformer" {
     transformer_queue_id = "${module.sierra_transformer_queue.url}"
     metrics_namespace    = "sierra_transformer"
     messages_bucket_name = "${aws_s3_bucket.messages.id}"
+    vhs_sierra_sourcedata_bucket_name = "${module.vhs_recorder.bucket_name}"
   }
 
   env_vars_length = 4
