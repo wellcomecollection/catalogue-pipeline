@@ -49,7 +49,7 @@ class SierraTransformerIntegrationTest
         withLocalS3Bucket { storageBucket =>
           withLocalS3Bucket { messagingBucket =>
             withLocalDynamoDbTable { table =>
-              val vhs = VHSBuilder.build[SierraTransformable](
+              val vhs = VHSBuilder.buildBackwardsCompat[SierraTransformable](
                 ObjectLocationPrefix(
                   namespace = storageBucket.name,
                   path = "sierra"),

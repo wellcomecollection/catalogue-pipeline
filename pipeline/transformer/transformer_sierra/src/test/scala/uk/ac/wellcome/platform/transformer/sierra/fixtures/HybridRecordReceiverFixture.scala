@@ -2,6 +2,7 @@ package uk.ac.wellcome.platform.transformer.sierra.fixtures
 
 import scala.util.Random
 import com.amazonaws.services.sns.AmazonSNS
+import io.circe.Json
 
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.transformer.sierra.services.{
@@ -20,7 +21,6 @@ import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig}
 
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
-import uk.ac.wellcome.storage.ObjectLocation
 import uk.ac.wellcome.storage.store.HybridStoreEntry
 import uk.ac.wellcome.storage.Version
 
@@ -63,7 +63,10 @@ trait HybridRecordReceiverFixture extends VHSFixture[SierraTransformable] {
     HybridRecord(
       id = id,
       version = version,
-      location = ObjectLocation("namespace.doesnt.matter", "path/is/irrelevant")
+      location = Json.obj(
+        ("namespace", Json.fromString("namespace.doesnt.matter")),
+        ("key", Json.fromString("path/is/irrelevant"))
+      )
     )
   }
 }

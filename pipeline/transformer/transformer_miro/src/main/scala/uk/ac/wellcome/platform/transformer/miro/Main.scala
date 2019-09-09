@@ -46,7 +46,7 @@ object Main extends WellcomeTypesafeApp {
       msgSender = BigMessagingBuilder
         .buildBigMessageSender[TransformedBaseWork](config),
       store = VHSBuilder
-        .buildWithMetadata[MiroRecord, MiroMetadata](config)
+        .buildBackwardsCompatWithMetadata[MiroRecord, MiroMetadata](config)
     )
 
     new MiroTransformerWorkerService(

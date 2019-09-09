@@ -39,7 +39,7 @@ object Main extends WellcomeTypesafeApp {
       msgSender = BigMessagingBuilder
         .buildBigMessageSender[TransformedBaseWork](config),
       store = VHSBuilder
-        .build[SierraTransformable](config))
+        .buildBackwardsCompat[SierraTransformable](config))
 
     new SierraTransformerWorkerService(
       messageReceiver = messageReceiver,
