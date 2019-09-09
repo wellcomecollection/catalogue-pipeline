@@ -8,11 +8,11 @@ locals {
   sierra_merged_items_topic_name = "${data.terraform_remote_state.sierra_adapter.merged_items_topic_name}"
   sierra_merged_bibs_topic_name  = "${data.terraform_remote_state.sierra_adapter.merged_bibs_topic_name}"
 
-  vhs_sierra_read_policy = "${data.terraform_remote_state.catalogue_pipeline_data.vhs_sierra_read_policy}"
+  vhs_sierra_read_policy = "${data.terraform_remote_state.catalogue_infra_critical.vhs_sierra_read_policy}"
 
   miro_updates_topic_name = "${data.terraform_remote_state.shared_infra.miro_updates_topic_name}"
 
-  vhs_miro_read_policy = "${data.terraform_remote_state.catalogue_pipeline_data.vhs_miro_read_policy}"
+  vhs_miro_read_policy = "${data.terraform_remote_state.catalogue_infra_critical.vhs_miro_read_policy}"
 
   rds_access_security_group_id = "${data.terraform_remote_state.catalogue_infra_critical.rds_access_security_group_id}"
 
