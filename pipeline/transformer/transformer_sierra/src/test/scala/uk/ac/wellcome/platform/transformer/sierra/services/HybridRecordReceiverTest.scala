@@ -135,7 +135,7 @@ class HybridRecordReceiverTest
               version = 1,
               location = Json.obj(
                 ("namespace", Json.fromString("some.namespace")),
-                ("key", Json.fromString("some/path"))
+                ("path", Json.fromString("some/path"))
               )
             )
           )

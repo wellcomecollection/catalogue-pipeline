@@ -2,12 +2,11 @@ package uk.ac.wellcome.platform.transformer.sierra.fixtures
 
 import scala.util.Random
 import com.amazonaws.services.sns.AmazonSNS
-import io.circe.Json
 
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.transformer.sierra.services.{
   HybridRecord,
-  HybridRecordReceiver
+  UpcomingHybridRecordReceiver
 }
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.Implicits._
@@ -22,7 +21,7 @@ import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig}
 
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import uk.ac.wellcome.storage.store.HybridStoreEntry
-import uk.ac.wellcome.storage.Version
+import uk.ac.wellcome.storage.{Version, ObjectLocation}
 
 trait HybridRecordReceiverFixture extends VHSFixture[SierraTransformable] {
 
@@ -30,10 +29,10 @@ trait HybridRecordReceiverFixture extends VHSFixture[SierraTransformable] {
                                   topic: Topic,
                                   bucket: Bucket,
                                   snsClient: AmazonSNS = snsClient)(
-    testWith: TestWith[HybridRecordReceiver[SNSConfig], R]): R =
+    testWith: TestWith[UpcomingHybridRecordReceiver[SNSConfig], R]): R =
     withSqsBigMessageSender[TransformedBaseWork, R](bucket, topic, snsClient) {
       msgSender =>
-        val recorderReciver = new HybridRecordReceiver(msgSender, vhs)
+        val recorderReciver = new UpcomingHybridRecordReceiver(msgSender, vhs)
         testWith(recorderReciver)
     }
 
@@ -56,17 +55,14 @@ trait HybridRecordReceiverFixture extends VHSFixture[SierraTransformable] {
     sierraTransformable: SierraTransformable,
     vhs: VHS,
     version: Int = 1,
-    id: String = Random.alphanumeric take 10 mkString): HybridRecord = {
+    id: String = Random.alphanumeric take 10 mkString): HybridRecord[ObjectLocation] = {
 
     vhs.put(Version(id, version))(
       HybridStoreEntry(sierraTransformable, EmptyMetadata()))
     HybridRecord(
       id = id,
       version = version,
-      location = Json.obj(
-        ("namespace", Json.fromString("namespace.doesnt.matter")),
-        ("key", Json.fromString("path/is/irrelevant"))
-      )
+      location = ObjectLocation("namespace.doesnt.matter", "path/is/irrelevant")
     )
   }
 }

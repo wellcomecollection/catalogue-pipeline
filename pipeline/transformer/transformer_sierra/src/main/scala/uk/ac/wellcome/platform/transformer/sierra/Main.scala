@@ -8,14 +8,14 @@ import scala.concurrent.ExecutionContext
 import uk.ac.wellcome.models.transformable.SierraTransformable
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.transformer.sierra.services.{
-  HybridRecordReceiver,
+  BackwardsCompatHybridRecordReceiver,
   SierraTransformerWorkerService
 }
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.models.Implicits._
 
-import uk.ac.wellcome.bigmessaging.typesafe.{BigMessagingBuilder, VHSBuilder}
+import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
 import uk.ac.wellcome.messaging.typesafe.SQSBuilder
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 
@@ -35,11 +35,11 @@ object Main extends WellcomeTypesafeApp {
     implicit val msgStore =
       S3TypedStore[TransformedBaseWork]
 
-    val messageReceiver = new HybridRecordReceiver(
+    val messageReceiver = new BackwardsCompatHybridRecordReceiver(
       msgSender = BigMessagingBuilder
         .buildBigMessageSender[TransformedBaseWork](config),
-      store = VHSBuilder
-        .buildBackwardsCompat[SierraTransformable](config))
+      store = S3TypedStore[SierraTransformable]
+    )
 
     new SierraTransformerWorkerService(
       messageReceiver = messageReceiver,

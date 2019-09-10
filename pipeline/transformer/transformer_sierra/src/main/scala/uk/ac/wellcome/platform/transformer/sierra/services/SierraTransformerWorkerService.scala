@@ -9,8 +9,8 @@ import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.Future
 
-class SierraTransformerWorkerService[MsgDestination](
-  messageReceiver: HybridRecordReceiver[MsgDestination],
+class SierraTransformerWorkerService[MsgDestination, Location](
+  messageReceiver: HybridRecordReceiver[MsgDestination, Location],
   sierraTransformer: SierraTransformableTransformer,
   sqsStream: SQSStream[NotificationMessage]
 ) extends Runnable {

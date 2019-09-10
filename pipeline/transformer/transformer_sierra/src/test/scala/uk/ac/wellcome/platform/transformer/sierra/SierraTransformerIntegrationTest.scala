@@ -21,7 +21,7 @@ import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig}
 
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures
 import uk.ac.wellcome.storage.dynamo.DynamoConfig
-import uk.ac.wellcome.storage.ObjectLocationPrefix
+import uk.ac.wellcome.storage.{ObjectLocation, ObjectLocationPrefix}
 import uk.ac.wellcome.storage.streaming.Codec._
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 
@@ -49,7 +49,7 @@ class SierraTransformerIntegrationTest
         withLocalS3Bucket { storageBucket =>
           withLocalS3Bucket { messagingBucket =>
             withLocalDynamoDbTable { table =>
-              val vhs = VHSBuilder.buildBackwardsCompat[SierraTransformable](
+              val vhs = VHSBuilder.build[SierraTransformable](
                 ObjectLocationPrefix(
                   namespace = storageBucket.name,
                   path = "sierra"),
@@ -117,7 +117,7 @@ class SierraTransformerIntegrationTest
                            topic: Topic,
                            bucket: Bucket,
                            queue: Queue)(
-    testWith: TestWith[SierraTransformerWorkerService[SNSConfig], R]): R =
+    testWith: TestWith[SierraTransformerWorkerService[SNSConfig, ObjectLocation], R]): R =
     withHybridRecordReceiver(vhs, topic, bucket) { messageReceiver =>
       withActorSystem { implicit actorSystem =>
         withSQSStream[NotificationMessage, R](queue) { sqsStream =>
