@@ -20,6 +20,7 @@ locals {
   sierra_reindexer_topic_name = "${data.terraform_remote_state.shared_infra.catalogue_sierra_reindex_topic_name}"
 
   vhs_sierra_sourcedata_bucket_name = "${data.terraform_remote_state.catalogue_infra_critical.vhs_sierra_bucket_name}"
+  vhs_sierra_sourcedata_table_name  = "${data.terraform_remote_state.catalogue_infra_critical.vhs_sierra_table_name}"
 
   infra_bucket = "${data.terraform_remote_state.shared_infra.infra_bucket}"
 

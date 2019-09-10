@@ -28,6 +28,7 @@ variable "sierra_adapter_topic_names" {
 variable "vhs_miro_read_policy" {}
 variable "vhs_sierra_read_policy" {}
 variable "vhs_sierra_sourcedata_bucket_name" {}
+variable "vhs_sierra_sourcedata_table_name" {}
 
 variable "private_subnets" {
   type = "list"

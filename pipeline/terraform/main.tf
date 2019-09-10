@@ -36,14 +36,15 @@ module "catalogue_pipeline_20190829" {
   vhs_sierra_read_policy            = "${local.vhs_sierra_read_policy}"
   vhs_miro_read_policy              = "${local.vhs_miro_read_policy}"
   vhs_sierra_sourcedata_bucket_name = "${local.vhs_sierra_sourcedata_bucket_name}"
+  vhs_sierra_sourcedata_table_name  = "${local.vhs_sierra_sourcedata_table_name}"
 }
 
-module "catalogue_pipeline_20190910" {
+module "catalogue_pipeline_20190910-02" {
   source = "stack"
 
-  namespace = "catalogue-20190910"
+  namespace = "catalogue-20190910-02"
 
-  release_label = "stage"
+  release_label = "latest"
 
   account_id      = "${data.aws_caller_identity.current.account_id}"
   aws_region      = "${local.aws_region}"
@@ -75,4 +76,5 @@ module "catalogue_pipeline_20190910" {
   vhs_sierra_read_policy            = "${local.vhs_sierra_read_policy}"
   vhs_miro_read_policy              = "${local.vhs_miro_read_policy}"
   vhs_sierra_sourcedata_bucket_name = "${local.vhs_sierra_sourcedata_bucket_name}"
+  vhs_sierra_sourcedata_table_name  = "${local.vhs_sierra_sourcedata_table_name}"
 }

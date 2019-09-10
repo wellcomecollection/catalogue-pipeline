@@ -45,9 +45,10 @@ module "sierra_transformer" {
     metrics_namespace      = "sierra_transformer"
     messages_bucket_name   = "${aws_s3_bucket.messages.id}"
     vhs_sierra_bucket_name = "${var.vhs_sierra_sourcedata_bucket_name}"
+    vhs_sierra_table_name  = "${var.vhs_sierra_sourcedata_table_name}"
   }
 
-  env_vars_length = 4
+  env_vars_length = 6
 
   secret_env_vars        = {}
   secret_env_vars_length = "0"
