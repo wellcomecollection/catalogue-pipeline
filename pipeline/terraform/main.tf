@@ -38,10 +38,10 @@ module "catalogue_pipeline_20190829" {
   vhs_sierra_sourcedata_bucket_name = "${local.vhs_sierra_sourcedata_bucket_name}"
 }
 
-module "catalogue_pipeline_20190909" {
+module "catalogue_pipeline_20190910" {
   source = "stack"
 
-  namespace = "catalogue-20190909"
+  namespace = "catalogue-20190910"
 
   release_label = "stage"
 
@@ -68,7 +68,7 @@ module "catalogue_pipeline_20190909" {
     "${local.miro_updates_topic_name}",
   ]
   # Elasticsearch
-  es_works_index = "v2-20190909-alternative-titles"
+  es_works_index = "v2-20190910-alternative-titles"
   # RDS
   rds_ids_access_security_group_id = "${local.rds_access_security_group_id}"
   # Adapter VHS
