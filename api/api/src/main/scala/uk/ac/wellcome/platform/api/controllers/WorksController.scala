@@ -123,7 +123,7 @@ abstract class WorksController[M <: MultipleResultsRequest[W],
       case None            => defaultIndex
     }
 
-    val aggregations = request._aggregations
+    val aggregations = request.aggregations
 
     val worksSearchOptions = WorksSearchOptions(
       filters = buildFilters(request),

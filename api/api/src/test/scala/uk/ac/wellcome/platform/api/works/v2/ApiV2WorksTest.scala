@@ -399,7 +399,7 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
 
         eventually {
           server.httpGet(
-            path = s"/$apiPrefix/works?_aggregations=workType",
+            path = s"/$apiPrefix/works?aggregations=workType",
             andExpect = Status.Ok,
             withJsonBody = s"""
                               |{
