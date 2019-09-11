@@ -24,8 +24,6 @@ case class HybridRecord(
   location: BackwardsCompatObjectLocation
 )
 
-case class UpcomingMsg(id: String, version: Int)
-
 abstract class HybridRecordReceiver[MsgDestination, MsgIn](
   msgSender: BigMessageSender[MsgDestination, TransformedBaseWork])(
   implicit decoder: Decoder[MsgIn]) extends Logging {
@@ -70,6 +68,11 @@ class BackwardsCompatHybridRecordReceiver[MsgDestination](
     }
 }
 
+case class UpcomingMsg(id: String, version: Int)
+
+// When the adaptor has been updated to use the new storage lib we should use this
+// receiver. The adaptor should be changed to emit just id / version as location is
+// an internal detail that should ideally be abstracted away.
 class UpcomingHybridRecordReceiver[MsgDestination](
   msgSender: BigMessageSender[MsgDestination, TransformedBaseWork],
   store: Store[Version[String, Int], HybridStoreEntry[SierraTransformable, EmptyMetadata]])
