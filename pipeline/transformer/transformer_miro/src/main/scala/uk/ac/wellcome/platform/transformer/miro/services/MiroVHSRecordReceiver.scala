@@ -14,7 +14,7 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 
-import uk.ac.wellcome.storage.store.{TypedStoreEntry, Store}
+import uk.ac.wellcome.storage.store.{Store, TypedStoreEntry}
 import uk.ac.wellcome.storage.{Identified, ObjectLocation}
 
 // In future we should just receive the ID and version from the adaptor as the
@@ -64,8 +64,7 @@ class MiroVHSRecordReceiver[MsgDestination](
       .map(_ => ())
   }
 
-  private def getRecord(
-    record: HybridRecord): Try[MiroRecord] =
+  private def getRecord(record: HybridRecord): Try[MiroRecord] =
     record match {
       case HybridRecord(_, _, BackwardsCompatObjectLocation(namespace, path)) =>
         store.get(ObjectLocation(namespace, path)) match {

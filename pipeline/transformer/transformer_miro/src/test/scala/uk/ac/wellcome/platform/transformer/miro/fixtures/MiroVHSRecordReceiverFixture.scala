@@ -8,9 +8,9 @@ import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
 import uk.ac.wellcome.platform.transformer.miro.services.{
+  BackwardsCompatObjectLocation,
   HybridRecord,
-  MiroVHSRecordReceiver,
-  BackwardsCompatObjectLocation
+  MiroVHSRecordReceiver
 }
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 import uk.ac.wellcome.fixtures.TestWith
@@ -24,7 +24,7 @@ import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig}
 
 import uk.ac.wellcome.storage.ObjectLocation
-import uk.ac.wellcome.storage.store.{TypedStoreEntry, Store}
+import uk.ac.wellcome.storage.store.{Store, TypedStoreEntry}
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import uk.ac.wellcome.storage.store.memory.MemoryStore
 import uk.ac.wellcome.storage.streaming.Codec._
@@ -61,10 +61,11 @@ trait MiroVHSRecordReceiverFixture
          |  "id": "${hybridRecord.id}",
          |  "location": ${toJson(hybridRecord.location).get},
          |  "version": ${hybridRecord.version},
-         |  "isClearedForCatalogueAPI": ${toJson(miroMetadata.isClearedForCatalogueAPI).get}
+         |  "isClearedForCatalogueAPI": ${toJson(
+           miroMetadata.isClearedForCatalogueAPI).get}
          |}
        """.stripMargin
-     )
+    )
   }
 
   def createHybridRecordWith(
@@ -79,7 +80,8 @@ trait MiroVHSRecordReceiverFixture
     HybridRecord(
       id = id,
       version = version,
-      location = BackwardsCompatObjectLocation(location.namespace, location.path)
+      location =
+        BackwardsCompatObjectLocation(location.namespace, location.path)
     )
   }
 }
