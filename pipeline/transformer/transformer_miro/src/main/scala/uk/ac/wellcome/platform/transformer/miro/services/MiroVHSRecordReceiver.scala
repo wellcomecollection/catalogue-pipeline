@@ -2,7 +2,6 @@ package uk.ac.wellcome.platform.transformer.miro.services
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
-import io.circe.Json
 import grizzled.slf4j.Logging
 
 import uk.ac.wellcome.json.exceptions.JsonDecodingError
@@ -15,8 +14,8 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 
-import uk.ac.wellcome.storage.store.{HybridStoreEntry, Store}
-import uk.ac.wellcome.storage.{Identified, Version}
+import uk.ac.wellcome.storage.store.{TypedStoreEntry, Store}
+import uk.ac.wellcome.storage.{Identified, ObjectLocation}
 
 // In future we should just receive the ID and version from the adaptor as the
 // S3 specific `location` field is an implementation detail we should not be
@@ -24,13 +23,14 @@ import uk.ac.wellcome.storage.{Identified, Version}
 case class HybridRecord(
   id: String,
   version: Int,
-  location: Json
+  location: BackwardsCompatObjectLocation
 )
+
+case class BackwardsCompatObjectLocation(namespace: String, key: String)
 
 class MiroVHSRecordReceiver[MsgDestination](
   msgSender: BigMessageSender[MsgDestination, TransformedBaseWork],
-  store: Store[Version[String, Int],
-               HybridStoreEntry[MiroRecord, MiroMetadata]])(
+  store: Store[ObjectLocation, TypedStoreEntry[MiroRecord]])(
   implicit ec: ExecutionContext)
     extends Logging {
 
@@ -43,9 +43,10 @@ class MiroVHSRecordReceiver[MsgDestination](
 
     val msgNotification = Future.fromTry {
       for {
-        record <- fromJson[HybridRecord](message.body)
-        (miroRecord, miroMetadata) <- getRecordAndMetadata(record)
-        work <- transformToWork(miroRecord, miroMetadata, record.version)
+        hybridRecord <- fromJson[HybridRecord](message.body)
+        metadata <- fromJson[MiroMetadata](message.body)
+        record <- getRecord(hybridRecord)
+        work <- transformToWork(record, metadata, hybridRecord.version)
         msgNotification <- msgSender.sendT(work)
         _ = debug(
           s"Published work: ${work.sourceIdentifier} with message $msgNotification")
@@ -63,11 +64,14 @@ class MiroVHSRecordReceiver[MsgDestination](
       .map(_ => ())
   }
 
-  private def getRecordAndMetadata(
-    record: HybridRecord): Try[(MiroRecord, MiroMetadata)] =
-    store.get(Version(record.id, record.version)) match {
-      case Right(Identified(_, HybridStoreEntry(miroRecord, miroMetadata))) =>
-        Success((miroRecord, miroMetadata))
-      case Left(error) => Failure(error.e)
+  private def getRecord(
+    record: HybridRecord): Try[MiroRecord] =
+    record match {
+      case HybridRecord(_, _, BackwardsCompatObjectLocation(namespace, path)) =>
+        store.get(ObjectLocation(namespace, path)) match {
+          case Right(Identified(_, TypedStoreEntry(miroRecord, _))) =>
+            Success(miroRecord)
+          case Left(error) => Failure(error.e)
+        }
     }
 }

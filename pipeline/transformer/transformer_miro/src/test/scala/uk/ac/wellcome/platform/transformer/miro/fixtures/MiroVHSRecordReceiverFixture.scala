@@ -2,7 +2,6 @@ package uk.ac.wellcome.platform.transformer.miro.fixtures
 
 import scala.util.Random
 import scala.concurrent.ExecutionContext.Implicits.global
-import io.circe.Json
 
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
@@ -10,7 +9,8 @@ import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
 import uk.ac.wellcome.platform.transformer.miro.services.{
   HybridRecord,
-  MiroVHSRecordReceiver
+  MiroVHSRecordReceiver,
+  BackwardsCompatObjectLocation
 }
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 import uk.ac.wellcome.fixtures.TestWith
@@ -23,8 +23,8 @@ import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig}
 
-import uk.ac.wellcome.storage.Version
-import uk.ac.wellcome.storage.store.{HybridStoreEntry, Store}
+import uk.ac.wellcome.storage.ObjectLocation
+import uk.ac.wellcome.storage.store.{TypedStoreEntry, Store}
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import uk.ac.wellcome.storage.store.memory.MemoryStore
 import uk.ac.wellcome.storage.streaming.Codec._
@@ -34,8 +34,8 @@ trait MiroVHSRecordReceiverFixture
     with MiroRecordGenerators {
 
   type MiroStore = Store[
-    Version[String, Int],
-    HybridStoreEntry[MiroRecord, MiroMetadata]
+    ObjectLocation,
+    TypedStoreEntry[MiroRecord]
   ]
 
   private val store: MiroStore = new MemoryStore(Map.empty)
@@ -55,23 +55,31 @@ trait MiroVHSRecordReceiverFixture
     version: Int = 1): NotificationMessage = {
 
     val hybridRecord = createHybridRecordWith(miroRecord, miroMetadata, version)
-    createNotificationMessageWith(hybridRecord)
+    createNotificationMessageWith(
+      s"""
+         |{
+         |  "id": "${hybridRecord.id}",
+         |  "location": ${toJson(hybridRecord.location).get},
+         |  "version": ${hybridRecord.version},
+         |  "isClearedForCatalogueAPI": ${toJson(miroMetadata.isClearedForCatalogueAPI).get}
+         |}
+       """.stripMargin
+     )
   }
 
   def createHybridRecordWith(
     miroRecord: MiroRecord = createMiroRecord,
     miroMetadata: MiroMetadata = MiroMetadata(isClearedForCatalogueAPI = true),
     version: Int = 1,
+    namespace: String = "test",
     id: String = Random.alphanumeric take 10 mkString): HybridRecord = {
+    val location = ObjectLocation(namespace, id)
 
-    store.put(Version(id, version))(HybridStoreEntry(miroRecord, miroMetadata))
+    store.put(location)(TypedStoreEntry(miroRecord, Map.empty))
     HybridRecord(
       id = id,
       version = version,
-      location = Json.obj(
-        ("namespace", Json.fromString("namespace.doesnt.matter")),
-        ("key", Json.fromString("path/is/irrelevant"))
-      )
+      location = BackwardsCompatObjectLocation(location.namespace, location.path)
     )
   }
 }
