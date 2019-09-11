@@ -16,11 +16,7 @@ import uk.ac.wellcome.storage.maxima.Maxima
 import uk.ac.wellcome.storage.{ObjectLocation, ObjectLocationPrefix, Version}
 import uk.ac.wellcome.storage.typesafe.{DynamoBuilder, S3Builder}
 import uk.ac.wellcome.storage.streaming.Codec
-import uk.ac.wellcome.bigmessaging.{
-  EmptyMetadata,
-  VHS,
-  VHSInternalStore
-}
+import uk.ac.wellcome.bigmessaging.{EmptyMetadata, VHS, VHSInternalStore}
 
 object VHSBuilder {
 
@@ -99,8 +95,7 @@ object VHSBuilder {
 
   private def createIndexStore[Metadata](dynamoClient: AmazonDynamoDB,
                                          dynamoConfig: DynamoConfig)(
-    implicit format: IndexFormat[Metadata])
-    : IndexStore[Metadata] = {
+    implicit format: IndexFormat[Metadata]): IndexStore[Metadata] = {
     implicit val dynamo = dynamoClient;
     new DynamoHashStore[
       String,

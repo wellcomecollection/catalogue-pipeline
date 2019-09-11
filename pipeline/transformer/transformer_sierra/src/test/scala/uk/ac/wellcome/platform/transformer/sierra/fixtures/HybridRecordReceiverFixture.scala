@@ -5,11 +5,11 @@ import com.amazonaws.services.sns.AmazonSNS
 
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.transformer.sierra.services.{
-  HybridRecord,
-  UpcomingMsg,
-  UpcomingHybridRecordReceiver,
   BackwardsCompatHybridRecordReceiver,
-  BackwardsCompatObjectLocation
+  BackwardsCompatObjectLocation,
+  HybridRecord,
+  UpcomingHybridRecordReceiver,
+  UpcomingMsg
 }
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.Implicits._
@@ -17,7 +17,7 @@ import uk.ac.wellcome.json.JsonUtil._
 
 import uk.ac.wellcome.models.transformable.SierraTransformable
 
-import uk.ac.wellcome.bigmessaging.fixtures.{VHSFixture, BigMessagingFixture}
+import uk.ac.wellcome.bigmessaging.fixtures.{BigMessagingFixture, VHSFixture}
 import uk.ac.wellcome.bigmessaging.EmptyMetadata
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig}
@@ -43,7 +43,8 @@ trait BackwardsCompatHybridRecordReceiverFixture extends BigMessagingFixture {
     testWith: TestWith[BackwardsCompatHybridRecordReceiver[SNSConfig], R]): R =
     withSqsBigMessageSender[TransformedBaseWork, R](bucket, topic, snsClient) {
       msgSender =>
-        val recorderReciver = new BackwardsCompatHybridRecordReceiver(msgSender, store)
+        val recorderReciver =
+          new BackwardsCompatHybridRecordReceiver(msgSender, store)
         testWith(recorderReciver)
     }
 
@@ -75,7 +76,8 @@ trait BackwardsCompatHybridRecordReceiverFixture extends BigMessagingFixture {
     HybridRecord(
       id = id,
       version = version,
-      location = BackwardsCompatObjectLocation(location.namespace, location.path)
+      location =
+        BackwardsCompatObjectLocation(location.namespace, location.path)
     )
   }
 
@@ -86,14 +88,16 @@ trait BackwardsCompatHybridRecordReceiverFixture extends BigMessagingFixture {
     testWith(BrokenSierraStore)
 
   object BrokenSierraStore extends SierraStore {
-    def put(id: ObjectLocation)(entry: TypedStoreEntry[SierraTransformable]): WriteEither =
+    def put(id: ObjectLocation)(
+      entry: TypedStoreEntry[SierraTransformable]): WriteEither =
       Left(StoreWriteError(new Error("BOOM!")))
     def get(id: ObjectLocation): ReadEither =
       Left(StoreReadError(new Error("BOOM!")))
   }
 }
 
-trait UpcomingHybridRecordReceiverFixture extends VHSFixture[SierraTransformable] {
+trait UpcomingHybridRecordReceiverFixture
+    extends VHSFixture[SierraTransformable] {
 
   def withHybridRecordReceiver[R](vhs: VHS,
                                   topic: Topic,

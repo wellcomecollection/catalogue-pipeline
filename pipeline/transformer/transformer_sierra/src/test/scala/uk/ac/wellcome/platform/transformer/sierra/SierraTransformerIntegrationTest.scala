@@ -98,7 +98,8 @@ class SierraTransformerIntegrationTest
                            topic: Topic,
                            bucket: Bucket,
                            queue: Queue)(
-    testWith: TestWith[SierraTransformerWorkerService[SNSConfig, HybridRecord], R]): R =
+    testWith: TestWith[SierraTransformerWorkerService[SNSConfig, HybridRecord],
+                       R]): R =
     withHybridRecordReceiver(store, topic, bucket) { messageReceiver =>
       withActorSystem { implicit actorSystem =>
         withSQSStream[NotificationMessage, R](queue) { sqsStream =>
