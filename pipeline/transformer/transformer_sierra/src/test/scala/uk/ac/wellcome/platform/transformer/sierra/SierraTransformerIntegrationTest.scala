@@ -7,8 +7,8 @@ import uk.ac.wellcome.models.transformable.sierra.test.utils.SierraGenerators
 import uk.ac.wellcome.models.transformable.SierraTransformable
 import uk.ac.wellcome.models.work.internal.UnidentifiedWork
 import uk.ac.wellcome.platform.transformer.sierra.services.{
+  HybridRecord,
   SierraTransformerWorkerService,
-  BackwardsCompatObjectLocation
 }
 import uk.ac.wellcome.platform.transformer.sierra.fixtures.BackwardsCompatHybridRecordReceiverFixture
 import uk.ac.wellcome.fixtures.TestWith
@@ -98,7 +98,7 @@ class SierraTransformerIntegrationTest
                            topic: Topic,
                            bucket: Bucket,
                            queue: Queue)(
-    testWith: TestWith[SierraTransformerWorkerService[SNSConfig, BackwardsCompatObjectLocation], R]): R =
+    testWith: TestWith[SierraTransformerWorkerService[SNSConfig, HybridRecord], R]): R =
     withHybridRecordReceiver(store, topic, bucket) { messageReceiver =>
       withActorSystem { implicit actorSystem =>
         withSQSStream[NotificationMessage, R](queue) { sqsStream =>

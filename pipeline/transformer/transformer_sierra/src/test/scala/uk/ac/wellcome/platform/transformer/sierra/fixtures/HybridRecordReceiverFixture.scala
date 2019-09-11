@@ -6,6 +6,7 @@ import com.amazonaws.services.sns.AmazonSNS
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.transformer.sierra.services.{
   HybridRecord,
+  UpcomingMsg,
   UpcomingHybridRecordReceiver,
   BackwardsCompatHybridRecordReceiver,
   BackwardsCompatObjectLocation
@@ -68,7 +69,7 @@ trait BackwardsCompatHybridRecordReceiverFixture extends BigMessagingFixture {
     store: SierraStore,
     version: Int = 1,
     namespace: String = "test",
-    id: String = Random.alphanumeric take 10 mkString): HybridRecord[BackwardsCompatObjectLocation] = {
+    id: String = Random.alphanumeric take 10 mkString): HybridRecord = {
     val location = ObjectLocation(namespace = namespace, path = id)
     store.put(location)(TypedStoreEntry(sierraTransformable, Map.empty))
     HybridRecord(
@@ -92,7 +93,7 @@ trait BackwardsCompatHybridRecordReceiverFixture extends BigMessagingFixture {
   }
 }
 
-trait HybridRecordReceiverFixture extends VHSFixture[SierraTransformable] {
+trait UpcomingHybridRecordReceiverFixture extends VHSFixture[SierraTransformable] {
 
   def withHybridRecordReceiver[R](vhs: VHS,
                                   topic: Topic,
@@ -124,14 +125,10 @@ trait HybridRecordReceiverFixture extends VHSFixture[SierraTransformable] {
     sierraTransformable: SierraTransformable,
     vhs: VHS,
     version: Int = 1,
-    id: String = Random.alphanumeric take 10 mkString): HybridRecord[ObjectLocation] = {
+    id: String = Random.alphanumeric take 10 mkString): UpcomingMsg = {
 
     vhs.put(Version(id, version))(
       HybridStoreEntry(sierraTransformable, EmptyMetadata()))
-    HybridRecord(
-      id = id,
-      version = version,
-      location = ObjectLocation("namespace.doesnt.matter", "path/is/irrelevant")
-    )
+    UpcomingMsg(id = id, version = version)
   }
 }

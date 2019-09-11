@@ -18,15 +18,17 @@ import uk.ac.wellcome.storage.{Identified, Version, ObjectLocation}
 
 case class BackwardsCompatObjectLocation(namespace: String, key: String)
 
-case class HybridRecord[Location](
+case class HybridRecord(
   id: String,
   version: Int,
-  location: Location
+  location: BackwardsCompatObjectLocation
 )
 
-abstract class HybridRecordReceiver[MsgDestination, Location](
+case class UpcomingMsg(id: String, version: Int)
+
+abstract class HybridRecordReceiver[MsgDestination, MsgIn](
   msgSender: BigMessageSender[MsgDestination, TransformedBaseWork])(
-  implicit decoder: Decoder[HybridRecord[Location]]) extends Logging {
+  implicit decoder: Decoder[MsgIn]) extends Logging {
 
   def receiveMessage(message: NotificationMessage,
                      transformToWork: (
@@ -35,9 +37,9 @@ abstract class HybridRecordReceiver[MsgDestination, Location](
     debug(s"Starting to process message $message")
 
     Future.fromTry { for {
-        record <- fromJson[HybridRecord[Location]](message.body)
-        transformable <- getTransformable(record)
-        work <- transformToWork(transformable, record.version)
+        msg <- fromJson[MsgIn](message.body)
+        transformable <- getTransformable(msg)
+        work <- transformToWork(transformable, getVersion(msg))
         msgNotification <- msgSender.sendT(work)
         _ = debug(
           s"Published work: ${work.sourceIdentifier} with message $msgNotification")
@@ -45,16 +47,19 @@ abstract class HybridRecordReceiver[MsgDestination, Location](
     }
   }
 
-  protected def getTransformable(record: HybridRecord[Location]): Try[SierraTransformable]
+  protected def getVersion(msg: MsgIn): Int
+
+  protected def getTransformable(msg: MsgIn): Try[SierraTransformable]
 }
 
 class BackwardsCompatHybridRecordReceiver[MsgDestination](
   msgSender: BigMessageSender[MsgDestination, TransformedBaseWork],
   store: Store[ObjectLocation, TypedStoreEntry[SierraTransformable]])
-    extends HybridRecordReceiver[MsgDestination, BackwardsCompatObjectLocation](msgSender) with Logging {
+    extends HybridRecordReceiver[MsgDestination, HybridRecord](msgSender) with Logging {
 
-  protected def getTransformable(
-    record: HybridRecord[BackwardsCompatObjectLocation]): Try[SierraTransformable] =
+  protected def getVersion(record: HybridRecord): Int = record.version
+
+  protected def getTransformable(record: HybridRecord): Try[SierraTransformable] =
     record match {
       case HybridRecord(_, _, BackwardsCompatObjectLocation(namespace, path)) =>
         store.get(ObjectLocation(namespace, path)) match {
@@ -68,15 +73,14 @@ class BackwardsCompatHybridRecordReceiver[MsgDestination](
 class UpcomingHybridRecordReceiver[MsgDestination](
   msgSender: BigMessageSender[MsgDestination, TransformedBaseWork],
   store: Store[Version[String, Int], HybridStoreEntry[SierraTransformable, EmptyMetadata]])
-    extends HybridRecordReceiver[MsgDestination, ObjectLocation](msgSender) with Logging {
+    extends HybridRecordReceiver[MsgDestination, UpcomingMsg](msgSender) with Logging {
 
-  protected def getTransformable(record: HybridRecord[ObjectLocation]): Try[SierraTransformable] =
-    record match {
-      case HybridRecord(id, version, _) =>
-        store.get(Version(id, version)) match {
-          case Right(Identified(_, HybridStoreEntry(transformable, _))) =>
-            Success(transformable)
-          case Left(error) => Failure(error.e)
-        }
+  protected def getVersion(msg: UpcomingMsg): Int = msg.version
+
+  protected def getTransformable(msg: UpcomingMsg): Try[SierraTransformable] =
+    store.get(Version(msg.id, msg.version)) match {
+      case Right(Identified(_, HybridStoreEntry(transformable, _))) =>
+        Success(transformable)
+      case Left(error) => Failure(error.e)
     }
 }
