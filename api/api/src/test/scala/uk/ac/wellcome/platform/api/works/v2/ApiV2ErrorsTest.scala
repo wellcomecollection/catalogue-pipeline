@@ -45,22 +45,22 @@ class ApiV2ErrorsTest extends ApiV2WorksTestBase with ApiErrorsTestBase {
     "returns a 400 Bad Request for errors in the ?aggregations parameter") {
     it("a single invalid aggregation") {
       assertIsBadRequest(
-        "/works?_aggregations=foo",
-        description = "_aggregations: 'foo' is not a valid aggregation"
+        "/works?aggregations=foo",
+        description = "aggregations: 'foo' is not a valid aggregation"
       )
     }
 
     it("multiple invalid aggregations") {
       assertIsBadRequest(
-        "/works?_aggregations=foo,bar",
-        description = "_aggregations: 'foo', 'bar' are not valid aggregations"
+        "/works?aggregations=foo,bar",
+        description = "aggregations: 'foo', 'bar' are not valid aggregations"
       )
     }
 
     it("a mixture of valid and invalid aggregations") {
       assertIsBadRequest(
-        "/works?_aggregations=foo,workType,bar",
-        description = "_aggregations: 'foo', 'bar' are not valid aggregations"
+        "/works?aggregations=foo,workType,bar",
+        description = "aggregations: 'foo', 'bar' are not valid aggregations"
       )
     }
   }

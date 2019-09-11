@@ -21,20 +21,20 @@ trait MultipleResultsRequest[W <: WorksIncludes] extends ApiRequest {
   val pageSize: Option[Int]
   val include: Option[W]
   val query: Option[String]
+  val aggregations: List[AggregationRequest]
   val _index: Option[String]
   val _queryType: Option[String]
-  val _aggregations: List[AggregationRequest]
   val request: Request
 }
 
 case class V1MultipleResultsRequest(
   @Min(1) @QueryParam page: Int = 1,
   @Min(1) @Max(100) @QueryParam pageSize: Option[Int],
+  @QueryParam() aggregations: List[AggregationRequest] = Nil,
   @QueryParam includes: Option[V1WorksIncludes],
   @QueryParam query: Option[String],
   @QueryParam _index: Option[String],
   @QueryParam _queryType: Option[String] = None,
-  @QueryParam() _aggregations: List[AggregationRequest] = Nil,
   request: Request
 ) extends MultipleResultsRequest[V1WorksIncludes] {
   val include: Option[V1WorksIncludes] = includes
@@ -47,11 +47,11 @@ case class V2MultipleResultsRequest(
   @QueryParam query: Option[String],
   @QueryParam workType: Option[String],
   @QueryParam("items.locations.locationType") itemLocationType: Option[String],
+  @QueryParam() aggregations: List[AggregationRequest] = Nil,
   @QueryParam _index: Option[String],
   @QueryParam _queryType: Option[String],
   @QueryParam _dateFrom: Option[LocalDate],
   @QueryParam _dateTo: Option[LocalDate],
-  @QueryParam() _aggregations: List[AggregationRequest] = Nil,
   request: Request
 ) extends MultipleResultsRequest[V2WorksIncludes]
 

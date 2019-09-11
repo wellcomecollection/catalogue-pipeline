@@ -2,7 +2,10 @@ package uk.ac.wellcome.platform.api.responses
 
 import com.fasterxml.jackson.annotation.{JsonProperty, JsonUnwrapped}
 import uk.ac.wellcome.display.models.{DisplayWork, WorksIncludes}
-import uk.ac.wellcome.platform.api.models.{AggregationSet, DisplayResultList}
+import uk.ac.wellcome.platform.api.models.{
+  DisplayAggregations,
+  DisplayResultList
+}
 import uk.ac.wellcome.platform.api.requests.{ApiRequest, MultipleResultsRequest}
 
 case class ResultResponse(
@@ -19,7 +22,7 @@ case class ResultListResponse(
   results: List[_ <: Any],
   prevPage: Option[String] = None,
   nextPage: Option[String] = None,
-  aggregations: Option[AggregationSet] = None
+  aggregations: Option[DisplayAggregations] = None
 )
 
 object ResultListResponse {
