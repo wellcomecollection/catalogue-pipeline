@@ -13,7 +13,7 @@ import uk.ac.wellcome.bigmessaging.EmptyMetadata
 import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 
-import uk.ac.wellcome.storage.store.{HybridStoreEntry, VersionedStore, TypedStore, TypedStoreEntry}
+import uk.ac.wellcome.storage.store.{Store, HybridStoreEntry, TypedStoreEntry}
 import uk.ac.wellcome.storage.{Identified, Version, ObjectLocation}
 
 case class BackwardsCompatObjectLocation(namespace: String, key: String)
@@ -50,10 +50,11 @@ abstract class HybridRecordReceiver[MsgDestination, Location](
 
 class BackwardsCompatHybridRecordReceiver[MsgDestination](
   msgSender: BigMessageSender[MsgDestination, TransformedBaseWork],
-  store: TypedStore[ObjectLocation, SierraTransformable])
+  store: Store[ObjectLocation, TypedStoreEntry[SierraTransformable]])
     extends HybridRecordReceiver[MsgDestination, BackwardsCompatObjectLocation](msgSender) with Logging {
 
-  protected def getTransformable(record: HybridRecord[BackwardsCompatObjectLocation]): Try[SierraTransformable] =
+  protected def getTransformable(
+    record: HybridRecord[BackwardsCompatObjectLocation]): Try[SierraTransformable] =
     record match {
       case HybridRecord(_, _, BackwardsCompatObjectLocation(namespace, path)) =>
         store.get(ObjectLocation(namespace, path)) match {
@@ -66,9 +67,7 @@ class BackwardsCompatHybridRecordReceiver[MsgDestination](
 
 class UpcomingHybridRecordReceiver[MsgDestination](
   msgSender: BigMessageSender[MsgDestination, TransformedBaseWork],
-  store: VersionedStore[String,
-                        Int,
-                        HybridStoreEntry[SierraTransformable, EmptyMetadata]])
+  store: Store[Version[String, Int], HybridStoreEntry[SierraTransformable, EmptyMetadata]])
     extends HybridRecordReceiver[MsgDestination, ObjectLocation](msgSender) with Logging {
 
   protected def getTransformable(record: HybridRecord[ObjectLocation]): Try[SierraTransformable] =

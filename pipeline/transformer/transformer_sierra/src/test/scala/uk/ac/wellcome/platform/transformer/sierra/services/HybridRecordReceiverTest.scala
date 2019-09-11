@@ -9,7 +9,6 @@ import org.mockito.Matchers.any
 import com.amazonaws.services.sns.AmazonSNS
 import com.amazonaws.services.sns.model.PublishRequest
 import org.scalatest.{FunSpec, Matchers}
-import io.circe.Json
 
 import uk.ac.wellcome.json.exceptions.JsonDecodingError
 import uk.ac.wellcome.models.transformable.SierraTransformable
@@ -19,7 +18,7 @@ import uk.ac.wellcome.models.work.internal.{
   TransformedBaseWork,
   UnidentifiedWork
 }
-import uk.ac.wellcome.platform.transformer.sierra.fixtures.HybridRecordReceiverFixture
+import uk.ac.wellcome.platform.transformer.sierra.fixtures.BackwardsCompatHybridRecordReceiverFixture
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
 
@@ -30,7 +29,7 @@ class HybridRecordReceiverTest
     with Matchers
     with BigMessagingFixture
     with Eventually
-    with HybridRecordReceiverFixture
+    with BackwardsCompatHybridRecordReceiverFixture
     with IntegrationPatience
     with MockitoSugar
     with ScalaFutures
@@ -47,13 +46,13 @@ class HybridRecordReceiverTest
   it("receives a message and sends it to SNS client") {
     withLocalSnsTopic { topic =>
       withLocalS3Bucket { bucket =>
-        withVHS { vhs =>
+        withSierraStore { store =>
           val sqsMessage = createHybridRecordNotificationWith(
             createSierraTransformable,
-            vhs
+            store
           )
 
-          withHybridRecordReceiver(vhs, topic, bucket) { recordReceiver =>
+          withHybridRecordReceiver(store, topic, bucket) { recordReceiver =>
             val future =
               recordReceiver.receiveMessage(sqsMessage, transformToWork)
 
@@ -76,14 +75,14 @@ class HybridRecordReceiverTest
 
     withLocalSnsTopic { topic =>
       withLocalS3Bucket { bucket =>
-        withVHS { vhs =>
+        withSierraStore { store =>
           val notification = createHybridRecordNotificationWith(
             createSierraTransformable,
-            vhs,
+            store,
             version = version
           )
 
-          withHybridRecordReceiver(vhs, topic, bucket) { recordReceiver =>
+          withHybridRecordReceiver(store, topic, bucket) { recordReceiver =>
             val future =
               recordReceiver.receiveMessage(notification, transformToWork)
 
@@ -103,16 +102,22 @@ class HybridRecordReceiverTest
     }
   }
 
-  it("fails if VHS errors when retrieving the record") {
+  it("fails if store errors when retrieving the record") {
     withLocalSnsTopic { topic =>
       withLocalS3Bucket { bucket =>
-        withBrokenVHS { vhs =>
-          val sqsMessage = createHybridRecordNotificationWith(
-            createSierraTransformable,
-            vhs
+        withBrokenSierraStore { store =>
+          val sqsMessage = createNotificationMessageWith(
+            HybridRecord(
+              id = "some-id",
+              version = 1,
+              location = BackwardsCompatObjectLocation(
+                "some.namespace",
+                "some/path"
+              )
+            )
           )
 
-          withHybridRecordReceiver(vhs, topic, bucket) { recordReceiver =>
+          withHybridRecordReceiver(store, topic, bucket) { recordReceiver =>
             val future =
               recordReceiver.receiveMessage(sqsMessage, transformToWork)
 
@@ -125,21 +130,21 @@ class HybridRecordReceiverTest
     }
   }
 
-  it("fails if the record does not exist in VHS") {
+  it("fails if the record does not exist in store") {
     withLocalSnsTopic { topic =>
       withLocalS3Bucket { bucket =>
-        withVHS { vhs =>
+        withSierraStore { store =>
           val sqsMessage = createNotificationMessageWith(
             HybridRecord(
               id = "some-nonexistent-id",
               version = 1,
-              location = Json.obj(
-                ("namespace", Json.fromString("some.namespace")),
-                ("path", Json.fromString("some/path"))
+              location = BackwardsCompatObjectLocation(
+                "some.namespace",
+                "some/path"
               )
             )
           )
-          withHybridRecordReceiver(vhs, topic, bucket) { recordReceiver =>
+          withHybridRecordReceiver(store, topic, bucket) { recordReceiver =>
             val future =
               recordReceiver.receiveMessage(sqsMessage, transformToWork)
             whenReady(future.failed) {
@@ -154,12 +159,12 @@ class HybridRecordReceiverTest
   it("fails if it can't parse a HybridRecord from SNS") {
     withLocalSnsTopic { topic =>
       withLocalS3Bucket { bucket =>
-        withVHS { vhs =>
+        withSierraStore { store =>
           val invalidSqsMessage = createNotificationMessageWith(
             message = Random.alphanumeric take 50 mkString
           )
 
-          withHybridRecordReceiver(vhs, topic, bucket) { recordReceiver =>
+          withHybridRecordReceiver(store, topic, bucket) { recordReceiver =>
             val future =
               recordReceiver.receiveMessage(invalidSqsMessage, transformToWork)
 
@@ -175,13 +180,13 @@ class HybridRecordReceiverTest
   it("fails if it's unable to perform a transformation") {
     withLocalSnsTopic { topic =>
       withLocalS3Bucket { bucket =>
-        withVHS { vhs =>
+        withSierraStore { store =>
           val failingSqsMessage = createHybridRecordNotificationWith(
             createSierraTransformable,
-            vhs
+            store
           )
 
-          withHybridRecordReceiver(vhs, topic, bucket) { recordReceiver =>
+          withHybridRecordReceiver(store, topic, bucket) { recordReceiver =>
             val future =
               recordReceiver.receiveMessage(
                 failingSqsMessage,
@@ -199,14 +204,14 @@ class HybridRecordReceiverTest
   it("fails if it's unable to publish the work") {
     withLocalSnsTopic { topic =>
       withLocalS3Bucket { bucket =>
-        withVHS { vhs =>
+        withSierraStore { store =>
           val message = createHybridRecordNotificationWith(
             createSierraTransformable,
-            vhs
+            store
           )
 
           withHybridRecordReceiver(
-            vhs,
+            store,
             topic,
             bucket,
             mockSnsClientFailPublishMessage) { recordReceiver =>
