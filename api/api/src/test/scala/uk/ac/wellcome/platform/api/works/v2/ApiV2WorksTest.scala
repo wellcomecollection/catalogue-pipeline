@@ -406,31 +406,36 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
                               |  ${resultList(apiPrefix, totalResults = 5)},
                               |  "results": [],
                               |  "aggregations": {
+                              |  "type" : "Aggregations",
                               |   "workType": {
+                              |     "type" : "Aggregation",
                               |     "buckets": [
                               |       {
                               |         "data" : {
                               |           "id" : "a",
                               |           "label" : "Books",
-                              |           "ontologyType" : "WorkType"
+                              |           "type" : "WorkType"
                               |         },
-                              |         "count" : 2
+                              |         "count" : 2,
+                              |         "type" : "AggregationBucket"
                               |       },
                               |       {
                               |         "data" : {
                               |           "id" : "d",
                               |           "label" : "Journals",
-                              |           "ontologyType" : "WorkType"
+                              |           "type" : "WorkType"
                               |         },
-                              |         "count" : 1
+                              |         "count" : 1,
+                              |         "type" : "AggregationBucket"
                               |       },
                               |       {
                               |         "data" : {
                               |           "id" : "k",
                               |           "label" : "Pictures",
-                              |           "ontologyType" : "WorkType"
+                              |           "type" : "WorkType"
                               |         },
-                              |         "count" : 2
+                              |         "count" : 2,
+                              |         "type" : "AggregationBucket"
                               |       }
                               |     ]
                               |   }

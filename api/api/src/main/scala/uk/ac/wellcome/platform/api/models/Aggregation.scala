@@ -6,14 +6,19 @@ import uk.ac.wellcome.json.JsonUtil._
 
 import scala.util.{Failure, Success}
 
+trait OntologyType {
+  val ontologyType: String
+}
+object OntologyType {}
+
 // TODO: Return a `ParseError`s where applicable
 case class Genre(label: String)
-case class AggregationSet(workType: Option[Aggregation[WorkType]],
-                          genre: Option[Aggregation[Genre]])
-object AggregationSet {
+case class Aggregations(workType: Option[Aggregation[WorkType]],
+                        genre: Option[Aggregation[Genre]])
+object Aggregations {
   val validAggregationRequests = List("workType", "genre")
 
-  def isEmpty(a: AggregationSet): Boolean =
+  def isEmpty(a: Aggregations): Boolean =
     a.workType.isEmpty && a.genre.isEmpty
 
   def getFromJson[AggregationDataType](json: Json)(
@@ -31,7 +36,7 @@ object AggregationSet {
     })
   }
 
-  def apply(jsonString: String): Option[AggregationSet] = {
+  def apply(jsonString: String): Option[Aggregations] = {
     val json = fromJson[Map[String, Json]](jsonString)
 
     json match {
@@ -47,7 +52,7 @@ object AggregationSet {
             val genre =
               jsonMap.get("genre").flatMap(json => getFromJson[Genre](json))
 
-            Some(AggregationSet(workType = workType, genre = genre))
+            Some(Aggregations(workType = workType, genre = genre))
         }
     }
   }

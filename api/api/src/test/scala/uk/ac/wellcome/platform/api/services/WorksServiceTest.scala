@@ -14,7 +14,7 @@ import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
 import uk.ac.wellcome.platform.api.models.{
   Aggregation,
   AggregationBucket,
-  AggregationSet,
+  Aggregations,
   DateRangeFilter,
   ResultList,
   WorkTypeFilter
@@ -422,7 +422,7 @@ class WorksServiceTest
             createWorksSearchOptionsWith(
               aggregations = List(WorkTypeAggregationRequest()))
 
-          val expectedAggregations = AggregationSet(
+          val expectedAggregations = Aggregations(
             Some(
               Aggregation(List(
                 AggregationBucket(data = WorkType("a", "Archives"), count = 1),
@@ -450,7 +450,7 @@ class WorksServiceTest
     allWorks: Seq[IdentifiedBaseWork],
     expectedWorks: Seq[IdentifiedBaseWork],
     expectedTotalResults: Int,
-    expectedAggregations: Option[AggregationSet] = None,
+    expectedAggregations: Option[Aggregations] = None,
     worksSearchOptions: WorksSearchOptions = createWorksSearchOptions
   ): Assertion =
     assertResultIsCorrect(
@@ -466,7 +466,7 @@ class WorksServiceTest
     allWorks: Seq[IdentifiedBaseWork],
     expectedWorks: Seq[IdentifiedBaseWork],
     expectedTotalResults: Int,
-    expectedAggregations: Option[AggregationSet] = None,
+    expectedAggregations: Option[Aggregations] = None,
     worksSearchOptions: WorksSearchOptions = createWorksSearchOptions
   ): Assertion =
     assertResultIsCorrect(
@@ -486,7 +486,7 @@ class WorksServiceTest
     allWorks: Seq[IdentifiedBaseWork],
     expectedWorks: Seq[IdentifiedBaseWork],
     expectedTotalResults: Int,
-    expectedAggregations: Option[AggregationSet],
+    expectedAggregations: Option[Aggregations],
     worksSearchOptions: WorksSearchOptions
   ): Assertion =
     withLocalWorksIndex { index =>
