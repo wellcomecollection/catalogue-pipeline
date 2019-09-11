@@ -4,7 +4,6 @@ import scala.concurrent.ExecutionContext
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import org.scanamo.auto._
 import com.typesafe.config.Config
 
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
@@ -15,11 +14,10 @@ import uk.ac.wellcome.platform.transformer.miro.services.{
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
-import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.platform.transformer.miro.Implicits._
 
-import uk.ac.wellcome.bigmessaging.typesafe.{BigMessagingBuilder, VHSBuilder}
+import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.SQSBuilder
 import uk.ac.wellcome.messaging.sns.SNSConfig
@@ -45,8 +43,7 @@ object Main extends WellcomeTypesafeApp {
     val vhsRecordReceiver = new MiroVHSRecordReceiver[SNSConfig](
       msgSender = BigMessagingBuilder
         .buildBigMessageSender[TransformedBaseWork](config),
-      store = VHSBuilder
-        .buildBackwardsCompatWithMetadata[MiroRecord, MiroMetadata](config)
+      store = S3TypedStore[MiroRecord]
     )
 
     new MiroTransformerWorkerService(

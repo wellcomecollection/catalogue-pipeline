@@ -1,111 +1,92 @@
 package uk.ac.wellcome.platform.transformer.sierra
 
-import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType
 import org.scalatest.concurrent.IntegrationPatience
 import org.scalatest.{FunSpec, Matchers}
 
 import uk.ac.wellcome.models.transformable.sierra.test.utils.SierraGenerators
 import uk.ac.wellcome.models.transformable.SierraTransformable
 import uk.ac.wellcome.models.work.internal.UnidentifiedWork
-import uk.ac.wellcome.platform.transformer.sierra.services.SierraTransformerWorkerService
-import uk.ac.wellcome.platform.transformer.sierra.fixtures.HybridRecordReceiverFixture
+import uk.ac.wellcome.platform.transformer.sierra.services.{
+  HybridRecord,
+  SierraTransformerWorkerService,
+}
+import uk.ac.wellcome.platform.transformer.sierra.fixtures.BackwardsCompatHybridRecordReceiverFixture
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
 
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
-import uk.ac.wellcome.bigmessaging.typesafe.VHSBuilder
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig}
 
-import uk.ac.wellcome.storage.fixtures.DynamoFixtures
-import uk.ac.wellcome.storage.dynamo.DynamoConfig
-import uk.ac.wellcome.storage.ObjectLocationPrefix
 import uk.ac.wellcome.storage.streaming.Codec._
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
+import uk.ac.wellcome.storage.store.s3.S3TypedStore
 
 class SierraTransformerIntegrationTest
     extends FunSpec
     with Matchers
     with IntegrationPatience
-    with DynamoFixtures
     with BigMessagingFixture
-    with HybridRecordReceiverFixture
+    with BackwardsCompatHybridRecordReceiverFixture
     with SierraGenerators {
-
-  override def createTable(
-    table: DynamoFixtures.Table): DynamoFixtures.Table = {
-    createTableWithHashKey(
-      table,
-      keyName = "id",
-      keyType = ScalarAttributeType.S
-    )
-  }
 
   it("transforms sierra records and publishes the result to the given topic") {
     withLocalSnsTopic { topic =>
       withLocalSqsQueue { queue =>
         withLocalS3Bucket { storageBucket =>
           withLocalS3Bucket { messagingBucket =>
-            withLocalDynamoDbTable { table =>
-              val vhs = VHSBuilder.buildBackwardsCompat[SierraTransformable](
-                ObjectLocationPrefix(
-                  namespace = storageBucket.name,
-                  path = "sierra"),
-                DynamoConfig(table.name, table.index),
-                dynamoClient,
-                s3Client,
-              )
-              withWorkerService(vhs, topic, messagingBucket, queue) {
-                workerService =>
-                  val id = createSierraBibNumber
-                  val title = "A pot of possums"
-                  val sierraTransformable = SierraTransformable(
-                    bibRecord = createSierraBibRecordWith(
-                      id = id,
-                      data = s"""
-                     |{
-                     | "id": "$id",
-                     | "title": "$title",
-                     | "varFields": []
-                     |}
-                      """.stripMargin
-                    )
+            val store = S3TypedStore[SierraTransformable]
+            withWorkerService(store, topic, messagingBucket, queue) {
+              workerService =>
+                val id = createSierraBibNumber
+                val title = "A pot of possums"
+                val sierraTransformable = SierraTransformable(
+                  bibRecord = createSierraBibRecordWith(
+                    id = id,
+                    data = s"""
+                   |{
+                   | "id": "$id",
+                   | "title": "$title",
+                   | "varFields": []
+                   |}
+                    """.stripMargin
                   )
-                  sendSqsMessage(
-                    queue = queue,
-                    obj = createHybridRecordNotificationWith(
-                      sierraTransformable,
-                      vhs
-                    )
+                )
+                sendSqsMessage(
+                  queue = queue,
+                  obj = createHybridRecordNotificationWith(
+                    sierraTransformable,
+                    store,
+                    namespace = storageBucket.name,
                   )
-                  eventually {
-                    val snsMessages = listMessagesReceivedFromSNS(topic)
-                    snsMessages.size should be >= 1
+                )
+                eventually {
+                  val snsMessages = listMessagesReceivedFromSNS(topic)
+                  snsMessages.size should be >= 1
 
-                    val sourceIdentifier =
-                      createSierraSystemSourceIdentifierWith(
-                        value = id.withCheckDigit
-                      )
+                  val sourceIdentifier =
+                    createSierraSystemSourceIdentifierWith(
+                      value = id.withCheckDigit
+                    )
 
-                    val sierraIdentifier =
-                      createSierraIdentifierSourceIdentifierWith(
-                        value = id.withoutCheckDigit
-                      )
+                  val sierraIdentifier =
+                    createSierraIdentifierSourceIdentifierWith(
+                      value = id.withoutCheckDigit
+                    )
 
-                    val works = getMessages[UnidentifiedWork](topic)
-                    works.length shouldBe >=(1)
+                  val works = getMessages[UnidentifiedWork](topic)
+                  works.length shouldBe >=(1)
 
-                    works.map { actualWork =>
-                      actualWork.sourceIdentifier shouldBe sourceIdentifier
-                      actualWork.title shouldBe title
-                      actualWork.identifiers shouldBe List(
-                        sourceIdentifier,
-                        sierraIdentifier)
-                    }
+                  works.map { actualWork =>
+                    actualWork.sourceIdentifier shouldBe sourceIdentifier
+                    actualWork.title shouldBe title
+                    actualWork.identifiers shouldBe List(
+                      sourceIdentifier,
+                      sierraIdentifier)
                   }
-              }
+                }
             }
           }
         }
@@ -113,12 +94,13 @@ class SierraTransformerIntegrationTest
     }
   }
 
-  def withWorkerService[R](vhs: VHS,
+  def withWorkerService[R](store: SierraStore,
                            topic: Topic,
                            bucket: Bucket,
                            queue: Queue)(
-    testWith: TestWith[SierraTransformerWorkerService[SNSConfig], R]): R =
-    withHybridRecordReceiver(vhs, topic, bucket) { messageReceiver =>
+    testWith: TestWith[SierraTransformerWorkerService[SNSConfig, HybridRecord],
+                       R]): R =
+    withHybridRecordReceiver(store, topic, bucket) { messageReceiver =>
       withActorSystem { implicit actorSystem =>
         withSQSStream[NotificationMessage, R](queue) { sqsStream =>
           val workerService = new SierraTransformerWorkerService(
