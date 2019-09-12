@@ -83,14 +83,14 @@ class MatcherWorkerServiceTest
             createUnidentifiedWorkWith(
               sourceIdentifier = identifierA,
               mergeCandidates = List(MergeCandidate(identifierB)))
-          // Work Av1 matched to B (before B exists hence version 0)
+          // Work Av1 matched to B (before B exists hence version is None)
           // need to match to works that do not exist to support
           // bi-directionally matched works without deadlocking (A->B, B->A)
           val expectedMatchedWorks = MatcherResult(
             Set(
               MatchedIdentifiers(Set(
-                WorkIdentifier("sierra-system-number/A", 1),
-                WorkIdentifier("sierra-system-number/B", 0)))))
+                WorkIdentifier("sierra-system-number/A", Some(1)),
+                WorkIdentifier("sierra-system-number/B", None)))))
 
           processAndAssertMatchedWorkIs(
             workAv1,

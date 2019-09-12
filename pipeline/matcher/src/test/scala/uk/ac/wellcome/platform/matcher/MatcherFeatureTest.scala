@@ -67,7 +67,7 @@ class MatcherFeatureTest
 
               val existingWorkAv2 = WorkNode(
                 id = workAv1.sourceIdentifier.toString,
-                version = existingWorkVersion,
+                version = Some(existingWorkVersion),
                 linkedIds = Nil,
                 componentId = workAv1.sourceIdentifier.toString
               )
