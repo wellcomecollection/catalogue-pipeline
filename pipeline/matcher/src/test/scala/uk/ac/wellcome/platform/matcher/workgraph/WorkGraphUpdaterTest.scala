@@ -44,7 +44,7 @@ class WorkGraphUpdaterTest extends FunSpec with Matchers with MatcherFixtures {
         )
         .nodes shouldBe Set(
         WorkNode("A", 1, List("B"), hashed_AB),
-        WorkNode("B", 0, List(), hashed_AB))
+        WorkNode("B", None, List(), hashed_AB))
     }
 
     it("updating nothing with B->A gives A+B:B->A") {
@@ -55,7 +55,7 @@ class WorkGraphUpdaterTest extends FunSpec with Matchers with MatcherFixtures {
         )
         .nodes shouldBe Set(
         WorkNode("B", 1, List("A"), hashed_AB),
-        WorkNode("A", 0, List(), hashed_AB))
+        WorkNode("A", None, List(), hashed_AB))
     }
   }
 
@@ -177,7 +177,7 @@ class WorkGraphUpdaterTest extends FunSpec with Matchers with MatcherFixtures {
         .nodes should contain theSameElementsAs
         List(
           WorkNode("A", 2, List("B"), hashed_AB),
-          WorkNode("B", 0, List(), hashed_AB))
+          WorkNode("B", None, List(), hashed_AB))
     }
 
     it("doesn't process an update for a lower version") {
@@ -260,7 +260,7 @@ class WorkGraphUpdaterTest extends FunSpec with Matchers with MatcherFixtures {
         )
         .nodes shouldBe Set(
         WorkNode("A", 2, Nil, hashed_A),
-        WorkNode("B", 0, Nil, hashed_B)
+        WorkNode("B", None, Nil, hashed_B)
       )
     }
 

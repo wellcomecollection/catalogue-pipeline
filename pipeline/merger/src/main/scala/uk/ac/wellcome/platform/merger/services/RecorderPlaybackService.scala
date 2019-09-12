@@ -43,18 +43,21 @@ class RecorderPlaybackService(
     */
   private def getWorkForIdentifier(
     workIdentifier: WorkIdentifier): Option[TransformedBaseWork] =
-    vhs.getLatest(workIdentifier.identifier) match {
-      case Right(Identified(_, HybridStoreEntry(work, _))) =>
-        if (work.version == workIdentifier.version) {
-          Some(work)
-        } else {
-          debug(
-            s"VHS version = ${work.version}, identifier version = ${workIdentifier.version}, so discarding work")
-          None
+    workIdentifier match {
+      case WorkIdentifier(id, Some(version)) =>
+        vhs.getLatest(workIdentifier.identifier) match {
+          case Right(Identified(_, HybridStoreEntry(work, _))) =>
+            if (work.version == version) {
+              Some(work)
+            } else {
+              debug(
+                s"VHS version = ${work.version}, identifier version = ${version}, so discarding work")
+              None
+            }
+          case Left(NoVersionExistsError(_)) =>
+            throw new NoSuchElementException(s"Work ${id} is not in VHS!")
+          case Left(readError) => throw readError.e
         }
-      case Left(NoVersionExistsError(_)) =>
-        throw new NoSuchElementException(
-          s"Work ${workIdentifier.identifier} is not in VHS!")
-      case Left(readError) => throw readError.e
+      case _ => None
     }
 }

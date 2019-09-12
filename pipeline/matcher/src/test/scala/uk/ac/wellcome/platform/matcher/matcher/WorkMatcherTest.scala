@@ -98,7 +98,7 @@ class WorkMatcherTest
                 MatcherResult(
                   Set(MatchedIdentifiers(Set(
                     WorkIdentifier("sierra-system-number/A", 1),
-                    WorkIdentifier("sierra-system-number/B", 0)))))
+                    WorkIdentifier("sierra-system-number/B", None)))))
 
               val savedWorkNodes = scan[WorkNode](dynamoClient, graphTable.name)
                 .map(_.right.get)
@@ -111,7 +111,7 @@ class WorkMatcherTest
                   ciHash("sierra-system-number/A+sierra-system-number/B")),
                 WorkNode(
                   "sierra-system-number/B",
-                  0,
+                  None,
                   Nil,
                   ciHash("sierra-system-number/A+sierra-system-number/B"))
               )
