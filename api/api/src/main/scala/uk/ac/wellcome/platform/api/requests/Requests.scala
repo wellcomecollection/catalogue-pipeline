@@ -50,8 +50,8 @@ case class V2MultipleResultsRequest(
   @QueryParam() aggregations: List[AggregationRequest] = Nil,
   @QueryParam _index: Option[String],
   @QueryParam _queryType: Option[String],
-  @QueryParam _dateFrom: Option[LocalDate],
-  @QueryParam _dateTo: Option[LocalDate],
+  @QueryParam("production.dates.from") productionDateFrom: Option[LocalDate],
+  @QueryParam("production.dates.to") productionDateTo: Option[LocalDate],
   request: Request
 ) extends MultipleResultsRequest[V2WorksIncludes]
 

@@ -196,7 +196,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
           eventually {
             server.httpGet(
               path =
-                s"/$apiPrefix/works?_dateFrom=1900-01-01&_dateTo=1960-01-01",
+                s"/$apiPrefix/works?production.dates.from=1900-01-01&production.dates.to=1960-01-01",
               andExpect = Status.Ok,
               withJsonBody = s"""
                                 |{
@@ -221,7 +221,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
           insertIntoElasticsearch(indexV2, work1, work2, work3)
           eventually {
             server.httpGet(
-              path = s"/$apiPrefix/works?_dateFrom=1900-01-01",
+              path = s"/$apiPrefix/works?production.dates.from=1900-01-01",
               andExpect = Status.Ok,
               withJsonBody = s"""
                                 |{
@@ -251,7 +251,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
           insertIntoElasticsearch(indexV2, work1, work2, work3)
           eventually {
             server.httpGet(
-              path = s"/$apiPrefix/works?_dateTo=1960-01-01",
+              path = s"/$apiPrefix/works?production.dates.to=1960-01-01",
               andExpect = Status.Ok,
               withJsonBody = s"""
                                 |{
@@ -281,7 +281,8 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
           insertIntoElasticsearch(indexV2, work1, work2, work3)
           eventually {
             server.httpGet(
-              path = s"/$apiPrefix/works?_dateFrom=1900-01-01&_dateTo=INVALID",
+              path =
+                s"/$apiPrefix/works?production.dates.from=1900-01-01&production.dates.to=INVALID",
               andExpect = Status.BadRequest,
             )
           }

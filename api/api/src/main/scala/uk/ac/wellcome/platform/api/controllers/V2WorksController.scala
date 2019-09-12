@@ -61,7 +61,7 @@ class V2WorksController @Inject()(
         }
 
     val maybeDateRangeFilter: Option[DateRangeFilter] =
-      (request._dateFrom, request._dateTo) match {
+      (request.productionDateFrom, request.productionDateTo) match {
         case (None, None)       => None
         case (dateFrom, dateTo) => Some(DateRangeFilter(dateFrom, dateTo))
       }
