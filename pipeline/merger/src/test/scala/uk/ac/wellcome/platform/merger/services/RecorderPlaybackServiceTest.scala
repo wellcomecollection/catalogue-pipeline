@@ -40,14 +40,14 @@ class RecorderPlaybackServiceTest
     }
   }
 
-  it("returns None if asked to fetch a Work without a version") {	
-    val work = createUnidentifiedWorkWith(version = 0)	
+  it("returns None if asked to fetch a Work without a version") {
+    val work = createUnidentifiedWorkWith(version = 0)
     val workId = WorkIdentifier(work.sourceIdentifier.toString, None)
 
-    withVHS { vhs =>	
+    withVHS { vhs =>
       val service = new RecorderPlaybackService(vhs)
-      whenReady(service.fetchAllWorks(List(workId))) {
-        result =>	result shouldBe Seq(None)	
+      whenReady(service.fetchAllWorks(List(workId))) { result =>
+        result shouldBe Seq(None)
       }
     }
   }

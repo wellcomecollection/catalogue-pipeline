@@ -20,7 +20,8 @@ object WorkGraphUpdater extends Logging {
     doUpdate(workUpdate, existingGraph)
   }
 
-  private def checkVersionConflicts(workUpdate: WorkUpdate, existingGraph: WorkGraph) = {
+  private def checkVersionConflicts(workUpdate: WorkUpdate,
+                                    existingGraph: WorkGraph) = {
     val maybeExistingNode = existingGraph.nodes.find(_.id == workUpdate.workId)
     maybeExistingNode match {
       case Some(WorkNode(_, Some(existingVersion), linkedIds, _)) =>
@@ -45,20 +46,20 @@ object WorkGraphUpdater extends Logging {
       existingGraph.nodes.filterNot(_.id == workUpdate.workId)
 
     val nodeVersions: Map[String, Int] =
-      linkedNodes
-        .collect { case WorkNode(id, Some(version), _, _) => (id, version) }
-        .toMap + (workUpdate.workId -> workUpdate.version)
+      linkedNodes.collect {
+        case WorkNode(id, Some(version), _, _) => (id, version)
+      }.toMap + (workUpdate.workId -> workUpdate.version)
 
-    val edges = 
+    val edges =
       linkedNodes
-        .flatMap { 
-          node => toEdges(node.id, node.linkedIds)
+        .flatMap { node =>
+          toEdges(node.id, node.linkedIds)
         } ++ toEdges(workUpdate.workId, workUpdate.referencedWorkIds)
 
     val nodeIds =
       existingGraph.nodes
-        .flatMap {
-          node => node.id +: node.linkedIds
+        .flatMap { node =>
+          node.id +: node.linkedIds
         } + workUpdate.workId
 
     val g = Graph.from(edges = edges, nodes = nodeIds)

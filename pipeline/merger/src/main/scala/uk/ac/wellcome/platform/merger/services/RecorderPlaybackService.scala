@@ -55,8 +55,7 @@ class RecorderPlaybackService(
               None
             }
           case Left(NoVersionExistsError(_)) =>
-            throw new NoSuchElementException(
-              s"Work ${id} is not in VHS!")
+            throw new NoSuchElementException(s"Work ${id} is not in VHS!")
           case Left(readError) => throw readError.e
         }
       case _ => None

@@ -9,10 +9,9 @@ case class WorkNode(
 
 object WorkNode {
 
-  def apply(
-    id: String,
-    version: Int,
-    linkedIds: List[String],
-    componentId: String): WorkNode =
+  def apply(id: String,
+            version: Int,
+            linkedIds: List[String],
+            componentId: String): WorkNode =
     WorkNode(id, Some(version), linkedIds, componentId)
 }
