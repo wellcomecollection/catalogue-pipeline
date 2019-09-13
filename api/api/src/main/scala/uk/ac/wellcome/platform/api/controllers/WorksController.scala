@@ -133,7 +133,7 @@ abstract class WorksController[M <: MultipleResultsRequest[W],
       pageNumber = request.page,
       aggregations = aggregations,
       sortBy = sortBy,
-      sortOrder = sortOrder 
+      sortOrder = sortOrder
     )
 
     def searchFunction: (Index, WorksSearchOptions) => Future[

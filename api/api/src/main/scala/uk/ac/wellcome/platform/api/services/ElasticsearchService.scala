@@ -108,12 +108,11 @@ class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
     }
 
     val sortOrder = queryOptions.sortOrder match {
-      case SortingOrder.Ascending => SortOrder.ASC
+      case SortingOrder.Ascending  => SortOrder.ASC
       case SortingOrder.Descending => SortOrder.DESC
     }
 
-    val sort = queryOptions
-      .sortBy
+    val sort = queryOptions.sortBy
       .flatMap {
         case ProductionDateFromSortRequest =>
           Some(FieldSort("production.dates.range.from"))

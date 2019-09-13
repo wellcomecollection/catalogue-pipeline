@@ -7,11 +7,11 @@ import com.twitter.finatra.request.{QueryParam, RouteParam}
 import com.twitter.finatra.validation.{Max, Min}
 import uk.ac.wellcome.display.models.{
   AggregationsRequest,
+  SortingOrder,
   SortsRequest,
   V1WorksIncludes,
   V2WorksIncludes,
-  WorksIncludes,
-  SortingOrder
+  WorksIncludes
 }
 
 sealed trait ApiRequest {
