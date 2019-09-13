@@ -526,7 +526,8 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
 
         eventually {
           server.httpGet(
-            path = s"/$apiPrefix/works?sort=production.dates.from&sortOrder=desc",
+            path =
+              s"/$apiPrefix/works?sort=production.dates.from&sortOrder=desc",
             andExpect = Status.Ok,
             withJsonBody = s"""
                               |{
