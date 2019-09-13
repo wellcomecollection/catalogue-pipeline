@@ -8,7 +8,7 @@ import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.ElasticError
 import com.sksamuel.elastic4s.requests.get.GetResponse
 import com.sksamuel.elastic4s.requests.searches.{SearchHit, SearchResponse}
-import uk.ac.wellcome.display.models.{AggregationRequest, SortRequest}
+import uk.ac.wellcome.display.models.{AggregationRequest, SortRequest, SortingOrder}
 import uk.ac.wellcome.models.work.internal.{IdentifiedBaseWork, IdentifiedWork}
 import uk.ac.wellcome.platform.api.models.{
   Aggregations,
@@ -24,7 +24,8 @@ case class WorksSearchOptions(
   pageSize: Int,
   pageNumber: Int,
   aggregations: List[AggregationRequest],
-  sort: List[SortRequest]
+  sortBy: List[SortRequest],
+  sortOrder: SortingOrder,
 )
 
 @Singleton
@@ -118,7 +119,8 @@ class WorksService @Inject()(searchService: ElasticsearchService)(
       filters = worksSearchOptions.filters,
       limit = worksSearchOptions.pageSize,
       aggregations = worksSearchOptions.aggregations,
-      sort = worksSearchOptions.sort,
+      sortBy = worksSearchOptions.sortBy,
+      sortOrder = worksSearchOptions.sortOrder,
       from = from
     )
   }

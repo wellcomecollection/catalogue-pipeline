@@ -1,6 +1,6 @@
 package uk.ac.wellcome.display.serialize
 
-import uk.ac.wellcome.display.models.{SortingOrder, SortAscending, SortDescending}
+import uk.ac.wellcome.display.models.SortingOrder
 
 import com.fasterxml.jackson.core.{JsonParser, JsonProcessingException}
 import com.fasterxml.jackson.databind.{DeserializationContext, JsonDeserializer}
@@ -13,8 +13,8 @@ class SortingOrderDeserializer extends JsonDeserializer[SortingOrder] {
   override def deserialize(p: JsonParser,
                            ctx: DeserializationContext): SortingOrder = {
     p.getText() match {
-      case "desc" => SortDescending
-      case "asc" => SortAscending
+      case "asc" => SortingOrder.Ascending
+      case "desc" => SortingOrder.Descending
       case text => throw new SortingOrderParsingException(
         s"Invalid value ${text}. Choose 'desc' or 'asc'"
       )

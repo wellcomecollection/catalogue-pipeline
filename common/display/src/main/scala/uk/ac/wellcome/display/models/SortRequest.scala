@@ -19,5 +19,8 @@ object SortRequest {
 }
 
 sealed trait SortingOrder
-case object SortAscending extends SortingOrder
-case object SortDescending extends SortingOrder
+
+object SortingOrder {
+  case object Ascending extends SortingOrder
+  case object Descending extends SortingOrder
+}

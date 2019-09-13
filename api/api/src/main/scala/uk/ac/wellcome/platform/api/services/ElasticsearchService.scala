@@ -19,6 +19,7 @@ import uk.ac.wellcome.display.models.{
   ProductionDateFromSortRequest,
   ProductionDateToSortRequest,
   SortRequest,
+  SortingOrder,
   WorkTypeAggregationRequest
 }
 import uk.ac.wellcome.platform.api.models._
@@ -29,7 +30,8 @@ case class ElasticsearchQueryOptions(filters: List[WorkFilter],
                                      limit: Int,
                                      from: Int,
                                      aggregations: List[AggregationRequest],
-                                     sort: List[SortRequest])
+                                     sortBy: List[SortRequest],
+                                     sortOrder: SortingOrder)
 
 @Singleton
 class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
@@ -105,13 +107,21 @@ class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
       case _ => None
     }
 
-    val sort = queryOptions.sort flatMap {
-      case ProductionDateFromSortRequest =>
-        Some(FieldSort("production.dates.range.from"))
-      case ProductionDateToSortRequest =>
-        Some(FieldSort("production.dates.range.to"))
-      case _ => None
+    val sortOrder = queryOptions.sortOrder match {
+      case SortingOrder.Ascending => SortOrder.ASC
+      case SortingOrder.Descending => SortOrder.DESC
     }
+
+    val sort = queryOptions
+      .sortBy
+      .flatMap {
+        case ProductionDateFromSortRequest =>
+          Some(FieldSort("production.dates.range.from"))
+        case ProductionDateToSortRequest =>
+          Some(FieldSort("production.dates.range.to"))
+        case _ => None
+      }
+      .map { _.order(sortOrder) }
 
     val limit = if (aggregations.nonEmpty) 0 else queryOptions.limit
 
