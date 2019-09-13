@@ -10,9 +10,9 @@ import com.sksamuel.elastic4s.requests.searches.aggs.{
   CompositeAggregation,
   TermsValueSource
 }
-import com.sksamuel.elastic4s.requests.searches.queries.{Query, RangeQuery}
+import com.sksamuel.elastic4s.requests.searches.queries.Query
 import com.sksamuel.elastic4s.requests.searches.sort.{FieldSort, SortOrder}
-import com.sksamuel.elastic4s.{ElasticDate, Index}
+import com.sksamuel.elastic4s.Index
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.display.models.{
   AggregationRequest,
@@ -123,23 +123,6 @@ class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
       .from(queryOptions.from)
   }
 
-  private def toQuery(workFilter: WorkFilter): Query =
-    workFilter match {
-      case ItemLocationTypeFilter(itemLocationTypeIds) =>
-        termsQuery(
-          field = "items.agent.locations.locationType.id",
-          values = itemLocationTypeIds)
-      case WorkTypeFilter(workTypeIds) =>
-        termsQuery(field = "workType.id", values = workTypeIds)
-      case DateRangeFilter(fromDate, toDate) =>
-        val (gte, lte) =
-          (fromDate map ElasticDate.apply, toDate map ElasticDate.apply)
-        boolQuery should (
-          RangeQuery("production.dates.range.from", lte = lte, gte = gte),
-          RangeQuery("production.dates.range.to", lte = lte, gte = gte)
-        )
-    }
-
   private def buildFilteredQuery(maybeWorkQuery: Option[WorkQuery],
                                  filters: List[WorkFilter]): Query = {
     val query = maybeWorkQuery match {
@@ -150,7 +133,7 @@ class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
     }
 
     val filterDefinitions: List[Query] =
-      filters.map { toQuery } :+ termQuery(
+      filters.map { _.query } :+ termQuery(
         field = "type",
         value = "IdentifiedWork")
 
