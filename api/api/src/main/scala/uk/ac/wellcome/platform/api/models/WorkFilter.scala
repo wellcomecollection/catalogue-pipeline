@@ -46,13 +46,10 @@ case class DateRangeFilter(fromDate: Option[LocalDate],
     val maxDate = getElasticDate(toDate, Int.MaxValue)
 
     boolQuery should (
-
       // Start date of work is within query range
       RangeQuery("production.dates.range.from", gte = minDate, lte = maxDate),
-
       // End date of work is within query range
       RangeQuery("production.dates.range.to", gte = minDate, lte = maxDate),
-
       // Work date range is broader than whole query range
       boolQuery must (
         RangeQuery("production.dates.range.from", lte = minDate),
