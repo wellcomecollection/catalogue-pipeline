@@ -5,8 +5,8 @@ import com.twitter.finatra.json.modules.FinatraJacksonModule
 import uk.ac.wellcome.display.serialize.{
   CommaSeparatedStringRequestDeserializerModule,
   LocalDateDeserializerModule,
-  WorksIncludesDeserializerModule,
-  SortingOrderDeserializerModule
+  SortingOrderDeserializerModule,
+  WorksIncludesDeserializerModule
 }
 
 object DisplayJacksonModule extends FinatraJacksonModule {

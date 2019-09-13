@@ -13,11 +13,12 @@ class SortingOrderDeserializer extends JsonDeserializer[SortingOrder] {
   override def deserialize(p: JsonParser,
                            ctx: DeserializationContext): SortingOrder = {
     p.getText() match {
-      case "asc" => SortingOrder.Ascending
+      case "asc"  => SortingOrder.Ascending
       case "desc" => SortingOrder.Descending
-      case text => throw new SortingOrderParsingException(
-        s"Invalid value ${text}. Choose 'desc' or 'asc'"
-      )
+      case text =>
+        throw new SortingOrderParsingException(
+          s"Invalid value ${text}. Choose 'desc' or 'asc'"
+        )
     }
   }
 }
