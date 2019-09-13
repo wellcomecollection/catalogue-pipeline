@@ -2,7 +2,7 @@ package uk.ac.wellcome.display.models.v2
 
 import org.scalatest.{Assertion, FunSpec}
 import uk.ac.wellcome.display.json.DisplayJsonUtil._
-import uk.ac.wellcome.display.models.V2WorksIncludes
+import uk.ac.wellcome.display.models.WorksIncludes
 import uk.ac.wellcome.display.test.util.JsonMapperTestUtil
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
@@ -82,7 +82,7 @@ class DisplayLocationsV2SerialisationTest
     expectedJson: String
   ): Assertion =
     assertObjectMapsToJson(
-      DisplayWorkV2(work, includes = V2WorksIncludes(items = true)),
+      DisplayWorkV2(work, includes = WorksIncludes(items = true)),
       expectedJson = expectedJson
     )
 }

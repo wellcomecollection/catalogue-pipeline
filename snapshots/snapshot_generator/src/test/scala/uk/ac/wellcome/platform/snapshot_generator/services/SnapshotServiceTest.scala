@@ -19,7 +19,7 @@ import uk.ac.wellcome.display.models.v2.DisplayWorkV2
 import uk.ac.wellcome.display.models.{
   ApiVersions,
   V1WorksIncludes,
-  V2WorksIncludes
+  WorksIncludes
 }
 import uk.ac.wellcome.elasticsearch.ElasticClientBuilder
 import uk.ac.wellcome.models.work.generators.WorksGenerators
@@ -146,7 +146,7 @@ class SnapshotServiceTest
           val contents = readGzipFile(downloadFile.getPath)
           val expectedContents = visibleWorks
             .map {
-              DisplayWorkV2(_, includes = V2WorksIncludes.includeAll())
+              DisplayWorkV2(_, includes = WorksIncludes.includeAll())
             }
             .map {
               DisplayJsonUtil.toJson(_)

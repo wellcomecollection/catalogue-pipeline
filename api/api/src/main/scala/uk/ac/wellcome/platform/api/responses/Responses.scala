@@ -1,12 +1,12 @@
 package uk.ac.wellcome.platform.api.responses
 
 import com.fasterxml.jackson.annotation.{JsonProperty, JsonUnwrapped}
-import uk.ac.wellcome.display.models.{DisplayWork, WorksIncludes}
+import uk.ac.wellcome.display.models.DisplayWork
 import uk.ac.wellcome.platform.api.models.{
   DisplayAggregations,
   DisplayResultList
 }
-import uk.ac.wellcome.platform.api.requests.{ApiRequest, MultipleResultsRequest}
+import uk.ac.wellcome.platform.api.requests.MultipleResultsRequest
 
 case class ResultResponse(
   @JsonProperty("@context") context: String,
@@ -26,12 +26,10 @@ case class ResultListResponse(
 )
 
 object ResultListResponse {
-  def create[T <: DisplayWork,
-             M <: MultipleResultsRequest[W],
-             W <: WorksIncludes](
+  def create(
     contextUri: String,
-    displayResultList: DisplayResultList[T],
-    multipleResultsRequest: M,
+    displayResultList: DisplayResultList[DisplayWork],
+    multipleResultsRequest: MultipleResultsRequest,
     requestBaseUri: String
   ): ResultListResponse = {
 
@@ -72,7 +70,7 @@ object ResultListResponse {
 
   private def createApiLink(
     requestBaseUri: String,
-    apiRequest: ApiRequest
+    apiRequest: MultipleResultsRequest
   )(
     updateMap: Map[String, Any]
   ): String = {

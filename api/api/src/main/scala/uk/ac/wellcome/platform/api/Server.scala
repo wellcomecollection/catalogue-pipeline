@@ -43,7 +43,7 @@ class Server extends HttpServer {
       .add[ContextController]
       .add[DocsController]
       .add[V1GoneController]
-      .add[V2WorksController]
+      .add[WorksController]
       .add[MissingPathController]
       .exceptionMapper[GeneralExceptionMapper]
       .exceptionMapper[CaseClassMappingExceptionWrapper]

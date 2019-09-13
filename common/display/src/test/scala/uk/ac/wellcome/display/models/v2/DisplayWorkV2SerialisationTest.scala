@@ -2,7 +2,7 @@ package uk.ac.wellcome.display.models.v2
 
 import org.scalatest.FunSpec
 import uk.ac.wellcome.display.json.DisplayJsonUtil._
-import uk.ac.wellcome.display.models.V2WorksIncludes
+import uk.ac.wellcome.display.models.WorksIncludes
 import uk.ac.wellcome.display.test.util.JsonMapperTestUtil
 import uk.ac.wellcome.models.work.generators.{
   ProductionEventGenerators,
@@ -58,7 +58,7 @@ class DisplayWorkV2SerialisationTest
           """.stripMargin
 
     assertObjectMapsToJson(
-      DisplayWorkV2(work, includes = V2WorksIncludes(items = true)),
+      DisplayWorkV2(work, includes = WorksIncludes(items = true)),
       expectedJson = expectedJson
     )
   }
@@ -78,7 +78,7 @@ class DisplayWorkV2SerialisationTest
           """.stripMargin
 
     assertObjectMapsToJson(
-      DisplayWorkV2(work, includes = V2WorksIncludes(items = true)),
+      DisplayWorkV2(work, includes = WorksIncludes(items = true)),
       expectedJson = expectedJson
     )
   }
@@ -121,7 +121,7 @@ class DisplayWorkV2SerialisationTest
     assertObjectMapsToJson(
       DisplayWorkV2(
         workWithCopyright,
-        includes = V2WorksIncludes(items = true)
+        includes = WorksIncludes(items = true)
       ),
       expectedJson = expectedJson
     )
@@ -146,7 +146,7 @@ class DisplayWorkV2SerialisationTest
     assertObjectMapsToJson(
       DisplayWorkV2(
         workWithSubjects,
-        includes = V2WorksIncludes(subjects = true)
+        includes = WorksIncludes(subjects = true)
       ),
       expectedJson = expectedJson
     )
@@ -170,7 +170,7 @@ class DisplayWorkV2SerialisationTest
     assertObjectMapsToJson(
       DisplayWorkV2(
         workWithProduction,
-        includes = V2WorksIncludes(production = true)
+        includes = WorksIncludes(production = true)
       ),
       expectedJson = expectedJson
     )
@@ -204,7 +204,7 @@ class DisplayWorkV2SerialisationTest
           """.stripMargin
 
     assertObjectMapsToJson(
-      DisplayWorkV2(work, includes = V2WorksIncludes(contributors = true)),
+      DisplayWorkV2(work, includes = WorksIncludes(contributors = true)),
       expectedJson = expectedJson
     )
   }
@@ -232,7 +232,7 @@ class DisplayWorkV2SerialisationTest
                           |   }""".stripMargin
 
     assertObjectMapsToJson(
-      DisplayWorkV2(work, includes = V2WorksIncludes(genres = true)),
+      DisplayWorkV2(work, includes = WorksIncludes(genres = true)),
       expectedJson = expectedJson
     )
   }
@@ -254,7 +254,7 @@ class DisplayWorkV2SerialisationTest
           """.stripMargin
 
     assertObjectMapsToJson(
-      DisplayWorkV2(work, includes = V2WorksIncludes(identifiers = true)),
+      DisplayWorkV2(work, includes = WorksIncludes(identifiers = true)),
       expectedJson = expectedJson
     )
   }
@@ -274,7 +274,7 @@ class DisplayWorkV2SerialisationTest
           """.stripMargin
 
     assertObjectMapsToJson(
-      DisplayWorkV2(work, includes = V2WorksIncludes(identifiers = true)),
+      DisplayWorkV2(work, includes = WorksIncludes(identifiers = true)),
       expectedJson = expectedJson
     )
   }
@@ -299,7 +299,7 @@ class DisplayWorkV2SerialisationTest
           """.stripMargin
 
     assertObjectMapsToJson(
-      DisplayWorkV2(work, includes = V2WorksIncludes()),
+      DisplayWorkV2(work, includes = WorksIncludes()),
       expectedJson = expectedJson
     )
   }

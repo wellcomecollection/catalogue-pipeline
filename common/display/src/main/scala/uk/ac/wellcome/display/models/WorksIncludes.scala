@@ -1,34 +1,15 @@
 package uk.ac.wellcome.display.models
 
-trait WorksIncludes
-
-case class V1WorksIncludes(
-  identifiers: Boolean = false,
-  thumbnail: Boolean = false,
-  items: Boolean = false
-) extends WorksIncludes
-
-case class V2WorksIncludes(
+case class WorksIncludes(
   identifiers: Boolean = false,
   items: Boolean = false,
   subjects: Boolean = false,
   genres: Boolean = false,
   contributors: Boolean = false,
   production: Boolean = false
-) extends WorksIncludes
+)
 
-object V1WorksIncludes {
-  val recognisedIncludes = List("identifiers", "thumbnail", "items")
-  def apply(includesList: List[String]): V1WorksIncludes = V1WorksIncludes(
-    identifiers = includesList.contains("identifiers"),
-    thumbnail = includesList.contains("thumbnail"),
-    items = includesList.contains("items")
-  )
-
-  def includeAll() = V1WorksIncludes(recognisedIncludes)
-}
-
-object V2WorksIncludes {
+object WorksIncludes {
   val recognisedIncludes = List(
     "identifiers",
     "items",
@@ -36,7 +17,7 @@ object V2WorksIncludes {
     "genres",
     "contributors",
     "production")
-  def apply(includesList: List[String]): V2WorksIncludes = V2WorksIncludes(
+  def apply(includesList: List[String]): WorksIncludes = WorksIncludes(
     identifiers = includesList.contains("identifiers"),
     items = includesList.contains("items"),
     subjects = includesList.contains("subjects"),
@@ -45,5 +26,5 @@ object V2WorksIncludes {
     production = includesList.contains("production")
   )
 
-  def includeAll() = V2WorksIncludes(recognisedIncludes)
+  def includeAll() = WorksIncludes(recognisedIncludes)
 }

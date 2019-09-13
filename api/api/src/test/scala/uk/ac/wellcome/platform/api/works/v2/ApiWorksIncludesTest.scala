@@ -8,7 +8,7 @@ import uk.ac.wellcome.models.work.generators.{
 }
 import uk.ac.wellcome.models.work.internal._
 
-class ApiV2WorksIncludesTest
+class ApiWorksIncludesTest
     extends ApiV2WorksTestBase
     with ProductionEventGenerators
     with SubjectGenerators {

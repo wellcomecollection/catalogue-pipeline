@@ -2,10 +2,9 @@ package uk.ac.wellcome.platform.api.responses
 
 import com.twitter.finagle.http.{Method, Request}
 import org.scalatest.{FunSpec, Matchers}
-import uk.ac.wellcome.display.models.V1WorksIncludes
-import uk.ac.wellcome.display.models.v1.DisplayWorkV1
+import uk.ac.wellcome.display.models.DisplayWork
 import uk.ac.wellcome.platform.api.models.DisplayResultList
-import uk.ac.wellcome.platform.api.requests.V1MultipleResultsRequest
+import uk.ac.wellcome.platform.api.requests.MultipleResultsRequest
 
 class ResultListResponseTest extends FunSpec with Matchers {
   val contextUri = "https://example.org/context.json"
@@ -13,7 +12,7 @@ class ResultListResponseTest extends FunSpec with Matchers {
   val requestBaseUri = "https://api.example.org"
   val requestUri = "/works"
 
-  val displayResultList = DisplayResultList[DisplayWorkV1](
+  val displayResultList = DisplayResultList[DisplayWork](
     pageSize = 10,
     totalPages = 5,
     totalResults = 45,
@@ -22,16 +21,19 @@ class ResultListResponseTest extends FunSpec with Matchers {
     aggregations = None
   )
 
-  val multipleResultsRequest = V1MultipleResultsRequest(
-    page = 1,
+  val multipleResultsRequest = MultipleResultsRequest(
     pageSize = Some(displayResultList.pageSize),
-    includes = None,
+    include = None,
     query = None,
     aggregations = None,
     sort = None,
     _queryType = None,
     _index = None,
-    request = Request(method = Method.Get, uri = requestUri)
+    request = Request(method = Method.Get, uri = requestUri),
+    workType = None,
+    itemLocationType = None,
+    productionDateFrom = None,
+    productionDateTo = None
   )
 
   it("inclues a nextPage and prevPage parameter where appropriate") {
@@ -120,12 +122,12 @@ class ResultListResponseTest extends FunSpec with Matchers {
 
   private def getResponse(
     contextUri: String = contextUri,
-    displayResultList: DisplayResultList[DisplayWorkV1],
-    multipleResultsRequest: V1MultipleResultsRequest = multipleResultsRequest,
+    displayResultList: DisplayResultList[DisplayWork],
+    multipleResultsRequest: MultipleResultsRequest = multipleResultsRequest,
     requestBaseUri: String = requestBaseUri
   ): ResultListResponse =
     ResultListResponse
-      .create[DisplayWorkV1, V1MultipleResultsRequest, V1WorksIncludes](
+      .create(
         contextUri = contextUri,
         displayResultList = displayResultList,
         multipleResultsRequest = multipleResultsRequest,

@@ -4,7 +4,7 @@ import akka.stream.scaladsl.{Sink, Source}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.akka.fixtures.Akka
-import uk.ac.wellcome.display.models.{V1WorksIncludes, V2WorksIncludes}
+import uk.ac.wellcome.display.models.{V1WorksIncludes, WorksIncludes}
 import uk.ac.wellcome.display.models.v1.DisplayWorkV1
 import uk.ac.wellcome.display.models.v2.DisplayWorkV2
 import uk.ac.wellcome.models.work.generators.WorksGenerators
@@ -40,7 +40,7 @@ class IdentifiedWorkToVisibleDisplayWorkFlowTest
   it("creates V2 DisplayWorks from IdentifiedWorks") {
     withMaterializer { implicit materializer =>
       val flow = IdentifiedWorkToVisibleDisplayWork(
-        toDisplayWork = DisplayWorkV2.apply(_, V2WorksIncludes.includeAll()))
+        toDisplayWork = DisplayWorkV2.apply(_, WorksIncludes.includeAll()))
 
       val works = createIdentifiedWorks(count = 3).toList
 
@@ -50,7 +50,7 @@ class IdentifiedWorkToVisibleDisplayWorkFlowTest
 
       whenReady(eventualDisplayWorks) { displayWorks =>
         val expectedDisplayWorks = works.map {
-          DisplayWorkV2(_, includes = V2WorksIncludes.includeAll())
+          DisplayWorkV2(_, includes = WorksIncludes.includeAll())
         }
         displayWorks shouldBe expectedDisplayWorks
       }

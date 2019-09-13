@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.api.controllers
 
+import com.google.inject.Inject
 import com.jakehschwartz.finatra.swagger.SwaggerController
 import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.ElasticError
@@ -26,9 +27,7 @@ import scala.collection.JavaConverters._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect.runtime.universe.TypeTag
 
-abstract class WorksController[M <: MultipleResultsRequest[W],
-                               S <: SingleWorkRequest[W],
-                               W <: WorksIncludes](
+class WorksController @Inject()(
   apiConfig: ApiConfig,
   defaultIndex: Index,
   worksService: WorksService)(implicit ec: ExecutionContext)
@@ -36,9 +35,11 @@ abstract class WorksController[M <: MultipleResultsRequest[W],
     with RedirectedWorkController
     with SwaggerController {
 
-  protected val includeParameterName: String
-  def emptyWorksIncludes: W
-  def recognisedIncludes: List[String]
+  implicit protected val swagger = ApiV2Swagger
+  lazy protected val includeParameterName: String = "include"
+  def emptyWorksIncludes: WorksIncludes = WorksIncludes.apply()
+  def recognisedIncludes: List[String] =
+    WorksIncludes.recognisedIncludes
 
   val includeSwaggerParam: QueryParameter = new QueryParameter()
     .name(includeParameterName)
@@ -51,12 +52,12 @@ abstract class WorksController[M <: MultipleResultsRequest[W],
   protected def setupResultListEndpoint[T <: DisplayWork](
     version: ApiVersions.Value,
     endpointSuffix: String,
-    toDisplayWork: (IdentifiedWork, W) => T)(
+    toDisplayWork: (IdentifiedWork, WorksIncludes) => T)(
     implicit evidence: TypeTag[DisplayResultList[T]],
-    manifest: Manifest[M]): Unit = {
+    manifest: Manifest[MultipleResultsRequest]): Unit = {
     getWithDoc(endpointSuffix) { doc =>
       setupResultListSwaggerDocs[T](s"$endpointSuffix", swagger, doc)
-    } { request: M =>
+    } { request: MultipleResultsRequest =>
       val pageSize = request.pageSize.getOrElse(apiConfig.defaultPageSize)
       val includes = request.include.getOrElse(emptyWorksIncludes)
 
@@ -79,11 +80,12 @@ abstract class WorksController[M <: MultipleResultsRequest[W],
   protected def setupSingleWorkEndpoint[T <: DisplayWork](
     version: ApiVersions.Value,
     endpointSuffix: String,
-    toDisplayWork: (IdentifiedWork, W) => T)(implicit evidence: TypeTag[T],
-                                             manifest: Manifest[S]): Unit = {
+    toDisplayWork: (IdentifiedWork, WorksIncludes) => T)(
+    implicit evidence: TypeTag[T],
+    manifest: Manifest[SingleWorkRequest]): Unit = {
     getWithDoc(endpointSuffix) { doc =>
       setUpSingleWorkSwaggerDocs[T](swagger, doc)
-    } { request: S =>
+    } { request: SingleWorkRequest =>
       val includes = request.include.getOrElse(emptyWorksIncludes)
 
       val index: Index = request._index match {
@@ -113,10 +115,36 @@ abstract class WorksController[M <: MultipleResultsRequest[W],
   /** Given a request object, return a list of WorkFilter instances that should
     * be applied to the corresponding Elasticsearch request.
     */
-  def buildFilters(request: M): List[WorkFilter]
+  def buildFilters(request: MultipleResultsRequest): List[WorkFilter] = {
+    val maybeItemLocationTypeFilter: Option[ItemLocationTypeFilter] =
+      request.itemLocationType
+        .map { arg =>
+          arg.split(",").map { _.trim }
+        }
+        .map { locationTypeIds: Array[String] =>
+          ItemLocationTypeFilter(locationTypeIds)
+        }
+
+    val maybeWorkTypeFilter: Option[WorkTypeFilter] =
+      request.workType
+        .map { arg =>
+          arg.split(",").map { _.trim }
+        }
+        .map { workTypeIds: Array[String] =>
+          WorkTypeFilter(workTypeIds)
+        }
+
+    val maybeDateRangeFilter: Option[DateRangeFilter] =
+      (request.productionDateFrom, request.productionDateTo) match {
+        case (None, None)       => None
+        case (dateFrom, dateTo) => Some(DateRangeFilter(dateFrom, dateTo))
+      }
+
+    List(maybeItemLocationTypeFilter, maybeWorkTypeFilter, maybeDateRangeFilter).flatten
+  }
 
   private def getWorkList(
-    request: M,
+    request: MultipleResultsRequest,
     pageSize: Int): Future[Either[ElasticError, ResultList]] = {
     val index: Index = request._index match {
       case Some(indexName) => Index(name = indexName)
@@ -176,15 +204,17 @@ abstract class WorksController[M <: MultipleResultsRequest[W],
       }
     }
 
-  private def generateSingleWorkResponse[T <: DisplayWork](
+  private def generateSingleWorkResponse(
     maybeWork: Option[IdentifiedBaseWork],
-    toDisplayWork: (IdentifiedWork, W) => T,
-    includes: W,
-    request: S,
+    toDisplayWork: (IdentifiedWork, WorksIncludes) => DisplayWork,
+    includes: WorksIncludes,
+    request: SingleWorkRequest,
     contextUri: String) =
     maybeWork match {
       case Some(work: IdentifiedWork) =>
-        respondWithWork[T](toDisplayWork(work, includes), contextUri: String)
+        respondWithWork[DisplayWork](
+          toDisplayWork(work, includes),
+          contextUri: String)
       case Some(work: IdentifiedRedirectedWork) =>
         respondWithRedirect(
           originalRequest = request.request,
@@ -195,12 +225,12 @@ abstract class WorksController[M <: MultipleResultsRequest[W],
         respondWithNotFoundError(request, contextUri: String)
     }
 
-  private def generateResultListResponse[T <: DisplayWork](
+  private def generateResultListResponse(
     resultList: ResultList,
-    toDisplayWork: (IdentifiedWork, W) => T,
+    toDisplayWork: (IdentifiedWork, WorksIncludes) => DisplayWork,
     pageSize: Int,
-    includes: W,
-    request: M,
+    includes: WorksIncludes,
+    request: MultipleResultsRequest,
     apiVersion: ApiVersions.Value): ResponseBuilder#EnrichedResponse = {
     val displayResultList = DisplayResultList(
       resultList = resultList,
@@ -215,7 +245,7 @@ abstract class WorksController[M <: MultipleResultsRequest[W],
     )
 
     response.ok.json(
-      ResultListResponse.create[T, M, W](
+      ResultListResponse.create(
         contextUri = contextUri,
         displayResultList,
         request,
@@ -257,7 +287,8 @@ abstract class WorksController[M <: MultipleResultsRequest[W],
     )
   }
 
-  private def respondWithNotFoundError(request: S, contextUri: String) = {
+  private def respondWithNotFoundError(request: SingleWorkRequest,
+                                       contextUri: String) = {
     val result = Error(
       variant = "http-404",
       description = Some(s"Work not found for identifier ${request.id}")
@@ -331,4 +362,5 @@ abstract class WorksController[M <: MultipleResultsRequest[W],
       .parameter(includeSwaggerParam)
     // Deliberately undocumented: the index flag.  See above.
   }
+
 }

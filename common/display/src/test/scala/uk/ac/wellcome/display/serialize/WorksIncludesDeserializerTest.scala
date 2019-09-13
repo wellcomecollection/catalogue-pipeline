@@ -1,15 +1,15 @@
 package uk.ac.wellcome.display.serialize
 
 import org.scalatest.{FunSpec, Matchers}
-import uk.ac.wellcome.display.models.V1WorksIncludes
+import uk.ac.wellcome.display.models.WorksIncludes
 
 class WorksIncludesDeserializerTest extends FunSpec with Matchers {
 
   it("parses a present value as true") {
     val includes = WorksIncludesDeserializer(
       "identifiers",
-      V1WorksIncludes.recognisedIncludes,
-      V1WorksIncludes.apply)
+      WorksIncludes.recognisedIncludes,
+      WorksIncludes.apply)
     includes.identifiers shouldBe true
   }
 
@@ -17,8 +17,8 @@ class WorksIncludesDeserializerTest extends FunSpec with Matchers {
     intercept[WorksIncludesParsingException] {
       WorksIncludesDeserializer(
         "foo,bar",
-        V1WorksIncludes.recognisedIncludes,
-        V1WorksIncludes.apply)
+        WorksIncludes.recognisedIncludes,
+        WorksIncludes.apply)
     }
   }
 }
