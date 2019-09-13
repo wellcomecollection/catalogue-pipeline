@@ -29,6 +29,7 @@ class ResultListResponseTest extends FunSpec with Matchers {
     query = None,
     aggregations = None,
     sort = None,
+    sortOrder = None,
     _queryType = None,
     _index = None,
     request = Request(method = Method.Get, uri = requestUri)
