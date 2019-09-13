@@ -275,6 +275,32 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
       }
     }
 
+    it("filters when work has a broader date range than query") {
+      withV2Api {
+        case (indexV2, server: EmbeddedHttpServer) =>
+          val work = createDatedWork("1000-1100", canonicalId = "d")
+          insertIntoElasticsearch(indexV2, work, work1, work2, work3)
+          eventually {
+            server.httpGet(
+              s"/$apiPrefix/works?production.dates.from=1066-01-01&production.dates.to=1066-12-31",
+              andExpect = Status.Ok,
+              withJsonBody = s"""
+                                |{
+                                |  ${resultList(apiPrefix, totalResults = 1)},
+                                |  "results": [
+                                |    {
+                                |      "type": "Work",
+                                |      "id": "${work.canonicalId}",
+                                |      "title": "${work.title}"
+                                |    }
+                                |  ]
+                                |}
+          """.stripMargin
+            )
+          }
+      }
+    }
+
     it("errors on invalid date") {
       withV2Api {
         case (indexV2, server: EmbeddedHttpServer) =>
