@@ -106,9 +106,9 @@ class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
     }
 
     val sort = queryOptions.sort flatMap {
-      case _: ProductionDateFromSortRequest =>
+      case ProductionDateFromSortRequest =>
         Some(FieldSort("production.dates.range.from"))
-      case _: ProductionDateToSortRequest =>
+      case ProductionDateToSortRequest =>
         Some(FieldSort("production.dates.range.to"))
       case _ => None
     }
