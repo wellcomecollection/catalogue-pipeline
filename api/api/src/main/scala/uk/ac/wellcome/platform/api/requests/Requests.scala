@@ -6,7 +6,8 @@ import com.twitter.finagle.http.Request
 import com.twitter.finatra.request.{QueryParam, RouteParam}
 import com.twitter.finatra.validation.{Max, Min}
 import uk.ac.wellcome.display.models.{
-  AggregationRequest,
+  AggregationsRequest,
+  SortsRequest,
   V1WorksIncludes,
   V2WorksIncludes,
   WorksIncludes
@@ -21,7 +22,8 @@ trait MultipleResultsRequest[W <: WorksIncludes] extends ApiRequest {
   val pageSize: Option[Int]
   val include: Option[W]
   val query: Option[String]
-  val aggregations: List[AggregationRequest]
+  val aggregations: Option[AggregationsRequest]
+  val sort: Option[SortsRequest]
   val _index: Option[String]
   val _queryType: Option[String]
   val request: Request
@@ -30,8 +32,9 @@ trait MultipleResultsRequest[W <: WorksIncludes] extends ApiRequest {
 case class V1MultipleResultsRequest(
   @Min(1) @QueryParam page: Int = 1,
   @Min(1) @Max(100) @QueryParam pageSize: Option[Int],
-  @QueryParam() aggregations: List[AggregationRequest] = Nil,
   @QueryParam includes: Option[V1WorksIncludes],
+  @QueryParam() aggregations: Option[AggregationsRequest],
+  @QueryParam() sort: Option[SortsRequest],
   @QueryParam query: Option[String],
   @QueryParam _index: Option[String],
   @QueryParam _queryType: Option[String] = None,
@@ -47,11 +50,12 @@ case class V2MultipleResultsRequest(
   @QueryParam query: Option[String],
   @QueryParam workType: Option[String],
   @QueryParam("items.locations.locationType") itemLocationType: Option[String],
-  @QueryParam() aggregations: List[AggregationRequest] = Nil,
-  @QueryParam _index: Option[String],
-  @QueryParam _queryType: Option[String],
   @QueryParam("production.dates.from") productionDateFrom: Option[LocalDate],
   @QueryParam("production.dates.to") productionDateTo: Option[LocalDate],
+  @QueryParam() aggregations: Option[AggregationsRequest],
+  @QueryParam() sort: Option[SortsRequest],
+  @QueryParam _index: Option[String],
+  @QueryParam _queryType: Option[String],
   request: Request
 ) extends MultipleResultsRequest[V2WorksIncludes]
 

@@ -3,7 +3,7 @@ package uk.ac.wellcome.display.modules
 import com.fasterxml.jackson.databind.PropertyNamingStrategy
 import com.twitter.finatra.json.modules.FinatraJacksonModule
 import uk.ac.wellcome.display.serialize.{
-  AggregationsRequestDeserializerModule,
+  CommaSeparatedStringRequestDeserializerModule,
   LocalDateDeserializerModule,
   WorksIncludesDeserializerModule
 }
@@ -13,6 +13,6 @@ object DisplayJacksonModule extends FinatraJacksonModule {
   override val additionalJacksonModules = Seq(
     new LocalDateDeserializerModule,
     new WorksIncludesDeserializerModule,
-    new AggregationsRequestDeserializerModule
+    new CommaSeparatedStringRequestDeserializerModule
   )
 }
