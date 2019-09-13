@@ -46,21 +46,58 @@ class ApiV2ErrorsTest extends ApiV2WorksTestBase with ApiErrorsTestBase {
     it("a single invalid aggregation") {
       assertIsBadRequest(
         "/works?aggregations=foo",
-        description = "aggregations: 'foo' is not a valid aggregation"
+        description = "aggregations: 'foo' is not a valid value"
       )
     }
 
     it("multiple invalid aggregations") {
       assertIsBadRequest(
         "/works?aggregations=foo,bar",
-        description = "aggregations: 'foo', 'bar' are not valid aggregations"
+        description = "aggregations: 'foo', 'bar' are not valid values"
+      )
+    }
+
+    it("multiple invalid sorts") {
+      assertIsBadRequest(
+        "/works?sort=foo,bar",
+        description = "sort: 'foo', 'bar' are not valid values"
       )
     }
 
     it("a mixture of valid and invalid aggregations") {
       assertIsBadRequest(
         "/works?aggregations=foo,workType,bar",
-        description = "aggregations: 'foo', 'bar' are not valid aggregations"
+        description = "aggregations: 'foo', 'bar' are not valid values"
+      )
+    }
+  }
+
+  describe("returns a 400 Bad Request for errors in the ?sort parameter") {
+    it("a single invalid aggregation") {
+      assertIsBadRequest(
+        "/works?sort=foo",
+        description = "sort: 'foo' is not a valid value"
+      )
+    }
+
+    it("multiple invalid sort") {
+      assertIsBadRequest(
+        "/works?sort=foo,bar",
+        description = "sort: 'foo', 'bar' are not valid values"
+      )
+    }
+
+    it("multiple invalid sorts") {
+      assertIsBadRequest(
+        "/works?sort=foo,bar",
+        description = "sort: 'foo', 'bar' are not valid values"
+      )
+    }
+
+    it("a mixture of valid and invalid sort") {
+      assertIsBadRequest(
+        "/works?sort=foo,production.dates.from,bar",
+        description = "sort: 'foo', 'bar' are not valid values"
       )
     }
   }

@@ -16,6 +16,9 @@ import com.sksamuel.elastic4s.{ElasticDate, Index}
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.display.models.{
   AggregationRequest,
+  ProductionDateFromSortRequest,
+  ProductionDateToSortRequest,
+  SortRequest,
   WorkTypeAggregationRequest
 }
 import uk.ac.wellcome.platform.api.models._
@@ -25,7 +28,8 @@ import scala.concurrent.{ExecutionContext, Future}
 case class ElasticsearchQueryOptions(filters: List[WorkFilter],
                                      limit: Int,
                                      from: Int,
-                                     aggregations: List[AggregationRequest])
+                                     aggregations: List[AggregationRequest],
+                                     sort: List[SortRequest])
 
 @Singleton
 class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
@@ -101,11 +105,21 @@ class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
       case _ => None
     }
 
+    val sort = queryOptions.sort flatMap {
+      case _: ProductionDateFromSortRequest =>
+        Some(FieldSort("production.dates.range.from"))
+      case _: ProductionDateToSortRequest =>
+        Some(FieldSort("production.dates.range.to"))
+      case _ => None
+    }
+
+    val limit = if (aggregations.nonEmpty) 0 else queryOptions.limit
+
     search(index)
       .aggs(aggregations)
       .query(queryDefinition)
-      .sortBy(sortDefinitions)
-      .limit(if (aggregations.nonEmpty) 0 else queryOptions.limit)
+      .sortBy(sort ++ sortDefinitions)
+      .limit(limit)
       .from(queryOptions.from)
   }
 

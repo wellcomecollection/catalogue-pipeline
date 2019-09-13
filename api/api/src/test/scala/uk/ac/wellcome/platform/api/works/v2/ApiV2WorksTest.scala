@@ -446,4 +446,64 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
         }
     }
   }
+
+  it("supports production date sorting") {
+    withV2Api {
+      case (indexV2, server: EmbeddedHttpServer) =>
+        val work1 = createDatedWork(
+          canonicalId = "1",
+          dateLabel = "1900"
+        )
+        val work2 = createDatedWork(
+          canonicalId = "2",
+          dateLabel = "1976"
+        )
+        val work3 = createDatedWork(
+          canonicalId = "3",
+          dateLabel = "1904"
+        )
+        val work4 = createDatedWork(
+          canonicalId = "4",
+          dateLabel = "2020"
+        )
+        val work5 = createDatedWork(
+          canonicalId = "5",
+          dateLabel = "1098"
+        )
+        insertIntoElasticsearch(indexV2, work1, work2, work3, work4, work5)
+
+        eventually {
+          server.httpGet(
+            path = s"/$apiPrefix/works?sort=production.dates.from",
+            andExpect = Status.Ok,
+            withJsonBody = s"""
+                              |{
+                              |  ${resultList(apiPrefix, totalResults = 5)},
+                              |  "results": [{
+	                            |  	 "id": "5",
+	                            |  	 "title": "${work5.title}",
+	                            |  	 "type": "Work"
+	                            |  }, {
+	                            |  	 "id": "1",
+	                            |  	 "title": "${work1.title}",
+	                            |  	 "type": "Work"
+	                            |  }, {
+	                            |  	 "id": "3",
+	                            |  	 "title": "${work3.title}",
+	                            |  	 "type": "Work"
+	                            |  }, {
+	                            |  	 "id": "2",
+	                            |  	 "title": "${work2.title}",
+	                            |  	 "type": "Work"
+	                            |  }, {
+	                            |  	 "id": "4",
+	                            |  	 "title": "${work4.title}",
+	                            |  	 "type": "Work"
+	                            |  }]
+                              |}
+          """.stripMargin
+          )
+        }
+    }
+  }
 }
