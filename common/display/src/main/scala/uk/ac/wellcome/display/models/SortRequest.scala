@@ -17,3 +17,7 @@ object SortRequest {
       case _                       => Left(InvalidSortRequest(str))
     }
 }
+
+sealed trait SortingOrder
+case object SortAscending extends SortingOrder
+case object SortDescending extends SortingOrder

@@ -10,7 +10,8 @@ import uk.ac.wellcome.display.models.{
   SortsRequest,
   V1WorksIncludes,
   V2WorksIncludes,
-  WorksIncludes
+  WorksIncludes,
+  SortingOrder
 }
 
 sealed trait ApiRequest {
@@ -52,6 +53,7 @@ case class V2MultipleResultsRequest(
   @QueryParam("items.locations.locationType") itemLocationType: Option[String],
   @QueryParam("production.dates.from") productionDateFrom: Option[LocalDate],
   @QueryParam("production.dates.to") productionDateTo: Option[LocalDate],
+  @QueryParam("sortOrder") sortOrder: Option[SortingOrder],
   @QueryParam() aggregations: Option[AggregationsRequest],
   @QueryParam() sort: Option[SortsRequest],
   @QueryParam _index: Option[String],
