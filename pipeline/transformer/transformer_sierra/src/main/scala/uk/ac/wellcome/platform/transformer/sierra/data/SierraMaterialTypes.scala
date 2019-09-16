@@ -15,16 +15,18 @@ object SierraMaterialTypes {
 
   private lazy val materialTypesJson =
     Source
-      .fromInputStream(getClass.getResourceAsStream("/sierra-material-types.json"))
+      .fromInputStream(
+        getClass.getResourceAsStream("/sierra-material-types.json"))
       .getLines
       .mkString
 
   private lazy val workTypeDescriptions =
     decode[Map[String, WorkTypeDescription]](materialTypesJson) match {
       case Left(error) => throw error
-      case Right(mapping) => mapping
-        .map { case (key, value) => (key.toList -> value) }
-        .collect { case (char :: Nil, value) => (char -> value) }
+      case Right(mapping) =>
+        mapping
+          .map { case (key, value) => (key.toList -> value) }
+          .collect { case (char :: Nil, value) => (char -> value) }
     }
 
   private lazy val unlinkedWorkTypes = workTypeDescriptions
@@ -36,10 +38,11 @@ object SierraMaterialTypes {
   private lazy val linkedWorkTypes = workTypeDescriptions
     .collect { case (id, Linked(_, linksTo)) => id -> linksTo.head }
     .flatMap {
-      case (id, linksTo) => unlinkedWorkTypes.get(linksTo) match {
-        case Some(workType) => Some(id -> workType)
-        case None           => None
-      }
+      case (id, linksTo) =>
+        unlinkedWorkTypes.get(linksTo) match {
+          case Some(workType) => Some(id -> workType)
+          case None           => None
+        }
     }
 
   private lazy val workTypeMap = unlinkedWorkTypes ++ linkedWorkTypes
