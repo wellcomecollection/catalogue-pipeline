@@ -18,6 +18,7 @@ import uk.ac.wellcome.display.models.{
   AggregationRequest,
   ProductionDateFromSortRequest,
   ProductionDateToSortRequest,
+  ProductionDateSortRequest,
   SortRequest,
   SortingOrder,
   WorkTypeAggregationRequest
@@ -113,14 +114,16 @@ class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
     }
 
     val sort = queryOptions.sortBy
-      .flatMap {
-        case ProductionDateFromSortRequest =>
-          Some(FieldSort("production.dates.range.from"))
-        case ProductionDateToSortRequest =>
-          Some(FieldSort("production.dates.range.to"))
-        case _ => None
+      .map {
+        case ProductionDateFromSortRequest => "production.dates.range.from"
+        case ProductionDateToSortRequest => "production.dates.range.to"
+        case ProductionDateSortRequest =>
+          queryOptions.sortOrder match {
+            case SortingOrder.Ascending  => "production.dates.range.to"
+            case SortingOrder.Descending => "production.dates.range.from"
+          }
       }
-      .map { _.order(sortOrder) }
+      .map { FieldSort(_).order(sortOrder) }
 
     val limit = if (aggregations.nonEmpty) 0 else queryOptions.limit
 

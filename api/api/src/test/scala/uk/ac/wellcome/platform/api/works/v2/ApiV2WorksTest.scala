@@ -447,7 +447,7 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
     }
   }
 
-  it("supports production date sorting") {
+  it("supports production date sorting by from date") {
     withV2Api {
       case (indexV2, server: EmbeddedHttpServer) =>
         val work1 = createDatedWork(
@@ -546,6 +546,50 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
 	                            |  	 "type": "Work"
 	                            |  }]
                               |}
+          """.stripMargin
+          )
+        }
+    }
+  }
+
+  it(
+    "supports sorting of dates, with broadly dated works not always high in results"
+  ) {
+    withV2Api {
+      case (indexV2, server: EmbeddedHttpServer) =>
+        val work1 = createDatedWork(dateLabel = "1900", canonicalId="1")
+        val work2 = createDatedWork(dateLabel = "1920", canonicalId="2")
+        val work3 = createDatedWork(dateLabel = "1910-1930", canonicalId="3")
+        insertIntoElasticsearch(indexV2, work1, work2, work3)
+        val result1 =
+          s"""{"id": "1", "title": "${work1.title}", "type": "Work"}"""
+        val result2 =
+          s"""{"id": "2", "title": "${work2.title}", "type": "Work"}"""
+        val result3 =
+          s"""{"id": "3", "title": "${work3.title}", "type": "Work"}"""
+        eventually {
+          server.httpGet(
+            path =
+              s"/$apiPrefix/works?sort=production.dates&sortOrder=asc",
+            andExpect = Status.Ok,
+            withJsonBody = s"""
+              |{
+              |  ${resultList(apiPrefix, totalResults = 3)},
+              |  "results": [${result1}, ${result2}, ${result3}]
+              |}
+          """.stripMargin
+          )
+        }
+        eventually {
+          server.httpGet(
+            path =
+              s"/$apiPrefix/works?sort=production.dates&sortOrder=desc",
+            andExpect = Status.Ok,
+            withJsonBody = s"""
+              |{
+              |  ${resultList(apiPrefix, totalResults = 3)},
+              |  "results": [${result2}, ${result3}, ${result1}]
+              |}
           """.stripMargin
           )
         }
