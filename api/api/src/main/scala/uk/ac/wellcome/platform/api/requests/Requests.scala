@@ -7,6 +7,7 @@ import com.twitter.finatra.request.{QueryParam, RouteParam}
 import com.twitter.finatra.validation.{Max, Min}
 import uk.ac.wellcome.display.models.{
   AggregationsRequest,
+  SortingOrder,
   SortsRequest,
   V1WorksIncludes,
   V2WorksIncludes,
@@ -24,6 +25,7 @@ trait MultipleResultsRequest[W <: WorksIncludes] extends ApiRequest {
   val query: Option[String]
   val aggregations: Option[AggregationsRequest]
   val sort: Option[SortsRequest]
+  val sortOrder: Option[SortingOrder]
   val _index: Option[String]
   val _queryType: Option[String]
   val request: Request
@@ -35,6 +37,7 @@ case class V1MultipleResultsRequest(
   @QueryParam includes: Option[V1WorksIncludes],
   @QueryParam() aggregations: Option[AggregationsRequest],
   @QueryParam() sort: Option[SortsRequest],
+  @QueryParam("sortOrder") sortOrder: Option[SortingOrder],
   @QueryParam query: Option[String],
   @QueryParam _index: Option[String],
   @QueryParam _queryType: Option[String] = None,
@@ -52,6 +55,7 @@ case class V2MultipleResultsRequest(
   @QueryParam("items.locations.locationType") itemLocationType: Option[String],
   @QueryParam("production.dates.from") productionDateFrom: Option[LocalDate],
   @QueryParam("production.dates.to") productionDateTo: Option[LocalDate],
+  @QueryParam("sortOrder") sortOrder: Option[SortingOrder],
   @QueryParam() aggregations: Option[AggregationsRequest],
   @QueryParam() sort: Option[SortsRequest],
   @QueryParam _index: Option[String],

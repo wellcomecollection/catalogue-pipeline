@@ -124,14 +124,16 @@ abstract class WorksController[M <: MultipleResultsRequest[W],
     }
 
     val aggregations = request.aggregations.map(r => r.values).getOrElse(Nil)
-    val sort = request.sort.map(r => r.values).getOrElse(Nil)
+    val sortBy = request.sort.map(r => r.values).getOrElse(Nil)
+    val sortOrder = request.sortOrder.getOrElse(SortingOrder.Ascending)
 
     val worksSearchOptions = WorksSearchOptions(
       filters = buildFilters(request),
       pageSize = pageSize,
       pageNumber = request.page,
       aggregations = aggregations,
-      sort = sort
+      sortBy = sortBy,
+      sortOrder = sortOrder
     )
 
     def searchFunction: (Index, WorksSearchOptions) => Future[
