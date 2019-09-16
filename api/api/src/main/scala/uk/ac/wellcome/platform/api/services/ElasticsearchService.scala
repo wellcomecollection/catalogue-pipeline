@@ -17,8 +17,8 @@ import grizzled.slf4j.Logging
 import uk.ac.wellcome.display.models.{
   AggregationRequest,
   ProductionDateFromSortRequest,
-  ProductionDateToSortRequest,
   ProductionDateSortRequest,
+  ProductionDateToSortRequest,
   SortRequest,
   SortingOrder,
   WorkTypeAggregationRequest
@@ -116,7 +116,7 @@ class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
     val sort = queryOptions.sortBy
       .map {
         case ProductionDateFromSortRequest => "production.dates.range.from"
-        case ProductionDateToSortRequest => "production.dates.range.to"
+        case ProductionDateToSortRequest   => "production.dates.range.to"
         case ProductionDateSortRequest =>
           queryOptions.sortOrder match {
             case SortingOrder.Ascending  => "production.dates.range.to"

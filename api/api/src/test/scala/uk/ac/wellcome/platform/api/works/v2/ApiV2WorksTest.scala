@@ -557,9 +557,9 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
   ) {
     withV2Api {
       case (indexV2, server: EmbeddedHttpServer) =>
-        val work1 = createDatedWork(dateLabel = "1900", canonicalId="1")
-        val work2 = createDatedWork(dateLabel = "1920", canonicalId="2")
-        val work3 = createDatedWork(dateLabel = "1910-1930", canonicalId="3")
+        val work1 = createDatedWork(dateLabel = "1900", canonicalId = "1")
+        val work2 = createDatedWork(dateLabel = "1920", canonicalId = "2")
+        val work3 = createDatedWork(dateLabel = "1910-1930", canonicalId = "3")
         insertIntoElasticsearch(indexV2, work1, work2, work3)
         val result1 =
           s"""{"id": "1", "title": "${work1.title}", "type": "Work"}"""
@@ -569,8 +569,7 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
           s"""{"id": "3", "title": "${work3.title}", "type": "Work"}"""
         eventually {
           server.httpGet(
-            path =
-              s"/$apiPrefix/works?sort=production.dates&sortOrder=asc",
+            path = s"/$apiPrefix/works?sort=production.dates&sortOrder=asc",
             andExpect = Status.Ok,
             withJsonBody = s"""
               |{
@@ -582,8 +581,7 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
         }
         eventually {
           server.httpGet(
-            path =
-              s"/$apiPrefix/works?sort=production.dates&sortOrder=desc",
+            path = s"/$apiPrefix/works?sort=production.dates&sortOrder=desc",
             andExpect = Status.Ok,
             withJsonBody = s"""
               |{
