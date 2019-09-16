@@ -1,45 +1,48 @@
 package uk.ac.wellcome.platform.transformer.sierra.data
 
-import java.io.InputStream
-
-import com.github.tototoshi.csv.CSVReader
 import uk.ac.wellcome.models.work.internal.WorkType
 import uk.ac.wellcome.platform.transformer.sierra.exceptions.SierraTransformerException
+import uk.ac.wellcome.json.JsonUtil._
 
 import scala.io.Source
+import io.circe.parser.decode
 
 object SierraMaterialTypes {
-  private val stream: InputStream =
-    getClass.getResourceAsStream("/sierra-material-types.csv")
-  private val source = Source.fromInputStream(stream)
-  private val csvReader = CSVReader.open(source)
-  private val csvRows = csvReader.all()
 
-  // sierra-material-types.csv is a list of 4-tuples, e.g.:
-  //
-  //
-  //    Books,a,books,Books
-  //    StudentDissertations,w,student-dissertations,Student dissertations
-  //
-  // We care about two parts: the single letter code, which is what we
-  // get back from the Sierra API, and the label.
-  //
-  // A couple of rows don't contain a single letter code -- we ignore them
-  // for now.
-  //
-  private val workTypeMap: Map[Char, WorkType] = csvRows
-    .map { row =>
-      row(1).toList match {
-        case List(char: Char) =>
-          Map(
-            char -> WorkType(id = row(1), label = row(3).trim)
-          )
-        case _ => Map[Char, WorkType]()
+  sealed trait WorkTypeDescription
+  case class Unlinked(label: String) extends WorkTypeDescription
+  case class Linked(label: String, linkTo: String) extends WorkTypeDescription
+
+  private lazy val materialTypesJson =
+    Source
+      .fromInputStream(getClass.getResourceAsStream("/sierra-material-types.json"))
+      .getLines
+      .mkString
+
+  private lazy val workTypeDescriptions =
+    decode[Map[String, WorkTypeDescription]](materialTypesJson) match {
+      case Left(error) => throw error
+      case Right(mapping) => mapping
+        .map { case (key, value) => (key.toList -> value) }
+        .collect { case (char :: Nil, value) => (char -> value) }
+    }
+
+  private lazy val unlinkedWorkTypes = workTypeDescriptions
+    .collect {
+      case (id, Unlinked(label)) =>
+        id -> WorkType(id = id.toString, label = label)
+    }
+
+  private lazy val linkedWorkTypes = workTypeDescriptions
+    .collect { case (id, Linked(_, linksTo)) => id -> linksTo.head }
+    .flatMap {
+      case (id, linksTo) => unlinkedWorkTypes.get(linksTo) match {
+        case Some(workType) => Some(id -> workType)
+        case None           => None
       }
     }
-    .fold(Map()) { (x, y) =>
-      x ++ y
-    }
+
+  private lazy val workTypeMap = unlinkedWorkTypes ++ linkedWorkTypes
 
   def fromCode(code: String): WorkType = {
     code.toList match {
