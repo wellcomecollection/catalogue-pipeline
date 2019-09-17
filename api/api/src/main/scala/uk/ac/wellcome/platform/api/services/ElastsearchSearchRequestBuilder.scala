@@ -44,13 +44,14 @@ case class ElastsearchSearchRequestBuilder(
         )
       )
     case AggregationRequest.Date(interval) =>
-      DateHistogramAggregation("productionDate")
+      DateHistogramAggregation("year")
         .interval(
           interval match {
             case DateInterval.Year => DateHistogramInterval.Year
           }
         )
-        .field("production.dates.from")
+        .field("production.dates.range.from")
+        .minDocCount(1)
   }
 
   lazy val sort = queryOptions.sortBy
