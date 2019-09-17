@@ -1,0 +1,97 @@
+{
+  "a": {
+    "label": "Books",
+    "type": "Unlinked"
+  },
+  "q": {
+    "label": "Digital Images",
+    "type": "Unlinked"
+  },
+  "x": {
+    "label": "E-manuscripts, Asian",
+    "type": "Unlinked"
+  },
+  "l": {
+    "label": "Ephemera",
+    "type": "Unlinked"
+  },
+  "e": {
+    "label": "Maps",
+    "type": "Unlinked"
+  },
+  "k": {
+    "label": "Pictures",
+    "type": "Unlinked"
+  },
+  "w": {
+    "label": "Student dissertations",
+    "type": "Unlinked"
+  },
+  "r": {
+    "label": "3-D Objects",
+    "type": "Unlinked"
+  },
+  "m": {
+    "label": "CD-Roms",
+    "type": "Unlinked"
+  },
+  "v": {
+    "label": "E-books",
+    "type": "Linked",
+    "linkTo": "a"
+  },
+  "s": {
+    "label": "E-sound",
+    "type": "Linked",
+    "linkTo": "i"
+  },
+  "d": { 
+    "label": "Journals",
+    "type": "Unlinked"
+  },
+  "p": { 
+    "label": "Mixed materials",
+    "type": "Unlinked"
+  },
+  "i": {
+    "label": "Audio",
+    "type": "Unlinked"
+  },
+  "g": {
+    "label": "Videos",
+    "type": "Unlinked"
+  },
+  "h": {
+    "label": "Archives and manuscripts",
+    "type": "Unlinked"
+  },
+  "n": {
+    "label": "Film",
+    "type": "Unlinked"
+  },
+  "j": {
+    "label": "Journals",
+    "type": "Unlinked"
+  },
+  "f": {
+    "label": "E-videos",
+    "type": "Linked",
+    "linkTo": "g"
+  },
+  "b": {
+    "label": "Manuscripts, Asian",
+    "type": "Unlinked"
+  },
+  "c": {
+    "label": "Music",
+    "type": "Unlinked"
+  },
+  "u": {
+    "label": "Standing order",
+    "type": "Unlinked"
+  },
+  "z": {
+    "label": "Web sites",
+    "type": "Unlinked"
+  }
+}
