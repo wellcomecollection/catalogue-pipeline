@@ -3,12 +3,13 @@ package uk.ac.wellcome.platform.api.services
 import com.google.inject.{Inject, Singleton}
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.get.GetResponse
-import com.sksamuel.elastic4s.requests.searches.SearchResponse
+import com.sksamuel.elastic4s.requests.searches.{SearchResponse, DateHistogramInterval}
 import com.sksamuel.elastic4s.{ElasticClient, ElasticError, Response}
 import com.sksamuel.elastic4s.requests.searches.SearchRequest
 import com.sksamuel.elastic4s.requests.searches.aggs.{
   CompositeAggregation,
-  TermsValueSource
+  TermsValueSource,
+  DateHistogramAggregation,
 }
 import com.sksamuel.elastic4s.requests.searches.queries.{Query, RangeQuery}
 import com.sksamuel.elastic4s.requests.searches.sort.{FieldSort, SortOrder}
@@ -20,7 +21,7 @@ import uk.ac.wellcome.display.models.{
   ProductionDateToSortRequest,
   SortRequest,
   SortingOrder,
-  WorkTypeAggregationRequest
+  DateInterval
 }
 import uk.ac.wellcome.platform.api.models._
 
@@ -88,51 +89,53 @@ class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
                                  queryOptions: ElasticsearchQueryOptions) = {
     val queryDefinition: Query = buildFilteredQuery(
       maybeWorkQuery = maybeWorkQuery,
-      filters = queryOptions.filters
-    )
-
-    val aggregations = queryOptions.aggregations flatMap {
-      case _: WorkTypeAggregationRequest =>
-        Some(
-          CompositeAggregation(
-            "workType",
-            sources = List(
-              TermsValueSource(
-                name = "label",
-                field = Some("workType.label.raw")),
-              TermsValueSource(name = "id", field = Some("workType.id")),
-              TermsValueSource(
-                name = "type",
-                field = Some("workType.ontologyType"))
-            )
-          ))
-      case _ => None
-    }
-
-    val sortOrder = queryOptions.sortOrder match {
-      case SortingOrder.Ascending  => SortOrder.ASC
-      case SortingOrder.Descending => SortOrder.DESC
-    }
-
-    val sort = queryOptions.sortBy
-      .flatMap {
-        case ProductionDateFromSortRequest =>
-          Some(FieldSort("production.dates.range.from"))
-        case ProductionDateToSortRequest =>
-          Some(FieldSort("production.dates.range.to"))
-        case _ => None
-      }
-      .map { _.order(sortOrder) }
-
-    val limit = if (aggregations.nonEmpty) 0 else queryOptions.limit
-
+      filters = queryOptions.filters)
+    val aggregations = getAggregations(queryOptions)
     search(index)
       .aggs(aggregations)
       .query(queryDefinition)
-      .sortBy(sort ++ sortDefinitions)
-      .limit(limit)
+      .sortBy(getSort(queryOptions) ++ sortDefinitions)
+      .limit(if (aggregations.nonEmpty) 0 else queryOptions.limit)
       .from(queryOptions.from)
   }
+
+  private def getAggregations(queryOptions: ElasticsearchQueryOptions) =
+    queryOptions.aggregations collect {
+      case AggregationRequest.WorkType =>
+        CompositeAggregation(
+          "workType",
+          sources = List(
+            TermsValueSource(
+              name = "label",
+              field = Some("workType.label.raw")),
+            TermsValueSource(name = "id", field = Some("workType.id")),
+            TermsValueSource(
+              name = "type",
+              field = Some("workType.ontologyType"))
+          )
+        )
+      case AggregationRequest.Date(interval) =>
+        DateHistogramAggregation("productionDate")
+          .interval (
+            interval match {
+              case DateInterval.Year => DateHistogramInterval.Year
+            }
+          )
+          .field("production.dates.from")
+    }
+
+  private def getSort(queryOptions: ElasticsearchQueryOptions) =
+    queryOptions.sortBy
+      .collect {
+        case ProductionDateFromSortRequest => "production.dates.range.from"
+        case ProductionDateToSortRequest =>"production.dates.range.to"
+      }
+      .map {
+        FieldSort(_).order(queryOptions.sortOrder match {
+          case SortingOrder.Ascending  => SortOrder.ASC
+          case SortingOrder.Descending => SortOrder.DESC
+        })
+      }
 
   private def toQuery(workFilter: WorkFilter): Query =
     workFilter match {

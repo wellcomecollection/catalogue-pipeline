@@ -25,7 +25,7 @@ import scala.concurrent.Future
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-import uk.ac.wellcome.display.models.WorkTypeAggregationRequest
+import uk.ac.wellcome.display.models.AggregationRequest
 import uk.ac.wellcome.platform.api.models.WorkQuery.MSMBoostQuery
 
 class WorksServiceTest
@@ -420,7 +420,7 @@ class WorksServiceTest
 
           val worksSearchOptions =
             createWorksSearchOptionsWith(
-              aggregations = List(WorkTypeAggregationRequest()))
+              aggregations = List(AggregationRequest.WorkType))
 
           val expectedAggregations = Aggregations(
             Some(

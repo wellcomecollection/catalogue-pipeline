@@ -1,7 +1,8 @@
 package uk.ac.wellcome.platform.api.models
 
 import io.circe.{Decoder, Json}
-import uk.ac.wellcome.models.work.internal.WorkType
+import grizzled.slf4j.Logging
+import uk.ac.wellcome.models.work.internal.{WorkType, Period}
 import uk.ac.wellcome.json.JsonUtil._
 
 import scala.util.{Failure, Success}
@@ -13,34 +14,35 @@ object OntologyType {}
 
 // TODO: Return a `ParseError`s where applicable
 case class Genre(label: String)
-case class Aggregations(workType: Option[Aggregation[WorkType]],
-                        genre: Option[Aggregation[Genre]])
-object Aggregations {
+
+case class Aggregations(workType: Option[Aggregation[WorkType]] = None,
+                        genre: Option[Aggregation[Genre]] = None,
+                        date: Option[Aggregation[Period]] = None)
+
+object Aggregations extends Logging {
   val validAggregationRequests = List("workType", "genre")
 
   def isEmpty(a: Aggregations): Boolean =
     a.workType.isEmpty && a.genre.isEmpty
 
-  def getFromJson[AggregationDataType](json: Json)(
-    implicit decoder: Decoder[AggregationDataType])
-    : Option[Aggregation[AggregationDataType]] = {
-    val maybeEsAggregation = fromJson[EsAggregation](json.toString).toOption
+  def getFromJson[T](json: Json)(
+    implicit decoderT: Decoder[T],
+    decoderEsAgg: Decoder[EsAggregation]): Option[Aggregation[T]] =
+    decoderEsAgg.decodeJson(json).right.toOption.map { esAgg =>
+      Aggregation(
+        esAgg.buckets.flatMap { esAggBucket =>
+          decoderT.decodeJson(esAggBucket.key).right.toOption.map {
+            data => AggregationBucket(data, esAggBucket.doc_count)
+          }
+        }
+      )
+    }
 
-    maybeEsAggregation.map(esAggregation => {
-      val buckets = esAggregation.buckets.flatMap(esAggregationBucket =>
-        fromJson[AggregationDataType](esAggregationBucket.key.toString()) map (
-          data =>
-            AggregationBucket(data, esAggregationBucket.doc_count)) toOption)
-
-      Aggregation(buckets = buckets)
-    })
-  }
-
-  def apply(jsonString: String): Option[Aggregations] = {
-    val json = fromJson[Map[String, Json]](jsonString)
-
-    json match {
-      case Failure(_) => None
+  def apply(jsonString: String): Option[Aggregations] =
+    fromJson[Map[String, Json]](jsonString) match {
+      case Failure(error) =>
+        warn(s"Error decoding elasticsearch json response: ${error}")
+        None
       case Success(jsonMap) =>
         jsonMap.size match {
           case 0 => None
@@ -51,11 +53,12 @@ object Aggregations {
                 .flatMap(json => getFromJson[WorkType](json))
             val genre =
               jsonMap.get("genre").flatMap(json => getFromJson[Genre](json))
+            // val dates =
+            //   jsonMap.get("date").flatMap(json => getFromJson[Genre](json))
 
             Some(Aggregations(workType = workType, genre = genre))
         }
     }
-  }
 }
 
 case class Aggregation[T](buckets: List[AggregationBucket[T]])
