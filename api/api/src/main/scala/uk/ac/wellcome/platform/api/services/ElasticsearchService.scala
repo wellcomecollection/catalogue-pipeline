@@ -3,25 +3,15 @@ package uk.ac.wellcome.platform.api.services
 import com.google.inject.{Inject, Singleton}
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.get.GetResponse
-import com.sksamuel.elastic4s.requests.searches.{SearchResponse, DateHistogramInterval}
+import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import com.sksamuel.elastic4s.{ElasticClient, ElasticError, Response}
-import com.sksamuel.elastic4s.requests.searches.SearchRequest
-import com.sksamuel.elastic4s.requests.searches.aggs.{
-  CompositeAggregation,
-  TermsValueSource,
-  DateHistogramAggregation,
-}
-import com.sksamuel.elastic4s.requests.searches.queries.{Query, RangeQuery}
 import com.sksamuel.elastic4s.requests.searches.sort.{FieldSort, SortOrder}
-import com.sksamuel.elastic4s.{ElasticDate, Index}
+import com.sksamuel.elastic4s.Index
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.display.models.{
   AggregationRequest,
-  ProductionDateFromSortRequest,
-  ProductionDateToSortRequest,
   SortRequest,
-  SortingOrder,
-  DateInterval
+  SortingOrder
 }
 import uk.ac.wellcome.platform.api.models._
 
@@ -73,8 +63,9 @@ class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
   )(index: Index, queryOptions: ElasticsearchQueryOptions)
     : Future[Either[ElasticError, SearchResponse]] = {
 
-    val searchRequest: SearchRequest =
-      buildSearchRequest(index, maybeWorkQuery, sortDefinitions, queryOptions)
+    val searchRequest = ElastsearchSearchRequestBuilder(
+      index, maybeWorkQuery, sortDefinitions, queryOptions
+    ).request
 
     debug(s"Sending ES request: ${searchRequest.show}")
 
@@ -83,93 +74,6 @@ class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
       .map { toEither }
   }
 
-  private def buildSearchRequest(index: Index,
-                                 maybeWorkQuery: Option[WorkQuery],
-                                 sortDefinitions: List[FieldSort],
-                                 queryOptions: ElasticsearchQueryOptions) = {
-    val queryDefinition: Query = buildFilteredQuery(
-      maybeWorkQuery = maybeWorkQuery,
-      filters = queryOptions.filters)
-    val aggregations = getAggregations(queryOptions)
-    search(index)
-      .aggs(aggregations)
-      .query(queryDefinition)
-      .sortBy(getSort(queryOptions) ++ sortDefinitions)
-      .limit(if (aggregations.nonEmpty) 0 else queryOptions.limit)
-      .from(queryOptions.from)
-  }
-
-  private def getAggregations(queryOptions: ElasticsearchQueryOptions) =
-    queryOptions.aggregations collect {
-      case AggregationRequest.WorkType =>
-        CompositeAggregation(
-          "workType",
-          sources = List(
-            TermsValueSource(
-              name = "label",
-              field = Some("workType.label.raw")),
-            TermsValueSource(name = "id", field = Some("workType.id")),
-            TermsValueSource(
-              name = "type",
-              field = Some("workType.ontologyType"))
-          )
-        )
-      case AggregationRequest.Date(interval) =>
-        DateHistogramAggregation("productionDate")
-          .interval (
-            interval match {
-              case DateInterval.Year => DateHistogramInterval.Year
-            }
-          )
-          .field("production.dates.from")
-    }
-
-  private def getSort(queryOptions: ElasticsearchQueryOptions) =
-    queryOptions.sortBy
-      .collect {
-        case ProductionDateFromSortRequest => "production.dates.range.from"
-        case ProductionDateToSortRequest =>"production.dates.range.to"
-      }
-      .map {
-        FieldSort(_).order(queryOptions.sortOrder match {
-          case SortingOrder.Ascending  => SortOrder.ASC
-          case SortingOrder.Descending => SortOrder.DESC
-        })
-      }
-
-  private def toQuery(workFilter: WorkFilter): Query =
-    workFilter match {
-      case ItemLocationTypeFilter(itemLocationTypeIds) =>
-        termsQuery(
-          field = "items.agent.locations.locationType.id",
-          values = itemLocationTypeIds)
-      case WorkTypeFilter(workTypeIds) =>
-        termsQuery(field = "workType.id", values = workTypeIds)
-      case DateRangeFilter(fromDate, toDate) =>
-        val (gte, lte) =
-          (fromDate map ElasticDate.apply, toDate map ElasticDate.apply)
-        boolQuery should (
-          RangeQuery("production.dates.range.from", lte = lte, gte = gte),
-          RangeQuery("production.dates.range.to", lte = lte, gte = gte)
-        )
-    }
-
-  private def buildFilteredQuery(maybeWorkQuery: Option[WorkQuery],
-                                 filters: List[WorkFilter]): Query = {
-    val query = maybeWorkQuery match {
-      case Some(workQuery) =>
-        must(workQuery.query())
-      case None =>
-        boolQuery()
-    }
-
-    val filterDefinitions: List[Query] =
-      filters.map { toQuery } :+ termQuery(
-        field = "type",
-        value = "IdentifiedWork")
-
-    query.filter(filterDefinitions)
-  }
 
   private def toEither[T](response: Response[T]): Either[ElasticError, T] =
     if (response.isError) {

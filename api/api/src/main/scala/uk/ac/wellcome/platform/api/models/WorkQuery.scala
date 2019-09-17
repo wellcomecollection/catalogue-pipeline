@@ -8,7 +8,7 @@ import com.sksamuel.elastic4s.requests.searches.queries.{
 
 sealed trait WorkQuery {
   val queryString: String
-  def query(): Query
+  def query: Query
 }
 
 object WorkQuery {
@@ -28,7 +28,7 @@ object WorkQuery {
   )
 
   case class MSMBoostQuery(queryString: String) extends WorkQuery {
-    override def query(): SimpleStringQuery = {
+    override def query: SimpleStringQuery = {
       SimpleStringQuery(
         queryString,
         fields = defaultBoostedFields,
