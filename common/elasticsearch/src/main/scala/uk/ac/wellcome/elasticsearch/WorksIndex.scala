@@ -4,6 +4,7 @@ import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.mappings.{FieldDefinition, ObjectField}
 
 object WorksIndex {
+  val label = textField("label").fields(keywordField("raw"))
   val license = objectField("license").fields(
     keywordField("id")
   )
@@ -11,8 +12,8 @@ object WorksIndex {
   def sourceIdentifierFields = Seq(
     keywordField("ontologyType"),
     objectField("identifierType").fields(
+      label,
       keywordField("id"),
-      keywordField("label"),
       keywordField("ontologyType")
     ),
     keywordField("value")
@@ -26,9 +27,9 @@ object WorksIndex {
 
   val workType = objectField("workType")
     .fields(
+      label,
       keywordField("ontologyType"),
-      keywordField("id"),
-      keywordField("label")
+      keywordField("id")
     )
 
   def location(fieldName: String = "locations") =
@@ -36,11 +37,11 @@ object WorksIndex {
       keywordField("type"),
       keywordField("ontologyType"),
       objectField("locationType").fields(
+        label,
         keywordField("id"),
-        keywordField("label"),
         keywordField("ontologyType")
       ),
-      keywordField("label"),
+      label,
       textField("url"),
       textField("credit"),
       license
@@ -49,10 +50,10 @@ object WorksIndex {
   def date(fieldName: String) = objectField(fieldName).fields(period)
 
   val period = Seq(
-    textField("label"),
+    label,
     keywordField("ontologyType"),
     objectField("range").fields(
-      textField("label"),
+      label,
       dateField("from"),
       dateField("to"),
       booleanField("inferred")
@@ -60,13 +61,13 @@ object WorksIndex {
   )
 
   val concept = Seq(
-    textField("label"),
+    label,
     keywordField("ontologyType"),
     keywordField("type")
   )
 
   val agent = Seq(
-    textField("label"),
+    label,
     keywordField("type"),
     keywordField("prefix"),
     keywordField("numeration"),
@@ -85,7 +86,7 @@ object WorksIndex {
     )
 
   val subject: Seq[FieldDefinition] = Seq(
-    textField("label"),
+    label,
     keywordField("ontologyType"),
     identified("concepts", rootConcept)
   )
@@ -93,13 +94,13 @@ object WorksIndex {
   def subjects: ObjectField = identified("subjects", subject)
 
   def genre(fieldName: String) = objectField(fieldName).fields(
-    textField("label"),
+    label,
     keywordField("ontologyType"),
     identified("concepts", rootConcept)
   )
 
   def labelledTextField(fieldName: String) = objectField(fieldName).fields(
-    textField("label"),
+    label,
     keywordField("ontologyType")
   )
 
@@ -117,22 +118,22 @@ object WorksIndex {
     textField(name).fields(textField("english").analyzer("english"))
 
   val language = objectField("language").fields(
+    label,
     keywordField("id"),
-    textField("label"),
     keywordField("ontologyType")
   )
 
   val contributors = objectField("contributors").fields(
     identified("agent", agent),
     objectField("roles").fields(
-      textField("label"),
+      label,
       keywordField("ontologyType")
     ),
     keywordField("ontologyType")
   )
 
   val production: ObjectField = objectField("production").fields(
-    textField("label"),
+    label,
     period("places"),
     identified("agents", agent),
     date("dates"),

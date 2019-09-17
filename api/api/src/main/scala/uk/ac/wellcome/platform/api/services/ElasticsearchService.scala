@@ -97,7 +97,9 @@ class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
           CompositeAggregation(
             "workType",
             sources = List(
-              TermsValueSource(name = "label", field = Some("workType.label")),
+              TermsValueSource(
+                name = "label",
+                field = Some("workType.label.raw")),
               TermsValueSource(name = "id", field = Some("workType.id")),
               TermsValueSource(
                 name = "type",
