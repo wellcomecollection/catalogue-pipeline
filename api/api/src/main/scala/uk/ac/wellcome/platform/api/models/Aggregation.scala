@@ -4,7 +4,7 @@ import scala.util.Try
 import io.circe.Decoder
 import java.time.{Instant, LocalDateTime, ZoneOffset}
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.models.work.internal.{WorkType, Period}
+import uk.ac.wellcome.models.work.internal.{Period, WorkType}
 import uk.ac.wellcome.json.JsonUtil._
 
 trait OntologyType {
@@ -24,7 +24,8 @@ object Aggregations extends Logging {
   def apply(jsonString: String): Option[Aggregations] =
     fromJson[EsAggregations](jsonString)
       .collect {
-        case EsAggregations(workType, genre, year) if List(workType, genre, year).flatten.nonEmpty =>
+        case EsAggregations(workType, genre, year)
+            if List(workType, genre, year).flatten.nonEmpty =>
           Some(
             Aggregations(
               workType = getAggregation[WorkType](workType),
@@ -35,7 +36,8 @@ object Aggregations extends Logging {
       }
       .getOrElse { None }
 
-  def getAggregation[T](maybeEsAgg: Option[EsAggregation[T]]): Option[Aggregation[T]] =
+  def getAggregation[T](
+    maybeEsAgg: Option[EsAggregation[T]]): Option[Aggregation[T]] =
     maybeEsAgg.map { esAgg =>
       Aggregation(
         esAgg.buckets.map { esAggBucket =>
@@ -48,8 +50,12 @@ object Aggregations extends Logging {
   implicit val decodePeriod: Decoder[Period] =
     Decoder.decodeLong.emap { epochMilli =>
       Try { Instant.ofEpochMilli(epochMilli) }
-        .map { instant =>  LocalDateTime.ofInstant(instant, ZoneOffset.UTC) }
-        .map { date => Right(Period(date.getYear.toString)) }
+        .map { instant =>
+          LocalDateTime.ofInstant(instant, ZoneOffset.UTC)
+        }
+        .map { date =>
+          Right(Period(date.getYear.toString))
+        }
         .getOrElse { Left("Error decoding") }
     }
 }

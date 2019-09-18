@@ -50,7 +50,8 @@ object DisplayAggregations {
     )
 
   private def displayAggregation[T, D](
-    maybeAgg: Option[Aggregation[T]], display: T => D): Option[DisplayAggregation[D]] =
+    maybeAgg: Option[Aggregation[T]],
+    display: T => D): Option[DisplayAggregation[D]] =
     maybeAgg.map { agg =>
       DisplayAggregation(
         buckets = agg.buckets.map { bucket =>

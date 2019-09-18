@@ -5,18 +5,18 @@ import com.sksamuel.elastic4s.requests.searches.DateHistogramInterval
 import com.sksamuel.elastic4s.requests.searches.SearchRequest
 import com.sksamuel.elastic4s.requests.searches.aggs.{
   CompositeAggregation,
-  TermsValueSource,
   DateHistogramAggregation,
+  TermsValueSource,
 }
 import com.sksamuel.elastic4s.requests.searches.queries.{Query, RangeQuery}
 import com.sksamuel.elastic4s.requests.searches.sort.{FieldSort, SortOrder}
 import com.sksamuel.elastic4s.{ElasticDate, Index}
 import uk.ac.wellcome.display.models.{
   AggregationRequest,
+  DateInterval,
   ProductionDateFromSortRequest,
   ProductionDateToSortRequest,
   SortingOrder,
-  DateInterval,
 }
 
 import uk.ac.wellcome.platform.api.models._
@@ -57,7 +57,7 @@ case class ElastsearchSearchRequestBuilder(
   lazy val sort = queryOptions.sortBy
     .map {
       case ProductionDateFromSortRequest => "production.dates.range.from"
-      case ProductionDateToSortRequest =>"production.dates.range.to"
+      case ProductionDateToSortRequest   => "production.dates.range.to"
     }
     .map { FieldSort(_).order(sortOrder) }
 
@@ -67,7 +67,9 @@ case class ElastsearchSearchRequestBuilder(
   }
 
   lazy val filteredQuery = maybeWorkQuery
-    .map  { workQuery => must(workQuery.query) }
+    .map { workQuery =>
+      must(workQuery.query)
+    }
     .getOrElse { boolQuery }
     .filter {
       (IdentifiedWorkFilter :: queryOptions.filters).map(buildWorkFilterQuery)

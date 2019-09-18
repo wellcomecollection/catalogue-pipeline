@@ -556,8 +556,8 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
     withV2Api {
       case (indexV2, server: EmbeddedHttpServer) =>
         val works = List("1st May 1970", "1970", "1976", "1970-1979")
-          .map( label => createDatedWork(dateLabel = label))
-        insertIntoElasticsearch(indexV2, works:_*)
+          .map(label => createDatedWork(dateLabel = label))
+        insertIntoElasticsearch(indexV2, works: _*)
         eventually {
           server.httpGet(
             path = s"/$apiPrefix/works?aggregations=year",

@@ -14,14 +14,15 @@ object AggregationRequest {
   case object WorkType extends AggregationRequest
 
   case class Date(interval: DateInterval = DateInterval.Year)
-    extends AggregationRequest
+      extends AggregationRequest
 
   def apply(str: String)
     : Either[InvalidAggregationStringKeyRequest, AggregationRequest] =
     str match {
       case "workType" => Right(AggregationRequest.WorkType)
-      case "year"     => Right(AggregationRequest.Date(interval = DateInterval.Year))
-      case _          => Left(InvalidAggregationStringKeyRequest(str))
+      case "year" =>
+        Right(AggregationRequest.Date(interval = DateInterval.Year))
+      case _ => Left(InvalidAggregationStringKeyRequest(str))
     }
 }
 

@@ -64,7 +64,10 @@ class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
     : Future[Either[ElasticError, SearchResponse]] = {
 
     val searchRequest = ElastsearchSearchRequestBuilder(
-      index, maybeWorkQuery, sortDefinitions, queryOptions
+      index,
+      maybeWorkQuery,
+      sortDefinitions,
+      queryOptions
     ).request
 
     debug(s"Sending ES request: ${searchRequest.show}")
@@ -73,7 +76,6 @@ class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
       .execute { searchRequest.trackTotalHits(true) }
       .map { toEither }
   }
-
 
   private def toEither[T](response: Response[T]): Either[ElasticError, T] =
     if (response.isError) {
