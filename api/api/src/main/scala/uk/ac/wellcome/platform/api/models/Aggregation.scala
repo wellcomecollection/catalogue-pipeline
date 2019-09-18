@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.api.models
 
 import scala.util.Try
-import io.circe.{Decoder, Json}
+import io.circe.Decoder
 import java.time.{Instant, LocalDateTime, ZoneOffset}
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.models.work.internal.{WorkType, Period}
@@ -22,23 +22,27 @@ case class Aggregations(workType: Option[Aggregation[WorkType]] = None,
 object Aggregations extends Logging {
 
   def apply(jsonString: String): Option[Aggregations] =
-    fromJson[Map[String, Json]](jsonString)
+    fromJson[EsAggregations](jsonString)
       .collect {
-        case jsonMap if jsonMap.nonEmpty =>
+        case EsAggregations(workType, genre, year) if List(workType, genre, year).flatten.nonEmpty =>
           Some(
             Aggregations(
-              workType = getAggregation[WorkType]("workType", jsonMap),
-              genre    = getAggregation[Genre]("genre", jsonMap),
-              year     = getAggregation[Period]("year", jsonMap),
+              workType = getAggregation[WorkType](workType),
+              genre = getAggregation[Genre](genre),
+              year = getAggregation[Period](year)
             )
           )
       }
       .getOrElse { None }
 
-  def getAggregation[T](key: String, jsonMap: Map[String, Json])(
-    implicit
-    decoder: Decoder[EsAggregation[T]]): Option[Aggregation[T]] =
-    jsonMap.get(key).flatMap(Aggregation.fromJson[T])
+  def getAggregation[T](maybeEsAgg: Option[EsAggregation[T]]): Option[Aggregation[T]] =
+    maybeEsAgg.map { esAgg =>
+      Aggregation(
+        esAgg.buckets.map { esAggBucket =>
+          AggregationBucket(esAggBucket.key, esAggBucket.doc_count)
+        }
+      )
+    }
 
   // Elasticsearch encodes the date key as milliseconds since the epoch
   implicit val decodePeriod: Decoder[Period] =
@@ -51,28 +55,7 @@ object Aggregations extends Logging {
 }
 
 case class Aggregation[T](buckets: List[AggregationBucket[T]])
-
-object Aggregation extends Logging {
-
-  def fromJson[T](json: Json)(
-    implicit
-    decoder: Decoder[EsAggregation[T]]): Option[Aggregation[T]] = {
-    decoder
-      .decodeJson(json)
-      .left.map { error => warn(s"Error decoding ES aggregation: $error") }
-      .toOption
-      .map { esAgg =>
-        Aggregation(
-          esAgg.buckets.map { esAggBucket =>
-            AggregationBucket(esAggBucket.key, esAggBucket.doc_count)
-          }
-        )
-      }
-    }
-}
-
 case class AggregationBucket[T](data: T, count: Int)
-
 
 /**
   * We use these to convert the JSON into Elasticsearch case classes (not supplied via elastic4s)
@@ -101,5 +84,10 @@ case class AggregationBucket[T](data: T, count: Int)
   *   }
   * }
   */
+case class EsAggregations(
+  workType: Option[EsAggregation[WorkType]] = None,
+  genre: Option[EsAggregation[Genre]] = None,
+  year: Option[EsAggregation[Period]] = None,
+)
 case class EsAggregation[T](buckets: List[EsAggregationBucket[T]])
 case class EsAggregationBucket[T](key: T, doc_count: Int)
