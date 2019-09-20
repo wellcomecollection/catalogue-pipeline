@@ -18,8 +18,8 @@ object AggregationRequest {
   def apply(str: String)
     : Either[InvalidAggregationStringKeyRequest, AggregationRequest] =
     str match {
-      case "workType" => Right(AggregationRequest.WorkType)
+      case "workType"         => Right(AggregationRequest.WorkType)
       case "production.dates" => Right(AggregationRequest.Date)
-      case _ => Left(InvalidAggregationStringKeyRequest(str))
+      case _                  => Left(InvalidAggregationStringKeyRequest(str))
     }
 }
