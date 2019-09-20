@@ -22,3 +22,5 @@ case object WorkTypeFilter {
 case class DateRangeFilter(fromDate: Option[LocalDate],
                            toDate: Option[LocalDate])
     extends WorkFilter
+
+case object IdentifiedWorkFilter extends WorkFilter

@@ -6,14 +6,28 @@ case class InvalidAggregationStringKeyRequest(key: String)
     extends InvalidStringKeyException
 
 case class AggregationsRequest(values: List[AggregationRequest])
+
 sealed trait AggregationRequest
-final case class WorkTypeAggregationRequest() extends AggregationRequest
 
 object AggregationRequest {
+
+  case object WorkType extends AggregationRequest
+
+  case class Date(interval: DateInterval = DateInterval.Year)
+      extends AggregationRequest
+
   def apply(str: String)
     : Either[InvalidAggregationStringKeyRequest, AggregationRequest] =
     str match {
-      case "workType" => Right(WorkTypeAggregationRequest())
-      case _          => Left(InvalidAggregationStringKeyRequest(str))
+      case "workType" => Right(AggregationRequest.WorkType)
+      case "year" =>
+        Right(AggregationRequest.Date(interval = DateInterval.Year))
+      case _ => Left(InvalidAggregationStringKeyRequest(str))
     }
+}
+
+sealed trait DateInterval
+
+object DateInterval {
+  object Year extends DateInterval
 }

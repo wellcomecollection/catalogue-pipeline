@@ -1,10 +1,11 @@
 package uk.ac.wellcome.platform.api.models
 
-import io.circe.{Decoder, Json}
-import uk.ac.wellcome.models.work.internal.WorkType
+import scala.util.Try
+import io.circe.Decoder
+import java.time.{Instant, LocalDateTime, ZoneOffset}
+import grizzled.slf4j.Logging
+import uk.ac.wellcome.models.work.internal.{Period, WorkType}
 import uk.ac.wellcome.json.JsonUtil._
-
-import scala.util.{Failure, Success}
 
 trait OntologyType {
   val ontologyType: String
@@ -13,49 +14,50 @@ object OntologyType {}
 
 // TODO: Return a `ParseError`s where applicable
 case class Genre(label: String)
-case class Aggregations(workType: Option[Aggregation[WorkType]],
-                        genre: Option[Aggregation[Genre]])
-object Aggregations {
-  val validAggregationRequests = List("workType", "genre")
 
-  def isEmpty(a: Aggregations): Boolean =
-    a.workType.isEmpty && a.genre.isEmpty
+case class Aggregations(workType: Option[Aggregation[WorkType]] = None,
+                        genre: Option[Aggregation[Genre]] = None,
+                        year: Option[Aggregation[Period]] = None)
 
-  def getFromJson[AggregationDataType](json: Json)(
-    implicit decoder: Decoder[AggregationDataType])
-    : Option[Aggregation[AggregationDataType]] = {
-    val maybeEsAggregation = fromJson[EsAggregation](json.toString).toOption
+object Aggregations extends Logging {
 
-    maybeEsAggregation.map(esAggregation => {
-      val buckets = esAggregation.buckets.flatMap(esAggregationBucket =>
-        fromJson[AggregationDataType](esAggregationBucket.key.toString()) map (
-          data =>
-            AggregationBucket(data, esAggregationBucket.doc_count)) toOption)
+  def apply(jsonString: String): Option[Aggregations] =
+    fromJson[EsAggregations](jsonString)
+      .collect {
+        case EsAggregations(workType, genre, year)
+            if List(workType, genre, year).flatten.nonEmpty =>
+          Some(
+            Aggregations(
+              workType = getAggregation[WorkType](workType),
+              genre = getAggregation[Genre](genre),
+              year = getAggregation[Period](year)
+            )
+          )
+      }
+      .getOrElse { None }
 
-      Aggregation(buckets = buckets)
-    })
-  }
-
-  def apply(jsonString: String): Option[Aggregations] = {
-    val json = fromJson[Map[String, Json]](jsonString)
-
-    json match {
-      case Failure(_) => None
-      case Success(jsonMap) =>
-        jsonMap.size match {
-          case 0 => None
-          case _ =>
-            val workType =
-              jsonMap
-                .get("workType")
-                .flatMap(json => getFromJson[WorkType](json))
-            val genre =
-              jsonMap.get("genre").flatMap(json => getFromJson[Genre](json))
-
-            Some(Aggregations(workType = workType, genre = genre))
+  def getAggregation[T](
+    maybeEsAgg: Option[EsAggregation[T]]): Option[Aggregation[T]] =
+    maybeEsAgg.map { esAgg =>
+      Aggregation(
+        esAgg.buckets.map { esAggBucket =>
+          AggregationBucket(esAggBucket.key, esAggBucket.doc_count)
         }
+      )
     }
-  }
+
+  // Elasticsearch encodes the date key as milliseconds since the epoch
+  implicit val decodePeriod: Decoder[Period] =
+    Decoder.decodeLong.emap { epochMilli =>
+      Try { Instant.ofEpochMilli(epochMilli) }
+        .map { instant =>
+          LocalDateTime.ofInstant(instant, ZoneOffset.UTC)
+        }
+        .map { date =>
+          Right(Period(date.getYear.toString))
+        }
+        .getOrElse { Left("Error decoding") }
+    }
 }
 
 case class Aggregation[T](buckets: List[AggregationBucket[T]])
@@ -88,5 +90,10 @@ case class AggregationBucket[T](data: T, count: Int)
   *   }
   * }
   */
-case class EsAggregation(buckets: List[EsAggregationBucket])
-case class EsAggregationBucket(key: Json, doc_count: Int)
+case class EsAggregations(
+  workType: Option[EsAggregation[WorkType]] = None,
+  genre: Option[EsAggregation[Genre]] = None,
+  year: Option[EsAggregation[Period]] = None,
+)
+case class EsAggregation[T](buckets: List[EsAggregationBucket[T]])
+case class EsAggregationBucket[T](key: T, doc_count: Int)

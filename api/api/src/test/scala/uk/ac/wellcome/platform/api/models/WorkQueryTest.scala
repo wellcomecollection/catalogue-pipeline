@@ -10,7 +10,7 @@ import uk.ac.wellcome.platform.api.models.WorkQuery._
 class WorkQueryTest extends FunSpec with ElasticsearchFixtures {
   it("creates a MSMBoostQuery") {
     assertQuery(
-      MSMBoostQuery("the query").query(),
+      MSMBoostQuery("the query").query,
       """{"query":{"simple_query_string":{"lenient":"true","minimum_should_match":"60%","fields":["*.*","title^9.0","subjects.*^8.0","genres.label^8.0","description^3.0","contributors.*^2.0"],"flags":"PHRASE","query":"the query"}}}"""
     )
   }

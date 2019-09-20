@@ -551,4 +551,49 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
         }
     }
   }
+
+  it("supports aggregating on dates by from year") {
+    withV2Api {
+      case (indexV2, server: EmbeddedHttpServer) =>
+        val works = List("1st May 1970", "1970", "1976", "1970-1979")
+          .map(label => createDatedWork(dateLabel = label))
+        insertIntoElasticsearch(indexV2, works: _*)
+        eventually {
+          server.httpGet(
+            path = s"/$apiPrefix/works?aggregations=year",
+            andExpect = Status.Ok,
+            withJsonBody = s"""
+              |{
+              |  ${resultList(apiPrefix, totalResults = 4)},
+              |  "results": [],
+              |  "aggregations": {
+              |    "type" : "Aggregations",
+              |    "year": {
+              |      "type" : "Aggregation",
+              |      "buckets": [
+              |        {
+              |          "data" : {
+              |            "label": "1970",
+              |            "type": "Period"
+              |          },
+              |          "count" : 3,
+              |          "type" : "AggregationBucket"
+              |        },
+              |        {
+              |          "data" : {
+              |            "label": "1976",
+              |            "type": "Period"
+              |          },
+              |          "count" : 1,
+              |          "type" : "AggregationBucket"
+              |        }
+              |      ]
+              |    }
+              |  }
+              |}
+          """.stripMargin
+          )
+        }
+    }
+  }
 }
