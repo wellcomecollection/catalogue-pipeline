@@ -3,14 +3,11 @@ package uk.ac.wellcome.platform.transformer.sierra
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.exceptions.JsonDecodingError
 import uk.ac.wellcome.models.transformable.SierraTransformable
-import uk.ac.wellcome.models.transformable.sierra.{
-  SierraItemNumber,
-  SierraItemRecord
-}
+import uk.ac.wellcome.models.transformable.sierra.{SierraItemNumber, SierraBibRecord}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.sierra.exceptions.{
-  ShouldNotTransformException,
-  SierraTransformerException
+  SierraTransformerException,
+  ShouldNotTransformException
 }
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData,
@@ -19,33 +16,38 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
 import uk.ac.wellcome.platform.transformer.sierra.transformers._
 import uk.ac.wellcome.platform.transformer.sierra.source.SierraMaterialType._
 
+import grizzled.slf4j.Logging
 import scala.util.{Failure, Success, Try}
 
-class SierraTransformableTransformer
-    extends SierraIdentifiers
-    with SierraContributors
-    with SierraDescription
-    with SierraPhysicalDescription
-    with SierraWorkType
-    with SierraExtent
-    with SierraItems
-    with SierraLanguage
-    with SierraLettering
-    with SierraTitle
-    with SierraAlternativeTitles
-    with SierraLocation
-    with SierraProduction
-    with SierraDimensions
-    with SierraEdition
-    with SierraGenres
-    with SierraMergeCandidates
-    with SierraSubjects {
 
-  def transform(
-    transformable: SierraTransformable,
-    version: Int
-  ): Try[TransformedBaseWork] =
-    doTransform(transformable, version)
+object SierraTransformableTransformer {
+
+  def apply(transformable: SierraTransformable, version: Int): Try[TransformedBaseWork] =
+    new SierraTransformableTransformer(transformable, version).transform
+}
+
+class SierraTransformableTransformer(
+  sierraTransformable: SierraTransformable,
+  version: Int) extends Logging {
+
+  def transform: Try[TransformedBaseWork] =
+    sierraTransformable.maybeBibRecord
+      .map { bibRecord =>
+        debug(s"Attempting to transform ${bibRecord.id}")
+        workFromBibRecord(bibRecord)
+      }
+      .getOrElse {
+        // A merged record can have both bibs and items.  If we only have
+        // the item data so far, we don't have enough to build a Work to show
+        // in the API, so we return an InvisibleWork.
+        debug(s"No bib data for ${sierraTransformable.sierraId}, so skipping")
+        Success(
+          UnidentifiedInvisibleWork(
+            sourceIdentifier = sourceIdentifier,
+            version = version
+          )
+        )
+      }
       .map { transformed =>
         debug(s"Transformed record to $transformed")
         transformed
@@ -56,93 +58,62 @@ class SierraTransformableTransformer
           throw e
       }
 
-  private def doTransform(sierraTransformable: SierraTransformable,
-                          version: Int): Try[TransformedBaseWork] = {
-    val bibId = sierraTransformable.sierraId
-    val sourceIdentifier = SourceIdentifier(
-      identifierType = IdentifierType("sierra-system-number"),
-      ontologyType = "Work",
-      value = bibId.withCheckDigit
-    )
-
-    sierraTransformable.maybeBibRecord
-      .map { bibRecord =>
-        debug(s"Attempting to transform ${bibRecord.id}")
-
-        fromJson[SierraBibData](bibRecord.data)
-          .map { sierraBibData =>
-            val sierraItemDataMap =
-              extractItemData(sierraTransformable.itemRecords)
-
-            if (!(sierraBibData.deleted || sierraBibData.suppressed)) {
-              UnidentifiedWork(
-                sourceIdentifier = sourceIdentifier,
-                otherIdentifiers = getOtherIdentifiers(
-                  bibId = bibId,
-                  bibData = sierraBibData
-                ),
-                mergeCandidates = getMergeCandidates(sierraBibData),
-                title = getTitle(sierraBibData),
-                alternativeTitles = getAlternativeTitles(sierraBibData),
-                workType = getWorkType(sierraBibData),
-                description = getDescription(sierraBibData),
-                physicalDescription = getPhysicalDescription(sierraBibData),
-                extent = getExtent(sierraBibData),
-                lettering = getLettering(sierraBibData),
-                createdDate = None,
-                subjects = getSubjects(bibId, sierraBibData),
-                genres = getGenres(sierraBibData),
-                contributors = getContributors(sierraBibData),
-                thumbnail = None,
-                production = getProduction(bibId, sierraBibData),
-                language = getLanguage(sierraBibData),
-                dimensions = getDimensions(sierraBibData),
-                edition = getEdition(sierraBibData),
-                items = getItems(
-                  bibId = bibId,
-                  bibData = sierraBibData,
-                  itemDataMap = sierraItemDataMap
-                ),
-                itemsV1 = List(),
-                version = version
-              )
-            } else {
-              throw new ShouldNotTransformException(
-                s"Sierra record ${bibRecord.id} is either deleted or suppressed!"
-              )
-            }
-          }
-          .recover {
-            case e: JsonDecodingError =>
-              throw SierraTransformerException(
-                s"Unable to parse bib data for ${bibRecord.id} as JSON: <<${bibRecord.data}>>"
-              )
-            case e: ShouldNotTransformException =>
-              debug(s"Should not transform $bibId: ${e.getMessage}")
-              UnidentifiedInvisibleWork(
-                sourceIdentifier = sourceIdentifier,
-                version = version
-              )
-          }
+  def workFromBibRecord(bibRecord: SierraBibRecord): Try[TransformedBaseWork] =
+    fromJson[SierraBibData](bibRecord.data)
+      .map { bibData =>
+        if (bibData.deleted || bibData.suppressed) {
+          throw new ShouldNotTransformException(
+            s"Sierra record $bibId is either deleted or suppressed!"
+          )
+        }
+        UnidentifiedWork(
+          sourceIdentifier = sourceIdentifier,
+          otherIdentifiers = SierraIdentifiers(bibId, bibData),
+          mergeCandidates = SierraMergeCandidates(bibId, bibData),
+          title = SierraTitle(bibId, bibData),
+          alternativeTitles = SierraAlternativeTitles(bibId, bibData),
+          workType = SierraWorkType(bibId, bibData),
+          description = SierraDescription(bibId, bibData),
+          physicalDescription = SierraPhysicalDescription(bibId, bibData),
+          extent = SierraExtent(bibId, bibData),
+          lettering = SierraLettering(bibId, bibData),
+          createdDate = None,
+          subjects = SierraSubjects(bibId, bibData),
+          genres = SierraGenres(bibId, bibData),
+          contributors = SierraContributors(bibId, bibData),
+          thumbnail = None,
+          production = SierraProduction(bibId, bibData),
+          language = SierraLanguage(bibId, bibData),
+          dimensions = SierraDimensions(bibId, bibData),
+          edition = SierraEdition(bibId, bibData),
+          items = SierraItems(itemDataMap)(bibId, bibData),
+          itemsV1 = Nil,
+          version = version
+        )
       }
-
-      // A merged record can have both bibs and items.  If we only have
-      // the item data so far, we don't have enough to build a Work to show
-      // in the API, so we return an InvisibleWork.
-      .getOrElse {
-        debug(s"No bib data for ${sierraTransformable.sierraId}, so skipping")
-        Success(
+      .recover {
+        case e: JsonDecodingError =>
+          throw SierraTransformerException(
+            s"Unable to parse bib data for ${bibRecord.id} as JSON: <<${bibRecord.data}>>"
+          )
+        case e: ShouldNotTransformException =>
+          debug(s"Should not transform $bibId: ${e.getMessage}")
           UnidentifiedInvisibleWork(
             sourceIdentifier = sourceIdentifier,
             version = version
           )
-        )
       }
-  }
 
-  def extractItemData(itemRecords: Map[SierraItemNumber, SierraItemRecord])
-    : Map[SierraItemNumber, SierraItemData] =
-    itemRecords
+  lazy val bibId = sierraTransformable.sierraId
+
+  lazy val sourceIdentifier = SourceIdentifier(
+    identifierType = IdentifierType("sierra-system-number"),
+    ontologyType = "Work",
+    value = bibId.withCheckDigit
+  )
+
+  lazy val itemDataMap: Map[SierraItemNumber, SierraItemData] =
+    sierraTransformable.itemRecords
       .map { case (id, itemRecord) => (id, itemRecord.data) }
       .map {
         case (id, jsonString) =>
@@ -153,5 +124,4 @@ class SierraTransformableTransformer
                 s"Unable to parse item data for $id as JSON: <<$jsonString>>")
           }
       }
-
 }

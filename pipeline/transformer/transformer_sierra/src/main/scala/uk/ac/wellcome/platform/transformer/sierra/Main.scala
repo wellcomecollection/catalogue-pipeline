@@ -43,7 +43,6 @@ object Main extends WellcomeTypesafeApp {
 
     new SierraTransformerWorkerService(
       messageReceiver = messageReceiver,
-      sierraTransformer = new SierraTransformableTransformer(),
       sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config)
     )
   }

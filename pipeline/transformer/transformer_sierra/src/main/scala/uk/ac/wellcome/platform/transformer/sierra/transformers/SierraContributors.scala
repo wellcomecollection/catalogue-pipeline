@@ -1,12 +1,15 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import uk.ac.wellcome.models.work.internal._
+import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
   SierraBibData
 }
 
-trait SierraContributors extends MarcUtils with SierraAgents {
+object SierraContributors extends SierraTransformer with MarcUtils with SierraAgents {
+
+  type Output = List[Contributor[MaybeDisplayable[AbstractAgent]]]
 
   /* Populate wwork:contributors. Rules:
    *
@@ -30,8 +33,7 @@ trait SierraContributors extends MarcUtils with SierraAgents {
    * https://www.loc.gov/marc/bibliographic/bd710.html
    *
    */
-  def getContributors(bibData: SierraBibData)
-    : List[Contributor[MaybeDisplayable[AbstractAgent]]] =
+  def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
     getPersonContributors(bibData, marcTag = "100") ++
       getOrganisationContributors(bibData, marcTag = "110") ++
       getPersonContributors(bibData, marcTag = "700") ++

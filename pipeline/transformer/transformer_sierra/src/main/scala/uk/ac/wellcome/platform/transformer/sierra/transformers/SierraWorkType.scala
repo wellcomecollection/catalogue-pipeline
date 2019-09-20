@@ -2,9 +2,12 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import uk.ac.wellcome.models.work.internal.WorkType
 import uk.ac.wellcome.platform.transformer.sierra.data.SierraMaterialTypes
+import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 import uk.ac.wellcome.platform.transformer.sierra.source.SierraBibData
 
-trait SierraWorkType {
+object SierraWorkType extends SierraTransformer {
+
+  type Output = Option[WorkType]
 
   /* Populate wwork:workType. Rules:
    *
@@ -21,7 +24,7 @@ trait SierraWorkType {
    *
    * Note: will map to a controlled vocabulary terms in future
    */
-  def getWorkType(bibData: SierraBibData): Option[WorkType] =
+  def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
     bibData.materialType.map { t =>
       SierraMaterialTypes.fromCode(t.code)
     }

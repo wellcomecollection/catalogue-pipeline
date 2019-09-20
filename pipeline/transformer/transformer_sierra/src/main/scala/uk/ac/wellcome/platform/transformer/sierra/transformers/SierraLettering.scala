@@ -1,11 +1,14 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
+import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
   SierraBibData
 }
 
-trait SierraLettering {
+object SierraLettering extends SierraTransformer {
+
+  type Output = Option[String]
 
   // Populate wwork:lettering.
   //
@@ -30,7 +33,7 @@ trait SierraLettering {
   //
   // https://www.loc.gov/marc/bibliographic/bd246.html
   //
-  def getLettering(bibData: SierraBibData): Option[String] = {
+  def apply(bibId: SierraBibNumber, bibData: SierraBibData) = {
     val matchingSubfields = bibData.varFields
       .filter {
         _.marcTag.contains("246")

@@ -11,11 +11,12 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraItemData
 }
 
-trait SierraItems extends Logging with SierraLocation {
-  def getItems(bibId: SierraBibNumber,
-               bibData: SierraBibData,
-               itemDataMap: Map[SierraItemNumber, SierraItemData])
-    : List[MaybeDisplayable[Item]] = {
+case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
+  extends SierraTransformer with Logging with SierraLocation {
+
+  type Output = List[MaybeDisplayable[Item]]
+
+  def apply(bibId: SierraBibNumber, bibData: SierraBibData) = {
     val physicalItems = getPhysicalItems(itemDataMap)
     val maybeDigitalItem = getDigitalItem(bibId = bibId, bibData = bibData)
 

@@ -11,8 +11,11 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData,
   VarField
 }
+import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 
-trait SierraGenres extends MarcUtils with SierraConcepts {
+object SierraGenres extends SierraTransformer with MarcUtils with SierraConcepts {
+
+  type Output = List[Genre[MaybeDisplayable[AbstractConcept]]]
 
   private val marcTag = "655"
 
@@ -46,10 +49,8 @@ trait SierraGenres extends MarcUtils with SierraConcepts {
   //      Note that only concepts from subfield $a are identified; everything
   //      else is unidentified.
   //
-  def getGenres(
-    bibData: SierraBibData): List[Genre[MaybeDisplayable[AbstractConcept]]] = {
+  def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
     getGenresForMarcTag(bibData, marcTag)
-  }
 
   private def getGenresForMarcTag(bibData: SierraBibData, marcTag: String) = {
     val marcVarFields = getMatchingVarFields(bibData, marcTag = marcTag)

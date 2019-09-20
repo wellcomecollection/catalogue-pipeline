@@ -1,9 +1,11 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
-import uk.ac.wellcome.platform.transformer.sierra.source.SierraBibData
-import uk.ac.wellcome.platform.transformer.sierra.source.VarField
+import uk.ac.wellcome.platform.transformer.sierra.source.{SierraBibData, VarField}
+import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 
-trait SierraAlternativeTitles extends MarcUtils {
+object SierraAlternativeTitles extends SierraTransformer with MarcUtils {
+
+   type Output = List[String] 
 
   // Populate work:alternativeTitles
   //
@@ -14,7 +16,7 @@ trait SierraAlternativeTitles extends MarcUtils {
   //
   // 246 is only used when indicator2 is not equal to 6, as this is used for
   // the work:lettering field
-  def getAlternativeTitles(bibData: SierraBibData): List[String] =
+  def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
     getAlternativeTitleFields(bibData).flatMap {
       getSubfieldContents(_, Some("a"))
     }
