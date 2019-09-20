@@ -17,20 +17,20 @@ case class Genre(label: String)
 
 case class Aggregations(workType: Option[Aggregation[WorkType]] = None,
                         genre: Option[Aggregation[Genre]] = None,
-                        year: Option[Aggregation[Period]] = None)
+                        date: Option[Aggregation[Period]] = None)
 
 object Aggregations extends Logging {
 
   def apply(jsonString: String): Option[Aggregations] =
     fromJson[EsAggregations](jsonString)
       .collect {
-        case EsAggregations(workType, genre, year)
-            if List(workType, genre, year).flatten.nonEmpty =>
+        case EsAggregations(workType, genre, date)
+            if List(workType, genre, date).flatten.nonEmpty =>
           Some(
             Aggregations(
               workType = getAggregation[WorkType](workType),
               genre = getAggregation[Genre](genre),
-              year = getAggregation[Period](year)
+              date = getAggregation[Period](date)
             )
           )
       }
@@ -93,7 +93,7 @@ case class AggregationBucket[T](data: T, count: Int)
 case class EsAggregations(
   workType: Option[EsAggregation[WorkType]] = None,
   genre: Option[EsAggregation[Genre]] = None,
-  year: Option[EsAggregation[Period]] = None,
+  date: Option[EsAggregation[Period]] = None,
 )
 case class EsAggregation[T](buckets: List[EsAggregationBucket[T]])
 case class EsAggregationBucket[T](key: T, doc_count: Int)
