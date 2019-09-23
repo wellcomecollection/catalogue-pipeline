@@ -13,12 +13,21 @@ import uk.ac.wellcome.platform.transformer.sierra.transformers.subjects.{
   SierraPersonSubjects
 }
 
-trait SierraSubjects
-    extends SierraConceptSubjects
+object SierraSubjects
+    extends SierraTransformer
+    with SierraConceptSubjects
     with SierraPersonSubjects
     with SierraOrganisationSubjects {
-  def getSubjects(bibId: SierraBibNumber, bibData: SierraBibData)
-    : List[MaybeDisplayable[Subject[MaybeDisplayable[AbstractRootConcept]]]] =
+
+  type Output = List[
+    MaybeDisplayable[
+      Subject[
+        MaybeDisplayable[AbstractRootConcept]
+      ]
+    ]
+  ]
+
+  def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
     getSubjectswithAbstractConcepts(bibData) ++
       getSubjectsWithPerson(bibData) ++
       getSubjectsWithOrganisation(bibId, bibData)

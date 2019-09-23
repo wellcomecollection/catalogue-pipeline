@@ -10,6 +10,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData,
   SierraMaterialType
 }
+import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 import uk.ac.wellcome.platform.transformer.sierra.transformers.parsers.{
   MiroIdParser,
   WellcomeImagesURLParser
@@ -17,12 +18,15 @@ import uk.ac.wellcome.platform.transformer.sierra.transformers.parsers.{
 
 import scala.util.matching.Regex
 
-trait SierraMergeCandidates
-    extends MarcUtils
+object SierraMergeCandidates
+    extends SierraTransformer
+    with MarcUtils
     with WellcomeImagesURLParser
     with MiroIdParser {
 
-  def getMergeCandidates(sierraBibData: SierraBibData): List[MergeCandidate] =
+  type Output = List[MergeCandidate]
+
+  def apply(bibId: SierraBibNumber, sierraBibData: SierraBibData) =
     get776mergeCandidates(sierraBibData) ++
       getSinglePageMiroMergeCandidates(sierraBibData)
 

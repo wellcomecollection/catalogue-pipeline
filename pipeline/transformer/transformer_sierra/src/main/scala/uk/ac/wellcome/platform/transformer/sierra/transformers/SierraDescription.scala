@@ -1,29 +1,14 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
+import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
   SierraBibData
 }
 
-trait SierraDescription {
+object SierraDescription extends SierraTransformer {
 
-  def getSubfields(
-    bibData: SierraBibData,
-    marcTag: String,
-    marcSubfieldTags: List[String]
-  ): List[Map[String, MarcSubfield]] = {
-    val matchingFields = bibData.varFields
-      .filter {
-        _.marcTag.contains(marcTag)
-      }
-
-    matchingFields.map(varField => {
-      varField.subfields
-        .filter(subfield => marcSubfieldTags.contains(subfield.tag))
-        .map(subfield => subfield.tag -> subfield)
-        .toMap
-    })
-  }
+  type Output = Option[String]
 
   // Populate wwork:description.
   //
@@ -38,7 +23,7 @@ trait SierraDescription {
   //
   // https://www.loc.gov/marc/bibliographic/bd520.html
   //
-  def getDescription(bibData: SierraBibData): Option[String] = {
+  def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
     getSubfields(bibData, "520", List("a", "b"))
       .foldLeft[List[String]](Nil)((acc, subfields) => {
 
@@ -59,5 +44,22 @@ trait SierraDescription {
       case Nil  => None
       case list => Some(list.mkString(" "))
     }
+
+  def getSubfields(
+    bibData: SierraBibData,
+    marcTag: String,
+    marcSubfieldTags: List[String]
+  ): List[Map[String, MarcSubfield]] = {
+    val matchingFields = bibData.varFields
+      .filter {
+        _.marcTag.contains(marcTag)
+      }
+
+    matchingFields.map(varField => {
+      varField.subfields
+        .filter(subfield => marcSubfieldTags.contains(subfield.tag))
+        .map(subfield => subfield.tag -> subfield)
+        .toMap
+    })
   }
 }

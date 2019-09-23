@@ -293,7 +293,7 @@ class SierraProductionTest
         val bibId = createSierraBibNumber
 
         val caught = intercept[CataloguingException] {
-          transformer.getProduction(bibId, bibData)
+          SierraProduction(bibId, bibData)
         }
 
         caught.getMessage should startWith("Problem in the Sierra data")
@@ -459,7 +459,7 @@ class SierraProductionTest
       val bibId = createSierraBibNumber
 
       val caught = intercept[CataloguingException] {
-        transformer.getProduction(bibId, bibData)
+        SierraProduction(bibId, bibData)
       }
 
       caught.getMessage should startWith("Problem in the Sierra data")
@@ -683,8 +683,6 @@ class SierraProductionTest
   private def transformToProduction(varFields: List[VarField])
     : List[ProductionEvent[MaybeDisplayable[AbstractAgent]]] = {
     val bibData = createSierraBibDataWith(varFields = varFields)
-    transformer.getProduction(bibId = createSierraBibNumber, bibData)
+    SierraProduction(createSierraBibNumber, bibData)
   }
-
-  val transformer = new SierraProduction {}
 }

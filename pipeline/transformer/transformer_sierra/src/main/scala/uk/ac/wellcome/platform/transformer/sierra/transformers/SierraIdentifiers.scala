@@ -4,7 +4,9 @@ import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 import uk.ac.wellcome.models.work.internal.{IdentifierType, SourceIdentifier}
 import uk.ac.wellcome.platform.transformer.sierra.source.SierraBibData
 
-trait SierraIdentifiers extends MarcUtils {
+object SierraIdentifiers extends SierraTransformer with MarcUtils {
+
+  type Output = List[SourceIdentifier]
 
   // Populate wwork:identifiers.
   //
@@ -18,8 +20,7 @@ trait SierraIdentifiers extends MarcUtils {
   //
   //    Adding other identifiers is out-of-scope for now.
   //
-  def getOtherIdentifiers(bibId: SierraBibNumber,
-                          bibData: SierraBibData): List[SourceIdentifier] = {
+  def apply(bibId: SierraBibNumber, bibData: SierraBibData) = {
     val sierraIdentifier = SourceIdentifier(
       identifierType = IdentifierType("sierra-identifier"),
       ontologyType = "Work",

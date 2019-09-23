@@ -70,11 +70,10 @@ class SierraAlternativeTitlesTest
     getAlternativeTitles(varFields) shouldBe List("A", "B")
   }
 
-  val transformer = new SierraAlternativeTitles {}
-
   private def getAlternativeTitles(varFields: List[VarField]) =
-    transformer getAlternativeTitles (createSierraBibDataWith(
-      varFields = varFields))
+    SierraAlternativeTitles(
+      createSierraBibNumber,
+      createSierraBibDataWith(varFields = varFields))
 
   private def createVarField(
     content: String,

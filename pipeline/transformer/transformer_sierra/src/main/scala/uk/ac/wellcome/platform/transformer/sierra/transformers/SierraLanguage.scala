@@ -2,8 +2,11 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import uk.ac.wellcome.models.work.internal.Language
 import uk.ac.wellcome.platform.transformer.sierra.source.SierraBibData
+import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 
-trait SierraLanguage {
+object SierraLanguage extends SierraTransformer {
+
+  type Output = Option[Language]
 
   // Populate wwork:language.
   //
@@ -15,7 +18,7 @@ trait SierraLanguage {
   //  - These are populated by ISO 639-2 language codes, but we treat them
   //    as opaque identifiers for our purposes.
   //
-  def getLanguage(bibData: SierraBibData): Option[Language] =
+  def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
     bibData.lang.map { lang =>
       Language(
         id = lang.code,

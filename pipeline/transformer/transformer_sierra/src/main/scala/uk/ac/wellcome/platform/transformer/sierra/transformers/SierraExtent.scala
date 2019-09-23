@@ -1,8 +1,11 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import uk.ac.wellcome.platform.transformer.sierra.source.SierraBibData
+import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 
-trait SierraExtent extends MarcUtils {
+object SierraExtent extends SierraTransformer with MarcUtils {
+
+  type Output = Option[String]
 
   // Populate wwork:extent.
   //
@@ -24,7 +27,7 @@ trait SierraExtent extends MarcUtils {
   //
   // https://www.loc.gov/marc/bibliographic/bd300.html
   //
-  def getExtent(bibData: SierraBibData): Option[String] = {
+  def apply(bibId: SierraBibNumber, bibData: SierraBibData) = {
     val matchingSubfields = getMatchingSubfields(
       bibData = bibData,
       marcTag = "300",

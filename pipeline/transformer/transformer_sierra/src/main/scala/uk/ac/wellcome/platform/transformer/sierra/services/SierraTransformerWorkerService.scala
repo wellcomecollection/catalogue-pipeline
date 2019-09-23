@@ -11,7 +11,6 @@ import scala.concurrent.Future
 
 class SierraTransformerWorkerService[MsgDestination, MsgIn](
   messageReceiver: HybridRecordReceiver[MsgDestination, MsgIn],
-  sierraTransformer: SierraTransformableTransformer,
   sqsStream: SQSStream[NotificationMessage]
 ) extends Runnable {
 
@@ -19,5 +18,7 @@ class SierraTransformerWorkerService[MsgDestination, MsgIn](
     sqsStream.foreach(this.getClass.getSimpleName, processMessage)
 
   private def processMessage(message: NotificationMessage): Future[Unit] =
-    messageReceiver.receiveMessage(message, sierraTransformer.transform)
+    messageReceiver.receiveMessage(
+      message,
+      SierraTransformableTransformer.apply)
 }

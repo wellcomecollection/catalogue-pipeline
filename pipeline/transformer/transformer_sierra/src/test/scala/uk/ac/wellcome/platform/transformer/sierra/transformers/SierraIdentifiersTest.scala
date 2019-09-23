@@ -16,7 +16,6 @@ class SierraIdentifiersTest
 
   it("passes through the main identifier from the bib record") {
     val bibId = createSierraBibNumber
-
     val expectedIdentifiers = List(
       SourceIdentifier(
         identifierType = IdentifierType("sierra-identifier"),
@@ -24,16 +23,11 @@ class SierraIdentifiersTest
         value = bibId.withoutCheckDigit
       )
     )
-
-    val otherIdentifiers =
-      transformer.getOtherIdentifiers(bibId, bibData = createSierraBibData)
-
-    otherIdentifiers shouldBe expectedIdentifiers
+    SierraIdentifiers(bibId, createSierraBibData) shouldBe expectedIdentifiers
   }
 
   it("passes through an ISBN identifier if present") {
     val isbn = "1785783033"
-
     val bibData = createSierraBibDataWith(
       varFields = List(
         createVarFieldWith(
@@ -44,12 +38,7 @@ class SierraIdentifiersTest
         )
       )
     )
-
-    val otherIdentifiers = transformer.getOtherIdentifiers(
-      bibId = createSierraBibNumber,
-      bibData = bibData
-    )
-
+    val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
     otherIdentifiers should contain(
       SourceIdentifier(
         identifierType = IdentifierType("isbn"),
@@ -61,7 +50,6 @@ class SierraIdentifiersTest
   it("passes through multiple ISBN identifiers if present") {
     val isbn10 = "1473647649"
     val isbn13 = "978-1473647640"
-
     val bibData = createSierraBibDataWith(
       varFields = List(
         createVarFieldWith(
@@ -78,19 +66,13 @@ class SierraIdentifiersTest
         )
       )
     )
-
-    val otherIdentifiers = transformer.getOtherIdentifiers(
-      bibId = createSierraBibNumber,
-      bibData = bibData
-    )
-
+    val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
     otherIdentifiers should contain(
       SourceIdentifier(
         identifierType = IdentifierType("isbn"),
         ontologyType = "Work",
         value = isbn10
       ))
-
     otherIdentifiers should contain(
       SourceIdentifier(
         identifierType = IdentifierType("isbn"),
@@ -98,6 +80,4 @@ class SierraIdentifiersTest
         value = isbn13
       ))
   }
-
-  val transformer = new Object with SierraIdentifiers
 }

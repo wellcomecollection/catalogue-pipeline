@@ -13,16 +13,14 @@ class SierraPhysicalDescriptionTest
     with MarcGenerators
     with SierraDataGenerators {
 
-  val transformer = new SierraPhysicalDescription {}
-
   it(
     "gets no physical description if there is no MARC field 300 with subfield $b") {
     val bibData = createSierraBibDataWith(varFields = List())
-    transformer.getPhysicalDescription(bibData = bibData) shouldBe None
+    SierraPhysicalDescription(createSierraBibNumber, bibData) shouldBe None
   }
 
   it("extracts physical description from MARC field 300 subfield $b") {
-    val physicalDescription = "Queuing quokkas quarrel about Quirinus Quirrell"
+    val expectedDescription = "Queuing quokkas quarrel about Quirinus Quirrell"
 
     val varFields = List(
       createVarFieldWith(
@@ -34,17 +32,15 @@ class SierraPhysicalDescriptionTest
           ),
           MarcSubfield(
             tag = "b",
-            content = physicalDescription
+            content = expectedDescription
           )
         )
       )
     )
 
     val bibData = createSierraBibDataWith(varFields = varFields)
-
-    transformer
-      .getPhysicalDescription(bibData = bibData)
-      .get shouldBe physicalDescription
+    val bibId = createSierraBibNumber
+    SierraPhysicalDescription(bibId, bibData) shouldBe Some(expectedDescription)
   }
 
   it(
@@ -52,7 +48,7 @@ class SierraPhysicalDescriptionTest
     val physicalDescription1 = "The queer quolls quits and quarrels"
     val physicalDescription2 = "A quintessential quadraped is quick"
 
-    val expectedPhysicalDescription =
+    val expectedDescription =
       s"$physicalDescription1\n\n$physicalDescription2"
 
     val varFields = List(
@@ -81,9 +77,7 @@ class SierraPhysicalDescriptionTest
     )
 
     val bibData = createSierraBibDataWith(varFields = varFields)
-
-    transformer
-      .getPhysicalDescription(bibData = bibData)
-      .get shouldBe expectedPhysicalDescription
+    val bibId = createSierraBibNumber
+    SierraPhysicalDescription(bibId, bibData) shouldBe Some(expectedDescription)
   }
 }

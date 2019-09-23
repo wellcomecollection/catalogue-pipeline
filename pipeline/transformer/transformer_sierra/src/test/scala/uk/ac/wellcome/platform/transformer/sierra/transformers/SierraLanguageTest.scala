@@ -10,11 +10,9 @@ class SierraLanguageTest
     with Matchers
     with SierraDataGenerators {
 
-  val transformer = new SierraLanguage {}
-
   it("ignores records which don't have a lang field") {
     val bibData = createSierraBibDataWith(lang = None)
-    transformer.getLanguage(bibData = bibData) shouldBe None
+    SierraLanguage(createSierraBibNumber, bibData) shouldBe None
   }
 
   it("picks up the language from the lang field") {
@@ -26,7 +24,7 @@ class SierraLanguageTest
         ))
     )
 
-    transformer.getLanguage(bibData = bibData) shouldBe Some(
+    SierraLanguage(createSierraBibNumber, bibData) shouldBe Some(
       Language(
         id = "eng",
         label = "English"

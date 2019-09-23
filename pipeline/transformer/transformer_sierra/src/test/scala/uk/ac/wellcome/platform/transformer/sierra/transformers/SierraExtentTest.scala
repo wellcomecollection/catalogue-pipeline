@@ -13,11 +13,9 @@ class SierraExtentTest
     with MarcGenerators
     with SierraDataGenerators {
 
-  val transformer = new SierraExtent {}
-
   it("gets no extent if there is no MARC field 300 with subfield $$a") {
     val bibData = createSierraBibDataWith(varFields = List())
-    transformer.getExtent(bibData = bibData) shouldBe None
+    SierraExtent(createSierraBibNumber, bibData) shouldBe None
   }
 
   it("extracts extent from MARC field 300 subfield $$a") {
@@ -34,7 +32,7 @@ class SierraExtentTest
     )
 
     val bibData = createSierraBibDataWith(varFields = varFields)
-    transformer.getExtent(bibData = bibData) shouldBe Some(extent)
+    SierraExtent(createSierraBibNumber, bibData) shouldBe Some(extent)
   }
 
   it("extracts an extent where there are multiple MARC field 300 $$a") {
@@ -71,6 +69,6 @@ class SierraExtentTest
     )
 
     val bibData = createSierraBibDataWith(varFields = varFields)
-    transformer.getExtent(bibData = bibData) shouldBe Some(expectedExtent)
+    SierraExtent(createSierraBibNumber, bibData) shouldBe Some(expectedExtent)
   }
 }
