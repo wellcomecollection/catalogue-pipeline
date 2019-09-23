@@ -568,7 +568,7 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
               |  "results": [],
               |  "aggregations": {
               |    "type" : "Aggregations",
-              |    "date": {
+              |    "production.dates": {
               |      "type" : "Aggregation",
               |      "buckets": [
               |        {

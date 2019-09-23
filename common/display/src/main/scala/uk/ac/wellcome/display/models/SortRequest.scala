@@ -6,15 +6,13 @@ case class InvalidSortRequest(key: String) extends InvalidStringKeyException
 
 case class SortsRequest(values: List[SortRequest])
 sealed trait SortRequest
-case object ProductionDateFromSortRequest extends SortRequest
-case object ProductionDateToSortRequest extends SortRequest
+case object ProductionDateSortRequest extends SortRequest
 
 object SortRequest {
   def apply(str: String): Either[InvalidSortRequest, SortRequest] =
     str match {
-      case "production.dates.from" => Right(ProductionDateFromSortRequest)
-      case "production.dates.to"   => Right(ProductionDateToSortRequest)
-      case _                       => Left(InvalidSortRequest(str))
+      case "production.dates" => Right(ProductionDateSortRequest)
+      case _                  => Left(InvalidSortRequest(str))
     }
 }
 
