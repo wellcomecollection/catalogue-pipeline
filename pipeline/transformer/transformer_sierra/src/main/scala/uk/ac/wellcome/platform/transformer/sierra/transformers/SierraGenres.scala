@@ -13,7 +13,10 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
 }
 import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 
-object SierraGenres extends SierraTransformer with MarcUtils with SierraConcepts {
+object SierraGenres
+    extends SierraTransformer
+    with MarcUtils
+    with SierraConcepts {
 
   type Output = List[Genre[MaybeDisplayable[AbstractConcept]]]
 

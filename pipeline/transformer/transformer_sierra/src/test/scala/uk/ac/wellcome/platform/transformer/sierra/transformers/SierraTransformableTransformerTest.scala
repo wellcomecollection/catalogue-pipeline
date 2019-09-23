@@ -936,7 +936,8 @@ class SierraTransformableTransformerTest
       itemRecords = itemRecords
     )
 
-    val triedMaybeWork = SierraTransformableTransformer(sierraTransformable, version = 1)
+    val triedMaybeWork =
+      SierraTransformableTransformer(sierraTransformable, version = 1)
     triedMaybeWork.isSuccess shouldBe true
 
     triedMaybeWork.get shouldBe UnidentifiedInvisibleWork(

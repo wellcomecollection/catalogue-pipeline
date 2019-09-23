@@ -7,7 +7,10 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData
 }
 
-object SierraContributors extends SierraTransformer with MarcUtils with SierraAgents {
+object SierraContributors
+    extends SierraTransformer
+    with MarcUtils
+    with SierraAgents {
 
   type Output = List[Contributor[MaybeDisplayable[AbstractAgent]]]
 

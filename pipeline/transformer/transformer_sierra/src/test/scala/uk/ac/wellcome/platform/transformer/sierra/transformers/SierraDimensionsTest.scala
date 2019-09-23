@@ -15,7 +15,7 @@ class SierraDimensionsTest
 
   it("gets no dimensions if there is no MARC field 300 with subfield $$c") {
     val bibData = createSierraBibDataWith(varFields = List())
-    val bibId  = createSierraBibNumber
+    val bibId = createSierraBibNumber
     SierraDimensions(bibId, bibData) shouldBe None
   }
 
@@ -33,7 +33,7 @@ class SierraDimensionsTest
     )
 
     val bibData = createSierraBibDataWith(varFields = varFields)
-    val bibId  = createSierraBibNumber
+    val bibId = createSierraBibNumber
     SierraDimensions(bibId, bibData) shouldBe Some(dimensions)
   }
 
@@ -60,7 +60,7 @@ class SierraDimensionsTest
     )
 
     val bibData = createSierraBibDataWith(varFields = varFields)
-    val bibId  = createSierraBibNumber
+    val bibId = createSierraBibNumber
     SierraDimensions(bibId, bibData) shouldBe Some(expectedDimensions)
   }
 }

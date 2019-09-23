@@ -1,11 +1,14 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
-import uk.ac.wellcome.platform.transformer.sierra.source.{SierraBibData, VarField}
+import uk.ac.wellcome.platform.transformer.sierra.source.{
+  SierraBibData,
+  VarField
+}
 import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 
 object SierraAlternativeTitles extends SierraTransformer with MarcUtils {
 
-   type Output = List[String] 
+  type Output = List[String]
 
   // Populate work:alternativeTitles
   //

@@ -3,11 +3,14 @@ package uk.ac.wellcome.platform.transformer.sierra
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.exceptions.JsonDecodingError
 import uk.ac.wellcome.models.transformable.SierraTransformable
-import uk.ac.wellcome.models.transformable.sierra.{SierraItemNumber, SierraBibRecord}
+import uk.ac.wellcome.models.transformable.sierra.{
+  SierraBibRecord,
+  SierraItemNumber
+}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.sierra.exceptions.{
-  SierraTransformerException,
-  ShouldNotTransformException
+  ShouldNotTransformException,
+  SierraTransformerException
 }
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData,
@@ -19,16 +22,16 @@ import uk.ac.wellcome.platform.transformer.sierra.source.SierraMaterialType._
 import grizzled.slf4j.Logging
 import scala.util.{Failure, Success, Try}
 
-
 object SierraTransformableTransformer {
 
-  def apply(transformable: SierraTransformable, version: Int): Try[TransformedBaseWork] =
+  def apply(transformable: SierraTransformable,
+            version: Int): Try[TransformedBaseWork] =
     new SierraTransformableTransformer(transformable, version).transform
 }
 
-class SierraTransformableTransformer(
-  sierraTransformable: SierraTransformable,
-  version: Int) extends Logging {
+class SierraTransformableTransformer(sierraTransformable: SierraTransformable,
+                                     version: Int)
+    extends Logging {
 
   def transform: Try[TransformedBaseWork] =
     sierraTransformable.maybeBibRecord

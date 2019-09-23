@@ -14,7 +14,7 @@ import uk.ac.wellcome.platform.transformer.sierra.transformers.subjects.{
 }
 
 object SierraSubjects
-  extends SierraTransformer
+    extends SierraTransformer
     with SierraConceptSubjects
     with SierraPersonSubjects
     with SierraOrganisationSubjects {

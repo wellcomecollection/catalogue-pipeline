@@ -3,9 +3,9 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 import uk.ac.wellcome.platform.transformer.sierra.source.SierraBibData
 
-/** 
- *  Trait for transforming incoming bib data to some output type
- */
+/**
+  *  Trait for transforming incoming bib data to some output type
+  */
 trait SierraTransformer {
 
   type Output

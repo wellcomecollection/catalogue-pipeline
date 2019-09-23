@@ -19,7 +19,7 @@ import uk.ac.wellcome.platform.transformer.sierra.transformers.parsers.{
 import scala.util.matching.Regex
 
 object SierraMergeCandidates
-  extends SierraTransformer
+    extends SierraTransformer
     with MarcUtils
     with WellcomeImagesURLParser
     with MiroIdParser {

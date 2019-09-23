@@ -12,7 +12,9 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
 }
 
 case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
-  extends SierraTransformer with Logging with SierraLocation {
+    extends SierraTransformer
+    with Logging
+    with SierraLocation {
 
   type Output = List[MaybeDisplayable[Item]]
 

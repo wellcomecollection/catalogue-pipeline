@@ -29,7 +29,6 @@ trait SierraTransformableTestBase extends Matchers {
   }
 
   def assertTransformToWorkFails(transformable: SierraTransformable): Unit = {
-    SierraTransformableTransformer(transformable, version = 1)
-      .isSuccess shouldBe false
+    SierraTransformableTransformer(transformable, version = 1).isSuccess shouldBe false
   }
 }
