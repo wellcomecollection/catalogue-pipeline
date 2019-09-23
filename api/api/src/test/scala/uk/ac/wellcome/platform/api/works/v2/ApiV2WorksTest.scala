@@ -560,7 +560,7 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
         insertIntoElasticsearch(indexV2, works: _*)
         eventually {
           server.httpGet(
-            path = s"/$apiPrefix/works?aggregations=year",
+            path = s"/$apiPrefix/works?aggregations=production.dates",
             andExpect = Status.Ok,
             withJsonBody = s"""
               |{
@@ -568,7 +568,7 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
               |  "results": [],
               |  "aggregations": {
               |    "type" : "Aggregations",
-              |    "year": {
+              |    "date": {
               |      "type" : "Aggregation",
               |      "buckets": [
               |        {

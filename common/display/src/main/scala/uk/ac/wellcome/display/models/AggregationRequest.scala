@@ -13,21 +13,13 @@ object AggregationRequest {
 
   case object WorkType extends AggregationRequest
 
-  case class Date(interval: DateInterval = DateInterval.Year)
-      extends AggregationRequest
+  case object Date extends AggregationRequest
 
   def apply(str: String)
     : Either[InvalidAggregationStringKeyRequest, AggregationRequest] =
     str match {
-      case "workType" => Right(AggregationRequest.WorkType)
-      case "year" =>
-        Right(AggregationRequest.Date(interval = DateInterval.Year))
-      case _ => Left(InvalidAggregationStringKeyRequest(str))
+      case "workType"         => Right(AggregationRequest.WorkType)
+      case "production.dates" => Right(AggregationRequest.Date)
+      case _                  => Left(InvalidAggregationStringKeyRequest(str))
     }
-}
-
-sealed trait DateInterval
-
-object DateInterval {
-  object Year extends DateInterval
 }

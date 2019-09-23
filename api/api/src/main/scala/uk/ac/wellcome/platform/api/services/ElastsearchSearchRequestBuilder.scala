@@ -13,7 +13,6 @@ import com.sksamuel.elastic4s.requests.searches.sort.{FieldSort, SortOrder}
 import com.sksamuel.elastic4s.{ElasticDate, Index}
 import uk.ac.wellcome.display.models.{
   AggregationRequest,
-  DateInterval,
   ProductionDateFromSortRequest,
   ProductionDateToSortRequest,
   SortingOrder,
@@ -43,13 +42,9 @@ case class ElastsearchSearchRequestBuilder(
           TermsValueSource("type", field = Some("workType.ontologyType"))
         )
       )
-    case AggregationRequest.Date(interval) =>
-      DateHistogramAggregation("year")
-        .interval(
-          interval match {
-            case DateInterval.Year => DateHistogramInterval.Year
-          }
-        )
+    case AggregationRequest.Date =>
+      DateHistogramAggregation("date")
+        .interval(DateHistogramInterval.Year)
         .field("production.dates.range.from")
         .minDocCount(1)
   }
