@@ -7,10 +7,10 @@ import uk.ac.wellcome.platform.transformer.sierra.generators.{
 }
 
 class SierraNotesTest
-  extends FunSpec
-  with Matchers
-  with MarcGenerators
-  with SierraDataGenerators {
+    extends FunSpec
+    with Matchers
+    with MarcGenerators
+    with SierraDataGenerators {
 
   it("should extract notes from all fields") {
     val notes = List(
@@ -23,7 +23,7 @@ class SierraNotesTest
       "547" -> "note g",
       "562" -> "note h",
     )
-    SierraNotes(bibId, bibData(notes:_*)) shouldBe notes.map(_._2)
+    SierraNotes(bibId, bibData(notes: _*)) shouldBe notes.map(_._2)
   }
 
   it("should extract all notes when duplicate fields") {
@@ -31,7 +31,7 @@ class SierraNotesTest
       "500" -> "note a",
       "500" -> "note b",
     )
-    SierraNotes(bibId, bibData(notes:_*)) shouldBe notes.map(_._2)
+    SierraNotes(bibId, bibData(notes: _*)) shouldBe notes.map(_._2)
   }
 
   it("should not extract notes from non notes fields") {
@@ -39,7 +39,7 @@ class SierraNotesTest
       "100" -> "not a note",
       "502" -> "not a note",
     )
-    SierraNotes(bibId, bibData(notes:_*)) shouldBe Nil
+    SierraNotes(bibId, bibData(notes: _*)) shouldBe Nil
   }
 
   it("should preserve html in notes fields") {
@@ -50,10 +50,10 @@ class SierraNotesTest
   def bibId = createSierraBibNumber
 
   def bibData(notes: (String, String)*) =
-      createSierraBibDataWith(
-        varFields =
-          notes.toList.map { case (tag, value) =>
-            createVarFieldWith(marcTag = tag, content = Some(value))
-          }
-      )
+    createSierraBibDataWith(
+      varFields = notes.toList.map {
+        case (tag, value) =>
+          createVarFieldWith(marcTag = tag, content = Some(value))
+      }
+    )
 }
