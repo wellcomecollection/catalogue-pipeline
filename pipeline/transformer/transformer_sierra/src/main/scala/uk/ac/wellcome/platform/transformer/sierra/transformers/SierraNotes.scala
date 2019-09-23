@@ -12,5 +12,5 @@ object SierraNotes extends SierraTransformer with MarcUtils {
   def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
     notesFields
       .flatMap(getMatchingVarFields(bibData, _))
-      .flatMap(_.content)
+      .flatMap(getSubfieldContents(_, Some("a")))
 }

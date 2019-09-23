@@ -223,7 +223,9 @@ class SierraTransformableTransformerTest
 
     val notesField = createVarFieldWith(
       marcTag = "500",
-      content = Some("It's a note")
+      subfields = List(
+        MarcSubfield(tag = "a", content = "It's a note")
+      )
     )
 
     val marcFields =
