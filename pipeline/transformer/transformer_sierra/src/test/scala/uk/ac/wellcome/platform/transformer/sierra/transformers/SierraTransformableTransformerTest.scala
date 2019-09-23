@@ -226,7 +226,8 @@ class SierraTransformableTransformerTest
       content = Some("It's a note")
     )
 
-    val marcFields = List(productionField, descriptionField, letteringField, notesField)
+    val marcFields =
+      List(productionField, descriptionField, letteringField, notesField)
 
     val data =
       s"""
