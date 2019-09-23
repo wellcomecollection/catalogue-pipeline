@@ -82,6 +82,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     thumbnail: Option[Location] = None,
     contributors: List[Contributor[MaybeDisplayable[AbstractAgent]]] = List(),
     production: List[ProductionEvent[MaybeDisplayable[AbstractAgent]]] = List(),
+    notes: List[String] = Nil,
     items: List[MaybeDisplayable[Item]] = List(),
     itemsV1: List[Identifiable[Item]] = List(),
   ): UnidentifiedWork =
@@ -105,6 +106,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
       language = None,
       dimensions = None,
       edition = None,
+      notes = notes,
       items = items,
       itemsV1 = itemsV1,
       version = version
@@ -134,6 +136,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     contributors: List[Contributor[Displayable[AbstractAgent]]] = List(),
     thumbnail: Option[Location] = None,
     production: List[ProductionEvent[Displayable[AbstractAgent]]] = List(),
+    notes: List[String] = Nil,
     language: Option[Language] = None,
     items: List[Displayable[Item]] = List(),
     itemsV1: List[Identified[Item]] = List(),
@@ -161,6 +164,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
       language = language,
       dimensions = None,
       edition = None,
+      notes = notes,
       items = items,
       itemsV1 = itemsV1,
       version = version,
