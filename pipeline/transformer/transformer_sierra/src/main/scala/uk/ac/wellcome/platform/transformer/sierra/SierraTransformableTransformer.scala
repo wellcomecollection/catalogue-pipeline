@@ -89,6 +89,7 @@ class SierraTransformableTransformer(sierraTransformable: SierraTransformable,
           language = SierraLanguage(bibId, bibData),
           dimensions = SierraDimensions(bibId, bibData),
           edition = SierraEdition(bibId, bibData),
+          notes = SierraNotes(bibId, bibData),
           items = SierraItems(itemDataMap)(bibId, bibData),
           itemsV1 = Nil,
           version = version

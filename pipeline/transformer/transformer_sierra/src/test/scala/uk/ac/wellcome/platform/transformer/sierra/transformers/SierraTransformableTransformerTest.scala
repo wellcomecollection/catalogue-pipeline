@@ -221,7 +221,13 @@ class SierraTransformableTransformerTest
       )
     )
 
-    val marcFields = List(productionField, descriptionField, letteringField)
+    val notesField = createVarFieldWith(
+      marcTag = "500",
+      content = Some("It's a note")
+    )
+
+    val marcFields =
+      List(productionField, descriptionField, letteringField, notesField)
 
     val data =
       s"""
@@ -255,6 +261,7 @@ class SierraTransformableTransformerTest
           function = None
         )
       ),
+      notes = List("It's a note"),
       lettering = Some(lettering)
     )
   }
