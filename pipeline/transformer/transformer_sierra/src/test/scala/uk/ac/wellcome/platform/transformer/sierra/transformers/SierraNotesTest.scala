@@ -5,6 +5,7 @@ import uk.ac.wellcome.platform.transformer.sierra.generators.{
   MarcGenerators,
   SierraDataGenerators
 }
+import uk.ac.wellcome.platform.transformer.sierra.source.MarcSubfield
 
 class SierraNotesTest
     extends FunSpec
@@ -53,7 +54,10 @@ class SierraNotesTest
     createSierraBibDataWith(
       varFields = notes.toList.map {
         case (tag, value) =>
-          createVarFieldWith(marcTag = tag, content = Some(value))
+          createVarFieldWith(
+            marcTag = tag,
+            subfields= List(MarcSubfield(tag = "a", content = value))
+          )
       }
     )
 }
