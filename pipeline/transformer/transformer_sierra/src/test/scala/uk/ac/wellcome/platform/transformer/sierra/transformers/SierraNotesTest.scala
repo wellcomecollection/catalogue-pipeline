@@ -56,7 +56,7 @@ class SierraNotesTest
         case (tag, value) =>
           createVarFieldWith(
             marcTag = tag,
-            subfields= List(MarcSubfield(tag = "a", content = value))
+            subfields = List(MarcSubfield(tag = "a", content = value))
           )
       }
     )
