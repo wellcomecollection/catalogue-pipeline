@@ -40,10 +40,10 @@ class SierraEditionTest
     getEdition(varFields) shouldBe Some("1st edition. 2nd edition.")
   }
 
-  val transformer = new SierraEdition {}
-
   private def getEdition(varFields: List[VarField]) =
-    transformer getEdition (createSierraBibDataWith(varFields = varFields))
+    SierraEdition(
+      createSierraBibNumber,
+      createSierraBibDataWith(varFields = varFields))
 
   private def createVarField(
     content: String,

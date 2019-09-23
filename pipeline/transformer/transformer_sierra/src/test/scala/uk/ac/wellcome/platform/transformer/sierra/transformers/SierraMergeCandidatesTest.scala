@@ -23,8 +23,6 @@ class SierraMergeCandidatesTest
     with MarcGenerators
     with SierraDataGenerators {
 
-  val transformer = new SierraMergeCandidates {}
-
   val mergeCandidateBibNumber = "b21414440"
   val miroID = "A0123456"
 
@@ -36,7 +34,7 @@ class SierraMergeCandidatesTest
         )
       )
 
-      transformer.getMergeCandidates(sierraData) shouldBe
+      SierraMergeCandidates(createSierraBibNumber, sierraData) shouldBe
         physicalAndDigitalSierraMergeCandidate(mergeCandidateBibNumber)
     }
 
@@ -47,7 +45,7 @@ class SierraMergeCandidatesTest
         )
       )
 
-      transformer.getMergeCandidates(sierraData) shouldBe
+      SierraMergeCandidates(createSierraBibNumber, sierraData) shouldBe
         physicalAndDigitalSierraMergeCandidate(mergeCandidateBibNumber)
     }
 
@@ -63,7 +61,7 @@ class SierraMergeCandidatesTest
         )
       )
 
-      transformer.getMergeCandidates(sierraData) shouldBe Nil
+      SierraMergeCandidates(createSierraBibNumber, sierraData) shouldBe Nil
     }
 
     it("ignores values in 776$$w that aren't prefixed with (UkLW)") {
@@ -73,7 +71,7 @@ class SierraMergeCandidatesTest
         )
       )
 
-      transformer.getMergeCandidates(sierraData) shouldBe Nil
+      SierraMergeCandidates(createSierraBibNumber, sierraData) shouldBe Nil
     }
 
     it(
@@ -84,7 +82,7 @@ class SierraMergeCandidatesTest
         )
       )
 
-      transformer.getMergeCandidates(bibData) shouldBe List()
+      SierraMergeCandidates(createSierraBibNumber, bibData) shouldBe Nil
     }
 
     it(
@@ -99,7 +97,7 @@ class SierraMergeCandidatesTest
         )
       )
 
-      transformer.getMergeCandidates(bibData) shouldBe
+      SierraMergeCandidates(createSierraBibNumber, bibData) shouldBe
         physicalAndDigitalSierraMergeCandidate(mergeCandidateBibNumber)
     }
   }
@@ -110,8 +108,8 @@ class SierraMergeCandidatesTest
         urls = List(s"http://wellcomeimages.org/indexplus/image/$miroID.html")
       )
 
-      transformer.getMergeCandidates(bibData) shouldBe singleMiroMergeCandidate(
-        miroID)
+      SierraMergeCandidates(createSierraBibNumber, bibData) shouldBe
+        singleMiroMergeCandidate(miroID)
     }
 
     it(
@@ -123,7 +121,7 @@ class SierraMergeCandidatesTest
         )
       )
 
-      transformer.getMergeCandidates(bibData) shouldBe List()
+      SierraMergeCandidates(createSierraBibNumber, bibData) shouldBe Nil
     }
 
     it("creates a merge candidate if multiple URLs point to the same Miro ID") {
@@ -134,8 +132,8 @@ class SierraMergeCandidatesTest
         )
       )
 
-      transformer.getMergeCandidates(bibData) shouldBe singleMiroMergeCandidate(
-        miroID)
+      SierraMergeCandidates(createSierraBibNumber, bibData) shouldBe
+        singleMiroMergeCandidate(miroID)
     }
 
     it("does not create a merge candidate if the URL is unrecognised") {
@@ -144,7 +142,7 @@ class SierraMergeCandidatesTest
           "http://film.wellcome.ac.uk:15151/mediaplayer.html?fug_7340-1&pw=524ph=600.html")
       )
 
-      transformer.getMergeCandidates(bibData) shouldBe List()
+      SierraMergeCandidates(createSierraBibNumber, bibData) shouldBe Nil
     }
 
     it("creates a merge candidate if the material type is 'Picture'") {
@@ -155,7 +153,7 @@ class SierraMergeCandidatesTest
         )
       )
 
-      transformer.getMergeCandidates(bibData) shouldBe
+      SierraMergeCandidates(createSierraBibNumber, bibData) shouldBe
         singleMiroMergeCandidate(miroID)
     }
 
@@ -166,7 +164,7 @@ class SierraMergeCandidatesTest
         varFields = create089subfieldsWith(List("V 13889"))
       )
 
-      transformer.getMergeCandidates(bibData) shouldBe
+      SierraMergeCandidates(createSierraBibNumber, bibData) shouldBe
         singleMiroMergeCandidate(
           miroID = "V0013889",
           reason = "Single page Miro/Sierra work (secondary source)")
@@ -178,7 +176,7 @@ class SierraMergeCandidatesTest
         varFields = create089subfieldsWith(List("V 13889"))
       )
 
-      transformer.getMergeCandidates(bibData) shouldBe
+      SierraMergeCandidates(createSierraBibNumber, bibData) shouldBe
         singleMiroMergeCandidate(
           miroID = "V0013889",
           reason = "Single page Miro/Sierra work (secondary source)")
@@ -189,7 +187,7 @@ class SierraMergeCandidatesTest
         varFields = create089subfieldsWith(List("V 13889", "V 12"))
       )
 
-      transformer.getMergeCandidates(bibData) shouldBe List()
+      SierraMergeCandidates(createSierraBibNumber, bibData) shouldBe Nil
     }
 
     it("prefers to merge from tag 962 even if there is a 089 tag") {
@@ -199,7 +197,7 @@ class SierraMergeCandidatesTest
             ++ create089subfieldsWith(List("V 13889"))
       )
 
-      transformer.getMergeCandidates(bibData) shouldBe
+      SierraMergeCandidates(createSierraBibNumber, bibData) shouldBe
         singleMiroMergeCandidate(miroID)
     }
 
@@ -212,7 +210,7 @@ class SierraMergeCandidatesTest
             ++ create089subfieldsWith(List("V 13889"))
       )
 
-      transformer.getMergeCandidates(bibData) shouldBe List()
+      SierraMergeCandidates(createSierraBibNumber, bibData) shouldBe Nil
     }
 
     // - - - - - - -  Material type - - - - - - -
@@ -221,7 +219,7 @@ class SierraMergeCandidatesTest
         varFields = create962subfieldsForWellcomeImageUrl(miroID)
       )
 
-      transformer.getMergeCandidates(bibData) shouldBe
+      SierraMergeCandidates(createSierraBibNumber, bibData) shouldBe
         singleMiroMergeCandidate(miroID)
     }
 
@@ -230,7 +228,7 @@ class SierraMergeCandidatesTest
         varFields = create962subfieldsForWellcomeImageUrl(miroID)
       )
 
-      transformer.getMergeCandidates(bibData) shouldBe
+      SierraMergeCandidates(createSierraBibNumber, bibData) shouldBe
         singleMiroMergeCandidate(miroID)
     }
 
@@ -240,7 +238,7 @@ class SierraMergeCandidatesTest
         varFields = create962subfieldsForWellcomeImageUrl(miroID),
         materialTypeCode = 'x')
 
-      transformer.getMergeCandidates(bibData) shouldBe List()
+      SierraMergeCandidates(createSierraBibNumber, bibData) shouldBe Nil
     }
   }
 
@@ -260,12 +258,13 @@ class SierraMergeCandidatesTest
         physicalAndDigitalSierraMergeCandidate(mergeCandidateBibNumber) ++
           singleMiroMergeCandidate(miroID)
 
-      transformer.getMergeCandidates(sierraData) shouldBe expectedMergeCandidates
+      SierraMergeCandidates(createSierraBibNumber, sierraData) shouldBe
+        expectedMergeCandidates
     }
 
     it("returns an empty list if there is no MARC tag 776 or 962") {
       val sierraData = createSierraBibDataWith(varFields = List())
-      transformer.getMergeCandidates(sierraData) shouldBe Nil
+      SierraMergeCandidates(createSierraBibNumber, sierraData) shouldBe Nil
     }
   }
 

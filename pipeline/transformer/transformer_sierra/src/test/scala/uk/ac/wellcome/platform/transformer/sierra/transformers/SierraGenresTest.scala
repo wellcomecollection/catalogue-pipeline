@@ -251,8 +251,7 @@ class SierraGenresTest
       )
     )
 
-    val actualSourceIdentifiers = transformer
-      .getGenres(bibData)
+    val actualSourceIdentifiers = SierraGenres(createSierraBibNumber, bibData)
       .map { _.concepts.head }
       .map {
         case Identifiable(_: Concept, sourceIdentifier, _, _) =>
@@ -263,11 +262,9 @@ class SierraGenresTest
     expectedSourceIdentifiers shouldBe actualSourceIdentifiers
   }
 
-  private val transformer = new SierraGenres {}
-
   private def assertExtractsGenres(
     bibData: SierraBibData,
     expected: List[Genre[MaybeDisplayable[AbstractConcept]]]) = {
-    transformer.getGenres(bibData) shouldBe expected
+    SierraGenres(createSierraBibNumber, bibData) shouldBe expected
   }
 }

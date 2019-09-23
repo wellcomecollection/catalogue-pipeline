@@ -10,12 +10,10 @@ import scala.util.Try
 
 trait SierraTransformableTestBase extends Matchers {
 
-  val transformer: SierraTransformableTransformer
-
   def transformToWork(
     transformable: SierraTransformable): TransformedBaseWork = {
     val triedWork: Try[TransformedBaseWork] =
-      transformer.transform(transformable, version = 1)
+      SierraTransformableTransformer(transformable, version = 1)
 
     if (triedWork.isFailure) {
       triedWork.failed.get.printStackTrace()
@@ -31,8 +29,7 @@ trait SierraTransformableTestBase extends Matchers {
   }
 
   def assertTransformToWorkFails(transformable: SierraTransformable): Unit = {
-    transformer
-      .transform(transformable, version = 1)
+    SierraTransformableTransformer(transformable, version = 1)
       .isSuccess shouldBe false
   }
 }

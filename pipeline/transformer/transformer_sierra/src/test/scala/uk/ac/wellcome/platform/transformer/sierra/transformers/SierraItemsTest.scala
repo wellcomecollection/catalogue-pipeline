@@ -15,8 +15,6 @@ import uk.ac.wellcome.platform.transformer.sierra.generators.SierraDataGenerator
 
 class SierraItemsTest extends FunSpec with Matchers with SierraDataGenerators {
 
-  val transformer = new Object with SierraItems
-
   it("creates both forms of the Sierra ID in 'identifiers'") {
     val itemData = createSierraItemData
     val itemId = createSierraItemNumber
@@ -230,9 +228,5 @@ class SierraItemsTest extends FunSpec with Matchers with SierraDataGenerators {
     bibData: SierraBibData = createSierraBibData,
     itemDataMap: Map[SierraItemNumber, SierraItemData] = Map())
     : List[MaybeDisplayable[Item]] =
-    transformer.getItems(
-      bibId = bibId,
-      bibData = bibData,
-      itemDataMap = itemDataMap
-    )
+    SierraItems(itemDataMap)(bibId, bibData)
 }

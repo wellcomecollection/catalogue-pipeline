@@ -17,8 +17,6 @@ class SierraContributorsTest
     with MarcGenerators
     with SierraDataGenerators {
 
-  val transformer = new SierraContributors {}
-
   it("gets an empty contributor list from empty bib data") {
     transformAndCheckContributors(
       varFields = List(),
@@ -121,7 +119,7 @@ class SierraContributorsTest
       )
 
       val bibData = createSierraBibDataWith(varFields = varFields)
-      val contributors = transformer.getContributors(bibData)
+      val contributors = SierraContributors(createSierraBibNumber, bibData)
       contributors should have size 1
       val contributor = contributors.head
 
@@ -579,7 +577,8 @@ class SierraContributorsTest
     varFields: List[VarField],
     expectedContributors: List[Contributor[MaybeDisplayable[AbstractAgent]]]
   ) = {
+    val bibId = createSierraBibNumber
     val bibData = createSierraBibDataWith(varFields = varFields)
-    transformer.getContributors(bibData) shouldBe expectedContributors
+    SierraContributors(bibId, bibData) shouldBe expectedContributors
   }
 }

@@ -13,11 +13,10 @@ class SierraDimensionsTest
     with MarcGenerators
     with SierraDataGenerators {
 
-  val transformer = new SierraDimensions {}
-
   it("gets no dimensions if there is no MARC field 300 with subfield $$c") {
     val bibData = createSierraBibDataWith(varFields = List())
-    transformer.getDimensions(bibData = bibData) shouldBe None
+    val bibId  = createSierraBibNumber
+    SierraDimensions(bibId, bibData) shouldBe None
   }
 
   it("extracts dimensions from MARC field 300 subfield $$c") {
@@ -34,7 +33,8 @@ class SierraDimensionsTest
     )
 
     val bibData = createSierraBibDataWith(varFields = varFields)
-    transformer.getDimensions(bibData = bibData) shouldBe Some(dimensions)
+    val bibId  = createSierraBibNumber
+    SierraDimensions(bibId, bibData) shouldBe Some(dimensions)
   }
 
   it("extracts an dimensions where there are multiple MARC field 300 $$c") {
@@ -60,7 +60,7 @@ class SierraDimensionsTest
     )
 
     val bibData = createSierraBibDataWith(varFields = varFields)
-    transformer.getDimensions(bibData = bibData) shouldBe Some(
-      expectedDimensions)
+    val bibId  = createSierraBibNumber
+    SierraDimensions(bibId, bibData) shouldBe Some(expectedDimensions)
   }
 }

@@ -107,13 +107,11 @@ class SierraLetteringTest
     )
   }
 
-  val transformer = new SierraLettering {}
-
   private def assertFindsCorrectLettering(
     varFields: List[VarField],
     expectedLettering: Option[String]
   ) = {
     val bibData = createSierraBibDataWith(varFields = varFields)
-    transformer.getLettering(bibData = bibData) shouldBe expectedLettering
+    SierraLettering(createSierraBibNumber, bibData) shouldBe expectedLettering
   }
 }

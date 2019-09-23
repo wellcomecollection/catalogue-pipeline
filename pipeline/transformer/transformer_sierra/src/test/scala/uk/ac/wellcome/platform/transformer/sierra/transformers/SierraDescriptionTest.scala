@@ -88,13 +88,12 @@ class SierraDescriptionTest
     )
   }
 
-  val transformer = new SierraDescription {}
-
   private def assertFindsCorrectDescription(
     varFields: List[VarField],
     expectedDescription: Option[String]
   ) = {
     val bibData = createSierraBibDataWith(varFields = varFields)
-    transformer.getDescription(bibData = bibData) shouldBe expectedDescription
+    val bibId = createSierraBibNumber
+    SierraDescription(bibId, bibData) shouldBe expectedDescription
   }
 }

@@ -105,7 +105,6 @@ class SierraTransformerIntegrationTest
         withSQSStream[NotificationMessage, R](queue) { sqsStream =>
           val workerService = new SierraTransformerWorkerService(
             messageReceiver = messageReceiver,
-            sierraTransformer = new SierraTransformableTransformer,
             sqsStream = sqsStream
           )
           workerService.run()

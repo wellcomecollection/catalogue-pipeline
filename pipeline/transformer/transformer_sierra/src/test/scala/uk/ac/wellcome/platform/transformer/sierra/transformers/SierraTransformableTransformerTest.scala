@@ -23,7 +23,6 @@ class SierraTransformableTransformerTest
     with SierraGenerators
     with SierraTransformableTestBase
     with WorksGenerators {
-  val transformer = new SierraTransformableTransformer
 
   it("performs a transformation on a work with physical items") {
     val itemRecords = List(
@@ -75,7 +74,7 @@ class SierraTransformableTransformerTest
       label = "Pictures"
     )
 
-    val triedWork = transformer.transform(
+    val triedWork = SierraTransformableTransformer(
       createSierraTransformableWith(id, Some(bibRecord)),
       1)
     triedWork.isSuccess shouldBe true
@@ -863,7 +862,7 @@ class SierraTransformableTransformerTest
         )
       )
 
-      val result = transformer.transform(transformable, version = 1)
+      val result = SierraTransformableTransformer(transformable, version = 1)
       result.isFailure shouldBe true
       result.failed.get shouldBe a[SierraTransformerException]
       result.failed.get
@@ -885,7 +884,7 @@ class SierraTransformableTransformerTest
         )
       )
 
-      val result = transformer.transform(transformable, version = 1)
+      val result = SierraTransformableTransformer(transformable, version = 1)
       result.isFailure shouldBe true
       result.failed.get shouldBe a[SierraTransformerException]
       result.failed.get
@@ -902,7 +901,7 @@ class SierraTransformableTransformerTest
         bibRecord = bibRecord
       )
 
-      val result = transformer.transform(transformable, version = 1)
+      val result = SierraTransformableTransformer(transformable, version = 1)
       result.isFailure shouldBe true
       result.failed.get shouldBe a[SierraTransformerException]
       result.failed.get
@@ -937,7 +936,7 @@ class SierraTransformableTransformerTest
       itemRecords = itemRecords
     )
 
-    val triedMaybeWork = transformer.transform(sierraTransformable, version = 1)
+    val triedMaybeWork = SierraTransformableTransformer(sierraTransformable, version = 1)
     triedMaybeWork.isSuccess shouldBe true
 
     triedMaybeWork.get shouldBe UnidentifiedInvisibleWork(

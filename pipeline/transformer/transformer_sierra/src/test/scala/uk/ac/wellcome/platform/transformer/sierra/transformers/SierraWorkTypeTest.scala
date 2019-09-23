@@ -10,11 +10,10 @@ class SierraWorkTypeTest
     with Matchers
     with SierraDataGenerators {
 
-  val transformer = new SierraWorkType {}
-
   it("extracts WorkType from bib records") {
     val workTypeId = "a"
     val sierraValue = "Books"
+    val bibId = createSierraBibNumber
 
     val bibData = createSierraBibDataWith(
       materialType = Some(
@@ -27,6 +26,6 @@ class SierraWorkTypeTest
       label = sierraValue
     )
 
-    transformer.getWorkType(bibData = bibData) shouldBe Some(expectedWorkType)
+    SierraWorkType(bibId, bibData) shouldBe Some(expectedWorkType)
   }
 }
