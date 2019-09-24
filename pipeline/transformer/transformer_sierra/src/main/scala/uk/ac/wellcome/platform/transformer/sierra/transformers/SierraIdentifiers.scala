@@ -32,8 +32,7 @@ object SierraIdentifiers extends SierraTransformer with MarcUtils {
         bibData = bibData,
         marcTag = "020",
         marcSubfieldTag = "a"
-      )
-        .map { _.content }
+      ).map { _.content }
         .map { value =>
           SourceIdentifier(
             identifierType = IdentifierType("isbn"),

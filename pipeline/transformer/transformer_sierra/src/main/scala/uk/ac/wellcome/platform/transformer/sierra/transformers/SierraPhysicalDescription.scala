@@ -35,15 +35,16 @@ object SierraPhysicalDescription extends SierraTransformer with MarcUtils {
   //
   def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
     physicalDescriptionFields
-      .flatMap { case (tag, subfieldTag) =>
-        getMatchingSubfields(
-          bibData = bibData,
-          marcTag = tag,
-          marcSubfieldTag = subfieldTag
-        )
+      .flatMap {
+        case (tag, subfieldTag) =>
+          getMatchingSubfields(
+            bibData = bibData,
+            marcTag = tag,
+            marcSubfieldTag = subfieldTag
+          )
       }
       .map(_.content) match {
-        case Nil => None
-        case contents => Some(contents.mkString("\n"))
-      }
+      case Nil      => None
+      case contents => Some(contents.mkString("\n"))
+    }
 }

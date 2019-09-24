@@ -20,10 +20,9 @@ trait MarcUtils {
           }
       }
 
-  def getMatchingSubfields(
-    bibData: SierraBibData,
-    marcTag: String,
-    marcSubfieldTags: List[String]): List[MarcSubfield] =
+  def getMatchingSubfields(bibData: SierraBibData,
+                           marcTag: String,
+                           marcSubfieldTags: List[String]): List[MarcSubfield] =
     getMatchingSubfieldLists(
       bibData = bibData,
       marcTag = marcTag,

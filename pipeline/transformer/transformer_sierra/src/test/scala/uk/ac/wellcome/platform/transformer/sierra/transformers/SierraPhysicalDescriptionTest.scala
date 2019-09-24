@@ -16,9 +16,8 @@ class SierraPhysicalDescriptionTest
     with Matchers
     with MarcGenerators
     with SierraDataGenerators {
-  
-  it(
-    "gets no physical description if there is no MARC field 300 / 563") {
+
+  it("gets no physical description if there is no MARC field 300 / 563") {
     val field = varField(
       "500",
       MarcSubfield("b", "The edifying extent of early emus")
@@ -62,8 +61,7 @@ class SierraPhysicalDescriptionTest
     SierraPhysicalDescription(bibId, bibData(field)) shouldBe Some(description)
   }
 
-  it(
-    "extracts a physical description where there both MARC field 300 and 563") {
+  it("extracts a physical description where there both MARC field 300 and 563") {
     val descriptionA = "The queer quolls quits and quarrels"
     val descriptionB = "A quintessential quadraped is quick"
     val expectedDescription = s"$descriptionA\n$descriptionB"
