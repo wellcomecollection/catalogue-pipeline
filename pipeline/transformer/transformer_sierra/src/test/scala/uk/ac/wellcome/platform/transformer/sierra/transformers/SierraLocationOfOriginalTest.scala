@@ -17,7 +17,7 @@ class SierraLocationOfOriginalTest
     with MarcGenerators
     with SierraDataGenerators {
 
-  val content = "cite as content"
+  val content = "location of original content"
 
   it("should extract locationOfOriginal from 535") {
     SierraLocationOfOriginal(bibId, bibData(content)) shouldBe Some(content)
