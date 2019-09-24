@@ -25,29 +25,32 @@ class SierraCiteAsTest
 
   it("should extract first citeAs from 524 when multiple defined") {
     SierraCiteAs(
-      bibId, bibData(varField(content), varField("More"))
+      bibId,
+      bibData(varField(content), varField("More"))
     ) shouldBe Some(content)
   }
 
   it("should not extract citeAs when incorrect varfield") {
-    SierraCiteAs(
-      bibId, bibData(content, tag = "500")) shouldBe None
+    SierraCiteAs(bibId, bibData(content, tag = "500")) shouldBe None
   }
 
   it("should not extract citeAs when incorrect subfield") {
-    SierraCiteAs(
-      bibId, bibData(content, subfieldTag = "b")) shouldBe None
+    SierraCiteAs(bibId, bibData(content, subfieldTag = "b")) shouldBe None
   }
 
   def bibId = createSierraBibNumber
 
-  def bibData(content: String, tag: String = "524", subfieldTag: String = "a"): SierraBibData =
+  def bibData(content: String,
+              tag: String = "524",
+              subfieldTag: String = "a"): SierraBibData =
     bibData(varField(content, tag, subfieldTag))
 
   def bibData(varFields: VarField*): SierraBibData =
     createSierraBibDataWith(varFields = varFields.toList)
 
-  def varField(content: String, tag: String = "524", subfieldTag: String = "a") =
+  def varField(content: String,
+               tag: String = "524",
+               subfieldTag: String = "a") =
     createVarFieldWith(
       marcTag = tag,
       subfields = List(MarcSubfield(tag = subfieldTag, content = content))
