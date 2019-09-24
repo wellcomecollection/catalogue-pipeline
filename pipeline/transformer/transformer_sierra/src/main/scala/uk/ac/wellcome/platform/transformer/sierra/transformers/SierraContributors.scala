@@ -55,35 +55,34 @@ object SierraContributors
       bibData,
       marcTag = marcTag,
       marcSubfieldTags = List("a", "b", "c", "d", "e", "t", "0")
-    )
-      .flatMap { subfields: List[MarcSubfield] =>
-        val hasSubfieldT = subfields.exists {
-          _.tag == "t"
-        }
-        val roles = getContributionRoles(subfields)
-
-        val maybeAgent = if (hasSubfieldT) {
-          getLabel(subfields)
-            .map {
-              Agent(_)
-            }
-            .map { agent =>
-              identify(subfields, agent, "Agent")
-            }
-        } else {
-          getPerson(subfields, normalisePerson = true)
-            .map { person =>
-              identify(subfields, person, "Person")
-            }
-        }
-
-        maybeAgent map { agent =>
-          Contributor(
-            agent = agent,
-            roles = roles
-          )
-        }
+    ).flatMap { subfields: List[MarcSubfield] =>
+      val hasSubfieldT = subfields.exists {
+        _.tag == "t"
       }
+      val roles = getContributionRoles(subfields)
+
+      val maybeAgent = if (hasSubfieldT) {
+        getLabel(subfields)
+          .map {
+            Agent(_)
+          }
+          .map { agent =>
+            identify(subfields, agent, "Agent")
+          }
+      } else {
+        getPerson(subfields, normalisePerson = true)
+          .map { person =>
+            identify(subfields, person, "Person")
+          }
+      }
+
+      maybeAgent map { agent =>
+        Contributor(
+          agent = agent,
+          roles = roles
+        )
+      }
+    }
 
   /* For a given MARC tag (110 or 710), return a list of all the Contributor[Organisation] instances
    * this MARC tag represents.
@@ -95,18 +94,17 @@ object SierraContributors
       bibData,
       marcTag = marcTag,
       marcSubfieldTags = List("a", "b", "c", "d", "e", "0")
-    )
-      .flatMap { subfields: List[MarcSubfield] =>
-        val roles = getContributionRoles(subfields)
-        val maybeAgent = getOrganisation(subfields)
+    ).flatMap { subfields: List[MarcSubfield] =>
+      val roles = getContributionRoles(subfields)
+      val maybeAgent = getOrganisation(subfields)
 
-        maybeAgent.map { agent =>
-          Contributor(
-            agent = identify(subfields, agent, "Organisation"),
-            roles = roles
-          )
-        }
+      maybeAgent.map { agent =>
+        Contributor(
+          agent = identify(subfields, agent, "Organisation"),
+          roles = roles
+        )
       }
+    }
 
   private def getMeetingContributors(
     bibData: SierraBibData,
@@ -115,18 +113,17 @@ object SierraContributors
       bibData,
       marcTag = marcTag,
       marcSubfieldTags = List("a", "c", "d", "j", "t", "0")
-    )
-      .flatMap { subfields: List[MarcSubfield] =>
-        val roles = getContributionRoles(subfields, "j")
-        val maybeAgent = getMeeting(subfields)
+    ).flatMap { subfields: List[MarcSubfield] =>
+      val roles = getContributionRoles(subfields, "j")
+      val maybeAgent = getMeeting(subfields)
 
-        maybeAgent.map { agent =>
-          Contributor(
-            agent = identify(subfields, agent, "Meeting"),
-            roles = roles
-          )
-        }
+      maybeAgent.map { agent =>
+        Contributor(
+          agent = identify(subfields, agent, "Meeting"),
+          roles = roles
+        )
       }
+    }
   }
 
   private def getContributionRoles(
