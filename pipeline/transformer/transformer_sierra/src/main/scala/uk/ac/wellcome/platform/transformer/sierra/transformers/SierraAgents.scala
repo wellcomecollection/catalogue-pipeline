@@ -43,6 +43,11 @@ trait SierraAgents {
       Organisation.normalised(label = label)
     }
 
+  def getMeeting(subfields: List[MarcSubfield]): Option[Meeting] =
+    getLabel(subfields).map { label =>
+      Meeting.normalised(label = label)
+    }
+
   /* Given an agent and the associated MARC subfields, look for instances of subfield $0,
    * which are used for identifiers.
    *
