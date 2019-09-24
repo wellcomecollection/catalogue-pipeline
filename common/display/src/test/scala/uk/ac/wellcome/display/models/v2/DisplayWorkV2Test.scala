@@ -132,17 +132,6 @@ class DisplayWorkV2Test
     displayWork.workType shouldBe Some(expectedDisplayWorkV2)
   }
 
-  it("gets the extent from a Work") {
-    val extent = "Bound in boxes of bark"
-
-    val work = createIdentifiedWorkWith(
-      extent = Some(extent)
-    )
-
-    val displayWork = DisplayWorkV2(work)
-    displayWork.extent shouldBe Some(extent)
-  }
-
   it("gets the language from a Work") {
     val language = Language(
       id = "bsl",

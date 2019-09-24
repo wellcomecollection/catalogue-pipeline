@@ -7,6 +7,13 @@ object SierraPhysicalDescription extends SierraTransformer with MarcUtils {
 
   type Output = Option[String]
 
+  val physicalDescriptionFields = List(
+    "300" -> "a",
+    "300" -> "b",
+    "300" -> "c",
+    "563" -> "a"
+  )
+
   // Populate wwork:physicalDescription.
   //
   // We use MARC field 300 and subfield $b.
@@ -26,20 +33,18 @@ object SierraPhysicalDescription extends SierraTransformer with MarcUtils {
   //
   // https://www.loc.gov/marc/bibliographic/bd300.html
   //
-  def apply(bibId: SierraBibNumber, bibData: SierraBibData) = {
-    val matchingSubfields = getMatchingSubfields(
-      bibData = bibData,
-      marcTag = "300",
-      marcSubfieldTag = "b"
-    ).flatten
-
-    if (matchingSubfields.isEmpty) {
-      None
-    } else {
-      val label = matchingSubfields
-        .map { _.content }
-        .mkString("\n\n")
-      Some(label)
+  def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
+    physicalDescriptionFields
+      .flatMap {
+        case (tag, subfieldTag) =>
+          getMatchingSubfields(
+            bibData = bibData,
+            marcTag = tag,
+            marcSubfieldTag = subfieldTag
+          )
+      }
+      .map(_.content) match {
+      case Nil      => None
+      case contents => Some(contents.mkString("\n"))
     }
-  }
 }

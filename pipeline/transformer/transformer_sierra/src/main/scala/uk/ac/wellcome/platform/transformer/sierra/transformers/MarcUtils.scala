@@ -8,7 +8,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
 
 trait MarcUtils {
 
-  def getMatchingSubfields(
+  def getMatchingSubfieldLists(
     bibData: SierraBibData,
     marcTag: String,
     marcSubfieldTags: List[String]): List[List[MarcSubfield]] =
@@ -20,13 +20,22 @@ trait MarcUtils {
           }
       }
 
+  def getMatchingSubfields(bibData: SierraBibData,
+                           marcTag: String,
+                           marcSubfieldTags: List[String]): List[MarcSubfield] =
+    getMatchingSubfieldLists(
+      bibData = bibData,
+      marcTag = marcTag,
+      marcSubfieldTags = marcSubfieldTags
+    ).flatten
+
   def getMatchingVarFields(bibData: SierraBibData,
                            marcTag: String): List[VarField] =
     bibData.varFields filter { _.marcTag.contains(marcTag) }
 
   def getMatchingSubfields(bibData: SierraBibData,
                            marcTag: String,
-                           marcSubfieldTag: String): List[List[MarcSubfield]] =
+                           marcSubfieldTag: String): List[MarcSubfield] =
     getMatchingSubfields(
       bibData = bibData,
       marcTag = marcTag,
