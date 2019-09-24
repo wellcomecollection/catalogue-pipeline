@@ -7,7 +7,12 @@ object SierraPhysicalDescription extends SierraTransformer with MarcUtils {
 
   type Output = Option[String]
 
-  val physicalDescriptionFields = List("300" -> "b", "563" -> "a")
+  val physicalDescriptionFields = List(
+    "300" -> "a",
+    "300" -> "b",
+    "300" -> "c",
+    "563" -> "a"
+  )
 
   // Populate wwork:physicalDescription.
   //
@@ -39,6 +44,6 @@ object SierraPhysicalDescription extends SierraTransformer with MarcUtils {
       }
       .map(_.content) match {
         case Nil => None
-        case contents => Some(contents.mkString("\n\n"))
+        case contents => Some(contents.mkString("\n"))
       }
 }
