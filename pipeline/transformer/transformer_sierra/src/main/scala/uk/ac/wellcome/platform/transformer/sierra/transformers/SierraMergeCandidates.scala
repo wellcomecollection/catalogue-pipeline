@@ -48,7 +48,7 @@ object SierraMergeCandidates
       sierraBibData,
       marcTag = "776",
       marcSubfieldTag = "w"
-    ).flatten
+    )
 
     val maybeBibNumbers: List[Option[String]] = matchingSubfields
       .map { _.content }
@@ -97,7 +97,7 @@ object SierraMergeCandidates
           sierraBibData,
           marcTag = "962",
           marcSubfieldTag = "u"
-        ).flatten
+        )
 
         val miroIdsFrom962: List[String] = matching962Subfields
           .map { _.content }
@@ -108,7 +108,7 @@ object SierraMergeCandidates
           sierraBibData,
           marcTag = "089",
           marcSubfieldTag = "a"
-        ).flatten
+        )
 
         val miroIdsFrom089: List[String] = matching089Subfields
           .map { _.content }

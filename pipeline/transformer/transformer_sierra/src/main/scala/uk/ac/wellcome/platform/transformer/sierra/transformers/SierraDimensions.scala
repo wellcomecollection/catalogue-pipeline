@@ -42,7 +42,7 @@ object SierraDimensions extends SierraTransformer with MarcUtils {
       bibData = bibData,
       marcTag = "300",
       marcSubfieldTag = "c"
-    ).flatten
+    )
 
     if (matchingSubfields.isEmpty) {
       None

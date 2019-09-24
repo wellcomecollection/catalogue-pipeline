@@ -45,7 +45,7 @@ object SierraContributors
   private def getPersonContributors(
     bibData: SierraBibData,
     marcTag: String): List[Contributor[MaybeDisplayable[AbstractAgent]]] = {
-    val persons = getMatchingSubfields(
+    val persons = getMatchingSubfieldLists(
       bibData,
       marcTag = marcTag,
       marcSubfieldTags = List("a", "b", "c", "d", "e", "t", "0")
@@ -88,7 +88,7 @@ object SierraContributors
   private def getOrganisationContributors(
     bibData: SierraBibData,
     marcTag: String): List[Contributor[MaybeDisplayable[Organisation]]] = {
-    val organisations = getMatchingSubfields(
+    val organisations = getMatchingSubfieldLists(
       bibData,
       marcTag = marcTag,
       marcSubfieldTags = List("a", "b", "c", "d", "e", "0")
