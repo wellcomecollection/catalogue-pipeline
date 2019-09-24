@@ -33,6 +33,9 @@ sealed trait Work extends BaseWork with MultipleSourceIdentifiers {
   val dimensions: Option[String]
   val edition: Option[String]
   val notes: List[String]
+  val dissertation: Option[String]
+  val locationOfOriginal: Option[String]
+  val citeAs: Option[String]
 
   val items: List[IdentityState[Item]]
   val itemsV1: List[IdentityState[Item]]
@@ -64,6 +67,9 @@ case class UnidentifiedWork(
   dimensions: Option[String],
   edition: Option[String],
   notes: List[String] = Nil,
+  dissertation: Option[String] = None,
+  locationOfOriginal: Option[String] = None,
+  citeAs: Option[String] = None,
   items: List[MaybeDisplayable[Item]],
   itemsV1: List[Identifiable[Item]],
   version: Int,
@@ -95,6 +101,9 @@ case class IdentifiedWork(
   dimensions: Option[String],
   edition: Option[String],
   notes: List[String] = Nil,
+  dissertation: Option[String] = None,
+  locationOfOriginal: Option[String] = None,
+  citeAs: Option[String] = None,
   items: List[Displayable[Item]],
   itemsV1: List[Identified[Item]],
   version: Int,

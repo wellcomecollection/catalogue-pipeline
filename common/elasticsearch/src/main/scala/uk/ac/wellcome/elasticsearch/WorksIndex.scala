@@ -173,6 +173,9 @@ object WorksIndex {
       textField("dimensions"),
       textField("edition"),
       englishTextField("notes"),
+      englishTextField("dissertation"),
+      englishTextField("locationOfOriginal"),
+      englishTextField("citeAs"),
       objectField("redirect")
         .fields(sourceIdentifier, keywordField("canonicalId")),
       keywordField("type"),

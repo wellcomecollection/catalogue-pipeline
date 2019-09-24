@@ -47,4 +47,11 @@ trait MarcUtils {
   def getVarFieldContents(bibData: SierraBibData,
                           marcTag: String): List[String] =
     getMatchingVarFields(bibData, marcTag) flatMap (_.content)
+
+  def getFirstSubfieldContent(bibData: SierraBibData,
+                              marcTag: String,
+                              subfieldTag: String): Option[String] =
+    getMatchingVarFields(bibData, marcTag)
+      .flatMap(getSubfieldContents(_, Some(subfieldTag)))
+      .headOption
 }
