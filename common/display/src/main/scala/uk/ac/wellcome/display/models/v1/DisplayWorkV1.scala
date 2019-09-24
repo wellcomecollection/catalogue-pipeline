@@ -37,11 +37,6 @@ case class DisplayWorkV1(
   ) workType: Option[DisplayWorkType] = None,
   @ApiModelProperty(
     dataType = "String",
-    value =
-      "Number of physical pages, volumes, cassettes, total playing time, etc., of of each type of unit"
-  ) extent: Option[String] = None,
-  @ApiModelProperty(
-    dataType = "String",
     value = "Recording written text on a (usually visual) work."
   ) lettering: Option[String] = None,
   @ApiModelProperty(
@@ -91,9 +86,6 @@ case class DisplayWorkV1(
     value = "Relates a work to its primary language."
   ) language: Option[DisplayLanguage] = None,
   @ApiModelProperty(
-    dataType = "String"
-  ) dimensions: Option[String] = None,
-  @ApiModelProperty(
     readOnly = true,
     value =
       "A broad, top-level description of the form of a work: namely, whether it is a printed book, archive, painting, photograph, moving image, etc."
@@ -121,7 +113,6 @@ case object DisplayWorkV1 {
       title = work.title,
       description = work.description,
       physicalDescription = work.physicalDescription,
-      extent = work.extent,
       lettering = work.lettering,
       createdDate = work.createdDate.map { DisplayPeriodV1(_) },
       creators = work.contributors.map {
@@ -152,7 +143,6 @@ case object DisplayWorkV1 {
       publicationDate = None,
       placesOfPublication = List(),
       language = work.language.map { DisplayLanguage(_) },
-      dimensions = work.dimensions
     )
   }
 

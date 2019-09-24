@@ -113,14 +113,6 @@
       "@id" : "wwork:physicalDescription",
       "@type" : "rdf:langString"
     },
-    "extent" : {
-      "@id" : "wwork:extent",
-      "@type" : "rdf:langString"
-    },
-    "dimensions" : {
-      "@id" : "wwork:dimensions",
-      "@type" : "rdf:langString"
-    },
     "workType" : {
       "@id" : "wwork:workType"
     },

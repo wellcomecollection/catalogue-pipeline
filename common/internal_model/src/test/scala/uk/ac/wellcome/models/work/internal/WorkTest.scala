@@ -31,7 +31,6 @@ class WorkTest extends FunSpec with Matchers with IdentifiersGenerators {
         |  "workType": null,
         |  "description": null,
         |  "physicalDescription": null,
-        |  "extent": null,
         |  "lettering": null,
         |  "createdDate": null,
         |  "subjects": [],
@@ -40,7 +39,6 @@ class WorkTest extends FunSpec with Matchers with IdentifiersGenerators {
         |  "thumbnail": null,
         |  "production": [],
         |  "language": null,
-        |  "dimensions": null,
         |  "items": [
         |    {
         |      "canonicalId": "$createCanonicalId",

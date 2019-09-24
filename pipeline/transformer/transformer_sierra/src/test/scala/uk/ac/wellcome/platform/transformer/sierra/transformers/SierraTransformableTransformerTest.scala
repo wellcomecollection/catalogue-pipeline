@@ -353,36 +353,6 @@ class SierraTransformableTransformerTest
     work.physicalDescription shouldBe Some(physicalDescription)
   }
 
-  it("includes the extent, if present") {
-    val id = createSierraBibNumber
-    val extent = "Purple pages"
-
-    val data =
-      s"""
-        | {
-        |   "id": "$id",
-        |   "title": "English earwigs earn evidence of evil",
-        |   "varFields": [
-        |     {
-        |       "fieldTag": "a",
-        |       "marcTag": "300",
-        |       "ind1": " ",
-        |       "ind2": " ",
-        |       "subfields": [
-        |         {
-        |           "tag": "a",
-        |           "content": "$extent"
-        |         }
-        |       ]
-        |     }
-        |   ]
-        | }
-      """.stripMargin
-
-    val work = transformDataToUnidentifiedWork(id = id, data = data)
-    work.extent shouldBe Some(extent)
-  }
-
   it("includes the work type, if present") {
     val id = createSierraBibNumber
     val workTypeId = "a"
@@ -534,36 +504,6 @@ class SierraTransformableTransformerTest
       Contributor[MaybeDisplayable[AbstractAgent]](
         Unidentifiable(Person(label = name)))
     )
-  }
-
-  it("extracts dimensions if present") {
-    val id = createSierraBibNumber
-    val dimensions = "24cm"
-
-    val data =
-      s"""
-         | {
-         |   "id": "$id",
-         |   "title": "Dastardly Danish dogs draw dubious doughnuts",
-         |   "varFields": [
-         |     {
-         |       "fieldTag": "",
-         |       "marcTag": "300",
-         |       "ind1": " ",
-         |       "ind2": " ",
-         |       "subfields": [
-         |         {
-         |           "tag": "c",
-         |           "content": "$dimensions"
-         |         }
-         |       ]
-         |     }
-         |   ]
-         | }
-      """.stripMargin
-
-    val work = transformDataToUnidentifiedWork(id = id, data = data)
-    work.dimensions shouldBe Some(dimensions)
   }
 
   it("extracts subjects if present") {

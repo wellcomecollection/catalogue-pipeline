@@ -21,7 +21,6 @@ sealed trait Work extends BaseWork with MultipleSourceIdentifiers {
   val workType: Option[WorkType]
   val description: Option[String]
   val physicalDescription: Option[String]
-  val extent: Option[String]
   val lettering: Option[String]
   val createdDate: Option[Period]
   val subjects: List[IdentityState[Subject[IdentityState[AbstractRootConcept]]]]
@@ -30,7 +29,6 @@ sealed trait Work extends BaseWork with MultipleSourceIdentifiers {
   val thumbnail: Option[Location]
   val production: List[ProductionEvent[IdentityState[AbstractAgent]]]
   val language: Option[Language]
-  val dimensions: Option[String]
   val edition: Option[String]
   val notes: List[String]
   val dissertation: Option[String]
@@ -54,7 +52,6 @@ case class UnidentifiedWork(
   workType: Option[WorkType],
   description: Option[String],
   physicalDescription: Option[String],
-  extent: Option[String],
   lettering: Option[String],
   createdDate: Option[Period],
   subjects: List[
@@ -64,7 +61,6 @@ case class UnidentifiedWork(
   thumbnail: Option[Location],
   production: List[ProductionEvent[MaybeDisplayable[AbstractAgent]]],
   language: Option[Language],
-  dimensions: Option[String],
   edition: Option[String],
   notes: List[String] = Nil,
   dissertation: Option[String] = None,
@@ -89,7 +85,6 @@ case class IdentifiedWork(
   workType: Option[WorkType],
   description: Option[String],
   physicalDescription: Option[String],
-  extent: Option[String],
   lettering: Option[String],
   createdDate: Option[Period],
   subjects: List[Displayable[Subject[Displayable[AbstractRootConcept]]]],
@@ -98,7 +93,6 @@ case class IdentifiedWork(
   thumbnail: Option[Location],
   production: List[ProductionEvent[Displayable[AbstractAgent]]],
   language: Option[Language],
-  dimensions: Option[String],
   edition: Option[String],
   notes: List[String] = Nil,
   dissertation: Option[String] = None,
