@@ -10,6 +10,45 @@ import uk.ac.wellcome.models.work.internal._
 )
 sealed trait DisplayAbstractAgentV2 extends DisplayAbstractRootConcept
 
+case object DisplayAbstractAgentV2 {
+
+  def apply(displayableAgent: Displayable[AbstractAgent],
+            includesIdentifiers: Boolean): DisplayAbstractAgentV2 =
+    displayableAgent match {
+      case Unidentifiable(agent) => displayAgent(agent)
+      case Identified(agent, canonicalId, sourceId, otherIds) =>
+        displayAgent(
+          agent,
+          if (includesIdentifiers)
+            Some((sourceId +: otherIds).map(DisplayIdentifierV2(_)))
+          else
+            None,
+          Some(canonicalId)
+        )
+    }
+
+  private def displayAgent(
+    agent: AbstractAgent,
+    displayIdentifiers: Option[List[DisplayIdentifierV2]] = None,
+    canonicalId:  Option[String] = None):  DisplayAbstractAgentV2 =
+    agent match {
+      case Agent(label) =>
+        DisplayAgentV2(canonicalId, displayIdentifiers, label)
+      case Person(label, prefix, numeration) =>
+        DisplayPersonV2(
+          canonicalId,
+          displayIdentifiers,
+          label,
+          prefix,
+          numeration
+        )
+      case Organisation(label) =>
+        DisplayOrganisationV2(canonicalId, displayIdentifiers, label)
+      case Meeting(label) =>
+        DisplayMeetingV2(canonicalId, displayIdentifiers, label)
+    }
+}
+
 @ApiModel(
   value = "Agent"
 )
@@ -21,75 +60,6 @@ case class DisplayAgentV2(
   ) label: String,
   @JsonProperty("type") @JsonKey("type") ontologyType: String = "Agent"
 ) extends DisplayAbstractAgentV2
-
-case object DisplayAbstractAgentV2 {
-  def apply(displayableAgent: Displayable[AbstractAgent],
-            includesIdentifiers: Boolean): DisplayAbstractAgentV2 =
-    displayableAgent match {
-      case Unidentifiable(a: Agent) =>
-        DisplayAgentV2(
-          id = None,
-          identifiers = None,
-          label = a.label
-        )
-      case Identified(
-          agent: Agent,
-          canonicalId,
-          sourceIdentifier,
-          otherIdentifiers) =>
-        DisplayAgentV2(
-          id = Some(canonicalId),
-          identifiers =
-            if (includesIdentifiers)
-              Some(
-                (sourceIdentifier +: otherIdentifiers).map(
-                  DisplayIdentifierV2(_)))
-            else None,
-          label = agent.label
-        )
-      case Identified(
-          person: Person,
-          canonicalId,
-          sourceIdentifier,
-          otherIdentifiers) =>
-        DisplayPersonV2(
-          id = Some(canonicalId),
-          identifiers =
-            if (includesIdentifiers)
-              Some(
-                (sourceIdentifier +: otherIdentifiers).map(
-                  DisplayIdentifierV2(_)))
-            else None,
-          label = person.label,
-          prefix = person.prefix,
-          numeration = person.numeration
-        )
-      case Unidentifiable(p: Person) =>
-        DisplayPersonV2(
-          id = None,
-          identifiers = None,
-          label = p.label,
-          prefix = p.prefix,
-          numeration = p.numeration)
-      case Identified(
-          org: Organisation,
-          canonicalId,
-          sourceIdentifier,
-          otherIdentifiers) =>
-        DisplayOrganisationV2(
-          id = Some(canonicalId),
-          identifiers =
-            if (includesIdentifiers)
-              Some(
-                (sourceIdentifier +: otherIdentifiers).map(
-                  DisplayIdentifierV2(_)))
-            else None,
-          label = org.label
-        )
-      case Unidentifiable(o: Organisation) =>
-        DisplayOrganisationV2(id = None, identifiers = None, label = o.label)
-    }
-}
 
 @ApiModel(
   value = "Person"
@@ -135,4 +105,20 @@ case class DisplayOrganisationV2(
     value = "The name of the organisation"
   ) label: String,
   @JsonProperty("type") @JsonKey("type") ontologyType: String = "Organisation")
+    extends DisplayAbstractAgentV2
+
+case class DisplayMeetingV2(
+  @ApiModelProperty(
+    dataType = "String",
+    readOnly = true,
+    value = "The canonical identifier given to a thing.") id: Option[String],
+  @ApiModelProperty(
+    dataType = "List[uk.ac.wellcome.display.models.v2.DisplayIdentifierV2]",
+    value =
+      "Relates the item to a unique system-generated identifier that governs interaction between systems and is regarded as canonical within the Wellcome data ecosystem."
+  ) identifiers: Option[List[DisplayIdentifierV2]],
+  @ApiModelProperty(
+    value = "The name of the meeting"
+  ) label: String,
+  @JsonProperty("type") @JsonKey("type") ontologyType: String = "Meeting")
     extends DisplayAbstractAgentV2
