@@ -71,7 +71,8 @@ class SierraContributorsTest
       Contributor(agent = Unidentifiable(Organisation("Spinach Solicitors"))),
       Contributor(agent = Unidentifiable(Person("Sebastian the sugarsnap"))),
       Contributor(agent = Unidentifiable(Organisation("Shallot Swimmers"))),
-      Contributor(agent = Unidentifiable(Meeting("Sammys meet the Sammys at Sammys"))),
+      Contributor(
+        agent = Unidentifiable(Meeting("Sammys meet the Sammys at Sammys"))),
     )
     transformAndCheckContributors(
       varFields = varFields,
@@ -622,7 +623,7 @@ class SierraContributorsTest
     }
 
     it("gets the roles from subfield $$j") {
-      val varField =  createVarFieldWith(
+      val varField = createVarFieldWith(
         marcTag = "111",
         subfields = List(
           MarcSubfield(tag = "a", content = "label"),

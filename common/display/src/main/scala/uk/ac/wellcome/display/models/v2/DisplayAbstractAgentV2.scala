@@ -30,7 +30,7 @@ case object DisplayAbstractAgentV2 {
   private def displayAgent(
     agent: AbstractAgent,
     displayIdentifiers: Option[List[DisplayIdentifierV2]] = None,
-    canonicalId:  Option[String] = None):  DisplayAbstractAgentV2 =
+    canonicalId: Option[String] = None): DisplayAbstractAgentV2 =
     agent match {
       case Agent(label) =>
         DisplayAgentV2(canonicalId, displayIdentifiers, label)
