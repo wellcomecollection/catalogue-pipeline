@@ -96,7 +96,7 @@ class ApiV2ErrorsTest extends ApiV2WorksTestBase with ApiErrorsTestBase {
 
     it("a mixture of valid and invalid sort") {
       assertIsBadRequest(
-        "/works?sort=foo,production.dates.from,bar",
+        "/works?sort=foo,production.dates,bar",
         description = "sort: 'foo', 'bar' are not valid values"
       )
     }

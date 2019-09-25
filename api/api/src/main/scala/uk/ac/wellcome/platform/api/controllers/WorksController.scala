@@ -304,6 +304,7 @@ abstract class WorksController[M <: MultipleResultsRequest[W],
         |To search for any of these special characters, they should be escaped with \.""".stripMargin,
         required = false
       )
+      .parameter(includeSwaggerParam)
       .queryParam[LocalDateTime](
         "production.dates.from",
         """
