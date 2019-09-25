@@ -23,7 +23,7 @@ class SierraContributorsTest
       expectedContributors = List())
   }
 
-  it("extracts a mixture of Person and Organisation contributors") {
+  it("extracts a mixture of Person, Organisation and Meeting contributors") {
     val varFields = List(
       createVarFieldWith(
         marcTag = "100",
@@ -55,7 +55,14 @@ class SierraContributorsTest
         subfields = List(
           MarcSubfield(tag = "a", content = "Shallot Swimmers")
         )
-      )
+      ),
+      createVarFieldWith(
+        marcTag = "711",
+        subfields = List(
+          MarcSubfield(tag = "a", content = "Sammys meet the Sammys"),
+          MarcSubfield(tag = "c", content = "at Sammys")
+        )
+      ),
     )
 
     val expectedContributors = List(
@@ -63,7 +70,8 @@ class SierraContributorsTest
       Contributor(agent = Unidentifiable(Person("Sam the squash, Sir"))),
       Contributor(agent = Unidentifiable(Organisation("Spinach Solicitors"))),
       Contributor(agent = Unidentifiable(Person("Sebastian the sugarsnap"))),
-      Contributor(agent = Unidentifiable(Organisation("Shallot Swimmers")))
+      Contributor(agent = Unidentifiable(Organisation("Shallot Swimmers"))),
+      Contributor(agent = Unidentifiable(Meeting("Sammys meet the Sammys at Sammys"))),
     )
     transformAndCheckContributors(
       varFields = varFields,
@@ -571,6 +579,85 @@ class SierraContributorsTest
     transformAndCheckContributors(
       varFields = varFields,
       expectedContributors = List())
+  }
+
+  describe("Meeting") {
+    it("gets the name from MARC tag 111 subfield $$a") {
+      val varField = createVarFieldWith(
+        marcTag = "111",
+        subfields = List(MarcSubfield(tag = "a", content = "Big meeting"))
+      )
+      val contributor = Contributor(
+        agent = Unidentifiable(Meeting(label = "Big meeting"))
+      )
+      transformAndCheckContributors(List(varField), List(contributor))
+    }
+
+    it("gets the name from MARC tag 711 subfield $$a") {
+      val varField = createVarFieldWith(
+        marcTag = "711",
+        subfields = List(MarcSubfield(tag = "a", content = "Big meeting"))
+      )
+      val contributor = Contributor(
+        agent = Unidentifiable(Meeting(label = "Big meeting"))
+      )
+      transformAndCheckContributors(List(varField), List(contributor))
+    }
+
+    it("combinies subfields $$a, $$c, $$d and $$t with spaces") {
+      val varField = createVarFieldWith(
+        marcTag = "111",
+        subfields = List(
+          MarcSubfield(tag = "a", content = "1"),
+          MarcSubfield(tag = "b", content = "not used"),
+          MarcSubfield(tag = "c", content = "2"),
+          MarcSubfield(tag = "d", content = "3"),
+          MarcSubfield(tag = "t", content = "4"),
+        )
+      )
+      val contributor = Contributor(
+        agent = Unidentifiable(Meeting(label = "1 2 3 4"))
+      )
+      transformAndCheckContributors(List(varField), List(contributor))
+    }
+
+    it("gets the roles from subfield $$j") {
+      val varField =  createVarFieldWith(
+        marcTag = "111",
+        subfields = List(
+          MarcSubfield(tag = "a", content = "label"),
+          MarcSubfield(tag = "e", content = "not a role"),
+          MarcSubfield(tag = "j", content = "1st role"),
+          MarcSubfield(tag = "j", content = "2nd role"),
+        )
+      )
+      val contributor = Contributor(
+        agent = Unidentifiable(Meeting(label = "label")),
+        roles = List(ContributionRole("1st role"), ContributionRole("2nd role"))
+      )
+      transformAndCheckContributors(List(varField), List(contributor))
+    }
+
+    it("gets an identifier from subfield $$0") {
+      val varField = createVarFieldWith(
+        marcTag = "111",
+        subfields = List(
+          MarcSubfield(tag = "a", content = "label"),
+          MarcSubfield(tag = "0", content = "456")
+        )
+      )
+      val contributor = Contributor(
+        agent = Identifiable(
+          Meeting(label = "label"),
+          sourceIdentifier = SourceIdentifier(
+            identifierType = IdentifierType("lc-names"),
+            ontologyType = "Meeting",
+            value = "456"
+          )
+        )
+      )
+      transformAndCheckContributors(List(varField), List(contributor))
+    }
   }
 
   private def transformAndCheckContributors(
