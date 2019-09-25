@@ -474,7 +474,7 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
 
         eventually {
           server.httpGet(
-            path = s"/$apiPrefix/works?sort=production.dates.from",
+            path = s"/$apiPrefix/works?sort=production.dates",
             andExpect = Status.Ok,
             withJsonBody = s"""
                               |{
@@ -526,8 +526,7 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
 
         eventually {
           server.httpGet(
-            path =
-              s"/$apiPrefix/works?sort=production.dates.from&sortOrder=desc",
+            path = s"/$apiPrefix/works?sort=production.dates&sortOrder=desc",
             andExpect = Status.Ok,
             withJsonBody = s"""
                               |{
@@ -568,7 +567,7 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
               |  "results": [],
               |  "aggregations": {
               |    "type" : "Aggregations",
-              |    "date": {
+              |    "production.dates": {
               |      "type" : "Aggregation",
               |      "buckets": [
               |        {

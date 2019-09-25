@@ -17,7 +17,7 @@ case class Genre(label: String)
 
 case class Aggregations(workType: Option[Aggregation[WorkType]] = None,
                         genre: Option[Aggregation[Genre]] = None,
-                        date: Option[Aggregation[Period]] = None)
+                        productionDates: Option[Aggregation[Period]] = None)
 
 object Aggregations extends Logging {
 
@@ -30,7 +30,7 @@ object Aggregations extends Logging {
             Aggregations(
               workType = getAggregation[WorkType](workType),
               genre = getAggregation[Genre](genre),
-              date = getAggregation[Period](date)
+              productionDates = getAggregation[Period](date)
             )
           )
       }
@@ -93,7 +93,7 @@ case class AggregationBucket[T](data: T, count: Int)
 case class EsAggregations(
   workType: Option[EsAggregation[WorkType]] = None,
   genre: Option[EsAggregation[Genre]] = None,
-  date: Option[EsAggregation[Period]] = None,
+  productionDates: Option[EsAggregation[Period]] = None,
 )
 case class EsAggregation[T](buckets: List[EsAggregationBucket[T]])
 case class EsAggregationBucket[T](key: T, doc_count: Int)

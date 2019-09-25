@@ -13,8 +13,7 @@ import com.sksamuel.elastic4s.requests.searches.sort.{FieldSort, SortOrder}
 import com.sksamuel.elastic4s.{ElasticDate, Index}
 import uk.ac.wellcome.display.models.{
   AggregationRequest,
-  ProductionDateFromSortRequest,
-  ProductionDateToSortRequest,
+  ProductionDateSortRequest,
   SortingOrder,
 }
 
@@ -42,8 +41,10 @@ case class ElastsearchSearchRequestBuilder(
           TermsValueSource("type", field = Some("workType.ontologyType"))
         )
       )
-    case AggregationRequest.Date =>
-      DateHistogramAggregation("date")
+    case AggregationRequest.ProductionDates =>
+      // We use `productionDates` here over `production.dates` to match the case classes, which we then serialise to
+      // the JSON path later.
+      DateHistogramAggregation("productionDates")
         .interval(DateHistogramInterval.Year)
         .field("production.dates.range.from")
         .minDocCount(1)
@@ -51,8 +52,7 @@ case class ElastsearchSearchRequestBuilder(
 
   lazy val sort = queryOptions.sortBy
     .map {
-      case ProductionDateFromSortRequest => "production.dates.range.from"
-      case ProductionDateToSortRequest   => "production.dates.range.to"
+      case ProductionDateSortRequest => "production.dates.range.from"
     }
     .map { FieldSort(_).order(sortOrder) }
 

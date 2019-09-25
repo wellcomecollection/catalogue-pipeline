@@ -1,5 +1,7 @@
 package uk.ac.wellcome.platform.api.controllers
 
+import java.time.LocalDateTime
+
 import com.jakehschwartz.finatra.swagger.SwaggerController
 import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.ElasticError
@@ -292,23 +294,68 @@ abstract class WorksController[M <: MultipleResultsRequest[W],
         required = false)
       .queryParam[String](
         "query",
-        """Full-text search query, which will OR supplied terms by default.
+        """
+        |Full-text search query, which will OR supplied terms by default.
         |
         |The following special characters can be used to change the search behaviour:
         |
-        |- \+ signifies AND operation
-        |- | signifies OR operation
-        |- \- negates a single token
         |- " wraps a number of tokens to signify a phrase for searching
-        |- \* at the end of a term signifies a prefix query
-        |- ( and ) signify precedence
-        |- ~N after a word signifies edit distance (fuzziness)
-        |- ~N after a phrase signifies slop amount
         |
         |To search for any of these special characters, they should be escaped with \.""".stripMargin,
         required = false
       )
       .parameter(includeSwaggerParam)
+      .queryParam[LocalDateTime](
+        "production.dates.from",
+        """
+          |Return all works with a production date after and including this date.
+          |
+          |Can be used in conjunction with `production.dates.to` to create a range.
+          |
+          |Needs to be supplied in ISO 8601 format.""".stripMargin,
+        required = false
+      )
+      .queryParam[LocalDateTime](
+        "production.dates.to",
+        """
+          |Return all works with a production date before and including this date.
+          |
+          |Can be used in conjunction with `production.dates.from` to create a range.
+          |
+          |Needs to be supplied in ISO 8601 format.""".stripMargin,
+        required = false
+      )
+      .queryParam[String](
+        "sort",
+        """
+          |Which field to sort the results on.
+          |
+          |Valid values: production.dates
+          |""".stripMargin,
+        required = false
+      )
+      .queryParam[String](
+        "sortOrder",
+        """
+          |The order that the results should be returned in.
+          |
+          |Valid values: asc, desc
+          |
+          |Default: relevancy
+          |""".stripMargin,
+        required = false
+      )
+      .queryParam[String](
+        "aggreations",
+        """
+          |What aggregated data in correlation to the results should we return.
+          |
+          |Valid values: `workType`, `production.dates`
+          |
+          |Default: relevancy
+          |""".stripMargin,
+        required = false
+      )
     // Deliberately undocumented: we have an 'index' query param that
     // allows the user to pick which Elasticsearch index to use.  This is
     // useful for us to try out transformer changes, different index

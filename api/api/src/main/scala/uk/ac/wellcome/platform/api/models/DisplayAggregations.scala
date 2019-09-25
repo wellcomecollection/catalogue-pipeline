@@ -17,7 +17,8 @@ case class DisplayAggregations(
   ) workType: Option[DisplayAggregation[DisplayWorkType]],
   @ApiModelProperty(
     value = "Date aggregation on a set of results."
-  ) date: Option[DisplayAggregation[DisplayPeriod]],
+  ) @JsonProperty("production.dates") @JsonKey("production.dates") productionDates: Option[
+    DisplayAggregation[DisplayPeriod]],
   @ApiModelProperty(
     value = "Genre aggregation on a set of results."
   ) genre: Option[DisplayAggregation[Genre]],
@@ -45,7 +46,8 @@ object DisplayAggregations {
   def apply(aggs: Aggregations): DisplayAggregations =
     DisplayAggregations(
       workType = displayAggregation(aggs.workType, DisplayWorkType.apply),
-      date = displayAggregation(aggs.date, DisplayPeriod.apply),
+      productionDates =
+        displayAggregation(aggs.productionDates, DisplayPeriod.apply),
       genre = None
     )
 
