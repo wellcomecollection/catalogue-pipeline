@@ -12,6 +12,7 @@ import uk.ac.wellcome.platform.transformer.sierra.transformers.subjects.{
   SierraOrganisationSubjects,
   SierraPersonSubjects,
   SierraMeetingSubjects,
+  SierraBrandNameSubjects
 }
 
 object SierraSubjects extends SierraTransformer {
@@ -28,7 +29,8 @@ object SierraSubjects extends SierraTransformer {
     SierraConceptSubjects,
     SierraPersonSubjects,
     SierraOrganisationSubjects,
-    SierraMeetingSubjects
+    SierraMeetingSubjects,
+    SierraBrandNameSubjects
   )
 
   def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
