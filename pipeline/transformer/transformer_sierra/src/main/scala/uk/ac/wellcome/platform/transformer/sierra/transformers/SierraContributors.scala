@@ -59,7 +59,7 @@ object SierraContributors
       val hasSubfieldT = subfields.exists {
         _.tag == "t"
       }
-      val roles = getContributionRoles(subfields)
+      val roles = getContributionRoles(subfields, "e")
 
       val maybeAgent = if (hasSubfieldT) {
         getLabel(subfields)
@@ -95,7 +95,7 @@ object SierraContributors
       marcTag = marcTag,
       marcSubfieldTags = List("a", "b", "c", "d", "e", "0")
     ).flatMap { subfields: List[MarcSubfield] =>
-      val roles = getContributionRoles(subfields)
+      val roles = getContributionRoles(subfields, "e")
       val maybeAgent = getOrganisation(subfields)
 
       maybeAgent.map { agent =>
@@ -128,7 +128,7 @@ object SierraContributors
 
   private def getContributionRoles(
     subfields: List[MarcSubfield],
-    subfieldTag: String = "e"): List[ContributionRole] =
+    subfieldTag: String): List[ContributionRole] =
     // Extract the roles from subfield.  This is a repeatable field.
     subfields.collect {
       case MarcSubfield(tag, content) if tag == subfieldTag =>
