@@ -60,19 +60,4 @@ object SierraOrganisationSubjects extends SierraSubjectsTransformer with SierraA
 
     Unidentifiable(Organisation(label = label))
   }
-
-  /** Given a varField and a list of subfield tags, create a label by
-    * concatenating the contents of every subfield with one of the given tags.
-    *
-    * The order is the same as that in the original MARC.
-    *
-    */
-  private def createLabel(varField: VarField,
-                          subfieldTags: List[String]): String =
-    varField.subfields
-      .filter { vf =>
-        subfieldTags.contains(vf.tag)
-      }
-      .map { _.content }
-      .mkString(" ")
 }

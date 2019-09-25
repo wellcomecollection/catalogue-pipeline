@@ -10,7 +10,8 @@ import uk.ac.wellcome.platform.transformer.sierra.source.SierraBibData
 import uk.ac.wellcome.platform.transformer.sierra.transformers.subjects.{
   SierraConceptSubjects,
   SierraOrganisationSubjects,
-  SierraPersonSubjects
+  SierraPersonSubjects,
+  SierraMeetingSubjects,
 }
 
 object SierraSubjects extends SierraTransformer {
@@ -26,7 +27,8 @@ object SierraSubjects extends SierraTransformer {
   val subjectsTransformers = List(
     SierraConceptSubjects,
     SierraPersonSubjects,
-    SierraOrganisationSubjects
+    SierraOrganisationSubjects,
+    SierraMeetingSubjects
   )
 
   def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
