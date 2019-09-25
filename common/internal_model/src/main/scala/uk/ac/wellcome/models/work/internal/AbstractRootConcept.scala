@@ -106,3 +106,9 @@ object Person {
       numeration = numeration)
   }
 }
+
+case class Meeting(label: String) extends AbstractAgent
+object Meeting {
+  def normalised(label: String): Meeting =
+    Meeting(trimTrailing(label, ','))
+}

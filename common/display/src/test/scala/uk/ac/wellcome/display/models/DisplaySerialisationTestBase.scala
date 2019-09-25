@@ -124,6 +124,7 @@ trait DisplaySerialisationTestBase { this: Suite =>
       case a: Agent        => agent(a)
       case o: Organisation => organisation(o)
       case p: Person       => person(p)
+      case m: Meeting      => meeting(m)
     }
 
   def person(p: Person) = {
@@ -139,6 +140,13 @@ trait DisplaySerialisationTestBase { this: Suite =>
     s"""{
         "type": "Organisation",
         "label": "${o.label}"
+      }"""
+  }
+
+  def meeting(m: Meeting) = {
+    s"""{
+        "type": "Meeting",
+        "label": "${m.label}"
       }"""
   }
 
@@ -169,6 +177,7 @@ trait DisplaySerialisationTestBase { this: Suite =>
       case _: Agent        => "Agent"
       case _: Organisation => "Organisation"
       case _: Person       => "Person"
+      case _: Meeting      => "Meeting"
     }
 
   def concept(concept: AbstractRootConcept) = {

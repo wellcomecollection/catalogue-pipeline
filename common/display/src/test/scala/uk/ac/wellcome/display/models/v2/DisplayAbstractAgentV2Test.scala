@@ -188,4 +188,49 @@ class DisplayAbstractAgentV2Test
       DisplayAbstractAgentV2(identifiedAgent, includesIdentifiers = false) shouldBe expectedOrganisation
     }
   }
+
+  describe("Meeting") {
+    val unidentifiedAgent = Unidentifiable(Meeting(label = label))
+
+    val identifiedAgent = Identified(
+      canonicalId = canonicalId,
+      sourceIdentifier = sourceIdentifier,
+      otherIdentifiers = otherIdentifiers,
+      agent = Meeting(label = label)
+    )
+
+    it(
+      "converts an Unidentifiable Meeting to a DisplayMeetingV2 (includesIdentifiers = true)") {
+      DisplayAbstractAgentV2(unidentifiedAgent, includesIdentifiers = true) shouldBe
+        DisplayMeetingV2(None, None, label)
+    }
+
+    it(
+      "converts an Unidentifiable Meeting to a DisplayOrganisationV2 (includesIdentifiers = false)") {
+      DisplayAbstractAgentV2(unidentifiedAgent, includesIdentifiers = false) shouldBe
+        DisplayMeetingV2(None, None, label)
+    }
+
+    it(
+      "converts an Identified Meeting to a DisplayMeetingV2 (includesIdentifiers = true)") {
+      DisplayAbstractAgentV2(identifiedAgent, includesIdentifiers = true) shouldBe
+        DisplayMeetingV2(
+          id = Some(canonicalId),
+          identifiers = Some((List(sourceIdentifier) ++ otherIdentifiers).map {
+            DisplayIdentifierV2(_)
+          }),
+          label = label
+        )
+    }
+
+    it(
+      "converts an Identified Meeting to a DisplayMeetingV2 (includesIdentifiers = false)") {
+      DisplayAbstractAgentV2(identifiedAgent, includesIdentifiers = false) shouldBe
+        DisplayMeetingV2(
+          id = Some(canonicalId),
+          identifiers = None,
+          label = label
+        )
+    }
+  }
 }
