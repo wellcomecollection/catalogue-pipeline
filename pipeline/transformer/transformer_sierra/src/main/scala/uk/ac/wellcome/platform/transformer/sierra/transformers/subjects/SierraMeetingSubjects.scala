@@ -21,13 +21,15 @@ import uk.ac.wellcome.platform.transformer.sierra.transformers.SierraAgents
 //
 // https://www.loc.gov/marc/bibliographic/bd611.html
 //
-object SierraMeetingSubjects extends SierraSubjectsTransformer with SierraAgents {
+object SierraMeetingSubjects
+    extends SierraSubjectsTransformer
+    with SierraAgents {
 
   val subjectVarFields = List("611")
 
-  def getSubjectsFromVarFields(bibId: SierraBibNumber, varFields: List[VarField]) =
+  def getSubjectsFromVarFields(bibId: SierraBibNumber,
+                               varFields: List[VarField]) =
     varFields.map { varField =>
-
       val label = createLabel(varField, subfieldTags = List("a", "c", "d"))
 
       val subject = Subject(

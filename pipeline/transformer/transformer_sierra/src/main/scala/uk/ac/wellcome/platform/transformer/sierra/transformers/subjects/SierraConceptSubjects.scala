@@ -47,11 +47,14 @@ import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 //      else is unidentified.
 //
 object SierraConceptSubjects
-  extends SierraSubjectsTransformer with MarcUtils with SierraConcepts {
+    extends SierraSubjectsTransformer
+    with MarcUtils
+    with SierraConcepts {
 
   val subjectVarFields = List("650", "648", "651")
 
-  def getSubjectsFromVarFields(bibId: SierraBibNumber, varFields: List[VarField]): Output = {
+  def getSubjectsFromVarFields(bibId: SierraBibNumber,
+                               varFields: List[VarField]): Output = {
     // Second indicator 7 means that the subject authority is something other
     // than library of congress or mesh. Some MARC records have duplicated subjects
     // when the same subject has more than one authority (for example mesh and FAST),

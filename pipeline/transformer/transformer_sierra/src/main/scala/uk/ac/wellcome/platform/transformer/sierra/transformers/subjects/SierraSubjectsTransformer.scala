@@ -1,8 +1,14 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers.subjects
 
-import uk.ac.wellcome.platform.transformer.sierra.transformers.{SierraTransformer, MarcUtils}
+import uk.ac.wellcome.platform.transformer.sierra.transformers.{
+  MarcUtils,
+  SierraTransformer
+}
 import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
-import uk.ac.wellcome.platform.transformer.sierra.source.{SierraBibData, VarField}
+import uk.ac.wellcome.platform.transformer.sierra.source.{
+  SierraBibData,
+  VarField
+}
 import uk.ac.wellcome.models.work.internal.{
   AbstractRootConcept,
   MaybeDisplayable,
@@ -27,7 +33,8 @@ trait SierraSubjectsTransformer extends SierraTransformer with MarcUtils {
       subjectVarFields.flatMap(getMatchingVarFields(bibData, _))
     )
 
-  def getSubjectsFromVarFields(bibId: SierraBibNumber, varFields: List[VarField]): Output
+  def getSubjectsFromVarFields(bibId: SierraBibNumber,
+                               varFields: List[VarField]): Output
 
   /** Given a varField and a list of subfield tags, create a label by
     * concatenating the contents of every subfield with one of the given tags.
