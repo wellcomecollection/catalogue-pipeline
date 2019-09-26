@@ -3,10 +3,11 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
-  VarField
+  VarField,
+  SierraQueryOps
 }
 
-trait SierraConcepts extends MarcUtils {
+trait SierraConcepts extends SierraQueryOps {
 
   // Get the label.  This is populated by the label of subfield $a, followed
   // by other subfields, in the order they come from MARC.  The labels are
@@ -21,9 +22,9 @@ trait SierraConcepts extends MarcUtils {
     * this varField, which is a commonly-used subfield for identifiers.
     */
   def getIdentifierSubfieldContents(varField: VarField): List[String] =
-    varField.subfields
-      .filter { _.tag == "0" }
-      .map { _.content }
+    varField
+      .subfieldsWithTag("0")
+      .contents
 
       // We've seen the following data in subfield $0 which needs to be
       // normalisation:

@@ -47,7 +47,7 @@ class SierraMeetingSubjectsTest
     )
   }
 
-  it("returns subjects with subfields $$a, $$c and $$d concatenated in order") {
+  it("returns subjects with subfields $$a, $$c and $$d concatenated in order they appear") {
     val data = bibData(
       varField(
         "611",
@@ -59,8 +59,8 @@ class SierraMeetingSubjectsTest
     SierraMeetingSubjects(bibId, data) shouldBe List(
       Unidentifiable(
         Subject(
-          label = "A C D",
-          concepts = List(Unidentifiable(Meeting(label = "A C D")))
+          label = "C A D",
+          concepts = List(Unidentifiable(Meeting(label = "C A D")))
         )
       )
     )

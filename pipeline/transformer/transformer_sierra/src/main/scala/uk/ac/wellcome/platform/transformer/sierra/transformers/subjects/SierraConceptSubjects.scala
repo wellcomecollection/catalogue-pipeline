@@ -3,10 +3,10 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers.subjects
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
-  VarField
+  VarField,
+  SierraQueryOps
 }
 import uk.ac.wellcome.platform.transformer.sierra.transformers.{
-  MarcUtils,
   SierraConcepts
 }
 import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
@@ -48,21 +48,21 @@ import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 //
 object SierraConceptSubjects
     extends SierraSubjectsTransformer
-    with MarcUtils
+    with SierraQueryOps
     with SierraConcepts {
 
   val subjectVarFields = List("650", "648", "651")
 
   def getSubjectsFromVarFields(bibId: SierraBibNumber,
-                               varFields: List[VarField]): Output = {
+                               varfields: List[VarField]): Output = {
     // Second indicator 7 means that the subject authority is something other
     // than library of congress or mesh. Some MARC records have duplicated subjects
     // when the same subject has more than one authority (for example mesh and FAST),
     // which causes duplicated subjects to appear in the API.
     //
     // So let's filter anything that is from another authority for now.
-    varFields.filterNot(_.indicator2.contains("7")).map { varField =>
-      val subfields = filterSubfields(varField, List("a", "v", "x", "y", "z"))
+    varfields.filterNot(_.indicator2.contains("7")).map { varfield =>
+      val subfields = varfield.subfieldsWithTags("a", "v", "x", "y", "z")
       val (primarySubfields, subdivisionSubfields) = subfields.partition {
         _.tag == "a"
       }
@@ -70,20 +70,14 @@ object SierraConceptSubjects
       val label = getLabel(primarySubfields, subdivisionSubfields)
       val concepts: List[MaybeDisplayable[AbstractConcept]] = getPrimaryConcept(
         primarySubfields,
-        varField = varField) ++ getSubdivisions(subdivisionSubfields)
+        varField = varfield) ++ getSubdivisions(subdivisionSubfields)
 
       val subject = Subject(
         label = label,
         concepts = concepts
       )
 
-      identifyConcept(subject, varField = varField)
-    }
-  }
-
-  private def filterSubfields(varField: VarField, subfields: List[String]) = {
-    varField.subfields.filter { subfield =>
-      subfields.contains(subfield.tag)
+      identifyConcept(subject, varField = varfield)
     }
   }
 

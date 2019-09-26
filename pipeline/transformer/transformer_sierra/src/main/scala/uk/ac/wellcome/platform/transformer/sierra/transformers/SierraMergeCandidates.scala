@@ -6,9 +6,9 @@ import uk.ac.wellcome.models.work.internal.{
   SourceIdentifier
 }
 import uk.ac.wellcome.platform.transformer.sierra.source.{
-  MarcSubfield,
   SierraBibData,
-  SierraMaterialType
+  SierraMaterialType,
+  SierraQueryOps
 }
 import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 import uk.ac.wellcome.platform.transformer.sierra.transformers.parsers.{
@@ -20,15 +20,15 @@ import scala.util.matching.Regex
 
 object SierraMergeCandidates
     extends SierraTransformer
-    with MarcUtils
+    with SierraQueryOps
     with WellcomeImagesURLParser
     with MiroIdParser {
 
   type Output = List[MergeCandidate]
 
-  def apply(bibId: SierraBibNumber, sierraBibData: SierraBibData) =
-    get776mergeCandidates(sierraBibData) ++
-      getSinglePageMiroMergeCandidates(sierraBibData)
+  def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
+    get776mergeCandidates(bibData) ++
+      getSinglePageMiroMergeCandidates(bibData)
 
   // This regex matches any string starting with (UkLW), followed by
   // any number of spaces, and then captures everything after the
@@ -43,36 +43,28 @@ object SierraMergeCandidates
     *
     */
   private def get776mergeCandidates(
-    sierraBibData: SierraBibData): List[MergeCandidate] = {
-    val matchingSubfields: List[MarcSubfield] = getMatchingSubfields(
-      sierraBibData,
-      marcTag = "776",
-      marcSubfieldTag = "w"
-    )
-
-    val maybeBibNumbers: List[Option[String]] = matchingSubfields
-      .map { _.content }
+    bibData: SierraBibData): List[MergeCandidate] =
+    bibData
+      .subfieldsWithTag("776" -> "w")
+      .contents
       .map {
         case uklwPrefixRegex(bibNumber) => Some(bibNumber)
         case _                          => None
       }
-      .distinct
-
-    maybeBibNumbers match {
-      case List(Some(bibNumber)) =>
-        List(
-          MergeCandidate(
-            identifier = SourceIdentifier(
-              identifierType = IdentifierType("sierra-system-number"),
-              ontologyType = "Work",
-              value = bibNumber
-            ),
-            reason = Some("Physical/digitised Sierra work")
+      .distinct match {
+        case List(Some(bibNumber)) =>
+          List(
+            MergeCandidate(
+              identifier = SourceIdentifier(
+                identifierType = IdentifierType("sierra-system-number"),
+                ontologyType = "Work",
+                value = bibNumber
+              ),
+              reason = Some("Physical/digitised Sierra work")
+            )
           )
-        )
-      case _ => List()
-    }
-  }
+        case _ => Nil
+      }
 
   /** We can merge a single-page Miro and Sierra work if:
     *
@@ -84,37 +76,14 @@ object SierraMergeCandidates
     *
     */
   private def getSinglePageMiroMergeCandidates(
-    sierraBibData: SierraBibData): List[MergeCandidate] = {
-    sierraBibData.materialType match {
+    bibData: SierraBibData): List[MergeCandidate] =
+    bibData.materialType match {
       // The Sierra material type codes we care about are:
-      //
-      //    k   Pictures
-      //    q   Digital Images
-      //
+      // * k (Pictures)
+      // * q (Digital Images)
       case Some(SierraMaterialType("k")) | Some(SierraMaterialType("q")) | Some(
             SierraMaterialType("r")) =>
-        val matching962Subfields: List[MarcSubfield] = getMatchingSubfields(
-          sierraBibData,
-          marcTag = "962",
-          marcSubfieldTag = "u"
-        )
-
-        val miroIdsFrom962: List[String] = matching962Subfields
-          .map { _.content }
-          .flatMap { maybeGetMiroID }
-          .distinct
-
-        val matching089Subfields: List[MarcSubfield] = getMatchingSubfields(
-          sierraBibData,
-          marcTag = "089",
-          marcSubfieldTag = "a"
-        )
-
-        val miroIdsFrom089: List[String] = matching089Subfields
-          .map { _.content }
-          .flatMap { parse089MiroId }
-
-        (miroIdsFrom962, miroIdsFrom089) match {
+        (matching962Ids(bibData), matching089Ids(bibData)) match {
           case (List(miroId), _) =>
             List(
               miroMergeCandidate(miroId, "Single page Miro/Sierra work")
@@ -125,11 +94,23 @@ object SierraMergeCandidates
                 miroId,
                 "Single page Miro/Sierra work (secondary source)")
             )
-          case _ => List()
+          case _ => Nil
         }
-      case _ => List()
+      case _ => Nil
     }
-  }
+
+  private def matching962Ids(bibData: SierraBibData) =
+    bibData
+      .subfieldsWithTag("962" -> "u")
+      .contents
+      .flatMap { maybeGetMiroID }
+      .distinct
+
+  private def matching089Ids(bibData: SierraBibData) =
+    bibData
+      .subfieldsWithTag("089" -> "a")
+      .contents
+      .flatMap { parse089MiroId }
 
   private def miroMergeCandidate(miroId: String, reason: String) = {
     MergeCandidate(

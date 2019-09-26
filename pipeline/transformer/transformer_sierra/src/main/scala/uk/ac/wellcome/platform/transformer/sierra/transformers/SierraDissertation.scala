@@ -1,12 +1,14 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
-import uk.ac.wellcome.platform.transformer.sierra.source.SierraBibData
+import uk.ac.wellcome.platform.transformer.sierra.source.{SierraBibData, SierraQueryOps}
 
-object SierraDissertation extends SierraTransformer with MarcUtils {
+object SierraDissertation extends SierraTransformer with SierraQueryOps {
 
   type Output = Option[String]
 
   def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
-    getFirstSubfieldContent(bibData, "502", "a")
+    bibData
+      .subfieldsWithTag("502" -> "a")
+      .firstContent
 }

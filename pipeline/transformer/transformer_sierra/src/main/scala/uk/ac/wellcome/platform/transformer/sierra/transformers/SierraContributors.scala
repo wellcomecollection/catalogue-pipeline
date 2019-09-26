@@ -4,12 +4,13 @@ import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
-  SierraBibData
+  SierraBibData,
+  SierraQueryOps,
 }
 
 object SierraContributors
     extends SierraTransformer
-    with MarcUtils
+    with SierraQueryOps
     with SierraAgents {
 
   type Output = List[Contributor[MaybeDisplayable[AbstractAgent]]]
@@ -134,4 +135,14 @@ object SierraContributors
       case MarcSubfield(tag, content) if tag == subfieldTag =>
         ContributionRole(content)
     }
+
+  private def getMatchingSubfieldLists(
+    bibData: SierraBibData,
+    marcTag: String,
+    marcSubfieldTags: List[String]): List[List[MarcSubfield]] =
+    bibData
+      .varfieldsWithTag(marcTag)
+      .collect { case varfield =>
+        varfield.subfieldsWithTags(marcSubfieldTags:_*)
+      }
 }

@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers.subjects
 
 import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.transformer.sierra.source.VarField
+import uk.ac.wellcome.platform.transformer.sierra.source.{VarField, SierraQueryOps}
 import uk.ac.wellcome.platform.transformer.sierra.transformers.SierraAgents
 
 // Populate wwork:subject
@@ -23,6 +23,7 @@ import uk.ac.wellcome.platform.transformer.sierra.transformers.SierraAgents
 //
 object SierraMeetingSubjects
     extends SierraSubjectsTransformer
+    with SierraQueryOps
     with SierraAgents {
 
   val subjectVarFields = List("611")
