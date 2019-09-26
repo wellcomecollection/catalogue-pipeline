@@ -27,19 +27,24 @@ object SierraMeetingSubjects
 
   val subjectVarFields = List("611")
 
+  val labelSubfields = List("a", "b", "c")
+
   def getSubjectsFromVarFields(bibId: SierraBibNumber,
                                varFields: List[VarField]) =
-    varFields.map { varField =>
-      val label = createLabel(varField, subfieldTags = List("a", "c", "d"))
-
-      val subject = Subject(
-        label = label,
-        concepts = List(Unidentifiable(Meeting(label = label)))
-      )
-
-      varField.indicator2 match {
-        case Some("0") => identify(varField.subfields, subject, "Meeting")
-        case _         => Unidentifiable(subject)
+    varFields.flatMap { varField =>
+      createLabel(varField, subfieldTags = List("a", "c", "d")) match {
+        case "" => None
+        case label =>
+          val subject = Subject(
+            label = label,
+            concepts = List(Unidentifiable(Meeting(label = label)))
+          )
+          Some(
+            varField.indicator2 match {
+              case Some("0") => identify(varField.subfields, subject, "Meeting")
+              case _         => Unidentifiable(subject)
+            }
+          )
       }
     }
 }

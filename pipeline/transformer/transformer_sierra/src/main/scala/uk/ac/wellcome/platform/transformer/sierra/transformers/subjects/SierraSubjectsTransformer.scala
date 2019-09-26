@@ -43,10 +43,12 @@ trait SierraSubjectsTransformer extends SierraTransformer with MarcUtils {
     *
     */
   def createLabel(varField: VarField, subfieldTags: List[String]): String =
-    varField.subfields
-      .filter { vf =>
-        subfieldTags.contains(vf.tag)
+    varField
+      .subfields
+      .filter { subfield =>
+        subfieldTags.contains(subfield.tag)
       }
+      .sortBy { _.tag }
       .map { _.content }
       .mkString(" ")
 }
