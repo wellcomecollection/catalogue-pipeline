@@ -8,11 +8,11 @@ import uk.ac.wellcome.models.work.internal.{
 }
 import uk.ac.wellcome.platform.transformer.sierra.source.SierraBibData
 import uk.ac.wellcome.platform.transformer.sierra.transformers.subjects.{
+  SierraBrandNameSubjects,
   SierraConceptSubjects,
-  SierraOrganisationSubjects,
-  SierraPersonSubjects,
   SierraMeetingSubjects,
-  SierraBrandNameSubjects
+  SierraOrganisationSubjects,
+  SierraPersonSubjects
 }
 
 object SierraSubjects extends SierraTransformer {

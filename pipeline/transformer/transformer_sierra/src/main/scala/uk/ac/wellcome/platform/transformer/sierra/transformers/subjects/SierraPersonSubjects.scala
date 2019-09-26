@@ -24,11 +24,14 @@ import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 // The person can be identified if there is an identifier in subfield $0 and the second indicator is "0".
 // If second indicator is anything other than 0, we don't expose the identifier for now.
 //
-object SierraPersonSubjects extends SierraSubjectsTransformer with SierraAgents {
+object SierraPersonSubjects
+    extends SierraSubjectsTransformer
+    with SierraAgents {
 
   val subjectVarFields = List("600")
 
-  def getSubjectsFromVarFields(bibId: SierraBibNumber, varFields: List[VarField]): Output = {
+  def getSubjectsFromVarFields(bibId: SierraBibNumber,
+                               varFields: List[VarField]): Output = {
     // Second indicator 7 means that the subject authority is something other
     // than library of congress or mesh. Some MARC records have duplicated subjects
     // when the same subject has more than one authority (for example mesh and FAST),
