@@ -2,7 +2,10 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers.subjects
 
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.transformer.sierra.source.{MarcSubfield, VarField}
+import uk.ac.wellcome.platform.transformer.sierra.source.{
+  MarcSubfield,
+  VarField
+}
 import uk.ac.wellcome.platform.transformer.sierra.generators.{
   MarcGenerators,
   SierraDataGenerators
@@ -20,7 +23,10 @@ class SierraBrandNameSubjectsTest
     createSierraBibDataWith(varFields = varFields.toList)
 
   def varField(tag: String, content: Option[String], subfields: MarcSubfield*) =
-    createVarFieldWith(marcTag = tag, content = content, subfields = subfields.toList)
+    createVarFieldWith(
+      marcTag = tag,
+      content = content,
+      subfields = subfields.toList)
 
   it("returns zero subjects if there are none") {
     SierraBrandNameSubjects(bibId, bibData()) shouldBe Nil
@@ -69,4 +75,3 @@ class SierraBrandNameSubjectsTest
     )
   }
 }
-

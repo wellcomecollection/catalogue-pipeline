@@ -311,7 +311,7 @@ class SierraConceptSubjectsTest
     val actualSourceIdentifiers = SierraConceptSubjects(bibId, bibData)
       .map {
         case Identifiable(_, sourceIdentifier, _, _) => sourceIdentifier
-        case other => assert(false, other)
+        case other                                   => assert(false, other)
       }
 
     expectedSourceIdentifiers shouldBe actualSourceIdentifiers

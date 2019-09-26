@@ -2,7 +2,10 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers.subjects
 
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.transformer.sierra.source.{MarcSubfield, VarField}
+import uk.ac.wellcome.platform.transformer.sierra.source.{
+  MarcSubfield,
+  VarField
+}
 import uk.ac.wellcome.platform.transformer.sierra.generators.{
   MarcGenerators,
   SierraDataGenerators
@@ -20,7 +23,10 @@ class SierraMeetingSubjectsTest
     createSierraBibDataWith(varFields = varFields.toList)
 
   def varField(tag: String, subfields: MarcSubfield*) =
-    createVarFieldWith(marcTag = tag, subfields = subfields.toList, indicator2 = "0")
+    createVarFieldWith(
+      marcTag = tag,
+      subfields = subfields.toList,
+      indicator2 = "0")
 
   it("returns zero subjects if there are none") {
     SierraMeetingSubjects(bibId, bibData()) shouldBe Nil

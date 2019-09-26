@@ -285,7 +285,6 @@ class SierraPersonSubjectsTest
       )
     )
 
-    
     val actualSubjects = SierraPersonSubjects(bibId, bibData)
     actualSubjects should have size 1
     val subject = actualSubjects.head
@@ -318,7 +317,6 @@ class SierraPersonSubjectsTest
       )
     )
 
-    
     val actualSubjects = SierraPersonSubjects(bibId, bibData)
     actualSubjects should have size 1
     val subject = actualSubjects.head
