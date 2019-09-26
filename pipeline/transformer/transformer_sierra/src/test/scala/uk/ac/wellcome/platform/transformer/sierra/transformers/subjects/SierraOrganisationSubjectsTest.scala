@@ -16,10 +16,8 @@ class SierraOrganisationSubjectsTest
     with Matchers
     with SierraDataGenerators {
   it("returns an empty list if there are no instances of MARC tag 610") {
-    val bibData = createSierraBibDataWith(varFields = List())
-    transformer.getSubjectsWithOrganisation(
-      bibId = createSierraBibNumber,
-      bibData) shouldBe List()
+    val bibData = createSierraBibDataWith(varFields = Nil)
+    getOrganisationSubjects(bibData) shouldBe Nil
   }
 
   describe("label") {
@@ -235,10 +233,8 @@ class SierraOrganisationSubjectsTest
       subfields = subfields
     )
 
-  val transformer = new SierraOrganisationSubjects {}
-
   private def getOrganisationSubjects(bibData: SierraBibData,
                                       bibId: SierraBibNumber =
                                         createSierraBibNumber) =
-    transformer.getSubjectsWithOrganisation(bibId = bibId, bibData = bibData)
+    SierraOrganisationSubjects(bibId, bibData)
 }

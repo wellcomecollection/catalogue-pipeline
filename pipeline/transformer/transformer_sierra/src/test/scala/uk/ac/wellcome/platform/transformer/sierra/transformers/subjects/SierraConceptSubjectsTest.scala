@@ -13,15 +13,16 @@ class SierraConceptSubjectsTest
     with Matchers
     with MarcGenerators
     with SierraDataGenerators {
-  private val transformer = new SierraConceptSubjects {}
+
+  def bibId = createSierraBibNumber
 
   it("returns zero subjects if there are none") {
-    val bibData = createSierraBibDataWith(varFields = List())
-    transformer.getSubjectswithAbstractConcepts(bibData) shouldBe Nil
+    val bibData = createSierraBibDataWith(varFields = Nil)
+    SierraConceptSubjects(bibId, bibData) shouldBe Nil
   }
 
   it("returns subjects for tag 650 with only subfield a") {
-    val sierraBibData = createSierraBibDataWith(
+    val bibData = createSierraBibDataWith(
       varFields = List(
         createVarFieldWith(
           marcTag = "650",
@@ -32,7 +33,7 @@ class SierraConceptSubjectsTest
       )
     )
 
-    transformer.getSubjectswithAbstractConcepts(sierraBibData) shouldBe List(
+    SierraConceptSubjects(bibId, bibData) shouldBe List(
       Unidentifiable(
         Subject(
           label = "A Content",
@@ -44,7 +45,7 @@ class SierraConceptSubjectsTest
   }
 
   it("returns subjects for tag 650 with only subfields a and v") {
-    val sierraBibData = createSierraBibDataWith(
+    val bibData = createSierraBibDataWith(
       varFields = List(
         createVarFieldWith(
           marcTag = "650",
@@ -56,7 +57,7 @@ class SierraConceptSubjectsTest
       )
     )
 
-    transformer.getSubjectswithAbstractConcepts(sierraBibData) shouldBe List(
+    SierraConceptSubjects(bibId, bibData) shouldBe List(
       Unidentifiable(
         Subject(
           label = "A Content - V Content",
@@ -70,7 +71,7 @@ class SierraConceptSubjectsTest
 
   it(
     "subfield a is always first concept when returning subjects for tag 650 with subfields a, v") {
-    val sierraBibData = createSierraBibDataWith(
+    val bibData = createSierraBibDataWith(
       varFields = List(
         createVarFieldWith(
           marcTag = "650",
@@ -81,7 +82,7 @@ class SierraConceptSubjectsTest
         )
       )
     )
-    transformer.getSubjectswithAbstractConcepts(sierraBibData) shouldBe List(
+    SierraConceptSubjects(bibId, bibData) shouldBe List(
       Unidentifiable(
         Subject(
           label = "A Content - V Content",
@@ -94,7 +95,7 @@ class SierraConceptSubjectsTest
   }
 
   it("returns subjects for tag 650 subfields a, v, and x") {
-    val sierraBibData = createSierraBibDataWith(
+    val bibData = createSierraBibDataWith(
       varFields = List(
         createVarFieldWith(
           marcTag = "650",
@@ -107,7 +108,7 @@ class SierraConceptSubjectsTest
       )
     )
 
-    transformer.getSubjectswithAbstractConcepts(sierraBibData) shouldBe List(
+    SierraConceptSubjects(bibId, bibData) shouldBe List(
       Unidentifiable(
         Subject(
           label = "A Content - X Content - V Content",
@@ -122,7 +123,7 @@ class SierraConceptSubjectsTest
   }
 
   it("returns subjects for tag 650 with subfields a, y") {
-    val sierraBibData = createSierraBibDataWith(
+    val bibData = createSierraBibDataWith(
       varFields = List(
         createVarFieldWith(
           marcTag = "650",
@@ -134,7 +135,7 @@ class SierraConceptSubjectsTest
       )
     )
 
-    transformer.getSubjectswithAbstractConcepts(sierraBibData) shouldBe List(
+    SierraConceptSubjects(bibId, bibData) shouldBe List(
       Unidentifiable(
         Subject(
           label = "A Content - Y Content",
@@ -148,7 +149,7 @@ class SierraConceptSubjectsTest
   }
 
   it("returns subjects for tag 650 with subfields a, z") {
-    val sierraBibData = createSierraBibDataWith(
+    val bibData = createSierraBibDataWith(
       varFields = List(
         createVarFieldWith(
           marcTag = "650",
@@ -159,7 +160,7 @@ class SierraConceptSubjectsTest
         )
       )
     )
-    transformer.getSubjectswithAbstractConcepts(sierraBibData) shouldBe List(
+    SierraConceptSubjects(bibId, bibData) shouldBe List(
       Unidentifiable(
         Subject(
           label = "A Content - Z Content",
@@ -192,7 +193,7 @@ class SierraConceptSubjectsTest
       )
     )
 
-    transformer.getSubjectswithAbstractConcepts(bibData) shouldBe List(
+    SierraConceptSubjects(bibId, bibData) shouldBe List(
       Unidentifiable(
         Subject(
           label = "A1 Content - Z1 Content",
@@ -215,7 +216,7 @@ class SierraConceptSubjectsTest
   }
 
   it("returns subjects with primary concept Period for tag 648") {
-    val sierraBibData = createSierraBibDataWith(
+    val bibData = createSierraBibDataWith(
       varFields = List(
         createVarFieldWith(
           marcTag = "648",
@@ -228,7 +229,7 @@ class SierraConceptSubjectsTest
       )
     )
 
-    transformer.getSubjectswithAbstractConcepts(sierraBibData) shouldBe List(
+    SierraConceptSubjects(bibId, bibData) shouldBe List(
       Unidentifiable(
         Subject(
           label = "A Content - X Content - V Content",
@@ -243,7 +244,7 @@ class SierraConceptSubjectsTest
   }
 
   it("returns subjects with primary concept Place for tag 651") {
-    val sierraBibData = createSierraBibDataWith(
+    val bibData = createSierraBibDataWith(
       varFields = List(
         createVarFieldWith(
           marcTag = "651",
@@ -256,7 +257,7 @@ class SierraConceptSubjectsTest
       )
     )
 
-    transformer.getSubjectswithAbstractConcepts(sierraBibData) shouldBe List(
+    SierraConceptSubjects(bibId, bibData) shouldBe List(
       Unidentifiable(
         Subject(
           label = "A Content - X Content - V Content",
@@ -307,15 +308,9 @@ class SierraConceptSubjectsTest
       )
     )
 
-    val actualSourceIdentifiers = transformer
-      .getSubjectswithAbstractConcepts(bibData)
+    val actualSourceIdentifiers = SierraConceptSubjects(bibId, bibData)
       .map {
-        case Identifiable(
-            _: Subject[MaybeDisplayable[AbstractConcept]],
-            sourceIdentifier,
-            _,
-            _) =>
-          sourceIdentifier
+        case Identifiable(_, sourceIdentifier, _, _) => sourceIdentifier
         case other => assert(false, other)
       }
 
@@ -351,8 +346,7 @@ class SierraConceptSubjectsTest
       ontologyType = "Subject"
     )
 
-    transformer
-      .getSubjectswithAbstractConcepts(bibData) shouldBe List(
+    SierraConceptSubjects(bibId, bibData) shouldBe List(
       Identifiable(
         Subject(
           label = "abolition",
@@ -378,7 +372,6 @@ class SierraConceptSubjectsTest
       )
     )
 
-    transformer
-      .getSubjectswithAbstractConcepts(bibData) shouldBe List()
+    SierraConceptSubjects(bibId, bibData) shouldBe Nil
   }
 }

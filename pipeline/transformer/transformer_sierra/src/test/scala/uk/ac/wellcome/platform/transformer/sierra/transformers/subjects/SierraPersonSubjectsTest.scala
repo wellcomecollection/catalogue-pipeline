@@ -13,15 +13,16 @@ class SierraPersonSubjectsTest
     with Matchers
     with MarcGenerators
     with SierraDataGenerators {
-  private val transformer = new SierraPersonSubjects {}
+
+  def bibId = createSierraBibNumber
 
   it("returns zero subjects if there are none") {
     val bibData = createSierraBibDataWith(varFields = List())
-    transformer.getSubjectsWithPerson(bibData) shouldBe Nil
+    SierraPersonSubjects(bibId, bibData) shouldBe Nil
   }
 
   it("returns subjects for tag 600 with only subfield a") {
-    val sierraBibData = createSierraBibDataWith(
+    val bibData = createSierraBibDataWith(
       varFields = List(
         createVarFieldWith(
           marcTag = "600",
@@ -32,7 +33,7 @@ class SierraPersonSubjectsTest
       )
     )
 
-    transformer.getSubjectsWithPerson(sierraBibData) shouldBe List(
+    SierraPersonSubjects(bibId, bibData) shouldBe List(
       Unidentifiable(
         Subject(
           label = "A Content",
@@ -43,7 +44,7 @@ class SierraPersonSubjectsTest
   }
 
   it("returns subjects for tag 600 with only subfields a and c") {
-    val sierraBibData = createSierraBibDataWith(
+    val bibData = createSierraBibDataWith(
       varFields = List(
         createVarFieldWith(
           marcTag = "600",
@@ -55,7 +56,7 @@ class SierraPersonSubjectsTest
       )
     )
 
-    transformer.getSubjectsWithPerson(sierraBibData) shouldBe List(
+    SierraPersonSubjects(bibId, bibData) shouldBe List(
       Unidentifiable(
         Subject(
           label = "Larrey, D. J. baron",
@@ -69,7 +70,7 @@ class SierraPersonSubjectsTest
   }
 
   it("returns subjects for tag 600 with only subfields a and multiple c") {
-    val sierraBibData = createSierraBibDataWith(
+    val bibData = createSierraBibDataWith(
       varFields = List(
         createVarFieldWith(
           marcTag = "600",
@@ -82,7 +83,7 @@ class SierraPersonSubjectsTest
       )
     )
 
-    transformer.getSubjectsWithPerson(sierraBibData) shouldBe List(
+    SierraPersonSubjects(bibId, bibData) shouldBe List(
       Unidentifiable(
         Subject(
           label = "David Attenborough sir doctor",
@@ -94,7 +95,7 @@ class SierraPersonSubjectsTest
   }
 
   it("returns subjects for tag 600 with only subfields a and b") {
-    val sierraBibData = createSierraBibDataWith(
+    val bibData = createSierraBibDataWith(
       varFields = List(
         createVarFieldWith(
           marcTag = "600",
@@ -106,7 +107,7 @@ class SierraPersonSubjectsTest
       )
     )
 
-    transformer.getSubjectsWithPerson(sierraBibData) shouldBe List(
+    SierraPersonSubjects(bibId, bibData) shouldBe List(
       Unidentifiable(
         Subject(
           label = "David Attenborough II",
@@ -118,7 +119,7 @@ class SierraPersonSubjectsTest
   }
 
   it("returns subjects for tag 600 with subfields a and e") {
-    val sierraBibData = createSierraBibDataWith(
+    val bibData = createSierraBibDataWith(
       varFields = List(
         createVarFieldWith(
           marcTag = "600",
@@ -130,7 +131,7 @@ class SierraPersonSubjectsTest
       )
     )
 
-    transformer.getSubjectsWithPerson(sierraBibData) shouldBe List(
+    SierraPersonSubjects(bibId, bibData) shouldBe List(
       Unidentifiable(
         Subject(
           label = "David Attenborough, author",
@@ -141,7 +142,7 @@ class SierraPersonSubjectsTest
   }
 
   it("returns subjects for tag 600 with subfields a and d") {
-    val sierraBibData = createSierraBibDataWith(
+    val bibData = createSierraBibDataWith(
       varFields = List(
         createVarFieldWith(
           marcTag = "600",
@@ -155,7 +156,7 @@ class SierraPersonSubjectsTest
       )
     )
 
-    transformer.getSubjectsWithPerson(sierraBibData) shouldBe List(
+    SierraPersonSubjects(bibId, bibData) shouldBe List(
       Unidentifiable(
         Subject(
           label = "Rita Levi Montalcini, 22 April 1909 – 30 December 2012",
@@ -167,7 +168,7 @@ class SierraPersonSubjectsTest
   }
 
   it("returns subjects for tag 600 with subfields a and multiple e") {
-    val sierraBibData = createSierraBibDataWith(
+    val bibData = createSierraBibDataWith(
       varFields = List(
         createVarFieldWith(
           marcTag = "600",
@@ -180,7 +181,7 @@ class SierraPersonSubjectsTest
       )
     )
 
-    transformer.getSubjectsWithPerson(sierraBibData) shouldBe List(
+    SierraPersonSubjects(bibId, bibData) shouldBe List(
       Unidentifiable(
         Subject(
           label = "David Attenborough, author, editor",
@@ -194,7 +195,7 @@ class SierraPersonSubjectsTest
   // error, but all the person will do is delete the field, so we can avoid
   // throwing an error.
   it("errors transforming a subject 600 if subfield a is missing") {
-    val sierraBibData = createSierraBibDataWith(
+    val bibData = createSierraBibDataWith(
       varFields = List(
         createVarFieldWith(
           marcTag = "600",
@@ -203,7 +204,7 @@ class SierraPersonSubjectsTest
       )
     )
 
-    transformer.getSubjectsWithPerson(sierraBibData) shouldBe List()
+    SierraPersonSubjects(bibId, bibData) shouldBe Nil
   }
 
   it(
@@ -211,7 +212,7 @@ class SierraPersonSubjectsTest
     val name = "Gerry the Garlic"
     val lcshCode = "lcsh7212"
 
-    val sierraBibData = createSierraBibDataWith(
+    val bibData = createSierraBibDataWith(
       varFields = List(
         createVarFieldWith(
           marcTag = "600",
@@ -230,7 +231,7 @@ class SierraPersonSubjectsTest
       value = lcshCode
     )
 
-    transformer.getSubjectsWithPerson(sierraBibData) shouldBe List(
+    SierraPersonSubjects(bibId, bibData) shouldBe List(
       Identifiable(
         Subject(
           label = "Gerry the Garlic",
@@ -245,7 +246,7 @@ class SierraPersonSubjectsTest
 
   it("creates an unidentifiable person concept if second indicator is not 0") {
     val name = "Gerry the Garlic"
-    val sierraBibData = createSierraBibDataWith(
+    val bibData = createSierraBibDataWith(
       varFields = List(
         createVarFieldWith(
           marcTag = "600",
@@ -258,7 +259,7 @@ class SierraPersonSubjectsTest
       )
     )
 
-    transformer.getSubjectsWithPerson(sierraBibData) shouldBe List(
+    SierraPersonSubjects(bibId, bibData) shouldBe List(
       Unidentifiable(
         Subject(
           label = "Gerry the Garlic",
@@ -284,7 +285,8 @@ class SierraPersonSubjectsTest
       )
     )
 
-    val actualSubjects = transformer.getSubjectsWithPerson(bibData)
+    
+    val actualSubjects = SierraPersonSubjects(bibId, bibData)
     actualSubjects should have size 1
     val subject = actualSubjects.head
 
@@ -316,7 +318,8 @@ class SierraPersonSubjectsTest
       )
     )
 
-    val actualSubjects = transformer.getSubjectsWithPerson(bibData)
+    
+    val actualSubjects = SierraPersonSubjects(bibId, bibData)
     actualSubjects should have size 1
     val subject = actualSubjects.head
 
