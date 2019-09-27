@@ -1,9 +1,9 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.transformer.sierra.source.MarcSubfield
+import uk.ac.wellcome.platform.transformer.sierra.source.{MarcSubfield, SierraQueryOps}
 
-trait SierraAgents {
+trait SierraAgents extends SierraQueryOps {
   // This is used to construct a Person from MARc tags 100, 700 and 600.
   // For all these cases:
   //  - subfield $a populates the person label
@@ -44,9 +44,10 @@ trait SierraAgents {
     }
 
   def getMeeting(subfields: List[MarcSubfield]): Option[Meeting] =
-    getLabel(subfields).map { label =>
-      Meeting.normalised(label = label)
-    }
+    getLabel(subfields.withTags("a", "c", "d", "j", "t", "0"))
+      .map { label =>
+        Meeting.normalised(label = label)
+      }
 
   /* Given an agent and the associated MARC subfields, look for instances of subfield $0,
    * which are used for identifiers.
