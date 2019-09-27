@@ -38,7 +38,7 @@ object SierraContributors
   type Output = List[Contributor[MaybeDisplayable[AbstractAgent]]]
 
   val contributorFields = List(
-    ("100",  getPersonContributors _, "e"),
+    ("100", getPersonContributors _, "e"),
     ("110", getOrganisationContributors _, "e"),
     ("111", getMeetingContributors _, "j"),
     ("700", getPersonContributors _, "e"),
@@ -47,18 +47,19 @@ object SierraContributors
   )
 
   def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
-    contributorFields.flatMap { case (tag, f, roleTag) =>
-      bibData
-        .varfieldsWithTag(tag)
-        .flatMap { varfield =>
-          val (ontologyType, maybeAgent) = f(varfield.subfields)
-          maybeAgent.map { agent =>
-            Contributor(
-              agent = identify(varfield.subfields, agent, ontologyType),
-              roles = getContributionRoles(varfield.subfields, roleTag)
-            )
+    contributorFields.flatMap {
+      case (tag, f, roleTag) =>
+        bibData
+          .varfieldsWithTag(tag)
+          .flatMap { varfield =>
+            val (ontologyType, maybeAgent) = f(varfield.subfields)
+            maybeAgent.map { agent =>
+              Contributor(
+                agent = identify(varfield.subfields, agent, ontologyType),
+                roles = getContributionRoles(varfield.subfields, roleTag)
+              )
+            }
           }
-        }
     }
 
   private def getPersonContributors(subfields: List[MarcSubfield]) =
@@ -74,10 +75,10 @@ object SierraContributors
     "Meeting" -> getMeeting(subfields)
 
   private def getContributionRoles(
-  subfields: List[MarcSubfield],
-  subfieldTag: String): List[ContributionRole] =
-  subfields
-    .withTag(subfieldTag)
-    .contents
-    .map(ContributionRole(_))
+    subfields: List[MarcSubfield],
+    subfieldTag: String): List[ContributionRole] =
+    subfields
+      .withTag(subfieldTag)
+      .contents
+      .map(ContributionRole(_))
 }
