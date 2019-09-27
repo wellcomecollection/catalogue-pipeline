@@ -12,7 +12,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
 }
 
 class SierraDurationTest
-    extends FunSpec
+  extends FunSpec
     with Matchers
     with MarcGenerators
     with SierraDataGenerators {
