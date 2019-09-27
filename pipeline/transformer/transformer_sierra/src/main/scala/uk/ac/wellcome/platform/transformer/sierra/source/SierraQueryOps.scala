@@ -4,7 +4,7 @@ trait SierraQueryOps {
 
   implicit class BibDataOps(bibData: SierraBibData) {
 
-    def varfields: List[VarField] = bibData.varFields
+    val varfields: List[VarField] = bibData.varFields
 
     def varfieldsWithTags(tags: String*): List[VarField] =
       bibData.varFields.withTags(tags: _*)
