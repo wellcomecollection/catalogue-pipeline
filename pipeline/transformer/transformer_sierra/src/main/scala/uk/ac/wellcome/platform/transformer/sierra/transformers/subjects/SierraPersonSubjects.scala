@@ -3,43 +3,42 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers.subjects
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
-  SierraBibData,
   VarField
 }
-import uk.ac.wellcome.platform.transformer.sierra.transformers.{
-  MarcUtils,
-  SierraAgents
-}
+import uk.ac.wellcome.platform.transformer.sierra.transformers.SierraAgents
+import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 
-trait SierraPersonSubjects extends MarcUtils with SierraAgents {
+// Populate wwork:subject
+//
+// Use MARC field "600" where the second indicator is not 7.
+//
+// The concepts come from:
+//
+//    - The person
+//    - The contents of subfields $t and $x (title and general subdivision),
+//      both as Concepts
+//
+// The label is constructed concatenating subfields $a, $b, $c, $d, $e,
+// where $d and $e represent the person's dates and roles respectively.
+//
+// The person can be identified if there is an identifier in subfield $0 and the second indicator is "0".
+// If second indicator is anything other than 0, we don't expose the identifier for now.
+//
+object SierraPersonSubjects
+    extends SierraSubjectsTransformer
+    with SierraAgents {
 
-  // Populate wwork:subject
-  //
-  // Use MARC field "600" where the second indicator is not 7.
-  //
-  // The concepts come from:
-  //
-  //    - The person
-  //    - The contents of subfields $t and $x (title and general subdivision),
-  //      both as Concepts
-  //
-  // The label is constructed concatenating subfields $a, $b, $c, $d, $e,
-  // where $d and $e represent the person's dates and roles respectively.
-  //
-  // The person can be identified if there is an identifier in subfield $0 and the second indicator is "0".
-  // If second indicator is anything other than 0, we don't expose the identifier for now.
-  //
-  def getSubjectsWithPerson(bibData: SierraBibData)
-    : List[MaybeDisplayable[Subject[MaybeDisplayable[AbstractRootConcept]]]] = {
-    val marcVarFields = getMatchingVarFields(bibData, marcTag = "600")
+  val subjectVarFields = List("600")
 
+  def getSubjectsFromVarFields(bibId: SierraBibNumber,
+                               varFields: List[VarField]): Output = {
     // Second indicator 7 means that the subject authority is something other
     // than library of congress or mesh. Some MARC records have duplicated subjects
     // when the same subject has more than one authority (for example mesh and FAST),
     // which causes duplicated subjects to appear in the API.
     //
     // So let's filter anything that is from another authority for now.
-    marcVarFields
+    varFields
       .filterNot { _.indicator2.contains("7") }
       .flatMap { varField: VarField =>
         val subfields = varField.subfields

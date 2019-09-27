@@ -3,37 +3,34 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers.subjects
 import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.sierra.exceptions.CataloguingException
-import uk.ac.wellcome.platform.transformer.sierra.source.{
-  SierraBibData,
-  VarField
-}
-import uk.ac.wellcome.platform.transformer.sierra.transformers.{
-  MarcUtils,
-  SierraAgents
-}
+import uk.ac.wellcome.platform.transformer.sierra.source.VarField
+import uk.ac.wellcome.platform.transformer.sierra.transformers.SierraAgents
 
-trait SierraOrganisationSubjects extends SierraAgents with MarcUtils {
+// Populate wwork:subject
+//
+// Use MARC field "610".
+//
+// *  Populate the platform "label" with the concatenated values of
+//    subfields a, b, c, d and e.
+//
+// *  Populate "concepts" with a single value:
+//
+//    -   Create "label" from subfields a and b
+//    -   Set "type" to "Organisation"
+//    -   Use subfield 0 to populate "identifiers", if present.  Note the
+//        identifierType should be "lc-names".
+//
+// https://www.loc.gov/marc/bibliographic/bd610.html
+//
+object SierraOrganisationSubjects
+    extends SierraSubjectsTransformer
+    with SierraAgents {
 
-  // Populate wwork:subject
-  //
-  // Use MARC field "610".
-  //
-  // *  Populate the platform "label" with the concatenated values of
-  //    subfields a, b, c, d and e.
-  //
-  // *  Populate "concepts" with a single value:
-  //
-  //    -   Create "label" from subfields a and b
-  //    -   Set "type" to "Organisation"
-  //    -   Use subfield 0 to populate "identifiers", if present.  Note the
-  //        identifierType should be "lc-names".
-  //
-  // https://www.loc.gov/marc/bibliographic/bd610.html
-  //
-  def getSubjectsWithOrganisation(bibId: SierraBibNumber,
-                                  bibData: SierraBibData)
-    : List[MaybeDisplayable[Subject[MaybeDisplayable[Organisation]]]] =
-    getMatchingVarFields(bibData, marcTag = "610").map { varField =>
+  val subjectVarFields = List("610")
+
+  def getSubjectsFromVarFields(bibId: SierraBibNumber,
+                               varFields: List[VarField]): Output =
+    varFields.map { varField =>
       val label =
         createLabel(varField, subfieldTags = List("a", "b", "c", "d", "e"))
 
@@ -66,19 +63,4 @@ trait SierraOrganisationSubjects extends SierraAgents with MarcUtils {
 
     Unidentifiable(Organisation(label = label))
   }
-
-  /** Given a varField and a list of subfield tags, create a label by
-    * concatenating the contents of every subfield with one of the given tags.
-    *
-    * The order is the same as that in the original MARC.
-    *
-    */
-  private def createLabel(varField: VarField,
-                          subfieldTags: List[String]): String =
-    varField.subfields
-      .filter { vf =>
-        subfieldTags.contains(vf.tag)
-      }
-      .map { _.content }
-      .mkString(" ")
 }

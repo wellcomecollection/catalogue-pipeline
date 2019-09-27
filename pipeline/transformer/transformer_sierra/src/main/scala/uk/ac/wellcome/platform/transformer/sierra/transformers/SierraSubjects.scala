@@ -8,16 +8,14 @@ import uk.ac.wellcome.models.work.internal.{
 }
 import uk.ac.wellcome.platform.transformer.sierra.source.SierraBibData
 import uk.ac.wellcome.platform.transformer.sierra.transformers.subjects.{
+  SierraBrandNameSubjects,
   SierraConceptSubjects,
+  SierraMeetingSubjects,
   SierraOrganisationSubjects,
   SierraPersonSubjects
 }
 
-object SierraSubjects
-    extends SierraTransformer
-    with SierraConceptSubjects
-    with SierraPersonSubjects
-    with SierraOrganisationSubjects {
+object SierraSubjects extends SierraTransformer {
 
   type Output = List[
     MaybeDisplayable[
@@ -27,8 +25,14 @@ object SierraSubjects
     ]
   ]
 
+  val subjectsTransformers = List(
+    SierraConceptSubjects,
+    SierraPersonSubjects,
+    SierraOrganisationSubjects,
+    SierraMeetingSubjects,
+    SierraBrandNameSubjects
+  )
+
   def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
-    getSubjectswithAbstractConcepts(bibData) ++
-      getSubjectsWithPerson(bibData) ++
-      getSubjectsWithOrganisation(bibId, bibData)
+    subjectsTransformers.flatMap(transform => transform(bibId, bibData))
 }

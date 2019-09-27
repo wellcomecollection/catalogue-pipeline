@@ -611,6 +611,75 @@ class SierraTransformableTransformerTest
     )
   }
 
+  it("extracts meeting subjects if present") {
+    val id = createSierraBibNumber
+    val content = "Big Meeting"
+
+    val data =
+      s"""
+         | {
+         |   "id": "$id",
+         |   "title": "Proceedings of 3rd Big Meeting",
+         |   "varFields": [
+         |     {
+         |       "fieldTag": "",
+         |       "marcTag": "611",
+         |       "ind1": " ",
+         |       "ind2": " ",
+         |       "subfields": [
+         |         {
+         |           "tag": "a",
+         |           "content": "$content"
+         |         }
+         |       ]
+         |     }
+         |   ]
+         | }
+      """.stripMargin
+
+    val work = transformDataToUnidentifiedWork(id = id, data = data)
+    work.subjects shouldBe List(
+      Unidentifiable(
+        Subject(
+          label = content,
+          List(Unidentifiable(Meeting(content)))
+        )
+      )
+    )
+  }
+
+  it("extracts brand name subjects if present") {
+    val id = createSierraBibNumber
+    val content = "ACME"
+
+    val data =
+      s"""
+         | {
+         |   "id": "$id",
+         |   "title": "Wacky Racers",
+         |   "varFields": [
+         |     {
+         |       "fieldTag": "",
+         |       "marcTag": "652",
+         |       "ind1": " ",
+         |       "ind2": " ",
+         |       "content": "$content"
+         |     }
+         |   ]
+         | }
+      """.stripMargin
+
+    val work = transformDataToUnidentifiedWork(id = id, data = data)
+    work.subjects shouldBe List(
+      Unidentifiable(
+        Subject(
+          label = content,
+          List(Unidentifiable(Concept(content)))
+        )
+      )
+    )
+  }
+
   it("adds production events if possible") {
     val id = createSierraBibNumber
     val placeLabel = "London"
