@@ -13,8 +13,8 @@ object SierraCredits extends SierraTransformer with MarcUtils {
     creditsVarFields
       .flatMap(getMatchingVarFields(bibData, _))
       .flatMap(getSubfieldContents(_, Some("a"))) match {
-        case Nil => None
-        case strings => Some(strings.mkString("\n"))
-      }
-      
+      case Nil     => None
+      case strings => Some(strings.mkString("\n"))
+    }
+
 }
