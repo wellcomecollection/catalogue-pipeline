@@ -47,7 +47,8 @@ class SierraMeetingSubjectsTest
     )
   }
 
-  it("returns subjects with subfields $$a, $$c and $$d concatenated in order they appear") {
+  it(
+    "returns subjects with subfields $$a, $$c and $$d concatenated in order they appear") {
     val data = bibData(
       varField(
         "611",

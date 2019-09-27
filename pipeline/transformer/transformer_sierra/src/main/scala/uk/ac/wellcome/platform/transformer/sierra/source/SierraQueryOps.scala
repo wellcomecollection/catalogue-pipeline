@@ -1,6 +1,5 @@
 package uk.ac.wellcome.platform.transformer.sierra.source
 
-
 trait SierraQueryOps {
 
   implicit class BibDataOps(bibData: SierraBibData) {
@@ -8,14 +7,15 @@ trait SierraQueryOps {
     def varfields: List[VarField] = bibData.varFields
 
     def varfieldsWithTags(tags: String*): List[VarField] =
-      bibData.varFields.withTags(tags:_*)
+      bibData.varFields.withTags(tags: _*)
 
     def varfieldsWithTag(tag: String): List[VarField] =
       varfieldsWithTags(tag)
 
     def subfieldsWithTags(tags: (String, String)*): List[MarcSubfield] =
-      tags.toList.flatMap { case (tag, subfieldTag) =>
-        varfieldsWithTag(tag).subfieldsWithTag(subfieldTag)
+      tags.toList.flatMap {
+        case (tag, subfieldTag) =>
+          varfieldsWithTag(tag).subfieldsWithTag(subfieldTag)
       }
 
     def subfieldsWithTag(tag: (String, String)): List[MarcSubfield] =
@@ -27,7 +27,9 @@ trait SierraQueryOps {
     def withTags(tags: String*): List[VarField] =
       varfields
         .filter { _.marcTag.map(tag => tags.contains(tag)).getOrElse(false) }
-        .sortBy { varfield => tags.indexOf(varfield.marcTag.get) }
+        .sortBy { varfield =>
+          tags.indexOf(varfield.marcTag.get)
+        }
 
     def withTags(tag: String): List[VarField] = withTags(tag)
 
@@ -40,7 +42,7 @@ trait SierraQueryOps {
     def subfields: List[MarcSubfield] = varfields.flatMap(_.subfields)
 
     def subfieldsWithTags(tags: String*): List[MarcSubfield] =
-      varfields.subfields.withTags(tags:_*)
+      varfields.subfields.withTags(tags: _*)
 
     def subfieldsWithTag(tag: String): List[MarcSubfield] =
       subfieldsWithTags(tag)
@@ -51,7 +53,8 @@ trait SierraQueryOps {
 
     def firstContent: Option[String] = varfields.contents.headOption
 
-    def contentString(sep: String): Option[String] = contents.mkStringOrNone(sep)
+    def contentString(sep: String): Option[String] =
+      contents.mkStringOrNone(sep)
 
     def contentString: Option[String] = contents.mkStringOrNone
   }
@@ -60,7 +63,9 @@ trait SierraQueryOps {
 
     def withTags(tags: String*): List[MarcSubfield] =
       subfields
-        .filter { subfield => tags.contains(subfield.tag) }
+        .filter { subfield =>
+          tags.contains(subfield.tag)
+        }
 
     def withTag(tag: String): List[MarcSubfield] = withTags(tag)
 
@@ -68,7 +73,8 @@ trait SierraQueryOps {
 
     def firstContent: Option[String] = subfields.contents.headOption
 
-    def contentString(sep: String): Option[String] = contents.mkStringOrNone(sep)
+    def contentString(sep: String): Option[String] =
+      contents.mkStringOrNone(sep)
 
     def contentString: Option[String] = contents.mkStringOrNone
   }
@@ -77,13 +83,13 @@ trait SierraQueryOps {
 
     def mkStringOrNone(sep: String): Option[String] =
       strings match {
-        case Nil => None
+        case Nil     => None
         case strings => Some(strings.mkString(sep))
       }
 
     def mkStringOrNone: Option[String] =
       strings match {
-        case Nil => None
+        case Nil     => None
         case strings => Some(strings.mkString)
       }
   }

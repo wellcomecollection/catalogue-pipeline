@@ -142,7 +142,8 @@ object SierraContributors
     marcSubfieldTags: List[String]): List[List[MarcSubfield]] =
     bibData
       .varfieldsWithTag(marcTag)
-      .collect { case varfield =>
-        varfield.subfieldsWithTags(marcSubfieldTags:_*)
+      .collect {
+        case varfield =>
+          varfield.subfieldsWithTags(marcSubfieldTags: _*)
       }
 }

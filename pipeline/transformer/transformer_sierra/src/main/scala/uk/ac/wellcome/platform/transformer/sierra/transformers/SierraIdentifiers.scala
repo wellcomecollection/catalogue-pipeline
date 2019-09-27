@@ -2,7 +2,10 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 import uk.ac.wellcome.models.work.internal.{IdentifierType, SourceIdentifier}
-import uk.ac.wellcome.platform.transformer.sierra.source.{SierraQueryOps, SierraBibData}
+import uk.ac.wellcome.platform.transformer.sierra.source.{
+  SierraBibData,
+  SierraQueryOps
+}
 
 // Populate wwork:identifiers.
 //
@@ -29,7 +32,7 @@ object SierraIdentifiers extends SierraTransformer with SierraQueryOps {
 
     val isbnIdentifiers: List[SourceIdentifier] =
       bibData
-        .subfieldsWithTag("020" ->  "a")
+        .subfieldsWithTag("020" -> "a")
         .contents
         .map { value =>
           SourceIdentifier(

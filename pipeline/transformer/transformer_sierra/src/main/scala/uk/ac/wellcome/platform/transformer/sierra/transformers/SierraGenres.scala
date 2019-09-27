@@ -9,8 +9,8 @@ import uk.ac.wellcome.models.work.internal.{
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
   SierraBibData,
-  VarField,
-  SierraQueryOps
+  SierraQueryOps,
+  VarField
 }
 import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 
@@ -61,7 +61,8 @@ object SierraGenres
             .partition { _.tag == "a" }
 
         val label = getLabel(primarySubfields, subdivisionSubfields)
-        val concepts: List[MaybeDisplayable[AbstractConcept]] = getPrimaryConcept(
+        val concepts
+          : List[MaybeDisplayable[AbstractConcept]] = getPrimaryConcept(
           primarySubfields,
           varField = varField) ++ getSubdivisions(subdivisionSubfields)
 

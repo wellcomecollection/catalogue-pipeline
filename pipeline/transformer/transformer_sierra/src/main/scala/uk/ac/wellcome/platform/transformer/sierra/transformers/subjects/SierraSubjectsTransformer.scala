@@ -4,8 +4,8 @@ import uk.ac.wellcome.platform.transformer.sierra.transformers.SierraTransformer
 import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData,
-  VarField,
-  SierraQueryOps
+  SierraQueryOps,
+  VarField
 }
 import uk.ac.wellcome.models.work.internal.{
   AbstractRootConcept,
@@ -26,7 +26,6 @@ trait SierraSubjectsTransformer extends SierraTransformer with SierraQueryOps {
   val subjectVarFields: List[String]
 
   def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
-
     getSubjectsFromVarFields(
       bibId,
       subjectVarFields.flatMap(bibData.varfieldsWithTag(_))
@@ -43,7 +42,7 @@ trait SierraSubjectsTransformer extends SierraTransformer with SierraQueryOps {
     */
   def createLabel(varField: VarField, subfieldTags: List[String]): String =
     varField
-      .subfieldsWithTags(subfieldTags:_*)
+      .subfieldsWithTags(subfieldTags: _*)
       .contents
       .mkString(" ")
 }

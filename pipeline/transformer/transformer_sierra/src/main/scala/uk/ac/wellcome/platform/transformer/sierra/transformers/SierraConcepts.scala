@@ -3,8 +3,8 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
-  VarField,
-  SierraQueryOps
+  SierraQueryOps,
+  VarField
 }
 
 trait SierraConcepts extends SierraQueryOps {

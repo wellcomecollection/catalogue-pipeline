@@ -1,7 +1,10 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
-import uk.ac.wellcome.platform.transformer.sierra.source.{SierraBibData, SierraQueryOps}
+import uk.ac.wellcome.platform.transformer.sierra.source.{
+  SierraBibData,
+  SierraQueryOps
+}
 
 object SierraLocationOfOriginal extends SierraTransformer with SierraQueryOps {
 

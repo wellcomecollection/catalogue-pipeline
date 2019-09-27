@@ -6,8 +6,8 @@ import uk.ac.wellcome.platform.transformer.sierra.exceptions.CataloguingExceptio
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
   SierraBibData,
-  VarField,
-  SierraQueryOps
+  SierraQueryOps,
+  VarField
 }
 import uk.ac.wellcome.models.parse.Marc008Parser
 

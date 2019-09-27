@@ -3,12 +3,10 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers.subjects
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
-  VarField,
-  SierraQueryOps
+  SierraQueryOps,
+  VarField
 }
-import uk.ac.wellcome.platform.transformer.sierra.transformers.{
-  SierraConcepts
-}
+import uk.ac.wellcome.platform.transformer.sierra.transformers.{SierraConcepts}
 import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 
 // Populate wwork:subject

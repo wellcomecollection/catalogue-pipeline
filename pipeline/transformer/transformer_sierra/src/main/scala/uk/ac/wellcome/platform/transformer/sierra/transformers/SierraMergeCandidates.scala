@@ -52,19 +52,19 @@ object SierraMergeCandidates
         case _                          => None
       }
       .distinct match {
-        case List(Some(bibNumber)) =>
-          List(
-            MergeCandidate(
-              identifier = SourceIdentifier(
-                identifierType = IdentifierType("sierra-system-number"),
-                ontologyType = "Work",
-                value = bibNumber
-              ),
-              reason = Some("Physical/digitised Sierra work")
-            )
+      case List(Some(bibNumber)) =>
+        List(
+          MergeCandidate(
+            identifier = SourceIdentifier(
+              identifierType = IdentifierType("sierra-system-number"),
+              ontologyType = "Work",
+              value = bibNumber
+            ),
+            reason = Some("Physical/digitised Sierra work")
           )
-        case _ => Nil
-      }
+        )
+      case _ => Nil
+    }
 
   /** We can merge a single-page Miro and Sierra work if:
     *
