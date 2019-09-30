@@ -72,6 +72,39 @@ case class DisplayWorkV2(
     dataType = "uk.ac.wellcome.display.models.DisplayLanguage",
     value = "Relates a work to its primary language."
   ) language: Option[DisplayLanguage] = None,
+
+  @ApiModelProperty(
+    dataType = "String",
+    value = "Information relating to the edition of a work."
+  ) edition: Option[String] = None,
+  @ApiModelProperty(
+    dataType = "List[String]",
+    value = "Miscellaneous notes associated with the work."
+  ) notes: List[String] = Nil,
+  @ApiModelProperty(
+    dataType = "String",
+    value = "Designation of an academic dissertation or thesis and the institution to which it was presented."
+  ) dissertation: Option[String] = None,
+  @ApiModelProperty(
+    dataType = "String",
+    value = "Name and address of the repository with custody over originals or duplicates of the work."
+  ) locationOfOriginal: Option[String] = None,
+  @ApiModelProperty(
+    dataType = "String",
+    value = "Format for the citation of the described materials that is preferred by the custodian."
+  ) citeAs: Option[String] = None,
+  @ApiModelProperty(
+    dataType = "String",
+    value = "Titles of separate works or parts of an item or the table of contents."
+  ) contents: Option[String] = None,
+  @ApiModelProperty(
+    dataType = "Integer",
+    value = "The playing time for audiovisual works, in seconds."
+  ) duration: Option[Int] = None,
+  @ApiModelProperty(
+    dataType = "String",
+    value = "Credits for audiovisual works."
+  ) credits: Option[String] = None,
   @ApiModelProperty(
     readOnly = true,
     value =
@@ -124,6 +157,14 @@ case object DisplayWorkV2 {
         })
         else None,
       language = work.language.map { DisplayLanguage(_) },
+      edition = work.edition,
+      notes = work.notes,
+      dissertation = work.dissertation,
+      locationOfOriginal = work.locationOfOriginal,
+      citeAs = work.citeAs,
+      contents = work.contents,
+      duration = work.duration,
+      credits = work.credits,
     )
   }
 
