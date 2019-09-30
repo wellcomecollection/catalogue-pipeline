@@ -10,8 +10,6 @@ case class V2WorksIncludes(
   contributors: Boolean = false,
   production: Boolean = false,
   notes: Boolean = false,
-  contents: Boolean = false,
-  credits: Boolean = false,
   dissertation: Boolean = false,
 ) extends WorksIncludes
 
@@ -25,8 +23,6 @@ object V2WorksIncludes {
     "contributors",
     "production",
     "notes",
-    "contents",
-    "credits",
     "dissertation",
   )
 
@@ -37,9 +33,7 @@ object V2WorksIncludes {
     genres = includesList.contains("genres"),
     contributors = includesList.contains("contributors"),
     production = includesList.contains("production"),
-    notes = includesList.contains("production"),
-    contents = includesList.contains("contents"),
-    credits = includesList.contains("credits"),
+    notes = includesList.contains("notes"),
     dissertation = includesList.contains("dissertation"),
   )
 

@@ -94,17 +94,9 @@ case class DisplayWorkV2(
     value = "Format for the citation of the described materials that is preferred by the custodian."
   ) citeAs: Option[String] = None,
   @ApiModelProperty(
-    dataType = "String",
-    value = "Titles of separate works or parts of an item or the table of contents."
-  ) contents: Option[String] = None,
-  @ApiModelProperty(
     dataType = "Integer",
     value = "The playing time for audiovisual works, in seconds."
   ) duration: Option[Int] = None,
-  @ApiModelProperty(
-    dataType = "String",
-    value = "Credits for audiovisual works."
-  ) credits: Option[String] = None,
   @ApiModelProperty(
     readOnly = true,
     value =
@@ -162,9 +154,7 @@ case object DisplayWorkV2 {
       dissertation = if (includes.dissertation) work.dissertation else None,
       locationOfOriginal = work.locationOfOriginal,
       citeAs = work.citeAs,
-      contents = if (includes.contents) work.contents else None,
       duration = work.duration,
-      credits = if (includes.credits) work.credits else None,
     )
   }
 
