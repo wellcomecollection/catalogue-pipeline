@@ -45,7 +45,6 @@ module "task" {
 
   app_env_vars = {
     api_host    = "api.wellcomecollection.org"
-    es_index_v1 = "${var.es_config["index_v1"]}"
     es_index_v2 = "${var.es_config["index_v2"]}"
   }
 
