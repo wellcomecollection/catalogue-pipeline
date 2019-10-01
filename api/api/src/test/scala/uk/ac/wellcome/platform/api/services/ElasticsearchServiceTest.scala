@@ -337,6 +337,44 @@ class ElasticsearchServiceTest
 
       }
     }
+
+    it("excludes notes from MSMBoostQuery") {
+      withLocalWorksIndex { index =>
+        // Longer text used to ensure signal in TF/IDF
+        val withNotes =
+          createIdentifiedWorkWith(
+            title = "Mermaids and Marmite",
+            notes = List("Aegean", "Holiday snaps"))
+
+        insertIntoElasticsearch(index, withNotes)
+
+        val results =
+          searchResults(
+            index = index,
+            workQuery = MSMBoostQuery("Aegean holiday snaps"))
+
+        results should have length 0
+      }
+    }
+
+    it("includes notes from MSMBoostQueryWithNotes") {
+      withLocalWorksIndex { index =>
+        // Longer text used to ensure signal in TF/IDF
+        val withNotes =
+          createIdentifiedWorkWith(
+            title = "Mermaids and Marmite",
+            notes = List("Aegean", "Holiday snaps"))
+
+        insertIntoElasticsearch(index, withNotes)
+
+        val results =
+          searchResults(
+            index = index,
+            workQuery = MSMBoostQueryWithNotes("Aegean holiday snaps"))
+
+        results should have length 1
+      }
+    }
   }
 
   describe("findResultById") {

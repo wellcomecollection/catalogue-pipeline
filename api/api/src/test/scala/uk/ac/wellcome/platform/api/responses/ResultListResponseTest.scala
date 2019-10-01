@@ -23,7 +23,6 @@ class ResultListResponseTest extends FunSpec with Matchers {
   )
 
   val multipleResultsRequest = V1MultipleResultsRequest(
-    page = 1,
     pageSize = Some(displayResultList.pageSize),
     includes = None,
     query = None,

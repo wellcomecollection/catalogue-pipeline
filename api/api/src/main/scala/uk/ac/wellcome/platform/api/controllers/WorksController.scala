@@ -155,7 +155,8 @@ abstract class WorksController[M <: MultipleResultsRequest[W],
     queryString: String,
     maybeQueryType: Option[String]): WorkQuery = {
     maybeQueryType.map(_.toLowerCase) match {
-      case _ => MSMBoostQuery(queryString)
+      case Some("withNotes") => MSMBoostQueryWithNotes(queryString)
+      case _                 => MSMBoostQuery(queryString)
     }
   }
 
