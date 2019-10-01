@@ -67,6 +67,36 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
     }
   }
 
+  it("returns optional fields when they exist") {
+    withV2Api {
+      case (indexV2, server: EmbeddedHttpServer) =>
+        val work = createIdentifiedWorkWith(
+          duration=Some(3600),
+          edition=Some("Special edition"),
+          locationOfOriginal=Some("Somewhere"),
+          citeAs=Some("A text")
+        )
+        insertIntoElasticsearch(indexV2, work)
+        eventually {
+          server.httpGet(
+            path = s"/$apiPrefix/works/${work.canonicalId}",
+            andExpect = Status.Ok,
+            withJsonBody = s"""
+               |{
+               | ${singleWorkResult(apiPrefix)},
+               | "id": "${work.canonicalId}",
+               | "title": "${work.title}",
+               | "edition": "Special edition",
+               | "duration": 3600,
+               | "locationOfOriginal": "Somewhere",
+               | "citeAs": "A text"
+               |}
+          """.stripMargin
+          )
+        }
+    }
+  }
+
   it(
     "returns the requested page of results when requested with page & pageSize") {
     withV2Api {
