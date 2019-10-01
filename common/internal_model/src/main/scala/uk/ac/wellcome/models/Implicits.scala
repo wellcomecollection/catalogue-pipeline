@@ -25,6 +25,7 @@ import uk.ac.wellcome.models.work.internal.{
   Location,
   MaybeDisplayable,
   MergeCandidate,
+  Note,
   Period,
   Person,
   PhysicalLocation,
@@ -36,7 +37,7 @@ import uk.ac.wellcome.models.work.internal.{
   UnidentifiedInvisibleWork,
   UnidentifiedRedirectedWork,
   UnidentifiedWork,
-  WorkType,
+  WorkType
 }
 import uk.ac.wellcome.models.transformable.SierraTransformable
 import uk.ac.wellcome.models.transformable.SierraTransformable._
@@ -52,6 +53,7 @@ object Implicits {
   // flamegraphs using the scalac-profiling plugin. See this blog post for
   // info: https://www.scala-lang.org/blog/2018/06/04/scalac-profiling.html
 
+  implicit val _dec01: Decoder[Note] = deriveDecoder
   implicit val _dec02: Decoder[SourceIdentifier] = deriveDecoder
   implicit val _dec03: Decoder[Identifiable[AbstractConcept]] = deriveDecoder
   implicit val _dec04: Decoder[Unidentifiable[AbstractConcept]] = deriveDecoder
@@ -127,6 +129,7 @@ object Implicits {
   implicit val _dec54: Decoder[BaseWork] = deriveDecoder
   implicit val _dec55: Decoder[SierraTransformable] = deriveDecoder
 
+  implicit val _enc01: Encoder[Note] = deriveEncoder
   implicit val _enc02: Encoder[SourceIdentifier] = deriveEncoder
   implicit val _enc03: Encoder[Identifiable[AbstractConcept]] = deriveEncoder
   implicit val _enc04: Encoder[Unidentifiable[AbstractConcept]] = deriveEncoder

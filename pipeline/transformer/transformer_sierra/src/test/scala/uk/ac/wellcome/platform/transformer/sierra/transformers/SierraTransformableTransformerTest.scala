@@ -263,7 +263,7 @@ class SierraTransformableTransformerTest
           function = None
         )
       ),
-      notes = List("It's a note"),
+      notes = List(GeneralNote("It's a note")),
       lettering = Some(lettering)
     )
   }
