@@ -9,13 +9,11 @@ import io.swagger.models.{Info, Scheme, Swagger}
 import uk.ac.wellcome.display.models.ApiVersions
 import uk.ac.wellcome.platform.api.models.ApiConfig
 
-object ApiV1Swagger extends Swagger
 object ApiV2Swagger extends Swagger
 
 @Singleton
 class DocsController @Inject()(apiConfig: ApiConfig) extends Controller {
   prefix(apiConfig.pathPrefix) {
-    setupSwaggerEndpoint(ApiVersions.v1, ApiV1Swagger)
     setupSwaggerEndpoint(ApiVersions.v2, ApiV2Swagger)
   }
 

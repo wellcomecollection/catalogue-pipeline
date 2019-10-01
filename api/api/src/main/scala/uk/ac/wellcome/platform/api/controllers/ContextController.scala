@@ -10,7 +10,6 @@ import uk.ac.wellcome.platform.api.models.ApiConfig
 class ContextController @Inject()(apiConfig: ApiConfig) extends Controller {
 
   prefix(apiConfig.pathPrefix) {
-    setupContextEndpoint(ApiVersions.v1)
     setupContextEndpoint(ApiVersions.v2)
   }
 
