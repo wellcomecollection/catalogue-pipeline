@@ -12,6 +12,7 @@ class ApiV2WorksIncludesTest
     extends ApiV2WorksTestBase
     with ProductionEventGenerators
     with SubjectGenerators {
+
   it(
     "includes a list of identifiers on a list endpoint if we pass ?include=identifiers") {
     withV2Api {
@@ -381,6 +382,260 @@ class ApiV2WorksIncludesTest
                  |  "title": "${work.title}",
                  |  "production": [ ${production(productionEventList)}]
                  |}
+          """.stripMargin
+          )
+        }
+    }
+  }
+
+  it("includes notes on the list endpoint if we pass ?include=notes") {
+    withV2Api {
+      case (indexV2, server: EmbeddedHttpServer) =>
+        val works = List(
+          createIdentifiedWorkWith(notes=List("A", "B")),
+          createIdentifiedWorkWith(notes=List("C"))
+        )
+        insertIntoElasticsearch(indexV2, works:_*)
+        eventually {
+          server.httpGet(
+            path = s"/$apiPrefix/works?include=notes",
+            andExpect = Status.Ok,
+            withJsonBody = s"""
+              |{
+              |  ${resultList(apiPrefix, totalResults = 2)},
+              |  "results": [
+              |   {
+              |     "type": "Work",
+              |     "id": "${works(0).canonicalId}",
+              |     "title": "${works(0).title}",
+              |     "notes": ["A", "B"]
+              |   },
+              |   {
+              |     "type": "Work",
+              |     "id": "${works(1).canonicalId}",
+              |     "title": "${works(1).title}",
+              |     "notes": ["C"]
+              |   }
+              |  ]
+              |}
+          """.stripMargin
+          )
+        }
+    }
+  }
+
+  it("includes notes on the single work endpoint if we pass ?include=notes") {
+    withV2Api {
+      case (indexV2, server: EmbeddedHttpServer) =>
+        val work = createIdentifiedWorkWith(notes=List("A", "B"))
+        insertIntoElasticsearch(indexV2, work)
+        eventually {
+          server.httpGet(
+            path = s"/$apiPrefix/works/${work.canonicalId}?include=notes",
+            andExpect = Status.Ok,
+            withJsonBody = s"""
+              |{
+              |  ${singleWorkResult(apiPrefix)},
+              |  "id": "${work.canonicalId}",
+              |  "title": "${work.title}",
+              |  "notes": ["A", "B"]
+              |}
+          """.stripMargin
+          )
+        }
+    }
+  }
+
+  it("includes contents on the list endpoint if we pass ?include=contents") {
+    withV2Api {
+      case (indexV2, server: EmbeddedHttpServer) =>
+        val work = createIdentifiedWorkWith(contents=Some("A"))
+        insertIntoElasticsearch(indexV2, work)
+        eventually {
+          server.httpGet(
+            path = s"/$apiPrefix/works?include=contents",
+            andExpect = Status.Ok,
+            withJsonBody = s"""
+              |{
+              |  ${resultList(apiPrefix, totalResults = 1)},
+              |  "results": [
+              |     {
+              |       "type": "Work",
+              |       "id": "${work.canonicalId}",
+              |       "title": "${work.title}",
+              |       "contents": "A"
+              |     }
+              |  ]
+              |}
+          """.stripMargin
+          )
+        }
+    }
+  }
+
+  it("includes contents on the single work endpoint if we pass ?include=contents") {
+    withV2Api {
+      case (indexV2, server: EmbeddedHttpServer) =>
+        val work = createIdentifiedWorkWith(contents=Some("A"))
+        insertIntoElasticsearch(indexV2, work)
+        eventually {
+          server.httpGet(
+            path = s"/$apiPrefix/works/${work.canonicalId}?include=contents",
+            andExpect = Status.Ok,
+            withJsonBody = s"""
+              |{
+              |  ${singleWorkResult(apiPrefix)},
+              |  "id": "${work.canonicalId}",
+              |  "title": "${work.title}",
+              |  "contents": "A"
+              |}
+          """.stripMargin
+          )
+        }
+    }
+  }
+
+  it("includes credits on the list endpoint if we pass ?include=credits") {
+    withV2Api {
+      case (indexV2, server: EmbeddedHttpServer) =>
+        val work = createIdentifiedWorkWith(credits=Some("A"))
+        insertIntoElasticsearch(indexV2, work)
+        eventually {
+          server.httpGet(
+            path = s"/$apiPrefix/works?include=credits",
+            andExpect = Status.Ok,
+            withJsonBody = s"""
+              |{
+              |  ${resultList(apiPrefix, totalResults = 1)},
+              |  "results": [
+              |     {
+              |       "type": "Work",
+              |       "id": "${work.canonicalId}",
+              |       "title": "${work.title}",
+              |       "credits": "A"
+              |     }
+              |  ]
+              |}
+          """.stripMargin
+          )
+        }
+    }
+  }
+
+  it("includes credits on the single work endpoint if we pass ?include=credits") {
+    withV2Api {
+      case (indexV2, server: EmbeddedHttpServer) =>
+        val work = createIdentifiedWorkWith(credits=Some("A"))
+        insertIntoElasticsearch(indexV2, work)
+        eventually {
+          server.httpGet(
+            path = s"/$apiPrefix/works/${work.canonicalId}?include=credits",
+            andExpect = Status.Ok,
+            withJsonBody = s"""
+              |{
+              |  ${singleWorkResult(apiPrefix)},
+              |  "id": "${work.canonicalId}",
+              |  "title": "${work.title}",
+              |  "credits": "A"
+              |}
+          """.stripMargin
+          )
+        }
+    }
+  }
+
+  it("includes dissertation on the list endpoint if we pass ?include=dissertation") {
+    withV2Api {
+      case (indexV2, server: EmbeddedHttpServer) =>
+        val work = createIdentifiedWorkWith(dissertation=Some("A"))
+        insertIntoElasticsearch(indexV2, work)
+        eventually {
+          server.httpGet(
+            path = s"/$apiPrefix/works?include=dissertation",
+            andExpect = Status.Ok,
+            withJsonBody = s"""
+              |{
+              |  ${resultList(apiPrefix, totalResults = 1)},
+              |  "results": [
+              |     {
+              |       "type": "Work",
+              |       "id": "${work.canonicalId}",
+              |       "title": "${work.title}",
+              |       "dissertation": "A"
+              |     }
+              |  ]
+              |}
+          """.stripMargin
+          )
+        }
+    }
+  }
+
+  it("includes dissertation on the single work endpoint if we pass ?include=dissertation") {
+    withV2Api {
+      case (indexV2, server: EmbeddedHttpServer) =>
+        val work = createIdentifiedWorkWith(dissertation=Some("A"))
+        insertIntoElasticsearch(indexV2, work)
+        eventually {
+          server.httpGet(
+            path = s"/$apiPrefix/works/${work.canonicalId}?include=dissertation",
+            andExpect = Status.Ok,
+            withJsonBody = s"""
+              |{
+              |  ${singleWorkResult(apiPrefix)},
+              |  "id": "${work.canonicalId}",
+              |  "title": "${work.title}",
+              |  "dissertation": "A"
+              |}
+          """.stripMargin
+          )
+        }
+    }
+  }
+
+  it("includes alternativeTitles on the list endpoint if we pass ?include=alternativeTitles") {
+    withV2Api {
+      case (indexV2, server: EmbeddedHttpServer) =>
+        val work = createIdentifiedWorkWith(alternativeTitles=List("A", "B"))
+        insertIntoElasticsearch(indexV2, work)
+        eventually {
+          server.httpGet(
+            path = s"/$apiPrefix/works?include=alternativeTitles",
+            andExpect = Status.Ok,
+            withJsonBody = s"""
+              |{
+              |  ${resultList(apiPrefix, totalResults = 1)},
+              |  "results": [
+              |     {
+              |       "type": "Work",
+              |       "id": "${work.canonicalId}",
+              |       "title": "${work.title}",
+              |       "alternativeTitles": ["A", "B"]
+              |     }
+              |  ]
+              |}
+          """.stripMargin
+          )
+        }
+    }
+  }
+
+  it("includes alternativeTitles on the single work endpoint if we pass ?include=alternativeTitles") {
+    withV2Api {
+      case (indexV2, server: EmbeddedHttpServer) =>
+        val work = createIdentifiedWorkWith(alternativeTitles=List("A"))
+        insertIntoElasticsearch(indexV2, work)
+        eventually {
+          server.httpGet(
+            path = s"/$apiPrefix/works/${work.canonicalId}?include=alternativeTitles",
+            andExpect = Status.Ok,
+            withJsonBody = s"""
+              |{
+              |  ${singleWorkResult(apiPrefix)},
+              |  "id": "${work.canonicalId}",
+              |  "title": "${work.title}",
+              |  "alternativeTitles": ["A"]
+              |}
           """.stripMargin
           )
         }
