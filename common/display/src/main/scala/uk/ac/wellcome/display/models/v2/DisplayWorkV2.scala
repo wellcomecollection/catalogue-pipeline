@@ -20,6 +20,11 @@ case class DisplayWorkV2(
       "The title or other short label of a work, including labels not present in the actual work or item but applied by the cataloguer for the purposes of search or description."
   ) title: String,
   @ApiModelProperty(
+    dataType = "List[String]",
+    value =
+      "Alternative titles of  the work."
+  ) alternativeTitles: Option[List[String]],
+  @ApiModelProperty(
     dataType = "String",
     value = "A description given to a thing."
   ) description: Option[String] = None,
@@ -72,7 +77,6 @@ case class DisplayWorkV2(
     dataType = "uk.ac.wellcome.display.models.DisplayLanguage",
     value = "Relates a work to its primary language."
   ) language: Option[DisplayLanguage] = None,
-
   @ApiModelProperty(
     dataType = "String",
     value = "Information relating to the edition of a work."
@@ -112,6 +116,7 @@ case object DisplayWorkV2 {
     DisplayWorkV2(
       id = work.canonicalId,
       title = work.title,
+      alternativeTitles = if (includes.alternativeTitles) Some(work.alternativeTitles) else None,
       description = work.description,
       physicalDescription = work.physicalDescription,
       lettering = work.lettering,
