@@ -25,10 +25,11 @@ object SierraNotes extends SierraTransformer with SierraQueryOps {
 
   def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
     notesFields
-      .flatMap { case (tag, createNote) =>
-        bibData
-          .varfieldsWithTags(tag)
-          .subfieldContents
-          .map(createNote)
+      .flatMap {
+        case (tag, createNote) =>
+          bibData
+            .varfieldsWithTags(tag)
+            .subfieldContents
+            .map(createNote)
       }
 }
