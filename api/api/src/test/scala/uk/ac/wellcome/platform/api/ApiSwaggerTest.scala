@@ -130,7 +130,6 @@ class ApiSwaggerTest extends FunSpec with Matchers with fixtures.Server {
       "api.host" -> "test.host",
       "api.scheme" -> "http",
       "api.name" -> "catalogue",
-      "es.index.v1" -> "v1",
       "es.index.v2" -> "v2"
     )
 

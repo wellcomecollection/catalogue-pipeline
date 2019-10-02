@@ -28,16 +28,6 @@ object WorksIncludesDeserializer {
   }
 }
 
-class V1WorksIncludesDeserializer extends JsonDeserializer[V1WorksIncludes] {
-  override def deserialize(p: JsonParser,
-                           ctx: DeserializationContext): V1WorksIncludes = {
-    WorksIncludesDeserializer(
-      p.getText(),
-      V1WorksIncludes.recognisedIncludes,
-      V1WorksIncludes.apply)
-  }
-}
-
 class V2WorksIncludesDeserializer extends JsonDeserializer[V2WorksIncludes] {
   override def deserialize(p: JsonParser,
                            ctx: DeserializationContext): V2WorksIncludes = {
@@ -49,6 +39,5 @@ class V2WorksIncludesDeserializer extends JsonDeserializer[V2WorksIncludes] {
 }
 
 class WorksIncludesDeserializerModule extends SimpleModule {
-  addDeserializer(classOf[V1WorksIncludes], new V1WorksIncludesDeserializer())
   addDeserializer(classOf[V2WorksIncludes], new V2WorksIncludesDeserializer())
 }

@@ -12,7 +12,6 @@ import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.ElasticClient
 import com.twitter.inject.Logging
 import uk.ac.wellcome.display.models._
-import uk.ac.wellcome.display.models.v1.DisplayWorkV1
 import uk.ac.wellcome.display.models.v2.DisplayWorkV2
 import uk.ac.wellcome.display.modules.DisplayJacksonModule
 import uk.ac.wellcome.elasticsearch.DisplayElasticConfig
@@ -53,13 +52,6 @@ class SnapshotService(akkaS3Client: S3Client,
     val publicObjectKey = snapshotJob.publicObjectKey
 
     val uploadResult = snapshotJob.apiVersion match {
-      case ApiVersions.v1 =>
-        runStream(
-          publicBucketName = publicBucketName,
-          publicObjectKey = publicObjectKey,
-          index = elasticConfig.indexV1,
-          toDisplayWork = DisplayWorkV1.apply(_, V1WorksIncludes.includeAll())
-        )
       case ApiVersions.v2 =>
         runStream(
           publicBucketName = publicBucketName,

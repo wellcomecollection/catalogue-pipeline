@@ -9,7 +9,7 @@ import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.display.models.ApiVersions
-import uk.ac.wellcome.display.models.v1.DisplayV1SerialisationTestBase
+import uk.ac.wellcome.display.models.v2.DisplayV2SerialisationTestBase
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
@@ -36,23 +36,23 @@ class SnapshotGeneratorFeatureTest
     with GzipUtils
     with JsonAssertions
     with IntegrationPatience
-    with DisplayV1SerialisationTestBase
+    with DisplayV2SerialisationTestBase
     with WorkerServiceFixture
     with WorksGenerators {
 
   it("completes a snapshot generation") {
     withFixtures {
-      case (queue, topic, indexV1, _, publicBucket: Bucket) =>
+      case (queue, topic, indexV2, _, publicBucket: Bucket) =>
         val works = createIdentifiedWorks(count = 3)
 
-        insertIntoElasticsearch(indexV1, works: _*)
+        insertIntoElasticsearch(indexV2, works: _*)
 
         val publicObjectKey = "target.txt.gz"
 
         val snapshotJob = SnapshotJob(
           publicBucketName = publicBucket.name,
           publicObjectKey = publicObjectKey,
-          apiVersion = ApiVersions.v1
+          apiVersion = ApiVersions.v2
         )
 
         sendNotificationToSQS(queue = queue, message = snapshotJob)
@@ -73,12 +73,11 @@ class SnapshotGeneratorFeatureTest
                  |  "id": "${work.canonicalId}",
                  |  "title": "${work.title}",
                  |  "identifiers": [ ${identifier(work.sourceIdentifier)} ],
-                 |  "creators": [ ],
+                 |  "contributors": [ ],
                  |  "genres": [ ],
                  |  "subjects": [ ],
                  |  "items": [ ],
-                 |  "publishers": [ ],
-                 |  "placesOfPublication": [ ],
+                 |  "production": [ ],
                  |  "type": "Work"
                    }""".stripMargin
           }
@@ -111,12 +110,10 @@ class SnapshotGeneratorFeatureTest
       withMaterializer(actorSystem) { implicit materializer =>
         withLocalSqsQueue { queue =>
           withLocalSnsTopic { topic =>
-            withLocalWorksIndex { indexV1 =>
-              withLocalWorksIndex { indexV2 =>
-                withLocalS3Bucket { bucket =>
-                  withWorkerService(queue, topic, indexV1, indexV2) { _ =>
-                    testWith((queue, topic, indexV1, indexV2, bucket))
-                  }
+            withLocalWorksIndex { indexV2 =>
+              withLocalS3Bucket { bucket =>
+                withWorkerService(queue, topic, indexV2) { _ =>
+                  testWith((queue, topic, indexV2, indexV2, bucket))
                 }
               }
             }
