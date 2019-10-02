@@ -6,7 +6,10 @@ import uk.ac.wellcome.platform.transformer.sierra.generators.{
   MarcGenerators,
   SierraDataGenerators
 }
-import uk.ac.wellcome.platform.transformer.sierra.source.{MarcSubfield, SierraBibData}
+import uk.ac.wellcome.platform.transformer.sierra.source.{
+  MarcSubfield,
+  SierraBibData
+}
 
 class SierraNotesTest
     extends FunSpec
