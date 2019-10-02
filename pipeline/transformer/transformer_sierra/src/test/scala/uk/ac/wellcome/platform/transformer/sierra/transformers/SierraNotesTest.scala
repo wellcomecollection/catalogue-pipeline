@@ -21,10 +21,10 @@ class SierraNotesTest
     val notes = List(
       "500" -> GeneralNote("note a"),
       "501" -> GeneralNote("note b"),
-      "504" -> GeneralNote("note c"),
-      "518" -> GeneralNote("note d"),
-      "536" -> GeneralNote("note e"),
-      "545" -> GeneralNote("note f"),
+      "504" -> BibliographicalInformation("note c"),
+      "518" -> TimeAndPlaceNote("note d"),
+      "536" -> FundingInformation("note e"),
+      "545" -> BibliographicalInformation("note f"),
       "547" -> GeneralNote("note g"),
       "562" -> GeneralNote("note h"),
     )

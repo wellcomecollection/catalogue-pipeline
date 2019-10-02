@@ -15,10 +15,10 @@ object SierraNotes extends SierraTransformer with SierraQueryOps {
     List(
       "500" -> GeneralNote.apply,
       "501" -> GeneralNote.apply,
-      "504" -> GeneralNote.apply,
-      "518" -> GeneralNote.apply,
-      "536" -> GeneralNote.apply,
-      "545" -> GeneralNote.apply,
+      "504" -> BibliographicalInformation.apply,
+      "518" -> TimeAndPlaceNote.apply,
+      "536" -> FundingInformation.apply,
+      "545" -> BibliographicalInformation.apply,
       "547" -> GeneralNote.apply,
       "562" -> GeneralNote.apply
     )
