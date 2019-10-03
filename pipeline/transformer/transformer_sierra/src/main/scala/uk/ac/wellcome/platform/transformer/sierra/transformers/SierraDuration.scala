@@ -4,7 +4,10 @@ import scala.util.Try
 import scala.concurrent.duration._
 
 import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
-import uk.ac.wellcome.platform.transformer.sierra.source.{SierraBibData, SierraQueryOps}
+import uk.ac.wellcome.platform.transformer.sierra.source.{
+  SierraBibData,
+  SierraQueryOps
+}
 
 object SierraDuration extends SierraTransformer with SierraQueryOps {
 
