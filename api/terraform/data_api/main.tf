@@ -14,7 +14,6 @@ module "snapshot_generator" {
     queue_url = "${module.snapshot_generator_queue.id}"
     topic_arn = "${module.snapshot_complete_topic.arn}"
 
-    es_index_v1 = "${var.es_config_snapshot["index_v1"]}"
     es_index_v2 = "${var.es_config_snapshot["index_v2"]}"
 
     metric_namespace = "snapshot_generator"
@@ -48,6 +47,5 @@ module "snapshot_scheduler" {
 
   public_bucket_name = "${aws_s3_bucket.public_data.id}"
 
-  public_object_key_v1 = "catalogue/v1/works.json.gz"
   public_object_key_v2 = "catalogue/v2/works.json.gz"
 }

@@ -1,12 +1,10 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers.subjects
 
-import uk.ac.wellcome.platform.transformer.sierra.transformers.{
-  MarcUtils,
-  SierraTransformer
-}
+import uk.ac.wellcome.platform.transformer.sierra.transformers.SierraTransformer
 import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData,
+  SierraQueryOps,
   VarField
 }
 import uk.ac.wellcome.models.work.internal.{
@@ -15,7 +13,7 @@ import uk.ac.wellcome.models.work.internal.{
   Subject
 }
 
-trait SierraSubjectsTransformer extends SierraTransformer with MarcUtils {
+trait SierraSubjectsTransformer extends SierraTransformer with SierraQueryOps {
 
   type Output = List[
     MaybeDisplayable[
@@ -30,7 +28,7 @@ trait SierraSubjectsTransformer extends SierraTransformer with MarcUtils {
   def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
     getSubjectsFromVarFields(
       bibId,
-      subjectVarFields.flatMap(getMatchingVarFields(bibData, _))
+      subjectVarFields.flatMap(bibData.varfieldsWithTag(_))
     )
 
   def getSubjectsFromVarFields(bibId: SierraBibNumber,
@@ -43,11 +41,8 @@ trait SierraSubjectsTransformer extends SierraTransformer with MarcUtils {
     *
     */
   def createLabel(varField: VarField, subfieldTags: List[String]): String =
-    varField.subfields
-      .filter { subfield =>
-        subfieldTags.contains(subfield.tag)
-      }
-      .sortBy { _.tag }
-      .map { _.content }
+    varField
+      .subfieldsWithTags(subfieldTags: _*)
+      .contents
       .mkString(" ")
 }

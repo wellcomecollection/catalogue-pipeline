@@ -6,11 +6,12 @@ import uk.ac.wellcome.platform.transformer.sierra.exceptions.CataloguingExceptio
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
   SierraBibData,
+  SierraQueryOps,
   VarField
 }
 import uk.ac.wellcome.models.parse.Marc008Parser
 
-object SierraProduction extends SierraTransformer with MarcUtils {
+object SierraProduction extends SierraTransformer with SierraQueryOps {
 
   type Output = List[ProductionEvent[MaybeDisplayable[AbstractAgent]]]
 
@@ -33,8 +34,8 @@ object SierraProduction extends SierraTransformer with MarcUtils {
   //
   def apply(bibId: SierraBibNumber, bibData: SierraBibData) = {
 
-    val maybeMarc260fields = getMatchingVarFields(bibData, "260")
-    val maybeMarc264fields = getMatchingVarFields(bibData, "264")
+    val maybeMarc260fields = bibData.varfieldsWithTag("260")
+    val maybeMarc264fields = bibData.varfieldsWithTag("264")
 
     val productions = (maybeMarc260fields, maybeMarc264fields) match {
       case (Nil, Nil)           => List()
@@ -179,7 +180,7 @@ object SierraProduction extends SierraTransformer with MarcUtils {
 
   private def marc264IsOnlyPunctuation(marc264fields: List[VarField]): Boolean =
     marc264fields
-      .map { getSubfieldContents(_) mkString "" }
+      .map { _.subfields.contents.mkString("") }
       .forall { _ matches "^[:,]*$" }
 
   /** Populate the production data if both 260 and 264 are present.
@@ -233,7 +234,10 @@ object SierraProduction extends SierraTransformer with MarcUtils {
 
   def getProductionFrom008(bibData: SierraBibData)
     : List[ProductionEvent[MaybeDisplayable[AbstractAgent]]] =
-    getVarFieldContents(bibData, "008") flatMap (Marc008Parser(_))
+    bibData
+      .varfieldsWithTag("008")
+      .contents
+      .flatMap(Marc008Parser(_))
 
   // @@AWLC: I'm joining these with a space because that seems more appropriate
   // given our catalogue, but the MARC spec isn't entirely clear on what to do.
@@ -249,22 +253,30 @@ object SierraProduction extends SierraTransformer with MarcUtils {
   //    MARC        264  0 [Netherne, Surrey],|c[ca. 1966]
   //    Website     [Netherne, Surrey], [ca. 1966]
   //
-  private def labelFromSubFields(vf: VarField): String =
-    getSubfieldContents(vf) mkString " "
+  private def labelFromSubFields(varfield: VarField): String =
+    varfield.subfieldContents.mkString(" ")
 
-  private def placesFromSubfields(vf: VarField,
+  private def placesFromSubfields(varfield: VarField,
                                   subfieldTag: String): List[Place] =
-    getSubfieldContents(vf, Some(subfieldTag)) map Place.normalised
+    varfield
+      .subfieldsWithTag(subfieldTag)
+      .contents
+      .map(Place.normalised)
 
   private def agentsFromSubfields(
-    vf: VarField,
+    varfield: VarField,
     subfieldTag: String): List[Unidentifiable[Agent]] =
-    getSubfieldContents(vf, Some(subfieldTag))
+    varfield
+      .subfieldsWithTag(subfieldTag)
+      .contents
       .map { content =>
         Unidentifiable(Agent.normalised(content))
       }
 
-  private def datesFromSubfields(vf: VarField,
+  private def datesFromSubfields(varfield: VarField,
                                  subfieldTag: String): List[Period] =
-    getSubfieldContents(vf, Some(subfieldTag)) map Period.apply
+    varfield
+      .subfieldsWithTag(subfieldTag)
+      .contents
+      .map(Period(_))
 }

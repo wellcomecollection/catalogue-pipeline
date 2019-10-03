@@ -4,7 +4,6 @@ import io.circe.generic.extras.{AutoDerivation, Configuration}
 import io.circe.{Encoder, Printer}
 import io.circe.syntax._
 import uk.ac.wellcome.display.models.DisplayWork
-import uk.ac.wellcome.display.models.v1._
 import uk.ac.wellcome.display.models.v2._
 
 /** Format JSON objects as suitable for display.
@@ -38,11 +37,6 @@ object DisplayJsonUtil extends AutoDerivation {
   // It is the "recommended: approach in the Circe docs:
   // https://circe.github.io/circe/codecs/adt.html
 
-  implicit val locationV1Encoder: Encoder[DisplayLocationV1] = {
-    case digitalLocation: DisplayDigitalLocationV1   => digitalLocation.asJson
-    case physicalLocation: DisplayPhysicalLocationV1 => physicalLocation.asJson
-  }
-
   implicit val abstractAgentEncoder: Encoder[DisplayAbstractAgentV2] = {
     case agent: DisplayAgentV2               => agent.asJson
     case person: DisplayPersonV2             => person.asJson
@@ -68,7 +62,6 @@ object DisplayJsonUtil extends AutoDerivation {
   }
 
   implicit val displayWorkEncoder: Encoder[DisplayWork] = {
-    case work: DisplayWorkV1 => work.asJson
     case work: DisplayWorkV2 => work.asJson
   }
 }

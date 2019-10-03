@@ -100,7 +100,7 @@ def remove_image_from_es_indexes(catalogue_id):
             app_secrets["es_port"],
         )
 
-        for index_name in (app_env_vars["es_index_v1"], app_env_vars["es_index_v2"]):
+        for index_name in [app_env_vars["es_index_v2"]]:
             print("··· Looking up %s in index %s" % (catalogue_id, index_name))
             resp = requests.get(
                 f"{es_host}{index_name}/_doc/{catalogue_id}", auth=es_auth

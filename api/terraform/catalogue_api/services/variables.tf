@@ -6,10 +6,6 @@ variable "romulus_es_config" {
   type = "map"
 }
 
-variable "v1_amber_es_config" {
-  type = "map"
-}
-
 variable "subnets" {
   type = "list"
 }
@@ -18,7 +14,6 @@ variable "vpc_id" {}
 
 variable "remus_container_image" {}
 variable "romulus_container_image" {}
-variable "v1_amber_container_image" {}
 variable "container_port" {}
 
 variable "nginx_container_image" {}
@@ -33,7 +28,6 @@ variable "nlb_arn" {}
 
 variable "romulus_listener_port" {}
 variable "remus_listener_port" {}
-variable "v1_amber_listener_port" {}
 
 data "aws_vpc" "vpc" {
   id = "${var.vpc_id}"
@@ -41,4 +35,3 @@ data "aws_vpc" "vpc" {
 
 variable "remus_task_number" {}
 variable "romulus_task_number" {}
-variable "v1_amber_task_number" {}

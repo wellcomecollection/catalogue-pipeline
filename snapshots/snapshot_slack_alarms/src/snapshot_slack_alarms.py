@@ -65,7 +65,7 @@ def get_snapshot_report():
 
     s3 = boto3.client("s3")
 
-    for version in ["v1", "v2"]:
+    for version in ["v2"]:
         try:
             # Yes, this makes a bunch of hard-coded assumptions about the
             # way the bucket is laid out.  It's a quick-win helper for

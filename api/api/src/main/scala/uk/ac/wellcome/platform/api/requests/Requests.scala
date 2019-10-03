@@ -9,7 +9,6 @@ import uk.ac.wellcome.display.models.{
   AggregationsRequest,
   SortingOrder,
   SortsRequest,
-  V1WorksIncludes,
   V2WorksIncludes,
   WorksIncludes
 }
@@ -29,21 +28,6 @@ trait MultipleResultsRequest[W <: WorksIncludes] extends ApiRequest {
   val _index: Option[String]
   val _queryType: Option[String]
   val request: Request
-}
-
-case class V1MultipleResultsRequest(
-  @Min(1) @QueryParam page: Int = 1,
-  @Min(1) @Max(100) @QueryParam pageSize: Option[Int],
-  @QueryParam includes: Option[V1WorksIncludes],
-  @QueryParam() aggregations: Option[AggregationsRequest],
-  @QueryParam() sort: Option[SortsRequest],
-  @QueryParam("sortOrder") sortOrder: Option[SortingOrder],
-  @QueryParam query: Option[String],
-  @QueryParam _index: Option[String],
-  @QueryParam _queryType: Option[String] = None,
-  request: Request
-) extends MultipleResultsRequest[V1WorksIncludes] {
-  val include: Option[V1WorksIncludes] = includes
 }
 
 case class V2MultipleResultsRequest(
@@ -68,15 +52,6 @@ trait SingleWorkRequest[W <: WorksIncludes] {
   val include: Option[W]
   val _index: Option[String]
   val request: Request
-}
-
-case class V1SingleWorkRequest(
-  @RouteParam id: String,
-  @QueryParam includes: Option[V1WorksIncludes],
-  @QueryParam _index: Option[String],
-  request: Request
-) extends SingleWorkRequest[V1WorksIncludes] {
-  val include = includes
 }
 
 case class V2SingleWorkRequest(

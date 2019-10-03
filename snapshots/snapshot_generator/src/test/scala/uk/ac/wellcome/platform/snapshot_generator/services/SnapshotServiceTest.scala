@@ -14,13 +14,8 @@ import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.display.json.DisplayJsonUtil
 import uk.ac.wellcome.display.json.DisplayJsonUtil._
-import uk.ac.wellcome.display.models.v1.DisplayWorkV1
 import uk.ac.wellcome.display.models.v2.DisplayWorkV2
-import uk.ac.wellcome.display.models.{
-  ApiVersions,
-  V1WorksIncludes,
-  V2WorksIncludes
-}
+import uk.ac.wellcome.display.models.{ApiVersions, V2WorksIncludes}
 import uk.ac.wellcome.elasticsearch.ElasticClientBuilder
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.platform.snapshot_generator.fixtures.{
@@ -48,18 +43,15 @@ class SnapshotServiceTest
     with WorksGenerators {
 
   def withFixtures[R](
-    testWith: TestWith[(SnapshotService, Index, Index, Bucket), R]): R =
+    testWith: TestWith[(SnapshotService, Index, Bucket), R]): R =
     withActorSystem { implicit actorSystem =>
       withMaterializer(actorSystem) { implicit materializer =>
         withS3AkkaClient { s3Client =>
-          withLocalWorksIndex { indexV1 =>
-            withLocalWorksIndex { indexV2 =>
-              withLocalS3Bucket { bucket =>
-                withSnapshotService(s3Client, indexV1, indexV2) {
-                  snapshotService =>
-                    {
-                      testWith((snapshotService, indexV1, indexV2, bucket))
-                    }
+          withLocalWorksIndex { indexV2 =>
+            withLocalS3Bucket { bucket =>
+              withSnapshotService(s3Client, indexV2) { snapshotService =>
+                {
+                  testWith((snapshotService, indexV2, bucket))
                 }
               }
             }
@@ -68,57 +60,9 @@ class SnapshotServiceTest
       }
     }
 
-  it("completes a V1 snapshot generation") {
-    withFixtures {
-      case (snapshotService: SnapshotService, indexV1, _, publicBucket) =>
-        val visibleWorks = createIdentifiedWorks(count = 3)
-        val notVisibleWorks = createIdentifiedInvisibleWorks(count = 1)
-
-        val works = visibleWorks ++ notVisibleWorks
-
-        insertIntoElasticsearch(indexV1, works: _*)
-
-        val publicObjectKey = "target.txt.gz"
-
-        val snapshotJob = SnapshotJob(
-          publicBucketName = publicBucket.name,
-          publicObjectKey = publicObjectKey,
-          apiVersion = ApiVersions.v1
-        )
-
-        val future = snapshotService.generateSnapshot(snapshotJob)
-
-        whenReady(future) { result =>
-          val downloadFile =
-            File.createTempFile("snapshotServiceTest", ".txt.gz")
-          s3Client.getObject(
-            new GetObjectRequest(publicBucket.name, publicObjectKey),
-            downloadFile)
-
-          val contents = readGzipFile(downloadFile.getPath)
-          val expectedContents = visibleWorks
-            .map {
-              DisplayWorkV1(_, includes = V1WorksIncludes.includeAll())
-            }
-            .map {
-              DisplayJsonUtil.toJson(_)
-            }
-            .mkString("\n") + "\n"
-
-          contents shouldBe expectedContents
-
-          result shouldBe CompletedSnapshotJob(
-            snapshotJob = snapshotJob,
-            targetLocation =
-              s"http://localhost:33333/${publicBucket.name}/$publicObjectKey"
-          )
-        }
-    }
-  }
-
   it("completes a V2 snapshot generation") {
     withFixtures {
-      case (snapshotService: SnapshotService, _, indexV2, publicBucket) =>
+      case (snapshotService: SnapshotService, indexV2, publicBucket) =>
         val visibleWorks = createIdentifiedWorks(count = 4)
         val notVisibleWorks = createIdentifiedInvisibleWorks(count = 2)
 
@@ -167,20 +111,20 @@ class SnapshotServiceTest
 
   it("completes a snapshot generation of an index with more than 10000 items") {
     withFixtures {
-      case (snapshotService: SnapshotService, indexV1, _, publicBucket) =>
+      case (snapshotService: SnapshotService, indexV2, publicBucket) =>
         val works = (1 to 11000).map { id =>
           createIdentifiedWorkWith(
             title = randomAlphanumeric(length = 1500)
           )
         }
 
-        insertIntoElasticsearch(indexV1, works: _*)
+        insertIntoElasticsearch(indexV2, works: _*)
 
         val publicObjectKey = "target.txt.gz"
         val snapshotJob = SnapshotJob(
           publicBucketName = publicBucket.name,
           publicObjectKey = publicObjectKey,
-          apiVersion = ApiVersions.v1
+          apiVersion = ApiVersions.v2
         )
 
         val future = snapshotService.generateSnapshot(snapshotJob)
@@ -195,7 +139,7 @@ class SnapshotServiceTest
           val contents = readGzipFile(downloadFile.getPath)
           val expectedContents = works
             .map {
-              DisplayWorkV1(_, includes = V1WorksIncludes.includeAll())
+              DisplayWorkV2(_, includes = V2WorksIncludes.includeAll())
             }
             .map {
               DisplayJsonUtil.toJson(_)
@@ -215,15 +159,15 @@ class SnapshotServiceTest
 
   it("returns a failed future if the S3 upload fails") {
     withFixtures {
-      case (snapshotService: SnapshotService, indexV1, _, _) =>
+      case (snapshotService: SnapshotService, indexV2, _) =>
         val works = createIdentifiedWorks(count = 3)
 
-        insertIntoElasticsearch(indexV1, works: _*)
+        insertIntoElasticsearch(indexV2, works: _*)
 
         val snapshotJob = SnapshotJob(
           publicBucketName = "wrongBukkit",
           publicObjectKey = "target.json.gz",
-          apiVersion = ApiVersions.v1
+          apiVersion = ApiVersions.v2
         )
 
         val future = snapshotService.generateSnapshot(snapshotJob)
@@ -248,13 +192,12 @@ class SnapshotServiceTest
 
           withSnapshotService(
             s3Client,
-            indexV1 = "wrong-index",
             indexV2 = "wrong-index",
             elasticClient = brokenElasticClient) { brokenSnapshotService =>
             val snapshotJob = SnapshotJob(
               publicBucketName = "bukkit",
               publicObjectKey = "target.json.gz",
-              apiVersion = ApiVersions.v1
+              apiVersion = ApiVersions.v2
             )
 
             val future = brokenSnapshotService.generateSnapshot(snapshotJob)
@@ -271,7 +214,7 @@ class SnapshotServiceTest
   describe("buildLocation") {
     it("creates the correct object location in tests") {
       withFixtures {
-        case (snapshotService: SnapshotService, _, _, _) =>
+        case (snapshotService: SnapshotService, _, _) =>
           snapshotService.buildLocation(
             bucketName = "bukkit",
             objectKey = "snapshot.json.gz"
@@ -283,14 +226,12 @@ class SnapshotServiceTest
       withActorSystem { implicit actorSystem =>
         withMaterializer(actorSystem) { implicit materializer =>
           withS3AkkaClient(endpoint = "") { s3Client =>
-            withSnapshotService(
-              s3Client,
-              indexV1 = "indexv1",
-              indexV2 = "indexv2") { snapshotService =>
-              snapshotService.buildLocation(
-                bucketName = "bukkit",
-                objectKey = "snapshot.json.gz"
-              ) shouldBe Uri("s3://bukkit/snapshot.json.gz")
+            withSnapshotService(s3Client, indexV2 = "indexv2") {
+              snapshotService =>
+                snapshotService.buildLocation(
+                  bucketName = "bukkit",
+                  objectKey = "snapshot.json.gz"
+                ) shouldBe Uri("s3://bukkit/snapshot.json.gz")
             }
           }
         }
