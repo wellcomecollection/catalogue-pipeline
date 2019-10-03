@@ -447,6 +447,82 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
     }
   }
 
+  it("supports fetching the genres aggregation") {
+    withV2Api {
+      case (indexV2, server: EmbeddedHttpServer) =>
+        val concept0 = Unidentifiable(Concept("conceptLabel"))
+        val concept1 = Unidentifiable(Place("placeLabel"))
+        val concept2 = Identified(
+          canonicalId = createCanonicalId,
+          sourceIdentifier = createSourceIdentifierWith(
+            ontologyType = "Period"
+          ),
+          agent = Period("periodLabel")
+        )
+
+        val genre = Genre(
+          label = "Electronic books.",
+          concepts = List(concept0, concept1, concept2)
+        )
+
+        val work1 = createIdentifiedWorkWith(
+          canonicalId = "1",
+          title = "Working with wombats",
+          genres = List(genre)
+        )
+
+        insertIntoElasticsearch(indexV2, work1)
+
+        eventually {
+          server.httpGet(
+            path = s"/$apiPrefix/works?aggregations=genres",
+            andExpect = Status.Ok,
+            withJsonBody = s"""
+                              |{
+                              |  ${resultList(apiPrefix, totalResults = 1)},
+                              |  "results": [],
+                              |  "aggregations": {
+                              |  "type" : "Aggregations",
+                              |   "genres": {
+                              |     "type" : "Aggregation",
+                              |     "buckets": [
+                              |       {
+                              |         "data" : {
+                              |           "label" : "conceptLabel",
+                              |           "concepts": [],
+                              |           "type" : "Genre"
+                              |         },
+                              |         "count" : 1,
+                              |         "type" : "AggregationBucket"
+                              |       },
+                              |              {
+                              |         "data" : {
+                              |           "label" : "periodLabel",
+                              |           "concepts": [],
+                              |           "type" : "Genre"
+                              |         },
+                              |         "count" : 1,
+                              |         "type" : "AggregationBucket"
+                              |       },
+                              |              {
+                              |         "data" : {
+                              |           "label" : "placeLabel",
+                              |           "concepts": [],
+                              |           "type" : "Genre"
+                              |         },
+                              |         "count" : 1,
+                              |         "type" : "AggregationBucket"
+                              |       }
+                              |     ]
+                              |   }
+                              |  }
+                              |}
+          """.stripMargin
+          )
+        }
+    }
+  }
+
   it("supports production date sorting") {
     withV2Api {
       case (indexV2, server: EmbeddedHttpServer) =>

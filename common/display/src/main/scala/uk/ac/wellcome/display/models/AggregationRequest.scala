@@ -15,10 +15,13 @@ object AggregationRequest {
 
   case object ProductionDates extends AggregationRequest
 
+  case object Genres extends AggregationRequest
+
   def apply(str: String)
     : Either[InvalidAggregationStringKeyRequest, AggregationRequest] =
     str match {
       case "workType"         => Right(AggregationRequest.WorkType)
+      case "genres"           => Right(AggregationRequest.Genres)
       case "production.dates" => Right(AggregationRequest.ProductionDates)
       case _                  => Left(InvalidAggregationStringKeyRequest(str))
     }

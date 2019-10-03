@@ -48,6 +48,17 @@ case class ElastsearchSearchRequestBuilder(
         .interval(DateHistogramInterval.Year)
         .field("production.dates.range.from")
         .minDocCount(1)
+
+    // We don't split genres into concepts, as the data isn't great, and for rendering isn't useful at the moment.
+    // But we've left it as a CompositeAggregation to scale when we need to.
+    case AggregationRequest.Genres =>
+      CompositeAggregation("genres").sources(
+        List(
+          TermsValueSource(
+            "label",
+            field = Some("genres.concepts.agent.label.raw"))
+        )
+      )
   }
 
   lazy val sort = queryOptions.sortBy

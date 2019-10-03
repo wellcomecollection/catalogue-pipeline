@@ -3,9 +3,8 @@ package uk.ac.wellcome.platform.api.models
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.circe.generic.extras.JsonKey
 import io.swagger.annotations.{ApiModel, ApiModelProperty}
-
 import uk.ac.wellcome.display.models.DisplayWorkType
-import uk.ac.wellcome.display.models.v2.DisplayPeriod
+import uk.ac.wellcome.display.models.v2.{DisplayGenre, DisplayPeriod}
 
 @ApiModel(
   value = "AggregationMap",
@@ -21,7 +20,7 @@ case class DisplayAggregations(
     DisplayAggregation[DisplayPeriod]],
   @ApiModelProperty(
     value = "Genre aggregation on a set of results."
-  ) genre: Option[DisplayAggregation[Genre]],
+  ) genres: Option[DisplayAggregation[DisplayGenre]],
   @JsonProperty("type") @JsonKey("type") ontologyType: String = "Aggregations"
 )
 
@@ -43,13 +42,16 @@ case class DisplayAggregationBucket[T](
 
 object DisplayAggregations {
 
-  def apply(aggs: Aggregations): DisplayAggregations =
+  def apply(aggs: Aggregations): DisplayAggregations = {
     DisplayAggregations(
       workType = displayAggregation(aggs.workType, DisplayWorkType.apply),
       productionDates =
         displayAggregation(aggs.productionDates, DisplayPeriod.apply),
-      genre = None
+      genres = displayAggregation(
+        aggs.genres,
+        (genre: AggregatedGenre) => DisplayGenre(genre.label, List()))
     )
+  }
 
   private def displayAggregation[T, D](
     maybeAgg: Option[Aggregation[T]],

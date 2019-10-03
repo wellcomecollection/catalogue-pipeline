@@ -3,20 +3,15 @@ package uk.ac.wellcome.platform.api.models
 import scala.util.Try
 import io.circe.Decoder
 import java.time.{Instant, LocalDateTime, ZoneOffset}
+
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.models.work.internal.{Period, WorkType}
 import uk.ac.wellcome.json.JsonUtil._
 
-trait OntologyType {
-  val ontologyType: String
-}
-object OntologyType {}
-
-// TODO: Return a `ParseError`s where applicable
-case class Genre(label: String)
+case class AggregatedGenre(label: String)
 
 case class Aggregations(workType: Option[Aggregation[WorkType]] = None,
-                        genre: Option[Aggregation[Genre]] = None,
+                        genres: Option[Aggregation[AggregatedGenre]] = None,
                         productionDates: Option[Aggregation[Period]] = None)
 
 object Aggregations extends Logging {
@@ -24,15 +19,17 @@ object Aggregations extends Logging {
   def apply(jsonString: String): Option[Aggregations] =
     fromJson[EsAggregations](jsonString)
       .collect {
-        case EsAggregations(workType, genre, date)
-            if List(workType, genre, date).flatten.nonEmpty =>
+        case EsAggregations(workType, genres, date)
+            if List(workType, genres, date).flatten.nonEmpty => {
+
           Some(
             Aggregations(
               workType = getAggregation[WorkType](workType),
-              genre = getAggregation[Genre](genre),
+              genres = getAggregation[AggregatedGenre](genres),
               productionDates = getAggregation[Period](date)
             )
           )
+        }
       }
       .getOrElse { None }
 
@@ -92,7 +89,7 @@ case class AggregationBucket[T](data: T, count: Int)
   */
 case class EsAggregations(
   workType: Option[EsAggregation[WorkType]] = None,
-  genre: Option[EsAggregation[Genre]] = None,
+  genres: Option[EsAggregation[AggregatedGenre]] = None,
   productionDates: Option[EsAggregation[Period]] = None,
 )
 case class EsAggregation[T](buckets: List[EsAggregationBucket[T]])
