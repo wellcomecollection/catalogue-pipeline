@@ -23,8 +23,8 @@ module "services" {
   nginx_container_image = "${var.nginx_container_image}"
   nginx_container_port  = "${var.nginx_container_port}"
 
-  remus_task_number    = "${var.remus_task_number}"
-  romulus_task_number  = "${var.romulus_task_number}"
+  remus_task_number   = "${var.remus_task_number}"
+  romulus_task_number = "${var.romulus_task_number}"
 }
 
 resource "aws_service_discovery_private_dns_namespace" "namespace" {
