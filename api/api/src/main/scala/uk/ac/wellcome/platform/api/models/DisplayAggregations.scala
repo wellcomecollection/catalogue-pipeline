@@ -5,6 +5,7 @@ import io.circe.generic.extras.JsonKey
 import io.swagger.annotations.{ApiModel, ApiModelProperty}
 import uk.ac.wellcome.display.models.DisplayWorkType
 import uk.ac.wellcome.display.models.v2.{DisplayGenre, DisplayPeriod}
+import uk.ac.wellcome.models.work.internal.{AbstractConcept, Displayable, Genre}
 
 @ApiModel(
   value = "AggregationMap",
@@ -42,16 +43,15 @@ case class DisplayAggregationBucket[T](
 
 object DisplayAggregations {
 
-  def apply(aggs: Aggregations): DisplayAggregations = {
+  def apply(aggs: Aggregations): DisplayAggregations =
     DisplayAggregations(
       workType = displayAggregation(aggs.workType, DisplayWorkType.apply),
       productionDates =
         displayAggregation(aggs.productionDates, DisplayPeriod.apply),
       genres = displayAggregation(
         aggs.genres,
-        (genre: AggregatedGenre) => DisplayGenre(genre.label, List()))
+        (g: Genre[Displayable[AbstractConcept]]) => DisplayGenre(g, false))
     )
-  }
 
   private def displayAggregation[T, D](
     maybeAgg: Option[Aggregation[T]],
