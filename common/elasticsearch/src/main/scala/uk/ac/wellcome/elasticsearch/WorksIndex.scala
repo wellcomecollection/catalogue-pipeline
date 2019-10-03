@@ -32,6 +32,12 @@ object WorksIndex {
       keywordField("id")
     )
 
+  val notes = objectField("notes")
+    .fields(
+      keywordField("type"),
+      englishTextField("content")
+    )
+
   def location(fieldName: String = "locations") =
     objectField(fieldName).fields(
       keywordField("type"),
@@ -170,7 +176,7 @@ object WorksIndex {
       language,
       location("thumbnail"),
       textField("edition"),
-      englishTextField("notes"),
+      notes,
       englishTextField("dissertation"),
       englishTextField("locationOfOriginal"),
       englishTextField("citeAs"),
