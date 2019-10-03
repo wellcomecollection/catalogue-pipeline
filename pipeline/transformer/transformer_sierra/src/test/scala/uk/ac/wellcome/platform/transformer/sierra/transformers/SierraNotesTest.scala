@@ -19,14 +19,17 @@ class SierraNotesTest
 
   it("should extract notes from all fields") {
     val notes = List(
-      "500" -> GeneralNote("note a"),
-      "501" -> GeneralNote("note b"),
-      "504" -> BibliographicalInformation("note c"),
-      "518" -> TimeAndPlaceNote("note d"),
-      "536" -> FundingInformation("note e"),
-      "545" -> BibliographicalInformation("note f"),
-      "547" -> GeneralNote("note g"),
-      "562" -> GeneralNote("note h"),
+      "500" -> GeneralNote("general note a"),
+      "501" -> GeneralNote("general note b"),
+      "504" -> BibliographicalInformation("bib info a"),
+      "505" -> ContentsNote("contents note"),
+      "508" -> CreditsNote("credits note a"),
+      "511" -> CreditsNote("credits note b"),
+      "518" -> TimeAndPlaceNote("time and place note"),
+      "536" -> FundingInformation("funding information"),
+      "545" -> BibliographicalInformation("bib info b"),
+      "547" -> GeneralNote("general note c"),
+      "562" -> GeneralNote("general note d"),
     )
     SierraNotes(bibId, bibData(notes)) shouldBe notes.map(_._2)
   }
