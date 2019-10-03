@@ -4,14 +4,16 @@ import scala.util.Try
 import scala.concurrent.duration._
 
 import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
-import uk.ac.wellcome.platform.transformer.sierra.source.SierraBibData
+import uk.ac.wellcome.platform.transformer.sierra.source.{SierraBibData, SierraQueryOps}
 
-object SierraDuration extends SierraTransformer with MarcUtils {
+object SierraDuration extends SierraTransformer with SierraQueryOps {
 
   type Output = Option[Int]
 
   def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
-    getFirstSubfieldContent(bibData, "306", "a")
+    bibData
+      .subfieldsWithTag("306" -> "a")
+      .firstContent
       .map { durationString =>
         durationString
           .grouped(2)
@@ -20,6 +22,6 @@ object SierraDuration extends SierraTransformer with MarcUtils {
       }
       .collect {
         case Seq(Some(hours), Some(minutes), Some(seconds)) =>
-          (hours.hours + minutes.minutes + seconds.seconds).toSeconds.toInt
+          (hours.hours + minutes.minutes + seconds.seconds).toMillis.toInt
       }
 }
