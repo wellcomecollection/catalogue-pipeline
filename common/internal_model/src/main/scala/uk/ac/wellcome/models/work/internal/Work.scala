@@ -30,7 +30,7 @@ sealed trait Work extends BaseWork with MultipleSourceIdentifiers {
   val production: List[ProductionEvent[IdentityState[AbstractAgent]]]
   val language: Option[Language]
   val edition: Option[String]
-  val notes: List[String]
+  val notes: List[Note]
   val dissertation: Option[String]
   val locationOfOriginal: Option[String]
   val citeAs: Option[String]
@@ -62,7 +62,7 @@ case class UnidentifiedWork(
   production: List[ProductionEvent[MaybeDisplayable[AbstractAgent]]],
   language: Option[Language],
   edition: Option[String],
-  notes: List[String] = Nil,
+  notes: List[Note] = Nil,
   dissertation: Option[String] = None,
   locationOfOriginal: Option[String] = None,
   citeAs: Option[String] = None,
@@ -94,7 +94,7 @@ case class IdentifiedWork(
   production: List[ProductionEvent[Displayable[AbstractAgent]]],
   language: Option[Language],
   edition: Option[String],
-  notes: List[String] = Nil,
+  notes: List[Note] = Nil,
   dissertation: Option[String] = None,
   locationOfOriginal: Option[String] = None,
   citeAs: Option[String] = None,
