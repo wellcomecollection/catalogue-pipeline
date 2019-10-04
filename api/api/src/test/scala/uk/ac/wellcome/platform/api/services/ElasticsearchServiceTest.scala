@@ -344,7 +344,7 @@ class ElasticsearchServiceTest
         val withNotes =
           createIdentifiedWorkWith(
             title = "Mermaids and Marmite",
-            notes = List("Aegean", "Holiday snaps"))
+            notes = List(GeneralNote("Aegean"), GeneralNote("Holiday snaps")))
 
         insertIntoElasticsearch(index, withNotes)
 
@@ -363,7 +363,7 @@ class ElasticsearchServiceTest
         val withNotes =
           createIdentifiedWorkWith(
             title = "Mermaids and Marmite",
-            notes = List("Aegean", "Holiday snaps"))
+            notes = List(GeneralNote("Aegean"), GeneralNote("Holiday snaps")))
 
         insertIntoElasticsearch(index, withNotes)
 
