@@ -57,7 +57,7 @@ object WorkQuery {
     override def query: SimpleStringQuery = {
       SimpleStringQuery(
         queryString,
-        fields = defaultBoostedFields :+ (("notes", None)),
+        fields = defaultBoostedFields :+ (("notes.content", None)),
         lenient = Some(true),
         minimumShouldMatch = Some(defaultMSM),
         // PHRASE is the only syntax that researchers know and understand, so we use this exclusively
