@@ -32,7 +32,7 @@ object Aggregations extends Logging {
           // We have to do this conversion here as we only get a label back from the Elastic response
           // as it creating a composite aggregation, which doesn't really have the knowledge of a full
           // Genre object
-          val genres = convertAggregationData(
+          val genres = convert(
             getAggregation[AggregatedGenre](aggregatedGenres),
             (aggregateGenre: AggregatedGenre) =>
               Genre[Displayable[AbstractConcept]](aggregateGenre.label, List()))
@@ -48,8 +48,8 @@ object Aggregations extends Logging {
       }
       .getOrElse { None }
 
-  def convertAggregationData[T, V](maybeAgg: Option[Aggregation[T]],
-                                   c: T => V): Option[Aggregation[V]] =
+  def convert[T, V](maybeAgg: Option[Aggregation[T]],
+                    c: T => V): Option[Aggregation[V]] =
     maybeAgg.map { agg =>
       Aggregation(
         agg.buckets.map { aggBucket =>
