@@ -394,8 +394,7 @@ class ApiV2WorksIncludesTest
         val works = List(
           createIdentifiedWorkWith(
             notes = List(GeneralNote("A"), FundingInformation("B"))),
-          createIdentifiedWorkWith(
-            notes = List(GeneralNote("C"))),
+          createIdentifiedWorkWith(notes = List(GeneralNote("C"))),
         )
         insertIntoElasticsearch(indexV2, works: _*)
         eventually {
