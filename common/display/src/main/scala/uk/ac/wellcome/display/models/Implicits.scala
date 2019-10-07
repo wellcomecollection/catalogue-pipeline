@@ -1,11 +1,11 @@
 package uk.ac.wellcome.display.models
 
 import io.circe.generic.extras.semiauto._
-import io.circe._
-import uk.ac.wellcome.json.JsonUtil._
+import io.circe.{Decoder, Encoder}
+import uk.ac.wellcome.display.json.DisplayJsonUtil
 import uk.ac.wellcome.display.models.v2._
 
-object Implicits {
+object Implicits extends DisplayJsonUtil {
 
   // Cache these here to improve compilation times (otherwise they are
   // re-derived every time they are required).
@@ -19,7 +19,7 @@ object Implicits {
   implicit val _enc07: Encoder[DisplayGenre] = deriveEncoder
   implicit val _enc08: Encoder[DisplayProductionEvent] = deriveEncoder
   implicit val _enc09: Encoder[DisplayItemV2] = deriveEncoder
-  implicit val _enc10: Encoder[DisplayLocationV2] = deriveEncoder
+  implicit val _enc10: Encoder[DisplayNote] = deriveEncoder
   implicit val _enc11: Encoder[DisplayWorkV2] = deriveEncoder
 
   implicit val _dec01: Decoder[DisplayLanguage] = deriveDecoder
@@ -30,6 +30,7 @@ object Implicits {
   implicit val _dec06: Decoder[DisplaySubject] = deriveDecoder
   implicit val _dec07: Decoder[DisplayGenre] = deriveDecoder
   implicit val _dec08: Decoder[DisplayProductionEvent] = deriveDecoder
-  implicit val _dec10: Decoder[DisplayLocationV2] = deriveDecoder
+  implicit val _dec09: Decoder[DisplayItemV2] = deriveDecoder
+  implicit val _dec10: Decoder[DisplayNote] = deriveDecoder
   implicit val _dec11: Decoder[DisplayWorkV2] = deriveDecoder
 }

@@ -16,7 +16,7 @@ import uk.ac.wellcome.display.models.v2._
   *     render the complete value for disambiguation.
   *
   */
-object DisplayJsonUtil extends AutoDerivation {
+trait DisplayJsonUtil extends AutoDerivation {
   private val printer = Printer.noSpaces.copy(
     dropNullValues = true
   )
@@ -65,3 +65,5 @@ object DisplayJsonUtil extends AutoDerivation {
     case work: DisplayWorkV2 => work.asJson
   }
 }
+
+object DisplayJsonUtil extends DisplayJsonUtil
