@@ -1,8 +1,8 @@
 package uk.ac.wellcome.display.models.v2
 
 import org.scalatest.FunSpec
-import uk.ac.wellcome.display.json.DisplayJsonUtil._
 import uk.ac.wellcome.display.models.V2WorksIncludes
+import uk.ac.wellcome.display.models.Implicits._
 import uk.ac.wellcome.display.test.util.JsonMapperTestUtil
 import uk.ac.wellcome.models.work.generators.{
   ProductionEventGenerators,
@@ -239,7 +239,7 @@ class DisplayWorkV2SerialisationTest
 
   it("includes 'notes' if the notes include is present") {
     val work = createIdentifiedWorkWith(
-      notes = List("A note")
+      notes = List(GeneralNote("A note"))
     )
 
     val expectedJson = s"""
@@ -247,7 +247,7 @@ class DisplayWorkV2SerialisationTest
                           | "type": "Work",
                           | "id": "${work.canonicalId}",
                           | "title": "${work.title}",
-                          | "notes": ["A note"]
+                          | "notes": [{"type": "GeneralNote", "content": "A note"}]
                           |}
           """.stripMargin
 

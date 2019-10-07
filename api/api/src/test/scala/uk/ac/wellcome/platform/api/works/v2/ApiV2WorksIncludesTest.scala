@@ -392,8 +392,8 @@ class ApiV2WorksIncludesTest
     withV2Api {
       case (indexV2, server: EmbeddedHttpServer) =>
         val works = List(
-          createIdentifiedWorkWith(notes=List("A", "B")),
-          createIdentifiedWorkWith(notes=List("C"))
+          createIdentifiedWorkWith(notes=List(GeneralNote("A"))),
+          createIdentifiedWorkWith(notes=List(GeneralNote("B"), FundingInformation("C"))),
         )
         insertIntoElasticsearch(indexV2, works:_*)
         eventually {
@@ -406,15 +406,20 @@ class ApiV2WorksIncludesTest
               |  "results": [
               |   {
               |     "type": "Work",
-              |     "id": "${works(0).canonicalId}",
-              |     "title": "${works(0).title}",
-              |     "notes": ["A", "B"]
+              |     "id": "${works(1).canonicalId}",
+              |     "title": "${works(1).title}",
+              |     "notes": [
+              |       { "type": "GeneralNote", "content": "B" },
+              |       { "type": "FundingInformation", "content": "C" }
+              |     ]
               |   },
               |   {
               |     "type": "Work",
-              |     "id": "${works(1).canonicalId}",
-              |     "title": "${works(1).title}",
-              |     "notes": ["C"]
+              |     "id": "${works(0).canonicalId}",
+              |     "title": "${works(0).title}",
+              |     "notes": [
+              |       { "type": "GeneralNote", "content": "A" }
+              |     ]
               |   }
               |  ]
               |}
@@ -427,7 +432,7 @@ class ApiV2WorksIncludesTest
   it("includes notes on the single work endpoint if we pass ?include=notes") {
     withV2Api {
       case (indexV2, server: EmbeddedHttpServer) =>
-        val work = createIdentifiedWorkWith(notes=List("A", "B"))
+        val work = createIdentifiedWorkWith(notes=List(GeneralNote("A"), FundingInformation("B")))
         insertIntoElasticsearch(indexV2, work)
         eventually {
           server.httpGet(
@@ -438,7 +443,10 @@ class ApiV2WorksIncludesTest
               |  ${singleWorkResult(apiPrefix)},
               |  "id": "${work.canonicalId}",
               |  "title": "${work.title}",
-              |  "notes": ["A", "B"]
+              |  "notes": [
+              |    { "type": "GeneralNote", "content": "A" },
+              |    { "type": "FundingInformation", "content": "B" }
+              |  ]
               |}
           """.stripMargin
           )

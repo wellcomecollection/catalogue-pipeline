@@ -84,7 +84,7 @@ case class DisplayWorkV2(
   @ApiModelProperty(
     dataType = "List[String]",
     value = "Miscellaneous notes associated with the work."
-  ) notes: Option[List[String]] = None,
+  ) notes: Option[List[DisplayNote]] = None,
   @ApiModelProperty(
     dataType = "String",
     value = "Designation of an academic dissertation or thesis and the institution to which it was presented."
@@ -155,7 +155,7 @@ case object DisplayWorkV2 {
         else None,
       language = work.language.map { DisplayLanguage(_) },
       edition = work.edition,
-      notes = if (includes.notes && work.notes.nonEmpty) Some(work.notes) else None,
+      notes = if (includes.notes && work.notes.nonEmpty) Some(work.notes.map(DisplayNote(_))) else None,
       dissertation = if (includes.dissertation) work.dissertation else None,
       locationOfOriginal = work.locationOfOriginal,
       citeAs = work.citeAs,
