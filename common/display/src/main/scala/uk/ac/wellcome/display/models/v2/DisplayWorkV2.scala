@@ -21,8 +21,7 @@ case class DisplayWorkV2(
   ) title: String,
   @ApiModelProperty(
     dataType = "List[String]",
-    value =
-      "Alternative titles of  the work."
+    value = "Alternative titles of  the work."
   ) alternativeTitles: Option[List[String]],
   @ApiModelProperty(
     dataType = "String",
@@ -87,15 +86,18 @@ case class DisplayWorkV2(
   ) notes: Option[List[DisplayNote]] = None,
   @ApiModelProperty(
     dataType = "String",
-    value = "Designation of an academic dissertation or thesis and the institution to which it was presented."
+    value =
+      "Designation of an academic dissertation or thesis and the institution to which it was presented."
   ) dissertation: Option[String] = None,
   @ApiModelProperty(
     dataType = "String",
-    value = "Name and address of the repository with custody over originals or duplicates of the work."
+    value =
+      "Name and address of the repository with custody over originals or duplicates of the work."
   ) locationOfOriginal: Option[String] = None,
   @ApiModelProperty(
     dataType = "String",
-    value = "Format for the citation of the described materials that is preferred by the custodian."
+    value =
+      "Format for the citation of the described materials that is preferred by the custodian."
   ) citeAs: Option[String] = None,
   @ApiModelProperty(
     dataType = "Integer",
@@ -116,7 +118,8 @@ case object DisplayWorkV2 {
     DisplayWorkV2(
       id = work.canonicalId,
       title = work.title,
-      alternativeTitles = if (includes.alternativeTitles) Some(work.alternativeTitles) else None,
+      alternativeTitles =
+        if (includes.alternativeTitles) Some(work.alternativeTitles) else None,
       description = work.description,
       physicalDescription = work.physicalDescription,
       lettering = work.lettering,
@@ -155,7 +158,10 @@ case object DisplayWorkV2 {
         else None,
       language = work.language.map { DisplayLanguage(_) },
       edition = work.edition,
-      notes = if (includes.notes && work.notes.nonEmpty) Some(work.notes.map(DisplayNote(_))) else None,
+      notes =
+        if (includes.notes && work.notes.nonEmpty)
+          Some(work.notes.map(DisplayNote(_)))
+        else None,
       dissertation = if (includes.dissertation) work.dissertation else None,
       locationOfOriginal = work.locationOfOriginal,
       citeAs = work.citeAs,

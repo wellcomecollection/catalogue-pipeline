@@ -1,7 +1,7 @@
 package uk.ac.wellcome.display.models
 
 import io.circe.generic.extras.semiauto._
-import io.circe.{Encoder, Decoder}
+import io.circe.{Decoder, Encoder}
 import uk.ac.wellcome.display.json.DisplayJsonUtil
 import uk.ac.wellcome.display.models.v2._
 import io.circe.syntax._

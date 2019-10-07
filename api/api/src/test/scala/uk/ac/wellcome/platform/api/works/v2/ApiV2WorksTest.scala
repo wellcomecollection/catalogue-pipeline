@@ -71,10 +71,10 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
     withV2Api {
       case (indexV2, server: EmbeddedHttpServer) =>
         val work = createIdentifiedWorkWith(
-          duration=Some(3600),
-          edition=Some("Special edition"),
-          locationOfOriginal=Some("Somewhere"),
-          citeAs=Some("A text")
+          duration = Some(3600),
+          edition = Some("Special edition"),
+          locationOfOriginal = Some("Somewhere"),
+          citeAs = Some("A text")
         )
         insertIntoElasticsearch(indexV2, work)
         eventually {
