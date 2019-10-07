@@ -406,20 +406,20 @@ class ApiV2WorksIncludesTest
               |  ${resultList(apiPrefix, totalResults = 2)},
               |  "results": [
               |   {
-              |     "type": "Work",
-              |     "id": "${works(1).canonicalId}",
-              |     "title": "${works(1).title}",
-              |     "notes": [
-              |       { "type": "GeneralNote", "content": "B" },
-              |       { "type": "FundingInformation", "content": "C" }
-              |     ]
-              |   },
               |   {
               |     "type": "Work",
               |     "id": "${works(0).canonicalId}",
               |     "title": "${works(0).title}",
               |     "notes": [
               |       { "type": "GeneralNote", "content": "A" }
+              |     ]
+              |   },
+              |     "type": "Work",
+              |     "id": "${works(1).canonicalId}",
+              |     "title": "${works(1).title}",
+              |     "notes": [
+              |       { "type": "GeneralNote", "content": "B" },
+              |       { "type": "FundingInformation", "content": "C" }
               |     ]
               |   }
               |  ]
