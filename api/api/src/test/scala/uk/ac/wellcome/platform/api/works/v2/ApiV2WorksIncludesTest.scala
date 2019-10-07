@@ -392,9 +392,10 @@ class ApiV2WorksIncludesTest
     withV2Api {
       case (indexV2, server: EmbeddedHttpServer) =>
         val works = List(
-          createIdentifiedWorkWith(notes = List(GeneralNote("A"))),
           createIdentifiedWorkWith(
-            notes = List(GeneralNote("B"), FundingInformation("C"))),
+            notes = List(GeneralNote("A"), FundingInformation("B"))),
+          createIdentifiedWorkWith(
+            notes = List(GeneralNote("C"))),
         )
         insertIntoElasticsearch(indexV2, works: _*)
         eventually {
@@ -405,23 +406,23 @@ class ApiV2WorksIncludesTest
               |{
               |  ${resultList(apiPrefix, totalResults = 2)},
               |  "results": [
-              |   {
-              |   {
-              |     "type": "Work",
-              |     "id": "${works(0).canonicalId}",
-              |     "title": "${works(0).title}",
-              |     "notes": [
-              |       { "type": "GeneralNote", "content": "A" }
-              |     ]
-              |   },
-              |     "type": "Work",
-              |     "id": "${works(1).canonicalId}",
-              |     "title": "${works(1).title}",
-              |     "notes": [
-              |       { "type": "GeneralNote", "content": "B" },
-              |       { "type": "FundingInformation", "content": "C" }
-              |     ]
-              |   }
+              |     {
+              |       "type": "Work",
+              |       "id": "${works(0).canonicalId}",
+              |       "title": "${works(0).title}",
+              |       "notes": [
+              |         { "type": "GeneralNote", "content": "A" },
+              |         { "type": "FundingInformation", "content": "B" }
+              |       ]
+              |     },
+              |     {
+              |       "type": "Work",
+              |       "id": "${works(1).canonicalId}",
+              |       "title": "${works(1).title}",
+              |       "notes": [
+              |         { "type": "GeneralNote", "content": "C" }
+              |       ]
+              |    }
               |  ]
               |}
           """.stripMargin
