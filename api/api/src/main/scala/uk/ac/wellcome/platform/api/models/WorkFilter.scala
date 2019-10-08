@@ -4,8 +4,10 @@ import java.time.LocalDate
 
 sealed trait WorkFilter
 
-case class ItemLocationTypeFilter(locationTypeIds: Seq[String]) extends WorkFilter
-object ItemLocationTypeFilter extends ApplyCommaSeperated[ItemLocationTypeFilter] {
+case class ItemLocationTypeFilter(locationTypeIds: Seq[String])
+    extends WorkFilter
+object ItemLocationTypeFilter
+    extends ApplyCommaSeperated[ItemLocationTypeFilter] {
   val fromSeq = ItemLocationTypeFilter(_)
 }
 
@@ -31,7 +33,7 @@ case class SubjectFilter(subjectQuery: String) extends WorkFilter
 
 trait ApplyCommaSeperated[T] {
 
-  protected val fromSeq: Seq[String] =>  T
+  protected val fromSeq: Seq[String] => T
 
   def apply(str: String): T =
     fromSeq(str.split(',').map(_.trim))
