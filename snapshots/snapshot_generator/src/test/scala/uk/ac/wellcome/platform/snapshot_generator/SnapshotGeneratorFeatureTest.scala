@@ -78,6 +78,7 @@ class SnapshotGeneratorFeatureTest
                  |  "subjects": [ ],
                  |  "items": [ ],
                  |  "production": [ ],
+                 |  "alternativeTitles": [ ],
                  |  "type": "Work"
                    }""".stripMargin
           }

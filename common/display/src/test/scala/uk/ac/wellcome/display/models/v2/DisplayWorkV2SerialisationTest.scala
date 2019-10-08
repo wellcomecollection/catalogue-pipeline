@@ -1,8 +1,8 @@
 package uk.ac.wellcome.display.models.v2
 
 import org.scalatest.FunSpec
-import uk.ac.wellcome.display.json.DisplayJsonUtil._
 import uk.ac.wellcome.display.models.V2WorksIncludes
+import uk.ac.wellcome.display.models.Implicits._
 import uk.ac.wellcome.display.test.util.JsonMapperTestUtil
 import uk.ac.wellcome.models.work.generators.{
   ProductionEventGenerators,
@@ -233,6 +233,46 @@ class DisplayWorkV2SerialisationTest
 
     assertObjectMapsToJson(
       DisplayWorkV2(work, includes = V2WorksIncludes(genres = true)),
+      expectedJson = expectedJson
+    )
+  }
+
+  it("includes 'notes' if the notes include is present") {
+    val work = createIdentifiedWorkWith(
+      notes = List(GeneralNote("A note"))
+    )
+
+    val expectedJson = s"""
+                          |{
+                          | "type": "Work",
+                          | "id": "${work.canonicalId}",
+                          | "title": "${work.title}",
+                          | "notes": [{"type": "GeneralNote", "content": "A note"}]
+                          |}
+          """.stripMargin
+
+    assertObjectMapsToJson(
+      DisplayWorkV2(work, includes = V2WorksIncludes(notes = true)),
+      expectedJson = expectedJson
+    )
+  }
+
+  it("includes 'dissertation' if the dissertation include is present") {
+    val work = createIdentifiedWorkWith(
+      dissertation = Some("Dissertation")
+    )
+
+    val expectedJson = s"""
+                          |{
+                          | "type": "Work",
+                          | "id": "${work.canonicalId}",
+                          | "title": "${work.title}",
+                          | "dissertation": "Dissertation"
+                          |}
+          """.stripMargin
+
+    assertObjectMapsToJson(
+      DisplayWorkV2(work, includes = V2WorksIncludes(dissertation = true)),
       expectedJson = expectedJson
     )
   }
