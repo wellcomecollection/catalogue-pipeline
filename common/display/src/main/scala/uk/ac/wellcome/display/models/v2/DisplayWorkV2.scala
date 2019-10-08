@@ -160,7 +160,7 @@ case object DisplayWorkV2 {
       edition = work.edition,
       notes =
         if (includes.notes && work.notes.nonEmpty)
-          Some(work.notes.map(DisplayNote(_)))
+          Some(DisplayNote.merge(work.notes.map(DisplayNote(_))))
         else None,
       dissertation = if (includes.dissertation) work.dissertation else None,
       locationOfOriginal = work.locationOfOriginal,
