@@ -55,7 +55,23 @@ class V2WorksController @Inject()(
         case (dateFrom, dateTo) => Some(DateRangeFilter(dateFrom, dateTo))
       }
 
-    List(itemLocationTypeFilter, workTypeFilter, dateRangeFilter).flatten
+    val languageFilter =
+      request.language.map(LanguageFilter(_))
+
+    val genreFilter =
+      request.genre.map(GenreFilter(_))
+
+    val subjectFilter =
+      request.subject.map(SubjectFilter(_))
+
+    List(
+      itemLocationTypeFilter,
+      workTypeFilter,
+      dateRangeFilter,
+      languageFilter,
+      genreFilter,
+      subjectFilter
+    ).flatten
   }
 
   override def setupResultListSwaggerDocs[T <: DisplayWork](

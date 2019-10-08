@@ -20,6 +20,15 @@ case class DateRangeFilter(fromDate: Option[LocalDate],
 
 case object IdentifiedWorkFilter extends WorkFilter
 
+case class LanguageFilter(languageIds: Seq[String]) extends WorkFilter
+object LanguageFilter extends ApplyCommaSeperated[LanguageFilter] {
+  val fromSeq = LanguageFilter(_)
+}
+
+case class GenreFilter(genreQuery: String) extends WorkFilter
+
+case class SubjectFilter(subjectQuery: String) extends WorkFilter
+
 trait ApplyCommaSeperated[T] {
 
   protected val fromSeq: Seq[String] =>  T
