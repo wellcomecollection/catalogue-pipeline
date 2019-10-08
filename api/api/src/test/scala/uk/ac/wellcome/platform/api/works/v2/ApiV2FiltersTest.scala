@@ -489,7 +489,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
     it("filters by language") {
       withV2Api {
         case (indexV2, server: EmbeddedHttpServer) =>
-          insertIntoElasticsearch(indexV2, works:_*)
+          insertIntoElasticsearch(indexV2, works: _*)
           eventually {
             server.httpGet(
               path = s"/$apiPrefix/works?language=eng",
@@ -519,7 +519,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
     it("filters by multiple comma seperated languages") {
       withV2Api {
         case (indexV2, server: EmbeddedHttpServer) =>
-          insertIntoElasticsearch(indexV2, works:_*)
+          insertIntoElasticsearch(indexV2, works: _*)
           eventually {
             server.httpGet(
               path = s"/$apiPrefix/works?language=eng,ger",
