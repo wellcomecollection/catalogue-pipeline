@@ -137,8 +137,7 @@ class ElasticsearchServiceTest
           index = index,
           workQuery = MSMBoostQuery("tangerines"),
           queryOptions = createElasticsearchQueryOptionsWith(
-            filters =
-              List(ItemLocationTypeFilter("iiif-image"))
+            filters = List(ItemLocationTypeFilter("iiif-image"))
           ),
           expectedWorks = List(work)
         )
