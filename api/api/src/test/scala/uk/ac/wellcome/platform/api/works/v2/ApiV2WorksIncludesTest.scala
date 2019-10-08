@@ -393,8 +393,11 @@ class ApiV2WorksIncludesTest
       case (indexV2, server: EmbeddedHttpServer) =>
         val works = List(
           createIdentifiedWorkWith(
+            canonicalId = "A",
             notes = List(GeneralNote("A"), FundingInformation("B"))),
-          createIdentifiedWorkWith(notes = List(GeneralNote("C"))),
+          createIdentifiedWorkWith(
+            canonicalId = "B",
+            notes = List(GeneralNote("C"))),
         )
         insertIntoElasticsearch(indexV2, works: _*)
         eventually {
