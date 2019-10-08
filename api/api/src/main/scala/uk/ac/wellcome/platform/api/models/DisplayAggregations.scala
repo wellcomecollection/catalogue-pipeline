@@ -3,9 +3,9 @@ package uk.ac.wellcome.platform.api.models
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.circe.generic.extras.JsonKey
 import io.swagger.annotations.{ApiModel, ApiModelProperty}
-
 import uk.ac.wellcome.display.models.DisplayWorkType
-import uk.ac.wellcome.display.models.v2.DisplayPeriod
+import uk.ac.wellcome.display.models.v2.{DisplayGenre, DisplayPeriod}
+import uk.ac.wellcome.models.work.internal.{AbstractConcept, Displayable, Genre}
 
 @ApiModel(
   value = "AggregationMap",
@@ -21,7 +21,7 @@ case class DisplayAggregations(
     DisplayAggregation[DisplayPeriod]],
   @ApiModelProperty(
     value = "Genre aggregation on a set of results."
-  ) genre: Option[DisplayAggregation[Genre]],
+  ) genres: Option[DisplayAggregation[DisplayGenre]],
   @JsonProperty("type") @JsonKey("type") ontologyType: String = "Aggregations"
 )
 
@@ -48,7 +48,9 @@ object DisplayAggregations {
       workType = displayAggregation(aggs.workType, DisplayWorkType.apply),
       productionDates =
         displayAggregation(aggs.productionDates, DisplayPeriod.apply),
-      genre = None
+      genres = displayAggregation(
+        aggs.genres,
+        (g: Genre[Displayable[AbstractConcept]]) => DisplayGenre(g, false))
     )
 
   private def displayAggregation[T, D](
