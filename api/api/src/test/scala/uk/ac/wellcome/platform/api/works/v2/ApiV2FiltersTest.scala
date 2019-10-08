@@ -473,6 +473,90 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
     }
   }
 
+  describe("filtering works by language") {
+
+    val englishWork = createIdentifiedWorkWith(
+      title = "Caterpiller",
+      language = Some(Language("eng", "English"))
+    )
+    val germanWork = createIdentifiedWorkWith(
+      title = "Ubergang",
+      language = Some(Language("ger", "German"))
+    )
+    val noLanguageWork = createIdentifiedWorkWith(title = "£@@!&$")
+    val works = List(englishWork, germanWork, noLanguageWork)
+
+    it("filters by language") {
+      withV2Api {
+        case (indexV2, server: EmbeddedHttpServer) =>
+          insertIntoElasticsearch(indexV2, works:_*)
+          eventually {
+            server.httpGet(
+              path = s"/$apiPrefix/works?language=eng",
+              andExpect = Status.Ok,
+              withJsonBody = s"""
+                |{
+                |  ${resultList(apiPrefix, totalResults = 1)},
+                |  "results": [
+                |    {
+                |      "type": "Work",
+                |      "id": "${englishWork.canonicalId}",
+                |      "title": "${englishWork.title}",
+                |      "language": {
+                |        "id": "eng",
+                |        "label": "English",
+                |        "type": "Language"
+                |      }
+                |    }
+                |  ]
+                |}
+          """.stripMargin
+            )
+          }
+      }
+    }
+
+    it("filters by multiple comma seperated languages") {
+      withV2Api {
+        case (indexV2, server: EmbeddedHttpServer) =>
+          insertIntoElasticsearch(indexV2, works:_*)
+          eventually {
+            server.httpGet(
+              path = s"/$apiPrefix/works?language=eng,ger",
+              andExpect = Status.Ok,
+              withJsonBody = s"""
+                |{
+                |  ${resultList(apiPrefix, totalResults = 2)},
+                |  "results": [
+                |    {
+                |      "type": "Work",
+                |      "id": "${englishWork.canonicalId}",
+                |      "title": "${englishWork.title}",
+                |      "language": {
+                |        "id": "eng",
+                |        "label": "English",
+                |        "type": "Language"
+                |      }
+                |    },
+                |    {
+                |      "type": "Work",
+                |      "id": "${germanWork.canonicalId}",
+                |      "title": "${germanWork.title}",
+                |      "language": {
+                |        "id": "ger",
+                |        "label": "German",
+                |        "type": "Language"
+                |      }
+                |    }
+                |  ]
+                |}
+          """.stripMargin
+            )
+          }
+      }
+    }
+  }
+
   private def createItemWithLocationType(
     locationType: LocationType): Identified[Item] =
     createIdentifiedItemWith(

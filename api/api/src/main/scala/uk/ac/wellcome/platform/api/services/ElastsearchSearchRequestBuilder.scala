@@ -88,7 +88,7 @@ case class ElastsearchSearchRequestBuilder(
           RangeQuery("production.dates.range.to", lte = lte, gte = gte)
         )
       case LanguageFilter(languageIds) =>
-        termsQuery(field = "langauge.id", values = languageIds)
+        termsQuery(field = "language.id", values = languageIds)
       case GenreFilter(genreQuery) =>
         matchQuery(field = "genres.label", value = genreQuery)
       case SubjectFilter(subjectQuery) =>
