@@ -641,6 +641,87 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
     }
   }
 
+  describe("filtering works by subject") {
+
+    val nineteenthCentury = createSubjectWith("19th Century")
+    val paris = createSubjectWith("Paris")
+
+    val nineteenthCenturyWork = createIdentifiedWorkWith(
+      title = "19th century",
+      canonicalId = "1",
+      subjects = List(nineteenthCentury)
+    )
+    val parisWork = createIdentifiedWorkWith(
+      title = "paris",
+      canonicalId = "2",
+      subjects = List(paris)
+    )
+    val nineteenthCenturyParisWork = createIdentifiedWorkWith(
+      title = "19th century paris",
+      canonicalId = "3",
+      subjects = List(nineteenthCentury, paris)
+    )
+    val noSubjectWork = createIdentifiedWorkWith(
+      title = "no subject",
+      canonicalId="4"
+    )
+
+    val works = List(nineteenthCenturyWork, parisWork, nineteenthCenturyParisWork, noSubjectWork)
+
+    def workResponse(work: IdentifiedWork): String =
+      s"""
+        | {
+        |   "type": "Work",
+        |   "id": "${work.canonicalId}",
+        |   "title": "${work.title}"
+        | }
+      """.stripMargin
+
+    it("filters by genre") {
+      withV2Api {
+        case (indexV2, server: EmbeddedHttpServer) =>
+          insertIntoElasticsearch(indexV2, works: _*)
+          eventually {
+            server.httpGet(
+              path = s"/$apiPrefix/works?subject.label=paris",
+              andExpect = Status.Ok,
+              withJsonBody = s"""
+                |{
+                |  ${resultList(apiPrefix, totalResults = 2)},
+                |  "results": [
+                |    ${workResponse(parisWork)},
+                |    ${workResponse(nineteenthCenturyParisWork)}
+                |  ]
+                |}
+          """.stripMargin
+            )
+          }
+      }
+    }
+
+    it("filters by genre using multiple terms") {
+      withV2Api {
+        case (indexV2, server: EmbeddedHttpServer) =>
+          insertIntoElasticsearch(indexV2, works: _*)
+          eventually {
+            server.httpGet(
+              path = s"/$apiPrefix/works?subject.label=19th+century+paris",
+              andExpect = Status.Ok,
+              withJsonBody = s"""
+                |{
+                |  ${resultList(apiPrefix, totalResults = 3)},
+                |  "results": [
+                |    ${workResponse(nineteenthCenturyWork)},
+                |    ${workResponse(parisWork)},
+                |    ${workResponse(nineteenthCenturyParisWork)}
+                |  ]
+                |}
+          """.stripMargin
+            )
+          }
+      }
+    }
+  }
 
   private def createItemWithLocationType(
     locationType: LocationType): Identified[Item] =

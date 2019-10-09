@@ -9,7 +9,11 @@ import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures._
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.models.work.generators.{WorksGenerators, GenreGenerators}
+import uk.ac.wellcome.models.work.generators.{
+  WorksGenerators,
+  GenreGenerators,
+  SubjectGenerators
+}
 import uk.ac.wellcome.models.work.internal.IdentifiedWork
 import uk.ac.wellcome.platform.api.Server
 
@@ -19,7 +23,8 @@ trait ApiWorksTestBase
     extends FunSpec
     with ElasticsearchFixtures
     with WorksGenerators
-    with GenreGenerators {
+    with GenreGenerators
+    with SubjectGenerators {
 
   implicit object IdentifiedWorkIndexable extends Indexable[IdentifiedWork] {
     override def json(t: IdentifiedWork): String =
