@@ -581,7 +581,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
     )
     val noGenreWork = createIdentifiedWorkWith(
       title = "no genre",
-      canonicalId="4"
+      canonicalId = "4"
     )
 
     val works = List(horrorWork, romcomWork, romcomHorrorWork, noGenreWork)
@@ -663,10 +663,14 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
     )
     val noSubjectWork = createIdentifiedWorkWith(
       title = "no subject",
-      canonicalId="4"
+      canonicalId = "4"
     )
 
-    val works = List(nineteenthCenturyWork, parisWork, nineteenthCenturyParisWork, noSubjectWork)
+    val works = List(
+      nineteenthCenturyWork,
+      parisWork,
+      nineteenthCenturyParisWork,
+      noSubjectWork)
 
     def workResponse(work: IdentifiedWork): String =
       s"""
