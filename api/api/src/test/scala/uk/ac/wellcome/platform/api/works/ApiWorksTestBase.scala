@@ -9,7 +9,7 @@ import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures._
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.models.work.generators.WorksGenerators
+import uk.ac.wellcome.models.work.generators.{WorksGenerators, GenreGenerators}
 import uk.ac.wellcome.models.work.internal.IdentifiedWork
 import uk.ac.wellcome.platform.api.Server
 
@@ -18,7 +18,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 trait ApiWorksTestBase
     extends FunSpec
     with ElasticsearchFixtures
-    with WorksGenerators {
+    with WorksGenerators
+    with GenreGenerators {
 
   implicit object IdentifiedWorkIndexable extends Indexable[IdentifiedWork] {
     override def json(t: IdentifiedWork): String =

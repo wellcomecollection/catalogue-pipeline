@@ -559,6 +559,89 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
     }
   }
 
+  describe("filtering works by genre") {
+
+    val horror = createGenreWith("horrible stuff")
+    val romcom = createGenreWith("heartwarming stuff")
+
+    val horrorWork = createIdentifiedWorkWith(
+      title = "horror",
+      canonicalId = "1",
+      genres = List(horror)
+    )
+    val romcomWork = createIdentifiedWorkWith(
+      title = "romcom",
+      canonicalId = "2",
+      genres = List(romcom)
+    )
+    val romcomHorrorWork = createIdentifiedWorkWith(
+      title = "romcom horror",
+      canonicalId = "3",
+      genres = List(romcom, horror)
+    )
+    val noGenreWork = createIdentifiedWorkWith(
+      title = "no genre",
+      canonicalId="4"
+    )
+
+    val works = List(horrorWork, romcomWork, romcomHorrorWork, noGenreWork)
+
+    def workResponse(work: IdentifiedWork): String =
+      s"""
+        | {
+        |   "type": "Work",
+        |   "id": "${work.canonicalId}",
+        |   "title": "${work.title}"
+        | }
+      """.stripMargin
+
+    it("filters by genre with partial match") {
+      withV2Api {
+        case (indexV2, server: EmbeddedHttpServer) =>
+          insertIntoElasticsearch(indexV2, works: _*)
+          eventually {
+            server.httpGet(
+              path = s"/$apiPrefix/works?genre.label=horrible",
+              andExpect = Status.Ok,
+              withJsonBody = s"""
+                |{
+                |  ${resultList(apiPrefix, totalResults = 2)},
+                |  "results": [
+                |    ${workResponse(horrorWork)},
+                |    ${workResponse(romcomHorrorWork)}
+                |  ]
+                |}
+          """.stripMargin
+            )
+          }
+      }
+    }
+
+    it("filters by genre using multiple terms") {
+      withV2Api {
+        case (indexV2, server: EmbeddedHttpServer) =>
+          insertIntoElasticsearch(indexV2, works: _*)
+          eventually {
+            server.httpGet(
+              path = s"/$apiPrefix/works?genre.label=horrible+heartwarming",
+              andExpect = Status.Ok,
+              withJsonBody = s"""
+                |{
+                |  ${resultList(apiPrefix, totalResults = 3)},
+                |  "results": [
+                |    ${workResponse(horrorWork)},
+                |    ${workResponse(romcomWork)},
+                |    ${workResponse(romcomHorrorWork)}
+                |  ]
+                |}
+          """.stripMargin
+            )
+          }
+      }
+    }
+  }
+
+
   private def createItemWithLocationType(
     locationType: LocationType): Identified[Item] =
     createIdentifiedItemWith(
