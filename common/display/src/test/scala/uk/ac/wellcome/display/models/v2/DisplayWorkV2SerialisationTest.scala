@@ -237,7 +237,8 @@ class DisplayWorkV2SerialisationTest
     )
   }
 
-  it("includes 'notes' if the notes include is present, with similar notes grouped together") {
+  it(
+    "includes 'notes' if the notes include is present, with similar notes grouped together") {
     val work = createIdentifiedWorkWith(
       notes = List(GeneralNote("A"), FundingInformation("B"), GeneralNote("C"))
     )
