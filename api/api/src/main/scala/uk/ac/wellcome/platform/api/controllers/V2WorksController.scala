@@ -47,7 +47,7 @@ class V2WorksController @Inject()(
       request.itemLocationType.map(ItemLocationTypeFilter(_))
 
     val workTypeFilter =
-      request.itemLocationType.map(WorkTypeFilter(_))
+      request.workType.map(WorkTypeFilter(_))
 
     val dateRangeFilter =
       (request.productionDateFrom, request.productionDateTo) match {
