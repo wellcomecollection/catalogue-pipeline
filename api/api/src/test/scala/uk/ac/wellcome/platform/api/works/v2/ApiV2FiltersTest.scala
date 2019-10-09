@@ -476,10 +476,12 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
   describe("filtering works by language") {
 
     val englishWork = createIdentifiedWorkWith(
+      canonicalId = "1",
       title = "Caterpiller",
       language = Some(Language("eng", "English"))
     )
     val germanWork = createIdentifiedWorkWith(
+      canonicalId = "2",
       title = "Ubergang",
       language = Some(Language("ger", "German"))
     )
