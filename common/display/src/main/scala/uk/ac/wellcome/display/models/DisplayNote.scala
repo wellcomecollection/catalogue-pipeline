@@ -49,7 +49,7 @@ object DisplayNoteType {
       case BibliographicalInformation(_) =>
         DisplayNoteType("bibliographical-info", "Bibliographical information")
       case FundingInformation(_) =>
-        DisplayNoteType("fuding-info", "Funding information")
+        DisplayNoteType("funding-info", "Funding information")
       case TimeAndPlaceNote(_) =>
         DisplayNoteType("time-and-place-note", "Time and place note")
       case CreditsNote(_) =>

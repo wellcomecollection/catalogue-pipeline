@@ -397,7 +397,7 @@ class ApiV2WorksIncludesTest
             notes = List(GeneralNote("A"), FundingInformation("B"))),
           createIdentifiedWorkWith(
             canonicalId = "B",
-            notes = List(GeneralNote("C"))),
+            notes = List(GeneralNote("C"), GeneralNote("D"))),
         )
         insertIntoElasticsearch(indexV2, works: _*)
         eventually {
@@ -413,8 +413,24 @@ class ApiV2WorksIncludesTest
               |       "id": "${works(0).canonicalId}",
               |       "title": "${works(0).title}",
               |       "notes": [
-              |         { "type": "GeneralNote", "content": "A" },
-              |         { "type": "FundingInformation", "content": "B" }
+              |         {
+              |           "noteType": {
+              |             "id": "funding-info",
+              |             "label": "Funding information",
+              |             "type": "NoteType"
+              |           },
+              |           "contents": ["B"],
+              |           "type": "Note"
+              |         },
+              |         {
+              |           "noteType": {
+              |             "id": "general-note",
+              |             "label": "General note",
+              |             "type": "NoteType"
+              |           },
+              |           "contents": ["A"],
+              |           "type": "Note"
+              |         }
               |       ]
               |     },
               |     {
@@ -422,7 +438,15 @@ class ApiV2WorksIncludesTest
               |       "id": "${works(1).canonicalId}",
               |       "title": "${works(1).title}",
               |       "notes": [
-              |         { "type": "GeneralNote", "content": "C" }
+              |         {
+              |           "noteType": {
+              |             "id": "general-note",
+              |             "label": "General note",
+              |             "type": "NoteType"
+              |           },
+              |           "contents": ["C", "D"],
+              |           "type": "Note"
+              |         }
               |       ]
               |    }
               |  ]
@@ -437,7 +461,7 @@ class ApiV2WorksIncludesTest
     withV2Api {
       case (indexV2, server: EmbeddedHttpServer) =>
         val work = createIdentifiedWorkWith(
-          notes = List(GeneralNote("A"), FundingInformation("B")))
+          notes = List(GeneralNote("A"), GeneralNote("B")))
         insertIntoElasticsearch(indexV2, work)
         eventually {
           server.httpGet(
@@ -449,8 +473,15 @@ class ApiV2WorksIncludesTest
               |  "id": "${work.canonicalId}",
               |  "title": "${work.title}",
               |  "notes": [
-              |    { "type": "GeneralNote", "content": "A" },
-              |    { "type": "FundingInformation", "content": "B" }
+              |     {
+              |       "noteType": {
+              |         "id": "general-note",
+              |         "label": "General note",
+              |         "type": "NoteType"
+              |       },
+              |       "contents": ["A", "B"],
+              |       "type": "Note"
+              |     }
               |  ]
               |}
           """.stripMargin

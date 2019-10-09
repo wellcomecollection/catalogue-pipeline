@@ -237,19 +237,38 @@ class DisplayWorkV2SerialisationTest
     )
   }
 
-  it("includes 'notes' if the notes include is present") {
+  it("includes 'notes' if the notes include is present, with similar notes grouped together") {
     val work = createIdentifiedWorkWith(
-      notes = List(GeneralNote("A note"))
+      notes = List(GeneralNote("A"), FundingInformation("B"), GeneralNote("C"))
     )
 
     val expectedJson = s"""
-                          |{
-                          | "type": "Work",
-                          | "id": "${work.canonicalId}",
-                          | "title": "${work.title}",
-                          | "notes": [{"type": "GeneralNote", "content": "A note"}]
-                          |}
-          """.stripMargin
+      |{
+      | "type": "Work",
+      | "id": "${work.canonicalId}",
+      | "title": "${work.title}",
+      | "notes": [
+      |   {
+      |     "noteType": {
+      |       "id": "funding-info",
+      |       "label": "Funding information",
+      |       "type": "NoteType"
+      |     },
+      |     "contents": ["B"],
+      |     "type": "Note"
+      |   },
+      |   {
+      |     "noteType": {
+      |       "id": "general-note",
+      |       "label": "General note",
+      |       "type": "NoteType"
+      |     },
+      |     "contents": ["A", "C"],
+      |     "type": "Note"
+      |   }
+      | ]
+      |}
+    """.stripMargin
 
     assertObjectMapsToJson(
       DisplayWorkV2(work, includes = V2WorksIncludes(notes = true)),
