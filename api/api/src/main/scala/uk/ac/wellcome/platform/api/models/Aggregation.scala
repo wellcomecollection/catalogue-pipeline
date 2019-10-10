@@ -13,26 +13,27 @@ case class Aggregations(
   genre: Option[Aggregation[Genre[Displayable[AbstractConcept]]]] = None,
   productionDate: Option[Aggregation[Period]] = None,
   language: Option[Aggregation[Language]] = None,
-  subject: Option[Aggregation[Subject[Displayable[AbstractRootConcept]]]] =
-    None,
+  subject: Option[Aggregation[Subject[Displayable[AbstractRootConcept]]]] = None,
 )
 
 object Aggregations extends Logging {
 
   def apply(jsonString: String): Option[Aggregations] =
     fromJson[EsAggregations](jsonString)
-      .collect { case esAggs if esAggs.nonEmpty =>
-        Some(
-          Aggregations(
-            workType = getAggregation[WorkType](esAggs.workType),
-            genre = getAggregation[Genre[Displayable[AbstractConcept]]](
-              esAggs.genre),
-            productionDate = getAggregation[Period](esAggs.productionDate),
-            language = getAggregation[Language](esAggs.language),
-            subject = getAggregation[Subject[Displayable[AbstractRootConcept]]](
-              esAggs.subject),
+      .collect {
+        case esAggs if esAggs.nonEmpty =>
+          Some(
+            Aggregations(
+              workType = getAggregation[WorkType](esAggs.workType),
+              genre = getAggregation[Genre[Displayable[AbstractConcept]]](
+                esAggs.genre),
+              productionDate = getAggregation[Period](esAggs.productionDate),
+              language = getAggregation[Language](esAggs.language),
+              subject =
+                getAggregation[Subject[Displayable[AbstractRootConcept]]](
+                  esAggs.subject),
+            )
           )
-        )
       }
       .getOrElse { None }
 

@@ -3,8 +3,12 @@ package uk.ac.wellcome.platform.api.models
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.circe.generic.extras.JsonKey
 import io.swagger.annotations.{ApiModel, ApiModelProperty}
-import uk.ac.wellcome.display.models.{DisplayWorkType, DisplayLanguage}
-import uk.ac.wellcome.display.models.v2.{DisplayGenre, DisplayPeriod, DisplaySubject}
+import uk.ac.wellcome.display.models.{DisplayLanguage, DisplayWorkType}
+import uk.ac.wellcome.display.models.v2.{
+  DisplayGenre,
+  DisplayPeriod,
+  DisplaySubject
+}
 import uk.ac.wellcome.models.work.internal._
 
 @ApiModel(
@@ -51,21 +55,20 @@ object DisplayAggregations {
 
   def apply(aggs: Aggregations): DisplayAggregations =
     DisplayAggregations(
-      workType =
-        displayAggregation(aggs.workType, DisplayWorkType.apply),
+      workType = displayAggregation(aggs.workType, DisplayWorkType.apply),
       productionDate =
         displayAggregation(aggs.productionDate, DisplayPeriod.apply),
       genre =
         displayAggregation[Genre[Displayable[AbstractConcept]], DisplayGenre](
           aggs.genre,
           DisplayGenre(_, false)),
-      language =
-        displayAggregation(aggs.language, DisplayLanguage.apply),
-      subject =
-        displayAggregation[Subject[Displayable[AbstractRootConcept]], DisplaySubject](
-          aggs.subject,
-          subject => DisplaySubject(Unidentifiable(subject), false)
-        )
+      language = displayAggregation(aggs.language, DisplayLanguage.apply),
+      subject = displayAggregation[
+        Subject[Displayable[AbstractRootConcept]],
+        DisplaySubject](
+        aggs.subject,
+        subject => DisplaySubject(Unidentifiable(subject), false)
+      )
     )
 
   private def displayAggregation[T, D](
