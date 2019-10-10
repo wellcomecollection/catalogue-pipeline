@@ -477,7 +477,7 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
     }
   }
 
-  it("supports fetching the genres aggregation") {
+  it("supports fetching the genre aggregation") {
     withV2Api {
       case (indexV2, server: EmbeddedHttpServer) =>
         val concept0 = Unidentifiable(Concept("conceptLabel"))
@@ -505,7 +505,7 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
 
         eventually {
           server.httpGet(
-            path = s"/$apiPrefix/works?aggregations=genres",
+            path = s"/$apiPrefix/works?aggregations=genre",
             andExpect = Status.Ok,
             withJsonBody = s"""
                               |{
@@ -513,7 +513,7 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
                               |  "results": [],
                               |  "aggregations": {
                               |  "type" : "Aggregations",
-                              |   "genres": {
+                              |   "genre": {
                               |     "type" : "Aggregation",
                               |     "buckets": [
                               |       {
