@@ -42,31 +42,36 @@ class V2WorksController @Inject()(
 
   override def buildFilters(
     request: V2MultipleResultsRequest): List[WorkFilter] = {
-    val maybeItemLocationTypeFilter: Option[ItemLocationTypeFilter] =
-      request.itemLocationType
-        .map { arg =>
-          arg.split(",").map { _.trim }
-        }
-        .map { locationTypeIds: Array[String] =>
-          ItemLocationTypeFilter(locationTypeIds)
-        }
 
-    val maybeWorkTypeFilter: Option[WorkTypeFilter] =
-      request.workType
-        .map { arg =>
-          arg.split(",").map { _.trim }
-        }
-        .map { workTypeIds: Array[String] =>
-          WorkTypeFilter(workTypeIds)
-        }
+    val itemLocationTypeFilter =
+      request.itemLocationType.map(ItemLocationTypeFilter(_))
 
-    val maybeDateRangeFilter: Option[DateRangeFilter] =
+    val workTypeFilter =
+      request.workType.map(WorkTypeFilter(_))
+
+    val dateRangeFilter =
       (request.productionDateFrom, request.productionDateTo) match {
         case (None, None)       => None
         case (dateFrom, dateTo) => Some(DateRangeFilter(dateFrom, dateTo))
       }
 
-    List(maybeItemLocationTypeFilter, maybeWorkTypeFilter, maybeDateRangeFilter).flatten
+    val languageFilter =
+      request.language.map(LanguageFilter(_))
+
+    val genreFilter =
+      request.genre.map(GenreFilter(_))
+
+    val subjectFilter =
+      request.subject.map(SubjectFilter(_))
+
+    List(
+      itemLocationTypeFilter,
+      workTypeFilter,
+      dateRangeFilter,
+      languageFilter,
+      genreFilter,
+      subjectFilter
+    ).flatten
   }
 
   override def setupResultListSwaggerDocs[T <: DisplayWork](

@@ -70,7 +70,7 @@ class ElasticsearchServiceTest
           index = index,
           workQuery = MSMBoostQuery("artichokes"),
           queryOptions = createElasticsearchQueryOptionsWith(
-            filters = List(WorkTypeFilter(workTypeId = "b"))
+            filters = List(WorkTypeFilter("b"))
           ),
           expectedWorks = List(workWithCorrectWorkType)
         )
@@ -137,8 +137,7 @@ class ElasticsearchServiceTest
           index = index,
           workQuery = MSMBoostQuery("tangerines"),
           queryOptions = createElasticsearchQueryOptionsWith(
-            filters =
-              List(ItemLocationTypeFilter(locationTypeId = "iiif-image"))
+            filters = List(ItemLocationTypeFilter("iiif-image"))
           ),
           expectedWorks = List(work)
         )
@@ -536,7 +535,7 @@ class ElasticsearchServiceTest
         insertIntoElasticsearch(index, work1, work2, workWithWrongWorkType)
 
         val queryOptions = createElasticsearchQueryOptionsWith(
-          filters = List(WorkTypeFilter(workTypeId = "b"))
+          filters = List(WorkTypeFilter("b"))
         )
 
         assertListResultsAreCorrect(

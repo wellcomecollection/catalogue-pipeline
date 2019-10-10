@@ -473,6 +473,260 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
     }
   }
 
+  describe("filtering works by language") {
+
+    val englishWork = createIdentifiedWorkWith(
+      canonicalId = "1",
+      title = "Caterpiller",
+      language = Some(Language("eng", "English"))
+    )
+    val germanWork = createIdentifiedWorkWith(
+      canonicalId = "2",
+      title = "Ubergang",
+      language = Some(Language("ger", "German"))
+    )
+    val noLanguageWork = createIdentifiedWorkWith(title = "£@@!&$")
+    val works = List(englishWork, germanWork, noLanguageWork)
+
+    it("filters by language") {
+      withV2Api {
+        case (indexV2, server: EmbeddedHttpServer) =>
+          insertIntoElasticsearch(indexV2, works: _*)
+          eventually {
+            server.httpGet(
+              path = s"/$apiPrefix/works?language=eng",
+              andExpect = Status.Ok,
+              withJsonBody = s"""
+                |{
+                |  ${resultList(apiPrefix, totalResults = 1)},
+                |  "results": [
+                |    {
+                |      "type": "Work",
+                |      "id": "${englishWork.canonicalId}",
+                |      "title": "${englishWork.title}",
+                |      "language": {
+                |        "id": "eng",
+                |        "label": "English",
+                |        "type": "Language"
+                |      }
+                |    }
+                |  ]
+                |}
+          """.stripMargin
+            )
+          }
+      }
+    }
+
+    it("filters by multiple comma seperated languages") {
+      withV2Api {
+        case (indexV2, server: EmbeddedHttpServer) =>
+          insertIntoElasticsearch(indexV2, works: _*)
+          eventually {
+            server.httpGet(
+              path = s"/$apiPrefix/works?language=eng,ger",
+              andExpect = Status.Ok,
+              withJsonBody = s"""
+                |{
+                |  ${resultList(apiPrefix, totalResults = 2)},
+                |  "results": [
+                |    {
+                |      "type": "Work",
+                |      "id": "${englishWork.canonicalId}",
+                |      "title": "${englishWork.title}",
+                |      "language": {
+                |        "id": "eng",
+                |        "label": "English",
+                |        "type": "Language"
+                |      }
+                |    },
+                |    {
+                |      "type": "Work",
+                |      "id": "${germanWork.canonicalId}",
+                |      "title": "${germanWork.title}",
+                |      "language": {
+                |        "id": "ger",
+                |        "label": "German",
+                |        "type": "Language"
+                |      }
+                |    }
+                |  ]
+                |}
+          """.stripMargin
+            )
+          }
+      }
+    }
+  }
+
+  describe("filtering works by genre") {
+
+    val horror = createGenreWith("horrible stuff")
+    val romcom = createGenreWith("heartwarming stuff")
+
+    val horrorWork = createIdentifiedWorkWith(
+      title = "horror",
+      canonicalId = "1",
+      genres = List(horror)
+    )
+    val romcomWork = createIdentifiedWorkWith(
+      title = "romcom",
+      canonicalId = "2",
+      genres = List(romcom)
+    )
+    val romcomHorrorWork = createIdentifiedWorkWith(
+      title = "romcom horror",
+      canonicalId = "3",
+      genres = List(romcom, horror)
+    )
+    val noGenreWork = createIdentifiedWorkWith(
+      title = "no genre",
+      canonicalId = "4"
+    )
+
+    val works = List(horrorWork, romcomWork, romcomHorrorWork, noGenreWork)
+
+    def workResponse(work: IdentifiedWork): String =
+      s"""
+        | {
+        |   "type": "Work",
+        |   "id": "${work.canonicalId}",
+        |   "title": "${work.title}"
+        | }
+      """.stripMargin
+
+    it("filters by genre with partial match") {
+      withV2Api {
+        case (indexV2, server: EmbeddedHttpServer) =>
+          insertIntoElasticsearch(indexV2, works: _*)
+          eventually {
+            server.httpGet(
+              path = s"/$apiPrefix/works?genre.label=horrible",
+              andExpect = Status.Ok,
+              withJsonBody = s"""
+                |{
+                |  ${resultList(apiPrefix, totalResults = 2)},
+                |  "results": [
+                |    ${workResponse(horrorWork)},
+                |    ${workResponse(romcomHorrorWork)}
+                |  ]
+                |}
+          """.stripMargin
+            )
+          }
+      }
+    }
+
+    it("filters by genre using multiple terms") {
+      withV2Api {
+        case (indexV2, server: EmbeddedHttpServer) =>
+          insertIntoElasticsearch(indexV2, works: _*)
+          eventually {
+            server.httpGet(
+              path = s"/$apiPrefix/works?genre.label=horrible+heartwarming",
+              andExpect = Status.Ok,
+              withJsonBody = s"""
+                |{
+                |  ${resultList(apiPrefix, totalResults = 3)},
+                |  "results": [
+                |    ${workResponse(horrorWork)},
+                |    ${workResponse(romcomWork)},
+                |    ${workResponse(romcomHorrorWork)}
+                |  ]
+                |}
+          """.stripMargin
+            )
+          }
+      }
+    }
+  }
+
+  describe("filtering works by subject") {
+
+    val nineteenthCentury = createSubjectWith("19th Century")
+    val paris = createSubjectWith("Paris")
+
+    val nineteenthCenturyWork = createIdentifiedWorkWith(
+      title = "19th century",
+      canonicalId = "1",
+      subjects = List(nineteenthCentury)
+    )
+    val parisWork = createIdentifiedWorkWith(
+      title = "paris",
+      canonicalId = "2",
+      subjects = List(paris)
+    )
+    val nineteenthCenturyParisWork = createIdentifiedWorkWith(
+      title = "19th century paris",
+      canonicalId = "3",
+      subjects = List(nineteenthCentury, paris)
+    )
+    val noSubjectWork = createIdentifiedWorkWith(
+      title = "no subject",
+      canonicalId = "4"
+    )
+
+    val works = List(
+      nineteenthCenturyWork,
+      parisWork,
+      nineteenthCenturyParisWork,
+      noSubjectWork)
+
+    def workResponse(work: IdentifiedWork): String =
+      s"""
+        | {
+        |   "type": "Work",
+        |   "id": "${work.canonicalId}",
+        |   "title": "${work.title}"
+        | }
+      """.stripMargin
+
+    it("filters by genre") {
+      withV2Api {
+        case (indexV2, server: EmbeddedHttpServer) =>
+          insertIntoElasticsearch(indexV2, works: _*)
+          eventually {
+            server.httpGet(
+              path = s"/$apiPrefix/works?subject.label=paris",
+              andExpect = Status.Ok,
+              withJsonBody = s"""
+                |{
+                |  ${resultList(apiPrefix, totalResults = 2)},
+                |  "results": [
+                |    ${workResponse(parisWork)},
+                |    ${workResponse(nineteenthCenturyParisWork)}
+                |  ]
+                |}
+          """.stripMargin
+            )
+          }
+      }
+    }
+
+    it("filters by genre using multiple terms") {
+      withV2Api {
+        case (indexV2, server: EmbeddedHttpServer) =>
+          insertIntoElasticsearch(indexV2, works: _*)
+          eventually {
+            server.httpGet(
+              path = s"/$apiPrefix/works?subject.label=19th+century+paris",
+              andExpect = Status.Ok,
+              withJsonBody = s"""
+                |{
+                |  ${resultList(apiPrefix, totalResults = 3)},
+                |  "results": [
+                |    ${workResponse(nineteenthCenturyWork)},
+                |    ${workResponse(parisWork)},
+                |    ${workResponse(nineteenthCenturyParisWork)}
+                |  ]
+                |}
+          """.stripMargin
+            )
+          }
+      }
+    }
+  }
+
   private def createItemWithLocationType(
     locationType: LocationType): Identified[Item] =
     createIdentifiedItemWith(

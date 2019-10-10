@@ -91,7 +91,7 @@ class WorksServiceTest
         expectedWorks = Seq(work1, work2),
         expectedTotalResults = 2,
         worksSearchOptions = createWorksSearchOptionsWith(
-          filters = List(WorkTypeFilter(workTypeId = "b"))
+          filters = List(WorkTypeFilter("b"))
         )
       )
     }
@@ -294,7 +294,7 @@ class WorksServiceTest
         expectedWorks = List(matchingWork),
         expectedTotalResults = 1,
         worksSearchOptions = createWorksSearchOptionsWith(
-          filters = List(WorkTypeFilter(workTypeId = "b"))
+          filters = List(WorkTypeFilter("b"))
         )
       )
     }

@@ -98,5 +98,11 @@ case class ElastsearchSearchRequestBuilder(
           RangeQuery("production.dates.range.from", lte = lte, gte = gte),
           RangeQuery("production.dates.range.to", lte = lte, gte = gte)
         )
+      case LanguageFilter(languageIds) =>
+        termsQuery(field = "language.id", values = languageIds)
+      case GenreFilter(genreQuery) =>
+        matchQuery(field = "genres.label", value = genreQuery)
+      case SubjectFilter(subjectQuery) =>
+        matchQuery(field = "subjects.agent.label", value = subjectQuery)
     }
 }
