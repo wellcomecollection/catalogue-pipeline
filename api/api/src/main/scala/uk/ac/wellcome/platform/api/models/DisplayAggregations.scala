@@ -60,13 +60,13 @@ object DisplayAggregations {
         displayAggregation(aggs.productionDates, DisplayPeriod.apply),
       genres =
         displayAggregation[Genre[Displayable[AbstractConcept]], DisplayGenre](
-          aggs.genre,
+          aggs.genres,
           DisplayGenre(_, false)),
       language = displayAggregation(aggs.language, DisplayLanguage.apply),
       subjects = displayAggregation[
         Subject[Displayable[AbstractRootConcept]],
         DisplaySubject](
-        aggs.subject,
+        aggs.subjects,
         subject => DisplaySubject(Unidentifiable(subject), false)
       )
     )

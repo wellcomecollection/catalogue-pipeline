@@ -10,10 +10,11 @@ import uk.ac.wellcome.json.JsonUtil._
 
 case class Aggregations(
   workType: Option[Aggregation[WorkType]] = None,
-  genre: Option[Aggregation[Genre[Displayable[AbstractConcept]]]] = None,
+  genres: Option[Aggregation[Genre[Displayable[AbstractConcept]]]] = None,
   productionDates: Option[Aggregation[Period]] = None,
   language: Option[Aggregation[Language]] = None,
-  subject: Option[Aggregation[Subject[Displayable[AbstractRootConcept]]]] = None,
+  subjects: Option[Aggregation[Subject[Displayable[AbstractRootConcept]]]] =
+    None,
 )
 
 object Aggregations extends Logging {
@@ -25,11 +26,11 @@ object Aggregations extends Logging {
           Some(
             Aggregations(
               workType = getAggregation[WorkType](esAggs.workType),
-              genre = getAggregation[Genre[Displayable[AbstractConcept]]](
+              genres = getAggregation[Genre[Displayable[AbstractConcept]]](
                 esAggs.genres),
               productionDates = getAggregation[Period](esAggs.productionDates),
               language = getAggregation[Language](esAggs.language),
-              subject =
+              subjects =
                 getAggregation[Subject[Displayable[AbstractRootConcept]]](
                   esAggs.subjects),
             )
