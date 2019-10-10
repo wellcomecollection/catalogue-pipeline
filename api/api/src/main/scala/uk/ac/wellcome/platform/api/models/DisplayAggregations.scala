@@ -21,7 +21,7 @@ case class DisplayAggregations(
     DisplayAggregation[DisplayPeriod]],
   @ApiModelProperty(
     value = "Genre aggregation on a set of results."
-  ) genres: Option[DisplayAggregation[DisplayGenre]],
+  ) genre: Option[DisplayAggregation[DisplayGenre]],
   @JsonProperty("type") @JsonKey("type") ontologyType: String = "Aggregations"
 )
 
@@ -48,8 +48,8 @@ object DisplayAggregations {
       workType = displayAggregation(aggs.workType, DisplayWorkType.apply),
       productionDates =
         displayAggregation(aggs.productionDates, DisplayPeriod.apply),
-      genres = displayAggregation(
-        aggs.genres,
+      genre = displayAggregation(
+        aggs.genre,
         (g: Genre[Displayable[AbstractConcept]]) => DisplayGenre(g, false))
     )
 

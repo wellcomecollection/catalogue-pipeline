@@ -18,7 +18,7 @@ case class AggregatedGenre(label: String)
 
 case class Aggregations(
   workType: Option[Aggregation[WorkType]] = None,
-  genres: Option[Aggregation[Genre[Displayable[AbstractConcept]]]] = None,
+  genre: Option[Aggregation[Genre[Displayable[AbstractConcept]]]] = None,
   productionDates: Option[Aggregation[Period]] = None)
 
 object Aggregations extends Logging {
@@ -32,7 +32,7 @@ object Aggregations extends Logging {
           // We have to do this conversion here as we only get a label back from the Elastic response
           // as it creating a composite aggregation, which doesn't really have the knowledge of a full
           // Genre object
-          val genres = convert(
+          val genre = convert(
             getAggregation[AggregatedGenre](aggregatedGenres),
             (aggregateGenre: AggregatedGenre) =>
               Genre[Displayable[AbstractConcept]](aggregateGenre.label, List()))
@@ -40,7 +40,7 @@ object Aggregations extends Logging {
           Some(
             Aggregations(
               workType = getAggregation[WorkType](workType),
-              genres = genres,
+              genre = genre,
               productionDates = getAggregation[Period](date)
             )
           )
@@ -114,7 +114,7 @@ case class AggregationBucket[T](data: T, count: Int)
   */
 case class EsAggregations(
   workType: Option[EsAggregation[WorkType]] = None,
-  genres: Option[EsAggregation[AggregatedGenre]] = None,
+  genre: Option[EsAggregation[AggregatedGenre]] = None,
   productionDates: Option[EsAggregation[Period]] = None,
 )
 case class EsAggregation[T](buckets: List[EsAggregationBucket[T]])

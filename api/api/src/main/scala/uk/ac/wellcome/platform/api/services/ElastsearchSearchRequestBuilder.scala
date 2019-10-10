@@ -52,7 +52,7 @@ case class ElastsearchSearchRequestBuilder(
     // We don't split genres into concepts, as the data isn't great, and for rendering isn't useful at the moment.
     // But we've left it as a CompositeAggregation to scale when we need to.
     case AggregationRequest.Genres =>
-      CompositeAggregation("genres").sources(
+      CompositeAggregation("genre").sources(
         List(
           TermsValueSource(
             "label",
