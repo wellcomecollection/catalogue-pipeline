@@ -21,14 +21,14 @@ case class DisplayAggregations(
   ) workType: Option[DisplayAggregation[DisplayWorkType]],
   @ApiModelProperty(
     value = "Date aggregation on a set of results."
-  ) @JsonProperty("production.date") @JsonKey("production.dates") productionDate: Option[
+  ) @JsonProperty("production.dates") @JsonKey("production.dates") productionDates: Option[
     DisplayAggregation[DisplayPeriod]],
   @ApiModelProperty(
     value = "Genre aggregation on a set of results."
-  ) genre: Option[DisplayAggregation[DisplayGenre]],
+  ) genres: Option[DisplayAggregation[DisplayGenre]],
   @ApiModelProperty(
     value = "Subject aggregation on a set of results."
-  ) subject: Option[DisplayAggregation[DisplaySubject]],
+  ) subjects: Option[DisplayAggregation[DisplaySubject]],
   @ApiModelProperty(
     value = "Language aggregation on a set of results."
   ) language: Option[DisplayAggregation[DisplayLanguage]],
@@ -56,14 +56,14 @@ object DisplayAggregations {
   def apply(aggs: Aggregations): DisplayAggregations =
     DisplayAggregations(
       workType = displayAggregation(aggs.workType, DisplayWorkType.apply),
-      productionDate =
-        displayAggregation(aggs.productionDate, DisplayPeriod.apply),
-      genre =
+      productionDates =
+        displayAggregation(aggs.productionDates, DisplayPeriod.apply),
+      genres =
         displayAggregation[Genre[Displayable[AbstractConcept]], DisplayGenre](
           aggs.genre,
           DisplayGenre(_, false)),
       language = displayAggregation(aggs.language, DisplayLanguage.apply),
-      subject = displayAggregation[
+      subjects = displayAggregation[
         Subject[Displayable[AbstractRootConcept]],
         DisplaySubject](
         aggs.subject,

@@ -505,7 +505,7 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
 
         eventually {
           server.httpGet(
-            path = s"/$apiPrefix/works?aggregations=genre",
+            path = s"/$apiPrefix/works?aggregations=genres",
             andExpect = Status.Ok,
             withJsonBody = s"""
                               |{
@@ -513,7 +513,7 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
                               |  "results": [],
                               |  "aggregations": {
                               |  "type" : "Aggregations",
-                              |   "genre": {
+                              |   "genres": {
                               |     "type" : "Aggregation",
                               |     "buckets": [
                               |       {
@@ -665,7 +665,7 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
         insertIntoElasticsearch(indexV2, works: _*)
         eventually {
           server.httpGet(
-            path = s"/$apiPrefix/works?aggregations=production.date",
+            path = s"/$apiPrefix/works?aggregations=production.dates",
             andExpect = Status.Ok,
             withJsonBody = s"""
               |{
@@ -673,7 +673,7 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
               |  "results": [],
               |  "aggregations": {
               |    "type" : "Aggregations",
-              |    "production.date": {
+              |    "production.dates": {
               |      "type" : "Aggregation",
               |      "buckets": [
               |        {
