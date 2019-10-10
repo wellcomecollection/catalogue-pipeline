@@ -5,58 +5,36 @@ import io.circe.Decoder
 import java.time.{Instant, LocalDateTime, ZoneOffset}
 
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.models.work.internal.{
-  AbstractConcept,
-  Displayable,
-  Genre,
-  Period,
-  WorkType
-}
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.json.JsonUtil._
-
-case class AggregatedGenre(label: String)
 
 case class Aggregations(
   workType: Option[Aggregation[WorkType]] = None,
   genre: Option[Aggregation[Genre[Displayable[AbstractConcept]]]] = None,
-  productionDates: Option[Aggregation[Period]] = None)
+  productionDate: Option[Aggregation[Period]] = None,
+  language: Option[Aggregation[Language]] = None,
+  subject: Option[Aggregation[Subject[Displayable[AbstractRootConcept]]]] =
+    None,
+)
 
 object Aggregations extends Logging {
 
   def apply(jsonString: String): Option[Aggregations] =
     fromJson[EsAggregations](jsonString)
-      .collect {
-        case EsAggregations(workType, aggregatedGenres, date)
-            if List(workType, aggregatedGenres, date).flatten.nonEmpty => {
-
-          // We have to do this conversion here as we only get a label back from the Elastic response
-          // as it creating a composite aggregation, which doesn't really have the knowledge of a full
-          // Genre object
-          val genre = convert(
-            getAggregation[AggregatedGenre](aggregatedGenres),
-            (aggregateGenre: AggregatedGenre) =>
-              Genre[Displayable[AbstractConcept]](aggregateGenre.label, List()))
-
-          Some(
-            Aggregations(
-              workType = getAggregation[WorkType](workType),
-              genre = genre,
-              productionDates = getAggregation[Period](date)
-            )
+      .collect { case esAggs if esAggs.nonEmpty =>
+        Some(
+          Aggregations(
+            workType = getAggregation[WorkType](esAggs.workType),
+            genre = getAggregation[Genre[Displayable[AbstractConcept]]](
+              esAggs.genre),
+            productionDate = getAggregation[Period](esAggs.productionDate),
+            language = getAggregation[Language](esAggs.language),
+            subject = getAggregation[Subject[Displayable[AbstractRootConcept]]](
+              esAggs.subject),
           )
-        }
+        )
       }
       .getOrElse { None }
-
-  def convert[T, V](maybeAgg: Option[Aggregation[T]],
-                    c: T => V): Option[Aggregation[V]] =
-    maybeAgg.map { agg =>
-      Aggregation(
-        agg.buckets.map { aggBucket =>
-          AggregationBucket(c(aggBucket.data), aggBucket.count)
-        }
-      )
-    }
 
   def getAggregation[T](
     maybeEsAgg: Option[EsAggregation[T]]): Option[Aggregation[T]] =
@@ -114,8 +92,16 @@ case class AggregationBucket[T](data: T, count: Int)
   */
 case class EsAggregations(
   workType: Option[EsAggregation[WorkType]] = None,
-  genre: Option[EsAggregation[AggregatedGenre]] = None,
-  productionDates: Option[EsAggregation[Period]] = None,
-)
+  genre: Option[EsAggregation[Genre[Displayable[AbstractConcept]]]] = None,
+  productionDate: Option[EsAggregation[Period]] = None,
+  language: Option[EsAggregation[Language]] = None,
+  subject: Option[EsAggregation[Subject[Displayable[AbstractRootConcept]]]] =
+    None,
+) {
+  def nonEmpty: Boolean =
+    List(workType, genre, productionDate, language, subject).flatten.nonEmpty
+}
+
 case class EsAggregation[T](buckets: List[EsAggregationBucket[T]])
+
 case class EsAggregationBucket[T](key: T, doc_count: Int)
