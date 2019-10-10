@@ -219,7 +219,7 @@ class ApiV2WorksAggregationsTest extends ApiV2WorksTestBase {
       createIdentifiedWorkWith(
         language = Some(Language("ger", "German"))
       ),
-      createIdentifiedWorkWith(language=None)
+      createIdentifiedWorkWith(language = None)
     )
     withV2Api {
       case (indexV2, server: EmbeddedHttpServer) =>
@@ -264,7 +264,7 @@ class ApiV2WorksAggregationsTest extends ApiV2WorksTestBase {
         }
     }
   }
-  
+
   it("supports aggregating on subject") {
 
     val paeleoNeuroBiology = createSubjectWith(label = "paeleoNeuroBiology")
