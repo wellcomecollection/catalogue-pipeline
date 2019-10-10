@@ -24,11 +24,11 @@ object AggregationRequest {
   def apply(str: String)
     : Either[InvalidAggregationStringKeyRequest, AggregationRequest] =
     str match {
-      case "workType"        => Right(WorkType)
-      case "genre"           => Right(Genre)
-      case "production.date" => Right(ProductionDate)
-      case "subject"         => Right(Subject)
-      case "language"        => Right(Language)
-      case _                 => Left(InvalidAggregationStringKeyRequest(str))
+      case "workType"         => Right(WorkType)
+      case "genres"           => Right(Genre)
+      case "production.dates" => Right(ProductionDate)
+      case "subjects"         => Right(Subject)
+      case "language"         => Right(Language)
+      case _                  => Left(InvalidAggregationStringKeyRequest(str))
     }
 }

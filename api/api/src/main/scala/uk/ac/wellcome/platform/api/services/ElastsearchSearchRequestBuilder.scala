@@ -44,7 +44,7 @@ case class ElastsearchSearchRequestBuilder(
     case AggregationRequest.ProductionDate =>
       // We use `productionDates` here over `production.dates` to match the case classes, which we then serialise to
       // the JSON path later.
-      DateHistogramAggregation("productionDate")
+      DateHistogramAggregation("productionDates")
         .interval(DateHistogramInterval.Year)
         .field("production.dates.range.from")
         .minDocCount(1)
@@ -52,7 +52,7 @@ case class ElastsearchSearchRequestBuilder(
     // We don't split genres into concepts, as the data isn't great, and for rendering isn't useful at the moment.
     // But we've left it as a CompositeAggregation to scale when we need to.
     case AggregationRequest.Genre =>
-      CompositeAggregation("genre").sources(
+      CompositeAggregation("genres").sources(
         List(
           TermsValueSource(
             "label",
@@ -61,7 +61,7 @@ case class ElastsearchSearchRequestBuilder(
       )
 
     case AggregationRequest.Subject =>
-      CompositeAggregation("subject").sources(
+      CompositeAggregation("subjects").sources(
         List(
           TermsValueSource(
             "label",

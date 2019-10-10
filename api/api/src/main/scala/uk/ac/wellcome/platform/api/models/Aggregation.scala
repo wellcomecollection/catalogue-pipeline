@@ -11,7 +11,7 @@ import uk.ac.wellcome.json.JsonUtil._
 case class Aggregations(
   workType: Option[Aggregation[WorkType]] = None,
   genre: Option[Aggregation[Genre[Displayable[AbstractConcept]]]] = None,
-  productionDate: Option[Aggregation[Period]] = None,
+  productionDates: Option[Aggregation[Period]] = None,
   language: Option[Aggregation[Language]] = None,
   subject: Option[Aggregation[Subject[Displayable[AbstractRootConcept]]]] = None,
 )
@@ -26,12 +26,12 @@ object Aggregations extends Logging {
             Aggregations(
               workType = getAggregation[WorkType](esAggs.workType),
               genre = getAggregation[Genre[Displayable[AbstractConcept]]](
-                esAggs.genre),
-              productionDate = getAggregation[Period](esAggs.productionDate),
+                esAggs.genres),
+              productionDates = getAggregation[Period](esAggs.productionDates),
               language = getAggregation[Language](esAggs.language),
               subject =
                 getAggregation[Subject[Displayable[AbstractRootConcept]]](
-                  esAggs.subject),
+                  esAggs.subjects),
             )
           )
       }
@@ -93,14 +93,14 @@ case class AggregationBucket[T](data: T, count: Int)
   */
 case class EsAggregations(
   workType: Option[EsAggregation[WorkType]] = None,
-  genre: Option[EsAggregation[Genre[Displayable[AbstractConcept]]]] = None,
-  productionDate: Option[EsAggregation[Period]] = None,
+  genres: Option[EsAggregation[Genre[Displayable[AbstractConcept]]]] = None,
+  productionDates: Option[EsAggregation[Period]] = None,
   language: Option[EsAggregation[Language]] = None,
-  subject: Option[EsAggregation[Subject[Displayable[AbstractRootConcept]]]] =
+  subjects: Option[EsAggregation[Subject[Displayable[AbstractRootConcept]]]] =
     None,
 ) {
   def nonEmpty: Boolean =
-    List(workType, genre, productionDate, language, subject).flatten.nonEmpty
+    List(workType, genres, productionDates, language, subjects).flatten.nonEmpty
 }
 
 case class EsAggregation[T](buckets: List[EsAggregationBucket[T]])
