@@ -206,4 +206,126 @@ class ApiV2WorksAggregationsTest extends ApiV2WorksTestBase {
         }
     }
   }
+
+  it("supports aggregating on language") {
+
+    val works = List(
+      createIdentifiedWorkWith(
+        language = Some(Language("eng", "English"))
+      ),
+      createIdentifiedWorkWith(
+        language = Some(Language("ger", "German"))
+      ),
+      createIdentifiedWorkWith(
+        language = Some(Language("ger", "German"))
+      ),
+      createIdentifiedWorkWith(language=None)
+    )
+    withV2Api {
+      case (indexV2, server: EmbeddedHttpServer) =>
+        insertIntoElasticsearch(indexV2, works: _*)
+        eventually {
+          server.httpGet(
+            path = s"/$apiPrefix/works?aggregations=language",
+            andExpect = Status.Ok,
+            withJsonBody = s"""
+              |{
+              | ${resultList(apiPrefix, totalResults = 4)},
+              | "results": [],
+              | "aggregations": {
+              |   "type" : "Aggregations",
+              |   "language": {
+              |     "type" : "Aggregation",
+              |     "buckets": [
+              |       {
+              |         "data" : {
+              |           "label": "English",
+              |           "id": "eng",
+              |           "type": "Language"
+              |         },
+              |         "count" : 1,
+              |         "type" : "AggregationBucket"
+              |       },
+              |       {
+              |         "data" : {
+              |           "label": "German",
+              |           "id": "ger",
+              |           "type": "Language"
+              |         },
+              |         "count" : 2,
+              |         "type" : "AggregationBucket"
+              |       }
+              |     ]
+              |   }
+              | }
+              |}
+          """.stripMargin
+          )
+        }
+    }
+  }
+  
+  it("supports aggregating on subject") {
+
+    val paeleoNeuroBiology = createSubjectWith(label = "paeleoNeuroBiology")
+    val realAnalysis = createSubjectWith(label = "realAnalysis")
+
+    val works = List(
+      createIdentifiedWorkWith(
+        subjects = List(paeleoNeuroBiology)
+      ),
+      createIdentifiedWorkWith(
+        subjects = List(paeleoNeuroBiology)
+      ),
+      createIdentifiedWorkWith(
+        subjects = List(realAnalysis)
+      ),
+      createIdentifiedWorkWith(
+        subjects = List(paeleoNeuroBiology, realAnalysis)
+      ),
+      createIdentifiedWorkWith(subjects = Nil)
+    )
+    withV2Api {
+      case (indexV2, server: EmbeddedHttpServer) =>
+        insertIntoElasticsearch(indexV2, works: _*)
+        eventually {
+          server.httpGet(
+            path = s"/$apiPrefix/works?aggregations=subjects",
+            andExpect = Status.Ok,
+            withJsonBody = s"""
+              |{
+              | ${resultList(apiPrefix, totalResults = 5)},
+              | "results": [],
+              | "aggregations": {
+              |   "type" : "Aggregations",
+              |   "subjects": {
+              |     "type" : "Aggregation",
+              |     "buckets": [
+              |       {
+              |         "data" : {
+              |           "label": "paeleoNeuroBiology",
+              |           "concepts": [],
+              |           "type": "Subject"
+              |         },
+              |         "count" : 3,
+              |         "type" : "AggregationBucket"
+              |       },
+              |       {
+              |         "data" : {
+              |           "label": "realAnalysis",
+              |           "concepts": [],
+              |           "type": "Subject"
+              |         },
+              |         "count" : 2,
+              |         "type" : "AggregationBucket"
+              |       }
+              |     ]
+              |   }
+              | }
+              |}
+          """.stripMargin
+          )
+        }
+    }
+  }
 }

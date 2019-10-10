@@ -73,7 +73,8 @@ case class ElastsearchSearchRequestBuilder(
     case AggregationRequest.Language =>
       CompositeAggregation("language").sources(
         List(
-          TermsValueSource("id", field = Some("language.id"))
+          TermsValueSource("id", field = Some("language.id")),
+          TermsValueSource("label", field = Some("language.label.raw"))
         )
       )
   }
