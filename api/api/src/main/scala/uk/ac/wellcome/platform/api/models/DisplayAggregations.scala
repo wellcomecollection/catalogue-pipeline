@@ -3,9 +3,9 @@ package uk.ac.wellcome.platform.api.models
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.circe.generic.extras.JsonKey
 import io.swagger.annotations.{ApiModel, ApiModelProperty}
-import uk.ac.wellcome.display.models.DisplayWorkType
-import uk.ac.wellcome.display.models.v2.{DisplayGenre, DisplayPeriod}
-import uk.ac.wellcome.models.work.internal.{AbstractConcept, Displayable, Genre}
+import uk.ac.wellcome.display.models.{DisplayWorkType, DisplayLanguage}
+import uk.ac.wellcome.display.models.v2.{DisplayGenre, DisplayPeriod, DisplaySubject}
+import uk.ac.wellcome.models.work.internal._
 
 @ApiModel(
   value = "AggregationMap",
@@ -17,11 +17,17 @@ case class DisplayAggregations(
   ) workType: Option[DisplayAggregation[DisplayWorkType]],
   @ApiModelProperty(
     value = "Date aggregation on a set of results."
-  ) @JsonProperty("production.dates") @JsonKey("production.dates") productionDates: Option[
+  ) @JsonProperty("production.date") @JsonKey("production.dates") productionDate: Option[
     DisplayAggregation[DisplayPeriod]],
   @ApiModelProperty(
     value = "Genre aggregation on a set of results."
   ) genre: Option[DisplayAggregation[DisplayGenre]],
+  @ApiModelProperty(
+    value = "Subject aggregation on a set of results."
+  ) subject: Option[DisplayAggregation[DisplaySubject]],
+  @ApiModelProperty(
+    value = "Language aggregation on a set of results."
+  ) language: Option[DisplayAggregation[DisplayLanguage]],
   @JsonProperty("type") @JsonKey("type") ontologyType: String = "Aggregations"
 )
 
@@ -45,12 +51,21 @@ object DisplayAggregations {
 
   def apply(aggs: Aggregations): DisplayAggregations =
     DisplayAggregations(
-      workType = displayAggregation(aggs.workType, DisplayWorkType.apply),
-      productionDates =
-        displayAggregation(aggs.productionDates, DisplayPeriod.apply),
-      genre = displayAggregation(
-        aggs.genre,
-        (g: Genre[Displayable[AbstractConcept]]) => DisplayGenre(g, false))
+      workType =
+        displayAggregation(aggs.workType, DisplayWorkType.apply),
+      productionDate =
+        displayAggregation(aggs.productionDate, DisplayPeriod.apply),
+      genre =
+        displayAggregation[Genre[Displayable[AbstractConcept]], DisplayGenre](
+          aggs.genre,
+          DisplayGenre(_, false)),
+      language =
+        displayAggregation(aggs.language, DisplayLanguage.apply),
+      subject =
+        displayAggregation[Subject[Displayable[AbstractRootConcept]], DisplaySubject](
+          aggs.subject,
+          subject => DisplaySubject(Unidentifiable(subject), false)
+        )
     )
 
   private def displayAggregation[T, D](
