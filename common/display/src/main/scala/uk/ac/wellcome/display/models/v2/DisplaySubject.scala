@@ -10,8 +10,8 @@ import uk.ac.wellcome.models.work.internal._
   description = "A subject"
 )
 case class DisplaySubject(
-  id: Option[String],
-  identifiers: Option[List[DisplayIdentifierV2]],
+  id: Option[String] = None,
+  identifiers: Option[List[DisplayIdentifierV2]] = None,
   @ApiModelProperty(value = "A label given to a thing.") label: String,
   @ApiModelProperty(value = "Relates a subject to a list of concepts.") concepts: List[
     DisplayAbstractRootConcept],

@@ -601,7 +601,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
           insertIntoElasticsearch(indexV2, works: _*)
           eventually {
             server.httpGet(
-              path = s"/$apiPrefix/works?genre.label=horrible",
+              path = s"/$apiPrefix/works?genres.label=horrible",
               andExpect = Status.Ok,
               withJsonBody = s"""
                 |{
@@ -623,7 +623,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
           insertIntoElasticsearch(indexV2, works: _*)
           eventually {
             server.httpGet(
-              path = s"/$apiPrefix/works?genre.label=horrible+heartwarming",
+              path = s"/$apiPrefix/works?genres.label=horrible+heartwarming",
               andExpect = Status.Ok,
               withJsonBody = s"""
                 |{
@@ -687,7 +687,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
           insertIntoElasticsearch(indexV2, works: _*)
           eventually {
             server.httpGet(
-              path = s"/$apiPrefix/works?subject.label=paris",
+              path = s"/$apiPrefix/works?subjects.label=paris",
               andExpect = Status.Ok,
               withJsonBody = s"""
                 |{
@@ -709,7 +709,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
           insertIntoElasticsearch(indexV2, works: _*)
           eventually {
             server.httpGet(
-              path = s"/$apiPrefix/works?subject.label=19th+century+paris",
+              path = s"/$apiPrefix/works?subjects.label=19th+century+paris",
               andExpect = Status.Ok,
               withJsonBody = s"""
                 |{
