@@ -4,7 +4,7 @@ import com.google.inject.{Inject, Singleton}
 import com.twitter.finagle.http.Request
 import com.twitter.finatra.http.Controller
 import uk.ac.wellcome.platform.api.ContextHelper.buildContextUri
-import uk.ac.wellcome.platform.api.models.{ApiConfig, DisplayError, Error}
+import uk.ac.wellcome.platform.api.models.{ApiConfig, DisplayError, Error, ErrorVariant}
 import uk.ac.wellcome.platform.api.responses.ResultResponse
 
 /** This controller returns a 404 to any requests for an undefined path.
@@ -24,7 +24,7 @@ class MissingPathController @Inject()(apiConfig: ApiConfig) extends Controller {
 
   get("/:*") { request: Request =>
     val result = Error(
-      variant = "http-404",
+      variant = ErrorVariant.http404,
       description = Some(s"Page not found for URL ${request.uri}")
     )
 
