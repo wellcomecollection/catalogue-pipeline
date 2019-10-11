@@ -10,38 +10,39 @@ case class Error(
 }
 
 case object Error {
-  def apply(variant: String, description: Option[String]): Error = {
-    variant match {
-      case "http-400" =>
-        Error(
-          errorType = "http",
-          httpStatus = Some(400),
-          label = "Bad Request",
-          description = description
-        )
-      case "http-404" =>
-        Error(
-          errorType = "http",
-          httpStatus = Some(404),
-          label = "Not Found",
-          description = description
-        )
-      case "http-410" =>
-        Error(
-          errorType = "http",
-          httpStatus = Some(410),
-          label = "Gone",
-          description = description
-        )
-      case "http-500" =>
-        Error(
-          errorType = "http",
-          httpStatus = Some(500),
-          label = "Internal Server Error",
-          description = description
-        )
-      case unknownVariant =>
-        throw new Exception(s"$unknownVariant is not a valid error variant")
-    }
+  def apply(variant: ErrorVariant, description: Option[String]): Error =
+    Error(
+      errorType = "http",
+      httpStatus = Some(variant.status),
+      label = variant.label,
+      description = description
+    )
+}
+
+sealed trait ErrorVariant {
+  val status: Int
+  val label: String
+}
+
+object ErrorVariant {
+
+  val http400 = new ErrorVariant {
+    val status = 400
+    val label = "Bad Request"
+  }
+
+  val http404 = new ErrorVariant {
+    val status = 404
+    val label = "Not Found"
+  }
+
+  val http410 = new ErrorVariant {
+    val status = 410
+    val label = "Gone"
+  }
+
+  val http500 = new ErrorVariant {
+    val status = 500
+    val label = "Internal Server Error"
   }
 }

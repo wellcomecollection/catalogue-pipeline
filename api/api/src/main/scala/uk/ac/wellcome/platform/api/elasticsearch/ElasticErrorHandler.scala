@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.api.elasticsearch
 
 import com.sksamuel.elastic4s.ElasticError
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.platform.api.models.{DisplayError, Error}
+import uk.ac.wellcome.platform.api.models.{DisplayError, Error, ErrorVariant}
 
 object ElasticErrorHandler extends Logging {
 
@@ -56,20 +56,20 @@ object ElasticErrorHandler extends Logging {
                         elasticError: ElasticError): DisplayError = {
     warn(
       s"Sending HTTP 400 from ${this.getClass.getSimpleName} ($message; $elasticError)")
-    DisplayError(Error(variant = "http-400", description = Some(message)))
+    DisplayError(Error(ErrorVariant.http400, description = Some(message)))
   }
 
   private def notFound(message: String,
                        elasticError: ElasticError): DisplayError = {
     warn(
       s"Sending HTTP 404 from ${this.getClass.getSimpleName} ($message; $elasticError)")
-    DisplayError(Error(variant = "http-404", description = Some(message)))
+    DisplayError(Error(ErrorVariant.http404, description = Some(message)))
   }
 
   private def serverError(message: String,
                           elasticError: ElasticError): DisplayError = {
     error(
       s"Sending HTTP 500 from ${this.getClass.getSimpleName} ($message; $elasticError)")
-    DisplayError(Error(variant = "http-500", description = None))
+    DisplayError(Error(ErrorVariant.http500, description = None))
   }
 }

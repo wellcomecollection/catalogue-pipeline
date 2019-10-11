@@ -8,7 +8,12 @@ import com.twitter.finatra.json.internal.caseclass.exceptions.CaseClassMappingEx
 import com.twitter.inject.Logging
 
 import uk.ac.wellcome.platform.api.ContextHelper.buildContextUri
-import uk.ac.wellcome.platform.api.models.{ApiConfig, DisplayError, Error}
+import uk.ac.wellcome.platform.api.models.{
+  ApiConfig,
+  DisplayError,
+  Error,
+  ErrorVariant
+}
 import uk.ac.wellcome.platform.api.responses.ResultResponse
 
 @Singleton
@@ -28,7 +33,7 @@ class CaseClassMappingExceptionWrapper @Inject()(response: ResponseBuilder,
       .mkString(", ")
     error(s"Sending HTTP 400 for $errorString")
     val result = DisplayError(
-      Error(variant = "http-400", description = Some(errorString)))
+      Error(variant = ErrorVariant.http400, description = Some(errorString)))
     val errorResponse = ResultResponse(
       context = buildContextUri(apiConfig = apiConfig, version = version),
       result = result

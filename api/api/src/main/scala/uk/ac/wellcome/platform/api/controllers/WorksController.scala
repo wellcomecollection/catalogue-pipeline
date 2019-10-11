@@ -251,7 +251,7 @@ abstract class WorksController[M <: MultipleResultsRequest[W],
 
   private def respondWithGoneError(contextUri: String) = {
     val result = Error(
-      variant = "http-410",
+      variant = ErrorVariant.http410,
       description = Some("This work has been deleted")
     )
     response.gone.json(
@@ -264,7 +264,7 @@ abstract class WorksController[M <: MultipleResultsRequest[W],
 
   private def respondWithNotFoundError(request: S, contextUri: String) = {
     val result = Error(
-      variant = "http-404",
+      variant = ErrorVariant.http404,
       description = Some(s"Work not found for identifier ${request.id}")
     )
     response.notFound.json(

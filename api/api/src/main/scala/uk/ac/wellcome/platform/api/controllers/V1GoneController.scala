@@ -4,7 +4,12 @@ import com.google.inject.{Inject, Singleton}
 import com.twitter.finagle.http.Request
 import com.twitter.finatra.http.Controller
 import uk.ac.wellcome.display.models.ApiVersions
-import uk.ac.wellcome.platform.api.models.{ApiConfig, DisplayError, Error}
+import uk.ac.wellcome.platform.api.models.{
+  ApiConfig,
+  DisplayError,
+  Error,
+  ErrorVariant
+}
 import uk.ac.wellcome.platform.api.responses.ResultResponse
 import uk.ac.wellcome.platform.api.ContextHelper.buildContextUri
 
@@ -21,7 +26,7 @@ class V1GoneController @Inject()(apiConfig: ApiConfig) extends Controller {
         ResultResponse(
           context = buildContextUri(apiConfig, version),
           result = DisplayError(Error(
-            "http-410",
+            ErrorVariant.http410,
             Some("This API is now decommissioned. Please use https://api.wellcomecollection.org/catalogue/v2/works.")))
         ))
     }
