@@ -8,7 +8,12 @@ import com.twitter.finatra.json.internal.caseclass.exceptions.CaseClassMappingEx
 import com.twitter.inject.Logging
 
 import uk.ac.wellcome.platform.api.ContextHelper.buildContextUri
-import uk.ac.wellcome.platform.api.models.{ApiConfig, DisplayError, Error, ErrorVariant}
+import uk.ac.wellcome.platform.api.models.{
+  ApiConfig,
+  DisplayError,
+  Error,
+  ErrorVariant
+}
 import uk.ac.wellcome.platform.api.responses.ResultResponse
 
 @Singleton

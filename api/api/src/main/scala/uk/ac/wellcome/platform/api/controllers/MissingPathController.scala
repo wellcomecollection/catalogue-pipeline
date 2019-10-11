@@ -4,7 +4,12 @@ import com.google.inject.{Inject, Singleton}
 import com.twitter.finagle.http.Request
 import com.twitter.finatra.http.Controller
 import uk.ac.wellcome.platform.api.ContextHelper.buildContextUri
-import uk.ac.wellcome.platform.api.models.{ApiConfig, DisplayError, Error, ErrorVariant}
+import uk.ac.wellcome.platform.api.models.{
+  ApiConfig,
+  DisplayError,
+  Error,
+  ErrorVariant
+}
 import uk.ac.wellcome.platform.api.responses.ResultResponse
 
 /** This controller returns a 404 to any requests for an undefined path.
