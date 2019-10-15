@@ -24,9 +24,6 @@ object WorkQuery {
     ("genres.label", Some(8.0)),
     ("description", Some(3.0)),
     ("contributors.*", Some(2.0)),
-    ("canonicalId", None),
-    ("sourceIdentifier.value", None),
-    ("otherIdentifiers.value", None),
     ("alternativeTitles", None),
     ("physicalDescription", None),
     ("lettering", None),
@@ -36,6 +33,13 @@ object WorkQuery {
     ("dissertation", None),
     ("locationOfOriginal", None),
     ("citeAs", None),
+    // Identifiers
+    ("canonicalId", None),
+    ("sourceIdentifier.value", None),
+    ("otherIdentifiers.value", None),
+    ("items.canonicalId", None),
+    ("items.sourceIdentifier.value", None),
+    ("items.otherIdentifiers.value", None),
   )
 
   case class MSMBoostQuery(queryString: String) extends WorkQuery {
