@@ -8,16 +8,16 @@ locals {
 
   # API pins
 
-  production_api     = "romulus"
+  production_api     = "remus"
   pinned_nginx       = "760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/nginx_api-gw:bad0dbfa548874938d16496e313b05adb71268b7"
-  pinned_remus_api   = "760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/api:282e9d374ec2b17cf9c325691c293b4a46c39b5e"
+  pinned_remus_api   = "760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/api:27205655198ba788243187a88e4a3363d5954c09"
   pinned_romulus_api = "760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/api:3226a31caa172193f22b3133bec6484da2793c23"
   romulus_es_config = {
     index_v2 = "v2-20191007"
     doc_type = "work"
   }
   remus_es_config = {
-    index_v2 = "v2-20190916-raw-labels"
+    index_v2 = "v2-20191007"
     doc_type = "work"
   }
 
