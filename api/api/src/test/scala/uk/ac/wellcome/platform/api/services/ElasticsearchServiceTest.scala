@@ -223,6 +223,149 @@ class ElasticsearchServiceTest
     }
   }
 
+  describe("searches IDs") {
+    it("searches the canonicalId") {
+      withLocalWorksIndex { index =>
+        val work = createIdentifiedWorkWith(
+          canonicalId = "abc123"
+        )
+
+        insertIntoElasticsearch(index, work)
+
+        assertSearchResultsAreCorrect(
+          index = index,
+          workQuery = MSMBoostQuery("abc123"),
+          queryOptions = defaultQueryOptions,
+          expectedWorks = List(work)
+        )
+      }
+    }
+
+    it("searches the sourceIdentifiers") {
+      withLocalWorksIndex { index =>
+        val work = createIdentifiedWorkWith(
+          canonicalId = "abc123",
+          sourceIdentifier = createSourceIdentifierWith()
+        )
+        val workNotMatching = createIdentifiedWorkWith(
+          canonicalId = "123abc",
+          sourceIdentifier = createSourceIdentifierWith()
+        )
+        val query = work.sourceIdentifier.value
+
+        insertIntoElasticsearch(index, work, workNotMatching)
+
+        assertSearchResultsAreCorrect(
+          index = index,
+          workQuery = MSMBoostQuery(query),
+          queryOptions = defaultQueryOptions,
+          expectedWorks = List(work)
+        )
+      }
+    }
+
+    it("searches the otherIdentifiers") {
+      withLocalWorksIndex { index =>
+        val work = createIdentifiedWorkWith(
+          canonicalId = "abc123",
+          otherIdentifiers = List(createSourceIdentifierWith())
+        )
+        val workNotMatching = createIdentifiedWorkWith(
+          canonicalId = "123abc",
+          otherIdentifiers = List(createSourceIdentifierWith())
+        )
+        val query = work.otherIdentifiers.head.value
+
+        insertIntoElasticsearch(index, work, workNotMatching)
+
+        assertSearchResultsAreCorrect(
+          index = index,
+          workQuery = MSMBoostQuery(query),
+          queryOptions = defaultQueryOptions,
+          expectedWorks = List(work)
+        )
+      }
+    }
+
+    it("searches the items.canonicalId as keyword") {
+      withLocalWorksIndex { index =>
+        val work = createIdentifiedWorkWith(
+          canonicalId = "abc123",
+          items = List(createIdentifiedItemWith(canonicalId = "def"))
+        )
+        val workNotMatching = createIdentifiedWorkWith(
+          canonicalId = "123abc",
+          items = List(createIdentifiedItemWith(canonicalId = "def456"))
+        )
+        val query = "def"
+
+        insertIntoElasticsearch(index, work, workNotMatching)
+
+        assertSearchResultsAreCorrect(
+          index = index,
+          workQuery = MSMBoostQuery(query),
+          queryOptions = defaultQueryOptions,
+          expectedWorks = List(work)
+        )
+      }
+    }
+
+    it("searches the items.sourceIdentifiers") {
+      withLocalWorksIndex { index =>
+        val work = createIdentifiedWorkWith(
+          canonicalId = "abc123",
+          items = List(
+            createIdentifiedItemWith(sourceIdentifier =
+              createSourceIdentifierWith(value = "sourceIdentifier123")))
+        )
+        val workNotMatching = createIdentifiedWorkWith(
+          canonicalId = "123abc",
+          items = List(
+            createIdentifiedItemWith(sourceIdentifier =
+              createSourceIdentifierWith(value = "sourceIdentifier456")))
+        )
+
+        val query = "sourceIdentifier123"
+
+        insertIntoElasticsearch(index, work, workNotMatching)
+
+        assertSearchResultsAreCorrect(
+          index = index,
+          workQuery = MSMBoostQuery(query),
+          queryOptions = defaultQueryOptions,
+          expectedWorks = List(work)
+        )
+      }
+    }
+
+    it("searches the items.otherIdentifiers") {
+      withLocalWorksIndex { index =>
+        val work = createIdentifiedWorkWith(
+          canonicalId = "abc123",
+          items = List(
+            createIdentifiedItemWith(otherIdentifiers =
+              List(createSourceIdentifierWith(value = "sourceIdentifier123"))))
+        )
+        val workNotMatching = createIdentifiedWorkWith(
+          canonicalId = "def456",
+          items = List(
+            createIdentifiedItemWith(otherIdentifiers =
+              List(createSourceIdentifierWith(value = "sourceIdentifier456"))))
+        )
+        val query = "sourceIdentifier123"
+
+        insertIntoElasticsearch(index, work, workNotMatching)
+
+        assertSearchResultsAreCorrect(
+          index = index,
+          workQuery = MSMBoostQuery(query),
+          queryOptions = defaultQueryOptions,
+          expectedWorks = List(work)
+        )
+      }
+    }
+  }
+
   describe("searches using Selectable queries") {
     val noMatch =
       createIdentifiedWorkWith(title = "Before a Bengal")
