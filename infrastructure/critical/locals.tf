@@ -15,7 +15,6 @@ locals {
 
     # Data science
     "arn:aws:iam::964279923020:role/datascience_ec2",
-
     "arn:aws:iam::964279923020:root",
   ]
 }
