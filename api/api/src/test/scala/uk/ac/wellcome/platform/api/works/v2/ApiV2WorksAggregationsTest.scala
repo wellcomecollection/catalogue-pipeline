@@ -1,14 +1,12 @@
 package uk.ac.wellcome.platform.api.works.v2
 
-import com.twitter.finagle.http.Status
-import com.twitter.finatra.http.EmbeddedHttpServer
 import uk.ac.wellcome.models.work.internal._
 
 class ApiV2WorksAggregationsTest extends ApiV2WorksTestBase {
 
   it("supports fetching the workType aggregation") {
-    withV2Api {
-      case (indexV2, server: EmbeddedHttpServer) =>
+    withApi {
+      case (indexV2, routes) =>
         val work1 = createIdentifiedWorkWith(
           canonicalId = "1",
           title = "Working with wombats",
@@ -36,59 +34,55 @@ class ApiV2WorksAggregationsTest extends ApiV2WorksTestBase {
         )
         insertIntoElasticsearch(indexV2, work1, work2, work3, work4, work5)
 
-        eventually {
-          server.httpGet(
-            path = s"/$apiPrefix/works?aggregations=workType",
-            andExpect = Status.Ok,
-            withJsonBody = s"""
-              |{
-              | ${resultList(apiPrefix, totalResults = 5)},
-              | "results": [],
-              | "aggregations": {
-              | "type" : "Aggregations",
-              |  "workType": {
-              |    "type" : "Aggregation",
-              |    "buckets": [
-              |      {
-              |        "data" : {
-              |          "id" : "a",
-              |          "label" : "Books",
-              |          "type" : "WorkType"
-              |        },
-              |        "count" : 2,
-              |        "type" : "AggregationBucket"
-              |      },
-              |      {
-              |        "data" : {
-              |          "id" : "d",
-              |          "label" : "Journals",
-              |          "type" : "WorkType"
-              |        },
-              |        "count" : 1,
-              |        "type" : "AggregationBucket"
-              |      },
-              |      {
-              |        "data" : {
-              |          "id" : "k",
-              |          "label" : "Pictures",
-              |          "type" : "WorkType"
-              |        },
-              |        "count" : 2,
-              |        "type" : "AggregationBucket"
-              |      }
-              |    ]
-              |  }
-              | }
-              |}
-            """.stripMargin
-          )
+        assertJsonResponse(routes, s"/$apiPrefix/works?aggregations=workType") {
+          Status.OK -> s"""
+            {
+              ${resultList(apiPrefix, totalResults = 5)},
+              "results": [],
+              "aggregations": {
+              "type" : "Aggregations",
+               "workType": {
+                 "type" : "Aggregation",
+                 "buckets": [
+                   {
+                     "data" : {
+                       "id" : "a",
+                       "label" : "Books",
+                       "type" : "WorkType"
+                     },
+                     "count" : 2,
+                     "type" : "AggregationBucket"
+                   },
+                   {
+                     "data" : {
+                       "id" : "d",
+                       "label" : "Journals",
+                       "type" : "WorkType"
+                     },
+                     "count" : 1,
+                     "type" : "AggregationBucket"
+                   },
+                   {
+                     "data" : {
+                       "id" : "k",
+                       "label" : "Pictures",
+                       "type" : "WorkType"
+                     },
+                     "count" : 2,
+                     "type" : "AggregationBucket"
+                   }
+                 ]
+               }
+              }
+            }
+          """
         }
     }
   }
 
   it("supports fetching the genre aggregation") {
-    withV2Api {
-      case (indexV2, server: EmbeddedHttpServer) =>
+    withApi {
+      case (indexV2, routes) =>
         val concept0 = Unidentifiable(Concept("conceptLabel"))
         val concept1 = Unidentifiable(Place("placeLabel"))
         val concept2 = Identified(
@@ -112,97 +106,91 @@ class ApiV2WorksAggregationsTest extends ApiV2WorksTestBase {
 
         insertIntoElasticsearch(indexV2, work1)
 
-        eventually {
-          server.httpGet(
-            path = s"/$apiPrefix/works?aggregations=genres",
-            andExpect = Status.Ok,
-            withJsonBody = s"""
-              |{
-              | ${resultList(apiPrefix, totalResults = 1)},
-              | "results": [],
-              | "aggregations": {
-              | "type" : "Aggregations",
-              |  "genres": {
-              |    "type" : "Aggregation",
-              |    "buckets": [
-              |      {
-              |        "data" : {
-              |          "label" : "conceptLabel",
-              |          "concepts": [],
-              |          "type" : "Genre"
-              |        },
-              |        "count" : 1,
-              |        "type" : "AggregationBucket"
-              |      },
-              |             {
-              |        "data" : {
-              |          "label" : "periodLabel",
-              |          "concepts": [],
-              |          "type" : "Genre"
-              |        },
-              |        "count" : 1,
-              |        "type" : "AggregationBucket"
-              |      },
-              |             {
-              |        "data" : {
-              |          "label" : "placeLabel",
-              |          "concepts": [],
-              |          "type" : "Genre"
-              |        },
-              |        "count" : 1,
-              |        "type" : "AggregationBucket"
-              |      }
-              |    ]
-              |  }
-              | }
-              |}
-          """.stripMargin
-          )
+        assertJsonResponse(routes, s"/$apiPrefix/works?aggregations=genres") {
+          Status.OK -> s"""
+            {
+              ${resultList(apiPrefix, totalResults = 1)},
+              "results": [],
+              "aggregations": {
+              "type" : "Aggregations",
+               "genres": {
+                 "type" : "Aggregation",
+                 "buckets": [
+                   {
+                     "data" : {
+                       "label" : "conceptLabel",
+                       "concepts": [],
+                       "type" : "Genre"
+                     },
+                     "count" : 1,
+                     "type" : "AggregationBucket"
+                   },
+                          {
+                     "data" : {
+                       "label" : "periodLabel",
+                       "concepts": [],
+                       "type" : "Genre"
+                     },
+                     "count" : 1,
+                     "type" : "AggregationBucket"
+                   },
+                          {
+                     "data" : {
+                       "label" : "placeLabel",
+                       "concepts": [],
+                       "type" : "Genre"
+                     },
+                     "count" : 1,
+                     "type" : "AggregationBucket"
+                   }
+                 ]
+               }
+              }
+            }
+          """
         }
     }
   }
 
   it("supports aggregating on dates by from year") {
-    withV2Api {
-      case (indexV2, server: EmbeddedHttpServer) =>
+    withApi {
+      case (indexV2, routes) =>
         val works = List("1st May 1970", "1970", "1976", "1970-1979")
           .map(label => createDatedWork(dateLabel = label))
         insertIntoElasticsearch(indexV2, works: _*)
-        eventually {
-          server.httpGet(
-            path = s"/$apiPrefix/works?aggregations=production.dates",
-            andExpect = Status.Ok,
-            withJsonBody = s"""
-              |{
-              | ${resultList(apiPrefix, totalResults = 4)},
-              | "results": [],
-              | "aggregations": {
-              |   "type" : "Aggregations",
-              |   "production.dates": {
-              |     "type" : "Aggregation",
-              |     "buckets": [
-              |       {
-              |         "data" : {
-              |           "label": "1970",
-              |           "type": "Period"
-              |         },
-              |         "count" : 3,
-              |         "type" : "AggregationBucket"
-              |       },
-              |       {
-              |         "data" : {
-              |           "label": "1976",
-              |           "type": "Period"
-              |         },
-              |         "count" : 1,
-              |         "type" : "AggregationBucket"
-              |       }
-              |     ]
-              |   }
-              | }
-              |}
-          """.stripMargin
-          )
+        assertJsonResponse(
+          routes,
+          s"/$apiPrefix/works?aggregations=production.dates") {
+          Status.OK -> s"""
+            {
+             ${resultList(apiPrefix, totalResults = 4)},
+             "results": [],
+             "aggregations": {
+               "type" : "Aggregations",
+               "production.dates": {
+                 "type" : "Aggregation",
+                 "buckets": [
+                   {
+                     "data" : {
+                       "label": "1970",
+                       "type": "Period"
+                     },
+                     "count" : 3,
+                     "type" : "AggregationBucket"
+                   },
+                   {
+                     "data" : {
+                       "label": "1976",
+                       "type": "Period"
+                     },
+                     "count" : 1,
+                     "type" : "AggregationBucket"
+                   }
+                 ]
+               }
+             }
+            }
+          """
         }
     }
   }
@@ -221,46 +209,42 @@ class ApiV2WorksAggregationsTest extends ApiV2WorksTestBase {
       ),
       createIdentifiedWorkWith(language = None)
     )
-    withV2Api {
-      case (indexV2, server: EmbeddedHttpServer) =>
+    withApi {
+      case (indexV2, routes) =>
         insertIntoElasticsearch(indexV2, works: _*)
-        eventually {
-          server.httpGet(
-            path = s"/$apiPrefix/works?aggregations=language",
-            andExpect = Status.Ok,
-            withJsonBody = s"""
-              |{
-              | ${resultList(apiPrefix, totalResults = 4)},
-              | "results": [],
-              | "aggregations": {
-              |   "type" : "Aggregations",
-              |   "language": {
-              |     "type" : "Aggregation",
-              |     "buckets": [
-              |       {
-              |         "data" : {
-              |           "label": "English",
-              |           "id": "eng",
-              |           "type": "Language"
-              |         },
-              |         "count" : 1,
-              |         "type" : "AggregationBucket"
-              |       },
-              |       {
-              |         "data" : {
-              |           "label": "German",
-              |           "id": "ger",
-              |           "type": "Language"
-              |         },
-              |         "count" : 2,
-              |         "type" : "AggregationBucket"
-              |       }
-              |     ]
-              |   }
-              | }
-              |}
-          """.stripMargin
-          )
+        assertJsonResponse(routes, s"/$apiPrefix/works?aggregations=language") {
+          Status.OK -> s"""
+            {
+              ${resultList(apiPrefix, totalResults = 4)},
+              "results": [],
+              "aggregations": {
+                "type" : "Aggregations",
+                "language": {
+                  "type" : "Aggregation",
+                  "buckets": [
+                    {
+                      "data" : {
+                        "label": "English",
+                        "id": "eng",
+                        "type": "Language"
+                      },
+                      "count" : 1,
+                      "type" : "AggregationBucket"
+                    },
+                    {
+                      "data" : {
+                        "label": "German",
+                        "id": "ger",
+                        "type": "Language"
+                      },
+                      "count" : 2,
+                      "type" : "AggregationBucket"
+                    }
+                  ]
+                }
+              }
+            }
+          """
         }
     }
   }
@@ -285,46 +269,42 @@ class ApiV2WorksAggregationsTest extends ApiV2WorksTestBase {
       ),
       createIdentifiedWorkWith(subjects = Nil)
     )
-    withV2Api {
-      case (indexV2, server: EmbeddedHttpServer) =>
+    withApi {
+      case (indexV2, routes) =>
         insertIntoElasticsearch(indexV2, works: _*)
-        eventually {
-          server.httpGet(
-            path = s"/$apiPrefix/works?aggregations=subjects",
-            andExpect = Status.Ok,
-            withJsonBody = s"""
-              |{
-              | ${resultList(apiPrefix, totalResults = 5)},
-              | "results": [],
-              | "aggregations": {
-              |   "type" : "Aggregations",
-              |   "subjects": {
-              |     "type" : "Aggregation",
-              |     "buckets": [
-              |       {
-              |         "data" : {
-              |           "label": "paeleoNeuroBiology",
-              |           "concepts": [],
-              |           "type": "Subject"
-              |         },
-              |         "count" : 3,
-              |         "type" : "AggregationBucket"
-              |       },
-              |       {
-              |         "data" : {
-              |           "label": "realAnalysis",
-              |           "concepts": [],
-              |           "type": "Subject"
-              |         },
-              |         "count" : 2,
-              |         "type" : "AggregationBucket"
-              |       }
-              |     ]
-              |   }
-              | }
-              |}
+        assertJsonResponse(routes, s"/$apiPrefix/works?aggregations=subjects") {
+          Status.OK -> s"""
+            {
+             ${resultList(apiPrefix, totalResults = 5)},
+             "results": [],
+             "aggregations": {
+               "type" : "Aggregations",
+               "subjects": {
+                 "type" : "Aggregation",
+                 "buckets": [
+                   {
+                     "data" : {
+                       "label": "paeleoNeuroBiology",
+                       "concepts": [],
+                       "type": "Subject"
+                     },
+                     "count" : 3,
+                     "type" : "AggregationBucket"
+                   },
+                   {
+                     "data" : {
+                       "label": "realAnalysis",
+                       "concepts": [],
+                       "type": "Subject"
+                     },
+                     "count" : 2,
+                     "type" : "AggregationBucket"
+                   }
+                 ]
+               }
+             }
+            }
           """.stripMargin
-          )
         }
     }
   }

@@ -1,7 +1,5 @@
 package uk.ac.wellcome.platform.api.works.v2
 
-import com.twitter.finagle.http.Status
-import com.twitter.finatra.http.EmbeddedHttpServer
 import uk.ac.wellcome.models.work.internal._
 
 import scala.util.Random
@@ -10,8 +8,8 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
 
   describe("listing works") {
     it("ignores works with no workType") {
-      withV2Api {
-        case (indexV2, server: EmbeddedHttpServer) =>
+      withApi {
+        case (indexV2, routes) =>
           val noWorkTypeWorks = (1 to 3).map { _ =>
             createIdentifiedWorkWith(workType = None)
           }
@@ -21,31 +19,27 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
           val works = noWorkTypeWorks :+ matchingWork
           insertIntoElasticsearch(indexV2, works: _*)
 
-          eventually {
-            server.httpGet(
-              path = s"/$apiPrefix/works?workType=b",
-              andExpect = Status.Ok,
-              withJsonBody = s"""
-                   |{
-                   |  ${resultList(apiPrefix, totalResults = 1)},
-                   |  "results": [
-                   |    {
-                   |      "type": "Work",
-                   |      "id": "${matchingWork.canonicalId}",
-                   |      "title": "${matchingWork.title}",
-                   |      "workType": ${workType(matchingWork.workType.get)}
-                   |    }
-                   |  ]
-                   |}
-          """.stripMargin
-            )
+          assertJsonResponse(routes, s"/$apiPrefix/works?workType=b") {
+            Status.OK -> s"""
+              {
+                ${resultList(apiPrefix, totalResults = 1)},
+                "results": [
+                  {
+                    "type": "Work",
+                    "id": "${matchingWork.canonicalId}",
+                    "title": "${matchingWork.title}",
+                    "workType": ${workType(matchingWork.workType.get)}
+                  }
+                ]
+              }
+            """
           }
       }
     }
 
     it("filters out works with a different workType") {
-      withV2Api {
-        case (indexV2, server: EmbeddedHttpServer) =>
+      withApi {
+        case (indexV2, routes) =>
           val wrongWorkTypeWorks = (1 to 3).map { _ =>
             createIdentifiedWorkWith(
               workType = Some(WorkType(id = "m", label = "Manuscripts")))
@@ -56,31 +50,27 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
           val works = wrongWorkTypeWorks :+ matchingWork
           insertIntoElasticsearch(indexV2, works: _*)
 
-          eventually {
-            server.httpGet(
-              path = s"/$apiPrefix/works?workType=b",
-              andExpect = Status.Ok,
-              withJsonBody = s"""
-                   |{
-                   |  ${resultList(apiPrefix, totalResults = 1)},
-                   |  "results": [
-                   |    {
-                   |      "type": "Work",
-                   |      "id": "${matchingWork.canonicalId}",
-                   |      "title": "${matchingWork.title}",
-                   |      "workType": ${workType(matchingWork.workType.get)}
-                   |    }
-                   |  ]
-                   |}
-          """.stripMargin
-            )
+          assertJsonResponse(routes, s"/$apiPrefix/works?workType=b") {
+            Status.OK -> s"""
+              {
+                ${resultList(apiPrefix, totalResults = 1)},
+                "results": [
+                  {
+                    "type": "Work",
+                    "id": "${matchingWork.canonicalId}",
+                    "title": "${matchingWork.title}",
+                    "workType": ${workType(matchingWork.workType.get)}
+                  }
+                ]
+              }
+            """
           }
       }
     }
 
     it("can filter by multiple workTypes") {
-      withV2Api {
-        case (indexV2, server: EmbeddedHttpServer) =>
+      withApi {
+        case (indexV2, routes) =>
           val wrongWorkTypeWorks = (1 to 3).map { _ =>
             createIdentifiedWorkWith(
               workType = Some(WorkType(id = "m", label = "Manuscripts")))
@@ -95,39 +85,33 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
           val works = wrongWorkTypeWorks :+ matchingWork1 :+ matchingWork2
           insertIntoElasticsearch(indexV2, works: _*)
 
-          eventually {
-            server.httpGet(
-              path = s"/$apiPrefix/works?workType=a,b",
-              andExpect = Status.Ok,
-              withJsonBody = s"""
-                                |{
-                                |  ${resultList(apiPrefix, totalResults = 2)},
-                                |  "results": [
-                                |    {
-                                |      "type": "Work",
-                                |      "id": "${matchingWork1.canonicalId}",
-                                |      "title": "${matchingWork1.title}",
-                                |      "workType": ${workType(
-                                  matchingWork1.workType.get)}
-                                |    },
-                                |    {
-                                |      "type": "Work",
-                                |      "id": "${matchingWork2.canonicalId}",
-                                |      "title": "${matchingWork2.title}",
-                                |      "workType": ${workType(
-                                  matchingWork2.workType.get)}
-                                |    }
-                                |  ]
-                                |}
-          """.stripMargin
-            )
+          assertJsonResponse(routes, s"/$apiPrefix/works?workType=a,b") {
+            Status.OK -> s"""
+              {
+                ${resultList(apiPrefix, totalResults = 2)},
+                "results": [
+                  {
+                    "type": "Work",
+                    "id": "${matchingWork1.canonicalId}",
+                    "title": "${matchingWork1.title}",
+                    "workType": ${workType(matchingWork1.workType.get)}
+                  },
+                  {
+                    "type": "Work",
+                    "id": "${matchingWork2.canonicalId}",
+                    "title": "${matchingWork2.title}",
+                    "workType": ${workType(matchingWork2.workType.get)}
+                  }
+                ]
+              }
+            """
           }
       }
     }
 
     it("filters by item LocationType") {
-      withV2Api {
-        case (indexV2, server: EmbeddedHttpServer) =>
+      withApi {
+        case (indexV2, routes) =>
           val noItemWorks = createIdentifiedWorks(count = 3)
           val matchingWork1 = createIdentifiedWorkWith(
             canonicalId = "001",
@@ -151,31 +135,28 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
           val works = noItemWorks :+ matchingWork1 :+ matchingWork2 :+ wrongLocationTypeWork
           insertIntoElasticsearch(indexV2, works: _*)
 
-          eventually {
-            server.httpGet(
-              path =
-                s"/$apiPrefix/works?items.locations.locationType=iiif-image,digit&include=items",
-              andExpect = Status.Ok,
-              withJsonBody = s"""
-                                |{
-                                |  ${resultList(apiPrefix, totalResults = 2)},
-                                |  "results": [
-                                |    {
-                                |      "type": "Work",
-                                |      "id": "${matchingWork1.canonicalId}",
-                                |      "title": "${matchingWork1.title}",
-                                |      "items": [${items(matchingWork1.items)}]
-                                |    },
-                                |    {
-                                |      "type": "Work",
-                                |      "id": "${matchingWork2.canonicalId}",
-                                |      "title": "${matchingWork2.title}",
-                                |      "items": [${items(matchingWork2.items)}]
-                                |    }
-                                |  ]
-                                |}
-          """.stripMargin
-            )
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works?items.locations.locationType=iiif-image,digit&include=items") {
+            Status.OK -> s"""
+              {
+                ${resultList(apiPrefix, totalResults = 2)},
+                "results": [
+                  {
+                    "type": "Work",
+                    "id": "${matchingWork1.canonicalId}",
+                    "title": "${matchingWork1.title}",
+                    "items": [${items(matchingWork1.items)}]
+                  },
+                  {
+                    "type": "Work",
+                    "id": "${matchingWork2.canonicalId}",
+                    "title": "${matchingWork2.title}",
+                    "items": [${items(matchingWork2.items)}]
+                  }
+                ]
+              }
+            """
           }
       }
     }
@@ -190,110 +171,106 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
     )
 
     it("filters by date range") {
-      withV2Api {
-        case (indexV2, server: EmbeddedHttpServer) =>
+      withApi {
+        case (indexV2, routes) =>
           insertIntoElasticsearch(indexV2, work1, work2, work3)
-          eventually {
-            server.httpGet(
-              path =
-                s"/$apiPrefix/works?production.dates.from=1900-01-01&production.dates.to=1960-01-01",
-              andExpect = Status.Ok,
-              withJsonBody = s"""
-                                |{
-                                |  ${resultList(apiPrefix, totalResults = 1)},
-                                |  "results": [
-                                |    {
-                                |      "type": "Work",
-                                |      "id": "${work2.canonicalId}",
-                                |      "title": "${work2.title}"
-                                |    }
-                                |  ]
-                                |}
-          """.stripMargin
-            )
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works?production.dates.from=1900-01-01&production.dates.to=1960-01-01") {
+            Status.OK -> s"""
+              {
+                ${resultList(apiPrefix, totalResults = 1)},
+                "results": [
+                  {
+                    "type": "Work",
+                    "id": "${work2.canonicalId}",
+                    "title": "${work2.title}"
+                  }
+                ]
+              }
+            """
           }
       }
     }
 
     it("filters by from date") {
-      withV2Api {
-        case (indexV2, server: EmbeddedHttpServer) =>
+      withApi {
+        case (indexV2, routes) =>
           insertIntoElasticsearch(indexV2, work1, work2, work3)
-          eventually {
-            server.httpGet(
-              path = s"/$apiPrefix/works?production.dates.from=1900-01-01",
-              andExpect = Status.Ok,
-              withJsonBody = s"""
-                                |{
-                                |  ${resultList(apiPrefix, totalResults = 2)},
-                                |  "results": [
-                                |    {
-                                |      "type": "Work",
-                                |      "id": "${work2.canonicalId}",
-                                |      "title": "${work2.title}"
-                                |    },
-                                |    {
-                                |      "type": "Work",
-                                |      "id": "${work3.canonicalId}",
-                                |      "title": "${work3.title}"
-                                |    }
-                                |  ]
-                                |}
-          """.stripMargin
-            )
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works?production.dates.from=1900-01-01") {
+            Status.OK -> s"""
+              {
+                ${resultList(apiPrefix, totalResults = 2)},
+                "results": [
+                  {
+                    "type": "Work",
+                    "id": "${work2.canonicalId}",
+                    "title": "${work2.title}"
+                  },
+                  {
+                    "type": "Work",
+                    "id": "${work3.canonicalId}",
+                    "title": "${work3.title}"
+                  }
+                ]
+              }
+            """
           }
       }
     }
 
     it("filters by to date") {
-      withV2Api {
-        case (indexV2, server: EmbeddedHttpServer) =>
+      withApi {
+        case (indexV2, routes) =>
           insertIntoElasticsearch(indexV2, work1, work2, work3)
-          eventually {
-            server.httpGet(
-              path = s"/$apiPrefix/works?production.dates.to=1960-01-01",
-              andExpect = Status.Ok,
-              withJsonBody = s"""
-                                |{
-                                |  ${resultList(apiPrefix, totalResults = 2)},
-                                |  "results": [
-                                |    {
-                                |      "type": "Work",
-                                |      "id": "${work1.canonicalId}",
-                                |      "title": "${work1.title}"
-                                |    },
-                                |    {
-                                |      "type": "Work",
-                                |      "id": "${work2.canonicalId}",
-                                |      "title": "${work2.title}"
-                                |    }
-                                |  ]
-                                |}
-          """.stripMargin
-            )
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works?production.dates.to=1960-01-01") {
+            Status.OK -> s"""
+              {
+                ${resultList(apiPrefix, totalResults = 2)},
+                "results": [
+                  {
+                    "type": "Work",
+                    "id": "${work1.canonicalId}",
+                    "title": "${work1.title}"
+                  },
+                  {
+                    "type": "Work",
+                    "id": "${work2.canonicalId}",
+                    "title": "${work2.title}"
+                  }
+                ]
+              }
+            """
           }
       }
     }
 
     it("errors on invalid date") {
-      withV2Api {
-        case (indexV2, server: EmbeddedHttpServer) =>
+      withApi {
+        case (indexV2, routes) =>
           insertIntoElasticsearch(indexV2, work1, work2, work3)
-          eventually {
-            server.httpGet(
-              path =
-                s"/$apiPrefix/works?production.dates.from=1900-01-01&production.dates.to=INVALID",
-              andExpect = Status.BadRequest,
-            )
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works?production.dates.from=1900-01-01&production.dates.to=INVALID") {
+            Status.BadRequest ->
+              badRequest(
+                apiPrefix,
+                "production.dates.to: Invalid date encoding. Expected YYYY-MM-DD"
+              )
           }
       }
     }
   }
 
   describe("searching works") {
+
     it("ignores works with no workType") {
-      withV2Api {
-        case (indexV2, server: EmbeddedHttpServer) =>
+      withApi {
+        case (indexV2, routes) =>
           val noWorkTypeWorks = (1 to 3).map { _ =>
             createIdentifiedWorkWith(
               title = "Amazing aubergines",
@@ -306,31 +283,29 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
           val works = noWorkTypeWorks :+ matchingWork
           insertIntoElasticsearch(indexV2, works: _*)
 
-          eventually {
-            server.httpGet(
-              path = s"/$apiPrefix/works?query=aubergines&workType=b",
-              andExpect = Status.Ok,
-              withJsonBody = s"""
-                   |{
-                   |  ${resultList(apiPrefix, totalResults = 1)},
-                   |  "results": [
-                   |    {
-                   |      "type": "Work",
-                   |      "id": "${matchingWork.canonicalId}",
-                   |      "title": "${matchingWork.title}",
-                   |      "workType": ${workType(matchingWork.workType.get)}
-                   |    }
-                   |  ]
-                   |}
-          """.stripMargin
-            )
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works?query=aubergines&workType=b") {
+            Status.OK -> s"""
+              {
+                ${resultList(apiPrefix, totalResults = 1)},
+                "results": [
+                  {
+                    "type": "Work",
+                    "id": "${matchingWork.canonicalId}",
+                    "title": "${matchingWork.title}",
+                    "workType": ${workType(matchingWork.workType.get)}
+                  }
+                ]
+              }
+            """
           }
       }
     }
 
     it("filters out works with a different workType") {
-      withV2Api {
-        case (indexV2, server: EmbeddedHttpServer) =>
+      withApi {
+        case (indexV2, routes) =>
           val wrongWorkTypeWorks = (1 to 3).map { _ =>
             createIdentifiedWorkWith(
               title = "Bouncing bananas",
@@ -343,31 +318,29 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
           val works = wrongWorkTypeWorks :+ matchingWork
           insertIntoElasticsearch(indexV2, works: _*)
 
-          eventually {
-            server.httpGet(
-              path = s"/$apiPrefix/works?query=bananas&workType=b",
-              andExpect = Status.Ok,
-              withJsonBody = s"""
-                   |{
-                   |  ${resultList(apiPrefix, totalResults = 1)},
-                   |  "results": [
-                   |    {
-                   |      "type": "Work",
-                   |      "id": "${matchingWork.canonicalId}",
-                   |      "title": "${matchingWork.title}",
-                   |      "workType": ${workType(matchingWork.workType.get)}
-                   |    }
-                   |  ]
-                   |}
-          """.stripMargin
-            )
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works?query=bananas&workType=b") {
+            Status.OK -> s"""
+              {
+                ${resultList(apiPrefix, totalResults = 1)},
+                "results": [
+                  {
+                    "type": "Work",
+                    "id": "${matchingWork.canonicalId}",
+                    "title": "${matchingWork.title}",
+                    "workType": ${workType(matchingWork.workType.get)}
+                  }
+                ]
+              }
+            """
           }
       }
     }
 
     it("can filter by multiple workTypes") {
-      withV2Api {
-        case (indexV2, server: EmbeddedHttpServer) =>
+      withApi {
+        case (indexV2, routes) =>
           val wrongWorkTypeWorks = (1 to 3).map { _ =>
             createIdentifiedWorkWith(
               title = "Bouncing bananas",
@@ -385,39 +358,35 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
           val works = wrongWorkTypeWorks :+ matchingWork1 :+ matchingWork2
           insertIntoElasticsearch(indexV2, works: _*)
 
-          eventually {
-            server.httpGet(
-              path = s"/$apiPrefix/works?query=bananas&workType=a,b",
-              andExpect = Status.Ok,
-              withJsonBody = s"""
-                                |{
-                                |  ${resultList(apiPrefix, totalResults = 2)},
-                                |  "results": [
-                                |    {
-                                |      "type": "Work",
-                                |      "id": "${matchingWork1.canonicalId}",
-                                |      "title": "${matchingWork1.title}",
-                                |      "workType": ${workType(
-                                  matchingWork1.workType.get)}
-                                |    },
-                                |    {
-                                |      "type": "Work",
-                                |      "id": "${matchingWork2.canonicalId}",
-                                |      "title": "${matchingWork2.title}",
-                                |      "workType": ${workType(
-                                  matchingWork2.workType.get)}
-                                |    }
-                                |  ]
-                                |}
-          """.stripMargin
-            )
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works?query=bananas&workType=a,b") {
+            Status.OK -> s"""
+              {
+                ${resultList(apiPrefix, totalResults = 2)},
+                "results": [
+                  {
+                    "type": "Work",
+                    "id": "${matchingWork1.canonicalId}",
+                    "title": "${matchingWork1.title}",
+                    "workType": ${workType(matchingWork1.workType.get)}
+                  },
+                  {
+                    "type": "Work",
+                    "id": "${matchingWork2.canonicalId}",
+                    "title": "${matchingWork2.title}",
+                    "workType": ${workType(matchingWork2.workType.get)}
+                  }
+                ]
+              }
+            """
           }
       }
     }
 
     it("filters by item LocationType") {
-      withV2Api {
-        case (indexV2, server: EmbeddedHttpServer) =>
+      withApi {
+        case (indexV2, routes) =>
           val noItemWorks = createIdentifiedWorks(count = 3)
           val matchingWork1 = createIdentifiedWorkWith(
             canonicalId = "001",
@@ -443,31 +412,28 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
           val works = noItemWorks :+ matchingWork1 :+ matchingWork2 :+ wrongLocationTypeWork
           insertIntoElasticsearch(indexV2, works: _*)
 
-          eventually {
-            server.httpGet(
-              path =
-                s"/$apiPrefix/works?query=carrots&items.locations.locationType=iiif-image,digit&include=items",
-              andExpect = Status.Ok,
-              withJsonBody = s"""
-                                |{
-                                |  ${resultList(apiPrefix, totalResults = 2)},
-                                |  "results": [
-                                |    {
-                                |      "type": "Work",
-                                |      "id": "${matchingWork1.canonicalId}",
-                                |      "title": "${matchingWork1.title}",
-                                |      "items": [${items(matchingWork1.items)}]
-                                |    },
-                                |    {
-                                |      "type": "Work",
-                                |      "id": "${matchingWork2.canonicalId}",
-                                |      "title": "${matchingWork2.title}",
-                                |      "items": [${items(matchingWork2.items)}]
-                                |    }
-                                |  ]
-                                |}
-          """.stripMargin
-            )
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works?query=carrots&items.locations.locationType=iiif-image,digit&include=items") {
+            Status.OK -> s"""
+              {
+                ${resultList(apiPrefix, totalResults = 2)},
+                "results": [
+                  {
+                    "type": "Work",
+                    "id": "${matchingWork1.canonicalId}",
+                    "title": "${matchingWork1.title}",
+                    "items": [${items(matchingWork1.items)}]
+                  },
+                  {
+                    "type": "Work",
+                    "id": "${matchingWork2.canonicalId}",
+                    "title": "${matchingWork2.title}",
+                    "items": [${items(matchingWork2.items)}]
+                  }
+                ]
+              }
+            """
           }
       }
     }
@@ -489,71 +455,63 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
     val works = List(englishWork, germanWork, noLanguageWork)
 
     it("filters by language") {
-      withV2Api {
-        case (indexV2, server: EmbeddedHttpServer) =>
+      withApi {
+        case (indexV2, routes) =>
           insertIntoElasticsearch(indexV2, works: _*)
-          eventually {
-            server.httpGet(
-              path = s"/$apiPrefix/works?language=eng",
-              andExpect = Status.Ok,
-              withJsonBody = s"""
-                |{
-                |  ${resultList(apiPrefix, totalResults = 1)},
-                |  "results": [
-                |    {
-                |      "type": "Work",
-                |      "id": "${englishWork.canonicalId}",
-                |      "title": "${englishWork.title}",
-                |      "language": {
-                |        "id": "eng",
-                |        "label": "English",
-                |        "type": "Language"
-                |      }
-                |    }
-                |  ]
-                |}
-          """.stripMargin
-            )
+          assertJsonResponse(routes, s"/$apiPrefix/works?language=eng") {
+            Status.OK -> s"""
+              {
+                ${resultList(apiPrefix, totalResults = 1)},
+                "results": [
+                  {
+                    "type": "Work",
+                    "id": "${englishWork.canonicalId}",
+                    "title": "${englishWork.title}",
+                    "language": {
+                      "id": "eng",
+                      "label": "English",
+                      "type": "Language"
+                    }
+                  }
+                ]
+              }
+            """
           }
       }
     }
 
     it("filters by multiple comma seperated languages") {
-      withV2Api {
-        case (indexV2, server: EmbeddedHttpServer) =>
+      withApi {
+        case (indexV2, routes) =>
           insertIntoElasticsearch(indexV2, works: _*)
-          eventually {
-            server.httpGet(
-              path = s"/$apiPrefix/works?language=eng,ger",
-              andExpect = Status.Ok,
-              withJsonBody = s"""
-                |{
-                |  ${resultList(apiPrefix, totalResults = 2)},
-                |  "results": [
-                |    {
-                |      "type": "Work",
-                |      "id": "${englishWork.canonicalId}",
-                |      "title": "${englishWork.title}",
-                |      "language": {
-                |        "id": "eng",
-                |        "label": "English",
-                |        "type": "Language"
-                |      }
-                |    },
-                |    {
-                |      "type": "Work",
-                |      "id": "${germanWork.canonicalId}",
-                |      "title": "${germanWork.title}",
-                |      "language": {
-                |        "id": "ger",
-                |        "label": "German",
-                |        "type": "Language"
-                |      }
-                |    }
-                |  ]
-                |}
-          """.stripMargin
-            )
+          assertJsonResponse(routes, s"/$apiPrefix/works?language=eng,ger") {
+            Status.OK -> s"""
+              {
+                ${resultList(apiPrefix, totalResults = 2)},
+                "results": [
+                  {
+                    "type": "Work",
+                    "id": "${englishWork.canonicalId}",
+                    "title": "${englishWork.title}",
+                    "language": {
+                      "id": "eng",
+                      "label": "English",
+                      "type": "Language"
+                    }
+                  },
+                  {
+                    "type": "Work",
+                    "id": "${germanWork.canonicalId}",
+                    "title": "${germanWork.title}",
+                    "language": {
+                      "id": "ger",
+                      "label": "German",
+                      "type": "Language"
+                    }
+                  }
+                ]
+              }
+            """
           }
       }
     }
@@ -596,46 +554,40 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
       """.stripMargin
 
     it("filters by genre with partial match") {
-      withV2Api {
-        case (indexV2, server: EmbeddedHttpServer) =>
+      withApi {
+        case (indexV2, routes) =>
           insertIntoElasticsearch(indexV2, works: _*)
-          eventually {
-            server.httpGet(
-              path = s"/$apiPrefix/works?genres.label=horrible",
-              andExpect = Status.Ok,
-              withJsonBody = s"""
-                |{
-                |  ${resultList(apiPrefix, totalResults = 2)},
-                |  "results": [
-                |    ${workResponse(horrorWork)},
-                |    ${workResponse(romcomHorrorWork)}
-                |  ]
-                |}
-          """.stripMargin
-            )
+          assertJsonResponse(routes, s"/$apiPrefix/works?genres.label=horrible") {
+            Status.OK -> s"""
+              {
+                ${resultList(apiPrefix, totalResults = 2)},
+                "results": [
+                  ${workResponse(horrorWork)},
+                  ${workResponse(romcomHorrorWork)}
+                ]
+              }
+            """
           }
       }
     }
 
     it("filters by genre using multiple terms") {
-      withV2Api {
-        case (indexV2, server: EmbeddedHttpServer) =>
+      withApi {
+        case (indexV2, routes) =>
           insertIntoElasticsearch(indexV2, works: _*)
-          eventually {
-            server.httpGet(
-              path = s"/$apiPrefix/works?genres.label=horrible+heartwarming",
-              andExpect = Status.Ok,
-              withJsonBody = s"""
-                |{
-                |  ${resultList(apiPrefix, totalResults = 3)},
-                |  "results": [
-                |    ${workResponse(horrorWork)},
-                |    ${workResponse(romcomWork)},
-                |    ${workResponse(romcomHorrorWork)}
-                |  ]
-                |}
-          """.stripMargin
-            )
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works?genres.label=horrible+heartwarming") {
+            Status.OK -> s"""
+              {
+                ${resultList(apiPrefix, totalResults = 3)},
+                "results": [
+                  ${workResponse(horrorWork)},
+                  ${workResponse(romcomWork)},
+                  ${workResponse(romcomHorrorWork)}
+                ]
+              }
+            """
           }
       }
     }
@@ -682,46 +634,40 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
       """.stripMargin
 
     it("filters by genre") {
-      withV2Api {
-        case (indexV2, server: EmbeddedHttpServer) =>
+      withApi {
+        case (indexV2, routes) =>
           insertIntoElasticsearch(indexV2, works: _*)
-          eventually {
-            server.httpGet(
-              path = s"/$apiPrefix/works?subjects.label=paris",
-              andExpect = Status.Ok,
-              withJsonBody = s"""
-                |{
-                |  ${resultList(apiPrefix, totalResults = 2)},
-                |  "results": [
-                |    ${workResponse(parisWork)},
-                |    ${workResponse(nineteenthCenturyParisWork)}
-                |  ]
-                |}
-          """.stripMargin
-            )
+          assertJsonResponse(routes, s"/$apiPrefix/works?subjects.label=paris") {
+            Status.OK -> s"""
+              {
+                ${resultList(apiPrefix, totalResults = 2)},
+                "results": [
+                  ${workResponse(parisWork)},
+                  ${workResponse(nineteenthCenturyParisWork)}
+                ]
+              }
+            """
           }
       }
     }
 
     it("filters by genre using multiple terms") {
-      withV2Api {
-        case (indexV2, server: EmbeddedHttpServer) =>
+      withApi {
+        case (indexV2, routes) =>
           insertIntoElasticsearch(indexV2, works: _*)
-          eventually {
-            server.httpGet(
-              path = s"/$apiPrefix/works?subjects.label=19th+century+paris",
-              andExpect = Status.Ok,
-              withJsonBody = s"""
-                |{
-                |  ${resultList(apiPrefix, totalResults = 3)},
-                |  "results": [
-                |    ${workResponse(nineteenthCenturyWork)},
-                |    ${workResponse(parisWork)},
-                |    ${workResponse(nineteenthCenturyParisWork)}
-                |  ]
-                |}
-          """.stripMargin
-            )
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works?subjects.label=19th+century+paris") {
+            Status.OK -> s"""
+              {
+                ${resultList(apiPrefix, totalResults = 3)},
+                "results": [
+                  ${workResponse(nineteenthCenturyWork)},
+                  ${workResponse(parisWork)},
+                  ${workResponse(nineteenthCenturyParisWork)}
+                ]
+              }
+            """
           }
       }
     }

@@ -1,55 +1,34 @@
 package uk.ac.wellcome.platform.api.works.v2
 
-import com.twitter.finagle.http.Status
-import com.twitter.finatra.http.EmbeddedHttpServer
-
 class ApiV2RedirectsTest extends ApiV2WorksTestBase {
+
+  val redirectedWork = createIdentifiedRedirectedWork
+  val redirectId = redirectedWork.redirect.canonicalId
+
   it("returns a TemporaryRedirect if looking up a redirected work") {
-    val redirectedWork = createIdentifiedRedirectedWork
-
-    withV2Api {
-      case (indexV2, server: EmbeddedHttpServer) =>
+    withApi {
+      case (indexV2, routes) => {
         insertIntoElasticsearch(indexV2, redirectedWork)
-        server.httpGet(
-          path = s"/$apiPrefix/works/${redirectedWork.canonicalId}",
-          andExpect = Status.Found,
-          withBody = "",
-          withLocation =
-            s"/$apiPrefix/works/${redirectedWork.redirect.canonicalId}"
-        )
-    }
-  }
-
-  it("uses the configured host/scheme for the Location header") {
-    val redirectedWork = createIdentifiedRedirectedWork
-
-    withV2Api {
-      case (indexV2, server: EmbeddedHttpServer) =>
-        insertIntoElasticsearch(indexV2, redirectedWork)
-        val resp = server.httpGet(
-          path = s"/$apiPrefix/works/${redirectedWork.canonicalId}",
-          andExpect = Status.Found
-        )
-
-        resp.headerMap.getOrNull("Location") should startWith(
-          s"$apiScheme://$apiHost")
+        val path = s"/$apiPrefix/works/${redirectedWork.canonicalId}"
+        assertRedirectResponse(routes, path) {
+          Status.Found ->
+            s"$apiScheme://$apiHost/$apiPrefix/works/${redirectId}"
+        }
+      }
     }
   }
 
   it("preserves query parameters on a 302 Redirect") {
-    val redirectedWork = createIdentifiedRedirectedWork
-
-    withV2Api {
-      case (indexV2, server: EmbeddedHttpServer) =>
+    withApi {
+      case (indexV2, routes) => {
         insertIntoElasticsearch(indexV2, redirectedWork)
-        server.httpGet(
-          path =
-            s"/$apiPrefix/works/${redirectedWork.canonicalId}?include=identifiers",
-          andExpect = Status.Found,
-          withBody = "",
-          withLocation =
-            s"/$apiPrefix/works/${redirectedWork.redirect.canonicalId}?include=identifiers"
-        )
+        val path =
+          s"/$apiPrefix/works/${redirectedWork.canonicalId}?include=identifiers"
+        assertRedirectResponse(routes, path) {
+          Status.Found ->
+            s"$apiScheme://$apiHost/$apiPrefix/works/${redirectId}?include=identifiers"
+        }
+      }
     }
   }
 }

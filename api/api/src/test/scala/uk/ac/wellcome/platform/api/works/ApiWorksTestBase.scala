@@ -1,12 +1,8 @@
 package uk.ac.wellcome.platform.api.works
-
 import com.sksamuel.elastic4s.{Index, Indexable}
 import com.sksamuel.elastic4s.ElasticDsl._
-import com.twitter.finatra.http.EmbeddedHttpServer
-import org.scalatest.FunSpec
+
 import uk.ac.wellcome.display.models.ApiVersions
-import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
-import uk.ac.wellcome.fixtures._
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.generators.{
@@ -15,13 +11,11 @@ import uk.ac.wellcome.models.work.generators.{
   WorksGenerators
 }
 import uk.ac.wellcome.models.work.internal.IdentifiedWork
-import uk.ac.wellcome.platform.api.Server
-
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.ac.wellcome.platform.api.fixtures.ApiFixture
+import uk.ac.wellcome.fixtures._
 
 trait ApiWorksTestBase
-    extends FunSpec
-    with ElasticsearchFixtures
+    extends ApiFixture
     with WorksGenerators
     with GenreGenerators
     with SubjectGenerators {
@@ -31,51 +25,13 @@ trait ApiWorksTestBase
       toJson(t).get
   }
 
-  val apiScheme: String = "https"
-  val apiHost: String = "api-testing.local"
-
-  def withServer[R](indexV1: Index, indexV2: Index)(
-    testWith: TestWith[EmbeddedHttpServer, R]): R = {
-
-    val server: EmbeddedHttpServer = new EmbeddedHttpServer(
-      new Server,
-      flags = displayEsLocalFlags(
-        indexV1 = indexV1,
-        indexV2 = indexV2
-      ) ++ Map(
-        "api.scheme" -> apiScheme,
-        "api.host" -> apiHost
-      )
-    )
-
-    server.start()
-
-    try {
-      testWith(server)
-    } finally {
-      server.close()
-    }
-  }
-
-  val apiName = "catalogue/"
-
   def getApiPrefix(
     apiVersion: ApiVersions.Value = ApiVersions.default): String =
-    apiName + apiVersion
+    apiName + "/" + apiVersion
 
-  def withApi[R](testWith: TestWith[(Index, Index, EmbeddedHttpServer), R]): R =
-    withLocalWorksIndex { indexV1 =>
-      withLocalWorksIndex { indexV2 =>
-        withServer(indexV1, indexV2) { server =>
-          testWith((indexV1, indexV2, server))
-        }
-      }
-    }
-
-  def withHttpServer[R](testWith: TestWith[EmbeddedHttpServer, R]): R =
-    withServer(Index("index-v1"), Index("index-v2")) { server =>
-      testWith(server)
-    }
+  val apiScheme = "https"
+  val apiHost = "api-testing.local"
+  val apiName = "catalogue"
 
   def contextUrl(apiPrefix: String): String =
     s"$apiScheme://$apiHost/$apiPrefix/context.json"
