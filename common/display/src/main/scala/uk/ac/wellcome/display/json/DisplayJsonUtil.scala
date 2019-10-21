@@ -17,7 +17,7 @@ import uk.ac.wellcome.display.models.v2._
   *
   */
 trait DisplayJsonUtil extends AutoDerivation {
-  private val printer = Printer.noSpaces.copy(
+  val printer = Printer.noSpaces.copy(
     dropNullValues = true
   )
 

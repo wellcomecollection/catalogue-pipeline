@@ -2,10 +2,10 @@ package uk.ac.wellcome.display.models
 
 import io.circe.generic.extras.semiauto._
 import io.circe.{Decoder, Encoder}
-import uk.ac.wellcome.display.json.DisplayJsonUtil
+import uk.ac.wellcome.display.json.DisplayJsonUtil._
 import uk.ac.wellcome.display.models.v2._
 
-object Implicits extends DisplayJsonUtil {
+object Implicits {
 
   // Cache these here to improve compilation times (otherwise they are
   // re-derived every time they are required).

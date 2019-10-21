@@ -1,29 +1,29 @@
 package uk.ac.wellcome.display.models.v2
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import io.circe.generic.extras.JsonKey
-import io.swagger.annotations.{ApiModel, ApiModelProperty}
+import io.swagger.v3.oas.annotations.media.Schema
 import uk.ac.wellcome.models.work.internal._
 
-@ApiModel(
-  value = "Item",
+@Schema(
+  name = "Item",
   description = "An item is a manifestation of a Work."
 )
 case class DisplayItemV2(
-  @ApiModelProperty(
-    dataType = "String",
+  @Schema(
+    `type` = "String",
     readOnly = true,
-    value = "The canonical identifier given to a thing.") id: Option[String],
-  @ApiModelProperty(
-    dataType = "List[uk.ac.wellcome.display.models.v2.DisplayIdentifierV2]",
-    value =
+    description = "The canonical identifier given to a thing.") id: Option[
+    String],
+  @Schema(
+    `type` = "List[uk.ac.wellcome.display.models.v2.DisplayIdentifierV2]",
+    description =
       "Relates the item to a unique system-generated identifier that governs interaction between systems and is regarded as canonical within the Wellcome data ecosystem."
   ) identifiers: Option[List[DisplayIdentifierV2]] = None,
-  @ApiModelProperty(
-    value = "List of locations that provide access to the item"
+  @Schema(
+    description = "List of locations that provide access to the item"
   ) locations: List[DisplayLocationV2] = List(),
-  @ApiModelProperty(readOnly = true, value = "A type of thing")
-  @JsonProperty("type") @JsonKey("type") ontologyType: String = "Item"
+  @Schema(readOnly = true, description = "A type of thing")
+  @JsonKey("type") ontologyType: String = "Item"
 )
 
 object DisplayItemV2 {

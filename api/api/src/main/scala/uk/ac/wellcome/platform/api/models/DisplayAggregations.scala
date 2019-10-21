@@ -1,8 +1,10 @@
 package uk.ac.wellcome.platform.api.models
 
-import com.fasterxml.jackson.annotation.JsonProperty
+import io.circe.generic.extras.semiauto._
+import io.circe.Encoder
 import io.circe.generic.extras.JsonKey
-import io.swagger.annotations.{ApiModel, ApiModelProperty}
+import io.swagger.v3.oas.annotations.media.Schema
+
 import uk.ac.wellcome.display.models.{DisplayLanguage, DisplayWorkType}
 import uk.ac.wellcome.display.models.v2.{
   DisplayGenre,
@@ -10,48 +12,52 @@ import uk.ac.wellcome.display.models.v2.{
   DisplaySubject
 }
 import uk.ac.wellcome.models.work.internal._
+import uk.ac.wellcome.display.models.Implicits._
+import uk.ac.wellcome.display.json.DisplayJsonUtil._
 
-@ApiModel(
-  value = "AggregationMap",
+@Schema(
+  name = "AggregationMap",
   description = "A map of the different aggregations on the ResultList."
 )
 case class DisplayAggregations(
-  @ApiModelProperty(
-    value = "WorkType aggregation on a set of results."
+  @Schema(
+    description = "WorkType aggregation on a set of results."
   ) workType: Option[DisplayAggregation[DisplayWorkType]],
-  @ApiModelProperty(
-    value = "Date aggregation on a set of results."
-  ) @JsonProperty("production.dates") @JsonKey("production.dates") productionDates: Option[
+  @Schema(
+    description = "Date aggregation on a set of results."
+  ) @JsonKey("production.dates") productionDates: Option[
     DisplayAggregation[DisplayPeriod]],
-  @ApiModelProperty(
-    value = "Genre aggregation on a set of results."
+  @Schema(
+    description = "Genre aggregation on a set of results."
   ) genres: Option[DisplayAggregation[DisplayGenre]],
-  @ApiModelProperty(
-    value = "Subject aggregation on a set of results."
+  @Schema(
+    description = "Subject aggregation on a set of results."
   ) subjects: Option[DisplayAggregation[DisplaySubject]],
-  @ApiModelProperty(
-    value = "Language aggregation on a set of results."
+  @Schema(
+    description = "Language aggregation on a set of results."
   ) language: Option[DisplayAggregation[DisplayLanguage]],
-  @JsonProperty("type") @JsonKey("type") ontologyType: String = "Aggregations"
+  @JsonKey("type") ontologyType: String = "Aggregations"
 )
 
 case class DisplayAggregation[T](
-  @ApiModelProperty(
-    value = "An aggregation on a set of results"
-  ) buckets: List[DisplayAggregationBucket[T]],
-  @JsonProperty("type") @JsonKey("type") ontologyType: String = "Aggregation")
+  @Schema(description = "An aggregation on a set of results") buckets: List[
+    DisplayAggregationBucket[T]],
+  @JsonKey("type") ontologyType: String = "Aggregation"
+)
 
 case class DisplayAggregationBucket[T](
-  @ApiModelProperty(
-    value = "The data that this aggregation is of."
+  @Schema(
+    description = "The data that this aggregation is of."
   ) data: T,
-  @ApiModelProperty(
-    value = "The count of how often this data occurs in this set of results."
+  @Schema(
+    description =
+      "The count of how often this data occurs in this set of results."
   ) count: Int,
-  @JsonProperty("type") @JsonKey("type") ontologyType: String =
-    "AggregationBucket")
+  @JsonKey("type") ontologyType: String = "AggregationBucket")
 
 object DisplayAggregations {
+
+  implicit def encoder: Encoder[DisplayAggregations] = deriveEncoder
 
   def apply(aggs: Aggregations): DisplayAggregations =
     DisplayAggregations(
