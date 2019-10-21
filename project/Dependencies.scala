@@ -177,7 +177,8 @@ object ExternalDependencies {
     "io.swagger.core.v3" % "swagger-models" % versions.swagger,
     "io.swagger.core.v3" % "swagger-integration" % versions.swagger,
     "io.swagger.core.v3" % "swagger-jaxrs2" % versions.swagger,
-    "javax.ws.rs" % "javax.ws.rs-api" % "2.0.1"
+    "javax.ws.rs" % "javax.ws.rs-api" % "2.0.1",
+    "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.8.8",
   )
 
   val parseDependencies = Seq(

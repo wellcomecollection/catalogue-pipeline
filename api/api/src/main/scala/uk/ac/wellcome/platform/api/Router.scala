@@ -19,6 +19,7 @@ import io.circe.Printer
 import uk.ac.wellcome.platform.api.services.{ElasticsearchService, WorksService}
 import uk.ac.wellcome.elasticsearch.DisplayElasticConfig
 import uk.ac.wellcome.platform.api.elasticsearch.ElasticErrorHandler
+import uk.ac.wellcome.platform.api.swagger.SwaggerDocs
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.display.models._
