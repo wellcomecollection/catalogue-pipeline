@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.snapshot_generator.flow
 import akka.NotUsed
 import akka.stream.scaladsl.{Compression, Flow}
 import akka.util.ByteString
-import com.twitter.inject.Logging
+import grizzled.slf4j.Logging
 
 /** Converts instances of String into gzip-compressed ByteString.
   *
