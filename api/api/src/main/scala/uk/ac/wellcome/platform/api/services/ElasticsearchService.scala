@@ -1,6 +1,5 @@
 package uk.ac.wellcome.platform.api.services
 
-import com.google.inject.{Inject, Singleton}
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.get.GetResponse
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
@@ -24,8 +23,7 @@ case class ElasticsearchQueryOptions(filters: List[WorkFilter],
                                      sortBy: List[SortRequest],
                                      sortOrder: SortingOrder)
 
-@Singleton
-class ElasticsearchService @Inject()(elasticClient: ElasticClient)(
+class ElasticsearchService(elasticClient: ElasticClient)(
   implicit ec: ExecutionContext
 ) extends Logging {
 

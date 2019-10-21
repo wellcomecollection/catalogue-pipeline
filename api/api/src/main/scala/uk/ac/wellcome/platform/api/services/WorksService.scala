@@ -3,7 +3,6 @@ package uk.ac.wellcome.platform.api.services
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 import io.circe.Decoder
-import com.google.inject.{Inject, Singleton}
 import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.ElasticError
 import com.sksamuel.elastic4s.requests.get.GetResponse
@@ -32,8 +31,7 @@ case class WorksSearchOptions(
   sortOrder: SortingOrder,
 )
 
-@Singleton
-class WorksService @Inject()(searchService: ElasticsearchService)(
+class WorksService(searchService: ElasticsearchService)(
   implicit ec: ExecutionContext) {
 
   def findWorkById(canonicalId: String)(
@@ -47,6 +45,17 @@ class WorksService @Inject()(searchService: ElasticsearchService)(
           else None
         }
       }
+
+  def listOrSearchWorks(
+    index: Index,
+    searchOptions: WorksSearchOptions,
+    query: Option[WorkQuery]): Future[Either[ElasticError, ResultList]] =
+    query match {
+      case Some(query) =>
+        searchWorks(query)(index, searchOptions)
+      case None =>
+        listWorks(index, searchOptions)
+    }
 
   def listWorks(index: Index, worksSearchOptions: WorksSearchOptions)
     : Future[Either[ElasticError, ResultList]] =
