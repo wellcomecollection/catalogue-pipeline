@@ -4,6 +4,7 @@
   "dependencyIds" : [
     "internal_model",
     "display",
-    "elasticsearch"
+    "elasticsearch",
+    "elasticsearch_typesafe"
   ]
 }
