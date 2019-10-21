@@ -40,9 +40,9 @@ object Main extends WellcomeTypesafeApp {
         scheme = config.getOrElse[String]("api.scheme")(default = "https"),
         defaultPageSize = config.getOrElse[Int]("api.pageSize")(default = 10),
         pathPrefix =
-          s"${config.getOrElse[String]("api.apiName")(default = "api")}/",
+          s"${config.getOrElse[String]("api.apiName")(default = "catalogue")}",
         contextSuffix = config.getOrElse[String]("api.context.suffix")(
-          default = "/context.json"),
+          default = "context.json"),
       )
 
     val router = new Router(elasticClient, elasticConfig, apiConfig)
