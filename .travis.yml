@@ -23,6 +23,7 @@ jobs:
     - env: SBT_PROJECT=recorder
     - env: SBT_PROJECT=transformer_miro
     - env: SBT_PROJECT=transformer_sierra
+    - env: SBT_PROJECT=transformer_mets
 
     - env: SBT_PROJECT=sierra_reader
     - env: SBT_PROJECT=sierra_bib_merger
@@ -61,6 +62,7 @@ cache:
     - pipeline/recorder/target
     - pipeline/transformer/transformer_miro/target
     - pipeline/transformer/transformer_sierra/target
+    - pipeline/transformer/transformer_mets/target
 
     - reindexer/reindex_worker/target
 
