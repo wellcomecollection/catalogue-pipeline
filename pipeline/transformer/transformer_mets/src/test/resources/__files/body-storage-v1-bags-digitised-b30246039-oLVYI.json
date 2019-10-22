@@ -1,1 +1,170 @@
-{"@context":"https://api.wellcomecollection.org/context.json","id":"digitised/b30246039","space":{"id":"digitised","type":"Space"},"info":{"externalIdentifier":"b30246039","payloadOxum":"4258698.13","baggingDate":"2019-08-20","sourceOrganization":"Intranda GmbH","externalDescription":"[Report 1942] /","type":"BagInfo"},"manifest":{"checksumAlgorithm":"SHA-256","files":[{"checksum":"96731d48e90eac8ab65d15d575c6fd4b2e636732ddd49eee90e095dcc2d9c847","name":"data/b30246039.xml","path":"v1/data/b30246039.xml","size":22506,"type":"File"},{"checksum":"a22de2f236bc36a0d11602e42defe3c2eb6388efa86a5e00fea8b498c9b92208","name":"data/alto/b30246039_0001.xml","path":"v1/data/alto/b30246039_0001.xml","size":80678,"type":"File"},{"checksum":"375112f0a11886a34d1ed9ee271284db2118da600931c429a6e22476b682c164","name":"data/alto/b30246039_0002.xml","path":"v1/data/alto/b30246039_0002.xml","size":68972,"type":"File"},{"checksum":"4c6a5dd7b8d72a81e0fbe1cdfef273f513996c26fa0eb1cb1d582267f5f89fae","name":"data/alto/b30246039_0003.xml","path":"v1/data/alto/b30246039_0003.xml","size":25210,"type":"File"},{"checksum":"f8e39f6cc2107f20fd0b8faf5a722232e3904a59dd456422c2e004351af51ffe","name":"data/alto/b30246039_0004.xml","path":"v1/data/alto/b30246039_0004.xml","size":85368,"type":"File"},{"checksum":"af77673411d557a22f46ad46498c45e3c382d8ec33de1b45685f4dc54eb28198","name":"data/alto/b30246039_0005.xml","path":"v1/data/alto/b30246039_0005.xml","size":49723,"type":"File"},{"checksum":"ab580f5b7f1fda5a7eb5b6d7645075fa91fbca1260d05915a9b0e284c54d2520","name":"data/alto/b30246039_0006.xml","path":"v1/data/alto/b30246039_0006.xml","size":100297,"type":"File"},{"checksum":"3e3b647866146569acc9c88ce3a4ab61bddf93406980a67463434cf037db1757","name":"data/objects/b30246039_0001.jp2","path":"v1/data/objects/b30246039_0001.jp2","size":792017,"type":"File"},{"checksum":"946223e241f62fc30b7ed179e4fb92a49837df5b4665c6d4bbe6d0ed28a69ca8","name":"data/objects/b30246039_0002.jp2","path":"v1/data/objects/b30246039_0002.jp2","size":706557,"type":"File"},{"checksum":"cc58efa2e57c12d98091994a59c995635c3ed80b9acec6822bcab6e1ae30c20c","name":"data/objects/b30246039_0003.jp2","path":"v1/data/objects/b30246039_0003.jp2","size":307447,"type":"File"},{"checksum":"592ef33cfca9da88279af00a10f1a4823328ee57c7a63e19be1c5dff742bcab8","name":"data/objects/b30246039_0004.jp2","path":"v1/data/objects/b30246039_0004.jp2","size":571399,"type":"File"},{"checksum":"4f5eb97d0a35ca6c50bc1b3f24ae8b4481934e18bd41cb579bedfccf5e331a79","name":"data/objects/b30246039_0005.jp2","path":"v1/data/objects/b30246039_0005.jp2","size":515446,"type":"File"},{"checksum":"6f14bcd8543130c6ec0caad79c35b73d96db6d181e3395dc7a3dc12dfaaf68ea","name":"data/objects/b30246039_0006.jp2","path":"v1/data/objects/b30246039_0006.jp2","size":933078,"type":"File"}],"type":"BagManifest"},"tagManifest":{"checksumAlgorithm":"SHA-256","files":[{"checksum":"9a76c1b13c30ccb3cb75ffd336d472cc3a28455deb5da0a13f0df85207d272a4","name":"manifest-sha512.txt","path":"v1/manifest-sha512.txt","size":2075,"type":"File"},{"checksum":"d28dce46370d6a8f96bd7e349d33e3b0e6e0e4f764cba0b9f37b44addf7c3065","name":"bag-info.txt","path":"v1/bag-info.txt","size":278,"type":"File"},{"checksum":"e91f941be5973ff71f1dccbdd1a32d598881893a7f21be516aca743da38b1689","name":"bagit.txt","path":"v1/bagit.txt","size":55,"type":"File"},{"checksum":"c51ded7632d2aee1cf52521c0236ed81f123e60da7eaf44d0c8e8dbe2748e82e","name":"manifest-sha256.txt","path":"v1/manifest-sha256.txt","size":1243,"type":"File"}],"type":"BagManifest"},"location":{"provider":{"id":"aws-s3-ia","type":"Provider"},"bucket":"wellcomecollection-storage","path":"digitised/b30246039","type":"Location"},"replicaLocations":[{"provider":{"id":"aws-s3-glacier","type":"Provider"},"bucket":"wellcomecollection-storage-replica-ireland","path":"digitised/b30246039","type":"Location"}],"createdDate":"2019-09-14T02:25:40.532998Z","version":"v1","type":"Bag"}
+{
+  "@context": "https://api.wellcomecollection.org/context.json",
+  "id": "digitised/b30246039",
+  "space": {
+    "id": "digitised",
+    "type": "Space"
+  },
+  "info": {
+    "externalIdentifier": "b30246039",
+    "payloadOxum": "4258698.13",
+    "baggingDate": "2019-08-20",
+    "sourceOrganization": "Intranda GmbH",
+    "externalDescription": "[Report 1942] /",
+    "type": "BagInfo"
+  },
+  "manifest": {
+    "checksumAlgorithm": "SHA-256",
+    "files": [
+      {
+        "checksum": "96731d48e90eac8ab65d15d575c6fd4b2e636732ddd49eee90e095dcc2d9c847",
+        "name": "data/b30246039.xml",
+        "path": "v1/data/b30246039.xml",
+        "size": 22506,
+        "type": "File"
+      },
+      {
+        "checksum": "a22de2f236bc36a0d11602e42defe3c2eb6388efa86a5e00fea8b498c9b92208",
+        "name": "data/alto/b30246039_0001.xml",
+        "path": "v1/data/alto/b30246039_0001.xml",
+        "size": 80678,
+        "type": "File"
+      },
+      {
+        "checksum": "375112f0a11886a34d1ed9ee271284db2118da600931c429a6e22476b682c164",
+        "name": "data/alto/b30246039_0002.xml",
+        "path": "v1/data/alto/b30246039_0002.xml",
+        "size": 68972,
+        "type": "File"
+      },
+      {
+        "checksum": "4c6a5dd7b8d72a81e0fbe1cdfef273f513996c26fa0eb1cb1d582267f5f89fae",
+        "name": "data/alto/b30246039_0003.xml",
+        "path": "v1/data/alto/b30246039_0003.xml",
+        "size": 25210,
+        "type": "File"
+      },
+      {
+        "checksum": "f8e39f6cc2107f20fd0b8faf5a722232e3904a59dd456422c2e004351af51ffe",
+        "name": "data/alto/b30246039_0004.xml",
+        "path": "v1/data/alto/b30246039_0004.xml",
+        "size": 85368,
+        "type": "File"
+      },
+      {
+        "checksum": "af77673411d557a22f46ad46498c45e3c382d8ec33de1b45685f4dc54eb28198",
+        "name": "data/alto/b30246039_0005.xml",
+        "path": "v1/data/alto/b30246039_0005.xml",
+        "size": 49723,
+        "type": "File"
+      },
+      {
+        "checksum": "ab580f5b7f1fda5a7eb5b6d7645075fa91fbca1260d05915a9b0e284c54d2520",
+        "name": "data/alto/b30246039_0006.xml",
+        "path": "v1/data/alto/b30246039_0006.xml",
+        "size": 100297,
+        "type": "File"
+      },
+      {
+        "checksum": "3e3b647866146569acc9c88ce3a4ab61bddf93406980a67463434cf037db1757",
+        "name": "data/objects/b30246039_0001.jp2",
+        "path": "v1/data/objects/b30246039_0001.jp2",
+        "size": 792017,
+        "type": "File"
+      },
+      {
+        "checksum": "946223e241f62fc30b7ed179e4fb92a49837df5b4665c6d4bbe6d0ed28a69ca8",
+        "name": "data/objects/b30246039_0002.jp2",
+        "path": "v1/data/objects/b30246039_0002.jp2",
+        "size": 706557,
+        "type": "File"
+      },
+      {
+        "checksum": "cc58efa2e57c12d98091994a59c995635c3ed80b9acec6822bcab6e1ae30c20c",
+        "name": "data/objects/b30246039_0003.jp2",
+        "path": "v1/data/objects/b30246039_0003.jp2",
+        "size": 307447,
+        "type": "File"
+      },
+      {
+        "checksum": "592ef33cfca9da88279af00a10f1a4823328ee57c7a63e19be1c5dff742bcab8",
+        "name": "data/objects/b30246039_0004.jp2",
+        "path": "v1/data/objects/b30246039_0004.jp2",
+        "size": 571399,
+        "type": "File"
+      },
+      {
+        "checksum": "4f5eb97d0a35ca6c50bc1b3f24ae8b4481934e18bd41cb579bedfccf5e331a79",
+        "name": "data/objects/b30246039_0005.jp2",
+        "path": "v1/data/objects/b30246039_0005.jp2",
+        "size": 515446,
+        "type": "File"
+      },
+      {
+        "checksum": "6f14bcd8543130c6ec0caad79c35b73d96db6d181e3395dc7a3dc12dfaaf68ea",
+        "name": "data/objects/b30246039_0006.jp2",
+        "path": "v1/data/objects/b30246039_0006.jp2",
+        "size": 933078,
+        "type": "File"
+      }
+    ],
+    "type": "BagManifest"
+  },
+  "tagManifest": {
+    "checksumAlgorithm": "SHA-256",
+    "files": [
+      {
+        "checksum": "9a76c1b13c30ccb3cb75ffd336d472cc3a28455deb5da0a13f0df85207d272a4",
+        "name": "manifest-sha512.txt",
+        "path": "v1/manifest-sha512.txt",
+        "size": 2075,
+        "type": "File"
+      },
+      {
+        "checksum": "d28dce46370d6a8f96bd7e349d33e3b0e6e0e4f764cba0b9f37b44addf7c3065",
+        "name": "bag-info.txt",
+        "path": "v1/bag-info.txt",
+        "size": 278,
+        "type": "File"
+      },
+      {
+        "checksum": "e91f941be5973ff71f1dccbdd1a32d598881893a7f21be516aca743da38b1689",
+        "name": "bagit.txt",
+        "path": "v1/bagit.txt",
+        "size": 55,
+        "type": "File"
+      },
+      {
+        "checksum": "c51ded7632d2aee1cf52521c0236ed81f123e60da7eaf44d0c8e8dbe2748e82e",
+        "name": "manifest-sha256.txt",
+        "path": "v1/manifest-sha256.txt",
+        "size": 1243,
+        "type": "File"
+      }
+    ],
+    "type": "BagManifest"
+  },
+  "location": {
+    "provider": {
+      "id": "aws-s3-ia",
+      "type": "Provider"
+    },
+    "bucket": "wellcomecollection-storage",
+    "path": "digitised/b30246039",
+    "type": "Location"
+  },
+  "replicaLocations": [
+    {
+      "provider": {
+        "id": "aws-s3-glacier",
+        "type": "Provider"
+      },
+      "bucket": "wellcomecollection-storage-replica-ireland",
+      "path": "digitised/b30246039",
+      "type": "Location"
+    }
+  ],
+  "createdDate": "2019-09-14T02:25:40.532998Z",
+  "version": "v1",
+  "type": "Bag"
+}

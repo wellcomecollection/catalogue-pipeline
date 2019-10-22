@@ -147,6 +147,10 @@ object ExternalDependencies {
     "org.mockito" % "mockito-core" % versions.mockito % "test"
   )
 
+  val wireMockDependencies = Seq(
+    "com.github.tomakehurst" % "wiremock" % "2.25.1" % Test
+  )
+
   val mySqlDependencies = Seq(
     "com.amazonaws" % "aws-java-sdk-rds" % versions.aws,
     "org.flywaydb" % "flyway-core" % "4.2.0",
@@ -265,7 +269,7 @@ object CatalogueDependencies {
 
   val metsTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies ++
-      ExternalDependencies.mockitoDependencies
+      ExternalDependencies.mockitoDependencies ++ ExternalDependencies.wireMockDependencies
 
   // Sierra adapter stack
 
