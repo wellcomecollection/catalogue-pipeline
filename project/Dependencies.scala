@@ -117,7 +117,7 @@ object ExternalDependencies {
   )
 
   val akkaActorDependencies = Seq(
-    "com.typesafe.akka" %% "akka-actor" % versions.akka,
+    "com.typesafe.akka" %% "akka-actor" % versions.akka
   )
 
   val alpakkaS3Dependencies = Seq(
@@ -276,6 +276,10 @@ object CatalogueDependencies {
   val reindexWorkerDependencies: Seq[ModuleID] = Nil
 
   val sierraTransformerDependencies: Seq[ModuleID] =
+    ExternalDependencies.apacheCommonsDependencies ++
+      ExternalDependencies.mockitoDependencies
+
+  val metsTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies ++
       ExternalDependencies.mockitoDependencies
 
