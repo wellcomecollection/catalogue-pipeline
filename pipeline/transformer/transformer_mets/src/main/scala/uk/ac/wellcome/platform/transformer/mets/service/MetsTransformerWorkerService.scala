@@ -8,11 +8,13 @@ import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.Future
 
-class MetsTransformerWorkerService[MsgDestination](messageStream: BigMessageStream[IngestUpdate],
-                                             msgSender: MessageSender[MsgDestination]) extends Runnable {
+class MetsTransformerWorkerService[MsgDestination](
+  messageStream: BigMessageStream[IngestUpdate],
+  msgSender: MessageSender[MsgDestination])
+    extends Runnable {
   def run(): Future[Done] =
-    messageStream.foreach(this.getClass.getSimpleName, (_: IngestUpdate) => Future.successful(()))
+    messageStream.foreach(
+      this.getClass.getSimpleName,
+      (_: IngestUpdate) => Future.successful(()))
 
 }
-
-

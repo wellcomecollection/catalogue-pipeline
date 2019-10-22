@@ -18,6 +18,10 @@ object Main extends WellcomeTypesafeApp {
     implicit val materializer: ActorMaterializer =
       AkkaBuilder.buildActorMaterializer()
 
-    new MetsTransformerWorkerService(BigMessagingBuilder.buildMessageStream[IngestUpdate](config), SNSBuilder.buildSNSMessageSender(config, subject = "Sent from the mets transformer"))
+    new MetsTransformerWorkerService(
+      BigMessagingBuilder.buildMessageStream[IngestUpdate](config),
+      SNSBuilder.buildSNSMessageSender(
+        config,
+        subject = "Sent from the mets transformer"))
   }
 }
