@@ -171,7 +171,6 @@ object WorksIndex {
       subjects,
       genre("genres"),
       items("items"),
-      items("itemsV1"),
       production,
       language,
       location("thumbnail"),

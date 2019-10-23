@@ -90,7 +90,6 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     locationOfOriginal: Option[String] = None,
     duration: Option[Int] = None,
     items: List[MaybeDisplayable[Item]] = List(),
-    itemsV1: List[Identifiable[Item]] = List(),
   ): UnidentifiedWork =
     UnidentifiedWork(
       sourceIdentifier = sourceIdentifier,
@@ -116,7 +115,6 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
       locationOfOriginal = locationOfOriginal,
       duration = duration,
       items = items,
-      itemsV1 = itemsV1,
       version = version
     )
 
@@ -152,7 +150,6 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     locationOfOriginal: Option[String] = None,
     duration: Option[Int] = None,
     items: List[Displayable[Item]] = List(),
-    itemsV1: List[Identified[Item]] = List(),
     version: Int = 1,
     merged: Boolean = false
   ): IdentifiedWork =
@@ -181,7 +178,6 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
       locationOfOriginal = locationOfOriginal,
       duration = duration,
       items = items,
-      itemsV1 = itemsV1,
       version = version,
       merged = merged
     )

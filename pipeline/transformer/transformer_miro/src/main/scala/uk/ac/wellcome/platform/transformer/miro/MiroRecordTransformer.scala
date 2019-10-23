@@ -86,7 +86,6 @@ class MiroRecordTransformer
         language = None,
         edition = None,
         items = getItems(miroRecord),
-        itemsV1 = getItemsV1(miroRecord),
         version = version
       )
     }.recover {
