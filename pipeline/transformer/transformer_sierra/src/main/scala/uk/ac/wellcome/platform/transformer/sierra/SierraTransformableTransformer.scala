@@ -93,7 +93,6 @@ class SierraTransformableTransformer(sierraTransformable: SierraTransformable,
           citeAs = SierraCiteAs(bibId, bibData),
           duration = SierraDuration(bibId, bibData),
           items = SierraItems(itemDataMap)(bibId, bibData),
-          itemsV1 = Nil,
           version = version
         )
       }

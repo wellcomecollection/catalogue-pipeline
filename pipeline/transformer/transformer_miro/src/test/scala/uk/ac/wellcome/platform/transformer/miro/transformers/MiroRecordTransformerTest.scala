@@ -266,7 +266,7 @@ class MiroRecordTransformerTest
       credit = Some("Ezra Feilden"),
       locationType = LocationType("iiif-image")
     )
-    work.itemsV1.head.agent.locations shouldBe List(expectedDigitalLocation)
+    work.items.head.agent.locations shouldBe List(expectedDigitalLocation)
   }
 
   it("extracts both identifiable and unidentifiable items") {
@@ -279,15 +279,6 @@ class MiroRecordTransformerTest
       LocationType("iiif-image"),
       Some(License_CCBY),
       None)
-    work.itemsV1 shouldBe List(
-      Identifiable(
-        Item(List(expectedLocation)),
-        createMiroSourceIdentifierWith(
-          value = "B0011308",
-          ontologyType = "Item"
-        )
-      )
-    )
     work.items shouldBe List(Unidentifiable(Item(List(expectedLocation))))
   }
 

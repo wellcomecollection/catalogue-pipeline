@@ -79,7 +79,7 @@ class MiroRecordTransformerCopyrightTest
     expectedCredit: Option[String]
   ): Assertion = {
     val transformedWork = transformWork(miroRecord)
-    val location = transformedWork.itemsV1.head.agent.locations.head
+    val location = transformedWork.items.head.agent.locations.head
     location shouldBe a[DigitalLocation]
     location.asInstanceOf[DigitalLocation].credit shouldBe expectedCredit
   }
