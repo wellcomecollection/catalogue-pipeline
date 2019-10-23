@@ -152,12 +152,8 @@ object WorksIndex {
     keywordField("reason")
   )
 
-  val rootIndexFields: Seq[FieldDefinition with Product with Serializable] =
-    Seq(
-      keywordField("canonicalId"),
-      keywordField("ontologyType"),
-      intField("version"),
-      sourceIdentifier,
+  val data: ObjectField =
+    objectField("data").fields(
       otherIdentifiers,
       mergeCandidates,
       workType,
@@ -177,9 +173,18 @@ object WorksIndex {
       textField("edition"),
       notes,
       intField("duration"),
+      booleanField("merged")
+    )
+
+  val rootIndexFields: Seq[FieldDefinition with Product with Serializable] =
+    Seq(
+      keywordField("canonicalId"),
+      keywordField("ontologyType"),
+      intField("version"),
+      sourceIdentifier,
       objectField("redirect")
         .fields(sourceIdentifier, keywordField("canonicalId")),
       keywordField("type"),
-      booleanField("merged")
+      data
     )
 }
