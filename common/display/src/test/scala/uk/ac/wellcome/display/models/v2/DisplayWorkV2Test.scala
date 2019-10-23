@@ -397,7 +397,7 @@ class DisplayWorkV2Test
           work,
           includes = V2WorksIncludes(identifiers = true, items = true))
         val item: DisplayItemV2 = displayWork.items.get.head
-        val identifiedItem = work.items.head.asInstanceOf[Identified[Item]]
+        val identifiedItem = work.data.items.head.asInstanceOf[Identified[Item]]
         item.identifiers shouldBe Some(
           List(DisplayIdentifierV2(identifiedItem.sourceIdentifier)))
       }

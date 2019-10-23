@@ -95,7 +95,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     notes: List[Note] = Nil,
     edition: Option[String] = None,
     duration: Option[Int] = None,
-    items: List[MaybeDisplayable[Item]] = Nil): UnidentifiedWork =
+    items: List[MaybeDisplayable[Item]] = List()): UnidentifiedWork =
     UnidentifiedWork(
       sourceIdentifier = sourceIdentifier,
       version = version,
@@ -112,7 +112,6 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
         production = production,
         edition = edition,
         notes = notes,
-        dissertation = dissertation,
         duration = duration,
         items = items,
       )
@@ -146,7 +145,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     edition: Option[String] = None,
     language: Option[Language] = None,
     duration: Option[Int] = None,
-    items: List[Displayable[Item]] = Nil,
+    items: List[Displayable[Item]] = List(),
     version: Int = 1,
     merged: Boolean = false
   ): IdentifiedWork =
@@ -172,7 +171,6 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
         language = language,
         edition = edition,
         notes = notes,
-        dissertation = dissertation,
         duration = duration,
         items = items,
         merged = merged

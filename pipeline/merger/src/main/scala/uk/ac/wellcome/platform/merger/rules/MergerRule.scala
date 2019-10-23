@@ -22,10 +22,11 @@ trait MergerRule { this: Partitioner with WorkPairMerger =>
 
   private def updateVersion(mergedWork: MergedWork): Seq[BaseWork] =
     mergedWork match {
-      case MergedWork(work, redirectedWork) => List(
-        work.copy(data = work.data.copy(merged = true)),
-        redirectedWork
-      )
+      case MergedWork(work, redirectedWork) =>
+        List(
+          work.withData(_.copy(merged = true)),
+          redirectedWork
+        )
     }
 }
 
