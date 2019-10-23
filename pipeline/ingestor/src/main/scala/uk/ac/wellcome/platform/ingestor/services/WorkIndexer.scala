@@ -95,7 +95,7 @@ class WorkIndexer(
     * version, by adding one to work.version * 10.
     */
   private def calculateEsVersion(work: IdentifiedBaseWork): Int = work match {
-    case w: IdentifiedWork           => (w.version * 10) + w.merged
+    case w: IdentifiedWork           => (w.version * 10) + w.data.merged
     case w: IdentifiedRedirectedWork => (w.version * 10) + 1
     case w: IdentifiedInvisibleWork  => w.version * 10
   }

@@ -29,26 +29,32 @@ object SierraMiroMergeRule
   override protected def mergeAndRedirectWorkPair(
     sierraWork: UnidentifiedWork,
     miroWork: UnidentifiedWork): Option[MergedWork] = {
-    (sierraWork.items, miroWork.items) match {
+    (sierraWork.data.items, miroWork.data.items) match {
       case (
           List(sierraItem: MaybeDisplayable[Item]),
           List(miroItem: Unidentifiable[Item])) =>
         info(s"Merging ${describeWorkPair(sierraWork, miroWork)}.")
 
         val mergedWork = sierraWork.copy(
-          otherIdentifiers = mergeIdentifiers(sierraWork, miroWork),
-          items = mergeItems(sierraItem, miroItem),
-          // We always copy across the thumbnail from the Miro work, at least
-          // for now -- it's never populated on Sierra, always populated in Miro.
-          // Later we may use the iiif-presentation item location to populate
-          // this field, but right now it's empty on all Sierra works.
-          thumbnail = miroWork.thumbnail
+          data = sierraWork.data.copy(
+            otherIdentifiers = mergeIdentifiers(sierraWork, miroWork),
+            items = mergeItems(sierraItem, miroItem),
+            // We always copy across the thumbnail from the Miro work, at least
+            // for now -- it's never populated on Sierra, always populated in Miro.
+            // Later we may use the iiif-presentation item location to populate
+            // this field, but right now it's empty on all Sierra works.
+            thumbnail = miroWork.data.thumbnail
+          )
         )
 
         Some(
           MergedWork(
             mergedWork,
-            UnidentifiedRedirectedWork(miroWork, sierraWork)
+            UnidentifiedRedirectedWork(
+              version = miroWork.version,
+              sourceIdentifier = miroWork.sourceIdentifier,
+              redirect = IdentifiableRedirect(sierraWork.sourceIdentifier),
+            )
           )
         )
       case _ =>

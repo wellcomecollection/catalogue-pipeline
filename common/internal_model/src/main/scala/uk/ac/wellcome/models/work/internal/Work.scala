@@ -1,5 +1,7 @@
 package uk.ac.wellcome.models.work.internal
 
+import scala.language.higherKinds
+
 sealed trait BaseWork {
   val version: Int
   val sourceIdentifier: SourceIdentifier
@@ -8,131 +10,83 @@ sealed trait BaseWork {
 sealed trait IdentifiedBaseWork extends BaseWork {
   val canonicalId: String
 }
+
 sealed trait TransformedBaseWork extends BaseWork
 
-/** A representation of a work in our ontology */
-sealed trait Work extends BaseWork with MultipleSourceIdentifiers {
-  val sourceIdentifier: SourceIdentifier
-  val otherIdentifiers: List[SourceIdentifier]
-  val mergeCandidates: List[MergeCandidate]
+sealed trait InvisibleWork extends BaseWork
 
-  val title: String
-  val alternativeTitles: List[String]
-  val workType: Option[WorkType]
-  val description: Option[String]
-  val physicalDescription: Option[String]
-  val lettering: Option[String]
-  val createdDate: Option[Period]
-  val subjects: List[IdentityState[Subject[IdentityState[AbstractRootConcept]]]]
-  val genres: List[Genre[IdentityState[AbstractConcept]]]
-  val contributors: List[Contributor[IdentityState[AbstractAgent]]]
-  val thumbnail: Option[Location]
-  val production: List[ProductionEvent[IdentityState[AbstractAgent]]]
-  val language: Option[Language]
-  val edition: Option[String]
-  val notes: List[Note]
-  val duration: Option[Int]
-  val items: List[IdentityState[Item]]
-  val version: Int
-  val ontologyType: String
+sealed trait RedirectedWork extends BaseWork {
+  val redirect: Redirect
 }
 
-case class UnidentifiedWork(
-  sourceIdentifier: SourceIdentifier,
-  otherIdentifiers: List[SourceIdentifier],
-  mergeCandidates: List[MergeCandidate],
+case class WorkData[+IdState[+S] <: IdentityState[S]](
   title: String,
+  otherIdentifiers: List[SourceIdentifier] = Nil,
+  mergeCandidates: List[MergeCandidate] = Nil,
   alternativeTitles: List[String] = Nil,
   workType: Option[WorkType] = None,
   description: Option[String] = None,
   physicalDescription: Option[String] = None,
   lettering: Option[String] = None,
   createdDate: Option[Period] = None,
-  subjects: List[
-    MaybeDisplayable[Subject[MaybeDisplayable[AbstractRootConcept]]]] = Nil,
-  genres: List[Genre[MaybeDisplayable[AbstractConcept]]] = Nil,
-  contributors: List[Contributor[MaybeDisplayable[AbstractAgent]]] = Nil,
+  subjects: List[IdState[Subject[IdState[AbstractRootConcept]]]] = Nil,
+  genres: List[Genre[IdState[AbstractConcept]]] = Nil,
+  contributors: List[Contributor[IdState[AbstractAgent]]] = Nil,
   thumbnail: Option[Location] = None,
-  production: List[ProductionEvent[MaybeDisplayable[AbstractAgent]]] = Nil,
+  production: List[ProductionEvent[IdState[AbstractAgent]]] = Nil,
   language: Option[Language] = None,
   edition: Option[String] = None,
   notes: List[Note] = Nil,
   duration: Option[Int] = None,
-  items: List[MaybeDisplayable[Item]],
-  version: Int,
+  items: List[IdState[Item]] = Nil,
   merged: Boolean = false,
+)
+
+case class UnidentifiedWork(
+  version: Int,
+  sourceIdentifier: SourceIdentifier,
+  data: WorkData[MaybeDisplayable],
   ontologyType: String = "Work",
-  identifiedType: String = classOf[IdentifiedWork].getSimpleName)
-    extends Work
-    with TransformedBaseWork
+  identifiedType: String = classOf[IdentifiedWork].getSimpleName
+) extends TransformedBaseWork with MultipleSourceIdentifiers {
+  val otherIdentifiers = data.otherIdentifiers
+}
 
 case class IdentifiedWork(
   canonicalId: String,
-  sourceIdentifier: SourceIdentifier,
-  otherIdentifiers: List[SourceIdentifier],
-  mergeCandidates: List[MergeCandidate],
-  title: String,
-  alternativeTitles: List[String] = Nil,
-  workType: Option[WorkType] = None,
-  description: Option[String] = None,
-  physicalDescription: Option[String],
-  lettering: Option[String] = None,
-  createdDate: Option[Period] = None,
-  subjects: List[Displayable[Subject[Displayable[AbstractRootConcept]]]] = Nil,
-  genres: List[Genre[Displayable[AbstractConcept]]] = Nil,
-  contributors: List[Contributor[Displayable[AbstractAgent]]] = Nil,
-  thumbnail: Option[Location] = None,
-  production: List[ProductionEvent[Displayable[AbstractAgent]]] = Nil,
-  language: Option[Language] = None,
-  edition: Option[String] = None,
-  notes: List[Note] = Nil,
-  duration: Option[Int] = None,
-  items: List[Displayable[Item]],
   version: Int,
-  merged: Boolean = false,
-  ontologyType: String = "Work")
-    extends Work
-    with IdentifiedBaseWork
+  sourceIdentifier: SourceIdentifier,
+  data: WorkData[Displayable],
+  ontologyType: String = "Work"
+) extends IdentifiedBaseWork with MultipleSourceIdentifiers {
+  val otherIdentifiers = data.otherIdentifiers
 
-sealed trait InvisibleWork extends BaseWork
+  def withData(f: WorkData[Displayable] => WorkData[Displayable]) =
+    this.copy(data = f(data))
+}
 
 case class UnidentifiedInvisibleWork(
-  sourceIdentifier: SourceIdentifier,
   version: Int,
-  identifiedType: String = classOf[IdentifiedInvisibleWork].getSimpleName)
-    extends InvisibleWork
-    with TransformedBaseWork
+  sourceIdentifier: SourceIdentifier,
+  identifiedType: String = classOf[IdentifiedInvisibleWork].getSimpleName
+) extends TransformedBaseWork with InvisibleWork
 
-case class IdentifiedInvisibleWork(sourceIdentifier: SourceIdentifier,
-                                   version: Int,
-                                   canonicalId: String)
-    extends InvisibleWork
-    with IdentifiedBaseWork
-
-sealed trait RedirectedWork extends BaseWork {
-  val redirect: Redirect
-}
+case class IdentifiedInvisibleWork(
+  canonicalId: String,
+  version: Int,
+  sourceIdentifier: SourceIdentifier,
+) extends IdentifiedBaseWork with InvisibleWork
 
 case class UnidentifiedRedirectedWork(
   sourceIdentifier: SourceIdentifier,
   version: Int,
   redirect: IdentifiableRedirect,
   identifiedType: String = classOf[IdentifiedRedirectedWork].getSimpleName
-) extends RedirectedWork
-
-case object UnidentifiedRedirectedWork {
-  def apply(source: UnidentifiedWork,
-            target: UnidentifiedWork): UnidentifiedRedirectedWork =
-    UnidentifiedRedirectedWork(
-      sourceIdentifier = source.sourceIdentifier,
-      version = source.version,
-      redirect = IdentifiableRedirect(target.sourceIdentifier))
-}
+) extends TransformedBaseWork with RedirectedWork
 
 case class IdentifiedRedirectedWork(
   canonicalId: String,
   sourceIdentifier: SourceIdentifier,
   version: Int,
   redirect: IdentifiedRedirect
-) extends RedirectedWork
-    with IdentifiedBaseWork
+) extends IdentifiedBaseWork with RedirectedWork

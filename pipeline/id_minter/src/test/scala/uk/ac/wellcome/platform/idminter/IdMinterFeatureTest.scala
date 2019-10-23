@@ -51,7 +51,8 @@ class IdMinterFeatureTest
                       .sourceIdentifier shouldBe work.sourceIdentifier
                     receivedWork
                       .asInstanceOf[IdentifiedWork]
-                      .title shouldBe work.title
+                      .data
+                      .title shouldBe work.data.title
                   }
                 }
             }

@@ -3,6 +3,7 @@ import uk.ac.wellcome.models.work.internal.{BaseWork, UnidentifiedWork}
 import uk.ac.wellcome.platform.merger.model.MergedWork
 
 trait MergerRule { this: Partitioner with WorkPairMerger =>
+
   def mergeAndRedirectWorks(works: Seq[BaseWork]): Seq[BaseWork] =
     partitionWorks(works)
       .map {
@@ -19,10 +20,13 @@ trait MergerRule { this: Partitioner with WorkPairMerger =>
       }
       .getOrElse(works)
 
-  private def updateVersion(mergedWork: MergedWork): Seq[BaseWork] = List(
-    mergedWork.work.copy(merged = true),
-    mergedWork.redirectedWork
-  )
+  private def updateVersion(mergedWork: MergedWork): Seq[BaseWork] =
+    mergedWork match {
+      case MergedWork(work, redirectedWork) => List(
+        work.copy(data = work.data.copy(merged = true)),
+        redirectedWork
+      )
+    }
 }
 
 case class Partition(firstWork: UnidentifiedWork,

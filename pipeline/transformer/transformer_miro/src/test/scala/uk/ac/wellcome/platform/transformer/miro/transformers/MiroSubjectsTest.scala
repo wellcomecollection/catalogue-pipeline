@@ -73,6 +73,6 @@ class MiroSubjectsTest
         Subject(label = label, concepts = List(Unidentifiable(Concept(label))))
       )
     }
-    transformedWork.subjects shouldBe expectedSubjects
+    transformedWork.data.subjects shouldBe expectedSubjects
   }
 }

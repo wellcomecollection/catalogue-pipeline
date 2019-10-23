@@ -19,19 +19,21 @@ class MergerTest extends FunSpec with WorksGenerators with Matchers {
     result.size shouldBe 2
 
     val physicalItem =
-      sierraPhysicalWork.items.head.asInstanceOf[Identifiable[Item]]
-    val digitalItem = sierraDigitalWork.items.head
+      sierraPhysicalWork.data.items.head.asInstanceOf[Identifiable[Item]]
+    val digitalItem = sierraDigitalWork.data.items.head
 
     val expectedMergedWork = sierraPhysicalWork.copy(
-      otherIdentifiers = sierraPhysicalWork.otherIdentifiers ++ sierraDigitalWork.identifiers,
-      items = List(
-        physicalItem.copy(
-          agent = physicalItem.agent.copy(
-            locations = physicalItem.agent.locations ++ digitalItem.agent.locations
+      data = sierraPhysicalWork.data.copy(
+        merged = true,
+        otherIdentifiers = sierraPhysicalWork.data.otherIdentifiers ++ sierraDigitalWork.identifiers,
+        items = List(
+          physicalItem.copy(
+            agent = physicalItem.agent.copy(
+              locations = physicalItem.agent.locations ++ digitalItem.agent.locations
+            )
           )
         )
-      ),
-      merged = true
+      )
     )
 
     val expectedRedirectedWork =
@@ -54,20 +56,22 @@ class MergerTest extends FunSpec with WorksGenerators with Matchers {
     result.size shouldBe 2
 
     val sierraItem =
-      sierraPhysicalWork.items.head.asInstanceOf[Identifiable[Item]]
-    val miroItem = miroWork.items.head
+      sierraPhysicalWork.data.items.head.asInstanceOf[Identifiable[Item]]
+    val miroItem = miroWork.data.items.head
 
     val expectedMergedWork = sierraPhysicalWork.copy(
-      otherIdentifiers = sierraPhysicalWork.otherIdentifiers ++ miroWork.identifiers,
-      thumbnail = miroWork.thumbnail,
-      items = List(
-        sierraItem.copy(
-          agent = sierraItem.agent.copy(
-            locations = sierraItem.agent.locations ++ miroItem.agent.locations
+      data = sierraPhysicalWork.data.copy(
+        otherIdentifiers = sierraPhysicalWork.data.otherIdentifiers ++ miroWork.identifiers,
+        thumbnail = miroWork.data.thumbnail,
+        items = List(
+          sierraItem.copy(
+            agent = sierraItem.agent.copy(
+              locations = sierraItem.agent.locations ++ miroItem.agent.locations
+            )
           )
-        )
-      ),
-      merged = true
+        ),
+        merged = true
+      )
     )
 
     val expectedRedirectedWork =
@@ -89,20 +93,22 @@ class MergerTest extends FunSpec with WorksGenerators with Matchers {
     result.size shouldBe 2
 
     val sierraItem =
-      sierraDigitalWork.items.head.asInstanceOf[Unidentifiable[Item]]
-    val miroItem = miroWork.items.head
+      sierraDigitalWork.data.items.head.asInstanceOf[Unidentifiable[Item]]
+    val miroItem = miroWork.data.items.head
 
     val expectedMergedWork = sierraDigitalWork.copy(
-      otherIdentifiers = sierraDigitalWork.otherIdentifiers ++ miroWork.identifiers,
-      thumbnail = miroWork.thumbnail,
-      items = List(
-        sierraItem.copy(
-          agent = sierraItem.agent.copy(
-            locations = sierraItem.agent.locations ++ miroItem.agent.locations
+      data = sierraDigitalWork.data.copy(
+        otherIdentifiers = sierraDigitalWork.data.otherIdentifiers ++ miroWork.identifiers,
+        thumbnail = miroWork.data.thumbnail,
+        items = List(
+          sierraItem.copy(
+            agent = sierraItem.agent.copy(
+              locations = sierraItem.agent.locations ++ miroItem.agent.locations
+            )
           )
-        )
-      ),
-      merged = true
+        ),
+        merged = true
+      )
     )
 
     val expectedRedirectedWork =
@@ -125,21 +131,23 @@ class MergerTest extends FunSpec with WorksGenerators with Matchers {
     result.size shouldBe 3
 
     val sierraItem =
-      sierraPhysicalWork.items.head.asInstanceOf[Identifiable[Item]]
-    val digitalItem = sierraDigitalWork.items.head
-    val miroItem = miroWork.items.head
+      sierraPhysicalWork.data.items.head.asInstanceOf[Identifiable[Item]]
+    val digitalItem = sierraDigitalWork.data.items.head
+    val miroItem = miroWork.data.items.head
 
     val expectedMergedWork = sierraPhysicalWork.copy(
-      otherIdentifiers = sierraPhysicalWork.otherIdentifiers ++ sierraDigitalWork.identifiers ++ miroWork.identifiers,
-      thumbnail = miroWork.thumbnail,
-      items = List(
-        sierraItem.copy(
-          agent = sierraItem.agent.copy(
-            locations = sierraItem.agent.locations ++ digitalItem.agent.locations ++ miroItem.agent.locations
+      data = sierraPhysicalWork.data.copy(
+        otherIdentifiers = sierraPhysicalWork.data.otherIdentifiers ++ sierraDigitalWork.identifiers ++ miroWork.identifiers,
+        thumbnail = miroWork.data.thumbnail,
+        items = List(
+          sierraItem.copy(
+            agent = sierraItem.agent.copy(
+              locations = sierraItem.agent.locations ++ digitalItem.agent.locations ++ miroItem.agent.locations
+            )
           )
-        )
-      ),
-      merged = true
+        ),
+        merged = true
+      )
     )
 
     val expectedRedirectedDigitalWork =

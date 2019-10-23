@@ -9,7 +9,7 @@ case class WorkUpdate(workId: String,
 case object WorkUpdate {
   def apply(work: UnidentifiedWork): WorkUpdate = {
     val id = work.sourceIdentifier.toString
-    val referencedWorkIds = work.mergeCandidates
+    val referencedWorkIds = work.data.mergeCandidates
       .map { mergeCandidate =>
         mergeCandidate.identifier.toString
       }

@@ -74,7 +74,9 @@ class WorkIndexerTest
 
   it("replaces a Work with the same version") {
     val work = createIdentifiedWorkWith(version = 3)
-    val updatedWork = work.copy(title = "a different title")
+    val updatedWork = work.copy(
+      data = work.data.copy(title = "a different title")
+    )
 
     withLocalWorksIndex { index =>
       val future = ingestWorkPairInOrder(
@@ -94,7 +96,9 @@ class WorkIndexerTest
     it(
       "doesn't override a merged Work with same version but merged flag = false") {
       val mergedWork = createIdentifiedWorkWith(version = 3, merged = true)
-      val unmergedWork = mergedWork.copy(merged = false)
+      val unmergedWork = mergedWork.copy(
+        data = mergedWork.data.copy(merged = false)
+      )
 
       withLocalWorksIndex { index =>
         val unmergedWorkInsertFuture = ingestWorkPairInOrder(
@@ -114,7 +118,10 @@ class WorkIndexerTest
 
     it("doesn't overwrite a Work with lower version and merged = true") {
       val unmergedNewWork = createIdentifiedWorkWith(version = 4)
-      val mergedOldWork = unmergedNewWork.copy(version = 3, merged = true)
+      val mergedOldWork = unmergedNewWork.copy(
+        version = 3,
+        data = unmergedNewWork.data.copy(merged = true)
+      )
 
       withLocalWorksIndex { index =>
         val mergedWorkInsertFuture = ingestWorkPairInOrder(

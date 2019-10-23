@@ -74,6 +74,6 @@ class MiroGenresTest
     val expectedGenres = expectedGenreLabels.map { label =>
       Genre(label, concepts = List(Unidentifiable(Concept(label))))
     }
-    transformedWork.genres shouldBe expectedGenres
+    transformedWork.data.genres shouldBe expectedGenres
   }
 }

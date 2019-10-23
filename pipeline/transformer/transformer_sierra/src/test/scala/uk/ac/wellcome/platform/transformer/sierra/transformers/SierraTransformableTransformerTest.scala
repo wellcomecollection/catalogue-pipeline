@@ -48,6 +48,7 @@ class SierraTransformableTransformerTest
 
     val actualIdentifiers = work
       .asInstanceOf[UnidentifiedWork]
+      .data
       .items
       .map { _.asInstanceOf[Identifiable[Item]].sourceIdentifier }
 
@@ -79,7 +80,7 @@ class SierraTransformableTransformerTest
       1)
     triedWork.isSuccess shouldBe true
 
-    triedWork.get.asInstanceOf[UnidentifiedWork].workType shouldBe Some(
+    triedWork.get.asInstanceOf[UnidentifiedWork].data.workType shouldBe Some(
       expectedWorkType)
   }
 
@@ -116,7 +117,7 @@ class SierraTransformableTransformerTest
     val work = transformToWork(transformable)
     work shouldBe a[UnidentifiedWork]
     val unidentifiedWork = work.asInstanceOf[UnidentifiedWork]
-    unidentifiedWork.items should have size 1
+    unidentifiedWork.data.items should have size 1
 
     val expectedSourceIdentifier = createSierraSystemSourceIdentifierWith(
       value = itemId.withCheckDigit,
@@ -130,7 +131,7 @@ class SierraTransformableTransformerTest
       )
     )
 
-    unidentifiedWork.items.head shouldBe Identifiable(
+    unidentifiedWork.data.items.head shouldBe Identifiable(
       sourceIdentifier = expectedSourceIdentifier,
       otherIdentifiers = expectedOtherIdentifiers,
       agent =
@@ -312,7 +313,7 @@ class SierraTransformableTransformerTest
       """.stripMargin
 
     val work = transformDataToUnidentifiedWork(id = id, data = data)
-    work.physicalDescription shouldBe Some(physicalDescription)
+    work.data.physicalDescription shouldBe Some(physicalDescription)
   }
 
   it("includes the work type, if present") {
@@ -339,7 +340,7 @@ class SierraTransformableTransformerTest
       """.stripMargin
 
     val work = transformDataToUnidentifiedWork(id = id, data = data)
-    work.workType shouldBe Some(expectedWorkType)
+    work.data.workType shouldBe Some(expectedWorkType)
   }
 
   it("includes the alternative title, if present") {
@@ -369,7 +370,7 @@ class SierraTransformableTransformerTest
       """.stripMargin
 
     val work = transformDataToUnidentifiedWork(id = id, data = data)
-    work.alternativeTitles shouldBe List(alternativeTitle)
+    work.data.alternativeTitles shouldBe List(alternativeTitle)
   }
 
   it("includes the edition, if present") {
@@ -399,7 +400,7 @@ class SierraTransformableTransformerTest
       """.stripMargin
 
     val work = transformDataToUnidentifiedWork(id = id, data = data)
-    work.edition shouldBe Some(edition)
+    work.data.edition shouldBe Some(edition)
   }
 
   it("uses the full Sierra system number as the source identifier") {
@@ -432,7 +433,7 @@ class SierraTransformableTransformerTest
     )
 
     val work = transformDataToUnidentifiedWork(id = id, data = data)
-    work.language.get shouldBe expectedLanguage
+    work.data.language.get shouldBe expectedLanguage
   }
 
   it("extracts contributor information if present") {
@@ -462,7 +463,7 @@ class SierraTransformableTransformerTest
        """.stripMargin
 
     val work = transformDataToUnidentifiedWork(id = id, data = data)
-    work.contributors shouldBe List(
+    work.data.contributors shouldBe List(
       Contributor[MaybeDisplayable[AbstractAgent]](
         Unidentifiable(Person(label = name)))
     )
@@ -495,7 +496,7 @@ class SierraTransformableTransformerTest
       """.stripMargin
 
     val work = transformDataToUnidentifiedWork(id = id, data = data)
-    work.subjects shouldBe List(
+    work.data.subjects shouldBe List(
       Unidentifiable(
         Subject(content, List(Unidentifiable(Concept(content))))
       )
@@ -529,7 +530,7 @@ class SierraTransformableTransformerTest
       """.stripMargin
 
     val work = transformDataToUnidentifiedWork(id = id, data = data)
-    work.subjects shouldBe List(
+    work.data.subjects shouldBe List(
       Unidentifiable(
         Subject(content, List(Unidentifiable(Person(content))))
       )
@@ -563,7 +564,7 @@ class SierraTransformableTransformerTest
       """.stripMargin
 
     val work = transformDataToUnidentifiedWork(id = id, data = data)
-    work.subjects shouldBe List(
+    work.data.subjects shouldBe List(
       Unidentifiable(
         Subject(
           label = content,
@@ -600,7 +601,7 @@ class SierraTransformableTransformerTest
       """.stripMargin
 
     val work = transformDataToUnidentifiedWork(id = id, data = data)
-    work.subjects shouldBe List(
+    work.data.subjects shouldBe List(
       Unidentifiable(
         Subject(
           label = content,
@@ -637,7 +638,7 @@ class SierraTransformableTransformerTest
       """.stripMargin
 
     val work = transformDataToUnidentifiedWork(id = id, data = data)
-    work.subjects shouldBe List(
+    work.data.subjects shouldBe List(
       Unidentifiable(
         Subject(
           label = content,
@@ -674,7 +675,7 @@ class SierraTransformableTransformerTest
       """.stripMargin
 
     val work = transformDataToUnidentifiedWork(id = id, data = data)
-    work.production shouldBe List(
+    work.data.production shouldBe List(
       ProductionEvent(
         label = placeLabel,
         places = List(Place(placeLabel)),
@@ -711,7 +712,7 @@ class SierraTransformableTransformerTest
       """.stripMargin
 
     val work = transformDataToUnidentifiedWork(id = id, data = data)
-    work.mergeCandidates shouldBe List(
+    work.data.mergeCandidates shouldBe List(
       MergeCandidate(
         identifier = createSierraSystemSourceIdentifierWith(
           value = mergeCandidateBibNumber
@@ -748,7 +749,7 @@ class SierraTransformableTransformerTest
       """.stripMargin
 
     val work = transformDataToUnidentifiedWork(id = id, data = data)
-    work.mergeCandidates shouldBe List(
+    work.data.mergeCandidates shouldBe List(
       MergeCandidate(
         identifier = createMiroSourceIdentifierWith(value = miroId),
         reason = Some("Single page Miro/Sierra work")
@@ -784,7 +785,7 @@ class SierraTransformableTransformerTest
       """.stripMargin
 
     val work = transformDataToUnidentifiedWork(id = id, data = data)
-    work.mergeCandidates shouldBe List(
+    work.data.mergeCandidates shouldBe List(
       MergeCandidate(
         identifier = createMiroSourceIdentifierWith(value = miroId),
         reason = Some("Single page Miro/Sierra work")
@@ -830,7 +831,7 @@ class SierraTransformableTransformerTest
 
     val work = transformDataToWork(id = id, data = bibData)
     work shouldBe a[UnidentifiedWork]
-    work.asInstanceOf[UnidentifiedWork].workType shouldBe Some(
+    work.asInstanceOf[UnidentifiedWork].data.workType shouldBe Some(
       WorkType(id = "k", label = "Pictures")
     )
   }

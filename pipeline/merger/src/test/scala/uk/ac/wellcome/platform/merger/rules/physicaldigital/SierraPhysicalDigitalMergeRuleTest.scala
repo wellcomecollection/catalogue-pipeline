@@ -150,12 +150,12 @@ class SierraPhysicalDigitalMergeRuleTest
 
   private def expectedMergedWork(physicalWork: UnidentifiedWork,
                                  digitalWork: UnidentifiedWork) = {
-    val sierraPhysicalAgent = physicalWork.items.head.agent
-    val sierraDigitalAgent = digitalWork.items.head.agent
+    val sierraPhysicalAgent = physicalWork.data.items.head.agent
+    val sierraDigitalAgent = digitalWork.data.items.head.agent
 
     val expectedLocations = sierraPhysicalAgent.locations ++ sierraDigitalAgent.locations
 
-    val expectedItem = physicalWork.items.head
+    val expectedItem = physicalWork.data.items.head
       .asInstanceOf[Identifiable[Item]]
       .copy(
         agent = sierraPhysicalAgent.copy(
@@ -165,9 +165,11 @@ class SierraPhysicalDigitalMergeRuleTest
     val expectedOtherIdentifiers = physicalWork.otherIdentifiers ++ digitalWork.identifiers
 
     val expectedMergedWork = physicalWork.copy(
-      otherIdentifiers = expectedOtherIdentifiers,
-      items = List(expectedItem),
-      merged = true
+      data = physicalWork.data.copy(
+        otherIdentifiers = expectedOtherIdentifiers,
+        items = List(expectedItem),
+        merged = true
+      )
     )
     expectedMergedWork
   }
