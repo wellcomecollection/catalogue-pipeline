@@ -13,6 +13,11 @@ module "ecr_repository_transformer_sierra" {
   name   = "transformer_sierra"
 }
 
+module "ecr_repository_transformer_mets" {
+  source = "git::https://github.com/wellcometrust/terraform.git//ecr?ref=v1.0.0"
+  name   = "transformer_mets"
+}
+
 module "ecr_repository_id_minter" {
   source = "git::https://github.com/wellcometrust/terraform.git//ecr?ref=v1.0.0"
   name   = "id_minter"

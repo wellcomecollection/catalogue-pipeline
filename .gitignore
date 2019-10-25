@@ -5,6 +5,7 @@
 .lambda_hashes.json
 terraform.plan
 .terraform
+**/.terraform
 shared_infra/.releases
 *.tfvars
 *.tfstate

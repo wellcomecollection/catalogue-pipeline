@@ -1,4 +1,4 @@
-TERRAFORM_IMAGE = hashicorp/terraform:0.11.11
+TERRAFORM_IMAGE = hashicorp/terraform:0.11.14
 
 
 define _terraform_run
