@@ -184,9 +184,15 @@ trait QueryParamsUtils extends Directives with TimeInstances {
 
   implicit val includesDecoder: Decoder[V2WorksIncludes] =
     decodeOneOfCommaSeperated(
-      V2WorksIncludes.recognisedIncludes.zip(
-        V2WorksIncludes.recognisedIncludes
-      ): _*
+      "identifiers" -> WorkInclude.Identifiers,
+      "items" -> WorkInclude.Items,
+      "subjects" -> WorkInclude.Subjects,
+      "genres" -> WorkInclude.Genres,
+      "contributors" -> WorkInclude.Contributors,
+      "production" -> WorkInclude.Production,
+      "notes" -> WorkInclude.Notes,
+      "dissertation" -> WorkInclude.Dissertation,
+      "alternativeTitles" -> WorkInclude.AlternativeTitles,
     ).emap(values => Right(V2WorksIncludes(values)))
 
   implicit val decodeLocalDate: Decoder[LocalDate] =
