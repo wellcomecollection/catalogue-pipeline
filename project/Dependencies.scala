@@ -107,7 +107,12 @@ object ExternalDependencies {
     val scalaGraph = "1.12.5"
     val scalatest = "3.0.1"
     val logstashLogback = "6.1"
+    val scalajHttpVersion = "2.4.2"
   }
+
+  val scalajHttp = Seq(
+    "org.scalaj" %% "scalaj-http" % versions.scalajHttpVersion
+  )
 
   val logbackDependencies = Seq(
     "ch.qos.logback" % "logback-classic" % versions.logback,
@@ -182,7 +187,7 @@ object ExternalDependencies {
     "io.swagger.core.v3" % "swagger-integration" % versions.swagger,
     "io.swagger.core.v3" % "swagger-jaxrs2" % versions.swagger,
     "javax.ws.rs" % "javax.ws.rs-api" % "2.0.1",
-    "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.8.8",
+    "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.8.8"
   )
 
   val parseDependencies = Seq(
@@ -269,7 +274,7 @@ object CatalogueDependencies {
 
   val metsTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies ++
-      ExternalDependencies.mockitoDependencies ++ ExternalDependencies.wireMockDependencies
+      ExternalDependencies.mockitoDependencies ++ ExternalDependencies.wireMockDependencies ++ ExternalDependencies.scalajHttp
 
   // Sierra adapter stack
 
