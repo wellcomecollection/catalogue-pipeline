@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.api
 
+import scala.reflect.runtime.universe._
 import org.scalatest.Matchers
 import akka.http.scaladsl.model.ContentTypes
 import io.circe.Json
@@ -47,7 +48,10 @@ class ApiSwaggerTest extends ApiV2WorksTestBase with Matchers {
       getKey(endpoint.get, "summary").isEmpty shouldBe false
       val numParams = getKey(endpoint.get, "parameters")
         .flatMap(params => getLength(params))
-      numParams shouldBe Some(2)
+      val numRouteParams = 1
+      numParams shouldBe Some(
+        getNumPublicQueryParams[SingleWorkParams] + numRouteParams
+      )
     }
   }
 
@@ -61,7 +65,10 @@ class ApiSwaggerTest extends ApiV2WorksTestBase with Matchers {
       getKey(endpoint.get, "summary").isEmpty shouldBe false
       val numParams = getKey(endpoint.get, "parameters")
         .flatMap(params => getLength(params))
-      numParams shouldBe Some(11)
+      val numRouteParams = 0
+      numParams shouldBe Some(
+        getNumPublicQueryParams[MultipleWorksParams] + numRouteParams
+      )
     }
   }
 
@@ -88,6 +95,17 @@ class ApiSwaggerTest extends ApiV2WorksTestBase with Matchers {
       arr => Some(arr.length),
       obj => Some(obj.keys.toList.length)
     )
+
+  private def getNumPublicQueryParams[T: TypeTag]: Int =
+    typeOf[T].members
+      .collect {
+        case m: MethodSymbol if m.isCaseAccessor => m.name.toString
+      }
+      .filterNot {
+        _.startsWith("_")
+      }
+      .toList
+      .length
 
   private def checkSwaggerJson(f: Json => Unit) =
     withApi {

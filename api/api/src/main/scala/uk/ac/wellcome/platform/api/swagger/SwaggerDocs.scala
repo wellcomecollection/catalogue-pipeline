@@ -149,6 +149,24 @@ trait MultipleWorksSwagger {
         required = false
       ),
       new Parameter(
+        name = "language",
+        in = ParameterIn.QUERY,
+        description = "Filter the work by language.",
+        required = false
+      ),
+      new Parameter(
+        name = "genres.label",
+        in = ParameterIn.QUERY,
+        description = "Filter the work by genre.",
+        required = false
+      ),
+      new Parameter(
+        name = "subjects.label",
+        in = ParameterIn.QUERY,
+        description = "Filter the work by subject.",
+        required = false
+      ),
+      new Parameter(
         name = "sort",
         in = ParameterIn.QUERY,
         description = "Which field to sort the results on",
