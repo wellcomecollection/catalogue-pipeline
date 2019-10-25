@@ -1,29 +1,28 @@
 package uk.ac.wellcome.display.models
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import io.circe.generic.extras.JsonKey
-import io.swagger.annotations.{ApiModel, ApiModelProperty}
+import io.swagger.v3.oas.annotations.media.Schema
 
 import uk.ac.wellcome.models.work.internal._
 
-@ApiModel(
-  value = "Note",
+@Schema(
+  name = "Note",
   description = "A note associated with the work."
 )
 case class DisplayNote(
-  @ApiModelProperty(value = "The note contents.") contents: List[String],
-  @ApiModelProperty(value = "The type of note.") noteType: DisplayNoteType,
-  @JsonProperty("type") @JsonKey("type") ontologyType: String = "Note"
+  @Schema(description = "The note contents.") contents: List[String],
+  @Schema(description = "The type of note.") noteType: DisplayNoteType,
+  @JsonKey("type") ontologyType: String = "Note"
 )
 
 case class DisplayNoteType(
-  @ApiModelProperty(
-    dataType = "String"
+  @Schema(
+    `type` = "String"
   ) id: String,
-  @ApiModelProperty(
-    dataType = "String"
+  @Schema(
+    `type` = "String"
   ) label: String,
-  @JsonProperty("type") @JsonKey("type") ontologyType: String = "NoteType"
+  @JsonKey("type") ontologyType: String = "NoteType"
 )
 
 object DisplayNote {

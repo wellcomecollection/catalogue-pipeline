@@ -1,19 +1,18 @@
 package uk.ac.wellcome.platform.snapshot_generator.services
 
+import scala.concurrent.{ExecutionContext, Future}
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.Uri
 import akka.stream.ActorMaterializer
 import akka.stream.alpakka.s3.scaladsl.{MultipartUploadResult, S3Client}
 import akka.stream.scaladsl.{Sink, Source}
 import akka.util.ByteString
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.ElasticClient
-import com.twitter.inject.Logging
+import grizzled.slf4j.Logging
+
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.display.models.v2.DisplayWorkV2
-import uk.ac.wellcome.display.modules.DisplayJacksonModule
 import uk.ac.wellcome.elasticsearch.DisplayElasticConfig
 import uk.ac.wellcome.models.work.internal.IdentifiedWork
 import uk.ac.wellcome.platform.snapshot_generator.flow.{
@@ -27,8 +26,6 @@ import uk.ac.wellcome.platform.snapshot_generator.models.{
 }
 import uk.ac.wellcome.platform.snapshot_generator.source.ElasticsearchWorksSource
 
-import scala.concurrent.{ExecutionContext, Future}
-
 class SnapshotService(akkaS3Client: S3Client,
                       elasticClient: ElasticClient,
                       elasticConfig: DisplayElasticConfig)(
@@ -36,8 +33,6 @@ class SnapshotService(akkaS3Client: S3Client,
   materializer: ActorMaterializer,
   ec: ExecutionContext
 ) extends Logging {
-  val objectMapper: ObjectMapper with ScalaObjectMapper =
-    DisplayJacksonModule.provideScalaObjectMapper(injector = null)
 
   val s3Endpoint = akkaS3Client.s3Settings.endpointUrl.getOrElse("s3:/")
 
@@ -88,7 +83,7 @@ class SnapshotService(akkaS3Client: S3Client,
     // This source generates JSON strings of DisplayWork instances, which
     // should be written to the destination snapshot.
     val jsonStrings: Source[String, Any] = displayWorks
-      .via(DisplayWorkToJsonStringFlow(mapper = objectMapper))
+      .via(DisplayWorkToJsonStringFlow.flow)
 
     // This source generates gzip-compressed JSON strings, corresponding to
     // the DisplayWork instances from the source snapshot.

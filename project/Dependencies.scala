@@ -89,7 +89,8 @@ object WellcomeDependencies {
 
 object ExternalDependencies {
   lazy val versions = new {
-    val akka = "2.5.9"
+    val akkaHttp = "10.1.0"
+    val akkaHttpCirce = "1.20.0"
     val akkaStreamAlpakka = "0.20"
     val apacheCommons = "3.7"
     val apacheLogging = "2.8.2"
@@ -97,8 +98,7 @@ object ExternalDependencies {
     val circe = "0.9.0"
     val elastic4s = "7.1.0"
     val fastparse = "2.1.3"
-    val finatra = "19.8.0"
-    val guice = "4.2.0"
+    val swagger = "2.0.10"
     val logback = "1.2.3"
     val mockito = "1.9.5"
     val scalacheck = "1.13.4"
@@ -116,8 +116,10 @@ object ExternalDependencies {
     "net.logstash.logback" % "logstash-logback-encoder" % versions.logstashLogback
   )
 
-  val akkaActorDependencies = Seq(
-    "com.typesafe.akka" %% "akka-actor" % versions.akka
+  val akkaHttpDependencies = Seq(
+    "com.typesafe.akka" %% "akka-http" % versions.akkaHttp,
+    "com.typesafe.akka" %% "akka-http-testkit" % versions.akkaHttp,
+    "de.heikoseeberger" %% "akka-http-circe" % versions.akkaHttpCirce
   )
 
   val alpakkaS3Dependencies = Seq(
@@ -139,27 +141,6 @@ object ExternalDependencies {
     "com.sksamuel.elastic4s" %% "elastic4s-client-esjava" % versions.elastic4s,
     "com.sksamuel.elastic4s" %% "elastic4s-http-streams" % versions.elastic4s,
     "com.sksamuel.elastic4s" %% "elastic4s-testkit" % versions.elastic4s % "test"
-  )
-
-  val finatraDependencies = Seq(
-    "com.twitter" %% "finatra-http" % versions.finatra % "test" classifier "tests",
-    "com.twitter" %% "finatra-http" % versions.finatra,
-    "com.twitter" %% "finatra-httpclient" % versions.finatra,
-    "com.twitter" %% "finatra-jackson" % versions.finatra % "test",
-    "com.twitter" %% "finatra-jackson" % versions.finatra % "test" classifier "tests",
-    "com.twitter" %% "inject-app" % versions.finatra % "test" classifier "tests",
-    "com.twitter" %% "inject-app" % versions.finatra % "test",
-    "com.twitter" %% "inject-core" % versions.finatra,
-    "com.twitter" %% "inject-core" % versions.finatra % "test" classifier "tests",
-    "com.twitter" %% "inject-modules" % versions.finatra % "test",
-    "com.twitter" %% "inject-modules" % versions.finatra % "test" classifier "tests",
-    "com.twitter" %% "inject-server" % versions.finatra % "test" classifier "tests",
-    "com.twitter" %% "inject-server" % versions.finatra % "test"
-  )
-
-  val guiceDependencies = Seq(
-    "com.google.inject" % "guice" % versions.guice,
-    "com.google.inject.extensions" % "guice-testlib" % versions.guice % "test"
   )
 
   val mockitoDependencies: Seq[ModuleID] = Seq(
@@ -191,7 +172,13 @@ object ExternalDependencies {
   )
 
   val swaggerDependencies = Seq(
-    "com.jakehschwartz" %% "finatra-swagger" % versions.finatra
+    "io.swagger.core.v3" % "swagger-core" % versions.swagger,
+    "io.swagger.core.v3" % "swagger-annotations" % versions.swagger,
+    "io.swagger.core.v3" % "swagger-models" % versions.swagger,
+    "io.swagger.core.v3" % "swagger-integration" % versions.swagger,
+    "io.swagger.core.v3" % "swagger-jaxrs2" % versions.swagger,
+    "javax.ws.rs" % "javax.ws.rs-api" % "2.0.1",
+    "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.8.8",
   )
 
   val parseDependencies = Seq(
@@ -217,7 +204,6 @@ object CatalogueDependencies {
 
   val displayModelDependencies =
     ExternalDependencies.swaggerDependencies ++
-      ExternalDependencies.guiceDependencies ++
       ExternalDependencies.scalacheckDependencies
 
   val elasticsearchDependencies: Seq[ModuleID] =
@@ -241,10 +227,8 @@ object CatalogueDependencies {
     WellcomeDependencies.typesafeLibrary
 
   val apiDependencies: Seq[ModuleID] =
-    ExternalDependencies.akkaActorDependencies ++
-      ExternalDependencies.finatraDependencies ++
-      ExternalDependencies.guiceDependencies ++
-      WellcomeDependencies.fixturesLibrary
+      ExternalDependencies.akkaHttpDependencies ++
+      WellcomeDependencies.typesafeLibrary
 
   val goobiReaderDependencies: Seq[ModuleID] =
     ExternalDependencies.mockitoDependencies ++

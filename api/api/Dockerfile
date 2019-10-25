@@ -1,11 +1,5 @@
-FROM wellcome/finatra_service_base:39
+FROM wellcome/typesafe_config_base:104
 
 ADD target/universal/stage /opt/docker
 
-USER root
-RUN chown -R daemon:daemon /opt/docker
-
-ENV project=api
-
-USER daemon
-CMD ["/run.sh"]
+ENV PROJECT api

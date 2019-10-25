@@ -1,21 +1,20 @@
 package uk.ac.wellcome.display.models.v2
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import io.circe.generic.extras.JsonKey
-import io.swagger.annotations.{ApiModel, ApiModelProperty}
+import io.swagger.v3.oas.annotations.media.Schema
 import uk.ac.wellcome.models.work.internal._
 
-@ApiModel(
-  value = "Subject",
+@Schema(
+  name = "Subject",
   description = "A subject"
 )
 case class DisplaySubject(
   id: Option[String] = None,
   identifiers: Option[List[DisplayIdentifierV2]] = None,
-  @ApiModelProperty(value = "A label given to a thing.") label: String,
-  @ApiModelProperty(value = "Relates a subject to a list of concepts.") concepts: List[
+  @Schema(description = "A label given to a thing.") label: String,
+  @Schema(description = "Relates a subject to a list of concepts.") concepts: List[
     DisplayAbstractRootConcept],
-  @JsonProperty("type") @JsonKey("type") ontologyType: String = "Subject"
+  @JsonKey("type") ontologyType: String = "Subject"
 )
 
 object DisplaySubject {

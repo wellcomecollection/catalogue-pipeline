@@ -1,13 +1,7 @@
 package uk.ac.wellcome.platform.api.works
 
-import com.twitter.finagle.http.{Response, Status}
-import com.twitter.finatra.http.EmbeddedHttpServer
-import uk.ac.wellcome.fixtures.TestWith
-
 trait ApiErrorsTestBase { this: ApiWorksTestBase =>
   val apiPrefix: String
-
-  def withServer[R](testWith: TestWith[EmbeddedHttpServer, R]): R
 
   describe("returns a 400 Bad Request for user errors") {
     describe("errors in the ?pageSize query") {
@@ -15,7 +9,7 @@ trait ApiErrorsTestBase { this: ApiWorksTestBase =>
         val pageSize = "penguin"
         assertIsBadRequest(
           s"/works?pageSize=$pageSize",
-          description = s"pageSize: '$pageSize' is not a valid Integer"
+          description = s"pageSize: must be a valid Integer"
         )
       }
 
@@ -23,8 +17,7 @@ trait ApiErrorsTestBase { this: ApiWorksTestBase =>
         val pageSize = 101
         assertIsBadRequest(
           s"/works?pageSize=$pageSize",
-          description =
-            s"pageSize: [$pageSize] is not less than or equal to 100"
+          description = "pageSize: must be between 1 and 100"
         )
       }
 
@@ -32,8 +25,7 @@ trait ApiErrorsTestBase { this: ApiWorksTestBase =>
         val pageSize = 0
         assertIsBadRequest(
           s"/works?pageSize=$pageSize",
-          description =
-            s"pageSize: [$pageSize] is not greater than or equal to 1"
+          description = "pageSize: must be between 1 and 100"
         )
       }
 
@@ -41,8 +33,7 @@ trait ApiErrorsTestBase { this: ApiWorksTestBase =>
         val pageSize = 100000
         assertIsBadRequest(
           s"/works?pageSize=$pageSize",
-          description =
-            s"pageSize: [$pageSize] is not less than or equal to 100"
+          description = "pageSize: must be between 1 and 100"
         )
       }
 
@@ -50,8 +41,7 @@ trait ApiErrorsTestBase { this: ApiWorksTestBase =>
         val pageSize = -50
         assertIsBadRequest(
           s"/works?pageSize=$pageSize",
-          description =
-            s"pageSize: [$pageSize] is not greater than or equal to 1"
+          description = "pageSize: must be between 1 and 100"
         )
       }
     }
@@ -61,7 +51,7 @@ trait ApiErrorsTestBase { this: ApiWorksTestBase =>
         val page = 0
         assertIsBadRequest(
           s"/works?page=$page",
-          description = s"page: [$page] is not greater than or equal to 1"
+          description = "page: must be greater than 1"
         )
       }
 
@@ -69,7 +59,7 @@ trait ApiErrorsTestBase { this: ApiWorksTestBase =>
         val page = -50
         assertIsBadRequest(
           s"/works?page=$page",
-          description = s"page: [$page] is not greater than or equal to 1"
+          description = "page: must be greater than 1"
         )
       }
     }
@@ -108,7 +98,7 @@ trait ApiErrorsTestBase { this: ApiWorksTestBase =>
       assertIsBadRequest(
         s"/works?pageSize=$pageSize&page=$page",
         description =
-          s"page: [$page] is not greater than or equal to 1, pageSize: [$pageSize] is not greater than or equal to 1"
+          "page: must be greater than 1, pageSize: must be between 1 and 100"
       )
     }
   }
@@ -162,46 +152,47 @@ trait ApiErrorsTestBase { this: ApiWorksTestBase =>
     //
     // By creating an index without a mapping, we don't have a canonicalId field
     // to sort on.  Trying to query this index of these will trigger one such exception!
-    withHttpServer { server: EmbeddedHttpServer =>
-      withEmptyIndex { index =>
-        server.httpGet(
-          path = s"/${getApiPrefix()}/works?_index=${index.name}",
-          andExpect = Status.InternalServerError,
-          withJsonBody = s"""
-               |{
-               |  "@context": "${contextUrl(getApiPrefix())}",
-               |  "type": "Error",
-               |  "errorType": "http",
-               |  "httpStatus": 500,
-               |  "label": "Internal Server Error"
-               |}
-               """.stripMargin
-        )
-      }
+    withApi {
+      case (index, routes) =>
+        withEmptyIndex { index =>
+          val path = s"/${getApiPrefix()}/works?_index=${index.name}"
+          assertJsonResponse(routes, path)(
+            Status.InternalServerError ->
+              s"""
+             |{
+             |  "@context": "${contextUrl(getApiPrefix())}",
+             |  "type": "Error",
+             |  "errorType": "http",
+             |  "httpStatus": 500,
+             |  "label": "Internal Server Error"
+             |}
+            """.stripMargin
+          )
+        }
     }
   }
 
-  def assertIsBadRequest(path: String, description: String): Response =
-    withServer { server: EmbeddedHttpServer =>
-      server.httpGet(
-        path = s"/$apiPrefix$path",
-        andExpect = Status.BadRequest,
-        withJsonBody = badRequest(
-          apiPrefix = apiPrefix,
-          description = description
+  def assertIsBadRequest(path: String, description: String) =
+    withApi {
+      case (index, routes) =>
+        assertJsonResponse(routes, s"/$apiPrefix$path")(
+          Status.BadRequest ->
+            badRequest(
+              apiPrefix = apiPrefix,
+              description = description
+            )
         )
-      )
     }
 
-  def assertIsNotFound(path: String, description: String): Response =
-    withServer { server: EmbeddedHttpServer =>
-      server.httpGet(
-        path = s"/$apiPrefix$path",
-        andExpect = Status.NotFound,
-        withJsonBody = notFound(
-          apiPrefix = apiPrefix,
-          description = description
+  def assertIsNotFound(path: String, description: String) =
+    withApi {
+      case (index, routes) =>
+        assertJsonResponse(routes, s"/$apiPrefix$path")(
+          Status.NotFound ->
+            notFound(
+              apiPrefix = apiPrefix,
+              description = description
+            )
         )
-      )
     }
 }

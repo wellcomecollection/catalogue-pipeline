@@ -32,13 +32,6 @@ trait ElasticsearchFixtures
   private val esHost = "localhost"
   private val esPort = 9200
 
-  def displayEsLocalFlags(indexV1: Index, indexV2: Index) =
-    Map(
-      "es.host" -> esHost,
-      "es.port" -> esPort.toString,
-      "es.index.v2" -> indexV2.name
-    )
-
   val elasticClient: ElasticClient = ElasticClientBuilder.create(
     hostname = esHost,
     port = esPort,

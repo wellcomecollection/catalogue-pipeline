@@ -1,12 +1,11 @@
 package uk.ac.wellcome.display.models.v2
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import io.circe.generic.extras.JsonKey
-import io.swagger.annotations.{ApiModel, ApiModelProperty}
+import io.swagger.v3.oas.annotations.media.Schema
 import uk.ac.wellcome.models.work.internal._
 
-@ApiModel(
-  value = "Concept"
+@Schema(
+  name = "Concept"
 )
 sealed trait DisplayAbstractRootConcept {
   val id: Option[String]
@@ -38,8 +37,8 @@ object DisplayAbstractRootConcept {
     }
 }
 
-@ApiModel(
-  value = "Concept"
+@Schema(
+  name = "Concept"
 )
 sealed trait DisplayAbstractConcept extends DisplayAbstractRootConcept
 
@@ -113,44 +112,44 @@ case object DisplayAbstractConcept {
     }
 }
 
-@ApiModel(
-  value = "Concept",
+@Schema(
+  name = "Concept",
   description = "A broad concept"
 )
 case class DisplayConcept(
-  @ApiModelProperty(
-    dataType = "String",
-    value = "The canonical identifier given to a thing"
+  @Schema(
+    `type` = "String",
+    description = "The canonical identifier given to a thing"
   ) id: Option[String] = None,
-  @ApiModelProperty(
-    dataType = "List[uk.ac.wellcome.display.models.v2.DisplayIdentifierV2]",
-    value =
+  @Schema(
+    `type` = "List[uk.ac.wellcome.display.models.v2.DisplayIdentifierV2]",
+    description =
       "Relates the item to a unique system-generated identifier that governs interaction between systems and is regarded as canonical within the Wellcome data ecosystem."
   ) identifiers: Option[List[DisplayIdentifierV2]] = None,
-  @ApiModelProperty(
-    dataType = "String"
+  @Schema(
+    `type` = "String"
   ) label: String,
-  @JsonProperty("type") @JsonKey("type") ontologyType: String = "Concept"
+  @JsonKey("type") ontologyType: String = "Concept"
 ) extends DisplayAbstractConcept
 
-@ApiModel(
-  value = "Period",
+@Schema(
+  name = "Period",
   description = "A period of time"
 )
 case class DisplayPeriod(
-  @ApiModelProperty(
-    dataType = "String",
-    value = "The canonical identifier given to a thing"
+  @Schema(
+    `type` = "String",
+    description = "The canonical identifier given to a thing"
   ) id: Option[String] = None,
-  @ApiModelProperty(
-    dataType = "List[uk.ac.wellcome.display.models.v2.DisplayIdentifierV2]",
-    value =
+  @Schema(
+    `type` = "List[uk.ac.wellcome.display.models.v2.DisplayIdentifierV2]",
+    description =
       "Relates the item to a unique system-generated identifier that governs interaction between systems and is regarded as canonical within the Wellcome data ecosystem."
   ) identifiers: Option[List[DisplayIdentifierV2]] = None,
-  @ApiModelProperty(
-    dataType = "String"
+  @Schema(
+    `type` = "String"
   ) label: String,
-  @JsonProperty("type") @JsonKey("type") ontologyType: String = "Period"
+  @JsonKey("type") ontologyType: String = "Period"
 ) extends DisplayAbstractConcept
 
 case object DisplayPeriod {
@@ -159,24 +158,24 @@ case object DisplayPeriod {
   )
 }
 
-@ApiModel(
-  value = "Place",
+@Schema(
+  name = "Place",
   description = "A place"
 )
 case class DisplayPlace(
-  @ApiModelProperty(
-    dataType = "String",
-    value = "The canonical identifier given to a thing"
+  @Schema(
+    `type` = "String",
+    description = "The canonical identifier given to a thing"
   ) id: Option[String] = None,
-  @ApiModelProperty(
-    dataType = "List[uk.ac.wellcome.display.models.v2.DisplayIdentifierV2]",
-    value =
+  @Schema(
+    `type` = "List[uk.ac.wellcome.display.models.v2.DisplayIdentifierV2]",
+    description =
       "Relates the item to a unique system-generated identifier that governs interaction between systems and is regarded as canonical within the Wellcome data ecosystem."
   ) identifiers: Option[List[DisplayIdentifierV2]] = None,
-  @ApiModelProperty(
-    dataType = "String"
+  @Schema(
+    `type` = "String"
   ) label: String,
-  @JsonProperty("type") @JsonKey("type") ontologyType: String = "Place"
+  @JsonKey("type") ontologyType: String = "Place"
 ) extends DisplayAbstractConcept
 
 case object DisplayPlace {
@@ -185,8 +184,8 @@ case object DisplayPlace {
   )
 }
 
-@ApiModel(
-  value = "Agent"
+@Schema(
+  name = "Agent"
 )
 sealed trait DisplayAbstractAgentV2 extends DisplayAbstractRootConcept
 
@@ -229,76 +228,79 @@ case object DisplayAbstractAgentV2 {
     }
 }
 
-@ApiModel(
-  value = "Agent"
+@Schema(
+  name = "Agent"
 )
 case class DisplayAgentV2(
   id: Option[String],
   identifiers: Option[List[DisplayIdentifierV2]],
-  @ApiModelProperty(
-    value = "The name of the agent"
+  @Schema(
+    description = "The name of the agent"
   ) label: String,
-  @JsonProperty("type") @JsonKey("type") ontologyType: String = "Agent"
+  @JsonKey("type") ontologyType: String = "Agent"
 ) extends DisplayAbstractAgentV2
 
-@ApiModel(
-  value = "Person"
+@Schema(
+  name = "Person"
 )
 case class DisplayPersonV2(
-  @ApiModelProperty(
-    dataType = "String",
+  @Schema(
+    `type` = "String",
     readOnly = true,
-    value = "The canonical identifier given to a thing.") id: Option[String],
-  @ApiModelProperty(
-    dataType = "List[uk.ac.wellcome.display.models.v2.DisplayIdentifierV2]",
-    value =
+    description = "The canonical identifier given to a thing.") id: Option[
+    String],
+  @Schema(
+    `type` = "List[uk.ac.wellcome.display.models.v2.DisplayIdentifierV2]",
+    description =
       "Relates the item to a unique system-generated identifier that governs interaction between systems and is regarded as canonical within the Wellcome data ecosystem."
   ) identifiers: Option[List[DisplayIdentifierV2]],
-  @ApiModelProperty(
-    value = "The name of the person"
+  @Schema(
+    description = "The name of the person"
   ) label: String,
-  @ApiModelProperty(
-    dataType = "String",
-    value = "The title of the person"
+  @Schema(
+    `type` = "String",
+    description = "The title of the person"
   ) prefix: Option[String] = None,
-  @ApiModelProperty(
-    dataType = "String",
-    value = "The numeration of the person"
+  @Schema(
+    `type` = "String",
+    description = "The numeration of the person"
   ) numeration: Option[String] = None,
-  @JsonProperty("type") @JsonKey("type") ontologyType: String = "Person")
+  @JsonKey("type") ontologyType: String = "Person")
     extends DisplayAbstractAgentV2
 
-@ApiModel(
-  value = "Organisation"
+@Schema(
+  name = "Organisation"
 )
 case class DisplayOrganisationV2(
-  @ApiModelProperty(
-    dataType = "String",
+  @Schema(
+    `type` = "String",
     readOnly = true,
-    value = "The canonical identifier given to a thing.") id: Option[String],
-  @ApiModelProperty(
-    dataType = "List[uk.ac.wellcome.display.models.v2.DisplayIdentifierV2]",
-    value =
+    description = "The canonical identifier given to a thing.") id: Option[
+    String],
+  @Schema(
+    `type` = "List[uk.ac.wellcome.display.models.v2.DisplayIdentifierV2]",
+    description =
       "Relates the item to a unique system-generated identifier that governs interaction between systems and is regarded as canonical within the Wellcome data ecosystem."
   ) identifiers: Option[List[DisplayIdentifierV2]],
-  @ApiModelProperty(
-    value = "The name of the organisation"
+  @Schema(
+    description = "The name of the organisation"
   ) label: String,
-  @JsonProperty("type") @JsonKey("type") ontologyType: String = "Organisation")
+  @JsonKey("type") ontologyType: String = "Organisation")
     extends DisplayAbstractAgentV2
 
 case class DisplayMeetingV2(
-  @ApiModelProperty(
-    dataType = "String",
+  @Schema(
+    `type` = "String",
     readOnly = true,
-    value = "The canonical identifier given to a thing.") id: Option[String],
-  @ApiModelProperty(
-    dataType = "List[uk.ac.wellcome.display.models.v2.DisplayIdentifierV2]",
-    value =
+    description = "The canonical identifier given to a thing.") id: Option[
+    String],
+  @Schema(
+    `type` = "List[uk.ac.wellcome.display.models.v2.DisplayIdentifierV2]",
+    description =
       "Relates the item to a unique system-generated identifier that governs interaction between systems and is regarded as canonical within the Wellcome data ecosystem."
   ) identifiers: Option[List[DisplayIdentifierV2]],
-  @ApiModelProperty(
-    value = "The name of the meeting"
+  @Schema(
+    description = "The name of the meeting"
   ) label: String,
-  @JsonProperty("type") @JsonKey("type") ontologyType: String = "Meeting")
+  @JsonKey("type") ontologyType: String = "Meeting")
     extends DisplayAbstractAgentV2

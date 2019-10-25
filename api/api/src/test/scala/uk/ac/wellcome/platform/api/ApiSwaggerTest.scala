@@ -1,149 +1,119 @@
 package uk.ac.wellcome.platform.api
 
-import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
-import com.twitter.finagle.http.{Response, Status}
-import org.scalatest.{FunSpec, Matchers}
-import uk.ac.wellcome.display.models.ApiVersions
+import scala.reflect.runtime.universe._
+import org.scalatest.Matchers
+import akka.http.scaladsl.model.ContentTypes
+import io.circe.Json
 
-import scala.collection.JavaConverters._
+import uk.ac.wellcome.platform.api.works.v2.ApiV2WorksTestBase
 
-class ApiSwaggerTest extends FunSpec with Matchers with fixtures.Server {
+class ApiSwaggerTest extends ApiV2WorksTestBase with Matchers {
 
-  describe("all API versions") {
-    it("returns a valid JSON response") {
-      allResponses.foreach {
-        case (version: ApiVersions.Value, response: JsonNode) =>
-          response.at("/host").toString should be("\"test.host\"")
-          response.at("/schemes").toString should be("[\"http\"]")
-          response.at("/info/version").toString should be(
-            s""""${version.toString}"""")
-          response.at("/basePath").toString should be("")
-      }
-    }
-
-    it("includes the DisplayError model") {
-      allResponses.values.foreach { response: JsonNode =>
-        response.at("/definitions/Error/type").toString should be("\"object\"")
-      }
-    }
-
-    it("shows only the endpoints for the specified version") {
-      allResponses.foreach {
-        case (version: ApiVersions.Value, response: JsonNode) =>
-          response.at("/paths").isObject shouldBe true
-          response
-            .at("/paths")
-            .fieldNames
-            .asScala
-            .toList should contain only (s"/catalogue/${version.toString}/works", s"/catalogue/${version.toString}/works/{id}")
-      }
-    }
-
-    it("doesn't show DisplayWork in the definitions") {
-      allResponses.values.foreach { response: JsonNode =>
-        response
-          .at("/definitions")
-          .fieldNames
-          .asScala
-          .toList shouldNot contain("DisplayWork")
-      }
-    }
-
-    it("shows Work as the items type in ResultList") {
-      allResponses.values.foreach { response: JsonNode =>
-        response
-          .at(s"/definitions/ResultList/properties/results/items/$$ref")
-          .toString shouldBe "\"#/definitions/Work\""
-      }
+  it("should return valid json object") {
+    checkSwaggerJson { json =>
+      json.isObject shouldBe true
     }
   }
 
-  describe("v2") {
-    it("shows the correct Work model") {
-      v2response.at("/definitions/Work").isObject shouldBe true
-      v2response
-        .at("/definitions/Work/properties/contributors/type")
-        .toString shouldBe "\"array\""
-    }
-
-    it("shows the include request parameter model") {
-      v2response.at("/definitions/Work").isObject shouldBe true
-      val parameters = v2response
-        .at("/paths")
-        .findPath(s"/catalogue/${ApiVersions.v2.toString}/works")
-        .at("/get/parameters")
-        .asScala
-        .map(_.findPath("name").asText())
-
-      parameters should contain("include")
-      parameters should not contain "includes"
-    }
-
-    it("shows the correct Subject model") {
-      v2response.at("/definitions/Subject").isObject shouldBe true
-      v2response
-        .at("/definitions/Subject/properties/concepts/type")
-        .toString shouldBe "\"array\""
-      v2response
-        .at("/definitions/Subject/properties/concepts/items/$ref")
-        .toString shouldBe "\"#/definitions/Concept\""
-    }
-
-    it("shows the type of contributors") {
-      v2response
-        .at("/definitions/Work/properties/contributors/items/$ref")
-        .toString shouldBe "\"#/definitions/Contributor\""
-    }
-
-    it("shows the correct Genre model") {
-      v2response.at("/definitions/Genre").isObject shouldBe true
-      v2response
-        .at("/definitions/Genre/properties/concepts/type")
-        .toString shouldBe "\"array\""
-      v2response
-        .at("/definitions/Genre/properties/concepts/items/$ref")
-        .toString shouldBe "\"#/definitions/Concept\""
-    }
-
-    it("includes the filter query parameters") {
-      val parameters = v2response
-        .at("/paths")
-        .findPath(s"/catalogue/${ApiVersions.v2.toString}/works")
-        .at("/get/parameters")
-        .asScala
-        .map(_.findPath("name").asText())
-
-      parameters should contain("items.locations.locationType")
-      parameters should contain("workType")
+  it("should contain info") {
+    checkSwaggerJson { json =>
+      val info = getKey(json, "info")
+      info.isEmpty shouldBe false
+      getKey(info.get, "version") shouldBe Some(Json.fromString("v2"))
+      getKey(info.get, "description") shouldBe Some(
+        Json.fromString("Search our collections"))
+      getKey(info.get, "title") shouldBe Some(Json.fromString("Catalogue"))
     }
   }
 
-  val v2response: JsonNode = readTree(
-    s"/catalogue/${ApiVersions.v2.toString}/swagger.json")
-
-  val allResponses = Map(
-    ApiVersions.v2 -> v2response,
-  )
-
-  def readTree(path: String): JsonNode = {
-    val flags = Map(
-      "api.host" -> "test.host",
-      "api.scheme" -> "http",
-      "api.name" -> "catalogue",
-      "es.index.v2" -> "v2"
-    )
-
-    val response: Response = withServer(flags) { server =>
-      server.httpGet(
-        path = path,
-        andExpect = Status.Ok
+  it("should contain servers") {
+    checkSwaggerJson { json =>
+      getKey(json, "servers") shouldBe Some(
+        Json.arr(
+          Json.obj(
+            "url" -> Json.fromString("https://api-testing.local/catalogue/v2/")
+          )
+        )
       )
     }
-
-    val mapper = new ObjectMapper()
-
-    noException should be thrownBy { mapper.readTree(response.contentString) }
-
-    mapper.readTree(response.contentString)
   }
+
+  it("should contain single work endpoint in paths") {
+    checkSwaggerJson { json =>
+      val endpoint = getKey(json, "paths")
+        .flatMap(paths => getKey(paths, "/works/:id"))
+        .flatMap(path => getKey(path, "get"))
+      endpoint.isEmpty shouldBe false
+      getKey(endpoint.get, "description").isEmpty shouldBe false
+      getKey(endpoint.get, "summary").isEmpty shouldBe false
+      val numParams = getKey(endpoint.get, "parameters")
+        .flatMap(params => getLength(params))
+      val numRouteParams = 1
+      numParams shouldBe Some(
+        getNumPublicQueryParams[SingleWorkParams] + numRouteParams
+      )
+    }
+  }
+
+  it("should contain multiple work endpoints in paths") {
+    checkSwaggerJson { json =>
+      val endpoint = getKey(json, "paths")
+        .flatMap(paths => getKey(paths, "/works"))
+        .flatMap(path => getKey(path, "get"))
+      endpoint.isEmpty shouldBe false
+      getKey(endpoint.get, "description").isEmpty shouldBe false
+      getKey(endpoint.get, "summary").isEmpty shouldBe false
+      val numParams = getKey(endpoint.get, "parameters")
+        .flatMap(params => getLength(params))
+      val numRouteParams = 0
+      numParams shouldBe Some(
+        getNumPublicQueryParams[MultipleWorksParams] + numRouteParams
+      )
+    }
+  }
+
+  it("should contain schemas") {
+    checkSwaggerJson { json =>
+      val numSchemas = getKey(json, "components")
+        .flatMap(components => getKey(components, "schemas"))
+        .flatMap(getLength)
+      numSchemas.isEmpty shouldBe false
+      numSchemas.get should be > 40
+    }
+  }
+
+  private def getKey(json: Json, key: String): Option[Json] =
+    json.arrayOrObject(
+      None,
+      _ => None,
+      obj => obj.toMap.get(key)
+    )
+
+  private def getLength(json: Json): Option[Int] =
+    json.arrayOrObject(
+      None,
+      arr => Some(arr.length),
+      obj => Some(obj.keys.toList.length)
+    )
+
+  private def getNumPublicQueryParams[T: TypeTag]: Int =
+    typeOf[T].members
+      .collect {
+        case m: MethodSymbol if m.isCaseAccessor => m.name.toString
+      }
+      .filterNot {
+        _.startsWith("_")
+      }
+      .toList
+      .length
+
+  private def checkSwaggerJson(f: Json => Unit) =
+    withApi {
+      case (indexV2, routes) =>
+        Get(s"/$apiPrefix/swagger.json") ~> routes ~> check {
+          status shouldEqual Status.OK
+          contentType shouldEqual ContentTypes.`application/json`
+          f(parseJson(responseAs[String]).toOption.get)
+        }
+    }
 }

@@ -1,25 +1,23 @@
 package uk.ac.wellcome.display.models.v2
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import io.circe.generic.extras.JsonKey
-import io.swagger.annotations.{ApiModel, ApiModelProperty}
+import io.swagger.v3.oas.annotations.media.Schema
 import uk.ac.wellcome.models.work.internal._
 
-@ApiModel(
-  value = "ProductionEvent",
+@Schema(
+  name = "ProductionEvent",
   description =
     "An event contributing to the production, publishing or distribution of a work."
 )
 case class DisplayProductionEvent(
-  @ApiModelProperty label: String,
-  @ApiModelProperty places: List[DisplayPlace],
-  @ApiModelProperty agents: List[DisplayAbstractAgentV2],
-  @ApiModelProperty dates: List[DisplayPeriod],
-  @ApiModelProperty(
-    dataType = "uk.ac.wellcome.display.models.v2.DisplayAbstractConcept"
+  @Schema label: String,
+  @Schema places: List[DisplayPlace],
+  @Schema agents: List[DisplayAbstractAgentV2],
+  @Schema dates: List[DisplayPeriod],
+  @Schema(
+    `type` = "uk.ac.wellcome.display.models.v2.DisplayAbstractConcept"
   ) function: Option[DisplayAbstractConcept],
-  @JsonProperty("type") @JsonKey("type") ontologyType: String =
-    "ProductionEvent"
+  @JsonKey("type") ontologyType: String = "ProductionEvent"
 )
 
 object DisplayProductionEvent {

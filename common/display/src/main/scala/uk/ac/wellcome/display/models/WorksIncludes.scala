@@ -1,44 +1,62 @@
 package uk.ac.wellcome.display.models
 
+sealed trait WorkInclude
+
+object WorkInclude {
+  case object Identifiers extends WorkInclude
+  case object Items extends WorkInclude
+  case object Subjects extends WorkInclude
+  case object Genres extends WorkInclude
+  case object Contributors extends WorkInclude
+  case object Production extends WorkInclude
+  case object Notes extends WorkInclude
+  case object Dissertation extends WorkInclude
+  case object AlternativeTitles extends WorkInclude
+}
+
 trait WorksIncludes
 
-case class V2WorksIncludes(
-  identifiers: Boolean = false,
-  items: Boolean = false,
-  subjects: Boolean = false,
-  genres: Boolean = false,
-  contributors: Boolean = false,
-  production: Boolean = false,
-  notes: Boolean = false,
-  dissertation: Boolean = false,
-  alternativeTitles: Boolean = false,
-) extends WorksIncludes
+case class V2WorksIncludes(includes: List[WorkInclude]) extends WorksIncludes {
+  def identifiers = includes.contains(WorkInclude.Identifiers)
+  def items = includes.contains(WorkInclude.Items)
+  def subjects = includes.contains(WorkInclude.Subjects)
+  def genres = includes.contains(WorkInclude.Genres)
+  def contributors = includes.contains(WorkInclude.Contributors)
+  def production = includes.contains(WorkInclude.Production)
+  def notes = includes.contains(WorkInclude.Notes)
+  def dissertation = includes.contains(WorkInclude.Dissertation)
+  def alternativeTitles = includes.contains(WorkInclude.AlternativeTitles)
+}
 
 object V2WorksIncludes {
 
-  val recognisedIncludes = List(
-    "identifiers",
-    "items",
-    "subjects",
-    "genres",
-    "contributors",
-    "production",
-    "notes",
-    "dissertation",
-    "alternativeTitles",
+  import WorkInclude._
+
+  def apply(
+    identifiers: Boolean = false,
+    items: Boolean = false,
+    subjects: Boolean = false,
+    genres: Boolean = false,
+    contributors: Boolean = false,
+    production: Boolean = false,
+    notes: Boolean = false,
+    dissertation: Boolean = false,
+    alternativeTitles: Boolean = false,
+  ): V2WorksIncludes = V2WorksIncludes(
+    List(
+      if (identifiers) Some(Identifiers) else None,
+      if (items) Some(Items) else None,
+      if (subjects) Some(Subjects) else None,
+      if (genres) Some(Genres) else None,
+      if (contributors) Some(Contributors) else None,
+      if (production) Some(Production) else None,
+      if (notes) Some(Notes) else None,
+      if (dissertation) Some(Dissertation) else None,
+      if (alternativeTitles) Some(AlternativeTitles) else None,
+    ).flatten
   )
 
-  def apply(includesList: List[String]): V2WorksIncludes = V2WorksIncludes(
-    identifiers = includesList.contains("identifiers"),
-    items = includesList.contains("items"),
-    subjects = includesList.contains("subjects"),
-    genres = includesList.contains("genres"),
-    contributors = includesList.contains("contributors"),
-    production = includesList.contains("production"),
-    notes = includesList.contains("notes"),
-    dissertation = includesList.contains("dissertation"),
-    alternativeTitles = includesList.contains("alternativeTitles"),
+  def includeAll(): V2WorksIncludes = V2WorksIncludes(
+    true, true, true, true, true, true, true, true, true
   )
-
-  def includeAll() = V2WorksIncludes(recognisedIncludes)
 }
