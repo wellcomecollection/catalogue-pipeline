@@ -48,7 +48,8 @@ case class UnidentifiedWork(
   data: WorkData[MaybeDisplayable],
   ontologyType: String = "Work",
   identifiedType: String = classOf[IdentifiedWork].getSimpleName
-) extends TransformedBaseWork with MultipleSourceIdentifiers {
+) extends TransformedBaseWork
+    with MultipleSourceIdentifiers {
   val otherIdentifiers = data.otherIdentifiers
 }
 
@@ -58,7 +59,8 @@ case class IdentifiedWork(
   sourceIdentifier: SourceIdentifier,
   data: WorkData[Displayable],
   ontologyType: String = "Work"
-) extends IdentifiedBaseWork with MultipleSourceIdentifiers {
+) extends IdentifiedBaseWork
+    with MultipleSourceIdentifiers {
   val otherIdentifiers = data.otherIdentifiers
 
   def withData(f: WorkData[Displayable] => WorkData[Displayable]) =
@@ -69,24 +71,28 @@ case class UnidentifiedInvisibleWork(
   version: Int,
   sourceIdentifier: SourceIdentifier,
   identifiedType: String = classOf[IdentifiedInvisibleWork].getSimpleName
-) extends TransformedBaseWork with InvisibleWork
+) extends TransformedBaseWork
+    with InvisibleWork
 
 case class IdentifiedInvisibleWork(
   canonicalId: String,
   version: Int,
   sourceIdentifier: SourceIdentifier,
-) extends IdentifiedBaseWork with InvisibleWork
+) extends IdentifiedBaseWork
+    with InvisibleWork
 
 case class UnidentifiedRedirectedWork(
   sourceIdentifier: SourceIdentifier,
   version: Int,
   redirect: IdentifiableRedirect,
   identifiedType: String = classOf[IdentifiedRedirectedWork].getSimpleName
-) extends TransformedBaseWork with RedirectedWork
+) extends TransformedBaseWork
+    with RedirectedWork
 
 case class IdentifiedRedirectedWork(
   canonicalId: String,
   sourceIdentifier: SourceIdentifier,
   version: Int,
   redirect: IdentifiedRedirect
-) extends IdentifiedBaseWork with RedirectedWork
+) extends IdentifiedBaseWork
+    with RedirectedWork

@@ -17,8 +17,12 @@ class ApiV2WorksIncludesTest
       case (indexV2, routes) =>
         val identifier0 = createSourceIdentifier
         val identifier1 = createSourceIdentifier
-        val work0 = createIdentifiedWorkWith(canonicalId = "1", otherIdentifiers = List(identifier0))
-        val work1 = createIdentifiedWorkWith(canonicalId = "2", otherIdentifiers = List(identifier1))
+        val work0 = createIdentifiedWorkWith(
+          canonicalId = "1",
+          otherIdentifiers = List(identifier0))
+        val work1 = createIdentifiedWorkWith(
+          canonicalId = "2",
+          otherIdentifiers = List(identifier1))
 
         insertIntoElasticsearch(indexV2, work0, work1)
 
@@ -114,8 +118,10 @@ class ApiV2WorksIncludesTest
       case (indexV2, routes) =>
         val subjects1 = List(createSubject)
         val subjects2 = List(createSubject)
-        val work0 = createIdentifiedWorkWith(canonicalId = "1", subjects = subjects1)
-        val work1 = createIdentifiedWorkWith(canonicalId = "2", subjects = subjects2)
+        val work0 =
+          createIdentifiedWorkWith(canonicalId = "1", subjects = subjects1)
+        val work1 =
+          createIdentifiedWorkWith(canonicalId = "2", subjects = subjects2)
 
         insertIntoElasticsearch(indexV2, work0, work1)
 
@@ -177,8 +183,10 @@ class ApiV2WorksIncludesTest
           Genre("ornithology", List(Unidentifiable(Concept("ornithology")))))
         val genres2 = List(
           Genre("flying cars", List(Unidentifiable(Concept("flying cars")))))
-        val work0 = createIdentifiedWorkWith(canonicalId = "1", genres = genres1)
-        val work1 = createIdentifiedWorkWith(canonicalId = "2", genres = genres2)
+        val work0 =
+          createIdentifiedWorkWith(canonicalId = "1", genres = genres1)
+        val work1 =
+          createIdentifiedWorkWith(canonicalId = "2", genres = genres2)
 
         insertIntoElasticsearch(indexV2, work0, work1)
 
@@ -242,8 +250,12 @@ class ApiV2WorksIncludesTest
           List(Contributor(Unidentifiable(Person("Ginger Rogers"))))
         val contributors2 =
           List(Contributor(Unidentifiable(Person("Fred Astair"))))
-        val work0 = createIdentifiedWorkWith(canonicalId = "1", contributors = contributors1)
-        val work1 = createIdentifiedWorkWith(canonicalId = "2", contributors = contributors2)
+        val work0 = createIdentifiedWorkWith(
+          canonicalId = "1",
+          contributors = contributors1)
+        val work1 = createIdentifiedWorkWith(
+          canonicalId = "2",
+          contributors = contributors2)
 
         insertIntoElasticsearch(indexV2, work0, work1)
 
@@ -304,8 +316,12 @@ class ApiV2WorksIncludesTest
       case (indexV2, routes) =>
         val productionEvents1 = createProductionEventList(count = 1)
         val productionEvents2 = createProductionEventList(count = 2)
-        val work0 = createIdentifiedWorkWith(canonicalId = "1", production = productionEvents1)
-        val work1 = createIdentifiedWorkWith(canonicalId = "2", production = productionEvents2)
+        val work0 = createIdentifiedWorkWith(
+          canonicalId = "1",
+          production = productionEvents1)
+        val work1 = createIdentifiedWorkWith(
+          canonicalId = "2",
+          production = productionEvents2)
 
         insertIntoElasticsearch(indexV2, work0, work1)
 

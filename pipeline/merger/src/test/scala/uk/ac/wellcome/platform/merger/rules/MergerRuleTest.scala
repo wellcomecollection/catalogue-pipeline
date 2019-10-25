@@ -64,7 +64,8 @@ class MergerRuleTest extends FunSpec with WorksGenerators with Matchers {
 
     val works = createUnidentifiedWorks(5)
 
-    val expectedMergedWork = works.head.copy(data = works.head.data.copy(merged = true))
+    val expectedMergedWork =
+      works.head.copy(data = works.head.data.copy(merged = true))
     val expectedRedirectedWork = UnidentifiedRedirectedWork(
       version = 1,
       sourceIdentifier = works.tail.head.sourceIdentifier,

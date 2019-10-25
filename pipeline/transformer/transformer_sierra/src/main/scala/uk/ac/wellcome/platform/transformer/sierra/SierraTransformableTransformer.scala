@@ -4,8 +4,8 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.exceptions.JsonDecodingError
 import uk.ac.wellcome.models.transformable.SierraTransformable
 import uk.ac.wellcome.models.transformable.sierra.{
-  SierraBibRecord,
   SierraBibNumber,
+  SierraBibRecord,
   SierraItemNumber
 }
 import uk.ac.wellcome.models.work.internal._
