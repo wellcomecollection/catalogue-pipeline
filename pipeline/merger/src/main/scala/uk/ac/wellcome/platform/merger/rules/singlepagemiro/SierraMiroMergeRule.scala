@@ -35,8 +35,8 @@ object SierraMiroMergeRule
           List(miroItem: Unidentifiable[Item])) =>
         info(s"Merging ${describeWorkPair(sierraWork, miroWork)}.")
 
-        val mergedWork = sierraWork.copy(
-          data = sierraWork.data.copy(
+        val mergedWork = sierraWork.withData { data =>
+          data.copy(
             otherIdentifiers = mergeIdentifiers(sierraWork, miroWork),
             items = mergeItems(sierraItem, miroItem),
             // We always copy across the thumbnail from the Miro work, at least
@@ -45,7 +45,7 @@ object SierraMiroMergeRule
             // this field, but right now it's empty on all Sierra works.
             thumbnail = miroWork.data.thumbnail
           )
-        )
+        }
 
         Some(
           MergedWork(

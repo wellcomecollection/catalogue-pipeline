@@ -62,10 +62,9 @@ class RecorderWorkerServiceTest
         withVHS { vhs =>
           withWorkerService(queue, vhs, msgSender) { service =>
             val olderWork = createUnidentifiedWork
-            val newerWork = olderWork.copy(
-              version = 10,
-              data = olderWork.data.copy(title = "A nice new thing")
-            )
+            val newerWork = olderWork
+              .copy(version = 10)
+              .withData(data =>  data.copy(title = "A nice new thing"))
             sendMessage[TransformedBaseWork](queue = queue, newerWork)
             eventually { assertWorkStored(vhs, newerWork) }
             sendMessage[TransformedBaseWork](queue = queue, obj = olderWork)
@@ -83,10 +82,9 @@ class RecorderWorkerServiceTest
         withVHS { vhs =>
           withWorkerService(queue, vhs, msgSender) { service =>
             val olderWork = createUnidentifiedWork
-            val newerWork = olderWork.copy(
-              version = 10,
-              data = olderWork.data.copy(title = "A nice new thing")
-            )
+            val newerWork = olderWork
+              .copy(version = 10)
+              .withData(data =>  data.copy(title = "A nice new thing"))
             sendMessage[TransformedBaseWork](queue = queue, obj = olderWork)
             eventually {
               assertWorkStored(vhs, olderWork)

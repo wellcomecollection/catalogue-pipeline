@@ -51,6 +51,9 @@ case class UnidentifiedWork(
 ) extends TransformedBaseWork
     with MultipleSourceIdentifiers {
   val otherIdentifiers = data.otherIdentifiers
+
+  def withData(f: WorkData[MaybeDisplayable] => WorkData[MaybeDisplayable]) =
+    this.copy(data = f(data))
 }
 
 case class IdentifiedWork(

@@ -164,13 +164,12 @@ class SierraPhysicalDigitalMergeRuleTest
       )
     val expectedOtherIdentifiers = physicalWork.otherIdentifiers ++ digitalWork.identifiers
 
-    val expectedMergedWork = physicalWork.copy(
-      data = physicalWork.data.copy(
+    physicalWork.withData { data =>
+      data.copy(
         otherIdentifiers = expectedOtherIdentifiers,
         items = List(expectedItem),
         merged = true
       )
-    )
-    expectedMergedWork
+    }
   }
 }

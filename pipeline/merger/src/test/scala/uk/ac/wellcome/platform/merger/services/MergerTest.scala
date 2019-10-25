@@ -22,8 +22,8 @@ class MergerTest extends FunSpec with WorksGenerators with Matchers {
       sierraPhysicalWork.data.items.head.asInstanceOf[Identifiable[Item]]
     val digitalItem = sierraDigitalWork.data.items.head
 
-    val expectedMergedWork = sierraPhysicalWork.copy(
-      data = sierraPhysicalWork.data.copy(
+    val expectedMergedWork = sierraPhysicalWork.withData { data =>
+      data.copy(
         merged = true,
         otherIdentifiers = sierraPhysicalWork.data.otherIdentifiers ++ sierraDigitalWork.identifiers,
         items = List(
@@ -34,7 +34,7 @@ class MergerTest extends FunSpec with WorksGenerators with Matchers {
           )
         )
       )
-    )
+    }
 
     val expectedRedirectedWork =
       UnidentifiedRedirectedWork(
@@ -59,8 +59,8 @@ class MergerTest extends FunSpec with WorksGenerators with Matchers {
       sierraPhysicalWork.data.items.head.asInstanceOf[Identifiable[Item]]
     val miroItem = miroWork.data.items.head
 
-    val expectedMergedWork = sierraPhysicalWork.copy(
-      data = sierraPhysicalWork.data.copy(
+    val expectedMergedWork = sierraPhysicalWork.withData { data =>
+      data.copy(
         otherIdentifiers = sierraPhysicalWork.data.otherIdentifiers ++ miroWork.identifiers,
         thumbnail = miroWork.data.thumbnail,
         items = List(
@@ -72,7 +72,7 @@ class MergerTest extends FunSpec with WorksGenerators with Matchers {
         ),
         merged = true
       )
-    )
+    }
 
     val expectedRedirectedWork =
       UnidentifiedRedirectedWork(
@@ -96,8 +96,8 @@ class MergerTest extends FunSpec with WorksGenerators with Matchers {
       sierraDigitalWork.data.items.head.asInstanceOf[Unidentifiable[Item]]
     val miroItem = miroWork.data.items.head
 
-    val expectedMergedWork = sierraDigitalWork.copy(
-      data = sierraDigitalWork.data.copy(
+    val expectedMergedWork = sierraDigitalWork.withData { data =>
+      data.copy(
         otherIdentifiers = sierraDigitalWork.data.otherIdentifiers ++ miroWork.identifiers,
         thumbnail = miroWork.data.thumbnail,
         items = List(
@@ -109,7 +109,7 @@ class MergerTest extends FunSpec with WorksGenerators with Matchers {
         ),
         merged = true
       )
-    )
+    }
 
     val expectedRedirectedWork =
       UnidentifiedRedirectedWork(
@@ -135,8 +135,8 @@ class MergerTest extends FunSpec with WorksGenerators with Matchers {
     val digitalItem = sierraDigitalWork.data.items.head
     val miroItem = miroWork.data.items.head
 
-    val expectedMergedWork = sierraPhysicalWork.copy(
-      data = sierraPhysicalWork.data.copy(
+    val expectedMergedWork = sierraPhysicalWork.withData { data =>
+      data.copy(
         otherIdentifiers = sierraPhysicalWork.data.otherIdentifiers ++ sierraDigitalWork.identifiers ++ miroWork.identifiers,
         thumbnail = miroWork.data.thumbnail,
         items = List(
@@ -148,7 +148,7 @@ class MergerTest extends FunSpec with WorksGenerators with Matchers {
         ),
         merged = true
       )
-    )
+    }
 
     val expectedRedirectedDigitalWork =
       UnidentifiedRedirectedWork(
