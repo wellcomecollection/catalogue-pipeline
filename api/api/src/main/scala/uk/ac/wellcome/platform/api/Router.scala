@@ -89,17 +89,15 @@ class Router(elasticClient: ElasticClient,
         case Left(err) => elasticError(err)
         case Right(resultList) =>
           extractUri { uri =>
-            contextUri { contextUri =>
-              complete(
-                MultipleWorksResponse(
-                  resultList,
-                  searchOptions,
-                  params.include.getOrElse(V2WorksIncludes()),
-                  uri,
-                  contextUri
-                )
+            complete(
+              MultipleWorksResponse(
+                resultList,
+                searchOptions,
+                params.include.getOrElse(V2WorksIncludes()),
+                uri,
+                contextUri
               )
-            }
+            )
           }
       }
   }
@@ -119,14 +117,12 @@ class Router(elasticClient: ElasticClient,
   }
 
   def workFound(work: IdentifiedWork, includes: V2WorksIncludes): Route =
-    contextUri { context =>
-      complete(
-        ResultResponse(
-          context = context,
-          result = DisplayWorkV2(work, includes)
-        )
+    complete(
+      ResultResponse(
+        context = contextUri,
+        result = DisplayWorkV2(work, includes)
       )
-    }
+    )
 
   def workRedirect(work: IdentifiedRedirectedWork): Route =
     extractUri { uri =>
@@ -178,16 +174,14 @@ class Router(elasticClient: ElasticClient,
   )
 
   def error(err: DisplayError): Route = {
-    contextUri { context =>
-      val status = err.httpStatus match {
-        case Some(400) => BadRequest
-        case Some(404) => NotFound
-        case Some(410) => Gone
-        case Some(500) => InternalServerError
-        case _         => InternalServerError
-      }
-      complete(status -> ResultResponse(context = context, result = err))
+    val status = err.httpStatus match {
+      case Some(400) => BadRequest
+      case Some(404) => NotFound
+      case Some(410) => Gone
+      case Some(500) => InternalServerError
+      case _         => InternalServerError
     }
+    complete(status -> ResultResponse(context = contextUri, result = err))
   }
 
   def getClusterHealth: Route = {
@@ -204,14 +198,6 @@ class Router(elasticClient: ElasticClient,
       HttpEntity(MediaTypes.`application/json`, swaggerDocs.json)
     )
   }
-
-  def contextUri =
-    extract { _ =>
-      apiConfig match {
-        case ApiConfig(host, scheme, _, pathPrefix, contextSuffix) =>
-          s"$scheme://$host/$pathPrefix/${ApiVersions.v2}/$contextSuffix"
-      }
-    }
 
   def rejectionHandler =
     RejectionHandler.newBuilder
@@ -238,6 +224,12 @@ class Router(elasticClient: ElasticClient,
   val swaggerDocs = new SwaggerDocs(apiConfig)
 
   lazy val context = getClass.getResource("/context-v2.json")
+
+  lazy val contextUri =
+    apiConfig match {
+      case ApiConfig(host, scheme, _, pathPrefix, contextSuffix) =>
+        s"$scheme://$host/$pathPrefix/${ApiVersions.v2}/$contextSuffix"
+    }
 
   lazy val worksService =
     new WorksService(new ElasticsearchService(elasticClient))
