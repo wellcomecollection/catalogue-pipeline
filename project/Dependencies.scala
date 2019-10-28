@@ -189,6 +189,10 @@ object ExternalDependencies {
     "javax.xml.bind" % "jaxb-api" % "2.3.0",
     "com.sun.xml.bind" % "jaxb-ri" % "2.3.0"
   )
+
+  val scalaXmlDependencies = Seq(
+    "org.scala-lang.modules" %% "scala-xml" % "1.2.0"
+  )
 }
 
 object CatalogueDependencies {
@@ -265,7 +269,8 @@ object CatalogueDependencies {
 
   val metsTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies ++
-      ExternalDependencies.mockitoDependencies
+      ExternalDependencies.mockitoDependencies ++
+      ExternalDependencies.scalaXmlDependencies
 
   // Sierra adapter stack
 
