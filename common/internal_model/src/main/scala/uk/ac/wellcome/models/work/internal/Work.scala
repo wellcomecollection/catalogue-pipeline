@@ -89,8 +89,7 @@ case class UnidentifiedRedirectedWork(
   version: Int,
   redirect: IdentifiableRedirect,
   identifiedType: String = classOf[IdentifiedRedirectedWork].getSimpleName
-) extends TransformedBaseWork
-    with RedirectedWork
+) extends RedirectedWork
 
 case class IdentifiedRedirectedWork(
   canonicalId: String,
