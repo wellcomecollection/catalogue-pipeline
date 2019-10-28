@@ -2,27 +2,18 @@ package uk.ac.wellcome.platform.transformer.mets
 
 import scala.xml.{Elem, XML}
 
-import uk.ac.wellcome.models.work.internal.UnidentifiedWork
-
-case class MetsData(
-  recordIdentifier: Option[String],
-  accessCondition: Option[String]
-) {
-
-  def toWork: UnidentifiedWork =
-    throw new NotImplementedError
-}
-
 object MetsXmlParser {
 
-  def apply(str: String): MetsData =
+  def apply(str: String): Option[MetsData] =
     MetsXmlParser(XML.loadString(str))
 
-  def apply(root: Elem): MetsData =
-    MetsData(
-      recordIdentifier = recordIdentifier(root),
-      accessCondition = accessCondition(root),
-    )
+  def apply(root: Elem): Option[MetsData] =
+    recordIdentifier(root).map { id =>
+      MetsData(
+        recordIdentifier = id,
+        accessCondition = accessCondition(root),
+      )
+    }
 
   private def recordIdentifier(root: Elem): Option[String] =
     (root \\ "recordIdentifier").headOption
@@ -30,7 +21,7 @@ object MetsXmlParser {
 
   private def accessCondition(root: Elem): Option[String] =
     (root \\ "accessCondition")
-      .filter(node => node \@ "type" == "dz")
+      .filter(_ \@ "type" == "dz")
       .headOption
       .map(_.text)
 }
