@@ -12,10 +12,10 @@ class MiroRecordTest extends FunSpec with Matchers {
       .mkString
 
   it("parses recordIdentifier from XML") {
-    MetsXmlParser(xml).recordIdentifier shouldBe Some("b30246039")
+    MetsXmlParser(xml).get.recordIdentifier shouldBe "b30246039"
   }
 
   it("parses accessCondition from XML") {
-    MetsXmlParser(xml).accessCondition shouldBe Some("CC-BY-NC")
+    MetsXmlParser(xml).get.accessCondition shouldBe Some("CC-BY-NC")
   }
 }
