@@ -23,9 +23,7 @@ class SierraBrandNameSubjectsTest
     createSierraBibDataWith(varFields = varFields.toList)
 
   def varField(tag: String, subfields: MarcSubfield*) =
-    createVarFieldWith(
-      marcTag = tag,
-      subfields = subfields.toList)
+    createVarFieldWith(marcTag = tag, subfields = subfields.toList)
 
   it("returns zero subjects if there are none") {
     SierraBrandNameSubjects(bibId, bibData()) shouldBe Nil
