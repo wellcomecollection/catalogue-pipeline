@@ -8,7 +8,11 @@ import org.scalatest.Suite
 trait BagsWiremock { this: Suite =>
 
   def withBagsService[R](port: Int, host: String)(testWith: => R): R = {
-    val wireMockServer = new WireMockServer(WireMockConfiguration.wireMockConfig().usingFilesUnderClasspath(".").port(port))
+    val wireMockServer = new WireMockServer(
+      WireMockConfiguration
+        .wireMockConfig()
+        .usingFilesUnderClasspath(".")
+        .port(port))
     wireMockServer.start()
     WireMock.configureFor(host, port)
     val result = testWith

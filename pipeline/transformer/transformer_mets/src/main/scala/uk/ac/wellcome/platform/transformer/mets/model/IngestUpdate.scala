@@ -7,7 +7,8 @@ trait BaseBag {
   val info: BagInfo
 }
 case class StubBag(info: BagInfo) extends BaseBag
-case class Bag(info: BagInfo, manifest: BagManifest, location: BagLocation) extends BaseBag
+case class Bag(info: BagInfo, manifest: BagManifest, location: BagLocation)
+    extends BaseBag
 case class BagInfo(externalIdentifier: String)
 
 case class BagManifest(files: List[BagFile])
