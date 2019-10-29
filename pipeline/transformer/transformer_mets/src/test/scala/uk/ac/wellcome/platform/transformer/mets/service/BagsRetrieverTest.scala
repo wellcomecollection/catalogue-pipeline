@@ -1,29 +1,44 @@
 package uk.ac.wellcome.platform.transformer.mets.service
 
 import com.github.tomakehurst.wiremock.client.WireMock._
+import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FunSpec, Inside, Matchers}
+import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.platform.transformer.mets.model.{Bag, BagFile, BagLocation, BagManifest}
 
-class BagsRetrieverTest extends FunSpec with Matchers with BagsWiremock with Inside{
+import scala.concurrent.ExecutionContext.Implicits.global
+
+class BagsRetrieverTest extends FunSpec with Matchers with BagsWiremock with Inside with ScalaFutures with Akka with IntegrationPatience{
 
   it("gets a bag from the storage service"){
-
     withBagsService(8089, "localhost") {
-      val bagsRetriever = new BagsRetriever("http://localhost:8089/storage/v1/bags")
-      inside(bagsRetriever.getBag("digitised","b30246039")) { case Some(Bag(_, BagManifest(files), BagLocation(bucket, path))) =>
-        verify(getRequestedFor(urlEqualTo("/storage/v1/bags/digitised/b30246039")))
-        files.head shouldBe BagFile("data/b30246039.xml", "v1/data/b30246039.xml")
-        bucket shouldBe "wellcomecollection-storage"
-        path shouldBe "digitised/b30246039"
+      withActorSystem { implicit actorSystem =>
+        withMaterializer(actorSystem) { implicit materializer =>
+
+          val bagsRetriever = new BagsRetriever("http://localhost:8089/storage/v1/bags")
+          whenReady(bagsRetriever.getBag("digitised", "b30246039")) { maybeBag =>
+            inside(maybeBag) { case Some(Bag(_, BagManifest(files), BagLocation(bucket, path))) =>
+              verify(getRequestedFor(urlEqualTo("/storage/v1/bags/digitised/b30246039")))
+              files.head shouldBe BagFile("data/b30246039.xml", "v1/data/b30246039.xml")
+              bucket shouldBe "wellcomecollection-storage"
+              path shouldBe "digitised/b30246039"
+            }
+          }
+        }
       }
     }
-
   }
 
   it("returns a none if the bag does not exist in the storage service") {
     withBagsService(8089, "localhost") {
-      val bagsRetriever = new BagsRetriever("http://localhost:8089/storage/v1/bags")
-      bagsRetriever.getBag("digitised", "not-existing") shouldBe None
+      withActorSystem { implicit actorSystem =>
+        withMaterializer(actorSystem) { implicit materializer =>
+          val bagsRetriever = new BagsRetriever("http://localhost:8089/storage/v1/bags")
+          whenReady(bagsRetriever.getBag("digitised", "not-existing")) { maybeBag =>
+            maybeBag shouldBe None
+          }
+        }
+      }
     }
   }
 

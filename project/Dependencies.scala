@@ -107,12 +107,7 @@ object ExternalDependencies {
     val scalaGraph = "1.12.5"
     val scalatest = "3.0.1"
     val logstashLogback = "6.1"
-    val scalajHttpVersion = "2.4.2"
   }
-
-  val scalajHttp = Seq(
-    "org.scalaj" %% "scalaj-http" % versions.scalajHttpVersion
-  )
 
   val logbackDependencies = Seq(
     "ch.qos.logback" % "logback-classic" % versions.logback,
@@ -274,7 +269,7 @@ object CatalogueDependencies {
 
   val metsTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies ++
-      ExternalDependencies.mockitoDependencies ++ ExternalDependencies.wireMockDependencies ++ ExternalDependencies.scalajHttp
+      ExternalDependencies.mockitoDependencies ++ ExternalDependencies.wireMockDependencies ++ ExternalDependencies.akkaHttpDependencies
 
   // Sierra adapter stack
 
