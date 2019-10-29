@@ -147,6 +147,10 @@ object ExternalDependencies {
     "org.mockito" % "mockito-core" % versions.mockito % "test"
   )
 
+  val wireMockDependencies = Seq(
+    "com.github.tomakehurst" % "wiremock" % "2.25.1" % Test
+  )
+
   val mySqlDependencies = Seq(
     "com.amazonaws" % "aws-java-sdk-rds" % versions.aws,
     "org.flywaydb" % "flyway-core" % "4.2.0",
@@ -178,7 +182,7 @@ object ExternalDependencies {
     "io.swagger.core.v3" % "swagger-integration" % versions.swagger,
     "io.swagger.core.v3" % "swagger-jaxrs2" % versions.swagger,
     "javax.ws.rs" % "javax.ws.rs-api" % "2.0.1",
-    "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.8.8",
+    "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.8.8"
   )
 
   val parseDependencies = Seq(
@@ -265,7 +269,7 @@ object CatalogueDependencies {
 
   val metsTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies ++
-      ExternalDependencies.mockitoDependencies
+      ExternalDependencies.mockitoDependencies ++ ExternalDependencies.wireMockDependencies ++ ExternalDependencies.akkaHttpDependencies
 
   // Sierra adapter stack
 
