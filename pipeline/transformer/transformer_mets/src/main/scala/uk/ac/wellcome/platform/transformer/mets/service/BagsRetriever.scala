@@ -18,11 +18,15 @@ class BagsRetriever(url: String)(implicit actorSystem: ActorSystem, materializer
     for {
       response <- Http().singleRequest(HttpRequest(uri = s"$url/$space/$bagId"))
       responseAsString <- Unmarshal(response.entity).to[String]
-    } yield {
-      response.status match {
-        case StatusCodes.OK => Some(fromJson[Bag](responseAsString).get)
-        case _ => None
-      }
+      maybeBag <- jhgj(response, responseAsString)
+    } yield maybeBag
+  }
+
+  private def jhgj(response: HttpResponse, responseAsString: String) = {
+    response.status match {
+      case StatusCodes.OK => Future.successful(Some(fromJson[Bag](responseAsString).get))
+      case StatusCodes.NotFound => Future.successful(None)
+      case _ => Future.failed(new Exception("Received error from storage service"))
     }
   }
 }

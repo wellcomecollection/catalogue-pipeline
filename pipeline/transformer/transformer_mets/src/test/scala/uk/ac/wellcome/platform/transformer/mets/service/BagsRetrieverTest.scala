@@ -42,4 +42,20 @@ class BagsRetrieverTest extends FunSpec with Matchers with BagsWiremock with Ins
     }
   }
 
+  it("returns a failed future if the storage service responds with 500") {
+    withBagsService(8089, "localhost") {
+      withActorSystem { implicit actorSystem =>
+        withMaterializer(actorSystem) { implicit materializer =>
+          stubFor(get(urlMatching("/storage/v1/bags/digitised/this-shall-crash")).willReturn(aResponse().withStatus(500)))
+
+          val bagsRetriever = new BagsRetriever("http://localhost:8089/storage/v1/bags")
+
+          whenReady(bagsRetriever.getBag("digitised", "this-shall-crash").failed) { e =>
+            e shouldBe a[Throwable]
+          }
+        }
+      }
+    }
+  }
+
 }
