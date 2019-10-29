@@ -25,9 +25,12 @@ class BagsRetriever(url: String)(implicit actorSystem: ActorSystem, materializer
   private def responseToBag(response: HttpResponse) = {
     debug(s"Received response ${response.status}")
     response.status match {
-      case StatusCodes.OK => Unmarshal(response.entity).to[Bag].map(Some(_))
+      case StatusCodes.OK => Unmarshal(response.entity).to[Bag].map(Some(_)).recover{ case t =>
+        debug("Failed parsing response", t)
+        throw new Exception("Failed parsing response into a Bag")}
       case StatusCodes.NotFound => Future.successful(None)
-      case _ => Future.failed(new Exception("Received error from storage service"))
+      case _ =>
+        Future.failed(new Exception("Received error from storage service"))
     }
   }
 }
