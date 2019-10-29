@@ -277,26 +277,6 @@ class DisplayWorkV2SerialisationTest
     )
   }
 
-  it("includes 'dissertation' if the dissertation include is present") {
-    val work = createIdentifiedWorkWith(
-      dissertation = Some("Dissertation")
-    )
-
-    val expectedJson = s"""
-                          |{
-                          | "type": "Work",
-                          | "id": "${work.canonicalId}",
-                          | "title": "${work.title}",
-                          | "dissertation": "Dissertation"
-                          |}
-          """.stripMargin
-
-    assertObjectMapsToJson(
-      DisplayWorkV2(work, includes = V2WorksIncludes(dissertation = true)),
-      expectedJson = expectedJson
-    )
-  }
-
   it("includes a list of identifiers on DisplayWorkV2") {
     val otherIdentifier = createSourceIdentifier
     val work = createIdentifiedWorkWith(

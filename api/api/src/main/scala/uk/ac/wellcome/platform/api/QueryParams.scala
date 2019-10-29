@@ -191,7 +191,6 @@ trait QueryParamsUtils extends Directives with TimeInstances {
       "contributors" -> WorkInclude.Contributors,
       "production" -> WorkInclude.Production,
       "notes" -> WorkInclude.Notes,
-      "dissertation" -> WorkInclude.Dissertation,
       "alternativeTitles" -> WorkInclude.AlternativeTitles,
     ).emap(values => Right(V2WorksIncludes(values)))
 
