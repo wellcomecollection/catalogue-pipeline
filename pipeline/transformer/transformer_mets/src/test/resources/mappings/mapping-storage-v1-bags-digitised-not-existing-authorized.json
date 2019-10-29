@@ -1,12 +1,19 @@
 {
+  "scenarioName": "get a bag",
+  "requiredScenarioState": "Authorized",
   "id" : "829d5ba1-f3cd-3933-bf2f-35fb9f2d04b8",
   "request" : {
     "url" : "/storage/v1/bags/digitised/not-existing",
-    "method" : "GET"
+    "method" : "GET",
+    "headers": {
+      "Authorization": {
+        "equalTo": "Bearer token"
+      }
+    }
   },
   "response" : {
     "status" : 404,
-    "bodyFileName" : "body-storage-v1-bags-digitised-not-existing-eggBM.json",
+    "bodyFileName" : "body-storage-v1-bags-digitised-not-existing-authorized.json",
     "headers" : {
       "Content-Type" : "application/json",
       "Connection" : "keep-alive",
