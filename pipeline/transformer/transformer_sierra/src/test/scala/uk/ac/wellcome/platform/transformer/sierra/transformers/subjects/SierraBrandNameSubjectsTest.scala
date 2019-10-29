@@ -22,10 +22,9 @@ class SierraBrandNameSubjectsTest
   def bibData(varFields: VarField*) =
     createSierraBibDataWith(varFields = varFields.toList)
 
-  def varField(tag: String, content: Option[String], subfields: MarcSubfield*) =
+  def varField(tag: String, subfields: MarcSubfield*) =
     createVarFieldWith(
       marcTag = tag,
-      content = content,
       subfields = subfields.toList)
 
   it("returns zero subjects if there are none") {
@@ -34,8 +33,8 @@ class SierraBrandNameSubjectsTest
 
   it("returns subjects for varfield 652") {
     val data = bibData(
-      varField("600", Some("Not Content")),
-      varField("652", Some("Content")),
+      varField("600", MarcSubfield("a", "Not Content")),
+      varField("652", MarcSubfield("a", "Content")),
     )
     SierraBrandNameSubjects(bibId, data) shouldBe List(
       Unidentifiable(
@@ -47,17 +46,17 @@ class SierraBrandNameSubjectsTest
     )
   }
 
-  it("does not used subfields to parse the content") {
+  it("does not used non 'a' subfields to parse the content") {
     val data = bibData(
-      varField("652", None, MarcSubfield(tag = "x", content = "Hmmm"))
+      varField("652", MarcSubfield(tag = "b", content = "Hmmm"))
     )
     SierraBrandNameSubjects(bibId, data) shouldBe Nil
   }
 
   it("returns multiple subjects if multiple 652") {
     val data = bibData(
-      varField("652", Some("First")),
-      varField("652", Some("Second")),
+      varField("652", MarcSubfield("a", "First")),
+      varField("652", MarcSubfield("a", "Second")),
     )
     SierraBrandNameSubjects(bibId, data) shouldBe List(
       Unidentifiable(
