@@ -23,6 +23,7 @@ class BagsRetriever(url: String)(implicit actorSystem: ActorSystem, materializer
   }
 
   private def responseToBag(response: HttpResponse) = {
+    debug(s"Received response ${response.status}")
     response.status match {
       case StatusCodes.OK => Unmarshal(response.entity).to[Bag].map(Some(_))
       case StatusCodes.NotFound => Future.successful(None)

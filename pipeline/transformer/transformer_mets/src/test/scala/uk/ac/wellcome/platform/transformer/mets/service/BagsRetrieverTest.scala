@@ -1,6 +1,7 @@
 package uk.ac.wellcome.platform.transformer.mets.service
 
 import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.http.Fault
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FunSpec, Inside, Matchers}
 import uk.ac.wellcome.akka.fixtures.Akka
@@ -8,9 +9,9 @@ import uk.ac.wellcome.platform.transformer.mets.model.{Bag, BagFile, BagLocation
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class BagsRetrieverTest extends FunSpec with Matchers with BagsWiremock with Inside with ScalaFutures with Akka with IntegrationPatience{
+class BagsRetrieverTest extends FunSpec with Matchers with BagsWiremock with Inside with ScalaFutures with Akka with IntegrationPatience {
 
-  it("gets a bag from the storage service"){
+  it("gets a bag from the storage service") {
     withBagsService(8089, "localhost") {
       withActorSystem { implicit actorSystem =>
         withMaterializer(actorSystem) { implicit materializer =>
@@ -58,4 +59,19 @@ class BagsRetrieverTest extends FunSpec with Matchers with BagsWiremock with Ins
     }
   }
 
+  it("returns a failed future if the storage service response has a fault") {
+    withBagsService(8089, "localhost") {
+      withActorSystem { implicit actorSystem =>
+        withMaterializer(actorSystem) { implicit materializer =>
+          stubFor(get(urlMatching("/storage/v1/bags/digitised/this-will-fault")).willReturn(aResponse().withStatus(200).withFault(Fault.CONNECTION_RESET_BY_PEER)))
+          val bagsRetriever = new BagsRetriever("http://localhost:8089/storage/v1/bags")
+
+          whenReady(bagsRetriever.getBag("digitised", "this-will-fault").failed) { e =>
+            e shouldBe a[Throwable]
+          }
+        }
+
+      }
+    }
+  }
 }
