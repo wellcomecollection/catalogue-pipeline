@@ -17,8 +17,10 @@ object SierraBrandNameSubjects
 
   def getSubjectsFromVarFields(bibId: SierraBibNumber,
                                varFields: List[VarField]) =
-    varFields.flatMap { varField =>
-      varField.content.map { label =>
+    varFields
+      .subfieldsWithTag("a")
+      .contents
+      .map { label =>
         Unidentifiable(
           Subject(
             label = label,
@@ -26,5 +28,4 @@ object SierraBrandNameSubjects
           )
         )
       }
-    }
 }
