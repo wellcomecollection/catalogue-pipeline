@@ -625,7 +625,12 @@ class SierraTransformableTransformerTest
          |       "marcTag": "652",
          |       "ind1": " ",
          |       "ind2": " ",
-         |       "content": "$content"
+         |       "subfields": [
+         |         {
+         |           "tag": "a",
+         |           "content": "$content"
+         |         }
+         |       ]
          |     }
          |   ]
          | }
