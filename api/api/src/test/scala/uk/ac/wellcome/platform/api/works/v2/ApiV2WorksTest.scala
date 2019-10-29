@@ -63,8 +63,6 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
         val work = createIdentifiedWorkWith(
           duration = Some(3600),
           edition = Some("Special edition"),
-          locationOfOriginal = Some("Somewhere"),
-          citeAs = Some("A text")
         )
         insertIntoElasticsearch(indexV2, work)
         assertJsonResponse(routes, s"/$apiPrefix/works/${work.canonicalId}") {
@@ -74,9 +72,7 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
              "id": "${work.canonicalId}",
              "title": "${work.title}",
              "edition": "Special edition",
-             "duration": 3600,
-             "locationOfOriginal": "Somewhere",
-             "citeAs": "A text"
+             "duration": 3600
             }
             """
         }

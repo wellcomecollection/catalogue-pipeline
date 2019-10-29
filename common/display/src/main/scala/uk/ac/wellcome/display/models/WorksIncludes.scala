@@ -10,7 +10,6 @@ object WorkInclude {
   case object Contributors extends WorkInclude
   case object Production extends WorkInclude
   case object Notes extends WorkInclude
-  case object Dissertation extends WorkInclude
   case object AlternativeTitles extends WorkInclude
 }
 
@@ -24,7 +23,6 @@ case class V2WorksIncludes(includes: List[WorkInclude]) extends WorksIncludes {
   def contributors = includes.contains(WorkInclude.Contributors)
   def production = includes.contains(WorkInclude.Production)
   def notes = includes.contains(WorkInclude.Notes)
-  def dissertation = includes.contains(WorkInclude.Dissertation)
   def alternativeTitles = includes.contains(WorkInclude.AlternativeTitles)
 }
 
@@ -40,7 +38,6 @@ object V2WorksIncludes {
     contributors: Boolean = false,
     production: Boolean = false,
     notes: Boolean = false,
-    dissertation: Boolean = false,
     alternativeTitles: Boolean = false,
   ): V2WorksIncludes = V2WorksIncludes(
     List(
@@ -51,12 +48,11 @@ object V2WorksIncludes {
       if (contributors) Some(Contributors) else None,
       if (production) Some(Production) else None,
       if (notes) Some(Notes) else None,
-      if (dissertation) Some(Dissertation) else None,
       if (alternativeTitles) Some(AlternativeTitles) else None,
     ).flatten
   )
 
   def includeAll(): V2WorksIncludes = V2WorksIncludes(
-    true, true, true, true, true, true, true, true, true
+    true, true, true, true, true, true, true, true
   )
 }

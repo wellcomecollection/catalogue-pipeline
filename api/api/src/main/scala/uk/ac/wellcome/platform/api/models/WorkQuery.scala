@@ -30,9 +30,6 @@ object WorkQuery {
     ("production.*.label", None),
     ("language.label", None),
     ("edition", None),
-    ("dissertation", None),
-    ("locationOfOriginal", None),
-    ("citeAs", None),
     // Identifiers
     ("canonicalId", None),
     ("sourceIdentifier.value", None),

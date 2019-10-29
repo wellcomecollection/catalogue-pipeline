@@ -56,5 +56,13 @@ object DisplayNoteType {
         DisplayNoteType("credits-note", "Credits note")
       case ContentsNote(_) =>
         DisplayNoteType("contents-note", "Contents note")
+      case CiteAsNote(_) =>
+        DisplayNoteType("cite-as-note", "Cite-as note")
+      case DissertationNote(_) =>
+        DisplayNoteType("dissertation-note", "Dissertation note")
+      case LocationOfOriginalNote(_) =>
+        DisplayNoteType(
+          "location-of-original-note",
+          "Location of original note")
     }
 }

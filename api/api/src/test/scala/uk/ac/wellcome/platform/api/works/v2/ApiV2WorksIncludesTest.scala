@@ -455,51 +455,6 @@ class ApiV2WorksIncludesTest
   }
 
   it(
-    "includes dissertation on the list endpoint if we pass ?include=dissertation") {
-    withApi {
-      case (indexV2, routes) =>
-        val work = createIdentifiedWorkWith(dissertation = Some("A"))
-        insertIntoElasticsearch(indexV2, work)
-        assertJsonResponse(routes, s"/$apiPrefix/works?include=dissertation") {
-          Status.OK -> s"""
-            {
-              ${resultList(apiPrefix, totalResults = 1)},
-              "results": [
-                 {
-                   "type": "Work",
-                   "id": "${work.canonicalId}",
-                   "title": "${work.title}",
-                   "dissertation": "A"
-                 }
-              ]
-            }
-          """
-        }
-    }
-  }
-
-  it(
-    "includes dissertation on the single work endpoint if we pass ?include=dissertation") {
-    withApi {
-      case (indexV2, routes) =>
-        val work = createIdentifiedWorkWith(dissertation = Some("A"))
-        insertIntoElasticsearch(indexV2, work)
-        assertJsonResponse(
-          routes,
-          s"/$apiPrefix/works/${work.canonicalId}?include=dissertation") {
-          Status.OK -> s"""
-            {
-              ${singleWorkResult(apiPrefix)},
-              "id": "${work.canonicalId}",
-              "title": "${work.title}",
-              "dissertation": "A"
-            }
-          """
-        }
-    }
-  }
-
-  it(
     "includes alternativeTitles on the list endpoint if we pass ?include=alternativeTitles") {
     withApi {
       case (indexV2, routes) =>

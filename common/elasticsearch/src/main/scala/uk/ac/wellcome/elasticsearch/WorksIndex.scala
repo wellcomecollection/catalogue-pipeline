@@ -176,9 +176,6 @@ object WorksIndex {
       location("thumbnail"),
       textField("edition"),
       notes,
-      englishTextField("dissertation"),
-      englishTextField("locationOfOriginal"),
-      englishTextField("citeAs"),
       intField("duration"),
       objectField("redirect")
         .fields(sourceIdentifier, keywordField("canonicalId")),

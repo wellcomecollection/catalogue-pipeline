@@ -21,11 +21,14 @@ class SierraNotesTest
     val notes = List(
       "500" -> GeneralNote("general note a"),
       "501" -> GeneralNote("general note b"),
+      "502" -> DissertationNote("dissertation note"),
       "504" -> BibliographicalInformation("bib info a"),
       "505" -> ContentsNote("contents note"),
       "508" -> CreditsNote("credits note a"),
       "511" -> CreditsNote("credits note b"),
       "518" -> TimeAndPlaceNote("time and place note"),
+      "524" -> CiteAsNote("cite as note"),
+      "535" -> LocationOfOriginalNote("location of original note"),
       "536" -> FundingInformation("funding information"),
       "545" -> BibliographicalInformation("bib info b"),
       "547" -> GeneralNote("general note c"),
@@ -45,7 +48,7 @@ class SierraNotesTest
   it("should not extract notes from non notes fields") {
     val notes = List(
       "100" -> "not a note",
-      "502" -> "not a note",
+      "530" -> "not a note",
     )
     SierraNotes(bibId, bibData(notes: _*)) shouldBe Nil
   }

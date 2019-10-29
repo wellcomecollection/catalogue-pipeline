@@ -87,21 +87,6 @@ case class DisplayWorkV2(
     description = "Miscellaneous notes associated with the work."
   ) notes: Option[List[DisplayNote]] = None,
   @Schema(
-    `type` = "String",
-    description =
-      "Designation of an academic dissertation or thesis and the institution to which it was presented."
-  ) dissertation: Option[String] = None,
-  @Schema(
-    `type` = "String",
-    description =
-      "Name and address of the repository with custody over originals or duplicates of the work."
-  ) locationOfOriginal: Option[String] = None,
-  @Schema(
-    `type` = "String",
-    description =
-      "Format for the citation of the described materials that is preferred by the custodian."
-  ) citeAs: Option[String] = None,
-  @Schema(
     `type` = "Integer",
     description = "The playing time for audiovisual works, in seconds."
   ) duration: Option[Int] = None,
@@ -164,9 +149,6 @@ case object DisplayWorkV2 {
         if (includes.notes && work.notes.nonEmpty)
           Some(DisplayNote.merge(work.notes.map(DisplayNote(_))))
         else None,
-      dissertation = if (includes.dissertation) work.dissertation else None,
-      locationOfOriginal = work.locationOfOriginal,
-      citeAs = work.citeAs,
       duration = work.duration,
     )
   }
