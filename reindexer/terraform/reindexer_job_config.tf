@@ -4,11 +4,11 @@
 #
 #     {
 #       "id1": {
-#         "dynamoConfig": {"table": "mytable1"},
+#         "dynamoConfig": {"tableName": "mytable1"},
 #         "destinationConfig": {"topicArn": "mytopic1"}
 #       },
 #       "id2": {
-#         "dynamoConfig": {"table": "mytable2"},
+#         "dynamoConfig": {"tableName": "mytable2"},
 #         "destinationConfig": {"topicArn": "mytopic2"}
 #       }
 #     }
@@ -26,7 +26,7 @@ data "template_file" "single_reindex_job_config" {
   template = <<EOF
   "$${id}": {
     "dynamoConfig": {
-      "table": "$${table}"
+      "tableName": "$${table}"
     },
     "destinationConfig": {
       "topicArn": "$${topicArn}"

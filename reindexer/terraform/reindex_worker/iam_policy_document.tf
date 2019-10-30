@@ -14,6 +14,7 @@ data "aws_iam_policy_document" "vhs_read_policy" {
   statement {
     actions = [
       "dynamodb:Scan",
+      "dynamodb:BatchGetItem"
     ]
 
     resources = [
