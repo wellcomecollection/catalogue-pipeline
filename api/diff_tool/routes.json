@@ -58,5 +58,9 @@
     "params": {
       "include": "items,genres,identifiers"
     }
+  },
+  {
+    "workId": "nonexistent",
+    "params": {}
   }
 ]
