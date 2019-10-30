@@ -1,7 +1,4 @@
 {
-  "scenarioName": "get a bag",
-  "requiredScenarioState": "Started",
-  "newScenarioState": "Authorized",
   "id": "c4c51257-4385-4543-8559-50d46241ee46",
   "request": {
     "url": "/oauth2/token",

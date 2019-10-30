@@ -7,10 +7,12 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.model.headers.OAuth2BearerToken
 import akka.stream.Materializer
 import com.github.dakatsuka.akka.http.oauth2.client.{Client, Config, GrantType}
+import scala.concurrent.duration._
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
-class TokenService(url: String, clientId: String, secret: String,scope: String)(implicit actorSystem: ActorSystem, mat: Materializer, ec: ExecutionContext) {
+class TokenService(url: String, clientId: String, secret: String,scope: String,initialDelay: FiniteDuration, interval: FiniteDuration)(implicit actorSystem: ActorSystem, mat: Materializer, ec: ExecutionContext) {
   private val config = Config(
     clientId     = clientId,
     clientSecret = secret,
@@ -19,19 +21,26 @@ class TokenService(url: String, clientId: String, secret: String,scope: String)(
   )
 
   private val client = Client(config)
-  private val token = new AtomicReference[OAuth2BearerToken](OAuth2BearerToken(""))
+  private val token = new AtomicReference[OAuth2BearerToken]
 
-  def getNewToken(): Future[OAuth2BearerToken] =
+  actorSystem.scheduler.schedule(initialDelay, interval)(refreshToken)
+
+  private def refreshToken() =
     client.getAccessToken(GrantType.ClientCredentials,Map("scope" -> scope))
     .flatMap{
       case Right(accessToken) =>
 
         val newToken = OAuth2BearerToken(accessToken.accessToken)
-        token.set(newToken)
-        Future.successful(newToken)
+        Future.fromTry(Try(token.updateAndGet(_ => newToken)))
       case Left(throwable) => Future.failed(throwable)
       }
 
-  def getCurrentToken: OAuth2BearerToken = token.get()
+  def getToken: Future[OAuth2BearerToken] = {
+    val maybeToken = Option(token.get())
+    maybeToken match {
+      case Some(token) => Future.successful(token)
+      case None => refreshToken()
+    }
+  }
 
 }

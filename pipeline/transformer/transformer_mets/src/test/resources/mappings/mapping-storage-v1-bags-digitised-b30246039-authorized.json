@@ -1,6 +1,4 @@
 {
-  "scenarioName": "get a bag",
-  "requiredScenarioState": "Authorized",
   "id" : "bd90d7b2-b939-3c65-8c2e-263a27e49073",
   "request" : {
     "url" : "/storage/v1/bags/digitised/b30246039",
