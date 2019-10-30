@@ -1,18 +1,17 @@
 package uk.ac.wellcome.platform.transformer.mets.service
 
+import akka.http.scaladsl.model.headers.OAuth2BearerToken
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.http.Fault
+import org.mockito.Mockito
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
+import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSpec, Inside, Matchers}
 import uk.ac.wellcome.akka.fixtures.Akka
-import uk.ac.wellcome.platform.transformer.mets.model.{
-  Bag,
-  BagFile,
-  BagLocation,
-  BagManifest
-}
+import uk.ac.wellcome.platform.transformer.mets.model.{Bag, BagFile, BagLocation, BagManifest}
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class BagsRetrieverTest
     extends FunSpec
@@ -21,7 +20,7 @@ class BagsRetrieverTest
     with Inside
     with ScalaFutures
     with Akka
-    with IntegrationPatience {
+    with IntegrationPatience with MockitoSugar{
 
   it("gets a bag from the storage service") {
     withBagsService(8089, "localhost") {
@@ -57,6 +56,25 @@ class BagsRetrieverTest
           whenReady(bagsRetriever.getBag("digitised", "not-existing")) {
             maybeBag =>
               maybeBag shouldBe None
+          }
+        }
+      }
+    }
+  }
+
+  it("retries only once if the storage service responds with unauthorized") {
+    withBagsService(8089, "localhost") {
+      withActorSystem { implicit actorSystem =>
+        withMaterializer(actorSystem) { implicit materializer =>
+          val tokenService = mock[TokenService]
+          Mockito.when(tokenService.getCurrentToken).thenReturn(OAuth2BearerToken("not-valid-token"))
+          Mockito.when(tokenService.getNewToken()).thenReturn(Future.successful(OAuth2BearerToken("not-valid-token")))
+          val bagsRetriever =
+            new BagsRetriever("http://localhost:8089/storage/v1/bags", tokenService)
+          whenReady(bagsRetriever.getBag("digitised", "b30246039").failed) {e =>
+            e shouldBe a[Throwable]
+            verify(2, getRequestedFor(
+              urlEqualTo("/storage/v1/bags/digitised/b30246039")))
           }
         }
       }

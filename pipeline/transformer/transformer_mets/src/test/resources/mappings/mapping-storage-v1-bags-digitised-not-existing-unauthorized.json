@@ -6,7 +6,7 @@
   },
   "response": {
     "status": 401,
-    "bodyFileName": "body-storage-v1-digitised-not-existing-unauthorized.json",
+    "bodyFileName": "unauthorized.json",
     "headers": {
       "Content-Type": "application/json",
       "Connection": "keep-alive",
