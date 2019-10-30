@@ -10,7 +10,7 @@ module "service" {
   security_group_ids = ["${var.service_egress_security_group_id}"]
 
   cpu    = 1024
-  memory = 1024
+  memory = 2048
 
   env_vars = {
     reindex_jobs_queue_id     = "${module.reindex_worker_queue.id}"
