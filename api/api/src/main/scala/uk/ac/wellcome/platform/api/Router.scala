@@ -94,7 +94,7 @@ class Router(elasticClient: ElasticClient,
                 resultList,
                 searchOptions,
                 params.include.getOrElse(V2WorksIncludes()),
-                uri,
+                uri.withHost(apiConfig.host),
                 contextUri
               )
             )
