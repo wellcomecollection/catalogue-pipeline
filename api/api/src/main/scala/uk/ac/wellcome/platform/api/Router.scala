@@ -88,13 +88,13 @@ class Router(elasticClient: ElasticClient,
       .map {
         case Left(err) => elasticError(err)
         case Right(resultList) =>
-          extractUri { uri =>
+          extractPublicUri { uri =>
             complete(
               MultipleWorksResponse(
                 resultList,
                 searchOptions,
                 params.include.getOrElse(V2WorksIncludes()),
-                uri.withHost(apiConfig.host),
+                uri,
                 contextUri
               )
             )
@@ -125,7 +125,7 @@ class Router(elasticClient: ElasticClient,
     )
 
   def workRedirect(work: IdentifiedRedirectedWork): Route =
-    extractUri { uri =>
+    extractPublicUri { uri =>
       val newPath = (work.redirect.canonicalId :: uri.path.reverse.tail).reverse
       redirect(uri.withPath(newPath), Found)
     }
@@ -156,7 +156,7 @@ class Router(elasticClient: ElasticClient,
     )
   )
 
-  def notFound = extractUri { uri =>
+  def notFound = extractPublicUri { uri =>
     error(
       DisplayError(
         ErrorVariant.http404,
@@ -219,6 +219,19 @@ class Router(elasticClient: ElasticClient,
             DisplayError(ErrorVariant.http500, Some("Unhandled error."))
           )
       }
+    }
+
+  // Directive for getting public URI of the current request, using the host
+  // and scheme as per the config.
+  // (without this URIs end up looking like https://localhost:8888/..., rather
+  // than https://api.wellcomecollection.org/...))
+  def extractPublicUri =
+    extractUri.map { uri =>
+      uri
+        .withHost(apiConfig.host)
+        // akka-http uses 0 to indicate no explicit port in the URI
+        .withPort(0)
+        .withScheme(apiConfig.scheme)
     }
 
   val swaggerDocs = new SwaggerDocs(apiConfig)
