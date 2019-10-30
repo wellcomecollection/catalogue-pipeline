@@ -28,7 +28,7 @@ class BagsRetrieverTest
       withActorSystem { implicit actorSystem =>
         withMaterializer(actorSystem) { implicit materializer =>
           val bagsRetriever =
-            new BagsRetriever("http://localhost:8089/storage/v1/bags")
+            new BagsRetriever("http://localhost:8089/storage/v1/bags", new TokenService("", "", ""))
           whenReady(bagsRetriever.getBag("digitised", "b30246039")) {
             maybeBag =>
               inside(maybeBag) {
@@ -53,7 +53,7 @@ class BagsRetrieverTest
       withActorSystem { implicit actorSystem =>
         withMaterializer(actorSystem) { implicit materializer =>
           val bagsRetriever =
-            new BagsRetriever("http://localhost:8089/storage/v1/bags")
+            new BagsRetriever("http://localhost:8089/storage/v1/bags", new TokenService("", "", ""))
           whenReady(bagsRetriever.getBag("digitised", "not-existing")) {
             maybeBag =>
               maybeBag shouldBe None
@@ -72,7 +72,7 @@ class BagsRetrieverTest
               .willReturn(aResponse().withStatus(500)))
 
           val bagsRetriever =
-            new BagsRetriever("http://localhost:8089/storage/v1/bags")
+            new BagsRetriever("http://localhost:8089/storage/v1/bags", new TokenService("", "", ""))
 
           whenReady(
             bagsRetriever.getBag("digitised", "this-shall-crash").failed) { e =>
@@ -93,7 +93,7 @@ class BagsRetrieverTest
                 .withStatus(200)
                 .withFault(Fault.CONNECTION_RESET_BY_PEER)))
           val bagsRetriever =
-            new BagsRetriever("http://localhost:8089/storage/v1/bags")
+            new BagsRetriever("http://localhost:8089/storage/v1/bags", new TokenService("", "", ""))
 
           whenReady(bagsRetriever.getBag("digitised", "this-will-fault").failed) {
             e =>

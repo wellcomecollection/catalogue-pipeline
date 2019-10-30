@@ -1,8 +1,11 @@
 package uk.ac.wellcome.platform.transformer.mets.service
 
+import java.util.concurrent.atomic.AtomicReference
+
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
+import akka.http.scaladsl.model.headers.{Authorization, OAuth2BearerToken}
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.ActorMaterializer
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
@@ -12,14 +15,20 @@ import uk.ac.wellcome.platform.transformer.mets.model.Bag
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class BagsRetriever(url: String)(implicit actorSystem: ActorSystem,
+class TokenService(url: String, clientId: String, secret: String) {
+  private val token = new AtomicReference[String]("")
+  def getCurrentToken: String = token.get()
+
+}
+
+class BagsRetriever(url: String, tokenService: TokenService)(implicit actorSystem: ActorSystem,
                                  materializer: ActorMaterializer,
                                  executionContext: ExecutionContext)
     extends Logging {
   def getBag(space: String, bagId: String): Future[Option[Bag]] = {
     debug(s"Executing request to $url/$space/$bagId")
     for {
-      response <- Http().singleRequest(HttpRequest(uri = s"$url/$space/$bagId"))
+      response <- Http().singleRequest(HttpRequest(uri = s"$url/$space/$bagId").addHeader(Authorization(OAuth2BearerToken(tokenService.getCurrentToken))))
       maybeBag <- responseToBag(response)
     } yield maybeBag
   }
