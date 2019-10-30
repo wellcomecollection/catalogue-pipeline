@@ -4,20 +4,6 @@ import requests
 import click
 import json
 
-routes = [
-    (None, {"include": "notes"}),
-    (None, {"page": 4, "pageSize": 5}),
-    (None, {"query": "botany"}),
-    (None, {"dateFrom": "1890-12-03", "dateTo": "1896-03-03"}),
-    (None, {"sort": "production.dates", "sortOrder": "desc"}),
-    (None, {"sort": "INVALID"}),
-    (None, {"aggregations": "workType,genres"}),
-    (None, {"language": "ger"}),
-    (None, {"workType": "b"}),
-    ("a224tb56", {"include": "notes"}),
-    ("a22au6yn", {"include": "items,genres,identifiers"}),
-]
-
 
 class ApiDiffer:
 
@@ -98,7 +84,7 @@ class ObjDiffer:
             msg = f"unchanged between {self.name_a} and {self.name_b}"
             col = "green"
         else:
-            msg = f"changed from {self.name_b}={fmt(a)} to {self.name_b}={fmt(b)}"
+            msg = f"changed from {fmt(a)} on {self.name_a} to {fmt(b)} on {self.name_b}"
             col = "red"
         if self.show_colour:
             msg = click.style(msg, fg=col)
@@ -146,11 +132,20 @@ class Key:
         return self.parts == other.parts
 
 
+def load_routes(filename):
+    with open(filename) as f:
+        return [(route.get("workId"), route.get("params")) for route in json.load(f)]
+
+
 @click.command()
-def main():
-    for work_id, params in routes:
-        differ = ApiDiffer(work_id, params)
-        differ.display_diff()
+@click.option("--colour/--no-colour", default=True)
+@click.option("--routes-file", default="routes.json")
+@click.option("--repeats", default=1)
+def main(colour, routes_file, repeats):
+    for work_id, params in load_routes(routes_file):
+        for _ in range(repeats):
+            differ = ApiDiffer(work_id, params, show_colour=colour)
+            differ.display_diff()
 
 
 if __name__ == "__main__":

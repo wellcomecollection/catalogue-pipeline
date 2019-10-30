@@ -1,0 +1,62 @@
+[
+  {
+    "params": {
+      "include": "notes"
+    }
+  },
+  {
+    "params": {
+      "page": 4,
+      "pageSize": 5
+    }
+  },
+  {
+    "params": {
+      "query": "botany"
+    }
+  },
+  {
+    "params": {
+      "dateFrom": "1890-12-03",
+      "dateTo": "1896-03-03"
+    }
+  },
+  {
+    "params": {
+      "sort": "production.dates",
+      "sortOrder": "desc"
+    }
+  },
+  {
+    "params": {
+      "sort": "INVALID"
+    }
+  },
+  {
+    "params": {
+      "aggregations": "workType,genres"
+    }
+  },
+  {
+    "params": {
+      "language": "ger"
+    }
+  },
+  {
+    "params": {
+      "workType": "b"
+    }
+  },
+  {
+    "workId": "a224tb56",
+    "params": {
+      "include": "notes"
+    }
+  },
+  {
+    "workId": "a22au6yn",
+    "params": {
+      "include": "items,genres,identifiers"
+    }
+  }
+]
