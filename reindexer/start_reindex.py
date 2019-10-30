@@ -54,6 +54,13 @@ def partial_reindex_parameters(max_records):
     yield {"maxRecords": max_records, "type": "PartialReindexParameters"}
 
 
+def specific_reindex_parameters(record_ids):
+    yield {
+        "ids": record_ids,
+        "type": "SpecificReindexParameters"
+    }
+
+
 def read_from_s3(bucket, key):
     s3 = session.client("s3")
     obj = s3.get_object(Bucket=bucket, Key=key)
@@ -147,7 +154,7 @@ def publish_messages(job_config_id, topic_arn, parameters):
 )
 @click.option(
     "--mode",
-    type=click.Choice(["complete", "partial"]),
+    type=click.Choice(["complete", "partial", "specific"]),
     required=True,
     prompt="Every record (complete) or just a few (partial)?",
     help="Should this reindex send every record (complete) or just a few (partial)?",
@@ -166,6 +173,15 @@ def start_reindex(src, dst, mode, reason):
     elif mode == "partial":
         max_records = click.prompt("How many records do you want to send?", default=10)
         parameters = partial_reindex_parameters(max_records)
+    elif mode == "specific":
+        specified_records_str = click.prompt(
+            "Which records do you want to reindex? (separate multiple IDs with spaces)",
+            type=str
+        )
+        specified_records = specified_records_str.split()
+        if len(specified_records) is 0:
+            return sys.exit("You need to specify at least 1 record ID")
+        parameters = specific_reindex_parameters(specified_records)
 
     # TODO: This was broken by the move to AssumeRole, because the GetUser call
     # doesn't work in an IAM role.  When we agree a replacement, we should apply
