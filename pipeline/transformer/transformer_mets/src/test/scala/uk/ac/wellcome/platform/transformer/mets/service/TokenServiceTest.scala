@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.transformer.mets.service
 
+import akka.http.scaladsl.model.headers.OAuth2BearerToken
 import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FunSpec, Matchers}
@@ -8,6 +9,7 @@ import uk.ac.wellcome.akka.fixtures.Akka
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class TokenServiceTest extends FunSpec with BagsWiremock with Matchers with ScalaFutures with Akka with IntegrationPatience{
+
   it("requests a token to the storage service"){
     withBagsService(8089, "localhost"){
       withActorSystem { implicit actorSystem =>
@@ -22,7 +24,7 @@ class TokenServiceTest extends FunSpec with BagsWiremock with Matchers with Scal
               .withRequestBody(matching(".*client_secret=secret.*"))
             )
 
-            token shouldBe Right("token")
+            token shouldBe OAuth2BearerToken("token")
           }
         }
       }

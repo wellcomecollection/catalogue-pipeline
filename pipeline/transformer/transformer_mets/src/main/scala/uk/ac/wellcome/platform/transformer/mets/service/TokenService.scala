@@ -4,6 +4,7 @@ import java.net.URI
 import java.util.concurrent.atomic.AtomicReference
 
 import akka.actor.ActorSystem
+import akka.http.scaladsl.model.headers.OAuth2BearerToken
 import akka.stream.Materializer
 import com.github.dakatsuka.akka.http.oauth2.client.{Client, Config, GrantType}
 
@@ -18,15 +19,19 @@ class TokenService(url: String, clientId: String, secret: String,scope: String)(
   )
 
   private val client = Client(config)
-  private val token = new AtomicReference[String]("")
-  def getNewToken(): Future[Either[Throwable, String]] =
-    client.getAccessToken(GrantType.ClientCredentials,Map("scope" -> scope))
-    .map(either =>
-      either.map(accessToken => {
-        token.set(accessToken.accessToken)
-        accessToken.accessToken
-      }))
+  private val token = new AtomicReference[OAuth2BearerToken](OAuth2BearerToken(""))
 
-  def getCurrentToken: String = token.get()
+  def getNewToken(): Future[OAuth2BearerToken] =
+    client.getAccessToken(GrantType.ClientCredentials,Map("scope" -> scope))
+    .flatMap{
+      case Right(accessToken) =>
+
+        val newToken = OAuth2BearerToken(accessToken.accessToken)
+        token.set(newToken)
+        Future.successful(newToken)
+      case Left(throwable) => Future.failed(throwable)
+      }
+
+  def getCurrentToken: OAuth2BearerToken = token.get()
 
 }

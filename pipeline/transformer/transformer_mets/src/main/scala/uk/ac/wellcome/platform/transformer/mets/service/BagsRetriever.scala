@@ -21,24 +21,37 @@ class BagsRetriever(url: String, tokenService: TokenService)(implicit actorSyste
     extends Logging {
   def getBag(space: String, bagId: String): Future[Option[Bag]] = {
     debug(s"Executing request to $url/$space/$bagId")
+    val token = tokenService.getCurrentToken
+    maybeGetBag(space, bagId, token, ifUnauthorized = refreshTokenAndRetryOnce(space, bagId))
+  }
+
+  private def maybeGetBag(space: String, bagId: String, token: OAuth2BearerToken, ifUnauthorized: => Future[Option[Bag]]): Future[Option[Bag]] = {
     for {
-      response <- Http().singleRequest(HttpRequest(uri = s"$url/$space/$bagId").addHeader(Authorization(OAuth2BearerToken(tokenService.getCurrentToken))))
-      maybeBag <- responseToBag(response)
+      response <- Http().singleRequest(HttpRequest(uri = s"$url/$space/$bagId").addHeader(Authorization(token)))
+      maybeBag <- {
+        debug(s"Received response ${response.status}")
+        response.status match {
+          case StatusCodes.OK => parseIntoBag(response)
+          case StatusCodes.NotFound => Future.successful(None)
+          case StatusCodes.Unauthorized => ifUnauthorized
+          case _ =>
+            Future.failed(new Exception("Received error from storage service"))
+        }
+      }
     } yield maybeBag
   }
 
-  private def responseToBag(response: HttpResponse) = {
-    debug(s"Received response ${response.status}")
-    response.status match {
-      case StatusCodes.OK =>
-        Unmarshal(response.entity).to[Bag].map(Some(_)).recover {
-          case t =>
-            debug("Failed parsing response", t)
-            throw new Exception("Failed parsing response into a Bag")
-        }
-      case StatusCodes.NotFound => Future.successful(None)
-      case _ =>
-        Future.failed(new Exception("Received error from storage service"))
-    }
+  private def refreshTokenAndRetryOnce(space: String, bagId: String) =
+    for {
+    newToken <- tokenService.getNewToken()
+    maybeBag <- maybeGetBag(space, bagId, newToken,
+      ifUnauthorized = Future.failed(new Exception("Failed to authorize with storage service")))
+  } yield maybeBag
+
+  private def parseIntoBag(response: HttpResponse) =
+    Unmarshal(response.entity).to[Bag].map(Some(_)).recover {
+    case t =>
+      debug("Failed parsing response", t)
+      throw new Exception("Failed parsing response into a Bag")
   }
 }
