@@ -50,7 +50,7 @@ object Main extends WellcomeTypesafeApp {
     new Runnable {
       def run() =
         Http()
-          .bindAndHandle(router.routes, apiConfig.host, 8888)
+          .bindAndHandle(router.routes, "0.0.0.0", 8888)
           .flatMap(_ => Promise[Done].future)
     }
   }
