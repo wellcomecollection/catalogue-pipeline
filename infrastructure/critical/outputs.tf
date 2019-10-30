@@ -19,6 +19,9 @@ output "vhs_miro_assumable_read_role" {
 }
 
 # Miro Inventory Hybrid Store
+output "vhs_miro_inventory_read_policy" {
+  value = "${module.vhs_miro_inventory.read_policy}"
+}
 
 output "vhs_miro_inventory_table_name" {
   value = "${module.vhs_miro_migration.table_name}"
