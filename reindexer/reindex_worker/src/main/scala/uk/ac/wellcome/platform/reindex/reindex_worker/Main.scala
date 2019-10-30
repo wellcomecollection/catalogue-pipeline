@@ -7,6 +7,7 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.platform.reindex.reindex_worker.config.ReindexJobConfigBuilder
 import uk.ac.wellcome.platform.reindex.reindex_worker.dynamo.{
+  BatchItemGetter,
   MaxRecordsScanner,
   ParallelScanner,
   ScanSpecScanner
@@ -31,9 +32,8 @@ object Main extends WellcomeTypesafeApp {
     implicit val materializer: ActorMaterializer =
       AkkaBuilder.buildActorMaterializer()
 
-    val scanSpecScanner = new ScanSpecScanner(
-      dynamoDBClient = DynamoBuilder.buildDynamoClient(config)
-    )
+    val dynamoDBClient = DynamoBuilder.buildDynamoClient(config)
+    val scanSpecScanner = new ScanSpecScanner(dynamoDBClient)
 
     val recordReader = new RecordReader(
       maxRecordsScanner = new MaxRecordsScanner(
@@ -41,6 +41,9 @@ object Main extends WellcomeTypesafeApp {
       ),
       parallelScanner = new ParallelScanner(
         scanSpecScanner = scanSpecScanner
+      ),
+      specificItemsGetter = new BatchItemGetter(
+        dynamoDBClient
       )
     )
 
