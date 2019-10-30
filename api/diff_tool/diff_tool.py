@@ -138,9 +138,17 @@ def load_routes(filename):
 
 
 @click.command()
-@click.option("--colour/--no-colour", default=True)
-@click.option("--routes-file", default="routes.json")
-@click.option("--repeats", default=1)
+@click.option(
+    "--colour/--no-colour",
+    default=True,
+    help="Whether to display in terminal with colours or not",
+)
+@click.option(
+    "--routes-file",
+    default="routes.json",
+    help="What routes file to use (default=routes.json)",
+)
+@click.option("--repeats", default=1, help="How many times to call each route")
 def main(colour, routes_file, repeats):
     for work_id, params in load_routes(routes_file):
         for _ in range(repeats):
