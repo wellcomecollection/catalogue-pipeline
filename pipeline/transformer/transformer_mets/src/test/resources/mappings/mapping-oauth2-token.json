@@ -7,17 +7,14 @@
     "url": "/oauth2/token",
     "method": "POST",
     "headers": {
-      "Authorization": {
-        "equalTo": "Basic Y2xpZW50OnNlY3JldA=="
-      },
       "Content-Type": {
-        "equalTo": "application/x-www-form-urlencoded",
+        "equalTo": "application/x-www-form-urlencoded; charset=UTF-8",
         "caseInsensitive": true
       }
     },
     "bodyPatterns": [
       {
-        "equalTo": "grant_type=client_credentials&scope=https%3A%2F%2Fapi.wellcomecollection.org%2Fscope",
+        "equalTo": "scope=https%3A%2F%2Fapi.wellcomecollection.org%2Fscope&grant_type=client_credentials&client_id=client&client_secret=secret",
         "caseInsensitive": false
       }
     ]
