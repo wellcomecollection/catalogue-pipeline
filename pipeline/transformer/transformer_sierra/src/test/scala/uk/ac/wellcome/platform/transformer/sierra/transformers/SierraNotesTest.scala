@@ -59,6 +59,32 @@ class SierraNotesTest
     SierraNotes(bibId, bibData(notes)) shouldBe notes.map(_._2)
   }
 
+  it("should concatenate subfields into a single note") {
+    val bibData = createSierraBibDataWith(
+      varFields = List(
+        createVarFieldWith(
+          marcTag = "500",
+          subfields = List(
+            MarcSubfield(tag = "a", content = "1st part."),
+            MarcSubfield(tag = "b", content = "2nd part."),
+            MarcSubfield(tag = "c", content = "3rd part."),
+          )
+        )
+      )
+    )
+    SierraNotes(bibId, bibData) shouldBe List(
+      GeneralNote("1st part. 2nd part. 3rd part.")
+    )
+  }
+
+  it("should not concatenate seperate varfields") {
+    val notes = List(
+      "500" -> GeneralNote("1st note."),
+      "500" -> GeneralNote("2nd note."),
+    )
+    SierraNotes(bibId, bibData(notes)) shouldBe notes.map(_._2)
+  }
+
   def bibId = createSierraBibNumber
 
   def bibData(contents: List[(String, Note)]): SierraBibData =

@@ -36,7 +36,7 @@ object SierraNotes extends SierraTransformer with SierraQueryOps {
         case (tag, createNote) =>
           bibData
             .varfieldsWithTags(tag)
-            .subfieldContents
+            .map(_.subfieldContents.mkString(" "))
             .map(createNote)
       }
 }
