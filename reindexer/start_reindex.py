@@ -55,10 +55,7 @@ def partial_reindex_parameters(max_records):
 
 
 def specific_reindex_parameters(record_ids):
-    yield {
-        "ids": record_ids,
-        "type": "SpecificReindexParameters"
-    }
+    yield {"ids": record_ids, "type": "SpecificReindexParameters"}
 
 
 def read_from_s3(bucket, key):
@@ -176,7 +173,7 @@ def start_reindex(src, dst, mode, reason):
     elif mode == "specific":
         specified_records_str = click.prompt(
             "Which records do you want to reindex? (separate multiple IDs with spaces)",
-            type=str
+            type=str,
         )
         specified_records = specified_records_str.split()
         if not specified_records:
