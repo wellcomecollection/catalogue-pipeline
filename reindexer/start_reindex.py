@@ -156,8 +156,8 @@ def publish_messages(job_config_id, topic_arn, parameters):
     "--mode",
     type=click.Choice(["complete", "partial", "specific"]),
     required=True,
-    prompt="Every record (complete) or just a few (partial)?",
-    help="Should this reindex send every record (complete) or just a few (partial)?",
+    prompt="Every record (complete), just a few (partial), or specific records (specific)?",
+    help="Should this reindex send every record (complete), just a few (partial), or specific records (specific)?",
 )
 @click.option(
     "--reason",
@@ -179,7 +179,7 @@ def start_reindex(src, dst, mode, reason):
             type=str
         )
         specified_records = specified_records_str.split()
-        if len(specified_records) is 0:
+        if not specified_records:
             return sys.exit("You need to specify at least 1 record ID")
         parameters = specific_reindex_parameters(specified_records)
 
