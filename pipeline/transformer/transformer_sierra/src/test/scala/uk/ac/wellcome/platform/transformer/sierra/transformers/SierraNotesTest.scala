@@ -33,6 +33,7 @@ class SierraNotesTest
       "545" -> BibliographicalInformation("bib info b"),
       "547" -> GeneralNote("general note c"),
       "562" -> GeneralNote("general note d"),
+      "563" -> BindingInformation("binding info note"),
     )
     SierraNotes(bibId, bibData(notes)) shouldBe notes.map(_._2)
   }
@@ -55,6 +56,32 @@ class SierraNotesTest
 
   it("should preserve html in notes fields") {
     val notes = List("500" -> GeneralNote("<p>note</p>"))
+    SierraNotes(bibId, bibData(notes)) shouldBe notes.map(_._2)
+  }
+
+  it("should concatenate subfields into a single note") {
+    val bibData = createSierraBibDataWith(
+      varFields = List(
+        createVarFieldWith(
+          marcTag = "500",
+          subfields = List(
+            MarcSubfield(tag = "a", content = "1st part."),
+            MarcSubfield(tag = "b", content = "2nd part."),
+            MarcSubfield(tag = "c", content = "3rd part."),
+          )
+        )
+      )
+    )
+    SierraNotes(bibId, bibData) shouldBe List(
+      GeneralNote("1st part. 2nd part. 3rd part.")
+    )
+  }
+
+  it("should not concatenate seperate varfields") {
+    val notes = List(
+      "500" -> GeneralNote("1st note."),
+      "500" -> GeneralNote("2nd note."),
+    )
     SierraNotes(bibId, bibData(notes)) shouldBe notes.map(_._2)
   }
 

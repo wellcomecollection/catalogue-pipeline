@@ -21,3 +21,5 @@ case class DissertationNote(val content: String) extends Note
 case class CiteAsNote(val content: String) extends Note
 
 case class LocationOfOriginalNote(val content: String) extends Note
+
+case class BindingInformation(val content: String) extends Note

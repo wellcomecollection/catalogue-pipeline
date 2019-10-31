@@ -8,7 +8,8 @@ import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 
 // Populate wwork:physicalDescription.
 //
-// We use MARC field 300 and subfield $b.
+// We use MARC field 300 and subfields $a, $b and $c.
+//
 //
 // Notes:
 //
@@ -35,7 +36,6 @@ object SierraPhysicalDescription extends SierraTransformer with SierraQueryOps {
         "300" -> "a",
         "300" -> "b",
         "300" -> "c",
-        "563" -> "a"
       )
       .contentString("\n")
 }

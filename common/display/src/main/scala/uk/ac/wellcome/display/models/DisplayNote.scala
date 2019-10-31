@@ -64,5 +64,7 @@ object DisplayNoteType {
         DisplayNoteType(
           "location-of-original-note",
           "Location of original note")
+      case BindingInformation(_) =>
+        DisplayNoteType("binding-information", "Binding information")
     }
 }
