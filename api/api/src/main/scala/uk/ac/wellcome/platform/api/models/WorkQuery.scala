@@ -37,6 +37,7 @@ object WorkQuery {
     ("items.canonicalId", None),
     ("items.sourceIdentifier.value", None),
     ("items.otherIdentifiers.value", None),
+    ("notes.content", None),
   )
 
   case class MSMBoostQuery(queryString: String) extends WorkQuery {
