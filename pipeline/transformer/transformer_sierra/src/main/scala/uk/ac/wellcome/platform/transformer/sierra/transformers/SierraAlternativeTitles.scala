@@ -25,6 +25,5 @@ object SierraAlternativeTitles extends SierraTransformer with SierraQueryOps {
       .filterNot { varfield =>
         varfield.marcTag.contains("246") && varfield.indicator2.contains("6")
       }
-      .subfieldsWithTag("a")
-      .contents
+      .flatMap(_.subfields.contentString(" "))
 }

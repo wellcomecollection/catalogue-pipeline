@@ -47,13 +47,21 @@ class SierraAlternativeTitlesTest
     getAlternativeTitles(varFields) shouldBe List("A", "D")
   }
 
-  it("should not extract any alternative titles when no 240 / 130 / 246") {
-    val varFields = List(createVarField("X", "251"))
-    getAlternativeTitles(varFields) shouldBe Nil
+  it("should concatenate subfields for alternative titles") {
+    val varFields = List(
+      createVarFieldWith(
+        marcTag = "240",
+        subfields = List(
+          MarcSubfield(tag = "a", content = "start,"),
+          MarcSubfield(tag = "b", content = "end.")
+        )
+      )
+    )
+    getAlternativeTitles(varFields) shouldBe List("start, end.")
   }
 
-  it("should not any extract alternative titles when incorrect contentTag") {
-    val varFields = List(createVarField("X", "240", contentTag = "x"))
+  it("should not extract any alternative titles when no 240 / 130 / 246") {
+    val varFields = List(createVarField("X", "251"))
     getAlternativeTitles(varFields) shouldBe Nil
   }
 
