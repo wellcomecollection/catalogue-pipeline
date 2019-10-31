@@ -21,9 +21,8 @@ class BatchItemGetterTest
       val futureResult =
         batchItemGetter.get(List(specifiedRecord.id))(table.name)
 
-      whenReady(convertScalaFuture(futureResult)) { result =>
-        convertToAnyShouldWrapper(
-          result.map { fromJson[NamedRecord](_).get }.head shouldBe specifiedRecord)
+      whenReady(futureResult) { result =>
+        result.map { fromJson[NamedRecord](_).get }.head shouldBe specifiedRecord
       }
     }
   }
@@ -38,10 +37,9 @@ class BatchItemGetterTest
       val futureResult =
         batchItemGetter.get(specifiedRecords.map { _.id }.toList)(table.name)
 
-      whenReady(convertScalaFuture(futureResult)) { result =>
-        convertToAnyShouldWrapper(
-          result
-            .map { fromJson[NamedRecord](_).get } shouldEqual specifiedRecords)
+      whenReady(futureResult) { result =>
+        result
+          .map { fromJson[NamedRecord](_).get } shouldEqual specifiedRecords
       }
     }
   }
@@ -55,8 +53,8 @@ class BatchItemGetterTest
       val futureResult =
         batchItemGetter.get(List("bananas"))(table.name)
 
-      whenReady(convertScalaFuture(futureResult)) { result =>
-        convertToAnyShouldWrapper(result shouldBe empty)
+      whenReady(futureResult) { result =>
+        result shouldBe empty
       }
     }
   }
