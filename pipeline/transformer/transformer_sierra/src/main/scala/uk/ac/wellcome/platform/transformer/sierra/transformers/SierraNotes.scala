@@ -26,7 +26,8 @@ object SierraNotes extends SierraTransformer with SierraQueryOps {
       "536" -> FundingInformation.apply,
       "545" -> BibliographicalInformation.apply,
       "547" -> GeneralNote.apply,
-      "562" -> GeneralNote.apply
+      "562" -> GeneralNote.apply,
+      "563" -> BindingInformation.apply
     )
 
   def apply(bibId: SierraBibNumber, bibData: SierraBibData) =

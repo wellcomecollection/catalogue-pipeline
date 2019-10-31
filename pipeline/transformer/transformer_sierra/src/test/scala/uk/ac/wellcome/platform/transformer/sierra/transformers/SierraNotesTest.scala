@@ -33,6 +33,7 @@ class SierraNotesTest
       "545" -> BibliographicalInformation("bib info b"),
       "547" -> GeneralNote("general note c"),
       "562" -> GeneralNote("general note d"),
+      "563" -> BindingInformation("binding info note"),
     )
     SierraNotes(bibId, bibData(notes)) shouldBe notes.map(_._2)
   }
