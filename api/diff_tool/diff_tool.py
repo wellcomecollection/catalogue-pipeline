@@ -83,7 +83,7 @@ class ObjDiffer:
         if not self.verbose and not any(results):
             msg = "Unchanged between stage and prod"
             if self.show_colour:
-                msg = click.style(msg, fg='green')
+                msg = click.style(msg, fg="green")
             click.echo(msg)
         else:
             self.display_results(results)
@@ -102,9 +102,7 @@ class ObjDiffer:
             click.echo(f"{self.format_key(key)}: {msg}")
 
     def format_key(self, key):
-        return ".".join(
-            f"[{part}]" if isinstance(part, int) else part for part in key
-        )
+        return ".".join(f"[{part}]" if isinstance(part, int) else part for part in key)
 
     def format_value(self, value):
         if isinstance(value, str):
