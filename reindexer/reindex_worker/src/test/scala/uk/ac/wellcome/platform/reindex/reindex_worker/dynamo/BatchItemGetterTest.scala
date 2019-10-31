@@ -58,4 +58,20 @@ class BatchItemGetterTest
       }
     }
   }
+
+  it("handles being asked for a mix of valid and non-existent records") {
+    withLocalDynamoDbTable { table =>
+      val batchItemGetter = createBatchItemGetter
+
+      val records = createRecords(table, count = 5)
+      val specifiedRecordIds =
+        List(records.head.id, "durian", records(1).id, "jackfruit")
+
+      val futureResult = batchItemGetter.get(specifiedRecordIds)(table.name)
+
+      whenReady(futureResult) { result =>
+        result should have length 2
+      }
+    }
+  }
 }
