@@ -9,7 +9,7 @@ class ApiV2ErrorsTest extends ApiV2WorksTestBase with ApiErrorsTestBase {
       assertIsBadRequest(
         "/works?include=foo",
         description =
-          "include: 'foo' is not a valid value. Please choose one of: ['identifiers', 'items', 'subjects', 'genres', 'contributors', 'production', 'notes', 'alternativeTitles']"
+          "include: 'foo' is not a valid value. Please choose one of: ['identifiers', 'items', 'subjects', 'genres', 'contributors', 'production', 'notes']"
       )
     }
 
@@ -17,7 +17,7 @@ class ApiV2ErrorsTest extends ApiV2WorksTestBase with ApiErrorsTestBase {
       assertIsBadRequest(
         "/works?include=foo,bar",
         description =
-          "include: 'foo', 'bar' are not valid values. Please choose one of: ['identifiers', 'items', 'subjects', 'genres', 'contributors', 'production', 'notes', 'alternativeTitles']"
+          "include: 'foo', 'bar' are not valid values. Please choose one of: ['identifiers', 'items', 'subjects', 'genres', 'contributors', 'production', 'notes']"
       )
     }
 
@@ -25,7 +25,7 @@ class ApiV2ErrorsTest extends ApiV2WorksTestBase with ApiErrorsTestBase {
       assertIsBadRequest(
         "/works?include=foo,identifiers,bar",
         description =
-          "include: 'foo', 'bar' are not valid values. Please choose one of: ['identifiers', 'items', 'subjects', 'genres', 'contributors', 'production', 'notes', 'alternativeTitles']"
+          "include: 'foo', 'bar' are not valid values. Please choose one of: ['identifiers', 'items', 'subjects', 'genres', 'contributors', 'production', 'notes']"
       )
     }
 
@@ -33,7 +33,7 @@ class ApiV2ErrorsTest extends ApiV2WorksTestBase with ApiErrorsTestBase {
       assertIsBadRequest(
         "/works/nfdn7wac?include=foo",
         description =
-          "include: 'foo' is not a valid value. Please choose one of: ['identifiers', 'items', 'subjects', 'genres', 'contributors', 'production', 'notes', 'alternativeTitles']"
+          "include: 'foo' is not a valid value. Please choose one of: ['identifiers', 'items', 'subjects', 'genres', 'contributors', 'production', 'notes']"
       )
     }
   }
