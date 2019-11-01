@@ -17,7 +17,8 @@ import uk.ac.wellcome.platform.api.models.{
   Aggregations,
   DateRangeFilter,
   ResultList,
-  WorkTypeFilter
+  WorkTypeFilter,
+  WorkQuery
 }
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -26,7 +27,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 import uk.ac.wellcome.display.models.AggregationRequest
-import uk.ac.wellcome.platform.api.models.WorkQuery.MSMBoostQuery
+import uk.ac.wellcome.platform.api.models.WorkQueryType.MSMBoostQuery
 
 class WorksServiceTest
     extends FunSpec
@@ -331,7 +332,7 @@ class WorksServiceTest
 
     it("returns a Left[ElasticError] if there's an Elasticsearch error") {
       val future = worksService.searchWorks(
-        workQuery = MSMBoostQuery("cat")
+        workQuery = WorkQuery("cat", MSMBoostQuery)
       )(
         index = Index("doesnotexist"),
         worksSearchOptions = defaultWorksSearchOptions
@@ -470,7 +471,7 @@ class WorksServiceTest
     worksSearchOptions: WorksSearchOptions = createWorksSearchOptions
   ): Assertion =
     assertResultIsCorrect(
-      worksService.searchWorks(MSMBoostQuery(query))
+      worksService.searchWorks(WorkQuery(query, MSMBoostQuery))
     )(
       allWorks,
       expectedWorks,

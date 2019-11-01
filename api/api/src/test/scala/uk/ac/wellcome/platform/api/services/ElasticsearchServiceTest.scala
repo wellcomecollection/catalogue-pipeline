@@ -16,7 +16,7 @@ import uk.ac.wellcome.models.work.generators.{
 }
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
-import uk.ac.wellcome.platform.api.models.WorkQuery._
+import uk.ac.wellcome.platform.api.models.WorkQueryType._
 import uk.ac.wellcome.platform.api.models.{
   ItemLocationTypeFilter,
   WorkQuery,
@@ -68,7 +68,7 @@ class ElasticsearchServiceTest
 
         assertSearchResultsAreCorrect(
           index = index,
-          workQuery = MSMBoostQuery("artichokes"),
+          workQuery = WorkQuery("artichokes", MSMBoostQuery),
           queryOptions = createElasticsearchQueryOptionsWith(
             filters = List(WorkTypeFilter("b"))
           ),
@@ -105,7 +105,7 @@ class ElasticsearchServiceTest
 
         assertSearchResultsAreCorrect(
           index = index,
-          workQuery = MSMBoostQuery("artichokes"),
+          workQuery = WorkQuery("artichokes", MSMBoostQuery),
           queryOptions = createElasticsearchQueryOptionsWith(
             filters = List(WorkTypeFilter(List("b", "m")))
           ),
@@ -135,7 +135,7 @@ class ElasticsearchServiceTest
 
         assertSearchResultsAreCorrect(
           index = index,
-          workQuery = MSMBoostQuery("tangerines"),
+          workQuery = WorkQuery("tangerines", MSMBoostQuery),
           queryOptions = createElasticsearchQueryOptionsWith(
             filters = List(ItemLocationTypeFilter("iiif-image"))
           ),
@@ -172,7 +172,7 @@ class ElasticsearchServiceTest
 
         assertSearchResultsAreCorrect(
           index = index,
-          workQuery = MSMBoostQuery("tangerines"),
+          workQuery = WorkQuery("tangerines", MSMBoostQuery),
           queryOptions = createElasticsearchQueryOptionsWith(
             filters = List(
               ItemLocationTypeFilter(
@@ -201,7 +201,7 @@ class ElasticsearchServiceTest
 
         (1 to 10).foreach { _ =>
           val searchResponseFuture = searchService
-            .queryResults(MSMBoostQuery("A"))(index, defaultQueryOptions)
+            .queryResults(WorkQuery("A", MSMBoostQuery))(index, defaultQueryOptions)
 
           whenReady(searchResponseFuture) { response =>
             searchResponseToWorks(response) shouldBe works
@@ -212,7 +212,7 @@ class ElasticsearchServiceTest
 
     it("returns a Left[ElasticError] if Elasticsearch returns an error") {
       val future = searchService
-        .queryResults(MSMBoostQuery("cat"))(
+        .queryResults(WorkQuery("cat", MSMBoostQuery))(
           Index("doesnotexist"),
           defaultQueryOptions)
 
@@ -234,7 +234,7 @@ class ElasticsearchServiceTest
 
         assertSearchResultsAreCorrect(
           index = index,
-          workQuery = MSMBoostQuery("abc123"),
+          workQuery = WorkQuery("abc123", MSMBoostQuery),
           queryOptions = defaultQueryOptions,
           expectedWorks = List(work)
         )
@@ -257,7 +257,7 @@ class ElasticsearchServiceTest
 
         assertSearchResultsAreCorrect(
           index = index,
-          workQuery = MSMBoostQuery(query),
+          workQuery = WorkQuery(query, MSMBoostQuery),
           queryOptions = defaultQueryOptions,
           expectedWorks = List(work)
         )
@@ -280,7 +280,7 @@ class ElasticsearchServiceTest
 
         assertSearchResultsAreCorrect(
           index = index,
-          workQuery = MSMBoostQuery(query),
+          workQuery = WorkQuery(query, MSMBoostQuery),
           queryOptions = defaultQueryOptions,
           expectedWorks = List(work)
         )
@@ -303,7 +303,7 @@ class ElasticsearchServiceTest
 
         assertSearchResultsAreCorrect(
           index = index,
-          workQuery = MSMBoostQuery(query),
+          workQuery = WorkQuery(query, MSMBoostQuery),
           queryOptions = defaultQueryOptions,
           expectedWorks = List(work)
         )
@@ -331,7 +331,7 @@ class ElasticsearchServiceTest
 
         assertSearchResultsAreCorrect(
           index = index,
-          workQuery = MSMBoostQuery(query),
+          workQuery = WorkQuery(query, MSMBoostQuery),
           queryOptions = defaultQueryOptions,
           expectedWorks = List(work)
         )
@@ -358,7 +358,7 @@ class ElasticsearchServiceTest
 
         assertSearchResultsAreCorrect(
           index = index,
-          workQuery = MSMBoostQuery(query),
+          workQuery = WorkQuery(query, MSMBoostQuery),
           queryOptions = defaultQueryOptions,
           expectedWorks = List(work)
         )
@@ -446,7 +446,7 @@ class ElasticsearchServiceTest
         val results =
           searchResults(
             index = index,
-            workQuery = MSMBoostQuery("Text that contains Aegean"))
+            workQuery = WorkQuery("Text that contains Aegean", MSMBoostQuery))
 
         results should have length 10
 
@@ -493,7 +493,7 @@ class ElasticsearchServiceTest
         val results =
           searchResults(
             index = index,
-            workQuery = MSMBoostQuery("Aegean holiday snaps"))
+            workQuery = WorkQuery("Aegean holiday snaps", MSMBoostQuery))
 
         results should have length 1
       }
@@ -516,7 +516,7 @@ class ElasticsearchServiceTest
         val results =
           searchResults(
             index = index,
-            workQuery = MSMBoostQuery("Petite Persimmon"))
+            workQuery = WorkQuery("Petite Persimmon", MSMBoostQuery))
 
         results should have length 3
       }
@@ -539,7 +539,7 @@ class ElasticsearchServiceTest
         val results =
           searchResults(
             index = index,
-            workQuery = MSMBoostQueryUsingAndOperator("Lyrical Lychee"))
+            workQuery = WorkQuery("Lyrical Lychee", MSMBoostQueryUsingAndOperator))
 
         results should have length 1
       }

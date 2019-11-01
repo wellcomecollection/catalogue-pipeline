@@ -49,7 +49,7 @@ case class MultipleWorksParams(
   sort: Option[List[SortRequest]],
   sortOrder: Option[SortingOrder],
   query: Option[String],
-  _queryType: Option[String],
+  _queryType: Option[WorkQueryType],
   _index: Option[String],
 ) extends QueryParams {
 
@@ -64,11 +64,11 @@ case class MultipleWorksParams(
     )
 
   def workQuery: Option[WorkQuery] =
-    query.map { qry =>
-      _queryType.map(_.toLowerCase) match {
-        case Some("usingand") => WorkQuery.MSMBoostQueryUsingAndOperator(qry)
-        case _                => WorkQuery.MSMBoostQuery(qry)
-      }
+    query.map {qry =>
+      WorkQuery(
+        queryString = qry,
+        queryType = _queryType.getOrElse(WorkQueryType.MSMBoostQuery)
+      )
     }
 
   def validationErrors: List[String] =
@@ -122,7 +122,7 @@ object MultipleWorksParams extends QueryParamsUtils {
         "sort".as[List[SortRequest]].?,
         "sortOrder".as[SortingOrder].?,
         "query".as[String].?,
-        "_queryType".as[String].?,
+        "_queryType".as[WorkQueryType].?,
         "_index".as[String].?,
       )
     ).tflatMap { args =>
@@ -168,6 +168,12 @@ object MultipleWorksParams extends QueryParamsUtils {
     decodeOneOf(
       "asc" -> SortingOrder.Ascending,
       "desc" -> SortingOrder.Descending,
+    )
+
+  implicit val workQueryDecoder: Decoder[WorkQueryType] =
+    decodeOneOf(
+      "default" -> WorkQueryType.MSMBoostQuery,
+      "usingAnd" -> WorkQueryType.MSMBoostQueryUsingAndOperator
     )
 }
 

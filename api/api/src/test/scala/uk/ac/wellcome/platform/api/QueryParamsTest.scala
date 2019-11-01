@@ -9,33 +9,39 @@ import uk.ac.wellcome.display.models.{
   SortingOrder,
   V2WorksIncludes
 }
-import uk.ac.wellcome.platform.api.models.WorkQuery.{
-  MSMBoostQuery,
-  MSMBoostQueryUsingAndOperator
-}
 import uk.ac.wellcome.platform.api.models.{
+  WorkQuery,
+  WorkQueryType,
   GenreFilter,
   ItemLocationTypeFilter,
   LanguageFilter,
   SubjectFilter,
   WorkTypeFilter
 }
+import uk.ac.wellcome.platform.api.models.WorkQueryType._
 
 class QueryParamsTest extends FunSpec with Matchers with OptionValues {
   describe("MultipleWorksParams") {
     it("has default workQuery type of MSMBoostQuery") {
       val params = createMultipleWorksParams(query = Some("Royal Redcurrant"))
 
-      params.workQuery.value shouldBe a[MSMBoostQuery]
+      params.workQuery.value shouldEqual WorkQuery(
+        queryString = "Royal Redcurrant",
+        queryType = MSMBoostQuery
+      )
     }
 
     it(
       "has workQuery type of MSMBoostQueryUsingAndOperator if `_queryType` is 'usingAnd'") {
       val params = createMultipleWorksParams(
         query = Some("Royal Redcurrant"),
-        _queryType = Some("usingAnd"))
+        _queryType = Some(MSMBoostQueryUsingAndOperator)
+      )
 
-      params.workQuery.value shouldBe a[MSMBoostQueryUsingAndOperator]
+      params.workQuery.value shouldEqual WorkQuery(
+        queryString = "Royal Redcurrant",
+        queryType = MSMBoostQueryUsingAndOperator
+      )
     }
   }
 
@@ -54,7 +60,7 @@ class QueryParamsTest extends FunSpec with Matchers with OptionValues {
     sort: Option[List[SortRequest]] = None,
     sortOrder: Option[SortingOrder] = None,
     query: Option[String] = None,
-    _queryType: Option[String] = None,
+    _queryType: Option[WorkQueryType] = None,
     _index: Option[String] = None,
   ): MultipleWorksParams = MultipleWorksParams(
     page = page,
