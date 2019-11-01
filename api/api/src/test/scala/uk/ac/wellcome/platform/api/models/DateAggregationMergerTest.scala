@@ -17,7 +17,7 @@ class DateAggregationMergerTest extends FunSpec with Matchers {
         AggregationBucket(Period("1983"), 2),
       )
     )
-    DateAggregationMerger(aggregation, maxBuckets=5) shouldBe Aggregation(
+    DateAggregationMerger(aggregation, maxBuckets = 5) shouldBe Aggregation(
       List(
         AggregationBucket(Period("1950-1959"), 3),
         AggregationBucket(Period("1960-1969"), 6),
@@ -39,7 +39,7 @@ class DateAggregationMergerTest extends FunSpec with Matchers {
         AggregationBucket(Period("1983"), 2),
       )
     )
-    DateAggregationMerger(aggregation, maxBuckets=5) shouldBe Aggregation(
+    DateAggregationMerger(aggregation, maxBuckets = 5) shouldBe Aggregation(
       List(
         AggregationBucket(Period("1850-1899"), 2),
         AggregationBucket(Period("1900-1949"), 2),
@@ -47,7 +47,7 @@ class DateAggregationMergerTest extends FunSpec with Matchers {
       )
     )
   }
- 
+
   it("aggregates by century when too many buckets") {
     val aggregation = Aggregation(
       List(
@@ -61,7 +61,7 @@ class DateAggregationMergerTest extends FunSpec with Matchers {
         AggregationBucket(Period("2012"), 3),
       )
     )
-    DateAggregationMerger(aggregation, maxBuckets=5) shouldBe Aggregation(
+    DateAggregationMerger(aggregation, maxBuckets = 5) shouldBe Aggregation(
       List(
         AggregationBucket(Period("1400-1499"), 1),
         AggregationBucket(Period("1600-1699"), 1),
