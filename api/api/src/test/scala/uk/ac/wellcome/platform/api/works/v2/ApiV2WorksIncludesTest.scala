@@ -34,6 +34,7 @@ class ApiV2WorksIncludesTest
                  "type": "Work",
                  "id": "${work0.canonicalId}",
                  "title": "${work0.title}",
+                 "alternativeTitles": [],
                  "identifiers": [
                    ${identifier(work0.sourceIdentifier)},
                    ${identifier(identifier0)}
@@ -43,6 +44,7 @@ class ApiV2WorksIncludesTest
                  "type": "Work",
                  "id": "${work1.canonicalId}",
                  "title": "${work1.title}",
+                 "alternativeTitles": [],
                  "identifiers": [
                    ${identifier(work1.sourceIdentifier)},
                    ${identifier(identifier1)}
@@ -73,6 +75,7 @@ class ApiV2WorksIncludesTest
               ${singleWorkResult(apiPrefix)},
               "id": "${work.canonicalId}",
               "title": "${work.title}",
+              "alternativeTitles": [],
               "identifiers": [
                 ${identifier(work.sourceIdentifier)},
                 ${identifier(otherIdentifier)}
@@ -100,6 +103,7 @@ class ApiV2WorksIncludesTest
               ${singleWorkResult(apiPrefix)},
               "id": "${work.canonicalId}",
               "title": "${work.title}",
+              "alternativeTitles": [],
               "items": [ ${items(work.items)} ]
             }
           """
@@ -129,12 +133,14 @@ class ApiV2WorksIncludesTest
                  "type": "Work",
                  "id": "${work0.canonicalId}",
                  "title": "${work0.title}",
+                 "alternativeTitles": [],
                  "subjects": [ ${subjects(subjects1)}]
                },
                {
                  "type": "Work",
                  "id": "${work1.canonicalId}",
                  "title": "${work1.title}",
+                 "alternativeTitles": [],
                  "subjects": [ ${subjects(subjects2)}]
                }
               ]
@@ -161,6 +167,7 @@ class ApiV2WorksIncludesTest
               ${singleWorkResult(apiPrefix)},
               "id": "${work.canonicalId}",
               "title": "${work.title}",
+              "alternativeTitles": [],
               "subjects": [ ${subjects(subject)}]
             }
           """
@@ -191,12 +198,14 @@ class ApiV2WorksIncludesTest
                  "type": "Work",
                  "id": "${work0.canonicalId}",
                  "title": "${work0.title}",
+                 "alternativeTitles": [],
                  "genres": [ ${genres(genres1)}]
                },
                {
                  "type": "Work",
                  "id": "${work1.canonicalId}",
                  "title": "${work1.title}",
+                 "alternativeTitles": [],
                  "genres": [ ${genres(genres2)}]
                }
               ]
@@ -224,6 +233,7 @@ class ApiV2WorksIncludesTest
               ${singleWorkResult(apiPrefix)},
               "id": "${work.canonicalId}",
               "title": "${work.title}",
+              "alternativeTitles": [],
               "genres": [ ${genres(genre)}]
             }
           """
@@ -255,12 +265,14 @@ class ApiV2WorksIncludesTest
                  "type": "Work",
                  "id": "${work0.canonicalId}",
                  "title": "${work0.title}",
+                 "alternativeTitles": [],
                  "contributors": [ ${contributors(contributors1)}]
                },
                {
                  "type": "Work",
                  "id": "${work1.canonicalId}",
                  "title": "${work1.title}",
+                 "alternativeTitles": [],
                  "contributors": [ ${contributors(contributors2)}]
                }
               ]
@@ -288,6 +300,7 @@ class ApiV2WorksIncludesTest
               ${singleWorkResult(apiPrefix)},
               "id": "${work.canonicalId}",
               "title": "${work.title}",
+              "alternativeTitles": [],
               "contributors": [ ${contributors(contributor)}]
             }
           """
@@ -317,12 +330,14 @@ class ApiV2WorksIncludesTest
                  "type": "Work",
                  "id": "${work0.canonicalId}",
                  "title": "${work0.title}",
+                 "alternativeTitles": [],
                  "production": [ ${production(productionEvents1)}]
                },
                {
                  "type": "Work",
                  "id": "${work1.canonicalId}",
                  "title": "${work1.title}",
+                 "alternativeTitles": [],
                  "production": [ ${production(productionEvents2)}]
                }
               ]
@@ -351,6 +366,7 @@ class ApiV2WorksIncludesTest
               ${singleWorkResult(apiPrefix)},
               "id": "${work.canonicalId}",
               "title": "${work.title}",
+              "alternativeTitles": [],
               "production": [ ${production(productionEventList)}]
             }
           """
@@ -379,6 +395,7 @@ class ApiV2WorksIncludesTest
                    "type": "Work",
                    "id": "${works(0).canonicalId}",
                    "title": "${works(0).title}",
+                   "alternativeTitles": [],
                    "notes": [
                      {
                        "noteType": {
@@ -404,6 +421,7 @@ class ApiV2WorksIncludesTest
                    "type": "Work",
                    "id": "${works(1).canonicalId}",
                    "title": "${works(1).title}",
+                   "alternativeTitles": [],
                    "notes": [
                      {
                        "noteType": {
@@ -437,6 +455,7 @@ class ApiV2WorksIncludesTest
               ${singleWorkResult(apiPrefix)},
               "id": "${work.canonicalId}",
               "title": "${work.title}",
+              "alternativeTitles": [],
               "notes": [
                  {
                    "noteType": {
