@@ -40,7 +40,6 @@ case class WorkQuery(queryString: String, queryType: WorkQueryType) {
     ("items.canonicalId", None),
     ("items.sourceIdentifier.value", None),
     ("items.otherIdentifiers.value", None),
-    ("notes.content", None),
   )
 
   import WorkQueryType._

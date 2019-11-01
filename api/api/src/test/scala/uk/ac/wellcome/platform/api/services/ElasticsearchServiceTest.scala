@@ -482,7 +482,7 @@ class ElasticsearchServiceTest
       }
     }
 
-    it("includes notes from MSMBoostQuery") {
+    it("excludes notes from MSMBoostQuery") {
       withLocalWorksIndex { index =>
         // Longer text used to ensure signal in TF/IDF
         val withNotes =
@@ -543,6 +543,25 @@ class ElasticsearchServiceTest
             index = index,
             workQuery =
               WorkQuery("Lyrical Lychee", MSMBoostQueryUsingAndOperator))
+
+        results should have length 0
+      }
+    }
+
+    it("includes notes from MSMBoostQueryWithNotes") {
+      withLocalWorksIndex { index =>
+        // Longer text used to ensure signal in TF/IDF
+        val withNotes =
+          createIdentifiedWorkWith(
+            title = "Mermaids and Marmite",
+            notes = List(GeneralNote("Aegean"), GeneralNote("Holiday snaps")))
+
+        insertIntoElasticsearch(index, withNotes)
+
+        val results =
+          searchResults(
+            index = index,
+            workQuery = MSMBoostQueryWithNotes("Aegean holiday snaps"))
 
         results should have length 1
       }
