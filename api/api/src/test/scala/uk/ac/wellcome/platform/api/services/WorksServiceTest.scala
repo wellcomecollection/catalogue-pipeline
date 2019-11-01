@@ -17,8 +17,8 @@ import uk.ac.wellcome.platform.api.models.{
   Aggregations,
   DateRangeFilter,
   ResultList,
-  WorkTypeFilter,
-  WorkQuery
+  WorkQuery,
+  WorkTypeFilter
 }
 
 import scala.concurrent.ExecutionContext.Implicits.global

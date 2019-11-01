@@ -10,12 +10,12 @@ import uk.ac.wellcome.display.models.{
   V2WorksIncludes
 }
 import uk.ac.wellcome.platform.api.models.{
-  WorkQuery,
-  WorkQueryType,
   GenreFilter,
   ItemLocationTypeFilter,
   LanguageFilter,
   SubjectFilter,
+  WorkQuery,
+  WorkQueryType,
   WorkTypeFilter
 }
 import uk.ac.wellcome.platform.api.models.WorkQueryType._

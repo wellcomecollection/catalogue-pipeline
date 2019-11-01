@@ -201,7 +201,9 @@ class ElasticsearchServiceTest
 
         (1 to 10).foreach { _ =>
           val searchResponseFuture = searchService
-            .queryResults(WorkQuery("A", MSMBoostQuery))(index, defaultQueryOptions)
+            .queryResults(WorkQuery("A", MSMBoostQuery))(
+              index,
+              defaultQueryOptions)
 
           whenReady(searchResponseFuture) { response =>
             searchResponseToWorks(response) shouldBe works
@@ -539,7 +541,8 @@ class ElasticsearchServiceTest
         val results =
           searchResults(
             index = index,
-            workQuery = WorkQuery("Lyrical Lychee", MSMBoostQueryUsingAndOperator))
+            workQuery =
+              WorkQuery("Lyrical Lychee", MSMBoostQueryUsingAndOperator))
 
         results should have length 1
       }

@@ -64,7 +64,7 @@ case class MultipleWorksParams(
     )
 
   def workQuery: Option[WorkQuery] =
-    query.map {qry =>
+    query.map { qry =>
       WorkQuery(
         queryString = qry,
         queryType = _queryType.getOrElse(WorkQueryType.MSMBoostQuery)
