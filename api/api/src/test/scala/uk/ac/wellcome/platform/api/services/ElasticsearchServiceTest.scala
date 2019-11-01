@@ -498,6 +498,52 @@ class ElasticsearchServiceTest
         results should have length 1
       }
     }
+
+    it("includes any query tokens from MSMBoostQuery") {
+      withLocalWorksIndex { index =>
+        // Longer text used to ensure signal in TF/IDF
+        val works = List(
+          "Petite Persimmon",
+          "Placid Persimmon",
+          "Petite Pomegranate",
+          "Placid Pomegranate"
+        ).map { t =>
+          createIdentifiedWorkWith(title = t)
+        }
+
+        insertIntoElasticsearch(index, works: _*)
+
+        val results =
+          searchResults(
+            index = index,
+            workQuery = MSMBoostQuery("Petite Persimmon"))
+
+        results should have length 3
+      }
+    }
+
+    it("includes all query tokens from MSMBoostQueryUsingAndOperator") {
+      withLocalWorksIndex { index =>
+        // Longer text used to ensure signal in TF/IDF
+        val works = List(
+          "Lyrical Lychee",
+          "Loose Lychee",
+          "Lyrical Lime",
+          "Loose Lime"
+        ).map { t =>
+          createIdentifiedWorkWith(title = t)
+        }
+
+        insertIntoElasticsearch(index, works: _*)
+
+        val results =
+          searchResults(
+            index = index,
+            workQuery = MSMBoostQueryUsingAndOperator("Lyrical Lychee"))
+
+        results should have length 1
+      }
+    }
   }
 
   describe("findResultById") {

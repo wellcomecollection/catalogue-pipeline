@@ -47,6 +47,7 @@ object WorkQuery {
         fields = defaultBoostedFields,
         lenient = Some(true),
         minimumShouldMatch = Some(defaultMSM),
+        operator = Some("OR"),
         // PHRASE is the only syntax that researchers know and understand, so we use this exclusively
         // so as not to have unexpected results returned when using simple query string syntax.
         // See: https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html#simple-query-string-syntax
@@ -55,13 +56,15 @@ object WorkQuery {
     }
   }
 
-  case class MSMBoostQueryWithNotes(queryString: String) extends WorkQuery {
+  case class MSMBoostQueryUsingAndOperator(queryString: String)
+      extends WorkQuery {
     override def query: SimpleStringQuery = {
       SimpleStringQuery(
         queryString,
         fields = defaultBoostedFields :+ (("notes.content", None)),
         lenient = Some(true),
         minimumShouldMatch = Some(defaultMSM),
+        operator = Some("AND"),
         // PHRASE is the only syntax that researchers know and understand, so we use this exclusively
         // so as not to have unexpected results returned when using simple query string syntax.
         // See: https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html#simple-query-string-syntax

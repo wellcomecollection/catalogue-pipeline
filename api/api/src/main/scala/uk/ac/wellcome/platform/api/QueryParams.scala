@@ -66,8 +66,8 @@ case class MultipleWorksParams(
   def workQuery: Option[WorkQuery] =
     query.map { qry =>
       _queryType.map(_.toLowerCase) match {
-        case Some("withNotes") => WorkQuery.MSMBoostQueryWithNotes(qry)
-        case _                 => WorkQuery.MSMBoostQuery(qry)
+        case Some("usingAnd") => WorkQuery.MSMBoostQueryUsingAndOperator(qry)
+        case _                => WorkQuery.MSMBoostQuery(qry)
       }
     }
 
