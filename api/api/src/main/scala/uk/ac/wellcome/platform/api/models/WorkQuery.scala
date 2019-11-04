@@ -6,12 +6,15 @@ import com.sksamuel.elastic4s.requests.searches.queries.{
   SimpleStringQuery
 }
 
-sealed trait WorkQuery {
-  val queryString: String
-  def query: Query
+sealed trait WorkQueryType
+
+object WorkQueryType {
+  case object MSMBoostQuery extends WorkQueryType
+  case object MSMBoostQueryUsingAndOperator extends WorkQueryType
 }
 
-object WorkQuery {
+case class WorkQuery(queryString: String, queryType: WorkQueryType) {
+
   val defaultMSM = "60%"
   val defaultBoostedFields: Seq[(String, Option[Double])] = Seq(
     ("title", Some(9.0)),
@@ -39,33 +42,33 @@ object WorkQuery {
     ("items.otherIdentifiers.value", None),
   )
 
-  case class MSMBoostQuery(queryString: String) extends WorkQuery {
-    override def query: SimpleStringQuery = {
-      SimpleStringQuery(
-        queryString,
-        fields = defaultBoostedFields,
-        lenient = Some(true),
-        minimumShouldMatch = Some(defaultMSM),
-        // PHRASE is the only syntax that researchers know and understand, so we use this exclusively
-        // so as not to have unexpected results returned when using simple query string syntax.
-        // See: https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html#simple-query-string-syntax
-        flags = Seq(SimpleQueryStringFlag.PHRASE)
-      )
-    }
-  }
+  import WorkQueryType._
 
-  case class MSMBoostQueryWithNotes(queryString: String) extends WorkQuery {
-    override def query: SimpleStringQuery = {
-      SimpleStringQuery(
-        queryString,
-        fields = defaultBoostedFields :+ (("notes.content", None)),
-        lenient = Some(true),
-        minimumShouldMatch = Some(defaultMSM),
-        // PHRASE is the only syntax that researchers know and understand, so we use this exclusively
-        // so as not to have unexpected results returned when using simple query string syntax.
-        // See: https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html#simple-query-string-syntax
-        flags = Seq(SimpleQueryStringFlag.PHRASE)
-      )
+  def query: Query =
+    queryType match {
+      case MSMBoostQuery =>
+        SimpleStringQuery(
+          queryString,
+          fields = defaultBoostedFields,
+          lenient = Some(true),
+          minimumShouldMatch = Some(defaultMSM),
+          operator = Some("OR"),
+          // PHRASE is the only syntax that researchers know and understand, so we use this exclusively
+          // so as not to have unexpected results returned when using simple query string syntax.
+          // See: https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html#simple-query-string-syntax
+          flags = Seq(SimpleQueryStringFlag.PHRASE)
+        )
+      case MSMBoostQueryUsingAndOperator =>
+        SimpleStringQuery(
+          queryString,
+          fields = defaultBoostedFields :+ (("notes.content", None)),
+          lenient = Some(true),
+          minimumShouldMatch = Some(defaultMSM),
+          operator = Some("AND"),
+          // PHRASE is the only syntax that researchers know and understand, so we use this exclusively
+          // so as not to have unexpected results returned when using simple query string syntax.
+          // See: https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html#simple-query-string-syntax
+          flags = Seq(SimpleQueryStringFlag.PHRASE)
+        )
     }
-  }
 }
