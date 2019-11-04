@@ -34,49 +34,56 @@ case class ElastsearchSearchRequestBuilder(
 
   lazy val aggregations = queryOptions.aggregations.map {
     case AggregationRequest.WorkType =>
-      CompositeAggregation("workType").sources(
-        List(
-          TermsValueSource("label", field = Some("workType.label.raw")),
-          TermsValueSource("id", field = Some("workType.id")),
-          TermsValueSource("type", field = Some("workType.ontologyType"))
+      CompositeAggregation("workType")
+        .size(100)
+        .sources(
+          List(
+            TermsValueSource("label", field = Some("workType.label.raw")),
+            TermsValueSource("id", field = Some("workType.id")),
+            TermsValueSource("type", field = Some("workType.ontologyType"))
+          )
         )
-      )
+
     case AggregationRequest.ProductionDate =>
-      // We use `productionDates` here over `production.dates` to match the case classes, which we then serialise to
-      // the JSON path later.
       DateHistogramAggregation("productionDates")
         .interval(DateHistogramInterval.Year)
         .field("production.dates.range.from")
         .minDocCount(1)
 
-    // We don't split genres into concepts, as the data isn't great, and for rendering isn't useful at the moment.
-    // But we've left it as a CompositeAggregation to scale when we need to.
+    // We don't split genres into concepts, as the data isn't great, and for rendering isn't useful
+    // at the moment. But we've left it as a CompositeAggregation to scale when we need to.
     case AggregationRequest.Genre =>
-      CompositeAggregation("genres").sources(
-        List(
-          TermsValueSource(
-            "label",
-            field = Some("genres.concepts.agent.label.raw"))
-        )
-      )
-
-    case AggregationRequest.Subject =>
-      CompositeAggregation("subjects").sources(
-        List(
-          TermsValueSource(
-            "label",
-            field = Some("subjects.agent.label.raw")
+      CompositeAggregation("genres")
+        .size(20)
+        .sources(
+          List(
+            TermsValueSource(
+              "label",
+              field = Some("genres.concepts.agent.label.raw"))
           )
         )
-      )
+
+    case AggregationRequest.Subject =>
+      CompositeAggregation("subjects")
+        .size(20)
+        .sources(
+          List(
+            TermsValueSource(
+              "label",
+              field = Some("subjects.agent.label.raw")
+            )
+          )
+        )
 
     case AggregationRequest.Language =>
-      CompositeAggregation("language").sources(
-        List(
-          TermsValueSource("id", field = Some("language.id")),
-          TermsValueSource("label", field = Some("language.label.raw"))
+      CompositeAggregation("language")
+        .size(200)
+        .sources(
+          List(
+            TermsValueSource("id", field = Some("language.id")),
+            TermsValueSource("label", field = Some("language.label.raw"))
+          )
         )
-      )
   }
 
   lazy val sort = queryOptions.sortBy
