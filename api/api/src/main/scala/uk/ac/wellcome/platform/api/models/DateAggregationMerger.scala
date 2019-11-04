@@ -5,17 +5,17 @@ import java.time.{LocalDateTime, ZoneOffset}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.parse.DateHelpers
 
-sealed trait PeriodRange
+sealed trait DateBucketRange
 
-object PeriodRange {
-  object Decade extends PeriodRange
-  object HalfCentury extends PeriodRange
-  object Century extends PeriodRange
+object DateBucketRange {
+  object Decade extends DateBucketRange
+  object HalfCentury extends DateBucketRange
+  object Century extends DateBucketRange
 }
 
 object DateAggregationMerger extends DateHelpers {
 
-  import PeriodRange._
+  import DateBucketRange._
 
   /** Dynamically merges a set of date aggregation results based on the range
     *  of dates covered. Merging happens recursively until the number of buckets
@@ -24,7 +24,7 @@ object DateAggregationMerger extends DateHelpers {
     */
   def apply(agg: Aggregation[Period],
             maxBuckets: Int = 20,
-            range: PeriodRange = Decade): Aggregation[Period] =
+            range: DateBucketRange = Decade): Aggregation[Period] =
     if (agg.buckets.length > maxBuckets)
       range match {
         case Decade =>
