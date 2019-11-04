@@ -2,6 +2,7 @@ package uk.ac.wellcome.platform.reindex.reindex_worker.services
 
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.platform.reindex.reindex_worker.dynamo.{
+  BatchItemGetter,
   MaxRecordsScanner,
   ParallelScanner
 }
@@ -12,7 +13,8 @@ import scala.concurrent.Future
 
 class RecordReader(
   maxRecordsScanner: MaxRecordsScanner,
-  parallelScanner: ParallelScanner
+  parallelScanner: ParallelScanner,
+  specificItemsGetter: BatchItemGetter
 ) extends Logging {
 
   def findRecordsForReindexing(
@@ -30,6 +32,8 @@ class RecordReader(
       case PartialReindexParameters(maxRecords) =>
         maxRecordsScanner.scan(maxRecords = maxRecords)(
           tableName = dynamoConfig.tableName)
+      case SpecificReindexParameters(ids) =>
+        specificItemsGetter.get(ids)(tableName = dynamoConfig.tableName)
     }
   }
 }

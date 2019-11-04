@@ -2,8 +2,8 @@ package uk.ac.wellcome.platform.reindex.reindex_worker.fixtures
 
 import org.scanamo.{Scanamo, Table => ScanamoTable}
 import org.scanamo.auto._
-
 import uk.ac.wellcome.platform.reindex.reindex_worker.dynamo.{
+  BatchItemGetter,
   MaxRecordsScanner,
   ParallelScanner,
   ScanSpecScanner
@@ -49,4 +49,7 @@ trait ReindexDynamoFixtures extends ReindexableTable {
     new MaxRecordsScanner(
       scanSpecScanner = createScanSpecScanner
     )
+
+  def createBatchItemGetter: BatchItemGetter =
+    new BatchItemGetter(dynamoClient)
 }

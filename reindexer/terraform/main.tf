@@ -13,4 +13,6 @@ module "reindex_worker" {
   namespace_id                     = "${aws_service_discovery_private_dns_namespace.reindexer.id}"
 
   account_id = "${data.aws_caller_identity.current.account_id}"
+
+  namespace = "reindex_worker"
 }

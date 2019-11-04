@@ -6,6 +6,7 @@ trait RecordReaderFixture extends ReindexDynamoFixtures {
   def createRecordReader: RecordReader =
     new RecordReader(
       maxRecordsScanner = createMaxRecordsScanner,
-      parallelScanner = createParallelScanner
+      parallelScanner = createParallelScanner,
+      specificItemsGetter = createBatchItemGetter
     )
 }

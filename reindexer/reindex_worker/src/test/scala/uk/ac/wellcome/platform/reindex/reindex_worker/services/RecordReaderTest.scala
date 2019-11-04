@@ -10,7 +10,8 @@ import uk.ac.wellcome.platform.reindex.reindex_worker.fixtures.{
 }
 import uk.ac.wellcome.platform.reindex.reindex_worker.models.{
   CompleteReindexParameters,
-  PartialReindexParameters
+  PartialReindexParameters,
+  SpecificReindexParameters
 }
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
 
@@ -59,6 +60,26 @@ class RecordReaderTest
 
       whenReady(future) {
         _ should have size 5
+      }
+    }
+  }
+
+  it("finds records in the table with a specified records reindex") {
+    withLocalDynamoDbTable { table =>
+      val reader = createRecordReader
+
+      val records = createRecords(table, count = 15)
+
+      val reindexParameters = SpecificReindexParameters(List(records.head.id))
+
+      val future = reader.findRecordsForReindexing(
+        reindexParameters = reindexParameters,
+        dynamoConfig = createDynamoConfigWith(table)
+      )
+
+      whenReady(future) { actualRecords =>
+        actualRecords should have length 1
+        fromJson[NamedRecord](actualRecords.head).get shouldEqual records.head
       }
     }
   }
