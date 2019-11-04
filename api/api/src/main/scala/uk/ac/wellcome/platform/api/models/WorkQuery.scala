@@ -61,7 +61,7 @@ case class WorkQuery(queryString: String, queryType: WorkQueryType) {
       case MSMBoostQueryUsingAndOperator =>
         SimpleStringQuery(
           queryString,
-          fields = defaultBoostedFields :+ (("notes.content", None)),
+          fields = defaultBoostedFields,
           lenient = Some(true),
           minimumShouldMatch = Some(defaultMSM),
           operator = Some("AND"),
