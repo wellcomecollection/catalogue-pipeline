@@ -62,6 +62,7 @@ case class ElastsearchSearchRequestBuilder(
               field = Some("genres.concepts.agent.label.raw"))
           )
         )
+        .subAggregations(sortedByCount)
 
     case AggregationRequest.Subject =>
       CompositeAggregation("subjects")
@@ -74,6 +75,7 @@ case class ElastsearchSearchRequestBuilder(
             )
           )
         )
+        .subAggregations(sortedByCount)
 
     case AggregationRequest.Language =>
       CompositeAggregation("language")
@@ -130,4 +132,12 @@ case class ElastsearchSearchRequestBuilder(
       case SubjectFilter(subjectQuery) =>
         matchQuery(field = "subjects.agent.label", value = subjectQuery)
     }
+
+  private def sortedByCount =
+    List(
+      bucketSortAggregation(
+        "sort_by_count",
+        Seq(FieldSort("_count").order(SortOrder.DESC))
+      )
+    )
 }
