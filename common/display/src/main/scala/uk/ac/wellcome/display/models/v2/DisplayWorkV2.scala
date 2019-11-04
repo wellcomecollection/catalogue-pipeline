@@ -22,7 +22,7 @@ case class DisplayWorkV2(
   @Schema(
     `type` = "List[String]",
     description = "Alternative titles of  the work."
-  ) alternativeTitles: Option[List[String]],
+  ) alternativeTitles: List[String],
   @Schema(
     `type` = "String",
     description = "A description given to a thing."
@@ -105,8 +105,7 @@ case object DisplayWorkV2 {
     DisplayWorkV2(
       id = work.canonicalId,
       title = work.title,
-      alternativeTitles =
-        if (includes.alternativeTitles) Some(work.alternativeTitles) else None,
+      alternativeTitles = work.alternativeTitles,
       description = work.description,
       physicalDescription = work.physicalDescription,
       lettering = work.lettering,

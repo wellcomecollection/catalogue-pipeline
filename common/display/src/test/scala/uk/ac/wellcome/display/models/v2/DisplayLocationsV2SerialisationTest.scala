@@ -24,12 +24,14 @@ class DisplayLocationsV2SerialisationTest
     )
 
     val expectedJson = s"""
-                            |{
-                            |  "type": "Work",
-                            |  "id": "${work.canonicalId}",
-                            |  "title": "${work.title}",
-                            |  "items": [ ${items(work.items)} ]
-                            |}""".stripMargin
+      |{
+      | "type": "Work",
+      | "id": "${work.canonicalId}",
+      | "title": "${work.title}",
+      | "alternativeTitles": [],
+      | "items": [ ${items(work.items)} ]
+      |}
+    """.stripMargin
 
     assertWorkMapsToJson(work, expectedJson = expectedJson)
   }
@@ -45,12 +47,14 @@ class DisplayLocationsV2SerialisationTest
     )
 
     val expectedJson = s"""
-                          |{
-                          |  "type": "Work",
-                          |  "id": "${work.canonicalId}",
-                          |  "title": "${work.title}",
-                          |  "items": [ ${items(work.items)} ]
-                          |}""".stripMargin
+      |{
+      | "type": "Work",
+      | "id": "${work.canonicalId}",
+      | "title": "${work.title}",
+      | "alternativeTitles": [],
+      | "items": [ ${items(work.items)} ]
+      |}
+    """.stripMargin
 
     assertWorkMapsToJson(work, expectedJson = expectedJson)
   }
@@ -67,12 +71,14 @@ class DisplayLocationsV2SerialisationTest
     )
 
     val expectedJson = s"""
-                          |{
-                          |  "type": "Work",
-                          |  "id": "${work.canonicalId}",
-                          |  "title": "${work.title}",
-                          |  "items": [ ${items(work.items)} ]
-                          |}""".stripMargin
+      |{
+      | "type": "Work",
+      | "id": "${work.canonicalId}",
+      | "title": "${work.title}",
+      | "alternativeTitles": [],
+      | "items": [ ${items(work.items)} ]
+      |}
+    """.stripMargin
 
     assertWorkMapsToJson(work, expectedJson = expectedJson)
   }

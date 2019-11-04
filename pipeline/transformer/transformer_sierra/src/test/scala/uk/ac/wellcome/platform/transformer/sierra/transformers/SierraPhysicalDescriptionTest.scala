@@ -39,7 +39,7 @@ class SierraPhysicalDescriptionTest
     "extracts a physical description where there are multiple MARC field 300 $b") {
     val descriptionA = "The queer quolls quits and quarrels"
     val descriptionB = "A quintessential quadraped is quick"
-    val expectedDescription = s"$descriptionA\n$descriptionB"
+    val expectedDescription = s"$descriptionA $descriptionB"
     val data = bibData(
       varField("300", MarcSubfield("b", descriptionA)),
       varField(
@@ -56,7 +56,7 @@ class SierraPhysicalDescriptionTest
     val descriptionA = "The queer quolls quits and quarrels"
     val descriptionB = "A quintessential quadraped is quick"
     val descriptionC = "The edifying extent of early emus"
-    val expectedDescription = s"$descriptionA\n$descriptionB\n$descriptionC"
+    val expectedDescription = s"$descriptionA $descriptionB $descriptionC"
     val data = bibData(
       varField("300", MarcSubfield("b", descriptionB)),
       varField("300", MarcSubfield("a", descriptionA)),

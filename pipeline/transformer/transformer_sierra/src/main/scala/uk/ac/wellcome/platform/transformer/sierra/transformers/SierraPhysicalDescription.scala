@@ -37,5 +37,5 @@ object SierraPhysicalDescription extends SierraTransformer with SierraQueryOps {
         "300" -> "b",
         "300" -> "c",
       )
-      .contentString("\n")
+      .contentString(" ")
 }

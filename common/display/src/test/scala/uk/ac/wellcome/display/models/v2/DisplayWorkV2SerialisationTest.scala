@@ -29,16 +29,17 @@ class DisplayWorkV2SerialisationTest
     )
 
     val expectedJson = s"""
-       |{
-       | "type": "Work",
-       | "id": "${work.canonicalId}",
-       | "title": "${work.title}",
-       | "description": "${work.description.get}",
-       | "workType" : ${workType(work.workType.get)},
-       | "lettering": "${work.lettering.get}",
-       | "createdDate": ${period(work.createdDate.get)}
-       |}
-          """.stripMargin
+      |{
+      | "type": "Work",
+      | "id": "${work.canonicalId}",
+      | "title": "${work.title}",
+      | "description": "${work.description.get}",
+      | "workType" : ${workType(work.workType.get)},
+      | "lettering": "${work.lettering.get}",
+      | "alternativeTitles": [],
+      | "createdDate": ${period(work.createdDate.get)}
+      |}
+    """.stripMargin
 
     assertObjectMapsToJson(DisplayWorkV2(work), expectedJson = expectedJson)
   }
@@ -49,13 +50,14 @@ class DisplayWorkV2SerialisationTest
     )
 
     val expectedJson = s"""
-                          |{
-                          | "type": "Work",
-                          | "id": "${work.canonicalId}",
-                          | "title": "${work.title}",
-                          | "items": [ ${items(work.items)} ]
-                          |}
-          """.stripMargin
+      |{
+      | "type": "Work",
+      | "id": "${work.canonicalId}",
+      | "title": "${work.title}",
+      | "alternativeTitles": [],
+      | "items": [ ${items(work.items)} ]
+      |}
+    """.stripMargin
 
     assertObjectMapsToJson(
       DisplayWorkV2(work, includes = V2WorksIncludes(items = true)),
@@ -69,13 +71,14 @@ class DisplayWorkV2SerialisationTest
     )
 
     val expectedJson = s"""
-                          |{
-                          | "type": "Work",
-                          | "id": "${work.canonicalId}",
-                          | "title": "${work.title}",
-                          | "items": [ ]
-                          |}
-          """.stripMargin
+      |{
+      | "type": "Work",
+      | "id": "${work.canonicalId}",
+      | "title": "${work.title}",
+      | "alternativeTitles": [],
+      | "items": [ ]
+      |}
+    """.stripMargin
 
     assertObjectMapsToJson(
       DisplayWorkV2(work, includes = V2WorksIncludes(items = true)),
@@ -95,28 +98,29 @@ class DisplayWorkV2SerialisationTest
       items = List(item)
     )
 
-    val expectedJson = s"""{
-                          |     "type": "Work",
-                          |     "id": "${workWithCopyright.canonicalId}",
-                          |     "title": "${workWithCopyright.title}",
-                          |     "items": [
-                          |       {
-                          |         "id": "${item.canonicalId}",
-                          |         "type": "${item.agent.ontologyType}",
-                          |         "locations": [
-                          |           {
-                          |             "type": "${location.ontologyType}",
-                          |             "url": "",
-                          |             "locationType": ${locationType(
-                            location.locationType)},
-                          |             "license": ${license(
-                            location.license.get)},
-                          |             "credit": "${location.credit.get}"
-                          |           }
-                          |         ]
-                          |       }
-                          |     ]
-                          |   }""".stripMargin
+    val expectedJson = s"""
+      |{
+      | "type": "Work",
+      | "id": "${workWithCopyright.canonicalId}",
+      | "title": "${workWithCopyright.title}",
+      | "alternativeTitles": [],
+      | "items": [
+      |   {
+      |     "id": "${item.canonicalId}",
+      |     "type": "${item.agent.ontologyType}",
+      |     "locations": [
+      |       {
+      |         "type": "${location.ontologyType}",
+      |         "url": "",
+      |         "locationType": ${locationType(location.locationType)},
+      |         "license": ${license(location.license.get)},
+      |         "credit": "${location.credit.get}"
+      |       }
+      |     ]
+      |   }
+      | ]
+      |}
+    """.stripMargin
 
     assertObjectMapsToJson(
       DisplayWorkV2(
@@ -135,13 +139,15 @@ class DisplayWorkV2SerialisationTest
       }.toList
     )
 
-    val expectedJson = s"""{
-                          |     "type": "Work",
-                          |     "id": "${workWithSubjects.canonicalId}",
-                          |     "title": "${workWithSubjects.title}",
-                          |     "subjects": [ ${subjects(
-                            workWithSubjects.subjects)} ]
-                          |   }""".stripMargin
+    val expectedJson = s"""
+      |{
+      | "type": "Work",
+      | "id": "${workWithSubjects.canonicalId}",
+      | "title": "${workWithSubjects.title}",
+      | "alternativeTitles": [],
+      | "subjects": [${subjects(workWithSubjects.subjects)}]
+      |}
+    """.stripMargin
 
     assertObjectMapsToJson(
       DisplayWorkV2(
@@ -160,12 +166,13 @@ class DisplayWorkV2SerialisationTest
 
     val expectedJson = s"""
       |{
-      |  "type": "Work",
-      |  "id": "${workWithProduction.canonicalId}",
-      |  "title": "${workWithProduction.title}",
-      |  "production": [ ${production(workWithProduction.production)} ]
+      | "type": "Work",
+      | "id": "${workWithProduction.canonicalId}",
+      | "title": "${workWithProduction.title}",
+      | "alternativeTitles": [],
+      | "production": [${production(workWithProduction.production)}]
       |}
-      |""".stripMargin
+    """.stripMargin
 
     assertObjectMapsToJson(
       DisplayWorkV2(
@@ -190,18 +197,18 @@ class DisplayWorkV2SerialisationTest
     )
 
     val expectedJson = s"""
-                                |{
-                                | "type": "Work",
-                                | "id": "${work.canonicalId}",
-                                | "title": "${work.title}",
-                                | "description": "${work.description.get}",
-                                | "workType" : ${workType(work.workType.get)},
-                                | "lettering": "${work.lettering.get}",
-                                | "createdDate": ${period(work.createdDate.get)},
-                                | "contributors": [ ${contributor(
-                            work.contributors.head)} ]
-                                |}
-          """.stripMargin
+      |{
+      | "type": "Work",
+      | "id": "${work.canonicalId}",
+      | "title": "${work.title}",
+      | "description": "${work.description.get}",
+      | "alternativeTitles": [],
+      | "workType" : ${workType(work.workType.get)},
+      | "lettering": "${work.lettering.get}",
+      | "createdDate": ${period(work.createdDate.get)},
+      | "contributors": [${contributor(work.contributors.head)}]
+      |}
+    """.stripMargin
 
     assertObjectMapsToJson(
       DisplayWorkV2(work, includes = V2WorksIncludes(contributors = true)),
@@ -224,12 +231,14 @@ class DisplayWorkV2SerialisationTest
     )
 
     val expectedJson = s"""
-                          |{
-                          |     "type": "Work",
-                          |     "id": "${work.canonicalId}",
-                          |     "title": "${work.title}",
-                          |     "genres": [ ${genres(work.genres)} ]
-                          |   }""".stripMargin
+      |{
+      | "type": "Work",
+      | "id": "${work.canonicalId}",
+      | "title": "${work.title}",
+      | "alternativeTitles": [],
+      | "genres": [ ${genres(work.genres)} ]
+      |}
+    """.stripMargin
 
     assertObjectMapsToJson(
       DisplayWorkV2(work, includes = V2WorksIncludes(genres = true)),
@@ -248,6 +257,7 @@ class DisplayWorkV2SerialisationTest
       | "type": "Work",
       | "id": "${work.canonicalId}",
       | "title": "${work.title}",
+      | "alternativeTitles": [],
       | "notes": [
       |   {
       |     "noteType": {
@@ -284,14 +294,17 @@ class DisplayWorkV2SerialisationTest
     )
 
     val expectedJson = s"""
-                          |{
-                          | "type": "Work",
-                          | "id": "${work.canonicalId}",
-                          | "title": "${work.title}",
-                          | "identifiers": [ ${identifier(work.sourceIdentifier)}, ${identifier(
-                            otherIdentifier)} ]
-                          |}
-          """.stripMargin
+      |{
+      | "type": "Work",
+      | "id": "${work.canonicalId}",
+      | "title": "${work.title}",
+      | "alternativeTitles": [],
+      | "identifiers": [
+      |   ${identifier(work.sourceIdentifier)},
+      |   ${identifier(otherIdentifier)}
+      | ]
+      |}
+    """.stripMargin
 
     assertObjectMapsToJson(
       DisplayWorkV2(work, includes = V2WorksIncludes(identifiers = true)),
@@ -305,13 +318,14 @@ class DisplayWorkV2SerialisationTest
     )
 
     val expectedJson = s"""
-                          |{
-                          | "type": "Work",
-                          | "id": "${work.canonicalId}",
-                          | "title": "${work.title}",
-                          | "identifiers": [ ${identifier(work.sourceIdentifier)} ]
-                          |}
-          """.stripMargin
+      |{
+      | "type": "Work",
+      | "id": "${work.canonicalId}",
+      | "title": "${work.title}",
+      | "alternativeTitles": [],
+      | "identifiers": [ ${identifier(work.sourceIdentifier)} ]
+      |}
+    """.stripMargin
 
     assertObjectMapsToJson(
       DisplayWorkV2(work, includes = V2WorksIncludes(identifiers = true)),
@@ -330,13 +344,14 @@ class DisplayWorkV2SerialisationTest
     )
 
     val expectedJson = s"""
-                          |   {
-                          |     "type": "Work",
-                          |     "id": "${work.canonicalId}",
-                          |     "title": "${work.title}",
-                          |     "thumbnail": ${location(work.thumbnail.get)}
-                          |   }
-          """.stripMargin
+      |{
+      | "type": "Work",
+      | "id": "${work.canonicalId}",
+      | "title": "${work.title}",
+      | "alternativeTitles": [],
+      | "thumbnail": ${location(work.thumbnail.get)}
+      |}
+    """.stripMargin
 
     assertObjectMapsToJson(
       DisplayWorkV2(work, includes = V2WorksIncludes()),
