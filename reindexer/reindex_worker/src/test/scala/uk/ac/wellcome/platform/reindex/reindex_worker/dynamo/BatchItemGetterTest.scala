@@ -39,7 +39,7 @@ class BatchItemGetterTest
 
       whenReady(futureResult) { result =>
         result
-          .map { fromJson[NamedRecord](_).get } shouldEqual specifiedRecords
+          .map { fromJson[NamedRecord](_).get } should contain theSameElementsAs specifiedRecords
       }
     }
   }
