@@ -19,7 +19,7 @@ module "snapshot_generator" {
     metric_namespace = "snapshot_generator"
   }
 
-  env_vars_length = "5"
+  env_vars_length = 4
 
   secret_env_vars = {
     es_host     = "catalogue/api/es_host"
@@ -29,7 +29,7 @@ module "snapshot_generator" {
     es_password = "catalogue/api/es_password"
   }
 
-  secret_env_vars_length = "5"
+  secret_env_vars_length = 5
 
   service_egress_security_group_id = "${aws_security_group.service_egress_security_group.id}"
 
