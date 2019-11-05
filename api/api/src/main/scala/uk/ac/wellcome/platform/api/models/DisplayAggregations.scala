@@ -16,8 +16,8 @@ import uk.ac.wellcome.display.models.Implicits._
 import uk.ac.wellcome.display.json.DisplayJsonUtil._
 
 @Schema(
-  name = "AggregationMap",
-  description = "A map of the different aggregations on the ResultList."
+  name = "Aggregations",
+  description = "A map containing the requested aggregations."
 )
 case class DisplayAggregations(
   @Schema(
@@ -39,12 +39,20 @@ case class DisplayAggregations(
   @JsonKey("type") ontologyType: String = "Aggregations"
 )
 
+@Schema(
+  name = "Aggregation",
+  description = "An aggregation over the results."
+)
 case class DisplayAggregation[T](
   @Schema(description = "An aggregation on a set of results") buckets: List[
     DisplayAggregationBucket[T]],
   @JsonKey("type") ontologyType: String = "Aggregation"
 )
 
+@Schema(
+  name = "AggregationBucket",
+  description = "An individual bucket within an aggregation."
+)
 case class DisplayAggregationBucket[T](
   @Schema(
     description = "The data that this aggregation is of."

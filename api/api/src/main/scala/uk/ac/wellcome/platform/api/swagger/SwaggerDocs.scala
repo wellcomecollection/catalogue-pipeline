@@ -69,7 +69,13 @@ trait SingleWorkSwagger {
         name = "include",
         in = ParameterIn.QUERY,
         description = "A comma-separated list of extra fields to include",
-        schema = new Schema(implementation = classOf[V2WorksIncludes]),
+        schema = new Schema(allowableValues = Array("identifiers",
+                                                    "items",
+                                                    "subjects",
+                                                    "genres",
+                                                    "contributors",
+                                                    "production",
+                                                    "notes")),
         required = false,
       ),
     )
@@ -125,7 +131,13 @@ trait MultipleWorksSwagger {
         name = "include",
         in = ParameterIn.QUERY,
         description = "A comma-separated list of extra fields to include",
-        schema = new Schema(implementation = classOf[V2WorksIncludes]),
+        schema = new Schema(allowableValues = Array("identifiers",
+                                                    "items",
+                                                    "subjects",
+                                                    "genres",
+                                                    "contributors",
+                                                    "production",
+                                                    "notes")),
         required = false,
       ),
       new Parameter(
@@ -146,6 +158,11 @@ trait MultipleWorksSwagger {
         in = ParameterIn.QUERY,
         description =
           "What aggregated data in correlation to the results should we return.",
+        schema = new Schema(allowableValues = Array("workType",
+                                                    "genres",
+                                                    "production.dates",
+                                                    "subjects",
+                                                    "language")),
         required = false
       ),
       new Parameter(
