@@ -249,7 +249,7 @@ class ApiV2WorksAggregationsTest extends ApiV2WorksTestBase {
     }
   }
 
-  it("supports aggregating on subject") {
+  it("supports aggregating on subject, ordered by frequency") {
 
     val paeleoNeuroBiology = createSubjectWith(label = "paeleoNeuroBiology")
     val realAnalysis = createSubjectWith(label = "realAnalysis")
@@ -259,7 +259,7 @@ class ApiV2WorksAggregationsTest extends ApiV2WorksTestBase {
         subjects = List(paeleoNeuroBiology)
       ),
       createIdentifiedWorkWith(
-        subjects = List(paeleoNeuroBiology)
+        subjects = List(realAnalysis)
       ),
       createIdentifiedWorkWith(
         subjects = List(realAnalysis)
@@ -284,7 +284,7 @@ class ApiV2WorksAggregationsTest extends ApiV2WorksTestBase {
                  "buckets": [
                    {
                      "data" : {
-                       "label": "paeleoNeuroBiology",
+                       "label": "realAnalysis",
                        "concepts": [],
                        "type": "Subject"
                      },
@@ -293,7 +293,7 @@ class ApiV2WorksAggregationsTest extends ApiV2WorksTestBase {
                    },
                    {
                      "data" : {
-                       "label": "realAnalysis",
+                       "label": "paeleoNeuroBiology",
                        "concepts": [],
                        "type": "Subject"
                      },
