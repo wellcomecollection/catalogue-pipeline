@@ -564,16 +564,6 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
 
     val works = List(horrorWork, romcomWork, romcomHorrorWork, noGenreWork)
 
-    def workResponse(work: IdentifiedWork): String =
-      s"""
-        | {
-        |   "type": "Work",
-        |   "id": "${work.canonicalId}",
-        |   "title": "${work.title}",
-        |   "alternativeTitles": []
-        | }
-      """.stripMargin
-
     it("filters by genre with partial match") {
       withApi {
         case (indexV2, routes) =>

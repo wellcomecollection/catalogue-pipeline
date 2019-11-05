@@ -29,7 +29,7 @@ case class ElastsearchSearchRequestBuilder(
     .aggs { aggregations }
     .query { filteredQuery }
     .sortBy { sort ++ sortDefinitions }
-    .limit { if (aggregations.nonEmpty) 0 else queryOptions.limit }
+    .limit { queryOptions.limit }
     .from { queryOptions.from }
 
   lazy val aggregations = queryOptions.aggregations.map {
