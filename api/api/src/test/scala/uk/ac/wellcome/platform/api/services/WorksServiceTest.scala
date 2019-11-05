@@ -437,7 +437,7 @@ class WorksServiceTest
 
           assertListResultIsCorrect(
             allWorks = List(work1, work2, work3, work4),
-            expectedWorks = List(),
+            expectedWorks = List(work1, work2, work3, work4),
             expectedTotalResults = 4,
             expectedAggregations = Some(expectedAggregations),
             worksSearchOptions = worksSearchOptions
