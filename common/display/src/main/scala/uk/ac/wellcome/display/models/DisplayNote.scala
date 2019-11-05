@@ -15,6 +15,10 @@ case class DisplayNote(
   @JsonKey("type") ontologyType: String = "Note"
 )
 
+@Schema(
+  name = "NoteType",
+  description = "Indicates the type of note associated with the work."
+)
 case class DisplayNoteType(
   @Schema(
     `type` = "String"
