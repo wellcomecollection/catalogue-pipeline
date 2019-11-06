@@ -36,7 +36,7 @@ case class DisplayAggregations(
   @Schema(
     description = "Language aggregation on a set of results."
   ) language: Option[DisplayAggregation[DisplayLanguage]],
-  @JsonKey("type") ontologyType: String = "Aggregations"
+  @JsonKey("type") @Schema(name = "type") ontologyType: String = "Aggregations"
 )
 
 @Schema(
@@ -46,7 +46,7 @@ case class DisplayAggregations(
 case class DisplayAggregation[T](
   @Schema(description = "An aggregation on a set of results") buckets: List[
     DisplayAggregationBucket[T]],
-  @JsonKey("type") ontologyType: String = "Aggregation"
+  @JsonKey("type") @Schema(name = "type") ontologyType: String = "Aggregation"
 )
 
 @Schema(
@@ -61,7 +61,7 @@ case class DisplayAggregationBucket[T](
     description =
       "The count of how often this data occurs in this set of results."
   ) count: Int,
-  @JsonKey("type") ontologyType: String = "AggregationBucket")
+  @JsonKey("type") @Schema(name = "type") ontologyType: String = "AggregationBucket")
 
 object DisplayAggregations {
 

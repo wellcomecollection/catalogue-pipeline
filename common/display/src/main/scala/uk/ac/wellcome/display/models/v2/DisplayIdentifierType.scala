@@ -10,7 +10,7 @@ import uk.ac.wellcome.models.work.internal.IdentifierType
 case class DisplayIdentifierType(
   @Schema id: String,
   @Schema label: String,
-  @JsonKey("type") ontologyType: String = "IdentifierType"
+  @JsonKey("type") @Schema(name = "type") ontologyType: String = "IdentifierType"
 )
 
 object DisplayIdentifierType {

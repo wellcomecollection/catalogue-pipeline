@@ -90,12 +90,7 @@ case class DisplayWorkV2(
     `type` = "Integer",
     description = "The playing time for audiovisual works, in seconds."
   ) duration: Option[Int] = None,
-  @Schema(
-    readOnly = true,
-    description =
-      "A broad, top-level description of the form of a work: namely, whether it is a printed book, archive, painting, photograph, moving image, etc."
-  )
-  @JsonKey("type") ontologyType: String = "Work"
+  @JsonKey("type") @Schema(name = "type") ontologyType: String = "Work"
 ) extends DisplayWork
 
 case object DisplayWorkV2 {

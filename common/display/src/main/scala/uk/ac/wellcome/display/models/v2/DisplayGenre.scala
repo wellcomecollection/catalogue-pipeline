@@ -12,7 +12,7 @@ case class DisplayGenre(
   @Schema(description = "A label given to a thing.") label: String,
   @Schema(description = "Relates a genre to a list of concepts.") concepts: List[
     DisplayAbstractConcept],
-  @JsonKey("type") ontologyType: String = "Genre"
+  @JsonKey("type") @Schema(name = "type") ontologyType: String = "Genre"
 )
 
 object DisplayGenre {

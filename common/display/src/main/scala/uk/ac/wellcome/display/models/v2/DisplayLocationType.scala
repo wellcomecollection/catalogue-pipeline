@@ -10,7 +10,7 @@ import uk.ac.wellcome.models.work.internal.LocationType
 case class DisplayLocationType(
   @Schema id: String,
   @Schema label: String,
-  @JsonKey("type") ontologyType: String = "LocationType"
+  @JsonKey("type") @Schema(name = "type") ontologyType: String = "LocationType"
 )
 
 object DisplayLocationType {

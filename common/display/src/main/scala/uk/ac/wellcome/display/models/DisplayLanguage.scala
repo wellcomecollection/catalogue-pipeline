@@ -16,7 +16,7 @@ case class DisplayLanguage(
   @Schema(
     description = "The name of a language"
   ) label: String,
-  @JsonKey("type") ontologyType: String = "Language"
+  @JsonKey("type") @Schema(name = "type") ontologyType: String = "Language"
 )
 
 case object DisplayLanguage {

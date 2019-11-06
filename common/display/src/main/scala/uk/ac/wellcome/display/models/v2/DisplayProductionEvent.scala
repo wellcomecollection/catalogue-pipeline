@@ -17,7 +17,7 @@ case class DisplayProductionEvent(
   @Schema(
     `type` = "uk.ac.wellcome.display.models.v2.DisplayAbstractConcept"
   ) function: Option[DisplayAbstractConcept],
-  @JsonKey("type") ontologyType: String = "ProductionEvent"
+  @JsonKey("type") @Schema(name = "type") ontologyType: String = "ProductionEvent"
 )
 
 object DisplayProductionEvent {
