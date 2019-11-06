@@ -23,12 +23,12 @@ import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
 
 case class WorksSearchOptions(
-  filters: List[WorkFilter],
-  pageSize: Int,
-  pageNumber: Int,
-  aggregations: List[AggregationRequest],
-  sortBy: List[SortRequest],
-  sortOrder: SortingOrder,
+  filters: List[WorkFilter] = Nil,
+  pageSize: Int = 10,
+  pageNumber: Int = 1,
+  aggregations: List[AggregationRequest] = Nil,
+  sortBy: List[SortRequest] = Nil,
+  sortOrder: SortingOrder = SortingOrder.Ascending,
 )
 
 class WorksService(searchService: ElasticsearchService)(

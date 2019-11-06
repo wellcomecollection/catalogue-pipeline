@@ -121,10 +121,7 @@ case class ElastsearchSearchRequestBuilder(
       case DateRangeFilter(fromDate, toDate) =>
         val (gte, lte) =
           (fromDate map ElasticDate.apply, toDate map ElasticDate.apply)
-        boolQuery should (
-          RangeQuery("production.dates.range.from", lte = lte, gte = gte),
-          RangeQuery("production.dates.range.to", lte = lte, gte = gte)
-        )
+        RangeQuery("production.dates.range.from", lte = lte, gte = gte)
       case LanguageFilter(languageIds) =>
         termsQuery(field = "language.id", values = languageIds)
       case GenreFilter(genreQuery) =>
