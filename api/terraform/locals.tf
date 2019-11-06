@@ -8,7 +8,7 @@ locals {
 
   # API pins
 
-  production_api     = "romulus"
+  production_api     = "remus"
   pinned_nginx       = "760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/nginx_api-gw:bad0dbfa548874938d16496e313b05adb71268b7"
   pinned_remus_api   = "760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/api:785c0e98827b3ed174403b936e966e3b341ed085"
   pinned_romulus_api = "760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/api:d49dbf416ff5c8de80b795425c15eca8c7646b8c"
