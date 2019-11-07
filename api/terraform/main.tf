@@ -1,5 +1,5 @@
 module "catalogue_api" {
-  source = "catalogue_api"
+  source = "./catalogue_api"
 
   namespace = "catalogue_api_gw"
 
@@ -26,7 +26,7 @@ module "catalogue_api" {
 }
 
 module "data_api" {
-  source = "data_api"
+  source = "./data_api"
 
   aws_region   = "${var.aws_region}"
   infra_bucket = "${local.infra_bucket}"
@@ -42,7 +42,7 @@ module "data_api" {
 }
 
 module "api_docs" {
-  source = "api_docs"
+  source = "./api_docs"
 
   update_api_docs_release_uri = "${local.update_api_docs_release_uri}"
 }
