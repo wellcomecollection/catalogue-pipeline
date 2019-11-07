@@ -25,14 +25,13 @@ class SwaggerScalaModelConverter extends AbstractModelConverter(Json.mapper()) {
   override def resolve(annotatedType: AnnotatedType,
                        context: ModelConverterContext,
                        chain: Iterator[ModelConverter]): Schema[_] = {
-    val javaType = _mapper.constructType(annotatedType.getType)
-    val cls = javaType.getRawClass
+    val cls = _mapper.constructType(annotatedType.getType).getRawClass
 
     if (cls == classOf[Option[_]])
-      resolve(containedType(annotatedType, cls, javaType), context, chain)
+      resolve(containedType(annotatedType, cls), context, chain)
     else if (cls == classOf[List[_]])
       new ArraySchema().items(
-        resolve(containedType(annotatedType, cls, javaType), context, chain)
+        resolve(containedType(annotatedType, cls), context, chain)
       )
     else if (chain.hasNext)
       chain.next().resolve(annotatedType, context, chain)
@@ -41,10 +40,9 @@ class SwaggerScalaModelConverter extends AbstractModelConverter(Json.mapper()) {
   }
 
   private def containedType(annotatedType: AnnotatedType,
-                            cls: Class[_],
-                            javaType: JavaType): AnnotatedType =
+                            cls: Class[_]): AnnotatedType =
     (new AnnotatedType)
-      .`type`(getContentType(annotatedType).getOrElse(javaType))
+      .`type`(getContentType(annotatedType))
       .ctxAnnotations(annotatedType.getCtxAnnotations)
       .parent(annotatedType.getParent)
       .schemaProperty(annotatedType.isSchemaProperty)
@@ -54,10 +52,10 @@ class SwaggerScalaModelConverter extends AbstractModelConverter(Json.mapper()) {
       .jsonViewAnnotation(annotatedType.getJsonViewAnnotation)
       .skipOverride(annotatedType.isSkipOverride)
 
-  private def getContentType(annotatedType: AnnotatedType): Option[JavaType] =
+  private def getContentType(annotatedType: AnnotatedType): JavaType =
     annotatedType.getType match {
-      case rt: ReferenceType      => Some(rt.getContentType)
-      case ct: CollectionLikeType => Some(ct.getContentType)
-      case _                      => None
+      case rt: ReferenceType      => rt.getContentType
+      case ct: CollectionLikeType => ct.getContentType
+      case t                      => throw new IllegalArgumentException(s"Unknown type $t")
     }
 }
