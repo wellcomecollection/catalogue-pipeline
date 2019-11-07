@@ -12,7 +12,8 @@ case class DisplayContributionRole(
   @Schema(
     name = "The name of the agent"
   ) label: String,
-  @JsonKey("type") @Schema(name = "type") ontologyType: String = "ContributionRole"
+  @JsonKey("type") @Schema(name = "type") ontologyType: String =
+    "ContributionRole"
 )
 
 object DisplayContributionRole {

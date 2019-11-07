@@ -61,7 +61,8 @@ case class DisplayAggregationBucket[T](
     description =
       "The count of how often this data occurs in this set of results."
   ) count: Int,
-  @JsonKey("type") @Schema(name = "type") ontologyType: String = "AggregationBucket")
+  @JsonKey("type") @Schema(name = "type") ontologyType: String =
+    "AggregationBucket")
 
 object DisplayAggregations {
 
