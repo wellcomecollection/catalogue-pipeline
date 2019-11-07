@@ -1,5 +1,5 @@
 module "remus" {
-  source = "service"
+  source = "./service"
 
   namespace = "${var.namespace}-remus"
 

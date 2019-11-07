@@ -1,5 +1,5 @@
 module "services" {
-  source = "services"
+  source = "./services"
 
   namespace = "${var.namespace}"
 

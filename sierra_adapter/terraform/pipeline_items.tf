@@ -1,5 +1,5 @@
 module "items_window_generator" {
-  source = "sierra_window_generator"
+  source = "./sierra_window_generator"
 
   resource_type = "items"
 
@@ -11,7 +11,7 @@ module "items_window_generator" {
 }
 
 module "items_reader" {
-  source = "sierra_reader"
+  source = "./sierra_reader"
 
   resource_type = "items"
 
@@ -42,7 +42,7 @@ module "items_reader" {
 }
 
 module "items_to_dynamo" {
-  source = "items_to_dynamo"
+  source = "./items_to_dynamo"
 
   demultiplexer_topic_name = "${module.items_reader.topic_name}"
 
@@ -63,7 +63,7 @@ module "items_to_dynamo" {
 }
 
 module "items_merger" {
-  source = "item_merger"
+  source = "./item_merger"
 
   resource_type = "items"
 

@@ -1,5 +1,5 @@
 module "catalogue_pipeline_20191007" {
-  source = "stack"
+  source = "./stack"
 
   namespace = "catalogue-20191007"
 
