@@ -3,5 +3,5 @@ output "snapshots_bucket_arn" {
 }
 
 output "catalogue_api_nlb_arn" {
-  value = "${module.catalogue_api.nlb_arn}"
+  value = "${module.nlb.arn}"
 }

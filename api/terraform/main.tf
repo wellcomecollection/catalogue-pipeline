@@ -1,28 +1,59 @@
-module "catalogue_api" {
+module "catalogue_api_prod" {
   source = "catalogue_api"
 
-  namespace = "catalogue_api_gw"
+  namespace   = "${local.namespace}"
+  environment = "${local.prod_name}"
 
   vpc_id  = "${local.vpc_id}"
   subnets = ["${local.private_subnets}"]
 
-  container_port = "8888"
-  cluster_name   = "${aws_ecs_cluster.cluster.name}"
+  api_container_image = "${module.prod_images.services["api"]}"
+  listener_port       = "${local.prod_listener_port}"
+  task_desired_count  = "${local.prod_task_number}"
 
-  remus_container_image = "${local.remus_app_uri}"
-  remus_es_config       = "${local.remus_es_config}"
-  remus_task_number     = "${local.remus_task_number}"
+  nginx_container_image = "${module.prod_images.services["nginx_api-gw"]}"
 
-  romulus_container_image = "${local.romulus_app_uri}"
-  romulus_es_config       = "${local.romulus_es_config}"
-  romulus_task_number     = "${local.romulus_task_number}"
+  cluster_name = "${aws_ecs_cluster.cluster.name}"
+  es_config    = "${local.prod_es_config}"
 
-  nginx_container_image = "${local.nginx_container_uri}"
+  api_id = "${aws_api_gateway_rest_api.api.id}"
 
-  production_api = "${local.production_api}"
-  stage_api      = "${local.stage_api}"
+  gateway_depends = [
+    "${module.root_resource_integration.uri}",
+    "${module.simple_integration.uri}",
+  ]
 
-  alarm_topic_arn = "${local.gateway_server_error_alarm_arn}"
+  lb_arn           = "${module.nlb.arn}"
+  lb_ingress_sg_id = "${aws_security_group.service_lb_ingress_security_group.id}"
+}
+
+module "catalogue_api_staging" {
+  source = "catalogue_api"
+
+  namespace   = "${local.namespace}"
+  environment = "${local.staging_name}"
+
+  vpc_id  = "${local.vpc_id}"
+  subnets = ["${local.private_subnets}"]
+
+  api_container_image = "${module.staging_images.services["api"]}"
+  listener_port       = "${local.staging_listener_port}"
+  task_desired_count  = "${local.staging_task_number}"
+
+  nginx_container_image = "${module.staging_images.services["nginx_api-gw"]}"
+
+  cluster_name = "${aws_ecs_cluster.cluster.name}"
+  es_config    = "${local.staging_es_config}"
+
+  api_id = "${aws_api_gateway_rest_api.api.id}"
+
+  gateway_depends = [
+    "${module.root_resource_integration.uri}",
+    "${module.simple_integration.uri}",
+  ]
+
+  lb_arn           = "${module.nlb.arn}"
+  lb_ingress_sg_id = "${aws_security_group.service_lb_ingress_security_group.id}"
 }
 
 module "data_api" {
@@ -33,7 +64,7 @@ module "data_api" {
 
   es_config_snapshot = "${local.prod_es_config}"
 
-  snapshot_generator_release_uri = "${local.snapshot_generator_release_uri}"
+  snapshot_generator_release_uri = "${module.latest_images.services["snapshot_generator"]}"
 
   critical_slack_webhook = ""
 
@@ -44,5 +75,5 @@ module "data_api" {
 module "api_docs" {
   source = "api_docs"
 
-  update_api_docs_release_uri = "${local.update_api_docs_release_uri}"
+  update_api_docs_release_uri = "${module.latest_images.services["update_api_docs"]}"
 }

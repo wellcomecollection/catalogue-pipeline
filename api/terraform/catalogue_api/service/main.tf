@@ -3,7 +3,7 @@ data "aws_ecs_cluster" "cluster" {
 }
 
 module "service" {
-  source = "git::github.com/wellcometrust/terraform.git//ecs/modules/service/prebuilt/load_balanced?ref=v16.1.3"
+  source = "git::github.com/wellcometrust/terraform.git//ecs/modules/service/prebuilt/rest/tcp?ref=v19.16.2"
 
   service_name       = "${var.namespace}"
   task_desired_count = "${var.task_desired_count}"
@@ -22,8 +22,7 @@ module "service" {
 
   namespace_id = "${var.namespace_id}"
 
-  launch_type           = "FARGATE"
-  target_group_protocol = "TCP"
+  launch_type = "FARGATE"
 
   listener_port = "${var.listener_port}"
   lb_arn        = "${var.lb_arn}"
