@@ -16,7 +16,7 @@ case class DisplayWorkType(
   @Schema(
     `type` = "String"
   ) label: String,
-  @JsonKey("type") ontologyType: String = "WorkType"
+  @JsonKey("type") @Schema(name = "type") ontologyType: String = "WorkType"
 )
 
 case object DisplayWorkType {

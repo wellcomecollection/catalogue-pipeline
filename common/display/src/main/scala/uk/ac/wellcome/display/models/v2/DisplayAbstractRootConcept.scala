@@ -129,7 +129,7 @@ case class DisplayConcept(
   @Schema(
     `type` = "String"
   ) label: String,
-  @JsonKey("type") ontologyType: String = "Concept"
+  @JsonKey("type") @Schema(name = "type") ontologyType: String = "Concept"
 ) extends DisplayAbstractConcept
 
 @Schema(
@@ -149,7 +149,7 @@ case class DisplayPeriod(
   @Schema(
     `type` = "String"
   ) label: String,
-  @JsonKey("type") ontologyType: String = "Period"
+  @JsonKey("type") @Schema(name = "type") ontologyType: String = "Period"
 ) extends DisplayAbstractConcept
 
 case object DisplayPeriod {
@@ -175,7 +175,7 @@ case class DisplayPlace(
   @Schema(
     `type` = "String"
   ) label: String,
-  @JsonKey("type") ontologyType: String = "Place"
+  @JsonKey("type") @Schema(name = "type") ontologyType: String = "Place"
 ) extends DisplayAbstractConcept
 
 case object DisplayPlace {
@@ -237,7 +237,7 @@ case class DisplayAgentV2(
   @Schema(
     description = "The name of the agent"
   ) label: String,
-  @JsonKey("type") ontologyType: String = "Agent"
+  @JsonKey("type") @Schema(name = "type") ontologyType: String = "Agent"
 ) extends DisplayAbstractAgentV2
 
 @Schema(
@@ -265,7 +265,7 @@ case class DisplayPersonV2(
     `type` = "String",
     description = "The numeration of the person"
   ) numeration: Option[String] = None,
-  @JsonKey("type") ontologyType: String = "Person")
+  @JsonKey("type") @Schema(name = "type") ontologyType: String = "Person")
     extends DisplayAbstractAgentV2
 
 @Schema(
@@ -285,7 +285,7 @@ case class DisplayOrganisationV2(
   @Schema(
     description = "The name of the organisation"
   ) label: String,
-  @JsonKey("type") ontologyType: String = "Organisation")
+  @JsonKey("type") @Schema(name = "type") ontologyType: String = "Organisation")
     extends DisplayAbstractAgentV2
 
 case class DisplayMeetingV2(
@@ -302,5 +302,5 @@ case class DisplayMeetingV2(
   @Schema(
     description = "The name of the meeting"
   ) label: String,
-  @JsonKey("type") ontologyType: String = "Meeting")
+  @JsonKey("type") @Schema(name = "type") ontologyType: String = "Meeting")
     extends DisplayAbstractAgentV2

@@ -16,7 +16,7 @@ case class DisplayContributor(
   @Schema(description = "The agent.") agent: DisplayAbstractAgentV2,
   @Schema(description = "The list of contribution roles.") roles: List[
     DisplayContributionRole],
-  @JsonKey("type") ontologyType: String = "Contributor"
+  @JsonKey("type") @Schema(name = "type") ontologyType: String = "Contributor"
 )
 
 object DisplayContributor {

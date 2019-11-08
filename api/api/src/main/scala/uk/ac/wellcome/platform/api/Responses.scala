@@ -4,14 +4,13 @@ import io.circe.generic.extras.semiauto.deriveEncoder
 import io.circe.generic.extras.JsonKey
 import io.circe.{Encoder, Json}
 import akka.http.scaladsl.model.Uri
+import io.swagger.v3.oas.annotations.media.Schema
 
 import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.display.models.v2._
 import uk.ac.wellcome.display.models.Implicits._
 import uk.ac.wellcome.platform.api.services.WorksSearchOptions
-
-import io.circe.generic.extras.semiauto._
 import uk.ac.wellcome.display.json.DisplayJsonUtil._
 
 case class ResultResponse[T: Encoder](
@@ -37,9 +36,13 @@ object ResultResponse {
     }
 }
 
+@Schema(
+  name = "ResultList",
+  description = "A paginated list of works."
+)
 case class MultipleWorksResponse(
   @JsonKey("@context") context: String,
-  @JsonKey("type") ontologyType: String,
+  @JsonKey("type") @Schema(name = "type") ontologyType: String,
   pageSize: Int,
   totalPages: Int,
   totalResults: Int,

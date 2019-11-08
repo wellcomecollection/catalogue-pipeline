@@ -78,9 +78,28 @@ class ApiSwaggerTest extends ApiV2WorksTestBase with Matchers {
         .flatMap(components => getKey(components, "schemas"))
         .flatMap(getLength)
       numSchemas.isEmpty shouldBe false
-      numSchemas.get should be > 40
+      numSchemas.get should be > 20
     }
   }
+
+  it("should not contain lots of List* schemas") {
+    checkSwaggerJson { json =>
+      val listSchemas = getKey(json, "components")
+        .flatMap(components => getKey(components, "schemas"))
+        .map { schemas =>
+          getKeys(schemas).filter(key => key.startsWith("List"))
+        }
+      listSchemas.isEmpty shouldBe false
+      listSchemas.get shouldBe Nil
+    }
+  }
+
+  private def getKeys(json: Json): List[String] =
+    json.arrayOrObject(
+      Nil,
+      _ => Nil,
+      obj => obj.keys.toList
+    )
 
   private def getKey(json: Json, key: String): Option[Json] =
     json.arrayOrObject(

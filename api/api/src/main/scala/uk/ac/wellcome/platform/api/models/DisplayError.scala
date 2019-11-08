@@ -25,7 +25,7 @@ case class DisplayError(
     `type` = "String",
     description = "The specific error"
   ) description: Option[String] = None,
-  @JsonKey("type") ontologyType: String = "Error"
+  @JsonKey("type") @Schema(name = "type") ontologyType: String = "Error"
 )
 
 object DisplayError {
