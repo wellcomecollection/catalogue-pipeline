@@ -105,7 +105,7 @@ class ApiV2WorksIncludesTest
               "id": "${work.canonicalId}",
               "title": "${work.data.title}",
               "alternativeTitles": [],
-              "items": [ ${items(work.items)} ]
+              "items": [ ${items(work.data.items)} ]
             }
           """
         }
@@ -289,8 +289,8 @@ class ApiV2WorksIncludesTest
     "includes a list of contributors on a single work endpoint if we pass ?include=contributors") {
     withApi {
       case (indexV2, routes) =>
-        val contributor = Contributor(Unidentifiable(Person("Ginger Rogers")))
-        val work = createIdentifiedWorkWith(contributors = List(contributor))
+        val contributor = List(Contributor(Unidentifiable(Person("Ginger Rogers"))))
+        val work = createIdentifiedWorkWith(contributors = contributor)
 
         insertIntoElasticsearch(indexV2, work)
 
