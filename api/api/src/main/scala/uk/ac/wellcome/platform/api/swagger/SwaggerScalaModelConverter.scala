@@ -46,7 +46,8 @@ class SwaggerScalaModelConverter extends AbstractModelConverter(Json.mapper()) {
       if (cls == classOf[DisplayAggregation[_]])
         schema.name(s"${getAggregationClassName(annotatedType)}Aggregation")
       else if (cls == classOf[DisplayAggregationBucket[_]])
-        schema.name(s"${getAggregationClassName(annotatedType)}AggregationBucket")
+        schema.name(
+          s"${getAggregationClassName(annotatedType)}AggregationBucket")
       else
         schema
     } else
