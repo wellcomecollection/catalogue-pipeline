@@ -2,6 +2,7 @@ data "aws_iam_policy_document" "allow_catalogue_access" {
   statement {
     principals {
       identifiers = [
+        "${local.platform_developer_role_arn}",
         "${local.catalogue_developer_role_arn}",
       ]
 
