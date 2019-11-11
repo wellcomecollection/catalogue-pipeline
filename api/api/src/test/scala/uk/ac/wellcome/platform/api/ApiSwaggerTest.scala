@@ -94,6 +94,39 @@ class ApiSwaggerTest extends ApiV2WorksTestBase with Matchers {
     }
   }
 
+  it("should not contain lots of Display* schemas") {
+    checkSwaggerJson { json =>
+      val listSchemas = getKey(json, "components")
+        .flatMap(components => getKey(components, "schemas"))
+        .map { schemas =>
+          getKeys(schemas).filter(key => key.startsWith("Display"))
+        }
+      listSchemas.isEmpty shouldBe false
+      listSchemas.get shouldBe Nil
+    }
+  }
+
+  it("should contain aggregation schemas") {
+    checkSwaggerJson { json =>
+      val schemas = getKey(json, "components")
+        .flatMap(components => getKey(components, "schemas"))
+        .map(getKeys)
+      schemas.isEmpty shouldBe false
+      schemas.get should contain allOf (
+        "GenreAggregation",
+        "WorkTypeAggregation",
+        "PeriodAggregation",
+        "SubjectAggregation",
+        "LanguageAggregation",
+        "GenreAggregationBucket",
+        "WorkTypeAggregationBucket",
+        "PeriodAggregationBucket",
+        "SubjectAggregationBucket",
+        "LanguageAggregationBucket",
+      )
+    }
+  }
+
   private def getKeys(json: Json): List[String] =
     json.arrayOrObject(
       Nil,
