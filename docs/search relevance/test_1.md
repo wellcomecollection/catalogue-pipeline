@@ -1,14 +1,17 @@
 # Test 1
+
 ## Candidates
+
 Four initial candidates were assembled to get a feel for the effects of each lever we can pull. They were tested explicitly with internal users. Using the json query format, they look like this:
 
 **just boosting**
+
 ```
 {
   "query": {
     "multi_match" : {
       "query" : "oil painting of urine",
-      "fields" : ["*", "subjects*^4", "genres*^4", "title^3"], 
+      "fields" : ["*", "subjects*^4", "genres*^4", "title^3"],
       "type": "cross_fields"
     }
   }
@@ -16,12 +19,13 @@ Four initial candidates were assembled to get a feel for the effects of each lev
 ```
 
 **broader boosting**
+
 ```
 {
   "query": {
     "multi_match" : {
       "query" : "oil painting of urine",
-      "fields" : ["*", "subjects*^8", "genres*^8", "title^5", "description*^2", "lettering*^2", "contributors*^2"], 
+      "fields" : ["*", "subjects*^8", "genres*^8", "title^5", "description*^2", "lettering*^2", "contributors*^2"],
       "type": "cross_fields"
     }
   }
@@ -29,12 +33,13 @@ Four initial candidates were assembled to get a feel for the effects of each lev
 ```
 
 **slop**
+
 ```
 {
   "query": {
     "multi_match" : {
       "query" : "oil painting of urine",
-      "fields" : ["*"], 
+      "fields" : ["*"],
       "type": "cross_fields",
       "slop": 3
     }
@@ -43,12 +48,13 @@ Four initial candidates were assembled to get a feel for the effects of each lev
 ```
 
 **minimum should match**
+
 ```
 {
   "query": {
     "multi_match" : {
       "query" : "oil painting of urine",
-      "fields" : ["*"], 
+      "fields" : ["*"],
       "type": "cross_fields",
       "minimum_should_match": "70%"
     }
@@ -58,14 +64,15 @@ Four initial candidates were assembled to get a feel for the effects of each lev
 
 ## Results
 
-|        Query        |     NDCG     | P<sub>strict</sub> | P<sub>loose</sub> | P<sub>permissive</sub> |
-|---------------------|--------------|--------------------|-------------------|------------------------|
-| justBoost           | 0.874        | 0.366              | 0.491             | **0.893**              |
-| broaderBoost        | 0.858        | 0.362              | 0.500             | 0.839                  |
-| slop                | **0.908**    | **0.509**          | **0.679**         | 0.885                  |
-| minimumShouldMatch  | 0.883        | 0.426              | 0.561             | 0.861                  |
+| Query              | NDCG      | P<sub>strict</sub> | P<sub>loose</sub> | P<sub>permissive</sub> |
+| ------------------ | --------- | ------------------ | ----------------- | ---------------------- |
+| justBoost          | 0.874     | 0.366              | 0.491             | **0.893**              |
+| broaderBoost       | 0.858     | 0.362              | 0.500             | 0.839                  |
+| slop               | **0.908** | **0.509**          | **0.679**         | 0.885                  |
+| minimumShouldMatch | 0.883     | 0.426              | 0.561             | 0.861                  |
 
 ## Conclusions
+
 Stupidly, we didn't measure the performance of the standard algorithm alongside the candidates below so we can't immediately swap the existing one out for a better performing one yet. However, the candidates weren't intended to be an immediate improvement (more a test of the kind of tweaks we can make) so we're happy to save the rpduction changes for a later date.
 
 The difference between `justboost` and `broaderBoost` shows that we are having an effect by tweaking these parameters. We'll be carrying over some of these insights into the next round of testing.
