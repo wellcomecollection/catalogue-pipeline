@@ -41,7 +41,7 @@ class ApiSwaggerTest extends ApiV2WorksTestBase with Matchers {
   it("should contain single work endpoint in paths") {
     checkSwaggerJson { json =>
       val endpoint = getKey(json, "paths")
-        .flatMap(paths => getKey(paths, "/works/:id"))
+        .flatMap(paths => getKey(paths, "/works/{id}"))
         .flatMap(path => getKey(path, "get"))
       endpoint.isEmpty shouldBe false
       getKey(endpoint.get, "description").isEmpty shouldBe false
