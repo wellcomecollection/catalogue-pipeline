@@ -22,4 +22,7 @@ locals {
   vpc_id                         = "${data.terraform_remote_state.shared_infra.catalogue_vpc_id}"
   private_subnets                = "${data.terraform_remote_state.shared_infra.catalogue_vpc_private_subnets}"
   gateway_server_error_alarm_arn = "${data.terraform_remote_state.shared_infra.gateway_server_error_alarm_arn}"
+
+  // This is taken from the routemaster AWS account which doesn't expose its terraform state
+  routermaster_router53_zone_id = "Z3THRVQ5VDYDMC"
 }
