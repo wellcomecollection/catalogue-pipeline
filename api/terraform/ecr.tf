@@ -3,7 +3,8 @@ data "aws_iam_policy_document" "allow_catalogue_access" {
     principals {
       identifiers = [
         "${local.platform_developer_role_arn}",
-        "${local.catalogue_developer_role_arn}",
+        "${module.catalogue_api_prod.task_execution_role_arn}",
+        "${module.catalogue_api_staging.task_execution_role_arn}",
       ]
 
       type = "AWS"
