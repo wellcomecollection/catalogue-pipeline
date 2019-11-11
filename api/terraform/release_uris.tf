@@ -20,7 +20,7 @@ module "staging_images" {
   source = "git::https://github.com/wellcometrust/terraform.git//ecs/modules/images?ref=v19.8.0"
 
   project = "catalogue_api"
-  label   = "staging"
+  label   = "stage"
 
   services = [
     "api",
