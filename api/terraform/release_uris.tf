@@ -10,6 +10,10 @@ module "prod_images" {
     "snapshot_generator",
     "update_api_docs",
   ]
+
+  providers = {
+    aws = "aws.platform_account"
+  }
 }
 
 module "staging_images" {
@@ -24,6 +28,10 @@ module "staging_images" {
     "snapshot_generator",
     "update_api_docs",
   ]
+
+  providers = {
+    aws = "aws.platform_account"
+  }
 }
 
 module "latest_images" {
@@ -38,4 +46,8 @@ module "latest_images" {
     "snapshot_generator",
     "update_api_docs",
   ]
+
+  providers = {
+    aws = "aws.platform_account"
+  }
 }

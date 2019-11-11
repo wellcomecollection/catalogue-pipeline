@@ -1,5 +1,6 @@
 data "aws_ssm_parameter" "infra_bucket" {
-  name = "/api/config/prod/infra_bucket"
+  provider = "aws.platform_account"
+  name     = "/api/config/prod/infra_bucket"
 }
 
 locals {
