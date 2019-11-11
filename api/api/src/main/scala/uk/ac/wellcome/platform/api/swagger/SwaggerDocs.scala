@@ -49,13 +49,13 @@ class SwaggerDocs(apiConfig: ApiConfig) extends Logging {
     Json.pretty(new Reader(config).read(apiClasses.asJava))
 }
 
-@Path("/works/:id")
+@Path("/works/{id}")
 trait SingleWorkSwagger {
 
   @GET
   @Tag(name = "Works")
   @Operation(
-    summary = "/works/:id",
+    summary = "/works/{id}",
     description = "Returns a single work",
     tags = Array("Works"),
     parameters = Array(
