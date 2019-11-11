@@ -140,7 +140,7 @@ case object DisplayWorkV2 {
       language = work.language.map { DisplayLanguage(_) },
       edition = work.edition,
       notes =
-        if (includes.notes && work.notes.nonEmpty)
+        if (includes.notes)
           Some(DisplayNote.merge(work.notes.map(DisplayNote(_))))
         else None,
       duration = work.duration,
