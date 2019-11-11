@@ -1,0 +1,8 @@
+{
+  "id" : "mets_adapter",
+  "folder" : "mets_adapter",
+  "dependencyIds" : [
+    "internal_model",
+    "big_messaging_typesafe"
+  ]
+}
