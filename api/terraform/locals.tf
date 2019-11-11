@@ -35,4 +35,7 @@ locals {
     "snapshot_generator",
     "update_api_docs",
   ]
+
+  prod_domain_name    = "catalogue.api2.wellcomecollection.org"
+  staging_domain_name = "catalogue.api2-stage.wellcomecollection.org"
 }

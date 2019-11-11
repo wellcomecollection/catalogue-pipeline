@@ -1,5 +1,5 @@
 resource "aws_acm_certificate" "catalogue_api" {
-  domain_name       = "catalogue.api.wellcomecollection.org"
+  domain_name       = "${local.prod_domain_name}"
   validation_method = "DNS"
 
   lifecycle {
@@ -21,18 +21,48 @@ resource "aws_acm_certificate_validation" "catalogue_api_validation" {
   validation_record_fqdns = ["${aws_route53_record.cert_validation.fqdn}"]
 }
 
-module "catalogue_api_domain_prod" {
-  source = "git::https://github.com/wellcometrust/terraform.git//api_gateway/modules/domain?ref=v18.2.3"
+resource "aws_api_gateway_domain_name" "prod" {
+  domain_name              = "${local.prod_domain_name}"
+  regional_certificate_arn = "${aws_acm_certificate_validation.catalogue_api_validation.certificate_arn}"
 
-  domain_name      = "catalogue.api.wellcomecollection.org"
-  cert_domain_name = "${aws_acm_certificate.catalogue_api.domain_name}"
+  endpoint_configuration {
+    types = ["REGIONAL"]
+  }
 }
 
-module "catalogue_api_domain_stage" {
-  source = "git::https://github.com/wellcometrust/terraform.git//api_gateway/modules/domain?ref=v18.2.3"
+resource "aws_api_gateway_domain_name" "staging" {
+  domain_name              = "${local.staging_domain_name}"
+  regional_certificate_arn = "${aws_acm_certificate_validation.catalogue_api_validation.certificate_arn}"
 
-  domain_name      = "catalogue.api-stage.wellcomecollection.org"
-  cert_domain_name = "${aws_acm_certificate.catalogue_api.domain_name}"
+  endpoint_configuration {
+    types = ["REGIONAL"]
+  }
+}
+
+resource "aws_route53_record" "prod" {
+  provider = "aws.routermaster"
+  zone_id  = "${local.routermaster_router53_zone_id}"
+  name     = "${aws_api_gateway_domain_name.prod.domain_name}"
+  type     = "A"
+
+  alias {
+    name                   = "${aws_api_gateway_domain_name.prod.regional_domain_name}"
+    zone_id                = "${aws_api_gateway_domain_name.prod.regional_zone_id}"
+    evaluate_target_health = false
+  }
+}
+
+resource "aws_route53_record" "staging" {
+  provider = "aws.routermaster"
+  zone_id  = "${local.routermaster_router53_zone_id}"
+  name     = "${aws_api_gateway_domain_name.staging.domain_name}"
+  type     = "A"
+
+  alias {
+    name                   = "${aws_api_gateway_domain_name.staging.regional_domain_name}"
+    zone_id                = "${aws_api_gateway_domain_name.staging.regional_zone_id}"
+    evaluate_target_health = false
+  }
 }
 
 provider "aws" {
