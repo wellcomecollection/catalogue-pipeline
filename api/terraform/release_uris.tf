@@ -4,12 +4,7 @@ module "prod_images" {
   project = "catalogue_api"
   label   = "prod"
 
-  services = [
-    "api",
-    "nginx_api-gw",
-    "snapshot_generator",
-    "update_api_docs",
-  ]
+  services = "${local.service_repositories}"
 
   providers = {
     aws = "aws.platform_account"
@@ -22,12 +17,7 @@ module "staging_images" {
   project = "catalogue_api"
   label   = "stage"
 
-  services = [
-    "api",
-    "nginx_api-gw",
-    "snapshot_generator",
-    "update_api_docs",
-  ]
+  services = "${local.service_repositories}"
 
   providers = {
     aws = "aws.platform_account"
@@ -40,12 +30,7 @@ module "latest_images" {
   project = "catalogue_api"
   label   = "latest"
 
-  services = [
-    "api",
-    "nginx_api-gw",
-    "snapshot_generator",
-    "update_api_docs",
-  ]
+  services = "${local.service_repositories}"
 
   providers = {
     aws = "aws.platform_account"
