@@ -1,5 +1,7 @@
 package uk.ac.wellcome.mets
 
+import scala.concurrent.ExecutionContext
+import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import com.typesafe.config.Config
 import com.amazonaws.services.sns.AmazonSNSAsync
@@ -12,6 +14,10 @@ case class SNSConfig(topicArn: String)
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
+    implicit val ec: ExecutionContext =
+      AkkaBuilder.buildExecutionContext()
+    implicit val actorSystem: ActorSystem =
+      AkkaBuilder.buildActorSystem()
     implicit val materializer: ActorMaterializer =
       AkkaBuilder.buildActorMaterializer()
     implicit val sqsClient =

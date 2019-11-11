@@ -1,7 +1,9 @@
 package uk.ac.wellcome.mets
 
-import akka.Done
+import scala.concurrent.ExecutionContext
+import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
+import akka.Done
 import akka.stream.scaladsl._
 import akka.stream.alpakka.sqs.scaladsl._
 import akka.stream.alpakka.sns.scaladsl._
@@ -14,14 +16,14 @@ import uk.ac.wellcome.json.JsonUtil._
 
 import scala.concurrent.Future
 
-case class StorageUpdate(bagId: String)
-
-case class Bag()
+case class StorageUpdate(space: String, bagId: String)
 
 case class Mets()
 
 class MetsAdaptorWorkerService(sqsConfig: SQSConfig, snsConfig: SNSConfig)(
   implicit
+  ec: ExecutionContext,
+  actorSystem: ActorSystem,
   materializer: ActorMaterializer,
   snsClient: AmazonSNSAsync,
   sqsClient: AmazonSQSAsync)
@@ -40,7 +42,7 @@ class MetsAdaptorWorkerService(sqsConfig: SQSConfig, snsConfig: SNSConfig)(
       .map(msg => fromJson[StorageUpdate](msg.getBody).get)
 
   def retrieveBag: Flow[StorageUpdate, Bag, _] =
-    throw new NotImplementedError
+    new BagsRetriever("?url?").flow
 
   def getMetsXml: Flow[Bag, Mets, _] =
     throw new NotImplementedError
