@@ -18,7 +18,7 @@
   },
   "response": {
     "status": 200,
-    "bodyFileName" : "body-oauth2-token.json",
+    "bodyFileName" : "body-oauth2-token-successful.json",
     "headers": {
       "Content-Type": "application/json;charset=UTF-8",
       "Connection": "keep-alive",

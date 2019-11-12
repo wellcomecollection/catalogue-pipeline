@@ -7,10 +7,9 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.model.headers.OAuth2BearerToken
 import akka.stream.Materializer
 import com.github.dakatsuka.akka.http.oauth2.client.{Client, Config, GrantType}
-import scala.concurrent.duration._
 
+import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
 
 class TokenService(url: String,
                    clientId: String,
@@ -30,16 +29,16 @@ class TokenService(url: String,
   private val client = Client(config)
   private val token = new AtomicReference[OAuth2BearerToken]
 
-  actorSystem.scheduler.schedule(initialDelay, interval)(refreshToken)
+  actorSystem.scheduler.schedule(initialDelay, interval)(refreshToken())
 
   private def refreshToken() =
     client
       .getAccessToken(GrantType.ClientCredentials, Map("scope" -> scope))
-      .flatMap {
+      .map {
         case Right(accessToken) =>
           val newToken = OAuth2BearerToken(accessToken.accessToken)
-          Future.fromTry(Try(token.updateAndGet(_ => newToken)))
-        case Left(throwable) => Future.failed(throwable)
+          token.updateAndGet(_ => newToken)
+        case Left(throwable) => throw throwable
       }
 
   def getToken: Future[OAuth2BearerToken] = {
