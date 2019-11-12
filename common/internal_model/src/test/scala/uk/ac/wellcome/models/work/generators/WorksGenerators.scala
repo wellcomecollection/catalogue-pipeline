@@ -50,12 +50,11 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     )
 
   def createUnidentifiedInvisibleWorkWith(
-    sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    title: String = createTitle,
+    sourceIdentifier: SourceIdentifier = createSourceIdentifier
   ): UnidentifiedInvisibleWork =
     UnidentifiedInvisibleWork(
       sourceIdentifier = sourceIdentifier,
-      data = WorkData(title = title),
+      data = WorkData(),
       version = 1
     )
 
@@ -65,14 +64,13 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
   def createIdentifiedInvisibleWorkWith(
     canonicalId: String = createCanonicalId,
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    version: Int = 1,
-    title: String = createTitle,
+    version: Int = 1
   ): IdentifiedInvisibleWork =
     IdentifiedInvisibleWork(
       sourceIdentifier = sourceIdentifier,
       version = version,
       canonicalId = canonicalId,
-      data = WorkData(title = title)
+      data = WorkData()
     )
 
   def createIdentifiedInvisibleWork: IdentifiedInvisibleWork =
@@ -86,7 +84,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
   def createUnidentifiedWorkWith(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     version: Int = 1,
-    title: String = createTitle,
+    title: Option[String] = Some(createTitle),
     alternativeTitles: List[String] = Nil,
     otherIdentifiers: List[SourceIdentifier] = List(),
     mergeCandidates: List[MergeCandidate] = List(),
@@ -132,7 +130,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     canonicalId: String = createCanonicalId,
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     otherIdentifiers: List[SourceIdentifier] = List(),
-    title: String = createTitle,
+    title: Option[String] = Some(createTitle),
     alternativeTitles: List[String] = Nil,
     workType: Option[WorkType] = None,
     description: Option[String] = None,

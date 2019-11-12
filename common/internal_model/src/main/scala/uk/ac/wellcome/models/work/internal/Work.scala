@@ -20,7 +20,7 @@ sealed trait RedirectedWork extends BaseWork {
 }
 
 case class WorkData[+IdState[+S] <: IdentityState[S]](
-  title: String,
+  title: Option[String] = None,
   otherIdentifiers: List[SourceIdentifier] = Nil,
   mergeCandidates: List[MergeCandidate] = Nil,
   alternativeTitles: List[String] = Nil,
