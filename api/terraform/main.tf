@@ -73,8 +73,9 @@ module "data_api" {
   route_zone_id   = "${local.routemaster_router53_zone_id}"
 
   providers = {
-    aws.us_e1       = "aws.us_e1"
-    aws.routemaster = "aws.routemaster"
+    aws.us_e1            = "aws.us_e1"
+    aws.routemaster      = "aws.routemaster"
+    aws.platform_account = "aws.platform_account"
   }
 }
 

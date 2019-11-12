@@ -5,5 +5,9 @@ provider "aws" {
 }
 
 provider "aws" {
+  alias = "platform_account"
+}
+
+provider "aws" {
   alias = "routemaster"
 }
