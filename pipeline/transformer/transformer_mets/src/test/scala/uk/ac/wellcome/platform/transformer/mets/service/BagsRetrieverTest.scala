@@ -33,11 +33,11 @@ class BagsRetrieverTest
     with MockitoSugar {
 
   it("gets a bag from the storage service") {
-    withBagsService(8089, "localhost") {
+    withBagsService("localhost") {port=>
       withActorSystem { implicit actorSystem =>
         withMaterializer(actorSystem) { implicit materializer =>
           withTokenService(
-            "http://localhost:8089",
+            s"http://localhost:$port",
             "client",
             "secret",
             "https://api.wellcomecollection.org/scope")(
@@ -45,7 +45,7 @@ class BagsRetrieverTest
             1 milliseconds) { tokenService =>
             val bagsRetriever =
               new BagsRetriever(
-                "http://localhost:8089/storage/v1/bags",
+                s"http://localhost:$port/storage/v1/bags",
                 tokenService)
             whenReady(bagsRetriever.getBag("digitised", "b30246039")) {
               maybeBag =>
@@ -75,11 +75,11 @@ class BagsRetrieverTest
   }
 
   it("returns a none if the bag does not exist in the storage service") {
-    withBagsService(8089, "localhost") {
+    withBagsService("localhost") {port =>
       withActorSystem { implicit actorSystem =>
         withMaterializer(actorSystem) { implicit materializer =>
           withTokenService(
-            "http://localhost:8089",
+            s"http://localhost:$port",
             "client",
             "secret",
             "https://api.wellcomecollection.org/scope")(
@@ -87,7 +87,7 @@ class BagsRetrieverTest
             100 milliseconds) { tokenService =>
             val bagsRetriever =
               new BagsRetriever(
-                "http://localhost:8089/storage/v1/bags",
+                s"http://localhost:$port/storage/v1/bags",
                 tokenService)
             whenReady(bagsRetriever.getBag("digitised", "not-existing")) {
               maybeBag =>
@@ -100,7 +100,7 @@ class BagsRetrieverTest
   }
 
   it("does not retry if the storage service responds with unauthorized") {
-    withBagsService(8089, "localhost") {
+    withBagsService("localhost") { port =>
       withActorSystem { implicit actorSystem =>
         withMaterializer(actorSystem) { implicit materializer =>
           val tokenService = mock[TokenService]
@@ -109,7 +109,7 @@ class BagsRetrieverTest
             .thenReturn(Future.successful(OAuth2BearerToken("not-valid-token")))
           val bagsRetriever =
             new BagsRetriever(
-              "http://localhost:8089/storage/v1/bags",
+              s"http://localhost:$port/storage/v1/bags",
               tokenService)
           whenReady(bagsRetriever.getBag("digitised", "b30246039").failed) {
             e =>
@@ -125,11 +125,11 @@ class BagsRetrieverTest
   }
 
   it("returns a failed future if the storage service responds with 500") {
-    withBagsService(8089, "localhost") {
+    withBagsService("localhost") {port =>
       withActorSystem { implicit actorSystem =>
         withMaterializer(actorSystem) { implicit materializer =>
           withTokenService(
-            "http://localhost:8089",
+            s"http://localhost:$port",
             "client",
             "secret",
             "https://api.wellcomecollection.org/scope")(
@@ -141,7 +141,7 @@ class BagsRetrieverTest
 
             val bagsRetriever =
               new BagsRetriever(
-                "http://localhost:8089/storage/v1/bags",
+                s"http://localhost:$port/storage/v1/bags",
                 tokenService)
 
             whenReady(
@@ -156,11 +156,11 @@ class BagsRetrieverTest
   }
 
   it("returns a failed future if the storage service response has a fault") {
-    withBagsService(8089, "localhost") {
+    withBagsService("localhost") {port=>
       withActorSystem { implicit actorSystem =>
         withMaterializer(actorSystem) { implicit materializer =>
           withTokenService(
-            "http://localhost:8089",
+            s"http://localhost:$port",
             "client",
             "secret",
             "https://api.wellcomecollection.org/scope")(
@@ -173,7 +173,7 @@ class BagsRetrieverTest
                   .withFault(Fault.CONNECTION_RESET_BY_PEER)))
             val bagsRetriever =
               new BagsRetriever(
-                "http://localhost:8089/storage/v1/bags",
+                s"http://localhost:$port/storage/v1/bags",
                 tokenService)
 
             whenReady(

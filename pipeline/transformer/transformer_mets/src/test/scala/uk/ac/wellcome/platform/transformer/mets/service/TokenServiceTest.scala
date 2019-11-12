@@ -1,14 +1,13 @@
 package uk.ac.wellcome.platform.transformer.mets.service
 
 import akka.http.scaladsl.model.headers.OAuth2BearerToken
-import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.akka.fixtures.Akka
 
-import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 
 class TokenServiceTest
     extends FunSpec
@@ -20,11 +19,11 @@ class TokenServiceTest
     with Eventually {
 
   it("requests a token to the storage service") {
-    withBagsService(8089, "localhost") {
+    withBagsService("localhost") {port =>
       withActorSystem { implicit actorSystem =>
         withMaterializer(actorSystem) { implicit mat =>
           val tokenService = new TokenService(
-            "http://localhost:8089",
+            s"http://localhost:$port",
             "client",
             "secret",
             "https://api.wellcomecollection.org/scope",
@@ -50,11 +49,11 @@ class TokenServiceTest
 
   it(
     "returns a failed future if it cannot get a token from the storage service") {
-    withBagsService(8089, "localhost") {
+    withBagsService("localhost") {port =>
       withActorSystem { implicit actorSystem =>
         withMaterializer(actorSystem) { implicit mat =>
           val tokenService = new TokenService(
-            "http://localhost:8089",
+            s"http://localhost:$port",
             "wrongclient",
             "wrongsecret",
             "https://api.wellcomecollection.org/scope",
@@ -65,14 +64,6 @@ class TokenServiceTest
             throwable shouldBe a[Throwable]
           }
 
-          eventually {
-            verify(
-              WireMock.exactly(3),
-              postRequestedFor(urlEqualTo("/oauth2/token"))
-                .withRequestBody(matching(".*client_id=wrongclient.*"))
-                .withRequestBody(matching(".*client_secret=wrongsecret.*"))
-            )
-          }
         }
       }
     }
