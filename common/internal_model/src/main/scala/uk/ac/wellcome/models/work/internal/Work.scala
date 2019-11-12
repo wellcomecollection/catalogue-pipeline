@@ -73,16 +73,24 @@ case class IdentifiedWork(
 case class UnidentifiedInvisibleWork(
   version: Int,
   sourceIdentifier: SourceIdentifier,
+  data: WorkData[MaybeDisplayable],
   identifiedType: String = classOf[IdentifiedInvisibleWork].getSimpleName
 ) extends TransformedBaseWork
-    with InvisibleWork
+    with InvisibleWork {
+  def withData(f: WorkData[MaybeDisplayable] => WorkData[MaybeDisplayable]) =
+    this.copy(data = f(data))
+}
 
 case class IdentifiedInvisibleWork(
   canonicalId: String,
   version: Int,
   sourceIdentifier: SourceIdentifier,
+  data: WorkData[Displayable]
 ) extends IdentifiedBaseWork
-    with InvisibleWork
+    with InvisibleWork {
+  def withData(f: WorkData[Displayable] => WorkData[Displayable]) =
+    this.copy(data = f(data))
+}
 
 case class UnidentifiedRedirectedWork(
   sourceIdentifier: SourceIdentifier,

@@ -50,10 +50,12 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     )
 
   def createUnidentifiedInvisibleWorkWith(
-    sourceIdentifier: SourceIdentifier = createSourceIdentifier
+    sourceIdentifier: SourceIdentifier = createSourceIdentifier,
+    title: String = createTitle,
   ): UnidentifiedInvisibleWork =
     UnidentifiedInvisibleWork(
       sourceIdentifier = sourceIdentifier,
+      data = WorkData(title = title),
       version = 1
     )
 
@@ -63,12 +65,14 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
   def createIdentifiedInvisibleWorkWith(
     canonicalId: String = createCanonicalId,
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    version: Int = 1
+    version: Int = 1,
+    title: String = createTitle,
   ): IdentifiedInvisibleWork =
     IdentifiedInvisibleWork(
       sourceIdentifier = sourceIdentifier,
       version = version,
-      canonicalId = canonicalId
+      canonicalId = canonicalId,
+      data = WorkData(title = title)
     )
 
   def createIdentifiedInvisibleWork: IdentifiedInvisibleWork =
