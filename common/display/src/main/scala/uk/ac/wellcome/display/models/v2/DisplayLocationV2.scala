@@ -11,8 +11,8 @@ import uk.ac.wellcome.models.work.internal.{
 @Schema(
   name = "Location",
   description = "A location that provides access to an item",
-  subTypes =
-    Array(classOf[DisplayDigitalLocationV2], classOf[DisplayPhysicalLocationV2])
+  discriminatorProperty = "type",
+  allOf = Array(classOf[DisplayDigitalLocationV2], classOf[DisplayPhysicalLocationV2])
 )
 sealed trait DisplayLocationV2
 
