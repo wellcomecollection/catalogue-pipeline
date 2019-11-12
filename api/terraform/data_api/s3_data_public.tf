@@ -1,5 +1,5 @@
 locals {
-  public_data_bucket_name = "wellcomecollection-data-public"
+  public_data_bucket_name = "wellcomecollection-data-public-delta"
 }
 
 resource "aws_s3_bucket" "public_data" {

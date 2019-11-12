@@ -27,3 +27,9 @@ variable "vpc_id" {}
 variable "private_subnets" {
   type = "list"
 }
+
+variable "data_page_url" {
+  default = "data2.wellcomecollection.org"
+}
+
+variable "route_zone_id" {}

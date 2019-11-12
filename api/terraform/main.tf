@@ -70,6 +70,12 @@ module "data_api" {
 
   vpc_id          = "${local.vpc_id}"
   private_subnets = ["${local.private_subnets}"]
+  route_zone_id   = "${local.routemaster_router53_zone_id}"
+
+  providers = {
+    aws.us_e1       = "aws.us_e1"
+    aws.routemaster = "aws.routemaster"
+  }
 }
 
 module "api_docs" {

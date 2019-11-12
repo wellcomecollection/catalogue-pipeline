@@ -24,7 +24,7 @@ locals {
   gateway_server_error_alarm_arn = "${data.terraform_remote_state.shared_infra.gateway_server_error_alarm_arn}"
 
   // This is taken from the routemaster AWS account which doesn't expose its terraform state
-  routermaster_router53_zone_id = "Z3THRVQ5VDYDMC"
+  routemaster_router53_zone_id = "Z3THRVQ5VDYDMC"
 
   platform_developer_role_arn  = "arn:aws:iam::760097843905:role/platform-developer"
   catalogue_developer_role_arn = "arn:aws:iam::756629837203:role/catalogue-developer"

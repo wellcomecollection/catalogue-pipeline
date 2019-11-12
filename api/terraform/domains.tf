@@ -8,10 +8,10 @@ resource "aws_acm_certificate" "catalogue_api" {
 }
 
 resource "aws_route53_record" "cert_validation" {
-  provider = "aws.routermaster"
+  provider = "aws.routemaster"
   name     = "${aws_acm_certificate.catalogue_api.domain_validation_options.0.resource_record_name}"
   type     = "${aws_acm_certificate.catalogue_api.domain_validation_options.0.resource_record_type}"
-  zone_id  = "${local.routermaster_router53_zone_id}"
+  zone_id  = "${local.routemaster_router53_zone_id}"
   records  = ["${aws_acm_certificate.catalogue_api.domain_validation_options.0.resource_record_value}"]
   ttl      = 60
 }
@@ -40,8 +40,8 @@ resource "aws_api_gateway_domain_name" "staging" {
 }
 
 resource "aws_route53_record" "prod" {
-  provider = "aws.routermaster"
-  zone_id  = "${local.routermaster_router53_zone_id}"
+  provider = "aws.routemaster"
+  zone_id  = "${local.routemaster_router53_zone_id}"
   name     = "${aws_api_gateway_domain_name.prod.domain_name}"
   type     = "A"
 
@@ -53,8 +53,8 @@ resource "aws_route53_record" "prod" {
 }
 
 resource "aws_route53_record" "staging" {
-  provider = "aws.routermaster"
-  zone_id  = "${local.routermaster_router53_zone_id}"
+  provider = "aws.routemaster"
+  zone_id  = "${local.routemaster_router53_zone_id}"
   name     = "${aws_api_gateway_domain_name.staging.domain_name}"
   type     = "A"
 
@@ -62,15 +62,5 @@ resource "aws_route53_record" "staging" {
     name                   = "${aws_api_gateway_domain_name.staging.regional_domain_name}"
     zone_id                = "${aws_api_gateway_domain_name.staging.regional_zone_id}"
     evaluate_target_health = false
-  }
-}
-
-provider "aws" {
-  region  = "eu-west-1"
-  version = "1.57.0"
-  alias   = "routermaster"
-
-  assume_role {
-    role_arn = "arn:aws:iam::250790015188:role/wellcomecollection-assume_role_hosted_zone_update"
   }
 }
