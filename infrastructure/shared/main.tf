@@ -1,0 +1,3 @@
+module "cognito" {
+  source = "./cognito"
+}

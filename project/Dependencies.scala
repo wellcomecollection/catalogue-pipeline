@@ -110,7 +110,8 @@ object ExternalDependencies {
     val scribeJava = "6.8.1"
   }
 
-  val scribeJavaDependencies = Seq("com.github.dakatsuka" %% "akka-http-oauth2-client" % "0.2.0")
+  val scribeJavaDependencies = Seq(
+    "com.github.dakatsuka" %% "akka-http-oauth2-client" % "0.2.0")
 
   val logbackDependencies = Seq(
     "ch.qos.logback" % "logback-classic" % versions.logback,
@@ -234,7 +235,7 @@ object CatalogueDependencies {
     WellcomeDependencies.typesafeLibrary
 
   val apiDependencies: Seq[ModuleID] =
-      ExternalDependencies.akkaHttpDependencies ++
+    ExternalDependencies.akkaHttpDependencies ++
       WellcomeDependencies.typesafeLibrary
 
   val goobiReaderDependencies: Seq[ModuleID] =

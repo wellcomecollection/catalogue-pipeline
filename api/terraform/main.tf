@@ -46,3 +46,7 @@ module "api_docs" {
 
   update_api_docs_release_uri = "${local.update_api_docs_release_uri}"
 }
+
+module "cognito" {
+  source = "./cognito"
+}
