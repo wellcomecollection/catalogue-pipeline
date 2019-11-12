@@ -30,19 +30,6 @@ resource "aws_service_discovery_private_dns_namespace" "namespace" {
   vpc  = "${var.vpc_id}"
 }
 
-module "gateway_stage" {
-  source = "git::https://github.com/wellcometrust/terraform.git//api_gateway/modules/stage?ref=v17.0.0"
-
-  stage_name = "${var.environment}"
-  api_id     = "${var.api_id}"
-
-  variables = {
-    port = "${var.listener_port}"
-  }
-
-  depends_on = "${var.gateway_depends}"
-}
-
 resource "aws_security_group" "service_egress_security_group" {
   name        = "${var.namespace}-${var.environment}-service_egress_security_group"
   description = "Allow traffic from service"
