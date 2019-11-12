@@ -35,6 +35,7 @@ class MetsAdaptorWorkerService(sqsConfig: SQSConfig, snsConfig: SNSConfig, token
   def run(): Future[Done] =
     msgSource
       .via(retrieveBag)
+      .collect { case Some(bag) => bag }
       .via(getMetsXml)
       .via(storeMets)
       .toMat(msgSink)(Keep.right)
@@ -44,8 +45,8 @@ class MetsAdaptorWorkerService(sqsConfig: SQSConfig, snsConfig: SNSConfig, token
     SqsSource(sqsConfig.queueUrl)
       .map(msg => fromJson[StorageUpdate](msg.getBody).get)
 
-  def retrieveBag: Flow[StorageUpdate, Bag, _] =
-    new BagsRetriever("?url?", tokenService).flow
+  def retrieveBag: Flow[StorageUpdate, Option[Bag], _] =
+    new BagRetriever("?url?", tokenService).flow
 
   def getMetsXml: Flow[Bag, Mets, _] =
     throw new NotImplementedError

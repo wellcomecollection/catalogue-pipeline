@@ -3,7 +3,7 @@ package uk.ac.wellcome.mets.models
 case class IngestUpdate(space: Space, bag: StubBag)
 
 case class Space(id: String)
-trait BaseBag {
+sealed trait BaseBag {
   val info: BagInfo
 }
 case class StubBag(info: BagInfo) extends BaseBag

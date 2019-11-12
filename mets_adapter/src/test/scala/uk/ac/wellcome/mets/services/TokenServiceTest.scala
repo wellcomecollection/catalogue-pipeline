@@ -1,4 +1,4 @@
-package uk.ac.wellcome.mets.service
+package uk.ac.wellcome.mets.services
 
 import akka.http.scaladsl.model.headers.OAuth2BearerToken
 import com.github.tomakehurst.wiremock.client.WireMock._

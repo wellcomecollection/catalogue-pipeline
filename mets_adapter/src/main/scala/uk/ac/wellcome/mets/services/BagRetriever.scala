@@ -8,19 +8,19 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.http.scaladsl.model.headers.{Authorization, OAuth2BearerToken}
 import akka.stream.ActorMaterializer
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import grizzled.slf4j.Logging
 import io.circe.generic.auto._
+import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 
 import uk.ac.wellcome.mets.models._
 
-class BagsRetriever(url: String, tokenService: TokenService, concurrentConnections: Int = 6)(
+class BagRetriever(url: String, tokenService: TokenService, concurrentConnections: Int = 6)(
   implicit
   ec: ExecutionContext,
   actorSystem: ActorSystem,
-  actorMaterializer: ActorMaterializer) extends Logging {
+  actorMaterializer: ActorMaterializer) extends Logging with FailFastCirceSupport {
 
-  def flow: Flow[StorageUpdate, Bag, _] =
+  def flow: Flow[StorageUpdate, Option[Bag], _] =
     Flow[StorageUpdate]
       .mapAsync(1) { update =>
         tokenService.getToken.map(token => (token, update))
@@ -29,7 +29,6 @@ class BagsRetriever(url: String, tokenService: TokenService, concurrentConnectio
         Http().singleRequest(generateRequest(update, token))
       }
       .mapAsync(2)(resp => responseToBag(resp))
-      .collect { case Some(bag) => bag }
   
   private def generateRequest(update: StorageUpdate, token: OAuth2BearerToken): HttpRequest =
    HttpRequest(uri = s"$url/${update.space}/${update.bagId}")
