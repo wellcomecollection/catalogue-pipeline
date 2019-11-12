@@ -32,12 +32,12 @@ class DisplayWorkV2SerialisationTest
       |{
       | "type": "Work",
       | "id": "${work.canonicalId}",
-      | "title": "${work.title}",
-      | "description": "${work.description.get}",
-      | "workType" : ${workType(work.workType.get)},
-      | "lettering": "${work.lettering.get}",
+      | "title": "${work.data.title}",
+      | "description": "${work.data.description.get}",
+      | "workType" : ${workType(work.data.workType.get)},
+      | "lettering": "${work.data.lettering.get}",
       | "alternativeTitles": [],
-      | "createdDate": ${period(work.createdDate.get)}
+      | "createdDate": ${period(work.data.createdDate.get)}
       |}
     """.stripMargin
 
@@ -53,9 +53,9 @@ class DisplayWorkV2SerialisationTest
       |{
       | "type": "Work",
       | "id": "${work.canonicalId}",
-      | "title": "${work.title}",
+      | "title": "${work.data.title}",
       | "alternativeTitles": [],
-      | "items": [ ${items(work.items)} ]
+      | "items": [ ${items(work.data.items)} ]
       |}
     """.stripMargin
 
@@ -74,7 +74,7 @@ class DisplayWorkV2SerialisationTest
       |{
       | "type": "Work",
       | "id": "${work.canonicalId}",
-      | "title": "${work.title}",
+      | "title": "${work.data.title}",
       | "alternativeTitles": [],
       | "items": [ ]
       |}
@@ -102,7 +102,7 @@ class DisplayWorkV2SerialisationTest
       |{
       | "type": "Work",
       | "id": "${workWithCopyright.canonicalId}",
-      | "title": "${workWithCopyright.title}",
+      | "title": "${workWithCopyright.data.title}",
       | "alternativeTitles": [],
       | "items": [
       |   {
@@ -143,9 +143,9 @@ class DisplayWorkV2SerialisationTest
       |{
       | "type": "Work",
       | "id": "${workWithSubjects.canonicalId}",
-      | "title": "${workWithSubjects.title}",
+      | "title": "${workWithSubjects.data.title}",
       | "alternativeTitles": [],
-      | "subjects": [${subjects(workWithSubjects.subjects)}]
+      | "subjects": [${subjects(workWithSubjects.data.subjects)}]
       |}
     """.stripMargin
 
@@ -168,9 +168,9 @@ class DisplayWorkV2SerialisationTest
       |{
       | "type": "Work",
       | "id": "${workWithProduction.canonicalId}",
-      | "title": "${workWithProduction.title}",
+      | "title": "${workWithProduction.data.title}",
       | "alternativeTitles": [],
-      | "production": [${production(workWithProduction.production)}]
+      | "production": [${production(workWithProduction.data.production)}]
       |}
     """.stripMargin
 
@@ -200,13 +200,13 @@ class DisplayWorkV2SerialisationTest
       |{
       | "type": "Work",
       | "id": "${work.canonicalId}",
-      | "title": "${work.title}",
-      | "description": "${work.description.get}",
+      | "title": "${work.data.title}",
+      | "description": "${work.data.description.get}",
       | "alternativeTitles": [],
-      | "workType" : ${workType(work.workType.get)},
-      | "lettering": "${work.lettering.get}",
-      | "createdDate": ${period(work.createdDate.get)},
-      | "contributors": [${contributor(work.contributors.head)}]
+      | "workType" : ${workType(work.data.workType.get)},
+      | "lettering": "${work.data.lettering.get}",
+      | "createdDate": ${period(work.data.createdDate.get)},
+      | "contributors": [${contributor(work.data.contributors.head)}]
       |}
     """.stripMargin
 
@@ -234,9 +234,9 @@ class DisplayWorkV2SerialisationTest
       |{
       | "type": "Work",
       | "id": "${work.canonicalId}",
-      | "title": "${work.title}",
+      | "title": "${work.data.title}",
       | "alternativeTitles": [],
-      | "genres": [ ${genres(work.genres)} ]
+      | "genres": [ ${genres(work.data.genres)} ]
       |}
     """.stripMargin
 
@@ -256,7 +256,7 @@ class DisplayWorkV2SerialisationTest
       |{
       | "type": "Work",
       | "id": "${work.canonicalId}",
-      | "title": "${work.title}",
+      | "title": "${work.data.title}",
       | "alternativeTitles": [],
       | "notes": [
       |   {
@@ -297,7 +297,7 @@ class DisplayWorkV2SerialisationTest
       |{
       | "type": "Work",
       | "id": "${work.canonicalId}",
-      | "title": "${work.title}",
+      | "title": "${work.data.title}",
       | "alternativeTitles": [],
       | "identifiers": [
       |   ${identifier(work.sourceIdentifier)},
@@ -321,7 +321,7 @@ class DisplayWorkV2SerialisationTest
       |{
       | "type": "Work",
       | "id": "${work.canonicalId}",
-      | "title": "${work.title}",
+      | "title": "${work.data.title}",
       | "alternativeTitles": [],
       | "identifiers": [ ${identifier(work.sourceIdentifier)} ]
       |}
@@ -347,9 +347,9 @@ class DisplayWorkV2SerialisationTest
       |{
       | "type": "Work",
       | "id": "${work.canonicalId}",
-      | "title": "${work.title}",
+      | "title": "${work.data.title}",
       | "alternativeTitles": [],
-      | "thumbnail": ${location(work.thumbnail.get)}
+      | "thumbnail": ${location(work.data.thumbnail.get)}
       |}
     """.stripMargin
 

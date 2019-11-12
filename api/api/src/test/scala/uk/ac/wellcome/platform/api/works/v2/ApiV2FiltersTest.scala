@@ -27,9 +27,9 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
                   {
                     "type": "Work",
                     "id": "${matchingWork.canonicalId}",
-                    "title": "${matchingWork.title}",
+                    "title": "${matchingWork.data.title}",
                     "alternativeTitles": [],
-                    "workType": ${workType(matchingWork.workType.get)}
+                    "workType": ${workType(matchingWork.data.workType.get)}
                   }
                 ]
               }
@@ -59,9 +59,9 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
                   {
                     "type": "Work",
                     "id": "${matchingWork.canonicalId}",
-                    "title": "${matchingWork.title}",
+                    "title": "${matchingWork.data.title}",
                     "alternativeTitles": [],
-                    "workType": ${workType(matchingWork.workType.get)}
+                    "workType": ${workType(matchingWork.data.workType.get)}
                   }
                 ]
               }
@@ -95,16 +95,16 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
                   {
                     "type": "Work",
                     "id": "${matchingWork1.canonicalId}",
-                    "title": "${matchingWork1.title}",
+                    "title": "${matchingWork1.data.title}",
                     "alternativeTitles": [],
-                    "workType": ${workType(matchingWork1.workType.get)}
+                    "workType": ${workType(matchingWork1.data.workType.get)}
                   },
                   {
                     "type": "Work",
                     "id": "${matchingWork2.canonicalId}",
-                    "title": "${matchingWork2.title}",
+                    "title": "${matchingWork2.data.title}",
                     "alternativeTitles": [],
-                    "workType": ${workType(matchingWork2.workType.get)}
+                    "workType": ${workType(matchingWork2.data.workType.get)}
                   }
                 ]
               }
@@ -149,16 +149,16 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
                   {
                     "type": "Work",
                     "id": "${matchingWork1.canonicalId}",
-                    "title": "${matchingWork1.title}",
+                    "title": "${matchingWork1.data.title}",
                     "alternativeTitles": [],
-                    "items": [${items(matchingWork1.items)}]
+                    "items": [${items(matchingWork1.data.items)}]
                   },
                   {
                     "type": "Work",
                     "id": "${matchingWork2.canonicalId}",
-                    "title": "${matchingWork2.title}",
+                    "title": "${matchingWork2.data.title}",
                     "alternativeTitles": [],
-                    "items": [${items(matchingWork2.items)}]
+                    "items": [${items(matchingWork2.data.items)}]
                   }
                 ]
               }
@@ -190,7 +190,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
                   {
                     "type": "Work",
                     "id": "${work2.canonicalId}",
-                    "title": "${work2.title}",
+                    "title": "${work2.data.title}",
                     "alternativeTitles": []
                   }
                 ]
@@ -214,13 +214,13 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
                   {
                     "type": "Work",
                     "id": "${work2.canonicalId}",
-                    "title": "${work2.title}",
+                    "title": "${work2.data.title}",
                     "alternativeTitles": []
                   },
                   {
                     "type": "Work",
                     "id": "${work3.canonicalId}",
-                    "title": "${work3.title}",
+                    "title": "${work3.data.title}",
                     "alternativeTitles": []
                   }
                 ]
@@ -244,13 +244,13 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
                   {
                     "type": "Work",
                     "id": "${work1.canonicalId}",
-                    "title": "${work1.title}",
+                    "title": "${work1.data.title}",
                     "alternativeTitles": []
                   },
                   {
                     "type": "Work",
                     "id": "${work2.canonicalId}",
-                    "title": "${work2.title}",
+                    "title": "${work2.data.title}",
                     "alternativeTitles": []
                   }
                 ]
@@ -304,9 +304,9 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
                   {
                     "type": "Work",
                     "id": "${matchingWork.canonicalId}",
-                    "title": "${matchingWork.title}",
+                    "title": "${matchingWork.data.title}",
                     "alternativeTitles": [],
-                    "workType": ${workType(matchingWork.workType.get)}
+                    "workType": ${workType(matchingWork.data.workType.get)}
                   }
                 ]
               }
@@ -340,9 +340,9 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
                   {
                     "type": "Work",
                     "id": "${matchingWork.canonicalId}",
-                    "title": "${matchingWork.title}",
+                    "title": "${matchingWork.data.title}",
                     "alternativeTitles": [],
-                    "workType": ${workType(matchingWork.workType.get)}
+                    "workType": ${workType(matchingWork.data.workType.get)}
                   }
                 ]
               }
@@ -381,16 +381,16 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
                   {
                     "type": "Work",
                     "id": "${matchingWork1.canonicalId}",
-                    "title": "${matchingWork1.title}",
+                    "title": "${matchingWork1.data.title}",
                     "alternativeTitles": [],
-                    "workType": ${workType(matchingWork1.workType.get)}
+                    "workType": ${workType(matchingWork1.data.workType.get)}
                   },
                   {
                     "type": "Work",
                     "id": "${matchingWork2.canonicalId}",
-                    "title": "${matchingWork2.title}",
+                    "title": "${matchingWork2.data.title}",
                     "alternativeTitles": [],
-                    "workType": ${workType(matchingWork2.workType.get)}
+                    "workType": ${workType(matchingWork2.data.workType.get)}
                   }
                 ]
               }
@@ -437,16 +437,16 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
                   {
                     "type": "Work",
                     "id": "${matchingWork1.canonicalId}",
-                    "title": "${matchingWork1.title}",
+                    "title": "${matchingWork1.data.title}",
                     "alternativeTitles": [],
-                    "items": [${items(matchingWork1.items)}]
+                    "items": [${items(matchingWork1.data.items)}]
                   },
                   {
                     "type": "Work",
                     "id": "${matchingWork2.canonicalId}",
-                    "title": "${matchingWork2.title}",
+                    "title": "${matchingWork2.data.title}",
                     "alternativeTitles": [],
-                    "items": [${items(matchingWork2.items)}]
+                    "items": [${items(matchingWork2.data.items)}]
                   }
                 ]
               }
@@ -483,7 +483,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
                   {
                     "type": "Work",
                     "id": "${englishWork.canonicalId}",
-                    "title": "${englishWork.title}",
+                    "title": "${englishWork.data.title}",
                     "alternativeTitles": [],
                     "language": {
                       "id": "eng",
@@ -510,7 +510,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
                   {
                     "type": "Work",
                     "id": "${englishWork.canonicalId}",
-                    "title": "${englishWork.title}",
+                    "title": "${englishWork.data.title}",
                     "alternativeTitles": [],
                     "language": {
                       "id": "eng",
@@ -521,7 +521,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
                   {
                     "type": "Work",
                     "id": "${germanWork.canonicalId}",
-                    "title": "${germanWork.title}",
+                    "title": "${germanWork.data.title}",
                     "alternativeTitles": [],
                     "language": {
                       "id": "ger",
@@ -640,7 +640,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
         | {
         |   "type": "Work",
         |   "id": "${work.canonicalId}",
-        |   "title": "${work.title}",
+        |   "title": "${work.data.title}",
         |   "alternativeTitles": []
         | }
       """.stripMargin

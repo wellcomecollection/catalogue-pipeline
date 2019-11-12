@@ -25,7 +25,7 @@ object SierraPhysicalDigitalMergeRule
   override protected def mergeAndRedirectWorkPair(
     physicalWork: UnidentifiedWork,
     digitalWork: UnidentifiedWork): Option[MergedWork] =
-    (physicalWork.items, digitalWork.items) match {
+    (physicalWork.data.items, digitalWork.data.items) match {
       case (
           List(physicalItem: Identifiable[Item]),
           List(digitalItem: Unidentifiable[Item])) =>
@@ -36,14 +36,20 @@ object SierraPhysicalDigitalMergeRule
         // the digital work.  We know both works only have a single item,
         // so these locations definitely correspond to this item.
         val mergedWork = physicalWork.copy(
-          otherIdentifiers = physicalWork.otherIdentifiers ++ digitalWork.identifiers,
-          items = mergeItems(physicalItem, digitalItem)
+          data = physicalWork.data.copy(
+            otherIdentifiers = physicalWork.data.otherIdentifiers ++ digitalWork.identifiers,
+            items = mergeItems(physicalItem, digitalItem)
+          )
         )
 
         Some(
           MergedWork(
             mergedWork,
-            UnidentifiedRedirectedWork(digitalWork, physicalWork)
+            UnidentifiedRedirectedWork(
+              version = digitalWork.version,
+              sourceIdentifier = digitalWork.sourceIdentifier,
+              redirect = IdentifiableRedirect(physicalWork.sourceIdentifier),
+            )
           ))
       case _ =>
         debug(

@@ -27,9 +27,9 @@ class DisplayLocationsV2SerialisationTest
       |{
       | "type": "Work",
       | "id": "${work.canonicalId}",
-      | "title": "${work.title}",
+      | "title": "${work.data.title}",
       | "alternativeTitles": [],
-      | "items": [ ${items(work.items)} ]
+      | "items": [ ${items(work.data.items)} ]
       |}
     """.stripMargin
 
@@ -50,9 +50,9 @@ class DisplayLocationsV2SerialisationTest
       |{
       | "type": "Work",
       | "id": "${work.canonicalId}",
-      | "title": "${work.title}",
+      | "title": "${work.data.title}",
       | "alternativeTitles": [],
-      | "items": [ ${items(work.items)} ]
+      | "items": [ ${items(work.data.items)} ]
       |}
     """.stripMargin
 
@@ -74,9 +74,9 @@ class DisplayLocationsV2SerialisationTest
       |{
       | "type": "Work",
       | "id": "${work.canonicalId}",
-      | "title": "${work.title}",
+      | "title": "${work.data.title}",
       | "alternativeTitles": [],
-      | "items": [ ${items(work.items)} ]
+      | "items": [ ${items(work.data.items)} ]
       |}
     """.stripMargin
 

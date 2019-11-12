@@ -19,19 +19,19 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
                {
                  "type": "Work",
                  "id": "${works(0).canonicalId}",
-                 "title": "${works(0).title}",
+                 "title": "${works(0).data.title}",
                  "alternativeTitles": []
                },
                {
                  "type": "Work",
                  "id": "${works(1).canonicalId}",
-                 "title": "${works(1).title}",
+                 "title": "${works(1).data.title}",
                  "alternativeTitles": []
                },
                {
                  "type": "Work",
                  "id": "${works(2).canonicalId}",
-                 "title": "${works(2).title}",
+                 "title": "${works(2).data.title}",
                  "alternativeTitles": []
                }
               ]
@@ -53,7 +53,7 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
             {
              ${singleWorkResult(apiPrefix)},
              "id": "${work.canonicalId}",
-             "title": "${work.title}",
+             "title": "${work.data.title}",
              "alternativeTitles": []
             }
           """
@@ -74,7 +74,7 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
             {
              ${singleWorkResult(apiPrefix)},
              "id": "${work.canonicalId}",
-             "title": "${work.title}",
+             "title": "${work.data.title}",
              "alternativeTitles": [],
              "edition": "Special edition",
              "duration": 3600
@@ -106,7 +106,7 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
                 {
                   "type": "Work",
                   "id": "${works(1).canonicalId}",
-                  "title": "${works(1).title}",
+                  "title": "${works(1).data.title}",
                   "alternativeTitles": []
                 }
               ]
@@ -127,7 +127,7 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
                 {
                   "type": "Work",
                   "id": "${works(0).canonicalId}",
-                  "title": "${works(0).title}",
+                  "title": "${works(0).data.title}",
                   "alternativeTitles": []
                 }
               ]
@@ -148,7 +148,7 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
                 {
                   "type": "Work",
                   "id": "${works(2).canonicalId}",
-                  "title": "${works(2).title}",
+                  "title": "${works(2).data.title}",
                   "alternativeTitles": []
                 }
               ]
@@ -190,7 +190,7 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
                {
                  "type": "Work",
                  "id": "${work1.canonicalId}",
-                 "title": "${work1.title}",
+                 "title": "${work1.data.title}",
                  "alternativeTitles": []
                }
               ]
@@ -215,7 +215,7 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
               {
                ${singleWorkResult(apiPrefix)},
                "id": "${work.canonicalId}",
-               "title": "${work.title}",
+               "title": "${work.data.title}",
                "alternativeTitles": []
               }
             """
@@ -228,7 +228,7 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
               {
                ${singleWorkResult(apiPrefix)},
                "id": "${altWork.canonicalId}",
-               "title": "${altWork.title}",
+               "title": "${altWork.data.title}",
                "alternativeTitles": []
               }
             """
@@ -259,7 +259,7 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
                  {
                    "type": "Work",
                    "id": "${work.canonicalId}",
-                   "title": "${work.title}",
+                   "title": "${work.data.title}",
                    "alternativeTitles": []
                  }
                 ]
@@ -277,7 +277,7 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
                  {
                    "type": "Work",
                    "id": "${altWork.canonicalId}",
-                   "title": "${altWork.title}",
+                   "title": "${altWork.data.title}",
                    "alternativeTitles": []
                  }
                 ]
@@ -309,9 +309,9 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
                {
                  "type": "Work",
                  "id": "${work.canonicalId}",
-                 "title": "${work.title}",
+                 "title": "${work.data.title}",
                  "alternativeTitles": [],
-                 "thumbnail": ${location(work.thumbnail.get)}
+                 "thumbnail": ${location(work.data.thumbnail.get)}
                 }
               ]
             }
@@ -351,27 +351,27 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
               ${resultList(apiPrefix, totalResults = 5)},
               "results": [{
 	            	 "id": "5",
-	            	 "title": "${work5.title}",
+	            	 "title": "${work5.data.title}",
                  "alternativeTitles": [],
 	            	 "type": "Work"
 	            }, {
 	            	 "id": "1",
-	            	 "title": "${work1.title}",
+	            	 "title": "${work1.data.title}",
                  "alternativeTitles": [],
 	            	 "type": "Work"
 	            }, {
 	            	 "id": "3",
-	            	 "title": "${work3.title}",
+	            	 "title": "${work3.data.title}",
                  "alternativeTitles": [],
 	            	 "type": "Work"
 	            }, {
 	            	 "id": "2",
-	            	 "title": "${work2.title}",
+	            	 "title": "${work2.data.title}",
                  "alternativeTitles": [],
 	            	 "type": "Work"
 	            }, {
 	            	 "id": "4",
-	            	 "title": "${work4.title}",
+	            	 "title": "${work4.data.title}",
                  "alternativeTitles": [],
 	            	 "type": "Work"
 	            }]
@@ -406,17 +406,17 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
               ${resultList(apiPrefix, totalResults = 3)},
               "results": [{
 	            	 "id": "2",
-	            	 "title": "${work2.title}",
+	            	 "title": "${work2.data.title}",
                  "alternativeTitles": [],
 	            	 "type": "Work"
 	            }, {
 	            	 "id": "3",
-	            	 "title": "${work3.title}",
+	            	 "title": "${work3.data.title}",
                  "alternativeTitles": [],
 	            	 "type": "Work"
 	            }, {
 	            	 "id": "1",
-	            	 "title": "${work1.title}",
+	            	 "title": "${work1.data.title}",
                  "alternativeTitles": [],
 	            	 "type": "Work"
 	            }]

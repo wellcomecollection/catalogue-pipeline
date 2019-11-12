@@ -62,11 +62,11 @@ class SierraMiroMergeRuleTest
       }
 
       it("copies item locations from the Miro work to a physical Sierra work") {
-        mergedWork.items shouldBe List(
+        mergedWork.data.items shouldBe List(
           sierraPhysicalItem.copy(
             agent = sierraPhysicalItem.agent.copy(
               locations =
-                sierraPhysicalItem.agent.locations ++ miroWork.items.head.agent.locations
+                sierraPhysicalItem.agent.locations ++ miroWork.data.items.head.agent.locations
             )
           ))
       }
@@ -74,19 +74,19 @@ class SierraMiroMergeRuleTest
       it("copies across the Miro location if the Sierra work already has a DigitalLocation") {
         val mergedWork = getMergedWork(sierraDigitalWork, miroWork)
 
-        mergedWork.items shouldBe List(
+        mergedWork.data.items shouldBe List(
           sierraDigitalItem.copy(
             agent = sierraDigitalItem.agent.copy(
               locations =
-                sierraDigitalItem.agent.locations ++ miroWork.items.head.agent.locations
+                sierraDigitalItem.agent.locations ++ miroWork.data.items.head.agent.locations
             )
           ))
       }
 
       it("copies across the thumbnail from the Miro work") {
-        miroWork.thumbnail.isDefined shouldBe true
-        mergedWork.thumbnail.isDefined shouldBe true
-        mergedWork.thumbnail shouldBe miroWork.thumbnail
+        miroWork.data.thumbnail.isDefined shouldBe true
+        mergedWork.data.thumbnail.isDefined shouldBe true
+        mergedWork.data.thumbnail shouldBe miroWork.data.thumbnail
       }
     }
 
@@ -107,11 +107,11 @@ class SierraMiroMergeRuleTest
       }
 
       it("copies item locations from the Miro work to a physical Sierra work") {
-        mergedWork.items shouldBe List(
+        mergedWork.data.items shouldBe List(
           sierraPhysicalItem.copy(
             agent = sierraPhysicalItem.agent.copy(
               locations =
-                sierraPhysicalItem.agent.locations ++ miroWork.items.head.agent.locations
+                sierraPhysicalItem.agent.locations ++ miroWork.data.items.head.agent.locations
             )
           ))
       }

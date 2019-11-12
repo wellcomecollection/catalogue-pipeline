@@ -38,16 +38,16 @@ case class ElastsearchSearchRequestBuilder(
         .size(100)
         .sources(
           List(
-            TermsValueSource("label", field = Some("workType.label.raw")),
-            TermsValueSource("id", field = Some("workType.id")),
-            TermsValueSource("type", field = Some("workType.ontologyType"))
+            TermsValueSource("label", field = Some("data.workType.label.raw")),
+            TermsValueSource("id", field = Some("data.workType.id")),
+            TermsValueSource("type", field = Some("data.workType.ontologyType"))
           )
         )
 
     case AggregationRequest.ProductionDate =>
       DateHistogramAggregation("productionDates")
         .interval(DateHistogramInterval.Year)
-        .field("production.dates.range.from")
+        .field("data.production.dates.range.from")
         .minDocCount(1)
 
     // We don't split genres into concepts, as the data isn't great, and for rendering isn't useful
@@ -59,7 +59,7 @@ case class ElastsearchSearchRequestBuilder(
           List(
             TermsValueSource(
               "label",
-              field = Some("genres.concepts.agent.label.raw"))
+              field = Some("data.genres.concepts.agent.label.raw"))
           )
         )
         .subAggregations(sortedByCount)
@@ -71,7 +71,7 @@ case class ElastsearchSearchRequestBuilder(
           List(
             TermsValueSource(
               "label",
-              field = Some("subjects.agent.label.raw")
+              field = Some("data.subjects.agent.label.raw")
             )
           )
         )
@@ -82,15 +82,15 @@ case class ElastsearchSearchRequestBuilder(
         .size(200)
         .sources(
           List(
-            TermsValueSource("id", field = Some("language.id")),
-            TermsValueSource("label", field = Some("language.label.raw"))
+            TermsValueSource("id", field = Some("data.language.id")),
+            TermsValueSource("label", field = Some("data.language.label.raw"))
           )
         )
   }
 
   lazy val sort = queryOptions.sortBy
     .map {
-      case ProductionDateSortRequest => "production.dates.range.from"
+      case ProductionDateSortRequest => "data.production.dates.range.from"
     }
     .map { FieldSort(_).order(sortOrder) }
 
@@ -114,20 +114,20 @@ case class ElastsearchSearchRequestBuilder(
         termQuery(field = "type", value = "IdentifiedWork")
       case ItemLocationTypeFilter(itemLocationTypeIds) =>
         termsQuery(
-          field = "items.agent.locations.locationType.id",
+          field = "data.items.agent.locations.locationType.id",
           values = itemLocationTypeIds)
       case WorkTypeFilter(workTypeIds) =>
-        termsQuery(field = "workType.id", values = workTypeIds)
+        termsQuery(field = "data.workType.id", values = workTypeIds)
       case DateRangeFilter(fromDate, toDate) =>
         val (gte, lte) =
           (fromDate map ElasticDate.apply, toDate map ElasticDate.apply)
-        RangeQuery("production.dates.range.from", lte = lte, gte = gte)
+        RangeQuery("data.production.dates.range.from", lte = lte, gte = gte)
       case LanguageFilter(languageIds) =>
-        termsQuery(field = "language.id", values = languageIds)
+        termsQuery(field = "data.language.id", values = languageIds)
       case GenreFilter(genreQuery) =>
-        matchQuery(field = "genres.label", value = genreQuery)
+        matchQuery(field = "data.genres.label", value = genreQuery)
       case SubjectFilter(subjectQuery) =>
-        matchQuery(field = "subjects.agent.label", value = subjectQuery)
+        matchQuery(field = "data.subjects.agent.label", value = subjectQuery)
     }
 
   private def sortedByCount =

@@ -56,7 +56,7 @@ class MiroTransformerFeatureTest
 
                 works.map { actualWork =>
                   actualWork.identifiers.head.value shouldBe miroID
-                  actualWork.title shouldBe title
+                  actualWork.data.title shouldBe title
                 }
               }
             }

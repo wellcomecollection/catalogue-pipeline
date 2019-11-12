@@ -4,6 +4,7 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.exceptions.JsonDecodingError
 import uk.ac.wellcome.models.transformable.SierraTransformable
 import uk.ac.wellcome.models.transformable.sierra.{
+  SierraBibNumber,
   SierraBibRecord,
   SierraItemNumber
 }
@@ -69,29 +70,8 @@ class SierraTransformableTransformer(sierraTransformable: SierraTransformable,
             s"Sierra record $bibId is either deleted or suppressed!"
           )
         }
-        UnidentifiedWork(
-          sourceIdentifier = sourceIdentifier,
-          otherIdentifiers = SierraIdentifiers(bibId, bibData),
-          mergeCandidates = SierraMergeCandidates(bibId, bibData),
-          title = SierraTitle(bibId, bibData),
-          alternativeTitles = SierraAlternativeTitles(bibId, bibData),
-          workType = SierraWorkType(bibId, bibData),
-          description = SierraDescription(bibId, bibData),
-          physicalDescription = SierraPhysicalDescription(bibId, bibData),
-          lettering = SierraLettering(bibId, bibData),
-          createdDate = None,
-          subjects = SierraSubjects(bibId, bibData),
-          genres = SierraGenres(bibId, bibData),
-          contributors = SierraContributors(bibId, bibData),
-          thumbnail = None,
-          production = SierraProduction(bibId, bibData),
-          language = SierraLanguage(bibId, bibData),
-          edition = SierraEdition(bibId, bibData),
-          notes = SierraNotes(bibId, bibData),
-          duration = SierraDuration(bibId, bibData),
-          items = SierraItems(itemDataMap)(bibId, bibData),
-          version = version
-        )
+        val data = workDataFromBibData(bibId, bibData)
+        UnidentifiedWork(version, sourceIdentifier, data)
       }
       .recover {
         case e: JsonDecodingError =>
@@ -105,6 +85,27 @@ class SierraTransformableTransformer(sierraTransformable: SierraTransformable,
             version = version
           )
       }
+
+  def workDataFromBibData(bibId: SierraBibNumber, bibData: SierraBibData) =
+    WorkData(
+      otherIdentifiers = SierraIdentifiers(bibId, bibData),
+      mergeCandidates = SierraMergeCandidates(bibId, bibData),
+      title = SierraTitle(bibId, bibData),
+      alternativeTitles = SierraAlternativeTitles(bibId, bibData),
+      workType = SierraWorkType(bibId, bibData),
+      description = SierraDescription(bibId, bibData),
+      physicalDescription = SierraPhysicalDescription(bibId, bibData),
+      lettering = SierraLettering(bibId, bibData),
+      subjects = SierraSubjects(bibId, bibData),
+      genres = SierraGenres(bibId, bibData),
+      contributors = SierraContributors(bibId, bibData),
+      production = SierraProduction(bibId, bibData),
+      language = SierraLanguage(bibId, bibData),
+      edition = SierraEdition(bibId, bibData),
+      notes = SierraNotes(bibId, bibData),
+      duration = SierraDuration(bibId, bibData),
+      items = SierraItems(itemDataMap)(bibId, bibData),
+    )
 
   lazy val bibId = sierraTransformable.sierraId
 

@@ -118,7 +118,7 @@ class MiroRecordTransformerContributorsTest
     expectedContributors: List[String]
   ): Assertion = {
     val transformedWork = transformWork(miroRecord)
-    transformedWork.contributors shouldBe expectedContributors.map {
+    transformedWork.data.contributors shouldBe expectedContributors.map {
       contributor =>
         Contributor(
           agent = Unidentifiable(Agent(contributor))

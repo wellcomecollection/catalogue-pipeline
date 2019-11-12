@@ -42,7 +42,7 @@ trait SierraPhysicalDigitalPartitioner extends Partitioner {
       "sierra-system-number")
 
   private def isDigitalWork(work: UnidentifiedWork): Boolean =
-    work.workType match {
+    work.data.workType match {
       case None    => false
       case Some(t) => t.id == "v" && t.label == "E-books"
     }
