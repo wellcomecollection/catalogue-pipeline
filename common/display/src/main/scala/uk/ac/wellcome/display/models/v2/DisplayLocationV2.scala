@@ -12,7 +12,8 @@ import uk.ac.wellcome.models.work.internal.{
   name = "Location",
   description = "A location that provides access to an item",
   discriminatorProperty = "type",
-  allOf = Array(classOf[DisplayDigitalLocationV2], classOf[DisplayPhysicalLocationV2])
+  allOf =
+    Array(classOf[DisplayDigitalLocationV2], classOf[DisplayPhysicalLocationV2])
 )
 sealed trait DisplayLocationV2
 
