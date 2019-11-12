@@ -33,7 +33,7 @@ class BagsRetrieverTest
     with MockitoSugar {
 
   it("gets a bag from the storage service") {
-    withBagsService("localhost") {port=>
+    withBagsService("localhost") { port =>
       withActorSystem { implicit actorSystem =>
         withMaterializer(actorSystem) { implicit materializer =>
           withTokenService(
@@ -75,7 +75,7 @@ class BagsRetrieverTest
   }
 
   it("returns a none if the bag does not exist in the storage service") {
-    withBagsService("localhost") {port =>
+    withBagsService("localhost") { port =>
       withActorSystem { implicit actorSystem =>
         withMaterializer(actorSystem) { implicit materializer =>
           withTokenService(
@@ -125,7 +125,7 @@ class BagsRetrieverTest
   }
 
   it("returns a failed future if the storage service responds with 500") {
-    withBagsService("localhost") {port =>
+    withBagsService("localhost") { port =>
       withActorSystem { implicit actorSystem =>
         withMaterializer(actorSystem) { implicit materializer =>
           withTokenService(
@@ -156,7 +156,7 @@ class BagsRetrieverTest
   }
 
   it("returns a failed future if the storage service response has a fault") {
-    withBagsService("localhost") {port=>
+    withBagsService("localhost") { port =>
       withActorSystem { implicit actorSystem =>
         withMaterializer(actorSystem) { implicit materializer =>
           withTokenService(

@@ -19,7 +19,7 @@ class TokenServiceTest
     with Eventually {
 
   it("requests a token to the storage service") {
-    withBagsService("localhost") {port =>
+    withBagsService("localhost") { port =>
       withActorSystem { implicit actorSystem =>
         withMaterializer(actorSystem) { implicit mat =>
           val tokenService = new TokenService(
@@ -49,7 +49,7 @@ class TokenServiceTest
 
   it(
     "returns a failed future if it cannot get a token from the storage service") {
-    withBagsService("localhost") {port =>
+    withBagsService("localhost") { port =>
       withActorSystem { implicit actorSystem =>
         withMaterializer(actorSystem) { implicit mat =>
           val tokenService = new TokenService(

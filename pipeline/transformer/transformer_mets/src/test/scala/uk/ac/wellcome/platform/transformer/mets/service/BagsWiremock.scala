@@ -10,11 +10,12 @@ import scala.util.Try
 
 trait BagsWiremock { this: Suite =>
 
-  def withBagsService[R](host: String)(testWith: TestWith[Int,R]): R = {
+  def withBagsService[R](host: String)(testWith: TestWith[Int, R]): R = {
     val wireMockServer = new WireMockServer(
       WireMockConfiguration
         .wireMockConfig()
-        .usingFilesUnderClasspath(".").dynamicPort())
+        .usingFilesUnderClasspath(".")
+        .dynamicPort())
     wireMockServer.start()
     val port = wireMockServer.port()
     WireMock.configureFor(host, port)
