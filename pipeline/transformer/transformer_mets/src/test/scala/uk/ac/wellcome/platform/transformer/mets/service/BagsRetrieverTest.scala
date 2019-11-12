@@ -51,11 +51,13 @@ class BagsRetrieverTest
               maybeBag =>
                 inside(maybeBag) {
                   case Some(
-                  Bag(_, BagManifest(files), BagLocation(bucket, path))) =>
-                    verify(moreThanOrExactly(1),postRequestedFor(
-                      urlEqualTo("/oauth2/token"))
-                      .withRequestBody(matching(".*client_id=client.*"))
-                      .withRequestBody(matching(".*client_secret=secret.*")))
+                      Bag(_, BagManifest(files), BagLocation(bucket, path))) =>
+                    verify(
+                      moreThanOrExactly(1),
+                      postRequestedFor(urlEqualTo("/oauth2/token"))
+                        .withRequestBody(matching(".*client_id=client.*"))
+                        .withRequestBody(matching(".*client_secret=secret.*"))
+                    )
 
                     verify(getRequestedFor(
                       urlEqualTo("/storage/v1/bags/digitised/b30246039")))

@@ -48,7 +48,8 @@ class TokenServiceTest
     }
   }
 
-  it("returns a failed future if it cannot get a token from the storage service"){
+  it(
+    "returns a failed future if it cannot get a token from the storage service") {
     withBagsService(8089, "localhost") {
       withActorSystem { implicit actorSystem =>
         withMaterializer(actorSystem) { implicit mat =>
