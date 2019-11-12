@@ -107,7 +107,10 @@ object ExternalDependencies {
     val scalaGraph = "1.12.5"
     val scalatest = "3.0.1"
     val logstashLogback = "6.1"
+    val scribeJava = "6.8.1"
   }
+
+  val scribeJavaDependencies = Seq("com.github.dakatsuka" %% "akka-http-oauth2-client" % "0.2.0")
 
   val logbackDependencies = Seq(
     "ch.qos.logback" % "logback-classic" % versions.logback,
@@ -269,7 +272,10 @@ object CatalogueDependencies {
 
   val metsTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies ++
-      ExternalDependencies.mockitoDependencies ++ ExternalDependencies.wireMockDependencies ++ ExternalDependencies.akkaHttpDependencies
+      ExternalDependencies.mockitoDependencies ++
+      ExternalDependencies.wireMockDependencies ++
+      ExternalDependencies.akkaHttpDependencies ++
+      ExternalDependencies.scribeJavaDependencies
 
   // Sierra adapter stack
 

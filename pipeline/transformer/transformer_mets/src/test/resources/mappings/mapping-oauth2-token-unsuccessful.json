@@ -1,0 +1,52 @@
+{
+  "id": "a8bb6f02-f1ab-4911-9471-5cfcbf8e8f2a",
+  "request": {
+    "url": "/oauth2/token",
+    "method": "POST",
+    "headers": {
+      "Accept": {
+        "equalTo": "*/*",
+        "caseInsensitive": true
+      },
+      "Content-Type": {
+        "equalTo": "application/x-www-form-urlencoded; charset=UTF-8",
+        "caseInsensitive": true
+      }
+    },
+    "bodyPatterns": [
+      {
+        "equalTo": "scope=https%3A%2F%2Fapi.wellcomecollection.org%2Fscope&grant_type=client_credentials&client_id=wrongclient&client_secret=wrongsecret",
+        "caseInsensitive": false
+      }
+    ]
+  },
+  "response": {
+    "status": 400,
+    "bodyFileName" : "body-oauth2-token-unsuccessful.json",
+    "headers": {
+      "Content-Type": "application/json;charset=UTF-8",
+      "Connection": "keep-alive",
+      "Date": "Mon, 04 Nov 2019 16:32:29 GMT",
+      "Set-Cookie": "XSRF-TOKEN=65c2627a-8b17-4b69-8426-b221cc3539b6; Path=/; Secure; HttpOnly",
+      "x-amz-cognito-request-id": "41cce5d7-45a0-4616-ae4a-06e699b3a3ad",
+      "X-Application-Context": "application:prod:8443",
+      "X-Content-Type-Options": "nosniff",
+      "X-XSS-Protection": "1; mode=block",
+      "Cache-Control": "no-cache, no-store, max-age=0, must-revalidate",
+      "Pragma": "no-cache",
+      "Expires": "0",
+      "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains",
+      "X-Frame-Options": "DENY",
+      "Server": "Server",
+      "X-Cache": "Error from cloudfront",
+      "Via": "1.1 39bd65250ede94b166a38738260ee3c0.cloudfront.net (CloudFront)",
+      "X-Amz-Cf-Pop": "MAN50-C1",
+      "X-Amz-Cf-Id": "G7TafKWJpj2HvkYOOdFaCnMUartc2zKNZ4CtUqCcEOtVkU7NUq3bEQ=="
+    }
+  },
+  "uuid": "a8bb6f02-f1ab-4911-9471-5cfcbf8e8f2a",
+  "persistent": true,
+  "scenarioName": "scenario-1-oauth2-token",
+  "requiredScenarioState": "Started",
+  "newScenarioState": "scenario-1-oauth2-token-2"
+}
