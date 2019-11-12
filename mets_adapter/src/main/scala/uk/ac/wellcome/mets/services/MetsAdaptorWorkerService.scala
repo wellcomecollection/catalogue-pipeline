@@ -1,4 +1,4 @@
-package uk.ac.wellcome.mets
+package uk.ac.wellcome.mets.services
 
 import scala.concurrent.ExecutionContext
 import akka.actor.ActorSystem
@@ -13,14 +13,17 @@ import com.amazonaws.services.sns.AmazonSNSAsync
 import uk.ac.wellcome.messaging.sqs.SQSConfig
 import uk.ac.wellcome.typesafe.Runnable
 import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.mets.models._
 
 import scala.concurrent.Future
+
+case class SNSConfig(topicArn: String)
 
 case class StorageUpdate(space: String, bagId: String)
 
 case class Mets()
 
-class MetsAdaptorWorkerService(sqsConfig: SQSConfig, snsConfig: SNSConfig)(
+class MetsAdaptorWorkerService(sqsConfig: SQSConfig, snsConfig: SNSConfig, tokenService: TokenService)(
   implicit
   ec: ExecutionContext,
   actorSystem: ActorSystem,
@@ -42,7 +45,7 @@ class MetsAdaptorWorkerService(sqsConfig: SQSConfig, snsConfig: SNSConfig)(
       .map(msg => fromJson[StorageUpdate](msg.getBody).get)
 
   def retrieveBag: Flow[StorageUpdate, Bag, _] =
-    new BagsRetriever("?url?").flow
+    new BagsRetriever("?url?", tokenService).flow
 
   def getMetsXml: Flow[Bag, Mets, _] =
     throw new NotImplementedError
