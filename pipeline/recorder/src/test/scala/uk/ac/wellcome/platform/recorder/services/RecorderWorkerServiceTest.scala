@@ -64,7 +64,7 @@ class RecorderWorkerServiceTest
             val olderWork = createUnidentifiedWork
             val newerWork = olderWork
               .copy(version = 10)
-              .withData(data => data.copy(title = "A nice new thing"))
+              .withData(data => data.copy(title = Some("A nice new thing")))
             sendMessage[TransformedBaseWork](queue = queue, newerWork)
             eventually { assertWorkStored(vhs, newerWork) }
             sendMessage[TransformedBaseWork](queue = queue, obj = olderWork)
@@ -84,7 +84,7 @@ class RecorderWorkerServiceTest
             val olderWork = createUnidentifiedWork
             val newerWork = olderWork
               .copy(version = 10)
-              .withData(data => data.copy(title = "A nice new thing"))
+              .withData(data => data.copy(title = Some("A nice new thing")))
             sendMessage[TransformedBaseWork](queue = queue, obj = olderWork)
             eventually {
               assertWorkStored(vhs, olderWork)

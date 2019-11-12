@@ -9,27 +9,27 @@ class ApiV2WorksAggregationsTest extends ApiV2WorksTestBase {
       case (indexV2, routes) =>
         val work1 = createIdentifiedWorkWith(
           canonicalId = "1",
-          title = "Working with wombats",
+          title = Some("Working with wombats"),
           workType = Some(WorkType("a", "Books"))
         )
         val work2 = createIdentifiedWorkWith(
           canonicalId = "2",
-          title = "Working with wombats",
+          title = Some("Working with wombats"),
           workType = Some(WorkType("a", "Books"))
         )
         val work3 = createIdentifiedWorkWith(
           canonicalId = "3",
-          title = "Working with wombats",
+          title = Some("Working with wombats"),
           workType = Some(WorkType("k", "Pictures"))
         )
         val work4 = createIdentifiedWorkWith(
           canonicalId = "4",
-          title = "Working with wombats",
+          title = Some("Working with wombats"),
           workType = Some(WorkType("k", "Pictures"))
         )
         val work5 = createIdentifiedWorkWith(
           canonicalId = "5",
-          title = "Working with wombats",
+          title = Some("Working with wombats"),
           workType = Some(WorkType("d", "Journals"))
         )
         insertIntoElasticsearch(indexV2, work1, work2, work3, work4, work5)
@@ -106,7 +106,7 @@ class ApiV2WorksAggregationsTest extends ApiV2WorksTestBase {
 
         val work1 = createIdentifiedWorkWith(
           canonicalId = "1",
-          title = "Working with wombats",
+          title = Some("Working with wombats"),
           genres = List(genre)
         )
 
