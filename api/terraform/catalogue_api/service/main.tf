@@ -47,7 +47,7 @@ module "task" {
     es_index_v2 = "${var.es_config["index_v2"]}"
   }
 
-  app_env_vars_length = 3
+  app_env_vars_length = 2
 
   sidecar_env_vars = {
     APP_HOST = "localhost"
