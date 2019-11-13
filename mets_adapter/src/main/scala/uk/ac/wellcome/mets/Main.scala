@@ -8,7 +8,7 @@ import com.amazonaws.services.sns.AmazonSNSAsync
 
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
-import uk.ac.wellcome.messaging.typesafe.SQSBuilder
+import uk.ac.wellcome.messaging.typesafe.{SQSBuilder, SNSBuilder}
 import uk.ac.wellcome.mets.services.{BagRetriever, MetsAdaptorWorkerService, SNSConfig, TokenService}
 
 object Main extends WellcomeTypesafeApp {
@@ -19,14 +19,10 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildActorSystem()
     implicit val materializer: ActorMaterializer =
       AkkaBuilder.buildActorMaterializer()
-    implicit val sqsClient =
-      SQSBuilder.buildSQSAsyncClient(config)
-    implicit val snsClient =
-      buildSNSClient(config)
 
     new MetsAdaptorWorkerService(
-      SQSBuilder.buildSQSConfig(config),
-      buildSNSConfig(config),
+      SQSBuilder.buildSQSStream(config),
+      SNSBuilder.buildSNSMessageSender(config, subject = "?"),
       buildBagRetriever(config),
     )
   }

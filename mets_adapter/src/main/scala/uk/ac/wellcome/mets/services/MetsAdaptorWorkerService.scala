@@ -1,14 +1,13 @@
 package uk.ac.wellcome.mets.services
 
-import akka.stream.ActorMaterializer
-import akka.Done
+import scala.concurrent.ExecutionContext
+import scala.util.Success
+import akka.{Done, NotUsed}
 import akka.stream.scaladsl._
-import akka.stream.alpakka.sqs.scaladsl._
-import akka.stream.alpakka.sns.scaladsl._
-import com.amazonaws.services.sqs.AmazonSQSAsync
-import com.amazonaws.services.sns.AmazonSNSAsync
+import com.amazonaws.services.sqs.model.{Message => SQSMessage}
 
-import uk.ac.wellcome.messaging.sqs.SQSConfig
+import uk.ac.wellcome.messaging.sqs.SQSStream
+import uk.ac.wellcome.messaging.sns.SNSMessageSender
 import uk.ac.wellcome.typesafe.Runnable
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.mets.models._
@@ -19,42 +18,40 @@ case class SNSConfig(topicArn: String)
 
 case class StorageUpdate(space: String, bagId: String)
 
-case class Mets()
+case class MetsLocation(location: String)
 
 class MetsAdaptorWorkerService(
-  sqsConfig: SQSConfig,
-  snsConfig: SNSConfig,
+  sqsStream: SQSStream[StorageUpdate],
+  snsMsgSender: SNSMessageSender,
   bagRetriever: BagRetriever,
   concurrentConnections: Int = 6)(
-  implicit
-  materializer: ActorMaterializer,
-  snsClient: AmazonSNSAsync,
-  sqsClient: AmazonSQSAsync)
+  implicit ec: ExecutionContext)
     extends Runnable {
 
+  val className = this.getClass.getSimpleName
+
   def run(): Future[Done] =
-    msgSource
-      .via(retrieveBag)
-      .via(getMetsXml)
-      .via(storeMets)
-      .toMat(msgSink)(Keep.right)
-      .run()
+    sqsStream.runStream(className, source => {
+      source
+        .via(retrieveBag)
+        .via(getMetsLocation)
+        .via(publishMetsLocation)
+    })
 
-  def msgSource: Source[StorageUpdate, _] =
-    SqsSource(sqsConfig.queueUrl)
-      .map(msg => fromJson[StorageUpdate](msg.getBody).get)
+  def retrieveBag: Flow[(SQSMessage, StorageUpdate), (SQSMessage, Bag), _] =
+    Flow[(SQSMessage, StorageUpdate)]
+      .mapAsync(concurrentConnections) {
+        case (msg, update) => bagRetriever.getBag(update).map(bag => (msg, bag))
+      }
+      .collect { case (msg, Some(bag)) => (msg, bag) }
 
-  def retrieveBag: Flow[StorageUpdate, Bag, _] =
-    Flow[StorageUpdate]
-      .mapAsync(concurrentConnections) { bagRetriever.getBag }
-      .collect { case Some(bag) => bag }
-
-  def getMetsXml: Flow[Bag, Mets, _] =
+  def getMetsLocation: Flow[(SQSMessage, Bag), (SQSMessage, MetsLocation), _] =
     throw new NotImplementedError
 
-  def storeMets: Flow[Mets, String, _] =
-    throw new NotImplementedError
-
-  def msgSink: Sink[String, Future[Done]] =
-    SnsPublisher.sink(snsConfig.topicArn)
+  def publishMetsLocation: Flow[(SQSMessage, MetsLocation), SQSMessage, NotUsed] =
+    Flow[(SQSMessage, MetsLocation)]
+      .map { case (msg, metsLocation) =>
+        (msg, snsMsgSender.sendT(metsLocation))
+      }
+      .collect { case (msg, Success(_)) => msg }
 }

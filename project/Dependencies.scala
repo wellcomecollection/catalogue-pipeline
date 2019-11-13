@@ -286,7 +286,6 @@ object CatalogueDependencies {
   val metsAdaptorDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies ++
       ExternalDependencies.akkaHttpDependencies ++
-      ExternalDependencies.alpakkaSnsDependencies ++
       ExternalDependencies.mockitoDependencies ++
       ExternalDependencies.wireMockDependencies ++
       ExternalDependencies.scribeJavaDependencies
