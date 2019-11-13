@@ -24,7 +24,7 @@ object SierraPhysicalDigitalMergeRule
     with SierraPhysicalDigitalPartitioner {
   override protected def mergeAndRedirectWorkPair(
     physicalWork: UnidentifiedWork,
-    digitalWork: UnidentifiedWork): Option[MergedWork] =
+    digitalWork: TransformedBaseWork): Option[MergedWork] =
     (physicalWork.data.items, digitalWork.data.items) match {
       case (
           List(physicalItem: Identifiable[Item]),

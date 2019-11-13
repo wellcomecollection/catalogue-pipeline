@@ -1,5 +1,5 @@
 package uk.ac.wellcome.platform.merger.rules
-import uk.ac.wellcome.models.work.internal.{BaseWork, UnidentifiedWork}
+import uk.ac.wellcome.models.work.internal.{BaseWork, TransformedBaseWork, UnidentifiedWork}
 import uk.ac.wellcome.platform.merger.model.MergedWork
 
 trait MergerRule { this: Partitioner with WorkPairMerger =>
@@ -31,7 +31,7 @@ trait MergerRule { this: Partitioner with WorkPairMerger =>
 }
 
 case class Partition(firstWork: UnidentifiedWork,
-                     secondWork: UnidentifiedWork,
+                     secondWork: TransformedBaseWork,
                      otherWorks: Seq[BaseWork])
 
 trait Partitioner {
@@ -41,5 +41,5 @@ trait Partitioner {
 trait WorkPairMerger {
   protected def mergeAndRedirectWorkPair(
     firstWork: UnidentifiedWork,
-    secondWork: UnidentifiedWork): Option[MergedWork]
+    secondWork: TransformedBaseWork): Option[MergedWork]
 }

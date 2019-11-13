@@ -1,10 +1,6 @@
 package uk.ac.wellcome.platform.merger.services
 
-import uk.ac.wellcome.models.work.internal.{
-  BaseWork,
-  TransformedBaseWork,
-  UnidentifiedWork
-}
+import uk.ac.wellcome.models.work.internal.{BaseWork, TransformedBaseWork}
 
 class MergerManager(mergerRules: Merger) {
 
@@ -16,13 +12,13 @@ class MergerManager(mergerRules: Merger) {
     */
   def applyMerge(
     maybeWorks: Seq[Option[TransformedBaseWork]]): Seq[BaseWork] = {
-    val unidentifiedWorks = maybeWorks
+    val transformedBaseWorks = maybeWorks
       .collect {
-        case Some(unidentifiedWork: UnidentifiedWork) => unidentifiedWork
+        case Some(transformedBaseWork: TransformedBaseWork) => transformedBaseWork
       }
 
-    if (unidentifiedWorks.size == maybeWorks.size) {
-      mergerRules.merge(unidentifiedWorks)
+    if (transformedBaseWorks.size == maybeWorks.size) {
+      mergerRules.merge(transformedBaseWorks)
     } else {
       maybeWorks.flatten
     }

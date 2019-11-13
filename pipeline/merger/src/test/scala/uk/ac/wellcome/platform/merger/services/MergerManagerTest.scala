@@ -2,12 +2,7 @@ package uk.ac.wellcome.platform.merger.services
 
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.models.work.internal.{
-  BaseWork,
-  IdentifiableRedirect,
-  UnidentifiedRedirectedWork,
-  UnidentifiedWork
-}
+import uk.ac.wellcome.models.work.internal.{BaseWork, IdentifiableRedirect, TransformedBaseWork, UnidentifiedRedirectedWork, UnidentifiedWork}
 
 class MergerManagerTest extends FunSpec with Matchers with WorksGenerators {
 
@@ -54,7 +49,7 @@ class MergerManagerTest extends FunSpec with Matchers with WorksGenerators {
     /** Make every work a redirect to the first work in the list, and leave
       * the first work intact.
       */
-    override def merge(works: Seq[UnidentifiedWork]): Seq[BaseWork] =
+    override def merge(works: Seq[TransformedBaseWork]): Seq[BaseWork] =
       works.head +: works.tail.map { work =>
         UnidentifiedRedirectedWork(
           sourceIdentifier = work.sourceIdentifier,

@@ -6,7 +6,7 @@ import uk.ac.wellcome.platform.merger.rules.physicaldigital.SierraPhysicalDigita
 import uk.ac.wellcome.platform.merger.rules.singlepagemiro.SierraMiroMergeRule
 
 class Merger(rules: List[MergerRule]) {
-  def merge(works: Seq[UnidentifiedWork]): Seq[BaseWork] = {
+  def merge(works: Seq[TransformedBaseWork]): Seq[BaseWork] = {
     rules.foldLeft(works: Seq[BaseWork])((works, rule) =>
       rule.mergeAndRedirectWorks(works))
   }

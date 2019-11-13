@@ -1,12 +1,7 @@
 package uk.ac.wellcome.platform.merger.rules
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.models.work.internal.{
-  BaseWork,
-  IdentifiableRedirect,
-  UnidentifiedRedirectedWork,
-  UnidentifiedWork
-}
+import uk.ac.wellcome.models.work.internal.{BaseWork, IdentifiableRedirect, TransformedBaseWork, UnidentifiedRedirectedWork, UnidentifiedWork}
 import uk.ac.wellcome.platform.merger.model.MergedWork
 
 class MergerRuleTest extends FunSpec with WorksGenerators with Matchers {
@@ -16,7 +11,7 @@ class MergerRuleTest extends FunSpec with WorksGenerators with Matchers {
         works: Seq[BaseWork]): Option[Partition] = None
       override protected def mergeAndRedirectWorkPair(
         firstWork: UnidentifiedWork,
-        secondWork: UnidentifiedWork): Option[MergedWork] = None
+        secondWork: TransformedBaseWork): Option[MergedWork] = None
     }
 
     val works = createUnidentifiedWorks(5)
@@ -35,7 +30,7 @@ class MergerRuleTest extends FunSpec with WorksGenerators with Matchers {
             works.tail.tail))
       override protected def mergeAndRedirectWorkPair(
         firstWork: UnidentifiedWork,
-        secondWork: UnidentifiedWork): Option[MergedWork] = None
+        secondWork: TransformedBaseWork): Option[MergedWork] = None
     }
 
     val works = createUnidentifiedWorks(5)
@@ -53,7 +48,7 @@ class MergerRuleTest extends FunSpec with WorksGenerators with Matchers {
             works.tail.tail))
       override protected def mergeAndRedirectWorkPair(
         firstWork: UnidentifiedWork,
-        secondWork: UnidentifiedWork): Option[MergedWork] =
+        secondWork: TransformedBaseWork): Option[MergedWork] =
         Some(
           MergedWork(
             firstWork,

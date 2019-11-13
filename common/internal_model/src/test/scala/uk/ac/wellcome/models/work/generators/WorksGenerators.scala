@@ -16,7 +16,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     )
 
   def createUnidentifiedRedirectedWork(
-    source: UnidentifiedWork,
+    source: TransformedBaseWork,
     target: UnidentifiedWork): UnidentifiedRedirectedWork =
     UnidentifiedRedirectedWork(
       sourceIdentifier = source.sourceIdentifier,
