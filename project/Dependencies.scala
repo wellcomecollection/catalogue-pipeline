@@ -284,7 +284,9 @@ object CatalogueDependencies {
   // METS adapter
 
   val metsAdapterDependencies: Seq[ModuleID] =
-    ExternalDependencies.apacheCommonsDependencies ++
+    WellcomeDependencies.newStorageTypesafeLibrary ++
+      WellcomeDependencies.newMessagingTypesafeLibrary ++
+      ExternalDependencies.apacheCommonsDependencies ++
       ExternalDependencies.akkaHttpDependencies ++
       ExternalDependencies.mockitoDependencies ++
       ExternalDependencies.wireMockDependencies ++

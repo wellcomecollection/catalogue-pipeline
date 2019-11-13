@@ -74,7 +74,7 @@ cache:
     - sierra_adapter/sierra_item_merger/target
     - sierra_adapter/sierra_items_to_dynamo/target
 
-    - mets_adapter/target
+    - mets_adapter/mets_adapter/target
 
     - snapshots/snapshot_generator/target
 

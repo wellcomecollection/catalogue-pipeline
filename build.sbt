@@ -142,8 +142,8 @@ lazy val sierra_items_to_dynamo = setupProject(project,
 // METS adapter
 
 lazy val mets_adapter = setupProject(project,
-  folder = "mets_adapter",
-  localDependencies = Seq(internal_model, big_messaging_typesafe),
+  folder = "mets_adapter/mets_adapter",
+  localDependencies = Seq(internal_model),
   externalDependencies = CatalogueDependencies.metsAdapterDependencies
 )
 

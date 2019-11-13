@@ -1,8 +1,7 @@
 {
   "id" : "mets_adapter",
-  "folder" : "mets_adapter",
+  "folder" : "mets_adapter/mets_adapter",
   "dependencyIds" : [
-    "internal_model",
-    "big_messaging_typesafe"
+    "internal_model"
   ]
 }
