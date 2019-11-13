@@ -10,7 +10,12 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{EitherValues, FunSpec, Matchers}
 import org.scanamo.syntax._
-import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult, WorkIdentifier, WorkNode}
+import uk.ac.wellcome.models.matcher.{
+  MatchedIdentifiers,
+  MatcherResult,
+  WorkIdentifier,
+  WorkNode
+}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.MergeCandidate
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
@@ -25,7 +30,8 @@ class WorkMatcherTest
     with MatcherFixtures
     with ScalaFutures
     with MockitoSugar
-    with WorksGenerators with EitherValues {
+    with WorksGenerators
+    with EitherValues {
 
   private val identifierA = createSierraSystemSourceIdentifierWith(value = "A")
   private val identifierB = createSierraSystemSourceIdentifierWith(value = "B")
@@ -69,7 +75,8 @@ class WorkMatcherTest
               matcherResult shouldBe
                 MatcherResult(
                   Set(MatchedIdentifiers(Set(WorkIdentifier(workId, 1)))))
-              get[WorkNode](dynamoClient, graphTable.name)('id -> workId).map(_.right.get) shouldBe Some(
+              get[WorkNode](dynamoClient, graphTable.name)('id -> workId)
+                .map(_.right.get) shouldBe Some(
                 WorkNode(workId, 1, Nil, ciHash(workId)))
             }
           }

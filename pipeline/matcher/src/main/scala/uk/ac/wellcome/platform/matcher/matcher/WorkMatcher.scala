@@ -2,14 +2,23 @@ package uk.ac.wellcome.platform.matcher.matcher
 
 import cats.implicits._
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult, WorkIdentifier, WorkNode}
+import uk.ac.wellcome.models.matcher.{
+  MatchedIdentifiers,
+  MatcherResult,
+  WorkIdentifier,
+  WorkNode
+}
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.models._
 import uk.ac.wellcome.platform.matcher.storage.WorkGraphStore
 import uk.ac.wellcome.platform.matcher.workgraph.WorkGraphUpdater
 import uk.ac.wellcome.storage.locking.dynamo.DynamoLockingService
-import uk.ac.wellcome.storage.locking.{FailedLockingServiceOp, FailedProcess, FailedUnlock}
+import uk.ac.wellcome.storage.locking.{
+  FailedLockingServiceOp,
+  FailedProcess,
+  FailedUnlock
+}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -21,7 +30,8 @@ class WorkMatcher(
 
   type Out = Set[MatchedIdentifiers]
 
-  def matchWork(work: TransformedBaseWork): Future[MatcherResult] = doMatch(work).map(MatcherResult)
+  def matchWork(work: TransformedBaseWork): Future[MatcherResult] =
+    doMatch(work).map(MatcherResult)
 
   private def doMatch(work: TransformedBaseWork): Future[Out] = {
     val update = WorkUpdate(work)
