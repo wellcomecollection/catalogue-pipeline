@@ -11,7 +11,9 @@ sealed trait IdentifiedBaseWork extends BaseWork {
   val canonicalId: String
 }
 
-sealed trait TransformedBaseWork extends BaseWork
+sealed trait TransformedBaseWork extends BaseWork {
+  val data: WorkData[MaybeDisplayable]
+}
 
 sealed trait InvisibleWork extends BaseWork
 

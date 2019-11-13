@@ -1,31 +1,26 @@
 package uk.ac.wellcome.platform.matcher.matcher
 
-import scala.concurrent.{ExecutionContext, Future}
-import grizzled.slf4j.Logging
 import cats.implicits._
-
+import grizzled.slf4j.Logging
 import uk.ac.wellcome.models.matcher.{
   MatchedIdentifiers,
   MatcherResult,
   WorkIdentifier,
   WorkNode
 }
-import uk.ac.wellcome.models.work.internal.{
-  TransformedBaseWork,
-  UnidentifiedInvisibleWork,
-  UnidentifiedWork
-}
+import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.models._
 import uk.ac.wellcome.platform.matcher.storage.WorkGraphStore
 import uk.ac.wellcome.platform.matcher.workgraph.WorkGraphUpdater
-
 import uk.ac.wellcome.storage.locking.dynamo.DynamoLockingService
 import uk.ac.wellcome.storage.locking.{
   FailedLockingServiceOp,
   FailedProcess,
   FailedUnlock
 }
+
+import scala.concurrent.{ExecutionContext, Future}
 
 class WorkMatcher(
   workGraphStore: WorkGraphStore,
@@ -35,14 +30,10 @@ class WorkMatcher(
 
   type Out = Set[MatchedIdentifiers]
 
-  def matchWork(work: TransformedBaseWork): Future[MatcherResult] = work match {
-    case w: UnidentifiedWork =>
-      doMatch(w).map(MatcherResult)
-    case w: UnidentifiedInvisibleWork =>
-      Future.successful(singleMatchedIdentifier(w))
-  }
+  def matchWork(work: TransformedBaseWork): Future[MatcherResult] =
+    doMatch(work).map(MatcherResult)
 
-  private def doMatch(work: UnidentifiedWork): Future[Out] = {
+  private def doMatch(work: TransformedBaseWork): Future[Out] = {
     val update = WorkUpdate(work)
     val updateAffectedIdentifiers = update.referencedWorkIds + update.workId
     withLocks(update, updateAffectedIdentifiers) {
@@ -69,14 +60,6 @@ class WorkMatcher(
       case FailedProcess(_, e)   => e
       case _                     => new RuntimeException(failure.toString)
     }
-
-  private def singleMatchedIdentifier(work: UnidentifiedInvisibleWork) = {
-    MatcherResult(
-      Set(
-        MatchedIdentifiers(Set(WorkIdentifier(work)))
-      )
-    )
-  }
 
   private def withUpdateLocked(
     update: WorkUpdate,
