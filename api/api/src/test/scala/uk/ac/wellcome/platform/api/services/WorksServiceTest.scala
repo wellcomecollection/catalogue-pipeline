@@ -348,8 +348,8 @@ class WorksServiceTest
     describe("simple query string syntax") {
       it("uses only PHRASE simple query syntax") {
         val work = createIdentifiedWorkWith(
-          title =
-            Some("+a -title | with (all the simple) query~4 syntax operators in it*")
+          title = Some(
+            "+a -title | with (all the simple) query~4 syntax operators in it*")
         )
 
         assertSearchResultIsCorrect(query =

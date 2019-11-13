@@ -239,7 +239,9 @@ class WorkIndexerTest
           keywordField("contributors"),
           keywordField("production"),
           keywordField("notes"),
-          keywordField("items"),keywordField("merged"))
+          keywordField("items"),
+          keywordField("merged")
+        )
       )
   }
 
