@@ -1,4 +1,4 @@
-package uk.ac.wellcome.mets.models
+package uk.ac.wellcome.mets_adapter.models
 
 case class IngestUpdate(space: Space, bag: StubBag)
 

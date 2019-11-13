@@ -1,4 +1,4 @@
-package uk.ac.wellcome.mets.services
+package uk.ac.wellcome.mets_adapter.services
 
 import scala.concurrent.ExecutionContext
 import scala.util.Success
@@ -10,7 +10,7 @@ import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.messaging.sns.SNSMessageSender
 import uk.ac.wellcome.typesafe.Runnable
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.mets.models._
+import uk.ac.wellcome.mets_adapter.models._
 
 import scala.concurrent.Future
 

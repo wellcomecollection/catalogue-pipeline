@@ -1,4 +1,4 @@
-package uk.ac.wellcome.mets.services
+package uk.ac.wellcome.mets_adapter.services
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.headers.OAuth2BearerToken
@@ -11,7 +11,7 @@ import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSpec, Inside, Matchers}
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.mets.models._
+import uk.ac.wellcome.mets_adapter.models._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

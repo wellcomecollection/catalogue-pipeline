@@ -1,4 +1,4 @@
-package uk.ac.wellcome.mets.services
+package uk.ac.wellcome.mets_adapter.services
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
@@ -9,7 +9,7 @@ import akka.stream.ActorMaterializer
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import grizzled.slf4j.Logging
 import io.circe.generic.auto._
-import uk.ac.wellcome.mets.models.Bag
+import uk.ac.wellcome.mets_adapter.models.Bag
 
 import scala.concurrent.{ExecutionContext, Future}
 

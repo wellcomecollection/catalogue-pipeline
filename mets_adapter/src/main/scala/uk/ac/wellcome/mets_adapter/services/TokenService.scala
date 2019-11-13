@@ -1,4 +1,4 @@
-package uk.ac.wellcome.mets.services
+package uk.ac.wellcome.mets_adapter.services
 
 import java.net.URI
 import java.util.concurrent.atomic.AtomicReference
