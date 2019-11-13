@@ -24,8 +24,7 @@ class MetsAdaptorWorkerService(
   sqsStream: SQSStream[StorageUpdate],
   snsMsgSender: SNSMessageSender,
   bagRetriever: BagRetriever,
-  concurrentConnections: Int = 6)(
-  implicit ec: ExecutionContext)
+  concurrentConnections: Int = 6)(implicit ec: ExecutionContext)
     extends Runnable {
 
   val className = this.getClass.getSimpleName
@@ -48,10 +47,12 @@ class MetsAdaptorWorkerService(
   def getMetsLocation: Flow[(SQSMessage, Bag), (SQSMessage, MetsLocation), _] =
     throw new NotImplementedError
 
-  def publishMetsLocation: Flow[(SQSMessage, MetsLocation), SQSMessage, NotUsed] =
+  def publishMetsLocation
+    : Flow[(SQSMessage, MetsLocation), SQSMessage, NotUsed] =
     Flow[(SQSMessage, MetsLocation)]
-      .map { case (msg, metsLocation) =>
-        (msg, snsMsgSender.sendT(metsLocation))
+      .map {
+        case (msg, metsLocation) =>
+          (msg, snsMsgSender.sendT(metsLocation))
       }
       .collect { case (msg, Success(_)) => msg }
 }

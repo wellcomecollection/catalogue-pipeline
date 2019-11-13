@@ -8,8 +8,13 @@ import com.amazonaws.services.sns.AmazonSNSAsync
 
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
-import uk.ac.wellcome.messaging.typesafe.{SQSBuilder, SNSBuilder}
-import uk.ac.wellcome.mets.services.{BagRetriever, MetsAdaptorWorkerService, SNSConfig, TokenService}
+import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
+import uk.ac.wellcome.mets.services.{
+  BagRetriever,
+  MetsAdaptorWorkerService,
+  SNSConfig,
+  TokenService
+}
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
