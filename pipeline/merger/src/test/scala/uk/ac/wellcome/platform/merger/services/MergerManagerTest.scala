@@ -2,7 +2,13 @@ package uk.ac.wellcome.platform.merger.services
 
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.models.work.internal.{BaseWork, IdentifiableRedirect, TransformedBaseWork, UnidentifiedRedirectedWork, UnidentifiedWork}
+import uk.ac.wellcome.models.work.internal.{
+  BaseWork,
+  IdentifiableRedirect,
+  TransformedBaseWork,
+  UnidentifiedRedirectedWork,
+  UnidentifiedWork
+}
 
 class MergerManagerTest extends FunSpec with Matchers with WorksGenerators {
 

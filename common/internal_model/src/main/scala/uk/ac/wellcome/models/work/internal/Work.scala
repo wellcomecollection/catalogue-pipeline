@@ -11,7 +11,9 @@ sealed trait IdentifiedBaseWork extends BaseWork {
   val canonicalId: String
 }
 
-sealed trait TransformedBaseWork extends BaseWork with MultipleSourceIdentifiers {
+sealed trait TransformedBaseWork
+    extends BaseWork
+    with MultipleSourceIdentifiers {
   val data: WorkData[MaybeDisplayable]
   val otherIdentifiers = data.otherIdentifiers
 }

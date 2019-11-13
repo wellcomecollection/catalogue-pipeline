@@ -1,6 +1,9 @@
 package uk.ac.wellcome.platform.merger.logging
 
-import uk.ac.wellcome.models.work.internal.{TransformedBaseWork, UnidentifiedWork}
+import uk.ac.wellcome.models.work.internal.{
+  TransformedBaseWork,
+  UnidentifiedWork
+}
 
 trait MergerLogging {
   def describeWorkPair(workA: UnidentifiedWork, workB: TransformedBaseWork) =

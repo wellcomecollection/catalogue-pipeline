@@ -1,5 +1,9 @@
 package uk.ac.wellcome.platform.merger.rules
-import uk.ac.wellcome.models.work.internal.{BaseWork, TransformedBaseWork, UnidentifiedWork}
+import uk.ac.wellcome.models.work.internal.{
+  BaseWork,
+  TransformedBaseWork,
+  UnidentifiedWork
+}
 import uk.ac.wellcome.platform.merger.model.MergedWork
 
 trait MergerRule { this: Partitioner with WorkPairMerger =>

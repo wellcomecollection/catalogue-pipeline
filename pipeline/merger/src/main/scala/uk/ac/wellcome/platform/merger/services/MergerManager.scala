@@ -14,7 +14,8 @@ class MergerManager(mergerRules: Merger) {
     maybeWorks: Seq[Option[TransformedBaseWork]]): Seq[BaseWork] = {
     val transformedBaseWorks = maybeWorks
       .collect {
-        case Some(transformedBaseWork: TransformedBaseWork) => transformedBaseWork
+        case Some(transformedBaseWork: TransformedBaseWork) =>
+          transformedBaseWork
       }
 
     if (transformedBaseWorks.size == maybeWorks.size) {
