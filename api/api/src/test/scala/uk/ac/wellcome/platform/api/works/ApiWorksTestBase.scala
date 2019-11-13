@@ -105,7 +105,7 @@ trait ApiWorksTestBase
       | {
       |   "type": "Work",
       |   "id": "${work.canonicalId}",
-      |   "title": "${work.data.title}",
+      |   "title": "${work.data.title.get}",
       |   ${work.data.workType.map(workTypeResponse).getOrElse("")}
       |   ${work.data.language.map(languageResponse).getOrElse("")}
       |   "alternativeTitles": []

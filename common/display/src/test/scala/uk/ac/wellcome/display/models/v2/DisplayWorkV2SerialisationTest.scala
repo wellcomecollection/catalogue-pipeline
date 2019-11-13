@@ -32,7 +32,7 @@ class DisplayWorkV2SerialisationTest
       |{
       | "type": "Work",
       | "id": "${work.canonicalId}",
-      | "title": "${work.data.title}",
+      | "title": "${work.data.title.get}",
       | "description": "${work.data.description.get}",
       | "workType" : ${workType(work.data.workType.get)},
       | "lettering": "${work.data.lettering.get}",
@@ -53,7 +53,7 @@ class DisplayWorkV2SerialisationTest
       |{
       | "type": "Work",
       | "id": "${work.canonicalId}",
-      | "title": "${work.data.title}",
+      | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "items": [ ${items(work.data.items)} ]
       |}
@@ -74,7 +74,7 @@ class DisplayWorkV2SerialisationTest
       |{
       | "type": "Work",
       | "id": "${work.canonicalId}",
-      | "title": "${work.data.title}",
+      | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "items": [ ]
       |}
@@ -102,7 +102,7 @@ class DisplayWorkV2SerialisationTest
       |{
       | "type": "Work",
       | "id": "${workWithCopyright.canonicalId}",
-      | "title": "${workWithCopyright.data.title}",
+      | "title": "${workWithCopyright.data.title.get}",
       | "alternativeTitles": [],
       | "items": [
       |   {
@@ -143,7 +143,7 @@ class DisplayWorkV2SerialisationTest
       |{
       | "type": "Work",
       | "id": "${workWithSubjects.canonicalId}",
-      | "title": "${workWithSubjects.data.title}",
+      | "title": "${workWithSubjects.data.title.get}",
       | "alternativeTitles": [],
       | "subjects": [${subjects(workWithSubjects.data.subjects)}]
       |}
@@ -168,7 +168,7 @@ class DisplayWorkV2SerialisationTest
       |{
       | "type": "Work",
       | "id": "${workWithProduction.canonicalId}",
-      | "title": "${workWithProduction.data.title}",
+      | "title": "${workWithProduction.data.title.get}",
       | "alternativeTitles": [],
       | "production": [${production(workWithProduction.data.production)}]
       |}
@@ -200,7 +200,7 @@ class DisplayWorkV2SerialisationTest
       |{
       | "type": "Work",
       | "id": "${work.canonicalId}",
-      | "title": "${work.data.title}",
+      | "title": "${work.data.title.get}",
       | "description": "${work.data.description.get}",
       | "alternativeTitles": [],
       | "workType" : ${workType(work.data.workType.get)},
@@ -234,7 +234,7 @@ class DisplayWorkV2SerialisationTest
       |{
       | "type": "Work",
       | "id": "${work.canonicalId}",
-      | "title": "${work.data.title}",
+      | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "genres": [ ${genres(work.data.genres)} ]
       |}
@@ -256,7 +256,7 @@ class DisplayWorkV2SerialisationTest
       |{
       | "type": "Work",
       | "id": "${work.canonicalId}",
-      | "title": "${work.data.title}",
+      | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "notes": [
       |   {
@@ -297,7 +297,7 @@ class DisplayWorkV2SerialisationTest
       |{
       | "type": "Work",
       | "id": "${work.canonicalId}",
-      | "title": "${work.data.title}",
+      | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "identifiers": [
       |   ${identifier(work.sourceIdentifier)},
@@ -321,7 +321,7 @@ class DisplayWorkV2SerialisationTest
       |{
       | "type": "Work",
       | "id": "${work.canonicalId}",
-      | "title": "${work.data.title}",
+      | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "identifiers": [ ${identifier(work.sourceIdentifier)} ]
       |}
@@ -347,7 +347,7 @@ class DisplayWorkV2SerialisationTest
       |{
       | "type": "Work",
       | "id": "${work.canonicalId}",
-      | "title": "${work.data.title}",
+      | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "thumbnail": ${location(work.data.thumbnail.get)}
       |}

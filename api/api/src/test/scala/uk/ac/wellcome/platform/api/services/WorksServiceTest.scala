@@ -236,10 +236,10 @@ class WorksServiceTest
   describe("searchWorks") {
     it("only finds results that match a query if doing a full-text search") {
       val workDodo = createIdentifiedWorkWith(
-        title = "A drawing of a dodo"
+        title = Some("A drawing of a dodo")
       )
       val workMouse = createIdentifiedWorkWith(
-        title = "A mezzotint of a mouse"
+        title = Some("A mezzotint of a mouse")
       )
 
       assertSearchResultIsCorrect(
@@ -261,7 +261,7 @@ class WorksServiceTest
 
     it("doesn't throw an exception if passed an invalid query string") {
       val workEmu = createIdentifiedWorkWith(
-        title = "An etching of an emu"
+        title = Some("An etching of an emu")
       )
 
       // unmatched quotes are a lexical error in the Elasticsearch parser
@@ -276,15 +276,15 @@ class WorksServiceTest
 
     it("filters searches by workType") {
       val matchingWork = createIdentifiedWorkWith(
-        title = "Animated artichokes",
+        title = Some("Animated artichokes"),
         workType = Some(WorkType(id = "b", label = "Books"))
       )
       val workWithWrongTitle = createIdentifiedWorkWith(
-        title = "Bouncing bananas",
+        title = Some("Bouncing bananas"),
         workType = Some(WorkType(id = "b", label = "Books"))
       )
       val workWithWrongWorkType = createIdentifiedWorkWith(
-        title = "Animated artichokes",
+        title = Some("Animated artichokes"),
         workType = Some(WorkType(id = "m", label = "Manuscripts"))
       )
 
@@ -302,19 +302,19 @@ class WorksServiceTest
 
     it("filters searches by multiple workTypes") {
       val work1 = createIdentifiedWorkWith(
-        title = "Animated artichokes",
+        title = Some("Animated artichokes"),
         workType = Some(WorkType(id = "b", label = "Books"))
       )
       val workWithWrongTitle = createIdentifiedWorkWith(
-        title = "Bouncing bananas",
+        title = Some("Bouncing bananas"),
         workType = Some(WorkType(id = "b", label = "Books"))
       )
       val work2 = createIdentifiedWorkWith(
-        title = "Animated artichokes",
+        title = Some("Animated artichokes"),
         workType = Some(WorkType(id = "m", label = "Manuscripts"))
       )
       val workWithWrongWorkType = createIdentifiedWorkWith(
-        title = "Animated artichokes",
+        title = Some("Animated artichokes"),
         workType = Some(WorkType(id = "a", label = "Archives"))
       )
 
@@ -348,8 +348,8 @@ class WorksServiceTest
     describe("simple query string syntax") {
       it("uses only PHRASE simple query syntax") {
         val work = createIdentifiedWorkWith(
-          title =
-            "+a -title | with (all the simple) query~4 syntax operators in it*"
+          title = Some(
+            "+a -title | with (all the simple) query~4 syntax operators in it*")
         )
 
         assertSearchResultIsCorrect(query =
@@ -362,7 +362,7 @@ class WorksServiceTest
 
       it("doesn't throw a too_many_clauses exception when passed a query that creates too many clauses") {
         val workEmu = createIdentifiedWorkWith(
-          title = "a b c"
+          title = Some("a b c")
         )
 
         // This query uses precedence and would exceed the default 1024 clauses
@@ -377,11 +377,11 @@ class WorksServiceTest
 
       it("matches results with the PHRASE syntax (\"term\")") {
         val workExactTitle = createIdentifiedWorkWith(
-          title = "An exact match of a title"
+          title = Some("An exact match of a title")
         )
 
         val workLooseTitle = createIdentifiedWorkWith(
-          title = "A loose match of a title"
+          title = Some("A loose match of a title")
         )
 
         // Should return both
