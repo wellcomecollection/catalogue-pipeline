@@ -72,7 +72,7 @@ class SnapshotGeneratorFeatureTest
             s"""
               |{
               |  "id": "${work.canonicalId}",
-              |  "title": "${work.data.title}",
+              |  "title": "${work.data.title.get}",
               |  "identifiers": [ ${identifier(work.sourceIdentifier)} ],
               |  "contributors": [ ],
               |  "genres": [ ],
