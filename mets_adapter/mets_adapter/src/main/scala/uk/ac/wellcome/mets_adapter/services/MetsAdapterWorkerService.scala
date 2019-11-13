@@ -14,12 +14,8 @@ import uk.ac.wellcome.mets_adapter.models._
 
 import scala.concurrent.Future
 
-case class StorageUpdate(space: String, bagId: String)
-
-case class MetsLocation(location: String)
-
 class MetsAdapterWorkerService(
-  sqsStream: SQSStream[StorageUpdate],
+  sqsStream: SQSStream[IngestUpdate],
   snsMsgSender: SNSMessageSender,
   bagRetriever: BagRetriever,
   concurrentConnections: Int = 6)(implicit ec: ExecutionContext)
@@ -30,20 +26,18 @@ class MetsAdapterWorkerService(
   def run(): Future[Done] =
     sqsStream.runStream(className, source => {
       source
-        .via(retrieveBag)
         .via(getMetsLocation)
         .via(publishMetsLocation)
     })
 
-  def retrieveBag: Flow[(SQSMessage, StorageUpdate), (SQSMessage, Bag), _] =
-    Flow[(SQSMessage, StorageUpdate)]
+  def getMetsLocation
+    : Flow[(SQSMessage, IngestUpdate), (SQSMessage, MetsLocation), NotUsed] =
+    Flow[(SQSMessage, IngestUpdate)]
       .mapAsync(concurrentConnections) {
         case (msg, update) => bagRetriever.getBag(update).map(bag => (msg, bag))
       }
-      .collect { case (msg, Some(bag)) => (msg, bag) }
-
-  def getMetsLocation: Flow[(SQSMessage, Bag), (SQSMessage, MetsLocation), _] =
-    throw new NotImplementedError
+      .collect { case (msg, Some(bag)) => (msg, bag.metsLocation) }
+      .collect { case (msg, Some(metsLocation)) => (msg, metsLocation) }
 
   def publishMetsLocation
     : Flow[(SQSMessage, MetsLocation), SQSMessage, NotUsed] =

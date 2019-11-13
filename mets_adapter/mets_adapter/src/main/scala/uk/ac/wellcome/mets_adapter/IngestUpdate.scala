@@ -1,14 +1,23 @@
 package uk.ac.wellcome.mets_adapter.models
 
-case class IngestUpdate(space: Space, bag: StubBag)
+case class IngestUpdate(space: String, bagId: String)
 
-case class Space(id: String)
-sealed trait BaseBag {
-  val info: BagInfo
+case class MetsLocation(path: String)
+
+case class Bag(info: BagInfo, manifest: BagManifest, location: BagLocation) {
+
+  // Storage-service only stores a list of files, so we need to search for a
+  // XML file in data directory named with some b-number.
+  private val metsRegex = "^data/b[0-9]{7}[0-9x].xml$".r
+
+  def metsLocation: Option[MetsLocation] =
+    manifest.files
+      .collectFirst {
+        case file if metsRegex.findFirstIn(file.name).nonEmpty =>
+          MetsLocation(s"${location.path}/${file.path}")
+      }
 }
-case class StubBag(info: BagInfo) extends BaseBag
-case class Bag(info: BagInfo, manifest: BagManifest, location: BagLocation)
-    extends BaseBag
+
 case class BagInfo(externalIdentifier: String)
 
 case class BagManifest(files: List[BagFile])
