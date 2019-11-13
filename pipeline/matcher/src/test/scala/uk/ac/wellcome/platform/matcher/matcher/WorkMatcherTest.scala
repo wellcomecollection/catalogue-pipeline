@@ -8,15 +8,9 @@ import org.mockito.Matchers.any
 import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.{EitherValues, FunSpec, Matchers}
 import org.scanamo.syntax._
-
-import uk.ac.wellcome.models.matcher.{
-  MatchedIdentifiers,
-  MatcherResult,
-  WorkIdentifier,
-  WorkNode
-}
+import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult, WorkIdentifier, WorkNode}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.MergeCandidate
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
@@ -31,7 +25,7 @@ class WorkMatcherTest
     with MatcherFixtures
     with ScalaFutures
     with MockitoSugar
-    with WorksGenerators {
+    with WorksGenerators with EitherValues {
 
   private val identifierA = createSierraSystemSourceIdentifierWith(value = "A")
   private val identifierB = createSierraSystemSourceIdentifierWith(value = "B")
@@ -53,7 +47,7 @@ class WorkMatcherTest
 
               val savedLinkedWork =
                 get[WorkNode](dynamoClient, graphTable.name)('id -> workId)
-                  .map(_.right.get)
+                  .map(_.right.value)
 
               savedLinkedWork shouldBe Some(
                 WorkNode(workId, 1, Nil, ciHash(workId)))
