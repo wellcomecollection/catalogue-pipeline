@@ -283,7 +283,7 @@ object CatalogueDependencies {
 
   // METS adapter
 
-  val metsAdaptorDependencies: Seq[ModuleID] =
+  val metsAdapterDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies ++
       ExternalDependencies.akkaHttpDependencies ++
       ExternalDependencies.mockitoDependencies ++

@@ -17,7 +17,7 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.storage.store.{Store, TypedStoreEntry}
 import uk.ac.wellcome.storage.{Identified, ObjectLocation}
 
-// In future we should just receive the ID and version from the adaptor as the
+// In future we should just receive the ID and version from the adapter as the
 // S3 specific `location` field is an implementation detail we should not be
 // concerned with here.
 case class HybridRecord(

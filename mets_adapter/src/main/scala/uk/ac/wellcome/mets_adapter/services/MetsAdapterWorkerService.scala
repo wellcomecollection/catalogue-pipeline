@@ -14,13 +14,11 @@ import uk.ac.wellcome.mets.models._
 
 import scala.concurrent.Future
 
-case class SNSConfig(topicArn: String)
-
 case class StorageUpdate(space: String, bagId: String)
 
 case class MetsLocation(location: String)
 
-class MetsAdaptorWorkerService(
+class MetsAdapterWorkerService(
   sqsStream: SQSStream[StorageUpdate],
   snsMsgSender: SNSMessageSender,
   bagRetriever: BagRetriever,
