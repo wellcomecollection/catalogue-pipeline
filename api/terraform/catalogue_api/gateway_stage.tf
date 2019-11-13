@@ -9,6 +9,9 @@ resource "aws_api_gateway_deployment" "stage" {
   stage_name  = ""
   variables   = "${local.variables}"
 
+  # This forces a new deployment (which is necessary) when Gateway config changes
+  stage_description = "${filemd5("gateway.tf")}"
+
   lifecycle {
     create_before_destroy = true
   }
