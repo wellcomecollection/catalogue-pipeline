@@ -64,7 +64,7 @@ class WorkMatcherTest
     }
   }
 
-  it("doesn't store an invisible work and sends the work id") {
+  it("stores an invisible work and sends the work id") {
     withLockTable { lockTable =>
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
@@ -75,7 +75,8 @@ class WorkMatcherTest
               matcherResult shouldBe
                 MatcherResult(
                   Set(MatchedIdentifiers(Set(WorkIdentifier(workId, 1)))))
-              get[WorkNode](dynamoClient, graphTable.name)('id -> workId) shouldBe None
+              get[WorkNode](dynamoClient, graphTable.name)('id -> workId).map(_.right.get) shouldBe Some(
+                WorkNode(workId, 1, Nil, ciHash(workId)))
             }
           }
         }
