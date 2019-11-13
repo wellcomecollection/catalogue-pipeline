@@ -12,8 +12,6 @@ jobs:
     - stage: services
       env: SBT_PROJECT=api
 
-    - env: SBT_PROJECT=goobi_reader
-
     - env: SBT_PROJECT=reindex_worker
 
     - env: SBT_PROJECT=id_minter
@@ -52,8 +50,6 @@ cache:
     - common/elasticsearch/target
     - common/elasticsearch_typesafe/target
     - common/internal_model/target
-
-    - goobi_adapter/goobi_reader/target
 
     - pipeline/id_minter/target
     - pipeline/ingestor/target

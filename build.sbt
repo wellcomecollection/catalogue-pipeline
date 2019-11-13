@@ -62,10 +62,6 @@ lazy val api = setupProject(project, "api/api",
   externalDependencies = CatalogueDependencies.apiDependencies
 )
 
-lazy val goobi_reader = setupProject(project, "goobi_adapter/goobi_reader",
-  externalDependencies = CatalogueDependencies.goobiReaderDependencies
-)
-
 lazy val id_minter = setupProject(project, "pipeline/id_minter",
   localDependencies = Seq(internal_model, big_messaging_typesafe),
   externalDependencies = CatalogueDependencies.idminterDependencies
