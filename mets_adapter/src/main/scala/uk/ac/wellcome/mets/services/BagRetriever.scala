@@ -1,56 +1,55 @@
 package uk.ac.wellcome.mets.services
 
-import scala.concurrent.{ExecutionContext, Future}
 import akka.actor.ActorSystem
-import akka.stream.scaladsl._
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.http.scaladsl.model.headers.{Authorization, OAuth2BearerToken}
+import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.ActorMaterializer
+import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import grizzled.slf4j.Logging
 import io.circe.generic.auto._
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
+import uk.ac.wellcome.mets.models.Bag
 
-import uk.ac.wellcome.mets.models._
+import scala.concurrent.{ExecutionContext, Future}
 
-class BagRetriever(url: String, tokenService: TokenService, concurrentConnections: Int = 6)(
+class BagRetriever(url: String, tokenService: TokenService)(
   implicit
-  ec: ExecutionContext,
   actorSystem: ActorSystem,
-  actorMaterializer: ActorMaterializer) extends Logging with FailFastCirceSupport {
+  materializer: ActorMaterializer,
+  executionContext: ExecutionContext)
+    extends Logging {
 
-  def flow: Flow[StorageUpdate, Option[Bag], _] =
-    Flow[StorageUpdate]
-      .mapAsync(1) { update =>
-        tokenService.getToken.map(token => (token, update))
+  def getBag(update: StorageUpdate): Future[Option[Bag]] = {
+    debug(s"Executing request to $url/${update.space}/${update.bagId}")
+    for {
+      token <- tokenService.getToken
+      response <- Http().singleRequest(generateRequest(update, token))
+      maybeBag <- {
+        debug(s"Received response ${response.status}")
+        handleResponse(response)
       }
-      .mapAsync(concurrentConnections) { case (token, update) =>
-        Http().singleRequest(generateRequest(update, token))
-      }
-      .mapAsync(2)(resp => responseToBag(resp))
-  
+    } yield maybeBag
+  }
+
   private def generateRequest(update: StorageUpdate, token: OAuth2BearerToken): HttpRequest =
    HttpRequest(uri = s"$url/${update.space}/${update.bagId}")
      .addHeader(Authorization(token))
 
-  private def responseToBag(response: HttpResponse): Future[Option[Bag]] =
+  private def handleResponse(response: HttpResponse): Future[Option[Bag]] =
     response.status match {
-      case StatusCodes.OK => parseResponse(response)
-      case status =>
-        if (status == StatusCodes.Unauthorized)
-          error(s"Failed to authorize with storage service")
-        else if (status != StatusCodes.NotFound)
-          error(s"Received $status from storage service")
-        Future.successful(None)
-  }
+      case StatusCodes.OK       => parseResponseIntoBag(response)
+      case StatusCodes.NotFound => Future.successful(None)
+      case StatusCodes.Unauthorized =>
+        Future.failed(
+          new Exception("Failed to authorize with storage service"))
+      case _ =>
+        Future.failed(new Exception("Received error from storage service"))
+    }
 
-  private def parseResponse(response: HttpResponse): Future[Option[Bag]] =
-    Unmarshal(response.entity)
-      .to[Bag]
-      .map(Some(_))
-      .recover { case exc =>
-        error(s"Failed parsing response into bag", exc)
-        None
-      }
+  private def parseResponseIntoBag(response: HttpResponse) =
+    Unmarshal(response.entity).to[Bag].map(Some(_)).recover {
+      case t =>
+        throw new Exception("Failed parsing response into a Bag")
+    }
 }

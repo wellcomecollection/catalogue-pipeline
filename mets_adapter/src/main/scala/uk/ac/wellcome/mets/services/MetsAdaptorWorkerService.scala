@@ -1,7 +1,5 @@
 package uk.ac.wellcome.mets.services
 
-import scala.concurrent.ExecutionContext
-import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.Done
 import akka.stream.scaladsl._
@@ -23,10 +21,12 @@ case class StorageUpdate(space: String, bagId: String)
 
 case class Mets()
 
-class MetsAdaptorWorkerService(sqsConfig: SQSConfig, snsConfig: SNSConfig, tokenService: TokenService)(
+class MetsAdaptorWorkerService(
+  sqsConfig: SQSConfig,
+  snsConfig: SNSConfig,
+  bagRetriever: BagRetriever,
+  concurrentConnections: Int = 6)(
   implicit
-  ec: ExecutionContext,
-  actorSystem: ActorSystem,
   materializer: ActorMaterializer,
   snsClient: AmazonSNSAsync,
   sqsClient: AmazonSQSAsync)
@@ -35,7 +35,6 @@ class MetsAdaptorWorkerService(sqsConfig: SQSConfig, snsConfig: SNSConfig, token
   def run(): Future[Done] =
     msgSource
       .via(retrieveBag)
-      .collect { case Some(bag) => bag }
       .via(getMetsXml)
       .via(storeMets)
       .toMat(msgSink)(Keep.right)
@@ -45,8 +44,10 @@ class MetsAdaptorWorkerService(sqsConfig: SQSConfig, snsConfig: SNSConfig, token
     SqsSource(sqsConfig.queueUrl)
       .map(msg => fromJson[StorageUpdate](msg.getBody).get)
 
-  def retrieveBag: Flow[StorageUpdate, Option[Bag], _] =
-    new BagRetriever("?url?", tokenService).flow
+  def retrieveBag: Flow[StorageUpdate, Bag, _] =
+    Flow[StorageUpdate]
+      .mapAsync(concurrentConnections) { bagRetriever.getBag }
+      .collect { case Some(bag) => bag }
 
   def getMetsXml: Flow[Bag, Mets, _] =
     throw new NotImplementedError

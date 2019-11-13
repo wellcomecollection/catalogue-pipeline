@@ -1,28 +1,21 @@
 package uk.ac.wellcome.mets.services
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scala.concurrent.duration._
-import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{FunSpec, Inside, Matchers}
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.headers.OAuth2BearerToken
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl._
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.http.Fault
 import org.mockito.Mockito
-
+import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
+import org.scalatest.mockito.MockitoSugar
+import org.scalatest.{FunSpec, Inside, Matchers}
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.mets.models.{
-  Bag,
-  BagFile,
-  BagLocation,
-  BagManifest
-}
+import uk.ac.wellcome.mets.models._
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.duration._
 
 class BagRetrieverTest
     extends FunSpec
@@ -105,7 +98,7 @@ class BagRetrieverTest
           stubFor(
             get(urlMatching("/storage/v1/bags/digitised/this-shall-crash"))
               .willReturn(aResponse().withStatus(500)))
-          whenReady(getBag(bagRetriever, "digitised", "this-shall-crash")) {
+          whenReady(getBag(bagRetriever, "digitised", "this-shall-crash").failed) {
             e =>
               e shouldBe a[Throwable]
           }
@@ -123,7 +116,7 @@ class BagRetrieverTest
               .willReturn(aResponse()
                 .withStatus(200)
                 .withFault(Fault.CONNECTION_RESET_BY_PEER)))
-          whenReady(getBag(bagRetriever, "digitised", "this-will-fault")) {
+          whenReady(getBag(bagRetriever, "digitised", "this-will-fault").failed) {
             e =>
               e shouldBe a[Throwable]
           }
@@ -131,14 +124,9 @@ class BagRetrieverTest
       }
     }
   }
-  
-  def getBag(bagRetriever: BagRetriever, space: String, bagId: String)(
-    implicit materializer: ActorMaterializer): Future[Option[Bag]] =
-    Source
-      .single(StorageUpdate(space, bagId))
-      .via(bagRetriever.flow)
-      .toMat(Sink.last)(Keep.right)
-      .run()
+
+  def getBag(bagRetriever: BagRetriever, space: String, bagId: String): Future[Option[Bag]] =
+    bagRetriever.getBag(StorageUpdate(space, bagId))
 
   def withBagRetriever[R](tokenService: TokenService)(
     testWith: TestWith[BagRetriever, R])(
@@ -169,14 +157,15 @@ class BagRetrieverTest
           )
         }
     }
-
+  
   def withTokenService[R](
     url: String,
     clientId: String,
     secret: String,
     scope: String)(initialDelay: FiniteDuration, interval: FiniteDuration)(
     testWith: TestWith[TokenService, R])(implicit actorSystem: ActorSystem,
-                                         materializer: ActorMaterializer) =
+                                         materializer: ActorMaterializer) {
     testWith(
       new TokenService(url, clientId, secret, scope, initialDelay, interval))
+  }
 }
