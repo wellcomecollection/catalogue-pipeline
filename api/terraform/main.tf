@@ -1,22 +1,18 @@
 module "catalogue_api_prod" {
   source = "catalogue_api"
 
-  namespace   = "${local.namespace}"
-  environment = "${local.prod_name}"
-
-  vpc_id  = "${local.vpc_id}"
-  subnets = ["${local.private_subnets}"]
-
-  api_container_image = "${module.prod_images.services["api"]}"
-  listener_port       = "${local.prod_listener_port}"
-  task_desired_count  = "${local.prod_task_number}"
-
+  environment           = "${local.prod_name}"
+  api_container_image   = "${module.prod_images.services["api"]}"
   nginx_container_image = "${module.prod_images.services["nginx_api-gw"]}"
+  listener_port         = "${local.prod_listener_port}"
+  task_desired_count    = "${local.prod_task_number}"
+  es_config             = "${local.prod_es_config}"
 
+  namespace    = "${local.namespace}"
+  vpc_id       = "${local.vpc_id}"
+  subnets      = ["${local.private_subnets}"]
   cluster_name = "${aws_ecs_cluster.cluster.name}"
-  es_config    = "${local.prod_es_config}"
-
-  api_id = "${aws_api_gateway_rest_api.api.id}"
+  api_id       = "${aws_api_gateway_rest_api.api.id}"
 
   gateway_depends = [
     "${module.root_resource_integration.uri}",
@@ -30,22 +26,18 @@ module "catalogue_api_prod" {
 module "catalogue_api_staging" {
   source = "catalogue_api"
 
-  namespace   = "${local.namespace}"
-  environment = "${local.staging_name}"
-
-  vpc_id  = "${local.vpc_id}"
-  subnets = ["${local.private_subnets}"]
-
-  api_container_image = "${module.staging_images.services["api"]}"
-  listener_port       = "${local.staging_listener_port}"
-  task_desired_count  = "${local.staging_task_number}"
-
+  environment           = "${local.staging_name}"
+  api_container_image   = "${module.staging_images.services["api"]}"
   nginx_container_image = "${module.staging_images.services["nginx_api-gw"]}"
+  listener_port         = "${local.staging_listener_port}"
+  task_desired_count    = "${local.staging_task_number}"
+  es_config             = "${local.staging_es_config}"
 
+  namespace    = "${local.namespace}"
+  vpc_id       = "${local.vpc_id}"
+  subnets      = ["${local.private_subnets}"]
   cluster_name = "${aws_ecs_cluster.cluster.name}"
-  es_config    = "${local.staging_es_config}"
-
-  api_id = "${aws_api_gateway_rest_api.api.id}"
+  api_id       = "${aws_api_gateway_rest_api.api.id}"
 
   gateway_depends = [
     "${module.root_resource_integration.uri}",

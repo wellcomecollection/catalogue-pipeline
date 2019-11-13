@@ -32,7 +32,7 @@ resource "aws_service_discovery_private_dns_namespace" "namespace" {
 
 resource "aws_security_group" "service_egress_security_group" {
   name        = "${var.namespace}-${var.environment}-service_egress_security_group"
-  description = "Allow traffic from service"
+  description = "Allow any traffic on any port out of the (${var.namespace}-${var.environment}) service"
   vpc_id      = "${var.vpc_id}"
 
   egress {
