@@ -16,7 +16,9 @@ import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.models.Implicits._
 
-import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
+import uk.ac.wellcome.storage.Version
+import uk.ac.wellcome.messaging.typesafe.SQSBuilder
+import uk.ac.wellcome.bigmessaging.typesafe.VHSBuilder
 import uk.ac.wellcome.messaging.typesafe.SNSBuilder
 import uk.ac.wellcome.storage.locking.dynamo.{
   DynamoLockDao,
@@ -56,8 +58,9 @@ object Main extends WellcomeTypesafeApp {
     val workMatcher = new WorkMatcher(workGraphStore, new DynamoLockingService)
 
     new MatcherWorkerService(
-      msgStream = BigMessagingBuilder
-        .buildMessageStream[TransformedBaseWork](config),
+      store = VHSBuilder.build[TransformedBaseWork](config),
+      msgStream = SQSBuilder
+        .buildSQSStream[Version[String, Int]](config),
       msgSender = SNSBuilder
         .buildSNSMessageSender(config, subject = "Sent from the matcher"),
       workMatcher = workMatcher

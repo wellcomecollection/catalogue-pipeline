@@ -9,14 +9,22 @@ import uk.ac.wellcome.platform.matcher.models.VersionExpectedConflictException
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.typesafe.Runnable
 import uk.ac.wellcome.models.Implicits._
+import uk.ac.wellcome.json.JsonUtil._
 
-import uk.ac.wellcome.bigmessaging.message.BigMessageStream
+import uk.ac.wellcome.storage.store.{HybridStoreEntry, VersionedStore}
+import uk.ac.wellcome.storage.{Version, Identified}
+import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.messaging.MessageSender
+import uk.ac.wellcome.bigmessaging.EmptyMetadata
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class MatcherWorkerService[MsgDestination](
-  msgStream: BigMessageStream[TransformedBaseWork],
+  store: VersionedStore[
+    String,
+    Int,
+    HybridStoreEntry[TransformedBaseWork, EmptyMetadata]],
+  msgStream: SQSStream[Version[String, Int]],
   msgSender: MessageSender[MsgDestination],
   workMatcher: WorkMatcher)(implicit val actorSystem: ActorSystem,
                             ec: ExecutionContext)
@@ -26,13 +34,22 @@ class MatcherWorkerService[MsgDestination](
   def run(): Future[Done] =
     msgStream.foreach(this.getClass.getSimpleName, processMessage)
 
-  def processMessage(work: TransformedBaseWork): Future[Unit] =
+  def processMessage(key: Version[String, Int]): Future[Unit] =
     (for {
+      work <- getWork(key)
       identifiersList <- workMatcher.matchWork(work)
       _ <- Future.fromTry(msgSender.sendT(identifiersList))
     } yield ()).recover {
       case MatcherException(e: VersionExpectedConflictException) =>
         debug(
           s"Not matching work due to version conflict exception: ${e.getMessage}")
+    }
+
+  def getWork(key: Version[String, Int]): Future[TransformedBaseWork] =
+    store.get(key) match {
+      case Left(err) =>
+        error(s"Error fetching $key from VHS")
+        Future.failed(err.e)
+      case Right(Identified(_, entry)) => Future.successful(entry.t)
     }
 }

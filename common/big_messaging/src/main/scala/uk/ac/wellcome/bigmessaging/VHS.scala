@@ -1,7 +1,6 @@
 package uk.ac.wellcome.bigmessaging
 
 import java.util.UUID
-import scala.util.{Failure, Success, Try}
 
 import uk.ac.wellcome.storage.store.{
   HybridIndexedStoreEntry,
@@ -11,7 +10,6 @@ import uk.ac.wellcome.storage.store.{
   VersionedHybridStore
 }
 import uk.ac.wellcome.storage.{
-  Identified,
   ObjectLocation,
   ObjectLocationPrefix,
   Version
@@ -19,10 +17,6 @@ import uk.ac.wellcome.storage.{
 import uk.ac.wellcome.storage.maxima.Maxima
 
 case class EmptyMetadata()
-
-trait GetLocation {
-  def getLocation(key: Version[String, Int]): Try[ObjectLocation]
-}
 
 class VHS[T, Metadata](val hybridStore: VHSInternalStore[T, Metadata])
     extends VersionedHybridStore[
@@ -32,14 +26,6 @@ class VHS[T, Metadata](val hybridStore: VHSInternalStore[T, Metadata])
       T,
       Metadata
     ](hybridStore)
-    with GetLocation {
-
-  def getLocation(key: Version[String, Int]): Try[ObjectLocation] =
-    hybridStore.indexedStore.get(key) match {
-      case Right(Identified(_, entry)) => Success(entry.typedStoreId)
-      case Left(error)                 => Failure(error.e)
-    }
-}
 
 class VHSInternalStore[T, Metadata](
   prefix: ObjectLocationPrefix,
