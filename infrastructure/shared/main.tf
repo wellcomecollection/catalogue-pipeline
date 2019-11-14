@@ -1,0 +1,3 @@
+module "identity" {
+  source = "./identity"
+}
