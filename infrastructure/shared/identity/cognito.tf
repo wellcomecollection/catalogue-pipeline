@@ -84,6 +84,18 @@ resource "aws_cognito_user_pool" "pool" {
       min_length = "0"
     }
   }
+  schema { # forces replacement
+    attribute_data_type      = "String"
+    developer_only_attribute = false
+    mutable                  = true
+    name                     = "patronID"
+    required                 = false
+
+    string_attribute_constraints {
+      max_length = "256"
+      min_length = "1"
+    }
+  }
 }
 
 resource "aws_cognito_user_pool_domain" "id" {
