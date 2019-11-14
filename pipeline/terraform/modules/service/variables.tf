@@ -27,4 +27,11 @@ variable "security_group_ids" {
   type    = "list"
 }
 
+variable "max_capacity" {
+}
 variable "logstash_host" {}
+
+variable "messages_bucket_arn" {
+}
+variable "queue_read_policy" {
+}

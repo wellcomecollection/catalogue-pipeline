@@ -1,22 +1,14 @@
 # Input queue
 
 module "sierra_transformer_queue" {
-  source = "../modules/queue"
-
+  source = "git::https://github.com/wellcometrust/terraform-modules.git//sqs?ref=v11.6.0"
+  queue_name  = "${local.namespace_underscores}_sierra_transformer"
   topic_names = ["${var.sierra_adapter_topic_names}"]
-
-  role_names = ["${module.sierra_transformer.task_role_name}"]
-
-  namespace = "${var.namespace}_sierra_transformer"
-
-  visibility_timeout_seconds = 30
-  max_receive_count          = 3
+  topic_count = "${var.sierra_adapter_topic_count}"
 
   aws_region    = "${var.aws_region}"
   account_id    = "${var.account_id}"
-  dlq_alarm_arn = "${var.dlq_alarm_arn}"
-
-  messages_bucket_arn = "${aws_s3_bucket.messages.arn}"
+  alarm_topic_arn = "${var.dlq_alarm_arn}"
 }
 
 # Service
@@ -24,7 +16,7 @@ module "sierra_transformer_queue" {
 module "sierra_transformer" {
   source = "../modules/service"
 
-  service_name = "${var.namespace}_sierra_transformer"
+  service_name = "${local.namespace_underscores}_sierra_transformer"
 
   container_image = "${local.transformer_sierra_image}"
 
@@ -41,8 +33,8 @@ module "sierra_transformer" {
 
   env_vars = {
     sns_arn                = "${module.sierra_transformer_topic.arn}"
-    transformer_queue_id   = "${module.sierra_transformer_queue.url}"
-    metrics_namespace      = "sierra_transformer"
+    transformer_queue_id   = "${module.sierra_transformer_queue.id}"
+    metrics_namespace      = "${local.namespace_underscores}_sierra_transformer"
     messages_bucket_name   = "${aws_s3_bucket.messages.id}"
     vhs_sierra_bucket_name = "${var.vhs_sierra_sourcedata_bucket_name}"
     vhs_sierra_table_name  = "${var.vhs_sierra_sourcedata_table_name}"
@@ -55,6 +47,10 @@ module "sierra_transformer" {
 
   subnets    = ["${var.subnets}"]
   aws_region = "${var.aws_region}"
+  max_capacity = 10
+  messages_bucket_arn = "${aws_s3_bucket.messages.arn}"
+
+  queue_read_policy = "${module.sierra_transformer_queue.read_policy}"
 }
 
 # Permissions
@@ -69,7 +65,7 @@ resource "aws_iam_role_policy" "sierra_transformer_vhs_sierra_adapter_read" {
 module "sierra_transformer_topic" {
   source = "../modules/topic"
 
-  name       = "${var.namespace}_sierra_transformer"
+  name       = "${local.namespace_underscores}_sierra_transformer"
   role_names = ["${module.sierra_transformer.task_role_name}"]
 
   messages_bucket_arn = "${aws_s3_bucket.messages.arn}"
