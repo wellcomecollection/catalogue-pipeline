@@ -81,7 +81,7 @@ class SierraTransformerIntegrationTest
 
                   works.map { actualWork =>
                     actualWork.sourceIdentifier shouldBe sourceIdentifier
-                    actualWork.data.title shouldBe title
+                    actualWork.data.title shouldBe Some(title)
                     actualWork.identifiers shouldBe List(
                       sourceIdentifier,
                       sierraIdentifier)

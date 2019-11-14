@@ -210,7 +210,7 @@ class MiroRecordTransformerTest
       )
     )
 
-    work.data.title shouldBe "A café for cats"
+    work.data.title shouldBe Some("A café for cats")
     work.data.contributors shouldBe List(
       Contributor(agent = Unidentifiable(Agent("Gyokushō, a cät Ôwnêr")))
     )
@@ -320,7 +320,8 @@ class MiroRecordTransformerTest
       sourceIdentifier = createMiroSourceIdentifierWith(
         value = miroRecord.imageNumber
       ),
-      version = 1
+      version = 1,
+      data = WorkData()
     )
   }
 

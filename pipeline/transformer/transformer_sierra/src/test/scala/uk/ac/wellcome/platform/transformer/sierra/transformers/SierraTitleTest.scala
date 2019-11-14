@@ -27,6 +27,6 @@ class SierraTitleTest extends FunSpec with Matchers with SierraDataGenerators {
     expectedTitle: String
   ) = {
     val bibData = createSierraBibDataWith(title = Some(bibDataTitle))
-    SierraTitle(createSierraBibNumber, bibData) shouldBe expectedTitle
+    SierraTitle(createSierraBibNumber, bibData) shouldBe Some(expectedTitle)
   }
 }

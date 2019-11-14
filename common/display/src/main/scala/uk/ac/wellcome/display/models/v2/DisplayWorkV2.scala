@@ -18,7 +18,7 @@ case class DisplayWorkV2(
   @Schema(
     description =
       "The title or other short label of a work, including labels not present in the actual work or item but applied by the cataloguer for the purposes of search or description."
-  ) title: String,
+  ) title: Option[String],
   @Schema(
     `type` = "List[String]",
     description = "Alternative titles of  the work."

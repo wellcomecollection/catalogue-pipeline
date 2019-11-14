@@ -70,7 +70,7 @@ class MiroRecordTransformer
 
       val data = WorkData[MaybeDisplayable](
         otherIdentifiers = getOtherIdentifiers(miroRecord),
-        title = title,
+        title = Some(title),
         workType = getWorkType,
         description = description,
         lettering = miroRecord.suppLettering,
@@ -88,7 +88,8 @@ class MiroRecordTransformer
         debug(s"Should not transform: ${e.getMessage}")
         UnidentifiedInvisibleWork(
           sourceIdentifier = sourceIdentifier,
-          version = version
+          version = version,
+          data = WorkData()
         )
     }
   }

@@ -11,7 +11,9 @@ sealed trait IdentifiedBaseWork extends BaseWork {
   val canonicalId: String
 }
 
-sealed trait TransformedBaseWork extends BaseWork
+sealed trait TransformedBaseWork extends BaseWork {
+  val data: WorkData[MaybeDisplayable]
+}
 
 sealed trait InvisibleWork extends BaseWork
 
@@ -20,7 +22,7 @@ sealed trait RedirectedWork extends BaseWork {
 }
 
 case class WorkData[+IdState[+S] <: IdentityState[S]](
-  title: String,
+  title: Option[String] = None,
   otherIdentifiers: List[SourceIdentifier] = Nil,
   mergeCandidates: List[MergeCandidate] = Nil,
   alternativeTitles: List[String] = Nil,
@@ -73,16 +75,24 @@ case class IdentifiedWork(
 case class UnidentifiedInvisibleWork(
   version: Int,
   sourceIdentifier: SourceIdentifier,
+  data: WorkData[MaybeDisplayable],
   identifiedType: String = classOf[IdentifiedInvisibleWork].getSimpleName
 ) extends TransformedBaseWork
-    with InvisibleWork
+    with InvisibleWork {
+  def withData(f: WorkData[MaybeDisplayable] => WorkData[MaybeDisplayable]) =
+    this.copy(data = f(data))
+}
 
 case class IdentifiedInvisibleWork(
   canonicalId: String,
   version: Int,
   sourceIdentifier: SourceIdentifier,
+  data: WorkData[Displayable]
 ) extends IdentifiedBaseWork
-    with InvisibleWork
+    with InvisibleWork {
+  def withData(f: WorkData[Displayable] => WorkData[Displayable]) =
+    this.copy(data = f(data))
+}
 
 case class UnidentifiedRedirectedWork(
   sourceIdentifier: SourceIdentifier,

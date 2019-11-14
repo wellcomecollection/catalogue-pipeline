@@ -27,7 +27,7 @@ class DisplayLocationsV2SerialisationTest
       |{
       | "type": "Work",
       | "id": "${work.canonicalId}",
-      | "title": "${work.data.title}",
+      | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "items": [ ${items(work.data.items)} ]
       |}
@@ -50,7 +50,7 @@ class DisplayLocationsV2SerialisationTest
       |{
       | "type": "Work",
       | "id": "${work.canonicalId}",
-      | "title": "${work.data.title}",
+      | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "items": [ ${items(work.data.items)} ]
       |}
@@ -74,7 +74,7 @@ class DisplayLocationsV2SerialisationTest
       |{
       | "type": "Work",
       | "id": "${work.canonicalId}",
-      | "title": "${work.data.title}",
+      | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "items": [ ${items(work.data.items)} ]
       |}

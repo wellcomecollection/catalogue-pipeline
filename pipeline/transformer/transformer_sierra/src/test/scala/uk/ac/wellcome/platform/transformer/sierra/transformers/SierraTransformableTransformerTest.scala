@@ -213,7 +213,7 @@ class SierraTransformableTransformerTest
     val work = transformDataToWork(id = id, data = data)
 
     work shouldBe createUnidentifiedWorkWith(
-      title = title,
+      title = Some(title),
       sourceIdentifier = sourceIdentifier,
       otherIdentifiers = List(sierraIdentifier),
       description = Some("A delightful description of a dead daisy."),
@@ -930,7 +930,8 @@ class SierraTransformableTransformerTest
       sourceIdentifier = createSierraSystemSourceIdentifierWith(
         value = id.withCheckDigit
       ),
-      version = 1
+      version = 1,
+      data = WorkData()
     )
   }
 

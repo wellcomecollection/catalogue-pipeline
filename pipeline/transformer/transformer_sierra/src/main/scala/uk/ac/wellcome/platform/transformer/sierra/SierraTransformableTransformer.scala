@@ -48,7 +48,8 @@ class SierraTransformableTransformer(sierraTransformable: SierraTransformable,
         Success(
           UnidentifiedInvisibleWork(
             sourceIdentifier = sourceIdentifier,
-            version = version
+            version = version,
+            data = WorkData()
           )
         )
       }
@@ -82,7 +83,8 @@ class SierraTransformableTransformer(sierraTransformable: SierraTransformable,
           debug(s"Should not transform $bibId: ${e.getMessage}")
           UnidentifiedInvisibleWork(
             sourceIdentifier = sourceIdentifier,
-            version = version
+            version = version,
+            data = WorkData()
           )
       }
 
