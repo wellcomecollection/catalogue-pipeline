@@ -6,19 +6,20 @@ import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.miro.exceptions.ShouldNotTransformException
 import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
+import uk.ac.wellcome.platform.transformer.miro.transformers._
 
 import scala.util.Try
 
 class MiroRecordTransformer
-    extends transformers.MiroContributors
-    with transformers.MiroCreatedDate
-    with transformers.MiroItems
-    with transformers.MiroGenres
-    with transformers.MiroIdentifiers
-    with transformers.MiroSubjects
-    with transformers.MiroThumbnail
-    with transformers.MiroTitleAndDescription
-    with transformers.MiroWorkType
+    extends MiroContributors
+    with MiroCreatedDate
+    with MiroItems
+    with MiroGenres
+    with MiroIdentifiers
+    with MiroSubjects
+    with MiroThumbnail
+    with MiroTitleAndDescription
+    with MiroWorkType
     with Logging {
 
   def transform(miroRecord: MiroRecord,
@@ -67,33 +68,28 @@ class MiroRecordTransformer
 
       val (title, description) = getTitleAndDescription(miroRecord)
 
-      UnidentifiedWork(
-        sourceIdentifier = sourceIdentifier,
+      val data = WorkData[MaybeDisplayable](
         otherIdentifiers = getOtherIdentifiers(miroRecord),
-        mergeCandidates = List(),
-        title = title,
-        alternativeTitles = Nil,
+        title = Some(title),
         workType = getWorkType,
         description = description,
-        physicalDescription = None,
         lettering = miroRecord.suppLettering,
         createdDate = getCreatedDate(miroRecord),
         subjects = getSubjects(miroRecord),
         genres = getGenres(miroRecord),
         contributors = getContributors(miroRecord),
         thumbnail = Some(getThumbnail(miroRecord)),
-        production = List(),
-        language = None,
-        edition = None,
         items = getItems(miroRecord),
-        version = version
       )
+
+      UnidentifiedWork(version, sourceIdentifier, data)
     }.recover {
       case e: ShouldNotTransformException =>
         debug(s"Should not transform: ${e.getMessage}")
         UnidentifiedInvisibleWork(
           sourceIdentifier = sourceIdentifier,
-          version = version
+          version = version,
+          data = WorkData()
         )
     }
   }

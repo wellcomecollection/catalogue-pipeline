@@ -1,23 +1,28 @@
 # Test 2
+
 ## Candidates
+
 Based on the conclusions from test 1, we've tweaked a few of the parameters and assembled three new candidates which we think will be effective improvements to the standard algorithm.
 
 We'd like to test this on the live site with people outside Wellcome, possibly collecting explicit feedback from users who opt in (or don't opt in! The site is in beta after all). We'll also be able to evaluate the standard algorithm alonside the new candidates.
 
 **minimum should match**
+
 ```
 {
   "query": {
     "multi_match" : {
       "type": "cross_fields",
       "query" : "oil painting of urine",
-      "fields" : ["*"], 
+      "fields" : ["*"],
       "minimum_should_match": "60%"
     }
   }
 }
 ```
+
 **boost**
+
 ```
 {
   "query": {
@@ -29,7 +34,9 @@ We'd like to test this on the live site with people outside Wellcome, possibly c
   }
 }
 ```
+
 **minimum should match + boost**
+
 ```
 {
   "query": {
@@ -44,4 +51,5 @@ We'd like to test this on the live site with people outside Wellcome, possibly c
 ```
 
 ## Results
+
 ## Conclusions

@@ -27,9 +27,9 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
                   {
                     "type": "Work",
                     "id": "${matchingWork.canonicalId}",
-                    "title": "${matchingWork.title}",
+                    "title": "${matchingWork.data.title.get}",
                     "alternativeTitles": [],
-                    "workType": ${workType(matchingWork.workType.get)}
+                    "workType": ${workType(matchingWork.data.workType.get)}
                   }
                 ]
               }
@@ -59,9 +59,9 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
                   {
                     "type": "Work",
                     "id": "${matchingWork.canonicalId}",
-                    "title": "${matchingWork.title}",
+                    "title": "${matchingWork.data.title.get}",
                     "alternativeTitles": [],
-                    "workType": ${workType(matchingWork.workType.get)}
+                    "workType": ${workType(matchingWork.data.workType.get)}
                   }
                 ]
               }
@@ -95,16 +95,16 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
                   {
                     "type": "Work",
                     "id": "${matchingWork1.canonicalId}",
-                    "title": "${matchingWork1.title}",
+                    "title": "${matchingWork1.data.title.get}",
                     "alternativeTitles": [],
-                    "workType": ${workType(matchingWork1.workType.get)}
+                    "workType": ${workType(matchingWork1.data.workType.get)}
                   },
                   {
                     "type": "Work",
                     "id": "${matchingWork2.canonicalId}",
-                    "title": "${matchingWork2.title}",
+                    "title": "${matchingWork2.data.title.get}",
                     "alternativeTitles": [],
-                    "workType": ${workType(matchingWork2.workType.get)}
+                    "workType": ${workType(matchingWork2.data.workType.get)}
                   }
                 ]
               }
@@ -149,16 +149,16 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
                   {
                     "type": "Work",
                     "id": "${matchingWork1.canonicalId}",
-                    "title": "${matchingWork1.title}",
+                    "title": "${matchingWork1.data.title.get}",
                     "alternativeTitles": [],
-                    "items": [${items(matchingWork1.items)}]
+                    "items": [${items(matchingWork1.data.items)}]
                   },
                   {
                     "type": "Work",
                     "id": "${matchingWork2.canonicalId}",
-                    "title": "${matchingWork2.title}",
+                    "title": "${matchingWork2.data.title.get}",
                     "alternativeTitles": [],
-                    "items": [${items(matchingWork2.items)}]
+                    "items": [${items(matchingWork2.data.items)}]
                   }
                 ]
               }
@@ -190,7 +190,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
                   {
                     "type": "Work",
                     "id": "${work2.canonicalId}",
-                    "title": "${work2.title}",
+                    "title": "${work2.data.title.get}",
                     "alternativeTitles": []
                   }
                 ]
@@ -214,13 +214,13 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
                   {
                     "type": "Work",
                     "id": "${work2.canonicalId}",
-                    "title": "${work2.title}",
+                    "title": "${work2.data.title.get}",
                     "alternativeTitles": []
                   },
                   {
                     "type": "Work",
                     "id": "${work3.canonicalId}",
-                    "title": "${work3.title}",
+                    "title": "${work3.data.title.get}",
                     "alternativeTitles": []
                   }
                 ]
@@ -244,13 +244,13 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
                   {
                     "type": "Work",
                     "id": "${work1.canonicalId}",
-                    "title": "${work1.title}",
+                    "title": "${work1.data.title.get}",
                     "alternativeTitles": []
                   },
                   {
                     "type": "Work",
                     "id": "${work2.canonicalId}",
-                    "title": "${work2.title}",
+                    "title": "${work2.data.title.get}",
                     "alternativeTitles": []
                   }
                 ]
@@ -284,11 +284,11 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
         case (indexV2, routes) =>
           val noWorkTypeWorks = (1 to 3).map { _ =>
             createIdentifiedWorkWith(
-              title = "Amazing aubergines",
+              title = Some("Amazing aubergines"),
               workType = None)
           }
           val matchingWork = createIdentifiedWorkWith(
-            title = "Amazing aubergines",
+            title = Some("Amazing aubergines"),
             workType = Some(WorkType(id = "b", label = "Books")))
 
           val works = noWorkTypeWorks :+ matchingWork
@@ -304,9 +304,9 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
                   {
                     "type": "Work",
                     "id": "${matchingWork.canonicalId}",
-                    "title": "${matchingWork.title}",
+                    "title": "${matchingWork.data.title.get}",
                     "alternativeTitles": [],
-                    "workType": ${workType(matchingWork.workType.get)}
+                    "workType": ${workType(matchingWork.data.workType.get)}
                   }
                 ]
               }
@@ -320,11 +320,11 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
         case (indexV2, routes) =>
           val wrongWorkTypeWorks = (1 to 3).map { _ =>
             createIdentifiedWorkWith(
-              title = "Bouncing bananas",
+              title = Some("Bouncing bananas"),
               workType = Some(WorkType(id = "m", label = "Manuscripts")))
           }
           val matchingWork = createIdentifiedWorkWith(
-            title = "Bouncing bananas",
+            title = Some("Bouncing bananas"),
             workType = Some(WorkType(id = "b", label = "Books")))
 
           val works = wrongWorkTypeWorks :+ matchingWork
@@ -340,9 +340,9 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
                   {
                     "type": "Work",
                     "id": "${matchingWork.canonicalId}",
-                    "title": "${matchingWork.title}",
+                    "title": "${matchingWork.data.title.get}",
                     "alternativeTitles": [],
-                    "workType": ${workType(matchingWork.workType.get)}
+                    "workType": ${workType(matchingWork.data.workType.get)}
                   }
                 ]
               }
@@ -356,16 +356,16 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
         case (indexV2, routes) =>
           val wrongWorkTypeWorks = (1 to 3).map { _ =>
             createIdentifiedWorkWith(
-              title = "Bouncing bananas",
+              title = Some("Bouncing bananas"),
               workType = Some(WorkType(id = "m", label = "Manuscripts")))
           }
           val matchingWork1 = createIdentifiedWorkWith(
             canonicalId = "001",
-            title = "Bouncing bananas",
+            title = Some("Bouncing bananas"),
             workType = Some(WorkType(id = "b", label = "Books")))
           val matchingWork2 = createIdentifiedWorkWith(
             canonicalId = "002",
-            title = "Bouncing bananas",
+            title = Some("Bouncing bananas"),
             workType = Some(WorkType(id = "a", label = "Archives")))
 
           val works = wrongWorkTypeWorks :+ matchingWork1 :+ matchingWork2
@@ -381,16 +381,16 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
                   {
                     "type": "Work",
                     "id": "${matchingWork1.canonicalId}",
-                    "title": "${matchingWork1.title}",
+                    "title": "${matchingWork1.data.title.get}",
                     "alternativeTitles": [],
-                    "workType": ${workType(matchingWork1.workType.get)}
+                    "workType": ${workType(matchingWork1.data.workType.get)}
                   },
                   {
                     "type": "Work",
                     "id": "${matchingWork2.canonicalId}",
-                    "title": "${matchingWork2.title}",
+                    "title": "${matchingWork2.data.title.get}",
                     "alternativeTitles": [],
-                    "workType": ${workType(matchingWork2.workType.get)}
+                    "workType": ${workType(matchingWork2.data.workType.get)}
                   }
                 ]
               }
@@ -405,14 +405,14 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
           val noItemWorks = createIdentifiedWorks(count = 3)
           val matchingWork1 = createIdentifiedWorkWith(
             canonicalId = "001",
-            title = "Crumbling carrots",
+            title = Some("Crumbling carrots"),
             items = List(
               createItemWithLocationType(LocationType("iiif-image"))
             )
           )
           val matchingWork2 = createIdentifiedWorkWith(
             canonicalId = "002",
-            title = "Crumbling carrots",
+            title = Some("Crumbling carrots"),
             items = List(
               createItemWithLocationType(LocationType("digit")),
               createItemWithLocationType(LocationType("dimgs"))
@@ -437,16 +437,16 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
                   {
                     "type": "Work",
                     "id": "${matchingWork1.canonicalId}",
-                    "title": "${matchingWork1.title}",
+                    "title": "${matchingWork1.data.title.get}",
                     "alternativeTitles": [],
-                    "items": [${items(matchingWork1.items)}]
+                    "items": [${items(matchingWork1.data.items)}]
                   },
                   {
                     "type": "Work",
                     "id": "${matchingWork2.canonicalId}",
-                    "title": "${matchingWork2.title}",
+                    "title": "${matchingWork2.data.title.get}",
                     "alternativeTitles": [],
-                    "items": [${items(matchingWork2.items)}]
+                    "items": [${items(matchingWork2.data.items)}]
                   }
                 ]
               }
@@ -460,15 +460,15 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
 
     val englishWork = createIdentifiedWorkWith(
       canonicalId = "1",
-      title = "Caterpiller",
+      title = Some("Caterpiller"),
       language = Some(Language("eng", "English"))
     )
     val germanWork = createIdentifiedWorkWith(
       canonicalId = "2",
-      title = "Ubergang",
+      title = Some("Ubergang"),
       language = Some(Language("ger", "German"))
     )
-    val noLanguageWork = createIdentifiedWorkWith(title = "£@@!&$")
+    val noLanguageWork = createIdentifiedWorkWith(title = Some("£@@!&$"))
     val works = List(englishWork, germanWork, noLanguageWork)
 
     it("filters by language") {
@@ -483,7 +483,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
                   {
                     "type": "Work",
                     "id": "${englishWork.canonicalId}",
-                    "title": "${englishWork.title}",
+                    "title": "${englishWork.data.title.get}",
                     "alternativeTitles": [],
                     "language": {
                       "id": "eng",
@@ -510,7 +510,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
                   {
                     "type": "Work",
                     "id": "${englishWork.canonicalId}",
-                    "title": "${englishWork.title}",
+                    "title": "${englishWork.data.title.get}",
                     "alternativeTitles": [],
                     "language": {
                       "id": "eng",
@@ -521,7 +521,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
                   {
                     "type": "Work",
                     "id": "${germanWork.canonicalId}",
-                    "title": "${germanWork.title}",
+                    "title": "${germanWork.data.title.get}",
                     "alternativeTitles": [],
                     "language": {
                       "id": "ger",
@@ -543,36 +543,26 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
     val romcom = createGenreWith("heartwarming stuff")
 
     val horrorWork = createIdentifiedWorkWith(
-      title = "horror",
+      title = Some("horror"),
       canonicalId = "1",
       genres = List(horror)
     )
     val romcomWork = createIdentifiedWorkWith(
-      title = "romcom",
+      title = Some("romcom"),
       canonicalId = "2",
       genres = List(romcom)
     )
     val romcomHorrorWork = createIdentifiedWorkWith(
-      title = "romcom horror",
+      title = Some("romcom horror"),
       canonicalId = "3",
       genres = List(romcom, horror)
     )
     val noGenreWork = createIdentifiedWorkWith(
-      title = "no genre",
+      title = Some("no genre"),
       canonicalId = "4"
     )
 
     val works = List(horrorWork, romcomWork, romcomHorrorWork, noGenreWork)
-
-    def workResponse(work: IdentifiedWork): String =
-      s"""
-        | {
-        |   "type": "Work",
-        |   "id": "${work.canonicalId}",
-        |   "title": "${work.title}",
-        |   "alternativeTitles": []
-        | }
-      """.stripMargin
 
     it("filters by genre with partial match") {
       withApi {
@@ -620,22 +610,22 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
     val paris = createSubjectWith("Paris")
 
     val nineteenthCenturyWork = createIdentifiedWorkWith(
-      title = "19th century",
+      title = Some("19th century"),
       canonicalId = "1",
       subjects = List(nineteenthCentury)
     )
     val parisWork = createIdentifiedWorkWith(
-      title = "paris",
+      title = Some("paris"),
       canonicalId = "2",
       subjects = List(paris)
     )
     val nineteenthCenturyParisWork = createIdentifiedWorkWith(
-      title = "19th century paris",
+      title = Some("19th century paris"),
       canonicalId = "3",
       subjects = List(nineteenthCentury, paris)
     )
     val noSubjectWork = createIdentifiedWorkWith(
-      title = "no subject",
+      title = Some("no subject"),
       canonicalId = "4"
     )
 
@@ -650,7 +640,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
         | {
         |   "type": "Work",
         |   "id": "${work.canonicalId}",
-        |   "title": "${work.title}",
+        |   "title": "${work.data.title.get}",
         |   "alternativeTitles": []
         | }
       """.stripMargin

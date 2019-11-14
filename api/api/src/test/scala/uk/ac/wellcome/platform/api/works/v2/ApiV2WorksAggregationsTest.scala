@@ -9,27 +9,27 @@ class ApiV2WorksAggregationsTest extends ApiV2WorksTestBase {
       case (indexV2, routes) =>
         val work1 = createIdentifiedWorkWith(
           canonicalId = "1",
-          title = "Working with wombats",
+          title = Some("Working with wombats"),
           workType = Some(WorkType("a", "Books"))
         )
         val work2 = createIdentifiedWorkWith(
           canonicalId = "2",
-          title = "Working with wombats",
+          title = Some("Working with wombats"),
           workType = Some(WorkType("a", "Books"))
         )
         val work3 = createIdentifiedWorkWith(
           canonicalId = "3",
-          title = "Working with wombats",
+          title = Some("Working with wombats"),
           workType = Some(WorkType("k", "Pictures"))
         )
         val work4 = createIdentifiedWorkWith(
           canonicalId = "4",
-          title = "Working with wombats",
+          title = Some("Working with wombats"),
           workType = Some(WorkType("k", "Pictures"))
         )
         val work5 = createIdentifiedWorkWith(
           canonicalId = "5",
-          title = "Working with wombats",
+          title = Some("Working with wombats"),
           workType = Some(WorkType("d", "Journals"))
         )
         insertIntoElasticsearch(indexV2, work1, work2, work3, work4, work5)
@@ -38,42 +38,48 @@ class ApiV2WorksAggregationsTest extends ApiV2WorksTestBase {
           Status.OK -> s"""
             {
               ${resultList(apiPrefix, totalResults = 5)},
-              "results": [],
               "aggregations": {
-              "type" : "Aggregations",
-               "workType": {
-                 "type" : "Aggregation",
-                 "buckets": [
-                   {
-                     "data" : {
-                       "id" : "a",
-                       "label" : "Books",
-                       "type" : "WorkType"
-                     },
-                     "count" : 2,
-                     "type" : "AggregationBucket"
-                   },
-                   {
-                     "data" : {
-                       "id" : "d",
-                       "label" : "Journals",
-                       "type" : "WorkType"
-                     },
-                     "count" : 1,
-                     "type" : "AggregationBucket"
-                   },
-                   {
-                     "data" : {
-                       "id" : "k",
-                       "label" : "Pictures",
-                       "type" : "WorkType"
-                     },
-                     "count" : 2,
-                     "type" : "AggregationBucket"
-                   }
-                 ]
-               }
-              }
+                "type" : "Aggregations",
+                "workType": {
+                  "type" : "Aggregation",
+                  "buckets": [
+                    {
+                      "data" : {
+                        "id" : "a",
+                        "label" : "Books",
+                        "type" : "WorkType"
+                      },
+                      "count" : 2,
+                      "type" : "AggregationBucket"
+                    },
+                    {
+                      "data" : {
+                        "id" : "d",
+                        "label" : "Journals",
+                        "type" : "WorkType"
+                      },
+                      "count" : 1,
+                      "type" : "AggregationBucket"
+                    },
+                    {
+                      "data" : {
+                        "id" : "k",
+                        "label" : "Pictures",
+                        "type" : "WorkType"
+                      },
+                      "count" : 2,
+                      "type" : "AggregationBucket"
+                    }
+                  ]
+                }
+              },
+              "results": [
+                ${workResponse(work1)},
+                ${workResponse(work2)},
+                ${workResponse(work3)},
+                ${workResponse(work4)},
+                ${workResponse(work5)}
+              ]
             }
           """
         }
@@ -100,7 +106,7 @@ class ApiV2WorksAggregationsTest extends ApiV2WorksTestBase {
 
         val work1 = createIdentifiedWorkWith(
           canonicalId = "1",
-          title = "Working with wombats",
+          title = Some("Working with wombats"),
           genres = List(genre)
         )
 
@@ -110,42 +116,42 @@ class ApiV2WorksAggregationsTest extends ApiV2WorksTestBase {
           Status.OK -> s"""
             {
               ${resultList(apiPrefix, totalResults = 1)},
-              "results": [],
               "aggregations": {
-              "type" : "Aggregations",
-               "genres": {
-                 "type" : "Aggregation",
-                 "buckets": [
-                   {
-                     "data" : {
-                       "label" : "conceptLabel",
-                       "concepts": [],
-                       "type" : "Genre"
-                     },
-                     "count" : 1,
-                     "type" : "AggregationBucket"
-                   },
-                          {
-                     "data" : {
-                       "label" : "periodLabel",
-                       "concepts": [],
-                       "type" : "Genre"
-                     },
-                     "count" : 1,
-                     "type" : "AggregationBucket"
-                   },
-                          {
-                     "data" : {
-                       "label" : "placeLabel",
-                       "concepts": [],
-                       "type" : "Genre"
-                     },
-                     "count" : 1,
-                     "type" : "AggregationBucket"
-                   }
-                 ]
-               }
-              }
+                "type" : "Aggregations",
+                "genres": {
+                  "type" : "Aggregation",
+                  "buckets": [
+                    {
+                      "data" : {
+                        "label" : "conceptLabel",
+                        "concepts": [],
+                        "type" : "Genre"
+                      },
+                      "count" : 1,
+                      "type" : "AggregationBucket"
+                    },
+                           {
+                      "data" : {
+                        "label" : "periodLabel",
+                        "concepts": [],
+                        "type" : "Genre"
+                      },
+                      "count" : 1,
+                      "type" : "AggregationBucket"
+                    },
+                           {
+                      "data" : {
+                        "label" : "placeLabel",
+                        "concepts": [],
+                        "type" : "Genre"
+                      },
+                      "count" : 1,
+                      "type" : "AggregationBucket"
+                    }
+                  ]
+                }
+              },
+              "results": [${workResponse(work1)}]
             }
           """
         }
@@ -157,38 +163,39 @@ class ApiV2WorksAggregationsTest extends ApiV2WorksTestBase {
       case (indexV2, routes) =>
         val works = List("1st May 1970", "1970", "1976", "1970-1979")
           .map(label => createDatedWork(dateLabel = label))
+          .sortBy(_.canonicalId)
         insertIntoElasticsearch(indexV2, works: _*)
         assertJsonResponse(
           routes,
           s"/$apiPrefix/works?aggregations=production.dates") {
           Status.OK -> s"""
             {
-             ${resultList(apiPrefix, totalResults = 4)},
-             "results": [],
-             "aggregations": {
-               "type" : "Aggregations",
-               "production.dates": {
-                 "type" : "Aggregation",
-                 "buckets": [
-                   {
-                     "data" : {
-                       "label": "1970",
-                       "type": "Period"
-                     },
-                     "count" : 3,
-                     "type" : "AggregationBucket"
-                   },
-                   {
-                     "data" : {
-                       "label": "1976",
-                       "type": "Period"
-                     },
-                     "count" : 1,
-                     "type" : "AggregationBucket"
-                   }
-                 ]
-               }
-             }
+              ${resultList(apiPrefix, totalResults = 4)},
+              "aggregations": {
+                "type" : "Aggregations",
+                "production.dates": {
+                  "type" : "Aggregation",
+                  "buckets": [
+                    {
+                      "data" : {
+                        "label": "1970",
+                        "type": "Period"
+                      },
+                      "count" : 3,
+                      "type" : "AggregationBucket"
+                    },
+                    {
+                      "data" : {
+                        "label": "1976",
+                        "type": "Period"
+                      },
+                      "count" : 1,
+                      "type" : "AggregationBucket"
+                    }
+                  ]
+                }
+              },
+              "results": [${works.map(workResponse).mkString(",")}]
             }
           """
         }
@@ -208,7 +215,7 @@ class ApiV2WorksAggregationsTest extends ApiV2WorksTestBase {
         language = Some(Language("ger", "German"))
       ),
       createIdentifiedWorkWith(language = None)
-    )
+    ).sortBy(_.canonicalId)
     withApi {
       case (indexV2, routes) =>
         insertIntoElasticsearch(indexV2, works: _*)
@@ -216,7 +223,6 @@ class ApiV2WorksAggregationsTest extends ApiV2WorksTestBase {
           Status.OK -> s"""
             {
               ${resultList(apiPrefix, totalResults = 4)},
-              "results": [],
               "aggregations": {
                 "type" : "Aggregations",
                 "language": {
@@ -242,14 +248,15 @@ class ApiV2WorksAggregationsTest extends ApiV2WorksTestBase {
                     }
                   ]
                 }
-              }
+              },
+              "results": [${works.map(workResponse).mkString(",")}]
             }
           """
         }
     }
   }
 
-  it("supports aggregating on subject") {
+  it("supports aggregating on subject, ordered by frequency") {
 
     val paeleoNeuroBiology = createSubjectWith(label = "paeleoNeuroBiology")
     val realAnalysis = createSubjectWith(label = "realAnalysis")
@@ -259,7 +266,7 @@ class ApiV2WorksAggregationsTest extends ApiV2WorksTestBase {
         subjects = List(paeleoNeuroBiology)
       ),
       createIdentifiedWorkWith(
-        subjects = List(paeleoNeuroBiology)
+        subjects = List(realAnalysis)
       ),
       createIdentifiedWorkWith(
         subjects = List(realAnalysis)
@@ -268,41 +275,41 @@ class ApiV2WorksAggregationsTest extends ApiV2WorksTestBase {
         subjects = List(paeleoNeuroBiology, realAnalysis)
       ),
       createIdentifiedWorkWith(subjects = Nil)
-    )
+    ).sortBy(_.canonicalId)
     withApi {
       case (indexV2, routes) =>
         insertIntoElasticsearch(indexV2, works: _*)
         assertJsonResponse(routes, s"/$apiPrefix/works?aggregations=subjects") {
           Status.OK -> s"""
             {
-             ${resultList(apiPrefix, totalResults = 5)},
-             "results": [],
-             "aggregations": {
-               "type" : "Aggregations",
-               "subjects": {
-                 "type" : "Aggregation",
-                 "buckets": [
-                   {
-                     "data" : {
-                       "label": "paeleoNeuroBiology",
-                       "concepts": [],
-                       "type": "Subject"
-                     },
-                     "count" : 3,
-                     "type" : "AggregationBucket"
-                   },
-                   {
-                     "data" : {
-                       "label": "realAnalysis",
-                       "concepts": [],
-                       "type": "Subject"
-                     },
-                     "count" : 2,
-                     "type" : "AggregationBucket"
-                   }
-                 ]
-               }
-             }
+              ${resultList(apiPrefix, totalResults = 5)},
+              "aggregations": {
+                "type" : "Aggregations",
+                "subjects": {
+                  "type" : "Aggregation",
+                  "buckets": [
+                    {
+                      "data" : {
+                        "label": "realAnalysis",
+                        "concepts": [],
+                        "type": "Subject"
+                      },
+                      "count" : 3,
+                      "type" : "AggregationBucket"
+                    },
+                    {
+                      "data" : {
+                        "label": "paeleoNeuroBiology",
+                        "concepts": [],
+                        "type": "Subject"
+                      },
+                      "count" : 2,
+                      "type" : "AggregationBucket"
+                    }
+                  ]
+                }
+              },
+              "results": [${works.map(workResponse).mkString(",")}]
             }
           """.stripMargin
         }

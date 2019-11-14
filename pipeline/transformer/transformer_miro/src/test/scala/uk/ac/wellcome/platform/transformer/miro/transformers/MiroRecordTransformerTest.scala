@@ -104,7 +104,7 @@ class MiroRecordTransformerTest
 
   it("has no description if no image_image_desc field is present") {
     val work = transformWork(createMiroRecord)
-    work.description shouldBe None
+    work.data.description shouldBe None
   }
 
   it("passes through the value of the description field") {
@@ -112,7 +112,7 @@ class MiroRecordTransformerTest
     val work = transformWork(
       createMiroRecordWith(description = Some(description))
     )
-    work.description shouldBe Some(description)
+    work.data.description shouldBe Some(description)
   }
 
   describe("Wellcome Images Awards metadata") {
@@ -125,7 +125,7 @@ class MiroRecordTransformerTest
           awardDate = List(None)
         )
       )
-      work.description shouldBe Some(description)
+      work.data.description shouldBe Some(description)
     }
 
     it("adds WIA metadata if present") {
@@ -137,7 +137,7 @@ class MiroRecordTransformerTest
           awardDate = List(Some("2001"))
         )
       )
-      work.description shouldBe Some(
+      work.data.description shouldBe Some(
         description + " Biomedical Image Awards 2001.")
     }
 
@@ -152,7 +152,7 @@ class MiroRecordTransformerTest
           awardDate = List(None, Some("2002"))
         )
       )
-      work.description shouldBe Some(
+      work.data.description shouldBe Some(
         description + " Biomedical Image Awards 2002.")
     }
 
@@ -166,7 +166,7 @@ class MiroRecordTransformerTest
           awardDate = List(Some("2015"), Some("2015"))
         )
       )
-      work.description shouldBe Some(
+      work.data.description shouldBe Some(
         description + " Wellcome Image Awards Overall Winner 2015.")
     }
   }
@@ -179,7 +179,7 @@ class MiroRecordTransformerTest
         imageNumber = "V1234567"
       )
     )
-    work.createdDate shouldBe Some(Period(date))
+    work.data.createdDate shouldBe Some(Period(date))
   }
 
   it("does not pass through the value of the creation date on non-V records") {
@@ -189,7 +189,7 @@ class MiroRecordTransformerTest
         imageNumber = "A1234567"
       )
     )
-    work.createdDate shouldBe None
+    work.data.createdDate shouldBe None
   }
 
   it("passes through the lettering field if available") {
@@ -199,7 +199,7 @@ class MiroRecordTransformerTest
         suppLettering = Some(lettering)
       )
     )
-    work.lettering shouldBe Some(lettering)
+    work.data.lettering shouldBe Some(lettering)
   }
 
   it("corrects HTML-encoded entities in the input JSON") {
@@ -210,8 +210,8 @@ class MiroRecordTransformerTest
       )
     )
 
-    work.title shouldBe "A café for cats"
-    work.contributors shouldBe List(
+    work.data.title shouldBe Some("A café for cats")
+    work.data.contributors shouldBe List(
       Contributor(agent = Unidentifiable(Agent("Gyokushō, a cät Ôwnêr")))
     )
   }
@@ -266,7 +266,7 @@ class MiroRecordTransformerTest
       credit = Some("Ezra Feilden"),
       locationType = LocationType("iiif-image")
     )
-    work.items.head.agent.locations shouldBe List(expectedDigitalLocation)
+    work.data.items.head.agent.locations shouldBe List(expectedDigitalLocation)
   }
 
   it("extracts both identifiable and unidentifiable items") {
@@ -279,13 +279,13 @@ class MiroRecordTransformerTest
       LocationType("iiif-image"),
       Some(License_CCBY),
       None)
-    work.items shouldBe List(Unidentifiable(Item(List(expectedLocation))))
+    work.data.items shouldBe List(Unidentifiable(Item(List(expectedLocation))))
   }
 
   it("sets the WorkType as 'Digital Images'") {
     val work = transformWork(createMiroRecord)
-    work.workType.isDefined shouldBe true
-    work.workType.get.label shouldBe "Digital Images"
+    work.data.workType.isDefined shouldBe true
+    work.data.workType.get.label shouldBe "Digital Images"
   }
 
   it("sets the thumbnail with the IIIF Image URL") {
@@ -294,7 +294,7 @@ class MiroRecordTransformerTest
       createMiroRecordWith(imageNumber = miroId)
     )
 
-    work.thumbnail shouldBe Some(
+    work.data.thumbnail shouldBe Some(
       DigitalLocation(
         url =
           s"https://iiif.wellcomecollection.org/image/$miroId.jpg/full/300,/0/default.jpg",
@@ -320,7 +320,8 @@ class MiroRecordTransformerTest
       sourceIdentifier = createMiroSourceIdentifierWith(
         value = miroRecord.imageNumber
       ),
-      version = 1
+      version = 1,
+      data = WorkData()
     )
   }
 

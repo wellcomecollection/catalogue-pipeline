@@ -14,7 +14,7 @@ case class DisplaySubject(
   @Schema(description = "A label given to a thing.") label: String,
   @Schema(description = "Relates a subject to a list of concepts.") concepts: List[
     DisplayAbstractRootConcept],
-  @JsonKey("type") ontologyType: String = "Subject"
+  @JsonKey("type") @Schema(name = "type") ontologyType: String = "Subject"
 )
 
 object DisplaySubject {

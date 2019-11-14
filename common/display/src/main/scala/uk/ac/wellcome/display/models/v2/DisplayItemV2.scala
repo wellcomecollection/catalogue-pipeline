@@ -22,8 +22,7 @@ case class DisplayItemV2(
   @Schema(
     description = "List of locations that provide access to the item"
   ) locations: List[DisplayLocationV2] = List(),
-  @Schema(readOnly = true, description = "A type of thing")
-  @JsonKey("type") ontologyType: String = "Item"
+  @JsonKey("type") @Schema(name = "type") ontologyType: String = "Item"
 )
 
 object DisplayItemV2 {

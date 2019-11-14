@@ -114,7 +114,7 @@ class SnapshotServiceTest
       case (snapshotService: SnapshotService, indexV2, publicBucket) =>
         val works = (1 to 11000).map { id =>
           createIdentifiedWorkWith(
-            title = randomAlphanumeric(length = 1500)
+            title = Some(randomAlphanumeric(length = 1500))
           )
         }
 

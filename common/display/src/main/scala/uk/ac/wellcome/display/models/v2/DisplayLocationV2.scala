@@ -11,7 +11,8 @@ import uk.ac.wellcome.models.work.internal.{
 @Schema(
   name = "Location",
   description = "A location that provides access to an item",
-  subTypes =
+  discriminatorProperty = "type",
+  allOf =
     Array(classOf[DisplayDigitalLocationV2], classOf[DisplayPhysicalLocationV2])
 )
 sealed trait DisplayLocationV2
@@ -53,8 +54,8 @@ case class DisplayDigitalLocationV2(
     description =
       "The specific license under which the work in question is released to the public - for example, one of the forms of Creative Commons - if it is a precise license to which a link can be made."
   ) license: Option[DisplayLicenseV2] = None,
-  @Schema(readOnly = true, description = "A type of thing")
-  @JsonKey("type") ontologyType: String = "DigitalLocation"
+  @JsonKey("type") @Schema(name = "type") ontologyType: String =
+    "DigitalLocation"
 ) extends DisplayLocationV2
 
 @Schema(
@@ -69,6 +70,6 @@ case class DisplayPhysicalLocationV2(
     `type` = "String",
     description = "The title or other short name of the location."
   ) label: String,
-  @Schema(readOnly = true, description = "A type of thing")
-  @JsonKey("type") ontologyType: String = "PhysicalLocation"
+  @JsonKey("type") @Schema(name = "type") ontologyType: String =
+    "PhysicalLocation"
 ) extends DisplayLocationV2

@@ -16,8 +16,8 @@ import uk.ac.wellcome.display.models.Implicits._
 import uk.ac.wellcome.display.json.DisplayJsonUtil._
 
 @Schema(
-  name = "AggregationMap",
-  description = "A map of the different aggregations on the ResultList."
+  name = "Aggregations",
+  description = "A map containing the requested aggregations."
 )
 case class DisplayAggregations(
   @Schema(
@@ -36,15 +36,23 @@ case class DisplayAggregations(
   @Schema(
     description = "Language aggregation on a set of results."
   ) language: Option[DisplayAggregation[DisplayLanguage]],
-  @JsonKey("type") ontologyType: String = "Aggregations"
+  @JsonKey("type") @Schema(name = "type") ontologyType: String = "Aggregations"
 )
 
+@Schema(
+  name = "Aggregation",
+  description = "An aggregation over the results."
+)
 case class DisplayAggregation[T](
   @Schema(description = "An aggregation on a set of results") buckets: List[
     DisplayAggregationBucket[T]],
-  @JsonKey("type") ontologyType: String = "Aggregation"
+  @JsonKey("type") @Schema(name = "type") ontologyType: String = "Aggregation"
 )
 
+@Schema(
+  name = "AggregationBucket",
+  description = "An individual bucket within an aggregation."
+)
 case class DisplayAggregationBucket[T](
   @Schema(
     description = "The data that this aggregation is of."
@@ -53,7 +61,8 @@ case class DisplayAggregationBucket[T](
     description =
       "The count of how often this data occurs in this set of results."
   ) count: Int,
-  @JsonKey("type") ontologyType: String = "AggregationBucket")
+  @JsonKey("type") @Schema(name = "type") ontologyType: String =
+    "AggregationBucket")
 
 object DisplayAggregations {
 

@@ -18,7 +18,7 @@ case class DisplayWorkV2(
   @Schema(
     description =
       "The title or other short label of a work, including labels not present in the actual work or item but applied by the cataloguer for the purposes of search or description."
-  ) title: String,
+  ) title: Option[String],
   @Schema(
     `type` = "List[String]",
     description = "Alternative titles of  the work."
@@ -90,38 +90,32 @@ case class DisplayWorkV2(
     `type` = "Integer",
     description = "The playing time for audiovisual works, in seconds."
   ) duration: Option[Int] = None,
-  @Schema(
-    readOnly = true,
-    description =
-      "A broad, top-level description of the form of a work: namely, whether it is a printed book, archive, painting, photograph, moving image, etc."
-  )
-  @JsonKey("type") ontologyType: String = "Work"
+  @JsonKey("type") @Schema(name = "type") ontologyType: String = "Work"
 ) extends DisplayWork
 
 case object DisplayWorkV2 {
 
-  def apply(work: IdentifiedWork, includes: V2WorksIncludes): DisplayWorkV2 = {
-
+  def apply(work: IdentifiedWork, includes: V2WorksIncludes): DisplayWorkV2 =
     DisplayWorkV2(
       id = work.canonicalId,
-      title = work.title,
-      alternativeTitles = work.alternativeTitles,
-      description = work.description,
-      physicalDescription = work.physicalDescription,
-      lettering = work.lettering,
-      createdDate = work.createdDate.map { DisplayPeriod(_) },
+      title = work.data.title,
+      alternativeTitles = work.data.alternativeTitles,
+      description = work.data.description,
+      physicalDescription = work.data.physicalDescription,
+      lettering = work.data.lettering,
+      createdDate = work.data.createdDate.map { DisplayPeriod(_) },
       contributors = if (includes.contributors) {
-        Some(work.contributors.map {
+        Some(work.data.contributors.map {
           DisplayContributor(_, includesIdentifiers = includes.identifiers)
         })
       } else None,
       subjects = if (includes.subjects) {
-        Some(work.subjects.map {
+        Some(work.data.subjects.map {
           DisplaySubject(_, includesIdentifiers = includes.identifiers)
         })
       } else None,
       genres = if (includes.genres) {
-        Some(work.genres.map {
+        Some(work.data.genres.map {
           DisplayGenre(_, includesIdentifiers = includes.identifiers)
         })
       } else None,
@@ -129,28 +123,27 @@ case object DisplayWorkV2 {
         if (includes.identifiers)
           Some(work.identifiers.map { DisplayIdentifierV2(_) })
         else None,
-      workType = work.workType.map { DisplayWorkType(_) },
-      thumbnail = work.thumbnail.map { DisplayLocationV2(_) },
+      workType = work.data.workType.map { DisplayWorkType(_) },
+      thumbnail = work.data.thumbnail.map { DisplayLocationV2(_) },
       items =
         if (includes.items)
-          Some(work.items.map {
+          Some(work.data.items.map {
             DisplayItemV2(_, includesIdentifiers = includes.identifiers)
           })
         else None,
       production =
-        if (includes.production) Some(work.production.map {
+        if (includes.production) Some(work.data.production.map {
           DisplayProductionEvent(_, includesIdentifiers = includes.identifiers)
         })
         else None,
-      language = work.language.map { DisplayLanguage(_) },
-      edition = work.edition,
+      language = work.data.language.map { DisplayLanguage(_) },
+      edition = work.data.edition,
       notes =
-        if (includes.notes && work.notes.nonEmpty)
-          Some(DisplayNote.merge(work.notes.map(DisplayNote(_))))
+        if (includes.notes)
+          Some(DisplayNote.merge(work.data.notes.map(DisplayNote(_))))
         else None,
-      duration = work.duration,
+      duration = work.data.duration,
     )
-  }
 
   def apply(work: IdentifiedWork): DisplayWorkV2 =
     DisplayWorkV2(work = work, includes = V2WorksIncludes())

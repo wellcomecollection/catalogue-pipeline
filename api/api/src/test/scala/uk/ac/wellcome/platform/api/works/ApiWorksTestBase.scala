@@ -10,7 +10,7 @@ import uk.ac.wellcome.models.work.generators.{
   SubjectGenerators,
   WorksGenerators
 }
-import uk.ac.wellcome.models.work.internal.IdentifiedWork
+import uk.ac.wellcome.models.work.internal.{IdentifiedWork, Language, WorkType}
 import uk.ac.wellcome.platform.api.fixtures.ApiFixture
 import uk.ac.wellcome.fixtures._
 
@@ -99,6 +99,36 @@ trait ApiWorksTestBase
       "label": "Gone",
       "description": "This work has been deleted"
     }"""
+
+  def workResponse(work: IdentifiedWork): String =
+    s"""
+      | {
+      |   "type": "Work",
+      |   "id": "${work.canonicalId}",
+      |   "title": "${work.data.title.get}",
+      |   ${work.data.workType.map(workTypeResponse).getOrElse("")}
+      |   ${work.data.language.map(languageResponse).getOrElse("")}
+      |   "alternativeTitles": []
+      | }
+    """.stripMargin
+
+  def workTypeResponse(workType: WorkType): String =
+    s"""
+      | "workType": {
+      |   "id": "${workType.id}",
+      |   "label": "${workType.label}",
+      |   "type": "WorkType"
+      | },
+    """.stripMargin
+
+  def languageResponse(language: Language): String =
+    s"""
+      | "language": {
+      |   "id": "${language.id}",
+      |   "label": "${language.label}",
+      |   "type": "Language"
+      | },
+    """.stripMargin
 
   def withEmptyIndex[R]: Fixture[Index, R] =
     fixture[Index, R](

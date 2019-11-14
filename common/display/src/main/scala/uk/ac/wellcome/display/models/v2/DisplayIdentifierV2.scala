@@ -13,8 +13,7 @@ case class DisplayIdentifierV2(
   @Schema(description =
     "Relates a Identifier to a particular authoritative source identifier scheme: for example, if the identifier is MS.49 this property might indicate that this identifier has its origins in the Wellcome Library's CALM archive management system.") identifierType: DisplayIdentifierType,
   @Schema(description = "The value of the thing. e.g. an identifier") value: String,
-  @Schema(readOnly = true, description = "A type of thing")
-  @JsonKey("type") ontologyType: String = "Identifier"
+  @JsonKey("type") @Schema(name = "type") ontologyType: String = "Identifier"
 )
 
 object DisplayIdentifierV2 {

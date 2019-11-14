@@ -69,18 +69,20 @@ class SnapshotGeneratorFeatureTest
             readGzipFile(downloadFile.getPath).split("\n").toList
 
           val expectedJsonLines = works.sortBy { _.canonicalId }.map { work =>
-            s"""{
-                 |  "id": "${work.canonicalId}",
-                 |  "title": "${work.title}",
-                 |  "identifiers": [ ${identifier(work.sourceIdentifier)} ],
-                 |  "contributors": [ ],
-                 |  "genres": [ ],
-                 |  "subjects": [ ],
-                 |  "items": [ ],
-                 |  "production": [ ],
-                 |  "alternativeTitles": [ ],
-                 |  "type": "Work"
-                   }""".stripMargin
+            s"""
+              |{
+              |  "id": "${work.canonicalId}",
+              |  "title": "${work.data.title.get}",
+              |  "identifiers": [ ${identifier(work.sourceIdentifier)} ],
+              |  "contributors": [ ],
+              |  "genres": [ ],
+              |  "subjects": [ ],
+              |  "items": [ ],
+              |  "production": [ ],
+              |  "alternativeTitles": [ ],
+              |  "notes": [ ],
+              |  "type": "Work"
+              |}""".stripMargin
           }
 
           actualJsonLines.sorted.zip(expectedJsonLines).foreach {

@@ -1,0 +1,30 @@
+{
+  "id": "8947cdc0-ab50-4059-90c7-d6dc76f1c44e",
+  "request": {
+    "url": "/storage/v1/bags/digitised/b30246039",
+    "method": "GET",
+    "headers": {
+      "Authorization": {
+        "doesNotMatch": "Bearer token"
+      }
+    }
+  },
+  "response": {
+    "status": 401,
+    "bodyFileName": "unauthorized.json",
+    "headers": {
+      "Content-Type": "application/json",
+      "Connection": "keep-alive",
+      "Date": "Tue, 29 Oct 2019 14:51:41 GMT",
+      "x-amzn-RequestId": "647ce3cd-27d6-4f70-ad9e-0a377d863cb2",
+      "x-amzn-ErrorType": "UnauthorizedException",
+      "x-amz-apigw-id": "CVG_qEaqDoEFhbw=",
+      "X-Cache": "Error from cloudfront",
+      "Via": "1.1 40dd67e1de4ae20a5a592aa54489b7f0.cloudfront.net (CloudFront)",
+      "X-Amz-Cf-Pop": "LHR61-C1",
+      "X-Amz-Cf-Id": "lNKvmKTO6Bq94csqJyqE5JnktKIvvQkXtYC_9e9z343BbNL0f0NioA=="
+    }
+  },
+  "uuid": "8947cdc0-ab50-4059-90c7-d6dc76f1c44e",
+  "persistent": true
+}

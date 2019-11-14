@@ -1,5 +1,5 @@
 module "bibs_window_generator" {
-  source = "sierra_window_generator"
+  source = "./sierra_window_generator"
 
   resource_type = "bibs"
 
@@ -11,7 +11,7 @@ module "bibs_window_generator" {
 }
 
 module "bibs_reader" {
-  source = "sierra_reader"
+  source = "./sierra_reader"
 
   resource_type = "bibs"
 
@@ -42,7 +42,7 @@ module "bibs_reader" {
 }
 
 module "bibs_merger" {
-  source = "bib_merger"
+  source = "./bib_merger"
 
   resource_type = "bibs"
 

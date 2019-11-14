@@ -12,9 +12,13 @@ import uk.ac.wellcome.models.work.internal._
 case class DisplayNote(
   @Schema(description = "The note contents.") contents: List[String],
   @Schema(description = "The type of note.") noteType: DisplayNoteType,
-  @JsonKey("type") ontologyType: String = "Note"
+  @JsonKey("type") @Schema(name = "type") ontologyType: String = "Note"
 )
 
+@Schema(
+  name = "NoteType",
+  description = "Indicates the type of note associated with the work."
+)
 case class DisplayNoteType(
   @Schema(
     `type` = "String"
@@ -22,7 +26,7 @@ case class DisplayNoteType(
   @Schema(
     `type` = "String"
   ) label: String,
-  @JsonKey("type") ontologyType: String = "NoteType"
+  @JsonKey("type") @Schema(name = "type") ontologyType: String = "NoteType"
 )
 
 object DisplayNote {

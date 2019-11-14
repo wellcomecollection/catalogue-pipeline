@@ -15,6 +15,15 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
       )
     )
 
+  def createUnidentifiedRedirectedWork(
+    source: UnidentifiedWork,
+    target: UnidentifiedWork): UnidentifiedRedirectedWork =
+    UnidentifiedRedirectedWork(
+      sourceIdentifier = source.sourceIdentifier,
+      version = source.version,
+      redirect = IdentifiableRedirect(target.sourceIdentifier)
+    )
+
   def createUnidentifiedRedirectedWorkWith(
     redirect: IdentifiableRedirect): UnidentifiedRedirectedWork =
     UnidentifiedRedirectedWork(
@@ -45,6 +54,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
   ): UnidentifiedInvisibleWork =
     UnidentifiedInvisibleWork(
       sourceIdentifier = sourceIdentifier,
+      data = WorkData(),
       version = 1
     )
 
@@ -59,7 +69,8 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     IdentifiedInvisibleWork(
       sourceIdentifier = sourceIdentifier,
       version = version,
-      canonicalId = canonicalId
+      canonicalId = canonicalId,
+      data = WorkData()
     )
 
   def createIdentifiedInvisibleWork: IdentifiedInvisibleWork =
@@ -73,7 +84,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
   def createUnidentifiedWorkWith(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     version: Int = 1,
-    title: String = createTitle,
+    title: Option[String] = Some(createTitle),
     alternativeTitles: List[String] = Nil,
     otherIdentifiers: List[SourceIdentifier] = List(),
     mergeCandidates: List[MergeCandidate] = List(),
@@ -86,30 +97,26 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     notes: List[Note] = Nil,
     edition: Option[String] = None,
     duration: Option[Int] = None,
-    items: List[MaybeDisplayable[Item]] = List(),
-  ): UnidentifiedWork =
+    items: List[MaybeDisplayable[Item]] = List()): UnidentifiedWork =
     UnidentifiedWork(
       sourceIdentifier = sourceIdentifier,
-      otherIdentifiers = otherIdentifiers,
-      mergeCandidates = mergeCandidates,
-      title = title,
-      alternativeTitles = alternativeTitles,
-      workType = workType,
-      description = description,
-      physicalDescription = None,
-      lettering = lettering,
-      createdDate = None,
-      subjects = List(),
-      genres = List(),
-      contributors = contributors,
-      thumbnail = thumbnail,
-      production = production,
-      language = None,
-      edition = edition,
-      notes = notes,
-      duration = duration,
-      items = items,
-      version = version
+      version = version,
+      data = WorkData(
+        otherIdentifiers = otherIdentifiers,
+        mergeCandidates = mergeCandidates,
+        title = title,
+        alternativeTitles = alternativeTitles,
+        workType = workType,
+        description = description,
+        lettering = lettering,
+        contributors = contributors,
+        thumbnail = thumbnail,
+        production = production,
+        edition = edition,
+        notes = notes,
+        duration = duration,
+        items = items,
+      )
     )
 
   def createUnidentifiedWork: UnidentifiedWork = createUnidentifiedWorkWith()
@@ -123,7 +130,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     canonicalId: String = createCanonicalId,
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     otherIdentifiers: List[SourceIdentifier] = List(),
-    title: String = createTitle,
+    title: Option[String] = Some(createTitle),
     alternativeTitles: List[String] = Nil,
     workType: Option[WorkType] = None,
     description: Option[String] = None,
@@ -147,27 +154,29 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     IdentifiedWork(
       canonicalId = canonicalId,
       sourceIdentifier = sourceIdentifier,
-      otherIdentifiers = otherIdentifiers,
-      mergeCandidates = List(),
-      title = title,
-      alternativeTitles = alternativeTitles,
-      workType = workType,
-      description = description,
-      physicalDescription = physicalDescription,
-      lettering = lettering,
-      createdDate = createdDate,
-      subjects = subjects,
-      genres = genres,
-      contributors = contributors,
-      thumbnail = thumbnail,
-      production = production,
-      language = language,
-      edition = edition,
-      notes = notes,
-      duration = duration,
-      items = items,
       version = version,
-      merged = merged
+      data = WorkData(
+        otherIdentifiers = otherIdentifiers,
+        mergeCandidates = List(),
+        title = title,
+        alternativeTitles = alternativeTitles,
+        workType = workType,
+        description = description,
+        physicalDescription = physicalDescription,
+        lettering = lettering,
+        createdDate = createdDate,
+        subjects = subjects,
+        genres = genres,
+        contributors = contributors,
+        thumbnail = thumbnail,
+        production = production,
+        language = language,
+        edition = edition,
+        notes = notes,
+        duration = duration,
+        items = items,
+        merged = merged
+      )
     )
 
   def createIdentifiedWork: IdentifiedWork = createIdentifiedWorkWith()

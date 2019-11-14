@@ -1,17 +1,13 @@
 package uk.ac.wellcome.platform.ingestor.services
 
-import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.ElasticDsl.{intField, keywordField, objectField}
+import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.requests.mappings.FieldDefinition
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Assertion, FunSpec, Matchers}
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.models.work.internal.{
-  IdentifiedBaseWork,
-  Subject,
-  Unidentifiable
-}
+import uk.ac.wellcome.models.work.internal.IdentifiedBaseWork
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -74,7 +70,9 @@ class WorkIndexerTest
 
   it("replaces a Work with the same version") {
     val work = createIdentifiedWorkWith(version = 3)
-    val updatedWork = work.copy(title = "a different title")
+    val updatedWork = work.copy(
+      data = work.data.copy(title = Some("a different title"))
+    )
 
     withLocalWorksIndex { index =>
       val future = ingestWorkPairInOrder(
@@ -94,7 +92,7 @@ class WorkIndexerTest
     it(
       "doesn't override a merged Work with same version but merged flag = false") {
       val mergedWork = createIdentifiedWorkWith(version = 3, merged = true)
-      val unmergedWork = mergedWork.copy(merged = false)
+      val unmergedWork = mergedWork.withData(_.copy(merged = false))
 
       withLocalWorksIndex { index =>
         val unmergedWorkInsertFuture = ingestWorkPairInOrder(
@@ -114,7 +112,9 @@ class WorkIndexerTest
 
     it("doesn't overwrite a Work with lower version and merged = true") {
       val unmergedNewWork = createIdentifiedWorkWith(version = 4)
-      val mergedOldWork = unmergedNewWork.copy(version = 3, merged = true)
+      val mergedOldWork = unmergedNewWork
+        .copy(version = 3)
+        .withData(_.copy(merged = true))
 
       withLocalWorksIndex { index =>
         val mergedWorkInsertFuture = ingestWorkPairInOrder(
@@ -212,7 +212,7 @@ class WorkIndexerTest
     }
   }
 
-  object OnlyInvisibleWorksIndex {
+  object WorksWIthNoEditionIndex {
     def sourceIdentifierFields = Seq(
       keywordField("ontologyType"),
       objectField("identifierType").fields(
@@ -229,24 +229,32 @@ class WorkIndexerTest
         intField("version"),
         objectField("sourceIdentifier")
           .fields(sourceIdentifierFields),
-        keywordField("type")
+        keywordField("type"),
+        objectField("data").fields(
+          keywordField("otherIdentifiers"),
+          keywordField("mergeCandidates"),
+          keywordField("alternativeTitles"),
+          keywordField("subjects"),
+          keywordField("genres"),
+          keywordField("contributors"),
+          keywordField("production"),
+          keywordField("notes"),
+          keywordField("items"),
+          keywordField("merged")
+        )
       )
   }
 
   it("returns a list of Works that weren't indexed correctly") {
     val validWorks = createIdentifiedInvisibleWorks(count = 5)
     val notMatchingMappingWork = createIdentifiedWorkWith(
-      subjects = List(
-        Unidentifiable(
-          Subject(label = "crystallography", concepts = Nil)
-        )
-      )
+      edition = Some("An edition")
     )
 
     val works = validWorks :+ notMatchingMappingWork
 
     withLocalElasticsearchIndex(
-      fields = OnlyInvisibleWorksIndex.rootIndexFields) { index =>
+      fields = WorksWIthNoEditionIndex.rootIndexFields) { index =>
       val future = workIndexer.indexWorks(
         works = works,
         index = index

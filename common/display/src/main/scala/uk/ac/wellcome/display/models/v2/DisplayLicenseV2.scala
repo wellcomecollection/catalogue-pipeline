@@ -21,8 +21,7 @@ case class DisplayLicenseV2(
   @Schema(
     description = "URL to the full text of a license"
   ) url: Option[String],
-  @Schema(readOnly = true, description = "A type of thing")
-  @JsonKey("type") ontologyType: String = "License"
+  @JsonKey("type") @Schema(name = "type") ontologyType: String = "License"
 )
 
 case object DisplayLicenseV2 {

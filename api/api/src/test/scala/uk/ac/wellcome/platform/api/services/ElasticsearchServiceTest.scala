@@ -48,15 +48,15 @@ class ElasticsearchServiceTest
     it("filters search results by workType") {
       withLocalWorksIndex { index =>
         val workWithCorrectWorkType = createIdentifiedWorkWith(
-          title = "Animated artichokes",
+          title = Some("Animated artichokes"),
           workType = Some(WorkType(id = "b", label = "Books"))
         )
         val workWithWrongTitle = createIdentifiedWorkWith(
-          title = "Bouncing bananas",
+          title = Some("Bouncing bananas"),
           workType = Some(WorkType(id = "b", label = "Books"))
         )
         val workWithWrongWorkType = createIdentifiedWorkWith(
-          title = "Animated artichokes",
+          title = Some("Animated artichokes"),
           workType = Some(WorkType(id = "m", label = "Manuscripts"))
         )
 
@@ -70,7 +70,7 @@ class ElasticsearchServiceTest
           index = index,
           workQuery = WorkQuery("artichokes", MSMBoostQuery),
           queryOptions = createElasticsearchQueryOptionsWith(
-            filters = List(WorkTypeFilter("b"))
+            filters = List(WorkTypeFilter(Seq("b")))
           ),
           expectedWorks = List(workWithCorrectWorkType)
         )
@@ -80,19 +80,19 @@ class ElasticsearchServiceTest
     it("filters search results with multiple workTypes") {
       withLocalWorksIndex { index =>
         val work1 = createIdentifiedWorkWith(
-          title = "Animated artichokes",
+          title = Some("Animated artichokes"),
           workType = Some(WorkType(id = "b", label = "Books"))
         )
         val workWithWrongTitle = createIdentifiedWorkWith(
-          title = "Bouncing bananas",
+          title = Some("Bouncing bananas"),
           workType = Some(WorkType(id = "b", label = "Books"))
         )
         val work2 = createIdentifiedWorkWith(
-          title = "Animated artichokes",
+          title = Some("Animated artichokes"),
           workType = Some(WorkType(id = "m", label = "Manuscripts"))
         )
         val workWithWrongType = createIdentifiedWorkWith(
-          title = "Animated artichokes",
+          title = Some("Animated artichokes"),
           workType = Some(WorkType(id = "a", label = "Archives"))
         )
 
@@ -117,7 +117,7 @@ class ElasticsearchServiceTest
     it("filters results by item locationType") {
       withLocalWorksIndex { index =>
         val work = createIdentifiedWorkWith(
-          title = "Tumbling tangerines",
+          title = Some("Tumbling tangerines"),
           items = List(
             createItemWithLocationType(LocationType("iiif-image")),
             createItemWithLocationType(LocationType("acqi"))
@@ -125,7 +125,7 @@ class ElasticsearchServiceTest
         )
 
         val notMatchingWork = createIdentifiedWorkWith(
-          title = "Tumbling tangerines",
+          title = Some("Tumbling tangerines"),
           items = List(
             createItemWithLocationType(LocationType("acqi"))
           )
@@ -137,7 +137,7 @@ class ElasticsearchServiceTest
           index = index,
           workQuery = WorkQuery("tangerines", MSMBoostQuery),
           queryOptions = createElasticsearchQueryOptionsWith(
-            filters = List(ItemLocationTypeFilter("iiif-image"))
+            filters = List(ItemLocationTypeFilter(Seq("iiif-image")))
           ),
           expectedWorks = List(work)
         )
@@ -147,7 +147,7 @@ class ElasticsearchServiceTest
     it("filters results by multiple item locationTypes") {
       withLocalWorksIndex { index =>
         val work = createIdentifiedWorkWith(
-          title = "Tumbling tangerines",
+          title = Some("Tumbling tangerines"),
           items = List(
             createItemWithLocationType(LocationType("iiif-image")),
             createItemWithLocationType(LocationType("acqi"))
@@ -155,14 +155,14 @@ class ElasticsearchServiceTest
         )
 
         val notMatchingWork = createIdentifiedWorkWith(
-          title = "Tumbling tangerines",
+          title = Some("Tumbling tangerines"),
           items = List(
             createItemWithLocationType(LocationType("acqi"))
           )
         )
 
         val work2 = createIdentifiedWorkWith(
-          title = "Tumbling tangerines",
+          title = Some("Tumbling tangerines"),
           items = List(
             createItemWithLocationType(LocationType("digit"))
           )
@@ -193,7 +193,7 @@ class ElasticsearchServiceTest
         // ID order when we search for "A".
         val works = (1 to 5)
           .map { _ =>
-            createIdentifiedWorkWith(title = title)
+            createIdentifiedWorkWith(title = Some(title))
           }
           .sortBy(_.canonicalId)
 
@@ -370,7 +370,7 @@ class ElasticsearchServiceTest
 
   describe("searches using Selectable queries") {
     val noMatch =
-      createIdentifiedWorkWith(title = "Before a Bengal")
+      createIdentifiedWorkWith(title = Some("Before a Bengal"))
 
     it("finds results for a MSMBoostQuery search") {
       withLocalWorksIndex { index =>
@@ -378,15 +378,15 @@ class ElasticsearchServiceTest
         val matchingTitle100 =
           createIdentifiedWorkWith(
             canonicalId = "matchingTitle100",
-            title = "Title text that contains Aegean")
+            title = Some("Title text that contains Aegean"))
         val matchingTitle75 =
           createIdentifiedWorkWith(
             canonicalId = "matchingTitle75",
-            title = "Title text that contains")
+            title = Some("Title text that contains"))
         val matchingTitle25 =
           createIdentifiedWorkWith(
             canonicalId = "matchingTitle25",
-            title = "Title text")
+            title = Some("Title text"))
 
         val matchingSubject100 =
           createIdentifiedWorkWith(
@@ -487,7 +487,7 @@ class ElasticsearchServiceTest
         // Longer text used to ensure signal in TF/IDF
         val withNotes =
           createIdentifiedWorkWith(
-            title = "Mermaids and Marmite",
+            title = Some("Mermaids and Marmite"),
             notes = List(GeneralNote("Aegean"), GeneralNote("Holiday snaps")))
 
         insertIntoElasticsearch(index, withNotes)
@@ -510,7 +510,7 @@ class ElasticsearchServiceTest
           "Petite Pomegranate",
           "Placid Pomegranate"
         ).map { t =>
-          createIdentifiedWorkWith(title = t)
+          createIdentifiedWorkWith(title = Some(t))
         }
 
         insertIntoElasticsearch(index, works: _*)
@@ -533,7 +533,7 @@ class ElasticsearchServiceTest
           "Lyrical Lime",
           "Loose Lime"
         ).map { t =>
-          createIdentifiedWorkWith(title = t)
+          createIdentifiedWorkWith(title = Some(t))
         }
 
         insertIntoElasticsearch(index, works: _*)
@@ -708,7 +708,7 @@ class ElasticsearchServiceTest
         insertIntoElasticsearch(index, work1, work2, workWithWrongWorkType)
 
         val queryOptions = createElasticsearchQueryOptionsWith(
-          filters = List(WorkTypeFilter("b"))
+          filters = List(WorkTypeFilter(Seq("b")))
         )
 
         assertListResultsAreCorrect(

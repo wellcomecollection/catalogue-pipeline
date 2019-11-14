@@ -8,9 +8,8 @@ import org.mockito.Matchers.any
 import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.{EitherValues, FunSpec, Matchers}
 import org.scanamo.syntax._
-
 import uk.ac.wellcome.models.matcher.{
   MatchedIdentifiers,
   MatcherResult,
@@ -31,7 +30,8 @@ class WorkMatcherTest
     with MatcherFixtures
     with ScalaFutures
     with MockitoSugar
-    with WorksGenerators {
+    with WorksGenerators
+    with EitherValues {
 
   private val identifierA = createSierraSystemSourceIdentifierWith(value = "A")
   private val identifierB = createSierraSystemSourceIdentifierWith(value = "B")
@@ -53,7 +53,7 @@ class WorkMatcherTest
 
               val savedLinkedWork =
                 get[WorkNode](dynamoClient, graphTable.name)('id -> workId)
-                  .map(_.right.get)
+                  .map(_.right.value)
 
               savedLinkedWork shouldBe Some(
                 WorkNode(workId, 1, Nil, ciHash(workId)))
@@ -64,7 +64,7 @@ class WorkMatcherTest
     }
   }
 
-  it("doesn't store an invisible work and sends the work id") {
+  it("stores an invisible work and sends the work id") {
     withLockTable { lockTable =>
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
@@ -75,7 +75,9 @@ class WorkMatcherTest
               matcherResult shouldBe
                 MatcherResult(
                   Set(MatchedIdentifiers(Set(WorkIdentifier(workId, 1)))))
-              get[WorkNode](dynamoClient, graphTable.name)('id -> workId) shouldBe None
+              get[WorkNode](dynamoClient, graphTable.name)('id -> workId)
+                .map(_.right.get) shouldBe Some(
+                WorkNode(workId, 1, Nil, ciHash(workId)))
             }
           }
         }

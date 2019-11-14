@@ -17,29 +17,29 @@ case class WorkQuery(queryString: String, queryType: WorkQueryType) {
 
   val defaultMSM = "60%"
   val defaultBoostedFields: Seq[(String, Option[Double])] = Seq(
-    ("title", Some(9.0)),
+    ("data.title", Some(9.0)),
     // Because subjects and genres have been indexed differently
     // We need to query them slightly differently
     // TODO: (jamesgorrie) think of a more sustainable way of doing this
     // maybe having a just a list of terms that we use terms queries to query against,
     // and then have more structured data underlying
-    ("subjects.*", Some(8.0)),
-    ("genres.label", Some(8.0)),
-    ("description", Some(3.0)),
-    ("contributors.*", Some(2.0)),
-    ("alternativeTitles", None),
-    ("physicalDescription", None),
-    ("lettering", None),
-    ("production.*.label", None),
-    ("language.label", None),
-    ("edition", None),
+    ("data.subjects.*", Some(8.0)),
+    ("data.genres.label", Some(8.0)),
+    ("data.description", Some(3.0)),
+    ("data.contributors.*", Some(2.0)),
+    ("data.alternativeTitles", None),
+    ("data.physicalDescription", None),
+    ("data.lettering", None),
+    ("data.production.*.label", None),
+    ("data.language.label", None),
+    ("data.edition", None),
     // Identifiers
     ("canonicalId", None),
     ("sourceIdentifier.value", None),
-    ("otherIdentifiers.value", None),
-    ("items.canonicalId", None),
-    ("items.sourceIdentifier.value", None),
-    ("items.otherIdentifiers.value", None),
+    ("data.otherIdentifiers.value", None),
+    ("data.items.canonicalId", None),
+    ("data.items.sourceIdentifier.value", None),
+    ("data.items.otherIdentifiers.value", None),
   )
 
   import WorkQueryType._
@@ -61,7 +61,7 @@ case class WorkQuery(queryString: String, queryType: WorkQueryType) {
       case MSMBoostQueryUsingAndOperator =>
         SimpleStringQuery(
           queryString,
-          fields = defaultBoostedFields :+ (("notes.content", None)),
+          fields = defaultBoostedFields,
           lenient = Some(true),
           minimumShouldMatch = Some(defaultMSM),
           operator = Some("AND"),

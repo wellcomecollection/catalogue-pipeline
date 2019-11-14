@@ -1,5 +1,5 @@
 module "catalogue_api_prod" {
-  source = "catalogue_api"
+  source = "./catalogue_api"
 
   environment           = "${local.prod_name}"
   api_container_image   = "${module.prod_images.services["api"]}"
@@ -24,7 +24,7 @@ module "catalogue_api_prod" {
 }
 
 module "catalogue_api_staging" {
-  source = "catalogue_api"
+  source = "./catalogue_api"
 
   environment           = "${local.staging_name}"
   api_container_image   = "${module.staging_images.services["api"]}"
@@ -49,7 +49,7 @@ module "catalogue_api_staging" {
 }
 
 module "data_api" {
-  source = "data_api"
+  source = "./data_api"
 
   aws_region   = "${var.aws_region}"
   infra_bucket = "${local.infra_bucket}"
@@ -72,7 +72,7 @@ module "data_api" {
 }
 
 module "api_docs" {
-  source = "api_docs"
+  source = "./api_docs"
 
   update_api_docs_release_uri = "${module.latest_images.services["update_api_docs"]}"
 }

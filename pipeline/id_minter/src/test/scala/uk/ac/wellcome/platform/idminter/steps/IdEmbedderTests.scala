@@ -61,7 +61,7 @@ class IdEmbedderTests
 
         val expectedWork = createIdentifiedWorkWith(
           canonicalId = newCanonicalId,
-          title = originalWork.title,
+          title = originalWork.data.title,
           sourceIdentifier = originalWork.sourceIdentifier,
           version = originalWork.version
         )
@@ -116,7 +116,7 @@ class IdEmbedderTests
 
         val expectedWork = createIdentifiedWorkWith(
           canonicalId = newWorkCanonicalId,
-          title = originalWork.title,
+          title = originalWork.data.title,
           sourceIdentifier = originalWork.sourceIdentifier,
           contributors = List(
             Contributor(
@@ -216,8 +216,8 @@ class IdEmbedderTests
         whenReady(eventualWork) { json =>
           val work = fromJson[IdentifiedWork](json.toString()).get
 
-          val actualItem1 = work.items.head
-          val actualItem2 = work.items.tail.head
+          val actualItem1 = work.data.items.head
+          val actualItem2 = work.data.items.tail.head
 
           assertJsonStringsAreEqual(
             toJson(actualItem1).get,

@@ -28,7 +28,8 @@ object Aggregations extends Logging {
               workType = getAggregation[WorkType](esAggs.workType),
               genres = getAggregation[Genre[Displayable[AbstractConcept]]](
                 esAggs.genres),
-              productionDates = getAggregation[Period](esAggs.productionDates),
+              productionDates = getAggregation[Period](esAggs.productionDates)
+                .map(DateAggregationMerger(_)),
               language = getAggregation[Language](esAggs.language),
               subjects =
                 getAggregation[Subject[Displayable[AbstractRootConcept]]](

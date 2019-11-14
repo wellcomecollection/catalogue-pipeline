@@ -1,5 +1,5 @@
 module "service" {
-  source = "service"
+  source = "./service"
 
   namespace    = "${var.namespace}-${var.environment}"
   namespace_id = "${aws_service_discovery_private_dns_namespace.namespace.id}"

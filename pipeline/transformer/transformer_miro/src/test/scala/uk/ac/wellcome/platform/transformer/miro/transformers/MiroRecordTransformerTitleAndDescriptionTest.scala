@@ -140,7 +140,7 @@ class MiroRecordTransformerTitleAndDescriptionTest
   ): Assertion = {
     val transformedWork = transformWork(miroRecord)
 
-    transformedWork.title shouldBe expectedTitle
-    transformedWork.description shouldBe expectedDescription
+    transformedWork.data.title shouldBe Some(expectedTitle)
+    transformedWork.data.description shouldBe expectedDescription
   }
 }

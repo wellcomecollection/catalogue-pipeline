@@ -54,14 +54,18 @@ class MergerRuleTest extends FunSpec with WorksGenerators with Matchers {
       override protected def mergeAndRedirectWorkPair(
         firstWork: UnidentifiedWork,
         secondWork: UnidentifiedWork): Option[MergedWork] =
-        Some(MergedWork(
-          firstWork,
-          UnidentifiedRedirectedWork(source = secondWork, target = firstWork)))
+        Some(
+          MergedWork(
+            firstWork,
+            createUnidentifiedRedirectedWork(secondWork, firstWork)
+          )
+        )
     }
 
     val works = createUnidentifiedWorks(5)
 
-    val expectedMergedWork = works.head.copy(merged = true)
+    val expectedMergedWork =
+      works.head.withData(data => data.copy(merged = true))
     val expectedRedirectedWork = UnidentifiedRedirectedWork(
       version = 1,
       sourceIdentifier = works.tail.head.sourceIdentifier,

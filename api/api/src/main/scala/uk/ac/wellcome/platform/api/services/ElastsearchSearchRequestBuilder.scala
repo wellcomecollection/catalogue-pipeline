@@ -29,59 +29,68 @@ case class ElastsearchSearchRequestBuilder(
     .aggs { aggregations }
     .query { filteredQuery }
     .sortBy { sort ++ sortDefinitions }
-    .limit { if (aggregations.nonEmpty) 0 else queryOptions.limit }
+    .limit { queryOptions.limit }
     .from { queryOptions.from }
 
   lazy val aggregations = queryOptions.aggregations.map {
     case AggregationRequest.WorkType =>
-      CompositeAggregation("workType").sources(
-        List(
-          TermsValueSource("label", field = Some("workType.label.raw")),
-          TermsValueSource("id", field = Some("workType.id")),
-          TermsValueSource("type", field = Some("workType.ontologyType"))
-        )
-      )
-    case AggregationRequest.ProductionDate =>
-      // We use `productionDates` here over `production.dates` to match the case classes, which we then serialise to
-      // the JSON path later.
-      DateHistogramAggregation("productionDates")
-        .interval(DateHistogramInterval.Year)
-        .field("production.dates.range.from")
-        .minDocCount(1)
-
-    // We don't split genres into concepts, as the data isn't great, and for rendering isn't useful at the moment.
-    // But we've left it as a CompositeAggregation to scale when we need to.
-    case AggregationRequest.Genre =>
-      CompositeAggregation("genres").sources(
-        List(
-          TermsValueSource(
-            "label",
-            field = Some("genres.concepts.agent.label.raw"))
-        )
-      )
-
-    case AggregationRequest.Subject =>
-      CompositeAggregation("subjects").sources(
-        List(
-          TermsValueSource(
-            "label",
-            field = Some("subjects.agent.label.raw")
+      CompositeAggregation("workType")
+        .size(100)
+        .sources(
+          List(
+            TermsValueSource("label", field = Some("data.workType.label.raw")),
+            TermsValueSource("id", field = Some("data.workType.id")),
+            TermsValueSource("type", field = Some("data.workType.ontologyType"))
           )
         )
-      )
+
+    case AggregationRequest.ProductionDate =>
+      DateHistogramAggregation("productionDates")
+        .interval(DateHistogramInterval.Year)
+        .field("data.production.dates.range.from")
+        .minDocCount(1)
+
+    // We don't split genres into concepts, as the data isn't great, and for rendering isn't useful
+    // at the moment. But we've left it as a CompositeAggregation to scale when we need to.
+    case AggregationRequest.Genre =>
+      CompositeAggregation("genres")
+        .size(20)
+        .sources(
+          List(
+            TermsValueSource(
+              "label",
+              field = Some("data.genres.concepts.agent.label.raw"))
+          )
+        )
+        .subAggregations(sortedByCount)
+
+    case AggregationRequest.Subject =>
+      CompositeAggregation("subjects")
+        .size(20)
+        .sources(
+          List(
+            TermsValueSource(
+              "label",
+              field = Some("data.subjects.agent.label.raw")
+            )
+          )
+        )
+        .subAggregations(sortedByCount)
 
     case AggregationRequest.Language =>
-      CompositeAggregation("language").sources(
-        List(
-          TermsValueSource("id", field = Some("language.id")),
-          TermsValueSource("label", field = Some("language.label.raw"))
+      CompositeAggregation("language")
+        .size(200)
+        .sources(
+          List(
+            TermsValueSource("id", field = Some("data.language.id")),
+            TermsValueSource("label", field = Some("data.language.label.raw"))
+          )
         )
-      )
   }
 
   lazy val sort = queryOptions.sortBy
     .map {
-      case ProductionDateSortRequest => "production.dates.range.from"
+      case ProductionDateSortRequest => "data.production.dates.range.from"
     }
     .map { FieldSort(_).order(sortOrder) }
 
@@ -105,22 +114,27 @@ case class ElastsearchSearchRequestBuilder(
         termQuery(field = "type", value = "IdentifiedWork")
       case ItemLocationTypeFilter(itemLocationTypeIds) =>
         termsQuery(
-          field = "items.agent.locations.locationType.id",
+          field = "data.items.agent.locations.locationType.id",
           values = itemLocationTypeIds)
       case WorkTypeFilter(workTypeIds) =>
-        termsQuery(field = "workType.id", values = workTypeIds)
+        termsQuery(field = "data.workType.id", values = workTypeIds)
       case DateRangeFilter(fromDate, toDate) =>
         val (gte, lte) =
           (fromDate map ElasticDate.apply, toDate map ElasticDate.apply)
-        boolQuery should (
-          RangeQuery("production.dates.range.from", lte = lte, gte = gte),
-          RangeQuery("production.dates.range.to", lte = lte, gte = gte)
-        )
+        RangeQuery("data.production.dates.range.from", lte = lte, gte = gte)
       case LanguageFilter(languageIds) =>
-        termsQuery(field = "language.id", values = languageIds)
+        termsQuery(field = "data.language.id", values = languageIds)
       case GenreFilter(genreQuery) =>
-        matchQuery(field = "genres.label", value = genreQuery)
+        matchQuery(field = "data.genres.label", value = genreQuery)
       case SubjectFilter(subjectQuery) =>
-        matchQuery(field = "subjects.agent.label", value = subjectQuery)
+        matchQuery(field = "data.subjects.agent.label", value = subjectQuery)
     }
+
+  private def sortedByCount =
+    List(
+      bucketSortAggregation(
+        "sort_by_count",
+        Seq(FieldSort("_count").order(SortOrder.DESC))
+      )
+    )
 }
