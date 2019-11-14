@@ -2,13 +2,13 @@ package uk.ac.wellcome.platform.recorder.services
 
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FunSpec, Matchers}
-import io.circe.parser.parse
 
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.recorder.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.Implicits._
+import uk.ac.wellcome.json.utils.JsonAssertions
 
 import uk.ac.wellcome.storage.ObjectLocation
 
@@ -22,6 +22,7 @@ class RecorderWorkerServiceTest
     with BigMessagingFixture
     with IntegrationPatience
     with WorkerServiceFixture
+    with JsonAssertions
     with WorksGenerators {
 
   it("records an UnidentifiedWork") {
@@ -119,7 +120,7 @@ class RecorderWorkerServiceTest
     }
   }
 
-  it("sends the remote notification to the queue") {
+  it("sends the VHS key to the queue") {
     withLocalSqsQueue { queue =>
       withMemoryMessageSender { msgSender =>
         withVHS { vhs =>
@@ -128,22 +129,13 @@ class RecorderWorkerServiceTest
             sendMessage[TransformedBaseWork](queue = queue, obj = work)
             eventually {
               val id = work.sourceIdentifier.toString
-              val expected = parse(
-                s"""
+              val expected = s"""
                 |{
-                |  "type": "RemoteNotification",
-                |  "location": {
-                |    "namespace": "test",
-                |    "path": "${id}/0"
-                |  }
+                |  "id": "$id",
+                |  "version": 0
                 |}""".stripMargin
-              ).right
-              msgSender.messages
-                .map(_.body)
-                .map(parse(_).right)
-                .toList shouldBe List(
-                expected
-              )
+              val actual = msgSender.messages.map(_.body).head
+              assertJsonStringsAreEqual(actual, expected)
             }
           }
         }

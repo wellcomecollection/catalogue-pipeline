@@ -34,7 +34,7 @@ class MatcherWorkerService[MsgDestination](
   def run(): Future[Done] =
     msgStream.foreach(this.getClass.getSimpleName, processMessage)
 
-  def processMessage(key: Version[String, Int]): Future[Unit] =
+  def processMessage(key: Version[String, Int]): Future[Unit] = {
     (for {
       work <- getWork(key)
       identifiersList <- workMatcher.matchWork(work)
@@ -44,6 +44,7 @@ class MatcherWorkerService[MsgDestination](
         debug(
           s"Not matching work due to version conflict exception: ${e.getMessage}")
     }
+  }
 
   def getWork(key: Version[String, Int]): Future[TransformedBaseWork] =
     store.get(key) match {
