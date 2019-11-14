@@ -53,6 +53,12 @@ module "id_minter" {
   }
 
   secret_env_vars_length = "4"
+
+  // The maximum number of connections to RDS is 45.
+  // Each id minter task is configured to have 8 connections
+  // in the connection pool (see `max_connections` parameterabove).
+  // To avoid exceeding the maximum nuber of connections to RDS,
+  // the maximum capacity for the id minter should be no higher than 5
   max_capacity = 5
   messages_bucket_arn = "${aws_s3_bucket.messages.arn}"
   queue_read_policy = "${module.id_minter_queue.read_policy}"
