@@ -1,7 +1,7 @@
 # Route 53
 provider "aws" {
-  region = "eu-west-1"
-  alias  = "routemaster"
+  region  = "eu-west-1"
+  alias   = "routemaster"
   version = "~> 2.35"
 
   assume_role {
@@ -10,8 +10,8 @@ provider "aws" {
 }
 
 provider "aws" {
-  region = "us-east-1"
-  alias  = "aws_us_1"
+  region  = "us-east-1"
+  alias   = "aws_us_1"
   version = "~> 2.35"
 
   assume_role {
@@ -43,11 +43,12 @@ resource "aws_route53_record" "cert_validation" {
 resource "aws_acm_certificate_validation" "id_cert" {
   certificate_arn         = aws_acm_certificate.id.arn
   validation_record_fqdns = [aws_route53_record.cert_validation.fqdn]
+  provider                = "aws.aws_us_1"
 }
 
 resource "aws_route53_record" "cognito_cloudfront_distribution" {
-  name = "id.wellcomecollection.org"
-  type = "A"
+  name    = "id.wellcomecollection.org"
+  type    = "A"
   zone_id = data.aws_route53_zone.weco_zone.id
 
   alias {
