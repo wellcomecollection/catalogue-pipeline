@@ -45,6 +45,19 @@ resource "aws_acm_certificate_validation" "id_cert" {
   validation_record_fqdns = [aws_route53_record.cert_validation.fqdn]
 }
 
+resource "aws_route53_record" "cognito_cloudfront_distribution" {
+  name = "id.wellcomecollection.org"
+  type = "A"
+  zone_id = data.aws_route53_zone.weco_zone.id
+
+  alias {
+    name                   = aws_cognito_user_pool_domain.id.cloudfront_distribution_arn
+    zone_id                = "Z2FDTNDATAQYW2"
+    evaluate_target_health = true
+  }
+  provider = "aws.routemaster"
+}
+
 # Cognito
 resource "aws_cognito_user_pool" "pool" {
   name = "Wellcome Collection Identity"
