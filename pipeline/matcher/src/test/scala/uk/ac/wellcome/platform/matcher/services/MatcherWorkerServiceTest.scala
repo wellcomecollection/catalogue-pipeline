@@ -275,10 +275,10 @@ class MatcherWorkerServiceTest
 
   it("does not match a lower version") {
     withLocalSnsTopic { topic =>
-      withLocalSqsQueueAndDlq { queuePair =>
+      withLocalSqsQueueAndDlq {
+        case QueuePair(queue, dlq) =>
         withVHS { vhs =>
-          withWorkerService(vhs, queuePair.queue, topic) { _ =>
-            // process Work V2
+          withWorkerService(vhs, queue, topic) { _ =>
             val workAv2 = createUnidentifiedWorkWith(
               sourceIdentifier = identifierA,
               version = 2
@@ -292,7 +292,7 @@ class MatcherWorkerServiceTest
               workAv2,
               expectedMatchedWorkAv2,
               vhs,
-              queuePair.queue,
+              queue,
               topic)
 
             // Work V1 is sent but not matched
@@ -300,10 +300,10 @@ class MatcherWorkerServiceTest
               sourceIdentifier = identifierA,
               version = 1)
 
-            sendWork(workAv1, vhs, queuePair.queue)
+            sendWork(workAv1, vhs, queue)
             eventually {
-              noMessagesAreWaitingIn(queuePair.queue)
-              noMessagesAreWaitingIn(queuePair.dlq)
+              noMessagesAreWaitingIn(queue)
+              noMessagesAreWaitingIn(dlq)
               assertLastMatchedResultIs(
                 topic = topic,
                 expectedMatcherResult = expectedMatchedWorkAv2
@@ -317,39 +317,38 @@ class MatcherWorkerServiceTest
 
   it("does not match an existing version with different information") {
     withLocalSnsTopic { topic =>
-      withLocalSqsQueueAndDlq {
-        case QueuePair(queue, dlq) =>
-          withVHS { vhs =>
-            withWorkerService(vhs, queue, topic) { _ =>
-              val workAv2 = createUnidentifiedWorkWith(
-                sourceIdentifier = identifierA,
-                version = 2
-              )
+      withLocalSqsQueueAndDlq { case QueuePair(queue, dlq) =>
+        withVHS { vhs =>
+          withWorkerService(vhs, queue, topic) { _ =>
+            val workAv2 = createUnidentifiedWorkWith(
+              sourceIdentifier = identifierA,
+              version = 2
+            )
 
-              val expectedMatchedWorkAv2 = MatcherResult(
-                Set(MatchedIdentifiers(
-                  Set(WorkIdentifier("sierra-system-number/A", 2)))))
+            val expectedMatchedWorkAv2 = MatcherResult(
+              Set(MatchedIdentifiers(
+                Set(WorkIdentifier("sierra-system-number/A", 2)))))
 
-              processAndAssertMatchedWorkIs(
-                workAv2,
-                expectedMatchedWorkAv2,
-                vhs,
-                queue,
-                topic)
+            processAndAssertMatchedWorkIs(
+              workAv2,
+              expectedMatchedWorkAv2,
+              vhs,
+              queue,
+              topic)
 
-              // Work V1 is sent but not matched
-              val differentWorkAv2 = createUnidentifiedWorkWith(
-                sourceIdentifier = identifierA,
-                mergeCandidates = List(MergeCandidate(identifierB)),
-                version = 2)
+            // Work V1 is sent but not matched
+            val differentWorkAv2 = createUnidentifiedWorkWith(
+              sourceIdentifier = identifierA,
+              mergeCandidates = List(MergeCandidate(identifierB)),
+              version = 2)
 
-              sendWork(differentWorkAv2, vhs, queue)
-              eventually {
-                assertQueueEmpty(queue)
-                assertQueueHasSize(dlq, 1)
-              }
+            sendWork(differentWorkAv2, vhs, queue)
+            eventually {
+              assertQueueEmpty(queue)
+              assertQueueHasSize(dlq, 1)
             }
           }
+        }
       }
     }
   }
