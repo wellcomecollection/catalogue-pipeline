@@ -3,6 +3,8 @@ include $(ROOT)/makefiles/functions.Makefile
 
 STACK_ROOT = mets_adapter
 
+PROJECT_ID = mets_adapter
+
 SBT_APPS = mets_adapter
 
 SBT_DOCKER_LIBRARIES =
