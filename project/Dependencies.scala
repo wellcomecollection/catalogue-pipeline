@@ -129,6 +129,10 @@ object ExternalDependencies {
     "com.lightbend.akka" %% "akka-stream-alpakka-s3" % versions.akkaStreamAlpakka
   )
 
+  val alpakkaSnsDependencies = Seq(
+    "com.lightbend.akka" %% "akka-stream-alpakka-sns" % versions.akkaStreamAlpakka
+  )
+
   val apacheCommonsDependencies = Seq(
     "org.apache.commons" % "commons-lang3" % versions.apacheCommons
   )
@@ -275,6 +279,19 @@ object CatalogueDependencies {
       ExternalDependencies.mockitoDependencies ++
       ExternalDependencies.wireMockDependencies ++
       ExternalDependencies.akkaHttpDependencies ++
+      ExternalDependencies.scribeJavaDependencies
+
+  // METS adapter
+
+  val metsAdapterDependencies: Seq[ModuleID] =
+    WellcomeDependencies.typesafeLibrary ++
+      WellcomeDependencies.newMonitoringLibrary ++
+      WellcomeDependencies.newStorageTypesafeLibrary ++
+      WellcomeDependencies.newMessagingTypesafeLibrary ++
+      ExternalDependencies.apacheCommonsDependencies ++
+      ExternalDependencies.akkaHttpDependencies ++
+      ExternalDependencies.mockitoDependencies ++
+      ExternalDependencies.wireMockDependencies ++
       ExternalDependencies.scribeJavaDependencies
 
   // Sierra adapter stack

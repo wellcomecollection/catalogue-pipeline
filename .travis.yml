@@ -30,6 +30,8 @@ jobs:
     - env: SBT_PROJECT=sierra_item_merger
     - env: SBT_PROJECT=sierra_items_to_dynamo
 
+    - env: SBT_PROJECT=mets_adapter
+
     - env: SBT_PROJECT=snapshot_generator
     - env: TASK=lambda-test
 
@@ -71,6 +73,8 @@ cache:
     - sierra_adapter/sierra_bib_merger/target
     - sierra_adapter/sierra_item_merger/target
     - sierra_adapter/sierra_items_to_dynamo/target
+
+    - mets_adapter/mets_adapter/target
 
     - snapshots/snapshot_generator/target
 

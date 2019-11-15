@@ -10,6 +10,7 @@ include pipeline/Makefile
 include reindexer/Makefile
 include sierra_adapter/Makefile
 include snapshots/Makefile
+include mets_adapter/Makefile
 
 lambda-test: snapshot_scheduler-test \
 			 s3_demultiplexer-test \
