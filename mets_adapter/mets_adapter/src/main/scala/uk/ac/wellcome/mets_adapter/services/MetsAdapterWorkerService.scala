@@ -1,10 +1,11 @@
 package uk.ac.wellcome.mets_adapter.services
 
-import scala.concurrent.ExecutionContext
 import scala.util.Success
-import akka.{Done, NotUsed}
+import scala.concurrent.ExecutionContext
+import akka.Done
 import akka.stream.scaladsl._
 import com.amazonaws.services.sqs.model.{Message => SQSMessage}
+import grizzled.slf4j.Logging
 
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.messaging.sns.SNSMessageSender
@@ -14,37 +15,60 @@ import uk.ac.wellcome.mets_adapter.models._
 
 import scala.concurrent.Future
 
+case class Context[T](data: T, msg: SQSMessage)
+
 class MetsAdapterWorkerService(
-  sqsStream: SQSStream[IngestUpdate],
-  snsMsgSender: SNSMessageSender,
+  msgStream: SQSStream[IngestUpdate],
+  msgSender: SNSMessageSender,
   bagRetriever: BagRetriever,
   concurrentConnections: Int = 6)(implicit ec: ExecutionContext)
-    extends Runnable {
+    extends Runnable with Logging {
+
+  type Result[T] = Either[Throwable, T]
 
   val className = this.getClass.getSimpleName
 
   def run(): Future[Done] =
-    sqsStream.runStream(className, source => {
+    msgStream.runStream(className, source => {
       source
-        .via(getMetsLocation)
-        .via(publishMetsLocation)
+        .via(retrieveBag)
+        .via(parseMetsData)
+        .via(publishMetsData)
     })
 
-  def getMetsLocation
-    : Flow[(SQSMessage, IngestUpdate), (SQSMessage, MetsLocation), NotUsed] =
+  def retrieveBag =
     Flow[(SQSMessage, IngestUpdate)]
       .mapAsync(concurrentConnections) {
-        case (msg, update) => bagRetriever.getBag(update).map(bag => (msg, bag))
+        case (msg, update) =>
+          bagRetriever
+            .getBag(update)
+            .transform(result => Success((msg, result.toEither)))
       }
-      .collect { case (msg, Some(bag)) => (msg, bag.metsLocation) }
-      .collect { case (msg, Some(metsLocation)) => (msg, metsLocation) }
+      .via(logErrors)
+      .collect { case (msg, Some(bag)) => (msg, bag) }
 
-  def publishMetsLocation
-    : Flow[(SQSMessage, MetsLocation), SQSMessage, NotUsed] =
-    Flow[(SQSMessage, MetsLocation)]
-      .map {
-        case (msg, metsLocation) =>
-          (msg, snsMsgSender.sendT(metsLocation))
+  def parseMetsData =
+    Flow[(SQSMessage, Bag)]
+      .map { case (msg, bag) => (msg, bag.metsData) }
+      .via(logErrors)
+
+  def publishMetsData =
+    Flow[(SQSMessage, MetsData)]
+      .map { case (msg, data) =>
+        (msg, msgSender.sendT(data).toEither)
       }
-      .collect { case (msg, Success(_)) => msg }
+      .via(logErrors)
+      .map { case (msg, _) => msg }
+
+  def logErrors[T] =
+    Flow[(SQSMessage, Result[T])]
+      .map { case (msg, result) =>
+        result.left.map { err =>
+          error(s"Error encountered processing SQS message. [Error]: ${err.getMessage} [Message]: ${msg}", err)
+        }
+        (msg, result)
+      }
+      .collect {
+        case (msg, Right(data)) => (msg, data)
+      }
 }
