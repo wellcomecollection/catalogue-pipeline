@@ -22,6 +22,12 @@ The catalogue consits of three main parts with supporting services. These are:
 
 ---
 
+## Problems you might have
+
+- **Stack overflow from scalac (in IntelliJ) when building projects**:
+  
+  Go to `Settings > Build, Execution, Deployment > Compiler` and change `Build process heap size (Mbytes)` to something large, eg 2048.
+
 ## Things you might want to do
 Generally small things you might want to do irregularly involving the API & data are stored within [`./scripts`].
 
