@@ -241,11 +241,6 @@ object CatalogueDependencies {
       ExternalDependencies.akkaHttpDependencies ++
       WellcomeDependencies.typesafeLibrary
 
-  val goobiReaderDependencies: Seq[ModuleID] =
-    ExternalDependencies.mockitoDependencies ++
-      WellcomeDependencies.jsonLibrary ++
-      WellcomeDependencies.messagingTypesafeLibrary
-
   val idminterDependencies: Seq[ModuleID] =
     ExternalDependencies.mockitoDependencies ++
       ExternalDependencies.mySqlDependencies ++

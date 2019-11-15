@@ -71,24 +71,6 @@ output "vhs_sierra_items_assumable_read_role" {
   value = "${module.vhs_sierra_items.assumable_read_role}"
 }
 
-# Goobi Hybrid Store
-
-output "vhs_goobi_full_access_policy" {
-  value = "${module.vhs_goobi_mets.full_access_policy}"
-}
-
-output "vhs_goobi_table_name" {
-  value = "${module.vhs_goobi_mets.table_name}"
-}
-
-output "vhs_goobi_bucket_name" {
-  value = "${module.vhs_goobi_mets.bucket_name}"
-}
-
-output "vhs_goobi_assumable_read_role" {
-  value = "${module.vhs_goobi_mets.assumable_read_role}"
-}
-
 # Calm Hybrid Store
 output "vhs_calm_read_policy" {
   value = "${module.vhs_calm_sourcedata.read_policy}"
