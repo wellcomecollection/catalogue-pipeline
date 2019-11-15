@@ -28,7 +28,7 @@ object SierraMiroMergeRule
 
   override protected def mergeAndRedirectWorkPair(
     sierraWork: UnidentifiedWork,
-    miroWork: UnidentifiedWork): Option[MergedWork] = {
+    miroWork: TransformedBaseWork): Option[MergedWork] = {
     (sierraWork.data.items, miroWork.data.items) match {
       case (
           List(sierraItem: MaybeDisplayable[Item]),
@@ -95,7 +95,7 @@ object SierraMiroMergeRule
   val doNotMergeIdentifierTypes =
     List("sierra-identifier", "sierra-system-number")
   private def mergeIdentifiers(sierraWork: UnidentifiedWork,
-                               miroWork: UnidentifiedWork) = {
+                               miroWork: TransformedBaseWork) = {
     sierraWork.otherIdentifiers ++
       miroWork.identifiers.filterNot(sourceIdentifier =>
         doNotMergeIdentifierTypes.contains(sourceIdentifier.identifierType.id))

@@ -11,8 +11,11 @@ sealed trait IdentifiedBaseWork extends BaseWork {
   val canonicalId: String
 }
 
-sealed trait TransformedBaseWork extends BaseWork {
+sealed trait TransformedBaseWork
+    extends BaseWork
+    with MultipleSourceIdentifiers {
   val data: WorkData[MaybeDisplayable]
+  val otherIdentifiers = data.otherIdentifiers
 }
 
 sealed trait InvisibleWork extends BaseWork
@@ -50,9 +53,7 @@ case class UnidentifiedWork(
   data: WorkData[MaybeDisplayable],
   ontologyType: String = "Work",
   identifiedType: String = classOf[IdentifiedWork].getSimpleName
-) extends TransformedBaseWork
-    with MultipleSourceIdentifiers {
-  val otherIdentifiers = data.otherIdentifiers
+) extends TransformedBaseWork {
 
   def withData(f: WorkData[MaybeDisplayable] => WorkData[MaybeDisplayable]) =
     this.copy(data = f(data))
