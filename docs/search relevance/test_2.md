@@ -52,4 +52,4 @@ We'd like to test this on the live site with people outside Wellcome, possibly c
 
 ## Results
 
-## Conclusions
+minimum should match + boost did best! Default query changed accordingly
