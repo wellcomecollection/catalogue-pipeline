@@ -20,9 +20,13 @@ variable "release_label" {}
 variable "miro_adapter_topic_names" {
   type = "list"
 }
+variable "miro_adapter_topic_count" {
+}
 
 variable "sierra_adapter_topic_names" {
   type = "list"
+}
+variable "sierra_adapter_topic_count" {
 }
 
 variable "vhs_miro_read_policy" {}

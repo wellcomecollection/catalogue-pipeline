@@ -19,7 +19,7 @@ module "service" {
   security_group_ids = ["${var.security_group_ids}"]
 
   min_capacity = 0
-  max_capacity = 10
+  max_capacity = "${var.max_capacity}"
 
   env_vars = "${merge(
     var.env_vars,

@@ -1,30 +1,23 @@
 # Input queue
 
 module "id_minter_queue" {
-  source = "../modules/queue"
-
+  source = "git::https://github.com/wellcometrust/terraform-modules.git//sqs?ref=v11.6.0"
+  queue_name  = "${local.namespace_hyphen}_id_minter"
   topic_names = ["${module.merger_topic.name}"]
-
-  role_names = ["${module.id_minter.task_role_name}"]
-
-  namespace = "${var.namespace}_id_minter"
-
-  visibility_timeout_seconds = 60
-  max_receive_count          = 5
+  topic_count = 1
 
   aws_region    = "${var.aws_region}"
   account_id    = "${var.account_id}"
-  dlq_alarm_arn = "${var.dlq_alarm_arn}"
-
-  messages_bucket_arn = "${aws_s3_bucket.messages.arn}"
+  alarm_topic_arn = "${var.dlq_alarm_arn}"
 }
+
 
 # Service
 
 module "id_minter" {
   source = "../modules/service"
 
-  service_name = "${var.namespace}_id_minter"
+  service_name = "${local.namespace_hyphen}_id_minter"
 
   container_image = "${local.id_minter_image}"
 
@@ -42,10 +35,10 @@ module "id_minter" {
   logstash_host = "${local.logstash_host}"
 
   env_vars = {
-    metrics_namespace    = "${var.namespace}_id_minter"
+    metrics_namespace    = "${local.namespace_hyphen}_id_minter"
     messages_bucket_name = "${aws_s3_bucket.messages.id}"
 
-    queue_url       = "${module.id_minter_queue.url}"
+    queue_url       = "${module.id_minter_queue.id}"
     topic_arn       = "${module.id_minter_topic.arn}"
     max_connections = 8
   }
@@ -60,6 +53,15 @@ module "id_minter" {
   }
 
   secret_env_vars_length = "4"
+
+  // The maximum number of connections to RDS is 45.
+  // Each id minter task is configured to have 8 connections
+  // in the connection pool (see `max_connections` parameterabove).
+  // To avoid exceeding the maximum nuber of connections to RDS,
+  // the maximum capacity for the id minter should be no higher than 5
+  max_capacity = 5
+  messages_bucket_arn = "${aws_s3_bucket.messages.arn}"
+  queue_read_policy = "${module.id_minter_queue.read_policy}"
 }
 
 # Output topic
@@ -67,7 +69,7 @@ module "id_minter" {
 module "id_minter_topic" {
   source = "../modules/topic"
 
-  name       = "${var.namespace}_id_minter"
+  name       = "${local.namespace_hyphen}_id_minter"
   role_names = ["${module.id_minter.task_role_name}"]
 
   messages_bucket_arn = "${aws_s3_bucket.messages.arn}"

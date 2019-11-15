@@ -1,25 +1,22 @@
 # Input queue
 
 module "matcher_queue" {
-  source = "../modules/queue"
+  source = "git::https://github.com/wellcometrust/terraform-modules.git//sqs?ref=v11.6.0"
 
-  topic_names = ["${module.recorder_topic.name}"]
-  role_names  = ["${module.matcher.task_role_name}"]
+  topic_names = [
+    "${module.recorder_topic.name}"]
+  topic_count = 1
 
-  namespace = "${var.namespace}_matcher"
+  queue_name  = "${local.namespace_hyphen}_matcher"
 
   // The records in the locktable expire after 3 minutes
   // The matcher is able to override locks that have expired
   // Wait slightly longer to make sure locks are expired
   visibility_timeout_seconds = 210
 
-  max_receive_count = 5
-
-  aws_region    = "${var.aws_region}"
-  account_id    = "${var.account_id}"
-  dlq_alarm_arn = "${var.dlq_alarm_arn}"
-
-  messages_bucket_arn = "${aws_s3_bucket.messages.arn}"
+  aws_region = "${var.aws_region}"
+  account_id = "${var.account_id}"
+  alarm_topic_arn = "${var.dlq_alarm_arn}"
 }
 
 # Service
@@ -36,13 +33,13 @@ module "matcher" {
   cluster_id    = "${aws_ecs_cluster.cluster.id}"
   namespace_id  = "${aws_service_discovery_private_dns_namespace.namespace.id}"
   subnets       = "${var.subnets}"
-  service_name  = "${var.namespace}_matcher"
+  service_name  = "${local.namespace_hyphen}_matcher"
   aws_region    = "${var.aws_region}"
   logstash_host = "${local.logstash_host}"
 
   env_vars = {
-    queue_url         = "${module.matcher_queue.url}"
-    metrics_namespace = "${var.namespace}_matcher"
+    queue_url         = "${module.matcher_queue.id}"
+    metrics_namespace = "${local.namespace_hyphen}_matcher"
     vhs_bucket_name   = "${module.vhs_recorder.bucket_name}"
     topic_arn         = "${module.matcher_topic.arn}"
 
@@ -59,6 +56,9 @@ module "matcher" {
   secret_env_vars_length = "0"
 
   container_image = "${local.matcher_image}"
+  max_capacity = 10
+  messages_bucket_arn = "${aws_s3_bucket.messages.arn}"
+  queue_read_policy = "${module.matcher_queue.read_policy}"
 }
 
 # Permissions
@@ -83,7 +83,7 @@ resource "aws_iam_role_policy" "matcher_lock_readwrite" {
 module "matcher_topic" {
   source = "../modules/topic"
 
-  name       = "${var.namespace}_matcher"
+  name       = "${local.namespace_hyphen}_matcher"
   role_names = ["${module.matcher.task_role_name}"]
 
   messages_bucket_arn = "${aws_s3_bucket.messages.arn}"

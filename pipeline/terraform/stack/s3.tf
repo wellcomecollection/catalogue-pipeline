@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "messages" {
-  bucket = "wellcomecollection-${var.namespace}-messages"
+  bucket = "wellcomecollection-${local.namespace_hyphen}-messages"
   acl    = "private"
 
   # Normally S3 buckets have prevent_destroy = true

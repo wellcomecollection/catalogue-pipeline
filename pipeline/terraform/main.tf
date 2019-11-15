@@ -1,7 +1,7 @@
-module "catalogue_pipeline_20191007" {
+module "catalogue_pipeline_20191115" {
   source = "./stack"
 
-  namespace = "catalogue-20191007"
+  namespace = "catalogue-20191115"
 
   release_label = "prod"
 
@@ -19,17 +19,19 @@ module "catalogue_pipeline_20191007" {
   # reindexer topic names.
 
   sierra_adapter_topic_names = [
-    # "${local.sierra_reindexer_topic_name}",
+    "${local.sierra_reindexer_topic_name}",
     "${local.sierra_merged_bibs_topic_name}",
 
     "${local.sierra_merged_items_topic_name}",
   ]
+  sierra_adapter_topic_count = "3"
   miro_adapter_topic_names = [
-    # "${local.miro_reindexer_topic_name}",
+    "${local.miro_reindexer_topic_name}",
     "${local.miro_updates_topic_name}",
   ]
+  miro_adapter_topic_count = "2"
   # Elasticsearch
-  es_works_index = "v2-20191007"
+  es_works_index = "v2-20191115"
   # RDS
   rds_ids_access_security_group_id = "${local.rds_access_security_group_id}"
   # Adapter VHS

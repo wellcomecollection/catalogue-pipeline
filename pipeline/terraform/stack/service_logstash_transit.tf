@@ -13,7 +13,7 @@ module "logstash_transit" {
 
   env_vars = {
     XPACK_MONITORING_ENABLED = "false"
-    NAMESPACE                = "${var.namespace}"
+    NAMESPACE                = "${local.namespace_hyphen}"
   }
 
   env_vars_length = 2

@@ -1,21 +1,13 @@
 # Input queue
-
 module "miro_transformer_queue" {
-  source = "../modules/queue"
-
+  source = "git::https://github.com/wellcometrust/terraform-modules.git//sqs?ref=v11.6.0"
+  queue_name  = "${local.namespace_hyphen}_miro_transformer"
   topic_names = ["${var.miro_adapter_topic_names}"]
-  role_names  = ["${module.miro_transformer.task_role_name}"]
-
-  namespace = "${var.namespace}_miro_transformer"
-
-  visibility_timeout_seconds = 30
-  max_receive_count          = 3
+  topic_count = "${var.miro_adapter_topic_count}"
 
   aws_region    = "${var.aws_region}"
   account_id    = "${var.account_id}"
-  dlq_alarm_arn = "${var.dlq_alarm_arn}"
-
-  messages_bucket_arn = "${aws_s3_bucket.messages.arn}"
+  alarm_topic_arn = "${var.dlq_alarm_arn}"
 }
 
 # Service
@@ -23,7 +15,7 @@ module "miro_transformer_queue" {
 module "miro_transformer" {
   source = "../modules/service"
 
-  service_name = "${var.namespace}_miro_transformer"
+  service_name = "${local.namespace_hyphen}_miro_transformer"
 
   container_image = "${local.transformer_miro_image}"
 
@@ -40,8 +32,8 @@ module "miro_transformer" {
 
   env_vars = {
     sns_arn              = "${module.miro_transformer_topic.arn}"
-    transformer_queue_id = "${module.miro_transformer_queue.url}"
-    metrics_namespace    = "miro_transformer"
+    transformer_queue_id = "${module.miro_transformer_queue.id}"
+    metrics_namespace    = "${local.namespace_hyphen}_miro_transformer"
     messages_bucket_name = "${aws_s3_bucket.messages.id}"
   }
 
@@ -52,6 +44,9 @@ module "miro_transformer" {
 
   subnets    = ["${var.subnets}"]
   aws_region = "${var.aws_region}"
+  max_capacity = 10
+  messages_bucket_arn = "${aws_s3_bucket.messages.arn}"
+  queue_read_policy = "${module.miro_transformer_queue.read_policy}"
 }
 
 # Permissions
@@ -66,7 +61,7 @@ resource "aws_iam_role_policy" "miro_transformer_vhs_miro_adapter_read" {
 module "miro_transformer_topic" {
   source = "../modules/topic"
 
-  name       = "${var.namespace}_miro_transformer"
+  name       = "${local.namespace_hyphen}_miro_transformer"
   role_names = ["${module.miro_transformer.task_role_name}"]
 
   messages_bucket_arn = "${aws_s3_bucket.messages.arn}"
