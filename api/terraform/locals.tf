@@ -9,7 +9,7 @@ locals {
   }
 
   staging_es_config = {
-    index_v2 = "v2-20191007"
+    index_v2 = "v2-20191114"
     doc_type = "work"
   }
 
@@ -37,5 +37,5 @@ locals {
   ]
 
   prod_domain_name    = "catalogue.api2.wellcomecollection.org"
-  staging_domain_name = "catalogue.api2-stage.wellcomecollection.org"
+  staging_domain_name = "catalogue.api-stage.wellcomecollection.org"
 }
