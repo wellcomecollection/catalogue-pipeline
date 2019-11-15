@@ -43,6 +43,6 @@ resource "aws_security_group" "service_egress_security_group" {
   }
 
   tags {
-    Name = "${var.namespace}-${var.environment}-egress"
+    Name = "${var.namespace}"
   }
 }
