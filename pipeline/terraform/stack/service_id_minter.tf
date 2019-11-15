@@ -2,7 +2,7 @@
 
 module "id_minter_queue" {
   source = "git::https://github.com/wellcometrust/terraform-modules.git//sqs?ref=v11.6.0"
-  queue_name  = "${local.namespace_underscores}_id_minter"
+  queue_name  = "${local.namespace_hyphen}_id_minter"
   topic_names = ["${module.merger_topic.name}"]
   topic_count = 1
 
@@ -17,7 +17,7 @@ module "id_minter_queue" {
 module "id_minter" {
   source = "../modules/service"
 
-  service_name = "${local.namespace_underscores}_id_minter"
+  service_name = "${local.namespace_hyphen}_id_minter"
 
   container_image = "${local.id_minter_image}"
 
@@ -35,7 +35,7 @@ module "id_minter" {
   logstash_host = "${local.logstash_host}"
 
   env_vars = {
-    metrics_namespace    = "${local.namespace_underscores}_id_minter"
+    metrics_namespace    = "${local.namespace_hyphen}_id_minter"
     messages_bucket_name = "${aws_s3_bucket.messages.id}"
 
     queue_url       = "${module.id_minter_queue.id}"
@@ -69,7 +69,7 @@ module "id_minter" {
 module "id_minter_topic" {
   source = "../modules/topic"
 
-  name       = "${local.namespace_underscores}_id_minter"
+  name       = "${local.namespace_hyphen}_id_minter"
   role_names = ["${module.id_minter.task_role_name}"]
 
   messages_bucket_arn = "${aws_s3_bucket.messages.arn}"

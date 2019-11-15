@@ -2,7 +2,7 @@
 
 module "merger_queue" {
   source = "git::https://github.com/wellcometrust/terraform-modules.git//sqs?ref=v11.6.0"
-  queue_name  = "${local.namespace_underscores}_merger"
+  queue_name  = "${local.namespace_hyphen}_merger"
   topic_names = ["${module.matcher_topic.name}"]
   topic_count = 1
 
@@ -25,12 +25,12 @@ module "merger" {
   cluster_id    = "${aws_ecs_cluster.cluster.id}"
   namespace_id  = "${aws_service_discovery_private_dns_namespace.namespace.id}"
   subnets       = "${var.subnets}"
-  service_name  = "${local.namespace_underscores}_merger"
+  service_name  = "${local.namespace_hyphen}_merger"
   aws_region    = "${var.aws_region}"
   logstash_host = "${local.logstash_host}"
 
   env_vars = {
-    metrics_namespace        = "${local.namespace_underscores}_merger"
+    metrics_namespace        = "${local.namespace_hyphen}_merger"
     messages_bucket_name     = "${aws_s3_bucket.messages.id}"
     topic_arn                = "${module.matcher_topic.arn}"
     merger_queue_id          = "${module.merger_queue.id}"
@@ -64,7 +64,7 @@ resource "aws_iam_role_policy" "merger_vhs_recorder_read" {
 module "merger_topic" {
   source = "../modules/topic"
 
-  name       = "${local.namespace_underscores}_merger"
+  name       = "${local.namespace_hyphen}_merger"
   role_names = ["${module.merger.task_role_name}"]
 
   messages_bucket_arn = "${aws_s3_bucket.messages.arn}"

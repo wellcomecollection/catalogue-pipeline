@@ -7,7 +7,7 @@ module "matcher_queue" {
     "${module.recorder_topic.name}"]
   topic_count = 1
 
-  queue_name  = "${local.namespace_underscores}_matcher"
+  queue_name  = "${local.namespace_hyphen}_matcher"
 
   // The records in the locktable expire after 3 minutes
   // The matcher is able to override locks that have expired
@@ -33,13 +33,13 @@ module "matcher" {
   cluster_id    = "${aws_ecs_cluster.cluster.id}"
   namespace_id  = "${aws_service_discovery_private_dns_namespace.namespace.id}"
   subnets       = "${var.subnets}"
-  service_name  = "${local.namespace_underscores}_matcher"
+  service_name  = "${local.namespace_hyphen}_matcher"
   aws_region    = "${var.aws_region}"
   logstash_host = "${local.logstash_host}"
 
   env_vars = {
     queue_url         = "${module.matcher_queue.id}"
-    metrics_namespace = "${local.namespace_underscores}_matcher"
+    metrics_namespace = "${local.namespace_hyphen}_matcher"
     vhs_bucket_name   = "${module.vhs_recorder.bucket_name}"
     topic_arn         = "${module.matcher_topic.arn}"
 
@@ -83,7 +83,7 @@ resource "aws_iam_role_policy" "matcher_lock_readwrite" {
 module "matcher_topic" {
   source = "../modules/topic"
 
-  name       = "${local.namespace_underscores}_matcher"
+  name       = "${local.namespace_hyphen}_matcher"
   role_names = ["${module.matcher.task_role_name}"]
 
   messages_bucket_arn = "${aws_s3_bucket.messages.arn}"

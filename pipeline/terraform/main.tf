@@ -1,9 +1,9 @@
-module "catalogue_pipeline_20191114" {
+module "catalogue_pipeline_20191115" {
   source = "./stack"
 
-  namespace = "catalogue-20191114"
+  namespace = "catalogue-20191115"
 
-  release_label = "latest"
+  release_label = "prod"
 
   account_id      = "${data.aws_caller_identity.current.account_id}"
   aws_region      = "${local.aws_region}"
@@ -31,7 +31,7 @@ module "catalogue_pipeline_20191114" {
   ]
   miro_adapter_topic_count = "2"
   # Elasticsearch
-  es_works_index = "v2-20191114"
+  es_works_index = "v2-20191115"
   # RDS
   rds_ids_access_security_group_id = "${local.rds_access_security_group_id}"
   # Adapter VHS

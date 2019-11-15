@@ -2,7 +2,7 @@
 
 module "ingestor_queue" {
   source = "git::https://github.com/wellcometrust/terraform-modules.git//sqs?ref=v11.6.0"
-  queue_name  = "${local.namespace_underscores}_ingestor"
+  queue_name  = "${local.namespace_hyphen}_ingestor"
   topic_names = ["${module.id_minter_topic.name}"]
   topic_count = 1
 
@@ -16,7 +16,7 @@ module "ingestor_queue" {
 module "ingestor" {
   source = "../modules/service"
 
-  service_name = "${local.namespace_underscores}_ingestor"
+  service_name = "${local.namespace_hyphen}_ingestor"
 
   container_image = "${local.ingestor_image}"
 
@@ -33,7 +33,7 @@ module "ingestor" {
   logstash_host = "${local.logstash_host}"
 
   env_vars = {
-    metrics_namespace = "${local.namespace_underscores}_ingestor"
+    metrics_namespace = "${local.namespace_hyphen}_ingestor"
     es_index          = "${var.es_works_index}"
     ingest_queue_id   = "${module.ingestor_queue.id}"
   }

@@ -1,7 +1,7 @@
 # Input queue
 module "miro_transformer_queue" {
   source = "git::https://github.com/wellcometrust/terraform-modules.git//sqs?ref=v11.6.0"
-  queue_name  = "${local.namespace_underscores}_miro_transformer"
+  queue_name  = "${local.namespace_hyphen}_miro_transformer"
   topic_names = ["${var.miro_adapter_topic_names}"]
   topic_count = "${var.miro_adapter_topic_count}"
 
@@ -15,7 +15,7 @@ module "miro_transformer_queue" {
 module "miro_transformer" {
   source = "../modules/service"
 
-  service_name = "${local.namespace_underscores}_miro_transformer"
+  service_name = "${local.namespace_hyphen}_miro_transformer"
 
   container_image = "${local.transformer_miro_image}"
 
@@ -33,7 +33,7 @@ module "miro_transformer" {
   env_vars = {
     sns_arn              = "${module.miro_transformer_topic.arn}"
     transformer_queue_id = "${module.miro_transformer_queue.id}"
-    metrics_namespace    = "${local.namespace_underscores}_miro_transformer"
+    metrics_namespace    = "${local.namespace_hyphen}_miro_transformer"
     messages_bucket_name = "${aws_s3_bucket.messages.id}"
   }
 
@@ -61,7 +61,7 @@ resource "aws_iam_role_policy" "miro_transformer_vhs_miro_adapter_read" {
 module "miro_transformer_topic" {
   source = "../modules/topic"
 
-  name       = "${local.namespace_underscores}_miro_transformer"
+  name       = "${local.namespace_hyphen}_miro_transformer"
   role_names = ["${module.miro_transformer.task_role_name}"]
 
   messages_bucket_arn = "${aws_s3_bucket.messages.arn}"

@@ -1,7 +1,7 @@
 # Graph table
 
 resource "aws_dynamodb_table" "matcher_graph_table" {
-  name     = "${local.namespace_underscores}_works-graph"
+  name     = "${local.namespace_hyphen}_works-graph"
   hash_key = "id"
 
   attribute {
@@ -51,7 +51,7 @@ data "aws_iam_policy_document" "graph_table_readwrite" {
 # Lock table
 
 resource "aws_dynamodb_table" "matcher_lock_table" {
-  name     = "${local.namespace_underscores}_matcher-lock-table"
+  name     = "${local.namespace_hyphen}_matcher-lock-table"
   hash_key = "id"
 
   billing_mode = "PAY_PER_REQUEST"

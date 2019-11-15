@@ -2,7 +2,7 @@
 
 module "sierra_transformer_queue" {
   source = "git::https://github.com/wellcometrust/terraform-modules.git//sqs?ref=v11.6.0"
-  queue_name  = "${local.namespace_underscores}_sierra_transformer"
+  queue_name  = "${local.namespace_hyphen}_sierra_transformer"
   topic_names = ["${var.sierra_adapter_topic_names}"]
   topic_count = "${var.sierra_adapter_topic_count}"
 
@@ -16,7 +16,7 @@ module "sierra_transformer_queue" {
 module "sierra_transformer" {
   source = "../modules/service"
 
-  service_name = "${local.namespace_underscores}_sierra_transformer"
+  service_name = "${local.namespace_hyphen}_sierra_transformer"
 
   container_image = "${local.transformer_sierra_image}"
 
@@ -34,7 +34,7 @@ module "sierra_transformer" {
   env_vars = {
     sns_arn                = "${module.sierra_transformer_topic.arn}"
     transformer_queue_id   = "${module.sierra_transformer_queue.id}"
-    metrics_namespace      = "${local.namespace_underscores}_sierra_transformer"
+    metrics_namespace      = "${local.namespace_hyphen}_sierra_transformer"
     messages_bucket_name   = "${aws_s3_bucket.messages.id}"
     vhs_sierra_bucket_name = "${var.vhs_sierra_sourcedata_bucket_name}"
     vhs_sierra_table_name  = "${var.vhs_sierra_sourcedata_table_name}"
@@ -65,7 +65,7 @@ resource "aws_iam_role_policy" "sierra_transformer_vhs_sierra_adapter_read" {
 module "sierra_transformer_topic" {
   source = "../modules/topic"
 
-  name       = "${local.namespace_underscores}_sierra_transformer"
+  name       = "${local.namespace_hyphen}_sierra_transformer"
   role_names = ["${module.sierra_transformer.task_role_name}"]
 
   messages_bucket_arn = "${aws_s3_bucket.messages.arn}"

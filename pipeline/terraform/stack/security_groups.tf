@@ -1,14 +1,14 @@
 module "egress_security_group" {
   source = "github.com/wellcometrust/terraform//network/prebuilt/vpc/egress_security_group?ref=v19.5.0"
 
-  name = "${local.namespace_underscores}_pipeline_services"
+  name = "${local.namespace_hyphen}_pipeline_services"
 
   vpc_id     = "${var.vpc_id}"
   subnet_ids = "${var.subnets}"
 }
 
 resource "aws_security_group" "service_egress" {
-  name        = "${local.namespace_underscores}_service_egress"
+  name        = "${local.namespace_hyphen}_service_egress"
   description = "Allow traffic between services"
   vpc_id      = "${var.vpc_id}"
 
@@ -23,12 +23,12 @@ resource "aws_security_group" "service_egress" {
   }
 
   tags {
-    Name = "${local.namespace_underscores}-egress"
+    Name = "${local.namespace_hyphen}-egress"
   }
 }
 
 resource "aws_security_group" "interservice" {
-  name        = "${local.namespace_underscores}_interservice"
+  name        = "${local.namespace_hyphen}_interservice"
   description = "Allow traffic between services"
   vpc_id      = "${var.vpc_id}"
 
@@ -40,6 +40,6 @@ resource "aws_security_group" "interservice" {
   }
 
   tags {
-    Name = "${local.namespace_underscores}-interservice"
+    Name = "${local.namespace_hyphen}-interservice"
   }
 }
