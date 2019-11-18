@@ -35,7 +35,7 @@ class BagRetrieverTest
             maybeBag =>
               inside(maybeBag) {
                 case Some(
-                    Bag(_, BagManifest(files), BagLocation(bucket, path))) =>
+                    Bag(_, BagManifest(files), BagLocation(bucket, path), _)) =>
                   verify(
                     moreThanOrExactly(1),
                     postRequestedFor(urlEqualTo("/oauth2/token"))
