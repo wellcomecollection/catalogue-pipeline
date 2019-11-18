@@ -8,69 +8,18 @@ resource "aws_api_gateway_rest_api" "api" {
   }
 }
 
-# Stages
-
-module "romulus" {
-  source = "git::https://github.com/wellcometrust/terraform.git//api_gateway/modules/stage?ref=v17.0.0"
-
-  stage_name = "romulus"
-  api_id     = "${aws_api_gateway_rest_api.api.id}"
-
-  variables = {
-    port = "${local.romulus_listener_port}"
-  }
-
-  depends_on = [
-    "${module.root_resource_integration.uri}",
-    "${module.simple_integration.uri}",
-  ]
-}
-
-module "remus" {
-  source = "git::https://github.com/wellcometrust/terraform.git//api_gateway/modules/stage?ref=v17.0.0"
-
-  stage_name = "remus"
-  api_id     = "${aws_api_gateway_rest_api.api.id}"
-
-  variables = {
-    port = "${local.remus_listener_port}"
-  }
-
-  depends_on = [
-    "${module.root_resource_integration.uri}",
-    "${module.simple_integration.uri}",
-  ]
-}
-
-module "v1_amber" {
-  source = "git::https://github.com/wellcometrust/terraform.git//api_gateway/modules/stage?ref=v17.0.0"
-
-  stage_name = "v1_amber"
-  api_id     = "${aws_api_gateway_rest_api.api.id}"
-
-  variables = {
-    port = "${local.v1_amber_listener_port}"
-  }
-
-  depends_on = [
-    "${module.root_resource_integration.uri}",
-    "${module.simple_integration.uri}",
-  ]
-}
-
 # Base path mappings
-
-resource "aws_api_gateway_base_path_mapping" "catalogue_stage" {
+resource "aws_api_gateway_base_path_mapping" "catalogue_prod" {
   api_id      = "${aws_api_gateway_rest_api.api.id}"
-  stage_name  = "${var.stage_api}"
-  domain_name = "catalogue.api-stage.wellcomecollection.org"
+  stage_name  = "${local.prod_name}"
+  domain_name = "${aws_api_gateway_domain_name.prod.domain_name}"
   base_path   = "catalogue"
 }
 
-resource "aws_api_gateway_base_path_mapping" "catalogue_prod" {
+resource "aws_api_gateway_base_path_mapping" "catalogue_staging" {
   api_id      = "${aws_api_gateway_rest_api.api.id}"
-  stage_name  = "${var.production_api}"
-  domain_name = "catalogue.api.wellcomecollection.org"
+  stage_name  = "${local.staging_name}"
+  domain_name = "${aws_api_gateway_domain_name.staging.domain_name}"
   base_path   = "catalogue"
 }
 
@@ -131,7 +80,7 @@ module "simple_integration" {
 # Link
 
 resource "aws_api_gateway_vpc_link" "link" {
-  name        = "${var.namespace}_vpc_link"
+  name        = "${local.namespace}_vpc_link"
   target_arns = ["${module.nlb.arn}"]
 
   lifecycle {

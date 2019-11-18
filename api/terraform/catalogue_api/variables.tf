@@ -1,13 +1,11 @@
-variable "remus_es_config" {
+variable "namespace" {}
+variable "environment" {}
+
+variable "es_config" {
   type = "map"
 }
 
-variable "romulus_es_config" {
-  type = "map"
-}
-
-variable "remus_task_number" {}
-variable "romulus_task_number" {}
+variable "task_desired_count" {}
 
 variable "subnets" {
   type = "list"
@@ -15,21 +13,19 @@ variable "subnets" {
 
 variable "vpc_id" {}
 
-variable "remus_container_image" {}
-variable "romulus_container_image" {}
+variable "api_container_image" {}
 variable "nginx_container_image" {}
-
-variable "container_port" {}
-
-variable "nginx_container_port" {
-  default = "9000"
-}
 
 variable "cluster_name" {}
 
-variable "namespace" {}
+variable "listener_port" {}
 
-variable "production_api" {}
-variable "stage_api" {}
+variable "api_id" {}
 
-variable "alarm_topic_arn" {}
+variable "gateway_depends" {
+  type = "list"
+}
+
+variable "lb_arn" {}
+
+variable "lb_ingress_sg_id" {}

@@ -1,28 +1,51 @@
-module "catalogue_api" {
+module "catalogue_api_prod" {
   source = "./catalogue_api"
 
-  namespace = "catalogue_api_gw"
+  environment           = "${local.prod_name}"
+  api_container_image   = "${module.prod_images.services["api"]}"
+  nginx_container_image = "${module.prod_images.services["nginx_api-gw"]}"
+  listener_port         = "${local.prod_listener_port}"
+  task_desired_count    = "${local.prod_task_number}"
+  es_config             = "${local.prod_es_config}"
 
-  vpc_id  = "${local.vpc_id}"
-  subnets = ["${local.private_subnets}"]
+  namespace    = "${local.namespace}"
+  vpc_id       = "${local.vpc_id}"
+  subnets      = ["${local.private_subnets}"]
+  cluster_name = "${aws_ecs_cluster.cluster.name}"
+  api_id       = "${aws_api_gateway_rest_api.api.id}"
 
-  container_port = "8888"
-  cluster_name   = "${aws_ecs_cluster.cluster.name}"
+  gateway_depends = [
+    "${module.root_resource_integration.uri}",
+    "${module.simple_integration.uri}",
+  ]
 
-  remus_container_image = "${local.remus_app_uri}"
-  remus_es_config       = "${local.remus_es_config}"
-  remus_task_number     = "${local.remus_task_number}"
+  lb_arn           = "${module.nlb.arn}"
+  lb_ingress_sg_id = "${aws_security_group.service_lb_ingress_security_group.id}"
+}
 
-  romulus_container_image = "${local.romulus_app_uri}"
-  romulus_es_config       = "${local.romulus_es_config}"
-  romulus_task_number     = "${local.romulus_task_number}"
+module "catalogue_api_staging" {
+  source = "./catalogue_api"
 
-  nginx_container_image = "${local.nginx_container_uri}"
+  environment           = "${local.staging_name}"
+  api_container_image   = "${module.staging_images.services["api"]}"
+  nginx_container_image = "${module.staging_images.services["nginx_api-gw"]}"
+  listener_port         = "${local.staging_listener_port}"
+  task_desired_count    = "${local.staging_task_number}"
+  es_config             = "${local.staging_es_config}"
 
-  production_api = "${local.production_api}"
-  stage_api      = "${local.stage_api}"
+  namespace    = "${local.namespace}"
+  vpc_id       = "${local.vpc_id}"
+  subnets      = ["${local.private_subnets}"]
+  cluster_name = "${aws_ecs_cluster.cluster.name}"
+  api_id       = "${aws_api_gateway_rest_api.api.id}"
 
-  alarm_topic_arn = "${local.gateway_server_error_alarm_arn}"
+  gateway_depends = [
+    "${module.root_resource_integration.uri}",
+    "${module.simple_integration.uri}",
+  ]
+
+  lb_arn           = "${module.nlb.arn}"
+  lb_ingress_sg_id = "${aws_security_group.service_lb_ingress_security_group.id}"
 }
 
 module "data_api" {
@@ -33,16 +56,23 @@ module "data_api" {
 
   es_config_snapshot = "${local.prod_es_config}"
 
-  snapshot_generator_release_uri = "${local.snapshot_generator_release_uri}"
+  snapshot_generator_release_uri = "${module.latest_images.services["snapshot_generator"]}"
 
   critical_slack_webhook = ""
 
   vpc_id          = "${local.vpc_id}"
   private_subnets = ["${local.private_subnets}"]
+  route_zone_id   = "${local.routemaster_router53_zone_id}"
+
+  providers = {
+    aws.us_e1            = "aws.us_e1"
+    aws.routemaster      = "aws.routemaster"
+    aws.platform_account = "aws.platform_account"
+  }
 }
 
 module "api_docs" {
   source = "./api_docs"
 
-  update_api_docs_release_uri = "${local.update_api_docs_release_uri}"
+  update_api_docs_release_uri = "${module.latest_images.services["update_api_docs"]}"
 }

@@ -1,33 +1,48 @@
-module "services" {
-  source = "./services"
+module "service" {
+  source = "./service"
 
-  namespace = "${var.namespace}"
-
+  namespace    = "${var.namespace}-${var.environment}"
   namespace_id = "${aws_service_discovery_private_dns_namespace.namespace.id}"
 
   subnets      = ["${var.subnets}"]
   cluster_name = "${var.cluster_name}"
   vpc_id       = "${var.vpc_id}"
-  nlb_arn      = "${module.nlb.arn}"
+  lb_arn       = "${var.lb_arn}"
 
-  container_port = "${var.container_port}"
+  container_port = "${local.api_container_port}"
 
-  remus_container_image = "${var.remus_container_image}"
-  remus_es_config       = "${var.remus_es_config}"
-  remus_listener_port   = "${local.remus_listener_port}"
-
-  romulus_container_image = "${var.romulus_container_image}"
-  romulus_es_config       = "${var.romulus_es_config}"
-  romulus_listener_port   = "${local.romulus_listener_port}"
+  container_image = "${var.api_container_image}"
+  es_config       = "${var.es_config}"
+  listener_port   = "${var.listener_port}"
 
   nginx_container_image = "${var.nginx_container_image}"
-  nginx_container_port  = "${var.nginx_container_port}"
+  nginx_container_port  = "${local.nginx_container_port}"
 
-  remus_task_number   = "${var.remus_task_number}"
-  romulus_task_number = "${var.romulus_task_number}"
+  task_desired_count = "${var.task_desired_count}"
+
+  security_group_ids = ["${var.lb_ingress_sg_id}"]
+
+  service_egress_security_group_id = "${aws_security_group.service_egress_security_group.id}"
 }
 
 resource "aws_service_discovery_private_dns_namespace" "namespace" {
-  name = "${var.namespace}"
+  name = "${var.namespace}-${var.environment}"
   vpc  = "${var.vpc_id}"
+}
+
+resource "aws_security_group" "service_egress_security_group" {
+  name        = "${var.namespace}-${var.environment}-service_egress_security_group"
+  description = "Allow any traffic on any port out of the (${var.namespace}-${var.environment}) service"
+  vpc_id      = "${var.vpc_id}"
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags {
+    Name = "${var.namespace}"
+  }
 }

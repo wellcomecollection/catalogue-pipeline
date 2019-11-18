@@ -39,5 +39,5 @@ module "ecr_repository_update_api_docs" {
 # ECS Cluster
 
 resource "aws_ecs_cluster" "cluster" {
-  name = "${local.namespace}"
+  name = "${replace(local.namespace, "_", "-")}"
 }

@@ -71,7 +71,7 @@ def get_snapshot_report():
             # way the bucket is laid out.  It's a quick-win helper for
             # bug diagnosis, not a prod API.
             s3_object = s3.head_object(
-                Bucket="wellcomecollection-data-public",
+                Bucket="wellcomecollection-data-public-delta",
                 Key=f"catalogue/{version}/works.json.gz",
             )
 
