@@ -29,7 +29,7 @@ variable "private_subnets" {
 }
 
 variable "data_page_url" {
-  default = "data2.wellcomecollection.org"
+  default = "data.wellcomecollection.org"
 }
 
 variable "route_zone_id" {}

@@ -2,6 +2,10 @@ resource "aws_acm_certificate" "data_page" {
   provider          = "aws.us_e1"
   domain_name       = "${var.data_page_url}"
   validation_method = "DNS"
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "aws_route53_record" "cert_validation" {
