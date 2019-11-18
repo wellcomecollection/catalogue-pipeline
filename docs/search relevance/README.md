@@ -44,7 +44,9 @@ Some of the data we've used to measure search relevance is collected in sessions
 
 This data is small (20-50 rows per person, per session, with ~10 people taking part), but can be deeply contextualised by talking to the people who took part.
 
-We're now ready to start collecting explicit feedback through an opt-in mechanism on wellcomecollection.org/works, with all users given the option to rate the relevance of individual results to their query. The resulting data matches the format of the small-scale research described above, but can be collected at a much faster pace with less use of analyst time. The increased sample size and breadth of subjects evaluated should also give us more confidence in the 'goodness' of the changes we're making to our search algorithms.
+We're now ready to start collecting explicit feedback through an [opt-in mechanism on wellcomecollection.org/works](https://github.com/wellcometrust/wellcomecollection.org/issues/4411), with all users given the option to rate the relevance of individual results in relation to their query.
+
+The resulting data matches the format of the small-scale research described above, but can be collected at a much faster pace with less use of an analyst's time. The increased sample size and breadth of subjects evaluated should also give us more confidence in the 'goodness' of the changes we're making to our search algorithms.
 
 ### Metrics
 
