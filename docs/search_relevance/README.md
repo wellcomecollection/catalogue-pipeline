@@ -29,10 +29,11 @@ We're collecting data in two distinct ways:
 The larger of the two major datasets we are using is passively collected while users carry out searches and look through pages of results.
 
 We track:
-* The search query parameters, such as the search terms and page number
-* The works they click on and its position in the result set
-* Whether they're on the Wellcome staff network as we want to be able to distinguish between internal and external users
-* The toggles and A/B tests that are enabled or disabled
+
+- The search query parameters, such as the search terms and page number
+- The works they click on and its position in the result set
+- Whether they're on the Wellcome staff network as we want to be able to distinguish between internal and external users
+- The toggles and A/B tests that are enabled or disabled
 
 This data is aggregated under an anonymous session id.
 
@@ -69,8 +70,8 @@ It's important to note that the metrics we're using aren't perfect, and we can't
 
 # Tests
 
-- [read about test 1 here](./test_1.md)
-- [read about test 2 here](./test_2.md)
-- [read about test 3 here](./test_3.md)
-- [read about test 4 here](./test_4.md)
-- [read about test 5 here](./test_5.md)
+- [read about test 1 here](./001_explicit_feedback.md)
+- [read about test 2 here](./002_implicit_feedback.md)
+- [read about test 3 here](./003_adding_notes.md)
+- [read about test 4 here](./004_AND_or_OR.md)
+- [read about test 5 here](./005_stacked_queries.md)
