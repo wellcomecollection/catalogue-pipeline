@@ -1,5 +1,7 @@
 package uk.ac.wellcome.platform.transformer.mets.parsers
 
+import java.io.InputStream
+
 import uk.ac.wellcome.platform.transformer.mets.transformer.Mets
 
 import scala.util.{Failure, Success, Try}
@@ -7,8 +9,11 @@ import scala.xml.{Elem, XML}
 
 object MetsXmlParser {
 
-  def apply(str: String): Try[Mets] =
-    MetsXmlParser(XML.loadString(str))
+  def apply(inputStream: InputStream): Try[Mets] =
+    for {
+      is <-Try(XML.load(inputStream))
+      mets <- MetsXmlParser(is)
+    }yield(mets)
 
   def apply(root: Elem): Try[Mets] =
     {

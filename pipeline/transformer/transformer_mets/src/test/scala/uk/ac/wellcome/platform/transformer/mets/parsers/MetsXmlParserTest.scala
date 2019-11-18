@@ -1,8 +1,8 @@
 package uk.ac.wellcome.platform.transformer.mets.parsers
 
+import org.apache.commons.io.IOUtils
 import org.scalatest.{FunSpec, Matchers}
 
-import scala.io.Source
 import scala.util.Failure
 
 class MetsXmlParserTest extends FunSpec with Matchers {
@@ -31,21 +31,21 @@ class MetsXmlParserTest extends FunSpec with Matchers {
     MetsXmlParser(xmlMultipleLicense) shouldBe a [Failure[_]]
   }
 
+  it("fails if the input stream is not an xml") {
+    MetsXmlParser("hagdf".toInputStream) shouldBe a [Failure[_]]
+  }
 
-  val xml =
-    Source
-      .fromInputStream(getClass.getResourceAsStream("/b30246039.xml"))
-      .getLines
-      .mkString
 
-  val xmlNodmdSec =
+  def xml = getClass.getResourceAsStream("/b30246039.xml")
+
+  def xmlNodmdSec =
     s"""
        |<mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3">
        |  <mods:recordIdentifier source="gbv-ppn">b30246039</mods:recordIdentifier>
        |</mets:mets>
-       |""".stripMargin
+       |""".stripMargin.toInputStream
 
-  val xmlMultipleIds =
+  def xmlMultipleIds =
     s"""
        |<mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3">
        |  <mets:dmdSec ID="DMDLOG_0000">
@@ -61,9 +61,9 @@ class MetsXmlParserTest extends FunSpec with Matchers {
        |    </mets:mdWrap>
        |  </mets:dmdSec>
        |</mets:mets>
-       |""".stripMargin
+       |""".stripMargin.toInputStream
 
-  val xmlNoLicense =
+  def xmlNoLicense =
     s"""
        |<mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3">
        |<mets:dmdSec ID="DMDLOG_0000">
@@ -78,9 +78,9 @@ class MetsXmlParserTest extends FunSpec with Matchers {
        |  </mets:mdWrap>
        |</mets:dmdSec>
        |</mets:mets>
-       |""".stripMargin
+       |""".stripMargin.toInputStream
 
-  val xmlMultipleLicense =
+  def xmlMultipleLicense =
     s"""
        |<mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3">
        |  <mets:dmdSec ID="DMDLOG_0000">
@@ -97,5 +97,12 @@ class MetsXmlParserTest extends FunSpec with Matchers {
        |    </mets:mdWrap>
        |  </mets:dmdSec>
        |</mets:mets>
-       |""".stripMargin
+       |""".stripMargin.toInputStream
+
+  implicit class StringToInputStream(string: String){
+    def toInputStream = IOUtils.toInputStream(string, "UTF-8")
+  }
+
 }
+
+

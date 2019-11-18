@@ -17,10 +17,20 @@ class MetsTest extends FunSpec with RandomStrings with Matchers{
     val digitalLocation = DigitalLocation(url,LocationType("iiif-presentation"),license = Some(License_CCBYNC))
 
     val unidentifiableItem: MaybeDisplayable[Item] = Unidentifiable(Item(locations = List(digitalLocation)))
-    metsData.toWork(version) shouldBe UnidentifiedInvisibleWork(
+    metsData.toWork(version).get shouldBe UnidentifiedInvisibleWork(
       version = version,
       sourceIdentifier = expectedSourceIdentifier,
-      WorkData(items = List(unidentifiableItem)
+      WorkData(items = List(unidentifiableItem),
+        mergeCandidates = List(
+          MergeCandidate(
+            identifier = SourceIdentifier(
+              identifierType = IdentifierType("sierra-system-number"),
+              ontologyType = "Work",
+              value = bNumber
+            ),
+            reason = Some("METS work")
+          )
+        )
       )
     )
   }
@@ -35,10 +45,21 @@ class MetsTest extends FunSpec with RandomStrings with Matchers{
     val digitalLocation = DigitalLocation(url,LocationType("iiif-presentation"),license = None)
 
     val unidentifiableItem: MaybeDisplayable[Item] = Unidentifiable(Item(locations = List(digitalLocation)))
-    metsData.toWork(version) shouldBe UnidentifiedInvisibleWork(
+    metsData.toWork(version).get shouldBe UnidentifiedInvisibleWork(
       version = version,
       sourceIdentifier = expectedSourceIdentifier,
-      WorkData(items = List(unidentifiableItem)
+      WorkData(items = List(unidentifiableItem),
+        mergeCandidates = List(
+          MergeCandidate(
+            identifier = SourceIdentifier(
+              identifierType = IdentifierType("sierra-system-number"),
+              ontologyType = "Work",
+              value = bNumber
+            ),
+            reason = Some("METS work")
+          )
+        )
+
       )
     )
   }
@@ -48,9 +69,9 @@ class MetsTest extends FunSpec with RandomStrings with Matchers{
     val metsData = Mets(recordIdentifier = bNumber, accessCondition = Some("blah"))
     val version = 1
 
-    intercept[ShouldNotTransformException]{
-      metsData.toWork(version)
-    }
+
+    metsData.toWork(version).failed.get shouldBe a [ShouldNotTransformException]
+
   }
 
 }
