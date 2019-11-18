@@ -20,7 +20,7 @@ class MetsStore(store: VersionedStore[String, Int, MetsData]) {
   def shouldUpdate(bagId: String, data: MetsData): Either[StorageError, Boolean] =
     store.getLatest(bagId) match {
       case Right(Identified(_, existingData)) => 
-        Right(existingData.version >= data.version && existingData.path != data.path)
+        Right(data.version >= existingData.version && data.path != existingData.path)
       case Left(_: NoVersionExistsError) => Right(true)
       case Left(err) => Left(err)
     }
