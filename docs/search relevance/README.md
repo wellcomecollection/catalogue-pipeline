@@ -40,7 +40,7 @@ We can collect lots of this data (100,000s of actions logged so far), but it lac
 
 - **Explicit data collection:** users are told that they are part of an experiment, and providing us with information is their primary motive.
 
-Some of the data we've used to measure search relevance is collected in sessions with internal users who know the collection well and the kind of things that users might be looking for, following a set of instructions to obtain data in a useful format.
+Some of the data we've used to measure search relevance is collected in sessions with internal users who know the collection well and the kind of things that people / researchers might be looking for, following a set of instructions to obtain data in a useful format.
 
 This data is small (20-50 rows per person, per session, with ~10 people taking part), but can be deeply contextualised by talking to the people who took part.
 
