@@ -48,18 +48,18 @@ class MetsXmlParserTest extends FunSpec with Matchers {
   val xmlMultipleIds =
     s"""
        |<mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3">
-       |<mets:dmdSec ID="DMDLOG_0000">
+       |  <mets:dmdSec ID="DMDLOG_0000">
        |    <mets:mdWrap MDTYPE="MODS">
        |      <mets:xmlData>
        |        <mods:mods>
-       |        <mods:recordInfo>
-       |  <mods:recordIdentifier source="gbv-ppn">b30246039</mods:recordIdentifier>
-       |  <mods:recordIdentifier source="gbv-ppn">b3024346567</mods:recordIdentifier>
-       |  </mods:recordInfo>
-       |  </mods:mods>
-       |  </mets:xmlData>
-       |  </mets:mdWrap>
-       |</mets:dmdSec>
+       |          <mods:recordInfo>
+       |            <mods:recordIdentifier source="gbv-ppn">b30246039</mods:recordIdentifier>
+       |            <mods:recordIdentifier source="gbv-ppn">b3024346567</mods:recordIdentifier>
+       |          </mods:recordInfo>
+       |        </mods:mods>
+       |      </mets:xmlData>
+       |    </mets:mdWrap>
+       |  </mets:dmdSec>
        |</mets:mets>
        |""".stripMargin
 
@@ -67,14 +67,14 @@ class MetsXmlParserTest extends FunSpec with Matchers {
     s"""
        |<mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3">
        |<mets:dmdSec ID="DMDLOG_0000">
-       |    <mets:mdWrap MDTYPE="MODS">
-       |      <mets:xmlData>
-       |        <mods:mods>
-       |                <mods:recordInfo>
-       |  <mods:recordIdentifier source="gbv-ppn">b30246039</mods:recordIdentifier>
-       |  </mods:recordInfo>
-       |  </mods:mods>
-       |  </mets:xmlData>
+       |  <mets:mdWrap MDTYPE="MODS">
+       |    <mets:xmlData>
+       |      <mods:mods>
+       |        <mods:recordInfo>
+       |          <mods:recordIdentifier source="gbv-ppn">b30246039</mods:recordIdentifier>
+       |        </mods:recordInfo>
+       |      </mods:mods>
+       |    </mets:xmlData>
        |  </mets:mdWrap>
        |</mets:dmdSec>
        |</mets:mets>
@@ -82,20 +82,20 @@ class MetsXmlParserTest extends FunSpec with Matchers {
 
   val xmlMultipleLicense =
     s"""
-       |<mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3">
-       |<mets:dmdSec ID="DMDLOG_0000">
+       ||<mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3">
+       |  <mets:dmdSec ID="DMDLOG_0000">
        |    <mets:mdWrap MDTYPE="MODS">
        |      <mets:xmlData>
        |        <mods:mods>
-       |                <mods:recordInfo>
-       |  <mods:recordIdentifier source="gbv-ppn">b30246039</mods:recordIdentifier>
-       |  </mods:recordInfo>
-       |  <mods:accessCondition type="dz">CC-BY-NC</mods:accessCondition>
-       |  <mods:accessCondition type="dz">CC-BY</mods:accessCondition>
-       |  </mods:mods>
-       |  </mets:xmlData>
-       |  </mets:mdWrap>
-       |</mets:dmdSec>
+       |          <mods:recordInfo>
+       |            <mods:recordIdentifier source="gbv-ppn">b30246039</mods:recordIdentifier>
+       |          </mods:recordInfo>
+       |          <mods:accessCondition type="dz">CC-BY-NC</mods:accessCondition>
+       |          <mods:accessCondition type="dz">CC-BY</mods:accessCondition>
+       |        </mods:mods>
+       |      </mets:xmlData>
+       |    </mets:mdWrap>
+       |  </mets:dmdSec>
        |</mets:mets>
        |""".stripMargin
 }
