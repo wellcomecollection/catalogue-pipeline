@@ -19,7 +19,7 @@ case class Bag(info: BagInfo, manifest: BagManifest, location: BagLocation, vers
           .map(version =>  Right(MetsData(path, version)))
           .getOrElse(Left(new Exception("Couldn't parse version")))
       }
-      .getOrElse(Left(new Exception("Couldn't parse METS path")))
+      .getOrElse(Left(new Exception("Couldn't find METS path")))
 
   def metsPath: Option[String] =
     manifest.files
