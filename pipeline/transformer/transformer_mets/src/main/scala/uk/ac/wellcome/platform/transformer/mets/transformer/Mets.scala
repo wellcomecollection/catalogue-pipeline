@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.transformer.mets.transformer
 
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.transformer.mets.exceptions.ShouldNotTransformException
 
 import scala.util.Try
 import cats.implicits._
@@ -40,9 +39,7 @@ case class Mets(
 
   private def parseLicense = {
     accessCondition.map { license =>
-      Try(License.createLicense(license.toLowerCase)).recover{
-        case _:Exception => throw new ShouldNotTransformException(s"$license is not a valid license")
-      }
+      Try(License.createLicense(license.toLowerCase))
     }.sequence
   }
 

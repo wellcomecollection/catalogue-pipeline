@@ -3,7 +3,6 @@ package uk.ac.wellcome.platform.transformer.mets.transformer
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.models.generators.RandomStrings
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.transformer.mets.exceptions.ShouldNotTransformException
 
 class MetsTest extends FunSpec with RandomStrings with Matchers{
 
@@ -70,7 +69,7 @@ class MetsTest extends FunSpec with RandomStrings with Matchers{
     val version = 1
 
 
-    metsData.toWork(version).failed.get shouldBe a [ShouldNotTransformException]
+    metsData.toWork(version).failed.get shouldBe a [Exception]
 
   }
 

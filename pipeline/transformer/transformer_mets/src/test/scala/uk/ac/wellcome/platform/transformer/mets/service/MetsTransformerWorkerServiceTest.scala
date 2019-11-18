@@ -6,7 +6,7 @@ import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
-import uk.ac.wellcome.messaging.fixtures.SQS.Queue
+import uk.ac.wellcome.messaging.fixtures.SQS.{Queue, QueuePair}
 import uk.ac.wellcome.models.generators.RandomStrings
 import uk.ac.wellcome.models.work.internal.{DigitalLocation, IdentifierType, Item, License_CCBYNC, LocationType, MaybeDisplayable, MergeCandidate, SourceIdentifier, TransformedBaseWork, Unidentifiable, UnidentifiedInvisibleWork, WorkData}
 import uk.ac.wellcome.platform.transformer.mets.fixtures.MetsGenerators
@@ -34,6 +34,8 @@ class MetsTransformerWorkerServiceTest extends FunSpec with BigMessagingFixture 
                 val works = getMessages[UnidentifiedInvisibleWork](topic)
                 works.length should be >= 1
 
+                assertQueueEmpty(queue)
+
                 val url = s"https://wellcomelibrary.org/iiif/$identifier/manifest"
                 val digitalLocation = DigitalLocation(url,LocationType("iiif-presentation"),license = Some(License_CCBYNC))
                 val item: MaybeDisplayable[Item] = Unidentifiable(Item(locations = List(digitalLocation)))
@@ -54,6 +56,33 @@ class MetsTransformerWorkerServiceTest extends FunSpec with BigMessagingFixture 
                   )
                 )
 
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  it("sends failed messages to the dlq") {
+    withLocalSqsQueueAndDlq{ case QueuePair(queue, dlq) =>
+      withLocalSnsTopic { topic =>
+        withLocalS3Bucket { messagingBucket =>
+          withLocalS3Bucket { storageBucket =>
+            val version = randomInt(1, 10)
+            val path = "mets.xml"
+            s3Client.putObject(storageBucket.name,path,"this is not a valid mets file")
+
+            sendSqsMessage(queue, MetsData(path, version))
+
+            withWorkerService(topic = topic, messagingBucket = messagingBucket, storageBucket = storageBucket, queue = queue) { _ =>
+
+              eventually{
+                val works = getMessages[UnidentifiedInvisibleWork](topic)
+                works should have size 0
+
+                assertQueueEmpty(queue)
+                assertQueueHasSize(dlq, 1)
               }
             }
           }
