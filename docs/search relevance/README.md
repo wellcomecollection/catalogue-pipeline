@@ -26,7 +26,15 @@ We're collecting data in two distinct ways:
 
 - **Implicit data collection:** users know that their data might be used to understand aggregate user behaviour, but their behaviour on the site is driven by another motive.
 
-The larger of the two major datasets we're using is passively collected while users carry out searches and look through pages of results. We track the query string, the page number, the works they click on, and whether they're on the Wellcome staff network (we want to be able to distinguish between internal and external users). This data is aggregated under an anonymous session id.
+The larger of the two major datasets we are using is passively collected while users carry out searches and look through pages of results.
+
+We track:
+* The search query parameters, such as the search terms and page number
+* The works they click on and its position in the result set
+* Whether they're on the Wellcome staff network as we want to be able to distinguish between internal and external users
+* The toggles and A/B tests that are enabled or disabled
+
+This data is aggregated under an anonymous session id.
 
 We can collect lots of this data (100,000s of actions logged so far), but it lacks any contextual information and unpicking a user's motivation for an action is hard.
 
