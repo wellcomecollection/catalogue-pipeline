@@ -13,12 +13,16 @@ import uk.ac.wellcome.mets_adapter.models._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class BagRetriever(url: String, tokenService: TokenService)(
+trait BagRetriever {
+  def getBag(update: IngestUpdate): Future[Option[Bag]]
+}
+
+class HttpBagRetriever(url: String, tokenService: TokenService)(
   implicit
   actorSystem: ActorSystem,
   materializer: ActorMaterializer,
   executionContext: ExecutionContext)
-    extends Logging {
+    extends BagRetriever with Logging {
 
   def getBag(update: IngestUpdate): Future[Option[Bag]] = {
     debug(s"Executing request to $url/${update.space}/${update.bagId}")

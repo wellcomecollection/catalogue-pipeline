@@ -95,9 +95,9 @@ class BagTest extends FunSpec with Matchers {
   }
 
   def createBag(
-    s3Path: String = "path/to/bag",
+    s3Path: String = "digitised/b30246039",
     version: String = "v1",
-    files: List[(String, String)] = Nil) =
+    files: List[(String, String)] = List("data/b30246039.xml" -> "v1/data/b30246039.xml")) =
     Bag(
       BagInfo("external-identifier"),
       BagManifest(

@@ -1,13 +1,14 @@
 package uk.ac.wellcome.mets_adapter.services
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 import akka.http.scaladsl.model.headers.OAuth2BearerToken
 import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatest.{FunSpec, Matchers}
-import uk.ac.wellcome.akka.fixtures.Akka
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
+import uk.ac.wellcome.akka.fixtures.Akka
+import uk.ac.wellcome.mets_adapter.fixtures.BagsWiremock
 
 class TokenServiceTest
     extends FunSpec

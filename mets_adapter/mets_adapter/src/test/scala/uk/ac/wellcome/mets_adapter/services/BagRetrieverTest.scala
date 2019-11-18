@@ -12,6 +12,7 @@ import org.scalatest.{FunSpec, Inside, Matchers}
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.mets_adapter.models._
+import uk.ac.wellcome.mets_adapter.fixtures.BagsWiremock
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -135,7 +136,7 @@ class BagRetrieverTest
                                          materializer: ActorMaterializer) =
     withBagsService("localhost") { port =>
       testWith(
-        new BagRetriever(
+        new HttpBagRetriever(
           s"http://localhost:$port/storage/v1/bags",
           tokenService)
       )
@@ -154,7 +155,7 @@ class BagRetrieverTest
         "https://api.wellcomecollection.org/scope")(initialDelay, interval) {
         tokenService =>
           testWith(
-            new BagRetriever(
+            new HttpBagRetriever(
               s"http://localhost:$port/storage/v1/bags",
               tokenService)
           )

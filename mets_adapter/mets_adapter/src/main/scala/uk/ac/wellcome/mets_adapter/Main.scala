@@ -12,6 +12,7 @@ import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.mets_adapter.services.{
   MetsAdapterWorkerService,
   BagRetriever,
+  HttpBagRetriever,
   TokenService,
   MetsStore,
 }
@@ -41,7 +42,7 @@ object Main extends WellcomeTypesafeApp {
     actorSystem: ActorSystem,
     materializer: ActorMaterializer,
     ec: ExecutionContext): BagRetriever =
-    new BagRetriever(
+    new HttpBagRetriever(
       ???,
       buildTokenService(config)
     )

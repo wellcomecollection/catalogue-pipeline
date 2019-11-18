@@ -62,12 +62,13 @@ class MetsAdapterWorkerService(
     Flow[(Context, MetsData)]
       .map { case (ctx, data) => (ctx, metsStore.storeMetsData(ctx.bagId, data)) }
       .via(logErrors)
-      .collect { case (ctx, Some(data)) => (ctx, data) }
 
   def publishMetsData =
-    Flow[(Context, MetsData)]
-      .map { case (ctx, data) =>
-        (ctx, msgSender.sendT(data).toEither)
+    Flow[(Context, Option[MetsData])]
+      .map {
+        case (ctx, Some(data)) =>
+          (ctx, msgSender.sendT(data).toEither.right.map(Some(_)))
+        case (ctx, None) => (ctx, Right(None))
       }
       .via(logErrors)
       .map { case (Context(msg, _), _) => msg }
