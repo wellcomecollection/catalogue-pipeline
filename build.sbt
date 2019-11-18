@@ -106,7 +106,7 @@ lazy val transformer_sierra = setupProject(project,
 
 lazy val transformer_mets = setupProject(project,
   folder = "pipeline/transformer/transformer_mets",
-  localDependencies = Seq(internal_model, big_messaging_typesafe),
+  localDependencies = Seq(internal_model, big_messaging_typesafe, mets_adapter),
   externalDependencies = CatalogueDependencies.metsTransformerDependencies
 )
 
