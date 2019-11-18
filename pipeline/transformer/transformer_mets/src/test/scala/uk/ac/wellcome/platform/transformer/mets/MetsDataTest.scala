@@ -3,6 +3,7 @@ package uk.ac.wellcome.platform.transformer.mets
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.models.generators.RandomStrings
 import uk.ac.wellcome.models.work.internal.{DigitalLocation, IdentifierType, Item, License_CCBYNC, LocationType, MaybeDisplayable, SourceIdentifier, Unidentifiable, UnidentifiedInvisibleWork, WorkData}
+import uk.ac.wellcome.platform.transformer.mets.exceptions.ShouldNotTransformException
 
 class MetsDataTest extends FunSpec with RandomStrings with Matchers{
 
@@ -10,7 +11,7 @@ class MetsDataTest extends FunSpec with RandomStrings with Matchers{
     val bNumber = randomAlphanumeric(10)
     val metsData = MetsData(recordIdentifier = bNumber, accessCondition = Some("CC-BY-NC"))
     val version = 1
-    val expectedSourceIdentifier = SourceIdentifier(IdentifierType("mets","mets"), ontologyType = "Work", value = bNumber)
+    val expectedSourceIdentifier = SourceIdentifier(IdentifierType("mets","METS"), ontologyType = "Work", value = bNumber)
 
     val url = s"https://wellcomelibrary.org/iiif/$bNumber/manifest"
     val digitalLocation = DigitalLocation(url,LocationType("iiif-presentation"),license = Some(License_CCBYNC))
@@ -28,7 +29,7 @@ class MetsDataTest extends FunSpec with RandomStrings with Matchers{
     val bNumber = randomAlphanumeric(10)
     val metsData = MetsData(recordIdentifier = bNumber, accessCondition = None)
     val version = 1
-    val expectedSourceIdentifier = SourceIdentifier(IdentifierType("mets","mets"), ontologyType = "Work", value = bNumber)
+    val expectedSourceIdentifier = SourceIdentifier(IdentifierType("mets","METS"), ontologyType = "Work", value = bNumber)
 
     val url = s"https://wellcomelibrary.org/iiif/$bNumber/manifest"
     val digitalLocation = DigitalLocation(url,LocationType("iiif-presentation"),license = None)
@@ -54,5 +55,4 @@ class MetsDataTest extends FunSpec with RandomStrings with Matchers{
 
 }
 
-class ShouldNotTransformException(message: String)
-  extends RuntimeException(message)
+
