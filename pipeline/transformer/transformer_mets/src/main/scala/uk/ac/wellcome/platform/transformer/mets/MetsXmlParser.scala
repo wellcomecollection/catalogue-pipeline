@@ -5,15 +5,15 @@ import scala.xml.{Elem, XML}
 
 object MetsXmlParser {
 
-  def apply(str: String): Try[MetsData] =
+  def apply(str: String): Try[Mets] =
     MetsXmlParser(XML.loadString(str))
 
-  def apply(root: Elem): Try[MetsData] =
+  def apply(root: Elem): Try[Mets] =
     {
       for {
         id <- recordIdentifier(root)
         maybeAccessCondition <- accessCondition(root)
-      } yield MetsData(
+      } yield Mets(
         recordIdentifier = id,
         accessCondition = maybeAccessCondition,
       )

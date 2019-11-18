@@ -5,11 +5,11 @@ import uk.ac.wellcome.models.generators.RandomStrings
 import uk.ac.wellcome.models.work.internal.{DigitalLocation, IdentifierType, Item, License_CCBYNC, LocationType, MaybeDisplayable, SourceIdentifier, Unidentifiable, UnidentifiedInvisibleWork, WorkData}
 import uk.ac.wellcome.platform.transformer.mets.exceptions.ShouldNotTransformException
 
-class MetsDataTest extends FunSpec with RandomStrings with Matchers{
+class MetsTest extends FunSpec with RandomStrings with Matchers{
 
   it("creates a invisible work with an item and a license"){
     val bNumber = randomAlphanumeric(10)
-    val metsData = MetsData(recordIdentifier = bNumber, accessCondition = Some("CC-BY-NC"))
+    val metsData = Mets(recordIdentifier = bNumber, accessCondition = Some("CC-BY-NC"))
     val version = 1
     val expectedSourceIdentifier = SourceIdentifier(IdentifierType("mets","METS"), ontologyType = "Work", value = bNumber)
 
@@ -27,7 +27,7 @@ class MetsDataTest extends FunSpec with RandomStrings with Matchers{
 
   it("creates a invisible work with an item and no license"){
     val bNumber = randomAlphanumeric(10)
-    val metsData = MetsData(recordIdentifier = bNumber, accessCondition = None)
+    val metsData = Mets(recordIdentifier = bNumber, accessCondition = None)
     val version = 1
     val expectedSourceIdentifier = SourceIdentifier(IdentifierType("mets","METS"), ontologyType = "Work", value = bNumber)
 
@@ -45,7 +45,7 @@ class MetsDataTest extends FunSpec with RandomStrings with Matchers{
 
   it("fails creating a work if it cannot parse the license") {
     val bNumber = randomAlphanumeric(10)
-    val metsData = MetsData(recordIdentifier = bNumber, accessCondition = Some("blah"))
+    val metsData = Mets(recordIdentifier = bNumber, accessCondition = Some("blah"))
     val version = 1
 
     intercept[ShouldNotTransformException]{

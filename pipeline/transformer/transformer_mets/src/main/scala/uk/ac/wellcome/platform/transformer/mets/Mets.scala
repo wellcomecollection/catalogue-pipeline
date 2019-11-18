@@ -5,7 +5,7 @@ import uk.ac.wellcome.platform.transformer.mets.exceptions.ShouldNotTransformExc
 
 import scala.util.Try
 
-case class MetsData(
+case class Mets(
                      recordIdentifier: String,
                      accessCondition: Option[String]
                    ) {
