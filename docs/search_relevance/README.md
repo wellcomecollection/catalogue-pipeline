@@ -37,7 +37,7 @@ We track:
 
 This data is aggregated under an anonymous session id.
 
-We can collect lots of this data (100,000s of actions logged so far), but it lacks any contextual information and unpicking a user's motivation for an action is hard.
+We can collect lots of this data (100,000s of actions logged so far), but it lacks any contextual information and unpicking a user's motivation for an action is hard. Collecting explict feedback (below) should solve this problem.
 
 - **Explicit data collection:** users are told that they are part of an experiment, and providing us with information is their primary motive.
 
