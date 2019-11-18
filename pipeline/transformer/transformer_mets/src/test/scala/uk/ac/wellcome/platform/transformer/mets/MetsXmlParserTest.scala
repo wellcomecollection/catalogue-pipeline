@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.transformer.mets
 import scala.io.Source
 import org.scalatest.{FunSpec, Matchers}
 
-class MiroRecordTest extends FunSpec with Matchers {
+class MetsXmlParserTest extends FunSpec with Matchers {
 
   val xml =
     Source
