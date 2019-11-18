@@ -1,4 +1,4 @@
-# Test 5
+# Test 5: Stacked queries
 
 ## Candidates
 
