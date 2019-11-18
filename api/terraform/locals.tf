@@ -36,6 +36,6 @@ locals {
     "update_api_docs",
   ]
 
-  prod_domain_name    = "catalogue.api2.wellcomecollection.org"
+  prod_domain_name    = "catalogue.api.wellcomecollection.org"
   staging_domain_name = "catalogue.api-stage.wellcomecollection.org"
 }
