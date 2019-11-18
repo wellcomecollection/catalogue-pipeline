@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.transformer.mets
+package uk.ac.wellcome.platform.transformer.mets.transformer
 
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.mets.exceptions.ShouldNotTransformException

@@ -1,8 +1,8 @@
-package uk.ac.wellcome.platform.transformer.mets
+package uk.ac.wellcome.platform.transformer.mets.transformer
 
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.models.generators.RandomStrings
-import uk.ac.wellcome.models.work.internal.{DigitalLocation, IdentifierType, Item, License_CCBYNC, LocationType, MaybeDisplayable, SourceIdentifier, Unidentifiable, UnidentifiedInvisibleWork, WorkData}
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.mets.exceptions.ShouldNotTransformException
 
 class MetsTest extends FunSpec with RandomStrings with Matchers{

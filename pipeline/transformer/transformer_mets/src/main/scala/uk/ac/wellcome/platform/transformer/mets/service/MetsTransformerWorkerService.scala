@@ -8,10 +8,10 @@ import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.typesafe.Runnable
 import uk.ac.wellcome.json.JsonUtil._
 
-case class MetsLocation(location: String)
+case class MetsData(path: String, version: Int)
 
 class MetsTransformerWorkerService[MsgDestination](
-  msgStream: SQSStream[MetsLocation],
+  msgStream: SQSStream[MetsData],
   msgSender: MessageSender[MsgDestination])
     extends Runnable {
 

@@ -1,8 +1,8 @@
-package uk.ac.wellcome.platform.transformer.mets
+package uk.ac.wellcome.platform.transformer.mets.parsers
 
-import scala.io.Source
 import org.scalatest.{FunSpec, Matchers}
 
+import scala.io.Source
 import scala.util.Failure
 
 class MetsXmlParserTest extends FunSpec with Matchers {

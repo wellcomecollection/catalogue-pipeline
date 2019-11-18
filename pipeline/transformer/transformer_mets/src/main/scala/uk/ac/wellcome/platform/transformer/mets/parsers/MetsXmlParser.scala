@@ -1,4 +1,6 @@
-package uk.ac.wellcome.platform.transformer.mets
+package uk.ac.wellcome.platform.transformer.mets.parsers
+
+import uk.ac.wellcome.platform.transformer.mets.transformer.Mets
 
 import scala.util.{Failure, Success, Try}
 import scala.xml.{Elem, XML}
