@@ -35,7 +35,7 @@ import uk.ac.wellcome.storage.locking.dynamo.{
   DynamoLockingService,
   ExpiringLock
 }
-import uk.ac.wellcome.storage.{Version, Identified}
+import uk.ac.wellcome.storage.{Identified, Version}
 import uk.ac.wellcome.storage.store.HybridStoreEntry
 
 trait MatcherFixtures
@@ -58,7 +58,10 @@ trait MatcherFixtures
       testWith(table)
     }
 
-  def withWorkerService[R](vhs: VHS, queue: SQS.Queue, topic: Topic, graphTable: Table)(
+  def withWorkerService[R](vhs: VHS,
+                           queue: SQS.Queue,
+                           topic: Topic,
+                           graphTable: Table)(
     testWith: TestWith[MatcherWorkerService[SNSConfig], R]): R =
     withSnsMessageSender(topic) { msgSender =>
       withActorSystem { implicit actorSystem =>
@@ -67,7 +70,11 @@ trait MatcherFixtures
             withWorkMatcher(workGraphStore, lockTable) { workMatcher =>
               withSQSStream[Version[String, Int], R](queue) { msgStream =>
                 val workerService =
-                  new MatcherWorkerService(vhs, msgStream, msgSender, workMatcher)
+                  new MatcherWorkerService(
+                    vhs,
+                    msgStream,
+                    msgSender,
+                    workMatcher)
                 workerService.run()
                 testWith(workerService)
               }
@@ -120,11 +127,14 @@ trait MatcherFixtures
     testWith(workNodeDao)
   }
 
-  def sendWork(work: TransformedBaseWork, vhs: VHS, queue: SQS.Queue, version: Int = 1) = {
+  def sendWork(work: TransformedBaseWork,
+               vhs: VHS,
+               queue: SQS.Queue,
+               version: Int = 1) = {
     val entry = HybridStoreEntry(work, EmptyMetadata())
     val id = work.sourceIdentifier.toString
     val key = vhs.putLatest(id)(entry) match {
-      case Left(err) => throw new Exception(s"Failed storing work in VHS: $err")
+      case Left(err)                 => throw new Exception(s"Failed storing work in VHS: $err")
       case Right(Identified(key, _)) => key
     }
     sendSqsMessage(queue, key)

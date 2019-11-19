@@ -84,7 +84,7 @@ class MatcherFeatureTest
                 listMessagesReceivedFromSNS(topic).size shouldBe 0
               }
             }
-        }
+          }
       }
     }
   }

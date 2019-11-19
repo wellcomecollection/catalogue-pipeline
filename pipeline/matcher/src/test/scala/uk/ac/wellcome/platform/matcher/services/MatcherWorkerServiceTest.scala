@@ -140,9 +140,8 @@ class MatcherWorkerServiceTest
 
             processAndAssertMatchedWorkIs(
               workBv1,
-              MatcherResult(
-                Set(MatchedIdentifiers(
-                  Set(WorkIdentifier("sierra-system-number/B", 1))))),
+              MatcherResult(Set(MatchedIdentifiers(
+                Set(WorkIdentifier("sierra-system-number/B", 1))))),
               vhs,
               queue,
               topic)
@@ -171,9 +170,8 @@ class MatcherWorkerServiceTest
 
             processAndAssertMatchedWorkIs(
               workCv1,
-              MatcherResult(
-                Set(MatchedIdentifiers(
-                  Set(WorkIdentifier("sierra-system-number/C", 1))))),
+              MatcherResult(Set(MatchedIdentifiers(
+                Set(WorkIdentifier("sierra-system-number/C", 1))))),
               vhs,
               queue,
               topic)
@@ -215,9 +213,8 @@ class MatcherWorkerServiceTest
 
             processAndAssertMatchedWorkIs(
               workAv1,
-              MatcherResult(
-                Set(MatchedIdentifiers(
-                  Set(WorkIdentifier("sierra-system-number/A", 1))))),
+              MatcherResult(Set(MatchedIdentifiers(
+                Set(WorkIdentifier("sierra-system-number/A", 1))))),
               vhs,
               queue,
               topic)
@@ -229,9 +226,8 @@ class MatcherWorkerServiceTest
 
             processAndAssertMatchedWorkIs(
               workBv1,
-              MatcherResult(
-                Set(MatchedIdentifiers(
-                  Set(WorkIdentifier("sierra-system-number/B", 1))))),
+              MatcherResult(Set(MatchedIdentifiers(
+                Set(WorkIdentifier("sierra-system-number/B", 1))))),
               vhs,
               queue,
               topic)
@@ -323,37 +319,37 @@ class MatcherWorkerServiceTest
     withLocalSnsTopic { topic =>
       withLocalSqsQueueAndDlq {
         case QueuePair(queue, dlq) =>
-        withVHS { vhs =>
-          withWorkerService(vhs, queue, topic) { _ =>
-            val workAv2 = createUnidentifiedWorkWith(
-              sourceIdentifier = identifierA,
-              version = 2
-            )
+          withVHS { vhs =>
+            withWorkerService(vhs, queue, topic) { _ =>
+              val workAv2 = createUnidentifiedWorkWith(
+                sourceIdentifier = identifierA,
+                version = 2
+              )
 
-            val expectedMatchedWorkAv2 = MatcherResult(
-              Set(MatchedIdentifiers(
-                Set(WorkIdentifier("sierra-system-number/A", 2)))))
+              val expectedMatchedWorkAv2 = MatcherResult(
+                Set(MatchedIdentifiers(
+                  Set(WorkIdentifier("sierra-system-number/A", 2)))))
 
-            processAndAssertMatchedWorkIs(
-              workAv2,
-              expectedMatchedWorkAv2,
-              vhs,
-              queue,
-              topic)
+              processAndAssertMatchedWorkIs(
+                workAv2,
+                expectedMatchedWorkAv2,
+                vhs,
+                queue,
+                topic)
 
-            // Work V1 is sent but not matched
-            val differentWorkAv2 = createUnidentifiedWorkWith(
-              sourceIdentifier = identifierA,
-              mergeCandidates = List(MergeCandidate(identifierB)),
-              version = 2)
+              // Work V1 is sent but not matched
+              val differentWorkAv2 = createUnidentifiedWorkWith(
+                sourceIdentifier = identifierA,
+                mergeCandidates = List(MergeCandidate(identifierB)),
+                version = 2)
 
-            sendWork(differentWorkAv2, vhs, queue)
-            eventually {
-              assertQueueEmpty(queue)
-              assertQueueHasSize(dlq, 1)
+              sendWork(differentWorkAv2, vhs, queue)
+              eventually {
+                assertQueueEmpty(queue)
+                assertQueueHasSize(dlq, 1)
+              }
             }
           }
-        }
       }
     }
   }

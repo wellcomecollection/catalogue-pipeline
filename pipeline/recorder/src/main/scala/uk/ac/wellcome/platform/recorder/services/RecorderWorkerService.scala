@@ -16,10 +16,9 @@ import uk.ac.wellcome.storage.store.{HybridStoreEntry, VersionedStore}
 import uk.ac.wellcome.storage.{Identified, Version}
 
 class RecorderWorkerService[MsgDestination](
-  store: VersionedStore[
-    String,
-    Int,
-    HybridStoreEntry[TransformedBaseWork, EmptyMetadata]],
+  store: VersionedStore[String,
+                        Int,
+                        HybridStoreEntry[TransformedBaseWork, EmptyMetadata]],
   messageStream: BigMessageStream[TransformedBaseWork],
   msgSender: MessageSender[MsgDestination])
     extends Runnable {

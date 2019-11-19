@@ -9,11 +9,7 @@ import uk.ac.wellcome.storage.store.{
   TypedStore,
   VersionedHybridStore
 }
-import uk.ac.wellcome.storage.{
-  ObjectLocation,
-  ObjectLocationPrefix,
-  Version
-}
+import uk.ac.wellcome.storage.{ObjectLocation, ObjectLocationPrefix, Version}
 import uk.ac.wellcome.storage.maxima.Maxima
 
 case class EmptyMetadata()

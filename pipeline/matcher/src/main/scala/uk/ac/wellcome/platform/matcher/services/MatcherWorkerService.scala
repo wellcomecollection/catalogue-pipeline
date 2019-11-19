@@ -12,7 +12,7 @@ import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
 
 import uk.ac.wellcome.storage.store.{HybridStoreEntry, VersionedStore}
-import uk.ac.wellcome.storage.{Version, Identified}
+import uk.ac.wellcome.storage.{Identified, Version}
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.bigmessaging.EmptyMetadata
@@ -20,10 +20,9 @@ import uk.ac.wellcome.bigmessaging.EmptyMetadata
 import scala.concurrent.{ExecutionContext, Future}
 
 class MatcherWorkerService[MsgDestination](
-  store: VersionedStore[
-    String,
-    Int,
-    HybridStoreEntry[TransformedBaseWork, EmptyMetadata]],
+  store: VersionedStore[String,
+                        Int,
+                        HybridStoreEntry[TransformedBaseWork, EmptyMetadata]],
   msgStream: SQSStream[Version[String, Int]],
   msgSender: MessageSender[MsgDestination],
   workMatcher: WorkMatcher)(implicit val actorSystem: ActorSystem,
