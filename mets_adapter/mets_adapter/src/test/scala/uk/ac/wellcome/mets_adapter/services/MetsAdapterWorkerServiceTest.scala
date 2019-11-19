@@ -1,6 +1,6 @@
 package uk.ac.wellcome.mets_adapter.services
 
-import scala.util.{Try, Failure}
+import scala.util.{Failure, Try}
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalatest.{FunSpec, Matchers}
@@ -14,15 +14,15 @@ import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
 import uk.ac.wellcome.messaging.sns.SNSMessageSender
-import uk.ac.wellcome.storage.{Version, Identified}
+import uk.ac.wellcome.storage.{Identified, Version}
 import uk.ac.wellcome.json.JsonUtil._
 
 class MetsAdapterWorkerServiceTest
-  extends FunSpec
-  with Matchers
-  with Akka
-  with SQS
-  with SNS {
+    extends FunSpec
+    with Matchers
+    with Akka
+    with SQS
+    with SNS {
 
   val bag = Bag(
     BagInfo("external-identifier"),
@@ -109,24 +109,25 @@ class MetsAdapterWorkerServiceTest
     }
   }
 
-  def withWorkerService[R](
-    bagRetriever: BagRetriever,
-    internalStore: VersionedStore[String, Int, MetsData],
-    createMsgSender: SNS.Topic => SNSMessageSender = createMsgSender(_))(
+  def withWorkerService[R](bagRetriever: BagRetriever,
+                           internalStore: VersionedStore[String, Int, MetsData],
+                           createMsgSender: SNS.Topic => SNSMessageSender =
+                             createMsgSender(_))(
     testWith: TestWith[(MetsAdapterWorkerService, QueuePair, SNS.Topic), R]) =
     withActorSystem { implicit actorSystem =>
       withLocalSnsTopic { topic =>
-        withLocalSqsQueueAndDlq { case QueuePair(queue, dlq) =>
-          withSQSStream[IngestUpdate, R](queue) { stream =>
-            val workerService = new MetsAdapterWorkerService(
-              stream,
-              createMsgSender(topic),
-              bagRetriever,
-              new MetsStore(internalStore)
-            )
-            workerService.run()
-            testWith((workerService, QueuePair(queue, dlq), topic))
-          }
+        withLocalSqsQueueAndDlq {
+          case QueuePair(queue, dlq) =>
+            withSQSStream[IngestUpdate, R](queue) { stream =>
+              val workerService = new MetsAdapterWorkerService(
+                stream,
+                createMsgSender(topic),
+                bagRetriever,
+                new MetsStore(internalStore)
+              )
+              workerService.run()
+              testWith((workerService, QueuePair(queue, dlq), topic))
+            }
         }
       }
     }
@@ -148,7 +149,8 @@ class MetsAdapterWorkerServiceTest
         Failure(new Exception("Waaah I couldn't send message"))
     }
 
-  def createInternalStore(data: Map[Version[String, Int], MetsData] = Map.empty) =
+  def createInternalStore(
+    data: Map[Version[String, Int], MetsData] = Map.empty) =
     MemoryVersionedStore(data)
 
   def getMessages(topic: SNS.Topic): List[MetsData] =

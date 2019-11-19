@@ -4,7 +4,10 @@ case class IngestUpdate(space: String, bagId: String)
 
 case class MetsData(path: String, version: Int)
 
-case class Bag(info: BagInfo, manifest: BagManifest, location: BagLocation, version: String) {
+case class Bag(info: BagInfo,
+               manifest: BagManifest,
+               location: BagLocation,
+               version: String) {
 
   // Storage-service only stores a list of files, so we need to search for a
   // XML file in data directory named with some b-number.
@@ -16,7 +19,7 @@ case class Bag(info: BagInfo, manifest: BagManifest, location: BagLocation, vers
     metsPath
       .map { path =>
         parsedVersion
-          .map(version =>  Right(MetsData(path, version)))
+          .map(version => Right(MetsData(path, version)))
           .getOrElse(Left(new Exception("Couldn't parse version")))
       }
       .getOrElse(Left(new Exception("Couldn't find METS path")))
@@ -31,7 +34,7 @@ case class Bag(info: BagInfo, manifest: BagManifest, location: BagLocation, vers
   def parsedVersion: Option[Int] =
     version match {
       case versionRegex(num) => Some(num.toInt)
-      case _ => None
+      case _                 => None
     }
 }
 

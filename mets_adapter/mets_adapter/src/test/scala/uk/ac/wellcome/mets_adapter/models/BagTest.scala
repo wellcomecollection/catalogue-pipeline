@@ -75,7 +75,8 @@ class BagTest extends FunSpec with Matchers {
         version = "v2",
         files = List("data/b30246039.xml" -> "v1/data/b30246039.xml"),
       )
-      bag.metsData shouldBe Right(MetsData("digitised/b30246039/v1/data/b30246039.xml", 2))
+      bag.metsData shouldBe Right(
+        MetsData("digitised/b30246039/v1/data/b30246039.xml", 2))
     }
 
     it("fails extracting METS data if invalid version string") {
@@ -94,10 +95,10 @@ class BagTest extends FunSpec with Matchers {
     }
   }
 
-  def createBag(
-    s3Path: String = "digitised/b30246039",
-    version: String = "v1",
-    files: List[(String, String)] = List("data/b30246039.xml" -> "v1/data/b30246039.xml")) =
+  def createBag(s3Path: String = "digitised/b30246039",
+                version: String = "v1",
+                files: List[(String, String)] = List(
+                  "data/b30246039.xml" -> "v1/data/b30246039.xml")) =
     Bag(
       BagInfo("external-identifier"),
       BagManifest(

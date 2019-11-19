@@ -22,7 +22,8 @@ class HttpBagRetriever(url: String, tokenService: TokenService)(
   actorSystem: ActorSystem,
   materializer: ActorMaterializer,
   executionContext: ExecutionContext)
-    extends BagRetriever with Logging {
+    extends BagRetriever
+    with Logging {
 
   def getBag(update: IngestUpdate): Future[Option[Bag]] = {
     debug(s"Executing request to $url/${update.space}/${update.bagId}")

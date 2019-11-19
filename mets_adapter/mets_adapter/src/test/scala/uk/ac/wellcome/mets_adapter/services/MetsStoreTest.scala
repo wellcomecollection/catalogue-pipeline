@@ -4,7 +4,7 @@ import org.scalatest.{FunSpec, Matchers}
 
 import uk.ac.wellcome.mets_adapter.models.MetsData
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
-import uk.ac.wellcome.storage.{Version, Identified}
+import uk.ac.wellcome.storage.{Identified, Version}
 
 class MetsStoreTest extends FunSpec with Matchers {
 
@@ -48,6 +48,7 @@ class MetsStoreTest extends FunSpec with Matchers {
     store.filterMetsData("001", newData) shouldBe Right(None)
   }
 
-  def createInternalStore(data: Map[Version[String, Int], MetsData] = Map.empty) =
+  def createInternalStore(
+    data: Map[Version[String, Int], MetsData] = Map.empty) =
     MemoryVersionedStore(data)
 }
