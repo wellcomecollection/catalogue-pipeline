@@ -1,8 +1,10 @@
 package uk.ac.wellcome.mets_adapter.services
 
+import scala.util.{Try, Failure}
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalatest.{FunSpec, Matchers}
+import io.circe.Encoder
 
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
@@ -64,6 +66,7 @@ class MetsAdapterWorkerServiceTest
     withWorkerService(bagRetriever, internalStore) {
       case (workerService, QueuePair(queue, dlq), topic) =>
         sendSqsMessage(queue, IngestUpdate("space", "123"))
+        Thread.sleep(2000)
         assertQueueEmpty(queue)
         assertQueueEmpty(dlq)
         val metsData = getMessages(topic)
@@ -92,18 +95,32 @@ class MetsAdapterWorkerServiceTest
     }
   }
 
-  def withWorkerService[R](bagRetriever: BagRetriever, internalStore: VersionedStore[String, Int, MetsData])(testWith: TestWith[(MetsAdapterWorkerService, QueuePair, SNS.Topic), R]) =
+  it("should not store METS data if publishing fails") {
+    val internalStore = createInternalStore()
+    withWorkerService(bagRetriever, internalStore, createBrokenMsgSender(_)) {
+      case (workerService, QueuePair(queue, dlq), topic) =>
+        sendSqsMessage(queue, IngestUpdate("space", "123"))
+        Thread.sleep(2000)
+        assertQueueEmpty(queue)
+        assertQueueHasSize(dlq, 1)
+        val metsData = getMessages(topic)
+        metsData shouldEqual Nil
+        internalStore.getLatest("123") shouldBe a[Left[_, _]]
+    }
+  }
+
+  def withWorkerService[R](
+    bagRetriever: BagRetriever,
+    internalStore: VersionedStore[String, Int, MetsData],
+    createMsgSender: SNS.Topic => SNSMessageSender = createMsgSender(_))(
+    testWith: TestWith[(MetsAdapterWorkerService, QueuePair, SNS.Topic), R]) =
     withActorSystem { implicit actorSystem =>
       withLocalSnsTopic { topic =>
         withLocalSqsQueueAndDlq { case QueuePair(queue, dlq) =>
           withSQSStream[IngestUpdate, R](queue) { stream =>
             val workerService = new MetsAdapterWorkerService(
               stream,
-              new SNSMessageSender(
-                snsClient = snsClient,
-                snsConfig = createSNSConfigWith(topic),
-                subject = "SNSMessageSender"
-              ),
+              createMsgSender(topic),
               bagRetriever,
               new MetsStore(internalStore)
             )
@@ -112,6 +129,23 @@ class MetsAdapterWorkerServiceTest
           }
         }
       }
+    }
+
+  def createMsgSender(topic: SNS.Topic) =
+    new SNSMessageSender(
+      snsClient = snsClient,
+      snsConfig = createSNSConfigWith(topic),
+      subject = "SNSMessageSender"
+    )
+
+  def createBrokenMsgSender(topic: SNS.Topic) =
+    new SNSMessageSender(
+      snsClient = snsClient,
+      snsConfig = createSNSConfigWith(topic),
+      subject = "BrokenSNSMessageSender"
+    ) {
+      override def sendT[T](item: T)(implicit encoder: Encoder[T]): Try[Unit] =
+        Failure(new Exception("Waaah I couldn't send message"))
     }
 
   def createInternalStore(data: Map[Version[String, Int], MetsData] = Map.empty) =

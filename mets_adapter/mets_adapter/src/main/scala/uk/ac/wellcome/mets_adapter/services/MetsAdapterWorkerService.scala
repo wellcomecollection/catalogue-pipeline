@@ -2,7 +2,7 @@ package uk.ac.wellcome.mets_adapter.services
 
 import scala.util.Success
 import scala.concurrent.ExecutionContext
-import akka.Done
+import akka.{Done, NotUsed}
 import akka.stream.scaladsl._
 import com.amazonaws.services.sqs.model.{Message => SQSMessage}
 import grizzled.slf4j.Logging
@@ -15,12 +15,16 @@ import uk.ac.wellcome.mets_adapter.models._
 
 import scala.concurrent.Future
 
-/** Encapsulates context to pass along each akka-stream stage. Newer versions
- *  of akka-streams have the asSourceWithContext/ asFlowWithContext idioms for
- *  this purpose, which we can migrate to if the library is updated.
+/** Processes SQS messages representing bag ingests on storage-service, and
+ *  publishes METS data for use in the pipeline.
+ *
+ *  Consists of the following stages:
+ *  - Retrieve the bag from storarge-service with the given ID
+ *  - Parse METS data from the bag
+ *  - Check whether the METS data is new / changed, and ignore it otherwise
+ *  - Publish the METS data to SNS
+ *  - Store the METS data so in future can tell if it's seen before
  */
-case class Context(msg: SQSMessage, bagId: String)
-
 class MetsAdapterWorkerService(
   msgStream: SQSStream[IngestUpdate],
   msgSender: SNSMessageSender,
@@ -39,8 +43,10 @@ class MetsAdapterWorkerService(
         .map { case (msg, update) => (Context(msg, update.bagId), update) }
         .via(retrieveBag)
         .via(parseMetsData)
-        .via(storeMetsData)
+        .via(filterMetsData)
         .via(publishMetsData)
+        .via(storeMetsData)
+        .map { case (Context(msg, _), _) => msg }
     })
 
   def retrieveBag =
@@ -50,30 +56,59 @@ class MetsAdapterWorkerService(
           .getBag(update)
           .transform(result => Success((ctx, result.toEither)))
       }
-      .via(logErrors)
-      .collect { case (msg, Some(bag)) => (msg, bag) }
+      .via(catchErrors)
 
   def parseMetsData =
-    Flow[(Context, Bag)]
-      .map { case (ctx, bag) => (ctx, bag.metsData) }
-      .via(logErrors)
+    Flow[(Context, Option[Bag])]
+      .mapWithContext { case (ctx, bag) => bag.metsData }
 
-  def storeMetsData =
-    Flow[(Context, MetsData)]
-      .map { case (ctx, data) => (ctx, metsStore.storeMetsData(ctx.bagId, data)) }
-      .via(logErrors)
+  def filterMetsData =
+    Flow[(Context, Option[MetsData])]
+      .mapOptionalWithContext {
+        case (ctx, data) => metsStore.filterMetsData(ctx.bagId, data)
+      }
 
   def publishMetsData =
     Flow[(Context, Option[MetsData])]
-      .map {
-        case (ctx, Some(data)) =>
-          (ctx, msgSender.sendT(data).toEither.right.map(Some(_)))
-        case (ctx, None) => (ctx, Right(None))
+      .mapWithContext {
+        case (ctx, data) => msgSender.sendT(data).toEither.right.map(_ => data)
       }
-      .via(logErrors)
-      .map { case (Context(msg, _), _) => msg }
 
-  def logErrors[T] =
+  def storeMetsData =
+    Flow[(Context, Option[MetsData])]
+      .mapWithContext {
+        case (ctx, data) => metsStore.storeMetsData(ctx.bagId, data)
+      }
+
+  /** Encapsulates context to pass along each akka-stream stage. Newer versions
+   *  of akka-streams have the asSourceWithContext/ asFlowWithContext idioms for
+   *  this purpose, which we can migrate to if the library is updated.
+   */
+  case class Context(msg: SQSMessage, bagId: String)
+
+  /** Allows mapping a flow with a function, where:
+   *  - Context is passed through.
+   *  - None values are ignored and passed to the next stage: this is required
+   *    for the SQS delete action to trigger at the end of the stream
+   *  - Any errors are caught and the message prevented from propagating downstream,
+   *    resulting in the message being put back on the queue / on the dlq.
+   */
+  implicit class ContextFlowOps[In, Out](
+    val flow: Flow[(Context, In), (Context, Option[Out]), NotUsed]) {
+
+    def mapWithContext[T](f: (Context, Out) => Result[T]) =
+      mapOptionalWithContext { case (ctx, data) => f(ctx, data).map(Some(_)) }
+
+    def mapOptionalWithContext[T](f: (Context, Out) => Result[Option[T]]) =
+      flow
+        .map {
+          case (ctx, Some(data)) => (ctx, f(ctx, data))
+          case (ctx, None) => (ctx, Right(None))
+        }
+        .via(catchErrors)
+  }
+
+  def catchErrors[T] =
     Flow[(Context, Result[T])]
       .map { case (ctx, result) =>
         result.left.map { err =>

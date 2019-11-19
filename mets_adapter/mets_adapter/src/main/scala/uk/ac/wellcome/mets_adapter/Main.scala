@@ -31,7 +31,7 @@ object Main extends WellcomeTypesafeApp {
 
     new MetsAdapterWorkerService(
       SQSBuilder.buildSQSStream(config),
-      SNSBuilder.buildSNSMessageSender(config, subject = "?"),
+      SNSBuilder.buildSNSMessageSender(config, subject = ???),
       buildBagRetriever(config),
       buildMetsStore(config),
     )
