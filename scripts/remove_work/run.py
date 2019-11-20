@@ -21,14 +21,11 @@ def sha256(bs):
     h.update(bs)
     return h.hexdigest()
 
-
-def platform_client(service_name):
+def aws_client(service_name, role_arn):
     sts = boto3.client("sts")
-
     session_name = "%s--%s" % (getpass.getuser(), os.path.basename(__file__))
-
     resp = sts.assume_role(
-        RoleArn="arn:aws:iam::760097843905:role/platform-developer",
+        RoleArn=role_arn,
         RoleSessionName=session_name,
     )
 
@@ -42,23 +39,28 @@ def platform_client(service_name):
         region_name="eu-west-1",
     )
 
+def platform_client(service_name):
+    return aws_client(service_name, "arn:aws:iam::760097843905:role/platform-developer")
+
+def catalogue_client(service_name):
+    return aws_client(service_name, "arn:aws:iam::756629837203:role/catalogue-developer")
 
 def remove_image_from_es_indexes(catalogue_id):
     print("*** Removing the image from our Elasticsearch indexes")
 
-    ecs_client = platform_client("ecs")
-    ssm_client = platform_client("ssm")
+    ecs_client = catalogue_client("ecs")
+    ssm_client = catalogue_client("ssm")
 
     # AWLC: Yes, it would be more robust if we got this config by checking the
     # ingestor task definition to see what the current parameters are, but that's
     # such a faff with the namespace that I literally CBA.
     print("··· Reading Elasticsearch config for the ingestor (write credentials)")
     es_username = ssm_client.get_parameter(
-        Name="/aws/reference/secretsmanager/catalogue/ingestor/es_username",
+        Name="/aws/reference/secretsmanager/catalogue/takedown/es_username",
         WithDecryption=True,
     )
     es_password = ssm_client.get_parameter(
-        Name="/aws/reference/secretsmanager/catalogue/ingestor/es_password",
+        Name="/aws/reference/secretsmanager/catalogue/takedown/es_password",
         WithDecryption=True,
     )
     es_auth = (es_username["Parameter"]["Value"], es_password["Parameter"]["Value"])
@@ -121,7 +123,7 @@ def remove_image_from_es_indexes(catalogue_id):
                 continue
 
             # While we're looking at API responses, try to get the Miro ID.
-            identifiers = [existing_work["sourceIdentifier"]] + existing_work[
+            identifiers = [existing_work["sourceIdentifier"]] + existing_work["data"][
                 "otherIdentifiers"
             ]
             miro_identifiers = [
@@ -149,6 +151,7 @@ def remove_image_from_es_indexes(catalogue_id):
                 # this one.
                 "version": existing_work["version"] + 1,
             }
+
             print("··· Replacing work with an IdentifiedInvisibleWork")
             resp = requests.put(
                 f"{es_host}{index_name}/_doc/{catalogue_id}",
@@ -157,6 +160,7 @@ def remove_image_from_es_indexes(catalogue_id):
             )
             resp.raise_for_status()
 
+            print("··· Asserting work was made invisible")
             resp = requests.get(
                 f"{es_host}{index_name}/_doc/{catalogue_id}", auth=es_auth
             )
