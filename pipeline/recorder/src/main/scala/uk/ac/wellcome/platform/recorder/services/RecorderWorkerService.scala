@@ -8,22 +8,17 @@ import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.typesafe.Runnable
 import uk.ac.wellcome.json.JsonUtil._
 
-import uk.ac.wellcome.bigmessaging.{EmptyMetadata, GetLocation}
+import uk.ac.wellcome.bigmessaging.EmptyMetadata
 import uk.ac.wellcome.messaging.MessageSender
-import uk.ac.wellcome.bigmessaging.message.{
-  BigMessageStream,
-  MessageNotification,
-  RemoteNotification
-}
+import uk.ac.wellcome.bigmessaging.message.BigMessageStream
 
 import uk.ac.wellcome.storage.store.{HybridStoreEntry, VersionedStore}
 import uk.ac.wellcome.storage.{Identified, Version}
 
 class RecorderWorkerService[MsgDestination](
-  store: VersionedStore[
-    String,
-    Int,
-    HybridStoreEntry[TransformedBaseWork, EmptyMetadata]] with GetLocation,
+  store: VersionedStore[String,
+                        Int,
+                        HybridStoreEntry[TransformedBaseWork, EmptyMetadata]],
   messageStream: BigMessageStream[TransformedBaseWork],
   msgSender: MessageSender[MsgDestination])
     extends Runnable {
@@ -35,8 +30,7 @@ class RecorderWorkerService[MsgDestination](
     Future.fromTry {
       for {
         key <- storeWork(work)
-        location <- store.getLocation(key)
-        _ <- msgSender.sendT[MessageNotification](RemoteNotification(location))
+        _ <- msgSender.sendT[Version[String, Int]](key)
       } yield ()
     }
 

@@ -13,22 +13,21 @@ import org.scanamo.query.UniqueKey
 import org.scanamo.semiauto._
 import org.scanamo.time.JavaTimeFormats._
 
+import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher
 import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, WorkNode}
 import uk.ac.wellcome.platform.matcher.services.MatcherWorkerService
 import uk.ac.wellcome.platform.matcher.storage.{WorkGraphStore, WorkNodeDao}
-import uk.ac.wellcome.models.Implicits._
 
 import uk.ac.wellcome.messaging.sns.SNSConfig
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS
-import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
-import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
+import uk.ac.wellcome.bigmessaging.fixtures.{BigMessagingFixture, VHSFixture}
+import uk.ac.wellcome.bigmessaging.EmptyMetadata
 
 import uk.ac.wellcome.storage.dynamo._
-import uk.ac.wellcome.storage.ObjectLocation
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
 import uk.ac.wellcome.storage.fixtures.S3Fixtures
 import uk.ac.wellcome.storage.locking.dynamo.{
@@ -36,11 +35,14 @@ import uk.ac.wellcome.storage.locking.dynamo.{
   DynamoLockingService,
   ExpiringLock
 }
+import uk.ac.wellcome.storage.{Identified, Version}
+import uk.ac.wellcome.storage.store.HybridStoreEntry
 
 trait MatcherFixtures
     extends BigMessagingFixture
     with DynamoLockDaoFixtures
     with LocalWorkGraphDynamoDb
+    with VHSFixture[TransformedBaseWork]
     with S3Fixtures {
 
   implicit val workNodeFormat: DynamoFormat[WorkNode] = deriveDynamoFormat
@@ -56,18 +58,23 @@ trait MatcherFixtures
       testWith(table)
     }
 
-  def withWorkerService[R](queue: SQS.Queue, topic: Topic, graphTable: Table)(
+  def withWorkerService[R](vhs: VHS,
+                           queue: SQS.Queue,
+                           topic: Topic,
+                           graphTable: Table)(
     testWith: TestWith[MatcherWorkerService[SNSConfig], R]): R =
     withSnsMessageSender(topic) { msgSender =>
       withActorSystem { implicit actorSystem =>
         withLockTable { lockTable =>
           withWorkGraphStore(graphTable) { workGraphStore =>
             withWorkMatcher(workGraphStore, lockTable) { workMatcher =>
-              implicit val streamStore =
-                MemoryTypedStoreCompanion[ObjectLocation, TransformedBaseWork]()
-              withBigMessageStream[TransformedBaseWork, R](queue) { msgStream =>
+              withSQSStream[Version[String, Int], R](queue) { msgStream =>
                 val workerService =
-                  new MatcherWorkerService(msgStream, msgSender, workMatcher)
+                  new MatcherWorkerService(
+                    vhs,
+                    msgStream,
+                    msgSender,
+                    workMatcher)
                 workerService.run()
                 testWith(workerService)
               }
@@ -77,10 +84,10 @@ trait MatcherFixtures
       }
     }
 
-  def withWorkerService[R](queue: SQS.Queue, topic: Topic)(
+  def withWorkerService[R](vhs: VHS, queue: SQS.Queue, topic: Topic)(
     testWith: TestWith[MatcherWorkerService[SNSConfig], R]): R =
     withWorkGraphTable { graphTable =>
-      withWorkerService(queue, topic, graphTable) { service =>
+      withWorkerService(vhs, queue, topic, graphTable) { service =>
         testWith(service)
       }
     }
@@ -118,6 +125,19 @@ trait MatcherFixtures
       DynamoConfig(table.name, table.index)
     )
     testWith(workNodeDao)
+  }
+
+  def sendWork(work: TransformedBaseWork,
+               vhs: VHS,
+               queue: SQS.Queue,
+               version: Int = 1) = {
+    val entry = HybridStoreEntry(work, EmptyMetadata())
+    val id = work.sourceIdentifier.toString
+    val key = vhs.putLatest(id)(entry) match {
+      case Left(err)                 => throw new Exception(s"Failed storing work in VHS: $err")
+      case Right(Identified(key, _)) => key
+    }
+    sendSqsMessage(queue, key)
   }
 
   def ciHash(str: String): String =
