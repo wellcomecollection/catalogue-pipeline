@@ -28,6 +28,7 @@ case class ElastsearchSearchRequestBuilder(
   lazy val request: SearchRequest = search(index)
     .aggs { aggregations }
     .query { filteredQuery }
+    .postFilter { ??? }
     .sortBy { sort ++ sortDefinitions }
     .limit { queryOptions.limit }
     .from { queryOptions.from }
