@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.api.services
 
-import co.elastic.apm.api.{ElasticApm, Traced, Transaction}
+import co.elastic.apm.api.{ElasticApm, Transaction}
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.get.GetResponse
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
@@ -13,6 +13,7 @@ import uk.ac.wellcome.display.models.{
   SortRequest,
   SortingOrder
 }
+import uk.ac.wellcome.platform.api.AsyncTracing
 import uk.ac.wellcome.platform.api.models._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -26,7 +27,8 @@ case class ElasticsearchQueryOptions(filters: List[WorkFilter],
 
 class ElasticsearchService(elasticClient: ElasticClient)(
   implicit ec: ExecutionContext
-) extends Logging {
+) extends Logging
+    with AsyncTracing {
 
   def findResultById(canonicalId: String)(
     index: Index): Future[Either[ElasticError, GetResponse]] =
@@ -56,35 +58,39 @@ class ElasticsearchService(elasticClient: ElasticClient)(
   /** Given a set of query options, build a SearchDefinition for Elasticsearch
     * using the elastic4s query DSL, then execute the search.
     */
-  @Traced(subtype = "elastic", action = "query")
   private def executeSearch(
     maybeWorkQuery: Option[WorkQuery],
     sortDefinitions: List[FieldSort]
   )(index: Index, queryOptions: ElasticsearchQueryOptions)
-    : Future[Either[ElasticError, SearchResponse]] = {
+    : Future[Either[ElasticError, SearchResponse]] =
+    spanFuture(
+      name = "ElasticSearch#executeSearch",
+      spanType = "request",
+      subType = "elastic",
+      action = "query")({
 
-    val searchRequest = ElastsearchSearchRequestBuilder(
-      index,
-      maybeWorkQuery,
-      sortDefinitions,
-      queryOptions
-    ).request
+      val searchRequest = ElastsearchSearchRequestBuilder(
+        index,
+        maybeWorkQuery,
+        sortDefinitions,
+        queryOptions
+      ).request
 
-    debug(s"Sending ES request: ${searchRequest.show}")
-    val parentTransaction = ElasticApm
-      .currentTransaction()
-      .addQueryOptionLabels(queryOptions)
+      debug(s"Sending ES request: ${searchRequest.show}")
+      val parentTransaction = ElasticApm
+        .currentTransaction()
+        .addQueryOptionLabels(queryOptions)
 
-    elasticClient
-      .execute { searchRequest.trackTotalHits(true) }
-      .map { toEither }
-      .map {
-        _.map { res =>
-          parentTransaction.addLabel("elasticTook", res.took)
-          res
+      elasticClient
+        .execute { searchRequest.trackTotalHits(true) }
+        .map { toEither }
+        .map {
+          _.map { res =>
+            parentTransaction.addLabel("elasticTook", res.took)
+            res
+          }
         }
-      }
-  }
+    })
 
   private def toEither[T](response: Response[T]): Either[ElasticError, T] =
     if (response.isError) {
