@@ -4,7 +4,6 @@ import akka.Done
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
-import co.elastic.apm.attach.ElasticApmAttacher
 import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
 import uk.ac.wellcome.elasticsearch.DisplayElasticConfig
@@ -26,7 +25,7 @@ object Main extends WellcomeTypesafeApp {
     implicit val materializer: ActorMaterializer =
       AkkaBuilder.buildActorMaterializer()
 
-    ElasticApmAttacher.attach()
+    Tracing.init(config)
     val elasticClient = ElasticBuilder.buildElasticClient(config)
 
     val elasticConfig =
