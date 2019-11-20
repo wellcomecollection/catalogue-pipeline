@@ -125,9 +125,13 @@ case class ElastsearchSearchRequestBuilder(
       case LanguageFilter(languageIds) =>
         termsQuery(field = "data.language.id", values = languageIds)
       case GenreFilter(genreQuery) =>
-        matchQuery(field = "data.genres.label", value = genreQuery)
+        simpleStringQuery(genreQuery)
+          .field("data.genres.label")
+          .defaultOperator("AND")
       case SubjectFilter(subjectQuery) =>
-        matchQuery(field = "data.subjects.agent.label", value = subjectQuery)
+        simpleStringQuery(subjectQuery)
+          .field("data.subjects.agent.label")
+          .defaultOperator("AND")
     }
 
   private def sortedByCount =
