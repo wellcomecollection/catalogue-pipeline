@@ -9,12 +9,12 @@ class MetsXmlParserTest extends FunSpec with Matchers {
     MetsXmlParser(xml).right.get.recordIdentifier shouldBe "b30246039"
   }
 
-  it("does not parse a mets if recordIdentifier is outside of dmdSec element"){
-    MetsXmlParser(xmlNodmdSec) shouldBe a [Left[_,_]]
+  it("does not parse a mets if recordIdentifier is outside of dmdSec element") {
+    MetsXmlParser(xmlNodmdSec) shouldBe a[Left[_, _]]
   }
 
-  it("does not parse if there is more than one recordIdentifier"){
-    MetsXmlParser(xmlMultipleIds) shouldBe a [Left[_,_]]
+  it("does not parse if there is more than one recordIdentifier") {
+    MetsXmlParser(xmlMultipleIds) shouldBe a[Left[_, _]]
   }
 
   it("parses accessCondition from XML") {
@@ -26,13 +26,12 @@ class MetsXmlParserTest extends FunSpec with Matchers {
   }
 
   it("does not parse a METS with no multiple licenses") {
-    MetsXmlParser(xmlMultipleLicense) shouldBe a [Left[_,_]]
+    MetsXmlParser(xmlMultipleLicense) shouldBe a[Left[_, _]]
   }
 
   it("fails if the input stream is not an xml") {
-    MetsXmlParser("hagdf".toInputStream) shouldBe a [Left[_,_]]
+    MetsXmlParser("hagdf".toInputStream) shouldBe a[Left[_, _]]
   }
-
 
   def xml = getClass.getResourceAsStream("/b30246039.xml")
 
@@ -97,10 +96,8 @@ class MetsXmlParserTest extends FunSpec with Matchers {
        |</mets:mets>
        |""".stripMargin.toInputStream
 
-  implicit class StringToInputStream(string: String){
+  implicit class StringToInputStream(string: String) {
     def toInputStream = IOUtils.toInputStream(string, "UTF-8")
   }
 
 }
-
-

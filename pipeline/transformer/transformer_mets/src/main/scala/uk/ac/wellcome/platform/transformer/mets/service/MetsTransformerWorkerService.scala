@@ -17,12 +17,13 @@ import scala.concurrent.{ExecutionContext, Future}
 case class MetsData(path: String, version: Int)
 
 class MetsTransformerWorkerService(
-                                    msgStream: SQSStream[MetsData],
-                                    messageSender: BigMessageSender[SNSConfig,TransformedBaseWork],
-                                    s3Client: AmazonS3,
-                                    s3Config: S3Config
-                                  )(implicit ec: ExecutionContext)
-    extends Runnable with Logging{
+  msgStream: SQSStream[MetsData],
+  messageSender: BigMessageSender[SNSConfig, TransformedBaseWork],
+  s3Client: AmazonS3,
+  s3Config: S3Config
+)(implicit ec: ExecutionContext)
+    extends Runnable
+    with Logging {
 
   val className = this.getClass.getSimpleName
 
@@ -32,11 +33,12 @@ class MetsTransformerWorkerService(
       processAndLog
     )
 
-  def processAndLog(metsData: MetsData): Future[Unit] = process(metsData).recover{
-    case t =>
-      error(s"There was an error processing $metsData: ",t)
-      throw t
-  }
+  def processAndLog(metsData: MetsData): Future[Unit] =
+    process(metsData).recover {
+      case t =>
+        error(s"There was an error processing $metsData: ", t)
+        throw t
+    }
 
   private def process(metsData: MetsData) = {
     for {
@@ -49,7 +51,7 @@ class MetsTransformerWorkerService(
 
   private def fetchMets(metsData: MetsData) = {
     Future {
-        s3Client.getObject(s3Config.bucketName, metsData.path).getObjectContent
+      s3Client.getObject(s3Config.bucketName, metsData.path).getObjectContent
     }
   }
 }

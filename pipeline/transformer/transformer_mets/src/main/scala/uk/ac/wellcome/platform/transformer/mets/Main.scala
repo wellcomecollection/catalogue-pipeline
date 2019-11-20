@@ -35,6 +35,7 @@ object Main extends WellcomeTypesafeApp {
       SQSBuilder.buildSQSStream(config),
       messageSender = BigMessagingBuilder
         .buildBigMessageSender[TransformedBaseWork](config),
-      s3Client, s3Config)
+      s3Client,
+      s3Config)
   }
 }

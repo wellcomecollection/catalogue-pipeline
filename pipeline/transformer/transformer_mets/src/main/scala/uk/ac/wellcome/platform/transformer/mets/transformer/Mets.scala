@@ -6,20 +6,26 @@ import scala.util.Try
 import cats.implicits._
 
 case class Mets(
-                     recordIdentifier: String,
-                     accessCondition: Option[String]
-                   ) {
+  recordIdentifier: String,
+  accessCondition: Option[String]
+) {
 
-  def toWork(version: Int): Either[Throwable, UnidentifiedInvisibleWork] = for {
-    maybeDigitalLocation <- digitalLocation
-    unidentifiableItem: MaybeDisplayable[Item] = Unidentifiable(Item(locations = List(maybeDigitalLocation)))
-  } yield UnidentifiedInvisibleWork(
-    version = version,
-    sourceIdentifier = sourceIdentifier,
-    workData(unidentifiableItem)
-  )
+  def toWork(version: Int): Either[Throwable, UnidentifiedInvisibleWork] =
+    for {
+      maybeDigitalLocation <- digitalLocation
+      unidentifiableItem: MaybeDisplayable[Item] = Unidentifiable(
+        Item(locations = List(maybeDigitalLocation)))
+    } yield
+      UnidentifiedInvisibleWork(
+        version = version,
+        sourceIdentifier = sourceIdentifier,
+        workData(unidentifiableItem)
+      )
 
-  private def workData(unidentifiableItem: MaybeDisplayable[Item]) = WorkData(items = List(unidentifiableItem), mergeCandidates = List(mergeCandidate))
+  private def workData(unidentifiableItem: MaybeDisplayable[Item]) =
+    WorkData(
+      items = List(unidentifiableItem),
+      mergeCandidates = List(mergeCandidate))
 
   private def mergeCandidate = MergeCandidate(
     identifier = SourceIdentifier(
@@ -34,7 +40,11 @@ case class Mets(
     val url = s"https://wellcomelibrary.org/iiif/$recordIdentifier/manifest"
     for {
       maybeLicense <- parseLicense
-    } yield (DigitalLocation(url, LocationType("iiif-presentation"), license = maybeLicense))
+    } yield
+      (DigitalLocation(
+        url,
+        LocationType("iiif-presentation"),
+        license = maybeLicense))
   }
 
   private def parseLicense = {
@@ -44,6 +54,9 @@ case class Mets(
   }
 
   private def sourceIdentifier = {
-    SourceIdentifier(IdentifierType("mets"), ontologyType = "Work", value = recordIdentifier)
+    SourceIdentifier(
+      IdentifierType("mets"),
+      ontologyType = "Work",
+      value = recordIdentifier)
   }
 }
