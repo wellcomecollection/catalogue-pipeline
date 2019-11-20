@@ -1,0 +1,9 @@
+apm-server:
+  host: "0.0.0.0:8200"
+  kibana:
+    enabled: true
+      host: "http://kibana:5601"
+output.elasticsearch:
+  hosts: ["elasticsearch:9200"]
+logging.to_files: false
+      

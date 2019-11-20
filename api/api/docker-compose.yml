@@ -1,11 +1,28 @@
-elasticsearch:
-  image: "docker.elastic.co/elasticsearch/elasticsearch:7.3.0"
-  ports:
-    - "9200:9200"
-    - "9300:9300"
-  environment:
-    - "http.host=0.0.0.0"
-    - "transport.host=0.0.0.0"
-    - "cluster.name=wellcome"
-    - "logger.level=DEBUG"
-    - "discovery.type=single-node"
+version: "3"
+services:
+  elasticsearch:
+    image: "docker.elastic.co/elasticsearch/elasticsearch:7.3.0"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - "http.host=0.0.0.0"
+      - "transport.host=0.0.0.0"
+      - "cluster.name=wellcome"
+      - "logger.level=DEBUG"
+      - "discovery.type=single-node"
+  kibana:
+    image: "docker.elastic.co/kibana/kibana:7.3.0"
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+  apm_server:
+    image: "docker.elastic.co/apm/apm-server:7.3.0"
+    ports:
+      - "8200:8200"
+    volumes:
+      - ./apm-server.docker.yml:/usr/share/apm-server/apm-server.yml:ro
+    depends_on:
+      - elasticsearch
+      - kibana

@@ -2,7 +2,6 @@ package uk.ac.wellcome.platform.api
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
-
 import akka.http.scaladsl.model.{HttpEntity, MediaTypes}
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.server.{
@@ -12,10 +11,10 @@ import akka.http.scaladsl.server.{
   Route,
   ValidationRejection
 }
+import co.elastic.apm.api.Traced
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import com.sksamuel.elastic4s.{ElasticClient, ElasticError, Index}
 import io.circe.Printer
-
 import uk.ac.wellcome.platform.api.services.{ElasticsearchService, WorksService}
 import uk.ac.wellcome.elasticsearch.DisplayElasticConfig
 import uk.ac.wellcome.platform.api.elasticsearch.ElasticErrorHandler
@@ -43,14 +42,10 @@ class Router(elasticClient: ElasticClient,
           pathPrefix("v2") {
             concat(
               path("works") {
-                MultipleWorksParams.parse { params =>
-                  getWithFuture(multipleWorks(params))
-                }
+                MultipleWorksParams.parse { getMultipleWorks }
               },
               path("works" / Segment) { workId =>
-                SingleWorkParams.parse { params =>
-                  getWithFuture(singleWork(workId, params))
-                }
+                SingleWorkParams.parse { getSingleWork(workId, _) }
               },
               path("context.json") {
                 getFromFile(context.getPath)
@@ -80,40 +75,44 @@ class Router(elasticClient: ElasticClient,
     }
   }
 
-  def multipleWorks(params: MultipleWorksParams): Future[Route] = {
+  @Traced(value = "GET /works")
+  def getMultipleWorks(params: MultipleWorksParams): Route = {
     val searchOptions = params.searchOptions(apiConfig)
     val index = params._index.map(Index(_)).getOrElse(elasticConfig.indexV2)
-    worksService
-      .listOrSearchWorks(index, searchOptions, params.workQuery)
-      .map {
-        case Left(err) => elasticError(err)
-        case Right(resultList) =>
-          extractPublicUri { uri =>
-            complete(
-              MultipleWorksResponse(
-                resultList,
-                searchOptions,
-                params.include.getOrElse(V2WorksIncludes()),
-                uri,
-                contextUri
+    getWithFuture(
+      worksService
+        .listOrSearchWorks(index, searchOptions, params.workQuery)
+        .map {
+          case Left(err) => elasticError(err)
+          case Right(resultList) =>
+            extractPublicUri { uri =>
+              complete(
+                MultipleWorksResponse(
+                  resultList,
+                  searchOptions,
+                  params.include.getOrElse(V2WorksIncludes()),
+                  uri,
+                  contextUri
+                )
               )
-            )
-          }
-      }
+            }
+        })
   }
 
-  def singleWork(id: String, params: SingleWorkParams): Future[Route] = {
+  @Traced(value = "GET /works/{workId}")
+  def getSingleWork(id: String, params: SingleWorkParams): Route = {
     val index = params._index.map(Index(_)).getOrElse(elasticConfig.indexV2)
     val includes = params.include.getOrElse(V2WorksIncludes())
-    worksService
-      .findWorkById(id)(index)
-      .map {
-        case Right(Some(work: IdentifiedWork))           => workFound(work, includes)
-        case Right(Some(work: IdentifiedRedirectedWork)) => workRedirect(work)
-        case Right(Some(_))                              => workGone
-        case Right(None)                                 => workNotFound(id)
-        case Left(err)                                   => elasticError(err)
-      }
+    getWithFuture(
+      worksService
+        .findWorkById(id)(index)
+        .map {
+          case Right(Some(work: IdentifiedWork))           => workFound(work, includes)
+          case Right(Some(work: IdentifiedRedirectedWork)) => workRedirect(work)
+          case Right(Some(_))                              => workGone
+          case Right(None)                                 => workNotFound(id)
+          case Left(err)                                   => elasticError(err)
+        })
   }
 
   def workFound(work: IdentifiedWork, includes: V2WorksIncludes): Route =

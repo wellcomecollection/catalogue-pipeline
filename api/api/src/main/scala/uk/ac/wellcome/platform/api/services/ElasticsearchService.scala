@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.api.services
 
+import co.elastic.apm.api.{ElasticApm, Traced, Transaction}
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.get.GetResponse
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
@@ -55,6 +56,7 @@ class ElasticsearchService(elasticClient: ElasticClient)(
   /** Given a set of query options, build a SearchDefinition for Elasticsearch
     * using the elastic4s query DSL, then execute the search.
     */
+  @Traced(subtype = "elastic", action = "query")
   private def executeSearch(
     maybeWorkQuery: Option[WorkQuery],
     sortDefinitions: List[FieldSort]
@@ -69,10 +71,19 @@ class ElasticsearchService(elasticClient: ElasticClient)(
     ).request
 
     debug(s"Sending ES request: ${searchRequest.show}")
+    val parentTransaction = ElasticApm
+      .currentTransaction()
+      .addQueryOptionLabels(queryOptions)
 
     elasticClient
       .execute { searchRequest.trackTotalHits(true) }
       .map { toEither }
+      .map {
+        _.map { res =>
+          parentTransaction.addLabel("elasticTook", res.took)
+          res
+        }
+      }
   }
 
   private def toEither[T](response: Response[T]): Either[ElasticError, T] =
@@ -81,4 +92,22 @@ class ElasticsearchService(elasticClient: ElasticClient)(
     } else {
       Right(response.result)
     }
+
+  implicit class EnhancedTransaction(transaction: Transaction) {
+    def addQueryOptionLabels(
+      queryOptions: ElasticsearchQueryOptions): Transaction = {
+      transaction.addLabel("limit", queryOptions.limit)
+      transaction.addLabel("from", queryOptions.from)
+      transaction.addLabel("sortOrder", queryOptions.sortOrder.toString)
+      transaction.addLabel(
+        "sortBy",
+        queryOptions.sortBy.map { _.toString }.mkString(","))
+      transaction.addLabel(
+        "filters",
+        queryOptions.filters.map { _.toString }.mkString(","))
+      transaction.addLabel(
+        "aggregations",
+        queryOptions.aggregations.map { _.toString }.mkString(","))
+    }
+  }
 }
