@@ -10,7 +10,7 @@ case class Mets(
                      accessCondition: Option[String]
                    ) {
 
-  def toWork(version: Int): Try[UnidentifiedInvisibleWork] = for {
+  def toWork(version: Int): Either[Throwable, UnidentifiedInvisibleWork] = for {
     maybeDigitalLocation <- digitalLocation
     unidentifiableItem: MaybeDisplayable[Item] = Unidentifiable(Item(locations = List(maybeDigitalLocation)))
   } yield UnidentifiedInvisibleWork(
@@ -39,7 +39,7 @@ case class Mets(
 
   private def parseLicense = {
     accessCondition.map { license =>
-      Try(License.createLicense(license.toLowerCase))
+      Try(License.createLicense(license.toLowerCase)).toEither
     }.sequence
   }
 

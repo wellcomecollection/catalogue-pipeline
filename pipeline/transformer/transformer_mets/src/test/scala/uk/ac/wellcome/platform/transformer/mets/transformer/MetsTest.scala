@@ -16,7 +16,7 @@ class MetsTest extends FunSpec with RandomStrings with Matchers{
     val digitalLocation = DigitalLocation(url,LocationType("iiif-presentation"),license = Some(License_CCBYNC))
 
     val unidentifiableItem: MaybeDisplayable[Item] = Unidentifiable(Item(locations = List(digitalLocation)))
-    metsData.toWork(version).get shouldBe UnidentifiedInvisibleWork(
+    metsData.toWork(version).right.get shouldBe UnidentifiedInvisibleWork(
       version = version,
       sourceIdentifier = expectedSourceIdentifier,
       WorkData(items = List(unidentifiableItem),
@@ -44,7 +44,7 @@ class MetsTest extends FunSpec with RandomStrings with Matchers{
     val digitalLocation = DigitalLocation(url,LocationType("iiif-presentation"),license = None)
 
     val unidentifiableItem: MaybeDisplayable[Item] = Unidentifiable(Item(locations = List(digitalLocation)))
-    metsData.toWork(version).get shouldBe UnidentifiedInvisibleWork(
+    metsData.toWork(version).right.get shouldBe UnidentifiedInvisibleWork(
       version = version,
       sourceIdentifier = expectedSourceIdentifier,
       WorkData(items = List(unidentifiableItem),
@@ -69,7 +69,7 @@ class MetsTest extends FunSpec with RandomStrings with Matchers{
     val version = 1
 
 
-    metsData.toWork(version).failed.get shouldBe a [Exception]
+    metsData.toWork(version).left.get shouldBe a [Exception]
 
   }
 

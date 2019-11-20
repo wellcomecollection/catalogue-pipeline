@@ -2,6 +2,7 @@ package uk.ac.wellcome.platform.transformer.mets.service
 
 import akka.Done
 import com.amazonaws.services.s3.AmazonS3
+import grizzled.slf4j.Logging
 import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.SNSConfig
@@ -21,23 +22,30 @@ class MetsTransformerWorkerService(
                                     s3Client: AmazonS3,
                                     s3Config: S3Config
                                   )(implicit ec: ExecutionContext)
-    extends Runnable {
+    extends Runnable with Logging{
 
   val className = this.getClass.getSimpleName
 
   def run(): Future[Done] =
     msgStream.foreach(
       className,
-      process
+      processAndLog
     )
 
-  def process(metsData: MetsData): Future[Unit] =
+  def processAndLog(metsData: MetsData): Future[Unit] = process(metsData).recover{
+    case t =>
+      error(s"There was an error processing $metsData: ",t)
+      throw t
+  }
+
+  private def process(metsData: MetsData) = {
     for {
       metsXmlInputStream <- fetchMets(metsData)
-      mets <- Future.fromTry(MetsXmlParser(metsXmlInputStream))
-      work <- Future.fromTry(mets.toWork(metsData.version))
+      mets <- Future.fromTry(MetsXmlParser(metsXmlInputStream).toTry)
+      work <- Future.fromTry(mets.toWork(metsData.version).toTry)
       _ <- Future.fromTry(messageSender.sendT(work))
-    } yield()
+    } yield ()
+  }
 
   private def fetchMets(metsData: MetsData) = {
     Future {

@@ -3,36 +3,34 @@ package uk.ac.wellcome.platform.transformer.mets.parsers
 import org.apache.commons.io.IOUtils
 import org.scalatest.{FunSpec, Matchers}
 
-import scala.util.Failure
-
 class MetsXmlParserTest extends FunSpec with Matchers {
 
   it("parses recordIdentifier from XML") {
-    MetsXmlParser(xml).get.recordIdentifier shouldBe "b30246039"
+    MetsXmlParser(xml).right.get.recordIdentifier shouldBe "b30246039"
   }
 
   it("does not parse a mets if recordIdentifier is outside of dmdSec element"){
-    MetsXmlParser(xmlNodmdSec) shouldBe a [Failure[_]]
+    MetsXmlParser(xmlNodmdSec) shouldBe a [Left[_,_]]
   }
 
   it("does not parse if there is more than one recordIdentifier"){
-    MetsXmlParser(xmlMultipleIds) shouldBe a [Failure[_]]
+    MetsXmlParser(xmlMultipleIds) shouldBe a [Left[_,_]]
   }
 
   it("parses accessCondition from XML") {
-    MetsXmlParser(xml).get.accessCondition shouldBe Some("CC-BY-NC")
+    MetsXmlParser(xml).right.get.accessCondition shouldBe Some("CC-BY-NC")
   }
 
   it("parses a METS with no access condition") {
-    MetsXmlParser(xmlNoLicense).get.accessCondition shouldBe None
+    MetsXmlParser(xmlNoLicense).right.get.accessCondition shouldBe None
   }
 
   it("does not parse a METS with no multiple licenses") {
-    MetsXmlParser(xmlMultipleLicense) shouldBe a [Failure[_]]
+    MetsXmlParser(xmlMultipleLicense) shouldBe a [Left[_,_]]
   }
 
   it("fails if the input stream is not an xml") {
-    MetsXmlParser("hagdf".toInputStream) shouldBe a [Failure[_]]
+    MetsXmlParser("hagdf".toInputStream) shouldBe a [Left[_,_]]
   }
 
 
