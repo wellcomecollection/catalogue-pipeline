@@ -588,13 +588,11 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
           insertIntoElasticsearch(indexV2, works: _*)
           assertJsonResponse(
             routes,
-            s"/$apiPrefix/works?genres.label=horrible+heartwarming") {
+            s"/$apiPrefix/works?genres.label=horrible%20heartwarming") {
             Status.OK -> s"""
               {
-                ${resultList(apiPrefix, totalResults = 3)},
+                ${resultList(apiPrefix, totalResults = 1)},
                 "results": [
-                  ${workResponse(horrorWork)},
-                  ${workResponse(romcomWork)},
                   ${workResponse(romcomHorrorWork)}
                 ]
               }
@@ -645,7 +643,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
         | }
       """.stripMargin
 
-    it("filters by genre") {
+    it("filters by subjects") {
       withApi {
         case (indexV2, routes) =>
           insertIntoElasticsearch(indexV2, works: _*)
@@ -663,19 +661,17 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
       }
     }
 
-    it("filters by genre using multiple terms") {
+    it("filters by subjects using multiple terms") {
       withApi {
         case (indexV2, routes) =>
           insertIntoElasticsearch(indexV2, works: _*)
           assertJsonResponse(
             routes,
-            s"/$apiPrefix/works?subjects.label=19th+century+paris") {
+            s"/$apiPrefix/works?subjects.label=19th%20century%20paris") {
             Status.OK -> s"""
               {
-                ${resultList(apiPrefix, totalResults = 3)},
+                ${resultList(apiPrefix, totalResults = 1)},
                 "results": [
-                  ${workResponse(nineteenthCenturyWork)},
-                  ${workResponse(parisWork)},
                   ${workResponse(nineteenthCenturyParisWork)}
                 ]
               }
