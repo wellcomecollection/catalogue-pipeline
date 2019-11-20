@@ -1,0 +1,424 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mets:mets xmlns:dv="http://dfg-viewer.de/" xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3" xmlns:premis="http://www.loc.gov/premis/v3" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" OBJID="276914" xsi:schemaLocation="http://www.loc.gov/standards/premis/ http://www.loc.gov/standards/premis/v2/premis-v2-0.xsd http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-7.xsd http://www.loc.gov/METS/ http://www.loc.gov/standards/mets/mets.xsd http://www.loc.gov/standards/mix/ http://www.loc.gov/standards/mix/mix.xsd">
+  <mets:metsHdr CREATEDATE="2018-06-26T23:45:51Z">
+    <mets:agent OTHERTYPE="SOFTWARE" ROLE="CREATOR" TYPE="OTHER">
+      <mets:name>Goobi - ugh-3.0-847ece1 - 08−February−2018</mets:name>
+      <mets:note>Goobi</mets:note>
+    </mets:agent>
+  </mets:metsHdr>
+  <mets:dmdSec ID="DMDLOG_0000">
+    <mets:mdWrap MDTYPE="MODS">
+      <mets:xmlData>
+        <mods:mods>
+          <mods:name type="corporate">
+            <mods:namePart>
+              Wells-next-the-Sea (England)
+              <mods:namePart>Urban District Council.</mods:namePart>
+            </mods:namePart>
+          </mods:name>
+          <mods:originInfo>
+            <mods:place>
+              <mods:placeTerm type="code">enk</mods:placeTerm>
+            </mods:place>
+            <mods:dateIssued encoding="w3cdtf" keyDate="yes">1942</mods:dateIssued>
+          </mods:originInfo>
+          <mods:titleInfo>
+            <mods:title>[Report 1942] /</mods:title>
+          </mods:titleInfo>
+          <mods:recordInfo>
+            <mods:recordIdentifier source="gbv-ppn">b30246039</mods:recordIdentifier>
+          </mods:recordInfo>
+          <mods:classification authority="WT">19th century</mods:classification>
+          <mods:language>
+            <mods:languageTerm authority="iso639-2b" type="code">eng</mods:languageTerm>
+          </mods:language>
+          <mods:note type="leader6">a</mods:note>
+          <mods:accessCondition type="dz">CC-BY-NC</mods:accessCondition>
+          <mods:accessCondition type="player">63</mods:accessCondition>
+          <mods:accessCondition type="status">Open</mods:accessCondition>
+          <mods:originInfo>
+            <mods:place>
+              <mods:placeTerm type="text">Wellcome Trust</mods:placeTerm>
+            </mods:place>
+            <mods:publisher>Wellcome Trust</mods:publisher>
+            <mods:edition>[Electronic ed.]</mods:edition>
+            <mods:dateCaptured encoding="w3cdtf">2012</mods:dateCaptured>
+          </mods:originInfo>
+          <mods:physicalDescription>
+            <mods:digitalOrigin>reformatted digital</mods:digitalOrigin>
+          </mods:physicalDescription>
+        </mods:mods>
+      </mets:xmlData>
+    </mets:mdWrap>
+  </mets:dmdSec>
+  <mets:dmdSec ID="DMDPHYS_0000">
+    <mets:mdWrap MDTYPE="MODS">
+      <mets:xmlData>
+        <mods:mods>
+          <mods:originInfo>
+            <mods:dateCaptured encoding="w3cdtf">180305</mods:dateCaptured>
+          </mods:originInfo>
+          <mods:physicalDescription>
+            <mods:digitalOrigin>Wellcome Trust</mods:digitalOrigin>
+          </mods:physicalDescription>
+        </mods:mods>
+      </mets:xmlData>
+    </mets:mdWrap>
+  </mets:dmdSec>
+  <mets:amdSec ID="AMD">
+    <mets:techMD ID="AMD_0001">
+      <mets:mdWrap MDTYPE="OTHER" MIMETYPE="text/xml">
+        <mets:xmlData>
+          <premis:object version="3.0" xsi:schemaLocation="http://www.loc.gov/premis/v3 http://www.loc.gov/standards/premis/v3/premis.xsd" xsi:type="premis:file">
+            <premis:objectIdentifier>
+              <premis:objectIdentifierType>local</premis:objectIdentifierType>
+              <premis:objectIdentifierValue>b30246039_0001.jp2</premis:objectIdentifierValue>
+              </premis:objectIdentifier>
+            <premis:objectIdentifier>
+              <premis:objectIdentifierType>uuid</premis:objectIdentifierType>
+              <premis:objectIdentifierValue>4b7fc208-a71d-428f-9120-dcaa07d3ca22</premis:objectIdentifierValue>
+              </premis:objectIdentifier>
+            <premis:significantProperties>
+              <premis:significantPropertiesType>ImageHeight</premis:significantPropertiesType>
+              <premis:significantPropertiesValue>4330</premis:significantPropertiesValue>
+              </premis:significantProperties>
+            <premis:significantProperties>
+              <premis:significantPropertiesType>ImageWidth</premis:significantPropertiesType>
+              <premis:significantPropertiesValue>2644</premis:significantPropertiesValue>
+              </premis:significantProperties>
+            <premis:objectCharacteristics>
+              <premis:compositionLevel />
+              <premis:fixity>
+                <premis:messageDigestAlgorithm>SHA-1</premis:messageDigestAlgorithm>
+                <premis:messageDigest>2b7b256dec843c3522200be7de86ed5c4ec714d1</premis:messageDigest>
+                </premis:fixity>
+              <premis:size>792017</premis:size>
+              <premis:format>
+                <premis:formatDesignation>
+                  <premis:formatName>JP2 (JPEG 2000 part 1)</premis:formatName>
+                  </premis:formatDesignation>
+                <premis:formatRegistry>
+                  <premis:formatRegistryName>PRONOM</premis:formatRegistryName>
+                  <premis:formatRegistryKey>x-fmt/392</premis:formatRegistryKey>
+                  </premis:formatRegistry>
+                </premis:format>
+              </premis:objectCharacteristics>
+            </premis:object>
+          </mets:xmlData>
+      </mets:mdWrap>
+    </mets:techMD>
+    <mets:techMD ID="AMD_0002">
+      <mets:mdWrap MDTYPE="OTHER" MIMETYPE="text/xml">
+        <mets:xmlData>
+          <premis:object version="3.0" xsi:schemaLocation="http://www.loc.gov/premis/v3 http://www.loc.gov/standards/premis/v3/premis.xsd" xsi:type="premis:file">
+            <premis:objectIdentifier>
+              <premis:objectIdentifierType>local</premis:objectIdentifierType>
+              <premis:objectIdentifierValue>b30246039_0002.jp2</premis:objectIdentifierValue>
+              </premis:objectIdentifier>
+            <premis:objectIdentifier>
+              <premis:objectIdentifierType>uuid</premis:objectIdentifierType>
+              <premis:objectIdentifierValue>e662dec9-c3f2-44a3-aa7f-2e37eeb098f8</premis:objectIdentifierValue>
+              </premis:objectIdentifier>
+            <premis:significantProperties>
+              <premis:significantPropertiesType>ImageHeight</premis:significantPropertiesType>
+              <premis:significantPropertiesValue>4491</premis:significantPropertiesValue>
+              </premis:significantProperties>
+            <premis:significantProperties>
+              <premis:significantPropertiesType>ImageWidth</premis:significantPropertiesType>
+              <premis:significantPropertiesValue>2552</premis:significantPropertiesValue>
+              </premis:significantProperties>
+            <premis:objectCharacteristics>
+              <premis:compositionLevel />
+              <premis:fixity>
+                <premis:messageDigestAlgorithm>SHA-1</premis:messageDigestAlgorithm>
+                <premis:messageDigest>ade8d397acd6a7d02bc99c4d42133b979f645223</premis:messageDigest>
+                </premis:fixity>
+              <premis:size>706557</premis:size>
+              <premis:format>
+                <premis:formatDesignation>
+                  <premis:formatName>JP2 (JPEG 2000 part 1)</premis:formatName>
+                  </premis:formatDesignation>
+                <premis:formatRegistry>
+                  <premis:formatRegistryName>PRONOM</premis:formatRegistryName>
+                  <premis:formatRegistryKey>x-fmt/392</premis:formatRegistryKey>
+                  </premis:formatRegistry>
+                </premis:format>
+              </premis:objectCharacteristics>
+            </premis:object>
+          </mets:xmlData>
+      </mets:mdWrap>
+    </mets:techMD>
+    <mets:techMD ID="AMD_0003">
+      <mets:mdWrap MDTYPE="OTHER" MIMETYPE="text/xml">
+        <mets:xmlData>
+          <premis:object version="3.0" xsi:schemaLocation="http://www.loc.gov/premis/v3 http://www.loc.gov/standards/premis/v3/premis.xsd" xsi:type="premis:file">
+            <premis:objectIdentifier>
+              <premis:objectIdentifierType>local</premis:objectIdentifierType>
+              <premis:objectIdentifierValue>b30246039_0003.jp2</premis:objectIdentifierValue>
+              </premis:objectIdentifier>
+            <premis:objectIdentifier>
+              <premis:objectIdentifierType>uuid</premis:objectIdentifierType>
+              <premis:objectIdentifierValue>2c3128b0-3547-4d6a-9c4c-4f6b7479030a</premis:objectIdentifierValue>
+              </premis:objectIdentifier>
+            <premis:significantProperties>
+              <premis:significantPropertiesType>ImageHeight</premis:significantPropertiesType>
+              <premis:significantPropertiesValue>4307</premis:significantPropertiesValue>
+              </premis:significantProperties>
+            <premis:significantProperties>
+              <premis:significantPropertiesType>ImageWidth</premis:significantPropertiesType>
+              <premis:significantPropertiesValue>2621</premis:significantPropertiesValue>
+              </premis:significantProperties>
+            <premis:objectCharacteristics>
+              <premis:compositionLevel />
+              <premis:fixity>
+                <premis:messageDigestAlgorithm>SHA-1</premis:messageDigestAlgorithm>
+                <premis:messageDigest>b85be00604616859a5f52061ba54a2bfc9152719</premis:messageDigest>
+                </premis:fixity>
+              <premis:size>307447</premis:size>
+              <premis:format>
+                <premis:formatDesignation>
+                  <premis:formatName>JP2 (JPEG 2000 part 1)</premis:formatName>
+                  </premis:formatDesignation>
+                <premis:formatRegistry>
+                  <premis:formatRegistryName>PRONOM</premis:formatRegistryName>
+                  <premis:formatRegistryKey>x-fmt/392</premis:formatRegistryKey>
+                  </premis:formatRegistry>
+                </premis:format>
+              </premis:objectCharacteristics>
+            </premis:object>
+          </mets:xmlData>
+      </mets:mdWrap>
+    </mets:techMD>
+    <mets:techMD ID="AMD_0004">
+      <mets:mdWrap MDTYPE="OTHER" MIMETYPE="text/xml">
+        <mets:xmlData>
+          <premis:object version="3.0" xsi:schemaLocation="http://www.loc.gov/premis/v3 http://www.loc.gov/standards/premis/v3/premis.xsd" xsi:type="premis:file">
+            <premis:objectIdentifier>
+              <premis:objectIdentifierType>local</premis:objectIdentifierType>
+              <premis:objectIdentifierValue>b30246039_0004.jp2</premis:objectIdentifierValue>
+              </premis:objectIdentifier>
+            <premis:objectIdentifier>
+              <premis:objectIdentifierType>uuid</premis:objectIdentifierType>
+              <premis:objectIdentifierValue>0b5118bf-b1aa-43aa-8e93-9ae139b88bb4</premis:objectIdentifierValue>
+              </premis:objectIdentifier>
+            <premis:significantProperties>
+              <premis:significantPropertiesType>ImageHeight</premis:significantPropertiesType>
+              <premis:significantPropertiesValue>4376</premis:significantPropertiesValue>
+              </premis:significantProperties>
+            <premis:significantProperties>
+              <premis:significantPropertiesType>ImageWidth</premis:significantPropertiesType>
+              <premis:significantPropertiesValue>2629</premis:significantPropertiesValue>
+              </premis:significantProperties>
+            <premis:objectCharacteristics>
+              <premis:compositionLevel />
+              <premis:fixity>
+                <premis:messageDigestAlgorithm>SHA-1</premis:messageDigestAlgorithm>
+                <premis:messageDigest>c32b490a47cb59b7ed9e51dc49913abe3db537ea</premis:messageDigest>
+                </premis:fixity>
+              <premis:size>571399</premis:size>
+              <premis:format>
+                <premis:formatDesignation>
+                  <premis:formatName>JP2 (JPEG 2000 part 1)</premis:formatName>
+                  </premis:formatDesignation>
+                <premis:formatRegistry>
+                  <premis:formatRegistryName>PRONOM</premis:formatRegistryName>
+                  <premis:formatRegistryKey>x-fmt/392</premis:formatRegistryKey>
+                  </premis:formatRegistry>
+                </premis:format>
+              </premis:objectCharacteristics>
+            </premis:object>
+          </mets:xmlData>
+      </mets:mdWrap>
+    </mets:techMD>
+    <mets:techMD ID="AMD_0005">
+      <mets:mdWrap MDTYPE="OTHER" MIMETYPE="text/xml">
+        <mets:xmlData>
+          <premis:object version="3.0" xsi:schemaLocation="http://www.loc.gov/premis/v3 http://www.loc.gov/standards/premis/v3/premis.xsd" xsi:type="premis:file">
+            <premis:objectIdentifier>
+              <premis:objectIdentifierType>local</premis:objectIdentifierType>
+              <premis:objectIdentifierValue>b30246039_0005.jp2</premis:objectIdentifierValue>
+              </premis:objectIdentifier>
+            <premis:objectIdentifier>
+              <premis:objectIdentifierType>uuid</premis:objectIdentifierType>
+              <premis:objectIdentifierValue>84006587-88a9-4013-8778-ffdf5ad95449</premis:objectIdentifierValue>
+              </premis:objectIdentifier>
+            <premis:significantProperties>
+              <premis:significantPropertiesType>ImageHeight</premis:significantPropertiesType>
+              <premis:significantPropertiesValue>4376</premis:significantPropertiesValue>
+              </premis:significantProperties>
+            <premis:significantProperties>
+              <premis:significantPropertiesType>ImageWidth</premis:significantPropertiesType>
+              <premis:significantPropertiesValue>2629</premis:significantPropertiesValue>
+              </premis:significantProperties>
+            <premis:objectCharacteristics>
+              <premis:compositionLevel />
+              <premis:fixity>
+                <premis:messageDigestAlgorithm>SHA-1</premis:messageDigestAlgorithm>
+                <premis:messageDigest>4e5eebc053f51330dc70744b52ea57266398f578</premis:messageDigest>
+                </premis:fixity>
+              <premis:size>515446</premis:size>
+              <premis:format>
+                <premis:formatDesignation>
+                  <premis:formatName>JP2 (JPEG 2000 part 1)</premis:formatName>
+                  </premis:formatDesignation>
+                <premis:formatRegistry>
+                  <premis:formatRegistryName>PRONOM</premis:formatRegistryName>
+                  <premis:formatRegistryKey>x-fmt/392</premis:formatRegistryKey>
+                  </premis:formatRegistry>
+                </premis:format>
+              </premis:objectCharacteristics>
+            </premis:object>
+          </mets:xmlData>
+      </mets:mdWrap>
+    </mets:techMD>
+    <mets:techMD ID="AMD_0006">
+      <mets:mdWrap MDTYPE="OTHER" MIMETYPE="text/xml">
+        <mets:xmlData>
+          <premis:object version="3.0" xsi:schemaLocation="http://www.loc.gov/premis/v3 http://www.loc.gov/standards/premis/v3/premis.xsd" xsi:type="premis:file">
+            <premis:objectIdentifier>
+              <premis:objectIdentifierType>local</premis:objectIdentifierType>
+              <premis:objectIdentifierValue>b30246039_0006.jp2</premis:objectIdentifierValue>
+              </premis:objectIdentifier>
+            <premis:objectIdentifier>
+              <premis:objectIdentifierType>uuid</premis:objectIdentifierType>
+              <premis:objectIdentifierValue>ce628059-37e7-4fd0-91dd-25b8a05b876a</premis:objectIdentifierValue>
+              </premis:objectIdentifier>
+            <premis:significantProperties>
+              <premis:significantPropertiesType>ImageHeight</premis:significantPropertiesType>
+              <premis:significantPropertiesValue>4445</premis:significantPropertiesValue>
+              </premis:significantProperties>
+            <premis:significantProperties>
+              <premis:significantPropertiesType>ImageWidth</premis:significantPropertiesType>
+              <premis:significantPropertiesValue>2652</premis:significantPropertiesValue>
+              </premis:significantProperties>
+            <premis:objectCharacteristics>
+              <premis:compositionLevel />
+              <premis:fixity>
+                <premis:messageDigestAlgorithm>SHA-1</premis:messageDigestAlgorithm>
+                <premis:messageDigest>a178c520814c3b2ee3c70d0879653354b1af8721</premis:messageDigest>
+                </premis:fixity>
+              <premis:size>933078</premis:size>
+              <premis:format>
+                <premis:formatDesignation>
+                  <premis:formatName>JP2 (JPEG 2000 part 1)</premis:formatName>
+                  </premis:formatDesignation>
+                <premis:formatRegistry>
+                  <premis:formatRegistryName>PRONOM</premis:formatRegistryName>
+                  <premis:formatRegistryKey>x-fmt/392</premis:formatRegistryKey>
+                  </premis:formatRegistry>
+                </premis:format>
+              </premis:objectCharacteristics>
+            </premis:object>
+          </mets:xmlData>
+      </mets:mdWrap>
+    </mets:techMD>
+    <mets:rightsMD ID="RIGHTS">
+      <mets:mdWrap MDTYPE="OTHER" MIMETYPE="text/xml" OTHERMDTYPE="DVRIGHTS">
+        <mets:xmlData>
+          <dv:rights>
+            <dv:owner>Wellcome Collection</dv:owner>
+            <dv:ownerLogo>http://wellcomelibrary.org/assets/img/wellcome-logo.png</dv:ownerLogo>
+            <dv:ownerSiteURL>http://wellcomelibrary.org</dv:ownerSiteURL>
+            <dv:ownerContact>wdl@wellcome.ac.uk</dv:ownerContact>
+          </dv:rights>
+        </mets:xmlData>
+      </mets:mdWrap>
+    </mets:rightsMD>
+    <mets:digiprovMD ID="DIGIPROV">
+      <mets:mdWrap MDTYPE="OTHER" MIMETYPE="text/xml" OTHERMDTYPE="DVLINKS">
+        <mets:xmlData>
+          <dv:links>
+            <dv:reference>b30246039</dv:reference>
+            <dv:presentation>b30246039</dv:presentation>
+          </dv:links>
+        </mets:xmlData>
+      </mets:mdWrap>
+    </mets:digiprovMD>
+  </mets:amdSec>
+  <mets:fileSec>
+    <mets:fileGrp USE="OBJECTS">
+      <mets:file ID="FILE_0001_OBJECTS" MIMETYPE="image/jp2">
+        <mets:FLocat LOCTYPE="URL" xlink:href="objects/b30246039_0001.jp2" />
+      </mets:file>
+      <mets:file ID="FILE_0002_OBJECTS" MIMETYPE="image/jp2">
+        <mets:FLocat LOCTYPE="URL" xlink:href="objects/b30246039_0002.jp2" />
+      </mets:file>
+      <mets:file ID="FILE_0003_OBJECTS" MIMETYPE="image/jp2">
+        <mets:FLocat LOCTYPE="URL" xlink:href="objects/b30246039_0003.jp2" />
+      </mets:file>
+      <mets:file ID="FILE_0004_OBJECTS" MIMETYPE="image/jp2">
+        <mets:FLocat LOCTYPE="URL" xlink:href="objects/b30246039_0004.jp2" />
+      </mets:file>
+      <mets:file ID="FILE_0005_OBJECTS" MIMETYPE="image/jp2">
+        <mets:FLocat LOCTYPE="URL" xlink:href="objects/b30246039_0005.jp2" />
+      </mets:file>
+      <mets:file ID="FILE_0006_OBJECTS" MIMETYPE="image/jp2">
+        <mets:FLocat LOCTYPE="URL" xlink:href="objects/b30246039_0006.jp2" />
+      </mets:file>
+    </mets:fileGrp>
+    <mets:fileGrp USE="ALTO">
+      <mets:file ID="FILE_0001_ALTO" MIMETYPE="application/xml">
+        <mets:FLocat LOCTYPE="URL" xlink:href="alto/b30246039_0001.xml" />
+      </mets:file>
+      <mets:file ID="FILE_0002_ALTO" MIMETYPE="application/xml">
+        <mets:FLocat LOCTYPE="URL" xlink:href="alto/b30246039_0002.xml" />
+      </mets:file>
+      <mets:file ID="FILE_0003_ALTO" MIMETYPE="application/xml">
+        <mets:FLocat LOCTYPE="URL" xlink:href="alto/b30246039_0003.xml" />
+      </mets:file>
+      <mets:file ID="FILE_0004_ALTO" MIMETYPE="application/xml">
+        <mets:FLocat LOCTYPE="URL" xlink:href="alto/b30246039_0004.xml" />
+      </mets:file>
+      <mets:file ID="FILE_0005_ALTO" MIMETYPE="application/xml">
+        <mets:FLocat LOCTYPE="URL" xlink:href="alto/b30246039_0005.xml" />
+      </mets:file>
+      <mets:file ID="FILE_0006_ALTO" MIMETYPE="application/xml">
+        <mets:FLocat LOCTYPE="URL" xlink:href="alto/b30246039_0006.xml" />
+      </mets:file>
+    </mets:fileGrp>
+  </mets:fileSec>
+  <mets:structMap TYPE="LOGICAL">
+    <mets:div ADMID="AMD" DMDID="DMDLOG_0000" ID="LOG_0000" LABEL="[Report 1942] /" TYPE="Monograph">
+      <mets:div ID="LOG_0001" TYPE="Cover" />
+      <mets:div ID="LOG_0002" TYPE="Cover" />
+    </mets:div>
+  </mets:structMap>
+  <mets:structMap TYPE="PHYSICAL">
+    <mets:div DMDID="DMDPHYS_0000" ID="PHYS_0000" TYPE="physSequence">
+      <mets:div ADMID="AMD_0001" ID="PHYS_0001" ORDER="1" ORDERLABEL=" - " TYPE="page">
+        <mets:fptr FILEID="FILE_0001_OBJECTS" />
+        <mets:fptr FILEID="FILE_0001_ALTO" />
+      </mets:div>
+      <mets:div ADMID="AMD_0002" ID="PHYS_0002" ORDER="2" ORDERLABEL=" - " TYPE="page">
+        <mets:fptr FILEID="FILE_0002_OBJECTS" />
+        <mets:fptr FILEID="FILE_0002_ALTO" />
+      </mets:div>
+      <mets:div ADMID="AMD_0003" ID="PHYS_0003" ORDER="3" ORDERLABEL=" - " TYPE="page">
+        <mets:fptr FILEID="FILE_0003_OBJECTS" />
+        <mets:fptr FILEID="FILE_0003_ALTO" />
+      </mets:div>
+      <mets:div ADMID="AMD_0004" ID="PHYS_0004" ORDER="4" ORDERLABEL=" - " TYPE="page">
+        <mets:fptr FILEID="FILE_0004_OBJECTS" />
+        <mets:fptr FILEID="FILE_0004_ALTO" />
+      </mets:div>
+      <mets:div ADMID="AMD_0005" ID="PHYS_0005" ORDER="5" ORDERLABEL=" - " TYPE="page">
+        <mets:fptr FILEID="FILE_0005_OBJECTS" />
+        <mets:fptr FILEID="FILE_0005_ALTO" />
+      </mets:div>
+      <mets:div ADMID="AMD_0006" ID="PHYS_0006" ORDER="6" ORDERLABEL=" - " TYPE="page">
+        <mets:fptr FILEID="FILE_0006_OBJECTS" />
+        <mets:fptr FILEID="FILE_0006_ALTO" />
+      </mets:div>
+    </mets:div>
+  </mets:structMap>
+  <mets:structLink>
+    <mets:smLink xlink:from="LOG_0000" xlink:to="PHYS_0001" />
+    <mets:smLink xlink:from="LOG_0000" xlink:to="PHYS_0002" />
+    <mets:smLink xlink:from="LOG_0000" xlink:to="PHYS_0003" />
+    <mets:smLink xlink:from="LOG_0000" xlink:to="PHYS_0004" />
+    <mets:smLink xlink:from="LOG_0000" xlink:to="PHYS_0005" />
+    <mets:smLink xlink:from="LOG_0000" xlink:to="PHYS_0006" />
+    <mets:smLink xlink:from="LOG_0001" xlink:to="PHYS_0001" />
+    <mets:smLink xlink:from="LOG_0002" xlink:to="PHYS_0006" />
+  </mets:structLink>
+</mets:mets>

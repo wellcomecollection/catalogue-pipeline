@@ -189,7 +189,7 @@ object ExternalDependencies {
     "io.swagger.core.v3" % "swagger-integration" % versions.swagger,
     "io.swagger.core.v3" % "swagger-jaxrs2" % versions.swagger,
     "javax.ws.rs" % "javax.ws.rs-api" % "2.0.1",
-    "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.8.8"
+    "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.8.8",
   )
 
   val parseDependencies = Seq(
@@ -199,6 +199,10 @@ object ExternalDependencies {
   val javaxDependencies = Seq(
     "javax.xml.bind" % "jaxb-api" % "2.3.0",
     "com.sun.xml.bind" % "jaxb-ri" % "2.3.0"
+  )
+
+  val scalaXmlDependencies = Seq(
+    "org.scala-lang.modules" %% "scala-xml" % "1.2.0"
   )
 }
 
@@ -274,7 +278,8 @@ object CatalogueDependencies {
       ExternalDependencies.mockitoDependencies ++
       ExternalDependencies.wireMockDependencies ++
       ExternalDependencies.akkaHttpDependencies ++
-      ExternalDependencies.scribeJavaDependencies
+      ExternalDependencies.scribeJavaDependencies ++
+      ExternalDependencies.scalaXmlDependencies
 
   // METS adapter
 
