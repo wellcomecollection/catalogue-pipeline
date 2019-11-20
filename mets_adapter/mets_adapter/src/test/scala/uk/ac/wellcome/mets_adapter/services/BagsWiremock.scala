@@ -1,4 +1,4 @@
-package uk.ac.wellcome.mets_adapter.services
+package uk.ac.wellcome.mets_adapter.fixtures
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock

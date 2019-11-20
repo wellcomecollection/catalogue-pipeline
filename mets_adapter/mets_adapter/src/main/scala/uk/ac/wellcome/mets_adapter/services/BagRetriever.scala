@@ -9,18 +9,23 @@ import akka.stream.ActorMaterializer
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import grizzled.slf4j.Logging
 import io.circe.generic.auto._
-import uk.ac.wellcome.mets_adapter.models.Bag
+import uk.ac.wellcome.mets_adapter.models._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class BagRetriever(url: String, tokenService: TokenService)(
+trait BagRetriever {
+  def getBag(update: IngestUpdate): Future[Option[Bag]]
+}
+
+class HttpBagRetriever(url: String, tokenService: TokenService)(
   implicit
   actorSystem: ActorSystem,
   materializer: ActorMaterializer,
   executionContext: ExecutionContext)
-    extends Logging {
+    extends BagRetriever
+    with Logging {
 
-  def getBag(update: StorageUpdate): Future[Option[Bag]] = {
+  def getBag(update: IngestUpdate): Future[Option[Bag]] = {
     debug(s"Executing request to $url/${update.space}/${update.bagId}")
     for {
       token <- tokenService.getToken
@@ -32,7 +37,7 @@ class BagRetriever(url: String, tokenService: TokenService)(
     } yield maybeBag
   }
 
-  private def generateRequest(update: StorageUpdate,
+  private def generateRequest(update: IngestUpdate,
                               token: OAuth2BearerToken): HttpRequest =
     HttpRequest(uri = s"$url/${update.space}/${update.bagId}")
       .addHeader(Authorization(token))

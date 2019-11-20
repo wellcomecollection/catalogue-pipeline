@@ -4,15 +4,21 @@ import scala.concurrent.ExecutionContext
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import com.typesafe.config.Config
+import org.scanamo.auto._
 
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.mets_adapter.services.{
   BagRetriever,
+  HttpBagRetriever,
   MetsAdapterWorkerService,
-  TokenService
+  MetsStore,
+  TokenService,
 }
+import uk.ac.wellcome.storage.store.dynamo.DynamoHashStore
+import uk.ac.wellcome.storage.typesafe.DynamoBuilder
+import uk.ac.wellcome.storage.store.VersionedStore
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
@@ -25,8 +31,9 @@ object Main extends WellcomeTypesafeApp {
 
     new MetsAdapterWorkerService(
       SQSBuilder.buildSQSStream(config),
-      SNSBuilder.buildSNSMessageSender(config, subject = "?"),
+      SNSBuilder.buildSNSMessageSender(config, subject = ???),
       buildBagRetriever(config),
+      buildMetsStore(config),
     )
   }
 
@@ -35,11 +42,22 @@ object Main extends WellcomeTypesafeApp {
     actorSystem: ActorSystem,
     materializer: ActorMaterializer,
     ec: ExecutionContext): BagRetriever =
-    new BagRetriever(
-      "URL??",
+    new HttpBagRetriever(
+      ???,
       buildTokenService(config)
     )
 
   private def buildTokenService(config: Config): TokenService =
     throw new NotImplementedError
+
+  private def buildMetsStore(config: Config) = {
+    implicit val dynamoClient = DynamoBuilder.buildDynamoClient(config)
+    new MetsStore(
+      new VersionedStore(
+        new DynamoHashStore(
+          DynamoBuilder.buildDynamoConfig(config)
+        )
+      )
+    )
+  }
 }
