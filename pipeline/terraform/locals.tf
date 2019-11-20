@@ -7,6 +7,7 @@ locals {
 
   sierra_merged_items_topic_name = "${data.terraform_remote_state.sierra_adapter.merged_items_topic_name}"
   sierra_merged_bibs_topic_name  = "${data.terraform_remote_state.sierra_adapter.merged_bibs_topic_name}"
+  mets_data_topic_name = "${data.terraform_remote_state.mets_adapter.mets_data_topic_name}"
 
   vhs_sierra_read_policy = "${data.terraform_remote_state.catalogue_infra_critical.vhs_sierra_read_policy}"
 

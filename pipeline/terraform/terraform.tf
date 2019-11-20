@@ -68,4 +68,16 @@ data "terraform_remote_state" "sierra_adapter" {
   }
 }
 
+data "terraform_remote_state" "mets_adapter" {
+  backend = "s3"
+
+  config {
+    role_arn = "arn:aws:iam::760097843905:role/platform-developer"
+
+    bucket = "wellcomecollection-platform-infra"
+    key    = "terraform/mets_adapter.tfstate"
+    region = "eu-west-1"
+  }
+}
+
 data "aws_caller_identity" "current" {}
