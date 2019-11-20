@@ -21,13 +21,11 @@ def sha256(bs):
     h.update(bs)
     return h.hexdigest()
 
+
 def aws_client(service_name, role_arn):
     sts = boto3.client("sts")
     session_name = "%s--%s" % (getpass.getuser(), os.path.basename(__file__))
-    resp = sts.assume_role(
-        RoleArn=role_arn,
-        RoleSessionName=session_name,
-    )
+    resp = sts.assume_role(RoleArn=role_arn, RoleSessionName=session_name)
 
     credentials = resp["Credentials"]
 
@@ -39,11 +37,16 @@ def aws_client(service_name, role_arn):
         region_name="eu-west-1",
     )
 
+
 def platform_client(service_name):
     return aws_client(service_name, "arn:aws:iam::760097843905:role/platform-developer")
 
+
 def catalogue_client(service_name):
-    return aws_client(service_name, "arn:aws:iam::756629837203:role/catalogue-developer")
+    return aws_client(
+        service_name, "arn:aws:iam::756629837203:role/catalogue-developer"
+    )
+
 
 def remove_image_from_es_indexes(catalogue_id):
     print("*** Removing the image from our Elasticsearch indexes")
