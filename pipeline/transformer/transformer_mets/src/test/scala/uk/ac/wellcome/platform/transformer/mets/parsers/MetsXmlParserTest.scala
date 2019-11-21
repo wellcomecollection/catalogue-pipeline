@@ -33,15 +33,16 @@ class MetsXmlParserTest extends FunSpec with Matchers {
     MetsXmlParser("hagdf") shouldBe a[Left[_, _]]
   }
 
-  def xml = IOUtils.toString(getClass.getResourceAsStream("/b30246039.xml"),"UTF-8")
+  def xml =
+    IOUtils.toString(getClass.getResourceAsStream("/b30246039.xml"), "UTF-8")
 
   def xmlNodmdSec =
-       <mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3">
+    <mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3">
          <mods:recordIdentifier source="gbv-ppn">b30246039</mods:recordIdentifier>
        </mets:mets>.toString()
 
   def xmlMultipleIds =
-       <mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3">
+    <mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3">
          <mets:dmdSec ID="DMDLOG_0000">
            <mets:mdWrap MDTYPE="MODS">
              <mets:xmlData>
@@ -57,7 +58,7 @@ class MetsXmlParserTest extends FunSpec with Matchers {
        </mets:mets>.toString()
 
   def xmlNoLicense =
-       <mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3">
+    <mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3">
        <mets:dmdSec ID="DMDLOG_0000">
          <mets:mdWrap MDTYPE="MODS">
            <mets:xmlData>
@@ -72,7 +73,7 @@ class MetsXmlParserTest extends FunSpec with Matchers {
        </mets:mets>.toString()
 
   def xmlMultipleLicense =
-       <mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3">
+    <mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3">
          <mets:dmdSec ID="DMDLOG_0000">
            <mets:mdWrap MDTYPE="MODS">
              <mets:xmlData>

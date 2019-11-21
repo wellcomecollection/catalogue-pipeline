@@ -14,13 +14,10 @@ import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.{ExecutionContext, Future}
 
-
 class MetsTransformerWorkerService(
   msgStream: SQSStream[Version[String, Int]],
   messageSender: BigMessageSender[SNSConfig, TransformedBaseWork],
-  store: VersionedStore[String,
-    Int,
-    HybridStoreEntry[String, EmptyMetadata]],
+  store: VersionedStore[String, Int, HybridStoreEntry[String, EmptyMetadata]],
 )(implicit ec: ExecutionContext)
     extends Runnable
     with Logging {
@@ -51,10 +48,10 @@ class MetsTransformerWorkerService(
 
   private def fetchMets(key: Version[String, Int]) = {
     store.get(key) match {
-      case Left(err) => Left(err.e)
+      case Left(err)                   => Left(err.e)
       case Right(Identified(_, entry)) => Right(entry.t)
     }
   }
 }
 
-case class VersionedMets(version:Int, metsString: String)
+case class VersionedMets(version: Int, metsString: String)

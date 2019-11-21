@@ -18,12 +18,13 @@ import uk.ac.wellcome.storage.{Identified, Version}
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class MetsTransformerWorkerServiceTest
-  extends FunSpec
+    extends FunSpec
     with BigMessagingFixture
     with MetsGenerators
     with RandomStrings
     with Eventually
-    with IntegrationPatience with VHSFixture[String] {
+    with IntegrationPatience
+    with VHSFixture[String] {
 
   it("retrieves a mets file from s3 and sends an invisible work") {
 
@@ -31,16 +32,17 @@ class MetsTransformerWorkerServiceTest
     val version = randomInt(1, 10)
     val str = metsXmlWith(identifier, License_CCBYNC)
 
-    withWorkerService { case (QueuePair(queue, _), topic, vhs) =>
-      sendWork(str, "mets.xml", vhs, queue, version)
-      eventually {
-        val works = getMessages[UnidentifiedInvisibleWork](topic)
-        works.length should be >= 1
+    withWorkerService {
+      case (QueuePair(queue, _), topic, vhs) =>
+        sendWork(str, "mets.xml", vhs, queue, version)
+        eventually {
+          val works = getMessages[UnidentifiedInvisibleWork](topic)
+          works.length should be >= 1
 
-        assertQueueEmpty(queue)
+          assertQueueEmpty(queue)
 
-        works.head shouldBe expectedWork(identifier, version)
-      }
+          works.head shouldBe expectedWork(identifier, version)
+        }
     }
   }
 
@@ -49,16 +51,16 @@ class MetsTransformerWorkerServiceTest
     val version = randomInt(1, 10)
     val value1 = "this is not a valid mets file"
 
+    withWorkerService {
+      case (QueuePair(queue, dlq), topic, vhs) =>
+        sendWork(value1, "mets.xml", vhs, queue, version)
+        eventually {
+          val works = getMessages[UnidentifiedInvisibleWork](topic)
+          works should have size 0
 
-    withWorkerService { case (QueuePair(queue, dlq), topic, vhs) =>
-      sendWork(value1, "mets.xml", vhs, queue, version)
-      eventually {
-        val works = getMessages[UnidentifiedInvisibleWork](topic)
-        works should have size 0
-
-        assertQueueEmpty(queue)
-        assertQueueHasSize(dlq, 1)
-      }
+          assertQueueEmpty(queue)
+          assertQueueHasSize(dlq, 1)
+        }
     }
   }
 
@@ -72,7 +74,6 @@ class MetsTransformerWorkerServiceTest
     val expectedItem: MaybeDisplayable[Item] =
       Unidentifiable(Item(locations = List(expectedDigitalLocation)))
 
-
     val expectedWork = UnidentifiedInvisibleWork(
       version = version,
       sourceIdentifier = SourceIdentifier(
@@ -84,8 +85,7 @@ class MetsTransformerWorkerServiceTest
         mergeCandidates = List(
           MergeCandidate(
             identifier = SourceIdentifier(
-              identifierType =
-                IdentifierType("sierra-system-number"),
+              identifierType = IdentifierType("sierra-system-number"),
               ontologyType = "Work",
               value = identifier
             ),
@@ -97,11 +97,11 @@ class MetsTransformerWorkerServiceTest
     expectedWork
   }
 
-
   def withWorkerService[R](testWith: TestWith[(QueuePair, Topic, VHS), R]): R =
-    withLocalSqsQueueAndDlq { case queuePair@QueuePair(queue, _) =>
-      withLocalSnsTopic { topic =>
-        withLocalS3Bucket { messagingBucket =>
+    withLocalSqsQueueAndDlq {
+      case queuePair @ QueuePair(queue, _) =>
+        withLocalSnsTopic { topic =>
+          withLocalS3Bucket { messagingBucket =>
             withVHS { vhs =>
               withActorSystem { implicit actorSystem =>
                 withSQSStream[Version[String, Int], R](queue) { sqsStream =>
@@ -111,7 +111,8 @@ class MetsTransformerWorkerServiceTest
                     snsClient) { messageSender =>
                     val workerService = new MetsTransformerWorkerService(
                       sqsStream,
-                      messageSender, vhs)
+                      messageSender,
+                      vhs)
                     workerService.run()
                     testWith((queuePair, topic, vhs))
                   }
@@ -119,18 +120,18 @@ class MetsTransformerWorkerServiceTest
               }
             }
           }
-      }
+        }
     }
 
   private def sendWork(mets: String,
-               name: String,
-               vhs: VHS,
-               queue: SQS.Queue,
-               version: Int) = {
+                       name: String,
+                       vhs: VHS,
+                       queue: SQS.Queue,
+                       version: Int) = {
     val entry = HybridStoreEntry(mets, EmptyMetadata())
     val id = name
     val key = vhs.put(Version(id, version))(entry) match {
-      case Left(err) => throw new Exception(s"Failed storing work in VHS: $err")
+      case Left(err)                 => throw new Exception(s"Failed storing work in VHS: $err")
       case Right(Identified(key, _)) => key
     }
     sendSqsMessage(queue, key)

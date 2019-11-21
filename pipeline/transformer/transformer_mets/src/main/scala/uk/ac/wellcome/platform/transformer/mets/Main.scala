@@ -32,6 +32,7 @@ object Main extends WellcomeTypesafeApp {
       SQSBuilder.buildSQSStream(config),
       messageSender = BigMessagingBuilder
         .buildBigMessageSender[TransformedBaseWork](config),
-      store = VHSBuilder.build[String](config))
+      store = VHSBuilder.build[String](config)
+    )
   }
 }
