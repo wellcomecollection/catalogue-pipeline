@@ -51,7 +51,7 @@ class MetsTransformerWorkerService(
 
   private def fetchMets(key: Version[String, Int]) = {
     store.get(key) match {
-      case Left(err) => Left(new Exception(err.e))
+      case Left(err) => Left(err.e)
       case Right(Identified(_, entry)) => Right(entry.t)
     }
   }
