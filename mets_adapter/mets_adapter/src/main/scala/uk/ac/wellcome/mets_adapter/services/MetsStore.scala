@@ -1,35 +1,31 @@
 package uk.ac.wellcome.mets_adapter.services
 
+import grizzled.slf4j.Logging
 import uk.ac.wellcome.mets_adapter.models._
-import uk.ac.wellcome.storage.store.VersionedStore
-import uk.ac.wellcome.storage.{Identified, NoVersionExistsError}
+import uk.ac.wellcome.storage.VersionAlreadyExistsError
+import uk.ac.wellcome.storage.store.{VersionedStore, HybridStoreEntry}
+import uk.ac.wellcome.storage.{Identified, NoVersionExistsError, Version}
+import uk.ac.wellcome.bigmessaging.EmptyMetadata
 
-/** Stores METS data. The data should first be filtered to ensure storing is
-  *  performed only if it is a newer version and the location is pointing to a
-  *  different XML file.
-  */
-class MetsStore(store: VersionedStore[String, Int, MetsData]) {
+class MetsStore(store: VersionedStore[String, Int, HybridStoreEntry[String, EmptyMetadata]]) extends Logging {
 
-  def storeMetsData(bagId: String,
-                    data: MetsData): Either[Throwable, MetsData] =
+  def storeXml(key: Version[String, Int],
+               xml: String): Either[Throwable, Version[String, Int]] =
     store
-      .putLatest(bagId)(data)
+      .put(key)(HybridStoreEntry(xml, EmptyMetadata()))
       .right
-      .map(_ => data)
+      .map { case Identified(key, _) => key }
       .left
-      .map(_.e)
+      .flatMap {
+        case VersionAlreadyExistsError(_) =>
+          warn(s"$key already exists in VHS so re-publishing")
+          Right(key)
+        case err => Left(err.e)
+      }
+}
 
-  def filterMetsData(bagId: String,
-                     data: MetsData): Either[Throwable, Option[MetsData]] =
-    store.getLatest(bagId) match {
-      case Right(Identified(_, existingData)) =>
-        Right(
-          if (shouldUpdate(data, existingData)) Some(data) else None
-        )
-      case Left(_: NoVersionExistsError) => Right(Some(data))
-      case Left(err)                     => Left(err.e)
-    }
-
-  private def shouldUpdate(newData: MetsData, existingData: MetsData) =
-    newData.version >= existingData.version
+object MetsStore {
+  
+  def apply(store: VersionedStore[String, Int, HybridStoreEntry[String, EmptyMetadata]]) =
+    new MetsStore(store)
 }

@@ -4,7 +4,6 @@ import scala.concurrent.ExecutionContext
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import com.typesafe.config.Config
-import org.scanamo.auto._
 
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
@@ -16,9 +15,8 @@ import uk.ac.wellcome.mets_adapter.services.{
   MetsStore,
   TokenService,
 }
-import uk.ac.wellcome.storage.store.dynamo.DynamoHashStore
-import uk.ac.wellcome.storage.typesafe.DynamoBuilder
-import uk.ac.wellcome.storage.store.VersionedStore
+import uk.ac.wellcome.storage.store.s3.S3TypedStore
+import uk.ac.wellcome.bigmessaging.typesafe.VHSBuilder
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
@@ -33,7 +31,8 @@ object Main extends WellcomeTypesafeApp {
       SQSBuilder.buildSQSStream(config),
       SNSBuilder.buildSNSMessageSender(config, subject = ???),
       buildBagRetriever(config),
-      buildMetsStore(config),
+      buildXmlStore(config),
+      MetsStore(VHSBuilder.build(config))
     )
   }
 
@@ -47,17 +46,8 @@ object Main extends WellcomeTypesafeApp {
       buildTokenService(config)
     )
 
+  private def buildXmlStore(config: Config): S3TypedStore[String] = ???
+
   private def buildTokenService(config: Config): TokenService =
     throw new NotImplementedError
-
-  private def buildMetsStore(config: Config) = {
-    implicit val dynamoClient = DynamoBuilder.buildDynamoClient(config)
-    new MetsStore(
-      new VersionedStore(
-        new DynamoHashStore(
-          DynamoBuilder.buildDynamoConfig(config)
-        )
-      )
-    )
-  }
 }

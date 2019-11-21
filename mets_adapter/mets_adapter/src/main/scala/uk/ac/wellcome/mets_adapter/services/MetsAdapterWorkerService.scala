@@ -12,6 +12,8 @@ import uk.ac.wellcome.messaging.sns.SNSMessageSender
 import uk.ac.wellcome.typesafe.Runnable
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.mets_adapter.models._
+import uk.ac.wellcome.storage.{Version, ObjectLocation}
+import uk.ac.wellcome.storage.store.TypedStore
 
 import scala.concurrent.Future
 
@@ -29,12 +31,16 @@ class MetsAdapterWorkerService(
   msgStream: SQSStream[IngestUpdate],
   msgSender: SNSMessageSender,
   bagRetriever: BagRetriever,
+  xmlStore: TypedStore[ObjectLocation, String],
   metsStore: MetsStore,
-  concurrentConnections: Int = 6)(implicit ec: ExecutionContext)
+  concurrentHttpConnections: Int = 6,
+  concurrentS3Connections: Int = 4)(implicit ec: ExecutionContext)
     extends Runnable
     with Logging {
 
   type Result[T] = Either[Throwable, T]
+
+  case class MetsDataAndXml(data: MetsData, xml: String)
 
   val className = this.getClass.getSimpleName
 
@@ -46,16 +52,16 @@ class MetsAdapterWorkerService(
           .map { case (msg, update) => (Context(msg, update.bagId), update) }
           .via(retrieveBag)
           .via(parseMetsData)
-          .via(filterMetsData)
-          .via(storeMetsData)
-          .via(publishMetsData)
+          .via(retrieveXml)
+          .via(storeXml)
+          .via(publishKey)
           .map { case (Context(msg, _), _) => msg }
       }
     )
 
   def retrieveBag =
     Flow[(Context, IngestUpdate)]
-      .mapAsync(concurrentConnections) {
+      .mapAsync(concurrentHttpConnections) {
         case (ctx, update) =>
           bagRetriever
             .getBag(update)
@@ -67,20 +73,27 @@ class MetsAdapterWorkerService(
     Flow[(Context, Option[Bag])]
       .mapWithContext { case (ctx, bag) => bag.metsData }
 
-  def filterMetsData =
+  def retrieveXml =
     Flow[(Context, Option[MetsData])]
-      .mapOptionalWithContext {
-        case (ctx, data) => metsStore.filterMetsData(ctx.bagId, data)
+      .mapWithContextAsync(concurrentS3Connections) { case (ctx, data) =>
+        Future {
+          xmlStore
+            .get(ObjectLocation(data.bucket, data.path))
+            .right
+            .map(obj => MetsDataAndXml(data, obj.identifiedT.t))
+            .left
+            .map(_.e)
+        }
       }
 
-  def storeMetsData =
-    Flow[(Context, Option[MetsData])]
-      .mapWithContext {
-        case (ctx, data) => metsStore.storeMetsData(ctx.bagId, data)
+  def storeXml =
+    Flow[(Context, Option[MetsDataAndXml])]
+      .mapWithContext { case (ctx, MetsDataAndXml(data, xml)) =>
+        metsStore.storeXml(Version(ctx.bagId, data.version), xml)
       }
 
-  def publishMetsData =
-    Flow[(Context, Option[MetsData])]
+  def publishKey =
+    Flow[(Context, Option[Version[String, Int]])]
       .mapWithContext {
         case (ctx, data) => msgSender.sendT(data).toEither.right.map(_ => data)
       }
@@ -102,13 +115,27 @@ class MetsAdapterWorkerService(
     val flow: Flow[(Context, In), (Context, Option[Out]), NotUsed]) {
 
     def mapWithContext[T](f: (Context, Out) => Result[T]) =
-      mapOptionalWithContext { case (ctx, data) => f(ctx, data).map(Some(_)) }
+      mapWithContextAsync(1) {
+        case (ctx, data) => Future.successful(f(ctx, data))
+      }
 
     def mapOptionalWithContext[T](f: (Context, Out) => Result[Option[T]]) =
+      mapOptionalWithContextAsync(1) {
+        case (ctx, data) => Future.successful(f(ctx, data))
+      }
+
+    def mapWithContextAsync[T](parallelism: Int)(
+      f: (Context, Out) => Future[Result[T]]) =
+      mapOptionalWithContextAsync(parallelism) {
+        case (ctx, data) => f(ctx, data).map(res => res.map(Some(_)))
+      }
+
+    def mapOptionalWithContextAsync[T](parallelism: Int)(
+      f: (Context, Out) => Future[Result[Option[T]]]) =
       flow
-        .map {
-          case (ctx, Some(data)) => (ctx, f(ctx, data))
-          case (ctx, None)       => (ctx, Right(None))
+        .mapAsync(parallelism) {
+          case (ctx, Some(data)) => f(ctx, data).map((ctx, _))
+          case (ctx, None)       => Future.successful((ctx, Right(None)))
         }
         .via(catchErrors)
   }

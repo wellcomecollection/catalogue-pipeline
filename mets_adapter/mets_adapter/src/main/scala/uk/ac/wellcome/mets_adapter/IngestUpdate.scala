@@ -2,7 +2,7 @@ package uk.ac.wellcome.mets_adapter.models
 
 case class IngestUpdate(space: String, bagId: String)
 
-case class MetsData(path: String, version: Int)
+case class MetsData(bucket: String, path: String, version: Int)
 
 case class Bag(info: BagInfo,
                manifest: BagManifest,
@@ -19,7 +19,7 @@ case class Bag(info: BagInfo,
     metsPath
       .map { path =>
         parsedVersion
-          .map(version => Right(MetsData(path, version)))
+          .map(version => Right(MetsData(location.bucket, path, version)))
           .getOrElse(Left(new Exception("Couldn't parse version")))
       }
       .getOrElse(Left(new Exception("Couldn't find METS path")))

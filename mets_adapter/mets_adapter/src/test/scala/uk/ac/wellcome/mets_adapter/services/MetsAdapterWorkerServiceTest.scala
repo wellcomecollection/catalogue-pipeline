@@ -11,11 +11,12 @@ import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.mets_adapter.models._
 import uk.ac.wellcome.akka.fixtures.Akka
-import uk.ac.wellcome.storage.store.VersionedStore
-import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
+import uk.ac.wellcome.storage.store.{VersionedStore, TypedStore, TypedStoreEntry, HybridStoreEntry}
+import uk.ac.wellcome.storage.store.memory.{MemoryVersionedStore, MemoryTypedStore}
 import uk.ac.wellcome.messaging.sns.SNSMessageSender
-import uk.ac.wellcome.storage.{Identified, Version}
+import uk.ac.wellcome.storage.{Identified, Version, ObjectLocation}
 import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.bigmessaging.EmptyMetadata
 
 class MetsAdapterWorkerServiceTest
     extends FunSpec
@@ -33,7 +34,7 @@ class MetsAdapterWorkerServiceTest
     ),
     BagLocation(
       path = "root",
-      bucket = "s3-bucket",
+      bucket = "bucket",
     ),
     "v1"
   )
@@ -44,76 +45,99 @@ class MetsAdapterWorkerServiceTest
         Future.successful(Some(bag))
     }
 
-  it("should process ingest updates and store and publish METS data") {
-    val internalStore = createInternalStore()
-    withWorkerService(bagRetriever, internalStore) {
+  it("processes ingest updates and store and publish METS data") {
+    val vhs = createVhs()
+    withWorkerService(bagRetriever, vhs) {
       case (workerService, QueuePair(queue, dlq), topic) =>
         sendSqsMessage(queue, IngestUpdate("space", "123"))
         assertQueueEmpty(queue)
         assertQueueEmpty(dlq)
-        val metsData = getMessages(topic)
-        metsData shouldEqual List(MetsData("root/mets.xml", 1))
-        internalStore.getLatest("123") shouldBe Right(
-          Identified(Version("123", 0), MetsData("root/mets.xml", 1))
+        getMessages(topic) shouldEqual List(Version("123", 1))
+        vhs.getLatest("123") shouldBe Right(
+          Identified(Version("123", 1), vhsEntry("XML"))
         )
     }
   }
 
-  it(
-    "should re-publish METS data when same version already exists in the store") {
-    val internalStore = createInternalStore(
-      Map(Version("123", 0) -> MetsData("root/mets.xml", 1))
-    )
-    withWorkerService(bagRetriever, internalStore) {
+  it("publishes new METS data when old version exists in the store") {
+    val vhs = createVhs(Map(Version("123", 0) -> "old-data"))
+    withWorkerService(bagRetriever, vhs) {
       case (workerService, QueuePair(queue, dlq), topic) =>
         sendSqsMessage(queue, IngestUpdate("space", "123"))
         Thread.sleep(2000)
         assertQueueEmpty(queue)
         assertQueueEmpty(dlq)
-        val metsData = getMessages(topic)
-        metsData shouldEqual List(MetsData("root/mets.xml", 1))
-        internalStore.getLatest("123") shouldBe Right(
-          Identified(Version("123", 1), MetsData("root/mets.xml", 1))
+        getMessages(topic) shouldEqual List(Version("123", 1))
+        vhs.getLatest("123") shouldBe Right(
+          Identified(Version("123", 1), vhsEntry("XML"))
+        )
+    }
+  }
+
+  it("re-publishes existing data when current version exists in the store") {
+    val vhs = createVhs(Map(Version("123", 1) -> "existing-data"))
+    withWorkerService(bagRetriever, vhs) {
+      case (workerService, QueuePair(queue, dlq), topic) =>
+        sendSqsMessage(queue, IngestUpdate("space", "123"))
+        assertQueueEmpty(queue)
+        assertQueueEmpty(dlq)
+        getMessages(topic) shouldEqual List(Version("123", 1))
+        vhs.getLatest("123") shouldBe Right(
+          Identified(Version("123", 1), vhsEntry("existing-data"))
+        )
+    }
+  }
+
+  it("ignores messages when greater version exists in the store") {
+    val vhs = createVhs(Map(Version("123", 2) -> "existing-data"))
+    withWorkerService(bagRetriever, vhs) {
+      case (workerService, QueuePair(queue, dlq), topic) =>
+        sendSqsMessage(queue, IngestUpdate("space", "123"))
+        Thread.sleep(2000)
+        assertQueueEmpty(queue)
+        assertQueueHasSize(dlq, 1)
+        getMessages(topic) shouldEqual Nil
+        vhs.getLatest("123") shouldBe Right(
+          Identified(Version("123", 2), vhsEntry("existing-data"))
         )
     }
   }
 
   it("should not store / publish anything when bag retrieval fails") {
-    val internalStore = createInternalStore()
+    val vhs = createVhs()
     val brokenBagRetriever = new BagRetriever {
       def getBag(update: IngestUpdate): Future[Option[Bag]] =
         Future.failed(new Exception("Failed retrieving bag"))
     }
-    withWorkerService(brokenBagRetriever, internalStore) {
-      case (workerService, QueuePair(queue, dlq), topic) =>
-        sendSqsMessage(queue, IngestUpdate("space", "123"))
-        Thread.sleep(2000)
-        assertQueueHasSize(queue, 0)
-        assertQueueHasSize(dlq, 1)
-        val metsData = getMessages(topic)
-        metsData shouldEqual Nil
-        internalStore.getLatest("123") shouldBe a[Left[_, _]]
-    }
-  }
-
-  it("should store METS data if publishing fails") {
-    val internalStore = createInternalStore()
-    withWorkerService(bagRetriever, internalStore, createBrokenMsgSender(_)) {
+    withWorkerService(brokenBagRetriever, vhs) {
       case (workerService, QueuePair(queue, dlq), topic) =>
         sendSqsMessage(queue, IngestUpdate("space", "123"))
         Thread.sleep(2000)
         assertQueueEmpty(queue)
         assertQueueHasSize(dlq, 1)
-        val metsData = getMessages(topic)
-        metsData shouldEqual Nil
-        internalStore.getLatest("123") shouldBe a[Right[_, _]]
+        getMessages(topic) shouldEqual Nil
+        vhs.getLatest("123") shouldBe a[Left[_, _]]
     }
   }
 
-  def withWorkerService[R](bagRetriever: BagRetriever,
-                           internalStore: VersionedStore[String, Int, MetsData],
-                           createMsgSender: SNS.Topic => SNSMessageSender =
-                             createMsgSender(_))(
+  it("should store METS data if publishing fails") {
+    val vhs = createVhs()
+    withWorkerService(bagRetriever, vhs, createBrokenMsgSender(_)) {
+      case (workerService, QueuePair(queue, dlq), topic) =>
+        sendSqsMessage(queue, IngestUpdate("space", "123"))
+        Thread.sleep(2000)
+        assertQueueEmpty(queue)
+        assertQueueHasSize(dlq, 1)
+        getMessages(topic) shouldEqual Nil
+        vhs.getLatest("123") shouldBe a[Right[_, _]]
+    }
+  }
+
+  def withWorkerService[R](
+    bagRetriever: BagRetriever,
+    vhs: VersionedStore[String, Int, HybridStoreEntry[String, EmptyMetadata]],
+    createMsgSender: SNS.Topic => SNSMessageSender = createMsgSender(_),
+    xmlStore: TypedStore[ObjectLocation, String] = createXmlStore())(
     testWith: TestWith[(MetsAdapterWorkerService, QueuePair, SNS.Topic), R]) =
     withActorSystem { implicit actorSystem =>
       withLocalSnsTopic { topic =>
@@ -124,7 +148,8 @@ class MetsAdapterWorkerServiceTest
                 stream,
                 createMsgSender(topic),
                 bagRetriever,
-                new MetsStore(internalStore)
+                xmlStore,
+                MetsStore(vhs)
               )
               workerService.run()
               testWith((workerService, QueuePair(queue, dlq), topic))
@@ -150,12 +175,22 @@ class MetsAdapterWorkerServiceTest
         Failure(new Exception("Waaah I couldn't send message"))
     }
 
-  def createInternalStore(
-    data: Map[Version[String, Int], MetsData] = Map.empty) =
-    MemoryVersionedStore(data)
+  def createXmlStore(
+    data: Map[ObjectLocation, String] =
+      Map(ObjectLocation("bucket", "root/mets.xml") -> "XML")) =
+    MemoryTypedStore(
+      data.mapValues(value => TypedStoreEntry(value, Map.empty))
+    )
 
-  def getMessages(topic: SNS.Topic): List[MetsData] =
+  def createVhs(
+    data: Map[Version[String, Int], String] = Map.empty) =
+    MemoryVersionedStore(data.mapValues(vhsEntry))
+
+  def vhsEntry(xml: String) =
+    HybridStoreEntry(xml, EmptyMetadata())
+
+  def getMessages(topic: SNS.Topic) =
     listMessagesReceivedFromSNS(topic)
-      .map(msgInfo => fromJson[MetsData](msgInfo.message).get)
+      .map(msgInfo => fromJson[Version[String, Int]](msgInfo.message).get)
       .toList
 }
