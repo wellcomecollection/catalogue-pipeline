@@ -1,6 +1,15 @@
 package uk.ac.wellcome.platform.api.models
 
+import com.sksamuel.elastic4s.requests.common.Operator
+import com.sksamuel.elastic4s.requests.searches.queries.matches.{
+  FieldWithOptionalBoost,
+  MatchQuery,
+  MultiMatchQuery,
+  MultiMatchQueryBuilderType
+}
 import com.sksamuel.elastic4s.requests.searches.queries.{
+  BoolQuery,
+  ConstantScore,
   Query,
   SimpleQueryStringFlag,
   SimpleStringQuery
@@ -11,10 +20,10 @@ sealed trait WorkQueryType
 object WorkQueryType {
   case object MSMBoostQuery extends WorkQueryType
   case object MSMBoostQueryUsingAndOperator extends WorkQueryType
+  case object FieldAndTerms extends WorkQueryType
 }
 
-case class WorkQuery(queryString: String, queryType: WorkQueryType) {
-
+object WorkQueryDefaults {
   val defaultMSM = "60%"
   val defaultBoostedFields: Seq[(String, Option[Double])] = Seq(
     ("data.title", Some(9.0)),
@@ -41,8 +50,12 @@ case class WorkQuery(queryString: String, queryType: WorkQueryType) {
     ("data.items.sourceIdentifier.value", None),
     ("data.items.otherIdentifiers.value", None),
   )
+}
+
+case class WorkQuery(queryString: String, queryType: WorkQueryType) {
 
   import WorkQueryType._
+  import WorkQueryDefaults._
 
   def query: Query =
     queryType match {
@@ -70,5 +83,56 @@ case class WorkQuery(queryString: String, queryType: WorkQueryType) {
           // See: https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html#simple-query-string-syntax
           flags = Seq(SimpleQueryStringFlag.PHRASE)
         )
+      case FieldAndTerms => FieldAndTermsQuery(queryString).elasticQuery
     }
+}
+
+sealed trait ElasticQuery {
+  val qs: String
+  val elasticQuery: Query
+}
+case class TitleQuery(qs: String) extends ElasticQuery {
+  lazy val elasticQuery =
+    MatchQuery(
+      field = "title.english",
+      value = qs,
+      operator = Some(Operator.And))
+}
+
+case class GenreQuery(qs: String) extends ElasticQuery {
+  lazy val elasticQuery =
+    MatchQuery(
+      field = "genres.concepts.agent.label",
+      value = qs,
+      operator = Some(Operator.And))
+}
+
+case class SubjectQuery(qs: String) extends ElasticQuery {
+  lazy val elasticQuery =
+    MatchQuery(
+      field = "subjects.agent.concepts.agent.label",
+      value = qs,
+      operator = Some(Operator.And))
+}
+
+case class FieldAndTermsQuery(qs: String) extends ElasticQuery {
+  import WorkQueryDefaults._
+
+  val fields = defaultBoostedFields map {
+    case (field, boost) =>
+      FieldWithOptionalBoost(field = field, boost = boost)
+  }
+  val baseQuery = MultiMatchQuery(
+    text = qs,
+    fields = fields,
+    minimumShouldMatch = Some(defaultMSM),
+    `type` = Some(MultiMatchQueryBuilderType.CROSS_FIELDS)
+  )
+  lazy val elasticQuery = BoolQuery(
+    should = Seq(
+      ConstantScore(query = TitleQuery(qs).elasticQuery, boost = Some(2000)),
+      ConstantScore(query = GenreQuery(qs).elasticQuery, boost = Some(1000)),
+      ConstantScore(query = SubjectQuery(qs).elasticQuery, boost = Some(1000)),
+      baseQuery
+    ))
 }
