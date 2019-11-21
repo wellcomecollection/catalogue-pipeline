@@ -5,7 +5,7 @@ import uk.ac.wellcome.display.models.{
   SortRequest,
   SortingOrder
 }
-import uk.ac.wellcome.platform.api.models.WorkFilter
+import uk.ac.wellcome.platform.api.models.{SearchQuery, WorkFilter}
 import uk.ac.wellcome.platform.api.services.{
   ElasticsearchQueryOptions,
   WorksSearchOptions
@@ -13,12 +13,13 @@ import uk.ac.wellcome.platform.api.services.{
 
 trait SearchOptionsGenerators {
   def createElasticsearchQueryOptionsWith(
-    filters: List[WorkFilter] = List(),
+    filters: List[WorkFilter] = Nil,
     limit: Int = 10,
     from: Int = 0,
-    aggregations: List[AggregationRequest] = List(),
-    sort: List[SortRequest] = List(),
-    sortOrder: SortingOrder = SortingOrder.Ascending
+    aggregations: List[AggregationRequest] = Nil,
+    sort: List[SortRequest] = Nil,
+    sortOrder: SortingOrder = SortingOrder.Ascending,
+    searchQuery: Option[SearchQuery] = None
   ): ElasticsearchQueryOptions =
     ElasticsearchQueryOptions(
       filters = filters,
@@ -26,19 +27,21 @@ trait SearchOptionsGenerators {
       from = from,
       aggregations = aggregations,
       sortBy = sort,
-      sortOrder = sortOrder
+      sortOrder = sortOrder,
+      searchQuery = searchQuery
     )
 
   def createElasticsearchQueryOptions: ElasticsearchQueryOptions =
     createElasticsearchQueryOptionsWith()
 
   def createWorksSearchOptionsWith(
-    filters: List[WorkFilter] = List(),
+    filters: List[WorkFilter] = Nil,
     pageSize: Int = 10,
     pageNumber: Int = 1,
-    aggregations: List[AggregationRequest] = List(),
-    sort: List[SortRequest] = List(),
-    sortOrder: SortingOrder = SortingOrder.Ascending
+    aggregations: List[AggregationRequest] = Nil,
+    sort: List[SortRequest] = Nil,
+    sortOrder: SortingOrder = SortingOrder.Ascending,
+    searchQuery: Option[SearchQuery] = None
   ): WorksSearchOptions =
     WorksSearchOptions(
       filters = filters,
@@ -46,7 +49,8 @@ trait SearchOptionsGenerators {
       pageNumber = pageNumber,
       aggregations = aggregations,
       sortBy = sort,
-      sortOrder = sortOrder
+      sortOrder = sortOrder,
+      searchQuery = searchQuery
     )
 
   def createWorksSearchOptions: WorksSearchOptions =

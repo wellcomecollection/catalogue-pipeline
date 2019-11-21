@@ -21,7 +21,8 @@ case class ElasticsearchQueryOptions(filters: List[WorkFilter],
                                      from: Int,
                                      aggregations: List[AggregationRequest],
                                      sortBy: List[SortRequest],
-                                     sortOrder: SortingOrder)
+                                     sortOrder: SortingOrder,
+                                     searchQuery: Option[SearchQuery])
 
 class ElasticsearchService(elasticClient: ElasticClient)(
   implicit ec: ExecutionContext
@@ -38,15 +39,12 @@ class ElasticsearchService(elasticClient: ElasticClient)(
   def listResults: (Index, ElasticsearchQueryOptions) => Future[
     Either[ElasticError, SearchResponse]] =
     executeSearch(
-      maybeWorkQuery = None,
       sortDefinitions = List(fieldSort("canonicalId").order(SortOrder.ASC))
     )
 
-  def queryResults(
-    workQuery: WorkQuery): (Index, ElasticsearchQueryOptions) => Future[
+  def queryResults: (Index, ElasticsearchQueryOptions) => Future[
     Either[ElasticError, SearchResponse]] =
     executeSearch(
-      maybeWorkQuery = Some(workQuery),
       sortDefinitions = List(
         fieldSort("_score").order(SortOrder.DESC),
         fieldSort("canonicalId").order(SortOrder.ASC))
@@ -56,14 +54,12 @@ class ElasticsearchService(elasticClient: ElasticClient)(
     * using the elastic4s query DSL, then execute the search.
     */
   private def executeSearch(
-    maybeWorkQuery: Option[WorkQuery],
     sortDefinitions: List[FieldSort]
   )(index: Index, queryOptions: ElasticsearchQueryOptions)
     : Future[Either[ElasticError, SearchResponse]] = {
 
     val searchRequest = ElastsearchSearchRequestBuilder(
       index,
-      maybeWorkQuery,
       sortDefinitions,
       queryOptions
     ).request

@@ -84,7 +84,7 @@ class Router(elasticClient: ElasticClient,
     val searchOptions = params.searchOptions(apiConfig)
     val index = params._index.map(Index(_)).getOrElse(elasticConfig.indexV2)
     worksService
-      .listOrSearchWorks(index, searchOptions, params.workQuery)
+      .listOrSearchWorks(index, searchOptions)
       .map {
         case Left(err) => elasticError(err)
         case Right(resultList) =>
