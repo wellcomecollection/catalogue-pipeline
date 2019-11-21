@@ -35,6 +35,7 @@ module "mets_transformer" {
     transformer_queue_id = "${module.mets_transformer_queue.id}"
     metrics_namespace    = "${local.namespace_hyphen}_mets_transformer"
     messages_bucket_name = "${aws_s3_bucket.messages.id}"
+    storage_bucket_name = "${var.storage_bucket_name}"
   }
 
   env_vars_length = 4
@@ -51,10 +52,10 @@ module "mets_transformer" {
 
 # Permissions
 
-resource "aws_iam_role_policy" "mets_transformer_s3_storage_read" {
+/*resource "aws_iam_role_policy" "mets_transformer_s3_storage_read" {
   role   = "${module.mets_transformer.task_role_name}"
   policy = "${var.s3_storage_read_policy}"
-}
+}*/
 
 # Output topic
 
