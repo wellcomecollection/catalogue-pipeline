@@ -102,7 +102,6 @@ class MetsTransformerWorkerServiceTest
     withLocalSqsQueueAndDlq { case queuePair@QueuePair(queue, _) =>
       withLocalSnsTopic { topic =>
         withLocalS3Bucket { messagingBucket =>
-          withLocalS3Bucket { storageBucket =>
             withVHS { vhs =>
               withActorSystem { implicit actorSystem =>
                 withSQSStream[Version[String, Int], R](queue) { sqsStream =>
@@ -120,7 +119,6 @@ class MetsTransformerWorkerServiceTest
               }
             }
           }
-        }
       }
     }
 
