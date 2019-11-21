@@ -373,35 +373,6 @@ class WorksServiceTest
         )
       }
 
-      it("matches results with the PHRASE syntax (\"term\")") {
-        val workExactTitle = createIdentifiedWorkWith(
-          title = Some("An exact match of a title")
-        )
-
-        val workLooseTitle = createIdentifiedWorkWith(
-          title = Some("A loose match of a title")
-        )
-
-        // Should return both
-        assertSearchResultIsCorrect(
-          query = "An exact match of a title"
-        )(
-          allWorks = List(workExactTitle, workLooseTitle),
-          expectedWorks = List(workExactTitle, workLooseTitle),
-          expectedTotalResults = 2,
-          expectedAggregations = None
-        )
-
-        // Should return only the exact match
-        assertSearchResultIsCorrect(
-          query = "\"An exact match of a title\""
-        )(
-          allWorks = List(workExactTitle, workLooseTitle),
-          expectedWorks = List(workExactTitle),
-          expectedTotalResults = 1
-        )
-      }
-
       it("aggregates workTypes") {
         withLocalWorksIndex { index =>
           val work1 = createIdentifiedWorkWith(
