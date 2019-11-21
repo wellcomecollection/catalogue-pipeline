@@ -59,7 +59,8 @@ class MetsAdapterWorkerServiceTest
     }
   }
 
-  it("should not publish METS data when already exists in the store") {
+  it(
+    "should re-publish METS data when same version already exists in the store") {
     val internalStore = createInternalStore(
       Map(Version("123", 0) -> MetsData("root/mets.xml", 1))
     )
@@ -70,9 +71,9 @@ class MetsAdapterWorkerServiceTest
         assertQueueEmpty(queue)
         assertQueueEmpty(dlq)
         val metsData = getMessages(topic)
-        metsData shouldEqual Nil
+        metsData shouldEqual List(MetsData("root/mets.xml", 1))
         internalStore.getLatest("123") shouldBe Right(
-          Identified(Version("123", 0), MetsData("root/mets.xml", 1))
+          Identified(Version("123", 1), MetsData("root/mets.xml", 1))
         )
     }
   }
@@ -95,7 +96,7 @@ class MetsAdapterWorkerServiceTest
     }
   }
 
-  it("should not store METS data if publishing fails") {
+  it("should store METS data if publishing fails") {
     val internalStore = createInternalStore()
     withWorkerService(bagRetriever, internalStore, createBrokenMsgSender(_)) {
       case (workerService, QueuePair(queue, dlq), topic) =>
@@ -105,7 +106,7 @@ class MetsAdapterWorkerServiceTest
         assertQueueHasSize(dlq, 1)
         val metsData = getMessages(topic)
         metsData shouldEqual Nil
-        internalStore.getLatest("123") shouldBe a[Left[_, _]]
+        internalStore.getLatest("123") shouldBe a[Right[_, _]]
     }
   }
 

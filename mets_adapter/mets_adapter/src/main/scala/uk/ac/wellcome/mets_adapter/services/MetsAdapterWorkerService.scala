@@ -47,8 +47,8 @@ class MetsAdapterWorkerService(
           .via(retrieveBag)
           .via(parseMetsData)
           .via(filterMetsData)
-          .via(publishMetsData)
           .via(storeMetsData)
+          .via(publishMetsData)
           .map { case (Context(msg, _), _) => msg }
       }
     )
@@ -73,16 +73,16 @@ class MetsAdapterWorkerService(
         case (ctx, data) => metsStore.filterMetsData(ctx.bagId, data)
       }
 
-  def publishMetsData =
-    Flow[(Context, Option[MetsData])]
-      .mapWithContext {
-        case (ctx, data) => msgSender.sendT(data).toEither.right.map(_ => data)
-      }
-
   def storeMetsData =
     Flow[(Context, Option[MetsData])]
       .mapWithContext {
         case (ctx, data) => metsStore.storeMetsData(ctx.bagId, data)
+      }
+
+  def publishMetsData =
+    Flow[(Context, Option[MetsData])]
+      .mapWithContext {
+        case (ctx, data) => msgSender.sendT(data).toEither.right.map(_ => data)
       }
 
   /** Encapsulates context to pass along each akka-stream stage. Newer versions

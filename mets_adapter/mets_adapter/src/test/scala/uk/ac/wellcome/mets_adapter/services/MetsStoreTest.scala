@@ -18,7 +18,7 @@ class MetsStoreTest extends FunSpec with Matchers {
     )
   }
 
-  it("should not filter update METS data when newer version") {
+  it("should not filter METS data when newer version") {
     val oldData = MetsData("old/file.xml", 1)
     val newData = MetsData("new/file.xml", 2)
     val internalStore = createInternalStore(
@@ -38,14 +38,14 @@ class MetsStoreTest extends FunSpec with Matchers {
     store.filterMetsData("001", newData) shouldBe Right(None)
   }
 
-  it("should filter METS data when file path unchanged") {
-    val oldData = MetsData("old/file.xml", 2)
-    val newData = MetsData("old/file.xml", 1)
+  it("should not filter METS data when same version") {
+    val oldData = MetsData("old/file.xml", 1)
+    val newData = MetsData("new/file.xml", 1)
     val internalStore = createInternalStore(
       Map(Version("001", 0) -> oldData)
     )
     val store = new MetsStore(internalStore)
-    store.filterMetsData("001", newData) shouldBe Right(None)
+    store.filterMetsData("001", newData) shouldBe Right(Some(newData))
   }
 
   def createInternalStore(

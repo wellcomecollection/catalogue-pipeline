@@ -31,5 +31,5 @@ class MetsStore(store: VersionedStore[String, Int, MetsData]) {
     }
 
   private def shouldUpdate(newData: MetsData, existingData: MetsData) =
-    newData.version >= existingData.version && newData.path != existingData.path
+    newData.version >= existingData.version
 }
