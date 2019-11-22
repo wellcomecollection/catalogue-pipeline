@@ -2,7 +2,6 @@ package uk.ac.wellcome.mets_adapter.services
 
 import org.scalatest.{FunSpec, Matchers}
 
-import uk.ac.wellcome.mets_adapter.models.MetsData
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
 import uk.ac.wellcome.storage.{Identified, Version}
 import uk.ac.wellcome.bigmessaging.EmptyMetadata
@@ -10,49 +9,50 @@ import uk.ac.wellcome.storage.store.HybridStoreEntry
 
 class MetsStoreTest extends FunSpec with Matchers {
 
-  // it("should store new METS data") {
-  //   val internalStore = createInternalStore()
-  //   val store = new MetsStore(internalStore)
-  //   val data = MetsData("bucket", "mets/file.xml", 3)
-  //   store.storeMetsData("001", data) shouldBe Right(data)
-  //   internalStore.getLatest("001") shouldBe Right(
-  //     Identified(Version("001", 0), data)
-  //   )
-  // }
+  it("should store new METS data") {
+    val internalStore = createInternalStore()
+    val store = new MetsStore(internalStore)
+    store.storeXml(Version("001", 1), "NEW") shouldBe Right(Version("001", 1))
+    internalStore.getLatest("001") shouldBe Right(
+      Identified(Version("001", 1), vhsEntry("NEW"))
+    )
+  }
 
-  // it("should not filter METS data when newer version") {
-  //   val oldData = MetsData("bucket", "old/file.xml", 1)
-  //   val newData = MetsData("bucket", "new/file.xml", 2)
-  //   val internalStore = createInternalStore(
-  //     Map(Version("001", 0) -> oldData)
-  //   )
-  //   val store = new MetsStore(internalStore)
-  //   store.filterMetsData("001", newData) shouldBe Right(Some(newData))
-  // }
+  it("should update METS data when newer version") {
+    val internalStore = createInternalStore(Version("001", 1) -> "OLD")
+    val store = new MetsStore(internalStore)
+    store.storeXml(Version("001", 2), "NEW") shouldBe Right(Version("001", 2))
+    internalStore.getLatest("001") shouldBe Right(
+      Identified(Version("001", 2), vhsEntry("NEW"))
+    )
+  }
 
-  // it("should filter METS data when older version") {
-  //   val oldData = MetsData("bucket", "old/file.xml", 2)
-  //   val newData = MetsData("bucket", "new/file.xml", 1)
-  //   val internalStore = createInternalStore(
-  //     Map(Version("001", 0) -> oldData)
-  //   )
-  //   val store = new MetsStore(internalStore)
-  //   store.filterMetsData("001", newData) shouldBe Right(None)
-  // }
+  it("should not update METS data when current version") {
+    val internalStore = createInternalStore(Version("001", 1) -> "OLD")
+    val store = new MetsStore(internalStore)
+    store.storeXml(Version("001", 1), "NEW") shouldBe Right(Version("001", 1))
+    internalStore.getLatest("001") shouldBe Right(
+      Identified(Version("001", 1), vhsEntry("OLD"))
+    )
+  }
 
-  // it("should not filter METS data when same version") {
-  //   val oldData = MetsData("bucket", "old/file.xml", 1)
-  //   val newData = MetsData("bucket", "new/file.xml", 1)
-  //   val internalStore = createInternalStore(
-  //     Map(Version("001", 0) -> oldData)
-  //   )
-  //   val store = new MetsStore(internalStore)
-  //   store.filterMetsData("001", newData) shouldBe Right(Some(newData))
-  // }
+  it("should error when inserting older version") {
+    val internalStore = createInternalStore(Version("001", 2) -> "NEW")
+    val store = new MetsStore(internalStore)
+    store.storeXml(Version("001", 1), "NEW") shouldBe a[Left[_, _]]
+    internalStore.getLatest("001") shouldBe Right(
+      Identified(Version("001", 2), vhsEntry("NEW"))
+    )
+  }
 
   def createInternalStore(
-    data: Map[Version[String, Int], MetsData] = Map.empty) =
-    MemoryVersionedStore(
-      data.mapValues(value => HybridStoreEntry(value, EmptyMetadata()))
+    data: (Version[String, Int], String)*) =
+    MemoryVersionedStore[String, HybridStoreEntry[String, EmptyMetadata]](
+      Map(
+        data.map { case (version, xml) => (version, vhsEntry(xml)) }:_*
+      )
     )
+
+  def vhsEntry(xml: String) =
+    HybridStoreEntry(xml, EmptyMetadata())
 }
