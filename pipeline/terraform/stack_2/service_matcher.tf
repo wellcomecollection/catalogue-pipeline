@@ -40,16 +40,18 @@ module "matcher" {
   env_vars = {
     queue_url         = "${module.matcher_queue.id}"
     metrics_namespace = "${local.namespace_hyphen}_matcher"
-    vhs_bucket_name   = "${module.vhs_recorder.bucket_name}"
     topic_arn         = "${module.matcher_topic.arn}"
 
     dynamo_table            = "${aws_dynamodb_table.matcher_graph_table.id}"
     dynamo_index            = "work-sets-index"
     dynamo_lock_table       = "${aws_dynamodb_table.matcher_lock_table.id}"
     dynamo_lock_table_index = "context-ids-index"
+
+    vhs_recorder_dynamo_table_name = "${module.vhs_recorder.table_name}"
+    vhs_recorder_bucket_name       = "${module.vhs_recorder.bucket_name}"
   }
 
-  env_vars_length = 8
+  env_vars_length = 9
 
   secret_env_vars = {}
 

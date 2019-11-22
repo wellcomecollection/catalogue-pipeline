@@ -35,10 +35,12 @@ module "mets_transformer" {
     transformer_queue_id = "${module.mets_transformer_queue.id}"
     metrics_namespace    = "${local.namespace_hyphen}_mets_transformer"
     messages_bucket_name = "${aws_s3_bucket.messages.id}"
-    storage_bucket_name = "${var.storage_bucket_name}"
+
+    vhs_mets_adapter_dynamo_table_name = "${var.vhs_mets_adapter_table_name}"
+    vhs_mets_adapter_bucket_name       = "${var.vhs_mets_adapter_bucket_name}"
   }
 
-  env_vars_length = 4
+  env_vars_length = 6
 
   secret_env_vars        = {}
   secret_env_vars_length = "0"
@@ -52,10 +54,10 @@ module "mets_transformer" {
 
 # Permissions
 
-/*resource "aws_iam_role_policy" "mets_transformer_s3_storage_read" {
+resource "aws_iam_role_policy" "mets_transformer_vhs_mets_adapter_read" {
   role   = "${module.mets_transformer.task_role_name}"
-  policy = "${var.s3_storage_read_policy}"
-}*/
+  policy = "${var.vhs_mets_adapter_read_policy}"
+}
 
 # Output topic
 

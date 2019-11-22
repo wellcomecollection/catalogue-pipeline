@@ -34,16 +34,22 @@ variable "sierra_adapter_topic_names" {
 variable "sierra_adapter_topic_count" {
 }
 
-variable "vhs_miro_read_policy" {}
 //variable "s3_storage_read_policy" {}
 variable "vhs_sierra_read_policy" {}
 variable "vhs_sierra_sourcedata_bucket_name" {}
 variable "vhs_sierra_sourcedata_table_name" {}
 
+variable "vhs_mets_adapter_read_policy" {
+}
+
+variable "vhs_mets_adapter_table_name" {
+}
+
+variable "vhs_mets_adapter_bucket_name" {
+}
+
 variable "private_subnets" {
   type = "list"
 }
 
-variable "storage_bucket_name" {
-}
 
