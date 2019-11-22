@@ -6,6 +6,7 @@ locals {
   ingestor_image  = "${module.images.services["ingestor"]}"
 
   transformer_miro_image   = "${module.images.services["transformer_miro"]}"
+  transformer_mets_image   = "${module.images.services["transformer_mets"]}"
   transformer_sierra_image = "${module.images.services["transformer_sierra"]}"
 }
 
@@ -22,6 +23,7 @@ module "images" {
     "id_minter",
     "recorder",
     "transformer_miro",
+    "transformer_mets",
     "transformer_sierra",
   ]
 }
