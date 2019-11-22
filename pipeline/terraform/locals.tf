@@ -11,9 +11,9 @@ locals {
   sierra_merged_bibs_topic_name  = "${data.terraform_remote_state.sierra_adapter.merged_bibs_topic_name}"
 
   # Mets adapter VHS
-  vhs_mets_adapter_read_policy = "${data.terraform_remote_state.catalogue_infra_critical.vhs_mets_adapter_read_policy}"
-  vhs_mets_adapter_bucket_name = "${data.terraform_remote_state.catalogue_infra_critical.vhs_mets_adapter_bucket_name}"
-  vhs_mets_adapter_table_name  = "${data.terraform_remote_state.catalogue_infra_critical.vhs_mets_adapter_table_name}"
+  vhs_mets_adapter_read_policy = "${data.terraform_remote_state.catalogue_infra_critical.vhs_mets_read_policy}"
+  vhs_mets_adapter_bucket_name = "${data.terraform_remote_state.catalogue_infra_critical.vhs_mets_bucket_name}"
+  vhs_mets_adapter_table_name  = "${data.terraform_remote_state.catalogue_infra_critical.vhs_mets_table_name}"
 
   # Mets adapter topics
   mets_data_topic_name = "${data.terraform_remote_state.mets_adapter.mets_data_topic_name}"
