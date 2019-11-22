@@ -1,5 +1,6 @@
 locals {
-  miro_updates_topic_name = "${data.terraform_remote_state.shared_infra.miro_updates_topic_name}" // ???
+  miro_updates_topic_name = "${data.terraform_remote_state.shared_infra.miro_updates_topic_name}"
+  vhs_miro_read_policy = "${data.terraform_remote_state.catalogue_infra_critical.vhs_miro_read_policy}"
 
   # Sierra adapter VHS
   vhs_sierra_read_policy = "${data.terraform_remote_state.catalogue_infra_critical.vhs_sierra_read_policy}"
@@ -16,7 +17,7 @@ locals {
   vhs_mets_adapter_table_name  = "${data.terraform_remote_state.catalogue_infra_critical.vhs_mets_table_name}"
 
   # Mets adapter topics
-  mets_data_topic_name = "${data.terraform_remote_state.mets_adapter.mets_data_topic_name}"
+  mets_vhs_keys_topic_name = "${data.terraform_remote_state.mets_adapter.mets_vhs_keys_topic_name}"
 
   # Reindexer topics
   miro_reindexer_topic_name   = "${data.terraform_remote_state.shared_infra.catalogue_miro_reindex_topic_name}"

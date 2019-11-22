@@ -75,7 +75,7 @@ module "catalogue_pipeline_20191122" {
   miro_adapter_topic_count = "2"
 
   mets_adapter_topic_count = 1
-  mets_adapter_topic_names = ["${local.mets_data_topic_name}"]
+  mets_adapter_topic_names = ["${local.mets_vhs_keys_topic_name}"]
 
   # Elasticsearch
   es_works_index = "v2-20191122"
@@ -85,6 +85,7 @@ module "catalogue_pipeline_20191122" {
   vhs_sierra_read_policy            = "${local.vhs_sierra_read_policy}"
   vhs_sierra_sourcedata_bucket_name = "${local.vhs_sierra_sourcedata_bucket_name}"
   vhs_sierra_sourcedata_table_name  = "${local.vhs_sierra_sourcedata_table_name}"
+  vhs_miro_read_policy              = "${local.vhs_miro_read_policy}"
 
   vhs_mets_adapter_bucket_name = "${local.vhs_mets_adapter_bucket_name}"
   vhs_mets_adapter_read_policy = "${local.vhs_mets_adapter_read_policy}"

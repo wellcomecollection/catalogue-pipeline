@@ -49,6 +49,13 @@ module "miro_transformer" {
   queue_read_policy = "${module.miro_transformer_queue.read_policy}"
 }
 
+# Permissions
+
+resource "aws_iam_role_policy" "miro_transformer_vhs_miro_adapter_read" {
+  role   = "${module.miro_transformer.task_role_name}"
+  policy = "${var.vhs_miro_read_policy}"
+}
+
 # Output topic
 
 module "miro_transformer_topic" {
