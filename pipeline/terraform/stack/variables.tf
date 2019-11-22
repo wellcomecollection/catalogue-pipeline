@@ -22,6 +22,11 @@ variable "miro_adapter_topic_names" {
 }
 variable "miro_adapter_topic_count" {
 }
+variable "mets_adapter_topic_names" {
+  type = "list"
+}
+variable "mets_adapter_topic_count" {
+}
 
 variable "sierra_adapter_topic_names" {
   type = "list"
@@ -30,10 +35,22 @@ variable "sierra_adapter_topic_count" {
 }
 
 variable "vhs_miro_read_policy" {}
+
 variable "vhs_sierra_read_policy" {}
 variable "vhs_sierra_sourcedata_bucket_name" {}
 variable "vhs_sierra_sourcedata_table_name" {}
 
+variable "vhs_mets_adapter_read_policy" {
+}
+
+variable "vhs_mets_adapter_table_name" {
+}
+
+variable "vhs_mets_adapter_bucket_name" {
+}
+
 variable "private_subnets" {
   type = "list"
 }
+
+
