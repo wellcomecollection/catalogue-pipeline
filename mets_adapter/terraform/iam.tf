@@ -3,7 +3,7 @@ resource "aws_iam_role_policy" "read_from_q" {
   policy = "${module.queue.read_policy}"
 }
 
-resource "aws_iam_role_policy" "mats_adapter_vhs_readwrite" {
+resource "aws_iam_role_policy" "mets_adapter_vhs_readwrite" {
   role   = "${module.service.task_role_name}"
   policy = "${local.vhs_mets_full_access_policy}"
 }
