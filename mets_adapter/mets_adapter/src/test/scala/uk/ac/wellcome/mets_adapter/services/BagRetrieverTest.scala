@@ -33,38 +33,38 @@ class BagRetrieverTest
       withMaterializer(actorSystem) { implicit materializer =>
         withBagRetriever(0 milliseconds, 1 milliseconds) { bagRetriever =>
           whenReady(getBag(bagRetriever, "digitised", "b30246039")) {
-            maybeBag =>
-              inside(maybeBag) {
-                case Some(
-                    Bag(_, BagManifest(files), BagLocation(bucket, path), _)) =>
-                  verify(
-                    moreThanOrExactly(1),
-                    postRequestedFor(urlEqualTo("/oauth2/token"))
-                      .withRequestBody(matching(".*client_id=client.*"))
-                      .withRequestBody(matching(".*client_secret=secret.*"))
-                  )
+            case Bag(_, BagManifest(files), BagLocation(bucket, path), _) =>
+              verify(
+                moreThanOrExactly(1),
+                postRequestedFor(urlEqualTo("/oauth2/token"))
+                  .withRequestBody(matching(".*client_id=client.*"))
+                  .withRequestBody(matching(".*client_secret=secret.*"))
+              )
 
-                  verify(getRequestedFor(
-                    urlEqualTo("/storage/v1/bags/digitised/b30246039")))
-                  files.head shouldBe BagFile(
-                    "data/b30246039.xml",
-                    "v1/data/b30246039.xml")
-                  bucket shouldBe "wellcomecollection-storage"
-                  path shouldBe "digitised/b30246039"
-              }
+              verify(getRequestedFor(
+                urlEqualTo("/storage/v1/bags/digitised/b30246039")))
+              files.head shouldBe BagFile(
+                "data/b30246039.xml",
+                "v1/data/b30246039.xml")
+              bucket shouldBe "wellcomecollection-storage"
+              path shouldBe "digitised/b30246039"
           }
         }
       }
     }
   }
 
-  it("returns a none if the bag does not exist in the storage service") {
+  it("fails if the bag does not exist in the storage service") {
     withActorSystem { implicit actorSystem =>
       withMaterializer(actorSystem) { implicit materializer =>
         withBagRetriever(0 milliseconds, 100 milliseconds) { bagRetriever =>
-          whenReady(getBag(bagRetriever, "digitised", "not-existing")) {
-            maybeBag =>
-              maybeBag shouldBe None
+          whenReady(getBag(bagRetriever, "digitised", "not-existing").failed) {
+            e =>
+              e shouldBe a[Throwable]
+              verify(
+                1,
+                getRequestedFor(
+                  urlEqualTo("/storage/v1/bags/digitised/not-existing")))
           }
         }
       }
@@ -128,7 +128,7 @@ class BagRetrieverTest
 
   def getBag(bagRetriever: BagRetriever,
              space: String,
-             bagId: String): Future[Option[Bag]] =
+             bagId: String) =
     bagRetriever.getBag(IngestUpdate(space, bagId))
 
   def withBagRetriever[R](tokenService: TokenService)(

@@ -1,10 +1,9 @@
 package uk.ac.wellcome.mets_adapter.services
 
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.mets_adapter.models._
 import uk.ac.wellcome.storage.VersionAlreadyExistsError
 import uk.ac.wellcome.storage.store.{VersionedStore, HybridStoreEntry}
-import uk.ac.wellcome.storage.{Identified, NoVersionExistsError, Version}
+import uk.ac.wellcome.storage.{Identified, Version}
 import uk.ac.wellcome.bigmessaging.EmptyMetadata
 
 class MetsStore(store: VersionedStore[String, Int, HybridStoreEntry[String, EmptyMetadata]]) extends Logging {
