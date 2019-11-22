@@ -2,11 +2,13 @@ package uk.ac.wellcome.mets_adapter.services
 
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.storage.VersionAlreadyExistsError
-import uk.ac.wellcome.storage.store.{VersionedStore, HybridStoreEntry}
+import uk.ac.wellcome.storage.store.{HybridStoreEntry, VersionedStore}
 import uk.ac.wellcome.storage.{Identified, Version}
 import uk.ac.wellcome.bigmessaging.EmptyMetadata
 
-class MetsStore(store: VersionedStore[String, Int, HybridStoreEntry[String, EmptyMetadata]]) extends Logging {
+class MetsStore(
+  store: VersionedStore[String, Int, HybridStoreEntry[String, EmptyMetadata]])
+    extends Logging {
 
   def storeXml(key: Version[String, Int],
                xml: String): Either[Throwable, Version[String, Int]] =
@@ -24,7 +26,10 @@ class MetsStore(store: VersionedStore[String, Int, HybridStoreEntry[String, Empt
 }
 
 object MetsStore {
-  
-  def apply(store: VersionedStore[String, Int, HybridStoreEntry[String, EmptyMetadata]]) =
+
+  def apply(
+    store: VersionedStore[String,
+                          Int,
+                          HybridStoreEntry[String, EmptyMetadata]]) =
     new MetsStore(store)
 }

@@ -45,11 +45,10 @@ class MetsStoreTest extends FunSpec with Matchers {
     )
   }
 
-  def createInternalStore(
-    data: (Version[String, Int], String)*) =
+  def createInternalStore(data: (Version[String, Int], String)*) =
     MemoryVersionedStore[String, HybridStoreEntry[String, EmptyMetadata]](
       Map(
-        data.map { case (version, xml) => (version, vhsEntry(xml)) }:_*
+        data.map { case (version, xml) => (version, vhsEntry(xml)) }: _*
       )
     )
 

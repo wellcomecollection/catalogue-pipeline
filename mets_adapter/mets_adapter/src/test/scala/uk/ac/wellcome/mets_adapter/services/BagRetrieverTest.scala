@@ -41,8 +41,9 @@ class BagRetrieverTest
                   .withRequestBody(matching(".*client_secret=secret.*"))
               )
 
-              verify(getRequestedFor(
-                urlEqualTo("/storage/v1/bags/digitised/b30246039")))
+              verify(
+                getRequestedFor(
+                  urlEqualTo("/storage/v1/bags/digitised/b30246039")))
               files.head shouldBe BagFile(
                 "data/b30246039.xml",
                 "v1/data/b30246039.xml")
@@ -126,9 +127,7 @@ class BagRetrieverTest
     }
   }
 
-  def getBag(bagRetriever: BagRetriever,
-             space: String,
-             bagId: String) =
+  def getBag(bagRetriever: BagRetriever, space: String, bagId: String) =
     bagRetriever.getBag(IngestUpdate(space, bagId))
 
   def withBagRetriever[R](tokenService: TokenService)(

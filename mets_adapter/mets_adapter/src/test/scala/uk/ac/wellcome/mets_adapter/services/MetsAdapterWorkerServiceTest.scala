@@ -11,10 +11,18 @@ import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.mets_adapter.models._
 import uk.ac.wellcome.akka.fixtures.Akka
-import uk.ac.wellcome.storage.store.{VersionedStore, TypedStore, TypedStoreEntry, HybridStoreEntry}
-import uk.ac.wellcome.storage.store.memory.{MemoryVersionedStore, MemoryTypedStore}
+import uk.ac.wellcome.storage.store.{
+  HybridStoreEntry,
+  TypedStore,
+  TypedStoreEntry,
+  VersionedStore
+}
+import uk.ac.wellcome.storage.store.memory.{
+  MemoryTypedStore,
+  MemoryVersionedStore
+}
 import uk.ac.wellcome.messaging.sns.SNSMessageSender
-import uk.ac.wellcome.storage.{Identified, Version, ObjectLocation}
+import uk.ac.wellcome.storage.{Identified, ObjectLocation, Version}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.bigmessaging.EmptyMetadata
 
@@ -176,14 +184,13 @@ class MetsAdapterWorkerServiceTest
     }
 
   def createXmlStore(
-    data: Map[ObjectLocation, String] =
-      Map(ObjectLocation("bucket", "root/mets.xml") -> "XML")) =
+    data: Map[ObjectLocation, String] = Map(
+      ObjectLocation("bucket", "root/mets.xml") -> "XML")) =
     MemoryTypedStore(
       data.mapValues(value => TypedStoreEntry(value, Map.empty))
     )
 
-  def createVhs(
-    data: Map[Version[String, Int], String] = Map.empty) =
+  def createVhs(data: Map[Version[String, Int], String] = Map.empty) =
     MemoryVersionedStore(data.mapValues(vhsEntry))
 
   def vhsEntry(xml: String) =

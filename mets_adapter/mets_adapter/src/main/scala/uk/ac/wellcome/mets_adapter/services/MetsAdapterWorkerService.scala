@@ -12,7 +12,7 @@ import uk.ac.wellcome.messaging.sns.SNSMessageSender
 import uk.ac.wellcome.typesafe.Runnable
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.mets_adapter.models._
-import uk.ac.wellcome.storage.{Version, ObjectLocation}
+import uk.ac.wellcome.storage.{ObjectLocation, Version}
 import uk.ac.wellcome.storage.store.TypedStore
 
 import scala.concurrent.Future
@@ -82,15 +82,16 @@ class MetsAdapterWorkerService(
 
   def retrieveXml =
     Flow[(Context, MetsData)]
-      .mapWithContextAsync(concurrentS3Connections) { case (ctx, data) =>
-        Future {
-          xmlStore
-            .get(ObjectLocation(data.bucket, data.path))
-            .right
-            .map(obj => MetsDataAndXml(data, obj.identifiedT.t))
-            .left
-            .map(_.e)
-        }
+      .mapWithContextAsync(concurrentS3Connections) {
+        case (ctx, data) =>
+          Future {
+            xmlStore
+              .get(ObjectLocation(data.bucket, data.path))
+              .right
+              .map(obj => MetsDataAndXml(data, obj.identifiedT.t))
+              .left
+              .map(_.e)
+          }
       }
 
   def storeXml =

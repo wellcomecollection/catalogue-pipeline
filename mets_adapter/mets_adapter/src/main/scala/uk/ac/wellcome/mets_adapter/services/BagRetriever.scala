@@ -50,7 +50,8 @@ class HttpBagRetriever(url: String, tokenService: TokenService)(
       case StatusCodes.Unauthorized =>
         Future.failed(new Exception("Failed to authorize with storage service"))
       case status =>
-        Future.failed(new Exception(s"Received error from storage service: $status"))
+        Future.failed(
+          new Exception(s"Received error from storage service: $status"))
     }
 
   private def parseResponseIntoBag(response: HttpResponse) =
