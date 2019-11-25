@@ -5,7 +5,6 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalatest.{FunSpec, Matchers}
 import io.circe.Encoder
-
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
@@ -21,7 +20,7 @@ import uk.ac.wellcome.storage.store.memory.{
   MemoryTypedStore,
   MemoryVersionedStore
 }
-import uk.ac.wellcome.messaging.sns.SNSMessageSender
+import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSMessageSender}
 import uk.ac.wellcome.storage.{Identified, ObjectLocation, Version}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.bigmessaging.EmptyMetadata
@@ -57,7 +56,7 @@ class MetsAdapterWorkerServiceTest
     val vhs = createVhs()
     withWorkerService(bagRetriever, vhs) {
       case (workerService, QueuePair(queue, dlq), topic) =>
-        sendSqsMessage(queue, IngestUpdate("space", "123"))
+        sendNotificationToSQS(queue, IngestUpdate("space", "123"))
         assertQueueEmpty(queue)
         assertQueueEmpty(dlq)
         getMessages(topic) shouldEqual List(Version("123", 1))
@@ -71,7 +70,7 @@ class MetsAdapterWorkerServiceTest
     val vhs = createVhs(Map(Version("123", 0) -> "old-data"))
     withWorkerService(bagRetriever, vhs) {
       case (workerService, QueuePair(queue, dlq), topic) =>
-        sendSqsMessage(queue, IngestUpdate("space", "123"))
+        sendNotificationToSQS(queue, IngestUpdate("space", "123"))
         Thread.sleep(2000)
         assertQueueEmpty(queue)
         assertQueueEmpty(dlq)
@@ -86,7 +85,7 @@ class MetsAdapterWorkerServiceTest
     val vhs = createVhs(Map(Version("123", 1) -> "existing-data"))
     withWorkerService(bagRetriever, vhs) {
       case (workerService, QueuePair(queue, dlq), topic) =>
-        sendSqsMessage(queue, IngestUpdate("space", "123"))
+        sendNotificationToSQS(queue, IngestUpdate("space", "123"))
         assertQueueEmpty(queue)
         assertQueueEmpty(dlq)
         getMessages(topic) shouldEqual List(Version("123", 1))
@@ -100,7 +99,7 @@ class MetsAdapterWorkerServiceTest
     val vhs = createVhs(Map(Version("123", 2) -> "existing-data"))
     withWorkerService(bagRetriever, vhs) {
       case (workerService, QueuePair(queue, dlq), topic) =>
-        sendSqsMessage(queue, IngestUpdate("space", "123"))
+        sendNotificationToSQS(queue, IngestUpdate("space", "123"))
         Thread.sleep(2000)
         assertQueueEmpty(queue)
         assertQueueHasSize(dlq, 1)
@@ -119,7 +118,7 @@ class MetsAdapterWorkerServiceTest
     }
     withWorkerService(brokenBagRetriever, vhs) {
       case (workerService, QueuePair(queue, dlq), topic) =>
-        sendSqsMessage(queue, IngestUpdate("space", "123"))
+        sendNotificationToSQS(queue, IngestUpdate("space", "123"))
         Thread.sleep(2000)
         assertQueueEmpty(queue)
         assertQueueHasSize(dlq, 1)
@@ -132,12 +131,25 @@ class MetsAdapterWorkerServiceTest
     val vhs = createVhs()
     withWorkerService(bagRetriever, vhs, createBrokenMsgSender(_)) {
       case (workerService, QueuePair(queue, dlq), topic) =>
-        sendSqsMessage(queue, IngestUpdate("space", "123"))
+        sendNotificationToSQS(queue, IngestUpdate("space", "123"))
         Thread.sleep(2000)
         assertQueueEmpty(queue)
         assertQueueHasSize(dlq, 1)
         getMessages(topic) shouldEqual Nil
         vhs.getLatest("123") shouldBe a[Right[_, _]]
+    }
+  }
+
+  it(
+    "sends message to the dlq if message is not wrapped in NotificationMessage") {
+    val vhs = createVhs()
+    withWorkerService(bagRetriever, vhs) {
+      case (workerService, QueuePair(queue, dlq), topic) =>
+        sendSqsMessage(queue, IngestUpdate("space", "123"))
+        Thread.sleep(2000)
+        assertQueueEmpty(queue)
+        assertQueueHasSize(dlq, 1)
+        getMessages(topic) shouldEqual Nil
     }
   }
 
@@ -151,7 +163,7 @@ class MetsAdapterWorkerServiceTest
       withLocalSnsTopic { topic =>
         withLocalSqsQueueAndDlq {
           case QueuePair(queue, dlq) =>
-            withSQSStream[IngestUpdate, R](queue) { stream =>
+            withSQSStream[NotificationMessage, R](queue) { stream =>
               val workerService = new MetsAdapterWorkerService(
                 stream,
                 createMsgSender(topic),
