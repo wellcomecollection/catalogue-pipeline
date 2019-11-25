@@ -5,6 +5,7 @@ locals {
  logstash_host                 = "${local.logstash_transit_service_name}.${local.namespace}"
 
  bag_api_url = "https://api.wellcomecollection.org/storage/v1/bags"
+ oauth_url = "https://auth.wellcomecollection.org/oauth2/token"
 
  # VHS
  vhs_mets_full_access_policy = "${data.terraform_remote_state.catalogue_infra_critical.vhs_mets_full_access_policy}"

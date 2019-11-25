@@ -31,6 +31,7 @@ module "service" {
     vhs_mets_adapter_bucket_name       = "${local.vhs_mets_adapter_bucket_name}"
 
     bag_api_url = "${local.bag_api_url}"
+    oauth_url = "${local.oauth_url}"
   }
 
   env_vars_length = 7

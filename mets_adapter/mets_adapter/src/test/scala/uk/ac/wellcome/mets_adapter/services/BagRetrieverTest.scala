@@ -16,7 +16,6 @@ import uk.ac.wellcome.mets_adapter.fixtures.BagsWiremock
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.concurrent.duration._
 
 class BagRetrieverTest
     extends FunSpec
@@ -31,7 +30,7 @@ class BagRetrieverTest
   it("gets a bag from the storage service") {
     withActorSystem { implicit actorSystem =>
       withMaterializer(actorSystem) { implicit materializer =>
-        withBagRetriever(0 milliseconds, 1 milliseconds) { bagRetriever =>
+        withBagRetriever { bagRetriever =>
           whenReady(getBag(bagRetriever, "digitised", "b30246039")) {
             case Bag(_, BagManifest(files), BagLocation(bucket, path), _) =>
               verify(
@@ -58,7 +57,7 @@ class BagRetrieverTest
   it("fails if the bag does not exist in the storage service") {
     withActorSystem { implicit actorSystem =>
       withMaterializer(actorSystem) { implicit materializer =>
-        withBagRetriever(0 milliseconds, 100 milliseconds) { bagRetriever =>
+        withBagRetriever { bagRetriever =>
           whenReady(getBag(bagRetriever, "digitised", "not-existing").failed) {
             e =>
               e shouldBe a[Throwable]
@@ -96,7 +95,7 @@ class BagRetrieverTest
   it("returns a failed future if the storage service responds with 500") {
     withActorSystem { implicit actorSystem =>
       withMaterializer(actorSystem) { implicit materializer =>
-        withBagRetriever(100 milliseconds, 100 milliseconds) { bagRetriever =>
+        withBagRetriever { bagRetriever =>
           stubFor(
             get(urlMatching("/storage/v1/bags/digitised/this-shall-crash"))
               .willReturn(aResponse().withStatus(500)))
@@ -112,7 +111,7 @@ class BagRetrieverTest
   it("returns a failed future if the storage service response has a fault") {
     withActorSystem { implicit actorSystem =>
       withMaterializer(actorSystem) { implicit materializer =>
-        withBagRetriever(100 milliseconds, 100 milliseconds) { bagRetriever =>
+        withBagRetriever { bagRetriever =>
           stubFor(
             get(urlMatching("/storage/v1/bags/digitised/this-will-fault"))
               .willReturn(aResponse()
@@ -141,9 +140,7 @@ class BagRetrieverTest
       )
     }
 
-  def withBagRetriever[R](
-    initialDelay: FiniteDuration,
-    interval: FiniteDuration)(testWith: TestWith[BagRetriever, R])(
+  def withBagRetriever[R](testWith: TestWith[BagRetriever, R])(
     implicit actorSystem: ActorSystem,
     materializer: ActorMaterializer) =
     withBagsService("localhost") { port =>
@@ -151,7 +148,7 @@ class BagRetrieverTest
         s"http://localhost:$port",
         "client",
         "secret",
-        "https://api.wellcomecollection.org/scope")(initialDelay, interval) {
+        "https://api.wellcomecollection.org/scope") {
         tokenService =>
           testWith(
             new HttpBagRetriever(
@@ -165,10 +162,8 @@ class BagRetrieverTest
     url: String,
     clientId: String,
     secret: String,
-    scope: String)(initialDelay: FiniteDuration, interval: FiniteDuration)(
+    scope: String)(
     testWith: TestWith[TokenService, R])(implicit actorSystem: ActorSystem,
                                          materializer: ActorMaterializer) {
-    testWith(
-      new TokenService(url, clientId, secret, scope, initialDelay, interval))
-  }
+    testWith(new TokenService(url, clientId, secret, scope))}
 }

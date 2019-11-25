@@ -1,12 +1,14 @@
 package uk.ac.wellcome.mets_adapter
 
 import scala.concurrent.ExecutionContext
+import scala.concurrent.duration._
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import com.typesafe.config.Config
 
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
+import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.mets_adapter.services.{
   BagRetriever,
@@ -16,6 +18,7 @@ import uk.ac.wellcome.mets_adapter.services.{
   TokenService,
 }
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
+import uk.ac.wellcome.storage.typesafe.S3Builder
 import uk.ac.wellcome.bigmessaging.typesafe.VHSBuilder
 
 object Main extends WellcomeTypesafeApp {
@@ -26,12 +29,14 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildActorSystem()
     implicit val materializer: ActorMaterializer =
       AkkaBuilder.buildActorMaterializer()
+    implicit val s3Client =
+      S3Builder.buildS3Client(config)
 
     new MetsAdapterWorkerService(
       SQSBuilder.buildSQSStream(config),
-      SNSBuilder.buildSNSMessageSender(config, subject = ???),
+      SNSBuilder.buildSNSMessageSender(config, subject = "METS adapter"),
       buildBagRetriever(config),
-      buildXmlStore(config),
+      S3TypedStore[String],
       MetsStore(VHSBuilder.build(config))
     )
   }
@@ -42,12 +47,13 @@ object Main extends WellcomeTypesafeApp {
     materializer: ActorMaterializer,
     ec: ExecutionContext): BagRetriever =
     new HttpBagRetriever(
-      ???,
-      buildTokenService(config)
+      config.required[String]("bags.api.url"),
+      new TokenService(
+        config.required[String]("bags.oauth.url"),
+        config.required[String]("bags.oauth.client_id"),
+        config.required[String]("bags.oauth.secret"),
+        config.required[String]("bags.api.url"),
+        20 minutes
+      )
     )
-
-  private def buildXmlStore(config: Config): S3TypedStore[String] = ???
-
-  private def buildTokenService(config: Config): TokenService =
-    throw new NotImplementedError
 }
