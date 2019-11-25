@@ -9,6 +9,8 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
+import uk.ac.wellcome.messaging.sns.NotificationMessage
+import uk.ac.wellcome.messaging.sqs.NotificationStream
 import uk.ac.wellcome.models.generators.RandomStrings
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.mets.fixtures.MetsGenerators
@@ -104,13 +106,15 @@ class MetsTransformerWorkerServiceTest
           withLocalS3Bucket { messagingBucket =>
             withVHS { vhs =>
               withActorSystem { implicit actorSystem =>
-                withSQSStream[Version[String, Int], R](queue) { sqsStream =>
+                withSQSStream[NotificationMessage, R](queue) { sqsStream =>
+                  val notificationStream =
+                    new NotificationStream[Version[String, Int]](sqsStream)
                   withSqsBigMessageSender[TransformedBaseWork, R](
                     messagingBucket,
                     topic,
                     snsClient) { messageSender =>
                     val workerService = new MetsTransformerWorkerService(
-                      sqsStream,
+                      notificationStream,
                       messageSender,
                       vhs)
                     workerService.run()
@@ -134,6 +138,6 @@ class MetsTransformerWorkerServiceTest
       case Left(err)                 => throw new Exception(s"Failed storing work in VHS: $err")
       case Right(Identified(key, _)) => key
     }
-    sendSqsMessage(queue, key)
+    sendNotificationToSQS(queue, key)
   }
 }

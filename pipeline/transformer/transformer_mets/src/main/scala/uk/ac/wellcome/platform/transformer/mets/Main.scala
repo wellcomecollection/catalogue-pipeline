@@ -5,9 +5,10 @@ import akka.stream.ActorMaterializer
 import com.typesafe.config.Config
 import uk.ac.wellcome.bigmessaging.typesafe.{BigMessagingBuilder, VHSBuilder}
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.messaging.typesafe.SQSBuilder
+import uk.ac.wellcome.messaging.typesafe.NotificationStreamBuilder
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.transformer.mets.service.MetsTransformerWorkerService
+import uk.ac.wellcome.storage.Version
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.typesafe.S3Builder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
@@ -29,7 +30,7 @@ object Main extends WellcomeTypesafeApp {
       S3TypedStore[TransformedBaseWork]
 
     new MetsTransformerWorkerService(
-      SQSBuilder.buildSQSStream(config),
+      NotificationStreamBuilder.buildStream[Version[String, Int]](config),
       messageSender = BigMessagingBuilder
         .buildBigMessageSender[TransformedBaseWork](config),
       store = VHSBuilder.build[String](config)
