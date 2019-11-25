@@ -34,7 +34,7 @@ module "service" {
     oauth_url = "${local.oauth_url}"
   }
 
-  env_vars_length = 7
+  env_vars_length = 8
 
   secret_env_vars = {
     oauth_client_id     = "mets_adapter/mets_adapter/client_id"
