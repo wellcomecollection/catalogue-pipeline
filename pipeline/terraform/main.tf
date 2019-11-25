@@ -19,14 +19,14 @@ module "catalogue_pipeline_20191115" {
   # reindexer topic names.
 
   sierra_adapter_topic_names = [
-    "${local.sierra_reindexer_topic_name}",
+    #"${local.sierra_reindexer_topic_name}",
     "${local.sierra_merged_bibs_topic_name}",
 
     "${local.sierra_merged_items_topic_name}",
   ]
   sierra_adapter_topic_count = "3"
   miro_adapter_topic_names = [
-    "${local.miro_reindexer_topic_name}",
+    #"${local.miro_reindexer_topic_name}",
     "${local.miro_updates_topic_name}",
   ]
   miro_adapter_topic_count = "2"
