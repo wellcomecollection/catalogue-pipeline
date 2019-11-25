@@ -148,22 +148,21 @@ class BagRetrieverTest
         s"http://localhost:$port",
         "client",
         "secret",
-        "https://api.wellcomecollection.org/scope") {
-        tokenService =>
-          testWith(
-            new HttpBagRetriever(
-              s"http://localhost:$port/storage/v1/bags",
-              tokenService)
-          )
+        "https://api.wellcomecollection.org/scope") { tokenService =>
+        testWith(
+          new HttpBagRetriever(
+            s"http://localhost:$port/storage/v1/bags",
+            tokenService)
+        )
       }
     }
 
-  def withTokenService[R](
-    url: String,
-    clientId: String,
-    secret: String,
-    scope: String)(
-    testWith: TestWith[TokenService, R])(implicit actorSystem: ActorSystem,
-                                         materializer: ActorMaterializer) {
-    testWith(new TokenService(url, clientId, secret, scope))}
+  def withTokenService[R](url: String,
+                          clientId: String,
+                          secret: String,
+                          scope: String)(testWith: TestWith[TokenService, R])(
+    implicit actorSystem: ActorSystem,
+    materializer: ActorMaterializer) {
+    testWith(new TokenService(url, clientId, secret, scope))
+  }
 }

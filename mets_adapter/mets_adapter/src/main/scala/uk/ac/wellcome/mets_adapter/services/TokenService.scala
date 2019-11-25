@@ -16,10 +16,10 @@ class TokenService(url: String,
                    secret: String,
                    scope: String,
                    interval: FiniteDuration = 5 minutes)(
-                   implicit
-                   actorSystem: ActorSystem,
-                   mat: Materializer,
-                   ec: ExecutionContext) {
+  implicit
+  actorSystem: ActorSystem,
+  mat: Materializer,
+  ec: ExecutionContext) {
   private val config = Config(
     clientId = clientId,
     clientSecret = secret,
