@@ -7,6 +7,8 @@ locals {
  bag_api_url = "https://api.wellcomecollection.org/storage/v1/bags"
  oauth_url = "https://auth.wellcomecollection.org/oauth2/token"
 
+ storage_bucket = "wellcomecollection-storage"
+
  # VHS
  vhs_mets_full_access_policy = "${data.terraform_remote_state.catalogue_infra_critical.vhs_mets_full_access_policy}"
  vhs_mets_adapter_table_name = "${data.terraform_remote_state.catalogue_infra_critical.vhs_mets_table_name}"
