@@ -55,8 +55,7 @@ class MetsAdapterWorkerService(
       className,
       source => {
         source
-          .map { case (msg,NotificationMessage(body)) => (msg,fromJson[IngestUpdate](body).get) }
-          .map { case (msg, update) => (Context(msg, update.bagId), update) }
+          .via(unwrapMessage)
           .via(retrieveBag)
           .via(parseMetsData)
           .via(retrieveXml)
@@ -65,6 +64,12 @@ class MetsAdapterWorkerService(
           .map { case (Context(msg, _), _) => msg }
       }
     )
+
+  def unwrapMessage =
+    Flow[(SQSMessage, NotificationMessage)]
+    .map { case (msg,NotificationMessage(body)) => (msg,fromJson[IngestUpdate](body).toEither) }
+      .via(catchErrors)
+      .map { case (msg, update) => (Context(msg, update.bagId), update) }
 
   def retrieveBag =
     Flow[(Context, IngestUpdate)]
@@ -131,13 +136,13 @@ class MetsAdapterWorkerService(
         .via(catchErrors)
   }
 
-  def catchErrors[T] =
-    Flow[(Context, Result[T])]
+  def catchErrors[C,T] =
+    Flow[(C, Result[T])]
       .map {
         case (ctx, result) =>
           result.left.map { err =>
             error(
-              s"Error encountered processing SQS message. [Error]: ${err.getMessage} [Message]: ${ctx.msg}",
+              s"Error encountered processing SQS message. [Error]: ${err.getMessage} [Message]: ${ctx}",
               err)
           }
           (ctx, result)

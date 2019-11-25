@@ -132,6 +132,18 @@ class MetsAdapterWorkerServiceTest
     }
   }
 
+  it("sends message to the dlq if message is not wrapped in NotificationMessage") {
+    val vhs = createVhs()
+    withWorkerService(bagRetriever, vhs) {
+      case (workerService, QueuePair(queue, dlq), topic) =>
+        sendSqsMessage(queue, IngestUpdate("space", "123"))
+        Thread.sleep(2000)
+        assertQueueEmpty(queue)
+        assertQueueHasSize(dlq, 1)
+        getMessages(topic) shouldEqual Nil
+    }
+  }
+
   def withWorkerService[R](
     bagRetriever: BagRetriever,
     vhs: VersionedStore[String, Int, HybridStoreEntry[String, EmptyMetadata]],
