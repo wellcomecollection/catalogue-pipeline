@@ -6,9 +6,8 @@ import akka.{Done, NotUsed}
 import akka.stream.scaladsl._
 import com.amazonaws.services.sqs.model.{Message => SQSMessage}
 import grizzled.slf4j.Logging
-
 import uk.ac.wellcome.messaging.sqs.SQSStream
-import uk.ac.wellcome.messaging.sns.SNSMessageSender
+import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSMessageSender}
 import uk.ac.wellcome.typesafe.Runnable
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.mets_adapter.models._
@@ -28,14 +27,14 @@ import scala.concurrent.Future
   *  - Publish the VHS key to SNS
   */
 class MetsAdapterWorkerService(
-  msgStream: SQSStream[IngestUpdate],
-  msgSender: SNSMessageSender,
-  bagRetriever: BagRetriever,
-  xmlStore: TypedStore[ObjectLocation, String],
-  metsStore: MetsStore,
-  concurrentHttpConnections: Int = 6,
-  concurrentS3Connections: Int = 4,
-  concurrentVhsConnections: Int = 4)(implicit ec: ExecutionContext)
+                                msgStream: SQSStream[NotificationMessage],
+                                msgSender: SNSMessageSender,
+                                bagRetriever: BagRetriever,
+                                xmlStore: TypedStore[ObjectLocation, String],
+                                metsStore: MetsStore,
+                                concurrentHttpConnections: Int = 6,
+                                concurrentS3Connections: Int = 4,
+                                concurrentVhsConnections: Int = 4)(implicit ec: ExecutionContext)
     extends Runnable
     with Logging {
 
@@ -56,6 +55,7 @@ class MetsAdapterWorkerService(
       className,
       source => {
         source
+          .map { case (msg,NotificationMessage(body)) => (msg,fromJson[IngestUpdate](body).get) }
           .map { case (msg, update) => (Context(msg, update.bagId), update) }
           .via(retrieveBag)
           .via(parseMetsData)
