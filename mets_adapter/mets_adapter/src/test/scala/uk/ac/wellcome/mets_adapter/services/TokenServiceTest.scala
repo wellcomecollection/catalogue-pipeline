@@ -1,7 +1,6 @@
 package uk.ac.wellcome.mets_adapter.services
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
 import akka.http.scaladsl.model.headers.OAuth2BearerToken
 import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
@@ -27,9 +26,7 @@ class TokenServiceTest
             s"http://localhost:$port",
             "client",
             "secret",
-            "https://api.wellcomecollection.org/scope",
-            100 milliseconds,
-            100 millis)
+            "https://api.wellcomecollection.org/scope")
 
           whenReady(tokenService.getToken) { token =>
             token shouldBe OAuth2BearerToken("token")
@@ -57,9 +54,7 @@ class TokenServiceTest
             s"http://localhost:$port",
             "wrongclient",
             "wrongsecret",
-            "https://api.wellcomecollection.org/scope",
-            100 milliseconds,
-            100 millis)
+            "https://api.wellcomecollection.org/scope")
 
           whenReady(tokenService.getToken.failed) { throwable =>
             throwable shouldBe a[Throwable]
