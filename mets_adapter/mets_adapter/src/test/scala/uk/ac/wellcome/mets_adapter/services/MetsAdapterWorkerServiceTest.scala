@@ -10,8 +10,16 @@ import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.mets_adapter.models._
 import uk.ac.wellcome.akka.fixtures.Akka
-import uk.ac.wellcome.storage.store.{HybridStoreEntry, TypedStore, TypedStoreEntry, VersionedStore}
-import uk.ac.wellcome.storage.store.memory.{MemoryTypedStore, MemoryVersionedStore}
+import uk.ac.wellcome.storage.store.{
+  HybridStoreEntry,
+  TypedStore,
+  TypedStoreEntry,
+  VersionedStore
+}
+import uk.ac.wellcome.storage.store.memory.{
+  MemoryTypedStore,
+  MemoryVersionedStore
+}
 import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSMessageSender}
 import uk.ac.wellcome.storage.{Identified, ObjectLocation, Version}
 import uk.ac.wellcome.json.JsonUtil._
@@ -132,7 +140,8 @@ class MetsAdapterWorkerServiceTest
     }
   }
 
-  it("sends message to the dlq if message is not wrapped in NotificationMessage") {
+  it(
+    "sends message to the dlq if message is not wrapped in NotificationMessage") {
     val vhs = createVhs()
     withWorkerService(bagRetriever, vhs) {
       case (workerService, QueuePair(queue, dlq), topic) =>

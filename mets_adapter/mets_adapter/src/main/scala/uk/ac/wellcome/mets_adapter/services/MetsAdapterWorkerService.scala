@@ -27,14 +27,14 @@ import scala.concurrent.Future
   *  - Publish the VHS key to SNS
   */
 class MetsAdapterWorkerService(
-                                msgStream: SQSStream[NotificationMessage],
-                                msgSender: SNSMessageSender,
-                                bagRetriever: BagRetriever,
-                                xmlStore: TypedStore[ObjectLocation, String],
-                                metsStore: MetsStore,
-                                concurrentHttpConnections: Int = 6,
-                                concurrentS3Connections: Int = 4,
-                                concurrentVhsConnections: Int = 4)(implicit ec: ExecutionContext)
+  msgStream: SQSStream[NotificationMessage],
+  msgSender: SNSMessageSender,
+  bagRetriever: BagRetriever,
+  xmlStore: TypedStore[ObjectLocation, String],
+  metsStore: MetsStore,
+  concurrentHttpConnections: Int = 6,
+  concurrentS3Connections: Int = 4,
+  concurrentVhsConnections: Int = 4)(implicit ec: ExecutionContext)
     extends Runnable
     with Logging {
 
@@ -67,7 +67,10 @@ class MetsAdapterWorkerService(
 
   def unwrapMessage =
     Flow[(SQSMessage, NotificationMessage)]
-    .map { case (msg,NotificationMessage(body)) => (msg,fromJson[IngestUpdate](body).toEither) }
+      .map {
+        case (msg, NotificationMessage(body)) =>
+          (msg, fromJson[IngestUpdate](body).toEither)
+      }
       .via(catchErrors)
       .map { case (msg, update) => (Context(msg, update.bagId), update) }
 
@@ -136,7 +139,7 @@ class MetsAdapterWorkerService(
         .via(catchErrors)
   }
 
-  def catchErrors[C,T] =
+  def catchErrors[C, T] =
     Flow[(C, Result[T])]
       .map {
         case (ctx, result) =>
