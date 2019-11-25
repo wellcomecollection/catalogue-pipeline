@@ -107,7 +107,8 @@ class MetsTransformerWorkerServiceTest
             withVHS { vhs =>
               withActorSystem { implicit actorSystem =>
                 withSQSStream[NotificationMessage, R](queue) { sqsStream =>
-                  val notificationStream = new NotificationStream[Version[String, Int]](sqsStream)
+                  val notificationStream =
+                    new NotificationStream[Version[String, Int]](sqsStream)
                   withSqsBigMessageSender[TransformedBaseWork, R](
                     messagingBucket,
                     topic,

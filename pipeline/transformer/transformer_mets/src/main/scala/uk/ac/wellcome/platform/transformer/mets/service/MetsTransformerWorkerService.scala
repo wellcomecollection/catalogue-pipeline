@@ -13,7 +13,11 @@ import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class MetsTransformerWorkerService(msgStream: NotificationStream[Version[String,Int]],messageSender: BigMessageSender[SNSConfig, TransformedBaseWork],store: VersionedStore[String, Int, HybridStoreEntry[String, EmptyMetadata]])(implicit ec: ExecutionContext)
+class MetsTransformerWorkerService(
+  msgStream: NotificationStream[Version[String, Int]],
+  messageSender: BigMessageSender[SNSConfig, TransformedBaseWork],
+  store: VersionedStore[String, Int, HybridStoreEntry[String, EmptyMetadata]])(
+  implicit ec: ExecutionContext)
     extends Runnable
     with Logging {
 
