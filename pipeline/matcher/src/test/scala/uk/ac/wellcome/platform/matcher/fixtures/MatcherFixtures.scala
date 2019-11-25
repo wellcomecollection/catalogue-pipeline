@@ -2,17 +2,14 @@ package uk.ac.wellcome.platform.matcher.fixtures
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import org.apache.commons.codec.digest.DigestUtils
-
 import org.scanamo.{Scanamo, Table => ScanamoTable}
 import org.scanamo.DynamoFormat
 import org.scanamo.error.DynamoReadError
 import org.scanamo.query.UniqueKey
 import org.scanamo.semiauto._
 import org.scanamo.time.JavaTimeFormats._
-
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
@@ -20,13 +17,12 @@ import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher
 import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, WorkNode}
 import uk.ac.wellcome.platform.matcher.services.MatcherWorkerService
 import uk.ac.wellcome.platform.matcher.storage.{WorkGraphStore, WorkNodeDao}
-
-import uk.ac.wellcome.messaging.sns.SNSConfig
+import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig}
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.bigmessaging.fixtures.{BigMessagingFixture, VHSFixture}
 import uk.ac.wellcome.bigmessaging.EmptyMetadata
-
+import uk.ac.wellcome.messaging.sqs.NotificationStream
 import uk.ac.wellcome.storage.dynamo._
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
 import uk.ac.wellcome.storage.fixtures.S3Fixtures
@@ -68,11 +64,13 @@ trait MatcherFixtures
         withLockTable { lockTable =>
           withWorkGraphStore(graphTable) { workGraphStore =>
             withWorkMatcher(workGraphStore, lockTable) { workMatcher =>
-              withSQSStream[Version[String, Int], R](queue) { msgStream =>
+              withSQSStream[NotificationMessage, R](queue) { msgStream =>
+                val notificationStream =
+                  new NotificationStream[Version[String, Int]](msgStream)
                 val workerService =
                   new MatcherWorkerService(
                     vhs,
-                    msgStream,
+                    notificationStream,
                     msgSender,
                     workMatcher)
                 workerService.run()
@@ -137,7 +135,7 @@ trait MatcherFixtures
       case Left(err)                 => throw new Exception(s"Failed storing work in VHS: $err")
       case Right(Identified(key, _)) => key
     }
-    sendSqsMessage(queue, key)
+    sendNotificationToSQS(queue, key)
   }
 
   def ciHash(str: String): String =
