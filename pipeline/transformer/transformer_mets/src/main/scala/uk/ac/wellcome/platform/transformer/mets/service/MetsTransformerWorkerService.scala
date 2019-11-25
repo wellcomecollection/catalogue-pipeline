@@ -3,32 +3,23 @@ package uk.ac.wellcome.platform.transformer.mets.service
 import akka.Done
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.bigmessaging.{BigMessageSender, EmptyMetadata}
-import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.SNSConfig
-import uk.ac.wellcome.messaging.sqs.SQSStream
+import uk.ac.wellcome.messaging.sqs.NotificationStream
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.transformer.mets.parsers.MetsXmlParser
-import uk.ac.wellcome.storage.{Identified, Version}
 import uk.ac.wellcome.storage.store.{HybridStoreEntry, VersionedStore}
+import uk.ac.wellcome.storage.{Identified, Version}
 import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class MetsTransformerWorkerService(
-  msgStream: SQSStream[Version[String, Int]],
-  messageSender: BigMessageSender[SNSConfig, TransformedBaseWork],
-  store: VersionedStore[String, Int, HybridStoreEntry[String, EmptyMetadata]],
-)(implicit ec: ExecutionContext)
+class MetsTransformerWorkerService(msgStream: NotificationStream[Version[String,Int]],messageSender: BigMessageSender[SNSConfig, TransformedBaseWork],store: VersionedStore[String, Int, HybridStoreEntry[String, EmptyMetadata]])(implicit ec: ExecutionContext)
     extends Runnable
     with Logging {
 
   val className = this.getClass.getSimpleName
 
-  def run(): Future[Done] =
-    msgStream.foreach(
-      className,
-      processAndLog
-    )
+  def run(): Future[Done] = msgStream.run(processAndLog)
 
   def processAndLog(key: Version[String, Int]): Future[Unit] =
     Future.fromTry(process(key).toTry).recover {
