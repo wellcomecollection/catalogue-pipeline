@@ -17,7 +17,11 @@ import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.storage.Version
 import uk.ac.wellcome.bigmessaging.typesafe.VHSBuilder
 import uk.ac.wellcome.messaging.typesafe.{NotificationStreamBuilder, SNSBuilder}
-import uk.ac.wellcome.storage.locking.dynamo.{DynamoLockDao, DynamoLockDaoConfig, DynamoLockingService}
+import uk.ac.wellcome.storage.locking.dynamo.{
+  DynamoLockDao,
+  DynamoLockDaoConfig,
+  DynamoLockingService
+}
 import uk.ac.wellcome.storage.typesafe.DynamoBuilder
 import uk.ac.wellcome.json.JsonUtil._
 
@@ -53,7 +57,8 @@ object Main extends WellcomeTypesafeApp {
 
     new MatcherWorkerService(
       store = VHSBuilder.build[TransformedBaseWork](config),
-      msgStream = NotificationStreamBuilder.buildStream[Version[String, Int]](config),
+      msgStream =
+        NotificationStreamBuilder.buildStream[Version[String, Int]](config),
       msgSender = SNSBuilder
         .buildSNSMessageSender(config, subject = "Sent from the matcher"),
       workMatcher = workMatcher
