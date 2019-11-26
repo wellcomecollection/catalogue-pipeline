@@ -315,4 +315,54 @@ class ApiV2WorksAggregationsTest extends ApiV2WorksTestBase {
         }
     }
   }
+
+  it("supports aggregating on license") {
+
+    val works = List(
+      createLicensedWork("A", License_CCBY),
+      createLicensedWork("B", License_CCBYNC),
+      createLicensedWork("C", License_CCBY, License_CCBYNC),
+      createIdentifiedWorkWith(canonicalId = "D")
+    )
+    withApi {
+      case (indexV2, routes) =>
+        insertIntoElasticsearch(indexV2, works: _*)
+        assertJsonResponse(routes, s"/$apiPrefix/works?aggregations=license") {
+          Status.OK -> s"""
+            {
+              ${resultList(apiPrefix, totalResults = 4)},
+              "aggregations": {
+                "type" : "Aggregations",
+                "license": {
+                  "type" : "Aggregation",
+                  "buckets": [
+                    {
+                      "count" : 2,
+                      "data" : {
+                        "id" : "cc-by",
+                        "label" : "Attribution 4.0 International (CC BY 4.0)",
+                        "type" : "License",
+                        "url" : "http://creativecommons.org/licenses/by/4.0/"
+                      },
+                      "type" : "AggregationBucket"
+                    },
+                    {
+                      "count" : 2,
+                      "data" : {
+                        "id" : "cc-by-nc",
+                        "label" : "Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)",
+                        "type" : "License",
+                        "url" : "https://creativecommons.org/licenses/by-nc/4.0/"
+                      },
+                      "type" : "AggregationBucket"
+                    }
+                  ]
+                }
+              },
+              "results": [${works.map(workResponse).mkString(",")}]
+            }
+          """.stripMargin
+        }
+    }
+  }
 }

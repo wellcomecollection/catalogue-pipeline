@@ -114,7 +114,7 @@ object MultipleWorksParams extends QueryParamsUtils {
         "language".as[LanguageFilter].?,
         "genres.label".as[GenreFilter].?,
         "subjects.label".as[SubjectFilter].?,
-        "licence".as[LicenseFilter].?,
+        "license".as[LicenseFilter].?,
         "include".as[V2WorksIncludes].?,
         "aggregations".as[List[AggregationRequest]].?,
         "sort".as[List[SortRequest]].?,
@@ -158,6 +158,7 @@ object MultipleWorksParams extends QueryParamsUtils {
       "production.dates" -> AggregationRequest.ProductionDate,
       "subjects" -> AggregationRequest.Subject,
       "language" -> AggregationRequest.Language,
+      "license" -> AggregationRequest.License,
     )
 
   implicit val sortDecoder: Decoder[List[SortRequest]] =

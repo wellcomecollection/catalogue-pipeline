@@ -697,7 +697,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
       withApi {
         case (indexV2, routes) =>
           insertIntoElasticsearch(indexV2, works: _*)
-          assertJsonResponse(routes, s"/$apiPrefix/works?licence=cc-by") {
+          assertJsonResponse(routes, s"/$apiPrefix/works?license=cc-by") {
             Status.OK -> s"""
               {
                 ${resultList(apiPrefix, totalResults = 2)},
@@ -717,7 +717,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
           insertIntoElasticsearch(indexV2, works: _*)
           assertJsonResponse(
             routes,
-            s"/$apiPrefix/works?licence=cc-by,cc-by-nc") {
+            s"/$apiPrefix/works?license=cc-by,cc-by-nc") {
             Status.OK -> s"""
               {
                 ${resultList(apiPrefix, totalResults = 3)},
