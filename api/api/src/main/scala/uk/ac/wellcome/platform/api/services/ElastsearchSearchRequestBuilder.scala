@@ -6,8 +6,8 @@ import com.sksamuel.elastic4s.requests.searches.SearchRequest
 import com.sksamuel.elastic4s.requests.searches.aggs.{
   CompositeAggregation,
   DateHistogramAggregation,
-  TermsValueSource,
   TermsAggregation,
+  TermsValueSource,
 }
 import com.sksamuel.elastic4s.requests.searches.queries.{
   BoolQuery,

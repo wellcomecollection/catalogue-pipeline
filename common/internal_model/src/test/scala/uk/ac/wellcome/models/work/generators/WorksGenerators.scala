@@ -247,7 +247,8 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
       production = List(createProductionEventWith(dateLabel = Some(dateLabel)))
     )
 
-  def createLicensedWork(canonicalId: String, licenses: License*): IdentifiedWork =
+  def createLicensedWork(canonicalId: String,
+                         licenses: License*): IdentifiedWork =
     createIdentifiedWorkWith(
       canonicalId = canonicalId,
       items = licenses.toList.map { license =>

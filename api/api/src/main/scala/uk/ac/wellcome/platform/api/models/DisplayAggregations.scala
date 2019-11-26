@@ -8,9 +8,9 @@ import io.swagger.v3.oas.annotations.media.Schema
 import uk.ac.wellcome.display.models.{DisplayLanguage, DisplayWorkType}
 import uk.ac.wellcome.display.models.v2.{
   DisplayGenre,
+  DisplayLicenseV2,
   DisplayPeriod,
-  DisplaySubject,
-  DisplayLicenseV2
+  DisplaySubject
 }
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.display.models.Implicits._

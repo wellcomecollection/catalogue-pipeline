@@ -66,9 +66,7 @@ object Aggregations extends Logging {
 
   implicit val decodeLicense: Decoder[License] =
     Decoder.decodeString.emap { str =>
-      Try(License.createLicense(str))
-        .toEither
-        .left
+      Try(License.createLicense(str)).toEither.left
         .map(err => err.getMessage)
     }
 }

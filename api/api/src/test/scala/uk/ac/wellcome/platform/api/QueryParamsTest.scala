@@ -13,8 +13,8 @@ import uk.ac.wellcome.platform.api.models.{
   GenreFilter,
   ItemLocationTypeFilter,
   LanguageFilter,
-  SubjectFilter,
   LicenseFilter,
+  SubjectFilter,
   WorkQuery,
   WorkQueryType,
   WorkTypeFilter
