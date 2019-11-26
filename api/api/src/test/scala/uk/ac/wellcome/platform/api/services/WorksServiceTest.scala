@@ -242,19 +242,19 @@ class WorksServiceTest
       )
 
       assertSearchResultIsCorrect(
-        query = "cat"
-      )(
         allWorks = List(workDodo, workMouse),
         expectedWorks = List(),
-        expectedTotalResults = 0
+        expectedTotalResults = 0,
+        worksSearchOptions =
+          createWorksSearchOptionsWith(searchQuery = Some(SearchQuery("cat")))
       )
 
       assertSearchResultIsCorrect(
-        query = "dodo"
-      )(
         allWorks = List(workDodo, workMouse),
         expectedWorks = List(workDodo),
-        expectedTotalResults = 1
+        expectedTotalResults = 1,
+        worksSearchOptions =
+          createWorksSearchOptionsWith(searchQuery = Some(SearchQuery("dodo")))
       )
     }
 
@@ -265,11 +265,11 @@ class WorksServiceTest
 
       // unmatched quotes are a lexical error in the Elasticsearch parser
       assertSearchResultIsCorrect(
-        query = "emu \""
-      )(
         allWorks = List(workEmu),
         expectedWorks = List(workEmu),
-        expectedTotalResults = 1
+        expectedTotalResults = 1,
+        worksSearchOptions = createWorksSearchOptionsWith(
+          searchQuery = Some(SearchQuery("emu \"")))
       )
     }
 
@@ -288,12 +288,11 @@ class WorksServiceTest
       )
 
       assertSearchResultIsCorrect(
-        query = "artichokes"
-      )(
         allWorks = List(matchingWork, workWithWrongTitle, workWithWrongWorkType),
         expectedWorks = List(matchingWork),
         expectedTotalResults = 1,
         worksSearchOptions = createWorksSearchOptionsWith(
+          searchQuery = Some(SearchQuery("artichokes")),
           filters = List(WorkTypeFilter(Seq("b")))
         )
       )
@@ -318,12 +317,11 @@ class WorksServiceTest
       )
 
       assertSearchResultIsCorrect(
-        query = "artichokes"
-      )(
         allWorks = List(work1, workWithWrongTitle, work2, workWithWrongWorkType),
         expectedWorks = List(work1, work2),
         expectedTotalResults = 2,
         worksSearchOptions = createWorksSearchOptionsWith(
+          searchQuery = Some(SearchQuery("artichokes")),
           filters = List(WorkTypeFilter(List("b", "m")))
         )
       )
@@ -350,26 +348,28 @@ class WorksServiceTest
             "+a -title | with (all the simple) query~4 syntax operators in it*")
         )
 
-        assertSearchResultIsCorrect(query =
-          "+a -title | with (all the simple) query~4 syntax operators in it*")(
+        assertSearchResultIsCorrect(
           allWorks = List(work),
           expectedWorks = List(work),
-          expectedTotalResults = 1
+          expectedTotalResults = 1,
+          worksSearchOptions = createWorksSearchOptionsWith(
+            searchQuery = Some(SearchQuery(
+              "+a -title | with (all the simple) query~4 syntax operators in it*")))
         )
       }
 
       it("doesn't throw a too_many_clauses exception when passed a query that creates too many clauses") {
-        val workEmu = createIdentifiedWorkWith(
-          title = Some("a b c")
+        val work = createIdentifiedWorkWith(
+          title = Some("(a b c d e) h")
         )
 
         // This query uses precedence and would exceed the default 1024 clauses
         assertSearchResultIsCorrect(
-          query = "(a b c d e) h"
-        )(
-          allWorks = List(workEmu),
-          expectedWorks = List(workEmu),
-          expectedTotalResults = 1
+          allWorks = List(work),
+          expectedWorks = List(work),
+          expectedTotalResults = 1,
+          worksSearchOptions = createWorksSearchOptionsWith(
+            searchQuery = Some(SearchQuery("(a b c d e) h")))
         )
       }
 
@@ -432,12 +432,12 @@ class WorksServiceTest
       expectedAggregations,
       worksSearchOptions)
 
-  private def assertSearchResultIsCorrect(query: String)(
+  private def assertSearchResultIsCorrect(
     allWorks: Seq[IdentifiedBaseWork],
     expectedWorks: Seq[IdentifiedBaseWork],
     expectedTotalResults: Int,
     expectedAggregations: Option[Aggregations] = None,
-    worksSearchOptions: WorksSearchOptions = createWorksSearchOptions
+    worksSearchOptions: WorksSearchOptions
   ): Assertion =
     assertResultIsCorrect(
       worksService.searchWorks
