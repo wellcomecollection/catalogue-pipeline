@@ -134,6 +134,10 @@ case class ElastsearchSearchRequestBuilder(
         simpleStringQuery(subjectQuery)
           .field("data.subjects.agent.label")
           .defaultOperator("AND")
+      case LicenseFilter(licenseIds) =>
+        termsQuery(
+          field = "data.items.agent.locations.license.id",
+          values = licenseIds)
     }
 
   private def sortedByCount =

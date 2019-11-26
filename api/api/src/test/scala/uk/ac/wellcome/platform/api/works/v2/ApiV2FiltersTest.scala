@@ -681,6 +681,58 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
     }
   }
 
+  describe("filtering works by license") {
+
+    val ccByWork = createLicensedWork("A", License_CCBY)
+
+    val ccByNcWork = createLicensedWork("B", License_CCBYNC)
+
+    val bothLicenseWork = createLicensedWork("C", License_CCBY, License_CCBYNC)
+
+    val noLicenseWork = createIdentifiedWorkWith(canonicalId = "D")
+
+    val works = List(ccByWork, ccByNcWork, bothLicenseWork, noLicenseWork)
+
+    it("filters by license") {
+      withApi {
+        case (indexV2, routes) =>
+          insertIntoElasticsearch(indexV2, works: _*)
+          assertJsonResponse(routes, s"/$apiPrefix/works?licence=cc-by") {
+            Status.OK -> s"""
+              {
+                ${resultList(apiPrefix, totalResults = 2)},
+                "results": [
+                  ${workResponse(ccByWork)},
+                  ${workResponse(bothLicenseWork)}
+                ]
+              }
+            """
+          }
+      }
+    }
+
+    it("filters by multiple licenses") {
+      withApi {
+        case (indexV2, routes) =>
+          insertIntoElasticsearch(indexV2, works: _*)
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works?licence=cc-by,cc-by-nc") {
+            Status.OK -> s"""
+              {
+                ${resultList(apiPrefix, totalResults = 3)},
+                "results": [
+                  ${workResponse(ccByWork)},
+                  ${workResponse(ccByNcWork)},
+                  ${workResponse(bothLicenseWork)}
+                ]
+              }
+            """
+          }
+      }
+    }
+  }
+
   private def createItemWithLocationType(
     locationType: LocationType): Identified[Item] =
     createIdentifiedItemWith(
