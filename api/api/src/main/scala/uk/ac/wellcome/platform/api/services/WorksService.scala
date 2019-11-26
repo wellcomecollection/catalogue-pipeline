@@ -16,8 +16,9 @@ import uk.ac.wellcome.models.work.internal.{IdentifiedBaseWork, IdentifiedWork}
 import uk.ac.wellcome.platform.api.models.{
   Aggregations,
   ResultList,
-  WorkFilter,
-  WorkQuery
+  SearchQuery,
+  SearchQueryType,
+  WorkFilter
 }
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
@@ -29,7 +30,10 @@ case class WorksSearchOptions(
   aggregations: List[AggregationRequest] = Nil,
   sortBy: List[SortRequest] = Nil,
   sortOrder: SortingOrder = SortingOrder.Ascending,
+  searchQuery: Option[SearchQuery] = None
 )
+
+case class WorkQuery(query: String, queryType: SearchQueryType)
 
 class WorksService(searchService: ElasticsearchService)(
   implicit ec: ExecutionContext) {
@@ -46,13 +50,11 @@ class WorksService(searchService: ElasticsearchService)(
         }
       }
 
-  def listOrSearchWorks(
-    index: Index,
-    searchOptions: WorksSearchOptions,
-    query: Option[WorkQuery]): Future[Either[ElasticError, ResultList]] =
-    query match {
-      case Some(query) =>
-        searchWorks(query)(index, searchOptions)
+  def listOrSearchWorks(index: Index, searchOptions: WorksSearchOptions)
+    : Future[Either[ElasticError, ResultList]] =
+    searchOptions.searchQuery match {
+      case Some(_) =>
+        searchWorks(index, searchOptions)
       case None =>
         listWorks(index, searchOptions)
     }
@@ -65,13 +67,10 @@ class WorksService(searchService: ElasticsearchService)(
         result.map { createResultList }
       }
 
-  def searchWorks(workQuery: WorkQuery)(index: Index,
-                                        worksSearchOptions: WorksSearchOptions)
+  def searchWorks(index: Index, worksSearchOptions: WorksSearchOptions)
     : Future[Either[ElasticError, ResultList]] =
     searchService
-      .queryResults(workQuery)(
-        index,
-        toElasticsearchQueryOptions(worksSearchOptions))
+      .queryResults(index, toElasticsearchQueryOptions(worksSearchOptions))
       .map { result: Either[ElasticError, SearchResponse] =>
         result.map { createResultList }
       }
@@ -129,6 +128,7 @@ class WorksService(searchService: ElasticsearchService)(
     )
 
     ElasticsearchQueryOptions(
+      searchQuery = worksSearchOptions.searchQuery,
       filters = worksSearchOptions.filters,
       limit = worksSearchOptions.pageSize,
       aggregations = worksSearchOptions.aggregations,
