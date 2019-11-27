@@ -50,11 +50,12 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     )
 
   def createUnidentifiedInvisibleWorkWith(
-    sourceIdentifier: SourceIdentifier = createSourceIdentifier
+    sourceIdentifier: SourceIdentifier = createSourceIdentifier,
+    items: List[MaybeDisplayable[Item]] = List()
   ): UnidentifiedInvisibleWork =
     UnidentifiedInvisibleWork(
       sourceIdentifier = sourceIdentifier,
-      data = WorkData(),
+      data = WorkData(items = items),
       version = 1
     )
 
@@ -196,10 +197,14 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
       items = items
     )
 
-  def createUnidentifiedInvisibleMetsWorkWith(): UnidentifiedInvisibleWork =
+  def createUnidentifiedInvisibleMetsWorkWith(
+    sourceIdentifier: SourceIdentifier = createMetsSourceIdentifier,
+    items: List[MaybeDisplayable[Item]] = List(createDigitalItem))
+    : UnidentifiedInvisibleWork =
     createUnidentifiedInvisibleWorkWith(
-      sourceIdentifier =
-        createSourceIdentifierWith(identifierType = IdentifierType("mets")))
+      sourceIdentifier = createMetsSourceIdentifier,
+      items = items
+    )
 
   def createUnidentifiedSierraWork: UnidentifiedWork =
     createUnidentifiedSierraWorkWith()
@@ -210,13 +215,17 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
         createIdentifiableItemWith(locations = List(createPhysicalLocation))))
 
   def createSierraDigitalWork: UnidentifiedWork =
+    createSierraDigitalWorkWith()
+
+  def createSierraDigitalWorkWith(
+    items: List[Unidentifiable[Item]] = List(
+      createUnidentifiableItemWith(locations = List(createDigitalLocation))))
+    : UnidentifiedWork =
     createUnidentifiedSierraWorkWith(
       workType = Some(WorkType("v", "E-books")),
-      items = List(
-        createUnidentifiableItemWith(locations = List(createDigitalLocation)))
-    )
+      items = items)
 
-  def createMetsInvisibleWork: UnidentifiedInvisibleWork =
+  def createUnidentifiedInvisibleMetsWork: UnidentifiedInvisibleWork =
     createUnidentifiedInvisibleMetsWorkWith()
 
   def createMiroWorkWith(
@@ -260,7 +269,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     createIdentifiedWorkWith(
       canonicalId = canonicalId,
       items = licenses.map { license =>
-        createDigitalItemWith(license = license)
+        createDigitalItemWith(license = Some(license))
       }
     )
 }
