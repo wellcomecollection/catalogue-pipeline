@@ -8,10 +8,12 @@ import uk.ac.wellcome.platform.merger.model.MergedWork
 class SierraMetsWorkPairMergerTest extends FunSpec with WorksGenerators with Matchers with Inside{
 
   val sierraWork = createSierraPhysicalWork
-  val metsWork = createMetsInvisibleWork
+  val metsWork = createUnidentifiedInvisibleMetsWork
+
+  val workPairMerger = new SierraMetsWorkPairMerger{}
 
   it("merges a Sierra and a Mets work") {
-    val result = SierraMetsWorkPairMerger.mergeAndRedirectWorkPair(sierraWork, metsWork)
+    val result = workPairMerger.mergeAndRedirectWorkPair(sierraWork, metsWork)
 
     val physicalItem: Identifiable[Item] = sierraWork.data.items.head.asInstanceOf[Identifiable[Item]]
 
@@ -44,7 +46,7 @@ class SierraMetsWorkPairMergerTest extends FunSpec with WorksGenerators with Mat
 
     val sierraWorkWithDigitalLocation = createUnidentifiedSierraWorkWith(items = List(sierraItem))
 
-    val result = SierraMetsWorkPairMerger.mergeAndRedirectWorkPair(sierraWorkWithDigitalLocation, metsWork)
+    val result = workPairMerger.mergeAndRedirectWorkPair(sierraWorkWithDigitalLocation, metsWork)
 
     inside(result) { case Some(MergedWork(UnidentifiedWork(sierraWorkWithDigitalLocation.version, sierraWorkWithDigitalLocation.sourceIdentifier, data, sierraWorkWithDigitalLocation.ontologyType, sierraWorkWithDigitalLocation.identifiedType), _)) =>
       data.items shouldBe expectedItems
@@ -67,7 +69,7 @@ class SierraMetsWorkPairMergerTest extends FunSpec with WorksGenerators with Mat
 
     val sierraWork = createUnidentifiedSierraWorkWith(items = List(sierraItem))
 
-    val result = SierraMetsWorkPairMerger.mergeAndRedirectWorkPair(sierraWork, metsWork)
+    val result = workPairMerger.mergeAndRedirectWorkPair(sierraWork, metsWork)
 
     inside(result) { case Some(MergedWork(UnidentifiedWork(sierraWork.version, sierraWork.sourceIdentifier, data, sierraWork.ontologyType, sierraWork.identifiedType), _)) =>
       data.items shouldBe expectedItems
@@ -79,7 +81,15 @@ class SierraMetsWorkPairMergerTest extends FunSpec with WorksGenerators with Mat
       items = List(createPhysicalItem, createPhysicalItem)
     )
 
-    SierraMetsWorkPairMerger.mergeAndRedirectWorkPair(sierraWorkWithMultipleItems, metsWork) shouldBe None
+    workPairMerger.mergeAndRedirectWorkPair(sierraWorkWithMultipleItems, metsWork) shouldBe None
+  }
+
+  it("doesn't merge if the sierra work has an unidentifiable item") {
+    val sierraWorkWithUnidentifiableItems = createUnidentifiedSierraWorkWith(
+      items = List(createUnidentifiableItemWith(List(createPhysicalLocation)))
+    )
+
+    workPairMerger.mergeAndRedirectWorkPair(sierraWorkWithUnidentifiableItems, metsWork) shouldBe None
   }
 
   it("doesn't merge if the mets work has more than one item"){
@@ -88,13 +98,13 @@ class SierraMetsWorkPairMergerTest extends FunSpec with WorksGenerators with Mat
       items = List(createDigitalItem, createDigitalItem)
     )
 
-    SierraMetsWorkPairMerger.mergeAndRedirectWorkPair(sierraWork, metsWithMultipleItems) shouldBe None
+    workPairMerger.mergeAndRedirectWorkPair(sierraWork, metsWithMultipleItems) shouldBe None
   }
 
   it("doesn't merge if the sierra work has no items"){
     val sierraWorkNoItems = createUnidentifiedSierraWorkWith(items = Nil)
 
-    SierraMetsWorkPairMerger.mergeAndRedirectWorkPair(sierraWorkNoItems, metsWork) shouldBe None
+    workPairMerger.mergeAndRedirectWorkPair(sierraWorkNoItems, metsWork) shouldBe None
   }
 
   it("doesn't merge if the METS work has no items"){
@@ -103,7 +113,7 @@ class SierraMetsWorkPairMergerTest extends FunSpec with WorksGenerators with Mat
       items = Nil
     )
 
-    SierraMetsWorkPairMerger.mergeAndRedirectWorkPair(sierraWork, metsWorkNoItems) shouldBe None
+    workPairMerger.mergeAndRedirectWorkPair(sierraWork, metsWorkNoItems) shouldBe None
   }
 
   it("doesn't merge if the METS work item has more than one location"){
@@ -112,7 +122,7 @@ class SierraMetsWorkPairMergerTest extends FunSpec with WorksGenerators with Mat
       items = List(createUnidentifiableItemWith(locations = List(createDigitalLocation, createDigitalLocation)))
     )
 
-    SierraMetsWorkPairMerger.mergeAndRedirectWorkPair(sierraWork, metsMultipleLocations) shouldBe None
+    workPairMerger.mergeAndRedirectWorkPair(sierraWork, metsMultipleLocations) shouldBe None
   }
 
   it("doesn't merge if the METS work item has no locations"){
@@ -121,7 +131,7 @@ class SierraMetsWorkPairMergerTest extends FunSpec with WorksGenerators with Mat
       items = List(createUnidentifiableItemWith(locations = Nil))
     )
 
-    SierraMetsWorkPairMerger.mergeAndRedirectWorkPair(sierraWork, metsNoLocations) shouldBe None
+    workPairMerger.mergeAndRedirectWorkPair(sierraWork, metsNoLocations) shouldBe None
   }
 
 }

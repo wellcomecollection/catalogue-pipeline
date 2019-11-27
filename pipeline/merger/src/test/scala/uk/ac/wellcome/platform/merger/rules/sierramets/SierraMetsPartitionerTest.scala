@@ -10,7 +10,7 @@ class SierraMetsPartitionerTest
     with Matchers {
   private val partitioner = new SierraMetsPartitioner {}
   private val sierraWork = createSierraPhysicalWork
-  private val metsWork = createMetsInvisibleWork
+  private val metsWork = createUnidentifiedInvisibleMetsWork
   private val otherWorks = createIsbnWorks(4)
 
   it("partitions a sierra physical and a mets work") {
@@ -59,7 +59,7 @@ class SierraMetsPartitionerTest
 
   it("does not partition multiple Mets works") {
     val works = (1 to 3).map { _ =>
-      createMetsInvisibleWork
+      createUnidentifiedInvisibleMetsWork
     }
     val result = partitioner.partitionWorks(works)
 
@@ -75,7 +75,7 @@ class SierraMetsPartitionerTest
   it("does not partition multiple Sierra works with a single Mets work") {
     val works = (1 to 3).map { _ =>
       createSierraPhysicalWork
-    } ++ Seq(createMetsInvisibleWork)
+    } ++ Seq(createUnidentifiedInvisibleMetsWork)
 
     val result = partitioner.partitionWorks(works)
 
@@ -84,7 +84,7 @@ class SierraMetsPartitionerTest
 
   it("does not partition multiple Mets works with a single Sierra work") {
     val works = (1 to 3).map { _ =>
-      createMetsInvisibleWork
+      createUnidentifiedInvisibleMetsWork
     } ++ Seq(createSierraPhysicalWork)
 
     val result = partitioner.partitionWorks(works)

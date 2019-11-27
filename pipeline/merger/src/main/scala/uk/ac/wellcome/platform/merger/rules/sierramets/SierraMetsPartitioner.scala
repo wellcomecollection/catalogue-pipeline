@@ -8,7 +8,7 @@ import uk.ac.wellcome.models.work.internal.{
 }
 import uk.ac.wellcome.platform.merger.rules.WorkTagPartitioner
 
-class SierraMetsPartitioner extends WorkTagPartitioner {
+trait SierraMetsPartitioner extends WorkTagPartitioner {
 
   def tagWork(work: BaseWork): WorkTag =
     work match {
