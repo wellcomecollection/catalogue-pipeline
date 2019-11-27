@@ -1,14 +1,28 @@
 package uk.ac.wellcome.platform.merger.rules.sierramets
 
-import uk.ac.wellcome.models.work.internal.{IdentifiableRedirect, TransformedBaseWork, UnidentifiedRedirectedWork, UnidentifiedWork}
+import uk.ac.wellcome.models.work.internal.{DigitalLocation, IdentifiableRedirect, TransformedBaseWork, UnidentifiedRedirectedWork, UnidentifiedWork}
 import uk.ac.wellcome.platform.merger.model.MergedWork
 import uk.ac.wellcome.platform.merger.rules.WorkPairMerger
 
 object SierraMetsWorkPairMerger extends WorkPairMerger {
-  override def mergeAndRedirectWorkPair(firstWork: UnidentifiedWork, secondWork: TransformedBaseWork): Option[MergedWork] = {
-    val maybeDisplayable = firstWork.data.items.head
-    val value = maybeDisplayable.withAgent(item => item.copy(locations = item.locations ++ secondWork.data.items.head.agent.locations))
+  override def mergeAndRedirectWorkPair(sierraWork: UnidentifiedWork, metsWork: TransformedBaseWork): Option[MergedWork] = {
+    (sierraWork.data.items, metsWork.data.items) match {
+      case (List(sierraItem),List(metsItem)) =>
+        metsItem.agent.locations match {
+          case List(metsLocation: DigitalLocation) =>
+        val mergedItem = sierraItem.withAgent (i => {
+          val filteredLocations = i.locations.filter{
+            case l: DigitalLocation if l.url.equals(metsLocation.url) => false
+            case _ => true
+          }
 
-    Some(MergedWork(firstWork.withData(data => data.copy(items = List(value))), UnidentifiedRedirectedWork(secondWork.sourceIdentifier, secondWork.version, IdentifiableRedirect(firstWork.sourceIdentifier))))
+          i.copy(locations = filteredLocations :+ metsLocation)
+        } )
+
+        Some (MergedWork (sierraWork.withData (data => data.copy (items = List (mergedItem) ) ), UnidentifiedRedirectedWork (metsWork.sourceIdentifier, metsWork.version, IdentifiableRedirect (sierraWork.sourceIdentifier) ) ) )
+          case _ => None
+        }
+      case _ => None
+    }
   }
 }

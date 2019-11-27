@@ -28,6 +28,8 @@ trait IdentifiersGenerators extends RandomStrings {
       ontologyType = ontologyType
     )
 
+  def createMetsSourceIdentifier: SourceIdentifier = createSourceIdentifierWith(identifierType = IdentifierType("mets"))
+
   def createSierraSystemSourceIdentifier: SourceIdentifier =
     createSierraSystemSourceIdentifierWith()
 
