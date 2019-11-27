@@ -248,10 +248,10 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     )
 
   def createLicensedWork(canonicalId: String,
-                         licenses: License*): IdentifiedWork =
+                         licenses: List[License]): IdentifiedWork =
     createIdentifiedWorkWith(
       canonicalId = canonicalId,
-      items = licenses.toList.map { license =>
+      items = licenses.map { license =>
         createDigitalItemWith(license = license)
       }
     )
