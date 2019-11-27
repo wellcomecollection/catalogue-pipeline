@@ -404,20 +404,20 @@ class ApiV2WorksIncludesTest
                    "notes": [
                      {
                        "noteType": {
+                         "id": "general-note",
+                         "label": "Notes",
+                         "type": "NoteType"
+                       },
+                       "contents": ["A"],
+                       "type": "Note"
+                     },
+                     {
+                       "noteType": {
                          "id": "funding-info",
                          "label": "Funding information",
                          "type": "NoteType"
                        },
                        "contents": ["B"],
-                       "type": "Note"
-                     },
-                     {
-                       "noteType": {
-                         "id": "general-note",
-                         "label": "General note",
-                         "type": "NoteType"
-                       },
-                       "contents": ["A"],
                        "type": "Note"
                      }
                    ]
@@ -431,7 +431,7 @@ class ApiV2WorksIncludesTest
                      {
                        "noteType": {
                          "id": "general-note",
-                         "label": "General note",
+                         "label": "Notes",
                          "type": "NoteType"
                        },
                        "contents": ["C", "D"],
@@ -465,7 +465,7 @@ class ApiV2WorksIncludesTest
                  {
                    "noteType": {
                      "id": "general-note",
-                     "label": "General note",
+                     "label": "Notes",
                      "type": "NoteType"
                    },
                    "contents": ["A", "B"],
