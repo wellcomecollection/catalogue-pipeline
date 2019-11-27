@@ -197,7 +197,9 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     )
 
   def createUnidentifiedInvisibleMetsWorkWith(): UnidentifiedInvisibleWork =
-    createUnidentifiedInvisibleWorkWith(sourceIdentifier = createSourceIdentifierWith(identifierType = IdentifierType("mets")))
+    createUnidentifiedInvisibleWorkWith(
+      sourceIdentifier =
+        createSourceIdentifierWith(identifierType = IdentifierType("mets")))
 
   def createUnidentifiedSierraWork: UnidentifiedWork =
     createUnidentifiedSierraWorkWith()

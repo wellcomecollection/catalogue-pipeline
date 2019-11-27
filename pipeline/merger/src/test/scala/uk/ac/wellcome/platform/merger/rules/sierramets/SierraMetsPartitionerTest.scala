@@ -5,7 +5,7 @@ import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.platform.merger.rules.Partition
 
 class SierraMetsPartitionerTest
-  extends FunSpec
+    extends FunSpec
     with WorksGenerators
     with Matchers {
   private val partitioner = new SierraMetsPartitioner {}
@@ -89,5 +89,3 @@ class SierraMetsPartitionerTest
     result shouldBe None
   }
 }
-
-
