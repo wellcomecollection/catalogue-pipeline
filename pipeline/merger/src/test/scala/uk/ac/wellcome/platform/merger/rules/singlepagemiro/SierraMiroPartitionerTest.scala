@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.merger.rules.singlepagemiro
 
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.platform.merger.rules.Partition
+import uk.ac.wellcome.platform.merger.rules.{Partition, PotentialMergedWork}
 
 class SierraMiroPartitionerTest
     extends FunSpec
@@ -17,20 +17,23 @@ class SierraMiroPartitionerTest
   it("partitions a sierra and miro work") {
     val result = partitioner.partitionWorks(Seq(sierraWork, miroWork))
 
-    result shouldBe Some(Partition(sierraWork, miroWork, Nil))
+    result shouldBe Some(
+      Partition(PotentialMergedWork(sierraWork, miroWork), Nil))
   }
 
   it("partitions a Sierra and Miro work, order in sequence") {
     val result = partitioner.partitionWorks(Seq(miroWork, sierraWork))
 
-    result shouldBe Some(Partition(sierraWork, miroWork, Nil))
+    result shouldBe Some(
+      Partition(PotentialMergedWork(sierraWork, miroWork), Nil))
   }
 
   it("partitions a Sierra, Miro and other works") {
     val result =
       partitioner.partitionWorks(Seq(sierraWork, miroWork) ++ otherWorks)
 
-    result shouldBe Some(Partition(sierraWork, miroWork, otherWorks))
+    result shouldBe Some(
+      Partition(PotentialMergedWork(sierraWork, miroWork), otherWorks))
   }
 
   it("does not partition a single Sierra work") {

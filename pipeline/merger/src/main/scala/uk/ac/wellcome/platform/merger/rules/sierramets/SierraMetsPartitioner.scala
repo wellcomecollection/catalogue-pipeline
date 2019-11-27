@@ -6,37 +6,16 @@ import uk.ac.wellcome.models.work.internal.{
   UnidentifiedInvisibleWork,
   UnidentifiedWork
 }
-import uk.ac.wellcome.platform.merger.rules.{Partition, Partitioner}
+import uk.ac.wellcome.platform.merger.rules.WorkTagPartitioner
 
-class SierraMetsPartitioner extends Partitioner {
+class SierraMetsPartitioner extends WorkTagPartitioner {
 
-  private object workType extends Enumeration {
-    val SierraWork, MetsWork, OtherWork = Value
-  }
-
-  override def partitionWorks(works: Seq[BaseWork]): Option[Partition] = {
-    val groupedWorks = works.groupBy {
-      case work: UnidentifiedWork if isSierraWork(work) =>
-        workType.SierraWork
-      case work: UnidentifiedInvisibleWork if isMetsWork(work) =>
-        workType.MetsWork
-      case _ => workType.OtherWork
+  def tagWork(work: BaseWork): WorkTag =
+    work match {
+      case work: UnidentifiedWork if isSierraWork(work)        => Target
+      case work: UnidentifiedInvisibleWork if isMetsWork(work) => Redirected
+      case _                                                   => PassThrough
     }
-
-    val sierraWorks =
-      groupedWorks.get(workType.SierraWork).toList.flatten
-    val metsWorks =
-      groupedWorks.get(workType.MetsWork).toList.flatten
-    val otherWorks = groupedWorks.get(workType.OtherWork).toList.flatten
-
-    (sierraWorks, metsWorks) match {
-      case (
-          List(physicalWork: UnidentifiedWork),
-          List(metsWork: UnidentifiedInvisibleWork)) =>
-        Some(Partition(physicalWork, metsWork, otherWorks))
-      case _ => None
-    }
-  }
 
   private def isSierraWork(work: UnidentifiedWork): Boolean =
     work.sourceIdentifier.identifierType == IdentifierType(

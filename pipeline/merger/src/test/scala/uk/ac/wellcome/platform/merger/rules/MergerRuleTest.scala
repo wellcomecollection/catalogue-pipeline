@@ -31,9 +31,13 @@ class MergerRuleTest extends FunSpec with WorksGenerators with Matchers {
         works: Seq[BaseWork]): Option[Partition] =
         Some(
           Partition(
-            works.head.asInstanceOf[UnidentifiedWork],
-            works.tail.head.asInstanceOf[UnidentifiedWork],
-            works.tail.tail))
+            PotentialMergedWork(
+              works.head.asInstanceOf[UnidentifiedWork],
+              works.tail.head.asInstanceOf[UnidentifiedWork]
+            ),
+            works.tail.tail
+          )
+        )
       override protected def mergeAndRedirectWorkPair(
         firstWork: UnidentifiedWork,
         secondWork: TransformedBaseWork): Option[MergedWork] = None
@@ -49,9 +53,13 @@ class MergerRuleTest extends FunSpec with WorksGenerators with Matchers {
         works: Seq[BaseWork]): Option[Partition] =
         Some(
           Partition(
-            works.head.asInstanceOf[UnidentifiedWork],
-            works.tail.head.asInstanceOf[UnidentifiedWork],
-            works.tail.tail))
+            PotentialMergedWork(
+              works.head.asInstanceOf[UnidentifiedWork],
+              works.tail.head.asInstanceOf[UnidentifiedWork]
+            ),
+            works.tail.tail
+          )
+        )
       override protected def mergeAndRedirectWorkPair(
         firstWork: UnidentifiedWork,
         secondWork: TransformedBaseWork): Option[MergedWork] =
