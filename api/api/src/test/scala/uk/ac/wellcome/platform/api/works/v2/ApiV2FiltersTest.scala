@@ -685,7 +685,8 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
 
     val ccByWork = createLicensedWork("A", List(License_CCBY))
     val ccByNcWork = createLicensedWork("B", List(License_CCBYNC))
-    val bothLicenseWork = createLicensedWork("C", List(License_CCBY, License_CCBYNC))
+    val bothLicenseWork =
+      createLicensedWork("C", List(License_CCBY, License_CCBYNC))
     val noLicenseWork = createLicensedWork("D", Nil)
 
     val works = List(ccByWork, ccByNcWork, bothLicenseWork, noLicenseWork)
