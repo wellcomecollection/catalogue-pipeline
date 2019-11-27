@@ -50,11 +50,12 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     )
 
   def createUnidentifiedInvisibleWorkWith(
-    sourceIdentifier: SourceIdentifier = createSourceIdentifier
+    sourceIdentifier: SourceIdentifier = createSourceIdentifier,
+    items: List[MaybeDisplayable[Item]] = List()
   ): UnidentifiedInvisibleWork =
     UnidentifiedInvisibleWork(
       sourceIdentifier = sourceIdentifier,
-      data = WorkData(),
+      data = WorkData(items = items),
       version = 1
     )
 
@@ -199,7 +200,9 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
   def createUnidentifiedInvisibleMetsWorkWith(): UnidentifiedInvisibleWork =
     createUnidentifiedInvisibleWorkWith(
       sourceIdentifier =
-        createSourceIdentifierWith(identifierType = IdentifierType("mets")))
+        createSourceIdentifierWith(identifierType = IdentifierType("mets")),
+      items = List(Unidentifiable(Item(List(DigitalLocation(url = "http://somewhere.iiif-presentation.org/manifest", LocationType("iiif-presentation"))))))
+    )
 
   def createUnidentifiedSierraWork: UnidentifiedWork =
     createUnidentifiedSierraWorkWith()
