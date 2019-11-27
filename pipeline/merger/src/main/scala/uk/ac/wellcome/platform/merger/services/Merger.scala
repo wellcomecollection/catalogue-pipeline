@@ -14,4 +14,8 @@ class Merger(rules: List[MergerRule]) {
 }
 
 object PlatformMerger
-    extends Merger(List(SierraPhysicalDigitalMergeRule, SierraMiroMergeRule, SierraMetsMergerRule))
+    extends Merger(
+      List(
+        SierraPhysicalDigitalMergeRule,
+        SierraMiroMergeRule,
+        SierraMetsMergerRule))

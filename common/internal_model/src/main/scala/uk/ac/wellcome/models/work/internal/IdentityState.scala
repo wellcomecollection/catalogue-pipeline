@@ -29,13 +29,13 @@ case class Identifiable[T](agent: T,
                              classOf[Identified[T]].getSimpleName)
     extends IdentityState[T]
     with MaybeDisplayable[T]
-    with MultipleSourceIdentifiers{
+    with MultipleSourceIdentifiers {
   def withAgent[A](f: T => A) = this.copy(agent = f(agent))
 }
 
 case class Unidentifiable[T](agent: T)
     extends IdentityState[T]
     with Displayable[T]
-    with MaybeDisplayable[T]{
+    with MaybeDisplayable[T] {
   def withAgent[A](f: T => A) = this.copy(agent = f(agent))
 }

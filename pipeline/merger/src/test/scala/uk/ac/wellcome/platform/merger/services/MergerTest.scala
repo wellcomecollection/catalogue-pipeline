@@ -5,13 +5,16 @@ import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
 
 class MergerTest extends FunSpec with WorksGenerators with Matchers {
-  val digitalLocationCCBYNC = createDigitalLocationWith(license = Some(License_CCBYNC))
+  val digitalLocationCCBYNC = createDigitalLocationWith(
+    license = Some(License_CCBYNC))
   val digitalLocationNoLicense = digitalLocationCCBYNC.copy(license = None)
 
   private val sierraPhysicalWork = createSierraPhysicalWork
-  private val sierraDigitalWork = createSierraDigitalWorkWith(items = List(createDigitalItemWith(List(digitalLocationNoLicense))))
+  private val sierraDigitalWork = createSierraDigitalWorkWith(
+    items = List(createDigitalItemWith(List(digitalLocationNoLicense))))
   private val miroWork = createMiroWork
-  private val metsWork = createUnidentifiedInvisibleMetsWorkWith(items = List(createDigitalItemWith(List(digitalLocationCCBYNC))))
+  private val metsWork = createUnidentifiedInvisibleMetsWorkWith(
+    items = List(createDigitalItemWith(List(digitalLocationCCBYNC))))
 
   private val merger = PlatformMerger
 
@@ -209,8 +212,6 @@ class MergerTest extends FunSpec with WorksGenerators with Matchers {
       expectedRedirectedWork)
   }
 
-
-
   it(
     "merges a physical Sierra work with a digital Sierra work, a single-page Miro work and a METS work") {
     val result = merger.merge(
@@ -261,7 +262,8 @@ class MergerTest extends FunSpec with WorksGenerators with Matchers {
     result should contain theSameElementsAs List(
       expectedMergedWork,
       expectedRedirectedDigitalWork,
-      expectedMiroRedirectedWork, expectedMetsRedirectedWork)
+      expectedMiroRedirectedWork,
+      expectedMetsRedirectedWork)
   }
 
 }
