@@ -1,7 +1,5 @@
 package uk.ac.wellcome.platform.transformer.mets.parsers
 
-import java.io.InputStream
-
 import uk.ac.wellcome.platform.transformer.mets.transformer.Mets
 
 import scala.util.Try
@@ -9,9 +7,9 @@ import scala.xml.{Elem, XML}
 
 object MetsXmlParser {
 
-  def apply(inputStream: InputStream): Either[Throwable, Mets] =
+  def apply(str: String): Either[Throwable, Mets] =
     for {
-      is <- Try(XML.load(inputStream)).toEither
+      is <- Try(XML.loadString(str)).toEither
       mets <- MetsXmlParser(is)
     } yield (mets)
 

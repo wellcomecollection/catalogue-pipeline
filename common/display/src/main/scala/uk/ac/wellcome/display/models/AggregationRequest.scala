@@ -13,4 +13,6 @@ object AggregationRequest {
   case object Subject extends AggregationRequest
 
   case object Language extends AggregationRequest
+
+  case object License extends AggregationRequest
 }

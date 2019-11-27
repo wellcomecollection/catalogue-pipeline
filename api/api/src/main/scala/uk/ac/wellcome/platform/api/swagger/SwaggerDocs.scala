@@ -190,6 +190,20 @@ trait MultipleWorksSwagger {
         required = false
       ),
       new Parameter(
+        name = "license",
+        in = ParameterIn.QUERY,
+        description = "Filter the work by license.",
+        schema = new Schema(
+          allowableValues = Array(
+            "cc-by",
+            "cc-by-nc",
+            "cc-by-nc-nd",
+            "cc-0",
+            "pdm",
+            "copyright-not-cleared")),
+        required = false
+      ),
+      new Parameter(
         name = "sort",
         in = ParameterIn.QUERY,
         description = "Which field to sort the results on",

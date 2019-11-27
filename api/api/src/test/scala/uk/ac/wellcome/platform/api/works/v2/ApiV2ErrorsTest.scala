@@ -44,7 +44,7 @@ class ApiV2ErrorsTest extends ApiV2WorksTestBase with ApiErrorsTestBase {
       assertIsBadRequest(
         "/works?aggregations=foo",
         description =
-          "aggregations: 'foo' is not a valid value. Please choose one of: ['workType', 'genres', 'production.dates', 'subjects', 'language']"
+          "aggregations: 'foo' is not a valid value. Please choose one of: ['workType', 'genres', 'production.dates', 'subjects', 'language', 'license']"
       )
     }
 
@@ -52,7 +52,7 @@ class ApiV2ErrorsTest extends ApiV2WorksTestBase with ApiErrorsTestBase {
       assertIsBadRequest(
         "/works?aggregations=foo,bar",
         description =
-          "aggregations: 'foo', 'bar' are not valid values. Please choose one of: ['workType', 'genres', 'production.dates', 'subjects', 'language']"
+          "aggregations: 'foo', 'bar' are not valid values. Please choose one of: ['workType', 'genres', 'production.dates', 'subjects', 'language', 'license']"
       )
     }
 
@@ -68,7 +68,7 @@ class ApiV2ErrorsTest extends ApiV2WorksTestBase with ApiErrorsTestBase {
       assertIsBadRequest(
         "/works?aggregations=foo,workType,bar",
         description =
-          "aggregations: 'foo', 'bar' are not valid values. Please choose one of: ['workType', 'genres', 'production.dates', 'subjects', 'language']"
+          "aggregations: 'foo', 'bar' are not valid values. Please choose one of: ['workType', 'genres', 'production.dates', 'subjects', 'language', 'license']"
       )
     }
   }

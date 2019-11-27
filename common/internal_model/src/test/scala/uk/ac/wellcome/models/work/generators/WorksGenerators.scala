@@ -50,11 +50,12 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     )
 
   def createUnidentifiedInvisibleWorkWith(
-    sourceIdentifier: SourceIdentifier = createSourceIdentifier
+    sourceIdentifier: SourceIdentifier = createSourceIdentifier,
+    items: List[MaybeDisplayable[Item]] = List()
   ): UnidentifiedInvisibleWork =
     UnidentifiedInvisibleWork(
       sourceIdentifier = sourceIdentifier,
-      data = WorkData(),
+      data = WorkData(items = items),
       version = 1
     )
 
@@ -196,6 +197,15 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
       items = items
     )
 
+  def createUnidentifiedInvisibleMetsWorkWith(
+    sourceIdentifier: SourceIdentifier = createMetsSourceIdentifier,
+    items: List[MaybeDisplayable[Item]] = List(createDigitalItem))
+    : UnidentifiedInvisibleWork =
+    createUnidentifiedInvisibleWorkWith(
+      sourceIdentifier = createMetsSourceIdentifier,
+      items = items
+    )
+
   def createUnidentifiedSierraWork: UnidentifiedWork =
     createUnidentifiedSierraWorkWith()
 
@@ -205,11 +215,18 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
         createIdentifiableItemWith(locations = List(createPhysicalLocation))))
 
   def createSierraDigitalWork: UnidentifiedWork =
+    createSierraDigitalWorkWith()
+
+  def createSierraDigitalWorkWith(
+    items: List[Unidentifiable[Item]] = List(
+      createUnidentifiableItemWith(locations = List(createDigitalLocation))))
+    : UnidentifiedWork =
     createUnidentifiedSierraWorkWith(
       workType = Some(WorkType("v", "E-books")),
-      items = List(
-        createUnidentifiableItemWith(locations = List(createDigitalLocation)))
-    )
+      items = items)
+
+  def createUnidentifiedInvisibleMetsWork: UnidentifiedInvisibleWork =
+    createUnidentifiedInvisibleMetsWorkWith()
 
   def createMiroWorkWith(
     otherIdentifiers: List[SourceIdentifier] = List()): UnidentifiedWork =
@@ -245,5 +262,14 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     createIdentifiedWorkWith(
       canonicalId = canonicalId,
       production = List(createProductionEventWith(dateLabel = Some(dateLabel)))
+    )
+
+  def createLicensedWork(canonicalId: String,
+                         licenses: List[License]): IdentifiedWork =
+    createIdentifiedWorkWith(
+      canonicalId = canonicalId,
+      items = licenses.map { license =>
+        createDigitalItemWith(license = Some(license))
+      }
     )
 }

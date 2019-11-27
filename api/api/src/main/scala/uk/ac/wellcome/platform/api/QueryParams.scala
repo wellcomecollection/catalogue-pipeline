@@ -1,12 +1,12 @@
 package uk.ac.wellcome.platform.api
 
 import java.time.LocalDate
+
 import io.circe.Decoder
 import io.circe.java8.time.TimeInstances
 import akka.http.scaladsl.server.{Directives, ValidationRejection}
 import akka.http.scaladsl.unmarshalling.Unmarshaller
 import io.circe.{Decoder, Json}
-
 import uk.ac.wellcome.platform.api.services.WorksSearchOptions
 import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.display.models._
@@ -44,17 +44,21 @@ case class MultipleWorksParams(
   language: Option[LanguageFilter],
   `genres.label`: Option[GenreFilter],
   `subjects.label`: Option[SubjectFilter],
+  license: Option[LicenseFilter],
   include: Option[V2WorksIncludes],
   aggregations: Option[List[AggregationRequest]],
   sort: Option[List[SortRequest]],
   sortOrder: Option[SortingOrder],
   query: Option[String],
-  _queryType: Option[WorkQueryType],
+  _queryType: Option[SearchQueryType],
   _index: Option[String],
 ) extends QueryParams {
 
   def searchOptions(apiConfig: ApiConfig): WorksSearchOptions =
     WorksSearchOptions(
+      searchQuery = query map { query =>
+        SearchQuery(query, _queryType)
+      },
       filters = filters,
       pageSize = pageSize.getOrElse(apiConfig.defaultPageSize),
       pageNumber = page.getOrElse(1),
@@ -62,14 +66,6 @@ case class MultipleWorksParams(
       sortBy = sort.getOrElse(Nil),
       sortOrder = sortOrder.getOrElse(SortingOrder.Ascending),
     )
-
-  def workQuery: Option[WorkQuery] =
-    query.map { qry =>
-      WorkQuery(
-        queryString = qry,
-        queryType = _queryType.getOrElse(WorkQueryType.MSMBoostQuery)
-      )
-    }
 
   def validationErrors: List[String] =
     List(
@@ -89,6 +85,7 @@ case class MultipleWorksParams(
       language,
       `genres.label`,
       `subjects.label`,
+      license
     ).flatten
 
   private def dateFilter =
@@ -117,12 +114,13 @@ object MultipleWorksParams extends QueryParamsUtils {
         "language".as[LanguageFilter].?,
         "genres.label".as[GenreFilter].?,
         "subjects.label".as[SubjectFilter].?,
+        "license".as[LicenseFilter].?,
         "include".as[V2WorksIncludes].?,
         "aggregations".as[List[AggregationRequest]].?,
         "sort".as[List[SortRequest]].?,
         "sortOrder".as[SortingOrder].?,
         "query".as[String].?,
-        "_queryType".as[WorkQueryType].?,
+        "_queryType".as[SearchQueryType].?,
         "_index".as[String].?,
       )
     ).tflatMap { args =>
@@ -150,6 +148,9 @@ object MultipleWorksParams extends QueryParamsUtils {
   implicit val subjectFilter: Decoder[SubjectFilter] =
     Decoder.decodeString.emap(str => Right(SubjectFilter(str)))
 
+  implicit val licenseFilter: Decoder[LicenseFilter] =
+    decodeCommaSeperated.emap(strs => Right(LicenseFilter(strs)))
+
   implicit val aggregationsDecoder: Decoder[List[AggregationRequest]] =
     decodeOneOfCommaSeperated(
       "workType" -> AggregationRequest.WorkType,
@@ -157,6 +158,7 @@ object MultipleWorksParams extends QueryParamsUtils {
       "production.dates" -> AggregationRequest.ProductionDate,
       "subjects" -> AggregationRequest.Subject,
       "language" -> AggregationRequest.Language,
+      "license" -> AggregationRequest.License,
     )
 
   implicit val sortDecoder: Decoder[List[SortRequest]] =
@@ -170,10 +172,9 @@ object MultipleWorksParams extends QueryParamsUtils {
       "desc" -> SortingOrder.Descending,
     )
 
-  implicit val workQueryDecoder: Decoder[WorkQueryType] =
+  implicit val _queryTypeDecoder: Decoder[SearchQueryType] =
     decodeOneOf(
-      "default" -> WorkQueryType.MSMBoostQuery,
-      "usingAnd" -> WorkQueryType.MSMBoostQueryUsingAndOperator
+      "scoringTiers" -> SearchQueryType.ScoringTiers
     )
 }
 

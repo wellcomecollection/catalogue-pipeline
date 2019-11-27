@@ -53,6 +53,28 @@ output "vhs_sierra_assumable_read_role" {
   value = "${module.vhs_sierra.assumable_read_role}"
 }
 
+# Mets Hybrid Store
+
+output "vhs_mets_full_access_policy" {
+  value = "${module.vhs_mets.full_access_policy}"
+}
+
+output "vhs_mets_read_policy" {
+  value = "${module.vhs_mets.read_policy}"
+}
+
+output "vhs_mets_table_name" {
+  value = "${module.vhs_mets.table_name}"
+}
+
+output "vhs_mets_bucket_name" {
+  value = "${module.vhs_mets.bucket_name}"
+}
+
+output "vhs_mets_assumable_read_role" {
+  value = "${module.vhs_mets.assumable_read_role}"
+}
+
 # Sierra Items Hybrid Store
 
 output "vhs_sierra_items_full_access_policy" {

@@ -16,7 +16,6 @@ import uk.ac.wellcome.mets_adapter.fixtures.BagsWiremock
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.concurrent.duration._
 
 class BagRetrieverTest
     extends FunSpec
@@ -31,40 +30,41 @@ class BagRetrieverTest
   it("gets a bag from the storage service") {
     withActorSystem { implicit actorSystem =>
       withMaterializer(actorSystem) { implicit materializer =>
-        withBagRetriever(0 milliseconds, 1 milliseconds) { bagRetriever =>
+        withBagRetriever { bagRetriever =>
           whenReady(getBag(bagRetriever, "digitised", "b30246039")) {
-            maybeBag =>
-              inside(maybeBag) {
-                case Some(
-                    Bag(_, BagManifest(files), BagLocation(bucket, path), _)) =>
-                  verify(
-                    moreThanOrExactly(1),
-                    postRequestedFor(urlEqualTo("/oauth2/token"))
-                      .withRequestBody(matching(".*client_id=client.*"))
-                      .withRequestBody(matching(".*client_secret=secret.*"))
-                  )
+            case Bag(_, BagManifest(files), BagLocation(bucket, path), _) =>
+              verify(
+                moreThanOrExactly(1),
+                postRequestedFor(urlEqualTo("/oauth2/token"))
+                  .withRequestBody(matching(".*client_id=client.*"))
+                  .withRequestBody(matching(".*client_secret=secret.*"))
+              )
 
-                  verify(getRequestedFor(
-                    urlEqualTo("/storage/v1/bags/digitised/b30246039")))
-                  files.head shouldBe BagFile(
-                    "data/b30246039.xml",
-                    "v1/data/b30246039.xml")
-                  bucket shouldBe "wellcomecollection-storage"
-                  path shouldBe "digitised/b30246039"
-              }
+              verify(
+                getRequestedFor(
+                  urlEqualTo("/storage/v1/bags/digitised/b30246039")))
+              files.head shouldBe BagFile(
+                "data/b30246039.xml",
+                "v1/data/b30246039.xml")
+              bucket shouldBe "wellcomecollection-storage"
+              path shouldBe "digitised/b30246039"
           }
         }
       }
     }
   }
 
-  it("returns a none if the bag does not exist in the storage service") {
+  it("fails if the bag does not exist in the storage service") {
     withActorSystem { implicit actorSystem =>
       withMaterializer(actorSystem) { implicit materializer =>
-        withBagRetriever(0 milliseconds, 100 milliseconds) { bagRetriever =>
-          whenReady(getBag(bagRetriever, "digitised", "not-existing")) {
-            maybeBag =>
-              maybeBag shouldBe None
+        withBagRetriever { bagRetriever =>
+          whenReady(getBag(bagRetriever, "digitised", "not-existing").failed) {
+            e =>
+              e shouldBe a[Throwable]
+              verify(
+                1,
+                getRequestedFor(
+                  urlEqualTo("/storage/v1/bags/digitised/not-existing")))
           }
         }
       }
@@ -95,7 +95,7 @@ class BagRetrieverTest
   it("returns a failed future if the storage service responds with 500") {
     withActorSystem { implicit actorSystem =>
       withMaterializer(actorSystem) { implicit materializer =>
-        withBagRetriever(100 milliseconds, 100 milliseconds) { bagRetriever =>
+        withBagRetriever { bagRetriever =>
           stubFor(
             get(urlMatching("/storage/v1/bags/digitised/this-shall-crash"))
               .willReturn(aResponse().withStatus(500)))
@@ -111,7 +111,7 @@ class BagRetrieverTest
   it("returns a failed future if the storage service response has a fault") {
     withActorSystem { implicit actorSystem =>
       withMaterializer(actorSystem) { implicit materializer =>
-        withBagRetriever(100 milliseconds, 100 milliseconds) { bagRetriever =>
+        withBagRetriever { bagRetriever =>
           stubFor(
             get(urlMatching("/storage/v1/bags/digitised/this-will-fault"))
               .willReturn(aResponse()
@@ -126,9 +126,7 @@ class BagRetrieverTest
     }
   }
 
-  def getBag(bagRetriever: BagRetriever,
-             space: String,
-             bagId: String): Future[Option[Bag]] =
+  def getBag(bagRetriever: BagRetriever, space: String, bagId: String) =
     bagRetriever.getBag(IngestUpdate(space, bagId))
 
   def withBagRetriever[R](tokenService: TokenService)(
@@ -142,9 +140,7 @@ class BagRetrieverTest
       )
     }
 
-  def withBagRetriever[R](
-    initialDelay: FiniteDuration,
-    interval: FiniteDuration)(testWith: TestWith[BagRetriever, R])(
+  def withBagRetriever[R](testWith: TestWith[BagRetriever, R])(
     implicit actorSystem: ActorSystem,
     materializer: ActorMaterializer) =
     withBagsService("localhost") { port =>
@@ -152,24 +148,21 @@ class BagRetrieverTest
         s"http://localhost:$port",
         "client",
         "secret",
-        "https://api.wellcomecollection.org/scope")(initialDelay, interval) {
-        tokenService =>
-          testWith(
-            new HttpBagRetriever(
-              s"http://localhost:$port/storage/v1/bags",
-              tokenService)
-          )
+        "https://api.wellcomecollection.org/scope") { tokenService =>
+        testWith(
+          new HttpBagRetriever(
+            s"http://localhost:$port/storage/v1/bags",
+            tokenService)
+        )
       }
     }
 
-  def withTokenService[R](
-    url: String,
-    clientId: String,
-    secret: String,
-    scope: String)(initialDelay: FiniteDuration, interval: FiniteDuration)(
-    testWith: TestWith[TokenService, R])(implicit actorSystem: ActorSystem,
-                                         materializer: ActorMaterializer) {
-    testWith(
-      new TokenService(url, clientId, secret, scope, initialDelay, interval))
+  def withTokenService[R](url: String,
+                          clientId: String,
+                          secret: String,
+                          scope: String)(testWith: TestWith[TokenService, R])(
+    implicit actorSystem: ActorSystem,
+    materializer: ActorMaterializer) {
+    testWith(new TokenService(url, clientId, secret, scope))
   }
 }

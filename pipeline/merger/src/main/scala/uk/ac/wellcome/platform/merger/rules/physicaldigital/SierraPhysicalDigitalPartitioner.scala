@@ -5,37 +5,16 @@ import uk.ac.wellcome.models.work.internal.{
   IdentifierType,
   UnidentifiedWork
 }
-import uk.ac.wellcome.platform.merger.rules.{Partition, Partitioner}
+import uk.ac.wellcome.platform.merger.rules.WorkTagPartitioner
 
-trait SierraPhysicalDigitalPartitioner extends Partitioner {
+trait SierraPhysicalDigitalPartitioner extends WorkTagPartitioner {
 
-  private object workType extends Enumeration {
-    val SierraDigitalWork, SierraPhysicalWork, OtherWork = Value
-  }
-
-  override def partitionWorks(works: Seq[BaseWork]): Option[Partition] = {
-    val groupedWorks = works.groupBy {
-      case work: UnidentifiedWork if isSierraPhysicalWork(work) =>
-        workType.SierraPhysicalWork
-      case work: UnidentifiedWork if isSierraDigitalWork(work) =>
-        workType.SierraDigitalWork
-      case _ => workType.OtherWork
+  def tagWork(work: BaseWork): WorkTag =
+    work match {
+      case work: UnidentifiedWork if isSierraPhysicalWork(work) => Target
+      case work: UnidentifiedWork if isSierraDigitalWork(work)  => Redirected
+      case _                                                    => PassThrough
     }
-
-    val physicalWorks =
-      groupedWorks.get(workType.SierraPhysicalWork).toList.flatten
-    val digitalWorks =
-      groupedWorks.get(workType.SierraDigitalWork).toList.flatten
-    val otherWorks = groupedWorks.get(workType.OtherWork).toList.flatten
-
-    (physicalWorks, digitalWorks) match {
-      case (
-          List(physicalWork: UnidentifiedWork),
-          List(digitalWork: UnidentifiedWork)) =>
-        Some(Partition(physicalWork, digitalWork, otherWorks))
-      case _ => None
-    }
-  }
 
   private def isSierraWork(work: UnidentifiedWork): Boolean =
     work.sourceIdentifier.identifierType == IdentifierType(

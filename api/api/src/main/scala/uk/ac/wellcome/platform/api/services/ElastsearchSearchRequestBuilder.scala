@@ -6,22 +6,25 @@ import com.sksamuel.elastic4s.requests.searches.SearchRequest
 import com.sksamuel.elastic4s.requests.searches.aggs.{
   CompositeAggregation,
   DateHistogramAggregation,
+  TermsAggregation,
   TermsValueSource,
 }
-import com.sksamuel.elastic4s.requests.searches.queries.{Query, RangeQuery}
+import com.sksamuel.elastic4s.requests.searches.queries.{
+  BoolQuery,
+  Query,
+  RangeQuery
+}
 import com.sksamuel.elastic4s.requests.searches.sort.{FieldSort, SortOrder}
 import com.sksamuel.elastic4s.{ElasticDate, Index}
 import uk.ac.wellcome.display.models.{
   AggregationRequest,
   ProductionDateSortRequest,
-  SortingOrder,
+  SortingOrder
 }
-
 import uk.ac.wellcome.platform.api.models._
 
 case class ElastsearchSearchRequestBuilder(
   index: Index,
-  maybeWorkQuery: Option[WorkQuery],
   sortDefinitions: List[FieldSort],
   queryOptions: ElasticsearchQueryOptions) {
 
@@ -86,6 +89,11 @@ case class ElastsearchSearchRequestBuilder(
             TermsValueSource("label", field = Some("data.language.label.raw"))
           )
         )
+
+    case AggregationRequest.License =>
+      TermsAggregation("license")
+        .size(100)
+        .field("data.items.agent.locations.license.id")
   }
 
   lazy val sort = queryOptions.sortBy
@@ -99,9 +107,9 @@ case class ElastsearchSearchRequestBuilder(
     case SortingOrder.Descending => SortOrder.DESC
   }
 
-  lazy val filteredQuery = maybeWorkQuery
-    .map { workQuery =>
-      must(workQuery.query)
+  lazy val filteredQuery: BoolQuery = queryOptions.searchQuery
+    .map { searchQuery =>
+      ElasticsearchQueryBuilder(searchQuery).query
     }
     .getOrElse { boolQuery }
     .filter {
@@ -132,6 +140,10 @@ case class ElastsearchSearchRequestBuilder(
         simpleStringQuery(subjectQuery)
           .field("data.subjects.agent.label")
           .defaultOperator("AND")
+      case LicenseFilter(licenseIds) =>
+        termsQuery(
+          field = "data.items.agent.locations.license.id",
+          values = licenseIds)
     }
 
   private def sortedByCount =

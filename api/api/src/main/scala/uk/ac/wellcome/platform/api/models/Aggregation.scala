@@ -15,6 +15,7 @@ case class Aggregations(
   language: Option[Aggregation[Language]] = None,
   subjects: Option[Aggregation[Subject[Displayable[AbstractRootConcept]]]] =
     None,
+  license: Option[Aggregation[License]] = None,
 )
 
 object Aggregations extends Logging {
@@ -34,6 +35,7 @@ object Aggregations extends Logging {
               subjects =
                 getAggregation[Subject[Displayable[AbstractRootConcept]]](
                   esAggs.subjects),
+              license = getAggregation[License](esAggs.license),
             )
           )
       }
@@ -60,6 +62,12 @@ object Aggregations extends Logging {
           Right(Period(date.getYear.toString))
         }
         .getOrElse { Left("Error decoding") }
+    }
+
+  implicit val decodeLicense: Decoder[License] =
+    Decoder.decodeString.emap { str =>
+      Try(License.createLicense(str)).toEither.left
+        .map(err => err.getMessage)
     }
 }
 
@@ -100,9 +108,10 @@ case class EsAggregations(
   language: Option[EsAggregation[Language]] = None,
   subjects: Option[EsAggregation[Subject[Displayable[AbstractRootConcept]]]] =
     None,
+  license: Option[EsAggregation[License]] = None
 ) {
   def nonEmpty: Boolean =
-    List(workType, genres, productionDates, language, subjects).flatten.nonEmpty
+    List(workType, genres, productionDates, language, subjects, license).flatten.nonEmpty
 }
 
 case class EsAggregation[T](buckets: List[EsAggregationBucket[T]])

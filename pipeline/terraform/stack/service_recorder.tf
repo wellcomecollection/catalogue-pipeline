@@ -6,9 +6,10 @@ module "recorder_queue" {
   topic_names = [
     "${module.miro_transformer_topic.name}",
     "${module.sierra_transformer_topic.name}",
+    "${module.mets_transformer_topic.name}"
   ]
 
-  topic_count = 2
+  topic_count = 3
 
   aws_region    = "${var.aws_region}"
   account_id    = "${var.account_id}"

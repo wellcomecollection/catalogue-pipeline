@@ -15,10 +15,11 @@ class TokenService(url: String,
                    clientId: String,
                    secret: String,
                    scope: String,
-                   initialDelay: FiniteDuration,
-                   interval: FiniteDuration)(implicit actorSystem: ActorSystem,
-                                             mat: Materializer,
-                                             ec: ExecutionContext) {
+                   interval: FiniteDuration = 5 minutes)(
+  implicit
+  actorSystem: ActorSystem,
+  mat: Materializer,
+  ec: ExecutionContext) {
   private val config = Config(
     clientId = clientId,
     clientSecret = secret,
@@ -29,7 +30,7 @@ class TokenService(url: String,
   private val client = Client(config)
   private val token = new AtomicReference[OAuth2BearerToken]
 
-  actorSystem.scheduler.schedule(initialDelay, interval)(refreshToken())
+  actorSystem.scheduler.schedule(0 milliseconds, interval)(refreshToken())
 
   private def refreshToken() =
     client
