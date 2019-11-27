@@ -16,7 +16,7 @@ import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.bigmessaging.typesafe.VHSBuilder
-import uk.ac.wellcome.messaging.typesafe.{SQSBuilder, SNSBuilder}
+import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.storage.locking.dynamo.{
   DynamoLockDao,
   DynamoLockDaoConfig,
@@ -56,8 +56,7 @@ object Main extends WellcomeTypesafeApp {
 
     new MatcherWorkerService(
       store = VHSBuilder.build[TransformedBaseWork](config),
-      msgStream =
-        SQSBuilder.buildSQSStream[NotificationMessage](config),
+      msgStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
       msgSender = SNSBuilder
         .buildSNSMessageSender(config, subject = "Sent from the matcher"),
       workMatcher = workMatcher

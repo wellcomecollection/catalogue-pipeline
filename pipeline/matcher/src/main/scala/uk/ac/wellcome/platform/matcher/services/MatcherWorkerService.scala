@@ -20,21 +20,22 @@ import uk.ac.wellcome.typesafe.Runnable
 import scala.concurrent.{ExecutionContext, Future}
 
 class MatcherWorkerService[MsgDestination](
-                                            store: VersionedStore[String,
+  store: VersionedStore[String,
                         Int,
                         HybridStoreEntry[TransformedBaseWork, EmptyMetadata]],
-                                            msgStream: SQSStream[NotificationMessage],
-                                            msgSender: MessageSender[MsgDestination],
-                                            workMatcher: WorkMatcher)(implicit val actorSystem: ActorSystem,
+  msgStream: SQSStream[NotificationMessage],
+  msgSender: MessageSender[MsgDestination],
+  workMatcher: WorkMatcher)(implicit val actorSystem: ActorSystem,
                             ec: ExecutionContext)
     extends Logging
     with Runnable {
 
-  def run(): Future[Done] = msgStream.foreach(this.getClass.getSimpleName,processMessage)
+  def run(): Future[Done] =
+    msgStream.foreach(this.getClass.getSimpleName, processMessage)
 
   def processMessage(message: NotificationMessage): Future[Unit] = {
     (for {
-      key <-Future.fromTry(fromJson[Version[String, Int]](message.body))
+      key <- Future.fromTry(fromJson[Version[String, Int]](message.body))
       work <- getWork(key)
       identifiersList <- workMatcher.matchWork(work)
       _ <- Future.fromTry(msgSender.sendT(identifiersList))

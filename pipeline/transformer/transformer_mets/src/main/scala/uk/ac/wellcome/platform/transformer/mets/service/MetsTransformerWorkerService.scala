@@ -15,19 +15,20 @@ import uk.ac.wellcome.typesafe.Runnable
 import scala.concurrent.Future
 
 class MetsTransformerWorkerService(
-                                    msgStream: SQSStream[NotificationMessage],
-                                    messageSender: BigMessageSender[SNSConfig, TransformedBaseWork],
-                                    store: VersionedStore[String, Int, HybridStoreEntry[String, EmptyMetadata]])
+  msgStream: SQSStream[NotificationMessage],
+  messageSender: BigMessageSender[SNSConfig, TransformedBaseWork],
+  store: VersionedStore[String, Int, HybridStoreEntry[String, EmptyMetadata]])
     extends Runnable
     with Logging {
 
   val className = this.getClass.getSimpleName
 
-  def run(): Future[Done] = msgStream.foreach(this.getClass.getSimpleName,processAndLog)
+  def run(): Future[Done] =
+    msgStream.foreach(this.getClass.getSimpleName, processAndLog)
 
   def processAndLog(message: NotificationMessage): Future[Unit] = {
     val tried = for {
-      key <-fromJson[Version[String, Int]](message.body)
+      key <- fromJson[Version[String, Int]](message.body)
       _ <- process(key).toTry
     } yield ()
     Future.fromTry(tried.recover {
