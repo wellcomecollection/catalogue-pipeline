@@ -11,7 +11,6 @@ import akka.http.scaladsl.server.{
   Route,
   ValidationRejection
 }
-import co.elastic.apm.api.Traced
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import com.sksamuel.elastic4s.{ElasticClient, ElasticError, Index}
 import io.circe.Printer
@@ -30,7 +29,8 @@ class Router(elasticClient: ElasticClient,
              elasticConfig: DisplayElasticConfig,
              apiConfig: ApiConfig)(implicit ec: ExecutionContext)
     extends FailFastCirceSupport
-    with Directives {
+    with Directives
+    with AsyncTracing {
 
   import MultipleWorksResponse.encoder
   import ResultResponse.encoder
@@ -42,10 +42,14 @@ class Router(elasticClient: ElasticClient,
           pathPrefix("v2") {
             concat(
               path("works") {
-                MultipleWorksParams.parse { getMultipleWorks }
+                MultipleWorksParams.parse { params =>
+                  getWithFuture(multipleWorks(params))
+                }
               },
               path("works" / Segment) { workId =>
-                SingleWorkParams.parse { getSingleWork(workId, _) }
+                SingleWorkParams.parse { params =>
+                  getWithFuture(singleWork(workId, params))
+                }
               },
               path("context.json") {
                 getFromFile(context.getPath)
@@ -75,11 +79,10 @@ class Router(elasticClient: ElasticClient,
     }
   }
 
-  @Traced(value = "GET /works")
-  def getMultipleWorks(params: MultipleWorksParams): Route = {
-    val searchOptions = params.searchOptions(apiConfig)
-    val index = params._index.map(Index(_)).getOrElse(elasticConfig.indexV2)
-    getWithFuture(
+  def multipleWorks(params: MultipleWorksParams): Future[Route] =
+    transactFuture("GET /works")({
+      val searchOptions = params.searchOptions(apiConfig)
+      val index = params._index.map(Index(_)).getOrElse(elasticConfig.indexV2)
       worksService
         .listOrSearchWorks(index, searchOptions, params.workQuery)
         .map {
@@ -96,14 +99,13 @@ class Router(elasticClient: ElasticClient,
                 )
               )
             }
-        })
-  }
+        }
+    })
 
-  @Traced(value = "GET /works/{workId}")
-  def getSingleWork(id: String, params: SingleWorkParams): Route = {
-    val index = params._index.map(Index(_)).getOrElse(elasticConfig.indexV2)
-    val includes = params.include.getOrElse(V2WorksIncludes())
-    getWithFuture(
+  def singleWork(id: String, params: SingleWorkParams): Future[Route] =
+    transactFuture("GET /works/{workId}")({
+      val index = params._index.map(Index(_)).getOrElse(elasticConfig.indexV2)
+      val includes = params.include.getOrElse(V2WorksIncludes())
       worksService
         .findWorkById(id)(index)
         .map {
@@ -112,8 +114,8 @@ class Router(elasticClient: ElasticClient,
           case Right(Some(_))                              => workGone
           case Right(None)                                 => workNotFound(id)
           case Left(err)                                   => elasticError(err)
-        })
-  }
+        }
+    })
 
   def workFound(work: IdentifiedWork, includes: V2WorksIncludes): Route =
     complete(
