@@ -4,8 +4,10 @@ import akka.Done
 import akka.actor.ActorSystem
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.bigmessaging.EmptyMetadata
+import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.MessageSender
-import uk.ac.wellcome.messaging.sqs.NotificationStream
+import uk.ac.wellcome.messaging.sns.NotificationMessage
+import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
@@ -18,20 +20,21 @@ import uk.ac.wellcome.typesafe.Runnable
 import scala.concurrent.{ExecutionContext, Future}
 
 class MatcherWorkerService[MsgDestination](
-  store: VersionedStore[String,
+                                            store: VersionedStore[String,
                         Int,
                         HybridStoreEntry[TransformedBaseWork, EmptyMetadata]],
-  msgStream: NotificationStream[Version[String, Int]],
-  msgSender: MessageSender[MsgDestination],
-  workMatcher: WorkMatcher)(implicit val actorSystem: ActorSystem,
+                                            msgStream: SQSStream[NotificationMessage],
+                                            msgSender: MessageSender[MsgDestination],
+                                            workMatcher: WorkMatcher)(implicit val actorSystem: ActorSystem,
                             ec: ExecutionContext)
     extends Logging
     with Runnable {
 
-  def run(): Future[Done] = msgStream.run(processMessage)
+  def run(): Future[Done] = msgStream.foreach(this.getClass.getSimpleName,processMessage)
 
-  def processMessage(key: Version[String, Int]): Future[Unit] = {
+  def processMessage(message: NotificationMessage): Future[Unit] = {
     (for {
+      key <-Future.fromTry(fromJson[Version[String, Int]](message.body))
       work <- getWork(key)
       identifiersList <- workMatcher.matchWork(work)
       _ <- Future.fromTry(msgSender.sendT(identifiersList))

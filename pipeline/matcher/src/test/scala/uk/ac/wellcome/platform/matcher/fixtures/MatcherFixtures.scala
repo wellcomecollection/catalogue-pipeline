@@ -22,7 +22,6 @@ import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.bigmessaging.fixtures.{BigMessagingFixture, VHSFixture}
 import uk.ac.wellcome.bigmessaging.EmptyMetadata
-import uk.ac.wellcome.messaging.sqs.NotificationStream
 import uk.ac.wellcome.storage.dynamo._
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
 import uk.ac.wellcome.storage.fixtures.S3Fixtures
@@ -31,7 +30,7 @@ import uk.ac.wellcome.storage.locking.dynamo.{
   DynamoLockingService,
   ExpiringLock
 }
-import uk.ac.wellcome.storage.{Identified, Version}
+import uk.ac.wellcome.storage.Identified
 import uk.ac.wellcome.storage.store.HybridStoreEntry
 
 trait MatcherFixtures
@@ -65,12 +64,10 @@ trait MatcherFixtures
           withWorkGraphStore(graphTable) { workGraphStore =>
             withWorkMatcher(workGraphStore, lockTable) { workMatcher =>
               withSQSStream[NotificationMessage, R](queue) { msgStream =>
-                val notificationStream =
-                  new NotificationStream[Version[String, Int]](msgStream)
                 val workerService =
                   new MatcherWorkerService(
                     vhs,
-                    notificationStream,
+                    msgStream,
                     msgSender,
                     workMatcher)
                 workerService.run()
