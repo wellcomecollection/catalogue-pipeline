@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.merger.rules.sierramets
 
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.platform.merger.rules.Partition
+import uk.ac.wellcome.platform.merger.rules.{Partition, PotentialMergedWork}
 
 class SierraMetsPartitionerTest
     extends FunSpec
@@ -16,20 +16,20 @@ class SierraMetsPartitionerTest
   it("partitions a sierra physical and a mets work") {
     val result = partitioner.partitionWorks(Seq(sierraWork, metsWork))
 
-    result shouldBe Some(Partition(sierraWork, metsWork, Nil))
+    result shouldBe Some(Partition(PotentialMergedWork(sierraWork, metsWork), Nil))
   }
 
   it("partitions a Sierra and mets work, order in sequence") {
     val result = partitioner.partitionWorks(Seq(metsWork, sierraWork))
 
-    result shouldBe Some(Partition(sierraWork, metsWork, Nil))
+    result shouldBe Some(Partition(PotentialMergedWork(sierraWork, metsWork), Nil))
   }
 
   it("partitions a Sierra, Mets and other works") {
     val result =
       partitioner.partitionWorks(Seq(sierraWork, metsWork) ++ otherWorks)
 
-    result shouldBe Some(Partition(sierraWork, metsWork, otherWorks))
+    result shouldBe Some(Partition(PotentialMergedWork(sierraWork, metsWork), otherWorks))
   }
 
   it("does not partition a single Sierra work") {

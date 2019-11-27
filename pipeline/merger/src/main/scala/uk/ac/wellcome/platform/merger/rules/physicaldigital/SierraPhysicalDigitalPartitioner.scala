@@ -5,15 +5,11 @@ import uk.ac.wellcome.models.work.internal.{
   IdentifierType,
   UnidentifiedWork
 }
-import uk.ac.wellcome.platform.merger.rules.{Partition, Partitioner}
+import uk.ac.wellcome.platform.merger.rules.{Partition, Partitioner, PotentialMergedWork}
 
 trait SierraPhysicalDigitalPartitioner extends Partitioner {
 
-  private object workType extends Enumeration {
-    val SierraDigitalWork, SierraPhysicalWork, OtherWork = Value
-  }
-
-  override def partitionWorks(works: Seq[BaseWork]): Option[Partition] = {
+  def partitionWorks(works: Seq[BaseWork]): Option[Partition] = {
     val groupedWorks = works.groupBy {
       case work: UnidentifiedWork if isSierraPhysicalWork(work) =>
         workType.SierraPhysicalWork
@@ -32,9 +28,13 @@ trait SierraPhysicalDigitalPartitioner extends Partitioner {
       case (
           List(physicalWork: UnidentifiedWork),
           List(digitalWork: UnidentifiedWork)) =>
-        Some(Partition(physicalWork, digitalWork, otherWorks))
+        Some(Partition(PotentialMergedWork(physicalWork, digitalWork), otherWorks))
       case _ => None
     }
+  }
+
+  private object workType extends Enumeration {
+    val SierraDigitalWork, SierraPhysicalWork, OtherWork = Value
   }
 
   private def isSierraWork(work: UnidentifiedWork): Boolean =

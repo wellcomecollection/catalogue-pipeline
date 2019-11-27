@@ -6,15 +6,11 @@ import uk.ac.wellcome.models.work.internal.{
   UnidentifiedInvisibleWork,
   UnidentifiedWork
 }
-import uk.ac.wellcome.platform.merger.rules.{Partition, Partitioner}
+import uk.ac.wellcome.platform.merger.rules.{Partition, Partitioner, PotentialMergedWork}
 
 class SierraMetsPartitioner extends Partitioner {
 
-  private object workType extends Enumeration {
-    val SierraWork, MetsWork, OtherWork = Value
-  }
-
-  override def partitionWorks(works: Seq[BaseWork]): Option[Partition] = {
+  def partitionWorks(works: Seq[BaseWork]): Option[Partition] = {
     val groupedWorks = works.groupBy {
       case work: UnidentifiedWork if isSierraWork(work) =>
         workType.SierraWork
@@ -33,11 +29,14 @@ class SierraMetsPartitioner extends Partitioner {
       case (
           List(physicalWork: UnidentifiedWork),
           List(metsWork: UnidentifiedInvisibleWork)) =>
-        Some(Partition(physicalWork, metsWork, otherWorks))
+        Some(Partition(PotentialMergedWork(physicalWork, metsWork), otherWorks))
       case _ => None
     }
   }
 
+  private object workType extends Enumeration {
+    val SierraWork, MetsWork, OtherWork = Value
+  }
   private def isSierraWork(work: UnidentifiedWork): Boolean =
     work.sourceIdentifier.identifierType == IdentifierType(
       "sierra-system-number")
