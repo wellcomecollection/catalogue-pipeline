@@ -5,7 +5,6 @@ import uk.ac.wellcome.models.work.internal.{
   Identifiable,
   IdentifiableRedirect,
   Item,
-  Location,
   TransformedBaseWork,
   Unidentifiable,
   UnidentifiedRedirectedWork,
