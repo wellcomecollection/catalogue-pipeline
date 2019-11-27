@@ -6,7 +6,8 @@ import com.sksamuel.elastic4s.requests.searches.SearchRequest
 import com.sksamuel.elastic4s.requests.searches.aggs.{
   CompositeAggregation,
   DateHistogramAggregation,
-  TermsValueSource
+  TermsAggregation,
+  TermsValueSource,
 }
 import com.sksamuel.elastic4s.requests.searches.queries.{
   BoolQuery,
@@ -88,6 +89,11 @@ case class ElastsearchSearchRequestBuilder(
             TermsValueSource("label", field = Some("data.language.label.raw"))
           )
         )
+
+    case AggregationRequest.License =>
+      TermsAggregation("license")
+        .size(100)
+        .field("data.items.agent.locations.license.id")
   }
 
   lazy val sort = queryOptions.sortBy
@@ -134,6 +140,10 @@ case class ElastsearchSearchRequestBuilder(
         simpleStringQuery(subjectQuery)
           .field("data.subjects.agent.label")
           .defaultOperator("AND")
+      case LicenseFilter(licenseIds) =>
+        termsQuery(
+          field = "data.items.agent.locations.license.id",
+          values = licenseIds)
     }
 
   private def sortedByCount =

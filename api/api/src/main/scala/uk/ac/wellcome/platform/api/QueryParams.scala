@@ -44,6 +44,7 @@ case class MultipleWorksParams(
   language: Option[LanguageFilter],
   `genres.label`: Option[GenreFilter],
   `subjects.label`: Option[SubjectFilter],
+  license: Option[LicenseFilter],
   include: Option[V2WorksIncludes],
   aggregations: Option[List[AggregationRequest]],
   sort: Option[List[SortRequest]],
@@ -84,6 +85,7 @@ case class MultipleWorksParams(
       language,
       `genres.label`,
       `subjects.label`,
+      license
     ).flatten
 
   private def dateFilter =
@@ -112,6 +114,7 @@ object MultipleWorksParams extends QueryParamsUtils {
         "language".as[LanguageFilter].?,
         "genres.label".as[GenreFilter].?,
         "subjects.label".as[SubjectFilter].?,
+        "license".as[LicenseFilter].?,
         "include".as[V2WorksIncludes].?,
         "aggregations".as[List[AggregationRequest]].?,
         "sort".as[List[SortRequest]].?,
@@ -145,6 +148,9 @@ object MultipleWorksParams extends QueryParamsUtils {
   implicit val subjectFilter: Decoder[SubjectFilter] =
     Decoder.decodeString.emap(str => Right(SubjectFilter(str)))
 
+  implicit val licenseFilter: Decoder[LicenseFilter] =
+    decodeCommaSeperated.emap(strs => Right(LicenseFilter(strs)))
+
   implicit val aggregationsDecoder: Decoder[List[AggregationRequest]] =
     decodeOneOfCommaSeperated(
       "workType" -> AggregationRequest.WorkType,
@@ -152,6 +158,7 @@ object MultipleWorksParams extends QueryParamsUtils {
       "production.dates" -> AggregationRequest.ProductionDate,
       "subjects" -> AggregationRequest.Subject,
       "language" -> AggregationRequest.Language,
+      "license" -> AggregationRequest.License,
     )
 
   implicit val sortDecoder: Decoder[List[SortRequest]] =

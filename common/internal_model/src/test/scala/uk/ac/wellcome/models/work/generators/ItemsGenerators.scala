@@ -68,6 +68,11 @@ trait ItemsGenerators extends IdentifiersGenerators {
   def createDigitalItem: Unidentifiable[Item] =
     createUnidentifiableItemWith(locations = List(createDigitalLocation))
 
+  def createDigitalItemWith(license: License): Unidentifiable[Item] =
+    createUnidentifiableItemWith(
+      locations = List(createDigitalLocationWith(license = license))
+    )
+
   private def defaultLocation = createDigitalLocationWith()
 
   private def defaultLocationUrl =
