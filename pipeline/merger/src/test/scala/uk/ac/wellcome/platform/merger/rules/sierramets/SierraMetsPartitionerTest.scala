@@ -16,20 +16,23 @@ class SierraMetsPartitionerTest
   it("partitions a sierra physical and a mets work") {
     val result = partitioner.partitionWorks(Seq(sierraWork, metsWork))
 
-    result shouldBe Some(Partition(PotentialMergedWork(sierraWork, metsWork), Nil))
+    result shouldBe Some(
+      Partition(PotentialMergedWork(sierraWork, metsWork), Nil))
   }
 
   it("partitions a Sierra and mets work, order in sequence") {
     val result = partitioner.partitionWorks(Seq(metsWork, sierraWork))
 
-    result shouldBe Some(Partition(PotentialMergedWork(sierraWork, metsWork), Nil))
+    result shouldBe Some(
+      Partition(PotentialMergedWork(sierraWork, metsWork), Nil))
   }
 
   it("partitions a Sierra, Mets and other works") {
     val result =
       partitioner.partitionWorks(Seq(sierraWork, metsWork) ++ otherWorks)
 
-    result shouldBe Some(Partition(PotentialMergedWork(sierraWork, metsWork), otherWorks))
+    result shouldBe Some(
+      Partition(PotentialMergedWork(sierraWork, metsWork), otherWorks))
   }
 
   it("does not partition a single Sierra work") {

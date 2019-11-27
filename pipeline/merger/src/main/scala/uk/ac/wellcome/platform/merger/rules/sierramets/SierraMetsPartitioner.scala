@@ -12,9 +12,9 @@ class SierraMetsPartitioner extends WorkTagPartitioner {
 
   def tagWork(work: BaseWork): WorkTag =
     work match {
-      case work: UnidentifiedWork if isSierraWork(work) => Target
+      case work: UnidentifiedWork if isSierraWork(work)        => Target
       case work: UnidentifiedInvisibleWork if isMetsWork(work) => Redirected
-      case _ => PassThrough
+      case _                                                   => PassThrough
     }
 
   private def isSierraWork(work: UnidentifiedWork): Boolean =

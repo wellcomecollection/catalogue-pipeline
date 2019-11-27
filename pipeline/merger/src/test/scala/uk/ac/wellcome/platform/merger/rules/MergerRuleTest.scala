@@ -29,15 +29,15 @@ class MergerRuleTest extends FunSpec with WorksGenerators with Matchers {
     val mergerRule = new MergerRule with Partitioner with WorkPairMerger {
       override protected def partitionWorks(
         works: Seq[BaseWork]): Option[Partition] =
-          Some(
-            Partition(
-              PotentialMergedWork(
-                works.head.asInstanceOf[UnidentifiedWork],
-                works.tail.head.asInstanceOf[UnidentifiedWork]
-              ),
-              works.tail.tail
-            )
+        Some(
+          Partition(
+            PotentialMergedWork(
+              works.head.asInstanceOf[UnidentifiedWork],
+              works.tail.head.asInstanceOf[UnidentifiedWork]
+            ),
+            works.tail.tail
           )
+        )
       override protected def mergeAndRedirectWorkPair(
         firstWork: UnidentifiedWork,
         secondWork: TransformedBaseWork): Option[MergedWork] = None
@@ -51,15 +51,15 @@ class MergerRuleTest extends FunSpec with WorksGenerators with Matchers {
     val mergerRule = new MergerRule with Partitioner with WorkPairMerger {
       override protected def partitionWorks(
         works: Seq[BaseWork]): Option[Partition] =
-          Some(
-            Partition(
-              PotentialMergedWork(
-                works.head.asInstanceOf[UnidentifiedWork],
-                works.tail.head.asInstanceOf[UnidentifiedWork]
-              ),
-              works.tail.tail
-            )
+        Some(
+          Partition(
+            PotentialMergedWork(
+              works.head.asInstanceOf[UnidentifiedWork],
+              works.tail.head.asInstanceOf[UnidentifiedWork]
+            ),
+            works.tail.tail
           )
+        )
       override protected def mergeAndRedirectWorkPair(
         firstWork: UnidentifiedWork,
         secondWork: TransformedBaseWork): Option[MergedWork] =

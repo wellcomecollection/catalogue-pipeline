@@ -17,20 +17,23 @@ class SierraMiroPartitionerTest
   it("partitions a sierra and miro work") {
     val result = partitioner.partitionWorks(Seq(sierraWork, miroWork))
 
-    result shouldBe Some(Partition(PotentialMergedWork(sierraWork, miroWork), Nil))
+    result shouldBe Some(
+      Partition(PotentialMergedWork(sierraWork, miroWork), Nil))
   }
 
   it("partitions a Sierra and Miro work, order in sequence") {
     val result = partitioner.partitionWorks(Seq(miroWork, sierraWork))
 
-    result shouldBe Some(Partition(PotentialMergedWork(sierraWork, miroWork), Nil))
+    result shouldBe Some(
+      Partition(PotentialMergedWork(sierraWork, miroWork), Nil))
   }
 
   it("partitions a Sierra, Miro and other works") {
     val result =
       partitioner.partitionWorks(Seq(sierraWork, miroWork) ++ otherWorks)
 
-    result shouldBe Some(Partition(PotentialMergedWork(sierraWork, miroWork), otherWorks))
+    result shouldBe Some(
+      Partition(PotentialMergedWork(sierraWork, miroWork), otherWorks))
   }
 
   it("does not partition a single Sierra work") {

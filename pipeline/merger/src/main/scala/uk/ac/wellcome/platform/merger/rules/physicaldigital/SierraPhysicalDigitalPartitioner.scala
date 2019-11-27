@@ -12,8 +12,8 @@ trait SierraPhysicalDigitalPartitioner extends WorkTagPartitioner {
   def tagWork(work: BaseWork): WorkTag =
     work match {
       case work: UnidentifiedWork if isSierraPhysicalWork(work) => Target
-      case work: UnidentifiedWork if isSierraDigitalWork(work) => Redirected
-      case _ => PassThrough
+      case work: UnidentifiedWork if isSierraDigitalWork(work)  => Redirected
+      case _                                                    => PassThrough
     }
 
   private def isSierraWork(work: UnidentifiedWork): Boolean =

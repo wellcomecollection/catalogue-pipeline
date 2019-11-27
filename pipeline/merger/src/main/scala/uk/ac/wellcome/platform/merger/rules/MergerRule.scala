@@ -10,7 +10,8 @@ trait MergerRule { this: Partitioner with WorkPairMerger =>
 
   def mergeAndRedirectWorks(works: Seq[BaseWork]): Seq[BaseWork] =
     partitionWorks(works) match {
-      case Some(Partition(PotentialMergedWork(target, redirectedWork), remaining)) =>
+      case Some(
+          Partition(PotentialMergedWork(target, redirectedWork), remaining)) =>
         mergeAndRedirectWorkPair(target, redirectedWork)
           .map(result => updateVersion(result) ++ remaining)
           .getOrElse(works)
@@ -53,7 +54,9 @@ trait WorkTagPartitioner extends Partitioner {
     val redirectedWorks = taggedWorks.get(Redirected).toList.flatten
     val remaining = taggedWorks.get(PassThrough).toList.flatten
     (targetWorks, redirectedWorks) match {
-      case (List(target: UnidentifiedWork), List(redirected: TransformedBaseWork)) =>
+      case (
+          List(target: UnidentifiedWork),
+          List(redirected: TransformedBaseWork)) =>
         Some(Partition(PotentialMergedWork(target, redirected), remaining))
       case _ => None
     }
