@@ -3,34 +3,39 @@ package uk.ac.wellcome.platform.transformer.mets.service
 import akka.Done
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.bigmessaging.{BigMessageSender, EmptyMetadata}
-import uk.ac.wellcome.messaging.sns.SNSConfig
-import uk.ac.wellcome.messaging.sqs.NotificationStream
+import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig}
+import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.transformer.mets.parsers.MetsXmlParser
 import uk.ac.wellcome.storage.store.{HybridStoreEntry, VersionedStore}
 import uk.ac.wellcome.storage.{Identified, Version}
 import uk.ac.wellcome.typesafe.Runnable
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 class MetsTransformerWorkerService(
-  msgStream: NotificationStream[Version[String, Int]],
-  messageSender: BigMessageSender[SNSConfig, TransformedBaseWork],
-  store: VersionedStore[String, Int, HybridStoreEntry[String, EmptyMetadata]])(
-  implicit ec: ExecutionContext)
+                                    msgStream: SQSStream[NotificationMessage],
+                                    messageSender: BigMessageSender[SNSConfig, TransformedBaseWork],
+                                    store: VersionedStore[String, Int, HybridStoreEntry[String, EmptyMetadata]])
     extends Runnable
     with Logging {
 
   val className = this.getClass.getSimpleName
 
-  def run(): Future[Done] = msgStream.run(processAndLog)
+  def run(): Future[Done] = msgStream.foreach(this.getClass.getSimpleName,processAndLog)
 
-  def processAndLog(key: Version[String, Int]): Future[Unit] =
-    Future.fromTry(process(key).toTry).recover {
+  def processAndLog(message: NotificationMessage): Future[Unit] = {
+    val tried = for {
+      key <-fromJson[Version[String, Int]](message.body)
+      _ <- process(key).toTry
+    } yield ()
+    Future.fromTry(tried.recover {
       case t =>
-        error(s"There was an error processing $key: ", t)
+        error(s"There was an error processing $message: ", t)
         throw t
-    }
+    })
+  }
 
   private def process(key: Version[String, Int]) = {
     for {
