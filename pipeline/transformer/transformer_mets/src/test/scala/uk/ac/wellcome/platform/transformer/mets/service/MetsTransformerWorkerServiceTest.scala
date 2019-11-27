@@ -10,14 +10,11 @@ import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.sqs.NotificationStream
 import uk.ac.wellcome.models.generators.RandomStrings
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.mets.fixtures.MetsGenerators
 import uk.ac.wellcome.storage.store.HybridStoreEntry
 import uk.ac.wellcome.storage.{Identified, Version}
-
-import scala.concurrent.ExecutionContext.Implicits.global
 
 class MetsTransformerWorkerServiceTest
     extends FunSpec
@@ -107,14 +104,12 @@ class MetsTransformerWorkerServiceTest
             withVHS { vhs =>
               withActorSystem { implicit actorSystem =>
                 withSQSStream[NotificationMessage, R](queue) { sqsStream =>
-                  val notificationStream =
-                    new NotificationStream[Version[String, Int]](sqsStream)
                   withSqsBigMessageSender[TransformedBaseWork, R](
                     messagingBucket,
                     topic,
                     snsClient) { messageSender =>
                     val workerService = new MetsTransformerWorkerService(
-                      notificationStream,
+                      sqsStream,
                       messageSender,
                       vhs)
                     workerService.run()
