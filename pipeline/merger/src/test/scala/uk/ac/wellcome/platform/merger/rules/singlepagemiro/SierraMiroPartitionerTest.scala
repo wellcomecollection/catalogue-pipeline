@@ -57,7 +57,7 @@ class SierraMiroPartitionerTest
 
   it("does not partition multiple Miro works") {
     val works = (1 to 3).map { _ =>
-      createSierraDigitalWork
+      createMiroWork
     }
     val result = partitioner.partitionWorks(works)
 
@@ -73,7 +73,7 @@ class SierraMiroPartitionerTest
   it("does not partition multiple Sierra works with a single Miro work") {
     val works = (1 to 3).map { _ =>
       createSierraPhysicalWork
-    } ++ Seq(createSierraDigitalWork)
+    } ++ Seq(createMiroWork)
 
     val result = partitioner.partitionWorks(works)
 
@@ -82,7 +82,7 @@ class SierraMiroPartitionerTest
 
   it("does not partition multiple Miro works with a single Sierra work") {
     val works = (1 to 3).map { _ =>
-      createSierraDigitalWork
+      createMiroWork
     } ++ Seq(createSierraPhysicalWork)
 
     val result = partitioner.partitionWorks(works)
