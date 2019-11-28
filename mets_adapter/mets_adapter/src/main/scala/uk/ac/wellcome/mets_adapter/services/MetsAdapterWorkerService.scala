@@ -72,7 +72,10 @@ class MetsAdapterWorkerService(
           (msg, fromJson[IngestUpdate](body).toEither)
       }
       .via(catchErrors)
-      .map { case (msg, update) => (Context(msg, update.bagId), update) }
+      .map {
+        case (msg, update) =>
+          (Context(msg, update.context.externalIdentifier), update)
+      }
 
   def retrieveBag =
     Flow[(Context, IngestUpdate)]
@@ -145,7 +148,7 @@ class MetsAdapterWorkerService(
         case (ctx, result) =>
           result.left.map { err =>
             error(
-              s"Error encountered processing SQS message. [Error]: ${err.getMessage} [Message]: ${ctx}",
+              s"Error encountered processing SQS message. [Error]: ${err.getMessage} [Context]: ${ctx}",
               err)
           }
           (ctx, result)

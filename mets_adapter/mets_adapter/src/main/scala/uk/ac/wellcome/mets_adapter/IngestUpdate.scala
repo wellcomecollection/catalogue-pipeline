@@ -1,6 +1,8 @@
 package uk.ac.wellcome.mets_adapter.models
 
-case class IngestUpdate(space: String, bagId: String)
+case class IngestUpdate(context: IngestUpdateContext)
+
+case class IngestUpdateContext(storageSpace: String, externalIdentifier: String)
 
 case class MetsData(bucket: String, path: String, version: Int)
 

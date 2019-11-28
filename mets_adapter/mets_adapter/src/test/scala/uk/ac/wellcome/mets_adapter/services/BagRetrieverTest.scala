@@ -127,7 +127,9 @@ class BagRetrieverTest
   }
 
   def getBag(bagRetriever: BagRetriever, space: String, bagId: String) =
-    bagRetriever.getBag(IngestUpdate(space, bagId))
+    bagRetriever.getBag(
+      IngestUpdate(IngestUpdateContext(space, bagId))
+    )
 
   def withBagRetriever[R](tokenService: TokenService)(
     testWith: TestWith[BagRetriever, R])(implicit actorSystem: ActorSystem,
