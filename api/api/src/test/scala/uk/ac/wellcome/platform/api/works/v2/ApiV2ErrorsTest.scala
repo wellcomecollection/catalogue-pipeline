@@ -98,4 +98,24 @@ class ApiV2ErrorsTest extends ApiV2WorksTestBase with ApiErrorsTestBase {
       )
     }
   }
+
+  // This is expected as it's transient parameter that will have valid values changing over time
+  // And if there is a client with a deprecated value, we wouldn't want it to fail
+  describe("returns a 200 for invalid values in the ?_queryType parameter") {
+    it("200s despite being a unknown value") {
+      withApi {
+        case (_, routes) =>
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works?_queryType=athingwewouldneverusebutmightbecausewesaidwewouldnot") {
+            Status.OK -> s"""
+            {
+              ${resultList(apiPrefix, totalResults = 0, totalPages = 0)},
+              "results": []
+            }
+          """
+          }
+      }
+    }
+  }
 }
