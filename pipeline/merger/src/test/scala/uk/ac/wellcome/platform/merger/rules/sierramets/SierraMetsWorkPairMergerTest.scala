@@ -124,7 +124,8 @@ class SierraMetsWorkPairMergerTest
     val sierraWork = createSierraDigitalWork
     val result = workPairMerger.mergeAndRedirectWorkPair(sierraWork, metsWork)
 
-    val digitalItem = sierraWork.data.items.head.asInstanceOf[Unidentifiable[Item]]
+    val digitalItem =
+      sierraWork.data.items.head.asInstanceOf[Unidentifiable[Item]]
 
     val metsLocation = metsWork.data.items.head.agent.locations.head
     val expectedItems = List(
@@ -133,14 +134,14 @@ class SierraMetsWorkPairMergerTest
 
     inside(result) {
       case Some(
-      MergedWork(
-      UnidentifiedWork(
-      sierraWork.version,
-      sierraWork.sourceIdentifier,
-      data,
-      sierraWork.ontologyType,
-      sierraWork.identifiedType),
-      redirectedWork)) =>
+          MergedWork(
+            UnidentifiedWork(
+              sierraWork.version,
+              sierraWork.sourceIdentifier,
+              data,
+              sierraWork.ontologyType,
+              sierraWork.identifiedType),
+            redirectedWork)) =>
         data shouldBe sierraWork.data.copy(items = expectedItems)
 
         redirectedWork shouldBe UnidentifiedRedirectedWork(
