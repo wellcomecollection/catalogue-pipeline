@@ -56,7 +56,7 @@ class MetsAdapterWorkerServiceTest
     val vhs = createVhs()
     withWorkerService(bagRetriever, vhs) {
       case (workerService, QueuePair(queue, dlq), topic) =>
-        sendNotificationToSQS(queue, IngestUpdate("space", "123"))
+        sendNotificationToSQS(queue, ingestUpdate("space", "123"))
         assertQueueEmpty(queue)
         assertQueueEmpty(dlq)
         getMessages(topic) shouldEqual List(Version("123", 1))
@@ -70,7 +70,7 @@ class MetsAdapterWorkerServiceTest
     val vhs = createVhs(Map(Version("123", 0) -> "old-data"))
     withWorkerService(bagRetriever, vhs) {
       case (workerService, QueuePair(queue, dlq), topic) =>
-        sendNotificationToSQS(queue, IngestUpdate("space", "123"))
+        sendNotificationToSQS(queue, ingestUpdate("space", "123"))
         Thread.sleep(2000)
         assertQueueEmpty(queue)
         assertQueueEmpty(dlq)
@@ -85,7 +85,7 @@ class MetsAdapterWorkerServiceTest
     val vhs = createVhs(Map(Version("123", 1) -> "existing-data"))
     withWorkerService(bagRetriever, vhs) {
       case (workerService, QueuePair(queue, dlq), topic) =>
-        sendNotificationToSQS(queue, IngestUpdate("space", "123"))
+        sendNotificationToSQS(queue, ingestUpdate("space", "123"))
         assertQueueEmpty(queue)
         assertQueueEmpty(dlq)
         getMessages(topic) shouldEqual List(Version("123", 1))
@@ -99,7 +99,7 @@ class MetsAdapterWorkerServiceTest
     val vhs = createVhs(Map(Version("123", 2) -> "existing-data"))
     withWorkerService(bagRetriever, vhs) {
       case (workerService, QueuePair(queue, dlq), topic) =>
-        sendNotificationToSQS(queue, IngestUpdate("space", "123"))
+        sendNotificationToSQS(queue, ingestUpdate("space", "123"))
         Thread.sleep(2000)
         assertQueueEmpty(queue)
         assertQueueHasSize(dlq, 1)
@@ -118,7 +118,7 @@ class MetsAdapterWorkerServiceTest
     }
     withWorkerService(brokenBagRetriever, vhs) {
       case (workerService, QueuePair(queue, dlq), topic) =>
-        sendNotificationToSQS(queue, IngestUpdate("space", "123"))
+        sendNotificationToSQS(queue, ingestUpdate("space", "123"))
         Thread.sleep(2000)
         assertQueueEmpty(queue)
         assertQueueHasSize(dlq, 1)
@@ -131,7 +131,7 @@ class MetsAdapterWorkerServiceTest
     val vhs = createVhs()
     withWorkerService(bagRetriever, vhs, createBrokenMsgSender(_)) {
       case (workerService, QueuePair(queue, dlq), topic) =>
-        sendNotificationToSQS(queue, IngestUpdate("space", "123"))
+        sendNotificationToSQS(queue, ingestUpdate("space", "123"))
         Thread.sleep(2000)
         assertQueueEmpty(queue)
         assertQueueHasSize(dlq, 1)
@@ -145,7 +145,7 @@ class MetsAdapterWorkerServiceTest
     val vhs = createVhs()
     withWorkerService(bagRetriever, vhs) {
       case (workerService, QueuePair(queue, dlq), topic) =>
-        sendSqsMessage(queue, IngestUpdate("space", "123"))
+        sendSqsMessage(queue, ingestUpdate("space", "123"))
         Thread.sleep(2000)
         assertQueueEmpty(queue)
         assertQueueHasSize(dlq, 1)
@@ -212,4 +212,7 @@ class MetsAdapterWorkerServiceTest
     listMessagesReceivedFromSNS(topic)
       .map(msgInfo => fromJson[Version[String, Int]](msgInfo.message).get)
       .toList
+
+  def ingestUpdate(space: String, id: String) =
+    IngestUpdate(IngestUpdateContext(space, id))
 }

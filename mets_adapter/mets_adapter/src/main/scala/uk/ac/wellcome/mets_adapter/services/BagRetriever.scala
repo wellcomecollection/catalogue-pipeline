@@ -26,7 +26,7 @@ class HttpBagRetriever(url: String, tokenService: TokenService)(
     with Logging {
 
   def getBag(update: IngestUpdate): Future[Bag] = {
-    debug(s"Executing request to $url/${update.space}/${update.bagId}")
+    debug(s"Executing request to ${generateUrl(update)}")
     for {
       token <- tokenService.getToken
       response <- Http().singleRequest(generateRequest(update, token))
@@ -37,10 +37,12 @@ class HttpBagRetriever(url: String, tokenService: TokenService)(
     } yield maybeBag
   }
 
+  private def generateUrl(update: IngestUpdate) =
+    s"$url/${update.context.storageSpace}/${update.context.externalIdentifier}"
+
   private def generateRequest(update: IngestUpdate,
                               token: OAuth2BearerToken): HttpRequest =
-    HttpRequest(uri = s"$url/${update.space}/${update.bagId}")
-      .addHeader(Authorization(token))
+    HttpRequest(uri = generateUrl(update)).addHeader(Authorization(token))
 
   private def handleResponse(response: HttpResponse): Future[Bag] =
     response.status match {
