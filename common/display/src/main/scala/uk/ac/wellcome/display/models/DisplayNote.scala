@@ -65,9 +65,7 @@ object DisplayNoteType {
       case DissertationNote(_) =>
         DisplayNoteType("dissertation-note", "Dissertation note")
       case LocationOfOriginalNote(_) =>
-        DisplayNoteType(
-          "location-of-original",
-          "Location of original")
+        DisplayNoteType("location-of-original", "Location of original")
       case BindingInformation(_) =>
         DisplayNoteType("binding-detail", "Binding detail")
     }
