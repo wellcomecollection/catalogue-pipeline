@@ -19,10 +19,10 @@ import uk.ac.wellcome.platform.merger.rules.{MergerRule, WorkPairMerger}
   * the url to the iiif-presentation API and the license associated with it.
   *
   * If we have a Sierra and a METS work each one with a single item,
-  * we merge the digital location of the METS work into the locations of the Serra work.
+  * we merge the digital location of the METS work into the locations of the Sierra work.
   *
-  * If the Sierra work already contais a digital location for the same URL, we take
-  * the one coming from the METS work becasue the Sierra one doesn't have a `License` as license
+  * If the Sierra work already contains a digital location for the same URL, we take
+  * the one coming from the METS work because the Sierra one doesn't have a `License` as license
   * information for digitised works is only available in the METS XML.
   */
 trait SierraMetsWorkPairMerger extends WorkPairMerger {
