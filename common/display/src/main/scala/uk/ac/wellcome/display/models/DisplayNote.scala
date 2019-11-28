@@ -49,26 +49,24 @@ object DisplayNoteType {
   def apply(note: Note): DisplayNoteType =
     note match {
       case GeneralNote(_) =>
-        DisplayNoteType("general-note", "General note")
+        DisplayNoteType("general-note", "Notes")
       case BibliographicalInformation(_) =>
-        DisplayNoteType("bibliographical-info", "Bibliographical information")
+        DisplayNoteType("bibliographic-info", "Bibliographic information")
       case FundingInformation(_) =>
         DisplayNoteType("funding-info", "Funding information")
       case TimeAndPlaceNote(_) =>
         DisplayNoteType("time-and-place-note", "Time and place note")
       case CreditsNote(_) =>
-        DisplayNoteType("credits-note", "Credits note")
+        DisplayNoteType("credits", "Creator/production credits")
       case ContentsNote(_) =>
-        DisplayNoteType("contents-note", "Contents note")
+        DisplayNoteType("contents", "Contents")
       case CiteAsNote(_) =>
-        DisplayNoteType("cite-as-note", "Cite-as note")
+        DisplayNoteType("reference", "Reference")
       case DissertationNote(_) =>
         DisplayNoteType("dissertation-note", "Dissertation note")
       case LocationOfOriginalNote(_) =>
-        DisplayNoteType(
-          "location-of-original-note",
-          "Location of original note")
+        DisplayNoteType("location-of-original", "Location of original")
       case BindingInformation(_) =>
-        DisplayNoteType("binding-information", "Binding information")
+        DisplayNoteType("binding-detail", "Binding detail")
     }
 }
