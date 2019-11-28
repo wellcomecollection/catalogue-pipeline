@@ -41,8 +41,9 @@ object SierraNotes extends SierraTransformer with SierraQueryOps {
             .varfieldsWithTags(tag)
             .map { varfield =>
               varfield
-                .subfieldsWithoutTags(supressedSubfields.toSeq:_*)
-                .contents.mkString(" ")
+                .subfieldsWithoutTags(supressedSubfields.toSeq: _*)
+                .contents
+                .mkString(" ")
             }
             .map(createNote)
       }
