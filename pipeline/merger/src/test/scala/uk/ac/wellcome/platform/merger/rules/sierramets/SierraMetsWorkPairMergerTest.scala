@@ -16,7 +16,7 @@ class SierraMetsWorkPairMergerTest
 
   val workPairMerger = new SierraMetsWorkPairMerger {}
 
-  it("merges a Sierra and a Mets work") {
+  it("merges a physical Sierra and a Mets work") {
     val result = workPairMerger.mergeAndRedirectWorkPair(sierraWork, metsWork)
 
     val physicalItem: Identifiable[Item] =
@@ -120,6 +120,37 @@ class SierraMetsWorkPairMergerTest
     }
   }
 
+  it("merges a digital Sierra and a Mets work") {
+    val sierraWork = createSierraDigitalWork
+    val result = workPairMerger.mergeAndRedirectWorkPair(sierraWork, metsWork)
+
+    val digitalItem =
+      sierraWork.data.items.head.asInstanceOf[Unidentifiable[Item]]
+
+    val metsLocation = metsWork.data.items.head.agent.locations.head
+    val expectedItems = List(
+      digitalItem.copy(agent = digitalItem.agent.copy(
+        locations = digitalItem.agent.locations :+ metsLocation)))
+
+    inside(result) {
+      case Some(
+          MergedWork(
+            UnidentifiedWork(
+              sierraWork.version,
+              sierraWork.sourceIdentifier,
+              data,
+              sierraWork.ontologyType,
+              sierraWork.identifiedType),
+            redirectedWork)) =>
+        data shouldBe sierraWork.data.copy(items = expectedItems)
+
+        redirectedWork shouldBe UnidentifiedRedirectedWork(
+          sourceIdentifier = metsWork.sourceIdentifier,
+          version = metsWork.version,
+          redirect = IdentifiableRedirect(sierraWork.sourceIdentifier))
+    }
+  }
+
   it("doesn't merge if the sierra work has more than one item") {
     val sierraWorkWithMultipleItems = createUnidentifiedSierraWorkWith(
       items = List(createPhysicalItem, createPhysicalItem)
@@ -127,16 +158,6 @@ class SierraMetsWorkPairMergerTest
 
     workPairMerger.mergeAndRedirectWorkPair(
       sierraWorkWithMultipleItems,
-      metsWork) shouldBe None
-  }
-
-  it("doesn't merge if the sierra work has an unidentifiable item") {
-    val sierraWorkWithUnidentifiableItems = createUnidentifiedSierraWorkWith(
-      items = List(createUnidentifiableItemWith(List(createPhysicalLocation)))
-    )
-
-    workPairMerger.mergeAndRedirectWorkPair(
-      sierraWorkWithUnidentifiableItems,
       metsWork) shouldBe None
   }
 

@@ -2,9 +2,9 @@ package uk.ac.wellcome.platform.merger.rules.sierramets
 
 import uk.ac.wellcome.models.work.internal.{
   DigitalLocation,
-  Identifiable,
   IdentifiableRedirect,
   Item,
+  MaybeDisplayable,
   TransformedBaseWork,
   Unidentifiable,
   UnidentifiedRedirectedWork,
@@ -30,9 +30,7 @@ trait SierraMetsWorkPairMerger extends WorkPairMerger {
     sierraWork: UnidentifiedWork,
     metsWork: TransformedBaseWork): Option[MergedWork] = {
     (sierraWork.data.items, metsWork.data.items) match {
-      case (
-          List(sierraItem: Identifiable[Item]),
-          List(metsItem: Unidentifiable[Item])) =>
+      case (List(sierraItem), List(metsItem: Unidentifiable[Item])) =>
         metsItem.agent.locations match {
           case List(metsLocation: DigitalLocation) =>
             val targetWork = sierraWork.withData(data =>
@@ -48,7 +46,7 @@ trait SierraMetsWorkPairMerger extends WorkPairMerger {
     }
   }
 
-  private def mergeLocations(sierraItem: Identifiable[Item],
+  private def mergeLocations(sierraItem: MaybeDisplayable[Item],
                              metsLocation: DigitalLocation) = {
     sierraItem.withAgent(item => {
       val filteredLocations = item.locations.filter {
