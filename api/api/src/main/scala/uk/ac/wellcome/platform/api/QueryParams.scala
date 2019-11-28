@@ -88,7 +88,7 @@ case class MultipleWorksParams(
       license
     ).flatten
 
-  private def dateFilter =
+  private def dateFilter: Option[DateRangeFilter] =
     (`production.dates.from`, `production.dates.to`) match {
       case (None, None)       => None
       case (dateFrom, dateTo) => Some(DateRangeFilter(dateFrom, dateTo))
@@ -173,7 +173,8 @@ object MultipleWorksParams extends QueryParamsUtils {
     )
 
   implicit val _queryTypeDecoder: Decoder[SearchQueryType] =
-    decodeOneOf(
+    decodeOneWithDefaultOf(
+      SearchQueryType.default,
       "scoringTiers" -> SearchQueryType.ScoringTiers
     )
 }
@@ -218,6 +219,9 @@ trait QueryParamsUtils extends Directives with TimeInstances {
         .map(Right(_))
         .getOrElse(Left(invalidValuesMsg(List(str), values.map(_._1).toList)))
     }
+
+  def decodeOneWithDefaultOf[T](default: T, values: (String, T)*): Decoder[T] =
+    Decoder.decodeString.map { values.toMap.getOrElse(_, default) }
 
   def decodeOneOfCommaSeperated[T](values: (String, T)*): Decoder[List[T]] =
     decodeCommaSeperated.emap { strs =>
