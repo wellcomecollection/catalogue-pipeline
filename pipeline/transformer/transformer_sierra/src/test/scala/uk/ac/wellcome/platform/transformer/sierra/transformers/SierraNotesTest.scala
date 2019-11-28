@@ -85,6 +85,23 @@ class SierraNotesTest
     SierraNotes(bibId, bibData(notes)) shouldBe notes.map(_._2)
   }
 
+  it("should supress subfield $5 in binding information") {
+    val bibData = createSierraBibDataWith(
+      varFields = List(
+        createVarFieldWith(
+          marcTag = "563",
+          subfields = List(
+            MarcSubfield(tag = "a", content = "Main bit."),
+            MarcSubfield(tag = "5", content = "UkLW"),
+          )
+        )
+      )
+    )
+    SierraNotes(bibId, bibData) shouldBe List(
+      BindingInformation("Main bit.")
+    )
+  }
+
   def bibId = createSierraBibNumber
 
   def bibData(contents: List[(String, Note)]): SierraBibData =

@@ -44,6 +44,9 @@ trait SierraQueryOps {
     def subfieldsWithTags(tags: String*): List[MarcSubfield] =
       varfields.subfields.withTags(tags: _*)
 
+    def subfieldsWithoutTags(tags: String*): List[MarcSubfield] =
+      varfields.subfields.withoutTags(tags: _*)
+
     def subfieldsWithTag(tag: String): List[MarcSubfield] =
       subfieldsWithTags(tag)
 
@@ -68,6 +71,12 @@ trait SierraQueryOps {
         }
 
     def withTag(tag: String): List[MarcSubfield] = withTags(tag)
+
+    def withoutTags(tags: String*): List[MarcSubfield] =
+      subfields
+        .filterNot { subfield =>
+          tags.contains(subfield.tag)
+        }
 
     def contents: List[String] = subfields.map(_.content)
 
