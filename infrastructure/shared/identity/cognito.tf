@@ -84,11 +84,11 @@ resource "aws_cognito_user_pool" "pool" {
       min_length = "0"
     }
   }
-  schema { # forces replacement
+  schema {
     attribute_data_type      = "String"
     developer_only_attribute = false
     mutable                  = true
-    name                     = "patronID"
+    name                     = "patronId"
     required                 = false
 
     string_attribute_constraints {
@@ -131,8 +131,8 @@ resource "aws_cognito_user_pool_client" "web_auth" {
   user_pool_id    = "${aws_cognito_user_pool.pool.id}"
   generate_secret = false
 
-  callback_urls                = ["https://wellcomecollection.org"]
-  default_redirect_uri         = "https://wellcomecollection.org"
+  callback_urls                = ["https://wellcomecollection.org/works/auth-code"]
+  default_redirect_uri         = "https://wellcomecollection.org/works/auth-code"
   logout_urls                  = ["https://wellcomecollection.org/logout"]
   supported_identity_providers = ["COGNITO"]
 }
@@ -147,8 +147,8 @@ resource "aws_cognito_user_pool_client" "web_auth_test" {
   user_pool_id    = "${aws_cognito_user_pool.pool.id}"
   generate_secret = false
 
-  callback_urls                = ["http://localhost:3000"]
-  default_redirect_uri         = "http://localhost:3000"
+  callback_urls                = ["http://localhost:3000/works/auth-code"]
+  default_redirect_uri         = "http://localhost:3000/works/auth-code"
   logout_urls                  = ["http://localhost:3000/logout"]
   supported_identity_providers = ["COGNITO"]
 }
