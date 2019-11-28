@@ -8,7 +8,6 @@ import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 import scala.collection.JavaConverters._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
-import scala.util.control.NonFatal
 
 object Tracing {
   def init(config: Config): Unit = {
@@ -34,16 +33,14 @@ trait AsyncTracing {
         .currentTransaction()
         .startSpan(spanType, subType, action)
         .setName(name)
-    try {
-      wrappedFunction.map { f =>
-        span.end()
-        f
+
+    wrappedFunction.transform { res =>
+      res match {
+        case Success(_)      =>
+        case Failure(reason) => span.captureException(reason)
       }
-    } catch {
-      case NonFatal(e) =>
-        span.captureException(e)
-        span.end()
-        throw e
+      span.end()
+      res
     }
   }
 
@@ -52,11 +49,12 @@ trait AsyncTracing {
     wrappedFunction: => Future[T])(implicit ec: ExecutionContext): Future[T] = {
     val transaction = ElasticApm.startTransaction()
     val scope = transaction.activate()
-    try {
-      transaction
-        .setName(name)
-        .setType(transactionType)
-      wrappedFunction.transform { res =>
+    transaction
+      .setName(name)
+      .setType(transactionType)
+
+    wrappedFunction
+      .transform { res =>
         res match {
           case Success(_)      =>
           case Failure(reason) => transaction.captureException(reason)
@@ -65,12 +63,5 @@ trait AsyncTracing {
         scope.close()
         res
       }
-    } catch {
-      case NonFatal(e) =>
-        transaction.captureException(e)
-        transaction.end()
-        scope.close()
-        throw e
-    }
   }
 }
