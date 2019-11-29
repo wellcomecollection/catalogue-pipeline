@@ -95,7 +95,7 @@ object ExternalDependencies {
     val apacheCommons = "3.7"
     val apacheLogging = "2.8.2"
     val aws = "1.11.504"
-    val circe = "0.11.1"
+    val circe = "0.11.0"
     val elastic4s = "7.1.0"
     val fastparse = "2.1.3"
     val swagger = "2.0.10"
@@ -110,7 +110,7 @@ object ExternalDependencies {
     val scribeJava = "6.8.1"
     val apm = "1.11.0"
     val enumeratumVersion = "1.5.13"
-    val enumeratumCirceVersion = "1.5.22"
+    val enumeratumCirceVersion = "1.5.21"
   }
   val enumeratumDependencies = Seq(
     "com.beachape" %% "enumeratum" % versions.enumeratumVersion,
