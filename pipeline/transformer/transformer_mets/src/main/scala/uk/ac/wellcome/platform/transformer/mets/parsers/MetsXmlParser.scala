@@ -17,10 +17,12 @@ object MetsXmlParser {
     for {
       id <- recordIdentifier(root)
       maybeAccessCondition <- accessCondition(root)
+      thumbnailUrl <- thumbnailUrl(root)
     } yield
       Mets(
         recordIdentifier = id,
         accessCondition = maybeAccessCondition,
+        thumbnailUrl = thumbnailUrl,
       )
   }
 
@@ -48,4 +50,7 @@ object MetsXmlParser {
           new Exception("Found multiple accessCondtions in METS XML"))
     }
   }
+
+  private def thumbnailUrl(root: Elem): Either[Exception, Option[String]] =
+    Right(None)
 }
