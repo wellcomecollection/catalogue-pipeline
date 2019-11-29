@@ -49,10 +49,10 @@ module "catalogue_pipeline_20191115" {
   vhs_mets_adapter_table_name = "${local.vhs_mets_adapter_table_name}"
 }
 
-module "catalogue_pipeline_20191122" {
+module "catalogue_pipeline_20191128" {
   source = "./stack"
 
-  namespace = "catalogue-20191122"
+  namespace = "catalogue-20191128"
 
   release_label = "latest"
 
@@ -71,22 +71,22 @@ module "catalogue_pipeline_20191122" {
 
   sierra_adapter_topic_names = [
     "${local.sierra_reindexer_topic_name}",
-    "${local.sierra_merged_bibs_topic_name}",
+   # "${local.sierra_merged_bibs_topic_name}",
 
-    "${local.sierra_merged_items_topic_name}",
+   # "${local.sierra_merged_items_topic_name}",
   ]
-  sierra_adapter_topic_count = "3"
+  sierra_adapter_topic_count = "1"
   miro_adapter_topic_names = [
     "${local.miro_reindexer_topic_name}",
-    "${local.miro_updates_topic_name}",
+   # "${local.miro_updates_topic_name}",
   ]
-  miro_adapter_topic_count = "2"
+  miro_adapter_topic_count = "1"
 
   mets_adapter_topic_count = 1
   mets_adapter_topic_names = ["${local.mets_vhs_keys_topic_name}"]
 
   # Elasticsearch
-  es_works_index = "v2-20191122"
+  es_works_index = "v2-20191128"
   # RDS
   rds_ids_access_security_group_id = "${local.rds_access_security_group_id}"
   # Adapter VHS
