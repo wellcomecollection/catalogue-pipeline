@@ -1,23 +1,19 @@
 package uk.ac.wellcome.platform.api
 
-import scala.concurrent.{ExecutionContext, Promise}
-
 import akka.Done
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.server.Directives._
-
+import akka.stream.ActorMaterializer
 import com.sksamuel.elastic4s.Index
-
 import com.typesafe.config.Config
-
-import uk.ac.wellcome.typesafe.{Runnable, WellcomeTypesafeApp}
+import uk.ac.wellcome.elasticsearch.DisplayElasticConfig
+import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
+import uk.ac.wellcome.platform.api.models.ApiConfig
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
-import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
-import uk.ac.wellcome.elasticsearch.DisplayElasticConfig
-import uk.ac.wellcome.platform.api.models.ApiConfig
+import uk.ac.wellcome.typesafe.{Runnable, WellcomeTypesafeApp}
+
+import scala.concurrent.{ExecutionContext, Promise}
 
 object Main extends WellcomeTypesafeApp {
 
@@ -29,6 +25,7 @@ object Main extends WellcomeTypesafeApp {
     implicit val materializer: ActorMaterializer =
       AkkaBuilder.buildActorMaterializer()
 
+    Tracing.init(config)
     val elasticClient = ElasticBuilder.buildElasticClient(config)
 
     val elasticConfig =

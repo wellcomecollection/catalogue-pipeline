@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.api.services
 
+import co.elastic.apm.api.{ElasticApm, Transaction}
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.get.GetResponse
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
@@ -12,6 +13,7 @@ import uk.ac.wellcome.display.models.{
   SortRequest,
   SortingOrder
 }
+import uk.ac.wellcome.platform.api.AsyncTracing
 import uk.ac.wellcome.platform.api.models._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -26,7 +28,8 @@ case class ElasticsearchQueryOptions(filters: List[WorkFilter],
 
 class ElasticsearchService(elasticClient: ElasticClient)(
   implicit ec: ExecutionContext
-) extends Logging {
+) extends Logging
+    with AsyncTracing {
 
   def findResultById(canonicalId: String)(
     index: Index): Future[Either[ElasticError, GetResponse]] =
@@ -56,20 +59,34 @@ class ElasticsearchService(elasticClient: ElasticClient)(
   private def executeSearch(
     sortDefinitions: List[FieldSort]
   )(index: Index, queryOptions: ElasticsearchQueryOptions)
-    : Future[Either[ElasticError, SearchResponse]] = {
+    : Future[Either[ElasticError, SearchResponse]] =
+    spanFuture(
+      name = "ElasticSearch#executeSearch",
+      spanType = "request",
+      subType = "elastic",
+      action = "query")({
 
-    val searchRequest = ElastsearchSearchRequestBuilder(
-      index,
-      sortDefinitions,
-      queryOptions
-    ).request
+      val searchRequest = ElastsearchSearchRequestBuilder(
+        index,
+        sortDefinitions,
+        queryOptions
+      ).request
 
-    debug(s"Sending ES request: ${searchRequest.show}")
+      debug(s"Sending ES request: ${searchRequest.show}")
+      val parentTransaction = ElasticApm
+        .currentTransaction()
+        .addQueryOptionLabels(queryOptions)
 
-    elasticClient
-      .execute { searchRequest.trackTotalHits(true) }
-      .map { toEither }
-  }
+      elasticClient
+        .execute { searchRequest.trackTotalHits(true) }
+        .map { toEither }
+        .map {
+          _.map { res =>
+            parentTransaction.addLabel("elasticTook", res.took)
+            res
+          }
+        }
+    })
 
   private def toEither[T](response: Response[T]): Either[ElasticError, T] =
     if (response.isError) {
@@ -77,4 +94,22 @@ class ElasticsearchService(elasticClient: ElasticClient)(
     } else {
       Right(response.result)
     }
+
+  implicit class EnhancedTransaction(transaction: Transaction) {
+    def addQueryOptionLabels(
+      queryOptions: ElasticsearchQueryOptions): Transaction = {
+      transaction.addLabel("limit", queryOptions.limit)
+      transaction.addLabel("from", queryOptions.from)
+      transaction.addLabel("sortOrder", queryOptions.sortOrder.toString)
+      transaction.addLabel(
+        "sortBy",
+        queryOptions.sortBy.map { _.toString }.mkString(","))
+      transaction.addLabel(
+        "filters",
+        queryOptions.filters.map { _.toString }.mkString(","))
+      transaction.addLabel(
+        "aggregations",
+        queryOptions.aggregations.map { _.toString }.mkString(","))
+    }
+  }
 }

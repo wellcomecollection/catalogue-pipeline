@@ -108,15 +108,22 @@ object ExternalDependencies {
     val scalatest = "3.0.1"
     val logstashLogback = "6.1"
     val scribeJava = "6.8.1"
+    val apm = "1.11.0"
   }
 
-  val scribeJavaDependencies = Seq("com.github.dakatsuka" %% "akka-http-oauth2-client" % "0.2.0")
+  val scribeJavaDependencies = Seq(
+    "com.github.dakatsuka" %% "akka-http-oauth2-client" % "0.2.0")
 
   val logbackDependencies = Seq(
     "ch.qos.logback" % "logback-classic" % versions.logback,
     "ch.qos.logback" % "logback-core" % versions.logback,
     "ch.qos.logback" % "logback-access" % versions.logback,
     "net.logstash.logback" % "logstash-logback-encoder" % versions.logstashLogback
+  )
+
+  val apmDependencies = Seq(
+    "co.elastic.apm" % "apm-agent-attach" % versions.apm,
+    "co.elastic.apm" % "apm-agent-api" % versions.apm
   )
 
   val akkaHttpDependencies = Seq(
@@ -207,7 +214,7 @@ object ExternalDependencies {
 }
 
 object CatalogueDependencies {
-  val commmonDependencies =
+  val commonDependencies =
     ExternalDependencies.scalatestDependencies ++
       ExternalDependencies.logbackDependencies ++
       ExternalDependencies.javaxDependencies
@@ -242,7 +249,8 @@ object CatalogueDependencies {
     WellcomeDependencies.typesafeLibrary
 
   val apiDependencies: Seq[ModuleID] =
-      ExternalDependencies.akkaHttpDependencies ++
+    ExternalDependencies.akkaHttpDependencies ++
+      ExternalDependencies.apmDependencies ++
       WellcomeDependencies.typesafeLibrary
 
   val idminterDependencies: Seq[ModuleID] =
