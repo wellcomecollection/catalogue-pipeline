@@ -10,7 +10,7 @@ case class Mets(
   accessCondition: Option[String],
   thumbnailLocation: Option[String] = None
 ) {
-  
+
   def toWork(version: Int): Either[Throwable, UnidentifiedInvisibleWork] =
     for {
       maybeDigitalLocation <- digitalLocation
@@ -43,7 +43,8 @@ case class Mets(
     val url = s"https://wellcomelibrary.org/iiif/$recordIdentifier/manifest"
     for {
       maybeLicense <- parseLicense
-    } yield DigitalLocation(
+    } yield
+      DigitalLocation(
         url,
         LocationType("iiif-presentation"),
         license = maybeLicense)

@@ -34,7 +34,8 @@ class MetsXmlParserTest extends FunSpec with Matchers {
   }
 
   it("parses thumbnail from XML") {
-    MetsXmlParser(xml).right.get.thumbnailLocation shouldBe Some("b30246039_0001.jp2")
+    MetsXmlParser(xml).right.get.thumbnailLocation shouldBe Some(
+      "b30246039_0001.jp2")
   }
 
   def xml =

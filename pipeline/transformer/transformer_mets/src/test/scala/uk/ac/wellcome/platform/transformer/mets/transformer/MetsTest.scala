@@ -89,9 +89,9 @@ class MetsTest extends FunSpec with RandomStrings with Matchers {
 
   it("creates a invisible work with a thumbnail location") {
     val metsData = Mets(
-        recordIdentifier = randomAlphanumeric(10),
-        accessCondition = Some("CC-BY-NC"),
-        thumbnailLocation = Some("location.png")
+      recordIdentifier = randomAlphanumeric(10),
+      accessCondition = Some("CC-BY-NC"),
+      thumbnailLocation = Some("location.png")
     )
     val result = metsData.toWork(1)
     result shouldBe a[Right[_, _]]

@@ -52,23 +52,20 @@ object MetsXmlParser {
   }
 
   private def thumbnailLocation(root: Elem): Option[String] =
-    physicalStructMap(root)
-      .headOption
-      .flatMap { case (_, fileId) =>
-        fileObjects(root).get(fileId)
+    physicalStructMap(root).headOption
+      .flatMap {
+        case (_, fileId) =>
+          fileObjects(root).get(fileId)
       }
       .map(_.stripPrefix("objects/"))
 
   private def fileObjects(root: Elem): Map[String, String] =
-    (root \ "fileSec" \ "fileGrp")
-      .toList
+    (root \ "fileSec" \ "fileGrp").toList
       .filter(_ \@ "USE" == "OBJECTS")
       .flatMap(_ \ "file")
       .map { node =>
         val id = node \@ "ID"
-        val location = (node  \ "FLocat")
-          .toList
-          .headOption
+        val location = (node \ "FLocat").toList.headOption
           .map(_ \@ "{http://www.w3.org/1999/xlink}href")
         (id, location)
       }
@@ -79,8 +76,7 @@ object MetsXmlParser {
 
   private def physicalStructMap(root: Elem): ListMap[String, String] = {
     val physicalMappings =
-      (root \ "structMap")
-        .toList
+      (root \ "structMap").toList
         .filter(_ \@ "TYPE" == "PHYSICAL")
         .flatMap(_ \\ "div")
         .map { node =>
@@ -91,6 +87,6 @@ object MetsXmlParser {
         .collect {
           case (id, Some(fileId)) if fileId.nonEmpty => (id, fileId)
         }
-    ListMap(physicalMappings:_*)
+    ListMap(physicalMappings: _*)
   }
 }
