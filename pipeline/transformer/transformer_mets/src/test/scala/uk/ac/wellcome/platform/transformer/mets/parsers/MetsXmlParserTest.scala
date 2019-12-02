@@ -43,70 +43,54 @@ class MetsXmlParserTest extends FunSpec with Matchers {
 
   def xmlNodmdSec =
     <mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3">
-         <mods:recordIdentifier source="gbv-ppn">b30246039</mods:recordIdentifier>
-       </mets:mets>.toString()
+       <mods:recordIdentifier source="gbv-ppn">b30246039</mods:recordIdentifier>
+     </mets:mets>
 
   def xmlMultipleIds =
     <mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3">
-         <mets:dmdSec ID="DMDLOG_0000">
-           <mets:mdWrap MDTYPE="MODS">
-             <mets:xmlData>
-               <mods:mods>
-                 <mods:recordInfo>
-                   <mods:recordIdentifier source="gbv-ppn">b30246039</mods:recordIdentifier>
-                   <mods:recordIdentifier source="gbv-ppn">b3024346567</mods:recordIdentifier>
-                 </mods:recordInfo>
-               </mods:mods>
-             </mets:xmlData>
-           </mets:mdWrap>
-         </mets:dmdSec>
-       </mets:mets>.toString()
+      <mets:dmdSec ID="DMDLOG_0000">
+        <mets:mdWrap MDTYPE="MODS">
+          <mets:xmlData>
+            <mods:mods>
+              <mods:recordInfo>
+                <mods:recordIdentifier source="gbv-ppn">b30246039</mods:recordIdentifier>
+                <mods:recordIdentifier source="gbv-ppn">b3024346567</mods:recordIdentifier>
+              </mods:recordInfo>
+            </mods:mods>
+          </mets:xmlData>
+        </mets:mdWrap>
+      </mets:dmdSec>
+    </mets:mets>
 
   def xmlNoLicense =
     <mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3">
-       <mets:dmdSec ID="DMDLOG_0000">
-         <mets:mdWrap MDTYPE="MODS">
-           <mets:xmlData>
-             <mods:mods>
-               <mods:recordInfo>
-                 <mods:recordIdentifier source="gbv-ppn">b30246039</mods:recordIdentifier>
-               </mods:recordInfo>
-             </mods:mods>
-           </mets:xmlData>
-         </mets:mdWrap>
-       </mets:dmdSec>
-       </mets:mets>.toString()
+      <mets:dmdSec ID="DMDLOG_0000">
+        <mets:mdWrap MDTYPE="MODS">
+          <mets:xmlData>
+            <mods:mods>
+              <mods:recordInfo>
+                <mods:recordIdentifier source="gbv-ppn">b30246039</mods:recordIdentifier>
+              </mods:recordInfo>
+            </mods:mods>
+          </mets:xmlData>
+        </mets:mdWrap>
+      </mets:dmdSec>
+    </mets:mets>
 
   def xmlMultipleLicense =
     <mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3">
-         <mets:dmdSec ID="DMDLOG_0000">
-           <mets:mdWrap MDTYPE="MODS">
-             <mets:xmlData>
-               <mods:mods>
-                 <mods:recordInfo>
-                   <mods:recordIdentifier source="gbv-ppn">b30246039</mods:recordIdentifier>
-                 </mods:recordInfo>
-                 <mods:accessCondition type="dz">CC-BY-NC</mods:accessCondition>
-                 <mods:accessCondition type="dz">CC-BY</mods:accessCondition>
-               </mods:mods>
-             </mets:xmlData>
-           </mets:mdWrap>
-         </mets:dmdSec>
-       </mets:mets>.toString()
-
-  def xmlThumbnail =
-    <mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3">
-         <mets:dmdSec ID="DMDLOG_0000">
-           <mets:mdWrap MDTYPE="MODS">
-             <mets:xmlData>
-               <mods:mods>
-                 <mods:recordInfo>
-                   <mods:recordIdentifier source="gbv-ppn">b30246039</mods:recordIdentifier>
-                   <mods:recordIdentifier source="gbv-ppn">b3024346567</mods:recordIdentifier>
-                 </mods:recordInfo>
-               </mods:mods>
-             </mets:xmlData>
-           </mets:mdWrap>
-         </mets:dmdSec>
-       </mets:mets>.toString()
+      <mets:dmdSec ID="DMDLOG_0000">
+        <mets:mdWrap MDTYPE="MODS">
+          <mets:xmlData>
+            <mods:mods>
+              <mods:recordInfo>
+                <mods:recordIdentifier source="gbv-ppn">b30246039</mods:recordIdentifier>
+              </mods:recordInfo>
+              <mods:accessCondition type="dz">CC-BY-NC</mods:accessCondition>
+              <mods:accessCondition type="dz">CC-BY</mods:accessCondition>
+            </mods:mods>
+          </mets:xmlData>
+        </mets:mdWrap>
+      </mets:dmdSec>
+    </mets:mets>
 }
