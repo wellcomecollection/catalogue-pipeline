@@ -70,7 +70,8 @@ object MetsXmlParser {
         (id, location)
       }
       .collect {
-        case (id, Some(location)) if location.nonEmpty => (id, location)
+        case (id, Some(location)) if id.nonEmpty && location.nonEmpty =>
+          (id, location)
       }
       .toMap
 
@@ -85,7 +86,8 @@ object MetsXmlParser {
           (id, fileId)
         }
         .collect {
-          case (id, Some(fileId)) if fileId.nonEmpty => (id, fileId)
+          case (id, Some(fileId)) if id.nonEmpty && fileId.nonEmpty =>
+            (id, fileId)
         }
     ListMap(physicalMappings: _*)
   }
