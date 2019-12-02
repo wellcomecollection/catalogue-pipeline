@@ -1,9 +1,10 @@
 package uk.ac.wellcome.platform.transformer.mets.parsers
 
-import uk.ac.wellcome.platform.transformer.mets.transformer.Mets
-
+import scala.collection.immutable.ListMap
 import scala.util.Try
 import scala.xml.{Elem, XML}
+
+import uk.ac.wellcome.platform.transformer.mets.transformer.Mets
 
 object MetsXmlParser {
 
@@ -17,12 +18,11 @@ object MetsXmlParser {
     for {
       id <- recordIdentifier(root)
       maybeAccessCondition <- accessCondition(root)
-      thumbnailUrl <- thumbnailUrl(root)
     } yield
       Mets(
         recordIdentifier = id,
         accessCondition = maybeAccessCondition,
-        thumbnailUrl = thumbnailUrl,
+        thumbnailLocation = thumbnailLocation(root),
       )
   }
 
@@ -51,6 +51,46 @@ object MetsXmlParser {
     }
   }
 
-  private def thumbnailUrl(root: Elem): Either[Exception, Option[String]] =
-    Right(None)
+  private def thumbnailLocation(root: Elem): Option[String] =
+    physicalStructMap(root)
+      .headOption
+      .flatMap { case (_, fileId) =>
+        fileObjects(root).get(fileId)
+      }
+      .map(_.stripPrefix("objects/"))
+
+  private def fileObjects(root: Elem): Map[String, String] =
+    (root \ "fileSec" \ "fileGrp")
+      .toList
+      .filter(_ \@ "USE" == "OBJECTS")
+      .flatMap(_ \ "file")
+      .map { node =>
+        val id = node \@ "ID"
+        val location = (node  \ "FLocat")
+          .toList
+          .headOption
+          .map(_ \@ "{http://www.w3.org/1999/xlink}href")
+        (id, location)
+      }
+      .collect {
+        case (id, Some(location)) if location.nonEmpty => (id, location)
+      }
+      .toMap
+
+  private def physicalStructMap(root: Elem): ListMap[String, String] = {
+    val physicalMappings =
+      (root \ "structMap")
+        .toList
+        .filter(_ \@ "TYPE" == "PHYSICAL")
+        .flatMap(_ \\ "div")
+        .map { node =>
+          val id = node \@ "ID"
+          val fileId = (node \ "fptr").toList.headOption.map(_ \@ "FILEID")
+          (id, fileId)
+        }
+        .collect {
+          case (id, Some(fileId)) if fileId.nonEmpty => (id, fileId)
+        }
+    ListMap(physicalMappings:_*)
+  }
 }

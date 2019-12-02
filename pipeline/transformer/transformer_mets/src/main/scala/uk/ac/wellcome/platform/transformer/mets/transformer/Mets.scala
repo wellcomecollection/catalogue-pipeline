@@ -8,9 +8,9 @@ import cats.implicits._
 case class Mets(
   recordIdentifier: String,
   accessCondition: Option[String],
-  thumbnailUrl: Option[String] = None
+  thumbnailLocation: Option[String] = None
 ) {
-
+  
   def toWork(version: Int): Either[Throwable, UnidentifiedInvisibleWork] =
     for {
       maybeDigitalLocation <- digitalLocation
@@ -61,12 +61,14 @@ case class Mets(
       ontologyType = "Work",
       value = recordIdentifier)
   }
-  
+
+  private val thumbnailHeight = "200"
+
   private def thumbnail =
-    thumbnailUrl.map { url =>
+    thumbnailLocation.map { location =>
       DigitalLocation(
-        url = url,
-        locationType = LocationType("thumbnail-image"),
+        s"https://dlcs.io/iiif-img/wellcome/5/$location/full/,$thumbnailHeight/0/default.jpg",
+        LocationType("thumbnail-image"),
       )
     }
 }
