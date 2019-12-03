@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.transformer.mets.parsers
 
 import scala.collection.immutable.ListMap
 import scala.util.Try
-import scala.xml.{Elem, XML, NodeSeq}
+import scala.xml.{Elem, NodeSeq, XML}
 
 import uk.ac.wellcome.platform.transformer.mets.transformer.Mets
 
