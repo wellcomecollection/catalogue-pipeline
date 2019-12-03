@@ -3,7 +3,7 @@ import sbt._
 object WellcomeDependencies {
   lazy val versions = new {
     val fixtures = "1.0.0"
-    val json = "1.1.2"
+    val json = "1.1.1"
     val messaging = "1.6.0"
     val monitoring = "2.0.0"
     val storage = "3.6.0"
@@ -95,7 +95,7 @@ object ExternalDependencies {
     val apacheCommons = "3.7"
     val apacheLogging = "2.8.2"
     val aws = "1.11.504"
-    val circe = "0.11.0"
+    val circe = "0.9.0"
     val elastic4s = "7.1.0"
     val fastparse = "2.1.3"
     val swagger = "2.0.10"

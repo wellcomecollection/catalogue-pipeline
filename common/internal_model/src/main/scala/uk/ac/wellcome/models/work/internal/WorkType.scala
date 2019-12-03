@@ -24,8 +24,12 @@ object WorkType extends Enum[WorkType]{
       for {
         id <- cursor.downField("id").as[String]
       } yield {
-        values.find(workType => workType.id == id).getOrElse(throw new Exception(s"Invalid WorkType id: $id"))
+        fromCode(id).getOrElse(throw new Exception(s"Invalid WorkType id: $id"))
       }
+  }
+
+  def fromCode(id: String): Option[WorkType] = {
+    values.find(workType => workType.id == id)
   }
 
   sealed trait UnlinkedWorkType extends WorkType

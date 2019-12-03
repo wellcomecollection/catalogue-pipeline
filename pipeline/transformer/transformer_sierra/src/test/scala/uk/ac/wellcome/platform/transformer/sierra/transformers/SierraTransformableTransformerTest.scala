@@ -3,11 +3,7 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.models.transformable.SierraTransformable
 import uk.ac.wellcome.models.transformable.sierra.test.utils.SierraGenerators
-import uk.ac.wellcome.models.transformable.sierra.{
-  SierraBibNumber,
-  SierraBibRecord,
-  SierraItemRecord
-}
+import uk.ac.wellcome.models.transformable.sierra.{SierraBibNumber, SierraBibRecord, SierraItemRecord}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.sierra.SierraTransformableTransformer
@@ -15,6 +11,7 @@ import uk.ac.wellcome.platform.transformer.sierra.exceptions.SierraTransformerEx
 import uk.ac.wellcome.platform.transformer.sierra.generators.MarcGenerators
 import uk.ac.wellcome.platform.transformer.sierra.source.MarcSubfield
 import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.models.work.internal.WorkType.{BooksWorkType, PicturesWorkType}
 
 class SierraTransformableTransformerTest
     extends FunSpec
@@ -70,10 +67,7 @@ class SierraTransformableTransformerTest
 
     val bibRecord = createSierraBibRecordWith(id = id, data = data)
 
-    val expectedWorkType = WorkType(
-      id = "k",
-      label = "Pictures"
-    )
+    val expectedWorkType = PicturesWorkType
 
     val triedWork = SierraTransformableTransformer(
       createSierraTransformableWith(id, Some(bibRecord)),
@@ -321,10 +315,7 @@ class SierraTransformableTransformerTest
     val workTypeId = "a"
     val workTypeValue = "Books"
 
-    val expectedWorkType = WorkType(
-      id = workTypeId,
-      label = workTypeValue
-    )
+    val expectedWorkType = BooksWorkType
 
     val data =
       s"""
@@ -832,7 +823,7 @@ class SierraTransformableTransformerTest
     val work = transformDataToWork(id = id, data = bibData)
     work shouldBe a[UnidentifiedWork]
     work.asInstanceOf[UnidentifiedWork].data.workType shouldBe Some(
-      WorkType(id = "k", label = "Pictures")
+      PicturesWorkType
     )
   }
 

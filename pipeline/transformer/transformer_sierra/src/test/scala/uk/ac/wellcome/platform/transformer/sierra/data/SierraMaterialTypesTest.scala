@@ -1,14 +1,12 @@
 package uk.ac.wellcome.platform.transformer.sierra.data
 
 import org.scalatest.{FunSpec, Matchers}
-import uk.ac.wellcome.models.work.internal.WorkType
+import uk.ac.wellcome.models.work.internal.WorkType.StudentDissertationsWorkType
 import uk.ac.wellcome.platform.transformer.sierra.exceptions.SierraTransformerException
 
 class SierraMaterialTypesTest extends FunSpec with Matchers {
   it("looks up a WorkType by code") {
-    SierraMaterialTypes.fromCode("w") shouldBe WorkType(
-      id = "w",
-      label = "Student dissertations")
+    SierraMaterialTypes.fromCode("w") shouldBe StudentDissertationsWorkType
   }
 
   it("throws an exception if passed an unrecognised code") {
