@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.transformer.mets.parsers
 
 import scala.collection.immutable.ListMap
 import scala.util.Try
-import scala.xml.{Elem, XML}
+import scala.xml.{Elem, XML, NodeSeq}
 
 import uk.ac.wellcome.platform.transformer.mets.transformer.Mets
 
@@ -39,7 +39,7 @@ object MetsXmlParser {
 
   private def accessCondition(root: Elem): Either[Exception, Option[String]] = {
     val licenseNodes = (root \\ "dmdSec" \ "mdWrap" \\ "accessCondition")
-      .filter(_ \@ "type" == "dz")
+      .filterByAttribute("type", "dz")
       .toList
     licenseNodes match {
       case Nil => Right(None)
@@ -60,35 +60,48 @@ object MetsXmlParser {
       .map(_.stripPrefix("objects/"))
 
   private def fileObjects(root: Elem): Map[String, String] =
-    (root \ "fileSec" \ "fileGrp").toList
-      .filter(_ \@ "USE" == "OBJECTS")
-      .flatMap(_ \ "file")
-      .map { node =>
-        val id = node \@ "ID"
-        val location = (node \ "FLocat").toList.headOption
-          .map(_ \@ "{http://www.w3.org/1999/xlink}href")
-        (id, location)
-      }
-      .collect {
-        case (id, Some(location)) if id.nonEmpty && location.nonEmpty =>
-          (id, location)
-      }
-      .toMap
+    (root \ "fileSec" \ "fileGrp")
+      .filterByAttribute("USE", "OBJECTS")
+      .childrenWithTag("file")
+      .toMapping(
+        keyAttrib = "ID",
+        valueNode = "FLocat",
+        valueAttrib = "{http://www.w3.org/1999/xlink}href"
+      )
 
-  private def physicalStructMap(root: Elem): ListMap[String, String] = {
-    val physicalMappings =
-      (root \ "structMap").toList
-        .filter(_ \@ "TYPE" == "PHYSICAL")
-        .flatMap(_ \\ "div")
+  private def physicalStructMap(root: Elem): ListMap[String, String] =
+    (root \ "structMap")
+      .filterByAttribute("TYPE", "PHYSICAL")
+      .descendentsWithTag("div")
+      .toMapping(
+        keyAttrib = "ID",
+        valueNode = "fptr",
+        valueAttrib = "FILEID"
+      )
+
+  implicit class NodeSeqOps(nodes: NodeSeq) {
+
+    def filterByAttribute(attrib: String, value: String) =
+      nodes.filter(_ \@ attrib == value)
+
+    def childrenWithTag(tag: String) =
+      nodes.flatMap(_ \ tag)
+
+    def descendentsWithTag(tag: String) =
+      nodes.flatMap(_ \\ tag)
+
+    def toMapping(keyAttrib: String, valueNode: String, valueAttrib: String) = {
+      val mappings = nodes
         .map { node =>
-          val id = node \@ "ID"
-          val fileId = (node \ "fptr").toList.headOption.map(_ \@ "FILEID")
-          (id, fileId)
+          val key = node \@ keyAttrib
+          val value = (node \ valueNode).toList.headOption.map(_ \@ valueAttrib)
+          (key, value)
         }
         .collect {
-          case (id, Some(fileId)) if id.nonEmpty && fileId.nonEmpty =>
-            (id, fileId)
+          case (key, Some(value)) if key.nonEmpty && value.nonEmpty =>
+            (key, value)
         }
-    ListMap(physicalMappings: _*)
+      ListMap(mappings: _*)
+    }
   }
 }
