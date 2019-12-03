@@ -40,7 +40,7 @@ class SierraItemRecordTest extends FunSpec with Matchers with SierraGenerators {
   it("throws an exception for invalid JSON") {
     assertCreatingFromDataFails(
       data = "not a json string",
-      expectedMessage = "expected null got 'not a ...' (line 1, column 1)"
+      expectedMessage = "expected null got n (line 1, column 1)"
     )
   }
 
@@ -62,7 +62,7 @@ class SierraItemRecordTest extends FunSpec with Matchers with SierraGenerators {
   it("throws an exception when bibIds is not a list") {
     assertCreatingFromDataFails(
       data = """{"bibIds":"blah"}""",
-      expectedMessage = "C[A]: DownField(bibIds)"
+      expectedMessage = "CanBuildFrom for A: DownField(bibIds)"
     )
   }
 

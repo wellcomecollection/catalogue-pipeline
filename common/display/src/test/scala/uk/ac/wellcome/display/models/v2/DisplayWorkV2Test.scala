@@ -10,7 +10,7 @@ import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.models.work.internal._
 import org.scalacheck.ScalacheckShapeless._
 import uk.ac.wellcome.models.work.generators.{ProductionEventGenerators, WorksGenerators}
-import uk.ac.wellcome.models.work.internal.WorkType.VideosWorkType
+import uk.ac.wellcome.models.work.internal.WorkType.Videos
 
 class DisplayWorkV2Test
     extends FunSpec
@@ -112,7 +112,7 @@ class DisplayWorkV2Test
   }
 
   it("gets the workType from a Work") {
-    val workType = VideosWorkType
+    val workType = Videos
 
     val expectedDisplayWorkV2 = DisplayWorkType(
       id = workType.id,

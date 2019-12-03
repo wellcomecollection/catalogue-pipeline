@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import org.scalatest.{FunSpec, Matchers}
-import uk.ac.wellcome.models.work.internal.WorkType.BooksWorkType
+import uk.ac.wellcome.models.work.internal.WorkType.Books
 import uk.ac.wellcome.platform.transformer.sierra.generators.SierraDataGenerators
 import uk.ac.wellcome.platform.transformer.sierra.source.SierraMaterialType
 
@@ -20,7 +20,7 @@ class SierraWorkTypeTest
       )
     )
 
-    val expectedWorkType = BooksWorkType
+    val expectedWorkType = Books
 
     SierraWorkType(bibId, bibData) shouldBe Some(expectedWorkType)
   }

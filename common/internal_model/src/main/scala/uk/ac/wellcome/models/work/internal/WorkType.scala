@@ -32,130 +32,130 @@ object WorkType extends Enum[WorkType]{
     values.find(workType => workType.id == id)
   }
 
-  sealed trait UnlinkedWorkType extends WorkType
-  sealed trait LinkedWorkType extends WorkType
+  sealed trait Unlinked extends WorkType
+  sealed trait Linked extends WorkType
   {
-    val linksTo: UnlinkedWorkType
+    val linksTo: Unlinked
   }
 
-  case object BooksWorkType extends UnlinkedWorkType {
+  case object Books extends Unlinked {
     override val id: String = "a"
     override val label: String = "Books"
   }
 
-  case object DigitalImagesWorkType extends UnlinkedWorkType {
+  case object DigitalImages extends Unlinked {
     override val id: String = "q"
     override val label: String = "Digital Images"
   }
 
-  case object EphemeraWorkType extends UnlinkedWorkType {
+  case object Ephemera extends Unlinked {
     override val id: String = "l"
     override val label: String = "Ephemera"
   }
 
-  case object MapsWorkType extends UnlinkedWorkType {
+  case object Maps extends Unlinked {
     override val id: String = "e"
     override val label: String = "Maps"
   }
 
-  case object PicturesWorkType extends UnlinkedWorkType {
+  case object Pictures extends Unlinked {
     override val id: String = "k"
     override val label: String = "Pictures"
   }
 
-  case object StudentDissertationsWorkType extends UnlinkedWorkType {
+  case object StudentDissertations extends Unlinked {
     override val id: String = "w"
     override val label: String = "Student dissertations"
   }
 
-  case object `3DObjectsWorkType` extends UnlinkedWorkType {
+  case object `3DObjects` extends Unlinked {
     override val id: String = "r"
     override val label: String = "3-D Objects"
   }
 
-  case object CDRomsWorkType extends UnlinkedWorkType {
+  case object CDRoms extends Unlinked {
     override val id: String = "m"
     override val label: String = "CD-Roms"
   }
 
-  case object JournalsWorkType extends UnlinkedWorkType {
+  case object Journals extends Unlinked {
     override val id: String = "d"
     override val label: String = "Journals"
   }
 
-  case object MixedMaterialsWorkType extends UnlinkedWorkType {
+  case object MixedMaterials extends Unlinked {
     override val id: String = "p"
     override val label: String = "Mixed materials"
   }
 
-  case object AudioWorkType extends UnlinkedWorkType {
+  case object Audio extends Unlinked {
     override val id: String = "i"
     override val label: String = "Audio"
   }
 
-  case object VideosWorkType extends UnlinkedWorkType {
+  case object Videos extends Unlinked {
     override val id: String = "g"
     override val label: String = "Videos"
   }
 
-  case object ArchivesAndManuscriptsWorkType extends UnlinkedWorkType {
+  case object ArchivesAndManuscripts extends Unlinked {
     override val id: String = "h"
     override val label: String = "Archives and manuscripts"
   }
 
-  case object FilmWorkType extends UnlinkedWorkType {
+  case object Film extends Unlinked {
     override val id: String = "n"
     override val label: String = "Film"
   }
 
-  case object ManuscriptsAsianWorkType extends UnlinkedWorkType {
+  case object ManuscriptsAsian extends Unlinked {
     override val id: String = "b"
     override val label: String = "Manuscripts, Asian"
   }
 
-  case object MusicWorkType extends UnlinkedWorkType {
+  case object Music extends Unlinked {
     override val id: String = "c"
     override val label: String = "Music"
   }
 
-  case object StandingOrderWorkType extends UnlinkedWorkType {
+  case object StandingOrder extends Unlinked {
     override val id: String = "u"
     override val label: String = "Standing order"
   }
 
-  case object WebSitesOrderWorkType extends UnlinkedWorkType {
+  case object WebSites extends Unlinked {
     override val id: String = "z"
     override val label: String = "Web sites"
   }
 
-  case object EBooksWorkType extends LinkedWorkType {
+  case object EBooks extends Linked {
     override val id: String = "v"
     override val label: String = "E-books"
-    override val linksTo: UnlinkedWorkType = BooksWorkType
+    override val linksTo: Unlinked = Books
   }
 
-  case object ESoundWorkType extends LinkedWorkType {
+  case object ESound extends Linked {
     override val id: String = "s"
     override val label: String = "E-sound"
-    override val linksTo: UnlinkedWorkType = AudioWorkType
+    override val linksTo: Unlinked = Audio
   }
 
-  case object EJournalsWorkType extends LinkedWorkType {
+  case object EJournals extends Linked {
     override val id: String = "j"
     override val label: String = "E-journals"
-    override val linksTo: UnlinkedWorkType = JournalsWorkType
+    override val linksTo: Unlinked = Journals
   }
 
-  case object EVideosWorkType extends LinkedWorkType {
+  case object EVideos extends Linked {
     override val id: String = "f"
     override val label: String = "E-videos"
-    override val linksTo: UnlinkedWorkType = VideosWorkType
+    override val linksTo: Unlinked = Videos
   }
 
-  case object EManuscriptsAsianWorkType extends LinkedWorkType {
+  case object EManuscriptsAsian extends Linked {
     override val id: String = "x"
     override val label: String = "E-manuscripts, Asian"
-    override val linksTo: UnlinkedWorkType = ManuscriptsAsianWorkType
+    override val linksTo: Unlinked = ManuscriptsAsian
   }
 
 }

@@ -1,6 +1,5 @@
 package uk.ac.wellcome.models.work.generators
 
-import uk.ac.wellcome.models.work.internal.WorkType.EBooksWorkType
 import uk.ac.wellcome.models.work.internal._
 
 trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
