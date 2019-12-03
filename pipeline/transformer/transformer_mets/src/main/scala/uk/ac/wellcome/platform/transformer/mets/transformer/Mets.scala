@@ -7,7 +7,8 @@ import cats.implicits._
 
 case class Mets(
   recordIdentifier: String,
-  accessCondition: Option[String]
+  accessCondition: Option[String],
+  thumbnailLocation: Option[String] = None
 ) {
 
   def toWork(version: Int): Either[Throwable, UnidentifiedInvisibleWork] =
@@ -25,7 +26,9 @@ case class Mets(
   private def workData(unidentifiableItem: MaybeDisplayable[Item]) =
     WorkData(
       items = List(unidentifiableItem),
-      mergeCandidates = List(mergeCandidate))
+      mergeCandidates = List(mergeCandidate),
+      thumbnail = thumbnail,
+    )
 
   private def mergeCandidate = MergeCandidate(
     identifier = SourceIdentifier(
@@ -41,10 +44,10 @@ case class Mets(
     for {
       maybeLicense <- parseLicense
     } yield
-      (DigitalLocation(
+      DigitalLocation(
         url,
         LocationType("iiif-presentation"),
-        license = maybeLicense))
+        license = maybeLicense)
   }
 
   private def parseLicense = {
@@ -59,4 +62,14 @@ case class Mets(
       ontologyType = "Work",
       value = recordIdentifier)
   }
+
+  private val thumbnailDim = "200"
+
+  private def thumbnail =
+    thumbnailLocation.map { location =>
+      DigitalLocation(
+        s"https://dlcs.io/iiif-img/wellcome/5/$location/full/!$thumbnailDim,$thumbnailDim/0/default.jpg",
+        LocationType("thumbnail-image"),
+      )
+    }
 }
