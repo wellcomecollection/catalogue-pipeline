@@ -110,11 +110,9 @@ object ExternalDependencies {
     val scribeJava = "6.8.1"
     val apm = "1.11.0"
     val enumeratumVersion = "1.5.13"
-    val enumeratumCirceVersion = "1.5.21"
   }
   val enumeratumDependencies = Seq(
-    "com.beachape" %% "enumeratum" % versions.enumeratumVersion,
-    "com.beachape" %% "enumeratum-circe" % versions.enumeratumCirceVersion
+    "com.beachape" %% "enumeratum" % versions.enumeratumVersion
   )
 
   val scribeJavaDependencies = Seq(

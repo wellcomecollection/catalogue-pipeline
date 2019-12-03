@@ -1,14 +1,32 @@
 package uk.ac.wellcome.models.work.internal
 
-import enumeratum.{CirceEnum, Enum, EnumEntry}
+import enumeratum.{Enum, EnumEntry}
+import io.circe.{Decoder, Encoder, Json}
 
 sealed trait WorkType extends EnumEntry{
   val id: String
   val label: String
 }
 
-object WorkType extends Enum[WorkType] with CirceEnum[WorkType] {
+object WorkType extends Enum[WorkType]{
   val values = findValues
+
+  implicit val workTypeEncoder: Encoder[WorkType] = Encoder.instance[WorkType] {
+    workType =>
+      Json.obj(
+        ("id", Json.fromString(workType.id)),
+        ("label", Json.fromString(workType.label))
+      )
+  }
+
+  implicit val workTypeDecoder: Decoder[WorkType] = Decoder.instance[WorkType] {
+    cursor =>
+      for {
+        id <- cursor.downField("id").as[String]
+      } yield {
+        values.find(workType => workType.id == id).getOrElse(throw new Exception(s"Invalid WorkType id: $id"))
+      }
+  }
 
   sealed trait UnlinkedWorkType extends WorkType
   sealed trait LinkedWorkType extends WorkType
