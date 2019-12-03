@@ -63,12 +63,12 @@ case class Mets(
       value = recordIdentifier)
   }
 
-  private val thumbnailHeight = "200"
+  private val thumbnailDim = "200"
 
   private def thumbnail =
     thumbnailLocation.map { location =>
       DigitalLocation(
-        s"https://dlcs.io/iiif-img/wellcome/5/$location/full/,$thumbnailHeight/0/default.jpg",
+        s"https://dlcs.io/iiif-img/wellcome/5/$location/full/!$thumbnailDim,$thumbnailDim/0/default.jpg",
         LocationType("thumbnail-image"),
       )
     }
