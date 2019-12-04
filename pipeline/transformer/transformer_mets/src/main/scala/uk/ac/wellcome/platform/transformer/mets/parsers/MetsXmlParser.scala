@@ -153,6 +153,7 @@ object MetsXmlParser {
     (root \ "structMap")
       .filterByAttribute("TYPE", "PHYSICAL")
       .descendentsWithTag("div")
+      .sortByAttribute("ORDER")
       .toMapping(
         keyAttrib = "ID",
         valueNode = "fptr",
@@ -169,6 +170,9 @@ object MetsXmlParser {
 
     def descendentsWithTag(tag: String) =
       nodes.flatMap(_ \\ tag)
+
+    def sortByAttribute(attrib: String) =
+      nodes.sortBy(_ \@ attrib)
 
     def toMapping(keyAttrib: String, valueNode: String, valueAttrib: String) = {
       val mappings = nodes
