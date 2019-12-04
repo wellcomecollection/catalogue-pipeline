@@ -6,8 +6,8 @@ import com.sksamuel.elastic4s.requests.searches.{SearchHit, SearchResponse}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Assertion, FunSpec, Matchers}
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
-import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.{
   ContributorGenerators,
   GenreGenerators,
@@ -380,33 +380,8 @@ class ElasticsearchServiceTest
         }
       }
     }
-
-    describe("SearchQueryTypes and relevancy") {
-      it("includes all query tokens from MSMBoostQueryUsingAndOperator") {
-        withLocalWorksIndex { index =>
-          // Longer text used to ensure signal in TF/IDF
-          val works = List(
-            "Lyrical Lychee",
-            "Loose Lychee",
-            "Lyrical Lime",
-            "Loose Lime"
-          ).map { t =>
-            createIdentifiedWorkWith(title = Some(t))
-          }
-
-          insertIntoElasticsearch(index, works: _*)
-
-          val results =
-            searchResults(
-              index = index,
-              queryOptions = createElasticsearchQueryOptionsWith(
-                searchQuery = Some(SearchQuery("Lyrical Lychee"))))
-
-          results should have length 1
-        }
-      }
-    }
   }
+
   describe("findResultById") {
     it("finds a result by ID") {
       withLocalWorksIndex { index =>
