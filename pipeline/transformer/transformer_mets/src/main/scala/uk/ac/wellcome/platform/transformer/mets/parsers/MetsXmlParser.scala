@@ -38,7 +38,7 @@ object MetsXmlParser {
     *          </mods:recordInfo>
     *        </mod:mods>
     *      </mets:xmlData>
-    *    </mets:mdWrap> 
+    *    </mets:mdWrap>
     *  </mets:dmdSec>
     *
     *  The expected output would be: "b30246039"
