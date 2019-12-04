@@ -1,26 +1,17 @@
 package uk.ac.wellcome.platform.api.services
 
-import com.sksamuel.elastic4s.Index
-import com.sksamuel.elastic4s.ElasticError
+import com.sksamuel.elastic4s.{ElasticError, Index}
 import com.sksamuel.elastic4s.requests.searches.{SearchHit, SearchResponse}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Assertion, FunSpec, Matchers}
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.generators.{
-  ContributorGenerators,
-  GenreGenerators,
-  SubjectGenerators,
-  WorksGenerators
-}
+import uk.ac.wellcome.models.work.generators.{ContributorGenerators, GenreGenerators, SubjectGenerators, WorksGenerators}
+import uk.ac.wellcome.models.work.internal.WorkType.{Books, CDRoms, ManuscriptsAsian}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
-import uk.ac.wellcome.platform.api.models.{
-  ItemLocationTypeFilter,
-  SearchQuery,
-  WorkTypeFilter
-}
+import uk.ac.wellcome.platform.api.models.{ItemLocationTypeFilter, SearchQuery, WorkTypeFilter}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Random
@@ -107,15 +98,15 @@ class ElasticsearchServiceTest
         withLocalWorksIndex { index =>
           val workWithCorrectWorkType = createIdentifiedWorkWith(
             title = Some("Animated artichokes"),
-            workType = Some(WorkType(id = "b", label = "Books"))
+            workType = Some(ManuscriptsAsian)
           )
           val workWithWrongTitle = createIdentifiedWorkWith(
             title = Some("Bouncing bananas"),
-            workType = Some(WorkType(id = "b", label = "Books"))
+            workType = Some(ManuscriptsAsian)
           )
           val workWithWrongWorkType = createIdentifiedWorkWith(
             title = Some("Animated artichokes"),
-            workType = Some(WorkType(id = "m", label = "Manuscripts"))
+            workType = Some(CDRoms)
           )
 
           insertIntoElasticsearch(
@@ -139,19 +130,19 @@ class ElasticsearchServiceTest
         withLocalWorksIndex { index =>
           val work1 = createIdentifiedWorkWith(
             title = Some("Animated artichokes"),
-            workType = Some(WorkType(id = "b", label = "Books"))
+            workType = Some(ManuscriptsAsian)
           )
           val workWithWrongTitle = createIdentifiedWorkWith(
             title = Some("Bouncing bananas"),
-            workType = Some(WorkType(id = "b", label = "Books"))
+            workType = Some(ManuscriptsAsian)
           )
           val work2 = createIdentifiedWorkWith(
             title = Some("Animated artichokes"),
-            workType = Some(WorkType(id = "m", label = "Manuscripts"))
+            workType = Some(CDRoms)
           )
           val workWithWrongType = createIdentifiedWorkWith(
             title = Some("Animated artichokes"),
-            workType = Some(WorkType(id = "a", label = "Archives"))
+            workType = Some(Books)
           )
 
           insertIntoElasticsearch(
@@ -510,13 +501,13 @@ class ElasticsearchServiceTest
     it("filters list results by workType") {
       withLocalWorksIndex { index =>
         val work1 = createIdentifiedWorkWith(
-          workType = Some(WorkType(id = "b", label = "Books"))
+          workType = Some(ManuscriptsAsian)
         )
         val work2 = createIdentifiedWorkWith(
-          workType = Some(WorkType(id = "b", label = "Books"))
+          workType = Some(ManuscriptsAsian)
         )
         val workWithWrongWorkType = createIdentifiedWorkWith(
-          workType = Some(WorkType(id = "m", label = "Manuscripts"))
+          workType = Some(CDRoms)
         )
 
         insertIntoElasticsearch(index, work1, work2, workWithWrongWorkType)
@@ -536,16 +527,16 @@ class ElasticsearchServiceTest
     it("filters list results with multiple workTypes") {
       withLocalWorksIndex { index =>
         val work1 = createIdentifiedWorkWith(
-          workType = Some(WorkType(id = "b", label = "Books"))
+          workType = Some(ManuscriptsAsian)
         )
         val work2 = createIdentifiedWorkWith(
-          workType = Some(WorkType(id = "b", label = "Books"))
+          workType = Some(ManuscriptsAsian)
         )
         val work3 = createIdentifiedWorkWith(
-          workType = Some(WorkType(id = "a", label = "Archives"))
+          workType = Some(Books)
         )
         val workWithWrongWorkType = createIdentifiedWorkWith(
-          workType = Some(WorkType(id = "m", label = "Manuscripts"))
+          workType = Some(CDRoms)
         )
 
         insertIntoElasticsearch(

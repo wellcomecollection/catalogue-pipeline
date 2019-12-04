@@ -1,32 +1,21 @@
 package uk.ac.wellcome.platform.api.services
 
-import com.sksamuel.elastic4s.Index
-import com.sksamuel.elastic4s.ElasticError
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{Assertion, FunSpec, Matchers}
-import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
-import uk.ac.wellcome.models.work.generators.{
-  ProductionEventGenerators,
-  WorksGenerators
-}
-import uk.ac.wellcome.models.work.internal.{IdentifiedBaseWork, WorkType}
-import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
-import uk.ac.wellcome.platform.api.models.{
-  Aggregation,
-  AggregationBucket,
-  Aggregations,
-  DateRangeFilter,
-  ResultList,
-  SearchQuery,
-  WorkTypeFilter
-}
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+import com.sksamuel.elastic4s.{ElasticError, Index}
+import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.{Assertion, FunSpec, Matchers}
 import uk.ac.wellcome.display.models.AggregationRequest
+import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
+import uk.ac.wellcome.models.work.generators.{ProductionEventGenerators, WorksGenerators}
+import uk.ac.wellcome.models.work.internal.IdentifiedBaseWork
+import uk.ac.wellcome.models.work.internal.WorkType.{ArchivesAndManuscripts, Audio, Books, CDRoms, ManuscriptsAsian}
+import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
+import uk.ac.wellcome.platform.api.models._
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class WorksServiceTest
     extends FunSpec
@@ -77,13 +66,13 @@ class WorksServiceTest
 
     it("filters records by workType") {
       val work1 = createIdentifiedWorkWith(
-        workType = Some(WorkType(id = "b", label = "Books"))
+        workType = Some(ManuscriptsAsian)
       )
       val work2 = createIdentifiedWorkWith(
-        workType = Some(WorkType(id = "b", label = "Books"))
+        workType = Some(ManuscriptsAsian)
       )
       val workWithWrongWorkType = createIdentifiedWorkWith(
-        workType = Some(WorkType(id = "m", label = "Manuscripts"))
+        workType = Some(CDRoms)
       )
 
       assertListResultIsCorrect(
@@ -98,16 +87,16 @@ class WorksServiceTest
 
     it("filters records by multiple workTypes") {
       val work1 = createIdentifiedWorkWith(
-        workType = Some(WorkType(id = "b", label = "Books"))
+        workType = Some(ManuscriptsAsian)
       )
       val work2 = createIdentifiedWorkWith(
-        workType = Some(WorkType(id = "b", label = "Books"))
+        workType = Some(ManuscriptsAsian)
       )
       val work3 = createIdentifiedWorkWith(
-        workType = Some(WorkType(id = "a", label = "Archives"))
+        workType = Some(Books)
       )
       val workWithWrongWorkType = createIdentifiedWorkWith(
-        workType = Some(WorkType(id = "m", label = "Manuscripts"))
+        workType = Some(CDRoms)
       )
 
       assertListResultIsCorrect(
@@ -276,15 +265,15 @@ class WorksServiceTest
     it("filters searches by workType") {
       val matchingWork = createIdentifiedWorkWith(
         title = Some("Animated artichokes"),
-        workType = Some(WorkType(id = "b", label = "Books"))
+        workType = Some(ManuscriptsAsian)
       )
       val workWithWrongTitle = createIdentifiedWorkWith(
         title = Some("Bouncing bananas"),
-        workType = Some(WorkType(id = "b", label = "Books"))
+        workType = Some(ManuscriptsAsian)
       )
       val workWithWrongWorkType = createIdentifiedWorkWith(
         title = Some("Animated artichokes"),
-        workType = Some(WorkType(id = "m", label = "Manuscripts"))
+        workType = Some(CDRoms)
       )
 
       assertSearchResultIsCorrect(
@@ -301,19 +290,19 @@ class WorksServiceTest
     it("filters searches by multiple workTypes") {
       val work1 = createIdentifiedWorkWith(
         title = Some("Animated artichokes"),
-        workType = Some(WorkType(id = "b", label = "Books"))
+        workType = Some(ManuscriptsAsian)
       )
       val workWithWrongTitle = createIdentifiedWorkWith(
         title = Some("Bouncing bananas"),
-        workType = Some(WorkType(id = "b", label = "Books"))
+        workType = Some(ManuscriptsAsian)
       )
       val work2 = createIdentifiedWorkWith(
         title = Some("Animated artichokes"),
-        workType = Some(WorkType(id = "m", label = "Manuscripts"))
+        workType = Some(CDRoms)
       )
       val workWithWrongWorkType = createIdentifiedWorkWith(
         title = Some("Animated artichokes"),
-        workType = Some(WorkType(id = "a", label = "Archives"))
+        workType = Some(Books)
       )
 
       assertSearchResultIsCorrect(
@@ -376,16 +365,16 @@ class WorksServiceTest
       it("aggregates workTypes") {
         withLocalWorksIndex { index =>
           val work1 = createIdentifiedWorkWith(
-            workType = Some(WorkType(id = "b", label = "Books"))
+            workType = Some(Books)
           )
           val work2 = createIdentifiedWorkWith(
-            workType = Some(WorkType(id = "b", label = "Books"))
+            workType = Some(Books)
           )
           val work3 = createIdentifiedWorkWith(
-            workType = Some(WorkType(id = "a", label = "Archives"))
+            workType = Some(Audio)
           )
           val work4 = createIdentifiedWorkWith(
-            workType = Some(WorkType(id = "m", label = "Manuscripts"))
+            workType = Some(ArchivesAndManuscripts)
           )
 
           val worksSearchOptions =
@@ -395,11 +384,11 @@ class WorksServiceTest
           val expectedAggregations = Aggregations(
             Some(
               Aggregation(List(
-                AggregationBucket(data = WorkType("a", "Archives"), count = 1),
-                AggregationBucket(data = WorkType("b", "Books"), count = 2),
+                AggregationBucket(data = ArchivesAndManuscripts, count = 1),
+                AggregationBucket(data = Audio, count = 1),
                 AggregationBucket(
-                  data = WorkType("m", "Manuscripts"),
-                  count = 1)
+                  data = Books,
+                  count = 2)
               ))),
             None
           )

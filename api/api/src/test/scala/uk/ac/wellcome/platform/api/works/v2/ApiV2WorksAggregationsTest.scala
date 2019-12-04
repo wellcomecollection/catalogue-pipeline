@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.api.works.v2
 
+import uk.ac.wellcome.models.work.internal.WorkType.{Books, Journals, Pictures}
 import uk.ac.wellcome.models.work.internal._
 
 class ApiV2WorksAggregationsTest extends ApiV2WorksTestBase {
@@ -10,27 +11,27 @@ class ApiV2WorksAggregationsTest extends ApiV2WorksTestBase {
         val work1 = createIdentifiedWorkWith(
           canonicalId = "1",
           title = Some("Working with wombats"),
-          workType = Some(WorkType("a", "Books"))
+          workType = Some(Books)
         )
         val work2 = createIdentifiedWorkWith(
           canonicalId = "2",
           title = Some("Working with wombats"),
-          workType = Some(WorkType("a", "Books"))
+          workType = Some(Books)
         )
         val work3 = createIdentifiedWorkWith(
           canonicalId = "3",
           title = Some("Working with wombats"),
-          workType = Some(WorkType("k", "Pictures"))
+          workType = Some(Pictures)
         )
         val work4 = createIdentifiedWorkWith(
           canonicalId = "4",
           title = Some("Working with wombats"),
-          workType = Some(WorkType("k", "Pictures"))
+          workType = Some(Pictures)
         )
         val work5 = createIdentifiedWorkWith(
           canonicalId = "5",
           title = Some("Working with wombats"),
-          workType = Some(WorkType("d", "Journals"))
+          workType = Some(Journals)
         )
         insertIntoElasticsearch(indexV2, work1, work2, work3, work4, work5)
 

@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.api.works.v2
 
+import uk.ac.wellcome.models.work.internal.WorkType.{Books, CDRoms, ManuscriptsAsian}
 import uk.ac.wellcome.models.work.internal._
 
 import scala.util.Random
@@ -14,7 +15,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
             createIdentifiedWorkWith(workType = None)
           }
           val matchingWork = createIdentifiedWorkWith(
-            workType = Some(WorkType(id = "b", label = "Books")))
+            workType = Some(ManuscriptsAsian))
 
           val works = noWorkTypeWorks :+ matchingWork
           insertIntoElasticsearch(indexV2, works: _*)
@@ -43,10 +44,10 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
         case (indexV2, routes) =>
           val wrongWorkTypeWorks = (1 to 3).map { _ =>
             createIdentifiedWorkWith(
-              workType = Some(WorkType(id = "m", label = "Manuscripts")))
+              workType = Some(CDRoms))
           }
           val matchingWork = createIdentifiedWorkWith(
-            workType = Some(WorkType(id = "b", label = "Books")))
+            workType = Some(ManuscriptsAsian))
 
           val works = wrongWorkTypeWorks :+ matchingWork
           insertIntoElasticsearch(indexV2, works: _*)
@@ -75,14 +76,14 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
         case (indexV2, routes) =>
           val wrongWorkTypeWorks = (1 to 3).map { _ =>
             createIdentifiedWorkWith(
-              workType = Some(WorkType(id = "m", label = "Manuscripts")))
+              workType = Some(CDRoms))
           }
           val matchingWork1 = createIdentifiedWorkWith(
             canonicalId = "001",
-            workType = Some(WorkType(id = "b", label = "Books")))
+            workType = Some(ManuscriptsAsian))
           val matchingWork2 = createIdentifiedWorkWith(
             canonicalId = "002",
-            workType = Some(WorkType(id = "a", label = "Archives")))
+            workType = Some(Books))
 
           val works = wrongWorkTypeWorks :+ matchingWork1 :+ matchingWork2
           insertIntoElasticsearch(indexV2, works: _*)
@@ -289,7 +290,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
           }
           val matchingWork = createIdentifiedWorkWith(
             title = Some("Amazing aubergines"),
-            workType = Some(WorkType(id = "b", label = "Books")))
+            workType = Some(ManuscriptsAsian))
 
           val works = noWorkTypeWorks :+ matchingWork
           insertIntoElasticsearch(indexV2, works: _*)
@@ -321,11 +322,11 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
           val wrongWorkTypeWorks = (1 to 3).map { _ =>
             createIdentifiedWorkWith(
               title = Some("Bouncing bananas"),
-              workType = Some(WorkType(id = "m", label = "Manuscripts")))
+              workType = Some(CDRoms))
           }
           val matchingWork = createIdentifiedWorkWith(
             title = Some("Bouncing bananas"),
-            workType = Some(WorkType(id = "b", label = "Books")))
+            workType = Some(ManuscriptsAsian))
 
           val works = wrongWorkTypeWorks :+ matchingWork
           insertIntoElasticsearch(indexV2, works: _*)
@@ -357,16 +358,16 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
           val wrongWorkTypeWorks = (1 to 3).map { _ =>
             createIdentifiedWorkWith(
               title = Some("Bouncing bananas"),
-              workType = Some(WorkType(id = "m", label = "Manuscripts")))
+              workType = Some(CDRoms))
           }
           val matchingWork1 = createIdentifiedWorkWith(
             canonicalId = "001",
             title = Some("Bouncing bananas"),
-            workType = Some(WorkType(id = "b", label = "Books")))
+            workType = Some(ManuscriptsAsian))
           val matchingWork2 = createIdentifiedWorkWith(
             canonicalId = "002",
             title = Some("Bouncing bananas"),
-            workType = Some(WorkType(id = "a", label = "Archives")))
+            workType = Some(Books))
 
           val works = wrongWorkTypeWorks :+ matchingWork1 :+ matchingWork2
           insertIntoElasticsearch(indexV2, works: _*)

@@ -15,17 +15,18 @@ object WorkType extends Enum[WorkType]{
     workType =>
       Json.obj(
         ("id", Json.fromString(workType.id)),
+        ("ontologyType", Json.fromString("WorkType")),
         ("label", Json.fromString(workType.label))
       )
   }
 
-  implicit val workTypeDecoder: Decoder[WorkType] = Decoder.instance[WorkType] {
-    cursor =>
-      for {
-        id <- cursor.downField("id").as[String]
-      } yield {
-        fromCode(id).getOrElse(throw new Exception(s"Invalid WorkType id: $id"))
-      }
+  implicit val workTypeDecoder: Decoder[WorkType] = Decoder.decodeJsonObject.emap{ json =>
+    val maybeWorkType = for {
+      idJson <- json("id")
+      id <- idJson.asString
+      workType <- fromCode(id)
+    } yield workType
+    maybeWorkType.toRight(s"Invalid WorkType json $json")
   }
 
   def fromCode(id: String): Option[WorkType] = {
