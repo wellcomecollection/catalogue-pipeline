@@ -55,12 +55,14 @@ class ElasticsearchQueryTest
         }
 
         val subjectedWorks = List(
-          "Anatomy",
-          "Nothing to see here",
-          "Lyrical Lime",
-          "Loose Lime"
-        ).map { t =>
-          createIdentifiedWorkWith(canonicalId = t, title = Some(t))
+          ("exact match subject", "Gray's Anatomy"),
+          ("partial match subject", "Anatomy"),
+        ).map {
+          case (id, subject) =>
+            createIdentifiedWorkWith(
+              canonicalId = id,
+              title = Some(s"subjected $subject"),
+              subjects = List(createSubjectWithConcept(subject)))
         }
 
         insertIntoElasticsearch(index, titledWorks ++ subjectedWorks: _*)
@@ -73,7 +75,12 @@ class ElasticsearchQueryTest
                 SearchQuery("Gray's anatomy", SearchQueryType.ScoringTiers))))
 
         withClue("the exact title should be first") {
-          results.head should be(getWork("Gray's anatomy.", results))
+          results.head should be(getWorkWithId("Gray's anatomy.", results))
+        }
+
+        withClue(
+          "should find only subjects matching on AND operator and order it highly") {
+          results(1) should be(getWorkWithId("exact match subject", results))
         }
       }
     }
@@ -103,8 +110,9 @@ class ElasticsearchQueryTest
     }
   }
 
-  private def getWork(id: String,
-                      works: List[IdentifiedBaseWork]): IdentifiedBaseWork =
+  private def getWorkWithId(
+    id: String,
+    works: List[IdentifiedBaseWork]): IdentifiedBaseWork =
     works.find(work => work.canonicalId == id).get
 
   private def searchResults(index: Index,

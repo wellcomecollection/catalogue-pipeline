@@ -42,8 +42,8 @@ object QueryDefaults {
     // TODO: (jamesgorrie) think of a more sustainable way of doing this
     // maybe having a just a list of terms that we use terms queries to query against,
     // and then have more structured data underlying
-    ("subjects.agent.concepts.agent.label", Some(8.0)),
-    ("genres.concepts.agent.label", Some(8.0)),
+    ("data.subjects.agent.concepts.agent.label", Some(8.0)),
+    ("data.genres.concepts.agent.label", Some(8.0)),
     ("data.description", Some(3.0)),
     ("data.contributors.*", Some(2.0)),
     ("data.alternativeTitles", None),
