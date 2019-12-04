@@ -36,8 +36,7 @@ import uk.ac.wellcome.models.work.internal.{
   Unidentifiable,
   UnidentifiedInvisibleWork,
   UnidentifiedRedirectedWork,
-  UnidentifiedWork,
-  WorkType
+  UnidentifiedWork
 }
 import uk.ac.wellcome.models.transformable.SierraTransformable
 import uk.ac.wellcome.models.transformable.SierraTransformable._
@@ -65,7 +64,6 @@ object Implicits {
   implicit val _dec10: Decoder[Location] = deriveDecoder
   implicit val _dec11: Decoder[Item] = deriveDecoder
   implicit val _dec12: Decoder[MergeCandidate] = deriveDecoder
-  implicit val _dec13: Decoder[WorkType] = deriveDecoder
   implicit val _dec14: Decoder[MatcherResult] = deriveDecoder
   implicit val _dec15: Decoder[Concept] = deriveDecoder
   implicit val _dec16: Decoder[AbstractConcept] = deriveDecoder
@@ -141,7 +139,6 @@ object Implicits {
   implicit val _enc10: Encoder[Location] = deriveEncoder
   implicit val _enc11: Encoder[Item] = deriveEncoder
   implicit val _enc12: Encoder[MergeCandidate] = deriveEncoder
-  implicit val _enc13: Encoder[WorkType] = deriveEncoder
   implicit val _enc14: Encoder[MatcherResult] = deriveEncoder
   implicit val _enc15: Encoder[Concept] = deriveEncoder
   implicit val _enc16: Encoder[AbstractConcept] = deriveEncoder

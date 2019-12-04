@@ -2,6 +2,11 @@ package uk.ac.wellcome.platform.api.models
 
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.models.work.internal.WorkType
+import uk.ac.wellcome.models.work.internal.WorkType.{
+  Books,
+  ManuscriptsAsian,
+  Music
+}
 
 class AggregationResultsTest extends FunSpec with Matchers {
   it("destructures a single aggregation result") {
@@ -45,12 +50,11 @@ class AggregationResultsTest extends FunSpec with Matchers {
 
     val singleAgg = Aggregations(responseString)
     singleAgg.get.workType shouldBe Some(
-      Aggregation(List(
-        AggregationBucket(data = WorkType("a", "Books"), count = 393145),
-        AggregationBucket(
-          data = WorkType("b", "Manuscripts, Asian"),
-          count = 5696),
-        AggregationBucket(data = WorkType("c", "Music"), count = 9)
-      )))
+      Aggregation[WorkType](
+        List(
+          AggregationBucket(data = Books, count = 393145),
+          AggregationBucket(data = ManuscriptsAsian, count = 5696),
+          AggregationBucket(data = Music, count = 9)
+        )))
   }
 }

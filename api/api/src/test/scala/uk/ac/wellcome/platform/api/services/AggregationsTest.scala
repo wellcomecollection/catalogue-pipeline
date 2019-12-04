@@ -5,7 +5,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalatest.{FunSpec, Matchers}
 import org.scalatest.concurrent.ScalaFutures
 import com.sksamuel.elastic4s.Index
-
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.platform.api.models._
@@ -24,31 +23,7 @@ class AggregationsTest
   )
 
   it("returns more than 10 workType aggregations") {
-    val workTypes = List(
-      WorkType("a", "Books"),
-      WorkType("q", "Digital Images"),
-      WorkType("x", "E-manuscripts, Asian"),
-      WorkType("l", "Ephemera"),
-      WorkType("e", "Maps"),
-      WorkType("k", "Pictures"),
-      WorkType("w", "Student dissertations"),
-      WorkType("r", "3-D Objects"),
-      WorkType("m", "CD-Roms"),
-      WorkType("v", "E-books"),
-      WorkType("s", "E-sound"),
-      WorkType("d", "Journals"),
-      WorkType("p", "Mixed materials"),
-      WorkType("i", "Sound"),
-      WorkType("g", "Videorecordings"),
-      WorkType("h", "Archives and manuscripts"),
-      WorkType("n", "Cinefilm"),
-      WorkType("j", "E-journals"),
-      WorkType("f", "E-videos"),
-      WorkType("b", "Manuscripts, Asian"),
-      WorkType("c", "Music"),
-      WorkType("u", "Standing order"),
-      WorkType("z", "Web sites"),
-    )
+    val workTypes = WorkType.values
     val works = workTypes.flatMap { workType =>
       (0 to 4).map(_ => createIdentifiedWorkWith(workType = Some(workType)))
     }

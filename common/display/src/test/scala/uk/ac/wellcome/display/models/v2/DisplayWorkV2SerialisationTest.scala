@@ -9,6 +9,7 @@ import uk.ac.wellcome.models.work.generators.{
   SubjectGenerators,
   WorksGenerators
 }
+import uk.ac.wellcome.models.work.internal.WorkType.{Books, EBooks}
 import uk.ac.wellcome.models.work.internal._
 
 class DisplayWorkV2SerialisationTest
@@ -21,8 +22,7 @@ class DisplayWorkV2SerialisationTest
 
   it("serialises a DisplayWorkV2") {
     val work = createIdentifiedWorkWith(
-      workType = Some(
-        WorkType(id = randomAlphanumeric(5), label = randomAlphanumeric(10))),
+      workType = Some(Books),
       description = Some(randomAlphanumeric(100)),
       lettering = Some(randomAlphanumeric(100)),
       createdDate = Some(Period("1901"))
@@ -186,8 +186,7 @@ class DisplayWorkV2SerialisationTest
   it(
     "includes the contributors in DisplayWorkV2 serialisation with the contribuotrs include") {
     val work = createIdentifiedWorkWith(
-      workType = Some(
-        WorkType(id = randomAlphanumeric(5), label = randomAlphanumeric(10))),
+      workType = Some(EBooks),
       description = Some(randomAlphanumeric(100)),
       lettering = Some(randomAlphanumeric(100)),
       createdDate = Some(Period("1901")),

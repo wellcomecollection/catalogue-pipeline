@@ -109,7 +109,13 @@ object ExternalDependencies {
     val logstashLogback = "6.1"
     val scribeJava = "6.8.1"
     val apm = "1.11.0"
+    val enumeratum = "1.5.13"
+    val enumeratumScalacheck = "1.5.16"
   }
+  val enumeratumDependencies = Seq(
+    "com.beachape" %% "enumeratum" % versions.enumeratum,
+      "com.beachape" %% "enumeratum-scalacheck" % versions.enumeratumScalacheck % "test"
+  )
 
   val scribeJavaDependencies = Seq(
     "com.github.dakatsuka" %% "akka-http-oauth2-client" % "0.2.0")
@@ -222,7 +228,8 @@ object CatalogueDependencies {
   val internalModelDependencies =
     ExternalDependencies.scalacsvDependencies ++
       WellcomeDependencies.jsonLibrary ++
-      ExternalDependencies.parseDependencies
+      ExternalDependencies.parseDependencies ++
+      ExternalDependencies.enumeratumDependencies
 
   val displayModelDependencies =
     ExternalDependencies.swaggerDependencies ++
