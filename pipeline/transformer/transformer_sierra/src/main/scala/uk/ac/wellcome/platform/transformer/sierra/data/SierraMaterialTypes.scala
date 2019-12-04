@@ -11,7 +11,7 @@ object SierraMaterialTypes {
       case List(c) =>
         WorkType.fromCode(c.toString) match {
           case Some(workType: Unlinked) => workType
-          case Some(workType: Linked) => workType.linksTo
+          case Some(workType: Linked)   => workType.linksTo
           case None =>
             throw SierraTransformerException(s"Unrecognised work type code: $c")
         }

@@ -7,11 +7,24 @@ import org.scalatest.{Assertion, FunSpec, Matchers}
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.generators.{ContributorGenerators, GenreGenerators, SubjectGenerators, WorksGenerators}
-import uk.ac.wellcome.models.work.internal.WorkType.{Books, CDRoms, ManuscriptsAsian}
+import uk.ac.wellcome.models.work.generators.{
+  ContributorGenerators,
+  GenreGenerators,
+  SubjectGenerators,
+  WorksGenerators
+}
+import uk.ac.wellcome.models.work.internal.WorkType.{
+  Books,
+  CDRoms,
+  ManuscriptsAsian
+}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
-import uk.ac.wellcome.platform.api.models.{ItemLocationTypeFilter, SearchQuery, WorkTypeFilter}
+import uk.ac.wellcome.platform.api.models.{
+  ItemLocationTypeFilter,
+  SearchQuery,
+  WorkTypeFilter
+}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Random

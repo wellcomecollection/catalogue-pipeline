@@ -9,7 +9,10 @@ import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.models.work.internal._
 import org.scalacheck.ScalacheckShapeless._
-import uk.ac.wellcome.models.work.generators.{ProductionEventGenerators, WorksGenerators}
+import uk.ac.wellcome.models.work.generators.{
+  ProductionEventGenerators,
+  WorksGenerators
+}
 import uk.ac.wellcome.models.work.internal.WorkType.Videos
 
 class DisplayWorkV2Test

@@ -8,9 +8,18 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Assertion, FunSpec, Matchers}
 import uk.ac.wellcome.display.models.AggregationRequest
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
-import uk.ac.wellcome.models.work.generators.{ProductionEventGenerators, WorksGenerators}
+import uk.ac.wellcome.models.work.generators.{
+  ProductionEventGenerators,
+  WorksGenerators
+}
 import uk.ac.wellcome.models.work.internal.IdentifiedBaseWork
-import uk.ac.wellcome.models.work.internal.WorkType.{ArchivesAndManuscripts, Audio, Books, CDRoms, ManuscriptsAsian}
+import uk.ac.wellcome.models.work.internal.WorkType.{
+  ArchivesAndManuscripts,
+  Audio,
+  Books,
+  CDRoms,
+  ManuscriptsAsian
+}
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
 import uk.ac.wellcome.platform.api.models._
 
@@ -383,13 +392,12 @@ class WorksServiceTest
 
           val expectedAggregations = Aggregations(
             Some(
-              Aggregation(List(
-                AggregationBucket(data = ArchivesAndManuscripts, count = 1),
-                AggregationBucket(data = Audio, count = 1),
-                AggregationBucket(
-                  data = Books,
-                  count = 2)
-              ))),
+              Aggregation(
+                List(
+                  AggregationBucket(data = ArchivesAndManuscripts, count = 1),
+                  AggregationBucket(data = Audio, count = 1),
+                  AggregationBucket(data = Books, count = 2)
+                ))),
             None
           )
 

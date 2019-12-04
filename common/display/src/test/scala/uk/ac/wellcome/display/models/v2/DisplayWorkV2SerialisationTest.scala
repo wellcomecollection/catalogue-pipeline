@@ -4,7 +4,11 @@ import org.scalatest.FunSpec
 import uk.ac.wellcome.display.models.V2WorksIncludes
 import uk.ac.wellcome.display.models.Implicits._
 import uk.ac.wellcome.display.test.util.JsonMapperTestUtil
-import uk.ac.wellcome.models.work.generators.{ProductionEventGenerators, SubjectGenerators, WorksGenerators}
+import uk.ac.wellcome.models.work.generators.{
+  ProductionEventGenerators,
+  SubjectGenerators,
+  WorksGenerators
+}
 import uk.ac.wellcome.models.work.internal.WorkType.{Books, EBooks}
 import uk.ac.wellcome.models.work.internal._
 
@@ -182,8 +186,7 @@ class DisplayWorkV2SerialisationTest
   it(
     "includes the contributors in DisplayWorkV2 serialisation with the contribuotrs include") {
     val work = createIdentifiedWorkWith(
-      workType = Some(
-        EBooks),
+      workType = Some(EBooks),
       description = Some(randomAlphanumeric(100)),
       lettering = Some(randomAlphanumeric(100)),
       createdDate = Some(Period("1901")),

@@ -3,12 +3,12 @@ package uk.ac.wellcome.models.work.internal
 import enumeratum.{Enum, EnumEntry}
 import io.circe.{Decoder, Encoder, Json}
 
-sealed trait WorkType extends EnumEntry{
+sealed trait WorkType extends EnumEntry {
   val id: String
   val label: String
 }
 
-object WorkType extends Enum[WorkType]{
+object WorkType extends Enum[WorkType] {
   val values = findValues
 
   implicit val workTypeEncoder: Encoder[WorkType] = Encoder.instance[WorkType] {
@@ -20,22 +20,22 @@ object WorkType extends Enum[WorkType]{
       )
   }
 
-  implicit val workTypeDecoder: Decoder[WorkType] = Decoder.decodeJsonObject.emap{ json =>
-    val maybeWorkType = for {
-      idJson <- json("id")
-      id <- idJson.asString
-      workType <- fromCode(id)
-    } yield workType
-    maybeWorkType.toRight(s"Invalid WorkType json $json")
-  }
+  implicit val workTypeDecoder: Decoder[WorkType] =
+    Decoder.decodeJsonObject.emap { json =>
+      val maybeWorkType = for {
+        idJson <- json("id")
+        id <- idJson.asString
+        workType <- fromCode(id)
+      } yield workType
+      maybeWorkType.toRight(s"Invalid WorkType json $json")
+    }
 
   def fromCode(id: String): Option[WorkType] = {
     values.find(workType => workType.id == id)
   }
 
   sealed trait Unlinked extends WorkType
-  sealed trait Linked extends WorkType
-  {
+  sealed trait Linked extends WorkType {
     val linksTo: Unlinked
   }
 
