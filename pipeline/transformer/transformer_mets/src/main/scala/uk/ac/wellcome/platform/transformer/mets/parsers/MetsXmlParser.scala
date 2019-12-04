@@ -26,6 +26,23 @@ object MetsXmlParser {
       )
   }
 
+  /** The record identifier (generally the B number) is encoded in the METS. For
+    *  example:
+    *
+    *  <mets:dmdSec ID="DMDLOG_0000">
+    *    <mets:mdWrap MDTYPE="MODS">
+    *      <mets:xmlData>
+    *        <mods:mods>
+    *          <mods:recordInfo>
+    *            <mods:recordIdentifier source="gbv-ppn">b30246039</mods:recordIdentifier>
+    *          </mods:recordInfo>
+    *        </mod:mods>
+    *      </mets:xmlData>
+    *    </mets:mdWrap>
+    *  </mets:dmdSec>
+    *
+    *  The expected output would be: "b30246039"
+    */
   private def recordIdentifier(root: Elem): Either[Exception, String] = {
     val identifierNodes =
       (root \\ "dmdSec" \ "mdWrap" \\ "recordInfo" \ "recordIdentifier").toList
@@ -37,6 +54,24 @@ object MetsXmlParser {
     }
   }
 
+  /** We are interested with the access condition with type `dz`. For example:
+    *
+    *  <mets:dmdSec ID="DMDLOG_0000">
+    *    <mets:mdWrap MDTYPE="MODS">
+    *      <mets:xmlData>
+    *        <mods:mods>
+    *          ...
+    *          <mods:accessCondition type="dz">CC-BY-NC</mods:accessCondition>
+    *          <mods:accessCondition type="player">63</mods:accessCondition>
+    *          <mods:accessCondition type="status">Open</mods:accessCondition>
+    *          ...
+    *        </mods:mods>
+    *      </mets:xmlData>
+    *    </mets:mdWrap>
+    *  </mets:dmdSec>
+    *
+    *  The expected output would be: "CC-BY-NC"
+    */
   private def accessCondition(root: Elem): Either[Exception, Option[String]] = {
     val licenseNodes = (root \\ "dmdSec" \ "mdWrap" \\ "accessCondition")
       .filterByAttribute("type", "dz")
@@ -118,6 +153,7 @@ object MetsXmlParser {
     (root \ "structMap")
       .filterByAttribute("TYPE", "PHYSICAL")
       .descendentsWithTag("div")
+      .sortByAttribute("ORDER")
       .toMapping(
         keyAttrib = "ID",
         valueNode = "fptr",
@@ -135,6 +171,9 @@ object MetsXmlParser {
     def descendentsWithTag(tag: String) =
       nodes.flatMap(_ \\ tag)
 
+    def sortByAttribute(attrib: String) =
+      nodes.sortBy(_ \@ attrib)
+
     def toMapping(keyAttrib: String, valueNode: String, valueAttrib: String) = {
       val mappings = nodes
         .map { node =>
@@ -146,6 +185,7 @@ object MetsXmlParser {
           case (key, Some(value)) if key.nonEmpty && value.nonEmpty =>
             (key, value)
         }
+      // Return a ListMap here over standard Map to preserve ordering
       ListMap(mappings: _*)
     }
   }
