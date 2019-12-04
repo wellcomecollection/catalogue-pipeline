@@ -37,7 +37,8 @@ class SierraPhysicalDigitalPartitionerTest
   }
 
   it("does not partition a digital work and a non physical sierra work") {
-    val result = partitioner.partitionWorks(Seq(digitalWork,createUnidentifiedSierraWork))
+    val result =
+      partitioner.partitionWorks(Seq(digitalWork, createUnidentifiedSierraWork))
 
     result shouldBe None
   }

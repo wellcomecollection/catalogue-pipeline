@@ -1,6 +1,15 @@
 package uk.ac.wellcome.platform.merger.rules.physicaldigital
 
-import uk.ac.wellcome.models.work.internal.{BaseWork, DigitalLocation, Identifiable, IdentifierType, Item, PhysicalLocation, Unidentifiable, UnidentifiedWork}
+import uk.ac.wellcome.models.work.internal.{
+  BaseWork,
+  DigitalLocation,
+  Identifiable,
+  IdentifierType,
+  Item,
+  PhysicalLocation,
+  Unidentifiable,
+  UnidentifiedWork
+}
 import uk.ac.wellcome.platform.merger.rules.WorkTagPartitioner
 
 trait SierraPhysicalDigitalPartitioner extends WorkTagPartitioner {
@@ -27,8 +36,8 @@ trait SierraPhysicalDigitalPartitioner extends WorkTagPartitioner {
     */
   private def isDigitalWork(work: UnidentifiedWork): Boolean =
     work.data.items match {
-      case List(Unidentifiable(Item(List(_:DigitalLocation), _))) => true
-      case _ => false
+      case List(Unidentifiable(Item(List(_: DigitalLocation), _))) => true
+      case _                                                       => false
     }
 
   /***
@@ -38,7 +47,9 @@ trait SierraPhysicalDigitalPartitioner extends WorkTagPartitioner {
     */
   private def isPhysicalWork(work: UnidentifiedWork): Boolean =
     work.data.items match {
-      case List(Identifiable(Item(locations, _), _, _,_)) if locations.exists(l => l.isInstanceOf[PhysicalLocation]) => true
+      case List(Identifiable(Item(locations, _), _, _, _))
+          if locations.exists(l => l.isInstanceOf[PhysicalLocation]) =>
+        true
       case _ => false
     }
 }
