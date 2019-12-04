@@ -185,6 +185,7 @@ object MetsXmlParser {
           case (key, Some(value)) if key.nonEmpty && value.nonEmpty =>
             (key, value)
         }
+      // Return a ListMap here over standard Map to preserve ordering
       ListMap(mappings: _*)
     }
   }
