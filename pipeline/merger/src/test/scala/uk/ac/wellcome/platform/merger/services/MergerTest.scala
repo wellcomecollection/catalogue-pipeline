@@ -13,8 +13,21 @@ class MergerTest extends FunSpec with WorksGenerators with Matchers {
   private val sierraDigitalWork = createSierraDigitalWorkWith(
     items = List(createDigitalItemWith(List(digitalLocationNoLicense))))
   private val miroWork = createMiroWork
-  private val metsWork = createUnidentifiedInvisibleMetsWorkWith(
-    items = List(createDigitalItemWith(List(digitalLocationCCBYNC))))
+  private val metsWork =
+    createUnidentifiedInvisibleMetsWorkWith(
+      items = List(createDigitalItemWith(List(digitalLocationCCBYNC)))
+    )
+    .withData { data =>
+      data.copy(
+        thumbnail = Some(
+          DigitalLocation(
+            url = "https://path.to/thumbnail.jpg",
+            locationType = LocationType("thumbnail-image"),
+            license = Some(License_CCBY)
+          )
+        )
+      )
+    }
 
   private val merger = PlatformMerger
 
@@ -196,7 +209,8 @@ class MergerTest extends FunSpec with WorksGenerators with Matchers {
               locations = physicalItem.agent.locations ++ digitalItem.agent.locations
             )
           )
-        )
+        ),
+        thumbnail = metsWork.data.thumbnail,
       )
     }
 
@@ -222,17 +236,16 @@ class MergerTest extends FunSpec with WorksGenerators with Matchers {
 
     val sierraItem =
       sierraPhysicalWork.data.items.head.asInstanceOf[Identifiable[Item]]
-    val miroItem = miroWork.data.items.head
     val metsItem = metsWork.data.items.head
 
     val expectedMergedWork = sierraPhysicalWork.withData { data =>
       data.copy(
         otherIdentifiers = sierraPhysicalWork.data.otherIdentifiers ++ sierraDigitalWork.identifiers ++ miroWork.identifiers,
-        thumbnail = miroWork.data.thumbnail,
+        thumbnail = metsWork.data.thumbnail,
         items = List(
           sierraItem.copy(
             agent = sierraItem.agent.copy(
-              locations = sierraItem.agent.locations ++ miroItem.agent.locations ++ metsItem.agent.locations
+              locations = sierraItem.agent.locations ++ metsItem.agent.locations
             )
           )
         ),
