@@ -122,11 +122,13 @@ final case class ScoringTiersQuery(q: String) extends ElasticsearchQuery {
     `type` = Some(MultiMatchQueryBuilderType.CROSS_FIELDS)
   )
 
-  lazy val elasticQuery = BoolQuery(
-    should = Seq(
+  lazy val elasticQuery = bool(
+    shouldQueries = Seq(
       ConstantScore(query = TitleQuery(q).elasticQuery, boost = Some(2000)),
       ConstantScore(query = GenreQuery(q).elasticQuery, boost = Some(1000)),
-      ConstantScore(query = SubjectQuery(q).elasticQuery, boost = Some(1000)),
-      baseQuery
-    ))
+      ConstantScore(query = SubjectQuery(q).elasticQuery, boost = Some(1000))
+    ),
+    mustQueries = Seq(baseQuery),
+    notQueries = Seq()
+  )
 }

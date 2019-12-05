@@ -64,8 +64,8 @@ class ElasticsearchQueryTest
               title = Some(s"subjected $subject"),
               subjects = List(createSubjectWithConcept(subject)))
         }
-
-        insertIntoElasticsearch(index, titledWorks ++ subjectedWorks: _*)
+        val insertedWorks = titledWorks ++ subjectedWorks
+        insertIntoElasticsearch(index, insertedWorks: _*)
 
         val results =
           searchResults(
@@ -73,6 +73,11 @@ class ElasticsearchQueryTest
             queryOptions = createElasticsearchQueryOptionsWith(
               searchQuery = Some(
                 SearchQuery("Gray's anatomy", SearchQueryType.ScoringTiers))))
+
+        withClue(
+          "a MUST query is used on the base query so as not to match everything") {
+          (results.size < insertedWorks.size) should be(true)
+        }
 
         withClue("the exact title should be first") {
           results.head should be(getWorkWithId("Gray's anatomy.", results))
