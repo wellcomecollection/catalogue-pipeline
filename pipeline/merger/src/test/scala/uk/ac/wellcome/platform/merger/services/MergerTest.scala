@@ -16,18 +16,17 @@ class MergerTest extends FunSpec with WorksGenerators with Matchers {
   private val metsWork =
     createUnidentifiedInvisibleMetsWorkWith(
       items = List(createDigitalItemWith(List(digitalLocationCCBYNC)))
-    )
-    .withData { data =>
-      data.copy(
-        thumbnail = Some(
-          DigitalLocation(
-            url = "https://path.to/thumbnail.jpg",
-            locationType = LocationType("thumbnail-image"),
-            license = Some(License_CCBY)
+    ).withData { data =>
+        data.copy(
+          thumbnail = Some(
+            DigitalLocation(
+              url = "https://path.to/thumbnail.jpg",
+              locationType = LocationType("thumbnail-image"),
+              license = Some(License_CCBY)
+            )
           )
         )
-      )
-    }
+      }
 
   private val merger = PlatformMerger
 
