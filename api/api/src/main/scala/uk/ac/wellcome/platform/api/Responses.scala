@@ -63,15 +63,15 @@ object MultipleWorksResponse {
             requestUri: Uri,
             contextUri: String): MultipleWorksResponse =
     MultipleWorksResponse(
-      DisplayResultList(
+      resultList = DisplayResultList(
         resultList,
         DisplayWorkV2.apply,
         searchOptions.pageSize,
         includes,
       ),
-      searchOptions.pageNumber,
-      requestUri,
-      contextUri
+      currentPage = searchOptions.pageNumber,
+      requestUri = requestUri,
+      contextUri = contextUri
     )
 
   def apply(resultList: DisplayResultList[DisplayWorkV2],
