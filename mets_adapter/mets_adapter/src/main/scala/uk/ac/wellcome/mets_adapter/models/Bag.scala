@@ -1,11 +1,7 @@
 package uk.ac.wellcome.mets_adapter.models
 
-case class IngestUpdate(context: IngestUpdateContext)
-
-case class IngestUpdateContext(storageSpace: String, externalIdentifier: String)
-
-case class MetsData(bucket: String, path: String, version: Int)
-
+/** The response receiveved from the storage-service bag API.
+  */
 case class Bag(info: BagInfo,
                manifest: BagManifest,
                location: BagLocation,
