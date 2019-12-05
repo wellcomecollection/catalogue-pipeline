@@ -7,32 +7,46 @@ case class Bag(info: BagInfo,
                location: BagLocation,
                version: String) {
 
+  def metsData: Either[Exception, MetsData] =
+    file
+      .flatMap { file =>
+        parsedVersion.map { version =>
+          MetsData(
+            location.bucket,
+            location.path,
+            version,
+            file,
+            manifestations)
+        }
+      }
+
   // Storage-service only stores a list of files, so we need to search for a
   // XML file in data directory named with some b-number.
-  private val metsRegex = "^data/b[0-9]{7}[0-9x].xml$".r
+  private val metsFileRegex = "^data/b[0-9]{7}[0-9x].xml$".r
+
+  private val manifestationRegex = "^data/b[0-9]{7}[0-9x]_\\w+.xml$".r
 
   private val versionRegex = "^v([0-9]+)".r
 
-  def metsData: Either[Throwable, MetsData] =
-    metsPath
-      .map { path =>
-        parsedVersion
-          .map(version => Right(MetsData(location.bucket, path, version)))
-          .getOrElse(Left(new Exception("Couldn't parse version")))
-      }
-      .getOrElse(Left(new Exception("Couldn't find METS path")))
-
-  def metsPath: Option[String] =
+  private def file: Either[Exception, String] =
     manifest.files
       .collectFirst {
-        case file if metsRegex.findFirstIn(file.name).nonEmpty =>
-          s"${location.path}/${file.path}"
+        case file if metsFileRegex.findFirstIn(file.name).nonEmpty =>
+          Right(file.path)
+      }
+      .getOrElse(Left(new Exception("Couldn't find METS file")))
+
+  private def manifestations: List[String] =
+    manifest.files
+      .collect {
+        case file if manifestationRegex.findFirstIn(file.name).nonEmpty =>
+          file.path
       }
 
-  def parsedVersion: Option[Int] =
+  private def parsedVersion: Either[Exception, Int] =
     version match {
-      case versionRegex(num) => Some(num.toInt)
-      case _                 => None
+      case versionRegex(num) => Right(num.toInt)
+      case _                 => Left(new Exception("Couldn't parse version"))
     }
 }
 
