@@ -28,7 +28,7 @@ case class Bag(info: BagInfo,
 
   private val versionRegex = "^v([0-9]+)".r
 
-  private def file: Either[Exception, String] =
+  def file: Either[Exception, String] =
     manifest.files
       .collectFirst {
         case file if metsFileRegex.findFirstIn(file.name).nonEmpty =>
@@ -36,14 +36,14 @@ case class Bag(info: BagInfo,
       }
       .getOrElse(Left(new Exception("Couldn't find METS file")))
 
-  private def manifestations: List[String] =
+  def manifestations: List[String] =
     manifest.files
       .collect {
         case file if manifestationRegex.findFirstIn(file.name).nonEmpty =>
           file.path
       }
 
-  private def parsedVersion: Either[Exception, Int] =
+  def parsedVersion: Either[Exception, Int] =
     version match {
       case versionRegex(num) => Right(num.toInt)
       case _                 => Left(new Exception("Couldn't parse version"))

@@ -9,8 +9,8 @@ import uk.ac.wellcome.mets_adapter.models.MetsData
 class MetsStore(store: VersionedStore[String, Int, MetsData])
     extends Logging {
 
-  def storeMetsData(key: Version[String, Int],
-                    data: MetsData): Either[Throwable, Version[String, Int]] =
+  def storeData(key: Version[String, Int],
+                data: MetsData): Either[Throwable, Version[String, Int]] =
     store
       .put(key)(data)
       .map { case Identified(key, _) => key }

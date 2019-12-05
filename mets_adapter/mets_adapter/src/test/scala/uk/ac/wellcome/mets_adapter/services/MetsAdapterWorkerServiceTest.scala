@@ -10,20 +10,11 @@ import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.mets_adapter.models._
 import uk.ac.wellcome.akka.fixtures.Akka
-import uk.ac.wellcome.storage.store.{
-  HybridStoreEntry,
-  TypedStore,
-  TypedStoreEntry,
-  VersionedStore
-}
-import uk.ac.wellcome.storage.store.memory.{
-  MemoryTypedStore,
-  MemoryVersionedStore
-}
+import uk.ac.wellcome.storage.store.VersionedStore
+import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
 import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSMessageSender}
-import uk.ac.wellcome.storage.{Identified, ObjectLocation, Version}
+import uk.ac.wellcome.storage.{Identified, Version}
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.bigmessaging.EmptyMetadata
 
 class MetsAdapterWorkerServiceTest
     extends FunSpec
@@ -53,7 +44,7 @@ class MetsAdapterWorkerServiceTest
     }
 
   it("processes ingest updates and store and publish METS data") {
-    val vhs = createVhs()
+    val vhs = createStore()
     withWorkerService(bagRetriever, vhs) {
       case (workerService, QueuePair(queue, dlq), topic) =>
         sendNotificationToSQS(queue, ingestUpdate("space", "123"))
@@ -61,13 +52,13 @@ class MetsAdapterWorkerServiceTest
         assertQueueEmpty(dlq)
         getMessages(topic) shouldEqual List(Version("123", 1))
         vhs.getLatest("123") shouldBe Right(
-          Identified(Version("123", 1), vhsEntry("XML"))
+          Identified(Version("123", 1), metsData())
         )
     }
   }
 
   it("publishes new METS data when old version exists in the store") {
-    val vhs = createVhs(Map(Version("123", 0) -> "old-data"))
+    val vhs = createStore(Map(Version("123", 0) -> "old-data"))
     withWorkerService(bagRetriever, vhs) {
       case (workerService, QueuePair(queue, dlq), topic) =>
         sendNotificationToSQS(queue, ingestUpdate("space", "123"))
@@ -76,13 +67,13 @@ class MetsAdapterWorkerServiceTest
         assertQueueEmpty(dlq)
         getMessages(topic) shouldEqual List(Version("123", 1))
         vhs.getLatest("123") shouldBe Right(
-          Identified(Version("123", 1), vhsEntry("XML"))
+          Identified(Version("123", 1), metsData())
         )
     }
   }
 
   it("re-publishes existing data when current version exists in the store") {
-    val vhs = createVhs(Map(Version("123", 1) -> "existing-data"))
+    val vhs = createStore(Map(Version("123", 1) -> "existing-data"))
     withWorkerService(bagRetriever, vhs) {
       case (workerService, QueuePair(queue, dlq), topic) =>
         sendNotificationToSQS(queue, ingestUpdate("space", "123"))
@@ -90,13 +81,13 @@ class MetsAdapterWorkerServiceTest
         assertQueueEmpty(dlq)
         getMessages(topic) shouldEqual List(Version("123", 1))
         vhs.getLatest("123") shouldBe Right(
-          Identified(Version("123", 1), vhsEntry("existing-data"))
+          Identified(Version("123", 1), metsData("existing-data"))
         )
     }
   }
 
   it("ignores messages when greater version exists in the store") {
-    val vhs = createVhs(Map(Version("123", 2) -> "existing-data"))
+    val vhs = createStore(Map(Version("123", 2) -> "existing-data"))
     withWorkerService(bagRetriever, vhs) {
       case (workerService, QueuePair(queue, dlq), topic) =>
         sendNotificationToSQS(queue, ingestUpdate("space", "123"))
@@ -105,13 +96,13 @@ class MetsAdapterWorkerServiceTest
         assertQueueHasSize(dlq, 1)
         getMessages(topic) shouldEqual Nil
         vhs.getLatest("123") shouldBe Right(
-          Identified(Version("123", 2), vhsEntry("existing-data"))
+          Identified(Version("123", 2), metsData("existing-data"))
         )
     }
   }
 
   it("should not store / publish anything when bag retrieval fails") {
-    val vhs = createVhs()
+    val vhs = createStore()
     val brokenBagRetriever = new BagRetriever {
       def getBag(update: IngestUpdate): Future[Bag] =
         Future.failed(new Exception("Failed retrieving bag"))
@@ -128,7 +119,7 @@ class MetsAdapterWorkerServiceTest
   }
 
   it("should store METS data if publishing fails") {
-    val vhs = createVhs()
+    val vhs = createStore()
     withWorkerService(bagRetriever, vhs, createBrokenMsgSender(_)) {
       case (workerService, QueuePair(queue, dlq), topic) =>
         sendNotificationToSQS(queue, ingestUpdate("space", "123"))
@@ -142,7 +133,7 @@ class MetsAdapterWorkerServiceTest
 
   it(
     "sends message to the dlq if message is not wrapped in NotificationMessage") {
-    val vhs = createVhs()
+    val vhs = createStore()
     withWorkerService(bagRetriever, vhs) {
       case (workerService, QueuePair(queue, dlq), topic) =>
         sendSqsMessage(queue, ingestUpdate("space", "123"))
@@ -155,9 +146,8 @@ class MetsAdapterWorkerServiceTest
 
   def withWorkerService[R](
     bagRetriever: BagRetriever,
-    vhs: VersionedStore[String, Int, HybridStoreEntry[String, EmptyMetadata]],
-    createMsgSender: SNS.Topic => SNSMessageSender = createMsgSender(_),
-    xmlStore: TypedStore[ObjectLocation, String] = createXmlStore())(
+    store: VersionedStore[String, Int, MetsData],
+    createMsgSender: SNS.Topic => SNSMessageSender = createMsgSender(_))(
     testWith: TestWith[(MetsAdapterWorkerService, QueuePair, SNS.Topic), R]) =
     withActorSystem { implicit actorSystem =>
       withLocalSnsTopic { topic =>
@@ -168,8 +158,7 @@ class MetsAdapterWorkerServiceTest
                 stream,
                 createMsgSender(topic),
                 bagRetriever,
-                xmlStore,
-                MetsStore(vhs)
+                new MetsStore(store)
               )
               workerService.run()
               testWith((workerService, QueuePair(queue, dlq), topic))
@@ -195,18 +184,11 @@ class MetsAdapterWorkerServiceTest
         Failure(new Exception("Waaah I couldn't send message"))
     }
 
-  def createXmlStore(
-    data: Map[ObjectLocation, String] = Map(
-      ObjectLocation("bucket", "root/mets.xml") -> "XML")) =
-    MemoryTypedStore(
-      data.mapValues(value => TypedStoreEntry(value, Map.empty))
-    )
+  def createStore(data: Map[Version[String, Int], String] = Map.empty) =
+    MemoryVersionedStore(data.mapValues(metsData(_)))
 
-  def createVhs(data: Map[Version[String, Int], String] = Map.empty) =
-    MemoryVersionedStore(data.mapValues(vhsEntry))
-
-  def vhsEntry(xml: String) =
-    HybridStoreEntry(xml, EmptyMetadata())
+  def metsData(file: String = "new.file", version: Int = 1) =
+    MetsData("bucket", "path", version, file, Nil)
 
   def getMessages(topic: SNS.Topic) =
     listMessagesReceivedFromSNS(topic)

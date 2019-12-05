@@ -19,9 +19,8 @@ import uk.ac.wellcome.mets_adapter.services.{
   MetsStore,
   TokenService,
 }
-import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.store.dynamo.DynamoSingleVersionStore
-import uk.ac.wellcome.storage.typesafe.{S3Builder, DynamoBuilder}
+import uk.ac.wellcome.storage.typesafe.DynamoBuilder
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
@@ -31,8 +30,6 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildActorSystem()
     implicit val materializer: ActorMaterializer =
       AkkaBuilder.buildActorMaterializer()
-    implicit val s3Client =
-      S3Builder.buildS3Client(config)
     implicit val dynamoClilent: AmazonDynamoDB =
       DynamoBuilder.buildDynamoClient(config)
 
@@ -40,7 +37,6 @@ object Main extends WellcomeTypesafeApp {
       SQSBuilder.buildSQSStream(config),
       SNSBuilder.buildSNSMessageSender(config, subject = "METS adapter"),
       buildBagRetriever(config),
-      S3TypedStore[String],
       buildMetsStore(config),
     )
   }

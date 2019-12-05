@@ -11,8 +11,7 @@ import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSMessageSender}
 import uk.ac.wellcome.typesafe.Runnable
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.mets_adapter.models._
-import uk.ac.wellcome.storage.{ObjectLocation, Version}
-import uk.ac.wellcome.storage.store.TypedStore
+import uk.ac.wellcome.storage.Version
 
 import scala.concurrent.Future
 
@@ -30,7 +29,6 @@ class MetsAdapterWorkerService(
   msgStream: SQSStream[NotificationMessage],
   msgSender: SNSMessageSender,
   bagRetriever: BagRetriever,
-  xmlStore: TypedStore[ObjectLocation, String],
   metsStore: MetsStore,
   concurrentHttpConnections: Int = 6,
   concurrentDynamoConnections: Int = 4)(implicit ec: ExecutionContext)
@@ -94,7 +92,7 @@ class MetsAdapterWorkerService(
       .mapWithContextAsync(concurrentDynamoConnections) {
         case (ctx, data) =>
           Future {
-            metsStore.storeMetsData(Version(ctx.bagId, data.version), data)
+            metsStore.storeData(Version(ctx.bagId, data.version), data)
           }
       }
 
