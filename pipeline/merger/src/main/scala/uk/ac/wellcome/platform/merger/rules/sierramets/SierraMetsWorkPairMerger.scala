@@ -1,15 +1,6 @@
 package uk.ac.wellcome.platform.merger.rules.sierramets
 
-import uk.ac.wellcome.models.work.internal.{
-  DigitalLocation,
-  IdentifiableRedirect,
-  Item,
-  MaybeDisplayable,
-  TransformedBaseWork,
-  Unidentifiable,
-  UnidentifiedRedirectedWork,
-  UnidentifiedWork
-}
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.model.MergedWork
 import uk.ac.wellcome.platform.merger.rules.{MergerRule, WorkPairMerger}
 
@@ -28,13 +19,18 @@ import uk.ac.wellcome.platform.merger.rules.{MergerRule, WorkPairMerger}
 trait SierraMetsWorkPairMerger extends WorkPairMerger {
   override def mergeAndRedirectWorkPair(
     sierraWork: UnidentifiedWork,
-    metsWork: TransformedBaseWork): Option[MergedWork] = {
+    metsWork: TransformedBaseWork): Option[MergedWork] =
     (sierraWork.data.items, metsWork.data.items) match {
       case (List(sierraItem), List(metsItem: Unidentifiable[Item])) =>
         metsItem.agent.locations match {
           case List(metsLocation: DigitalLocation) =>
-            val targetWork = sierraWork.withData(data =>
-              data.copy(items = List(mergeLocations(sierraItem, metsLocation))))
+            val targetWork = sierraWork.withData { data =>
+              data.copy(
+                items = List(mergeLocations(sierraItem, metsLocation)),
+                thumbnail =
+                  metsWork.data.thumbnail.map(Some(_)).getOrElse(data.thumbnail)
+              )
+            }
             val redirectedWork = UnidentifiedRedirectedWork(
               metsWork.sourceIdentifier,
               metsWork.version,
@@ -44,18 +40,24 @@ trait SierraMetsWorkPairMerger extends WorkPairMerger {
         }
       case _ => None
     }
-  }
 
   private def mergeLocations(sierraItem: MaybeDisplayable[Item],
-                             metsLocation: DigitalLocation) = {
-    sierraItem.withAgent(item => {
-      val filteredLocations = item.locations.filter {
-        case l: DigitalLocation if l.url.equals(metsLocation.url) => false
-        case _                                                    => true
-      }
-      item.copy(locations = filteredLocations :+ metsLocation)
-    })
-  }
+                             metsLocation: DigitalLocation) =
+    sierraItem.withAgent { item =>
+      item.copy(
+        locations =
+          item.locations.filterNot(shouldIgnoreLocation(_, metsLocation.url))
+            :+ metsLocation
+      )
+    }
+
+  private def shouldIgnoreLocation(location: Location, metsUrl: String) =
+    location match {
+      case DigitalLocation(url, LocationType("iiif-image", _, _), _, _, _) =>
+        true
+      case DigitalLocation(url, _, _, _, _) if url.equals(metsUrl) => true
+      case _                                                       => false
+    }
 }
 
 object SierraMetsMergerRule
