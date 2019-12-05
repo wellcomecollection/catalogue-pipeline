@@ -2,34 +2,22 @@ package uk.ac.wellcome.mets_adapter.services
 
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.storage.VersionAlreadyExistsError
-import uk.ac.wellcome.storage.store.{HybridStoreEntry, VersionedStore}
+import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.{Identified, Version}
-import uk.ac.wellcome.bigmessaging.EmptyMetadata
+import uk.ac.wellcome.mets_adapter.models.MetsData
 
-class MetsStore(
-  store: VersionedStore[String, Int, HybridStoreEntry[String, EmptyMetadata]])
+class MetsStore(store: VersionedStore[String, Int, MetsData])
     extends Logging {
 
-  def storeXml(key: Version[String, Int],
-               xml: String): Either[Throwable, Version[String, Int]] =
+  def storeMetsData(key: Version[String, Int],
+                    data: MetsData): Either[Throwable, Version[String, Int]] =
     store
-      .put(key)(HybridStoreEntry(xml, EmptyMetadata()))
-      .right
+      .put(key)(data)
       .map { case Identified(key, _) => key }
-      .left
-      .flatMap {
+      .left.flatMap {
         case VersionAlreadyExistsError(_) =>
-          warn(s"$key already exists in VHS so re-publishing")
+          warn(s"$key already exists in store so re-publishing")
           Right(key)
         case err => Left(err.e)
       }
-}
-
-object MetsStore {
-
-  def apply(
-    store: VersionedStore[String,
-                          Int,
-                          HybridStoreEntry[String, EmptyMetadata]]) =
-    new MetsStore(store)
 }

@@ -5,6 +5,8 @@ import scala.concurrent.duration._
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import com.typesafe.config.Config
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
+import org.scanamo.auto._
 
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
@@ -18,8 +20,8 @@ import uk.ac.wellcome.mets_adapter.services.{
   TokenService,
 }
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
-import uk.ac.wellcome.storage.typesafe.S3Builder
-import uk.ac.wellcome.bigmessaging.typesafe.VHSBuilder
+import uk.ac.wellcome.storage.store.dynamo.DynamoSingleVersionStore
+import uk.ac.wellcome.storage.typesafe.{S3Builder, DynamoBuilder}
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
@@ -31,15 +33,25 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildActorMaterializer()
     implicit val s3Client =
       S3Builder.buildS3Client(config)
+    implicit val dynamoClilent: AmazonDynamoDB =
+      DynamoBuilder.buildDynamoClient(config)
 
     new MetsAdapterWorkerService(
       SQSBuilder.buildSQSStream(config),
       SNSBuilder.buildSNSMessageSender(config, subject = "METS adapter"),
       buildBagRetriever(config),
       S3TypedStore[String],
-      MetsStore(VHSBuilder.build(config))
+      buildMetsStore(config),
     )
   }
+
+  private def buildMetsStore(config: Config)(
+    implicit dynamoClilent: AmazonDynamoDB): MetsStore =
+    new MetsStore(
+      new DynamoSingleVersionStore(
+        DynamoBuilder.buildDynamoConfig(config, namespace = "mets")
+      )
+    )
 
   private def buildBagRetriever(config: Config)(
     implicit
