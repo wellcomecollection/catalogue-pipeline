@@ -27,7 +27,8 @@ trait SierraMetsWorkPairMerger extends WorkPairMerger {
             val targetWork = sierraWork.withData { data =>
               data.copy(
                 items = List(mergeLocations(sierraItem, metsLocation)),
-                thumbnail = metsWork.data.thumbnail.map(Some(_)).getOrElse(data.thumbnail)
+                thumbnail =
+                  metsWork.data.thumbnail.map(Some(_)).getOrElse(data.thumbnail)
               )
             }
             val redirectedWork = UnidentifiedRedirectedWork(
@@ -46,7 +47,7 @@ trait SierraMetsWorkPairMerger extends WorkPairMerger {
       item.copy(
         locations =
           item.locations.filterNot(shouldIgnoreLocation(_, metsLocation.url))
-          :+ metsLocation
+            :+ metsLocation
       )
     }
 
@@ -55,7 +56,7 @@ trait SierraMetsWorkPairMerger extends WorkPairMerger {
       case DigitalLocation(url, LocationType("iiif-image", _, _), _, _, _) =>
         true
       case DigitalLocation(url, _, _, _, _) if url.equals(metsUrl) => true
-      case _ => false
+      case _                                                       => false
     }
 }
 

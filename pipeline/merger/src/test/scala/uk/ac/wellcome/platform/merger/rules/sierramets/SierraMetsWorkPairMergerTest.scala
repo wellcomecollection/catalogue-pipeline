@@ -152,7 +152,7 @@ class SierraMetsWorkPairMergerTest
   }
 
   it("merges a digital Sierra and a Mets work using the Mets thumbnail") {
-    val thumbnail =  DigitalLocation(
+    val thumbnail = DigitalLocation(
       url = "https://path.to/thumbnail.jpg",
       locationType = LocationType("thumbnail-image"),
       license = Some(License_CCBY)
