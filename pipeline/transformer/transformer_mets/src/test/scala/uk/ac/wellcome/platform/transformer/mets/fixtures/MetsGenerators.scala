@@ -21,7 +21,9 @@ trait MetsGenerators {
        </mets:dmdSec>
      </mets:mets>.toString()
 
-  def xmlWithThumbnailImages(recordIdentifier: String, structMap: Elem = structMap, filePrefix: String => String = identity) =
+  def xmlWithThumbnailImages(recordIdentifier: String,
+                             structMap: Elem = structMap,
+                             filePrefix: String => String = identity) =
     <mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3" xmlns:xlink="http://www.w3.org/1999/xlink">
       <mets:dmdSec ID="DMDLOG_0000">
         <mets:mdWrap MDTYPE="MODS">

@@ -52,7 +52,9 @@ class MetsXmlParserTest extends FunSpec with Matchers with MetsGenerators {
   it("parses thumbnail if filename doesn't start with bnumber") {
     val bnumber = "b30246039"
     val filePrefix = "V000012"
-    MetsXmlParser(xmlWithThumbnailImages(recordIdentifier= bnumber, filePrefix = _ => filePrefix)).right.get.thumbnailLocation shouldBe Some(
+    MetsXmlParser(xmlWithThumbnailImages(
+      recordIdentifier = bnumber,
+      filePrefix = _ => filePrefix)).right.get.thumbnailLocation shouldBe Some(
       s"${bnumber}_${filePrefix}_0001.jp2")
   }
 
@@ -117,8 +119,9 @@ class MetsXmlParserTest extends FunSpec with Matchers with MetsGenerators {
     </mets:mets>
 
   def xmlNonSequentialOrder(recordIdentifier: String) =
-    xmlWithThumbnailImages (recordIdentifier,{
-      <mets:structMap TYPE="PHYSICAL">
+    xmlWithThumbnailImages(
+      recordIdentifier, {
+        <mets:structMap TYPE="PHYSICAL">
         <mets:div DMDID="DMDPHYS_0000" ID="PHYS_0000" TYPE="physSequence">
           <mets:div ADMID="AMD_0002" ID="PHYS_0002" ORDER="2" TYPE="page">
             <mets:fptr FILEID="FILE_0002_OBJECTS" />
@@ -129,11 +132,13 @@ class MetsXmlParserTest extends FunSpec with Matchers with MetsGenerators {
           </mets:div>
         </mets:div>
       </mets:structMap>
-    })
+      }
+    )
 
-  def xmlInvalidFileId(recordIdentifier: String)  =
-    xmlWithThumbnailImages  (recordIdentifier,{
-      <mets:structMap TYPE="PHYSICAL">
+  def xmlInvalidFileId(recordIdentifier: String) =
+    xmlWithThumbnailImages(
+      recordIdentifier, {
+        <mets:structMap TYPE="PHYSICAL">
         <mets:div DMDID="DMDPHYS_0000" ID="PHYS_0000" TYPE="physSequence">
           <mets:div ADMID="AMD_0001" ID="PHYS_0001" ORDER="1" TYPE="page">
             <mets:fptr FILEID="OOPS" />
@@ -144,5 +149,6 @@ class MetsXmlParserTest extends FunSpec with Matchers with MetsGenerators {
           </mets:div>
         </mets:div>
       </mets:structMap>
-    })
+      }
+    )
 }

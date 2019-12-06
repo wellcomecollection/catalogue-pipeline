@@ -23,7 +23,8 @@ case class Mets(
         workData(unidentifiableItem, thumbnail(maybeLicense))
       )
 
-  private def workData(unidentifiableItem: MaybeDisplayable[Item], thumbnail: Option[DigitalLocation]) =
+  private def workData(unidentifiableItem: MaybeDisplayable[Item],
+                       thumbnail: Option[DigitalLocation]) =
     WorkData(
       items = List(unidentifiableItem),
       mergeCandidates = List(mergeCandidate),
@@ -41,10 +42,10 @@ case class Mets(
 
   private def digitalLocation(maybeLicense: Option[License]) = {
     val url = s"https://wellcomelibrary.org/iiif/$recordIdentifier/manifest"
-      DigitalLocation(
-        url,
-        LocationType("iiif-presentation"),
-        license = maybeLicense)
+    DigitalLocation(
+      url,
+      LocationType("iiif-presentation"),
+      license = maybeLicense)
   }
 
   private def parseLicense = {
@@ -65,7 +66,8 @@ case class Mets(
   private def thumbnail(maybeLicense: Option[License]) =
     thumbnailLocation.map { location =>
       DigitalLocation(
-        url = s"https://dlcs.io/iiif-img/wellcome/5/$location/full/!$thumbnailDim,$thumbnailDim/0/default.jpg",
+        url =
+          s"https://dlcs.io/iiif-img/wellcome/5/$location/full/!$thumbnailDim,$thumbnailDim/0/default.jpg",
         locationType = LocationType("thumbnail-image"),
         license = maybeLicense
       )
