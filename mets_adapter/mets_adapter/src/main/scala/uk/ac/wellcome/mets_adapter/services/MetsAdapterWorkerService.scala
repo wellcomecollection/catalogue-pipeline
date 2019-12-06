@@ -11,8 +11,7 @@ import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSMessageSender}
 import uk.ac.wellcome.typesafe.Runnable
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.mets_adapter.models._
-import uk.ac.wellcome.storage.{ObjectLocation, Version}
-import uk.ac.wellcome.storage.store.TypedStore
+import uk.ac.wellcome.storage.Version
 
 import scala.concurrent.Future
 
@@ -30,11 +29,9 @@ class MetsAdapterWorkerService(
   msgStream: SQSStream[NotificationMessage],
   msgSender: SNSMessageSender,
   bagRetriever: BagRetriever,
-  xmlStore: TypedStore[ObjectLocation, String],
   metsStore: MetsStore,
   concurrentHttpConnections: Int = 6,
-  concurrentS3Connections: Int = 4,
-  concurrentVhsConnections: Int = 4)(implicit ec: ExecutionContext)
+  concurrentDynamoConnections: Int = 4)(implicit ec: ExecutionContext)
     extends Runnable
     with Logging {
 
@@ -58,8 +55,7 @@ class MetsAdapterWorkerService(
           .via(unwrapMessage)
           .via(retrieveBag)
           .via(parseMetsData)
-          .via(retrieveXml)
-          .via(storeXml)
+          .via(storeMetsData)
           .via(publishKey)
           .map { case (Context(msg, _), _) => msg }
       }
@@ -91,26 +87,12 @@ class MetsAdapterWorkerService(
     Flow[(Context, Bag)]
       .mapWithContext { case (ctx, bag) => bag.metsData }
 
-  def retrieveXml =
+  def storeMetsData =
     Flow[(Context, MetsData)]
-      .mapWithContextAsync(concurrentS3Connections) {
+      .mapWithContextAsync(concurrentDynamoConnections) {
         case (ctx, data) =>
           Future {
-            xmlStore
-              .get(ObjectLocation(data.bucket, data.path))
-              .right
-              .map(obj => MetsDataAndXml(data, obj.identifiedT.t))
-              .left
-              .map(_.e)
-          }
-      }
-
-  def storeXml =
-    Flow[(Context, MetsDataAndXml)]
-      .mapWithContextAsync(concurrentVhsConnections) {
-        case (ctx, MetsDataAndXml(data, xml)) =>
-          Future {
-            metsStore.storeXml(Version(ctx.bagId, data.version), xml)
+            metsStore.storeData(Version(ctx.bagId, data.version), data)
           }
       }
 
