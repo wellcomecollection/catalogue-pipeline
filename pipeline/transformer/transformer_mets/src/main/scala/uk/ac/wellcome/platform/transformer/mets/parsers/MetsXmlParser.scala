@@ -22,7 +22,7 @@ object MetsXmlParser {
       Mets(
         recordIdentifier = id,
         accessCondition = maybeAccessCondition,
-        thumbnailLocation = thumbnailLocation(root),
+        thumbnailLocation = thumbnailLocation(root, id),
       )
   }
 
@@ -90,13 +90,20 @@ object MetsXmlParser {
     *  file ID the fileObjects mapping, and use the files location as the
     *  thumbnail image.
     */
-  private def thumbnailLocation(root: Elem): Option[String] =
+  private def thumbnailLocation(root: Elem, bnumber: String): Option[String] = {
+    // Filenames in DLCS are always prefixed with the bnumber to ensure uniqueness.
+    // However they might not be prefixed with the bnumber in the METS file.
+    // So we need to do two thinhs:
+    //  - strip the "objects/" part of the link
+    //  - prepend the bnumber followed by an underscore if it's not already present
+    val filePrefixRegex = s"objects/(?:${bnumber}_)?"
     physicalStructMap(root).headOption
       .flatMap {
         case (_, fileId) =>
           fileObjects(root).get(fileId)
       }
-      .map(_.stripPrefix("objects/"))
+      .map(_.replaceFirst(filePrefixRegex, s"${bnumber}_"))
+  }
 
   /** The METS XML contains locations of associated files, contained in a
     *  mapping with the following format:

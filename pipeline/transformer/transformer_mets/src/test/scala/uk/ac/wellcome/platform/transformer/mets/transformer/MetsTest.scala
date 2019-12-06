@@ -98,7 +98,8 @@ class MetsTest extends FunSpec with RandomStrings with Matchers {
     result.right.get.data.thumbnail shouldBe Some(
       DigitalLocation(
         s"https://dlcs.io/iiif-img/wellcome/5/location.png/full/!200,200/0/default.jpg",
-        LocationType("thumbnail-image")
+        LocationType("thumbnail-image"),
+        license = Some(License_CCBYNC)
       )
     )
   }

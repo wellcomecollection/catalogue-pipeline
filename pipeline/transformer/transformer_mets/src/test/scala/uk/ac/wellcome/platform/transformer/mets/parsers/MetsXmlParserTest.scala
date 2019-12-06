@@ -2,9 +2,9 @@ package uk.ac.wellcome.platform.transformer.mets.parsers
 
 import org.apache.commons.io.IOUtils
 import org.scalatest.{FunSpec, Matchers}
-import scala.xml.Elem
+import uk.ac.wellcome.platform.transformer.mets.fixtures.MetsGenerators
 
-class MetsXmlParserTest extends FunSpec with Matchers {
+class MetsXmlParserTest extends FunSpec with Matchers with MetsGenerators {
 
   it("parses recordIdentifier from XML") {
     MetsXmlParser(xml).right.get.recordIdentifier shouldBe "b30246039"
@@ -40,17 +40,26 @@ class MetsXmlParserTest extends FunSpec with Matchers {
   }
 
   it("parses first thumbnail when no ORDER attribute") {
-    MetsXmlParser(xmlNoOrderAttrib).right.get.thumbnailLocation shouldBe Some(
+    MetsXmlParser(xmlWithThumbnailImages("b30246039")).right.get.thumbnailLocation shouldBe Some(
       "b30246039_0001.jp2")
   }
 
   it("parses thumbnail using ORDER attrib when non-sequential order") {
-    MetsXmlParser(xmlNonSequentialOrder).right.get.thumbnailLocation shouldBe Some(
+    MetsXmlParser(xmlNonSequentialOrder("b30246039")).right.get.thumbnailLocation shouldBe Some(
       "b30246039_0001.jp2")
   }
 
+  it("parses thumbnail if filename doesn't start with bnumber") {
+    val bnumber = "b30246039"
+    val filePrefix = "V000012"
+    MetsXmlParser(xmlWithThumbnailImages(
+      recordIdentifier = bnumber,
+      filePrefix = _ => filePrefix)).right.get.thumbnailLocation shouldBe Some(
+      s"${bnumber}_${filePrefix}_0001.jp2")
+  }
+
   it("cannot parse thumbnail when invalid file ID") {
-    MetsXmlParser(xmlInvalidFileId).right.get.thumbnailLocation shouldBe None
+    MetsXmlParser(xmlInvalidFileId("b30246039")).right.get.thumbnailLocation shouldBe None
   }
 
   def xml =
@@ -109,55 +118,10 @@ class MetsXmlParserTest extends FunSpec with Matchers {
       </mets:dmdSec>
     </mets:mets>
 
-  def xmlWithThumbnailImages(structMap: Elem) =
-    <mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3" xmlns:xlink="http://www.w3.org/1999/xlink">
-      <mets:dmdSec ID="DMDLOG_0000">
-        <mets:mdWrap MDTYPE="MODS">
-          <mets:xmlData>
-            <mods:mods>
-              <mods:recordInfo>
-                <mods:recordIdentifier source="gbv-ppn">b30246039</mods:recordIdentifier>
-              </mods:recordInfo>
-            </mods:mods>
-          </mets:xmlData>
-        </mets:mdWrap>
-      </mets:dmdSec>
-      <mets:fileSec>
-        <mets:fileGrp USE="OBJECTS">
-          <mets:file ID="FILE_0001_OBJECTS" MIMETYPE="image/jp2">
-            <mets:FLocat LOCTYPE="URL" xlink:href="objects/b30246039_0001.jp2" />
-          </mets:file>
-          <mets:file ID="FILE_0002_OBJECTS" MIMETYPE="image/jp2">
-            <mets:FLocat LOCTYPE="URL" xlink:href="objects/b30246039_0002.jp2" />
-          </mets:file>
-        </mets:fileGrp>
-        <mets:fileGrp USE="ALTO">
-          <mets:file ID="FILE_0001_ALTO" MIMETYPE="application/xml">
-            <mets:FLocat LOCTYPE="URL" xlink:href="alto/b30246039_0001.xml" />
-          </mets:file>
-        </mets:fileGrp>
-      </mets:fileSec>
-      {structMap}
-    </mets:mets>
-
-  def xmlNoOrderAttrib =
-    xmlWithThumbnailImages {
-      <mets:structMap TYPE="PHYSICAL">
-        <mets:div DMDID="DMDPHYS_0000" ID="PHYS_0000" TYPE="physSequence">
-          <mets:div ADMID="AMD_0001" ID="PHYS_0001" TYPE="page">
-            <mets:fptr FILEID="FILE_0001_OBJECTS" />
-            <mets:fptr FILEID="FILE_0001_ALTO" />
-          </mets:div>
-          <mets:div ADMID="AMD_0002" ID="PHYS_0002" TYPE="page">
-            <mets:fptr FILEID="FILE_0002_OBJECTS" />
-          </mets:div>
-        </mets:div>
-      </mets:structMap>
-    }
-
-  def xmlNonSequentialOrder =
-    xmlWithThumbnailImages {
-      <mets:structMap TYPE="PHYSICAL">
+  def xmlNonSequentialOrder(recordIdentifier: String) =
+    xmlWithThumbnailImages(
+      recordIdentifier, {
+        <mets:structMap TYPE="PHYSICAL">
         <mets:div DMDID="DMDPHYS_0000" ID="PHYS_0000" TYPE="physSequence">
           <mets:div ADMID="AMD_0002" ID="PHYS_0002" ORDER="2" TYPE="page">
             <mets:fptr FILEID="FILE_0002_OBJECTS" />
@@ -168,11 +132,13 @@ class MetsXmlParserTest extends FunSpec with Matchers {
           </mets:div>
         </mets:div>
       </mets:structMap>
-    }
+      }
+    )
 
-  def xmlInvalidFileId =
-    xmlWithThumbnailImages {
-      <mets:structMap TYPE="PHYSICAL">
+  def xmlInvalidFileId(recordIdentifier: String) =
+    xmlWithThumbnailImages(
+      recordIdentifier, {
+        <mets:structMap TYPE="PHYSICAL">
         <mets:div DMDID="DMDPHYS_0000" ID="PHYS_0000" TYPE="physSequence">
           <mets:div ADMID="AMD_0001" ID="PHYS_0001" ORDER="1" TYPE="page">
             <mets:fptr FILEID="OOPS" />
@@ -183,5 +149,6 @@ class MetsXmlParserTest extends FunSpec with Matchers {
           </mets:div>
         </mets:div>
       </mets:structMap>
-    }
+      }
+    )
 }
