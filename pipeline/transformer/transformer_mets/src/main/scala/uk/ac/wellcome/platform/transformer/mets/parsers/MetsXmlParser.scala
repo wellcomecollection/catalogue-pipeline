@@ -91,13 +91,11 @@ object MetsXmlParser {
     *  thumbnail image.
     */
   private def thumbnailLocation(root: Elem, bnumber: String): Option[String] = {
-    /**
-      * Filenames in DLCS are always prefixed with the bnumber to ensure uniqueness.
-      * However they might not be prefixed with the bnumber in the METS file.
-      * So we need to do two thinhs:
-      *  - strip the "objects/" part of the link
-      *  - prepend the bnumber followed by an underscore if it's not already present
-      */
+    // Filenames in DLCS are always prefixed with the bnumber to ensure uniqueness.
+    // However they might not be prefixed with the bnumber in the METS file.
+    // So we need to do two thinhs:
+    //  - strip the "objects/" part of the link
+    //  - prepend the bnumber followed by an underscore if it's not already present
     val filePrefixRegex = s"objects/(?:${bnumber}_)?"
     physicalStructMap(root).headOption
       .flatMap {

@@ -13,17 +13,17 @@ case class Mets(
 
   def toWork(version: Int): Either[Throwable, UnidentifiedInvisibleWork] =
     for {
-      maybeDigitalLocation <- digitalLocation
+      maybeLicense <- parseLicense
       unidentifiableItem: MaybeDisplayable[Item] = Unidentifiable(
-        Item(locations = List(maybeDigitalLocation)))
+        Item(locations = List(digitalLocation(maybeLicense))))
     } yield
       UnidentifiedInvisibleWork(
         version = version,
         sourceIdentifier = sourceIdentifier,
-        workData(unidentifiableItem)
+        workData(unidentifiableItem, thumbnail(maybeLicense))
       )
 
-  private def workData(unidentifiableItem: MaybeDisplayable[Item]) =
+  private def workData(unidentifiableItem: MaybeDisplayable[Item], thumbnail: Option[DigitalLocation]) =
     WorkData(
       items = List(unidentifiableItem),
       mergeCandidates = List(mergeCandidate),
@@ -39,11 +39,8 @@ case class Mets(
     reason = Some("METS work")
   )
 
-  private def digitalLocation = {
+  private def digitalLocation(maybeLicense: Option[License]) = {
     val url = s"https://wellcomelibrary.org/iiif/$recordIdentifier/manifest"
-    for {
-      maybeLicense <- parseLicense
-    } yield
       DigitalLocation(
         url,
         LocationType("iiif-presentation"),
@@ -65,11 +62,12 @@ case class Mets(
 
   private val thumbnailDim = "200"
 
-  private def thumbnail =
+  private def thumbnail(maybeLicense: Option[License]) =
     thumbnailLocation.map { location =>
       DigitalLocation(
-        s"https://dlcs.io/iiif-img/wellcome/5/$location/full/!$thumbnailDim,$thumbnailDim/0/default.jpg",
-        LocationType("thumbnail-image"),
+        url = s"https://dlcs.io/iiif-img/wellcome/5/$location/full/!$thumbnailDim,$thumbnailDim/0/default.jpg",
+        locationType = LocationType("thumbnail-image"),
+        license = maybeLicense
       )
     }
 }
