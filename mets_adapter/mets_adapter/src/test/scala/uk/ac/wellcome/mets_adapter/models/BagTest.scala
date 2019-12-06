@@ -80,8 +80,9 @@ class BagTest extends FunSpec with Matchers {
           "data/b30246039_0002.xml" -> "v1/data/b30246039_0002.xml",
         )
       )
-      bag.manifestations shouldBe List("v1/data/b30246039_0001.xml",
-                                       "v1/data/b30246039_0002.xml")
+      bag.manifestations shouldBe List(
+        "v1/data/b30246039_0001.xml",
+        "v1/data/b30246039_0002.xml")
     }
   }
 

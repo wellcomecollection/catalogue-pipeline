@@ -144,10 +144,10 @@ class MetsAdapterWorkerServiceTest
     }
   }
 
-  def withWorkerService[R](
-    bagRetriever: BagRetriever,
-    store: VersionedStore[String, Int, MetsData],
-    createMsgSender: SNS.Topic => SNSMessageSender = createMsgSender(_))(
+  def withWorkerService[R](bagRetriever: BagRetriever,
+                           store: VersionedStore[String, Int, MetsData],
+                           createMsgSender: SNS.Topic => SNSMessageSender =
+                             createMsgSender(_))(
     testWith: TestWith[(MetsAdapterWorkerService, QueuePair, SNS.Topic), R]) =
     withActorSystem { implicit actorSystem =>
       withLocalSnsTopic { topic =>

@@ -11,7 +11,8 @@ class MetsStoreTest extends FunSpec with Matchers {
   it("should store new METS data") {
     val internalStore = createInternalStore()
     val store = new MetsStore(internalStore)
-    store.storeData(Version("001", 1), metsData("NEW")) shouldBe Right(Version("001", 1))
+    store.storeData(Version("001", 1), metsData("NEW")) shouldBe Right(
+      Version("001", 1))
     internalStore.getLatest("001") shouldBe Right(
       Identified(Version("001", 1), metsData("NEW"))
     )
@@ -20,7 +21,8 @@ class MetsStoreTest extends FunSpec with Matchers {
   it("should update METS data when newer version") {
     val internalStore = createInternalStore(Version("001", 1) -> "OLD")
     val store = new MetsStore(internalStore)
-    store.storeData(Version("001", 2), metsData("NEW")) shouldBe Right(Version("001", 2))
+    store.storeData(Version("001", 2), metsData("NEW")) shouldBe Right(
+      Version("001", 2))
     internalStore.getLatest("001") shouldBe Right(
       Identified(Version("001", 2), metsData("NEW"))
     )
@@ -29,7 +31,8 @@ class MetsStoreTest extends FunSpec with Matchers {
   it("should not update METS data when current version") {
     val internalStore = createInternalStore(Version("001", 1) -> "OLD")
     val store = new MetsStore(internalStore)
-    store.storeData(Version("001", 1), metsData("NEW")) shouldBe Right(Version("001", 1))
+    store.storeData(Version("001", 1), metsData("NEW")) shouldBe Right(
+      Version("001", 1))
     internalStore.getLatest("001") shouldBe Right(
       Identified(Version("001", 1), metsData("OLD"))
     )
