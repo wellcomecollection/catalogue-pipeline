@@ -24,6 +24,8 @@ case class Bag(info: BagInfo,
   // XML file in data directory named with some b-number.
   private val metsFileRegex = "^data/b[0-9]{7}[0-9x].xml$".r
 
+  // A bag can contain number of manifestations, generally named the same as the
+  // main METS file followed by an underscore and it's (zero-padded) index.
   private val manifestationRegex = "^data/b[0-9]{7}[0-9x]_\\w+.xml$".r
 
   private val versionRegex = "^v([0-9]+)".r

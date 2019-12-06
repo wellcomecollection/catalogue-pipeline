@@ -187,8 +187,8 @@ class MetsAdapterWorkerServiceTest
   def createStore(data: Map[Version[String, Int], String] = Map.empty) =
     MemoryVersionedStore(data.mapValues(metsData(_)))
 
-  def metsData(file: String = "new.file", version: Int = 1) =
-    MetsData("bucket", "path", version, file, Nil)
+  def metsData(file: String = "mets.xml", version: Int = 1) =
+    MetsData("bucket", "root", version, file, Nil)
 
   def getMessages(topic: SNS.Topic) =
     listMessagesReceivedFromSNS(topic)
