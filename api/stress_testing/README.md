@@ -6,5 +6,5 @@ It uses [artillery](https://artillery.io/) and can be run (after a `yarn` to ins
 ```
 yarn start
 ```
-The behaviour is defined in `normal_usage.yml`, the IDs it uses are in `ids.csv`, and the queries are in `queries.csv`.
+The behaviour is defined in `normal_usage.yml`, the IDs it uses are in `ids.csv`, and the queries are in `queries.csv` - they are a human-random selection, there is nothing special or specifically useful about them, nor are they meticulously stratified.
 

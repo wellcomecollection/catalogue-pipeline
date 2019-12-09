@@ -20,6 +20,20 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.ref.WeakReference
 import scala.util.{DynamicVariable, Failure, Success}
 
+// Some context on why there's a custom dispatcher here, and what `currentTransaction` is all about:
+
+// APM stores activated transactions and spans in a ThreadLocal pool, which is why it requires that Scopes are
+// closed on the same thread on which they are started. Scala's Futures are run in a ForkJoinPool to which new
+// Futures are enqueued: they can either execute on the thread from which they were created, a new thread that
+// is forked by the pool, or be 'stolen' by an existing thread that has become available.
+//
+// mapping on Futures creates new ones which, at low volume, are likely to be run on the same thread thus
+// preserving the integrity of APM's ThreadLocals. However, at high request volume, the forking and work-stealing
+// is much more likely to occur (due to the asynchronicity of requests), and so we cannot guarantee that the mapping
+// function is run in the same thread as the Future which it maps. This results in closing Scopes on new threads,
+// and referring to "current" transactions which are either null-transactions or are unrelated, causing the
+// problems described above.
+
 object Tracing {
   def init(config: Config)(implicit actorSystem: ActorSystem): Unit = {
     ElasticApmAttacher.attach(
@@ -38,9 +52,15 @@ object Tracing {
     ec = actorSystem.dispatchers.lookup("tracing-dispatcher")
   }
 
+  // This is set to the global EC so that tests work.
+  // In practice it's mutated by `init` but this does mean that if
+  // you forget to call `init` then you might experience issues.
   implicit var ec: ExecutionContext =
     scala.concurrent.ExecutionContext.Implicits.global
 
+  // This is copied across from the current thread when executing a new Runnable (ie a Future) by the dispatcher
+  // configured in TraceableDispatcherConfigurator across. The WeakReference ensures that APM controls the memory
+  // in which the Transaction lives (we never truly acquire the object) and so prevents the possibility of memory leaks.
   private val _currentTransaction =
     new DynamicVariable[WeakReference[Transaction]](
       new WeakReference[Transaction](ElasticApm.currentTransaction())
@@ -97,6 +117,8 @@ trait Tracing {
       }
   }
 
+  // This is to activate the currentTransaction for cases where we want APM's auto-instrumentation to kick in:
+  // for us, that's for it to instrument the calls to the Elastic REST API.
   def withActiveTrace[T](wrapped: => T): T = {
     val scope = Tracing.currentTransaction.activate()
     val result = wrapped
@@ -118,6 +140,7 @@ object Helpers {
   }
 }
 
+// This ensures that the currentTransaction is always valid: see comments on `currentTransaction` above.
 class TraceableDispatcherConfigurator(config: Config,
                                       prerequisites: DispatcherPrerequisites)
     extends MessageDispatcherConfigurator(config, prerequisites) {
