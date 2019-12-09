@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.api.services
 
-import co.elastic.apm.api.{ElasticApm, Transaction}
+import co.elastic.apm.api.Transaction
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.get.GetResponse
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
@@ -13,7 +13,7 @@ import uk.ac.wellcome.display.models.{
   SortRequest,
   SortingOrder
 }
-import uk.ac.wellcome.platform.api.AsyncTracing
+import uk.ac.wellcome.platform.api.Tracing
 import uk.ac.wellcome.platform.api.models._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -29,15 +29,13 @@ case class ElasticsearchQueryOptions(filters: List[WorkFilter],
 class ElasticsearchService(elasticClient: ElasticClient)(
   implicit ec: ExecutionContext
 ) extends Logging
-    with AsyncTracing {
+    with Tracing {
 
   def findResultById(canonicalId: String)(
     index: Index): Future[Either[ElasticError, GetResponse]] =
-    elasticClient
-      .execute {
-        get(canonicalId).from(index.name)
-      }
-      .map { toEither }
+    withActiveTrace(elasticClient.execute {
+      get(canonicalId).from(index.name)
+    }).map { toEither }
 
   def listResults: (Index, ElasticsearchQueryOptions) => Future[
     Either[ElasticError, SearchResponse]] =
@@ -73,16 +71,16 @@ class ElasticsearchService(elasticClient: ElasticClient)(
       ).request
 
       debug(s"Sending ES request: ${searchRequest.show}")
-      val parentTransaction = ElasticApm
-        .currentTransaction()
+      val transaction = Tracing.currentTransaction
         .addQueryOptionLabels(queryOptions)
 
-      elasticClient
-        .execute { searchRequest.trackTotalHits(true) }
+      withActiveTrace(
+        elasticClient
+          .execute { searchRequest.trackTotalHits(true) })
         .map { toEither }
         .map {
           _.map { res =>
-            parentTransaction.addLabel("elasticTook", res.took)
+            transaction.addLabel("elasticTook", res.took)
             res
           }
         }
