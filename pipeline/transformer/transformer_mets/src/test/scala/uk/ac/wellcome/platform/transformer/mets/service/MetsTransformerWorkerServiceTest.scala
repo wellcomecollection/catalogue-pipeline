@@ -10,10 +10,12 @@ import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.sns.NotificationMessage
+import uk.ac.wellcome.mets_adapter.models.MetsData
 import uk.ac.wellcome.models.generators.RandomStrings
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.mets.fixtures.MetsGenerators
-import uk.ac.wellcome.storage.store.HybridStoreEntry
+import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
+import uk.ac.wellcome.storage.store.{HybridStoreEntry, VersionedStore}
 import uk.ac.wellcome.storage.{Identified, Version}
 
 class MetsTransformerWorkerServiceTest
@@ -101,19 +103,23 @@ class MetsTransformerWorkerServiceTest
       case queuePair @ QueuePair(queue, _) =>
         withLocalSnsTopic { topic =>
           withLocalS3Bucket { messagingBucket =>
-            withVHS { vhs =>
+            withMemoryStore { versionedStore =>
               withActorSystem { implicit actorSystem =>
                 withSQSStream[NotificationMessage, R](queue) { sqsStream =>
                   withSqsBigMessageSender[TransformedBaseWork, R](
                     messagingBucket,
                     topic,
                     snsClient) { messageSender =>
-                    val workerService = new MetsTransformerWorkerService(
-                      sqsStream,
-                      messageSender,
-                      vhs)
-                    workerService.run()
-                    testWith((queuePair, topic, vhs))
+                    withAssumeRoleClientProvider(roleArn) {
+                      val workerService = new MetsTransformerWorkerService(
+                        sqsStream,
+                        messageSender,
+                        versionedStore,
+                        assumeRoleclientProvider
+                      )
+                      workerService.run()
+                      testWith((queuePair, topic, versionedStore))
+                    }
                   }
                 }
               }
@@ -121,6 +127,10 @@ class MetsTransformerWorkerServiceTest
           }
         }
     }
+
+  def withMemoryStore[R](testWith: TestWith[VersionedStore[String, Int, MetsData], R]) = {
+    testWith(MemoryVersionedStore(Map()))
+  }
 
   private def sendWork(mets: String,
                        name: String,
