@@ -8,13 +8,15 @@ import uk.ac.wellcome.models.transformable.sierra.{
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData,
-  SierraItemData
+  SierraItemData,
+  SierraQueryOps
 }
 
 case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
     extends SierraTransformer
     with Logging
-    with SierraLocation {
+    with SierraLocation
+    with SierraQueryOps {
 
   type Output = List[MaybeDisplayable[Item]]
 
@@ -41,29 +43,6 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
         )
       case _ => physicalItems ++ List(maybeDigitalItem).flatten
     }
-  }
-
-  private def transformItemData(
-    itemId: SierraItemNumber,
-    itemData: SierraItemData): Identifiable[Item] = {
-    debug(s"Attempting to transform $itemId")
-    Identifiable(
-      sourceIdentifier = SourceIdentifier(
-        identifierType = IdentifierType("sierra-system-number"),
-        ontologyType = "Item",
-        value = itemId.withCheckDigit
-      ),
-      otherIdentifiers = List(
-        SourceIdentifier(
-          identifierType = IdentifierType("sierra-identifier"),
-          ontologyType = "Item",
-          value = itemId.withoutCheckDigit
-        )
-      ),
-      agent = Item(
-        locations = getPhysicalLocation(itemData).toList
-      )
-    )
   }
 
   private def getPhysicalItems(
@@ -114,4 +93,31 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
       None
     }
   }
+
+  private def transformItemData(
+    itemId: SierraItemNumber,
+    itemData: SierraItemData): Identifiable[Item] = {
+    debug(s"Attempting to transform $itemId")
+    Identifiable(
+      sourceIdentifier = SourceIdentifier(
+        identifierType = IdentifierType("sierra-system-number"),
+        ontologyType = "Item",
+        value = itemId.withCheckDigit
+      ),
+      otherIdentifiers = List(
+        SourceIdentifier(
+          identifierType = IdentifierType("sierra-identifier"),
+          ontologyType = "Item",
+          value = itemId.withoutCheckDigit
+        )
+      ),
+      agent = Item(
+        title = getItemTitle(itemData),
+        locations = getPhysicalLocation(itemData).toList
+      )
+    )
+  }
+
+  private def getItemTitle(data: SierraItemData) =
+    data.varFields.withTag("v").contents.headOption
 }

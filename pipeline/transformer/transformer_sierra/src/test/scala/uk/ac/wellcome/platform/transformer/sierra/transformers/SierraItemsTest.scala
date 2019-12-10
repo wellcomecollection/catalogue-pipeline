@@ -8,7 +8,8 @@ import uk.ac.wellcome.models.transformable.sierra.{
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData,
-  SierraItemData
+  SierraItemData,
+  VarField
 }
 import uk.ac.wellcome.platform.transformer.sierra.source.sierra.SierraSourceLocation
 import uk.ac.wellcome.platform.transformer.sierra.generators.SierraDataGenerators
@@ -57,6 +58,25 @@ class SierraItemsTest extends FunSpec with Matchers with SierraDataGenerators {
     transformedItem
       .asInstanceOf[Identifiable[Item]]
       .sourceIdentifier shouldBe sourceIdentifier
+  }
+
+  it("extracts the title from item varfield $v") {
+    val itemId = createSierraItemNumber
+    val itemData = createSierraItemData.copy(
+      varFields = List(
+        VarField(marcTag = Some("b"), content = Some("S11.1L")),
+        VarField(marcTag = Some("v"), content = Some("Envelope")),
+      )
+    )
+
+    val transformedItem: MaybeDisplayable[Item] = getTransformedItems(
+      itemDataMap = Map(itemId -> itemData)
+    ).head
+
+    transformedItem
+      .asInstanceOf[Identifiable[Item]]
+      .agent
+      .title shouldBe Some("Envelope")
   }
 
   it("removes items with deleted=true") {
