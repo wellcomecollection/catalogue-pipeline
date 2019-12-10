@@ -45,7 +45,7 @@ class MetsTransformerWorkerService(
   private def process(key: Version[String, Int]) = {
     for {
       metsData <- getKey(key)
-      metsString <- temporaryCredentialsStore.get(ObjectLocation(metsData.bucket, s"${metsData.path}/${metsData.file}"))
+      metsString <- getFromMetsStore(metsData)
       mets <- MetsXmlParser(metsString)
       work <- mets.toWork(key.version)
       _ <- messageSender.sendT(work).toEither
@@ -59,5 +59,7 @@ class MetsTransformerWorkerService(
     }
   }
 
-
+  private def getFromMetsStore(metsData: MetsData) = {
+    temporaryCredentialsStore.get(ObjectLocation(metsData.bucket, s"${metsData.path}/${metsData.file}"))
+  }
 }

@@ -6,10 +6,10 @@ import uk.ac.wellcome.storage.ObjectLocation
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.streaming.Codec
 
-class TemporaryCredentialsStore[T](mestStoreAssumeRoleClient: AssumeRoleClientProvider[AmazonS3])(implicit codec: Codec[T]) {
+class TemporaryCredentialsStore[T](assumeRoleClientProvider: AssumeRoleClientProvider[AmazonS3])(implicit codec: Codec[T]) {
   def get(objectLocation: ObjectLocation): Either[Throwable, T] = {
     for {
-      client <- mestStoreAssumeRoleClient.getClient
+      client <- assumeRoleClientProvider.getClient
       r <-S3TypedStore[T](codec, client)
         .get(objectLocation)
         .left.map(error => error.e)

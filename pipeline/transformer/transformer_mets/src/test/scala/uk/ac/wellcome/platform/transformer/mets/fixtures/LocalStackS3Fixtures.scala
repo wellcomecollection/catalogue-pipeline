@@ -21,7 +21,7 @@ trait LocalStackS3Fixtures extends S3Fixtures { this: Suite =>
     secretKey = ""
   )
   val localStackS3Store = S3TypedStore[String](implicitly[Codec[String]], localStackS3Client)
-  val testS3ClientBuilder = new TestS3ClientBuilder(localStackS3Endoint, "localhost")
+  val testS3ClientBuilder = new TestS3ClientBuilder(localStackS3Endoint, "us-east-1")
 
   def withLocalStackS3Bucket[R]: Fixture[Bucket, R] =
     fixture[Bucket, R](
