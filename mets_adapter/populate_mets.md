@@ -4,7 +4,7 @@ This scans through the storage-service VHS and publishes messages for the METS a
 
 ## Installation
 
-```
+```text
 virtualenv venv
 . venv/bin/activate
 pip install -r requirements.txt
@@ -14,5 +14,5 @@ pip install -r requirements.txt
 
 Run by:
 
-```
-./populate_mets.py
+\`\`\` ./populate\_mets.py
+

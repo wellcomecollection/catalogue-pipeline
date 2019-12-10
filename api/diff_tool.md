@@ -6,7 +6,7 @@ It is intended to be used before switching stage to prod, and makes best sense w
 
 ## Installation
 
-```
+```text
 virtualenv venv
 . venv/bin/activate
 pip install -r requirements.txt
@@ -16,12 +16,13 @@ pip install -r requirements.txt
 
 Run by:
 
-```
+```text
 ./diff_tool.py
 ```
 
 Show all options with:
 
-```
+```text
 ./diff_tool.py --help
 ```
+

@@ -14,9 +14,9 @@ Notes fields are also queried alongside the default fields, with no extra boosti
 
 ## Results
 
-As mentioned in [#3933](https://github.com/wellcometrust/platform/issues/3933), we saw no discernable difference between the two candidates.
-![image](https://user-images.githubusercontent.com/11006680/67676260-0151ae00-f979-11e9-9027-167bef011f64.png)
+As mentioned in [\#3933](https://github.com/wellcometrust/platform/issues/3933), we saw no discernable difference between the two candidates. ![image](https://user-images.githubusercontent.com/11006680/67676260-0151ae00-f979-11e9-9027-167bef011f64.png)
 
 ## Conclusions
 
 The reason we saw no difference is that the test never really ran as a result of a [bug](https://github.com/wellcometrust/platform/issues/4019) in the query selection. Decided to delay re-testing in favour of changes that we suspect will be more impactful.
+
