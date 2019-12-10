@@ -1,4 +1,4 @@
-# Test 5: Stacked queries
+# Test 5 - Scoring tiers
 
 ## Candidates
 

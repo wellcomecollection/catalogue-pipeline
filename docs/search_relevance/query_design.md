@@ -1,4 +1,6 @@
-# Intentions & Expectations
+# Query design
+
+## Intentions & Expectations
 
 Searching for an known title within the catalogue
 

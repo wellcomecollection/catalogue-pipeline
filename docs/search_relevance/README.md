@@ -70,15 +70,6 @@ Among many others, we're looking at:
 
   ![IMG\_20191118\_102749](https://user-images.githubusercontent.com/11006680/69045281-78b1b500-09ee-11ea-8f94-63ff6e7506b8.jpg)
 
-  [Test 4](004_and_or_or.md) also contains a good practical example of how we're using these graphs in practice.
+[Test 4](004_and_or_or.md) also contains a good practical example of how we're using these graphs in practice.
 
 It's important to note that the metrics we're using aren't perfect, and we can't always assume that the candidate with the biggest number is best. The results require interpretation alongside the data itself to build a clear picture of what's going on and why, as we'll demonstrate in the discussion of the tests below.
-
-## Tests
-
-* [read about test 1 here](001_explicit_feedback.md)
-* [read about test 2 here](002_implicit_feedback.md)
-* [read about test 3 here](003_adding_notes.md)
-* [read about test 4 here](004_and_or_or.md)
-* [read about test 5 here](005_stacked_queries.md)
-

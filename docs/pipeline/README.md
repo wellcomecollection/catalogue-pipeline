@@ -1,4 +1,4 @@
-# Ingest pipeline
+# Pipeline
 
 Our ingest pipeline is made up of a number of steps, which are illustrated below. Each orange box is one of our applications.
 
