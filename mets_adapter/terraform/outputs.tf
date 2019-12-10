@@ -1,3 +1,3 @@
-output "mets_vhs_keys_topic_name" {
-  value = "${module.mets_vhs_keys_topic.name}"
+output "mets_adapter_topic_name" {
+  value = "${module.mets_adapter_topic.name}"
 }

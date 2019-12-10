@@ -32,7 +32,7 @@ module "catalogue_pipeline_20191115" {
   miro_adapter_topic_count = "2"
 
   mets_adapter_topic_count = 1
-  mets_adapter_topic_names = ["${local.mets_vhs_keys_topic_name}"]
+  mets_adapter_topic_names = ["${local.mets_adapter_topic_name}"]
 
   # Elasticsearch
   es_works_index = "v2-20191115"

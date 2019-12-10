@@ -24,17 +24,16 @@ module "service" {
   env_vars = {
     logstash_host = "${local.logstash_host}"
 
-    sns_arn              = "${module.mets_vhs_keys_topic.arn}"
+    sns_arn              = "${module.mets_adapter_topic.arn}"
     queue_id = "${module.queue.id}"
     metrics_namespace    = "${local.namespace}"
-    vhs_mets_adapter_dynamo_table_name = "${local.vhs_mets_adapter_table_name}"
-    vhs_mets_adapter_bucket_name       = "${local.vhs_mets_adapter_bucket_name}"
+    mets_adapter_dynamo_table = "${local.mets_adapter_table_name}"
 
     bag_api_url = "${local.bag_api_url}"
     oauth_url = "${local.oauth_url}"
   }
 
-  env_vars_length = 8
+  env_vars_length = 7
 
   secret_env_vars = {
     oauth_client_id     = "mets_adapter/mets_adapter/client_id"
