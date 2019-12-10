@@ -65,14 +65,22 @@ trait ApiWorksTestBase
   def resultList(apiPrefix: String,
                  pageSize: Int = 10,
                  totalPages: Int = 1,
-                 totalResults: Int = 1) =
+                 totalResults: Int = 1,
+                 page: Int = 1,
+                 sort: List[String] = Nil,
+                 sortOrder: String = "asc") = {
+
     s"""
       "@context": "${contextUrl(apiPrefix)}",
       "type": "ResultList",
       "pageSize": $pageSize,
       "totalPages": $totalPages,
-      "totalResults": $totalResults
+      "totalResults": $totalResults,
+      "sort": ${toJson(sort).get},
+      "sortOrder": "$sortOrder",
+      "page": $page
     """
+  }
 
   def singleWorkResult(apiPrefix: String): String =
     s"""

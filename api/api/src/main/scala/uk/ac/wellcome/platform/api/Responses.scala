@@ -5,9 +5,9 @@ import io.circe.generic.extras.JsonKey
 import io.circe.{Encoder, Json}
 import akka.http.scaladsl.model.Uri
 import io.swagger.v3.oas.annotations.media.Schema
-
 import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.display.models._
+import uk.ac.wellcome.display.json.DisplayJsonSerializers
 import uk.ac.wellcome.display.models.v2._
 import uk.ac.wellcome.display.models.Implicits._
 import uk.ac.wellcome.platform.api.services.WorksSearchOptions
@@ -46,13 +46,16 @@ case class MultipleWorksResponse(
   pageSize: Int,
   totalPages: Int,
   totalResults: Int,
+  page: Int,
+  sort: List[SortRequest],
+  sortOrder: SortingOrder,
   results: List[DisplayWorkV2],
   prevPage: Option[String] = None,
   nextPage: Option[String] = None,
   aggregations: Option[DisplayAggregations] = None
 )
 
-object MultipleWorksResponse {
+object MultipleWorksResponse extends DisplayJsonSerializers {
 
   import DisplayAggregations.{encoder => aggsEncoder}
   implicit val encoder: Encoder[MultipleWorksResponse] = deriveEncoder
@@ -71,13 +74,17 @@ object MultipleWorksResponse {
       ),
       currentPage = searchOptions.pageNumber,
       requestUri = requestUri,
-      contextUri = contextUri
+      contextUri = contextUri,
+      sort = searchOptions.sortBy,
+      sortOrder = searchOptions.sortOrder
     )
 
   def apply(resultList: DisplayResultList[DisplayWorkV2],
             currentPage: Int,
             requestUri: Uri,
-            contextUri: String): MultipleWorksResponse =
+            contextUri: String,
+            sort: List[SortRequest],
+            sortOrder: SortingOrder): MultipleWorksResponse =
     MultipleWorksResponse(
       context = contextUri,
       ontologyType = resultList.ontologyType,
@@ -88,6 +95,9 @@ object MultipleWorksResponse {
       prevPage = pageLink(currentPage - 1, resultList.totalPages, requestUri),
       nextPage = pageLink(currentPage + 1, resultList.totalPages, requestUri),
       aggregations = resultList.aggregations,
+      page = currentPage,
+      sort = sort,
+      sortOrder = sortOrder
     )
 
   private def pageLink(page: Int,

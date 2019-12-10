@@ -99,7 +99,8 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
             apiPrefix,
             pageSize = 1,
             totalPages = 3,
-            totalResults = 3)},
+            totalResults = 3,
+            page = 2)},
               "prevPage": "$apiScheme://$apiHost/$apiPrefix/works?page=1&pageSize=1",
               "nextPage": "$apiScheme://$apiHost/$apiPrefix/works?page=3&pageSize=1",
               "results": [
@@ -121,7 +122,8 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
             apiPrefix,
             pageSize = 1,
             totalPages = 3,
-            totalResults = 3)},
+            totalResults = 3,
+            page = 1)},
               "nextPage": "$apiScheme://$apiHost/$apiPrefix/works?page=2&pageSize=1",
               "results": [
                 {
@@ -142,7 +144,8 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
             apiPrefix,
             pageSize = 1,
             totalPages = 3,
-            totalResults = 3)},
+            totalResults = 3,
+            page = 3)},
               "prevPage": "$apiScheme://$apiHost/$apiPrefix/works?page=2&pageSize=1",
               "results": [
                 {
@@ -345,10 +348,11 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
         )
         insertIntoElasticsearch(indexV2, work1, work2, work3, work4, work5)
 
+        val sort = List("production.dates")
         assertJsonResponse(routes, s"/$apiPrefix/works?sort=production.dates") {
           Status.OK -> s"""
             {
-              ${resultList(apiPrefix, totalResults = 5)},
+              ${resultList(apiPrefix, totalResults = 5, sort = sort)},
               "results": [{
 	            	 "id": "5",
 	            	 "title": "${work5.data.title.get}",
@@ -398,12 +402,18 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
         )
         insertIntoElasticsearch(indexV2, work1, work2, work3)
 
+        val sortOrder = "desc"
+        val sort = List("production.dates")
         assertJsonResponse(
           routes,
-          s"/$apiPrefix/works?sort=production.dates&sortOrder=desc") {
+          s"/$apiPrefix/works?sort=${sort.mkString(",")}&sortOrder=$sortOrder") {
           Status.OK -> s"""
             {
-              ${resultList(apiPrefix, totalResults = 3)},
+              ${resultList(
+            apiPrefix,
+            totalResults = 3,
+            sort = sort,
+            sortOrder = sortOrder)},
               "results": [{
 	            	 "id": "2",
 	            	 "title": "${work2.data.title.get}",
