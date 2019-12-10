@@ -42,24 +42,30 @@ trait DisplaySerialisationTestBase { this: Suite =>
       }
       .mkString(",")
 
-  def unidentifiableItem(it: Unidentifiable[Item]) = {
-    s"""{
-          "type": "${it.agent.ontologyType}",
-          "locations": [
-            ${locations(it.agent.locations)}
-          ]
-        }"""
-  }
+  def unidentifiableItem(it: Unidentifiable[Item]) =
+    s"""
+      {
+        "type": "${it.agent.ontologyType}",
+        ${itemTitle(it.agent)}
+        "locations": [${locations(it.agent.locations)}]
+      }
+    """
 
-  def identifiedItem(it: Identified[Item]) = {
-    s"""{
-          "id": "${it.canonicalId}",
-          "type": "${it.agent.ontologyType}",
-          "locations": [
-            ${locations(it.agent.locations)}
-          ]
-        }"""
-  }
+  def identifiedItem(it: Identified[Item]) =
+    s"""
+      {
+        "id": "${it.canonicalId}",
+        "type": "${it.agent.ontologyType}",
+        ${itemTitle(it.agent)}
+        "locations": [${locations(it.agent.locations)}]
+      }
+    """
+
+  def itemTitle(item: Item) =
+    item.title match {
+      case Some(title) => s""""title": "$title","""
+      case None        => ""
+    }
 
   def locations(locations: List[Location]) =
     locations

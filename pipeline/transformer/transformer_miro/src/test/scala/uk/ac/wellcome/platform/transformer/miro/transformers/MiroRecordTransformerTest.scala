@@ -279,7 +279,9 @@ class MiroRecordTransformerTest
       LocationType("iiif-image"),
       Some(License_CCBY),
       None)
-    work.data.items shouldBe List(Unidentifiable(Item(List(expectedLocation))))
+    work.data.items shouldBe List(
+      Unidentifiable(Item(locations = List(expectedLocation)))
+    )
   }
 
   it("sets the WorkType as 'Digital Images'") {
