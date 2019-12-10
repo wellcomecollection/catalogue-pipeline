@@ -61,16 +61,17 @@ object Tracing {
   // This is copied across from the current thread when executing a new Runnable (ie a Future) by the dispatcher
   // configured in TraceableDispatcherConfigurator across. The WeakReference ensures that APM controls the memory
   // in which the Transaction lives (we never truly acquire the object) and so prevents the possibility of memory leaks.
-  private val _currentTransaction =
+  private val threadLocalTransactionReference =
     new DynamicVariable[WeakReference[Transaction]](
       new WeakReference[Transaction](ElasticApm.currentTransaction())
     )
 
   def currentTransaction: Transaction =
-    _currentTransaction.value.get.getOrElse(ElasticApm.currentTransaction())
+    threadLocalTransactionReference.value.get
+      .getOrElse(ElasticApm.currentTransaction())
 
   def currentTransaction_=(t: Transaction) {
-    _currentTransaction.value = new WeakReference[Transaction](t)
+    threadLocalTransactionReference.value = new WeakReference[Transaction](t)
   }
 }
 
