@@ -26,22 +26,22 @@ There's a lot of interesting discussion to be had about different search modalit
 
 We're collecting data in two distinct ways:
 
-* **Implicit data collection:** users know that their data might be used to understand aggregate user behaviour, but their behaviour on the site is driven by another motive.
+- **Implicit data collection:** users know that their data might be used to understand aggregate user behaviour, but their behaviour on the site is driven by another motive.
 
 The larger of the two major datasets we are using is passively collected while users carry out searches and look through pages of results.
 
 We track:
 
-* The search query parameters, such as the search terms and page number
-* The works they click on and its position in the result set
-* Whether they're on the Wellcome staff network as we want to be able to distinguish between internal and external users
-* The toggles and A/B tests that are enabled or disabled
+- The search query parameters, such as the search terms and page number
+- The works they click on and its position in the result set
+- Whether they're on the Wellcome staff network as we want to be able to distinguish between internal and external users
+- The toggles and A/B tests that are enabled or disabled
 
 This data is aggregated under an anonymous session id.
 
 We can collect lots of this data \(100,000s of actions logged so far\), but it lacks any contextual information and unpicking a user's motivation for an action is hard. Collecting explict feedback \(below\) should solve this problem.
 
-* **Explicit data collection:** users are told that they are part of an experiment, and providing us with information is their primary motive.
+- **Explicit data collection:** users are told that they are part of an experiment, and providing us with information is their primary motive.
 
 Some of the data we've used to measure search relevance is collected in sessions with internal users who know the collection well and the kind of things that people / researchers might be looking for, following a set of instructions to obtain data in a useful format.
 
@@ -57,18 +57,18 @@ We're using multiple complementary metrics to measure search relevance:
 
 **Explicit**
 
-* **Normalised Discounted Cumulative Gain \(NDCG\)** is well explained in [this post](https://www.ebayinc.com/stories/blogs/tech/measuring-search-relevance/) by ebay. It relies on explicitly collected data from users who know that the data they give us will be used to measure algorithmic performance. It compares the actual performance of a query-type \(the order of a set of rated results\) to the _ideal_ performance \(the same results, sorted from most to least relevant according to the user's rating\).
-* **Strict, loose, and permissive precision** use the same data as NDCG. For strict precision, the percentage of results rated 4+ is counted. Loose precision counts the percentage of 3+ ratings, and permissive precision counts 2+. Explained in the book [_Search Analytics For Your Site_](https://rosenfeldmedia.com/books/search-analytics-for-your-site/) by Louis Rosenfeld.
+- **Normalised Discounted Cumulative Gain \(NDCG\)** is well explained in [this post](https://www.ebayinc.com/stories/blogs/tech/measuring-search-relevance/) by ebay. It relies on explicitly collected data from users who know that the data they give us will be used to measure algorithmic performance. It compares the actual performance of a query-type \(the order of a set of rated results\) to the _ideal_ performance \(the same results, sorted from most to least relevant according to the user's rating\).
+- **Strict, loose, and permissive precision** use the same data as NDCG. For strict precision, the percentage of results rated 4+ is counted. Loose precision counts the percentage of 3+ ratings, and permissive precision counts 2+. Explained in the book [_Search Analytics For Your Site_](https://rosenfeldmedia.com/books/search-analytics-for-your-site/) by Louis Rosenfeld.
 
 **Implicit**
 
 Among many others, we're looking at:
 
-* **Click through rate \(CTR\)** is measured passively by tracking users' behaviour while they use the search function. This version of CTR is different to the usual definition; we take the ratio of the number of distinct searches to the number of items clicked on for each anonymised session id.
-* **Top n click through rate \(CTR5\)** is almost exactly the same as the above, but only counts the clicks on works which appear in the top n results.
-* **Click distribution curve fitting** uses plots of the distribution of clicks on the first page of results. This distribution tends to follow a regular exponentially decaying shape, but search variants produce slightly different behaviour. In the simplest case of motivation for a test \(wanting to generate more clicks at the top of the set of results\), observing differences in the graphs over a sufficient window of time will reveal which variant is performing better. This can also be quantified by fitting a line of the form `y = (a * e^(-b * x)) + c` to the curves and comparing the values of `b`. A lower `b` corresponds to a sharper elbow in the decay, and therefore a steeper concentration of clicks towards the top of the result set. In the graph below, variant 1 would be the better-performing variant, as it concentrates clicks towards the top end of the list of results.
+- **Click through rate \(CTR\)** is measured passively by tracking users' behaviour while they use the search function. This version of CTR is different to the usual definition; we take the ratio of the number of distinct searches to the number of items clicked on for each anonymised session id.
+- **Top n click through rate \(CTR5\)** is almost exactly the same as the above, but only counts the clicks on works which appear in the top n results.
+- **Click distribution curve fitting** uses plots of the distribution of clicks on the first page of results. This distribution tends to follow a regular exponentially decaying shape, but search variants produce slightly different behaviour. In the simplest case of motivation for a test \(wanting to generate more clicks at the top of the set of results\), observing differences in the graphs over a sufficient window of time will reveal which variant is performing better. This can also be quantified by fitting a line of the form `y = (a * e^(-b * x)) + c` to the curves and comparing the values of `b`. A lower `b` corresponds to a sharper elbow in the decay, and therefore a steeper concentration of clicks towards the top of the result set. In the graph below, variant 1 would be the better-performing variant, as it concentrates clicks towards the top end of the list of results.
 
-  ![IMG\_20191118\_102749](https://user-images.githubusercontent.com/11006680/69045281-78b1b500-09ee-11ea-8f94-63ff6e7506b8.jpg)
+  ![IMG_20191118_102749](https://user-images.githubusercontent.com/11006680/69045281-78b1b500-09ee-11ea-8f94-63ff6e7506b8.jpg)
 
   [Test 4](004_and_or_or.md) also contains a good practical example of how we're using these graphs in practice.
 
@@ -76,9 +76,8 @@ It's important to note that the metrics we're using aren't perfect, and we can't
 
 ## Tests
 
-* [read about test 1 here](001_explicit_feedback.md)
-* [read about test 2 here](002_implicit_feedback.md)
-* [read about test 3 here](003_adding_notes.md)
-* [read about test 4 here](004_and_or_or.md)
-* [read about test 5 here](005_stacked_queries.md)
-
+- [read about test 1 here](001_explicit_feedback.md)
+- [read about test 2 here](002_implicit_feedback.md)
+- [read about test 3 here](003_adding_notes.md)
+- [read about test 4 here](004_and_or_or.md)
+- [read about test 5 here](005_scoring_tiers.md)
