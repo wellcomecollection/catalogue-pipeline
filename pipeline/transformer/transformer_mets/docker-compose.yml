@@ -7,9 +7,13 @@ sqs:
   ports:
     - "9324:9324"
 sts:
-  image: motoserver/moto:1.3.5
+  image: localstack/localstack
   ports:
-    - "5000:5000"
+    - "4592:4592"
+    - "4572:4572"
+  environment:
+    - SERVICES=sts,s3
+    - DEBUG=1
 s3:
   image: scality/s3server:mem-latest
   ports:

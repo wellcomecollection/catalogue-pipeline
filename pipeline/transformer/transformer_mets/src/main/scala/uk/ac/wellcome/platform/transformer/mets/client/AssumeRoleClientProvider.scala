@@ -9,10 +9,7 @@ import com.amazonaws.services.securitytoken.model.AssumeRoleRequest
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
-
-trait ClientFactory[T] {
-  def buildClient(credentials: BasicSessionCredentials): T
-}
+import scala.util.Try
 
 class AssumeRoleClientProvider[T](stsClient: AWSSecurityTokenService, roleArn: String, interval: FiniteDuration = 30 seconds)
                                  (clientFactory: ClientFactory[T])
@@ -21,15 +18,15 @@ class AssumeRoleClientProvider[T](stsClient: AWSSecurityTokenService, roleArn: S
 
   actorSystem.scheduler.schedule(0 milliseconds, interval)(refreshClient())
 
-  def getClient: T = {
+  def getClient: Either[Throwable, T] = {
     Option(client.get()) match {
-      case Some(client) => client
+      case Some(client) => Right(client)
       case None => refreshClient()
     }
   }
 
-  private def refreshClient() = {
-    val assumeRoleResult = stsClient.assumeRole(new AssumeRoleRequest().withRoleArn(roleArn))
+  private def refreshClient() = Try{
+    val assumeRoleResult = stsClient.assumeRole(new AssumeRoleRequest().withRoleArn(roleArn).withRoleSessionName("transformer"))
     val temporaryCredentials = new BasicSessionCredentials(
       assumeRoleResult.getCredentials.getAccessKeyId,
       assumeRoleResult.getCredentials.getSecretAccessKey,
@@ -38,5 +35,5 @@ class AssumeRoleClientProvider[T](stsClient: AWSSecurityTokenService, roleArn: S
     val t = clientFactory.buildClient(temporaryCredentials)
     client.set(t)
     t
-  }
+  }.toEither
 }

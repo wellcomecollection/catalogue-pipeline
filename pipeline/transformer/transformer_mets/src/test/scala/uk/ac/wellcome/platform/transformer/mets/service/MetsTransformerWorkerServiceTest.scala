@@ -2,8 +2,7 @@ package uk.ac.wellcome.platform.transformer.mets.service
 
 import org.scalatest.FunSpec
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import uk.ac.wellcome.bigmessaging.EmptyMetadata
-import uk.ac.wellcome.bigmessaging.fixtures.{BigMessagingFixture, VHSFixture}
+import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
@@ -13,10 +12,13 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.mets_adapter.models.MetsData
 import uk.ac.wellcome.models.generators.RandomStrings
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.transformer.mets.fixtures.MetsGenerators
+import uk.ac.wellcome.platform.transformer.mets.fixtures.{LocalStackS3Fixtures, MetsGenerators, STSFixtures}
+import uk.ac.wellcome.platform.transformer.mets.store.TemporaryCredentialsStore
+import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
-import uk.ac.wellcome.storage.store.{HybridStoreEntry, VersionedStore}
-import uk.ac.wellcome.storage.{Identified, Version}
+import uk.ac.wellcome.storage.store.s3.S3TypedStore
+import uk.ac.wellcome.storage.store.{TypedStoreEntry, VersionedStore}
+import uk.ac.wellcome.storage.{Identified, ObjectLocation, Version}
 
 class MetsTransformerWorkerServiceTest
     extends FunSpec
@@ -25,7 +27,9 @@ class MetsTransformerWorkerServiceTest
     with RandomStrings
     with Eventually
     with IntegrationPatience
-    with VHSFixture[String] {
+    with STSFixtures with LocalStackS3Fixtures {
+
+  val roleArn ="arn:aws:iam::123456789012:role/new_role"
 
   it("retrieves a mets file from s3 and sends an invisible work") {
 
@@ -34,8 +38,8 @@ class MetsTransformerWorkerServiceTest
     val str = metsXmlWith(identifier, License_CCBYNC)
 
     withWorkerService {
-      case (QueuePair(queue, _), topic, vhs) =>
-        sendWork(str, "mets.xml", vhs, queue, version)
+      case (QueuePair(queue, _), metsBucket, topic, dynamoStore) =>
+        sendWork(str, "mets.xml", localStackS3Store , dynamoStore, metsBucket, queue, version)
         eventually {
           val works = getMessages[UnidentifiedInvisibleWork](topic)
           works.length should be >= 1
@@ -53,8 +57,8 @@ class MetsTransformerWorkerServiceTest
     val value1 = "this is not a valid mets file"
 
     withWorkerService {
-      case (QueuePair(queue, dlq), topic, vhs) =>
-        sendWork(value1, "mets.xml", vhs, queue, version)
+      case (QueuePair(queue, dlq), metsBucket, topic, vhs) =>
+        sendWork(value1, "mets.xml", localStackS3Store, vhs, metsBucket, queue, version)
         eventually {
           val works = getMessages[UnidentifiedInvisibleWork](topic)
           works should have size 0
@@ -98,11 +102,12 @@ class MetsTransformerWorkerServiceTest
     expectedWork
   }
 
-  def withWorkerService[R](testWith: TestWith[(QueuePair, Topic, VHS), R]): R =
+  def withWorkerService[R](testWith: TestWith[(QueuePair, Bucket, Topic, VersionedStore[String,Int, MetsData]), R]): R =
     withLocalSqsQueueAndDlq {
       case queuePair @ QueuePair(queue, _) =>
         withLocalSnsTopic { topic =>
           withLocalS3Bucket { messagingBucket =>
+            withLocalStackS3Bucket { metsBucket =>
             withMemoryStore { versionedStore =>
               withActorSystem { implicit actorSystem =>
                 withSQSStream[NotificationMessage, R](queue) { sqsStream =>
@@ -110,39 +115,49 @@ class MetsTransformerWorkerServiceTest
                     messagingBucket,
                     topic,
                     snsClient) { messageSender =>
-                    withAssumeRoleClientProvider(roleArn) {
+                    withAssumeRoleClientProvider(roleArn)(testS3ClientBuilder) { assumeRoleclientProvider =>
                       val workerService = new MetsTransformerWorkerService(
                         sqsStream,
                         messageSender,
                         versionedStore,
-                        assumeRoleclientProvider
+                        new TemporaryCredentialsStore[String](assumeRoleclientProvider)
                       )
                       workerService.run()
-                      testWith((queuePair, topic, versionedStore))
+                      testWith((queuePair, metsBucket,topic, versionedStore))
                     }
                   }
                 }
               }
             }
+            }
           }
         }
     }
 
-  def withMemoryStore[R](testWith: TestWith[VersionedStore[String, Int, MetsData], R]) = {
+  def withMemoryStore[R](testWith: TestWith[VersionedStore[String, Int, MetsData], R]): R = {
     testWith(MemoryVersionedStore(Map()))
   }
 
   private def sendWork(mets: String,
                        name: String,
-                       vhs: VHS,
+                       s3Store: S3TypedStore[String],
+                       dynamoStore: VersionedStore[String, Int,MetsData],
+                       metsBucket: Bucket,
                        queue: SQS.Queue,
                        version: Int) = {
-    val entry = HybridStoreEntry(mets, EmptyMetadata())
-    val id = name
-    val key = vhs.put(Version(id, version))(entry) match {
+    val rootPath = "data"
+    val key = for {
+      _ <- s3Store.put(ObjectLocation(metsBucket.name, s"$rootPath/$name"))(TypedStoreEntry(mets, Map()))
+      entry = MetsData(metsBucket.name, rootPath, 1, name, List())
+      key <- dynamoStore.put(Version(name, version))(entry)
+    } yield key
+
+    key match {
       case Left(err)                 => throw new Exception(s"Failed storing work in VHS: $err")
-      case Right(Identified(key, _)) => key
+      case Right(Identified(key, _)) => sendNotificationToSQS(queue, key)
     }
-    sendNotificationToSQS(queue, key)
+
   }
 }
+
+

@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.transformer.mets.service
 
 import akka.Done
-import com.amazonaws.services.s3.AmazonS3
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.json.JsonUtil._
@@ -9,11 +8,9 @@ import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig}
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.mets_adapter.models.MetsData
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
-import uk.ac.wellcome.platform.transformer.mets.client.AssumeRoleClientProvider
 import uk.ac.wellcome.platform.transformer.mets.parsers.MetsXmlParser
+import uk.ac.wellcome.platform.transformer.mets.store.TemporaryCredentialsStore
 import uk.ac.wellcome.storage.store.VersionedStore
-import uk.ac.wellcome.storage.store.s3.S3TypedStore
-import uk.ac.wellcome.storage.streaming.Codec
 import uk.ac.wellcome.storage.{Identified, ObjectLocation, Version}
 import uk.ac.wellcome.typesafe.Runnable
 
@@ -23,7 +20,7 @@ class MetsTransformerWorkerService(
                                     msgStream: SQSStream[NotificationMessage],
                                     messageSender: BigMessageSender[SNSConfig, TransformedBaseWork],
                                     adapterStore: VersionedStore[String, Int, MetsData],
-                                  mestStoreAssumeRoleClient: AssumeRoleClientProvider[AmazonS3]
+                                    temporaryCredentialsStore: TemporaryCredentialsStore[String]
                                   )
     extends Runnable
     with Logging {
@@ -48,7 +45,7 @@ class MetsTransformerWorkerService(
   private def process(key: Version[String, Int]) = {
     for {
       metsData <- getKey(key)
-      metsString <- fetchMets(metsData)
+      metsString <- temporaryCredentialsStore.get(ObjectLocation(metsData.bucket, s"${metsData.path}/${metsData.file}"))
       mets <- MetsXmlParser(metsString)
       work <- mets.toWork(key.version)
       _ <- messageSender.sendT(work).toEither
@@ -62,12 +59,5 @@ class MetsTransformerWorkerService(
     }
   }
 
-  private def fetchMets(metsData: MetsData) = {
-    S3TypedStore[String](implicitly[Codec[String]], mestStoreAssumeRoleClient.getClient)
-      .get(ObjectLocation(metsData.bucket, metsData.path+metsData.file))
-      .right.map(_.identifiedT.t)
-      .left.map(error => error.e)
-  }
-}
 
-case class VersionedMets(version: Int, metsString: String)
+}

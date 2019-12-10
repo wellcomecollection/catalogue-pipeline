@@ -299,7 +299,8 @@ object CatalogueDependencies {
       ExternalDependencies.akkaHttpDependencies ++
       ExternalDependencies.scribeJavaDependencies ++
       ExternalDependencies.scalaXmlDependencies ++
-      ExternalDependencies.awsSTSDependencies ++ WellcomeDependencies.typesafeLibrary
+      ExternalDependencies.awsSTSDependencies ++
+      WellcomeDependencies.typesafeLibrary
 
   // METS adapter
 

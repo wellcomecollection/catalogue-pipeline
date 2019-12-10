@@ -23,6 +23,7 @@ import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import scala.concurrent.ExecutionContext
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 import org.scanamo.auto._
+import uk.ac.wellcome.platform.transformer.mets.store.TemporaryCredentialsStore
 import uk.ac.wellcome.typesafe.config.builders.AWSClientConfigBuilder
 
 object Main extends WellcomeTypesafeApp with AWSClientConfigBuilder{
@@ -41,8 +42,9 @@ object Main extends WellcomeTypesafeApp with AWSClientConfigBuilder{
       DynamoBuilder.buildDynamoClient(config)
 
     val stsClient = AWSSecurityTokenServiceClientBuilder.standard().withRegion("eu-west-1").build()
-
     val s3ClientFactory = new AmazonS3ClientFactory(buildAWSClientConfig(config, namespace = "storage"))
+    val assumeRoleS3ClientProvider = new AssumeRoleClientProvider[AmazonS3](stsClient, config.required[String]("aws.s3.storage.role.arn"))(s3ClientFactory)
+    val temporaryCredentialsStore = new TemporaryCredentialsStore[String](assumeRoleS3ClientProvider)
 
     new MetsTransformerWorkerService(
       SQSBuilder.buildSQSStream[NotificationMessage](config),
@@ -51,7 +53,7 @@ object Main extends WellcomeTypesafeApp with AWSClientConfigBuilder{
       adapterStore = new DynamoSingleVersionStore[String, MetsData](
         DynamoBuilder.buildDynamoConfig(config, namespace = "mets")
       ),
-      new AssumeRoleClientProvider[AmazonS3](stsClient, config.required[String]("aws.s3.storage.role.arn"))(s3ClientFactory)
+      temporaryCredentialsStore
     )
   }
 }
