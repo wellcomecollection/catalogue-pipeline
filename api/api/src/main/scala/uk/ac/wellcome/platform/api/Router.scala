@@ -30,7 +30,7 @@ class Router(elasticClient: ElasticClient,
              apiConfig: ApiConfig)(implicit ec: ExecutionContext)
     extends FailFastCirceSupport
     with Directives
-    with AsyncTracing {
+    with Tracing {
 
   import MultipleWorksResponse.encoder
   import ResultResponse.encoder

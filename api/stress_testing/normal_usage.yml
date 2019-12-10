@@ -1,0 +1,28 @@
+config:
+  target: "https://api.wellcomecollection.org"
+  phases:
+    - duration: 10
+      arrivalRate: 4
+    - duration: 30
+      arrivalRate: 2
+      rampTo: 8
+    - duration: 10
+      arrivalRate: 10
+  payload:
+    -
+      path: "ids.csv"
+      fields:
+        - "id"
+    -
+      path: "queries.csv"
+      fields:
+        - "query"
+
+scenarios:
+  - name: "Normal usage"
+    flow:
+      - get:
+          url: "/catalogue/v2/works?query={{ query }}"
+      - think: 0.5
+      - get:
+          url: "/catalogue/v2/works/{{ id }}"

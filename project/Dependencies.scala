@@ -108,13 +108,13 @@ object ExternalDependencies {
     val scalatest = "3.0.1"
     val logstashLogback = "6.1"
     val scribeJava = "6.8.1"
-    val apm = "1.11.0"
+    val apm = "1.12.0"
     val enumeratum = "1.5.13"
     val enumeratumScalacheck = "1.5.16"
   }
   val enumeratumDependencies = Seq(
     "com.beachape" %% "enumeratum" % versions.enumeratum,
-      "com.beachape" %% "enumeratum-scalacheck" % versions.enumeratumScalacheck % "test"
+    "com.beachape" %% "enumeratum-scalacheck" % versions.enumeratumScalacheck % "test"
   )
 
   val scribeJavaDependencies = Seq(
