@@ -22,10 +22,10 @@ trait STSFixtures {
     .build()
 
 
-  def withAssumeRoleClientProvider[R,T](roleArn:String)
+  def withAssumeRoleClientProvider[R,T](roleArn:String, interval: FiniteDuration = 30 seconds)
                                      (clientFactory: ClientFactory[T])
                                      (testWith: TestWith[AssumeRoleClientProvider[T], R])
                                      (implicit actorSystem: ActorSystem) = {
-    testWith(new AssumeRoleClientProvider[T](stsClient, roleArn, 30 seconds)(clientFactory))
+    testWith(new AssumeRoleClientProvider[T](stsClient, roleArn, interval)(clientFactory))
   }
 }

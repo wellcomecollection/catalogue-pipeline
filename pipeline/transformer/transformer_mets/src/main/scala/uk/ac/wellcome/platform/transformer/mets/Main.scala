@@ -25,6 +25,7 @@ import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 import org.scanamo.auto._
 import uk.ac.wellcome.platform.transformer.mets.store.TemporaryCredentialsStore
 import uk.ac.wellcome.typesafe.config.builders.AWSClientConfigBuilder
+import scala.concurrent.duration._
 
 object Main extends WellcomeTypesafeApp with AWSClientConfigBuilder{
   runWithConfig { config: Config =>
@@ -43,7 +44,7 @@ object Main extends WellcomeTypesafeApp with AWSClientConfigBuilder{
 
     val stsClient = AWSSecurityTokenServiceClientBuilder.standard().withRegion("eu-west-1").build()
     val s3ClientFactory = new AmazonS3ClientFactory(buildAWSClientConfig(config, namespace = "storage"))
-    val assumeRoleS3ClientProvider = new AssumeRoleClientProvider[AmazonS3](stsClient, config.required[String]("aws.s3.storage.role.arn"))(s3ClientFactory)
+    val assumeRoleS3ClientProvider = new AssumeRoleClientProvider[AmazonS3](stsClient, config.required[String]("aws.s3.storage.role.arn"), 20 minutes)(s3ClientFactory)
     val temporaryCredentialsStore = new TemporaryCredentialsStore[String](assumeRoleS3ClientProvider)
 
     new MetsTransformerWorkerService(

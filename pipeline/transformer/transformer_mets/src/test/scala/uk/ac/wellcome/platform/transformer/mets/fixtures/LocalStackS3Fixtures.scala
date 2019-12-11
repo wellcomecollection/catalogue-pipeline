@@ -12,6 +12,7 @@ import uk.ac.wellcome.storage.streaming.Codec
 
 import scala.collection.JavaConverters._
 
+// TODO: move this into scala-storage
 trait LocalStackS3Fixtures extends S3Fixtures { this: Suite =>
   val localStackS3Endoint = "http://localhost:4572"
   val localStackS3Client: AmazonS3 = S3ClientFactory.create(

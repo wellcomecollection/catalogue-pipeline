@@ -11,7 +11,7 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import scala.util.Try
 
-class AssumeRoleClientProvider[T](stsClient: AWSSecurityTokenService, roleArn: String, interval: FiniteDuration = 30 seconds)
+class AssumeRoleClientProvider[T](stsClient: AWSSecurityTokenService, roleArn: String, interval: FiniteDuration)
                                  (clientFactory: ClientFactory[T])
                                  (implicit actorSystem: ActorSystem, ec: ExecutionContext) {
   val client = new AtomicReference[T]
