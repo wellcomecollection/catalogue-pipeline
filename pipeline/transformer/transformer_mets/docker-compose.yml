@@ -7,13 +7,12 @@ sqs:
   ports:
     - "9324:9324"
 sts:
-  image: localstack/localstack
+  image: localstack/localstack:0.10.5
   ports:
     - "4592:4592"
     - "4572:4572"
   environment:
     - SERVICES=sts,s3
-    - DEBUG=1
 s3:
   image: scality/s3server:mem-latest
   ports:

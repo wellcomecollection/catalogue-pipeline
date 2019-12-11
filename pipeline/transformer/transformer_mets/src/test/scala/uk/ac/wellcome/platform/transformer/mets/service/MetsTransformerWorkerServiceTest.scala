@@ -20,7 +20,6 @@ import uk.ac.wellcome.platform.transformer.mets.fixtures.{
 import uk.ac.wellcome.platform.transformer.mets.store.TemporaryCredentialsStore
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
-import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.store.{TypedStoreEntry, VersionedStore}
 import uk.ac.wellcome.storage.{Identified, ObjectLocation, Version}
 
@@ -47,7 +46,6 @@ class MetsTransformerWorkerServiceTest
         sendWork(
           str,
           "mets.xml",
-          localStackS3Store,
           dynamoStore,
           metsBucket,
           queue,
@@ -73,7 +71,6 @@ class MetsTransformerWorkerServiceTest
         sendWork(
           value1,
           "mets.xml",
-          localStackS3Store,
           vhs,
           metsBucket,
           queue,
@@ -168,14 +165,13 @@ class MetsTransformerWorkerServiceTest
 
   private def sendWork(mets: String,
                        name: String,
-                       s3Store: S3TypedStore[String],
                        dynamoStore: VersionedStore[String, Int, MetsData],
                        metsBucket: Bucket,
                        queue: SQS.Queue,
                        version: Int) = {
     val rootPath = "data"
     val key = for {
-      _ <- s3Store.put(ObjectLocation(metsBucket.name, s"$rootPath/$name"))(
+      _ <- localStackS3Store.put(ObjectLocation(metsBucket.name, s"$rootPath/$name"))(
         TypedStoreEntry(mets, Map()))
       entry = MetsData(metsBucket.name, rootPath, 1, name, List())
       key <- dynamoStore.put(Version(name, version))(entry)

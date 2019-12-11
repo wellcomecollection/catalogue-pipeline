@@ -56,8 +56,9 @@ class AssumeRoleClientProviderTest
           withAssumeRoleClientProvider(
             "arn:aws:iam::123456789012:role/new_role",
             10 milliseconds)(mockClientFactory) { assumeRoleClientProvider =>
+            Thread.sleep((30 milliseconds).toMillis)
             val s3Client1 = assumeRoleClientProvider.getClient
-            Thread.sleep((15 milliseconds).toMillis)
+            Thread.sleep((30 milliseconds).toMillis)
             val s3Client2 = assumeRoleClientProvider.getClient
 
             s3Client1.right.get shouldNot be theSameInstanceAs (s3Client2.right.get)
