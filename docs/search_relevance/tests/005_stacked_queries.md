@@ -6,7 +6,7 @@ Two candidates were compared, one control \(AND query from [test 4](https://gith
 
 By layering up the queries from a low-precision, high-recall generic query with no boost, to a highly boosted set of precise queries on a specific set of fields, we're able to tune the precision and recall of our queries and match our queries directly to user intentions. We can also continuously fine-tune these queries as more intentions/expectations are added.
 
-Here, we're stacking a base query with two equally weighted `AND` queries across subject and genre, followed by an even more heavily weighted `OR` query on the title. The code itself can be seen [here](https://github.com/wellcometrust/catalogue/blob/39f8289dac0e7f0bf23bfe9341aa50ac67131b24/api/api/src/main/scala/uk/ac/wellcome/platform/api/services/ElasticsearchQueryBuilder.scala)
+Here, we're stacking a base query with two equally weighted `AND` queries across subject and genre, followed by an even more heavily weighted `OR` query on the title. The code itself can be seen [here](https://github.com/wellcometrust/catalogue/blob/39f8289dac0e7f0bf23bfe9341aa50ac67131b24/api/api/src/main/scala/uk/ac/wellcome/platform/api/services/ElasticsearchQueryBuilder.scala).
 
 [![scoring tiers](https://user-images.githubusercontent.com/11006680/70548661-db6c1b80-1b6a-11ea-8247-7a1358451c06.png)](https://user-images.githubusercontent.com/11006680/70548661-db6c1b80-1b6a-11ea-8247-7a1358451c06.png)
 

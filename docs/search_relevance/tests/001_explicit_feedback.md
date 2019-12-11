@@ -2,7 +2,7 @@
 
 ## Candidates
 
-Four initial candidates were assembled to get a feel for the effects of each lever we can pull. They were tested explicitly with internal users. Using the json query format, they look like this:
+Four initial candidates were assembled to get a feel for the effects of each lever we can pull. They were tested explicitly with internal users. Using the JSON query format, they look like this:
 
 **just boosting**
 
@@ -73,7 +73,7 @@ Four initial candidates were assembled to get a feel for the effects of each lev
 
 ## Conclusions
 
-Stupidly, we didn't measure the performance of the standard algorithm alongside the candidates below so we can't immediately swap the existing one out for a better performing one yet. However, the candidates weren't intended to be an immediate improvement \(more a test of the kind of tweaks we can make\) so we're happy to save the rpduction changes for a later date.
+Stupidly, we didn't measure the performance of the standard algorithm alongside the candidates below so we can't immediately swap the existing one out for a better performing one yet. However, the candidates weren't intended to be an immediate improvement \(more a test of the kind of tweaks we can make\) so we're happy to save the changes for a later date.
 
 The difference between `justboost` and `broaderBoost` shows that we are having an effect by tweaking these parameters. We'll be carrying over some of these insights into the next round of testing.
 
