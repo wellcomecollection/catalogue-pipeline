@@ -1,4 +1,4 @@
-# README
+# Search relevance
 
 ## Search relevance
 
@@ -70,6 +70,7 @@ Among many others, we're looking at:
 
   ![IMG\_20191118\_102749](https://user-images.githubusercontent.com/11006680/69045281-78b1b500-09ee-11ea-8f94-63ff6e7506b8.jpg)
 
-[Test 4](004_and_or_or.md) also contains a good practical example of how we're using these graphs in practice.
+[Test 4](https://github.com/wellcometrust/catalogue/tree/11c66ae149e3504e845464e1307895a997857993/docs/search_relevance/004_and_or_or.md) also contains a good practical example of how we're using these graphs in practice.
 
 It's important to note that the metrics we're using aren't perfect, and we can't always assume that the candidate with the biggest number is best. The results require interpretation alongside the data itself to build a clear picture of what's going on and why, as we'll demonstrate in the discussion of the tests below.
+
