@@ -2,7 +2,7 @@
 
 ## Candidates
 
-Two candidates were compared, one control \(AND query from [test 4](https://github.com/wellcometrust/catalogue/blob/1815824ba326bb32f6178a01c860443a5ca427d0/docs/search_relevance/004_AND_or_OR.md)\), and one which stacked a loose, generic query with a set of much more constrained and highly boosted queries. [\#246](https://github.com/wellcometrust/catalogue/pull/246)
+Two candidates were compared, one control (AND query from [test 4](./004_AND_or_OR.md)), and one which stacked a loose, generic query with a set of much more constrained and highly boosted queries. [\#246](https://github.com/wellcometrust/catalogue/pull/246)
 
 By layering up the queries from a low-precision, high-recall generic query with no boost, to a highly boosted set of precise queries on a specific set of fields, we're able to tune the precision and recall of our queries and match our queries directly to user intentions. We can also continuously fine-tune these queries as more intentions/expectations are added.
 
