@@ -7,7 +7,7 @@
     * [Test 2 - Implicit feedback](search_relevance/tests/002_implicit_feedback.md)
     * [Test 3 - Adding notes](search_relevance/tests/003_adding_notes.md)
     * [Test 4 - AND or OR](search_relevance/tests/004_and_or_or.md)
-    * [Test 5 - Stacked queries](search_relevance/tests/005_stacked_queries.md)
+    * [Test 5 - Scoring Tiers](search_relevance/tests/005_stacked_queries.md)
   * [Query design](search_relevance/query_design.md)
 * [Adapters](adapters/README.md)
   * [Adapter lifecycle](adapters/adapter_lifecycle.md)
