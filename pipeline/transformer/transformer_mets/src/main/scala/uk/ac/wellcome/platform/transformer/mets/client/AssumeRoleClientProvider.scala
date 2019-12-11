@@ -11,9 +11,12 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import scala.util.Try
 
-class AssumeRoleClientProvider[T](stsClient: AWSSecurityTokenService, roleArn: String, interval: FiniteDuration)
-                                 (clientFactory: ClientFactory[T])
-                                 (implicit actorSystem: ActorSystem, ec: ExecutionContext) {
+class AssumeRoleClientProvider[T](
+  stsClient: AWSSecurityTokenService,
+  roleArn: String,
+  interval: FiniteDuration)(clientFactory: ClientFactory[T])(
+  implicit actorSystem: ActorSystem,
+  ec: ExecutionContext) {
   private val client = new AtomicReference[T]
 
   actorSystem.scheduler.schedule(0 milliseconds, interval)(refreshClient())
@@ -21,19 +24,23 @@ class AssumeRoleClientProvider[T](stsClient: AWSSecurityTokenService, roleArn: S
   def getClient: Either[Throwable, T] = {
     Option(client.get()) match {
       case Some(client) => Right(client)
-      case None => refreshClient()
+      case None         => refreshClient()
     }
   }
 
-  private def refreshClient() = Try{
-    val assumeRoleResult = stsClient.assumeRole(new AssumeRoleRequest().withRoleArn(roleArn).withRoleSessionName("transformer"))
-    val temporaryCredentials = new BasicSessionCredentials(
-      assumeRoleResult.getCredentials.getAccessKeyId,
-      assumeRoleResult.getCredentials.getSecretAccessKey,
-      assumeRoleResult.getCredentials.getSessionToken);
+  private def refreshClient() =
+    Try {
+      val assumeRoleResult = stsClient.assumeRole(
+        new AssumeRoleRequest()
+          .withRoleArn(roleArn)
+          .withRoleSessionName("transformer"))
+      val temporaryCredentials = new BasicSessionCredentials(
+        assumeRoleResult.getCredentials.getAccessKeyId,
+        assumeRoleResult.getCredentials.getSecretAccessKey,
+        assumeRoleResult.getCredentials.getSessionToken);
 
-    val t = clientFactory.buildClient(temporaryCredentials)
-    client.set(t)
-    t
-  }.toEither
+      val t = clientFactory.buildClient(temporaryCredentials)
+      client.set(t)
+      t
+    }.toEither
 }

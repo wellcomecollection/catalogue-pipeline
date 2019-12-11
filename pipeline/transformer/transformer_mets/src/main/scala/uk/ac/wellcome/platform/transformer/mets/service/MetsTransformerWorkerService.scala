@@ -17,12 +17,11 @@ import uk.ac.wellcome.typesafe.Runnable
 import scala.concurrent.Future
 
 class MetsTransformerWorkerService(
-                                    msgStream: SQSStream[NotificationMessage],
-                                    messageSender: BigMessageSender[SNSConfig, TransformedBaseWork],
-                                    adapterStore: VersionedStore[String, Int, MetsData],
-                                    temporaryCredentialsStore: TemporaryCredentialsStore[String]
-                                  )
-    extends Runnable
+  msgStream: SQSStream[NotificationMessage],
+  messageSender: BigMessageSender[SNSConfig, TransformedBaseWork],
+  adapterStore: VersionedStore[String, Int, MetsData],
+  temporaryCredentialsStore: TemporaryCredentialsStore[String]
+) extends Runnable
     with Logging {
 
   val className = this.getClass.getSimpleName
@@ -60,6 +59,7 @@ class MetsTransformerWorkerService(
   }
 
   private def getFromMetsStore(metsData: MetsData) = {
-    temporaryCredentialsStore.get(ObjectLocation(metsData.bucket, s"${metsData.path}/${metsData.file}"))
+    temporaryCredentialsStore.get(
+      ObjectLocation(metsData.bucket, s"${metsData.path}/${metsData.file}"))
   }
 }

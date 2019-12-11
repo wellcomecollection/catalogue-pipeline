@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.transformer.mets.fixtures
 
 import com.amazonaws.services.s3.AmazonS3
 import org.scalatest.Suite
-import uk.ac.wellcome.fixtures.{Fixture, fixture, safeCleanup}
+import uk.ac.wellcome.fixtures.{fixture, safeCleanup, Fixture}
 import uk.ac.wellcome.fixtures._
 import uk.ac.wellcome.storage.fixtures.S3Fixtures
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
@@ -21,8 +21,10 @@ trait LocalStackS3Fixtures extends S3Fixtures { this: Suite =>
     accessKey = "",
     secretKey = ""
   )
-  val localStackS3Store = S3TypedStore[String](implicitly[Codec[String]], localStackS3Client)
-  val testS3ClientBuilder = new TestS3ClientBuilder(localStackS3Endoint, "us-east-1")
+  val localStackS3Store =
+    S3TypedStore[String](implicitly[Codec[String]], localStackS3Client)
+  val testS3ClientBuilder =
+    new TestS3ClientBuilder(localStackS3Endoint, "us-east-1")
 
   def withLocalStackS3Bucket[R]: Fixture[Bucket, R] =
     fixture[Bucket, R](

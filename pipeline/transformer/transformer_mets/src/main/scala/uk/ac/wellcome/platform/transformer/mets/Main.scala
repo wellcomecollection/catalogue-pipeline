@@ -12,7 +12,10 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.SQSBuilder
 import uk.ac.wellcome.mets_adapter.models.MetsData
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
-import uk.ac.wellcome.platform.transformer.mets.client.{AmazonS3ClientFactory, AssumeRoleClientProvider}
+import uk.ac.wellcome.platform.transformer.mets.client.{
+  AmazonS3ClientFactory,
+  AssumeRoleClientProvider
+}
 import uk.ac.wellcome.platform.transformer.mets.service.MetsTransformerWorkerService
 import uk.ac.wellcome.storage.store.dynamo.DynamoSingleVersionStore
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
@@ -27,7 +30,7 @@ import uk.ac.wellcome.platform.transformer.mets.store.TemporaryCredentialsStore
 import uk.ac.wellcome.typesafe.config.builders.AWSClientConfigBuilder
 import scala.concurrent.duration._
 
-object Main extends WellcomeTypesafeApp with AWSClientConfigBuilder{
+object Main extends WellcomeTypesafeApp with AWSClientConfigBuilder {
   runWithConfig { config: Config =>
     implicit val ec: ExecutionContext =
       AkkaBuilder.buildExecutionContext()
@@ -42,10 +45,18 @@ object Main extends WellcomeTypesafeApp with AWSClientConfigBuilder{
     implicit val dynamoClilent: AmazonDynamoDB =
       DynamoBuilder.buildDynamoClient(config)
 
-    val stsClient = AWSSecurityTokenServiceClientBuilder.standard().withRegion("eu-west-1").build()
-    val s3ClientFactory = new AmazonS3ClientFactory(buildAWSClientConfig(config, namespace = "storage"))
-    val assumeRoleS3ClientProvider = new AssumeRoleClientProvider[AmazonS3](stsClient, config.required[String]("aws.s3.storage.role.arn"), 20 minutes)(s3ClientFactory)
-    val temporaryCredentialsStore = new TemporaryCredentialsStore[String](assumeRoleS3ClientProvider)
+    val stsClient = AWSSecurityTokenServiceClientBuilder
+      .standard()
+      .withRegion("eu-west-1")
+      .build()
+    val s3ClientFactory = new AmazonS3ClientFactory(
+      buildAWSClientConfig(config, namespace = "storage"))
+    val assumeRoleS3ClientProvider = new AssumeRoleClientProvider[AmazonS3](
+      stsClient,
+      config.required[String]("aws.s3.storage.role.arn"),
+      20 minutes)(s3ClientFactory)
+    val temporaryCredentialsStore =
+      new TemporaryCredentialsStore[String](assumeRoleS3ClientProvider)
 
     new MetsTransformerWorkerService(
       SQSBuilder.buildSQSStream[NotificationMessage](config),
