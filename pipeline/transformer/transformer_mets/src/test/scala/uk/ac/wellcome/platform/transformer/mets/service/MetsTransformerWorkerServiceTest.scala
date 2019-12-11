@@ -43,13 +43,7 @@ class MetsTransformerWorkerServiceTest
 
     withWorkerService {
       case (QueuePair(queue, _), metsBucket, topic, dynamoStore) =>
-        sendWork(
-          str,
-          "mets.xml",
-          dynamoStore,
-          metsBucket,
-          queue,
-          version)
+        sendWork(str, "mets.xml", dynamoStore, metsBucket, queue, version)
         eventually {
           val works = getMessages[UnidentifiedInvisibleWork](topic)
           works.length should be >= 1
@@ -68,13 +62,7 @@ class MetsTransformerWorkerServiceTest
 
     withWorkerService {
       case (QueuePair(queue, dlq), metsBucket, topic, vhs) =>
-        sendWork(
-          value1,
-          "mets.xml",
-          vhs,
-          metsBucket,
-          queue,
-          version)
+        sendWork(value1, "mets.xml", vhs, metsBucket, queue, version)
         eventually {
           val works = getMessages[UnidentifiedInvisibleWork](topic)
           works should have size 0
@@ -171,7 +159,8 @@ class MetsTransformerWorkerServiceTest
                        version: Int) = {
     val rootPath = "data"
     val key = for {
-      _ <- localStackS3Store.put(ObjectLocation(metsBucket.name, s"$rootPath/$name"))(
+      _ <- localStackS3Store.put(
+        ObjectLocation(metsBucket.name, s"$rootPath/$name"))(
         TypedStoreEntry(mets, Map()))
       entry = MetsData(metsBucket.name, rootPath, 1, name, List())
       key <- dynamoStore.put(Version(name, version))(entry)
