@@ -1,5 +1,7 @@
 package uk.ac.wellcome.platform.transformer.mets.service
 
+import com.amazonaws.auth.BasicSessionCredentials
+import com.amazonaws.services.s3.AmazonS3
 import org.scalatest.FunSpec
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
@@ -13,14 +15,12 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.mets_adapter.models.MetsData
 import uk.ac.wellcome.models.generators.RandomStrings
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.transformer.mets.fixtures.{
-  LocalStackS3Fixtures,
-  MetsGenerators,
-  STSFixtures
-}
+import uk.ac.wellcome.platform.transformer.mets.client.ClientFactory
+import uk.ac.wellcome.platform.transformer.mets.fixtures.{LocalStackS3Fixtures, MetsGenerators, STSFixtures}
 import uk.ac.wellcome.platform.transformer.mets.store.TemporaryCredentialsStore
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
+import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.store.{TypedStoreEntry, VersionedStore}
 import uk.ac.wellcome.storage.{Identified, ObjectLocation, Version}
 
@@ -35,6 +35,12 @@ class MetsTransformerWorkerServiceTest
     with LocalStackS3Fixtures {
 
   val roleArn = "arn:aws:iam::123456789012:role/new_role"
+
+  // The test S3 container requires a specific accessKey and secretKey so
+  // it fails if we use the temporary credentials
+  object BypassCredentialsClientFactory extends ClientFactory[AmazonS3] {
+    override def buildClient(credentials: BasicSessionCredentials): AmazonS3 = s3Client
+  }
 
   it("retrieves a mets file from s3 and sends an invisible work") {
 
@@ -117,7 +123,7 @@ class MetsTransformerWorkerServiceTest
       case queuePair @ QueuePair(queue, _) =>
         withLocalSnsTopic { topic =>
           withLocalS3Bucket { messagingBucket =>
-            withLocalStackS3Bucket { metsBucket =>
+            withLocalS3Bucket { metsBucket =>
               withMemoryStore { versionedStore =>
                 withActorSystem { implicit actorSystem =>
                   withSQSStream[NotificationMessage, R](queue) { sqsStream =>
@@ -125,7 +131,7 @@ class MetsTransformerWorkerServiceTest
                       messagingBucket,
                       topic,
                       snsClient) { messageSender =>
-                      withAssumeRoleClientProvider(roleArn)(testS3ClientBuilder) {
+                      withAssumeRoleClientProvider(roleArn)(BypassCredentialsClientFactory) {
                         assumeRoleclientProvider =>
                           val workerService = new MetsTransformerWorkerService(
                             sqsStream,
@@ -160,7 +166,7 @@ class MetsTransformerWorkerServiceTest
                        version: Int) = {
     val rootPath = "data"
     val key = for {
-      _ <- localStackS3Store.put(
+      _ <- S3TypedStore[String].put(
         ObjectLocation(metsBucket.name, s"$rootPath/$name"))(
         TypedStoreEntry(mets, Map()))
       entry = MetsData(metsBucket.name, rootPath, 1, name, List())
