@@ -44,7 +44,7 @@ class MetsTransformerWorkerService(
 
   private def process(key: Version[String, Int]) = {
     for {
-      metsData <- getKey(key)
+      metsData <- getMetsData(key)
       metsString <- getFromMetsStore(metsData)
       mets <- MetsXmlParser(metsString)
       work <- mets.toWork(key.version)
@@ -52,7 +52,7 @@ class MetsTransformerWorkerService(
     } yield ()
   }
 
-  private def getKey(key: Version[String, Int]) = {
+  private def getMetsData(key: Version[String, Int]) = {
     adapterStore.get(key) match {
       case Left(err)                   => Left(err.e)
       case Right(Identified(_, entry)) => Right(entry)
