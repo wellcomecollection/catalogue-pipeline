@@ -1,4 +1,4 @@
-# Test 4: AND or OR
+# Test 4 - `AND` or `OR`
 
 ## Candidates
 

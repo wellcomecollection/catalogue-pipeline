@@ -1,4 +1,4 @@
-# Test 3: Adding notes
+# Test 3 - Adding notes
 
 ## Candidates
 
