@@ -7,13 +7,14 @@ trait ItemsGenerators extends IdentifiersGenerators {
     canonicalId: String = createCanonicalId,
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     otherIdentifiers: List[SourceIdentifier] = Nil,
-    locations: List[Location] = List(defaultLocation)
+    locations: List[Location] = List(defaultLocation),
+    title: Option[String] = None,
   ): Identified[Item] =
     Identified(
       canonicalId = canonicalId,
       sourceIdentifier = sourceIdentifier,
       otherIdentifiers = otherIdentifiers,
-      agent = Item(locations = locations)
+      agent = Item(locations = locations, title = title)
     )
 
   def createIdentifiedItem: Identified[Item] = createIdentifiedItemWith()

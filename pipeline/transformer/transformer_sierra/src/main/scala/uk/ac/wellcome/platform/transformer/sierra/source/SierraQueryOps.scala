@@ -31,7 +31,7 @@ trait SierraQueryOps {
           tags.indexOf(varfield.marcTag.get)
         }
 
-    def withTags(tag: String): List[VarField] = withTags(tag)
+    def withTag(tag: String): List[VarField] = withTags(tag)
 
     def withIndicator1(ind: String): List[VarField] =
       varfields.filter(_.indicator1 == Some(ind))

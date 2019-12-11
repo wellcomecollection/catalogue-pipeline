@@ -69,4 +69,16 @@ class DisplayItemV2Test extends FunSpec with Matchers with ItemsGenerators {
 
     displayItemV2.locations shouldBe List()
   }
+
+  it("parses an identified Item with title") {
+    val title = Some("Nice item")
+    val item = createIdentifiedItemWith(title = title)
+
+    val displayItemV2 = DisplayItemV2(
+      item = item,
+      includesIdentifiers = true
+    )
+
+    displayItemV2.title shouldBe title
+  }
 }

@@ -20,14 +20,19 @@ case class DisplayItemV2(
       "Relates the item to a unique system-generated identifier that governs interaction between systems and is regarded as canonical within the Wellcome data ecosystem."
   ) identifiers: Option[List[DisplayIdentifierV2]] = None,
   @Schema(
+    readOnly = true,
+    description = "A human readable title."
+  ) title: Option[String] = None,
+  @Schema(
     description = "List of locations that provide access to the item"
   ) locations: List[DisplayLocationV2] = List(),
   @JsonKey("type") @Schema(name = "type") ontologyType: String = "Item"
 )
 
 object DisplayItemV2 {
+
   def apply(item: Displayable[Item],
-            includesIdentifiers: Boolean): DisplayItemV2 = {
+            includesIdentifiers: Boolean): DisplayItemV2 =
     item match {
       case identifiedItem: Identified[Item] =>
         DisplayItemV2(
@@ -36,19 +41,18 @@ object DisplayItemV2 {
             if (includesIdentifiers)
               Some(identifiedItem.identifiers.map { DisplayIdentifierV2(_) })
             else None,
-          locations = identifiedItem.agent.locations.map {
-            DisplayLocationV2(_)
-          }
+          title = identifiedItem.agent.title,
+          locations = displayLocations(identifiedItem.agent)
         )
       case unidentifiableItem: Unidentifiable[Item] =>
         DisplayItemV2(
           id = None,
           identifiers = None,
-          locations = unidentifiableItem.agent.locations.map {
-            DisplayLocationV2(_)
-          }
+          title = unidentifiableItem.agent.title,
+          locations = displayLocations(unidentifiableItem.agent)
         )
     }
 
-  }
+  private def displayLocations(item: Item) =
+    item.locations.map(DisplayLocationV2(_))
 }

@@ -91,7 +91,10 @@ class ApiV2WorksIncludesTest
     withApi {
       case (indexV2, routes) =>
         val work = createIdentifiedWorkWith(
-          items = createIdentifiedItems(count = 1) :+ createUnidentifiableItemWith()
+          items = List(
+            createIdentifiedItemWith(title = Some("item title")),
+            createUnidentifiableItemWith()
+          )
         )
 
         insertIntoElasticsearch(indexV2, work)

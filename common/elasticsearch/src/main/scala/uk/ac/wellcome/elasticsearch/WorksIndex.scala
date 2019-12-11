@@ -117,7 +117,11 @@ object WorksIndex {
     sourceIdentifier,
     otherIdentifiers,
     keywordField("type"),
-    objectField("agent").fields(location(), keywordField("ontologyType"))
+    objectField("agent").fields(
+      location(),
+      englishTextField("title"),
+      keywordField("ontologyType")
+    )
   )
 
   def englishTextField(name: String) =
