@@ -14,7 +14,7 @@ import scala.util.Try
 class AssumeRoleClientProvider[T](stsClient: AWSSecurityTokenService, roleArn: String, interval: FiniteDuration)
                                  (clientFactory: ClientFactory[T])
                                  (implicit actorSystem: ActorSystem, ec: ExecutionContext) {
-  val client = new AtomicReference[T]
+  private val client = new AtomicReference[T]
 
   actorSystem.scheduler.schedule(0 milliseconds, interval)(refreshClient())
 
