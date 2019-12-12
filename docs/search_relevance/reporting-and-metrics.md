@@ -4,8 +4,8 @@
 
 ### TODO
 
-* Define a timeframe \(should relate to testing as we should be able to make decisions within this timeframe\)
-* 
+* Define a timeframe for data retention \(should relate to testing as we should be able to make decisions within this timeframe\)
+
 ### Objectives
 
 #### Access
@@ -19,9 +19,12 @@
 
 **People with a specific search intentions can have their expectations met**
 
+* **Clicks per search \(CPS\)** is measured passively by tracking users' behaviour while they use the search function. This is a variant of a traditional click through rate \(CTR\), calculated by taking the ratio of the number of items clicked to the number of distinct searches, for each anonymised session id
 * **Top n clicks per search \(CPS5\)** is almost exactly the same as the above, but only counts the clicks on works which appear in the top n results.
 
 **Metrics without a home**
 
-* **Clicks per search \(CPS\)** is measured passively by tracking users' behaviour while they use the search function. This version of CTR is different to the usual definition; we take the ratio of the number of distinct searches to the number of items clicked on for each anonymised session id
+* \*\*\*\*
+
+
 
