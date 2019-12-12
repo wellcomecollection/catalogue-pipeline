@@ -16,7 +16,11 @@ import uk.ac.wellcome.mets_adapter.models.MetsData
 import uk.ac.wellcome.models.generators.RandomStrings
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.mets.client.ClientFactory
-import uk.ac.wellcome.platform.transformer.mets.fixtures.{LocalStackS3Fixtures, MetsGenerators, STSFixtures}
+import uk.ac.wellcome.platform.transformer.mets.fixtures.{
+  LocalStackS3Fixtures,
+  MetsGenerators,
+  STSFixtures
+}
 import uk.ac.wellcome.platform.transformer.mets.store.TemporaryCredentialsStore
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
@@ -39,7 +43,8 @@ class MetsTransformerWorkerServiceTest
   // The test S3 container requires a specific accessKey and secretKey so
   // it fails if we use the temporary credentials
   object BypassCredentialsClientFactory extends ClientFactory[AmazonS3] {
-    override def buildClient(credentials: BasicSessionCredentials): AmazonS3 = s3Client
+    override def buildClient(credentials: BasicSessionCredentials): AmazonS3 =
+      s3Client
   }
 
   it("retrieves a mets file from s3 and sends an invisible work") {
@@ -131,7 +136,8 @@ class MetsTransformerWorkerServiceTest
                       messagingBucket,
                       topic,
                       snsClient) { messageSender =>
-                      withAssumeRoleClientProvider(roleArn)(BypassCredentialsClientFactory) {
+                      withAssumeRoleClientProvider(roleArn)(
+                        BypassCredentialsClientFactory) {
                         assumeRoleclientProvider =>
                           val workerService = new MetsTransformerWorkerService(
                             sqsStream,
