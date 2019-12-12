@@ -20,7 +20,7 @@ class MetsTransformerWorkerService(
   msgStream: SQSStream[NotificationMessage],
   messageSender: BigMessageSender[SNSConfig, TransformedBaseWork],
   adapterStore: VersionedStore[String, Int, MetsData],
-  temporaryCredentialsStore: TemporaryCredentialsStore[String]
+  metsXmlStore: TemporaryCredentialsStore[String]
 ) extends Runnable
     with Logging {
 
@@ -59,7 +59,7 @@ class MetsTransformerWorkerService(
   }
 
   private def getFromMetsStore(metsData: MetsData) = {
-    temporaryCredentialsStore.get(
+    metsXmlStore.get(
       ObjectLocation(metsData.bucket, s"${metsData.path}/${metsData.file}"))
   }
 }
