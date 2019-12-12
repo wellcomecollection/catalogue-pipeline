@@ -12,5 +12,4 @@
 #### People with a specific search intentions can have their expectations met
 
 * Works viewed in the top 10 of results
-* COLLABORATE
-
+* 
