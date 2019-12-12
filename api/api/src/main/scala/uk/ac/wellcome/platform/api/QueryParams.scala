@@ -134,13 +134,13 @@ object MultipleWorksParams extends QueryParamsUtils {
     }
 
   implicit val workTypeFilter: Decoder[WorkTypeFilter] =
-    decodeCommaSeperated.emap(strs => Right(WorkTypeFilter(strs)))
+    decodeCommaSeparated.emap(strs => Right(WorkTypeFilter(strs)))
 
   implicit val itemLocationTypeFilter: Decoder[ItemLocationTypeFilter] =
-    decodeCommaSeperated.emap(strs => Right(ItemLocationTypeFilter(strs)))
+    decodeCommaSeparated.emap(strs => Right(ItemLocationTypeFilter(strs)))
 
   implicit val languageFilter: Decoder[LanguageFilter] =
-    decodeCommaSeperated.emap(strs => Right(LanguageFilter(strs)))
+    decodeCommaSeparated.emap(strs => Right(LanguageFilter(strs)))
 
   implicit val genreFilter: Decoder[GenreFilter] =
     Decoder.decodeString.emap(str => Right(GenreFilter(str)))
@@ -149,10 +149,10 @@ object MultipleWorksParams extends QueryParamsUtils {
     Decoder.decodeString.emap(str => Right(SubjectFilter(str)))
 
   implicit val licenseFilter: Decoder[LicenseFilter] =
-    decodeCommaSeperated.emap(strs => Right(LicenseFilter(strs)))
+    decodeCommaSeparated.emap(strs => Right(LicenseFilter(strs)))
 
   implicit val aggregationsDecoder: Decoder[List[AggregationRequest]] =
-    decodeOneOfCommaSeperated(
+    decodeOneOfCommaSeparated(
       "workType" -> AggregationRequest.WorkType,
       "genres" -> AggregationRequest.Genre,
       "production.dates" -> AggregationRequest.ProductionDate,
@@ -162,7 +162,7 @@ object MultipleWorksParams extends QueryParamsUtils {
     )
 
   implicit val sortDecoder: Decoder[List[SortRequest]] =
-    decodeOneOfCommaSeperated(
+    decodeOneOfCommaSeparated(
       "production.dates" -> ProductionDateSortRequest
     )
 
@@ -191,7 +191,7 @@ trait QueryParamsUtils extends Directives with TimeInstances {
     }
 
   implicit val includesDecoder: Decoder[V2WorksIncludes] =
-    decodeOneOfCommaSeperated(
+    decodeOneOfCommaSeparated(
       "identifiers" -> WorkInclude.Identifiers,
       "items" -> WorkInclude.Items,
       "subjects" -> WorkInclude.Subjects,
@@ -209,7 +209,7 @@ trait QueryParamsUtils extends Directives with TimeInstances {
   implicit val decodeInt: Decoder[Int] =
     Decoder.decodeInt.withErrorMessage("must be a valid Integer")
 
-  def decodeCommaSeperated: Decoder[List[String]] =
+  def decodeCommaSeparated: Decoder[List[String]] =
     Decoder.decodeString.emap(str => Right(str.split(",").toList))
 
   def decodeOneOf[T](values: (String, T)*): Decoder[T] =
@@ -223,8 +223,8 @@ trait QueryParamsUtils extends Directives with TimeInstances {
   def decodeOneWithDefaultOf[T](default: T, values: (String, T)*): Decoder[T] =
     Decoder.decodeString.map { values.toMap.getOrElse(_, default) }
 
-  def decodeOneOfCommaSeperated[T](values: (String, T)*): Decoder[List[T]] =
-    decodeCommaSeperated.emap { strs =>
+  def decodeOneOfCommaSeparated[T](values: (String, T)*): Decoder[List[T]] =
+    decodeCommaSeparated.emap { strs =>
       val mapping = values.toMap
       val results = strs.map { str =>
         mapping
