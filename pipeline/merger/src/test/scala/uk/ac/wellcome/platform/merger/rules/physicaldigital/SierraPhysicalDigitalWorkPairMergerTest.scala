@@ -25,12 +25,25 @@ class SierraPhysicalDigitalWorkPairMergerTest
       ))
     }
 
+  it("merges if physical work has >1 items") {
+    val workWithTwoPhysicalItems = createSierraWorkWithTwoPhysicalItems
+    val digitalWork = createSierraDigitalWork
+    workPairMerger.mergeAndRedirectWorkPair(workWithTwoPhysicalItems, digitalWork) shouldBe Some(MergedWork(
+      workWithTwoPhysicalItems.withData { data =>
+        data.copy(
+          otherIdentifiers = workWithTwoPhysicalItems.otherIdentifiers ++ digitalWork.identifiers,
+          items = workWithTwoPhysicalItems.data.items :+ digitalWork.data.items.head
+        )
+      },
+      UnidentifiedRedirectedWork(
+        sourceIdentifier = digitalWork.sourceIdentifier,
+        version = digitalWork.version,
+        redirect = IdentifiableRedirect(workWithTwoPhysicalItems.sourceIdentifier))
+    ))
+  }
+
     it("does not merge if physical work has 0 items") {
       workPairMerger.mergeAndRedirectWorkPair(createSierraWorkWithoutItems, createSierraDigitalWork) shouldBe None
-    }
-
-    it("does not merge if physical work has >1 items") {
-      workPairMerger.mergeAndRedirectWorkPair(createSierraWorkWithTwoPhysicalItems, createSierraDigitalWork) shouldBe None
     }
 
     it("does not merge if digital work has 0 items") {
@@ -40,11 +53,6 @@ class SierraPhysicalDigitalWorkPairMergerTest
     it("does not merge if digital work has >1 items") {
       workPairMerger.mergeAndRedirectWorkPair(createSierraPhysicalWork, createSierraWorkWithTwoDigitalItems) shouldBe None
     }
-
-  private def createSierraWorkWithTwoPhysicalItems =
-    createUnidentifiedSierraWorkWith(
-      items = List(createPhysicalItem, createPhysicalItem)
-    )
   private def createSierraWorkWithTwoDigitalItems =
     createUnidentifiedSierraWorkWith(
       items = List(createDigitalItem, createDigitalItem)

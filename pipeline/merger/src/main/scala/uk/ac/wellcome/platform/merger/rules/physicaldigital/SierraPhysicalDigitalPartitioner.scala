@@ -1,15 +1,6 @@
 package uk.ac.wellcome.platform.merger.rules.physicaldigital
 
-import uk.ac.wellcome.models.work.internal.{
-  BaseWork,
-  DigitalLocation,
-  Identifiable,
-  IdentifierType,
-  Item,
-  PhysicalLocation,
-  Unidentifiable,
-  UnidentifiedWork
-}
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.rules.WorkTagPartitioner
 
 trait SierraPhysicalDigitalPartitioner extends WorkTagPartitioner {
@@ -41,15 +32,10 @@ trait SierraPhysicalDigitalPartitioner extends WorkTagPartitioner {
     }
 
   /***
-    * A Sierra physical work will have a single item with one or more locations
-    * of which at least one is a [[PhysicalLocation]]. It might have additional
-    * [[DigitalLocation]]s if the Sierra record contains a dlnk
+    * A Sierra work is a physical work if it has at least one item with one [[PhysicalLocation]].
+    * The work can have multiple items with [[PhysicalLocation]]s and/or [[DigitalLocation]]s
     */
   private def isPhysicalWork(work: UnidentifiedWork): Boolean =
-    work.data.items match {
-      case List(Identifiable(Item(_, locations, _), _, _, _))
-          if locations.exists(l => l.isInstanceOf[PhysicalLocation]) =>
-        true
-      case _ => false
-    }
+    work.data.items.exists(item => item.agent.locations.exists(l => l.isInstanceOf[PhysicalLocation]))
+
 }

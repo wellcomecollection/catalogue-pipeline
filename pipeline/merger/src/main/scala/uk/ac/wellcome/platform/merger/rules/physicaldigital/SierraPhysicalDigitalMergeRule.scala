@@ -16,13 +16,13 @@ import uk.ac.wellcome.platform.merger.rules.{MergerRule, WorkPairMerger}
   * work, and redirect the digital work to the physical work.
   *
   */
-trait SierraPhysicalDigitalWorkPairMerger extends WorkPairMerger with Logging with MergerLogging{
+trait SierraPhysicalDigitalWorkPairMerger extends WorkPairMerger with Logging with MergerLogging {
   override def mergeAndRedirectWorkPair(
-                                                   physicalWork: UnidentifiedWork,
-                                                   digitalWork: TransformedBaseWork): Option[MergedWork] =
+                                         physicalWork: UnidentifiedWork,
+                                         digitalWork: TransformedBaseWork): Option[MergedWork] =
     (physicalWork.data.items, digitalWork.data.items) match {
       case (
-        List(physicalItem: Identifiable[Item]),
+        physicalItems@_ :: _,
         List(digitalItem: Unidentifiable[Item])) =>
         info(
           s"Merging ${describeWorkPair(physicalWork, digitalWork)} work pair.")
@@ -33,7 +33,7 @@ trait SierraPhysicalDigitalWorkPairMerger extends WorkPairMerger with Logging wi
         val mergedWork = physicalWork.copy(
           data = physicalWork.data.copy(
             otherIdentifiers = physicalWork.data.otherIdentifiers ++ digitalWork.identifiers,
-            items = mergeItems(physicalItem, digitalItem)
+            items = mergeItems(physicalItems, digitalItem)
           )
         )
 
@@ -52,19 +52,23 @@ trait SierraPhysicalDigitalWorkPairMerger extends WorkPairMerger with Logging wi
         None
     }
 
-  private def mergeItems(physicalItem: Identifiable[Item],
+  private def mergeItems(physicalItems: List[MaybeDisplayable[Item]],
                          digitalItem: Unidentifiable[Item]) = {
-    List(
-      physicalItem.copy(
-        agent = physicalItem.agent.copy(
-          locations = physicalItem.agent.locations ++ digitalItem.agent.locations
+    physicalItems match {
+      case List(physicalItem: Identifiable[Item]) =>
+        List(
+          physicalItem.copy(
+            agent = physicalItem.agent.copy(
+              locations = physicalItem.agent.locations ++ digitalItem.agent.locations
+            )
+          )
         )
-      )
-    )
+      case _ => physicalItems :+ digitalItem
+    }
   }
 }
 
 object SierraPhysicalDigitalMergeRule
-    extends MergerRule
+  extends MergerRule
     with SierraPhysicalDigitalWorkPairMerger
     with SierraPhysicalDigitalPartitioner
