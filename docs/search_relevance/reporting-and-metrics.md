@@ -4,7 +4,7 @@
 
 ### TODO
 
-* Define a timeframe
+* Define a timeframe \(should relate to testing as we should be able to make decisions within this timeframe\)
 * 
 ### Objectives
 
