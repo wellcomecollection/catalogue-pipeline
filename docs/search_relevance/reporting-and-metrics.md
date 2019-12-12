@@ -24,7 +24,13 @@
 
 **Metrics without a home**
 
-* \*\*\*\*
+### **Session segmentation**
+
+We occasionally distinguish between **'discerning'** and **'non-discerning'** sessions where 'discerning' sessions are those which include searches beyond the first page of results. This follows an assumption that the users who work their way through a page of results and decide to keep going are more engaged than those who are satisfied with a single page.   
+This is a _very_ rough proxy for intent and we know that there will be some  genuinely discerning users who never make it beyond the first page, either because the results are good enough to satisfy their needs already, or because they're so bad that they lose hope of finding the work\(s\) they're looking for.   
+Nevertheless, this can be a useful way of splitting metrics to ensure that we're meeting the coarsest of user intentions.
+
+\*\*\*\*
 
 
 
