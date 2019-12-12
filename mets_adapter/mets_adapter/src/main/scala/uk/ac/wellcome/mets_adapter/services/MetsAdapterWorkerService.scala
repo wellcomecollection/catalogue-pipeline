@@ -20,9 +20,8 @@ import scala.concurrent.Future
   *
   *  Consists of the following stages:
   *  - Retrieve the bag from storarge-service with the given ID
-  *  - Parse METS data from the bag
-  *  - Retrieve the METS XMl from S3
-  *  - Store the XML in the VHS
+  *  - Parse METS data (which contains paths to the XML files) from the bag
+  *  - Store the METS data in the VHS
   *  - Publish the VHS key to SNS
   */
 class MetsAdapterWorkerService(
