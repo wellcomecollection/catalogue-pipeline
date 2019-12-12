@@ -64,8 +64,8 @@ We're using multiple complementary metrics to measure search relevance:
 
 Among many others, we're looking at:
 
-* **Click through rate \(CTR\)** is measured passively by tracking users' behaviour while they use the search function. This version of CTR is different to the usual definition; we take the ratio of the number of distinct searches to the number of items clicked on for each anonymised session id.
-* **Top n click through rate \(CTR5\)** is almost exactly the same as the above, but only counts the clicks on works which appear in the top n results.
+* **Clicks per search \(CPS\)** is measured passively by tracking users' behaviour while they use the search function. This version of CTR is different to the usual definition; we take the ratio of the number of distinct searches to the number of items clicked on for each anonymised session id.
+* **Top n clicks per search \(CPS5\)** is almost exactly the same as the above, but only counts the clicks on works which appear in the top n results.
 * **Click distribution curve fitting** uses plots of the distribution of clicks on the first page of results. This distribution tends to follow a regular exponentially decaying shape, but search variants produce slightly different behaviour. In the simplest case of motivation for a test \(wanting to generate more clicks at the top of the set of results\), observing differences in the graphs over a sufficient window of time will reveal which variant is performing better. This can also be quantified by fitting a line of the form `y = (a * e^(-b * x)) + c` to the curves and comparing the values of `b`. A lower `b` corresponds to a sharper elbow in the decay, and therefore a steeper concentration of clicks towards the top of the result set. In the graph below, variant 1 would be the better-performing variant, as it concentrates clicks towards the top end of the list of results.
 
   ![IMG\_20191118\_102749](https://user-images.githubusercontent.com/11006680/69045281-78b1b500-09ee-11ea-8f94-63ff6e7506b8.jpg)
