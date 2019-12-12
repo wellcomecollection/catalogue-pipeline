@@ -12,7 +12,7 @@ class SierraPhysicalDigitalPartitionerTest
   private val partitioner = new SierraPhysicalDigitalPartitioner {}
   private val physicalWork = createSierraPhysicalWork
   private val digitalWork = createSierraDigitalWork
-  private val otherWorks = createUnidentifiedWorks(4)
+  private val otherWorks = createIsbnWorks(4)
 
   it("partitions a physical and digital work") {
     val result = partitioner.partitionWorks(Seq(physicalWork, digitalWork))

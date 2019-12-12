@@ -8,7 +8,7 @@ import uk.ac.wellcome.platform.merger.model.MergedWork
 
 trait MergerRule { this: Partitioner with WorkPairMerger =>
 
-  def mergeAndRedirectWorks(works: Seq[BaseWork]): Seq[BaseWork] =
+  final def mergeAndRedirectWorks(works: Seq[BaseWork]): Seq[BaseWork] =
     partitionWorks(works) match {
       case Some(
           Partition(PotentialMergedWork(target, redirectedWork), remaining)) =>
