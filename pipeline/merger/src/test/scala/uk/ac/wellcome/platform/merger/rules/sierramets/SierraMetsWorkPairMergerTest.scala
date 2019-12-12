@@ -175,14 +175,29 @@ class SierraMetsWorkPairMergerTest
     }
   }
 
-  it("doesn't merge if the sierra work has more than one item") {
-    val sierraWorkWithMultipleItems = createUnidentifiedSierraWorkWith(
-      items = List(createPhysicalItem, createPhysicalItem)
-    )
+  it("merges if the sierra work has more than one item") {
+    val items = (1 to 3).map(_ => createPhysicalItem).toList
+    val sierraWork = createUnidentifiedSierraWorkWith(
+      items = items)
 
-    workPairMerger.mergeAndRedirectWorkPair(
-      sierraWorkWithMultipleItems,
-      metsWork) shouldBe None
+    inside(workPairMerger.mergeAndRedirectWorkPair(sierraWork, metsWork)) {
+      case Some(
+      MergedWork(
+      UnidentifiedWork(
+      sierraWork.version,
+      sierraWork.sourceIdentifier,
+      data,
+      sierraWork.ontologyType,
+      sierraWork.identifiedType),
+      redirectedWork)) =>
+
+        data shouldBe sierraWork.data.copy(items = items ++ metsWork.data.items)
+
+        redirectedWork shouldBe UnidentifiedRedirectedWork(
+          sourceIdentifier = metsWork.sourceIdentifier,
+          version = metsWork.version,
+          redirect = IdentifiableRedirect(sierraWork.sourceIdentifier))
+    }
   }
 
   it("doesn't merge if the mets work has more than one item") {

@@ -24,22 +24,28 @@ trait SierraMetsWorkPairMerger extends WorkPairMerger {
       case (List(sierraItem), List(metsItem: Unidentifiable[Item])) =>
         metsItem.agent.locations match {
           case List(metsLocation: DigitalLocation) =>
-            val targetWork = sierraWork.withData { data =>
-              data.copy(
-                items = List(mergeLocations(sierraItem, metsLocation)),
-                thumbnail =
-                  metsWork.data.thumbnail.map(Some(_)).getOrElse(data.thumbnail)
-              )
-            }
-            val redirectedWork = UnidentifiedRedirectedWork(
-              metsWork.sourceIdentifier,
-              metsWork.version,
-              IdentifiableRedirect(sierraWork.sourceIdentifier))
-            Some(MergedWork(targetWork, redirectedWork))
+            createMergedWork(sierraWork, metsWork, List(mergeLocations(sierraItem, metsLocation)))
           case _ => None
         }
+      case (sierraItems@ _ :: _, List(metsItem)) =>
+        createMergedWork(sierraWork, metsWork, sierraItems :+ metsItem)
       case _ => None
     }
+
+  private def createMergedWork(sierraWork: UnidentifiedWork, metsWork: TransformedBaseWork, items: List[MaybeDisplayable[Item]]) = {
+    val targetWork = sierraWork.withData { data =>
+      data.copy(
+        items = items,
+        thumbnail =
+          metsWork.data.thumbnail.map(Some(_)).getOrElse(data.thumbnail)
+      )
+    }
+    val redirectedWork = UnidentifiedRedirectedWork(
+      metsWork.sourceIdentifier,
+      metsWork.version,
+      IdentifiableRedirect(sierraWork.sourceIdentifier))
+    Some(MergedWork(targetWork, redirectedWork))
+  }
 
   private def mergeLocations(sierraItem: MaybeDisplayable[Item],
                              metsLocation: DigitalLocation) =
