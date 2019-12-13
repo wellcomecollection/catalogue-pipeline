@@ -21,27 +21,37 @@ trait SierraMetsWorkPairMerger extends WorkPairMerger {
     sierraWork: UnidentifiedWork,
     metsWork: TransformedBaseWork): Option[MergedWork] =
     (sierraWork.data.items, metsWork.data.items) match {
-      case (_::_, List(metsItem @ Unidentifiable(Item(_, List(metsLocation:DigitalLocation),_)))) =>
+      case (
+          _ :: _,
+          List(
+            metsItem @ Unidentifiable(
+              Item(_, List(metsLocation: DigitalLocation), _)))) =>
         val items = createItems(sierraWork, metsItem, metsLocation)
         createMergedWork(sierraWork, metsWork, items)
       case _ => None
     }
 
-  private def createItems(sierraWork: UnidentifiedWork, metsItem: Unidentifiable[Item], metsLocation: DigitalLocation) = {
+  private def createItems(sierraWork: UnidentifiedWork,
+                          metsItem: Unidentifiable[Item],
+                          metsLocation: DigitalLocation) = {
     sierraWork.data.items match {
       case List(sierraItem) => List(mergeLocations(sierraItem, metsLocation))
-      case sierraItems => sierraItems.filterNot(shouldIgnoreItem(_, metsLocation)) :+ metsItem
+      case sierraItems =>
+        sierraItems.filterNot(shouldIgnoreItem(_, metsLocation)) :+ metsItem
     }
   }
 
-  private def shouldIgnoreItem(item: MaybeDisplayable[Item], metsLocation: DigitalLocation) = {
+  private def shouldIgnoreItem(item: MaybeDisplayable[Item],
+                               metsLocation: DigitalLocation) = {
     item.agent.locations match {
       case List(location) => shouldIgnoreLocation(location, metsLocation.url)
-      case _ => false
+      case _              => false
     }
   }
 
-  private def createMergedWork(sierraWork: UnidentifiedWork, metsWork: TransformedBaseWork, items: List[MaybeDisplayable[Item]]) = {
+  private def createMergedWork(sierraWork: UnidentifiedWork,
+                               metsWork: TransformedBaseWork,
+                               items: List[MaybeDisplayable[Item]]) = {
     val targetWork = sierraWork.withData { data =>
       data.copy(
         items = items,

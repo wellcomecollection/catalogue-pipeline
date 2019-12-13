@@ -36,6 +36,7 @@ trait SierraPhysicalDigitalPartitioner extends WorkTagPartitioner {
     * The work can have multiple items with [[PhysicalLocation]]s and/or [[DigitalLocation]]s
     */
   private def isPhysicalWork(work: UnidentifiedWork): Boolean =
-    work.data.items.exists(item => item.agent.locations.exists(l => l.isInstanceOf[PhysicalLocation]))
+    work.data.items.exists(item =>
+      item.agent.locations.exists(l => l.isInstanceOf[PhysicalLocation]))
 
 }

@@ -17,14 +17,15 @@ import uk.ac.wellcome.platform.merger.rules.{MergerRule, WorkPairMerger}
   *   - we redirect the digital work to the physical work.
   *
   */
-trait SierraPhysicalDigitalWorkPairMerger extends WorkPairMerger with Logging with MergerLogging {
+trait SierraPhysicalDigitalWorkPairMerger
+    extends WorkPairMerger
+    with Logging
+    with MergerLogging {
   override def mergeAndRedirectWorkPair(
-                                         physicalWork: UnidentifiedWork,
-                                         digitalWork: TransformedBaseWork): Option[MergedWork] =
+    physicalWork: UnidentifiedWork,
+    digitalWork: TransformedBaseWork): Option[MergedWork] =
     (physicalWork.data.items, digitalWork.data.items) match {
-      case (
-        physicalItems@_ :: _,
-        List(digitalItem: Unidentifiable[Item])) =>
+      case (physicalItems @ _ :: _, List(digitalItem: Unidentifiable[Item])) =>
         info(
           s"Merging ${describeWorkPair(physicalWork, digitalWork)} work pair.")
 
@@ -71,6 +72,6 @@ trait SierraPhysicalDigitalWorkPairMerger extends WorkPairMerger with Logging wi
 }
 
 object SierraPhysicalDigitalMergeRule
-  extends MergerRule
+    extends MergerRule
     with SierraPhysicalDigitalWorkPairMerger
     with SierraPhysicalDigitalPartitioner

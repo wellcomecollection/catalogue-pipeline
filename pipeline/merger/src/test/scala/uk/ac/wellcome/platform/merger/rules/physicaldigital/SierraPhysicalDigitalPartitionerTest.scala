@@ -23,17 +23,22 @@ class SierraPhysicalDigitalPartitionerTest
 
   it("partitions physical work with multiple physical items and digital work") {
     val sierraWorkWithTwoPhysicalItems = createSierraWorkWithTwoPhysicalItems
-    val result = partitioner.partitionWorks(Seq(sierraWorkWithTwoPhysicalItems, digitalWork))
+    val result = partitioner.partitionWorks(
+      Seq(sierraWorkWithTwoPhysicalItems, digitalWork))
 
     result shouldBe Some(
-      Partition(PotentialMergedWork(sierraWorkWithTwoPhysicalItems, digitalWork), Nil))
+      Partition(
+        PotentialMergedWork(sierraWorkWithTwoPhysicalItems, digitalWork),
+        Nil))
   }
 
-  it("partitions physical work with a mixture of physical and digital items and digital work") {
+  it(
+    "partitions physical work with a mixture of physical and digital items and digital work") {
     val sierraWorkWithTwoItems = createUnidentifiedSierraWorkWith(
       items = List(createPhysicalItem, createDigitalItem)
     )
-    val result = partitioner.partitionWorks(Seq(sierraWorkWithTwoItems, digitalWork))
+    val result =
+      partitioner.partitionWorks(Seq(sierraWorkWithTwoItems, digitalWork))
 
     result shouldBe Some(
       Partition(PotentialMergedWork(sierraWorkWithTwoItems, digitalWork), Nil))

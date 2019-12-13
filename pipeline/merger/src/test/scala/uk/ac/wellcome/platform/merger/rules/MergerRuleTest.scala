@@ -14,7 +14,7 @@ class MergerRuleTest extends FunSpec with WorksGenerators with Matchers {
   it("merges a pair of works in a list") {
     val mergerRule = new MergerRule with Partitioner with WorkPairMerger {
       override protected def partitionWorks(
-                                             works: Seq[BaseWork]): Option[Partition] =
+        works: Seq[BaseWork]): Option[Partition] =
         Some(
           Partition(
             PotentialMergedWork(
@@ -25,8 +25,8 @@ class MergerRuleTest extends FunSpec with WorksGenerators with Matchers {
           )
         )
       override protected def mergeAndRedirectWorkPair(
-                                                       firstWork: UnidentifiedWork,
-                                                       secondWork: TransformedBaseWork): Option[MergedWork] =
+        firstWork: UnidentifiedWork,
+        secondWork: TransformedBaseWork): Option[MergedWork] =
         Some(
           MergedWork(
             firstWork,

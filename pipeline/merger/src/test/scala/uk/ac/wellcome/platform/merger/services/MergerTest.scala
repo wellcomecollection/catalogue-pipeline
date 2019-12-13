@@ -279,10 +279,9 @@ class MergerTest extends FunSpec with WorksGenerators with Matchers {
       expectedMetsRedirectedWork)
   }
 
-  it(
-    "merges a multiple items physical Sierra work with a METS work") {
+  it("merges a multiple items physical Sierra work with a METS work") {
     val result = merger.merge(
-      works = Seq(multipleItemsSierraWork,metsWork)
+      works = Seq(multipleItemsSierraWork, metsWork)
     )
 
     result.size shouldBe 2
@@ -303,17 +302,17 @@ class MergerTest extends FunSpec with WorksGenerators with Matchers {
       UnidentifiedRedirectedWork(
         sourceIdentifier = metsWork.sourceIdentifier,
         version = metsWork.version,
-        redirect = IdentifiableRedirect(multipleItemsSierraWork.sourceIdentifier))
+        redirect =
+          IdentifiableRedirect(multipleItemsSierraWork.sourceIdentifier))
 
     result should contain theSameElementsAs List(
       expectedMergedWork,
       expectedMetsRedirectedWork)
   }
 
-  it(
-    "merges a multiple items physical Sierra work with a digital work") {
+  it("merges a multiple items physical Sierra work with a digital work") {
     val result = merger.merge(
-      works = Seq(multipleItemsSierraWork,sierraDigitalWork)
+      works = Seq(multipleItemsSierraWork, sierraDigitalWork)
     )
 
     result.size shouldBe 2
@@ -334,7 +333,8 @@ class MergerTest extends FunSpec with WorksGenerators with Matchers {
       UnidentifiedRedirectedWork(
         sourceIdentifier = sierraDigitalWork.sourceIdentifier,
         version = sierraDigitalWork.version,
-        redirect = IdentifiableRedirect(multipleItemsSierraWork.sourceIdentifier)
+        redirect =
+          IdentifiableRedirect(multipleItemsSierraWork.sourceIdentifier)
       )
 
     result should contain theSameElementsAs List(
@@ -366,15 +366,16 @@ class MergerTest extends FunSpec with WorksGenerators with Matchers {
       UnidentifiedRedirectedWork(
         sourceIdentifier = sierraDigitalWork.sourceIdentifier,
         version = sierraDigitalWork.version,
-        redirect = IdentifiableRedirect(multipleItemsSierraWork.sourceIdentifier)
+        redirect =
+          IdentifiableRedirect(multipleItemsSierraWork.sourceIdentifier)
       )
-
 
     val expectedMetsRedirectedWork =
       UnidentifiedRedirectedWork(
         sourceIdentifier = metsWork.sourceIdentifier,
         version = metsWork.version,
-        redirect = IdentifiableRedirect(multipleItemsSierraWork.sourceIdentifier))
+        redirect =
+          IdentifiableRedirect(multipleItemsSierraWork.sourceIdentifier))
 
     result should contain theSameElementsAs List(
       expectedMergedWork,
