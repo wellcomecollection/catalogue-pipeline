@@ -8,12 +8,13 @@ import uk.ac.wellcome.platform.merger.rules.{MergerRule, WorkPairMerger}
 
 /** If we have a pair of Sierra records:
   *
-  *   - One of which has a single Physical location ("physical work")
+  *   - One of which has a at least one item with at least a Physical location ("physical work")
   *   - The other of which has a single Digital location ("digital work")
   *
   * Then the digital work is a digitised version of the physical work.
-  * The physical work takes precedence, we copy the location from the digital
-  * work, and redirect the digital work to the physical work.
+  *   - we merge the items from both works into the physical work
+  *   - we merge the identifiers from both into the physical work
+  *   - we redirect the digital work to the physical work.
   *
   */
 trait SierraPhysicalDigitalWorkPairMerger extends WorkPairMerger with Logging with MergerLogging {
@@ -27,9 +28,6 @@ trait SierraPhysicalDigitalWorkPairMerger extends WorkPairMerger with Logging wi
         info(
           s"Merging ${describeWorkPair(physicalWork, digitalWork)} work pair.")
 
-        // Copy the identifiers and locations from the physical work on to
-        // the digital work.  We know both works only have a single item,
-        // so these locations definitely correspond to this item.
         val mergedWork = physicalWork.copy(
           data = physicalWork.data.copy(
             otherIdentifiers = physicalWork.data.otherIdentifiers ++ digitalWork.identifiers,
@@ -52,6 +50,10 @@ trait SierraPhysicalDigitalWorkPairMerger extends WorkPairMerger with Logging wi
         None
     }
 
+  // If the physical work has a single item, we merge the items by appending
+  // the digital location to the locations of the item on the physical work.
+  // If the physical work has more than one item, we append the digital item
+  // to the list of items on the physical work.
   private def mergeItems(physicalItems: List[MaybeDisplayable[Item]],
                          digitalItem: Unidentifiable[Item]) = {
     physicalItems match {
