@@ -200,6 +200,33 @@ class SierraMetsWorkPairMergerTest
     }
   }
 
+  it("filters digital items for the same url as the METS item") {
+    val digitalLocationCCBYNC = createDigitalLocationWith(
+      license = Some(License_CCBYNC))
+    val digitalLocationNoLicense = digitalLocationCCBYNC.copy(license = None)
+
+    val physicalItem = createPhysicalItem
+    val sierraWork = createUnidentifiedSierraWorkWith(
+      items = List(physicalItem, createDigitalItemWith(List(digitalLocationNoLicense))))
+
+    val metsItem = createDigitalItemWith(List(digitalLocationCCBYNC))
+    val metsWork = createUnidentifiedInvisibleMetsWorkWith(items = List(metsItem))
+
+    inside(workPairMerger.mergeAndRedirectWorkPair(sierraWork, metsWork)) {
+      case Some(
+      MergedWork(
+      UnidentifiedWork(
+      _,
+      _,
+      data,
+      _,
+      _),
+      _)) =>
+
+        data.items shouldBe List(physicalItem, metsItem)
+    }
+  }
+
   it("doesn't merge if the mets work has more than one item") {
     val metsWithMultipleItems = createUnidentifiedInvisibleWorkWith(
       sourceIdentifier = createMetsSourceIdentifier,

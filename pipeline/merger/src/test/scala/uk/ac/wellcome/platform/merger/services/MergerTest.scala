@@ -10,6 +10,7 @@ class MergerTest extends FunSpec with WorksGenerators with Matchers {
   val digitalLocationNoLicense = digitalLocationCCBYNC.copy(license = None)
 
   private val sierraPhysicalWork = createSierraPhysicalWork
+  private val multipleItemsSierraWork = createSierraWorkWithTwoPhysicalItems
   private val sierraDigitalWork = createSierraDigitalWorkWith(
     items = List(createDigitalItemWith(List(digitalLocationNoLicense))))
   private val miroWork = createMiroWork
@@ -188,7 +189,7 @@ class MergerTest extends FunSpec with WorksGenerators with Matchers {
       expectedMiroRedirectedWork)
   }
 
-  it("merges a Sierra work wit a METS work") {
+  it("merges a Sierra work with a METS work") {
     val result = merger.merge(
       works = Seq(sierraPhysicalWork, metsWork)
     )
@@ -275,6 +276,109 @@ class MergerTest extends FunSpec with WorksGenerators with Matchers {
       expectedMergedWork,
       expectedRedirectedDigitalWork,
       expectedMiroRedirectedWork,
+      expectedMetsRedirectedWork)
+  }
+
+  it(
+    "merges a multiple items physical Sierra work with a METS work") {
+    val result = merger.merge(
+      works = Seq(multipleItemsSierraWork,metsWork)
+    )
+
+    result.size shouldBe 2
+
+    val sierraItems =
+      multipleItemsSierraWork.data.items
+    val metsItem = metsWork.data.items.head
+
+    val expectedMergedWork = multipleItemsSierraWork.withData { data =>
+      data.copy(
+        thumbnail = metsWork.data.thumbnail,
+        items = sierraItems :+ metsItem,
+        merged = true
+      )
+    }
+
+    val expectedMetsRedirectedWork =
+      UnidentifiedRedirectedWork(
+        sourceIdentifier = metsWork.sourceIdentifier,
+        version = metsWork.version,
+        redirect = IdentifiableRedirect(multipleItemsSierraWork.sourceIdentifier))
+
+    result should contain theSameElementsAs List(
+      expectedMergedWork,
+      expectedMetsRedirectedWork)
+  }
+
+  it(
+    "merges a multiple items physical Sierra work with a digital work") {
+    val result = merger.merge(
+      works = Seq(multipleItemsSierraWork,sierraDigitalWork)
+    )
+
+    result.size shouldBe 2
+
+    val sierraItems =
+      multipleItemsSierraWork.data.items
+    val digitalItem = sierraDigitalWork.data.items.head
+
+    val expectedMergedWork = multipleItemsSierraWork.withData { data =>
+      data.copy(
+        otherIdentifiers = multipleItemsSierraWork.data.otherIdentifiers ++ sierraDigitalWork.identifiers,
+        items = sierraItems :+ digitalItem,
+        merged = true
+      )
+    }
+
+    val expectedRedirectedDigitalWork =
+      UnidentifiedRedirectedWork(
+        sourceIdentifier = sierraDigitalWork.sourceIdentifier,
+        version = sierraDigitalWork.version,
+        redirect = IdentifiableRedirect(multipleItemsSierraWork.sourceIdentifier)
+      )
+
+    result should contain theSameElementsAs List(
+      expectedMergedWork,
+      expectedRedirectedDigitalWork)
+  }
+
+  it(
+    "merges a multiple items physical Sierra work with a digital Sierra work and a METS work") {
+    val result = merger.merge(
+      works = Seq(multipleItemsSierraWork, sierraDigitalWork, metsWork)
+    )
+
+    result.size shouldBe 3
+
+    val sierraItems = multipleItemsSierraWork.data.items
+    val metsItem = metsWork.data.items.head
+
+    val expectedMergedWork = multipleItemsSierraWork.withData { data =>
+      data.copy(
+        otherIdentifiers = multipleItemsSierraWork.data.otherIdentifiers ++ sierraDigitalWork.identifiers,
+        thumbnail = metsWork.data.thumbnail,
+        items = sierraItems :+ metsItem,
+        merged = true
+      )
+    }
+
+    val expectedRedirectedDigitalWork =
+      UnidentifiedRedirectedWork(
+        sourceIdentifier = sierraDigitalWork.sourceIdentifier,
+        version = sierraDigitalWork.version,
+        redirect = IdentifiableRedirect(multipleItemsSierraWork.sourceIdentifier)
+      )
+
+
+    val expectedMetsRedirectedWork =
+      UnidentifiedRedirectedWork(
+        sourceIdentifier = metsWork.sourceIdentifier,
+        version = metsWork.version,
+        redirect = IdentifiableRedirect(multipleItemsSierraWork.sourceIdentifier))
+
+    result should contain theSameElementsAs List(
+      expectedMergedWork,
+      expectedRedirectedDigitalWork,
       expectedMetsRedirectedWork)
   }
 
