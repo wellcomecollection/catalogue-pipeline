@@ -10,7 +10,7 @@ import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig}
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.mets_adapter.models.MetsLocation
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
-import uk.ac.wellcome.platform.transformer.mets.transformer.MetsXml
+import uk.ac.wellcome.platform.transformer.mets.transformer.MetsXmlTransformer
 import uk.ac.wellcome.storage.store.{VersionedStore, Readable}
 import uk.ac.wellcome.storage.{Identified, Version, ObjectLocation}
 import uk.ac.wellcome.typesafe.Runnable
@@ -26,6 +26,8 @@ class MetsTransformerWorkerService(
   type Result[T] = Either[Throwable, T]
 
   val className = this.getClass.getSimpleName
+
+  val xmlTransformer = new MetsXmlTransformer(metsXmlStore)
 
   def run(): Future[Done] =
     msgStream.foreach(this.getClass.getSimpleName, processAndLog)
@@ -45,9 +47,8 @@ class MetsTransformerWorkerService(
   private def process(key: Version[String, Int]) =
     for {
       metsLocation <- getMetsLocation(key)
-      metsXml <- getMetsXml(metsLocation)
-      mets <- metsXml.toMetsData
-      work <- mets.toWork(key.version)
+      metsData <- xmlTransformer.transform(metsLocation)
+      work <- metsData.toWork(key.version)
       _ <- messageSender.sendT(work).toEither
     } yield ()
 
@@ -56,11 +57,4 @@ class MetsTransformerWorkerService(
       case Left(err)                   => Left(err.e)
       case Right(Identified(_, entry)) => Right(entry)
     }
-
-  private def getMetsXml(metsLocation: MetsLocation): Result[MetsXml] =
-    metsXmlStore
-      .get(metsLocation.xmlLocation)
-      .left
-      .map(_.e)
-      .flatMap { case Identified(_, xmlString) => MetsXml(xmlString) }
 }

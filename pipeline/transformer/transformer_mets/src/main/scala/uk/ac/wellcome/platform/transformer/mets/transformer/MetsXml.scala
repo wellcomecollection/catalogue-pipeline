@@ -6,17 +6,6 @@ import scala.xml.{Elem, NodeSeq, XML}
 
 case class MetsXml(root: Elem) {
 
-  def toMetsData: Either[Exception, MetsData] =
-    for {
-      id <- recordIdentifier
-      accessCondition <- accessCondition
-    } yield
-      MetsData(
-        recordIdentifier = id,
-        accessCondition = accessCondition,
-        thumbnailLocation = thumbnailLocation(id),
-      )
-
   /** The record identifier (generally the B number) is encoded in the METS. For
     *  example:
     *
