@@ -6,9 +6,6 @@ import uk.ac.wellcome.json.utils.JsonAssertions
 
 class MarcFieldTest extends FunSpec with Matchers with JsonAssertions {
 
-  // These tests are intended to check that we can parse a VarField in
-  // both forms sent by Sierra.
-
   it("reads a JSON string as a long-form VarField") {
     val jsonString = s"""{
       "fieldTag": "n",
@@ -32,9 +29,10 @@ class MarcFieldTest extends FunSpec with Matchers with JsonAssertions {
     }"""
 
     val expectedVarField = VarField(
-      marcTag = "008",
-      indicator1 = " ",
-      indicator2 = " ",
+      fieldTag = Some("n"),
+      marcTag = Some("008"),
+      indicator1 = Some(" "),
+      indicator2 = Some(" "),
       subfields = List(
         MarcSubfield(tag = "a", content = "An armada of armadillos"),
         MarcSubfield(tag = "b", content = "A bonanza of bears"),
@@ -53,7 +51,8 @@ class MarcFieldTest extends FunSpec with Matchers with JsonAssertions {
     }"""
 
     val expectedVarField = VarField(
-      content = "Enjoying an event with enormous eagles"
+      fieldTag = Some("c"),
+      content = Some("Enjoying an event with enormous eagles")
     )
 
     fromJson[VarField](jsonString).get shouldBe expectedVarField

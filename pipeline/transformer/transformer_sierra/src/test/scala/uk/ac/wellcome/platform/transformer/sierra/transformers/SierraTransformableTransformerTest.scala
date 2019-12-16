@@ -137,6 +137,48 @@ class SierraTransformableTransformerTest
     )
   }
 
+  it("extracts title from items") {
+    val bibId = createSierraBibNumber
+    val itemId = createSierraItemNumber
+    val locationType = LocationType("sgmed")
+    val locationLabel = "A museum of mermaids"
+    val itemData =
+      s"""
+         |{
+         |  "id": "$itemId",
+         |  "location": {
+         |    "code": "${locationType.id}",
+         |    "name": "$locationLabel"
+         |  },
+         |  "varFields": [
+         |    {
+         |        "fieldTag": "v",
+         |        "content": "Envelope"
+         |    }
+         |]
+         |}
+         |""".stripMargin
+
+    val itemRecord = createSierraItemRecordWith(
+      id = itemId,
+      data = itemData,
+      bibIds = List(bibId)
+    )
+
+    val bibRecord = createSierraBibRecordWith(id = bibId)
+
+    val transformable = createSierraTransformableWith(
+      sierraId = bibId,
+      maybeBibRecord = Some(bibRecord),
+      itemRecords = List(itemRecord)
+    )
+
+    val unidentifiedWork =
+      transformToWork(transformable).asInstanceOf[UnidentifiedWork]
+
+    unidentifiedWork.data.items.head.agent.title shouldBe Some("Envelope")
+  }
+
   it("returns an InvisibleWork if there isn't any bib data") {
     assertTransformReturnsInvisibleWork(
       maybeBibRecord = None

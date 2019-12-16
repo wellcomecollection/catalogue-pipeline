@@ -227,9 +227,9 @@ class SierraOrganisationSubjectsTest
   private def createMarc610VarField(subfields: List[MarcSubfield],
                                     indicator2: String = ""): VarField =
     VarField(
-      marcTag = "610",
-      indicator1 = "",
-      indicator2 = indicator2,
+      marcTag = Some("610"),
+      indicator1 = Some(""),
+      indicator2 = Some(indicator2),
       subfields = subfields
     )
 

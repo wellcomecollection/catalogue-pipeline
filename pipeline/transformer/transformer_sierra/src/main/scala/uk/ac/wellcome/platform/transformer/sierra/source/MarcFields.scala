@@ -34,33 +34,11 @@ case class MarcSubfield(
 case class VarField(
   content: Option[String] = None,
   marcTag: Option[String] = None,
+  fieldTag: Option[String] = None,
   @JsonKey("ind1") indicator1: Option[String] = None,
   @JsonKey("ind2") indicator2: Option[String] = None,
   subfields: List[MarcSubfield] = Nil
 )
-
-case object VarField {
-  def apply(content: String): VarField =
-    VarField(
-      content = Some(content),
-      marcTag = None,
-      indicator1 = None,
-      indicator2 = None,
-      subfields = Nil
-    )
-
-  def apply(marcTag: String,
-            indicator1: String,
-            indicator2: String,
-            subfields: List[MarcSubfield]): VarField =
-    VarField(
-      content = None,
-      marcTag = Some(marcTag),
-      indicator1 = Some(indicator1),
-      indicator2 = Some(indicator2),
-      subfields = subfields
-    )
-}
 
 // Examples of fixedFields from the Sierra JSON:
 //
