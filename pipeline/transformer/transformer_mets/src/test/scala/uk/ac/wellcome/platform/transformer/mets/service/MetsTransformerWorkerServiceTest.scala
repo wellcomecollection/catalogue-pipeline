@@ -12,7 +12,7 @@ import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.mets_adapter.models.MetsData
+import uk.ac.wellcome.mets_adapter.models.MetsLocation
 import uk.ac.wellcome.models.generators.RandomStrings
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.mets.client.ClientFactory
@@ -122,7 +122,7 @@ class MetsTransformerWorkerServiceTest
     testWith: TestWith[(QueuePair,
                         Bucket,
                         Topic,
-                        VersionedStore[String, Int, MetsData]),
+                        VersionedStore[String, Int, MetsLocation]),
                        R]): R =
     withLocalSqsQueueAndDlq {
       case queuePair @ QueuePair(queue, _) =>
@@ -160,13 +160,13 @@ class MetsTransformerWorkerServiceTest
     }
 
   def withMemoryStore[R](
-    testWith: TestWith[VersionedStore[String, Int, MetsData], R]): R = {
+    testWith: TestWith[VersionedStore[String, Int, MetsLocation], R]): R = {
     testWith(MemoryVersionedStore(Map()))
   }
 
   private def sendWork(mets: String,
                        name: String,
-                       dynamoStore: VersionedStore[String, Int, MetsData],
+                       dynamoStore: VersionedStore[String, Int, MetsLocation],
                        metsBucket: Bucket,
                        queue: SQS.Queue,
                        version: Int) = {
@@ -175,7 +175,7 @@ class MetsTransformerWorkerServiceTest
       _ <- S3TypedStore[String].put(
         ObjectLocation(metsBucket.name, s"$rootPath/$name"))(
         TypedStoreEntry(mets, Map()))
-      entry = MetsData(metsBucket.name, rootPath, 1, name, List())
+      entry = MetsLocation(metsBucket.name, rootPath, 1, name, List())
       key <- dynamoStore.put(Version(name, version))(entry)
     } yield key
 

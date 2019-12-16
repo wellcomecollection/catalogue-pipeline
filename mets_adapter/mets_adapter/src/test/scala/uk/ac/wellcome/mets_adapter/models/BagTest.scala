@@ -93,8 +93,12 @@ class BagTest extends FunSpec with Matchers {
         version = "v2",
         files = List("data/b30246039.xml" -> "v1/data/b30246039.xml"),
       )
-      bag.metsData shouldBe Right(
-        MetsData("bucket", "digitised/b30246039", 2, "v1/data/b30246039.xml"))
+      bag.metsLocation shouldBe Right(
+        MetsLocation(
+          "bucket",
+          "digitised/b30246039",
+          2,
+          "v1/data/b30246039.xml"))
     }
 
     it("fails extracting METS data if invalid version string") {
@@ -102,14 +106,14 @@ class BagTest extends FunSpec with Matchers {
         version = "oops",
         files = List("data/b30246039.xml" -> "v1/data/b30246039.xml"),
       )
-      bag.metsData shouldBe a[Left[_, _]]
-      bag.metsData.left.get.getMessage shouldBe "Couldn't parse version"
+      bag.metsLocation shouldBe a[Left[_, _]]
+      bag.metsLocation.left.get.getMessage shouldBe "Couldn't parse version"
     }
 
     it("fails extracting METS data if invalid no METS file") {
       val bag = createBag(files = Nil)
-      bag.metsData shouldBe a[Left[_, _]]
-      bag.metsData.left.get.getMessage shouldBe "Couldn't find METS file"
+      bag.metsLocation shouldBe a[Left[_, _]]
+      bag.metsLocation.left.get.getMessage shouldBe "Couldn't find METS file"
     }
   }
 

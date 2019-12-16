@@ -52,7 +52,7 @@ class MetsAdapterWorkerServiceTest
         assertQueueEmpty(dlq)
         getMessages(topic) shouldEqual List(Version("123", 1))
         vhs.getLatest("123") shouldBe Right(
-          Identified(Version("123", 1), metsData())
+          Identified(Version("123", 1), metsLocation())
         )
     }
   }
@@ -67,7 +67,7 @@ class MetsAdapterWorkerServiceTest
         assertQueueEmpty(dlq)
         getMessages(topic) shouldEqual List(Version("123", 1))
         vhs.getLatest("123") shouldBe Right(
-          Identified(Version("123", 1), metsData())
+          Identified(Version("123", 1), metsLocation())
         )
     }
   }
@@ -81,7 +81,7 @@ class MetsAdapterWorkerServiceTest
         assertQueueEmpty(dlq)
         getMessages(topic) shouldEqual List(Version("123", 1))
         vhs.getLatest("123") shouldBe Right(
-          Identified(Version("123", 1), metsData("existing-data"))
+          Identified(Version("123", 1), metsLocation("existing-data"))
         )
     }
   }
@@ -96,7 +96,7 @@ class MetsAdapterWorkerServiceTest
         assertQueueHasSize(dlq, 1)
         getMessages(topic) shouldEqual Nil
         vhs.getLatest("123") shouldBe Right(
-          Identified(Version("123", 2), metsData("existing-data"))
+          Identified(Version("123", 2), metsLocation("existing-data"))
         )
     }
   }
@@ -145,7 +145,7 @@ class MetsAdapterWorkerServiceTest
   }
 
   def withWorkerService[R](bagRetriever: BagRetriever,
-                           store: VersionedStore[String, Int, MetsData],
+                           store: VersionedStore[String, Int, MetsLocation],
                            createMsgSender: SNS.Topic => SNSMessageSender =
                              createMsgSender(_))(
     testWith: TestWith[(MetsAdapterWorkerService, QueuePair, SNS.Topic), R]) =
@@ -185,10 +185,10 @@ class MetsAdapterWorkerServiceTest
     }
 
   def createStore(data: Map[Version[String, Int], String] = Map.empty) =
-    MemoryVersionedStore(data.mapValues(metsData(_)))
+    MemoryVersionedStore(data.mapValues(metsLocation(_)))
 
-  def metsData(file: String = "mets.xml", version: Int = 1) =
-    MetsData("bucket", "root", version, file, Nil)
+  def metsLocation(file: String = "mets.xml", version: Int = 1) =
+    MetsLocation("bucket", "root", version, file, Nil)
 
   def getMessages(topic: SNS.Topic) =
     listMessagesReceivedFromSNS(topic)

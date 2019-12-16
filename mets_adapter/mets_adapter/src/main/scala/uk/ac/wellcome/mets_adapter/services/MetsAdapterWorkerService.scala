@@ -42,8 +42,6 @@ class MetsAdapterWorkerService(
 
   type Result[T] = Either[Throwable, T]
 
-  case class MetsDataAndXml(data: MetsData, xml: String)
-
   val className = this.getClass.getSimpleName
 
   def run(): Future[Done] =
@@ -53,8 +51,8 @@ class MetsAdapterWorkerService(
         source
           .via(unwrapMessage)
           .via(retrieveBag)
-          .via(parseMetsData)
-          .via(storeMetsData)
+          .via(parseMetsLocation)
+          .via(storeMetsLocation)
           .via(publishKey)
           .map { case (Context(msg, _), _) => msg }
       }
@@ -82,12 +80,12 @@ class MetsAdapterWorkerService(
       }
       .via(catchErrors)
 
-  def parseMetsData =
+  def parseMetsLocation =
     Flow[(Context, Bag)]
-      .mapWithContext { case (ctx, bag) => bag.metsData }
+      .mapWithContext { case (ctx, bag) => bag.metsLocation }
 
-  def storeMetsData =
-    Flow[(Context, MetsData)]
+  def storeMetsLocation =
+    Flow[(Context, MetsLocation)]
       .mapWithContextAsync(concurrentDynamoConnections) {
         case (ctx, data) =>
           Future {

@@ -5,7 +5,7 @@ import uk.ac.wellcome.models.work.internal._
 import scala.util.Try
 import cats.implicits._
 
-case class Mets(
+case class MetsData(
   recordIdentifier: String,
   accessCondition: Option[String],
   thumbnailLocation: Option[String] = None

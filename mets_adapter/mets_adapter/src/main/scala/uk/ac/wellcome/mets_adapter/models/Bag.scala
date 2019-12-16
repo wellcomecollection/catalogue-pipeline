@@ -7,11 +7,11 @@ case class Bag(info: BagInfo,
                location: BagLocation,
                version: String) {
 
-  def metsData: Either[Exception, MetsData] =
+  def metsLocation: Either[Exception, MetsLocation] =
     file
       .flatMap { file =>
         parsedVersion.map { version =>
-          MetsData(
+          MetsLocation(
             location.bucket,
             location.path,
             version,
