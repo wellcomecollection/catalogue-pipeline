@@ -1,6 +1,6 @@
 locals {
  namespace = "mets-adapter"
- storage_notifications_topic = ""
+ storage_notifications_topic_arn = "arn:aws:sns:eu-west-1:975596993436:storage_prod_bag_register_output"
  logstash_transit_service_name = "${local.namespace}_logstash_transit"
  logstash_host                 = "${local.logstash_transit_service_name}.${local.namespace}"
 
