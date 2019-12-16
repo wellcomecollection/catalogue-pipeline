@@ -6,7 +6,7 @@ import uk.ac.wellcome.platform.transformer.mets.fixtures.{
   LocalStackS3Fixtures,
   STSFixtures
 }
-import uk.ac.wellcome.storage.ObjectLocation
+import uk.ac.wellcome.storage.{ObjectLocation, Identified}
 import uk.ac.wellcome.storage.store.TypedStoreEntry
 
 import scala.util.Right
@@ -29,7 +29,7 @@ class TemporaryCredentialsStoreTest
             val result = new TemporaryCredentialsStore[String](
               assumeRoleClientProvider).get(location)
             result shouldBe a[Right[_, _]]
-            result.right.get shouldBe content
+            result.right.get shouldBe Identified(location, content)
         }
       }
     }

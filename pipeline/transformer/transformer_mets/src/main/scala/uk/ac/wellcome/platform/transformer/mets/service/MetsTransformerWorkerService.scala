@@ -1,26 +1,25 @@
 package uk.ac.wellcome.platform.transformer.mets.service
 
+import scala.concurrent.Future
 import akka.Done
 import grizzled.slf4j.Logging
+
 import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig}
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.mets_adapter.models.MetsLocation
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
-import uk.ac.wellcome.platform.transformer.mets.store.TemporaryCredentialsStore
 import uk.ac.wellcome.platform.transformer.mets.transformer.MetsXml
-import uk.ac.wellcome.storage.store.VersionedStore
-import uk.ac.wellcome.storage.{Identified, Version}
+import uk.ac.wellcome.storage.store.{VersionedStore, Readable}
+import uk.ac.wellcome.storage.{Identified, Version, ObjectLocation}
 import uk.ac.wellcome.typesafe.Runnable
-
-import scala.concurrent.Future
 
 class MetsTransformerWorkerService(
   msgStream: SQSStream[NotificationMessage],
   messageSender: BigMessageSender[SNSConfig, TransformedBaseWork],
   adapterStore: VersionedStore[String, Int, MetsLocation],
-  metsXmlStore: TemporaryCredentialsStore[String]
+  metsXmlStore: Readable[ObjectLocation, String]
 ) extends Runnable
     with Logging {
 
@@ -61,5 +60,7 @@ class MetsTransformerWorkerService(
   private def getMetsXml(metsLocation: MetsLocation): Result[MetsXml] =
     metsXmlStore
       .get(metsLocation.xmlLocation)
-      .flatMap(MetsXml(_))
+      .left
+      .map(_.e)
+      .flatMap { case Identified(_, xmlString) => MetsXml(xmlString) }
 }
