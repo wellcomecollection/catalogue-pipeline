@@ -173,7 +173,8 @@ class SierraTransformableTransformerTest
       itemRecords = List(itemRecord)
     )
 
-    val unidentifiedWork = transformToWork(transformable).asInstanceOf[UnidentifiedWork]
+    val unidentifiedWork =
+      transformToWork(transformable).asInstanceOf[UnidentifiedWork]
 
     unidentifiedWork.data.items.head.agent.title shouldBe Some("Envelope")
   }

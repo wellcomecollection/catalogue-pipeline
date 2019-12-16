@@ -173,7 +173,13 @@ object SierraProduction extends SierraTransformer with SierraQueryOps {
     marc264fields: List[VarField]): Boolean =
     marc264fields match {
       case List(
-          VarField(_,Some("264"), _, _, _, List(MarcSubfield("c", content)))) =>
+          VarField(
+            _,
+            Some("264"),
+            _,
+            _,
+            _,
+            List(MarcSubfield("c", content)))) =>
         content.matches("^©\\d{4}$")
       case _ => false
     }
