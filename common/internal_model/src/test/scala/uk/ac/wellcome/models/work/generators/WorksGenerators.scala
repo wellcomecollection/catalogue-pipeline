@@ -210,12 +210,15 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     createUnidentifiedSierraWorkWith()
 
   def createSierraPhysicalWork: UnidentifiedWork =
-    createUnidentifiedSierraWorkWith(
-      items = List(
-        createIdentifiableItemWith(locations = List(createPhysicalLocation))))
+    createUnidentifiedSierraWorkWith(items = List(createPhysicalItem))
 
   def createSierraDigitalWork: UnidentifiedWork =
     createSierraDigitalWorkWith()
+
+  def createSierraWorkWithTwoPhysicalItems =
+    createUnidentifiedSierraWorkWith(
+      items = List(createPhysicalItem, createPhysicalItem)
+    )
 
   def createSierraDigitalWorkWith(
     items: List[Unidentifiable[Item]] = List(

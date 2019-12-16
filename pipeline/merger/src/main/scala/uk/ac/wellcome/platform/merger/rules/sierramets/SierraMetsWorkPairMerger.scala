@@ -21,25 +21,50 @@ trait SierraMetsWorkPairMerger extends WorkPairMerger {
     sierraWork: UnidentifiedWork,
     metsWork: TransformedBaseWork): Option[MergedWork] =
     (sierraWork.data.items, metsWork.data.items) match {
-      case (List(sierraItem), List(metsItem: Unidentifiable[Item])) =>
-        metsItem.agent.locations match {
-          case List(metsLocation: DigitalLocation) =>
-            val targetWork = sierraWork.withData { data =>
-              data.copy(
-                items = List(mergeLocations(sierraItem, metsLocation)),
-                thumbnail =
-                  metsWork.data.thumbnail.map(Some(_)).getOrElse(data.thumbnail)
-              )
-            }
-            val redirectedWork = UnidentifiedRedirectedWork(
-              metsWork.sourceIdentifier,
-              metsWork.version,
-              IdentifiableRedirect(sierraWork.sourceIdentifier))
-            Some(MergedWork(targetWork, redirectedWork))
-          case _ => None
-        }
+      case (
+          _ :: _,
+          List(
+            metsItem @ Unidentifiable(
+              Item(_, List(metsLocation: DigitalLocation), _)))) =>
+        val items = createItems(sierraWork, metsItem, metsLocation)
+        createMergedWork(sierraWork, metsWork, items)
       case _ => None
     }
+
+  private def createItems(sierraWork: UnidentifiedWork,
+                          metsItem: Unidentifiable[Item],
+                          metsLocation: DigitalLocation) = {
+    sierraWork.data.items match {
+      case List(sierraItem) => List(mergeLocations(sierraItem, metsLocation))
+      case sierraItems =>
+        sierraItems.filterNot(shouldIgnoreItem(_, metsLocation)) :+ metsItem
+    }
+  }
+
+  private def shouldIgnoreItem(item: MaybeDisplayable[Item],
+                               metsLocation: DigitalLocation) = {
+    item.agent.locations match {
+      case List(location) => shouldIgnoreLocation(location, metsLocation.url)
+      case _              => false
+    }
+  }
+
+  private def createMergedWork(sierraWork: UnidentifiedWork,
+                               metsWork: TransformedBaseWork,
+                               items: List[MaybeDisplayable[Item]]) = {
+    val targetWork = sierraWork.withData { data =>
+      data.copy(
+        items = items,
+        thumbnail =
+          metsWork.data.thumbnail.map(Some(_)).getOrElse(data.thumbnail)
+      )
+    }
+    val redirectedWork = UnidentifiedRedirectedWork(
+      metsWork.sourceIdentifier,
+      metsWork.version,
+      IdentifiableRedirect(sierraWork.sourceIdentifier))
+    Some(MergedWork(targetWork, redirectedWork))
+  }
 
   private def mergeLocations(sierraItem: MaybeDisplayable[Item],
                              metsLocation: DigitalLocation) =
