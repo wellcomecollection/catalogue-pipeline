@@ -10,7 +10,7 @@ import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.SQSBuilder
-import uk.ac.wellcome.mets_adapter.models.MetsData
+import uk.ac.wellcome.mets_adapter.models.MetsLocation
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.transformer.mets.client.{
   AmazonS3ClientFactory,
@@ -62,7 +62,7 @@ object Main extends WellcomeTypesafeApp with AWSClientConfigBuilder {
       SQSBuilder.buildSQSStream[NotificationMessage](config),
       messageSender = BigMessagingBuilder
         .buildBigMessageSender[TransformedBaseWork](config),
-      adapterStore = new DynamoSingleVersionStore[String, MetsData](
+      adapterStore = new DynamoSingleVersionStore[String, MetsLocation](
         DynamoBuilder.buildDynamoConfig(config, namespace = "mets")
       ),
       temporaryCredentialsStore

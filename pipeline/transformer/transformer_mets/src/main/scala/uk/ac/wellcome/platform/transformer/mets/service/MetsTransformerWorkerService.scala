@@ -6,12 +6,12 @@ import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig}
 import uk.ac.wellcome.messaging.sqs.SQSStream
-import uk.ac.wellcome.mets_adapter.models.MetsData
+import uk.ac.wellcome.mets_adapter.models.MetsLocation
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
-import uk.ac.wellcome.platform.transformer.mets.parsers.MetsXmlParser
 import uk.ac.wellcome.platform.transformer.mets.store.TemporaryCredentialsStore
+import uk.ac.wellcome.platform.transformer.mets.transformer.MetsXml
 import uk.ac.wellcome.storage.store.VersionedStore
-import uk.ac.wellcome.storage.{Identified, ObjectLocation, Version}
+import uk.ac.wellcome.storage.{Identified, Version}
 import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.Future
@@ -19,10 +19,12 @@ import scala.concurrent.Future
 class MetsTransformerWorkerService(
   msgStream: SQSStream[NotificationMessage],
   messageSender: BigMessageSender[SNSConfig, TransformedBaseWork],
-  adapterStore: VersionedStore[String, Int, MetsData],
+  adapterStore: VersionedStore[String, Int, MetsLocation],
   metsXmlStore: TemporaryCredentialsStore[String]
 ) extends Runnable
     with Logging {
+
+  type Result[T] = Either[Throwable, T]
 
   val className = this.getClass.getSimpleName
 
@@ -41,25 +43,23 @@ class MetsTransformerWorkerService(
     })
   }
 
-  private def process(key: Version[String, Int]) = {
+  private def process(key: Version[String, Int]) =
     for {
-      metsData <- getMetsData(key)
-      metsString <- getFromMetsStore(metsData)
-      mets <- MetsXmlParser(metsString)
+      metsLocation <- getMetsLocation(key)
+      metsXml <- getMetsXml(metsLocation)
+      mets <- metsXml.toMetsData
       work <- mets.toWork(key.version)
       _ <- messageSender.sendT(work).toEither
     } yield ()
-  }
 
-  private def getMetsData(key: Version[String, Int]) = {
+  private def getMetsLocation(key: Version[String, Int]): Result[MetsLocation] =
     adapterStore.get(key) match {
       case Left(err)                   => Left(err.e)
       case Right(Identified(_, entry)) => Right(entry)
     }
-  }
 
-  private def getFromMetsStore(metsData: MetsData) = {
-    metsXmlStore.get(
-      ObjectLocation(metsData.bucket, s"${metsData.path}/${metsData.file}"))
-  }
+  private def getMetsXml(metsLocation: MetsLocation): Result[MetsXml] =
+    metsXmlStore
+      .get(metsLocation.xmlLocation)
+      .flatMap(MetsXml(_))
 }

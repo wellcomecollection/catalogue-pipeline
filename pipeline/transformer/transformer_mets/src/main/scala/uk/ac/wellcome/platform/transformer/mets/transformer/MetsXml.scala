@@ -1,30 +1,21 @@
-package uk.ac.wellcome.platform.transformer.mets.parsers
+package uk.ac.wellcome.platform.transformer.mets.transformer
 
-import scala.collection.immutable.ListMap
 import scala.util.Try
+import scala.collection.immutable.ListMap
 import scala.xml.{Elem, NodeSeq, XML}
 
-import uk.ac.wellcome.platform.transformer.mets.transformer.Mets
+case class MetsXml(root: Elem) {
 
-object MetsXmlParser {
-
-  def apply(str: String): Either[Throwable, Mets] =
+  def toMetsData: Either[Exception, MetsData] =
     for {
-      is <- Try(XML.loadString(str)).toEither
-      mets <- MetsXmlParser(is)
-    } yield (mets)
-
-  def apply(root: Elem): Either[Exception, Mets] = {
-    for {
-      id <- recordIdentifier(root)
-      maybeAccessCondition <- accessCondition(root)
+      id <- recordIdentifier
+      accessCondition <- accessCondition
     } yield
-      Mets(
+      MetsData(
         recordIdentifier = id,
-        accessCondition = maybeAccessCondition,
-        thumbnailLocation = thumbnailLocation(root, id),
+        accessCondition = accessCondition,
+        thumbnailLocation = thumbnailLocation(id),
       )
-  }
 
   /** The record identifier (generally the B number) is encoded in the METS. For
     *  example:
@@ -43,7 +34,7 @@ object MetsXmlParser {
     *
     *  The expected output would be: "b30246039"
     */
-  private def recordIdentifier(root: Elem): Either[Exception, String] = {
+  def recordIdentifier: Either[Exception, String] = {
     val identifierNodes =
       (root \\ "dmdSec" \ "mdWrap" \\ "recordInfo" \ "recordIdentifier").toList
     identifierNodes match {
@@ -72,17 +63,17 @@ object MetsXmlParser {
     *
     *  The expected output would be: "CC-BY-NC"
     */
-  private def accessCondition(root: Elem): Either[Exception, Option[String]] = {
+  def accessCondition: Either[Exception, Option[String]] = {
     val licenseNodes = (root \\ "dmdSec" \ "mdWrap" \\ "accessCondition")
       .filterByAttribute("type", "dz")
       .toList
     licenseNodes match {
-      case Nil => Right(None)
-      case List(licenseNode) =>
-        Right[Exception, Option[String]](Some(licenseNode.text))
+      case Nil               => Right(None)
+      case List(licenseNode) => Right(Some(licenseNode.text))
       case _ =>
-        Left[Exception, Option[String]](
-          new Exception("Found multiple accessCondtions in METS XML"))
+        Left(
+          new Exception("Found multiple accessCondtions in METS XML")
+        )
     }
   }
 
@@ -90,18 +81,15 @@ object MetsXmlParser {
     *  file ID the fileObjects mapping, and use the files location as the
     *  thumbnail image.
     */
-  private def thumbnailLocation(root: Elem, bnumber: String): Option[String] = {
+  def thumbnailLocation(bnumber: String): Option[String] = {
     // Filenames in DLCS are always prefixed with the bnumber to ensure uniqueness.
     // However they might not be prefixed with the bnumber in the METS file.
     // So we need to do two thinhs:
     //  - strip the "objects/" part of the link
     //  - prepend the bnumber followed by an underscore if it's not already present
     val filePrefixRegex = s"objects/(?:${bnumber}_)?"
-    physicalStructMap(root).headOption
-      .flatMap {
-        case (_, fileId) =>
-          fileObjects(root).get(fileId)
-      }
+    physicalStructMap.headOption
+      .flatMap { case (_, fileId) => fileObjects.get(fileId) }
       .map(_.replaceFirst(filePrefixRegex, s"${bnumber}_"))
   }
 
@@ -124,7 +112,7 @@ object MetsXmlParser {
     *  Map("FILE_0001_OBJECTS" -> "objects/b30246039_0001.jp2",
     *      "FILE_0002_OBJECTS" -> "objects/b30246039_0002.jp2")
     */
-  private def fileObjects(root: Elem): Map[String, String] =
+  private def fileObjects: Map[String, String] =
     (root \ "fileSec" \ "fileGrp")
       .filterByAttribute("USE", "OBJECTS")
       .childrenWithTag("file")
@@ -156,7 +144,7 @@ object MetsXmlParser {
     *  Map("PHYS_0001" -> "FILE_0001_OBJECTS",
     *      "PHYS_0002" -> "FILE_0002_OBJECTS")
     */
-  private def physicalStructMap(root: Elem): ListMap[String, String] =
+  private def physicalStructMap: ListMap[String, String] =
     (root \ "structMap")
       .filterByAttribute("TYPE", "PHYSICAL")
       .descendentsWithTag("div")
@@ -196,4 +184,10 @@ object MetsXmlParser {
       ListMap(mappings: _*)
     }
   }
+}
+
+object MetsXml {
+
+  def apply(str: String): Either[Throwable, MetsXml] =
+    Try(XML.loadString(str)).map(MetsXml(_)).toEither
 }
