@@ -8,7 +8,7 @@ import uk.ac.wellcome.platform.merger.rules.{MergerRule, WorkPairMerger}
 
 /** If we have a pair of Sierra records:
   *
-  *   - One of which has a at least one item with at least a Physical location ("physical work")
+  *   - One of which has a at least one item containing a Physical location ("physical work")
   *   - The other of which has a single Digital location ("digital work")
   *
   * Then the digital work is a digitised version of the physical work.
