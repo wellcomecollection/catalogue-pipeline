@@ -1,6 +1,6 @@
 locals {
  namespace = "mets-adapter"
- storage_notifications_topic_arn = "${data.terraform_remote_state.storage_service.register_output_topic_arn}"
+ storage_notifications_topic_arn = "${data.terraform_remote_state.storage_service.bag_register_output_topic_arn}"
  logstash_transit_service_name = "${local.namespace}_logstash_transit"
  logstash_host                 = "${local.logstash_transit_service_name}.${local.namespace}"
 
