@@ -49,10 +49,10 @@ module "catalogue_pipeline_20191115" {
   read_storage_s3_role_arn = "${aws_iam_role.read_storage_s3.arn}"
 }
 
-module "catalogue_pipeline_20191211" {
+module "catalogue_pipeline_20191216" {
   source = "./stack"
 
-  namespace = "catalogue-20191211"
+  namespace = "catalogue-20191216"
 
   release_label = "latest"
 
@@ -86,7 +86,7 @@ module "catalogue_pipeline_20191211" {
   mets_adapter_topic_names = ["${local.mets_adapter_topic_name}"]
 
   # Elasticsearch
-  es_works_index = "v2-20191211"
+  es_works_index = "v2-20191216"
   # RDS
   rds_ids_access_security_group_id = "${local.rds_access_security_group_id}"
   # Adapter VHS
