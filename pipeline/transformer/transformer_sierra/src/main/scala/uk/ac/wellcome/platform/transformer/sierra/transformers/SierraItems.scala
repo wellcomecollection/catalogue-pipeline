@@ -119,5 +119,5 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
   }
 
   private def getItemTitle(data: SierraItemData) =
-    data.varFields.withTag("v").contents.headOption
+    data.varFields.withFieldTag("v").contents.headOption
 }
