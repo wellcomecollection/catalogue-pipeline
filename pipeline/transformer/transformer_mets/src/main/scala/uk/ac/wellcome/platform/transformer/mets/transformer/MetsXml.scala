@@ -176,7 +176,7 @@ case class MetsXml(root: Elem) {
     */
   private def logicalStructMapForMultipleManifestations: ListMap[String, String] =
     (root \ "structMap")
-      .filterByAttribute("TYPE", "PHYSICAL")
+      .filterByAttribute("TYPE", "LOGICAL")
       .childrenWithTag("div")
       .filterByAttribute("TYPE", "MultipleManifestation")
       .descendentsWithTag("div")
