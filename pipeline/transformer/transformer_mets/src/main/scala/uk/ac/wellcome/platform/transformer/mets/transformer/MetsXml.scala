@@ -82,6 +82,16 @@ case class MetsXml(root: Elem) {
       .map(_.replaceFirst(filePrefixRegex, s"${bnumber}_"))
   }
 
+  /** Returns the first href to a manifestation in the logical structMap
+    */
+  def firstManifestationFilename: Either[Exception, String] =
+    logicalStructMapForMultipleManifestations.headOption match {
+      case Some((_, name)) => Right(name)
+      case None            => Left(
+        new Exception("Could not parse any manifestation locations")
+      )
+    }
+
   /** The METS XML contains locations of associated files, contained in a
     *  mapping with the following format:
     *
@@ -142,6 +152,39 @@ case class MetsXml(root: Elem) {
         keyAttrib = "ID",
         valueNode = "fptr",
         valueAttrib = "FILEID"
+      )
+
+  /** Valid METS documents should contain a logicalStructMap section. When this
+    *  is data containing multiple manifestations, we can expect the map to
+    *  include links to the other XML files:
+    *
+    *  <mets:structMap TYPE="LOGICAL">
+    *    <mets:div ADMID="AMD" DMDID="DMDLOG_0000" ID="LOG_0000" TYPE="MultipleManifestation">
+    *      <mets:div ID="LOG_0001" ORDER="01" TYPE="Monograph">
+    *        <mets:mptr LOCTYPE="URL" xlink:href="b22012692_0001.xml" />
+    *      </mets:div>
+    *      <mets:div ID="LOG_0002" ORDER="03" TYPE="Monograph">
+    *        <mets:mptr LOCTYPE="URL" xlink:href="b22012692_0003.xml" />
+    *      </mets:div>
+    *    </mets:div>
+    *  </mets:structMap>
+    *
+    *  For this input we would expect the following output:
+    *
+    *  Map("LOG_0000" -> "b22012692_0001.xml",
+    *      "LOG_0002" -> "b22012692_0003.xml")
+    */
+  private def logicalStructMapForMultipleManifestations: ListMap[String, String] =
+    (root \ "structMap")
+      .filterByAttribute("TYPE", "PHYSICAL")
+      .childrenWithTag("div")
+      .filterByAttribute("TYPE", "MultipleManifestation")
+      .descendentsWithTag("div")
+      .sortByAttribute("ORDER")
+      .toMapping(
+        keyAttrib = "ID",
+        valueNode = "mptr",
+        valueAttrib = "{http://www.w3.org/1999/xlink}href"
       )
 
   implicit class NodeSeqOps(nodes: NodeSeq) {
