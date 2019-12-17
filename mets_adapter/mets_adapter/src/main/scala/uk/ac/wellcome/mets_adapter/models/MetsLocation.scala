@@ -14,5 +14,5 @@ case class MetsLocation(bucket: String,
     ObjectLocation(bucket, s"${path}/${file}")
 
   def manifestationLocations =
-    manifestations.map(path => ObjectLocation(bucket, s"${path}/${file}"))
+    manifestations.map(file => ObjectLocation(bucket, s"${path}/${file}"))
 }

@@ -54,6 +54,32 @@ trait MetsGenerators {
       {structMap}
     </mets:mets>
 
+  def xmlWithManifestations(manifestations: List[(String, String, String)]) =
+    <mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3" xmlns:xlink="http://www.w3.org/1999/xlink">
+      <mets:dmdSec ID="DMDLOG_0000">
+        <mets:mdWrap MDTYPE="MODS">
+          <mets:xmlData>
+            <mods:mods>
+              <mods:recordInfo>
+                <mods:recordIdentifier source="gbv-ppn">{"b30246039"}</mods:recordIdentifier>
+              </mods:recordInfo>
+            </mods:mods>
+          </mets:xmlData>
+        </mets:mdWrap>
+      </mets:dmdSec>
+      <mets:structMap TYPE="LOGICAL">
+        <mets:div ADMID="AMD" DMDID="DMDLOG_0000" ID="LOG_0000" TYPE="MultipleManifestation">
+          {
+            manifestations.map { case (id, order, filename) =>
+              <mets:div ID={id} ORDER={order} TYPE="Monograph">
+                <mets:mptr LOCTYPE="URL" xlink:href={filename} />
+              </mets:div>
+            }
+          }
+        </mets:div>
+      </mets:structMap>
+    </mets:mets>
+
   def structMap =
     <mets:structMap TYPE="PHYSICAL">
     <mets:div DMDID="DMDPHYS_0000" ID="PHYS_0000" TYPE="physSequence">
