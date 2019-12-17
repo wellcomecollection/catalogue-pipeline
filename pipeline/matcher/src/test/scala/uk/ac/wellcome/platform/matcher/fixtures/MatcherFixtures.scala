@@ -118,10 +118,7 @@ trait MatcherFixtures
     testWith(workNodeDao)
   }
 
-  def sendWork(work: TransformedBaseWork,
-               vhs: VHS,
-               queue: SQS.Queue,
-               version: Int = 1) = {
+  def sendWork(work: TransformedBaseWork, vhs: VHS, queue: SQS.Queue): Any = {
     val entry = HybridStoreEntry(work, EmptyMetadata())
     val id = work.sourceIdentifier.toString
     val key = vhs.putLatest(id)(entry) match {

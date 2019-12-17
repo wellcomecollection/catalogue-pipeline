@@ -33,7 +33,7 @@ class MatcherWorkerService[MsgDestination](
     (for {
       key <- Future.fromTry(fromJson[Version[String, Int]](message.body))
       work <- Future.fromTry(store.getWork(key).toTry)
-      identifiersList <- workMatcher.matchWork(work.get)
+      identifiersList <- workMatcher.matchWork(work)
       _ <- Future.fromTry(msgSender.sendT(identifiersList))
     } yield ()).recover {
       case MatcherException(e: VersionExpectedConflictException) =>

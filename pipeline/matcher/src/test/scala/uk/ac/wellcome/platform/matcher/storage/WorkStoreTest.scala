@@ -1,14 +1,16 @@
 package uk.ac.wellcome.platform.matcher.storage
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.{FunSpec, Inside, Matchers}
 import uk.ac.wellcome.bigmessaging.EmptyMetadata
 import uk.ac.wellcome.bigmessaging.fixtures.VHSFixture
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
+import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
+import uk.ac.wellcome.platform.matcher.models.VersionExpectedConflictException
 import uk.ac.wellcome.storage.Version
 import uk.ac.wellcome.storage.store.HybridStoreEntry
 
-class WorkStoreTest extends FunSpec with Matchers with VHSFixture[TransformedBaseWork] with WorksGenerators {
+class WorkStoreTest extends FunSpec with Matchers with VHSFixture[TransformedBaseWork] with WorksGenerators with Inside {
   it("gets a work from vhs"){
     withVHS {vhs: VHS =>
       val workStore = new WorkStore(vhs)
@@ -17,7 +19,7 @@ class WorkStoreTest extends FunSpec with Matchers with VHSFixture[TransformedBas
         key <- vhs.put(Version("b12345678", 1)) (HybridStoreEntry(expectedWork, EmptyMetadata()))
         work <- workStore.getWork(key.id)
       } yield(work)
-       actualWork shouldBe Right(Some(expectedWork))
+       actualWork shouldBe Right(expectedWork)
     }
   }
 
@@ -31,7 +33,7 @@ class WorkStoreTest extends FunSpec with Matchers with VHSFixture[TransformedBas
     }
   }
 
-  it("returns a none if the work exists in VHS with a higher version"){
+  it("returns a VersionExpectedConflictException if the work exists in VHS with a higher version"){
     withVHS {vhs: VHS =>
       val workStore = new WorkStore(vhs)
       val expectedWork = createUnidentifiedWork
@@ -39,7 +41,9 @@ class WorkStoreTest extends FunSpec with Matchers with VHSFixture[TransformedBas
         _ <- vhs.put(Version("b12345678", 2)) (HybridStoreEntry(expectedWork, EmptyMetadata()))
         work <- workStore.getWork(Version("b12345678", 1))
       } yield(work)
-      actualWork shouldBe Right(None)
+      inside(actualWork) {case Left(MatcherException(e)) =>
+        e shouldBe a[VersionExpectedConflictException]
+      }
     }
 
   }
