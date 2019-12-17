@@ -32,8 +32,8 @@ class MatcherWorkerService[MsgDestination](
   def processMessage(message: NotificationMessage): Future[Unit] = {
     (for {
       key <- Future.fromTry(fromJson[Version[String, Int]](message.body))
-      work <- store.getWork(key)
-      identifiersList <- workMatcher.matchWork(work)
+      work <- Future.fromTry(store.getWork(key).toTry)
+      identifiersList <- workMatcher.matchWork(work.get)
       _ <- Future.fromTry(msgSender.sendT(identifiersList))
     } yield ()).recover {
       case MatcherException(e: VersionExpectedConflictException) =>
