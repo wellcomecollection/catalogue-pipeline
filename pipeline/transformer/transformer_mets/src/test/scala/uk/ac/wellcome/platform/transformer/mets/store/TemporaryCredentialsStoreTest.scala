@@ -6,7 +6,7 @@ import uk.ac.wellcome.platform.transformer.mets.fixtures.{
   LocalStackS3Fixtures,
   STSFixtures
 }
-import uk.ac.wellcome.storage.{ObjectLocation, Identified}
+import uk.ac.wellcome.storage.{Identified, ObjectLocation}
 import uk.ac.wellcome.storage.store.TypedStoreEntry
 
 import scala.util.Right

@@ -38,17 +38,18 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
   }
 
   it("parses thumbnail from XML") {
-    MetsXml(xml).right.get.thumbnailLocation("b30246039") shouldBe Some("b30246039_0001.jp2")
+    MetsXml(xml).right.get.thumbnailLocation("b30246039") shouldBe Some(
+      "b30246039_0001.jp2")
   }
 
   it("parses first thumbnail when no ORDER attribute") {
-    MetsXml(xmlWithThumbnailImages("b30246039")).thumbnailLocation("b30246039") shouldBe Some(
-      "b30246039_0001.jp2")
+    MetsXml(xmlWithThumbnailImages("b30246039"))
+      .thumbnailLocation("b30246039") shouldBe Some("b30246039_0001.jp2")
   }
 
   it("parses thumbnail using ORDER attrib when non-sequential order") {
-    MetsXml(xmlNonSequentialOrder("b30246039")).thumbnailLocation("b30246039") shouldBe Some(
-      "b30246039_0001.jp2")
+    MetsXml(xmlNonSequentialOrder("b30246039"))
+      .thumbnailLocation("b30246039") shouldBe Some("b30246039_0001.jp2")
   }
 
   it("parses thumbnail if filename doesn't start with bnumber") {
@@ -62,7 +63,8 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
   }
 
   it("cannot parse thumbnail when invalid file ID") {
-    MetsXml(xmlInvalidFileId("b30246039")).thumbnailLocation("b30246039") shouldBe None
+    MetsXml(xmlInvalidFileId("b30246039"))
+      .thumbnailLocation("b30246039") shouldBe None
   }
 
   it("parses first manifestation filename when present") {

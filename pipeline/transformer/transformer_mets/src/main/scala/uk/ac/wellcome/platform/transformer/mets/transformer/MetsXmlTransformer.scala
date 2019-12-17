@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.transformer.mets.transformer
 
 import uk.ac.wellcome.storage.store.Readable
-import uk.ac.wellcome.storage.{ObjectLocation, Identified}
+import uk.ac.wellcome.storage.{Identified, ObjectLocation}
 import uk.ac.wellcome.mets_adapter.models.MetsLocation
 
 class MetsXmlTransformer(store: Readable[ObjectLocation, String]) {
@@ -29,7 +29,8 @@ class MetsXmlTransformer(store: Readable[ObjectLocation, String]) {
       )
 
   private def transformWithManifestations(
-    root: MetsXml, manifestations: List[ObjectLocation]): Result[MetsData] =
+    root: MetsXml,
+    manifestations: List[ObjectLocation]): Result[MetsData] =
     for {
       id <- root.recordIdentifier
       firstManifestation <- getFirstManifestation(root, manifestations)
@@ -42,14 +43,17 @@ class MetsXmlTransformer(store: Readable[ObjectLocation, String]) {
       )
 
   private def getFirstManifestation(
-    root: MetsXml, manifestations: List[ObjectLocation]): Result[MetsXml] =
+    root: MetsXml,
+    manifestations: List[ObjectLocation]): Result[MetsXml] =
     root.firstManifestationFilename
       .flatMap { name =>
         manifestations.find(_.path.endsWith(name)) match {
           case Some(location) => Right(location)
-          case None           => Left(
-            new Exception(s"Could not find manifestation with filename: $name")
-          )
+          case None =>
+            Left(
+              new Exception(
+                s"Could not find manifestation with filename: $name")
+            )
         }
       }
       .flatMap(getMetsXml)

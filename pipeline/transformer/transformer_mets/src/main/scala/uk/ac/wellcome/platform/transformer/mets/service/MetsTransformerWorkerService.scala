@@ -11,8 +11,8 @@ import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.mets_adapter.models.MetsLocation
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.transformer.mets.transformer.MetsXmlTransformer
-import uk.ac.wellcome.storage.store.{VersionedStore, Readable}
-import uk.ac.wellcome.storage.{Identified, Version, ObjectLocation}
+import uk.ac.wellcome.storage.store.{Readable, VersionedStore}
+import uk.ac.wellcome.storage.{Identified, ObjectLocation, Version}
 import uk.ac.wellcome.typesafe.Runnable
 
 class MetsTransformerWorkerService(

@@ -87,9 +87,10 @@ case class MetsXml(root: Elem) {
   def firstManifestationFilename: Either[Exception, String] =
     logicalStructMapForMultipleManifestations.headOption match {
       case Some((_, name)) => Right(name)
-      case None            => Left(
-        new Exception("Could not parse any manifestation locations")
-      )
+      case None =>
+        Left(
+          new Exception("Could not parse any manifestation locations")
+        )
     }
 
   /** The METS XML contains locations of associated files, contained in a
@@ -174,7 +175,8 @@ case class MetsXml(root: Elem) {
     *  Map("LOG_0000" -> "b22012692_0001.xml",
     *      "LOG_0002" -> "b22012692_0003.xml")
     */
-  private def logicalStructMapForMultipleManifestations: ListMap[String, String] =
+  private def logicalStructMapForMultipleManifestations
+    : ListMap[String, String] =
     (root \ "structMap")
       .filterByAttribute("TYPE", "LOGICAL")
       .childrenWithTag("div")

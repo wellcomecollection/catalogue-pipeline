@@ -80,7 +80,6 @@ trait MetsGenerators {
       </mets:structMap>
     </mets:mets>
 
-
   def structMap =
     <mets:structMap TYPE="PHYSICAL">
     <mets:div DMDID="DMDPHYS_0000" ID="PHYS_0000" TYPE="physSequence">

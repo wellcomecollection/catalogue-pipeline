@@ -61,12 +61,11 @@ class MetsXmlTransformerTest extends FunSpec with Matchers with MetsGenerators {
     )
 
     val store = new MemoryStore(
-      (manifestations ++ root.map(content => "root.xml" -> Some(content)))
-        .collect {
-          case (file, Some(content)) =>
-            ObjectLocation("bucket", s"path/$file") -> content
-        }
-        .toMap
+      (manifestations ++ root
+        .map(content => "root.xml" -> Some(content))).collect {
+        case (file, Some(content)) =>
+          ObjectLocation("bucket", s"path/$file") -> content
+      }.toMap
     )
 
     new MetsXmlTransformer(store).transform(metsLocation)
