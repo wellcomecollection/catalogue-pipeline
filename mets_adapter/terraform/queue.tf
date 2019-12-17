@@ -1,5 +1,5 @@
 module "queue" {
-  source = "git::https://github.com/wellcometrust/terraform-modules.git//sqs?ref=use_topic_arns_queue"
+  source = "git::https://github.com/wellcometrust/terraform-modules.git//sqs?ref=v19.17.0"
   queue_name  = "mets_adapter_queue"
   topic_arns = ["${local.storage_notifications_topic_arn}", "${module.temp_test_topic.arn}"]
   topic_count = 2
