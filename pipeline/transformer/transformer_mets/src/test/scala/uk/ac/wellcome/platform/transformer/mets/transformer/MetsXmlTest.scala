@@ -12,46 +12,44 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
     val xml = loadXmlFile("/b30246039.xml")
 
     it("parses recordIdentifier from XML") {
-      MetsXml(xml).right.get.toMetsData.right.get.recordIdentifier shouldBe "b30246039"
+      MetsXml(xml).right.get.recordIdentifier shouldBe Right("b30246039")
     }
 
     it("does not parse a mets if recordIdentifier is outside of dmdSec element") {
-      MetsXml(xmlNodmdSec).toMetsData shouldBe a[Left[_, _]]
+      MetsXml(xmlNodmdSec).recordIdentifier shouldBe a[Left[_, _]]
     }
 
     it("does not parse if there is more than one recordIdentifier") {
-      MetsXml(xmlMultipleIds).toMetsData shouldBe a[Left[_, _]]
+      MetsXml(xmlMultipleIds).recordIdentifier shouldBe a[Left[_, _]]
     }
 
     it("parses accessCondition from XML") {
-      MetsXml(xml).right.get.toMetsData.right.get.accessCondition shouldBe Some(
-        "CC-BY-NC")
+      MetsXml(xml).right.get.accessCondition shouldBe Right(Some("CC-BY-NC"))
     }
 
     it("parses a METS with no access condition") {
-      MetsXml(xmlNoLicense).toMetsData.right.get.accessCondition shouldBe None
+      MetsXml(xmlNoLicense).accessCondition shouldBe Right(None)
     }
 
     it("fails if the input string is not an xml") {
       MetsXml("hagdf") shouldBe a[Left[_, _]]
     }
 
-    it("does not parse a METS with no multiple licenses") {
-      MetsXml(xmlMultipleLicense).toMetsData shouldBe a[Left[_, _]]
+    it("does not parse a METS with multiple licenses") {
+      MetsXml(xmlMultipleLicense).accessCondition shouldBe a[Left[_, _]]
     }
 
     it("parses thumbnail from XML") {
-      MetsXml(xml).right.get.toMetsData.right.get.thumbnailLocation shouldBe Some(
-        "b30246039_0001.jp2")
+      MetsXml(xml).right.get.thumbnailLocation("b30246039") shouldBe Some("b30246039_0001.jp2")
     }
 
     it("parses first thumbnail when no ORDER attribute") {
-      MetsXml(xmlWithThumbnailImages("b30246039")).toMetsData.right.get.thumbnailLocation shouldBe Some(
+      MetsXml(xmlWithThumbnailImages("b30246039")).thumbnailLocation("b30246039") shouldBe Some(
         "b30246039_0001.jp2")
     }
 
     it("parses thumbnail using ORDER attrib when non-sequential order") {
-      MetsXml(xmlNonSequentialOrder("b30246039")).toMetsData.right.get.thumbnailLocation shouldBe Some(
+      MetsXml(xmlNonSequentialOrder("b30246039")).thumbnailLocation("b30246039") shouldBe Some(
         "b30246039_0001.jp2")
     }
 
@@ -61,12 +59,12 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
       MetsXml(
         xmlWithThumbnailImages(
           recordIdentifier = bnumber,
-          filePrefix = _ => filePrefix)).toMetsData.right.get.thumbnailLocation shouldBe Some(
+          filePrefix = _ => filePrefix)).thumbnailLocation(bnumber) shouldBe Some(
         s"${bnumber}_${filePrefix}_0001.jp2")
     }
 
     it("cannot parse thumbnail when invalid file ID") {
-      MetsXml(xmlInvalidFileId("b30246039")).toMetsData.right.get.thumbnailLocation shouldBe None
+      MetsXml(xmlInvalidFileId("b30246039")).thumbnailLocation("b30246039") shouldBe None
     }
 
     def xmlNodmdSec =
