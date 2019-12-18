@@ -49,7 +49,7 @@ class SierraMetsWorkPairMergerTest
   it("does not duplicate digital locations for the same url as the METS one") {
     val digitalLocationNoLicense = createDigitalLocationWith(license = None)
     val digitalLocationWithLicense =
-      digitalLocationNoLicense.copy(license = Some(License_CCBYNC))
+      digitalLocationNoLicense.copy(license = Some(License.CCBYNC))
     val physicalLocation = createPhysicalLocation
     val sierraItem = createIdentifiableItemWith(
       locations = List(physicalLocation, digitalLocationNoLicense))
@@ -155,7 +155,7 @@ class SierraMetsWorkPairMergerTest
     val thumbnail = DigitalLocation(
       url = "https://path.to/thumbnail.jpg",
       locationType = LocationType("thumbnail-image"),
-      license = Some(License_CCBY)
+      license = Some(License.CCBY)
     )
     val sierraWork = createSierraDigitalWork
     val metsWork = createUnidentifiedInvisibleMetsWork withData { data =>
@@ -200,7 +200,7 @@ class SierraMetsWorkPairMergerTest
 
   it("filters digital items for the same url as the METS item") {
     val digitalLocationCCBYNC =
-      createDigitalLocationWith(license = Some(License_CCBYNC))
+      createDigitalLocationWith(license = Some(License.CCBYNC))
     val digitalLocationNoLicense = digitalLocationCCBYNC.copy(license = None)
 
     val physicalItem = createPhysicalItem

@@ -1,11 +1,7 @@
 package uk.ac.wellcome.platform.transformer.miro.transformers
 
 import org.scalatest.{FunSpec, Matchers}
-import uk.ac.wellcome.models.work.internal.{
-  DigitalLocation,
-  License_CC0,
-  LocationType
-}
+import uk.ac.wellcome.models.work.internal.{DigitalLocation, License, LocationType}
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 
 class MiroLocationsTest
@@ -25,7 +21,7 @@ class MiroLocationsTest
       DigitalLocation(
         "https://iiif.wellcomecollection.org/image/B0011308.jpg/info.json",
         LocationType("iiif-image"),
-        Some(License_CC0),
+        Some(License.CC0),
         credit = Some("Ezra Feilden")))
   }
 }

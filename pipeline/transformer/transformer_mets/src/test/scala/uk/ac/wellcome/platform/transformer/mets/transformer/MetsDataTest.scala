@@ -20,7 +20,7 @@ class MetsDataTest extends FunSpec with RandomStrings with Matchers {
     val digitalLocation = DigitalLocation(
       url,
       LocationType("iiif-presentation"),
-      license = Some(License_CCBYNC))
+      license = Some(License.CCBYNC))
 
     val unidentifiableItem: MaybeDisplayable[Item] =
       Unidentifiable(Item(locations = List(digitalLocation)))
@@ -99,7 +99,7 @@ class MetsDataTest extends FunSpec with RandomStrings with Matchers {
       DigitalLocation(
         s"https://dlcs.io/iiif-img/wellcome/5/location.png/full/!200,200/0/default.jpg",
         LocationType("thumbnail-image"),
-        license = Some(License_CCBYNC)
+        license = Some(License.CCBYNC)
       )
     )
   }

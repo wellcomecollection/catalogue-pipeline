@@ -6,7 +6,7 @@ import uk.ac.wellcome.models.work.internal._
 
 class MergerTest extends FunSpec with WorksGenerators with Matchers {
   val digitalLocationCCBYNC = createDigitalLocationWith(
-    license = Some(License_CCBYNC))
+    license = Some(License.CCBYNC))
   val digitalLocationNoLicense = digitalLocationCCBYNC.copy(license = None)
 
   private val sierraPhysicalWork = createSierraPhysicalWork
@@ -23,7 +23,7 @@ class MergerTest extends FunSpec with WorksGenerators with Matchers {
           DigitalLocation(
             url = "https://path.to/thumbnail.jpg",
             locationType = LocationType("thumbnail-image"),
-            license = Some(License_CCBY)
+            license = Some(License.CCBY)
           )
         )
       )

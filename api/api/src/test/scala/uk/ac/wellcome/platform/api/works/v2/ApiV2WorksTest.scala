@@ -296,7 +296,7 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
             DigitalLocation(
               locationType = LocationType("thumbnail-image"),
               url = "https://iiif.example.org/1234/default.jpg",
-              license = Some(License_CCBY)
+              license = Some(License.CCBY)
             ))
         )
         insertIntoElasticsearch(indexV2, work)
