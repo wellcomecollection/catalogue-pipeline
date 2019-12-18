@@ -3,6 +3,7 @@ locals {
   vhs_miro_table_name           = "${data.terraform_remote_state.catalogue_infra_critical.vhs_miro_table_name}"
   vhs_miro_inventory_table_name = "${data.terraform_remote_state.catalogue_infra_critical.vhs_miro_inventory_table_name}"
   vhs_sierra_items_table_name   = "${data.terraform_remote_state.catalogue_infra_critical.vhs_sierra_items_table_name}"
+  mets_dynamo_table_name        = "${data.terraform_remote_state.catalogue_infra_critical.mets_dynamo_table_name}"
 
   dlq_alarm_arn = "${data.terraform_remote_state.shared_infra.dlq_alarm_arn}"
 
@@ -12,6 +13,7 @@ locals {
   catalogue_miro_hybrid_records_topic_arn           = "${data.terraform_remote_state.shared_infra.catalogue_miro_reindex_topic_arn}"
   catalogue_sierra_hybrid_records_topic_arn         = "${data.terraform_remote_state.shared_infra.catalogue_sierra_reindex_topic_arn}"
   catalogue_sierra_items_hybrid_records_topic_arn   = "${data.terraform_remote_state.shared_infra.catalogue_sierra_items_reindex_topic_arn}"
+  mets_reindexer_topic_arn                          = "${module.mets_reindexer_topic.arn}"
 
   vpc_id          = "${data.terraform_remote_state.shared_infra.catalogue_vpc_delta_id}"
   private_subnets = "${data.terraform_remote_state.shared_infra.catalogue_vpc_delta_private_subnets}"
@@ -52,6 +54,11 @@ locals {
       id    = "sierra_items--catalogue"
       table = "${local.vhs_sierra_items_table_name}"
       topic = "${local.catalogue_sierra_items_hybrid_records_topic_arn}"
+    },
+    {
+      id    = "mets--catalogue"
+      table = "${local.mets_dynamo_table_name}"
+      topic = "${local.mets_reindexer_topic_arn}"
     },
   ]
 }
