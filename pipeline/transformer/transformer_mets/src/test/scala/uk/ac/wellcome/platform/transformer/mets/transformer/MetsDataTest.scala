@@ -1,10 +1,10 @@
 package uk.ac.wellcome.platform.transformer.mets.transformer
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.{FunSpec, Inside, Matchers}
 import uk.ac.wellcome.models.generators.RandomStrings
 import uk.ac.wellcome.models.work.internal._
 
-class MetsDataTest extends FunSpec with RandomStrings with Matchers {
+class MetsDataTest extends FunSpec with RandomStrings with Matchers with Inside{
 
   it("creates a invisible work with an item and a license") {
     val bNumber = randomAlphanumeric(10)
@@ -85,6 +85,30 @@ class MetsDataTest extends FunSpec with RandomStrings with Matchers {
 
     metsData.toWork(version).left.get shouldBe a[Exception]
 
+  }
+
+  it("can create a license if it matches the license label lowercase") {
+    val metsData =
+      MetsData(recordIdentifier = randomAlphanumeric(10), accessCondition = Some("in copyright"))
+    inside(metsData.toWork(1).right.get.data.items){ case List(Unidentifiable(Item(_, List(DigitalLocation(_,_, license,_,_)), _))) =>
+      license shouldBe Some(License.InCopyright)
+    }
+  }
+
+  it("can create a license if it matches the license label") {
+    val metsData =
+      MetsData(recordIdentifier = randomAlphanumeric(10), accessCondition = Some("In copyright"))
+    inside(metsData.toWork(1).right.get.data.items){ case List(Unidentifiable(Item(_, List(DigitalLocation(_,_, license,_,_)), _))) =>
+      license shouldBe Some(License.InCopyright)
+    }
+  }
+
+  it("can create a license if it matches the license url") {
+    val metsData =
+      MetsData(recordIdentifier = randomAlphanumeric(10), accessCondition = Some(License.InCopyright.url))
+    inside(metsData.toWork(1).right.get.data.items){ case List(Unidentifiable(Item(_, List(DigitalLocation(_,_, license,_,_)), _))) =>
+      license shouldBe Some(License.InCopyright)
+    }
   }
 
   it("creates a invisible work with a thumbnail location") {

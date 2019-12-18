@@ -2,8 +2,8 @@ package uk.ac.wellcome.platform.transformer.mets.transformer
 
 import uk.ac.wellcome.models.work.internal._
 
-import scala.util.Try
 import cats.implicits._
+import org.apache.commons.lang3.StringUtils.equalsIgnoreCase
 
 case class MetsData(
   recordIdentifier: String,
@@ -48,9 +48,17 @@ case class MetsData(
       license = maybeLicense)
   }
 
+  // The access conditions in mets contains sometimes the license id (lowercase),
+  // sometimes the label (ie "in copyright")
+  // and sometimes the url of the license
   private def parseLicense = {
-    accessCondition.map { license =>
-      Try(License.createLicense(license.toLowerCase)).toEither
+    accessCondition.map { accessCondition =>
+      License.values.find{ license =>
+        equalsIgnoreCase(license.id, accessCondition) || equalsIgnoreCase(license.label, accessCondition) || equals(license.url, accessCondition)
+      } match {
+        case Some(license) => Right(license)
+        case None => Left(new Exception("Couldn't match $accesCondition to a license"))
+      }
     }.sequence
   }
 
