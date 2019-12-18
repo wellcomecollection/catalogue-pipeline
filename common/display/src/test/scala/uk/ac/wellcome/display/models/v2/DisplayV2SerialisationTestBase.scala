@@ -15,7 +15,7 @@ trait DisplayV2SerialisationTestBase extends DisplaySerialisationTestBase {
     s"""{
       "id": "${license.id}",
       "label": "${license.label}",
-      ${optionalString("url", license.url)}
+      "url": "${license.url}",
       "type": "${license.ontologyType}"
     }"""
 
