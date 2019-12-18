@@ -10,7 +10,7 @@ class MiroLicensesTest extends FunSpec with Matchers {
   }
 
   it("accepts an 'In Copyright' record") {
-    chooseLicense(Some("In copyright")) shouldBe License.CopyrightNotCleared
+    chooseLicense(Some("In copyright")) shouldBe License.InCopyright
   }
 
   it("rejects restrictions 'Do not use'") {
