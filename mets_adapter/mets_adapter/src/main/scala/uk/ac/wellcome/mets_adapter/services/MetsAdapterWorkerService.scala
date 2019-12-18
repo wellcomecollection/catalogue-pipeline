@@ -76,7 +76,7 @@ class MetsAdapterWorkerService(
       .map {
         case (ctx, update) if update.context.storageSpace == "digitised" =>
           (ctx, Some(update))
-        case (ctx, _) =>  (ctx, None)
+        case (ctx, _) => (ctx, None)
       }
 
   def retrieveBag =
@@ -128,8 +128,9 @@ class MetsAdapterWorkerService(
       f: (Context, Out) => Future[Result[T]]) =
       flow
         .mapAsync(parallelism) {
-          case (ctx, Some(data)) => f(ctx, data).map(out => (ctx, out.map(Some(_))))
-          case (ctx, None)       => Future.successful((ctx, Right(None)))
+          case (ctx, Some(data)) =>
+            f(ctx, data).map(out => (ctx, out.map(Some(_))))
+          case (ctx, None) => Future.successful((ctx, Right(None)))
         }
         .via(catchErrors)
   }
