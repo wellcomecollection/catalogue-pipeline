@@ -63,7 +63,7 @@ class DisplayLocationsV2SerialisationTest
     val digitalLocation = DigitalLocation(
       url = "https://wellcomelibrary.org/iiif/b22015085/manifest",
       locationType = LocationType("iiif-image"),
-      license = Some(License_CC0)
+      license = Some(License.CC0)
     )
 
     val work = createIdentifiedWorkWith(
