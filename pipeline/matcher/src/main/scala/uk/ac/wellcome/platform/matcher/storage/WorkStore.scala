@@ -18,7 +18,12 @@ class WorkStore(store: VersionedStore[String,
         error(s"Error fetching $key from VHS")
         Left(err.e)
       case Right(Identified(id, entry)) if id.version == key.version => Right(entry.t)
-      case Right(Identified(id, _)) if id.version > key.version => Left(MatcherException(VersionExpectedConflictException()))
+      case Right(Identified(id, _)) if id.version > key.version =>
+        // If the same message gets delivered to the recorder twice in quick succession,
+        // the version in the recorder VHS has advanced. This is an expected case
+        // where we can simply ignore the current message. To do this, we send a
+        // [[VersionExpectedConflictException]] downstream so the message can be deleted.
+        Left(MatcherException(VersionExpectedConflictException()))
       case Right(Identified(id, _)) => Left(new Exception(s"Version in vhs ${id.version} is lower than requested version ${key.version} for id $id"))
     }
 }
