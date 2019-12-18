@@ -51,7 +51,7 @@ class MetsTransformerWorkerServiceTest
 
     val identifier = randomAlphanumeric(10)
     val version = randomInt(1, 10)
-    val str = metsXmlWith(identifier, License_CCBYNC)
+    val str = metsXmlWith(identifier, License.CCBYNC)
 
     withWorkerService {
       case (QueuePair(queue, _), metsBucket, topic, dynamoStore) =>
@@ -91,7 +91,7 @@ class MetsTransformerWorkerServiceTest
     val expectedDigitalLocation = DigitalLocation(
       expectedUrl,
       LocationType("iiif-presentation"),
-      license = Some(License_CCBYNC))
+      license = Some(License.CCBYNC))
     val expectedItem: MaybeDisplayable[Item] =
       Unidentifiable(Item(locations = List(expectedDigitalLocation)))
 

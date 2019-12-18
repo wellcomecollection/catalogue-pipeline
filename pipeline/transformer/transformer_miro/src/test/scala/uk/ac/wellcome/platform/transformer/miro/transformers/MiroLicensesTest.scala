@@ -1,20 +1,16 @@
 package uk.ac.wellcome.platform.transformer.miro.transformers
 
 import org.scalatest.{FunSpec, Matchers}
-import uk.ac.wellcome.models.work.internal.{
-  License,
-  License_CC0,
-  License_CopyrightNotCleared
-}
+import uk.ac.wellcome.models.work.internal.License
 import uk.ac.wellcome.platform.transformer.miro.exceptions.ShouldNotTransformException
 
 class MiroLicensesTest extends FunSpec with Matchers {
   it("finds a recognised license") {
-    chooseLicense(Some("CC-0")) shouldBe License_CC0
+    chooseLicense(Some("CC-0")) shouldBe License.CC0
   }
 
   it("accepts an 'In Copyright' record") {
-    chooseLicense(Some("In copyright")) shouldBe License_CopyrightNotCleared
+    chooseLicense(Some("In copyright")) shouldBe License.CopyrightNotCleared
   }
 
   it("rejects restrictions 'Do not use'") {

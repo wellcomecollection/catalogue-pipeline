@@ -262,7 +262,7 @@ class MiroRecordTransformerTest
 
     val expectedDigitalLocation = DigitalLocation(
       url = "https://iiif.wellcomecollection.org/image/B0011308.jpg/info.json",
-      license = Some(License_CCBY),
+      license = Some(License.CCBY),
       credit = Some("Ezra Feilden"),
       locationType = LocationType("iiif-image")
     )
@@ -277,7 +277,7 @@ class MiroRecordTransformerTest
     val expectedLocation = DigitalLocation(
       "https://iiif.wellcomecollection.org/image/B0011308.jpg/info.json",
       LocationType("iiif-image"),
-      Some(License_CCBY),
+      Some(License.CCBY),
       None)
     work.data.items shouldBe List(
       Unidentifiable(Item(locations = List(expectedLocation)))
@@ -301,7 +301,7 @@ class MiroRecordTransformerTest
         url =
           s"https://iiif.wellcomecollection.org/image/$miroId.jpg/full/300,/0/default.jpg",
         locationType = LocationType("thumbnail-image"),
-        license = Some(License_CCBY)
+        license = Some(License.CCBY)
       )
     )
   }

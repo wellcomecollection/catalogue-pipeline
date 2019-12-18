@@ -238,7 +238,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
         DigitalLocation(
           url = "https://iiif.wellcomecollection.org/V01234.jpg",
           locationType = LocationType("thumbnail-image"),
-          license = Some(License_CCBY)
+          license = Some(License.CCBY)
         )),
       items = List(
         createUnidentifiableItemWith(locations = List(

@@ -3,7 +3,7 @@ package uk.ac.wellcome.display.models.v2
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.models.work.internal.{
   DigitalLocation,
-  License_CCBY,
+  License,
   LocationType,
   PhysicalLocation
 }
@@ -18,7 +18,7 @@ class DisplayLocationV2Test extends FunSpec with Matchers {
       val internalLocation = DigitalLocation(
         locationType = locationType,
         url = thumbnailUrl,
-        license = Some(License_CCBY)
+        license = Some(License.CCBY)
       )
       val displayLocation = DisplayLocationV2(internalLocation)
 
@@ -38,7 +38,7 @@ class DisplayLocationV2Test extends FunSpec with Matchers {
         locationType = LocationType("thumbnail-image"),
         url = "",
         credit = Some("Science Museum, Wellcome"),
-        license = Some(License_CCBY)
+        license = Some(License.CCBY)
       )
       val displayLocation = DisplayLocationV2(location)
 
