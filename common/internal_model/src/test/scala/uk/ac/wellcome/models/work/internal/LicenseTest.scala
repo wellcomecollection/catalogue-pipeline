@@ -5,8 +5,10 @@ import uk.ac.wellcome.json.JsonUtil._
 
 class LicenseTest extends FunSpec with Matchers {
 
-  it("can serialise and then deserialise a CC-BY license as JSON") {
-    assertRoundTripsLicenseCorrectly(License.CCBY)
+  it("can serialise and then deserialise any license as JSON") {
+    License.values.foreach {license =>
+      assertRoundTripsLicenseCorrectly(license)
+    }
   }
 
   def assertRoundTripsLicenseCorrectly(license: License): Assertion = {
