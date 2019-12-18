@@ -31,10 +31,10 @@ object License extends Enum[License] {
   }
 
   def createLicense(id: String): License =
-    values.find(l => l.id ==id) match {
+    values.find(l => l.id == id) match {
       case Some(license) => license
-      case _ => throw new Exception(s"$id is not a valid license id")
-  }
+      case _             => throw new Exception(s"$id is not a valid license id")
+    }
 
   case object CCBY extends License {
     val id = "cc-by"
@@ -58,7 +58,8 @@ object License extends Enum[License] {
   case object CC0 extends License {
     val id = "cc-0"
     val label = "CC0 1.0 Universal"
-    val url = Some("https://creativecommons.org/publicdomain/zero/1.0/legalcode")
+    val url = Some(
+      "https://creativecommons.org/publicdomain/zero/1.0/legalcode")
   }
 
   case object PDM extends License {
@@ -74,11 +75,3 @@ object License extends Enum[License] {
     val url: Option[String] = None
   }
 }
-
-
-
-
-
-
-
-
