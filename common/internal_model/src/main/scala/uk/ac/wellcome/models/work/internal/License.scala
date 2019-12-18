@@ -69,12 +69,6 @@ object License extends Enum[License] {
       "https://creativecommons.org/share-your-work/public-domain/pdm/")
   }
 
-  case object CopyrightNotCleared extends License {
-    val id = "copyright-not-cleared"
-    val label = "Copyright not cleared"
-    val url: Option[String] = None
-  }
-
   case object CCBYND extends License {
     val id = "cc-by-nd"
     val label =
@@ -110,21 +104,9 @@ object License extends Enum[License] {
     val url = Some("http://opencontent.org/openpub/")
   }
 
-  case object AllRightsReserved extends License {
-    override val id: String = ???
-    override val label: String = ???
-    override val url: Option[String] = ???
-  }
-
-  case object CopyrightNotCleared extends License {
-    override val id: String = ???
-    override val label: String = ???
-    override val url: Option[String] = ???
-  }
-
   case object InCopyright extends License {
-    override val id: String = ???
-    override val label: String = ???
-    override val url: Option[String] = ???
+    override val id: String = "in-copyright"
+    override val label: String = "In copyright"
+    override val url: Option[String] = Some("http://rightsstatements.org/vocab/InC/1.0/")
   }
 }
