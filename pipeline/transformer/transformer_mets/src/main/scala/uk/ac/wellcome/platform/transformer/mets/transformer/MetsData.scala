@@ -53,11 +53,14 @@ case class MetsData(
   // and sometimes the url of the license
   private def parseLicense = {
     accessCondition.map { accessCondition =>
-      License.values.find{ license =>
-        equalsIgnoreCase(license.id, accessCondition) || equalsIgnoreCase(license.label, accessCondition) || equals(license.url, accessCondition)
+      License.values.find { license =>
+        equalsIgnoreCase(license.id, accessCondition) || equalsIgnoreCase(
+          license.label,
+          accessCondition) || equals(license.url, accessCondition)
       } match {
         case Some(license) => Right(license)
-        case None => Left(new Exception("Couldn't match $accesCondition to a license"))
+        case None =>
+          Left(new Exception("Couldn't match $accesCondition to a license"))
       }
     }.sequence
   }

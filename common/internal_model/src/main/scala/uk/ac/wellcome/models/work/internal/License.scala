@@ -92,7 +92,8 @@ object License extends Enum[License] {
     val id = "ogl"
     val label =
       "Open Government License"
-    val url = "http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"
+    val url =
+      "http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"
   }
 
   case object OPL extends License {

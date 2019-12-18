@@ -6,7 +6,7 @@ import uk.ac.wellcome.json.JsonUtil._
 class LicenseTest extends FunSpec with Matchers {
 
   it("can serialise and then deserialise any license as JSON") {
-    License.values.foreach {license =>
+    License.values.foreach { license =>
       assertRoundTripsLicenseCorrectly(license)
     }
   }
