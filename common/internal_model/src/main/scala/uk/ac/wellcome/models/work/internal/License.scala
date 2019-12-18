@@ -74,4 +74,57 @@ object License extends Enum[License] {
     val label = "Copyright not cleared"
     val url: Option[String] = None
   }
+
+  case object CCBYND extends License {
+    val id = "cc-by-nd"
+    val label =
+      "Attribution-NoDerivatives 4.0 International (CC BY-ND 4.0)"
+    val url = Some("https://creativecommons.org/licenses/by-nd/4.0/")
+  }
+
+  case object CCBYSA extends License {
+    val id = "cc-by-sa"
+    val label =
+      "Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)"
+    val url = Some("https://creativecommons.org/licenses/by-sa/4.0/")
+  }
+
+  case object CCBYNCSA extends License {
+    val id = "cc-by-nc-sa"
+    val label =
+      "Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)"
+    val url = Some("https://creativecommons.org/licenses/by-nc-sa/4.0/")
+  }
+
+  case object OGL extends License {
+    val id = "ogl"
+    val label =
+      "Open Government License"
+    val url = Some("http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/")
+  }
+
+  case object OPL extends License {
+    val id = "opl"
+    val label =
+      "Open Publication License"
+    val url = Some("http://opencontent.org/openpub/")
+  }
+
+  case object AllRightsReserved extends License {
+    override val id: String = ???
+    override val label: String = ???
+    override val url: Option[String] = ???
+  }
+
+  case object CopyrightNotCleared extends License {
+    override val id: String = ???
+    override val label: String = ???
+    override val url: Option[String] = ???
+  }
+
+  case object InCopyright extends License {
+    override val id: String = ???
+    override val label: String = ???
+    override val url: Option[String] = ???
+  }
 }
