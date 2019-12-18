@@ -6,7 +6,12 @@ import uk.ac.wellcome.bigmessaging.EmptyMetadata
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult, WorkIdentifier, WorkNode}
+import uk.ac.wellcome.models.matcher.{
+  MatchedIdentifiers,
+  MatcherResult,
+  WorkIdentifier,
+  WorkNode
+}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
@@ -98,9 +103,15 @@ class MatcherFeatureTest
               withWorkerService(vhs, queue, topic, graphTable) { _ =>
                 val workv2 = createUnidentifiedWorkWith(version = 2)
 
-                val entry = HybridStoreEntry[TransformedBaseWork, EmptyMetadata](workv2, EmptyMetadata())
-                val key = vhs.put(Version(workv2.sourceIdentifier.toString, workv2.version))(entry) match {
-                  case Left(err)                 => throw new Exception(s"Failed storing work in VHS: $err")
+                val entry =
+                  HybridStoreEntry[TransformedBaseWork, EmptyMetadata](
+                    workv2,
+                    EmptyMetadata())
+                val key = vhs.put(
+                  Version(workv2.sourceIdentifier.toString, workv2.version))(
+                  entry) match {
+                  case Left(err) =>
+                    throw new Exception(s"Failed storing work in VHS: $err")
                   case Right(Identified(key, _)) => key
                 }
                 sendNotificationToSQS(queue, Version(key.id, 1))
