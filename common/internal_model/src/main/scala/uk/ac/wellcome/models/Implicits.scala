@@ -2,48 +2,18 @@ package uk.ac.wellcome.models
 
 import io.circe.generic.extras.semiauto._
 import io.circe.generic.{semiauto => simple}
+import io.circe.java8.time.TimeInstances
 import io.circe._
 
 import scala.collection.immutable.::
 
-import uk.ac.wellcome.models.work.internal.{
-  AbstractAgent,
-  AbstractConcept,
-  AbstractRootConcept,
-  BaseWork,
-  Concept,
-  Contributor,
-  DigitalLocation,
-  Displayable,
-  Genre,
-  Identifiable,
-  Identified,
-  IdentifiedBaseWork,
-  IdentifiedWork,
-  InstantRange,
-  Item,
-  Location,
-  MaybeDisplayable,
-  MergeCandidate,
-  Note,
-  Period,
-  Person,
-  PhysicalLocation,
-  ProductionEvent,
-  SourceIdentifier,
-  Subject,
-  TransformedBaseWork,
-  Unidentifiable,
-  UnidentifiedInvisibleWork,
-  UnidentifiedRedirectedWork,
-  UnidentifiedWork
-}
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.transformable.SierraTransformable
 import uk.ac.wellcome.models.transformable.SierraTransformable._
 import uk.ac.wellcome.models.matcher.MatcherResult
 import uk.ac.wellcome.json.JsonUtil._
 
-object Implicits {
+object Implicits extends TimeInstances {
 
   // Cache these here to improve compilation times (otherwise they are
   // re-derived every time they are required).
@@ -52,6 +22,8 @@ object Implicits {
   // flamegraphs using the scalac-profiling plugin. See this blog post for
   // info: https://www.scala-lang.org/blog/2018/06/04/scalac-profiling.html
 
+  implicit val _dec_access_cond: Decoder[AccessCondition] = deriveDecoder
+  implicit val _dec_license: Decoder[License] = deriveDecoder
   implicit val _dec01: Decoder[Note] = deriveDecoder
   implicit val _dec02: Decoder[SourceIdentifier] = deriveDecoder
   implicit val _dec03: Decoder[Identifiable[AbstractConcept]] = deriveDecoder
@@ -127,6 +99,8 @@ object Implicits {
   implicit val _dec54: Decoder[BaseWork] = deriveDecoder
   implicit val _dec55: Decoder[SierraTransformable] = deriveDecoder
 
+  implicit val _enc_access_cond: Encoder[AccessCondition] = deriveEncoder
+  implicit val _enc_license: Encoder[License] = deriveEncoder
   implicit val _enc01: Encoder[Note] = deriveEncoder
   implicit val _enc02: Encoder[SourceIdentifier] = deriveEncoder
   implicit val _enc03: Encoder[Identifiable[AbstractConcept]] = deriveEncoder
