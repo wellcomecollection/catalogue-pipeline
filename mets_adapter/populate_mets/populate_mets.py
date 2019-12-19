@@ -55,7 +55,10 @@ class StorageManifestScanner:
                 for item in items:
                     space, id = item["id"].split("/")
                     yield (space, id)
-            self.start_record = (page["LastEvaluatedKey"]["id"],page["LastEvaluatedKey"]["version"])
+            self.start_record = (
+                page["LastEvaluatedKey"]["id"],
+                page["LastEvaluatedKey"]["version"],
+            )
 
 
 class MessagePublisher:
