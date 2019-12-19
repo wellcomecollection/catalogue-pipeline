@@ -68,5 +68,19 @@ object DisplayNoteType {
         DisplayNoteType("location-of-original", "Location of original")
       case BindingInformation(_) =>
         DisplayNoteType("binding-detail", "Binding detail")
+      case BiographicalNote(_) =>
+        DisplayNoteType("biographical-note", "Biographical note")
+      case ReproductionNote(_) =>
+        DisplayNoteType("reproduction-note", "Reproduction note")
+      case TermsOfUse(_) =>
+        DisplayNoteType("terms-of-use", "Terms of use")
+      case CopyrightNote(_) =>
+        DisplayNoteType("copyright-note", "Copyright note")
+      case PublicationsNote(_) =>
+        DisplayNoteType("publication-note", "Publications note")
+      case ExhibitionsNote(_) =>
+        DisplayNoteType("exhibitions-note", "Exhibitions note")
+      case AwardsNote(_) =>
+        DisplayNoteType("awards-note", "Awards note")
     }
 }
