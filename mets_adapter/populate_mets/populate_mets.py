@@ -44,7 +44,7 @@ class StorageManifestScanner:
 
     def scan(self):
         for page in self._paginate():
-            click.echo(click.style(f"Processing {len(page['Items'])} records", fg='yellow'))
+            click.echo(click.style(f"Processing {len(page['Items'])} records", fg='green'))
             with click.progressbar(page["Items"]) as items:
                 for item in items:
                     space, id = item["id"].split("/")
@@ -62,6 +62,20 @@ class MessagePublisher:
     def publish(self, space, id):
         msg = {"context": {"storageSpace": space, "externalIdentifier": id}}
         publish_sns_message(self.sns, self.topic_arn, msg, "populate_mets.py")
+
+
+def scan_and_publish(scanner, publisher, mode, num_records):
+    try:
+        for i, (space, id) in zip(range(1, num_records + 1), scanner.scan()):
+            publisher.publish(space, id)
+    except ClientError:
+        click.echo(click.style(f"Stopped at {scanner.start_record}", fn="yellow"))
+        click.echo(click.style(f"Refresh your credentials then press enter to continue", fn="yellow"))
+        click.pause()
+        scan_and_publish(scanner, publisher, mode, num_records)
+    except:
+        click.echo(click.style(f"Failed! You may restart from token {scanner.start_record}", fn="red"))
+        raise
 
 
 @click.command()
@@ -88,16 +102,7 @@ def main(mode, start_record):
 
     scanner = StorageManifestScanner(start_record, num_records)
     publisher = MessagePublisher()
-    try:
-        for i, (space, id) in zip(range(1, num_records + 1), scanner.scan()):
-            publisher.publish(space, id)
-    except ClientError:
-        click.echo(f"Refresh your credentials then press enter to continue")
-        click.pause()
-        main(mode, scanner.start_record)
-    except:
-        click.echo(f"Failed! You may restart from token {scanner.start_record}")
-        raise
+    scan_and_publish(scanner=scanner, publisher=publisher, mode=mode, num_records=num_records)
     click.echo(click.style("Done!", fg='green'))
 
 
