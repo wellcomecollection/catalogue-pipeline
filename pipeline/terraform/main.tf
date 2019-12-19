@@ -71,6 +71,7 @@ module "catalogue_pipeline_20191218" {
 
   sierra_adapter_topic_names = [
     "${local.sierra_reindexer_topic_name}",
+    "${local.mets_reindexer_topic_name}",
     #"${local.sierra_merged_bibs_topic_name}",
 
     #"${local.sierra_merged_items_topic_name}",
