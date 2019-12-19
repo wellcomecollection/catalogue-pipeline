@@ -69,13 +69,10 @@ def scan_and_publish(scanner, publisher, mode, num_records):
         for i, (space, id) in zip(range(1, num_records + 1), scanner.scan()):
             publisher.publish(space, id)
     except ClientError:
-        click.echo(click.style(f"Stopped at {scanner.start_record}", fn="yellow"))
-        click.echo(click.style(f"Refresh your credentials then press enter to continue", fn="yellow"))
+        click.echo(click.style(f"Stopped at {scanner.start_record}", fg="yellow"))
+        click.echo(click.style(f"Refresh your credentials then press enter to continue", fg="yellow"))
         click.pause()
         scan_and_publish(scanner, publisher, mode, num_records)
-    except:
-        click.echo(click.style(f"Failed! You may restart from token {scanner.start_record}", fn="red"))
-        raise
 
 
 @click.command()
@@ -102,7 +99,11 @@ def main(mode, start_record):
 
     scanner = StorageManifestScanner(start_record, num_records)
     publisher = MessagePublisher()
-    scan_and_publish(scanner=scanner, publisher=publisher, mode=mode, num_records=num_records)
+    try:
+        scan_and_publish(scanner=scanner, publisher=publisher, mode=mode, num_records=num_records)
+    except:
+        click.echo(click.style(f"Failed! You may restart from token {scanner.start_record}", fg="red"))
+        raise
     click.echo(click.style("Done!", fg='green'))
 
 
