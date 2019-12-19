@@ -3,6 +3,8 @@ package uk.ac.wellcome.display.json
 import io.circe.generic.extras.{AutoDerivation, Configuration}
 import io.circe.{Encoder, Printer}
 import io.circe.syntax._
+import io.circe.java8.time.TimeInstances
+
 import uk.ac.wellcome.display.models.DisplayWork
 import uk.ac.wellcome.display.models.v2._
 
@@ -16,7 +18,7 @@ import uk.ac.wellcome.display.models.v2._
   *     render the complete value for disambiguation.
   *
   */
-trait DisplayJsonUtil extends AutoDerivation {
+trait DisplayJsonUtil extends AutoDerivation with TimeInstances {
   val printer = Printer.noSpaces.copy(
     dropNullValues = true
   )

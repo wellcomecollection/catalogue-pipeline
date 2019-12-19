@@ -86,6 +86,9 @@ trait DisplaySerialisationTestBase { this: Suite =>
       "locationType": ${locationType(digitalLocation.locationType)},
       "url": "${digitalLocation.url}"
       ${optionalObject("license", license, digitalLocation.license)}
+      ${optionalObject("accessCondition",
+                       accessCondition,
+                       digitalLocation.accessCondition)}
     }"""
 
   def physicalLocation(loc: PhysicalLocation) =
@@ -100,6 +103,26 @@ trait DisplaySerialisationTestBase { this: Suite =>
   def locationType(locType: LocationType): String
 
   def license(license: License): String
+
+  def accessCondition(cond: AccessCondition) =
+    s"""
+      {
+        "type": "AccessCondition",
+        ${optionalString("terms", cond.terms)}
+        ${optionalString("to", cond.to.map(_.toString))}
+        ${accessStatus(cond.status)}
+      }
+    """
+
+  def accessStatus(status: AccessStatus) = {
+    s"""
+      "status": {
+        "type": "AccessStatus",
+        "id": "${DisplayAccessStatus(status).id}",
+        "label": "${DisplayAccessStatus(status).label}"
+      }
+    """
+  }
 
   def identifier(identifier: SourceIdentifier): String
 

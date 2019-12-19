@@ -7,6 +7,7 @@ import uk.ac.wellcome.models.work.internal.{
   Location,
   PhysicalLocation
 }
+import uk.ac.wellcome.display.models.DisplayAccessCondition
 
 @Schema(
   name = "Location",
@@ -19,17 +20,19 @@ sealed trait DisplayLocationV2
 
 object DisplayLocationV2 {
   def apply(location: Location): DisplayLocationV2 = location match {
-    case l: DigitalLocation =>
+    case DigitalLocation(url, locType, license, credit, accessCondition, _) =>
       DisplayDigitalLocationV2(
-        locationType = DisplayLocationType(l.locationType),
-        url = l.url,
-        credit = l.credit,
-        license = l.license.map(DisplayLicenseV2(_))
+        locationType = DisplayLocationType(locType),
+        url = url,
+        credit = credit,
+        license = license.map(DisplayLicenseV2(_)),
+        accessCondition = accessCondition.map(DisplayAccessCondition(_))
       )
-    case l: PhysicalLocation =>
+    case PhysicalLocation(locationType, label, _) =>
       DisplayPhysicalLocationV2(
-        locationType = DisplayLocationType(l.locationType),
-        label = l.label)
+        locationType = DisplayLocationType(locationType),
+        label = label
+      )
   }
 }
 
@@ -54,6 +57,9 @@ case class DisplayDigitalLocationV2(
     description =
       "The specific license under which the work in question is released to the public - for example, one of the forms of Creative Commons - if it is a precise license to which a link can be made."
   ) license: Option[DisplayLicenseV2] = None,
+  @Schema(
+    description = "The access conditions"
+  ) accessCondition: Option[DisplayAccessCondition] = None,
   @JsonKey("type") @Schema(name = "type") ontologyType: String =
     "DigitalLocation"
 ) extends DisplayLocationV2

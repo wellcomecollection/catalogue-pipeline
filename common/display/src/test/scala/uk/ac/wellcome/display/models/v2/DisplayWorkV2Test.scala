@@ -1,14 +1,15 @@
 package uk.ac.wellcome.display.models.v2
 
-import java.time.Instant
+import java.time.{Instant, LocalDate}
 
 import org.scalacheck.Arbitrary
 import org.scalacheck.Gen.chooseNum
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{FunSpec, Matchers}
+import org.scalacheck.ScalacheckShapeless._
+
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.models.work.internal._
-import org.scalacheck.ScalacheckShapeless._
 import uk.ac.wellcome.models.work.generators.{
   ProductionEventGenerators,
   WorksGenerators
@@ -26,7 +27,7 @@ class DisplayWorkV2Test
   // We could just import the library, but I might wait until we need more
   // Taken from here:
   // https://github.com/rallyhealth/scalacheck-ops/blob/master/core/src/main/scala/org/scalacheck/ops/time/ImplicitJavaTimeGenerators.scala
-  implicit val arbInstant: Arbitrary[Instant] = {
+  implicit val arbInstant: Arbitrary[Instant] =
     Arbitrary {
       for {
         millis <- chooseNum(
@@ -37,7 +38,15 @@ class DisplayWorkV2Test
         Instant.ofEpochMilli(millis).plusNanos(nanos)
       }
     }
-  }
+
+  implicit val arbLocalDate: Arbitrary[LocalDate] =
+    Arbitrary {
+      for {
+        day <- chooseNum(1, 28)
+        month <- chooseNum(1, 12)
+        year <- chooseNum(2010, 2030)
+      } yield LocalDate.of(year, month, day)
+    }
 
   it("parses a Work without any items") {
     val work = createIdentifiedWorkWith(
@@ -86,7 +95,12 @@ class DisplayWorkV2Test
           DisplayLocationType(location.locationType),
           url = location.url,
           credit = location.credit,
-          license = location.license.map { DisplayLicenseV2.apply }))
+          license = location.license.map(DisplayLicenseV2(_)),
+          accessCondition = location
+            .accessCondition
+            .map(DisplayAccessCondition(_)),
+        )
+      )
     )
   }
 

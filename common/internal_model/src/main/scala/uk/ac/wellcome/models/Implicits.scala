@@ -22,8 +22,7 @@ object Implicits extends TimeInstances {
   // flamegraphs using the scalac-profiling plugin. See this blog post for
   // info: https://www.scala-lang.org/blog/2018/06/04/scalac-profiling.html
 
-  implicit val _dec_access_cond: Decoder[AccessCondition] = deriveDecoder
-  implicit val _dec_license: Decoder[License] = deriveDecoder
+  implicit val _dec00: Decoder[AccessCondition] = deriveDecoder
   implicit val _dec01: Decoder[Note] = deriveDecoder
   implicit val _dec02: Decoder[SourceIdentifier] = deriveDecoder
   implicit val _dec03: Decoder[Identifiable[AbstractConcept]] = deriveDecoder
@@ -99,8 +98,7 @@ object Implicits extends TimeInstances {
   implicit val _dec54: Decoder[BaseWork] = deriveDecoder
   implicit val _dec55: Decoder[SierraTransformable] = deriveDecoder
 
-  implicit val _enc_access_cond: Encoder[AccessCondition] = deriveEncoder
-  implicit val _enc_license: Encoder[License] = deriveEncoder
+  implicit val _enc00: Encoder[AccessCondition] = deriveEncoder
   implicit val _enc01: Encoder[Note] = deriveEncoder
   implicit val _enc02: Encoder[SourceIdentifier] = deriveEncoder
   implicit val _enc03: Encoder[Identifiable[AbstractConcept]] = deriveEncoder

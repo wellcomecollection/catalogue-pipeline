@@ -1,6 +1,6 @@
 package uk.ac.wellcome.elasticsearch
 
-import java.time.Instant
+import java.time.{Instant, LocalDate}
 
 import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.ElasticDsl.{indexInto, search, _}
@@ -58,6 +58,15 @@ class WorksIndexTest
       }
     }
   }
+
+  implicit val arbLocalDate: Arbitrary[LocalDate] =
+    Arbitrary {
+      for {
+        day <- chooseNum(1, 28)
+        month <- chooseNum(1, 12)
+        year <- chooseNum(2010, 2030)
+      } yield LocalDate.of(year, month, day)
+    }
 
   it("puts a valid work") {
     forAll { sampleWork: IdentifiedBaseWork =>
