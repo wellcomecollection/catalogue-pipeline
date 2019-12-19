@@ -35,21 +35,28 @@ class StorageManifestScanner:
         paginator = self.dynamodb.get_paginator("scan")
         if self.start_record[0]:
             exclusive_start_key = {
-                'id': self.start_record[0],
-                'version': Decimal(str(self.start_record[1]))
+                "id": self.start_record[0],
+                "version": Decimal(str(self.start_record[1])),
             }
-            return paginator.paginate(TableName=self.vhs, Limit=self.num_records,ExclusiveStartKey=exclusive_start_key)
+            return paginator.paginate(
+                TableName=self.vhs,
+                Limit=self.num_records,
+                ExclusiveStartKey=exclusive_start_key,
+            )
         else:
             return paginator.paginate(TableName=self.vhs, Limit=self.num_records)
 
     def scan(self):
         for page in self._paginate():
-            click.echo(click.style(f"Processing {len(page['Items'])} records", fg='green'))
+            click.echo(
+                click.style(f"Processing {len(page['Items'])} records", fg="green")
+            )
             with click.progressbar(page["Items"]) as items:
                 for item in items:
                     space, id = item["id"].split("/")
                     yield (space, id)
-            self.start_record=page["LastEvaluatedKey"]
+            self.start_record = page["LastEvaluatedKey"]
+
 
 class MessagePublisher:
 
@@ -70,7 +77,11 @@ def scan_and_publish(scanner, publisher, mode, num_records):
             publisher.publish(space, id)
     except ClientError:
         click.echo(click.style(f"Stopped at {scanner.start_record}", fg="yellow"))
-        click.echo(click.style(f"Refresh your credentials then press enter to continue", fg="yellow"))
+        click.echo(
+            click.style(
+                f"Refresh your credentials then press enter to continue", fg="yellow"
+            )
+        )
         click.pause()
         scan_and_publish(scanner, publisher, mode, num_records)
 
@@ -88,7 +99,7 @@ def scan_and_publish(scanner, publisher, mode, num_records):
     "--start-record",
     required=True,
     type=(str, int),
-    default=('',0),
+    default=("", 0),
     prompt="Which record do you want to start from (supply id and version)?",
 )
 def main(mode, start_record):
@@ -100,11 +111,17 @@ def main(mode, start_record):
     scanner = StorageManifestScanner(start_record, num_records)
     publisher = MessagePublisher()
     try:
-        scan_and_publish(scanner=scanner, publisher=publisher, mode=mode, num_records=num_records)
+        scan_and_publish(
+            scanner=scanner, publisher=publisher, mode=mode, num_records=num_records
+        )
     except:
-        click.echo(click.style(f"Failed! You may restart from token {scanner.start_record}", fg="red"))
+        click.echo(
+            click.style(
+                f"Failed! You may restart from token {scanner.start_record}", fg="red"
+            )
+        )
         raise
-    click.echo(click.style("Done!", fg='green'))
+    click.echo(click.style("Done!", fg="green"))
 
 
 if __name__ == "__main__":
