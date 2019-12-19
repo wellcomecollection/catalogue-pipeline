@@ -3,7 +3,9 @@
 from sys import maxsize
 import click
 import boto3
+from botocore.exceptions import ClientError
 from wellcome_aws_utils.sns_utils import publish_sns_message
+from decimal import Decimal
 
 
 def aws_resource(name, role_arn):
@@ -24,19 +26,29 @@ class StorageManifestScanner:
     role = "arn:aws:iam::975596993436:role/storage-read_only"
     vhs = "vhs-storage-manifests"
 
-    def __init__(self):
+    def __init__(self, start_record, num_records):
         self.dynamodb = aws_resource("dynamodb", self.role)
+        self.start_record = start_record
+        self.num_records = num_records
 
-    @property
-    def paginator(self):
-        return self.dynamodb.get_paginator("scan")
+    def _paginate(self):
+        paginator = self.dynamodb.get_paginator("scan")
+        if self.start_record:
+            exclusive_start_key = {
+                'id': self.start_record[0],
+                'version': Decimal(str(self.start_record[1]))
+            }
+            return paginator.paginate(TableName=self.vhs, Limit=self.num_records,ExclusiveStartKey=exclusive_start_key)
+        else:
+            return paginator.paginate(TableName=self.vhs, Limit=self.num_records)
 
     def scan(self):
-        for page in self.paginator.paginate(TableName=self.vhs):
-            for item in page["Items"]:
-                space, id = item["id"].split(":")
-                yield (space, id)
-
+        for page in self._paginate():
+            with click.progressbar(page["Items"]) as items:
+                for item in items:
+                    space, id = item["id"].split("/")
+                    yield (space, id)
+            self.start_record=page["LastEvaluatedKey"]
 
 class MessagePublisher:
 
@@ -60,16 +72,31 @@ class MessagePublisher:
     prompt="Every record from the storage-service VHS (complete) or just a few (partial)?",
     help="Should this populate from every record in the storage-service VHS?",
 )
-def main(mode):
+@click.option(
+    "--start-record",
+    required=True,
+    type=(str, int),
+    default=(),
+    prompt="Which record do you want to start from (supply id and version)?",
+)
+def main(mode, start_record):
     if mode == "partial":
         num_records = click.prompt("How many records do you want to send?", default=10)
     else:
         num_records = maxsize
-    scanner = StorageManifestScanner()
+
+    scanner = StorageManifestScanner(start_record, num_records)
     publisher = MessagePublisher()
-    for i, (space, id) in zip(range(1, num_records + 1), scanner.scan()):
-        click.echo(f"{click.style(str(i), fg='blue')}: {space}/{id}")
-        publisher.publish(space, id)
+    try:
+        for i, (space, id) in zip(range(1, num_records + 1), scanner.scan()):
+            publisher.publish(space, id)
+    except ClientError:
+        click.echo(f"Refresh your credentials then press enter to continue")
+        click.pause()
+        main(mode, scanner.start_record)
+    except:
+        click.echo(f"Failed! You may restart from token {scanner.start_record}")
+        raise
 
 
 if __name__ == "__main__":
