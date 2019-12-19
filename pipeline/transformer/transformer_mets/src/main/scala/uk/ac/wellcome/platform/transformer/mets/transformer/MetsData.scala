@@ -53,8 +53,10 @@ case class MetsData(
   // and sometimes the url of the license
   private def parseLicense = {
     accessCondition.map { accessCondition =>
-      License.values.find{ license =>
-        equalsIgnoreCase(license.id, accessCondition) || equalsIgnoreCase(license.label, accessCondition) || license.url.equals(accessCondition)
+      License.values.find { license =>
+        equalsIgnoreCase(license.id, accessCondition) || equalsIgnoreCase(
+          license.label,
+          accessCondition) || license.url.equals(accessCondition)
       } match {
         case Some(license) => Right(license)
         case None =>
