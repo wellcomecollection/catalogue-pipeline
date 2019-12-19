@@ -33,7 +33,7 @@ class StorageManifestScanner:
 
     def _paginate(self):
         paginator = self.dynamodb.get_paginator("scan")
-        if self.start_record:
+        if self.start_record[0]:
             exclusive_start_key = {
                 'id': self.start_record[0],
                 'version': Decimal(str(self.start_record[1]))
@@ -44,6 +44,7 @@ class StorageManifestScanner:
 
     def scan(self):
         for page in self._paginate():
+            click.echo(click.style(f"Processing {len(page['Items'])} records", fg='yellow'))
             with click.progressbar(page["Items"]) as items:
                 for item in items:
                     space, id = item["id"].split("/")
@@ -76,7 +77,7 @@ class MessagePublisher:
     "--start-record",
     required=True,
     type=(str, int),
-    default=(),
+    default=('',0),
     prompt="Which record do you want to start from (supply id and version)?",
 )
 def main(mode, start_record):
@@ -97,6 +98,7 @@ def main(mode, start_record):
     except:
         click.echo(f"Failed! You may restart from token {scanner.start_record}")
         raise
+    click.echo(click.style("Done!", fg='green'))
 
 
 if __name__ == "__main__":
