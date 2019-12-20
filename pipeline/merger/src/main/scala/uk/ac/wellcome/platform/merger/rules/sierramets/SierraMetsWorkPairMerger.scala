@@ -81,7 +81,7 @@ trait SierraMetsWorkPairMerger extends WorkPairMerger {
       case DigitalLocation(url, LocationType("iiif-image", _, _), _, _, _, _) =>
         true
       case DigitalLocation(url, _, _, _, _, _) if url.equals(metsUrl) => true
-      case _ => false
+      case _                                                          => false
     }
 }
 
