@@ -73,11 +73,10 @@ class FilteredAggregationBuilderTest extends FunSpec with Matchers {
       )
 
       sut.aggregations should have length 1
-      sut.aggregations.head shouldBe a[FilterAggregation]
-      sut.aggregations.head.subaggs.head shouldBe a[MockAggregation]
-      sut.aggregations.head.subaggs.head
-        .asInstanceOf[MockAggregation]
-        .request shouldBe AggregationRequest.WorkType
+      sut.aggregations.head shouldBe a[MockAggregation]
+      val agg = sut.aggregations.head.asInstanceOf[MockAggregation]
+      agg.subaggs.head shouldBe a[FilterAggregation]
+      agg.request shouldBe AggregationRequest.WorkType
     }
 
     it("does not apply to aggregations without a paired filter") {
@@ -90,11 +89,10 @@ class FilteredAggregationBuilderTest extends FunSpec with Matchers {
       )
 
       sut.aggregations should have length 1
-      sut.aggregations.head should not be a[FilterAggregation]
       sut.aggregations.head shouldBe a[MockAggregation]
       sut.aggregations.head
         .asInstanceOf[MockAggregation]
-        .request shouldBe AggregationRequest.WorkType
+        .subaggs should have length 0
     }
 
     it("applies all other aggregation-dependent filters to the paired filter") {
@@ -111,7 +109,12 @@ class FilteredAggregationBuilderTest extends FunSpec with Matchers {
         filterToQuery
       )
 
-      val agg = sut.aggregations.head.asInstanceOf[FilterAggregation]
+      val agg =
+        sut.aggregations.head
+          .asInstanceOf[MockAggregation]
+          .subaggs
+          .head
+          .asInstanceOf[FilterAggregation]
       agg.query shouldBe a[BoolQuery]
       val query = agg.query.asInstanceOf[BoolQuery]
       query.filters should not contain MockQuery(workTypeFilter)

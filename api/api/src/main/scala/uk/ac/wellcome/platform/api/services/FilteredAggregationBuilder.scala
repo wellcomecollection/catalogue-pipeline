@@ -2,6 +2,7 @@ package uk.ac.wellcome.platform.api.services
 
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.searches.aggs.{
+  AbstractAggregation,
   Aggregation,
   FilterAggregation
 }
@@ -22,20 +23,22 @@ class FilteredAggregationBuilder(
   lazy val aggregationDependentFilters: List[WorkFilter] =
     filterSets.getOrElse(FilterCategory.AggregationDependent, List())
 
-  lazy val aggregations: List[Aggregation] = aggregationRequests.map { aggReq =>
-    val agg = requestToAggregation(aggReq)
-    pairedFilter(aggReq) match {
-      case Some(filter) =>
-        FilterAggregation(
-          agg.name,
-          boolQuery.filter {
-            aggregationDependentFilters
-              .filterNot(_ == filter)
-              .map(filterToQuery)
-          }
-        ).subAggregations(agg)
-      case _ => agg
-    }
+  lazy val aggregations: List[AbstractAggregation] = aggregationRequests.map {
+    aggReq =>
+      val agg = requestToAggregation(aggReq)
+      pairedFilter(aggReq) match {
+        case Some(filter) =>
+          agg.subAggregations(
+            FilterAggregation(
+              "filtered",
+              boolQuery.filter {
+                aggregationDependentFilters
+                  .filterNot(_ == filter)
+                  .map(filterToQuery)
+              }
+            ))
+        case _ => agg
+      }
   }
 
   private lazy val filterSets: Map[FilterCategory, List[WorkFilter]] =
@@ -61,7 +64,7 @@ class FilteredAggregationBuilder(
     filter: WorkFilter): Option[AggregationRequest] = filter match {
     case _: ItemLocationTypeFilter => None
     case _: WorkTypeFilter         => Some(AggregationRequest.WorkType)
-    case _: DateRangeFilter        => Some(AggregationRequest.ProductionDate)
+    case _: DateRangeFilter        => None
     case IdentifiedWorkFilter      => None
     case _: LanguageFilter         => Some(AggregationRequest.Language)
     case _: GenreFilter            => Some(AggregationRequest.Genre)
