@@ -4,6 +4,8 @@ import scala.util.Try
 import io.circe.Decoder
 import java.time.{Instant, LocalDateTime, ZoneOffset}
 
+import com.sksamuel.elastic4s.AggReader
+import com.sksamuel.elastic4s.requests.searches.{SearchResponse, Transformable}
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.json.JsonUtil._
@@ -20,36 +22,34 @@ case class Aggregations(
 
 object Aggregations extends Logging {
 
-  def apply(jsonString: String): Option[Aggregations] =
-    fromJson[EsAggregations](jsonString)
-      .collect {
-        case esAggs if esAggs.nonEmpty =>
-          Some(
-            Aggregations(
-              workType = getAggregation[WorkType](esAggs.workType),
-              genres = getAggregation[Genre[Displayable[AbstractConcept]]](
-                esAggs.genres),
-              productionDates = getAggregation[Period](esAggs.productionDates)
-                .map(DateAggregationMerger(_)),
-              language = getAggregation[Language](esAggs.language),
-              subjects =
-                getAggregation[Subject[Displayable[AbstractRootConcept]]](
-                  esAggs.subjects),
-              license = getAggregation[License](esAggs.license),
-            )
-          )
-      }
-      .getOrElse { None }
-
-  def getAggregation[T](
-    maybeEsAgg: Option[EsAggregation[T]]): Option[Aggregation[T]] =
-    maybeEsAgg.map { esAgg =>
-      Aggregation(
-        esAgg.buckets.map { esAggBucket =>
-          AggregationBucket(esAggBucket.key, esAggBucket.doc_count)
-        }
-      )
+  def apply(searchResponse: SearchResponse): Option[Aggregations] = {
+    val e4sAggregations = searchResponse.aggregations
+    if (e4sAggregations.data.nonEmpty) {
+      Some(
+        Aggregations(
+          workType = e4sAggregations
+            .getAgg("workType")
+            .flatMap(_.toAgg[WorkType]),
+          genres = e4sAggregations
+            .getAgg("genres")
+            .flatMap(_.toAgg[Genre[Displayable[AbstractConcept]]]),
+          productionDates = e4sAggregations
+            .getAgg("productionDates")
+            .flatMap(_.toAgg[Period]),
+          language = e4sAggregations
+            .getAgg("language")
+            .flatMap(_.toAgg[Language]),
+          subjects = e4sAggregations
+            .getAgg("subjects")
+            .flatMap(_.toAgg[Subject[Displayable[AbstractRootConcept]]]),
+          license = e4sAggregations
+            .getAgg("license")
+            .flatMap(_.toAgg[License])
+        ))
+    } else {
+      None
     }
+  }
 
   // Elasticsearch encodes the date key as milliseconds since the epoch
   implicit val decodePeriod: Decoder[Period] =
@@ -69,6 +69,31 @@ object Aggregations extends Logging {
       Try(License.createLicense(str)).toEither.left
         .map(err => err.getMessage)
     }
+
+  implicit class EnhancedTransformable(transformable: Transformable) {
+    def toAgg[T: Decoder]: Option[Aggregation[T]] = {
+      transformable
+        .safeTo[EsAggregation[T]]
+        .toOption
+        .map(
+          agg =>
+            Aggregation(
+              agg.buckets
+                .map(getFilteredBucket)
+                .filter(_.count != 0)))
+    }
+
+    private def getFilteredBucket[T](
+      esAggBucket: EsAggregationBucket[T]): AggregationBucket[T] =
+      AggregationBucket(
+        esAggBucket.key,
+        esAggBucket.filtered
+          .map(_.doc_count)
+          .getOrElse(esAggBucket.doc_count))
+
+    implicit def fromJsonAggReader[T: Decoder]: AggReader[T] =
+      (json: String) => fromJson[T](json)
+  }
 }
 
 case class Aggregation[T](buckets: List[AggregationBucket[T]])
@@ -101,19 +126,9 @@ case class AggregationBucket[T](data: T, count: Int)
   *   }
   * }
   */
-case class EsAggregations(
-  workType: Option[EsAggregation[WorkType]] = None,
-  genres: Option[EsAggregation[Genre[Displayable[AbstractConcept]]]] = None,
-  productionDates: Option[EsAggregation[Period]] = None,
-  language: Option[EsAggregation[Language]] = None,
-  subjects: Option[EsAggregation[Subject[Displayable[AbstractRootConcept]]]] =
-    None,
-  license: Option[EsAggregation[License]] = None
-) {
-  def nonEmpty: Boolean =
-    List(workType, genres, productionDates, language, subjects, license).flatten.nonEmpty
-}
-
 case class EsAggregation[T](buckets: List[EsAggregationBucket[T]])
 
-case class EsAggregationBucket[T](key: T, doc_count: Int)
+case class EsAggregationBucket[T](key: T,
+                                  doc_count: Int,
+                                  filtered: Option[EsAggregationSubAgg])
+case class EsAggregationSubAgg(doc_count: Int)
