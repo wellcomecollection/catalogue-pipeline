@@ -320,9 +320,9 @@ class ApiV2WorksAggregationsTest extends ApiV2WorksTestBase {
   it("supports aggregating on license") {
 
     val works = List(
-      createLicensedWork("A", List(License_CCBY)),
-      createLicensedWork("B", List(License_CCBYNC)),
-      createLicensedWork("C", List(License_CCBY, License_CCBYNC)),
+      createLicensedWork("A", List(License.CCBY)),
+      createLicensedWork("B", List(License.CCBYNC)),
+      createLicensedWork("C", List(License.CCBY, License.CCBYNC)),
       createLicensedWork("D", Nil)
     )
     withApi {

@@ -178,6 +178,10 @@ object ExternalDependencies {
     "mysql" % "mysql-connector-java" % "6.0.6"
   )
 
+  val awsSTSDependencies = Seq(
+    "com.amazonaws" % "aws-java-sdk-sts" % versions.aws,
+  )
+
   val scalacheckDependencies = Seq(
     "org.scalacheck" %% "scalacheck" % versions.scalacheck % "test",
     "com.github.alexarchambault" %% "scalacheck-shapeless_1.13" % versions.scalacheckShapeless % "test"
@@ -294,7 +298,9 @@ object CatalogueDependencies {
       ExternalDependencies.wireMockDependencies ++
       ExternalDependencies.akkaHttpDependencies ++
       ExternalDependencies.scribeJavaDependencies ++
-      ExternalDependencies.scalaXmlDependencies
+      ExternalDependencies.scalaXmlDependencies ++
+      ExternalDependencies.awsSTSDependencies ++
+      WellcomeDependencies.typesafeLibrary
 
   // METS adapter
 

@@ -51,7 +51,7 @@ trait ItemsGenerators extends IdentifiersGenerators {
   def createDigitalLocationWith(
     locationType: LocationType = createPresentationLocationType,
     url: String = defaultLocationUrl,
-    license: Option[License] = Some(License_CCBY)) = DigitalLocation(
+    license: Option[License] = Some(License.CCBY)) = DigitalLocation(
     locationType = locationType,
     url = url,
     license = license

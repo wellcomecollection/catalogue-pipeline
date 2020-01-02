@@ -23,3 +23,17 @@ case class CiteAsNote(val content: String) extends Note
 case class LocationOfOriginalNote(val content: String) extends Note
 
 case class BindingInformation(val content: String) extends Note
+
+case class BiographicalNote(val content: String) extends Note
+
+case class ReproductionNote(val content: String) extends Note
+
+case class TermsOfUse(val content: String) extends Note
+
+case class CopyrightNote(val content: String) extends Note
+
+case class PublicationsNote(val content: String) extends Note
+
+case class ExhibitionsNote(val content: String) extends Note
+
+case class AwardsNote(val content: String) extends Note

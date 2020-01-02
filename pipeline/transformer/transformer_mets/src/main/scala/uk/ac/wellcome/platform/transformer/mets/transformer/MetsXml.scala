@@ -1,30 +1,10 @@
-package uk.ac.wellcome.platform.transformer.mets.parsers
+package uk.ac.wellcome.platform.transformer.mets.transformer
 
-import scala.collection.immutable.ListMap
 import scala.util.Try
+import scala.collection.immutable.ListMap
 import scala.xml.{Elem, NodeSeq, XML}
 
-import uk.ac.wellcome.platform.transformer.mets.transformer.Mets
-
-object MetsXmlParser {
-
-  def apply(str: String): Either[Throwable, Mets] =
-    for {
-      is <- Try(XML.loadString(str)).toEither
-      mets <- MetsXmlParser(is)
-    } yield (mets)
-
-  def apply(root: Elem): Either[Exception, Mets] = {
-    for {
-      id <- recordIdentifier(root)
-      maybeAccessCondition <- accessCondition(root)
-    } yield
-      Mets(
-        recordIdentifier = id,
-        accessCondition = maybeAccessCondition,
-        thumbnailLocation = thumbnailLocation(root, id),
-      )
-  }
+case class MetsXml(root: Elem) {
 
   /** The record identifier (generally the B number) is encoded in the METS. For
     *  example:
@@ -43,7 +23,7 @@ object MetsXmlParser {
     *
     *  The expected output would be: "b30246039"
     */
-  private def recordIdentifier(root: Elem): Either[Exception, String] = {
+  def recordIdentifier: Either[Exception, String] = {
     val identifierNodes =
       (root \\ "dmdSec" \ "mdWrap" \\ "recordInfo" \ "recordIdentifier").toList
     identifierNodes match {
@@ -72,17 +52,17 @@ object MetsXmlParser {
     *
     *  The expected output would be: "CC-BY-NC"
     */
-  private def accessCondition(root: Elem): Either[Exception, Option[String]] = {
+  def accessCondition: Either[Exception, Option[String]] = {
     val licenseNodes = (root \\ "dmdSec" \ "mdWrap" \\ "accessCondition")
       .filterByAttribute("type", "dz")
       .toList
     licenseNodes match {
-      case Nil => Right(None)
-      case List(licenseNode) =>
-        Right[Exception, Option[String]](Some(licenseNode.text))
+      case Nil               => Right(None)
+      case List(licenseNode) => Right(Some(licenseNode.text))
       case _ =>
-        Left[Exception, Option[String]](
-          new Exception("Found multiple accessCondtions in METS XML"))
+        Left(
+          new Exception("Found multiple accessCondtions in METS XML")
+        )
     }
   }
 
@@ -90,20 +70,28 @@ object MetsXmlParser {
     *  file ID the fileObjects mapping, and use the files location as the
     *  thumbnail image.
     */
-  private def thumbnailLocation(root: Elem, bnumber: String): Option[String] = {
+  def thumbnailLocation(bnumber: String): Option[String] = {
     // Filenames in DLCS are always prefixed with the bnumber to ensure uniqueness.
     // However they might not be prefixed with the bnumber in the METS file.
     // So we need to do two thinhs:
     //  - strip the "objects/" part of the link
     //  - prepend the bnumber followed by an underscore if it's not already present
     val filePrefixRegex = s"objects/(?:${bnumber}_)?"
-    physicalStructMap(root).headOption
-      .flatMap {
-        case (_, fileId) =>
-          fileObjects(root).get(fileId)
-      }
+    physicalStructMap.headOption
+      .flatMap { case (_, fileId) => fileObjects.get(fileId) }
       .map(_.replaceFirst(filePrefixRegex, s"${bnumber}_"))
   }
+
+  /** Returns the first href to a manifestation in the logical structMap
+    */
+  def firstManifestationFilename: Either[Exception, String] =
+    logicalStructMapForMultipleManifestations.headOption match {
+      case Some((_, name)) => Right(name)
+      case None =>
+        Left(
+          new Exception("Could not parse any manifestation locations")
+        )
+    }
 
   /** The METS XML contains locations of associated files, contained in a
     *  mapping with the following format:
@@ -124,7 +112,7 @@ object MetsXmlParser {
     *  Map("FILE_0001_OBJECTS" -> "objects/b30246039_0001.jp2",
     *      "FILE_0002_OBJECTS" -> "objects/b30246039_0002.jp2")
     */
-  private def fileObjects(root: Elem): Map[String, String] =
+  private def fileObjects: Map[String, String] =
     (root \ "fileSec" \ "fileGrp")
       .filterByAttribute("USE", "OBJECTS")
       .childrenWithTag("file")
@@ -156,7 +144,7 @@ object MetsXmlParser {
     *  Map("PHYS_0001" -> "FILE_0001_OBJECTS",
     *      "PHYS_0002" -> "FILE_0002_OBJECTS")
     */
-  private def physicalStructMap(root: Elem): ListMap[String, String] =
+  private def physicalStructMap: ListMap[String, String] =
     (root \ "structMap")
       .filterByAttribute("TYPE", "PHYSICAL")
       .descendentsWithTag("div")
@@ -165,6 +153,40 @@ object MetsXmlParser {
         keyAttrib = "ID",
         valueNode = "fptr",
         valueAttrib = "FILEID"
+      )
+
+  /** Valid METS documents should contain a logicalStructMap section. When this
+    *  is data containing multiple manifestations, we can expect the map to
+    *  include links to the other XML files:
+    *
+    *  <mets:structMap TYPE="LOGICAL">
+    *    <mets:div ADMID="AMD" DMDID="DMDLOG_0000" ID="LOG_0000" TYPE="MultipleManifestation">
+    *      <mets:div ID="LOG_0001" ORDER="01" TYPE="Monograph">
+    *        <mets:mptr LOCTYPE="URL" xlink:href="b22012692_0001.xml" />
+    *      </mets:div>
+    *      <mets:div ID="LOG_0002" ORDER="03" TYPE="Monograph">
+    *        <mets:mptr LOCTYPE="URL" xlink:href="b22012692_0003.xml" />
+    *      </mets:div>
+    *    </mets:div>
+    *  </mets:structMap>
+    *
+    *  For this input we would expect the following output:
+    *
+    *  Map("LOG_0000" -> "b22012692_0001.xml",
+    *      "LOG_0002" -> "b22012692_0003.xml")
+    */
+  private def logicalStructMapForMultipleManifestations
+    : ListMap[String, String] =
+    (root \ "structMap")
+      .filterByAttribute("TYPE", "LOGICAL")
+      .childrenWithTag("div")
+      .filterByAttribute("TYPE", "MultipleManifestation")
+      .descendentsWithTag("div")
+      .sortByAttribute("ORDER")
+      .toMapping(
+        keyAttrib = "ID",
+        valueNode = "mptr",
+        valueAttrib = "{http://www.w3.org/1999/xlink}href"
       )
 
   implicit class NodeSeqOps(nodes: NodeSeq) {
@@ -196,4 +218,10 @@ object MetsXmlParser {
       ListMap(mappings: _*)
     }
   }
+}
+
+object MetsXml {
+
+  def apply(str: String): Either[Throwable, MetsXml] =
+    Try(XML.loadString(str)).map(MetsXml(_)).toEither
 }

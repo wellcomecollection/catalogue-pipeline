@@ -1,0 +1,79 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mets:mets xmlns:dv="http://dfg-viewer.de/" xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3" xmlns:ns3="http://wellcome.ac.uk/" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd http://www.loc.gov/METS/ http://www.loc.gov/standards/mets/mets.xsd http://www.loc.gov/standards/premis/ http://www.loc.gov/standards/premis/v2/premis-v2-0.xsd http://www.loc.gov/standards/mix/ http://www.loc.gov/standards/mix/mix.xsd">
+  <mets:metsHdr CREATEDATE="2016-09-07T09:38:57">
+    <mets:agent OTHERTYPE="SOFTWARE" ROLE="CREATOR" TYPE="OTHER">
+      <mets:name>Goobi - ugh-3.0-ugh-2.0.0-24-gb21188e - 15−January−2016</mets:name>
+      <mets:note>Goobi</mets:note>
+    </mets:agent>
+  </mets:metsHdr>
+  <mets:dmdSec ID="DMDLOG_0000">
+    <mets:mdWrap MDTYPE="MODS">
+      <mets:xmlData>
+        <mods:mods>
+          <mods:titleInfo>
+            <mods:title>Enciclopedia anatomica che comprende l'anatomia descrittiva, l'anatomia generale, l'anatomia patologica, la storia dello sviluppo e delle razze umane /</mods:title>
+          </mods:titleInfo>
+          <mods:recordInfo>
+            <mods:recordIdentifier source="gbv-ppn">b22012692</mods:recordIdentifier>
+          </mods:recordInfo>
+          <mods:classification authority="WT">19th century</mods:classification>
+          <mods:note type="wellcomeidentifier">48935/C</mods:note>
+          <mods:originInfo>
+            <mods:place>
+              <mods:placeTerm type="text">Wellcome Trust</mods:placeTerm>
+            </mods:place>
+            <mods:publisher>Wellcome Trust</mods:publisher>
+          </mods:originInfo>
+          <mods:physicalDescription>
+            <mods:digitalOrigin>reformatted digital</mods:digitalOrigin>
+          </mods:physicalDescription>
+          <mods:extension>
+            <ns3:wt>
+              <ns3:manifestationType>General</ns3:manifestationType>
+            </ns3:wt>
+          </mods:extension>
+        </mods:mods>
+      </mets:xmlData>
+    </mets:mdWrap>
+  </mets:dmdSec>
+  <mets:amdSec ID="AMD">
+    <mets:rightsMD ID="RIGHTS">
+      <mets:mdWrap MDTYPE="OTHER" MIMETYPE="text/xml" OTHERMDTYPE="DVRIGHTS">
+        <mets:xmlData>
+          <dv:rights>
+            <dv:owner>Wellcome Collection</dv:owner>
+            <dv:ownerLogo>http://wellcomelibrary.org/assets/img/wellcome-logo.png</dv:ownerLogo>
+            <dv:ownerSiteURL>http://wellcomelibrary.org</dv:ownerSiteURL>
+            <dv:ownerContact>wdl@wellcome.ac.uk</dv:ownerContact>
+          </dv:rights>
+        </mets:xmlData>
+      </mets:mdWrap>
+    </mets:rightsMD>
+    <mets:digiprovMD ID="DIGIPROV">
+      <mets:mdWrap MDTYPE="OTHER" MIMETYPE="text/xml" OTHERMDTYPE="DVLINKS">
+        <mets:xmlData>
+          <dv:links>
+            <dv:reference>b22012692</dv:reference>
+            <dv:presentation>b22012692</dv:presentation>
+          </dv:links>
+        </mets:xmlData>
+      </mets:mdWrap>
+    </mets:digiprovMD>
+  </mets:amdSec>
+  <mets:structMap TYPE="LOGICAL">
+    <mets:div ADMID="AMD" DMDID="DMDLOG_0000" ID="LOG_0000" LABEL="Enciclopedia anatomica che comprende l'anatomia descrittiva, l'anatomia generale, l'anatomia patologica, la storia dello sviluppo e delle razze umane /" TYPE="MultipleManifestation">
+      <mets:div ID="LOG_0001" LABEL="Enciclopedia anatomica che comprende l'anatomia descrittiva, l'anatomia generale, l'anatomia patologica, la storia dello sviluppo e delle razze umane /" ORDER="01" TYPE="Monograph">
+        <mets:mptr LOCTYPE="URL" xlink:href="b22012692_0001.xml" />
+      </mets:div>
+      <mets:div ID="LOG_0002" LABEL="Enciclopedia anatomica che comprende l'anatomia descrittiva, l'anatomia generale, l'anatomia patologica, la storia dello sviluppo e delle razze umane /" ORDER="03" TYPE="Monograph">
+        <mets:mptr LOCTYPE="URL" xlink:href="b22012692_0003.xml" />
+      </mets:div>
+      <mets:div ID="LOG_0003" LABEL="Enciclopedia anatomica che comprende l'anatomia descrittiva, l'anatomia generale, l'anatomia patologica, la storia dello sviluppo e delle razze umane /" ORDER="08" TYPE="Monograph">
+        <mets:mptr LOCTYPE="URL" xlink:href="b22012692_0008.xml" />
+      </mets:div>
+      <mets:div ID="LOG_0004" LABEL="Enciclopedia anatomica che comprende l'anatomia descrittiva, l'anatomia generale, l'anatomia patologica, la storia dello sviluppo e delle razze umane /" ORDER="09" TYPE="Monograph">
+        <mets:mptr LOCTYPE="URL" xlink:href="b22012692_0009.xml" />
+      </mets:div>
+    </mets:div>
+  </mets:structMap>
+</mets:mets>

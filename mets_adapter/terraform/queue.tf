@@ -1,8 +1,8 @@
 module "queue" {
-  source = "git::https://github.com/wellcometrust/terraform-modules.git//sqs?ref=v11.6.0"
+  source = "git::https://github.com/wellcometrust/terraform-modules.git//sqs?ref=v19.17.0"
   queue_name  = "mets_adapter_queue"
-  topic_names = ["${module.temp_test_topic.name}"] // change this when we get a topic from the storage service
-  topic_count = 1
+  topic_arns = ["${local.storage_notifications_topic_arn}", "${module.temp_test_topic.arn}"]
+  topic_count = 2
 
   aws_region    = "${local.aws_region}"
   account_id    = "${local.account_id}"

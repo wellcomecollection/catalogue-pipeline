@@ -64,8 +64,8 @@ class SierraItemsTest extends FunSpec with Matchers with SierraDataGenerators {
     val itemId = createSierraItemNumber
     val itemData = createSierraItemData.copy(
       varFields = List(
-        VarField(marcTag = Some("b"), content = Some("S11.1L")),
-        VarField(marcTag = Some("v"), content = Some("Envelope")),
+        VarField(fieldTag = Some("b"), content = Some("S11.1L")),
+        VarField(fieldTag = Some("v"), content = Some("Envelope")),
       )
     )
 

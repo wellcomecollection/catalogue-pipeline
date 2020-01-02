@@ -1,6 +1,7 @@
 locals {
   miro_updates_topic_name = "${data.terraform_remote_state.shared_infra.miro_updates_topic_name}"
   vhs_miro_read_policy = "${data.terraform_remote_state.catalogue_infra_critical.vhs_miro_read_policy}"
+  storage_bucket = "wellcomecollection-storage"
 
   # Sierra adapter VHS
   vhs_sierra_read_policy = "${data.terraform_remote_state.catalogue_infra_critical.vhs_sierra_read_policy}"
@@ -12,9 +13,8 @@ locals {
   sierra_merged_bibs_topic_name  = "${data.terraform_remote_state.sierra_adapter.merged_bibs_topic_name}"
 
   # Mets adapter VHS
-  vhs_mets_adapter_read_policy = "${data.terraform_remote_state.catalogue_infra_critical.vhs_mets_read_policy}"
-  vhs_mets_adapter_bucket_name = "${data.terraform_remote_state.catalogue_infra_critical.vhs_mets_bucket_name}"
-  vhs_mets_adapter_table_name  = "${data.terraform_remote_state.catalogue_infra_critical.vhs_mets_table_name}"
+  mets_adapter_read_policy = "${data.terraform_remote_state.catalogue_infra_critical.mets_dynamo_read_policy}"
+  mets_adapter_table_name  = "${data.terraform_remote_state.catalogue_infra_critical.mets_dynamo_table_name}"
 
   # Mets adapter topics
   mets_adapter_topic_name = "${data.terraform_remote_state.mets_adapter.mets_adapter_topic_name}"
@@ -22,6 +22,7 @@ locals {
   # Reindexer topics
   miro_reindexer_topic_name   = "${data.terraform_remote_state.shared_infra.catalogue_miro_reindex_topic_name}"
   sierra_reindexer_topic_name = "${data.terraform_remote_state.shared_infra.catalogue_sierra_reindex_topic_name}"
+  mets_reindexer_topic_name   = "${data.terraform_remote_state.reindexer.mets_reindexer_topic_arn}"
 
   # Infra stuff
   infra_bucket = "${data.terraform_remote_state.shared_infra.infra_bucket}"

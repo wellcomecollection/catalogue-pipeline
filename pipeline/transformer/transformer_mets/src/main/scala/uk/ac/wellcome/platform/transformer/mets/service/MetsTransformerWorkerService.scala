@@ -1,27 +1,33 @@
 package uk.ac.wellcome.platform.transformer.mets.service
 
+import scala.concurrent.Future
 import akka.Done
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.bigmessaging.{BigMessageSender, EmptyMetadata}
+
+import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig}
 import uk.ac.wellcome.messaging.sqs.SQSStream
+import uk.ac.wellcome.mets_adapter.models.MetsLocation
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
-import uk.ac.wellcome.platform.transformer.mets.parsers.MetsXmlParser
-import uk.ac.wellcome.storage.store.{HybridStoreEntry, VersionedStore}
-import uk.ac.wellcome.storage.{Identified, Version}
+import uk.ac.wellcome.platform.transformer.mets.transformer.MetsXmlTransformer
+import uk.ac.wellcome.storage.store.{Readable, VersionedStore}
+import uk.ac.wellcome.storage.{Identified, ObjectLocation, Version}
 import uk.ac.wellcome.typesafe.Runnable
-
-import scala.concurrent.Future
 
 class MetsTransformerWorkerService(
   msgStream: SQSStream[NotificationMessage],
   messageSender: BigMessageSender[SNSConfig, TransformedBaseWork],
-  store: VersionedStore[String, Int, HybridStoreEntry[String, EmptyMetadata]])
-    extends Runnable
+  adapterStore: VersionedStore[String, Int, MetsLocation],
+  metsXmlStore: Readable[ObjectLocation, String]
+) extends Runnable
     with Logging {
 
+  type Result[T] = Either[Throwable, T]
+
   val className = this.getClass.getSimpleName
+
+  val xmlTransformer = new MetsXmlTransformer(metsXmlStore)
 
   def run(): Future[Done] =
     msgStream.foreach(this.getClass.getSimpleName, processAndLog)
@@ -38,21 +44,17 @@ class MetsTransformerWorkerService(
     })
   }
 
-  private def process(key: Version[String, Int]) = {
+  private def process(key: Version[String, Int]) =
     for {
-      metsString <- fetchMets(key)
-      mets <- MetsXmlParser(metsString)
-      work <- mets.toWork(key.version)
+      metsLocation <- getMetsLocation(key)
+      metsData <- xmlTransformer.transform(metsLocation)
+      work <- metsData.toWork(key.version)
       _ <- messageSender.sendT(work).toEither
     } yield ()
-  }
 
-  private def fetchMets(key: Version[String, Int]) = {
-    store.get(key) match {
+  private def getMetsLocation(key: Version[String, Int]): Result[MetsLocation] =
+    adapterStore.get(key) match {
       case Left(err)                   => Left(err.e)
-      case Right(Identified(_, entry)) => Right(entry.t)
+      case Right(Identified(_, entry)) => Right(entry)
     }
-  }
 }
-
-case class VersionedMets(version: Int, metsString: String)

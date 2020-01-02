@@ -1,69 +1,90 @@
-package uk.ac.wellcome.platform.transformer.mets.parsers
+package uk.ac.wellcome.platform.transformer.mets.transformer
 
 import org.apache.commons.io.IOUtils
 import org.scalatest.{FunSpec, Matchers}
+
 import uk.ac.wellcome.platform.transformer.mets.fixtures.MetsGenerators
 
-class MetsXmlParserTest extends FunSpec with Matchers with MetsGenerators {
+class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
+
+  val xml = loadXmlFile("/b30246039.xml")
 
   it("parses recordIdentifier from XML") {
-    MetsXmlParser(xml).right.get.recordIdentifier shouldBe "b30246039"
+    MetsXml(xml).right.get.recordIdentifier shouldBe Right("b30246039")
   }
 
   it("does not parse a mets if recordIdentifier is outside of dmdSec element") {
-    MetsXmlParser(xmlNodmdSec) shouldBe a[Left[_, _]]
+    MetsXml(xmlNodmdSec).recordIdentifier shouldBe a[Left[_, _]]
   }
 
   it("does not parse if there is more than one recordIdentifier") {
-    MetsXmlParser(xmlMultipleIds) shouldBe a[Left[_, _]]
+    MetsXml(xmlMultipleIds).recordIdentifier shouldBe a[Left[_, _]]
   }
 
   it("parses accessCondition from XML") {
-    MetsXmlParser(xml).right.get.accessCondition shouldBe Some("CC-BY-NC")
+    MetsXml(xml).right.get.accessCondition shouldBe Right(Some("CC-BY-NC"))
   }
 
   it("parses a METS with no access condition") {
-    MetsXmlParser(xmlNoLicense).right.get.accessCondition shouldBe None
-  }
-
-  it("does not parse a METS with no multiple licenses") {
-    MetsXmlParser(xmlMultipleLicense) shouldBe a[Left[_, _]]
+    MetsXml(xmlNoLicense).accessCondition shouldBe Right(None)
   }
 
   it("fails if the input string is not an xml") {
-    MetsXmlParser("hagdf") shouldBe a[Left[_, _]]
+    MetsXml("hagdf") shouldBe a[Left[_, _]]
+  }
+
+  it("does not parse a METS with multiple licenses") {
+    MetsXml(xmlMultipleLicense).accessCondition shouldBe a[Left[_, _]]
   }
 
   it("parses thumbnail from XML") {
-    MetsXmlParser(xml).right.get.thumbnailLocation shouldBe Some(
+    MetsXml(xml).right.get.thumbnailLocation("b30246039") shouldBe Some(
       "b30246039_0001.jp2")
   }
 
   it("parses first thumbnail when no ORDER attribute") {
-    MetsXmlParser(xmlWithThumbnailImages("b30246039")).right.get.thumbnailLocation shouldBe Some(
-      "b30246039_0001.jp2")
+    MetsXml(xmlWithThumbnailImages("b30246039"))
+      .thumbnailLocation("b30246039") shouldBe Some("b30246039_0001.jp2")
   }
 
   it("parses thumbnail using ORDER attrib when non-sequential order") {
-    MetsXmlParser(xmlNonSequentialOrder("b30246039")).right.get.thumbnailLocation shouldBe Some(
-      "b30246039_0001.jp2")
+    MetsXml(xmlNonSequentialOrder("b30246039"))
+      .thumbnailLocation("b30246039") shouldBe Some("b30246039_0001.jp2")
   }
 
   it("parses thumbnail if filename doesn't start with bnumber") {
     val bnumber = "b30246039"
     val filePrefix = "V000012"
-    MetsXmlParser(xmlWithThumbnailImages(
-      recordIdentifier = bnumber,
-      filePrefix = _ => filePrefix)).right.get.thumbnailLocation shouldBe Some(
+    MetsXml(
+      xmlWithThumbnailImages(
+        recordIdentifier = bnumber,
+        filePrefix = _ => filePrefix)).thumbnailLocation(bnumber) shouldBe Some(
       s"${bnumber}_${filePrefix}_0001.jp2")
   }
 
   it("cannot parse thumbnail when invalid file ID") {
-    MetsXmlParser(xmlInvalidFileId("b30246039")).right.get.thumbnailLocation shouldBe None
+    MetsXml(xmlInvalidFileId("b30246039"))
+      .thumbnailLocation("b30246039") shouldBe None
   }
 
-  def xml =
-    IOUtils.toString(getClass.getResourceAsStream("/b30246039.xml"), "UTF-8")
+  it("parses first manifestation filename when present") {
+    val xml = xmlWithManifestations(
+      List(("LOG_0001", "01", "first.xml"), ("LOG_0002", "02", "second.xml"))
+    )
+    MetsXml(xml).firstManifestationFilename shouldBe Right("first.xml")
+  }
+
+  it("parses manifestation filename using ordering when present") {
+    val xml = xmlWithManifestations(
+      List(("LOG_0001", "02", "second.xml"), ("LOG_0002", "01", "first.xml"))
+    )
+    MetsXml(xml).firstManifestationFilename shouldBe Right("first.xml")
+  }
+
+  it("doesnt parse manifestation filename when not present") {
+    val xml = xmlWithManifestations(Nil)
+    MetsXml(xml).firstManifestationFilename shouldBe a[Left[_, _]]
+  }
 
   def xmlNodmdSec =
     <mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3">
@@ -151,4 +172,7 @@ class MetsXmlParserTest extends FunSpec with Matchers with MetsGenerators {
       </mets:structMap>
       }
     )
+
+  def loadXmlFile(path: String) =
+    IOUtils.toString(getClass.getResourceAsStream(path), "UTF-8")
 }

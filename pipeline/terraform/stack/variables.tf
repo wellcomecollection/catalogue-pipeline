@@ -40,17 +40,17 @@ variable "vhs_sierra_read_policy" {}
 variable "vhs_sierra_sourcedata_bucket_name" {}
 variable "vhs_sierra_sourcedata_table_name" {}
 
-variable "vhs_mets_adapter_read_policy" {
+variable "mets_adapter_read_policy" {
 }
 
-variable "vhs_mets_adapter_table_name" {
-}
-
-variable "vhs_mets_adapter_bucket_name" {
+variable "mets_adapter_table_name" {
 }
 
 variable "private_subnets" {
   type = "list"
+}
+
+variable "read_storage_s3_role_arn" {
 }
 
 

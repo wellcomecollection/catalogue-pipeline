@@ -47,12 +47,12 @@ class MetsAdapterWorkerServiceTest
     val vhs = createStore()
     withWorkerService(bagRetriever, vhs) {
       case (workerService, QueuePair(queue, dlq), topic) =>
-        sendNotificationToSQS(queue, ingestUpdate("space", "123"))
+        sendNotificationToSQS(queue, ingestUpdate("digitised", "123"))
         assertQueueEmpty(queue)
         assertQueueEmpty(dlq)
         getMessages(topic) shouldEqual List(Version("123", 1))
         vhs.getLatest("123") shouldBe Right(
-          Identified(Version("123", 1), metsData())
+          Identified(Version("123", 1), metsLocation())
         )
     }
   }
@@ -61,13 +61,13 @@ class MetsAdapterWorkerServiceTest
     val vhs = createStore(Map(Version("123", 0) -> "old-data"))
     withWorkerService(bagRetriever, vhs) {
       case (workerService, QueuePair(queue, dlq), topic) =>
-        sendNotificationToSQS(queue, ingestUpdate("space", "123"))
+        sendNotificationToSQS(queue, ingestUpdate("digitised", "123"))
         Thread.sleep(2000)
         assertQueueEmpty(queue)
         assertQueueEmpty(dlq)
         getMessages(topic) shouldEqual List(Version("123", 1))
         vhs.getLatest("123") shouldBe Right(
-          Identified(Version("123", 1), metsData())
+          Identified(Version("123", 1), metsLocation())
         )
     }
   }
@@ -76,12 +76,12 @@ class MetsAdapterWorkerServiceTest
     val vhs = createStore(Map(Version("123", 1) -> "existing-data"))
     withWorkerService(bagRetriever, vhs) {
       case (workerService, QueuePair(queue, dlq), topic) =>
-        sendNotificationToSQS(queue, ingestUpdate("space", "123"))
+        sendNotificationToSQS(queue, ingestUpdate("digitised", "123"))
         assertQueueEmpty(queue)
         assertQueueEmpty(dlq)
         getMessages(topic) shouldEqual List(Version("123", 1))
         vhs.getLatest("123") shouldBe Right(
-          Identified(Version("123", 1), metsData("existing-data"))
+          Identified(Version("123", 1), metsLocation("existing-data"))
         )
     }
   }
@@ -90,13 +90,13 @@ class MetsAdapterWorkerServiceTest
     val vhs = createStore(Map(Version("123", 2) -> "existing-data"))
     withWorkerService(bagRetriever, vhs) {
       case (workerService, QueuePair(queue, dlq), topic) =>
-        sendNotificationToSQS(queue, ingestUpdate("space", "123"))
+        sendNotificationToSQS(queue, ingestUpdate("digitised", "123"))
         Thread.sleep(2000)
         assertQueueEmpty(queue)
         assertQueueHasSize(dlq, 1)
         getMessages(topic) shouldEqual Nil
         vhs.getLatest("123") shouldBe Right(
-          Identified(Version("123", 2), metsData("existing-data"))
+          Identified(Version("123", 2), metsLocation("existing-data"))
         )
     }
   }
@@ -109,7 +109,7 @@ class MetsAdapterWorkerServiceTest
     }
     withWorkerService(brokenBagRetriever, vhs) {
       case (workerService, QueuePair(queue, dlq), topic) =>
-        sendNotificationToSQS(queue, ingestUpdate("space", "123"))
+        sendNotificationToSQS(queue, ingestUpdate("digitised", "123"))
         Thread.sleep(2000)
         assertQueueEmpty(queue)
         assertQueueHasSize(dlq, 1)
@@ -122,7 +122,7 @@ class MetsAdapterWorkerServiceTest
     val vhs = createStore()
     withWorkerService(bagRetriever, vhs, createBrokenMsgSender(_)) {
       case (workerService, QueuePair(queue, dlq), topic) =>
-        sendNotificationToSQS(queue, ingestUpdate("space", "123"))
+        sendNotificationToSQS(queue, ingestUpdate("digitised", "123"))
         Thread.sleep(2000)
         assertQueueEmpty(queue)
         assertQueueHasSize(dlq, 1)
@@ -136,7 +136,7 @@ class MetsAdapterWorkerServiceTest
     val vhs = createStore()
     withWorkerService(bagRetriever, vhs) {
       case (workerService, QueuePair(queue, dlq), topic) =>
-        sendSqsMessage(queue, ingestUpdate("space", "123"))
+        sendSqsMessage(queue, ingestUpdate("digitised", "123"))
         Thread.sleep(2000)
         assertQueueEmpty(queue)
         assertQueueHasSize(dlq, 1)
@@ -144,8 +144,21 @@ class MetsAdapterWorkerServiceTest
     }
   }
 
+  it("doesn't process the update when storageSpace isn't equal to 'digitised'") {
+    val vhs = createStore()
+    withWorkerService(bagRetriever, vhs, createBrokenMsgSender(_)) {
+      case (workerService, QueuePair(queue, dlq), topic) =>
+        sendNotificationToSQS(queue, ingestUpdate("something-different", "123"))
+        Thread.sleep(2000)
+        assertQueueEmpty(queue)
+        assertQueueEmpty(dlq)
+        getMessages(topic) shouldEqual Nil
+        vhs.getLatest("123") shouldBe a[Left[_, _]]
+    }
+  }
+
   def withWorkerService[R](bagRetriever: BagRetriever,
-                           store: VersionedStore[String, Int, MetsData],
+                           store: VersionedStore[String, Int, MetsLocation],
                            createMsgSender: SNS.Topic => SNSMessageSender =
                              createMsgSender(_))(
     testWith: TestWith[(MetsAdapterWorkerService, QueuePair, SNS.Topic), R]) =
@@ -185,10 +198,10 @@ class MetsAdapterWorkerServiceTest
     }
 
   def createStore(data: Map[Version[String, Int], String] = Map.empty) =
-    MemoryVersionedStore(data.mapValues(metsData(_)))
+    MemoryVersionedStore(data.mapValues(metsLocation(_)))
 
-  def metsData(file: String = "mets.xml", version: Int = 1) =
-    MetsData("bucket", "root", version, file, Nil)
+  def metsLocation(file: String = "mets.xml", version: Int = 1) =
+    MetsLocation("bucket", "root", version, file, Nil)
 
   def getMessages(topic: SNS.Topic) =
     listMessagesReceivedFromSNS(topic)

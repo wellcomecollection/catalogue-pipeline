@@ -4,12 +4,12 @@ import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.models.generators.RandomStrings
 import uk.ac.wellcome.models.work.internal._
 
-class MetsTest extends FunSpec with RandomStrings with Matchers {
+class MetsDataTest extends FunSpec with RandomStrings with Matchers {
 
   it("creates a invisible work with an item and a license") {
     val bNumber = randomAlphanumeric(10)
     val metsData =
-      Mets(recordIdentifier = bNumber, accessCondition = Some("CC-BY-NC"))
+      MetsData(recordIdentifier = bNumber, accessCondition = Some("CC-BY-NC"))
     val version = 1
     val expectedSourceIdentifier = SourceIdentifier(
       IdentifierType("mets", "METS"),
@@ -20,7 +20,7 @@ class MetsTest extends FunSpec with RandomStrings with Matchers {
     val digitalLocation = DigitalLocation(
       url,
       LocationType("iiif-presentation"),
-      license = Some(License_CCBYNC))
+      license = Some(License.CCBYNC))
 
     val unidentifiableItem: MaybeDisplayable[Item] =
       Unidentifiable(Item(locations = List(digitalLocation)))
@@ -45,7 +45,7 @@ class MetsTest extends FunSpec with RandomStrings with Matchers {
 
   it("creates a invisible work with an item and no license") {
     val bNumber = randomAlphanumeric(10)
-    val metsData = Mets(recordIdentifier = bNumber, accessCondition = None)
+    val metsData = MetsData(recordIdentifier = bNumber, accessCondition = None)
     val version = 1
     val expectedSourceIdentifier = SourceIdentifier(
       IdentifierType("mets", "METS"),
@@ -80,7 +80,7 @@ class MetsTest extends FunSpec with RandomStrings with Matchers {
   it("fails creating a work if it cannot parse the license") {
     val bNumber = randomAlphanumeric(10)
     val metsData =
-      Mets(recordIdentifier = bNumber, accessCondition = Some("blah"))
+      MetsData(recordIdentifier = bNumber, accessCondition = Some("blah"))
     val version = 1
 
     metsData.toWork(version).left.get shouldBe a[Exception]
@@ -88,7 +88,7 @@ class MetsTest extends FunSpec with RandomStrings with Matchers {
   }
 
   it("creates a invisible work with a thumbnail location") {
-    val metsData = Mets(
+    val metsData = MetsData(
       recordIdentifier = randomAlphanumeric(10),
       accessCondition = Some("CC-BY-NC"),
       thumbnailLocation = Some("location.png")
@@ -99,7 +99,7 @@ class MetsTest extends FunSpec with RandomStrings with Matchers {
       DigitalLocation(
         s"https://dlcs.io/iiif-img/wellcome/5/location.png/full/!200,200/0/default.jpg",
         LocationType("thumbnail-image"),
-        license = Some(License_CCBYNC)
+        license = Some(License.CCBYNC)
       )
     )
   }

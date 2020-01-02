@@ -16,7 +16,11 @@ import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher
 import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, WorkNode}
 import uk.ac.wellcome.platform.matcher.services.MatcherWorkerService
-import uk.ac.wellcome.platform.matcher.storage.{WorkGraphStore, WorkNodeDao}
+import uk.ac.wellcome.platform.matcher.storage.{
+  WorkGraphStore,
+  WorkNodeDao,
+  WorkStore
+}
 import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig}
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS
@@ -66,7 +70,7 @@ trait MatcherFixtures
               withSQSStream[NotificationMessage, R](queue) { msgStream =>
                 val workerService =
                   new MatcherWorkerService(
-                    vhs,
+                    new WorkStore(vhs),
                     msgStream,
                     msgSender,
                     workMatcher)
@@ -122,10 +126,7 @@ trait MatcherFixtures
     testWith(workNodeDao)
   }
 
-  def sendWork(work: TransformedBaseWork,
-               vhs: VHS,
-               queue: SQS.Queue,
-               version: Int = 1) = {
+  def sendWork(work: TransformedBaseWork, vhs: VHS, queue: SQS.Queue): Any = {
     val entry = HybridStoreEntry(work, EmptyMetadata())
     val id = work.sourceIdentifier.toString
     val key = vhs.putLatest(id)(entry) match {

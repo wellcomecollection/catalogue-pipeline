@@ -7,7 +7,7 @@ trait SierraQueryOps {
     val varfields: List[VarField] = bibData.varFields
 
     def varfieldsWithTags(tags: String*): List[VarField] =
-      bibData.varFields.withTags(tags: _*)
+      bibData.varFields.withMarcTags(tags: _*)
 
     def varfieldsWithTag(tag: String): List[VarField] =
       varfieldsWithTags(tag)
@@ -24,20 +24,28 @@ trait SierraQueryOps {
 
   implicit class VarFieldsOps(varfields: List[VarField]) {
 
-    def withTags(tags: String*): List[VarField] =
+    def withMarcTags(tags: String*): List[VarField] =
       varfields
-        .filter { _.marcTag.map(tag => tags.contains(tag)).getOrElse(false) }
+        .filter { _.marcTag.exists(tag => tags.contains(tag)) }
         .sortBy { varfield =>
           tags.indexOf(varfield.marcTag.get)
         }
 
-    def withTag(tag: String): List[VarField] = withTags(tag)
+    def withFieldTags(tags: String*): List[VarField] =
+      varfields
+        .filter { _.fieldTag.exists(tag => tags.contains(tag)) }
+        .sortBy { varfield =>
+          tags.indexOf(varfield.marcTag.get)
+        }
+
+    def withFieldTag(tag: String): List[VarField] = withFieldTags(tag)
+    def withMarcTag(tag: String): List[VarField] = withMarcTags(tag)
 
     def withIndicator1(ind: String): List[VarField] =
-      varfields.filter(_.indicator1 == Some(ind))
+      varfields.filter(_.indicator1.contains(ind))
 
     def withIndicator2(ind: String): List[VarField] =
-      varfields.filter(_.indicator2 == Some(ind))
+      varfields.filter(_.indicator2.contains(ind))
 
     def subfields: List[MarcSubfield] = varfields.flatMap(_.subfields)
 

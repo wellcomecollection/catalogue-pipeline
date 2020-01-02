@@ -91,7 +91,7 @@ class DisplayWorkV2SerialisationTest
       locationType = LocationType("thumbnail-image"),
       url = "",
       credit = Some("Wellcome Collection"),
-      license = Some(License_CCBY)
+      license = Some(License.CCBY)
     )
     val item = createIdentifiedItemWith(locations = List(location))
     val workWithCopyright = createIdentifiedWorkWith(
@@ -338,7 +338,7 @@ class DisplayWorkV2SerialisationTest
         DigitalLocation(
           locationType = LocationType("thumbnail-image"),
           url = "https://iiif.example.org/1234/default.jpg",
-          license = Some(License_CCBY)
+          license = Some(License.CCBY)
         ))
     )
 

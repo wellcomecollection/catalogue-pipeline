@@ -20,9 +20,8 @@ import scala.concurrent.Future
   *
   *  Consists of the following stages:
   *  - Retrieve the bag from storarge-service with the given ID
-  *  - Parse METS data from the bag
-  *  - Retrieve the METS XMl from S3
-  *  - Store the XML in the VHS
+  *  - Parse METS data (which contains paths to the XML files) from the bag
+  *  - Store the METS data in the VHS
   *  - Publish the VHS key to SNS
   */
 class MetsAdapterWorkerService(
@@ -43,8 +42,6 @@ class MetsAdapterWorkerService(
 
   type Result[T] = Either[Throwable, T]
 
-  case class MetsDataAndXml(data: MetsData, xml: String)
-
   val className = this.getClass.getSimpleName
 
   def run(): Future[Done] =
@@ -53,9 +50,10 @@ class MetsAdapterWorkerService(
       source => {
         source
           .via(unwrapMessage)
+          .via(filterDigitised)
           .via(retrieveBag)
-          .via(parseMetsData)
-          .via(storeMetsData)
+          .via(parseMetsLocation)
+          .via(storeMetsLocation)
           .via(publishKey)
           .map { case (Context(msg, _), _) => msg }
       }
@@ -73,22 +71,29 @@ class MetsAdapterWorkerService(
           (Context(msg, update.context.externalIdentifier), update)
       }
 
-  def retrieveBag =
+  def filterDigitised =
     Flow[(Context, IngestUpdate)]
-      .mapAsync(concurrentHttpConnections) {
+      .map {
+        case (ctx, update) if update.context.storageSpace == "digitised" =>
+          (ctx, Some(update))
+        case (ctx, _) => (ctx, None)
+      }
+
+  def retrieveBag =
+    Flow[(Context, Option[IngestUpdate])]
+      .mapWithContextAsync(concurrentHttpConnections) {
         case (ctx, update) =>
           bagRetriever
             .getBag(update)
-            .transform(result => Success((ctx, result.toEither)))
+            .transform(result => Success(result.toEither))
       }
-      .via(catchErrors)
 
-  def parseMetsData =
-    Flow[(Context, Bag)]
-      .mapWithContext { case (ctx, bag) => bag.metsData }
+  def parseMetsLocation =
+    Flow[(Context, Option[Bag])]
+      .mapWithContext { case (ctx, bag) => bag.metsLocation }
 
-  def storeMetsData =
-    Flow[(Context, MetsData)]
+  def storeMetsLocation =
+    Flow[(Context, Option[MetsLocation])]
       .mapWithContextAsync(concurrentDynamoConnections) {
         case (ctx, data) =>
           Future {
@@ -97,7 +102,7 @@ class MetsAdapterWorkerService(
       }
 
   def publishKey =
-    Flow[(Context, Version[String, Int])]
+    Flow[(Context, Option[Version[String, Int]])]
       .mapWithContext {
         case (ctx, data) => msgSender.sendT(data).toEither.right.map(_ => data)
       }
@@ -106,20 +111,26 @@ class MetsAdapterWorkerService(
     *  - Context is passed through.
     *  - Any errors are caught and the message prevented from propagating downstream,
     *    resulting in the message being put back on the queue / on the dlq.
+    *  - None values are ignored but passed through (so they don't end up on the dlq)
     */
   implicit class ContextFlowOps[In, Out](
-    val flow: Flow[(Context, In), (Context, Out), NotUsed]) {
+    val flow: Flow[(Context, In), (Context, Option[Out]), NotUsed]) {
 
     def mapWithContext[T](f: (Context, Out) => Result[T]) =
       flow
-        .map { case (ctx, data) => (ctx, f(ctx, data)) }
+        .map {
+          case (ctx, Some(data)) => (ctx, (f(ctx, data).map(Some(_))))
+          case (ctx, None)       => (ctx, Right(None))
+        }
         .via(catchErrors)
 
     def mapWithContextAsync[T](parallelism: Int)(
       f: (Context, Out) => Future[Result[T]]) =
       flow
         .mapAsync(parallelism) {
-          case (ctx, data) => f(ctx, data).map((ctx, _))
+          case (ctx, Some(data)) =>
+            f(ctx, data).map(out => (ctx, out.map(Some(_))))
+          case (ctx, None) => Future.successful((ctx, Right(None)))
         }
         .via(catchErrors)
   }

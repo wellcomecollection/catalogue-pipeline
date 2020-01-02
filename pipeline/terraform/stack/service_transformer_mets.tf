@@ -36,8 +36,8 @@ module "mets_transformer" {
     metrics_namespace    = "${local.namespace_hyphen}_mets_transformer"
     messages_bucket_name = "${aws_s3_bucket.messages.id}"
 
-    vhs_mets_adapter_dynamo_table_name = "${var.vhs_mets_adapter_table_name}"
-    vhs_mets_adapter_bucket_name       = "${var.vhs_mets_adapter_bucket_name}"
+    mets_adapter_dynamo_table_name = "${var.mets_adapter_table_name}"
+    assume_role_arn = "${var.read_storage_s3_role_arn}"
   }
 
   env_vars_length = 6
@@ -50,13 +50,6 @@ module "mets_transformer" {
   max_capacity = 10
   messages_bucket_arn = "${aws_s3_bucket.messages.arn}"
   queue_read_policy = "${module.mets_transformer_queue.read_policy}"
-}
-
-# Permissions
-
-resource "aws_iam_role_policy" "mets_transformer_vhs_mets_adapter_read" {
-  role   = "${module.mets_transformer.task_role_name}"
-  policy = "${var.vhs_mets_adapter_read_policy}"
 }
 
 # Output topic
@@ -76,4 +69,29 @@ module "mets_transformer_scaling_alarm" {
 
   queue_high_actions = ["${module.mets_transformer.scale_up_arn}"]
   queue_low_actions  = ["${module.mets_transformer.scale_down_arn}"]
+}
+
+# Permissions
+
+resource "aws_iam_role_policy" "read_mets_adapter_table" {
+  role   = "${module.mets_transformer.task_role_name}"
+  policy = "${var.mets_adapter_read_policy}"
+}
+
+data "aws_iam_policy_document" "assume_storage_read_role" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "sts:AssumeRole"
+    ]
+
+    resources = [
+      "${var.read_storage_s3_role_arn}"
+    ]
+  }
+}
+
+resource "aws_iam_role_policy" "assume_role_policy" {
+  role   = "${module.mets_transformer.task_role_name}"
+  policy = "${data.aws_iam_policy_document.assume_storage_read_role.json}"
 }

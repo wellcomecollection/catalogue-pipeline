@@ -24,7 +24,7 @@ class MiroItemsTest
           agent = Item(locations = List(DigitalLocation(
             "https://iiif.wellcomecollection.org/image/B0011308.jpg/info.json",
             LocationType("iiif-image"),
-            Some(License_CC0),
+            Some(License.CC0),
             credit = Some("Ezra Feilden"))))))
     }
   }
