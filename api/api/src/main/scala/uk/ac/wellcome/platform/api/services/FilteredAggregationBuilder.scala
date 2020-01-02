@@ -12,6 +12,22 @@ import uk.ac.wellcome.platform.api.models._
 
 import scala.collection.immutable._
 
+/** This class governs the way in which we wish to combine the filters and aggregations
+  * that are specified for a search. We have a concept of "pairing" a filter and an aggregation:
+  * for example, an aggregation on workType is paired with a filter of a specific workType.
+  * If a search includes an aggregation and its paired filter, the filter is *not* applied to that
+  * aggregation, but is still applied to results and to all other aggregations.
+  *
+  * Given a list of aggregations requests and filters, as well as functions to convert these to
+  * constituents of the ES query, this class exposes:
+  *
+  * - `aggregations`: a list of all the ES query aggregations, where those that need to be filtered
+  *   now have a sub-aggregation of the filter aggregation type, named "filtered".
+  * - `independentFilters`: a list of all of the given filters which are not paired to any of
+  *   the given aggregations. These can be used as the ES query filters.
+  * - `aggregationDependentFilters`: a list of all of the given filters which are paired to one
+  *   of the given aggregations. These can be used as the ES post-query filters.
+  */
 class FilteredAggregationBuilder(
   aggregationRequests: List[AggregationRequest],
   filters: List[WorkFilter],
@@ -60,6 +76,7 @@ class FilteredAggregationBuilder(
       }
     }
 
+  // This pattern matching defines the pairings of filters <-> aggregations
   private def pairedAggregationRequest(
     filter: WorkFilter): Option[AggregationRequest] = filter match {
     case _: ItemLocationTypeFilter => None

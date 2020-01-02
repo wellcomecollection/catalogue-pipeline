@@ -83,6 +83,8 @@ object Aggregations extends Logging {
                 .filter(_.count != 0)))
     }
 
+    /** If the `filtered` sub-aggregation is present (see [[uk.ac.wellcome.platform.api.services.FilteredAggregationBuilder]])
+      * then use the count from it */
     private def getFilteredBucket[T](
       esAggBucket: EsAggregationBucket[T]): AggregationBucket[T] =
       AggregationBucket(
@@ -128,6 +130,8 @@ case class AggregationBucket[T](data: T, count: Int)
   */
 case class EsAggregation[T](buckets: List[EsAggregationBucket[T]])
 
+/** The `filtered` key is introduced by the nested aggregations requested by
+  * [[uk.ac.wellcome.platform.api.services.FilteredAggregationBuilder]] */
 case class EsAggregationBucket[T](key: T,
                                   doc_count: Int,
                                   filtered: Option[EsAggregationSubAgg])
