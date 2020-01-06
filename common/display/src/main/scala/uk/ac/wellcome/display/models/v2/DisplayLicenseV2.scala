@@ -20,7 +20,7 @@ case class DisplayLicenseV2(
   ) label: String,
   @Schema(
     description = "URL to the full text of a license"
-  ) url: Option[String],
+  ) url: String,
   @JsonKey("type") @Schema(name = "type") ontologyType: String = "License"
 )
 

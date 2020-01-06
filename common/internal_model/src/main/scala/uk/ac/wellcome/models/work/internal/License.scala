@@ -7,7 +7,7 @@ import io.circe.{Decoder, Encoder, Json}
 sealed trait License extends EnumEntry {
   val id: String
   val label: String
-  val url: Option[String]
+  val url: String
   val ontologyType: String = "License"
 }
 
@@ -39,39 +39,73 @@ object License extends Enum[License] {
   case object CCBY extends License {
     val id = "cc-by"
     val label = "Attribution 4.0 International (CC BY 4.0)"
-    val url = Some("http://creativecommons.org/licenses/by/4.0/")
+    val url = "http://creativecommons.org/licenses/by/4.0/"
   }
 
   case object CCBYNC extends License {
     val id = "cc-by-nc"
     val label = "Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)"
-    val url = Some("https://creativecommons.org/licenses/by-nc/4.0/")
+    val url = "https://creativecommons.org/licenses/by-nc/4.0/"
   }
 
   case object CCBYNCND extends License {
     val id = "cc-by-nc-nd"
     val label =
       "Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)"
-    val url = Some("https://creativecommons.org/licenses/by-nc-nd/4.0/")
+    val url = "https://creativecommons.org/licenses/by-nc-nd/4.0/"
   }
 
   case object CC0 extends License {
     val id = "cc-0"
     val label = "CC0 1.0 Universal"
-    val url = Some(
-      "https://creativecommons.org/publicdomain/zero/1.0/legalcode")
+    val url = "https://creativecommons.org/publicdomain/zero/1.0/legalcode"
   }
 
   case object PDM extends License {
     val id = "pdm"
     val label = "Public Domain Mark"
-    val url = Some(
-      "https://creativecommons.org/share-your-work/public-domain/pdm/")
+    val url = "https://creativecommons.org/share-your-work/public-domain/pdm/"
   }
 
-  case object CopyrightNotCleared extends License {
-    val id = "copyright-not-cleared"
-    val label = "Copyright not cleared"
-    val url: Option[String] = None
+  case object CCBYND extends License {
+    val id = "cc-by-nd"
+    val label =
+      "Attribution-NoDerivatives 4.0 International (CC BY-ND 4.0)"
+    val url = "https://creativecommons.org/licenses/by-nd/4.0/"
+  }
+
+  case object CCBYSA extends License {
+    val id = "cc-by-sa"
+    val label =
+      "Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)"
+    val url = "https://creativecommons.org/licenses/by-sa/4.0/"
+  }
+
+  case object CCBYNCSA extends License {
+    val id = "cc-by-nc-sa"
+    val label =
+      "Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)"
+    val url = "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+  }
+
+  case object OGL extends License {
+    val id = "ogl"
+    val label =
+      "Open Government License"
+    val url =
+      "http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"
+  }
+
+  case object OPL extends License {
+    val id = "opl"
+    val label =
+      "Open Publication License"
+    val url = "http://opencontent.org/openpub/"
+  }
+
+  case object InCopyright extends License {
+    val id: String = "inc"
+    val label: String = "In copyright"
+    val url = "http://rightsstatements.org/vocab/InC/1.0/"
   }
 }
