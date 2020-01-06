@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.api.models
 
-import scala.util.Try
+import scala.util.{Failure, Try}
 import io.circe.Decoder
 import java.time.{Instant, LocalDateTime, ZoneOffset}
 
@@ -74,6 +74,11 @@ object Aggregations extends Logging {
     def toAgg[T: Decoder]: Option[Aggregation[T]] = {
       transformable
         .safeTo[EsAggregation[T]]
+        .recoverWith {
+          case err =>
+            warn("Failed to parse aggregation from ES", err)
+            Failure(err)
+        }
         .toOption
         .map(
           agg =>
