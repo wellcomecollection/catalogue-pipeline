@@ -104,7 +104,7 @@ object License extends Enum[License] {
   }
 
   case object InCopyright extends License {
-    val id: String = "in-copyright"
+    val id: String = "inc"
     val label: String = "In copyright"
     val url = "http://rightsstatements.org/vocab/InC/1.0/"
   }
