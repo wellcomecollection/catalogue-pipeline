@@ -29,19 +29,20 @@ case class ElasticSearchRequestBuilder(
   queryOptions: ElasticsearchQueryOptions) {
 
   lazy val request: SearchRequest = search(index)
-    .aggs { filteredAggregationBuilder.aggregations }
+    .aggs { filteredAggregationBuilder.filteredAggregations }
     .query { filteredQuery }
     .postFilter { postFilterQuery }
     .sortBy { sort ++ sortDefinitions }
     .limit { queryOptions.limit }
     .from { queryOptions.from }
 
-  private lazy val filteredAggregationBuilder = new FilteredAggregationBuilder(
-    queryOptions.aggregations,
-    queryOptions.filters,
-    toAggregation,
-    buildWorkFilterQuery
-  )
+  private lazy val filteredAggregationBuilder =
+    new FiltersAndAggregationsBuilder(
+      queryOptions.aggregations,
+      queryOptions.filters,
+      toAggregation,
+      buildWorkFilterQuery
+    )
 
   private def toAggregation(aggReq: AggregationRequest) = aggReq match {
     case AggregationRequest.WorkType =>
@@ -116,8 +117,7 @@ case class ElasticSearchRequestBuilder(
   }
 
   lazy val postFilterQuery: BoolQuery = boolQuery.filter {
-    filteredAggregationBuilder.aggregationDependentFilters.map(
-      buildWorkFilterQuery)
+    filteredAggregationBuilder.pairedFilters.map(buildWorkFilterQuery)
   }
 
   lazy val filteredQuery: BoolQuery = queryOptions.searchQuery
@@ -126,7 +126,7 @@ case class ElasticSearchRequestBuilder(
     }
     .getOrElse { boolQuery }
     .filter {
-      (IdentifiedWorkFilter :: filteredAggregationBuilder.independentFilters)
+      (IdentifiedWorkFilter :: filteredAggregationBuilder.unpairedFilters)
         .map(buildWorkFilterQuery)
     }
 

@@ -16,81 +16,81 @@ import uk.ac.wellcome.platform.api.models.{
   WorkTypeFilter
 }
 
-class FilteredAggregationBuilderTest extends FunSpec with Matchers {
+class FiltersAndAggregationsBuilderTest extends FunSpec with Matchers {
 
   describe("filter discrimination") {
-    it("separates independent and aggregation-dependent filters") {
+    it("separates paired and unpaired filters") {
       val workTypeFilter = WorkTypeFilter(Seq("bananas"))
       val languageFilter = LanguageFilter(Seq("en"))
-      val sut = new FilteredAggregationBuilder(
+      val sut = new FiltersAndAggregationsBuilder(
         List(AggregationRequest.WorkType, AggregationRequest.License),
         List(workTypeFilter, languageFilter, IdentifiedWorkFilter),
         requestToAggregation,
         filterToQuery
       )
 
-      sut.aggregationDependentFilters should contain only workTypeFilter
-      sut.independentFilters should contain only (languageFilter, IdentifiedWorkFilter)
+      sut.pairedFilters should contain only workTypeFilter
+      sut.unpairedFilters should contain only (languageFilter, IdentifiedWorkFilter)
     }
 
-    it("handles the case where all filters are independent") {
+    it("handles the case where all filters are unpaired") {
       val workTypeFilter = WorkTypeFilter(Seq("bananas"))
       val languageFilter = LanguageFilter(Seq("en"))
-      val sut = new FilteredAggregationBuilder(
+      val sut = new FiltersAndAggregationsBuilder(
         List(AggregationRequest.License),
         List(workTypeFilter, languageFilter, IdentifiedWorkFilter),
         requestToAggregation,
         filterToQuery
       )
 
-      sut.aggregationDependentFilters should have length 0
-      sut.independentFilters should contain only (languageFilter, workTypeFilter, IdentifiedWorkFilter)
+      sut.pairedFilters should have length 0
+      sut.unpairedFilters should contain only (languageFilter, workTypeFilter, IdentifiedWorkFilter)
     }
 
-    it("handles the case where all filters are aggregation-dependent") {
+    it("handles the case where all filters are paired") {
       val workTypeFilter = WorkTypeFilter(Seq("bananas"))
       val languageFilter = LanguageFilter(Seq("en"))
-      val sut = new FilteredAggregationBuilder(
+      val sut = new FiltersAndAggregationsBuilder(
         List(AggregationRequest.WorkType, AggregationRequest.Language),
         List(workTypeFilter, languageFilter),
         requestToAggregation,
         filterToQuery
       )
 
-      sut.aggregationDependentFilters should contain only (workTypeFilter, languageFilter)
-      sut.independentFilters should have length 0
+      sut.pairedFilters should contain only (workTypeFilter, languageFilter)
+      sut.unpairedFilters should have length 0
     }
   }
 
   describe("aggregation-level filtering") {
     it("applies to aggregations with a paired filter") {
       val workTypeFilter = WorkTypeFilter(Seq("bananas"))
-      val sut = new FilteredAggregationBuilder(
+      val sut = new FiltersAndAggregationsBuilder(
         List(AggregationRequest.WorkType),
         List(workTypeFilter),
         requestToAggregation,
         filterToQuery
       )
 
-      sut.aggregations should have length 1
-      sut.aggregations.head shouldBe a[MockAggregation]
-      val agg = sut.aggregations.head.asInstanceOf[MockAggregation]
+      sut.filteredAggregations should have length 1
+      sut.filteredAggregations.head shouldBe a[MockAggregation]
+      val agg = sut.filteredAggregations.head.asInstanceOf[MockAggregation]
       agg.subaggs.head shouldBe a[FilterAggregation]
       agg.request shouldBe AggregationRequest.WorkType
     }
 
     it("does not apply to aggregations without a paired filter") {
       val languageFilter = LanguageFilter(Seq("en"))
-      val sut = new FilteredAggregationBuilder(
+      val sut = new FiltersAndAggregationsBuilder(
         List(AggregationRequest.WorkType),
         List(languageFilter),
         requestToAggregation,
         filterToQuery
       )
 
-      sut.aggregations should have length 1
-      sut.aggregations.head shouldBe a[MockAggregation]
-      sut.aggregations.head
+      sut.filteredAggregations should have length 1
+      sut.filteredAggregations.head shouldBe a[MockAggregation]
+      sut.filteredAggregations.head
         .asInstanceOf[MockAggregation]
         .subaggs should have length 0
     }
@@ -99,7 +99,7 @@ class FilteredAggregationBuilderTest extends FunSpec with Matchers {
       val workTypeFilter = WorkTypeFilter(Seq("bananas"))
       val languageFilter = LanguageFilter(Seq("en"))
       val genreFilter = GenreFilter("durian")
-      val sut = new FilteredAggregationBuilder(
+      val sut = new FiltersAndAggregationsBuilder(
         List(
           AggregationRequest.WorkType,
           AggregationRequest.Language,
@@ -110,7 +110,7 @@ class FilteredAggregationBuilderTest extends FunSpec with Matchers {
       )
 
       val agg =
-        sut.aggregations.head
+        sut.filteredAggregations.head
           .asInstanceOf[MockAggregation]
           .subaggs
           .head

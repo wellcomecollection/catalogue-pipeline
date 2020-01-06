@@ -21,26 +21,26 @@ import scala.collection.immutable._
   * Given a list of aggregations requests and filters, as well as functions to convert these to
   * constituents of the ES query, this class exposes:
   *
-  * - `aggregations`: a list of all the ES query aggregations, where those that need to be filtered
+  * - `filteredAggregations`: a list of all the ES query aggregations, where those that need to be filtered
   *   now have a sub-aggregation of the filter aggregation type, named "filtered".
-  * - `independentFilters`: a list of all of the given filters which are not paired to any of
+  * - `unpairedFilters`: a list of all of the given filters which are not paired to any of
   *   the given aggregations. These can be used as the ES query filters.
-  * - `aggregationDependentFilters`: a list of all of the given filters which are paired to one
+  * - `pairedFilters`: a list of all of the given filters which are paired to one
   *   of the given aggregations. These can be used as the ES post-query filters.
   */
-class FilteredAggregationBuilder(
+class FiltersAndAggregationsBuilder(
   aggregationRequests: List[AggregationRequest],
   filters: List[WorkFilter],
   requestToAggregation: AggregationRequest => Aggregation,
   filterToQuery: WorkFilter => Query) {
 
-  lazy val independentFilters: List[WorkFilter] =
-    filterSets.getOrElse(FilterCategory.Independent, List())
-  lazy val aggregationDependentFilters: List[WorkFilter] =
-    filterSets.getOrElse(FilterCategory.AggregationDependent, List())
+  lazy val unpairedFilters: List[WorkFilter] =
+    filterSets.getOrElse(FilterCategory.Unpaired, List())
+  lazy val pairedFilters: List[WorkFilter] =
+    filterSets.getOrElse(FilterCategory.Paired, List())
 
-  lazy val aggregations: List[AbstractAggregation] = aggregationRequests.map {
-    aggReq =>
+  lazy val filteredAggregations: List[AbstractAggregation] =
+    aggregationRequests.map { aggReq =>
       val agg = requestToAggregation(aggReq)
       pairedFilter(aggReq) match {
         case Some(filter) =>
@@ -48,28 +48,28 @@ class FilteredAggregationBuilder(
             FilterAggregation(
               "filtered",
               boolQuery.filter {
-                aggregationDependentFilters
+                pairedFilters
                   .filterNot(_ == filter)
                   .map(filterToQuery)
               }
             ))
         case _ => agg
       }
-  }
+    }
 
   private lazy val filterSets: Map[FilterCategory, List[WorkFilter]] =
     filters.groupBy {
       pairedAggregationRequest(_) match {
         case Some(aggregationRequest)
             if aggregationRequests contains aggregationRequest =>
-          FilterCategory.AggregationDependent
-        case _ => FilterCategory.Independent
+          FilterCategory.Paired
+        case _ => FilterCategory.Unpaired
       }
     }
 
   private def pairedFilter(
     aggregationRequest: AggregationRequest): Option[WorkFilter] =
-    aggregationDependentFilters.find {
+    pairedFilters.find {
       pairedAggregationRequest(_) match {
         case Some(agg) => agg == aggregationRequest
         case None      => false
@@ -91,7 +91,7 @@ class FilteredAggregationBuilder(
 
   private sealed trait FilterCategory
   private object FilterCategory {
-    case object Independent extends FilterCategory
-    case object AggregationDependent extends FilterCategory
+    case object Unpaired extends FilterCategory
+    case object Paired extends FilterCategory
   }
 }
