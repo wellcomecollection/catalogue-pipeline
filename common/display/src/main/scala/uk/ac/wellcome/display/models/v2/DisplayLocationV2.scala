@@ -59,7 +59,7 @@ case class DisplayDigitalLocationV2(
       "The specific license under which the work in question is released to the public - for example, one of the forms of Creative Commons - if it is a precise license to which a link can be made."
   ) license: Option[DisplayLicenseV2] = None,
   @Schema(
-    description = "The access conditions"
+    description = "Information about any access restrictions placed on the work"
   ) accessConditions: Option[List[DisplayAccessCondition]] = None,
   @JsonKey("type") @Schema(name = "type") ontologyType: String =
     "DigitalLocation"
@@ -78,7 +78,7 @@ case class DisplayPhysicalLocationV2(
     description = "The title or other short name of the location."
   ) label: String,
   @Schema(
-    description = "The access conditions"
+    description = "Information about any access restrictions placed on the work"
   ) accessConditions: Option[List[DisplayAccessCondition]] = None,
   @JsonKey("type") @Schema(name = "type") ontologyType: String =
     "PhysicalLocation"
