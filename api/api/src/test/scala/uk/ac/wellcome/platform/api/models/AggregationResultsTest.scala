@@ -1,5 +1,11 @@
 package uk.ac.wellcome.platform.api.models
 
+import com.sksamuel.elastic4s.requests.common.Shards
+import com.sksamuel.elastic4s.requests.searches.{
+  SearchHits,
+  SearchResponse,
+  Total
+}
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.models.work.internal.WorkType
 import uk.ac.wellcome.models.work.internal.WorkType.{
@@ -10,45 +16,51 @@ import uk.ac.wellcome.models.work.internal.WorkType.{
 
 class AggregationResultsTest extends FunSpec with Matchers {
   it("destructures a single aggregation result") {
-    // val searchResponse: com.sksamuel.elastic4s.requests.searches.SearchResponse
-    // This mimics the searchResponse.aggregationsAsString
-    val responseString =
-      """
-        |{
-        |  "workType": {
-        |    "doc_count_error_upper_bound": 0,
-        |    "sum_other_doc_count": 0,
-        |    "buckets": [
-        |      {
-        |          "key" : {
-        |            "id" : "a",
-        |            "label" : "Books",
-        |            "type" : "WorkType"
-        |          },
-        |          "doc_count" : 393145
-        |        },
-        |        {
-        |          "key" : {
-        |            "id" : "b",
-        |            "label" : "Manuscripts, Asian",
-        |            "type" : "WorkType"
-        |          },
-        |          "doc_count" : 5696
-        |        },
-        |        {
-        |          "key" : {
-        |            "id" : "c",
-        |            "label" : "Music",
-        |            "type" : "WorkType"
-        |          },
-        |          "doc_count" : 9
-        |        }
-        |    ]
-        |  }
-        |}
-        |""".stripMargin
-
-    val singleAgg = Aggregations(responseString)
+    val searchResponse = SearchResponse(
+      took = 1234,
+      isTimedOut = false,
+      isTerminatedEarly = false,
+      suggest = Map(),
+      _shards = Shards(total = 1, failed = 0, successful = 1),
+      scrollId = None,
+      hits = SearchHits(
+        total = Total(0, "potatoes"),
+        maxScore = 0.0,
+        hits = Array()),
+      _aggregationsAsMap = Map(
+        "workType" -> Map(
+          "doc_count_error_upper_bound" -> 0,
+          "sum_other_doc_count" -> 0,
+          "buckets" -> List(
+            Map(
+              "key" -> Map(
+                "id" -> "a",
+                "label" -> "Books",
+                "type" -> "WorkType"
+              ),
+              "doc_count" -> 393145
+            ),
+            Map(
+              "key" -> Map(
+                "id" -> "b",
+                "label" -> "Manuscripts, Asian",
+                "type" -> "WorkType"
+              ),
+              "doc_count" -> 5696
+            ),
+            Map(
+              "key" -> Map(
+                "id" -> "c",
+                "label" -> "Music",
+                "type" -> "WorkType"
+              ),
+              "doc_count" -> 9
+            )
+          )
+        )
+      )
+    )
+    val singleAgg = Aggregations(searchResponse)
     singleAgg.get.workType shouldBe Some(
       Aggregation[WorkType](
         List(
@@ -56,5 +68,43 @@ class AggregationResultsTest extends FunSpec with Matchers {
           AggregationBucket(data = ManuscriptsAsian, count = 5696),
           AggregationBucket(data = Music, count = 9)
         )))
+  }
+
+  it("uses the filtered count for aggregations with a filter subaggregation") {
+    val searchResponse = SearchResponse(
+      took = 1234,
+      isTimedOut = false,
+      isTerminatedEarly = false,
+      suggest = Map(),
+      _shards = Shards(total = 1, failed = 0, successful = 1),
+      scrollId = None,
+      hits = SearchHits(
+        total = Total(0, "potatoes"),
+        maxScore = 0.0,
+        hits = Array()),
+      _aggregationsAsMap = Map(
+        "workType" -> Map(
+          "doc_count_error_upper_bound" -> 0,
+          "sum_other_doc_count" -> 0,
+          "buckets" -> List(
+            Map(
+              "key" -> Map(
+                "id" -> "a",
+                "label" -> "Books",
+                "type" -> "WorkType"
+              ),
+              "doc_count" -> 393145,
+              "filtered" -> Map(
+                "doc_count" -> 1234
+              )
+            )
+          )
+        )
+      )
+    )
+    val singleAgg = Aggregations(searchResponse)
+    singleAgg.get.workType shouldBe Some(
+      Aggregation[WorkType](
+        List(AggregationBucket(data = Books, count = 1234))))
   }
 }

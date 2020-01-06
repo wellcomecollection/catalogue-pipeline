@@ -154,7 +154,7 @@ class WorksService(searchService: ElasticsearchService)(
 
   private def searchResponseToAggregationResults(
     searchResponse: SearchResponse): Option[Aggregations] = {
-    Aggregations(searchResponse.aggregationsAsString)
+    Aggregations(searchResponse)
   }
 
   private def jsonTo[T <: IdentifiedBaseWork](document: String)(

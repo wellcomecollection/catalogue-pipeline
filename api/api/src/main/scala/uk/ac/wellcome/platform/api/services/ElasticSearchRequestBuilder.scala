@@ -23,19 +23,28 @@ import uk.ac.wellcome.display.models.{
 }
 import uk.ac.wellcome.platform.api.models._
 
-case class ElastsearchSearchRequestBuilder(
+case class ElasticSearchRequestBuilder(
   index: Index,
   sortDefinitions: List[FieldSort],
   queryOptions: ElasticsearchQueryOptions) {
 
   lazy val request: SearchRequest = search(index)
-    .aggs { aggregations }
+    .aggs { filteredAggregationBuilder.filteredAggregations }
     .query { filteredQuery }
+    .postFilter { postFilterQuery }
     .sortBy { sort ++ sortDefinitions }
     .limit { queryOptions.limit }
     .from { queryOptions.from }
 
-  lazy val aggregations = queryOptions.aggregations.map {
+  private lazy val filteredAggregationBuilder =
+    new FiltersAndAggregationsBuilder(
+      queryOptions.aggregations,
+      queryOptions.filters,
+      toAggregation,
+      buildWorkFilterQuery
+    )
+
+  private def toAggregation(aggReq: AggregationRequest) = aggReq match {
     case AggregationRequest.WorkType =>
       CompositeAggregation("workType")
         .size(100)
@@ -107,13 +116,18 @@ case class ElastsearchSearchRequestBuilder(
     case SortingOrder.Descending => SortOrder.DESC
   }
 
+  lazy val postFilterQuery: BoolQuery = boolQuery.filter {
+    filteredAggregationBuilder.pairedFilters.map(buildWorkFilterQuery)
+  }
+
   lazy val filteredQuery: BoolQuery = queryOptions.searchQuery
     .map { searchQuery =>
       ElasticsearchQueryBuilder(searchQuery).query
     }
     .getOrElse { boolQuery }
     .filter {
-      (IdentifiedWorkFilter :: queryOptions.filters).map(buildWorkFilterQuery)
+      (IdentifiedWorkFilter :: filteredAggregationBuilder.unpairedFilters)
+        .map(buildWorkFilterQuery)
     }
 
   private def buildWorkFilterQuery(workFilter: WorkFilter): Query =

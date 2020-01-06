@@ -64,7 +64,7 @@ class ElasticsearchService(elasticClient: ElasticClient)(
       subType = "elastic",
       action = "query")({
 
-      val searchRequest = ElastsearchSearchRequestBuilder(
+      val searchRequest = ElasticSearchRequestBuilder(
         index,
         sortDefinitions,
         queryOptions

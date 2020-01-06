@@ -1,6 +1,7 @@
 package uk.ac.wellcome.platform.api.services
 
 import java.time.LocalDate
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalatest.{FunSpec, Matchers}
 import org.scalatest.concurrent.ScalaFutures
@@ -9,13 +10,19 @@ import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.models.work.generators.WorksGenerators
+import uk.ac.wellcome.models.work.generators.{
+  GenreGenerators,
+  SubjectGenerators,
+  WorksGenerators
+}
 
 class AggregationsTest
     extends FunSpec
     with Matchers
     with ScalaFutures
     with ElasticsearchFixtures
+    with SubjectGenerators
+    with GenreGenerators
     with WorksGenerators {
 
   val worksService = new WorksService(
@@ -68,6 +75,86 @@ class AggregationsTest
             )
           )
         )
+      }
+    }
+  }
+
+  describe("aggregations with filters") {
+    val workTypes = WorkType.values
+    val subjects = (0 to 5).map(_ => createSubject)
+    val works = workTypes.zipWithIndex.map {
+      case (workType, i) =>
+        createIdentifiedWorkWith(
+          workType = Some(workType),
+          subjects = List(subjects(i / subjects.size))
+        )
+    }
+
+    it("applies filters to their related aggregations") {
+      withLocalWorksIndex { index =>
+        insertIntoElasticsearch(index, works: _*)
+        val searchOptions = WorksSearchOptions(
+          aggregations =
+            List(AggregationRequest.WorkType, AggregationRequest.Subject),
+          filters = List(
+            WorkTypeFilter(List(WorkType.Books.id)),
+          )
+        )
+        whenReady(aggregationQuery(index, searchOptions)) { aggs =>
+          aggs.workType should not be empty
+          val buckets = aggs.workType.get.buckets
+          buckets.length shouldBe workTypes.length
+          buckets.map(_.data) should contain theSameElementsAs workTypes
+        }
+      }
+    }
+
+    it("applies all non-related filters to aggregations") {
+      withLocalWorksIndex { index =>
+        insertIntoElasticsearch(index, works: _*)
+        val subjectQuery = subjects.head match {
+          case Unidentifiable(Subject(label, _, _)) => label
+          case _                                    => "bilberry"
+        }
+        val searchOptions = WorksSearchOptions(
+          aggregations =
+            List(AggregationRequest.WorkType, AggregationRequest.Subject),
+          filters = List(
+            WorkTypeFilter(List(WorkType.Books.id)),
+            SubjectFilter(subjectQuery)
+          )
+        )
+        whenReady(aggregationQuery(index, searchOptions)) { aggs =>
+          val buckets = aggs.workType.get.buckets
+          val expectedWorkTypes = works
+            .filter { _.data.subjects.head.agent.label == subjectQuery }
+            .map { _.data.workType.get }
+          buckets.length shouldBe expectedWorkTypes.length
+          buckets.map(_.data) should contain theSameElementsAs expectedWorkTypes
+        }
+      }
+    }
+
+    it("applies all filters to the results") {
+      withLocalWorksIndex { index =>
+        insertIntoElasticsearch(index, works: _*)
+        val subjectQuery = subjects.head match {
+          case Unidentifiable(Subject(label, _, _)) => label
+          case _                                    => "passionfruit"
+        }
+        val searchOptions = WorksSearchOptions(
+          aggregations =
+            List(AggregationRequest.WorkType, AggregationRequest.Subject),
+          filters = List(
+            WorkTypeFilter(List(WorkType.Books.id)),
+            SubjectFilter(subjectQuery)
+          )
+        )
+        whenReady(worksService.listWorks(index, searchOptions)) { res =>
+          val results = res.right.get.results
+          results.map(_.data.workType.get) should contain only WorkType.Books
+          results.map(_.data.subjects.head.agent.label) should contain only subjectQuery
+        }
       }
     }
   }
