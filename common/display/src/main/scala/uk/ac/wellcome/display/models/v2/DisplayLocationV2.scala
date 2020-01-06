@@ -20,18 +20,19 @@ sealed trait DisplayLocationV2
 
 object DisplayLocationV2 {
   def apply(location: Location): DisplayLocationV2 = location match {
-    case DigitalLocation(url, locType, license, credit, accessCondition, _) =>
+    case DigitalLocation(url, locType, license, credit, accessConditions, _) =>
       DisplayDigitalLocationV2(
         locationType = DisplayLocationType(locType),
         url = url,
         credit = credit,
         license = license.map(DisplayLicenseV2(_)),
-        accessCondition = accessCondition.map(DisplayAccessCondition(_))
+        accessConditions =  accessConditions.map(_.map(DisplayAccessCondition(_)))
       )
-    case PhysicalLocation(locationType, label, _) =>
+    case PhysicalLocation(locationType, label, accessConditions,  _) =>
       DisplayPhysicalLocationV2(
         locationType = DisplayLocationType(locationType),
-        label = label
+        label = label,
+        accessConditions =  accessConditions.map(_.map(DisplayAccessCondition(_)))
       )
   }
 }
@@ -59,7 +60,7 @@ case class DisplayDigitalLocationV2(
   ) license: Option[DisplayLicenseV2] = None,
   @Schema(
     description = "The access conditions"
-  ) accessCondition: Option[DisplayAccessCondition] = None,
+  ) accessConditions: Option[List[DisplayAccessCondition]] = None,
   @JsonKey("type") @Schema(name = "type") ontologyType: String =
     "DigitalLocation"
 ) extends DisplayLocationV2
@@ -76,6 +77,9 @@ case class DisplayPhysicalLocationV2(
     `type` = "String",
     description = "The title or other short name of the location."
   ) label: String,
+  @Schema(
+    description = "The access conditions"
+  ) accessConditions: Option[List[DisplayAccessCondition]] = None,
   @JsonKey("type") @Schema(name = "type") ontologyType: String =
     "PhysicalLocation"
 ) extends DisplayLocationV2

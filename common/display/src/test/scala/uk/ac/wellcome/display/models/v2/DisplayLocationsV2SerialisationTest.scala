@@ -89,11 +89,13 @@ class DisplayLocationsV2SerialisationTest
     val digitalLocation = DigitalLocation(
       url = "https://wellcomelibrary.org/iiif/b22015085/manifest",
       locationType = LocationType("iiif-image"),
-      accessCondition = Some(
-        AccessCondition(
-          status = AccessStatus.Restricted,
-          terms = Some("Ask politely"),
-          to = Some(LocalDate.of(2024, 2, 24))
+      accessConditions = Some(
+        List(
+          AccessCondition(
+            status = AccessStatus.Restricted,
+            terms = Some("Ask politely"),
+            to = Some(LocalDate.of(2024, 2, 24))
+          )
         )
       )
     )
