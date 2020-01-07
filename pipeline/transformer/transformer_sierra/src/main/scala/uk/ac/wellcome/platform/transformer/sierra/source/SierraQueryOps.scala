@@ -35,7 +35,7 @@ trait SierraQueryOps {
       varfields
         .filter { _.fieldTag.exists(tag => tags.contains(tag)) }
         .sortBy { varfield =>
-          tags.indexOf(varfield.marcTag.get)
+          tags.indexOf(varfield.fieldTag.get)
         }
 
     def withFieldTag(tag: String): List[VarField] = withFieldTags(tag)
