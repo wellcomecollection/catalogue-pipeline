@@ -60,7 +60,7 @@ case class MetsData(
       } match {
         case Some(license) => Right(license)
         case None =>
-          Left(new Exception("Couldn't match $accesCondition to a license"))
+          Left(new Exception(s"Couldn't match $accessCondition to a license"))
       }
     }.sequence
   }
