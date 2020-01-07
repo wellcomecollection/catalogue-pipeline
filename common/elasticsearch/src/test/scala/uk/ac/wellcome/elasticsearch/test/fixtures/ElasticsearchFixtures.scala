@@ -2,6 +2,7 @@ package uk.ac.wellcome.elasticsearch.test.fixtures
 
 import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.requests.analysis.Analysis
 import com.sksamuel.elastic4s.requests.cluster.ClusterHealthResponse
 import com.sksamuel.elastic4s.requests.common.VersionType.ExternalGte
 import com.sksamuel.elastic4s.requests.get.GetResponse
@@ -56,9 +57,10 @@ trait ElasticsearchFixtures
     implicitly[Position])
 
   def withLocalWorksIndex[R](testWith: TestWith[Index, R]): R =
-    withLocalElasticsearchIndex[R](fields = WorksIndex.rootIndexFields) {
-      index =>
-        testWith(index)
+    withLocalElasticsearchIndex[R](
+      fields = WorksIndex.rootIndexFields,
+      WorksIndex.analysis) { index =>
+      testWith(index)
     }
 
   private val elasticsearchIndexCreator = new ElasticsearchIndexCreator(
@@ -67,10 +69,11 @@ trait ElasticsearchFixtures
 
   def withLocalElasticsearchIndex[R](
     fields: Seq[FieldDefinition],
+    analysis: Analysis,
     index: Index = createIndex): Fixture[Index, R] = fixture[Index, R](
     create = {
       elasticsearchIndexCreator
-        .create(index = index, fields = fields)
+        .create(index = index, fields = fields, analysis = analysis)
         .await
 
       // Elasticsearch is eventually consistent, so the future

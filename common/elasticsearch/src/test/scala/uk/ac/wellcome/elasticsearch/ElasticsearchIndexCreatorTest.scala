@@ -1,6 +1,7 @@
 package uk.ac.wellcome.elasticsearch
 
 import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.requests.analysis.Analysis
 import com.sksamuel.elastic4s.{RequestFailure, Response}
 import com.sksamuel.elastic4s.requests.indexes.IndexResponse
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
@@ -46,8 +47,10 @@ class ElasticsearchIndexCreatorTest
     booleanField("visible")
   )
 
+  val analysis = Analysis(List())
+
   it("creates an index into which doc of the expected type can be put") {
-    withLocalElasticsearchIndex(indexFields) { index =>
+    withLocalElasticsearchIndex(indexFields, analysis) { index =>
       val testObject = TestObject("id", "description", true)
       val testObjectJson = toJson(testObject).get
 
@@ -72,7 +75,7 @@ class ElasticsearchIndexCreatorTest
   }
 
   it("create an index where inserting a doc of an unexpected type fails") {
-    withLocalElasticsearchIndex(indexFields) { index =>
+    withLocalElasticsearchIndex(indexFields, analysis) { index =>
       val badTestObject = BadTestObject("id", 5)
       val badTestObjectJson = toJson(badTestObject).get
 
@@ -91,10 +94,13 @@ class ElasticsearchIndexCreatorTest
   }
 
   it("updates an already existing index with a compatible mapping") {
-    withLocalElasticsearchIndex(indexFields) { index =>
+    withLocalElasticsearchIndex(indexFields, analysis) { index =>
       val compatibleIndexFields = indexFields :+ intField("count")
 
-      withLocalElasticsearchIndex(compatibleIndexFields, index = index) { _ =>
+      withLocalElasticsearchIndex(
+        compatibleIndexFields,
+        index = index,
+        analysis = analysis) { _ =>
         val compatibleTestObject = CompatibleTestObject(
           id = "id",
           description = "description",

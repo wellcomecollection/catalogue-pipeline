@@ -2,6 +2,7 @@ package uk.ac.wellcome.elasticsearch
 
 import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.ElasticDsl.{createIndex, _}
+import com.sksamuel.elastic4s.requests.analysis.Analysis
 import com.sksamuel.elastic4s.requests.indexes.CreateIndexResponse
 import com.sksamuel.elastic4s.requests.indexes.PutMappingResponse
 import com.sksamuel.elastic4s.{ElasticClient, Response}
@@ -17,21 +18,27 @@ import scala.concurrent.{ExecutionContext, Future}
 class ElasticsearchIndexCreator(elasticClient: ElasticClient)(
   implicit ec: ExecutionContext)
     extends Logging {
-  def create(index: Index, fields: Seq[FieldDefinition]): Future[Unit] = {
+  def create(index: Index,
+             fields: Seq[FieldDefinition],
+             analysis: Analysis): Future[Unit] = {
     val mappingDefinition: MappingDefinition =
       properties(fields)
         .dynamic(DynamicMapping.Strict)
 
-    create(index = index, mappingDefinition = mappingDefinition)
+    create(
+      index = index,
+      mappingDefinition = mappingDefinition,
+      analysis = analysis)
   }
 
   private def create(index: Index,
-                     mappingDefinition: MappingDefinition): Future[Unit] =
+                     mappingDefinition: MappingDefinition,
+                     analysis: Analysis): Future[Unit] =
     elasticClient
       .execute {
         createIndex(index.name)
           .mapping { mappingDefinition }
-
+          .analysis(analysis)
           // Because we have a relatively small number of records (compared
           // to what Elasticsearch usually expects), we can get weird results
           // if our records are split across multiple shards.

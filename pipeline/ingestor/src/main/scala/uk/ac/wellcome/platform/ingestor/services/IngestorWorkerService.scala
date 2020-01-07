@@ -30,7 +30,8 @@ class IngestorWorkerService(
 
   private val indexCreated = indexCreator.create(
     index = ingestorConfig.index,
-    fields = WorksIndex.rootIndexFields
+    fields = WorksIndex.rootIndexFields,
+    analysis = WorksIndex.analysis
   )
 
   private def processMessages(bundles: List[Bundle]): FutureBundles =

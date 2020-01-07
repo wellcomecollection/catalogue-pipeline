@@ -384,6 +384,58 @@ class ElasticsearchServiceTest
         }
       }
     }
+
+    it("searches the identifiers case insensitively") {
+      withLocalWorksIndex { index =>
+        val workWithMatchingCanonicalId = createIdentifiedWorkWith(
+          canonicalId = "A1234567"
+        )
+
+        val workWithMatchingSourceIdentifier = createIdentifiedWorkWith(
+          canonicalId = "workWithMatchingSourceIdentifier",
+          sourceIdentifier = createSourceIdentifierWith(value = "B1234567")
+        )
+
+        val workWithMatchingOtherIdentifiers = createIdentifiedWorkWith(
+          canonicalId = "workWithMatchingOtherIdentifiers",
+          otherIdentifiers =
+            List(createSourceIdentifierWith(value = "C1234567"))
+        )
+
+        insertIntoElasticsearch(
+          index,
+          workWithMatchingCanonicalId,
+          workWithMatchingSourceIdentifier,
+          workWithMatchingOtherIdentifiers)
+
+        assertSearchResultsAreCorrect(
+          index = index,
+          queryOptions = createElasticsearchQueryOptionsWith(
+            searchQuery = Some(SearchQuery("a1234567"))),
+          expectedWorks = List(
+            workWithMatchingCanonicalId
+          )
+        )
+
+        assertSearchResultsAreCorrect(
+          index = index,
+          queryOptions = createElasticsearchQueryOptionsWith(
+            searchQuery = Some(SearchQuery("b1234567"))),
+          expectedWorks = List(
+            workWithMatchingSourceIdentifier
+          )
+        )
+
+        assertSearchResultsAreCorrect(
+          index = index,
+          queryOptions = createElasticsearchQueryOptionsWith(
+            searchQuery = Some(SearchQuery("c1234567"))),
+          expectedWorks = List(
+            workWithMatchingOtherIdentifiers
+          )
+        )
+      }
+    }
   }
 
   describe("findResultById") {

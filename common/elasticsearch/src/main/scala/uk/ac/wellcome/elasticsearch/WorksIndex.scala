@@ -1,9 +1,26 @@
 package uk.ac.wellcome.elasticsearch
 
 import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.requests.analysis.{Analysis, CustomNormalizer}
+import com.sksamuel.elastic4s.requests.analyzers.LowercaseTokenFilter
 import com.sksamuel.elastic4s.requests.mappings.{FieldDefinition, ObjectField}
 
 object WorksIndex {
+  val lowercaseNormalizer = CustomNormalizer(
+    "lowercase",
+    tokenFilters = List(LowercaseTokenFilter.name),
+    charFilters = List()
+  )
+
+  val value = keywordField("value")
+    .normalizer(lowercaseNormalizer.name)
+    .fields(keywordField("raw"))
+
+  val canonicalId =
+    keywordField("canonicalId")
+      .normalizer(lowercaseNormalizer.name)
+      .fields(keywordField("raw"))
+
   val label = textField("label").fields(keywordField("raw"))
   val license = objectField("license").fields(
     keywordField("id")
@@ -16,7 +33,7 @@ object WorksIndex {
       keywordField("id"),
       keywordField("ontologyType")
     ),
-    keywordField("value")
+    value
   )
 
   val sourceIdentifier = objectField("sourceIdentifier")
@@ -84,9 +101,9 @@ object WorksIndex {
 
   def identified(fieldName: String, fields: Seq[FieldDefinition]): ObjectField =
     objectField(fieldName).fields(
+      canonicalId,
       textField("type"),
       objectField("agent").fields(fields),
-      keywordField("canonicalId"),
       objectField("sourceIdentifier").fields(sourceIdentifierFields),
       objectField("otherIdentifiers").fields(sourceIdentifierFields)
     )
@@ -113,7 +130,7 @@ object WorksIndex {
   def period(fieldName: String) = labelledTextField(fieldName)
 
   def items(fieldName: String) = objectField(fieldName).fields(
-    keywordField("canonicalId"),
+    canonicalId,
     sourceIdentifier,
     otherIdentifiers,
     keywordField("type"),
@@ -182,13 +199,16 @@ object WorksIndex {
 
   val rootIndexFields: Seq[FieldDefinition with Product with Serializable] =
     Seq(
-      keywordField("canonicalId"),
+      canonicalId,
       keywordField("ontologyType"),
       intField("version"),
       sourceIdentifier,
       objectField("redirect")
-        .fields(sourceIdentifier, keywordField("canonicalId")),
+        .fields(sourceIdentifier, canonicalId),
       keywordField("type"),
       data
     )
+
+  val analysis =
+    Analysis(analyzers = List(), normalizers = List(lowercaseNormalizer))
 }
