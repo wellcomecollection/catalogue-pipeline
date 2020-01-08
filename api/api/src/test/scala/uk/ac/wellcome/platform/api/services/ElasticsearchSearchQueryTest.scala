@@ -90,7 +90,7 @@ class ElasticsearchQueryTest
       }
     }
 
-    describe("InEnglishWithContributors") {
+    describe("FixedFields") {
       it("returns all results in a tiered order") {
         withLocalWorksIndex { index =>
           // Longer text used to ensure signal in TF/IDF
@@ -168,9 +168,7 @@ class ElasticsearchQueryTest
               index = index,
               queryOptions = createElasticsearchQueryOptionsWith(
                 searchQuery = Some(
-                  SearchQuery(
-                    "vlad the impaler",
-                    SearchQueryType.InEnglishWithContributors)))
+                  SearchQuery("vlad the impaler", SearchQueryType.FixedFields)))
             )
 
           results should contain theSameElementsAs List(works.head)
@@ -198,11 +196,8 @@ class ElasticsearchQueryTest
           val results =
             searchResults(
               index = index,
-              queryOptions = createElasticsearchQueryOptionsWith(
-                searchQuery = Some(
-                  SearchQuery(
-                    "Alice Stewart",
-                    SearchQueryType.InEnglishWithContributors)))
+              queryOptions = createElasticsearchQueryOptionsWith(searchQuery =
+                Some(SearchQuery("Alice Stewart", SearchQueryType.FixedFields)))
             )
 
           results.head should be(workWithExactMatchingContributors)

@@ -15,15 +15,15 @@ import com.sksamuel.elastic4s.requests.searches.queries.{
 }
 import uk.ac.wellcome.platform.api.models.SearchQuery
 import uk.ac.wellcome.platform.api.models.SearchQueryType.{
-  InEnglishWithContributors,
+  FixedFields,
   ScoringTiers
 }
 
 case class ElasticsearchQueryBuilder(searchQuery: SearchQuery) {
   lazy val query: BoolQuery = searchQuery.queryType match {
     case ScoringTiers => ScoringTiersQuery(searchQuery.query).elasticQuery
-    case InEnglishWithContributors =>
-      InEnglishWithContributorsQuery(searchQuery.query).elasticQuery
+    case FixedFields =>
+      FixedFieldsQuery(searchQuery.query).elasticQuery
   }
 }
 
@@ -88,7 +88,7 @@ sealed trait ElasticsearchQuery {
 final case class TitleQuery(q: String) extends ElasticsearchQuery {
   lazy val elasticQuery =
     MatchQuery(
-      field = "data.title.english",
+      field = "title.english",
       value = q,
       operator = Some(Operator.And))
 }
@@ -96,7 +96,7 @@ final case class TitleQuery(q: String) extends ElasticsearchQuery {
 final case class GenreQuery(q: String) extends ElasticsearchQuery {
   lazy val elasticQuery =
     MatchQuery(
-      field = "data.genres.concepts.agent.label",
+      field = "genres.concepts.agent.label",
       value = q,
       operator = Some(Operator.And))
 }
@@ -105,6 +105,30 @@ final case class SubjectQuery(q: String) extends ElasticsearchQuery {
   lazy val elasticQuery =
     MatchQuery(
       field = "data.subjects.agent.concepts.agent.label",
+      value = q,
+      operator = Some(Operator.And))
+}
+
+final case class FixedTitleQuery(q: String) extends ElasticsearchQuery {
+  lazy val elasticQuery =
+    MatchQuery(
+      field = "data.title.english",
+      value = q,
+      operator = Some(Operator.And))
+}
+
+final case class FixedGenreQuery(q: String) extends ElasticsearchQuery {
+  lazy val elasticQuery =
+    MatchQuery(
+      field = "data.genres.concepts.agent.label",
+      value = q,
+      operator = Some(Operator.And))
+}
+
+final case class FixedSubjectQuery(q: String) extends ElasticsearchQuery {
+  lazy val elasticQuery =
+    MatchQuery(
+      field = "subjects.agent.concepts.agent.label",
       value = q,
       operator = Some(Operator.And))
 }
@@ -143,8 +167,7 @@ final case class ScoringTiersQuery(q: String) extends ElasticsearchQuery {
   )
 }
 
-final case class InEnglishWithContributorsQuery(q: String)
-    extends ElasticsearchQuery {
+final case class FixedFieldsQuery(q: String) extends ElasticsearchQuery {
   import QueryDefaults._
 
   val fields = englishBoostedFields map {
@@ -161,12 +184,16 @@ final case class InEnglishWithContributorsQuery(q: String)
 
   lazy val elasticQuery = bool(
     shouldQueries = Seq(
-      ConstantScore(query = GenreQuery(q).elasticQuery, boost = Some(2000)),
-      ConstantScore(query = SubjectQuery(q).elasticQuery, boost = Some(2000)),
+      ConstantScore(
+        query = FixedGenreQuery(q).elasticQuery,
+        boost = Some(2000)),
+      ConstantScore(
+        query = FixedSubjectQuery(q).elasticQuery,
+        boost = Some(2000)),
       ConstantScore(
         query = ContributorQuery(q).elasticQuery,
         boost = Some(2000)),
-      ConstantScore(query = TitleQuery(q).elasticQuery, boost = Some(1000))
+      ConstantScore(query = FixedTitleQuery(q).elasticQuery, boost = Some(1000))
     ),
     mustQueries = Seq(baseQuery),
     notQueries = Seq()
