@@ -104,7 +104,7 @@ final case class GenreQuery(q: String) extends ElasticsearchQuery {
 final case class SubjectQuery(q: String) extends ElasticsearchQuery {
   lazy val elasticQuery =
     MatchQuery(
-      field = "data.subjects.agent.concepts.agent.label",
+      field = "subjects.agent.concepts.agent.label",
       value = q,
       operator = Some(Operator.And))
 }
@@ -128,7 +128,7 @@ final case class FixedGenreQuery(q: String) extends ElasticsearchQuery {
 final case class FixedSubjectQuery(q: String) extends ElasticsearchQuery {
   lazy val elasticQuery =
     MatchQuery(
-      field = "subjects.agent.concepts.agent.label",
+      field = "data.subjects.agent.concepts.agent.label",
       value = q,
       operator = Some(Operator.And))
 }
