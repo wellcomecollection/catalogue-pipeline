@@ -5,6 +5,7 @@ import uk.ac.wellcome.models.work.generators.{
   SubjectGenerators
 }
 import uk.ac.wellcome.models.work.internal._
+import uk.ac.wellcome.platform.api.models.SearchQueryType
 
 class ApiV2WorksIncludesTest
     extends ApiV2WorksTestBase
@@ -475,6 +476,67 @@ class ApiV2WorksIncludesTest
                    "type": "Note"
                  }
               ]
+            }
+          """
+        }
+    }
+  }
+
+  it(
+    "includes empty search parameters on a list endpoint with no query if we pass ?include=parameters") {
+    withApi {
+      case (indexV2, routes) =>
+        val work = createIdentifiedWorkWith()
+
+        insertIntoElasticsearch(indexV2, work)
+
+        assertJsonResponse(routes, s"/$apiPrefix/works?include=parameters") {
+          Status.OK -> s"""
+            {
+              ${resultList(apiPrefix)},
+              "results": [
+               {
+                 "type": "Work",
+                 "id": "${work.canonicalId}",
+                 "title": "${work.data.title.get}",
+                 "alternativeTitles": []
+               }
+              ],
+              "parameters" : {
+                "type" : "SearchParameters"
+              }
+            }
+          """
+        }
+    }
+  }
+
+  it(
+    "includes queryType on search parameters on a list endpoint with a query if we pass ?include=parameters&query=catnip") {
+    withApi {
+      case (indexV2, routes) =>
+        val work = createIdentifiedWorkWith(canonicalId = "catnip")
+
+        insertIntoElasticsearch(indexV2, work)
+
+        assertJsonResponse(
+          routes,
+          s"/$apiPrefix/works?include=parameters&query=catnip") {
+          Status.OK -> s"""
+            {
+              ${resultList(apiPrefix)},
+              "results": [
+               {
+                 "type": "Work",
+                 "id": "${work.canonicalId}",
+                 "title": "${work.data.title.get}",
+                 "alternativeTitles": []
+               }
+              ],
+              "parameters" : {
+                "type" : "SearchParameters",
+                "queryType": "${SearchQueryType.default.name}"
+              }
             }
           """
         }

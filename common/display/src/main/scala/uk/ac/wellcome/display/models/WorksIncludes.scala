@@ -10,6 +10,7 @@ object WorkInclude {
   case object Contributors extends WorkInclude
   case object Production extends WorkInclude
   case object Notes extends WorkInclude
+  case object Parameters extends WorkInclude
 }
 
 trait WorksIncludes
@@ -22,6 +23,7 @@ case class V2WorksIncludes(includes: List[WorkInclude]) extends WorksIncludes {
   def contributors = includes.contains(WorkInclude.Contributors)
   def production = includes.contains(WorkInclude.Production)
   def notes = includes.contains(WorkInclude.Notes)
+  def parameters = includes.contains(WorkInclude.Parameters)
 }
 
 object V2WorksIncludes {
@@ -36,6 +38,7 @@ object V2WorksIncludes {
     contributors: Boolean = false,
     production: Boolean = false,
     notes: Boolean = false,
+    parameters: Boolean = false,
   ): V2WorksIncludes = V2WorksIncludes(
     List(
       if (identifiers) Some(Identifiers) else None,
@@ -45,10 +48,11 @@ object V2WorksIncludes {
       if (contributors) Some(Contributors) else None,
       if (production) Some(Production) else None,
       if (notes) Some(Notes) else None,
+      if (parameters) Some(Parameters) else None,
     ).flatten
   )
 
   def includeAll(): V2WorksIncludes = V2WorksIncludes(
-    true, true, true, true, true, true, true
+    true, true, true, true, true, true, true, true
   )
 }

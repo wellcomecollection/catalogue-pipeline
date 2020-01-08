@@ -49,7 +49,8 @@ case class MultipleWorksResponse(
   results: List[DisplayWorkV2],
   prevPage: Option[String] = None,
   nextPage: Option[String] = None,
-  aggregations: Option[DisplayAggregations] = None
+  aggregations: Option[DisplayAggregations] = None,
+  parameters: Option[DisplaySearchParameters] = None
 )
 
 object MultipleWorksResponse {
@@ -71,13 +72,16 @@ object MultipleWorksResponse {
       ),
       currentPage = searchOptions.pageNumber,
       requestUri = requestUri,
-      contextUri = contextUri
+      contextUri = contextUri,
+      searchParameters = Some(DisplaySearchParameters(searchOptions))
     )
 
-  def apply(resultList: DisplayResultList[DisplayWorkV2],
-            currentPage: Int,
-            requestUri: Uri,
-            contextUri: String): MultipleWorksResponse =
+  def apply(
+    resultList: DisplayResultList[DisplayWorkV2],
+    currentPage: Int,
+    requestUri: Uri,
+    contextUri: String,
+    searchParameters: Option[DisplaySearchParameters]): MultipleWorksResponse =
     MultipleWorksResponse(
       context = contextUri,
       ontologyType = resultList.ontologyType,
@@ -88,6 +92,7 @@ object MultipleWorksResponse {
       prevPage = pageLink(currentPage - 1, resultList.totalPages, requestUri),
       nextPage = pageLink(currentPage + 1, resultList.totalPages, requestUri),
       aggregations = resultList.aggregations,
+      parameters = searchParameters
     )
 
   private def pageLink(page: Int,
