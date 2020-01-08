@@ -88,7 +88,7 @@ sealed trait ElasticsearchQuery {
 final case class TitleQuery(q: String) extends ElasticsearchQuery {
   lazy val elasticQuery =
     MatchQuery(
-      field = "title.english",
+      field = "data.title.english",
       value = q,
       operator = Some(Operator.And))
 }
@@ -96,7 +96,7 @@ final case class TitleQuery(q: String) extends ElasticsearchQuery {
 final case class GenreQuery(q: String) extends ElasticsearchQuery {
   lazy val elasticQuery =
     MatchQuery(
-      field = "genres.concepts.agent.label",
+      field = "data.genres.concepts.agent.label",
       value = q,
       operator = Some(Operator.And))
 }
@@ -104,7 +104,7 @@ final case class GenreQuery(q: String) extends ElasticsearchQuery {
 final case class SubjectQuery(q: String) extends ElasticsearchQuery {
   lazy val elasticQuery =
     MatchQuery(
-      field = "subjects.agent.concepts.agent.label",
+      field = "data.subjects.agent.concepts.agent.label",
       value = q,
       operator = Some(Operator.And))
 }
