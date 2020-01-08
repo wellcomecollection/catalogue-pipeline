@@ -49,10 +49,10 @@ module "catalogue_pipeline_20191115" {
   read_storage_s3_role_arn = "${aws_iam_role.read_storage_s3.arn}"
 }
 
-module "catalogue_pipeline_20191219" {
+module "catalogue_pipeline_20200107" {
   source = "./stack"
 
-  namespace = "catalogue-20191219"
+  namespace = "catalogue-20200107"
 
   release_label = "latest"
 
@@ -71,23 +71,25 @@ module "catalogue_pipeline_20191219" {
 
   sierra_adapter_topic_names = [
     "${local.sierra_reindexer_topic_name}",
-    "${local.mets_reindexer_topic_name}",
-    #"${local.sierra_merged_bibs_topic_name}",
+    "${local.sierra_merged_bibs_topic_name}",
 
-    #"${local.sierra_merged_items_topic_name}",
+    "${local.sierra_merged_items_topic_name}",
   ]
-  sierra_adapter_topic_count = "1"
+  sierra_adapter_topic_count = "3"
   miro_adapter_topic_names = [
     "${local.miro_reindexer_topic_name}",
-    #"${local.miro_updates_topic_name}",
+    "${local.miro_updates_topic_name}",
   ]
-  miro_adapter_topic_count = "1"
+  miro_adapter_topic_count = "2"
 
-  mets_adapter_topic_count = 1
-  mets_adapter_topic_names = ["${local.mets_adapter_topic_name}"]
+  mets_adapter_topic_count = 2
+  mets_adapter_topic_names = [
+    "${local.mets_adapter_topic_name}",
+    "${local.mets_reindexer_topic_name}"
+  ]
 
   # Elasticsearch
-  es_works_index = "v2-20191219"
+  es_works_index = "v2-20200107"
   # RDS
   rds_ids_access_security_group_id = "${local.rds_access_security_group_id}"
   # Adapter VHS

@@ -13,6 +13,7 @@ locals {
   catalogue_miro_hybrid_records_topic_arn           = "${data.terraform_remote_state.shared_infra.catalogue_miro_reindex_topic_arn}"
   catalogue_sierra_hybrid_records_topic_arn         = "${data.terraform_remote_state.shared_infra.catalogue_sierra_reindex_topic_arn}"
   catalogue_sierra_items_hybrid_records_topic_arn   = "${data.terraform_remote_state.shared_infra.catalogue_sierra_items_reindex_topic_arn}"
+  mets_reindexer_topic_name                          = "${module.mets_reindexer_topic.name}"
   mets_reindexer_topic_arn                          = "${module.mets_reindexer_topic.arn}"
 
   vpc_id          = "${data.terraform_remote_state.shared_infra.catalogue_vpc_delta_id}"

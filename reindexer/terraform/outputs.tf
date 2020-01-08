@@ -7,6 +7,6 @@ output "topic_arn" {
   value = "${module.reindex_worker.topic_arn}"
 }
 
-output "mets_reindexer_topic_arn" {
-  value = "${local.mets_reindexer_topic_arn}"
+output "mets_reindexer_topic_name" {
+  value = "${local.mets_reindexer_topic_name}"
 }

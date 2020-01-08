@@ -22,7 +22,7 @@ locals {
   # Reindexer topics
   miro_reindexer_topic_name   = "${data.terraform_remote_state.shared_infra.catalogue_miro_reindex_topic_name}"
   sierra_reindexer_topic_name = "${data.terraform_remote_state.shared_infra.catalogue_sierra_reindex_topic_name}"
-  mets_reindexer_topic_name   = "${data.terraform_remote_state.reindexer.mets_reindexer_topic_arn}"
+  mets_reindexer_topic_name   = "${data.terraform_remote_state.reindexer.mets_reindexer_topic_name}"
 
   # Infra stuff
   infra_bucket = "${data.terraform_remote_state.shared_infra.infra_bucket}"
