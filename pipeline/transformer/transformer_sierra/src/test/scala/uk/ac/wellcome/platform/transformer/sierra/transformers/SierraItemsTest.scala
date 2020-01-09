@@ -75,7 +75,7 @@ class SierraItemsTest extends FunSpec with Matchers with SierraDataGenerators {
 
     transformedItem
       .asInstanceOf[Identifiable[Item]]
-      .agent
+      .thing
       .title shouldBe Some("Envelope")
   }
 
@@ -140,7 +140,7 @@ class SierraItemsTest extends FunSpec with Matchers with SierraDataGenerators {
 
     val expectedItems = List(
       Unidentifiable(
-        agent = Item(locations = List(DigitalLocation(
+        thing = Item(locations = List(DigitalLocation(
           url =
             s"https://wellcomelibrary.org/iiif/${bibId.withCheckDigit}/manifest",
           license = None,
@@ -161,7 +161,7 @@ class SierraItemsTest extends FunSpec with Matchers with SierraDataGenerators {
     val itemDataMap = Map(createSierraItemNumber -> itemData)
 
     val item = getTransformedItems(itemDataMap = itemDataMap).head
-    item.agent.locations shouldBe List(
+    item.thing.locations shouldBe List(
       PhysicalLocation(
         locationType = LocationType(sierraLocation.code),
         label = sierraLocation.name
@@ -195,7 +195,7 @@ class SierraItemsTest extends FunSpec with Matchers with SierraDataGenerators {
       itemDataMap = itemDataMap)
 
     result.size shouldBe 1
-    result.head.agent.locations shouldBe List(
+    result.head.thing.locations shouldBe List(
       PhysicalLocation(
         locationType = LocationType(sierraLocation.code),
         label = sierraLocation.name

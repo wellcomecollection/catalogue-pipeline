@@ -88,7 +88,7 @@ trait SierraAgents extends SierraQueryOps {
           ontologyType = ontologyType
         )
         Identifiable(
-          agent = agent,
+          thing = agent,
           sourceIdentifier = sourceIdentifier
         )
       }

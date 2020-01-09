@@ -20,7 +20,7 @@ class DisplayGenreV2SerialisationTest
       sourceIdentifier = createSourceIdentifierWith(
         ontologyType = "Period"
       ),
-      agent = Period("periodLabel")
+      thing = Period("periodLabel")
     )
 
     val genre = Genre(
@@ -35,18 +35,18 @@ class DisplayGenreV2SerialisationTest
          |    "label" : "${genre.label}",
          |    "concepts" : [
          |      {
-         |        "label" : "${concept0.agent.label}",
-         |        "type" : "${ontologyType(concept0.agent)}"
+         |        "label" : "${concept0.thing.label}",
+         |        "type" : "${ontologyType(concept0.thing)}"
          |      },
          |      {
-         |        "label" : "${concept1.agent.label}",
-         |        "type" : "${ontologyType(concept1.agent)}"
+         |        "label" : "${concept1.thing.label}",
+         |        "type" : "${ontologyType(concept1.thing)}"
          |      },
          |      {
          |        "id": "${concept2.canonicalId}",
          |        "identifiers": [${identifier(concept2.identifiers(0))}],
-         |        "label" : "${concept2.agent.label}",
-         |        "type" : "${ontologyType(concept2.agent)}"
+         |        "label" : "${concept2.thing.label}",
+         |        "type" : "${ontologyType(concept2.thing)}"
          |      }
          |    ],
          |    "type" : "${genre.ontologyType}"

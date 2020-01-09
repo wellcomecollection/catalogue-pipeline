@@ -61,8 +61,8 @@ trait SierraPhysicalDigitalWorkPairMerger
       case List(physicalItem: Identifiable[Item]) =>
         List(
           physicalItem.copy(
-            agent = physicalItem.agent.copy(
-              locations = physicalItem.agent.locations ++ digitalItem.agent.locations
+            thing = physicalItem.thing.copy(
+              locations = physicalItem.thing.locations ++ digitalItem.thing.locations
             )
           )
         )

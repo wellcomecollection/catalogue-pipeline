@@ -25,7 +25,7 @@ class DisplayAbstractAgentV2Test
       canonicalId = canonicalId,
       sourceIdentifier = sourceIdentifier,
       otherIdentifiers = otherIdentifiers,
-      agent = agent
+      thing = agent
     )
 
     val expectedUnidentifiedAgent: DisplayAgentV2 = DisplayAgentV2(
@@ -85,7 +85,7 @@ class DisplayAbstractAgentV2Test
       canonicalId = canonicalId,
       sourceIdentifier = sourceIdentifier,
       otherIdentifiers = otherIdentifiers,
-      agent = person
+      thing = person
     )
 
     val expectedUnidentifiedPerson: DisplayPersonV2 = DisplayPersonV2(
@@ -144,7 +144,7 @@ class DisplayAbstractAgentV2Test
       canonicalId = canonicalId,
       sourceIdentifier = sourceIdentifier,
       otherIdentifiers = otherIdentifiers,
-      agent = organisation
+      thing = organisation
     )
 
     val expectedUnidentifiedOrganisation: DisplayOrganisationV2 =
@@ -196,7 +196,7 @@ class DisplayAbstractAgentV2Test
       canonicalId = canonicalId,
       sourceIdentifier = sourceIdentifier,
       otherIdentifiers = otherIdentifiers,
-      agent = Meeting(label = label)
+      thing = Meeting(label = label)
     )
 
     it(

@@ -51,7 +51,7 @@ class DisplayConceptTest
       concept = Identified(
         canonicalId = "dj4kndg5",
         sourceIdentifier = sourceIdentifier,
-        agent = Concept(label = "darkness")
+        thing = Concept(label = "darkness")
       ),
       expectedDisplayConcept = DisplayConcept(
         id = Some("dj4kndg5"),
@@ -70,7 +70,7 @@ class DisplayConceptTest
       concept = Identified(
         canonicalId = "nrzbm3ah",
         sourceIdentifier = sourceIdentifier,
-        agent = Period(label = "never")
+        thing = Period(label = "never")
       ),
       expectedDisplayConcept = DisplayPeriod(
         id = Some("nrzbm3ah"),
@@ -89,7 +89,7 @@ class DisplayConceptTest
       concept = Identified(
         canonicalId = "axtswq4z",
         sourceIdentifier = sourceIdentifier,
-        agent = Place(label = "anywhere")
+        thing = Place(label = "anywhere")
       ),
       expectedDisplayConcept = DisplayPlace(
         id = Some("axtswq4z"),

@@ -107,7 +107,7 @@ class DisplayWorkV2SerialisationTest
       | "items": [
       |   {
       |     "id": "${item.canonicalId}",
-      |     "type": "${item.agent.ontologyType}",
+      |     "type": "${item.thing.ontologyType}",
       |     "locations": [
       |       {
       |         "type": "${location.ontologyType}",

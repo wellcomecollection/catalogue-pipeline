@@ -22,10 +22,10 @@ class SierraMetsWorkPairMergerTest
     val physicalItem: Identifiable[Item] =
       sierraWork.data.items.head.asInstanceOf[Identifiable[Item]]
 
-    val metsLocation = metsWork.data.items.head.agent.locations.head
+    val metsLocation = metsWork.data.items.head.thing.locations.head
     val expectedItems = List(
-      physicalItem.copy(agent = physicalItem.agent.copy(
-        locations = physicalItem.agent.locations :+ metsLocation)))
+      physicalItem.copy(thing = physicalItem.thing.copy(
+        locations = physicalItem.thing.locations :+ metsLocation)))
 
     inside(result) {
       case Some(
@@ -54,7 +54,7 @@ class SierraMetsWorkPairMergerTest
     val sierraItem = createIdentifiableItemWith(
       locations = List(physicalLocation, digitalLocationNoLicense))
 
-    val expectedItems = List(sierraItem.withAgent(i =>
+    val expectedItems = List(sierraItem.withThing(i =>
       i.copy(locations = List(physicalLocation, digitalLocationWithLicense))))
 
     val metsWork = createUnidentifiedInvisibleWorkWith(
@@ -93,7 +93,7 @@ class SierraMetsWorkPairMergerTest
       locations = List(physicalLocation, sierraDigitalLocation))
 
     val expectedItems = List(
-      sierraItem.withAgent(i =>
+      sierraItem.withThing(i =>
         i.copy(locations =
           List(physicalLocation, sierraDigitalLocation, metsDigitalLocation))))
 
@@ -127,10 +127,10 @@ class SierraMetsWorkPairMergerTest
     val digitalItem =
       sierraWork.data.items.head.asInstanceOf[Unidentifiable[Item]]
 
-    val metsLocation = metsWork.data.items.head.agent.locations.head
+    val metsLocation = metsWork.data.items.head.thing.locations.head
     val expectedItems = List(
-      digitalItem.copy(agent = digitalItem.agent.copy(
-        locations = digitalItem.agent.locations :+ metsLocation)))
+      digitalItem.copy(thing = digitalItem.thing.copy(
+        locations = digitalItem.thing.locations :+ metsLocation)))
 
     inside(result) {
       case Some(

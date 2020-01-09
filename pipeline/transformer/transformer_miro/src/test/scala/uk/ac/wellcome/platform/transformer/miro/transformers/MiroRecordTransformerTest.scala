@@ -266,7 +266,7 @@ class MiroRecordTransformerTest
       credit = Some("Ezra Feilden"),
       locationType = LocationType("iiif-image")
     )
-    work.data.items.head.agent.locations shouldBe List(expectedDigitalLocation)
+    work.data.items.head.thing.locations shouldBe List(expectedDigitalLocation)
   }
 
   it("extracts both identifiable and unidentifiable items") {

@@ -66,7 +66,7 @@ class DisplayAbstractConceptSerialisationTest
       sourceIdentifier = createSourceIdentifierWith(
         ontologyType = "Concept"
       ),
-      agent = Concept("conceptLabel")
+      thing = Concept("conceptLabel")
     )
 
     assertObjectMapsToJson(
@@ -75,7 +75,7 @@ class DisplayAbstractConceptSerialisationTest
          |  {
          |    "id": "${concept.canonicalId}",
          |    "identifiers": [${identifier(concept.identifiers(0))}],
-         |    "label" : "${concept.agent.label}",
+         |    "label" : "${concept.thing.label}",
          |    "type"  : "Concept"
          |  }
           """.stripMargin

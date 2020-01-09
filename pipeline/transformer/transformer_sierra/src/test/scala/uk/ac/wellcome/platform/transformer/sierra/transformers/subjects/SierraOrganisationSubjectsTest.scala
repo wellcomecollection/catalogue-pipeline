@@ -35,7 +35,7 @@ class SierraOrganisationSubjectsTest
       val subjects = getOrganisationSubjects(bibData)
       subjects should have size 1
 
-      subjects.head.agent.label shouldBe "United States. Supreme Court, Washington, DC. September 29, 2005, pictured."
+      subjects.head.thing.label shouldBe "United States. Supreme Court, Washington, DC. September 29, 2005, pictured."
     }
 
     it("uses repeated subfields for the label if necessary") {
@@ -53,7 +53,7 @@ class SierraOrganisationSubjectsTest
       val subjects = getOrganisationSubjects(bibData)
       subjects should have size 1
 
-      subjects.head.agent.label shouldBe "United States. Army. Cavalry, 7th. Company E, depicted."
+      subjects.head.thing.label shouldBe "United States. Army. Cavalry, 7th. Company E, depicted."
     }
   }
 
@@ -66,7 +66,7 @@ class SierraOrganisationSubjectsTest
       )
 
       val subjects = getOrganisationSubjects(bibData)
-      val concepts = subjects.head.agent.concepts
+      val concepts = subjects.head.thing.concepts
       concepts should have size 1
 
       val maybeDisplayableOrganisation = concepts.head
@@ -84,8 +84,8 @@ class SierraOrganisationSubjectsTest
       )
 
       val subjects = getOrganisationSubjects(bibData)
-      val concepts = subjects.head.agent.concepts
-      val organisation = concepts.head.agent
+      val concepts = subjects.head.thing.concepts
+      val organisation = concepts.head.thing
       organisation.label shouldBe "Wellcome Trust. Facilities, Health & Safety"
     }
 
@@ -147,7 +147,7 @@ class SierraOrganisationSubjectsTest
       )
 
       val subjects = getOrganisationSubjects(bibData)
-      val concepts = subjects.head.agent.concepts
+      val concepts = subjects.head.thing.concepts
       val maybeDisplayableOrganisation = concepts.head
       maybeDisplayableOrganisation shouldBe a[Unidentifiable[_]]
     }
@@ -162,7 +162,7 @@ class SierraOrganisationSubjectsTest
       )
 
       val subjects = getOrganisationSubjects(bibData)
-      val concepts = subjects.head.agent.concepts
+      val concepts = subjects.head.thing.concepts
       val maybeDisplayableOrganisation = concepts.head
       maybeDisplayableOrganisation shouldBe a[Unidentifiable[_]]
     }

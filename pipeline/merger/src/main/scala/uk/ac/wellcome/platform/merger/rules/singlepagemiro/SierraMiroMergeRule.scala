@@ -77,9 +77,9 @@ object SierraMiroMergeRule
     // after it came from Sierra.  We may remove the iiif-image later
     // (strictly speaking the -presentation replaces it), but we leave
     // it for now, so the website can still use it.
-    val locations = sierraItem.agent.locations ++ miroItem.agent.locations
+    val locations = sierraItem.thing.locations ++ miroItem.thing.locations
 
-    val agent: Item = sierraItem.agent.copy(
+    val agent: Item = sierraItem.thing.copy(
       locations = locations
     )
     List(copyItem(sierraItem, agent))
@@ -109,8 +109,8 @@ object SierraMiroMergeRule
   private def copyItem(item: MaybeDisplayable[Item], agent: Item) = {
     item match {
       case unidentifiable: Unidentifiable[_] =>
-        unidentifiable.copy(agent = agent)
-      case identifiable: Identifiable[_] => identifiable.copy(agent = agent)
+        unidentifiable.copy(thing = agent)
+      case identifiable: Identifiable[_] => identifiable.copy(thing = agent)
     }
   }
 }

@@ -75,15 +75,15 @@ class SierraPhysicalDigitalWorkPairMergerTest
 
   private def expectedMergedWork(physicalWork: UnidentifiedWork,
                                  digitalWork: UnidentifiedWork) = {
-    val sierraPhysicalAgent = physicalWork.data.items.head.agent
-    val sierraDigitalAgent = digitalWork.data.items.head.agent
+    val sierraPhysicalAgent = physicalWork.data.items.head.thing
+    val sierraDigitalAgent = digitalWork.data.items.head.thing
 
     val expectedLocations = sierraPhysicalAgent.locations ++ sierraDigitalAgent.locations
 
     val expectedItem = physicalWork.data.items.head
       .asInstanceOf[Identifiable[Item]]
       .copy(
-        agent = sierraPhysicalAgent.copy(
+        thing = sierraPhysicalAgent.copy(
           locations = expectedLocations
         )
       )

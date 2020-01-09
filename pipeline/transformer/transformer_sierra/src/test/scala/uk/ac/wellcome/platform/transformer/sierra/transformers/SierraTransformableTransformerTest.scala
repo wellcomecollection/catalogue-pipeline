@@ -132,7 +132,7 @@ class SierraTransformableTransformerTest
     unidentifiedWork.data.items.head shouldBe Identifiable(
       sourceIdentifier = expectedSourceIdentifier,
       otherIdentifiers = expectedOtherIdentifiers,
-      agent =
+      thing =
         Item(locations = List(PhysicalLocation(locationType, locationLabel)))
     )
   }
@@ -176,7 +176,7 @@ class SierraTransformableTransformerTest
     val unidentifiedWork =
       transformToWork(transformable).asInstanceOf[UnidentifiedWork]
 
-    unidentifiedWork.data.items.head.agent.title shouldBe Some("Envelope")
+    unidentifiedWork.data.items.head.thing.title shouldBe Some("Envelope")
   }
 
   it("returns an InvisibleWork if there isn't any bib data") {

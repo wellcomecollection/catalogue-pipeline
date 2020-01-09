@@ -41,15 +41,15 @@ object DisplayItemV2 {
             if (includesIdentifiers)
               Some(identifiedItem.identifiers.map { DisplayIdentifierV2(_) })
             else None,
-          title = identifiedItem.agent.title,
-          locations = displayLocations(identifiedItem.agent)
+          title = identifiedItem.thing.title,
+          locations = displayLocations(identifiedItem.thing)
         )
       case unidentifiableItem: Unidentifiable[Item] =>
         DisplayItemV2(
           id = None,
           identifiers = None,
-          title = unidentifiableItem.agent.title,
-          locations = displayLocations(unidentifiableItem.agent)
+          title = unidentifiableItem.thing.title,
+          locations = displayLocations(unidentifiableItem.thing)
         )
     }
 

@@ -290,7 +290,7 @@ class SierraPersonSubjectsTest
     val subject = actualSubjects.head
 
     it("in the concepts") {
-      subject.agent.concepts shouldBe List(
+      subject.thing.concepts shouldBe List(
         Unidentifiable(Person("Shakespeare, William,")),
         Unidentifiable(Concept("Characters")),
         Unidentifiable(Concept("Hamlet."))
@@ -298,7 +298,7 @@ class SierraPersonSubjectsTest
     }
 
     it("in the label") {
-      subject.agent.label shouldBe "Shakespeare, William, Characters Hamlet."
+      subject.thing.label shouldBe "Shakespeare, William, Characters Hamlet."
     }
   }
 
@@ -322,13 +322,13 @@ class SierraPersonSubjectsTest
     val subject = actualSubjects.head
 
     it("in the concepts") {
-      subject.agent.concepts shouldBe List(
+      subject.thing.concepts shouldBe List(
         Unidentifiable(Person("Aristophanes. Birds.")),
       )
     }
 
     it("in the label") {
-      subject.agent.label shouldBe "Aristophanes. Birds."
+      subject.thing.label shouldBe "Aristophanes. Birds."
     }
   }
 }

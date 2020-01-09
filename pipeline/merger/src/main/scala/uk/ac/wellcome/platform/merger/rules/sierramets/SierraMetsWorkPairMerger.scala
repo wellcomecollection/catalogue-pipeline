@@ -43,7 +43,7 @@ trait SierraMetsWorkPairMerger extends WorkPairMerger {
 
   private def shouldIgnoreItem(item: MaybeDisplayable[Item],
                                metsLocation: DigitalLocation) = {
-    item.agent.locations match {
+    item.thing.locations match {
       case List(location) => shouldIgnoreLocation(location, metsLocation.url)
       case _              => false
     }
@@ -68,7 +68,7 @@ trait SierraMetsWorkPairMerger extends WorkPairMerger {
 
   private def mergeLocations(sierraItem: MaybeDisplayable[Item],
                              metsLocation: DigitalLocation) =
-    sierraItem.withAgent { item =>
+    sierraItem.withThing { item =>
       item.copy(
         locations =
           item.locations.filterNot(shouldIgnoreLocation(_, metsLocation.url))

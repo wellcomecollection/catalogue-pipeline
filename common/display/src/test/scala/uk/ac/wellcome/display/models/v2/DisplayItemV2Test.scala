@@ -15,7 +15,7 @@ class DisplayItemV2Test extends FunSpec with Matchers with ItemsGenerators {
 
     displayItemV2.id shouldBe Some(item.canonicalId)
     displayItemV2.locations shouldBe List(
-      DisplayLocationV2(item.agent.locations.head))
+      DisplayLocationV2(item.thing.locations.head))
     displayItemV2.identifiers shouldBe Some(
       List(DisplayIdentifierV2(item.sourceIdentifier)))
     displayItemV2.ontologyType shouldBe "Item"
@@ -31,7 +31,7 @@ class DisplayItemV2Test extends FunSpec with Matchers with ItemsGenerators {
     displayItemV2 shouldBe DisplayItemV2(
       id = None,
       identifiers = None,
-      locations = List(DisplayLocationV2(item.agent.locations.head)))
+      locations = List(DisplayLocationV2(item.thing.locations.head)))
   }
 
   it("parses an unidentified Item without any locations") {

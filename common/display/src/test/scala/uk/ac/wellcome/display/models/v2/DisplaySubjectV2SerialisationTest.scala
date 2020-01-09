@@ -24,7 +24,7 @@ class DisplaySubjectV2SerialisationTest
       sourceIdentifier = createSourceIdentifierWith(
         ontologyType = "Place"
       ),
-      agent = Place("placeLabel")
+      thing = Place("placeLabel")
     )
 
     val subject = createSubjectWith(
@@ -35,24 +35,24 @@ class DisplaySubjectV2SerialisationTest
       DisplaySubject(subject, includesIdentifiers = true),
       expectedJson = s"""
          |  {
-         |    "label" : "${subject.agent.label}",
+         |    "label" : "${subject.thing.label}",
          |    "concepts" : [
          |      {
-         |        "label" : "${concept0.agent.label}",
-         |        "type" : "${ontologyType(concept0.agent)}"
+         |        "label" : "${concept0.thing.label}",
+         |        "type" : "${ontologyType(concept0.thing)}"
          |      },
          |      {
-         |        "label" : "${concept1.agent.label}",
-         |        "type" : "${ontologyType(concept1.agent)}"
+         |        "label" : "${concept1.thing.label}",
+         |        "type" : "${ontologyType(concept1.thing)}"
          |      },
          |      {
          |        "id": "${concept2.canonicalId}",
          |        "identifiers": [${identifier(concept2.identifiers(0))}],
-         |        "label" : "${concept2.agent.label}",
-         |        "type" : "${ontologyType(concept2.agent)}"
+         |        "label" : "${concept2.thing.label}",
+         |        "type" : "${ontologyType(concept2.thing)}"
          |      }
          |    ],
-         |    "type" : "${subject.agent.ontologyType}"
+         |    "type" : "${subject.thing.ontologyType}"
          |  }
           """.stripMargin
     )
@@ -67,13 +67,13 @@ class DisplaySubjectV2SerialisationTest
       DisplaySubject(subject, includesIdentifiers = true),
       expectedJson = s"""
                         |  {
-                        |    "label" : "${subject.agent.label}",
+                        |    "label" : "${subject.thing.label}",
                         |    "concepts" : [
                         |      {
                         |        "label" : "${person.label}",
                         |        "type" : "${ontologyType(person)}"
                         |      }],
-                        |    "type" : "${subject.agent.ontologyType}"
+                        |    "type" : "${subject.thing.ontologyType}"
                         |  }
           """.stripMargin
     )
@@ -88,13 +88,13 @@ class DisplaySubjectV2SerialisationTest
       DisplaySubject(subject, includesIdentifiers = true),
       expectedJson = s"""
                         |  {
-                        |    "label" : "${subject.agent.label}",
+                        |    "label" : "${subject.thing.label}",
                         |    "concepts" : [
                         |      {
                         |        "label" : "${agent.label}",
                         |        "type" : "${ontologyType(agent)}"
                         |      }],
-                        |    "type" : "${subject.agent.ontologyType}"
+                        |    "type" : "${subject.thing.ontologyType}"
                         |  }
           """.stripMargin
     )
@@ -109,13 +109,13 @@ class DisplaySubjectV2SerialisationTest
       DisplaySubject(subject, includesIdentifiers = true),
       expectedJson = s"""
                         |  {
-                        |    "label" : "${subject.agent.label}",
+                        |    "label" : "${subject.thing.label}",
                         |    "concepts" : [
                         |      {
                         |        "label" : "${organisation.label}",
                         |        "type" : "${ontologyType(organisation)}"
                         |      }],
-                        |    "type" : "${subject.agent.ontologyType}"
+                        |    "type" : "${subject.thing.ontologyType}"
                         |  }
           """.stripMargin
     )

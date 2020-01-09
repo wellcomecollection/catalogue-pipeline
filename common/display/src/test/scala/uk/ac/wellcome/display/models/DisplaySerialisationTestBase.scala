@@ -45,9 +45,9 @@ trait DisplaySerialisationTestBase { this: Suite =>
   def unidentifiableItem(it: Unidentifiable[Item]) =
     s"""
       {
-        "type": "${it.agent.ontologyType}",
-        ${itemTitle(it.agent)}
-        "locations": [${locations(it.agent.locations)}]
+        "type": "${it.thing.ontologyType}",
+        ${itemTitle(it.thing)}
+        "locations": [${locations(it.thing.locations)}]
       }
     """
 
@@ -55,9 +55,9 @@ trait DisplaySerialisationTestBase { this: Suite =>
     s"""
       {
         "id": "${it.canonicalId}",
-        "type": "${it.agent.ontologyType}",
-        ${itemTitle(it.agent)}
-        "locations": [${locations(it.agent.locations)}]
+        "type": "${it.thing.ontologyType}",
+        ${itemTitle(it.thing)}
+        "locations": [${locations(it.thing.locations)}]
       }
     """
 
@@ -113,9 +113,9 @@ trait DisplaySerialisationTestBase { this: Suite =>
   def identifiedOrUnidentifiable[T](displayable: Displayable[T],
                                     serialise: T => String) =
     displayable match {
-      case ag: Unidentifiable[T] => serialise(ag.agent)
+      case ag: Unidentifiable[T] => serialise(ag.thing)
       case disp: Identified[T] =>
-        val agent = parse(serialise(disp.agent)).right.get.asObject.get
+        val agent = parse(serialise(disp.thing)).right.get.asObject.get
         val identifiersJson = disp.identifiers.map { sourceIdentifier =>
           parse(identifier(sourceIdentifier)).right.get
         }

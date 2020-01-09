@@ -48,8 +48,8 @@ class MergerTest extends FunSpec with WorksGenerators with Matchers {
         otherIdentifiers = sierraPhysicalWork.data.otherIdentifiers ++ sierraDigitalWork.identifiers,
         items = List(
           physicalItem.copy(
-            agent = physicalItem.agent.copy(
-              locations = physicalItem.agent.locations ++ digitalItem.agent.locations
+            thing = physicalItem.thing.copy(
+              locations = physicalItem.thing.locations ++ digitalItem.thing.locations
             )
           )
         )
@@ -85,8 +85,8 @@ class MergerTest extends FunSpec with WorksGenerators with Matchers {
         thumbnail = miroWork.data.thumbnail,
         items = List(
           sierraItem.copy(
-            agent = sierraItem.agent.copy(
-              locations = sierraItem.agent.locations ++ miroItem.agent.locations
+            thing = sierraItem.thing.copy(
+              locations = sierraItem.thing.locations ++ miroItem.thing.locations
             )
           )
         ),
@@ -122,8 +122,8 @@ class MergerTest extends FunSpec with WorksGenerators with Matchers {
         thumbnail = miroWork.data.thumbnail,
         items = List(
           sierraItem.copy(
-            agent = sierraItem.agent.copy(
-              locations = sierraItem.agent.locations ++ miroItem.agent.locations
+            thing = sierraItem.thing.copy(
+              locations = sierraItem.thing.locations ++ miroItem.thing.locations
             )
           )
         ),
@@ -161,8 +161,8 @@ class MergerTest extends FunSpec with WorksGenerators with Matchers {
         thumbnail = miroWork.data.thumbnail,
         items = List(
           sierraItem.copy(
-            agent = sierraItem.agent.copy(
-              locations = sierraItem.agent.locations ++ digitalItem.agent.locations ++ miroItem.agent.locations
+            thing = sierraItem.thing.copy(
+              locations = sierraItem.thing.locations ++ digitalItem.thing.locations ++ miroItem.thing.locations
             )
           )
         ),
@@ -205,8 +205,8 @@ class MergerTest extends FunSpec with WorksGenerators with Matchers {
         merged = true,
         items = List(
           physicalItem.copy(
-            agent = physicalItem.agent.copy(
-              locations = physicalItem.agent.locations ++ digitalItem.agent.locations
+            thing = physicalItem.thing.copy(
+              locations = physicalItem.thing.locations ++ digitalItem.thing.locations
             )
           )
         ),
@@ -244,8 +244,8 @@ class MergerTest extends FunSpec with WorksGenerators with Matchers {
         thumbnail = metsWork.data.thumbnail,
         items = List(
           sierraItem.copy(
-            agent = sierraItem.agent.copy(
-              locations = sierraItem.agent.locations ++ metsItem.agent.locations
+            thing = sierraItem.thing.copy(
+              locations = sierraItem.thing.locations ++ metsItem.thing.locations
             )
           )
         ),

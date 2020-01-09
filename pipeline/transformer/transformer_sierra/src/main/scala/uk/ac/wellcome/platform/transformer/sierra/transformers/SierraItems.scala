@@ -36,8 +36,8 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
       case (Seq(physicalItem), Some(digitalItem)) =>
         List(
           physicalItem.copy(
-            agent = physicalItem.agent.copy(
-              locations = physicalItem.agent.locations ++ digitalItem.agent.locations
+            thing = physicalItem.thing.copy(
+              locations = physicalItem.thing.locations ++ digitalItem.thing.locations
             )
           )
         )
@@ -84,7 +84,7 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
     if (hasDlnkLocation) {
       Some(
         Unidentifiable(
-          agent = Item(
+          thing = Item(
             locations = List(getDigitalLocation(bibId.withCheckDigit))
           )
         )
@@ -111,7 +111,7 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
           value = itemId.withoutCheckDigit
         )
       ),
-      agent = Item(
+      thing = Item(
         title = getItemTitle(itemData),
         locations = getPhysicalLocation(itemData).toList
       )

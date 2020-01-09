@@ -127,7 +127,7 @@ class AggregationsTest
         whenReady(aggregationQuery(index, searchOptions)) { aggs =>
           val buckets = aggs.workType.get.buckets
           val expectedWorkTypes = works
-            .filter { _.data.subjects.head.agent.label == subjectQuery }
+            .filter { _.data.subjects.head.thing.label == subjectQuery }
             .map { _.data.workType.get }
           buckets.length shouldBe expectedWorkTypes.length
           buckets.map(_.data) should contain theSameElementsAs expectedWorkTypes
@@ -153,7 +153,7 @@ class AggregationsTest
         whenReady(worksService.listWorks(index, searchOptions)) { res =>
           val results = res.right.get.results
           results.map(_.data.workType.get) should contain only WorkType.Books
-          results.map(_.data.subjects.head.agent.label) should contain only subjectQuery
+          results.map(_.data.subjects.head.thing.label) should contain only subjectQuery
         }
       }
     }

@@ -21,7 +21,7 @@ class MiroItemsTest
           imageNumber = "B0011308"
         )) shouldBe List(
         Unidentifiable(
-          agent = Item(locations = List(DigitalLocation(
+          thing = Item(locations = List(DigitalLocation(
             "https://iiif.wellcomecollection.org/image/B0011308.jpg/info.json",
             LocationType("iiif-image"),
             Some(License.CC0),

@@ -14,7 +14,7 @@ trait ItemsGenerators extends IdentifiersGenerators {
       canonicalId = canonicalId,
       sourceIdentifier = sourceIdentifier,
       otherIdentifiers = otherIdentifiers,
-      agent = Item(locations = locations, title = title)
+      thing = Item(locations = locations, title = title)
     )
 
   def createIdentifiedItem: Identified[Item] = createIdentifiedItemWith()
@@ -30,13 +30,13 @@ trait ItemsGenerators extends IdentifiersGenerators {
   ): Identifiable[Item] =
     Identifiable(
       sourceIdentifier = sourceIdentifier,
-      agent = Item(locations = locations)
+      thing = Item(locations = locations)
     )
 
   def createUnidentifiableItemWith(
     locations: List[Location] = List(defaultLocation)) =
     Unidentifiable(
-      agent = Item(locations = locations)
+      thing = Item(locations = locations)
     )
 
   def createPhysicalLocation = createPhysicalLocationWith()

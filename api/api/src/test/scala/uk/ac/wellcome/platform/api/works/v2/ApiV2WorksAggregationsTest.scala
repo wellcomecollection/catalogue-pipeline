@@ -97,7 +97,7 @@ class ApiV2WorksAggregationsTest extends ApiV2WorksTestBase {
           sourceIdentifier = createSourceIdentifierWith(
             ontologyType = "Period"
           ),
-          agent = Period("periodLabel")
+          thing = Period("periodLabel")
         )
 
         val genre = Genre(

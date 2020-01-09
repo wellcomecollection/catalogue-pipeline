@@ -65,7 +65,7 @@ trait SierraConcepts extends SierraQueryOps {
           varField = varField,
           identifierSubfieldContent = subfieldContent
         )
-      case _ => Unidentifiable(agent = concept)
+      case _ => Unidentifiable(thing = concept)
     }
 
   // If there's exactly one subfield $0 on the VarField, add an identifier
@@ -81,10 +81,10 @@ trait SierraConcepts extends SierraQueryOps {
     )
 
     maybeSourceIdentifier match {
-      case None => Unidentifiable(agent = concept)
+      case None => Unidentifiable(thing = concept)
       case Some(sourceIdentifier) =>
         Identifiable(
-          agent = concept,
+          thing = concept,
           sourceIdentifier = sourceIdentifier
         )
     }

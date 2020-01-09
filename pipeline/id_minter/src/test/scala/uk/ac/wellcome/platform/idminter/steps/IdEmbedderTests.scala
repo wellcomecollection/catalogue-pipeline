@@ -121,7 +121,7 @@ class IdEmbedderTests
           contributors = List(
             Contributor(
               agent = Identified(
-                agent = person,
+                thing = person,
                 canonicalId = newCreatorCanonicalId,
                 sourceIdentifier = creatorIdentifier))
           ),
@@ -167,11 +167,11 @@ class IdEmbedderTests
 
     val originalItem1 = Identifiable(
       sourceIdentifier = identifier,
-      agent = Item(locations = List())
+      thing = Item(locations = List())
     )
 
     val originalItem2 = Unidentifiable(
-      agent = Item(locations = List())
+      thing = Item(locations = List())
     )
 
     val originalWork = createUnidentifiedWorkWith(
@@ -193,7 +193,7 @@ class IdEmbedderTests
         setUpIdentifierGeneratorMock(
           mockIdentifierGenerator = identifierGenerator,
           sourceIdentifier = originalItem1.sourceIdentifier,
-          ontologyType = originalItem1.agent.ontologyType,
+          ontologyType = originalItem1.thing.ontologyType,
           newCanonicalId = newItemCanonicalId1
         )
 
@@ -206,11 +206,11 @@ class IdEmbedderTests
         val expectedItem1: Displayable[Item] = createIdentifiedItemWith(
           sourceIdentifier = originalItem1.sourceIdentifier,
           canonicalId = newItemCanonicalId1,
-          locations = originalItem1.agent.locations
+          locations = originalItem1.thing.locations
         )
 
         val expectedItem2: Displayable[Item] = createUnidentifiableItemWith(
-          locations = originalItem2.agent.locations
+          locations = originalItem2.thing.locations
         )
 
         whenReady(eventualWork) { json =>
