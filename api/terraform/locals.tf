@@ -4,7 +4,7 @@ locals {
   staging_name = "staging"
 
   prod_es_config = {
-    index_v2 = "v2-20191115"
+    index_v2 = "v2-20200107"
     doc_type = "work"
   }
 
