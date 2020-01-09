@@ -42,7 +42,8 @@ object Tracing {
         "service_name" -> config.getOrElse("apm.service.name")("catalogue-api"),
         "server_urls" -> config.getOrElse("apm.server.url")(
           "http://localhost:9200"),
-        "secret_token" -> config.getOrElse[String]("apm.secret")("")
+        "secret_token" -> config.getOrElse[String]("apm.secret")(""),
+        "span_frames_min_duration" -> "250ms"
       ).asJava)
     actorSystem.dispatchers.registerConfigurator(
       "tracing-dispatcher",
