@@ -85,7 +85,7 @@ object WorksIndex {
   def identified(fieldName: String, fields: Seq[FieldDefinition]): ObjectField =
     objectField(fieldName).fields(
       textField("type"),
-      objectField("agent").fields(fields),
+      objectField("thing").fields(fields),
       keywordField("canonicalId"),
       objectField("sourceIdentifier").fields(sourceIdentifierFields),
       objectField("otherIdentifiers").fields(sourceIdentifierFields)
@@ -117,7 +117,7 @@ object WorksIndex {
     sourceIdentifier,
     otherIdentifiers,
     keywordField("type"),
-    objectField("agent").fields(
+    objectField("thing").fields(
       location(),
       englishTextField("title"),
       keywordField("ontologyType")
