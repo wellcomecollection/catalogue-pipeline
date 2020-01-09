@@ -7,7 +7,9 @@ import uk.ac.wellcome.platform.idminter.utils.Identifiable
 
 import scala.util.Try
 
-class IdentifierGenerator(identifiersDao: IdentifiersDao) {
+class IdentifierGenerator(
+                           identifiersDao: IdentifiersDao
+                         ) {
 
   def retrieveOrGenerateCanonicalId(
     identifier: SourceIdentifier
@@ -29,6 +31,7 @@ class IdentifierGenerator(identifiersDao: IdentifiersDao) {
     val canonicalId = Identifiable.generate
     identifiersDao
       .saveIdentifier(
+        sourceIdentifier,
         Identifier(
           canonicalId = canonicalId,
           sourceIdentifier = sourceIdentifier

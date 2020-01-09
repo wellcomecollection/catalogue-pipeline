@@ -8,13 +8,15 @@ import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
+import uk.ac.wellcome.models.work.internal.SourceIdentifier
 import uk.ac.wellcome.platform.idminter.config.models.IdentifiersTableConfig
 import uk.ac.wellcome.platform.idminter.database.IdentifiersDao
-import uk.ac.wellcome.platform.idminter.models.IdentifiersTable
+import uk.ac.wellcome.platform.idminter.models.{Identifier, IdentifiersTable}
 import uk.ac.wellcome.platform.idminter.services.IdMinterWorkerService
 import uk.ac.wellcome.platform.idminter.steps.{IdEmbedder, IdentifierGenerator}
 import uk.ac.wellcome.storage.ObjectLocation
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
+import uk.ac.wellcome.storage.store.memory.MemoryStore
 import uk.ac.wellcome.storage.streaming.Codec._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -62,11 +64,14 @@ trait WorkerServiceFixture
     Class.forName("com.mysql.jdbc.Driver")
     ConnectionPool.singleton(s"jdbc:mysql://$host:$port", username, password)
 
+    val memoryStore = new MemoryStore[SourceIdentifier, Identifier](Map.empty)
+
     val identifiersDao = new IdentifiersDao(
       db = DB.connect(),
       identifiers = new IdentifiersTable(
         identifiersTableConfig = identifiersTableConfig
-      )
+      ),
+      memoryStore
     )
     withWorkerService(
       bucket,

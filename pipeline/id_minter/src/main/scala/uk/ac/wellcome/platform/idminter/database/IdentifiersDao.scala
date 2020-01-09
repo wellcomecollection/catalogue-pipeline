@@ -7,28 +7,27 @@ import scalikejdbc._
 import uk.ac.wellcome.models.work.internal.SourceIdentifier
 import uk.ac.wellcome.platform.idminter.exceptions.IdMinterException
 import uk.ac.wellcome.platform.idminter.models.{Identifier, IdentifiersTable}
+import uk.ac.wellcome.storage.NotFoundError
+import uk.ac.wellcome.storage.store.Store
 
 import scala.concurrent.blocking
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
-class IdentifiersDao(db: DB, identifiers: IdentifiersTable) extends Logging {
+class IdentifiersDao(
+                      db: DB,
+                      identifiers: IdentifiersTable,
+                      store: Store[SourceIdentifier, Identifier]
+                    ) extends Logging {
 
   implicit val session = AutoSession(db.settingsProvider)
 
-  /* An unidentified record from the transformer can give us a list of
-   * identifiers from the source systems, and an ontology type (e.g. "Work").
-   *
-   * This method looks for existing IDs that have matching ontology type and
-   * source identifiers.
-   */
-  def lookupId(
-    sourceIdentifier: SourceIdentifier
-  ): Try[Option[Identifier]] = Try {
+  private def sqlLookup(
+                         sourceIdentifier: SourceIdentifier
+                       ): Try[Option[Identifier]] = Try {
 
     val sourceSystem = sourceIdentifier.identifierType.id
     val sourceId = sourceIdentifier.value
 
-    // TODO: handle gracefully, don't TryBackoff ad infinitum
     blocking {
       debug(s"Matching ($sourceIdentifier)")
 
@@ -47,15 +46,10 @@ class IdentifiersDao(db: DB, identifiers: IdentifiersTable) extends Logging {
       debug(s"Executing:'${query.statement}'")
       query.apply()
     }
+
   }
 
-  /* Save an identifier into the database.
-   *
-   * Note that this will copy _all_ the fields on `Identifier`, nulling any
-   * fields which aren't set on `Identifier`.
-   */
-  def saveIdentifier(identifier: Identifier): Try[Any] = {
-    Try {
+  private def sqlSave(identifier: Identifier): Try[Int] = Try {
       blocking {
         debug(s"Putting new identifier $identifier")
         withSQL {
@@ -78,5 +72,27 @@ class IdentifiersDao(db: DB, identifiers: IdentifiersTable) extends Logging {
         error(s"Failed inserting identifier $identifier in database", e)
         throw e
     }
-  }
+
+  /* An unidentified record from the transformer can give us a list of
+   * identifiers from the source systems, and an ontology type (e.g. "Work").n */
+  def lookupId(
+    sourceIdentifier: SourceIdentifier
+  ): Try[Option[Identifier]] =
+
+    store.get(sourceIdentifier) match {
+      case Right(identifier) => Success(Some(identifier.identifiedT))
+      case Left(_: NotFoundError) => sqlLookup(sourceIdentifier)
+      case Left(storageError) => Failure(storageError.e)
+    }
+
+  /* Save an identifier into the database. */
+  def saveIdentifier(
+                      sourceIdentifier: SourceIdentifier,
+                      identifier: Identifier
+                    ): Try[Any] =
+
+    store.put(sourceIdentifier)(identifier) match {
+      case Right(_) => sqlSave(identifier)
+      case Left(writeError) => Failure(writeError.e)
+    }
 }

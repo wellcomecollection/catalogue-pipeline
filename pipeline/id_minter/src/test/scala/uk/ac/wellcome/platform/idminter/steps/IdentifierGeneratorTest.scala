@@ -6,13 +6,12 @@ import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSpec, Matchers}
 import scalikejdbc._
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
-import uk.ac.wellcome.platform.idminter.database.{
-  IdentifiersDao,
-  TableProvisioner
-}
+import uk.ac.wellcome.platform.idminter.database.{IdentifiersDao, TableProvisioner}
 import uk.ac.wellcome.platform.idminter.fixtures
 import uk.ac.wellcome.platform.idminter.models.{Identifier, IdentifiersTable}
 import uk.ac.wellcome.fixtures.TestWith
+import uk.ac.wellcome.models.work.internal.SourceIdentifier
+import uk.ac.wellcome.storage.store.memory.MemoryStore
 
 import scala.util.{Failure, Success}
 
@@ -35,8 +34,10 @@ class IdentifierGeneratorTest
           tableName = identifiersTableConfig.tableName
         )
 
+      val memoryStore = new MemoryStore[SourceIdentifier, Identifier](Map.empty)
+
       val identifiersDao = maybeIdentifiersDao.getOrElse(
-        new IdentifiersDao(DB.connect(), identifiersTable)
+        new IdentifiersDao(DB.connect(), identifiersTable, memoryStore)
       )
 
       val identifierGenerator = new IdentifierGenerator(identifiersDao)
@@ -121,11 +122,11 @@ class IdentifierGeneratorTest
 
     val expectedException = new Exception("Noooo")
 
-    when(identifiersDao.saveIdentifier(any[Identifier]()))
+    when(identifiersDao.saveIdentifier(sourceIdentifier, any[Identifier]()))
       .thenReturn(Failure(expectedException))
 
     withIdentifierGenerator(Some(identifiersDao)) {
-      case (identifierGenerator, identifiersTable) =>
+      case (identifierGenerator, _) =>
         val triedGeneratingId =
           identifierGenerator.retrieveOrGenerateCanonicalId(
             sourceIdentifier

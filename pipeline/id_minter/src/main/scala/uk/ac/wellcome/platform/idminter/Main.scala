@@ -6,14 +6,13 @@ import com.amazonaws.services.s3.AmazonS3
 import com.typesafe.config.Config
 import io.circe.Json
 import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
-import uk.ac.wellcome.platform.idminter.config.builders.{
-  IdentifiersTableBuilder,
-  RDSBuilder
-}
+import uk.ac.wellcome.models.work.internal.SourceIdentifier
+import uk.ac.wellcome.platform.idminter.config.builders.{IdentifiersTableBuilder, RDSBuilder}
 import uk.ac.wellcome.platform.idminter.database.IdentifiersDao
-import uk.ac.wellcome.platform.idminter.models.IdentifiersTable
+import uk.ac.wellcome.platform.idminter.models.{Identifier, IdentifiersTable}
 import uk.ac.wellcome.platform.idminter.services.IdMinterWorkerService
 import uk.ac.wellcome.platform.idminter.steps.{IdEmbedder, IdentifierGenerator}
+import uk.ac.wellcome.storage.store.memory.MemoryStore
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
@@ -33,12 +32,16 @@ object Main extends WellcomeTypesafeApp {
 
     val identifiersTableConfig = IdentifiersTableBuilder.buildConfig(config)
 
+    val memoryStore = new MemoryStore[SourceIdentifier, Identifier](Map.empty)
+
+
     val identifierGenerator = new IdentifierGenerator(
       identifiersDao = new IdentifiersDao(
         db = RDSBuilder.buildDB(config),
         identifiers = new IdentifiersTable(
           identifiersTableConfig = identifiersTableConfig
-        )
+        ),
+        memoryStore
       )
     )
 
