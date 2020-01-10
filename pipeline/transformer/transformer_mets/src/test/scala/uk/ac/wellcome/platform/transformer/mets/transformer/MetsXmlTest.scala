@@ -62,6 +62,16 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
       s"${bnumber}_${filePrefix}_0001.jp2")
   }
 
+  it("parses thumbnail if filename starts with uppercase bnumber") {
+    val bnumber = "b30246039"
+    val filePrefix = bnumber.toUpperCase
+    MetsXml(
+      xmlWithThumbnailImages(
+        recordIdentifier = bnumber,
+        filePrefix = _ => filePrefix)).thumbnailLocation(bnumber) shouldBe Some(
+      s"${filePrefix}_0001.jp2")
+  }
+
   it("cannot parse thumbnail when invalid file ID") {
     MetsXml(xmlInvalidFileId("b30246039"))
       .thumbnailLocation("b30246039") shouldBe None
