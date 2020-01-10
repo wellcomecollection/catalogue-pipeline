@@ -78,7 +78,7 @@ case class MetsData(
     thumbnailLocation.map { location =>
       DigitalLocation(
         url =
-          s"https://dlcs.io/iiif-img/wellcome/5/$location/full/!$thumbnailDim,$thumbnailDim/0/default.jpg",
+          s"https://dlcs.io/thumbs/wellcome/5/$location/full/!$thumbnailDim,$thumbnailDim/0/default.jpg",
         locationType = LocationType("thumbnail-image"),
         license = maybeLicense
       )
