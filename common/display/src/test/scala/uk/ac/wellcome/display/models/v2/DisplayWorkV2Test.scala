@@ -1,6 +1,6 @@
 package uk.ac.wellcome.display.models.v2
 
-import java.time.{Instant, LocalDate}
+import java.time.Instant
 
 import org.scalacheck.Arbitrary
 import org.scalacheck.Gen.chooseNum
@@ -37,15 +37,6 @@ class DisplayWorkV2Test
       } yield {
         Instant.ofEpochMilli(millis).plusNanos(nanos)
       }
-    }
-
-  implicit val arbLocalDate: Arbitrary[LocalDate] =
-    Arbitrary {
-      for {
-        day <- chooseNum(1, 28)
-        month <- chooseNum(1, 12)
-        year <- chooseNum(2010, 2030)
-      } yield LocalDate.of(year, month, day)
     }
 
   it("parses a Work without any items") {

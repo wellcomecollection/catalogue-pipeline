@@ -5,6 +5,8 @@ import io.circe.parser._
 import org.scalatest.Suite
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.internal._
+import java.time.{LocalDateTime, ZoneOffset}
+import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
 
 trait DisplaySerialisationTestBase { this: Suite =>
 
@@ -112,15 +114,21 @@ trait DisplaySerialisationTestBase { this: Suite =>
   def accessConditions(conds: List[AccessCondition]) =
     s"[${conds.map(accessCondition).mkString(",")}]"
 
-  def accessCondition(cond: AccessCondition) =
+  def accessCondition(cond: AccessCondition) = {
+    val expectedTo = cond.to.map { instant =>
+      LocalDateTime
+        .ofInstant(instant, ZoneOffset.UTC)
+        .format(ISO_LOCAL_DATE)
+    }
     s"""
       {
         "type": "AccessCondition",
         ${optionalString("terms", cond.terms)}
-        ${optionalString("to", cond.to.map(_.toString))}
+        ${optionalString("to", expectedTo)}
         ${accessStatus(cond.status)}
       }
     """
+  }
 
   def accessStatus(status: AccessStatus) = {
     s"""
