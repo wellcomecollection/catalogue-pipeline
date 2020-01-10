@@ -2,14 +2,17 @@ package uk.ac.wellcome.display.models
 
 import io.circe.generic.extras.semiauto._
 import io.circe.{Decoder, Encoder}
+import io.circe.java8.time.TimeInstances
+
 import uk.ac.wellcome.display.json.DisplayJsonUtil._
 import uk.ac.wellcome.display.models.v2._
 
-object Implicits {
+object Implicits extends TimeInstances {
 
   // Cache these here to improve compilation times (otherwise they are
   // re-derived every time they are required).
 
+  implicit val _enc00: Encoder[DisplayAccessCondition] = deriveEncoder
   implicit val _enc01: Encoder[DisplayLanguage] = deriveEncoder
   implicit val _enc02: Encoder[DisplayWorkType] = deriveEncoder
   implicit val _enc03: Encoder[DisplayPeriod] = deriveEncoder
@@ -22,6 +25,7 @@ object Implicits {
   implicit val _enc10: Encoder[DisplayNote] = deriveEncoder
   implicit val _enc11: Encoder[DisplayWorkV2] = deriveEncoder
 
+  implicit val _dec00: Decoder[DisplayAccessCondition] = deriveDecoder
   implicit val _dec01: Decoder[DisplayLanguage] = deriveDecoder
   implicit val _dec02: Decoder[DisplayWorkType] = deriveDecoder
   implicit val _dec03: Decoder[DisplayPeriod] = deriveDecoder

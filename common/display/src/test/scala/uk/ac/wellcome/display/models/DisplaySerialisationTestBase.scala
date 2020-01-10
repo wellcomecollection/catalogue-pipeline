@@ -5,6 +5,8 @@ import io.circe.parser._
 import org.scalatest.Suite
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.internal._
+import java.time.{LocalDateTime, ZoneOffset}
+import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
 
 trait DisplaySerialisationTestBase { this: Suite =>
 
@@ -86,6 +88,10 @@ trait DisplaySerialisationTestBase { this: Suite =>
       "locationType": ${locationType(digitalLocation.locationType)},
       "url": "${digitalLocation.url}"
       ${optionalObject("license", license, digitalLocation.license)}
+      ${optionalObject(
+      "accessConditions",
+      accessConditions,
+      digitalLocation.accessConditions)}
     }"""
 
   def physicalLocation(loc: PhysicalLocation) =
@@ -94,12 +100,45 @@ trait DisplaySerialisationTestBase { this: Suite =>
         "type": "${loc.ontologyType}",
         "locationType": ${locationType(loc.locationType)},
         "label": "${loc.label}"
+        ${optionalObject(
+      "accessConditions",
+      accessConditions,
+      loc.accessConditions)}
        }
      """
 
   def locationType(locType: LocationType): String
 
   def license(license: License): String
+
+  def accessConditions(conds: List[AccessCondition]) =
+    s"[${conds.map(accessCondition).mkString(",")}]"
+
+  def accessCondition(cond: AccessCondition) = {
+    val expectedTo = cond.to.map { instant =>
+      LocalDateTime
+        .ofInstant(instant, ZoneOffset.UTC)
+        .format(ISO_LOCAL_DATE)
+    }
+    s"""
+      {
+        "type": "AccessCondition",
+        ${optionalString("terms", cond.terms)}
+        ${optionalString("to", expectedTo)}
+        ${accessStatus(cond.status)}
+      }
+    """
+  }
+
+  def accessStatus(status: AccessStatus) = {
+    s"""
+      "status": {
+        "type": "AccessStatus",
+        "id": "${DisplayAccessStatus(status).id}",
+        "label": "${DisplayAccessStatus(status).label}"
+      }
+    """
+  }
 
   def identifier(identifier: SourceIdentifier): String
 

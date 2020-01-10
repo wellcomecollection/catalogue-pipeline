@@ -4,10 +4,20 @@ import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.mappings.{FieldDefinition, ObjectField}
 
 object WorksIndex {
+
   val label = textField("label").fields(keywordField("raw"))
+
   val license = objectField("license").fields(
     keywordField("id")
   )
+
+  val accessCondition =
+    objectField("accessCondition")
+      .fields(
+        englishTextField("terms"),
+        dateField("to"),
+        keywordField("status")
+      )
 
   def sourceIdentifierFields = Seq(
     keywordField("ontologyType"),
@@ -50,7 +60,8 @@ object WorksIndex {
       label,
       textField("url"),
       textField("credit"),
-      license
+      license,
+      accessCondition
     )
 
   def date(fieldName: String) = objectField(fieldName).fields(period)

@@ -9,11 +9,13 @@ case class DigitalLocation(
   locationType: LocationType,
   license: Option[License] = None,
   credit: Option[String] = None,
+  accessConditions: Option[List[AccessCondition]] = None,
   ontologyType: String = "DigitalLocation"
 ) extends Location
 
 case class PhysicalLocation(
   locationType: LocationType,
   label: String,
+  accessConditions: Option[List[AccessCondition]] = None,
   ontologyType: String = "PhysicalLocation"
 ) extends Location

@@ -78,10 +78,10 @@ trait SierraMetsWorkPairMerger extends WorkPairMerger {
 
   private def shouldIgnoreLocation(location: Location, metsUrl: String) =
     location match {
-      case DigitalLocation(url, LocationType("iiif-image", _, _), _, _, _) =>
+      case DigitalLocation(url, LocationType("iiif-image", _, _), _, _, _, _) =>
         true
-      case DigitalLocation(url, _, _, _, _) if url.equals(metsUrl) => true
-      case _                                                       => false
+      case DigitalLocation(url, _, _, _, _, _) if url.equals(metsUrl) => true
+      case _                                                          => false
     }
 }
 

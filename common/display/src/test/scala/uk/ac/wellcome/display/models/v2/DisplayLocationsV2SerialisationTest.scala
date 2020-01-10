@@ -1,6 +1,8 @@
 package uk.ac.wellcome.display.models.v2
 
 import org.scalatest.{Assertion, FunSpec}
+import java.time.{LocalDate, ZoneOffset}
+
 import uk.ac.wellcome.display.json.DisplayJsonUtil._
 import uk.ac.wellcome.display.models.V2WorksIncludes
 import uk.ac.wellcome.display.test.util.JsonMapperTestUtil
@@ -39,7 +41,7 @@ class DisplayLocationsV2SerialisationTest
   it("serialises a digital location") {
     val digitalLocation = DigitalLocation(
       url = "https://wellcomelibrary.org/iiif/b22015085/manifest",
-      locationType = LocationType("iiif-image")
+      locationType = LocationType("iiif-image"),
     )
 
     val work = createIdentifiedWorkWith(
@@ -64,6 +66,40 @@ class DisplayLocationsV2SerialisationTest
       url = "https://wellcomelibrary.org/iiif/b22015085/manifest",
       locationType = LocationType("iiif-image"),
       license = Some(License.CC0)
+    )
+
+    val work = createIdentifiedWorkWith(
+      items = List(createIdentifiedItemWith(locations = List(digitalLocation)))
+    )
+
+    val expectedJson = s"""
+      |{
+      | "type": "Work",
+      | "id": "${work.canonicalId}",
+      | "title": "${work.data.title.get}",
+      | "alternativeTitles": [],
+      | "items": [ ${items(work.data.items)} ]
+      |}
+    """.stripMargin
+
+    assertWorkMapsToJson(work, expectedJson = expectedJson)
+  }
+
+  it("serialises a digital location with an access condition") {
+    val digitalLocation = DigitalLocation(
+      url = "https://wellcomelibrary.org/iiif/b22015085/manifest",
+      locationType = LocationType("iiif-image"),
+      accessConditions = Some(
+        List(
+          AccessCondition(
+            status = AccessStatus.Restricted,
+            terms = Some("Ask politely"),
+            to = Some(
+              LocalDate.of(2024, 2, 24).atStartOfDay.toInstant(ZoneOffset.UTC)
+            )
+          )
+        )
+      )
     )
 
     val work = createIdentifiedWorkWith(
