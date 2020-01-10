@@ -99,7 +99,7 @@ class MetsDataTest
     inside(metsData.toWork(1).right.get.data.items) {
       case List(
           Unidentifiable(
-            Item(_, List(DigitalLocation(_, _, license, _, _)), _))) =>
+            Item(_, List(DigitalLocation(_, _, license, _, _, _)), _))) =>
         license shouldBe Some(License.InCopyright)
     }
   }
@@ -112,7 +112,7 @@ class MetsDataTest
     inside(metsData.toWork(1).right.get.data.items) {
       case List(
           Unidentifiable(
-            Item(_, List(DigitalLocation(_, _, license, _, _)), _))) =>
+            Item(_, List(DigitalLocation(_, _, license, _, _, _)), _))) =>
         license shouldBe Some(License.InCopyright)
     }
   }
@@ -125,7 +125,7 @@ class MetsDataTest
     inside(metsData.toWork(1).right.get.data.items) {
       case List(
           Unidentifiable(
-            Item(_, List(DigitalLocation(_, _, license, _, _)), _))) =>
+            Item(_, List(DigitalLocation(_, _, license, _, _, _)), _))) =>
         license shouldBe Some(License.InCopyright)
     }
   }
