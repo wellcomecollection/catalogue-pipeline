@@ -101,9 +101,9 @@ trait DisplaySerialisationTestBase { this: Suite =>
         "locationType": ${locationType(loc.locationType)},
         "label": "${loc.label}"
         ${optionalObject(
-        "accessConditions",
-        accessConditions,
-        loc.accessConditions)}
+      "accessConditions",
+      accessConditions,
+      loc.accessConditions)}
        }
      """
 

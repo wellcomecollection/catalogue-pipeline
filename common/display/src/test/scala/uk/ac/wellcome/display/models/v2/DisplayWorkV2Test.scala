@@ -87,7 +87,8 @@ class DisplayWorkV2Test
           url = location.url,
           credit = location.credit,
           license = location.license.map(DisplayLicenseV2(_)),
-          accessConditions = location.accessConditions.map(_.map(DisplayAccessCondition(_))),
+          accessConditions =
+            location.accessConditions.map(_.map(DisplayAccessCondition(_))),
         )
       )
     )

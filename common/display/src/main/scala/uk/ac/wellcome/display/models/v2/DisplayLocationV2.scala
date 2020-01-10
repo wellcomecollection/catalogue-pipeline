@@ -26,13 +26,15 @@ object DisplayLocationV2 {
         url = url,
         credit = credit,
         license = license.map(DisplayLicenseV2(_)),
-        accessConditions =  accessConditions.map(_.map(DisplayAccessCondition(_)))
+        accessConditions =
+          accessConditions.map(_.map(DisplayAccessCondition(_)))
       )
-    case PhysicalLocation(locationType, label, accessConditions,  _) =>
+    case PhysicalLocation(locationType, label, accessConditions, _) =>
       DisplayPhysicalLocationV2(
         locationType = DisplayLocationType(locationType),
         label = label,
-        accessConditions =  accessConditions.map(_.map(DisplayAccessCondition(_)))
+        accessConditions =
+          accessConditions.map(_.map(DisplayAccessCondition(_)))
       )
   }
 }
