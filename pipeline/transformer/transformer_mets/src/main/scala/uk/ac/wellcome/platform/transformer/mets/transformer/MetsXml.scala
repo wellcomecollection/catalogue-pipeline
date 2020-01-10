@@ -79,16 +79,18 @@ case class MetsXml(root: Elem) {
     val filePrefixRegex = s"""objects/(?i:($bnumber)_)?(.*)""".r
     physicalStructMap.headOption
       .flatMap { case (_, fileId) => fileObjects.get(fileId) }
-      .map{ fileUrl =>
+      .map { fileUrl =>
         fileUrl match {
-          case filePrefixRegex(caseInsensitiveBnumber, postFix)  =>
+          case filePrefixRegex(caseInsensitiveBnumber, postFix) =>
             Option(caseInsensitiveBnumber) match {
-              case Some(caseInsensitiveBnumber) => s"${caseInsensitiveBnumber}_$postFix"
+              case Some(caseInsensitiveBnumber) =>
+                s"${caseInsensitiveBnumber}_$postFix"
               case _ => s"${bnumber}_$postFix"
             }
           case _ => fileUrl
         }
-  }}
+      }
+  }
 
   /** Returns the first href to a manifestation in the logical structMap
     */
