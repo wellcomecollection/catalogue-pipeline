@@ -16,7 +16,7 @@ SOURCES = {
     "miro": "vhs-sourcedata-miro",
     "sierra": "vhs-sourcedata-sierra",
     "sierra-items": "vhs-sourcedata-sierra-items",
-    "mets": "mets-adapter-store"
+    "mets": "mets-adapter-store",
 }
 
 DESTINATIONS = ["catalogue", "reporting"]
