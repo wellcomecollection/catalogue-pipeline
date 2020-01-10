@@ -76,12 +76,12 @@ case class MetsXml(root: Elem) {
     // So we need to do two things:
     //  - strip the "objects/" part of the link
     //  - prepend the bnumber followed by an underscore if it's not already present (uppercase or lowercase)
-    val filePrefixPattern = s"""objects/(?i:($bnumber)_)?(.*)""".r
+    val filePrefixRegex = s"""objects/(?i:($bnumber)_)?(.*)""".r
     physicalStructMap.headOption
       .flatMap { case (_, fileId) => fileObjects.get(fileId) }
       .map{ fileUrl =>
         fileUrl match {
-          case filePrefixPattern(caseInsensitiveBnumber, postFix)  =>
+          case filePrefixRegex(caseInsensitiveBnumber, postFix)  =>
             Option(caseInsensitiveBnumber) match {
               case Some(caseInsensitiveBnumber) => s"${caseInsensitiveBnumber}_$postFix"
               case _ => s"${bnumber}_$postFix"
