@@ -186,7 +186,7 @@ class MetsDataTest
     }
   }
 
-  it("fails createing a work when unknown AccessStatus") {
+  it("fails creating a work when unknown AccessStatus") {
     val result = MetsData(
       recordIdentifier = "ID",
       accessConditionStatus = Some("Kanye West"),
