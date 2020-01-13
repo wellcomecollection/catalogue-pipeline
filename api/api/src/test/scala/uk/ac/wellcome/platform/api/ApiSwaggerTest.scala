@@ -8,7 +8,8 @@ import uk.ac.wellcome.platform.api.models.SearchQueryType
 import uk.ac.wellcome.platform.api.works.v2.ApiV2WorksTestBase
 
 class ApiSwaggerTest extends ApiV2WorksTestBase with Matchers {
-
+  val worksEndoint = "/works"
+  val workEndpoint = "/works/{id}"
   it("should return valid json object") {
     checkSwaggerJson { json =>
       json.isObject shouldBe true
@@ -40,7 +41,7 @@ class ApiSwaggerTest extends ApiV2WorksTestBase with Matchers {
 
   it("should contain single work endpoint in paths") {
     checkSwaggerJson { json =>
-      val endpoint = getEndpoint(json)
+      val endpoint = getEndpoint(json, workEndpoint)
 
       getKey(endpoint, "description").isEmpty shouldBe false
       getKey(endpoint, "summary").isEmpty shouldBe false
@@ -55,7 +56,7 @@ class ApiSwaggerTest extends ApiV2WorksTestBase with Matchers {
 
   it("should contain multiple work endpoints in paths") {
     checkSwaggerJson { json =>
-      val endpoint = getEndpoint(json)
+      val endpoint = getEndpoint(json, worksEndoint)
 
       getKey(endpoint, "description").isEmpty shouldBe false
       getKey(endpoint, "summary").isEmpty shouldBe false
@@ -127,7 +128,7 @@ class ApiSwaggerTest extends ApiV2WorksTestBase with Matchers {
   it("should contain `_queryType parameter with valid `allowedValues`") {
     checkSwaggerJson { json =>
       val _queryType =
-        getParameter(json, "_queryType")
+        getParameter(getEndpoint(json, worksEndoint), "_queryType")
 
       val queryTypeAllowedValues =
         _queryType.get.hcursor
@@ -141,16 +142,16 @@ class ApiSwaggerTest extends ApiV2WorksTestBase with Matchers {
     }
   }
 
-  private def getParameter(json: Json, name: String) =
-    getKey(getEndpoint(json), "parameters")
+  private def getParameter(endpoint: Json, name: String) =
+    getKey(endpoint, "parameters")
       .flatMap(_.asArray)
       .flatMap(
         _.toList.find(getKey(_, "name").flatMap(_.asString).contains(name))
       )
 
-  private def getEndpoint(json: Json): Json = {
+  private def getEndpoint(json: Json, endpointString: String): Json = {
     val endpoint = getKey(json, "paths")
-      .flatMap(paths => getKey(paths, "/works"))
+      .flatMap(paths => getKey(paths, endpointString))
       .flatMap(path => getKey(path, "get"))
 
     endpoint.isEmpty shouldBe false
@@ -184,7 +185,7 @@ class ApiSwaggerTest extends ApiV2WorksTestBase with Matchers {
         case m: MethodSymbol if m.isCaseAccessor => m.name.toString
       }
       .filterNot {
-        _.startsWith("_")
+        _ == "_index"
       }
       .toList
       .length
