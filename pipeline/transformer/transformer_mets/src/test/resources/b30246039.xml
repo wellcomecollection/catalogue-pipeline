@@ -36,6 +36,7 @@
           <mods:accessCondition type="dz">CC-BY-NC</mods:accessCondition>
           <mods:accessCondition type="player">63</mods:accessCondition>
           <mods:accessCondition type="status">Open</mods:accessCondition>
+          <mods:accessCondition type="usage">Some terms</mods:accessCondition>
           <mods:originInfo>
             <mods:place>
               <mods:placeTerm type="text">Wellcome Trust</mods:placeTerm>

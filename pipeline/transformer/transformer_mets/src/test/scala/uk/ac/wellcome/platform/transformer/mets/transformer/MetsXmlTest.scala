@@ -25,6 +25,14 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
     MetsXml(xml).right.get.accessConditionDz shouldBe Right(Some("CC-BY-NC"))
   }
 
+  it("parses accessConditionStatus from XML") {
+    MetsXml(xml).right.get.accessConditionStatus shouldBe Right(Some("Open"))
+  }
+
+  it("parses accessConditionUsage from XML") {
+    MetsXml(xml).right.get.accessConditionUsage shouldBe Right(Some("Some terms"))
+  }
+
   it("parses a METS with no access condition") {
     MetsXml(xmlNoLicense).accessConditionDz shouldBe Right(None)
   }
