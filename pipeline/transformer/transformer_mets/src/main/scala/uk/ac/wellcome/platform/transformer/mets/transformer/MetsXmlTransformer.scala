@@ -21,10 +21,14 @@ class MetsXmlTransformer(store: Readable[ObjectLocation, String]) {
     for {
       id <- root.recordIdentifier
       accessConditionDz <- root.accessConditionDz
+      accessConditionStatus <- root.accessConditionStatus
+      accessConditionUsage <- root.accessConditionUsage
     } yield
       MetsData(
         recordIdentifier = id,
         accessConditionDz = accessConditionDz,
+        accessConditionStatus = accessConditionStatus,
+        accessConditionUsage = accessConditionUsage,
         thumbnailLocation = root.thumbnailLocation(id),
       )
 
@@ -35,10 +39,14 @@ class MetsXmlTransformer(store: Readable[ObjectLocation, String]) {
       id <- root.recordIdentifier
       firstManifestation <- getFirstManifestation(root, manifestations)
       accessConditionDz <- firstManifestation.accessConditionDz
+      accessConditionStatus <- firstManifestation.accessConditionStatus
+      accessConditionUsage <- firstManifestation.accessConditionUsage
     } yield
       MetsData(
         recordIdentifier = id,
         accessConditionDz = accessConditionDz,
+        accessConditionStatus = accessConditionStatus,
+        accessConditionUsage = accessConditionUsage,
         thumbnailLocation = firstManifestation.thumbnailLocation(id),
       )
 
