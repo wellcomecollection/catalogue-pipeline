@@ -71,15 +71,25 @@ case class MetsXml(root: Elem) {
     *  thumbnail image.
     */
   def thumbnailLocation(bnumber: String): Option[String] = {
-    // Filenames in DLCS are always prefixed with the bnumber to ensure uniqueness.
+    // Filenames in DLCS are always prefixed with the bnumber (uppercase or lowercase) to ensure uniqueness.
     // However they might not be prefixed with the bnumber in the METS file.
-    // So we need to do two thinhs:
+    // So we need to do two things:
     //  - strip the "objects/" part of the link
-    //  - prepend the bnumber followed by an underscore if it's not already present
-    val filePrefixRegex = s"objects/(?:${bnumber}_)?"
+    //  - prepend the bnumber followed by an underscore if it's not already present (uppercase or lowercase)
+    val filePrefixRegex = s"""objects/(?i:($bnumber)_)?(.*)""".r
     physicalStructMap.headOption
       .flatMap { case (_, fileId) => fileObjects.get(fileId) }
-      .map(_.replaceFirst(filePrefixRegex, s"${bnumber}_"))
+      .map { fileUrl =>
+        fileUrl match {
+          case filePrefixRegex(caseInsensitiveBnumber, postFix) =>
+            Option(caseInsensitiveBnumber) match {
+              case Some(caseInsensitiveBnumber) =>
+                s"${caseInsensitiveBnumber}_$postFix"
+              case _ => s"${bnumber}_$postFix"
+            }
+          case _ => fileUrl
+        }
+      }
   }
 
   /** Returns the first href to a manifestation in the logical structMap

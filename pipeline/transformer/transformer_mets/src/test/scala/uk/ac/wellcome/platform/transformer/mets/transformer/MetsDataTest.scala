@@ -140,7 +140,7 @@ class MetsDataTest
     result shouldBe a[Right[_, _]]
     result.right.get.data.thumbnail shouldBe Some(
       DigitalLocation(
-        s"https://dlcs.io/iiif-img/wellcome/5/location.png/full/!200,200/0/default.jpg",
+        s"https://dlcs.io/thumbs/wellcome/5/location.png/full/!200,200/0/default.jpg",
         LocationType("thumbnail-image"),
         license = Some(License.CCBYNC)
       )
