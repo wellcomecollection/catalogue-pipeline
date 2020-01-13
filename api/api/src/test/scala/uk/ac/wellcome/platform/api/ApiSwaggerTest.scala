@@ -4,7 +4,7 @@ import scala.reflect.runtime.universe._
 import org.scalatest.Matchers
 import akka.http.scaladsl.model.ContentTypes
 import io.circe.Json
-
+import uk.ac.wellcome.platform.api.models.SearchQueryType
 import uk.ac.wellcome.platform.api.works.v2.ApiV2WorksTestBase
 
 class ApiSwaggerTest extends ApiV2WorksTestBase with Matchers {
@@ -40,13 +40,11 @@ class ApiSwaggerTest extends ApiV2WorksTestBase with Matchers {
 
   it("should contain single work endpoint in paths") {
     checkSwaggerJson { json =>
-      val endpoint = getKey(json, "paths")
-        .flatMap(paths => getKey(paths, "/works/{id}"))
-        .flatMap(path => getKey(path, "get"))
-      endpoint.isEmpty shouldBe false
-      getKey(endpoint.get, "description").isEmpty shouldBe false
-      getKey(endpoint.get, "summary").isEmpty shouldBe false
-      val numParams = getKey(endpoint.get, "parameters")
+      val endpoint = getEndpoint(json)
+
+      getKey(endpoint, "description").isEmpty shouldBe false
+      getKey(endpoint, "summary").isEmpty shouldBe false
+      val numParams = getKey(endpoint, "parameters")
         .flatMap(params => getLength(params))
       val numRouteParams = 1
       numParams shouldBe Some(
@@ -57,13 +55,11 @@ class ApiSwaggerTest extends ApiV2WorksTestBase with Matchers {
 
   it("should contain multiple work endpoints in paths") {
     checkSwaggerJson { json =>
-      val endpoint = getKey(json, "paths")
-        .flatMap(paths => getKey(paths, "/works"))
-        .flatMap(path => getKey(path, "get"))
-      endpoint.isEmpty shouldBe false
-      getKey(endpoint.get, "description").isEmpty shouldBe false
-      getKey(endpoint.get, "summary").isEmpty shouldBe false
-      val numParams = getKey(endpoint.get, "parameters")
+      val endpoint = getEndpoint(json)
+
+      getKey(endpoint, "description").isEmpty shouldBe false
+      getKey(endpoint, "summary").isEmpty shouldBe false
+      val numParams = getKey(endpoint, "parameters")
         .flatMap(params => getLength(params))
       val numRouteParams = 0
       numParams shouldBe Some(
@@ -125,6 +121,40 @@ class ApiSwaggerTest extends ApiV2WorksTestBase with Matchers {
         "LanguageAggregationBucket",
       )
     }
+  }
+
+  //. We write this test for this specific parameter as it's used by the frontend
+  it("should contain `_queryType parameter with valid `allowedValues`") {
+    checkSwaggerJson { json =>
+      val _queryType =
+        getParameter(json, "_queryType")
+
+      val queryTypeAllowedValues =
+        _queryType.get.hcursor
+          .downField("schema")
+          .get[List[String]]("enum")
+          .toOption
+          .getOrElse(List())
+
+      queryTypeAllowedValues should contain theSameElementsAs (SearchQueryType.allowed
+        .map(_.name))
+    }
+  }
+
+  private def getParameter(json: Json, name: String) =
+    getKey(getEndpoint(json), "parameters")
+      .flatMap(_.asArray)
+      .flatMap(
+        _.toList.find(getKey(_, "name").flatMap(_.asString).contains(name))
+      )
+
+  private def getEndpoint(json: Json): Json = {
+    val endpoint = getKey(json, "paths")
+      .flatMap(paths => getKey(paths, "/works"))
+      .flatMap(path => getKey(path, "get"))
+
+    endpoint.isEmpty shouldBe false
+    endpoint.get
   }
 
   private def getKeys(json: Json): List[String] =
