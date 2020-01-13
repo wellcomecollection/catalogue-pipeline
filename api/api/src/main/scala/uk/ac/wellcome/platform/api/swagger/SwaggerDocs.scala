@@ -15,7 +15,6 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn
 import io.swagger.v3.oas.annotations.media.{Content, Schema}
 import javax.ws.rs.{GET, Path}
 import grizzled.slf4j.Logging
-
 import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.display.models.v2._
@@ -122,7 +121,6 @@ trait SingleWorkSwagger {
 
 @Path("/works")
 trait MultipleWorksSwagger {
-
   @GET
   @Tag(name = "Works")
   @Operation(
@@ -260,6 +258,17 @@ trait MultipleWorksSwagger {
         description = "The number of works to return per page (default: 10)",
         required = false
       ),
+      new Parameter(
+        name = "_queryType",
+        in = ParameterIn.QUERY,
+        description =
+          "Which query should we use search the works? Used predominantly for internal testing of relevancy. Considered Unstable.",
+        schema = new Schema(
+          `type` = "enum",
+          allowableValues = Array("ScoringTiers", "FixedFields"),
+        ),
+        required = false
+      )
     )
   )
   @ApiResponse(
