@@ -12,7 +12,12 @@ import requests
 import tqdm
 
 
-SOURCES = ["miro", "sierra", "sierra-items", "mets"]
+SOURCES = {
+    "miro": "vhs-sourcedata-miro",
+    "sierra": "vhs-sourcedata-sierra",
+    "sierra-items": "vhs-sourcedata-sierra-items",
+    "mets": "mets-adapter-store",
+}
 
 DESTINATIONS = ["catalogue", "reporting"]
 
@@ -137,7 +142,7 @@ def publish_messages(job_config_id, topic_arn, parameters):
 @click.command()
 @click.option(
     "--src",
-    type=click.Choice(SOURCES),
+    type=click.Choice(SOURCES.keys()),
     required=True,
     prompt="Which source do you want to reindex?",
     help="Name of the source to reindex",
@@ -165,7 +170,7 @@ def start_reindex(src, dst, mode, reason):
     print(f"Starting a reindex {src!r} ~> {dst!r}")
 
     if mode == "complete":
-        total_segments = how_many_segments(table_name=f"vhs-sourcedata-{src}")
+        total_segments = how_many_segments(table_name=SOURCES[src])
         parameters = complete_reindex_parameters(total_segments)
     elif mode == "partial":
         max_records = click.prompt("How many records do you want to send?", default=10)
