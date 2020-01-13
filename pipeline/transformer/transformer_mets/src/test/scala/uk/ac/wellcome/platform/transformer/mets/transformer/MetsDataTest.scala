@@ -49,7 +49,8 @@ class MetsDataTest
 
   it("creates a invisible work with an item and no license") {
     val bNumber = randomAlphanumeric(10)
-    val metsData = MetsData(recordIdentifier = bNumber, accessConditionDz = None)
+    val metsData =
+      MetsData(recordIdentifier = bNumber, accessConditionDz = None)
     val version = 1
     val expectedSourceIdentifier = SourceIdentifier(
       IdentifierType("mets", "METS"),

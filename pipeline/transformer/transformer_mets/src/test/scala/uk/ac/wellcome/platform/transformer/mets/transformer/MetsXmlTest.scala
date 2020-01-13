@@ -30,7 +30,8 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
   }
 
   it("parses accessConditionUsage from XML") {
-    MetsXml(xml).right.get.accessConditionUsage shouldBe Right(Some("Some terms"))
+    MetsXml(xml).right.get.accessConditionUsage shouldBe Right(
+      Some("Some terms"))
   }
 
   it("parses a METS with no access condition") {

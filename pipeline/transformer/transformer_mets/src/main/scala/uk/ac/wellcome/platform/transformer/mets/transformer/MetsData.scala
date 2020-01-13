@@ -43,7 +43,8 @@ case class MetsData(
     reason = Some("METS work")
   )
 
-  private def digitalLocation(license: Option[License], accessStatus: Option[AccessStatus]) =
+  private def digitalLocation(license: Option[License],
+                              accessStatus: Option[AccessStatus]) =
     DigitalLocation(
       url = s"https://wellcomelibrary.org/iiif/$recordIdentifier/manifest",
       locationType = LocationType("iiif-presentation"),
@@ -73,13 +74,14 @@ case class MetsData(
     accessConditionStatus
       .map(_.toLowerCase)
       .map {
-        case "open" => Right(AccessStatus.Open)
+        case "open"                  => Right(AccessStatus.Open)
         case "requires registration" => Right(AccessStatus.OpenWithAdvisory)
-        case "restricted" => Right(AccessStatus.Restricted)
-        case "clinical images" => Right(AccessStatus.Restricted)
-        case "closed" => Right(AccessStatus.Closed)
-        case "in copyright" => Right(AccessStatus.LicensedResources)
-        case status => Left(new Exception(s"Unrecognised access status: $status"))
+        case "restricted"            => Right(AccessStatus.Restricted)
+        case "clinical images"       => Right(AccessStatus.Restricted)
+        case "closed"                => Right(AccessStatus.Closed)
+        case "in copyright"          => Right(AccessStatus.LicensedResources)
+        case status =>
+          Left(new Exception(s"Unrecognised access status: $status"))
       }
       .sequence
 
