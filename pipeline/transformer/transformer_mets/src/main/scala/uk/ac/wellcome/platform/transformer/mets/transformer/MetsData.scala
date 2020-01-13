@@ -23,7 +23,7 @@ case class MetsData(
       UnidentifiedInvisibleWork(
         version = version,
         sourceIdentifier = sourceIdentifier,
-        workData(unidentifiableItem, thumbnail(maybeLicense))
+        workData(unidentifiableItem, thumbnail(maybeLicense, sourceIdentifier.value))
       )
 
   private def workData(unidentifiableItem: MaybeDisplayable[Item],
@@ -93,13 +93,19 @@ case class MetsData(
 
   private val thumbnailDim = "200"
 
-  private def thumbnail(maybeLicense: Option[License]) =
+  private def thumbnail(maybeLicense: Option[License], bnumber: String) =
     thumbnailLocation.map { location =>
+      val url = if(!location.toLowerCase.endsWith(".pdf")){
+        s"https://dlcs.io/thumbs/wellcome/5/$location/full/!$thumbnailDim,$thumbnailDim/0/default.jpg"
+      }else {
+        s"https://wellcomelibrary.org/pdfthumbs/${bnumber}/0/${location}.jpg"
+      }
       DigitalLocation(
         url =
-          s"https://dlcs.io/thumbs/wellcome/5/$location/full/!$thumbnailDim,$thumbnailDim/0/default.jpg",
+          url,
         locationType = LocationType("thumbnail-image"),
         license = maybeLicense
       )
-    }
+      }
+
 }
