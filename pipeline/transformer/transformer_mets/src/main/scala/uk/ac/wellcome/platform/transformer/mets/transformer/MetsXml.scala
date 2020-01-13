@@ -34,7 +34,8 @@ case class MetsXml(root: Elem) {
     }
   }
 
-  /** We are interested with the access condition with type `dz`. For example:
+  /** For licenses We are interested with the access condition with type `dz`.
+    *  For example:
     *
     *  <mets:dmdSec ID="DMDLOG_0000">
     *    <mets:mdWrap MDTYPE="MODS">
@@ -52,7 +53,7 @@ case class MetsXml(root: Elem) {
     *
     *  The expected output would be: "CC-BY-NC"
     */
-  def accessCondition: Either[Exception, Option[String]] = {
+  def accessConditionDz: Either[Exception, Option[String]] = {
     val licenseNodes = (root \\ "dmdSec" \ "mdWrap" \\ "accessCondition")
       .filterByAttribute("type", "dz")
       .toList
@@ -61,7 +62,7 @@ case class MetsXml(root: Elem) {
       case List(licenseNode) => Right(Some(licenseNode.text))
       case _ =>
         Left(
-          new Exception("Found multiple accessCondtions in METS XML")
+          new Exception("Found multiple accessCondtions with type dz in METS XML")
         )
     }
   }

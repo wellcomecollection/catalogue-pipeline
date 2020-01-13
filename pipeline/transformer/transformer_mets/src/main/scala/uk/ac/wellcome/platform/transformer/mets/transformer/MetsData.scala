@@ -7,7 +7,7 @@ import org.apache.commons.lang3.StringUtils.equalsIgnoreCase
 
 case class MetsData(
   recordIdentifier: String,
-  accessCondition: Option[String],
+  accessConditionDz: Option[String],
   thumbnailLocation: Option[String] = None
 ) {
 
@@ -52,7 +52,7 @@ case class MetsData(
   // sometimes the label (ie "in copyright")
   // and sometimes the url of the license
   private def parseLicense = {
-    accessCondition.map { accessCondition =>
+    accessConditionDz.map { accessCondition =>
       License.values.find { license =>
         equalsIgnoreCase(license.id, accessCondition) || equalsIgnoreCase(
           license.label,
