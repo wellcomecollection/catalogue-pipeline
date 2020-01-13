@@ -74,8 +74,10 @@ case class MetsData(
       .map(_.toLowerCase)
       .map {
         case "open" => Right(AccessStatus.Open)
-        case "requires registation" => Right(AccessStatus.OpenWithAdvisory)
+        case "requires registration" => Right(AccessStatus.OpenWithAdvisory)
         case "restricted" => Right(AccessStatus.Restricted)
+        case "clinical images" => Right(AccessStatus.Restricted)
+        case "closed" => Right(AccessStatus.Closed)
         case "in copyright" => Right(AccessStatus.LicensedResources)
         case status => Left(new Exception(s"Unrecognised access status: $status"))
       }

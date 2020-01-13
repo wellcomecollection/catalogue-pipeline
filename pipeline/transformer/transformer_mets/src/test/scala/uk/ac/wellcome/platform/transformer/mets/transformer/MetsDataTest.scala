@@ -146,4 +146,50 @@ class MetsDataTest
       )
     )
   }
+
+  it("creates a work with a single accessCondition") {
+    val result = MetsData(
+      recordIdentifier = "ID",
+      accessConditionStatus = Some("Requires registration"),
+    ).toWork(1)
+    result shouldBe a[Right[_, _]]
+    inside(result.right.get.data.items.head.agent.locations.head) {
+      case DigitalLocation(_, _, _, _, accessConditions, _) =>
+        accessConditions shouldBe Some(
+          List(
+            AccessCondition(
+              status = AccessStatus.OpenWithAdvisory
+            )
+          )
+        )
+    }
+  }
+
+  it("creates a work with a single accessCondition including usage terms") {
+    val result = MetsData(
+      recordIdentifier = "ID",
+      accessConditionStatus = Some("Clinical Images"),
+      accessConditionUsage = Some("Please ask nicely")
+    ).toWork(1)
+    result shouldBe a[Right[_, _]]
+    inside(result.right.get.data.items.head.agent.locations.head) {
+      case DigitalLocation(_, _, _, _, accessConditions, _) =>
+        accessConditions shouldBe Some(
+          List(
+            AccessCondition(
+              status = AccessStatus.Restricted,
+              terms = Some("Please ask nicely")
+            )
+          )
+        )
+    }
+  }
+
+  it("fails createing a work when unknown AccessStatus") {
+    val result = MetsData(
+      recordIdentifier = "ID",
+      accessConditionStatus = Some("Kanye West"),
+    ).toWork(1)
+    result shouldBe a[Left[_, _]]
+  }
 }
