@@ -2,6 +2,7 @@ package uk.ac.wellcome.platform.idminter
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.s3.AmazonS3
 import com.typesafe.config.Config
 import io.circe.Json
@@ -12,28 +13,36 @@ import uk.ac.wellcome.platform.idminter.database.IdentifiersDao
 import uk.ac.wellcome.platform.idminter.models.{Identifier, IdentifiersTable}
 import uk.ac.wellcome.platform.idminter.services.IdMinterWorkerService
 import uk.ac.wellcome.platform.idminter.steps.{IdEmbedder, IdentifierGenerator}
-import uk.ac.wellcome.storage.store.memory.MemoryStore
+import uk.ac.wellcome.platform.idminter.utils.SimpleDynamoStore
+import uk.ac.wellcome.storage.dynamo.DynamoConfig
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
+import uk.ac.wellcome.storage.streaming.Codec._
+import uk.ac.wellcome.storage.typesafe.{DynamoBuilder, S3Builder}
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 
 import scala.concurrent.ExecutionContext
-import uk.ac.wellcome.storage.streaming.Codec._
-import uk.ac.wellcome.storage.typesafe.S3Builder
+
+import org.scanamo.auto._
+
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
+
     implicit val actorSystem: ActorSystem =
       AkkaBuilder.buildActorSystem()
     implicit val executionContext: ExecutionContext =
       AkkaBuilder.buildExecutionContext()
     implicit val materializer: ActorMaterializer =
       AkkaBuilder.buildActorMaterializer()
+    implicit val dynamoClient: AmazonDynamoDB =
+      DynamoBuilder.buildDynamoClient(config)
+    implicit val dynamoConfig: DynamoConfig =
+      DynamoBuilder.buildDynamoConfig(config)
 
     val identifiersTableConfig = IdentifiersTableBuilder.buildConfig(config)
 
-    val memoryStore = new MemoryStore[SourceIdentifier, Identifier](Map.empty)
-
+    val dynamoStore = new SimpleDynamoStore[SourceIdentifier, Identifier](dynamoConfig)
 
     val identifierGenerator = new IdentifierGenerator(
       identifiersDao = new IdentifiersDao(
@@ -41,7 +50,7 @@ object Main extends WellcomeTypesafeApp {
         identifiers = new IdentifiersTable(
           identifiersTableConfig = identifiersTableConfig
         ),
-        memoryStore
+        dynamoStore
       )
     )
 

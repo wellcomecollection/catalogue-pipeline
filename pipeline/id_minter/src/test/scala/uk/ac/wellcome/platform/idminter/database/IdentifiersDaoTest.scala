@@ -19,7 +19,7 @@ class IdentifiersDaoTest
     with IdentifiersGenerators {
 
   def withIdentifiersDao[R](
-    testWith: TestWith[(IdentifiersDao, IdentifiersTable), R]): R =
+    testWith: TestWith[(IdentifiersDao[MemoryStore[SourceIdentifier, Identifier]], IdentifiersTable), R]): R =
     withIdentifiersDatabase { identifiersTableConfig =>
       val identifiersTable = new IdentifiersTable(identifiersTableConfig)
 

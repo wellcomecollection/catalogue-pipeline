@@ -27,14 +27,15 @@ trait WorkerServiceFixture
   def withWorkerService[R](bucket: Bucket,
                            topic: Topic,
                            queue: Queue,
-                           identifiersDao: IdentifiersDao,
+                           identifiersDao: IdentifiersDao[MemoryStore[SourceIdentifier, Identifier]],
                            identifiersTableConfig: IdentifiersTableConfig)(
-    testWith: TestWith[IdMinterWorkerService[SNSConfig], R]): R =
+    testWith: TestWith[IdMinterWorkerService[_,SNSConfig], R]): R =
     withActorSystem { implicit actorSystem =>
       withSqsBigMessageSender[Json, R](bucket, topic) { bigMessageSender =>
         {
           implicit val typedStoreT =
             MemoryTypedStoreCompanion[ObjectLocation, Json]()
+
           withBigMessageStream[Json, R](queue) { messageStream =>
             val workerService = new IdMinterWorkerService(
               idEmbedder = new IdEmbedder(
@@ -60,11 +61,13 @@ trait WorkerServiceFixture
                            topic: Topic,
                            queue: Queue,
                            identifiersTableConfig: IdentifiersTableConfig)(
-    testWith: TestWith[IdMinterWorkerService[SNSConfig], R]): R = {
+    testWith: TestWith[IdMinterWorkerService[_,SNSConfig], R]): R = {
     Class.forName("com.mysql.jdbc.Driver")
     ConnectionPool.singleton(s"jdbc:mysql://$host:$port", username, password)
 
     val memoryStore = new MemoryStore[SourceIdentifier, Identifier](Map.empty)
+
+//    val dynamoStore = new SimpleDynamoStore[SourceIdentifier, Identifier](dynamoConfig)
 
     val identifiersDao = new IdentifiersDao(
       db = DB.connect(),

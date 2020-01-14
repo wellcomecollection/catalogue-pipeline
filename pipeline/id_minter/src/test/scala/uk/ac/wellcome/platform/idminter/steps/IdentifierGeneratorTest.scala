@@ -22,9 +22,9 @@ class IdentifierGeneratorTest
     with MockitoSugar
     with IdentifiersGenerators {
 
-  def withIdentifierGenerator[R](maybeIdentifiersDao: Option[IdentifiersDao] =
+  def withIdentifierGenerator[R](maybeIdentifiersDao: Option[IdentifiersDao[MemoryStore[SourceIdentifier, Identifier]]] =
                                    None)(
-    testWith: TestWith[(IdentifierGenerator, IdentifiersTable), R]) =
+    testWith: TestWith[(IdentifierGenerator[MemoryStore[SourceIdentifier, Identifier]], IdentifiersTable), R]) =
     withIdentifiersDatabase[R] { identifiersTableConfig =>
       val identifiersTable = new IdentifiersTable(identifiersTableConfig)
 
@@ -109,7 +109,7 @@ class IdentifierGeneratorTest
   }
 
   it("returns a failure if it fails registering a new identifier") {
-    val identifiersDao = mock[IdentifiersDao]
+    val identifiersDao = mock[IdentifiersDao[MemoryStore[SourceIdentifier, Identifier]]]
 
     val sourceIdentifier = createSourceIdentifier
 
@@ -122,8 +122,11 @@ class IdentifierGeneratorTest
 
     val expectedException = new Exception("Noooo")
 
-    when(identifiersDao.saveIdentifier(sourceIdentifier, any[Identifier]()))
-      .thenReturn(Failure(expectedException))
+    val whenThing = identifiersDao.saveIdentifier(
+      org.mockito.Matchers.eq(sourceIdentifier), any[Identifier]()
+    )
+
+    when(whenThing).thenReturn(Failure(expectedException))
 
     withIdentifierGenerator(Some(identifiersDao)) {
       case (identifierGenerator, _) =>

@@ -13,10 +13,10 @@ import uk.ac.wellcome.storage.store.Store
 import scala.concurrent.blocking
 import scala.util.{Failure, Success, Try}
 
-class IdentifiersDao(
+class IdentifiersDao[StoreType <: Store[SourceIdentifier, Identifier]](
                       db: DB,
                       identifiers: IdentifiersTable,
-                      store: Store[SourceIdentifier, Identifier]
+                      store: StoreType
                     ) extends Logging {
 
   implicit val session = AutoSession(db.settingsProvider)

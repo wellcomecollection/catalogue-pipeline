@@ -6,12 +6,12 @@ import org.scalatest.{FunSpec, Matchers}
 import scalikejdbc._
 import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
-import uk.ac.wellcome.platform.idminter.database.{
-  FieldDescription,
-  IdentifiersDao
-}
+import uk.ac.wellcome.models.work.internal.SourceIdentifier
+import uk.ac.wellcome.platform.idminter.database.{FieldDescription, IdentifiersDao}
 import uk.ac.wellcome.platform.idminter.fixtures
 import uk.ac.wellcome.platform.idminter.fixtures.WorkerServiceFixture
+import uk.ac.wellcome.platform.idminter.models.Identifier
+import uk.ac.wellcome.storage.store.memory.MemoryStore
 
 class IdMinterWorkerServiceTest
     extends FunSpec
@@ -30,7 +30,7 @@ class IdMinterWorkerServiceTest
       withLocalSnsTopic { topic =>
         withIdentifiersDatabase { identifiersTableConfig =>
           withLocalS3Bucket { bucket =>
-            val identifiersDao = mock[IdentifiersDao]
+            val identifiersDao = mock[IdentifiersDao[MemoryStore[SourceIdentifier, Identifier]]]
             withWorkerService(
               bucket,
               topic,
