@@ -148,6 +148,36 @@ class MetsDataTest
     )
   }
 
+  it("serves the thumbnail from wellcomelibrary for PDFs") {
+    val bnumber = randomAlphanumeric(10)
+    val assetId = "location.pdf"
+    val metsData = MetsData(
+      recordIdentifier = bnumber,
+      accessConditionDz = Some("CC-BY-NC"),
+      thumbnailLocation = Some(assetId)
+    )
+    val result = metsData.toWork(1)
+    result shouldBe a[Right[_, _]]
+    result.right.get.data.thumbnail shouldBe Some(
+      DigitalLocation(
+        s"https://wellcomelibrary.org/pdfthumbs/${bnumber}/0/${assetId}.jpg",
+        LocationType("thumbnail-image"),
+        license = Some(License.CCBYNC)
+      )
+    )
+  }
+
+  it("does not add a thumbnail if the file is a video") {
+    val metsData = MetsData(
+      recordIdentifier = randomAlphanumeric(10),
+      accessConditionDz = Some("CC-BY-NC"),
+      thumbnailLocation = Some("video.mpg")
+    )
+    val result = metsData.toWork(1)
+    result shouldBe a[Right[_, _]]
+    result.right.get.data.thumbnail shouldBe None
+  }
+
   it("creates a work with a single accessCondition") {
     val result = MetsData(
       recordIdentifier = "ID",
