@@ -4,8 +4,8 @@ import java.time.Instant
 
 case class AccessCondition(
   status: AccessStatus,
-  terms: Option[String],
-  to: Option[Instant]
+  terms: Option[String] = None,
+  to: Option[Instant] = None
 )
 
 sealed trait AccessStatus

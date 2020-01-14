@@ -14,9 +14,11 @@ class MetsXmlTransformerTest extends FunSpec with Matchers with MetsGenerators {
     val xml = loadXmlFile("/b30246039.xml")
     transform(Some(xml)) shouldBe Right(
       MetsData(
-        "b30246039",
-        Some("CC-BY-NC"),
-        Some("b30246039_0001.jp2")
+        recordIdentifier = "b30246039",
+        accessConditionDz = Some("CC-BY-NC"),
+        accessConditionStatus = Some("Open"),
+        accessConditionUsage = Some("Some terms"),
+        thumbnailLocation = Some("b30246039_0001.jp2")
       )
     )
   }
@@ -33,9 +35,10 @@ class MetsXmlTransformerTest extends FunSpec with Matchers with MetsGenerators {
     )
     transform(Some(xml), manifestations) shouldBe Right(
       MetsData(
-        "b22012692",
-        Some("PDM"),
-        Some("b22012692_0001_0001.jp2")
+        recordIdentifier = "b22012692",
+        accessConditionDz = Some("PDM"),
+        accessConditionStatus = Some("Open"),
+        thumbnailLocation = Some("b22012692_0001_0001.jp2")
       )
     )
   }

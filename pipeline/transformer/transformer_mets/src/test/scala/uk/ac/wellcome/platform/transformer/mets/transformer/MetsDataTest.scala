@@ -13,7 +13,7 @@ class MetsDataTest
   it("creates a invisible work with an item and a license") {
     val bNumber = randomAlphanumeric(10)
     val metsData =
-      MetsData(recordIdentifier = bNumber, accessCondition = Some("CC-BY-NC"))
+      MetsData(recordIdentifier = bNumber, accessConditionDz = Some("CC-BY-NC"))
     val version = 1
     val expectedSourceIdentifier = SourceIdentifier(
       IdentifierType("mets", "METS"),
@@ -49,7 +49,8 @@ class MetsDataTest
 
   it("creates a invisible work with an item and no license") {
     val bNumber = randomAlphanumeric(10)
-    val metsData = MetsData(recordIdentifier = bNumber, accessCondition = None)
+    val metsData =
+      MetsData(recordIdentifier = bNumber, accessConditionDz = None)
     val version = 1
     val expectedSourceIdentifier = SourceIdentifier(
       IdentifierType("mets", "METS"),
@@ -84,7 +85,7 @@ class MetsDataTest
   it("fails creating a work if it cannot parse the license") {
     val bNumber = randomAlphanumeric(10)
     val metsData =
-      MetsData(recordIdentifier = bNumber, accessCondition = Some("blah"))
+      MetsData(recordIdentifier = bNumber, accessConditionDz = Some("blah"))
     val version = 1
 
     metsData.toWork(version).left.get shouldBe a[Exception]
@@ -95,7 +96,7 @@ class MetsDataTest
     val metsData =
       MetsData(
         recordIdentifier = randomAlphanumeric(10),
-        accessCondition = Some("in copyright"))
+        accessConditionDz = Some("in copyright"))
     inside(metsData.toWork(1).right.get.data.items) {
       case List(
           Unidentifiable(
@@ -108,7 +109,7 @@ class MetsDataTest
     val metsData =
       MetsData(
         recordIdentifier = randomAlphanumeric(10),
-        accessCondition = Some("In copyright"))
+        accessConditionDz = Some("In copyright"))
     inside(metsData.toWork(1).right.get.data.items) {
       case List(
           Unidentifiable(
@@ -121,7 +122,7 @@ class MetsDataTest
     val metsData =
       MetsData(
         recordIdentifier = randomAlphanumeric(10),
-        accessCondition = Some(License.InCopyright.url))
+        accessConditionDz = Some(License.InCopyright.url))
     inside(metsData.toWork(1).right.get.data.items) {
       case List(
           Unidentifiable(
@@ -133,7 +134,7 @@ class MetsDataTest
   it("creates a invisible work with a thumbnail location") {
     val metsData = MetsData(
       recordIdentifier = randomAlphanumeric(10),
-      accessCondition = Some("CC-BY-NC"),
+      accessConditionDz = Some("CC-BY-NC"),
       thumbnailLocation = Some("location.png")
     )
     val result = metsData.toWork(1)
@@ -145,5 +146,51 @@ class MetsDataTest
         license = Some(License.CCBYNC)
       )
     )
+  }
+
+  it("creates a work with a single accessCondition") {
+    val result = MetsData(
+      recordIdentifier = "ID",
+      accessConditionStatus = Some("Requires registration"),
+    ).toWork(1)
+    result shouldBe a[Right[_, _]]
+    inside(result.right.get.data.items.head.agent.locations.head) {
+      case DigitalLocation(_, _, _, _, accessConditions, _) =>
+        accessConditions shouldBe Some(
+          List(
+            AccessCondition(
+              status = AccessStatus.OpenWithAdvisory
+            )
+          )
+        )
+    }
+  }
+
+  it("creates a work with a single accessCondition including usage terms") {
+    val result = MetsData(
+      recordIdentifier = "ID",
+      accessConditionStatus = Some("Clinical Images"),
+      accessConditionUsage = Some("Please ask nicely")
+    ).toWork(1)
+    result shouldBe a[Right[_, _]]
+    inside(result.right.get.data.items.head.agent.locations.head) {
+      case DigitalLocation(_, _, _, _, accessConditions, _) =>
+        accessConditions shouldBe Some(
+          List(
+            AccessCondition(
+              status = AccessStatus.Restricted,
+              terms = Some("Please ask nicely")
+            )
+          )
+        )
+    }
+  }
+
+  it("fails creating a work when unknown AccessStatus") {
+    val result = MetsData(
+      recordIdentifier = "ID",
+      accessConditionStatus = Some("Kanye West"),
+    ).toWork(1)
+    result shouldBe a[Left[_, _]]
   }
 }

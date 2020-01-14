@@ -21,12 +21,21 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
     MetsXml(xmlMultipleIds).recordIdentifier shouldBe a[Left[_, _]]
   }
 
-  it("parses accessCondition from XML") {
-    MetsXml(xml).right.get.accessCondition shouldBe Right(Some("CC-BY-NC"))
+  it("parses accessConditionDz from XML") {
+    MetsXml(xml).right.get.accessConditionDz shouldBe Right(Some("CC-BY-NC"))
+  }
+
+  it("parses accessConditionStatus from XML") {
+    MetsXml(xml).right.get.accessConditionStatus shouldBe Right(Some("Open"))
+  }
+
+  it("parses accessConditionUsage from XML") {
+    MetsXml(xml).right.get.accessConditionUsage shouldBe Right(
+      Some("Some terms"))
   }
 
   it("parses a METS with no access condition") {
-    MetsXml(xmlNoLicense).accessCondition shouldBe Right(None)
+    MetsXml(xmlNoLicense).accessConditionDz shouldBe Right(None)
   }
 
   it("fails if the input string is not an xml") {
@@ -34,7 +43,7 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
   }
 
   it("does not parse a METS with multiple licenses") {
-    MetsXml(xmlMultipleLicense).accessCondition shouldBe a[Left[_, _]]
+    MetsXml(xmlMultipleLicense).accessConditionDz shouldBe a[Left[_, _]]
   }
 
   it("parses thumbnail from XML") {
