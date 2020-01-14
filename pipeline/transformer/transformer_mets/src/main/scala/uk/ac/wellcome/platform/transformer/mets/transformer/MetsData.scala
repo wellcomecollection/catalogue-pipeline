@@ -25,7 +25,9 @@ case class MetsData(
       UnidentifiedInvisibleWork(
         version = version,
         sourceIdentifier = sourceIdentifier,
-        workData(unidentifiableItem, thumbnail(maybeLicense, sourceIdentifier.value))
+        workData(
+          unidentifiableItem,
+          thumbnail(maybeLicense, sourceIdentifier.value))
       )
 
   private def workData(unidentifiableItem: MaybeDisplayable[Item],
@@ -97,21 +99,26 @@ case class MetsData(
 
   private def thumbnail(maybeLicense: Option[License], bnumber: String) =
     for {
-     location <- thumbnailLocation
+      location <- thumbnailLocation
       url <- buildThumbnailUrl(location, bnumber)
-    } yield DigitalLocation(
-      url =
-        url,
-      locationType = LocationType("thumbnail-image"),
-      license = maybeLicense
-    )
+    } yield
+      DigitalLocation(
+        url = url,
+        locationType = LocationType("thumbnail-image"),
+        license = maybeLicense
+      )
 
   private def buildThumbnailUrl(location: String, bnumber: String) = {
-    val mediaType = URLConnection.guessContentTypeFromName(new File(location).getName)
+    val mediaType =
+      URLConnection.guessContentTypeFromName(new File(location).getName)
     mediaType match {
-      case m if m startsWith("video/") => None
-      case m if m equals("application/pdf") => Some(s"https://wellcomelibrary.org/pdfthumbs/${bnumber}/0/${location}.jpg")
-      case _ => Some(s"https://dlcs.io/thumbs/wellcome/5/$location/full/!$thumbnailDim,$thumbnailDim/0/default.jpg")
+      case m if m startsWith ("video/") => None
+      case m if m equals ("application/pdf") =>
+        Some(
+          s"https://wellcomelibrary.org/pdfthumbs/${bnumber}/0/${location}.jpg")
+      case _ =>
+        Some(
+          s"https://dlcs.io/thumbs/wellcome/5/$location/full/!$thumbnailDim,$thumbnailDim/0/default.jpg")
     }
   }
 }
