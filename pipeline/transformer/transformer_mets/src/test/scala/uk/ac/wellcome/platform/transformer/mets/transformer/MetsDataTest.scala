@@ -167,6 +167,17 @@ class MetsDataTest
     )
   }
 
+  it("does not add a thumbnail if the file is a video") {
+    val metsData = MetsData(
+      recordIdentifier = randomAlphanumeric(10),
+      accessCondition = Some("CC-BY-NC"),
+      thumbnailLocation = Some("video.mpg")
+    )
+    val result = metsData.toWork(1)
+    result shouldBe a[Right[_, _]]
+    result.right.get.data.thumbnail shouldBe None
+  }
+
   it("creates a work with a single accessCondition") {
     val result = MetsData(
       recordIdentifier = "ID",

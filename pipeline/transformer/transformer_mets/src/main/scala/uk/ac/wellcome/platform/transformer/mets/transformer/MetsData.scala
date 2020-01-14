@@ -1,7 +1,9 @@
 package uk.ac.wellcome.platform.transformer.mets.transformer
 
-import uk.ac.wellcome.models.work.internal._
+import java.io.File
+import java.net.URLConnection
 
+import uk.ac.wellcome.models.work.internal._
 import cats.implicits._
 import org.apache.commons.lang3.StringUtils.equalsIgnoreCase
 
@@ -94,18 +96,22 @@ case class MetsData(
   private val thumbnailDim = "200"
 
   private def thumbnail(maybeLicense: Option[License], bnumber: String) =
-    thumbnailLocation.map { location =>
-      val url = if(!location.toLowerCase.endsWith(".pdf")){
-        s"https://dlcs.io/thumbs/wellcome/5/$location/full/!$thumbnailDim,$thumbnailDim/0/default.jpg"
-      }else {
-        s"https://wellcomelibrary.org/pdfthumbs/${bnumber}/0/${location}.jpg"
-      }
-      DigitalLocation(
-        url =
-          url,
-        locationType = LocationType("thumbnail-image"),
-        license = maybeLicense
-      )
-      }
+    for {
+     location <- thumbnailLocation
+      url <- buildThumbnailUrl(location, bnumber)
+    } yield DigitalLocation(
+      url =
+        url,
+      locationType = LocationType("thumbnail-image"),
+      license = maybeLicense
+    )
 
+  private def buildThumbnailUrl(location: String, bnumber: String) = {
+    val mediaType = URLConnection.guessContentTypeFromName(new File(location).getName)
+    mediaType match {
+      case m if m startsWith("video/") => None
+      case m if m equals("application/pdf") => Some(s"https://wellcomelibrary.org/pdfthumbs/${bnumber}/0/${location}.jpg")
+      case _ => Some(s"https://dlcs.io/thumbs/wellcome/5/$location/full/!$thumbnailDim,$thumbnailDim/0/default.jpg")
+    }
+  }
 }
