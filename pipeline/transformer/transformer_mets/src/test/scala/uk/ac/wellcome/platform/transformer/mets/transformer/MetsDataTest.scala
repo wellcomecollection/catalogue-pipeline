@@ -153,7 +153,7 @@ class MetsDataTest
     val assetId = "location.pdf"
     val metsData = MetsData(
       recordIdentifier = bnumber,
-      accessCondition = Some("CC-BY-NC"),
+      accessConditionDz = Some("CC-BY-NC"),
       thumbnailLocation = Some(assetId)
     )
     val result = metsData.toWork(1)
@@ -170,7 +170,7 @@ class MetsDataTest
   it("does not add a thumbnail if the file is a video") {
     val metsData = MetsData(
       recordIdentifier = randomAlphanumeric(10),
-      accessCondition = Some("CC-BY-NC"),
+      accessConditionDz = Some("CC-BY-NC"),
       thumbnailLocation = Some("video.mpg")
     )
     val result = metsData.toWork(1)
