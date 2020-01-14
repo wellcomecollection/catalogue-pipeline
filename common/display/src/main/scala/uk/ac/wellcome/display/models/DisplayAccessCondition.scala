@@ -1,7 +1,5 @@
 package uk.ac.wellcome.display.models
 
-import java.time.{LocalDateTime, ZoneOffset}
-import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
 import io.circe.generic.extras.JsonKey
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.ac.wellcome.models.work.internal.{AccessCondition, AccessStatus}
@@ -23,9 +21,7 @@ object DisplayAccessCondition {
     DisplayAccessCondition(
       status = DisplayAccessStatus(accessCondition.status),
       terms = accessCondition.terms,
-      to = accessCondition.to.map { instant =>
-        LocalDateTime.ofInstant(instant, ZoneOffset.UTC).format(ISO_LOCAL_DATE)
-      }
+      to = accessCondition.to
     )
 }
 

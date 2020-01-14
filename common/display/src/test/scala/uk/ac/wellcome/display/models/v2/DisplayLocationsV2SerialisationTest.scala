@@ -1,7 +1,6 @@
 package uk.ac.wellcome.display.models.v2
 
 import org.scalatest.{Assertion, FunSpec}
-import java.time.{LocalDate, ZoneOffset}
 
 import uk.ac.wellcome.display.json.DisplayJsonUtil._
 import uk.ac.wellcome.display.models.V2WorksIncludes
@@ -94,9 +93,7 @@ class DisplayLocationsV2SerialisationTest
           AccessCondition(
             status = AccessStatus.Restricted,
             terms = Some("Ask politely"),
-            to = Some(
-              LocalDate.of(2024, 2, 24).atStartOfDay.toInstant(ZoneOffset.UTC)
-            )
+            to = Some("2024-02-24")
           )
         )
       )

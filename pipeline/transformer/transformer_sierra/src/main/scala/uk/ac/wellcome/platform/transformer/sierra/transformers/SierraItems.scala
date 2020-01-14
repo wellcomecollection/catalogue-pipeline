@@ -21,7 +21,7 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
   type Output = List[MaybeDisplayable[Item]]
 
   def apply(bibId: SierraBibNumber, bibData: SierraBibData) = {
-    val physicalItems = getPhysicalItems(itemDataMap)
+    val physicalItems = getPhysicalItems(itemDataMap, bibData)
     val maybeDigitalItem = getDigitalItem(bibId = bibId, bibData = bibData)
 
     // If we have a digital Item and a *single* physical Item, we know
@@ -46,7 +46,8 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
   }
 
   private def getPhysicalItems(
-    sierraItemDataMap: Map[SierraItemNumber, SierraItemData])
+    sierraItemDataMap: Map[SierraItemNumber, SierraItemData],
+    bibData: SierraBibData)
     : List[Identifiable[Item]] =
     sierraItemDataMap
       .filterNot {
@@ -54,10 +55,7 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
       }
       .map {
         case (itemId: SierraItemNumber, itemData: SierraItemData) =>
-          transformItemData(
-            itemId = itemId,
-            itemData = itemData
-          )
+          transformItemData(itemId, itemData, bibData)
       }
       .toList
 
@@ -96,7 +94,8 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
 
   private def transformItemData(
     itemId: SierraItemNumber,
-    itemData: SierraItemData): Identifiable[Item] = {
+    itemData: SierraItemData,
+    bibData: SierraBibData): Identifiable[Item] = {
     debug(s"Attempting to transform $itemId")
     Identifiable(
       sourceIdentifier = SourceIdentifier(
@@ -113,7 +112,7 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
       ),
       agent = Item(
         title = getItemTitle(itemData),
-        locations = getPhysicalLocation(itemData).toList
+        locations = getPhysicalLocation(itemData, bibData).toList
       )
     )
   }

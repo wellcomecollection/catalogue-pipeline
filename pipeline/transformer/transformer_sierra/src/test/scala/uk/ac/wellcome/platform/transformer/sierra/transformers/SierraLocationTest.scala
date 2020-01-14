@@ -18,6 +18,9 @@ class SierraLocationTest
   private val transformer = new SierraLocation {}
 
   describe("Physical locations") {
+
+    val bibData = createSierraBibData
+
     it("extracts location from item data") {
       val locationTypeCode = "sgmed"
       val locationType = LocationType("sgmed")
@@ -27,7 +30,7 @@ class SierraLocationTest
       )
       val expectedLocation = PhysicalLocation(locationType, label)
 
-      transformer.getPhysicalLocation(itemData = itemData) shouldBe Some(
+      transformer.getPhysicalLocation(itemData, bibData) shouldBe Some(
         expectedLocation)
     }
 
@@ -36,14 +39,14 @@ class SierraLocationTest
         location = Some(SierraSourceLocation("", ""))
       )
 
-      transformer.getPhysicalLocation(itemData = itemData) shouldBe None
+      transformer.getPhysicalLocation(itemData, bibData) shouldBe None
     }
 
     it("returns None if the location field only contains the string 'none'") {
       val itemData = createSierraItemDataWith(
         location = Some(SierraSourceLocation("none", "none"))
       )
-      transformer.getPhysicalLocation(itemData = itemData) shouldBe None
+      transformer.getPhysicalLocation(itemData, bibData) shouldBe None
     }
 
     it("returns None if there is no location in the item data") {
@@ -51,7 +54,7 @@ class SierraLocationTest
         location = None
       )
 
-      transformer.getPhysicalLocation(itemData = itemData) shouldBe None
+      transformer.getPhysicalLocation(itemData, bibData) shouldBe None
     }
   }
 
