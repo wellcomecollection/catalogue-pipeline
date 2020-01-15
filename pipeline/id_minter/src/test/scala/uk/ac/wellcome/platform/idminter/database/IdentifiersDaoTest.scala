@@ -15,26 +15,31 @@ class IdentifiersDaoTest
     with Matchers
     with IdentifiersGenerators {
 
+  type StoreType = MemoryStore[SourceIdentifier, Identifier]
+
   def withIdentifiersDao[R](
-    testWith: TestWith[IdentifiersDao[MemoryStore[SourceIdentifier, Identifier]], R]): R  = {
+    testWith: TestWith[(IdentifiersDao[StoreType], StoreType), R]): R  = {
 
       val memoryStore =
         new MemoryStore[SourceIdentifier, Identifier](Map.empty)
 
       val identifiersDao = new IdentifiersDao(memoryStore)
 
-      testWith(identifiersDao)
+      testWith((identifiersDao, memoryStore))
     }
 
   describe("lookupID") {
     it("gets an Identifier if it finds a matching SourceSystem and SourceId") {
       val sourceIdentifier = createSourceIdentifier
-      val identifier = createSQLIdentifierWith(
+      val identifier = createIdentifierWith(
         sourceIdentifier = sourceIdentifier
       )
 
-      withIdentifiersDao { identifiersDao =>
-          identifiersDao.saveIdentifier(sourceIdentifier, identifier) shouldBe Success(1)
+      withIdentifiersDao { case (identifiersDao, _) =>
+          identifiersDao.saveIdentifier(
+            sourceIdentifier,
+            identifier
+          ) shouldBe a[Success[_]]
 
           val triedLookup = identifiersDao.lookupId(
             sourceIdentifier = sourceIdentifier
@@ -46,9 +51,9 @@ class IdentifiersDaoTest
 
     it(
       "does not get an identifier if there is no matching SourceSystem and SourceId") {
-      val (sourceIdentifier, identifier) = createSQLIdentifier
+      val (sourceIdentifier, identifier) = createIdentifier
 
-      withIdentifiersDao { identifiersDao =>
+      withIdentifiersDao { case (identifiersDao, _) =>
           identifiersDao.saveIdentifier(sourceIdentifier, identifier) shouldBe a[Success[_]]
 
           val unknownSourceIdentifier = createSourceIdentifierWith(
@@ -67,23 +72,24 @@ class IdentifiersDaoTest
 
   describe("saveIdentifier") {
     it("adds the provided identifier into the database") {
-      val (sourceIdentifier, identifier) = createSQLIdentifier
+      val (sourceIdentifier, identifier) = createIdentifier
 
-      withIdentifiersDao { identifiersDao =>
+      withIdentifiersDao { case (identifiersDao, memoryStore) =>
           identifiersDao.saveIdentifier(sourceIdentifier, identifier)
 
-          // TODO: introspect dynamo
-          true shouldBe false
+          val result = memoryStore.get(sourceIdentifier)
+
+          result.right.get.identifiedT shouldBe identifier
       }
     }
 
     it("fails to insert a record with a duplicate CanonicalId") {
-      val (sourceIdentifier, identifier) = createSQLIdentifier
-      val duplicateIdentifier = createSQLIdentifierWith(
+      val (sourceIdentifier, identifier) = createIdentifier
+      val duplicateIdentifier = createIdentifierWith(
         canonicalId = identifier.CanonicalId
       )
 
-      withIdentifiersDao { identifiersDao =>
+      withIdentifiersDao { case (identifiersDao, _) =>
           identifiersDao.saveIdentifier(
             sourceIdentifier,
             identifier
@@ -108,17 +114,24 @@ class IdentifiersDaoTest
         ontologyType = "Bar"
       )
 
-      val identifier1 = createSQLIdentifierWith(
+      val identifier1 = createIdentifierWith(
         sourceIdentifier = sourceIdentifier1
       )
 
-      val identifier2 = createSQLIdentifierWith(
+      val identifier2 = createIdentifierWith(
         sourceIdentifier = sourceIdentifier2
       )
 
-      withIdentifiersDao { identifiersDao =>
-          identifiersDao.saveIdentifier(sourceIdentifier1, identifier1) shouldBe a[Success[_]]
-          identifiersDao.saveIdentifier(sourceIdentifier2, identifier2) shouldBe a[Success[_]]
+      withIdentifiersDao { case (identifiersDao, _) =>
+          identifiersDao.saveIdentifier(
+            sourceIdentifier1,
+            identifier1
+          ) shouldBe a[Success[_]]
+
+          identifiersDao.saveIdentifier(
+            sourceIdentifier2,
+            identifier2
+          ) shouldBe a[Success[_]]
       }
     }
 
@@ -131,17 +144,24 @@ class IdentifiersDaoTest
         value = "5678"
       )
 
-      val identifier1 = createSQLIdentifierWith(
+      val identifier1 = createIdentifierWith(
         sourceIdentifier = sourceIdentifier1
       )
 
-      val identifier2 = createSQLIdentifierWith(
+      val identifier2 = createIdentifierWith(
         sourceIdentifier = sourceIdentifier2
       )
 
-      withIdentifiersDao { identifiersDao =>
-          identifiersDao.saveIdentifier(sourceIdentifier1, identifier1) shouldBe a[Success[_]]
-          identifiersDao.saveIdentifier(sourceIdentifier2, identifier2) shouldBe a[Success[_]]
+      withIdentifiersDao { case (identifiersDao, _) =>
+          identifiersDao.saveIdentifier(
+            sourceIdentifier1,
+            identifier1
+          ) shouldBe a[Success[_]]
+
+          identifiersDao.saveIdentifier(
+            sourceIdentifier2,
+            identifier2
+          ) shouldBe a[Success[_]]
       }
     }
 
@@ -149,17 +169,24 @@ class IdentifiersDaoTest
       "does not insert records with the same SourceId, SourceSystem and OntologyType") {
       val sourceIdentifier = createSourceIdentifier
 
-      val identifier1 = createSQLIdentifierWith(
+      val identifier1 = createIdentifierWith(
         sourceIdentifier = sourceIdentifier
       )
-      val identifier2 = createSQLIdentifierWith(
+      val identifier2 = createIdentifierWith(
         sourceIdentifier = sourceIdentifier
       )
 
-      withIdentifiersDao { identifiersDao =>
-          identifiersDao.saveIdentifier(sourceIdentifier, identifier1) shouldBe a[Success[_]]
+      withIdentifiersDao { case (identifiersDao, _) =>
 
-          val triedSave = identifiersDao.saveIdentifier(sourceIdentifier, identifier2)
+          identifiersDao.saveIdentifier(
+            sourceIdentifier,
+            identifier1
+          ) shouldBe a[Success[_]]
+
+          val triedSave = identifiersDao.saveIdentifier(
+            sourceIdentifier,
+            identifier2
+          )
 
           triedSave shouldBe a[Failure[_]]
           triedSave.failed.get shouldBe a[IdMinterException]
@@ -167,7 +194,7 @@ class IdentifiersDaoTest
     }
   }
 
-  def createSQLIdentifierWith(
+  def createIdentifierWith(
     canonicalId: String = createCanonicalId,
     sourceIdentifier: SourceIdentifier = createSourceIdentifier
   ): Identifier =
@@ -176,9 +203,12 @@ class IdentifiersDaoTest
       sourceIdentifier = sourceIdentifier
     )
 
-  def createSQLIdentifier: (SourceIdentifier, Identifier) = {
+  def createIdentifier: (SourceIdentifier, Identifier) = {
+
     val sourceIdentifier = createSourceIdentifier
-    val sqlIdentifier = createSQLIdentifierWith(sourceIdentifier = sourceIdentifier)
+    val sqlIdentifier = createIdentifierWith(
+      sourceIdentifier = sourceIdentifier
+    )
 
     (sourceIdentifier, sqlIdentifier)
   }

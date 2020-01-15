@@ -19,8 +19,10 @@ class IdentifierGeneratorTest
     with MockitoSugar
     with IdentifiersGenerators {
 
-  def withIdentifierGenerator[R](maybeIdentifiersDao: Option[IdentifiersDao[MemoryStore[SourceIdentifier, Identifier]]] = None)(
-    testWith: TestWith[IdentifierGenerator[MemoryStore[SourceIdentifier, Identifier]], R]): R = {
+  type StoreType = MemoryStore[SourceIdentifier, Identifier]
+
+  def withIdentifierGenerator[R](maybeIdentifiersDao: Option[IdentifiersDao[StoreType]] = None)(
+    testWith: TestWith[(IdentifierGenerator[StoreType], StoreType), R]): R = {
       val memoryStore = new MemoryStore[SourceIdentifier, Identifier](Map.empty)
 
       val identifiersDao = maybeIdentifiersDao.getOrElse(
@@ -29,16 +31,17 @@ class IdentifierGeneratorTest
 
       val identifierGenerator = new IdentifierGenerator(identifiersDao)
 
-      testWith(identifierGenerator)
+      testWith((identifierGenerator, memoryStore))
     }
 
   it("queries the database and return a matching canonical id") {
     val sourceIdentifier = createSourceIdentifier
     val canonicalId = createCanonicalId
 
-    withIdentifierGenerator() { identifierGenerator =>
+    withIdentifierGenerator() { case (identifierGenerator, store) =>
+        val identifier = Identifier(canonicalId, sourceIdentifier)
 
-        // TODO: insert id into db
+        store.put(sourceIdentifier)(identifier)
 
         val triedId = identifierGenerator.retrieveOrGenerateCanonicalId(
           sourceIdentifier
@@ -51,7 +54,7 @@ class IdentifierGeneratorTest
   it("generates and saves a new identifier") {
     val sourceIdentifier = createSourceIdentifier
 
-    withIdentifierGenerator() { identifierGenerator =>
+    withIdentifierGenerator() { case (identifierGenerator, store) =>
         val triedId = identifierGenerator.retrieveOrGenerateCanonicalId(
           sourceIdentifier
         )
@@ -61,8 +64,9 @@ class IdentifierGeneratorTest
         val id = triedId.get
         id should not be empty
 
-        true shouldBe false
-        // TODO: introspect store to ensure saved
+        val result = store.get(sourceIdentifier)
+
+        result.right.get.identifiedT.CanonicalId shouldBe id
     }
   }
 
@@ -86,7 +90,8 @@ class IdentifierGeneratorTest
 
     when(whenThing).thenReturn(Failure(expectedException))
 
-    withIdentifierGenerator(Some(identifiersDao)) { identifierGenerator =>
+    withIdentifierGenerator(Some(identifiersDao)) {
+      case (identifierGenerator, _) =>
         val triedGeneratingId =
           identifierGenerator.retrieveOrGenerateCanonicalId(
             sourceIdentifier
@@ -98,7 +103,7 @@ class IdentifierGeneratorTest
   }
 
   it("preserves the ontologyType when generating a new identifier") {
-    withIdentifierGenerator() { identifierGenerator =>
+    withIdentifierGenerator() { case (identifierGenerator, store) =>
         val sourceIdentifier = createSourceIdentifierWith(
           ontologyType = "Item"
         )
@@ -110,8 +115,9 @@ class IdentifierGeneratorTest
         val id = triedId.get
         id should not be (empty)
 
-        true shouldBe false
-        // TODO: introspect store to ensure saved
+        val result = store.get(sourceIdentifier)
+
+        result.right.get.identifiedT.CanonicalId shouldBe id
     }
   }
 }
