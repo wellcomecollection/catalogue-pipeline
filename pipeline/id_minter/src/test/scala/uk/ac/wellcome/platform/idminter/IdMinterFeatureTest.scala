@@ -17,7 +17,6 @@ class IdMinterFeatureTest
     with SQS
     with SNS
     with BigMessagingFixture
-    with fixtures.IdentifiersDatabase
     with IntegrationPatience
     with Eventually
     with Matchers
@@ -28,36 +27,33 @@ class IdMinterFeatureTest
     withLocalSqsQueue { queue =>
       withLocalSnsTopic { topic =>
         withLocalS3Bucket { bucket =>
-          withIdentifiersDatabase { identifiersTableConfig =>
-            withWorkerService(bucket, topic, queue, identifiersTableConfig) {
-              _ =>
-                eventuallyTableExists(identifiersTableConfig)
-                val work = createUnidentifiedWork
+          withWorkerService(bucket, topic, queue) { _ =>
+            val work = createUnidentifiedWork
 
-                val messageCount = 5
+            val messageCount = 5
 
-                (1 to messageCount).foreach { _ =>
-                  sendMessage(queue = queue, obj = work)
-                }
+            (1 to messageCount).foreach { _ =>
+              sendMessage(queue = queue, obj = work)
+            }
 
-                eventually {
-                  val works = getMessages[IdentifiedBaseWork](topic)
-                  works.length shouldBe >=(messageCount)
+            eventually {
+              val works = getMessages[IdentifiedBaseWork](topic)
+              works.length shouldBe >=(messageCount)
 
-                  works.map(_.canonicalId).distinct should have size 1
-                  works.foreach { receivedWork =>
-                    receivedWork
-                      .asInstanceOf[IdentifiedWork]
-                      .sourceIdentifier shouldBe work.sourceIdentifier
-                    receivedWork
-                      .asInstanceOf[IdentifiedWork]
-                      .data
-                      .title shouldBe work.data.title
-                  }
-                }
+              works.map(_.canonicalId).distinct should have size 1
+              works.foreach { receivedWork =>
+                receivedWork
+                  .asInstanceOf[IdentifiedWork]
+                  .sourceIdentifier shouldBe work.sourceIdentifier
+                receivedWork
+                  .asInstanceOf[IdentifiedWork]
+                  .data
+                  .title shouldBe work.data.title
+              }
             }
           }
         }
+
       }
     }
   }
@@ -66,27 +62,24 @@ class IdMinterFeatureTest
     withLocalSqsQueue { queue =>
       withLocalSnsTopic { topic =>
         withLocalS3Bucket { bucket =>
-          withIdentifiersDatabase { identifiersTableConfig =>
-            withWorkerService(bucket, topic, queue, identifiersTableConfig) {
-              _ =>
-                eventuallyTableExists(identifiersTableConfig)
-                val work = createUnidentifiedInvisibleWork
+          withWorkerService(bucket, topic, queue) { _ =>
+            val work = createUnidentifiedInvisibleWork
 
-                sendMessage(queue = queue, obj = work)
+            sendMessage(queue = queue, obj = work)
 
-                eventually {
-                  val works = getMessages[IdentifiedBaseWork](topic)
-                  works.length shouldBe >=(1)
+            eventually {
+              val works = getMessages[IdentifiedBaseWork](topic)
+              works.length shouldBe >=(1)
 
-                  val receivedWork = works.head
-                  val invisibleWork =
-                    receivedWork.asInstanceOf[IdentifiedInvisibleWork]
-                  invisibleWork.sourceIdentifier shouldBe work.sourceIdentifier
-                  invisibleWork.canonicalId shouldNot be(empty)
-                }
+              val receivedWork = works.head
+              val invisibleWork =
+                receivedWork.asInstanceOf[IdentifiedInvisibleWork]
+              invisibleWork.sourceIdentifier shouldBe work.sourceIdentifier
+              invisibleWork.canonicalId shouldNot be(empty)
             }
           }
         }
+
       }
     }
   }
@@ -95,39 +88,34 @@ class IdMinterFeatureTest
     withLocalSqsQueue { queue =>
       withLocalSnsTopic { topic =>
         withLocalS3Bucket { bucket =>
-          withIdentifiersDatabase { identifiersTableConfig =>
-            withWorkerService(bucket, topic, queue, identifiersTableConfig) {
-              _ =>
-                eventuallyTableExists(identifiersTableConfig)
+          withWorkerService(bucket, topic, queue) { _ =>
+            val work = createUnidentifiedRedirectedWork
 
-                val work = createUnidentifiedRedirectedWork
+            sendMessage(queue = queue, obj = work)
 
-                sendMessage(queue = queue, obj = work)
+            eventually {
+              val works = getMessages[IdentifiedBaseWork](topic)
+              works.length shouldBe >=(1)
 
-                eventually {
-                  val works = getMessages[IdentifiedBaseWork](topic)
-                  works.length shouldBe >=(1)
-
-                  val receivedWork = works.head
-                  val redirectedWork =
-                    receivedWork.asInstanceOf[IdentifiedRedirectedWork]
-                  redirectedWork.sourceIdentifier shouldBe work.sourceIdentifier
-                  redirectedWork.canonicalId shouldNot be(empty)
-                  redirectedWork.redirect.canonicalId shouldNot be(empty)
-                }
+              val receivedWork = works.head
+              val redirectedWork =
+                receivedWork.asInstanceOf[IdentifiedRedirectedWork]
+              redirectedWork.sourceIdentifier shouldBe work.sourceIdentifier
+              redirectedWork.canonicalId shouldNot be(empty)
+              redirectedWork.redirect.canonicalId shouldNot be(empty)
             }
           }
         }
       }
     }
+
   }
 
   it("continues if something fails processing a message") {
     withLocalSqsQueue { queue =>
       withLocalSnsTopic { topic =>
-        withIdentifiersDatabase { identifiersTableConfig =>
           withLocalS3Bucket { bucket =>
-            withWorkerService(bucket, topic, queue, identifiersTableConfig) {
+            withWorkerService(bucket, topic, queue) {
               _ =>
                 sendInvalidJSONto(queue)
 
@@ -142,7 +130,7 @@ class IdMinterFeatureTest
                   assertMessageIsNotDeleted(queue)
                 }
             }
-          }
+
         }
       }
     }

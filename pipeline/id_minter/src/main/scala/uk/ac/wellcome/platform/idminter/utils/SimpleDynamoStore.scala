@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.idminter.utils
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
-import com.amazonaws.services.dynamodbv2.model.ScanRequest
 import grizzled.slf4j.Logging
 import org.scanamo.{DynamoFormat, Scanamo, Table}
 import org.scanamo.query.{ConditionalOperation, Query}
@@ -31,12 +30,8 @@ trait SimpleDynamoWritable[HashKey, T]
 
   override def put(id: HashKey)(t: T): WriteEither = {
     val entry = createEntry(id, t)
-
     val ops = tableGiven(id).put(entry)
-
     val result = Try(Scanamo(client).exec(ops))
-
-    debug(s"PUT $t to $id, got $result")
 
     result match {
       case Success(Right(_))  => Right(Identified(id, parseEntry(entry)))
@@ -64,17 +59,7 @@ trait SimpleDynamoReadable[HashKey, T]
 
   def get(id: HashKey): ReadEither = {
     val ops = table.query(createKeyExpression(id))
-    val foo = client.scan(new ScanRequest(table.name))
-
-    debug(s"@@RK $foo")
-
-    val df = formatHashKey.write(id)
-
-    debug(s"@@RK $df")
-
     val result = Try(Scanamo(client).exec(ops))
-
-    debug(s"GET $id, got $result")
 
     result match {
       case Success(List(Right(entry))) => Right(entry)

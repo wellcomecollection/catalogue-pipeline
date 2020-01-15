@@ -4,11 +4,9 @@ import org.mockito.Matchers.any
 import org.mockito.Mockito.when
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSpec, Matchers}
-import scalikejdbc._
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
-import uk.ac.wellcome.platform.idminter.database.{IdentifiersDao, TableProvisioner}
-import uk.ac.wellcome.platform.idminter.fixtures
-import uk.ac.wellcome.platform.idminter.models.{Identifier, IdentifiersTable}
+import uk.ac.wellcome.platform.idminter.database.IdentifiersDao
+import uk.ac.wellcome.platform.idminter.models.Identifier
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.work.internal.SourceIdentifier
 import uk.ac.wellcome.storage.store.memory.MemoryStore
@@ -17,53 +15,30 @@ import scala.util.{Failure, Success}
 
 class IdentifierGeneratorTest
     extends FunSpec
-    with fixtures.IdentifiersDatabase
     with Matchers
     with MockitoSugar
     with IdentifiersGenerators {
 
-  def withIdentifierGenerator[R](maybeIdentifiersDao: Option[IdentifiersDao[MemoryStore[SourceIdentifier, Identifier]]] =
-                                   None)(
-    testWith: TestWith[(IdentifierGenerator[MemoryStore[SourceIdentifier, Identifier]], IdentifiersTable), R]) =
-    withIdentifiersDatabase[R] { identifiersTableConfig =>
-      val identifiersTable = new IdentifiersTable(identifiersTableConfig)
-
-      new TableProvisioner(rdsClientConfig)
-        .provision(
-          database = identifiersTableConfig.database,
-          tableName = identifiersTableConfig.tableName
-        )
-
+  def withIdentifierGenerator[R](maybeIdentifiersDao: Option[IdentifiersDao[MemoryStore[SourceIdentifier, Identifier]]] = None)(
+    testWith: TestWith[IdentifierGenerator[MemoryStore[SourceIdentifier, Identifier]], R]): R = {
       val memoryStore = new MemoryStore[SourceIdentifier, Identifier](Map.empty)
 
       val identifiersDao = maybeIdentifiersDao.getOrElse(
-        new IdentifiersDao(DB.connect(), identifiersTable, memoryStore)
+        new IdentifiersDao(memoryStore)
       )
 
       val identifierGenerator = new IdentifierGenerator(identifiersDao)
-      eventuallyTableExists(identifiersTableConfig)
 
-      testWith((identifierGenerator, identifiersTable))
+      testWith(identifierGenerator)
     }
 
   it("queries the database and return a matching canonical id") {
     val sourceIdentifier = createSourceIdentifier
     val canonicalId = createCanonicalId
 
-    withIdentifierGenerator() {
-      case (identifierGenerator, identifiersTable) =>
-        implicit val session = AutoSession
+    withIdentifierGenerator() { identifierGenerator =>
 
-        withSQL {
-          insert
-            .into(identifiersTable)
-            .namedValues(
-              identifiersTable.column.CanonicalId -> canonicalId,
-              identifiersTable.column.SourceSystem -> sourceIdentifier.identifierType.id,
-              identifiersTable.column.SourceId -> sourceIdentifier.value,
-              identifiersTable.column.OntologyType -> sourceIdentifier.ontologyType
-            )
-        }.update().apply()
+        // TODO: insert id into db
 
         val triedId = identifierGenerator.retrieveOrGenerateCanonicalId(
           sourceIdentifier
@@ -76,10 +51,7 @@ class IdentifierGeneratorTest
   it("generates and saves a new identifier") {
     val sourceIdentifier = createSourceIdentifier
 
-    withIdentifierGenerator() {
-      case (identifierGenerator, identifiersTable) =>
-        implicit val session = AutoSession
-
+    withIdentifierGenerator() { identifierGenerator =>
         val triedId = identifierGenerator.retrieveOrGenerateCanonicalId(
           sourceIdentifier
         )
@@ -89,22 +61,8 @@ class IdentifierGeneratorTest
         val id = triedId.get
         id should not be empty
 
-        val i = identifiersTable.i
-
-        val maybeIdentifier = withSQL {
-
-          select
-            .from(identifiersTable as i)
-            .where
-            .eq(i.SourceId, sourceIdentifier.value)
-
-        }.map(Identifier(i)).single.apply()
-
-        maybeIdentifier shouldBe defined
-        maybeIdentifier.get shouldBe Identifier(
-          canonicalId = id,
-          sourceIdentifier = sourceIdentifier
-        )
+        true shouldBe false
+        // TODO: introspect store to ensure saved
     }
   }
 
@@ -128,8 +86,7 @@ class IdentifierGeneratorTest
 
     when(whenThing).thenReturn(Failure(expectedException))
 
-    withIdentifierGenerator(Some(identifiersDao)) {
-      case (identifierGenerator, _) =>
+    withIdentifierGenerator(Some(identifiersDao)) { identifierGenerator =>
         val triedGeneratingId =
           identifierGenerator.retrieveOrGenerateCanonicalId(
             sourceIdentifier
@@ -141,10 +98,7 @@ class IdentifierGeneratorTest
   }
 
   it("preserves the ontologyType when generating a new identifier") {
-    withIdentifierGenerator() {
-      case (identifierGenerator, identifiersTable) =>
-        implicit val session = AutoSession
-
+    withIdentifierGenerator() { identifierGenerator =>
         val sourceIdentifier = createSourceIdentifierWith(
           ontologyType = "Item"
         )
@@ -156,21 +110,8 @@ class IdentifierGeneratorTest
         val id = triedId.get
         id should not be (empty)
 
-        val i = identifiersTable.i
-        val maybeIdentifier = withSQL {
-
-          select
-            .from(identifiersTable as i)
-            .where
-            .eq(i.SourceId, sourceIdentifier.value)
-
-        }.map(Identifier(i)).single.apply()
-
-        maybeIdentifier shouldBe defined
-        maybeIdentifier.get shouldBe Identifier(
-          canonicalId = id,
-          sourceIdentifier = sourceIdentifier
-        )
+        true shouldBe false
+        // TODO: introspect store to ensure saved
     }
   }
 }

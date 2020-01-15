@@ -7,4 +7,5 @@ case class SourceIdentifier(
   value: String
 ) {
   override def toString = s"${identifierType.id}/$value"
+  def createId = s"${identifierType.id}/$ontologyType/$value"
 }

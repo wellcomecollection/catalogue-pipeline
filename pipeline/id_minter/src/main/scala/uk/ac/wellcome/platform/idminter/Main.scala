@@ -8,9 +8,8 @@ import com.typesafe.config.Config
 import io.circe.Json
 import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
 import uk.ac.wellcome.models.work.internal.SourceIdentifier
-import uk.ac.wellcome.platform.idminter.config.builders.{IdentifiersTableBuilder, RDSBuilder}
 import uk.ac.wellcome.platform.idminter.database.IdentifiersDao
-import uk.ac.wellcome.platform.idminter.models.{Identifier, IdentifiersTable}
+import uk.ac.wellcome.platform.idminter.models.Identifier
 import uk.ac.wellcome.platform.idminter.services.IdMinterWorkerService
 import uk.ac.wellcome.platform.idminter.steps.{IdEmbedder, IdentifierGenerator}
 import uk.ac.wellcome.platform.idminter.utils.SimpleDynamoStore
@@ -24,7 +23,7 @@ import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import scala.concurrent.ExecutionContext
 
 import org.scanamo.auto._
-
+import uk.ac.wellcome.platform.idminter.utils.DynamoFormats._
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
@@ -40,23 +39,10 @@ object Main extends WellcomeTypesafeApp {
     implicit val dynamoConfig: DynamoConfig =
       DynamoBuilder.buildDynamoConfig(config)
 
-    val identifiersTableConfig = IdentifiersTableBuilder.buildConfig(config)
-
     val dynamoStore = new SimpleDynamoStore[SourceIdentifier, Identifier](dynamoConfig)
-
-    val identifierGenerator = new IdentifierGenerator(
-      identifiersDao = new IdentifiersDao(
-        db = RDSBuilder.buildDB(config),
-        identifiers = new IdentifiersTable(
-          identifiersTableConfig = identifiersTableConfig
-        ),
-        dynamoStore
-      )
-    )
-
-    val idEmbedder = new IdEmbedder(
-      identifierGenerator = identifierGenerator
-    )
+    val identifiersDao = new IdentifiersDao(dynamoStore)
+    val identifierGenerator = new IdentifierGenerator(identifiersDao)
+    val idEmbedder = new IdEmbedder(identifierGenerator)
 
     implicit val s3Client: AmazonS3 = S3Builder.buildS3Client(config)
     implicit val s3TypedStore = S3TypedStore[Json]
@@ -64,9 +50,7 @@ object Main extends WellcomeTypesafeApp {
     new IdMinterWorkerService(
       idEmbedder = idEmbedder,
       sender = BigMessagingBuilder.buildBigMessageSender[Json](config),
-      messageStream = BigMessagingBuilder.buildMessageStream[Json](config),
-      rdsClientConfig = RDSBuilder.buildRDSClientConfig(config),
-      identifiersTableConfig = identifiersTableConfig
+      messageStream = BigMessagingBuilder.buildMessageStream[Json](config)
     )
   }
 }

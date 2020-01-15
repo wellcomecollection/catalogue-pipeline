@@ -1,12 +1,10 @@
 package uk.ac.wellcome.platform.idminter.database
 
 import org.scalatest.{FunSpec, Matchers}
-import scalikejdbc._
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
 import uk.ac.wellcome.models.work.internal.SourceIdentifier
 import uk.ac.wellcome.platform.idminter.exceptions.IdMinterException
-import uk.ac.wellcome.platform.idminter.fixtures
-import uk.ac.wellcome.platform.idminter.models.{Identifier, IdentifiersTable}
+import uk.ac.wellcome.platform.idminter.models.Identifier
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.storage.store.memory.MemoryStore
 
@@ -14,27 +12,18 @@ import scala.util.{Failure, Success}
 
 class IdentifiersDaoTest
     extends FunSpec
-    with fixtures.IdentifiersDatabase
     with Matchers
     with IdentifiersGenerators {
 
   def withIdentifiersDao[R](
-    testWith: TestWith[(IdentifiersDao[MemoryStore[SourceIdentifier, Identifier]], IdentifiersTable), R]): R =
-    withIdentifiersDatabase { identifiersTableConfig =>
-      val identifiersTable = new IdentifiersTable(identifiersTableConfig)
+    testWith: TestWith[IdentifiersDao[MemoryStore[SourceIdentifier, Identifier]], R]): R  = {
 
-      new TableProvisioner(rdsClientConfig)
-        .provision(
-          database = identifiersTableConfig.database,
-          tableName = identifiersTableConfig.tableName
-        )
+      val memoryStore =
+        new MemoryStore[SourceIdentifier, Identifier](Map.empty)
 
-      val memoryStore = new MemoryStore[SourceIdentifier, Identifier](Map.empty)
-      val identifiersDao = new IdentifiersDao(DB.connect(), identifiersTable, memoryStore)
+      val identifiersDao = new IdentifiersDao(memoryStore)
 
-      eventuallyTableExists(identifiersTableConfig)
-
-      testWith((identifiersDao, identifiersTable))
+      testWith(identifiersDao)
     }
 
   describe("lookupID") {
@@ -44,8 +33,7 @@ class IdentifiersDaoTest
         sourceIdentifier = sourceIdentifier
       )
 
-      withIdentifiersDao {
-        case (identifiersDao, _) =>
+      withIdentifiersDao { identifiersDao =>
           identifiersDao.saveIdentifier(sourceIdentifier, identifier) shouldBe Success(1)
 
           val triedLookup = identifiersDao.lookupId(
@@ -60,9 +48,8 @@ class IdentifiersDaoTest
       "does not get an identifier if there is no matching SourceSystem and SourceId") {
       val (sourceIdentifier, identifier) = createSQLIdentifier
 
-      withIdentifiersDao {
-        case (identifiersDao, _) =>
-          identifiersDao.saveIdentifier(sourceIdentifier, identifier) shouldBe Success(1)
+      withIdentifiersDao { identifiersDao =>
+          identifiersDao.saveIdentifier(sourceIdentifier, identifier) shouldBe a[Success[_]]
 
           val unknownSourceIdentifier = createSourceIdentifierWith(
             ontologyType = identifier.OntologyType,
@@ -79,25 +66,14 @@ class IdentifiersDaoTest
   }
 
   describe("saveIdentifier") {
-    it("inserts the provided identifier into the database") {
+    it("adds the provided identifier into the database") {
       val (sourceIdentifier, identifier) = createSQLIdentifier
 
-      withIdentifiersDao {
-        case (identifiersDao, identifiersTable) =>
-          implicit val session = AutoSession
-
+      withIdentifiersDao { identifiersDao =>
           identifiersDao.saveIdentifier(sourceIdentifier, identifier)
-          val maybeIdentifier = withSQL {
-            select
-              .from(identifiersTable as identifiersTable.i)
-              .where
-              .eq(identifiersTable.i.SourceSystem, identifier.SourceSystem)
-              .and
-              .eq(identifiersTable.i.CanonicalId, identifier.CanonicalId)
-          }.map(Identifier(identifiersTable.i)).single.apply()
 
-          maybeIdentifier shouldBe defined
-          maybeIdentifier.get shouldBe identifier
+          // TODO: introspect dynamo
+          true shouldBe false
       }
     }
 
@@ -107,9 +83,11 @@ class IdentifiersDaoTest
         canonicalId = identifier.CanonicalId
       )
 
-      withIdentifiersDao {
-        case (identifiersDao, _) =>
-          identifiersDao.saveIdentifier(sourceIdentifier, identifier) shouldBe Success(1)
+      withIdentifiersDao { identifiersDao =>
+          identifiersDao.saveIdentifier(
+            sourceIdentifier,
+            identifier
+          ) shouldBe a[Success[_]]
 
           val triedSave = identifiersDao.saveIdentifier(
             sourceIdentifier,
@@ -138,10 +116,9 @@ class IdentifiersDaoTest
         sourceIdentifier = sourceIdentifier2
       )
 
-      withIdentifiersDao {
-        case (identifiersDao, _) =>
-          identifiersDao.saveIdentifier(sourceIdentifier1, identifier1) shouldBe Success(1)
-          identifiersDao.saveIdentifier(sourceIdentifier2, identifier2) shouldBe Success(1)
+      withIdentifiersDao { identifiersDao =>
+          identifiersDao.saveIdentifier(sourceIdentifier1, identifier1) shouldBe a[Success[_]]
+          identifiersDao.saveIdentifier(sourceIdentifier2, identifier2) shouldBe a[Success[_]]
       }
     }
 
@@ -162,10 +139,9 @@ class IdentifiersDaoTest
         sourceIdentifier = sourceIdentifier2
       )
 
-      withIdentifiersDao {
-        case (identifiersDao, _) =>
-          identifiersDao.saveIdentifier(sourceIdentifier1, identifier1) shouldBe Success(1)
-          identifiersDao.saveIdentifier(sourceIdentifier2, identifier2) shouldBe Success(1)
+      withIdentifiersDao { identifiersDao =>
+          identifiersDao.saveIdentifier(sourceIdentifier1, identifier1) shouldBe a[Success[_]]
+          identifiersDao.saveIdentifier(sourceIdentifier2, identifier2) shouldBe a[Success[_]]
       }
     }
 
@@ -180,9 +156,8 @@ class IdentifiersDaoTest
         sourceIdentifier = sourceIdentifier
       )
 
-      withIdentifiersDao {
-        case (identifiersDao, _) =>
-          identifiersDao.saveIdentifier(sourceIdentifier, identifier1) shouldBe Success(1)
+      withIdentifiersDao { identifiersDao =>
+          identifiersDao.saveIdentifier(sourceIdentifier, identifier1) shouldBe a[Success[_]]
 
           val triedSave = identifiersDao.saveIdentifier(sourceIdentifier, identifier2)
 
