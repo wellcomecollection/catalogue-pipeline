@@ -2,13 +2,13 @@ package uk.ac.wellcome.platform.idminter
 
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.{FunSpec, Matchers}
-import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
-import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.platform.idminter.fixtures.WorkerServiceFixture
+import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
 import uk.ac.wellcome.models.Implicits._
+import uk.ac.wellcome.models.work.generators.WorksGenerators
+import uk.ac.wellcome.models.work.internal._
+import uk.ac.wellcome.platform.idminter.fixtures.WorkerServiceFixture
 
 import scala.collection.JavaConverters._
 

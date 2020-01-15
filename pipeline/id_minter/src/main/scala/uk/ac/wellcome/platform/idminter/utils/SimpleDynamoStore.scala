@@ -1,6 +1,8 @@
 package uk.ac.wellcome.platform.idminter.utils
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
+import com.amazonaws.services.dynamodbv2.model.ScanRequest
+import grizzled.slf4j.Logging
 import org.scanamo.{DynamoFormat, Scanamo, Table}
 import org.scanamo.query.{ConditionalOperation, Query}
 import uk.ac.wellcome.storage.{DoesNotExistError, Identified, MultipleRecordsError, StoreReadError, StoreWriteError}
@@ -10,7 +12,8 @@ import uk.ac.wellcome.storage.store.{Readable, Store, Writable}
 import scala.util.{Failure, Success, Try}
 
 trait SimpleDynamoWritable[HashKey, T]
-  extends Writable[HashKey, T] {
+  extends Writable[HashKey, T]
+    with Logging {
 
   import org.scanamo.syntax._
 
@@ -31,7 +34,11 @@ trait SimpleDynamoWritable[HashKey, T]
 
     val ops = tableGiven(id).put(entry)
 
-    Try(Scanamo(client).exec(ops)) match {
+    val result = Try(Scanamo(client).exec(ops))
+
+    debug(s"PUT $t to $id, got $result")
+
+    result match {
       case Success(Right(_))  => Right(Identified(id, parseEntry(entry)))
       case Success(Left(err)) => Left(StoreWriteError(err))
       case Failure(err)       => Left(StoreWriteError(err))
@@ -40,7 +47,8 @@ trait SimpleDynamoWritable[HashKey, T]
 }
 
 trait SimpleDynamoReadable[HashKey, T]
-  extends Readable[HashKey, T] {
+  extends Readable[HashKey, T]
+    with Logging {
 
   import org.scanamo.syntax._
 
@@ -56,8 +64,19 @@ trait SimpleDynamoReadable[HashKey, T]
 
   def get(id: HashKey): ReadEither = {
     val ops = table.query(createKeyExpression(id))
+    val foo = client.scan(new ScanRequest(table.name))
 
-    Try(Scanamo(client).exec(ops)) match {
+    debug(s"@@RK $foo")
+
+    val df = formatHashKey.write(id)
+
+    debug(s"@@RK $df")
+
+    val result = Try(Scanamo(client).exec(ops))
+
+    debug(s"GET $id, got $result")
+
+    result match {
       case Success(List(Right(entry))) => Right(entry)
       case Success(List(Left(err))) =>
         val daoReadError = new Error(s"DynamoReadError: ${err.toString}")

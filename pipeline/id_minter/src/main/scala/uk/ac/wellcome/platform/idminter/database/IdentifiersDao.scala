@@ -14,42 +14,40 @@ import scala.concurrent.blocking
 import scala.util.{Failure, Success, Try}
 
 class IdentifiersDao[StoreType <: Store[SourceIdentifier, Identifier]](
-                      db: DB,
-                      identifiers: IdentifiersTable,
-                      store: StoreType
-                    ) extends Logging {
+  db: DB,
+  identifiers: IdentifiersTable,
+  store: StoreType
+) extends Logging {
 
   implicit val session = AutoSession(db.settingsProvider)
 
   private def sqlLookup(
-                         sourceIdentifier: SourceIdentifier
-                       ): Try[Option[Identifier]] = Try {
+    sourceIdentifier: SourceIdentifier
+  ): Try[Option[Identifier]] = Try {
 
     val sourceSystem = sourceIdentifier.identifierType.id
     val sourceId = sourceIdentifier.value
 
-    blocking {
-      debug(s"Matching ($sourceIdentifier)")
+    debug(s"Matching ($sourceIdentifier)")
 
-      val i = identifiers.i
-      val query = withSQL {
-        select
-          .from(identifiers as i)
-          .where
-          .eq(i.OntologyType, sourceIdentifier.ontologyType)
-          .and
-          .eq(i.SourceSystem, sourceSystem)
-          .and
-          .eq(i.SourceId, sourceId)
+    val i = identifiers.i
+    val query = withSQL {
+      select
+        .from(identifiers as i)
+        .where
+        .eq(i.OntologyType, sourceIdentifier.ontologyType)
+        .and
+        .eq(i.SourceSystem, sourceSystem)
+        .and
+        .eq(i.SourceId, sourceId)
 
-      }.map(Identifier(i)).single
-      debug(s"Executing:'${query.statement}'")
-      query.apply()
-    }
-
+    }.map(Identifier(i)).single
+    debug(s"Executing:'${query.statement}'")
+    query.apply()
   }
 
-  private def sqlSave(identifier: Identifier): Try[Int] = Try {
+  private def sqlSave(identifier: Identifier): Try[Int] =
+    Try {
       blocking {
         debug(s"Putting new identifier $identifier")
         withSQL {
@@ -77,22 +75,21 @@ class IdentifiersDao[StoreType <: Store[SourceIdentifier, Identifier]](
    * identifiers from the source systems, and an ontology type (e.g. "Work").n */
   def lookupId(
     sourceIdentifier: SourceIdentifier
-  ): Try[Option[Identifier]] =
-
+  ): Try[Option[Identifier]] = blocking {
     store.get(sourceIdentifier) match {
       case Right(identifier) => Success(Some(identifier.identifiedT))
       case Left(_: NotFoundError) => sqlLookup(sourceIdentifier)
       case Left(storageError) => Failure(storageError.e)
     }
+  }
 
   /* Save an identifier into the database. */
   def saveIdentifier(
-                      sourceIdentifier: SourceIdentifier,
-                      identifier: Identifier
-                    ): Try[Any] =
-
+    sourceIdentifier: SourceIdentifier,
+    identifier: Identifier
+  ): Try[Any] =
     store.put(sourceIdentifier)(identifier) match {
-      case Right(_) => sqlSave(identifier)
+      case Right(_)         => sqlSave(identifier)
       case Left(writeError) => Failure(writeError.e)
     }
 }
