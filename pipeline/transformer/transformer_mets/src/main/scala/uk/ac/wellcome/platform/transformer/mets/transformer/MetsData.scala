@@ -111,9 +111,9 @@ case class MetsData(
   private def buildThumbnailUrl(location: String, bnumber: String) = {
     val mediaType =
       URLConnection.guessContentTypeFromName(new File(location).getName)
-    mediaType match {
-      case m if m startsWith ("video/") => None
-      case m if m equals ("application/pdf") =>
+    Option(mediaType) match {
+      case Some(m) if m startsWith ("video/") => None
+      case Some(m) if m equals ("application/pdf") =>
         Some(
           s"https://wellcomelibrary.org/pdfthumbs/${bnumber}/0/${location}.jpg")
       case _ =>
