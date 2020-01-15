@@ -2,12 +2,18 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.sierra.exceptions.SierraTransformerException
-import uk.ac.wellcome.platform.transformer.sierra.source.{SierraBibData, SierraItemData, SierraQueryOps, VarField}
+import uk.ac.wellcome.platform.transformer.sierra.source.{
+  SierraBibData,
+  SierraItemData,
+  SierraQueryOps,
+  VarField
+}
 import uk.ac.wellcome.platform.transformer.sierra.source.sierra.SierraSourceLocation
 
 trait SierraLocation extends SierraQueryOps {
 
-  def getPhysicalLocation(itemData: SierraItemData, bibData: SierraBibData): Option[PhysicalLocation] =
+  def getPhysicalLocation(itemData: SierraItemData,
+                          bibData: SierraBibData): Option[PhysicalLocation] =
     itemData.location.flatMap {
       // We've seen records where the "location" field is populated in
       // the JSON, but the code and name are both empty strings or "none".
@@ -18,7 +24,8 @@ trait SierraLocation extends SierraQueryOps {
         Some(
           PhysicalLocation(
             locationType = LocationType(code),
-            accessConditions = Option(getAccessConditions(bibData)).filter(_.nonEmpty),
+            accessConditions =
+              Option(getAccessConditions(bibData)).filter(_.nonEmpty),
             label = name
           )
         )
@@ -38,7 +45,8 @@ trait SierraLocation extends SierraQueryOps {
     }
   }
 
-  private def getAccessConditions(bibData: SierraBibData): List[AccessCondition] =
+  private def getAccessConditions(
+    bibData: SierraBibData): List[AccessCondition] =
     bibData.varfieldsWithTag("506").map { varfield =>
       AccessCondition(
         status = getAccessStatus(varfield),
@@ -64,6 +72,7 @@ trait SierraLocation extends SierraQueryOps {
             throw new Exception(s"Unrecognised AccessStatus: $status")
         }
         .getOrElse {
-          throw new Exception("Could not parse AccessCondition: 506$f not found")
+          throw new Exception(
+            "Could not parse AccessCondition: 506$f not found")
         }
 }

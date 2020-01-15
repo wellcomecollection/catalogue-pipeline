@@ -47,8 +47,7 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
 
   private def getPhysicalItems(
     sierraItemDataMap: Map[SierraItemNumber, SierraItemData],
-    bibData: SierraBibData)
-    : List[Identifiable[Item]] =
+    bibData: SierraBibData): List[Identifiable[Item]] =
     sierraItemDataMap
       .filterNot {
         case (_: SierraItemNumber, itemData: SierraItemData) => itemData.deleted
@@ -92,10 +91,9 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
     }
   }
 
-  private def transformItemData(
-    itemId: SierraItemNumber,
-    itemData: SierraItemData,
-    bibData: SierraBibData): Identifiable[Item] = {
+  private def transformItemData(itemId: SierraItemNumber,
+                                itemData: SierraItemData,
+                                bibData: SierraBibData): Identifiable[Item] = {
     debug(s"Attempting to transform $itemId")
     Identifiable(
       sourceIdentifier = SourceIdentifier(
