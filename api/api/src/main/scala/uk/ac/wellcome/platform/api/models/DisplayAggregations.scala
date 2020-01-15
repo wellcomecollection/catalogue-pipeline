@@ -77,10 +77,9 @@ object DisplayAggregations {
       workType = displayAggregation(aggs.workType, DisplayWorkType.apply),
       productionDates =
         displayAggregation(aggs.productionDates, DisplayPeriod.apply),
-      genres =
-        displayAggregation[Genre[Minted[AbstractConcept]], DisplayGenre](
-          aggs.genres,
-          DisplayGenre(_, false)),
+      genres = displayAggregation[Genre[Minted[AbstractConcept]], DisplayGenre](
+        aggs.genres,
+        DisplayGenre(_, false)),
       language = displayAggregation(aggs.language, DisplayLanguage.apply),
       subjects = displayAggregation[
         Subject[Minted[AbstractRootConcept]],

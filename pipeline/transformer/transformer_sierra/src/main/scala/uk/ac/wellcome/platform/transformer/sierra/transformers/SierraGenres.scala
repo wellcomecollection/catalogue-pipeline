@@ -61,8 +61,7 @@ object SierraGenres
             .partition { _.tag == "a" }
 
         val label = getLabel(primarySubfields, subdivisionSubfields)
-        val concepts
-          : List[Unminted[AbstractConcept]] = getPrimaryConcept(
+        val concepts: List[Unminted[AbstractConcept]] = getPrimaryConcept(
           primarySubfields,
           varField = varField) ++ getSubdivisions(subdivisionSubfields)
 

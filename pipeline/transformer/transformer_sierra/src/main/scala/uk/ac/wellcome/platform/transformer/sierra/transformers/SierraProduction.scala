@@ -238,8 +238,8 @@ object SierraProduction extends SierraTransformer with SierraQueryOps {
     }
   }
 
-  def getProductionFrom008(bibData: SierraBibData)
-    : List[ProductionEvent[Unminted[AbstractAgent]]] =
+  def getProductionFrom008(
+    bibData: SierraBibData): List[ProductionEvent[Unminted[AbstractAgent]]] =
     bibData
       .varfieldsWithTag("008")
       .contents

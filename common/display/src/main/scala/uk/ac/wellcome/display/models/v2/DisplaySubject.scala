@@ -18,9 +18,8 @@ case class DisplaySubject(
 )
 
 object DisplaySubject {
-  def apply(
-    displayableSubject: Minted[Subject[Minted[AbstractRootConcept]]],
-    includesIdentifiers: Boolean): DisplaySubject = {
+  def apply(displayableSubject: Minted[Subject[Minted[AbstractRootConcept]]],
+            includesIdentifiers: Boolean): DisplaySubject = {
     displayableSubject match {
       case Unidentifiable(subject: Subject[Minted[AbstractRootConcept]]) =>
         DisplaySubject(

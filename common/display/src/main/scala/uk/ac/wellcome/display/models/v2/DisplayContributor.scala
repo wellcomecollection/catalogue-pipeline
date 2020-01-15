@@ -2,11 +2,7 @@ package uk.ac.wellcome.display.models.v2
 
 import io.circe.generic.extras.JsonKey
 import io.swagger.v3.oas.annotations.media.Schema
-import uk.ac.wellcome.models.work.internal.{
-  AbstractAgent,
-  Contributor,
-  Minted
-}
+import uk.ac.wellcome.models.work.internal.{AbstractAgent, Contributor, Minted}
 
 @Schema(
   name = "Contributor",

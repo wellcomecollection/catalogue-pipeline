@@ -15,8 +15,7 @@ case class Aggregations(
   genres: Option[Aggregation[Genre[Minted[AbstractConcept]]]] = None,
   productionDates: Option[Aggregation[Period]] = None,
   language: Option[Aggregation[Language]] = None,
-  subjects: Option[Aggregation[Subject[Minted[AbstractRootConcept]]]] =
-    None,
+  subjects: Option[Aggregation[Subject[Minted[AbstractRootConcept]]]] = None,
   license: Option[Aggregation[License]] = None,
 )
 

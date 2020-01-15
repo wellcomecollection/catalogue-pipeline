@@ -138,8 +138,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     physicalDescription: Option[String] = None,
     lettering: Option[String] = None,
     createdDate: Option[Period] = None,
-    subjects: List[Minted[Subject[Minted[AbstractRootConcept]]]] =
-      List(),
+    subjects: List[Minted[Subject[Minted[AbstractRootConcept]]]] = List(),
     genres: List[Genre[Minted[AbstractConcept]]] = List(),
     contributors: List[Contributor[Minted[AbstractAgent]]] = List(),
     thumbnail: Option[Location] = None,
@@ -187,9 +186,9 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
       createIdentifiedWork
     }
 
-  def createUnidentifiedSierraWorkWith(workType: Option[WorkType] = None,
-                                       items: List[Unminted[Item]] =
-                                         List()): UnidentifiedWork =
+  def createUnidentifiedSierraWorkWith(
+    workType: Option[WorkType] = None,
+    items: List[Unminted[Item]] = List()): UnidentifiedWork =
     createUnidentifiedWorkWith(
       sourceIdentifier = createSierraSystemSourceIdentifier,
       workType = workType,

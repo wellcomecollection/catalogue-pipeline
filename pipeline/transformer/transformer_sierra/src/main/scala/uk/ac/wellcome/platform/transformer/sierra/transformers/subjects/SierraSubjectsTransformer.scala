@@ -9,8 +9,8 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
 }
 import uk.ac.wellcome.models.work.internal.{
   AbstractRootConcept,
-  Unminted,
-  Subject
+  Subject,
+  Unminted
 }
 
 trait SierraSubjectsTransformer extends SierraTransformer with SierraQueryOps {

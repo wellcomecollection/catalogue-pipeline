@@ -251,8 +251,7 @@ trait DisplaySerialisationTestBase { this: Suite =>
     """
 
   def subjects(
-    subjects: List[Minted[Subject[Minted[AbstractRootConcept]]]])
-    : String =
+    subjects: List[Minted[Subject[Minted[AbstractRootConcept]]]]): String =
     subjects
       .map { s =>
         identifiedOrUnidentifiable(s, subject)
@@ -287,12 +286,10 @@ trait DisplaySerialisationTestBase { this: Suite =>
   def contributors(c: List[Contributor[Minted[AbstractAgent]]]) =
     c.map(contributor).mkString(",")
 
-  def production(
-    production: List[ProductionEvent[Minted[AbstractAgent]]]) =
+  def production(production: List[ProductionEvent[Minted[AbstractAgent]]]) =
     production.map(productionEvent).mkString(",")
 
-  def productionEvent(
-    event: ProductionEvent[Minted[AbstractAgent]]): String =
+  def productionEvent(event: ProductionEvent[Minted[AbstractAgent]]): String =
     s"""
        |{
        |  "label": "${event.label}",

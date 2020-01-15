@@ -48,8 +48,8 @@ object Implicits extends TimeInstances {
     deriveDecoder
   implicit val _dec22: Decoder[Contributor[Unminted[AbstractAgent]]] =
     deriveDecoder
-  implicit val _dec23
-    : Decoder[ProductionEvent[Unminted[AbstractAgent]]] = deriveDecoder
+  implicit val _dec23: Decoder[ProductionEvent[Unminted[AbstractAgent]]] =
+    deriveDecoder
   implicit val _dec24: Decoder[Unminted[Item]] = deriveDecoder
   implicit val _dec25: Decoder[::[Unminted[AbstractRootConcept]]] =
     simple.deriveDecoder
@@ -124,8 +124,8 @@ object Implicits extends TimeInstances {
     deriveEncoder
   implicit val _enc22: Encoder[Contributor[Unminted[AbstractAgent]]] =
     deriveEncoder
-  implicit val _enc23
-    : Encoder[ProductionEvent[Unminted[AbstractAgent]]] = deriveEncoder
+  implicit val _enc23: Encoder[ProductionEvent[Unminted[AbstractAgent]]] =
+    deriveEncoder
   implicit val _enc24: Encoder[Unminted[Item]] = deriveEncoder
   implicit val _enc25: Encoder[::[Unminted[AbstractRootConcept]]] =
     simple.deriveEncoder
