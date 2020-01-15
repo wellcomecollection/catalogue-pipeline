@@ -3,8 +3,8 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 import uk.ac.wellcome.models.work.internal.{
   AbstractRootConcept,
-  MaybeDisplayable,
-  Subject
+  Subject,
+  Unminted
 }
 import uk.ac.wellcome.platform.transformer.sierra.source.SierraBibData
 import uk.ac.wellcome.platform.transformer.sierra.transformers.subjects.{
@@ -18,9 +18,9 @@ import uk.ac.wellcome.platform.transformer.sierra.transformers.subjects.{
 object SierraSubjects extends SierraTransformer {
 
   type Output = List[
-    MaybeDisplayable[
+    Unminted[
       Subject[
-        MaybeDisplayable[AbstractRootConcept]
+        Unminted[AbstractRootConcept]
       ]
     ]
   ]

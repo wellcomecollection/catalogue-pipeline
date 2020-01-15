@@ -57,7 +57,7 @@ trait SierraConcepts extends SierraQueryOps {
   //
   // Note that some identifiers have an identifier scheme in
   // indicator 2, but no ID.  In this case, we just ignore it.
-  def identifyConcept[T](concept: T, varField: VarField): MaybeDisplayable[T] =
+  def identifyConcept[T](concept: T, varField: VarField): Unminted[T] =
     getIdentifierSubfieldContents(varField) match {
       case Seq(subfieldContent) =>
         maybeAddIdentifier[T](
@@ -73,7 +73,7 @@ trait SierraConcepts extends SierraQueryOps {
   private def maybeAddIdentifier[T](
     concept: T,
     varField: VarField,
-    identifierSubfieldContent: String): MaybeDisplayable[T] = {
+    identifierSubfieldContent: String): Unminted[T] = {
     val maybeSourceIdentifier = SierraConceptIdentifier.maybeFindIdentifier(
       varField = varField,
       identifierSubfieldContent = identifierSubfieldContent,

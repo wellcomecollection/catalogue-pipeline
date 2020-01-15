@@ -78,8 +78,9 @@ object SierraPersonSubjects
     (List(person.label) ++ roles ++ generalSubdivisions)
       .mkString(" ")
 
-  private def getConcepts(person: Person, generalSubdivisions: List[String])
-    : List[MaybeDisplayable[AbstractRootConcept]] = {
+  private def getConcepts(
+    person: Person,
+    generalSubdivisions: List[String]): List[Unminted[AbstractRootConcept]] = {
     val personConcept = Unidentifiable(person)
 
     val generalSubdivisionConcepts =

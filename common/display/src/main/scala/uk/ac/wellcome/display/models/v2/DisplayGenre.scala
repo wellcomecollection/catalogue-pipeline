@@ -2,7 +2,7 @@ package uk.ac.wellcome.display.models.v2
 
 import io.circe.generic.extras.JsonKey
 import io.swagger.v3.oas.annotations.media.Schema
-import uk.ac.wellcome.models.work.internal.{AbstractConcept, Displayable, Genre}
+import uk.ac.wellcome.models.work.internal.{AbstractConcept, Genre, Minted}
 
 @Schema(
   name = "Genre",
@@ -16,7 +16,7 @@ case class DisplayGenre(
 )
 
 object DisplayGenre {
-  def apply(genre: Genre[Displayable[AbstractConcept]],
+  def apply(genre: Genre[Minted[AbstractConcept]],
             includesIdentifiers: Boolean): DisplayGenre =
     DisplayGenre(label = genre.label, concepts = genre.concepts.map {
       DisplayAbstractConcept(_, includesIdentifiers = includesIdentifiers)

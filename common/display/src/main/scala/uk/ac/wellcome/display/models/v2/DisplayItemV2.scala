@@ -31,8 +31,7 @@ case class DisplayItemV2(
 
 object DisplayItemV2 {
 
-  def apply(item: Displayable[Item],
-            includesIdentifiers: Boolean): DisplayItemV2 =
+  def apply(item: Minted[Item], includesIdentifiers: Boolean): DisplayItemV2 =
     item match {
       case identifiedItem: Identified[Item] =>
         DisplayItemV2(

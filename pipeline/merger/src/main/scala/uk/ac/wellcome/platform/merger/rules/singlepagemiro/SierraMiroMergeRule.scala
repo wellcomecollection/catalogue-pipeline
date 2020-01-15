@@ -31,7 +31,7 @@ object SierraMiroMergeRule
     miroWork: TransformedBaseWork): Option[MergedWork] = {
     (sierraWork.data.items, miroWork.data.items) match {
       case (
-          List(sierraItem: MaybeDisplayable[Item]),
+          List(sierraItem: Unminted[Item]),
           List(miroItem: Unidentifiable[Item])) =>
         info(s"Merging ${describeWorkPair(sierraWork, miroWork)}.")
 
@@ -63,8 +63,8 @@ object SierraMiroMergeRule
   }
 
   private def mergeItems(
-    sierraItem: MaybeDisplayable[Item],
-    miroItem: Unidentifiable[Item]): List[MaybeDisplayable[Item]] = {
+    sierraItem: Unminted[Item],
+    miroItem: Unidentifiable[Item]): List[Unminted[Item]] = {
 
     // We always use the locations from the Sierra and the Miro records.
     //
@@ -103,10 +103,10 @@ object SierraMiroMergeRule
 
   /**
     * Need to wrap this to allow copying of an item for both Unidentifiable
-    * and Identifiable types because MaybeDisplayable doesn't have a
+    * and Identifiable types because Unminted doesn't have a
     * copy method defined.
     */
-  private def copyItem(item: MaybeDisplayable[Item], agent: Item) = {
+  private def copyItem(item: Unminted[Item], agent: Item) = {
     item match {
       case unidentifiable: Unidentifiable[_] =>
         unidentifiable.copy(agent = agent)

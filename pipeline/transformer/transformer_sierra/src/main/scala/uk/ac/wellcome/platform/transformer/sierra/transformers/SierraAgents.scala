@@ -60,7 +60,7 @@ trait SierraAgents extends SierraQueryOps {
    */
   def identify[T](subfields: List[MarcSubfield],
                   agent: T,
-                  ontologyType: String): MaybeDisplayable[T] = {
+                  ontologyType: String): Unminted[T] = {
 
     // We take the contents of subfield $0.  They may contain inconsistent
     // spacing and punctuation, such as:

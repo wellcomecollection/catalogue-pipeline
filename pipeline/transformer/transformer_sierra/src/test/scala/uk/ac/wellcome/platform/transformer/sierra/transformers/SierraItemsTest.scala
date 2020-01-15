@@ -32,7 +32,7 @@ class SierraItemsTest extends FunSpec with Matchers with SierraDataGenerators {
 
     val expectedIdentifiers = List(sourceIdentifier1, sourceIdentifier2)
 
-    val transformedItem: MaybeDisplayable[Item] = getTransformedItems(
+    val transformedItem: Unminted[Item] = getTransformedItems(
       itemDataMap = Map(
         itemId -> itemData
       )
@@ -51,7 +51,7 @@ class SierraItemsTest extends FunSpec with Matchers with SierraDataGenerators {
     )
     val itemData = createSierraItemData
 
-    val transformedItem: MaybeDisplayable[Item] = getTransformedItems(
+    val transformedItem: Unminted[Item] = getTransformedItems(
       itemDataMap = Map(itemId -> itemData)
     ).head
 
@@ -69,7 +69,7 @@ class SierraItemsTest extends FunSpec with Matchers with SierraDataGenerators {
       )
     )
 
-    val transformedItem: MaybeDisplayable[Item] = getTransformedItems(
+    val transformedItem: Unminted[Item] = getTransformedItems(
       itemDataMap = Map(itemId -> itemData)
     ).head
 
@@ -247,6 +247,6 @@ class SierraItemsTest extends FunSpec with Matchers with SierraDataGenerators {
     bibId: SierraBibNumber = createSierraBibNumber,
     bibData: SierraBibData = createSierraBibData,
     itemDataMap: Map[SierraItemNumber, SierraItemData] = Map())
-    : List[MaybeDisplayable[Item]] =
+    : List[Unminted[Item]] =
     SierraItems(itemDataMap)(bibId, bibData)
 }

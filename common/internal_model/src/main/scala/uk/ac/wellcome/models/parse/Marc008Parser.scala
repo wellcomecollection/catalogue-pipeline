@@ -4,9 +4,9 @@ import fastparse._, NoWhitespace._
 
 import uk.ac.wellcome.models.work.internal.{
   AbstractAgent,
-  MaybeDisplayable,
   Period,
-  ProductionEvent
+  ProductionEvent,
+  Unminted
 }
 
 /**
@@ -14,8 +14,7 @@ import uk.ac.wellcome.models.work.internal.{
   *
   *  Spec: https://www.loc.gov/marc/bibliographic/bd008a.html
   */
-object Marc008Parser
-    extends Parser[ProductionEvent[MaybeDisplayable[AbstractAgent]]] {
+object Marc008Parser extends Parser[ProductionEvent[Unminted[AbstractAgent]]] {
 
   def parser[_: P] =
     (Start ~ createdDate ~ Marc008DateParser.parser ~ MarcPlaceParser.parser.?)

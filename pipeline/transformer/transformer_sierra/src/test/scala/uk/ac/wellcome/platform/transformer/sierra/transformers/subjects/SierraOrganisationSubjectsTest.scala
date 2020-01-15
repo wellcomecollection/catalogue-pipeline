@@ -69,8 +69,8 @@ class SierraOrganisationSubjectsTest
       val concepts = subjects.head.agent.concepts
       concepts should have size 1
 
-      val maybeDisplayableOrganisation = concepts.head
-      maybeDisplayableOrganisation shouldBe a[Unidentifiable[_]]
+      val unmintedOrganisation = concepts.head
+      unmintedOrganisation shouldBe a[Unidentifiable[_]]
     }
 
     it("uses subfields a and b for the Organisation label") {
@@ -148,8 +148,8 @@ class SierraOrganisationSubjectsTest
 
       val subjects = getOrganisationSubjects(bibData)
       val concepts = subjects.head.agent.concepts
-      val maybeDisplayableOrganisation = concepts.head
-      maybeDisplayableOrganisation shouldBe a[Unidentifiable[_]]
+      val unmintedOrganisation = concepts.head
+      unmintedOrganisation shouldBe a[Unidentifiable[_]]
     }
 
     it("skips adding an identifier if the 2nd indicator is not '0'") {
@@ -163,8 +163,8 @@ class SierraOrganisationSubjectsTest
 
       val subjects = getOrganisationSubjects(bibData)
       val concepts = subjects.head.agent.concepts
-      val maybeDisplayableOrganisation = concepts.head
-      maybeDisplayableOrganisation shouldBe a[Unidentifiable[_]]
+      val unmintedOrganisation = concepts.head
+      unmintedOrganisation shouldBe a[Unidentifiable[_]]
     }
   }
 

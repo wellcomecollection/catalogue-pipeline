@@ -9,16 +9,16 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
 }
 import uk.ac.wellcome.models.work.internal.{
   AbstractRootConcept,
-  MaybeDisplayable,
-  Subject
+  Subject,
+  Unminted
 }
 
 trait SierraSubjectsTransformer extends SierraTransformer with SierraQueryOps {
 
   type Output = List[
-    MaybeDisplayable[
+    Unminted[
       Subject[
-        MaybeDisplayable[AbstractRootConcept]
+        Unminted[AbstractRootConcept]
       ]
     ]
   ]

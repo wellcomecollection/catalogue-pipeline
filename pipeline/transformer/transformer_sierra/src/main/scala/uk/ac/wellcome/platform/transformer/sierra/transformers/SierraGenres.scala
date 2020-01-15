@@ -4,7 +4,7 @@ import uk.ac.wellcome.models.work.internal.{
   AbstractConcept,
   Concept,
   Genre,
-  MaybeDisplayable
+  Unminted
 }
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
@@ -49,7 +49,7 @@ object SierraGenres
     with SierraQueryOps
     with SierraConcepts {
 
-  type Output = List[Genre[MaybeDisplayable[AbstractConcept]]]
+  type Output = List[Genre[Unminted[AbstractConcept]]]
 
   def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
     bibData
@@ -61,12 +61,11 @@ object SierraGenres
             .partition { _.tag == "a" }
 
         val label = getLabel(primarySubfields, subdivisionSubfields)
-        val concepts
-          : List[MaybeDisplayable[AbstractConcept]] = getPrimaryConcept(
+        val concepts: List[Unminted[AbstractConcept]] = getPrimaryConcept(
           primarySubfields,
           varField = varField) ++ getSubdivisions(subdivisionSubfields)
 
-        Genre[MaybeDisplayable[AbstractConcept]](
+        Genre[Unminted[AbstractConcept]](
           label = label,
           concepts = concepts
         )
@@ -76,7 +75,7 @@ object SierraGenres
   // only concept which might be identified.
   private def getPrimaryConcept(
     primarySubfields: List[MarcSubfield],
-    varField: VarField): List[MaybeDisplayable[AbstractConcept]] = {
+    varField: VarField): List[Unminted[AbstractConcept]] = {
     primarySubfields.map { subfield =>
       identifyConcept(
         concept = Concept(label = subfield.content),

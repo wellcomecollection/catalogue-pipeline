@@ -26,7 +26,7 @@ class MetsDataTest
       LocationType("iiif-presentation"),
       license = Some(License.CCBYNC))
 
-    val unidentifiableItem: MaybeDisplayable[Item] =
+    val unidentifiableItem: Unminted[Item] =
       Unidentifiable(Item(locations = List(digitalLocation)))
     metsData.toWork(version).right.get shouldBe UnidentifiedInvisibleWork(
       version = version,
@@ -61,7 +61,7 @@ class MetsDataTest
     val digitalLocation =
       DigitalLocation(url, LocationType("iiif-presentation"), license = None)
 
-    val unidentifiableItem: MaybeDisplayable[Item] =
+    val unidentifiableItem: Unminted[Item] =
       Unidentifiable(Item(locations = List(digitalLocation)))
     metsData.toWork(version).right.get shouldBe UnidentifiedInvisibleWork(
       version = version,

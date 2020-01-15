@@ -501,8 +501,7 @@ class SierraTransformableTransformerTest
 
     val work = transformDataToUnidentifiedWork(id = id, data = data)
     work.data.contributors shouldBe List(
-      Contributor[MaybeDisplayable[AbstractAgent]](
-        Unidentifiable(Person(label = name)))
+      Contributor[Unminted[AbstractAgent]](Unidentifiable(Person(label = name)))
     )
   }
 

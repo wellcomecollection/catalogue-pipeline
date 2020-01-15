@@ -35,7 +35,7 @@ object SierraContributors
     with SierraQueryOps
     with SierraAgents {
 
-  type Output = List[Contributor[MaybeDisplayable[AbstractAgent]]]
+  type Output = List[Contributor[Unminted[AbstractAgent]]]
 
   val contributorFields = List(
     ("100", getPersonContributors _, "e"),

@@ -34,7 +34,7 @@ trait DisplaySerialisationTestBase { this: Suite =>
          """
     }
 
-  def items(identifiedItems: List[Displayable[Item]]) =
+  def items(identifiedItems: List[Minted[Item]]) =
     identifiedItems
       .map {
         case it: Identified[Item] =>
@@ -149,7 +149,7 @@ trait DisplaySerialisationTestBase { this: Suite =>
   // unmodified.  In the second case, we modify the JSON to include
   // the "id" field and the "identifiers" field.
   //
-  def identifiedOrUnidentifiable[T](displayable: Displayable[T],
+  def identifiedOrUnidentifiable[T](displayable: Minted[T],
                                     serialise: T => String) =
     displayable match {
       case ag: Unidentifiable[T] => serialise(ag.agent)
@@ -234,14 +234,14 @@ trait DisplaySerialisationTestBase { this: Suite =>
     """
   }
 
-  def concepts(concepts: List[Displayable[AbstractRootConcept]]) =
+  def concepts(concepts: List[Minted[AbstractRootConcept]]) =
     concepts
       .map { c =>
         identifiedOrUnidentifiable(c, concept)
       }
       .mkString(",")
 
-  private def subject(s: Subject[Displayable[AbstractRootConcept]]): String =
+  private def subject(s: Subject[Minted[AbstractRootConcept]]): String =
     s"""
     {
       "label": "${s.label}",
@@ -251,15 +251,14 @@ trait DisplaySerialisationTestBase { this: Suite =>
     """
 
   def subjects(
-    subjects: List[Displayable[Subject[Displayable[AbstractRootConcept]]]])
-    : String =
+    subjects: List[Minted[Subject[Minted[AbstractRootConcept]]]]): String =
     subjects
       .map { s =>
         identifiedOrUnidentifiable(s, subject)
       }
       .mkString(",")
 
-  def genre(g: Genre[Displayable[AbstractConcept]]) =
+  def genre(g: Genre[Minted[AbstractConcept]]) =
     s"""
     {
       "label": "${g.label}",
@@ -268,12 +267,12 @@ trait DisplaySerialisationTestBase { this: Suite =>
     }
     """
 
-  def genres(genres: List[Genre[Displayable[AbstractConcept]]]) =
+  def genres(genres: List[Genre[Minted[AbstractConcept]]]) =
     genres
       .map { genre(_) }
       .mkString(",")
 
-  def contributor(contributors: Contributor[Displayable[AbstractAgent]]) =
+  def contributor(contributors: Contributor[Minted[AbstractAgent]]) =
     s"""
        |{
        |  "agent": ${identifiedOrUnidentifiable(
@@ -284,15 +283,13 @@ trait DisplaySerialisationTestBase { this: Suite =>
        |}
      """.stripMargin
 
-  def contributors(c: List[Contributor[Displayable[AbstractAgent]]]) =
+  def contributors(c: List[Contributor[Minted[AbstractAgent]]]) =
     c.map(contributor).mkString(",")
 
-  def production(
-    production: List[ProductionEvent[Displayable[AbstractAgent]]]) =
+  def production(production: List[ProductionEvent[Minted[AbstractAgent]]]) =
     production.map(productionEvent).mkString(",")
 
-  def productionEvent(
-    event: ProductionEvent[Displayable[AbstractAgent]]): String =
+  def productionEvent(event: ProductionEvent[Minted[AbstractAgent]]): String =
     s"""
        |{
        |  "label": "${event.label}",

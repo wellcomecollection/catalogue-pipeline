@@ -19,7 +19,7 @@ case class MetsData(
     for {
       maybeLicense <- parseLicense
       accessStatus <- parseAccessStatus
-      unidentifiableItem: MaybeDisplayable[Item] = Unidentifiable(
+      unidentifiableItem: Unminted[Item] = Unidentifiable(
         Item(locations = List(digitalLocation(maybeLicense, accessStatus))))
     } yield
       UnidentifiedInvisibleWork(
@@ -30,7 +30,7 @@ case class MetsData(
           thumbnail(maybeLicense, sourceIdentifier.value))
       )
 
-  private def workData(unidentifiableItem: MaybeDisplayable[Item],
+  private def workData(unidentifiableItem: Unminted[Item],
                        thumbnail: Option[DigitalLocation]) =
     WorkData(
       items = List(unidentifiableItem),
