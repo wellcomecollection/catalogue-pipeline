@@ -100,7 +100,7 @@ class DisplayConceptTest
   }
 
   private def assertDisplayConceptIsCorrect(
-    concept: Displayable[AbstractConcept],
+    concept: Minted[AbstractConcept],
     expectedDisplayConcept: DisplayAbstractConcept
   ) = {
     val displayConcept =

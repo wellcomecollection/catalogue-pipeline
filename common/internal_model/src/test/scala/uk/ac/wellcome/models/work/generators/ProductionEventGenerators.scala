@@ -7,7 +7,7 @@ trait ProductionEventGenerators extends RandomStrings {
   def createProductionEventWith(
     function: Option[Concept] = None,
     dateLabel: Option[String] = None
-  ): ProductionEvent[Displayable[AbstractAgent]] =
+  ): ProductionEvent[Minted[AbstractAgent]] =
     ProductionEvent(
       label = randomAlphanumeric(25),
       places = List(Place(randomAlphanumeric(10))),
@@ -16,11 +16,11 @@ trait ProductionEventGenerators extends RandomStrings {
       function = function
     )
 
-  def createProductionEvent: ProductionEvent[Displayable[AbstractAgent]] =
+  def createProductionEvent: ProductionEvent[Minted[AbstractAgent]] =
     createProductionEventWith()
 
   def createProductionEventList(
-    count: Int = 1): List[ProductionEvent[Displayable[AbstractAgent]]] =
+    count: Int = 1): List[ProductionEvent[Minted[AbstractAgent]]] =
     (1 to count).map { _ =>
       createProductionEvent
     }.toList

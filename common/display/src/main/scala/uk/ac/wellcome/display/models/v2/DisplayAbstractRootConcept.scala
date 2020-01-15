@@ -14,25 +14,25 @@ sealed trait DisplayAbstractRootConcept {
 }
 
 object DisplayAbstractRootConcept {
-  def apply(abstractConcept: Displayable[AbstractRootConcept],
+  def apply(abstractConcept: Minted[AbstractRootConcept],
             includesIdentifiers: Boolean): DisplayAbstractRootConcept =
     abstractConcept match {
       // Horribleness to circumvent Java type erasure ಠ_ಠ
       case agentConcept @ Unidentifiable(_: AbstractAgent) =>
         DisplayAbstractAgentV2(
-          agentConcept.asInstanceOf[Displayable[AbstractAgent]],
+          agentConcept.asInstanceOf[Minted[AbstractAgent]],
           includesIdentifiers)
       case agentConcept @ Identified(_: AbstractAgent, _, _, _) =>
         DisplayAbstractAgentV2(
-          agentConcept.asInstanceOf[Displayable[AbstractAgent]],
+          agentConcept.asInstanceOf[Minted[AbstractAgent]],
           includesIdentifiers)
       case concept @ Unidentifiable(_: AbstractConcept) =>
         DisplayAbstractConcept(
-          concept.asInstanceOf[Displayable[AbstractConcept]],
+          concept.asInstanceOf[Minted[AbstractConcept]],
           includesIdentifiers)
       case concept @ Identified(_: AbstractConcept, _, _, _) =>
         DisplayAbstractConcept(
-          concept.asInstanceOf[Displayable[AbstractConcept]],
+          concept.asInstanceOf[Minted[AbstractConcept]],
           includesIdentifiers)
     }
 }
@@ -43,7 +43,7 @@ object DisplayAbstractRootConcept {
 sealed trait DisplayAbstractConcept extends DisplayAbstractRootConcept
 
 case object DisplayAbstractConcept {
-  def apply(abstractConcept: Displayable[AbstractConcept],
+  def apply(abstractConcept: Minted[AbstractConcept],
             includesIdentifiers: Boolean): DisplayAbstractConcept =
     abstractConcept match {
       case Unidentifiable(concept: Concept) =>
@@ -191,7 +191,7 @@ sealed trait DisplayAbstractAgentV2 extends DisplayAbstractRootConcept
 
 case object DisplayAbstractAgentV2 {
 
-  def apply(displayableAgent: Displayable[AbstractAgent],
+  def apply(displayableAgent: Minted[AbstractAgent],
             includesIdentifiers: Boolean): DisplayAbstractAgentV2 =
     displayableAgent match {
       case Unidentifiable(agent) => displayAgent(agent)

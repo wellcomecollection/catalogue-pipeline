@@ -55,7 +55,7 @@ trait SierraPhysicalDigitalWorkPairMerger
   // the digital location to the locations of the item on the physical work.
   // If the physical work has more than one item, we append the digital item
   // to the list of items on the physical work.
-  private def mergeItems(physicalItems: List[MaybeDisplayable[Item]],
+  private def mergeItems(physicalItems: List[Unminted[Item]],
                          digitalItem: Unidentifiable[Item]) = {
     physicalItems match {
       case List(physicalItem: Identifiable[Item]) =>

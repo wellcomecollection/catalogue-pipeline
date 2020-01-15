@@ -14,7 +14,7 @@ sealed trait IdentifiedBaseWork extends BaseWork {
 sealed trait TransformedBaseWork
     extends BaseWork
     with MultipleSourceIdentifiers {
-  val data: WorkData[MaybeDisplayable]
+  val data: WorkData[Unminted]
   val otherIdentifiers = data.otherIdentifiers
 }
 
@@ -50,12 +50,12 @@ case class WorkData[+IdState[+S] <: IdentityState[S]](
 case class UnidentifiedWork(
   version: Int,
   sourceIdentifier: SourceIdentifier,
-  data: WorkData[MaybeDisplayable],
+  data: WorkData[Unminted],
   ontologyType: String = "Work",
   identifiedType: String = classOf[IdentifiedWork].getSimpleName
 ) extends TransformedBaseWork {
 
-  def withData(f: WorkData[MaybeDisplayable] => WorkData[MaybeDisplayable]) =
+  def withData(f: WorkData[Unminted] => WorkData[Unminted]) =
     this.copy(data = f(data))
 }
 
@@ -63,24 +63,24 @@ case class IdentifiedWork(
   canonicalId: String,
   version: Int,
   sourceIdentifier: SourceIdentifier,
-  data: WorkData[Displayable],
+  data: WorkData[Minted],
   ontologyType: String = "Work"
 ) extends IdentifiedBaseWork
     with MultipleSourceIdentifiers {
   val otherIdentifiers = data.otherIdentifiers
 
-  def withData(f: WorkData[Displayable] => WorkData[Displayable]) =
+  def withData(f: WorkData[Minted] => WorkData[Minted]) =
     this.copy(data = f(data))
 }
 
 case class UnidentifiedInvisibleWork(
   version: Int,
   sourceIdentifier: SourceIdentifier,
-  data: WorkData[MaybeDisplayable],
+  data: WorkData[Unminted],
   identifiedType: String = classOf[IdentifiedInvisibleWork].getSimpleName
 ) extends TransformedBaseWork
     with InvisibleWork {
-  def withData(f: WorkData[MaybeDisplayable] => WorkData[MaybeDisplayable]) =
+  def withData(f: WorkData[Unminted] => WorkData[Unminted]) =
     this.copy(data = f(data))
 }
 
@@ -88,10 +88,10 @@ case class IdentifiedInvisibleWork(
   canonicalId: String,
   version: Int,
   sourceIdentifier: SourceIdentifier,
-  data: WorkData[Displayable]
+  data: WorkData[Minted]
 ) extends IdentifiedBaseWork
     with InvisibleWork {
-  def withData(f: WorkData[Displayable] => WorkData[Displayable]) =
+  def withData(f: WorkData[Minted] => WorkData[Minted]) =
     this.copy(data = f(data))
 }
 

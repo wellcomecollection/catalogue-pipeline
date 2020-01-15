@@ -681,7 +681,7 @@ class SierraProductionTest
   }
 
   private def transformToProduction(varFields: List[VarField])
-    : List[ProductionEvent[MaybeDisplayable[AbstractAgent]]] = {
+    : List[ProductionEvent[Unminted[AbstractAgent]]] = {
     val bibData = createSierraBibDataWith(varFields = varFields)
     SierraProduction(createSierraBibNumber, bibData)
   }

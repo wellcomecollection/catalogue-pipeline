@@ -41,7 +41,7 @@ trait SierraMetsWorkPairMerger extends WorkPairMerger {
     }
   }
 
-  private def shouldIgnoreItem(item: MaybeDisplayable[Item],
+  private def shouldIgnoreItem(item: Unminted[Item],
                                metsLocation: DigitalLocation) = {
     item.agent.locations match {
       case List(location) => shouldIgnoreLocation(location, metsLocation.url)
@@ -51,7 +51,7 @@ trait SierraMetsWorkPairMerger extends WorkPairMerger {
 
   private def createMergedWork(sierraWork: UnidentifiedWork,
                                metsWork: TransformedBaseWork,
-                               items: List[MaybeDisplayable[Item]]) = {
+                               items: List[Unminted[Item]]) = {
     val targetWork = sierraWork.withData { data =>
       data.copy(
         items = items,
@@ -66,7 +66,7 @@ trait SierraMetsWorkPairMerger extends WorkPairMerger {
     Some(MergedWork(targetWork, redirectedWork))
   }
 
-  private def mergeLocations(sierraItem: MaybeDisplayable[Item],
+  private def mergeLocations(sierraItem: Unminted[Item],
                              metsLocation: DigitalLocation) =
     sierraItem.withAgent { item =>
       item.copy(

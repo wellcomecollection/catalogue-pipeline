@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import uk.ac.wellcome.models.work.internal.{
   AbstractAgent,
   Contributor,
-  Displayable
+  Minted
 }
 
 @Schema(
@@ -20,7 +20,7 @@ case class DisplayContributor(
 )
 
 object DisplayContributor {
-  def apply(contributor: Contributor[Displayable[AbstractAgent]],
+  def apply(contributor: Contributor[Minted[AbstractAgent]],
             includesIdentifiers: Boolean): DisplayContributor =
     DisplayContributor(
       agent = DisplayAbstractAgentV2(

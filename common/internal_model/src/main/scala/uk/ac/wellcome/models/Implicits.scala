@@ -39,39 +39,39 @@ object Implicits extends TimeInstances {
   implicit val _dec15: Decoder[Concept] = deriveDecoder
   implicit val _dec16: Decoder[AbstractConcept] = deriveDecoder
   implicit val _dec17: Decoder[AbstractRootConcept] = deriveDecoder
-  implicit val _dec18: Decoder[MaybeDisplayable[AbstractConcept]] =
+  implicit val _dec18: Decoder[Unminted[AbstractConcept]] =
     deriveDecoder
-  implicit val _dec19: Decoder[MaybeDisplayable[AbstractRootConcept]] =
+  implicit val _dec19: Decoder[Unminted[AbstractRootConcept]] =
     deriveDecoder
-  implicit val _dec20: Decoder[MaybeDisplayable[AbstractAgent]] = deriveDecoder
-  implicit val _dec21: Decoder[Genre[MaybeDisplayable[AbstractConcept]]] =
+  implicit val _dec20: Decoder[Unminted[AbstractAgent]] = deriveDecoder
+  implicit val _dec21: Decoder[Genre[Unminted[AbstractConcept]]] =
     deriveDecoder
-  implicit val _dec22: Decoder[Contributor[MaybeDisplayable[AbstractAgent]]] =
+  implicit val _dec22: Decoder[Contributor[Unminted[AbstractAgent]]] =
     deriveDecoder
   implicit val _dec23
-    : Decoder[ProductionEvent[MaybeDisplayable[AbstractAgent]]] = deriveDecoder
-  implicit val _dec24: Decoder[MaybeDisplayable[Item]] = deriveDecoder
-  implicit val _dec25: Decoder[::[MaybeDisplayable[AbstractRootConcept]]] =
+    : Decoder[ProductionEvent[Unminted[AbstractAgent]]] = deriveDecoder
+  implicit val _dec24: Decoder[Unminted[Item]] = deriveDecoder
+  implicit val _dec25: Decoder[::[Unminted[AbstractRootConcept]]] =
     simple.deriveDecoder
-  implicit val _dec26: Decoder[::[MaybeDisplayable[AbstractAgent]]] =
+  implicit val _dec26: Decoder[::[Unminted[AbstractAgent]]] =
     simple.deriveDecoder
-  implicit val _dec27: Decoder[Subject[MaybeDisplayable[AbstractRootConcept]]] =
+  implicit val _dec27: Decoder[Subject[Unminted[AbstractRootConcept]]] =
     deriveDecoder
-  implicit val _dec28: Decoder[Displayable[AbstractConcept]] = deriveDecoder
-  implicit val _dec29: Decoder[Displayable[AbstractRootConcept]] = deriveDecoder
-  implicit val _dec30: Decoder[Displayable[AbstractAgent]] = deriveDecoder
-  implicit val _dec31: Decoder[Genre[Displayable[AbstractConcept]]] =
+  implicit val _dec28: Decoder[Minted[AbstractConcept]] = deriveDecoder
+  implicit val _dec29: Decoder[Minted[AbstractRootConcept]] = deriveDecoder
+  implicit val _dec30: Decoder[Minted[AbstractAgent]] = deriveDecoder
+  implicit val _dec31: Decoder[Genre[Minted[AbstractConcept]]] =
     deriveDecoder
-  implicit val _dec32: Decoder[Contributor[Displayable[AbstractAgent]]] =
+  implicit val _dec32: Decoder[Contributor[Minted[AbstractAgent]]] =
     deriveDecoder
-  implicit val _dec33: Decoder[ProductionEvent[Displayable[AbstractAgent]]] =
+  implicit val _dec33: Decoder[ProductionEvent[Minted[AbstractAgent]]] =
     deriveDecoder
-  implicit val _dec34: Decoder[Displayable[Item]] = deriveDecoder
-  implicit val _dec35: Decoder[::[Displayable[AbstractRootConcept]]] =
+  implicit val _dec34: Decoder[Minted[Item]] = deriveDecoder
+  implicit val _dec35: Decoder[::[Minted[AbstractRootConcept]]] =
     simple.deriveDecoder
-  implicit val _dec36: Decoder[::[Displayable[AbstractAgent]]] =
+  implicit val _dec36: Decoder[::[Minted[AbstractAgent]]] =
     simple.deriveDecoder
-  implicit val _dec37: Decoder[Subject[Displayable[AbstractRootConcept]]] =
+  implicit val _dec37: Decoder[Subject[Minted[AbstractRootConcept]]] =
     deriveDecoder
   implicit val _dec38: Decoder[Identified[AbstractConcept]] = deriveDecoder
   implicit val _dec39: Decoder[Identified[AbstractRootConcept]] = deriveDecoder
@@ -115,39 +115,39 @@ object Implicits extends TimeInstances {
   implicit val _enc15: Encoder[Concept] = deriveEncoder
   implicit val _enc16: Encoder[AbstractConcept] = deriveEncoder
   implicit val _enc17: Encoder[AbstractRootConcept] = deriveEncoder
-  implicit val _enc18: Encoder[MaybeDisplayable[AbstractConcept]] =
+  implicit val _enc18: Encoder[Unminted[AbstractConcept]] =
     deriveEncoder
-  implicit val _enc19: Encoder[MaybeDisplayable[AbstractRootConcept]] =
+  implicit val _enc19: Encoder[Unminted[AbstractRootConcept]] =
     deriveEncoder
-  implicit val _enc20: Encoder[MaybeDisplayable[AbstractAgent]] = deriveEncoder
-  implicit val _enc21: Encoder[Genre[MaybeDisplayable[AbstractConcept]]] =
+  implicit val _enc20: Encoder[Unminted[AbstractAgent]] = deriveEncoder
+  implicit val _enc21: Encoder[Genre[Unminted[AbstractConcept]]] =
     deriveEncoder
-  implicit val _enc22: Encoder[Contributor[MaybeDisplayable[AbstractAgent]]] =
+  implicit val _enc22: Encoder[Contributor[Unminted[AbstractAgent]]] =
     deriveEncoder
   implicit val _enc23
-    : Encoder[ProductionEvent[MaybeDisplayable[AbstractAgent]]] = deriveEncoder
-  implicit val _enc24: Encoder[MaybeDisplayable[Item]] = deriveEncoder
-  implicit val _enc25: Encoder[::[MaybeDisplayable[AbstractRootConcept]]] =
+    : Encoder[ProductionEvent[Unminted[AbstractAgent]]] = deriveEncoder
+  implicit val _enc24: Encoder[Unminted[Item]] = deriveEncoder
+  implicit val _enc25: Encoder[::[Unminted[AbstractRootConcept]]] =
     simple.deriveEncoder
-  implicit val _enc26: Encoder[::[MaybeDisplayable[AbstractAgent]]] =
+  implicit val _enc26: Encoder[::[Unminted[AbstractAgent]]] =
     simple.deriveEncoder
-  implicit val _enc27: Encoder[Subject[MaybeDisplayable[AbstractRootConcept]]] =
+  implicit val _enc27: Encoder[Subject[Unminted[AbstractRootConcept]]] =
     deriveEncoder
-  implicit val _enc28: Encoder[Displayable[AbstractConcept]] = deriveEncoder
-  implicit val _enc29: Encoder[Displayable[AbstractRootConcept]] = deriveEncoder
-  implicit val _enc30: Encoder[Displayable[AbstractAgent]] = deriveEncoder
-  implicit val _enc31: Encoder[Genre[Displayable[AbstractConcept]]] =
+  implicit val _enc28: Encoder[Minted[AbstractConcept]] = deriveEncoder
+  implicit val _enc29: Encoder[Minted[AbstractRootConcept]] = deriveEncoder
+  implicit val _enc30: Encoder[Minted[AbstractAgent]] = deriveEncoder
+  implicit val _enc31: Encoder[Genre[Minted[AbstractConcept]]] =
     deriveEncoder
-  implicit val _enc32: Encoder[Contributor[Displayable[AbstractAgent]]] =
+  implicit val _enc32: Encoder[Contributor[Minted[AbstractAgent]]] =
     deriveEncoder
-  implicit val _enc33: Encoder[ProductionEvent[Displayable[AbstractAgent]]] =
+  implicit val _enc33: Encoder[ProductionEvent[Minted[AbstractAgent]]] =
     deriveEncoder
-  implicit val _enc34: Encoder[Displayable[Item]] = deriveEncoder
-  implicit val _enc35: Encoder[::[Displayable[AbstractRootConcept]]] =
+  implicit val _enc34: Encoder[Minted[Item]] = deriveEncoder
+  implicit val _enc35: Encoder[::[Minted[AbstractRootConcept]]] =
     simple.deriveEncoder
-  implicit val _enc36: Encoder[::[Displayable[AbstractAgent]]] =
+  implicit val _enc36: Encoder[::[Minted[AbstractAgent]]] =
     simple.deriveEncoder
-  implicit val _enc37: Encoder[Subject[Displayable[AbstractRootConcept]]] =
+  implicit val _enc37: Encoder[Subject[Minted[AbstractRootConcept]]] =
     deriveEncoder
   implicit val _enc38: Encoder[Identified[AbstractConcept]] = deriveEncoder
   implicit val _enc39: Encoder[Identified[AbstractRootConcept]] = deriveEncoder

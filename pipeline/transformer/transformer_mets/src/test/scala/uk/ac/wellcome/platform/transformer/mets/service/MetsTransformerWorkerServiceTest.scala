@@ -92,7 +92,7 @@ class MetsTransformerWorkerServiceTest
       expectedUrl,
       LocationType("iiif-presentation"),
       license = Some(License.CCBYNC))
-    val expectedItem: MaybeDisplayable[Item] =
+    val expectedItem: Unminted[Item] =
       Unidentifiable(Item(locations = List(expectedDigitalLocation)))
 
     val expectedWork = UnidentifiedInvisibleWork(

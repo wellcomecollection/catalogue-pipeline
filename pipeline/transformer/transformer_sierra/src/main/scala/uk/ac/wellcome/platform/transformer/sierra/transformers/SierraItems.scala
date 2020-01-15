@@ -18,7 +18,7 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
     with SierraLocation
     with SierraQueryOps {
 
-  type Output = List[MaybeDisplayable[Item]]
+  type Output = List[Unminted[Item]]
 
   def apply(bibId: SierraBibNumber, bibData: SierraBibData) = {
     val physicalItems = getPhysicalItems(itemDataMap)

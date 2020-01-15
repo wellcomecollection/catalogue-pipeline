@@ -5,9 +5,9 @@ import uk.ac.wellcome.models.work.internal._
 
 trait SubjectGenerators extends RandomStrings {
   def createSubjectWith(label: String = randomAlphanumeric(10),
-                        concepts: List[Displayable[AbstractRootConcept]] =
+                        concepts: List[Minted[AbstractRootConcept]] =
                           createConcepts())
-    : Displayable[Subject[Displayable[AbstractRootConcept]]] =
+    : Minted[Subject[Minted[AbstractRootConcept]]] =
     Unidentifiable(
       Subject(
         label = label,
@@ -17,7 +17,7 @@ trait SubjectGenerators extends RandomStrings {
 
   def createSubjectWithConcept(label: String = randomAlphanumeric(10),
                                conceptString: String = randomAlphanumeric(8))
-    : Displayable[Subject[Displayable[AbstractRootConcept]]] =
+    : Minted[Subject[Minted[AbstractRootConcept]]] =
     Unidentifiable(
       Subject(
         label = label,
@@ -25,16 +25,16 @@ trait SubjectGenerators extends RandomStrings {
       )
     )
 
-  def createSubject: Displayable[Subject[Displayable[AbstractRootConcept]]] =
+  def createSubject: Minted[Subject[Minted[AbstractRootConcept]]] =
     createSubjectWith()
 
   private def createConcepts(
     conceptStrings: Seq[String] = List.fill(3)(randomAlphanumeric(15)))
-    : List[Displayable[AbstractRootConcept]] =
+    : List[Minted[AbstractRootConcept]] =
     conceptStrings
       .map { concept: String =>
         Unidentifiable(Concept(concept))
       }
       .toList
-      .asInstanceOf[List[Displayable[AbstractRootConcept]]]
+      .asInstanceOf[List[Minted[AbstractRootConcept]]]
 }

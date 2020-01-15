@@ -12,10 +12,10 @@ import uk.ac.wellcome.json.JsonUtil._
 
 case class Aggregations(
   workType: Option[Aggregation[WorkType]] = None,
-  genres: Option[Aggregation[Genre[Displayable[AbstractConcept]]]] = None,
+  genres: Option[Aggregation[Genre[Minted[AbstractConcept]]]] = None,
   productionDates: Option[Aggregation[Period]] = None,
   language: Option[Aggregation[Language]] = None,
-  subjects: Option[Aggregation[Subject[Displayable[AbstractRootConcept]]]] =
+  subjects: Option[Aggregation[Subject[Minted[AbstractRootConcept]]]] =
     None,
   license: Option[Aggregation[License]] = None,
 )
@@ -32,7 +32,7 @@ object Aggregations extends Logging {
             .flatMap(_.toAgg[WorkType]),
           genres = e4sAggregations
             .getAgg("genres")
-            .flatMap(_.toAgg[Genre[Displayable[AbstractConcept]]]),
+            .flatMap(_.toAgg[Genre[Minted[AbstractConcept]]]),
           productionDates = e4sAggregations
             .getAgg("productionDates")
             .flatMap(_.toAgg[Period]),
@@ -41,7 +41,7 @@ object Aggregations extends Logging {
             .flatMap(_.toAgg[Language]),
           subjects = e4sAggregations
             .getAgg("subjects")
-            .flatMap(_.toAgg[Subject[Displayable[AbstractRootConcept]]]),
+            .flatMap(_.toAgg[Subject[Minted[AbstractRootConcept]]]),
           license = e4sAggregations
             .getAgg("license")
             .flatMap(_.toAgg[License])

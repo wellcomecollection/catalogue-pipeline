@@ -663,7 +663,7 @@ class SierraContributorsTest
 
   private def transformAndCheckContributors(
     varFields: List[VarField],
-    expectedContributors: List[Contributor[MaybeDisplayable[AbstractAgent]]]
+    expectedContributors: List[Contributor[Unminted[AbstractAgent]]]
   ) = {
     val bibId = createSierraBibNumber
     val bibData = createSierraBibDataWith(varFields = varFields)

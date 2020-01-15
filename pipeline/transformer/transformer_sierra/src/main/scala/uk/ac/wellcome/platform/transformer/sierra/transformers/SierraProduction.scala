@@ -13,7 +13,7 @@ import uk.ac.wellcome.models.parse.Marc008Parser
 
 object SierraProduction extends SierraTransformer with SierraQueryOps {
 
-  type Output = List[ProductionEvent[MaybeDisplayable[AbstractAgent]]]
+  type Output = List[ProductionEvent[Unminted[AbstractAgent]]]
 
   // Populate wwork:production.
   //
@@ -239,7 +239,7 @@ object SierraProduction extends SierraTransformer with SierraQueryOps {
   }
 
   def getProductionFrom008(bibData: SierraBibData)
-    : List[ProductionEvent[MaybeDisplayable[AbstractAgent]]] =
+    : List[ProductionEvent[Unminted[AbstractAgent]]] =
     bibData
       .varfieldsWithTag("008")
       .contents

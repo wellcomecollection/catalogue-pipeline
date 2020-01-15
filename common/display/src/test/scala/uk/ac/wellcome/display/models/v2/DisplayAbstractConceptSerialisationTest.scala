@@ -84,7 +84,7 @@ class DisplayAbstractConceptSerialisationTest
 
   it("serialises AbstractDisplayConcepts constructed from AbstractConcepts") {
     assertObjectMapsToJson(
-      List[Displayable[AbstractConcept]](
+      List[Minted[AbstractConcept]](
         Unidentifiable(Concept("conceptLabel")),
         Unidentifiable(Place("placeLabel")),
         Unidentifiable(Period("periodLabel"))
