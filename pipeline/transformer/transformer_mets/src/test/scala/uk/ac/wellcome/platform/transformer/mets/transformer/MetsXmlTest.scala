@@ -34,10 +34,12 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
   }
 
   it("gets the first accessConditionStatus if there are more than one") {
-    val str = metsXmlWith(recordIdentifier = "b30246039", accessConditionStatus = Some("Open"),
-      secondarySections = metsSecondarySection(accessConditionStatus = "Restricted"))
-    MetsXml(str).getRight
-      .accessConditionStatus shouldBe Right(Some("Open"))
+    val str = metsXmlWith(
+      recordIdentifier = "b30246039",
+      accessConditionStatus = Some("Open"),
+      secondarySections =
+        metsSecondarySection(accessConditionStatus = "Restricted"))
+    MetsXml(str).getRight.accessConditionStatus shouldBe Right(Some("Open"))
   }
 
   it("parses a METS with no access condition") {
@@ -62,12 +64,13 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
       recordIdentifier = "b30246039",
       fileSec = fileSec(filePrefix = "b30246039"),
       structMap = structMap)
-    MetsXml(str).getRight.thumbnailLocation("b30246039") shouldBe Some("b30246039_0001.jp2")
+    MetsXml(str).getRight.thumbnailLocation("b30246039") shouldBe Some(
+      "b30246039_0001.jp2")
   }
 
   it("parses thumbnail using ORDER attrib when non-sequential order") {
-    MetsXml(xmlNonSequentialOrder("b30246039"))
-      .getRight.thumbnailLocation("b30246039") shouldBe Some("b30246039_0001.jp2")
+    MetsXml(xmlNonSequentialOrder("b30246039")).getRight
+      .thumbnailLocation("b30246039") shouldBe Some("b30246039_0001.jp2")
   }
 
   it("parses thumbnail if filename doesn't start with bnumber") {
@@ -77,7 +80,8 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
       metsXmlWith(
         recordIdentifier = bnumber,
         fileSec = fileSec(filePrefix),
-        structMap = structMap)).getRight.thumbnailLocation(bnumber) shouldBe Some(
+        structMap = structMap)).getRight
+      .thumbnailLocation(bnumber) shouldBe Some(
       s"${bnumber}_${filePrefix}_0001.jp2")
   }
 
@@ -88,8 +92,8 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
       metsXmlWith(
         recordIdentifier = bnumber,
         fileSec = fileSec(filePrefix),
-        structMap = structMap)).getRight.thumbnailLocation(bnumber) shouldBe Some(
-      s"${filePrefix}_0001.jp2")
+        structMap = structMap)).getRight
+      .thumbnailLocation(bnumber) shouldBe Some(s"${filePrefix}_0001.jp2")
   }
 
   it("cannot parse thumbnail when invalid file ID") {
