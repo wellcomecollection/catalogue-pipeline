@@ -4,22 +4,18 @@ import uk.ac.wellcome.models.generators.RandomStrings
 import uk.ac.wellcome.models.work.internal._
 
 trait GenreGenerators extends RandomStrings {
-  def createGenreWith(label: String = randomAlphanumeric(10),
-                      concepts: List[Minted[AbstractConcept]] = createConcepts)
-    : Genre[Minted[AbstractConcept]] =
-    Genre(
-      label = label,
-      concepts = concepts
-    )
 
-  def createGenre: Genre[Minted[AbstractConcept]] =
+  def createGenreWith(
+    label: String = randomAlphanumeric(10),
+    concepts: List[AbstractConcept[Minted]] = createConcepts): Genre[Minted] =
+    Genre(label = label, concepts = concepts)
+
+  def createGenre: Genre[Minted] =
     createGenreWith()
 
-  private def createConcepts: List[Minted[AbstractConcept]] =
+  private def createConcepts: List[AbstractConcept[Minted]] =
     (1 to 3)
-      .map { _ =>
-        Unidentifiable(Concept(randomAlphanumeric(15)))
-      }
+      .map { _ => Concept(randomAlphanumeric(15)) }
       .toList
-      .asInstanceOf[List[Minted[AbstractConcept]]]
+      .asInstanceOf[List[AbstractConcept[Minted]]]
 }

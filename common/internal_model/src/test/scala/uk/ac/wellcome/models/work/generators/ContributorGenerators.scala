@@ -6,7 +6,7 @@ trait ContributorGenerators {
   def createPersonContributorWith(label: String,
                                   roles: List[ContributionRole] = List()) =
     Contributor(
-      agent = Unidentifiable(Person(label = label)),
+      agent = Person(label = label),
       roles = roles
     )
 }
