@@ -1,11 +1,9 @@
 package uk.ac.wellcome.models.work.internal
 
-import java.time.Instant
-
 case class AccessCondition(
   status: AccessStatus,
   terms: Option[String] = None,
-  to: Option[Instant] = None
+  to: Option[String] = None
 )
 
 sealed trait AccessStatus

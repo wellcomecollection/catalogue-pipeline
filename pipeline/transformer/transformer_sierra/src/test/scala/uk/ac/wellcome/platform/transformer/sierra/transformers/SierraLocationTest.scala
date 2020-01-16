@@ -2,12 +2,18 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.models.work.internal.{
+  AccessCondition,
+  AccessStatus,
   DigitalLocation,
   LocationType,
   PhysicalLocation
 }
 import uk.ac.wellcome.platform.transformer.sierra.exceptions.SierraTransformerException
 import uk.ac.wellcome.platform.transformer.sierra.source.sierra.SierraSourceLocation
+import uk.ac.wellcome.platform.transformer.sierra.source.{
+  MarcSubfield,
+  VarField
+}
 import uk.ac.wellcome.platform.transformer.sierra.generators.SierraDataGenerators
 
 class SierraLocationTest
@@ -18,16 +24,18 @@ class SierraLocationTest
   private val transformer = new SierraLocation {}
 
   describe("Physical locations") {
-    it("extracts location from item data") {
-      val locationTypeCode = "sgmed"
-      val locationType = LocationType("sgmed")
-      val label = "A museum of mermaids"
-      val itemData = createSierraItemDataWith(
-        location = Some(SierraSourceLocation(locationTypeCode, label))
-      )
-      val expectedLocation = PhysicalLocation(locationType, label)
 
-      transformer.getPhysicalLocation(itemData = itemData) shouldBe Some(
+    val bibData = createSierraBibData
+
+    val locationType = LocationType("sgmed")
+    val label = "A museum of mermaids"
+    val itemData = createSierraItemDataWith(
+      location = Some(SierraSourceLocation("sgmed", label))
+    )
+
+    it("extracts location from item data") {
+      val expectedLocation = PhysicalLocation(locationType, label)
+      transformer.getPhysicalLocation(itemData, bibData) shouldBe Some(
         expectedLocation)
     }
 
@@ -36,14 +44,14 @@ class SierraLocationTest
         location = Some(SierraSourceLocation("", ""))
       )
 
-      transformer.getPhysicalLocation(itemData = itemData) shouldBe None
+      transformer.getPhysicalLocation(itemData, bibData) shouldBe None
     }
 
     it("returns None if the location field only contains the string 'none'") {
       val itemData = createSierraItemDataWith(
         location = Some(SierraSourceLocation("none", "none"))
       )
-      transformer.getPhysicalLocation(itemData = itemData) shouldBe None
+      transformer.getPhysicalLocation(itemData, bibData) shouldBe None
     }
 
     it("returns None if there is no location in the item data") {
@@ -51,7 +59,66 @@ class SierraLocationTest
         location = None
       )
 
-      transformer.getPhysicalLocation(itemData = itemData) shouldBe None
+      transformer.getPhysicalLocation(itemData, bibData) shouldBe None
+    }
+
+    it("adds access condition to the location if present") {
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          VarField(
+            marcTag = Some("506"),
+            subfields = List(
+              MarcSubfield("a", "You're not allowed yet"),
+              MarcSubfield("f", "Restricted"),
+              MarcSubfield("g", "2099-12-31"),
+            )
+          )
+        )
+      )
+      transformer.getPhysicalLocation(itemData, bibData) shouldBe Some(
+        PhysicalLocation(
+          locationType = locationType,
+          label = label,
+          accessConditions = Some(
+            List(
+              AccessCondition(
+                status = AccessStatus.Restricted,
+                terms = Some("You're not allowed yet"),
+                to = Some("2099-12-31")
+              ),
+            )
+          )
+        )
+      )
+    }
+
+    it("adds 'Open' access condition if ind1 is 0") {
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          VarField(marcTag = Some("506"), indicator1 = Some("0"))
+        )
+      )
+      transformer.getPhysicalLocation(itemData, bibData) shouldBe Some(
+        PhysicalLocation(
+          locationType = locationType,
+          label = label,
+          accessConditions = Some(List(AccessCondition(AccessStatus.Open)))
+        )
+      )
+    }
+
+    it("fails if invalid AccessStatus") {
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          VarField(
+            marcTag = Some("506"),
+            subfields = List(MarcSubfield("f", "Oopsy"))
+          )
+        )
+      )
+      assertThrows[Exception] {
+        transformer.getPhysicalLocation(itemData, bibData)
+      }
     }
   }
 
