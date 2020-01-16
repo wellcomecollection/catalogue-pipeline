@@ -8,6 +8,7 @@ Since Sierra records can be edited at any time, it is also responsible for keepi
 See also:
 
 -   [Notes on Sierra IDs](https://github.com/wellcometrust/catalogue/blob/master/docs/sierra/sierra_ids.md)
+-   [Fetching records from Sierra](https://github.com/wellcometrust/catalogue/blob/master/docs/adapters/fetching_records_from_sierra.md)
 
 [sierra]: https://www.iii.com/products/sierra-ils/
 
@@ -25,7 +26,18 @@ The two we're especially interested in are *bibs* and *items*.
 There is a many-to-many mapping between bibs and items:
 
 *   A single bib can be associated with multiple items: for example, we might have multiple physical copies (the items) of a book (the bib).
-*   A single item can be associated with multiple bibs: for example, i15699833 is a single physical item (a bound volume of patents), and each of the individual patents has its own bib number.
+
+*   A single item can be associated with multiple bibs.
+    There are two cases where this can happen:
+    
+    -   "boundwith": items such as pamphlets or patents which are bound together, where there are bib records for individual pieces but not for the whole volume.
+        For example, i15699833 is a single physical item (a bound volume of patents), and each of the individual patents has its own bib number.
+    
+    -   "contained in": this is how the ephemera is organised.
+        You have a single box (an item) of ephemera, and then a bib record both for the box as a whole, and individual big records for the pieces of ephemera it contains – for example, i14702228.
+    
+    In both cases, there's a single item record because the physical objects have to be produced together.
+    You can't make an individual order for a single pamphlet or ephemera object.
 
 <img style="width: 400px" src="images/shape_of_the_data.svg">
 
