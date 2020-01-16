@@ -3,7 +3,6 @@ package uk.ac.wellcome.models.parse
 import fastparse._, NoWhitespace._
 
 import uk.ac.wellcome.models.work.internal.{
-  AbstractAgent,
   Period,
   ProductionEvent,
   Unminted
@@ -14,7 +13,7 @@ import uk.ac.wellcome.models.work.internal.{
   *
   *  Spec: https://www.loc.gov/marc/bibliographic/bd008a.html
   */
-object Marc008Parser extends Parser[ProductionEvent[Unminted[AbstractAgent]]] {
+object Marc008Parser extends Parser[ProductionEvent[Unminted]] {
 
   def parser[_: P] =
     (Start ~ createdDate ~ Marc008DateParser.parser ~ MarcPlaceParser.parser.?)
@@ -23,7 +22,9 @@ object Marc008Parser extends Parser[ProductionEvent[Unminted[AbstractAgent]]] {
           ProductionEvent(
             label = instantRange.label,
             agents = Nil,
-            dates = Period(instantRange.label, Some(instantRange)) :: Nil,
+            dates = Period(
+              instantRange.label,
+              Some(instantRange)) :: Nil,
             places = place.toList,
             function = None)
       }
