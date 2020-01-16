@@ -50,7 +50,9 @@ case class ElasticSearchRequestBuilder(
         .size(100)
         .sources(
           List(
-            TermsValueSource("label", field = Some("data.workType.label.raw")),
+            TermsValueSource(
+              "label",
+              field = Some("data.workType.label.keyword")),
             TermsValueSource("id", field = Some("data.workType.id")),
             TermsValueSource("type", field = Some("data.workType.ontologyType"))
           )
@@ -71,7 +73,7 @@ case class ElasticSearchRequestBuilder(
           List(
             TermsValueSource(
               "label",
-              field = Some("data.genres.concepts.agent.label.raw"))
+              field = Some("data.genres.concepts.agent.label.keyword"))
           )
         )
         .subAggregations(sortedByCount)
@@ -83,7 +85,7 @@ case class ElasticSearchRequestBuilder(
           List(
             TermsValueSource(
               "label",
-              field = Some("data.subjects.agent.label.raw")
+              field = Some("data.subjects.agent.label.keyword")
             )
           )
         )
@@ -95,7 +97,9 @@ case class ElasticSearchRequestBuilder(
         .sources(
           List(
             TermsValueSource("id", field = Some("data.language.id")),
-            TermsValueSource("label", field = Some("data.language.label.raw"))
+            TermsValueSource(
+              "label",
+              field = Some("data.language.label.keyword"))
           )
         )
 

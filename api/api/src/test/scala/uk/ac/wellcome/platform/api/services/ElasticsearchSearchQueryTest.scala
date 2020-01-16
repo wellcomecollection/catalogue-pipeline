@@ -71,8 +71,7 @@ class ElasticsearchQueryTest
           searchResults(
             index = index,
             queryOptions = createElasticsearchQueryOptionsWith(
-              searchQuery = Some(
-                SearchQuery("Gray's anatomy", SearchQueryType.ScoringTiers))))
+              searchQuery = Some(SearchQuery("Gray's anatomy"))))
 
         withClue(
           "a MUST query is used on the base query so as not to match everything") {
@@ -125,8 +124,7 @@ class ElasticsearchQueryTest
             searchResults(
               index = index,
               queryOptions = createElasticsearchQueryOptionsWith(
-                searchQuery = Some(
-                  SearchQuery("Gray's anatomy", SearchQueryType.ScoringTiers))))
+                searchQuery = Some(SearchQuery("Gray's anatomy"))))
 
           withClue(
             "a MUST query is used on the base query so as not to match everything") {

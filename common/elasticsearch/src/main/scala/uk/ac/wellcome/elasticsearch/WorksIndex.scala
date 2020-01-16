@@ -4,8 +4,22 @@ import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.mappings.{FieldDefinition, ObjectField}
 
 object WorksIndex {
+  // `textWithKeyword` and `keywordWithText` are slightly different in the semantics and their use case.
+  // If the intended field type is keyword, but you would like to search it textually, use `keywordWithText` and
+  // visa versa.
 
-  val label = textField("label").fields(keywordField("raw"))
+  // This encodes how someone would expect the field to work, but allow querying it in other ways.
+  def textWithKeyword(name: String) =
+    textField(name).fields(keywordField("keyword"))
+
+  def keywordWithText(name: String) =
+    keywordField(name).fields(textField("text"))
+
+  val label = textWithKeyword("label")
+
+  val sourceIdentifierValue = keywordWithText("value")
+
+  val canonicalId = keywordWithText("canonicalId")
 
   val license = objectField("license").fields(
     keywordField("id")
@@ -26,7 +40,7 @@ object WorksIndex {
       keywordField("id"),
       keywordField("ontologyType")
     ),
-    keywordField("value")
+    sourceIdentifierValue
   )
 
   val sourceIdentifier = objectField("sourceIdentifier")
@@ -95,9 +109,9 @@ object WorksIndex {
 
   def identified(fieldName: String, fields: Seq[FieldDefinition]): ObjectField =
     objectField(fieldName).fields(
+      canonicalId,
       textField("type"),
       objectField("agent").fields(fields),
-      keywordField("canonicalId"),
       objectField("sourceIdentifier").fields(sourceIdentifierFields),
       objectField("otherIdentifiers").fields(sourceIdentifierFields)
     )
@@ -124,7 +138,7 @@ object WorksIndex {
   def period(fieldName: String) = labelledTextField(fieldName)
 
   def items(fieldName: String) = objectField(fieldName).fields(
-    keywordField("canonicalId"),
+    canonicalId,
     sourceIdentifier,
     otherIdentifiers,
     keywordField("type"),
@@ -193,12 +207,12 @@ object WorksIndex {
 
   val rootIndexFields: Seq[FieldDefinition with Product with Serializable] =
     Seq(
-      keywordField("canonicalId"),
+      canonicalId,
       keywordField("ontologyType"),
       intField("version"),
       sourceIdentifier,
       objectField("redirect")
-        .fields(sourceIdentifier, keywordField("canonicalId")),
+        .fields(sourceIdentifier, canonicalId),
       keywordField("type"),
       data
     )

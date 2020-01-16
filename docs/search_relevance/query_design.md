@@ -74,9 +74,11 @@ Searching for a work based on local and external identifiers e.g. Catalogue API 
 
 #### Expectations
 
-* Searching for _an_ identifier, I get the result back
+* Searching for _an_ identifier, I get _the_ result back
 * Searching for a list of identifiers, I get all the results back
 * Searches should be case insensitive
+* If the search query contains and ID and other input, we should match
+  the ID and terms with the the ID match at the top of the list.
 
 #### Examples
 
