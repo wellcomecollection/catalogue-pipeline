@@ -5,10 +5,10 @@ import org.mockito.Mockito.when
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
-import uk.ac.wellcome.platform.idminter.database.IdentifiersDao
 import uk.ac.wellcome.platform.idminter.models.Identifier
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.work.internal.SourceIdentifier
+import uk.ac.wellcome.platform.idminter.services.IdentifiersService
 import uk.ac.wellcome.storage.store.memory.MemoryStore
 
 import scala.util.{Failure, Success}
@@ -21,12 +21,12 @@ class IdentifierGeneratorTest
 
   type StoreType = MemoryStore[SourceIdentifier, Identifier]
 
-  def withIdentifierGenerator[R](maybeIdentifiersDao: Option[IdentifiersDao[StoreType]] = None)(
+  def withIdentifierGenerator[R](maybeIdentifiersDao: Option[IdentifiersService[StoreType]] = None)(
     testWith: TestWith[(IdentifierGenerator[StoreType], StoreType), R]): R = {
       val memoryStore = new MemoryStore[SourceIdentifier, Identifier](Map.empty)
 
       val identifiersDao = maybeIdentifiersDao.getOrElse(
-        new IdentifiersDao(memoryStore)
+        new IdentifiersService(memoryStore)
       )
 
       val identifierGenerator = new IdentifierGenerator(identifiersDao)
@@ -66,12 +66,12 @@ class IdentifierGeneratorTest
 
         val result = store.get(sourceIdentifier)
 
-        result.right.get.identifiedT.CanonicalId shouldBe id
+        result.right.get.identifiedT.canonicalId shouldBe id
     }
   }
 
   it("returns a failure if it fails registering a new identifier") {
-    val identifiersDao = mock[IdentifiersDao[MemoryStore[SourceIdentifier, Identifier]]]
+    val identifiersDao = mock[IdentifiersService[MemoryStore[SourceIdentifier, Identifier]]]
 
     val sourceIdentifier = createSourceIdentifier
 
@@ -117,7 +117,7 @@ class IdentifierGeneratorTest
 
         val result = store.get(sourceIdentifier)
 
-        result.right.get.identifiedT.CanonicalId shouldBe id
+        result.right.get.identifiedT.canonicalId shouldBe id
     }
   }
 }

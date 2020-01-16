@@ -8,9 +8,8 @@ import com.typesafe.config.Config
 import io.circe.Json
 import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
 import uk.ac.wellcome.models.work.internal.SourceIdentifier
-import uk.ac.wellcome.platform.idminter.database.IdentifiersDao
 import uk.ac.wellcome.platform.idminter.models.Identifier
-import uk.ac.wellcome.platform.idminter.services.IdMinterWorkerService
+import uk.ac.wellcome.platform.idminter.services.{IdMinterWorkerService, IdentifiersService}
 import uk.ac.wellcome.platform.idminter.steps.{IdEmbedder, IdentifierGenerator}
 import uk.ac.wellcome.platform.idminter.utils.SimpleDynamoStore
 import uk.ac.wellcome.storage.dynamo.DynamoConfig
@@ -21,7 +20,6 @@ import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 
 import scala.concurrent.ExecutionContext
-
 import org.scanamo.auto._
 import uk.ac.wellcome.platform.idminter.utils.DynamoFormats._
 
@@ -40,7 +38,7 @@ object Main extends WellcomeTypesafeApp {
       DynamoBuilder.buildDynamoConfig(config)
 
     val dynamoStore = new SimpleDynamoStore[SourceIdentifier, Identifier](dynamoConfig)
-    val identifiersDao = new IdentifiersDao(dynamoStore)
+    val identifiersDao = new IdentifiersService(dynamoStore)
     val identifierGenerator = new IdentifierGenerator(identifiersDao)
     val idEmbedder = new IdEmbedder(identifierGenerator)
 

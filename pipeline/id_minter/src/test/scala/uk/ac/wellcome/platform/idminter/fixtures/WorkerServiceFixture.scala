@@ -9,9 +9,8 @@ import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.sns.SNSConfig
 import uk.ac.wellcome.models.work.internal.SourceIdentifier
-import uk.ac.wellcome.platform.idminter.database.IdentifiersDao
 import uk.ac.wellcome.platform.idminter.models.Identifier
-import uk.ac.wellcome.platform.idminter.services.IdMinterWorkerService
+import uk.ac.wellcome.platform.idminter.services.{IdMinterWorkerService, IdentifiersService}
 import uk.ac.wellcome.platform.idminter.steps.{IdEmbedder, IdentifierGenerator}
 import uk.ac.wellcome.platform.idminter.utils.DynamoFormats._
 import uk.ac.wellcome.platform.idminter.utils.SimpleDynamoStore
@@ -23,7 +22,6 @@ import uk.ac.wellcome.storage.store.Store
 import uk.ac.wellcome.storage.streaming.Codec._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-
 import org.scanamo.auto._
 
 trait WorkerServiceFixture
@@ -43,7 +41,7 @@ trait WorkerServiceFixture
     bucket: Bucket,
     topic: Topic,
     queue: Queue,
-    identifiersDao: IdentifiersDao[StoreType])(
+    identifiersDao: IdentifiersService[StoreType])(
     testWith: TestWith[IdMinterWorkerService[_, SNSConfig], R]): R =
     withActorSystem { implicit actorSystem =>
       withSqsBigMessageSender[Json, R](bucket, topic) { bigMessageSender =>
@@ -81,7 +79,7 @@ trait WorkerServiceFixture
         DynamoConfig(table.name, table.index)
       )
 
-      val identifiersDao = new IdentifiersDao(dynamoStore)
+      val identifiersDao = new IdentifiersService(dynamoStore)
 
       withWorkerService(
         bucket,

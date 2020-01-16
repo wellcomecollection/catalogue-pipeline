@@ -117,7 +117,7 @@ class SierraRecordWrapperFlowTest
       withRecordWrapperFlow(SierraBibRecord.apply) { wrapperFlow =>
         val id = createSierraBibNumber
         val deletedDate = "2014-01-31"
-        val jsonString =
+        val jsonStrinSg =
           s"""
           |{
           |  "id" : "$id",
