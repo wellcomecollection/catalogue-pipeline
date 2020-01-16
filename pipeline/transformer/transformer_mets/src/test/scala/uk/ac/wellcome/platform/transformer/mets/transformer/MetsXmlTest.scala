@@ -2,7 +2,6 @@ package uk.ac.wellcome.platform.transformer.mets.transformer
 
 import org.apache.commons.io.IOUtils
 import org.scalatest.{FunSpec, Matchers}
-
 import uk.ac.wellcome.platform.transformer.mets.fixtures.MetsGenerators
 
 class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
@@ -34,6 +33,13 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
       Some("Some terms"))
   }
 
+  it("gets the first accessConditionStatus if there are more than one") {
+    val str = metsXmlWith(recordIdentifier = "b30246039", accessConditionStatus = Some("Open"),
+      secondarySections = metsSecondarySection(accessConditionStatus = "Restricted"))
+    MetsXml(str).getRight
+      .accessConditionStatus shouldBe Right(Some("Open"))
+  }
+
   it("parses a METS with no access condition") {
     MetsXml(xmlNoLicense).accessConditionDz shouldBe Right(None)
   }
@@ -52,22 +58,26 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
   }
 
   it("parses first thumbnail when no ORDER attribute") {
-    MetsXml(xmlWithThumbnailImages("b30246039"))
-      .thumbnailLocation("b30246039") shouldBe Some("b30246039_0001.jp2")
+    val str = metsXmlWith(
+      recordIdentifier = "b30246039",
+      fileSec = fileSec(filePrefix = "b30246039"),
+      structMap = structMap)
+    MetsXml(str).getRight.thumbnailLocation("b30246039") shouldBe Some("b30246039_0001.jp2")
   }
 
   it("parses thumbnail using ORDER attrib when non-sequential order") {
     MetsXml(xmlNonSequentialOrder("b30246039"))
-      .thumbnailLocation("b30246039") shouldBe Some("b30246039_0001.jp2")
+      .getRight.thumbnailLocation("b30246039") shouldBe Some("b30246039_0001.jp2")
   }
 
   it("parses thumbnail if filename doesn't start with bnumber") {
     val bnumber = "b30246039"
     val filePrefix = "V000012"
     MetsXml(
-      xmlWithThumbnailImages(
+      metsXmlWith(
         recordIdentifier = bnumber,
-        filePrefix = _ => filePrefix)).thumbnailLocation(bnumber) shouldBe Some(
+        fileSec = fileSec(filePrefix),
+        structMap = structMap)).getRight.thumbnailLocation(bnumber) shouldBe Some(
       s"${bnumber}_${filePrefix}_0001.jp2")
   }
 
@@ -75,14 +85,15 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
     val bnumber = "b30246039"
     val filePrefix = bnumber.toUpperCase
     MetsXml(
-      xmlWithThumbnailImages(
+      metsXmlWith(
         recordIdentifier = bnumber,
-        filePrefix = _ => filePrefix)).thumbnailLocation(bnumber) shouldBe Some(
+        fileSec = fileSec(filePrefix),
+        structMap = structMap)).getRight.thumbnailLocation(bnumber) shouldBe Some(
       s"${filePrefix}_0001.jp2")
   }
 
   it("cannot parse thumbnail when invalid file ID") {
-    MetsXml(xmlInvalidFileId("b30246039"))
+    MetsXml(xmlInvalidFileId("b30246039")).getRight
       .thumbnailLocation("b30246039") shouldBe None
   }
 
@@ -159,8 +170,10 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
     </mets:mets>
 
   def xmlNonSequentialOrder(recordIdentifier: String) =
-    xmlWithThumbnailImages(
-      recordIdentifier, {
+    metsXmlWith(
+      recordIdentifier,
+      fileSec = fileSec(recordIdentifier),
+      structMap = {
         <mets:structMap TYPE="PHYSICAL">
         <mets:div DMDID="DMDPHYS_0000" ID="PHYS_0000" TYPE="physSequence">
           <mets:div ADMID="AMD_0002" ID="PHYS_0002" ORDER="2" TYPE="page">
@@ -176,8 +189,10 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
     )
 
   def xmlInvalidFileId(recordIdentifier: String) =
-    xmlWithThumbnailImages(
-      recordIdentifier, {
+    metsXmlWith(
+      recordIdentifier,
+      fileSec = fileSec(recordIdentifier),
+      structMap = {
         <mets:structMap TYPE="PHYSICAL">
         <mets:div DMDID="DMDPHYS_0000" ID="PHYS_0000" TYPE="physSequence">
           <mets:div ADMID="AMD_0001" ID="PHYS_0001" ORDER="1" TYPE="page">
@@ -194,4 +209,8 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
 
   def loadXmlFile(path: String) =
     IOUtils.toString(getClass.getResourceAsStream(path), "UTF-8")
+
+  implicit class GetRight[T](b: Either[Throwable, T]) {
+    def getRight = b.right.get
+  }
 }
