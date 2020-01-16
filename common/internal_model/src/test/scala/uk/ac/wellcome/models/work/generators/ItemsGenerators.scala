@@ -3,41 +3,43 @@ package uk.ac.wellcome.models.work.generators
 import uk.ac.wellcome.models.work.internal.{DigitalLocation, _}
 
 trait ItemsGenerators extends IdentifiersGenerators {
-  def createIdentifiedItemWith(
+
+  def createIdentifiedItemWith[Id >: Identified](
     canonicalId: String = createCanonicalId,
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     otherIdentifiers: List[SourceIdentifier] = Nil,
     locations: List[Location] = List(defaultLocation),
     title: Option[String] = None,
-  ): Identified[Item] =
-    Identified(
-      canonicalId = canonicalId,
-      sourceIdentifier = sourceIdentifier,
-      otherIdentifiers = otherIdentifiers,
-      agent = Item(locations = locations, title = title)
+  ): Item[Id] =
+    Item(
+      id = Identified(
+        canonicalId = canonicalId,
+        sourceIdentifier = sourceIdentifier,
+        otherIdentifiers = otherIdentifiers,
+      ),
+      locations = locations,
+      title = title,
     )
 
-  def createIdentifiedItem: Identified[Item] = createIdentifiedItemWith()
+  def createIdentifiedItem = createIdentifiedItemWith()
 
-  def createIdentifiedItems(count: Int): List[Identified[Item]] =
+  def createIdentifiedItems(count: Int) =
     (1 to count).map { _ =>
       createIdentifiedItem
     }.toList
 
-  def createIdentifiableItemWith(
+  def createIdentifiableItemWith[Id >: Identifiable](
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     locations: List[Location] = List(defaultLocation)
-  ): Identifiable[Item] =
-    Identifiable(
-      sourceIdentifier = sourceIdentifier,
-      agent = Item(locations = locations)
+  ): Item[Id] =
+    Item(
+      id = Identifiable(sourceIdentifier),
+      locations = locations
     )
 
-  def createUnidentifiableItemWith(
-    locations: List[Location] = List(defaultLocation)) =
-    Unidentifiable(
-      agent = Item(locations = locations)
-    )
+  def createUnidentifiableItemWith[Id >: Unidentifiable.type](
+    locations: List[Location] = List(defaultLocation)): Item[Id] =
+    Item(id = Unidentifiable, locations = locations)
 
   def createPhysicalLocation = createPhysicalLocationWith()
 
@@ -63,16 +65,16 @@ trait ItemsGenerators extends IdentifiersGenerators {
 
   def createStoresLocationType = LocationType("sgmed")
 
-  def createPhysicalItem: Identifiable[Item] =
+  def createPhysicalItem =
     createIdentifiableItemWith(locations = List(createPhysicalLocation))
 
-  def createDigitalItem: Unidentifiable[Item] =
+  def createDigitalItem =
     createUnidentifiableItemWith(locations = List(createDigitalLocation))
 
-  def createDigitalItemWith(locations: List[Location]): Unidentifiable[Item] =
+  def createDigitalItemWith(locations: List[Location]) =
     createUnidentifiableItemWith(locations = locations)
 
-  def createDigitalItemWith(license: Option[License]): Unidentifiable[Item] =
+  def createDigitalItemWith(license: Option[License]) =
     createUnidentifiableItemWith(
       locations = List(createDigitalLocationWith(license = license))
     )

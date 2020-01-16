@@ -1,7 +1,5 @@
 package uk.ac.wellcome.models.work.internal
 
-import scala.language.higherKinds
-
 sealed trait BaseWork {
   val version: Int
   val sourceIdentifier: SourceIdentifier
@@ -24,7 +22,7 @@ sealed trait RedirectedWork extends BaseWork {
   val redirect: Redirect
 }
 
-case class WorkData[+IdState[+S] <: IdentityState[S]](
+case class WorkData[Id <: IdState](
   title: Option[String] = None,
   otherIdentifiers: List[SourceIdentifier] = Nil,
   mergeCandidates: List[MergeCandidate] = Nil,
@@ -33,17 +31,17 @@ case class WorkData[+IdState[+S] <: IdentityState[S]](
   description: Option[String] = None,
   physicalDescription: Option[String] = None,
   lettering: Option[String] = None,
-  createdDate: Option[Period] = None,
-  subjects: List[IdState[Subject[IdState[AbstractRootConcept]]]] = Nil,
-  genres: List[Genre[IdState[AbstractConcept]]] = Nil,
-  contributors: List[Contributor[IdState[AbstractAgent]]] = Nil,
+  createdDate: Option[Period[Id]] = None,
+  subjects: List[Subject[Id]] = Nil,
+  genres: List[Genre[Id]] = Nil,
+  contributors: List[Contributor[Id]] = Nil,
   thumbnail: Option[Location] = None,
-  production: List[ProductionEvent[IdState[AbstractAgent]]] = Nil,
+  production: List[ProductionEvent[Id]] = Nil,
   language: Option[Language] = None,
   edition: Option[String] = None,
   notes: List[Note] = Nil,
   duration: Option[Int] = None,
-  items: List[IdState[Item]] = Nil,
+  items: List[Item[Id]] = Nil,
   merged: Boolean = false,
 )
 
