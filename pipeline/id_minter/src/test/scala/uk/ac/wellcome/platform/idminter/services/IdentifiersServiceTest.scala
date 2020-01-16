@@ -5,15 +5,14 @@ import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
 import uk.ac.wellcome.models.work.internal.SourceIdentifier
-import uk.ac.wellcome.platform.idminter.exceptions.IdMinterException
-import uk.ac.wellcome.platform.idminter.models.Identifier
-import uk.ac.wellcome.platform.idminter.utils.SimpleDynamoStore
+import uk.ac.wellcome.platform.idminter.models.{Identifier, IdentifierError}
 import uk.ac.wellcome.storage.dynamo.DynamoConfig
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures
 
 import scala.util.{Failure, Success}
 import uk.ac.wellcome.platform.idminter.utils.DynamoFormats._
 import org.scanamo.auto._
+import uk.ac.wellcome.platform.idminter.utils.DynamoIdentifierStore
 
 class IdentifiersServiceTest
     extends FunSpec
@@ -29,13 +28,11 @@ class IdentifiersServiceTest
     )
   }
 
-  type StoreType = SimpleDynamoStore[SourceIdentifier, Identifier]
-
   def withIdentifiersDao[R](
-    testWith: TestWith[(IdentifiersService[StoreType], StoreType), R]): R = {
+    testWith: TestWith[(IdentifiersService, DynamoIdentifierStore), R]): R = {
     withLocalDynamoDbTable { table =>
-      // TODO: Deal with slashes in identifier ontology type & id type must not have
-      val dynamoStore = new SimpleDynamoStore[SourceIdentifier, Identifier](
+
+      val dynamoStore = new DynamoIdentifierStore(
         DynamoConfig(table.name, table.index)
       )
 
@@ -77,7 +74,7 @@ class IdentifiersServiceTest
             Success[_]]
 
           val unknownSourceIdentifier = createSourceIdentifierWith(
-            ontologyType = identifier.ontologyType,
+            ontologyType = identifier.sourceIdentifier.ontologyType,
             value = "not_an_existing_value"
           )
 
@@ -95,12 +92,12 @@ class IdentifiersServiceTest
       val (sourceIdentifier, identifier) = createIdentifier
 
       withIdentifiersDao {
-        case (identifiersDao, memoryStore) =>
+        case (identifiersDao, store) =>
           identifiersDao.saveIdentifier(sourceIdentifier, identifier)
 
-          val result = memoryStore.get(sourceIdentifier)
+          val result = store.getBySourceIdentifier(sourceIdentifier)
 
-          result.right.get.identifiedT shouldBe identifier
+          result.right.get shouldBe identifier
       }
     }
 
@@ -110,7 +107,7 @@ class IdentifiersServiceTest
       val newSourceIdentifier = createSourceIdentifier
       val duplicateIdentifier = createIdentifierWith(
         sourceIdentifier = newSourceIdentifier,
-        canonicalId = identifier.canonicalId
+        canonicalId = identifier.id
       )
 
       withIdentifiersDao {
@@ -126,7 +123,7 @@ class IdentifiersServiceTest
           )
 
           triedSave shouldBe a[Failure[_]]
-          triedSave.failed.get shouldBe a[IdMinterException]
+          triedSave.failed.get shouldBe a[IdentifierError]
       }
     }
 
@@ -216,7 +213,7 @@ class IdentifiersServiceTest
           )
 
           triedSave shouldBe a[Failure[_]]
-          triedSave.failed.get shouldBe a[IdMinterException]
+          triedSave.failed.get shouldBe a[IdentifierError]
       }
     }
   }
@@ -226,7 +223,7 @@ class IdentifiersServiceTest
     sourceIdentifier: SourceIdentifier = createSourceIdentifier
   ): Identifier =
     Identifier(
-      canonicalId = canonicalId,
+      id = canonicalId,
       sourceIdentifier = sourceIdentifier
     )
 

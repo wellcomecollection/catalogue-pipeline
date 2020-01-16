@@ -13,7 +13,6 @@ import uk.ac.wellcome.platform.idminter.models.Identifier
 import uk.ac.wellcome.platform.idminter.services.{IdMinterWorkerService, IdentifiersService}
 import uk.ac.wellcome.platform.idminter.steps.{IdEmbedder, IdentifierGenerator}
 import uk.ac.wellcome.platform.idminter.utils.DynamoFormats._
-import uk.ac.wellcome.platform.idminter.utils.SimpleDynamoStore
 import uk.ac.wellcome.storage.ObjectLocation
 import uk.ac.wellcome.storage.dynamo.DynamoConfig
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures
@@ -23,6 +22,7 @@ import uk.ac.wellcome.storage.streaming.Codec._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.scanamo.auto._
+import uk.ac.wellcome.platform.idminter.utils.DynamoIdentifierStore
 
 trait WorkerServiceFixture
     extends BigMessagingFixture
@@ -41,8 +41,8 @@ trait WorkerServiceFixture
     bucket: Bucket,
     topic: Topic,
     queue: Queue,
-    identifiersDao: IdentifiersService[StoreType])(
-    testWith: TestWith[IdMinterWorkerService[_, SNSConfig], R]): R =
+    identifiersDao: IdentifiersService)(
+    testWith: TestWith[IdMinterWorkerService[SNSConfig], R]): R =
     withActorSystem { implicit actorSystem =>
       withSqsBigMessageSender[Json, R](bucket, topic) { bigMessageSender =>
         {
@@ -71,11 +71,10 @@ trait WorkerServiceFixture
   def withWorkerService[R](bucket: Bucket,
                            topic: Topic,
                            queue: Queue
-  )(testWith: TestWith[IdMinterWorkerService[_, SNSConfig], R]): R = {
+  )(testWith: TestWith[IdMinterWorkerService[SNSConfig], R]): R = {
     withLocalDynamoDbTable { table =>
 
-      // TODO: Deal with slashes in identifier ontology type & id type must not have
-      val dynamoStore = new SimpleDynamoStore[SourceIdentifier, Identifier](
+      val dynamoStore = new DynamoIdentifierStore(
         DynamoConfig(table.name, table.index)
       )
 

@@ -7,14 +7,12 @@ import io.circe._
 import uk.ac.wellcome.models.work.internal.SourceIdentifier
 import uk.ac.wellcome.json.JsonUtil.fromJson
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.platform.idminter.models.Identifier
-import uk.ac.wellcome.storage.store.Store
 
 import scala.annotation.tailrec
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
-class IdEmbedder[StoreType <: Store[SourceIdentifier, Identifier]](identifierGenerator: IdentifierGenerator[StoreType])(
+class IdEmbedder(identifierGenerator: IdentifierGenerator)(
   implicit ec: ExecutionContext)
     extends Logging {
 

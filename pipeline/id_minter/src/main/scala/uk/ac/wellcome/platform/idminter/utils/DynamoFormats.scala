@@ -18,7 +18,5 @@ object DynamoFormats {
           throw new IllegalArgumentException(
             s"Cannot create bag ID from $value")
       }
-    }(
-      _.createId
-    )
+    }(_.createId)
 }

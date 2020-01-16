@@ -4,13 +4,10 @@ import uk.ac.wellcome.models.work.internal.SourceIdentifier
 import uk.ac.wellcome.platform.idminter.models.Identifier
 import uk.ac.wellcome.platform.idminter.services.IdentifiersService
 import uk.ac.wellcome.platform.idminter.utils.Identifiable
-import uk.ac.wellcome.storage.store.Store
 
 import scala.util.Try
 
-class IdentifierGenerator[StoreType <: Store[SourceIdentifier, Identifier]](
-                           identifiersDao: IdentifiersService[StoreType]
-                         ) {
+class IdentifierGenerator(identifiersDao: IdentifiersService) {
 
   def retrieveOrGenerateCanonicalId(
     identifier: SourceIdentifier
@@ -21,7 +18,7 @@ class IdentifierGenerator[StoreType <: Store[SourceIdentifier, Identifier]](
           sourceIdentifier = identifier
         )
         .flatMap {
-          case Some(id) => Try(id.canonicalId)
+          case Some(id) => Try(id.id)
           case None     => generateAndSaveCanonicalId(identifier)
         }
     }.flatten
@@ -34,7 +31,7 @@ class IdentifierGenerator[StoreType <: Store[SourceIdentifier, Identifier]](
       .saveIdentifier(
         sourceIdentifier,
         Identifier(
-          canonicalId = canonicalId,
+          id = canonicalId,
           sourceIdentifier = sourceIdentifier
         )
       )

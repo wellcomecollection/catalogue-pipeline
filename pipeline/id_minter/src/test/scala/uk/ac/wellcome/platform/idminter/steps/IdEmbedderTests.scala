@@ -12,8 +12,6 @@ import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.json.JsonUtil.{fromJson, toJson}
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.platform.idminter.models.Identifier
-import uk.ac.wellcome.storage.store.memory.MemoryStore
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Try
@@ -29,13 +27,10 @@ class IdEmbedderTests
     with WorksGenerators {
 
   private def withIdEmbedder(
-    testWith: TestWith[(
-      IdentifierGenerator[MemoryStore[SourceIdentifier, Identifier]],
-        IdEmbedder[MemoryStore[SourceIdentifier, Identifier]]
-      ), Assertion]) = {
+    testWith: TestWith[(IdentifierGenerator, IdEmbedder), Assertion]) = {
     withActorSystem { actorSystem =>
-      val identifierGenerator: IdentifierGenerator[MemoryStore[SourceIdentifier, Identifier]] =
-        mock[IdentifierGenerator[MemoryStore[SourceIdentifier, Identifier]]]
+      val identifierGenerator: IdentifierGenerator =
+        mock[IdentifierGenerator]
 
       val idEmbedder = new IdEmbedder(
         identifierGenerator = identifierGenerator
@@ -462,7 +457,7 @@ class IdEmbedderTests
   }
 
   private def setUpIdentifierGeneratorMock(
-    mockIdentifierGenerator: IdentifierGenerator[MemoryStore[SourceIdentifier, Identifier]],
+    mockIdentifierGenerator: IdentifierGenerator,
     sourceIdentifier: SourceIdentifier,
     ontologyType: String,
     newCanonicalId: String) = {
@@ -483,5 +478,4 @@ class IdEmbedderTests
         }
     }
   }
-
 }
