@@ -1,0 +1,19 @@
+<svg viewBox="0 0 240 135" xmlns="http://www.w3.org/2000/svg" stroke="black" stroke-width="0.5" fill="white">
+  <line x1="30" y1="60" x2="210" y2="35"/>
+  <line x1="30" y1="60" x2="210" y2="85"/>
+
+  <rect x="20" y="50" width="20" height="20" stroke-width="1" fill="#9ACDED"/>
+
+  <circle cx="210" cy="35" r="10" stroke-width="1" fill="#90C879"/>
+  <circle cx="210" cy="85" r="10" stroke-width="1" fill="#90C879"/>
+
+  <rect x="10" y="10" width="220" height="100" stroke-dasharray="1,1" fill="none" rx="15"/>
+
+  <text x="115" y="125"
+    fill="black"
+    font-size="10px"
+    stroke-width="0"
+    text-anchor="middle"
+    dominant-baseline="middle"
+    font-family="sans-serif">Building blocks for a catalogue Work</text>
+</svg>

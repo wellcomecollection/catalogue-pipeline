@@ -1,0 +1,104 @@
+<svg viewBox="0 0 350 150" xmlns="http://www.w3.org/2000/svg" stroke="black" stroke-width="0.5">
+  <text x="10" y="25"
+    fill="black"
+    font-size="10px"
+    stroke-width="0"
+    text-anchor="left"
+    dominant-baseline="middle"
+    font-family="sans-serif">window 1</text>
+
+  <text x="10" y="50"
+    fill="black"
+    font-size="10px"
+    stroke-width="0"
+    text-anchor="left"
+    dominant-baseline="middle"
+    font-family="sans-serif">window 2</text>
+
+  <text x="10" y="75"
+    fill="black"
+    font-size="10px"
+    stroke-width="0"
+    text-anchor="left"
+    dominant-baseline="middle"
+    font-family="sans-serif">window 3</text>
+
+  <text x="10" y="100"
+    fill="black"
+    font-size="10px"
+    stroke-width="0"
+    text-anchor="left"
+    dominant-baseline="middle"
+    font-family="sans-serif">window 4</text>
+
+  <svg x="75" y="18">
+    <line x1="10" y1="0" x2="10" y2="11" stroke="#E10F2D" stroke-width="1.2" stroke-dasharray="1,1"/>
+    <line x1="110" y1="0" x2="110" y2="11" stroke="#E10F2D" stroke-width="1.2" stroke-dasharray="1,1"/>
+    <line x1="11.5" y1="5.5" x2="108.5" y2="5.5" stroke="#E10F2D" stroke-width="1.2" stroke-dasharray="1,1"/>
+  </svg>
+
+  <svg x="125" y="43">
+    <line x1="10" y1="0" x2="10" y2="11" stroke="#E10F2D" stroke-width="1.2" stroke-dasharray="1,1"/>
+    <line x1="110" y1="0" x2="110" y2="11" stroke="#E10F2D" stroke-width="1.2" stroke-dasharray="1,1"/>
+    <line x1="11.5" y1="5.5" x2="108.5" y2="5.5" stroke="#E10F2D" stroke-width="1.2" stroke-dasharray="1,1"/>
+  </svg>
+
+  <svg x="175" y="68">
+    <line x1="10" y1="0" x2="10" y2="11" stroke="#E10F2D" stroke-width="1.2" stroke-dasharray="1,1"/>
+    <line x1="110" y1="0" x2="110" y2="11" stroke="#E10F2D" stroke-width="1.2" stroke-dasharray="1,1"/>
+    <line x1="11.5" y1="5.5" x2="108.5" y2="5.5" stroke="#E10F2D" stroke-width="1.2" stroke-dasharray="1,1"/>
+  </svg>
+
+  <svg x="225" y="93">
+    <line x1="10" y1="0" x2="10" y2="11" stroke="#E10F2D" stroke-width="1.2" stroke-dasharray="1,1"/>
+    <line x1="110" y1="0" x2="110" y2="11" stroke="#E10F2D" stroke-width="1.2" stroke-dasharray="1,1"/>
+    <line x1="11.5" y1="5.5" x2="108.5" y2="5.5" stroke="#E10F2D" stroke-width="1.2" stroke-dasharray="1,1"/>
+  </svg>
+
+  <svg x="10">
+    <svg x="0">
+      <line y1="121" y2="129" x1="75"      x2="75"/>
+      <line y1="121" y2="129" x1="91.666"  x2="91.666"/>
+      <line y1="121" y2="129" x1="108.333" x2="108.333"/>
+    </svg>
+
+    <svg x="50">
+      <line y1="121" y2="129" x1="75"      x2="75"/>
+      <line y1="121" y2="129" x1="91.666"  x2="91.666"/>
+      <line y1="121" y2="129" x1="108.333" x2="108.333"/>
+    </svg>
+
+    <svg x="100">
+      <line y1="121" y2="129" x1="75"      x2="75"/>
+      <line y1="121" y2="129" x1="91.666"  x2="91.666"/>
+      <line y1="121" y2="129" x1="108.333" x2="108.333"/>
+    </svg>
+
+    <svg x="150">
+      <line y1="121" y2="129" x1="75"      x2="75"/>
+      <line y1="121" y2="129" x1="91.666"  x2="91.666"/>
+      <line y1="121" y2="129" x1="108.333" x2="108.333"/>
+    </svg>
+
+    <svg x="200">
+      <line y1="121" y2="129" x1="75"      x2="75"/>
+      <line y1="121" y2="129" x1="91.666"  x2="91.666"/>
+      <line y1="121" y2="129" x1="108.333" x2="108.333"/>
+    </svg>
+
+    <marker id="arrowhead" markerWidth="10" markerHeight="7"
+      refX="0" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" />
+    </marker>
+    <line x1="75" x2="325" y1="125" y2="125"  marker-end="url(#arrowhead)"/>
+
+    <text x="75" y="140"
+      fill="black"
+      font-size="10px"
+      stroke-width="0"
+      text-anchor="left"
+      dominant-baseline="middle"
+      font-family="sans-serif">time →</text>
+  </svg>
+
+</svg>
