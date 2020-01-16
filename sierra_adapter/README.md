@@ -29,10 +29,16 @@ There is a many-to-many mapping between bibs and items:
 
 <img style="width: 400px" src="images/shape_of_the_data.svg">
 
-When we create a Work from the Sierra data, we take a single bib and all the items it is associated with.
-We turn the bib into a Work, and the items into Items.
+
+
+## What do we need for a Work?
+
+The adapter needs to provide enough data for the Sierra transformer to create a Work for the catalogue API.
+To create a Work from the Sierra data, we need a single bib and all the items it is associated with.
 
 <img style="width: 400px" src="images/work_from_sierra.svg">
+
+In our ontology, the "Work" is the conceptual thing – which maps to a bib in Sierra – and an "Item" is the individual objects – like Sierra items.
 
 
 
