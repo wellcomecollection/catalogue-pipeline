@@ -1,0 +1,99 @@
+<svg viewBox="0 0 400 100" xmlns="http://www.w3.org/2000/svg">
+
+  <!--
+    The CloudWatch event
+    From https://aws.amazon.com/architecture/icons/
+  -->
+  <defs>
+    <style>.cls-cloudwatch-1{fill:#cd2264;}</style>
+  </defs>
+  <svg x="25" y="25" transform="scale(0.5)">
+    <path class="cls-cloudwatch-1" d="M14.69,44.75H5.31a1,1,0,0,1-1-1V23.12a1,1,0,0,1,1-1h9.38a1,1,0,0,1,1,1V43.75A1,1,0,0,1,14.69,44.75Zm-8.38-2h7.38V24.12H6.31Z"/>
+    <path class="cls-cloudwatch-1" d="M29.69,44.75H20.31a1,1,0,0,1-1-1V27.81a1,1,0,0,1,1-1h9.38a1,1,0,0,1,1,1V43.75A1,1,0,0,1,29.69,44.75Zm-8.38-2h7.38V28.81H21.31Z"/>
+    <rect class="cls-cloudwatch-1" x="1.56" y="46.5" width="46.88" height="2"/>
+    <path class="cls-cloudwatch-1" d="M44.69,44.75H35.31a1,1,0,0,1-1-1V20.31a1,1,0,0,1,1.41-.91,10.55,10.55,0,0,0,8.56,0,1,1,0,0,1,1.41.91V43.75A1,1,0,0,1,44.69,44.75Zm-8.38-2h7.38v-21a12.71,12.71,0,0,1-7.38,0Z"/>
+    <path class="cls-cloudwatch-1" d="M40,18.5A8.5,8.5,0,1,1,48.5,10,8.51,8.51,0,0,1,40,18.5Zm0-15A6.5,6.5,0,1,0,46.5,10,6.51,6.51,0,0,0,40,3.5Z"/>
+    <polygon class="cls-cloudwatch-1" points="41 11.92 35.33 11.92 35.33 9.92 39 9.92 39 5.31 41 5.31 41 11.92"/>
+  </svg>
+
+  <text x="50" y="92"
+    fill="black"
+    font-size="10px"
+    stroke-width="0"
+    text-anchor="middle"
+    dominant-baseline="middle"
+    font-family="sans-serif">CloudWatch event</text>
+
+  <!--
+    The Lambda function
+    From https://aws.amazon.com/architecture/icons/
+  -->
+  <defs>
+    <style>.cls-lambda-1{fill:#d86613;}.cls-lambda-2{fill:#fff;}</style>
+  </defs>
+  <svg x="175" y="25">
+    <rect id="Orange_Light_BG" data-name="Orange Light BG" class="cls-lambda-1" width="50" height="50"/>
+    <g id="Product_Icon" data-name="Product Icon" transform="scale(0.6666)">
+      <path class="cls-lambda-2" d="M60.5,62.5H48.18a1,1,0,0,1-.9-.57L29.86,25.5H22.49a1,1,0,0,1-1-1v-11a1,1,0,0,1,1-1H37.89a1,1,0,0,1,.9.57L56.13,49.5H60.5a1,1,0,0,1,1,1v11A1,1,0,0,1,60.5,62.5Zm-11.69-2H59.5v-9h-4a1,1,0,0,1-.9-.57L37.26,14.5H23.5v9h7a1,1,0,0,1,.9.57Z"/>
+      <path class="cls-lambda-2" d="M27.48,62.5h-13a1,1,0,0,1-.85-.47,1,1,0,0,1-.05-1L27.18,32.62a1,1,0,0,1,.9-.57h0a1,1,0,0,1,.9.56L35.49,46a1,1,0,0,1,0,.87l-7.1,15A1,1,0,0,1,27.48,62.5Zm-11.4-2H26.85l6.63-14L28.09,35.35Z"/>
+    </g>
+  </svg>
+
+  <text x="200" y="92"
+    fill="black"
+    font-size="10px"
+    stroke-width="0"
+    text-anchor="middle"
+    dominant-baseline="middle"
+    font-family="sans-serif">Sierra window generator</text>
+
+  <!--
+    The SNS topic
+    From https://aws.amazon.com/architecture/icons/
+  -->
+  <defs>
+    <style>.cls-sns-1{fill:#cd2264;}</style>
+  </defs>
+  <svg x="325" y="25" transform="scale(0.5)">
+    <path class="cls-sns-1" d="M47.5,17.09H2.5a1,1,0,0,1-1-1V5.78a1,1,0,0,1,1-1h45a1,1,0,0,1,1,1V16.09A1,1,0,0,1,47.5,17.09Zm-44-2h43V6.78H3.5Z"/>
+    <path class="cls-sns-1" d="M47.5,31.16h-2v-2h1v-1h2v2A1,1,0,0,1,47.5,31.16Z"/>
+    <path class="cls-sns-1" d="M43.64,31.16H39.91v-2h3.73Zm-5.59,0H34.32v-2h3.73Zm-5.59,0H28.73v-2h3.73Zm-5.6,0H23.14v-2h3.72Zm-5.59,0H17.55v-2h3.72Zm-5.59,0H12v-2h3.72Zm-5.59,0H6.36v-2h3.73Z"/>
+    <path class="cls-sns-1" d="M4.5,31.16h-2a1,1,0,0,1-1-1v-2h2v1h1Z"/>
+    <rect class="cls-sns-1" x="1.5" y="23.42" width="2" height="3.16"/>
+    <path class="cls-sns-1" d="M3.5,21.84h-2v-2a1,1,0,0,1,1-1h2v2h-1Z"/>
+    <path class="cls-sns-1" d="M43.64,20.84H39.91v-2h3.73Zm-5.6,0H34.32v-2H38Zm-5.59,0H28.73v-2h3.72Zm-5.59,0H23.14v-2h3.72Zm-5.59,0H17.54v-2h3.73Zm-5.59,0H12v-2h3.73Zm-5.59,0H6.36v-2h3.73Z"/>
+    <path class="cls-sns-1" d="M48.5,21.84h-2v-1h-1v-2h2a1,1,0,0,1,1,1Z"/>
+    <rect class="cls-sns-1" x="46.5" y="23.42" width="2" height="3.16"/>
+    <path class="cls-sns-1" d="M47.5,45.22h-2v-2h1v-1h2v2A1,1,0,0,1,47.5,45.22Z"/>
+    <path class="cls-sns-1" d="M43.64,45.22H39.91v-2h3.73Zm-5.59,0H34.32v-2h3.73Zm-5.59,0H28.73v-2h3.73Zm-5.6,0H23.14v-2h3.72Zm-5.59,0H17.55v-2h3.72Zm-5.59,0H12v-2h3.72Zm-5.59,0H6.36v-2h3.73Z"/>
+    <path class="cls-sns-1" d="M4.5,45.22h-2a1,1,0,0,1-1-1v-2h2v1h1Z"/>
+    <rect class="cls-sns-1" x="1.5" y="37.48" width="2" height="3.16"/>
+    <path class="cls-sns-1" d="M3.5,35.91h-2v-2a1,1,0,0,1,1-1h2v2h-1Z"/>
+    <path class="cls-sns-1" d="M43.64,34.91H39.91v-2h3.73Zm-5.6,0H34.32v-2H38Zm-5.59,0H28.73v-2h3.72Zm-5.59,0H23.14v-2h3.72Zm-5.59,0H17.54v-2h3.73Zm-5.59,0H12v-2h3.73Zm-5.59,0H6.36v-2h3.73Z"/>
+    <path class="cls-sns-1" d="M48.5,35.91h-2v-1h-1v-2h2a1,1,0,0,1,1,1Z"/>
+    <rect class="cls-sns-1" x="46.5" y="37.48" width="2" height="3.16"/>
+  </svg>
+
+  <text x="350" y="92"
+    fill="black"
+    font-size="10px"
+    stroke-width="0"
+    text-anchor="middle"
+    dominant-baseline="middle"
+    font-family="sans-serif">SNS topic</text>
+
+  <!-- Arrows -->
+  <marker id="arrowhead" markerWidth="10" markerHeight="7"
+    refX="0" refY="3.5" orient="auto">
+    <polygon points="0 0, 10 3.5, 0 7" />
+  </marker>
+
+  <svg x="0">
+    <line x1="87.5" x2="147.5" y1="50" y2="50" stroke="black" stroke-width="1" marker-end="url(#arrowhead)"/>
+  </svg>
+
+  <svg x="155">
+    <line x1="87.5" x2="147.5" y1="50" y2="50" stroke="black" stroke-width="1" marker-end="url(#arrowhead)"/>
+  </svg>
+
+</svg>

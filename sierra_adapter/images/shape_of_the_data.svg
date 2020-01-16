@@ -1,0 +1,36 @@
+<svg viewBox="0 0 240 280" xmlns="http://www.w3.org/2000/svg" stroke="black" stroke-width="0.5" fill="white">
+  <line x1="30" y1="60" x2="210" y2="35"/>
+  <line x1="30" y1="110" x2="210" y2="85"/>
+  <line x1="30" y1="110" x2="210" y2="135"/>
+  <line x1="30" y1="160" x2="210" y2="135"/>
+  <line x1="30" y1="210" x2="210" y2="135"/>
+  <line x1="30" y1="210" x2="210" y2="185"/>
+  <line x1="30" y1="210" x2="210" y2="235"/>
+
+  <rect x="20" y="50" width="20" height="20" stroke-width="1" fill="#9ACDED"/>
+  <rect x="20" y="100" width="20" height="20" stroke-width="1" fill="#9ACDED"/>
+  <rect x="20" y="150" width="20" height="20" stroke-width="1" fill="#9ACDED"/>
+  <rect x="20" y="200" width="20" height="20" stroke-width="1" fill="#9ACDED"/>
+
+  <circle cx="210" cy="35" r="10" stroke-width="1" fill="#90C879"/>
+  <circle cx="210" cy="85" r="10" stroke-width="1" fill="#90C879"/>
+  <circle cx="210" cy="135" r="10" stroke-width="1" fill="#90C879"/>
+  <circle cx="210" cy="185" r="10" stroke-width="1" fill="#90C879"/>
+  <circle cx="210" cy="235" r="10" stroke-width="1" fill="#90C879"/>
+
+  <text x="30" y="270"
+    fill="black"
+    font-size="12px"
+    stroke-width="0"
+    text-anchor="middle"
+    dominant-baseline="middle"
+    font-family="sans-serif">bibs</text>
+
+  <text x="210" y="270"
+    fill="black"
+    font-size="12px"
+    stroke-width="0"
+    text-anchor="middle"
+    dominant-baseline="middle"
+    font-family="sans-serif">items</text>
+</svg>

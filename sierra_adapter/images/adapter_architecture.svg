@@ -1,0 +1,198 @@
+<svg viewBox="0 0 600 360" xmlns="http://www.w3.org/2000/svg">
+
+  <defs>
+    <style>
+      text {
+        fill: black;
+        font-size: 10px;
+        stroke: none;
+        text-anchor: middle;
+        dominant-baseline: middle;
+        font-family: sans-serif;
+      }
+
+      .cls-server-1{fill:#232f3e;}
+      .cls-task-1{fill:#d86613;}
+      .cls-dynamo-1{fill:#3b48cc;}
+
+      line {
+        stroke-linecap: round;
+        stroke-width: 1.1;
+      }
+    </style>
+  </defs>
+
+  <!--
+    The bibs API endpoint
+    Server icon from https://aws.amazon.com/architecture/icons/
+  -->
+  <svg x="0" y="25">
+    <path class="cls-server-1" d="M37.66,48.5H12.34a1,1,0,0,1-1-1V2.5a1,1,0,0,1,1-1H37.66a1,1,0,0,1,1,1v45A1,1,0,0,1,37.66,48.5Zm-24.32-2H36.66V3.5H13.34Z"/>
+    <rect class="cls-server-1" x="16.09" y="6.19" width="17.81" height="2"/>
+    <rect class="cls-server-1" x="16.09" y="10.88" width="17.81" height="2"/>
+    <rect class="cls-server-1" x="16.09" y="15.56" width="17.81" height="2"/>
+    <rect class="cls-server-1" x="16.09" y="20.25" width="17.81" height="2"/>
+
+    <text x="25" y="65">/bibs API</text>
+  </svg>
+
+  <!--
+    The bib reader
+    Task icon from https://aws.amazon.com/architecture/icons/
+  -->
+  <svg x="125" y="25">
+    <path class="cls-task-1" d="M41.88,48.5H8.13a1,1,0,0,1-1-1V2.5a1,1,0,0,1,1-1H41.88a1,1,0,0,1,1,1v45A1,1,0,0,1,41.88,48.5Zm-32.75-2H40.88V3.5H9.13Z"/>
+    <path class="cls-task-1" d="M18.42,14.76H12.8a1,1,0,0,1-1-1V8.13a1,1,0,0,1,1-1h5.62a1,1,0,0,1,1,1v5.63A1,1,0,0,1,18.42,14.76Zm-4.62-2h3.62V9.13H13.8Z"/>
+    <path class="cls-task-1" d="M18.42,27.88H12.8a1,1,0,0,1-1-1V21.25a1,1,0,0,1,1-1h5.62a1,1,0,0,1,1,1v5.63A1,1,0,0,1,18.42,27.88Zm-4.62-2h3.62V22.25H13.8Z"/>
+    <path class="cls-task-1" d="M18.42,41H12.8a1,1,0,0,1-1-1V34.38a1,1,0,0,1,1-1h5.62a1,1,0,0,1,1,1V40A1,1,0,0,1,18.42,41ZM13.8,39h3.62V35.38H13.8Z"/>
+    <rect class="cls-task-1" x="21.25" y="9.94" width="16.88" height="2"/>
+    <rect class="cls-task-1" x="21.25" y="23.06" width="16.88" height="2"/>
+    <rect class="cls-task-1" x="21.25" y="36.19" width="16.88" height="2"/>
+
+    <text x="25" y="65">bib reader</text>
+  </svg>
+
+  <!--
+    The items API endpoint
+    Server icon from https://aws.amazon.com/architecture/icons/
+  -->
+  <svg x="0" y="150">
+    <path class="cls-server-1" d="M37.66,48.5H12.34a1,1,0,0,1-1-1V2.5a1,1,0,0,1,1-1H37.66a1,1,0,0,1,1,1v45A1,1,0,0,1,37.66,48.5Zm-24.32-2H36.66V3.5H13.34Z"/>
+    <rect class="cls-server-1" x="16.09" y="6.19" width="17.81" height="2"/>
+    <rect class="cls-server-1" x="16.09" y="10.88" width="17.81" height="2"/>
+    <rect class="cls-server-1" x="16.09" y="15.56" width="17.81" height="2"/>
+    <rect class="cls-server-1" x="16.09" y="20.25" width="17.81" height="2"/>
+
+    <text x="25" y="65">/items API</text>
+  </svg>
+
+  <!--
+    The item reader
+    Task icon from https://aws.amazon.com/architecture/icons/
+  -->
+  <svg x="125" y="150">
+    <path class="cls-task-1" d="M41.88,48.5H8.13a1,1,0,0,1-1-1V2.5a1,1,0,0,1,1-1H41.88a1,1,0,0,1,1,1v45A1,1,0,0,1,41.88,48.5Zm-32.75-2H40.88V3.5H9.13Z"/>
+    <path class="cls-task-1" d="M18.42,14.76H12.8a1,1,0,0,1-1-1V8.13a1,1,0,0,1,1-1h5.62a1,1,0,0,1,1,1v5.63A1,1,0,0,1,18.42,14.76Zm-4.62-2h3.62V9.13H13.8Z"/>
+    <path class="cls-task-1" d="M18.42,27.88H12.8a1,1,0,0,1-1-1V21.25a1,1,0,0,1,1-1h5.62a1,1,0,0,1,1,1v5.63A1,1,0,0,1,18.42,27.88Zm-4.62-2h3.62V22.25H13.8Z"/>
+    <path class="cls-task-1" d="M18.42,41H12.8a1,1,0,0,1-1-1V34.38a1,1,0,0,1,1-1h5.62a1,1,0,0,1,1,1V40A1,1,0,0,1,18.42,41ZM13.8,39h3.62V35.38H13.8Z"/>
+    <rect class="cls-task-1" x="21.25" y="9.94" width="16.88" height="2"/>
+    <rect class="cls-task-1" x="21.25" y="23.06" width="16.88" height="2"/>
+    <rect class="cls-task-1" x="21.25" y="36.19" width="16.88" height="2"/>
+  </svg>
+
+  <text x="150" y="215">item reader</text>
+
+  <!--
+    Items to Dynamo
+    Task icon from https://aws.amazon.com/architecture/icons/
+  -->
+  <svg x="250" y="150">
+    <path class="cls-task-1" d="M41.88,48.5H8.13a1,1,0,0,1-1-1V2.5a1,1,0,0,1,1-1H41.88a1,1,0,0,1,1,1v45A1,1,0,0,1,41.88,48.5Zm-32.75-2H40.88V3.5H9.13Z"/>
+    <path class="cls-task-1" d="M18.42,14.76H12.8a1,1,0,0,1-1-1V8.13a1,1,0,0,1,1-1h5.62a1,1,0,0,1,1,1v5.63A1,1,0,0,1,18.42,14.76Zm-4.62-2h3.62V9.13H13.8Z"/>
+    <path class="cls-task-1" d="M18.42,27.88H12.8a1,1,0,0,1-1-1V21.25a1,1,0,0,1,1-1h5.62a1,1,0,0,1,1,1v5.63A1,1,0,0,1,18.42,27.88Zm-4.62-2h3.62V22.25H13.8Z"/>
+    <path class="cls-task-1" d="M18.42,41H12.8a1,1,0,0,1-1-1V34.38a1,1,0,0,1,1-1h5.62a1,1,0,0,1,1,1V40A1,1,0,0,1,18.42,41ZM13.8,39h3.62V35.38H13.8Z"/>
+    <rect class="cls-task-1" x="21.25" y="9.94" width="16.88" height="2"/>
+    <rect class="cls-task-1" x="21.25" y="23.06" width="16.88" height="2"/>
+    <rect class="cls-task-1" x="21.25" y="36.19" width="16.88" height="2"/>
+  </svg>
+
+  <text x="275" y="215">items to dynamo</text>
+
+  <!--
+    The items to Dynamo table
+    Task icon from https://aws.amazon.com/architecture/icons/
+  -->
+  <svg x="250" y="275">
+    <path class="cls-dynamo-1" d="M11.94,11.94H1.5V1.5H11.94Zm-8.44-2H9.94V3.5H3.5Z"/>
+    <path class="cls-dynamo-1" d="M11.94,24.12H1.5V13.69H11.94Zm-8.44-2H9.94V15.69H3.5Z"/>
+    <path class="cls-dynamo-1" d="M11.94,36.31H1.5V25.88H11.94Zm-8.44-2H9.94V27.88H3.5Z"/>
+    <path class="cls-dynamo-1" d="M11.94,48.5H1.5V38.06H11.94Zm-8.44-2H9.94V40.06H3.5Z"/>
+    <path class="cls-dynamo-1" d="M48.5,11.94H13.69V1.5H48.5Zm-32.81-2H46.5V3.5H15.69Z"/>
+    <path class="cls-dynamo-1" d="M48.5,24.12H13.69V13.69H48.5Zm-32.81-2H46.5V15.69H15.69Z"/>
+    <path class="cls-dynamo-1" d="M48.5,36.31H13.69V25.88H48.5Zm-32.81-2H46.5V27.88H15.69Z"/>
+    <path class="cls-dynamo-1" d="M48.5,48.5H13.69V38.06H48.5Zm-32.81-2H46.5V40.06H15.69Z"/>
+  </svg>
+  <text x="275" y="340">Sierra items VHS</text>
+
+  <!--
+    Items merger
+    Task icon from https://aws.amazon.com/architecture/icons/
+  -->
+  <svg x="375" y="150">
+    <path class="cls-task-1" d="M41.88,48.5H8.13a1,1,0,0,1-1-1V2.5a1,1,0,0,1,1-1H41.88a1,1,0,0,1,1,1v45A1,1,0,0,1,41.88,48.5Zm-32.75-2H40.88V3.5H9.13Z"/>
+    <path class="cls-task-1" d="M18.42,14.76H12.8a1,1,0,0,1-1-1V8.13a1,1,0,0,1,1-1h5.62a1,1,0,0,1,1,1v5.63A1,1,0,0,1,18.42,14.76Zm-4.62-2h3.62V9.13H13.8Z"/>
+    <path class="cls-task-1" d="M18.42,27.88H12.8a1,1,0,0,1-1-1V21.25a1,1,0,0,1,1-1h5.62a1,1,0,0,1,1,1v5.63A1,1,0,0,1,18.42,27.88Zm-4.62-2h3.62V22.25H13.8Z"/>
+    <path class="cls-task-1" d="M18.42,41H12.8a1,1,0,0,1-1-1V34.38a1,1,0,0,1,1-1h5.62a1,1,0,0,1,1,1V40A1,1,0,0,1,18.42,41ZM13.8,39h3.62V35.38H13.8Z"/>
+    <rect class="cls-task-1" x="21.25" y="9.94" width="16.88" height="2"/>
+    <rect class="cls-task-1" x="21.25" y="23.06" width="16.88" height="2"/>
+    <rect class="cls-task-1" x="21.25" y="36.19" width="16.88" height="2"/>
+  </svg>
+
+  <text x="400" y="215">item merger</text>
+
+  <!--
+    Bib merger
+    Task icon from https://aws.amazon.com/architecture/icons/
+  -->
+  <svg x="375" y="25">
+    <path class="cls-task-1" d="M41.88,48.5H8.13a1,1,0,0,1-1-1V2.5a1,1,0,0,1,1-1H41.88a1,1,0,0,1,1,1v45A1,1,0,0,1,41.88,48.5Zm-32.75-2H40.88V3.5H9.13Z"/>
+    <path class="cls-task-1" d="M18.42,14.76H12.8a1,1,0,0,1-1-1V8.13a1,1,0,0,1,1-1h5.62a1,1,0,0,1,1,1v5.63A1,1,0,0,1,18.42,14.76Zm-4.62-2h3.62V9.13H13.8Z"/>
+    <path class="cls-task-1" d="M18.42,27.88H12.8a1,1,0,0,1-1-1V21.25a1,1,0,0,1,1-1h5.62a1,1,0,0,1,1,1v5.63A1,1,0,0,1,18.42,27.88Zm-4.62-2h3.62V22.25H13.8Z"/>
+    <path class="cls-task-1" d="M18.42,41H12.8a1,1,0,0,1-1-1V34.38a1,1,0,0,1,1-1h5.62a1,1,0,0,1,1,1V40A1,1,0,0,1,18.42,41ZM13.8,39h3.62V35.38H13.8Z"/>
+    <rect class="cls-task-1" x="21.25" y="9.94" width="16.88" height="2"/>
+    <rect class="cls-task-1" x="21.25" y="23.06" width="16.88" height="2"/>
+    <rect class="cls-task-1" x="21.25" y="36.19" width="16.88" height="2"/>
+  </svg>
+
+  <text x="400" y="90">bib merger</text>
+
+  <!--
+    The Sierra source data VHS
+    Task icon from https://aws.amazon.com/architecture/icons/
+  -->
+  <svg x="500" y="87.5">
+    <path class="cls-dynamo-1" d="M11.94,11.94H1.5V1.5H11.94Zm-8.44-2H9.94V3.5H3.5Z"/>
+    <path class="cls-dynamo-1" d="M11.94,24.12H1.5V13.69H11.94Zm-8.44-2H9.94V15.69H3.5Z"/>
+    <path class="cls-dynamo-1" d="M11.94,36.31H1.5V25.88H11.94Zm-8.44-2H9.94V27.88H3.5Z"/>
+    <path class="cls-dynamo-1" d="M11.94,48.5H1.5V38.06H11.94Zm-8.44-2H9.94V40.06H3.5Z"/>
+    <path class="cls-dynamo-1" d="M48.5,11.94H13.69V1.5H48.5Zm-32.81-2H46.5V3.5H15.69Z"/>
+    <path class="cls-dynamo-1" d="M48.5,24.12H13.69V13.69H48.5Zm-32.81-2H46.5V15.69H15.69Z"/>
+    <path class="cls-dynamo-1" d="M48.5,36.31H13.69V25.88H48.5Zm-32.81-2H46.5V27.88H15.69Z"/>
+    <path class="cls-dynamo-1" d="M48.5,48.5H13.69V38.06H48.5Zm-32.81-2H46.5V40.06H15.69Z"/>
+  </svg>
+  <text x="525" y="152.5">Sierra source data VHS</text>
+
+  <!-- Arrows -->
+  <marker id="arrowhead" markerWidth="10" markerHeight="7"
+    refX="0" refY="3.5" orient="auto">
+    <polygon points="0 0, 10 3.5, 0 7" />
+  </marker>
+
+  <svg y="0">
+    <!-- bibs API to bib reader -->
+    <line x1="50" x2="112.5" y1="50" y2="50" stroke="black" stroke-width="1" marker-end="url(#arrowhead)"/>
+
+    <!-- bib reader to bib merger -->
+    <line x1="177.5" x2="362.5" y1="50" y2="50" stroke="black" stroke-width="1" marker-end="url(#arrowhead)"/>
+  </svg>
+
+  <!-- bib/item merge to Sierra source data VHS -->
+  <line x1="427.5" x2="452.5" y1="50" y2="50" stroke="black" stroke-width="1"/>
+  <line x1="452.5" x2="452.5" y1="50" y2="175" stroke="black" stroke-width="1"/>
+  <line x1="427.5" x2="452.5" y1="175" y2="175" stroke="black" stroke-width="1"/>
+  <line x1="452.5" x2="482.5" y1="112.5" y2="112.5" stroke="black" stroke-width="1" marker-end="url(#arrowhead)"/>
+
+  <svg y="125">
+    <!-- items API to item reader -->
+    <line x1="50" x2="112.5" y1="50" y2="50" stroke="black" stroke-width="1" marker-end="url(#arrowhead)"/>
+
+    <!-- item reader to items to Dynamo -->
+    <line x1="177.5" x2="240" y1="50" y2="50" stroke="black" stroke-width="1" marker-end="url(#arrowhead)"/>
+
+    <!-- items to dynamo to item merger -->
+    <line x1="300" x2="362.5" y1="50" y2="50" stroke="black" stroke-width="1" marker-end="url(#arrowhead)"/>
+
+    <!-- items to dynamo to Sierra items VHS -->
+    <line x1="275" x2="275" y1="102.5" y2="132.5" stroke="black" stroke-width="1" marker-end="url(#arrowhead)"/>
+  </svg>
+</svg>
