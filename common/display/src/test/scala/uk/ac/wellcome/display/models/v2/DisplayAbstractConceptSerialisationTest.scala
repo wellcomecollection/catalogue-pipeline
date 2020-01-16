@@ -61,21 +61,23 @@ class DisplayAbstractConceptSerialisationTest
   }
 
   it("constructs a DisplayConcept from an identified Concept") {
-    val concept = Identified(
-      canonicalId = "uq4bt5us",
-      sourceIdentifier = createSourceIdentifierWith(
-        ontologyType = "Concept"
-      ),
-      agent = Concept("conceptLabel")
+    val concept = Concept(
+      label = "conceptLabel",
+      id = Identified(
+        canonicalId = "uq4bt5us",
+        sourceIdentifier = createSourceIdentifierWith(
+          ontologyType = "Concept"
+        )
+      )
     )
 
     assertObjectMapsToJson(
       DisplayAbstractConcept(concept, includesIdentifiers = true),
       expectedJson = s"""
          |  {
-         |    "id": "${concept.canonicalId}",
-         |    "identifiers": [${identifier(concept.identifiers(0))}],
-         |    "label" : "${concept.agent.label}",
+         |    "id": "${concept.id.canonicalId}",
+         |    "identifiers": [${identifier(concept.id.sourceIdentifier)}],
+         |    "label" : "${concept.label}",
          |    "type"  : "Concept"
          |  }
           """.stripMargin
@@ -83,12 +85,9 @@ class DisplayAbstractConceptSerialisationTest
   }
 
   it("serialises AbstractDisplayConcepts constructed from AbstractConcepts") {
+    val concepts = List(Concept("conceptLabel"), Place("placeLabel"), Period("periodLabel"))
     assertObjectMapsToJson(
-      List[Minted[AbstractConcept]](
-        Unidentifiable(Concept("conceptLabel")),
-        Unidentifiable(Place("placeLabel")),
-        Unidentifiable(Period("periodLabel"))
-      ).map(DisplayAbstractConcept(_, includesIdentifiers = false)),
+      concepts.map(DisplayAbstractConcept(_, includesIdentifiers = false)),
       expectedJson = s"""
           | [
           |    {

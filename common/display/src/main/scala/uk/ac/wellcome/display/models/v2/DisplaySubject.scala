@@ -17,43 +17,16 @@ case class DisplaySubject(
   @JsonKey("type") @Schema(name = "type") ontologyType: String = "Subject"
 )
 
-object DisplaySubject {
-  def apply(displayableSubject: Minted[Subject[Minted[AbstractRootConcept]]],
-            includesIdentifiers: Boolean): DisplaySubject = {
-    displayableSubject match {
-      case Unidentifiable(subject: Subject[Minted[AbstractRootConcept]]) =>
+object DisplaySubject extends GetIdentifiers {
+  def apply(subject: Subject[Minted],
+            includesIdentifiers: Boolean): DisplaySubject =
+    subject match {
+      case Subject(idState, label, concepts, _) =>
         DisplaySubject(
-          id = None,
-          identifiers = None,
-          label = subject.label,
-          concepts = subject.concepts.map {
-            DisplayAbstractRootConcept(
-              _,
-              includesIdentifiers = includesIdentifiers)
-          },
-          ontologyType = subject.ontologyType
-        )
-      case Identified(
-          subject: Subject[Minted[AbstractRootConcept]],
-          canonicalId,
-          sourceIdentifier,
-          otherIdentifiers) =>
-        DisplaySubject(
-          id = Some(canonicalId),
-          identifiers =
-            if (includesIdentifiers)
-              Some(
-                (sourceIdentifier +: otherIdentifiers).map(
-                  DisplayIdentifierV2(_)))
-            else None,
-          label = subject.label,
-          concepts = subject.concepts.map {
-            DisplayAbstractRootConcept(
-              _,
-              includesIdentifiers = includesIdentifiers)
-          },
-          ontologyType = subject.ontologyType
+          id = idState.id,
+          identifiers = getIdentifiers(idState, includesIdentifiers),
+          label = label,
+          concepts = concepts.map(DisplayAbstractRootConcept(_, includesIdentifiers))
         )
     }
-  }
 }

@@ -16,17 +16,12 @@ class DisplayAbstractAgentV2Test
   }.toList
   val canonicalId: String = createCanonicalId
 
+  val identified = Identified(canonicalId, sourceIdentifier, otherIdentifiers)
+
   describe("Agent") {
-    val agent = Agent(label = label)
+    val unidentifiedAgent = Agent(label = label, id = Unidentifiable)
 
-    val unidentifiedAgent = Unidentifiable(agent)
-
-    val identifiedAgent = Identified(
-      canonicalId = canonicalId,
-      sourceIdentifier = sourceIdentifier,
-      otherIdentifiers = otherIdentifiers,
-      agent = agent
-    )
+    val identifiedAgent = Agent(label = label, id = identified)
 
     val expectedUnidentifiedAgent: DisplayAgentV2 = DisplayAgentV2(
       id = None,
@@ -73,19 +68,18 @@ class DisplayAbstractAgentV2Test
     val prefix = randomAlphanumeric(length = 5)
     val numeration = randomAlphanumeric(length = 3)
 
-    val person = Person(
+    val unidentifiedPerson = Person(
+      id = Unidentifiable,
       label = label,
       prefix = Some(prefix),
       numeration = Some(numeration)
     )
 
-    val unidentifiedPerson = Unidentifiable(person)
-
-    val identifiedAgent = Identified(
-      canonicalId = canonicalId,
-      sourceIdentifier = sourceIdentifier,
-      otherIdentifiers = otherIdentifiers,
-      agent = person
+    val identifiedPerson = Person(
+      id = identified,
+      label = label,
+      prefix = Some(prefix),
+      numeration = Some(numeration)
     )
 
     val expectedUnidentifiedPerson: DisplayPersonV2 = DisplayPersonV2(
@@ -118,7 +112,7 @@ class DisplayAbstractAgentV2Test
         numeration = Some(numeration)
       )
 
-      DisplayAbstractAgentV2(identifiedAgent, includesIdentifiers = true) shouldBe expectedPerson
+      DisplayAbstractAgentV2(identifiedPerson, includesIdentifiers = true) shouldBe expectedPerson
     }
 
     it(
@@ -131,21 +125,14 @@ class DisplayAbstractAgentV2Test
         numeration = Some(numeration)
       )
 
-      DisplayAbstractAgentV2(identifiedAgent, includesIdentifiers = false) shouldBe expectedPerson
+      DisplayAbstractAgentV2(identifiedPerson, includesIdentifiers = false) shouldBe expectedPerson
     }
   }
 
   describe("Organisation") {
-    val organisation = Organisation(label = label)
+    val unidentifiedOrganisation = Organisation(label = label, id = Unidentifiable)
 
-    val unidentifiedAgent = Unidentifiable(organisation)
-
-    val identifiedAgent = Identified(
-      canonicalId = canonicalId,
-      sourceIdentifier = sourceIdentifier,
-      otherIdentifiers = otherIdentifiers,
-      agent = organisation
-    )
+    val identifiedOrganisation = Organisation(label = label, id = identified)
 
     val expectedUnidentifiedOrganisation: DisplayOrganisationV2 =
       DisplayOrganisationV2(
@@ -156,12 +143,12 @@ class DisplayAbstractAgentV2Test
 
     it(
       "converts an Unidentifiable Organisation to a DisplayOrganisationV2 (includesIdentifiers = true)") {
-      DisplayAbstractAgentV2(unidentifiedAgent, includesIdentifiers = true) shouldBe expectedUnidentifiedOrganisation
+      DisplayAbstractAgentV2(unidentifiedOrganisation, includesIdentifiers = true) shouldBe expectedUnidentifiedOrganisation
     }
 
     it(
       "converts an Unidentifiable Organisation to a DisplayOrganisationV2 (includesIdentifiers = false)") {
-      DisplayAbstractAgentV2(unidentifiedAgent, includesIdentifiers = false) shouldBe expectedUnidentifiedOrganisation
+      DisplayAbstractAgentV2(unidentifiedOrganisation, includesIdentifiers = false) shouldBe expectedUnidentifiedOrganisation
     }
 
     it(
@@ -174,7 +161,7 @@ class DisplayAbstractAgentV2Test
         label = label
       )
 
-      DisplayAbstractAgentV2(identifiedAgent, includesIdentifiers = true) shouldBe expectedOrganisation
+      DisplayAbstractAgentV2(identifiedOrganisation, includesIdentifiers = true) shouldBe expectedOrganisation
     }
 
     it(
@@ -185,35 +172,30 @@ class DisplayAbstractAgentV2Test
         label = label
       )
 
-      DisplayAbstractAgentV2(identifiedAgent, includesIdentifiers = false) shouldBe expectedOrganisation
+      DisplayAbstractAgentV2(identifiedOrganisation, includesIdentifiers = false) shouldBe expectedOrganisation
     }
   }
 
   describe("Meeting") {
-    val unidentifiedAgent = Unidentifiable(Meeting(label = label))
+    val unidentifiedMeeting = Meeting(label = label, id = Unidentifiable)
 
-    val identifiedAgent = Identified(
-      canonicalId = canonicalId,
-      sourceIdentifier = sourceIdentifier,
-      otherIdentifiers = otherIdentifiers,
-      agent = Meeting(label = label)
-    )
+    val identifiedMeeting = Meeting(label = label, id = identified)
 
     it(
       "converts an Unidentifiable Meeting to a DisplayMeetingV2 (includesIdentifiers = true)") {
-      DisplayAbstractAgentV2(unidentifiedAgent, includesIdentifiers = true) shouldBe
+      DisplayAbstractAgentV2(unidentifiedMeeting, includesIdentifiers = true) shouldBe
         DisplayMeetingV2(None, None, label)
     }
 
     it(
       "converts an Unidentifiable Meeting to a DisplayOrganisationV2 (includesIdentifiers = false)") {
-      DisplayAbstractAgentV2(unidentifiedAgent, includesIdentifiers = false) shouldBe
+      DisplayAbstractAgentV2(unidentifiedMeeting, includesIdentifiers = false) shouldBe
         DisplayMeetingV2(None, None, label)
     }
 
     it(
       "converts an Identified Meeting to a DisplayMeetingV2 (includesIdentifiers = true)") {
-      DisplayAbstractAgentV2(identifiedAgent, includesIdentifiers = true) shouldBe
+      DisplayAbstractAgentV2(identifiedMeeting, includesIdentifiers = true) shouldBe
         DisplayMeetingV2(
           id = Some(canonicalId),
           identifiers = Some((List(sourceIdentifier) ++ otherIdentifiers).map {
@@ -225,7 +207,7 @@ class DisplayAbstractAgentV2Test
 
     it(
       "converts an Identified Meeting to a DisplayMeetingV2 (includesIdentifiers = false)") {
-      DisplayAbstractAgentV2(identifiedAgent, includesIdentifiers = false) shouldBe
+      DisplayAbstractAgentV2(identifiedMeeting, includesIdentifiers = false) shouldBe
         DisplayMeetingV2(
           id = Some(canonicalId),
           identifiers = None,
