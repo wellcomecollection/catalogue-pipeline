@@ -185,7 +185,7 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
         assertJsonResponse(routes, s"/$apiPrefix/works?query=dodo") {
           Status.OK -> s"""
             {
-              ${resultList(apiPrefix)},
+              ${resultList(apiPrefix, totalResults = 1)},
               "results": [
                {
                  "type": "Work",
@@ -254,7 +254,7 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
           assertJsonResponse(routes, s"/$apiPrefix/works?query=pangolins") {
             Status.OK -> s"""
               {
-                ${resultList(apiPrefix)},
+                ${resultList(apiPrefix, totalResults = 1)},
                 "results": [
                  {
                    "type": "Work",
@@ -272,7 +272,7 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
             s"/$apiPrefix/works?query=pangolins&_index=${altIndex.name}") {
             Status.OK -> s"""
               {
-                ${resultList(apiPrefix)},
+                ${resultList(apiPrefix, totalResults = 1)},
                 "results": [
                  {
                    "type": "Work",
@@ -304,7 +304,7 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
         assertJsonResponse(routes, s"/$apiPrefix/works") {
           Status.OK -> s"""
             {
-              ${resultList(apiPrefix)},
+              ${resultList(apiPrefix, totalResults = 1)},
               "results": [
                {
                  "type": "Work",
