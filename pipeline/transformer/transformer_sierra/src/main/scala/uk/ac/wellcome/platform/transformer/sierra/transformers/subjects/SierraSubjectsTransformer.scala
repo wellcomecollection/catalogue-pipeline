@@ -7,21 +7,11 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraQueryOps,
   VarField
 }
-import uk.ac.wellcome.models.work.internal.{
-  AbstractRootConcept,
-  Subject,
-  Unminted
-}
+import uk.ac.wellcome.models.work.internal.{Subject, Unminted}
 
 trait SierraSubjectsTransformer extends SierraTransformer with SierraQueryOps {
 
-  type Output = List[
-    Unminted[
-      Subject[
-        Unminted[AbstractRootConcept]
-      ]
-    ]
-  ]
+  type Output = List[Subject[Unminted]]
 
   val subjectVarFields: List[String]
 

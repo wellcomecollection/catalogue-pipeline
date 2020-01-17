@@ -41,12 +41,12 @@ object SierraMeetingSubjects
         case label =>
           val subject = Subject(
             label = label,
-            concepts = List(Unidentifiable(Meeting(label = label)))
+            concepts = List(Meeting(label = label))
           )
           Some(
             varField.indicator2 match {
-              case Some("0") => identify(varField.subfields, subject, "Meeting")
-              case _         => Unidentifiable(subject)
+              case Some("0") => subject.copy(id = identify(varField.subfields, "Meeting"))
+              case _         => subject
             }
           )
       }

@@ -32,15 +32,11 @@ class SierraItemsTest extends FunSpec with Matchers with SierraDataGenerators {
 
     val expectedIdentifiers = List(sourceIdentifier1, sourceIdentifier2)
 
-    val transformedItem: Unminted[Item] = getTransformedItems(
-      itemDataMap = Map(
-        itemId -> itemData
-      )
+    val transformedItem = getTransformedItems(
+      itemDataMap = Map(itemId -> itemData)
     ).head
 
-    transformedItem
-      .asInstanceOf[Identifiable[Item]]
-      .identifiers shouldBe expectedIdentifiers
+    transformedItem.id.otherIds shouldBe expectedIdentifiers
   }
 
   it("uses the full Sierra system number as the source identifier") {
@@ -51,13 +47,11 @@ class SierraItemsTest extends FunSpec with Matchers with SierraDataGenerators {
     )
     val itemData = createSierraItemData
 
-    val transformedItem: Unminted[Item] = getTransformedItems(
+    val transformedItem = getTransformedItems(
       itemDataMap = Map(itemId -> itemData)
     ).head
 
-    transformedItem
-      .asInstanceOf[Identifiable[Item]]
-      .sourceIdentifier shouldBe sourceIdentifier
+    transformedItem.id.asInstanceOf[Identifiable].sourceIdentifier shouldBe sourceIdentifier
   }
 
   it("extracts the title from item varfield $v") {
@@ -69,14 +63,11 @@ class SierraItemsTest extends FunSpec with Matchers with SierraDataGenerators {
       )
     )
 
-    val transformedItem: Unminted[Item] = getTransformedItems(
+    val transformedItem = getTransformedItems(
       itemDataMap = Map(itemId -> itemData)
     ).head
 
-    transformedItem
-      .asInstanceOf[Identifiable[Item]]
-      .agent
-      .title shouldBe Some("Envelope")
+    transformedItem.title shouldBe Some("Envelope")
   }
 
   it("removes items with deleted=true") {
@@ -139,13 +130,13 @@ class SierraItemsTest extends FunSpec with Matchers with SierraDataGenerators {
     )
 
     val expectedItems = List(
-      Unidentifiable(
-        agent = Item(locations = List(DigitalLocation(
+      Item(
+        id = Unidentifiable,
+        locations = List(DigitalLocation(
           url =
             s"https://wellcomelibrary.org/iiif/${bibId.withCheckDigit}/manifest",
           license = None,
           locationType = LocationType("iiif-presentation"))))
-      )
     )
 
     getTransformedItems(bibId = bibId, bibData = bibData) shouldBe expectedItems
@@ -161,7 +152,7 @@ class SierraItemsTest extends FunSpec with Matchers with SierraDataGenerators {
     val itemDataMap = Map(createSierraItemNumber -> itemData)
 
     val item = getTransformedItems(itemDataMap = itemDataMap).head
-    item.agent.locations shouldBe List(
+    item.locations shouldBe List(
       PhysicalLocation(
         locationType = LocationType(sierraLocation.code),
         label = sierraLocation.name
@@ -195,7 +186,7 @@ class SierraItemsTest extends FunSpec with Matchers with SierraDataGenerators {
       itemDataMap = itemDataMap)
 
     result.size shouldBe 1
-    result.head.agent.locations shouldBe List(
+    result.head.locations shouldBe List(
       PhysicalLocation(
         locationType = LocationType(sierraLocation.code),
         label = sierraLocation.name
@@ -247,6 +238,6 @@ class SierraItemsTest extends FunSpec with Matchers with SierraDataGenerators {
     bibId: SierraBibNumber = createSierraBibNumber,
     bibData: SierraBibData = createSierraBibData,
     itemDataMap: Map[SierraItemNumber, SierraItemData] = Map())
-    : List[Unminted[Item]] =
+    : List[Item[Unminted]] =
     SierraItems(itemDataMap)(bibId, bibData)
 }

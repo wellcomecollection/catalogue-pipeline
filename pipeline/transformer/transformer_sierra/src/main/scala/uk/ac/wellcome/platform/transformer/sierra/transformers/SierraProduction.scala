@@ -13,7 +13,7 @@ import uk.ac.wellcome.models.parse.Marc008Parser
 
 object SierraProduction extends SierraTransformer with SierraQueryOps {
 
-  type Output = List[ProductionEvent[Unminted[AbstractAgent]]]
+  type Output = List[ProductionEvent[Unminted]]
 
   // Populate wwork:production.
   //
@@ -48,7 +48,8 @@ object SierraProduction extends SierraTransformer with SierraQueryOps {
 
     (productions, getProductionFrom008(bibData)) match {
       case (head :: tail, production :: _) =>
-        head.withDates(if (head.dates.isEmpty) production.dates else head.dates) :: tail
+        val dates = if (head.dates.nonEmpty) head.dates else production.dates
+        head.copy(dates = dates) :: tail
       case (maybe260or264, maybe008) => maybe260or264 ++ maybe008
     }
   }
@@ -239,7 +240,7 @@ object SierraProduction extends SierraTransformer with SierraQueryOps {
   }
 
   def getProductionFrom008(
-    bibData: SierraBibData): List[ProductionEvent[Unminted[AbstractAgent]]] =
+    bibData: SierraBibData): List[ProductionEvent[Unminted]] =
     bibData
       .varfieldsWithTag("008")
       .contents
@@ -263,7 +264,7 @@ object SierraProduction extends SierraTransformer with SierraQueryOps {
     varfield.subfieldContents.mkString(" ")
 
   private def placesFromSubfields(varfield: VarField,
-                                  subfieldTag: String): List[Place] =
+                                  subfieldTag: String): List[Place[Unminted]] =
     varfield
       .subfieldsWithTag(subfieldTag)
       .contents
@@ -271,16 +272,14 @@ object SierraProduction extends SierraTransformer with SierraQueryOps {
 
   private def agentsFromSubfields(
     varfield: VarField,
-    subfieldTag: String): List[Unidentifiable[Agent]] =
+    subfieldTag: String): List[Agent[Unminted]] =
     varfield
       .subfieldsWithTag(subfieldTag)
       .contents
-      .map { content =>
-        Unidentifiable(Agent.normalised(content))
-      }
+      .map(Agent.normalised)
 
   private def datesFromSubfields(varfield: VarField,
-                                 subfieldTag: String): List[Period] =
+                                 subfieldTag: String): List[Period[Unminted]] =
     varfield
       .subfieldsWithTag(subfieldTag)
       .contents

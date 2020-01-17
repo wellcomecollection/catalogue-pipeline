@@ -64,14 +64,14 @@ object SierraPersonSubjects
           )
 
           varField.indicator2 match {
-            case Some("0") => identify(varField.subfields, subject, "Subject")
-            case _         => Unidentifiable(subject)
+            case Some("0") => subject.copy(id = identify(varField.subfields, "Subject"))
+            case _         => subject
           }
         }
       }
   }
 
-  private def getPersonSubjectLabel(person: Person,
+  private def getPersonSubjectLabel(person: Person[Unminted],
                                     roles: List[String],
                                     dates: Option[String],
                                     generalSubdivisions: List[String]): String =
@@ -79,18 +79,9 @@ object SierraPersonSubjects
       .mkString(" ")
 
   private def getConcepts(
-    person: Person,
-    generalSubdivisions: List[String]): List[Unminted[AbstractRootConcept]] = {
-    val personConcept = Unidentifiable(person)
-
-    val generalSubdivisionConcepts =
-      generalSubdivisions
-        .map { label =>
-          Unidentifiable(Concept(label))
-        }
-
-    personConcept +: generalSubdivisionConcepts
-  }
+    person: Person[Unminted],
+    generalSubdivisions: List[String]): List[AbstractRootConcept[Unminted]] =
+    person +: generalSubdivisions.map(Concept(_))
 
   private def getRoles(secondarySubfields: List[MarcSubfield]) =
     secondarySubfields.collect { case MarcSubfield("e", role) => role }

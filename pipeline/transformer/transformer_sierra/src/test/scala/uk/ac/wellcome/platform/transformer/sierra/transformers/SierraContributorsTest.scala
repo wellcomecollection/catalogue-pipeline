@@ -66,13 +66,12 @@ class SierraContributorsTest
     )
 
     val expectedContributors = List(
-      Contributor(agent = Unidentifiable(Person("Sarah the soybean"))),
-      Contributor(agent = Unidentifiable(Person("Sam the squash, Sir"))),
-      Contributor(agent = Unidentifiable(Organisation("Spinach Solicitors"))),
-      Contributor(agent = Unidentifiable(Person("Sebastian the sugarsnap"))),
-      Contributor(agent = Unidentifiable(Organisation("Shallot Swimmers"))),
-      Contributor(
-        agent = Unidentifiable(Meeting("Sammys meet the Sammys at Sammys"))),
+      Contributor(Person("Sarah the soybean"), roles = Nil),
+      Contributor(Person("Sam the squash, Sir"), roles = Nil),
+      Contributor(Organisation("Spinach Solicitors"), roles = Nil),
+      Contributor(Person("Sebastian the sugarsnap"), roles = Nil),
+      Contributor(Organisation("Shallot Swimmers"), roles = Nil),
+      Contributor(Meeting("Sammys meet the Sammys at Sammys"), roles = Nil)
     )
     transformAndCheckContributors(
       varFields = varFields,
@@ -101,10 +100,12 @@ class SierraContributorsTest
       val varFields = List(varField100, varField700)
 
       val expectedContributors = List(
-        Contributor(agent = Unidentifiable(
-          Person(label = "Charles Emmanuel III, King of Sardinia, 1701-1773"))),
-        Contributor(agent = Unidentifiable(
-          Person(label = "Charles Emmanuel III, King of Sardinia, 1701-1773")))
+        Contributor(
+          Person(label = "Charles Emmanuel III, King of Sardinia, 1701-1773"),
+          roles = Nil),
+        Contributor(
+          Person(label = "Charles Emmanuel III, King of Sardinia, 1701-1773"),
+          roles = Nil)
       )
 
       transformAndCheckContributors(
@@ -132,8 +133,7 @@ class SierraContributorsTest
       contributors should have size 1
       val contributor = contributors.head
 
-      contributor.agent shouldBe Unidentifiable(
-        Agent(label = "Shakespeare, William, 1564-1616. Hamlet."))
+      contributor.agent shouldBe Agent("Shakespeare, William, 1564-1616. Hamlet.")
     }
 
     it(
@@ -161,9 +161,9 @@ class SierraContributorsTest
       )
 
       val expectedContributors = List(
-        Contributor(agent = Unidentifiable(Person(label = name1))),
-        Contributor(agent = Unidentifiable(Person(label = name2))),
-        Contributor(agent = Unidentifiable(Person(label = name3)))
+        Contributor(Person(label = name1), roles = Nil),
+        Contributor(Person(label = name2), roles = Nil),
+        Contributor(Person(label = name3), roles = Nil)
       )
 
       transformAndCheckContributors(
@@ -189,7 +189,7 @@ class SierraContributorsTest
 
       val expectedContributors = List(
         Contributor(
-          agent = Unidentifiable(Person(label = name)),
+          agent = Person(label = name),
           roles = List(ContributionRole(role1), ContributionRole(role2))
         )
       )
@@ -221,10 +221,8 @@ class SierraContributorsTest
 
       val expectedContributors = List(
         Contributor(
-          agent = Identifiable(
-            Person(label = name),
-            sourceIdentifier = sourceIdentifier
-          ))
+          Person(label = name, id = Identifiable(sourceIdentifier)),
+          roles = Nil)
       )
 
       transformAndCheckContributors(
@@ -264,10 +262,8 @@ class SierraContributorsTest
 
       val expectedContributors = List(
         Contributor(
-          agent = Identifiable(
-            Person(label = name),
-            sourceIdentifier = sourceIdentifier
-          ))
+          Person(label = name, id = Identifiable(sourceIdentifier)),
+          roles = Nil)
       )
 
       transformAndCheckContributors(
@@ -290,9 +286,7 @@ class SierraContributorsTest
       )
 
       val expectedContributors = List(
-        Contributor(
-          agent = Unidentifiable(Person(label = name))
-        )
+        Contributor(Person(name), roles = Nil)
       )
 
       transformAndCheckContributors(
@@ -315,8 +309,8 @@ class SierraContributorsTest
       )
 
       val expectedContributors = List(
-        Contributor(agent = Unidentifiable(Person(label = "George"))),
-        Contributor(agent = Unidentifiable(Person(label = "Sebastian")))
+        Contributor(Person(label = "George"), roles = Nil),
+        Contributor(Person(label = "Sebastian"), roles = Nil)
       )
 
       transformAndCheckContributors(
@@ -337,7 +331,7 @@ class SierraContributorsTest
       )
 
       val expectedContributors = List(
-        Contributor(agent = Unidentifiable(Organisation(label = name)))
+        Contributor(Organisation(label = name), roles = Nil)
       )
 
       transformAndCheckContributors(
@@ -369,8 +363,11 @@ class SierraContributorsTest
       )
 
       val expectedContributors = List(
-        Contributor(agent = Unidentifiable(Organisation(label =
-          "IARC Working Group on the Evaluation of the Carcinogenic Risk of Chemicals to Man. Meeting 1972 : Lyon, France")))
+        Contributor(
+          Organisation(
+            label = "IARC Working Group on the Evaluation of the Carcinogenic Risk of Chemicals to Man. Meeting 1972 : Lyon, France"
+          ),
+          roles = Nil)
       )
 
       transformAndCheckContributors(
@@ -403,9 +400,9 @@ class SierraContributorsTest
       )
 
       val expectedContributors = List(
-        Contributor(agent = Unidentifiable(Organisation(label = name1))),
-        Contributor(agent = Unidentifiable(Organisation(label = name2))),
-        Contributor(agent = Unidentifiable(Organisation(label = name3)))
+        Contributor(Organisation(label = name1), roles = Nil),
+        Contributor(Organisation(label = name2), roles = Nil),
+        Contributor(Organisation(label = name3), roles = Nil)
       )
 
       transformAndCheckContributors(
@@ -431,7 +428,7 @@ class SierraContributorsTest
 
       val expectedContributors = List(
         Contributor(
-          agent = Unidentifiable(Organisation(label = name)),
+          Organisation(label = name),
           roles = List(ContributionRole(role1), ContributionRole(role2))
         )
       )
@@ -463,10 +460,8 @@ class SierraContributorsTest
 
       val expectedContributors = List(
         Contributor(
-          agent = Identifiable(
-            Organisation(label = name),
-            sourceIdentifier = sourceIdentifier
-          ))
+          Organisation(label = name, id = Identifiable(sourceIdentifier)),
+          roles = Nil)
       )
 
       transformAndCheckContributors(
@@ -501,10 +496,8 @@ class SierraContributorsTest
 
       val expectedContributors = List(
         Contributor(
-          agent = Identifiable(
-            Organisation(label = name),
-            sourceIdentifier = sourceIdentifier
-          ))
+          Organisation(label = name, id = Identifiable(sourceIdentifier)),
+          roles = Nil)
       )
 
       transformAndCheckContributors(
@@ -527,9 +520,7 @@ class SierraContributorsTest
       )
 
       val expectedContributors = List(
-        Contributor(
-          agent = Unidentifiable(Organisation(label = name))
-        )
+        Contributor(Organisation(label = name), roles = Nil)
       )
 
       transformAndCheckContributors(
@@ -552,10 +543,8 @@ class SierraContributorsTest
       )
 
       val expectedContributors = List(
-        Contributor(
-          agent = Unidentifiable(Organisation(label = "The organisation"))),
-        Contributor(
-          agent = Unidentifiable(Organisation(label = "Another organisation")))
+        Contributor(Organisation(label = "The organisation"), roles = Nil),
+        Contributor(Organisation(label = "Another organisation"), roles = Nil)
       )
 
       transformAndCheckContributors(
@@ -588,9 +577,7 @@ class SierraContributorsTest
         marcTag = "111",
         subfields = List(MarcSubfield(tag = "a", content = "Big meeting"))
       )
-      val contributor = Contributor(
-        agent = Unidentifiable(Meeting(label = "Big meeting"))
-      )
+      val contributor = Contributor(Meeting(label = "Big meeting"), roles = Nil)
       transformAndCheckContributors(List(varField), List(contributor))
     }
 
@@ -599,9 +586,7 @@ class SierraContributorsTest
         marcTag = "711",
         subfields = List(MarcSubfield(tag = "a", content = "Big meeting"))
       )
-      val contributor = Contributor(
-        agent = Unidentifiable(Meeting(label = "Big meeting"))
-      )
+      val contributor = Contributor(Meeting(label = "Big meeting"), roles = Nil)
       transformAndCheckContributors(List(varField), List(contributor))
     }
 
@@ -616,9 +601,7 @@ class SierraContributorsTest
           MarcSubfield(tag = "t", content = "4"),
         )
       )
-      val contributor = Contributor(
-        agent = Unidentifiable(Meeting(label = "1 2 3 4"))
-      )
+      val contributor = Contributor(Meeting(label = "1 2 3 4"), roles = Nil)
       transformAndCheckContributors(List(varField), List(contributor))
     }
 
@@ -633,7 +616,7 @@ class SierraContributorsTest
         )
       )
       val contributor = Contributor(
-        agent = Unidentifiable(Meeting(label = "label")),
+        agent = Meeting(label = "label"),
         roles = List(ContributionRole("1st role"), ContributionRole("2nd role"))
       )
       transformAndCheckContributors(List(varField), List(contributor))
@@ -647,15 +630,14 @@ class SierraContributorsTest
           MarcSubfield(tag = "0", content = "456")
         )
       )
+      val sourceIdentifier = SourceIdentifier(
+        identifierType = IdentifierType("lc-names"),
+        ontologyType = "Meeting",
+        value = "456"
+      )
       val contributor = Contributor(
-        agent = Identifiable(
-          Meeting(label = "label"),
-          sourceIdentifier = SourceIdentifier(
-            identifierType = IdentifierType("lc-names"),
-            ontologyType = "Meeting",
-            value = "456"
-          )
-        )
+        Meeting(label = "label", id = Identifiable(sourceIdentifier)),
+        roles = Nil
       )
       transformAndCheckContributors(List(varField), List(contributor))
     }
@@ -663,7 +645,7 @@ class SierraContributorsTest
 
   private def transformAndCheckContributors(
     varFields: List[VarField],
-    expectedContributors: List[Contributor[Unminted[AbstractAgent]]]
+    expectedContributors: List[Contributor[Unminted]]
   ) = {
     val bibId = createSierraBibNumber
     val bibData = createSierraBibDataWith(varFields = varFields)

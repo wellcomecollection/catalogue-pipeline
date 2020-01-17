@@ -51,7 +51,7 @@ class SierraTransformableTransformerTest
       .asInstanceOf[UnidentifiedWork]
       .data
       .items
-      .map { _.asInstanceOf[Identifiable[Item]].sourceIdentifier }
+      .map { _.id.asInstanceOf[Identifiable].sourceIdentifier }
 
     actualIdentifiers should contain theSameElementsAs expectedIdentifiers
   }
@@ -129,11 +129,11 @@ class SierraTransformableTransformerTest
       )
     )
 
-    unidentifiedWork.data.items.head shouldBe Identifiable(
-      sourceIdentifier = expectedSourceIdentifier,
-      otherIdentifiers = expectedOtherIdentifiers,
-      agent =
-        Item(locations = List(PhysicalLocation(locationType, locationLabel)))
+    unidentifiedWork.data.items.head shouldBe Item(
+      id = Identifiable(
+        sourceIdentifier = expectedSourceIdentifier,
+        otherIdentifiers = expectedOtherIdentifiers),
+      locations = List(PhysicalLocation(locationType, locationLabel))
     )
   }
 
@@ -176,7 +176,7 @@ class SierraTransformableTransformerTest
     val unidentifiedWork =
       transformToWork(transformable).asInstanceOf[UnidentifiedWork]
 
-    unidentifiedWork.data.items.head.agent.title shouldBe Some("Envelope")
+    unidentifiedWork.data.items.head.title shouldBe Some("Envelope")
   }
 
   it("returns an InvisibleWork if there isn't any bib data") {
@@ -261,7 +261,7 @@ class SierraTransformableTransformerTest
         ProductionEvent(
           label = "Peaceful Poetry 1923",
           places = List(),
-          agents = List(Unidentifiable(Agent(label = "Peaceful Poetry"))),
+          agents = List(Agent(label = "Peaceful Poetry")),
           dates = List(Period("1923")),
           function = None
         )
@@ -500,9 +500,7 @@ class SierraTransformableTransformerTest
        """.stripMargin
 
     val work = transformDataToUnidentifiedWork(id = id, data = data)
-    work.data.contributors shouldBe List(
-      Contributor[Unminted[AbstractAgent]](Unidentifiable(Person(label = name)))
-    )
+    work.data.contributors shouldBe List(Contributor(Person(name), roles = Nil))
   }
 
   it("extracts subjects if present") {
@@ -533,9 +531,7 @@ class SierraTransformableTransformerTest
 
     val work = transformDataToUnidentifiedWork(id = id, data = data)
     work.data.subjects shouldBe List(
-      Unidentifiable(
-        Subject(content, List(Unidentifiable(Concept(content))))
-      )
+      Subject(content, List(Concept(content)))
     )
   }
 
@@ -567,9 +563,7 @@ class SierraTransformableTransformerTest
 
     val work = transformDataToUnidentifiedWork(id = id, data = data)
     work.data.subjects shouldBe List(
-      Unidentifiable(
-        Subject(content, List(Unidentifiable(Person(content))))
-      )
+      Subject(content, List(Person(content)))
     )
   }
 
@@ -601,11 +595,9 @@ class SierraTransformableTransformerTest
 
     val work = transformDataToUnidentifiedWork(id = id, data = data)
     work.data.subjects shouldBe List(
-      Unidentifiable(
-        Subject(
-          label = content,
-          List(Unidentifiable(Organisation(content)))
-        )
+      Subject(
+        label = content,
+        concepts = List(Organisation(content))
       )
     )
   }
@@ -638,11 +630,9 @@ class SierraTransformableTransformerTest
 
     val work = transformDataToUnidentifiedWork(id = id, data = data)
     work.data.subjects shouldBe List(
-      Unidentifiable(
-        Subject(
-          label = content,
-          List(Unidentifiable(Meeting(content)))
-        )
+      Subject(
+        label = content,
+        concepts = List(Meeting(content))
       )
     )
   }
@@ -675,11 +665,9 @@ class SierraTransformableTransformerTest
 
     val work = transformDataToUnidentifiedWork(id = id, data = data)
     work.data.subjects shouldBe List(
-      Unidentifiable(
-        Subject(
-          label = content,
-          List(Unidentifiable(Concept(content)))
-        )
+      Subject(
+        label = content,
+        concepts  = List(Concept(content))
       )
     )
   }

@@ -57,7 +57,7 @@ trait SierraConcepts extends SierraQueryOps {
   //
   // Note that some identifiers have an identifier scheme in
   // indicator 2, but no ID.  In this case, we just ignore it.
-  def identifyConcept[T](concept: T, varField: VarField): Unminted[T] =
+  def identifyConcept[T](concept: T, varField: VarField): Unminted =
     getIdentifierSubfieldContents(varField) match {
       case Seq(subfieldContent) =>
         maybeAddIdentifier[T](
@@ -65,7 +65,7 @@ trait SierraConcepts extends SierraQueryOps {
           varField = varField,
           identifierSubfieldContent = subfieldContent
         )
-      case _ => Unidentifiable(agent = concept)
+      case _ => Unidentifiable
     }
 
   // If there's exactly one subfield $0 on the VarField, add an identifier
@@ -73,34 +73,25 @@ trait SierraConcepts extends SierraQueryOps {
   private def maybeAddIdentifier[T](
     concept: T,
     varField: VarField,
-    identifierSubfieldContent: String): Unminted[T] = {
-    val maybeSourceIdentifier = SierraConceptIdentifier.maybeFindIdentifier(
-      varField = varField,
-      identifierSubfieldContent = identifierSubfieldContent,
-      ontologyType = concept.getClass.getSimpleName
-    )
-
-    maybeSourceIdentifier match {
-      case None => Unidentifiable(agent = concept)
-      case Some(sourceIdentifier) =>
-        Identifiable(
-          agent = concept,
-          sourceIdentifier = sourceIdentifier
-        )
-    }
-  }
+    identifierSubfieldContent: String): Unminted =
+    SierraConceptIdentifier
+      .maybeFindIdentifier(
+        varField = varField,
+        identifierSubfieldContent = identifierSubfieldContent,
+        ontologyType = concept.getClass.getSimpleName
+      )
+      .map(Identifiable(_))
+      .getOrElse(Unidentifiable)
 
   // Extract the subdivisions, which come from everything except subfield $a.
   // These are never identified.  We preserve the order from MARC.
   protected def getSubdivisions(subdivisionSubfields: List[MarcSubfield])
-    : List[Unidentifiable[AbstractConcept]] = {
-    val concepts: List[AbstractConcept] = subdivisionSubfields.map { subfield =>
+    : List[AbstractConcept[Unminted]] =
+    subdivisionSubfields.map { subfield =>
       subfield.tag match {
         case "v" | "x" => Concept(label = subfield.content)
         case "y"       => Period(label = subfield.content)
         case "z"       => Place(label = subfield.content)
       }
     }
-    concepts.map { Unidentifiable(_) }
-  }
 }

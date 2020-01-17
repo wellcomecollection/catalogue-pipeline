@@ -38,11 +38,9 @@ class SierraMeetingSubjectsTest
       varField("611", MarcSubfield(tag = "a", content = "Content")),
     )
     SierraMeetingSubjects(bibId, data) shouldBe List(
-      Unidentifiable(
-        Subject(
-          label = "Content",
-          concepts = List(Unidentifiable(Meeting(label = "Content")))
-        )
+      Subject(
+        label = "Content",
+        concepts = List(Meeting(label = "Content"))
       )
     )
   }
@@ -58,11 +56,9 @@ class SierraMeetingSubjectsTest
       )
     )
     SierraMeetingSubjects(bibId, data) shouldBe List(
-      Unidentifiable(
-        Subject(
-          label = "C A D",
-          concepts = List(Unidentifiable(Meeting(label = "C A D")))
-        )
+      Subject(
+        label = "C A D",
+        concepts = List(Meeting(label = "C A D"))
       )
     )
   }
@@ -88,12 +84,10 @@ class SierraMeetingSubjectsTest
       value = "lcsh7212"
     )
     SierraPersonSubjects(bibId, data) shouldBe List(
-      Identifiable(
-        Subject(
-          label = "Content",
-          concepts = List(Unidentifiable(Person(label = "Content")))
-        ),
-        sourceIdentifier = sourceIdentifier
+      Subject(
+        id = Identifiable(sourceIdentifier),
+        label = "Content",
+        concepts = List(Person(label = "Content"))
       )
     )
   }
@@ -104,17 +98,13 @@ class SierraMeetingSubjectsTest
       varField("611", MarcSubfield(tag = "a", content = "Second")),
     )
     SierraMeetingSubjects(bibId, data) shouldBe List(
-      Unidentifiable(
-        Subject(
-          label = "First",
-          concepts = List(Unidentifiable(Meeting(label = "First")))
-        )
+      Subject(
+        label = "First",
+        concepts = List(Meeting(label = "First"))
       ),
-      Unidentifiable(
-        Subject(
-          label = "Second",
-          concepts = List(Unidentifiable(Meeting(label = "Second")))
-        )
+      Subject(
+        label = "Second",
+        concepts = List(Meeting(label = "Second"))
       )
     )
   }
