@@ -16,12 +16,12 @@ import com.sksamuel.elastic4s.requests.searches.queries.{
 import uk.ac.wellcome.platform.api.models.SearchQuery
 import uk.ac.wellcome.platform.api.models.SearchQueryType.{
   FixedFields,
-  ScoringTiers
+  IdSearch
 }
 
 case class ElasticsearchQueryBuilder(searchQuery: SearchQuery) {
   lazy val query: BoolQuery = searchQuery.queryType match {
-    case ScoringTiers => ScoringTiersQuery(searchQuery.query).elasticQuery
+    case IdSearch => IdSearchQuery(searchQuery.query).elasticQuery
     case FixedFields =>
       FixedFieldsQuery(searchQuery.query).elasticQuery
   }
@@ -45,13 +45,6 @@ object QueryDefaults {
     ("data.production.*.label", None),
     ("data.language.label", None),
     ("data.edition", None),
-    // Identifiers
-    ("canonicalId", None),
-    ("sourceIdentifier.value", None),
-    ("data.otherIdentifiers.value", None),
-    ("data.items.canonicalId", None),
-    ("data.items.sourceIdentifier.value", None),
-    ("data.items.otherIdentifiers.value", None),
   )
 
   val englishBoostedFields: Seq[(String, Option[Double])] = Seq(
@@ -70,19 +63,29 @@ object QueryDefaults {
     ("data.production.*.label", None),
     ("data.language.label", None),
     ("data.edition", None),
-    // Identifiers
-    ("canonicalId", None),
-    ("sourceIdentifier.value", None),
-    ("data.otherIdentifiers.value", None),
-    ("data.items.canonicalId", None),
-    ("data.items.sourceIdentifier.value", None),
-    ("data.items.otherIdentifiers.value", None),
   )
 }
 
 sealed trait ElasticsearchQuery {
   val q: String
   val elasticQuery: Query
+}
+
+final case class IdQuery(q: String) extends ElasticsearchQuery {
+  lazy val idFields = Seq(
+    "canonicalId.text",
+    "sourceIdentifier.value.text",
+    "data.otherIdentifiers.value.text",
+    "data.items.canonicalId.text",
+    "data.items.sourceIdentifier.value.text",
+    "data.items.otherIdentifiers.value.text",
+  )
+  lazy val elasticQuery =
+    MultiMatchQuery(
+      fields = idFields.map(FieldWithOptionalBoost(_, None)),
+      text = q,
+      `type` = Some(MultiMatchQueryBuilderType.CROSS_FIELDS)
+    )
 }
 
 final case class TitleQuery(q: String) extends ElasticsearchQuery {
@@ -141,7 +144,7 @@ final case class ContributorQuery(q: String) extends ElasticsearchQuery {
       operator = Some(Operator.And))
 }
 
-final case class ScoringTiersQuery(q: String) extends ElasticsearchQuery {
+final case class IdSearchQuery(q: String) extends ElasticsearchQuery {
   import QueryDefaults._
 
   val fields = defaultBoostedFields map {
@@ -156,15 +159,29 @@ final case class ScoringTiersQuery(q: String) extends ElasticsearchQuery {
     `type` = Some(MultiMatchQueryBuilderType.CROSS_FIELDS)
   )
 
-  lazy val elasticQuery = bool(
-    shouldQueries = Seq(
-      ConstantScore(query = TitleQuery(q).elasticQuery, boost = Some(2000)),
-      ConstantScore(query = GenreQuery(q).elasticQuery, boost = Some(1000)),
-      ConstantScore(query = SubjectQuery(q).elasticQuery, boost = Some(1000))
-    ),
-    mustQueries = Seq(baseQuery),
-    notQueries = Seq()
-  )
+  lazy val elasticQuery =
+    bool(
+      shouldQueries = Seq(),
+      notQueries = Seq(),
+      mustQueries = Seq(
+        bool(
+          mustQueries = Seq(),
+          notQueries = Seq(),
+          shouldQueries = Seq(
+            ConstantScore(IdQuery(q).elasticQuery, boost = Some(5000)),
+            ConstantScore(
+              query = TitleQuery(q).elasticQuery,
+              boost = Some(2000)),
+            ConstantScore(
+              query = GenreQuery(q).elasticQuery,
+              boost = Some(1000)),
+            ConstantScore(
+              query = SubjectQuery(q).elasticQuery,
+              boost = Some(1000)),
+            baseQuery
+          )
+        ))
+    )
 }
 
 final case class FixedFieldsQuery(q: String) extends ElasticsearchQuery {
