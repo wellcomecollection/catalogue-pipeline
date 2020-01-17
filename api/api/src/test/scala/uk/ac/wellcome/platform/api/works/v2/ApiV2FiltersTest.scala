@@ -10,163 +10,176 @@ import uk.ac.wellcome.models.work.internal._
 import scala.util.Random
 
 class ApiV2FiltersTest extends ApiV2WorksTestBase {
+  describe("filtering by item LocationType") {
+    def createItemWithLocationType(locationType: LocationType): Identified[Item] =
+      createIdentifiedItemWith(
+        locations = List(
+          // This test really shouldn't be affected by physical/digital locations;
+          // we just pick randomly here to ensure we get a good mixture.
+          Random
+            .shuffle(
+              List(
+                createPhysicalLocationWith(locationType = locationType),
+                createDigitalLocationWith(locationType = locationType)
+              ))
+            .head
+        )
+      )
 
-  describe("listing works") {
-    it("ignores works with no workType") {
-      withApi {
-        case (indexV2, routes) =>
-          val noWorkTypeWorks = (1 to 3).map { _ =>
-            createIdentifiedWorkWith(workType = None)
-          }
-          val matchingWork =
-            createIdentifiedWorkWith(workType = Some(ManuscriptsAsian))
+    val worksWithNoItem = createIdentifiedWorks(count = 3)
 
-          val works = noWorkTypeWorks :+ matchingWork
-          insertIntoElasticsearch(indexV2, works: _*)
+    val work1 = createIdentifiedWorkWith(
+      canonicalId = "1",
+      title = Some("Crumbling carrots"),
+      items = List(
+        createItemWithLocationType(LocationType("iiif-image"))
+      )
+    )
+    val work2 = createIdentifiedWorkWith(
+      canonicalId = "2",
+      title = Some("Crumbling carrots"),
+      items = List(
+        createItemWithLocationType(LocationType("digit")),
+        createItemWithLocationType(LocationType("dimgs"))
+      )
+    )
+    val work3 = createIdentifiedWorkWith(
+      items = List(
+        createItemWithLocationType(LocationType("dpoaa"))
+      )
+    )
 
-          assertJsonResponse(routes, s"/$apiPrefix/works?workType=b") {
-            Status.OK -> s"""
-              {
-                ${resultList(apiPrefix, totalResults = 1)},
-                "results": [
-                  {
-                    "type": "Work",
-                    "id": "${matchingWork.canonicalId}",
-                    "title": "${matchingWork.data.title.get}",
-                    "alternativeTitles": [],
-                    "workType": ${workType(matchingWork.data.workType.get)}
-                  }
-                ]
-              }
-            """
-          }
+    val works = worksWithNoItem ++ Seq(work1, work2, work3)
+
+    it("when listing works") {
+      withApi { case (indexV2, routes) =>
+        insertIntoElasticsearch(indexV2, works: _*)
+
+        assertJsonResponse(
+          routes,
+          s"/$apiPrefix/works?items.locations.locationType=iiif-image,digit&include=items") {
+          Status.OK -> s"""
+            {
+              ${resultList(apiPrefix, totalResults = 2)},
+              "results": [
+                {
+                  "type": "Work",
+                  "id": "${work1.canonicalId}",
+                  "title": "${work1.data.title.get}",
+                  "alternativeTitles": [],
+                  "items": [${items(work1.data.items)}]
+                },
+                {
+                  "type": "Work",
+                  "id": "${work2.canonicalId}",
+                  "title": "${work2.data.title.get}",
+                  "alternativeTitles": [],
+                  "items": [${items(work2.data.items)}]
+                }
+              ]
+            }
+          """
+        }
       }
     }
 
-    it("filters out works with a different workType") {
-      withApi {
-        case (indexV2, routes) =>
-          val wrongWorkTypeWorks = (1 to 3).map { _ =>
-            createIdentifiedWorkWith(workType = Some(CDRoms))
-          }
-          val matchingWork =
-            createIdentifiedWorkWith(workType = Some(ManuscriptsAsian))
+    it("when searching works") {
+      withApi { case (indexV2, routes) =>
+        insertIntoElasticsearch(indexV2, works: _*)
 
-          val works = wrongWorkTypeWorks :+ matchingWork
-          insertIntoElasticsearch(indexV2, works: _*)
+        assertJsonResponse(
+          routes,
+          s"/$apiPrefix/works?query=carrots&items.locations.locationType=digit&include=items") {
+          Status.OK -> s"""
+            {
+              ${resultList(apiPrefix, totalResults = 1)},
+              "results": [
+                {
+                  "type": "Work",
+                  "id": "${work2.canonicalId}",
+                  "title": "${work2.data.title.get}",
+                  "alternativeTitles": [],
+                  "items": [${items(work2.data.items)}]
+                }
+              ]
+            }
+          """
+        }
+      }
+    }
+  }
 
-          assertJsonResponse(routes, s"/$apiPrefix/works?workType=b") {
-            Status.OK -> s"""
-              {
-                ${resultList(apiPrefix, totalResults = 1)},
+  describe("filtering by workType") {
+    val noWorkTypeWorks = (1 to 3).map { _ =>
+      createIdentifiedWorkWith(workType = None)
+    }
+
+    // We assign explicit canonical IDs to ensure stable ordering when listing
+    val bookWork = createIdentifiedWorkWith(
+      canonicalId = "book1",
+      workType = Some(Books)
+    )
+    val cdRomWork = createIdentifiedWorkWith(
+      canonicalId = "cdrom1",
+      workType = Some(CDRoms)
+    )
+    val manuscriptWork = createIdentifiedWorkWith(
+      canonicalId = "manuscript1",
+      workType = Some(ManuscriptsAsian)
+    )
+
+    val works = noWorkTypeWorks ++ Seq(bookWork, cdRomWork, manuscriptWork)
+
+    it("when listing works") {
+      withApi { case (indexV2, routes) =>
+        insertIntoElasticsearch(indexV2, works: _*)
+
+        assertJsonResponse(routes, s"/$apiPrefix/works?workType=${ManuscriptsAsian.id}") {
+          Status.OK -> s"""
+            {
+              ${resultList(apiPrefix, totalResults = 1)},
                 "results": [
                   {
                     "type": "Work",
-                    "id": "${matchingWork.canonicalId}",
-                    "title": "${matchingWork.data.title.get}",
+                    "id": "${manuscriptWork.canonicalId}",
+                    "title": "${manuscriptWork.data.title.get}",
                     "alternativeTitles": [],
-                    "workType": ${workType(matchingWork.data.workType.get)}
+                    "workType": ${workType(manuscriptWork.data.workType.get)}
                   }
                 ]
               }
             """
-          }
+        }
       }
     }
 
-    it("can filter by multiple workTypes") {
-      withApi {
-        case (indexV2, routes) =>
-          val wrongWorkTypeWorks = (1 to 3).map { _ =>
-            createIdentifiedWorkWith(workType = Some(CDRoms))
-          }
-          val matchingWork1 = createIdentifiedWorkWith(
-            canonicalId = "001",
-            workType = Some(ManuscriptsAsian))
-          val matchingWork2 = createIdentifiedWorkWith(
-            canonicalId = "002",
-            workType = Some(Books))
+    it("filters by multiple workTypes") {
+      withApi { case (indexV2, routes) =>
+        insertIntoElasticsearch(indexV2, works: _*)
 
-          val works = wrongWorkTypeWorks :+ matchingWork1 :+ matchingWork2
-          insertIntoElasticsearch(indexV2, works: _*)
-
-          assertJsonResponse(routes, s"/$apiPrefix/works?workType=a,b") {
-            Status.OK -> s"""
-              {
-                ${resultList(apiPrefix, totalResults = 2)},
-                "results": [
-                  {
-                    "type": "Work",
-                    "id": "${matchingWork1.canonicalId}",
-                    "title": "${matchingWork1.data.title.get}",
-                    "alternativeTitles": [],
-                    "workType": ${workType(matchingWork1.data.workType.get)}
-                  },
-                  {
-                    "type": "Work",
-                    "id": "${matchingWork2.canonicalId}",
-                    "title": "${matchingWork2.data.title.get}",
-                    "alternativeTitles": [],
-                    "workType": ${workType(matchingWork2.data.workType.get)}
-                  }
-                ]
-              }
-            """
-          }
-      }
-    }
-
-    it("filters by item LocationType") {
-      withApi {
-        case (indexV2, routes) =>
-          val noItemWorks = createIdentifiedWorks(count = 3)
-          val matchingWork1 = createIdentifiedWorkWith(
-            canonicalId = "001",
-            items = List(
-              createItemWithLocationType(LocationType("iiif-image"))
-            )
-          )
-          val matchingWork2 = createIdentifiedWorkWith(
-            canonicalId = "002",
-            items = List(
-              createItemWithLocationType(LocationType("digit")),
-              createItemWithLocationType(LocationType("dimgs"))
-            )
-          )
-          val wrongLocationTypeWork = createIdentifiedWorkWith(
-            items = List(
-              createItemWithLocationType(LocationType("dpoaa"))
-            )
-          )
-
-          val works = noItemWorks :+ matchingWork1 :+ matchingWork2 :+ wrongLocationTypeWork
-          insertIntoElasticsearch(indexV2, works: _*)
-
-          assertJsonResponse(
-            routes,
-            s"/$apiPrefix/works?items.locations.locationType=iiif-image,digit&include=items") {
-            Status.OK -> s"""
-              {
-                ${resultList(apiPrefix, totalResults = 2)},
-                "results": [
-                  {
-                    "type": "Work",
-                    "id": "${matchingWork1.canonicalId}",
-                    "title": "${matchingWork1.data.title.get}",
-                    "alternativeTitles": [],
-                    "items": [${items(matchingWork1.data.items)}]
-                  },
-                  {
-                    "type": "Work",
-                    "id": "${matchingWork2.canonicalId}",
-                    "title": "${matchingWork2.data.title.get}",
-                    "alternativeTitles": [],
-                    "items": [${items(matchingWork2.data.items)}]
-                  }
-                ]
-              }
-            """
-          }
+        assertJsonResponse(routes, s"/$apiPrefix/works?workType=${ManuscriptsAsian.id},${CDRoms.id}") {
+          Status.OK -> s"""
+            {
+              ${resultList(apiPrefix, totalResults = 2)},
+              "results": [
+                {
+                  "type": "Work",
+                  "id": "${cdRomWork.canonicalId}",
+                  "title": "${cdRomWork.data.title.get}",
+                  "alternativeTitles": [],
+                  "workType": ${workType(cdRomWork.data.workType.get)}
+                },
+                {
+                  "type": "Work",
+                  "id": "${manuscriptWork.canonicalId}",
+                  "title": "${manuscriptWork.data.title.get}",
+                  "alternativeTitles": [],
+                  "workType": ${workType(manuscriptWork.data.workType.get)}
+                }
+              ]
+            }
+          """
+        }
       }
     }
   }
@@ -402,61 +415,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
       }
     }
 
-    it("filters by item LocationType") {
-      withApi {
-        case (indexV2, routes) =>
-          val noItemWorks = createIdentifiedWorks(count = 3)
-          val matchingWork1 = createIdentifiedWorkWith(
-            canonicalId = "001",
-            title = Some("Crumbling carrots"),
-            items = List(
-              createItemWithLocationType(LocationType("iiif-image"))
-            )
-          )
-          val matchingWork2 = createIdentifiedWorkWith(
-            canonicalId = "002",
-            title = Some("Crumbling carrots"),
-            items = List(
-              createItemWithLocationType(LocationType("digit")),
-              createItemWithLocationType(LocationType("dimgs"))
-            )
-          )
-          val wrongLocationTypeWork = createIdentifiedWorkWith(
-            items = List(
-              createItemWithLocationType(LocationType("dpoaa"))
-            )
-          )
 
-          val works = noItemWorks :+ matchingWork1 :+ matchingWork2 :+ wrongLocationTypeWork
-          insertIntoElasticsearch(indexV2, works: _*)
-
-          assertJsonResponse(
-            routes,
-            s"/$apiPrefix/works?query=carrots&items.locations.locationType=iiif-image,digit&include=items") {
-            Status.OK -> s"""
-              {
-                ${resultList(apiPrefix, totalResults = 2)},
-                "results": [
-                  {
-                    "type": "Work",
-                    "id": "${matchingWork1.canonicalId}",
-                    "title": "${matchingWork1.data.title.get}",
-                    "alternativeTitles": [],
-                    "items": [${items(matchingWork1.data.items)}]
-                  },
-                  {
-                    "type": "Work",
-                    "id": "${matchingWork2.canonicalId}",
-                    "title": "${matchingWork2.data.title.get}",
-                    "alternativeTitles": [],
-                    "items": [${items(matchingWork2.data.items)}]
-                  }
-                ]
-              }
-            """
-          }
-      }
-    }
   }
 
   describe("filtering works by language") {
@@ -733,20 +692,4 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
       }
     }
   }
-
-  private def createItemWithLocationType(
-    locationType: LocationType): Identified[Item] =
-    createIdentifiedItemWith(
-      locations = List(
-        // This test really shouldn't be affected by physical/digital locations;
-        // we just pick randomly here to ensure we get a good mixture.
-        Random
-          .shuffle(
-            List(
-              createPhysicalLocationWith(locationType = locationType),
-              createDigitalLocationWith(locationType = locationType)
-            ))
-          .head
-      )
-    )
 }
