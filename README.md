@@ -1,8 +1,16 @@
-# catalogue
+# Catalogue
 
 [![Build Status](https://travis-ci.org/wellcometrust/catalogue.svg?branch=master)](https://travis-ci.org/wellcometrust/catalogue)
 
-The Catalogue API allows you to search our museum and library collections.
+
+## Purpose
+
+Making the Wellcome Collection's data and information open and discoverable via public APIs.
+
+You can [read more about how we do this in out documentation][catalogue docs], or just peruse the code at your leisure.
+
+
+## Architecture
 
 The catalogue consits of three main parts with supporting services. These are:
 
@@ -13,6 +21,7 @@ The catalogue consits of three main parts with supporting services. These are:
 * [Pipeline](pipeline.md): Taking adapter data and putting it into our query index, Elasticsearch
 * [API](api/): Serving the data from Elastic search to clients via HTTP 
 
+
 ## Dependencies
 
 * Java 1.8
@@ -22,11 +31,13 @@ The catalogue consits of three main parts with supporting services. These are:
 * Docker
 * Make
 
+
 ## Problems you might have
 
 * **Stack overflow from scalac \(in IntelliJ\) when building projects**:
 
   Go to `Settings > Build, Execution, Deployment > Compiler` and change `Build process heap size (Mbytes)` to something large, eg 2048.
+
 
 ## Things you might want to do
 
@@ -34,5 +45,8 @@ Generally small things you might want to do irregularly involving the API & data
 
 Documentation for using our API can be found at [https://developers.wellcomecollection.org/catalogue](https://developers.wellcomecollection.org/catalogue), and the API itself is published at [https://api.wellcomecollection.org/catalogue](https://api.wellcomecollection.org/catalogue).
 
-This is part of the [Wellcome Digital Platform](https://github.com/wellcometrust/platform).
+This is part of the [Wellcome Digital Platform][platform repo].
 
+
+[catalogue docs]: https://docs.wellcomecollection.org/catalogue/
+[platform repo]: [https://github.com/wellcometrust/platform]
