@@ -5,7 +5,7 @@
 
 ## Purpose
 
-Making Wellcome Collection's data and information open and discoverable
+Making Wellcome Collection's catalogue data and information open and discoverable
 via public APIs.
 
 **Interested in how we make these services?**
