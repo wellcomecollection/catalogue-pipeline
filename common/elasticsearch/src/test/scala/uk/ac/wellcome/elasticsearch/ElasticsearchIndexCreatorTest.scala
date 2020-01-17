@@ -1,17 +1,17 @@
 package uk.ac.wellcome.elasticsearch
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import org.scalatest.concurrent.{Eventually, ScalaFutures}
+import org.scalatest.{BeforeAndAfterEach, FunSpec, Matchers}
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.{RequestFailure, Response}
 import com.sksamuel.elastic4s.requests.indexes.IndexResponse
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
-import org.scalatest.concurrent.{Eventually, ScalaFutures}
-import org.scalatest.{BeforeAndAfterEach, FunSpec, Matchers}
+
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.utils.JsonAssertions
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 case class TestObject(
   id: String,

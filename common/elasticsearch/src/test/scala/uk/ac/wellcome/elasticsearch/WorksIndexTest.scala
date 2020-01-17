@@ -1,21 +1,24 @@
 package uk.ac.wellcome.elasticsearch
 
 import java.time.Instant
-
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import org.scalacheck.ScalacheckShapeless._
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+import org.scalacheck.{Arbitrary, Shrink}
+import org.scalatest.concurrent.{Eventually, ScalaFutures}
+import org.scalacheck.Gen.chooseNum
+import org.scalatest.{Assertion, FunSpec, Matchers}
 import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.ElasticDsl.{indexInto, search, _}
 import com.sksamuel.elastic4s.requests.indexes.IndexResponse
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import com.sksamuel.elastic4s.{ElasticError, Response}
 import io.circe.Encoder
-import org.scalacheck.{Arbitrary, Shrink}
-import org.scalatest.concurrent.{Eventually, ScalaFutures}
-import org.scalacheck.Gen.chooseNum
-import org.scalatest.{Assertion, FunSpec, Matchers}
+
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
+import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
-import org.scalacheck.ScalacheckShapeless._
-import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.{
@@ -24,9 +27,6 @@ import uk.ac.wellcome.models.work.internal.{
   Subject,
   Unidentifiable
 }
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 class WorksIndexTest
     extends FunSpec
@@ -62,7 +62,7 @@ class WorksIndexTest
   it("puts a valid work") {
     forAll { sampleWork: IdentifiedBaseWork =>
       withLocalWorksIndex { index =>
-        whenReady(indexObject(index, sampleWork)) { _ =>
+        whenReady(indexObject(index, sampleWork)) { resp =>
           assertObjectIndexed(index, sampleWork)
         }
       }
@@ -76,16 +76,15 @@ class WorksIndexTest
     withLocalWorksIndex { index =>
       val sampleWork = createIdentifiedWorkWith(
         subjects = List(
-          Unidentifiable(
-            Subject(
-              label = "Daredevil",
-              concepts = List(
-                Unidentifiable(
-                  Person(
-                    label = "Daredevil",
-                    prefix = Some("Superhero"),
-                    numeration = Some("I")
-                  ))
+          Subject(
+            id = Unidentifiable,
+            label = "Daredevil",
+            concepts = List(
+              Person(
+                id = Unidentifiable,
+                label = "Daredevil",
+                prefix = Some("Superhero"),
+                numeration = Some("I")
               )
             )
           )
@@ -121,7 +120,7 @@ class WorksIndexTest
   private def assertObjectIndexed[T](index: Index, t: T)(
     implicit encoder: Encoder[T]): Assertion =
     // Elasticsearch is eventually consistent so, when the future completes,
-    // the documents might not immediately appear in search
+    // the documents won't appear in the search until after a refresh
     eventually {
       val response: Response[SearchResponse] = elasticClient.execute {
         search(index).matchAllQuery()
@@ -131,5 +130,5 @@ class WorksIndexTest
 
       hits should have size 1
       assertJsonStringsAreEqual(hits.head.sourceAsString, toJson(t).get)
-    }
+  }
 }
