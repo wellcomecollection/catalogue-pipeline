@@ -104,10 +104,11 @@ case class MetsXml(root: Elem) {
   /** Retrive the accessCondition node in the document with given type. */
   def accessConditionWithType(
     typeAttrib: String): Either[Exception, Option[String]] = {
-    val nodes = (root \\ "dmdSec" \ "mdWrap" \\ "accessCondition")
+    val sec = (root \\ "dmdSec").headOption.toList
+    val nodes = (sec \ "mdWrap" \\ "accessCondition")
       .filterByAttribute("type", typeAttrib)
       .toList
-    nodes.toList match {
+    nodes match {
       case Nil        => Right(None)
       case List(node) => Right(Some(node.text))
       case _ =>

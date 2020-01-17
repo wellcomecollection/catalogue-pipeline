@@ -81,6 +81,7 @@ case class MetsData(
         case "open"                  => Right(AccessStatus.Open)
         case "requires registration" => Right(AccessStatus.OpenWithAdvisory)
         case "restricted"            => Right(AccessStatus.Restricted)
+        case "restricted files"      => Right(AccessStatus.Restricted)
         case "clinical images"       => Right(AccessStatus.Restricted)
         case "closed"                => Right(AccessStatus.Closed)
         case "in copyright"          => Right(AccessStatus.LicensedResources)

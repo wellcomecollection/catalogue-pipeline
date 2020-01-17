@@ -216,6 +216,24 @@ class MetsDataTest
     }
   }
 
+  it("maps restricted files to Restricted AccessCondition") {
+    val result = MetsData(
+      recordIdentifier = "ID",
+      accessConditionStatus = Some("Restricted files")
+    ).toWork(1)
+    result shouldBe a[Right[_, _]]
+    inside(result.right.get.data.items.head.agent.locations.head) {
+      case DigitalLocation(_, _, _, _, accessConditions, _) =>
+        accessConditions shouldBe Some(
+          List(
+            AccessCondition(
+              status = AccessStatus.Restricted
+            )
+          )
+        )
+    }
+  }
+
   it("fails creating a work when unknown AccessStatus") {
     val result = MetsData(
       recordIdentifier = "ID",
