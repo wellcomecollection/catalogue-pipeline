@@ -26,11 +26,13 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
 
     val works = Seq(work1, work2, work3)
 
-    withApi { case (indexV2, routes) =>
-      insertIntoElasticsearch(indexV2, works: _*)
-      assertJsonResponse(routes,
-        s"/$apiPrefix/works?genres.label=horror&subjects.label=england") {
-        Status.OK -> s"""
+    withApi {
+      case (indexV2, routes) =>
+        insertIntoElasticsearch(indexV2, works: _*)
+        assertJsonResponse(
+          routes,
+          s"/$apiPrefix/works?genres.label=horror&subjects.label=england") {
+          Status.OK -> s"""
           {
             ${resultList(apiPrefix, totalResults = 1)},
             "results": [
@@ -38,12 +40,13 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
             ]
           }
           """
-      }
+        }
     }
   }
 
   describe("filtering works by item LocationType") {
-    def createItemWithLocationType(locationType: LocationType): Identified[Item] =
+    def createItemWithLocationType(
+      locationType: LocationType): Identified[Item] =
       createIdentifiedItemWith(
         locations = List(
           // This test really shouldn't be affected by physical/digital locations;
@@ -84,13 +87,14 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
     val works = worksWithNoItem ++ Seq(work1, work2, work3)
 
     it("when listing works") {
-      withApi { case (indexV2, routes) =>
-        insertIntoElasticsearch(indexV2, works: _*)
+      withApi {
+        case (indexV2, routes) =>
+          insertIntoElasticsearch(indexV2, works: _*)
 
-        assertJsonResponse(
-          routes,
-          s"/$apiPrefix/works?items.locations.locationType=iiif-image,digit&include=items") {
-          Status.OK -> s"""
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works?items.locations.locationType=iiif-image,digit&include=items") {
+            Status.OK -> s"""
             {
               ${resultList(apiPrefix, totalResults = 2)},
               "results": [
@@ -111,18 +115,19 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
               ]
             }
           """
-        }
+          }
       }
     }
 
     it("when searching works") {
-      withApi { case (indexV2, routes) =>
-        insertIntoElasticsearch(indexV2, works: _*)
+      withApi {
+        case (indexV2, routes) =>
+          insertIntoElasticsearch(indexV2, works: _*)
 
-        assertJsonResponse(
-          routes,
-          s"/$apiPrefix/works?query=carrots&items.locations.locationType=digit&include=items") {
-          Status.OK -> s"""
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works?query=carrots&items.locations.locationType=digit&include=items") {
+            Status.OK -> s"""
             {
               ${resultList(apiPrefix, totalResults = 1)},
               "results": [
@@ -136,7 +141,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
               ]
             }
           """
-        }
+          }
       }
     }
   }
@@ -166,11 +171,14 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
     val works = noWorkTypeWorks ++ Seq(bookWork, cdRomWork, manuscriptWork)
 
     it("when listing works") {
-      withApi { case (indexV2, routes) =>
-        insertIntoElasticsearch(indexV2, works: _*)
+      withApi {
+        case (indexV2, routes) =>
+          insertIntoElasticsearch(indexV2, works: _*)
 
-        assertJsonResponse(routes, s"/$apiPrefix/works?workType=${ManuscriptsAsian.id}") {
-          Status.OK -> s"""
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works?workType=${ManuscriptsAsian.id}") {
+            Status.OK -> s"""
             {
               ${resultList(apiPrefix, totalResults = 1)},
                 "results": [
@@ -184,16 +192,19 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
                 ]
               }
             """
-        }
+          }
       }
     }
 
     it("filters by multiple workTypes") {
-      withApi { case (indexV2, routes) =>
-        insertIntoElasticsearch(indexV2, works: _*)
+      withApi {
+        case (indexV2, routes) =>
+          insertIntoElasticsearch(indexV2, works: _*)
 
-        assertJsonResponse(routes, s"/$apiPrefix/works?workType=${ManuscriptsAsian.id},${CDRoms.id}") {
-          Status.OK -> s"""
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works?workType=${ManuscriptsAsian.id},${CDRoms.id}") {
+            Status.OK -> s"""
             {
               ${resultList(apiPrefix, totalResults = 2)},
               "results": [
@@ -214,16 +225,19 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
               ]
             }
           """
-        }
+          }
       }
     }
 
     it("when searching works") {
-      withApi { case (indexV2, routes) =>
-        insertIntoElasticsearch(indexV2, works: _*)
+      withApi {
+        case (indexV2, routes) =>
+          insertIntoElasticsearch(indexV2, works: _*)
 
-        assertJsonResponse(routes, s"/$apiPrefix/works?query=apple&workType=${ManuscriptsAsian.id},${CDRoms.id}") {
-          Status.OK -> s"""
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works?query=apple&workType=${ManuscriptsAsian.id},${CDRoms.id}") {
+            Status.OK -> s"""
             {
               ${resultList(apiPrefix, totalResults = 2)},
                 "results": [
@@ -244,7 +258,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
                 ]
               }
             """
-        }
+          }
       }
     }
   }
