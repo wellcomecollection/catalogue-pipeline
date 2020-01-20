@@ -12,10 +12,10 @@ import uk.ac.wellcome.json.JsonUtil._
 
 case class Aggregations(
   workType: Option[Aggregation[WorkType]] = None,
-  genres: Option[Aggregation[Genre[Minted[AbstractConcept]]]] = None,
-  productionDates: Option[Aggregation[Period]] = None,
+  genres: Option[Aggregation[Genre[Minted]]] = None,
+  productionDates: Option[Aggregation[Period[Minted]]] = None,
   language: Option[Aggregation[Language]] = None,
-  subjects: Option[Aggregation[Subject[Minted[AbstractRootConcept]]]] = None,
+  subjects: Option[Aggregation[Subject[Minted]]] = None,
   license: Option[Aggregation[License]] = None,
 )
 
@@ -31,16 +31,16 @@ object Aggregations extends Logging {
             .flatMap(_.toAgg[WorkType]),
           genres = e4sAggregations
             .getAgg("genres")
-            .flatMap(_.toAgg[Genre[Minted[AbstractConcept]]]),
+            .flatMap(_.toAgg[Genre[Minted]]),
           productionDates = e4sAggregations
             .getAgg("productionDates")
-            .flatMap(_.toAgg[Period]),
+            .flatMap(_.toAgg[Period[Minted]]),
           language = e4sAggregations
             .getAgg("language")
             .flatMap(_.toAgg[Language]),
           subjects = e4sAggregations
             .getAgg("subjects")
-            .flatMap(_.toAgg[Subject[Minted[AbstractRootConcept]]]),
+            .flatMap(_.toAgg[Subject[Minted]]),
           license = e4sAggregations
             .getAgg("license")
             .flatMap(_.toAgg[License])
@@ -51,7 +51,7 @@ object Aggregations extends Logging {
   }
 
   // Elasticsearch encodes the date key as milliseconds since the epoch
-  implicit val decodePeriod: Decoder[Period] =
+  implicit val decodePeriod: Decoder[Period[Minted]] =
     Decoder.decodeLong.emap { epochMilli =>
       Try { Instant.ofEpochMilli(epochMilli) }
         .map { instant =>
@@ -67,6 +67,19 @@ object Aggregations extends Logging {
     Decoder.decodeString.emap { str =>
       Try(License.createLicense(str)).toEither.left
         .map(err => err.getMessage)
+    }
+
+  // Decode all Subjects with id as Unidentifiable. This custom decoder probably
+  // won't be necessary when we move to the "top hit" method rather than
+  // composite aggregations.
+  implicit val decodeSubject: Decoder[Subject[Minted]] =
+    Decoder.decodeJsonObject.emap { obj =>
+      obj("label")
+        .flatMap(_.asString)
+        .map { label =>
+          Right(Subject(label = label, concepts = Nil))
+        }
+        .getOrElse { Left("Error decoding Subject") }
     }
 
   implicit class EnhancedTransformable(transformable: Transformable) {
@@ -102,8 +115,8 @@ object Aggregations extends Logging {
   }
 }
 
-case class Aggregation[T](buckets: List[AggregationBucket[T]])
-case class AggregationBucket[T](data: T, count: Int)
+case class Aggregation[+T](buckets: List[AggregationBucket[T]])
+case class AggregationBucket[+T](data: T, count: Int)
 
 /**
   * We use these to convert the JSON into Elasticsearch case classes (not supplied via elastic4s)

@@ -182,10 +182,8 @@ class ApiV2WorksIncludesTest
   it("includes a list of genres on a list endpoint if we pass ?include=genres") {
     withApi {
       case (indexV2, routes) =>
-        val genres1 = List(
-          Genre("ornithology", List(Unidentifiable(Concept("ornithology")))))
-        val genres2 = List(
-          Genre("flying cars", List(Unidentifiable(Concept("flying cars")))))
+        val genres1 = List(Genre("ornithology", List(Concept("ornithology"))))
+        val genres2 = List(Genre("flying cars", List(Concept("flying cars"))))
         val work0 =
           createIdentifiedWorkWith(canonicalId = "1", genres = genres1)
         val work1 =
@@ -223,8 +221,7 @@ class ApiV2WorksIncludesTest
     "includes a list of genres on a single work endpoint if we pass ?include=genres") {
     withApi {
       case (indexV2, routes) =>
-        val genre = List(
-          Genre("ornithology", List(Unidentifiable(Concept("ornithology")))))
+        val genre = List(Genre("ornithology", List(Concept("ornithology"))))
         val work = createIdentifiedWorkWith(genres = genre)
 
         insertIntoElasticsearch(indexV2, work)
@@ -249,10 +246,8 @@ class ApiV2WorksIncludesTest
     "includes a list of contributors on a list endpoint if we pass ?include=contributors") {
     withApi {
       case (indexV2, routes) =>
-        val contributors1 =
-          List(Contributor(Unidentifiable(Person("Ginger Rogers"))))
-        val contributors2 =
-          List(Contributor(Unidentifiable(Person("Fred Astair"))))
+        val contributors1 = List(Contributor(Person("Ginger Rogers"), roles = Nil))
+        val contributors2 = List(Contributor(Person("Fred Astair"), roles = Nil))
         val work0 = createIdentifiedWorkWith(
           canonicalId = "1",
           contributors = contributors1)
@@ -292,8 +287,7 @@ class ApiV2WorksIncludesTest
     "includes a list of contributors on a single work endpoint if we pass ?include=contributors") {
     withApi {
       case (indexV2, routes) =>
-        val contributor =
-          List(Contributor(Unidentifiable(Person("Ginger Rogers"))))
+        val contributor = List(Contributor(Person("Ginger Rogers"), roles = Nil))
         val work = createIdentifiedWorkWith(contributors = contributor)
 
         insertIntoElasticsearch(indexV2, work)

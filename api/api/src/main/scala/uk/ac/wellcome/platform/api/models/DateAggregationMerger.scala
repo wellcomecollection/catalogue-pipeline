@@ -22,9 +22,9 @@ object DateAggregationMerger extends DateHelpers {
     *  is no greater than maxBuckets, or we reach the broadest aggregation
     *  granularity (i.e. centuries)
     */
-  def apply(agg: Aggregation[Period],
+  def apply(agg: Aggregation[Period[Minted]],
             maxBuckets: Int = 20,
-            range: DateBucketRange = Decade): Aggregation[Period] =
+            range: DateBucketRange = Decade): Aggregation[Period[Minted]] =
     if (agg.buckets.length > maxBuckets)
       range match {
         case Decade =>
@@ -41,8 +41,8 @@ object DateAggregationMerger extends DateHelpers {
           Aggregation(mergeBuckets(agg.buckets, 100))
       } else agg
 
-  private def mergeBuckets(buckets: List[AggregationBucket[Period]],
-                           yearRange: Int): List[AggregationBucket[Period]] =
+  private def mergeBuckets(buckets: List[AggregationBucket[Period[Minted]]],
+                           yearRange: Int): List[AggregationBucket[Period[Minted]]] =
     buckets
       .foldLeft(Map.empty[Int, Int]) {
         case (map, bucket) =>
@@ -62,10 +62,10 @@ object DateAggregationMerger extends DateHelpers {
           val label = s"$startYear-$endYear"
           val range =
             InstantRange(yearStart(startYear), yearEnd(endYear), label)
-          AggregationBucket(Period(label, Some(range)), count)
+          AggregationBucket(Period[Minted](label, Some(range)), count)
       }
 
-  private def yearFromPeriod(period: Period): Option[Int] =
+  private def yearFromPeriod(period: Period[Minted]): Option[Int] =
     period.range.map { range =>
       LocalDateTime
         .ofInstant(range.from, ZoneOffset.UTC)

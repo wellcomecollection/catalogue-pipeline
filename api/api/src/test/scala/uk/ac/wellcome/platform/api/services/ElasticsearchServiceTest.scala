@@ -711,7 +711,7 @@ class ElasticsearchServiceTest
   }
 
   private def createItemWithLocationType(
-    locationType: LocationType): Identified[Item] =
+    locationType: LocationType): Item[Minted] =
     createIdentifiedItemWith(
       locations = List(
         // This test really shouldn't be affected by physical/digital locations;
