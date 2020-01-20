@@ -219,7 +219,7 @@ class MetsDataTest
       accessConditionStatus = Some("Restricted files")
     ).toWork(1)
     result shouldBe a[Right[_, _]]
-    inside(result.right.get.data.items.head.agent.locations.head) {
+    inside(result.right.get.data.items.head.locations.head) {
       case DigitalLocation(_, _, _, _, accessConditions, _) =>
         accessConditions shouldBe Some(
           List(

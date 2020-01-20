@@ -93,7 +93,7 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
     debug(s"Attempting to transform $itemId")
     Item(
       title = getItemTitle(itemData),
-      locations = getPhysicalLocation(itemData).toList,
+      locations = getPhysicalLocation(itemData, bibData).toList,
       id = Identifiable(
         sourceIdentifier = SourceIdentifier(
           identifierType = IdentifierType("sierra-system-number"),

@@ -24,7 +24,7 @@ object WorksIndex {
   val id =
     objectField("id").fields(
       keywordField("type"),
-      keywordField("canonicalId"),
+      canonicalId,
       objectField("sourceIdentifier").fields(sourceIdentifierFields),
       objectField("otherIdentifiers").fields(sourceIdentifierFields)
     )

@@ -47,6 +47,7 @@ class ElasticsearchServiceTest
 
   val defaultQueryOptions: ElasticsearchQueryOptions =
     createElasticsearchQueryOptions
+
   describe("queryResults") {
     describe("Failures") {
       it("returns a Left[ElasticError] if Elasticsearch returns an error") {
