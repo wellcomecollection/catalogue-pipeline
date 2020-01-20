@@ -100,6 +100,36 @@ class SierraRecordParserTest
     )
   }
 
+  it("treats a deleted record as newer than an update on the same day") {
+    // Regression test for https://github.com/wellcometrust/platform/issues/4173
+    val id = createSierraBibNumber
+
+    val updatedJsonString =
+      s"""
+       |{
+       |  "id": "$id",
+       |  "updatedDate": "2020-01-20T15:31:00Z"
+       |}
+        """.stripMargin
+
+    val deletedJsonString =
+      s"""
+       |{
+       |  "id" : "$id",
+       |  "deletedDate" : "2020-01-20",
+       |  "deleted" : true
+       |}
+       |""".stripMargin
+
+    val updatedJson = parse(updatedJsonString).right.get
+    val deletedJson = parse(deletedJsonString).right.get
+
+    val updatedRecord = SierraRecordParser(SierraBibRecord.apply)(updatedJson)
+    val deletedRecord = SierraRecordParser(SierraBibRecord.apply)(deletedJson)
+
+    deletedRecord.modifiedDate.isAfter(updatedRecord.modifiedDate) shouldBe true
+  }
+
   private def assertSierraRecordsAreEqual(
     x: AbstractSierraRecord,
     y: AbstractSierraRecord): Assertion = {
