@@ -26,9 +26,7 @@ case class MetsData(
       UnidentifiedInvisibleWork(
         version = version,
         sourceIdentifier = sourceIdentifier,
-        workData(
-          item,
-          thumbnail(maybeLicense, sourceIdentifier.value))
+        workData(item, thumbnail(maybeLicense, sourceIdentifier.value))
       )
 
   private def workData(item: Item[Unminted],

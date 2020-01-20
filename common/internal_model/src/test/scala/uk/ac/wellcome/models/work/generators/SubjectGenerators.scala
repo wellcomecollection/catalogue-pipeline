@@ -13,9 +13,9 @@ trait SubjectGenerators extends RandomStrings {
       concepts = concepts
     )
 
-  def createSubjectWithConcept(label: String = randomAlphanumeric(10),
-                               conceptString: String = randomAlphanumeric(8))
-    : Subject[Minted] =
+  def createSubjectWithConcept(
+    label: String = randomAlphanumeric(10),
+    conceptString: String = randomAlphanumeric(8)): Subject[Minted] =
     Subject(
       id = Unidentifiable,
       label = label,

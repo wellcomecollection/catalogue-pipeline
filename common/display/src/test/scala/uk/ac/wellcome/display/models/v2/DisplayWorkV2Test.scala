@@ -261,16 +261,16 @@ class DisplayWorkV2Test
     val work = createIdentifiedWorkWith(
       contributors = List(
         Contributor(
-          agent = Agent(
-            label = "Bond",
-            id = Identified(
-              createCanonicalId,
-              contributorAgentSourceIdentifier),
-          ),
+          agent =
+            Agent(
+              label = "Bond",
+              id =
+                Identified(createCanonicalId, contributorAgentSourceIdentifier),
+            ),
           roles = Nil
         ),
         Contributor(
-          agent =  Organisation(
+          agent = Organisation(
             label = "Big Business",
             id = Identified(
               createCanonicalId,
@@ -279,11 +279,10 @@ class DisplayWorkV2Test
           roles = Nil
         ),
         Contributor(
-          agent =  Person(
+          agent = Person(
             label = "Blue Blaise",
-            id = Identified(
-              createCanonicalId,
-              contributorPersonSourceIdentifier),
+            id =
+              Identified(createCanonicalId, contributorPersonSourceIdentifier),
           ),
           roles = Nil
         )

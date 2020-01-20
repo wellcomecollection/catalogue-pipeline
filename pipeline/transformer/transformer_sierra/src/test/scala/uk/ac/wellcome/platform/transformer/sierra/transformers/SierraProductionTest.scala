@@ -176,7 +176,8 @@ class SierraProductionTest
             "Bethesda, Md. : Toxicology Information Program, National Library of Medicine [producer] ; Springfield, Va. : National Technical Information Service [distributor], 1974-",
           places = List(Place("Bethesda, Md."), Place("Springfield, Va.")),
           agents = List(
-            Agent("Toxicology Information Program, National Library of Medicine [producer] ;"),
+            Agent(
+              "Toxicology Information Program, National Library of Medicine [producer] ;"),
             Agent("National Technical Information Service [distributor]")
           ),
           dates = List(Period("1974-")),
@@ -676,8 +677,8 @@ class SierraProductionTest
     production.function shouldBe Some(Concept(expectedFunction))
   }
 
-  private def transformToProduction(varFields: List[VarField])
-    : List[ProductionEvent[Unminted]] = {
+  private def transformToProduction(
+    varFields: List[VarField]): List[ProductionEvent[Unminted]] = {
     val bibData = createSierraBibDataWith(varFields = varFields)
     SierraProduction(createSierraBibNumber, bibData)
   }

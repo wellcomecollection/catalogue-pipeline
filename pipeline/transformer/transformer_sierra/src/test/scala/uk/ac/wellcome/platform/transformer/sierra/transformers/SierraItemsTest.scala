@@ -51,7 +51,9 @@ class SierraItemsTest extends FunSpec with Matchers with SierraDataGenerators {
       itemDataMap = Map(itemId -> itemData)
     ).head
 
-    transformedItem.id.asInstanceOf[Identifiable].sourceIdentifier shouldBe sourceIdentifier
+    transformedItem.id
+      .asInstanceOf[Identifiable]
+      .sourceIdentifier shouldBe sourceIdentifier
   }
 
   it("extracts the title from item varfield $v") {
@@ -136,7 +138,8 @@ class SierraItemsTest extends FunSpec with Matchers with SierraDataGenerators {
           url =
             s"https://wellcomelibrary.org/iiif/${bibId.withCheckDigit}/manifest",
           license = None,
-          locationType = LocationType("iiif-presentation"))))
+          locationType = LocationType("iiif-presentation")))
+      )
     )
 
     getTransformedItems(bibId = bibId, bibData = bibData) shouldBe expectedItems

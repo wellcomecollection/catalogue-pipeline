@@ -68,9 +68,8 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
     * away with this code.
     *
     */
-  private def getDigitalItem(
-    bibId: SierraBibNumber,
-    bibData: SierraBibData): Option[Item[Unminted]] = {
+  private def getDigitalItem(bibId: SierraBibNumber,
+                             bibData: SierraBibData): Option[Item[Unminted]] = {
     val hasDlnkLocation = bibData.locations match {
       case Some(locations) => locations.map { _.code }.contains("dlnk")
       case None            => false

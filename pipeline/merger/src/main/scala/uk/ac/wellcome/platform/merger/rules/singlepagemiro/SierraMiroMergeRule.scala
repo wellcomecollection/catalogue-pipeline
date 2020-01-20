@@ -62,9 +62,8 @@ object SierraMiroMergeRule
     }
   }
 
-  private def mergeItems(
-    sierraItem: Item[Unminted],
-    miroItem: Item[Unminted]): List[Item[Unminted]] =
+  private def mergeItems(sierraItem: Item[Unminted],
+                         miroItem: Item[Unminted]): List[Item[Unminted]] =
     // We always use the locations from the Sierra and the Miro records.
     //
     // We may sometimes have digital locations from both records:

@@ -130,5 +130,5 @@ class WorksIndexTest
 
       hits should have size 1
       assertJsonStringsAreEqual(hits.head.sourceAsString, toJson(t).get)
-  }
+    }
 }

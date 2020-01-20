@@ -29,7 +29,9 @@ case class Period[+Id](
 ) extends AbstractConcept[Id]
 
 object Period {
-  def apply[Id >: Unidentifiable.type](label: String, range: Option[InstantRange]): Period[Id] =
+  def apply[Id >: Unidentifiable.type](
+    label: String,
+    range: Option[InstantRange]): Period[Id] =
     Period(Unidentifiable, label, range)
 
   def apply[Id >: Unidentifiable.type](label: String): Period[Id] = {

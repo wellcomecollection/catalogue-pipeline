@@ -65,7 +65,7 @@ class SierraMiroMergeRuleTest
         mergedWork.data.items shouldBe List(
           sierraPhysicalItem.copy(
             locations =
-                sierraPhysicalItem.locations ++ miroWork.data.items.head.locations
+              sierraPhysicalItem.locations ++ miroWork.data.items.head.locations
           )
         )
       }

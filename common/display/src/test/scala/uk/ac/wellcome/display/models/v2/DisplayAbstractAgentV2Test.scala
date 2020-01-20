@@ -130,7 +130,8 @@ class DisplayAbstractAgentV2Test
   }
 
   describe("Organisation") {
-    val unidentifiedOrganisation = Organisation(label = label, id = Unidentifiable)
+    val unidentifiedOrganisation =
+      Organisation(label = label, id = Unidentifiable)
 
     val identifiedOrganisation = Organisation(label = label, id = identified)
 
@@ -143,12 +144,16 @@ class DisplayAbstractAgentV2Test
 
     it(
       "converts an Unidentifiable Organisation to a DisplayOrganisationV2 (includesIdentifiers = true)") {
-      DisplayAbstractAgentV2(unidentifiedOrganisation, includesIdentifiers = true) shouldBe expectedUnidentifiedOrganisation
+      DisplayAbstractAgentV2(
+        unidentifiedOrganisation,
+        includesIdentifiers = true) shouldBe expectedUnidentifiedOrganisation
     }
 
     it(
       "converts an Unidentifiable Organisation to a DisplayOrganisationV2 (includesIdentifiers = false)") {
-      DisplayAbstractAgentV2(unidentifiedOrganisation, includesIdentifiers = false) shouldBe expectedUnidentifiedOrganisation
+      DisplayAbstractAgentV2(
+        unidentifiedOrganisation,
+        includesIdentifiers = false) shouldBe expectedUnidentifiedOrganisation
     }
 
     it(
@@ -172,7 +177,9 @@ class DisplayAbstractAgentV2Test
         label = label
       )
 
-      DisplayAbstractAgentV2(identifiedOrganisation, includesIdentifiers = false) shouldBe expectedOrganisation
+      DisplayAbstractAgentV2(
+        identifiedOrganisation,
+        includesIdentifiers = false) shouldBe expectedOrganisation
     }
   }
 

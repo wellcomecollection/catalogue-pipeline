@@ -15,7 +15,9 @@ trait GenreGenerators extends RandomStrings {
 
   private def createConcepts: List[AbstractConcept[Minted]] =
     (1 to 3)
-      .map { _ => Concept(randomAlphanumeric(15)) }
+      .map { _ =>
+        Concept(randomAlphanumeric(15))
+      }
       .toList
       .asInstanceOf[List[AbstractConcept[Minted]]]
 }

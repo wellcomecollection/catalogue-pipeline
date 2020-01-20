@@ -41,8 +41,9 @@ object DateAggregationMerger extends DateHelpers {
           Aggregation(mergeBuckets(agg.buckets, 100))
       } else agg
 
-  private def mergeBuckets(buckets: List[AggregationBucket[Period[Minted]]],
-                           yearRange: Int): List[AggregationBucket[Period[Minted]]] =
+  private def mergeBuckets(
+    buckets: List[AggregationBucket[Period[Minted]]],
+    yearRange: Int): List[AggregationBucket[Period[Minted]]] =
     buckets
       .foldLeft(Map.empty[Int, Int]) {
         case (map, bucket) =>

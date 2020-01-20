@@ -41,7 +41,8 @@ trait SierraAgents extends SierraQueryOps {
   //  - Subfield $a is "label"
   //  - Subfield $0 is used to populate "identifiers". The identifier scheme is lc-names.
   //
-  def getOrganisation(subfields: List[MarcSubfield]): Option[Organisation[Unminted]] =
+  def getOrganisation(
+    subfields: List[MarcSubfield]): Option[Organisation[Unminted]] =
     getLabel(subfields).map { label =>
       Organisation.normalised(label = label)
     }
@@ -58,7 +59,8 @@ trait SierraAgents extends SierraQueryOps {
    * This methods them (if present) and wraps the agent in Unidentifiable or Identifiable
    * as appropriate.
    */
-  def identify(subfields: List[MarcSubfield], ontologyType: String): Unminted = {
+  def identify(subfields: List[MarcSubfield],
+               ontologyType: String): Unminted = {
 
     // We take the contents of subfield $0.  They may contain inconsistent
     // spacing and punctuation, such as:
@@ -79,13 +81,14 @@ trait SierraAgents extends SierraQueryOps {
     // Some records have multiple instances of subfield $0 (it's a repeatable
     // field in the MARC spec).
     codes.distinct match {
-      case Seq(code) => Identifiable(
-        SourceIdentifier(
-          identifierType = IdentifierType("lc-names"),
-          value = code,
-          ontologyType = ontologyType
+      case Seq(code) =>
+        Identifiable(
+          SourceIdentifier(
+            identifierType = IdentifierType("lc-names"),
+            value = code,
+            ontologyType = ontologyType
+          )
         )
-      )
       case _ => Unidentifiable
     }
   }

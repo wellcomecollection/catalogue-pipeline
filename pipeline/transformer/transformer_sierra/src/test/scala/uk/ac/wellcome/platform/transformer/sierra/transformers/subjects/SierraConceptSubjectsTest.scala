@@ -58,9 +58,8 @@ class SierraConceptSubjectsTest
     SierraConceptSubjects(bibId, bibData) shouldBe List(
       Subject(
         label = "A Content - V Content",
-        concepts = List(
-          Concept(label = "A Content"),
-          Concept(label = "V Content"))
+        concepts =
+          List(Concept(label = "A Content"), Concept(label = "V Content"))
       )
     )
   }
@@ -81,9 +80,8 @@ class SierraConceptSubjectsTest
     SierraConceptSubjects(bibId, bibData) shouldBe List(
       Subject(
         label = "A Content - V Content",
-        concepts = List(
-          Concept(label = "A Content"),
-          Concept(label = "V Content"))
+        concepts =
+          List(Concept(label = "A Content"), Concept(label = "V Content"))
       )
     )
   }

@@ -99,7 +99,11 @@ class MetsDataTest
         accessConditionDz = Some("in copyright"))
     inside(metsData.toWork(1).right.get.data.items) {
       case List(
-        Item(Unidentifiable, _, List(DigitalLocation(_, _, license, _, _, _)), _)) =>
+          Item(
+            Unidentifiable,
+            _,
+            List(DigitalLocation(_, _, license, _, _, _)),
+            _)) =>
         license shouldBe Some(License.InCopyright)
     }
   }
@@ -111,7 +115,11 @@ class MetsDataTest
         accessConditionDz = Some("In copyright"))
     inside(metsData.toWork(1).right.get.data.items) {
       case List(
-        Item(Unidentifiable, _, List(DigitalLocation(_, _, license, _, _, _)), _)) =>
+          Item(
+            Unidentifiable,
+            _,
+            List(DigitalLocation(_, _, license, _, _, _)),
+            _)) =>
         license shouldBe Some(License.InCopyright)
     }
   }
@@ -123,7 +131,11 @@ class MetsDataTest
         accessConditionDz = Some(License.InCopyright.url))
     inside(metsData.toWork(1).right.get.data.items) {
       case List(
-        Item(Unidentifiable, _, List(DigitalLocation(_, _, license, _, _, _)), _)) =>
+          Item(
+            Unidentifiable,
+            _,
+            List(DigitalLocation(_, _, license, _, _, _)),
+            _)) =>
         license shouldBe Some(License.InCopyright)
     }
   }

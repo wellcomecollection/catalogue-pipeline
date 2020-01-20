@@ -2,11 +2,7 @@ package uk.ac.wellcome.models.parse
 
 import fastparse._, NoWhitespace._
 
-import uk.ac.wellcome.models.work.internal.{
-  Period,
-  ProductionEvent,
-  Unminted
-}
+import uk.ac.wellcome.models.work.internal.{Period, ProductionEvent, Unminted}
 
 /**
   *  Parses Marc 008 fields into ProductionEvent
@@ -22,9 +18,7 @@ object Marc008Parser extends Parser[ProductionEvent[Unminted]] {
           ProductionEvent(
             label = instantRange.label,
             agents = Nil,
-            dates = Period(
-              instantRange.label,
-              Some(instantRange)) :: Nil,
+            dates = Period(instantRange.label, Some(instantRange)) :: Nil,
             places = place.toList,
             function = None)
       }

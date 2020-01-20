@@ -58,8 +58,8 @@ class SierraPersonSubjectsTest
       Subject(
         label = "Larrey, D. J. baron",
         concepts = List(
-            Person(label = "Larrey, D. J. baron")
-          )
+          Person(label = "Larrey, D. J. baron")
+        )
       )
     )
   }
@@ -81,8 +81,7 @@ class SierraPersonSubjectsTest
     SierraPersonSubjects(bibId, bibData) shouldBe List(
       Subject(
         label = "David Attenborough sir doctor",
-        concepts = List(
-          Person(label = "David Attenborough sir doctor"))
+        concepts = List(Person(label = "David Attenborough sir doctor"))
       )
     )
   }
@@ -103,8 +102,7 @@ class SierraPersonSubjectsTest
     SierraPersonSubjects(bibId, bibData) shouldBe List(
       Subject(
         label = "David Attenborough II",
-        concepts =
-          List(Person(label = "David Attenborough II"))
+        concepts = List(Person(label = "David Attenborough II"))
       )
     )
   }
@@ -148,8 +146,9 @@ class SierraPersonSubjectsTest
     SierraPersonSubjects(bibId, bibData) shouldBe List(
       Subject(
         label = "Rita Levi Montalcini, 22 April 1909 – 30 December 2012",
-        concepts = List(Person(
-          label = "Rita Levi Montalcini, 22 April 1909 – 30 December 2012"))
+        concepts = List(
+          Person(
+            label = "Rita Levi Montalcini, 22 April 1909 – 30 December 2012"))
       )
     )
   }

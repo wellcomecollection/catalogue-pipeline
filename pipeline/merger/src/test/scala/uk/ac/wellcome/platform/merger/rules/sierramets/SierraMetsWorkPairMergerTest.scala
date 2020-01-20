@@ -56,7 +56,8 @@ class SierraMetsWorkPairMergerTest
       locations = List(physicalLocation, digitalLocationNoLicense))
 
     val expectedItems = List(
-      sierraItem.copy(locations = List(physicalLocation, digitalLocationWithLicense))
+      sierraItem.copy(
+        locations = List(physicalLocation, digitalLocationWithLicense))
     )
 
     val metsWork = createUnidentifiedInvisibleWorkWith(
@@ -96,7 +97,8 @@ class SierraMetsWorkPairMergerTest
 
     val expectedItems = List(
       sierraItem.copy(
-        locations = List(physicalLocation, sierraDigitalLocation, metsDigitalLocation)
+        locations =
+          List(physicalLocation, sierraDigitalLocation, metsDigitalLocation)
       )
     )
 

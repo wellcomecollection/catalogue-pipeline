@@ -24,7 +24,11 @@ trait SierraMetsWorkPairMerger extends WorkPairMerger {
       case (
           _ :: _,
           List(
-            metsItem @ Item(Unidentifiable, _, List(metsLocation: DigitalLocation), _))) =>
+            metsItem @ Item(
+              Unidentifiable,
+              _,
+              List(metsLocation: DigitalLocation),
+              _))) =>
         val items = createItems(sierraWork, metsItem, metsLocation)
         createMergedWork(sierraWork, metsWork, items)
       case _ => None
@@ -69,7 +73,8 @@ trait SierraMetsWorkPairMerger extends WorkPairMerger {
                              metsLocation: DigitalLocation) =
     sierraItem.copy(
       locations =
-        sierraItem.locations.filterNot(shouldIgnoreLocation(_, metsLocation.url))
+        sierraItem.locations.filterNot(
+          shouldIgnoreLocation(_, metsLocation.url))
           :+ metsLocation
     )
 

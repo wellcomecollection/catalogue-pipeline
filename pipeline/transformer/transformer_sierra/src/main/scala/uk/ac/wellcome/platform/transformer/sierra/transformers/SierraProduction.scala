@@ -270,9 +270,8 @@ object SierraProduction extends SierraTransformer with SierraQueryOps {
       .contents
       .map(Place.normalised)
 
-  private def agentsFromSubfields(
-    varfield: VarField,
-    subfieldTag: String): List[Agent[Unminted]] =
+  private def agentsFromSubfields(varfield: VarField,
+                                  subfieldTag: String): List[Agent[Unminted]] =
     varfield
       .subfieldsWithTag(subfieldTag)
       .contents

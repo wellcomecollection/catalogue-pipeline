@@ -25,7 +25,9 @@ trait SierraPhysicalDigitalWorkPairMerger
     physicalWork: UnidentifiedWork,
     digitalWork: TransformedBaseWork): Option[MergedWork] =
     (physicalWork.data.items, digitalWork.data.items) match {
-      case (physicalItems @ _ :: _, List(digitalItem @ Item(Unidentifiable, _, _, _))) =>
+      case (
+          physicalItems @ _ :: _,
+          List(digitalItem @ Item(Unidentifiable, _, _, _))) =>
         info(
           s"Merging ${describeWorkPair(physicalWork, digitalWork)} work pair.")
 

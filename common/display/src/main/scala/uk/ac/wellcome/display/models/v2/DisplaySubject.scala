@@ -26,7 +26,8 @@ object DisplaySubject extends GetIdentifiers {
           id = idState.id,
           identifiers = getIdentifiers(idState, includesIdentifiers),
           label = label,
-          concepts = concepts.map(DisplayAbstractRootConcept(_, includesIdentifiers))
+          concepts =
+            concepts.map(DisplayAbstractRootConcept(_, includesIdentifiers))
         )
     }
 }

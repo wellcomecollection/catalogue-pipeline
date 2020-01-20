@@ -262,9 +262,8 @@ class SierraGenresTest
     expectedSourceIdentifiers shouldBe actualSourceIdentifiers
   }
 
-  private def assertExtractsGenres(
-    bibData: SierraBibData,
-    expected: List[Genre[Unminted]]) = {
+  private def assertExtractsGenres(bibData: SierraBibData,
+                                   expected: List[Genre[Unminted]]) = {
     SierraGenres(createSierraBibNumber, bibData) shouldBe expected
   }
 }

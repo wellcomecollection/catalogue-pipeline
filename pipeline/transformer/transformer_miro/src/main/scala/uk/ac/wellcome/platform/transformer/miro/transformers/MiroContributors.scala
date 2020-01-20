@@ -6,8 +6,7 @@ import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 
 trait MiroContributors extends MiroContributorCodes {
   /* Populate wwork:contributors.  We use the <image_creator> tag from the Miro XML. */
-  def getContributors(
-    miroRecord: MiroRecord): List[Contributor[Unminted]] = {
+  def getContributors(miroRecord: MiroRecord): List[Contributor[Unminted]] = {
     val primaryCreators = miroRecord.creator match {
       case Some(maybeCreators) =>
         maybeCreators.collect {

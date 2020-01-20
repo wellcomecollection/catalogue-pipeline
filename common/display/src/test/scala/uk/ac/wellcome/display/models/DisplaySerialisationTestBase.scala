@@ -34,7 +34,7 @@ trait DisplaySerialisationTestBase { this: Suite =>
     items.map(item).mkString(",")
 
   def item(item: Item[Minted]) =
-   s"""
+    s"""
      {
        ${identifiers(item)}
        "type": "${item.ontologyType}",
@@ -104,11 +104,11 @@ trait DisplaySerialisationTestBase { this: Suite =>
     """
   }
   def identifiers(obj: HasIdState[Minted]) =
-    obj.id match  {
+    obj.id match {
       case Identified(canonicalId, _, _) => s"""
         "id": "$canonicalId",
       """
-      case Unidentifiable => ""
+      case Unidentifiable                => ""
     }
 
   def abstractAgent(ag: AbstractAgent[Minted]) =
@@ -172,13 +172,13 @@ trait DisplaySerialisationTestBase { this: Suite =>
 
   def abstractRootConcept(abstractRootConcept: AbstractRootConcept[Minted]) =
     abstractRootConcept match {
-     case c: Concept[Minted]      => concept(c)
-     case p: Place[Minted]        => place(p)
-     case p: Period[Minted]       => period(p)
-     case a: Agent[Minted]        => agent(a)
-     case o: Organisation[Minted] => organisation(o)
-     case p: Person[Minted]       => person(p)
-     case m: Meeting[Minted]      => meeting(m)
+      case c: Concept[Minted]      => concept(c)
+      case p: Place[Minted]        => place(p)
+      case p: Period[Minted]       => period(p)
+      case a: Agent[Minted]        => agent(a)
+      case o: Organisation[Minted] => organisation(o)
+      case p: Person[Minted]       => person(p)
+      case m: Meeting[Minted]      => meeting(m)
     }
 
   def concepts(concepts: List[AbstractRootConcept[Minted]]) =

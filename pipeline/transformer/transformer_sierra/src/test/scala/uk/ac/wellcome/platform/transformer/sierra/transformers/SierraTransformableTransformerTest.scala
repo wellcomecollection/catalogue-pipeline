@@ -667,7 +667,7 @@ class SierraTransformableTransformerTest
     work.data.subjects shouldBe List(
       Subject(
         label = content,
-        concepts  = List(Concept(content))
+        concepts = List(Concept(content))
       )
     )
   }

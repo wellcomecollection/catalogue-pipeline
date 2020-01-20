@@ -133,7 +133,8 @@ class SierraContributorsTest
       contributors should have size 1
       val contributor = contributors.head
 
-      contributor.agent shouldBe Agent("Shakespeare, William, 1564-1616. Hamlet.")
+      contributor.agent shouldBe Agent(
+        "Shakespeare, William, 1564-1616. Hamlet.")
     }
 
     it(
@@ -365,7 +366,8 @@ class SierraContributorsTest
       val expectedContributors = List(
         Contributor(
           Organisation(
-            label = "IARC Working Group on the Evaluation of the Carcinogenic Risk of Chemicals to Man. Meeting 1972 : Lyon, France"
+            label =
+              "IARC Working Group on the Evaluation of the Carcinogenic Risk of Chemicals to Man. Meeting 1972 : Lyon, France"
           ),
           roles = Nil)
       )

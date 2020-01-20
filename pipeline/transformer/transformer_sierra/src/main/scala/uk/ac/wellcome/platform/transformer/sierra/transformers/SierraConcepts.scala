@@ -85,8 +85,8 @@ trait SierraConcepts extends SierraQueryOps {
 
   // Extract the subdivisions, which come from everything except subfield $a.
   // These are never identified.  We preserve the order from MARC.
-  protected def getSubdivisions(subdivisionSubfields: List[MarcSubfield])
-    : List[AbstractConcept[Unminted]] =
+  protected def getSubdivisions(
+    subdivisionSubfields: List[MarcSubfield]): List[AbstractConcept[Unminted]] =
     subdivisionSubfields.map { subfield =>
       subfield.tag match {
         case "v" | "x" => Concept(label = subfield.content)
