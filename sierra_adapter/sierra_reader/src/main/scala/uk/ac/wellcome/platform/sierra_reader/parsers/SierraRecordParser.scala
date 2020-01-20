@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.sierra_reader.parsers
 
 import java.time.format.DateTimeFormatter
-import java.time.{Instant, LocalDate, ZoneOffset}
+import java.time.{Instant, LocalDate, LocalTime, ZoneOffset}
 
 import io.circe.Json
 import io.circe.optics.JsonPath.root
@@ -16,20 +16,34 @@ object SierraRecordParser {
     createRecord(id, data, modifiedDate)
   }
 
+  // The Sierra API has different levels of granularity for updated/deleted values.
+  //
+  //  - "updatedDate" is a date and a time, e.g. "2013-12-11T19:20:28Z"
+  //  - "deletedDate" is just a date, e.g. "2014-01-11"
+  //
+  // We need to be able to compare these two dates, so we can order records
+  // consistently.
+  //
+  // If a record was deleted and modified on the same day, we should treat the
+  // deletion as taking precedence.  If it was deleted and then un-deleted
+  // TODO: Is that even possible?
+  //
+  //
+
   private def getModifiedDate(json: Json): Instant = {
     val maybeUpdatedDate = root.updatedDate.string.getOption(json)
 
     maybeUpdatedDate match {
       case Some(updatedDate) => Instant.parse(updatedDate)
-      case None              => getDeletedDateTimeAtStartOfDay(json)
+      case None              => getDeletedAsDatetime(json)
     }
   }
 
-  private def getDeletedDateTimeAtStartOfDay(json: Json): Instant = {
+  private def getDeletedAsDatetime(json: Json): Instant = {
     val formatter = DateTimeFormatter.ISO_DATE
     LocalDate
       .parse(root.deletedDate.string.getOption(json).get, formatter)
-      .atStartOfDay()
+      .atTime(LocalTime.MAX)
       .toInstant(ZoneOffset.UTC)
   }
 

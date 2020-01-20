@@ -89,7 +89,7 @@ class SierraRecordParserTest
     val expectedRecord = createSierraBibRecordWith(
       id = id,
       data = jsonString,
-      modifiedDate = Instant.parse(s"${deletedDate}T00:00:00Z")
+      modifiedDate = Instant.parse(s"${deletedDate}T23:59:59.999999999Z")
     )
 
     val json = parse(jsonString).right.get
