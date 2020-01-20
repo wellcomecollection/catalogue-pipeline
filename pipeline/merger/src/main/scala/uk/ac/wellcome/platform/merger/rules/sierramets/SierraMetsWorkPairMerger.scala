@@ -24,15 +24,14 @@ trait SierraMetsWorkPairMerger extends WorkPairMerger {
       case (
           _ :: _,
           List(
-            metsItem @ Unidentifiable(
-              Item(_, List(metsLocation: DigitalLocation), _)))) =>
+            metsItem @ Item(Unidentifiable, _, List(metsLocation: DigitalLocation), _))) =>
         val items = createItems(sierraWork, metsItem, metsLocation)
         createMergedWork(sierraWork, metsWork, items)
       case _ => None
     }
 
   private def createItems(sierraWork: UnidentifiedWork,
-                          metsItem: Unidentifiable[Item],
+                          metsItem: Item[Unminted],
                           metsLocation: DigitalLocation) = {
     sierraWork.data.items match {
       case List(sierraItem) => List(mergeLocations(sierraItem, metsLocation))
@@ -41,9 +40,9 @@ trait SierraMetsWorkPairMerger extends WorkPairMerger {
     }
   }
 
-  private def shouldIgnoreItem(item: Unminted[Item],
+  private def shouldIgnoreItem(item: Item[Unminted],
                                metsLocation: DigitalLocation) = {
-    item.agent.locations match {
+    item.locations match {
       case List(location) => shouldIgnoreLocation(location, metsLocation.url)
       case _              => false
     }
@@ -51,7 +50,7 @@ trait SierraMetsWorkPairMerger extends WorkPairMerger {
 
   private def createMergedWork(sierraWork: UnidentifiedWork,
                                metsWork: TransformedBaseWork,
-                               items: List[Unminted[Item]]) = {
+                               items: List[Item[Unminted]]) = {
     val targetWork = sierraWork.withData { data =>
       data.copy(
         items = items,
@@ -66,15 +65,13 @@ trait SierraMetsWorkPairMerger extends WorkPairMerger {
     Some(MergedWork(targetWork, redirectedWork))
   }
 
-  private def mergeLocations(sierraItem: Unminted[Item],
+  private def mergeLocations(sierraItem: Item[Unminted],
                              metsLocation: DigitalLocation) =
-    sierraItem.withAgent { item =>
-      item.copy(
-        locations =
-          item.locations.filterNot(shouldIgnoreLocation(_, metsLocation.url))
-            :+ metsLocation
-      )
-    }
+    sierraItem.copy(
+      locations =
+        sierraItem.locations.filterNot(shouldIgnoreLocation(_, metsLocation.url))
+          :+ metsLocation
+    )
 
   private def shouldIgnoreLocation(location: Location, metsUrl: String) =
     location match {

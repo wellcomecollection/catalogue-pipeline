@@ -19,13 +19,14 @@ class SierraMetsWorkPairMergerTest
   it("merges a physical Sierra and a Mets work") {
     val result = workPairMerger.mergeAndRedirectWorkPair(sierraWork, metsWork)
 
-    val physicalItem: Identifiable[Item] =
-      sierraWork.data.items.head.asInstanceOf[Identifiable[Item]]
+    val physicalItem = sierraWork.data.items.head
 
-    val metsLocation = metsWork.data.items.head.agent.locations.head
+    val metsLocation = metsWork.data.items.head.locations.head
     val expectedItems = List(
-      physicalItem.copy(agent = physicalItem.agent.copy(
-        locations = physicalItem.agent.locations :+ metsLocation)))
+      physicalItem.copy(
+        locations = physicalItem.locations :+ metsLocation
+      )
+    )
 
     inside(result) {
       case Some(
@@ -54,8 +55,9 @@ class SierraMetsWorkPairMergerTest
     val sierraItem = createIdentifiableItemWith(
       locations = List(physicalLocation, digitalLocationNoLicense))
 
-    val expectedItems = List(sierraItem.withAgent(i =>
-      i.copy(locations = List(physicalLocation, digitalLocationWithLicense))))
+    val expectedItems = List(
+      sierraItem.copy(locations = List(physicalLocation, digitalLocationWithLicense))
+    )
 
     val metsWork = createUnidentifiedInvisibleWorkWith(
       sourceIdentifier = createMetsSourceIdentifier,
@@ -93,9 +95,10 @@ class SierraMetsWorkPairMergerTest
       locations = List(physicalLocation, sierraDigitalLocation))
 
     val expectedItems = List(
-      sierraItem.withAgent(i =>
-        i.copy(locations =
-          List(physicalLocation, sierraDigitalLocation, metsDigitalLocation))))
+      sierraItem.copy(
+        locations = List(physicalLocation, sierraDigitalLocation, metsDigitalLocation)
+      )
+    )
 
     val metsWork = createUnidentifiedInvisibleWorkWith(
       sourceIdentifier = createMetsSourceIdentifier,
@@ -124,13 +127,12 @@ class SierraMetsWorkPairMergerTest
     val sierraWork = createSierraDigitalWork
     val result = workPairMerger.mergeAndRedirectWorkPair(sierraWork, metsWork)
 
-    val digitalItem =
-      sierraWork.data.items.head.asInstanceOf[Unidentifiable[Item]]
+    val digitalItem = sierraWork.data.items.head
 
-    val metsLocation = metsWork.data.items.head.agent.locations.head
+    val metsLocation = metsWork.data.items.head.locations.head
     val expectedItems = List(
-      digitalItem.copy(agent = digitalItem.agent.copy(
-        locations = digitalItem.agent.locations :+ metsLocation)))
+      digitalItem.copy(locations = digitalItem.locations :+ metsLocation)
+    )
 
     inside(result) {
       case Some(
