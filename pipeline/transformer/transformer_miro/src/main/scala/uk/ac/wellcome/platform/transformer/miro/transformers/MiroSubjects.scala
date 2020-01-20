@@ -16,8 +16,7 @@ trait MiroSubjects {
    *  e.g. where keywords were pulled directly from Sierra -- but we don't
    *  have enough information in Miro to determine which ones those are.
    */
-  def getSubjects(miroRecord: MiroRecord)
-    : List[Unidentifiable[Subject[Unidentifiable[Concept]]]] = {
+  def getSubjects(miroRecord: MiroRecord): List[Subject[Unminted]] = {
     val keywords: List[String] = miroRecord.keywords.getOrElse(List())
 
     val keywordsUnauth: List[String] =
@@ -28,11 +27,9 @@ trait MiroSubjects {
 
     (keywords ++ keywordsUnauth).map { keyword =>
       val normalisedLabel = sentenceCase(keyword)
-      Unidentifiable(
-        Subject[Unidentifiable[Concept]](
-          label = normalisedLabel,
-          concepts = List(Unidentifiable(Concept(normalisedLabel)))
-        )
+      Subject(
+        label = normalisedLabel,
+        concepts = List(Concept(normalisedLabel))
       )
     }
   }

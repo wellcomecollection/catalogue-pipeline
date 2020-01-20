@@ -6,15 +6,14 @@ import uk.ac.wellcome.models.work.text.TextNormalisation.sentenceCase
 
 trait MiroGenres {
   def getGenres(
-    miroRecord: MiroRecord): List[Genre[Unidentifiable[Concept]]] = {
+    miroRecord: MiroRecord): List[Genre[Unminted]] =
     // Populate the genres field.  This is based on two fields in the XML,
     // <image_phys_format> and <image_lc_genre>.
     (miroRecord.physFormat.toList ++ miroRecord.lcGenre.toList).map { label =>
       val normalisedLabel = sentenceCase(label)
-      Genre[Unidentifiable[Concept]](
+      Genre(
         label = normalisedLabel,
-        concepts = List(Unidentifiable(Concept(normalisedLabel)))
+        concepts = List(Concept(normalisedLabel))
       )
     }.distinct
-  }
 }

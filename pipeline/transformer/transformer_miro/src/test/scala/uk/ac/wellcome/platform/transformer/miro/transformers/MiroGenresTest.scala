@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.transformer.miro.transformers
 
 import org.scalatest.{Assertion, FunSpec, Matchers}
-import uk.ac.wellcome.models.work.internal.{Concept, Genre, Unidentifiable}
+import uk.ac.wellcome.models.work.internal.{Concept, Genre}
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 
@@ -72,7 +72,7 @@ class MiroGenresTest
   ): Assertion = {
     val transformedWork = transformWork(miroRecord)
     val expectedGenres = expectedGenreLabels.map { label =>
-      Genre(label, concepts = List(Unidentifiable(Concept(label))))
+      Genre(label, concepts = List(Concept(label)))
     }
     transformedWork.data.genres shouldBe expectedGenres
   }

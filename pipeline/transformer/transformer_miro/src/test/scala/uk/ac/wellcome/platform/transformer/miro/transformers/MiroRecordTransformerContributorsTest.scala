@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.transformer.miro.transformers
 
 import org.scalatest.{Assertion, FunSpec}
-import uk.ac.wellcome.models.work.internal.{Agent, Contributor, Unidentifiable}
+import uk.ac.wellcome.models.work.internal.{Agent, Contributor}
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 
@@ -120,9 +120,7 @@ class MiroRecordTransformerContributorsTest
     val transformedWork = transformWork(miroRecord)
     transformedWork.data.contributors shouldBe expectedContributors.map {
       contributor =>
-        Contributor(
-          agent = Unidentifiable(Agent(contributor))
-        )
+        Contributor(agent = Agent(contributor), roles = Nil)
     }
   }
 }

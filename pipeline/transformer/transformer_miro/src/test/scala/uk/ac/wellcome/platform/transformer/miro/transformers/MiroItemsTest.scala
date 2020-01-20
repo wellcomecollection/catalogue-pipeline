@@ -20,12 +20,14 @@ class MiroItemsTest
           useRestrictions = Some("CC-0"),
           imageNumber = "B0011308"
         )) shouldBe List(
-        Unidentifiable(
-          agent = Item(locations = List(DigitalLocation(
-            "https://iiif.wellcomecollection.org/image/B0011308.jpg/info.json",
-            LocationType("iiif-image"),
-            Some(License.CC0),
-            credit = Some("Ezra Feilden"))))))
+          Item(
+            id = Unidentifiable,
+            locations = List(
+              DigitalLocation(
+                "https://iiif.wellcomecollection.org/image/B0011308.jpg/info.json",
+                LocationType("iiif-image"),
+                Some(License.CC0),
+                credit = Some("Ezra Feilden")))))
     }
   }
 }

@@ -1,18 +1,17 @@
 package uk.ac.wellcome.platform.transformer.miro.transformers
 
-import uk.ac.wellcome.models.work.internal
-import uk.ac.wellcome.models.work.internal.{Agent, Contributor, Unidentifiable}
+import uk.ac.wellcome.models.work.internal.{Agent, Contributor, Unminted}
 import uk.ac.wellcome.platform.transformer.miro.exceptions.MiroTransformerException
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 
 trait MiroContributors extends MiroContributorCodes {
   /* Populate wwork:contributors.  We use the <image_creator> tag from the Miro XML. */
   def getContributors(
-    miroRecord: MiroRecord): List[Contributor[Unidentifiable[Agent]]] = {
+    miroRecord: MiroRecord): List[Contributor[Unminted]] = {
     val primaryCreators = miroRecord.creator match {
       case Some(maybeCreators) =>
         maybeCreators.collect {
-          case Some(c) => Unidentifiable(Agent(c))
+          case Some(c) => Agent(c)
         }
       case None => List()
     }
@@ -20,11 +19,8 @@ trait MiroContributors extends MiroContributorCodes {
     // <image_secondary_creator>: what MIRO calls Secondary Creator, which
     // will also just have to map to our object property "hasCreator"
     val secondaryCreators = miroRecord.secondaryCreator match {
-      case Some(creator) =>
-        creator.map { c =>
-          Unidentifiable(Agent(c))
-        }
-      case None => List()
+      case Some(creator) => creator.map(Agent(_))
+      case None          => List()
     }
 
     // We also add the contributor code for the non-historical images, but
@@ -43,14 +39,12 @@ trait MiroContributors extends MiroContributorCodes {
     }
 
     val contributorCreators = maybeContributorCreator match {
-      case Some(contributor) => List(Unidentifiable(Agent(contributor)))
+      case Some(contributor) => List(Agent(contributor))
       case None              => List()
     }
 
     val creators = primaryCreators ++ secondaryCreators ++ contributorCreators
 
-    creators.map { agent: Unidentifiable[Agent] =>
-      internal.Contributor(agent = agent)
-    }
+    creators.map(Contributor(_, roles = Nil))
   }
 }
