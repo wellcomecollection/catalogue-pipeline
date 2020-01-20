@@ -39,7 +39,7 @@ class SierraRecordWrapperFlowTest
     testWith(wrapperFlow)
   }
 
-  it("creates a SierraRecord from a bib") {
+  it("pares a bib record from the stream") {
     withMaterializer { implicit materializer =>
       withRecordWrapperFlow(SierraBibRecord.apply) { wrapperFlow =>
         val id = createSierraBibNumber
@@ -70,7 +70,7 @@ class SierraRecordWrapperFlowTest
     }
   }
 
-  it("creates a SierraRecord from an item") {
+  it("parses an item record from the stream") {
     withMaterializer { implicit materializer =>
       withRecordWrapperFlow(SierraItemRecord.apply) { wrapperFlow =>
         val id = createSierraItemNumber
@@ -105,39 +105,6 @@ class SierraRecordWrapperFlowTest
           .via(wrapperFlow)
           .runWith(Sink.head)
 
-        whenReady(futureRecord) { sierraRecord =>
-          assertSierraRecordsAreEqual(sierraRecord, expectedRecord)
-        }
-      }
-    }
-  }
-
-  it("is able to handle deleted bibs") {
-    withMaterializer { implicit materializer =>
-      withRecordWrapperFlow(SierraBibRecord.apply) { wrapperFlow =>
-        val id = createSierraBibNumber
-        val deletedDate = "2014-01-31"
-        val jsonString =
-          s"""
-          |{
-          |  "id" : "$id",
-          |  "deletedDate" : "$deletedDate",
-          |  "deleted" : true
-          |}
-          |""".stripMargin
-
-        val expectedRecord = createSierraBibRecordWith(
-          id = id,
-          data = jsonString,
-          modifiedDate = Instant.parse(s"${deletedDate}T00:00:00Z")
-        )
-
-        val json = parse(jsonString).right.get
-
-        val futureRecord = Source
-          .single(json)
-          .via(wrapperFlow)
-          .runWith(Sink.head)
         whenReady(futureRecord) { sierraRecord =>
           assertSierraRecordsAreEqual(sierraRecord, expectedRecord)
         }
