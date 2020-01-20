@@ -5,14 +5,15 @@ import uk.ac.wellcome.models.work.internal._
 class ApiV2WorksTest extends ApiV2WorksTestBase {
 
   it("returns a list of works") {
-    withApi { case (indexV2, routes) =>
-      val works = createIdentifiedWorks(count = 3).sortBy { _.canonicalId }
+    withApi {
+      case (indexV2, routes) =>
+        val works = createIdentifiedWorks(count = 3).sortBy { _.canonicalId }
 
-      insertIntoElasticsearch(indexV2, works: _*)
+        insertIntoElasticsearch(indexV2, works: _*)
 
-      assertJsonResponse(routes, s"/$apiPrefix/works") {
-        Status.OK -> worksListResponse(apiPrefix, works = works)
-      }
+        assertJsonResponse(routes, s"/$apiPrefix/works") {
+          Status.OK -> worksListResponse(apiPrefix, works = works)
+        }
     }
   }
 

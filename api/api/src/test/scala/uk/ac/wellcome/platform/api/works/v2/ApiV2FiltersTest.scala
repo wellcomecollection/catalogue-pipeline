@@ -171,7 +171,9 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
           assertJsonResponse(
             routes,
             s"/$apiPrefix/works?workType=${ManuscriptsAsian.id}") {
-            Status.OK -> worksListResponse(apiPrefix, works = Seq(manuscriptWork))
+            Status.OK -> worksListResponse(
+              apiPrefix,
+              works = Seq(manuscriptWork))
           }
       }
     }
@@ -184,7 +186,9 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
           assertJsonResponse(
             routes,
             s"/$apiPrefix/works?workType=${ManuscriptsAsian.id},${CDRoms.id}") {
-            Status.OK -> worksListResponse(apiPrefix, works = Seq(cdRomWork, manuscriptWork))
+            Status.OK -> worksListResponse(
+              apiPrefix,
+              works = Seq(cdRomWork, manuscriptWork))
           }
       }
     }
@@ -197,7 +201,9 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
           assertJsonResponse(
             routes,
             s"/$apiPrefix/works?query=apple&workType=${ManuscriptsAsian.id},${CDRoms.id}") {
-            Status.OK -> worksListResponse(apiPrefix, works = Seq(cdRomWork, manuscriptWork))
+            Status.OK -> worksListResponse(
+              apiPrefix,
+              works = Seq(cdRomWork, manuscriptWork))
           }
       }
     }
@@ -292,7 +298,9 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
         case (indexV2, routes) =>
           insertIntoElasticsearch(indexV2, works: _*)
           assertJsonResponse(routes, s"/$apiPrefix/works?language=eng,ger") {
-            Status.OK -> worksListResponse(apiPrefix, works = Seq(englishWork, germanWork))
+            Status.OK -> worksListResponse(
+              apiPrefix,
+              works = Seq(englishWork, germanWork))
           }
       }
     }
@@ -329,7 +337,9 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
         case (indexV2, routes) =>
           insertIntoElasticsearch(indexV2, works: _*)
           assertJsonResponse(routes, s"/$apiPrefix/works?genres.label=horrible") {
-            Status.OK -> worksListResponse(apiPrefix, works = Seq(horrorWork, romcomHorrorWork))
+            Status.OK -> worksListResponse(
+              apiPrefix,
+              works = Seq(horrorWork, romcomHorrorWork))
           }
       }
     }
@@ -341,7 +351,9 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
           assertJsonResponse(
             routes,
             s"/$apiPrefix/works?genres.label=horrible%20heartwarming") {
-            Status.OK -> worksListResponse(apiPrefix, works = Seq(romcomHorrorWork))
+            Status.OK -> worksListResponse(
+              apiPrefix,
+              works = Seq(romcomHorrorWork))
           }
       }
     }
@@ -383,7 +395,8 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
           insertIntoElasticsearch(indexV2, works: _*)
           assertJsonResponse(routes, s"/$apiPrefix/works?subjects.label=paris") {
             Status.OK -> worksListResponse(
-              apiPrefix, works = Seq(parisWork, nineteenthCenturyParisWork)
+              apiPrefix,
+              works = Seq(parisWork, nineteenthCenturyParisWork)
             )
           }
       }
@@ -397,7 +410,8 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
             routes,
             s"/$apiPrefix/works?subjects.label=19th%20century%20paris") {
             Status.OK -> worksListResponse(
-              apiPrefix, works = Seq(nineteenthCenturyParisWork)
+              apiPrefix,
+              works = Seq(nineteenthCenturyParisWork)
             )
           }
       }

@@ -112,13 +112,12 @@ trait ApiWorksTestBase
       | }
     """.stripMargin
 
-  def worksListResponse(apiPrefix: String,
-                        works: Seq[IdentifiedWork]): String =
+  def worksListResponse(apiPrefix: String, works: Seq[IdentifiedWork]): String =
     s"""
        |{
        |  ${resultList(apiPrefix, totalResults = works.size)},
        |  "results": [
-       |    ${works.map { workResponse }.mkString(",") }
+       |    ${works.map { workResponse }.mkString(",")}
        |  ]
        |}
       """.stripMargin
