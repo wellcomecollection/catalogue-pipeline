@@ -32,14 +32,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
         assertJsonResponse(
           routes,
           s"/$apiPrefix/works?genres.label=horror&subjects.label=england") {
-          Status.OK -> s"""
-          {
-            ${resultList(apiPrefix, totalResults = 1)},
-            "results": [
-              ${workResponse(work2)}
-            ]
-          }
-          """
+          Status.OK -> worksListResponse(apiPrefix, works = Seq(work2))
         }
     }
   }
@@ -178,20 +171,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
           assertJsonResponse(
             routes,
             s"/$apiPrefix/works?workType=${ManuscriptsAsian.id}") {
-            Status.OK -> s"""
-            {
-              ${resultList(apiPrefix, totalResults = 1)},
-                "results": [
-                  {
-                    "type": "Work",
-                    "id": "${manuscriptWork.canonicalId}",
-                    "title": "${manuscriptWork.data.title.get}",
-                    "alternativeTitles": [],
-                    "workType": ${workType(manuscriptWork.data.workType.get)}
-                  }
-                ]
-              }
-            """
+            Status.OK -> worksListResponse(apiPrefix, works = Seq(manuscriptWork))
           }
       }
     }
@@ -204,27 +184,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
           assertJsonResponse(
             routes,
             s"/$apiPrefix/works?workType=${ManuscriptsAsian.id},${CDRoms.id}") {
-            Status.OK -> s"""
-            {
-              ${resultList(apiPrefix, totalResults = 2)},
-              "results": [
-                {
-                  "type": "Work",
-                  "id": "${cdRomWork.canonicalId}",
-                  "title": "${cdRomWork.data.title.get}",
-                  "alternativeTitles": [],
-                  "workType": ${workType(cdRomWork.data.workType.get)}
-                },
-                {
-                  "type": "Work",
-                  "id": "${manuscriptWork.canonicalId}",
-                  "title": "${manuscriptWork.data.title.get}",
-                  "alternativeTitles": [],
-                  "workType": ${workType(manuscriptWork.data.workType.get)}
-                }
-              ]
-            }
-          """
+            Status.OK -> worksListResponse(apiPrefix, works = Seq(cdRomWork, manuscriptWork))
           }
       }
     }
@@ -237,27 +197,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
           assertJsonResponse(
             routes,
             s"/$apiPrefix/works?query=apple&workType=${ManuscriptsAsian.id},${CDRoms.id}") {
-            Status.OK -> s"""
-            {
-              ${resultList(apiPrefix, totalResults = 2)},
-                "results": [
-                  {
-                    "type": "Work",
-                    "id": "${cdRomWork.canonicalId}",
-                    "title": "${cdRomWork.data.title.get}",
-                    "alternativeTitles": [],
-                    "workType": ${workType(cdRomWork.data.workType.get)}
-                  },
-                  {
-                    "type": "Work",
-                    "id": "${manuscriptWork.canonicalId}",
-                    "title": "${manuscriptWork.data.title.get}",
-                    "alternativeTitles": [],
-                    "workType": ${workType(manuscriptWork.data.workType.get)}
-                  }
-                ]
-              }
-            """
+            Status.OK -> worksListResponse(apiPrefix, works = Seq(cdRomWork, manuscriptWork))
           }
       }
     }
@@ -277,19 +217,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
           assertJsonResponse(
             routes,
             s"/$apiPrefix/works?production.dates.from=1900-01-01&production.dates.to=1960-01-01") {
-            Status.OK -> s"""
-              {
-                ${resultList(apiPrefix, totalResults = 1)},
-                "results": [
-                  {
-                    "type": "Work",
-                    "id": "${work2.canonicalId}",
-                    "title": "${work2.data.title.get}",
-                    "alternativeTitles": []
-                  }
-                ]
-              }
-            """
+            Status.OK -> worksListResponse(apiPrefix, works = Seq(work2))
           }
       }
     }
@@ -301,25 +229,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
           assertJsonResponse(
             routes,
             s"/$apiPrefix/works?production.dates.from=1900-01-01") {
-            Status.OK -> s"""
-              {
-                ${resultList(apiPrefix, totalResults = 2)},
-                "results": [
-                  {
-                    "type": "Work",
-                    "id": "${work2.canonicalId}",
-                    "title": "${work2.data.title.get}",
-                    "alternativeTitles": []
-                  },
-                  {
-                    "type": "Work",
-                    "id": "${work3.canonicalId}",
-                    "title": "${work3.data.title.get}",
-                    "alternativeTitles": []
-                  }
-                ]
-              }
-            """
+            Status.OK -> worksListResponse(apiPrefix, works = Seq(work2, work3))
           }
       }
     }
@@ -331,25 +241,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
           assertJsonResponse(
             routes,
             s"/$apiPrefix/works?production.dates.to=1960-01-01") {
-            Status.OK -> s"""
-              {
-                ${resultList(apiPrefix, totalResults = 2)},
-                "results": [
-                  {
-                    "type": "Work",
-                    "id": "${work1.canonicalId}",
-                    "title": "${work1.data.title.get}",
-                    "alternativeTitles": []
-                  },
-                  {
-                    "type": "Work",
-                    "id": "${work2.canonicalId}",
-                    "title": "${work2.data.title.get}",
-                    "alternativeTitles": []
-                  }
-                ]
-              }
-            """
+            Status.OK -> worksListResponse(apiPrefix, works = Seq(work1, work2))
           }
       }
     }
@@ -390,24 +282,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
         case (indexV2, routes) =>
           insertIntoElasticsearch(indexV2, works: _*)
           assertJsonResponse(routes, s"/$apiPrefix/works?language=eng") {
-            Status.OK -> s"""
-              {
-                ${resultList(apiPrefix, totalResults = 1)},
-                "results": [
-                  {
-                    "type": "Work",
-                    "id": "${englishWork.canonicalId}",
-                    "title": "${englishWork.data.title.get}",
-                    "alternativeTitles": [],
-                    "language": {
-                      "id": "eng",
-                      "label": "English",
-                      "type": "Language"
-                    }
-                  }
-                ]
-              }
-            """
+            Status.OK -> worksListResponse(apiPrefix, works = Seq(englishWork))
           }
       }
     }
@@ -417,35 +292,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
         case (indexV2, routes) =>
           insertIntoElasticsearch(indexV2, works: _*)
           assertJsonResponse(routes, s"/$apiPrefix/works?language=eng,ger") {
-            Status.OK -> s"""
-              {
-                ${resultList(apiPrefix, totalResults = 2)},
-                "results": [
-                  {
-                    "type": "Work",
-                    "id": "${englishWork.canonicalId}",
-                    "title": "${englishWork.data.title.get}",
-                    "alternativeTitles": [],
-                    "language": {
-                      "id": "eng",
-                      "label": "English",
-                      "type": "Language"
-                    }
-                  },
-                  {
-                    "type": "Work",
-                    "id": "${germanWork.canonicalId}",
-                    "title": "${germanWork.data.title.get}",
-                    "alternativeTitles": [],
-                    "language": {
-                      "id": "ger",
-                      "label": "German",
-                      "type": "Language"
-                    }
-                  }
-                ]
-              }
-            """
+            Status.OK -> worksListResponse(apiPrefix, works = Seq(englishWork, germanWork))
           }
       }
     }
@@ -482,15 +329,7 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
         case (indexV2, routes) =>
           insertIntoElasticsearch(indexV2, works: _*)
           assertJsonResponse(routes, s"/$apiPrefix/works?genres.label=horrible") {
-            Status.OK -> s"""
-              {
-                ${resultList(apiPrefix, totalResults = 2)},
-                "results": [
-                  ${workResponse(horrorWork)},
-                  ${workResponse(romcomHorrorWork)}
-                ]
-              }
-            """
+            Status.OK -> worksListResponse(apiPrefix, works = Seq(horrorWork, romcomHorrorWork))
           }
       }
     }
@@ -502,21 +341,13 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
           assertJsonResponse(
             routes,
             s"/$apiPrefix/works?genres.label=horrible%20heartwarming") {
-            Status.OK -> s"""
-              {
-                ${resultList(apiPrefix, totalResults = 1)},
-                "results": [
-                  ${workResponse(romcomHorrorWork)}
-                ]
-              }
-            """
+            Status.OK -> worksListResponse(apiPrefix, works = Seq(romcomHorrorWork))
           }
       }
     }
   }
 
   describe("filtering works by subject") {
-
     val nineteenthCentury = createSubjectWith("19th Century")
     val paris = createSubjectWith("Paris")
 
@@ -546,30 +377,14 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
       nineteenthCenturyParisWork,
       noSubjectWork)
 
-    def workResponse(work: IdentifiedWork): String =
-      s"""
-        | {
-        |   "type": "Work",
-        |   "id": "${work.canonicalId}",
-        |   "title": "${work.data.title.get}",
-        |   "alternativeTitles": []
-        | }
-      """.stripMargin
-
     it("filters by subjects") {
       withApi {
         case (indexV2, routes) =>
           insertIntoElasticsearch(indexV2, works: _*)
           assertJsonResponse(routes, s"/$apiPrefix/works?subjects.label=paris") {
-            Status.OK -> s"""
-              {
-                ${resultList(apiPrefix, totalResults = 2)},
-                "results": [
-                  ${workResponse(parisWork)},
-                  ${workResponse(nineteenthCenturyParisWork)}
-                ]
-              }
-            """
+            Status.OK -> worksListResponse(
+              apiPrefix, works = Seq(parisWork, nineteenthCenturyParisWork)
+            )
           }
       }
     }
@@ -581,21 +396,15 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
           assertJsonResponse(
             routes,
             s"/$apiPrefix/works?subjects.label=19th%20century%20paris") {
-            Status.OK -> s"""
-              {
-                ${resultList(apiPrefix, totalResults = 1)},
-                "results": [
-                  ${workResponse(nineteenthCenturyParisWork)}
-                ]
-              }
-            """
+            Status.OK -> worksListResponse(
+              apiPrefix, works = Seq(nineteenthCenturyParisWork)
+            )
           }
       }
     }
   }
 
   describe("filtering works by license") {
-
     val ccByWork = createLicensedWork("A", List(License.CCBY))
     val ccByNcWork = createLicensedWork("B", List(License.CCBYNC))
     val bothLicenseWork =
@@ -609,15 +418,10 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
         case (indexV2, routes) =>
           insertIntoElasticsearch(indexV2, works: _*)
           assertJsonResponse(routes, s"/$apiPrefix/works?license=cc-by") {
-            Status.OK -> s"""
-              {
-                ${resultList(apiPrefix, totalResults = 2)},
-                "results": [
-                  ${workResponse(ccByWork)},
-                  ${workResponse(bothLicenseWork)}
-                ]
-              }
-            """
+            Status.OK -> worksListResponse(
+              apiPrefix = apiPrefix,
+              works = Seq(ccByWork, bothLicenseWork)
+            )
           }
       }
     }
@@ -629,16 +433,10 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
           assertJsonResponse(
             routes,
             s"/$apiPrefix/works?license=cc-by,cc-by-nc") {
-            Status.OK -> s"""
-              {
-                ${resultList(apiPrefix, totalResults = 3)},
-                "results": [
-                  ${workResponse(ccByWork)},
-                  ${workResponse(ccByNcWork)},
-                  ${workResponse(bothLicenseWork)}
-                ]
-              }
-            """
+            Status.OK -> worksListResponse(
+              apiPrefix = apiPrefix,
+              works = Seq(ccByWork, ccByNcWork, bothLicenseWork)
+            )
           }
       }
     }

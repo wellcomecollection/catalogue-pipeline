@@ -5,39 +5,14 @@ import uk.ac.wellcome.models.work.internal._
 class ApiV2WorksTest extends ApiV2WorksTestBase {
 
   it("returns a list of works") {
-    withApi {
-      case (indexV2, routes) =>
-        val works = createIdentifiedWorks(count = 3).sortBy { _.canonicalId }
+    withApi { case (indexV2, routes) =>
+      val works = createIdentifiedWorks(count = 3).sortBy { _.canonicalId }
 
-        insertIntoElasticsearch(indexV2, works: _*)
+      insertIntoElasticsearch(indexV2, works: _*)
 
-        assertJsonResponse(routes, s"/$apiPrefix/works") {
-          Status.OK -> s"""
-            {
-              ${resultList(apiPrefix, totalResults = 3)},
-              "results": [
-               {
-                 "type": "Work",
-                 "id": "${works(0).canonicalId}",
-                 "title": "${works(0).data.title.get}",
-                 "alternativeTitles": []
-               },
-               {
-                 "type": "Work",
-                 "id": "${works(1).canonicalId}",
-                 "title": "${works(1).data.title.get}",
-                 "alternativeTitles": []
-               },
-               {
-                 "type": "Work",
-                 "id": "${works(2).canonicalId}",
-                 "title": "${works(2).data.title.get}",
-                 "alternativeTitles": []
-               }
-              ]
-            }
-          """
-        }
+      assertJsonResponse(routes, s"/$apiPrefix/works") {
+        Status.OK -> worksListResponse(apiPrefix, works = works)
+      }
     }
   }
 
@@ -103,12 +78,7 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
               "prevPage": "$apiScheme://$apiHost/$apiPrefix/works?page=1&pageSize=1",
               "nextPage": "$apiScheme://$apiHost/$apiPrefix/works?page=3&pageSize=1",
               "results": [
-                {
-                  "type": "Work",
-                  "id": "${works(1).canonicalId}",
-                  "title": "${works(1).data.title.get}",
-                  "alternativeTitles": []
-                }
+                ${workResponse(works(1))}
               ]
             }
           """
@@ -124,12 +94,7 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
             totalResults = 3)},
               "nextPage": "$apiScheme://$apiHost/$apiPrefix/works?page=2&pageSize=1",
               "results": [
-                {
-                  "type": "Work",
-                  "id": "${works(0).canonicalId}",
-                  "title": "${works(0).data.title.get}",
-                  "alternativeTitles": []
-                }
+                ${workResponse(works(0))}
               ]
             }
           """
@@ -145,12 +110,7 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
             totalResults = 3)},
               "prevPage": "$apiScheme://$apiHost/$apiPrefix/works?page=2&pageSize=1",
               "results": [
-                {
-                  "type": "Work",
-                  "id": "${works(2).canonicalId}",
-                  "title": "${works(2).data.title.get}",
-                  "alternativeTitles": []
-                }
+                ${workResponse(works(2))}
               ]
             }
           """
@@ -170,32 +130,20 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
   it("returns matching results if doing a full-text search") {
     withApi {
       case (indexV2, routes) =>
-        val work1 = createIdentifiedWorkWith(
+        val workDodo = createIdentifiedWorkWith(
           title = Some("A drawing of a dodo")
         )
-        val work2 = createIdentifiedWorkWith(
+        val workMouse = createIdentifiedWorkWith(
           title = Some("A mezzotint of a mouse")
         )
-        insertIntoElasticsearch(indexV2, work1, work2)
+        insertIntoElasticsearch(indexV2, workDodo, workMouse)
 
         assertJsonResponse(routes, s"/$apiPrefix/works?query=cat") {
           Status.OK -> emptyJsonResult(apiPrefix)
         }
 
         assertJsonResponse(routes, s"/$apiPrefix/works?query=dodo") {
-          Status.OK -> s"""
-            {
-              ${resultList(apiPrefix, totalResults = 1)},
-              "results": [
-               {
-                 "type": "Work",
-                 "id": "${work1.canonicalId}",
-                 "title": "${work1.data.title.get}",
-                 "alternativeTitles": []
-               }
-              ]
-            }
-          """
+          Status.OK -> worksListResponse(apiPrefix, works = Seq(workDodo))
         }
     }
   }
@@ -252,37 +200,13 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
           insertIntoElasticsearch(index = altIndex, altWork)
 
           assertJsonResponse(routes, s"/$apiPrefix/works?query=pangolins") {
-            Status.OK -> s"""
-              {
-                ${resultList(apiPrefix, totalResults = 1)},
-                "results": [
-                 {
-                   "type": "Work",
-                   "id": "${work.canonicalId}",
-                   "title": "${work.data.title.get}",
-                   "alternativeTitles": []
-                 }
-                ]
-              }
-            """
+            Status.OK -> worksListResponse(apiPrefix, works = Seq(work))
           }
 
           assertJsonResponse(
             routes,
             s"/$apiPrefix/works?query=pangolins&_index=${altIndex.name}") {
-            Status.OK -> s"""
-              {
-                ${resultList(apiPrefix, totalResults = 1)},
-                "results": [
-                 {
-                   "type": "Work",
-                   "id": "${altWork.canonicalId}",
-                   "title": "${altWork.data.title.get}",
-                   "alternativeTitles": []
-                 }
-                ]
-              }
-            """
+            Status.OK -> worksListResponse(apiPrefix, works = Seq(altWork))
           }
         }
     }
@@ -346,37 +270,10 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
         insertIntoElasticsearch(indexV2, work1, work2, work3, work4, work5)
 
         assertJsonResponse(routes, s"/$apiPrefix/works?sort=production.dates") {
-          Status.OK -> s"""
-            {
-              ${resultList(apiPrefix, totalResults = 5)},
-              "results": [{
-	            	 "id": "5",
-	            	 "title": "${work5.data.title.get}",
-                 "alternativeTitles": [],
-	            	 "type": "Work"
-	            }, {
-	            	 "id": "1",
-	            	 "title": "${work1.data.title.get}",
-                 "alternativeTitles": [],
-	            	 "type": "Work"
-	            }, {
-	            	 "id": "3",
-	            	 "title": "${work3.data.title.get}",
-                 "alternativeTitles": [],
-	            	 "type": "Work"
-	            }, {
-	            	 "id": "2",
-	            	 "title": "${work2.data.title.get}",
-                 "alternativeTitles": [],
-	            	 "type": "Work"
-	            }, {
-	            	 "id": "4",
-	            	 "title": "${work4.data.title.get}",
-                 "alternativeTitles": [],
-	            	 "type": "Work"
-	            }]
-            }
-          """
+          Status.OK -> worksListResponse(
+            apiPrefix = apiPrefix,
+            works = Seq(work5, work1, work3, work2, work4)
+          )
         }
     }
   }
@@ -401,27 +298,10 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
         assertJsonResponse(
           routes,
           s"/$apiPrefix/works?sort=production.dates&sortOrder=desc") {
-          Status.OK -> s"""
-            {
-              ${resultList(apiPrefix, totalResults = 3)},
-              "results": [{
-	            	 "id": "2",
-	            	 "title": "${work2.data.title.get}",
-                 "alternativeTitles": [],
-	            	 "type": "Work"
-	            }, {
-	            	 "id": "3",
-	            	 "title": "${work3.data.title.get}",
-                 "alternativeTitles": [],
-	            	 "type": "Work"
-	            }, {
-	            	 "id": "1",
-	            	 "title": "${work1.data.title.get}",
-                 "alternativeTitles": [],
-	            	 "type": "Work"
-	            }]
-            }
-          """
+          Status.OK -> worksListResponse(
+            apiPrefix = apiPrefix,
+            works = Seq(work2, work3, work1)
+          )
         }
     }
   }

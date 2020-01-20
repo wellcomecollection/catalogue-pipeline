@@ -26,25 +26,7 @@ class ApiV2WorksTestInvisible extends ApiV2WorksTestBase {
         insertIntoElasticsearch(indexV2, worksToIndex: _*)
 
         assertJsonResponse(routes, s"/$apiPrefix/works") {
-          Status.OK -> s"""
-             |{
-             |  ${resultList(apiPrefix, totalResults = 2)},
-             |  "results": [
-             |   {
-             |     "type": "Work",
-             |     "id": "${works(0).canonicalId}",
-             |     "title": "${works(0).data.title.get}",
-             |     "alternativeTitles": []
-             |   },
-             |   {
-             |     "type": "Work",
-             |     "id": "${works(1).canonicalId}",
-             |     "title": "${works(1).data.title.get}",
-             |     "alternativeTitles": []
-             |   }
-             |  ]
-             |}
-          """.stripMargin
+          Status.OK -> worksListResponse(apiPrefix, works = works)
         }
     }
   }
@@ -58,19 +40,7 @@ class ApiV2WorksTestInvisible extends ApiV2WorksTestBase {
         insertIntoElasticsearch(indexV2, work, deletedWork)
 
         assertJsonResponse(routes, s"/$apiPrefix/works?query=deleted") {
-          Status.OK -> s"""
-             |{
-             |  ${resultList(apiPrefix, totalResults = 1)},
-             |  "results": [
-             |   {
-             |     "type": "Work",
-             |     "id": "${work.canonicalId}",
-             |     "title": "${work.data.title.get}",
-             |     "alternativeTitles": []
-             |   }
-             |  ]
-             |}
-          """.stripMargin
+          Status.OK -> worksListResponse(apiPrefix, works = Seq(work))
         }
     }
   }
