@@ -65,7 +65,7 @@ trait ApiWorksTestBase
   def resultList(apiPrefix: String,
                  pageSize: Int = 10,
                  totalPages: Int = 1,
-                 totalResults: Int = 1) =
+                 totalResults: Int) =
     s"""
       "@context": "${contextUrl(apiPrefix)}",
       "type": "ResultList",
