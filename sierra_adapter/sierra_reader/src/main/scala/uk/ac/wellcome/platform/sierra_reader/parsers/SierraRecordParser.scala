@@ -8,7 +8,8 @@ import io.circe.optics.JsonPath.root
 import uk.ac.wellcome.models.transformable.sierra.AbstractSierraRecord
 
 object SierraRecordParser {
-  def apply[T <: AbstractSierraRecord](createRecord: (String, String, Instant) => T)(json: Json): T = {
+  def apply[T <: AbstractSierraRecord](
+    createRecord: (String, String, Instant) => T)(json: Json): T = {
     val id = getId(json)
     val data = json.noSpaces
     val modifiedDate = getModifiedDate(json)
