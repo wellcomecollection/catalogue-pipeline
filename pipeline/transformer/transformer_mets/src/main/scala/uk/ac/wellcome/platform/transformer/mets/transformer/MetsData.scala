@@ -19,21 +19,22 @@ case class MetsData(
     for {
       maybeLicense <- parseLicense
       accessStatus <- parseAccessStatus
-      unidentifiableItem: Unminted[Item] = Unidentifiable(
-        Item(locations = List(digitalLocation(maybeLicense, accessStatus))))
+      item = Item(
+        id = Unidentifiable,
+        locations = List(digitalLocation(maybeLicense, accessStatus)))
     } yield
       UnidentifiedInvisibleWork(
         version = version,
         sourceIdentifier = sourceIdentifier,
         workData(
-          unidentifiableItem,
+          item,
           thumbnail(maybeLicense, sourceIdentifier.value))
       )
 
-  private def workData(unidentifiableItem: Unminted[Item],
+  private def workData(item: Item[Unminted],
                        thumbnail: Option[DigitalLocation]) =
     WorkData(
-      items = List(unidentifiableItem),
+      items = List(item),
       mergeCandidates = List(mergeCandidate),
       thumbnail = thumbnail,
     )
