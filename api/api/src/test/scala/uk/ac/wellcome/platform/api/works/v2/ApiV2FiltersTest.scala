@@ -10,6 +10,38 @@ import uk.ac.wellcome.models.work.internal._
 import scala.util.Random
 
 class ApiV2FiltersTest extends ApiV2WorksTestBase {
+  it("combines multiple filters") {
+    val work1 = createIdentifiedWorkWith(
+      genres = List(createGenreWith(label = "horror")),
+      subjects = List(createSubjectWith(label = "france"))
+    )
+    val work2 = createIdentifiedWorkWith(
+      genres = List(createGenreWith(label = "horror")),
+      subjects = List(createSubjectWith(label = "england"))
+    )
+    val work3 = createIdentifiedWorkWith(
+      genres = List(createGenreWith(label = "fantasy")),
+      subjects = List(createSubjectWith(label = "england"))
+    )
+
+    val works = Seq(work1, work2, work3)
+
+    withApi { case (indexV2, routes) =>
+      insertIntoElasticsearch(indexV2, works: _*)
+      assertJsonResponse(routes,
+        s"/$apiPrefix/works?genres.label=horror&subjects.label=england") {
+        Status.OK -> s"""
+          {
+            ${resultList(apiPrefix, totalResults = 1)},
+            "results": [
+              ${workResponse(work2)}
+            ]
+          }
+          """
+      }
+    }
+  }
+
   describe("filtering works by item LocationType") {
     def createItemWithLocationType(locationType: LocationType): Identified[Item] =
       createIdentifiedItemWith(
@@ -406,7 +438,6 @@ class ApiV2FiltersTest extends ApiV2WorksTestBase {
   }
 
   describe("filtering works by genre") {
-
     val horror = createGenreWith("horrible stuff")
     val romcom = createGenreWith("heartwarming stuff")
 
