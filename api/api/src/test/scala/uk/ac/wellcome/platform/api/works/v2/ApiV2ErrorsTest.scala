@@ -108,12 +108,7 @@ class ApiV2ErrorsTest extends ApiV2WorksTestBase with ApiErrorsTestBase {
           assertJsonResponse(
             routes,
             s"/$apiPrefix/works?_queryType=athingwewouldneverusebutmightbecausewesaidwewouldnot") {
-            Status.OK -> s"""
-            {
-              ${resultList(apiPrefix, totalResults = 0, totalPages = 0)},
-              "results": []
-            }
-          """
+            Status.OK -> emptyJsonResult(apiPrefix)
           }
       }
     }
