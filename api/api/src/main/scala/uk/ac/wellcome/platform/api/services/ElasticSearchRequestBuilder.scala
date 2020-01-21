@@ -4,10 +4,9 @@ import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.searches.DateHistogramInterval
 import com.sksamuel.elastic4s.requests.searches.SearchRequest
 import com.sksamuel.elastic4s.requests.searches.aggs.{
-  CompositeAggregation,
   DateHistogramAggregation,
   TermsAggregation,
-  TermsValueSource,
+  TopHitsAggregation
 }
 import com.sksamuel.elastic4s.requests.searches.queries.{
   BoolQuery,
@@ -46,15 +45,9 @@ case class ElasticSearchRequestBuilder(
 
   private def toAggregation(aggReq: AggregationRequest) = aggReq match {
     case AggregationRequest.WorkType =>
-      CompositeAggregation("workType")
+      TermsAggregation("workType")
         .size(100)
-        .sources(
-          List(
-            TermsValueSource("label", field = Some("data.workType.label.raw")),
-            TermsValueSource("id", field = Some("data.workType.id")),
-            TermsValueSource("type", field = Some("data.workType.ontologyType"))
-          )
-        )
+        .field("data.workType.id")
 
     case AggregationRequest.ProductionDate =>
       DateHistogramAggregation("productionDates")
@@ -62,42 +55,23 @@ case class ElasticSearchRequestBuilder(
         .field("data.production.dates.range.from")
         .minDocCount(1)
 
-    // We don't split genres into concepts, as the data isn't great, and for rendering isn't useful
-    // at the moment. But we've left it as a CompositeAggregation to scale when we need to.
+    // We don't split genres into concepts, as the data isn't great,
+    // and for rendering isn't useful at the moment.
     case AggregationRequest.Genre =>
-      CompositeAggregation("genres")
+      TermsAggregation("genres")
         .size(20)
-        .sources(
-          List(
-            TermsValueSource(
-              "label",
-              field = Some("data.genres.concepts.agent.label.raw"))
-          )
-        )
-        .subAggregations(sortedByCount)
+        .field("data.genres.concepts.agent.label.raw")
 
     case AggregationRequest.Subject =>
-      CompositeAggregation("subjects")
+      TermsAggregation("subjects")
         .size(20)
-        .sources(
-          List(
-            TermsValueSource(
-              "label",
-              field = Some("data.subjects.agent.label.raw")
-            )
-          )
-        )
-        .subAggregations(sortedByCount)
+        .field("data.subjects.agent.label.raw")
 
     case AggregationRequest.Language =>
-      CompositeAggregation("language")
+      TermsAggregation("language")
         .size(200)
-        .sources(
-          List(
-            TermsValueSource("id", field = Some("data.language.id")),
-            TermsValueSource("label", field = Some("data.language.label.raw"))
-          )
-        )
+        .field("data.language.id")
+        .additionalField("data.language.label")
 
     case AggregationRequest.License =>
       TermsAggregation("license")
@@ -160,11 +134,15 @@ case class ElasticSearchRequestBuilder(
           values = licenseIds)
     }
 
-  private def sortedByCount =
-    List(
-      bucketSortAggregation(
-        "sort_by_count",
-        Seq(FieldSort("_count").order(SortOrder.DESC))
+  implicit class EnhancedTermsAggregation(agg: TermsAggregation) {
+    def additionalField(field: String): TermsAggregation =
+      additionalFields(List(field))
+    def additionalFields(fields: List[String]): TermsAggregation = {
+      agg.subAggregations(
+        TopHitsAggregation("sample_doc")
+          .size(1)
+          .fetchSource(fields.toArray ++ agg.field, Array())
       )
-    )
+    }
+  }
 }
