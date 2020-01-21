@@ -29,7 +29,8 @@ object Aggregations extends Logging {
           genres =
             e4sAggregations.decodeAgg[Genre[Minted[AbstractConcept]]]("genres"),
           productionDates = e4sAggregations.decodeAgg[Period]("productionDates"),
-          language = e4sAggregations.decodeAgg[Language]("language"),
+          language = e4sAggregations
+            .decodeAgg[Language]("language", Some("data.language")),
           subjects = e4sAggregations
             .decodeAgg[Subject[Minted[AbstractRootConcept]]]("subjects"),
           license = e4sAggregations.decodeAgg[License]("license")
@@ -80,12 +81,15 @@ object Aggregations extends Logging {
   implicit class EnhancedEsAggregations(
     aggregations: com.sksamuel.elastic4s.requests.searches.Aggregations) {
 
-    def decodeAgg[T: Decoder](name: String): Option[Aggregation[T]] = {
+    def decodeAgg[T: Decoder](
+      name: String,
+      documentPath: Option[String] = None): Option[Aggregation[T]] = {
       aggregations
         .getAgg(name)
         .flatMap(
           _.safeTo[Aggregation[T]]((json: String) =>
-            AggregationMapping.aggregationParser(name, json)).recoverWith {
+            AggregationMapping
+              .aggregationParser(json, documentPath)).recoverWith {
             case err =>
               warn("Failed to parse aggregation from ES", err)
               Failure(err)
@@ -97,6 +101,7 @@ object Aggregations extends Logging {
 
 object AggregationMapping extends Logging {
   import io.circe.parser._
+  import io.circe.optics.JsonPath
   import io.circe.optics.JsonPath._
 
   private val buckets = root.buckets.arr
@@ -104,10 +109,11 @@ object AggregationMapping extends Logging {
   private val bucketRootCount = root.doc_count.int
   private val bucketKey = root.key.json
   private val bucketSampleDoc =
-    root.sample_doc.hits.hits.index(0)._source.data.json
+    root.sample_doc.hits.hits.index(0)._source.json
 
-  def aggregationParser[T: Decoder](name: String,
-                                    json: String): Try[Aggregation[T]] = {
+  def aggregationParser[T: Decoder](
+    json: String,
+    path: Option[String]): Try[Aggregation[T]] = {
     val parsedJson = parse(json) match {
       case Right(json) => json
       case Left(err) =>
@@ -117,7 +123,7 @@ object AggregationMapping extends Logging {
       bucket <- buckets.getOption(parsedJson).getOrElse(List())
       bucketDoc <- bucketSampleDoc
         .getOption(bucket)
-        .flatMap(_.hcursor.downField(name).focus)
+        .flatMap(doc => path.flatMap(pathToOptic(_).json.getOption(doc)))
         .orElse(bucketKey.getOption(bucket))
         .map(_.as[T])
       bucketCount <- bucketFilteredCount
@@ -134,6 +140,11 @@ object AggregationMapping extends Logging {
     }
     Success(Aggregation(bucketMaybes.toList.flatten))
   }
+
+  private def pathToOptic(path: String): JsonPath =
+    path.split("\\.").foldLeft(root) { (optic, pathElement) =>
+      optic.selectDynamic(pathElement)
+    }
 
 }
 
