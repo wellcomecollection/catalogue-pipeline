@@ -25,7 +25,9 @@ trait SierraPhysicalDigitalWorkPairMerger
     physicalWork: UnidentifiedWork,
     digitalWork: TransformedBaseWork): Option[MergedWork] =
     (physicalWork.data.items, digitalWork.data.items) match {
-      case (physicalItems @ _ :: _, List(digitalItem: Unidentifiable[Item])) =>
+      case (
+          physicalItems @ _ :: _,
+          List(digitalItem @ Item(Unidentifiable, _, _, _))) =>
         info(
           s"Merging ${describeWorkPair(physicalWork, digitalWork)} work pair.")
 
@@ -55,15 +57,13 @@ trait SierraPhysicalDigitalWorkPairMerger
   // the digital location to the locations of the item on the physical work.
   // If the physical work has more than one item, we append the digital item
   // to the list of items on the physical work.
-  private def mergeItems(physicalItems: List[Unminted[Item]],
-                         digitalItem: Unidentifiable[Item]) = {
+  private def mergeItems(physicalItems: List[Item[Unminted]],
+                         digitalItem: Item[Unminted]) = {
     physicalItems match {
-      case List(physicalItem: Identifiable[Item]) =>
+      case List(physicalItem @ Item(Identifiable(_, _, _), _, _, _)) =>
         List(
           physicalItem.copy(
-            agent = physicalItem.agent.copy(
-              locations = physicalItem.agent.locations ++ digitalItem.agent.locations
-            )
+            locations = physicalItem.locations ++ digitalItem.locations
           )
         )
       case _ => physicalItems :+ digitalItem

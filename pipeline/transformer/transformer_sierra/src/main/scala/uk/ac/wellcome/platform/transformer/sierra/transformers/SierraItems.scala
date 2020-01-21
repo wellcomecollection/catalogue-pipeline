@@ -18,7 +18,7 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
     with SierraLocation
     with SierraQueryOps {
 
-  type Output = List[Unminted[Item]]
+  type Output = List[Item[Unminted]]
 
   def apply(bibId: SierraBibNumber, bibData: SierraBibData) = {
     val physicalItems = getPhysicalItems(itemDataMap, bibData)
@@ -36,9 +36,7 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
       case (Seq(physicalItem), Some(digitalItem)) =>
         List(
           physicalItem.copy(
-            agent = physicalItem.agent.copy(
-              locations = physicalItem.agent.locations ++ digitalItem.agent.locations
-            )
+            locations = physicalItem.locations ++ digitalItem.locations
           )
         )
       case _ => physicalItems ++ List(maybeDigitalItem).flatten
@@ -47,7 +45,7 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
 
   private def getPhysicalItems(
     sierraItemDataMap: Map[SierraItemNumber, SierraItemData],
-    bibData: SierraBibData): List[Identifiable[Item]] =
+    bibData: SierraBibData): List[Item[Unminted]] =
     sierraItemDataMap
       .filterNot {
         case (_: SierraItemNumber, itemData: SierraItemData) => itemData.deleted
@@ -70,47 +68,44 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
     * away with this code.
     *
     */
-  private def getDigitalItem(
-    bibId: SierraBibNumber,
-    bibData: SierraBibData): Option[Unidentifiable[Item]] = {
+  private def getDigitalItem(bibId: SierraBibNumber,
+                             bibData: SierraBibData): Option[Item[Unminted]] = {
     val hasDlnkLocation = bibData.locations match {
       case Some(locations) => locations.map { _.code }.contains("dlnk")
       case None            => false
     }
 
-    if (hasDlnkLocation) {
+    if (hasDlnkLocation)
       Some(
-        Unidentifiable(
-          agent = Item(
-            locations = List(getDigitalLocation(bibId.withCheckDigit))
-          )
+        Item(
+          id = Unidentifiable,
+          locations = List(getDigitalLocation(bibId.withCheckDigit))
         )
       )
-    } else {
+    else
       None
-    }
   }
 
   private def transformItemData(itemId: SierraItemNumber,
                                 itemData: SierraItemData,
-                                bibData: SierraBibData): Identifiable[Item] = {
+                                bibData: SierraBibData): Item[Unminted] = {
     debug(s"Attempting to transform $itemId")
-    Identifiable(
-      sourceIdentifier = SourceIdentifier(
-        identifierType = IdentifierType("sierra-system-number"),
-        ontologyType = "Item",
-        value = itemId.withCheckDigit
-      ),
-      otherIdentifiers = List(
-        SourceIdentifier(
-          identifierType = IdentifierType("sierra-identifier"),
+    Item(
+      title = getItemTitle(itemData),
+      locations = getPhysicalLocation(itemData, bibData).toList,
+      id = Identifiable(
+        sourceIdentifier = SourceIdentifier(
+          identifierType = IdentifierType("sierra-system-number"),
           ontologyType = "Item",
-          value = itemId.withoutCheckDigit
+          value = itemId.withCheckDigit
+        ),
+        otherIdentifiers = List(
+          SourceIdentifier(
+            identifierType = IdentifierType("sierra-identifier"),
+            ontologyType = "Item",
+            value = itemId.withoutCheckDigit
+          )
         )
-      ),
-      agent = Item(
-        title = getItemTitle(itemData),
-        locations = getPhysicalLocation(itemData, bibData).toList
       )
     )
   }

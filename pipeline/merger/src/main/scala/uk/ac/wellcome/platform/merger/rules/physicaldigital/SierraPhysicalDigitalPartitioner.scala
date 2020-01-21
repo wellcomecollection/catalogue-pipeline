@@ -27,7 +27,7 @@ trait SierraPhysicalDigitalPartitioner extends WorkTagPartitioner {
     */
   private def isDigitalWork(work: UnidentifiedWork): Boolean =
     work.data.items match {
-      case List(Unidentifiable(Item(_, List(_: DigitalLocation), _))) => true
+      case List(Item(Unidentifiable, _, List(_: DigitalLocation), _)) => true
       case _                                                          => false
     }
 
@@ -37,6 +37,6 @@ trait SierraPhysicalDigitalPartitioner extends WorkTagPartitioner {
     */
   private def isPhysicalWork(work: UnidentifiedWork): Boolean =
     work.data.items.exists(item =>
-      item.agent.locations.exists(l => l.isInstanceOf[PhysicalLocation]))
+      item.locations.exists(l => l.isInstanceOf[PhysicalLocation]))
 
 }

@@ -51,7 +51,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
 
   def createUnidentifiedInvisibleWorkWith(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    items: List[Unminted[Item]] = List()
+    items: List[Item[Unminted]] = Nil
   ): UnidentifiedInvisibleWork =
     UnidentifiedInvisibleWork(
       sourceIdentifier = sourceIdentifier,
@@ -93,12 +93,12 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     lettering: Option[String] = None,
     workType: Option[WorkType] = None,
     thumbnail: Option[Location] = None,
-    contributors: List[Contributor[Unminted[AbstractAgent]]] = List(),
-    production: List[ProductionEvent[Unminted[AbstractAgent]]] = List(),
+    contributors: List[Contributor[Unminted]] = Nil,
+    production: List[ProductionEvent[Unminted]] = Nil,
     notes: List[Note] = Nil,
     edition: Option[String] = None,
     duration: Option[Int] = None,
-    items: List[Unminted[Item]] = List()): UnidentifiedWork =
+    items: List[Item[Unminted]] = Nil): UnidentifiedWork =
     UnidentifiedWork(
       sourceIdentifier = sourceIdentifier,
       version = version,
@@ -137,17 +137,17 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     description: Option[String] = None,
     physicalDescription: Option[String] = None,
     lettering: Option[String] = None,
-    createdDate: Option[Period] = None,
-    subjects: List[Minted[Subject[Minted[AbstractRootConcept]]]] = List(),
-    genres: List[Genre[Minted[AbstractConcept]]] = List(),
-    contributors: List[Contributor[Minted[AbstractAgent]]] = List(),
+    createdDate: Option[Period[Minted]] = None,
+    subjects: List[Subject[Minted]] = Nil,
+    genres: List[Genre[Minted]] = Nil,
+    contributors: List[Contributor[Minted]] = Nil,
     thumbnail: Option[Location] = None,
-    production: List[ProductionEvent[Minted[AbstractAgent]]] = List(),
+    production: List[ProductionEvent[Minted]] = Nil,
     notes: List[Note] = Nil,
     edition: Option[String] = None,
     language: Option[Language] = None,
     duration: Option[Int] = None,
-    items: List[Minted[Item]] = List(),
+    items: List[Item[Minted]] = Nil,
     version: Int = 1,
     merged: Boolean = false
   ): IdentifiedWork =
@@ -188,7 +188,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
 
   def createUnidentifiedSierraWorkWith(
     workType: Option[WorkType] = None,
-    items: List[Unminted[Item]] = List()): UnidentifiedWork =
+    items: List[Item[Unminted]] = Nil): UnidentifiedWork =
     createUnidentifiedWorkWith(
       sourceIdentifier = createSierraSystemSourceIdentifier,
       workType = workType,
@@ -198,7 +198,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
 
   def createUnidentifiedInvisibleMetsWorkWith(
     sourceIdentifier: SourceIdentifier = createMetsSourceIdentifier,
-    items: List[Unminted[Item]] = List(createDigitalItem))
+    items: List[Item[Unminted]] = List(createDigitalItem))
     : UnidentifiedInvisibleWork =
     createUnidentifiedInvisibleWorkWith(
       sourceIdentifier = createMetsSourceIdentifier,
@@ -220,7 +220,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     )
 
   def createSierraDigitalWorkWith(
-    items: List[Unidentifiable[Item]] = List(
+    items: List[Item[Unminted]] = List(
       createUnidentifiableItemWith(locations = List(createDigitalLocation))))
     : UnidentifiedWork =
     createUnidentifiedSierraWorkWith(items = items)

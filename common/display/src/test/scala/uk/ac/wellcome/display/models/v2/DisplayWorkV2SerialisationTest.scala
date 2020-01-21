@@ -106,11 +106,11 @@ class DisplayWorkV2SerialisationTest
       | "alternativeTitles": [],
       | "items": [
       |   {
-      |     "id": "${item.canonicalId}",
-      |     "type": "${item.agent.ontologyType}",
+      |     "id": "${item.id.canonicalId}",
+      |     "type": "Item",
       |     "locations": [
       |       {
-      |         "type": "${location.ontologyType}",
+      |         "type": "DigitalLocation",
       |         "url": "",
       |         "locationType": ${locationType(location.locationType)},
       |         "license": ${license(location.license.get)},
@@ -191,7 +191,7 @@ class DisplayWorkV2SerialisationTest
       lettering = Some(randomAlphanumeric(100)),
       createdDate = Some(Period("1901")),
       contributors = List(
-        Contributor(Unidentifiable(Agent(randomAlphanumeric(25))))
+        Contributor(agent = Agent(randomAlphanumeric(25)), roles = Nil)
       )
     )
 
@@ -221,10 +221,7 @@ class DisplayWorkV2SerialisationTest
       genres = List(
         Genre(
           label = "genre",
-          concepts = List(
-            Unidentifiable(Concept("woodwork")),
-            Unidentifiable(Concept("etching"))
-          )
+          concepts = List(Concept("woodwork"), Concept("etching"))
         )
       )
     )

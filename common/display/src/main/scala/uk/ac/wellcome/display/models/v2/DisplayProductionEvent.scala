@@ -22,7 +22,7 @@ case class DisplayProductionEvent(
 )
 
 object DisplayProductionEvent {
-  def apply(productionEvent: ProductionEvent[Minted[AbstractAgent]],
+  def apply(productionEvent: ProductionEvent[Minted],
             includesIdentifiers: Boolean): DisplayProductionEvent = {
     DisplayProductionEvent(
       label = productionEvent.label,
@@ -31,7 +31,7 @@ object DisplayProductionEvent {
         DisplayAbstractAgentV2(_, includesIdentifiers = includesIdentifiers)
       },
       dates = productionEvent.dates.map { DisplayPeriod(_) },
-      function = productionEvent.function.map { concept: Concept =>
+      function = productionEvent.function.map { concept =>
         DisplayConcept(label = concept.label)
       }
     )

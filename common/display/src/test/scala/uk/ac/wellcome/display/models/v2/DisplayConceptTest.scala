@@ -11,7 +11,7 @@ class DisplayConceptTest
 
   it("reads an unidentified generic Concept as a DisplayConcept") {
     assertDisplayConceptIsCorrect(
-      concept = Unidentifiable(Concept(label = "evil")),
+      concept = Concept(label = "evil"),
       expectedDisplayConcept = DisplayConcept(
         id = None,
         identifiers = None,
@@ -22,7 +22,7 @@ class DisplayConceptTest
 
   it("reads an unidentified Period as a DisplayPeriod") {
     assertDisplayConceptIsCorrect(
-      concept = Unidentifiable(Period(label = "darkness")),
+      concept = Period(label = "darkness"),
       expectedDisplayConcept = DisplayPeriod(
         id = None,
         identifiers = None,
@@ -33,7 +33,7 @@ class DisplayConceptTest
 
   it("reads an unidentified Place as a DisplayPlace") {
     assertDisplayConceptIsCorrect(
-      concept = Unidentifiable(Place(label = "nowhere")),
+      concept = Place(label = "nowhere"),
       expectedDisplayConcept = DisplayPlace(
         id = None,
         identifiers = None,
@@ -48,10 +48,9 @@ class DisplayConceptTest
     )
 
     assertDisplayConceptIsCorrect(
-      concept = Identified(
-        canonicalId = "dj4kndg5",
-        sourceIdentifier = sourceIdentifier,
-        agent = Concept(label = "darkness")
+      concept = Concept(
+        label = "darkness",
+        id = Identified("dj4kndg5", sourceIdentifier)
       ),
       expectedDisplayConcept = DisplayConcept(
         id = Some("dj4kndg5"),
@@ -67,10 +66,10 @@ class DisplayConceptTest
     )
 
     assertDisplayConceptIsCorrect(
-      concept = Identified(
-        canonicalId = "nrzbm3ah",
-        sourceIdentifier = sourceIdentifier,
-        agent = Period(label = "never")
+      concept = Period(
+        label = "never",
+        range = None,
+        id = Identified("nrzbm3ah", sourceIdentifier)
       ),
       expectedDisplayConcept = DisplayPeriod(
         id = Some("nrzbm3ah"),
@@ -86,10 +85,9 @@ class DisplayConceptTest
     )
 
     assertDisplayConceptIsCorrect(
-      concept = Identified(
-        canonicalId = "axtswq4z",
-        sourceIdentifier = sourceIdentifier,
-        agent = Place(label = "anywhere")
+      concept = Place(
+        label = "anywhere",
+        id = Identified("axtswq4z", sourceIdentifier)
       ),
       expectedDisplayConcept = DisplayPlace(
         id = Some("axtswq4z"),
@@ -100,7 +98,7 @@ class DisplayConceptTest
   }
 
   private def assertDisplayConceptIsCorrect(
-    concept: Minted[AbstractConcept],
+    concept: AbstractConcept[Minted],
     expectedDisplayConcept: DisplayAbstractConcept
   ) = {
     val displayConcept =

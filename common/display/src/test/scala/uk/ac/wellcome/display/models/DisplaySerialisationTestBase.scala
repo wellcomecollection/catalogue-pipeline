@@ -1,7 +1,5 @@
 package uk.ac.wellcome.display.models
 
-import io.circe.Json
-import io.circe.parser._
 import org.scalatest.Suite
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.internal._
@@ -32,47 +30,21 @@ trait DisplaySerialisationTestBase { this: Suite =>
          """
     }
 
-  def items(identifiedItems: List[Minted[Item]]) =
-    identifiedItems
-      .map {
-        case it: Identified[Item] =>
-          identifiedItem(it)
-        case it: Unidentifiable[Item] =>
-          unidentifiableItem(it)
-      }
-      .mkString(",")
+  def items(items: List[Item[Minted]]) =
+    items.map(item).mkString(",")
 
-  def unidentifiableItem(it: Unidentifiable[Item]) =
+  def item(item: Item[Minted]) =
     s"""
-      {
-        "type": "${it.agent.ontologyType}",
-        ${itemTitle(it.agent)}
-        "locations": [${locations(it.agent.locations)}]
-      }
+     {
+       ${identifiers(item)}
+       "type": "${item.ontologyType}",
+       ${optionalString("title", item.title)}
+       "locations": [${locations(item.locations)}]
+     }
     """
-
-  def identifiedItem(it: Identified[Item]) =
-    s"""
-      {
-        "id": "${it.canonicalId}",
-        "type": "${it.agent.ontologyType}",
-        ${itemTitle(it.agent)}
-        "locations": [${locations(it.agent.locations)}]
-      }
-    """
-
-  def itemTitle(item: Item) =
-    item.title match {
-      case Some(title) => s""""title": "$title","""
-      case None        => ""
-    }
 
   def locations(locations: List[Location]) =
-    locations
-      .map {
-        location(_)
-      }
-      .mkString(",")
+    locations.map(location).mkString(",")
 
   def location(loc: Location) =
     loc match {
@@ -131,109 +103,88 @@ trait DisplaySerialisationTestBase { this: Suite =>
       }
     """
   }
-
-  def identifier(identifier: SourceIdentifier): String
-
-  // Some of our fields can be optionally identified (e.g. creators).
-  //
-  // Values in these fields are wrapped in either "Unidentifiable" or
-  // "Identified".  In the first case, we use the default serialisation
-  // unmodified.  In the second case, we modify the JSON to include
-  // the "id" field and the "identifiers" field.
-  //
-  def identifiedOrUnidentifiable[T](displayable: Minted[T],
-                                    serialise: T => String) =
-    displayable match {
-      case ag: Unidentifiable[T] => serialise(ag.agent)
-      case disp: Identified[T] =>
-        val agent = parse(serialise(disp.agent)).right.get.asObject.get
-        val identifiersJson = disp.identifiers.map { sourceIdentifier =>
-          parse(identifier(sourceIdentifier)).right.get
-        }
-        val newJson = ("id", Json.fromString(disp.canonicalId)) +: (
-          "identifiers",
-          Json.arr(identifiersJson: _*)) +: agent
-        Json.fromJsonObject(newJson).spaces2
+  def identifiers(obj: HasIdState[Minted]) =
+    obj.id match {
+      case Identified(canonicalId, _, _) => s"""
+        "id": "$canonicalId",
+      """
+      case Unidentifiable                => ""
     }
 
-  def abstractAgent(ag: AbstractAgent) =
+  def abstractAgent(ag: AbstractAgent[Minted]) =
     ag match {
-      case a: Agent        => agent(a)
-      case o: Organisation => organisation(o)
-      case p: Person       => person(p)
-      case m: Meeting      => meeting(m)
+      case a: Agent[Minted]        => agent(a)
+      case o: Organisation[Minted] => organisation(o)
+      case p: Person[Minted]       => person(p)
+      case m: Meeting[Minted]      => meeting(m)
     }
 
-  def person(p: Person) = {
+  def person(person: Person[Minted]) =
     s"""{
+       ${identifiers(person)}
         "type": "Person",
-        ${optionalString("prefix", p.prefix)}
-        ${optionalString("numeration", p.numeration)}
-        "label": "${p.label}"
+        ${optionalString("prefix", person.prefix)}
+        ${optionalString("numeration", person.numeration)}
+        "label": "${person.label}"
       }"""
-  }
 
-  def organisation(o: Organisation) = {
+  def organisation(organisation: Organisation[Minted]) =
     s"""{
+       ${identifiers(organisation)}
         "type": "Organisation",
-        "label": "${o.label}"
+        "label": "${organisation.label}"
       }"""
-  }
 
-  def meeting(m: Meeting) = {
+  def meeting(meeting: Meeting[Minted]) =
     s"""{
+       ${identifiers(meeting)}
         "type": "Meeting",
-        "label": "${m.label}"
+        "label": "${meeting.label}"
       }"""
-  }
 
-  def agent(a: Agent) = {
+  def agent(agent: Agent[Minted]) =
     s"""{
+       ${identifiers(agent)}
         "type": "Agent",
-        "label": "${a.label}"
+        "label": "${agent.label}"
       }"""
-  }
 
-  def period(p: Period) =
+  def period(period: Period[Minted]) =
     s"""{
+       ${identifiers(period)}
       "type": "Period",
-      "label": "${p.label}"
+      "label": "${period.label}"
     }"""
 
-  def place(p: Place) =
+  def place(place: Place[Minted]) =
     s"""{
+       ${identifiers(place)}
       "type": "Place",
-      "label": "${p.label}"
+      "label": "${place.label}"
     }"""
 
-  def ontologyType(concept: AbstractRootConcept) =
-    concept match {
-      case _: Concept      => "Concept"
-      case _: Place        => "Place"
-      case _: Period       => "Period"
-      case _: Agent        => "Agent"
-      case _: Organisation => "Organisation"
-      case _: Person       => "Person"
-      case _: Meeting      => "Meeting"
-    }
-
-  def concept(concept: AbstractRootConcept) = {
-    s"""
-    {
-      "type": "${ontologyType(concept)}",
+  def concept(concept: Concept[Minted]) =
+    s"""{
+       ${identifiers(concept)}
+      "type": "Concept",
       "label": "${concept.label}"
+    }"""
+
+  def abstractRootConcept(abstractRootConcept: AbstractRootConcept[Minted]) =
+    abstractRootConcept match {
+      case c: Concept[Minted]      => concept(c)
+      case p: Place[Minted]        => place(p)
+      case p: Period[Minted]       => period(p)
+      case a: Agent[Minted]        => agent(a)
+      case o: Organisation[Minted] => organisation(o)
+      case p: Person[Minted]       => person(p)
+      case m: Meeting[Minted]      => meeting(m)
     }
-    """
-  }
 
-  def concepts(concepts: List[Minted[AbstractRootConcept]]) =
-    concepts
-      .map { c =>
-        identifiedOrUnidentifiable(c, concept)
-      }
-      .mkString(",")
+  def concepts(concepts: List[AbstractRootConcept[Minted]]) =
+    concepts.map(abstractRootConcept).mkString(",")
 
-  private def subject(s: Subject[Minted[AbstractRootConcept]]): String =
+  def subject(s: Subject[Minted]): String =
     s"""
     {
       "label": "${s.label}",
@@ -242,64 +193,54 @@ trait DisplaySerialisationTestBase { this: Suite =>
     }
     """
 
-  def subjects(
-    subjects: List[Minted[Subject[Minted[AbstractRootConcept]]]]): String =
-    subjects
-      .map { s =>
-        identifiedOrUnidentifiable(s, subject)
-      }
-      .mkString(",")
+  def subjects(subjects: List[Subject[Minted]]): String =
+    subjects.map(subject).mkString(",")
 
-  def genre(g: Genre[Minted[AbstractConcept]]) =
+  def genre(genre: Genre[Minted]) =
     s"""
     {
-      "label": "${g.label}",
-      "type" : "${g.ontologyType}",
-      "concepts": [ ${concepts(g.concepts)} ]
+      "label": "${genre.label}",
+      "type" : "${genre.ontologyType}",
+      "concepts": [ ${concepts(genre.concepts)} ]
     }
     """
 
-  def genres(genres: List[Genre[Minted[AbstractConcept]]]) =
-    genres
-      .map { genre(_) }
-      .mkString(",")
+  def genres(genres: List[Genre[Minted]]) =
+    genres.map(genre).mkString(",")
 
-  def contributor(contributors: Contributor[Minted[AbstractAgent]]) =
+  def contributor(contributor: Contributor[Minted]) =
     s"""
-       |{
-       |  "agent": ${identifiedOrUnidentifiable(
-         contributors.agent,
-         abstractAgent)},
-       |  "roles": ${toJson(contributors.roles).get},
-       |  "type": "Contributor"
-       |}
-     """.stripMargin
+      {
+        ${identifiers(contributor)}
+        "agent": ${abstractAgent(contributor.agent)},
+        "roles": ${toJson(contributor.roles).get},
+        "type": "Contributor"
+      }
+    """.stripMargin
 
-  def contributors(c: List[Contributor[Minted[AbstractAgent]]]) =
-    c.map(contributor).mkString(",")
+  def contributors(contributors: List[Contributor[Minted]]) =
+    contributors.map(contributor).mkString(",")
 
-  def production(production: List[ProductionEvent[Minted[AbstractAgent]]]) =
+  def production(production: List[ProductionEvent[Minted]]) =
     production.map(productionEvent).mkString(",")
 
-  def productionEvent(event: ProductionEvent[Minted[AbstractAgent]]): String =
+  def productionEvent(event: ProductionEvent[Minted]): String =
     s"""
-       |{
-       |  "label": "${event.label}",
-       |  "dates": [${event.dates.map(period).mkString(",")}],
-       |  "agents": [${event.agents
-         .map(identifiedOrUnidentifiable(_, abstractAgent))
-         .mkString(",")}],
-       |  "places": [${event.places.map(place).mkString(",")}],
-       |  "type": "ProductionEvent"
-       |}
-     """.stripMargin
+      {
+        "label": "${event.label}",
+        "dates": [${event.dates.map(period).mkString(",")}],
+        "agents": [${event.agents.map(abstractAgent).mkString(",")}],
+        "places": [${event.places.map(place).mkString(",")}],
+        "type": "ProductionEvent"
+      }
+    """.stripMargin
 
   def workType(w: WorkType) =
     s"""
-       |{
-       |  "id": "${w.id}",
-       |  "label": "${w.label}",
-       |  "type": "WorkType"
-       |}
-     """.stripMargin
+      {
+        "id": "${w.id}",
+        "label": "${w.label}",
+        "type": "WorkType"
+      }
+    """.stripMargin
 }

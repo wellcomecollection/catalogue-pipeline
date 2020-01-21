@@ -13,14 +13,17 @@ class DisplayGenreV2SerialisationTest
     with IdentifiersGenerators {
 
   it("serialises a DisplayGenre constructed from a Genre") {
-    val concept0 = Unidentifiable(Concept("conceptLabel"))
-    val concept1 = Unidentifiable(Place("placeLabel"))
-    val concept2 = Identified(
-      canonicalId = createCanonicalId,
-      sourceIdentifier = createSourceIdentifierWith(
-        ontologyType = "Period"
-      ),
-      agent = Period("periodLabel")
+    val concept0 = Concept("conceptLabel")
+    val concept1 = Place("placeLabel")
+    val concept2 = Period(
+      label = "periodLabel",
+      range = None,
+      id = Identified(
+        canonicalId = createCanonicalId,
+        sourceIdentifier = createSourceIdentifierWith(
+          ontologyType = "Period"
+        )
+      )
     )
 
     val genre = Genre(
@@ -31,27 +34,27 @@ class DisplayGenreV2SerialisationTest
     assertObjectMapsToJson(
       DisplayGenre(genre, includesIdentifiers = true),
       expectedJson = s"""
-         |  {
-         |    "label" : "${genre.label}",
-         |    "concepts" : [
-         |      {
-         |        "label" : "${concept0.agent.label}",
-         |        "type" : "${ontologyType(concept0.agent)}"
-         |      },
-         |      {
-         |        "label" : "${concept1.agent.label}",
-         |        "type" : "${ontologyType(concept1.agent)}"
-         |      },
-         |      {
-         |        "id": "${concept2.canonicalId}",
-         |        "identifiers": [${identifier(concept2.identifiers(0))}],
-         |        "label" : "${concept2.agent.label}",
-         |        "type" : "${ontologyType(concept2.agent)}"
-         |      }
-         |    ],
-         |    "type" : "${genre.ontologyType}"
-         |  }
-          """.stripMargin
+        {
+          "label" : "genreLabel",
+          "concepts" : [
+            {
+              "label" : "conceptLabel",
+              "type" : "Concept"
+            },
+            {
+              "label" : "placeLabel",
+              "type" : "Place"
+            },
+            {
+              "id": "${concept2.id.canonicalId}",
+              "identifiers": [${identifier(concept2.id.sourceIdentifier)}],
+              "label" : "periodLabel",
+              "type" : "Period"
+            }
+          ],
+          "type" : "Genre"
+        }
+      """
     )
   }
 }

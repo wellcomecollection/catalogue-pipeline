@@ -80,13 +80,12 @@ class IdEmbedderTests
       ontologyType = "Person"
     )
 
-    val person = Person(label = "The Librarian")
+    val person = Person(
+      label = "The Librarian",
+      id = Identifiable(creatorIdentifier)
+    )
     val originalWork = createUnidentifiedWorkWith(
-      contributors = List(
-        Contributor(
-          agent = Identifiable(person, sourceIdentifier = creatorIdentifier)
-        )
-      )
+      contributors = List(Contributor(person, roles = Nil))
     )
 
     val newWorkCanonicalId = "5467"
@@ -120,10 +119,14 @@ class IdEmbedderTests
           sourceIdentifier = originalWork.sourceIdentifier,
           contributors = List(
             Contributor(
-              agent = Identified(
-                agent = person,
-                canonicalId = newCreatorCanonicalId,
-                sourceIdentifier = creatorIdentifier))
+              agent = person.copy(
+                id = Identified(
+                  canonicalId = newCreatorCanonicalId,
+                  sourceIdentifier = creatorIdentifier
+                )
+              ),
+              roles = Nil
+            )
           ),
           version = originalWork.version
         )
@@ -165,14 +168,9 @@ class IdEmbedderTests
       ontologyType = "Item"
     )
 
-    val originalItem1 = Identifiable(
-      sourceIdentifier = identifier,
-      agent = Item(locations = List())
-    )
+    val originalItem1 = Item(id = Identifiable(identifier))
 
-    val originalItem2 = Unidentifiable(
-      agent = Item(locations = List())
-    )
+    val originalItem2 = Item(id = Unidentifiable)
 
     val originalWork = createUnidentifiedWorkWith(
       sourceIdentifier = identifier,
@@ -192,8 +190,8 @@ class IdEmbedderTests
 
         setUpIdentifierGeneratorMock(
           mockIdentifierGenerator = identifierGenerator,
-          sourceIdentifier = originalItem1.sourceIdentifier,
-          ontologyType = originalItem1.agent.ontologyType,
+          sourceIdentifier = originalItem1.id.sourceIdentifier,
+          ontologyType = originalItem1.ontologyType,
           newCanonicalId = newItemCanonicalId1
         )
 
@@ -203,14 +201,14 @@ class IdEmbedderTests
           ).right.get
         )
 
-        val expectedItem1: Minted[Item] = createIdentifiedItemWith(
-          sourceIdentifier = originalItem1.sourceIdentifier,
+        val expectedItem1 = createIdentifiedItemWith[Minted](
+          sourceIdentifier = originalItem1.id.sourceIdentifier,
           canonicalId = newItemCanonicalId1,
-          locations = originalItem1.agent.locations
+          locations = originalItem1.locations
         )
 
-        val expectedItem2: Minted[Item] = createUnidentifiableItemWith(
-          locations = originalItem2.agent.locations
+        val expectedItem2 = createUnidentifiableItemWith[Minted](
+          locations = originalItem2.locations
         )
 
         whenReady(eventualWork) { json =>

@@ -35,7 +35,7 @@ class SierraOrganisationSubjectsTest
       val subjects = getOrganisationSubjects(bibData)
       subjects should have size 1
 
-      subjects.head.agent.label shouldBe "United States. Supreme Court, Washington, DC. September 29, 2005, pictured."
+      subjects.head.label shouldBe "United States. Supreme Court, Washington, DC. September 29, 2005, pictured."
     }
 
     it("uses repeated subfields for the label if necessary") {
@@ -53,7 +53,7 @@ class SierraOrganisationSubjectsTest
       val subjects = getOrganisationSubjects(bibData)
       subjects should have size 1
 
-      subjects.head.agent.label shouldBe "United States. Army. Cavalry, 7th. Company E, depicted."
+      subjects.head.label shouldBe "United States. Army. Cavalry, 7th. Company E, depicted."
     }
   }
 
@@ -66,11 +66,11 @@ class SierraOrganisationSubjectsTest
       )
 
       val subjects = getOrganisationSubjects(bibData)
-      val concepts = subjects.head.agent.concepts
+      val concepts = subjects.head.concepts
       concepts should have size 1
 
       val unmintedOrganisation = concepts.head
-      unmintedOrganisation shouldBe a[Unidentifiable[_]]
+      unmintedOrganisation.id shouldBe Unidentifiable
     }
 
     it("uses subfields a and b for the Organisation label") {
@@ -84,9 +84,8 @@ class SierraOrganisationSubjectsTest
       )
 
       val subjects = getOrganisationSubjects(bibData)
-      val concepts = subjects.head.agent.concepts
-      val organisation = concepts.head.agent
-      organisation.label shouldBe "Wellcome Trust. Facilities, Health & Safety"
+      val concepts = subjects.head.concepts
+      concepts.head.label shouldBe "Wellcome Trust. Facilities, Health & Safety"
     }
 
     it("creates an Identifiable Organisation if subfield 0 is present") {
@@ -102,13 +101,13 @@ class SierraOrganisationSubjectsTest
       val subjects = getOrganisationSubjects(bibData)
 
       val subject = subjects.head
-      val identifiableSubject = subject
-        .asInstanceOf[Identifiable[Subject[Unidentifiable[Organisation]]]]
 
-      identifiableSubject.sourceIdentifier shouldBe SourceIdentifier(
-        identifierType = IdentifierType("lc-names"),
-        ontologyType = "Subject",
-        value = lcNamesCode
+      subject.id shouldBe Identifiable(
+        SourceIdentifier(
+          identifierType = IdentifierType("lc-names"),
+          ontologyType = "Subject",
+          value = lcNamesCode
+        )
       )
     }
 
@@ -126,13 +125,13 @@ class SierraOrganisationSubjectsTest
       val subjects = getOrganisationSubjects(bibData)
 
       val subject = subjects.head
-      val identifiableSubject = subject
-        .asInstanceOf[Identifiable[Subject[Unidentifiable[Organisation]]]]
 
-      identifiableSubject.sourceIdentifier shouldBe SourceIdentifier(
-        identifierType = IdentifierType("lc-names"),
-        ontologyType = "Subject",
-        value = "n1234"
+      subject.id shouldBe Identifiable(
+        SourceIdentifier(
+          identifierType = IdentifierType("lc-names"),
+          ontologyType = "Subject",
+          value = "n1234"
+        )
       )
     }
 
@@ -147,9 +146,9 @@ class SierraOrganisationSubjectsTest
       )
 
       val subjects = getOrganisationSubjects(bibData)
-      val concepts = subjects.head.agent.concepts
+      val concepts = subjects.head.concepts
       val unmintedOrganisation = concepts.head
-      unmintedOrganisation shouldBe a[Unidentifiable[_]]
+      unmintedOrganisation.id shouldBe Unidentifiable
     }
 
     it("skips adding an identifier if the 2nd indicator is not '0'") {
@@ -162,9 +161,9 @@ class SierraOrganisationSubjectsTest
       )
 
       val subjects = getOrganisationSubjects(bibData)
-      val concepts = subjects.head.agent.concepts
+      val concepts = subjects.head.concepts
       val unmintedOrganisation = concepts.head
-      unmintedOrganisation shouldBe a[Unidentifiable[_]]
+      unmintedOrganisation.id shouldBe Unidentifiable
     }
   }
 

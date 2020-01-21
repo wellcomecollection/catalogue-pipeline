@@ -64,11 +64,10 @@ class SierraMiroMergeRuleTest
       it("copies item locations from the Miro work to a physical Sierra work") {
         mergedWork.data.items shouldBe List(
           sierraPhysicalItem.copy(
-            agent = sierraPhysicalItem.agent.copy(
-              locations =
-                sierraPhysicalItem.agent.locations ++ miroWork.data.items.head.agent.locations
-            )
-          ))
+            locations =
+              sierraPhysicalItem.locations ++ miroWork.data.items.head.locations
+          )
+        )
       }
 
       it("copies across the Miro location if the Sierra work already has a DigitalLocation") {
@@ -76,11 +75,10 @@ class SierraMiroMergeRuleTest
 
         mergedWork.data.items shouldBe List(
           sierraDigitalItem.copy(
-            agent = sierraDigitalItem.agent.copy(
-              locations =
-                sierraDigitalItem.agent.locations ++ miroWork.data.items.head.agent.locations
-            )
-          ))
+            locations =
+              sierraDigitalItem.locations ++ miroWork.data.items.head.locations
+          )
+        )
       }
 
       it("copies across the thumbnail from the Miro work") {
@@ -109,11 +107,10 @@ class SierraMiroMergeRuleTest
       it("copies item locations from the Miro work to a physical Sierra work") {
         mergedWork.data.items shouldBe List(
           sierraPhysicalItem.copy(
-            agent = sierraPhysicalItem.agent.copy(
-              locations =
-                sierraPhysicalItem.agent.locations ++ miroWork.data.items.head.agent.locations
-            )
-          ))
+            locations =
+              sierraPhysicalItem.locations ++ miroWork.data.items.head.locations
+          )
+        )
       }
     }
 

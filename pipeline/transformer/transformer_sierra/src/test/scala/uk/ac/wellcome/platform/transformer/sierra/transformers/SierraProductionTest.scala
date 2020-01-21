@@ -47,8 +47,8 @@ class SierraProductionTest
         ))
 
       production.agents shouldBe List(
-        Unidentifiable(Agent(label = "Gauthier-Villars ;")),
-        Unidentifiable(Agent(label = "Vogue"))
+        Agent(label = "Gauthier-Villars ;"),
+        Agent(label = "Vogue")
       )
     }
 
@@ -104,9 +104,9 @@ class SierraProductionTest
         ))
 
       production.agents shouldBe List(
-        Unidentifiable(Agent(label = "Macmillan")),
-        Unidentifiable(Agent(label = "Sussex Tapes")),
-        Unidentifiable(Agent(label = "US Dept of Energy"))
+        Agent(label = "Macmillan"),
+        Agent(label = "Sussex Tapes"),
+        Agent(label = "US Dept of Energy")
       )
 
       production.function shouldBe Some(Concept("Manufacture"))
@@ -165,8 +165,8 @@ class SierraProductionTest
             "London : Arts Council of Great Britain, 1976; Twickenham : CTD Printers, 1974",
           places = List(Place("London"), Place("Twickenham")),
           agents = List(
-            Unidentifiable(Agent("Arts Council of Great Britain")),
-            Unidentifiable(Agent("CTD Printers"))
+            Agent("Arts Council of Great Britain"),
+            Agent("CTD Printers")
           ),
           dates = List(Period("1976;"), Period("1974")),
           function = Some(Concept("Manufacture"))
@@ -176,10 +176,9 @@ class SierraProductionTest
             "Bethesda, Md. : Toxicology Information Program, National Library of Medicine [producer] ; Springfield, Va. : National Technical Information Service [distributor], 1974-",
           places = List(Place("Bethesda, Md."), Place("Springfield, Va.")),
           agents = List(
-            Unidentifiable(Agent(
-              "Toxicology Information Program, National Library of Medicine [producer] ;")),
-            Unidentifiable(
-              Agent("National Technical Information Service [distributor]"))
+            Agent(
+              "Toxicology Information Program, National Library of Medicine [producer] ;"),
+            Agent("National Technical Information Service [distributor]")
           ),
           dates = List(Period("1974-")),
           function = None
@@ -235,8 +234,8 @@ class SierraProductionTest
         ))
 
       production.agents shouldBe List(
-        Unidentifiable(Agent(label = "ABC Publishers")),
-        Unidentifiable(Agent(label = "Iverson Company"))
+        Agent(label = "ABC Publishers"),
+        Agent(label = "Iverson Company")
       )
     }
 
@@ -327,7 +326,7 @@ class SierraProductionTest
         ProductionEvent(
           label = "Cambridge : Kinsey Printing Company",
           places = List(Place("Cambridge")),
-          agents = List(Unidentifiable(Agent("Kinsey Printing Company"))),
+          agents = List(Agent("Kinsey Printing Company")),
           dates = List(),
           function = Some(Concept("Manufacture"))
         )
@@ -359,7 +358,7 @@ class SierraProductionTest
         ProductionEvent(
           label = "London : Wellcome Collection Publishing",
           places = List(Place("London")),
-          agents = List(Unidentifiable(Agent("Wellcome Collection Publishing"))),
+          agents = List(Agent("Wellcome Collection Publishing")),
           dates = List(),
           function = Some(Concept("Manufacture"))
         )
@@ -394,14 +393,14 @@ class SierraProductionTest
         ProductionEvent(
           label = "Columbia, S.C. : H.W. Williams Co., 1982",
           places = List(Place("Columbia, S.C.")),
-          agents = List(Unidentifiable(Agent("H.W. Williams Co."))),
+          agents = List(Agent("H.W. Williams Co.")),
           dates = List(Period("1982")),
           function = Some(Concept("Publication"))
         ),
         ProductionEvent(
           label = "Washington : U.S. G.P.O., 1981-",
           places = List(Place("Washington")),
-          agents = List(Unidentifiable(Agent("U.S. G.P.O."))),
+          agents = List(Agent("U.S. G.P.O.")),
           dates = List(Period("1981-")),
           function = Some(Concept("Distribution"))
         )
@@ -427,8 +426,8 @@ class SierraProductionTest
         Place(label = "Cambridge")
       )
       production.agents shouldBe List(
-        Unidentifiable(Agent(label = "ABC Publishers")),
-        Unidentifiable(Agent(label = "Iverson Ltd."))
+        Agent(label = "ABC Publishers"),
+        Agent(label = "Iverson Ltd.")
       )
       production.dates shouldBe List(
         Period(label = "2002"),
@@ -490,7 +489,7 @@ class SierraProductionTest
           label = "San Francisco : Morgan Kaufmann Publishers, 2004",
           places = List(Place("San Francisco")),
           agents = List(
-            Unidentifiable(Agent("Morgan Kaufmann Publishers"))
+            Agent("Morgan Kaufmann Publishers")
           ),
           dates = List(Period("2004")),
           function = None
@@ -522,9 +521,7 @@ class SierraProductionTest
         ProductionEvent(
           label = "London : Wellcome Trust, 1992",
           places = List(Place("London")),
-          agents = List(
-            Unidentifiable(Agent("Wellcome Trust"))
-          ),
+          agents = List(Agent("Wellcome Trust")),
           dates = List(Period("1992")),
           function = None
         )
@@ -680,8 +677,8 @@ class SierraProductionTest
     production.function shouldBe Some(Concept(expectedFunction))
   }
 
-  private def transformToProduction(varFields: List[VarField])
-    : List[ProductionEvent[Unminted[AbstractAgent]]] = {
+  private def transformToProduction(
+    varFields: List[VarField]): List[ProductionEvent[Unminted]] = {
     val bibData = createSierraBibDataWith(varFields = varFields)
     SierraProduction(createSierraBibNumber, bibData)
   }

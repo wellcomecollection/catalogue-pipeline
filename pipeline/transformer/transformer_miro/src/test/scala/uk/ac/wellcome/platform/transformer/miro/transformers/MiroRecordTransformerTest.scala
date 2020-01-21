@@ -212,7 +212,10 @@ class MiroRecordTransformerTest
 
     work.data.title shouldBe Some("A café for cats")
     work.data.contributors shouldBe List(
-      Contributor(agent = Unidentifiable(Agent("Gyokushō, a cät Ôwnêr")))
+      Contributor(
+        agent = Agent("Gyokushō, a cät Ôwnêr"),
+        roles = Nil
+      )
     )
   }
 
@@ -266,7 +269,7 @@ class MiroRecordTransformerTest
       credit = Some("Ezra Feilden"),
       locationType = LocationType("iiif-image")
     )
-    work.data.items.head.agent.locations shouldBe List(expectedDigitalLocation)
+    work.data.items.head.locations shouldBe List(expectedDigitalLocation)
   }
 
   it("extracts both identifiable and unidentifiable items") {
@@ -280,7 +283,7 @@ class MiroRecordTransformerTest
       Some(License.CCBY),
       None)
     work.data.items shouldBe List(
-      Unidentifiable(Item(locations = List(expectedLocation)))
+      Item(id = Unidentifiable, locations = List(expectedLocation))
     )
   }
 

@@ -21,6 +21,14 @@ object WorksIndex {
 
   val canonicalId = keywordWithText("canonicalId")
 
+  val id =
+    objectField("id").fields(
+      keywordField("type"),
+      canonicalId,
+      objectField("sourceIdentifier").fields(sourceIdentifierFields),
+      objectField("otherIdentifiers").fields(sourceIdentifierFields)
+    )
+
   val license = objectField("license").fields(
     keywordField("id")
   )
@@ -78,10 +86,9 @@ object WorksIndex {
       accessCondition
     )
 
-  def date(fieldName: String) = objectField(fieldName).fields(period)
-
   val period = Seq(
     label,
+    id,
     keywordField("ontologyType"),
     objectField("range").fields(
       label,
@@ -91,14 +98,21 @@ object WorksIndex {
     )
   )
 
+  val place = Seq(
+    label,
+    id
+  )
+
   val concept = Seq(
     label,
+    id,
     keywordField("ontologyType"),
     keywordField("type")
   )
 
   val agent = Seq(
     label,
+    id,
     keywordField("type"),
     keywordField("prefix"),
     keywordField("numeration"),
@@ -107,27 +121,19 @@ object WorksIndex {
 
   val rootConcept = concept ++ agent ++ period
 
-  def identified(fieldName: String, fields: Seq[FieldDefinition]): ObjectField =
-    objectField(fieldName).fields(
-      canonicalId,
-      textField("type"),
-      objectField("agent").fields(fields),
-      objectField("sourceIdentifier").fields(sourceIdentifierFields),
-      objectField("otherIdentifiers").fields(sourceIdentifierFields)
-    )
-
   val subject: Seq[FieldDefinition] = Seq(
+    id,
     label,
     keywordField("ontologyType"),
-    identified("concepts", rootConcept)
+    objectField("concepts").fields(rootConcept)
   )
 
-  def subjects: ObjectField = identified("subjects", subject)
+  def subjects: ObjectField = objectField("subjects").fields(subject)
 
   def genre(fieldName: String) = objectField(fieldName).fields(
     label,
     keywordField("ontologyType"),
-    identified("concepts", rootConcept)
+    objectField("concepts").fields(rootConcept)
   )
 
   def labelledTextField(fieldName: String) = objectField(fieldName).fields(
@@ -138,15 +144,10 @@ object WorksIndex {
   def period(fieldName: String) = labelledTextField(fieldName)
 
   def items(fieldName: String) = objectField(fieldName).fields(
-    canonicalId,
-    sourceIdentifier,
-    otherIdentifiers,
-    keywordField("type"),
-    objectField("agent").fields(
-      location(),
-      englishTextField("title"),
-      keywordField("ontologyType")
-    )
+    id,
+    location(),
+    englishTextField("title"),
+    keywordField("ontologyType")
   )
 
   def englishTextField(name: String) =
@@ -159,7 +160,8 @@ object WorksIndex {
   )
 
   val contributors = objectField("contributors").fields(
-    identified("agent", agent),
+    id,
+    objectField("agent").fields(agent),
     objectField("roles").fields(
       label,
       keywordField("ontologyType")
@@ -169,9 +171,9 @@ object WorksIndex {
 
   val production: ObjectField = objectField("production").fields(
     label,
-    period("places"),
-    identified("agents", agent),
-    date("dates"),
+    objectField("places").fields(place),
+    objectField("agents").fields(agent),
+    objectField("dates").fields(period),
     objectField("function").fields(concept),
     keywordField("ontologyType")
   )
@@ -191,7 +193,7 @@ object WorksIndex {
       englishTextField("description"),
       englishTextField("physicalDescription"),
       englishTextField("lettering"),
-      date("createdDate"),
+      objectField("createdDate").fields(period),
       contributors,
       subjects,
       genre("genres"),

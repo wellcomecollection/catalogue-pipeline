@@ -25,9 +25,9 @@ class SierraGenresTest
   it("returns genres for tag 655 with only subfield a") {
     val expectedGenres =
       List(
-        Genre[Unminted[AbstractConcept]](
+        Genre(
           label = "A Content",
-          concepts = List(Unidentifiable(Concept(label = "A Content")))))
+          concepts = List(Concept(label = "A Content"))))
 
     val bibData = createSierraBibDataWith(
       varFields = List(
@@ -44,11 +44,11 @@ class SierraGenresTest
   it("returns subjects for tag 655 with subfields a and v") {
     val expectedGenres =
       List(
-        Genre[Unminted[AbstractConcept]](
+        Genre(
           label = "A Content - V Content",
           concepts = List(
-            Unidentifiable(Concept(label = "A Content")),
-            Unidentifiable(Concept(label = "V Content"))
+            Concept(label = "A Content"),
+            Concept(label = "V Content")
           )
         )
       )
@@ -72,11 +72,11 @@ class SierraGenresTest
     "subfield a is always first concept when returning subjects for tag 655 with subfields a, v") {
     val expectedGenres =
       List(
-        Genre[Unminted[AbstractConcept]](
+        Genre(
           label = "A Content - V Content",
           concepts = List(
-            Unidentifiable(Concept(label = "A Content")),
-            Unidentifiable(Concept(label = "V Content"))
+            Concept(label = "A Content"),
+            Concept(label = "V Content")
           )
         )
       )
@@ -99,12 +99,12 @@ class SierraGenresTest
   it("returns genres for tag 655 subfields a, v, and x") {
     val expectedGenres =
       List(
-        Genre[Unminted[AbstractConcept]](
+        Genre(
           label = "A Content - X Content - V Content",
           concepts = List(
-            Unidentifiable(Concept(label = "A Content")),
-            Unidentifiable(Concept(label = "X Content")),
-            Unidentifiable(Concept(label = "V Content"))
+            Concept(label = "A Content"),
+            Concept(label = "X Content"),
+            Concept(label = "V Content")
           )
         ))
 
@@ -127,11 +127,11 @@ class SierraGenresTest
   it("returns subjects for tag 655 with subfields a, y") {
     val expectedGenres =
       List(
-        Genre[Unminted[AbstractConcept]](
+        Genre(
           label = "A Content - Y Content",
           concepts = List(
-            Unidentifiable(Concept(label = "A Content")),
-            Unidentifiable(Period(label = "Y Content"))
+            Concept(label = "A Content"),
+            Period(label = "Y Content")
           )))
 
     val bibData = createSierraBibDataWith(
@@ -152,11 +152,11 @@ class SierraGenresTest
   it("returns subjects for tag 655 with subfields a, z") {
     val expectedGenres =
       List(
-        Genre[Unminted[AbstractConcept]](
+        Genre(
           label = "A Content - Z Content",
           concepts = List(
-            Unidentifiable(Concept(label = "A Content")),
-            Unidentifiable(Place(label = "Z Content"))
+            Concept(label = "A Content"),
+            Place(label = "Z Content")
           )))
 
     val bibData = createSierraBibDataWith(
@@ -196,17 +196,17 @@ class SierraGenresTest
 
     val expectedSubjects =
       List(
-        Genre[Unminted[AbstractConcept]](
+        Genre(
           label = "A1 Content - Z1 Content",
           concepts = List(
-            Unidentifiable(Concept(label = "A1 Content")),
-            Unidentifiable(Place(label = "Z1 Content"))
+            Concept(label = "A1 Content"),
+            Place(label = "Z1 Content")
           )),
-        Genre[Unminted[AbstractConcept]](
+        Genre(
           label = "A2 Content - V2 Content",
           concepts = List(
-            Unidentifiable(Concept(label = "A2 Content")),
-            Unidentifiable(Concept(label = "V2 Content"))
+            Concept(label = "A2 Content"),
+            Concept(label = "V2 Content")
           ))
       )
     assertExtractsGenres(bibData, expectedSubjects)
@@ -252,9 +252,9 @@ class SierraGenresTest
     )
 
     val actualSourceIdentifiers = SierraGenres(createSierraBibNumber, bibData)
-      .map { _.concepts.head }
+      .map { _.concepts.head.id }
       .map {
-        case Identifiable(_: Concept, sourceIdentifier, _, _) =>
+        case Identifiable(sourceIdentifier, _, _) =>
           sourceIdentifier
         case other => assert(false, other)
       }
@@ -262,9 +262,8 @@ class SierraGenresTest
     expectedSourceIdentifiers shouldBe actualSourceIdentifiers
   }
 
-  private def assertExtractsGenres(
-    bibData: SierraBibData,
-    expected: List[Genre[Unminted[AbstractConcept]]]) = {
+  private def assertExtractsGenres(bibData: SierraBibData,
+                                   expected: List[Genre[Unminted]]) = {
     SierraGenres(createSierraBibNumber, bibData) shouldBe expected
   }
 }

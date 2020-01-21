@@ -73,7 +73,7 @@ case class ElasticSearchRequestBuilder(
           List(
             TermsValueSource(
               "label",
-              field = Some("data.genres.concepts.agent.label.keyword"))
+              field = Some("data.genres.concepts.label.keyword"))
           )
         )
         .subAggregations(sortedByCount)
@@ -85,7 +85,7 @@ case class ElasticSearchRequestBuilder(
           List(
             TermsValueSource(
               "label",
-              field = Some("data.subjects.agent.label.keyword")
+              field = Some("data.subjects.label.keyword")
             )
           )
         )
@@ -106,7 +106,7 @@ case class ElasticSearchRequestBuilder(
     case AggregationRequest.License =>
       TermsAggregation("license")
         .size(100)
-        .field("data.items.agent.locations.license.id")
+        .field("data.items.locations.license.id")
   }
 
   lazy val sort = queryOptions.sortBy
@@ -140,7 +140,7 @@ case class ElasticSearchRequestBuilder(
         termQuery(field = "type", value = "IdentifiedWork")
       case ItemLocationTypeFilter(itemLocationTypeIds) =>
         termsQuery(
-          field = "data.items.agent.locations.locationType.id",
+          field = "data.items.locations.locationType.id",
           values = itemLocationTypeIds)
       case WorkTypeFilter(workTypeIds) =>
         termsQuery(field = "data.workType.id", values = workTypeIds)
@@ -156,11 +156,11 @@ case class ElasticSearchRequestBuilder(
           .defaultOperator("AND")
       case SubjectFilter(subjectQuery) =>
         simpleStringQuery(subjectQuery)
-          .field("data.subjects.agent.label")
+          .field("data.subjects.label")
           .defaultOperator("AND")
       case LicenseFilter(licenseIds) =>
         termsQuery(
-          field = "data.items.agent.locations.license.id",
+          field = "data.items.locations.license.id",
           values = licenseIds)
     }
 
