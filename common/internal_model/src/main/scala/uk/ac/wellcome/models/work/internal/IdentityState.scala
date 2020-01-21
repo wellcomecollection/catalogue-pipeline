@@ -13,7 +13,7 @@ sealed trait Unminted extends IdState
 sealed trait Minted extends IdState
 
 /** Represents an ID that has been succesfully mintedo, and thus has a
- *  canonicalId assigned. */
+  *  canonicalId assigned. */
 case class Identified(
   canonicalId: String,
   sourceIdentifier: SourceIdentifier,
@@ -25,7 +25,7 @@ case class Identified(
 }
 
 /** Represents an ID that has not yet been minted, but will have a canonicalId
- *  assigned later in the pipeline. */
+  *  assigned later in the pipeline. */
 case class Identifiable(
   sourceIdentifier: SourceIdentifier,
   otherIdentifiers: List[SourceIdentifier] = Nil,
@@ -37,8 +37,8 @@ case class Identifiable(
 }
 
 /** Represents an ID that has no sourceIdentifier and thus impossible to have a
- *  canonicalId assigned. Note that it is possible for this ID to be either pre
- *  or post minter. */
+  *  canonicalId assigned. Note that it is possible for this ID to be either pre
+  *  or post minter. */
 case object Unidentifiable extends IdState with Unminted with Minted {
   def maybeCanonicalId = None
   def allSourceIdentifiers = Nil
