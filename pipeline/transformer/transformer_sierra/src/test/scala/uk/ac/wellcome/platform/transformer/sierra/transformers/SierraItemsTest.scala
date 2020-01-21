@@ -36,7 +36,7 @@ class SierraItemsTest extends FunSpec with Matchers with SierraDataGenerators {
       itemDataMap = Map(itemId -> itemData)
     ).head
 
-    transformedItem.id.otherIds shouldBe expectedIdentifiers
+    transformedItem.id.allSourceIdentifiers shouldBe expectedIdentifiers
   }
 
   it("uses the full Sierra system number as the source identifier") {

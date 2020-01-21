@@ -1,8 +1,8 @@
 package uk.ac.wellcome.models.work.internal
 
 sealed trait IdState {
-  def id: Option[String]
-  def otherIds: List[SourceIdentifier]
+  def maybeCanonicalId: Option[String]
+  def allSourceIdentifiers: List[SourceIdentifier]
 }
 
 sealed trait Unminted extends IdState
@@ -15,8 +15,8 @@ case class Identified(
   otherIdentifiers: List[SourceIdentifier] = Nil,
 ) extends IdState
     with Minted {
-  def id = Some(canonicalId)
-  def otherIds = sourceIdentifier +: otherIdentifiers
+  def maybeCanonicalId = Some(canonicalId)
+  def allSourceIdentifiers = sourceIdentifier +: otherIdentifiers
 }
 
 case class Identifiable(
@@ -25,13 +25,13 @@ case class Identifiable(
   identifiedType: String = classOf[Identified].getSimpleName,
 ) extends IdState
     with Unminted {
-  def id = None
-  def otherIds = sourceIdentifier +: otherIdentifiers
+  def maybeCanonicalId = None
+  def allSourceIdentifiers = sourceIdentifier +: otherIdentifiers
 }
 
 case object Unidentifiable extends IdState with Unminted with Minted {
-  def id = None
-  def otherIds = Nil
+  def maybeCanonicalId = None
+  def allSourceIdentifiers = Nil
 }
 
 trait HasIdState[+Id] {

@@ -33,10 +33,10 @@ object DisplayItemV2 extends GetIdentifiers {
 
   def apply(item: Item[Minted], includesIdentifiers: Boolean): DisplayItemV2 =
     item match {
-      case Item(idState, title, locations, _) =>
+      case Item(id, title, locations, _) =>
         DisplayItemV2(
-          id = idState.id,
-          identifiers = getIdentifiers(idState, includesIdentifiers),
+          id = id.maybeCanonicalId,
+          identifiers = getIdentifiers(id, includesIdentifiers),
           title = title,
           locations = locations.map(DisplayLocationV2(_))
         )

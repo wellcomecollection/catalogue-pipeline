@@ -34,23 +34,23 @@ case object DisplayAbstractConcept extends GetIdentifiers {
   def apply(abstractConcept: AbstractConcept[Minted],
             includesIdentifiers: Boolean): DisplayAbstractConcept =
     abstractConcept match {
-      case Concept(idState, label) =>
+      case Concept(id, label) =>
         DisplayConcept(
-          id = idState.id,
+          id = id.maybeCanonicalId,
           label = label,
-          identifiers = getIdentifiers(idState, includesIdentifiers)
+          identifiers = getIdentifiers(id, includesIdentifiers)
         )
-      case Period(idState, label, range) =>
+      case Period(id, label, range) =>
         DisplayPeriod(
-          id = idState.id,
+          id = id.maybeCanonicalId,
           label = label,
-          identifiers = getIdentifiers(idState, includesIdentifiers)
+          identifiers = getIdentifiers(id, includesIdentifiers)
         )
-      case Place(idState, label) =>
+      case Place(id, label) =>
         DisplayPlace(
-          id = idState.id,
+          id = id.maybeCanonicalId,
           label = label,
-          identifiers = getIdentifiers(idState, includesIdentifiers)
+          identifiers = getIdentifiers(id, includesIdentifiers)
         )
     }
 }
@@ -137,31 +137,31 @@ case object DisplayAbstractAgentV2 extends GetIdentifiers {
   def apply(agent: AbstractAgent[Minted],
             includesIdentifiers: Boolean): DisplayAbstractAgentV2 =
     agent match {
-      case Agent(idState, label) =>
+      case Agent(id, label) =>
         DisplayAgentV2(
-          id = idState.id,
+          id = id.maybeCanonicalId,
           label = label,
-          identifiers = getIdentifiers(idState, includesIdentifiers),
+          identifiers = getIdentifiers(id, includesIdentifiers),
         )
-      case Person(idState, label, prefix, numeration) =>
+      case Person(id, label, prefix, numeration) =>
         DisplayPersonV2(
-          id = idState.id,
+          id = id.maybeCanonicalId,
           label = label,
           numeration = numeration,
           prefix = prefix,
-          identifiers = getIdentifiers(idState, includesIdentifiers)
+          identifiers = getIdentifiers(id, includesIdentifiers)
         )
-      case Organisation(idState, label) =>
+      case Organisation(id, label) =>
         DisplayOrganisationV2(
-          id = idState.id,
+          id = id.maybeCanonicalId,
           label = label,
-          identifiers = getIdentifiers(idState, includesIdentifiers),
+          identifiers = getIdentifiers(id, includesIdentifiers),
         )
-      case Meeting(idState, label) =>
+      case Meeting(id, label) =>
         DisplayMeetingV2(
-          id = idState.id,
+          id = id.maybeCanonicalId,
           label = label,
-          identifiers = getIdentifiers(idState, includesIdentifiers),
+          identifiers = getIdentifiers(id, includesIdentifiers),
         )
     }
 }
@@ -245,9 +245,9 @@ case class DisplayMeetingV2(
 
 trait GetIdentifiers {
 
-  protected def getIdentifiers(idState: IdState, includesIdentifiers: Boolean) =
+  protected def getIdentifiers(id: IdState, includesIdentifiers: Boolean) =
     if (includesIdentifiers)
-      Option(idState.otherIds.map(DisplayIdentifierV2(_)))
+      Option(id.allSourceIdentifiers.map(DisplayIdentifierV2(_)))
         .filter(_.nonEmpty)
     else
       None

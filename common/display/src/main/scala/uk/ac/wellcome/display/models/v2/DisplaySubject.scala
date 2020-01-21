@@ -21,10 +21,10 @@ object DisplaySubject extends GetIdentifiers {
   def apply(subject: Subject[Minted],
             includesIdentifiers: Boolean): DisplaySubject =
     subject match {
-      case Subject(idState, label, concepts, _) =>
+      case Subject(id, label, concepts, _) =>
         DisplaySubject(
-          id = idState.id,
-          identifiers = getIdentifiers(idState, includesIdentifiers),
+          id = id.maybeCanonicalId,
+          identifiers = getIdentifiers(id, includesIdentifiers),
           label = label,
           concepts =
             concepts.map(DisplayAbstractRootConcept(_, includesIdentifiers))
