@@ -52,7 +52,7 @@ class Router(elasticClient: ElasticClient,
                 }
               },
               path("context.json") {
-                getFromFile(context.getPath)
+                getFromResource("context-v2.json")
               },
               path("swagger.json") {
                 swagger
@@ -236,8 +236,6 @@ class Router(elasticClient: ElasticClient,
     }
 
   val swaggerDocs = new SwaggerDocs(apiConfig)
-
-  lazy val context = getClass.getResource("/context-v2.json")
 
   lazy val contextUri =
     apiConfig match {
