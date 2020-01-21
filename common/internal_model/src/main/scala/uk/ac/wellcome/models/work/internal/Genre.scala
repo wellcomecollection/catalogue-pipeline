@@ -1,7 +1,7 @@
 package uk.ac.wellcome.models.work.internal
 
-case class Genre[+T <: IdentityState[AbstractConcept]](
+case class Genre[+Id](
   label: String,
-  concepts: List[T] = List(),
+  concepts: List[AbstractConcept[Id]] = Nil,
   ontologyType: String = "Genre"
 )

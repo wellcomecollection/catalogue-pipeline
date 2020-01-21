@@ -90,14 +90,17 @@ class ApiV2WorksAggregationsTest extends ApiV2WorksTestBase {
   it("supports fetching the genre aggregation") {
     withApi {
       case (indexV2, routes) =>
-        val concept0 = Unidentifiable(Concept("conceptLabel"))
-        val concept1 = Unidentifiable(Place("placeLabel"))
-        val concept2 = Identified(
-          canonicalId = createCanonicalId,
-          sourceIdentifier = createSourceIdentifierWith(
-            ontologyType = "Period"
+        val concept0 = Concept("conceptLabel")
+        val concept1 = Place("placeLabel")
+        val concept2 = Period(
+          id = Identified(
+            canonicalId = createCanonicalId,
+            sourceIdentifier = createSourceIdentifierWith(
+              ontologyType = "Period"
+            )
           ),
-          agent = Period("periodLabel")
+          label = "periodLabel",
+          range = None
         )
 
         val genre = Genre(

@@ -19,21 +19,20 @@ case class MetsData(
     for {
       maybeLicense <- parseLicense
       accessStatus <- parseAccessStatus
-      unidentifiableItem: Unminted[Item] = Unidentifiable(
-        Item(locations = List(digitalLocation(maybeLicense, accessStatus))))
+      item = Item(
+        id = Unidentifiable,
+        locations = List(digitalLocation(maybeLicense, accessStatus)))
     } yield
       UnidentifiedInvisibleWork(
         version = version,
         sourceIdentifier = sourceIdentifier,
-        workData(
-          unidentifiableItem,
-          thumbnail(maybeLicense, sourceIdentifier.value))
+        workData(item, thumbnail(maybeLicense, sourceIdentifier.value))
       )
 
-  private def workData(unidentifiableItem: Unminted[Item],
+  private def workData(item: Item[Unminted],
                        thumbnail: Option[DigitalLocation]) =
     WorkData(
-      items = List(unidentifiableItem),
+      items = List(item),
       mergeCandidates = List(mergeCandidate),
       thumbnail = thumbnail,
     )
@@ -81,6 +80,7 @@ case class MetsData(
         case "open"                  => Right(AccessStatus.Open)
         case "requires registration" => Right(AccessStatus.OpenWithAdvisory)
         case "restricted"            => Right(AccessStatus.Restricted)
+        case "restricted files"      => Right(AccessStatus.Restricted)
         case "clinical images"       => Right(AccessStatus.Restricted)
         case "closed"                => Right(AccessStatus.Closed)
         case "in copyright"          => Right(AccessStatus.LicensedResources)

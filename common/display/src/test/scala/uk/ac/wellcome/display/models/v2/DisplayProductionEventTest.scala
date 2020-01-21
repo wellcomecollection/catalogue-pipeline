@@ -12,7 +12,7 @@ class DisplayProductionEventTest
     val productionEvent = ProductionEvent(
       label = "London, Macmillan, 2005",
       places = List(Place("London")),
-      agents = List(Unidentifiable(Agent("Macmillan"))),
+      agents = List(Agent("Macmillan")),
       dates = List(Period("2005")),
       function = Some(Concept("Manufacture"))
     )

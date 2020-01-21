@@ -14,26 +14,26 @@ trait SierraAgents extends SierraQueryOps {
   //  - subfield $c populates the person prefixes
   //
   def getPerson(subfields: List[MarcSubfield],
-                normalisePerson: Boolean = false): Option[Person] =
+                normalisePerson: Boolean = false): Option[Person[Unminted]] =
     getLabel(subfields).map { label =>
       // The rule is to only normalise the 'Person' label when a contributor.  Strictly a 'Person' within
       // 'Subjects' (sourced from Marc 600) should not be normalised -- however, as these labels
       // are not expected to have punctuation normalisation should not change the 'Person' label for 'Subjects'
       // In which case normalisation is effectively a no-op and the test can be removed and Person.normalised
       // always returned when confident in the data.
-      if (normalisePerson) {
+      if (normalisePerson)
         Person.normalised(
           label = label,
           prefix = None,
           numeration = None
         )
-      } else {
+      else
         Person(
+          id = Unidentifiable,
           label = label,
           prefix = None,
           numeration = None
         )
-      }
     }
 
   // This is used to construct an Organisation from MARC tags 110 and 710.
@@ -41,12 +41,13 @@ trait SierraAgents extends SierraQueryOps {
   //  - Subfield $a is "label"
   //  - Subfield $0 is used to populate "identifiers". The identifier scheme is lc-names.
   //
-  def getOrganisation(subfields: List[MarcSubfield]): Option[Organisation] =
+  def getOrganisation(
+    subfields: List[MarcSubfield]): Option[Organisation[Unminted]] =
     getLabel(subfields).map { label =>
       Organisation.normalised(label = label)
     }
 
-  def getMeeting(subfields: List[MarcSubfield]): Option[Meeting] =
+  def getMeeting(subfields: List[MarcSubfield]): Option[Meeting[Unminted]] =
     getLabel(subfields.withTags("a", "c", "d", "j", "t", "0"))
       .map { label =>
         Meeting.normalised(label = label)
@@ -58,9 +59,8 @@ trait SierraAgents extends SierraQueryOps {
    * This methods them (if present) and wraps the agent in Unidentifiable or Identifiable
    * as appropriate.
    */
-  def identify[T](subfields: List[MarcSubfield],
-                  agent: T,
-                  ontologyType: String): Unminted[T] = {
+  def identify(subfields: List[MarcSubfield],
+               ontologyType: String): Unminted = {
 
     // We take the contents of subfield $0.  They may contain inconsistent
     // spacing and punctuation, such as:
@@ -81,18 +81,15 @@ trait SierraAgents extends SierraQueryOps {
     // Some records have multiple instances of subfield $0 (it's a repeatable
     // field in the MARC spec).
     codes.distinct match {
-      case Seq(code) => {
-        val sourceIdentifier = SourceIdentifier(
-          identifierType = IdentifierType("lc-names"),
-          value = code,
-          ontologyType = ontologyType
-        )
+      case Seq(code) =>
         Identifiable(
-          agent = agent,
-          sourceIdentifier = sourceIdentifier
+          SourceIdentifier(
+            identifierType = IdentifierType("lc-names"),
+            value = code,
+            ontologyType = ontologyType
+          )
         )
-      }
-      case _ => Unidentifiable(agent)
+      case _ => Unidentifiable
     }
   }
 

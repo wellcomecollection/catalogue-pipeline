@@ -66,7 +66,7 @@ object SierraConceptSubjects
       }
 
       val label = getLabel(primarySubfields, subdivisionSubfields)
-      val concepts: List[Unminted[AbstractConcept]] = getPrimaryConcept(
+      val concepts: List[AbstractConcept[Unminted]] = getPrimaryConcept(
         primarySubfields,
         varField = varfield) ++ getSubdivisions(subdivisionSubfields)
 
@@ -75,21 +75,18 @@ object SierraConceptSubjects
         concepts = concepts
       )
 
-      identifyConcept(subject, varField = varfield)
+      subject.copy(id = identifyConcept(subject, varfield))
     }
   }
 
   private def getPrimaryConcept(
     primarySubfields: List[MarcSubfield],
-    varField: VarField): List[Unminted[AbstractConcept]] = {
+    varField: VarField): List[AbstractConcept[Unminted]] =
     primarySubfields.map { subfield =>
-      val concept = varField.marcTag.get match {
+      varField.marcTag.get match {
         case "650" => Concept(label = subfield.content)
         case "648" => Period(label = subfield.content)
         case "651" => Place(label = subfield.content)
       }
-
-      Unidentifiable(concept)
     }
-  }
 }

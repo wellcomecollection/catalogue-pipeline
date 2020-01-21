@@ -35,11 +35,9 @@ class SierraBrandNameSubjectsTest
       varField("652", MarcSubfield("a", "Content")),
     )
     SierraBrandNameSubjects(bibId, data) shouldBe List(
-      Unidentifiable(
-        Subject(
-          label = "Content",
-          concepts = List(Unidentifiable(Concept(label = "Content")))
-        )
+      Subject(
+        label = "Content",
+        concepts = List(Concept(label = "Content"))
       )
     )
   }
@@ -57,17 +55,13 @@ class SierraBrandNameSubjectsTest
       varField("652", MarcSubfield("a", "Second")),
     )
     SierraBrandNameSubjects(bibId, data) shouldBe List(
-      Unidentifiable(
-        Subject(
-          label = "First",
-          concepts = List(Unidentifiable(Concept(label = "First")))
-        )
+      Subject(
+        label = "First",
+        concepts = List(Concept(label = "First"))
       ),
-      Unidentifiable(
-        Subject(
-          label = "Second",
-          concepts = List(Unidentifiable(Concept(label = "Second")))
-        )
+      Subject(
+        label = "Second",
+        concepts = List(Concept(label = "Second"))
       )
     )
   }

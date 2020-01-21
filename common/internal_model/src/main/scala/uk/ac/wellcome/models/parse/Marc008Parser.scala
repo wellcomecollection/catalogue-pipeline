@@ -2,19 +2,14 @@ package uk.ac.wellcome.models.parse
 
 import fastparse._, NoWhitespace._
 
-import uk.ac.wellcome.models.work.internal.{
-  AbstractAgent,
-  Period,
-  ProductionEvent,
-  Unminted
-}
+import uk.ac.wellcome.models.work.internal.{Period, ProductionEvent, Unminted}
 
 /**
   *  Parses Marc 008 fields into ProductionEvent
   *
   *  Spec: https://www.loc.gov/marc/bibliographic/bd008a.html
   */
-object Marc008Parser extends Parser[ProductionEvent[Unminted[AbstractAgent]]] {
+object Marc008Parser extends Parser[ProductionEvent[Unminted]] {
 
   def parser[_: P] =
     (Start ~ createdDate ~ Marc008DateParser.parser ~ MarcPlaceParser.parser.?)

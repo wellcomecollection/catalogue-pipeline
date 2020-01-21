@@ -34,11 +34,9 @@ class SierraPersonSubjectsTest
     )
 
     SierraPersonSubjects(bibId, bibData) shouldBe List(
-      Unidentifiable(
-        Subject(
-          label = "A Content",
-          concepts = List(Unidentifiable(Person(label = "A Content")))
-        )
+      Subject(
+        label = "A Content",
+        concepts = List(Person(label = "A Content"))
       )
     )
   }
@@ -57,13 +55,10 @@ class SierraPersonSubjectsTest
     )
 
     SierraPersonSubjects(bibId, bibData) shouldBe List(
-      Unidentifiable(
-        Subject(
-          label = "Larrey, D. J. baron",
-          concepts = List(
-            Unidentifiable(
-              Person(label = "Larrey, D. J. baron")
-            ))
+      Subject(
+        label = "Larrey, D. J. baron",
+        concepts = List(
+          Person(label = "Larrey, D. J. baron")
         )
       )
     )
@@ -84,12 +79,9 @@ class SierraPersonSubjectsTest
     )
 
     SierraPersonSubjects(bibId, bibData) shouldBe List(
-      Unidentifiable(
-        Subject(
-          label = "David Attenborough sir doctor",
-          concepts = List(
-            Unidentifiable(Person(label = "David Attenborough sir doctor")))
-        )
+      Subject(
+        label = "David Attenborough sir doctor",
+        concepts = List(Person(label = "David Attenborough sir doctor"))
       )
     )
   }
@@ -108,12 +100,9 @@ class SierraPersonSubjectsTest
     )
 
     SierraPersonSubjects(bibId, bibData) shouldBe List(
-      Unidentifiable(
-        Subject(
-          label = "David Attenborough II",
-          concepts =
-            List(Unidentifiable(Person(label = "David Attenborough II")))
-        )
+      Subject(
+        label = "David Attenborough II",
+        concepts = List(Person(label = "David Attenborough II"))
       )
     )
   }
@@ -132,11 +121,9 @@ class SierraPersonSubjectsTest
     )
 
     SierraPersonSubjects(bibId, bibData) shouldBe List(
-      Unidentifiable(
-        Subject(
-          label = "David Attenborough, author",
-          concepts = List(Unidentifiable(Person(label = "David Attenborough,")))
-        )
+      Subject(
+        label = "David Attenborough, author",
+        concepts = List(Person(label = "David Attenborough,"))
       )
     )
   }
@@ -157,12 +144,11 @@ class SierraPersonSubjectsTest
     )
 
     SierraPersonSubjects(bibId, bibData) shouldBe List(
-      Unidentifiable(
-        Subject(
-          label = "Rita Levi Montalcini, 22 April 1909 – 30 December 2012",
-          concepts = List(Unidentifiable(Person(
-            label = "Rita Levi Montalcini, 22 April 1909 – 30 December 2012")))
-        )
+      Subject(
+        label = "Rita Levi Montalcini, 22 April 1909 – 30 December 2012",
+        concepts = List(
+          Person(
+            label = "Rita Levi Montalcini, 22 April 1909 – 30 December 2012"))
       )
     )
   }
@@ -182,11 +168,9 @@ class SierraPersonSubjectsTest
     )
 
     SierraPersonSubjects(bibId, bibData) shouldBe List(
-      Unidentifiable(
-        Subject(
-          label = "David Attenborough, author, editor",
-          concepts = List(Unidentifiable(Person(label = "David Attenborough,")))
-        )
+      Subject(
+        label = "David Attenborough, author, editor",
+        concepts = List(Person(label = "David Attenborough,"))
       )
     )
   }
@@ -232,14 +216,10 @@ class SierraPersonSubjectsTest
     )
 
     SierraPersonSubjects(bibId, bibData) shouldBe List(
-      Identifiable(
-        Subject(
-          label = "Gerry the Garlic",
-          concepts = List(
-            Unidentifiable(Person(label = "Gerry the Garlic"))
-          )
-        ),
-        sourceIdentifier = sourceIdentifier
+      Subject(
+        id = Identifiable(sourceIdentifier),
+        label = "Gerry the Garlic",
+        concepts = List(Person(label = "Gerry the Garlic"))
       )
     )
   }
@@ -260,11 +240,9 @@ class SierraPersonSubjectsTest
     )
 
     SierraPersonSubjects(bibId, bibData) shouldBe List(
-      Unidentifiable(
-        Subject(
-          label = "Gerry the Garlic",
-          concepts = List(Unidentifiable(Person(label = "Gerry the Garlic")))
-        )
+      Subject(
+        label = "Gerry the Garlic",
+        concepts = List(Person(label = "Gerry the Garlic"))
       )
     )
   }
@@ -290,15 +268,15 @@ class SierraPersonSubjectsTest
     val subject = actualSubjects.head
 
     it("in the concepts") {
-      subject.agent.concepts shouldBe List(
-        Unidentifiable(Person("Shakespeare, William,")),
-        Unidentifiable(Concept("Characters")),
-        Unidentifiable(Concept("Hamlet."))
+      subject.concepts shouldBe List(
+        Person("Shakespeare, William,"),
+        Concept("Characters"),
+        Concept("Hamlet.")
       )
     }
 
     it("in the label") {
-      subject.agent.label shouldBe "Shakespeare, William, Characters Hamlet."
+      subject.label shouldBe "Shakespeare, William, Characters Hamlet."
     }
   }
 
@@ -322,13 +300,11 @@ class SierraPersonSubjectsTest
     val subject = actualSubjects.head
 
     it("in the concepts") {
-      subject.agent.concepts shouldBe List(
-        Unidentifiable(Person("Aristophanes. Birds.")),
-      )
+      subject.concepts shouldBe List(Person("Aristophanes. Birds."))
     }
 
     it("in the label") {
-      subject.agent.label shouldBe "Aristophanes. Birds."
+      subject.label shouldBe "Aristophanes. Birds."
     }
   }
 }

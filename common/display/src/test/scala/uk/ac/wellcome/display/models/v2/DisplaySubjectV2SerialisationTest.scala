@@ -17,14 +17,16 @@ class DisplaySubjectV2SerialisationTest
     with SubjectGenerators {
 
   it("serialises a DisplaySubject constructed from a Subject") {
-    val concept0 = Unidentifiable(Concept("conceptLabel"))
-    val concept1 = Unidentifiable(Period("periodLabel"))
-    val concept2 = Identified(
-      canonicalId = createCanonicalId,
-      sourceIdentifier = createSourceIdentifierWith(
-        ontologyType = "Place"
-      ),
-      agent = Place("placeLabel")
+    val concept0 = Concept(label = "conceptLabel")
+    val concept1 = Period(label = "periodLabel")
+    val concept2 = Place(
+      label = "placeLabel",
+      id = Identified(
+        canonicalId = "ABC",
+        sourceIdentifier = createSourceIdentifierWith(
+          ontologyType = "Place"
+        )
+      )
     )
 
     val subject = createSubjectWith(
@@ -34,90 +36,84 @@ class DisplaySubjectV2SerialisationTest
     assertObjectMapsToJson(
       DisplaySubject(subject, includesIdentifiers = true),
       expectedJson = s"""
-         |  {
-         |    "label" : "${subject.agent.label}",
-         |    "concepts" : [
-         |      {
-         |        "label" : "${concept0.agent.label}",
-         |        "type" : "${ontologyType(concept0.agent)}"
-         |      },
-         |      {
-         |        "label" : "${concept1.agent.label}",
-         |        "type" : "${ontologyType(concept1.agent)}"
-         |      },
-         |      {
-         |        "id": "${concept2.canonicalId}",
-         |        "identifiers": [${identifier(concept2.identifiers(0))}],
-         |        "label" : "${concept2.agent.label}",
-         |        "type" : "${ontologyType(concept2.agent)}"
-         |      }
-         |    ],
-         |    "type" : "${subject.agent.ontologyType}"
-         |  }
-          """.stripMargin
+        {
+          "label" : "${subject.label}",
+          "concepts" : [
+            {
+              "label" : "conceptLabel",
+              "type" : "Concept"
+            },
+            {
+              "label" : "periodLabel",
+              "type" : "Period"
+            },
+            {
+              "id": "ABC",
+              "identifiers": [${identifier(concept2.id.sourceIdentifier)}],
+              "label" : "placeLabel",
+              "type" : "Place"
+            }
+          ],
+          "type" : "Subject"
+        }
+      """
     )
   }
 
   it("serialises a DisplaySubject from a Subject with a Person concept") {
     val person = Person("Dolly Parton")
-    val subject = createSubjectWith(
-      concepts = List(Unidentifiable(person))
-    )
+    val subject = createSubjectWith(concepts = List(person))
     assertObjectMapsToJson(
       DisplaySubject(subject, includesIdentifiers = true),
       expectedJson = s"""
-                        |  {
-                        |    "label" : "${subject.agent.label}",
-                        |    "concepts" : [
-                        |      {
-                        |        "label" : "${person.label}",
-                        |        "type" : "${ontologyType(person)}"
-                        |      }],
-                        |    "type" : "${subject.agent.ontologyType}"
-                        |  }
-          """.stripMargin
+        {
+          "label" : "${subject.label}",
+          "concepts" : [
+            {
+              "label" : "Dolly Parton",
+              "type" : "Person"
+            }],
+          "type" : "Subject"
+        }
+      """
     )
   }
 
   it("serialises a DisplaySubject from a Subject with a Agent concept") {
     val agent = Agent("Dolly Parton")
-    val subject = createSubjectWith(
-      concepts = List(Unidentifiable(agent))
-    )
+    val subject = createSubjectWith(concepts = List(agent))
     assertObjectMapsToJson(
       DisplaySubject(subject, includesIdentifiers = true),
       expectedJson = s"""
-                        |  {
-                        |    "label" : "${subject.agent.label}",
-                        |    "concepts" : [
-                        |      {
-                        |        "label" : "${agent.label}",
-                        |        "type" : "${ontologyType(agent)}"
-                        |      }],
-                        |    "type" : "${subject.agent.ontologyType}"
-                        |  }
-          """.stripMargin
+        {
+          "label" : "${subject.label}",
+          "concepts" : [
+            {
+              "label" : "Dolly Parton",
+              "type" : "Agent"
+            }],
+          "type" : "Subject"
+        }
+      """
     )
   }
 
   it("serialises a DisplaySubject from a Subject with a Organisation concept") {
     val organisation = Organisation("Dolly Parton")
-    val subject = createSubjectWith(
-      concepts = List(Unidentifiable(organisation))
-    )
+    val subject = createSubjectWith(concepts = List(organisation))
     assertObjectMapsToJson(
       DisplaySubject(subject, includesIdentifiers = true),
       expectedJson = s"""
-                        |  {
-                        |    "label" : "${subject.agent.label}",
-                        |    "concepts" : [
-                        |      {
-                        |        "label" : "${organisation.label}",
-                        |        "type" : "${ontologyType(organisation)}"
-                        |      }],
-                        |    "type" : "${subject.agent.ontologyType}"
-                        |  }
-          """.stripMargin
+        {
+          "label" : "${subject.label}",
+          "concepts" : [
+            {
+              "label" : "Dolly Parton",
+              "type" : "Organisation"
+            }],
+          "type" : "Subject"
+        }
+      """
     )
   }
 }

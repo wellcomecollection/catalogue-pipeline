@@ -42,13 +42,14 @@ object SierraOrganisationSubjects
       )
 
       varField.indicator2 match {
-        case Some("0") => identify(varField.subfields, subject, "Subject")
-        case _         => Unidentifiable(subject)
+        case Some("0") =>
+          subject.copy(id = identify(varField.subfields, "Subject"))
+        case _ => subject
       }
     }
 
   private def createOrganisation(bibId: SierraBibNumber,
-                                 varField: VarField): Unminted[Organisation] = {
+                                 varField: VarField): Organisation[Unminted] = {
     val label = createLabel(varField, subfieldTags = List("a", "b"))
 
     // @@AWLC: I'm not sure if this can happen in practice -- but we don't have
@@ -60,6 +61,6 @@ object SierraOrganisationSubjects
         s"Not enough information to build a label on $varField")
     }
 
-    Unidentifiable(Organisation(label = label))
+    Organisation(label = label)
   }
 }

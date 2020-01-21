@@ -49,7 +49,7 @@ object SierraGenres
     with SierraQueryOps
     with SierraConcepts {
 
-  type Output = List[Genre[Unminted[AbstractConcept]]]
+  type Output = List[Genre[Unminted]]
 
   def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
     bibData
@@ -61,26 +61,19 @@ object SierraGenres
             .partition { _.tag == "a" }
 
         val label = getLabel(primarySubfields, subdivisionSubfields)
-        val concepts: List[Unminted[AbstractConcept]] = getPrimaryConcept(
-          primarySubfields,
-          varField = varField) ++ getSubdivisions(subdivisionSubfields)
+        val concepts = getPrimaryConcept(primarySubfields, varField = varField) ++ getSubdivisions(
+          subdivisionSubfields)
 
-        Genre[Unminted[AbstractConcept]](
-          label = label,
-          concepts = concepts
-        )
+        Genre(label = label, concepts = concepts)
       }
 
   // Extract the primary concept, which comes from subfield $a.  This is the
   // only concept which might be identified.
   private def getPrimaryConcept(
     primarySubfields: List[MarcSubfield],
-    varField: VarField): List[Unminted[AbstractConcept]] = {
+    varField: VarField): List[AbstractConcept[Unminted]] =
     primarySubfields.map { subfield =>
-      identifyConcept(
-        concept = Concept(label = subfield.content),
-        varField = varField
-      )
+      val concept = Concept(label = subfield.content)
+      concept.copy(id = identifyConcept(concept, varField))
     }
-  }
 }

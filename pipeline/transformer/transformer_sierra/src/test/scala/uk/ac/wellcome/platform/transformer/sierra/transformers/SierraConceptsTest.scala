@@ -11,7 +11,7 @@ class SierraConceptsTest extends FunSpec with Matchers with MarcGenerators {
     val concept =
       Concept(label = "Perservering puffins push past perspiration")
 
-    val maybeIdentifiedConcept = transformer.identifyConcept[Concept](
+    val maybeIdentifiedConcept = transformer.identifyConcept(
       concept = concept,
       varField = createVarFieldWith(
         marcTag = "CCC",
@@ -29,16 +29,13 @@ class SierraConceptsTest extends FunSpec with Matchers with MarcGenerators {
       ontologyType = "Concept"
     )
 
-    maybeIdentifiedConcept shouldBe Identifiable(
-      concept,
-      sourceIdentifier = sourceIdentifier
-    )
+    maybeIdentifiedConcept shouldBe Identifiable(sourceIdentifier)
   }
 
   it("normalises and deduplicates identifiers in subfield 0") {
     val concept = Concept(label = "Metaphysical mice migrating to Mars")
 
-    val maybeIdentifiedConcept = transformer.identifyConcept[Concept](
+    val maybeIdentifiedConcept = transformer.identifyConcept(
       concept = concept,
       varField = createVarFieldWith(
         marcTag = "CCC",
@@ -67,16 +64,13 @@ class SierraConceptsTest extends FunSpec with Matchers with MarcGenerators {
       ontologyType = "Concept"
     )
 
-    maybeIdentifiedConcept shouldBe Identifiable(
-      concept,
-      sourceIdentifier = sourceIdentifier
-    )
+    maybeIdentifiedConcept shouldBe Identifiable(sourceIdentifier)
   }
 
   it("ignores multiple instances of subfield 0 in the otherIdentifiers") {
     val concept = Concept(label = "Hitchhiking horses hurry home")
 
-    val maybeIdentifiedConcept = transformer.identifyConcept[Concept](
+    val maybeIdentifiedConcept = transformer.identifyConcept(
       concept = concept,
       varField = createVarFieldWith(
         marcTag = "CCC",
@@ -88,9 +82,7 @@ class SierraConceptsTest extends FunSpec with Matchers with MarcGenerators {
       )
     )
 
-    maybeIdentifiedConcept shouldBe Unidentifiable(
-      concept
-    )
+    maybeIdentifiedConcept shouldBe Unidentifiable
   }
 
   val transformer = new SierraConcepts {}

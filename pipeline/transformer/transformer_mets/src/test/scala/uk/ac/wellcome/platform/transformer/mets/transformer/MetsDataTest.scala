@@ -26,8 +26,8 @@ class MetsDataTest
       LocationType("iiif-presentation"),
       license = Some(License.CCBYNC))
 
-    val unidentifiableItem: Unminted[Item] =
-      Unidentifiable(Item(locations = List(digitalLocation)))
+    val unidentifiableItem =
+      Item(id = Unidentifiable, locations = List(digitalLocation))
     metsData.toWork(version).right.get shouldBe UnidentifiedInvisibleWork(
       version = version,
       sourceIdentifier = expectedSourceIdentifier,
@@ -61,8 +61,8 @@ class MetsDataTest
     val digitalLocation =
       DigitalLocation(url, LocationType("iiif-presentation"), license = None)
 
-    val unidentifiableItem: Unminted[Item] =
-      Unidentifiable(Item(locations = List(digitalLocation)))
+    val unidentifiableItem =
+      Item(id = Unidentifiable, locations = List(digitalLocation))
     metsData.toWork(version).right.get shouldBe UnidentifiedInvisibleWork(
       version = version,
       sourceIdentifier = expectedSourceIdentifier,
@@ -99,8 +99,11 @@ class MetsDataTest
         accessConditionDz = Some("in copyright"))
     inside(metsData.toWork(1).right.get.data.items) {
       case List(
-          Unidentifiable(
-            Item(_, List(DigitalLocation(_, _, license, _, _, _)), _))) =>
+          Item(
+            Unidentifiable,
+            _,
+            List(DigitalLocation(_, _, license, _, _, _)),
+            _)) =>
         license shouldBe Some(License.InCopyright)
     }
   }
@@ -112,8 +115,11 @@ class MetsDataTest
         accessConditionDz = Some("In copyright"))
     inside(metsData.toWork(1).right.get.data.items) {
       case List(
-          Unidentifiable(
-            Item(_, List(DigitalLocation(_, _, license, _, _, _)), _))) =>
+          Item(
+            Unidentifiable,
+            _,
+            List(DigitalLocation(_, _, license, _, _, _)),
+            _)) =>
         license shouldBe Some(License.InCopyright)
     }
   }
@@ -125,8 +131,11 @@ class MetsDataTest
         accessConditionDz = Some(License.InCopyright.url))
     inside(metsData.toWork(1).right.get.data.items) {
       case List(
-          Unidentifiable(
-            Item(_, List(DigitalLocation(_, _, license, _, _, _)), _))) =>
+          Item(
+            Unidentifiable,
+            _,
+            List(DigitalLocation(_, _, license, _, _, _)),
+            _)) =>
         license shouldBe Some(License.InCopyright)
     }
   }
@@ -184,7 +193,7 @@ class MetsDataTest
       accessConditionStatus = Some("Requires registration"),
     ).toWork(1)
     result shouldBe a[Right[_, _]]
-    inside(result.right.get.data.items.head.agent.locations.head) {
+    inside(result.right.get.data.items.head.locations.head) {
       case DigitalLocation(_, _, _, _, accessConditions, _) =>
         accessConditions shouldBe Some(
           List(
@@ -203,13 +212,31 @@ class MetsDataTest
       accessConditionUsage = Some("Please ask nicely")
     ).toWork(1)
     result shouldBe a[Right[_, _]]
-    inside(result.right.get.data.items.head.agent.locations.head) {
+    inside(result.right.get.data.items.head.locations.head) {
       case DigitalLocation(_, _, _, _, accessConditions, _) =>
         accessConditions shouldBe Some(
           List(
             AccessCondition(
               status = AccessStatus.Restricted,
               terms = Some("Please ask nicely")
+            )
+          )
+        )
+    }
+  }
+
+  it("maps restricted files to Restricted AccessCondition") {
+    val result = MetsData(
+      recordIdentifier = "ID",
+      accessConditionStatus = Some("Restricted files")
+    ).toWork(1)
+    result shouldBe a[Right[_, _]]
+    inside(result.right.get.data.items.head.locations.head) {
+      case DigitalLocation(_, _, _, _, accessConditions, _) =>
+        accessConditions shouldBe Some(
+          List(
+            AccessCondition(
+              status = AccessStatus.Restricted
             )
           )
         )

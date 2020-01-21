@@ -14,26 +14,13 @@ sealed trait DisplayAbstractRootConcept {
 }
 
 object DisplayAbstractRootConcept {
-  def apply(abstractConcept: Minted[AbstractRootConcept],
+  def apply(abstractConcept: AbstractRootConcept[Minted],
             includesIdentifiers: Boolean): DisplayAbstractRootConcept =
     abstractConcept match {
-      // Horribleness to circumvent Java type erasure ಠ_ಠ
-      case agentConcept @ Unidentifiable(_: AbstractAgent) =>
-        DisplayAbstractAgentV2(
-          agentConcept.asInstanceOf[Minted[AbstractAgent]],
-          includesIdentifiers)
-      case agentConcept @ Identified(_: AbstractAgent, _, _, _) =>
-        DisplayAbstractAgentV2(
-          agentConcept.asInstanceOf[Minted[AbstractAgent]],
-          includesIdentifiers)
-      case concept @ Unidentifiable(_: AbstractConcept) =>
-        DisplayAbstractConcept(
-          concept.asInstanceOf[Minted[AbstractConcept]],
-          includesIdentifiers)
-      case concept @ Identified(_: AbstractConcept, _, _, _) =>
-        DisplayAbstractConcept(
-          concept.asInstanceOf[Minted[AbstractConcept]],
-          includesIdentifiers)
+      case agent: AbstractAgent[Minted] =>
+        DisplayAbstractAgentV2(agent, includesIdentifiers)
+      case concept: AbstractConcept[Minted] =>
+        DisplayAbstractConcept(concept, includesIdentifiers)
     }
 }
 
@@ -42,72 +29,28 @@ object DisplayAbstractRootConcept {
 )
 sealed trait DisplayAbstractConcept extends DisplayAbstractRootConcept
 
-case object DisplayAbstractConcept {
-  def apply(abstractConcept: Minted[AbstractConcept],
+case object DisplayAbstractConcept extends GetIdentifiers {
+
+  def apply(abstractConcept: AbstractConcept[Minted],
             includesIdentifiers: Boolean): DisplayAbstractConcept =
     abstractConcept match {
-      case Unidentifiable(concept: Concept) =>
+      case Concept(id, label) =>
         DisplayConcept(
-          id = None,
-          identifiers = None,
-          label = concept.label
+          id = id.maybeCanonicalId,
+          label = label,
+          identifiers = getIdentifiers(id, includesIdentifiers)
         )
-      case Identified(
-          concept: Concept,
-          canonicalId,
-          sourceIdentifier,
-          otherIdentifiers) =>
-        DisplayConcept(
-          id = Some(canonicalId),
-          identifiers =
-            if (includesIdentifiers)
-              Some(
-                (sourceIdentifier +: otherIdentifiers).map(
-                  DisplayIdentifierV2(_)))
-            else None,
-          label = concept.label
-        )
-      case Unidentifiable(period: Period) =>
+      case Period(id, label, range) =>
         DisplayPeriod(
-          id = None,
-          identifiers = None,
-          label = period.label
+          id = id.maybeCanonicalId,
+          label = label,
+          identifiers = getIdentifiers(id, includesIdentifiers)
         )
-      case Identified(
-          period: Period,
-          canonicalId,
-          sourceIdentifier,
-          otherIdentifiers) =>
-        DisplayPeriod(
-          id = Some(canonicalId),
-          identifiers =
-            if (includesIdentifiers)
-              Some(
-                (sourceIdentifier +: otherIdentifiers).map(
-                  DisplayIdentifierV2(_)))
-            else None,
-          label = period.label
-        )
-      case Unidentifiable(place: Place) =>
+      case Place(id, label) =>
         DisplayPlace(
-          id = None,
-          identifiers = None,
-          label = place.label
-        )
-      case Identified(
-          place: Place,
-          canonicalId,
-          sourceIdentifier,
-          otherIdentifiers) =>
-        DisplayPlace(
-          id = Some(canonicalId),
-          identifiers =
-            if (includesIdentifiers)
-              Some(
-                (sourceIdentifier +: otherIdentifiers).map(
-                  DisplayIdentifierV2(_)))
-            else None,
-          label = place.label
+          id = id.maybeCanonicalId,
+          label = label,
+          identifiers = getIdentifiers(id, includesIdentifiers)
         )
     }
 }
@@ -153,7 +96,7 @@ case class DisplayPeriod(
 ) extends DisplayAbstractConcept
 
 case object DisplayPeriod {
-  def apply(period: Period): DisplayPeriod = DisplayPeriod(
+  def apply(period: Period[Minted]): DisplayPeriod = DisplayPeriod(
     label = period.label
   )
 }
@@ -179,7 +122,7 @@ case class DisplayPlace(
 ) extends DisplayAbstractConcept
 
 case object DisplayPlace {
-  def apply(place: Place): DisplayPlace = DisplayPlace(
+  def apply(place: Place[Minted]): DisplayPlace = DisplayPlace(
     label = place.label
   )
 }
@@ -189,42 +132,37 @@ case object DisplayPlace {
 )
 sealed trait DisplayAbstractAgentV2 extends DisplayAbstractRootConcept
 
-case object DisplayAbstractAgentV2 {
+case object DisplayAbstractAgentV2 extends GetIdentifiers {
 
-  def apply(displayableAgent: Minted[AbstractAgent],
+  def apply(agent: AbstractAgent[Minted],
             includesIdentifiers: Boolean): DisplayAbstractAgentV2 =
-    displayableAgent match {
-      case Unidentifiable(agent) => displayAgent(agent)
-      case Identified(agent, canonicalId, sourceId, otherIds) =>
-        displayAgent(
-          agent,
-          if (includesIdentifiers)
-            Some((sourceId +: otherIds).map(DisplayIdentifierV2(_)))
-          else
-            None,
-          Some(canonicalId)
-        )
-    }
-
-  private def displayAgent(
-    agent: AbstractAgent,
-    displayIdentifiers: Option[List[DisplayIdentifierV2]] = None,
-    canonicalId: Option[String] = None): DisplayAbstractAgentV2 =
     agent match {
-      case Agent(label) =>
-        DisplayAgentV2(canonicalId, displayIdentifiers, label)
-      case Person(label, prefix, numeration) =>
-        DisplayPersonV2(
-          canonicalId,
-          displayIdentifiers,
-          label,
-          prefix,
-          numeration
+      case Agent(id, label) =>
+        DisplayAgentV2(
+          id = id.maybeCanonicalId,
+          label = label,
+          identifiers = getIdentifiers(id, includesIdentifiers),
         )
-      case Organisation(label) =>
-        DisplayOrganisationV2(canonicalId, displayIdentifiers, label)
-      case Meeting(label) =>
-        DisplayMeetingV2(canonicalId, displayIdentifiers, label)
+      case Person(id, label, prefix, numeration) =>
+        DisplayPersonV2(
+          id = id.maybeCanonicalId,
+          label = label,
+          numeration = numeration,
+          prefix = prefix,
+          identifiers = getIdentifiers(id, includesIdentifiers)
+        )
+      case Organisation(id, label) =>
+        DisplayOrganisationV2(
+          id = id.maybeCanonicalId,
+          label = label,
+          identifiers = getIdentifiers(id, includesIdentifiers),
+        )
+      case Meeting(id, label) =>
+        DisplayMeetingV2(
+          id = id.maybeCanonicalId,
+          label = label,
+          identifiers = getIdentifiers(id, includesIdentifiers),
+        )
     }
 }
 
@@ -304,3 +242,13 @@ case class DisplayMeetingV2(
   ) label: String,
   @JsonKey("type") @Schema(name = "type") ontologyType: String = "Meeting")
     extends DisplayAbstractAgentV2
+
+trait GetIdentifiers {
+
+  protected def getIdentifiers(id: IdState, includesIdentifiers: Boolean) =
+    if (includesIdentifiers)
+      Option(id.allSourceIdentifiers.map(DisplayIdentifierV2(_)))
+        .filter(_.nonEmpty)
+    else
+      None
+}

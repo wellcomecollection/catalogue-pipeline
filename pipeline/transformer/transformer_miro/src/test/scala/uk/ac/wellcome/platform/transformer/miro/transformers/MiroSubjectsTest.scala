@@ -69,8 +69,9 @@ class MiroSubjectsTest
   ): Assertion = {
     val transformedWork = transformWork(miroRecord)
     val expectedSubjects = expectedSubjectLabels.map { label =>
-      Unidentifiable(
-        Subject(label = label, concepts = List(Unidentifiable(Concept(label))))
+      Subject(
+        label = label,
+        concepts = List(Concept(label))
       )
     }
     transformedWork.data.subjects shouldBe expectedSubjects

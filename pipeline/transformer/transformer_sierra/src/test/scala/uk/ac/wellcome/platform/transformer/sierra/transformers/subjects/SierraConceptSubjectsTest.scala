@@ -34,11 +34,9 @@ class SierraConceptSubjectsTest
     )
 
     SierraConceptSubjects(bibId, bibData) shouldBe List(
-      Unidentifiable(
-        Subject(
-          label = "A Content",
-          concepts = List(Unidentifiable(Concept(label = "A Content")))
-        )
+      Subject(
+        label = "A Content",
+        concepts = List(Concept(label = "A Content"))
       )
     )
 
@@ -58,13 +56,10 @@ class SierraConceptSubjectsTest
     )
 
     SierraConceptSubjects(bibId, bibData) shouldBe List(
-      Unidentifiable(
-        Subject(
-          label = "A Content - V Content",
-          concepts = List(
-            Unidentifiable(Concept(label = "A Content")),
-            Unidentifiable(Concept(label = "V Content")))
-        )
+      Subject(
+        label = "A Content - V Content",
+        concepts =
+          List(Concept(label = "A Content"), Concept(label = "V Content"))
       )
     )
   }
@@ -83,13 +78,10 @@ class SierraConceptSubjectsTest
       )
     )
     SierraConceptSubjects(bibId, bibData) shouldBe List(
-      Unidentifiable(
-        Subject(
-          label = "A Content - V Content",
-          concepts = List(
-            Unidentifiable(Concept(label = "A Content")),
-            Unidentifiable(Concept(label = "V Content")))
-        )
+      Subject(
+        label = "A Content - V Content",
+        concepts =
+          List(Concept(label = "A Content"), Concept(label = "V Content"))
       )
     )
   }
@@ -109,14 +101,12 @@ class SierraConceptSubjectsTest
     )
 
     SierraConceptSubjects(bibId, bibData) shouldBe List(
-      Unidentifiable(
-        Subject(
-          label = "A Content - X Content - V Content",
-          concepts = List(
-            Unidentifiable(Concept(label = "A Content")),
-            Unidentifiable(Concept(label = "X Content")),
-            Unidentifiable(Concept(label = "V Content"))
-          )
+      Subject(
+        label = "A Content - X Content - V Content",
+        concepts = List(
+          Concept(label = "A Content"),
+          Concept(label = "X Content"),
+          Concept(label = "V Content")
         )
       )
     )
@@ -136,13 +126,11 @@ class SierraConceptSubjectsTest
     )
 
     SierraConceptSubjects(bibId, bibData) shouldBe List(
-      Unidentifiable(
-        Subject(
-          label = "A Content - Y Content",
-          concepts = List(
-            Unidentifiable(Concept(label = "A Content")),
-            Unidentifiable(Period(label = "Y Content"))
-          )
+      Subject(
+        label = "A Content - Y Content",
+        concepts = List(
+          Concept(label = "A Content"),
+          Period(label = "Y Content")
         )
       )
     )
@@ -161,13 +149,11 @@ class SierraConceptSubjectsTest
       )
     )
     SierraConceptSubjects(bibId, bibData) shouldBe List(
-      Unidentifiable(
-        Subject(
-          label = "A Content - Z Content",
-          concepts = List(
-            Unidentifiable(Concept(label = "A Content")),
-            Unidentifiable(Place(label = "Z Content"))
-          )
+      Subject(
+        label = "A Content - Z Content",
+        concepts = List(
+          Concept(label = "A Content"),
+          Place(label = "Z Content")
         )
       )
     )
@@ -194,22 +180,18 @@ class SierraConceptSubjectsTest
     )
 
     SierraConceptSubjects(bibId, bibData) shouldBe List(
-      Unidentifiable(
-        Subject(
-          label = "A1 Content - Z1 Content",
-          concepts = List(
-            Unidentifiable(Concept(label = "A1 Content")),
-            Unidentifiable(Place(label = "Z1 Content"))
-          )
+      Subject(
+        label = "A1 Content - Z1 Content",
+        concepts = List(
+          Concept(label = "A1 Content"),
+          Place(label = "Z1 Content")
         )
       ),
-      Unidentifiable(
-        Subject(
-          label = "A2 Content - V2 Content",
-          concepts = List(
-            Unidentifiable(Concept(label = "A2 Content")),
-            Unidentifiable(Concept(label = "V2 Content"))
-          )
+      Subject(
+        label = "A2 Content - V2 Content",
+        concepts = List(
+          Concept(label = "A2 Content"),
+          Concept(label = "V2 Content")
         )
       )
     )
@@ -230,14 +212,12 @@ class SierraConceptSubjectsTest
     )
 
     SierraConceptSubjects(bibId, bibData) shouldBe List(
-      Unidentifiable(
-        Subject(
-          label = "A Content - X Content - V Content",
-          concepts = List(
-            Unidentifiable(Period(label = "A Content")),
-            Unidentifiable(Concept(label = "X Content")),
-            Unidentifiable(Concept(label = "V Content"))
-          )
+      Subject(
+        label = "A Content - X Content - V Content",
+        concepts = List(
+          Period(label = "A Content"),
+          Concept(label = "X Content"),
+          Concept(label = "V Content")
         )
       )
     )
@@ -258,14 +238,12 @@ class SierraConceptSubjectsTest
     )
 
     SierraConceptSubjects(bibId, bibData) shouldBe List(
-      Unidentifiable(
-        Subject(
-          label = "A Content - X Content - V Content",
-          concepts = List(
-            Unidentifiable(Place(label = "A Content")),
-            Unidentifiable(Concept(label = "X Content")),
-            Unidentifiable(Concept(label = "V Content"))
-          )
+      Subject(
+        label = "A Content - X Content - V Content",
+        concepts = List(
+          Place(label = "A Content"),
+          Concept(label = "X Content"),
+          Concept(label = "V Content")
         )
       )
     )
@@ -309,9 +287,10 @@ class SierraConceptSubjectsTest
     )
 
     val actualSourceIdentifiers = SierraConceptSubjects(bibId, bibData)
+      .map(_.id)
       .map {
-        case Identifiable(_, sourceIdentifier, _, _) => sourceIdentifier
-        case other                                   => assert(false, other)
+        case Identifiable(sourceIdentifier, _, _) => sourceIdentifier
+        case other                                => assert(false, other)
       }
 
     expectedSourceIdentifiers shouldBe actualSourceIdentifiers
@@ -347,14 +326,10 @@ class SierraConceptSubjectsTest
     )
 
     SierraConceptSubjects(bibId, bibData) shouldBe List(
-      Identifiable(
-        Subject(
-          label = "abolition",
-          concepts = List(
-            Unidentifiable(Concept("abolition"))
-          )
-        ),
-        sourceIdentifier = sourceIdentifier
+      Subject(
+        label = "abolition",
+        concepts = List(Concept("abolition")),
+        id = Identifiable(sourceIdentifier)
       )
     )
   }

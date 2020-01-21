@@ -29,29 +29,16 @@ case class DisplayItemV2(
   @JsonKey("type") @Schema(name = "type") ontologyType: String = "Item"
 )
 
-object DisplayItemV2 {
+object DisplayItemV2 extends GetIdentifiers {
 
-  def apply(item: Minted[Item], includesIdentifiers: Boolean): DisplayItemV2 =
+  def apply(item: Item[Minted], includesIdentifiers: Boolean): DisplayItemV2 =
     item match {
-      case identifiedItem: Identified[Item] =>
+      case Item(id, title, locations, _) =>
         DisplayItemV2(
-          id = Some(identifiedItem.canonicalId),
-          identifiers =
-            if (includesIdentifiers)
-              Some(identifiedItem.identifiers.map { DisplayIdentifierV2(_) })
-            else None,
-          title = identifiedItem.agent.title,
-          locations = displayLocations(identifiedItem.agent)
-        )
-      case unidentifiableItem: Unidentifiable[Item] =>
-        DisplayItemV2(
-          id = None,
-          identifiers = None,
-          title = unidentifiableItem.agent.title,
-          locations = displayLocations(unidentifiableItem.agent)
+          id = id.maybeCanonicalId,
+          identifiers = getIdentifiers(id, includesIdentifiers),
+          title = title,
+          locations = locations.map(DisplayLocationV2(_))
         )
     }
-
-  private def displayLocations(item: Item) =
-    item.locations.map(DisplayLocationV2(_))
 }

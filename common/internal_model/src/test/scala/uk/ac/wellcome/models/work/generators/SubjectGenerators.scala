@@ -5,36 +5,28 @@ import uk.ac.wellcome.models.work.internal._
 
 trait SubjectGenerators extends RandomStrings {
   def createSubjectWith(label: String = randomAlphanumeric(10),
-                        concepts: List[Minted[AbstractRootConcept]] =
-                          createConcepts())
-    : Minted[Subject[Minted[AbstractRootConcept]]] =
-    Unidentifiable(
-      Subject(
-        label = label,
-        concepts = concepts
-      )
+                        concepts: List[AbstractRootConcept[Minted]] =
+                          createConcepts()): Subject[Minted] =
+    Subject(
+      id = Unidentifiable,
+      label = label,
+      concepts = concepts
     )
 
-  def createSubjectWithConcept(label: String = randomAlphanumeric(10),
-                               conceptString: String = randomAlphanumeric(8))
-    : Minted[Subject[Minted[AbstractRootConcept]]] =
-    Unidentifiable(
-      Subject(
-        label = label,
-        concepts = createConcepts(List(conceptString))
-      )
+  def createSubjectWithConcept(
+    label: String = randomAlphanumeric(10),
+    conceptString: String = randomAlphanumeric(8)): Subject[Minted] =
+    Subject(
+      id = Unidentifiable,
+      label = label,
+      concepts = createConcepts(List(conceptString))
     )
 
-  def createSubject: Minted[Subject[Minted[AbstractRootConcept]]] =
+  def createSubject: Subject[Minted] =
     createSubjectWith()
 
   private def createConcepts(
-    conceptStrings: Seq[String] = List.fill(3)(randomAlphanumeric(15)))
-    : List[Minted[AbstractRootConcept]] =
-    conceptStrings
-      .map { concept: String =>
-        Unidentifiable(Concept(concept))
-      }
-      .toList
-      .asInstanceOf[List[Minted[AbstractRootConcept]]]
+    conceptStrings: List[String] = List.fill(3)(randomAlphanumeric(15)))
+    : List[AbstractRootConcept[Minted]] =
+    conceptStrings.map(Concept(_))
 }

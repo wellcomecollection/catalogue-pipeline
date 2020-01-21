@@ -62,15 +62,13 @@ class DisplayWorkV2Test
       includes = V2WorksIncludes(items = true)
     )
     val displayItem = displayWork.items.get.head
-    displayItem.id shouldBe Some(items.head.canonicalId)
+    displayItem.id shouldBe Some(items.head.id.canonicalId)
   }
 
   it("parses unidentified items on a work") {
     val item = createUnidentifiableItemWith()
-    val location = item.agent.locations.head.asInstanceOf[DigitalLocation]
-    val work = createIdentifiedWorkWith(
-      items = List(item)
-    )
+    val location = item.locations.head.asInstanceOf[DigitalLocation]
+    val work = createIdentifiedWorkWith(items = List(item))
 
     val displayWork = DisplayWorkV2(
       work = work,
@@ -159,16 +157,17 @@ class DisplayWorkV2Test
     val work = createIdentifiedWorkWith(
       contributors = List(
         Contributor(
-          agent = Identified(
-            Person(label = "Vlad the Vanquished"),
-            canonicalId = canonicalId,
-            sourceIdentifier = sourceIdentifier
-          )
+          agent = Person(
+            label = "Vlad the Vanquished",
+            id = Identified(
+              canonicalId = canonicalId,
+              sourceIdentifier = sourceIdentifier
+            )
+          ),
+          roles = Nil,
         ),
         Contributor(
-          agent = Unidentifiable(
-            Organisation(label = "Transylvania Terrors")
-          ),
+          agent = Organisation(label = "Transylvania Terrors"),
           roles = List(
             ContributionRole(label = "Background location")
           )
@@ -262,65 +261,61 @@ class DisplayWorkV2Test
     val work = createIdentifiedWorkWith(
       contributors = List(
         Contributor(
-          agent = Identified(
-            Agent(label = "Bond"),
-            canonicalId = createCanonicalId,
-            sourceIdentifier = contributorAgentSourceIdentifier
-          ),
-          roles = List()
+          agent =
+            Agent(
+              label = "Bond",
+              id =
+                Identified(createCanonicalId, contributorAgentSourceIdentifier),
+            ),
+          roles = Nil
         ),
         Contributor(
-          agent = Identified(
-            Organisation(label = "Big Business"),
-            canonicalId = createCanonicalId,
-            sourceIdentifier = contributorOrganisationSourceIdentifier
+          agent = Organisation(
+            label = "Big Business",
+            id = Identified(
+              createCanonicalId,
+              contributorOrganisationSourceIdentifier),
           ),
-          roles = List()
+          roles = Nil
         ),
         Contributor(
-          agent = Identified(
-            Person(label = "Blue Blaise"),
-            canonicalId = createCanonicalId,
-            sourceIdentifier = contributorPersonSourceIdentifier
+          agent = Person(
+            label = "Blue Blaise",
+            id =
+              Identified(createCanonicalId, contributorPersonSourceIdentifier),
           ),
-          roles = List()
+          roles = Nil
         )
       ),
       items = createIdentifiedItems(count = 1),
       subjects = List(
-        Identified(
-          Subject(
-            label = "Beryllium-Boron Bonding",
-            concepts = List(
-              Identified(
-                Concept("Bonding"),
-                canonicalId = createCanonicalId,
-                sourceIdentifier = conceptSourceIdentifier
-              ),
-              Identified(
-                Period("Before"),
-                canonicalId = createCanonicalId,
-                sourceIdentifier = periodSourceIdentifier
-              ),
-              Identified(
-                Place("Bulgaria"),
-                canonicalId = createCanonicalId,
-                sourceIdentifier = placeSourceIdentifier
-              )
+        Subject(
+          label = "Beryllium-Boron Bonding",
+          id = Identified(createCanonicalId, subjectSourceIdentifier),
+          concepts = List(
+            Concept(
+              label = "Bonding",
+              id = Identified(createCanonicalId, conceptSourceIdentifier),
+            ),
+            Period(
+              label = "Before",
+              id = Identified(createCanonicalId, periodSourceIdentifier),
+              range = None,
+            ),
+            Place(
+              label = "Bulgaria",
+              id = Identified(createCanonicalId, placeSourceIdentifier),
             )
-          ),
-          canonicalId = createCanonicalId,
-          sourceIdentifier = subjectSourceIdentifier
-        )
+          )
+        ),
       ),
       genres = List(
         Genre(
           label = "Black, Brown and Blue",
           concepts = List(
-            Identified(
-              Concept("Colours"),
-              canonicalId = createCanonicalId,
-              sourceIdentifier = conceptSourceIdentifier
+            Concept(
+              label = "Colours",
+              id = Identified(createCanonicalId, conceptSourceIdentifier)
             )
           )
         )
@@ -399,9 +394,9 @@ class DisplayWorkV2Test
           work,
           includes = V2WorksIncludes(identifiers = true, items = true))
         val item: DisplayItemV2 = displayWork.items.get.head
-        val identifiedItem = work.data.items.head.asInstanceOf[Identified[Item]]
+        val identifiedItem = work.data.items.head.asInstanceOf[Item[Identified]]
         item.identifiers shouldBe Some(
-          List(DisplayIdentifierV2(identifiedItem.sourceIdentifier)))
+          List(DisplayIdentifierV2(identifiedItem.id.sourceIdentifier)))
       }
 
       it("subjects") {

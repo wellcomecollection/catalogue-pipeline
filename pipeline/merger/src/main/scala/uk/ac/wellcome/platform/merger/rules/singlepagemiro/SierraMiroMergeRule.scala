@@ -31,8 +31,8 @@ object SierraMiroMergeRule
     miroWork: TransformedBaseWork): Option[MergedWork] = {
     (sierraWork.data.items, miroWork.data.items) match {
       case (
-          List(sierraItem: Unminted[Item]),
-          List(miroItem: Unidentifiable[Item])) =>
+          List(sierraItem: Item[Unminted]),
+          List(miroItem @ Item(Unidentifiable, _, _, _))) =>
         info(s"Merging ${describeWorkPair(sierraWork, miroWork)}.")
 
         val mergedWork = sierraWork.withData { data =>
@@ -62,10 +62,8 @@ object SierraMiroMergeRule
     }
   }
 
-  private def mergeItems(
-    sierraItem: Unminted[Item],
-    miroItem: Unidentifiable[Item]): List[Unminted[Item]] = {
-
+  private def mergeItems(sierraItem: Item[Unminted],
+                         miroItem: Item[Unminted]): List[Item[Unminted]] =
     // We always use the locations from the Sierra and the Miro records.
     //
     // We may sometimes have digital locations from both records:
@@ -77,13 +75,11 @@ object SierraMiroMergeRule
     // after it came from Sierra.  We may remove the iiif-image later
     // (strictly speaking the -presentation replaces it), but we leave
     // it for now, so the website can still use it.
-    val locations = sierraItem.agent.locations ++ miroItem.agent.locations
-
-    val agent: Item = sierraItem.agent.copy(
-      locations = locations
+    List(
+      sierraItem.copy(
+        locations = sierraItem.locations ++ miroItem.locations
+      )
     )
-    List(copyItem(sierraItem, agent))
-  }
 
   /**
     *  Exclude all Sierra identifiers from the Miro work when
@@ -99,18 +95,5 @@ object SierraMiroMergeRule
     sierraWork.otherIdentifiers ++
       miroWork.identifiers.filterNot(sourceIdentifier =>
         doNotMergeIdentifierTypes.contains(sourceIdentifier.identifierType.id))
-  }
-
-  /**
-    * Need to wrap this to allow copying of an item for both Unidentifiable
-    * and Identifiable types because Unminted doesn't have a
-    * copy method defined.
-    */
-  private def copyItem(item: Unminted[Item], agent: Item) = {
-    item match {
-      case unidentifiable: Unidentifiable[_] =>
-        unidentifiable.copy(agent = agent)
-      case identifiable: Identifiable[_] => identifiable.copy(agent = agent)
-    }
   }
 }

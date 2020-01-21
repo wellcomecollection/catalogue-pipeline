@@ -11,10 +11,10 @@ import uk.ac.wellcome.json.JsonUtil._
 
 case class Aggregations(
   workType: Option[Aggregation[WorkType]] = None,
-  genres: Option[Aggregation[Genre[Minted[AbstractConcept]]]] = None,
-  productionDates: Option[Aggregation[Period]] = None,
+  genres: Option[Aggregation[Genre[Minted]]] = None,
+  productionDates: Option[Aggregation[Period[Minted]]] = None,
   language: Option[Aggregation[Language]] = None,
-  subjects: Option[Aggregation[Subject[Minted[AbstractRootConcept]]]] = None,
+  subjects: Option[Aggregation[Subject[Minted]]] = None,
   license: Option[Aggregation[License]] = None,
 )
 
@@ -26,13 +26,13 @@ object Aggregations extends Logging {
       Some(
         Aggregations(
           workType = e4sAggregations.decodeAgg[WorkType]("workType"),
-          genres =
-            e4sAggregations.decodeAgg[Genre[Minted[AbstractConcept]]]("genres"),
-          productionDates = e4sAggregations.decodeAgg[Period]("productionDates"),
+          genres = e4sAggregations.decodeAgg[Genre[Minted]]("genres"),
+          productionDates =
+            e4sAggregations.decodeAgg[Period[Minted]]("productionDates"),
           language = e4sAggregations
             .decodeAgg[Language]("language", Some("data.language")),
           subjects = e4sAggregations
-            .decodeAgg[Subject[Minted[AbstractRootConcept]]]("subjects"),
+            .decodeAgg[Subject[Minted]]("subjects"),
           license = e4sAggregations.decodeAgg[License]("license")
         ))
     } else {
@@ -41,7 +41,7 @@ object Aggregations extends Logging {
   }
 
   // Elasticsearch encodes the date key as milliseconds since the epoch
-  implicit val decodePeriod: Decoder[Period] =
+  implicit val decodePeriod: Decoder[Period[Minted]] =
     Decoder.decodeLong.emap { epochMilli =>
       Try { Instant.ofEpochMilli(epochMilli) }
         .map { instant =>
@@ -67,15 +67,14 @@ object Aggregations extends Logging {
       }
     }
 
-  implicit val decodeGenreFromLabel: Decoder[Genre[Minted[AbstractConcept]]] =
+  implicit val decodeGenreFromLabel: Decoder[Genre[Minted]] =
     Decoder.decodeString.map { str =>
       Genre(label = str)
     }
 
-  implicit val decodeSubjectFromLabel
-    : Decoder[Subject[Minted[AbstractRootConcept]]] =
+  implicit val decodeSubjectFromLabel: Decoder[Subject[Minted]] =
     Decoder.decodeString.map { str =>
-      Subject(label = str)
+      Subject(label = str, concepts = Nil)
     }
 
   implicit class EnhancedEsAggregations(
@@ -148,5 +147,5 @@ object AggregationMapping extends Logging {
 
 }
 
-case class Aggregation[T](buckets: List[AggregationBucket[T]])
-case class AggregationBucket[T](data: T, count: Int)
+case class Aggregation[+T](buckets: List[AggregationBucket[T]])
+case class AggregationBucket[+T](data: T, count: Int)

@@ -20,6 +20,7 @@ import uk.ac.wellcome.models.work.internal.WorkType.{
 }
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
+import uk.ac.wellcome.platform.api.models.SearchQueryType.IdSearch
 import uk.ac.wellcome.platform.api.models.{
   ItemLocationTypeFilter,
   SearchQuery,
@@ -46,6 +47,7 @@ class ElasticsearchServiceTest
 
   val defaultQueryOptions: ElasticsearchQueryOptions =
     createElasticsearchQueryOptions
+
   describe("queryResults") {
     describe("Failures") {
       it("returns a Left[ElasticError] if Elasticsearch returns an error") {
@@ -81,7 +83,7 @@ class ElasticsearchServiceTest
               .queryResults(
                 index,
                 createElasticsearchQueryOptionsWith(
-                  searchQuery = Some(SearchQuery("A"))))
+                  searchQuery = Some(SearchQuery("A", IdSearch))))
 
             whenReady(searchResponseFuture) { response =>
               searchResponseToWorks(response) shouldBe works
@@ -257,7 +259,7 @@ class ElasticsearchServiceTest
           assertSearchResultsAreCorrect(
             index = index,
             queryOptions = createElasticsearchQueryOptionsWith(
-              searchQuery = Some(SearchQuery("abc123"))),
+              searchQuery = Some(SearchQuery("abc123", IdSearch))),
             expectedWorks = List(work)
           )
         }
@@ -279,7 +281,7 @@ class ElasticsearchServiceTest
           assertSearchResultsAreCorrect(
             index = index,
             queryOptions = createElasticsearchQueryOptionsWith(
-              searchQuery = Some(SearchQuery(query))),
+              searchQuery = Some(SearchQuery(query, IdSearch))),
             expectedWorks = List(work)
           )
         }
@@ -302,7 +304,7 @@ class ElasticsearchServiceTest
           assertSearchResultsAreCorrect(
             index = index,
             queryOptions = createElasticsearchQueryOptionsWith(
-              searchQuery = Some(SearchQuery(query))),
+              searchQuery = Some(SearchQuery(query, IdSearch))),
             expectedWorks = List(work)
           )
         }
@@ -325,7 +327,7 @@ class ElasticsearchServiceTest
           assertSearchResultsAreCorrect(
             index = index,
             queryOptions = createElasticsearchQueryOptionsWith(
-              searchQuery = Some(SearchQuery(query))),
+              searchQuery = Some(SearchQuery(query, IdSearch))),
             expectedWorks = List(work)
           )
         }
@@ -353,7 +355,7 @@ class ElasticsearchServiceTest
           assertSearchResultsAreCorrect(
             index = index,
             queryOptions = createElasticsearchQueryOptionsWith(
-              searchQuery = Some(SearchQuery(query))),
+              searchQuery = Some(SearchQuery(query, IdSearch))),
             expectedWorks = List(work)
           )
         }
@@ -378,8 +380,135 @@ class ElasticsearchServiceTest
           assertSearchResultsAreCorrect(
             index = index,
             queryOptions = createElasticsearchQueryOptionsWith(
-              searchQuery = Some(SearchQuery(query))),
+              searchQuery = Some(SearchQuery(query, IdSearch))),
             expectedWorks = List(work)
+          )
+        }
+      }
+
+      it("matches when searching for an ID") {
+        withLocalWorksIndex { index =>
+          val work = createIdentifiedWorkWith(
+            canonicalId = "abc123"
+          )
+          val query = "abc123"
+
+          insertIntoElasticsearch(index, work)
+
+          assertSearchResultsAreCorrect(
+            index = index,
+            queryOptions = createElasticsearchQueryOptionsWith(
+              searchQuery = Some(SearchQuery(query, IdSearch))),
+            expectedWorks = List(work)
+          )
+        }
+      }
+
+      it("matches when searching for multiple IDs") {
+        withLocalWorksIndex { index =>
+          val work1 = createIdentifiedWorkWith(
+            canonicalId = "abc123"
+          )
+          val work2 = createIdentifiedWorkWith(
+            canonicalId = "123abc"
+          )
+          val query = "abc123 123abc"
+
+          insertIntoElasticsearch(index, work1, work2)
+
+          assertSearchResultsAreCorrect(
+            index = index,
+            queryOptions = createElasticsearchQueryOptionsWith(
+              searchQuery = Some(SearchQuery(query, IdSearch))),
+            expectedWorks = List(work1, work2)
+          )
+        }
+      }
+
+      it("doesn't match on partial IDs") {
+        withLocalWorksIndex { index =>
+          val work1 = createIdentifiedWorkWith(
+            canonicalId = "abcdefg"
+          )
+          val work2 = createIdentifiedWorkWith(
+            canonicalId = "1234567"
+          )
+          val query = "123 abcdefg"
+
+          insertIntoElasticsearch(index, work1, work2)
+
+          assertSearchResultsAreCorrect(
+            index = index,
+            queryOptions = createElasticsearchQueryOptionsWith(
+              searchQuery = Some(SearchQuery(query, IdSearch))),
+            expectedWorks = List(work1)
+          )
+        }
+      }
+
+      it("matches IDs case insensitively") {
+        withLocalWorksIndex { index =>
+          val work1 = createIdentifiedWorkWith(
+            canonicalId = "AbCDeF1234"
+          )
+          val work2 = createIdentifiedWorkWith(
+            canonicalId = "12345Ef"
+          )
+          val query = "abcdef1234 12345ef"
+
+          insertIntoElasticsearch(index, work1, work2)
+
+          assertSearchResultsAreCorrect(
+            index = index,
+            queryOptions = createElasticsearchQueryOptionsWith(
+              searchQuery = Some(SearchQuery(query, IdSearch))),
+            expectedWorks = List(work1, work2)
+          )
+        }
+      }
+
+      it("matches if there is extra terms in the query") {
+        withLocalWorksIndex { index =>
+          val work1 = createIdentifiedWorkWith(
+            canonicalId = "AbCDeF1234"
+          )
+          val work2 = createIdentifiedWorkWith(
+            canonicalId = "12345Ef"
+          )
+          val query = "abcdef1234 12345ef hats, dogs and dolomites"
+
+          insertIntoElasticsearch(index, work1, work2)
+
+          assertSearchResultsAreCorrect(
+            index = index,
+            queryOptions = createElasticsearchQueryOptionsWith(
+              searchQuery = Some(SearchQuery(query, IdSearch))),
+            expectedWorks = List(work1, work2)
+          )
+        }
+      }
+
+      it("puts ID matches at the top of the results") {
+        withLocalWorksIndex { index =>
+          val workWithMatchingTitle = createIdentifiedWorkWith(
+            title = Some("Standing on wrong side of horse")
+          )
+          val workWithMatchingId = createIdentifiedWorkWith(
+            canonicalId = "AbCDeF1234"
+          )
+
+          val query = "abcdef1234 Standing on wrong side of horse"
+
+          insertIntoElasticsearch(
+            index,
+            workWithMatchingTitle,
+            workWithMatchingId)
+
+          assertSearchResultsAreCorrectAndInOrder(
+            index = index,
+            queryOptions = createElasticsearchQueryOptionsWith(
+              searchQuery = Some(SearchQuery(query, IdSearch))),
+            expectedWorks = List(workWithMatchingId, workWithMatchingTitle)
           )
         }
       }
@@ -583,7 +712,7 @@ class ElasticsearchServiceTest
   }
 
   private def createItemWithLocationType(
-    locationType: LocationType): Identified[Item] =
+    locationType: LocationType): Item[Minted] =
     createIdentifiedItemWith(
       locations = List(
         // This test really shouldn't be affected by physical/digital locations;
@@ -620,6 +749,13 @@ class ElasticsearchServiceTest
     queryOptions: ElasticsearchQueryOptions,
     expectedWorks: List[IdentifiedWork]) = {
     searchResults(index, queryOptions) should contain theSameElementsAs expectedWorks
+  }
+
+  private def assertSearchResultsAreCorrectAndInOrder(
+    index: Index,
+    queryOptions: ElasticsearchQueryOptions,
+    expectedWorks: List[IdentifiedWork]) = {
+    searchResults(index, queryOptions) should be(expectedWorks)
   }
 
   private def assertListResultsAreCorrect(

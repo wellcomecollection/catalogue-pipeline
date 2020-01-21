@@ -20,12 +20,5 @@ object SierraBrandNameSubjects
     varFields
       .subfieldsWithTag("a")
       .contents
-      .map { label =>
-        Unidentifiable(
-          Subject(
-            label = label,
-            concepts = List(Unidentifiable(Concept(label = label)))
-          )
-        )
-      }
+      .map(label => Subject(label, List(Concept(label))))
 }
