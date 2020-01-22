@@ -30,7 +30,7 @@ object IngestorConfigBuilder {
                     default: Option[Int] = None): Int =
     Try(config.getAnyRef(path))
       .map {
-        case value: String => value.toInt
+        case value: String  => value.toInt
         case value: Integer => value.asInstanceOf[Int]
         case obj =>
           throw new RuntimeException(
