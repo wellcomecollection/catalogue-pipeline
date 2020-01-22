@@ -1,7 +1,7 @@
 module "windows_queue" {
   source = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
 
-  queue_name = "sierra_${var.resource_type}_items"
+  queue_name = "sierra_${var.resource_type}_windows"
   topic_arns = [var.windows_topic_arn]
 
   # Ensure that messages are spread around -- if we get a timeout from the
