@@ -7,7 +7,7 @@ module "lambda" {
   s3_key    = "lambdas/sierra_adapter/sierra_progress_reporter.zip"
 
   description     = "Run progress reports against the Sierra reader"
-  alarm_topic_arn = "${local.lambda_error_alarm_arn}"
+  alarm_topic_arn = var.lambda_error_alarm_arn
   timeout         = 300
 
   environment_variables = {

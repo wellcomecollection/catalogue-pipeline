@@ -48,6 +48,10 @@ module "items_to_dynamo" {
 
   container_image = "${local.sierra_items_to_dynamo_image}"
 
+  vhs_sierra_items_full_access_policy = local.vhs_sierra_items_full_access_policy
+  vhs_sierra_items_table_name         = local.vhs_sierra_items_table_name
+  vhs_sierra_items_bucket_name        = local.vhs_sierra_items_bucket_name
+
   cluster_name = "${aws_ecs_cluster.cluster.name}"
   vpc_id       = "${local.vpc_id}"
 

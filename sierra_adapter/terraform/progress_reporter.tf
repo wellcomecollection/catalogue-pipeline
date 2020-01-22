@@ -6,4 +6,6 @@ module "progress_reporter" {
   slack_access_token       = "${local.critical_slack_webhook}"
 
   infra_bucket = "${var.infra_bucket}"
+
+  lambda_error_alarm_arn = local.lambda_error_alarm_arn
 }
