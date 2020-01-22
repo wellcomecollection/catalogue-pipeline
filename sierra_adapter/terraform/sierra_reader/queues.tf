@@ -18,9 +18,9 @@ module "windows_queue" {
 }
 
 module "scaling_alarm" {
-  source     = "git::https://github.com/wellcometrust/terraform-modules.git//autoscaling/alarms/queue?ref=v19.12.0"
+  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.0"
   queue_name = "sierra_${var.resource_type}_windows"
 
-  queue_high_actions = ["${module.sierra_reader_service.scale_up_arn}"]
-  queue_low_actions  = ["${module.sierra_reader_service.scale_down_arn}"]
+  queue_high_actions = [module.sierra_reader_service.scale_up_arn]
+  queue_low_actions  = [module.sierra_reader_service.scale_down_arn]
 }
