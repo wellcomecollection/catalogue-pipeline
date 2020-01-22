@@ -39,7 +39,7 @@ class SierraRecordWrapperFlowTest
     testWith(wrapperFlow)
   }
 
-  it("pares a bib record from the stream") {
+  it("parses a bib record from the stream") {
     withMaterializer { implicit materializer =>
       withRecordWrapperFlow(SierraBibRecord.apply) { wrapperFlow =>
         val id = createSierraBibNumber
