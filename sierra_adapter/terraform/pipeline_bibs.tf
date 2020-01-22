@@ -27,7 +27,7 @@ module "bibs_reader" {
   cluster_name = "${aws_ecs_cluster.cluster.name}"
   vpc_id       = "${local.vpc_id}"
 
-  dlq_alarm_arn          = "${data.terraform_remote_state.shared_infra.dlq_alarm_arn}"
+  dlq_alarm_arn          = local.dlq_alarm_arn
   lambda_error_alarm_arn = "${local.lambda_error_alarm_arn}"
 
   account_id = "${data.aws_caller_identity.current.account_id}"
@@ -53,7 +53,7 @@ module "bibs_merger" {
   cluster_name = "${aws_ecs_cluster.cluster.name}"
   vpc_id       = "${local.vpc_id}"
 
-  dlq_alarm_arn = "${data.terraform_remote_state.shared_infra.dlq_alarm_arn}"
+  dlq_alarm_arn = local.dlq_alarm_arn
 
   account_id = "${data.aws_caller_identity.current.account_id}"
 
