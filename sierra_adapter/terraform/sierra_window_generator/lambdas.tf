@@ -1,5 +1,5 @@
 module "window_generator_lambda" {
-  source = "git::https://github.com/wellcometrust/terraform.git//lambda?ref=v10.2.2"
+  source = "../modules/lambda"
 
   name = "sierra_${var.resource_type}_window_generator"
 

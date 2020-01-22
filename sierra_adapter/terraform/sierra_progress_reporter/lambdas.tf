@@ -1,5 +1,5 @@
 module "lambda" {
-  source = "git::https://github.com/wellcometrust/terraform.git//lambda?ref=v10.2.2"
+  source = "../modules/lambda"
 
   name = "sierra_progress_reporter"
 
