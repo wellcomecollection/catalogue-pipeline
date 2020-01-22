@@ -13,7 +13,7 @@ variable "description" {
 
 variable "environment_variables" {
   description = "Environment variables to pass to the Lambda"
-  type        = "map"
+  type        = map(string)
 
   # environment cannot be empty so we need to pass at least one value
   default = {
@@ -24,6 +24,7 @@ variable "environment_variables" {
 variable "timeout" {
   description = "The amount of time your Lambda function has to run in seconds"
   default     = 3
+  type        = number
 }
 
 variable "alarm_topic_arn" {

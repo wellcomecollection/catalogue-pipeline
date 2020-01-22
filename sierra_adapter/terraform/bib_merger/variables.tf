@@ -15,7 +15,7 @@ variable "vhs_full_access_policy" {}
 variable "bucket_name" {}
 
 variable "subnets" {
-  type = "list"
+  type = list(string)
 }
 
 variable "namespace_id" {}

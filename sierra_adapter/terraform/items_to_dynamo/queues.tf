@@ -1,5 +1,5 @@
 module "demultiplexer_queue" {
-  source = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.0"
+  source = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
 
   queue_name = "sierra_demultiplexed_items"
   topic_arns = [var.demultiplexer_topic_arn]
@@ -12,7 +12,7 @@ module "demultiplexer_queue" {
 }
 
 module "scaling_alarm" {
-  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.0"
+  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.2"
   queue_name = "sierra_demultiplexed_items"
 
   queue_high_actions = [module.sierra_to_dynamo_service.scale_up_arn]

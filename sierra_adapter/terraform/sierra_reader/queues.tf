@@ -1,5 +1,5 @@
 module "windows_queue" {
-  source = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.0"
+  source = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
 
   queue_name = "sierra_${var.resource_type}_items"
   topic_arns = [var.windows_topic_arn]
@@ -19,7 +19,7 @@ module "windows_queue" {
 }
 
 module "scaling_alarm" {
-  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.0"
+  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.2"
   queue_name = "sierra_${var.resource_type}_windows"
 
   queue_high_actions = [module.sierra_reader_service.scale_up_arn]

@@ -12,7 +12,7 @@ variable "aws_region" {
 }
 
 variable "subnets" {
-  type = "list"
+  type = list(string)
 }
 
 variable "vhs_sierra_items_full_access_policy" {}
