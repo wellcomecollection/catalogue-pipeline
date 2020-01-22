@@ -13,7 +13,7 @@ object IngestorConfigBuilder {
     // TODO: Work out how to get a Duration from a Typesafe flag.
     val flushInterval = 1 minute
 
-    val batchSize = config.getOrElse[Int]("es.ingest.batchSize")(default = 100)
+    val batchSize = config.required[Int]("es.ingest.batchSize")
 
     val indexName = config.required[String]("es.index")
 
