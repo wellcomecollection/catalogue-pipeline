@@ -5,17 +5,17 @@ data "aws_ecs_cluster" "cluster" {
 module "sierra_reader_service" {
   source = "../modules/scaling_worker"
 
-  service_name = "${local.service_name}"
+  service_name = local.service_name
 
-  container_image = "${var.container_image}"
+  container_image = var.container_image
 
   env_vars = {
-    resource_type     = "${var.resource_type}"
-    windows_queue_url = "${module.windows_queue.id}"
-    bucket_name       = "${var.bucket_name}"
-    metrics_namespace = "${local.service_name}"
-    sierra_api_url    = "${var.sierra_api_url}"
-    sierra_fields     = "${var.sierra_fields}"
+    resource_type     = var.resource_type
+    windows_queue_url = module.windows_queue.id
+    bucket_name       = var.bucket_name
+    metrics_namespace = local.service_name
+    sierra_api_url    = var.sierra_api_url
+    sierra_fields     = var.sierra_fields
     batch_size        = 50
   }
 
