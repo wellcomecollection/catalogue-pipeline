@@ -88,7 +88,7 @@ object Aggregations extends Logging {
         .flatMap(
           _.safeTo[Aggregation[T]]((json: String) =>
             AggregationMapping
-              .aggregationParser(json, documentPath)).recoverWith {
+              .aggregationParser[T](json, documentPath)).recoverWith {
             case err =>
               warn("Failed to parse aggregation from ES", err)
               Failure(err)
