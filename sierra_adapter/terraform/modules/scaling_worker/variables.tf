@@ -20,11 +20,9 @@ variable "memory" {
 }
 
 variable "min_capacity" {
-  default = 1
 }
 
 variable "max_capacity" {
-  default = 1
 }
 
 variable "desired_task_count" {
