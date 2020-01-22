@@ -140,6 +140,42 @@ class MetsDataTest
     }
   }
 
+  it("maps Copyright not cleared to In copyright") {
+    val metsData = MetsData(
+      recordIdentifier = randomAlphanumeric(10),
+      accessConditionDz = Some("Copyright not cleared"))
+    val result = metsData.toWork(1)
+
+    inside(result.right.get.data.items) {
+      case List(
+          Item(
+            Unidentifiable,
+            _,
+            List(DigitalLocation(_, _, license, _, _, _)),
+            _)) =>
+        license shouldBe Some(License.InCopyright)
+    }
+  }
+
+  it("can create a license for rightsstatements.org/page/InC/1.0/?language=en") {
+    val metsData =
+      MetsData(
+        recordIdentifier = randomAlphanumeric(10),
+        accessConditionDz =
+          Some("rightsstatements.org/page/InC/1.0/?language=en"))
+    val result = metsData.toWork(1)
+
+    inside(result.right.get.data.items) {
+      case List(
+          Item(
+            Unidentifiable,
+            _,
+            List(DigitalLocation(_, _, license, _, _, _)),
+            _)) =>
+        license shouldBe Some(License.InCopyright)
+    }
+  }
+
   it("creates a invisible work with a thumbnail location") {
     val metsData = MetsData(
       recordIdentifier = randomAlphanumeric(10),
