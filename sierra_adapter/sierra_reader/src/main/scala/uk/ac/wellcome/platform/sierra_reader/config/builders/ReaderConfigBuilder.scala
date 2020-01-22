@@ -21,7 +21,8 @@ object ReaderConfigBuilder {
     ReaderConfig(
       resourceType = resourceType,
       fields = config.required[String]("reader.fields"),
-      batchSize = config.getOrElse[String]("reader.batchSize")(default = "50").toInt
+      batchSize =
+        config.getOrElse[String]("reader.batchSize")(default = "50").toInt
     )
   }
 }
