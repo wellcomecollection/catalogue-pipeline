@@ -98,6 +98,24 @@ object Aggregations extends Logging {
   }
 }
 
+// This object contains the tools required to map an aggregation result from ES
+// into our Aggregation data type.
+//
+// There 2 independent variables in each bucket of these aggregations:
+//
+// ## Root count vs filtered count
+// If aggregation buckets have a subaggregation named `filtered` from [[uk.ac.wellcome.platform.api.services.FiltersAndAggregationsBuilder]]
+// then we use the count from there, otherwise we use the count from the root of the bucket.
+//
+// ## Key-only vs sample document
+// For some aggregation types `T` (in `Aggregation[T]`) we can decode `T` directly from the bucket key -
+// for example with WorkType, we can use `fromCode` to get the label of the WorkType given its id.
+// However, sometimes we need more information from the index, which is achieved using a top hits
+// aggregation of size 1 - see [[uk.ac.wellcome.platform.api.services.ElasticsearchQueryBuilder]].
+//
+// In this case there is a `sample_doc` subaggregation for which we can provide a
+// `path` to the relevant data inside it. For example, the Language type uses this to obtain both the
+// label and id at the path `data.language` within `sample_doc`.
 object AggregationMapping extends Logging {
   import io.circe.parser._
   import io.circe.optics.JsonPath
@@ -132,14 +150,15 @@ object AggregationMapping extends Logging {
       (bucketCount, bucketDoc) match {
         case (0, _)           => None
         case (n, Right(data)) => Some(AggregationBucket(data, n))
-        case (_, Left(err)) =>
-          warn("Failed to parse aggregation from ES", err)
+        case (_, Left(err))   =>
+          // We return a failure if _any_ individual bucket can't be parsed
           return Failure(err)
       }
     }
     Success(Aggregation(bucketMaybes.toList.flatten))
   }
 
+  // Takes a path of format "fruit.apple.seed" and converts it to a JsonPath optic
   private def pathToOptic(path: String): JsonPath =
     path.split("\\.").foldLeft(root) { (optic, pathElement) =>
       optic.selectDynamic(pathElement)
