@@ -11,7 +11,7 @@ module "sierra_reader_service" {
 
   env_vars = {
     resource_type     = var.resource_type
-    windows_queue_url = module.windows_queue.id
+    windows_queue_url = module.windows_queue.url
     bucket_name       = var.bucket_name
     metrics_namespace = local.service_name
     sierra_api_url    = var.sierra_api_url

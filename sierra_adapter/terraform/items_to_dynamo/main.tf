@@ -10,7 +10,7 @@ module "sierra_to_dynamo_service" {
   container_image = var.container_image
 
   env_vars = {
-    demultiplexer_queue_url = module.demultiplexer_queue.id
+    demultiplexer_queue_url = module.demultiplexer_queue.url
     metrics_namespace       = "sierra_items_to_dynamo"
 
     vhs_table_name  = var.vhs_sierra_items_table_name

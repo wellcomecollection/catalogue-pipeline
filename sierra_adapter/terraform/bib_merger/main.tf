@@ -10,7 +10,7 @@ module "sierra_merger_service" {
   container_image = var.container_image
 
   env_vars = {
-    windows_queue_url = module.updates_queue.id
+    windows_queue_url = module.updates_queue.url
     metrics_namespace = "sierra_bib_merger"
     dynamo_table_name = var.merged_dynamo_table_name
     bucket_name       = var.bucket_name
