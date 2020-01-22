@@ -12,7 +12,7 @@ sealed trait Unminted extends IdState
 /** Parent trait for an ID of an object that is post minter. */
 sealed trait Minted extends IdState
 
-/** Represents an ID that has been succesfully mintedo, and thus has a
+/** Represents an ID that has been successfully minted, and thus has a
   *  canonicalId assigned. */
 case class Identified(
   canonicalId: String,

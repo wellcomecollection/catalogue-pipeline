@@ -107,6 +107,7 @@ class SierraTransformableTransformer(sierraTransformable: SierraTransformable,
       notes = SierraNotes(bibId, bibData),
       duration = SierraDuration(bibId, bibData),
       items = SierraItems(itemDataMap)(bibId, bibData),
+      collection = SierraCalmRefNo(bibId, bibData)
     )
 
   lazy val bibId = sierraTransformable.sierraId

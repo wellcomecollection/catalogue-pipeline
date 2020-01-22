@@ -28,7 +28,7 @@ import uk.ac.wellcome.models.work.internal.{
   Unidentifiable
 }
 
-class WorksIndexTest
+class IndexConfigTest
     extends FunSpec
     with ElasticsearchFixtures
     with ScalaFutures
