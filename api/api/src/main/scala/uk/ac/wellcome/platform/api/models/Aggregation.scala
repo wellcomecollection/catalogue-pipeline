@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.api.models
 
 import scala.util.{Failure, Success, Try}
-import io.circe.Decoder
+import io.circe.{Decoder, Json}
 import java.time.{Instant, LocalDateTime, ZoneOffset}
 
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
@@ -104,22 +104,32 @@ object Aggregations extends Logging {
 // There 2 independent variables in each bucket of these aggregations:
 //
 // ## Root count vs filtered count
-// If aggregation buckets have a subaggregation named `filtered` from [[uk.ac.wellcome.platform.api.services.FiltersAndAggregationsBuilder]]
-// then we use the count from there, otherwise we use the count from the root of the bucket.
+// If aggregation buckets have a subaggregation named `filtered` from
+// [[uk.ac.wellcome.platform.api.services.FiltersAndAggregationsBuilder]] then
+// we use the count from there, otherwise we use the count from the root of the
+// bucket.
 //
 // ## Key-only vs sample document
-// For some aggregation types `T` (in `Aggregation[T]`) we can decode `T` directly from the bucket key -
-// for example with WorkType, we can use `fromCode` to get the label of the WorkType given its id.
-// However, sometimes we need more information from the index, which is achieved using a top hits
-// aggregation of size 1 - see [[uk.ac.wellcome.platform.api.services.ElasticsearchQueryBuilder]].
+// For some aggregation types `T` (in `Aggregation[T]`) we can decode `T`
+// directly from the bucket key - for example with WorkType, we can use
+// `fromCode` to get the label of the WorkType given its id.
 //
-// In this case there is a `sample_doc` subaggregation for which we can provide a
-// `path` to the relevant data inside it. For example, the Language type uses this to obtain both the
-// label and id at the path `data.language` within `sample_doc`.
+// However, sometimes
+// we need more information from the index, which is achieved using a top hits
+// aggregation of size 1 - see
+// [[uk.ac.wellcome.platform.api.services.ElasticsearchQueryBuilder]].
+//
+// In this case there is a `sample_doc` subaggregation for which we can provide
+// a `path` to the relevant data inside it. For example, the Language type uses
+// this to obtain both the label and id at the path `data.language` within
+// `sample_doc`.
 object AggregationMapping extends Logging {
   import io.circe.parser._
   import io.circe.optics.JsonPath
   import io.circe.optics.JsonPath._
+  import cats.syntax.traverse._
+  import cats.instances.list._
+  import cats.instances.try_._
 
   private val buckets = root.buckets.arr
   private val bucketFilteredCount = root.filtered.doc_count.int
@@ -128,35 +138,27 @@ object AggregationMapping extends Logging {
   private val bucketSampleDoc =
     root.sample_doc.hits.hits.index(0)._source.json
 
-  def aggregationParser[T: Decoder](
-    json: String,
-    path: Option[String]): Try[Aggregation[T]] = {
-    val parsedJson = parse(json) match {
-      case Right(json) => json
-      case Left(err) =>
-        return Failure(err)
-    }
-    val bucketMaybes = for {
-      bucket <- buckets.getOption(parsedJson).getOrElse(List())
-      bucketDoc <- bucketSampleDoc
-        .getOption(bucket)
-        .flatMap(doc => path.flatMap(pathToOptic(_).json.getOption(doc)))
-        .orElse(bucketKey.getOption(bucket))
-        .map(_.as[T])
-      bucketCount <- bucketFilteredCount
-        .getOption(bucket)
-        .orElse(bucketRootCount.getOption(bucket))
-    } yield {
-      (bucketCount, bucketDoc) match {
-        case (0, _)           => None
-        case (n, Right(data)) => Some(AggregationBucket(data, n))
-        case (_, Left(err))   =>
-          // We return a failure if _any_ individual bucket can't be parsed
-          return Failure(err)
+  def aggregationParser[T: Decoder](json: String,
+                                    path: Option[String]): Try[Aggregation[T]] =
+    parse(json).toTry
+      .map { parsedJson =>
+        for {
+          bucket <- getBuckets(parsedJson)
+          bucketDoc <- getBucketDoc(bucket, path).map(_.as[T])
+          bucketCount <- getBucketCount(bucket)
+        } yield {
+          (bucketCount, bucketDoc) match {
+            case (0, _)           => Success(None)
+            case (n, Right(data)) => Success(Some(AggregationBucket(data, n)))
+            case (_, Left(err))   => Failure(err)
+          }
+        }
       }
-    }
-    Success(Aggregation(bucketMaybes.toList.flatten))
-  }
+      .flatMap {
+        _.toList.sequence.map { maybeBuckets =>
+          Aggregation(maybeBuckets.flatten)
+        }
+      }
 
   // Takes a path of format "fruit.apple.seed" and converts it to a JsonPath optic
   private def pathToOptic(path: String): JsonPath =
@@ -164,6 +166,21 @@ object AggregationMapping extends Logging {
       optic.selectDynamic(pathElement)
     }
 
+  private def getBuckets(agg: Json) = buckets.getOption(agg).getOrElse(List())
+
+  private def getBucketDoc(bucket: Json, path: Option[String]) =
+    bucketSampleDoc
+      .getOption(bucket)
+      .flatMap(getJsonAtPath(path))
+      .orElse(bucketKey.getOption(bucket))
+
+  private def getJsonAtPath(path: Option[String])(doc: Json) =
+    path.flatMap(pathToOptic(_).json.getOption(doc))
+
+  private def getBucketCount(bucket: Json) =
+    bucketFilteredCount
+      .getOption(bucket)
+      .orElse(bucketRootCount.getOption(bucket))
 }
 
 case class Aggregation[+T](buckets: List[AggregationBucket[T]])
