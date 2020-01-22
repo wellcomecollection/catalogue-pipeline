@@ -62,21 +62,24 @@ case class MetsData(
       // A lot of METS record have "Copyright not cleared"
       // or "rightsstatements.org/page/InC/1.0/?language=en" as dz access condition.
       // They both need to be mapped to a InCopyright license so hardcoding here
-      case s if s.toLowerCase() == "copyright not cleared" => Right(License.InCopyright)
-      case s if s == "rightsstatements.org/page/InC/1.0/?language=en" => Right(License.InCopyright)
+      case s if s.toLowerCase() == "copyright not cleared" =>
+        Right(License.InCopyright)
+      case s if s == "rightsstatements.org/page/InC/1.0/?language=en" =>
+        Right(License.InCopyright)
       // The access conditions in mets contains sometimes the license id (lowercase),
       // sometimes the label (ie "in copyright")
       // and sometimes the url of the license
-      case accessCondition => License.values.find { license =>
-        equalsIgnoreCase(license.id, accessCondition) || equalsIgnoreCase(
-          license.label,
-          accessCondition) || license.url.equals(accessCondition)
+      case accessCondition =>
+        License.values.find { license =>
+          equalsIgnoreCase(license.id, accessCondition) || equalsIgnoreCase(
+            license.label,
+            accessCondition) || license.url.equals(accessCondition)
 
-      } match {
-        case Some(license) => Right(license)
-        case None =>
-          Left(new Exception(s"Couldn't match $accessCondition to a license"))
-      }
+        } match {
+          case Some(license) => Right(license)
+          case None =>
+            Left(new Exception(s"Couldn't match $accessCondition to a license"))
+        }
     }.sequence
 
   private val parseAccessStatus: Either[Exception, Option[AccessStatus]] =
