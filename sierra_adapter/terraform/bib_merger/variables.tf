@@ -1,4 +1,3 @@
-variable "resource_type" {}
 variable "merged_dynamo_table_name" {}
 variable "updates_topic_name" {}
 variable "cluster_name" {}

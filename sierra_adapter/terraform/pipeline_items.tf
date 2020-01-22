@@ -65,8 +65,6 @@ module "items_to_dynamo" {
 module "items_merger" {
   source = "./item_merger"
 
-  resource_type = "items"
-
   container_image = "${local.sierra_item_merger_image}"
 
   merged_dynamo_table_name = "${local.vhs_table_name}"

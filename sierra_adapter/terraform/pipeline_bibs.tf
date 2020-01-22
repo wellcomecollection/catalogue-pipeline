@@ -44,8 +44,6 @@ module "bibs_reader" {
 module "bibs_merger" {
   source = "./bib_merger"
 
-  resource_type = "bibs"
-
   container_image = "${local.sierra_bib_merger_image}"
 
   merged_dynamo_table_name = "${local.vhs_table_name}"
