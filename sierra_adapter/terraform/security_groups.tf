@@ -11,14 +11,14 @@ resource "aws_security_group" "egress_security_group" {
   }
 
   tags = {
-    Name = "${var.namespace}"
+    Name = var.namespace
   }
 }
 
 resource "aws_security_group" "interservice_security_group" {
   name        = "${var.namespace}_interservice_security_group"
   description = "Allow traffic between services"
-  vpc_id      = "${local.vpc_id}"
+  vpc_id      = local.vpc_id
 
   ingress {
     from_port = 0

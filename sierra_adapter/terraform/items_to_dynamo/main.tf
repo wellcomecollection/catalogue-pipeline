@@ -1,5 +1,5 @@
 data "aws_ecs_cluster" "cluster" {
-  cluster_name = "${var.cluster_name}"
+  cluster_name = var.cluster_name
 }
 
 module "sierra_to_dynamo_service" {

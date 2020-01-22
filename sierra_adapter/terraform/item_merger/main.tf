@@ -1,5 +1,5 @@
 data "aws_ecs_cluster" "cluster" {
-  cluster_name = "${var.cluster_name}"
+  cluster_name = var.cluster_name
 }
 
 module "sierra_merger_service" {
@@ -12,10 +12,10 @@ module "sierra_merger_service" {
   env_vars = {
     windows_queue_url   = module.updates_queue.url
     metrics_namespace   = "sierra_item_merger"
-    dynamo_table_name   = "${var.merged_dynamo_table_name}"
-    bucket_name         = "${var.bucket_name}"
-    sierra_items_bucket = "${var.sierra_items_bucket}"
-    topic_arn           = "${module.sierra_item_merger_results.arn}"
+    dynamo_table_name   = var.merged_dynamo_table_name
+    bucket_name         = var.bucket_name
+    sierra_items_bucket = var.sierra_items_bucket
+    topic_arn           = module.sierra_item_merger_results.arn
 
     # The item merger has to write lots of S3 objects, and we've seen issues
     # where we exhaust the HTTP connection pool.  Turning down the parallelism
