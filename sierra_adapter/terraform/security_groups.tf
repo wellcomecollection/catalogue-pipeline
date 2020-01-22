@@ -11,7 +11,7 @@ resource "aws_security_group" "egress_security_group" {
   }
 
   tags = {
-    Name = "${var.name}"
+    Name = "${var.namespace}"
   }
 }
 
@@ -27,7 +27,7 @@ resource "aws_security_group" "interservice_security_group" {
     self      = true
   }
 
-  tags {
+  tags = {
     Name = "${var.namespace}-interservice"
   }
 }
