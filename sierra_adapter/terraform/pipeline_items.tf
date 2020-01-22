@@ -33,9 +33,9 @@ module "items_reader" {
   infra_bucket = "${var.infra_bucket}"
 
   namespace_id = "${aws_service_discovery_private_dns_namespace.namespace.id}"
-  subnets      = ["${local.private_subnets}"]
+  subnets      = local.private_subnets
 
-  service_egress_security_group_id = "${module.egress_security_group.sg_id}"
+  service_egress_security_group_id = aws_security_group.egress_security_group.id
   interservice_security_group_id   = "${aws_security_group.interservice_security_group.id}"
 }
 
@@ -56,9 +56,9 @@ module "items_to_dynamo" {
   dlq_alarm_arn = local.dlq_alarm_arn
 
   namespace_id = "${aws_service_discovery_private_dns_namespace.namespace.id}"
-  subnets      = ["${local.private_subnets}"]
+  subnets      = local.private_subnets
 
-  service_egress_security_group_id = "${module.egress_security_group.sg_id}"
+  service_egress_security_group_id = aws_security_group.egress_security_group.id
   interservice_security_group_id   = "${aws_security_group.interservice_security_group.id}"
 }
 
@@ -74,7 +74,7 @@ module "items_merger" {
   merged_dynamo_table_name = "${local.vhs_table_name}"
 
   updates_topic_arn         = "${module.items_to_dynamo.topic_arn}"
-  reindexed_items_topic_arn = dat.aws_sns_topic.reindexed_items.arn
+  reindexed_items_topic_arn = data.aws_sns_topic.reindexed_items.arn
 
   cluster_name = "${aws_ecs_cluster.cluster.name}"
   vpc_id       = "${local.vpc_id}"
@@ -86,10 +86,10 @@ module "items_merger" {
   bucket_name = "${local.vhs_bucket_name}"
 
   namespace_id = "${aws_service_discovery_private_dns_namespace.namespace.id}"
-  subnets      = ["${local.private_subnets}"]
+  subnets      = local.private_subnets
 
   sierra_items_bucket = local.vhs_sierra_items_bucket_name
 
-  service_egress_security_group_id = "${module.egress_security_group.sg_id}"
+  service_egress_security_group_id = aws_security_group.egress_security_group.id
   interservice_security_group_id   = "${aws_security_group.interservice_security_group.id}"
 }

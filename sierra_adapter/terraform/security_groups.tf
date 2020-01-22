@@ -33,7 +33,7 @@ resource "aws_security_group" "interservice_security_group" {
 }
 
 module "vpc_endpoints" {
-  source = "github.com/wellcometrust/terraform//network/prebuilt/vpc/interface_endpoints?ref=bc8f95f"
+  source = "./modules/interface_endpoints"
 
   vpc_id            = local.vpc_id
   security_group_id = aws_security_group.egress_security_group.id

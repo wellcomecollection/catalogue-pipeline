@@ -25,4 +25,9 @@ module "trigger_sierra_window_generator_lambda" {
   lambda_function_arn     = "${module.window_generator_lambda.arn}"
   cloudwatch_trigger_arn  = "${aws_cloudwatch_event_rule.window_generator_rule.arn}"
   cloudwatch_trigger_name = "${aws_cloudwatch_event_rule.window_generator_rule.id}"
+
+  # This exists to tell the module "yes, really do create this trigger".
+  # It's a bit of a hack to fit the way the module is written: internally it's
+  # computing "${1 - var.custom_input}" to decide if you want a custom trigger.
+  custom_input = 1
 }

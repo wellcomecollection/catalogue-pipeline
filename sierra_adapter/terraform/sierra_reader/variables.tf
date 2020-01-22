@@ -22,7 +22,7 @@ variable "aws_region" {
 variable "infra_bucket" {}
 
 variable "subnets" {
-  type = "list"
+  type = list(string)
 }
 
 variable "namespace_id" {}
