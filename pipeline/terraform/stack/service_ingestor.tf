@@ -36,9 +36,10 @@ module "ingestor" {
     metrics_namespace = "${local.namespace_hyphen}_ingestor"
     es_index          = "${var.es_works_index}"
     ingest_queue_id   = "${module.ingestor_queue.id}"
+    es_ingest_batchSize = 1000
   }
 
-  env_vars_length = 3
+  env_vars_length = 4
 
   secret_env_vars = {
     es_host     = "catalogue/ingestor/es_host"
