@@ -1,5 +1,5 @@
 variable "merged_dynamo_table_name" {}
-variable "updates_topic_name" {}
+variable "updates_topic_arn" {}
 variable "cluster_name" {}
 variable "vpc_id" {}
 
@@ -11,7 +11,6 @@ variable "aws_region" {
   default = "eu-west-1"
 }
 
-variable "account_id" {}
 variable "vhs_full_access_policy" {}
 variable "bucket_name" {}
 

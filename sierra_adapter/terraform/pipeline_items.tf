@@ -15,8 +15,8 @@ module "items_reader" {
 
   resource_type = "items"
 
-  bucket_name        = "${aws_s3_bucket.sierra_adapter.id}"
-  windows_topic_name = "${module.items_window_generator.topic_name}"
+  bucket_name       = "${aws_s3_bucket.sierra_adapter.id}"
+  windows_topic_arn = "${module.items_window_generator.topic_arn}"
 
   sierra_fields = "${local.sierra_items_fields}"
 
@@ -30,8 +30,6 @@ module "items_reader" {
   dlq_alarm_arn          = local.dlq_alarm_arn
   lambda_error_alarm_arn = "${local.lambda_error_alarm_arn}"
 
-  account_id = "${data.aws_caller_identity.current.account_id}"
-
   infra_bucket = "${var.infra_bucket}"
 
   namespace_id = "${aws_service_discovery_private_dns_namespace.namespace.id}"
@@ -44,7 +42,7 @@ module "items_reader" {
 module "items_to_dynamo" {
   source = "./items_to_dynamo"
 
-  demultiplexer_topic_name = "${module.items_reader.topic_name}"
+  demultiplexer_topic_arn = "${module.items_reader.topic_arn}"
 
   container_image = "${local.sierra_items_to_dynamo_image}"
 
@@ -57,13 +55,15 @@ module "items_to_dynamo" {
 
   dlq_alarm_arn = local.dlq_alarm_arn
 
-  account_id = "${data.aws_caller_identity.current.account_id}"
-
   namespace_id = "${aws_service_discovery_private_dns_namespace.namespace.id}"
   subnets      = ["${local.private_subnets}"]
 
   service_egress_security_group_id = "${module.egress_security_group.sg_id}"
   interservice_security_group_id   = "${aws_security_group.interservice_security_group.id}"
+}
+
+data "aws_sns_topic" "reindexed_items" {
+  name = local.reindexed_items_topic_name
 }
 
 module "items_merger" {
@@ -73,15 +73,13 @@ module "items_merger" {
 
   merged_dynamo_table_name = "${local.vhs_table_name}"
 
-  updates_topic_name         = "${module.items_to_dynamo.topic_name}"
-  reindexed_items_topic_name = "${local.reindexed_items_topic_name}"
+  updates_topic_arn         = "${module.items_to_dynamo.topic_arn}"
+  reindexed_items_topic_arn = dat.aws_sns_topic.reindexed_items.arn
 
   cluster_name = "${aws_ecs_cluster.cluster.name}"
   vpc_id       = "${local.vpc_id}"
 
   dlq_alarm_arn = local.dlq_alarm_arn
-
-  account_id = "${data.aws_caller_identity.current.account_id}"
 
   vhs_full_access_policy = "${local.vhs_full_access_policy}"
 

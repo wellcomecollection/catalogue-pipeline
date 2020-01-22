@@ -1,3 +1,3 @@
-output "topic_name" {
-  value = "${module.windows_topic.name}"
+output "topic_arn" {
+  value = "${module.windows_topic.arn}"
 }

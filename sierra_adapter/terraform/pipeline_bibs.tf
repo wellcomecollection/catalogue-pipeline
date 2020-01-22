@@ -15,8 +15,8 @@ module "bibs_reader" {
 
   resource_type = "bibs"
 
-  bucket_name        = "wellcomecollection-platform-adapters-sierra"
-  windows_topic_name = "${module.bibs_window_generator.topic_name}"
+  bucket_name       = "wellcomecollection-platform-adapters-sierra"
+  windows_topic_arn = "${module.bibs_window_generator.topic_arn}"
 
   sierra_fields = "${local.sierra_bibs_fields}"
 
@@ -29,8 +29,6 @@ module "bibs_reader" {
 
   dlq_alarm_arn          = local.dlq_alarm_arn
   lambda_error_alarm_arn = "${local.lambda_error_alarm_arn}"
-
-  account_id = "${data.aws_caller_identity.current.account_id}"
 
   infra_bucket = "${var.infra_bucket}"
 
@@ -48,14 +46,12 @@ module "bibs_merger" {
 
   merged_dynamo_table_name = "${local.vhs_table_name}"
 
-  updates_topic_name = "${module.bibs_reader.topic_name}"
+  updates_topic_arn = "${module.bibs_reader.topic_arn}"
 
   cluster_name = "${aws_ecs_cluster.cluster.name}"
   vpc_id       = "${local.vpc_id}"
 
   dlq_alarm_arn = local.dlq_alarm_arn
-
-  account_id = "${data.aws_caller_identity.current.account_id}"
 
   vhs_full_access_policy = "${local.vhs_full_access_policy}"
 

@@ -1,13 +1,14 @@
 module "demultiplexer_queue" {
-  source      = "git::https://github.com/wellcometrust/terraform.git//sqs?ref=v1.1.0"
-  queue_name  = "sierra_demultiplexed_items"
-  aws_region  = "${var.aws_region}"
-  account_id  = "${var.account_id}"
-  topic_names = ["${var.demultiplexer_topic_name}"]
+  source = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.0"
 
-  alarm_topic_arn = "${var.dlq_alarm_arn}"
+  queue_name = "sierra_demultiplexed_items"
+  topic_arns = [var.demultiplexer_topic_arn]
 
   max_receive_count = 10
+
+  alarm_topic_arn = var.dlq_alarm_arn
+
+  aws_region = var.aws_region
 }
 
 module "scaling_alarm" {

@@ -1,6 +1,6 @@
 variable "container_image" {}
 
-variable "demultiplexer_topic_name" {}
+variable "demultiplexer_topic_arn" {}
 
 variable "cluster_name" {}
 variable "vpc_id" {}
@@ -10,8 +10,6 @@ variable "dlq_alarm_arn" {}
 variable "aws_region" {
   default = "eu-west-1"
 }
-
-variable "account_id" {}
 
 variable "subnets" {
   type = "list"
