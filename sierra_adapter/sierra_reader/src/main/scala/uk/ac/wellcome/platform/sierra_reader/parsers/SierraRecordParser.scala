@@ -26,19 +26,20 @@ object SierraRecordParser {
   // consistently.
   //
   // If a record was deleted and modified on the same day, we should treat the
-  // deletion as taking precedence.  If it was deleted and then un-deleted
-  // TODO: Is that even possible?
+  // deletion as taking precedence.  After a record is deleted in Sierra, it
+  // cannot be un-deleted.
   //
-  //
-
   private def getModifiedDate(json: Json): Instant = {
     val maybeUpdatedDate = root.updatedDate.string.getOption(json)
 
     maybeUpdatedDate match {
-      case Some(updatedDate) => Instant.parse(updatedDate)
+      case Some(updatedDate) => getUpdatedAsDateTime(updatedDate)
       case None              => getDeletedAsDatetime(json)
     }
   }
+
+  private def getUpdatedAsDateTime(updatedDate: String): Instant =
+    Instant.parse(updatedDate)
 
   private def getDeletedAsDatetime(json: Json): Instant = {
     val formatter = DateTimeFormatter.ISO_DATE
