@@ -312,6 +312,10 @@ object CatalogueDependencies {
       ExternalDependencies.wireMockDependencies ++
       ExternalDependencies.scribeJavaDependencies
 
+  // CALM adapter
+
+  val calmAdapterDependencies: Seq[ModuleID] = Nil
+
   // Sierra adapter stack
 
   val sierraAdapterCommonDependencies: Seq[ModuleID] =

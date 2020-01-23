@@ -171,6 +171,14 @@ lazy val mets_adapter = setupProject(
   externalDependencies = CatalogueDependencies.metsAdapterDependencies
 )
 
+// CALM adapter
+
+lazy val calm_adapter = setupProject(project,
+  folder = "calm_adapter/calm_adapter",
+  localDependencies = Seq(internal_model, big_messaging_typesafe),
+  externalDependencies = CatalogueDependencies.calmAdapterDependencies
+)
+
 // Snapshots
 
 lazy val snapshot_generator = setupProject(
