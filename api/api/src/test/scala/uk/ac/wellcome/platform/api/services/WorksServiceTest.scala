@@ -394,9 +394,9 @@ class WorksServiceTest
             Some(
               Aggregation(
                 List(
+                  AggregationBucket(data = Books, count = 2),
                   AggregationBucket(data = ArchivesAndManuscripts, count = 1),
                   AggregationBucket(data = Audio, count = 1),
-                  AggregationBucket(data = Books, count = 2)
                 ))),
             None
           )

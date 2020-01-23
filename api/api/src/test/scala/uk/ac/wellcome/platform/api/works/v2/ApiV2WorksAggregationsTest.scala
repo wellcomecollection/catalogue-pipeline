@@ -55,22 +55,22 @@ class ApiV2WorksAggregationsTest extends ApiV2WorksTestBase {
                     },
                     {
                       "data" : {
-                        "id" : "d",
-                        "label" : "Journals",
-                        "type" : "WorkType"
-                      },
-                      "count" : 1,
-                      "type" : "AggregationBucket"
-                    },
-                    {
-                      "data" : {
                         "id" : "k",
                         "label" : "Pictures",
                         "type" : "WorkType"
                       },
                       "count" : 2,
                       "type" : "AggregationBucket"
-                    }
+                    },
+                    {
+                      "data" : {
+                        "id" : "d",
+                        "label" : "Journals",
+                        "type" : "WorkType"
+                      },
+                      "count" : 1,
+                      "type" : "AggregationBucket"
+                    } 
                   ]
                 }
               },
@@ -234,20 +234,20 @@ class ApiV2WorksAggregationsTest extends ApiV2WorksTestBase {
                   "buckets": [
                     {
                       "data" : {
-                        "label": "English",
-                        "id": "eng",
-                        "type": "Language"
-                      },
-                      "count" : 1,
-                      "type" : "AggregationBucket"
-                    },
-                    {
-                      "data" : {
                         "label": "German",
                         "id": "ger",
                         "type": "Language"
                       },
                       "count" : 2,
+                      "type" : "AggregationBucket"
+                    },
+                    {
+                      "data" : {
+                        "label": "English",
+                        "id": "eng",
+                        "type": "Language"
+                      },
+                      "count" : 1,
                       "type" : "AggregationBucket"
                     }
                   ]
