@@ -231,6 +231,7 @@ case object WorksIndexConfig extends IndexConfig {
       intField("duration"),
       booleanField("merged"),
       objectField("collection").fields(
+        label,
         textField("path")
           .copyTo("collection.depth")
           .analyzer(pathAnalyzer.name)
