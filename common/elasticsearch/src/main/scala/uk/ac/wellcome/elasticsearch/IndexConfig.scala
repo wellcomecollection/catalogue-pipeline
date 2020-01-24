@@ -6,7 +6,6 @@ import com.sksamuel.elastic4s.requests.analysis.{
   CustomAnalyzer,
   PathHierarchyTokenizer
 }
-import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 import com.sksamuel.elastic4s.requests.mappings.{
   FieldDefinition,
   MappingDefinition,
@@ -253,5 +252,4 @@ case object WorksIndexConfig extends IndexConfig {
     )
 
   val mapping = properties(fields)
-    .dynamic(DynamicMapping.Strict)
 }
