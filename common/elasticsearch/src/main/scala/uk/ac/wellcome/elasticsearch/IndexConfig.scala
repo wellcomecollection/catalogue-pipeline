@@ -253,5 +253,4 @@ case object WorksIndexConfig extends IndexConfig {
     )
 
   val mapping = properties(fields)
-    .dynamic(DynamicMapping.Strict)
 }

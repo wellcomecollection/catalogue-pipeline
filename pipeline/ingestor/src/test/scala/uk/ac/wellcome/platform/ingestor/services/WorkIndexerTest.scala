@@ -254,8 +254,6 @@ class WorkIndexerTest
       )
 
     val mapping = properties(fields)
-      .dynamic(DynamicMapping.Strict)
-
   }
 
   it("returns a list of Works that weren't indexed correctly") {
