@@ -63,8 +63,10 @@ class WorkIndexer(
           }
 
           if (actualFailures.nonEmpty) {
-            val failedIds = actualFailures.map(_.id)
-            debug(s"Failed indexing works $failedIds")
+            val failedIds = actualFailures.map { failure =>
+              error(s"Failed ingesting ${failure.id}: ${failure.error}")
+              failure.id
+            }
 
             Left(works.filter(w => {
               failedIds.contains(w.canonicalId)
