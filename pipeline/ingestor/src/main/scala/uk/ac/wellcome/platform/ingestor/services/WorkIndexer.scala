@@ -63,7 +63,7 @@ class WorkIndexer(
           }
 
           if (actualFailures.nonEmpty) {
-            val failedIds = actualFailures.map{ failure =>
+            val failedIds = actualFailures.map { failure =>
               error(s"Failed ingesting ${failure.id}: ${failure.error}")
               failure.id
             }
