@@ -89,12 +89,12 @@ class DisplayLocationsV2SerialisationTest
       url = "https://wellcomelibrary.org/iiif/b22015085/manifest",
       locationType = LocationType("iiif-image"),
       accessConditions = List(
-          AccessCondition(
-            status = AccessStatus.Restricted,
-            terms = Some("Ask politely"),
-            to = Some("2024-02-24")
-          )
+        AccessCondition(
+          status = AccessStatus.Restricted,
+          terms = Some("Ask politely"),
+          to = Some("2024-02-24")
         )
+      )
     )
 
     val work = createIdentifiedWorkWith(
