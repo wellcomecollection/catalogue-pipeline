@@ -51,7 +51,7 @@ case class ElasticSearchRequestBuilder(
 
     case AggregationRequest.ProductionDate =>
       DateHistogramAggregation("productionDates")
-        .interval(DateHistogramInterval.Year)
+        .calendarInterval(DateHistogramInterval.Year)
         .field("data.production.dates.range.from")
         .minDocCount(1)
 
