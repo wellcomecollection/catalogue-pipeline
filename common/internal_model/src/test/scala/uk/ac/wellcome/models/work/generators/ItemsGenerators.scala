@@ -53,10 +53,11 @@ trait ItemsGenerators extends IdentifiersGenerators {
   def createDigitalLocationWith(
     locationType: LocationType = createPresentationLocationType,
     url: String = defaultLocationUrl,
-    license: Option[License] = Some(License.CCBY)) = DigitalLocation(
+    license: Option[License] = Some(License.CCBY), accessConditions: List[AccessCondition] = Nil) = DigitalLocation(
     locationType = locationType,
     url = url,
-    license = license
+    license = license,
+    accessConditions = accessConditions
   )
 
   def createImageLocationType = LocationType("iiif-image")

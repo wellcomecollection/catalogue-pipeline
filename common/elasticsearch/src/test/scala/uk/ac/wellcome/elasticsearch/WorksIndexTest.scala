@@ -96,6 +96,20 @@ class WorksIndexTest
     }
   }
 
+  // Possibly because the number of variations in the work model is too big,
+  // a bug in the mapping related to accessConditions wasn't caught by the catch-all test above.
+  // So let's add a specific one
+  it("puts a work with an access condition on the location") {
+    withLocalWorksIndex { index =>
+      val sampleWork = createIdentifiedWorkWith(items = List(createDigitalItemWith(List(createDigitalLocationWith())))
+
+      )
+      whenReady(indexObject(index, sampleWork)) { _ =>
+        assertObjectIndexed(index, sampleWork)
+      }
+    }
+  }
+
   it("does not put an invalid work") {
     withLocalWorksIndex { index =>
       val badTestObject = BadTestObject(
