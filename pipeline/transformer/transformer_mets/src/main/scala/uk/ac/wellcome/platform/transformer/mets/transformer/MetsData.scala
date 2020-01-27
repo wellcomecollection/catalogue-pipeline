@@ -53,8 +53,8 @@ case class MetsData(
       locationType = LocationType("iiif-presentation"),
       license = license,
       accessConditions = accessStatus.map { status =>
-        List(AccessCondition(status = status, terms = accessConditionUsage))
-      }
+        AccessCondition(status = status, terms = accessConditionUsage)
+      }.toList
     )
 
   private def parseLicense: Either[Exception, Option[License]] =

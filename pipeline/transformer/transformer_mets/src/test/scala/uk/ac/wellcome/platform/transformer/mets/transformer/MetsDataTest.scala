@@ -231,13 +231,12 @@ class MetsDataTest
     result shouldBe a[Right[_, _]]
     inside(result.right.get.data.items.head.locations.head) {
       case DigitalLocation(_, _, _, _, accessConditions, _) =>
-        accessConditions shouldBe Some(
-          List(
+        accessConditions shouldBe List(
             AccessCondition(
               status = AccessStatus.OpenWithAdvisory
             )
           )
-        )
+
     }
   }
 
@@ -250,14 +249,10 @@ class MetsDataTest
     result shouldBe a[Right[_, _]]
     inside(result.right.get.data.items.head.locations.head) {
       case DigitalLocation(_, _, _, _, accessConditions, _) =>
-        accessConditions shouldBe Some(
-          List(
-            AccessCondition(
+        accessConditions shouldBe List(AccessCondition(
               status = AccessStatus.Restricted,
               terms = Some("Please ask nicely")
-            )
-          )
-        )
+          ))
     }
   }
 
@@ -269,12 +264,11 @@ class MetsDataTest
     result shouldBe a[Right[_, _]]
     inside(result.right.get.data.items.head.locations.head) {
       case DigitalLocation(_, _, _, _, accessConditions, _) =>
-        accessConditions shouldBe Some(
+        accessConditions shouldBe
           List(
             AccessCondition(
               status = AccessStatus.Restricted
             )
-          )
         )
     }
   }
