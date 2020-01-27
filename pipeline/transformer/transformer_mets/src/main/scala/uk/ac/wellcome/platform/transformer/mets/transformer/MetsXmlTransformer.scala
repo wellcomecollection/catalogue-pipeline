@@ -55,7 +55,8 @@ class MetsXmlTransformer(store: Readable[ObjectLocation, String]) {
     manifestations: List[ObjectLocation]): Result[MetsXml] =
     root.firstManifestationFilename
       .flatMap { name =>
-        manifestations.find( m => m.path.endsWith(name) || m.path.endsWith(s"$name.xml")) match {
+        manifestations.find(m =>
+          m.path.endsWith(name) || m.path.endsWith(s"$name.xml")) match {
           case Some(location) => Right(location)
           case None =>
             Left(

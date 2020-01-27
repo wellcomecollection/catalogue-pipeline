@@ -48,10 +48,12 @@ class MetsXmlTransformerTest extends FunSpec with Matchers with MetsGenerators {
       List(("LOG_0001", "01", "first"), ("LOG_0002", "02", "second.xml"))
     ).toString()
     val manifestations = Map(
-      "first.xml" -> Some(metsXmlWith("b30246039",
-        license = Some(License.InCopyright),
-        fileSec = fileSec("b30246039"),
-        structMap = structMap)),
+      "first.xml" -> Some(
+        metsXmlWith(
+          "b30246039",
+          license = Some(License.InCopyright),
+          fileSec = fileSec("b30246039"),
+          structMap = structMap)),
       "second.xml" -> Some(metsXmlWith("b30246039")),
     )
     transform(Some(xml), manifestations) shouldBe Right(
