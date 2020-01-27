@@ -24,9 +24,34 @@ Each query has:
 
   * **Stable:** The current implementation of the query meets the
 
-    expectations and has been measured in the world as doing so.   
+    expectations and has been measured in the world as doing so.
 
 ## Intentions & Expectations
+
+### Shingled titles
+
+| Status | Query name | Ranking evaluation test |
+| :--- | :--- | :--- |
+| TODO | Shingles | TBD |
+
+#### Intentions
+
+Searching for works with structurally important features in the query. For example: a query for `east london` should give higher scores to instances of the phrase with tokens in that order than works which contain the tokens without the given structure. This should be particularly useful for users looking for specific titles, where word-order matters most.
+
+#### Data features
+
+* `data.title`
+* `data.alternativeTitle`
+
+#### Expectations
+
+* Searching for an exact title should show that title at the top of the list
+* Occurrences of ordered tokens matching the query should appear before the matches which occur in a different order 
+
+#### Examples
+
+* `east london` - [https://wellcomecollection.org/works/ufw89pqr](https://wellcomecollection.org/works/ufw89pqr) above [https://wellcomecollection.org/works/pabxvfqu](https://wellcomecollection.org/works/pabxvfqu)
+* `The ocean as a health resort : a practical handbook of the sea for the use of tourists and health-seekers`- [https://wellcomecollection.org/works/uxxaqdkg](https://wellcomecollection.org/works/uxxaqdkg) at the top of the list
 
 ### Titles
 
@@ -78,6 +103,7 @@ Searching for a work based on local and external identifiers e.g. Catalogue API 
 * Searching for a list of identifiers, I get all the results back
 * Searches should be case insensitive
 * If the search query contains and ID and other input, we should match
+
   the ID and terms with the the ID match at the top of the list.
 
 #### Examples
