@@ -33,8 +33,8 @@ object WorksIndex {
     keywordField("id")
   )
 
-  val accessCondition =
-    objectField("accessCondition")
+  val accessConditions =
+    objectField("accessConditions")
       .fields(
         englishTextField("terms"),
         dateField("to"),
@@ -83,7 +83,7 @@ object WorksIndex {
       textField("url"),
       textField("credit"),
       license,
-      accessCondition
+      accessConditions
     )
 
   val period = Seq(
