@@ -1,6 +1,7 @@
 package uk.ac.wellcome.elasticsearch
 
 import java.time.Instant
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import org.scalacheck.ScalacheckShapeless._
@@ -15,18 +16,12 @@ import com.sksamuel.elastic4s.requests.indexes.IndexResponse
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import com.sksamuel.elastic4s.{ElasticError, Response}
 import io.circe.Encoder
-
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.models.work.internal.{
-  IdentifiedBaseWork,
-  Person,
-  Subject,
-  Unidentifiable
-}
+import uk.ac.wellcome.models.work.internal.{AccessCondition, AccessStatus, IdentifiedBaseWork, Person, Subject, Unidentifiable}
 
 class WorksIndexTest
     extends FunSpec
@@ -90,6 +85,18 @@ class WorksIndexTest
           )
         )
       )
+      whenReady(indexObject(index, sampleWork)) { _ =>
+        assertObjectIndexed(index, sampleWork)
+      }
+    }
+  }
+
+  // Possibly because the number of variations in the work model is too big,
+  // a bug in the mapping related to accessConditions wasn't caught by the catch-all test above.
+  it("puts a work with a access condition") {
+    withLocalWorksIndex { index =>
+      val sampleWork = createIdentifiedWorkWith(
+        items = List(createIdentifiedItemWith(locations = List(createDigitalLocationWith(accessConditions = List(AccessCondition(status = AccessStatus.Open, terms = Some("ask nicely"), to= Some("2014"))))))))
       whenReady(indexObject(index, sampleWork)) { _ =>
         assertObjectIndexed(index, sampleWork)
       }

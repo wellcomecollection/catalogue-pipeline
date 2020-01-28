@@ -38,7 +38,7 @@ object WorksIndex {
       .fields(
         englishTextField("terms"),
         dateField("to"),
-        keywordField("status")
+        objectField("status").fields(keywordField("type"))
       )
 
   def sourceIdentifierFields = Seq(
