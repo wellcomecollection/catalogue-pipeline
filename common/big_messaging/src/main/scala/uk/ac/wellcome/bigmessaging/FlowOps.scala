@@ -1,7 +1,7 @@
 package uk.ac.wellcome.bigmessaging
 
 import grizzled.slf4j.Logging
-import scala.concurrent.{Future, ExecutionContext}
+import scala.concurrent.{ExecutionContext, Future}
 import akka.NotUsed
 import akka.stream.scaladsl._
 
@@ -50,6 +50,5 @@ trait FlowOps extends Logging {
           }
           (ctx, result)
       }
-      .collect { case (ctx, Right(data)) => (ctx, data)
-}
+      .collect { case (ctx, Right(data)) => (ctx, data) }
 }
