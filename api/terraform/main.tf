@@ -21,13 +21,17 @@ module "catalogue_api_prod" {
 
   lb_arn           = "${module.nlb.arn}"
   lb_ingress_sg_id = "${aws_security_group.service_lb_ingress_security_group.id}"
+
+  logstash_host = "${local.logstash_host}"
+
+  interservice_sg_id = "${aws_security_group.interservice.id}"
 }
 
 module "catalogue_api_staging" {
   source = "./catalogue_api"
 
   environment           = "${local.staging_name}"
-  api_container_image   = "${module.staging_images.services["api"]}"
+  api_container_image   = "760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/api:a379a2d9ad75cfc91b74ce992f9cd93b5b488f5b"
   nginx_container_image = "${module.staging_images.services["nginx_api-gw"]}"
   listener_port         = "${local.staging_listener_port}"
   task_desired_count    = "${local.staging_task_number}"
@@ -46,6 +50,10 @@ module "catalogue_api_staging" {
 
   lb_arn           = "${module.nlb.arn}"
   lb_ingress_sg_id = "${aws_security_group.service_lb_ingress_security_group.id}"
+
+  logstash_host = "${local.logstash_host}"
+
+  interservice_sg_id = "${aws_security_group.interservice.id}"
 }
 
 module "data_api" {
