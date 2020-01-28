@@ -92,6 +92,34 @@ class SierraLocationTest
       )
     }
 
+    it("strips punctuation from access condition if present") {
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          VarField(
+            marcTag = Some("506"),
+            subfields = List(
+              MarcSubfield("f", "Open."),
+              MarcSubfield("g", "2099-12-31"),
+            )
+          )
+        )
+      )
+      transformer.getPhysicalLocation(itemData, bibData) shouldBe Some(
+        PhysicalLocation(
+          locationType = locationType,
+          label = label,
+          accessConditions = Some(
+            List(
+              AccessCondition(
+                status = AccessStatus.Open,
+                to = Some("2099-12-31")
+              ),
+            )
+          )
+        )
+      )
+    }
+
     it("adds 'Open' access condition if ind1 is 0") {
       val bibData = createSierraBibDataWith(
         varFields = List(
