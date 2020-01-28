@@ -36,7 +36,7 @@ Each query has:
 
 #### Intentions
 
-Searching for works with structurally important features in the query. For example: a query for `east london` should give higher scores to instances of the phrase with tokens in that order than works which contain the tokens without the given structure. This should be particularly useful for users looking for specific titles, where word-order matters most.
+Searching for works with structurally important features in the query. Most useful when looking for specific titles, where the order of tokens matters most.
 
 #### Data features
 
