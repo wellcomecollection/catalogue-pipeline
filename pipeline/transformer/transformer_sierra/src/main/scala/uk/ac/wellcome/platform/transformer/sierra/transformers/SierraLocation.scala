@@ -65,10 +65,12 @@ trait SierraLocation extends SierraQueryOps {
         .contents
         .headOption
         .map {
-          case accessStatus(status) if status == "Open"               => AccessStatus.Open
-          case accessStatus(status) if status == "Open with advisory" => AccessStatus.OpenWithAdvisory
-          case accessStatus(status) if status == "Restricted"         => AccessStatus.Restricted
-          case accessStatus(status) if status == "Closed"             => AccessStatus.Closed
+          case accessStatus(status) if status == "Open" => AccessStatus.Open
+          case accessStatus(status) if status == "Open with advisory" =>
+            AccessStatus.OpenWithAdvisory
+          case accessStatus(status) if status == "Restricted" =>
+            AccessStatus.Restricted
+          case accessStatus(status) if status == "Closed" => AccessStatus.Closed
           case status =>
             throw new Exception(s"Unrecognised AccessStatus: $status")
         }

@@ -92,7 +92,6 @@ class SierraLocationTest
       )
     }
 
-
     it("strips punctuation from access condition if present") {
       val bibData = createSierraBibDataWith(
         varFields = List(
@@ -120,7 +119,6 @@ class SierraLocationTest
         )
       )
     }
-
 
     it("adds 'Open' access condition if ind1 is 0") {
       val bibData = createSierraBibDataWith(
