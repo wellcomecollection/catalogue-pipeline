@@ -5,8 +5,19 @@
 
 ## Purpose
 
-Making Wellcome Collection's catalogue data and information open and discoverable
-via public APIs.
+Making Wellcome Collection's catalogue open, accessible and
+discoverable.
+
+The catalogue consists of multiple sources including:
+* Library holdings
+* Archives and manuscripts
+* Born digital content
+* Images from what was previously wellcomeimages.org
+
+As and when these sources are made available digitally, we will consume
+them via [our pipeline](./pipeline), unify them into a
+[single model](./common/internal_model) and make them discoverable via
+our [API](./api).
 
 **Interested in how we make these services?**
 
