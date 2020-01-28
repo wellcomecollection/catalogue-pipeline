@@ -55,7 +55,8 @@ trait SierraLocation extends SierraQueryOps {
       )
     }
 
-  private def getAccessStatus(varfield: VarField): AccessStatus =
+  private def getAccessStatus(varfield: VarField): AccessStatus = {
+    val accessStatus = """([A-Za-z\s]+)\p{Punct}?""".r
     if (varfield.indicator1 == Some("0"))
       AccessStatus.Open
     else
@@ -64,10 +65,10 @@ trait SierraLocation extends SierraQueryOps {
         .contents
         .headOption
         .map {
-          case "Open"               => AccessStatus.Open
-          case "Open with advisory" => AccessStatus.OpenWithAdvisory
-          case "Restricted"         => AccessStatus.Restricted
-          case "Closed"             => AccessStatus.Closed
+          case accessStatus(status) if status == "Open"               => AccessStatus.Open
+          case accessStatus(status) if status == "Open with advisory" => AccessStatus.OpenWithAdvisory
+          case accessStatus(status) if status == "Restricted"         => AccessStatus.Restricted
+          case accessStatus(status) if status == "Closed"             => AccessStatus.Closed
           case status =>
             throw new Exception(s"Unrecognised AccessStatus: $status")
         }
@@ -75,4 +76,5 @@ trait SierraLocation extends SierraQueryOps {
           throw new Exception(
             "Could not parse AccessCondition: 506$f not found")
         }
+  }
 }
