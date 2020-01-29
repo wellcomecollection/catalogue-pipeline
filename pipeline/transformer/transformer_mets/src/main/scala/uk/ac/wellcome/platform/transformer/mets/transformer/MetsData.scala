@@ -66,6 +66,8 @@ case class MetsData(
         Right(License.InCopyright)
       case s if s == "rightsstatements.org/page/InC/1.0/?language=en" =>
         Right(License.InCopyright)
+      case s if s.toLowerCase == "all rights reserved" =>
+        Right(License.InCopyright)
       // The access conditions in mets contains sometimes the license id (lowercase),
       // sometimes the label (ie "in copyright")
       // and sometimes the url of the license
