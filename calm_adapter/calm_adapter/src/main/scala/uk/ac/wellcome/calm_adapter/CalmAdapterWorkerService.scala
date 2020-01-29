@@ -1,7 +1,7 @@
 package uk.ac.wellcome.calm_adapter
 
 import java.time.LocalDate
-import scala.concurrent.{Future, ExecutionContext}
+import scala.concurrent.{ExecutionContext, Future}
 import akka.Done
 import akka.stream.scaladsl._
 import grizzled.slf4j.Logging
@@ -56,8 +56,9 @@ class CalmAdapterWorkerService(
 
   def unwrapMessage =
     Flow[(SQSMessage, NotificationMessage)]
-      .map { case (msg, NotificationMessage(body)) =>
-        (msg, fromJson[CalmWindow](body).toEither)
+      .map {
+        case (msg, NotificationMessage(body)) =>
+          (msg, fromJson[CalmWindow](body).toEither)
       }
       .via(catchErrors)
       .map { case (msg, window) => (Context(msg), window) }
@@ -65,21 +66,22 @@ class CalmAdapterWorkerService(
   def retrieveCalmRecords =
     Flow[(Context, CalmWindow)]
       .map {
-        case (ctx, CalmWindow(date))  =>
+        case (ctx, CalmWindow(date)) =>
           (ctx, calmRetriever.getRecords(CalmQuery.ModifiedDate(date)))
       }
       .via(catchErrors)
       .mapConcat {
-        case (ctx, records)  => records.map(record => (ctx, record))
+        case (ctx, records) => records.map(record => (ctx, record))
       }
-      
+
   def storeCalmRecord =
     Flow[(Context, CalmRecord)]
-      .map { case (ctx, record) =>
-        // TODO: should store records, and emit the record key if the data differs
-        // to what is currently in the store
-        val key: Option[Version[String, Int]] = None
-        (ctx, key)
+      .map {
+        case (ctx, record) =>
+          // TODO: should store records, and emit the record key if the data differs
+          // to what is currently in the store
+          val key: Option[Version[String, Int]] = None
+          (ctx, key)
       }
 
   def publishKey =
