@@ -70,7 +70,8 @@ trait SierraLocation extends SierraQueryOps {
             AccessStatus.OpenWithAdvisory
           case accessStatus(status) if status == "Restricted" =>
             AccessStatus.Restricted
-          case accessStatus(status) if status == "Restricted access (Data Protection Act)" =>
+          case accessStatus(status)
+              if status == "Restricted access (Data Protection Act)" =>
             AccessStatus.Restricted
           case accessStatus(status) if status == "Cannot Be Produced" =>
             AccessStatus.Restricted

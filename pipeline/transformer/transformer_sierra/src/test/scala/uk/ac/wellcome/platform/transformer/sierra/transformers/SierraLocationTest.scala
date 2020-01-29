@@ -135,7 +135,8 @@ class SierraLocationTest
       )
     }
 
-    it("maps Restricted access (Data Protection Act) to restricted access status"){
+    it(
+      "maps Restricted access (Data Protection Act) to restricted access status") {
       val bibData = createSierraBibDataWith(
         varFields = List(
           VarField(
@@ -150,12 +151,13 @@ class SierraLocationTest
         PhysicalLocation(
           locationType = locationType,
           label = label,
-          accessConditions = Some(List(AccessCondition(AccessStatus.Restricted)))
+          accessConditions =
+            Some(List(AccessCondition(AccessStatus.Restricted)))
         )
       )
     }
 
-    it("maps Cannot Be Produced. to restricted access status"){
+    it("maps Cannot Be Produced. to restricted access status") {
       val bibData = createSierraBibDataWith(
         varFields = List(
           VarField(
@@ -170,12 +172,13 @@ class SierraLocationTest
         PhysicalLocation(
           locationType = locationType,
           label = label,
-          accessConditions = Some(List(AccessCondition(AccessStatus.Restricted)))
+          accessConditions =
+            Some(List(AccessCondition(AccessStatus.Restricted)))
         )
       )
     }
 
-    it("maps Certain restrictions apply. to restricted access status"){
+    it("maps Certain restrictions apply. to restricted access status") {
       val bibData = createSierraBibDataWith(
         varFields = List(
           VarField(
@@ -190,7 +193,8 @@ class SierraLocationTest
         PhysicalLocation(
           locationType = locationType,
           label = label,
-          accessConditions = Some(List(AccessCondition(AccessStatus.Restricted)))
+          accessConditions =
+            Some(List(AccessCondition(AccessStatus.Restricted)))
         )
       )
     }
