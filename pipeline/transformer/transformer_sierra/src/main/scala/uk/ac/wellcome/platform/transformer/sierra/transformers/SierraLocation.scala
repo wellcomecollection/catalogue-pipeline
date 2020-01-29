@@ -56,7 +56,7 @@ trait SierraLocation extends SierraQueryOps {
     }
 
   private def getAccessStatus(varfield: VarField): AccessStatus = {
-    val accessStatus = """([A-Za-z\s]+)\p{Punct}?""".r
+    val accessStatus = """([A-Za-z\s\(\)]+)\p{Punct}?""".r
     if (varfield.indicator1 == Some("0"))
       AccessStatus.Open
     else
@@ -69,6 +69,12 @@ trait SierraLocation extends SierraQueryOps {
           case accessStatus(status) if status == "Open with advisory" =>
             AccessStatus.OpenWithAdvisory
           case accessStatus(status) if status == "Restricted" =>
+            AccessStatus.Restricted
+          case accessStatus(status) if status == "Restricted access (Data Protection Act)" =>
+            AccessStatus.Restricted
+          case accessStatus(status) if status == "Cannot Be Produced" =>
+            AccessStatus.Restricted
+          case accessStatus(status) if status == "Certain restrictions apply" =>
             AccessStatus.Restricted
           case accessStatus(status) if status == "Closed" => AccessStatus.Closed
           case status =>

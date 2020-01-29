@@ -135,6 +135,66 @@ class SierraLocationTest
       )
     }
 
+    it("maps Restricted access (Data Protection Act) to restricted access status"){
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          VarField(
+            marcTag = Some("506"),
+            subfields = List(
+              MarcSubfield("f", "Restricted access (Data Protection Act)")
+            )
+          )
+        )
+      )
+      transformer.getPhysicalLocation(itemData, bibData) shouldBe Some(
+        PhysicalLocation(
+          locationType = locationType,
+          label = label,
+          accessConditions = Some(List(AccessCondition(AccessStatus.Restricted)))
+        )
+      )
+    }
+
+    it("maps Cannot Be Produced. to restricted access status"){
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          VarField(
+            marcTag = Some("506"),
+            subfields = List(
+              MarcSubfield("f", "Cannot Be Produced.")
+            )
+          )
+        )
+      )
+      transformer.getPhysicalLocation(itemData, bibData) shouldBe Some(
+        PhysicalLocation(
+          locationType = locationType,
+          label = label,
+          accessConditions = Some(List(AccessCondition(AccessStatus.Restricted)))
+        )
+      )
+    }
+
+    it("maps Certain restrictions apply. to restricted access status"){
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          VarField(
+            marcTag = Some("506"),
+            subfields = List(
+              MarcSubfield("f", "Certain restrictions apply.")
+            )
+          )
+        )
+      )
+      transformer.getPhysicalLocation(itemData, bibData) shouldBe Some(
+        PhysicalLocation(
+          locationType = locationType,
+          label = label,
+          accessConditions = Some(List(AccessCondition(AccessStatus.Restricted)))
+        )
+      )
+    }
+
     it("fails if invalid AccessStatus") {
       val bibData = createSierraBibDataWith(
         varFields = List(
