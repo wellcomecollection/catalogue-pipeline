@@ -180,17 +180,16 @@ class MetsDataTest
     val metsData =
       MetsData(
         recordIdentifier = randomAlphanumeric(10),
-        accessConditionDz =
-          Some("All Rights Reserved"))
+        accessConditionDz = Some("All Rights Reserved"))
     val result = metsData.toWork(1)
 
     inside(result.right.get.data.items) {
       case List(
-      Item(
-      Unidentifiable,
-      _,
-      List(DigitalLocation(_, _, license, _, _, _)),
-      _)) =>
+          Item(
+            Unidentifiable,
+            _,
+            List(DigitalLocation(_, _, license, _, _, _)),
+            _)) =>
         license shouldBe Some(License.InCopyright)
     }
   }
