@@ -29,3 +29,7 @@ variable "gateway_depends" {
 variable "lb_arn" {}
 
 variable "lb_ingress_sg_id" {}
+
+variable "logstash_host" {}
+
+variable "interservice_sg_id" {}

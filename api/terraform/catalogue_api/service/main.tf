@@ -47,20 +47,21 @@ module "task" {
   sidecar_cpu    = 512
   sidecar_memory = 1024
 
+  app_env_vars_length = 4
+
   app_env_vars = {
     api_host         = "api.wellcomecollection.org"
     es_index_v2      = "${var.es_config["index_v2"]}"
     apm_service_name = "${var.namespace}"
+    logstash_host    = "${var.logstash_host}"
   }
 
-  app_env_vars_length = 3
+  sidecar_env_vars_length = 2
 
   sidecar_env_vars = {
     APP_HOST = "localhost"
     APP_PORT = "${var.container_port}"
   }
-
-  sidecar_env_vars_length = 2
 
   secret_app_env_vars = {
     es_host        = "catalogue/api/es_host"
@@ -85,5 +86,5 @@ module "task" {
 }
 
 locals {
-  security_group_ids = "${concat(list(var.service_egress_security_group_id), var.security_group_ids)}"
+  security_group_ids = "${concat(list(var.service_egress_security_group_id, var.interservice_security_group_id), var.security_group_ids)}"
 }
