@@ -55,7 +55,8 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
   }
 
   it("parse a METS with a repeated license node") {
-    MetsXml(xmlRepeatedLicenseNode).accessConditionDz shouldBe Right(Some("CC-BY"))
+    MetsXml(xmlRepeatedLicenseNode).accessConditionDz shouldBe Right(
+      Some("CC-BY"))
   }
 
   it("does not parse a METS with multiple licenses") {
