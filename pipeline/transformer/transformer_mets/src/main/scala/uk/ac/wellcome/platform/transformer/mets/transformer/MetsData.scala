@@ -52,9 +52,14 @@ case class MetsData(
       url = s"https://wellcomelibrary.org/iiif/$recordIdentifier/manifest",
       locationType = LocationType("iiif-presentation"),
       license = license,
-      accessConditions = accessStatus.map { status =>
-        AccessCondition(status = status, terms = accessConditionUsage)
-      }.toList
+      accessConditions = (accessStatus, accessConditionUsage) match {
+        case (None, None) => Nil
+        case _ =>
+          List(
+            AccessCondition(
+              status = accessStatus,
+              terms = accessConditionUsage))
+      }
     )
 
   private def parseLicense: Either[Exception, Option[License]] =

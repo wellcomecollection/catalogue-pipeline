@@ -66,11 +66,8 @@ trait DisplaySerialisationTestBase { this: Suite =>
        {
         "type": "${loc.ontologyType}",
         "locationType": ${locationType(loc.locationType)},
-        "label": "${loc.label}"
-        ${optionalObject(
-      "accessConditions",
-      accessConditions,
-      loc.accessConditions)}
+        "label": "${loc.label}",
+        "accessConditions": ${accessConditions(loc.accessConditions)}
        }
      """
 
@@ -86,14 +83,14 @@ trait DisplaySerialisationTestBase { this: Suite =>
       {
         "type": "AccessCondition",
         ${optionalString("terms", cond.terms)}
-        ${optionalString("to", cond.to)}
-        ${accessStatus(cond.status)}
+        ${optionalString("to", cond.to, trailingComma = false)}
+        ${optionalObject("status", accessStatus, cond.status)}
       }
     """
 
   def accessStatus(status: AccessStatus) = {
     s"""
-      "status": {
+      {
         "type": "AccessStatus",
         "id": "${DisplayAccessStatus(status).id}",
         "label": "${DisplayAccessStatus(status).label}"

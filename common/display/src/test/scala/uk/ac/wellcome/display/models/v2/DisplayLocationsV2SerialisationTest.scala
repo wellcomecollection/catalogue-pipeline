@@ -90,7 +90,7 @@ class DisplayLocationsV2SerialisationTest
       locationType = LocationType("iiif-image"),
       accessConditions = List(
         AccessCondition(
-          status = AccessStatus.Restricted,
+          status = Some(AccessStatus.Restricted),
           terms = Some("Ask politely"),
           to = Some("2024-02-24")
         )

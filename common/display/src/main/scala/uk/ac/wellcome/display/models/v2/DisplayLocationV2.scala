@@ -32,8 +32,7 @@ object DisplayLocationV2 {
       DisplayPhysicalLocationV2(
         locationType = DisplayLocationType(locationType),
         label = label,
-        accessConditions =
-          accessConditions.map(_.map(DisplayAccessCondition(_)))
+        accessConditions = accessConditions.map(DisplayAccessCondition(_))
       )
   }
 }
@@ -80,7 +79,7 @@ case class DisplayPhysicalLocationV2(
   ) label: String,
   @Schema(
     description = "Information about any access restrictions placed on the work"
-  ) accessConditions: Option[List[DisplayAccessCondition]] = None,
+  ) accessConditions: List[DisplayAccessCondition] = Nil,
   @JsonKey("type") @Schema(name = "type") ontologyType: String =
     "PhysicalLocation"
 ) extends DisplayLocationV2
