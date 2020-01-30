@@ -314,7 +314,9 @@ object CatalogueDependencies {
 
   // CALM adapter
 
-  val calmAdapterDependencies: Seq[ModuleID] = Nil
+  val calmAdapterDependencies: Seq[ModuleID] =
+    ExternalDependencies.akkaHttpDependencies ++
+      ExternalDependencies.scalaXmlDependencies
 
   // Sierra adapter stack
 

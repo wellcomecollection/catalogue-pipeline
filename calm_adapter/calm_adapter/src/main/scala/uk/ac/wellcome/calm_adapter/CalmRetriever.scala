@@ -15,3 +15,10 @@ trait CalmRetriever {
 
   def getRecords(query: CalmQuery): Either[Throwable, List[CalmRecord]]
 }
+
+case class  HttpCalmCredentials(username: String, password: String)
+
+class HttpCalmRetriever(url: String, credentials: HttpCalmCredentials) {
+
+  def getRecords(query: CalmQuery): Either[Throwable, List[CalmRecord]] = ???
+}
