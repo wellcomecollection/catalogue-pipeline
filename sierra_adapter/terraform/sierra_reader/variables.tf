@@ -1,7 +1,7 @@
 variable "resource_type" {}
 
 variable "bucket_name" {}
-variable "windows_topic_name" {}
+variable "windows_topic_arn" {}
 
 variable "sierra_fields" {}
 
@@ -19,11 +19,10 @@ variable "aws_region" {
   default = "eu-west-1"
 }
 
-variable "account_id" {}
 variable "infra_bucket" {}
 
 variable "subnets" {
-  type = "list"
+  type = list(string)
 }
 
 variable "namespace_id" {}

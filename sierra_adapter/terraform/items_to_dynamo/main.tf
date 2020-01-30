@@ -1,21 +1,23 @@
 data "aws_ecs_cluster" "cluster" {
-  cluster_name = "${var.cluster_name}"
+  cluster_name = var.cluster_name
 }
 
 module "sierra_to_dynamo_service" {
-  source = "git::https://github.com/wellcometrust/terraform.git//ecs/prebuilt/scaling?ref=v19.12.0"
+  source = "../modules/scaling_worker"
 
   service_name = "sierra_items_to_dynamo"
 
-  container_image = "${var.container_image}"
+  container_image = var.container_image
 
-  security_group_ids = [
-    "${var.interservice_security_group_id}",
-    "${var.service_egress_security_group_id}",
-  ]
+  env_vars = {
+    demultiplexer_queue_url = module.demultiplexer_queue.url
+    metrics_namespace       = "sierra_items_to_dynamo"
 
-  cluster_id   = "${data.aws_ecs_cluster.cluster.id}"
-  cluster_name = "${var.cluster_name}"
+    vhs_table_name  = var.vhs_sierra_items_table_name
+    vhs_bucket_name = var.vhs_sierra_items_bucket_name
+
+    topic_arn = module.sierra_to_dynamo_updates_topic.arn
+  }
 
   cpu    = 256
   memory = 512
@@ -23,26 +25,15 @@ module "sierra_to_dynamo_service" {
   min_capacity = 0
   max_capacity = 3
 
-  env_vars = {
-    demultiplexer_queue_url = "${module.demultiplexer_queue.id}"
-    metrics_namespace       = "sierra_items_to_dynamo"
+  namespace_id = var.namespace_id
 
-    vhs_table_name  = "${local.vhs_sierra_items_table_name}"
-    vhs_bucket_name = "${local.vhs_sierra_items_bucket_name}"
+  cluster_name = var.cluster_name
+  cluster_arn  = data.aws_ecs_cluster.cluster.id
 
-    topic_arn = "${module.sierra_to_dynamo_updates_topic.arn}"
-  }
+  subnets = var.subnets
 
-  env_vars_length = 5
-
-  aws_region = "${var.aws_region}"
-
-  subnets = [
-    "${var.subnets}",
+  security_group_ids = [
+    var.interservice_security_group_id,
+    var.service_egress_security_group_id,
   ]
-
-  namespace_id = "${var.namespace_id}"
-
-  secret_env_vars        = {}
-  secret_env_vars_length = 0
 }

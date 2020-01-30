@@ -14,8 +14,8 @@ terraform {
 data "terraform_remote_state" "shared_infra" {
   backend = "s3"
 
-  config {
-    role_arn = "arn:aws:iam::760097843905:role/platform-developer"
+  config = {
+    role_arn = "arn:aws:iam::760097843905:role/platform-read_only"
 
     bucket = "wellcomecollection-platform-infra"
     key    = "terraform/shared_infra.tfstate"
@@ -26,8 +26,8 @@ data "terraform_remote_state" "shared_infra" {
 data "terraform_remote_state" "catalogue_infra_critical" {
   backend = "s3"
 
-  config {
-    role_arn = "arn:aws:iam::760097843905:role/platform-developer"
+  config = {
+    role_arn = "arn:aws:iam::760097843905:role/platform-read_only"
 
     bucket = "wellcomecollection-platform-infra"
     key    = "terraform/catalogue/infrastructure/critical.tfstate"
@@ -38,8 +38,8 @@ data "terraform_remote_state" "catalogue_infra_critical" {
 data "terraform_remote_state" "reindexer" {
   backend = "s3"
 
-  config {
-    role_arn = "arn:aws:iam::760097843905:role/platform-developer"
+  config = {
+    role_arn = "arn:aws:iam::760097843905:role/platform-read_only"
 
     bucket = "wellcomecollection-platform-infra"
     key    = "terraform/reindexer.tfstate"
