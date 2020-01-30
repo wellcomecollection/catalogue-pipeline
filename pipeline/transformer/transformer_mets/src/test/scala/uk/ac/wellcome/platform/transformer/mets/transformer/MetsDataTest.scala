@@ -251,7 +251,7 @@ class MetsDataTest
       case DigitalLocation(_, _, _, _, accessConditions, _) =>
         accessConditions shouldBe List(
           AccessCondition(
-            status = AccessStatus.OpenWithAdvisory
+            status = Some(AccessStatus.OpenWithAdvisory)
           )
         )
 
@@ -269,9 +269,22 @@ class MetsDataTest
       case DigitalLocation(_, _, _, _, accessConditions, _) =>
         accessConditions shouldBe List(
           AccessCondition(
-            status = AccessStatus.Restricted,
+            status = Some(AccessStatus.Restricted),
             terms = Some("Please ask nicely")
           ))
+    }
+  }
+
+  it("does not add access condition if all fields are empty") {
+    val result = MetsData(
+      recordIdentifier = "ID",
+      accessConditionStatus = None,
+      accessConditionUsage = None
+    ).toWork(1)
+    result shouldBe a[Right[_, _]]
+    inside(result.right.get.data.items.head.locations.head) {
+      case DigitalLocation(_, _, _, _, accessConditions, _) =>
+        accessConditions shouldBe List()
     }
   }
 
@@ -286,7 +299,7 @@ class MetsDataTest
         accessConditions shouldBe
           List(
             AccessCondition(
-              status = AccessStatus.Restricted
+              status = Some(AccessStatus.Restricted)
             )
           )
     }

@@ -24,7 +24,7 @@ import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.{AccessCondition, AccessStatus, IdentifiedBaseWork, Person, Subject, Unidentifiable}
 
 class WorksIndexTest
-    extends FunSpec
+  extends FunSpec
     with ElasticsearchFixtures
     with ScalaFutures
     with Eventually
@@ -96,7 +96,7 @@ class WorksIndexTest
   it("puts a work with a access condition") {
     withLocalWorksIndex { index =>
       val sampleWork = createIdentifiedWorkWith(
-        items = List(createIdentifiedItemWith(locations = List(createDigitalLocationWith(accessConditions = List(AccessCondition(status = AccessStatus.Open, terms = Some("ask nicely"), to= Some("2014"))))))))
+        items = List(createIdentifiedItemWith(locations = List(createDigitalLocationWith(accessConditions = List(AccessCondition(status = Some(AccessStatus.Open), terms = Some("ask nicely"), to = Some("2014"))))))))
       whenReady(indexObject(index, sampleWork)) { _ =>
         assertObjectIndexed(index, sampleWork)
       }
@@ -126,8 +126,8 @@ class WorksIndexTest
 
   private def assertObjectIndexed[T](index: Index, t: T)(
     implicit encoder: Encoder[T]): Assertion =
-    // Elasticsearch is eventually consistent so, when the future completes,
-    // the documents won't appear in the search until after a refresh
+  // Elasticsearch is eventually consistent so, when the future completes,
+  // the documents won't appear in the search until after a refresh
     eventually {
       val response: Response[SearchResponse] = elasticClient.execute {
         search(index).matchAllQuery()

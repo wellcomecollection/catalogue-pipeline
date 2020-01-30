@@ -1,7 +1,7 @@
 package uk.ac.wellcome.models.work.internal
 
 case class AccessCondition(
-  status: AccessStatus,
+  status: Option[AccessStatus] = None,
   terms: Option[String] = None,
   to: Option[String] = None
 )
