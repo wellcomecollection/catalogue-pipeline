@@ -22,7 +22,7 @@ object SierraCalmRefNo extends SierraTransformer with SierraQueryOps {
       .contentString
 
     val altRefNo = bibData
-      .varfieldsWithTag("001")
+      .varfieldsWithTag("100")
       .contentString
 
     refNo.map(path => Collection(path = path, label = altRefNo))
