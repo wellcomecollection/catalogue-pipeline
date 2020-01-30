@@ -102,7 +102,7 @@ class MetsDataTest
           Item(
             Unidentifiable,
             _,
-            List(DigitalLocation(_, _, license, _, _, _)),
+            List(DigitalLocation(_, _, license, _, _, _, _)),
             _)) =>
         license shouldBe Some(License.InCopyright)
     }
@@ -118,7 +118,7 @@ class MetsDataTest
           Item(
             Unidentifiable,
             _,
-            List(DigitalLocation(_, _, license, _, _, _)),
+            List(DigitalLocation(_, _, license, _, _, _, _)),
             _)) =>
         license shouldBe Some(License.InCopyright)
     }
@@ -134,7 +134,7 @@ class MetsDataTest
           Item(
             Unidentifiable,
             _,
-            List(DigitalLocation(_, _, license, _, _, _)),
+            List(DigitalLocation(_, _, license, _, _, _, _)),
             _)) =>
         license shouldBe Some(License.InCopyright)
     }
@@ -151,7 +151,7 @@ class MetsDataTest
           Item(
             Unidentifiable,
             _,
-            List(DigitalLocation(_, _, license, _, _, _)),
+            List(DigitalLocation(_, _, license, _, _, _, _)),
             _)) =>
         license shouldBe Some(License.InCopyright)
     }
@@ -170,7 +170,7 @@ class MetsDataTest
           Item(
             Unidentifiable,
             _,
-            List(DigitalLocation(_, _, license, _, _, _)),
+            List(DigitalLocation(_, _, license, _, _, _, _)),
             _)) =>
         license shouldBe Some(License.InCopyright)
     }
@@ -188,7 +188,7 @@ class MetsDataTest
           Item(
             Unidentifiable,
             _,
-            List(DigitalLocation(_, _, license, _, _, _)),
+            List(DigitalLocation(_, _, license, _, _, _, _)),
             _)) =>
         license shouldBe Some(License.InCopyright)
     }
@@ -248,7 +248,7 @@ class MetsDataTest
     ).toWork(1)
     result shouldBe a[Right[_, _]]
     inside(result.right.get.data.items.head.locations.head) {
-      case DigitalLocation(_, _, _, _, accessConditions, _) =>
+      case DigitalLocation(_, _, _, _, accessConditions, _, _) =>
         accessConditions shouldBe List(
           AccessCondition(
             status = AccessStatus.OpenWithAdvisory
@@ -266,7 +266,7 @@ class MetsDataTest
     ).toWork(1)
     result shouldBe a[Right[_, _]]
     inside(result.right.get.data.items.head.locations.head) {
-      case DigitalLocation(_, _, _, _, accessConditions, _) =>
+      case DigitalLocation(_, _, _, _, accessConditions, _, _) =>
         accessConditions shouldBe List(
           AccessCondition(
             status = AccessStatus.Restricted,
@@ -282,7 +282,7 @@ class MetsDataTest
     ).toWork(1)
     result shouldBe a[Right[_, _]]
     inside(result.right.get.data.items.head.locations.head) {
-      case DigitalLocation(_, _, _, _, accessConditions, _) =>
+      case DigitalLocation(_, _, _, _, accessConditions, _, _) =>
         accessConditions shouldBe
           List(
             AccessCondition(
@@ -298,5 +298,22 @@ class MetsDataTest
       accessConditionStatus = Some("Kanye West"),
     ).toWork(1)
     result shouldBe a[Left[_, _]]
+  }
+
+  it("attaches image source identifiers to DigitalLocation") {
+    val fileIds = List("beep", "boop", "bing", "bong")
+    val result = MetsData(
+      recordIdentifier = "ID",
+      imageFileIds = fileIds
+    ).toWork(1)
+    inside(result.right.get.data.items.head.locations.head) {
+      case DigitalLocation(_, _, _, _, _, imageSourceIds, _) =>
+        imageSourceIds should contain theSameElementsAs fileIds.map(
+          id =>
+            SourceIdentifier(
+              identifierType = IdentifierType("mets-image"),
+              ontologyType = "Image",
+              value = s"ID/$id"))
+    }
   }
 }

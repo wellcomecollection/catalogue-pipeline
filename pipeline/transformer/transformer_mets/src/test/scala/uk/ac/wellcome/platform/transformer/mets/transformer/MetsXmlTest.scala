@@ -54,6 +54,17 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
     MetsXml(xmlMultipleLicense).accessConditionDz shouldBe a[Left[_, _]]
   }
 
+  it("parses all file IDs from XML") {
+    MetsXml(xml).right.get.fileIds should contain theSameElementsAs List(
+      "FILE_0001_OBJECTS",
+      "FILE_0002_OBJECTS",
+      "FILE_0003_OBJECTS",
+      "FILE_0004_OBJECTS",
+      "FILE_0005_OBJECTS",
+      "FILE_0006_OBJECTS"
+    )
+  }
+
   it("parses thumbnail from XML") {
     MetsXml(xml).right.get.thumbnailLocation("b30246039") shouldBe Some(
       "b30246039_0001.jp2")

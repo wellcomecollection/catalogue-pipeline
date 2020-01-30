@@ -18,7 +18,8 @@ class MetsXmlTransformerTest extends FunSpec with Matchers with MetsGenerators {
         accessConditionDz = Some("CC-BY-NC"),
         accessConditionStatus = Some("Open"),
         accessConditionUsage = Some("Some terms"),
-        thumbnailLocation = Some("b30246039_0001.jp2")
+        thumbnailLocation = Some("b30246039_0001.jp2"),
+        imageFileIds = createIds(6)
       )
     )
   }
@@ -38,7 +39,8 @@ class MetsXmlTransformerTest extends FunSpec with Matchers with MetsGenerators {
         recordIdentifier = "b22012692",
         accessConditionDz = Some("PDM"),
         accessConditionStatus = Some("Open"),
-        thumbnailLocation = Some("b22012692_0001_0001.jp2")
+        thumbnailLocation = Some("b22012692_0001_0001.jp2"),
+        imageFileIds = createIds(2)
       )
     )
   }
@@ -61,7 +63,8 @@ class MetsXmlTransformerTest extends FunSpec with Matchers with MetsGenerators {
         recordIdentifier = "b30246039",
         accessConditionDz = Some("INC"),
         accessConditionStatus = None,
-        thumbnailLocation = Some("b30246039_0001.jp2")
+        thumbnailLocation = Some("b30246039_0001.jp2"),
+        imageFileIds = createIds(2)
       )
     )
   }
@@ -99,4 +102,9 @@ class MetsXmlTransformerTest extends FunSpec with Matchers with MetsGenerators {
 
   def loadXmlFile(path: String) =
     IOUtils.toString(getClass.getResourceAsStream(path), "UTF-8")
+
+  def createIds(n: Int): List[String] =
+    (1 to n).map { idx =>
+      f"FILE_$idx%04d_OBJECTS"
+    }.toList
 }
