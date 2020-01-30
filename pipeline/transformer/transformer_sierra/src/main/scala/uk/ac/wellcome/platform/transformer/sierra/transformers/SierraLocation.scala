@@ -24,8 +24,7 @@ trait SierraLocation extends SierraQueryOps {
         Some(
           PhysicalLocation(
             locationType = LocationType(code),
-            accessConditions =
-              Option(getAccessConditions(bibData)).filter(_.nonEmpty),
+            accessConditions = getAccessConditions(bibData),
             label = name
           )
         )
@@ -53,12 +52,15 @@ trait SierraLocation extends SierraQueryOps {
         terms = varfield.subfieldsWithTag("a").contentString,
         to = varfield.subfieldsWithTag("g").contents.headOption
       )
+    }.filter{
+      case AccessCondition(None, None, None) => false
+      case _ => true
     }
 
-  private def getAccessStatus(varfield: VarField): AccessStatus = {
+  private def getAccessStatus(varfield: VarField): Option[AccessStatus] = {
     val accessStatus = """([A-Za-z\s\(\)]+)\p{Punct}?""".r
     if (varfield.indicator1 == Some("0"))
-      AccessStatus.Open
+      Some(AccessStatus.Open)
     else
       varfield
         .subfieldsWithTag("f")
@@ -80,10 +82,6 @@ trait SierraLocation extends SierraQueryOps {
           case accessStatus(status) if status == "Closed" => AccessStatus.Closed
           case status =>
             throw new Exception(s"Unrecognised AccessStatus: $status")
-        }
-        .getOrElse {
-          throw new Exception(
-            "Could not parse AccessCondition: 506$f not found")
         }
   }
 }

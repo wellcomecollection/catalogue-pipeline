@@ -16,6 +16,6 @@ case class DigitalLocation(
 case class PhysicalLocation(
   locationType: LocationType,
   label: String,
-  accessConditions: Option[List[AccessCondition]] = None,
+  accessConditions: List[AccessCondition] = Nil,
   ontologyType: String = "PhysicalLocation"
 ) extends Location

@@ -79,16 +79,15 @@ class SierraLocationTest
         PhysicalLocation(
           locationType = locationType,
           label = label,
-          accessConditions = Some(
+          accessConditions =
             List(
               AccessCondition(
-                status = AccessStatus.Restricted,
+                status = Some(AccessStatus.Restricted),
                 terms = Some("You're not allowed yet"),
                 to = Some("2099-12-31")
               ),
             )
           )
-        )
       )
     }
 
@@ -108,15 +107,14 @@ class SierraLocationTest
         PhysicalLocation(
           locationType = locationType,
           label = label,
-          accessConditions = Some(
+          accessConditions =
             List(
               AccessCondition(
-                status = AccessStatus.Open,
+                status = Some(AccessStatus.Open),
                 to = Some("2099-12-31")
               ),
             )
           )
-        )
       )
     }
 
@@ -130,7 +128,36 @@ class SierraLocationTest
         PhysicalLocation(
           locationType = locationType,
           label = label,
-          accessConditions = Some(List(AccessCondition(AccessStatus.Open)))
+          accessConditions = List(AccessCondition(Some(AccessStatus.Open)))
+        )
+      )
+    }
+
+
+    it("adds access condition if f is not present but other subfields are") {
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          VarField(
+            marcTag = Some("506"),
+            subfields = List(
+              MarcSubfield("a", "You're not allowed yet"),
+              MarcSubfield("g", "2099-12-31"),
+            )
+          )
+        )
+      )
+      transformer.getPhysicalLocation(itemData, bibData) shouldBe Some(
+        PhysicalLocation(
+          locationType = locationType,
+          label = label,
+          accessConditions =
+            List(
+              AccessCondition(
+                status = None,
+                terms = Some("You're not allowed yet"),
+                to = Some("2099-12-31")
+              ),
+            )
         )
       )
     }
@@ -151,8 +178,7 @@ class SierraLocationTest
         PhysicalLocation(
           locationType = locationType,
           label = label,
-          accessConditions =
-            Some(List(AccessCondition(AccessStatus.Restricted)))
+          accessConditions = List(AccessCondition(Some(AccessStatus.Restricted)))
         )
       )
     }
@@ -172,8 +198,7 @@ class SierraLocationTest
         PhysicalLocation(
           locationType = locationType,
           label = label,
-          accessConditions =
-            Some(List(AccessCondition(AccessStatus.Restricted)))
+          accessConditions = List(AccessCondition(Some(AccessStatus.Restricted)))
         )
       )
     }
@@ -193,9 +218,28 @@ class SierraLocationTest
         PhysicalLocation(
           locationType = locationType,
           label = label,
-          accessConditions =
-            Some(List(AccessCondition(AccessStatus.Restricted)))
+          accessConditions = List(AccessCondition(Some(AccessStatus.Restricted)))
         )
+      )
+    }
+
+    it("does not add an access condition if none of the relvant subfields are present") {
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          VarField(
+            marcTag = Some("506"),
+            subfields = List(
+              MarcSubfield("e", "Something something"),
+            )
+          )
+        )
+      )
+      transformer.getPhysicalLocation(itemData, bibData) shouldBe Some(
+        PhysicalLocation(
+          locationType = locationType,
+          label = label,
+          accessConditions =List()
+          )
       )
     }
 
