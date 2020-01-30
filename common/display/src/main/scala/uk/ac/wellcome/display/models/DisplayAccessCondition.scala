@@ -8,7 +8,7 @@ import uk.ac.wellcome.models.work.internal.{AccessCondition, AccessStatus}
   name = "AccessCondition"
 )
 case class DisplayAccessCondition(
-  status: DisplayAccessStatus,
+  status: Option[DisplayAccessStatus],
   terms: Option[String],
   to: Option[String],
   @JsonKey("type") @Schema(name = "type") ontologyType: String =
@@ -19,7 +19,7 @@ object DisplayAccessCondition {
 
   def apply(accessCondition: AccessCondition): DisplayAccessCondition =
     DisplayAccessCondition(
-      status = DisplayAccessStatus(accessCondition.status),
+      status = accessCondition.status.map(DisplayAccessStatus.apply),
       terms = accessCondition.terms,
       to = accessCondition.to
     )
