@@ -114,7 +114,8 @@ class DisplayWorkV2SerialisationTest
       |         "url": "",
       |         "locationType": ${locationType(location.locationType)},
       |         "license": ${license(location.license.get)},
-      |         "credit": "${location.credit.get}"
+      |         "credit": "${location.credit.get}",
+      |         "accessConditions" : []
       |       }
       |     ]
       |   }

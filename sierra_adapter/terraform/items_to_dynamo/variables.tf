@@ -1,6 +1,6 @@
 variable "container_image" {}
 
-variable "demultiplexer_topic_name" {}
+variable "demultiplexer_topic_arn" {}
 
 variable "cluster_name" {}
 variable "vpc_id" {}
@@ -11,11 +11,13 @@ variable "aws_region" {
   default = "eu-west-1"
 }
 
-variable "account_id" {}
-
 variable "subnets" {
-  type = "list"
+  type = list(string)
 }
+
+variable "vhs_sierra_items_full_access_policy" {}
+variable "vhs_sierra_items_table_name" {}
+variable "vhs_sierra_items_bucket_name" {}
 
 variable "namespace_id" {}
 variable "interservice_security_group_id" {}

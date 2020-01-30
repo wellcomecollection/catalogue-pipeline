@@ -176,6 +176,24 @@ class MetsDataTest
     }
   }
 
+  it("maps All Rights Reserved to In Copyright license") {
+    val metsData =
+      MetsData(
+        recordIdentifier = randomAlphanumeric(10),
+        accessConditionDz = Some("All Rights Reserved"))
+    val result = metsData.toWork(1)
+
+    inside(result.right.get.data.items) {
+      case List(
+          Item(
+            Unidentifiable,
+            _,
+            List(DigitalLocation(_, _, license, _, _, _)),
+            _)) =>
+        license shouldBe Some(License.InCopyright)
+    }
+  }
+
   it("creates a invisible work with a thumbnail location") {
     val metsData = MetsData(
       recordIdentifier = randomAlphanumeric(10),
@@ -231,13 +249,12 @@ class MetsDataTest
     result shouldBe a[Right[_, _]]
     inside(result.right.get.data.items.head.locations.head) {
       case DigitalLocation(_, _, _, _, accessConditions, _) =>
-        accessConditions shouldBe Some(
-          List(
-            AccessCondition(
-              status = AccessStatus.OpenWithAdvisory
-            )
+        accessConditions shouldBe List(
+          AccessCondition(
+            status = AccessStatus.OpenWithAdvisory
           )
         )
+
     }
   }
 
@@ -250,14 +267,11 @@ class MetsDataTest
     result shouldBe a[Right[_, _]]
     inside(result.right.get.data.items.head.locations.head) {
       case DigitalLocation(_, _, _, _, accessConditions, _) =>
-        accessConditions shouldBe Some(
-          List(
-            AccessCondition(
-              status = AccessStatus.Restricted,
-              terms = Some("Please ask nicely")
-            )
-          )
-        )
+        accessConditions shouldBe List(
+          AccessCondition(
+            status = AccessStatus.Restricted,
+            terms = Some("Please ask nicely")
+          ))
     }
   }
 
@@ -269,13 +283,12 @@ class MetsDataTest
     result shouldBe a[Right[_, _]]
     inside(result.right.get.data.items.head.locations.head) {
       case DigitalLocation(_, _, _, _, accessConditions, _) =>
-        accessConditions shouldBe Some(
+        accessConditions shouldBe
           List(
             AccessCondition(
               status = AccessStatus.Restricted
             )
           )
-        )
     }
   }
 

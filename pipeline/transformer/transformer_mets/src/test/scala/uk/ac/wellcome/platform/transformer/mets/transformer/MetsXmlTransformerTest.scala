@@ -2,8 +2,8 @@ package uk.ac.wellcome.platform.transformer.mets.transformer
 
 import org.scalatest.{FunSpec, Matchers}
 import org.apache.commons.io.IOUtils
-
 import uk.ac.wellcome.mets_adapter.models.MetsLocation
+import uk.ac.wellcome.models.work.internal.License
 import uk.ac.wellcome.platform.transformer.mets.fixtures.MetsGenerators
 import uk.ac.wellcome.storage.store.memory.MemoryStore
 import uk.ac.wellcome.storage.ObjectLocation
@@ -39,6 +39,29 @@ class MetsXmlTransformerTest extends FunSpec with Matchers with MetsGenerators {
         accessConditionDz = Some("PDM"),
         accessConditionStatus = Some("Open"),
         thumbnailLocation = Some("b22012692_0001_0001.jp2")
+      )
+    )
+  }
+
+  it("should transform METS XML with manifestations without .xml in the name") {
+    val xml = xmlWithManifestations(
+      List(("LOG_0001", "01", "first"), ("LOG_0002", "02", "second.xml"))
+    ).toString()
+    val manifestations = Map(
+      "first.xml" -> Some(
+        metsXmlWith(
+          "b30246039",
+          license = Some(License.InCopyright),
+          fileSec = fileSec("b30246039"),
+          structMap = structMap)),
+      "second.xml" -> Some(metsXmlWith("b30246039")),
+    )
+    transform(Some(xml), manifestations) shouldBe Right(
+      MetsData(
+        recordIdentifier = "b30246039",
+        accessConditionDz = Some("INC"),
+        accessConditionStatus = None,
+        thumbnailLocation = Some("b30246039_0001.jp2")
       )
     )
   }

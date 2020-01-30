@@ -53,8 +53,8 @@ case class MetsData(
       locationType = LocationType("iiif-presentation"),
       license = license,
       accessConditions = accessStatus.map { status =>
-        List(AccessCondition(status = status, terms = accessConditionUsage))
-      }
+        AccessCondition(status = status, terms = accessConditionUsage)
+      }.toList
     )
 
   private def parseLicense: Either[Exception, Option[License]] =
@@ -65,6 +65,8 @@ case class MetsData(
       case s if s.toLowerCase() == "copyright not cleared" =>
         Right(License.InCopyright)
       case s if s == "rightsstatements.org/page/InC/1.0/?language=en" =>
+        Right(License.InCopyright)
+      case s if s.toLowerCase == "all rights reserved" =>
         Right(License.InCopyright)
       // The access conditions in mets contains sometimes the license id (lowercase),
       // sometimes the label (ie "in copyright")

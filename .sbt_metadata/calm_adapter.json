@@ -1,0 +1,8 @@
+{
+  "id" : "calm_adapter",
+  "folder" : "calm_adapter/calm_adapter",
+  "dependencyIds" : [
+    "internal_model",
+    "big_messaging_typesafe"
+  ]
+}

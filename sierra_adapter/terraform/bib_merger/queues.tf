@@ -1,9 +1,9 @@
 module "updates_queue" {
-  source      = "git::https://github.com/wellcometrust/terraform.git//sqs?ref=v6.4.0"
-  queue_name  = "sierra_${var.resource_type}_merger_queue"
-  aws_region  = "${var.aws_region}"
-  account_id  = "${var.account_id}"
-  topic_names = ["${var.updates_topic_name}"]
+  source      = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
+
+  queue_name  = "sierra_bibs_merger_queue"
+
+  topic_arns = [var.updates_topic_arn]
 
   # Ensure that messages are spread around -- if the merger has an error
   # (for example, hitting DynamoDB write limits), we don't retry too quickly.
@@ -14,13 +14,15 @@ module "updates_queue" {
   # message can be received before it gets marked as failed.
   max_receive_count = 12
 
-  alarm_topic_arn = "${var.dlq_alarm_arn}"
+  alarm_topic_arn = var.dlq_alarm_arn
+
+  aws_region  = var.aws_region
 }
 
 module "scaling_alarm" {
-  source     = "git::https://github.com/wellcometrust/terraform-modules.git//autoscaling/alarms/queue?ref=v19.12.0"
-  queue_name = "sierra_${var.resource_type}_merger_queue"
+  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.2"
+  queue_name = "sierra_bibs_merger_queue"
 
-  queue_high_actions = ["${module.sierra_merger_service.scale_up_arn}"]
-  queue_low_actions  = ["${module.sierra_merger_service.scale_down_arn}"]
+  queue_high_actions = [module.sierra_merger_service.scale_up_arn]
+  queue_low_actions  = [module.sierra_merger_service.scale_down_arn]
 }

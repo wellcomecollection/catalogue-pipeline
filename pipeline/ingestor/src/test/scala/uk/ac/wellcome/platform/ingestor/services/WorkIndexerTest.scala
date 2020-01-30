@@ -9,7 +9,6 @@ import com.sksamuel.elastic4s.ElasticDsl.{
 import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.requests.analysis.Analysis
 import com.sksamuel.elastic4s.requests.mappings.FieldDefinition
-import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Assertion, FunSpec, Matchers}
 import uk.ac.wellcome.elasticsearch.IndexConfig
@@ -274,7 +273,7 @@ class WorkIndexerTest
         whenReady(future) { result =>
           assertElasticsearchEventuallyHasWork(index = index, validWorks: _*)
           assertElasticsearchNeverHasWork(index = index, notMatchingMappingWork)
-          result.left.get should contain(notMatchingMappingWork)
+          result.left.get should contain only (notMatchingMappingWork)
         }
     }
   }

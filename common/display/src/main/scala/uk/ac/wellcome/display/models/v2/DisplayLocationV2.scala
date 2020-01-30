@@ -26,8 +26,7 @@ object DisplayLocationV2 {
         url = url,
         credit = credit,
         license = license.map(DisplayLicenseV2(_)),
-        accessConditions =
-          accessConditions.map(_.map(DisplayAccessCondition(_)))
+        accessConditions = accessConditions.map(DisplayAccessCondition(_))
       )
     case PhysicalLocation(locationType, label, accessConditions, _) =>
       DisplayPhysicalLocationV2(
@@ -62,7 +61,7 @@ case class DisplayDigitalLocationV2(
   ) license: Option[DisplayLicenseV2] = None,
   @Schema(
     description = "Information about any access restrictions placed on the work"
-  ) accessConditions: Option[List[DisplayAccessCondition]] = None,
+  ) accessConditions: List[DisplayAccessCondition] = Nil,
   @JsonKey("type") @Schema(name = "type") ontologyType: String =
     "DigitalLocation"
 ) extends DisplayLocationV2

@@ -262,6 +262,7 @@ object CatalogueDependencies {
   val apiDependencies: Seq[ModuleID] =
     ExternalDependencies.akkaHttpDependencies ++
       ExternalDependencies.apmDependencies ++
+      ExternalDependencies.circeOpticsDependencies ++
       WellcomeDependencies.typesafeLibrary
 
   val idminterDependencies: Seq[ModuleID] =
@@ -310,6 +311,10 @@ object CatalogueDependencies {
       ExternalDependencies.mockitoDependencies ++
       ExternalDependencies.wireMockDependencies ++
       ExternalDependencies.scribeJavaDependencies
+
+  // CALM adapter
+
+  val calmAdapterDependencies: Seq[ModuleID] = Nil
 
   // Sierra adapter stack
 

@@ -57,12 +57,12 @@ case object WorksIndexConfig extends IndexConfig {
     keywordField("id")
   )
 
-  val accessCondition =
-    objectField("accessCondition")
+  val accessConditions =
+    objectField("accessConditions")
       .fields(
         englishTextField("terms"),
         dateField("to"),
-        keywordField("status")
+        objectField("status").fields(keywordField("type"))
       )
 
   def sourceIdentifierFields = Seq(
@@ -107,7 +107,7 @@ case object WorksIndexConfig extends IndexConfig {
       textField("url"),
       textField("credit"),
       license,
-      accessCondition
+      accessConditions
     )
 
   val period = Seq(

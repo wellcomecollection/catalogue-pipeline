@@ -57,11 +57,8 @@ trait DisplaySerialisationTestBase { this: Suite =>
       "type": "${digitalLocation.ontologyType}",
       "locationType": ${locationType(digitalLocation.locationType)},
       "url": "${digitalLocation.url}"
-      ${optionalObject("license", license, digitalLocation.license)}
-      ${optionalObject(
-      "accessConditions",
-      accessConditions,
-      digitalLocation.accessConditions)}
+      ${optionalObject("license", license, digitalLocation.license)},
+      "accessConditions": ${accessConditions(digitalLocation.accessConditions)}
     }"""
 
   def physicalLocation(loc: PhysicalLocation) =

@@ -45,19 +45,19 @@ class ApiV2FilteredAggregationsTest extends ApiV2WorksTestBase {
                   "type" : "Aggregation",
                   "buckets": [
                     {
-                      "count" : 1,
+                      "count" : 3,
                       "data" : {
-                        "id" : "cats",
-                        "label" : "Meow",
+                        "id" : "dogs",
+                        "label" : "Bark",
                         "type" : "Language"
                       },
                       "type" : "AggregationBucket"
                     },
                     {
-                      "count" : 3,
+                      "count" : 1,
                       "data" : {
-                        "id" : "dogs",
-                        "label" : "Bark",
+                        "id" : "cats",
+                        "label" : "Meow",
                         "type" : "Language"
                       },
                       "type" : "AggregationBucket"
@@ -115,15 +115,6 @@ class ApiV2FilteredAggregationsTest extends ApiV2WorksTestBase {
                   "type" : "Aggregation",
                   "buckets": [
                     {
-                      "count" : 2,
-                      "data" : {
-                        "id" : "i",
-                        "label" : "Audio",
-                        "type" : "WorkType"
-                      },
-                      "type" : "AggregationBucket"
-                    },
-                    {
                       "count" : 4,
                       "data" : {
                         "id" : "a",
@@ -137,6 +128,15 @@ class ApiV2FilteredAggregationsTest extends ApiV2WorksTestBase {
                       "data" : {
                         "id" : "d",
                         "label" : "Journals",
+                        "type" : "WorkType"
+                      },
+                      "type" : "AggregationBucket"
+                    },
+                    {
+                      "count" : 2,
+                      "data" : {
+                        "id" : "i",
+                        "label" : "Audio",
                         "type" : "WorkType"
                       },
                       "type" : "AggregationBucket"

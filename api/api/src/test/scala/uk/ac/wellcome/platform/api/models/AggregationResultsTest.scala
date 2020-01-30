@@ -33,27 +33,15 @@ class AggregationResultsTest extends FunSpec with Matchers {
           "sum_other_doc_count" -> 0,
           "buckets" -> List(
             Map(
-              "key" -> Map(
-                "id" -> "a",
-                "label" -> "Books",
-                "type" -> "WorkType"
-              ),
+              "key" -> "a",
               "doc_count" -> 393145
             ),
             Map(
-              "key" -> Map(
-                "id" -> "b",
-                "label" -> "Manuscripts, Asian",
-                "type" -> "WorkType"
-              ),
+              "key" -> "b",
               "doc_count" -> 5696
             ),
             Map(
-              "key" -> Map(
-                "id" -> "c",
-                "label" -> "Music",
-                "type" -> "WorkType"
-              ),
+              "key" -> "c",
               "doc_count" -> 9
             )
           )
@@ -88,11 +76,7 @@ class AggregationResultsTest extends FunSpec with Matchers {
           "sum_other_doc_count" -> 0,
           "buckets" -> List(
             Map(
-              "key" -> Map(
-                "id" -> "a",
-                "label" -> "Books",
-                "type" -> "WorkType"
-              ),
+              "key" -> "a",
               "doc_count" -> 393145,
               "filtered" -> Map(
                 "doc_count" -> 1234
