@@ -17,7 +17,11 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
   }
 
   it("does not parse if there is more than one recordIdentifier") {
-    MetsXml(xmlMultipleIds).recordIdentifier shouldBe a[Left[_, _]]
+    MetsXml(xmlRepeatedIdNodes).recordIdentifier shouldBe Right("b30246039")
+  }
+
+  it("does not parse if there is more than one distinct recordIdentifier") {
+    MetsXml(xmlMultipleDistictIds).recordIdentifier shouldBe a[Left[_, _]]
   }
 
   it("parses accessConditionDz from XML") {
@@ -50,8 +54,13 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
     MetsXml("hagdf") shouldBe a[Left[_, _]]
   }
 
+  it("parse a METS with a repeated license node") {
+    MetsXml(xmlRepeatedLicenseNode).accessConditionDz shouldBe Right(
+      Some("CC-BY"))
+  }
+
   it("does not parse a METS with multiple licenses") {
-    MetsXml(xmlMultipleLicense).accessConditionDz shouldBe a[Left[_, _]]
+    MetsXml(xmlMultipleDistinctLicense).accessConditionDz shouldBe a[Left[_, _]]
   }
 
   it("parses thumbnail from XML") {
@@ -125,7 +134,23 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
        <mods:recordIdentifier source="gbv-ppn">b30246039</mods:recordIdentifier>
      </mets:mets>
 
-  def xmlMultipleIds =
+  def xmlRepeatedIdNodes =
+    <mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3">
+      <mets:dmdSec ID="DMDLOG_0000">
+        <mets:mdWrap MDTYPE="MODS">
+          <mets:xmlData>
+            <mods:mods>
+              <mods:recordInfo>
+                <mods:recordIdentifier source="gbv-ppn">b30246039</mods:recordIdentifier>
+                <mods:recordIdentifier source="gbv-ppn">b30246039</mods:recordIdentifier>
+              </mods:recordInfo>
+            </mods:mods>
+          </mets:xmlData>
+        </mets:mdWrap>
+      </mets:dmdSec>
+    </mets:mets>
+
+  def xmlMultipleDistictIds =
     <mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3">
       <mets:dmdSec ID="DMDLOG_0000">
         <mets:mdWrap MDTYPE="MODS">
@@ -156,7 +181,7 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
       </mets:dmdSec>
     </mets:mets>
 
-  def xmlMultipleLicense =
+  def xmlMultipleDistinctLicense =
     <mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3">
       <mets:dmdSec ID="DMDLOG_0000">
         <mets:mdWrap MDTYPE="MODS">
@@ -166,6 +191,23 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
                 <mods:recordIdentifier source="gbv-ppn">b30246039</mods:recordIdentifier>
               </mods:recordInfo>
               <mods:accessCondition type="dz">CC-BY-NC</mods:accessCondition>
+              <mods:accessCondition type="dz">CC-BY</mods:accessCondition>
+            </mods:mods>
+          </mets:xmlData>
+        </mets:mdWrap>
+      </mets:dmdSec>
+    </mets:mets>
+
+  def xmlRepeatedLicenseNode =
+    <mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3">
+      <mets:dmdSec ID="DMDLOG_0000">
+        <mets:mdWrap MDTYPE="MODS">
+          <mets:xmlData>
+            <mods:mods>
+              <mods:recordInfo>
+                <mods:recordIdentifier source="gbv-ppn">b30246039</mods:recordIdentifier>
+              </mods:recordInfo>
+              <mods:accessCondition type="dz">CC-BY</mods:accessCondition>
               <mods:accessCondition type="dz">CC-BY</mods:accessCondition>
             </mods:mods>
           </mets:xmlData>

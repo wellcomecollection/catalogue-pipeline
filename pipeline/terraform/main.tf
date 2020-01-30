@@ -96,7 +96,7 @@ module "catalogue_pipeline_20200128" {
   vhs_miro_read_policy              = "${local.vhs_miro_read_policy}"
   vhs_sierra_sourcedata_bucket_name = "${local.vhs_sierra_sourcedata_bucket_name}"
   vhs_sierra_sourcedata_table_name  = "${local.vhs_sierra_sourcedata_table_name}"
-  mets_adapter_read_policy = "${local.mets_adapter_read_policy}"
-  mets_adapter_table_name  = "${local.mets_adapter_table_name}"
-  read_storage_s3_role_arn = "${aws_iam_role.read_storage_s3.arn}"
+  mets_adapter_read_policy          = "${local.mets_adapter_read_policy}"
+  mets_adapter_table_name           = "${local.mets_adapter_table_name}"
+  read_storage_s3_role_arn          = "${aws_iam_role.read_storage_s3.arn}"
 }

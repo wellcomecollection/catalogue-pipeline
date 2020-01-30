@@ -1,7 +1,11 @@
+locals {
+  namespaced_env = "${var.namespace}-${var.environment}"
+}
+
 module "service" {
   source = "./service"
 
-  namespace    = "${var.namespace}-${var.environment}"
+  namespace    = "${local.namespaced_env}"
   namespace_id = "${aws_service_discovery_private_dns_namespace.namespace.id}"
 
   subnets      = ["${var.subnets}"]
@@ -23,6 +27,9 @@ module "service" {
   security_group_ids = ["${var.lb_ingress_sg_id}"]
 
   service_egress_security_group_id = "${aws_security_group.service_egress_security_group.id}"
+  interservice_security_group_id   = "${var.interservice_sg_id}"
+
+  logstash_host = "${var.logstash_host}"
 }
 
 resource "aws_service_discovery_private_dns_namespace" "namespace" {
