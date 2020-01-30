@@ -111,7 +111,7 @@ object WorkType extends Enum[WorkType] {
 
   case object ManuscriptsAsian extends Unlinked {
     override val id: String = "b"
-    override val label: String = "Manuscripts, Asian"
+    override val label: String = "Manuscripts"
   }
 
   case object Music extends Unlinked {
@@ -155,7 +155,7 @@ object WorkType extends Enum[WorkType] {
 
   case object EManuscriptsAsian extends Linked {
     override val id: String = "x"
-    override val label: String = "E-manuscripts, Asian"
+    override val label: String = "Manuscripts"
     override val linksTo: Unlinked = ManuscriptsAsian
   }
 
