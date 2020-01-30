@@ -2,7 +2,7 @@ package uk.ac.wellcome.mets_adapter.services
 
 import scala.util.Success
 import scala.concurrent.ExecutionContext
-import akka.{Done, NotUsed}
+import akka.Done
 import akka.stream.scaladsl._
 import com.amazonaws.services.sqs.model.{Message => SQSMessage}
 import grizzled.slf4j.Logging
@@ -12,6 +12,7 @@ import uk.ac.wellcome.typesafe.Runnable
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.mets_adapter.models._
 import uk.ac.wellcome.storage.Version
+import uk.ac.wellcome.bigmessaging.FlowOps
 
 import scala.concurrent.Future
 
@@ -30,8 +31,9 @@ class MetsAdapterWorkerService(
   bagRetriever: BagRetriever,
   metsStore: MetsStore,
   concurrentHttpConnections: Int = 6,
-  concurrentDynamoConnections: Int = 4)(implicit ec: ExecutionContext)
+  concurrentDynamoConnections: Int = 4)(implicit val ec: ExecutionContext)
     extends Runnable
+    with FlowOps
     with Logging {
 
   /** Encapsulates context to pass along each akka-stream stage. Newer versions
@@ -39,8 +41,6 @@ class MetsAdapterWorkerService(
     *  this purpose, which we can migrate to if the library is updated.
     */
   case class Context(msg: SQSMessage, bagId: String)
-
-  type Result[T] = Either[Throwable, T]
 
   val className = this.getClass.getSimpleName
 
@@ -105,48 +105,5 @@ class MetsAdapterWorkerService(
     Flow[(Context, Option[Version[String, Int]])]
       .mapWithContext {
         case (ctx, data) => msgSender.sendT(data).toEither.right.map(_ => data)
-      }
-
-  /** Allows mapping a flow with a function, where:
-    *  - Context is passed through.
-    *  - Any errors are caught and the message prevented from propagating downstream,
-    *    resulting in the message being put back on the queue / on the dlq.
-    *  - None values are ignored but passed through (so they don't end up on the dlq)
-    */
-  implicit class ContextFlowOps[In, Out](
-    val flow: Flow[(Context, In), (Context, Option[Out]), NotUsed]) {
-
-    def mapWithContext[T](f: (Context, Out) => Result[T]) =
-      flow
-        .map {
-          case (ctx, Some(data)) => (ctx, (f(ctx, data).map(Some(_))))
-          case (ctx, None)       => (ctx, Right(None))
-        }
-        .via(catchErrors)
-
-    def mapWithContextAsync[T](parallelism: Int)(
-      f: (Context, Out) => Future[Result[T]]) =
-      flow
-        .mapAsync(parallelism) {
-          case (ctx, Some(data)) =>
-            f(ctx, data).map(out => (ctx, out.map(Some(_))))
-          case (ctx, None) => Future.successful((ctx, Right(None)))
-        }
-        .via(catchErrors)
-  }
-
-  def catchErrors[C, T] =
-    Flow[(C, Result[T])]
-      .map {
-        case (ctx, result) =>
-          result.left.map { err =>
-            error(
-              s"Error encountered processing SQS message. [Error]: ${err.getMessage} [Context]: ${ctx}",
-              err)
-          }
-          (ctx, result)
-      }
-      .collect {
-        case (ctx, Right(data)) => (ctx, data)
       }
 }
