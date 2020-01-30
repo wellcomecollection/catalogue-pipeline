@@ -36,7 +36,7 @@ module "ingestor" {
     metrics_namespace   = "${local.namespace_hyphen}_ingestor"
     es_index            = "${var.es_works_index}"
     ingest_queue_id     = "${module.ingestor_queue.id}"
-    es_ingest_batchSize = 1000
+    es_ingest_batchSize = 100
   }
 
   env_vars_length = 4
