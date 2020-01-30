@@ -48,6 +48,7 @@ case class ElasticSearchRequestBuilder(
       TermsAggregation("workType")
         .size(100)
         .field("data.workType.id")
+        .minDocCount(0)
 
     case AggregationRequest.ProductionDate =>
       DateHistogramAggregation("productionDates")
@@ -61,22 +62,26 @@ case class ElasticSearchRequestBuilder(
       TermsAggregation("genres")
         .size(20)
         .field("data.genres.concepts.label.keyword")
+        .minDocCount(0)
 
     case AggregationRequest.Subject =>
       TermsAggregation("subjects")
         .size(20)
         .field("data.subjects.label.keyword")
+        .minDocCount(0)
 
     case AggregationRequest.Language =>
       TermsAggregation("language")
         .size(200)
         .field("data.language.id")
+        .minDocCount(0)
         .additionalField("data.language.label")
 
     case AggregationRequest.License =>
       TermsAggregation("license")
         .size(100)
         .field("data.items.locations.license.id")
+        .minDocCount(0)
   }
 
   lazy val sort = queryOptions.sortBy
