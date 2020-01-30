@@ -10,6 +10,7 @@ case class DigitalLocation(
   license: Option[License] = None,
   credit: Option[String] = None,
   accessConditions: List[AccessCondition] = Nil,
+  imageSourceIds: List[SourceIdentifier] = Nil,
   ontologyType: String = "DigitalLocation"
 ) extends Location
 

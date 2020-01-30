@@ -1,6 +1,8 @@
 package uk.ac.wellcome.platform.transformer.miro.transformers
 
-trait MiroImageApiURL {
+import uk.ac.wellcome.models.work.internal.{IdentifierType, SourceIdentifier}
+
+trait MiroImages {
   def buildImageApiURL(miroId: String, templateName: String): String = {
     val iiifImageApiBaseUri = "https://iiif.wellcomecollection.org"
 
@@ -16,4 +18,12 @@ trait MiroImageApiURL {
 
     imageUriTemplate.format(iiifImageApiBaseUri, miroId)
   }
+
+  def getImageSourceId(miroId: String): SourceIdentifier =
+    SourceIdentifier(
+      identifierType = IdentifierType("miro-image-number"),
+      ontologyType = "Image",
+      value = miroId
+    )
+
 }

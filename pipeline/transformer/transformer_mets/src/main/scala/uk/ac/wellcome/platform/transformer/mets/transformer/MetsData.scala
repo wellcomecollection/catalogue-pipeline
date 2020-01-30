@@ -12,7 +12,8 @@ case class MetsData(
   accessConditionDz: Option[String] = None,
   accessConditionStatus: Option[String] = None,
   accessConditionUsage: Option[String] = None,
-  thumbnailLocation: Option[String] = None
+  thumbnailLocation: Option[String] = None,
+  imageFileIds: List[String] = Nil
 ) {
 
   def toWork(version: Int): Either[Throwable, UnidentifiedInvisibleWork] =
@@ -26,7 +27,12 @@ case class MetsData(
       UnidentifiedInvisibleWork(
         version = version,
         sourceIdentifier = sourceIdentifier,
-        workData(item, thumbnail(maybeLicense, sourceIdentifier.value))
+        workData(
+          item,
+          thumbnail(
+            maybeLicense,
+            sourceIdentifier.value,
+            imageFileIds.headOption))
       )
 
   private def workData(item: Item[Unminted],
@@ -51,6 +57,9 @@ case class MetsData(
     DigitalLocation(
       url = s"https://wellcomelibrary.org/iiif/$recordIdentifier/manifest",
       locationType = LocationType("iiif-presentation"),
+      imageSourceIds = imageFileIds.map {
+        getImageSourceId(sourceIdentifier.value, _)
+      },
       license = license,
       accessConditions = accessStatus.map { status =>
         AccessCondition(status = status, terms = accessConditionUsage)
@@ -108,7 +117,9 @@ case class MetsData(
 
   private val thumbnailDim = "200"
 
-  private def thumbnail(maybeLicense: Option[License], bnumber: String) =
+  private def thumbnail(maybeLicense: Option[License],
+                        bnumber: String,
+                        maybeFileId: Option[String]) =
     for {
       location <- thumbnailLocation
       url <- buildThumbnailUrl(location, bnumber)
@@ -116,8 +127,19 @@ case class MetsData(
       DigitalLocation(
         url = url,
         locationType = LocationType("thumbnail-image"),
+        imageSourceIds = maybeFileId
+          .map(fileId => List(getImageSourceId(bnumber, fileId)))
+          .getOrElse(Nil),
         license = maybeLicense
       )
+
+  private def getImageSourceId(bnumber: String,
+                               fileId: String): SourceIdentifier =
+    SourceIdentifier(
+      identifierType = IdentifierType("mets-image"),
+      ontologyType = "Image",
+      value = s"$bnumber/$fileId"
+    )
 
   private def buildThumbnailUrl(location: String, bnumber: String) = {
     val mediaType =

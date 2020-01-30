@@ -120,6 +120,10 @@ case class MetsXml(root: Elem) {
     }
   }
 
+  /** The keys of the physicalStructMap are the METS file IDs.
+    * We require nothing of them here other than that they are unique. */
+  def fileIds: List[String] = physicalStructMap.values.toList
+
   /** Here we use the first defined item in the physicalStructMap to lookup a
     *  file ID the fileObjects mapping, and use the files location as the
     *  thumbnail image.
@@ -131,8 +135,8 @@ case class MetsXml(root: Elem) {
     //  - strip the "objects/" part of the link
     //  - prepend the bnumber followed by an underscore if it's not already present (uppercase or lowercase)
     val filePrefixRegex = s"""objects/(?i:($bnumber)_)?(.*)""".r
-    physicalStructMap.headOption
-      .flatMap { case (_, fileId) => fileObjects.get(fileId) }
+    fileIds.headOption
+      .flatMap { fileObjects.get(_) }
       .map { fileUrl =>
         fileUrl match {
           case filePrefixRegex(caseInsensitiveBnumber, postFix) =>
