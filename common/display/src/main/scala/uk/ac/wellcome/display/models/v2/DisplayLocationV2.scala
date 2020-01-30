@@ -32,8 +32,7 @@ object DisplayLocationV2 {
       DisplayPhysicalLocationV2(
         locationType = DisplayLocationType(locationType),
         label = label,
-        accessConditions =
-          accessConditions.map(DisplayAccessCondition(_))
+        accessConditions = accessConditions.map(DisplayAccessCondition(_))
       )
   }
 }

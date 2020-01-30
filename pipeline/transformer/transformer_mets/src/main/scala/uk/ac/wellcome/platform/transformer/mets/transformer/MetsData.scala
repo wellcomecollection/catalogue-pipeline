@@ -54,7 +54,11 @@ case class MetsData(
       license = license,
       accessConditions = (accessStatus, accessConditionUsage) match {
         case (None, None) => Nil
-        case _ => List(AccessCondition(status = accessStatus, terms = accessConditionUsage))
+        case _ =>
+          List(
+            AccessCondition(
+              status = accessStatus,
+              terms = accessConditionUsage))
       }
     )
 

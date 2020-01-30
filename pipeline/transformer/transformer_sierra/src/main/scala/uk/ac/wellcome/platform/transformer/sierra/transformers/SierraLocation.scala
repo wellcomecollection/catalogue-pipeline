@@ -46,16 +46,19 @@ trait SierraLocation extends SierraQueryOps {
 
   private def getAccessConditions(
     bibData: SierraBibData): List[AccessCondition] =
-    bibData.varfieldsWithTag("506").map { varfield =>
-      AccessCondition(
-        status = getAccessStatus(varfield),
-        terms = varfield.subfieldsWithTag("a").contentString,
-        to = varfield.subfieldsWithTag("g").contents.headOption
-      )
-    }.filter{
-      case AccessCondition(None, None, None) => false
-      case _ => true
-    }
+    bibData
+      .varfieldsWithTag("506")
+      .map { varfield =>
+        AccessCondition(
+          status = getAccessStatus(varfield),
+          terms = varfield.subfieldsWithTag("a").contentString,
+          to = varfield.subfieldsWithTag("g").contents.headOption
+        )
+      }
+      .filter {
+        case AccessCondition(None, None, None) => false
+        case _                                 => true
+      }
 
   private def getAccessStatus(varfield: VarField): Option[AccessStatus] = {
     val accessStatus = """([A-Za-z\s\(\)]+)\p{Punct}?""".r
