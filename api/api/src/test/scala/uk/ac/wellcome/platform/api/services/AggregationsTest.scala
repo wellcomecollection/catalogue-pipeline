@@ -126,9 +126,7 @@ class AggregationsTest
         )
         whenReady(aggregationQuery(index, searchOptions)) { aggs =>
           val buckets = aggs.workType.get.buckets
-          val expectedWorkTypes = works
-            .filter { _.data.subjects.head.label == subjectQuery }
-            .map { _.data.workType.get }
+          val expectedWorkTypes = works.map { _.data.workType.get }
           buckets.length shouldBe expectedWorkTypes.length
           buckets.map(_.data) should contain theSameElementsAs expectedWorkTypes
         }
