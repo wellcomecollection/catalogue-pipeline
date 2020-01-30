@@ -79,6 +79,28 @@ class AggregationsTest
     }
   }
 
+  it("returns empty buckets if they exist") {
+    val workTypes = WorkType.values
+    val works = workTypes.flatMap { workType =>
+      (0 to 4).map(_ => createIdentifiedWorkWith(workType = Some(workType)))
+    }
+    withLocalWorksIndex { index =>
+      insertIntoElasticsearch(index, works: _*)
+      val searchOptions = WorksSearchOptions(
+        searchQuery = Some(SearchQuery("anything will give zero results")),
+        aggregations = List(AggregationRequest.WorkType)
+      )
+      whenReady(aggregationQuery(index, searchOptions)) { aggs =>
+        aggs.workType should not be empty
+        val buckets = aggs.workType.get.buckets
+        buckets.length shouldBe workTypes.length
+        buckets.map(_.data.label) should contain theSameElementsAs workTypes
+          .map(_.label)
+        buckets.map(_.count) should contain only 0
+      }
+    }
+  }
+
   describe("aggregations with filters") {
     val workTypes = WorkType.values
     val subjects = (0 to 5).map(_ => createSubject)
@@ -126,9 +148,7 @@ class AggregationsTest
         )
         whenReady(aggregationQuery(index, searchOptions)) { aggs =>
           val buckets = aggs.workType.get.buckets
-          val expectedWorkTypes = works
-            .filter { _.data.subjects.head.label == subjectQuery }
-            .map { _.data.workType.get }
+          val expectedWorkTypes = works.map { _.data.workType.get }
           buckets.length shouldBe expectedWorkTypes.length
           buckets.map(_.data) should contain theSameElementsAs expectedWorkTypes
         }

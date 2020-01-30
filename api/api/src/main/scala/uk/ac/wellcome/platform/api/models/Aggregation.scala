@@ -147,10 +147,10 @@ object AggregationMapping extends Logging {
           bucketDoc <- getBucketDoc(bucket, path).map(_.as[T])
           bucketCount <- getBucketCount(bucket)
         } yield {
-          (bucketCount, bucketDoc) match {
-            case (0, _)           => Success(None)
-            case (n, Right(data)) => Success(Some(AggregationBucket(data, n)))
-            case (_, Left(err))   => Failure(err)
+          bucketDoc match {
+            case Right(data) =>
+              Success(Some(AggregationBucket(data, bucketCount)))
+            case Left(err) => Failure(err)
           }
         }
       }
