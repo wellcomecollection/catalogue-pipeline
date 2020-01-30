@@ -1,7 +1,8 @@
 locals {
-  namespace    = "catalogue_api"
-  prod_name    = "prod"
-  staging_name = "staging"
+  namespace        = "catalogue_api"
+  namespace_hyphen = "${replace(local.namespace,"_","-")}"
+  prod_name        = "prod"
+  staging_name     = "staging"
 
   prod_es_config = {
     index_v2 = "v2-20200107"
@@ -38,4 +39,7 @@ locals {
 
   prod_domain_name    = "catalogue.api.wellcomecollection.org"
   staging_domain_name = "catalogue.api-stage.wellcomecollection.org"
+
+  logstash_transit_service_name = "${local.namespace_hyphen}_logstash_transit"
+  logstash_host                 = "${local.logstash_transit_service_name}.${local.namespace_hyphen}"
 }

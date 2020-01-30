@@ -21,6 +21,10 @@ module "catalogue_api_prod" {
 
   lb_arn           = "${module.nlb.arn}"
   lb_ingress_sg_id = "${aws_security_group.service_lb_ingress_security_group.id}"
+
+  logstash_host = "${local.logstash_host}"
+
+  interservice_sg_id = "${aws_security_group.interservice.id}"
 }
 
 module "catalogue_api_staging" {
@@ -46,6 +50,10 @@ module "catalogue_api_staging" {
 
   lb_arn           = "${module.nlb.arn}"
   lb_ingress_sg_id = "${aws_security_group.service_lb_ingress_security_group.id}"
+
+  logstash_host = "${local.logstash_host}"
+
+  interservice_sg_id = "${aws_security_group.interservice.id}"
 }
 
 module "data_api" {
