@@ -27,7 +27,8 @@ case class MetsXml(root: Elem) {
     val identifierNodes =
       (root \\ "dmdSec" \ "mdWrap" \\ "recordInfo" \ "recordIdentifier").toList
     identifierNodes match {
-      case List(identifierNode) => Right[Exception, String](identifierNode.text)
+      case identifierNodes if identifierNodes.distinct.size == 1 =>
+        Right[Exception, String](identifierNodes.head.text)
       case _ =>
         Left[Exception, String](
           new Exception("Could not parse recordIdentifier from METS XML"))
@@ -109,8 +110,8 @@ case class MetsXml(root: Elem) {
       .filterByAttribute("type", typeAttrib)
       .toList
     nodes match {
-      case Nil        => Right(None)
-      case List(node) => Right(Some(node.text))
+      case Nil                               => Right(None)
+      case nodes if nodes.distinct.size == 1 => Right(Some(nodes.head.text))
       case _ =>
         Left(
           new Exception(
