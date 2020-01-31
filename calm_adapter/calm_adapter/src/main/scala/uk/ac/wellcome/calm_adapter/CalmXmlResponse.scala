@@ -3,10 +3,12 @@ package uk.ac.wellcome.calm_adapter
 import scala.util.Try
 import scala.xml.{Elem, XML, Node}
 
-trait CalmXmlResponse {
+trait CalmXmlResponse[T] {
   val root: Elem
 
   val responseTag: String
+
+  def parse: Either[Throwable, T]
 
   /** CALM SOAP responses are of the form:
     *
@@ -37,7 +39,7 @@ trait CalmXmlResponse {
   }
 }
 
-case class CalmSearchResponse(val root: Elem) extends CalmXmlResponse {
+case class CalmSearchResponse(val root: Elem) extends CalmXmlResponse[Int] {
 
   val responseTag = "SearchResponse"
 
@@ -49,7 +51,7 @@ case class CalmSearchResponse(val root: Elem) extends CalmXmlResponse {
    *
    *  Here we extract an integer containing n (the number of hits)
    */
-  def numHits: Either[Throwable, Int] =
+  def parse: Either[Throwable, Int] =
     responseNode
       .flatMap(_.childWithTag("SearchResult"))
       .flatMap(result => Try(result.text.toInt).toEither)
@@ -61,7 +63,7 @@ object CalmSearchResponse {
     Try(XML.loadString(str)).map(CalmSearchResponse(_)).toEither
 }
 
-case class CalmSummaryResponse(val root: Elem) extends CalmXmlResponse {
+case class CalmSummaryResponse(val root: Elem) extends CalmXmlResponse[CalmRecord] {
 
   val responseTag = "SummaryHeaderResponse"
 
@@ -81,7 +83,7 @@ case class CalmSummaryResponse(val root: Elem) extends CalmXmlResponse {
    *  Here we extract a CalmRecord, which contains a mapping between each `tag`
    *  and `value`.
    */
-  def record: Either[Throwable, CalmRecord] =
+  def parse: Either[Throwable, CalmRecord] =
     responseNode
       .flatMap(_.childWithTag("SummaryHeaderResult"))
       .flatMap(_.childWithTag("SummaryList"))

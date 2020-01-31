@@ -1,6 +1,6 @@
 package uk.ac.wellcome.calm_adapter
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{Future, ExecutionContext}
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 
@@ -22,7 +22,7 @@ object Main extends WellcomeTypesafeApp {
       SQSBuilder.buildSQSStream(config),
       SNSBuilder.buildSNSMessageSender(config, subject = "CALM adapter"),
       new CalmRetriever {
-        def getRecords(query: CalmQuery): Either[Throwable, List[CalmRecord]] =
+        def getRecords(query: CalmQuery): Future[List[CalmRecord]] =
           ???
       }
     )

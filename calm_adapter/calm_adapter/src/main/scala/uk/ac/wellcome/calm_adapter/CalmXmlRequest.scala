@@ -17,7 +17,7 @@ trait CalmXmlRequest {
     </soap12:Envelope>
 }
 
-case class CalmSearchRequest(query: CalmQuery, dbName: String = "Catalog") {
+case class CalmSearchRequest(query: CalmQuery, dbName: String = "Catalog") extends CalmXmlRequest {
   def body: Elem =
     <Search xmlns="http://ds.co.uk/cs/webservices/">
       <dbname>{dbName}</dbname>
@@ -26,7 +26,7 @@ case class CalmSearchRequest(query: CalmQuery, dbName: String = "Catalog") {
     </Search>
 }
 
-case class CalmSummaryRequest(pos: Int, dbName: String = "Catalog") {
+case class CalmSummaryRequest(pos: Int, dbName: String = "Catalog") extends CalmXmlRequest {
   def body: Elem =
     <SummaryHeader xmlns="http://ds.co.uk/cs/webservices/">
       <dbname>{dbName}</dbname>
