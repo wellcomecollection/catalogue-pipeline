@@ -1,24 +1,15 @@
 package uk.ac.wellcome.calm_adapter
 
-import java.time.LocalDate
-
-case class CalmRecord(data: Map[String, String])
-
-sealed trait CalmQuery
-
-object CalmQuery {
-
-  case class ModifiedDate(date: LocalDate) extends CalmQuery
-}
+// import akka.http.scaladsl.Http
 
 trait CalmRetriever {
 
   def getRecords(query: CalmQuery): Either[Throwable, List[CalmRecord]]
 }
 
-case class  HttpCalmCredentials(username: String, password: String)
+case class CalmCredentials(username: String, password: String)
 
-class HttpCalmRetriever(url: String, credentials: HttpCalmCredentials) {
+class HttpCalmRetriever(url: String, credentials: CalmCredentials) {
 
   def getRecords(query: CalmQuery): Either[Throwable, List[CalmRecord]] = ???
 }
