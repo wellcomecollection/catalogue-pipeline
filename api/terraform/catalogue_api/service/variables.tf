@@ -1,7 +1,3 @@
-variable "es_config" {
-  type = "map"
-}
-
 variable "subnets" {
   type = "list"
 }

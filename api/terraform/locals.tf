@@ -4,16 +4,6 @@ locals {
   prod_name        = "prod"
   staging_name     = "staging"
 
-  prod_es_config = {
-    index_v2 = "v2-20200107"
-    doc_type = "work"
-  }
-
-  staging_es_config = {
-    index_v2 = "v2-20200107"
-    doc_type = "work"
-  }
-
   prod_task_number    = 3
   staging_task_number = 1
 

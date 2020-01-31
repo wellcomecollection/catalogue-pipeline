@@ -32,13 +32,9 @@ module "catalogue_pipeline_20200107" {
   miro_adapter_topic_count = 1
   mets_adapter_topic_count = 1
   mets_adapter_topic_names = [
+    //    "${local.mets_reindexer_topic_name}"
     "${local.mets_adapter_topic_name}",
   ]
-
-  //    "${local.mets_reindexer_topic_name}"
-
-  # Elasticsearch
-  es_works_index = "v2-20200107"
   # RDS
   rds_ids_access_security_group_id = "${local.rds_access_security_group_id}"
   # Adapter VHS

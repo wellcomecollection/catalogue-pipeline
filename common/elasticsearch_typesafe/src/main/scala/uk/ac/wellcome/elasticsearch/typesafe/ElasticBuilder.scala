@@ -3,7 +3,11 @@ package uk.ac.wellcome.elasticsearch.typesafe
 import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.ElasticClient
 import com.typesafe.config.Config
-import uk.ac.wellcome.elasticsearch.{DisplayElasticConfig, ElasticClientBuilder}
+import uk.ac.wellcome.elasticsearch.{
+  DisplayElasticConfig,
+  ElasticClientBuilder,
+  WorksIndexConfig
+}
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 
 object ElasticBuilder {
@@ -29,6 +33,6 @@ object ElasticBuilder {
 
   def buildElasticConfig(config: Config): DisplayElasticConfig =
     DisplayElasticConfig(
-      indexV2 = Index(config.required[String]("es.index.v2"))
+      indexV2 = Index(WorksIndexConfig.name)
     )
 }

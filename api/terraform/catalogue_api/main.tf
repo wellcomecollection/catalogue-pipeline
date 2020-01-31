@@ -16,7 +16,6 @@ module "service" {
   container_port = "${local.api_container_port}"
 
   container_image = "${var.api_container_image}"
-  es_config       = "${var.es_config}"
   listener_port   = "${var.listener_port}"
 
   nginx_container_image = "${var.nginx_container_image}"

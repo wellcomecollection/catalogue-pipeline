@@ -1,13 +1,12 @@
 package uk.ac.wellcome.elasticsearch
 
 import com.sksamuel.elastic4s.Index
-import com.sksamuel.elastic4s.ElasticDsl.{createIndex, _}
-import com.sksamuel.elastic4s.requests.analysis.Analysis
+import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.indexes.CreateIndexResponse
 import com.sksamuel.elastic4s.requests.indexes.PutMappingResponse
 import com.sksamuel.elastic4s.{ElasticClient, Response}
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
-import com.sksamuel.elastic4s.requests.mappings.{MappingDefinition}
+import com.sksamuel.elastic4s.requests.mappings.MappingDefinition
 import grizzled.slf4j.Logging
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -15,42 +14,23 @@ import scala.concurrent.{ExecutionContext, Future}
 class ElasticsearchIndexCreator(elasticClient: ElasticClient)(
   implicit ec: ExecutionContext)
     extends Logging {
-  def create(index: Index, config: IndexConfig): Future[Unit] = {
 
-    create(index = index, mapping = config.mapping, config.analysis)
-  }
-
-  private def create(index: Index,
-                     mapping: MappingDefinition,
-                     analysis: Analysis): Future[Unit] =
+  def create(config: IndexConfig): Future[Unit] =
     elasticClient
       .execute {
-        createIndex(index.name)
-          .mapping { mapping.dynamic(DynamicMapping.Strict) }
-          .analysis { analysis }
-
-          // Because we have a relatively small number of records (compared
-          // to what Elasticsearch usually expects), we can get weird results
-          // if our records are split across multiple shards.
-          //
-          // e.g. searching for the same query multiple times gets varying results
-          //
-          // This forces all our records to be indexed into a single shard,
-          // which should avoid this problem.
-          //
-          // If/when we index more records, we should revisit this.
-          //
-          .shards(1)
+        config.create
       }
       .flatMap { response: Response[CreateIndexResponse] =>
         if (response.isError) {
           if (response.error.`type` == "resource_already_exists_exception" || response.error.`type` == "index_already_exists_exception") {
-            info(s"Index $index already exists")
-            update(index, mappingDefinition = mapping)
+            info(s"Index ${config.create.name} already exists")
+            update(
+              config.create.name,
+              mappingDefinition = config.create.mapping.getOrElse(properties()))
           } else {
             Future.failed(
               throw new RuntimeException(
-                s"Failed creating index $index: ${response.error}"
+                s"Failed creating index ${config.create.name}: ${response.error}"
               )
             )
           }

@@ -63,24 +63,23 @@ trait ElasticsearchFixtures
     elasticClient = elasticClient
   )
 
-  def withLocalElasticsearchIndex[R](
-    config: IndexConfig,
-    index: Index = createIndex): Fixture[Index, R] = fixture[Index, R](
-    create = {
-      elasticsearchIndexCreator
-        .create(index = index, config = config)
-        .await
+  def withLocalElasticsearchIndex[R](config: IndexConfig): Fixture[Index, R] =
+    fixture[Index, R](
+      create = {
+        elasticsearchIndexCreator
+          .create(config = config)
+          .await
 
-      // Elasticsearch is eventually consistent, so the future
-      // completing doesn't actually mean that the index exists yet
-      eventuallyIndexExists(index)
+        // Elasticsearch is eventually consistent, so the future
+        // completing doesn't actually mean that the index exists yet
+        eventuallyIndexExists(config.create.name)
 
-      index
-    },
-    destroy = { index =>
-      elasticClient.execute(deleteIndex(index.name))
-    }
-  )
+        Index(config.create.name)
+      },
+      destroy = { index =>
+        elasticClient.execute(deleteIndex(index.name))
+      }
+    )
 
   def eventuallyIndexExists(index: Index): Assertion =
     eventually {
@@ -165,6 +164,6 @@ trait ElasticsearchFixtures
     }
   }
 
-  private def createIndex: Index =
-    Index(name = (Random.alphanumeric take 10 mkString) toLowerCase)
+  def createIndexName: String =
+    (Random.alphanumeric take 10 mkString).toLowerCase
 }
