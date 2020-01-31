@@ -21,10 +21,17 @@ import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.models.work.internal.{AccessCondition, AccessStatus, IdentifiedBaseWork, Person, Subject, Unidentifiable}
+import uk.ac.wellcome.models.work.internal.{
+  AccessCondition,
+  AccessStatus,
+  IdentifiedBaseWork,
+  Person,
+  Subject,
+  Unidentifiable
+}
 
-class WorksIndexTest
-  extends FunSpec
+class IndexConfigTest
+    extends FunSpec
     with ElasticsearchFixtures
     with ScalaFutures
     with Eventually
@@ -94,9 +101,16 @@ class WorksIndexTest
   // Possibly because the number of variations in the work model is too big,
   // a bug in the mapping related to accessConditions wasn't caught by the catch-all test above.
   it("puts a work with a access condition") {
+    val accessCondition: AccessCondition = AccessCondition(
+      status = Some(AccessStatus.Open),
+      terms = Some("ask nicely"),
+      to = Some("2014"))
+
     withLocalWorksIndex { index =>
       val sampleWork = createIdentifiedWorkWith(
-        items = List(createIdentifiedItemWith(locations = List(createDigitalLocationWith(accessConditions = List(AccessCondition(status = Some(AccessStatus.Open), terms = Some("ask nicely"), to = Some("2014"))))))))
+        items = List(
+          createIdentifiedItemWith(locations = List(createDigitalLocationWith(
+            accessConditions = List(accessCondition))))))
       whenReady(indexObject(index, sampleWork)) { _ =>
         assertObjectIndexed(index, sampleWork)
       }
@@ -126,8 +140,8 @@ class WorksIndexTest
 
   private def assertObjectIndexed[T](index: Index, t: T)(
     implicit encoder: Encoder[T]): Assertion =
-  // Elasticsearch is eventually consistent so, when the future completes,
-  // the documents won't appear in the search until after a refresh
+    // Elasticsearch is eventually consistent so, when the future completes,
+    // the documents won't appear in the search until after a refresh
     eventually {
       val response: Response[SearchResponse] = elasticClient.execute {
         search(index).matchAllQuery()

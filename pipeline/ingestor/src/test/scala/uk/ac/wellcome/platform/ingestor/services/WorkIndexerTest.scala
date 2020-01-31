@@ -1,10 +1,17 @@
 package uk.ac.wellcome.platform.ingestor.services
 
-import com.sksamuel.elastic4s.ElasticDsl.{intField, keywordField, objectField}
+import com.sksamuel.elastic4s.ElasticDsl.{
+  intField,
+  keywordField,
+  objectField,
+  properties
+}
 import com.sksamuel.elastic4s.Index
+import com.sksamuel.elastic4s.requests.analysis.Analysis
 import com.sksamuel.elastic4s.requests.mappings.FieldDefinition
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Assertion, FunSpec, Matchers}
+import uk.ac.wellcome.elasticsearch.IndexConfig
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.IdentifiedBaseWork
@@ -212,8 +219,9 @@ class WorkIndexerTest
     }
   }
 
-  object WorksWIthNoEditionIndex {
-    def sourceIdentifierFields = Seq(
+  object WorksWithNoEditionIndexConfig extends IndexConfig {
+    val analysis = Analysis(Nil)
+    val sourceIdentifierFields = Seq(
       keywordField("ontologyType"),
       objectField("identifierType").fields(
         keywordField("id"),
@@ -223,7 +231,7 @@ class WorkIndexerTest
       keywordField("value")
     )
 
-    val rootIndexFields: Seq[FieldDefinition with Product with Serializable] =
+    val fields: Seq[FieldDefinition with Product with Serializable] =
       Seq(
         keywordField("canonicalId"),
         intField("version"),
@@ -243,6 +251,8 @@ class WorkIndexerTest
           keywordField("merged")
         )
       )
+
+    val mapping = properties(fields)
   }
 
   it("returns a list of Works that weren't indexed correctly") {
@@ -253,18 +263,18 @@ class WorkIndexerTest
 
     val works = validWorks :+ notMatchingMappingWork
 
-    withLocalElasticsearchIndex(
-      fields = WorksWIthNoEditionIndex.rootIndexFields) { index =>
-      val future = workIndexer.indexWorks(
-        works = works,
-        index = index
-      )
+    withLocalElasticsearchIndex(config = WorksWithNoEditionIndexConfig) {
+      index =>
+        val future = workIndexer.indexWorks(
+          works = works,
+          index = index
+        )
 
-      whenReady(future) { result =>
-        assertElasticsearchEventuallyHasWork(index = index, validWorks: _*)
-        assertElasticsearchNeverHasWork(index = index, notMatchingMappingWork)
-        result.left.get should contain only (notMatchingMappingWork)
-      }
+        whenReady(future) { result =>
+          assertElasticsearchEventuallyHasWork(index = index, validWorks: _*)
+          assertElasticsearchNeverHasWork(index = index, notMatchingMappingWork)
+          result.left.get should contain only (notMatchingMappingWork)
+        }
     }
   }
 
