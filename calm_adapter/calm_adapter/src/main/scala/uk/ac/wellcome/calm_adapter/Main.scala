@@ -1,6 +1,6 @@
 package uk.ac.wellcome.calm_adapter
 
-import scala.concurrent.{Future, ExecutionContext}
+import scala.concurrent.{ExecutionContext, Future}
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 

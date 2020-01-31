@@ -1,7 +1,7 @@
 package uk.ac.wellcome.calm_adapter
 
 import scala.util.Try
-import scala.xml.{Elem, XML, Node}
+import scala.xml.{Elem, Node, XML}
 
 trait CalmXmlResponse[T] {
   val root: Elem
@@ -32,8 +32,7 @@ trait CalmXmlResponse[T] {
   implicit class NodeOps(node: Node) {
 
     def childWithTag(tag: String): Either[Throwable, Node] =
-      (node \ tag)
-        .headOption
+      (node \ tag).headOption
         .map(Right(_))
         .getOrElse(Left(new Exception(s"Could not find child with tag: $tag")))
   }
@@ -44,13 +43,13 @@ case class CalmSearchResponse(val root: Elem) extends CalmXmlResponse[Int] {
   val responseTag = "SearchResponse"
 
   /** The search response XML is of the form:
-   *
-   *  <SearchResponse xmlns="http://ds.co.uk/cs/webservices/">
-   *    <SearchResult>n</SearchResult>
-   *  </SearchResponse>
-   *
-   *  Here we extract an integer containing n (the number of hits)
-   */
+    *
+    *  <SearchResponse xmlns="http://ds.co.uk/cs/webservices/">
+    *    <SearchResult>n</SearchResult>
+    *  </SearchResponse>
+    *
+    *  Here we extract an integer containing n (the number of hits)
+    */
   def parse: Either[Throwable, Int] =
     responseNode
       .flatMap(_.childWithTag("SearchResult"))
@@ -63,26 +62,27 @@ object CalmSearchResponse {
     Try(XML.loadString(str)).map(CalmSearchResponse(_)).toEither
 }
 
-case class CalmSummaryResponse(val root: Elem) extends CalmXmlResponse[CalmRecord] {
+case class CalmSummaryResponse(val root: Elem)
+    extends CalmXmlResponse[CalmRecord] {
 
   val responseTag = "SummaryHeaderResponse"
 
   /** The summary response XML is of the form:
-   *
-   *  <SummaryHeaderResponse xmlns="http://ds.co.uk/cs/webservices/">
-   *    <SummaryHeaderResult>
-   *      <SummaryList>
-   *        <Summary>
-   *          <tag>value</tag>
-   *          ...
-   *        </Summary>
-   *      </SummaryList>
-   *    </SummaryHeaderResult>
-   *  </SummaryHeaderResponse>
-   *
-   *  Here we extract a CalmRecord, which contains a mapping between each `tag`
-   *  and `value`.
-   */
+    *
+    *  <SummaryHeaderResponse xmlns="http://ds.co.uk/cs/webservices/">
+    *    <SummaryHeaderResult>
+    *      <SummaryList>
+    *        <Summary>
+    *          <tag>value</tag>
+    *          ...
+    *        </Summary>
+    *      </SummaryList>
+    *    </SummaryHeaderResult>
+    *  </SummaryHeaderResponse>
+    *
+    *  Here we extract a CalmRecord, which contains a mapping between each `tag`
+    *  and `value`.
+    */
   def parse: Either[Throwable, CalmRecord] =
     responseNode
       .flatMap(_.childWithTag("SummaryHeaderResult"))

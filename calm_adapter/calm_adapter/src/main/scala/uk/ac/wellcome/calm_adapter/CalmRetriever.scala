@@ -22,18 +22,22 @@ class HttpCalmRetriever(url: String, username: String, password: String)(
 
   def getRecords(query: CalmQuery): Future[List[CalmRecord]] =
     callApi(CalmSearchRequest(query), CalmSearchResponse(_))
-      .flatMap { case (numHits, cookie) => runSequentially(
-          0 to numHits,
-          (pos: Int) =>
-            callApi(CalmSummaryRequest(pos), CalmSummaryResponse(_), Some(cookie)) 
-              .map { case (record, _) => record  }
-        )
+      .flatMap {
+        case (numHits, cookie) =>
+          runSequentially(
+            0 to numHits,
+            (pos: Int) =>
+              callApi(
+                CalmSummaryRequest(pos),
+                CalmSummaryResponse(_),
+                Some(cookie))
+                .map { case (record, _) => record }
+          )
       }
 
-  def callApi[T](
-    xmlRequest: CalmXmlRequest, 
-    toCalmXml: String => Either[Throwable, CalmXmlResponse[T]],
-    cookie: Option[Cookie] = None): Future[(T, Cookie)] =
+  def callApi[T](xmlRequest: CalmXmlRequest,
+                 toCalmXml: String => Either[Throwable, CalmXmlResponse[T]],
+                 cookie: Option[Cookie] = None): Future[(T, Cookie)] =
     Http()
       .singleRequest(calmRequest(xmlRequest, cookie))
       .flatMap { resp =>
@@ -41,7 +45,8 @@ class HttpCalmRetriever(url: String, username: String, password: String)(
           .map(value => (value, cookie.getOrElse(parseCookie(resp))))
       }
 
-  def calmRequest(xmlRequest: CalmXmlRequest, cookie: Option[Cookie]): HttpRequest = {
+  def calmRequest(xmlRequest: CalmXmlRequest,
+                  cookie: Option[Cookie]): HttpRequest = {
     val request =
       HttpRequest(uri = url)
         .withEntity(ContentTypes.`text/xml(UTF-8)`, xmlRequest.xml.toString)
@@ -65,17 +70,18 @@ class HttpCalmRetriever(url: String, username: String, password: String)(
       }
 
   def parseCookie(resp: HttpResponse): Cookie =
-    resp
-      .headers
+    resp.headers
       .collect {
         case `Set-Cookie`(cookie) => Cookie(cookie.pair)
       }
       .headOption
-      .getOrElse(throw new Exception("Session cookie not found in CALM response"))
+      .getOrElse(
+        throw new Exception("Session cookie not found in CALM response"))
 
-  def runSequentially[I, O](inputs: Seq[I], f: I => Future[O]): Future[List[O]] =
-    inputs.foldLeft(Future.successful[List[O]](Nil)) {
-      (future, input) => future.flatMap { results =>
+  def runSequentially[I, O](inputs: Seq[I],
+                            f: I => Future[O]): Future[List[O]] =
+    inputs.foldLeft(Future.successful[List[O]](Nil)) { (future, input) =>
+      future.flatMap { results =>
         f(input).map(results :+ _)
       }
     }
