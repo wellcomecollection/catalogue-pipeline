@@ -8,7 +8,7 @@ import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.ElasticClient
 import org.scalatest.Suite
-import uk.ac.wellcome.elasticsearch.DisplayElasticConfig
+import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.platform.snapshot_generator.services.SnapshotService
 import uk.ac.wellcome.fixtures.TestWith
@@ -25,7 +25,7 @@ trait SnapshotServiceFixture extends ElasticsearchFixtures { this: Suite =>
     testWith: TestWith[SnapshotService, R])(
     implicit actorSystem: ActorSystem,
     materializer: ActorMaterializer): R = {
-    val elasticConfig = DisplayElasticConfig(indexV2 = indexV2)
+    val elasticConfig = ElasticConfig(indexV2 = indexV2)
 
     val snapshotService = new SnapshotService(
       elasticClient = elasticClient,

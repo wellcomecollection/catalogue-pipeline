@@ -4,8 +4,8 @@ import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.ElasticClient
 import com.typesafe.config.Config
 import uk.ac.wellcome.elasticsearch.{
-  DisplayElasticConfig,
   ElasticClientBuilder,
+  ElasticConfig,
   WorksIndexConfig
 }
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
@@ -31,8 +31,6 @@ object ElasticBuilder {
     )
   }
 
-  def buildElasticConfig(config: Config): DisplayElasticConfig =
-    DisplayElasticConfig(
-      indexV2 = Index(WorksIndexConfig.name)
-    )
+  def buildElasticConfig(config: Config): ElasticConfig =
+    ElasticConfig.hashed("2020-01-31", WorksIndexConfig)
 }

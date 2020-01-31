@@ -15,7 +15,7 @@ import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import com.sksamuel.elastic4s.{ElasticClient, ElasticError, Index}
 import io.circe.Printer
 import uk.ac.wellcome.platform.api.services.{ElasticsearchService, WorksService}
-import uk.ac.wellcome.elasticsearch.DisplayElasticConfig
+import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.platform.api.elasticsearch.ElasticErrorHandler
 import uk.ac.wellcome.platform.api.swagger.SwaggerDocs
 import uk.ac.wellcome.models.work.internal._
@@ -26,7 +26,7 @@ import uk.ac.wellcome.display.models.Implicits._
 import uk.ac.wellcome.display.json.DisplayJsonUtil
 
 class Router(elasticClient: ElasticClient,
-             elasticConfig: DisplayElasticConfig,
+             elasticConfig: ElasticConfig,
              apiConfig: ApiConfig)(implicit ec: ExecutionContext)
     extends FailFastCirceSupport
     with Directives

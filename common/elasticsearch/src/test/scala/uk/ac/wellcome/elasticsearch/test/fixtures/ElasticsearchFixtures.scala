@@ -55,26 +55,28 @@ trait ElasticsearchFixtures
     implicitly[Position])
 
   def withLocalWorksIndex[R](testWith: TestWith[Index, R]): R =
-    withLocalElasticsearchIndex[R](config = WorksIndexConfig) { index =>
-      testWith(index)
+    withLocalElasticsearchIndex[R](createIndexName, config = WorksIndexConfig) {
+      index =>
+        testWith(index)
     }
 
   private val elasticsearchIndexCreator = new ElasticsearchIndexCreator(
     elasticClient = elasticClient
   )
 
-  def withLocalElasticsearchIndex[R](config: IndexConfig): Fixture[Index, R] =
+  def withLocalElasticsearchIndex[R](name: String,
+                                     config: IndexConfig): Fixture[Index, R] =
     fixture[Index, R](
       create = {
         elasticsearchIndexCreator
-          .create(config = config)
+          .create(name, config)
           .await
 
         // Elasticsearch is eventually consistent, so the future
         // completing doesn't actually mean that the index exists yet
-        eventuallyIndexExists(config.create.name)
+        eventuallyIndexExists(name)
 
-        Index(config.create.name)
+        Index(name)
       },
       destroy = { index =>
         elasticClient.execute(deleteIndex(index.name))

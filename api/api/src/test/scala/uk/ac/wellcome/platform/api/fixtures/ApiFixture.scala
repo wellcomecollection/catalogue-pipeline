@@ -12,7 +12,7 @@ import com.sksamuel.elastic4s.Index
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.platform.api.Router
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
-import uk.ac.wellcome.elasticsearch.DisplayElasticConfig
+import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.platform.api.models.ApiConfig
 
 trait ApiFixture
@@ -32,10 +32,10 @@ trait ApiFixture
   )
 
   def withApi[R](testWith: TestWith[(Index, Route), R]): R =
-    withLocalWorksIndex { indexV2 =>
+    withLocalWorksIndex { index =>
       val router = new Router(
         elasticClient,
-        DisplayElasticConfig(indexV2 = indexV2),
+        ElasticConfig(index),
         ApiConfig(
           host = apiHost,
           scheme = apiScheme,
@@ -44,7 +44,7 @@ trait ApiFixture
           contextSuffix = "context.json"
         )
       )
-      testWith((indexV2, router.routes))
+      testWith((index, router.routes))
     }
 
   def assertJsonResponse(routes: Route, path: String)(

@@ -15,22 +15,23 @@ class ElasticsearchIndexCreator(elasticClient: ElasticClient)(
   implicit ec: ExecutionContext)
     extends Logging {
 
-  def create(config: IndexConfig): Future[Unit] =
+  def create(name: String, config: IndexConfig): Future[Unit] =
     elasticClient
       .execute {
-        config.create
+        config.create(name)
       }
       .flatMap { response: Response[CreateIndexResponse] =>
         if (response.isError) {
           if (response.error.`type` == "resource_already_exists_exception" || response.error.`type` == "index_already_exists_exception") {
-            info(s"Index ${config.create.name} already exists")
+            info(s"Index ${name} already exists")
             update(
-              config.create.name,
-              mappingDefinition = config.create.mapping.getOrElse(properties()))
+              name,
+              mappingDefinition =
+                config.create(name).mapping.getOrElse(properties()))
           } else {
             Future.failed(
               throw new RuntimeException(
-                s"Failed creating index ${config.create.name}: ${response.error}"
+                s"Failed creating index ${name}: ${response.error}"
               )
             )
           }

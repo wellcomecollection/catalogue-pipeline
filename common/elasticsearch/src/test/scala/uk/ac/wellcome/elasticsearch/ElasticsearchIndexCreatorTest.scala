@@ -46,28 +46,30 @@ class ElasticsearchIndexCreatorTest
   )
 
   object TestIndexConfig extends IndexConfig {
-    val create = createIndex(createIndexName).mapping(
-      properties(
-        Seq(
-          keywordField("id"),
-          textField("description"),
-          booleanField("visible")
-        )))
+    def create(name: String) =
+      createIndex(name).mapping(
+        properties(
+          Seq(
+            keywordField("id"),
+            textField("description"),
+            booleanField("visible")
+          )))
   }
 
   object CompatibleTestIndexConfig extends IndexConfig {
-    val create = createIndex(createIndexName).mapping(
-      properties(
-        Seq(
-          keywordField("id"),
-          textField("description"),
-          booleanField("visible"),
-          intField("count")
-        )))
+    def create(name: String) =
+      createIndex(name).mapping(
+        properties(
+          Seq(
+            keywordField("id"),
+            textField("description"),
+            booleanField("visible"),
+            intField("count")
+          )))
   }
 
   it("creates an index into which doc of the expected type can be put") {
-    withLocalElasticsearchIndex(TestIndexConfig) { index =>
+    withLocalElasticsearchIndex(createIndexName, TestIndexConfig) { index =>
       val testObject = TestObject("id", "description", visible = true)
       val testObjectJson = toJson(testObject).get
 
@@ -92,7 +94,7 @@ class ElasticsearchIndexCreatorTest
   }
 
   it("create an index where inserting a doc of an unexpected type fails") {
-    withLocalElasticsearchIndex(TestIndexConfig) { index =>
+    withLocalElasticsearchIndex(createIndexName, TestIndexConfig) { index =>
       val badTestObject = BadTestObject("id", 5)
       val badTestObjectJson = toJson(badTestObject).get
 
@@ -111,44 +113,45 @@ class ElasticsearchIndexCreatorTest
   }
 
   it("updates an already existing index with a compatible mapping") {
-    withLocalElasticsearchIndex(TestIndexConfig) { index =>
-      withLocalElasticsearchIndex(CompatibleTestIndexConfig) { _ =>
-        val compatibleTestObject = CompatibleTestObject(
-          id = "id",
-          description = "description",
-          count = 5,
-          visible = true
-        )
+    withLocalElasticsearchIndex(createIndexName, TestIndexConfig) { index =>
+      withLocalElasticsearchIndex(createIndexName, CompatibleTestIndexConfig) {
+        _ =>
+          val compatibleTestObject = CompatibleTestObject(
+            id = "id",
+            description = "description",
+            count = 5,
+            visible = true
+          )
 
-        val compatibleTestObjectJson = toJson(compatibleTestObject).get
+          val compatibleTestObjectJson = toJson(compatibleTestObject).get
 
-        val futureInsert: Future[Response[IndexResponse]] =
-          elasticClient
-            .execute {
-              indexInto(index.name)
-                .doc(compatibleTestObjectJson)
+          val futureInsert: Future[Response[IndexResponse]] =
+            elasticClient
+              .execute {
+                indexInto(index.name)
+                  .doc(compatibleTestObjectJson)
+              }
+
+          whenReady(futureInsert) { response =>
+            if (response.isError) { println(response) }
+            response.isError shouldBe false
+
+            eventually {
+              val response: Response[SearchResponse] =
+                elasticClient.execute {
+                  search(index).matchAllQuery()
+                }.await
+
+              val hits = response.result.hits.hits
+
+              hits should have size 1
+
+              assertJsonStringsAreEqual(
+                hits.head.sourceAsString,
+                compatibleTestObjectJson
+              )
             }
-
-        whenReady(futureInsert) { response =>
-          if (response.isError) { println(response) }
-          response.isError shouldBe false
-
-          eventually {
-            val response: Response[SearchResponse] =
-              elasticClient.execute {
-                search(index).matchAllQuery()
-              }.await
-
-            val hits = response.result.hits.hits
-
-            hits should have size 1
-
-            assertJsonStringsAreEqual(
-              hits.head.sourceAsString,
-              compatibleTestObjectJson
-            )
           }
-        }
       }
     }
   }

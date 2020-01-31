@@ -1,7 +1,5 @@
 package uk.ac.wellcome.elasticsearch
 
-import java.security.MessageDigest
-
 import com.sksamuel.elastic4s.ElasticDsl.{
   booleanField,
   createIndex,
@@ -9,7 +7,6 @@ import com.sksamuel.elastic4s.ElasticDsl.{
   intField,
   keywordField,
   objectField,
-  properties,
   textField,
   tokenCountField,
   _
@@ -19,6 +16,7 @@ import com.sksamuel.elastic4s.requests.analysis.{
   CustomAnalyzer,
   PathHierarchyTokenizer
 }
+import com.sksamuel.elastic4s.requests.indexes.CreateIndexRequest
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 import com.sksamuel.elastic4s.requests.mappings.{FieldDefinition, ObjectField}
 
@@ -261,13 +259,8 @@ case object WorksIndexConfig extends IndexConfig {
   // All of this below is specific to the Works index, and how we have the naming strategy of:
   // "{human_readable_label}_{sha256_hash_of_index_creation_json}"
 
-  // We use this method to create the checksum from the JSON of this request
-  // And then use that checksum in creating the actual index with the prefix
-  // and checksum in it.
-  private def createIndexRequest =
-    // We don't care about the name here as we
-    // add it once we've created the sha-256 of the index settings JSON
-    createIndex("")
+  def create(name: String): CreateIndexRequest =
+    createIndex(name)
       .mapping { mapping }
       .analysis { analysis }
       /*
@@ -282,16 +275,4 @@ case object WorksIndexConfig extends IndexConfig {
        See: https://www.elastic.co/guide/en/elasticsearch/reference/current/consistent-scoring.html#consistent-scoring
        */
       .shards(1)
-
-  val checksum =
-    MessageDigest
-      .getInstance("SHA-256")
-      .digest(createIndexRequest.request.entity.get.toString.getBytes("UTF-8"))
-      .map("%02x".format(_))
-      .mkString
-      .toLowerCase
-
-  val namePrefix = "2020-01-21"
-  val name = s"${namePrefix}_${checksum}"
-  val create = createIndexRequest.copy(name)
 }

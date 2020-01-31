@@ -6,7 +6,7 @@ import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
 import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
-import uk.ac.wellcome.elasticsearch.{DisplayElasticConfig, WorksIndexConfig}
+import uk.ac.wellcome.elasticsearch.{ElasticConfig, WorksIndexConfig}
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.platform.api.models.ApiConfig
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
@@ -29,7 +29,7 @@ object Main extends WellcomeTypesafeApp {
     val elasticClient = ElasticBuilder.buildElasticClient(config)
 
     val elasticConfig =
-      DisplayElasticConfig(indexV2 = Index(WorksIndexConfig.name))
+      ElasticConfig.hashed("2020-01-31", WorksIndexConfig)
 
     val apiConfig =
       ApiConfig(

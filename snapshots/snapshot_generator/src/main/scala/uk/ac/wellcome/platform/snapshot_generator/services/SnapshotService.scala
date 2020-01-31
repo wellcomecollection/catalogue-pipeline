@@ -13,7 +13,7 @@ import grizzled.slf4j.Logging
 
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.display.models.v2.DisplayWorkV2
-import uk.ac.wellcome.elasticsearch.DisplayElasticConfig
+import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.models.work.internal.IdentifiedWork
 import uk.ac.wellcome.platform.snapshot_generator.flow.{
   DisplayWorkToJsonStringFlow,
@@ -28,7 +28,7 @@ import uk.ac.wellcome.platform.snapshot_generator.source.ElasticsearchWorksSourc
 
 class SnapshotService(akkaS3Client: S3Client,
                       elasticClient: ElasticClient,
-                      elasticConfig: DisplayElasticConfig)(
+                      elasticConfig: ElasticConfig)(
   implicit actorSystem: ActorSystem,
   materializer: ActorMaterializer,
   ec: ExecutionContext
