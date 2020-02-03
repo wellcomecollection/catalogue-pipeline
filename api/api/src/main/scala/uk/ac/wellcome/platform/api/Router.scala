@@ -15,7 +15,7 @@ import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import com.sksamuel.elastic4s.{ElasticClient, ElasticError, Index}
 import io.circe.Printer
 import uk.ac.wellcome.platform.api.services.{ElasticsearchService, WorksService}
-import uk.ac.wellcome.elasticsearch.DisplayElasticConfig
+import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.platform.api.elasticsearch.ElasticErrorHandler
 import uk.ac.wellcome.platform.api.swagger.SwaggerDocs
 import uk.ac.wellcome.models.work.internal._
@@ -26,7 +26,7 @@ import uk.ac.wellcome.display.models.Implicits._
 import uk.ac.wellcome.display.json.DisplayJsonUtil
 
 class Router(elasticClient: ElasticClient,
-             elasticConfig: DisplayElasticConfig,
+             elasticConfig: ElasticConfig,
              apiConfig: ApiConfig)(implicit ec: ExecutionContext)
     extends FailFastCirceSupport
     with Directives
@@ -82,7 +82,7 @@ class Router(elasticClient: ElasticClient,
   def multipleWorks(params: MultipleWorksParams): Future[Route] =
     transactFuture("GET /works")({
       val searchOptions = params.searchOptions(apiConfig)
-      val index = params._index.map(Index(_)).getOrElse(elasticConfig.indexV2)
+      val index = params._index.map(Index(_)).getOrElse(elasticConfig.index)
       worksService
         .listOrSearchWorks(index, searchOptions)
         .map {
@@ -104,7 +104,7 @@ class Router(elasticClient: ElasticClient,
 
   def singleWork(id: String, params: SingleWorkParams): Future[Route] =
     transactFuture("GET /works/{workId}")({
-      val index = params._index.map(Index(_)).getOrElse(elasticConfig.indexV2)
+      val index = params._index.map(Index(_)).getOrElse(elasticConfig.index)
       val includes = params.include.getOrElse(V2WorksIncludes())
       worksService
         .findWorkById(id)(index)

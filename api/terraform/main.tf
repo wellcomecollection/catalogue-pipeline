@@ -6,7 +6,6 @@ module "catalogue_api_prod" {
   nginx_container_image = "${module.prod_images.services["nginx_api-gw"]}"
   listener_port         = "${local.prod_listener_port}"
   task_desired_count    = "${local.prod_task_number}"
-  es_config             = "${local.prod_es_config}"
 
   namespace    = "${local.namespace}"
   vpc_id       = "${local.vpc_id}"
@@ -35,7 +34,6 @@ module "catalogue_api_staging" {
   nginx_container_image = "${module.staging_images.services["nginx_api-gw"]}"
   listener_port         = "${local.staging_listener_port}"
   task_desired_count    = "${local.staging_task_number}"
-  es_config             = "${local.staging_es_config}"
 
   namespace    = "${local.namespace}"
   vpc_id       = "${local.vpc_id}"

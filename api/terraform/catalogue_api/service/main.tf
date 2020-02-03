@@ -51,7 +51,6 @@ module "task" {
 
   app_env_vars = {
     api_host         = "api.wellcomecollection.org"
-    es_index_v2      = "${var.es_config["index_v2"]}"
     apm_service_name = "${var.namespace}"
     logstash_host    = "${var.logstash_host}"
   }

@@ -27,7 +27,7 @@ object Main extends WellcomeTypesafeApp {
     val snapshotService = new SnapshotService(
       akkaS3Client = AkkaS3Builder.buildAkkaS3Client(config),
       elasticClient = ElasticBuilder.buildElasticClient(config),
-      elasticConfig = ElasticBuilder.buildElasticConfig(config)
+      elasticConfig = ElasticBuilder.buildElasticConfig()
     )
 
     new SnapshotGeneratorWorkerService(
