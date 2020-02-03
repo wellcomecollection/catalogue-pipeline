@@ -1,9 +1,7 @@
 package uk.ac.wellcome.calm_adapter
 
 import scala.concurrent.{ExecutionContext, Future}
-import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers._
 import akka.http.scaladsl.unmarshalling.Unmarshal
@@ -17,7 +15,7 @@ class HttpCalmRetriever(url: String, username: String, password: String)(
   implicit
   ec: ExecutionContext,
   materializer: ActorMaterializer,
-  actorSystem: ActorSystem)
+  httpClient: CalmHttpClient)
     extends CalmRetriever {
 
   def getRecords(query: CalmQuery): Future[List[CalmRecord]] =
@@ -38,8 +36,7 @@ class HttpCalmRetriever(url: String, username: String, password: String)(
   def callApi[T](xmlRequest: CalmXmlRequest,
                  toCalmXml: String => Either[Throwable, CalmXmlResponse[T]],
                  cookie: Option[Cookie] = None): Future[(T, Cookie)] =
-    Http()
-      .singleRequest(calmRequest(xmlRequest, cookie))
+    httpClient(calmRequest(xmlRequest, cookie))
       .flatMap { resp =>
         parseBody(resp, toCalmXml)
           .map(value => (value, cookie.getOrElse(parseCookie(resp))))
