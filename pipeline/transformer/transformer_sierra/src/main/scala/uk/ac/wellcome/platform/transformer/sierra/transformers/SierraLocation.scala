@@ -70,7 +70,8 @@ trait SierraLocation extends SierraQueryOps {
         .contents
         .headOption
         .flatMap {
-          case accessStatus(status) if status == "Open" => Some(AccessStatus.Open)
+          case accessStatus(status) if status == "Open" =>
+            Some(AccessStatus.Open)
           case accessStatus(status) if status == "Open with advisory" =>
             Some(AccessStatus.OpenWithAdvisory)
           case accessStatus(status) if status == "Restricted" =>
@@ -82,7 +83,8 @@ trait SierraLocation extends SierraQueryOps {
             Some(AccessStatus.Restricted)
           case accessStatus(status) if status == "Certain restrictions apply" =>
             Some(AccessStatus.Restricted)
-          case accessStatus(status) if status == "Closed" => Some(AccessStatus.Closed)
+          case accessStatus(status) if status == "Closed" =>
+            Some(AccessStatus.Closed)
           case _ => None
         }
   }
