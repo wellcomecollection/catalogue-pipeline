@@ -25,8 +25,7 @@ trait CalmXmlResponse[T] {
     */
   def responseNode: Either[Throwable, Node] =
     root
-      .childWithTag("Envelope")
-      .flatMap(_.childWithTag("Body"))
+      .childWithTag("Body")
       .flatMap(_.childWithTag(responseTag))
 
   implicit class NodeOps(node: Node) {
@@ -88,6 +87,7 @@ case class CalmSummaryResponse(val root: Elem)
       .flatMap(_.childWithTag("SummaryHeaderResult"))
       .flatMap(_.childWithTag("SummaryList"))
       .flatMap(_.childWithTag("Summary"))
+      .map(_ \ "_")
       .map { node =>
         CalmRecord(
           node
