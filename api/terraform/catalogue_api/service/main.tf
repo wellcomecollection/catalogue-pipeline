@@ -47,7 +47,7 @@ module "task" {
   sidecar_cpu    = 512
   sidecar_memory = 1024
 
-  app_env_vars_length = 4
+  app_env_vars_length = 3
 
   app_env_vars = {
     api_host         = "api.wellcomecollection.org"
@@ -62,6 +62,8 @@ module "task" {
     APP_PORT = "${var.container_port}"
   }
 
+  secret_app_env_vars_length = 7
+
   secret_app_env_vars = {
     es_host        = "catalogue/api/es_host"
     es_port        = "catalogue/api/es_port"
@@ -71,8 +73,6 @@ module "task" {
     apm_server_url = "catalogue/api/apm_server_url"
     apm_secret     = "catalogue/api/apm_secret"
   }
-
-  secret_app_env_vars_length = 7
 
   aws_region = "eu-west-1"
   task_name  = "${var.namespace}"
