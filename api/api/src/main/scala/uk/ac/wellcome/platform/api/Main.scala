@@ -4,9 +4,7 @@ import akka.Done
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
-import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
-import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.platform.api.models.ApiConfig
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
