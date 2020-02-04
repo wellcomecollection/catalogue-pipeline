@@ -18,7 +18,7 @@ class MetsXmlTransformerTest extends FunSpec with Matchers with MetsGenerators {
         accessConditionDz = Some("CC-BY-NC"),
         accessConditionStatus = Some("Open"),
         accessConditionUsage = Some("Some terms"),
-        thumbnailLocation = Some("b30246039_0001.jp2")
+        thumbnailLocation = Some(FileReference("b30246039_0001.jp2", "image/jp2"))
       )
     )
   }
@@ -38,7 +38,7 @@ class MetsXmlTransformerTest extends FunSpec with Matchers with MetsGenerators {
         recordIdentifier = "b22012692",
         accessConditionDz = Some("PDM"),
         accessConditionStatus = Some("Open"),
-        thumbnailLocation = Some("b22012692_0001_0001.jp2")
+        thumbnailLocation = Some(FileReference("b22012692_0001_0001.jp2", "image/jp2"))
       )
     )
   }
@@ -61,7 +61,7 @@ class MetsXmlTransformerTest extends FunSpec with Matchers with MetsGenerators {
         recordIdentifier = "b30246039",
         accessConditionDz = Some("INC"),
         accessConditionStatus = None,
-        thumbnailLocation = Some("b30246039_0001.jp2")
+        thumbnailLocation = Some(FileReference("b30246039_0001.jp2", "image/jp2"))
       )
     )
   }
@@ -91,7 +91,7 @@ class MetsXmlTransformerTest extends FunSpec with Matchers with MetsGenerators {
         .map(content => "root.xml" -> Some(content))).collect {
         case (file, Some(content)) =>
           ObjectLocation("bucket", s"path/$file") -> content
-      }.toMap
+      }
     )
 
     new MetsXmlTransformer(store).transform(metsLocation)

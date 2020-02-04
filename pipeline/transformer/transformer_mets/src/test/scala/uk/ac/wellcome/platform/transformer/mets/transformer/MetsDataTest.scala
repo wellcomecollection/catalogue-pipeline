@@ -198,7 +198,7 @@ class MetsDataTest
     val metsData = MetsData(
       recordIdentifier = randomAlphanumeric(10),
       accessConditionDz = Some("CC-BY-NC"),
-      thumbnailLocation = Some("location.jp2")
+      thumbnailLocation = Some(FileReference("location.jp2", "image/jp2"))
     )
     val result = metsData.toWork(1)
     result shouldBe a[Right[_, _]]
@@ -217,7 +217,7 @@ class MetsDataTest
     val metsData = MetsData(
       recordIdentifier = bnumber,
       accessConditionDz = Some("CC-BY-NC"),
-      thumbnailLocation = Some(assetId)
+      thumbnailLocation = Some(FileReference(assetId, "application/pdf"))
     )
     val result = metsData.toWork(1)
     result shouldBe a[Right[_, _]]
@@ -234,7 +234,7 @@ class MetsDataTest
     val metsData = MetsData(
       recordIdentifier = randomAlphanumeric(10),
       accessConditionDz = Some("CC-BY-NC"),
-      thumbnailLocation = Some("video.mpg")
+      thumbnailLocation = Some(FileReference("video.mpg", "video/"))
     )
     val result = metsData.toWork(1)
     result shouldBe a[Right[_, _]]

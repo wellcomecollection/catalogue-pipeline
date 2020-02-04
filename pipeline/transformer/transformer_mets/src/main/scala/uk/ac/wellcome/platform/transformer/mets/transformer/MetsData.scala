@@ -12,7 +12,7 @@ case class MetsData(
   accessConditionDz: Option[String] = None,
   accessConditionStatus: Option[String] = None,
   accessConditionUsage: Option[String] = None,
-  thumbnailLocation: Option[String] = None
+  thumbnailLocation: Option[FileReference] = None
 ) {
 
   def toWork(version: Int): Either[Throwable, UnidentifiedInvisibleWork] =
@@ -115,8 +115,8 @@ case class MetsData(
 
   private def thumbnail(maybeLicense: Option[License], bnumber: String) =
     for {
-      location <- thumbnailLocation
-      url <- buildThumbnailUrl(location, bnumber)
+      fileReference <- thumbnailLocation
+      url <- buildThumbnailUrl(fileReference, bnumber)
     } yield
       DigitalLocation(
         url = url,
@@ -124,9 +124,9 @@ case class MetsData(
         license = maybeLicense
       )
 
-  private def buildThumbnailUrl(location: String, bnumber: String) = {
+  private def buildThumbnailUrl(location: FileReference, bnumber: String) = {
     val mediaType =
-      URLConnection.guessContentTypeFromName(new File(location).getName)
+      URLConnection.guessContentTypeFromName(new File(location.location).getName)
     Option(mediaType) match {
       case Some(m) if m startsWith ("video/") => None
       case Some(m) if m equals ("application/pdf") =>
