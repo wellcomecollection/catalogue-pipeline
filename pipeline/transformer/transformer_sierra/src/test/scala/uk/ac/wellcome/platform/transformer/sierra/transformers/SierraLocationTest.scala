@@ -243,7 +243,7 @@ class SierraLocationTest
       )
     }
 
-    it("fails if invalid AccessStatus") {
+    it("puts none if invalid AccessStatus") {
       val bibData = createSierraBibDataWith(
         varFields = List(
           VarField(
@@ -252,9 +252,13 @@ class SierraLocationTest
           )
         )
       )
-      assertThrows[Exception] {
-        transformer.getPhysicalLocation(itemData, bibData)
-      }
+      transformer.getPhysicalLocation(itemData, bibData) shouldBe Some(
+        PhysicalLocation(
+          locationType = locationType,
+          label = label,
+          accessConditions = List()
+        )
+      )
     }
   }
 

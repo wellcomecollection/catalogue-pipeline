@@ -69,22 +69,23 @@ trait SierraLocation extends SierraQueryOps {
         .subfieldsWithTag("f")
         .contents
         .headOption
-        .map {
-          case accessStatus(status) if status == "Open" => AccessStatus.Open
+        .flatMap {
+          case accessStatus(status) if status == "Open" =>
+            Some(AccessStatus.Open)
           case accessStatus(status) if status == "Open with advisory" =>
-            AccessStatus.OpenWithAdvisory
+            Some(AccessStatus.OpenWithAdvisory)
           case accessStatus(status) if status == "Restricted" =>
-            AccessStatus.Restricted
+            Some(AccessStatus.Restricted)
           case accessStatus(status)
               if status == "Restricted access (Data Protection Act)" =>
-            AccessStatus.Restricted
+            Some(AccessStatus.Restricted)
           case accessStatus(status) if status == "Cannot Be Produced" =>
-            AccessStatus.Restricted
+            Some(AccessStatus.Restricted)
           case accessStatus(status) if status == "Certain restrictions apply" =>
-            AccessStatus.Restricted
-          case accessStatus(status) if status == "Closed" => AccessStatus.Closed
-          case status =>
-            throw new Exception(s"Unrecognised AccessStatus: $status")
+            Some(AccessStatus.Restricted)
+          case accessStatus(status) if status == "Closed" =>
+            Some(AccessStatus.Closed)
+          case _ => None
         }
   }
 }
