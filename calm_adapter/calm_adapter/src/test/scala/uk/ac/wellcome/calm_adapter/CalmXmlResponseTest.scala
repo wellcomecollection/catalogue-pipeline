@@ -68,6 +68,7 @@ class CalmXmlResponseTest extends FunSpec with Matchers {
                     <RefNo>WT/B/2/5/2/3</RefNo>
                     <Date>September 1996-April 2002  </Date>
                     <Modified><span class="HIT">30</span>/01/2020</Modified>
+                    <RecordID>123</RecordID>
                   </Summary>
                 </SummaryList>
               </SummaryHeaderResult>
@@ -76,12 +77,14 @@ class CalmXmlResponseTest extends FunSpec with Matchers {
         </soap:Envelope>
       CalmSummaryResponse(xml).parse shouldBe Right(
         CalmRecord(
+          "123",
           Map(
             "RecordType" -> "Component",
             "IDENTITY" -> "",
             "RefNo" -> "WT/B/2/5/2/3",
             "Date" -> "September 1996-April 2002  ",
-            "Modified" -> "30/01/2020"
+            "Modified" -> "30/01/2020",
+            "RecordID" -> "123"
           )
         )
       )

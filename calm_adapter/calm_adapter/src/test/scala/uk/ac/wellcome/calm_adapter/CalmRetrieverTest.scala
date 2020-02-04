@@ -28,23 +28,28 @@ class CalmRetrieverTest
   it("generates a list of CALM records from the API") {
     val responses = List(
       searchResponse(2),
-      summaryResponse(List("keyA" -> "valueA", "keyB" -> "valueB")),
-      summaryResponse(List("keyC" -> "valueC"))
+      summaryResponse(
+        List("RecordID" -> "1", "keyA" -> "valueA", "keyB" -> "valueB")),
+      summaryResponse(
+        List("RecordID" -> "2", "keyC" -> "valueC"))
     )
     withCalmRetriever(responses) {
       case (calmRetriever, _) =>
         whenReady(calmRetriever(query)) { records =>
           records shouldBe List(
-            CalmRecord(Map("keyA" -> "valueA", "keyB" -> "valueB")),
-            CalmRecord(Map("keyC" -> "valueC")),
+            CalmRecord("1", Map("RecordID" -> "1", "keyA" -> "valueA", "keyB" -> "valueB")),
+            CalmRecord("2", Map("RecordID" -> "2", "keyC" -> "valueC")),
           )
         }
     }
   }
 
   it("uses the credentials for all API requests") {
-    val responses =
-      List(searchResponse(2), summaryResponse(Nil), summaryResponse(Nil))
+    val responses = List(
+      searchResponse(2),
+      summaryResponse(List("RecordID" -> "1")),
+      summaryResponse(List("RecordID" -> "2"))
+    )
     withCalmRetriever(responses) {
       case (calmRetriever, httpClient) =>
         whenReady(calmRetriever(query)) { records =>
@@ -61,8 +66,11 @@ class CalmRetrieverTest
   }
 
   it("sets the 'SOAPAction' header for all API requests") {
-    val responses =
-      List(searchResponse(2), summaryResponse(Nil), summaryResponse(Nil))
+    val responses = List(
+      searchResponse(2),
+      summaryResponse(List("RecordID" -> "1")),
+      summaryResponse(List("RecordID" -> "2"))
+    )
     withCalmRetriever(responses) {
       case (calmRetriever, httpClient) =>
         whenReady(calmRetriever(query)) { records =>
@@ -82,8 +90,11 @@ class CalmRetrieverTest
   }
 
   it("uses the cookie from the first response for subsequent API requests") {
-    val responses =
-      List(searchResponse(2), summaryResponse(Nil), summaryResponse(Nil))
+    val responses = List(
+      searchResponse(2),
+      summaryResponse(List("RecordID" -> "1")),
+      summaryResponse(List("RecordID" -> "2"))
+    )
     withCalmRetriever(responses) {
       case (calmRetriever, httpClient) =>
         whenReady(calmRetriever(query)) { records =>
@@ -102,9 +113,10 @@ class CalmRetrieverTest
   it("uses num hits from the first response for subsequent API requests") {
     val responses = List(
       searchResponse(3),
-      summaryResponse(Nil),
-      summaryResponse(Nil),
-      summaryResponse(Nil))
+      summaryResponse(List("RecordID" -> "1")),
+      summaryResponse(List("RecordID" -> "2")),
+      summaryResponse(List("RecordID" -> "3"))
+    )
     withMaterializer { implicit materializer =>
       withCalmRetriever(responses) {
         case (calmRetriever, httpClient) =>
@@ -130,7 +142,7 @@ class CalmRetrieverTest
   it("fails if there is no session cookie in the inital response") {
     val responses = List(
       searchResponse(1, None),
-      summaryResponse(Nil),
+      summaryResponse(List("RecordID" -> "1"))
     )
     withCalmRetriever(responses) {
       case (calmRetriever, _) =>
@@ -143,13 +155,26 @@ class CalmRetrieverTest
   it("fails if error response from API") {
     val responses = List(
       searchResponse(2),
-      summaryResponse(Nil),
+      summaryResponse(List("RecordID" -> "1")),
       HttpResponse(500, Nil, "Error", protocol)
     )
     withCalmRetriever(responses) {
       case (calmRetriever, _) =>
         whenReady(calmRetriever(query).failed) { failure =>
           failure.getMessage shouldBe "Unexpected status from CALM API: 500 Internal Server Error"
+        }
+    }
+  }
+
+  it("fails if no RecordID in the response") {
+    val responses = List(
+      searchResponse(1),
+      summaryResponse(Nil)
+    )
+    withCalmRetriever(responses) {
+      case (calmRetriever, _) =>
+        whenReady(calmRetriever(query).failed) { failure =>
+          failure.getMessage shouldBe "RecordID not found"
         }
     }
   }

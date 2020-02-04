@@ -1,3 +1,3 @@
 package uk.ac.wellcome.calm_adapter
 
-case class CalmRecord(data: Map[String, String])
+case class CalmRecord(id: String, data: Map[String, String])
