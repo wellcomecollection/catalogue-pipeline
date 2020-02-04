@@ -1,8 +1,5 @@
 package uk.ac.wellcome.platform.transformer.mets.transformer
 
-import java.io.File
-import java.net.URLConnection
-
 import cats.implicits._
 import org.apache.commons.lang3.StringUtils.equalsIgnoreCase
 import uk.ac.wellcome.models.work.internal._
@@ -124,17 +121,13 @@ case class MetsData(
         license = maybeLicense
       )
 
-  private def buildThumbnailUrl(location: FileReference, bnumber: String) = {
-    val mediaType =
-      URLConnection.guessContentTypeFromName(new File(location.location).getName)
-    Option(mediaType) match {
-      case Some(m) if m startsWith ("video/") => None
-      case Some(m) if m equals ("application/pdf") =>
-        Some(
-          s"https://wellcomelibrary.org/pdfthumbs/${bnumber}/0/${location}.jpg")
-      case _ =>
-        Some(
-          s"https://dlcs.io/thumbs/wellcome/5/$location/full/!$thumbnailDim,$thumbnailDim/0/default.jpg")
-    }
+  private def buildThumbnailUrl(fileReference: FileReference, bnumber: String) = fileReference.mimeType match {
+    case m if m equals ("application/pdf") =>
+      Some(
+        s"https://wellcomelibrary.org/pdfthumbs/${bnumber}/0/${fileReference.location}.jpg")
+    case m if m startsWith "image/" =>
+      Some(
+        s"https://dlcs.io/thumbs/wellcome/5/${fileReference.location}/full/!$thumbnailDim,$thumbnailDim/0/default.jpg")
+    case _ => None
   }
 }

@@ -234,7 +234,18 @@ class MetsDataTest
     val metsData = MetsData(
       recordIdentifier = randomAlphanumeric(10),
       accessConditionDz = Some("CC-BY-NC"),
-      thumbnailLocation = Some(FileReference("video.mpg", "video/"))
+      thumbnailLocation = Some(FileReference("video.mpg", "video/mpeg"))
+    )
+    val result = metsData.toWork(1)
+    result shouldBe a[Right[_, _]]
+    result.right.get.data.thumbnail shouldBe None
+  }
+
+  it("does not add a thumbnail if the file is an audio") {
+    val metsData = MetsData(
+      recordIdentifier = randomAlphanumeric(10),
+      accessConditionDz = Some("CC-BY-NC"),
+      thumbnailLocation = Some(FileReference("video.mp3", "audio/x-mpeg-3"))
     )
     val result = metsData.toWork(1)
     result shouldBe a[Right[_, _]]
