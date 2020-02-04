@@ -5,6 +5,7 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
 import com.typesafe.config.Config
+import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.platform.api.models.ApiConfig
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
@@ -26,8 +27,7 @@ object Main extends WellcomeTypesafeApp {
     Tracing.init(config)
     val elasticClient = ElasticBuilder.buildElasticClient(config)
 
-    val elasticConfig =
-      ElasticBuilder.buildElasticConfig()
+    val elasticConfig = ElasticConfig()
 
     val apiConfig =
       ApiConfig(

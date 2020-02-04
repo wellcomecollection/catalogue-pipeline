@@ -3,6 +3,7 @@ package uk.ac.wellcome.platform.snapshot_generator
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import com.typesafe.config.Config
+import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
@@ -27,7 +28,7 @@ object Main extends WellcomeTypesafeApp {
     val snapshotService = new SnapshotService(
       akkaS3Client = AkkaS3Builder.buildAkkaS3Client(config),
       elasticClient = ElasticBuilder.buildElasticClient(config),
-      elasticConfig = ElasticBuilder.buildElasticConfig()
+      elasticConfig = ElasticConfig()
     )
 
     new SnapshotGeneratorWorkerService(
