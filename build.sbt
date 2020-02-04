@@ -132,6 +132,13 @@ lazy val transformer_mets = setupProject(
   externalDependencies = CatalogueDependencies.metsTransformerDependencies
 )
 
+lazy val transformer_calm = setupProject(
+  project,
+  folder = "pipeline/transformer/transformer_calm",
+  localDependencies = Seq(internal_model, big_messaging_typesafe, calm_adapter),
+  externalDependencies = CatalogueDependencies.calmTransformerDependencies
+)
+
 // Sierra adapter
 
 lazy val sierra_adapter_common = setupProject(
