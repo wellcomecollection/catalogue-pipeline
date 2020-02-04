@@ -69,8 +69,7 @@ class CalmAdapterWorkerService(
     Flow[(Context, CalmWindow)]
       .mapAsync(concurrentHttpConnections) {
         case (ctx, CalmWindow(date)) =>
-          calmRetriever
-            .getRecords(CalmQuery.ModifiedDate(date))
+          calmRetriever(CalmQuery.ModifiedDate(date))
             .transform(result => Success(result.toEither))
             .map(records => (ctx, records))
       }

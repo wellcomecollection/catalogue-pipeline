@@ -22,7 +22,7 @@ object Main extends WellcomeTypesafeApp {
       SQSBuilder.buildSQSStream(config),
       SNSBuilder.buildSNSMessageSender(config, subject = "CALM adapter"),
       new CalmRetriever {
-        def getRecords(query: CalmQuery): Future[List[CalmRecord]] =
+        def apply(query: CalmQuery): Future[List[CalmRecord]] =
           ???
       }
     )

@@ -8,7 +8,7 @@ import akka.http.scaladsl.unmarshalling.Unmarshal
 
 trait CalmRetriever {
 
-  def getRecords(query: CalmQuery): Future[List[CalmRecord]]
+  def apply(query: CalmQuery): Future[List[CalmRecord]]
 }
 
 class HttpCalmRetriever(url: String, username: String, password: String)(
@@ -18,12 +18,12 @@ class HttpCalmRetriever(url: String, username: String, password: String)(
   httpClient: CalmHttpClient)
     extends CalmRetriever {
 
-  def getRecords(query: CalmQuery): Future[List[CalmRecord]] =
+  def apply(query: CalmQuery): Future[List[CalmRecord]] =
     callApi(CalmSearchRequest(query), CalmSearchResponse(_))
       .flatMap {
         case (numHits, cookie) =>
           runSequentially(
-            0 to numHits,
+            0 until numHits,
             (pos: Int) =>
               callApi(
                 CalmSummaryRequest(pos),
@@ -38,8 +38,13 @@ class HttpCalmRetriever(url: String, username: String, password: String)(
                  cookie: Option[Cookie] = None): Future[(T, Cookie)] =
     httpClient(calmRequest(xmlRequest, cookie))
       .flatMap { resp =>
-        parseBody(resp, toCalmXml)
-          .map(value => (value, cookie.getOrElse(parseCookie(resp))))
+        resp.status match {
+          case StatusCodes.OK => parseBody(resp, toCalmXml)
+            .map(value => (value, cookie.getOrElse(parseCookie(resp))))
+          case status =>
+            Future.failed(
+              new Exception(s"Unexpected status from CALM API: $status"))
+        }
       }
 
   def calmRequest(xmlRequest: CalmXmlRequest,
