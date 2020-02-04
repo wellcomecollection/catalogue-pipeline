@@ -1,10 +1,6 @@
 variable "namespace" {}
 variable "environment" {}
 
-variable "es_config" {
-  type = "map"
-}
-
 variable "task_desired_count" {}
 
 variable "subnets" {
