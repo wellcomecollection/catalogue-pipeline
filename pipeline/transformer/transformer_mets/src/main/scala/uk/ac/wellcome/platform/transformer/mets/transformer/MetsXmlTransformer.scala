@@ -29,7 +29,7 @@ class MetsXmlTransformer(store: Readable[ObjectLocation, String]) {
         accessConditionDz = accessConditionDz,
         accessConditionStatus = accessConditionStatus,
         accessConditionUsage = accessConditionUsage,
-        thumbnailLocation = root.thumbnailLocation(id),
+        thumbnailLocation = root.thumbnail(id),
       )
 
   private def transformWithManifestations(
@@ -47,7 +47,7 @@ class MetsXmlTransformer(store: Readable[ObjectLocation, String]) {
         accessConditionDz = accessConditionDz,
         accessConditionStatus = accessConditionStatus,
         accessConditionUsage = accessConditionUsage,
-        thumbnailLocation = firstManifestation.thumbnailLocation(id),
+        thumbnailLocation = firstManifestation.thumbnail(id),
       )
 
   private def getFirstManifestation(
