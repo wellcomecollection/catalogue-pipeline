@@ -11,6 +11,14 @@ trait CalmRetriever {
   def apply(query: CalmQuery): Future[List[CalmRecord]]
 }
 
+/** Retrieves a list of CALM records from the API given some query.
+  *
+  * To retrieve records from the CALM API multiple requests are needed, each
+  * containing a SOAP document with the request data. An initial request is
+  * first made which searches for the number of hits. The API is stateful, with
+  * the response including a session cookie which is used on subsequenet
+  * requests, one for each of the indvidual records.
+  */
 class HttpCalmRetriever(url: String, username: String, password: String)(
   implicit
   ec: ExecutionContext,
@@ -81,6 +89,9 @@ class HttpCalmRetriever(url: String, username: String, password: String)(
       .getOrElse(
         throw new Exception("Session cookie not found in CALM response"))
 
+  /** Utility method to apply a function returning a Future on a sequence of
+    *  inputs, waiting for the result of one Future before proceeding to dispatch
+    *  the next. */
   def runSequentially[I, O](inputs: Seq[I],
                             f: I => Future[O]): Future[List[O]] =
     inputs.foldLeft(Future.successful[List[O]](Nil)) { (future, input) =>
