@@ -252,4 +252,5 @@ case object WorksIndexConfig extends IndexConfig {
     )
 
   val mapping = properties(fields)
+
 }
