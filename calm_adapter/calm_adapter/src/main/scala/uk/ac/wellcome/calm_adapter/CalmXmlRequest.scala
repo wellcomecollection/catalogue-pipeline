@@ -23,7 +23,7 @@ case class CalmSearchRequest(query: CalmQuery, dbName: String = "Catalog")
     <Search xmlns="http://ds.co.uk/cs/webservices/">
       <dbname>{dbName}</dbname>
       <elementSet>DC</elementSet>
-      <expr>{query.queryString}</expr>
+      <expr>{query.queryExpression}</expr>
     </Search>
 }
 

@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter
 sealed trait CalmQuery {
   def key: String
   def value: String
-  def queryString = s"$key=$value"
+  def queryExpression = s"$key=$value"
 }
 
 object CalmQuery {
