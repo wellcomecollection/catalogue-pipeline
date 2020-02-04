@@ -30,6 +30,7 @@ class CalmAdapterWorkerService(
   msgStream: SQSStream[NotificationMessage],
   msgSender: SNSMessageSender,
   calmRetriever: CalmRetriever,
+  calmStore: CalmStore,
   concurrentHttpConnections: Int = 3)(implicit val ec: ExecutionContext)
     extends Runnable
     with FlowOps
@@ -80,13 +81,8 @@ class CalmAdapterWorkerService(
 
   def storeCalmRecord =
     Flow[(Context, CalmRecord)]
-      .map {
-        case (ctx, record) =>
-          // TODO: should store records, and emit the record key if the data differs
-          // to what is currently in the store
-          val key: Option[Version[String, Int]] = None
-          (ctx, key)
-      }
+      .map { case (ctx, record) => (ctx, calmStore.putRecord(record)) }
+      .via(catchErrors)
 
   def publishKey =
     Flow[(Context, Option[Version[String, Int]])]
