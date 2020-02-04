@@ -51,7 +51,7 @@ class SnapshotService(akkaS3Client: S3Client,
         runStream(
           publicBucketName = publicBucketName,
           publicObjectKey = publicObjectKey,
-          index = elasticConfig.indexV2,
+          index = elasticConfig.index,
           toDisplayWork = DisplayWorkV2.apply(_, V2WorksIncludes.includeAll())
         )
     }
