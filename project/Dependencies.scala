@@ -303,6 +303,16 @@ object CatalogueDependencies {
       ExternalDependencies.awsSTSDependencies ++
       WellcomeDependencies.typesafeLibrary
 
+  val calmTransformerDependencies: Seq[ModuleID] =
+    ExternalDependencies.apacheCommonsDependencies ++
+      ExternalDependencies.mockitoDependencies ++
+      ExternalDependencies.wireMockDependencies ++
+      ExternalDependencies.akkaHttpDependencies ++
+      ExternalDependencies.scribeJavaDependencies ++
+      ExternalDependencies.scalaXmlDependencies ++
+      ExternalDependencies.awsSTSDependencies ++
+      WellcomeDependencies.typesafeLibrary
+
   // METS adapter
 
   val metsAdapterDependencies: Seq[ModuleID] =
