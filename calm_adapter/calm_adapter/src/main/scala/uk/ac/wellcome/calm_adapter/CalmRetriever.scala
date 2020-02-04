@@ -39,8 +39,9 @@ class HttpCalmRetriever(url: String, username: String, password: String)(
     httpClient(calmRequest(xmlRequest, cookie))
       .flatMap { resp =>
         resp.status match {
-          case StatusCodes.OK => parseBody(resp, toCalmXml)
-            .map(value => (value, cookie.getOrElse(parseCookie(resp))))
+          case StatusCodes.OK =>
+            parseBody(resp, toCalmXml)
+              .map(value => (value, cookie.getOrElse(parseCookie(resp))))
           case status =>
             Future.failed(
               new Exception(s"Unexpected status from CALM API: $status"))

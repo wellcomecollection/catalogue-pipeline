@@ -12,7 +12,11 @@ import akka.http.scaladsl.model.headers._
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 
-class CalmRetrieverTest extends FunSpec with Matchers with ScalaFutures with Akka {
+class CalmRetrieverTest
+    extends FunSpec
+    with Matchers
+    with ScalaFutures
+    with Akka {
 
   val url = "calm.api"
   val username = "calm-user"
@@ -27,92 +31,98 @@ class CalmRetrieverTest extends FunSpec with Matchers with ScalaFutures with Akk
       summaryResponse(List("keyA" -> "valueA", "keyB" -> "valueB")),
       summaryResponse(List("keyC" -> "valueC"))
     )
-    withCalmRetriever(responses) { case (calmRetriever, _) =>
-      whenReady(calmRetriever(query)) { records =>
-        records shouldBe List(
-          CalmRecord(Map("keyA" -> "valueA", "keyB" -> "valueB")),
-          CalmRecord(Map("keyC" -> "valueC")),
-        )
-      }
+    withCalmRetriever(responses) {
+      case (calmRetriever, _) =>
+        whenReady(calmRetriever(query)) { records =>
+          records shouldBe List(
+            CalmRecord(Map("keyA" -> "valueA", "keyB" -> "valueB")),
+            CalmRecord(Map("keyC" -> "valueC")),
+          )
+        }
     }
   }
 
   it("uses the credentials for all API requests") {
-    val responses = List(searchResponse(2),
-                         summaryResponse(Nil),
-                         summaryResponse(Nil))
-    withCalmRetriever(responses) { case (calmRetriever, httpClient) =>
-      whenReady(calmRetriever(query)) { records =>
-        val credentialsHeaders = httpClient.requests.map { request =>
-          request.headers.collect { case auth: Authorization => auth }
+    val responses =
+      List(searchResponse(2), summaryResponse(Nil), summaryResponse(Nil))
+    withCalmRetriever(responses) {
+      case (calmRetriever, httpClient) =>
+        whenReady(calmRetriever(query)) { records =>
+          val credentialsHeaders = httpClient.requests.map { request =>
+            request.headers.collect { case auth: Authorization => auth }
+          }
+          credentialsHeaders shouldBe List(
+            List(Authorization(BasicHttpCredentials(username, password))),
+            List(Authorization(BasicHttpCredentials(username, password))),
+            List(Authorization(BasicHttpCredentials(username, password))),
+          )
         }
-        credentialsHeaders shouldBe List(
-          List(Authorization(BasicHttpCredentials(username, password))),
-          List(Authorization(BasicHttpCredentials(username, password))),
-          List(Authorization(BasicHttpCredentials(username, password))),
-        )
-      }
     }
   }
 
   it("sets the 'SOAPAction' header for all API requests") {
-    val responses = List(searchResponse(2),
-                         summaryResponse(Nil),
-                         summaryResponse(Nil))
-    withCalmRetriever(responses) { case (calmRetriever, httpClient) =>
-      whenReady(calmRetriever(query)) { records =>
-        val soapHeaders = httpClient.requests.map { request =>
-          request.headers.collect { case header: RawHeader => header }
+    val responses =
+      List(searchResponse(2), summaryResponse(Nil), summaryResponse(Nil))
+    withCalmRetriever(responses) {
+      case (calmRetriever, httpClient) =>
+        whenReady(calmRetriever(query)) { records =>
+          val soapHeaders = httpClient.requests.map { request =>
+            request.headers.collect { case header: RawHeader => header }
+          }
+          soapHeaders shouldBe List(
+            List(
+              RawHeader("SOAPAction", "http://ds.co.uk/cs/webservices/Search")),
+            List(
+              RawHeader("SOAPAction", "http://ds.co.uk/cs/webservices/Search")),
+            List(
+              RawHeader("SOAPAction", "http://ds.co.uk/cs/webservices/Search")),
+          )
         }
-        soapHeaders shouldBe List(
-          List(RawHeader("SOAPAction", "http://ds.co.uk/cs/webservices/Search")),
-          List(RawHeader("SOAPAction", "http://ds.co.uk/cs/webservices/Search")),
-          List(RawHeader("SOAPAction", "http://ds.co.uk/cs/webservices/Search")),
-        )
-      }
     }
   }
 
   it("uses the cookie from the first response for subsequent API requests") {
-    val responses = List(searchResponse(2),
-                         summaryResponse(Nil),
-                         summaryResponse(Nil))
-    withCalmRetriever(responses) { case (calmRetriever, httpClient) =>
-      whenReady(calmRetriever(query)) { records =>
-        val cookieHeaders = httpClient.requests.map { request =>
-          request.headers.collect { case cookie: Cookie => cookie }
+    val responses =
+      List(searchResponse(2), summaryResponse(Nil), summaryResponse(Nil))
+    withCalmRetriever(responses) {
+      case (calmRetriever, httpClient) =>
+        whenReady(calmRetriever(query)) { records =>
+          val cookieHeaders = httpClient.requests.map { request =>
+            request.headers.collect { case cookie: Cookie => cookie }
+          }
+          cookieHeaders shouldBe List(
+            Nil,
+            List(Cookie(cookie)),
+            List(Cookie(cookie)),
+          )
         }
-        cookieHeaders shouldBe List(
-          Nil,
-          List(Cookie(cookie)),
-          List(Cookie(cookie)),
-        )
-      }
     }
   }
 
   it("uses num hits from the first response for subsequent API requests") {
-    val responses = List(searchResponse(3),
-                         summaryResponse(Nil),
-                         summaryResponse(Nil),
-                         summaryResponse(Nil))
+    val responses = List(
+      searchResponse(3),
+      summaryResponse(Nil),
+      summaryResponse(Nil),
+      summaryResponse(Nil))
     withMaterializer { implicit materializer =>
-      withCalmRetriever(responses) { case (calmRetriever, httpClient) =>
-        whenReady(calmRetriever(query)) { records =>
-          val hitPositions = httpClient.requests.map { request =>
-            val body = Await
-              .result(request.entity.toStrict(0 seconds), 0 seconds)
-              .data
-              .decodeString("utf-8")
-            (XML.loadString(body) \\ "HitLstPos").headOption.map(_.text)
+      withCalmRetriever(responses) {
+        case (calmRetriever, httpClient) =>
+          whenReady(calmRetriever(query)) { records =>
+            val hitPositions = httpClient.requests.map { request =>
+              val body = Await
+                .result(request.entity.toStrict(0 seconds), 0 seconds)
+                .data
+                .decodeString("utf-8")
+              (XML.loadString(body) \\ "HitLstPos").headOption.map(_.text)
+            }
+            hitPositions shouldBe List(
+              None,
+              Some("0"),
+              Some("1"),
+              Some("2"),
+            )
           }
-          hitPositions shouldBe List(
-            None,
-            Some("0"),
-            Some("1"),
-            Some("2"),
-          )
-        }
       }
     }
   }
@@ -122,10 +132,11 @@ class CalmRetrieverTest extends FunSpec with Matchers with ScalaFutures with Akk
       searchResponse(1, None),
       summaryResponse(Nil),
     )
-    withCalmRetriever(responses) { case (calmRetriever, _) =>
-      whenReady(calmRetriever(query).failed) { failure =>
-        failure.getMessage shouldBe "Session cookie not found in CALM response"
-      }
+    withCalmRetriever(responses) {
+      case (calmRetriever, _) =>
+        whenReady(calmRetriever(query).failed) { failure =>
+          failure.getMessage shouldBe "Session cookie not found in CALM response"
+        }
     }
   }
 
@@ -135,19 +146,21 @@ class CalmRetrieverTest extends FunSpec with Matchers with ScalaFutures with Akk
       summaryResponse(Nil),
       HttpResponse(500, Nil, "Error", protocol)
     )
-    withCalmRetriever(responses) { case (calmRetriever, _) =>
-      whenReady(calmRetriever(query).failed) { failure =>
-        failure.getMessage shouldBe "Unexpected status from CALM API: 500 Internal Server Error"
-      }
+    withCalmRetriever(responses) {
+      case (calmRetriever, _) =>
+        whenReady(calmRetriever(query).failed) { failure =>
+          failure.getMessage shouldBe "Unexpected status from CALM API: 500 Internal Server Error"
+        }
     }
   }
 
-  def searchResponse(n: Int, cookiePair: Option[(String, String)] = Some(cookie)) =
+  def searchResponse(n: Int,
+                     cookiePair: Option[(String, String)] = Some(cookie)) =
     HttpResponse(
       200,
-      cookiePair
-        .map { case (name, value) => `Set-Cookie`(HttpCookie(name, value)) }
-        .toList,
+      cookiePair.map {
+        case (name, value) => `Set-Cookie`(HttpCookie(name, value))
+      }.toList,
       <soap:Envelope
           xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -185,13 +198,15 @@ class CalmRetrieverTest extends FunSpec with Matchers with ScalaFutures with Akk
       protocol
     )
 
-  def withCalmRetriever[R](responses: List[HttpResponse])(testWith: TestWith[(CalmRetriever, CalmHttpTestClient), R]) =
+  def withCalmRetriever[R](responses: List[HttpResponse])(
+    testWith: TestWith[(CalmRetriever, CalmHttpTestClient), R]) =
     withMaterializer { implicit materializer =>
       implicit val httpClient = new CalmHttpTestClient(responses)
       testWith((new HttpCalmRetriever(url, username, password), httpClient))
     }
 
-  class CalmHttpTestClient(var responses: List[HttpResponse]) extends CalmHttpClient {
+  class CalmHttpTestClient(var responses: List[HttpResponse])
+      extends CalmHttpClient {
     var requests: List[HttpRequest] = Nil
     def apply(request: HttpRequest): Future[HttpResponse] = {
       val response = responses.headOption
