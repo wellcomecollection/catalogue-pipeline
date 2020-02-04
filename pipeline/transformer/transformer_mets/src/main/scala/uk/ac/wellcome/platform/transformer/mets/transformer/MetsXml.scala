@@ -140,8 +140,11 @@ case class MetsXml(root: Elem) {
           case filePrefixRegex(caseInsensitiveBnumber, postFix) =>
             Option(caseInsensitiveBnumber) match {
               case Some(caseInsensitiveBnumber) =>
-                FileReference(s"${caseInsensitiveBnumber}_$postFix", fileReference.mimeType)
-              case _ => FileReference(s"${bnumber}_$postFix", fileReference.mimeType)
+                FileReference(
+                  s"${caseInsensitiveBnumber}_$postFix",
+                  fileReference.mimeType)
+              case _ =>
+                FileReference(s"${bnumber}_$postFix", fileReference.mimeType)
             }
           case _ => fileReference
         }
@@ -185,7 +188,8 @@ case class MetsXml(root: Elem) {
       .map { node =>
         val key = node \@ "ID"
         val mimeType = node \@ "MIMETYPE"
-        val value = (node \ "FLocat").toList.headOption.map(_ \@ "{http://www.w3.org/1999/xlink}href")
+        val value = (node \ "FLocat").toList.headOption
+          .map(_ \@ "{http://www.w3.org/1999/xlink}href")
         (key, value, mimeType)
       }
       .collect {

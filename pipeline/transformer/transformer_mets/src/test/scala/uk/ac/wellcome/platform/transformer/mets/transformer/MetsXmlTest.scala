@@ -65,7 +65,7 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
 
   it("parses thumbnail from XML") {
     MetsXml(xml).right.get.thumbnail("b30246039") shouldBe Some(
-      FileReference(location="b30246039_0001.jp2", mimeType="image/jp2"))
+      FileReference(location = "b30246039_0001.jp2", mimeType = "image/jp2"))
   }
 
   it("parses first thumbnail when no ORDER attribute") {
@@ -74,12 +74,13 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
       fileSec = fileSec(filePrefix = "b30246039"),
       structMap = structMap)
     MetsXml(str).getRight.thumbnail("b30246039") shouldBe Some(
-      FileReference("b30246039_0001.jp2","image/jp2"))
+      FileReference("b30246039_0001.jp2", "image/jp2"))
   }
 
   it("parses thumbnail using ORDER attrib when non-sequential order") {
     MetsXml(xmlNonSequentialOrder("b30246039")).getRight
-      .thumbnail("b30246039") shouldBe Some(FileReference("b30246039_0001.jp2","image/jp2"))
+      .thumbnail("b30246039") shouldBe Some(
+      FileReference("b30246039_0001.jp2", "image/jp2"))
   }
 
   it("parses thumbnail if filename doesn't start with bnumber") {
@@ -91,7 +92,7 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
         fileSec = fileSec(filePrefix),
         structMap = structMap)).getRight
       .thumbnail(bnumber) shouldBe Some(
-      FileReference(s"${bnumber}_${filePrefix}_0001.jp2","image/jp2"))
+      FileReference(s"${bnumber}_${filePrefix}_0001.jp2", "image/jp2"))
   }
 
   it("parses thumbnail if filename starts with uppercase bnumber") {
@@ -102,7 +103,8 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
         recordIdentifier = bnumber,
         fileSec = fileSec(filePrefix),
         structMap = structMap)).getRight
-      .thumbnail(bnumber) shouldBe Some(FileReference(s"${filePrefix}_0001.jp2","image/jp2"))
+      .thumbnail(bnumber) shouldBe Some(
+      FileReference(s"${filePrefix}_0001.jp2", "image/jp2"))
   }
 
   it("cannot parse thumbnail when invalid file ID") {

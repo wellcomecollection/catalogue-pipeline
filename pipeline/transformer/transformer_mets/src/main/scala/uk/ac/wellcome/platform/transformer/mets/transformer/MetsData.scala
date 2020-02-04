@@ -121,13 +121,14 @@ case class MetsData(
         license = maybeLicense
       )
 
-  private def buildThumbnailUrl(fileReference: FileReference, bnumber: String) = fileReference.mimeType match {
-    case m if m equals ("application/pdf") =>
-      Some(
-        s"https://wellcomelibrary.org/pdfthumbs/${bnumber}/0/${fileReference.location}.jpg")
-    case m if m startsWith "image/" =>
-      Some(
-        s"https://dlcs.io/thumbs/wellcome/5/${fileReference.location}/full/!$thumbnailDim,$thumbnailDim/0/default.jpg")
-    case _ => None
-  }
+  private def buildThumbnailUrl(fileReference: FileReference, bnumber: String) =
+    fileReference.mimeType match {
+      case m if m equals ("application/pdf") =>
+        Some(
+          s"https://wellcomelibrary.org/pdfthumbs/${bnumber}/0/${fileReference.location}.jpg")
+      case m if m startsWith "image/" =>
+        Some(
+          s"https://dlcs.io/thumbs/wellcome/5/${fileReference.location}/full/!$thumbnailDim,$thumbnailDim/0/default.jpg")
+      case _ => None
+    }
 }
