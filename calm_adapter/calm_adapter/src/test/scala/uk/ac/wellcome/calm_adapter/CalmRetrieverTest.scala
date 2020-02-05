@@ -166,7 +166,7 @@ class CalmRetrieverTest
     }
   }
 
-  it("fails if no RecordID in the response") {
+  it("fails if there is no RecordID in the response") {
     val responses = List(
       searchResponse(1),
       summaryResponse(Nil)
