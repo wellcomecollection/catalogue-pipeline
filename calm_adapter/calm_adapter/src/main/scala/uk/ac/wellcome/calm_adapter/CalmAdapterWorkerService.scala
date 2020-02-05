@@ -2,6 +2,7 @@ package uk.ac.wellcome.calm_adapter
 
 import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Success
 import akka.Done
 import akka.stream.scaladsl._
 import grizzled.slf4j.Logging
@@ -28,7 +29,8 @@ case class CalmWindow(date: LocalDate)
 class CalmAdapterWorkerService(
   msgStream: SQSStream[NotificationMessage],
   msgSender: SNSMessageSender,
-  calmRetriever: CalmRetriever)(implicit val ec: ExecutionContext)
+  calmRetriever: CalmRetriever,
+  concurrentHttpConnections: Int = 3)(implicit val ec: ExecutionContext)
     extends Runnable
     with FlowOps
     with Logging {
@@ -65,9 +67,11 @@ class CalmAdapterWorkerService(
 
   def retrieveCalmRecords =
     Flow[(Context, CalmWindow)]
-      .map {
+      .mapAsync(concurrentHttpConnections) {
         case (ctx, CalmWindow(date)) =>
-          (ctx, calmRetriever.getRecords(CalmQuery.ModifiedDate(date)))
+          calmRetriever(CalmQuery.ModifiedDate(date))
+            .transform(result => Success(result.toEither))
+            .map(records => (ctx, records))
       }
       .via(catchErrors)
       .mapConcat {
