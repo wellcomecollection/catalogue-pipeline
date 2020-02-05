@@ -17,7 +17,7 @@ class CalmStoreTest extends FunSpec with Matchers {
     val record = CalmRecord("A", Map("key" -> "value"))
     calmStore(data).putRecord(record) shouldBe Right(Some(Version("A", 0)))
     data.entries shouldBe Map(
-      Version("A", 0) ->  Map("key" -> "value")
+      Version("A", 0) -> Map("key" -> "value")
     )
   }
 
@@ -26,8 +26,8 @@ class CalmStoreTest extends FunSpec with Matchers {
     val record = CalmRecord("A", Map("key" -> "new"))
     calmStore(data).putRecord(record) shouldBe Right(Some(Version("A", 2)))
     data.entries shouldBe Map(
-      Version("A", 1) ->  Map("key" -> "old"),
-      Version("A", 2) ->  Map("key" -> "new")
+      Version("A", 1) -> Map("key" -> "old"),
+      Version("A", 2) -> Map("key" -> "new")
     )
   }
 
@@ -36,7 +36,7 @@ class CalmStoreTest extends FunSpec with Matchers {
     val record = CalmRecord("A", Map("key" -> "new"))
     calmStore(data).putRecord(record) shouldBe Right(None)
     data.entries shouldBe Map(
-      Version("A", 4) ->  Map("key" -> "new"),
+      Version("A", 4) -> Map("key" -> "new"),
     )
   }
 
@@ -53,8 +53,7 @@ class CalmStoreTest extends FunSpec with Matchers {
     data.entries shouldBe Map.empty
   }
 
-  def dataStore(
-    entries: Map[Key, Data] = Map.empty) =
+  def dataStore(entries: Map[Key, Data] = Map.empty) =
     new MemoryStore(entries) with MemoryMaxima[String, Data]
 
   def calmStore(data: MemoryStore[Key, Data] with Maxima[String, Int]) =

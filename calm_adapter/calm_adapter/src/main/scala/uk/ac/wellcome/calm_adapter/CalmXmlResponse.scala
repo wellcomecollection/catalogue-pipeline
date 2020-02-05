@@ -92,7 +92,7 @@ case class CalmSummaryResponse(val root: Elem)
         val data = node.map(child => child.label -> child.text).toMap
         data
           .get("RecordID")
-          .map(id  =>  Right(CalmRecord(id, data)))
+          .map(id => Right(CalmRecord(id, data)))
           .getOrElse(Left(new Exception("RecordID not found")))
       }
 }

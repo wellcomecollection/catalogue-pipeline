@@ -30,14 +30,15 @@ class CalmRetrieverTest
       searchResponse(2),
       summaryResponse(
         List("RecordID" -> "1", "keyA" -> "valueA", "keyB" -> "valueB")),
-      summaryResponse(
-        List("RecordID" -> "2", "keyC" -> "valueC"))
+      summaryResponse(List("RecordID" -> "2", "keyC" -> "valueC"))
     )
     withCalmRetriever(responses) {
       case (calmRetriever, _) =>
         whenReady(calmRetriever(query)) { records =>
           records shouldBe List(
-            CalmRecord("1", Map("RecordID" -> "1", "keyA" -> "valueA", "keyB" -> "valueB")),
+            CalmRecord(
+              "1",
+              Map("RecordID" -> "1", "keyA" -> "valueA", "keyB" -> "valueB")),
             CalmRecord("2", Map("RecordID" -> "2", "keyC" -> "valueC")),
           )
         }

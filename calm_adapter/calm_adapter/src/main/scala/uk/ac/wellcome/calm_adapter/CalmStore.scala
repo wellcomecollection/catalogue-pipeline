@@ -1,6 +1,6 @@
 package uk.ac.wellcome.calm_adapter
 
-import uk.ac.wellcome.storage.{Identified, Version, NoVersionExistsError}
+import uk.ac.wellcome.storage.{Identified, NoVersionExistsError, Version}
 import uk.ac.wellcome.storage.store.VersionedStore
 
 class CalmStore(store: VersionedStore[String, Int, Map[String, String]]) {
@@ -9,15 +9,16 @@ class CalmStore(store: VersionedStore[String, Int, Map[String, String]]) {
 
   type Result[T] = Either[Throwable, T]
 
-  def putRecord(record: CalmRecord): Result[Option[Key]] = 
+  def putRecord(record: CalmRecord): Result[Option[Key]] =
     shouldStoreRecord(record)
       .flatMap {
-        case false         => Right(None)
-        case true          => store
-          .putLatest(record.id)(record.data)
-          .map { case Identified(key, _) => Some(key) }
-          .left
-          .map(_.e)
+        case false => Right(None)
+        case true =>
+          store
+            .putLatest(record.id)(record.data)
+            .map { case Identified(key, _) => Some(key) }
+            .left
+            .map(_.e)
       }
 
   def shouldStoreRecord(record: CalmRecord): Result[Boolean] =
@@ -25,8 +26,8 @@ class CalmStore(store: VersionedStore[String, Int, Map[String, String]]) {
       .getLatest(record.id)
       .map { case Identified(_, storedData) => record.data != storedData }
       .left
-      .flatMap { 
+      .flatMap {
         case NoVersionExistsError(_) => Right(true)
-        case err => Left(err.e)
+        case err                     => Left(err.e)
       }
 }
