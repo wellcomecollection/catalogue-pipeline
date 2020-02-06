@@ -232,7 +232,7 @@ case object WorksIndexConfig extends IndexConfig {
       objectField("collection").fields(
         label,
         textField("path")
-          .copyTo("collection.depth")
+          .copyTo("data.collection.depth")
           .analyzer(pathAnalyzer.name)
           .fields(keywordField("keyword")),
         tokenCountField("depth").analyzer("standard")
