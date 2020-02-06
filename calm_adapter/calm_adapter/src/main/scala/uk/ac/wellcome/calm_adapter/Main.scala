@@ -24,7 +24,8 @@ object Main extends WellcomeTypesafeApp {
       new CalmRetriever {
         def apply(query: CalmQuery): Future[List[CalmRecord]] =
           ???
-      }
+      },
+      new CalmStore(???)
     )
   }
 }

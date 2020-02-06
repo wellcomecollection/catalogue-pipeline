@@ -88,12 +88,12 @@ case class CalmSummaryResponse(val root: Elem)
       .flatMap(_.childWithTag("SummaryList"))
       .flatMap(_.childWithTag("Summary"))
       .map(_ \ "_")
-      .map { node =>
-        CalmRecord(
-          node
-            .map(child => child.label -> child.text)
-            .toMap
-        )
+      .flatMap { node =>
+        val data = node.map(child => child.label -> child.text).toMap
+        data
+          .get("RecordID")
+          .map(id => Right(CalmRecord(id, data)))
+          .getOrElse(Left(new Exception("RecordID not found")))
       }
 }
 
