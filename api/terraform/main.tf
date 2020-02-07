@@ -60,8 +60,6 @@ module "data_api" {
   aws_region   = "${var.aws_region}"
   infra_bucket = "${local.infra_bucket}"
 
-  es_config_snapshot = "${local.prod_es_config}"
-
   snapshot_generator_release_uri = "${module.latest_images.services["snapshot_generator"]}"
 
   critical_slack_webhook = ""
