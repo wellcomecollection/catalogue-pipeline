@@ -23,7 +23,8 @@ case class CalmWindow(date: LocalDate)
   *  Consists of the following stages:
   *  - Retrieve all CALM records which have modified field the same date as the
   *    window
-  *  - Store these records in VHS, filtering out ones where the data is unchanged
+  *  - Store these records in VHS, filtering out ones older than what is
+  *    currently in  the store
   *  - Publish the VHS key to SNS
   */
 class CalmAdapterWorkerService(

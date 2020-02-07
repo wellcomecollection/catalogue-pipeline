@@ -4,7 +4,7 @@ import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.xml.XML
-import java.time.LocalDate
+import java.time.{Instant, LocalDate}
 import org.scalatest.{FunSpec, Matchers}
 import org.scalatest.concurrent.ScalaFutures
 import akka.http.scaladsl.model._
@@ -24,6 +24,7 @@ class CalmRetrieverTest
   val cookie = ("cookie-name", "cookie-value")
   val protocol = HttpProtocols.`HTTP/1.0`
   val query = CalmQuery.ModifiedDate(LocalDate.of(2000, 1, 1))
+  val retrievedAt = Instant.ofEpochSecond(123456)
 
   it("generates a list of CALM records from the API") {
     val responses = List(
@@ -38,8 +39,12 @@ class CalmRetrieverTest
           records shouldBe List(
             CalmRecord(
               "1",
-              Map("RecordID" -> "1", "keyA" -> "valueA", "keyB" -> "valueB")),
-            CalmRecord("2", Map("RecordID" -> "2", "keyC" -> "valueC")),
+              Map("RecordID" -> "1", "keyA" -> "valueA", "keyB" -> "valueB"),
+              retrievedAt),
+            CalmRecord(
+              "2",
+              Map("RecordID" -> "2", "keyC" -> "valueC"),
+              retrievedAt),
           )
         }
     }
@@ -200,10 +205,11 @@ class CalmRetrieverTest
       protocol
     )
 
-  def summaryResponse(data: List[(String, String)]) =
+  def summaryResponse(data: List[(String, String)],
+                      timestamp: Option[Instant] = Some(retrievedAt)) =
     HttpResponse(
       200,
-      Nil,
+      timestamp.map(ts => Date(DateTime(ts.toEpochMilli))).toList,
       <soap:Envelope
           xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"

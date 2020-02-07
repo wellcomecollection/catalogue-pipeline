@@ -2,6 +2,8 @@ package uk.ac.wellcome.calm_adapter
 
 import scala.util.Try
 import scala.xml.{Elem, Node, XML}
+import java.time.Instant
+import akka.http.scaladsl.model.headers.Cookie
 
 trait CalmXmlResponse[T] {
   val root: Elem
@@ -37,7 +39,8 @@ trait CalmXmlResponse[T] {
   }
 }
 
-case class CalmSearchResponse(val root: Elem) extends CalmXmlResponse[Int] {
+case class CalmSearchResponse(val root: Elem, cookie: Cookie)
+    extends CalmXmlResponse[CalmSession] {
 
   val responseTag = "SearchResponse"
 
@@ -49,19 +52,24 @@ case class CalmSearchResponse(val root: Elem) extends CalmXmlResponse[Int] {
     *
     *  Here we extract an integer containing n (the number of hits)
     */
-  def parse: Either[Throwable, Int] =
+  def parse: Either[Throwable, CalmSession] =
     responseNode
       .flatMap(_.childWithTag("SearchResult"))
-      .flatMap(result => Try(result.text.toInt).toEither)
+      .flatMap { result =>
+        Try(result.text.toInt)
+          .map(numHits => CalmSession(numHits, cookie))
+          .toEither
+      }
 }
 
 object CalmSearchResponse {
 
-  def apply(str: String): Either[Throwable, CalmSearchResponse] =
-    Try(XML.loadString(str)).map(CalmSearchResponse(_)).toEither
+  def apply(str: String,
+            cookie: Cookie): Either[Throwable, CalmSearchResponse] =
+    Try(XML.loadString(str)).map(CalmSearchResponse(_, cookie)).toEither
 }
 
-case class CalmSummaryResponse(val root: Elem)
+case class CalmSummaryResponse(val root: Elem, retrievedAt: Instant)
     extends CalmXmlResponse[CalmRecord] {
 
   val responseTag = "SummaryHeaderResponse"
@@ -92,13 +100,14 @@ case class CalmSummaryResponse(val root: Elem)
         val data = node.map(child => child.label -> child.text).toMap
         data
           .get("RecordID")
-          .map(id => Right(CalmRecord(id, data)))
+          .map(id => Right(CalmRecord(id, data, retrievedAt)))
           .getOrElse(Left(new Exception("RecordID not found")))
       }
 }
 
 object CalmSummaryResponse {
 
-  def apply(str: String): Either[Throwable, CalmSummaryResponse] =
-    Try(XML.loadString(str)).map(CalmSummaryResponse(_)).toEither
+  def apply(str: String,
+            retrievedAt: Instant): Either[Throwable, CalmSummaryResponse] =
+    Try(XML.loadString(str)).map(CalmSummaryResponse(_, retrievedAt)).toEither
 }
