@@ -1,7 +1,7 @@
 package uk.ac.wellcome.calm_adapter
 
 import scala.util.Try
-import scala.xml.{Elem, Node, XML}
+import scala.xml.{Elem, Node, NodeSeq, XML}
 import java.time.Instant
 import akka.http.scaladsl.model.headers.Cookie
 
@@ -96,13 +96,21 @@ case class CalmSummaryResponse(val root: Elem, retrievedAt: Instant)
       .flatMap(_.childWithTag("SummaryList"))
       .flatMap(_.childWithTag("Summary"))
       .map(_ \ "_")
-      .flatMap { node =>
-        val data = node.map(child => child.label -> child.text).toMap
-        data
-          .get("RecordID")
-          .map(id => Right(CalmRecord(id, data, retrievedAt)))
-          .getOrElse(Left(new Exception("RecordID not found")))
+      .flatMap { nodes =>
+        val data = toMapping(nodes)
+        data.get("RecordID") match {
+          case Some(List(id)) => Right(CalmRecord(id, data, retrievedAt))
+          case Some(_)        => Left(new Exception("Multiple RecordIDs found"))
+          case None           => Left(new Exception("RecordID not found"))
+        }
       }
+
+  def toMapping(nodes: NodeSeq): Map[String, List[String]] =
+    nodes
+      .map(node => node.label -> node.text)
+      .groupBy(_._1)
+      .mapValues(_.map(_._2).toList)
+      .toMap
 }
 
 object CalmSummaryResponse {
