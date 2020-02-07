@@ -1,6 +1,7 @@
 package uk.ac.wellcome.calm_adapter
 
 import scala.concurrent.{ExecutionContext, Future}
+import java.time.Instant
 import akka.stream.ActorMaterializer
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers._
@@ -26,30 +27,29 @@ class HttpCalmRetriever(url: String, username: String, password: String)(
   httpClient: CalmHttpClient)
     extends CalmRetriever {
 
+  type Result[T] = Either[Throwable, T]
+
   def apply(query: CalmQuery): Future[List[CalmRecord]] =
-    callApi(CalmSearchRequest(query), CalmSearchResponse(_))
+    callApi(CalmSearchRequest(query), searchResponseParser)
       .flatMap {
-        case (numHits, cookie) =>
+        case CalmSession(numHits, cookie) =>
           runSequentially(
             0 until numHits,
             (pos: Int) =>
               callApi(
                 CalmSummaryRequest(pos),
-                CalmSummaryResponse(_),
+                summaryResponseParser,
                 Some(cookie))
-                .map { case (record, _) => record }
           )
       }
 
   def callApi[T](xmlRequest: CalmXmlRequest,
-                 toCalmXml: String => Either[Throwable, CalmXmlResponse[T]],
-                 cookie: Option[Cookie] = None): Future[(T, Cookie)] =
+                 parser: CalmResponseParser[T],
+                 cookie: Option[Cookie] = None): Future[T] =
     httpClient(calmRequest(xmlRequest, cookie))
       .flatMap { resp =>
         resp.status match {
-          case StatusCodes.OK =>
-            parseBody(resp, toCalmXml)
-              .map(value => (value, cookie.getOrElse(parseCookie(resp))))
+          case StatusCodes.OK => parser(resp)
           case status =>
             Future.failed(
               new Exception(s"Unexpected status from CALM API: $status"))
@@ -71,14 +71,28 @@ class HttpCalmRetriever(url: String, username: String, password: String)(
     }
   }
 
-  def parseBody[T](
-    resp: HttpResponse,
-    toCalmXml: String => Either[Throwable, CalmXmlResponse[T]]): Future[T] =
-    Unmarshal(resp.entity)
-      .to[String]
-      .flatMap { xmlStr =>
-        Future.fromTry(toCalmXml(xmlStr).flatMap(_.parse).toTry)
-      }
+  trait CalmResponseParser[T] {
+    def apply(resp: HttpResponse): Future[T] =
+      Unmarshal(resp.entity)
+        .to[String]
+        .flatMap { str =>
+          Future.fromTry(parseXml(resp, str).flatMap(_.parse).toTry)
+        }
+
+    def parseXml(resp: HttpResponse, str: String): Result[CalmXmlResponse[T]]
+  }
+
+  val searchResponseParser = new CalmResponseParser[CalmSession] {
+    def parseXml(resp: HttpResponse,
+                 str: String): Result[CalmXmlResponse[CalmSession]] =
+      CalmSearchResponse(str, parseCookie(resp))
+  }
+
+  val summaryResponseParser = new CalmResponseParser[CalmRecord] {
+    def parseXml(resp: HttpResponse,
+                 str: String): Result[CalmXmlResponse[CalmRecord]] =
+      CalmSummaryResponse(str, parseTimestamp(resp))
+  }
 
   def parseCookie(resp: HttpResponse): Cookie =
     resp.headers
@@ -88,6 +102,14 @@ class HttpCalmRetriever(url: String, username: String, password: String)(
       .headOption
       .getOrElse(
         throw new Exception("Session cookie not found in CALM response"))
+
+  def parseTimestamp(resp: HttpResponse): Instant =
+    resp.headers
+      .collect {
+        case `Date`(dateTime) => Instant.ofEpochMilli(dateTime.clicks)
+      }
+      .headOption
+      .getOrElse(throw new Exception("Timestamp not found in CALM response"))
 
   /** Utility method to apply a function returning a Future on a sequence of
     *  inputs, waiting for the result of one Future before proceeding to dispatch

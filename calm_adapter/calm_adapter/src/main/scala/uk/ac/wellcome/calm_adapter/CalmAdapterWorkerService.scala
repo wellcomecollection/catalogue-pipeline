@@ -9,7 +9,6 @@ import grizzled.slf4j.Logging
 import com.amazonaws.services.sqs.model.{Message => SQSMessage}
 
 import uk.ac.wellcome.typesafe.Runnable
-import uk.ac.wellcome.storage.Version
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSMessageSender}
 import uk.ac.wellcome.json.JsonUtil._
@@ -47,14 +46,14 @@ class CalmAdapterWorkerService(
   def run(): Future[Done] =
     msgStream.runStream(
       className,
-      source => {
+      source =>
         source
           .via(unwrapMessage)
           .via(retrieveCalmRecords)
           .via(storeCalmRecord)
-          .via(publishKey)
+          .via(publishId)
+          .via(storeCalmRecord)
           .map { case (Context(msg), _) => msg }
-      }
     )
 
   def unwrapMessage =
@@ -76,17 +75,23 @@ class CalmAdapterWorkerService(
       }
       .via(catchErrors)
       .mapConcat {
-        case (ctx, records) => records.map(record => (ctx, record))
+        case (ctx, records) => records.map(record => (ctx, Some(record)))
       }
 
   def storeCalmRecord =
-    Flow[(Context, CalmRecord)]
-      .map { case (ctx, record) => (ctx, calmStore.putRecord(record)) }
-      .via(catchErrors)
+    Flow[(Context, Option[CalmRecord])]
+      .flatMapWithContext {
+        case (ctx, record) => calmStore.putRecord(record)
+      }
 
-  def publishKey =
-    Flow[(Context, Option[Version[String, Int]])]
+  def publishId =
+    Flow[(Context, Option[CalmRecord])]
       .mapWithContext {
-        case (ctx, key) => msgSender.sendT(key).toEither.right.map(_ => key)
+        case (ctx, record) =>
+          msgSender
+            .sendT(record.id)
+            .toEither
+            .right
+            .map(_ => record.copy(published = true))
       }
 }

@@ -37,6 +37,14 @@ trait FlowOps extends Logging {
           case (ctx, None) => Future.successful((ctx, Right(None)))
         }
         .via(catchErrors)
+
+    def flatMapWithContext[T](f: (Ctx, Out) => Result[Option[T]]) =
+      flow
+        .map {
+          case (ctx, Some(data)) => (ctx, (f(ctx, data)))
+          case (ctx, None)       => (ctx, Right(None))
+        }
+        .via(catchErrors)
   }
 
   def catchErrors[C, T] =

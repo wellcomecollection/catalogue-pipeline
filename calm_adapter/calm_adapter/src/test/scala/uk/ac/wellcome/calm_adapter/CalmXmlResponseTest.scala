@@ -1,10 +1,15 @@
 package uk.ac.wellcome.calm_adapter
 
 import org.scalatest.{FunSpec, Matchers}
+import java.time.Instant
+import akka.http.scaladsl.model.headers.{Cookie, HttpCookiePair}
 
 class CalmXmlResponseTest extends FunSpec with Matchers {
 
   describe("CALM search response") {
+
+    val cookie = Cookie(List(HttpCookiePair("key", "value")))
+
     it("parses the number of hits from a CALM search response") {
       val xml =
         <soap:Envelope
@@ -17,7 +22,8 @@ class CalmXmlResponseTest extends FunSpec with Matchers {
             </SearchResponse>
           </soap:Body>
         </soap:Envelope>
-      CalmSearchResponse(xml).parse shouldBe Right(12)
+      CalmSearchResponse(xml, cookie).parse shouldBe Right(
+        CalmSession(12, cookie))
     }
 
     it("errors when num hits is not an integer") {
@@ -32,7 +38,7 @@ class CalmXmlResponseTest extends FunSpec with Matchers {
             </SearchResponse>
           </soap:Body>
         </soap:Envelope>
-      CalmSearchResponse(xml).parse shouldBe a[Left[_, _]]
+      CalmSearchResponse(xml, cookie).parse shouldBe a[Left[_, _]]
     }
 
     it("errors when invalid body") {
@@ -47,11 +53,14 @@ class CalmXmlResponseTest extends FunSpec with Matchers {
             </UnexpectedResponse>
           </soap:Body>
         </soap:Envelope>
-      CalmSearchResponse(xml).parse shouldBe a[Left[_, _]]
+      CalmSearchResponse(xml, cookie).parse shouldBe a[Left[_, _]]
     }
   }
 
   describe("CALM suummary response") {
+
+    val retrievedAt = Instant.ofEpochSecond(123456)
+
     it("parses a calm record CALM search response") {
       val xml =
         <soap:Envelope
@@ -75,7 +84,7 @@ class CalmXmlResponseTest extends FunSpec with Matchers {
             </SummaryHeaderResponse>
           </soap:Body>
         </soap:Envelope>
-      CalmSummaryResponse(xml).parse shouldBe Right(
+      CalmSummaryResponse(xml, retrievedAt).parse shouldBe Right(
         CalmRecord(
           "123",
           Map(
@@ -85,7 +94,8 @@ class CalmXmlResponseTest extends FunSpec with Matchers {
             "Date" -> "September 1996-April 2002  ",
             "Modified" -> "30/01/2020",
             "RecordID" -> "123"
-          )
+          ),
+          retrievedAt
         )
       )
     }
@@ -104,7 +114,7 @@ class CalmXmlResponseTest extends FunSpec with Matchers {
             </SummaryHeaderResponse>
           </soap:Body>
         </soap:Envelope>
-      CalmSummaryResponse(xml).parse shouldBe a[Left[_, _]]
+      CalmSummaryResponse(xml, retrievedAt).parse shouldBe a[Left[_, _]]
     }
   }
 }
