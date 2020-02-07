@@ -19,4 +19,8 @@ object AccessStatus {
   case object Closed extends AccessStatus
 
   case object LicensedResources extends AccessStatus
+
+  case object Unavailable extends AccessStatus
+
+  case object PermissionRequired extends AccessStatus
 }

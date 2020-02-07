@@ -222,8 +222,71 @@ class SierraLocationTest
       )
     }
 
+    it("maps Missing. to unavailable access status") {
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          VarField(
+            marcTag = Some("506"),
+            subfields = List(
+              MarcSubfield("f", "Missing.")
+            )
+          )
+        )
+      )
+      transformer.getPhysicalLocation(itemData, bibData) shouldBe Some(
+        PhysicalLocation(
+          locationType = locationType,
+          label = label,
+          accessConditions =
+            List(AccessCondition(Some(AccessStatus.Unavailable)))
+        )
+      )
+    }
+
+    it("maps Temporarily Unavailable. to unavailable access status") {
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          VarField(
+            marcTag = Some("506"),
+            subfields = List(
+              MarcSubfield("f", "Temporarily Unavailable.")
+            )
+          )
+        )
+      )
+      transformer.getPhysicalLocation(itemData, bibData) shouldBe Some(
+        PhysicalLocation(
+          locationType = locationType,
+          label = label,
+          accessConditions =
+            List(AccessCondition(Some(AccessStatus.Unavailable)))
+        )
+      )
+    }
+
+    it("maps Permission Required. to unavailable access status") {
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          VarField(
+            marcTag = Some("506"),
+            subfields = List(
+              MarcSubfield("f", "Permission Required.")
+            )
+          )
+        )
+      )
+      transformer.getPhysicalLocation(itemData, bibData) shouldBe Some(
+        PhysicalLocation(
+          locationType = locationType,
+          label = label,
+          accessConditions =
+            List(AccessCondition(Some(AccessStatus.PermissionRequired)))
+        )
+      )
+    }
+
     it(
-      "does not add an access condition if none of the relvant subfields are present") {
+      "does not add an access condition if none of the relevant subfields are present") {
       val bibData = createSierraBibDataWith(
         varFields = List(
           VarField(
@@ -243,7 +306,7 @@ class SierraLocationTest
       )
     }
 
-    it("puts none if invalid AccessStatus") {
+    it("errors if invalid AccessStatus") {
       val bibData = createSierraBibDataWith(
         varFields = List(
           VarField(
@@ -252,13 +315,9 @@ class SierraLocationTest
           )
         )
       )
-      transformer.getPhysicalLocation(itemData, bibData) shouldBe Some(
-        PhysicalLocation(
-          locationType = locationType,
-          label = label,
-          accessConditions = List()
-        )
-      )
+      assertThrows[Exception] {
+        transformer.getPhysicalLocation(itemData, bibData)
+      }
     }
   }
 
