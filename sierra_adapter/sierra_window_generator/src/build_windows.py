@@ -46,8 +46,8 @@ import pytz
 
 
 def generate_windows(start, end, minutes):
-    current = pytz.utc.localize(start)
-    end = pytz.utc.localize(end)
+    current = start.replace(tzinfo=pytz.utc)
+    end = end.replace(tzinfo=pytz.utc)
     while current <= end:
         yield {
             "start": current.isoformat(),
