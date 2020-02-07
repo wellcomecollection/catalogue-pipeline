@@ -149,7 +149,8 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     duration: Option[Int] = None,
     items: List[Item[Minted]] = Nil,
     version: Int = 1,
-    merged: Boolean = false
+    merged: Boolean = false,
+    collection: Option[Collection] = None,
   ): IdentifiedWork =
     IdentifiedWork(
       canonicalId = canonicalId,
@@ -175,7 +176,8 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
         notes = notes,
         duration = duration,
         items = items,
-        merged = merged
+        merged = merged,
+        collection = collection,
       )
     )
 
