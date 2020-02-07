@@ -99,8 +99,9 @@ object License extends Enum[License] {
   case object OPL extends License {
     val id = "opl"
     val label =
-      "Open Publication License"
-    val url = "http://opencontent.org/openpub/"
+      "Open Parliament License"
+    val url =
+      "https://www.parliament.uk/site-information/copyright-parliament/open-parliament-licence/"
   }
 
   case object InCopyright extends License {
