@@ -22,11 +22,10 @@ class CalmStoreTest extends FunSpec with Matchers {
   }
 
   it("replaces a previously stored CALM record if the retrieval date is newer") {
-    val oldRecord = CalmRecord("A", Map("key" -> "old"), retrievedAt)
-    val newRecord = CalmRecord(
-      "A",
-      Map("key" -> "new"),
-      Instant.ofEpochSecond(retrievedAt.getEpochSecond + 2))
+    val oldTime = retrievedAt
+    val newTime = Instant.ofEpochSecond(retrievedAt.getEpochSecond + 2)
+    val oldRecord = CalmRecord("A", Map("key" -> "old"), oldTime)
+    val newRecord = CalmRecord("A", Map("key" -> "new"), newTime)
     val data = dataStore(Version("A", 1) -> oldRecord)
     calmStore(data).putRecord(newRecord) shouldBe Right(Some(Version("A", 2)))
     data.entries shouldBe Map(
@@ -37,11 +36,10 @@ class CalmStoreTest extends FunSpec with Matchers {
 
   it(
     "does not replace a stored CALM record if the retrieval date on the new record is older") {
-    val oldRecord = CalmRecord("A", Map("key" -> "old"), retrievedAt)
-    val newRecord = CalmRecord(
-      "A",
-      Map("key" -> "new"),
-      Instant.ofEpochSecond(retrievedAt.getEpochSecond + 2))
+    val oldTime = retrievedAt
+    val newTime = Instant.ofEpochSecond(retrievedAt.getEpochSecond + 2)
+    val oldRecord = CalmRecord("A", Map("key" -> "old"), oldTime)
+    val newRecord = CalmRecord("A", Map("key" -> "old"), newTime)
     val data = dataStore(Version("A", 4) -> newRecord)
     calmStore(data).putRecord(oldRecord) shouldBe Right(None)
     data.entries shouldBe Map(Version("A", 4) -> newRecord)
