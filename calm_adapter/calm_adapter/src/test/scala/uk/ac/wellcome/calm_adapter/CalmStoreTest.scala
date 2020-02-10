@@ -35,7 +35,8 @@ class CalmStoreTest extends FunSpec with Matchers {
     )
   }
 
-  it("does not replace a stored CALM record if the retrieval date on the new record is older") {
+  it(
+    "does not replace a stored CALM record if the retrieval date on the new record is older") {
     val oldRecord = CalmRecord("A", Map("key" -> "old"), retrievedAt)
     val newRecord = CalmRecord(
       "A",
