@@ -3,7 +3,7 @@ package uk.ac.wellcome.calm_adapter
 import uk.ac.wellcome.storage.{Identified, NoVersionExistsError, Version}
 import uk.ac.wellcome.storage.store.VersionedStore
 
-class CalmStore(store: VersionedStore[String, Int, Map[String, String]]) {
+class CalmStore(store: VersionedStore[String, Int, CalmRecord]) {
 
   type Key = Version[String, Int]
 
@@ -15,7 +15,7 @@ class CalmStore(store: VersionedStore[String, Int, Map[String, String]]) {
         case false => Right(None)
         case true =>
           store
-            .putLatest(record.id)(record.data)
+            .putLatest(record.id)(record)
             .map { case Identified(key, _) => Some(key) }
             .left
             .map(_.e)
@@ -24,10 +24,22 @@ class CalmStore(store: VersionedStore[String, Int, Map[String, String]]) {
   def shouldStoreRecord(record: CalmRecord): Result[Boolean] =
     store
       .getLatest(record.id)
-      .map { case Identified(_, storedData) => record.data != storedData }
+      .map {
+        case Identified(_, storedRecord) =>
+          val sameTimestamp = record.retrievedAt == storedRecord.retrievedAt
+          val differingData = record.data != storedRecord.data
+          if (sameTimestamp && differingData)
+            Left(
+              new Exception(
+                "Cannot resolve latest data as timestamps are equal")
+            )
+          else
+            Right(record.retrievedAt.isAfter(storedRecord.retrievedAt))
+      }
       .left
       .flatMap {
-        case NoVersionExistsError(_) => Right(true)
+        case NoVersionExistsError(_) => Right(Right(true))
         case err                     => Left(err.e)
       }
+      .flatMap(identity)
 }
