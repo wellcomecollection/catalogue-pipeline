@@ -9,15 +9,21 @@ sealed trait ImageState
 sealed trait Merged extends ImageState
 sealed trait Unmerged extends ImageState
 
-case class UnmergedImage(sourceIdentifier: SourceIdentifier,
-                         location: DigitalLocation)
-    extends BaseImage[Unminted]
-    with Unmerged {
-  val id: Identifiable = Identifiable(sourceIdentifier)
-}
+case class UnmergedImage[+Id](id: Id, location: DigitalLocation)
+    extends BaseImage[Id]
+    with Unmerged
 
 case class MergedImage[+Id](id: Id, location: DigitalLocation, data: ImageData)
     extends BaseImage[Id]
     with Merged
 
 case class ImageData(title: Option[String], parentWorks: List[String])
+
+object UnmergedImage {
+  def apply(sourceIdentifier: SourceIdentifier,
+            location: DigitalLocation): UnmergedImage[Unminted] =
+    UnmergedImage(
+      id = Identifiable(sourceIdentifier),
+      location
+    )
+}

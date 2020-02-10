@@ -5,7 +5,8 @@ import uk.ac.wellcome.models.work.internal.{
   IdentifierType,
   LocationType,
   SourceIdentifier,
-  UnmergedImage
+  UnmergedImage,
+  Unminted
 }
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 
@@ -25,7 +26,7 @@ trait MiroImage {
     imageUriTemplate.format(iiifImageApiBaseUri, miroId)
   }
 
-  def getImage(miroRecord: MiroRecord): UnmergedImage =
+  def getImage(miroRecord: MiroRecord): UnmergedImage[Unminted] =
     UnmergedImage(
       sourceIdentifier = SourceIdentifier(
         identifierType = IdentifierType("miro-image-number"),
