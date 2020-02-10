@@ -39,11 +39,14 @@ class CalmRetrieverTest
           records shouldBe List(
             CalmRecord(
               "1",
-              Map("RecordID" -> "1", "keyA" -> "valueA", "keyB" -> "valueB"),
+              Map(
+                "RecordID" -> List("1"),
+                "keyA" -> List("valueA"),
+                "keyB" -> List("valueB")),
               retrievedAt),
             CalmRecord(
               "2",
-              Map("RecordID" -> "2", "keyC" -> "valueC"),
+              Map("RecordID" -> List("2"), "keyC" -> List("valueC")),
               retrievedAt),
           )
         }

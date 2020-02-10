@@ -88,16 +88,96 @@ class CalmXmlResponseTest extends FunSpec with Matchers {
         CalmRecord(
           "123",
           Map(
-            "RecordType" -> "Component",
-            "IDENTITY" -> "",
-            "RefNo" -> "WT/B/2/5/2/3",
-            "Date" -> "September 1996-April 2002  ",
-            "Modified" -> "30/01/2020",
-            "RecordID" -> "123"
+            "RecordType" -> List("Component"),
+            "IDENTITY" -> List(""),
+            "RefNo" -> List("WT/B/2/5/2/3"),
+            "Date" -> List("September 1996-April 2002  "),
+            "Modified" -> List("30/01/2020"),
+            "RecordID" -> List("123")
           ),
           retrievedAt
         )
       )
+    }
+
+    it("parses a Calm record with repeated fields") {
+      val xml =
+        <soap:Envelope
+            xmlns:soap="http://www.w3.org/2003/05/soap-envelope"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+          <soap:Body>
+            <SummaryHeaderResponse xmlns="http://ds.co.uk/cs/webservices/">
+              <SummaryHeaderResult>
+                <SummaryList>
+                  <Summary>
+                    <RecordType>Component</RecordType>
+                    <RecordType>Something-Else</RecordType>
+                    <RefNo>WT/B/2/5/2/3</RefNo>
+                    <RecordID>123</RecordID>
+                  </Summary>
+                </SummaryList>
+              </SummaryHeaderResult>
+            </SummaryHeaderResponse>
+          </soap:Body>
+        </soap:Envelope>
+      CalmSummaryResponse(xml, retrievedAt).parse shouldBe Right(
+        CalmRecord(
+          "123",
+          Map(
+            "RecordType" -> List("Component", "Something-Else"),
+            "RefNo" -> List("WT/B/2/5/2/3"),
+            "RecordID" -> List("123")
+          ),
+          retrievedAt
+        )
+      )
+    }
+
+    it("errors when no RecordID in document") {
+      val xml =
+        <soap:Envelope
+            xmlns:soap="http://www.w3.org/2003/05/soap-envelope"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+          <soap:Body>
+            <SummaryHeaderResponse xmlns="http://ds.co.uk/cs/webservices/">
+              <SummaryHeaderResult>
+                <SummaryList>
+                  <Summary>
+                    <RecordType>Component</RecordType>
+                    <RefNo>WT/B/2/5/2/3</RefNo>
+                  </Summary>
+                </SummaryList>
+              </SummaryHeaderResult>
+            </SummaryHeaderResponse>
+          </soap:Body>
+        </soap:Envelope>
+      CalmSummaryResponse(xml, retrievedAt).parse shouldBe a[Left[_, _]]
+    }
+
+    it("errors when multiple RecordIDs in document") {
+      val xml =
+        <soap:Envelope
+            xmlns:soap="http://www.w3.org/2003/05/soap-envelope"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+          <soap:Body>
+            <SummaryHeaderResponse xmlns="http://ds.co.uk/cs/webservices/">
+              <SummaryHeaderResult>
+                <SummaryList>
+                  <Summary>
+                    <RecordType>Component</RecordType>
+                    <RefNo>WT/B/2/5/2/3</RefNo>
+                    <RecordID>123</RecordID>
+                    <RecordID>456</RecordID>
+                  </Summary>
+                </SummaryList>
+              </SummaryHeaderResult>
+            </SummaryHeaderResponse>
+          </soap:Body>
+        </soap:Envelope>
+      CalmSummaryResponse(xml, retrievedAt).parse shouldBe a[Left[_, _]]
     }
 
     it("errors when invalid summary data") {
