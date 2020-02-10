@@ -21,7 +21,7 @@ class CalmStoreTest extends FunSpec with Matchers {
     data.entries shouldBe Map(Version("A", 0) -> record)
   }
 
-  it("stores already seen CALM records when newer data") {
+  it("replaces a previously stored CALM record if the retrieval date is newer") {
     val oldRecord = CalmRecord("A", Map("key" -> "old"), retrievedAt)
     val newRecord = CalmRecord(
       "A",
