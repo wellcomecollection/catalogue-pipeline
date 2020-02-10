@@ -175,7 +175,7 @@ object MultipleWorksParams extends QueryParamsUtils {
   implicit val _queryTypeDecoder: Decoder[SearchQueryType] =
     decodeOneWithDefaultOf(
       SearchQueryType.default,
-      "FixedFields" -> SearchQueryType.FixedFields
+      "AdditiveScore" -> SearchQueryType.AdditiveScore
     )
 }
 

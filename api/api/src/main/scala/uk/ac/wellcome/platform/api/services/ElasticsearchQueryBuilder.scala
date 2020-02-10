@@ -15,15 +15,15 @@ import com.sksamuel.elastic4s.requests.searches.queries.{
 }
 import uk.ac.wellcome.platform.api.models.SearchQuery
 import uk.ac.wellcome.platform.api.models.SearchQueryType.{
-  FixedFields,
+  AdditiveScore,
   IdSearch
 }
 
 case class ElasticsearchQueryBuilder(searchQuery: SearchQuery) {
   lazy val query: BoolQuery = searchQuery.queryType match {
     case IdSearch => IdSearchQuery(searchQuery.query).elasticQuery
-    case FixedFields =>
-      FixedFieldsQuery(searchQuery.query).elasticQuery
+    case AdditiveScore =>
+      AdditiveScoringQuery(searchQuery.query).elasticQuery
   }
 }
 
@@ -91,7 +91,7 @@ final case class IdQuery(q: String) extends ElasticsearchQuery {
 final case class TitleQuery(q: String) extends ElasticsearchQuery {
   lazy val elasticQuery =
     MatchQuery(
-      field = "title.english",
+      field = "data.title.english",
       value = q,
       operator = Some(Operator.And))
 }
@@ -99,36 +99,12 @@ final case class TitleQuery(q: String) extends ElasticsearchQuery {
 final case class GenreQuery(q: String) extends ElasticsearchQuery {
   lazy val elasticQuery =
     MatchQuery(
-      field = "genres.concepts.label",
-      value = q,
-      operator = Some(Operator.And))
-}
-
-final case class SubjectQuery(q: String) extends ElasticsearchQuery {
-  lazy val elasticQuery =
-    MatchQuery(
-      field = "subjects.concepts.label",
-      value = q,
-      operator = Some(Operator.And))
-}
-
-final case class FixedTitleQuery(q: String) extends ElasticsearchQuery {
-  lazy val elasticQuery =
-    MatchQuery(
-      field = "data.title.english",
-      value = q,
-      operator = Some(Operator.And))
-}
-
-final case class FixedGenreQuery(q: String) extends ElasticsearchQuery {
-  lazy val elasticQuery =
-    MatchQuery(
       field = "data.genres.concepts.label",
       value = q,
       operator = Some(Operator.And))
 }
 
-final case class FixedSubjectQuery(q: String) extends ElasticsearchQuery {
+final case class SubjectQuery(q: String) extends ElasticsearchQuery {
   lazy val elasticQuery =
     MatchQuery(
       field = "data.subjects.concepts.label",
@@ -184,10 +160,10 @@ final case class IdSearchQuery(q: String) extends ElasticsearchQuery {
     )
 }
 
-final case class FixedFieldsQuery(q: String) extends ElasticsearchQuery {
+final case class AdditiveScoringQuery(q: String) extends ElasticsearchQuery {
   import QueryDefaults._
 
-  val fields = englishBoostedFields map {
+  val fields = defaultBoostedFields map {
     case (field, boost) =>
       FieldWithOptionalBoost(field = field, boost = boost)
   }
@@ -199,20 +175,32 @@ final case class FixedFieldsQuery(q: String) extends ElasticsearchQuery {
     `type` = Some(MultiMatchQueryBuilderType.CROSS_FIELDS)
   )
 
-  lazy val elasticQuery = bool(
-    shouldQueries = Seq(
-      ConstantScore(
-        query = FixedGenreQuery(q).elasticQuery,
-        boost = Some(2000)),
-      ConstantScore(
-        query = FixedSubjectQuery(q).elasticQuery,
-        boost = Some(2000)),
-      ConstantScore(
-        query = ContributorQuery(q).elasticQuery,
-        boost = Some(2000)),
-      ConstantScore(query = FixedTitleQuery(q).elasticQuery, boost = Some(1000))
-    ),
-    mustQueries = Seq(baseQuery),
-    notQueries = Seq()
-  )
+  // TODO: I still haven't quite figured out how to
+  //  use the nice syntax from elastic4s
+  def mustQuery(query: ElasticsearchQuery, boost: Double) =
+    bool(
+      mustQueries = Seq(query.elasticQuery),
+      shouldQueries = Seq(),
+      notQueries = Seq()
+    ).boost(boost)
+
+  lazy val elasticQuery =
+    bool(
+      shouldQueries = Seq(
+        mustQuery(GenreQuery(q), 2000),
+        mustQuery(SubjectQuery(q), 2000),
+        mustQuery(ContributorQuery(q), 2000),
+        mustQuery(TitleQuery(q), 1000),
+      ),
+      notQueries = Seq(),
+      mustQueries = Seq(
+        bool(
+          mustQueries = Seq(),
+          notQueries = Seq(),
+          shouldQueries = Seq(
+            ConstantScore(IdQuery(q).elasticQuery, boost = Some(5000)),
+            baseQuery
+          )
+        ))
+    )
 }
