@@ -76,16 +76,14 @@ class CalmTransformerWorkerService(
       sent <- sendSuccessfulTransformation(work)
     } yield sent
 
-    tried.fold(
-      {
-        case MessageReadError(err, message) => error("MessageReadError")
-        case CalmStoreReadError(err, entry) => error("CalmStoreReadError")
-        case CalmTransformationError(err, data) =>
-          error("CalmTransformationError")
-        case MessageSendError(err) => error("MessageSendError")
-      },
-      _ => info("Success")
-    )
+    tried fold ({
+      case MessageReadError(err, message) => error("MessageReadError")
+      case CalmStoreReadError(err, entry) => error("CalmStoreReadError")
+      case CalmTransformationError(err, data) =>
+        error("CalmTransformationError")
+      case MessageSendError(err) => error("MessageSendError")
+    },
+    _ => info("Success"))
 
     tried match {
       case Left(transformerError) => Future.failed(transformerError.err)
