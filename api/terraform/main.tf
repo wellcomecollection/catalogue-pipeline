@@ -6,7 +6,6 @@ module "catalogue_api_prod" {
   nginx_container_image = "${module.prod_images.services["nginx_api-gw"]}"
   listener_port         = "${local.prod_listener_port}"
   task_desired_count    = "${local.prod_task_number}"
-  es_config             = "${local.prod_es_config}"
 
   namespace    = "${local.namespace}"
   vpc_id       = "${local.vpc_id}"
@@ -21,6 +20,10 @@ module "catalogue_api_prod" {
 
   lb_arn           = "${module.nlb.arn}"
   lb_ingress_sg_id = "${aws_security_group.service_lb_ingress_security_group.id}"
+
+  logstash_host = "${local.logstash_host}"
+
+  interservice_sg_id = "${aws_security_group.interservice.id}"
 }
 
 module "catalogue_api_staging" {
@@ -31,7 +34,6 @@ module "catalogue_api_staging" {
   nginx_container_image = "${module.staging_images.services["nginx_api-gw"]}"
   listener_port         = "${local.staging_listener_port}"
   task_desired_count    = "${local.staging_task_number}"
-  es_config             = "${local.staging_es_config}"
 
   namespace    = "${local.namespace}"
   vpc_id       = "${local.vpc_id}"
@@ -46,6 +48,10 @@ module "catalogue_api_staging" {
 
   lb_arn           = "${module.nlb.arn}"
   lb_ingress_sg_id = "${aws_security_group.service_lb_ingress_security_group.id}"
+
+  logstash_host = "${local.logstash_host}"
+
+  interservice_sg_id = "${aws_security_group.interservice.id}"
 }
 
 module "data_api" {
@@ -53,8 +59,6 @@ module "data_api" {
 
   aws_region   = "${var.aws_region}"
   infra_bucket = "${local.infra_bucket}"
-
-  es_config_snapshot = "${local.prod_es_config}"
 
   snapshot_generator_release_uri = "${module.latest_images.services["snapshot_generator"]}"
 

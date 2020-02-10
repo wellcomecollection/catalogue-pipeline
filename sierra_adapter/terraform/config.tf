@@ -8,5 +8,5 @@ locals {
   sierra_items_fields = "updatedDate,createdDate,deletedDate,deleted,bibIds,location,status,barcode,callNumber,itemType,fixedFields,varFields"
   sierra_bibs_fields  = "updatedDate,createdDate,deletedDate,deleted,suppressed,available,lang,title,author,materialType,bibLevel,publishYear,catalogDate,country,orders,normTitle,normAuthor,locations,fixedFields,varFields"
 
-  critical_slack_webhook = "${data.aws_ssm_parameter.critical_slack_webhook.value}"
+  critical_slack_webhook = data.aws_ssm_parameter.critical_slack_webhook.value
 }

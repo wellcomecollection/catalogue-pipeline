@@ -198,8 +198,8 @@ class MetsDataTest
     val metsData = MetsData(
       recordIdentifier = randomAlphanumeric(10),
       accessConditionDz = Some("CC-BY-NC"),
-      fileObjects = List(
-        FileObject("l", "location.jp2", Some("image/jp2"))
+      fileReferences = List(
+        FileReference("l", "location.jp2", Some("image/jp2"))
       )
     )
     val result = metsData.toWork(1)
@@ -219,8 +219,8 @@ class MetsDataTest
     val metsData = MetsData(
       recordIdentifier = bnumber,
       accessConditionDz = Some("CC-BY-NC"),
-      fileObjects = List(
-        FileObject("l", "location.pdf")
+      fileReferences = List(
+        FileReference("l", "location.pdf")
       )
     )
     val result = metsData.toWork(1)
@@ -238,8 +238,21 @@ class MetsDataTest
     val metsData = MetsData(
       recordIdentifier = randomAlphanumeric(10),
       accessConditionDz = Some("CC-BY-NC"),
-      fileObjects = List(
-        FileObject("v", "video.mpg")
+      fileReferences = List(
+        FileReference("v", "video.mpg", Some("video/mpeg"))
+      )
+    )
+    val result = metsData.toWork(1)
+    result shouldBe a[Right[_, _]]
+    result.right.get.data.thumbnail shouldBe None
+  }
+
+  it("does not add a thumbnail if the file is an audio") {
+    val metsData = MetsData(
+      recordIdentifier = randomAlphanumeric(10),
+      accessConditionDz = Some("CC-BY-NC"),
+      fileReferences = List(
+        FileReference("v", "video.mp3", Some("audio/x-mpeg-3"))
       )
     )
     val result = metsData.toWork(1)
@@ -257,7 +270,7 @@ class MetsDataTest
       case DigitalLocation(_, _, _, _, accessConditions, _) =>
         accessConditions shouldBe List(
           AccessCondition(
-            status = AccessStatus.OpenWithAdvisory
+            status = Some(AccessStatus.OpenWithAdvisory)
           )
         )
 
@@ -268,12 +281,12 @@ class MetsDataTest
     val result = MetsData(
       recordIdentifier = "ID",
       accessConditionDz = Some("CC-BY-NC"),
-      fileObjects = List(
-        FileObject("A", "location1.jp2", Some("image/jp2")),
-        FileObject("B", "location2.jp2", Some("image/jp2")),
-        FileObject("C", "location3.jp2", Some("image/jp2")),
-        FileObject("D", "location4.jp2", Some("application/pdf")),
-        FileObject("E", "location4.jp2", Some("video/mpeg"))
+      fileReferences = List(
+        FileReference("A", "location1.jp2", Some("image/jp2")),
+        FileReference("B", "location2.jp2", Some("image/jp2")),
+        FileReference("C", "location3.jp2", Some("image/jp2")),
+        FileReference("D", "location4.jp2", Some("application/pdf")),
+        FileReference("E", "location4.jp2", Some("video/mpeg"))
       )
     ).toWork(1)
     result shouldBe a[Right[_, _]]
@@ -297,9 +310,22 @@ class MetsDataTest
       case DigitalLocation(_, _, _, _, accessConditions, _) =>
         accessConditions shouldBe List(
           AccessCondition(
-            status = AccessStatus.Restricted,
+            status = Some(AccessStatus.Restricted),
             terms = Some("Please ask nicely")
           ))
+    }
+  }
+
+  it("does not add access condition if all fields are empty") {
+    val result = MetsData(
+      recordIdentifier = "ID",
+      accessConditionStatus = None,
+      accessConditionUsage = None
+    ).toWork(1)
+    result shouldBe a[Right[_, _]]
+    inside(result.right.get.data.items.head.locations.head) {
+      case DigitalLocation(_, _, _, _, accessConditions, _) =>
+        accessConditions shouldBe List()
     }
   }
 
@@ -314,7 +340,7 @@ class MetsDataTest
         accessConditions shouldBe
           List(
             AccessCondition(
-              status = AccessStatus.Restricted
+              status = Some(AccessStatus.Restricted)
             )
           )
     }

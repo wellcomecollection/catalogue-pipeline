@@ -12,7 +12,7 @@ import com.sksamuel.elastic4s.Index
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.platform.api.Router
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
-import uk.ac.wellcome.elasticsearch.DisplayElasticConfig
+import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.platform.api.models.ApiConfig
 
 trait ApiFixture
@@ -35,7 +35,7 @@ trait ApiFixture
     withLocalWorksIndex { indexV2 =>
       val router = new Router(
         elasticClient,
-        DisplayElasticConfig(indexV2 = indexV2),
+        ElasticConfig(index = indexV2),
         ApiConfig(
           host = apiHost,
           scheme = apiScheme,

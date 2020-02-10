@@ -1,7 +1,3 @@
-variable "es_config" {
-  type = "map"
-}
-
 variable "subnets" {
   type = "list"
 }
@@ -24,8 +20,11 @@ variable "security_group_ids" {
 }
 
 variable "service_egress_security_group_id" {}
+variable "interservice_security_group_id" {}
 
 variable "lb_arn" {}
 variable "listener_port" {}
 
 variable "task_desired_count" {}
+
+variable "logstash_host" {}

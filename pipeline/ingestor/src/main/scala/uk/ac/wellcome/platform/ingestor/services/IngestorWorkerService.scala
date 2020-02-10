@@ -4,7 +4,10 @@ import akka.Done
 import com.amazonaws.services.sqs.model.Message
 import com.sksamuel.elastic4s.ElasticClient
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.elasticsearch.{ElasticsearchIndexCreator, WorksIndex}
+import uk.ac.wellcome.elasticsearch.{
+  ElasticsearchIndexCreator,
+  WorksIndexConfig
+}
 import uk.ac.wellcome.bigmessaging.message.BigMessageStream
 import uk.ac.wellcome.models.work.internal.IdentifiedBaseWork
 import uk.ac.wellcome.platform.ingestor.config.models.IngestorConfig
@@ -30,7 +33,7 @@ class IngestorWorkerService(
 
   private val indexCreated = indexCreator.create(
     index = ingestorConfig.index,
-    fields = WorksIndex.rootIndexFields
+    config = WorksIndexConfig
   )
 
   private def processMessages(bundles: List[Bundle]): FutureBundles =

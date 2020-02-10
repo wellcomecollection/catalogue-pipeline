@@ -29,7 +29,7 @@ class MetsXmlTransformer(store: Readable[ObjectLocation, String]) {
         accessConditionDz = accessConditionDz,
         accessConditionStatus = accessConditionStatus,
         accessConditionUsage = accessConditionUsage,
-        fileObjects = root.physicalFileObjects(id)
+        fileReferences = root.physicalFileReferences(id)
       )
 
   private def transformWithManifestations(
@@ -47,7 +47,7 @@ class MetsXmlTransformer(store: Readable[ObjectLocation, String]) {
         accessConditionDz = accessConditionDz,
         accessConditionStatus = accessConditionStatus,
         accessConditionUsage = accessConditionUsage,
-        fileObjects = firstManifestation.physicalFileObjects(id)
+        fileReferences = firstManifestation.physicalFileReferences(id)
       )
 
   private def getFirstManifestation(

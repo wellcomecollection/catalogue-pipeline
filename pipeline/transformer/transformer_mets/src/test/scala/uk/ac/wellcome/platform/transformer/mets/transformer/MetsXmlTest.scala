@@ -17,7 +17,11 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
   }
 
   it("does not parse if there is more than one recordIdentifier") {
-    MetsXml(xmlMultipleIds).recordIdentifier shouldBe a[Left[_, _]]
+    MetsXml(xmlRepeatedIdNodes).recordIdentifier shouldBe Right("b30246039")
+  }
+
+  it("does not parse if there is more than one distinct recordIdentifier") {
+    MetsXml(xmlMultipleDistictIds).recordIdentifier shouldBe a[Left[_, _]]
   }
 
   it("parses accessConditionDz from XML") {
@@ -50,8 +54,13 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
     MetsXml("hagdf") shouldBe a[Left[_, _]]
   }
 
+  it("parse a METS with a repeated license node") {
+    MetsXml(xmlRepeatedLicenseNode).accessConditionDz shouldBe Right(
+      Some("CC-BY"))
+  }
+
   it("does not parse a METS with multiple licenses") {
-    MetsXml(xmlMultipleLicense).accessConditionDz shouldBe a[Left[_, _]]
+    MetsXml(xmlMultipleDistinctLicense).accessConditionDz shouldBe a[Left[_, _]]
   }
 
   it("parses all file IDs from XML") {
@@ -67,9 +76,9 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
 
   it("parses thumbnail from XML") {
     MetsXml(xml).right.get
-      .physicalFileObjects("b30246039")
+      .physicalFileReferences("b30246039")
       .head
-      .href shouldBe "b30246039_0001.jp2"
+      .location shouldBe "b30246039_0001.jp2"
   }
 
   it("parses first thumbnail when no ORDER attribute") {
@@ -78,16 +87,16 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
       fileSec = fileSec(filePrefix = "b30246039"),
       structMap = structMap)
     MetsXml(str).getRight
-      .physicalFileObjects("b30246039")
+      .physicalFileReferences("b30246039")
       .head
-      .href shouldBe "b30246039_0001.jp2"
+      .location shouldBe "b30246039_0001.jp2"
   }
 
   it("parses thumbnail using ORDER attrib when non-sequential order") {
     MetsXml(xmlNonSequentialOrder("b30246039")).getRight
-      .physicalFileObjects("b30246039")
+      .physicalFileReferences("b30246039")
       .head
-      .href shouldBe "b30246039_0001.jp2"
+      .location shouldBe "b30246039_0001.jp2"
   }
 
   it("parses thumbnail if filename doesn't start with bnumber") {
@@ -98,9 +107,9 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
         recordIdentifier = bnumber,
         fileSec = fileSec(filePrefix),
         structMap = structMap)).getRight
-      .physicalFileObjects(bnumber)
+      .physicalFileReferences(bnumber)
       .head
-      .href shouldBe s"${bnumber}_${filePrefix}_0001.jp2"
+      .location shouldBe s"${bnumber}_${filePrefix}_0001.jp2"
   }
 
   it("parses thumbnail if filename starts with uppercase bnumber") {
@@ -111,14 +120,14 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
         recordIdentifier = bnumber,
         fileSec = fileSec(filePrefix),
         structMap = structMap)).getRight
-      .physicalFileObjects(bnumber)
+      .physicalFileReferences(bnumber)
       .head
-      .href shouldBe s"${filePrefix}_0001.jp2"
+      .location shouldBe s"${filePrefix}_0001.jp2"
   }
 
   it("cannot parse thumbnail when invalid file ID") {
     MetsXml(xmlInvalidFileId("b30246039")).getRight
-      .physicalFileObjects("b30246039")
+      .physicalFileReferences("b30246039")
       .headOption shouldBe None
   }
 
@@ -146,7 +155,23 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
        <mods:recordIdentifier source="gbv-ppn">b30246039</mods:recordIdentifier>
      </mets:mets>
 
-  def xmlMultipleIds =
+  def xmlRepeatedIdNodes =
+    <mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3">
+      <mets:dmdSec ID="DMDLOG_0000">
+        <mets:mdWrap MDTYPE="MODS">
+          <mets:xmlData>
+            <mods:mods>
+              <mods:recordInfo>
+                <mods:recordIdentifier source="gbv-ppn">b30246039</mods:recordIdentifier>
+                <mods:recordIdentifier source="gbv-ppn">b30246039</mods:recordIdentifier>
+              </mods:recordInfo>
+            </mods:mods>
+          </mets:xmlData>
+        </mets:mdWrap>
+      </mets:dmdSec>
+    </mets:mets>
+
+  def xmlMultipleDistictIds =
     <mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3">
       <mets:dmdSec ID="DMDLOG_0000">
         <mets:mdWrap MDTYPE="MODS">
@@ -177,7 +202,7 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
       </mets:dmdSec>
     </mets:mets>
 
-  def xmlMultipleLicense =
+  def xmlMultipleDistinctLicense =
     <mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3">
       <mets:dmdSec ID="DMDLOG_0000">
         <mets:mdWrap MDTYPE="MODS">
@@ -187,6 +212,23 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
                 <mods:recordIdentifier source="gbv-ppn">b30246039</mods:recordIdentifier>
               </mods:recordInfo>
               <mods:accessCondition type="dz">CC-BY-NC</mods:accessCondition>
+              <mods:accessCondition type="dz">CC-BY</mods:accessCondition>
+            </mods:mods>
+          </mets:xmlData>
+        </mets:mdWrap>
+      </mets:dmdSec>
+    </mets:mets>
+
+  def xmlRepeatedLicenseNode =
+    <mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3">
+      <mets:dmdSec ID="DMDLOG_0000">
+        <mets:mdWrap MDTYPE="MODS">
+          <mets:xmlData>
+            <mods:mods>
+              <mods:recordInfo>
+                <mods:recordIdentifier source="gbv-ppn">b30246039</mods:recordIdentifier>
+              </mods:recordInfo>
+              <mods:accessCondition type="dz">CC-BY</mods:accessCondition>
               <mods:accessCondition type="dz">CC-BY</mods:accessCondition>
             </mods:mods>
           </mets:xmlData>

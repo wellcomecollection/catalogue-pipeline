@@ -11,7 +11,7 @@ case class MetsData(
   accessConditionDz: Option[String] = None,
   accessConditionStatus: Option[String] = None,
   accessConditionUsage: Option[String] = None,
-  fileObjects: List[FileObject] = Nil
+  fileReferences: List[FileReference] = Nil
 ) {
 
   def toWork(version: Int): Either[Throwable, UnidentifiedInvisibleWork] =
@@ -52,9 +52,14 @@ case class MetsData(
       url = s"https://wellcomelibrary.org/iiif/$recordIdentifier/manifest",
       locationType = LocationType("iiif-presentation"),
       license = license,
-      accessConditions = accessStatus.map { status =>
-        AccessCondition(status = status, terms = accessConditionUsage)
-      }.toList
+      accessConditions = (accessStatus, accessConditionUsage) match {
+        case (None, None) => Nil
+        case _ =>
+          List(
+            AccessCondition(
+              status = accessStatus,
+              terms = accessConditionUsage))
+      }
     )
 
   private def parseLicense: Either[Exception, Option[License]] =
@@ -110,8 +115,8 @@ case class MetsData(
 
   private def thumbnail(maybeLicense: Option[License], bnumber: String) =
     for {
-      fileObject <- fileObjects.headOption
-      url <- buildImageUrl(bnumber, fileObject)
+      fileReference <- fileReferences.headOption
+      url <- buildImageUrl(bnumber, fileReference)
     } yield
       DigitalLocation(
         url = url,
@@ -119,18 +124,18 @@ case class MetsData(
         license = maybeLicense
       )
 
-  private val images = fileObjects
+  private val images = fileReferences
     .filter {
       _.mimeType match {
         case Some(m) => m == "application/pdf" || m.startsWith("image")
         case None    => true
       }
     }
-    .map { fileObject =>
+    .map { fileReference =>
       UnmergedImage(
-        getImageSourceId(recordIdentifier, fileObject.id),
+        getImageSourceId(recordIdentifier, fileReference.id),
         DigitalLocation(
-          url = buildImageUrl(recordIdentifier, fileObject).getOrElse(""),
+          url = buildImageUrl(recordIdentifier, fileReference).getOrElse(""),
           locationType = LocationType("iiif-image")
         )
       )
@@ -144,15 +149,15 @@ case class MetsData(
       value = s"$bnumber/$fileId"
     )
 
-  private def buildImageUrl(bnumber: String, fileObject: FileObject) = {
-    fileObject.mimeType match {
+  private def buildImageUrl(bnumber: String, fileReference: FileReference) = {
+    fileReference.mimeType match {
       case Some(m) if m startsWith ("video/") => None
       case Some(m) if m equals ("application/pdf") =>
         Some(
-          s"https://wellcomelibrary.org/pdfthumbs/${bnumber}/0/${fileObject.href}.jpg")
+          s"https://wellcomelibrary.org/pdfthumbs/${bnumber}/0/${fileReference.location}.jpg")
       case _ =>
         Some(
-          s"https://dlcs.io/thumbs/wellcome/5/${fileObject.href}/full/!$thumbnailDim,$thumbnailDim/0/default.jpg")
+          s"https://dlcs.io/thumbs/wellcome/5/${fileReference.location}/full/!$thumbnailDim,$thumbnailDim/0/default.jpg")
     }
   }
 }

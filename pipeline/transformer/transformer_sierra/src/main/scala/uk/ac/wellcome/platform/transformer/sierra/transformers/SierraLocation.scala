@@ -24,8 +24,7 @@ trait SierraLocation extends SierraQueryOps {
         Some(
           PhysicalLocation(
             locationType = LocationType(code),
-            accessConditions =
-              Option(getAccessConditions(bibData)).filter(_.nonEmpty),
+            accessConditions = getAccessConditions(bibData),
             label = name
           )
         )
@@ -47,36 +46,51 @@ trait SierraLocation extends SierraQueryOps {
 
   private def getAccessConditions(
     bibData: SierraBibData): List[AccessCondition] =
-    bibData.varfieldsWithTag("506").map { varfield =>
-      AccessCondition(
-        status = getAccessStatus(varfield),
-        terms = varfield.subfieldsWithTag("a").contentString,
-        to = varfield.subfieldsWithTag("g").contents.headOption
-      )
-    }
+    bibData
+      .varfieldsWithTag("506")
+      .map { varfield =>
+        AccessCondition(
+          status = getAccessStatus(varfield),
+          terms = varfield.subfieldsWithTag("a").contentString,
+          to = varfield.subfieldsWithTag("g").contents.headOption
+        )
+      }
+      .filter {
+        case AccessCondition(None, None, None) => false
+        case _                                 => true
+      }
 
-  private def getAccessStatus(varfield: VarField): AccessStatus = {
-    val accessStatus = """([A-Za-z\s]+)\p{Punct}?""".r
+  private def getAccessStatus(varfield: VarField): Option[AccessStatus] = {
+    val accessStatus = """([A-Za-z\s\(\)]+)\p{Punct}?""".r
     if (varfield.indicator1 == Some("0"))
-      AccessStatus.Open
+      Some(AccessStatus.Open)
     else
       varfield
         .subfieldsWithTag("f")
         .contents
         .headOption
         .map {
-          case accessStatus(status) if status == "Open" => AccessStatus.Open
+          case accessStatus(status) if status == "Open" =>
+            AccessStatus.Open
           case accessStatus(status) if status == "Open with advisory" =>
             AccessStatus.OpenWithAdvisory
           case accessStatus(status) if status == "Restricted" =>
             AccessStatus.Restricted
-          case accessStatus(status) if status == "Closed" => AccessStatus.Closed
-          case status =>
-            throw new Exception(s"Unrecognised AccessStatus: $status")
-        }
-        .getOrElse {
-          throw new Exception(
-            "Could not parse AccessCondition: 506$f not found")
+          case accessStatus(status)
+              if status == "Restricted access (Data Protection Act)" =>
+            AccessStatus.Restricted
+          case accessStatus(status) if status == "Cannot Be Produced" =>
+            AccessStatus.Restricted
+          case accessStatus(status) if status == "Certain restrictions apply" =>
+            AccessStatus.Restricted
+          case accessStatus(status) if status == "Closed" =>
+            AccessStatus.Closed
+          case accessStatus(status) if status == "Missing" =>
+            AccessStatus.Unavailable
+          case accessStatus(status) if status == "Temporarily Unavailable" =>
+            AccessStatus.Unavailable
+          case accessStatus(status) if status == "Permission Required" =>
+            AccessStatus.PermissionRequired
         }
   }
 }

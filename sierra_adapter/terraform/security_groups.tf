@@ -1,16 +1,24 @@
-module "egress_security_group" {
-  source = "github.com/wellcometrust/terraform//network/prebuilt/vpc/egress_security_group?ref=bc8f95f"
+resource "aws_security_group" "egress_security_group" {
+  name        = "${var.namespace}_egress"
+  description = "Allows all egress traffic from the group"
+  vpc_id      = local.vpc_id
 
-  name = "${var.namespace}"
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
-  vpc_id     = "${local.vpc_id}"
-  subnet_ids = "${local.private_subnets}"
+  tags = {
+    Name = var.namespace
+  }
 }
 
 resource "aws_security_group" "interservice_security_group" {
   name        = "${var.namespace}_interservice_security_group"
   description = "Allow traffic between services"
-  vpc_id      = "${local.vpc_id}"
+  vpc_id      = local.vpc_id
 
   ingress {
     from_port = 0
@@ -19,7 +27,15 @@ resource "aws_security_group" "interservice_security_group" {
     self      = true
   }
 
-  tags {
+  tags = {
     Name = "${var.namespace}-interservice"
   }
+}
+
+module "vpc_endpoints" {
+  source = "./modules/interface_endpoints"
+
+  vpc_id            = local.vpc_id
+  security_group_id = aws_security_group.egress_security_group.id
+  subnet_ids        = local.private_subnets
 }

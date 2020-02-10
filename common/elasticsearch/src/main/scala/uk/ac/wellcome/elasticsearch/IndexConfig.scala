@@ -1,9 +1,33 @@
 package uk.ac.wellcome.elasticsearch
 
 import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.requests.mappings.{FieldDefinition, ObjectField}
+import com.sksamuel.elastic4s.requests.analysis.{
+  Analysis,
+  CustomAnalyzer,
+  PathHierarchyTokenizer
+}
+import com.sksamuel.elastic4s.requests.mappings.{
+  FieldDefinition,
+  MappingDefinition,
+  ObjectField
+}
 
-object WorksIndex {
+trait IndexConfig {
+  val mapping: MappingDefinition
+  val analysis: Analysis
+}
+
+case object WorksIndexConfig extends IndexConfig {
+  // Analysis
+  val pathTokenizer = PathHierarchyTokenizer("path_hierarchy_tokenizer")
+  val pathAnalyzer =
+    CustomAnalyzer("path_hierarchy_analyzer", pathTokenizer.name, Nil, Nil)
+  val analysis = Analysis(
+    analyzers = List(
+      pathAnalyzer
+    ),
+    tokenizers = List(pathTokenizer))
+
   // `textWithKeyword` and `keywordWithText` are slightly different in the semantics and their use case.
   // If the intended field type is keyword, but you would like to search it textually, use `keywordWithText` and
   // visa versa.
@@ -204,10 +228,18 @@ object WorksIndex {
       textField("edition"),
       notes,
       intField("duration"),
-      booleanField("merged")
+      booleanField("merged"),
+      objectField("collection").fields(
+        label,
+        textField("path")
+          .copyTo("data.collection.depth")
+          .analyzer(pathAnalyzer.name)
+          .fields(keywordField("keyword")),
+        tokenCountField("depth").analyzer("standard")
+      )
     )
 
-  val rootIndexFields: Seq[FieldDefinition with Product with Serializable] =
+  val fields: Seq[FieldDefinition with Product with Serializable] =
     Seq(
       canonicalId,
       keywordField("ontologyType"),
@@ -218,4 +250,7 @@ object WorksIndex {
       keywordField("type"),
       data
     )
+
+  val mapping = properties(fields)
+
 }

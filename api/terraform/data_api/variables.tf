@@ -4,16 +4,6 @@ variable "aws_region" {
 
 variable "infra_bucket" {}
 
-variable "es_config_snapshot" {
-  description = "Elasticcloud config for the snapshot generator"
-  type        = "map"
-
-  default = {
-    index_v2 = "v2-2018-07-30-merging"
-    doc_type = "work"
-  }
-}
-
 variable "namespace" {
   default = "data_api"
 }

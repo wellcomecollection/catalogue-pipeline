@@ -2,14 +2,12 @@ package uk.ac.wellcome.elasticsearch
 
 import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.ElasticDsl.{createIndex, _}
+import com.sksamuel.elastic4s.requests.analysis.Analysis
 import com.sksamuel.elastic4s.requests.indexes.CreateIndexResponse
 import com.sksamuel.elastic4s.requests.indexes.PutMappingResponse
 import com.sksamuel.elastic4s.{ElasticClient, Response}
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
-import com.sksamuel.elastic4s.requests.mappings.{
-  FieldDefinition,
-  MappingDefinition
-}
+import com.sksamuel.elastic4s.requests.mappings.{MappingDefinition}
 import grizzled.slf4j.Logging
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -17,20 +15,19 @@ import scala.concurrent.{ExecutionContext, Future}
 class ElasticsearchIndexCreator(elasticClient: ElasticClient)(
   implicit ec: ExecutionContext)
     extends Logging {
-  def create(index: Index, fields: Seq[FieldDefinition]): Future[Unit] = {
-    val mappingDefinition: MappingDefinition =
-      properties(fields)
-        .dynamic(DynamicMapping.Strict)
+  def create(index: Index, config: IndexConfig): Future[Unit] = {
 
-    create(index = index, mappingDefinition = mappingDefinition)
+    create(index = index, mapping = config.mapping, config.analysis)
   }
 
   private def create(index: Index,
-                     mappingDefinition: MappingDefinition): Future[Unit] =
+                     mapping: MappingDefinition,
+                     analysis: Analysis): Future[Unit] =
     elasticClient
       .execute {
         createIndex(index.name)
-          .mapping { mappingDefinition }
+          .mapping { mapping.dynamic(DynamicMapping.Strict) }
+          .analysis { analysis }
 
           // Because we have a relatively small number of records (compared
           // to what Elasticsearch usually expects), we can get weird results
@@ -49,7 +46,7 @@ class ElasticsearchIndexCreator(elasticClient: ElasticClient)(
         if (response.isError) {
           if (response.error.`type` == "resource_already_exists_exception" || response.error.`type` == "index_already_exists_exception") {
             info(s"Index $index already exists")
-            update(index, mappingDefinition = mappingDefinition)
+            update(index, mappingDefinition = mapping)
           } else {
             Future.failed(
               throw new RuntimeException(

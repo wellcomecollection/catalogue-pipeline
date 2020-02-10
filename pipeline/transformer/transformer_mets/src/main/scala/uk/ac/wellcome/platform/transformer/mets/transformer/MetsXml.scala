@@ -6,9 +6,9 @@ import scala.util.Try
 import scala.collection.immutable.ListMap
 import scala.xml.{Elem, NodeSeq, XML}
 
-case class FileObject(id: String,
-                      href: String,
-                      listedMimeType: Option[String] = None) {
+case class FileReference(id: String,
+                         location: String,
+                         listedMimeType: Option[String] = None) {
   // `guessContentTypeFromName` may still return a `null` (eg for `.jp2`)
   // because of the limited internal list of MIME types.
   lazy val mimeType: Option[String] =
@@ -39,7 +39,8 @@ case class MetsXml(root: Elem) {
     val identifierNodes =
       (root \\ "dmdSec" \ "mdWrap" \\ "recordInfo" \ "recordIdentifier").toList
     identifierNodes match {
-      case List(identifierNode) => Right[Exception, String](identifierNode.text)
+      case identifierNodes if identifierNodes.distinct.size == 1 =>
+        Right[Exception, String](identifierNodes.head.text)
       case _ =>
         Left[Exception, String](
           new Exception("Could not parse recordIdentifier from METS XML"))
@@ -121,8 +122,8 @@ case class MetsXml(root: Elem) {
       .filterByAttribute("type", typeAttrib)
       .toList
     nodes match {
-      case Nil        => Right(None)
-      case List(node) => Right(Some(node.text))
+      case Nil                               => Right(None)
+      case nodes if nodes.distinct.size == 1 => Right(Some(nodes.head.text))
       case _ =>
         Left(
           new Exception(
@@ -139,8 +140,8 @@ case class MetsXml(root: Elem) {
   /** Here we use the the items defined in the physicalStructMap to look up
     * file IDs in the (normalised) fileObjects mapping
     */
-  def physicalFileObjects(bnumber: String): List[FileObject] =
-    physicalFileIds.flatMap(normalisedFileObjects(bnumber).get(_))
+  def physicalFileReferences(bnumber: String): List[FileReference] =
+    physicalFileIds.flatMap(normalisedFileReferences(bnumber).get(_))
 
   /** Returns the first href to a manifestation in the logical structMap
     */
@@ -159,22 +160,23 @@ case class MetsXml(root: Elem) {
     *  - strip the "objects/" part of the location
     *  - prepend the bnumber followed by an underscore if it's not already present (uppercase or lowercase)
     */
-  private def normaliseLocation(bnumber: String): FileObject => FileObject = {
+  private def normaliseLocation(
+    bnumber: String): FileReference => FileReference = {
     val filePrefixRegex = s"""objects/(?i:($bnumber)_)?(.*)""".r
-    fileObject: FileObject =>
-      fileObject.copy(href = fileObject.href match {
+    fileReference: FileReference =>
+      fileReference.copy(location = fileReference.location match {
         case filePrefixRegex(caseInsensitiveBnumber, postFix) =>
           Option(caseInsensitiveBnumber) match {
             case Some(caseInsensitiveBnumber) =>
               s"${caseInsensitiveBnumber}_$postFix"
             case _ => s"${bnumber}_$postFix"
           }
-        case _ => fileObject.href
+        case _ => fileReference.location
       })
   }
 
-  private def normalisedFileObjects(bnumber: String) =
-    fileObjects.mapValues(normaliseLocation(bnumber))
+  private def normalisedFileReferences(bnumber: String) =
+    fileReferences.mapValues(normaliseLocation(bnumber))
 
   /** The METS XML contains locations of associated files, contained in a
     *  mapping with the following format:
@@ -192,10 +194,10 @@ case class MetsXml(root: Elem) {
     *
     *  For this input we would expect the following output:
     *
-    *  Map("FILE_0001_OBJECTS" -> FileObject("FILE_0001_OBJECTS", "objects/b30246039_0001.jp2", "image/jp2"),
-    *      "FILE_0002_OBJECTS" -> FileObject("FILE_0002_OBJECTS", "objects/b30246039_0002.jp2", "image/jp2"))
+    *  Map("FILE_0001_OBJECTS" -> FileReference("FILE_0001_OBJECTS", "objects/b30246039_0001.jp2", "image/jp2"),
+    *      "FILE_0002_OBJECTS" -> FileReference("FILE_0002_OBJECTS", "objects/b30246039_0002.jp2", "image/jp2"))
     */
-  private def fileObjects: ListMap[String, FileObject] =
+  private def fileReferences: ListMap[String, FileReference] =
     (root \ "fileSec" \ "fileGrp")
       .filterByAttribute("USE", "OBJECTS")
       .childrenWithTag("file")
@@ -209,7 +211,7 @@ case class MetsXml(root: Elem) {
       .collect {
         case (id, (Some(objectHref), mimeType))
             if id.nonEmpty && objectHref.nonEmpty =>
-          id -> FileObject(id, objectHref, mimeType)
+          id -> FileReference(id, objectHref, mimeType)
       } match {
       case mappings => ListMap(mappings: _*)
     }

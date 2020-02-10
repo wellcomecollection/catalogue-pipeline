@@ -1,7 +1,7 @@
 package uk.ac.wellcome.models.work.internal
 
 case class AccessCondition(
-  status: AccessStatus,
+  status: Option[AccessStatus] = None,
   terms: Option[String] = None,
   to: Option[String] = None
 )
@@ -19,4 +19,8 @@ object AccessStatus {
   case object Closed extends AccessStatus
 
   case object LicensedResources extends AccessStatus
+
+  case object Unavailable extends AccessStatus
+
+  case object PermissionRequired extends AccessStatus
 }

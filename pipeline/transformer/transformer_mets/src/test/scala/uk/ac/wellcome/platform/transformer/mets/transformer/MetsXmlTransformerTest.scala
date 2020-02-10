@@ -18,7 +18,7 @@ class MetsXmlTransformerTest extends FunSpec with Matchers with MetsGenerators {
         accessConditionDz = Some("CC-BY-NC"),
         accessConditionStatus = Some("Open"),
         accessConditionUsage = Some("Some terms"),
-        fileObjects = createFileObjects(6, "b30246039")
+        fileReferences = createFileReferences(6, "b30246039")
       )
     )
   }
@@ -38,7 +38,7 @@ class MetsXmlTransformerTest extends FunSpec with Matchers with MetsGenerators {
         recordIdentifier = "b22012692",
         accessConditionDz = Some("PDM"),
         accessConditionStatus = Some("Open"),
-        fileObjects = createFileObjects(2, "b22012692", Some(1))
+        fileReferences = createFileReferences(2, "b22012692", Some(1))
       )
     )
   }
@@ -61,7 +61,7 @@ class MetsXmlTransformerTest extends FunSpec with Matchers with MetsGenerators {
         recordIdentifier = "b30246039",
         accessConditionDz = Some("INC"),
         accessConditionStatus = None,
-        fileObjects = createFileObjects(2, "b30246039")
+        fileReferences = createFileReferences(2, "b30246039")
       )
     )
   }
@@ -91,17 +91,17 @@ class MetsXmlTransformerTest extends FunSpec with Matchers with MetsGenerators {
         .map(content => "root.xml" -> Some(content))).collect {
         case (file, Some(content)) =>
           ObjectLocation("bucket", s"path/$file") -> content
-      }.toMap
+      }
     )
 
     new MetsXmlTransformer(store).transform(metsLocation)
   }
 
-  def createFileObjects(n: Int,
-                        bumber: String,
-                        manifestN: Option[Int] = None): List[FileObject] =
+  def createFileReferences(n: Int,
+                           bumber: String,
+                           manifestN: Option[Int] = None): List[FileReference] =
     (1 to n).toList.map { i =>
-      FileObject(
+      FileReference(
         f"FILE_$i%04d_OBJECTS",
         manifestN match {
           case None    => f"$bumber%s_$i%04d.jp2"

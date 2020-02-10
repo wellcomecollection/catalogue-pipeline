@@ -8,7 +8,6 @@ import com.sksamuel.elastic4s.requests.get.GetResponse
 import com.sksamuel.elastic4s.requests.indexes.admin.IndexExistsResponse
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import com.sksamuel.elastic4s.{ElasticClient, Response}
-import com.sksamuel.elastic4s.requests.mappings.FieldDefinition
 import org.scalactic.source.Position
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatest.time.{Millis, Seconds, Span}
@@ -56,9 +55,8 @@ trait ElasticsearchFixtures
     implicitly[Position])
 
   def withLocalWorksIndex[R](testWith: TestWith[Index, R]): R =
-    withLocalElasticsearchIndex[R](fields = WorksIndex.rootIndexFields) {
-      index =>
-        testWith(index)
+    withLocalElasticsearchIndex[R](config = WorksIndexConfig) { index =>
+      testWith(index)
     }
 
   private val elasticsearchIndexCreator = new ElasticsearchIndexCreator(
@@ -66,11 +64,11 @@ trait ElasticsearchFixtures
   )
 
   def withLocalElasticsearchIndex[R](
-    fields: Seq[FieldDefinition],
+    config: IndexConfig,
     index: Index = createIndex): Fixture[Index, R] = fixture[Index, R](
     create = {
       elasticsearchIndexCreator
-        .create(index = index, fields = fields)
+        .create(index = index, config = config)
         .await
 
       // Elasticsearch is eventually consistent, so the future
