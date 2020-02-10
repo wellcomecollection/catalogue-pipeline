@@ -26,7 +26,7 @@ class CalmStore(store: VersionedStore[String, Int, CalmRecord]) {
       .getLatest(record.id)
       .map {
         case Identified(_, storedRecord) =>
-          record.retrievedAt.toEpochMilli > storedRecord.retrievedAt.toEpochMilli
+          record.retrievedAt.isAfter(storedRecord.retrievedAt)
       }
       .left
       .flatMap {
