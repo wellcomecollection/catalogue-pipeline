@@ -115,7 +115,7 @@ case class MetsData(
 
   private def thumbnail(maybeLicense: Option[License], bnumber: String) =
     for {
-      fileReference <- fileReferences.headOption
+      fileReference <- fileReferences.find(isImage)
       url <- buildImageUrl(bnumber, fileReference)
     } yield
       DigitalLocation(
@@ -125,12 +125,7 @@ case class MetsData(
       )
 
   private val images = fileReferences
-    .filter {
-      _.mimeType match {
-        case Some(m) => m == "application/pdf" || m.startsWith("image")
-        case None    => true
-      }
-    }
+    .filter(isImage)
     .map { fileReference =>
       UnmergedImage(
         getImageSourceId(recordIdentifier, fileReference.id),
@@ -139,6 +134,12 @@ case class MetsData(
           locationType = LocationType("iiif-image")
         )
       )
+    }
+
+  private def isImage(fileReference: FileReference): Boolean =
+    fileReference.mimeType match {
+      case Some(m) => m == "application/pdf" || m.startsWith("image")
+      case None    => true
     }
 
   private def getImageSourceId(bnumber: String,

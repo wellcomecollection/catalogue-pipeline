@@ -13,7 +13,8 @@ case class FileReference(id: String,
   // because of the limited internal list of MIME types.
   lazy val mimeType: Option[String] =
     Option(
-      listedMimeType.getOrElse(URLConnection.guessContentTypeFromName(href)))
+      listedMimeType.getOrElse(
+        URLConnection.guessContentTypeFromName(location)))
 }
 
 case class MetsXml(root: Elem) {
