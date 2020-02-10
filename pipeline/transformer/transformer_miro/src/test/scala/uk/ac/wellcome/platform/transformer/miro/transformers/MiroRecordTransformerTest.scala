@@ -267,14 +267,7 @@ class MiroRecordTransformerTest
       url = "https://iiif.wellcomecollection.org/image/B0011308.jpg/info.json",
       license = Some(License.CCBY),
       credit = Some("Ezra Feilden"),
-      locationType = LocationType("iiif-image"),
-      imageSourceIds = List(
-        SourceIdentifier(
-          identifierType = IdentifierType("miro-image-number"),
-          ontologyType = "Image",
-          value = "B0011308"
-        )
-      )
+      locationType = LocationType("iiif-image")
     )
     work.data.items.head.locations shouldBe List(expectedDigitalLocation)
   }
@@ -288,14 +281,7 @@ class MiroRecordTransformerTest
       "https://iiif.wellcomecollection.org/image/B0011308.jpg/info.json",
       LocationType("iiif-image"),
       Some(License.CCBY),
-      None,
-      imageSourceIds = List(
-        SourceIdentifier(
-          identifierType = IdentifierType("miro-image-number"),
-          ontologyType = "Image",
-          value = "B0011308"
-        )
-      )
+      None
     )
     work.data.items shouldBe List(
       Item(id = Unidentifiable, locations = List(expectedLocation))
@@ -319,14 +305,7 @@ class MiroRecordTransformerTest
         url =
           s"https://iiif.wellcomecollection.org/image/$miroId.jpg/full/300,/0/default.jpg",
         locationType = LocationType("thumbnail-image"),
-        license = Some(License.CCBY),
-        imageSourceIds = List(
-          SourceIdentifier(
-            identifierType = IdentifierType("miro-image-number"),
-            ontologyType = "Image",
-            value = "A0001234"
-          )
-        )
+        license = Some(License.CCBY)
       )
     )
   }

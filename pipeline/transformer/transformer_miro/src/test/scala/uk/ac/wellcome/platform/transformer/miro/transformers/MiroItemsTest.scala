@@ -26,14 +26,7 @@ class MiroItemsTest
             "https://iiif.wellcomecollection.org/image/B0011308.jpg/info.json",
             LocationType("iiif-image"),
             Some(License.CC0),
-            credit = Some("Ezra Feilden"),
-            imageSourceIds = List(
-              SourceIdentifier(
-                identifierType = IdentifierType("miro-image-number"),
-                ontologyType = "Image",
-                value = "B0011308"
-              )
-            )
+            credit = Some("Ezra Feilden")
           ))
         ))
     }

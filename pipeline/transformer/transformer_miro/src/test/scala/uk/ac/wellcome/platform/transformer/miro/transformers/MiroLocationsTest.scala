@@ -3,10 +3,8 @@ package uk.ac.wellcome.platform.transformer.miro.transformers
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.models.work.internal.{
   DigitalLocation,
-  IdentifierType,
   License,
-  LocationType,
-  SourceIdentifier
+  LocationType
 }
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 
@@ -28,14 +26,7 @@ class MiroLocationsTest
         "https://iiif.wellcomecollection.org/image/B0011308.jpg/info.json",
         LocationType("iiif-image"),
         Some(License.CC0),
-        credit = Some("Ezra Feilden"),
-        imageSourceIds = List(
-          SourceIdentifier(
-            identifierType = IdentifierType("miro-image-number"),
-            ontologyType = "Image",
-            value = "B0011308"
-          )
-        )
+        credit = Some("Ezra Feilden")
       ))
   }
 }

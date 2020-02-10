@@ -4,7 +4,7 @@ import uk.ac.wellcome.models.work.internal.{DigitalLocation, LocationType}
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 
 trait MiroLocations
-    extends MiroImages
+    extends MiroImage
     with MiroLicenses
     with MiroContributorCodes {
 
@@ -16,7 +16,6 @@ trait MiroLocations
           miroId = miroRecord.imageNumber,
           templateName = "info"
         ),
-        imageSourceIds = List(getImageSourceId(miroRecord.imageNumber)),
         credit = getCredit(miroRecord),
         license = Some(
           chooseLicense(

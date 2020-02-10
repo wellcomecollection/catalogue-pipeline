@@ -1,9 +1,8 @@
 package uk.ac.wellcome.platform.transformer.mets.transformer
 
-import java.io.File
-import java.net.URLConnection
-
-import cats.implicits._
+import cats.syntax.traverse._
+import cats.instances.either._
+import cats.instances.option._
 import org.apache.commons.lang3.StringUtils.equalsIgnoreCase
 import uk.ac.wellcome.models.work.internal._
 
@@ -12,8 +11,7 @@ case class MetsData(
   accessConditionDz: Option[String] = None,
   accessConditionStatus: Option[String] = None,
   accessConditionUsage: Option[String] = None,
-  thumbnailLocation: Option[String] = None,
-  imageFileIds: List[String] = Nil
+  fileObjects: List[FileObject] = Nil
 ) {
 
   def toWork(version: Int): Either[Throwable, UnidentifiedInvisibleWork] =
@@ -27,12 +25,7 @@ case class MetsData(
       UnidentifiedInvisibleWork(
         version = version,
         sourceIdentifier = sourceIdentifier,
-        workData(
-          item,
-          thumbnail(
-            maybeLicense,
-            sourceIdentifier.value,
-            imageFileIds.headOption))
+        workData(item, thumbnail(maybeLicense, sourceIdentifier.value))
       )
 
   private def workData(item: Item[Unminted],
@@ -41,6 +34,7 @@ case class MetsData(
       items = List(item),
       mergeCandidates = List(mergeCandidate),
       thumbnail = thumbnail,
+      images = images
     )
 
   private def mergeCandidate = MergeCandidate(
@@ -57,9 +51,6 @@ case class MetsData(
     DigitalLocation(
       url = s"https://wellcomelibrary.org/iiif/$recordIdentifier/manifest",
       locationType = LocationType("iiif-presentation"),
-      imageSourceIds = imageFileIds.map {
-        getImageSourceId(sourceIdentifier.value, _)
-      },
       license = license,
       accessConditions = accessStatus.map { status =>
         AccessCondition(status = status, terms = accessConditionUsage)
@@ -117,21 +108,33 @@ case class MetsData(
 
   private val thumbnailDim = "200"
 
-  private def thumbnail(maybeLicense: Option[License],
-                        bnumber: String,
-                        maybeFileId: Option[String]) =
+  private def thumbnail(maybeLicense: Option[License], bnumber: String) =
     for {
-      location <- thumbnailLocation
-      url <- buildThumbnailUrl(location, bnumber)
+      fileObject <- fileObjects.headOption
+      url <- buildImageUrl(bnumber, fileObject)
     } yield
       DigitalLocation(
         url = url,
         locationType = LocationType("thumbnail-image"),
-        imageSourceIds = maybeFileId
-          .map(fileId => List(getImageSourceId(bnumber, fileId)))
-          .getOrElse(Nil),
         license = maybeLicense
       )
+
+  private val images = fileObjects
+    .filter {
+      _.mimeType match {
+        case Some(m) => m == "application/pdf" || m.startsWith("image")
+        case None    => true
+      }
+    }
+    .map { fileObject =>
+      UnmergedImage(
+        getImageSourceId(recordIdentifier, fileObject.id),
+        DigitalLocation(
+          url = buildImageUrl(recordIdentifier, fileObject).getOrElse(""),
+          locationType = LocationType("iiif-image")
+        )
+      )
+    }
 
   private def getImageSourceId(bnumber: String,
                                fileId: String): SourceIdentifier =
@@ -141,17 +144,15 @@ case class MetsData(
       value = s"$bnumber/$fileId"
     )
 
-  private def buildThumbnailUrl(location: String, bnumber: String) = {
-    val mediaType =
-      URLConnection.guessContentTypeFromName(new File(location).getName)
-    Option(mediaType) match {
+  private def buildImageUrl(bnumber: String, fileObject: FileObject) = {
+    fileObject.mimeType match {
       case Some(m) if m startsWith ("video/") => None
       case Some(m) if m equals ("application/pdf") =>
         Some(
-          s"https://wellcomelibrary.org/pdfthumbs/${bnumber}/0/${location}.jpg")
+          s"https://wellcomelibrary.org/pdfthumbs/${bnumber}/0/${fileObject.href}.jpg")
       case _ =>
         Some(
-          s"https://dlcs.io/thumbs/wellcome/5/$location/full/!$thumbnailDim,$thumbnailDim/0/default.jpg")
+          s"https://dlcs.io/thumbs/wellcome/5/${fileObject.href}/full/!$thumbnailDim,$thumbnailDim/0/default.jpg")
     }
   }
 }

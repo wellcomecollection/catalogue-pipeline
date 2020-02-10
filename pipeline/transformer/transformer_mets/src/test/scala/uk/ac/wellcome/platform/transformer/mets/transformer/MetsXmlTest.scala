@@ -55,7 +55,7 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
   }
 
   it("parses all file IDs from XML") {
-    MetsXml(xml).right.get.fileIds should contain theSameElementsAs List(
+    MetsXml(xml).right.get.physicalFileIds should contain theSameElementsAs List(
       "FILE_0001_OBJECTS",
       "FILE_0002_OBJECTS",
       "FILE_0003_OBJECTS",
@@ -66,8 +66,10 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
   }
 
   it("parses thumbnail from XML") {
-    MetsXml(xml).right.get.thumbnailLocation("b30246039") shouldBe Some(
-      "b30246039_0001.jp2")
+    MetsXml(xml).right.get
+      .physicalFileObjects("b30246039")
+      .head
+      .href shouldBe "b30246039_0001.jp2"
   }
 
   it("parses first thumbnail when no ORDER attribute") {
@@ -75,13 +77,17 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
       recordIdentifier = "b30246039",
       fileSec = fileSec(filePrefix = "b30246039"),
       structMap = structMap)
-    MetsXml(str).getRight.thumbnailLocation("b30246039") shouldBe Some(
-      "b30246039_0001.jp2")
+    MetsXml(str).getRight
+      .physicalFileObjects("b30246039")
+      .head
+      .href shouldBe "b30246039_0001.jp2"
   }
 
   it("parses thumbnail using ORDER attrib when non-sequential order") {
     MetsXml(xmlNonSequentialOrder("b30246039")).getRight
-      .thumbnailLocation("b30246039") shouldBe Some("b30246039_0001.jp2")
+      .physicalFileObjects("b30246039")
+      .head
+      .href shouldBe "b30246039_0001.jp2"
   }
 
   it("parses thumbnail if filename doesn't start with bnumber") {
@@ -92,8 +98,9 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
         recordIdentifier = bnumber,
         fileSec = fileSec(filePrefix),
         structMap = structMap)).getRight
-      .thumbnailLocation(bnumber) shouldBe Some(
-      s"${bnumber}_${filePrefix}_0001.jp2")
+      .physicalFileObjects(bnumber)
+      .head
+      .href shouldBe s"${bnumber}_${filePrefix}_0001.jp2"
   }
 
   it("parses thumbnail if filename starts with uppercase bnumber") {
@@ -104,12 +111,15 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
         recordIdentifier = bnumber,
         fileSec = fileSec(filePrefix),
         structMap = structMap)).getRight
-      .thumbnailLocation(bnumber) shouldBe Some(s"${filePrefix}_0001.jp2")
+      .physicalFileObjects(bnumber)
+      .head
+      .href shouldBe s"${filePrefix}_0001.jp2"
   }
 
   it("cannot parse thumbnail when invalid file ID") {
     MetsXml(xmlInvalidFileId("b30246039")).getRight
-      .thumbnailLocation("b30246039") shouldBe None
+      .physicalFileObjects("b30246039")
+      .headOption shouldBe None
   }
 
   it("parses first manifestation filename when present") {
@@ -215,7 +225,7 @@ class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
             <mets:fptr FILEID="FILE_0001_ALTO" />
           </mets:div>
           <mets:div ADMID="AMD_0002" ID="PHYS_0002" ORDER="2" TYPE="page">
-            <mets:fptr FILEID="FILE_0002_OBJECTS" />
+            <mets:fptr FILEID="OH DEAR" />
           </mets:div>
         </mets:div>
       </mets:structMap>

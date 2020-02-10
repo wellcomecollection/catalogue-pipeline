@@ -1,8 +1,20 @@
 package uk.ac.wellcome.platform.transformer.mets.transformer
 
+import java.net.URLConnection
+
 import scala.util.Try
 import scala.collection.immutable.ListMap
 import scala.xml.{Elem, NodeSeq, XML}
+
+case class FileObject(id: String,
+                      href: String,
+                      listedMimeType: Option[String] = None) {
+  // `guessContentTypeFromName` may still return a `null` (eg for `.jp2`)
+  // because of the limited internal list of MIME types.
+  lazy val mimeType: Option[String] =
+    Option(
+      listedMimeType.getOrElse(URLConnection.guessContentTypeFromName(href)))
+}
 
 case class MetsXml(root: Elem) {
 
@@ -122,33 +134,13 @@ case class MetsXml(root: Elem) {
 
   /** The keys of the physicalStructMap are the METS file IDs.
     * We require nothing of them here other than that they are unique. */
-  def fileIds: List[String] = physicalStructMap.values.toList
+  def physicalFileIds: List[String] = physicalStructMap.values.toList
 
-  /** Here we use the first defined item in the physicalStructMap to lookup a
-    *  file ID the fileObjects mapping, and use the files location as the
-    *  thumbnail image.
+  /** Here we use the the items defined in the physicalStructMap to look up
+    * file IDs in the (normalised) fileObjects mapping
     */
-  def thumbnailLocation(bnumber: String): Option[String] = {
-    // Filenames in DLCS are always prefixed with the bnumber (uppercase or lowercase) to ensure uniqueness.
-    // However they might not be prefixed with the bnumber in the METS file.
-    // So we need to do two things:
-    //  - strip the "objects/" part of the link
-    //  - prepend the bnumber followed by an underscore if it's not already present (uppercase or lowercase)
-    val filePrefixRegex = s"""objects/(?i:($bnumber)_)?(.*)""".r
-    fileIds.headOption
-      .flatMap { fileObjects.get(_) }
-      .map { fileUrl =>
-        fileUrl match {
-          case filePrefixRegex(caseInsensitiveBnumber, postFix) =>
-            Option(caseInsensitiveBnumber) match {
-              case Some(caseInsensitiveBnumber) =>
-                s"${caseInsensitiveBnumber}_$postFix"
-              case _ => s"${bnumber}_$postFix"
-            }
-          case _ => fileUrl
-        }
-      }
-  }
+  def physicalFileObjects(bnumber: String): List[FileObject] =
+    physicalFileIds.flatMap(normalisedFileObjects(bnumber).get(_))
 
   /** Returns the first href to a manifestation in the logical structMap
     */
@@ -160,6 +152,29 @@ case class MetsXml(root: Elem) {
           new Exception("Could not parse any manifestation locations")
         )
     }
+
+  /** Filenames in DLCS are always prefixed with the bnumber (uppercase or lowercase) to ensure uniqueness.
+    * However they might not be prefixed with the bnumber in the METS file.
+    * So we need to do two things:
+    *  - strip the "objects/" part of the location
+    *  - prepend the bnumber followed by an underscore if it's not already present (uppercase or lowercase)
+    */
+  private def normaliseLocation(bnumber: String): FileObject => FileObject = {
+    val filePrefixRegex = s"""objects/(?i:($bnumber)_)?(.*)""".r
+    fileObject: FileObject =>
+      fileObject.copy(href = fileObject.href match {
+        case filePrefixRegex(caseInsensitiveBnumber, postFix) =>
+          Option(caseInsensitiveBnumber) match {
+            case Some(caseInsensitiveBnumber) =>
+              s"${caseInsensitiveBnumber}_$postFix"
+            case _ => s"${bnumber}_$postFix"
+          }
+        case _ => fileObject.href
+      })
+  }
+
+  private def normalisedFileObjects(bnumber: String) =
+    fileObjects.mapValues(normaliseLocation(bnumber))
 
   /** The METS XML contains locations of associated files, contained in a
     *  mapping with the following format:
@@ -177,18 +192,27 @@ case class MetsXml(root: Elem) {
     *
     *  For this input we would expect the following output:
     *
-    *  Map("FILE_0001_OBJECTS" -> "objects/b30246039_0001.jp2",
-    *      "FILE_0002_OBJECTS" -> "objects/b30246039_0002.jp2")
+    *  Map("FILE_0001_OBJECTS" -> FileObject("FILE_0001_OBJECTS", "objects/b30246039_0001.jp2", "image/jp2"),
+    *      "FILE_0002_OBJECTS" -> FileObject("FILE_0002_OBJECTS", "objects/b30246039_0002.jp2", "image/jp2"))
     */
-  private def fileObjects: Map[String, String] =
+  private def fileObjects: ListMap[String, FileObject] =
     (root \ "fileSec" \ "fileGrp")
       .filterByAttribute("USE", "OBJECTS")
       .childrenWithTag("file")
-      .toMapping(
-        keyAttrib = "ID",
-        valueNode = "FLocat",
-        valueAttrib = "{http://www.w3.org/1999/xlink}href"
-      )
+      .map { file =>
+        val key = file \@ "ID"
+        val objectHref = (file \ "FLocat").toList.headOption
+          .map(_ \@ "{http://www.w3.org/1999/xlink}href")
+        val mimeType = Option(file \@ "MIMETYPE").filter(_.nonEmpty)
+        (key, (objectHref, mimeType))
+      }
+      .collect {
+        case (id, (Some(objectHref), mimeType))
+            if id.nonEmpty && objectHref.nonEmpty =>
+          id -> FileObject(id, objectHref, mimeType)
+      } match {
+      case mappings => ListMap(mappings: _*)
+    }
 
   /** Valid METS documents should contain a physicalStructMap section, with the
     *  bottom most divs each representing a physical page, and linking to files

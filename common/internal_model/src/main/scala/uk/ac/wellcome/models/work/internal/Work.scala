@@ -43,6 +43,7 @@ case class WorkData[Id <: IdState](
   duration: Option[Int] = None,
   items: List[Item[Id]] = Nil,
   merged: Boolean = false,
+  images: List[BaseImage[Id]] = Nil
 )
 
 case class UnidentifiedWork(

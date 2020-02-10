@@ -102,7 +102,7 @@ class MetsDataTest
           Item(
             Unidentifiable,
             _,
-            List(DigitalLocation(_, _, license, _, _, _, _)),
+            List(DigitalLocation(_, _, license, _, _, _)),
             _)) =>
         license shouldBe Some(License.InCopyright)
     }
@@ -118,7 +118,7 @@ class MetsDataTest
           Item(
             Unidentifiable,
             _,
-            List(DigitalLocation(_, _, license, _, _, _, _)),
+            List(DigitalLocation(_, _, license, _, _, _)),
             _)) =>
         license shouldBe Some(License.InCopyright)
     }
@@ -134,7 +134,7 @@ class MetsDataTest
           Item(
             Unidentifiable,
             _,
-            List(DigitalLocation(_, _, license, _, _, _, _)),
+            List(DigitalLocation(_, _, license, _, _, _)),
             _)) =>
         license shouldBe Some(License.InCopyright)
     }
@@ -151,7 +151,7 @@ class MetsDataTest
           Item(
             Unidentifiable,
             _,
-            List(DigitalLocation(_, _, license, _, _, _, _)),
+            List(DigitalLocation(_, _, license, _, _, _)),
             _)) =>
         license shouldBe Some(License.InCopyright)
     }
@@ -170,7 +170,7 @@ class MetsDataTest
           Item(
             Unidentifiable,
             _,
-            List(DigitalLocation(_, _, license, _, _, _, _)),
+            List(DigitalLocation(_, _, license, _, _, _)),
             _)) =>
         license shouldBe Some(License.InCopyright)
     }
@@ -188,7 +188,7 @@ class MetsDataTest
           Item(
             Unidentifiable,
             _,
-            List(DigitalLocation(_, _, license, _, _, _, _)),
+            List(DigitalLocation(_, _, license, _, _, _)),
             _)) =>
         license shouldBe Some(License.InCopyright)
     }
@@ -198,7 +198,9 @@ class MetsDataTest
     val metsData = MetsData(
       recordIdentifier = randomAlphanumeric(10),
       accessConditionDz = Some("CC-BY-NC"),
-      thumbnailLocation = Some("location.jp2")
+      fileObjects = List(
+        FileObject("l", "location.jp2", Some("image/jp2"))
+      )
     )
     val result = metsData.toWork(1)
     result shouldBe a[Right[_, _]]
@@ -217,7 +219,9 @@ class MetsDataTest
     val metsData = MetsData(
       recordIdentifier = bnumber,
       accessConditionDz = Some("CC-BY-NC"),
-      thumbnailLocation = Some(assetId)
+      fileObjects = List(
+        FileObject("l", "location.pdf")
+      )
     )
     val result = metsData.toWork(1)
     result shouldBe a[Right[_, _]]
@@ -234,7 +238,9 @@ class MetsDataTest
     val metsData = MetsData(
       recordIdentifier = randomAlphanumeric(10),
       accessConditionDz = Some("CC-BY-NC"),
-      thumbnailLocation = Some("video.mpg")
+      fileObjects = List(
+        FileObject("v", "video.mpg")
+      )
     )
     val result = metsData.toWork(1)
     result shouldBe a[Right[_, _]]
@@ -248,7 +254,7 @@ class MetsDataTest
     ).toWork(1)
     result shouldBe a[Right[_, _]]
     inside(result.right.get.data.items.head.locations.head) {
-      case DigitalLocation(_, _, _, _, accessConditions, _, _) =>
+      case DigitalLocation(_, _, _, _, accessConditions, _) =>
         accessConditions shouldBe List(
           AccessCondition(
             status = AccessStatus.OpenWithAdvisory
@@ -256,6 +262,28 @@ class MetsDataTest
         )
 
     }
+  }
+
+  it("creates a work with all images") {
+    val result = MetsData(
+      recordIdentifier = "ID",
+      accessConditionDz = Some("CC-BY-NC"),
+      fileObjects = List(
+        FileObject("A", "location1.jp2", Some("image/jp2")),
+        FileObject("B", "location2.jp2", Some("image/jp2")),
+        FileObject("C", "location3.jp2", Some("image/jp2")),
+        FileObject("D", "location4.jp2", Some("application/pdf")),
+        FileObject("E", "location4.jp2", Some("video/mpeg"))
+      )
+    ).toWork(1)
+    result shouldBe a[Right[_, _]]
+    val images = result.right.get.data.images
+    images should have length 4
+    images.map(_.id.allSourceIdentifiers.head.value) should contain theSameElementsAs List(
+      "ID/A",
+      "ID/B",
+      "ID/C",
+      "ID/D")
   }
 
   it("creates a work with a single accessCondition including usage terms") {
@@ -266,7 +294,7 @@ class MetsDataTest
     ).toWork(1)
     result shouldBe a[Right[_, _]]
     inside(result.right.get.data.items.head.locations.head) {
-      case DigitalLocation(_, _, _, _, accessConditions, _, _) =>
+      case DigitalLocation(_, _, _, _, accessConditions, _) =>
         accessConditions shouldBe List(
           AccessCondition(
             status = AccessStatus.Restricted,
@@ -282,7 +310,7 @@ class MetsDataTest
     ).toWork(1)
     result shouldBe a[Right[_, _]]
     inside(result.right.get.data.items.head.locations.head) {
-      case DigitalLocation(_, _, _, _, accessConditions, _, _) =>
+      case DigitalLocation(_, _, _, _, accessConditions, _) =>
         accessConditions shouldBe
           List(
             AccessCondition(
@@ -298,22 +326,5 @@ class MetsDataTest
       accessConditionStatus = Some("Kanye West"),
     ).toWork(1)
     result shouldBe a[Left[_, _]]
-  }
-
-  it("attaches image source identifiers to DigitalLocation") {
-    val fileIds = List("beep", "boop", "bing", "bong")
-    val result = MetsData(
-      recordIdentifier = "ID",
-      imageFileIds = fileIds
-    ).toWork(1)
-    inside(result.right.get.data.items.head.locations.head) {
-      case DigitalLocation(_, _, _, _, _, imageSourceIds, _) =>
-        imageSourceIds should contain theSameElementsAs fileIds.map(
-          id =>
-            SourceIdentifier(
-              identifierType = IdentifierType("mets-image"),
-              ontologyType = "Image",
-              value = s"ID/$id"))
-    }
   }
 }
