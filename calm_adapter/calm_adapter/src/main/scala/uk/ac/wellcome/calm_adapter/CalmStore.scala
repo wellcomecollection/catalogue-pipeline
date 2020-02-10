@@ -26,11 +26,19 @@ class CalmStore(store: VersionedStore[String, Int, CalmRecord]) {
       .getLatest(record.id)
       .map {
         case Identified(_, storedRecord) =>
-          record.retrievedAt.isAfter(storedRecord.retrievedAt)
+          val sameTimestamp = record.retrievedAt == storedRecord.retrievedAt
+          val differingData = record.data != storedRecord.data
+          if (sameTimestamp && differingData)
+            Left(
+              new Exception("Cannot resolve latest data as timestamps are equal")
+            )
+          else
+            Right(record.retrievedAt.isAfter(storedRecord.retrievedAt))
       }
       .left
       .flatMap {
-        case NoVersionExistsError(_) => Right(true)
+        case NoVersionExistsError(_) => Right(Right(true))
         case err                     => Left(err.e)
       }
+      .flatMap(identity)
 }

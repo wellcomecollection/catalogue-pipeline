@@ -58,6 +58,14 @@ class CalmStoreTest extends FunSpec with Matchers {
     data.entries shouldBe Map.empty
   }
 
+  it("errors if the data differs but timestamp is the same") {
+    val x = CalmRecord("A", Map("key" -> "x"), retrievedAt)
+    val y = CalmRecord("A", Map("key" -> "y"), retrievedAt)
+    val data = dataStore(Version("A", 2) -> x)
+    calmStore(data).putRecord(y) shouldBe a[Left[_, _]]
+    data.entries shouldBe Map(Version("A", 2) -> x)
+  }
+
   def dataStore(entries: (Key, CalmRecord)*) =
     new MemoryStore(entries.toMap) with MemoryMaxima[String, CalmRecord]
 
