@@ -30,7 +30,8 @@ class CalmStore(store: VersionedStore[String, Int, CalmRecord]) {
           val differingData = record.data != storedRecord.data
           if (sameTimestamp && differingData)
             Left(
-              new Exception("Cannot resolve latest data as timestamps are equal")
+              new Exception(
+                "Cannot resolve latest data as timestamps are equal")
             )
           else
             Right(record.retrievedAt.isAfter(storedRecord.retrievedAt))
