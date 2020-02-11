@@ -1,14 +1,8 @@
 package uk.ac.wellcome.platform.ingestor.services
 
-import com.sksamuel.elastic4s.ElasticDsl.{
-  intField,
-  keywordField,
-  objectField,
-  properties
-}
+import com.sksamuel.elastic4s.ElasticDsl.properties
 import com.sksamuel.elastic4s.Index
-import com.sksamuel.elastic4s.requests.analysis.Analysis
-import com.sksamuel.elastic4s.requests.mappings.FieldDefinition
+import com.sksamuel.elastic4s.requests.mappings.{ObjectField, TextField}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Assertion, FunSpec, Matchers}
 import uk.ac.wellcome.elasticsearch.IndexConfig
@@ -220,39 +214,22 @@ class WorkIndexerTest
   }
 
   object WorksWithNoEditionIndexConfig extends IndexConfig {
-    val analysis = Analysis(Nil)
-    val sourceIdentifierFields = Seq(
-      keywordField("ontologyType"),
-      objectField("identifierType").fields(
-        keywordField("id"),
-        keywordField("label"),
-        keywordField("ontologyType")
-      ),
-      keywordField("value")
-    )
+    import uk.ac.wellcome.elasticsearch.WorksIndexConfig.{
+      fields,
+      analysis => defaultAnalysis
+    }
 
-    val fields: Seq[FieldDefinition with Product with Serializable] =
-      Seq(
-        keywordField("canonicalId"),
-        intField("version"),
-        objectField("sourceIdentifier")
-          .fields(sourceIdentifierFields),
-        keywordField("type"),
-        objectField("data").fields(
-          keywordField("otherIdentifiers"),
-          keywordField("mergeCandidates"),
-          keywordField("alternativeTitles"),
-          keywordField("subjects"),
-          keywordField("genres"),
-          keywordField("contributors"),
-          keywordField("production"),
-          keywordField("notes"),
-          keywordField("items"),
-          keywordField("merged")
-        )
-      )
+    val fieldsWithNoEdition = fields.map {
+      case data: ObjectField if data.name == "data" =>
+        data.copy(fields = data.fields.filter {
+          case edition: TextField if edition.name == "edition" => false
+          case _                                               => true
+        })
+      case field => field
+    }
 
-    val mapping = properties(fields)
+    val analysis = defaultAnalysis
+    val mapping = properties(fieldsWithNoEdition)
   }
 
   it("returns a list of Works that weren't indexed correctly") {
