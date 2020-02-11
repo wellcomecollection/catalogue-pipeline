@@ -2,22 +2,21 @@ package uk.ac.wellcome.platform.transformer.mets.transformer
 
 import uk.ac.wellcome.models.work.internal.{IdentifierType, SourceIdentifier}
 
-trait MetsDataImageUtils {
-  protected def isThumbnail(fileReference: FileReference): Boolean =
+object ImageUtils {
+  def isThumbnail(fileReference: FileReference): Boolean =
     fileReference.mimeType match {
       case Some("application/pdf")         => true
       case Some(m) if m startsWith "image" => true
       case _                               => false
     }
 
-  protected def isImage(fileReference: FileReference): Boolean =
+  def isImage(fileReference: FileReference): Boolean =
     fileReference.mimeType match {
       case Some(m) if m startsWith "image" => true
       case _                               => false
     }
 
-  protected def getImageSourceId(bnumber: String,
-                                 fileId: String): SourceIdentifier =
+  def getImageSourceId(bnumber: String, fileId: String): SourceIdentifier =
     SourceIdentifier(
       identifierType = IdentifierType("mets-image"),
       ontologyType = "Image",
@@ -26,9 +25,8 @@ trait MetsDataImageUtils {
 
   private final val thumbnailDim = "200"
 
-  protected def buildThumbnailUrl(
-    bnumber: String,
-    validThumbnailFile: FileReference): Option[String] = {
+  def buildThumbnailUrl(bnumber: String,
+                        validThumbnailFile: FileReference): Option[String] = {
     validThumbnailFile.mimeType match {
       case Some("application/pdf") =>
         Some(
@@ -39,8 +37,8 @@ trait MetsDataImageUtils {
     }
   }
 
-  protected def buildImageUrl(bnumber: String,
-                              validImageFile: FileReference): Option[String] = {
+  def buildImageUrl(bnumber: String,
+                    validImageFile: FileReference): Option[String] = {
     validImageFile.mimeType match {
       case _ =>
         Some(

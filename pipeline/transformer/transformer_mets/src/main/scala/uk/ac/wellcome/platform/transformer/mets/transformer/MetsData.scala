@@ -12,7 +12,7 @@ case class MetsData(
   accessConditionStatus: Option[String] = None,
   accessConditionUsage: Option[String] = None,
   fileReferences: List[FileReference] = Nil
-) extends MetsDataImageUtils {
+) {
 
   def toWork(version: Int): Either[Throwable, UnidentifiedInvisibleWork] =
     for {
@@ -113,8 +113,8 @@ case class MetsData(
 
   private def thumbnail(maybeLicense: Option[License], bnumber: String) =
     for {
-      fileReference <- fileReferences.find(isThumbnail)
-      url <- buildThumbnailUrl(bnumber, fileReference)
+      fileReference <- fileReferences.find(ImageUtils.isThumbnail)
+      url <- ImageUtils.buildThumbnailUrl(bnumber, fileReference)
     } yield
       DigitalLocation(
         url = url,
@@ -123,11 +123,12 @@ case class MetsData(
       )
 
   private val images = fileReferences
-    .filter(isImage)
+    .filter(ImageUtils.isImage)
     .flatMap { fileReference =>
-      buildImageUrl(recordIdentifier, fileReference).map { url =>
+      ImageUtils.buildImageUrl(recordIdentifier, fileReference).map { url =>
         UnmergedImage(
-          getImageSourceId(recordIdentifier, fileReference.id),
+          ImageUtils
+            .getImageSourceId(recordIdentifier, fileReference.id),
           DigitalLocation(
             url = url,
             locationType = LocationType("iiif-image")
