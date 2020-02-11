@@ -33,7 +33,7 @@ data "aws_iam_policy_document" "graph_table_readwrite" {
     ]
 
     resources = [
-      "${aws_dynamodb_table.matcher_graph_table.arn}",
+      aws_dynamodb_table.matcher_graph_table.arn,
     ]
   }
 
