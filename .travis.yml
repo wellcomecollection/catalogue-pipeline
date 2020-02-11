@@ -4,34 +4,34 @@ jobs:
       env: TASK=travis-format
 
     - stage: libraries
-      env: SBT_PROJECT=internal_model
-    - env: SBT_PROJECT=display
-    - env: SBT_PROJECT=elasticsearch
-    - env: SBT_PROJECT=big_messaging
+      script: travis_wait 45 ./.travis/run_job.py internal_model
+    - script: travis_wait 45 ./.travis/run_job.py display
+    - script: travis_wait 45 ./.travis/run_job.py elasticsearch
+    - script: travis_wait 45 ./.travis/run_job.py big_messaging
 
     - stage: services
-      env: SBT_PROJECT=api
+      script: travis_wait 45 ./.travis/run_job.py api
 
-    - env: SBT_PROJECT=reindex_worker
+    - script: travis_wait 45 ./.travis/run_job.py reindex_worker
 
-    - env: SBT_PROJECT=id_minter
-    - env: SBT_PROJECT=ingestor
-    - env: SBT_PROJECT=matcher
-    - env: SBT_PROJECT=merger
-    - env: SBT_PROJECT=recorder
-    - env: SBT_PROJECT=transformer_miro
-    - env: SBT_PROJECT=transformer_sierra
-    - env: SBT_PROJECT=transformer_mets
+    - script: travis_wait 45 ./.travis/run_job.py id_minter
+    - script: travis_wait 45 ./.travis/run_job.py ingestor
+    - script: travis_wait 45 ./.travis/run_job.py matcher
+    - script: travis_wait 45 ./.travis/run_job.py merger
+    - script: travis_wait 45 ./.travis/run_job.py recorder
+    - script: travis_wait 45 ./.travis/run_job.py transformer_miro
+    - script: travis_wait 45 ./.travis/run_job.py transformer_sierra
+    - script: travis_wait 45 ./.travis/run_job.py transformer_mets
 
-    - env: SBT_PROJECT=sierra_reader
-    - env: SBT_PROJECT=sierra_bib_merger
-    - env: SBT_PROJECT=sierra_item_merger
-    - env: SBT_PROJECT=sierra_items_to_dynamo
+    - script: travis_wait 45 ./.travis/run_job.py sierra_reader
+    - script: travis_wait 45 ./.travis/run_job.py sierra_bib_merger
+    - script: travis_wait 45 ./.travis/run_job.py sierra_item_merger
+    - script: travis_wait 45 ./.travis/run_job.py sierra_items_to_dynamo
 
-    - env: SBT_PROJECT=mets_adapter
-    - env: SBT_PROJECT=calm_adapter
+    - script: travis_wait 45 ./.travis/run_job.py mets_adapter
+    - script: travis_wait 45 ./.travis/run_job.py calm_adapter
 
-    - env: SBT_PROJECT=snapshot_generator
+    - script: travis_wait 45 ./.travis/run_job.py snapshot_generator
     - env: TASK=lambda-test
 
 script:
