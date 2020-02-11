@@ -1,10 +1,10 @@
 locals {
   miro_updates_topic_name = "${data.terraform_remote_state.shared_infra.miro_updates_topic_name}"
-  vhs_miro_read_policy = "${data.terraform_remote_state.catalogue_infra_critical.vhs_miro_read_policy}"
-  storage_bucket = "wellcomecollection-storage"
+  vhs_miro_read_policy    = "${data.terraform_remote_state.catalogue_infra_critical.vhs_miro_read_policy}"
+  storage_bucket          = "wellcomecollection-storage"
 
   # Sierra adapter VHS
-  vhs_sierra_read_policy = "${data.terraform_remote_state.catalogue_infra_critical.vhs_sierra_read_policy}"
+  vhs_sierra_read_policy            = "${data.terraform_remote_state.catalogue_infra_critical.vhs_sierra_read_policy}"
   vhs_sierra_sourcedata_bucket_name = "${data.terraform_remote_state.catalogue_infra_critical.vhs_sierra_bucket_name}"
   vhs_sierra_sourcedata_table_name  = "${data.terraform_remote_state.catalogue_infra_critical.vhs_sierra_table_name}"
 
@@ -25,10 +25,10 @@ locals {
   mets_reindexer_topic_name   = "${data.terraform_remote_state.reindexer.mets_reindexer_topic_name}"
 
   # Infra stuff
-  infra_bucket = "${data.terraform_remote_state.shared_infra.infra_bucket}"
-  aws_region = "eu-west-1"
-  dlq_alarm_arn = "${data.terraform_remote_state.shared_infra.dlq_alarm_arn}"
-  vpc_id = "${data.terraform_remote_state.shared_infra.catalogue_vpc_delta_id}"
-  private_subnets = "${data.terraform_remote_state.shared_infra.catalogue_vpc_delta_private_subnets}"
+  infra_bucket                 = "${data.terraform_remote_state.shared_infra.infra_bucket}"
+  aws_region                   = "eu-west-1"
+  dlq_alarm_arn                = "${data.terraform_remote_state.shared_infra.dlq_alarm_arn}"
+  vpc_id                       = "${data.terraform_remote_state.shared_infra.catalogue_vpc_delta_id}"
+  private_subnets              = "${data.terraform_remote_state.shared_infra.catalogue_vpc_delta_private_subnets}"
   rds_access_security_group_id = "${data.terraform_remote_state.catalogue_infra_critical.rds_access_security_group_id}"
 }

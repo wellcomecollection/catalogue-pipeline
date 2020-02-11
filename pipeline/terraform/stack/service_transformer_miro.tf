@@ -1,12 +1,12 @@
 # Input queue
 module "miro_transformer_queue" {
-  source = "git::https://github.com/wellcometrust/terraform-modules.git//sqs?ref=v11.6.0"
+  source      = "git::https://github.com/wellcometrust/terraform-modules.git//sqs?ref=v11.6.0"
   queue_name  = "${local.namespace_hyphen}_miro_transformer"
   topic_names = ["${var.miro_adapter_topic_names}"]
   topic_count = "${var.miro_adapter_topic_count}"
 
-  aws_region    = "${var.aws_region}"
-  account_id    = "${var.account_id}"
+  aws_region      = "${var.aws_region}"
+  account_id      = "${var.account_id}"
   alarm_topic_arn = "${var.dlq_alarm_arn}"
 }
 
@@ -42,11 +42,11 @@ module "miro_transformer" {
   secret_env_vars        = {}
   secret_env_vars_length = "0"
 
-  subnets    = ["${var.subnets}"]
-  aws_region = "${var.aws_region}"
-  max_capacity = 10
+  subnets             = ["${var.subnets}"]
+  aws_region          = "${var.aws_region}"
+  max_capacity        = 10
   messages_bucket_arn = "${aws_s3_bucket.messages.arn}"
-  queue_read_policy = "${module.miro_transformer_queue.read_policy}"
+  queue_read_policy   = "${module.miro_transformer_queue.read_policy}"
 }
 
 # Permissions

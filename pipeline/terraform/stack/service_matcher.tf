@@ -4,18 +4,20 @@ module "matcher_queue" {
   source = "git::https://github.com/wellcometrust/terraform-modules.git//sqs?ref=v11.6.0"
 
   topic_names = [
-    "${module.recorder_topic.name}"]
+    "${module.recorder_topic.name}",
+  ]
+
   topic_count = 1
 
-  queue_name  = "${local.namespace_hyphen}_matcher"
+  queue_name = "${local.namespace_hyphen}_matcher"
 
   // The records in the locktable expire after 3 minutes
   // The matcher is able to override locks that have expired
   // Wait slightly longer to make sure locks are expired
   visibility_timeout_seconds = 210
 
-  aws_region = "${var.aws_region}"
-  account_id = "${var.account_id}"
+  aws_region      = "${var.aws_region}"
+  account_id      = "${var.account_id}"
   alarm_topic_arn = "${var.dlq_alarm_arn}"
 }
 
@@ -58,10 +60,10 @@ module "matcher" {
 
   secret_env_vars_length = "0"
 
-  container_image = "${local.matcher_image}"
-  max_capacity = 10
+  container_image     = "${local.matcher_image}"
+  max_capacity        = 10
   messages_bucket_arn = "${aws_s3_bucket.messages.arn}"
-  queue_read_policy = "${module.matcher_queue.read_policy}"
+  queue_read_policy   = "${module.matcher_queue.read_policy}"
 }
 
 # Permissions

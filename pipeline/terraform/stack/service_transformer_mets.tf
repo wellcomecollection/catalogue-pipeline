@@ -1,12 +1,12 @@
 # Input queue
 module "mets_transformer_queue" {
-  source = "git::https://github.com/wellcometrust/terraform-modules.git//sqs?ref=v11.6.0"
+  source      = "git::https://github.com/wellcometrust/terraform-modules.git//sqs?ref=v11.6.0"
   queue_name  = "${local.namespace_hyphen}_mets_transformer"
   topic_names = ["${var.mets_adapter_topic_names}"]
   topic_count = "${var.mets_adapter_topic_count}"
 
-  aws_region    = "${var.aws_region}"
-  account_id    = "${var.account_id}"
+  aws_region      = "${var.aws_region}"
+  account_id      = "${var.account_id}"
   alarm_topic_arn = "${var.dlq_alarm_arn}"
 }
 
@@ -37,7 +37,7 @@ module "mets_transformer" {
     messages_bucket_name = "${aws_s3_bucket.messages.id}"
 
     mets_adapter_dynamo_table_name = "${var.mets_adapter_table_name}"
-    assume_role_arn = "${var.read_storage_s3_role_arn}"
+    assume_role_arn                = "${var.read_storage_s3_role_arn}"
   }
 
   env_vars_length = 6
@@ -45,11 +45,11 @@ module "mets_transformer" {
   secret_env_vars        = {}
   secret_env_vars_length = "0"
 
-  subnets    = ["${var.subnets}"]
-  aws_region = "${var.aws_region}"
-  max_capacity = 10
+  subnets             = ["${var.subnets}"]
+  aws_region          = "${var.aws_region}"
+  max_capacity        = 10
   messages_bucket_arn = "${aws_s3_bucket.messages.arn}"
-  queue_read_policy = "${module.mets_transformer_queue.read_policy}"
+  queue_read_policy   = "${module.mets_transformer_queue.read_policy}"
 }
 
 # Output topic
@@ -81,12 +81,13 @@ resource "aws_iam_role_policy" "read_mets_adapter_table" {
 data "aws_iam_policy_document" "assume_storage_read_role" {
   statement {
     effect = "Allow"
+
     actions = [
-      "sts:AssumeRole"
+      "sts:AssumeRole",
     ]
 
     resources = [
-      "${var.read_storage_s3_role_arn}"
+      "${var.read_storage_s3_role_arn}",
     ]
   }
 }
