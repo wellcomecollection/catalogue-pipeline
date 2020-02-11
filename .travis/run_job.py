@@ -13,9 +13,9 @@ def get_project_name():
     """Gets the project name either from the first argument of the
     command or from the environment
     """
-    if len(sys.argv) > 1:
+    try:
         return sys.argv[1]
-    else:
+    except IndexError:
         return os.environ["SBT_PROJECT"]
 
 
