@@ -9,8 +9,8 @@ locals {
   vhs_sierra_sourcedata_table_name  = data.terraform_remote_state.catalogue_infra_critical.outputs.vhs_sierra_table_name
 
   # Sierra adapter topics
-  sierra_merged_items_topic_name = data.terraform_remote_state.sierra_adapter.outputs.merged_items_topic_name
-  sierra_merged_bibs_topic_name  = data.terraform_remote_state.sierra_adapter.outputs.merged_bibs_topic_name
+  sierra_merged_items_topic_arn = data.terraform_remote_state.sierra_adapter.outputs.merged_items_topic_arn
+  sierra_merged_bibs_topic_arn  = data.terraform_remote_state.sierra_adapter.outputs.merged_bibs_topic_arn
 
   # Mets adapter VHS
   mets_adapter_read_policy = data.terraform_remote_state.catalogue_infra_critical.outputs.mets_dynamo_read_policy
@@ -21,7 +21,7 @@ locals {
 
   # Reindexer topics
   miro_reindexer_topic_name   = data.terraform_remote_state.shared_infra.outputs.catalogue_miro_reindex_topic_name
-  sierra_reindexer_topic_name = data.terraform_remote_state.shared_infra.outputs.catalogue_sierra_reindex_topic_name
+  sierra_reindexer_topic_arn = data.terraform_remote_state.shared_infra.outputs.catalogue_sierra_reindex_topic_arn
   mets_reindexer_topic_name   = data.terraform_remote_state.reindexer.outputs.mets_reindexer_topic_name
 
   # Infra stuff

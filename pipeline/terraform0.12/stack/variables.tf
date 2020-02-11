@@ -29,7 +29,7 @@ variable "mets_adapter_topic_names" {
 
 variable "mets_adapter_topic_count" {}
 
-variable "sierra_adapter_topic_names" {
+variable "sierra_adapter_topic_arns" {
   type = list(string)
 }
 
