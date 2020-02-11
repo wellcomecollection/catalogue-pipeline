@@ -1,18 +1,19 @@
 # Input queue
 
 module "recorder_queue" {
-  source = "git::https://github.com/wellcometrust/terraform-modules.git//sqs?ref=v11.6.0"
-  queue_name  = "${local.namespace_hyphen}_recorder"
+  source     = "git::https://github.com/wellcometrust/terraform-modules.git//sqs?ref=v11.6.0"
+  queue_name = "${local.namespace_hyphen}_recorder"
+
   topic_names = [
     "${module.miro_transformer_topic.name}",
     "${module.sierra_transformer_topic.name}",
-    "${module.mets_transformer_topic.name}"
+    "${module.mets_transformer_topic.name}",
   ]
 
   topic_count = 3
 
-  aws_region    = "${var.aws_region}"
-  account_id    = "${var.account_id}"
+  aws_region      = "${var.aws_region}"
+  account_id      = "${var.account_id}"
   alarm_topic_arn = "${var.dlq_alarm_arn}"
 }
 
@@ -50,10 +51,10 @@ module "recorder" {
 
   secret_env_vars_length = "0"
 
-  container_image = "${local.recorder_image}"
-  max_capacity = 10
+  container_image     = "${local.recorder_image}"
+  max_capacity        = 10
   messages_bucket_arn = "${aws_s3_bucket.messages.arn}"
-  queue_read_policy = "${module.recorder_queue.read_policy}"
+  queue_read_policy   = "${module.recorder_queue.read_policy}"
 }
 
 # Permissions

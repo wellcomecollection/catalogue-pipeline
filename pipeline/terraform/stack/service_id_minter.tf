@@ -1,16 +1,15 @@
 # Input queue
 
 module "id_minter_queue" {
-  source = "git::https://github.com/wellcometrust/terraform-modules.git//sqs?ref=v11.6.0"
+  source      = "git::https://github.com/wellcometrust/terraform-modules.git//sqs?ref=v11.6.0"
   queue_name  = "${local.namespace_hyphen}_id_minter"
   topic_names = ["${module.merger_topic.name}"]
   topic_count = 1
 
-  aws_region    = "${var.aws_region}"
-  account_id    = "${var.account_id}"
+  aws_region      = "${var.aws_region}"
+  account_id      = "${var.account_id}"
   alarm_topic_arn = "${var.dlq_alarm_arn}"
 }
-
 
 # Service
 
@@ -60,8 +59,9 @@ module "id_minter" {
   // To avoid exceeding the maximum nuber of connections to RDS,
   // the maximum capacity for the id minter should be no higher than 5
   max_capacity = 5
+
   messages_bucket_arn = "${aws_s3_bucket.messages.arn}"
-  queue_read_policy = "${module.id_minter_queue.read_policy}"
+  queue_read_policy   = "${module.id_minter_queue.read_policy}"
 }
 
 # Output topic

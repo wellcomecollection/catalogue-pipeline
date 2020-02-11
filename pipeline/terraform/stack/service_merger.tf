@@ -1,13 +1,13 @@
 # Input queue
 
 module "merger_queue" {
-  source = "git::https://github.com/wellcometrust/terraform-modules.git//sqs?ref=v11.6.0"
+  source      = "git::https://github.com/wellcometrust/terraform-modules.git//sqs?ref=v11.6.0"
   queue_name  = "${local.namespace_hyphen}_merger"
   topic_names = ["${module.matcher_topic.name}"]
   topic_count = 1
 
-  aws_region    = "${var.aws_region}"
-  account_id    = "${var.account_id}"
+  aws_region      = "${var.aws_region}"
+  account_id      = "${var.account_id}"
   alarm_topic_arn = "${var.dlq_alarm_arn}"
 }
 
@@ -45,8 +45,8 @@ module "merger" {
 
   secret_env_vars_length = "0"
 
-  container_image = "${local.merger_image}"
-  max_capacity = 10
+  container_image     = "${local.merger_image}"
+  max_capacity        = 10
   messages_bucket_arn = "${aws_s3_bucket.messages.arn}"
 
   queue_read_policy = "${module.merger_queue.read_policy}"
