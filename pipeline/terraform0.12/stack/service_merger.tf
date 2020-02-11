@@ -17,7 +17,7 @@ module "merger" {
   ]
 
   cluster_name  = aws_ecs_cluster.cluster.name
-  cluster_arn    = aws_ecs_cluster.cluster.id
+  cluster_arn    = aws_ecs_cluster.cluster.arn
 
   namespace_id  = aws_service_discovery_private_dns_namespace.namespace.id
 
@@ -52,8 +52,7 @@ module "merger_topic" {
   source = "../modules/topic"
 
   name       = "${local.namespace_hyphen}_merger"
-  role_names = [
-    module.merger.task_role_name]
+  role_names = [module.merger.task_role_name]
   messages_bucket_arn = aws_s3_bucket.messages.arn
 }
 

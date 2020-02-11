@@ -25,7 +25,7 @@ module "matcher" {
   ]
 
   cluster_name  = aws_ecs_cluster.cluster.name
-  cluster_arn    = aws_ecs_cluster.cluster.id
+  cluster_arn    = aws_ecs_cluster.cluster.arn
 
   namespace_id  = aws_service_discovery_private_dns_namespace.namespace.id
 
