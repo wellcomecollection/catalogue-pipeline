@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "eu-west-1"
+  region  = "eu-west-1"
   version = "~> 2.0"
 
   assume_role {
