@@ -5,7 +5,9 @@ variable "subnets" {
 }
 
 variable "vpc_id" {}
-variable "aws_region" {}
+variable "aws_region" {
+  default = "eu-west-1"
+}
 
 variable "account_id" {}
 
@@ -50,3 +52,4 @@ variable "private_subnets" {
 }
 
 variable "read_storage_s3_role_arn" {}
+

@@ -1,4 +1,3 @@
-
 module "logstash_transit" {
   source = "../modules/service/worker"
 
@@ -29,3 +28,4 @@ module "logstash_transit" {
 
   container_image = "wellcome/logstash_transit:edgelord"
 }
+
