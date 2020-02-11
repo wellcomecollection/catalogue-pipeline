@@ -51,8 +51,7 @@ module "recorder_topic" {
   source = "../modules/topic"
 
   name       = "${local.namespace_hyphen}_recorder"
-  role_names = [
-    module.recorder.task_role_name]
+  role_names = [module.recorder.task_role_name]
   messages_bucket_arn = aws_s3_bucket.messages.arn
 }
 
