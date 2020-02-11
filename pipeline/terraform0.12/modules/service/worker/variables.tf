@@ -27,6 +27,7 @@ variable "service_name" {
 }
 
 variable "desired_task_count" {
+  type = number
   default = 1
 }
 
@@ -40,9 +41,11 @@ variable "security_group_ids" {
 }
 
 variable "cpu" {
+  type = number
   default = 512
 }
 
 variable "memory" {
+  type = number
   default = 1024
 }

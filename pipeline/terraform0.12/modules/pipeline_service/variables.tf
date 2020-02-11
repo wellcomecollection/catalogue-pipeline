@@ -23,13 +23,16 @@ variable "security_group_ids" {
   type = list(string)
 }
 
-variable "max_capacity" {}
-
 variable "messages_bucket_arn" {}
 
 variable "queue_read_policy" {}
 
+variable "max_capacity" {
+  type = number
+}
+
 variable "desired_task_count" {
+  type = number
   default = 1
 }
 
@@ -38,13 +41,16 @@ variable "launch_type" {
 }
 
 variable "cpu" {
-  default = "256"
+  type = number
+  default = 256
 }
 
 variable "memory" {
-  default = "512"
+  type = number
+  default = 512
 }
 
 variable "min_capacity" {
+  type = number
   default = 0
 }
