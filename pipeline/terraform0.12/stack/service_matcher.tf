@@ -76,8 +76,7 @@ module "matcher_topic" {
   source = "../modules/topic"
 
   name       = "${local.namespace_hyphen}_matcher"
-  role_names = [
-    module.matcher.task_role_name]
+  role_names = [module.matcher.task_role_name]
   messages_bucket_arn = aws_s3_bucket.messages.arn
 }
 
