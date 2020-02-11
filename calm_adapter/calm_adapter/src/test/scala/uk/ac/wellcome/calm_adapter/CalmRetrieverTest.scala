@@ -9,6 +9,7 @@ import org.scalatest.{FunSpec, Matchers}
 import org.scalatest.concurrent.ScalaFutures
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers._
+
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 
