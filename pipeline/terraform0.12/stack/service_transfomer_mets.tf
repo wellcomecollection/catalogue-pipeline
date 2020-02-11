@@ -1,4 +1,3 @@
-# Input queue
 module "mets_transformer_queue" {
   source      = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
   queue_name  = "${local.namespace_hyphen}_mets_transformer"
@@ -6,8 +5,6 @@ module "mets_transformer_queue" {
   aws_region      = var.aws_region
   alarm_topic_arn = var.dlq_alarm_arn
 }
-
-# Service
 
 module "mets_transformer" {
   source = "../modules/pipeline_service"
@@ -21,7 +18,7 @@ module "mets_transformer" {
   cluster_name = aws_ecs_cluster.cluster.name
   cluster_arn   = aws_ecs_cluster.cluster.arn
 
-  namespace_id  = "${aws_service_discovery_private_dns_namespace.namespace.id}"
+  namespace_id  = aws_service_discovery_private_dns_namespace.namespace.id
 
   env_vars = {
     sns_arn              = module.mets_transformer_topic.arn
