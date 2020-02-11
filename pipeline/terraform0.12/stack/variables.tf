@@ -21,7 +21,7 @@ variable "miro_adapter_topic_arns" {
   type = list(string)
 }
 
-variable "mets_adapter_topic_names" {
+variable "mets_adapter_topic_arns" {
   type = list(string)
 }
 

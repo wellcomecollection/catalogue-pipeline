@@ -17,12 +17,12 @@ locals {
   mets_adapter_table_name  = data.terraform_remote_state.catalogue_infra_critical.outputs.mets_dynamo_table_name
 
   # Mets adapter topics
-  mets_adapter_topic_name = data.terraform_remote_state.mets_adapter.outputs.mets_adapter_topic_name
+  mets_adapter_topic_arn = data.terraform_remote_state.mets_adapter.outputs.mets_adapter_topic_arn
 
   # Reindexer topics
   miro_reindexer_topic_arn   = data.terraform_remote_state.shared_infra.outputs.catalogue_miro_reindex_topic_arn
   sierra_reindexer_topic_arn = data.terraform_remote_state.shared_infra.outputs.catalogue_sierra_reindex_topic_arn
-  mets_reindexer_topic_name   = data.terraform_remote_state.reindexer.outputs.mets_reindexer_topic_name
+  mets_reindexer_topic_arn   = data.terraform_remote_state.reindexer.outputs.mets_reindexer_topic_arn
 
   # Infra stuff
   infra_bucket                 = data.terraform_remote_state.shared_infra.outputs.infra_bucket

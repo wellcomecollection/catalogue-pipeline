@@ -29,9 +29,9 @@ module "catalogue_pipeline_20200131" {
     local.miro_updates_topic_arn,
   ]
 
-  mets_adapter_topic_names = [
-    local.mets_reindexer_topic_name,
-    local.mets_adapter_topic_name,
+  mets_adapter_topic_arns = [
+    local.mets_reindexer_topic_arn,
+    local.mets_adapter_topic_arn,
   ]
 
   # Elasticsearch
