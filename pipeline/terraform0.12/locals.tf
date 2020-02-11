@@ -1,5 +1,5 @@
 locals {
-  miro_updates_topic_name = data.terraform_remote_state.shared_infra.outputs.miro_updates_topic_name
+  miro_updates_topic_arn = data.terraform_remote_state.shared_infra.outputs.miro_updates_topic_arn
   vhs_miro_read_policy    = data.terraform_remote_state.catalogue_infra_critical.outputs.vhs_miro_read_policy
   storage_bucket          = "wellcomecollection-storage"
 
@@ -20,7 +20,7 @@ locals {
   mets_adapter_topic_name = data.terraform_remote_state.mets_adapter.outputs.mets_adapter_topic_name
 
   # Reindexer topics
-  miro_reindexer_topic_name   = data.terraform_remote_state.shared_infra.outputs.catalogue_miro_reindex_topic_name
+  miro_reindexer_topic_arn   = data.terraform_remote_state.shared_infra.outputs.catalogue_miro_reindex_topic_arn
   sierra_reindexer_topic_arn = data.terraform_remote_state.shared_infra.outputs.catalogue_sierra_reindex_topic_arn
   mets_reindexer_topic_name   = data.terraform_remote_state.reindexer.outputs.mets_reindexer_topic_name
 

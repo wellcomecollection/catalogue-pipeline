@@ -8,11 +8,8 @@ module "sierra_transformer_queue" {
 
 module "sierra_transformer" {
   source = "../modules/pipeline_service"
-
   service_name = "${local.namespace_hyphen}_sierra_transformer"
-
   container_image = local.transformer_sierra_image
-
   security_group_ids = [
     aws_security_group.service_egress.id,
     aws_security_group.interservice.id,
@@ -22,7 +19,6 @@ module "sierra_transformer" {
   cluster_arn   = aws_ecs_cluster.cluster.arn
 
   namespace_id  = aws_service_discovery_private_dns_namespace.namespace.id
-  logstash_host = local.logstash_host
 
   env_vars = {
     sns_arn                = module.sierra_transformer_topic.arn
@@ -31,12 +27,10 @@ module "sierra_transformer" {
     messages_bucket_name   = aws_s3_bucket.messages.id
     vhs_sierra_bucket_name = var.vhs_sierra_sourcedata_bucket_name
     vhs_sierra_table_name  = var.vhs_sierra_sourcedata_table_name
+    logstash_host = local.logstash_host
   }
 
-  env_vars_length = 6
-
   secret_env_vars        = {}
-  secret_env_vars_length = "0"
 
   subnets             = var.subnets
   aws_region          = var.aws_region
@@ -60,8 +54,8 @@ module "sierra_transformer_topic" {
   messages_bucket_arn = aws_s3_bucket.messages.arn
 }
 
-module "scaling_alarm" {
-  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.0"
+module "sierra_transformer_scaling_alarm" {
+  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.2"
   queue_name = module.sierra_transformer_queue.name
 
   queue_high_actions = [module.sierra_transformer.scale_up_arn]

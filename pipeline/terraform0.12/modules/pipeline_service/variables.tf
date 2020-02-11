@@ -14,13 +14,9 @@ variable "secret_env_vars" {
   type = map(string)
 }
 
-variable "secret_env_vars_length" {}
-
 variable "env_vars" {
   type = map(string)
 }
-
-variable "env_vars_length" {}
 
 variable "security_group_ids" {
   default = []
@@ -28,8 +24,6 @@ variable "security_group_ids" {
 }
 
 variable "max_capacity" {}
-
-variable "logstash_host" {}
 
 variable "messages_bucket_arn" {}
 

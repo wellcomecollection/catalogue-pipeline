@@ -17,23 +17,17 @@ variable "rds_ids_access_security_group_id" {}
 
 variable "release_label" {}
 
-variable "miro_adapter_topic_names" {
+variable "miro_adapter_topic_arns" {
   type = list(string)
 }
-
-variable "miro_adapter_topic_count" {}
 
 variable "mets_adapter_topic_names" {
   type = list(string)
 }
 
-variable "mets_adapter_topic_count" {}
-
 variable "sierra_adapter_topic_arns" {
   type = list(string)
 }
-
-variable "sierra_adapter_topic_count" {}
 
 variable "vhs_miro_read_policy" {}
 
