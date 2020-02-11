@@ -260,6 +260,22 @@ class MetsDataTest
     result.right.get.data.thumbnail shouldBe None
   }
 
+  it("uses the IIIF info.json for image URLs") {
+    val metsData = MetsData(
+      recordIdentifier = randomAlphanumeric(10),
+      accessConditionDz = Some("CC-BY-NC"),
+      fileReferences = List(
+        FileReference("l", "location.jp2", Some("image/jp2"))
+      )
+    )
+    val result = metsData.toWork(1)
+    result shouldBe a[Right[_, _]]
+    result.right.get.data.images.head.location shouldBe DigitalLocation(
+      s"https://dlcs.io/iiif-img/wellcome/5/location.jp2/info.json",
+      LocationType("iiif-image"),
+    )
+  }
+
   it("creates a work with a single accessCondition") {
     val result = MetsData(
       recordIdentifier = "ID",
@@ -291,12 +307,11 @@ class MetsDataTest
     ).toWork(1)
     result shouldBe a[Right[_, _]]
     val images = result.right.get.data.images
-    images should have length 4
+    images should have length 3
     images.map(_.id.allSourceIdentifiers.head.value) should contain theSameElementsAs List(
       "ID/A",
       "ID/B",
-      "ID/C",
-      "ID/D")
+      "ID/C")
   }
 
   it("creates a work with a single accessCondition including usage terms") {

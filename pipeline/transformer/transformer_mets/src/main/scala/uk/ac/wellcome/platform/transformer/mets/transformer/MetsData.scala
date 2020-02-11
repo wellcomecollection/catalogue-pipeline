@@ -12,7 +12,7 @@ case class MetsData(
   accessConditionStatus: Option[String] = None,
   accessConditionUsage: Option[String] = None,
   fileReferences: List[FileReference] = Nil
-) {
+) extends MetsDataImageUtils {
 
   def toWork(version: Int): Either[Throwable, UnidentifiedInvisibleWork] =
     for {
@@ -111,12 +111,10 @@ case class MetsData(
       ontologyType = "Work",
       value = recordIdentifier)
 
-  private val thumbnailDim = "200"
-
   private def thumbnail(maybeLicense: Option[License], bnumber: String) =
     for {
-      fileReference <- fileReferences.find(isImage)
-      url <- buildImageUrl(bnumber, fileReference)
+      fileReference <- fileReferences.find(isThumbnail)
+      url <- buildThumbnailUrl(bnumber, fileReference)
     } yield
       DigitalLocation(
         url = url,
@@ -126,39 +124,15 @@ case class MetsData(
 
   private val images = fileReferences
     .filter(isImage)
-    .map { fileReference =>
-      UnmergedImage(
-        getImageSourceId(recordIdentifier, fileReference.id),
-        DigitalLocation(
-          url = buildImageUrl(recordIdentifier, fileReference).getOrElse(""),
-          locationType = LocationType("iiif-image")
+    .flatMap { fileReference =>
+      buildImageUrl(recordIdentifier, fileReference).map { url =>
+        UnmergedImage(
+          getImageSourceId(recordIdentifier, fileReference.id),
+          DigitalLocation(
+            url = url,
+            locationType = LocationType("iiif-image")
+          )
         )
-      )
+      }
     }
-
-  private def isImage(fileReference: FileReference): Boolean =
-    fileReference.mimeType match {
-      case Some(m) => m == "application/pdf" || m.startsWith("image")
-      case None    => true
-    }
-
-  private def getImageSourceId(bnumber: String,
-                               fileId: String): SourceIdentifier =
-    SourceIdentifier(
-      identifierType = IdentifierType("mets-image"),
-      ontologyType = "Image",
-      value = s"$bnumber/$fileId"
-    )
-
-  private def buildImageUrl(bnumber: String, fileReference: FileReference) = {
-    fileReference.mimeType match {
-      case Some(m) if m startsWith ("video/") => None
-      case Some(m) if m equals ("application/pdf") =>
-        Some(
-          s"https://wellcomelibrary.org/pdfthumbs/${bnumber}/0/${fileReference.location}.jpg")
-      case _ =>
-        Some(
-          s"https://dlcs.io/thumbs/wellcome/5/${fileReference.location}/full/!$thumbnailDim,$thumbnailDim/0/default.jpg")
-    }
-  }
 }
