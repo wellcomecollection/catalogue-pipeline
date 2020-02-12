@@ -1,4 +1,4 @@
-module "catalogue_pipeline_20200131" {
+module "catalogue_pipeline_20200211" {
   source = "./stack"
 
   namespace = "catalogue-20200211"
