@@ -8,7 +8,7 @@ import uk.ac.wellcome.models.work.internal.{
   UnidentifiedRedirectedWork,
   UnidentifiedWork
 }
-import uk.ac.wellcome.platform.merger.model.MergedWork
+import uk.ac.wellcome.platform.merger.model.{MergedWork, PotentialMergedWork}
 
 class MergerRuleTest extends FunSpec with WorksGenerators with Matchers {
   it("merges a pair of works in a list") {

@@ -6,9 +6,9 @@ import uk.ac.wellcome.models.work.internal.{
   UnidentifiedInvisibleWork,
   UnidentifiedWork
 }
-import uk.ac.wellcome.platform.merger.rules.WorkTagPartitioner
+import uk.ac.wellcome.platform.merger.rules.WorkTagPairPartitioner
 
-trait SierraMetsPartitioner extends WorkTagPartitioner {
+trait SierraMetsPartitioner extends WorkTagPairPartitioner {
 
   def tagWork(work: BaseWork): WorkTag =
     work match {

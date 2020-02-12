@@ -14,6 +14,16 @@ trait Partitioner {
 case class Partition(potentialMergedWork: PotentialMergedWork,
                      remainingWorks: Seq[BaseWork])
 
+trait WorkTagPairPartitioner extends WorkTagPartitioner {
+  override def partitionWorks(works: Seq[BaseWork]): Option[Partition] =
+    super.partitionWorks(works).flatMap {
+      case Partition(PotentialMergedWork(_, worksToRedirect), _)
+          if worksToRedirect.size != 1 =>
+        None
+      case partition => Some(partition)
+    }
+}
+
 trait WorkTagPartitioner extends Partitioner {
 
   sealed trait WorkTag

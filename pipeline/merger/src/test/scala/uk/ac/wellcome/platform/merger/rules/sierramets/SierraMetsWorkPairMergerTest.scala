@@ -37,10 +37,10 @@ class SierraMetsWorkPairMergerTest
               data,
               sierraWork.ontologyType,
               sierraWork.identifiedType),
-            redirectedWork)) =>
+            redirectedWorks)) =>
         data shouldBe sierraWork.data.copy(items = expectedItems)
 
-        redirectedWork shouldBe UnidentifiedRedirectedWork(
+        redirectedWorks.head shouldBe UnidentifiedRedirectedWork(
           sourceIdentifier = metsWork.sourceIdentifier,
           version = metsWork.version,
           redirect = IdentifiableRedirect(sierraWork.sourceIdentifier))
@@ -145,10 +145,10 @@ class SierraMetsWorkPairMergerTest
               data,
               sierraWork.ontologyType,
               sierraWork.identifiedType),
-            redirectedWork)) =>
+            redirectedWorks)) =>
         data shouldBe sierraWork.data.copy(items = expectedItems)
 
-        redirectedWork shouldBe UnidentifiedRedirectedWork(
+        redirectedWorks.head shouldBe UnidentifiedRedirectedWork(
           sourceIdentifier = metsWork.sourceIdentifier,
           version = metsWork.version,
           redirect = IdentifiableRedirect(sierraWork.sourceIdentifier))
@@ -192,10 +192,10 @@ class SierraMetsWorkPairMergerTest
               data,
               sierraWork.ontologyType,
               sierraWork.identifiedType),
-            redirectedWork)) =>
+            redirectedWorks)) =>
         data shouldBe sierraWork.data.copy(items = items ++ metsWork.data.items)
 
-        redirectedWork shouldBe UnidentifiedRedirectedWork(
+        redirectedWorks.head shouldBe UnidentifiedRedirectedWork(
           sourceIdentifier = metsWork.sourceIdentifier,
           version = metsWork.version,
           redirect = IdentifiableRedirect(sierraWork.sourceIdentifier))

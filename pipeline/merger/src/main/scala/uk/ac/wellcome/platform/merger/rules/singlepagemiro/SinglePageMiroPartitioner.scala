@@ -3,11 +3,11 @@ package uk.ac.wellcome.platform.merger.rules.singlepagemiro
 import uk.ac.wellcome.models.work.internal.{
   BaseWork,
   IdentifierType,
-  UnidentifiedWork,
+  UnidentifiedWork
 }
-import uk.ac.wellcome.platform.merger.rules.WorkTagPartitioner
+import uk.ac.wellcome.platform.merger.rules.WorkTagPairPartitioner
 
-trait SierraMiroPartitioner extends WorkTagPartitioner {
+trait SinglePageMiroPartitioner extends WorkTagPairPartitioner {
 
   protected def tagWork(work: BaseWork): WorkTag =
     work match {

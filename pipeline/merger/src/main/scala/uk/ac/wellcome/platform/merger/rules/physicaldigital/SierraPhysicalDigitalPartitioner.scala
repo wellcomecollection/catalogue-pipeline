@@ -1,9 +1,9 @@
 package uk.ac.wellcome.platform.merger.rules.physicaldigital
 
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.merger.rules.WorkTagPartitioner
+import uk.ac.wellcome.platform.merger.rules.WorkTagPairPartitioner
 
-trait SierraPhysicalDigitalPartitioner extends WorkTagPartitioner {
+trait SierraPhysicalDigitalPartitioner extends WorkTagPairPartitioner {
 
   def tagWork(work: BaseWork): WorkTag =
     work match {
