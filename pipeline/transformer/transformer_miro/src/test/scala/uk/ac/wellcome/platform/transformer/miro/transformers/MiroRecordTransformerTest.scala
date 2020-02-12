@@ -281,7 +281,8 @@ class MiroRecordTransformerTest
       "https://iiif.wellcomecollection.org/image/B0011308.jpg/info.json",
       LocationType("iiif-image"),
       Some(License.CCBY),
-      None)
+      None
+    )
     work.data.items shouldBe List(
       Item(id = Unidentifiable, locations = List(expectedLocation))
     )

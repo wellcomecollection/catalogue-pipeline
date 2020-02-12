@@ -207,6 +207,11 @@ case object WorksIndexConfig extends IndexConfig {
     keywordField("reason")
   )
 
+  val images = objectField("images").fields(
+    id,
+    location("location")
+  )
+
   val data: ObjectField =
     objectField("data").fields(
       otherIdentifiers,
@@ -236,7 +241,8 @@ case object WorksIndexConfig extends IndexConfig {
           .analyzer(pathAnalyzer.name)
           .fields(keywordField("keyword")),
         tokenCountField("depth").analyzer("standard")
-      )
+      ),
+      images
     )
 
   val fields: Seq[FieldDefinition with Product with Serializable] =

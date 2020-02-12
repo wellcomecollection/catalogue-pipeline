@@ -4,7 +4,7 @@ import uk.ac.wellcome.models.work.internal.{DigitalLocation, LocationType}
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 
 trait MiroLocations
-    extends MiroImageApiURL
+    extends MiroImage
     with MiroLicenses
     with MiroContributorCodes {
 

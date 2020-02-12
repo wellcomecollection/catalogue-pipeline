@@ -26,7 +26,8 @@ class MiroItemsTest
             "https://iiif.wellcomecollection.org/image/B0011308.jpg/info.json",
             LocationType("iiif-image"),
             Some(License.CC0),
-            credit = Some("Ezra Feilden")))
+            credit = Some("Ezra Feilden")
+          ))
         ))
     }
   }

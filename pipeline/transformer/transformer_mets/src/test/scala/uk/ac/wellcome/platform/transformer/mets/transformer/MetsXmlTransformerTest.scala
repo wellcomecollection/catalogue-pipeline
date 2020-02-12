@@ -18,8 +18,7 @@ class MetsXmlTransformerTest extends FunSpec with Matchers with MetsGenerators {
         accessConditionDz = Some("CC-BY-NC"),
         accessConditionStatus = Some("Open"),
         accessConditionUsage = Some("Some terms"),
-        thumbnailLocation =
-          Some(FileReference("b30246039_0001.jp2", "image/jp2"))
+        fileReferences = createFileReferences(6, "b30246039")
       )
     )
   }
@@ -39,8 +38,7 @@ class MetsXmlTransformerTest extends FunSpec with Matchers with MetsGenerators {
         recordIdentifier = "b22012692",
         accessConditionDz = Some("PDM"),
         accessConditionStatus = Some("Open"),
-        thumbnailLocation =
-          Some(FileReference("b22012692_0001_0001.jp2", "image/jp2"))
+        fileReferences = createFileReferences(2, "b22012692", Some(1))
       )
     )
   }
@@ -63,8 +61,7 @@ class MetsXmlTransformerTest extends FunSpec with Matchers with MetsGenerators {
         recordIdentifier = "b30246039",
         accessConditionDz = Some("INC"),
         accessConditionStatus = None,
-        thumbnailLocation =
-          Some(FileReference("b30246039_0001.jp2", "image/jp2"))
+        fileReferences = createFileReferences(2, "b30246039")
       )
     )
   }
@@ -100,6 +97,25 @@ class MetsXmlTransformerTest extends FunSpec with Matchers with MetsGenerators {
     new MetsXmlTransformer(store).transform(metsLocation)
   }
 
+  def createFileReferences(n: Int,
+                           bumber: String,
+                           manifestN: Option[Int] = None): List[FileReference] =
+    (1 to n).toList.map { i =>
+      FileReference(
+        f"FILE_$i%04d_OBJECTS",
+        manifestN match {
+          case None    => f"$bumber%s_$i%04d.jp2"
+          case Some(n) => f"$bumber%s_$n%04d_$i%04d.jp2"
+        },
+        Some("image/jp2")
+      )
+    }
+
   def loadXmlFile(path: String) =
     IOUtils.toString(getClass.getResourceAsStream(path), "UTF-8")
+
+  def createIds(n: Int): List[String] =
+    (1 to n).map { idx =>
+      f"FILE_$idx%04d_OBJECTS"
+    }.toList
 }

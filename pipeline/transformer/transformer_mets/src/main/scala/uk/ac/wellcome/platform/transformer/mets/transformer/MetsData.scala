@@ -1,6 +1,8 @@
 package uk.ac.wellcome.platform.transformer.mets.transformer
 
-import cats.implicits._
+import cats.syntax.traverse._
+import cats.instances.either._
+import cats.instances.option._
 import org.apache.commons.lang3.StringUtils.equalsIgnoreCase
 import uk.ac.wellcome.models.work.internal._
 
@@ -9,7 +11,7 @@ case class MetsData(
   accessConditionDz: Option[String] = None,
   accessConditionStatus: Option[String] = None,
   accessConditionUsage: Option[String] = None,
-  thumbnailLocation: Option[FileReference] = None
+  fileReferences: List[FileReference] = Nil
 ) {
 
   def toWork(version: Int): Either[Throwable, UnidentifiedInvisibleWork] =
@@ -32,6 +34,7 @@ case class MetsData(
       items = List(item),
       mergeCandidates = List(mergeCandidate),
       thumbnail = thumbnail,
+      images = images
     )
 
   private def mergeCandidate = MergeCandidate(
@@ -108,12 +111,10 @@ case class MetsData(
       ontologyType = "Work",
       value = recordIdentifier)
 
-  private val thumbnailDim = "200"
-
   private def thumbnail(maybeLicense: Option[License], bnumber: String) =
     for {
-      fileReference <- thumbnailLocation
-      url <- buildThumbnailUrl(fileReference, bnumber)
+      fileReference <- fileReferences.find(ImageUtils.isThumbnail)
+      url <- ImageUtils.buildThumbnailUrl(bnumber, fileReference)
     } yield
       DigitalLocation(
         url = url,
@@ -121,14 +122,18 @@ case class MetsData(
         license = maybeLicense
       )
 
-  private def buildThumbnailUrl(fileReference: FileReference, bnumber: String) =
-    fileReference.mimeType match {
-      case m if m equals ("application/pdf") =>
-        Some(
-          s"https://wellcomelibrary.org/pdfthumbs/${bnumber}/0/${fileReference.location}.jpg")
-      case m if m startsWith "image/" =>
-        Some(
-          s"https://dlcs.io/thumbs/wellcome/5/${fileReference.location}/full/!$thumbnailDim,$thumbnailDim/0/default.jpg")
-      case _ => None
+  private val images = fileReferences
+    .filter(ImageUtils.isImage)
+    .flatMap { fileReference =>
+      ImageUtils.buildImageUrl(recordIdentifier, fileReference).map { url =>
+        UnmergedImage(
+          ImageUtils
+            .getImageSourceId(recordIdentifier, fileReference.id),
+          DigitalLocation(
+            url = url,
+            locationType = LocationType("iiif-image")
+          )
+        )
+      }
     }
 }
