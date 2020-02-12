@@ -37,17 +37,17 @@ trait WorkTagPartitioner extends Partitioner {
   def partitionWorks(works: Seq[BaseWork]): Option[Partition] = {
     val taggedWorks = works.groupBy(tagWork)
     val targetWorks = taggedWorks.get(Target).toList.flatten
-    val redirectedWorks = taggedWorks.get(Redirected).toList.flatten
+    val worksToRedirect = taggedWorks.get(Redirected).toList.flatten
     val remaining = taggedWorks.get(PassThrough).toList.flatten
-    (targetWorks, redirectedWorks) match {
+    (targetWorks, worksToRedirect) match {
       case (List(target: UnidentifiedWork), _ :: _) =>
-        val redirectedTransformedWorks = redirectedWorks.flatMap {
+        val transformedWorksToRedirect = worksToRedirect.flatMap {
           case work: TransformedBaseWork => Some(work)
           case _                         => None
         }
         Some(
           Partition(
-            PotentialMergedWork(target, redirectedTransformedWorks),
+            PotentialMergedWork(target, transformedWorksToRedirect),
             remaining))
       case _ => None
     }

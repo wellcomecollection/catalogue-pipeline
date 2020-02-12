@@ -15,10 +15,10 @@ object MergedWork {
 }
 
 case class PotentialMergedWork(target: UnidentifiedWork,
-                               redirectedWorks: Seq[TransformedBaseWork])
+                               worksToRedirect: Seq[TransformedBaseWork])
 
 object PotentialMergedWork {
   def apply(target: UnidentifiedWork,
-            redirectedWork: TransformedBaseWork): PotentialMergedWork =
-    PotentialMergedWork(target, Seq(redirectedWork))
+            workToRedirect: TransformedBaseWork): PotentialMergedWork =
+    PotentialMergedWork(target, Seq(workToRedirect))
 }

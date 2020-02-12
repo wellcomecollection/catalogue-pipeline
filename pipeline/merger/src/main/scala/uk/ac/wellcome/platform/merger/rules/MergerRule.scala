@@ -14,8 +14,8 @@ trait MergerRule { this: Partitioner with WorkPairMerger =>
   final def mergeAndRedirectWorks(works: Seq[BaseWork]): Seq[BaseWork] =
     partitionWorks(works) match {
       case Some(
-          Partition(PotentialMergedWork(target, redirectedWorks), remaining)) =>
-        foldWorkPairs(target, redirectedWorks)
+          Partition(PotentialMergedWork(target, worksToRedirect), remaining)) =>
+        foldWorkPairs(target, worksToRedirect)
           .map(result => updateVersion(result) ++ remaining)
           .getOrElse(works)
       case None => works
