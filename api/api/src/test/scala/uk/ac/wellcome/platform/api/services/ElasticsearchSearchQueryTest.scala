@@ -1,3 +1,5 @@
+package uk.ac.wellcome.platform.api.services
+
 import com.sksamuel.elastic4s.{ElasticError, Index}
 import com.sksamuel.elastic4s.requests.searches.{SearchHit, SearchResponse}
 import org.scalatest.{FunSpec, Matchers}
@@ -21,7 +23,7 @@ import uk.ac.wellcome.json.JsonUtil._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class ElasticsearchQueryTest
+class ElasticsearchSearchQueryTest
     extends FunSpec
     with Matchers
     with ElasticsearchFixtures
