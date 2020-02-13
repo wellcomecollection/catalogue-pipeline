@@ -7,6 +7,10 @@ provider "aws" {
   }
 }
 
+provider "template" {
+  version = "~> 2.1"
+}
+
 terraform {
   backend "s3" {
     role_arn = "arn:aws:iam::760097843905:role/platform-developer"
