@@ -2,14 +2,16 @@ package uk.ac.wellcome.calm_adapter
 
 import scala.concurrent.{ExecutionContext, Future}
 import java.time.Instant
+import akka.NotUsed
 import akka.stream.ActorMaterializer
+import akka.stream.scaladsl._
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers._
 import akka.http.scaladsl.unmarshalling.Unmarshal
 
 trait CalmRetriever {
 
-  def apply(query: CalmQuery): Future[List[CalmRecord]]
+  def apply(query: CalmQuery): Source[CalmRecord, NotUsed]
 }
 
 /** Retrieves a list of CALM records from the API given some query.
@@ -20,7 +22,10 @@ trait CalmRetriever {
   * the response including a session cookie which is used on subsequenet
   * requests, one for each of the indvidual records.
   */
-class HttpCalmRetriever(url: String, username: String, password: String)(
+class HttpCalmRetriever(url: String,
+                        username: String,
+                        password: String,
+                        concurrentHttpConnections: Int = 2)(
   implicit
   ec: ExecutionContext,
   materializer: ActorMaterializer,
@@ -29,18 +34,16 @@ class HttpCalmRetriever(url: String, username: String, password: String)(
 
   type Result[T] = Either[Throwable, T]
 
-  def apply(query: CalmQuery): Future[List[CalmRecord]] =
-    callApi(CalmSearchRequest(query), searchResponseParser)
-      .flatMap {
+  def apply(query: CalmQuery): Source[CalmRecord, NotUsed] =
+    Source
+      .fromFuture(callApi(CalmSearchRequest(query), searchResponseParser))
+      .mapConcat {
         case CalmSession(numHits, cookie) =>
-          runSequentially(
-            0 until numHits,
-            (pos: Int) =>
-              callApi(
-                CalmSummaryRequest(pos),
-                summaryResponseParser,
-                Some(cookie))
-          )
+          (0 until numHits).map(pos => (pos, cookie))
+      }
+      .mapAsync(concurrentHttpConnections) {
+        case (pos, cookie) =>
+          callApi(CalmSummaryRequest(pos), summaryResponseParser, Some(cookie))
       }
 
   def callApi[T](xmlRequest: CalmXmlRequest,
@@ -110,15 +113,4 @@ class HttpCalmRetriever(url: String, username: String, password: String)(
       }
       .headOption
       .getOrElse(throw new Exception("Timestamp not found in CALM response"))
-
-  /** Utility method to apply a function returning a Future on a sequence of
-    *  inputs, waiting for the result of one Future before proceeding to dispatch
-    *  the next. */
-  def runSequentially[I, O](inputs: Seq[I],
-                            f: I => Future[O]): Future[List[O]] =
-    inputs.foldLeft(Future.successful[List[O]](Nil)) { (future, input) =>
-      future.flatMap { results =>
-        f(input).map(results :+ _)
-      }
-    }
 }

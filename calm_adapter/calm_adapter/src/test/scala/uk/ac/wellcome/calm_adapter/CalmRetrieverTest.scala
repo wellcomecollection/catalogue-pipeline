@@ -7,6 +7,8 @@ import scala.xml.XML
 import java.time.{Instant, LocalDate}
 import org.scalatest.{FunSpec, Matchers}
 import org.scalatest.concurrent.ScalaFutures
+import akka.stream.ActorMaterializer
+import akka.stream.scaladsl._
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers._
 
@@ -34,23 +36,25 @@ class CalmRetrieverTest
         List("RecordID" -> "1", "keyA" -> "valueA", "keyB" -> "valueB")),
       summaryResponse(List("RecordID" -> "2", "keyC" -> "valueC"))
     )
-    withCalmRetriever(responses) {
-      case (calmRetriever, _) =>
-        whenReady(calmRetriever(query)) { records =>
-          records shouldBe List(
-            CalmRecord(
-              "1",
-              Map(
-                "RecordID" -> List("1"),
-                "keyA" -> List("valueA"),
-                "keyB" -> List("valueB")),
-              retrievedAt),
-            CalmRecord(
-              "2",
-              Map("RecordID" -> List("2"), "keyC" -> List("valueC")),
-              retrievedAt),
-          )
-        }
+    withMaterializer { implicit materializer =>
+      withCalmRetriever(responses) {
+        case (calmRetriever, _) =>
+          whenReady(calmRetriever(query).runWith(Sink.seq)) { records =>
+            records shouldBe List(
+              CalmRecord(
+                "1",
+                Map(
+                  "RecordID" -> List("1"),
+                  "keyA" -> List("valueA"),
+                  "keyB" -> List("valueB")),
+                retrievedAt),
+              CalmRecord(
+                "2",
+                Map("RecordID" -> List("2"), "keyC" -> List("valueC")),
+                retrievedAt),
+            )
+          }
+      }
     }
   }
 
@@ -60,18 +64,20 @@ class CalmRetrieverTest
       summaryResponse(List("RecordID" -> "1")),
       summaryResponse(List("RecordID" -> "2"))
     )
-    withCalmRetriever(responses) {
-      case (calmRetriever, httpClient) =>
-        whenReady(calmRetriever(query)) { records =>
-          val credentialsHeaders = httpClient.requests.map { request =>
-            request.headers.collect { case auth: Authorization => auth }
+    withMaterializer { implicit materializer =>
+      withCalmRetriever(responses) {
+        case (calmRetriever, httpClient) =>
+          whenReady(calmRetriever(query).runWith(Sink.seq)) { records =>
+            val credentialsHeaders = httpClient.requests.map { request =>
+              request.headers.collect { case auth: Authorization => auth }
+            }
+            credentialsHeaders shouldBe List(
+              List(Authorization(BasicHttpCredentials(username, password))),
+              List(Authorization(BasicHttpCredentials(username, password))),
+              List(Authorization(BasicHttpCredentials(username, password))),
+            )
           }
-          credentialsHeaders shouldBe List(
-            List(Authorization(BasicHttpCredentials(username, password))),
-            List(Authorization(BasicHttpCredentials(username, password))),
-            List(Authorization(BasicHttpCredentials(username, password))),
-          )
-        }
+      }
     }
   }
 
@@ -81,21 +87,29 @@ class CalmRetrieverTest
       summaryResponse(List("RecordID" -> "1")),
       summaryResponse(List("RecordID" -> "2"))
     )
-    withCalmRetriever(responses) {
-      case (calmRetriever, httpClient) =>
-        whenReady(calmRetriever(query)) { records =>
-          val soapHeaders = httpClient.requests.map { request =>
-            request.headers.collect { case header: RawHeader => header }
+    withMaterializer { implicit materializer =>
+      withCalmRetriever(responses) {
+        case (calmRetriever, httpClient) =>
+          whenReady(calmRetriever(query).runWith(Sink.seq)) { records =>
+            val soapHeaders = httpClient.requests.map { request =>
+              request.headers.collect { case header: RawHeader => header }
+            }
+            soapHeaders shouldBe List(
+              List(
+                RawHeader(
+                  "SOAPAction",
+                  "http://ds.co.uk/cs/webservices/Search")),
+              List(
+                RawHeader(
+                  "SOAPAction",
+                  "http://ds.co.uk/cs/webservices/Search")),
+              List(
+                RawHeader(
+                  "SOAPAction",
+                  "http://ds.co.uk/cs/webservices/Search")),
+            )
           }
-          soapHeaders shouldBe List(
-            List(
-              RawHeader("SOAPAction", "http://ds.co.uk/cs/webservices/Search")),
-            List(
-              RawHeader("SOAPAction", "http://ds.co.uk/cs/webservices/Search")),
-            List(
-              RawHeader("SOAPAction", "http://ds.co.uk/cs/webservices/Search")),
-          )
-        }
+      }
     }
   }
 
@@ -105,18 +119,20 @@ class CalmRetrieverTest
       summaryResponse(List("RecordID" -> "1")),
       summaryResponse(List("RecordID" -> "2"))
     )
-    withCalmRetriever(responses) {
-      case (calmRetriever, httpClient) =>
-        whenReady(calmRetriever(query)) { records =>
-          val cookieHeaders = httpClient.requests.map { request =>
-            request.headers.collect { case cookie: Cookie => cookie }
+    withMaterializer { implicit materializer =>
+      withCalmRetriever(responses) {
+        case (calmRetriever, httpClient) =>
+          whenReady(calmRetriever(query).runWith(Sink.seq)) { records =>
+            val cookieHeaders = httpClient.requests.map { request =>
+              request.headers.collect { case cookie: Cookie => cookie }
+            }
+            cookieHeaders shouldBe List(
+              Nil,
+              List(Cookie(cookie)),
+              List(Cookie(cookie)),
+            )
           }
-          cookieHeaders shouldBe List(
-            Nil,
-            List(Cookie(cookie)),
-            List(Cookie(cookie)),
-          )
-        }
+      }
     }
   }
 
@@ -130,7 +146,7 @@ class CalmRetrieverTest
     withMaterializer { implicit materializer =>
       withCalmRetriever(responses) {
         case (calmRetriever, httpClient) =>
-          whenReady(calmRetriever(query)) { records =>
+          whenReady(calmRetriever(query).runWith(Sink.seq)) { records =>
             val hitPositions = httpClient.requests.map { request =>
               val body = Await
                 .result(request.entity.toStrict(0 seconds), 0 seconds)
@@ -154,11 +170,13 @@ class CalmRetrieverTest
       searchResponse(1, None),
       summaryResponse(List("RecordID" -> "1"))
     )
-    withCalmRetriever(responses) {
-      case (calmRetriever, _) =>
-        whenReady(calmRetriever(query).failed) { failure =>
-          failure.getMessage shouldBe "Session cookie not found in CALM response"
-        }
+    withMaterializer { implicit materializer =>
+      withCalmRetriever(responses) {
+        case (calmRetriever, _) =>
+          whenReady(calmRetriever(query).runWith(Sink.seq).failed) { failure =>
+            failure.getMessage shouldBe "Session cookie not found in CALM response"
+          }
+      }
     }
   }
 
@@ -168,11 +186,13 @@ class CalmRetrieverTest
       summaryResponse(List("RecordID" -> "1")),
       HttpResponse(500, Nil, "Error", protocol)
     )
-    withCalmRetriever(responses) {
-      case (calmRetriever, _) =>
-        whenReady(calmRetriever(query).failed) { failure =>
-          failure.getMessage shouldBe "Unexpected status from CALM API: 500 Internal Server Error"
-        }
+    withMaterializer { implicit materializer =>
+      withCalmRetriever(responses) {
+        case (calmRetriever, _) =>
+          whenReady(calmRetriever(query).runWith(Sink.seq).failed) { failure =>
+            failure.getMessage shouldBe "Unexpected status from CALM API: 500 Internal Server Error"
+          }
+      }
     }
   }
 
@@ -181,11 +201,13 @@ class CalmRetrieverTest
       searchResponse(1),
       summaryResponse(Nil)
     )
-    withCalmRetriever(responses) {
-      case (calmRetriever, _) =>
-        whenReady(calmRetriever(query).failed) { failure =>
-          failure.getMessage shouldBe "RecordID not found"
-        }
+    withMaterializer { implicit materializer =>
+      withCalmRetriever(responses) {
+        case (calmRetriever, _) =>
+          whenReady(calmRetriever(query).runWith(Sink.seq).failed) { failure =>
+            failure.getMessage shouldBe "RecordID not found"
+          }
+      }
     }
   }
 
@@ -235,11 +257,11 @@ class CalmRetrieverTest
     )
 
   def withCalmRetriever[R](responses: List[HttpResponse])(
-    testWith: TestWith[(CalmRetriever, CalmHttpTestClient), R]) =
-    withMaterializer { implicit materializer =>
-      implicit val httpClient = new CalmHttpTestClient(responses)
-      testWith((new HttpCalmRetriever(url, username, password), httpClient))
-    }
+    testWith: TestWith[(CalmRetriever, CalmHttpTestClient), R])(
+    implicit materializer: ActorMaterializer) = {
+    implicit val httpClient = new CalmHttpTestClient(responses)
+    testWith((new HttpCalmRetriever(url, username, password), httpClient))
+  }
 
   class CalmHttpTestClient(var responses: List[HttpResponse])
       extends CalmHttpClient {

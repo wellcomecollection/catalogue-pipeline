@@ -146,7 +146,7 @@ class MetsAdapterWorkerServiceTest
 
   it("doesn't process the update when storageSpace isn't equal to 'digitised'") {
     val vhs = createStore()
-    withWorkerService(bagRetriever, vhs, createBrokenMsgSender(_)) {
+    withWorkerService(bagRetriever, vhs) {
       case (workerService, QueuePair(queue, dlq), topic) =>
         sendNotificationToSQS(queue, ingestUpdate("something-different", "123"))
         Thread.sleep(2000)
