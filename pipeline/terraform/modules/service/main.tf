@@ -1,5 +1,5 @@
 module "service" {
-  source = "../service/worker"
+  source = "../worker"
 
   env_vars        = var.env_vars
   secret_env_vars = var.secret_env_vars
