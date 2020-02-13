@@ -34,7 +34,7 @@ class CalmStore(store: VersionedStore[String, Int, CalmRecord]) {
                 "Cannot resolve latest data as timestamps are equal")
             )
           else
-            Right(record.retrievedAt.isAfter(storedRecord.retrievedAt))
+            Right(compareRecords(record, storedRecord))
       }
       .left
       .flatMap {
@@ -42,4 +42,8 @@ class CalmStore(store: VersionedStore[String, Int, CalmRecord]) {
         case err                     => Left(err.e)
       }
       .flatMap(identity)
+
+  def compareRecords(record: CalmRecord, storedRecord: CalmRecord): Boolean =
+    record.retrievedAt.isAfter(storedRecord.retrievedAt) &&
+      (record.data != storedRecord.data || !storedRecord.published)
 }
