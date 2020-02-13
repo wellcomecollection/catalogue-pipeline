@@ -1,21 +1,4 @@
 locals {
-  id_minter_image = "${module.images.services["id_minter"]}"
-  recorder_image  = "${module.images.services["recorder"]}"
-  matcher_image   = "${module.images.services["matcher"]}"
-  merger_image    = "${module.images.services["merger"]}"
-  ingestor_image  = "${module.images.services["ingestor"]}"
-
-  transformer_miro_image   = "${module.images.services["transformer_miro"]}"
-  transformer_mets_image   = "${module.images.services["transformer_mets"]}"
-  transformer_sierra_image = "${module.images.services["transformer_sierra"]}"
-}
-
-module "images" {
-  source = "git::https://github.com/wellcometrust/terraform.git//ecs/modules/images?ref=v19.8.0"
-
-  project = "catalogue_pipeline"
-  label   = "${var.release_label}"
-
   services = [
     "ingestor",
     "matcher",
@@ -26,4 +9,23 @@ module "images" {
     "transformer_mets",
     "transformer_sierra",
   ]
+}
+
+data "aws_ssm_parameter" "image_ids" {
+  count = length(local.services)
+
+  name = "/catalogue_pipeline/images/${var.release_label}/${local.services[count.index]}"
+}
+
+locals {
+  image_ids = zipmap(local.services, data.aws_ssm_parameter.image_ids.*.value)
+
+  id_minter_image          = local.image_ids["id_minter"]
+  recorder_image           = local.image_ids["recorder"]
+  matcher_image            = local.image_ids["matcher"]
+  merger_image             = local.image_ids["merger"]
+  ingestor_image           = local.image_ids["ingestor"]
+  transformer_miro_image   = local.image_ids["transformer_miro"]
+  transformer_mets_image   = local.image_ids["transformer_mets"]
+  transformer_sierra_image = local.image_ids["transformer_sierra"]
 }
