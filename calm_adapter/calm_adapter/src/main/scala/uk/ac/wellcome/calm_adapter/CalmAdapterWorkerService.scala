@@ -39,6 +39,8 @@ class CalmAdapterWorkerService(msgStream: SQSStream[NotificationMessage],
     with FlowOps
     with Logging {
 
+  type Key = Version[String, Int]
+
   /** Encapsulates context to pass along each akka-stream stage. Newer versions
     * of akka-streams have the asSourceWithContext/ asFlowWithContext idioms for
     * this purpose, which we can migrate to if the library is updated.
@@ -76,6 +78,7 @@ class CalmAdapterWorkerService(msgStream: SQSStream[NotificationMessage],
           calmRetriever(CalmQuery.ModifiedDate(date))
             .map(calmStore.putRecord)
             .via(publishKey)
+            .via(updatePublished)
             .runWith(Sink.seq)
             .map(checkResultsForErrors(_, date))
             .map((ctx, _))
@@ -83,12 +86,21 @@ class CalmAdapterWorkerService(msgStream: SQSStream[NotificationMessage],
       .via(catchErrors)
 
   def publishKey =
-    Flow[Result[Option[Version[String, Int]]]]
+    Flow[Result[Option[(Key, CalmRecord)]]]
       .map {
-        case Right(Some(key)) =>
-          msgSender.sendT(key).toEither.right.map(_ => Some(key))
+        case Right(Some((key, record))) =>
+          msgSender.sendT(key).toEither.right.map(_ => Some(key -> record))
         case Right(None) => Right(None)
-        case Left(err)   => Left(err)
+        case err         => err
+      }
+
+  def updatePublished =
+    Flow[Result[Option[(Key, CalmRecord)]]]
+      .map {
+        case Right(Some((key, record))) =>
+          calmStore.setRecordPublished(key, record)
+        case Right(None) => Right(None)
+        case err         => err
       }
 
   def checkResultsForErrors(results: Seq[Result[_]],
