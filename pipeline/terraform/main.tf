@@ -35,7 +35,7 @@ module "catalogue_pipeline_20200211" {
   ]
 
   # Elasticsearch
-  es_works_index = "v2-20200211"
+  es_works_index = "v2-20200131"
 
   # RDS
   rds_ids_access_security_group_id = local.rds_access_security_group_id
