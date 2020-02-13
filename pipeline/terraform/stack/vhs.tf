@@ -1,5 +1,5 @@
 module "vhs_recorder" {
-  source = "git::https://github.com/wellcomecollection/terraform-aws-vhs.git?ref=v19.7.2"
+  source = "git::github.com/wellcomecollection/terraform-aws-vhs.git?ref=v1.0.0"
 
   name = "${local.namespace_hyphen}-recorder"
 }
