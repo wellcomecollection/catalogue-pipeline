@@ -7,7 +7,7 @@ module "miro_transformer_queue" {
 }
 
 module "miro_transformer" {
-  source          = "../modules/pipeline_service"
+  source          = "../modules/service"
   service_name    = "${local.namespace_hyphen}_miro_transformer"
   container_image = local.transformer_miro_image
   security_group_ids = [
