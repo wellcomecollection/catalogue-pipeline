@@ -1,13 +1,13 @@
 resource "aws_iam_role" "read_storage_s3" {
   name               = "read_storage_s3_role"
-  assume_role_policy = "${data.aws_iam_policy_document.no-assume-role-policy.json}"
+  assume_role_policy = data.aws_iam_policy_document.no-assume-role-policy.json
 }
 
 data "aws_iam_policy_document" "no-assume-role-policy" {
   statement {
     actions = ["sts:AssumeRole"]
 
-    principals = {
+    principals {
       type        = "AWS"
       identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
     }
@@ -15,8 +15,8 @@ data "aws_iam_policy_document" "no-assume-role-policy" {
 }
 
 resource "aws_iam_role_policy" "storage_s3_read" {
-  role   = "${aws_iam_role.read_storage_s3.name}"
-  policy = "${data.aws_iam_policy_document.allow_storage_access.json}"
+  role   = aws_iam_role.read_storage_s3.name
+  policy = data.aws_iam_policy_document.allow_storage_access.json
 }
 
 data "aws_iam_policy_document" "allow_storage_access" {
