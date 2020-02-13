@@ -7,7 +7,7 @@ module "mets_transformer_queue" {
 }
 
 module "mets_transformer" {
-  source          = "../modules/pipeline_service"
+  source          = "../modules/service"
   service_name    = "${local.namespace_hyphen}_mets_transformer"
   container_image = local.transformer_mets_image
   security_group_ids = [

@@ -7,7 +7,7 @@ module "id_minter_queue" {
 }
 
 module "id_minter" {
-  source          = "../modules/pipeline_service"
+  source          = "../modules/service"
   service_name    = "${local.namespace_hyphen}_id_minter"
   container_image = local.id_minter_image
 
