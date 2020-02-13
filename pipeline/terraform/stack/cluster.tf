@@ -1,3 +1,3 @@
 resource "aws_ecs_cluster" "cluster" {
-  name = "${local.namespace_hyphen}"
+  name = local.namespace_hyphen
 }
