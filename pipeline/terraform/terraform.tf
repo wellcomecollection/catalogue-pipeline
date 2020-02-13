@@ -3,7 +3,7 @@ provider "aws" {
   version = "~> 2.0"
 
   assume_role {
-    role_arn = "arn:aws:iam::760097843905:role/platform-developer"
+    role_arn = "arn:aws:iam::760097843905:role/platform-admin"
   }
 }
 
