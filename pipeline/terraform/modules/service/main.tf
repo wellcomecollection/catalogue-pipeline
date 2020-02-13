@@ -1,33 +1,38 @@
 module "service" {
-  source = "git::https://github.com/wellcometrust/terraform.git//ecs/prebuilt/scaling?ref=v19.12.0"
+  source = "../service/worker"
 
-  service_name = "${var.service_name}"
+  env_vars        = var.env_vars
+  secret_env_vars = var.secret_env_vars
 
-  container_image = "${var.container_image}"
+  subnets = var.subnets
 
-  cluster_id   = "${var.cluster_id}"
-  cluster_name = "${var.cluster_name}"
+  container_image = var.container_image
 
-  subnets    = "${var.subnets}"
-  aws_region = "${var.aws_region}"
+  namespace_id = var.namespace_id
 
-  namespace_id = "${var.namespace_id}"
+  cluster_name = var.cluster_name
+  cluster_arn  = var.cluster_arn
 
-  cpu    = "256"
-  memory = "512"
+  service_name = var.service_name
 
-  security_group_ids = ["${var.security_group_ids}"]
+  desired_task_count = var.desired_task_count
 
-  min_capacity = 0
-  max_capacity = "${var.max_capacity}"
+  launch_type = var.launch_type
 
-  env_vars = "${merge(
-    var.env_vars,
-    map("logstash_host", "${var.logstash_host}")
-  )}"
+  security_group_ids = var.security_group_ids
 
-  env_vars_length = "${var.env_vars_length + 1}"
+  cpu    = var.cpu
+  memory = var.memory
+}
 
-  secret_env_vars        = "${var.secret_env_vars}"
-  secret_env_vars_length = "${var.secret_env_vars_length}"
+module "scaling" {
+  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//autoscaling?ref=v1.2.0"
+
+  name = var.service_name
+
+  cluster_name = var.cluster_name
+  service_name = var.service_name
+
+  min_capacity = var.min_capacity
+  max_capacity = var.max_capacity
 }
