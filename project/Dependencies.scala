@@ -278,7 +278,8 @@ object CatalogueDependencies {
       ExternalDependencies.scalaGraphDependencies
 
   val mergerDependencies: Seq[ModuleID] =
-    ExternalDependencies.mockitoDependencies
+    ExternalDependencies.mockitoDependencies ++
+      ExternalDependencies.scalacheckDependencies
 
   val miroTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies ++

@@ -39,11 +39,7 @@ object SierraMiroMergeRule
           data.copy(
             otherIdentifiers = mergeIdentifiers(sierraWork, miroWork),
             items = mergeItems(sierraItem, miroItem),
-            // We always copy across the thumbnail from the Miro work, at least
-            // for now -- it's never populated on Sierra, always populated in Miro.
-            // Later we may use the iiif-presentation item location to populate
-            // this field, but right now it's empty on all Sierra works.
-            thumbnail = miroWork.data.thumbnail
+            thumbnail = MiroIdOrdering.min(sierraWork, miroWork).data.thumbnail
           )
         }
 
@@ -95,5 +91,27 @@ object SierraMiroMergeRule
     sierraWork.otherIdentifiers ++
       miroWork.identifiers.filterNot(sourceIdentifier =>
         doNotMergeIdentifierTypes.contains(sourceIdentifier.identifierType.id))
+  }
+
+  // We deterministically identify thumbnail precedence by always picking
+  // the work that holds the lexicographically minimal Miro ID of the pair.
+  object MiroIdOrdering extends Ordering[TransformedBaseWork] {
+    def compare(x: TransformedBaseWork, y: TransformedBaseWork): Int =
+      (x.data.thumbnail, y.data.thumbnail) match {
+        case (None, None)    => 0
+        case (Some(_), None) => -1
+        case (None, Some(_)) => 1
+        case (Some(_), Some(_)) =>
+          getAllMiroIds(x).min compare getAllMiroIds(y).min
+      }
+
+    private def getAllMiroIds(x: TransformedBaseWork): List[String] =
+      (x.otherIdentifiers :+ x.sourceIdentifier).collect {
+        case SourceIdentifier(
+            IdentifierType("miro-image-number", _, _),
+            _,
+            value) =>
+          value
+      }
   }
 }
