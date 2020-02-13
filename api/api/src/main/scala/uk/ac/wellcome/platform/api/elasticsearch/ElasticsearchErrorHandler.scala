@@ -4,7 +4,7 @@ import com.sksamuel.elastic4s.ElasticError
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.platform.api.models.{DisplayError, Error, ErrorVariant}
 
-object ElasticErrorHandler extends Logging {
+object ElasticsearchErrorHandler extends Logging {
 
   // This error is of the form:
   //

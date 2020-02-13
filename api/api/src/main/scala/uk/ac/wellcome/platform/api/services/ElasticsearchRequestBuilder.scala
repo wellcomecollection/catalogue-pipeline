@@ -22,7 +22,7 @@ import uk.ac.wellcome.display.models.{
 }
 import uk.ac.wellcome.platform.api.models._
 
-case class ElasticSearchRequestBuilder(
+case class ElasticsearchRequestBuilder(
   index: Index,
   sortDefinitions: List[FieldSort],
   queryOptions: ElasticsearchQueryOptions) {
