@@ -1,5 +1,5 @@
 module "matcher_queue" {
-  source      = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
+  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
   queue_name = "${local.namespace_hyphen}_matcher"
   topic_arns = [
     module.recorder_topic.arn,
@@ -16,18 +16,18 @@ module "matcher_queue" {
 # Service
 
 module "matcher" {
-  source = "../modules/pipeline_service"
-  service_name  = "${local.namespace_hyphen}_matcher"
-  container_image     = local.matcher_image
+  source          = "../modules/service"
+  service_name    = "${local.namespace_hyphen}_matcher"
+  container_image = local.matcher_image
   security_group_ids = [
     aws_security_group.service_egress.id,
     aws_security_group.interservice.id,
   ]
 
-  cluster_name  = aws_ecs_cluster.cluster.name
-  cluster_arn    = aws_ecs_cluster.cluster.arn
+  cluster_name = aws_ecs_cluster.cluster.name
+  cluster_arn  = aws_ecs_cluster.cluster.arn
 
-  namespace_id  = aws_service_discovery_private_dns_namespace.namespace.id
+  namespace_id = aws_service_discovery_private_dns_namespace.namespace.id
 
   env_vars = {
     queue_url         = module.matcher_queue.url
@@ -48,8 +48,8 @@ module "matcher" {
 
   secret_env_vars = {}
 
-  subnets       = var.subnets
-  aws_region    = var.aws_region
+  subnets             = var.subnets
+  aws_region          = var.aws_region
   max_capacity        = 10
   messages_bucket_arn = aws_s3_bucket.messages.arn
   queue_read_policy   = module.matcher_queue.read_policy
@@ -75,8 +75,8 @@ resource "aws_iam_role_policy" "matcher_lock_readwrite" {
 module "matcher_topic" {
   source = "../modules/topic"
 
-  name       = "${local.namespace_hyphen}_matcher"
-  role_names = [module.matcher.task_role_name]
+  name                = "${local.namespace_hyphen}_matcher"
+  role_names          = [module.matcher.task_role_name]
   messages_bucket_arn = aws_s3_bucket.messages.arn
 }
 
