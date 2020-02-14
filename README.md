@@ -1,6 +1,6 @@
 # Catalogue
 
-[![Build Status](https://travis-ci.org/wellcometrust/catalogue.svg?branch=master)](https://travis-ci.org/wellcometrust/catalogue)
+[![Build Status](https://travis-ci.org/wellcomecollection/catalogue.svg?branch=master)](https://travis-ci.org/wellcomecollection/catalogue)
 
 
 ## Purpose
@@ -81,4 +81,4 @@ Part of the [Wellcome Digital Platform][platform repo].
 [catalogue docs]: https://docs.wellcomecollection.org/catalogue/
 [api developer docs]: https://developers.wellcomecollection.org/catalogue/
 [api]: https://api.wellcomecollection.org/catalogue
-[platform repo]: [https://github.com/wellcometrust/platform]
+[platform repo]: [https://github.com/wellcomecollection/platform]
