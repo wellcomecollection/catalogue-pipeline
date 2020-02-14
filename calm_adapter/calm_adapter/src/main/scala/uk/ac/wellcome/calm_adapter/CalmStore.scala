@@ -1,6 +1,11 @@
 package uk.ac.wellcome.calm_adapter
 
-import uk.ac.wellcome.storage.{Identified, NoVersionExistsError, Version}
+import uk.ac.wellcome.storage.{
+  Identified,
+  NoVersionExistsError,
+  StorageError,
+  Version
+}
 import uk.ac.wellcome.storage.store.VersionedStore
 
 class CalmStore(store: VersionedStore[String, Int, CalmRecord]) {
@@ -9,32 +14,33 @@ class CalmStore(store: VersionedStore[String, Int, CalmRecord]) {
 
   type Result[T] = Either[Throwable, T]
 
-  def putRecord(record: CalmRecord): Result[Option[Key]] =
+  def putRecord(record: CalmRecord): Result[Option[(Key, CalmRecord)]] =
     shouldStoreRecord(record)
       .flatMap {
         case false => Right(None)
         case true =>
           store
             .putLatest(record.id)(record)
-            .map { case Identified(key, _) => Some(key) }
+            .map { case Identified(key, record) => Some(key -> record) }
             .left
-            .map(_.e)
+            .map(toReadableException)
       }
+
+  def setRecordPublished(key: Key, record: CalmRecord): Result[Key] =
+    store
+      .put(Version(key.id, key.version + 1))(record.copy(published = true))
+      .map { case Identified(key, _) => key }
+      .left
+      .map(toReadableException)
 
   def shouldStoreRecord(record: CalmRecord): Result[Boolean] =
     store
       .getLatest(record.id)
       .map {
         case Identified(_, storedRecord) =>
-          val sameTimestamp = record.retrievedAt == storedRecord.retrievedAt
-          val differingData = record.data != storedRecord.data
-          if (sameTimestamp && differingData)
-            Left(
-              new Exception(
-                "Cannot resolve latest data as timestamps are equal")
-            )
-          else
-            Right(record.retrievedAt.isAfter(storedRecord.retrievedAt))
+          checkResolvable(record, storedRecord)
+            .map(Left(_))
+            .getOrElse(Right(compareRecords(record, storedRecord)))
       }
       .left
       .flatMap {
@@ -42,4 +48,30 @@ class CalmStore(store: VersionedStore[String, Int, CalmRecord]) {
         case err                     => Left(err.e)
       }
       .flatMap(identity)
+
+  def checkResolvable(record: CalmRecord,
+                      storedRecord: CalmRecord): Option[Exception] = {
+    val sameTimestamp = record.retrievedAt == storedRecord.retrievedAt
+    val differingData = record.data != storedRecord.data
+    if (sameTimestamp && differingData)
+      Some(
+        new Exception("Cannot resolve latest data as timestamps are equal")
+      )
+    else
+      None
+  }
+
+  def compareRecords(record: CalmRecord, storedRecord: CalmRecord): Boolean =
+    record.retrievedAt.isAfter(storedRecord.retrievedAt) &&
+      (record.data != storedRecord.data || !storedRecord.published)
+
+  /** Errors in the storage library sometimes wrap empty Exception objects with
+    * no message, meaning if we return them directly we lose any indication as
+    * to what has occured. Here we make sure the Exception is somewhat readable.
+    */
+  def toReadableException(err: StorageError): Throwable =
+    if (Option(err.e.getMessage).exists(_.trim.nonEmpty))
+      err.e
+    else
+      new Exception(err.getClass.getSimpleName)
 }

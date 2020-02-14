@@ -45,8 +45,11 @@ class CalmAdapterWorkerServiceTest
         Thread.sleep(500)
         store.entries shouldBe Map(
           Version("A", 0) -> recordA,
+          Version("A", 1) -> recordA.copy(published = true),
           Version("B", 0) -> recordB,
-          Version("C", 0) -> recordC
+          Version("B", 1) -> recordB.copy(published = true),
+          Version("C", 0) -> recordC,
+          Version("C", 1) -> recordC.copy(published = true)
         )
         retriever.previousQuery shouldBe Some(CalmQuery.ModifiedDate(queryDate))
         assertQueueEmpty(queue)
