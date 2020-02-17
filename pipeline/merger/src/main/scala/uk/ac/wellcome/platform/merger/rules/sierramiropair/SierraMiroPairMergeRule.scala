@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.merger.rules.singlepagemiro
+package uk.ac.wellcome.platform.merger.rules.sierramiropair
 
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.models.work.internal._
@@ -19,12 +19,12 @@ import uk.ac.wellcome.platform.merger.rules.{MergerRule, WorkPairMerger}
   *     location for the thumbnail.
   *
   */
-object SinglePageMiroMergeRule
+object SierraMiroPairMergeRule
     extends MergerRule
     with Logging
     with MergerLogging
     with WorkPairMerger
-    with SinglePageMiroPartitioner {
+    with SierraMiroPairPartitioner {
 
   override protected def mergeAndRedirectWorkPair(
     sierraWork: UnidentifiedWork,

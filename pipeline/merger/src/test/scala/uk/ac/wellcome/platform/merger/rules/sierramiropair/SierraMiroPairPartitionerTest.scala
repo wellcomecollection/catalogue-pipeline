@@ -1,16 +1,16 @@
-package uk.ac.wellcome.platform.merger.rules.singlepagemiro
+package uk.ac.wellcome.platform.merger.rules.sierramiropair
 
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.platform.merger.model.PotentialMergedWork
 import uk.ac.wellcome.platform.merger.rules.Partition
 
-class SinglePageMiroPartitionerTest
+class SierraMiroPairPartitionerTest
     extends FunSpec
     with Matchers
     with WorksGenerators {
 
-  private val partitioner = new SinglePageMiroPartitioner {}
+  private val partitioner = new SierraMiroPairPartitioner {}
   private val sierraWork = createUnidentifiedSierraWork
   private val miroWork = createMiroWork
   private val otherWorks = createIsbnWorks(4)

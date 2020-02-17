@@ -1,10 +1,10 @@
-package uk.ac.wellcome.platform.merger.rules.singlepagemiro
+package uk.ac.wellcome.platform.merger.rules.sierramiropair
 
 import org.scalatest.{Assertion, FunSpec, Matchers}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
 
-class SinglePageMiroMergeRuleTest
+class SierraMiroPairMergeRuleTest
     extends FunSpec
     with Matchers
     with WorksGenerators {
@@ -180,7 +180,7 @@ class SinglePageMiroMergeRuleTest
     mergeAndRedirectWorks(works) shouldBe works
 
   private def mergeAndRedirectWorks(works: Seq[BaseWork]): Seq[BaseWork] = {
-    val result = SinglePageMiroMergeRule.mergeAndRedirectWorks(works)
+    val result = SierraMiroPairMergeRule.mergeAndRedirectWorks(works)
 
     // We always get the same number of works as we started with.
     result.size shouldBe works.size
