@@ -134,6 +134,30 @@ class CalmXmlResponseTest extends FunSpec with Matchers {
       )
     }
 
+    it("parses a Calm record when inner document has ISO-8859-1 encoding") {
+      val xml =
+        <soap:Envelope
+            xmlns:soap="http://www.w3.org/2003/05/soap-envelope"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+          <soap:Body>
+            <SummaryHeaderResponse xmlns="http://ds.co.uk/cs/webservices/">
+              <SummaryHeaderResult>&lt;?xml version="1.0" encoding="ISO-8859-1"?&gt;&lt;SummaryList&gt;&lt;Summary&gt;&lt;RecordType&gt;Component&lt;/RecordType&gt;\n  &lt;RecordID&gt;6e4edfee-e702-4da6-be6d-c2e60ce79728&lt;/RecordID&gt;&lt;/Summary&gt;&lt;/SummaryList&gt;</SummaryHeaderResult>
+            </SummaryHeaderResponse>
+          </soap:Body>
+        </soap:Envelope>
+      CalmSummaryResponse(xml, retrievedAt).parse shouldBe Right(
+        CalmRecord(
+          "6e4edfee-e702-4da6-be6d-c2e60ce79728",
+          Map(
+            "RecordType" -> List("Component"),
+            "RecordID" -> List("6e4edfee-e702-4da6-be6d-c2e60ce79728")
+          ),
+          retrievedAt
+        )
+      )
+    }
+
     it("errors when no RecordID in document") {
       val xml =
         <soap:Envelope

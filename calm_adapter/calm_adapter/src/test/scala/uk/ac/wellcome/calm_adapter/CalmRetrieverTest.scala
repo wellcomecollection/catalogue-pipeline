@@ -102,11 +102,11 @@ class CalmRetrieverTest
               List(
                 RawHeader(
                   "SOAPAction",
-                  "http://ds.co.uk/cs/webservices/Search")),
+                  "http://ds.co.uk/cs/webservices/SummaryHeader")),
               List(
                 RawHeader(
                   "SOAPAction",
-                  "http://ds.co.uk/cs/webservices/Search")),
+                  "http://ds.co.uk/cs/webservices/SummaryHeader")),
             )
           }
       }
