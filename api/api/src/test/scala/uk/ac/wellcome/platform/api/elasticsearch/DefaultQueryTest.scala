@@ -23,7 +23,7 @@ import uk.ac.wellcome.platform.api.services.{
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class ElasticsearchQueryTest
+class DefaultQueryTest
     extends FunSpec
     with Matchers
     with ElasticsearchFixtures
@@ -39,7 +39,7 @@ class ElasticsearchQueryTest
   )
 
   describe("CoreQuery") {
-    it("should use the english analyser") {
+    it("should use the english analyser for titles") {
       withLocalWorksIndex { index =>
         val works = List(
           "Vlad the impaler",
@@ -69,35 +69,6 @@ class ElasticsearchQueryTest
       }
     }
 
-    it("AND scores heavily on the contributors field") {
-      withLocalWorksIndex { index =>
-        val workWithExactMatchingContributors =
-          createIdentifiedWorkWith(
-            contributors = List(
-              createPersonContributorWith("Alice Stewart"),
-              createPersonContributorWith("Honor Fell"),
-            ))
-
-        val workWithPartialMatchingContributors = createIdentifiedWorkWith(
-          contributors = List(
-            createPersonContributorWith("Alice Fell"),
-          ))
-
-        insertIntoElasticsearch(
-          index,
-          workWithPartialMatchingContributors,
-          workWithExactMatchingContributors)
-        val results =
-          searchResults(
-            index = index,
-            queryOptions = createElasticsearchQueryOptionsWith(
-              searchQuery = Some(SearchQuery("Alice Stewart")))
-          )
-
-        results.head should be(workWithExactMatchingContributors)
-        results.last should be(workWithPartialMatchingContributors)
-      }
-    }
     it("searches the canonicalId") {
       withLocalWorksIndex { index =>
         val work = createIdentifiedWorkWith(
@@ -282,7 +253,7 @@ class ElasticsearchQueryTest
             searchQuery = Some(SearchQuery(query)))
         )
 
-        results should be(List(work1, work2))
+        results should contain theSameElementsAs (List(work1, work2))
       }
     }
 
@@ -326,7 +297,7 @@ class ElasticsearchQueryTest
             searchQuery = Some(SearchQuery(query)))
         )
 
-        results should be(List(work1, work2))
+        results should contain theSameElementsAs (List(work1, work2))
       }
     }
 
@@ -348,7 +319,7 @@ class ElasticsearchQueryTest
             searchQuery = Some(SearchQuery(query)))
         )
 
-        results should be(List(work1, work2))
+        results should contain theSameElementsAs (List(work1, work2))
       }
     }
 
@@ -374,7 +345,9 @@ class ElasticsearchQueryTest
             searchQuery = Some(SearchQuery(query)))
         )
 
-        results should be(List(workWithMatchingId, workWithMatchingTitle))
+        results should contain theSameElementsAs (List(
+          workWithMatchingId,
+          workWithMatchingTitle))
       }
     }
   }

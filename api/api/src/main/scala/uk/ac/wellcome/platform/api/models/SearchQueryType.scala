@@ -14,7 +14,4 @@ object SearchQueryType {
   val allowed = List(ConstScore, BoolBoosted)
   final case object ConstScore extends SearchQueryType
   final case object BoolBoosted extends SearchQueryType
-
-  // These are used more for internal testing
-  final case object Core extends SearchQueryType
 }

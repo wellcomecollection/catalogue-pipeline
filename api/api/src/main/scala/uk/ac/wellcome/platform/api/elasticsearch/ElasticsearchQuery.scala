@@ -21,22 +21,23 @@ sealed trait ElasticsearchQuery {
 // to try more extreme tests.
 final case class CoreQuery(q: String, shouldQueries: Seq[Query])
     extends ElasticsearchQuery {
+
   lazy val elasticQuery = must(
     should(
-      BaseQuery(q).elasticQuery,
-      IdQuery(q).elasticQuery
+      List(BaseQuery(q).elasticQuery, IdQuery(q).elasticQuery) ++
+        shouldQueries: _*
     )
-  ) should (shouldQueries)
+  )
 }
 
 case class BaseQuery(q: String) extends ElasticsearchQuery {
   val minimumShouldMatch = "60%"
   val searchFields: Seq[(String, Option[Double])] = Seq(
-    ("data.subjects.concepts.label", Some(8.0)),
-    ("data.genres.concepts.label", Some(8.0)),
-    ("data.contributors.agent.label", Some(8.0)),
-    ("data.title.english", Some(5.0)),
-    ("data.description.english", Some(3.0)),
+    ("data.subjects.concepts.label", None),
+    ("data.genres.concepts.label", None),
+    ("data.contributors.agent.label", None),
+    ("data.title.english", None),
+    ("data.description.english", None),
     ("data.alternativeTitles.english", None),
     ("data.physicalDescription.english", None),
     ("data.production.*.label", None),
@@ -108,25 +109,19 @@ final case class ContributorQuery(q: String) extends ElasticsearchQuery {
 }
 
 final case class ConstScoreQuery(q: String) extends ElasticsearchQuery {
-  lazy val elasticQuery = CoreQuery(
-    q,
-    Seq(
-      ConstantScore(IdQuery(q).elasticQuery, boost = Some(5000)),
-      ConstantScore(query = TitleQuery(q).elasticQuery, boost = Some(2000)),
-      ConstantScore(query = GenreQuery(q).elasticQuery, boost = Some(1000)),
-      ConstantScore(query = SubjectQuery(q).elasticQuery, boost = Some(1000))
-    )
-  ).elasticQuery
+  lazy val elasticQuery = should(
+    ConstantScore(query = GenreQuery(q).elasticQuery, boost = Some(2000)),
+    ConstantScore(query = SubjectQuery(q).elasticQuery, boost = Some(2000)),
+    ConstantScore(query = ContributorQuery(q).elasticQuery, boost = Some(2000)),
+    ConstantScore(query = TitleQuery(q).elasticQuery, boost = Some(1000)),
+  )
 }
 
 final case class BoolBoostedQuery(q: String) extends ElasticsearchQuery {
-  lazy val elasticQuery = CoreQuery(
-    q,
-    Seq(
-      must(GenreQuery(q).elasticQuery).boost(2000),
-      must(SubjectQuery(q).elasticQuery).boost(2000),
-      must(ContributorQuery(q).elasticQuery).boost(2000),
-      must(TitleQuery(q).elasticQuery).boost(1000)
-    )
-  ).elasticQuery
+  lazy val elasticQuery = should(
+    must(GenreQuery(q).elasticQuery).boost(2000),
+    must(SubjectQuery(q).elasticQuery).boost(2000),
+    must(ContributorQuery(q).elasticQuery).boost(2000),
+    must(TitleQuery(q).elasticQuery).boost(1000)
+  )
 }

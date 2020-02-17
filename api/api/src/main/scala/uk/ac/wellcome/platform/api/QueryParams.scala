@@ -176,8 +176,7 @@ object MultipleWorksParams extends QueryParamsUtils {
     decodeOneWithDefaultOf(
       SearchQueryType.default,
       "ConstScore" -> SearchQueryType.ConstScore,
-      "BoolBoosted" -> SearchQueryType.BoolBoosted,
-      "Core" -> SearchQueryType.Core
+      "BoolBoosted" -> SearchQueryType.BoolBoosted
     )
 }
 

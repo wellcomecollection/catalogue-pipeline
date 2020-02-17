@@ -105,7 +105,7 @@ case class ElasticsearchRequestBuilder(
 
   lazy val filteredQuery: BoolQuery = queryOptions.searchQuery
     .map { searchQuery =>
-      ElasticsearchQueryBuilder(searchQuery).query
+      ElasticsearchCoreQueryBuilder(searchQuery).query
     }
     .getOrElse { boolQuery }
     .filter {
