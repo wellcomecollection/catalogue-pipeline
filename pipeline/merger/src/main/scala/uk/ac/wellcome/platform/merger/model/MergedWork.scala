@@ -6,6 +6,19 @@ import uk.ac.wellcome.models.work.internal.{
 }
 
 case class MergedWork(work: UnidentifiedWork,
-                      redirectedWork: UnidentifiedRedirectedWork)
+                      redirectedWorks: Seq[UnidentifiedRedirectedWork])
+
+object MergedWork {
+  def apply(work: UnidentifiedWork,
+            redirectedWork: UnidentifiedRedirectedWork): MergedWork =
+    MergedWork(work, Seq(redirectedWork))
+}
+
 case class PotentialMergedWork(target: UnidentifiedWork,
-                               redirectedWork: TransformedBaseWork)
+                               redirectedWorks: Seq[TransformedBaseWork])
+
+object PotentialMergedWork {
+  def apply(target: UnidentifiedWork,
+            redirectedWork: TransformedBaseWork): PotentialMergedWork =
+    PotentialMergedWork(target, Seq(redirectedWork))
+}

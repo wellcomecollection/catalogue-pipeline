@@ -30,10 +30,15 @@ trait WorkTagPartitioner extends Partitioner {
     val redirectedWorks = taggedWorks.get(Redirected).toList.flatten
     val remaining = taggedWorks.get(PassThrough).toList.flatten
     (targetWorks, redirectedWorks) match {
-      case (
-          List(target: UnidentifiedWork),
-          List(redirected: TransformedBaseWork)) =>
-        Some(Partition(PotentialMergedWork(target, redirected), remaining))
+      case (List(target: UnidentifiedWork), _ :: _) =>
+        val redirectedTransformedWorks = redirectedWorks.flatMap {
+          case work: TransformedBaseWork => Some(work)
+          case _                         => None
+        }
+        Some(
+          Partition(
+            PotentialMergedWork(target, redirectedTransformedWorks),
+            remaining))
       case _ => None
     }
   }
