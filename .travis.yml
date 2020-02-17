@@ -103,6 +103,9 @@ before_install:
   - openssl aes-256-cbc -K $encrypted_0ed9b3e7612f_key -iv $encrypted_0ed9b3e7612f_iv -in secrets.zip.enc -out secrets.zip -d
   - unzip secrets.zip
   - chmod 600 id_rsa
+  # Print the fingerprint of the SSH key, so we can check it's the same as the
+  # deploy key in GitHub.
+  - ssh-keygen -lf id_rsa
   - mkdir -p ~/.aws
   - cp config ~/.aws/config
   - cp credentials ~/.aws/credentials
