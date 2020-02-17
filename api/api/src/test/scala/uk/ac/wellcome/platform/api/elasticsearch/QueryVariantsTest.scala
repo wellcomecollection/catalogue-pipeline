@@ -18,7 +18,7 @@ import scala.util.Random
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.searches.sort.SortOrder
 
-class VarientQueriesTest
+class QueryVariantsTest
     extends FunSpec
     with Matchers
     with ElasticsearchFixtures

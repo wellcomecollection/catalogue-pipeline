@@ -64,7 +64,7 @@ class ElasticsearchServiceTest
       it("returns results in consistent sort order") {
         withLocalWorksIndex { index =>
           val title =
-            s"A ${Random.alphanumeric.filterNot(_.equals('A')) take 10 mkString}"
+            s"ABBA ${Random.alphanumeric.filterNot(_.equals('A')) take 10 mkString}"
 
           // We have a secondary sort on canonicalId in ElasticsearchService.
           // Since every work has the same title, we expect them to be returned in
@@ -82,7 +82,7 @@ class ElasticsearchServiceTest
               .queryResults(
                 index,
                 createElasticsearchQueryOptionsWith(
-                  searchQuery = Some(SearchQuery("A"))))
+                  searchQuery = Some(SearchQuery("abba"))))
 
             whenReady(searchResponseFuture) { response =>
               searchResponseToWorks(response) shouldBe works
