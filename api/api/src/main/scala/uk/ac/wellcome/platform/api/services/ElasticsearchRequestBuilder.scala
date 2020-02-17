@@ -22,7 +22,7 @@ import uk.ac.wellcome.display.models.{
 }
 import uk.ac.wellcome.platform.api.models._
 
-case class ElasticSearchRequestBuilder(
+case class ElasticsearchRequestBuilder(
   index: Index,
   sortDefinitions: List[FieldSort],
   queryOptions: ElasticsearchQueryOptions) {
@@ -105,7 +105,7 @@ case class ElasticSearchRequestBuilder(
 
   lazy val filteredQuery: BoolQuery = queryOptions.searchQuery
     .map { searchQuery =>
-      ElasticsearchQueryBuilder(searchQuery).query
+      ElasticsearchCoreQueryBuilder(searchQuery).query
     }
     .getOrElse { boolQuery }
     .filter {

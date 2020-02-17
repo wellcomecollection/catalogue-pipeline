@@ -22,6 +22,15 @@ trait SubjectGenerators extends RandomStrings {
       concepts = createConcepts(List(conceptString))
     )
 
+  def createSubjectWithMatchingConcept(
+    label: String = randomAlphanumeric(10),
+  ): Subject[Minted] =
+    Subject(
+      id = Unidentifiable,
+      label = label,
+      concepts = createConcepts(List(label))
+    )
+
   def createSubject: Subject[Minted] =
     createSubjectWith()
 
