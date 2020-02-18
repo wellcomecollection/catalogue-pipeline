@@ -67,6 +67,12 @@ object CalmSearchResponse {
   def apply(str: String,
             cookie: Cookie): Either[Throwable, CalmSearchResponse] =
     Try(XML.loadString(str)).map(CalmSearchResponse(_, cookie)).toEither
+
+  def apply(bytes: Array[Byte],
+            cookie: Cookie): Either[Throwable, CalmSearchResponse] =
+    Try(XML.load(new java.io.ByteArrayInputStream(bytes)))
+      .map(CalmSearchResponse(_, cookie))
+      .toEither
 }
 
 case class CalmSummaryResponse(val root: Elem, retrievedAt: Instant)
@@ -93,7 +99,13 @@ case class CalmSummaryResponse(val root: Elem, retrievedAt: Instant)
   def parse: Either[Throwable, CalmRecord] =
     responseNode
       .flatMap(_.childWithTag("SummaryHeaderResult"))
-      .flatMap(_.childWithTag("SummaryList"))
+      .flatMap { node =>
+        // The response contains an inner XML document (ISO-8859-1 encoded)
+        // within the top level UTF-8 one, so we need to parse this here if
+        // it exists
+        Try(XML.loadString(node.text)).toEither.left
+          .flatMap(_ => node.childWithTag("SummaryList"))
+      }
       .flatMap(_.childWithTag("Summary"))
       .map(_ \ "_")
       .flatMap { nodes =>
@@ -118,4 +130,10 @@ object CalmSummaryResponse {
   def apply(str: String,
             retrievedAt: Instant): Either[Throwable, CalmSummaryResponse] =
     Try(XML.loadString(str)).map(CalmSummaryResponse(_, retrievedAt)).toEither
+
+  def apply(bytes: Array[Byte],
+            retrievedAt: Instant): Either[Throwable, CalmSummaryResponse] =
+    Try(XML.load(new java.io.ByteArrayInputStream(bytes)))
+      .map(CalmSummaryResponse(_, retrievedAt))
+      .toEither
 }

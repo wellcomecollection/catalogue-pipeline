@@ -62,11 +62,13 @@ class HttpCalmRetriever(url: String,
   def calmRequest(xmlRequest: CalmXmlRequest,
                   cookie: Option[Cookie]): HttpRequest = {
     val request =
-      HttpRequest(uri = url)
+      HttpRequest(uri = url, method = HttpMethods.POST)
         .withEntity(ContentTypes.`text/xml(UTF-8)`, xmlRequest.xml.toString)
         .addCredentials(BasicHttpCredentials(username, password))
         .addHeader(
-          RawHeader("SOAPAction", "http://ds.co.uk/cs/webservices/Search")
+          RawHeader(
+            "SOAPAction",
+            s"http://ds.co.uk/cs/webservices/${xmlRequest.action}")
         )
     cookie match {
       case Some(cookie) => request.addHeader(cookie)
@@ -77,24 +79,25 @@ class HttpCalmRetriever(url: String,
   trait CalmResponseParser[T] {
     def apply(resp: HttpResponse): Future[T] =
       Unmarshal(resp.entity)
-        .to[String]
-        .flatMap { str =>
-          Future.fromTry(parseXml(resp, str).flatMap(_.parse).toTry)
+        .to[Array[Byte]]
+        .flatMap { bytes =>
+          Future.fromTry(parseXml(resp, bytes).flatMap(_.parse).toTry)
         }
 
-    def parseXml(resp: HttpResponse, str: String): Result[CalmXmlResponse[T]]
+    def parseXml(resp: HttpResponse,
+                 bytes: Array[Byte]): Result[CalmXmlResponse[T]]
   }
 
   val searchResponseParser = new CalmResponseParser[CalmSession] {
     def parseXml(resp: HttpResponse,
-                 str: String): Result[CalmXmlResponse[CalmSession]] =
-      CalmSearchResponse(str, parseCookie(resp))
+                 bytes: Array[Byte]): Result[CalmXmlResponse[CalmSession]] =
+      CalmSearchResponse(bytes, parseCookie(resp))
   }
 
   val summaryResponseParser = new CalmResponseParser[CalmRecord] {
     def parseXml(resp: HttpResponse,
-                 str: String): Result[CalmXmlResponse[CalmRecord]] =
-      CalmSummaryResponse(str, parseTimestamp(resp))
+                 bytes: Array[Byte]): Result[CalmXmlResponse[CalmRecord]] =
+      CalmSummaryResponse(bytes, parseTimestamp(resp))
   }
 
   def parseCookie(resp: HttpResponse): Cookie =
