@@ -4,7 +4,7 @@ variable "environment" {}
 variable "task_desired_count" {}
 
 variable "subnets" {
-  type = "list"
+  type = list(string)
 }
 
 variable "vpc_id" {}
@@ -19,7 +19,7 @@ variable "listener_port" {}
 variable "api_id" {}
 
 variable "gateway_depends" {
-  type = "list"
+  type = list(string)
 }
 
 variable "lb_arn" {}

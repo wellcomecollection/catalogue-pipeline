@@ -1,6 +1,5 @@
-module "ecr_repository_snapshot_generator" {
-  source = "git::https://github.com/wellcometrust/terraform.git//ecr?ref=v1.0.0"
-  name   = "snapshot_generator"
+resource "aws_ecr_repository" "ecr_repository_calm_adapter" {
+  name = "uk.ac.wellcome/snapshot_generator"
 }
 
 data "aws_iam_role" "snapshot_generator_execution_role" {
@@ -11,7 +10,7 @@ data "aws_iam_policy_document" "allow_snapshot_generator_access" {
   statement {
     principals {
       identifiers = [
-        "${data.aws_iam_role.snapshot_generator_execution_role.arn}",
+        data.aws_iam_role.snapshot_generator_execution_role.arn,
       ]
 
       type = "AWS"
@@ -28,5 +27,5 @@ data "aws_iam_policy_document" "allow_snapshot_generator_access" {
 resource "aws_ecr_repository_policy" "snapshot_generator_access_policy" {
   provider   = "aws.platform_account"
   repository = "uk.ac.wellcome/snapshot_generator"
-  policy     = "${data.aws_iam_policy_document.allow_snapshot_generator_access.json}"
+  policy     = data.aws_iam_policy_document.allow_snapshot_generator_access.json
 }

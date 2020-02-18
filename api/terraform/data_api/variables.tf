@@ -15,7 +15,7 @@ variable "critical_slack_webhook" {}
 variable "vpc_id" {}
 
 variable "private_subnets" {
-  type = "list"
+  type = list(string)
 }
 
 variable "data_page_url" {

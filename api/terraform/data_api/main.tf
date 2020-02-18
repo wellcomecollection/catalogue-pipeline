@@ -2,19 +2,19 @@ module "snapshot_generator" {
   source = "git::https://github.com/wellcometrust/terraform.git//ecs/prebuilt/scaling?ref=v19.7.2"
 
   service_name = "snapshot_generator"
-  cluster_id   = "${aws_ecs_cluster.cluster.id}"
-  cluster_name = "${aws_ecs_cluster.cluster.name}"
+  cluster_id   = aws_ecs_cluster.cluster.id
+  cluster_name = aws_ecs_cluster.cluster.name
 
-  subnets = "${var.private_subnets}"
+  subnets = var.private_subnets
 
-  namespace_id    = "${local.service_discovery_namespace}"
-  container_image = "${var.snapshot_generator_release_uri}"
+  namespace_id    = local.service_discovery_namespace
+  container_image = var.snapshot_generator_release_uri
 
   env_vars_length = 3
 
   env_vars = {
-    queue_url        = "${module.snapshot_generator_queue.id}"
-    topic_arn        = "${module.snapshot_complete_topic.arn}"
+    queue_url        = module.snapshot_generator_queue.id
+    topic_arn        = module.snapshot_complete_topic.arn
     metric_namespace = "snapshot_generator"
   }
 
@@ -28,7 +28,7 @@ module "snapshot_generator" {
     es_password = "catalogue/api/es_password"
   }
 
-  service_egress_security_group_id = "${aws_security_group.service_egress_security_group.id}"
+  service_egress_security_group_id = aws_security_group.service_egress_security_group.id
 
   metric_namespace = "AWS/SQS"
 

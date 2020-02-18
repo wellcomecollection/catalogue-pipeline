@@ -48,7 +48,7 @@ resource "aws_security_group" "service_egress_security_group" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags {
+  tags = {
     Name = var.namespace
   }
 }

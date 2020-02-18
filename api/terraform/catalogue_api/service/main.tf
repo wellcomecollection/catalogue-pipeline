@@ -3,12 +3,12 @@ data "aws_ecs_cluster" "cluster" {
 }
 
 module "service" {
-  source = "git::github.com/wellcometrust/terraform.git//ecs/modules/service/prebuilt/rest/tcp?ref=v19.16.3"
+  source = "../../modules/rest"
 
   service_name       = var.namespace
   task_desired_count = var.task_desired_count
 
-  task_definition_arn = module.task.task_definition_arn
+  task_definition_arn = module.task.arn
 
   security_group_ids = [local.security_group_ids]
 
@@ -34,12 +34,12 @@ module "service" {
 }
 
 module "task" {
-  source = "git::github.com/wellcometrust/terraform.git//ecs/modules/task/prebuilt/container_with_sidecar?ref=v19.6.0"
+  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//task_definition/container_with_sidecar?ref=v1.3.0"
 
   cpu    = 1024
   memory = 2048
 
-  launch_types = ["FARGATE"]
+  launch_type = ["FARGATE"]
 
   app_cpu    = 512
   app_memory = 1024
@@ -47,22 +47,16 @@ module "task" {
   sidecar_cpu    = 512
   sidecar_memory = 1024
 
-  app_env_vars_length = 3
-
   app_env_vars = {
     api_host         = "api.wellcomecollection.org"
     apm_service_name = var.namespace
     logstash_host    = var.logstash_host
   }
 
-  sidecar_env_vars_length = 2
-
   sidecar_env_vars = {
     APP_HOST = "localhost"
     APP_PORT = var.container_port
   }
-
-  secret_app_env_vars_length = 7
 
   secret_app_env_vars = {
     es_host        = "catalogue/api/es_host"

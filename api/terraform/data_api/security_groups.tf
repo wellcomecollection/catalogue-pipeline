@@ -1,7 +1,7 @@
 resource "aws_security_group" "service_egress_security_group" {
   name        = "${var.namespace}-service_egress_security_group"
   description = "Allow traffic between services"
-  vpc_id      = "${var.vpc_id}"
+  vpc_id      = var.vpc_id
 
   egress {
     from_port   = 0

@@ -1,5 +1,5 @@
 variable "subnets" {
-  type = "list"
+  type = list(string)
 }
 
 variable "cluster_name" {}
@@ -16,7 +16,7 @@ variable "nginx_container_image" {}
 variable "nginx_container_port" {}
 
 variable "security_group_ids" {
-  type = "list"
+  type = list(string)
 }
 
 variable "service_egress_security_group_id" {}
