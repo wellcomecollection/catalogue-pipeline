@@ -18,32 +18,32 @@ We use AWS SNS / SQS for this, there are talks of abstracting that out.
 SNS => Service => SQS
 ```
 
-### [Transformer](https://github.com/wellcometrust/catalogue/tree/864b998aae9ed3fe40515edfef061c7c7371f721/pipeline/transformer/README.md)
+### [Transformer](https://github.com/wellcomecollection/catalogue/tree/864b998aae9ed3fe40515edfef061c7c7371f721/pipeline/transformer/README.md)
 
 Each data source will have their own transformer e.g.
 
-* [Miro](https://github.com/wellcometrust/catalogue/tree/864b998aae9ed3fe40515edfef061c7c7371f721/pipeline/transformer/transformer_miro/README.md)
-* [Sierra](https://github.com/wellcometrust/catalogue/tree/864b998aae9ed3fe40515edfef061c7c7371f721/pipeline/transformer/transformer_sierra/README.md)
+* [Miro](https://github.com/wellcomecollection/catalogue/tree/864b998aae9ed3fe40515edfef061c7c7371f721/pipeline/transformer/transformer_miro/README.md)
+* [Sierra](https://github.com/wellcomecollection/catalogue/tree/864b998aae9ed3fe40515edfef061c7c7371f721/pipeline/transformer/transformer_sierra/README.md)
 
 These take the original source data from an adapter, and transform them into a Work \(Unidentified\).
 
-### [Recorder](https://github.com/wellcometrust/catalogue/tree/864b998aae9ed3fe40515edfef061c7c7371f721/pipeline/recorder/README.md)
+### [Recorder](https://github.com/wellcomecollection/catalogue/tree/864b998aae9ed3fe40515edfef061c7c7371f721/pipeline/recorder/README.md)
 
 Each transformed work is stored into a [VHS store](https://stacks.wellcomecollection.org/creating-a-data-store-from-s3-and-dynamodb-8bb9ecce8fc1).
 
-### [Matcher](https://github.com/wellcometrust/catalogue/tree/864b998aae9ed3fe40515edfef061c7c7371f721/pipeline/matcher/README.md)
+### [Matcher](https://github.com/wellcomecollection/catalogue/tree/864b998aae9ed3fe40515edfef061c7c7371f721/pipeline/matcher/README.md)
 
 Searches for potential merge candidates, and records them on the Work.
 
-### [Merger](https://github.com/wellcometrust/catalogue/tree/864b998aae9ed3fe40515edfef061c7c7371f721/pipeline/merger/README.md)
+### [Merger](https://github.com/wellcomecollection/catalogue/tree/864b998aae9ed3fe40515edfef061c7c7371f721/pipeline/merger/README.md)
 
-Runs some [rules](https://github.com/wellcometrust/catalogue/tree/864b998aae9ed3fe40515edfef061c7c7371f721/pipeline/merger/src/test/scala/uk/ac/wellcome/platform/merger/rules/README.md) on the merge candidates and decides if it is a valid merge.
+Runs some [rules](https://github.com/wellcomecollection/catalogue/tree/864b998aae9ed3fe40515edfef061c7c7371f721/pipeline/merger/src/test/scala/uk/ac/wellcome/platform/merger/rules/README.md) on the merge candidates and decides if it is a valid merge.
 
-### [ID Minter](https://github.com/wellcometrust/catalogue/tree/864b998aae9ed3fe40515edfef061c7c7371f721/pipeline/id_minter/README.md)
+### [ID Minter](https://github.com/wellcomecollection/catalogue/tree/864b998aae9ed3fe40515edfef061c7c7371f721/pipeline/id_minter/README.md)
 
 Each Unidentified Work has an ID minted for it, using a source ID and avoiding dupes.
 
-### [Ingestor](https://github.com/wellcometrust/catalogue/tree/864b998aae9ed3fe40515edfef061c7c7371f721/pipeline/ingestor/README.md)
+### [Ingestor](https://github.com/wellcomecollection/catalogue/tree/864b998aae9ed3fe40515edfef061c7c7371f721/pipeline/ingestor/README.md)
 
 Inserts a work into our query index - Elasticsearch.
 
@@ -60,7 +60,7 @@ Inserts a work into our query index - Elasticsearch.
 
 2. Create a new stack by copying the current one in
 
-   [`./terraform/main.tf`](https://github.com/wellcometrust/catalogue/tree/864b998aae9ed3fe40515edfef061c7c7371f721/pipeline/%60./terraform/main.tf%60).
+   [`./terraform/main.tf`](https://github.com/wellcomecollection/catalogue/tree/864b998aae9ed3fe40515edfef061c7c7371f721/pipeline/%60./terraform/main.tf%60).
 
 3. Change the namespace and index name
 4. Make sure the reindex topics are uncommented. You probably only need the Sierra one.
@@ -77,7 +77,7 @@ Inserts a work into our query index - Elasticsearch.
       terraform apply
    ```
 
-6. Run the [`reindexer`](https://github.com/wellcometrust/catalogue/tree/864b998aae9ed3fe40515edfef061c7c7371f721/reindexer/README.md)
+6. Run the [`reindexer`](https://github.com/wellcomecollection/catalogue/tree/864b998aae9ed3fe40515edfef061c7c7371f721/reindexer/README.md)
 
    ```text
     python3 ./start_reindex.py --src sierra --dst catalogue --reason "Great Good" --mode partial

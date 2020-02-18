@@ -28,7 +28,7 @@ TODO
 
 ### Review
 
-* Go to the [catalogue repo](https://github.com/wellcometrust/catalogue)
+* Go to the [catalogue repo](https://github.com/wellcomecollection/catalogue)
 * You should see a branch with the `docs/name_of_what_youre_up_to` and a button to compare & pull request - press that  
 
 ![gitbook\_pr](https://user-images.githubusercontent.com/31692/70724110-e604ed00-1cf1-11ea-92b1-d7b2e4a61108.png)

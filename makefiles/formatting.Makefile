@@ -5,7 +5,7 @@ lint-python:
 		--volume $(ROOT):/data \
 		--workdir /data \
 		wellcome/flake8:latest \
-		    --exclude .git,__pycache__,target,.terraform \
+		    --exclude .git,__pycache__,target,.terraform,venv \
 		    --ignore=E501,E122,E126,E203,W503
 
 format-terraform:
