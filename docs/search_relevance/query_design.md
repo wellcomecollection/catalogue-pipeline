@@ -28,11 +28,68 @@ Each query has:
 
 ## Intentions & Expectations
 
+### Phrase matching
+
+| Status | Query name | Ranking evaluation test |
+| :--- | :--- | :--- |
+| TODO | PhrasMatchQuery | TBD |
+
+#### Intentions
+
+Searching for an exact, ordered set of tokens, in quotation marks
+
+#### Data features
+
+* `data.title`
+* `data.alternativeTitle`
+* `physicalDescription`
+* `subjects.label`
+* `genres.label`
+* `contributors.label`
+* `description`
+
+#### Expectations
+
+* Searching for a phrase in quotation marks should match works containing that exact set of tokens, in the same order
+* Works matching individual tokens in the phrase should not be matched by this query
+
+#### Examples
+
+* `The ocean as a health resort : a practical handbook of the sea for the use of tourists and health-seekers`- [https://wellcomecollection.org/works/uxxaqdkg](https://wellcomecollection.org/works/uxxaqdkg) should be the only result returned by this query
+
+### Synonymous names and subjects
+
+| Status | Query name | Ranking evaluation test |
+| :--- | :--- | :--- |
+| TODO | SynonymQuery | TBD |
+
+#### Intentions
+
+Searching for names of people, scientific concepts, places, or other subjects which have known synonyms or alternative names
+
+#### Data features
+
+* A set of look-up-able synonyms obtained from [LCSH](http://id.loc.gov/authorities/subjects.html) variant terms, narrower terms and related terms
+* `subjects.label`
+* `contributors.label`
+
+#### Expectations
+
+* Searching for a name should return works by the author, even if the structure of the name is recorded differently in the catalogue
+* Searching for the current or scientific name of a disease should return works about the same disease recorded with its original or common name\(s\)
+* Searching for a scientific or medical concept should return works about the subject, even if described using different language in the catalogue, including "narrower terms" and "related terms"
+
+#### Examples
+
+* `william smellie` should match results tagged with `Smellie, William`, eg [https://wellcomecollection.org/works/nswqv96z](https://wellcomecollection.org/works/nswqv96z)
+* `flu` should match results tagged with `influenza`, eg [https://wellcomecollection.org/works/kfneqvdx](https://wellcomecollection.org/works/kfneqvdx)
+* `phytology` should match results tagged with `botany`, eg [https://wellcomecollection.org/works/eqqmtzca](https://wellcomecollection.org/works/eqqmtzca)
+
 ### Shingled titles
 
 | Status | Query name | Ranking evaluation test |
 | :--- | :--- | :--- |
-| TODO | Shingles | TBD |
+| TODO | ShingledTitleQuery | TBD |
 
 #### Intentions
 
@@ -51,7 +108,7 @@ Searching for works with structurally important features in the query. Most usef
 #### Examples
 
 * `east london` - [https://wellcomecollection.org/works/ufw89pqr](https://wellcomecollection.org/works/ufw89pqr) above [https://wellcomecollection.org/works/pabxvfqu](https://wellcomecollection.org/works/pabxvfqu)
-* `The ocean as a health resort : a practical handbook of the sea for the use of tourists and health-seekers`- [https://wellcomecollection.org/works/uxxaqdkg](https://wellcomecollection.org/works/uxxaqdkg) at the top of the list
+* `The ocean as a health resort : a practical handbook of the sea for the use of tourists and health-seekers`- [https://wellcomecollection.org/works/uxxaqdkg](https://wellcomecollection.org/works/uxxaqdkg) at the top of the list, with other works further down
 
 ### Titles
 
