@@ -2,18 +2,18 @@ module "logstash_transit" {
   source = "git::https://github.com/wellcometrust/terraform.git//ecs/prebuilt/default?ref=4ceb43fb9c08f5ac8ec3bc43b03f8c3c81621b97"
 
   security_group_ids = [
-    "${module.egress_security_group.sg_id}",
-    "${aws_security_group.interservice.id}",
+    module.egress_security_group.sg_id,
+    aws_security_group.interservice.id,
   ]
 
-  cluster_id   = "${aws_ecs_cluster.cluster.id}"
-  namespace_id = "${aws_service_discovery_private_dns_namespace.namespace.id}"
-  subnets      = "${local.private_subnets}"
-  service_name = "${local.logstash_transit_service_name}"
+  cluster_id   = aws_ecs_cluster.cluster.id
+  namespace_id = aws_service_discovery_private_dns_namespace.namespace.id
+  subnets      = local.private_subnets
+  service_name = local.logstash_transit_service_name
 
   env_vars = {
     XPACK_MONITORING_ENABLED = "false"
-    NAMESPACE                = "${local.namespace}"
+    NAMESPACE                = local.namespace
   }
 
   env_vars_length = 2
@@ -31,3 +31,4 @@ module "logstash_transit" {
 
   container_image = "wellcome/logstash_transit:edgelord"
 }
+

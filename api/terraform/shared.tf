@@ -7,8 +7,8 @@ module "ecr_repository_nginx_api-gw" {
 }
 
 resource "aws_ecr_repository_policy" "nginx_api_gw" {
-  repository = "${module.ecr_repository_nginx_api-gw.name}"
-  policy     = "${data.aws_iam_policy_document.storage_get_images.json}"
+  repository = module.ecr_repository_nginx_api-gw.name
+  policy     = data.aws_iam_policy_document.storage_get_images.json
 }
 
 data "aws_iam_policy_document" "storage_get_images" {
@@ -39,5 +39,6 @@ module "ecr_repository_update_api_docs" {
 # ECS Cluster
 
 resource "aws_ecs_cluster" "cluster" {
-  name = "${replace(local.namespace, "_", "-")}"
+  name = replace(local.namespace, "_", "-")
 }
+

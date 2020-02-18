@@ -1,6 +1,6 @@
 locals {
   namespace        = "catalogue_api"
-  namespace_hyphen = "${replace(local.namespace,"_","-")}"
+  namespace_hyphen = replace(local.namespace, "_", "-")
   prod_name        = "prod"
   staging_name     = "staging"
 
@@ -10,9 +10,9 @@ locals {
   prod_listener_port    = "80"
   staging_listener_port = "8080"
 
-  vpc_id                         = "${data.terraform_remote_state.shared_infra.catalogue_vpc_id}"
-  private_subnets                = "${data.terraform_remote_state.shared_infra.catalogue_vpc_private_subnets}"
-  gateway_server_error_alarm_arn = "${data.terraform_remote_state.shared_infra.gateway_server_error_alarm_arn}"
+  vpc_id                         = data.terraform_remote_state.shared_infra.outputs.catalogue_vpc_id
+  private_subnets                = data.terraform_remote_state.shared_infra.outputs.catalogue_vpc_private_subnets
+  gateway_server_error_alarm_arn = data.terraform_remote_state.shared_infra.outputs.gateway_server_error_alarm_arn
 
   // This is taken from the routemaster AWS account which doesn't expose its terraform state
   routemaster_router53_zone_id = "Z3THRVQ5VDYDMC"
@@ -33,3 +33,4 @@ locals {
   logstash_transit_service_name = "${local.namespace_hyphen}_logstash_transit"
   logstash_host                 = "${local.logstash_transit_service_name}.${local.namespace_hyphen}"
 }
+

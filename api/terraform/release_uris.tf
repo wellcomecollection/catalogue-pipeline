@@ -4,10 +4,10 @@ module "prod_images" {
   project = "catalogue_api"
   label   = "prod"
 
-  services = "${local.service_repositories}"
+  services = local.service_repositories
 
   providers = {
-    aws = "aws.platform_account"
+    aws = aws.platform_account
   }
 }
 
@@ -17,10 +17,10 @@ module "staging_images" {
   project = "catalogue_api"
   label   = "staging"
 
-  services = "${local.service_repositories}"
+  services = local.service_repositories
 
   providers = {
-    aws = "aws.platform_account"
+    aws = aws.platform_account
   }
 }
 
@@ -30,9 +30,10 @@ module "latest_images" {
   project = "catalogue_api"
   label   = "latest"
 
-  services = "${local.service_repositories}"
+  services = local.service_repositories
 
   providers = {
-    aws = "aws.platform_account"
+    aws = aws.platform_account
   }
 }
+
