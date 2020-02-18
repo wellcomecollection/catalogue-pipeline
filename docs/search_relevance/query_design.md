@@ -17,7 +17,6 @@ Each query has:
 * **Intentions:** What a person is trying to achieve with their search
 * **Data features:** Parts of the data we think are relevant
 * **Status:** Where we are with developing this query
-
   * **TODO:** We know it's something we need to do
   * **Testing:** The initial query has been created and is running as a
 
@@ -273,4 +272,3 @@ Searching the catalogue for general information
 #### Examples
 
 TBD
-
