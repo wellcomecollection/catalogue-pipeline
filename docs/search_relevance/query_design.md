@@ -50,7 +50,7 @@ Searching for an exact, ordered set of tokens, in quotation marks
 
 #### Expectations
 
-* Searching for a phrase in quotation marks should match works containing that exact set of tokens, in the same order
+* Phrases are defined by tokens wrapped in quotation marks and should be matched exactly
 * Works matching individual tokens in the phrase should not be matched by this query
 
 #### Examples
