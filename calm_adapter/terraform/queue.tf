@@ -1,13 +1,16 @@
-# TODO: Remove this once we're hooked into getting events for Calm
-# This is used as a placeolder for where the
-resource "aws_sns_topic" "test_receive_updates_topic" {
-  name = "calm_adapter_test_receive_updates_topic"
+resource "aws_sns_topic" "calm_windows_topic" {
+  name = "calm-windows"
 }
 
-module "ingestor_queue" {
+module "calm_windows_queue" {
   source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
-  queue_name      = "${local.namespace}_calm_adapter"
-  topic_arns      = [aws_sns_topic.test_receive_updates_topic.arn]
+  queue_name      = "calm-windows"
+  topic_arns      = [aws_sns_topic.calm_windows_topic.arn]
   aws_region      = local.aws_region
   alarm_topic_arn = local.dlq_alarm_arn
+}
+
+resource "aws_iam_role_policy" "read_from_queue" {
+  role = module.task_definition.task_role_name
+  policy = module.calm_windows_queue.read_policy
 }
