@@ -1,26 +1,22 @@
-#!/bin/env python3
-
-from datetime import date, timedelta
+from datetime import timedelta
 import json
 
-import click
 import boto3
-from tqdm import tqdm
 
 
 class WindowGenerator:
 
-    topic_arn = "arn:aws:sns:eu-west-1:760097843905:calm-windows"
     role_arn = "arn:aws:iam::760097843905:role/platform-developer"
 
-    def __init__(self, start, end=None):
+    def __init__(self, topic_arn, start, end=None):
+        self.topic_arn = topic_arn
         self.start = start
         self.end = end or start
         assert self.start <= self.end, "Start window is after end window"
         self.client = self.get_sns_client()
 
     def run(self):
-        for window in tqdm(list(self.windows)):
+        for window in self.windows:
             self.send_window_to_sns(window)
 
     @property
@@ -47,32 +43,3 @@ class WindowGenerator:
             aws_secret_access_key=credentials["SecretAccessKey"],
             aws_session_token=credentials["SessionToken"],
         )
-
-
-@click.group()
-def cli():
-    pass
-
-
-@cli.command()
-def full_ingest():
-    start = date(2015, 9, 30)  # First date returning any records
-    end = date.today()
-    WindowGenerator(start, end).run()
-
-
-@cli.command()
-def today():
-    start = date.today()
-    WindowGenerator(start).run()
-
-
-@cli.command()
-@click.argument("start", type=click.DateTime(["%Y-%m-%d"]))
-@click.argument("end", type=click.DateTime(["%Y-%m-%d"]))
-def date_range(start, end):
-    WindowGenerator(start.date(), end.date()).run()
-
-
-if __name__ == "__main__":
-    cli()
