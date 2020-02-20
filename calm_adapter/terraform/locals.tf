@@ -20,4 +20,6 @@ locals {
     calm_api_username = "calm_adapter/calm_api/username"
     calm_api_password = "calm_adapter/calm_api/password"
   }
+
+  window_generator_interval = "60 minutes"
 }

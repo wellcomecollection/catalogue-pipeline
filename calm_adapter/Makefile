@@ -11,7 +11,7 @@ SBT_DOCKER_LIBRARIES =
 SBT_NO_DOCKER_LIBRARIES =
 
 PYTHON_APPS =
-LAMBDAS =
+LAMBDAS = calm_window_generator
 
 TF_NAME = calm_adapter
 TF_PATH = $(STACK_ROOT)/terraform
