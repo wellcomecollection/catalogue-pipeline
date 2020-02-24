@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.api.elasticsearch
 
 import com.sksamuel.elastic4s.ElasticDsl.{must, should}
 import com.sksamuel.elastic4s.requests.common.Operator
-import com.sksamuel.elastic4s.requests.searches.queries.{ConstantScore, Query}
+import com.sksamuel.elastic4s.requests.searches.queries.Query
 import com.sksamuel.elastic4s.requests.searches.queries.matches.{
   FieldWithOptionalBoost,
   MatchQuery,
@@ -10,27 +10,38 @@ import com.sksamuel.elastic4s.requests.searches.queries.matches.{
   MultiMatchQueryBuilderType
 }
 
-sealed trait ElasticsearchQuery {
+trait BigT {
   val q: String
   val elasticQuery: Query
 }
 
-// Queries sent to the application _should_ implement this class
-// as it wraps core functionality that we wouldn't want to break.
-// We haven't enforced this in the type system as we _might_ want
-// to try more extreme tests.
+sealed trait ElasticsearchQuery extends BigT {
+  val q: String
+  val elasticQuery: Query
+}
+
+/**
+  * Queries sent to the application _should_ implement this class
+  * as it wraps core functionality that we wouldn't want to break.
+  * We haven't enforced this in the type system as we _might_ want
+  * to try more extreme tests.
+  */
 final case class CoreQuery(q: String, shouldQueries: Seq[Query])
     extends ElasticsearchQuery {
 
   lazy val elasticQuery = must(
     should(
-      List(BaseQuery(q).elasticQuery, IdQuery(q).elasticQuery) ++
+      List(BaseOrQuery(q).elasticQuery, IdQuery(q).elasticQuery) ++
         shouldQueries: _*
     )
   )
 }
 
-case class BaseQuery(q: String) extends ElasticsearchQuery {
+/**
+  * The `BaseAndQuery` & `BaseOrQuery` are almost identical, but we use the AND operator and a double boost on the
+  * `BaseAndQuery` as AND should always score higher.
+  */
+case class BaseOrQuery(q: String) extends ElasticsearchQuery {
   val minimumShouldMatch = "60%"
   val searchFields: Seq[(String, Option[Double])] = Seq(
     ("data.subjects.concepts.label", None),
@@ -55,7 +66,39 @@ case class BaseQuery(q: String) extends ElasticsearchQuery {
     text = q,
     fields = fields,
     minimumShouldMatch = Some(minimumShouldMatch),
-    `type` = Some(MultiMatchQueryBuilderType.CROSS_FIELDS)
+    `type` = Some(MultiMatchQueryBuilderType.CROSS_FIELDS),
+    operator = Some(Operator.OR)
+  )
+}
+
+case class BaseAndQuery(q: String) extends ElasticsearchQuery {
+  val minimumShouldMatch = "60%"
+  val searchFields: Seq[(String, Option[Double])] = Seq(
+    ("data.subjects.concepts.label", None),
+    ("data.genres.concepts.label", None),
+    ("data.contributors.agent.label", None),
+    ("data.title.english", None),
+    ("data.description.english", None),
+    ("data.alternativeTitles.english", None),
+    ("data.physicalDescription.english", None),
+    ("data.production.*.label", None),
+    ("data.language.label", None),
+    ("data.edition", None),
+    ("data.notes.content.english", None),
+  )
+
+  val fields = searchFields map {
+    case (field, boost) =>
+      FieldWithOptionalBoost(field = field, boost = boost)
+  }
+
+  lazy val elasticQuery = MultiMatchQuery(
+    text = q,
+    fields = fields,
+    minimumShouldMatch = Some(minimumShouldMatch),
+    `type` = Some(MultiMatchQueryBuilderType.CROSS_FIELDS),
+    operator = Some(Operator.AND),
+    boost = Some(2) // Double the OR query
   )
 }
 
@@ -108,12 +151,66 @@ final case class ContributorQuery(q: String) extends ElasticsearchQuery {
       operator = Some(Operator.And))
 }
 
-final case class ConstScoreQuery(q: String) extends ElasticsearchQuery {
+final case class TitlePhraseQuery(q: String) extends ElasticsearchQuery {
+  lazy val elasticQuery =
+    MultiMatchQuery(
+      text = q,
+      `type` = Some(MultiMatchQueryBuilderType.PHRASE),
+      fields = Seq(
+        FieldWithOptionalBoost("data.title.keyword", Some(5000)),
+        FieldWithOptionalBoost("data.title.english", Some(2000))
+      )
+    )
+}
+
+final case class SubjectsPhraseQuery(q: String) extends ElasticsearchQuery {
+  lazy val elasticQuery =
+    MultiMatchQuery(
+      text = q,
+      `type` = Some(MultiMatchQueryBuilderType.PHRASE),
+      fields = Seq(
+        FieldWithOptionalBoost(
+          "data.subjects.concepts.label.keyword",
+          Some(5000)),
+        FieldWithOptionalBoost("data.subjects.concepts.label", Some(2000))
+      )
+    )
+}
+
+final case class GenresPhraseQuery(q: String) extends ElasticsearchQuery {
+  lazy val elasticQuery =
+    MultiMatchQuery(
+      text = q,
+      `type` = Some(MultiMatchQueryBuilderType.PHRASE),
+      fields = Seq(
+        FieldWithOptionalBoost(
+          "data.genres.concepts.label.keyword",
+          Some(5000)),
+        FieldWithOptionalBoost("data.genres.concepts.label", Some(2000))
+      )
+    )
+}
+
+final case class ContributorsPhraseQuery(q: String) extends ElasticsearchQuery {
+  lazy val elasticQuery =
+    MultiMatchQuery(
+      text = q,
+      `type` = Some(MultiMatchQueryBuilderType.PHRASE),
+      fields = Seq(
+        FieldWithOptionalBoost(
+          "data.contributors.agent.label.keyword",
+          Some(5000)),
+        FieldWithOptionalBoost("data.contributors.agent.label", Some(2000))
+      )
+    )
+}
+
+final case class PhraseMatchQuery(q: String) extends ElasticsearchQuery {
   lazy val elasticQuery = should(
-    ConstantScore(query = GenreQuery(q).elasticQuery, boost = Some(2000)),
-    ConstantScore(query = SubjectQuery(q).elasticQuery, boost = Some(2000)),
-    ConstantScore(query = ContributorQuery(q).elasticQuery, boost = Some(2000)),
-    ConstantScore(query = TitleQuery(q).elasticQuery, boost = Some(1000)),
+    TitlePhraseQuery(q).elasticQuery,
+    GenresPhraseQuery(q).elasticQuery,
+    SubjectsPhraseQuery(q).elasticQuery,
+    ContributorsPhraseQuery(q).elasticQuery,
   )
 }
 
