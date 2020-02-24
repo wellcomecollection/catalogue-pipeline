@@ -6,8 +6,16 @@ import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig}
 import uk.ac.wellcome.messaging.sqs.SQSStream
-import uk.ac.wellcome.models.work.internal.{TransformedBaseWork, UnidentifiedWork, WorkData}
-import uk.ac.wellcome.platform.transformer.calm.{CalmTransformer, CalmTransformerError, Transformer}
+import uk.ac.wellcome.models.work.internal.{
+  TransformedBaseWork,
+  UnidentifiedWork,
+  WorkData
+}
+import uk.ac.wellcome.platform.transformer.calm.{
+  CalmTransformer,
+  CalmTransformerError,
+  Transformer
+}
 import uk.ac.wellcome.platform.transformer.calm.models.CalmRecord
 import uk.ac.wellcome.platform.transformer.calm.transformers.CalmToSourceIdentifier
 import uk.ac.wellcome.storage.store.{Readable, VersionedStore}
