@@ -27,9 +27,7 @@ class WindowGenerator:
 
     def send_window_to_sns(self, window):
         msg = json.dumps({"date": window.isoformat()})
-        self.client.publish(
-            TopicArn=self.topic_arn, Message=msg, Subject=f"Window sent by {__file__}"
-        )
+        self.client.publish(TopicArn=self.topic_arn, Message=msg)
 
     def get_sns_client(self):
         sts = boto3.client("sts")
