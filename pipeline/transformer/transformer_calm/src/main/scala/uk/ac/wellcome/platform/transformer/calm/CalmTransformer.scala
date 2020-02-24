@@ -7,7 +7,7 @@ trait CalmTransformerError extends Throwable
 case object SourceIdentifierMissingError extends CalmTransformerError
 case object MultipleSourceIdentifiersFoundError extends CalmTransformerError
 
-object CalmTransformer extends Transformer[CalmRecord, TransformedBaseWork] {
+object CalmTransformer extends Transformer[CalmRecord] {
   def transform(record: CalmRecord)
   : Either[CalmTransformerError, TransformedBaseWork] =
 

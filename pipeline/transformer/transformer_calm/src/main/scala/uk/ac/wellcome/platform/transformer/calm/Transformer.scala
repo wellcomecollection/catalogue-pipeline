@@ -1,8 +1,8 @@
 package uk.ac.wellcome.platform.transformer.calm
 
-trait Transformer[In, Out] {
-  def transform(in: In): Either[Throwable, Out]
+import uk.ac.wellcome.models.work.internal.TransformedBaseWork
+
+trait Transformer[T] {
+
+  def transform(input: T): Either[Throwable, TransformedBaseWork]
 }
-
-
-
