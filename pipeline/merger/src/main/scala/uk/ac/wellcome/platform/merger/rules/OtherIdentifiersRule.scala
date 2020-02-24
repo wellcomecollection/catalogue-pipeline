@@ -1,0 +1,62 @@
+package uk.ac.wellcome.platform.merger.rules
+import uk.ac.wellcome.models.work.internal.{
+  SourceIdentifier,
+  TransformedBaseWork,
+  UnidentifiedWork
+}
+import uk.ac.wellcome.platform.merger.logging.MergerLogging
+import uk.ac.wellcome.platform.merger.rules.WorkFilters.WorkFilter
+
+/*
+ * The otherIdentifiers field is made up of all of the identifiers on the sources,
+ * except for any Sierra identifiers on Miro sources, as these may be incorrect
+ */
+object OtherIdentifiersRule extends ComposedFieldMergeRule with MergerLogging {
+  type Field = List[SourceIdentifier]
+
+  override def merge(target: UnidentifiedWork,
+                     sources: Seq[TransformedBaseWork]): MergeResult[Field] =
+    MergeResult(
+      field = composeRules(liftIntoTarget)(miroIdsRule, physicalDigitalIdsRule)(
+        target,
+        sources).data.otherIdentifiers,
+      redirects = sources.filter { source =>
+        (miroIdsRule orElse physicalDigitalIdsRule)
+          .isDefinedAt((target, List(source)))
+      }
+    )
+
+  private def liftIntoTarget(target: UnidentifiedWork)(
+    ids: List[SourceIdentifier]): UnidentifiedWork =
+    target withData { data =>
+      data.copy(otherIdentifiers = ids)
+    }
+
+  private final val unmergeableMiroIdTypes =
+    List("sierra-identifier", "sierra-system-number")
+  private lazy val miroIdsRule = new PartialRule {
+    val isDefinedForTarget: WorkFilter = WorkFilters.singleItemSierra
+    val isDefinedForSource: WorkFilter = WorkFilters.singleItemMiro
+
+    override def rule(
+      target: UnidentifiedWork,
+      sources: Seq[TransformedBaseWork]): List[SourceIdentifier] = {
+      info(s"Merging Miro IDs from ${describeWorks(sources)}")
+      target.data.otherIdentifiers ++ sources.flatMap(
+        _.identifiers.filterNot(sourceIdentifier =>
+          unmergeableMiroIdTypes.contains(sourceIdentifier.identifierType.id)))
+    }
+  }
+
+  private lazy val physicalDigitalIdsRule = new PartialRule {
+    val isDefinedForTarget: WorkFilter = WorkFilters.physicalSierra
+    val isDefinedForSource: WorkFilter = WorkFilters.digitalSierra
+
+    override def rule(
+      target: UnidentifiedWork,
+      sources: Seq[TransformedBaseWork]): List[SourceIdentifier] = {
+      info(s"Merging physical and digital IDs from ${describeWorks(sources)}")
+      target.data.otherIdentifiers ++ sources.flatMap(_.identifiers)
+    }
+  }
+}
