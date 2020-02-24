@@ -1,33 +1,28 @@
 package uk.ac.wellcome.platform.transformer.calm
 
 import uk.ac.wellcome.models.work.internal.{
+  SourceIdentifier,
   TransformedBaseWork,
   UnidentifiedWork,
   WorkData
 }
 import uk.ac.wellcome.platform.transformer.calm.models.CalmRecord
-import uk.ac.wellcome.platform.transformer.calm.transformers.CalmToSourceIdentifier
 
 trait CalmTransformerError extends Throwable
 case object SourceIdentifierMissingError extends CalmTransformerError
 case object MultipleSourceIdentifiersFoundError extends CalmTransformerError
 
-object CalmTransformer extends Transformer[CalmRecord, TransformedBaseWork] {
-  def transform(calmRecord: CalmRecord)
-    : Either[CalmTransformerError, TransformedBaseWork] = {
-    val sourceIdentifier = CalmToSourceIdentifier.transform(calmRecord)
-
-    sourceIdentifier.map {
-      case head :: Nil =>
-        Right(
-          UnidentifiedWork(
-            version = 1,
-            sourceIdentifier = head,
-            data = WorkData()))
-
-      case _ => Left(MultipleSourceIdentifiersFoundError)
-    } getOrElse Left(SourceIdentifierMissingError)
-
-  }
-
+object CalmTransformer extends Transformer[CalmRecord] {
+  def transform(
+    record: CalmRecord): Either[CalmTransformerError, TransformedBaseWork] =
+    Right(
+      UnidentifiedWork(
+        sourceIdentifier = SourceIdentifier(
+          value = record.id,
+          identifierType = CalmIdentifierTypes.recordId,
+          ontologyType = "IdentifierType"),
+        version = 1,
+        data = WorkData()
+      )
+    )
 }

@@ -6,20 +6,14 @@ import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig}
 import uk.ac.wellcome.messaging.sqs.SQSStream
-import uk.ac.wellcome.models.work.internal.{
-  TransformedBaseWork,
-  UnidentifiedWork,
-  WorkData
-}
+import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.transformer.calm.{
   CalmTransformer,
-  CalmTransformerError,
-  Transformer
+  CalmTransformerError
 }
 import uk.ac.wellcome.platform.transformer.calm.models.CalmRecord
-import uk.ac.wellcome.platform.transformer.calm.transformers.CalmToSourceIdentifier
 import uk.ac.wellcome.storage.store.{Readable, VersionedStore}
-import uk.ac.wellcome.storage.{Identified, ObjectLocation, ReadError, Version}
+import uk.ac.wellcome.storage.{Identified, ObjectLocation, Version}
 import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.Future
@@ -68,7 +62,7 @@ class CalmTransformerWorkerService(
 
     tried match {
       case Left(transformerError) => Future.failed(transformerError.err)
-      case Right(_)               => Future.successful()
+      case Right(_)               => Future.successful(())
     }
   }
 
@@ -76,7 +70,7 @@ class CalmTransformerWorkerService(
     message: NotificationMessage): Result[Version[String, Int]] =
     fromJson[Version[String, Int]](message.body).toEither match {
       case Left(err) => Left(MessageReadError(err, message))
-      case _         => _
+      case result    => ???
     }
 
   private def getCalmRecord(key: Version[String, Int]): Result[CalmRecord] =
@@ -88,14 +82,14 @@ class CalmTransformerWorkerService(
   private def transform(calmRecord: CalmRecord): Result[TransformedBaseWork] =
     CalmTransformer.transform(calmRecord) match {
       case Left(err) => Left(CalmTransformationError(err, calmRecord))
-      case _         => _
+      case result    => ???
     }
 
   private def sendSuccessfulTransformation(
     work: TransformedBaseWork): Result[Unit] = {
     messageSender.sendT(work) toEither match {
       case Left(err) => Left(MessageSendError(err))
-      case Right(_)  => Right()
+      case Right(_)  => Right(())
     }
   }
 }
