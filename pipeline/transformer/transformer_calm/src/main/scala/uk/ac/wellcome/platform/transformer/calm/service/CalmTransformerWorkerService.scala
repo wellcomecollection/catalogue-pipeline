@@ -7,7 +7,10 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig}
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
-import uk.ac.wellcome.platform.transformer.calm.{CalmTransformer, CalmTransformerError}
+import uk.ac.wellcome.platform.transformer.calm.{
+  CalmTransformer,
+  CalmTransformerError
+}
 import uk.ac.wellcome.platform.transformer.calm.models.CalmRecord
 import uk.ac.wellcome.storage.store.{Readable, VersionedStore}
 import uk.ac.wellcome.storage.{Identified, ObjectLocation, Version}
