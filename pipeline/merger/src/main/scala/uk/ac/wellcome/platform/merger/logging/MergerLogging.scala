@@ -1,16 +1,20 @@
 package uk.ac.wellcome.platform.merger.logging
 
-import uk.ac.wellcome.models.work.internal.{
-  TransformedBaseWork,
-  UnidentifiedWork
-}
+import grizzled.slf4j.Logging
+import uk.ac.wellcome.models.work.internal.BaseWork
 
-trait MergerLogging {
-  def describeWorkPair(workA: UnidentifiedWork, workB: TransformedBaseWork) =
-    s"(id=${workA.sourceIdentifier.value}) and (id=${workB.sourceIdentifier.value})"
+trait MergerLogging extends Logging {
+  def describeWork(work: BaseWork): String =
+    s"(id=${work.sourceIdentifier.value})"
 
-  def describeWorkPairWithItems(workA: UnidentifiedWork,
-                                workB: TransformedBaseWork): String =
-    s"(id=${workA.sourceIdentifier.value}, itemsCount=${workA.data.items.size}) and " +
-      s"(id=${workB.sourceIdentifier.value}, itemsCount=${workB.data.items.size})"
+  def describeWorks(works: Seq[BaseWork]): String =
+    s"[${works.map(describeWork).mkString(",")}]"
+
+  def describeMergeSet(target: BaseWork, sources: Seq[BaseWork]): String =
+    s"target${describeWork(target)} with sources${describeWorks(sources)}"
+
+  def describeMergeOutcome(target: BaseWork,
+                           redirected: Seq[BaseWork],
+                           remaining: Seq[BaseWork]): String =
+    s"target${describeWork(target)} with redirected${describeWorks(redirected)} and remaining${describeWorks(remaining)}"
 }
