@@ -16,7 +16,7 @@ import com.sksamuel.elastic4s.{ElasticClient, ElasticError, Index}
 import io.circe.Printer
 import uk.ac.wellcome.platform.api.services.{ElasticsearchService, WorksService}
 import uk.ac.wellcome.elasticsearch.ElasticConfig
-import uk.ac.wellcome.platform.api.elasticsearch.ElasticErrorHandler
+import uk.ac.wellcome.platform.api.elasticsearch.ElasticsearchErrorHandler
 import uk.ac.wellcome.platform.api.swagger.SwaggerDocs
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.models._
@@ -171,7 +171,7 @@ class Router(elasticClient: ElasticClient,
   )
 
   def elasticError(err: ElasticError): Route = error(
-    ElasticErrorHandler.buildDisplayError(err)
+    ElasticsearchErrorHandler.buildDisplayError(err)
   )
 
   def error(err: DisplayError): Route = {

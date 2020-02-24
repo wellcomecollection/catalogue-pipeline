@@ -1,5 +1,4 @@
 # Graph table
-
 resource "aws_dynamodb_table" "matcher_graph_table" {
   name     = "${local.namespace_hyphen}_works-graph"
   hash_key = "id"
@@ -26,14 +25,14 @@ resource "aws_dynamodb_table" "matcher_graph_table" {
 data "aws_iam_policy_document" "graph_table_readwrite" {
   statement {
     actions = [
-      "dynamodb:UpdateItem",
-      "dynamodb:PutItem",
       "dynamodb:BatchGetItem",
       "dynamodb:GetItem",
+      "dynamodb:UpdateItem",
+      "dynamodb:PutItem",
     ]
 
     resources = [
-      "${aws_dynamodb_table.matcher_graph_table.arn}",
+      aws_dynamodb_table.matcher_graph_table.arn,
     ]
   }
 
@@ -88,7 +87,7 @@ data "aws_iam_policy_document" "lock_table_readwrite" {
     ]
 
     resources = [
-      "${aws_dynamodb_table.matcher_lock_table.arn}",
+      aws_dynamodb_table.matcher_lock_table.arn,
     ]
   }
 

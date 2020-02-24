@@ -1,7 +1,9 @@
 package uk.ac.wellcome.calm_adapter
 
 import scala.util.Try
-import scala.xml.{Elem, Node, XML}
+import scala.xml.{Elem, Node, NodeSeq, XML}
+import java.time.Instant
+import akka.http.scaladsl.model.headers.Cookie
 
 trait CalmXmlResponse[T] {
   val root: Elem
@@ -37,7 +39,8 @@ trait CalmXmlResponse[T] {
   }
 }
 
-case class CalmSearchResponse(val root: Elem) extends CalmXmlResponse[Int] {
+case class CalmSearchResponse(val root: Elem, cookie: Cookie)
+    extends CalmXmlResponse[CalmSession] {
 
   val responseTag = "SearchResponse"
 
@@ -49,19 +52,30 @@ case class CalmSearchResponse(val root: Elem) extends CalmXmlResponse[Int] {
     *
     *  Here we extract an integer containing n (the number of hits)
     */
-  def parse: Either[Throwable, Int] =
+  def parse: Either[Throwable, CalmSession] =
     responseNode
       .flatMap(_.childWithTag("SearchResult"))
-      .flatMap(result => Try(result.text.toInt).toEither)
+      .flatMap { result =>
+        Try(result.text.toInt)
+          .map(numHits => CalmSession(numHits, cookie))
+          .toEither
+      }
 }
 
 object CalmSearchResponse {
 
-  def apply(str: String): Either[Throwable, CalmSearchResponse] =
-    Try(XML.loadString(str)).map(CalmSearchResponse(_)).toEither
+  def apply(str: String,
+            cookie: Cookie): Either[Throwable, CalmSearchResponse] =
+    Try(XML.loadString(str)).map(CalmSearchResponse(_, cookie)).toEither
+
+  def apply(bytes: Array[Byte],
+            cookie: Cookie): Either[Throwable, CalmSearchResponse] =
+    Try(XML.load(new java.io.ByteArrayInputStream(bytes)))
+      .map(CalmSearchResponse(_, cookie))
+      .toEither
 }
 
-case class CalmSummaryResponse(val root: Elem)
+case class CalmSummaryResponse(val root: Elem, retrievedAt: Instant)
     extends CalmXmlResponse[CalmRecord] {
 
   val responseTag = "SummaryHeaderResponse"
@@ -85,20 +99,41 @@ case class CalmSummaryResponse(val root: Elem)
   def parse: Either[Throwable, CalmRecord] =
     responseNode
       .flatMap(_.childWithTag("SummaryHeaderResult"))
-      .flatMap(_.childWithTag("SummaryList"))
+      .flatMap { node =>
+        // The response contains an inner XML document (ISO-8859-1 encoded)
+        // within the top level UTF-8 one, so we need to parse this here if
+        // it exists
+        Try(XML.loadString(node.text)).toEither.left
+          .flatMap(_ => node.childWithTag("SummaryList"))
+      }
       .flatMap(_.childWithTag("Summary"))
       .map(_ \ "_")
-      .flatMap { node =>
-        val data = node.map(child => child.label -> child.text).toMap
-        data
-          .get("RecordID")
-          .map(id => Right(CalmRecord(id, data)))
-          .getOrElse(Left(new Exception("RecordID not found")))
+      .flatMap { nodes =>
+        val data = toMapping(nodes)
+        data.get("RecordID") match {
+          case Some(List(id)) => Right(CalmRecord(id, data, retrievedAt))
+          case Some(_)        => Left(new Exception("Multiple RecordIDs found"))
+          case None           => Left(new Exception("RecordID not found"))
+        }
       }
+
+  def toMapping(nodes: NodeSeq): Map[String, List[String]] =
+    nodes
+      .map(node => node.label -> node.text)
+      .groupBy(_._1)
+      .mapValues(_.map(_._2).toList)
+      .toMap
 }
 
 object CalmSummaryResponse {
 
-  def apply(str: String): Either[Throwable, CalmSummaryResponse] =
-    Try(XML.loadString(str)).map(CalmSummaryResponse(_)).toEither
+  def apply(str: String,
+            retrievedAt: Instant): Either[Throwable, CalmSummaryResponse] =
+    Try(XML.loadString(str)).map(CalmSummaryResponse(_, retrievedAt)).toEither
+
+  def apply(bytes: Array[Byte],
+            retrievedAt: Instant): Either[Throwable, CalmSummaryResponse] =
+    Try(XML.load(new java.io.ByteArrayInputStream(bytes)))
+      .map(CalmSummaryResponse(_, retrievedAt))
+      .toEither
 }

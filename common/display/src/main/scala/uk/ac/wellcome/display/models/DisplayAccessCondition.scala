@@ -48,5 +48,9 @@ object DisplayAccessStatus {
         DisplayAccessStatus("closed", "Closed")
       case AccessStatus.LicensedResources =>
         DisplayAccessStatus("licensed-resources", "Licensed Resources")
+      case AccessStatus.Unavailable =>
+        DisplayAccessStatus("unavailable", "Unavailable")
+      case AccessStatus.PermissionRequired =>
+        DisplayAccessStatus("permission-required", "Permission Required")
     }
 }

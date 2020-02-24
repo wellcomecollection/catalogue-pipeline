@@ -23,9 +23,7 @@ The test ran for three weeks over the Christmas break. It's worth bearing in min
 
 ## Conclusions
 
-The data indicates that the new variant query performs worse than the default, particularly at the top end of the list of results \(where worse performance is indicated by fewer clicks\). 
+The data indicates that the new variant query performs worse than the default, particularly at the top end of the list of results \(where worse performance is indicated by fewer clicks\).
 
 The difference isn't substantial, and both queries seem to perform better than some of our previous candidates. However, we should still step back and evaluate why performance is lower before proposing a new set of changes.
-
-## 
 

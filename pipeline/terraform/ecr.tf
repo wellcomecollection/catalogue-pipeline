@@ -1,49 +1,39 @@
-module "ecr_repository_nginx_services" {
-  source = "git::https://github.com/wellcometrust/terraform.git//ecr?ref=v1.0.0"
-  name   = "nginx_services"
+resource "aws_ecr_repository" "ecr_repository_nginx_services" {
+  name = "uk.ac.wellcome/nginx_services"
 }
 
-module "ecr_repository_transformer_miro" {
-  source = "git::https://github.com/wellcometrust/terraform.git//ecr?ref=v1.0.0"
-  name   = "transformer_miro"
+resource "aws_ecr_repository" "ecr_repository_transformer_miro" {
+  name = "uk.ac.wellcome/transformer_miro"
 }
 
-module "ecr_repository_transformer_sierra" {
-  source = "git::https://github.com/wellcometrust/terraform.git//ecr?ref=v1.0.0"
-  name   = "transformer_sierra"
+resource "aws_ecr_repository" "ecr_repository_transformer_sierra" {
+  name = "uk.ac.wellcome/transformer_sierra"
 }
 
-module "ecr_repository_transformer_mets" {
-  source = "git::https://github.com/wellcometrust/terraform.git//ecr?ref=v1.0.0"
-  name   = "transformer_mets"
+resource "aws_ecr_repository" "ecr_repository_transformer_mets" {
+  name = "uk.ac.wellcome/transformer_mets"
 }
 
-module "ecr_repository_id_minter" {
-  source = "git::https://github.com/wellcometrust/terraform.git//ecr?ref=v1.0.0"
-  name   = "id_minter"
+resource "aws_ecr_repository" "ecr_repository_id_minter" {
+  name = "uk.ac.wellcome/id_minter"
 }
 
-module "ecr_repository_recorder" {
-  source = "git::https://github.com/wellcometrust/terraform.git//ecr?ref=v1.0.0"
-  name   = "recorder"
+resource "aws_ecr_repository" "ecr_repository_recorder" {
+  name = "uk.ac.wellcome/recorder"
 }
 
-module "ecr_repository_matcher" {
-  source = "git::https://github.com/wellcometrust/terraform.git//ecr?ref=v1.0.0"
-  name   = "matcher"
+resource "aws_ecr_repository" "ecr_repository_matcher" {
+  name = "uk.ac.wellcome/matcher"
 }
 
-module "ecr_repository_merger" {
-  source = "git::https://github.com/wellcometrust/terraform.git//ecr?ref=v1.0.0"
-  name   = "merger"
+resource "aws_ecr_repository" "ecr_repository_merger" {
+  name = "uk.ac.wellcome/merger"
 }
 
-module "ecr_repository_ingestor" {
-  source = "git::https://github.com/wellcometrust/terraform.git//ecr?ref=v1.0.0"
-  name   = "ingestor"
+resource "aws_ecr_repository" "ecr_repository_ingestor" {
+  name = "uk.ac.wellcome/ingestor"
 }
 
-module "ecr_repository_elasticdump" {
-  source = "git::https://github.com/wellcometrust/terraform.git//ecr?ref=v1.0.0"
-  name   = "elasticdump"
+resource "aws_ecr_repository" "ecr_repository_elasticdump" {
+  name = "uk.ac.wellcome/elasticdump"
 }

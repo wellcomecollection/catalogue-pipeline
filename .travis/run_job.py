@@ -9,6 +9,16 @@ from git_utils import get_changed_paths, git
 from sbt_dependency_tree import Repository
 
 
+def get_project_name():
+    """Gets the project name either from the first argument of the
+    command or from the environment
+    """
+    try:
+        return sys.argv[1]
+    except IndexError:
+        return os.environ["SBT_PROJECT"]
+
+
 def check_call(cmd):
     """
     A wrapped version of subprocess.check_call() that doesn't print a
@@ -81,7 +91,7 @@ if __name__ == "__main__":
         # If it's not an sbt task, we always run it no matter what.
         task = os.environ["TASK"]
     except KeyError:
-        sbt_project_name = os.environ["SBT_PROJECT"]
+        sbt_project_name = get_project_name()
 
         repo = Repository(".sbt_metadata")
 

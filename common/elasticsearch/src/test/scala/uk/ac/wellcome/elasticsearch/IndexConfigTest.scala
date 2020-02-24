@@ -24,6 +24,7 @@ import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.{
   AccessCondition,
   AccessStatus,
+  Collection,
   IdentifiedBaseWork,
   Person,
   Subject,
@@ -111,6 +112,26 @@ class IndexConfigTest
         items = List(
           createIdentifiedItemWith(locations = List(createDigitalLocationWith(
             accessConditions = List(accessCondition))))))
+      whenReady(indexObject(index, sampleWork)) { _ =>
+        assertObjectIndexed(index, sampleWork)
+      }
+    }
+  }
+
+  // Because we use copy_to and some other index functionality
+  // the potentially fails at PUT index time, we urn this test
+  // e.g. copy_to was previously set to `collection.depth`
+  // which would not work as the mapping is strict and `collection`
+  // only exists at the `data.collection` level
+  it("puts a work with a collection") {
+    val collection =
+      Some(
+        Collection(
+          path = "PATH/FOR/THE/COLLECTION",
+          label = Some("PATH/FOR/THE/COLLECTION")))
+
+    withLocalWorksIndex { index =>
+      val sampleWork = createIdentifiedWorkWith(collection = collection)
       whenReady(indexObject(index, sampleWork)) { _ =>
         assertObjectIndexed(index, sampleWork)
       }

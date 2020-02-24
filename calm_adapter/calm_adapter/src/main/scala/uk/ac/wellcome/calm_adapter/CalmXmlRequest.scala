@@ -4,6 +4,8 @@ import scala.xml.Elem
 
 trait CalmXmlRequest {
 
+  val action: String
+
   def body: Elem
 
   def xml: Elem =
@@ -19,6 +21,9 @@ trait CalmXmlRequest {
 
 case class CalmSearchRequest(query: CalmQuery, dbName: String = "Catalog")
     extends CalmXmlRequest {
+
+  val action = "Search"
+
   def body: Elem =
     <Search xmlns="http://ds.co.uk/cs/webservices/">
       <dbname>{dbName}</dbname>
@@ -29,6 +34,9 @@ case class CalmSearchRequest(query: CalmQuery, dbName: String = "Catalog")
 
 case class CalmSummaryRequest(pos: Int, dbName: String = "Catalog")
     extends CalmXmlRequest {
+
+  val action = "SummaryHeader"
+
   def body: Elem =
     <SummaryHeader xmlns="http://ds.co.uk/cs/webservices/">
       <dbname>{dbName}</dbname>
