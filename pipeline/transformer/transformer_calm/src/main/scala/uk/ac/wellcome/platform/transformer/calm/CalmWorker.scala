@@ -21,7 +21,7 @@ class CalmWorker[SenderDest](
   sender: BigMessageSender[SenderDest, TransformedBaseWork],
   store: VersionedStore[String, Int, CalmRecord],
   source: Source[(Message, NotificationMessage), NotUsed])
-    extends Worker[
+    extends SimpleStreamWorker[
       (Message, NotificationMessage),
       CalmRecord,
       TransformedBaseWork] {
