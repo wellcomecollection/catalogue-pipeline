@@ -7,7 +7,7 @@ import uk.ac.wellcome.models.work.internal.{
   UnidentifiedRedirectedWork,
   UnidentifiedWork
 }
-import uk.ac.wellcome.platform.merger.rules.MergeResult
+import uk.ac.wellcome.platform.merger.models.{FieldMergeResult, MergeResult}
 
 class MergerTest extends FunSpec with Matchers with WorksGenerators {
   val inputWorks =
@@ -23,29 +23,31 @@ class MergerTest extends FunSpec with Matchers with WorksGenerators {
       works: Seq[TransformedBaseWork]): Option[UnidentifiedWork] =
       works.headOption.map(_.asInstanceOf[UnidentifiedWork])
 
-    override protected def createMergeResult(target: UnidentifiedWork,
-                                             sources: Seq[TransformedBaseWork])
-      : RedirectsAccumulator[UnidentifiedWork] =
+    override protected def createMergeResult(
+      target: UnidentifiedWork,
+      sources: Seq[TransformedBaseWork]): RedirectsAccumulator[MergeResult] =
       for {
         items <- accumulateRedirects(
-          MergeResult(
+          FieldMergeResult(
             fieldData = mergedTargetItems,
             redirects = List(sources.tail.head)
           )
         )
         otherIdentifiers <- accumulateRedirects(
-          MergeResult(
+          FieldMergeResult(
             fieldData = mergedOtherIdentifiers,
             redirects = sources.tail.tail
           )
         )
       } yield
-        target withData { data =>
-          data.copy(
-            items = items,
-            otherIdentifiers = otherIdentifiers
-          )
-        }
+        MergeResult(
+          target = target withData { data =>
+            data.copy(
+              items = items,
+              otherIdentifiers = otherIdentifiers
+            )
+          }
+        )
   }
 
   val mergedWorks = TestMerger.merge(inputWorks)

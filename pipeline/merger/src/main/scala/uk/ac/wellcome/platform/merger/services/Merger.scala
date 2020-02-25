@@ -9,13 +9,13 @@ import uk.ac.wellcome.models.work.internal.{
 }
 import uk.ac.wellcome.platform.merger.rules.{
   ItemsRule,
-  MergeResult,
   OtherIdentifiersRule,
   ThumbnailRule,
   WorkPredicates
 }
 import cats.data.State
 import uk.ac.wellcome.platform.merger.logging.MergerLogging
+import uk.ac.wellcome.platform.merger.models.{FieldMergeResult, MergeResult}
 
 /*
  * The implementor of a Merger must provide:
@@ -40,7 +40,7 @@ abstract class Merger extends MergerLogging {
 
   protected def createMergeResult(
     target: UnidentifiedWork,
-    sources: Seq[TransformedBaseWork]): RedirectsAccumulator[UnidentifiedWork]
+    sources: Seq[TransformedBaseWork]): RedirectsAccumulator[MergeResult]
 
   protected def getTargetAndSources(works: Seq[TransformedBaseWork])
     : Option[(UnidentifiedWork, Seq[TransformedBaseWork])] =
@@ -65,9 +65,9 @@ abstract class Merger extends MergerLogging {
       .getOrElse(works)
 
   protected def accumulateRedirects[T](
-    merged: => MergeResult[T]): RedirectsAccumulator[T] =
+    merged: => FieldMergeResult[T]): RedirectsAccumulator[T] =
     merged match {
-      case MergeResult(field, ruleRedirects) =>
+      case FieldMergeResult(field, ruleRedirects) =>
         State(existingRedirects =>
           (existingRedirects ++ ruleRedirects.toSet, field))
     }
@@ -93,19 +93,21 @@ object PlatformMerger extends Merger {
 
   override def createMergeResult(
     target: UnidentifiedWork,
-    sources: Seq[TransformedBaseWork]): RedirectsAccumulator[UnidentifiedWork] =
+    sources: Seq[TransformedBaseWork]): RedirectsAccumulator[MergeResult] =
     for {
       items <- accumulateRedirects(ItemsRule.merge(target, sources))
       thumbnail <- accumulateRedirects(ThumbnailRule.merge(target, sources))
       otherIdentifiers <- accumulateRedirects(
         OtherIdentifiersRule.merge(target, sources))
     } yield
-      target withData { data =>
-        data.copy(
-          items = items,
-          thumbnail = thumbnail,
-          otherIdentifiers = otherIdentifiers,
-          merged = true
-        )
-      }
+      MergeResult(
+        target = target withData { data =>
+          data.copy(
+            items = items,
+            thumbnail = thumbnail,
+            otherIdentifiers = otherIdentifiers,
+            merged = true
+          )
+        }
+      )
 }

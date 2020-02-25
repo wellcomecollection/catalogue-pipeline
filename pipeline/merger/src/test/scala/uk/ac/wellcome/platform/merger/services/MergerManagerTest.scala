@@ -10,6 +10,7 @@ import uk.ac.wellcome.models.work.internal.{
   UnidentifiedRedirectedWork,
   UnidentifiedWork
 }
+import uk.ac.wellcome.platform.merger.models.MergeResult
 
 class MergerManagerTest extends FunSpec with Matchers with WorksGenerators {
 
@@ -69,10 +70,10 @@ class MergerManagerTest extends FunSpec with Matchers with WorksGenerators {
       works: Seq[TransformedBaseWork]): Option[UnidentifiedWork] =
       works.headOption.map(_.asInstanceOf[UnidentifiedWork])
 
-    override protected def createMergeResult(target: UnidentifiedWork,
-                                             sources: Seq[TransformedBaseWork])
-      : RedirectsAccumulator[UnidentifiedWork] =
-      State(_ => (sources.toSet, target))
+    override protected def createMergeResult(
+      target: UnidentifiedWork,
+      sources: Seq[TransformedBaseWork]): RedirectsAccumulator[MergeResult] =
+      State(_ => (sources.toSet, MergeResult(target)))
   }
 
   val mergerManager = new MergerManager(mergerRules = mergerRules)

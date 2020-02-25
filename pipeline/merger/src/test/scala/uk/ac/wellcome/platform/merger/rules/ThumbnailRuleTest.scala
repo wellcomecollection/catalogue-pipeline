@@ -6,6 +6,7 @@ import uk.ac.wellcome.models.work.internal.{
   License,
   LocationType
 }
+import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 
 class ThumbnailRuleTest
     extends FunSpec
@@ -54,7 +55,7 @@ class ThumbnailRuleTest
   it(
     "chooses the METS thumbnail from a single-item digital METS work for a digital Sierra target") {
     inside(ThumbnailRule.merge(digitalSierraWork, miroWorks :+ metsWork)) {
-      case MergeResult(thumbnail, _) =>
+      case FieldMergeResult(thumbnail, _) =>
         thumbnail shouldBe defined
         thumbnail shouldBe metsWork.data.thumbnail
     }
@@ -63,7 +64,7 @@ class ThumbnailRuleTest
   it(
     "chooses a Miro thumbnail if no METS works are available, for a digital Sierra target") {
     inside(ThumbnailRule.merge(digitalSierraWork, miroWorks)) {
-      case MergeResult(thumbnail, _) =>
+      case FieldMergeResult(thumbnail, _) =>
         thumbnail shouldBe defined
         miroWorks.map(_.data.thumbnail) should contain(thumbnail)
     }
@@ -72,7 +73,7 @@ class ThumbnailRuleTest
   it(
     "chooses a Miro thumbnail if no METS works are available, for a physical Sierra target") {
     inside(ThumbnailRule.merge(physicalSierraWork, miroWorks)) {
-      case MergeResult(thumbnail, _) =>
+      case FieldMergeResult(thumbnail, _) =>
         thumbnail shouldBe defined
         miroWorks.map(_.data.thumbnail) should contain(thumbnail)
     }
@@ -80,7 +81,7 @@ class ThumbnailRuleTest
 
   it("chooses the Miro thumbnail from the work with the minimum ID") {
     inside(ThumbnailRule.merge(physicalSierraWork, miroWorks)) {
-      case MergeResult(thumbnail, _) =>
+      case FieldMergeResult(thumbnail, _) =>
         thumbnail shouldBe defined
         thumbnail shouldBe miroWorks
           .minBy(_.sourceIdentifier.value)
@@ -91,7 +92,7 @@ class ThumbnailRuleTest
 
   it("does not return any redirects") {
     inside(ThumbnailRule.merge(digitalSierraWork, miroWorks :+ metsWork)) {
-      case MergeResult(_, redirects) =>
+      case FieldMergeResult(_, redirects) =>
         redirects shouldBe empty
     }
   }

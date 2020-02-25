@@ -6,6 +6,7 @@ import uk.ac.wellcome.models.work.internal.{
   TransformedBaseWork,
   UnidentifiedWork
 }
+import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
 
 class FieldMergeRuleTest
@@ -72,6 +73,6 @@ class FieldMergeRuleTest
   // to access the private PartialRule trait
   override def merge(
     target: UnidentifiedWork,
-    sources: Seq[TransformedBaseWork]): MergeResult[FieldData] =
+    sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData] =
     ???
 }
