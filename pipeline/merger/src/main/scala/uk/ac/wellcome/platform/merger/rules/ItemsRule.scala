@@ -60,18 +60,18 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
 
     def rule(target: UnidentifiedWork,
              sources: Seq[TransformedBaseWork]): FieldData =
-      target.data.items match {
-        case List(sierraSingleItem) =>
+      (target.data.items, sources.partition(WorkFilters.miroWork)) match {
+        case (List(sierraSingleItem), (miroSources, sierraSources)) =>
           List(
             sierraSingleItem.copy(
-              locations = sierraSingleItem.locations ++ sources.flatMap(
-                _.data.items.flatMap(_.locations))
+              locations = sierraSingleItem.locations ++
+                (sierraSources ++ miroSources).flatMap(
+                  _.data.items.flatMap(_.locations)
+                )
             )
           )
-        case multipleSierraItems =>
-          multipleSierraItems ++ sources
-            .filter(WorkFilters.digitalSierra)
-            .flatMap(_.data.items)
+        case (multipleSierraItems, (_, sierraSources)) =>
+          multipleSierraItems ++ sierraSources.flatMap(_.data.items)
       }
   }
 }
