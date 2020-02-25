@@ -1,6 +1,7 @@
 package uk.ac.wellcome.platform.merger.services
 
-import uk.ac.wellcome.models.work.internal.{BaseWork, TransformedBaseWork}
+import uk.ac.wellcome.models.work.internal.TransformedBaseWork
+import uk.ac.wellcome.platform.merger.models.MergerOutcome
 
 class MergerManager(mergerRules: Merger) {
 
@@ -11,7 +12,7 @@ class MergerManager(mergerRules: Merger) {
     * wrong versions), we skip the merge and return the original works.
     */
   def applyMerge(
-    maybeWorks: Seq[Option[TransformedBaseWork]]): Seq[BaseWork] = {
+    maybeWorks: Seq[Option[TransformedBaseWork]]): MergerOutcome = {
     val transformedBaseWorks = maybeWorks
       .collect {
         case Some(transformedBaseWork: TransformedBaseWork) =>
@@ -21,7 +22,7 @@ class MergerManager(mergerRules: Merger) {
     if (transformedBaseWorks.size == maybeWorks.size) {
       mergerRules.merge(transformedBaseWorks)
     } else {
-      maybeWorks.flatten
+      MergerOutcome(maybeWorks.flatten, Nil)
     }
   }
 }

@@ -1,13 +1,13 @@
 package uk.ac.wellcome.platform.merger.services
 
 import uk.ac.wellcome.models.work.internal.{
-  BaseWork,
   IdentifiableRedirect,
   TransformedBaseWork,
   UnidentifiedRedirectedWork,
   UnidentifiedWork
 }
 import uk.ac.wellcome.platform.merger.rules.{
+  ImagesRule,
   ItemsRule,
   OtherIdentifiersRule,
   ThumbnailRule,
@@ -15,7 +15,11 @@ import uk.ac.wellcome.platform.merger.rules.{
 }
 import cats.data.State
 import uk.ac.wellcome.platform.merger.logging.MergerLogging
-import uk.ac.wellcome.platform.merger.models.{FieldMergeResult, MergeResult}
+import uk.ac.wellcome.platform.merger.models.{
+  FieldMergeResult,
+  MergeResult,
+  MergerOutcome
+}
 
 /*
  * The implementor of a Merger must provide:
@@ -48,21 +52,24 @@ abstract class Merger extends MergerLogging {
       (target, works.filterNot(_.sourceIdentifier == target.sourceIdentifier))
     }
 
-  def merge(works: Seq[TransformedBaseWork]): Seq[BaseWork] =
+  def merge(works: Seq[TransformedBaseWork]): MergerOutcome =
     getTargetAndSources(works)
       .map {
         case (target, sources) =>
           info(s"Attempting to merge ${describeMergeSet(target, sources)}")
-          val (toRedirect, mergedTarget) = createMergeResult(target, sources)
+          val (toRedirect, merged) = createMergeResult(target, sources)
             .run(Set.empty)
             .value
           val remaining = sources.toSet -- toRedirect
           val redirects = toRedirect.map(redirectSourceToTarget(target))
           info(
             s"Merged ${describeMergeOutcome(target, redirects.toList, remaining.toList)}")
-          redirects.toList ++ remaining :+ mergedTarget
+          MergerOutcome(
+            works = redirects.toList ++ remaining :+ merged.target,
+            images = merged.images
+          )
       }
-      .getOrElse(works)
+      .getOrElse(MergerOutcome(works, Nil))
 
   protected def accumulateRedirects[T](
     merged: => FieldMergeResult[T]): RedirectsAccumulator[T] =
@@ -99,6 +106,7 @@ object PlatformMerger extends Merger {
       thumbnail <- accumulateRedirects(ThumbnailRule.merge(target, sources))
       otherIdentifiers <- accumulateRedirects(
         OtherIdentifiersRule.merge(target, sources))
+      images <- accumulateRedirects(ImagesRule.merge(target, sources))
     } yield
       MergeResult(
         target = target withData { data =>
@@ -106,8 +114,10 @@ object PlatformMerger extends Merger {
             items = items,
             thumbnail = thumbnail,
             otherIdentifiers = otherIdentifiers,
+            images = images.map(_.toUnmerged),
             merged = true
           )
-        }
+        },
+        images = images
       )
 }

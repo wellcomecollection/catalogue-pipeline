@@ -9,7 +9,13 @@ case class UnmergedImage[+Id](id: Id, location: DigitalLocation)
     extends BaseImage[Id]
 
 case class MergedImage[+Id](id: Id, location: DigitalLocation, data: ImageData)
-    extends BaseImage[Id]
+    extends BaseImage[Id] {
+  def toUnmerged: UnmergedImage[Id] =
+    UnmergedImage[Id](
+      id = id,
+      location = location
+    )
+}
 
 case class ImageData(title: Option[String], parentWorks: List[String])
 

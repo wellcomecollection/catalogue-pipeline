@@ -46,14 +46,15 @@ class MergerTest extends FunSpec with Matchers with WorksGenerators {
               items = items,
               otherIdentifiers = otherIdentifiers
             )
-          }
+          },
+          images = Nil
         )
   }
 
   val mergedWorks = TestMerger.merge(inputWorks)
 
   it("returns a single target work as specified") {
-    mergedWorks should contain(
+    mergedWorks.works should contain(
       inputWorks.head.asInstanceOf[UnidentifiedWork] withData { data =>
         data.copy(
           items = mergedTargetItems,
@@ -65,13 +66,13 @@ class MergerTest extends FunSpec with Matchers with WorksGenerators {
 
   it(
     "returns redirects for all sources that were marked as such by any field rule") {
-    mergedWorks.collect {
+    mergedWorks.works.collect {
       case redirect: UnidentifiedRedirectedWork => redirect.sourceIdentifier
     } should contain theSameElementsAs
       inputWorks.tail.tail.map(_.sourceIdentifier)
   }
 
   it("returns all non-redirected and non-target works untouched") {
-    mergedWorks should contain(inputWorks.tail.head)
+    mergedWorks.works should contain(inputWorks.tail.head)
   }
 }
