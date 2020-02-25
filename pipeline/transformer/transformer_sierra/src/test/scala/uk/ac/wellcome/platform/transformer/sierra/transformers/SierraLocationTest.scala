@@ -186,7 +186,7 @@ class SierraLocationTest
           VarField(
             marcTag = Some("506"),
             subfields = List(
-              MarcSubfield("f", "Cannot Be Produced.")
+              MarcSubfield("f", "Cannot Be Produced - View Digitised Version")
             )
           )
         )

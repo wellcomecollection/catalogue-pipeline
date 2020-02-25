@@ -61,7 +61,6 @@ trait SierraLocation extends SierraQueryOps {
       }
 
   private def getAccessStatus(varfield: VarField): Option[AccessStatus] = {
-    val accessStatus = """([A-Za-z\s\(\)]+)\p{Punct}?""".r
     if (varfield.indicator1 == Some("0"))
       Some(AccessStatus.Open)
     else
@@ -70,26 +69,23 @@ trait SierraLocation extends SierraQueryOps {
         .contents
         .headOption
         .map {
-          case accessStatus(status) if status == "Open" =>
-            AccessStatus.Open
-          case accessStatus(status) if status == "Open with advisory" =>
+          case status if status.startsWith("Open with advisory") =>
             AccessStatus.OpenWithAdvisory
-          case accessStatus(status) if status == "Restricted" =>
+          case status if status.startsWith("Open") =>
+            AccessStatus.Open
+          case status if status.startsWith("Restricted") =>
             AccessStatus.Restricted
-          case accessStatus(status)
-              if status == "Restricted access (Data Protection Act)" =>
+          case status if status.startsWith("Cannot Be Produced") =>
             AccessStatus.Restricted
-          case accessStatus(status) if status == "Cannot Be Produced" =>
+          case status if status.startsWith("Certain restrictions apply") =>
             AccessStatus.Restricted
-          case accessStatus(status) if status == "Certain restrictions apply" =>
-            AccessStatus.Restricted
-          case accessStatus(status) if status == "Closed" =>
+          case status if status.startsWith("Closed") =>
             AccessStatus.Closed
-          case accessStatus(status) if status == "Missing" =>
+          case status if status.startsWith("Missing") =>
             AccessStatus.Unavailable
-          case accessStatus(status) if status == "Temporarily Unavailable" =>
+          case status if status.startsWith("Temporarily Unavailable") =>
             AccessStatus.Unavailable
-          case accessStatus(status) if status == "Permission Required" =>
+          case status if status.startsWith("Permission Required") =>
             AccessStatus.PermissionRequired
         }
   }
