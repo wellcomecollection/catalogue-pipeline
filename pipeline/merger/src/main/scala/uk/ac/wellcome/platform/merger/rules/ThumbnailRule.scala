@@ -15,12 +15,13 @@ import scala.util.Try
  * minimal ID is chosen.
  */
 object ThumbnailRule extends FieldMergeRule with MergerLogging {
-  type Field = Option[Location]
+  type FieldData = Option[Location]
 
-  override def merge(target: UnidentifiedWork,
-                     sources: Seq[TransformedBaseWork]): MergeResult[Field] =
+  override def merge(
+    target: UnidentifiedWork,
+    sources: Seq[TransformedBaseWork]): MergeResult[FieldData] =
     MergeResult(
-      field = (getMetsThumbnail orElse getMinMiroThumbnail orElse
+      fieldData = (getMetsThumbnail orElse getMinMiroThumbnail orElse
         (identityOnTarget andThen (_.data.thumbnail)))((target, sources)),
       redirects = Nil
     )
@@ -31,7 +32,7 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
       val isDefinedForSource: WorkFilter = WorkFilters.singleItemDigitalMets
 
       def rule(target: UnidentifiedWork,
-               sources: Seq[TransformedBaseWork]): Field = {
+               sources: Seq[TransformedBaseWork]): FieldData = {
         info(s"Choosing METS thumbnail from ${describeWorks(sources)}")
         sources.headOption.flatMap(_.data.thumbnail)
       }
@@ -43,7 +44,7 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
       val isDefinedForSource: WorkFilter = WorkFilters.singleItemMiro
 
       def rule(target: UnidentifiedWork,
-               sources: Seq[TransformedBaseWork]): Field = {
+               sources: Seq[TransformedBaseWork]): FieldData = {
         val minMiroSource = Try(sources.min(MiroIdOrdering)).toOption
         minMiroSource.foreach { source =>
           info(s"Choosing METS thumbnail from ${describeWork(source)}")

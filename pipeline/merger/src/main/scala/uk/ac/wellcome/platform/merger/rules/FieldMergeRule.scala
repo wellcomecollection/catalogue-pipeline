@@ -5,7 +5,13 @@ import uk.ac.wellcome.models.work.internal.{
 }
 import uk.ac.wellcome.platform.merger.rules.WorkFilters.WorkFilter
 
-case class MergeResult[T](field: T, redirects: Seq[TransformedBaseWork])
+/*
+ * MergeResult is the return type of a FieldMergeRule's `merge` method
+ * and contains both the new (merged) value for the field but also a list
+ * of sources which the rule would like the merger to redirect. It is up to
+ * the merger how to handle these.
+ */
+case class MergeResult[T](fieldData: T, redirects: Seq[TransformedBaseWork])
 
 /*
  * A trait to extend in order to merge fields of the type member `Field`
@@ -26,46 +32,44 @@ case class MergeResult[T](field: T, redirects: Seq[TransformedBaseWork])
  */
 trait FieldMergeRule {
   protected final type Params = (UnidentifiedWork, Seq[TransformedBaseWork])
-  protected type Field
+  protected type FieldData
 
   def merge(target: UnidentifiedWork,
-            sources: Seq[TransformedBaseWork]): MergeResult[Field]
+            sources: Seq[TransformedBaseWork]): MergeResult[FieldData]
 
   protected val identityOnTarget: PartialFunction[Params, UnidentifiedWork] = {
     case (target, _) => target
   }
 
-  protected trait PartialRule extends PartialFunction[Params, Field] {
+  protected trait PartialRule extends PartialFunction[Params, FieldData] {
     val isDefinedForTarget: WorkFilter
     val isDefinedForSource: WorkFilter
 
-    def rule(target: UnidentifiedWork, sources: Seq[TransformedBaseWork]): Field
+    def rule(target: UnidentifiedWork,
+             sources: Seq[TransformedBaseWork]): FieldData
 
-    override def apply(x: Params): Field =
-      x match {
+    override def apply(params: Params): FieldData =
+      params match {
         case (target, sources) =>
           rule(target, sources.filter(isDefinedForSource))
       }
 
-    override def isDefinedAt(x: Params): Boolean = x match {
+    override def isDefinedAt(params: Params): Boolean = params match {
       case (target, sources) =>
         isDefinedForTarget(target) && sources.exists(isDefinedForSource)
     }
   }
-}
 
-/*
- * PartialRules can be used with `orElse` as a chain of fallbacks for picking a
- * field off sources, or they can be composed.
- *
- * Extending the ComposedFieldMergeRule trait provides a helper, `composeRules`,
- * which takes a list of rules, as well as a helper function to copy the new
- * merged Fields from each step into the "running-total" target, and composes
- * them right-to-left.
- */
-trait ComposedFieldMergeRule extends FieldMergeRule {
+  /*
+   * PartialRules can be used with `orElse` as a chain of fallbacks for picking a
+   * field off sources, or they can be composed.
+   *
+   * `composeRules` is takes a list of rules, as well as a helper function to
+   * copy the new merged Fields from each step into the "running-total" target,
+   * and composes them right-to-left.
+   */
   protected final def composeRules(
-    liftIntoTarget: UnidentifiedWork => Field => UnidentifiedWork)(
+    liftIntoTarget: UnidentifiedWork => FieldData => UnidentifiedWork)(
     rules: PartialRule*)(target: UnidentifiedWork,
                          sources: Seq[TransformedBaseWork]): UnidentifiedWork =
     rules.foldRight(target) { (applyRule, nextTarget) =>
@@ -73,5 +77,3 @@ trait ComposedFieldMergeRule extends FieldMergeRule {
         (nextTarget, sources))
     }
 }
-
-object FieldMergeRule {}

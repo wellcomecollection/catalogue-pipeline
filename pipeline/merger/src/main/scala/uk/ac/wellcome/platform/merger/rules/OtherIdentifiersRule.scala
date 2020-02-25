@@ -11,15 +11,16 @@ import uk.ac.wellcome.platform.merger.rules.WorkFilters.WorkFilter
  * The otherIdentifiers field is made up of all of the identifiers on the sources,
  * except for any Sierra identifiers on Miro sources, as these may be incorrect
  */
-object OtherIdentifiersRule extends ComposedFieldMergeRule with MergerLogging {
-  type Field = List[SourceIdentifier]
+object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
+  type FieldData = List[SourceIdentifier]
 
-  override def merge(target: UnidentifiedWork,
-                     sources: Seq[TransformedBaseWork]): MergeResult[Field] =
+  override def merge(
+    target: UnidentifiedWork,
+    sources: Seq[TransformedBaseWork]): MergeResult[FieldData] =
     MergeResult(
-      field = composeRules(liftIntoTarget)(miroIdsRule, physicalDigitalIdsRule)(
-        target,
-        sources).data.otherIdentifiers,
+      fieldData = composeRules(liftIntoTarget)(
+        miroIdsRule,
+        physicalDigitalIdsRule)(target, sources).data.otherIdentifiers,
       redirects = sources.filter { source =>
         (miroIdsRule orElse physicalDigitalIdsRule)
           .isDefinedAt((target, List(source)))

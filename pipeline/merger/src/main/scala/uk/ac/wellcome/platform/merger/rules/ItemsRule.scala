@@ -20,13 +20,14 @@ import uk.ac.wellcome.platform.merger.rules.WorkFilters.WorkFilter
  *   physical Sierra works.
  * - Miro locations are added to single-item Sierra locations.
  */
-object ItemsRule extends ComposedFieldMergeRule with MergerLogging {
-  type Field = List[Item[Unminted]]
+object ItemsRule extends FieldMergeRule with MergerLogging {
+  type FieldData = List[Item[Unminted]]
 
-  override def merge(target: UnidentifiedWork,
-                     sources: Seq[TransformedBaseWork]): MergeResult[Field] =
+  override def merge(
+    target: UnidentifiedWork,
+    sources: Seq[TransformedBaseWork]): MergeResult[FieldData] =
     MergeResult(
-      field = composeRules(liftIntoTarget)(
+      fieldData = composeRules(liftIntoTarget)(
         metsItemsRule,
         miroItemsRule,
         physicalDigitalItemsRule)(target, sources).data.items,
@@ -37,7 +38,7 @@ object ItemsRule extends ComposedFieldMergeRule with MergerLogging {
     )
 
   private def liftIntoTarget(target: UnidentifiedWork)(
-    items: Field): UnidentifiedWork = target withData { data =>
+    items: FieldData): UnidentifiedWork = target withData { data =>
     data.copy(items = items)
   }
 
@@ -46,7 +47,7 @@ object ItemsRule extends ComposedFieldMergeRule with MergerLogging {
     val isDefinedForSource: WorkFilter = WorkFilters.singleItemDigitalMets
 
     def rule(target: UnidentifiedWork,
-             sources: Seq[TransformedBaseWork]): Field = {
+             sources: Seq[TransformedBaseWork]): FieldData = {
       val sierraItems = target.data.items
       val metsItems = sources.flatMap(_.data.items)
       info(s"Merging METS items from ${describeWorks(sources)}")
@@ -72,7 +73,7 @@ object ItemsRule extends ComposedFieldMergeRule with MergerLogging {
     val isDefinedForSource: WorkFilter = WorkFilters.singleItemMiro
 
     def rule(target: UnidentifiedWork,
-             sources: Seq[TransformedBaseWork]): Field = {
+             sources: Seq[TransformedBaseWork]): FieldData = {
       info(s"Merging Miro items from ${describeWorks(sources)}")
       (target.data.items, sources.flatMap(_.data.items)) match {
         case (List(sierraItem), miroItems) =>
@@ -91,7 +92,7 @@ object ItemsRule extends ComposedFieldMergeRule with MergerLogging {
     val isDefinedForSource: WorkFilter = WorkFilters.digitalSierra
 
     def rule(target: UnidentifiedWork,
-             sources: Seq[TransformedBaseWork]): Field = {
+             sources: Seq[TransformedBaseWork]): FieldData = {
       info(s"Merging physical and digital items from ${describeWorks(sources)}")
       (target.data.items, sources.flatMap(_.data.items)) match {
         case (List(physicalItem), digitalItems) =>

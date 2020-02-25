@@ -29,13 +29,13 @@ class MergerTest extends FunSpec with Matchers with WorksGenerators {
       for {
         items <- accumulateRedirects(
           MergeResult(
-            field = mergedTargetItems,
+            fieldData = mergedTargetItems,
             redirects = List(sources.tail.head)
           )
         )
         otherIdentifiers <- accumulateRedirects(
           MergeResult(
-            field = mergedOtherIdentifiers,
+            fieldData = mergedOtherIdentifiers,
             redirects = sources.tail.tail
           )
         )

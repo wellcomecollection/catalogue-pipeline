@@ -11,9 +11,9 @@ import uk.ac.wellcome.platform.merger.rules.WorkFilters.WorkFilter
 class FieldMergeRuleTest
     extends FunSpec
     with Matchers
-    with ComposedFieldMergeRule
+    with FieldMergeRule
     with WorksGenerators {
-  override protected type Field = Option[String]
+  override protected type FieldData = Option[String]
 
   val targetTitleIsA = new PartialRule {
     override val isDefinedForTarget: WorkFilter =
@@ -21,7 +21,7 @@ class FieldMergeRuleTest
     override val isDefinedForSource: WorkFilter = _ => true
 
     override def rule(target: UnidentifiedWork,
-                      sources: Seq[TransformedBaseWork]): Field = None
+                      sources: Seq[TransformedBaseWork]): FieldData = None
   }
   val sourceTitleIsA = new PartialRule {
     override val isDefinedForTarget: WorkFilter = _ => true
@@ -29,7 +29,7 @@ class FieldMergeRuleTest
       work => work.data.title.contains("A")
 
     override def rule(target: UnidentifiedWork,
-                      sources: Seq[TransformedBaseWork]): Field = None
+                      sources: Seq[TransformedBaseWork]): FieldData = None
   }
 
   val workWithTitleA = createUnidentifiedWorkWith(title = Some("A"))
@@ -57,7 +57,7 @@ class FieldMergeRuleTest
           work => work.data.title.contains("A")
 
         override def rule(target: UnidentifiedWork,
-                          sources: Seq[TransformedBaseWork]): Field = {
+                          sources: Seq[TransformedBaseWork]): FieldData = {
           sources should contain(workWithTitleA)
           sources should not contain workWithTitleB
           None
@@ -75,7 +75,7 @@ class FieldMergeRuleTest
         override val isDefinedForSource: WorkFilter = _ => true
 
         override def rule(target: UnidentifiedWork,
-                          sources: Seq[TransformedBaseWork]): Field =
+                          sources: Seq[TransformedBaseWork]): FieldData =
           target.data.title.map(_ + toConcat)
     }
 
@@ -109,7 +109,8 @@ class FieldMergeRuleTest
 
   // This is here because we are extending ComposedFieldMergeRule
   // to access the private PartialRule trait
-  override def merge(target: UnidentifiedWork,
-                     sources: Seq[TransformedBaseWork]): MergeResult[Field] =
+  override def merge(
+    target: UnidentifiedWork,
+    sources: Seq[TransformedBaseWork]): MergeResult[FieldData] =
     ???
 }
