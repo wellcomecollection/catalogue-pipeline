@@ -56,7 +56,7 @@ class MergerWorkerServiceTest
           val worksSent = getMessages[BaseWork](topic)
           worksSent should contain only (work1, work2, work3)
 
-          metrics.incrementedCounts.length shouldBe 1
+          metrics.incrementedCounts.length should be >= 1
           metrics.incrementedCounts.last should endWith("_success")
         }
     }
