@@ -6,7 +6,7 @@ import uk.ac.wellcome.models.work.internal.{
   TransformedBaseWork,
   UnidentifiedWork
 }
-import uk.ac.wellcome.platform.merger.rules.WorkFilters.WorkFilter
+import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
 
 class FieldMergeRuleTest
     extends FunSpec
@@ -16,16 +16,16 @@ class FieldMergeRuleTest
   override protected type FieldData = Option[String]
 
   val targetTitleIsA = new PartialRule {
-    override val isDefinedForTarget: WorkFilter =
+    override val isDefinedForTarget: WorkPredicate =
       work => work.data.title.contains("A")
-    override val isDefinedForSource: WorkFilter = _ => true
+    override val isDefinedForSource: WorkPredicate = _ => true
 
     override def rule(target: UnidentifiedWork,
                       sources: Seq[TransformedBaseWork]): FieldData = None
   }
   val sourceTitleIsA = new PartialRule {
-    override val isDefinedForTarget: WorkFilter = _ => true
-    override val isDefinedForSource: WorkFilter =
+    override val isDefinedForTarget: WorkPredicate = _ => true
+    override val isDefinedForSource: WorkPredicate =
       work => work.data.title.contains("A")
 
     override def rule(target: UnidentifiedWork,
@@ -52,8 +52,8 @@ class FieldMergeRuleTest
     it(
       "when applied, calls its rule method only for those sources satisfying isDefinedForSource") {
       val rule = new PartialRule {
-        override val isDefinedForTarget: WorkFilter = _ => true
-        override val isDefinedForSource: WorkFilter =
+        override val isDefinedForTarget: WorkPredicate = _ => true
+        override val isDefinedForSource: WorkPredicate =
           work => work.data.title.contains("A")
 
         override def rule(target: UnidentifiedWork,

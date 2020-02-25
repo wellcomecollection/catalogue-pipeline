@@ -3,7 +3,7 @@ import uk.ac.wellcome.models.work.internal.{
   TransformedBaseWork,
   UnidentifiedWork
 }
-import uk.ac.wellcome.platform.merger.rules.WorkFilters.WorkFilter
+import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
 
 /*
  * MergeResult is the return type of a FieldMergeRule's `merge` method
@@ -42,8 +42,8 @@ trait FieldMergeRule {
   }
 
   protected trait PartialRule extends PartialFunction[Params, FieldData] {
-    val isDefinedForTarget: WorkFilter
-    val isDefinedForSource: WorkFilter
+    val isDefinedForTarget: WorkPredicate
+    val isDefinedForSource: WorkPredicate
 
     def rule(target: UnidentifiedWork,
              sources: Seq[TransformedBaseWork]): FieldData

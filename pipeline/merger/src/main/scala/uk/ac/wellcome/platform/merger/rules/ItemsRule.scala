@@ -7,7 +7,10 @@ import uk.ac.wellcome.models.work.internal.{
   Unminted
 }
 import uk.ac.wellcome.platform.merger.logging.MergerLogging
-import uk.ac.wellcome.platform.merger.rules.WorkFilters.{FilterOps, WorkFilter}
+import uk.ac.wellcome.platform.merger.rules.WorkPredicates.{
+  WorkPredicate,
+  WorkPredicateOps
+}
 
 /*
  * Items are merged as follows:
@@ -33,8 +36,8 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     )
 
   private lazy val mergeMetsItems = new PartialRule {
-    val isDefinedForTarget: WorkFilter = WorkFilters.sierraWork
-    val isDefinedForSource: WorkFilter = WorkFilters.singleItemDigitalMets
+    val isDefinedForTarget: WorkPredicate = WorkPredicates.sierraWork
+    val isDefinedForSource: WorkPredicate = WorkPredicates.singleItemDigitalMets
 
     def rule(target: UnidentifiedWork,
              sources: Seq[TransformedBaseWork]): FieldData = {
@@ -54,13 +57,13 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
   }
 
   private lazy val mergeMiroPhysicalAndDigitalItems = new PartialRule {
-    val isDefinedForTarget: WorkFilter = WorkFilters.sierraWork
+    val isDefinedForTarget: WorkPredicate = WorkPredicates.sierraWork
     val isDefinedForSource
-      : WorkFilter = WorkFilters.miroWork or WorkFilters.digitalSierra
+      : WorkPredicate = WorkPredicates.miroWork or WorkPredicates.digitalSierra
 
     def rule(target: UnidentifiedWork,
              sources: Seq[TransformedBaseWork]): FieldData =
-      (target.data.items, sources.partition(WorkFilters.miroWork)) match {
+      (target.data.items, sources.partition(WorkPredicates.miroWork)) match {
         case (List(sierraSingleItem), (miroSources, sierraSources)) =>
           List(
             sierraSingleItem.copy(

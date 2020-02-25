@@ -7,29 +7,29 @@ import uk.ac.wellcome.models.work.internal.{
   TransformedBaseWork
 }
 
-object WorkFilters {
-  type WorkFilter = TransformedBaseWork => Boolean
+object WorkPredicates {
+  type WorkPredicate = TransformedBaseWork => Boolean
 
-  val sierraWork: WorkFilter = identifierTypeId("sierra-system-number")
-  val metsWork: WorkFilter = identifierTypeId("mets")
-  val miroWork: WorkFilter = identifierTypeId("miro-image-number")
+  val sierraWork: WorkPredicate = identifierTypeId("sierra-system-number")
+  val metsWork: WorkPredicate = identifierTypeId("mets")
+  val miroWork: WorkPredicate = identifierTypeId("miro-image-number")
 
-  val singleItem: WorkFilter = work => work.data.items.size == 1
+  val singleItem: WorkPredicate = work => work.data.items.size == 1
 
-  val singleItemDigitalMets: WorkFilter = satisfiesAll(
+  val singleItemDigitalMets: WorkPredicate = satisfiesAll(
     metsWork,
     singleItem,
     allDigitalLocations
   )
 
-  val singleItemMiro: WorkFilter = satisfiesAll(miroWork, singleItem)
+  val singleItemMiro: WorkPredicate = satisfiesAll(miroWork, singleItem)
 
-  val singleItemSierra: WorkFilter = satisfiesAll(sierraWork, singleItem)
+  val singleItemSierra: WorkPredicate = satisfiesAll(sierraWork, singleItem)
 
-  val physicalSierra: WorkFilter =
+  val physicalSierra: WorkPredicate =
     satisfiesAll(sierraWork, physicalLocationExists)
 
-  val digitalSierra: WorkFilter =
+  val digitalSierra: WorkPredicate =
     satisfiesAll(sierraWork, singleItem, allDigitalLocations)
 
   private def physicalLocationExists(work: TransformedBaseWork): Boolean =
@@ -54,8 +54,8 @@ object WorkFilters {
   private def satisfiesAll(predicates: (TransformedBaseWork => Boolean)*)(
     work: TransformedBaseWork): Boolean = predicates.forall(_(work))
 
-  implicit class FilterOps(val filterA: WorkFilter) {
-    def or(filterB: WorkFilter): WorkFilter =
+  implicit class WorkPredicateOps(val filterA: WorkPredicate) {
+    def or(filterB: WorkPredicate): WorkPredicate =
       work => filterA(work) || filterB(work)
   }
 }

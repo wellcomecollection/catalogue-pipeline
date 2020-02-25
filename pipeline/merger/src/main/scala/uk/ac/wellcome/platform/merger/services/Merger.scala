@@ -12,7 +12,7 @@ import uk.ac.wellcome.platform.merger.rules.{
   MergeResult,
   OtherIdentifiersRule,
   ThumbnailRule,
-  WorkFilters
+  WorkPredicates
 }
 import cats.data.State
 import uk.ac.wellcome.platform.merger.logging.MergerLogging
@@ -85,8 +85,8 @@ object PlatformMerger extends Merger {
   override def findTarget(
     works: Seq[TransformedBaseWork]): Option[UnidentifiedWork] =
     works
-      .find(WorkFilters.physicalSierra)
-      .orElse(works.find(WorkFilters.sierraWork)) match {
+      .find(WorkPredicates.physicalSierra)
+      .orElse(works.find(WorkPredicates.sierraWork)) match {
       case Some(target: UnidentifiedWork) => Some(target)
       case _                              => None
     }

@@ -5,7 +5,7 @@ import uk.ac.wellcome.models.work.internal.{
   UnidentifiedWork
 }
 import uk.ac.wellcome.platform.merger.logging.MergerLogging
-import uk.ac.wellcome.platform.merger.rules.WorkFilters.WorkFilter
+import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
 
 import scala.util.Try
 
@@ -28,8 +28,9 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
 
   private val getMetsThumbnail =
     new PartialRule {
-      val isDefinedForTarget: WorkFilter = WorkFilters.sierraWork
-      val isDefinedForSource: WorkFilter = WorkFilters.singleItemDigitalMets
+      val isDefinedForTarget: WorkPredicate = WorkPredicates.sierraWork
+      val isDefinedForSource: WorkPredicate =
+        WorkPredicates.singleItemDigitalMets
 
       def rule(target: UnidentifiedWork,
                sources: Seq[TransformedBaseWork]): FieldData = {
@@ -40,8 +41,8 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
 
   private val getMinMiroThumbnail =
     new PartialRule {
-      val isDefinedForTarget: WorkFilter = WorkFilters.singleItemSierra
-      val isDefinedForSource: WorkFilter = WorkFilters.singleItemMiro
+      val isDefinedForTarget: WorkPredicate = WorkPredicates.singleItemSierra
+      val isDefinedForSource: WorkPredicate = WorkPredicates.singleItemMiro
 
       def rule(target: UnidentifiedWork,
                sources: Seq[TransformedBaseWork]): FieldData = {

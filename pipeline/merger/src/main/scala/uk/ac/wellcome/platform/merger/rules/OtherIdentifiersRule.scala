@@ -5,7 +5,7 @@ import uk.ac.wellcome.models.work.internal.{
   UnidentifiedWork
 }
 import uk.ac.wellcome.platform.merger.logging.MergerLogging
-import uk.ac.wellcome.platform.merger.rules.WorkFilters.WorkFilter
+import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
 
 /*
  * The otherIdentifiers field is made up of all of the identifiers on the sources,
@@ -37,8 +37,8 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
   private final val unmergeableMiroIdTypes =
     List("sierra-identifier", "sierra-system-number")
   private lazy val miroIdsRule = new PartialRule {
-    val isDefinedForTarget: WorkFilter = WorkFilters.singleItemSierra
-    val isDefinedForSource: WorkFilter = WorkFilters.singleItemMiro
+    val isDefinedForTarget: WorkPredicate = WorkPredicates.singleItemSierra
+    val isDefinedForSource: WorkPredicate = WorkPredicates.singleItemMiro
 
     override def rule(
       target: UnidentifiedWork,
@@ -51,8 +51,8 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
   }
 
   private lazy val physicalDigitalIdsRule = new PartialRule {
-    val isDefinedForTarget: WorkFilter = WorkFilters.physicalSierra
-    val isDefinedForSource: WorkFilter = WorkFilters.digitalSierra
+    val isDefinedForTarget: WorkPredicate = WorkPredicates.physicalSierra
+    val isDefinedForSource: WorkPredicate = WorkPredicates.digitalSierra
 
     override def rule(
       target: UnidentifiedWork,

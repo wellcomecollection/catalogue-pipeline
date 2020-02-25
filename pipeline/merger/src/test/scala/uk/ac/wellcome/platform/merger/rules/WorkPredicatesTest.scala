@@ -8,7 +8,7 @@ import uk.ac.wellcome.models.work.internal.{
   TransformedBaseWork,
 }
 
-class WorkFiltersTest
+class WorkPredicatesTest
     extends FunSpec
     with WorksGenerators
     with Matchers
@@ -35,25 +35,25 @@ class WorkFiltersTest
   )
 
   it("selects Sierra works") {
-    forAll(works.filter(WorkFilters.sierraWork)) { work =>
+    forAll(works.filter(WorkPredicates.sierraWork)) { work =>
       work.sourceIdentifier.identifierType.id shouldBe "sierra-system-number"
     }
   }
 
   it("selects METS works") {
-    forAll(works.filter(WorkFilters.metsWork)) { work =>
+    forAll(works.filter(WorkPredicates.metsWork)) { work =>
       work.sourceIdentifier.identifierType.id shouldBe "mets"
     }
   }
 
   it("selects Miro works") {
-    forAll(works.filter(WorkFilters.miroWork)) { work =>
+    forAll(works.filter(WorkPredicates.miroWork)) { work =>
       work.sourceIdentifier.identifierType.id shouldBe "miro-image-number"
     }
   }
 
   it("selects single-item digital METS works") {
-    forAll(works.filter(WorkFilters.singleItemDigitalMets)) { work =>
+    forAll(works.filter(WorkPredicates.singleItemDigitalMets)) { work =>
       work.sourceIdentifier.identifierType.id shouldBe "mets"
       work.data.items should have length 1
       every(work.data.items.head.locations) should matchPattern {
@@ -63,21 +63,21 @@ class WorkFiltersTest
   }
 
   it("selects single-item Miro works") {
-    forAll(works.filter(WorkFilters.singleItemMiro)) { work =>
+    forAll(works.filter(WorkPredicates.singleItemMiro)) { work =>
       work.sourceIdentifier.identifierType.id shouldBe "miro-image-number"
       work.data.items should have length 1
     }
   }
 
   it("selects single-item Sierra works") {
-    forAll(works.filter(WorkFilters.singleItemSierra)) { work =>
+    forAll(works.filter(WorkPredicates.singleItemSierra)) { work =>
       work.sourceIdentifier.identifierType.id shouldBe "sierra-system-number"
       work.data.items should have length 1
     }
   }
 
   it("selects physical Sierra works") {
-    forAll(works.filter(WorkFilters.physicalSierra)) { work =>
+    forAll(works.filter(WorkPredicates.physicalSierra)) { work =>
       work.sourceIdentifier.identifierType.id shouldBe "sierra-system-number"
       atLeast(1, work.data.items.flatMap(_.locations)) should matchPattern {
         case _: PhysicalLocation =>
@@ -86,7 +86,7 @@ class WorkFiltersTest
   }
 
   it("selects digital Sierra works") {
-    forAll(works.filter(WorkFilters.digitalSierra)) { work =>
+    forAll(works.filter(WorkPredicates.digitalSierra)) { work =>
       work.sourceIdentifier.identifierType.id shouldBe "sierra-system-number"
       every(work.data.items.flatMap(_.locations)) should matchPattern {
         case _: DigitalLocation =>
