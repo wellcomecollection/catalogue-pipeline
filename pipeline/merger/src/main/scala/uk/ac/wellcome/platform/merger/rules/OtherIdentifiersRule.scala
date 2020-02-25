@@ -16,22 +16,23 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
 
   override def merge(
     target: UnidentifiedWork,
-    sources: Seq[TransformedBaseWork]): MergeResult[FieldData] =
+    sources: Seq[TransformedBaseWork]): MergeResult[FieldData] = {
+    val empty = (_: Params) => Nil
+    val miroIds =
+      miroIdsRule.applyOrElse((target, sources), empty)
+    val physicalDigitalIds =
+      physicalDigitalIdsRule.applyOrElse((target, sources), empty)
     MergeResult(
-      fieldData = composeRules(liftIntoTarget)(
-        miroIdsRule,
-        physicalDigitalIdsRule)(target, sources).data.otherIdentifiers,
+      fieldData = (physicalDigitalIds ++ miroIds).distinct match {
+        case nonEmptyList @ _ :: _ => nonEmptyList
+        case Nil                   => target.otherIdentifiers
+      },
       redirects = sources.filter { source =>
         (miroIdsRule orElse physicalDigitalIdsRule)
           .isDefinedAt((target, List(source)))
       }
     )
-
-  private def liftIntoTarget(target: UnidentifiedWork)(
-    ids: List[SourceIdentifier]): UnidentifiedWork =
-    target withData { data =>
-      data.copy(otherIdentifiers = ids)
-    }
+  }
 
   private final val unmergeableMiroIdTypes =
     List("sierra-identifier", "sierra-system-number")
