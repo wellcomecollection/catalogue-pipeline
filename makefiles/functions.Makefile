@@ -17,7 +17,7 @@ include $(ROOT)/makefiles/terraform.Makefile
 #
 define publish_lambda
     $(ROOT)/docker_run.py --aws --root -- \
-        wellcome/publish_lambda:126 \
+        wellcome/publish_lambda:130 \
         "$(1)" --key="lambdas/$(1).zip" --bucket="$(INFRA_BUCKET)" --role-arn="$(DEV_ROLE_ARN)" --sns-topic="arn:aws:sns:eu-west-1:760097843905:lambda_pushes"
 endef
 
