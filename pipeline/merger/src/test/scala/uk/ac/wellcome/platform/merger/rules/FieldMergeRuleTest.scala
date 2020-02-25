@@ -68,45 +68,6 @@ class FieldMergeRuleTest
     }
   }
 
-  describe("ComposedFieldMergeRule") {
-    val titleConcatRule = (toConcat: String) =>
-      new PartialRule {
-        override val isDefinedForTarget: WorkFilter = _ => true
-        override val isDefinedForSource: WorkFilter = _ => true
-
-        override def rule(target: UnidentifiedWork,
-                          sources: Seq[TransformedBaseWork]): FieldData =
-          target.data.title.map(_ + toConcat)
-    }
-
-    val liftTitleIntoTarget = (target: UnidentifiedWork) =>
-      (title: Option[String]) =>
-        target withData { data =>
-          data.copy(title = title)
-    }
-
-    it(
-      "can compose partial rules right-to-left when provided with a function to lift field results into new target works") {
-      val composedRule = composeRules(liftTitleIntoTarget)(
-        titleConcatRule("D"),
-        titleConcatRule("C"),
-        titleConcatRule("B"))(_, _)
-      composedRule(workWithTitleA, List(workWithTitleB)).data.title shouldBe
-        Some("ABCD")
-    }
-
-    it(
-      "does not modify the target or discard the result when the input is out of one of the composed rules' domains") {
-      val composedRule = composeRules(liftTitleIntoTarget)(
-        titleConcatRule("D"),
-        titleConcatRule("C"),
-        targetTitleIsA,
-        titleConcatRule("B"))(_, _)
-      composedRule(workWithTitleA, List(workWithTitleB)).data.title shouldBe
-        Some("ABCD")
-    }
-  }
-
   // This is here because we are extending ComposedFieldMergeRule
   // to access the private PartialRule trait
   override def merge(

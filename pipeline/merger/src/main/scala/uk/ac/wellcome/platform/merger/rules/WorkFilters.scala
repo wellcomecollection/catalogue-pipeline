@@ -14,6 +14,8 @@ object WorkFilters {
   val metsWork: WorkFilter = identifierTypeId("mets")
   val miroWork: WorkFilter = identifierTypeId("miro-image-number")
 
+  val singleItem: WorkFilter = work => work.data.items.size == 1
+
   val singleItemDigitalMets: WorkFilter = satisfiesAll(
     metsWork,
     singleItem,
@@ -46,12 +48,14 @@ object WorkFilters {
       }
     }
 
-  private def singleItem(work: TransformedBaseWork): Boolean =
-    work.data.items.size == 1
-
   private def identifierTypeId(id: String)(work: TransformedBaseWork): Boolean =
     work.sourceIdentifier.identifierType == IdentifierType(id)
 
   private def satisfiesAll(predicates: (TransformedBaseWork => Boolean)*)(
     work: TransformedBaseWork): Boolean = predicates.forall(_(work))
+
+  implicit class FilterOps(val filterA: WorkFilter) {
+    def or(filterB: WorkFilter): WorkFilter =
+      work => filterA(work) || filterB(work)
+  }
 }

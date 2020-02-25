@@ -1,16 +1,13 @@
 package uk.ac.wellcome.platform.merger.rules
 
 import uk.ac.wellcome.models.work.internal.{
-  DigitalLocation,
   Item,
-  Location,
-  LocationType,
   TransformedBaseWork,
   UnidentifiedWork,
   Unminted
 }
 import uk.ac.wellcome.platform.merger.logging.MergerLogging
-import uk.ac.wellcome.platform.merger.rules.WorkFilters.WorkFilter
+import uk.ac.wellcome.platform.merger.rules.WorkFilters.{FilterOps, WorkFilter}
 
 /*
  * Items are merged as follows:
@@ -27,22 +24,15 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     target: UnidentifiedWork,
     sources: Seq[TransformedBaseWork]): MergeResult[FieldData] =
     MergeResult(
-      fieldData = composeRules(liftIntoTarget)(
-        metsItemsRule,
-        miroItemsRule,
-        physicalDigitalItemsRule)(target, sources).data.items,
+      fieldData = (mergeMetsItems orElse mergeMiroPhysicalAndDigitalItems
+        orElse (identityOnTarget andThen (_.data.items)))((target, sources)),
       redirects = sources.filter { source =>
-        (metsItemsRule orElse miroItemsRule orElse physicalDigitalItemsRule)
+        (mergeMetsItems orElse mergeMiroPhysicalAndDigitalItems)
           .isDefinedAt((target, List(source)))
       }
     )
 
-  private def liftIntoTarget(target: UnidentifiedWork)(
-    items: FieldData): UnidentifiedWork = target withData { data =>
-    data.copy(items = items)
-  }
-
-  private lazy val metsItemsRule = new PartialRule {
+  private lazy val mergeMetsItems = new PartialRule {
     val isDefinedForTarget: WorkFilter = WorkFilters.sierraWork
     val isDefinedForSource: WorkFilter = WorkFilters.singleItemDigitalMets
 
@@ -54,93 +44,34 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
       sierraItems match {
         case List(sierraItem) =>
           List(
-            metsItems.foldLeft(sierraItem) { (mergedItem, metsItem) =>
-              MetsUtils.mergeLocations(mergedItem, metsItem)
-            }
-          )
-        case _ =>
-          sierraItems.filterNot { sierraItem =>
-            metsItems.exists { metsItem =>
-              MetsUtils.shouldIgnoreSierraItem(sierraItem, metsItem)
-            }
-          } ++ metsItems
-      }
-    }
-  }
-
-  private lazy val miroItemsRule = new PartialRule {
-    val isDefinedForTarget: WorkFilter = WorkFilters.singleItemSierra
-    val isDefinedForSource: WorkFilter = WorkFilters.singleItemMiro
-
-    def rule(target: UnidentifiedWork,
-             sources: Seq[TransformedBaseWork]): FieldData = {
-      info(s"Merging Miro items from ${describeWorks(sources)}")
-      (target.data.items, sources.flatMap(_.data.items)) match {
-        case (List(sierraItem), miroItems) =>
-          List(
             sierraItem.copy(
-              locations = sierraItem.locations ++ miroItems.flatMap(_.locations)
+              locations = sierraItem.locations ++ metsItems.flatMap(_.locations)
             )
           )
-        case _ => Nil
+        case _ => sierraItems ++ metsItems
       }
     }
   }
 
-  private lazy val physicalDigitalItemsRule = new PartialRule {
-    val isDefinedForTarget: WorkFilter = WorkFilters.physicalSierra
-    val isDefinedForSource: WorkFilter = WorkFilters.digitalSierra
+  private lazy val mergeMiroPhysicalAndDigitalItems = new PartialRule {
+    val isDefinedForTarget: WorkFilter = WorkFilters.sierraWork
+    val isDefinedForSource
+      : WorkFilter = WorkFilters.miroWork or WorkFilters.digitalSierra
 
     def rule(target: UnidentifiedWork,
-             sources: Seq[TransformedBaseWork]): FieldData = {
-      info(s"Merging physical and digital items from ${describeWorks(sources)}")
-      (target.data.items, sources.flatMap(_.data.items)) match {
-        case (List(physicalItem), digitalItems) =>
+             sources: Seq[TransformedBaseWork]): FieldData =
+      target.data.items match {
+        case List(sierraSingleItem) =>
           List(
-            physicalItem.copy(
-              locations = physicalItem.locations ++
-                digitalItems.flatMap(_.locations)
+            sierraSingleItem.copy(
+              locations = sierraSingleItem.locations ++ sources.flatMap(
+                _.data.items.flatMap(_.locations))
             )
           )
-        case (physicalItems, digitalItems) => physicalItems ++ digitalItems
+        case multipleSierraItems =>
+          multipleSierraItems ++ sources
+            .filter(WorkFilters.digitalSierra)
+            .flatMap(_.data.items)
       }
-    }
   }
-}
-
-private object MetsUtils {
-  def shouldIgnoreSierraItem(sierraItem: Item[Unminted],
-                             metsItem: Item[Unminted]): Boolean = {
-    (sierraItem.locations, getLocation(metsItem)) match {
-      case (List(sierraLocation), Some(metsLocation)) =>
-        shouldIgnoreLocation(sierraLocation, metsLocation.url)
-      case _ => false
-    }
-  }
-
-  def shouldIgnoreLocation(location: Location, metsUrl: String): Boolean =
-    location match {
-      case DigitalLocation(_, LocationType("iiif-image", _, _), _, _, _, _) =>
-        true
-      case DigitalLocation(url, _, _, _, _, _) if url.equals(metsUrl) => true
-      case _                                                          => false
-    }
-
-  def mergeLocations(sierraItem: Item[Unminted],
-                     metsItem: Item[Unminted]): Item[Unminted] =
-    getLocation(metsItem)
-      .map { metsLocation =>
-        sierraItem.copy(
-          locations =
-            sierraItem.locations.filterNot(
-              shouldIgnoreLocation(_, metsLocation.url))
-              :+ metsLocation
-        )
-      }
-      .getOrElse(sierraItem)
-
-  private def getLocation(metsItem: Item[Unminted]): Option[DigitalLocation] =
-    metsItem.locations.collectFirst {
-      case location: DigitalLocation => location
-    }
 }

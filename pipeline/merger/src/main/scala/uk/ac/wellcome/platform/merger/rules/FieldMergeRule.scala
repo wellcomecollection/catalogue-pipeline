@@ -59,21 +59,4 @@ trait FieldMergeRule {
         isDefinedForTarget(target) && sources.exists(isDefinedForSource)
     }
   }
-
-  /*
-   * PartialRules can be used with `orElse` as a chain of fallbacks for picking a
-   * field off sources, or they can be composed.
-   *
-   * `composeRules` is takes a list of rules, as well as a helper function to
-   * copy the new merged Fields from each step into the "running-total" target,
-   * and composes them right-to-left.
-   */
-  protected final def composeRules(
-    liftIntoTarget: UnidentifiedWork => FieldData => UnidentifiedWork)(
-    rules: PartialRule*)(target: UnidentifiedWork,
-                         sources: Seq[TransformedBaseWork]): UnidentifiedWork =
-    rules.foldRight(target) { (applyRule, nextTarget) =>
-      (applyRule andThen liftIntoTarget(nextTarget) orElse identityOnTarget)(
-        (nextTarget, sources))
-    }
 }
