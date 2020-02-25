@@ -4,8 +4,8 @@ import akka.NotUsed
 import akka.stream.scaladsl.Source
 import com.amazonaws.services.sqs.model.Message
 import uk.ac.wellcome.bigmessaging.BigMessageSender
-import uk.ac.wellcome.json.JsonUtil.fromJson
-import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig}
+import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.transformer.calm.models.CalmRecord
 import uk.ac.wellcome.storage.store.VersionedStore
@@ -41,7 +41,7 @@ class CalmWorker[SenderDest](
   def done(work: TransformedBaseWork): Result[Unit] =
     sender.sendT(work) toEither match {
       case Left(_)  => Left(MessageSendError)
-      case Right(_) => Right()
+      case Right(_) => Right((): Unit)
     }
 
   private def decodeKey(message: NotificationMessage) =

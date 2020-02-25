@@ -2,7 +2,6 @@ package uk.ac.wellcome.platform.transformer.calm
 
 import akka.{Done, NotUsed}
 import akka.stream.scaladsl.{Flow, Sink, Source}
-import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.Future
 

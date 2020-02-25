@@ -1,22 +1,12 @@
 package uk.ac.wellcome.platform.transformer.calm.service
 
-import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{Flow, Source}
-import akka.{Done, NotUsed}
-import com.amazonaws.services.sqs.model.Message
-import uk.ac.wellcome.bigmessaging.BigMessageSender
+import akka.stream.scaladsl.Flow
+import akka.Done
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig}
+import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.{SQSConfig, SQSStream}
-import uk.ac.wellcome.models.work.internal.TransformedBaseWork
-import uk.ac.wellcome.platform.transformer.calm.{
-  CalmTransformer,
-  CalmWorker,
-  Worker
-}
-import uk.ac.wellcome.platform.transformer.calm.models.CalmRecord
-import uk.ac.wellcome.storage.store.VersionedStore
-import uk.ac.wellcome.storage.{Identified, Version}
+import uk.ac.wellcome.platform.transformer.calm.CalmWorker
+import uk.ac.wellcome.storage.Version
 import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -31,8 +21,7 @@ class CalmTransformerWorkerService(
   stream: SQSStream[NotificationMessage],
   worker: CalmWorker[SQSConfig]
 )(implicit
-  val ec: ExecutionContext,
-  materializer: ActorMaterializer)
+  val ec: ExecutionContext)
     extends Runnable {
   type Result[T] = Either[Throwable, T]
   type StoreKey = Version[String, Int]
