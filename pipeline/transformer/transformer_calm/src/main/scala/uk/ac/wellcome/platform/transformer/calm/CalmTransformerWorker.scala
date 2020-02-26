@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.transformer.calm
 
-import akka.NotUsed
-import akka.stream.scaladsl.Source
+import akka.stream.scaladsl.Flow
 import com.amazonaws.services.sqs.model.Message
 import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.json.JsonUtil._
@@ -17,32 +16,31 @@ case class StoreReadError(msg: String) extends CalmWorkerError(msg)
 case class TransformerError(msg: String) extends CalmWorkerError(msg)
 case class MessageSendError(msg: String) extends CalmWorkerError(msg)
 
-class CalmWorker[SenderDest](
+class CalmTransformerWorker[SenderDest](
   sender: BigMessageSender[SenderDest, TransformedBaseWork],
-  store: VersionedStore[String, Int, CalmRecord],
-  source: Source[(Message, NotificationMessage), NotUsed])
-    extends SimpleStreamWorker[
+  store: VersionedStore[String, Int, CalmRecord])
+    extends StreamWorker[
       (Message, NotificationMessage),
       CalmRecord,
       TransformedBaseWork] {
+
   type Result[T] = Either[Throwable, T]
   type StoreKey = Version[String, Int]
 
-  def decodeMessage(
-    message: (Message, NotificationMessage)): Result[CalmRecord] =
-    decodeKey(message._2) flatMap getRecord
+  lazy val decodeMessage =
+    Flow.fromFunction(message => decodeKey(message._2) flatMap getRecord)
 
-  def work(sourceData: CalmRecord): Result[TransformedBaseWork] =
+  lazy val work = Flow.fromFunction(sourceData =>
     CalmTransformer.transform(sourceData) match {
       case Left(err)     => Left(TransformerError(err.toString))
       case Right(result) => Right(result)
-    }
+  })
 
-  def done(work: TransformedBaseWork): Result[Unit] =
+  lazy val done = Flow.fromFunction(work =>
     sender.sendT(work) toEither match {
       case Left(err) => Left(MessageSendError(err.toString))
       case Right(_)  => Right((): Unit)
-    }
+  })
 
   private def decodeKey(message: NotificationMessage) =
     fromJson[StoreKey](message.body).toEither match {
