@@ -7,6 +7,7 @@ import uk.ac.wellcome.models.work.internal.{
 import uk.ac.wellcome.platform.merger.logging.MergerLogging
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
+import scala.Function.const
 
 /*
  * The otherIdentifiers field is made up of all of the identifiers on the sources,
@@ -18,11 +19,10 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
   override def merge(
     target: UnidentifiedWork,
     sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData] = {
-    val empty = (_: Params) => Nil
     val miroIds =
-      miroIdsRule.applyOrElse((target, sources), empty)
+      miroIdsRule.applyOrElse((target, sources), const(Nil))
     val physicalDigitalIds =
-      physicalDigitalIdsRule.applyOrElse((target, sources), empty)
+      physicalDigitalIdsRule.applyOrElse((target, sources), const(Nil))
     FieldMergeResult(
       fieldData = (physicalDigitalIds ++ miroIds).distinct match {
         case nonEmptyList @ _ :: _ => nonEmptyList
