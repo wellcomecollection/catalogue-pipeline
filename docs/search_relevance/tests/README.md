@@ -1,2 +1,1 @@
-# Relevance query tests
-
+# Relevance tests
