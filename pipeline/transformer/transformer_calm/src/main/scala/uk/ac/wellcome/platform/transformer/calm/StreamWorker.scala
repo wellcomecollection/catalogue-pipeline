@@ -7,28 +7,28 @@ import scala.concurrent.Future
 
 trait StreamWorker[Message, MessageData, SinkData] {
   private type Result[T] = Either[Throwable, T]
-  def errorSink: Sink[Result[_], Future[Done]] = Sink.ignore
+  val errorSink: Sink[Result[_], Future[Done]] = Sink.ignore
 
-  def processMessage(source: Source[Message, NotUsed]) =
+  def withSource(source: Source[Message, NotUsed]): Source[Unit, NotUsed] =
     source.via(decodeMessageDiverted).via(workDiverted).via(doneDiverted)
 
   private def divertEither[I, O](
     flow: Flow[I, Result[O], NotUsed],
     to: Sink[Result[_], Future[Done]]): Flow[I, O, NotUsed] =
-    flow.divertTo(Sink.ignore, _.isLeft).collect {
+    flow.divertTo(errorSink, _.isLeft).collect {
       case Right(out) => out
     }
 
-  val decodeMessageFlow: Flow[Message, Result[MessageData], NotUsed]
-  val workFlow: Flow[MessageData, Result[SinkData], NotUsed]
-  val doneFlow: Flow[SinkData, Result[Unit], NotUsed]
+  val decodeMessage: Flow[Message, Result[MessageData], NotUsed]
+  val work: Flow[MessageData, Result[SinkData], NotUsed]
+  val done: Flow[SinkData, Result[Unit], NotUsed]
 
   val decodeMessageDiverted: Flow[Message, MessageData, NotUsed] =
-    divertEither(decodeMessageFlow, to = errorSink)
+    divertEither(decodeMessage, to = errorSink)
 
   val workDiverted: Flow[MessageData, SinkData, NotUsed] =
-    divertEither(workFlow, to = errorSink)
+    divertEither(work, to = errorSink)
 
   val doneDiverted: Flow[SinkData, Unit, NotUsed] =
-    divertEither(doneFlow, to = errorSink)
+    divertEither(done, to = errorSink)
 }

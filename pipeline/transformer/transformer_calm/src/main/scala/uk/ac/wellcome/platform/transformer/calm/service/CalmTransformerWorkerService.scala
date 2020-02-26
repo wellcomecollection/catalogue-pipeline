@@ -5,7 +5,7 @@ import akka.Done
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.{SQSConfig, SQSStream}
-import uk.ac.wellcome.platform.transformer.calm.CalmWorker
+import uk.ac.wellcome.platform.transformer.calm.CalmTransformerWorker
 import uk.ac.wellcome.storage.Version
 import uk.ac.wellcome.typesafe.Runnable
 
@@ -19,7 +19,7 @@ object MessageSendError extends CalmTransformerWorkerError
 
 class CalmTransformerWorkerService(
   stream: SQSStream[NotificationMessage],
-  worker: CalmWorker[SQSConfig]
+  worker: CalmTransformerWorker[SQSConfig]
 )(implicit
   val ec: ExecutionContext)
     extends Runnable {
@@ -31,7 +31,7 @@ class CalmTransformerWorkerService(
       "CalmTransformerWorkerService",
       source => {
         val end = source.via(Flow.fromFunction(message => message._1))
-        val processed = worker.processMessage(source)
+        val processed = worker.withSource(source)
 
         processed.flatMapConcat(_ => end)
       }
