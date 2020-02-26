@@ -21,7 +21,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 
 class CalmTransformerWorkerTest extends FunSpec with Matchers with Akka {
-  it("Runs") {
+  it("Never succeeds running a flow with an invalid source") {
     withMaterializer { implicit materializer =>
       withCalmTransformerWorker(
         records = Map(
