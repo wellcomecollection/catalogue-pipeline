@@ -11,11 +11,11 @@ import uk.ac.wellcome.platform.transformer.calm.models.CalmRecord
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.{Identified, Version}
 
-sealed trait CalmWorkerError extends Throwable
-object DecodeKeyError extends CalmWorkerError
-object StoreReadError extends CalmWorkerError
-object TransformerError extends CalmWorkerError
-object MessageSendError extends CalmWorkerError
+sealed abstract class CalmWorkerError(msg: String) extends Exception(msg)
+case class DecodeKeyError(msg: String) extends CalmWorkerError(msg)
+case class StoreReadError(msg: String) extends CalmWorkerError(msg)
+case class TransformerError(msg: String) extends CalmWorkerError(msg)
+case class MessageSendError(msg: String) extends CalmWorkerError(msg)
 
 class CalmWorker[SenderDest](
   sender: BigMessageSender[SenderDest, TransformedBaseWork],
@@ -34,24 +34,24 @@ class CalmWorker[SenderDest](
 
   def work(sourceData: CalmRecord): Result[TransformedBaseWork] =
     CalmTransformer.transform(sourceData) match {
-      case Left(_)       => Left(TransformerError)
+      case Left(err)     => Left(TransformerError(err.toString))
       case Right(result) => Right(result)
     }
 
   def done(work: TransformedBaseWork): Result[Unit] =
     sender.sendT(work) toEither match {
-      case Left(_)  => Left(MessageSendError)
-      case Right(_) => Right((): Unit)
+      case Left(err) => Left(MessageSendError(err.toString))
+      case Right(_)  => Right((): Unit)
     }
 
   private def decodeKey(message: NotificationMessage) =
     fromJson[StoreKey](message.body).toEither match {
-      case Left(_)       => Left(DecodeKeyError)
+      case Left(err)     => Left(DecodeKeyError(err.toString))
       case Right(result) => Right(result)
     }
 
   private def getRecord(key: StoreKey) = store.get(key) match {
-    case Left(_)                     => Left(StoreReadError)
+    case Left(err)                   => Left(StoreReadError(err.toString))
     case Right(Identified(_, entry)) => Right(entry)
   }
 }
