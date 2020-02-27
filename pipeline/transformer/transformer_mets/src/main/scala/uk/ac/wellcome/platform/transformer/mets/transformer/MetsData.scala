@@ -114,18 +114,16 @@ case class MetsData(
   private def thumbnail(bnumber: String,
                         license: Option[License],
                         accessStatus: Option[AccessStatus]) =
-    if (accessStatus.map(shouldCreateThumbnail).getOrElse(true))
-      fileReferences
-        .find(ImageUtils.isThumbnail)
-        .flatMap(ref => ImageUtils.buildThumbnailUrl(bnumber, ref))
-        .map { url =>
-          DigitalLocation(
-            url = url,
-            locationType = LocationType("thumbnail-image"),
-            license = license
-          )
-        } else
-      None
+    for {
+      fileReference <- fileReferences.find(ImageUtils.isThumbnail)
+      url <- ImageUtils.buildThumbnailUrl(bnumber, fileReference)
+      if accessStatus.forall(shouldCreateThumbnail)
+    } yield
+      DigitalLocation(
+        url = url,
+        locationType = LocationType("thumbnail-image"),
+        license = license
+      )
 
   private def shouldCreateThumbnail(accessStatus: AccessStatus) =
     accessStatus match {
