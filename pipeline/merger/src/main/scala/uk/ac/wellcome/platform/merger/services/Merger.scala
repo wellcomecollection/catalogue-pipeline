@@ -135,7 +135,7 @@ object PlatformMerger extends Merger {
     sources match {
       case Nil =>
         State.pure(
-          MergeResult(target, images = ImagesRule.merge(target, Nil).fieldData)
+          MergeResult(target, images = ImagesRule.merge(target).fieldData)
         )
       case _ =>
         for {

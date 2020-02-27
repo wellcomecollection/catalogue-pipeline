@@ -15,13 +15,27 @@ object ImagesRule extends FieldMergeRule {
 
   override def merge(
     target: UnidentifiedWork,
-    sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData] =
+    sources: Seq[TransformedBaseWork] = Nil): FieldMergeResult[FieldData] =
     FieldMergeResult(
-      fieldData =
-        getMetsImages.applyOrElse((target, sources), const(Nil)) ++
-          getMiroImages.applyOrElse((target, sources), const(Nil)),
+      fieldData = sources match {
+        case Nil =>
+          getSingleMiroImage.applyOrElse(target, const(Nil))
+        case _ :: _ =>
+          getMetsImages.applyOrElse((target, sources), const(Nil)) ++
+            getPairedMiroImages.applyOrElse((target, sources), const(Nil))
+      },
       redirects = Nil
     )
+
+  private lazy val getSingleMiroImage
+    : PartialFunction[UnidentifiedWork, FieldData] = {
+    case target if WorkPredicates.miroWork(target) =>
+      target.data.images.map {
+        _.mergeWith(
+          ImageData()
+        )
+      }
+  }
 
   private lazy val getMetsImages = new PartialRule {
     val isDefinedForTarget: WorkPredicate = WorkPredicates.sierraWork
@@ -38,7 +52,7 @@ object ImagesRule extends FieldMergeRule {
       }.toList
   }
 
-  private lazy val getMiroImages = new PartialRule {
+  private lazy val getPairedMiroImages = new PartialRule {
     val isDefinedForTarget: WorkPredicate = WorkPredicates.sierraWork
     val isDefinedForSource: WorkPredicate = WorkPredicates.miroWork
 
