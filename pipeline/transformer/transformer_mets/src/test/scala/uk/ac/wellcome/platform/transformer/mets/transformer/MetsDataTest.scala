@@ -213,6 +213,20 @@ class MetsDataTest
     )
   }
 
+  it("creates a invisible work without a thumbnail for restricted works") {
+    val metsData = MetsData(
+      recordIdentifier = randomAlphanumeric(10),
+      accessConditionDz = Some("CC-BY-NC"),
+      accessConditionStatus = Some("restricted"),
+      fileReferences = List(
+        FileReference("l", "location.jp2", Some("image/jp2"))
+      )
+    )
+    val result = metsData.toWork(1)
+    result shouldBe a[Right[_, _]]
+    result.right.get.data.thumbnail shouldBe None
+  }
+
   it("serves the thumbnail from wellcomelibrary for PDFs") {
     val bnumber = randomAlphanumeric(10)
     val assetId = "location.pdf"

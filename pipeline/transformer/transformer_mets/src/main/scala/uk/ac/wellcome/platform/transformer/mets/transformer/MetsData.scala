@@ -16,16 +16,16 @@ case class MetsData(
 
   def toWork(version: Int): Either[Throwable, UnidentifiedInvisibleWork] =
     for {
-      maybeLicense <- parseLicense
+      license <- parseLicense
       accessStatus <- parseAccessStatus
       item = Item(
         id = Unidentifiable,
-        locations = List(digitalLocation(maybeLicense, accessStatus)))
+        locations = List(digitalLocation(license, accessStatus)))
     } yield
       UnidentifiedInvisibleWork(
         version = version,
         sourceIdentifier = sourceIdentifier,
-        workData(item, thumbnail(maybeLicense, sourceIdentifier.value))
+        workData(item, thumbnail(sourceIdentifier.value, license, accessStatus))
       )
 
   private def workData(item: Item[Unminted],
@@ -111,16 +111,26 @@ case class MetsData(
       ontologyType = "Work",
       value = recordIdentifier)
 
-  private def thumbnail(maybeLicense: Option[License], bnumber: String) =
+  private def thumbnail(bnumber: String,
+                        license: Option[License],
+                        accessStatus: Option[AccessStatus]) =
     for {
       fileReference <- fileReferences.find(ImageUtils.isThumbnail)
       url <- ImageUtils.buildThumbnailUrl(bnumber, fileReference)
+      if accessStatus.forall(shouldCreateThumbnail)
     } yield
       DigitalLocation(
         url = url,
         locationType = LocationType("thumbnail-image"),
-        license = maybeLicense
+        license = license
       )
+
+  private def shouldCreateThumbnail(accessStatus: AccessStatus) =
+    accessStatus match {
+      case AccessStatus.Restricted => false
+      case AccessStatus.Closed     => false
+      case _                       => true
+    }
 
   private val images = fileReferences
     .filter(ImageUtils.isImage)
