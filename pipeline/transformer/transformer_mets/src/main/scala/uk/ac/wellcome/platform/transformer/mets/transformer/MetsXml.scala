@@ -214,7 +214,8 @@ case class MetsXml(root: Elem) {
             if id.nonEmpty && objectHref.nonEmpty =>
           id -> FileReference(id, objectHref, mimeType)
       } match {
-      case mappings => ListMap(mappings: _*)
+      case Nil      => ListMap()
+      case nonEmpty => ListMap(nonEmpty.head)
     }
 
   /** Valid METS documents should contain a physicalStructMap section, with the
