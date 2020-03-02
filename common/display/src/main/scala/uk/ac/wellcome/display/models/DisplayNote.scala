@@ -82,5 +82,19 @@ object DisplayNoteType {
         DisplayNoteType("exhibitions-note", "Exhibitions note")
       case AwardsNote(_) =>
         DisplayNoteType("awards-note", "Awards note")
+      case OwnershipNote(_) =>
+        DisplayNoteType("ownership-note", "Ownserhip note")
+      case AcquisitionNote(_) =>
+        DisplayNoteType("acquisition-note", "Acquisition note")
+      case AppraisalNote(_) =>
+        DisplayNoteType("appraisal-note", "Appraisal note")
+      case AccrualsNote(_) =>
+        DisplayNoteType("accruals-note", "Accruals note")
+      case RelatedMaterial(_) =>
+        DisplayNoteType("related-material", "Related material")
+      case FindingAids(_) =>
+        DisplayNoteType("finding-aids", "Finding aids")
+      case ArrangementNote(_) =>
+        DisplayNoteType("arrangement-note", "Arrangement")
     }
 }

@@ -37,3 +37,17 @@ case class PublicationsNote(val content: String) extends Note
 case class ExhibitionsNote(val content: String) extends Note
 
 case class AwardsNote(val content: String) extends Note
+
+case class OwnershipNote(val content: String) extends Note
+
+case class AcquisitionNote(val content: String) extends Note
+
+case class AppraisalNote(val content: String) extends Note
+
+case class AccrualsNote(val content: String) extends Note
+
+case class RelatedMaterial(val content: String) extends Note
+
+case class FindingAids(val content: String) extends Note
+
+case class ArrangementNote(val content: String) extends Note

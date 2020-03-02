@@ -60,7 +60,7 @@ trait SierraLocation extends SierraQueryOps {
         case _                                 => true
       }
 
-  private def getAccessStatus(varfield: VarField): Option[AccessStatus] = {
+  private def getAccessStatus(varfield: VarField): Option[AccessStatus] =
     if (varfield.indicator1 == Some("0"))
       Some(AccessStatus.Open)
     else
@@ -68,25 +68,10 @@ trait SierraLocation extends SierraQueryOps {
         .subfieldsWithTag("f")
         .contents
         .headOption
-        .map {
-          case status if status.startsWith("Open with advisory") =>
-            AccessStatus.OpenWithAdvisory
-          case status if status.startsWith("Open") =>
-            AccessStatus.Open
-          case status if status.startsWith("Restricted") =>
-            AccessStatus.Restricted
-          case status if status.startsWith("Cannot Be Produced") =>
-            AccessStatus.Restricted
-          case status if status.startsWith("Certain restrictions apply") =>
-            AccessStatus.Restricted
-          case status if status.startsWith("Closed") =>
-            AccessStatus.Closed
-          case status if status.startsWith("Missing") =>
-            AccessStatus.Unavailable
-          case status if status.startsWith("Temporarily Unavailable") =>
-            AccessStatus.Unavailable
-          case status if status.startsWith("Permission Required") =>
-            AccessStatus.PermissionRequired
+        .map { str =>
+          AccessStatus(str) match {
+            case Left(err)     => throw err
+            case Right(status) => status
+          }
         }
-  }
 }
