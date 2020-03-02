@@ -169,9 +169,10 @@ case class MetsXml(root: Elem) {
     * file IDs in the (normalised) fileObjects mapping
     */
   def physicalFileReferences(bnumber: String): List[FileReference] =
-    physicalFileIds
+    physicalFileIds.par
       .flatMap(getFileReference)
       .map(normaliseLocation(bnumber))
+      .toList
 
   /** Returns the first href to a manifestation in the logical structMap
     */
