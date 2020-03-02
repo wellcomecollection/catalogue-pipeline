@@ -156,7 +156,7 @@ trait MultipleWorksSwagger {
         required = false
       ),
       new Parameter(
-        name = "aggreations",
+        name = "aggregations",
         in = ParameterIn.QUERY,
         description =
           "What aggregated data in correlation to the results should we return.",
