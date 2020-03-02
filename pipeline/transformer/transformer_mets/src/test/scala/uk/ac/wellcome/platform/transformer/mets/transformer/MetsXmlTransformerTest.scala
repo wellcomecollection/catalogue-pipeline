@@ -18,7 +18,7 @@ class MetsXmlTransformerTest extends FunSpec with Matchers with MetsGenerators {
         accessConditionDz = Some("CC-BY-NC"),
         accessConditionStatus = Some("Open"),
         accessConditionUsage = Some("Some terms"),
-        fileReferences = List(createFileReferences(6, "b30246039").head)
+        fileReferences = createFileReferences(6, "b30246039")
       )
     )
   }
@@ -38,8 +38,7 @@ class MetsXmlTransformerTest extends FunSpec with Matchers with MetsGenerators {
         recordIdentifier = "b22012692",
         accessConditionDz = Some("PDM"),
         accessConditionStatus = Some("Open"),
-        fileReferences =
-          List(createFileReferences(2, "b22012692", Some(1)).head)
+        fileReferences = createFileReferences(2, "b22012692", Some(1))
       )
     )
   }
@@ -62,7 +61,7 @@ class MetsXmlTransformerTest extends FunSpec with Matchers with MetsGenerators {
         recordIdentifier = "b30246039",
         accessConditionDz = Some("INC"),
         accessConditionStatus = None,
-        fileReferences = List(createFileReferences(2, "b30246039").head)
+        fileReferences = createFileReferences(2, "b30246039")
       )
     )
   }

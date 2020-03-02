@@ -134,15 +134,44 @@ case class MetsXml(root: Elem) {
     }
   }
 
-  /** The keys of the physicalStructMap are the METS file IDs.
-    * We require nothing of them here other than that they are unique. */
-  def physicalFileIds: List[String] = physicalStructMap.values.toList
+  /** Valid METS documents should contain a physicalStructMap section, with the
+    *  bottom most divs each representing a physical page, and linking to files
+    *  in the corresponding fileSec structures:
+    *
+    *  <mets:structMap TYPE="PHYSICAL">
+    *    <mets:div DMDID="DMDPHYS_0000" ID="PHYS_0000" TYPE="physSequence">
+    *      <mets:div ADMID="AMD_0001" ID="PHYS_0001" ORDER="1" TYPE="page">
+    *        <mets:fptr FILEID="FILE_0001_OBJECTS" />
+    *        <mets:fptr FILEID="FILE_0001_ALTO" />
+    *      </mets:div>
+    *      <mets:div ADMID="AMD_0002" ID="PHYS_0002" ORDER="2" TYPE="page">
+    *        <mets:fptr FILEID="FILE_0002_OBJECTS" />
+    *        <mets:fptr FILEID="FILE_0002_ALTO" />
+    *      </mets:div>
+    *    </mets:div>
+    *  </mets:structMap>
+    *
+    *  For this input we would expect the following output:
+    *
+    *  List("FILE_0001_OBJECTS", "FILE_0002_OBJECTS")
+    */
+  def physicalFileIds: List[String] =
+    (root \ "structMap")
+      .filterByAttribute("TYPE", "PHYSICAL")
+      .descendentsWithTag("div")
+      .sortByAttribute("ORDER")
+      .flatMap { node =>
+        (node \ "fptr").headOption.map(_ \@ "FILEID")
+      }
+      .toList
 
   /** Here we use the the items defined in the physicalStructMap to look up
     * file IDs in the (normalised) fileObjects mapping
     */
   def physicalFileReferences(bnumber: String): List[FileReference] =
-    physicalFileIds.flatMap(normalisedFileReferences(bnumber).get(_))
+    physicalFileIds
+      .flatMap(getFileReference)
+      .map(normaliseLocation(bnumber))
 
   /** Returns the first href to a manifestation in the logical structMap
     */
@@ -176,9 +205,6 @@ case class MetsXml(root: Elem) {
       })
   }
 
-  private def normalisedFileReferences(bnumber: String) =
-    fileReferences.mapValues(normaliseLocation(bnumber))
-
   /** The METS XML contains locations of associated files, contained in a
     *  mapping with the following format:
     *
@@ -193,62 +219,23 @@ case class MetsXml(root: Elem) {
     *    </mets:fileGrp>
     *  </mets:fileSec>
     *
-    *  For this input we would expect the following output:
-    *
-    *  Map("FILE_0001_OBJECTS" -> FileReference("FILE_0001_OBJECTS", "objects/b30246039_0001.jp2", "image/jp2"),
-    *      "FILE_0002_OBJECTS" -> FileReference("FILE_0002_OBJECTS", "objects/b30246039_0002.jp2", "image/jp2"))
+    *  For the id "FILE_0002_OBJECTS", this function would return:
+    *  FileReference("FILE_0002_OBJECTS", "objects/b30246039_0002.jp2", Some("image/jp2"))
     */
-  private def fileReferences: ListMap[String, FileReference] =
-    (root \ "fileSec" \ "fileGrp")
-      .filterByAttribute("USE", "OBJECTS")
-      .childrenWithTag("file")
-      .map { file =>
-        val key = file \@ "ID"
-        val objectHref = (file \ "FLocat").toList.headOption
-          .map(_ \@ "{http://www.w3.org/1999/xlink}href")
-        val mimeType = Option(file \@ "MIMETYPE").filter(_.nonEmpty)
-        (key, (objectHref, mimeType))
-      }
-      .collect {
-        case (id, (Some(objectHref), mimeType))
-            if id.nonEmpty && objectHref.nonEmpty =>
-          id -> FileReference(id, objectHref, mimeType)
-      } match {
-      case Nil      => ListMap()
-      case nonEmpty => ListMap(nonEmpty.head)
-    }
-
-  /** Valid METS documents should contain a physicalStructMap section, with the
-    *  bottom most divs each representing a physical page, and linking to files
-    *  in the corresponding fileSec structures:
-    *
-    *  <mets:structMap TYPE="PHYSICAL">
-    *    <mets:div DMDID="DMDPHYS_0000" ID="PHYS_0000" TYPE="physSequence">
-    *      <mets:div ADMID="AMD_0001" ID="PHYS_0001" ORDER="1" TYPE="page">
-    *        <mets:fptr FILEID="FILE_0001_OBJECTS" />
-    *        <mets:fptr FILEID="FILE_0001_ALTO" />
-    *      </mets:div>
-    *      <mets:div ADMID="AMD_0002" ID="PHYS_0002" ORDER="2" TYPE="page">
-    *        <mets:fptr FILEID="FILE_0002_OBJECTS" />
-    *        <mets:fptr FILEID="FILE_0002_ALTO" />
-    *      </mets:div>
-    *    </mets:div>
-    *  </mets:structMap>
-    *
-    *  For this input we would expect the following output:
-    *
-    *  Map("PHYS_0001" -> "FILE_0001_OBJECTS",
-    *      "PHYS_0002" -> "FILE_0002_OBJECTS")
-    */
-  private def physicalStructMap: ListMap[String, String] =
-    (root \ "structMap")
-      .filterByAttribute("TYPE", "PHYSICAL")
-      .descendentsWithTag("div")
-      .sortByAttribute("ORDER")
-      .toMapping(
-        keyAttrib = "ID",
-        valueNode = "fptr",
-        valueAttrib = "FILEID"
+  private def getFileReference(id: String) =
+    for {
+      fileGrp <- root \ "fileSec" \ "fileGrp"
+      objects <- fileGrp.find(_ \@ "USE" == "OBJECTS")
+      listedFiles = objects \ "file"
+      file <- listedFiles.find(_ \@ "ID" == id)
+      objectHref <- (file \ "FLocat").headOption
+        .map(_ \@ "{http://www.w3.org/1999/xlink}href")
+      if objectHref.nonEmpty
+    } yield
+      FileReference(
+        id,
+        objectHref,
+        Option(file \@ "MIMETYPE").filter(_.nonEmpty)
       )
 
   /** Valid METS documents should contain a logicalStructMap section. When this
@@ -303,7 +290,7 @@ case class MetsXml(root: Elem) {
       val mappings = nodes
         .map { node =>
           val key = node \@ keyAttrib
-          val value = (node \ valueNode).toList.headOption.map(_ \@ valueAttrib)
+          val value = (node \ valueNode).headOption.map(_ \@ valueAttrib)
           (key, value)
         }
         .collect {
