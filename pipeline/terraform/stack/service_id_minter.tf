@@ -52,6 +52,9 @@ module "id_minter" {
   aws_region          = var.aws_region
   messages_bucket_arn = aws_s3_bucket.messages.arn
   queue_read_policy   = module.id_minter_queue.read_policy
+
+  cpu    = 512
+  memory = 1024
 }
 
 # Output topic

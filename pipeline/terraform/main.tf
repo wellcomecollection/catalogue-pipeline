@@ -1,7 +1,7 @@
-module "catalogue_pipeline_20200211" {
+module "catalogue_pipeline_20200228" {
   source = "./stack"
 
-  namespace = "catalogue-20200211"
+  namespace = "catalogue-20200228"
 
   release_label = "prod"
 
@@ -19,23 +19,23 @@ module "catalogue_pipeline_20200211" {
   # reindexer topic names.
 
   sierra_adapter_topic_arns = [
-    local.sierra_reindexer_topic_arn,
+    //    local.sierra_reindexer_topic_arn,
     local.sierra_merged_bibs_topic_arn,
     local.sierra_merged_items_topic_arn,
   ]
 
   miro_adapter_topic_arns = [
-    local.miro_reindexer_topic_arn,
+    //    local.miro_reindexer_topic_arn,
     local.miro_updates_topic_arn,
   ]
 
   mets_adapter_topic_arns = [
-    local.mets_reindexer_topic_arn,
+    //    local.mets_reindexer_topic_arn,
     local.mets_adapter_topic_arn,
   ]
 
   # Elasticsearch
-  es_works_index = "v2-20200211"
+  es_works_index = "v2-20200228"
 
   # RDS
   rds_ids_access_security_group_id = local.rds_access_security_group_id

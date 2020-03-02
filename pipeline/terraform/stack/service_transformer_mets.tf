@@ -38,6 +38,9 @@ module "mets_transformer" {
   max_capacity        = 10
   messages_bucket_arn = aws_s3_bucket.messages.arn
   queue_read_policy   = module.mets_transformer_queue.read_policy
+
+  cpu    = 1024
+  memory = 2048
 }
 
 module "mets_transformer_topic" {
