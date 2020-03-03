@@ -3,8 +3,13 @@ package uk.ac.wellcome.platform.merger.services
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
+import uk.ac.wellcome.platform.merger.fixtures.ImageFulltextAccess
 
-class PlatformMergerTest extends FunSpec with WorksGenerators with Matchers {
+class PlatformMergerTest
+    extends FunSpec
+    with WorksGenerators
+    with Matchers
+    with ImageFulltextAccess {
   val digitalLocationCCBYNC = createDigitalLocationWith(
     license = Some(License.CCBYNC))
   val digitalLocationNoLicense = digitalLocationCCBYNC.copy(license = None)
@@ -102,18 +107,7 @@ class PlatformMergerTest extends FunSpec with WorksGenerators with Matchers {
     val expectedImage = miroWork.data.images.head mergeWith {
       ImageData(
         parentWork = Identifiable(sierraPhysicalWork.sourceIdentifier),
-        fullText = Some(
-          List(
-            sierraPhysicalWork.data.title,
-            sierraPhysicalWork.data.description,
-            sierraPhysicalWork.data.physicalDescription,
-            sierraPhysicalWork.data.lettering,
-            miroWork.data.title,
-            miroWork.data.description,
-            miroWork.data.physicalDescription,
-            miroWork.data.lettering
-          ).flatten.mkString(" ")
-        )
+        fullText = createFulltext(List(sierraPhysicalWork, miroWork))
       )
     }
 
@@ -158,18 +152,7 @@ class PlatformMergerTest extends FunSpec with WorksGenerators with Matchers {
     val expectedImage = miroWork.data.images.head mergeWith {
       ImageData(
         parentWork = Identifiable(sierraDigitalWork.sourceIdentifier),
-        fullText = Some(
-          List(
-            sierraDigitalWork.data.title,
-            sierraDigitalWork.data.description,
-            sierraDigitalWork.data.physicalDescription,
-            sierraDigitalWork.data.lettering,
-            miroWork.data.title,
-            miroWork.data.description,
-            miroWork.data.physicalDescription,
-            miroWork.data.lettering
-          ).flatten.mkString(" ")
-        )
+        fullText = createFulltext(List(sierraDigitalWork, miroWork))
       )
     }
 
@@ -223,18 +206,7 @@ class PlatformMergerTest extends FunSpec with WorksGenerators with Matchers {
     val expectedImage = miroWork.data.images.head mergeWith {
       ImageData(
         parentWork = Identifiable(sierraPhysicalWork.sourceIdentifier),
-        fullText = Some(
-          List(
-            sierraPhysicalWork.data.title,
-            sierraPhysicalWork.data.description,
-            sierraPhysicalWork.data.physicalDescription,
-            sierraPhysicalWork.data.lettering,
-            miroWork.data.title,
-            miroWork.data.description,
-            miroWork.data.physicalDescription,
-            miroWork.data.lettering
-          ).flatten.mkString(" ")
-        )
+        fullText = createFulltext(List(sierraPhysicalWork, miroWork))
       )
     }
 
@@ -315,18 +287,7 @@ class PlatformMergerTest extends FunSpec with WorksGenerators with Matchers {
     val expectedImage = metsWork.data.images.head mergeWith {
       ImageData(
         parentWork = Identifiable(sierraPictureWork.sourceIdentifier),
-        fullText = Some(
-          List(
-            sierraPictureWork.data.title,
-            sierraPictureWork.data.description,
-            sierraPictureWork.data.physicalDescription,
-            sierraPictureWork.data.lettering,
-            metsWork.data.title,
-            metsWork.data.description,
-            metsWork.data.physicalDescription,
-            metsWork.data.lettering
-          ).flatten.mkString(" ")
-        )
+        fullText = createFulltext(List(sierraPictureWork, metsWork))
       )
     }
 
@@ -385,18 +346,7 @@ class PlatformMergerTest extends FunSpec with WorksGenerators with Matchers {
     val expectedImage = miroWork.data.images.head mergeWith {
       ImageData(
         parentWork = Identifiable(sierraPhysicalWork.sourceIdentifier),
-        fullText = Some(
-          List(
-            sierraPhysicalWork.data.title,
-            sierraPhysicalWork.data.description,
-            sierraPhysicalWork.data.physicalDescription,
-            sierraPhysicalWork.data.lettering,
-            miroWork.data.title,
-            miroWork.data.description,
-            miroWork.data.physicalDescription,
-            miroWork.data.lettering
-          ).flatten.mkString(" ")
-        )
+        fullText = createFulltext(List(sierraPhysicalWork, miroWork))
       )
     }
 
@@ -439,6 +389,7 @@ class PlatformMergerTest extends FunSpec with WorksGenerators with Matchers {
     result.works should contain theSameElementsAs List(
       expectedMergedWork,
       expectedMetsRedirectedWork)
+    result.images shouldBe empty
   }
 
   it("merges a multiple items physical Sierra work with a digital work") {
@@ -471,6 +422,7 @@ class PlatformMergerTest extends FunSpec with WorksGenerators with Matchers {
     result.works should contain theSameElementsAs List(
       expectedMergedWork,
       expectedRedirectedDigitalWork)
+    result.images shouldBe empty
   }
 
   it(
@@ -512,6 +464,7 @@ class PlatformMergerTest extends FunSpec with WorksGenerators with Matchers {
       expectedMergedWork,
       expectedRedirectedDigitalWork,
       expectedMetsRedirectedWork)
+    result.images shouldBe empty
   }
 
 }

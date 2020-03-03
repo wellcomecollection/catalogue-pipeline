@@ -8,7 +8,8 @@ import org.scalatest.{
   PrivateMethodTester
 }
 import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.models.work.internal.{TransformedBaseWork, WorkType}
+import uk.ac.wellcome.models.work.internal.WorkType
+import uk.ac.wellcome.platform.merger.fixtures.ImageFulltextAccess
 import uk.ac.wellcome.platform.merger.rules.ImagesRule.FlatImageMergeRule
 import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
 
@@ -18,7 +19,8 @@ class ImagesRuleTest
     with WorksGenerators
     with PrivateMethodTester
     with OptionValues
-    with Inspectors {
+    with Inspectors
+    with ImageFulltextAccess {
   describe("image creation rules") {
     it("creates 1 image from a 1 Miro work") {
       val miroWork = createMiroWork
@@ -90,11 +92,6 @@ class ImagesRuleTest
   }
 
   describe("fulltext field population") {
-    val createFulltextMethod =
-      PrivateMethod[Option[String]]('createFulltext)
-    val createFulltext: Seq[TransformedBaseWork] => Option[String] =
-      ImagesRule invokePrivate createFulltextMethod(_)
-
     val work = createUnidentifiedWorkWith(
       title = Some("destructive durian"),
       description = Some("boisterous banana"),
