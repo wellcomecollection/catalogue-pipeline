@@ -213,7 +213,7 @@ trait WorksGenerators
     createUnidentifiedInvisibleWorkWith(
       sourceIdentifier = createMetsSourceIdentifier,
       items = items,
-      images = (1 to nImages).map { i =>
+      images = (1 to nImages).map { _ =>
         createUnmergedImageWith(
           location = createDigitalLocation,
           identifierType = IdentifierType("mets-image")

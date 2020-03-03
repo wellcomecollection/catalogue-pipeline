@@ -42,7 +42,6 @@ object Main extends WellcomeTypesafeApp {
       playbackService = playbackService,
       mergerManager = mergerManager,
       workSender = BigMessagingBuilder.buildBigMessageSender[BaseWork](config),
-      imageSender = ???
     )
   }
 }

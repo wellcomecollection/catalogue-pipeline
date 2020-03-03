@@ -74,5 +74,5 @@ class FieldMergeRuleTest
   override def merge(
     target: UnidentifiedWork,
     sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData] =
-    ???
+    throw new NotImplementedError()
 }

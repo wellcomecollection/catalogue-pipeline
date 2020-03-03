@@ -32,8 +32,7 @@ trait WorkerServiceFixture extends LocalWorksVhs {
               sqsStream = sqsStream,
               playbackService = new RecorderPlaybackService(vhs),
               mergerManager = new MergerManager(PlatformMerger),
-              workSender = workSender,
-              imageSender = ???
+              workSender = workSender
             )
             workerService.run()
             testWith(workerService)

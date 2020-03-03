@@ -4,7 +4,7 @@ import akka.Done
 
 import scala.concurrent.{ExecutionContext, Future}
 import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult}
-import uk.ac.wellcome.models.work.internal.{BaseWork, MergedImage, Unminted}
+import uk.ac.wellcome.models.work.internal.BaseWork
 import uk.ac.wellcome.typesafe.Runnable
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.Implicits._
@@ -17,7 +17,6 @@ class MergerWorkerService[Destination](
   playbackService: RecorderPlaybackService,
   mergerManager: MergerManager,
   workSender: BigMessageSender[Destination, BaseWork],
-  imageSender: BigMessageSender[Destination, MergedImage[Unminted]]
 )(implicit ec: ExecutionContext)
     extends Runnable {
 
@@ -37,7 +36,7 @@ class MergerWorkerService[Destination](
       merged = mergerManager.applyMerge(maybeWorks = maybeWorks)
       (worksFuture, imagesFuture) = (
         sendMessages(workSender, merged.works),
-        sendMessages(imageSender, merged.images)
+        Future { Nil } // sendMessages(imageSender, merged.images)
       )
       _ <- worksFuture
       _ <- imagesFuture
