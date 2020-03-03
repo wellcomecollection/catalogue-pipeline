@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.merger.rules
 import uk.ac.wellcome.models.work.internal.{
+  Identifiable,
   ImageData,
   MergedImage,
   TransformedBaseWork,
@@ -7,7 +8,12 @@ import uk.ac.wellcome.models.work.internal.{
   Unminted
 }
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
-import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
+import uk.ac.wellcome.platform.merger.rules.WorkPredicates.{
+  not,
+  WorkPredicate,
+  WorkPredicateOps
+}
+
 import scala.Function.const
 
 object ImagesRule extends FieldMergeRule {
@@ -21,7 +27,7 @@ object ImagesRule extends FieldMergeRule {
         case Nil =>
           getSingleMiroImage.applyOrElse(target, const(Nil))
         case _ :: _ =>
-          getMetsImages.applyOrElse((target, sources), const(Nil)) ++
+          getPictureImages.applyOrElse((target, sources), const(Nil)) ++
             getPairedMiroImages.applyOrElse((target, sources), const(Nil))
       },
       redirects = Nil
@@ -32,38 +38,55 @@ object ImagesRule extends FieldMergeRule {
     case target if WorkPredicates.miroWork(target) =>
       target.data.images.map {
         _.mergeWith(
-          ImageData()
+          ImageData(
+            parentWork = Identifiable(target.sourceIdentifier),
+            fullText = createFulltext(List(target))
+          )
         )
       }
   }
 
-  private lazy val getMetsImages = new PartialRule {
-    val isDefinedForTarget: WorkPredicate = WorkPredicates.sierraWork
-    val isDefinedForSource: WorkPredicate = WorkPredicates.metsWork
-
-    def rule(target: UnidentifiedWork,
-             sources: Seq[TransformedBaseWork]): List[MergedImage[Unminted]] =
-      sources.flatMap {
-        _.data.images.map {
-          _.mergeWith(
-            ImageData()
-          )
-        }
-      }.toList
+  private lazy val getPictureImages = new FlatImageMergeRule {
+    val isDefinedForTarget: WorkPredicate = WorkPredicates.sierraPicture
+    val isDefinedForSource
+      : WorkPredicate = WorkPredicates.metsWork or WorkPredicates.miroWork
   }
 
-  private lazy val getPairedMiroImages = new PartialRule {
-    val isDefinedForTarget: WorkPredicate = WorkPredicates.sierraWork
+  private lazy val getPairedMiroImages = new FlatImageMergeRule {
+    val isDefinedForTarget: WorkPredicate =
+      WorkPredicates.sierraWork and not(WorkPredicates.sierraPicture)
     val isDefinedForSource: WorkPredicate = WorkPredicates.miroWork
+  }
 
-    def rule(target: UnidentifiedWork,
-             sources: Seq[TransformedBaseWork]): List[MergedImage[Unminted]] =
-      sources.flatMap {
+  trait FlatImageMergeRule extends PartialRule {
+    final override def rule(
+      target: UnidentifiedWork,
+      sources: Seq[TransformedBaseWork]): List[MergedImage[Unminted]] =
+      (target +: sources).flatMap {
         _.data.images.map {
           _.mergeWith(
-            ImageData()
+            ImageData(
+              parentWork = Identifiable(target.sourceIdentifier),
+              fullText = createFulltext(target +: sources)
+            )
           )
         }
       }.toList
   }
+
+  private def createFulltext(works: Seq[TransformedBaseWork]): Option[String] =
+    works
+      .map(_.data)
+      .flatMap { data =>
+        List(
+          data.title,
+          data.description,
+          data.physicalDescription,
+          data.lettering
+        )
+      }
+      .flatten match {
+      case Nil    => None
+      case fields => Some(fields.mkString(" "))
+    }
 }

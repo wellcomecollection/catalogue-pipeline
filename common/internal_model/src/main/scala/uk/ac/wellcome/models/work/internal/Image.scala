@@ -30,10 +30,8 @@ case class MergedImage[Id <: IdState](
 }
 
 case class ImageData[Id <: IdState](
-  caption: Option[String] = None,
-  description: Option[String] = None,
-  privateDescription: Option[String] = None,
-  parentWorks: List[Id] = Nil
+  parentWork: Id,
+  fullText: Option[String] = None
 )
 
 object UnmergedImage {
