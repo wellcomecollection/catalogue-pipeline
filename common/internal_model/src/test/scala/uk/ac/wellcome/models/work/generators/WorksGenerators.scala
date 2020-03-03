@@ -2,7 +2,10 @@ package uk.ac.wellcome.models.work.generators
 
 import uk.ac.wellcome.models.work.internal._
 
-trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
+trait WorksGenerators
+    extends ItemsGenerators
+    with ProductionEventGenerators
+    with ImageGenerators {
 
   private def createTitle: String = randomAlphanumeric(length = 100)
 
@@ -51,11 +54,12 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
 
   def createUnidentifiedInvisibleWorkWith(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    items: List[Item[Unminted]] = Nil
+    items: List[Item[Unminted]] = Nil,
+    images: List[UnmergedImage[Unminted]] = Nil,
   ): UnidentifiedInvisibleWork =
     UnidentifiedInvisibleWork(
       sourceIdentifier = sourceIdentifier,
-      data = WorkData(items = items),
+      data = WorkData(items = items, images = images),
       version = 1
     )
 
@@ -90,6 +94,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     otherIdentifiers: List[SourceIdentifier] = List(),
     mergeCandidates: List[MergeCandidate] = List(),
     description: Option[String] = None,
+    physicalDescription: Option[String] = None,
     lettering: Option[String] = None,
     workType: Option[WorkType] = None,
     thumbnail: Option[Location] = None,
@@ -98,7 +103,8 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     notes: List[Note] = Nil,
     edition: Option[String] = None,
     duration: Option[Int] = None,
-    items: List[Item[Unminted]] = Nil): UnidentifiedWork =
+    items: List[Item[Unminted]] = Nil,
+    images: List[UnmergedImage[Unminted]] = Nil): UnidentifiedWork =
     UnidentifiedWork(
       sourceIdentifier = sourceIdentifier,
       version = version,
@@ -109,6 +115,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
         alternativeTitles = alternativeTitles,
         workType = workType,
         description = description,
+        physicalDescription = physicalDescription,
         lettering = lettering,
         contributors = contributors,
         thumbnail = thumbnail,
@@ -117,6 +124,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
         notes = notes,
         duration = duration,
         items = items,
+        images = images
       )
     )
 
@@ -200,11 +208,17 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
 
   def createUnidentifiedInvisibleMetsWorkWith(
     sourceIdentifier: SourceIdentifier = createMetsSourceIdentifier,
-    items: List[Item[Unminted]] = List(createDigitalItem))
-    : UnidentifiedInvisibleWork =
+    items: List[Item[Unminted]] = List(createDigitalItem),
+    nImages: Int = 1): UnidentifiedInvisibleWork =
     createUnidentifiedInvisibleWorkWith(
       sourceIdentifier = createMetsSourceIdentifier,
-      items = items
+      items = items,
+      images = (1 to nImages).map { i =>
+        createUnmergedImageWith(
+          location = createDigitalLocation,
+          identifierType = IdentifierType("mets-image")
+        )
+      }.toList
     )
 
   def createUnidentifiedSierraWork: UnidentifiedWork =
@@ -243,7 +257,15 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
         )),
       items = List(
         createUnidentifiableItemWith(locations = List(
-          createDigitalLocationWith(locationType = createImageLocationType))))
+          createDigitalLocationWith(locationType = createImageLocationType)))),
+      images = List(
+        createUnmergedImageWith(
+          location = DigitalLocation(
+            url = "https://iiif.wellcomecollection.org/V01234.jpg",
+            locationType = LocationType("iiif-image"),
+            license = Some(License.CCBY)
+          )
+        ))
     )
 
   def createMiroWork: UnidentifiedWork =
