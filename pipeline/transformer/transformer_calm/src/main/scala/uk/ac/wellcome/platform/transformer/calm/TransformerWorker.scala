@@ -27,6 +27,10 @@ case class MessageSendError(msg: String) extends CalmWorkerError(msg)
   * - Emits the message via `BigMessageSender` to an SNS topic
   */
 trait TransformerWorker[In, SenderDest] {
+  type StreamMessage = (Message, NotificationMessage)
+  type Result[T] = Either[Throwable, T]
+  type StoreKey = Version[String, Int]
+
   val stream: SQSStream[NotificationMessage]
   val sender: BigMessageSender[SenderDest, TransformedBaseWork]
   val store: VersionedStore[String, Int, In]
@@ -34,7 +38,8 @@ trait TransformerWorker[In, SenderDest] {
 
   val errorSink: Sink[Result[_], Future[Done]] = Sink.ignore
 
-  def withSource(source: Source[Message, NotUsed]): Source[Unit, NotUsed] =
+  def withSource(
+    source: Source[StreamMessage, NotUsed]): Source[Unit, NotUsed] =
     source
       .via(divertEither(decodeMessage, to = errorSink))
       .via(divertEither(work, to = errorSink))
@@ -46,10 +51,6 @@ trait TransformerWorker[In, SenderDest] {
     flow.divertTo(errorSink, _.isLeft).collect {
       case Right(out) => out
     }
-
-  type StreamMessage = (Message, NotificationMessage)
-  type Result[T] = Either[Throwable, T]
-  type StoreKey = Version[String, Int]
 
   lazy val decodeMessage: Flow[StreamMessage, Result[In], NotUsed] =
     Flow.fromFunction(message => decodeKey(message._2) flatMap getRecord)
