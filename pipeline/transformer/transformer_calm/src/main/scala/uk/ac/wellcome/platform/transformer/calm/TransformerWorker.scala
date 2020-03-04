@@ -31,6 +31,7 @@ trait TransformerWorker[In, SenderDest] {
   type Result[T] = Either[Throwable, T]
   type StoreKey = Version[String, Int]
 
+  val name: String
   val stream: SQSStream[NotificationMessage]
   val sender: BigMessageSender[SenderDest, TransformedBaseWork]
   val store: VersionedStore[String, Int, In]
@@ -82,7 +83,7 @@ trait TransformerWorker[In, SenderDest] {
 
   def run(): Future[Done] = {
     stream.runStream(
-      "CalmTransformerWorkerService",
+      name,
       source => {
         val end = source.via(Flow.fromFunction(message => message._1))
         val processed = withSource(source)

@@ -17,4 +17,6 @@ class CalmTransformerWorker(
   val transformer: Transformer[CalmRecord]
 )(implicit val ec: ExecutionContext)
     extends Runnable
-    with TransformerWorker[CalmRecord, SNSConfig]
+    with TransformerWorker[CalmRecord, SNSConfig] {
+  val name = "CalmTransformerWorker"
+}
