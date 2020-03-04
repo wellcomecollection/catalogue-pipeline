@@ -162,12 +162,15 @@ case class MetsXml(root: Elem) {
     *  - prepend the bnumber followed by an underscore if it's not already present (uppercase or lowercase)
     */
   private def normaliseLocation(
-                                 bnumber: String): FileReference => FileReference = {
+    bnumber: String): FileReference => FileReference = {
     fileReference: FileReference =>
-      fileReference.copy(location = fileReference.location.replaceFirst("objects/", "") match {
-        case fileName if fileName.toLowerCase.startsWith(bnumber.toLowerCase) => fileName
-        case fileName => s"${bnumber}_$fileName"
-      })
+      fileReference.copy(
+        location = fileReference.location.replaceFirst("objects/", "") match {
+          case fileName
+              if fileName.toLowerCase.startsWith(bnumber.toLowerCase) =>
+            fileName
+          case fileName => s"${bnumber}_$fileName"
+        })
   }
 
   private def normalisedFileReferences(bnumber: String) =
