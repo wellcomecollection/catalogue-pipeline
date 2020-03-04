@@ -31,7 +31,7 @@ trait TransformerWorker[In, SenderDest] {
   type Result[T] = Either[Throwable, T]
   type StoreKey = Version[String, Int]
 
-  val name: String
+  def name: String = this.getClass.getSimpleName
   val stream: SQSStream[NotificationMessage]
   val sender: BigMessageSender[SenderDest, TransformedBaseWork]
   val store: VersionedStore[String, Int, In]
