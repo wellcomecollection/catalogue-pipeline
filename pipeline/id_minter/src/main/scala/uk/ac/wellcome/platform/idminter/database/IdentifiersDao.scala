@@ -8,19 +8,59 @@ import uk.ac.wellcome.models.work.internal.SourceIdentifier
 import uk.ac.wellcome.platform.idminter.exceptions.IdMinterException
 import uk.ac.wellcome.platform.idminter.models.{Identifier, IdentifiersTable}
 
+import scala.collection.mutable
 import scala.concurrent.blocking
 import scala.util.Try
 
 class IdentifiersDao(db: DB, identifiers: IdentifiersTable) extends Logging {
+  case class LookupResult(found: List[Identifier], notFound: List[SourceIdentifier])
 
   implicit val session = AutoSession(db.settingsProvider)
 
+  def lookupIds(sourceIdentifiers: Seq[SourceIdentifier])
+    : Try[LookupResult] = Try {
+    debug(s"Matching ($sourceIdentifiers)")
+    val sqlParametersToSourceIdentifier = buildSqlQueryParameters(sourceIdentifiers)
+
+    blocking {
+
+      val i = identifiers.i
+      val query = withSQL {
+
+        select
+          .from(identifiers as i)
+          .where.in((i.OntologyType, i.SourceSystem, i.SourceId), sqlParametersToSourceIdentifier.keys.toList)
+
+      }.map(rs => {
+        val foundParameter = buildSqlParametersFromResult(i, rs)
+        sqlParametersToSourceIdentifier.remove(foundParameter)
+        Identifier(i)(rs)
+      }).list()
+      debug(s"Executing:'${query.statement}'")
+      val result = query.apply()
+
+      LookupResult(result, sqlParametersToSourceIdentifier.values.toList)
+    }
+  }
+
+  private def buildSqlQueryParameters(sourceIdentifiers: Seq[SourceIdentifier]) = {
+    mutable.Map(sourceIdentifiers.map(sourceIdentifier => (buildSqlParametersFromSourceIdentifier(sourceIdentifier) -> sourceIdentifier)): _ *)
+  }
+
+  private def buildSqlParametersFromSourceIdentifier(sourceIdentifier: SourceIdentifier) = {
+    (sourceIdentifier.ontologyType, sourceIdentifier.identifierType.id, sourceIdentifier.value)
+  }
+
+  private def buildSqlParametersFromResult(i: SyntaxProvider[Identifier], rs: WrappedResultSet) = {
+    (rs.string(i.resultName.OntologyType), rs.string(i.resultName.SourceSystem), rs.string(i.resultName.SourceId))
+  }
+
   /* An unidentified record from the transformer can give us a list of
-   * identifiers from the source systems, and an ontology type (e.g. "Work").
-   *
-   * This method looks for existing IDs that have matching ontology type and
-   * source identifiers.
-   */
+     * identifiers from the source systems, and an ontology type (e.g. "Work").
+     *
+     * This method looks for existing IDs that have matching ontology type and
+     * source identifiers.
+     */
   def lookupId(
     sourceIdentifier: SourceIdentifier
   ): Try[Option[Identifier]] = Try {
