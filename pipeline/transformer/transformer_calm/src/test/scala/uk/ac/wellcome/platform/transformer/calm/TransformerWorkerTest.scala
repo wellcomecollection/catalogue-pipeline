@@ -28,15 +28,6 @@ import scala.concurrent.duration._
 
 case class TestDataIn(data: List[String])
 
-class TestTransformerWorker(
-  val stream: SQSStream[NotificationMessage],
-  val sender: MemoryBigMessageSender[TransformedBaseWork],
-  val store: VersionedStore[String, Int, TestDataIn],
-  val transformer: Transformer[TestDataIn]
-) extends TransformerWorker[TestDataIn, String] {
-  val name = "TestTransformerWorker"
-}
-
 object TestTransformer extends Transformer[TestDataIn] {
   def transform(data: TestDataIn) =
     Right(
@@ -49,6 +40,14 @@ object TestTransformer extends Transformer[TestDataIn] {
         data = WorkData()
       )
     )
+}
+
+class TestTransformerWorker(
+  val stream: SQSStream[NotificationMessage],
+  val sender: MemoryBigMessageSender[TransformedBaseWork],
+  val store: VersionedStore[String, Int, TestDataIn]
+) extends TransformerWorker[TestDataIn, String] {
+  val transformer = TestTransformer
 }
 
 class TransformerWorkerTest
@@ -90,14 +89,12 @@ class TransformerWorkerTest
         case QueuePair(queue, dlq) =>
           withSQSStream[NotificationMessage, R](queue) { stream =>
             val sender = new MemoryBigMessageSender[TransformedBaseWork]()
-            val data: MemoryStore[Version[String, Int], TestDataIn] with Maxima[
-              String,
-              Int] =
+            val data: MemoryStore[Version[String, Int], TestDataIn]
+              with Maxima[String, Int] =
               new MemoryStore(records) with MemoryMaxima[String, TestDataIn]
             val store = new MemoryVersionedStore[String, TestDataIn](data)
 
-            testWith(
-              new TestTransformerWorker(stream, sender, store, TestTransformer))
+            testWith(new TestTransformerWorker(stream, sender, store))
           }
       }
     }

@@ -14,9 +14,8 @@ class CalmTransformerWorker(
   val stream: SQSStream[NotificationMessage],
   val sender: BigMessageSender[SNSConfig, TransformedBaseWork],
   val store: VersionedStore[String, Int, CalmRecord],
-  val transformer: Transformer[CalmRecord]
 )(implicit val ec: ExecutionContext)
     extends Runnable
     with TransformerWorker[CalmRecord, SNSConfig] {
-  val name = "CalmTransformerWorker"
+  val transformer = CalmTransformer
 }

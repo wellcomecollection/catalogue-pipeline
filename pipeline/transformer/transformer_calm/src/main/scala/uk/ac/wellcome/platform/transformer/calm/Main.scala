@@ -49,11 +49,6 @@ object Main extends WellcomeTypesafeApp with AWSClientConfigBuilder {
       )
     )
 
-    new CalmTransformerWorker(
-      "CalmTransformerWorker",
-      stream,
-      sender,
-      store,
-      transformer = CalmTransformer)
+    new CalmTransformerWorker(stream, sender, store)
   }
 }
