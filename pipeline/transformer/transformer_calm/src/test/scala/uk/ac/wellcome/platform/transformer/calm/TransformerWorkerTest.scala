@@ -10,7 +10,6 @@ import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
 import scala.concurrent.Await
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.bigmessaging.memory.MemoryBigMessageSender
-import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.models.Implicits._
@@ -31,7 +30,7 @@ case class TestDataIn(data: List[String])
 
 class TestTransformerWorker(
   val stream: SQSStream[NotificationMessage],
-  val sender: BigMessageSender[String, TransformedBaseWork],
+  val sender: MemoryBigMessageSender[TransformedBaseWork],
   val store: VersionedStore[String, Int, TestDataIn],
   val transformer: Transformer[TestDataIn]
 ) extends TransformerWorker[TestDataIn, String]
@@ -77,13 +76,14 @@ class TransformerWorkerTest
           val successes = Await.result(sink, 3.seconds)
 
           successes.size should be(1)
+          transformerWorker.sender.messages.size should be(1)
         }
       }
     }
   }
 
   def withTransformerWorker[R](records: Map[Version[String, Int], TestDataIn])(
-    testWith: TestWith[TransformerWorker[TestDataIn, String], R]) =
+    testWith: TestWith[TestTransformerWorker, R]) =
     withActorSystem { implicit actorSystem =>
       withLocalSqsQueueAndDlq {
         case QueuePair(queue, dlq) =>
