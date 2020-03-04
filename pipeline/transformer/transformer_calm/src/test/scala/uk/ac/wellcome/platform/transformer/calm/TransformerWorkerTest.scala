@@ -89,8 +89,9 @@ class TransformerWorkerTest
         case QueuePair(queue, dlq) =>
           withSQSStream[NotificationMessage, R](queue) { stream =>
             val sender = new MemoryBigMessageSender[TransformedBaseWork]()
-            val data: MemoryStore[Version[String, Int], TestDataIn]
-              with Maxima[String, Int] =
+            val data: MemoryStore[Version[String, Int], TestDataIn] with Maxima[
+              String,
+              Int] =
               new MemoryStore(records) with MemoryMaxima[String, TestDataIn]
             val store = new MemoryVersionedStore[String, TestDataIn](data)
 
