@@ -57,8 +57,7 @@ class TransformerWorkerTest
     with Akka
     with SQS
     with SNS {
-  it(
-    "Should success and give a message to the sender if it receives a valid version") {
+  it("Should succeed give a valid version and data from a store") {
     withMaterializer { implicit materializer =>
       withTransformerWorker(
         records = Map(
