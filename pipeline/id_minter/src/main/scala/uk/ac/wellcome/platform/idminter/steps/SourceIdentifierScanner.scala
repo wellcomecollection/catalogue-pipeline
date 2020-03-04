@@ -7,15 +7,27 @@ import uk.ac.wellcome.json.JsonUtil.fromJson
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal.SourceIdentifier
 
+import scala.annotation.tailrec
 import scala.util.{Failure, Success, Try}
 
 object SourceIdentifierScanner extends Logging{
   def scan(inputJson: Json): Try[List[SourceIdentifier]] =
     Try(iterate(root.each.json.getAll(inputJson), findIdentifier(root.sourceIdentifier.json.getOption(inputJson)).toList))
 
-  private def iterate(children: List[Json], identifiers: List[SourceIdentifier]): List[SourceIdentifier] = {
-    identifiers ++ children.foldRight(List[SourceIdentifier]())((j, idAccumulator) =>idAccumulator ++ iterate(root.each.json.getAll(j), findIdentifier(root.sourceIdentifier.json.getOption(j)).toList))
-  }
+  @tailrec
+  private def iterate(
+                       children: List[Json],
+                       identifiers: List[SourceIdentifier]): List[SourceIdentifier] =
+    children match {
+      case Nil => identifiers
+      case headChild :: tailChildren =>
+        iterate(
+          root.each.json.getAll(headChild) ++ tailChildren,
+          identifiers ++ findIdentifier(
+            root.sourceIdentifier.json.getOption(headChild)
+          ).toList
+        )
+    }
 
   private def findIdentifier(json: Option[Json]): Option[SourceIdentifier] =
     json match {
