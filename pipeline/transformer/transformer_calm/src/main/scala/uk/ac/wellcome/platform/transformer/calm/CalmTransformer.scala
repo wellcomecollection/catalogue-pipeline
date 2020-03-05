@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.transformer.calm
 
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.transformer.calm.models.CalmRecord
 import uk.ac.wellcome.models.work.internal.result._
 
 object CalmTransformer extends Transformer[CalmRecord] with CalmOps {
@@ -126,7 +125,7 @@ object CalmTransformer extends Transformer[CalmRecord] with CalmOps {
     PhysicalLocation(
       locationType = LocationType("scmac"),
       label = "Closed stores Arch. & MSS",
-      accessConditions = List(accessCondition(record, status))
+      accessConditions = accessCondition(record, status).filterEmpty.toList
     )
 
   def accessCondition(record: CalmRecord,
@@ -148,7 +147,7 @@ object CalmTransformer extends Transformer[CalmRecord] with CalmOps {
       .toResult
 
   def physicalDescription(record: CalmRecord): Option[String] =
-    (record.getList("Extent") :: record.getList("UserWrapped6")) match {
+    (record.getList("Extent") ++ record.getList("UserWrapped6")) match {
       case Nil  => None
       case strs => Some(strs.mkString(" "))
     }

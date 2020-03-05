@@ -31,10 +31,10 @@ object Language {
   private def languageCodes: List[(String, String)] =
     Source
       .fromInputStream(
-        getClass.getResourceAsStream("language-codes.csv")
+        getClass.getResourceAsStream("/language-codes.csv")
       )
       .getLines
-      .map(_.split(",").toList)
+      .map(_.split(",", 2).toList)
       .map { case List(code, label) => (code, label) }
       .toList
 

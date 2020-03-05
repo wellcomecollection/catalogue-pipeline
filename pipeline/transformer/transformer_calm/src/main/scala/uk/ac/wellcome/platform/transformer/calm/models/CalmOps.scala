@@ -1,7 +1,5 @@
 package uk.ac.wellcome.platform.transformer.calm
 
-import uk.ac.wellcome.platform.transformer.calm.models.CalmRecord
-
 trait CalmOps {
 
   implicit class CalmRecordOps(record: CalmRecord) {

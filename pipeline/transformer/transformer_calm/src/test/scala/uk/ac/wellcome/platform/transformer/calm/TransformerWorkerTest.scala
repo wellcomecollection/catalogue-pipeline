@@ -29,14 +29,14 @@ import scala.concurrent.duration._
 case class TestDataIn(data: List[String])
 
 object TestTransformer extends Transformer[TestDataIn] {
-  def transform(data: TestDataIn) =
+  def apply(data: TestDataIn, version: Int) =
     Right(
       UnidentifiedWork(
         sourceIdentifier = SourceIdentifier(
           value = "id",
           identifierType = CalmIdentifierTypes.recordId,
           ontologyType = "IdentifierType"),
-        version = 1,
+        version = version,
         data = WorkData()
       )
     )
