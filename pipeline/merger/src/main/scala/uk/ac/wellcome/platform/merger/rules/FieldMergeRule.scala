@@ -3,15 +3,8 @@ import uk.ac.wellcome.models.work.internal.{
   TransformedBaseWork,
   UnidentifiedWork
 }
+import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
-
-/*
- * MergeResult is the return type of a FieldMergeRule's `merge` method
- * and contains both the new (merged) value for the field but also a list
- * of sources which the rule would like the merger to redirect. It is up to
- * the merger how to handle these.
- */
-case class MergeResult[T](fieldData: T, redirects: Seq[TransformedBaseWork])
 
 /*
  * A trait to extend in order to merge fields of the type member `Field`
@@ -35,7 +28,7 @@ trait FieldMergeRule {
   protected type FieldData
 
   def merge(target: UnidentifiedWork,
-            sources: Seq[TransformedBaseWork]): MergeResult[FieldData]
+            sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData]
 
   protected val identityOnTarget: PartialFunction[Params, UnidentifiedWork] = {
     case (target, _) => target

@@ -4,7 +4,8 @@ import uk.ac.wellcome.models.work.internal.{
   DigitalLocation,
   IdentifierType,
   PhysicalLocation,
-  TransformedBaseWork
+  TransformedBaseWork,
+  WorkType
 }
 
 object WorkPredicates {
@@ -32,6 +33,11 @@ object WorkPredicates {
   val digitalSierra: WorkPredicate =
     satisfiesAll(sierraWork, singleItem, allDigitalLocations)
 
+  val sierraPicture: WorkPredicate =
+    satisfiesAll(sierraWork, workType(WorkType.Pictures))
+
+  def not(pred: WorkPredicate): WorkPredicate = !pred(_)
+
   private def physicalLocationExists(work: TransformedBaseWork): Boolean =
     work.data.items.exists { item =>
       item.locations.exists {
@@ -51,11 +57,17 @@ object WorkPredicates {
   private def identifierTypeId(id: String)(work: TransformedBaseWork): Boolean =
     work.sourceIdentifier.identifierType == IdentifierType(id)
 
+  private def workType(workType: WorkType)(work: TransformedBaseWork): Boolean =
+    work.data.workType.contains(workType)
+
   private def satisfiesAll(predicates: (TransformedBaseWork => Boolean)*)(
     work: TransformedBaseWork): Boolean = predicates.forall(_(work))
 
-  implicit class WorkPredicateOps(val filterA: WorkPredicate) {
-    def or(filterB: WorkPredicate): WorkPredicate =
-      work => filterA(work) || filterB(work)
+  implicit class WorkPredicateOps(val predA: WorkPredicate) {
+    def or(predB: WorkPredicate): WorkPredicate =
+      work => predA(work) || predB(work)
+
+    def and(predB: WorkPredicate): WorkPredicate =
+      work => predA(work) && predB(work)
   }
 }

@@ -3,8 +3,13 @@ package uk.ac.wellcome.platform.merger.services
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
+import uk.ac.wellcome.platform.merger.fixtures.ImageFulltextAccess
 
-class PlatformMergerTest extends FunSpec with WorksGenerators with Matchers {
+class PlatformMergerTest
+    extends FunSpec
+    with WorksGenerators
+    with Matchers
+    with ImageFulltextAccess {
   val digitalLocationCCBYNC = createDigitalLocationWith(
     license = Some(License.CCBYNC))
   val digitalLocationNoLicense = digitalLocationCCBYNC.copy(license = None)
@@ -13,6 +18,10 @@ class PlatformMergerTest extends FunSpec with WorksGenerators with Matchers {
   private val multipleItemsSierraWork = createSierraWorkWithTwoPhysicalItems
   private val sierraDigitalWork = createSierraDigitalWorkWith(
     items = List(createDigitalItemWith(List(digitalLocationNoLicense))))
+  private val sierraPictureWork = createUnidentifiedSierraWorkWith(
+    items = List(createPhysicalItem),
+    workType = Some(WorkType.Pictures)
+  )
   private val miroWork = createMiroWork
   private val metsWork =
     createUnidentifiedInvisibleMetsWorkWith(
@@ -36,7 +45,7 @@ class PlatformMergerTest extends FunSpec with WorksGenerators with Matchers {
       works = Seq(sierraPhysicalWork, sierraDigitalWork)
     )
 
-    result.size shouldBe 2
+    result.works.size shouldBe 2
 
     val physicalItem = sierraPhysicalWork.data.items.head
     val digitalItem = sierraDigitalWork.data.items.head
@@ -60,7 +69,7 @@ class PlatformMergerTest extends FunSpec with WorksGenerators with Matchers {
         redirect = IdentifiableRedirect(sierraPhysicalWork.sourceIdentifier)
       )
 
-    result should contain theSameElementsAs List(
+    result.works should contain theSameElementsAs List(
       expectedMergedWork,
       expectedRedirectedWork)
   }
@@ -70,7 +79,7 @@ class PlatformMergerTest extends FunSpec with WorksGenerators with Matchers {
       works = Seq(sierraPhysicalWork, miroWork)
     )
 
-    result.size shouldBe 2
+    result.works.size shouldBe 2
 
     val sierraItem = sierraPhysicalWork.data.items.head
     val miroItem = miroWork.data.items.head
@@ -84,6 +93,7 @@ class PlatformMergerTest extends FunSpec with WorksGenerators with Matchers {
             locations = sierraItem.locations ++ miroItem.locations
           )
         ),
+        images = miroWork.data.images,
         merged = true
       )
     }
@@ -94,9 +104,17 @@ class PlatformMergerTest extends FunSpec with WorksGenerators with Matchers {
         version = miroWork.version,
         redirect = IdentifiableRedirect(sierraPhysicalWork.sourceIdentifier))
 
-    result should contain theSameElementsAs List(
+    val expectedImage = miroWork.data.images.head mergeWith (
+      parentWork = Identifiable(sierraPhysicalWork.sourceIdentifier),
+      fullText = createFulltext(List(sierraPhysicalWork, miroWork))
+    )
+
+    result.works should contain theSameElementsAs List(
       expectedMergedWork,
       expectedRedirectedWork)
+    result.images should contain theSameElementsAs List(
+      expectedImage
+    )
   }
 
   it("merges a Sierra digital work with a single-page Miro work") {
@@ -104,7 +122,7 @@ class PlatformMergerTest extends FunSpec with WorksGenerators with Matchers {
       works = Seq(sierraDigitalWork, miroWork)
     )
 
-    result.size shouldBe 2
+    result.works.size shouldBe 2
 
     val sierraItem = sierraDigitalWork.data.items.head
     val miroItem = miroWork.data.items.head
@@ -118,6 +136,7 @@ class PlatformMergerTest extends FunSpec with WorksGenerators with Matchers {
             locations = sierraItem.locations ++ miroItem.locations
           )
         ),
+        images = miroWork.data.images,
         merged = true
       )
     }
@@ -128,9 +147,17 @@ class PlatformMergerTest extends FunSpec with WorksGenerators with Matchers {
         version = miroWork.version,
         redirect = IdentifiableRedirect(sierraDigitalWork.sourceIdentifier))
 
-    result should contain theSameElementsAs List(
+    val expectedImage = miroWork.data.images.head mergeWith (
+      parentWork = Identifiable(sierraDigitalWork.sourceIdentifier),
+      fullText = createFulltext(List(sierraDigitalWork, miroWork))
+    )
+
+    result.works should contain theSameElementsAs List(
       expectedMergedWork,
       expectedRedirectedWork)
+    result.images should contain theSameElementsAs List(
+      expectedImage
+    )
   }
 
   it(
@@ -139,7 +166,7 @@ class PlatformMergerTest extends FunSpec with WorksGenerators with Matchers {
       works = Seq(sierraPhysicalWork, sierraDigitalWork, miroWork)
     )
 
-    result.size shouldBe 3
+    result.works.size shouldBe 3
 
     val sierraItem = sierraPhysicalWork.data.items.head
     val digitalItem = sierraDigitalWork.data.items.head
@@ -154,6 +181,7 @@ class PlatformMergerTest extends FunSpec with WorksGenerators with Matchers {
             locations = sierraItem.locations ++ digitalItem.locations ++ miroItem.locations
           )
         ),
+        images = miroWork.data.images,
         merged = true
       )
     }
@@ -171,18 +199,26 @@ class PlatformMergerTest extends FunSpec with WorksGenerators with Matchers {
         version = miroWork.version,
         redirect = IdentifiableRedirect(sierraPhysicalWork.sourceIdentifier))
 
-    result should contain theSameElementsAs List(
+    val expectedImage = miroWork.data.images.head mergeWith (
+      parentWork = Identifiable(sierraPhysicalWork.sourceIdentifier),
+      fullText = createFulltext(List(sierraPhysicalWork, miroWork))
+    )
+
+    result.works should contain theSameElementsAs List(
       expectedMergedWork,
       expectedRedirectedDigitalWork,
       expectedMiroRedirectedWork)
+    result.images should contain theSameElementsAs List(
+      expectedImage
+    )
   }
 
-  it("merges a Sierra work with a METS work") {
+  it("merges a non-picture Sierra work with a METS work") {
     val result = merger.merge(
       works = Seq(sierraPhysicalWork, metsWork)
     )
 
-    result.size shouldBe 2
+    result.works.size shouldBe 2
 
     val physicalItem = sierraPhysicalWork.data.items.head
     val digitalItem = metsWork.data.items.head
@@ -206,18 +242,62 @@ class PlatformMergerTest extends FunSpec with WorksGenerators with Matchers {
         redirect = IdentifiableRedirect(sierraPhysicalWork.sourceIdentifier)
       )
 
-    result should contain theSameElementsAs List(
+    result.works should contain theSameElementsAs List(
       expectedMergedWork,
       expectedRedirectedWork)
+    result.images shouldBe empty
+  }
+
+  it("merges a picture Sierra work with a METS work") {
+    val result = merger.merge(
+      works = Seq(sierraPictureWork, metsWork)
+    )
+
+    result.works.size shouldBe 2
+
+    val physicalItem = sierraPictureWork.data.items.head
+    val digitalItem = metsWork.data.items.head
+
+    val expectedMergedWork = sierraPictureWork.withData { data =>
+      data.copy(
+        merged = true,
+        items = List(
+          physicalItem.copy(
+            locations = physicalItem.locations ++ digitalItem.locations
+          )
+        ),
+        images = metsWork.data.images,
+        thumbnail = metsWork.data.thumbnail,
+      )
+    }
+
+    val expectedRedirectedWork =
+      UnidentifiedRedirectedWork(
+        sourceIdentifier = metsWork.sourceIdentifier,
+        version = metsWork.version,
+        redirect = IdentifiableRedirect(sierraPictureWork.sourceIdentifier)
+      )
+
+    val expectedImage = metsWork.data.images.head mergeWith (
+      parentWork = Identifiable(sierraPictureWork.sourceIdentifier),
+      fullText = createFulltext(List(sierraPictureWork, metsWork))
+    )
+
+    result.works should contain theSameElementsAs List(
+      expectedMergedWork,
+      expectedRedirectedWork)
+    result.images should contain theSameElementsAs List(
+      expectedImage
+    )
   }
 
   it(
-    "merges a physical Sierra work with a digital Sierra work, a single-page Miro work and a METS work") {
+    "merges a physical non-picture Sierra work with a digital Sierra work, a single-page Miro work and a METS work") {
     val result = merger.merge(
       works = Seq(sierraPhysicalWork, sierraDigitalWork, miroWork, metsWork)
     )
 
-    result.size shouldBe 4
+    result.works.size shouldBe 4
 
     val sierraItem = sierraPhysicalWork.data.items.head
     val metsItem = metsWork.data.items.head
@@ -231,6 +311,7 @@ class PlatformMergerTest extends FunSpec with WorksGenerators with Matchers {
             locations = sierraItem.locations ++ metsItem.locations
           )
         ),
+        images = miroWork.data.images,
         merged = true
       )
     }
@@ -254,11 +335,19 @@ class PlatformMergerTest extends FunSpec with WorksGenerators with Matchers {
         version = metsWork.version,
         redirect = IdentifiableRedirect(sierraPhysicalWork.sourceIdentifier))
 
-    result should contain theSameElementsAs List(
+    val expectedImage = miroWork.data.images.head mergeWith (
+      parentWork = Identifiable(sierraPhysicalWork.sourceIdentifier),
+      fullText = createFulltext(List(sierraPhysicalWork, miroWork))
+    )
+
+    result.works should contain theSameElementsAs List(
       expectedMergedWork,
       expectedRedirectedDigitalWork,
       expectedMiroRedirectedWork,
       expectedMetsRedirectedWork)
+    result.images should contain theSameElementsAs List(
+      expectedImage
+    )
   }
 
   it("merges a multiple items physical Sierra work with a METS work") {
@@ -266,7 +355,7 @@ class PlatformMergerTest extends FunSpec with WorksGenerators with Matchers {
       works = Seq(multipleItemsSierraWork, metsWork)
     )
 
-    result.size shouldBe 2
+    result.works.size shouldBe 2
 
     val sierraItems =
       multipleItemsSierraWork.data.items
@@ -287,9 +376,10 @@ class PlatformMergerTest extends FunSpec with WorksGenerators with Matchers {
         redirect =
           IdentifiableRedirect(multipleItemsSierraWork.sourceIdentifier))
 
-    result should contain theSameElementsAs List(
+    result.works should contain theSameElementsAs List(
       expectedMergedWork,
       expectedMetsRedirectedWork)
+    result.images shouldBe empty
   }
 
   it("merges a multiple items physical Sierra work with a digital work") {
@@ -297,7 +387,7 @@ class PlatformMergerTest extends FunSpec with WorksGenerators with Matchers {
       works = Seq(multipleItemsSierraWork, sierraDigitalWork)
     )
 
-    result.size shouldBe 2
+    result.works.size shouldBe 2
 
     val sierraItems =
       multipleItemsSierraWork.data.items
@@ -319,9 +409,10 @@ class PlatformMergerTest extends FunSpec with WorksGenerators with Matchers {
           IdentifiableRedirect(multipleItemsSierraWork.sourceIdentifier)
       )
 
-    result should contain theSameElementsAs List(
+    result.works should contain theSameElementsAs List(
       expectedMergedWork,
       expectedRedirectedDigitalWork)
+    result.images shouldBe empty
   }
 
   it(
@@ -330,7 +421,7 @@ class PlatformMergerTest extends FunSpec with WorksGenerators with Matchers {
       works = Seq(multipleItemsSierraWork, sierraDigitalWork, metsWork)
     )
 
-    result.size shouldBe 3
+    result.works.size shouldBe 3
 
     val sierraItems = multipleItemsSierraWork.data.items
     val metsItem = metsWork.data.items.head
@@ -359,10 +450,11 @@ class PlatformMergerTest extends FunSpec with WorksGenerators with Matchers {
         redirect =
           IdentifiableRedirect(multipleItemsSierraWork.sourceIdentifier))
 
-    result should contain theSameElementsAs List(
+    result.works should contain theSameElementsAs List(
       expectedMergedWork,
       expectedRedirectedDigitalWork,
       expectedMetsRedirectedWork)
+    result.images shouldBe empty
   }
 
 }

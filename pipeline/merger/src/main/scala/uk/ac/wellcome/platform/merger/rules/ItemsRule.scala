@@ -9,6 +9,7 @@ import uk.ac.wellcome.models.work.internal.{
   Unminted
 }
 import uk.ac.wellcome.platform.merger.logging.MergerLogging
+import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import uk.ac.wellcome.platform.merger.rules.WorkPredicates.{
   WorkPredicate,
   WorkPredicateOps
@@ -27,8 +28,8 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
 
   override def merge(
     target: UnidentifiedWork,
-    sources: Seq[TransformedBaseWork]): MergeResult[FieldData] =
-    MergeResult(
+    sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData] =
+    FieldMergeResult(
       fieldData = (mergeMetsItems orElse mergeMiroPhysicalAndDigitalItems
         orElse (identityOnTarget andThen (_.data.items)))((target, sources)),
       redirects = sources.filter { source =>
