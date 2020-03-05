@@ -127,7 +127,7 @@ class QueryVariantsTest
           index,
           List(
             ("4ExactMatch", "Krishna"),
-            ("3PhraseMatch", "Krishna moo yong"),
+            ("3PhraseMatch", "Krishna shoe young"),
             ("2PhraseMatch", "Krishna (Hindu diety)"),
             ("1NoMatch", "Krish"))
             .map(
