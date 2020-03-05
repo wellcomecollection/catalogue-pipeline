@@ -26,11 +26,11 @@ object CalmTransformer extends Transformer[CalmRecord] with CalmOps {
     ("Arrangement", ArrangementNote(_))
   )
 
-  def apply(record: CalmRecord): Result[TransformedBaseWork] =
+  def apply(record: CalmRecord, version: Int): Result[TransformedBaseWork] =
     workData(record) map { data =>
       UnidentifiedWork(
         sourceIdentifier = sourceIdentifier(record),
-        version = 0,
+        version = version,
         data = data
       )
     }

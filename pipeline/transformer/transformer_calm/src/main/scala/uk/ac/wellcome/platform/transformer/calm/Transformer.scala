@@ -5,5 +5,5 @@ import uk.ac.wellcome.models.work.internal.result.Result
 
 trait Transformer[T] {
 
-  def apply(input: T): Result[TransformedBaseWork]
+  def apply(input: T, version: Int): Result[TransformedBaseWork]
 }

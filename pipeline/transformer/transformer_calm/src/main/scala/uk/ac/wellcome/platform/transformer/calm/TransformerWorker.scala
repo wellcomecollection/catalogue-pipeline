@@ -53,17 +53,19 @@ trait TransformerWorker[In, SenderDest] {
       case Right(out) => out
     }
 
-  lazy val decodeMessage: Flow[StreamMessage, Result[In], NotUsed] =
+  val decodeMessage: Flow[StreamMessage, Result[(In, StoreKey)], NotUsed] =
     Flow.fromFunction(message => decodeKey(message._2) flatMap getRecord)
 
-  lazy val work: Flow[In, Result[TransformedBaseWork], NotUsed] =
-    Flow.fromFunction(sourceData =>
-      transformer.transform(sourceData) match {
-        case Left(err)     => Left(TransformerError(err.toString))
-        case Right(result) => Right(result)
-    })
+  val work: Flow[(In, StoreKey), Result[TransformedBaseWork], NotUsed] =
+    Flow.fromFunction {
+      case (sourceData, key) =>
+        transformer(sourceData, key.version) match {
+          case Left(err)     => Left(TransformerError(err.toString))
+          case Right(result) => Right(result)
+        }
+    }
 
-  lazy val done: Flow[TransformedBaseWork, Result[Unit], NotUsed] =
+  val done: Flow[TransformedBaseWork, Result[Unit], NotUsed] =
     Flow.fromFunction(work =>
       sender.sendT(work) toEither match {
         case Left(err) => Left(MessageSendError(err.toString))
@@ -77,11 +79,11 @@ trait TransformerWorker[In, SenderDest] {
     }
 
   private def getRecord(key: StoreKey) = store.get(key) match {
-    case Left(err)                   => Left(StoreReadError(err.toString))
-    case Right(Identified(_, entry)) => Right(entry)
+    case Left(err)                     => Left(StoreReadError(err.toString))
+    case Right(Identified(key, entry)) => Right((entry, key))
   }
 
-  def run(): Future[Done] = {
+  def run(): Future[Done] =
     stream.runStream(
       name,
       source => {
@@ -91,5 +93,4 @@ trait TransformerWorker[In, SenderDest] {
         processed.flatMapConcat(_ => end)
       }
     )
-  }
 }
