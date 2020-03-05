@@ -11,7 +11,6 @@ import uk.ac.wellcome.models.Implicits._
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto._
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
-import uk.ac.wellcome.platform.transformer.calm.models.CalmRecord
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.typesafe.S3Builder

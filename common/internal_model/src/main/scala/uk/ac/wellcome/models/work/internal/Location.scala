@@ -2,6 +2,7 @@ package uk.ac.wellcome.models.work.internal
 
 sealed trait Location {
   val locationType: LocationType
+  val accessConditions: List[AccessCondition]
 }
 
 case class DigitalLocation(

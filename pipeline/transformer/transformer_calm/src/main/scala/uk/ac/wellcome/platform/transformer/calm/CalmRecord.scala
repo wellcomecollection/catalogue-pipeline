@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.transformer.calm.models
+package uk.ac.wellcome.platform.transformer.calm
 
 import java.time.Instant
 
