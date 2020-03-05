@@ -48,7 +48,7 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
       val metsUrls = metsItems.flatMap(_.locations).collect {
         case DigitalLocation(url, _, _, _, _, _) => url
       }
-      info(s"Merging METS items from ${describeWorks(sources)}")
+      debug(s"Merging METS items from ${describeWorks(sources)}")
       sierraItems match {
         case List(sierraItem) =>
           List(

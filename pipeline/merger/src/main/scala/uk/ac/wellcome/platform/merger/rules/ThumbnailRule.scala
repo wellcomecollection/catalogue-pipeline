@@ -34,7 +34,7 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
 
       def rule(target: UnidentifiedWork,
                sources: Seq[TransformedBaseWork]): FieldData = {
-        info(s"Choosing METS thumbnail from ${describeWorks(sources)}")
+        debug(s"Choosing METS thumbnail from ${describeWorks(sources)}")
         sources.headOption.flatMap(_.data.thumbnail)
       }
     }
@@ -48,7 +48,7 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
                sources: Seq[TransformedBaseWork]): FieldData = {
         val minMiroSource = Try(sources.min(MiroIdOrdering)).toOption
         minMiroSource.foreach { source =>
-          info(s"Choosing METS thumbnail from ${describeWork(source)}")
+          debug(s"Choosing METS thumbnail from ${describeWork(source)}")
         }
         minMiroSource.flatMap(_.data.thumbnail)
       }
