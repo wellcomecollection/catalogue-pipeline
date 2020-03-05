@@ -33,6 +33,10 @@ class QueryVariantsTest
     elasticClient = elasticClient
   )
 
+  /**
+    * These test are more to explain what the query is doing
+    * not to test every eventuality what they might do.
+    */
   describe("BoolBoosted") {
     it("Has genre / subject / contributor / title tiered scoring") {
       withLocalWorksIndex { index =>

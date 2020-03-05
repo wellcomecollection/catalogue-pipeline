@@ -11,15 +11,19 @@ import com.sksamuel.elastic4s.requests.searches.queries.matches.{
 }
 
 /**
-  * We have `ComboQuery`s and `PartialQuery`s to help us with testing.
+  * We have `ComboQuery`s and `PartialQuery`s.
   *
-  * `ComboQuery`s are what the application use and are hard to test
-  * as they have a lot of weighting around TF/IDF in them that you:
-  * 1. Spend ages tuning your data in the tests for to account for TF/IDF-ness
-  * 2. Don't really capture anything without using large data sets where TF/IDF is relevant
+  * `ComboQuery`s are what we use in the application as they're a
+  * whole set of `PartialQuery`s stuck together, potentially with
+  * different boosting etc.
   *
-  * This way we can test the `PartialQuery`s in Scala app and use reporting to
-  * let us know if we're succeeding in giving people what they want.
+  * These are all quite hard to test _effectively_, as TF/IDF and
+  * all the other amazing Elastic stuff means we land up massaging
+  * the test data to eventually work or leaving the tests out.
+  *
+  * We do have core functionality tests that will run on all available
+  * `ComboQuery` but will use reporting to let us know how they are
+  * working for the public.
   */
 sealed trait ElasticsearchQuery {
   val q: String
@@ -61,7 +65,8 @@ final case class CoreQuery(q: String, shouldQueries: Seq[Query])
 }
 
 /**
-  * The `BaseAndQuery` & `BaseOrQuery` are almost identical, but we use the AND operator and a double boost on the
+  * The `BaseAndQuery` & `BaseOrQuery` are almost identical,
+  * but we use the AND operator and a double boost on the
   * `BaseAndQuery` as AND should always score higher.
   */
 case class BaseOrQuery(q: String) extends ElasticsearchPartialQuery {
