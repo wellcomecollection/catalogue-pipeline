@@ -42,43 +42,36 @@ trait TransformerWorker[In, SenderDest] {
   def withSource(
     source: Source[StreamMessage, NotUsed]): Source[Unit, NotUsed] =
     source
-      .via(divertEither(decodeMessage, to = errorSink))
-      .via(divertEither(work, to = errorSink))
-      .via(divertEither(done, to = errorSink))
+      .via(decodeMessage)
+      .via(work)
+      .via(done)
 
-  private def divertEither[I, O](
-    flow: Flow[I, Result[O], NotUsed],
-    to: Sink[Result[_], Future[Done]]): Flow[I, O, NotUsed] =
-    flow.divertTo(errorSink, _.isLeft).collect {
-      case Right(out) => out
-    }
+  lazy val decodeMessage: Flow[StreamMessage, In, NotUsed] =
+    Flow.fromFunction(message => getRecord(decodeKey(message._2)))
 
-  lazy val decodeMessage: Flow[StreamMessage, Result[In], NotUsed] =
-    Flow.fromFunction(message => decodeKey(message._2) flatMap getRecord)
-
-  lazy val work: Flow[In, Result[TransformedBaseWork], NotUsed] =
+  lazy val work: Flow[In, TransformedBaseWork, NotUsed] =
     Flow.fromFunction(sourceData =>
       transformer.transform(sourceData) match {
-        case Left(err)     => Left(TransformerError(err.toString))
-        case Right(result) => Right(result)
+        case Left(err)     => throw TransformerError(err.toString)
+        case Right(result) => result
     })
 
-  lazy val done: Flow[TransformedBaseWork, Result[Unit], NotUsed] =
+  lazy val done: Flow[TransformedBaseWork, Unit, NotUsed] =
     Flow.fromFunction(work =>
       sender.sendT(work) toEither match {
-        case Left(err) => Left(MessageSendError(err.toString))
-        case Right(_)  => Right((): Unit)
+        case Left(err) => throw MessageSendError(err.toString)
+        case Right(_)  => (): Unit
     })
 
   private def decodeKey(message: NotificationMessage) =
     fromJson[StoreKey](message.body).toEither match {
-      case Left(err)     => Left(DecodeKeyError(err.toString))
-      case Right(result) => Right(result)
+      case Left(err)     => throw DecodeKeyError(err.toString)
+      case Right(result) => result
     }
 
   private def getRecord(key: StoreKey) = store.get(key) match {
-    case Left(err)                   => Left(StoreReadError(err.toString))
-    case Right(Identified(_, entry)) => Right(entry)
+    case Left(err)                   => throw StoreReadError(err.toString)
+    case Right(Identified(_, entry)) => entry
   }
 
   def run(): Future[Done] = {
