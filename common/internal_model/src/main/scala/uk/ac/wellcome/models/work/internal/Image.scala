@@ -9,18 +9,21 @@ case class UnmergedImage[Id <: IdState](
   id: Id,
   location: DigitalLocation
 ) extends BaseImage[Id] {
-  def mergeWith(data: => ImageData[Id]): MergedImage[Id] =
+  def mergeWith(parentWork: Id,
+                fullText: Option[String] = None): MergedImage[Id] =
     MergedImage[Id](
       id = id,
       location = location,
-      data = data
+      parentWork = parentWork,
+      fullText = fullText
     )
 }
 
 case class MergedImage[Id <: IdState](
   id: Id,
   location: DigitalLocation,
-  data: ImageData[Id]
+  parentWork: Id,
+  fullText: Option[String] = None
 ) extends BaseImage[Id] {
   def toUnmerged: UnmergedImage[Id] =
     UnmergedImage[Id](
@@ -28,11 +31,6 @@ case class MergedImage[Id <: IdState](
       location = location
     )
 }
-
-case class ImageData[Id <: IdState](
-  parentWork: Id,
-  fullText: Option[String] = None
-)
 
 object UnmergedImage {
   def apply(sourceIdentifier: SourceIdentifier,

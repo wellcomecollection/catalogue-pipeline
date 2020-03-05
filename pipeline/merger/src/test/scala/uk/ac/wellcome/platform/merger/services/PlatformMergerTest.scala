@@ -104,12 +104,10 @@ class PlatformMergerTest
         version = miroWork.version,
         redirect = IdentifiableRedirect(sierraPhysicalWork.sourceIdentifier))
 
-    val expectedImage = miroWork.data.images.head mergeWith {
-      ImageData(
-        parentWork = Identifiable(sierraPhysicalWork.sourceIdentifier),
-        fullText = createFulltext(List(sierraPhysicalWork, miroWork))
-      )
-    }
+    val expectedImage = miroWork.data.images.head mergeWith (
+      parentWork = Identifiable(sierraPhysicalWork.sourceIdentifier),
+      fullText = createFulltext(List(sierraPhysicalWork, miroWork))
+    )
 
     result.works should contain theSameElementsAs List(
       expectedMergedWork,
@@ -149,12 +147,10 @@ class PlatformMergerTest
         version = miroWork.version,
         redirect = IdentifiableRedirect(sierraDigitalWork.sourceIdentifier))
 
-    val expectedImage = miroWork.data.images.head mergeWith {
-      ImageData(
-        parentWork = Identifiable(sierraDigitalWork.sourceIdentifier),
-        fullText = createFulltext(List(sierraDigitalWork, miroWork))
-      )
-    }
+    val expectedImage = miroWork.data.images.head mergeWith (
+      parentWork = Identifiable(sierraDigitalWork.sourceIdentifier),
+      fullText = createFulltext(List(sierraDigitalWork, miroWork))
+    )
 
     result.works should contain theSameElementsAs List(
       expectedMergedWork,
@@ -203,12 +199,10 @@ class PlatformMergerTest
         version = miroWork.version,
         redirect = IdentifiableRedirect(sierraPhysicalWork.sourceIdentifier))
 
-    val expectedImage = miroWork.data.images.head mergeWith {
-      ImageData(
-        parentWork = Identifiable(sierraPhysicalWork.sourceIdentifier),
-        fullText = createFulltext(List(sierraPhysicalWork, miroWork))
-      )
-    }
+    val expectedImage = miroWork.data.images.head mergeWith (
+      parentWork = Identifiable(sierraPhysicalWork.sourceIdentifier),
+      fullText = createFulltext(List(sierraPhysicalWork, miroWork))
+    )
 
     result.works should contain theSameElementsAs List(
       expectedMergedWork,
@@ -284,12 +278,10 @@ class PlatformMergerTest
         redirect = IdentifiableRedirect(sierraPictureWork.sourceIdentifier)
       )
 
-    val expectedImage = metsWork.data.images.head mergeWith {
-      ImageData(
-        parentWork = Identifiable(sierraPictureWork.sourceIdentifier),
-        fullText = createFulltext(List(sierraPictureWork, metsWork))
-      )
-    }
+    val expectedImage = metsWork.data.images.head mergeWith (
+      parentWork = Identifiable(sierraPictureWork.sourceIdentifier),
+      fullText = createFulltext(List(sierraPictureWork, metsWork))
+    )
 
     result.works should contain theSameElementsAs List(
       expectedMergedWork,
@@ -343,12 +335,10 @@ class PlatformMergerTest
         version = metsWork.version,
         redirect = IdentifiableRedirect(sierraPhysicalWork.sourceIdentifier))
 
-    val expectedImage = miroWork.data.images.head mergeWith {
-      ImageData(
-        parentWork = Identifiable(sierraPhysicalWork.sourceIdentifier),
-        fullText = createFulltext(List(sierraPhysicalWork, miroWork))
-      )
-    }
+    val expectedImage = miroWork.data.images.head mergeWith (
+      parentWork = Identifiable(sierraPhysicalWork.sourceIdentifier),
+      fullText = createFulltext(List(sierraPhysicalWork, miroWork))
+    )
 
     result.works should contain theSameElementsAs List(
       expectedMergedWork,

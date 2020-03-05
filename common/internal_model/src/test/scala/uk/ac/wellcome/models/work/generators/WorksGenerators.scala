@@ -209,11 +209,11 @@ trait WorksGenerators
   def createUnidentifiedInvisibleMetsWorkWith(
     sourceIdentifier: SourceIdentifier = createMetsSourceIdentifier,
     items: List[Item[Unminted]] = List(createDigitalItem),
-    nImages: Int = 1): UnidentifiedInvisibleWork =
+    numImages: Int = 1): UnidentifiedInvisibleWork =
     createUnidentifiedInvisibleWorkWith(
       sourceIdentifier = createMetsSourceIdentifier,
       items = items,
-      images = (1 to nImages).map { _ =>
+      images = (1 to numImages).map { _ =>
         createUnmergedImageWith(
           location = createDigitalLocation,
           identifierType = IdentifierType("mets-image")

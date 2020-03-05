@@ -28,7 +28,7 @@ class ImagesRuleTest
 
       result should have length 1
       result.head.location should be(miroWork.data.images.head.location)
-      result.head.data.parentWork.allSourceIdentifiers.head should
+      result.head.parentWork.allSourceIdentifiers.head should
         be(miroWork.sourceIdentifier)
     }
 
@@ -41,13 +41,13 @@ class ImagesRuleTest
       result should have length n
       result.map(_.location) should contain theSameElementsAs
         miroWorks.map(_.data.images.head.location)
-      result.flatMap(_.data.parentWork.allSourceIdentifiers) should contain only sierraWork.sourceIdentifier
+      result.flatMap(_.parentWork.allSourceIdentifiers) should contain only sierraWork.sourceIdentifier
     }
 
     it(
       "creates n images from a METS work containing n images, and a single Sierra picture work") {
       val n = 5
-      val metsWork = createUnidentifiedInvisibleMetsWorkWith(nImages = n)
+      val metsWork = createUnidentifiedInvisibleMetsWorkWith(numImages = n)
       val sierraPictureWork =
         createUnidentifiedSierraWorkWith(workType = Some(WorkType.Pictures))
       val result = ImagesRule.merge(sierraPictureWork, List(metsWork)).fieldData
@@ -55,7 +55,7 @@ class ImagesRuleTest
       result should have length n
       result.map(_.location) should contain theSameElementsAs
         metsWork.data.images.map(_.location)
-      result.flatMap(_.data.parentWork.allSourceIdentifiers) should contain only sierraPictureWork.sourceIdentifier
+      result.flatMap(_.parentWork.allSourceIdentifiers) should contain only sierraPictureWork.sourceIdentifier
     }
 
     it(
@@ -63,7 +63,7 @@ class ImagesRuleTest
       val n = 3
       val m = 4
       val miroWorks = (1 to m).map(_ => createMiroWork).toList
-      val metsWork = createUnidentifiedInvisibleMetsWorkWith(nImages = n)
+      val metsWork = createUnidentifiedInvisibleMetsWorkWith(numImages = n)
       val sierraPictureWork =
         createUnidentifiedSierraWorkWith(workType = Some(WorkType.Pictures))
       val result =
@@ -73,13 +73,13 @@ class ImagesRuleTest
       result.map(_.location) should contain theSameElementsAs
         metsWork.data.images.map(_.location) ++
           miroWorks.map(_.data.images.head.location)
-      result.flatMap(_.data.parentWork.allSourceIdentifiers) should contain only sierraPictureWork.sourceIdentifier
+      result.flatMap(_.parentWork.allSourceIdentifiers) should contain only sierraPictureWork.sourceIdentifier
     }
 
     it(
       "ignores METS images, but uses n Miro images, for a non-picture Sierra work") {
       val n = 3
-      val metsWork = createUnidentifiedInvisibleMetsWorkWith(nImages = 3)
+      val metsWork = createUnidentifiedInvisibleMetsWorkWith(numImages = 3)
       val miroWorks = (1 to n).map(_ => createMiroWork).toList
       val sierraWork = createSierraDigitalWork
       val result = ImagesRule.merge(sierraWork, miroWorks :+ metsWork).fieldData
@@ -87,7 +87,7 @@ class ImagesRuleTest
       result should have length n
       result.map(_.location) should contain theSameElementsAs
         miroWorks.map(_.data.images.head.location)
-      result.flatMap(_.data.parentWork.allSourceIdentifiers) should contain only sierraWork.sourceIdentifier
+      result.flatMap(_.parentWork.allSourceIdentifiers) should contain only sierraWork.sourceIdentifier
     }
   }
 
@@ -151,7 +151,7 @@ class ImagesRuleTest
       val target = createSierraDigitalWork
       val sources = (1 to 5).map(_ => createMiroWork)
       forAll(testRule.apply((target, sources))) {
-        _.data.parentWork.allSourceIdentifiers should
+        _.parentWork.allSourceIdentifiers should
           contain(target.sourceIdentifier)
       }
     }

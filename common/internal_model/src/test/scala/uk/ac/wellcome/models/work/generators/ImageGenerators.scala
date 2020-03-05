@@ -4,7 +4,6 @@ import uk.ac.wellcome.models.work.internal.{
   DigitalLocation,
   Identifiable,
   IdentifierType,
-  ImageData,
   MergedImage,
   SourceIdentifier,
   UnmergedImage,
@@ -28,12 +27,10 @@ trait ImageGenerators extends IdentifiersGenerators with ItemsGenerators {
     identifierType: IdentifierType = IdentifierType("miro-image-number"),
     parentWork: SourceIdentifier = createSierraSystemSourceIdentifier,
     fullText: Option[String] = None): MergedImage[Unminted] =
-    createUnmergedImageWith(location, identifierType) mergeWith {
-      ImageData(
-        parentWork = Identifiable(parentWork),
-        fullText = fullText
-      )
-    }
+    createUnmergedImageWith(location, identifierType) mergeWith (
+      parentWork = Identifiable(parentWork),
+      fullText = fullText
+    )
 
   def createMergedImage: MergedImage[Unminted] = createMergedImageWith()
 }

@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.merger.rules
 import uk.ac.wellcome.models.work.internal.{
   Identifiable,
-  ImageData,
   MergedImage,
   TransformedBaseWork,
   UnidentifiedWork,
@@ -38,10 +37,8 @@ object ImagesRule extends FieldMergeRule {
     case target if WorkPredicates.miroWork(target) =>
       target.data.images.map {
         _.mergeWith(
-          ImageData(
-            parentWork = Identifiable(target.sourceIdentifier),
-            fullText = createFulltext(List(target))
-          )
+          parentWork = Identifiable(target.sourceIdentifier),
+          fullText = createFulltext(List(target))
         )
       }
   }
@@ -65,10 +62,8 @@ object ImagesRule extends FieldMergeRule {
       (target +: sources).flatMap {
         _.data.images.map {
           _.mergeWith(
-            ImageData(
-              parentWork = Identifiable(target.sourceIdentifier),
-              fullText = createFulltext(target +: sources)
-            )
+            parentWork = Identifiable(target.sourceIdentifier),
+            fullText = createFulltext(target +: sources)
           )
         }
       }.toList
