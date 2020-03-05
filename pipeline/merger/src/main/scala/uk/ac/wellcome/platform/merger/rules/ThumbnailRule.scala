@@ -5,6 +5,7 @@ import uk.ac.wellcome.models.work.internal.{
   UnidentifiedWork
 }
 import uk.ac.wellcome.platform.merger.logging.MergerLogging
+import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
 
 import scala.util.Try
@@ -19,8 +20,8 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
 
   override def merge(
     target: UnidentifiedWork,
-    sources: Seq[TransformedBaseWork]): MergeResult[FieldData] =
-    MergeResult(
+    sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData] =
+    FieldMergeResult(
       fieldData = (getMetsThumbnail orElse getMinMiroThumbnail orElse
         (identityOnTarget andThen (_.data.thumbnail)))((target, sources)),
       redirects = Nil

@@ -7,7 +7,7 @@ import uk.ac.wellcome.models.work.internal.{
   UnidentifiedRedirectedWork,
   UnidentifiedWork
 }
-import uk.ac.wellcome.platform.merger.rules.MergeResult
+import uk.ac.wellcome.platform.merger.models.{FieldMergeResult, MergeResult}
 
 class MergerTest extends FunSpec with Matchers with WorksGenerators {
   val inputWorks =
@@ -23,35 +23,38 @@ class MergerTest extends FunSpec with Matchers with WorksGenerators {
       works: Seq[TransformedBaseWork]): Option[UnidentifiedWork] =
       works.headOption.map(_.asInstanceOf[UnidentifiedWork])
 
-    override protected def createMergeResult(target: UnidentifiedWork,
-                                             sources: Seq[TransformedBaseWork])
-      : RedirectsAccumulator[UnidentifiedWork] =
+    override protected def createMergeResult(
+      target: UnidentifiedWork,
+      sources: Seq[TransformedBaseWork]): RedirectsAccumulator[MergeResult] =
       for {
         items <- accumulateRedirects(
-          MergeResult(
+          FieldMergeResult(
             fieldData = mergedTargetItems,
             redirects = List(sources.tail.head)
           )
         )
         otherIdentifiers <- accumulateRedirects(
-          MergeResult(
+          FieldMergeResult(
             fieldData = mergedOtherIdentifiers,
             redirects = sources.tail.tail
           )
         )
       } yield
-        target withData { data =>
-          data.copy(
-            items = items,
-            otherIdentifiers = otherIdentifiers
-          )
-        }
+        MergeResult(
+          mergedTarget = target withData { data =>
+            data.copy(
+              items = items,
+              otherIdentifiers = otherIdentifiers
+            )
+          },
+          images = Nil
+        )
   }
 
   val mergedWorks = TestMerger.merge(inputWorks)
 
   it("returns a single target work as specified") {
-    mergedWorks should contain(
+    mergedWorks.works should contain(
       inputWorks.head.asInstanceOf[UnidentifiedWork] withData { data =>
         data.copy(
           items = mergedTargetItems,
@@ -63,13 +66,13 @@ class MergerTest extends FunSpec with Matchers with WorksGenerators {
 
   it(
     "returns redirects for all sources that were marked as such by any field rule") {
-    mergedWorks.collect {
+    mergedWorks.works.collect {
       case redirect: UnidentifiedRedirectedWork => redirect.sourceIdentifier
     } should contain theSameElementsAs
       inputWorks.tail.tail.map(_.sourceIdentifier)
   }
 
   it("returns all non-redirected and non-target works untouched") {
-    mergedWorks should contain(inputWorks.tail.head)
+    mergedWorks.works should contain(inputWorks.tail.head)
   }
 }

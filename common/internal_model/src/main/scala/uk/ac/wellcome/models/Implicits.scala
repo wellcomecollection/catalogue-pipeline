@@ -72,9 +72,8 @@ object Implicits extends TimeInstances {
   implicit val _dec52: Decoder[UnmergedImage[Minted]] = deriveDecoder
   implicit val _dec53: Decoder[MergedImage[Unminted]] = deriveDecoder
   implicit val _dec54: Decoder[MergedImage[Minted]] = deriveDecoder
-  implicit val _dec55: Decoder[ImageData] = deriveDecoder
-  implicit val _dec56: Decoder[BaseImage[Unminted]] = deriveDecoder
-  implicit val _dec57: Decoder[BaseImage[Minted]] = deriveDecoder
+  implicit val _dec55: Decoder[BaseImage[Unminted]] = deriveDecoder
+  implicit val _dec56: Decoder[BaseImage[Minted]] = deriveDecoder
 
   implicit val _enc00: Encoder[AccessCondition] = deriveEncoder
   implicit val _enc01: Encoder[Note] = deriveEncoder
@@ -129,7 +128,6 @@ object Implicits extends TimeInstances {
   implicit val _enc52: Encoder[UnmergedImage[Minted]] = deriveEncoder
   implicit val _enc53: Encoder[MergedImage[Unminted]] = deriveEncoder
   implicit val _enc54: Encoder[MergedImage[Minted]] = deriveEncoder
-  implicit val _enc55: Encoder[ImageData] = deriveEncoder
-  implicit val _enc56: Encoder[BaseImage[Unminted]] = deriveEncoder
-  implicit val _enc57: Encoder[BaseImage[Minted]] = deriveEncoder
+  implicit val _enc55: Encoder[BaseImage[Unminted]] = deriveEncoder
+  implicit val _enc56: Encoder[BaseImage[Minted]] = deriveEncoder
 }
