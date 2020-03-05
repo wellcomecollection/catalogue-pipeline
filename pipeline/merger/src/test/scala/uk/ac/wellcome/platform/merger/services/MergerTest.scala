@@ -41,7 +41,7 @@ class MergerTest extends FunSpec with Matchers with WorksGenerators {
         )
       } yield
         MergeResult(
-          target = target withData { data =>
+          mergedTarget = target withData { data =>
             data.copy(
               items = items,
               otherIdentifiers = otherIdentifiers

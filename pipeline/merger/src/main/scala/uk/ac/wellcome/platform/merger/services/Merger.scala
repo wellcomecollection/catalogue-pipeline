@@ -74,7 +74,7 @@ abstract class Merger extends MergerLogging {
           logResult(result, redirects.toList, remaining.toList)
 
           MergerOutcome(
-            works = redirects.toList ++ remaining :+ result.target,
+            works = redirects.toList ++ remaining :+ result.mergedTarget,
             images = result.images
           )
       }
@@ -110,7 +110,7 @@ abstract class Merger extends MergerLogging {
                         remaining: Seq[TransformedBaseWork]): Unit = {
     if (redirects.nonEmpty) {
       info(
-        s"Merged ${describeMergeOutcome(result.target, redirects, remaining)}")
+        s"Merged ${describeMergeOutcome(result.mergedTarget, redirects, remaining)}")
     }
     if (result.images.nonEmpty) {
       info(s"Created images ${describeImages(result.images)}")
@@ -146,7 +146,7 @@ object PlatformMerger extends Merger {
           images <- accumulateRedirects(ImagesRule.merge(target, sources))
         } yield
           MergeResult(
-            target = target withData { data =>
+            mergedTarget = target withData { data =>
               data.copy(
                 items = items,
                 thumbnail = thumbnail,
