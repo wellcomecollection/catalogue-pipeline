@@ -10,24 +10,47 @@ import com.sksamuel.elastic4s.requests.searches.queries.matches.{
   MultiMatchQueryBuilderType
 }
 
-trait BigT {
+/**
+  * We have `ComboQuery`s and `PartialQuery`s to help us with testing.
+  *
+  * `ComboQuery`s are what the application use and are hard to test
+  * as they have a lot of weighting around TF/IDF in them that you:
+  * 1. Spend ages tuning your data in the tests for to account for TF/IDF-ness
+  * 2. Don't really capture anything without using large data sets where TF/IDF is relevant
+  *
+  * This way we can test the `PartialQuery`s in Scala app and use reporting to
+  * let us know if we're succeeding in giving people what they want.
+  */
+sealed trait ElasticsearchQuery {
   val q: String
   val elasticQuery: Query
 }
 
-sealed trait ElasticsearchQuery extends BigT {
-  val q: String
-  val elasticQuery: Query
+trait ElasticsearchPartialQuery extends ElasticsearchQuery
+trait ElasticsearchComboQuery extends ElasticsearchQuery
+
+case class BoolBoostersQuery(q: String) extends ElasticsearchComboQuery {
+  val elasticQuery =
+    CoreQuery(q, BoolBoostedQuery(q).elasticQuery.should).elasticQuery
+}
+
+case class PhraserBeamQuery(q: String) extends ElasticsearchComboQuery {
+  val elasticQuery =
+    CoreQuery(
+      q,
+      PhraseMatchQuery(q).elasticQuery.should ++
+        Seq(BaseAndQuery(q).elasticQuery)).elasticQuery
 }
 
 /**
-  * Queries sent to the application _should_ implement this class
-  * as it wraps core functionality that we wouldn't want to break.
+  * `ComboQuery`s _should_ implement this class as it wraps core
+  * functionality that we wouldn't want to break.
+  *
   * We haven't enforced this in the type system as we _might_ want
-  * to try more extreme tests.
+  * to try more extreme tests that don't implement this.
   */
 final case class CoreQuery(q: String, shouldQueries: Seq[Query])
-    extends ElasticsearchQuery {
+    extends ElasticsearchPartialQuery {
 
   lazy val elasticQuery = must(
     should(
@@ -41,7 +64,7 @@ final case class CoreQuery(q: String, shouldQueries: Seq[Query])
   * The `BaseAndQuery` & `BaseOrQuery` are almost identical, but we use the AND operator and a double boost on the
   * `BaseAndQuery` as AND should always score higher.
   */
-case class BaseOrQuery(q: String) extends ElasticsearchQuery {
+case class BaseOrQuery(q: String) extends ElasticsearchPartialQuery {
   val minimumShouldMatch = "60%"
   val searchFields: Seq[(String, Option[Double])] = Seq(
     ("data.subjects.concepts.label", None),
@@ -71,7 +94,7 @@ case class BaseOrQuery(q: String) extends ElasticsearchQuery {
   )
 }
 
-case class BaseAndQuery(q: String) extends ElasticsearchQuery {
+case class BaseAndQuery(q: String) extends ElasticsearchPartialQuery {
   val minimumShouldMatch = "60%"
   val searchFields: Seq[(String, Option[Double])] = Seq(
     ("data.subjects.concepts.label", None),
@@ -102,7 +125,7 @@ case class BaseAndQuery(q: String) extends ElasticsearchQuery {
   )
 }
 
-final case class IdQuery(q: String) extends ElasticsearchQuery {
+final case class IdQuery(q: String) extends ElasticsearchPartialQuery {
   lazy val idFields = Seq(
     "canonicalId.text",
     "sourceIdentifier.value.text",
@@ -119,7 +142,7 @@ final case class IdQuery(q: String) extends ElasticsearchQuery {
     )
 }
 
-final case class TitleQuery(q: String) extends ElasticsearchQuery {
+final case class TitleQuery(q: String) extends ElasticsearchPartialQuery {
   lazy val elasticQuery =
     MatchQuery(
       field = "data.title.english",
@@ -127,7 +150,7 @@ final case class TitleQuery(q: String) extends ElasticsearchQuery {
       operator = Some(Operator.And))
 }
 
-final case class GenreQuery(q: String) extends ElasticsearchQuery {
+final case class GenreQuery(q: String) extends ElasticsearchPartialQuery {
   lazy val elasticQuery =
     MatchQuery(
       field = "data.genres.concepts.label",
@@ -135,7 +158,7 @@ final case class GenreQuery(q: String) extends ElasticsearchQuery {
       operator = Some(Operator.And))
 }
 
-final case class SubjectQuery(q: String) extends ElasticsearchQuery {
+final case class SubjectQuery(q: String) extends ElasticsearchPartialQuery {
   lazy val elasticQuery =
     MatchQuery(
       field = "data.subjects.concepts.label",
@@ -143,7 +166,7 @@ final case class SubjectQuery(q: String) extends ElasticsearchQuery {
       operator = Some(Operator.And))
 }
 
-final case class ContributorQuery(q: String) extends ElasticsearchQuery {
+final case class ContributorQuery(q: String) extends ElasticsearchPartialQuery {
   lazy val elasticQuery =
     MatchQuery(
       field = "data.contributors.agent.label",
@@ -151,7 +174,7 @@ final case class ContributorQuery(q: String) extends ElasticsearchQuery {
       operator = Some(Operator.And))
 }
 
-final case class TitlePhraseQuery(q: String) extends ElasticsearchQuery {
+final case class TitlePhraseQuery(q: String) extends ElasticsearchPartialQuery {
   lazy val elasticQuery =
     MultiMatchQuery(
       text = q,
@@ -163,7 +186,8 @@ final case class TitlePhraseQuery(q: String) extends ElasticsearchQuery {
     )
 }
 
-final case class SubjectsPhraseQuery(q: String) extends ElasticsearchQuery {
+final case class SubjectsPhraseQuery(q: String)
+    extends ElasticsearchPartialQuery {
   lazy val elasticQuery =
     MultiMatchQuery(
       text = q,
@@ -177,7 +201,8 @@ final case class SubjectsPhraseQuery(q: String) extends ElasticsearchQuery {
     )
 }
 
-final case class GenresPhraseQuery(q: String) extends ElasticsearchQuery {
+final case class GenresPhraseQuery(q: String)
+    extends ElasticsearchPartialQuery {
   lazy val elasticQuery =
     MultiMatchQuery(
       text = q,
@@ -191,7 +216,8 @@ final case class GenresPhraseQuery(q: String) extends ElasticsearchQuery {
     )
 }
 
-final case class ContributorsPhraseQuery(q: String) extends ElasticsearchQuery {
+final case class ContributorsPhraseQuery(q: String)
+    extends ElasticsearchPartialQuery {
   lazy val elasticQuery =
     MultiMatchQuery(
       text = q,
@@ -205,7 +231,7 @@ final case class ContributorsPhraseQuery(q: String) extends ElasticsearchQuery {
     )
 }
 
-final case class PhraseMatchQuery(q: String) extends ElasticsearchQuery {
+final case class PhraseMatchQuery(q: String) extends ElasticsearchPartialQuery {
   lazy val elasticQuery = should(
     TitlePhraseQuery(q).elasticQuery,
     GenresPhraseQuery(q).elasticQuery,
@@ -214,7 +240,7 @@ final case class PhraseMatchQuery(q: String) extends ElasticsearchQuery {
   )
 }
 
-final case class BoolBoostedQuery(q: String) extends ElasticsearchQuery {
+final case class BoolBoostedQuery(q: String) extends ElasticsearchPartialQuery {
   lazy val elasticQuery = should(
     must(GenreQuery(q).elasticQuery).boost(2000),
     must(SubjectQuery(q).elasticQuery).boost(2000),

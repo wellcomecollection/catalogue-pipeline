@@ -149,7 +149,7 @@ class QueryVariantsTest
     }
   }
 
-  private def elasticQuery(index: Index, query: BigT) = {
+  private def elasticQuery(index: Index, query: ElasticsearchQuery) = {
     val request = search(index)
       .query(
         query.elasticQuery
