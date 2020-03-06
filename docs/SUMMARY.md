@@ -11,6 +11,7 @@
     - [Test 5 - Scoring Tiers](search_relevance/tests/005_stacked_queries.md)
     - [Test 6 - English tokeniser and Contributors](search_relevance/tests/006-english-tokeniser-and-contributors.md)
     - [Test 7 - BoolBoosted vs ConstScore](search_relevance/tests/007-ConstScore-vs-BoolBoosted.md)
+    - [Test 7 - BoolBoosted vs PhaserBeam](search_relevance/tests/007-BoolBoosted-vs-PhaserBeam.md)
   - [Reporting and metrics](search_relevance/reporting-and-metrics.md)
 - [Adapters](adapters/README.md)
   - [Adapter lifecycle](adapters/adapter_lifecycle.md)
