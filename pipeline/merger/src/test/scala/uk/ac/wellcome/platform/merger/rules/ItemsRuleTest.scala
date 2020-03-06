@@ -2,6 +2,7 @@ package uk.ac.wellcome.platform.merger.rules
 
 import org.scalatest.{FunSpec, Inside, Matchers}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
+import uk.ac.wellcome.models.work.internal.{DigitalLocation, License}
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 
 class ItemsRuleTest
@@ -13,6 +14,19 @@ class ItemsRuleTest
   val multiItemPhysicalSierra = createSierraWorkWithTwoPhysicalItems
   val digitalSierra = createSierraDigitalWork
   val metsWork = createUnidentifiedInvisibleMetsWork
+  val metsWorkWithSierraUrl = createUnidentifiedInvisibleMetsWorkWith(
+    items = List(
+      createDigitalItemWith(
+        locations = List(
+          createDigitalLocationWith(
+            url = digitalSierra.data.items.head.locations.head
+              .asInstanceOf[DigitalLocation]
+              .url,
+            license = Some(License.InCopyright)
+          ))
+      )
+    )
+  )
   val miroWork = createMiroWork
 
   it(
@@ -46,11 +60,11 @@ class ItemsRuleTest
 
   it(
     "merges non-duplicate-URL locations from METS items into single-item Sierra works") {
-    inside(ItemsRule.merge(physicalSierra, List(metsWork))) {
+    inside(ItemsRule.merge(digitalSierra, List(metsWorkWithSierraUrl))) {
       case FieldMergeResult(items, _) =>
         items should have size 1
         items.head.locations should contain theSameElementsAs
-          physicalSierra.data.items.head.locations ++ metsWork.data.items.head.locations
+          metsWorkWithSierraUrl.data.items.head.locations
     }
   }
 

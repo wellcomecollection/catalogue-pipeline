@@ -44,7 +44,7 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
     override def rule(
       target: UnidentifiedWork,
       sources: Seq[TransformedBaseWork]): List[SourceIdentifier] = {
-      info(s"Merging Miro IDs from ${describeWorks(sources)}")
+      debug(s"Merging Miro IDs from ${describeWorks(sources)}")
       target.data.otherIdentifiers ++ sources.flatMap(
         _.identifiers.filterNot(sourceIdentifier =>
           unmergeableMiroIdTypes.contains(sourceIdentifier.identifierType.id)))
@@ -58,7 +58,7 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
     override def rule(
       target: UnidentifiedWork,
       sources: Seq[TransformedBaseWork]): List[SourceIdentifier] = {
-      info(s"Merging physical and digital IDs from ${describeWorks(sources)}")
+      debug(s"Merging physical and digital IDs from ${describeWorks(sources)}")
       target.data.otherIdentifiers ++ sources.flatMap(_.identifiers)
     }
   }
