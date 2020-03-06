@@ -18,15 +18,21 @@ module "lambda" {
   log_retention_in_days = 30
 }
 
-module "trigger_sierra_window_generator_lambda" {
-  source                  = "git::https://github.com/wellcometrust/terraform.git//lambda/trigger_cloudwatch?ref=v1.0.0"
-  lambda_function_name    = module.lambda.function_name
-  lambda_function_arn     = module.lambda.arn
-  cloudwatch_trigger_arn  = aws_cloudwatch_event_rule.rule.arn
-  cloudwatch_trigger_name = aws_cloudwatch_event_rule.rule.id
+resource "random_id" "cloudwatch_trigger_name" {
+  byte_length = 8
+  prefix      = "AllowExecutionFromCloudWatch_${module.lambda.function_name}_"
+}
 
-  # This exists to tell the module "yes, really do create this trigger".
-  # It's a bit of a hack to fit the way the module is written: internally it's
-  # computing "${1 - var.custom_input}" to decide if you want a custom trigger.
-  custom_input = 1
+resource "aws_lambda_permission" "allow_cloudwatch_trigger" {
+  statement_id  = random_id.cloudwatch_trigger_name.id
+  action        = "lambda:InvokeFunction"
+  function_name = module.lambda.function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.rule.arn
+}
+
+resource "aws_cloudwatch_event_target" "event_trigger_custom" {
+  rule  = aws_cloudwatch_event_rule.rule.id
+  arn   = module.lambda.arn
+  input = "{}"
 }
