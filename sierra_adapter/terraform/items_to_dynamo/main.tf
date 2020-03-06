@@ -25,6 +25,8 @@ module "sierra_to_dynamo_service" {
   min_capacity = 0
   max_capacity = 3
 
+  use_fargate_spot = true
+
   namespace_id = var.namespace_id
 
   cluster_name = var.cluster_name

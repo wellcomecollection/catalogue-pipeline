@@ -50,3 +50,8 @@ variable "security_group_ids" {
   type    = list(string)
   default = []
 }
+
+variable "use_fargate_spot" {
+  type    = bool
+  default = false
+}
