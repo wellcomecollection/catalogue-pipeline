@@ -1,20 +1,22 @@
-locals {
-  sierra_bib_merger_image      = "${module.images.services["sierra_bib_merger"]}"
-  sierra_item_merger_image     = "${module.images.services["sierra_item_merger"]}"
-  sierra_items_to_dynamo_image = "${module.images.services["sierra_items_to_dynamo"]}"
-  sierra_reader_image          = "${module.images.services["sierra_reader"]}"
+data "aws_ssm_parameter" "sierra_bib_merger" {
+  name = "/sierra_adapter/images/latest/sierra_bib_merger"
 }
 
-module "images" {
-  source = "git::https://github.com/wellcometrust/terraform.git//ecs/modules/images?ref=v19.8.0"
+data "aws_ssm_parameter" "sierra_item_merger" {
+  name = "/sierra_adapter/images/latest/sierra_item_merger"
+}
 
-  project = "sierra_adapter"
-  label   = "latest"
+data "aws_ssm_parameter" "sierra_items_to_dynamo" {
+  name = "/sierra_adapter/images/latest/sierra_items_to_dynamo"
+}
 
-  services = [
-    "sierra_bib_merger",
-    "sierra_item_merger",
-    "sierra_items_to_dynamo",
-    "sierra_reader",
-  ]
+data "aws_ssm_parameter" "sierra_reader" {
+  name = "/sierra_adapter/images/latest/sierra_reader"
+}
+
+locals {
+  sierra_bib_merger_image      = data.aws_ssm_parameter.sierra_bib_merger.value
+  sierra_item_merger_image     = data.aws_ssm_parameter.sierra_item_merger.value
+  sierra_items_to_dynamo_image = data.aws_ssm_parameter.sierra_items_to_dynamo.value
+  sierra_reader_image          = data.aws_ssm_parameter.sierra_reader.value
 }
