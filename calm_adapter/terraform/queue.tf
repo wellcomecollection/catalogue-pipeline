@@ -1,7 +1,3 @@
-resource "aws_sns_topic" "calm_windows_topic" {
-  name = "calm-windows"
-}
-
 module "calm_windows_queue" {
   source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
   queue_name      = "calm-windows"
