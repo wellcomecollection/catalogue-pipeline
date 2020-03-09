@@ -1,6 +1,5 @@
 package uk.ac.wellcome.platform.transformer.calm
 
-import akka.stream.{ActorMaterializer}
 import com.amazonaws.services.cloudwatch.model.StandardUnit
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto._
@@ -10,7 +9,6 @@ import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
 
-import scala.concurrent.ExecutionContext
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.bigmessaging.memory.MemoryBigMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
@@ -28,8 +26,6 @@ import uk.ac.wellcome.storage.maxima.Maxima
 import uk.ac.wellcome.storage.maxima.memory.MemoryMaxima
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryVersionedStore}
-
-import scala.concurrent.ExecutionContext.Implicits.global
 
 case class TestDataIn(data: List[String])
 
@@ -51,8 +47,7 @@ class TestTransformerWorker(
   val stream: SQSStream[NotificationMessage],
   val sender: MemoryBigMessageSender[TransformedBaseWork],
   val store: VersionedStore[String, Int, TestDataIn]
-)(implicit val ec: ExecutionContext, val materializer: ActorMaterializer)
-    extends TransformerWorker[TestDataIn, String] {
+) extends TransformerWorker[TestDataIn, String] {
   val transformer = TestTransformer
 }
 
@@ -114,14 +109,13 @@ class TransformerWorkerTest
               new MemoryStore(records) with MemoryMaxima[String, TestDataIn]
             val store = new MemoryVersionedStore[String, TestDataIn](data)
 
-            withMaterializer { implicit materializer =>
-              val transformerWorker =
-                new TestTransformerWorker(stream, sender, store)
+            val transformerWorker =
+              new TestTransformerWorker(stream, sender, store)
 
-              transformerWorker.run()
-              testWith((transformerWorker, QueuePair(queue, dlq), metrics))
-            }
+            transformerWorker.run()
+            testWith((transformerWorker, QueuePair(queue, dlq), metrics))
           }
+
       }
     }
 }
