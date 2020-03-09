@@ -20,6 +20,7 @@ import uk.ac.wellcome.display.models.{
   ProductionDateSortRequest,
   SortingOrder
 }
+import uk.ac.wellcome.platform.api.elasticsearch.ElasticsearchComboQuery
 import uk.ac.wellcome.platform.api.models._
 
 case class ElasticsearchRequestBuilder(
@@ -105,7 +106,7 @@ case class ElasticsearchRequestBuilder(
 
   lazy val filteredQuery: BoolQuery = queryOptions.searchQuery
     .map { searchQuery =>
-      ElasticsearchCoreQueryBuilder(searchQuery).query
+      ElasticsearchComboQuery(searchQuery).elasticQuery
     }
     .getOrElse { boolQuery }
     .filter {

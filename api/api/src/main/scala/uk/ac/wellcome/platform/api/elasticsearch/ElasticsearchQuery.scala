@@ -2,12 +2,17 @@ package uk.ac.wellcome.platform.api.elasticsearch
 
 import com.sksamuel.elastic4s.ElasticDsl.{must, should}
 import com.sksamuel.elastic4s.requests.common.Operator
-import com.sksamuel.elastic4s.requests.searches.queries.Query
+import com.sksamuel.elastic4s.requests.searches.queries.{BoolQuery, Query}
 import com.sksamuel.elastic4s.requests.searches.queries.matches.{
   FieldWithOptionalBoost,
   MatchQuery,
   MultiMatchQuery,
   MultiMatchQueryBuilderType
+}
+import uk.ac.wellcome.platform.api.models.SearchQuery
+import uk.ac.wellcome.platform.api.models.SearchQueryType.{
+  BoolBoosted,
+  PhraserBeam
 }
 
 /**
@@ -31,7 +36,17 @@ sealed trait ElasticsearchQuery {
 }
 
 trait ElasticsearchPartialQuery extends ElasticsearchQuery
-trait ElasticsearchComboQuery extends ElasticsearchQuery
+trait ElasticsearchComboQuery extends ElasticsearchQuery {
+  val elasticQuery: BoolQuery
+}
+object ElasticsearchComboQuery {
+  def apply(searchQuery: SearchQuery): ElasticsearchComboQuery =
+    searchQuery.queryType match {
+      case BoolBoosted =>
+        BoolBoostersQuery(searchQuery.query)
+      case PhraserBeam => PhraserBeamQuery(searchQuery.query)
+    }
+}
 
 case class BoolBoostersQuery(q: String) extends ElasticsearchComboQuery {
   val elasticQuery =
