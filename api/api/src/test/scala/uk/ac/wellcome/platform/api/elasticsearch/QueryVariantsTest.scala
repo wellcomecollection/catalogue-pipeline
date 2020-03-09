@@ -163,8 +163,6 @@ class QueryVariantsTest
         fieldSort("canonicalId").order(SortOrder.ASC))
       .explain(true)
 
-    println(request.show)
-
     elasticClient.execute {
       request
     } map { response =>
