@@ -2,7 +2,7 @@
 
 ## Overview
 
-Currently we are matching _named features_<sup>*</sup> with a simple **AND** query.
+Currently we are matching [_named features_](#glossary-named-feature) with a simple **AND** query.
 
 This means that if something has the `title` of `Treatise on Radioactivity`, all of
 the below will match with equal scoring:
@@ -26,13 +26,16 @@ applied it similarly to the `BaseQuery` but boosted it by 2.
 We think this should give us much better matching of items people know the name of,
 but retain the fetching of things that are loosely relevant.
 
-<sup>*</sup>A named feature is a piece of data in which the whole phrase contains
-semantic meaning. e.g. subjects, genres, titles, people and organisation names etc.
-
 ### Known unknowns
 After running through the explain API with this, boosting seems to be similar,
 but not exactly the same as what you put in the query, we'll be exploring further
 as to why that is the case.
+
+### Glossary
+
+<h4 id="glossary-named-feature">Named feature</h4>
+A named feature is a piece of data in which the whole phrase contains
+semantic meaning. e.g. subjects, genres, titles, people and organisation names etc.
 
 ## Results
 
