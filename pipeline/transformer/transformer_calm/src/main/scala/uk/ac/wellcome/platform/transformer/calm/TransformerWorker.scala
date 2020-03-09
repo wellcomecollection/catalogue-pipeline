@@ -1,6 +1,5 @@
 package uk.ac.wellcome.platform.transformer.calm
 
-import akka.stream.ActorMaterializer
 import akka.Done
 import com.amazonaws.services.sqs.model.Message
 import grizzled.slf4j.Logging
@@ -12,7 +11,7 @@ import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.{Identified, Version}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 sealed abstract class TransformerWorkerError(msg: String) extends Exception(msg)
 case class DecodeKeyError[T](msg: String, message: NotificationMessage)
@@ -37,8 +36,6 @@ trait TransformerWorker[In, SenderDest] extends Logging {
   type StreamMessage = (Message, NotificationMessage)
   type Result[T] = Either[TransformerWorkerError, T]
   type StoreKey = Version[String, Int]
-  implicit val materializer: ActorMaterializer
-  implicit val ec: ExecutionContext
 
   def name: String = this.getClass.getSimpleName
   val stream: SQSStream[NotificationMessage]
