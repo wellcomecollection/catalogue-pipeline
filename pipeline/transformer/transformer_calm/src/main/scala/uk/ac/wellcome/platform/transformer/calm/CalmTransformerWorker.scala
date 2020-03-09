@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.transformer.calm
 
+import akka.stream.ActorMaterializer
 import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig}
 import uk.ac.wellcome.messaging.sqs.SQSStream
@@ -13,7 +14,7 @@ class CalmTransformerWorker(
   val stream: SQSStream[NotificationMessage],
   val sender: BigMessageSender[SNSConfig, TransformedBaseWork],
   val store: VersionedStore[String, Int, CalmRecord],
-)(implicit val ec: ExecutionContext)
+)(implicit val ec: ExecutionContext, val materializer: ActorMaterializer)
     extends Runnable
     with TransformerWorker[CalmRecord, SNSConfig] {
   val transformer = CalmTransformer
