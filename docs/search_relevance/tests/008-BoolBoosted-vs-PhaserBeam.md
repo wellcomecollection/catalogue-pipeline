@@ -1,4 +1,4 @@
-# Test 6 - `ConstScore` vs `BoolBoosted`
+# Test 008 - BoolBoosted vs PhaserBeam
 
 ## Overview
 
