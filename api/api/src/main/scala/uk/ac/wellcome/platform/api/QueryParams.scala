@@ -155,7 +155,7 @@ object MultipleWorksParams extends QueryParamsUtils {
     decodeCommaSeparated.emap(strs => Right(LicenseFilter(strs)))
 
   implicit val collectionsDepthFilter: Decoder[CollectionDepthFilter] =
-    decodeInt map CollectionDepthFilter
+    decodeInt map (CollectionDepthFilter(_))
 
   implicit val aggregationsDecoder: Decoder[List[AggregationRequest]] =
     decodeOneOfCommaSeparated(
