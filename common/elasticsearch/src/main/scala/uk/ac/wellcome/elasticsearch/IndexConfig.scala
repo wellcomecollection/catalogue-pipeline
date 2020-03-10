@@ -175,7 +175,10 @@ case object WorksIndexConfig extends IndexConfig {
   )
 
   def englishTextField(name: String) =
-    textField(name).fields(textField("english").analyzer("english"))
+    textField(name).fields(
+      keywordField("keyword"),
+      textField("english").analyzer("english")
+    )
 
   val language = objectField("language").fields(
     label,

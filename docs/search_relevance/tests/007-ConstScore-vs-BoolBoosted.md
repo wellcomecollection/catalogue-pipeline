@@ -22,7 +22,7 @@ To do this we wrap the tiers in a `bool` query and boost each tier respectively.
 
 ## Results
 
-TBD
+![BoolBoosted calculation](../../.gitbook/assets/constscore_boolboosted_distribution.png)
 
 ### Click through rate
 

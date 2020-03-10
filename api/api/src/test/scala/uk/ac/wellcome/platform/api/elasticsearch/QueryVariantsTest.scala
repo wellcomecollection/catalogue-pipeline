@@ -33,7 +33,11 @@ class QueryVariantsTest
     elasticClient = elasticClient
   )
 
-  describe("BoolBoosted vs ConstScore") {
+  /**
+    * These test are more to explain what the query is doing
+    * not to test every eventuality what they might do.
+    */
+  describe("BoolBoosted") {
     it("Has genre / subject / contributor / title tiered scoring") {
       withLocalWorksIndex { index =>
         val workWithMatchingTitleGenresSubjectsContributors =
@@ -100,24 +104,11 @@ class QueryVariantsTest
             )): _*
         )
 
-        // We expect the results to be in order of of how many features match
-        // But when they have the same amount of features, our const score
-        // doesn't account for the nuance in there, and sorts by ID.
-
-        // Bool boost multiplies th the tf/idf score, so the nuance within each
-        // tier is respected
-        whenReady(elasticQuery(index, ConstScoreQuery("Rain"))) { resp =>
-          resp.hits.hits.map(_.id).toList should be(
-            List(
-              "5",
-              "4",
-              "3",
-              "genre1",
-              "genre2betterMatching",
-              "title1",
-              "title2betterMatching"))
-        }
-
+        /**
+          * BoolBoosted respects the tiered structure.
+          * BoolBoosted multiplies the tf/idf score, so the nuance within each tier is respected.
+          * BoolBoosted is the boss of you.
+          */
         whenReady(elasticQuery(index, BoolBoostedQuery("Rain"))) { resp =>
           resp.hits.hits.map(_.id).toList should be(
             List(
@@ -128,6 +119,35 @@ class QueryVariantsTest
               "genre1",
               "title2betterMatching",
               "title1"))
+        }
+      }
+    }
+  }
+
+  describe("PhraserBeam") {
+    it("Matches scores by exact match and then by phrase match") {
+      withLocalWorksIndex { index =>
+        insertIntoElasticsearch(
+          index,
+          List(
+            ("4ExactMatch", "Krishna"),
+            ("3PhraseMatch", "Krishna shoe young"),
+            ("2PhraseMatch", "Krishna (Hindu diety)"),
+            ("1NoMatch", "Krish"))
+            .map(
+              s =>
+                createIdentifiedWorkWith(
+                  canonicalId = s._1,
+                  title = Some(s._2))): _*
+        )
+
+        whenReady(elasticQuery(index, PhraserBeamQuery("Krishna"))) { resp =>
+          resp.hits.hits.map(_.id).toList should be(
+            List(
+              "4ExactMatch",
+              "2PhraseMatch",
+              "3PhraseMatch",
+            ))
         }
       }
     }

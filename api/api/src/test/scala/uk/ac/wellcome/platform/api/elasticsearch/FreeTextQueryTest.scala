@@ -14,8 +14,8 @@ import uk.ac.wellcome.models.work.generators.{
 }
 import uk.ac.wellcome.models.work.internal.IdentifiedBaseWork
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
-import uk.ac.wellcome.platform.api.models.SearchQuery
-import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.platform.api.models.{SearchQuery, SearchQueryType}
+import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.platform.api.services.{
   ElasticsearchQueryOptions,
   ElasticsearchService
@@ -23,7 +23,7 @@ import uk.ac.wellcome.platform.api.services.{
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class DefaultQueryTest
+class FreeTextQueryTest
     extends FunSpec
     with Matchers
     with ElasticsearchFixtures
@@ -38,7 +38,8 @@ class DefaultQueryTest
     elasticClient = elasticClient
   )
 
-  describe("CoreQuery") {
+  describe("Free text query functionality") {
+
     it("should use the english analyser for titles") {
       withLocalWorksIndex { index =>
         val works = List(
@@ -58,14 +59,8 @@ class DefaultQueryTest
 
         // We wouldn't want to use the english analyser at query time though
         // as we would lose detail used in other where we use exact matching
-        val results =
-          searchResults(
-            index = index,
-            queryOptions = createElasticsearchQueryOptionsWith(
-              searchQuery = Some(SearchQuery("vlad the impaler")))
-          )
-
-        results should contain theSameElementsAs List(works.head)
+        val query = "vlad the impaler"
+        assertResultsMatchForAllowedQueryTypes(index, query, List(works.head))
       }
     }
 
@@ -75,15 +70,11 @@ class DefaultQueryTest
           canonicalId = "abc123"
         )
 
+        val query = "abc123"
+
         insertIntoElasticsearch(index, work)
 
-        val results = searchResults(
-          index = index,
-          queryOptions = createElasticsearchQueryOptionsWith(
-            searchQuery = Some(SearchQuery("abc123")))
-        )
-
-        results should be(List(work))
+        assertResultsMatchForAllowedQueryTypes(index, query, List(work))
       }
     }
 
@@ -101,13 +92,7 @@ class DefaultQueryTest
 
         insertIntoElasticsearch(index, work, workNotMatching)
 
-        val results = searchResults(
-          index = index,
-          queryOptions = createElasticsearchQueryOptionsWith(
-            searchQuery = Some(SearchQuery(query)))
-        )
-
-        results should be(List(work))
+        assertResultsMatchForAllowedQueryTypes(index, query, List(work))
       }
     }
 
@@ -125,13 +110,7 @@ class DefaultQueryTest
 
         insertIntoElasticsearch(index, work, workNotMatching)
 
-        val results = searchResults(
-          index = index,
-          queryOptions = createElasticsearchQueryOptionsWith(
-            searchQuery = Some(SearchQuery(query)))
-        )
-
-        results should be(List(work))
+        assertResultsMatchForAllowedQueryTypes(index, query, List(work))
       }
     }
 
@@ -149,13 +128,7 @@ class DefaultQueryTest
 
         insertIntoElasticsearch(index, work, workNotMatching)
 
-        val results = searchResults(
-          index = index,
-          queryOptions = createElasticsearchQueryOptionsWith(
-            searchQuery = Some(SearchQuery(query)))
-        )
-
-        results should be(List(work))
+        assertResultsMatchForAllowedQueryTypes(index, query, List(work))
       }
     }
 
@@ -178,13 +151,7 @@ class DefaultQueryTest
 
         insertIntoElasticsearch(index, work, workNotMatching)
 
-        val results = searchResults(
-          index = index,
-          queryOptions = createElasticsearchQueryOptionsWith(
-            searchQuery = Some(SearchQuery(query)))
-        )
-
-        results should be(List(work))
+        assertResultsMatchForAllowedQueryTypes(index, query, List(work))
       }
     }
 
@@ -206,13 +173,7 @@ class DefaultQueryTest
 
         insertIntoElasticsearch(index, work, workNotMatching)
 
-        val results = searchResults(
-          index = index,
-          queryOptions = createElasticsearchQueryOptionsWith(
-            searchQuery = Some(SearchQuery(query)))
-        )
-
-        results should be(List(work))
+        assertResultsMatchForAllowedQueryTypes(index, query, List(work))
       }
     }
 
@@ -225,13 +186,7 @@ class DefaultQueryTest
 
         insertIntoElasticsearch(index, work)
 
-        val results = searchResults(
-          index = index,
-          queryOptions = createElasticsearchQueryOptionsWith(
-            searchQuery = Some(SearchQuery(query)))
-        )
-
-        results should be(List(work))
+        assertResultsMatchForAllowedQueryTypes(index, query, List(work))
       }
     }
 
@@ -247,13 +202,7 @@ class DefaultQueryTest
 
         insertIntoElasticsearch(index, work1, work2)
 
-        val results = searchResults(
-          index = index,
-          queryOptions = createElasticsearchQueryOptionsWith(
-            searchQuery = Some(SearchQuery(query)))
-        )
-
-        results should contain theSameElementsAs (List(work1, work2))
+        assertResultsMatchForAllowedQueryTypes(index, query, List(work1, work2))
       }
     }
 
@@ -269,13 +218,7 @@ class DefaultQueryTest
 
         insertIntoElasticsearch(index, work1, work2)
 
-        val results = searchResults(
-          index = index,
-          queryOptions = createElasticsearchQueryOptionsWith(
-            searchQuery = Some(SearchQuery(query)))
-        )
-
-        results should be(List(work1))
+        assertResultsMatchForAllowedQueryTypes(index, query, List(work1))
       }
     }
 
@@ -291,13 +234,7 @@ class DefaultQueryTest
 
         insertIntoElasticsearch(index, work1, work2)
 
-        val results = searchResults(
-          index = index,
-          queryOptions = createElasticsearchQueryOptionsWith(
-            searchQuery = Some(SearchQuery(query)))
-        )
-
-        results should contain theSameElementsAs (List(work1, work2))
+        assertResultsMatchForAllowedQueryTypes(index, query, List(work1, work2))
       }
     }
 
@@ -313,13 +250,7 @@ class DefaultQueryTest
 
         insertIntoElasticsearch(index, work1, work2)
 
-        val results = searchResults(
-          index = index,
-          queryOptions = createElasticsearchQueryOptionsWith(
-            searchQuery = Some(SearchQuery(query)))
-        )
-
-        results should contain theSameElementsAs (List(work1, work2))
+        assertResultsMatchForAllowedQueryTypes(index, query, List(work1, work2))
       }
     }
 
@@ -339,15 +270,77 @@ class DefaultQueryTest
           workWithMatchingTitle,
           workWithMatchingId)
 
-        val results = searchResults(
-          index = index,
-          queryOptions = createElasticsearchQueryOptionsWith(
-            searchQuery = Some(SearchQuery(query)))
+        assertResultsMatchForAllowedQueryTypes(
+          index,
+          query,
+          List(workWithMatchingId, workWithMatchingTitle))
+      }
+    }
+
+    it("Searches for contributors") {
+      withLocalWorksIndex { index =>
+        val matchingWork = createIdentifiedWorkWith(
+          contributors = List(createPersonContributorWith("Matching"))
+        )
+        val notMatchingWork = createIdentifiedWorkWith(
+          contributors = List(createPersonContributorWith("Notmatching"))
         )
 
-        results should contain theSameElementsAs (List(
-          workWithMatchingId,
-          workWithMatchingTitle))
+        val query = "matching"
+
+        insertIntoElasticsearch(index, matchingWork, notMatchingWork)
+
+        assertResultsMatchForAllowedQueryTypes(index, query, List(matchingWork))
+      }
+    }
+
+    it("Searches for genres") {
+      withLocalWorksIndex { index =>
+        val matchingWork = createIdentifiedWorkWith(
+          genres = List(createGenreWithMatchingConcept("Matching"))
+        )
+        val notMatchingWork = createIdentifiedWorkWith(
+          genres = List(createGenreWithMatchingConcept("Notmatching"))
+        )
+
+        val query = "matching"
+
+        insertIntoElasticsearch(index, matchingWork, notMatchingWork)
+
+        assertResultsMatchForAllowedQueryTypes(index, query, List(matchingWork))
+      }
+    }
+
+    it("Searches for subjects") {
+      withLocalWorksIndex { index =>
+        val matchingWork = createIdentifiedWorkWith(
+          subjects = List(createSubjectWithMatchingConcept("Matching"))
+        )
+        val notMatchingWork = createIdentifiedWorkWith(
+          subjects = List(createSubjectWithMatchingConcept("Notmatching"))
+        )
+
+        val query = "matching"
+
+        insertIntoElasticsearch(index, matchingWork, notMatchingWork)
+
+        assertResultsMatchForAllowedQueryTypes(index, query, List(matchingWork))
+      }
+    }
+  }
+
+  private def assertResultsMatchForAllowedQueryTypes(
+    index: Index,
+    query: String,
+    matches: List[IdentifiedBaseWork]) = {
+    SearchQueryType.allowed foreach { queryType =>
+      val results = searchResults(
+        index,
+        queryOptions = createElasticsearchQueryOptionsWith(
+          searchQuery = Some(SearchQuery(query, queryType))))
+
+      withClue(s"Using: ${queryType.name}") {
+        results should contain theSameElementsAs (matches)
       }
     }
   }

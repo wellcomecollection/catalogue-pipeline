@@ -7,11 +7,12 @@ sealed trait SearchQueryType {
   final val name = this.getClass.getSimpleName.split("\\$").last
 }
 object SearchQueryType {
-  val default = ConstScore
+  val default = BoolBoosted
   // These are the queries that we are surfacing to the frontend to be able to select which one they want to run.
   // You'll need to change the `allowableValues` in `uk.ac.wellcome.platform.api.swagger.SwaggerDocs`
   // when changing these as they can't be read there as they need to be constant.
-  val allowed = List(ConstScore, BoolBoosted)
-  final case object ConstScore extends SearchQueryType
+  val allowed = List(BoolBoosted, PhraserBeam)
+
   final case object BoolBoosted extends SearchQueryType
+  final case object PhraserBeam extends SearchQueryType
 }
