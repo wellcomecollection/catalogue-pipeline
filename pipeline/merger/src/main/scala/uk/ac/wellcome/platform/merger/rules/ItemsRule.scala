@@ -1,13 +1,6 @@
 package uk.ac.wellcome.platform.merger.rules
 
-import uk.ac.wellcome.models.work.internal.{
-  DigitalLocation,
-  Item,
-  Location,
-  TransformedBaseWork,
-  UnidentifiedWork,
-  Unminted
-}
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.logging.MergerLogging
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import uk.ac.wellcome.platform.merger.rules.WorkPredicates.{

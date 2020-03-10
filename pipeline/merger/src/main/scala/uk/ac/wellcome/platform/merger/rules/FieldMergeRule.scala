@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.merger.rules
 
-import cats.data.NonEmptyList
+import cats.data.{NonEmptyList, State}
 
 import uk.ac.wellcome.models.work.internal.{
   TransformedBaseWork,
@@ -29,6 +29,15 @@ import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
 trait FieldMergeRule {
   protected final type Params = (UnidentifiedWork, Seq[TransformedBaseWork])
   protected type FieldData
+  protected type MergeState = State[Set[TransformedBaseWork], FieldData]
+
+  def apply(targets: UnidentifiedWork,
+            sources: Seq[TransformedBaseWork]): MergeState =
+    merge(targets, sources) match {
+      case FieldMergeResult(field, ruleRedirects) =>
+        State(existingRedirects =>
+          (existingRedirects ++ ruleRedirects.toSet, field))
+    }
 
   def merge(target: UnidentifiedWork,
             sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData]

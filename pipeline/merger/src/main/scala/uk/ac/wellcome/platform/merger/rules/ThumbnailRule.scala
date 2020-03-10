@@ -37,7 +37,7 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
 
       def rule(target: UnidentifiedWork,
                sources: NonEmptyList[TransformedBaseWork]): FieldData = {
-        debug(s"Choosing METS thumbnail from ${describeWorks(sources)}")
+        debug(s"Choosing METS thumbnail from ${describeWork(sources.head)}")
         sources.head.data.thumbnail
       }
     }

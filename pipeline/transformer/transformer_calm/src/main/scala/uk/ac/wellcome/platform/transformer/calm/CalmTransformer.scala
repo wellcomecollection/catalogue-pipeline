@@ -168,6 +168,6 @@ object CalmTransformer extends Transformer[CalmRecord] with CalmOps {
 
   def notes(record: CalmRecord): List[Note] =
     notesMapping.flatMap {
-      case (key, createNote) => record.get(key).map(createNote)
+      case (key, createNote) => record.getList(key).map(createNote)
     }
 }

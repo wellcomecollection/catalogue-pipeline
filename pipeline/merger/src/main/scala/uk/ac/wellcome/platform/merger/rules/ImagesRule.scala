@@ -58,9 +58,9 @@ object ImagesRule extends FieldMergeRule {
   }
 
   trait FlatImageMergeRule extends PartialRule {
-    final override def rule(
-      target: UnidentifiedWork,
-      sources: NonEmptyList[TransformedBaseWork]): List[MergedImage[Unminted]] = {
+    final override def rule(target: UnidentifiedWork,
+                            sources: NonEmptyList[TransformedBaseWork])
+      : List[MergedImage[Unminted]] = {
       val works = sources.prepend(target).toList
       works flatMap {
         _.data.images.map {
