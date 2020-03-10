@@ -1,4 +1,8 @@
 package uk.ac.wellcome.platform.merger.rules
+
+import scala.Function.const
+import cats.data.NonEmptyList
+
 import uk.ac.wellcome.models.work.internal.{
   Identifiable,
   MergedImage,
@@ -12,8 +16,6 @@ import uk.ac.wellcome.platform.merger.rules.WorkPredicates.{
   WorkPredicate,
   WorkPredicateOps
 }
-
-import scala.Function.const
 
 object ImagesRule extends FieldMergeRule {
   type FieldData = List[MergedImage[Unminted]]
@@ -58,15 +60,17 @@ object ImagesRule extends FieldMergeRule {
   trait FlatImageMergeRule extends PartialRule {
     final override def rule(
       target: UnidentifiedWork,
-      sources: Seq[TransformedBaseWork]): List[MergedImage[Unminted]] =
-      (target +: sources).flatMap {
+      sources: NonEmptyList[TransformedBaseWork]): List[MergedImage[Unminted]] = {
+      val works = sources.prepend(target).toList
+      works flatMap {
         _.data.images.map {
           _.mergeWith(
             parentWork = Identifiable(target.sourceIdentifier),
-            fullText = createFulltext(target +: sources)
+            fullText = createFulltext(works)
           )
         }
-      }.toList
+      }
+    }
   }
 
   private def createFulltext(works: Seq[TransformedBaseWork]): Option[String] =

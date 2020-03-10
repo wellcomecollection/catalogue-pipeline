@@ -1,4 +1,8 @@
 package uk.ac.wellcome.platform.merger.rules
+
+import scala.Function.const
+import cats.data.NonEmptyList
+
 import uk.ac.wellcome.models.work.internal.{
   SourceIdentifier,
   TransformedBaseWork,
@@ -7,7 +11,6 @@ import uk.ac.wellcome.models.work.internal.{
 import uk.ac.wellcome.platform.merger.logging.MergerLogging
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
-import scala.Function.const
 
 /*
  * The otherIdentifiers field is made up of all of the identifiers on the sources,
@@ -43,9 +46,9 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
 
     override def rule(
       target: UnidentifiedWork,
-      sources: Seq[TransformedBaseWork]): List[SourceIdentifier] = {
-      debug(s"Merging Miro IDs from ${describeWorks(sources)}")
-      target.data.otherIdentifiers ++ sources.flatMap(
+      sources: NonEmptyList[TransformedBaseWork]): List[SourceIdentifier] = {
+      debug(s"Merging Miro IDs from ${describeWorks(sources.toList)}")
+      target.data.otherIdentifiers ++ sources.toList.flatMap(
         _.identifiers.filterNot(sourceIdentifier =>
           unmergeableMiroIdTypes.contains(sourceIdentifier.identifierType.id)))
     }
@@ -57,9 +60,9 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
 
     override def rule(
       target: UnidentifiedWork,
-      sources: Seq[TransformedBaseWork]): List[SourceIdentifier] = {
+      sources: NonEmptyList[TransformedBaseWork]): List[SourceIdentifier] = {
       debug(s"Merging physical and digital IDs from ${describeWorks(sources)}")
-      target.data.otherIdentifiers ++ sources.flatMap(_.identifiers)
+      target.data.otherIdentifiers ++ sources.toList.flatMap(_.identifiers)
     }
   }
 }

@@ -15,6 +15,8 @@ import uk.ac.wellcome.platform.merger.rules.WorkPredicates.{
   WorkPredicateOps
 }
 
+import cats.data.NonEmptyList
+
 /*
  * Items are merged as follows:
  *
@@ -43,9 +45,9 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     val isDefinedForSource: WorkPredicate = WorkPredicates.singleItemDigitalMets
 
     def rule(target: UnidentifiedWork,
-             sources: Seq[TransformedBaseWork]): FieldData = {
+             sources: NonEmptyList[TransformedBaseWork]): FieldData = {
       val sierraItems = target.data.items
-      val metsItems = sources.flatMap(_.data.items)
+      val metsItems = sources.toList.flatMap(_.data.items)
       val metsUrls = metsItems.flatMap(_.locations).collect {
         case DigitalLocation(url, _, _, _, _, _) => url
       }
@@ -71,8 +73,8 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
       : WorkPredicate = WorkPredicates.miroWork or WorkPredicates.digitalSierra
 
     def rule(target: UnidentifiedWork,
-             sources: Seq[TransformedBaseWork]): FieldData =
-      (target.data.items, sources.partition(WorkPredicates.miroWork)) match {
+             sources: NonEmptyList[TransformedBaseWork]): FieldData =
+      (target.data.items, sources.toList.partition(WorkPredicates.miroWork)) match {
         case (List(sierraSingleItem), (miroSources, sierraSources)) =>
           List(
             sierraSingleItem.copy(

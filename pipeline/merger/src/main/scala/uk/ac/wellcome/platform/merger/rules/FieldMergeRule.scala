@@ -1,4 +1,7 @@
 package uk.ac.wellcome.platform.merger.rules
+
+import cats.data.NonEmptyList
+
 import uk.ac.wellcome.models.work.internal.{
   TransformedBaseWork,
   UnidentifiedWork
@@ -39,12 +42,13 @@ trait FieldMergeRule {
     val isDefinedForSource: WorkPredicate
 
     def rule(target: UnidentifiedWork,
-             sources: Seq[TransformedBaseWork]): FieldData
+             sources: NonEmptyList[TransformedBaseWork]): FieldData
 
     override def apply(params: Params): FieldData =
       params match {
         case (target, sources) =>
-          rule(target, sources.filter(isDefinedForSource))
+          val filteredSources = sources.filter(isDefinedForSource).toList
+          rule(target, NonEmptyList.fromList(filteredSources).get)
       }
 
     override def isDefinedAt(params: Params): Boolean = params match {
