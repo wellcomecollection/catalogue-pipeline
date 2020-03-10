@@ -151,8 +151,9 @@ class TransformerWorkerTest
           val metrics = new MemoryMetrics[StandardUnit]()
           withSQSStream[NotificationMessage, R](queue, metrics) { stream =>
             val sender = new MemoryBigMessageSender[TransformedBaseWork]()
-            val data: MemoryStore[Version[String, Int], TestData]
-              with Maxima[String, Int] =
+            val data
+              : MemoryStore[Version[String, Int], TestData] with Maxima[String,
+                                                                        Int] =
               new MemoryStore(records) with MemoryMaxima[String, TestData]
             val store = new MemoryVersionedStore[String, TestData](data)
 
