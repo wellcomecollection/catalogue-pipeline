@@ -43,6 +43,26 @@ class IdentifiersDao(db: DB, identifiers: IdentifiersTable) extends Logging {
     }
   }
 
+  def saveIdentifiers(ids: List[Identifier]) =      Try {
+    val values = ids.map(i => Seq(i.CanonicalId, i.OntologyType, i.SourceSystem, i.SourceId))
+    blocking {
+      debug(s"Putting new identifier $ids")
+      withSQL {
+        insert
+          .into(identifiers).columns(identifiers.column.CanonicalId, identifiers.column.OntologyType,identifiers.column.SourceSystem,identifiers.column.SourceId).multipleValues(values:_*)
+      }.update().apply()
+    }
+  } recover {
+    case e: SQLIntegrityConstraintViolationException =>
+      warn(
+        s"Unable to insert $ids because of integrity constraints: ${e.getMessage}")
+      throw IdMinterException(e)
+    case e =>
+      error(s"Failed inserting identifier $ids in database", e)
+      throw e
+  }
+
+
   private def buildSqlQueryParameters(sourceIdentifiers: Seq[SourceIdentifier]) = {
     mutable.Map(sourceIdentifiers.map(sourceIdentifier => (buildSqlParametersFromSourceIdentifier(sourceIdentifier) -> sourceIdentifier)): _ *)
   }

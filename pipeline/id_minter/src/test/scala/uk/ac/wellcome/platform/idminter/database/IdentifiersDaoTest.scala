@@ -282,6 +282,50 @@ class IdentifiersDaoTest
     }
   }
 
+  describe("saveIdentifiers"){
+
+    it("saves a single identifier in the database"){
+      val identifier = createSQLIdentifier
+
+      withIdentifiersDao {
+        case (identifiersDao, identifiersTable) =>
+          implicit val session = AutoSession
+
+          identifiersDao.saveIdentifiers(List(identifier))
+          val maybeIdentifier = withSQL {
+            select
+              .from(identifiersTable as identifiersTable.i)
+              .where
+              .eq(identifiersTable.i.SourceSystem, identifier.SourceSystem)
+              .and
+              .eq(identifiersTable.i.CanonicalId, identifier.CanonicalId)
+          }.map(Identifier(identifiersTable.i)).single.apply()
+
+          maybeIdentifier shouldBe defined
+          maybeIdentifier.get shouldBe identifier
+      }
+    }
+
+    it("saves multiple identifiers in the database"){
+      val ids = (1 to 3).map{_ =>
+        val sourceIdentifier = createSourceIdentifier
+        (sourceIdentifier, Identifier(createCanonicalId, sourceIdentifier))
+      }.toMap
+
+      withIdentifiersDao {
+        case (identifiersDao, _) =>
+
+          val result = for {
+           _ <-  identifiersDao.saveIdentifiers(ids.values.toList)
+           lookupResult <- identifiersDao.lookupIds(ids.keys.toList)
+          } yield lookupResult
+
+          result shouldBe a[Success[_]]
+          result.get.found should contain theSameElementsAs(ids.values)
+      }
+    }
+  }
+
   def createSQLIdentifierWith(
     canonicalId: String = createCanonicalId,
     sourceIdentifier: SourceIdentifier = createSourceIdentifier

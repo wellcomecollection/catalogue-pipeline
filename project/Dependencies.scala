@@ -174,7 +174,7 @@ object ExternalDependencies {
   val mySqlDependencies = Seq(
     "com.amazonaws" % "aws-java-sdk-rds" % versions.aws,
     "org.flywaydb" % "flyway-core" % "4.2.0",
-    "org.scalikejdbc" %% "scalikejdbc" % "3.0.0",
+    "org.scalikejdbc" %% "scalikejdbc" % "3.4.0",
     "mysql" % "mysql-connector-java" % "6.0.6"
   )
 
