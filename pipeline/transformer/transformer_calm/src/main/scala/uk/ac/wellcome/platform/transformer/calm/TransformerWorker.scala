@@ -91,9 +91,9 @@ trait TransformerWorker[In, SenderDest] extends Logging {
                   case StoreReadError(_, key) =>
                     error(s"$name: StoreReadError on $key")
                   case TransformerError(_, sourceData, key) =>
-                    println(s"$name: TransformerError on $sourceData with $key")
+                    error(s"$name: TransformerError on $sourceData with $key")
                   case MessageSendError(_, work, key) =>
-                    println(s"$name: MessageSendError on $work with $key")
+                    error(s"$name: MessageSendError on $work with $key")
 
                 }
                 Future.failed(err)
