@@ -97,6 +97,13 @@ class ApiV2ErrorsTest extends ApiV2WorksTestBase with ApiErrorsTestBase {
           "sort: 'foo', 'bar' are not valid values. Please choose one of: ['production.dates']"
       )
     }
+
+    it("400s on a non-int-able value for collection.depth") {
+      assertIsBadRequest(
+        "/works?collection.depth=challenger-deep",
+        description = "collection.depth: must be a valid Integer"
+      )
+    }
   }
 
   // This is expected as it's transient parameter that will have valid values changing over time

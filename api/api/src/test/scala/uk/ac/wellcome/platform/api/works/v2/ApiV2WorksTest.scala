@@ -306,4 +306,63 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
         }
     }
   }
+
+  it("supports filtering collection on depth") {
+    withApi {
+      case (indexV2, routes) =>
+        val work1Depth1 = createIdentifiedWorkWith(
+          canonicalId = "1",
+          collection = Some(Collection(None, "/depth1"))
+        )
+        val work2Depth1 = createIdentifiedWorkWith(
+          canonicalId = "2",
+          collection = Some(Collection(None, "/depth1"))
+        )
+        val work3Depth2 = createIdentifiedWorkWith(
+          canonicalId = "3",
+          collection = Some(Collection(None, "/depth1/depth2"))
+        )
+        val work4Depth3 = createIdentifiedWorkWith(
+          canonicalId = "4",
+          collection = Some(Collection(None, "/depth1/depth2/depth3"))
+        )
+        val work5Depth3 = createIdentifiedWorkWith(
+          canonicalId = "5",
+          collection = Some(Collection(None, "/depth1/depth2/depth3"))
+        )
+        val work6NoDepth = createIdentifiedWorkWith(
+          canonicalId = "6",
+          collection = None
+        )
+        insertIntoElasticsearch(
+          indexV2,
+          work1Depth1,
+          work2Depth1,
+          work3Depth2,
+          work4Depth3,
+          work5Depth3,
+          work6NoDepth)
+
+        assertJsonResponse(routes, s"/$apiPrefix/works?collection.depth=1") {
+          Status.OK -> worksListResponse(
+            apiPrefix = apiPrefix,
+            works = Seq(work1Depth1, work2Depth1)
+          )
+        }
+
+        assertJsonResponse(routes, s"/$apiPrefix/works?collection.depth=2") {
+          Status.OK -> worksListResponse(
+            apiPrefix = apiPrefix,
+            works = Seq(work3Depth2)
+          )
+        }
+
+        assertJsonResponse(routes, s"/$apiPrefix/works?collection.depth=3") {
+          Status.OK -> worksListResponse(
+            apiPrefix = apiPrefix,
+            works = Seq(work4Depth3, work5Depth3)
+          )
+        }
+    }
+  }
 }

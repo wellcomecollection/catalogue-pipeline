@@ -142,6 +142,8 @@ case class ElasticsearchRequestBuilder(
         termsQuery(
           field = "data.items.locations.license.id",
           values = licenseIds)
+      case CollectionDepthFilter(depth) =>
+        termQuery(field = "data.collection.depth", value = depth)
     }
 
   implicit class EnhancedTermsAggregation(agg: TermsAggregation) {

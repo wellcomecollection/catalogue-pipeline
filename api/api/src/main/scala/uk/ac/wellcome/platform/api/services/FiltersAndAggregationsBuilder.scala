@@ -87,6 +87,7 @@ class FiltersAndAggregationsBuilder(
     case _: GenreFilter            => Some(AggregationRequest.Genre)
     case _: SubjectFilter          => Some(AggregationRequest.Subject)
     case _: LicenseFilter          => Some(AggregationRequest.License)
+    case _: CollectionDepthFilter  => None
   }
 
   private sealed trait FilterCategory
