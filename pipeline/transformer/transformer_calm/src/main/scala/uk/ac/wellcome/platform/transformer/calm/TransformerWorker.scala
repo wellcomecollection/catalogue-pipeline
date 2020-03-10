@@ -42,6 +42,7 @@ trait TransformerWorker[In, SenderDest] extends Logging {
   val sender: BigMessageSender[SenderDest, TransformedBaseWork]
   val store: VersionedStore[String, Int, In]
   val transformer: Transformer[In]
+  val concurrentTransformations: Int = 2
 
   def process(message: NotificationMessage): Result[Unit] = {
     for {
@@ -80,7 +81,7 @@ trait TransformerWorker[In, SenderDest] extends Logging {
     stream.runStream(
       name,
       source => {
-        source.mapAsync(2) {
+        source.mapAsync(concurrentTransformations) {
           case (message, notification) =>
             process(notification) match {
               case Left(err) => {
