@@ -7,14 +7,11 @@ import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.typesafe.Runnable
 
-import scala.concurrent.ExecutionContext
-
 class CalmTransformerWorker(
   val stream: SQSStream[NotificationMessage],
   val sender: BigMessageSender[SNSConfig, TransformedBaseWork],
   val store: VersionedStore[String, Int, CalmRecord],
-)(implicit val ec: ExecutionContext)
-    extends Runnable
+) extends Runnable
     with TransformerWorker[CalmRecord, SNSConfig] {
   val transformer = CalmTransformer
 }
