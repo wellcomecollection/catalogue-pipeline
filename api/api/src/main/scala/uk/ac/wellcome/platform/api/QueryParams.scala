@@ -50,7 +50,7 @@ case class MultipleWorksParams(
   sort: Option[List[SortRequest]],
   sortOrder: Option[SortingOrder],
   query: Option[String],
-  `collection`: Option[CollectionPathFilter],
+  collection: Option[CollectionPathFilter],
   `collection.depth`: Option[CollectionDepthFilter],
   _queryType: Option[SearchQueryType],
   _index: Option[String],
@@ -87,7 +87,7 @@ case class MultipleWorksParams(
       language,
       `genres.label`,
       `subjects.label`,
-      `collection`,
+      collection,
       `collection.depth`,
       license
     ).flatten
