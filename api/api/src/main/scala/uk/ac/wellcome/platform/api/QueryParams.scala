@@ -212,6 +212,7 @@ trait QueryParamsUtils extends Directives with TimeInstances {
       "contributors" -> WorkInclude.Contributors,
       "production" -> WorkInclude.Production,
       "notes" -> WorkInclude.Notes,
+      "collection" -> WorkInclude.Collection,
     ).emap(values => Right(V2WorksIncludes(values)))
 
   implicit val decodeLocalDate: Decoder[LocalDate] =
