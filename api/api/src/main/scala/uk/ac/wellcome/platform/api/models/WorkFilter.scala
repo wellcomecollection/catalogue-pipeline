@@ -22,3 +22,5 @@ case class GenreFilter(genreQuery: String) extends WorkFilter
 case class SubjectFilter(subjectQuery: String) extends WorkFilter
 
 case class LicenseFilter(licenseIds: Seq[String]) extends WorkFilter
+
+case class CollectionDepthFilter(depth: Int) extends WorkFilter
