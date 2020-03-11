@@ -1,5 +1,7 @@
 package uk.ac.wellcome.platform.idminter.database
 
+import java.sql.BatchUpdateException
+
 import org.scalatest.{FunSpec, Matchers}
 import scalikejdbc._
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
@@ -345,11 +347,76 @@ class IdentifiersDaoTest
           } yield (insertResult)
 
           result shouldBe a[Left[_,_]]
+          result.left.get.exception shouldBe a[BatchUpdateException]
           result.left.get.failed should contain theSameElementsAs(identifiers.filter(i => i.CanonicalId == duplicatedIdentifier1.CanonicalId || i.CanonicalId == duplicatedIdentifier2.CanonicalId))
           result.left.get.succeeded should contain theSameElementsAs(identifiers.filterNot(i => i.CanonicalId == duplicatedIdentifier1.CanonicalId || i.CanonicalId == duplicatedIdentifier2.CanonicalId))
 
           val lookupResult = identifiersDao.lookupIds(ids.keys.toList).right.get
           lookupResult.found should contain theSameElementsAs(result.left.get.succeeded)
+      }
+    }
+
+    it("fails saving the identifiers if the same OntologyType,SourceName, and SourceId are already present"){
+      val identifier = createSQLIdentifier
+      val duplicateIdentifier = identifier.copy(CanonicalId = createCanonicalId)
+
+      withIdentifiersDao {
+        case (identifiersDao, _) =>
+
+          val result = for {
+            _<- identifiersDao.saveIdentifiers(List(identifier))
+           insertResult <-  identifiersDao.saveIdentifiers(List(duplicateIdentifier))
+          } yield (insertResult)
+
+          result shouldBe a[Left[_,_]]
+          result.left.get.exception shouldBe a[BatchUpdateException]
+          result.left.get.failed shouldBe List(duplicateIdentifier)
+      }
+    }
+
+    it(
+      "saves records with the same SourceSystem and SourceId but different OntologyType") {
+      val sourceIdentifier1 = createSourceIdentifier
+      val sourceIdentifier2 = sourceIdentifier1.copy(ontologyType = "Foo")
+
+      val identifier1 = createSQLIdentifierWith(
+        sourceIdentifier = sourceIdentifier1
+      )
+
+      val identifier2 = createSQLIdentifierWith(
+        sourceIdentifier = sourceIdentifier2
+      )
+
+      withIdentifiersDao {
+        case (identifiersDao, _) =>
+          val result = for {
+            insertResult<- identifiersDao.saveIdentifiers(List(identifier1, identifier2))
+          } yield (insertResult)
+
+          result shouldBe a[Right[_,_]]
+      }
+    }
+
+    it(
+      "saves records with different SourceId but the same OntologyType and SourceSystem") {
+      val sourceIdentifier1 = createSourceIdentifier
+      val sourceIdentifier2 = sourceIdentifier1.copy(value = randomAlphanumeric(10))
+
+      val identifier1 = createSQLIdentifierWith(
+        sourceIdentifier = sourceIdentifier1
+      )
+
+      val identifier2 = createSQLIdentifierWith(
+        sourceIdentifier = sourceIdentifier2
+      )
+
+      withIdentifiersDao {
+        case (identifiersDao, _) =>
+          val result = for {
+            insertResult<- identifiersDao.saveIdentifiers(List(identifier1, identifier2))
+          } yield (insertResult)
+
+          result shouldBe a[Right[_,_]]
       }
     }
   }
