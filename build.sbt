@@ -180,7 +180,8 @@ lazy val mets_adapter = setupProject(
 
 // CALM adapter
 
-lazy val calm_adapter = setupProject(project,
+lazy val calm_adapter = setupProject(
+  project,
   folder = "calm_adapter/calm_adapter",
   localDependencies = Seq(internal_model, big_messaging_typesafe),
   externalDependencies = CatalogueDependencies.calmAdapterDependencies
@@ -193,4 +194,12 @@ lazy val snapshot_generator = setupProject(
   "snapshots/snapshot_generator",
   localDependencies = Seq(internal_model, display, elasticsearch_typesafe),
   externalDependencies = CatalogueDependencies.snapshotGeneratorDependencies
+)
+
+// Inference manager
+
+lazy val inference_manager = setupProject(
+  project,
+  folder = "pipeline/inferrer/inference_manager",
+  localDependencies = Seq(internal_model, big_messaging_typesafe)
 )
