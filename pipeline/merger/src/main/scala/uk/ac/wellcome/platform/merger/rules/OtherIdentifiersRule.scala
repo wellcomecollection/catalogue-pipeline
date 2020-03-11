@@ -1,6 +1,5 @@
 package uk.ac.wellcome.platform.merger.rules
 
-import scala.Function.const
 import cats.data.NonEmptyList
 
 import uk.ac.wellcome.models.work.internal.{
@@ -23,17 +22,17 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
     target: UnidentifiedWork,
     sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData] = {
     val miroIds =
-      miroIdsRule.applyOrElse((target, sources), const(Nil))
+      miroIdsRule(target, sources) getOrElse Nil
     val physicalDigitalIds =
-      physicalDigitalIdsRule.applyOrElse((target, sources), const(Nil))
+      physicalDigitalIdsRule(target, sources) getOrElse Nil
     FieldMergeResult(
       fieldData = (physicalDigitalIds ++ miroIds).distinct match {
         case Nil           => target.otherIdentifiers
         case nonEmptyList  => nonEmptyList
       },
       redirects = sources.filter { source =>
-        (miroIdsRule orElse physicalDigitalIdsRule)
-          .isDefinedAt((target, List(source)))
+        miroIdsRule.isDefinedAt(target, List(source)) ||
+          physicalDigitalIdsRule.isDefinedAt(target, List(source))
       }
     )
   }

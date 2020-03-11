@@ -24,8 +24,9 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
     target: UnidentifiedWork,
     sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData] =
     FieldMergeResult(
-      fieldData = (getMetsThumbnail orElse getMinMiroThumbnail orElse
-        (identityOnTarget andThen (_.data.thumbnail)))((target, sources)),
+      fieldData = getMetsThumbnail(target, sources)
+        orElse getMinMiroThumbnail(target, sources)
+        getOrElse target.data.thumbnail,
       redirects = Nil
     )
 

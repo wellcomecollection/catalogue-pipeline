@@ -28,8 +28,8 @@ object ImagesRule extends FieldMergeRule {
         case Nil =>
           getSingleMiroImage.applyOrElse(target, const(Nil))
         case _ :: _ =>
-          getPictureImages.applyOrElse((target, sources), const(Nil)) ++
-            getPairedMiroImages.applyOrElse((target, sources), const(Nil))
+          getPictureImages(target, sources).getOrElse(Nil) ++
+            getPairedMiroImages(target, sources).getOrElse(Nil)
       },
       redirects = Nil
     )

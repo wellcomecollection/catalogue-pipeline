@@ -15,9 +15,7 @@ trait UseCalmWhenExistsRule extends FieldMergeRule with MergerLogging {
     target: UnidentifiedWork,
     sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData] =
     FieldMergeResult(
-      fieldData = (
-        calmRule orElse (identityOnTarget andThen getData)
-      )((target, sources)),
+      fieldData = calmRule(target, sources) getOrElse getData(target),
       redirects = Nil
     )
 

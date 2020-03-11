@@ -46,23 +46,30 @@ trait FieldMergeRule {
     case (target, _) => target
   }
 
-  protected trait PartialRule extends PartialFunction[Params, FieldData] {
+  protected trait PartialRule {
     val isDefinedForTarget: WorkPredicate
     val isDefinedForSource: WorkPredicate
 
-    def rule(target: UnidentifiedWork,
-             sources: NonEmptyList[TransformedBaseWork]): FieldData
+    protected def rule(target: UnidentifiedWork,
+                       sources: NonEmptyList[TransformedBaseWork]): FieldData
 
-    override def apply(params: Params): FieldData =
-      params match {
-        case (target, sources) =>
-          val filteredSources = sources.filter(isDefinedForSource).toList
-          rule(target, NonEmptyList.fromList(filteredSources).get)
+    def apply(target: UnidentifiedWork,
+              sources: Seq[TransformedBaseWork]): Option[FieldData] =
+      apply(target, sources, rule)
+
+    def isDefinedAt(
+      target: UnidentifiedWork,
+      sources: Seq[TransformedBaseWork]): Boolean =
+      apply(target, sources, (_, _) => true).getOrElse(false)
+
+    private def apply[T](
+      target: UnidentifiedWork,
+      sources: Seq[TransformedBaseWork],
+      f: (UnidentifiedWork, NonEmptyList[TransformedBaseWork]) => T): Option[T] =
+      (isDefinedForTarget(target), sources.filter(isDefinedForSource)) match {
+        case (true, head :: tail) =>
+          Some(f(target, NonEmptyList(head, tail)))
+        case _ => None
       }
-
-    override def isDefinedAt(params: Params): Boolean = params match {
-      case (target, sources) =>
-        isDefinedForTarget(target) && sources.exists(isDefinedForSource)
-    }
   }
 }
