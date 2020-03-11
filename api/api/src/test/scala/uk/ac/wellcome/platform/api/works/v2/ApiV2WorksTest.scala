@@ -307,6 +307,93 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
     }
   }
 
+  it("supports filtering on collection") {
+    withApi {
+      case (indexV2, routes) =>
+        val work1Archive1Depth1 = createIdentifiedWorkWith(
+          canonicalId = "work1Archive1Depth1",
+          collection = Some(Collection(None, "archive1"))
+        )
+        val work2Archive1Depth2 = createIdentifiedWorkWith(
+          canonicalId = "work2Archive1Depth2",
+          collection = Some(Collection(None, "archive1/depth2"))
+        )
+        val work3Archive1Depth3 = createIdentifiedWorkWith(
+          canonicalId = "work3Archive1Depth3",
+          collection = Some(Collection(None, "archive1/depth2/depth3"))
+        )
+        val work4Archive2Depth1 = createIdentifiedWorkWith(
+          canonicalId = "work4Archive2Depth1",
+          collection = Some(Collection(None, "archive2"))
+        )
+        val work5Archive2Depth2 = createIdentifiedWorkWith(
+          canonicalId = "work5Archive2Depth2",
+          collection = Some(Collection(None, "archive2/depth2"))
+        )
+        val work6Archive2Depth3 = createIdentifiedWorkWith(
+          canonicalId = "work6Archive2Depth3",
+          collection = Some(Collection(None, "archive2/depth2/depth3"))
+        )
+        val work7Archiveless = createIdentifiedWorkWith(
+          canonicalId = "work7Archiveless",
+        )
+
+        insertIntoElasticsearch(
+          indexV2,
+          work1Archive1Depth1,
+          work2Archive1Depth2,
+          work3Archive1Depth3,
+          work4Archive2Depth1,
+          work5Archive2Depth2,
+          work6Archive2Depth3,
+          work7Archiveless)
+
+        withClue(
+          "Single depth collection returns everything in that collection") {
+          assertJsonResponse(routes, s"/$apiPrefix/works?collection=archive1") {
+            Status.OK -> worksListResponse(
+              apiPrefix = apiPrefix,
+              works = Seq(
+                work1Archive1Depth1,
+                work2Archive1Depth2,
+                work3Archive1Depth3)
+            )
+          }
+
+          assertJsonResponse(routes, s"/$apiPrefix/works?collection=archive2") {
+            Status.OK -> worksListResponse(
+              apiPrefix = apiPrefix,
+              works = Seq(
+                work4Archive2Depth1,
+                work5Archive2Depth2,
+                work6Archive2Depth3)
+            )
+          }
+        }
+
+        withClue(
+          "Multi depth collection returns everything within that section") {
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works?collection=archive1/depth2") {
+            Status.OK -> worksListResponse(
+              apiPrefix = apiPrefix,
+              works = Seq(work2Archive1Depth2, work3Archive1Depth3)
+            )
+          }
+
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works?collection=archive1/depth2/depth3") {
+            Status.OK -> worksListResponse(
+              apiPrefix = apiPrefix,
+              works = Seq(work3Archive1Depth3)
+            )
+          }
+        }
+    }
+  }
+
   it("supports filtering collection on depth") {
     withApi {
       case (indexV2, routes) =>

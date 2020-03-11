@@ -23,4 +23,6 @@ case class SubjectFilter(subjectQuery: String) extends WorkFilter
 
 case class LicenseFilter(licenseIds: Seq[String]) extends WorkFilter
 
+case class CollectionPathFilter(path: String) extends WorkFilter
+
 case class CollectionDepthFilter(depth: Int) extends WorkFilter
