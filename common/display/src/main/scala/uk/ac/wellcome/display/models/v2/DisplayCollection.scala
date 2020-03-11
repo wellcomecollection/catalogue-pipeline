@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import uk.ac.wellcome.models.work.internal.Collection
 
 @Schema(
-  name = "DisplayCollection",
+  name = "Collection",
   description = "A collection that a work is part of"
 )
 case class DisplayCollection(
