@@ -40,7 +40,8 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
 
   private final val unmergeableMiroIdTypes =
     List("sierra-identifier", "sierra-system-number")
-  private lazy val miroIdsRule = new PartialRule {
+
+  private val miroIdsRule = new PartialRule {
     val isDefinedForTarget: WorkPredicate = WorkPredicates.singleItemSierra
     val isDefinedForSource: WorkPredicate = WorkPredicates.singleItemMiro
 
@@ -54,7 +55,7 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
     }
   }
 
-  private lazy val physicalDigitalIdsRule = new PartialRule {
+  private val physicalDigitalIdsRule = new PartialRule {
     val isDefinedForTarget: WorkPredicate = WorkPredicates.physicalSierra
     val isDefinedForSource: WorkPredicate = WorkPredicates.digitalSierra
 

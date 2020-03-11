@@ -33,7 +33,7 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
       }
     )
 
-  private lazy val mergeMetsItems = new PartialRule {
+  private val mergeMetsItems = new PartialRule {
     val isDefinedForTarget: WorkPredicate = WorkPredicates.sierraWork
     val isDefinedForSource: WorkPredicate = WorkPredicates.singleItemDigitalMets
 
@@ -60,7 +60,7 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     }
   }
 
-  private lazy val mergeMiroPhysicalAndDigitalItems = new PartialRule {
+  private val mergeMiroPhysicalAndDigitalItems = new PartialRule {
     val isDefinedForTarget: WorkPredicate = WorkPredicates.sierraWork
     val isDefinedForSource
       : WorkPredicate = WorkPredicates.miroWork or WorkPredicates.digitalSierra
