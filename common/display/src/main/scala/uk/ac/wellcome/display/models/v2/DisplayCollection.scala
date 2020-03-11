@@ -10,7 +10,7 @@ import uk.ac.wellcome.models.work.internal.Collection
 )
 case class DisplayCollection(
   @Schema(description = "The label of the collection") label: Option[String],
-  @Schema(description = "Where in the hierarchy a wrk is in the collection") path: String,
+  @Schema(description = "Where in the hierarchy a work is in the collection") path: String,
   @JsonKey("type") @Schema(name = "type") ontologyType: String = "Collection"
 )
 
