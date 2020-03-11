@@ -202,9 +202,9 @@ class IdentifiersDaoTest
           val triedLookup = identifiersDao.lookupIds(
             List(sourceIdentifier)
           )
-          triedLookup shouldBe a [Success[_]]
-          triedLookup.get.found shouldBe List(identifier)
-          triedLookup.get.notFound shouldBe empty
+          triedLookup shouldBe a [Right[_,_]]
+          triedLookup.right.get.found shouldBe List(identifier)
+          triedLookup.right.get.notFound shouldBe empty
       }
     }
 
@@ -220,9 +220,9 @@ class IdentifiersDaoTest
             sourceIdentifiers
           )
 
-          triedLookup shouldBe a [Success[_]]
-        triedLookup.get.found should contain theSameElementsAs(identifiers)
-        triedLookup.get.notFound shouldBe empty
+          triedLookup shouldBe a [Right[_,_]]
+        triedLookup.right.get.found should contain theSameElementsAs(identifiers)
+        triedLookup.right.get.notFound shouldBe empty
       }
     }
 
@@ -240,9 +240,9 @@ class IdentifiersDaoTest
             sourceIdentifiers
           )
 
-          triedLookup shouldBe a [Success[_]]
-          triedLookup.get.found should contain theSameElementsAs(identifiers)
-          triedLookup.get.notFound shouldBe empty
+          triedLookup shouldBe a [Right[_,_]]
+          triedLookup.right.get.found should contain theSameElementsAs(identifiers)
+          triedLookup.right.get.notFound shouldBe empty
       }
     }
 
@@ -259,10 +259,10 @@ class IdentifiersDaoTest
             existingSourceIdentifiers ++ nonExistingSourceIdentifiers
           )
 
-          triedLookup shouldBe a [Success[_]]
+          triedLookup shouldBe a [Right[_,_]]
 
-          triedLookup.get.found should contain theSameElementsAs(identifiers)
-          triedLookup.get.notFound should contain theSameElementsAs (nonExistingSourceIdentifiers)
+          triedLookup.right.get.found should contain theSameElementsAs(identifiers)
+          triedLookup.right.get.notFound should contain theSameElementsAs (nonExistingSourceIdentifiers)
       }
     }
 
@@ -276,8 +276,8 @@ class IdentifiersDaoTest
           val triedLookup = identifiersDao.lookupIds(
             sourceIdentifiers
           )
-          triedLookup.get.found shouldBe empty
-          triedLookup.get.notFound should contain theSameElementsAs(sourceIdentifiers)
+          triedLookup.right.get.found shouldBe empty
+          triedLookup.right.get.notFound should contain theSameElementsAs(sourceIdentifiers)
       }
     }
   }
@@ -316,12 +316,40 @@ class IdentifiersDaoTest
         case (identifiersDao, _) =>
 
           val result = for {
-           _ <-  identifiersDao.saveIdentifiers(ids.values.toList)
+           insertResult <-  identifiersDao.saveIdentifiers(ids.values.toList)
            lookupResult <- identifiersDao.lookupIds(ids.keys.toList)
-          } yield lookupResult
+          } yield (insertResult,lookupResult)
 
-          result shouldBe a[Success[_]]
-          result.get.found should contain theSameElementsAs(ids.values)
+          result shouldBe a[Right[_,_]]
+          val (insertResult,lookupResult) = result.right.get
+          lookupResult.found should contain theSameElementsAs(ids.values)
+          insertResult.succeeded should contain theSameElementsAs(lookupResult.found)
+      }
+    }
+
+    it("fails saving the identifiers if the canonical id is already present"){
+      val ids = (1 to 5).map{_ =>
+        val sourceIdentifier = createSourceIdentifier
+        (sourceIdentifier, Identifier(createCanonicalId, sourceIdentifier))
+      }.toMap
+      val identifiers = ids.values.toList
+      val duplicatedIdentifier1 = createSQLIdentifierWith(canonicalId = identifiers.apply(1).CanonicalId)
+      val duplicatedIdentifier2 = createSQLIdentifierWith(canonicalId = identifiers.apply(3).CanonicalId)
+
+      withIdentifiersDao {
+        case (identifiersDao, _) =>
+
+          val result = for {
+            _<- identifiersDao.saveIdentifiers(List(duplicatedIdentifier1, duplicatedIdentifier2))
+           insertResult <-  identifiersDao.saveIdentifiers(identifiers)
+          } yield (insertResult)
+
+          result shouldBe a[Left[_,_]]
+          result.left.get.failed should contain theSameElementsAs(identifiers.filter(i => i.CanonicalId == duplicatedIdentifier1.CanonicalId || i.CanonicalId == duplicatedIdentifier2.CanonicalId))
+          result.left.get.succeeded should contain theSameElementsAs(identifiers.filterNot(i => i.CanonicalId == duplicatedIdentifier1.CanonicalId || i.CanonicalId == duplicatedIdentifier2.CanonicalId))
+
+          val lookupResult = identifiersDao.lookupIds(ids.keys.toList).right.get
+          lookupResult.found should contain theSameElementsAs(result.left.get.succeeded)
       }
     }
   }

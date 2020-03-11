@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.idminter.database
 
-import java.sql.SQLIntegrityConstraintViolationException
+import java.sql.{BatchUpdateException, SQLIntegrityConstraintViolationException, Statement}
 
 import grizzled.slf4j.Logging
 import scalikejdbc._
@@ -10,56 +10,77 @@ import uk.ac.wellcome.platform.idminter.models.{Identifier, IdentifiersTable}
 
 import scala.collection.mutable
 import scala.concurrent.blocking
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 class IdentifiersDao(db: DB, identifiers: IdentifiersTable) extends Logging {
   case class LookupResult(found: List[Identifier], notFound: List[SourceIdentifier])
+  case class LookupError(e: Throwable)
+  case class InsertError(failed:List[Identifier], exception: Throwable, succeeded: List[Identifier])
+  case class InsertResult(succeeded: List[Identifier])
 
   implicit val session = AutoSession(db.settingsProvider)
 
   def lookupIds(sourceIdentifiers: Seq[SourceIdentifier])
-    : Try[LookupResult] = Try {
-    debug(s"Matching ($sourceIdentifiers)")
-    val sqlParametersToSourceIdentifier = buildSqlQueryParameters(sourceIdentifiers)
+    : Either[LookupError,LookupResult] = {
+    val tr = Try {
+      debug(s"Matching ($sourceIdentifiers)")
+      val sqlParametersToSourceIdentifier = buildSqlQueryParameters(sourceIdentifiers)
 
-    blocking {
+      blocking {
 
-      val i = identifiers.i
-      val query = withSQL {
+        val i = identifiers.i
+        val query = withSQL {
 
-        select
-          .from(identifiers as i)
-          .where.in((i.OntologyType, i.SourceSystem, i.SourceId), sqlParametersToSourceIdentifier.keys.toList)
+          select
+            .from(identifiers as i)
+            .where.in((i.OntologyType, i.SourceSystem, i.SourceId), sqlParametersToSourceIdentifier.keys.toList)
 
-      }.map(rs => {
-        val foundParameter = buildSqlParametersFromResult(i, rs)
-        sqlParametersToSourceIdentifier.remove(foundParameter)
-        Identifier(i)(rs)
-      }).list()
-      debug(s"Executing:'${query.statement}'")
-      val result = query.apply()
+        }.map(rs => {
+          val foundParameter = buildSqlParametersFromResult(i, rs)
+          sqlParametersToSourceIdentifier.remove(foundParameter)
+          Identifier(i)(rs)
+        }).list()
+        debug(s"Executing:'${query.statement}'")
+        val result = query.apply()
 
-      LookupResult(result, sqlParametersToSourceIdentifier.values.toList)
+        LookupResult(result, sqlParametersToSourceIdentifier.values.toList)
+      }
+    }
+    tr match {
+      case Success(r) => Right(r)
+      case Failure(e) => Left(LookupError(e))
     }
   }
 
-  def saveIdentifiers(ids: List[Identifier]) =      Try {
-    val values = ids.map(i => Seq(i.CanonicalId, i.OntologyType, i.SourceSystem, i.SourceId))
-    blocking {
-      debug(s"Putting new identifier $ids")
-      withSQL {
-        insert
-          .into(identifiers).columns(identifiers.column.CanonicalId, identifiers.column.OntologyType,identifiers.column.SourceSystem,identifiers.column.SourceId).multipleValues(values:_*)
-      }.update().apply()
+  def saveIdentifiers(ids: List[Identifier]): Either[InsertError,InsertResult] = {
+    val tried =Try {
+      val values = ids.map(i => Seq(i.CanonicalId, i.OntologyType, i.SourceSystem, i.SourceId))
+      blocking {
+        debug(s"Putting new identifier $ids")
+        withSQL {
+          insert
+            .into(identifiers).namedValues(
+            identifiers.column.CanonicalId -> sqls.?,
+            identifiers.column.OntologyType -> sqls.?,
+            identifiers.column.SourceSystem -> sqls.?,
+            identifiers.column.SourceId -> sqls.?
+          )
+        }.batch(values: _*).apply()
+        InsertResult(ids)
+      }
     }
-  } recover {
-    case e: SQLIntegrityConstraintViolationException =>
-      warn(
-        s"Unable to insert $ids because of integrity constraints: ${e.getMessage}")
-      throw IdMinterException(e)
-    case e =>
-      error(s"Failed inserting identifier $ids in database", e)
-      throw e
+    tried match {
+      case Failure(e) if e.isInstanceOf[BatchUpdateException] =>
+        val exception = e.asInstanceOf[BatchUpdateException]
+        val groupedResult = ids.zip(exception.getUpdateCounts).groupBy{
+          case (_, Statement.EXECUTE_FAILED) => Statement.EXECUTE_FAILED
+          case (_, _) => Statement.SUCCESS_NO_INFO
+        }
+        val failedIdentifiers = groupedResult.getOrElse(Statement.EXECUTE_FAILED, Nil).map { case (identifier, _) => identifier }
+        val succeededIdentifiers = groupedResult.getOrElse(Statement.SUCCESS_NO_INFO, Nil).map { case (identifier, _) => identifier }
+        Left(InsertError(failedIdentifiers, e, succeededIdentifiers))
+      case Success(r) => Right(r)
+    }
   }
 
 
