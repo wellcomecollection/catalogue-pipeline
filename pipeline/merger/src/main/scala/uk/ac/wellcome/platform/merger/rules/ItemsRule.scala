@@ -27,8 +27,7 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     FieldMergeResult(
       fieldData = mergeItems(target, sources),
       redirects = sources.filter { source =>
-        mergeMetsItems.isDefinedAt(target, List(source)) ||
-          mergeMiroPhysicalAndDigitalItems.isDefinedAt(target, List(source))
+        (mergeMetsItems(target, source) orElse mergeMiroPhysicalAndDigitalItems(target, source)).isDefined
       }
     )
 

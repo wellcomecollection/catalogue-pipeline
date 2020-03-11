@@ -31,8 +31,7 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
         case nonEmptyList  => nonEmptyList
       },
       redirects = sources.filter { source =>
-        miroIdsRule.isDefinedAt(target, List(source)) ||
-          physicalDigitalIdsRule.isDefinedAt(target, List(source))
+        (miroIdsRule(target, source) orElse physicalDigitalIdsRule(target, source)).isDefined
       }
     )
   }

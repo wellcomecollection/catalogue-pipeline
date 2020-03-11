@@ -55,21 +55,14 @@ trait FieldMergeRule {
 
     def apply(target: UnidentifiedWork,
               sources: Seq[TransformedBaseWork]): Option[FieldData] =
-      apply(target, sources, rule)
-
-    def isDefinedAt(
-      target: UnidentifiedWork,
-      sources: Seq[TransformedBaseWork]): Boolean =
-      apply(target, sources, (_, _) => true).getOrElse(false)
-
-    private def apply[T](
-      target: UnidentifiedWork,
-      sources: Seq[TransformedBaseWork],
-      f: (UnidentifiedWork, NonEmptyList[TransformedBaseWork]) => T): Option[T] =
       (isDefinedForTarget(target), sources.filter(isDefinedForSource)) match {
         case (true, head :: tail) =>
-          Some(f(target, NonEmptyList(head, tail)))
+          Some(rule(target, NonEmptyList(head, tail)))
         case _ => None
       }
+
+    def apply(target: UnidentifiedWork,
+              source: TransformedBaseWork): Option[FieldData] =
+      apply(target, List(source))
   }
 }
