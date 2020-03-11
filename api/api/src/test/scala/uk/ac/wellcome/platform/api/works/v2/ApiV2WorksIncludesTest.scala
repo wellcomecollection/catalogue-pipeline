@@ -477,4 +477,77 @@ class ApiV2WorksIncludesTest
         }
     }
   }
+
+  it("includes collection on the list endpoint if we pass ?include=collection") {
+    withApi {
+      case (indexV2, routes) =>
+        val works = List(
+          createIdentifiedWorkWith(
+            canonicalId = "1",
+            collection = Some(Collection(Some("PPMI"), "PP/MI"))),
+          createIdentifiedWorkWith(
+            canonicalId = "2",
+            collection = Some(Collection(Some("CRGH"), "CRGH"))),
+        )
+        insertIntoElasticsearch(indexV2, works: _*)
+        assertJsonResponse(routes, s"/$apiPrefix/works?include=collection") {
+          Status.OK -> s"""
+            {
+              ${resultList(apiPrefix, totalResults = 2)},
+              "results": [
+                 {
+                   "type": "Work",
+                   "id": "${works.head.canonicalId}",
+                   "title": "${works.head.data.title.get}",
+                   "alternativeTitles": [],
+                   "collection": {
+                      "label": "PPMI",
+                      "path": "PP/MI",
+                      "type" : "Collection"
+                   }
+                 },
+                 {
+                   "type": "Work",
+                   "id": "${works(1).canonicalId}",
+                   "title": "${works(1).data.title.get}",
+                   "alternativeTitles": [],
+                   "collection": {
+                      "label": "CRGH",
+                      "path": "CRGH",
+                      "type" : "Collection"
+                   }
+                }
+              ]
+            }
+          """
+        }
+    }
+  }
+
+  it(
+    "includes collection on the single work endpoint if we pass ?include=collection") {
+    withApi {
+      case (indexV2, routes) =>
+        val work = createIdentifiedWorkWith(
+          collection = Some(Collection(Some("PPMI"), "PP/MI")))
+        insertIntoElasticsearch(indexV2, work)
+        assertJsonResponse(
+          routes,
+          s"/$apiPrefix/works/${work.canonicalId}?include=collection") {
+          Status.OK -> s"""
+            {
+              ${singleWorkResult(apiPrefix)},
+              "id": "${work.canonicalId}",
+              "title": "${work.data.title.get}",
+              "alternativeTitles": [],
+              "collection": {
+                "label": "PPMI",
+                "path": "PP/MI",
+                "type" : "Collection"
+              }
+            }
+          """
+        }
+    }
+  }
 }

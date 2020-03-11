@@ -76,7 +76,8 @@ trait SingleWorkSwagger {
             "genres",
             "contributors",
             "production",
-            "notes")),
+            "notes",
+            "collection")),
         required = false,
       ),
     )

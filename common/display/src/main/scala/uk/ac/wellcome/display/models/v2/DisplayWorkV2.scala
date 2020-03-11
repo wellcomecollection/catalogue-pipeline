@@ -90,6 +90,10 @@ case class DisplayWorkV2(
     `type` = "Integer",
     description = "The playing time for audiovisual works, in seconds."
   ) duration: Option[Int] = None,
+  @Schema(
+    `type` = "Collection",
+    description = "The collection a work is part of."
+  ) collection: Option[DisplayCollection] = None,
   @JsonKey("type") @Schema(name = "type") ontologyType: String = "Work"
 ) extends DisplayWork
 
@@ -143,6 +147,10 @@ case object DisplayWorkV2 {
           Some(DisplayNote.merge(work.data.notes.map(DisplayNote(_))))
         else None,
       duration = work.data.duration,
+      collection =
+        if (includes.collection)
+          work.data.collection.map(DisplayCollection(_))
+        else None
     )
 
   def apply(work: IdentifiedWork): DisplayWorkV2 =
