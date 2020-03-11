@@ -483,8 +483,10 @@ class ApiV2WorksIncludesTest
       case (indexV2, routes) =>
         val works = List(
           createIdentifiedWorkWith(
+            canonicalId = "1",
             collection = Some(Collection(Some("PPMI"), "PP/MI"))),
           createIdentifiedWorkWith(
+            canonicalId = "2",
             collection = Some(Collection(Some("CRGH"), "CRGH"))),
         )
         insertIntoElasticsearch(indexV2, works: _*)
