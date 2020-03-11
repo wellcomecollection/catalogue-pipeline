@@ -25,14 +25,44 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     target: UnidentifiedWork,
     sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData] =
     FieldMergeResult(
-      fieldData = mergeMetsItems(target, sources)
-        .orElse(mergeMiroPhysicalAndDigitalItems(target, sources))
-        .getOrElse(target.data.items)
+      fieldData = mergeItems(target, sources),
       redirects = sources.filter { source =>
         mergeMetsItems.isDefinedAt(target, List(source)) ||
           mergeMiroPhysicalAndDigitalItems.isDefinedAt(target, List(source))
       }
     )
+
+  private def mergeItems(target: UnidentifiedWork, sources: Seq[TransformedBaseWork]): FieldData = {
+    val mergedTarget = mergeCalmItems(target, sources)
+      .map(items => target.withData(_.copy(items = items)))
+      .getOrElse(target)
+    mergeMetsItems(mergedTarget, sources)
+      .orElse(mergeMiroPhysicalAndDigitalItems(mergedTarget, sources))
+      .getOrElse(mergedTarget.data.items)
+  }
+
+  private val mergeCalmItems = new PartialRule {
+    val isDefinedForTarget: WorkPredicate = WorkPredicates.sierraWork
+    val isDefinedForSource: WorkPredicate = WorkPredicates.calmWork
+
+    def rule(target: UnidentifiedWork,
+             sources: NonEmptyList[TransformedBaseWork]): FieldData = {
+
+      // The Calm transformer always creates a single item with a physical
+      // location so this is safe
+      val calmLocation = sources.head.data.items.head.locations.head
+
+      target.data.items match {
+        case List(item) => List(
+          item.copy(
+            locations = mergeLocations(calmLocation, item.locations)
+          )
+        )
+      }
+    }
+
+    def mergeLocations(calmLocation: Location, sierraLocations: List[Location]): List[Location] = ???
+  }
 
   private val mergeMetsItems = new PartialRule {
     val isDefinedForTarget: WorkPredicate = WorkPredicates.sierraWork
