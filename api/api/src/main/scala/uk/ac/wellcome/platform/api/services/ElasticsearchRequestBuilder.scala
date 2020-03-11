@@ -142,8 +142,11 @@ case class ElasticsearchRequestBuilder(
         termsQuery(
           field = "data.items.locations.license.id",
           values = licenseIds)
+      case CollectionPathFilter(path) =>
+        termQuery(field = "data.collection.path", value = path)
       case CollectionDepthFilter(depth) =>
         termQuery(field = "data.collection.depth", value = depth)
+
     }
 
   implicit class EnhancedTermsAggregation(agg: TermsAggregation) {

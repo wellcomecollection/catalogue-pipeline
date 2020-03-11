@@ -259,6 +259,12 @@ trait MultipleWorksSwagger {
         required = false
       ),
       new Parameter(
+        name = "collection",
+        in = ParameterIn.QUERY,
+        description = "Testing. Considered Unstable.",
+        required = false
+      ),
+      new Parameter(
         name = "collection.depth",
         in = ParameterIn.QUERY,
         description = "Testing. Considered Unstable.",
