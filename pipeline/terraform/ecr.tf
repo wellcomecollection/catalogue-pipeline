@@ -14,6 +14,10 @@ resource "aws_ecr_repository" "ecr_repository_transformer_mets" {
   name = "uk.ac.wellcome/transformer_mets"
 }
 
+resource "aws_ecr_repository" "ecr_repository_transformer_calm" {
+  name = "uk.ac.wellcome/transformer_calm"
+}
+
 resource "aws_ecr_repository" "ecr_repository_id_minter" {
   name = "uk.ac.wellcome/id_minter"
 }

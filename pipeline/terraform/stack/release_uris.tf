@@ -8,6 +8,7 @@ locals {
     "transformer_miro",
     "transformer_mets",
     "transformer_sierra",
+    "transformer_calm",
   ]
 }
 
@@ -28,4 +29,5 @@ locals {
   transformer_miro_image   = local.image_ids["transformer_miro"]
   transformer_mets_image   = local.image_ids["transformer_mets"]
   transformer_sierra_image = local.image_ids["transformer_sierra"]
+  transformer_calm_image   = local.image_ids["transformer_calm"]
 }
