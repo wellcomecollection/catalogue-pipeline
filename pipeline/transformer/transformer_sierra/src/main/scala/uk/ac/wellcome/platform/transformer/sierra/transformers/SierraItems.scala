@@ -39,7 +39,7 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
             locations = physicalItem.locations ++ digitalItem.locations
           )
         )
-      case _ => physicalItems ++ List(maybeDigitalItem).flatten
+      case _ => physicalItems ++ maybeDigitalItem.toList
     }
   }
 
