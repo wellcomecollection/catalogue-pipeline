@@ -30,7 +30,32 @@ case class MergedImage[Id <: IdState](
       id = id,
       location = location
     )
+
+  def augment(inferredData: => InferredData): AugmentedImage[Id] =
+    AugmentedImage[Id](
+      id = id,
+      location = location,
+      parentWork = parentWork,
+      fullText = fullText,
+      inferredData = Some(inferredData)
+    )
 }
+
+case class AugmentedImage[Id <: IdState](
+  id: Id,
+  location: DigitalLocation,
+  parentWork: Id,
+  fullText: Option[String] = None,
+  inferredData: Option[InferredData] = None
+) extends BaseImage[Id]
+
+case class InferredData(
+  // We split the feature vector so that it can fit into
+  // ES's dense vector type (max length 2048)
+  features1: List[Float],
+  features2: List[Float],
+  lshEncodedFeatures: List[String]
+)
 
 object UnmergedImage {
   def apply(sourceIdentifier: SourceIdentifier,

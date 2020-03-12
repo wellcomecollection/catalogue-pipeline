@@ -333,6 +333,10 @@ object CatalogueDependencies {
       ExternalDependencies.circeOpticsDependencies ++
       WellcomeDependencies.messagingTypesafeLibrary
 
+  // Inference  manager
+  val inferenceManagerDependencies: Seq[ModuleID] =
+    ExternalDependencies.akkaHttpDependencies
+
   // Snapshots stack
 
   val snapshotGeneratorDependencies: Seq[ModuleID] =
