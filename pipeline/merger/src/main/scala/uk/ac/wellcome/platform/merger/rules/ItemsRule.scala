@@ -65,7 +65,7 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     }
 
     def mergeLocations(calmLocation: Location,
-                       sierraLocations: List[Location]): List[Location] = ???
+                       sierraLocations: List[Location]): List[Location] = List(calmLocation)
   }
 
   private val mergeMetsItems = new PartialRule {
