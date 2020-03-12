@@ -27,11 +27,13 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
       physicalDigitalIdsRule(target, sources) getOrElse Nil
     FieldMergeResult(
       fieldData = (physicalDigitalIds ++ miroIds).distinct match {
-        case Nil           => target.otherIdentifiers
-        case nonEmptyList  => nonEmptyList
+        case Nil          => target.otherIdentifiers
+        case nonEmptyList => nonEmptyList
       },
       redirects = sources.filter { source =>
-        (miroIdsRule(target, source) orElse physicalDigitalIdsRule(target, source)).isDefined
+        (miroIdsRule(target, source) orElse physicalDigitalIdsRule(
+          target,
+          source)).isDefined
       }
     )
   }

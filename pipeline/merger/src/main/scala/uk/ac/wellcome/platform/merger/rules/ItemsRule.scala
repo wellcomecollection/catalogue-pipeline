@@ -27,11 +27,14 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     FieldMergeResult(
       fieldData = mergeItems(target, sources),
       redirects = sources.filter { source =>
-        (mergeMetsItems(target, source) orElse mergeMiroPhysicalAndDigitalItems(target, source)).isDefined
+        (mergeMetsItems(target, source) orElse mergeMiroPhysicalAndDigitalItems(
+          target,
+          source)).isDefined
       }
     )
 
-  private def mergeItems(target: UnidentifiedWork, sources: Seq[TransformedBaseWork]): FieldData = {
+  private def mergeItems(target: UnidentifiedWork,
+                         sources: Seq[TransformedBaseWork]): FieldData = {
     val mergedTarget = mergeCalmItems(target, sources)
       .map(items => target.withData(_.copy(items = items)))
       .getOrElse(target)
@@ -52,15 +55,17 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
       val calmLocation = sources.head.data.items.head.locations.head
 
       target.data.items match {
-        case List(item) => List(
-          item.copy(
-            locations = mergeLocations(calmLocation, item.locations)
+        case List(item) =>
+          List(
+            item.copy(
+              locations = mergeLocations(calmLocation, item.locations)
+            )
           )
-        )
       }
     }
 
-    def mergeLocations(calmLocation: Location, sierraLocations: List[Location]): List[Location] = ???
+    def mergeLocations(calmLocation: Location,
+                       sierraLocations: List[Location]): List[Location] = ???
   }
 
   private val mergeMetsItems = new PartialRule {
