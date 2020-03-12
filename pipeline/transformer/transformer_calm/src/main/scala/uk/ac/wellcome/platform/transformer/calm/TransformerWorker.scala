@@ -72,7 +72,7 @@ trait TransformerWorker[In, SenderDest] extends Logging {
     }
 
   private def getRecord(key: StoreKey): Result[(In, StoreKey)] =
-    store.get(key) match {
+    store.getLatest(key.id) match {
       case Left(err)                     => Left(StoreReadError(err.toString, key))
       case Right(Identified(key, entry)) => Right((entry, key))
     }
@@ -95,7 +95,6 @@ trait TransformerWorker[In, SenderDest] extends Logging {
                     error(s"$name: TransformerError on $sourceData with $key")
                   case MessageSendError(_, work, key) =>
                     error(s"$name: MessageSendError on $work with $key")
-
                 }
                 Future.failed(err)
               }
