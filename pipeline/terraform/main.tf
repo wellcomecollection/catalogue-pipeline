@@ -34,6 +34,11 @@ module "catalogue_pipeline_20200228" {
     local.mets_adapter_topic_arn,
   ]
 
+  calm_adapter_topic_arns = [
+    //    local.mets_reindexer_topic_arn,
+    local.calm_adapter_topic_arn,
+  ]
+
   # Elasticsearch
   es_works_index = "v2-20200228"
 
@@ -41,11 +46,14 @@ module "catalogue_pipeline_20200228" {
   rds_ids_access_security_group_id = local.rds_access_security_group_id
 
   # Adapter VHS
-  vhs_sierra_read_policy            = local.vhs_sierra_read_policy
   vhs_miro_read_policy              = local.vhs_miro_read_policy
+  vhs_sierra_read_policy            = local.vhs_sierra_read_policy
   vhs_sierra_sourcedata_bucket_name = local.vhs_sierra_sourcedata_bucket_name
   vhs_sierra_sourcedata_table_name  = local.vhs_sierra_sourcedata_table_name
   mets_adapter_read_policy          = local.mets_adapter_read_policy
   mets_adapter_table_name           = local.mets_adapter_table_name
+  vhs_calm_read_policy              = local.vhs_calm_read_policy
+  vhs_calm_sourcedata_bucket_name   = local.vhs_calm_sourcedata_bucket_name
+  vhs_calm_sourcedata_table_name    = local.vhs_calm_sourcedata_table_name
   read_storage_s3_role_arn          = aws_iam_role.read_storage_s3.arn
 }
