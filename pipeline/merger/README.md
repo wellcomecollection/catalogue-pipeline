@@ -1,6 +1,6 @@
 # Merger
 
-Merging rules are applied per field, with a matching rule being applied to a single `target` (a Sierra work) and one or more`sources`.
+Merging rules are applied per field, with a matching rule being applied to a single `target` (a Sierra work) and one or more `sources`.
 
 ## Items
 
