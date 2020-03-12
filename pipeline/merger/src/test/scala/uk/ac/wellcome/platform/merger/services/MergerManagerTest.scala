@@ -75,7 +75,7 @@ class MergerManagerTest extends FunSpec with Matchers with WorksGenerators {
 
     override protected def createMergeResult(
       target: UnidentifiedWork,
-      sources: Seq[TransformedBaseWork]): RedirectsAccumulator[MergeResult] =
+      sources: Seq[TransformedBaseWork]): MergeState =
       State(_ => (sources.toSet, MergeResult(target, Nil)))
   }
 

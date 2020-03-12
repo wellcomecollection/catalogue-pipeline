@@ -42,10 +42,6 @@ trait FieldMergeRule {
   def merge(target: UnidentifiedWork,
             sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData]
 
-  protected val identityOnTarget: PartialFunction[Params, UnidentifiedWork] = {
-    case (target, _) => target
-  }
-
   protected trait PartialRule {
     val isDefinedForTarget: WorkPredicate
     val isDefinedForSource: WorkPredicate
@@ -56,8 +52,8 @@ trait FieldMergeRule {
     def apply(target: UnidentifiedWork,
               sources: Seq[TransformedBaseWork]): Option[FieldData] =
       (isDefinedForTarget(target), sources.filter(isDefinedForSource)) match {
-        case (true, head :: tail) =>
-          Some(rule(target, NonEmptyList(head, tail)))
+        case (true, head +: tail) =>
+          Some(rule(target, NonEmptyList(head, tail.toList)))
         case _ => None
       }
 

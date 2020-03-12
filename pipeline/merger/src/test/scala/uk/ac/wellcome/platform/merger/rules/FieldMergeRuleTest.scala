@@ -1,6 +1,8 @@
 package uk.ac.wellcome.platform.merger.rules
 
 import org.scalatest.{FunSpec, Matchers}
+import cats.data.NonEmptyList
+
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.{
   TransformedBaseWork,
@@ -14,7 +16,7 @@ class FieldMergeRuleTest
     with Matchers
     with FieldMergeRule
     with WorksGenerators {
-  override protected type FieldData = Option[String]
+  override protected type FieldData = Unit
 
   val targetTitleIsA = new PartialRule {
     override val isDefinedForTarget: WorkPredicate =
@@ -22,7 +24,7 @@ class FieldMergeRuleTest
     override val isDefinedForSource: WorkPredicate = _ => true
 
     override def rule(target: UnidentifiedWork,
-                      sources: Seq[TransformedBaseWork]): FieldData = None
+                      sources: NonEmptyList[TransformedBaseWork]): FieldData = ()
   }
   val sourceTitleIsA = new PartialRule {
     override val isDefinedForTarget: WorkPredicate = _ => true
@@ -30,7 +32,7 @@ class FieldMergeRuleTest
       work => work.data.title.contains("A")
 
     override def rule(target: UnidentifiedWork,
-                      sources: Seq[TransformedBaseWork]): FieldData = None
+                      sources: NonEmptyList[TransformedBaseWork]): FieldData = ()
   }
 
   val workWithTitleA = createUnidentifiedWorkWith(title = Some("A"))
@@ -39,15 +41,15 @@ class FieldMergeRuleTest
   describe("PartialRule") {
     it(
       "is a partial function that is defined only for targets satisfying isDefinedForTarget") {
-      targetTitleIsA.isDefinedAt((workWithTitleA, List(workWithTitleB))) shouldBe true
-      targetTitleIsA.isDefinedAt((workWithTitleB, List(workWithTitleB))) shouldBe false
+      targetTitleIsA(workWithTitleA, List(workWithTitleB)).isDefined shouldBe true
+      targetTitleIsA(workWithTitleB, List(workWithTitleB)).isDefined shouldBe false
     }
 
     it(
       "is a partial function that is defined only if at least one source satisfies isDefinedForSource") {
-      sourceTitleIsA.isDefinedAt(
-        (workWithTitleB, List(workWithTitleA, workWithTitleB))) shouldBe true
-      sourceTitleIsA.isDefinedAt((workWithTitleB, List(workWithTitleB))) shouldBe false
+      sourceTitleIsA(
+        workWithTitleB, List(workWithTitleA, workWithTitleB)).isDefined shouldBe true
+      sourceTitleIsA(workWithTitleB, List(workWithTitleB)).isDefined shouldBe false
     }
 
     it(
@@ -58,14 +60,14 @@ class FieldMergeRuleTest
           work => work.data.title.contains("A")
 
         override def rule(target: UnidentifiedWork,
-                          sources: Seq[TransformedBaseWork]): FieldData = {
-          sources should contain(workWithTitleA)
-          sources should not contain workWithTitleB
+                          sources: NonEmptyList[TransformedBaseWork]): FieldData = {
+          sources.toList should contain(workWithTitleA)
+          sources.toList should not contain workWithTitleB
           None
         }
       }
 
-      rule((workWithTitleB, List(workWithTitleA, workWithTitleB)))
+      rule(workWithTitleB, List(workWithTitleA, workWithTitleB))
     }
   }
 
