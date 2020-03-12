@@ -35,7 +35,7 @@ module "catalogue_pipeline_20200228" {
   ]
 
   calm_adapter_topic_arns = [
-    //    local.mets_reindexer_topic_arn,
+    //    local.calm_reindexer_topic_arn,
     local.calm_adapter_topic_arn,
   ]
 
