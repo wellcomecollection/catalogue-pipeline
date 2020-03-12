@@ -13,7 +13,7 @@ import scala.concurrent.blocking
 import scala.util.{Failure, Success, Try}
 
 class IdentifiersDao(db: DB, identifiers: IdentifiersTable) extends Logging {
-  case class LookupResult(found: List[Identifier], notFound: List[SourceIdentifier])
+  case class LookupResult(found: Map[SourceIdentifier,Identifier], notFound: List[SourceIdentifier])
   case class LookupError(e: Throwable)
   case class InsertError(failed:List[Identifier], exception: Throwable, succeeded: List[Identifier])
   case class InsertResult(succeeded: List[Identifier])
@@ -37,11 +37,14 @@ class IdentifiersDao(db: DB, identifiers: IdentifiersTable) extends Logging {
 
         }.map(rs => {
           val foundParameter = buildSqlParametersFromResult(i, rs)
-          sqlParametersToSourceIdentifier.remove(foundParameter)
-          Identifier(i)(rs)
+          sqlParametersToSourceIdentifier.remove(foundParameter) match {
+            case Some(sourceIdentifier) => (sourceIdentifier,Identifier(i)(rs))
+            case None => ???
+          }
+
         }).list()
         debug(s"Executing:'${query.statement}'")
-        val result = query.apply()
+        val result = query.apply().toMap
 
         LookupResult(result, sqlParametersToSourceIdentifier.values.toList)
       }
@@ -70,6 +73,7 @@ class IdentifiersDao(db: DB, identifiers: IdentifiersTable) extends Logging {
       }
     }
     tried match {
+      case Success(r) => Right(r)
       case Failure(e) if e.isInstanceOf[BatchUpdateException] =>
         val exception = e.asInstanceOf[BatchUpdateException]
         val groupedResult = ids.zip(exception.getUpdateCounts).groupBy{
@@ -79,7 +83,7 @@ class IdentifiersDao(db: DB, identifiers: IdentifiersTable) extends Logging {
         val failedIdentifiers = groupedResult.getOrElse(Statement.EXECUTE_FAILED, Nil).map { case (identifier, _) => identifier }
         val succeededIdentifiers = groupedResult.getOrElse(Statement.SUCCESS_NO_INFO, Nil).map { case (identifier, _) => identifier }
         Left(InsertError(failedIdentifiers, e, succeededIdentifiers))
-      case Success(r) => Right(r)
+      case Failure(exception) => Left(InsertError(ids, exception, Nil))
     }
   }
 
