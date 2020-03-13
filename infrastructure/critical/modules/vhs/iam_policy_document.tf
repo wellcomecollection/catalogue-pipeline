@@ -11,7 +11,7 @@ data "aws_iam_policy_document" "read_policy" {
     ]
 
     resources = [
-      "${local.table_arn}",
+      local.table_arn,
     ]
   }
 
@@ -35,7 +35,7 @@ data "aws_iam_policy_document" "full_access_policy" {
     ]
 
     resources = [
-      "${local.table_arn}",
+      local.table_arn,
 
       # Allow access to the GSIs on the table
       "${local.table_arn}/*",

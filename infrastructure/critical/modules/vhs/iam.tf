@@ -2,23 +2,23 @@
 
 resource "aws_iam_role" "assumable_read_role" {
   name               = "${var.name}-assumable_read_role"
-  assume_role_policy = "${data.aws_iam_policy_document.assume_read_role.json}"
+  assume_role_policy = data.aws_iam_policy_document.assume_read_role.json
 }
 
 data "aws_iam_policy_document" "assume_read_role" {
-  "statement" {
+  statement {
     actions = [
       "sts:AssumeRole",
     ]
 
     principals {
-      identifiers = ["${var.read_principals}"]
+      identifiers = var.read_principles
       type        = "AWS"
     }
   }
 }
 
 resource "aws_iam_role_policy" "read" {
-  role   = "${aws_iam_role.assumable_read_role.id}"
-  policy = "${data.aws_iam_policy_document.read_policy.json}"
+  role   = aws_iam_role.assumable_read_role.id
+  policy = data.aws_iam_policy_document.read_policy.json
 }

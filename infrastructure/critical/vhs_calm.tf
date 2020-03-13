@@ -1,6 +1,7 @@
-module "vhs_calm_sourcedata" {
-  source = "./vhs"
-  name   = "calm"
+module "vhs_calm" {
+  source = "./modules/vhs"
+  name   = "sourcedata-calm"
 
-  read_principals = ["${local.read_principles}"]
+  read_principles = local.read_principles
 }
+

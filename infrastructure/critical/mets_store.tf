@@ -1,4 +1,3 @@
-
 resource "aws_dynamodb_table" "mets_adapter_table" {
   name     = "mets-adapter-store"
   hash_key = "id"
@@ -22,9 +21,7 @@ data "aws_iam_policy_document" "mets_dynamo_full_access_policy" {
     ]
 
     resources = [
-      "${aws_dynamodb_table.mets_adapter_table.arn}",
-
-      # Allow access to the GSIs on the table
+      aws_dynamodb_table.mets_adapter_table.arn,
       "${aws_dynamodb_table.mets_adapter_table.arn}/*",
     ]
   }
@@ -43,7 +40,8 @@ data "aws_iam_policy_document" "mets_dynamo_read_policy" {
     ]
 
     resources = [
-      "${aws_dynamodb_table.mets_adapter_table.arn}",
+      aws_dynamodb_table.mets_adapter_table.arn,
     ]
   }
 }
+

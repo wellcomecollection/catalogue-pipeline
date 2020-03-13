@@ -1,7 +1,7 @@
 data "aws_caller_identity" "current" {}
 
 locals {
-  account_id = "${data.aws_caller_identity.current.account_id}"
+  account_id = data.aws_caller_identity.current.account_id
 
   table_name  = "${var.table_name_prefix}${var.name}"
   bucket_name = "${var.bucket_name_prefix}${lower(var.name)}"
