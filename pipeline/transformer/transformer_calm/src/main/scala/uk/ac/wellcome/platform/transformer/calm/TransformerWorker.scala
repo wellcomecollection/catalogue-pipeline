@@ -44,7 +44,8 @@ trait TransformerWorker[In, SenderDest] extends Logging {
   val transformer: Transformer[In]
   val concurrentTransformations: Int = 2
 
-  def process(message: NotificationMessage): Result[Unit] = {
+  def process(
+    message: NotificationMessage): Result[(TransformedBaseWork, StoreKey)] = {
     for {
       key <- decodeKey(message)
       recordAndKey <- getRecord(key)
@@ -59,10 +60,11 @@ trait TransformerWorker[In, SenderDest] extends Logging {
       case Right(result) => Right(result)
     }
 
-  private def done(work: TransformedBaseWork, key: StoreKey): Result[Unit] =
+  private def done(work: TransformedBaseWork,
+                   key: StoreKey): Result[(TransformedBaseWork, StoreKey)] =
     sender.sendT(work) toEither match {
       case Left(err) => Left(MessageSendError(err.toString, work, key))
-      case Right(_)  => Right((): Unit)
+      case Right(_)  => Right((work, key))
     }
 
   private def decodeKey(message: NotificationMessage): Result[StoreKey] =
@@ -98,7 +100,10 @@ trait TransformerWorker[In, SenderDest] extends Logging {
                 }
                 Future.failed(err)
               }
-              case Right(_) => Future.successful(message)
+              case Right((work, key)) => {
+                info(s"$name: from $key transformed $work")
+                Future.successful(message)
+              }
             }
         }
       }
