@@ -12,7 +12,7 @@ data "aws_iam_policy_document" "assume_read_role" {
     ]
 
     principals {
-      identifiers = var.read_principals
+      identifiers = var.read_principles
       type        = "AWS"
     }
   }

@@ -16,7 +16,7 @@ variable "aws_region" {
   default = "eu-west-1"
 }
 
-variable "read_principals" {
+variable "read_principles" {
   default = []
   type    = list(string)
 }
