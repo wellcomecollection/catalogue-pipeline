@@ -17,6 +17,7 @@ SOURCES = {
     "sierra": "vhs-sourcedata-sierra",
     "sierra-items": "vhs-sourcedata-sierra-items",
     "mets": "mets-adapter-store",
+    "calm": "vhs-sourcedata-calm",
 }
 
 DESTINATIONS = ["catalogue", "reporting"]
