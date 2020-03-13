@@ -1,7 +1,7 @@
 resource "aws_security_group" "database_sg" {
   description = "controls direct access to application instances"
   vpc_id      = var.vpc_id
-  name        = "${var.database_name}_sg"
+  name        = "${var.database_name}_database_sg"
 
   ingress {
     protocol  = "tcp"
