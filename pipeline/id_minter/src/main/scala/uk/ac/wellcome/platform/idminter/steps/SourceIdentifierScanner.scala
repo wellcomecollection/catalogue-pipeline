@@ -12,30 +12,36 @@ import scala.annotation.tailrec
 import scala.util.{Failure, Success, Try}
 
 object SourceIdentifierScanner extends Logging {
-  def update(inputJson: Json, identifiers: Map[SourceIdentifier, Identifier]): Try[Json] =
+  def update(inputJson: Json,
+             identifiers: Map[SourceIdentifier, Identifier]): Try[Json] =
     Try {
       root.sourceIdentifier.json.getOption(inputJson) match {
         case Some(sourceIdentifierJson) =>
           val sourceIdentifier = parseSourceIdentifier(sourceIdentifierJson)
           identifiers.get(sourceIdentifier) match {
             case Some(identifier) =>
-              root.obj.modify(json => ("canonicalId", Json.fromString(identifier.CanonicalId)) +: json)(inputJson)
-            case None => throw new RuntimeException(s"Could not find $sourceIdentifier in $identifiers")
+              root.obj.modify(json =>
+                ("canonicalId", Json.fromString(identifier.CanonicalId)) +: json)(
+                inputJson)
+            case None =>
+              throw new RuntimeException(
+                s"Could not find $sourceIdentifier in $identifiers")
           }
 
-      case None => ???
+        case None => ???
+      }
     }
-}
-
-
 
   def scan(inputJson: Json): Try[List[SourceIdentifier]] =
-    Try(iterate(root.each.json.getAll(inputJson), findIdentifier(root.sourceIdentifier.json.getOption(inputJson)).toList))
+    Try(
+      iterate(
+        root.each.json.getAll(inputJson),
+        findIdentifier(root.sourceIdentifier.json.getOption(inputJson)).toList))
 
   @tailrec
   private def iterate(
-                       children: List[Json],
-                       identifiers: List[SourceIdentifier]): List[SourceIdentifier] =
+    children: List[Json],
+    identifiers: List[SourceIdentifier]): List[SourceIdentifier] =
     children match {
       case Nil => identifiers
       case headChild :: tailChildren =>
@@ -57,7 +63,7 @@ object SourceIdentifierScanner extends Logging {
     }
 
   private def parseSourceIdentifier(
-                                     sourceIdentifierJson: Json): SourceIdentifier = {
+    sourceIdentifierJson: Json): SourceIdentifier = {
     fromJson[SourceIdentifier](sourceIdentifierJson.toString()) match {
       case Success(sourceIdentifier) => sourceIdentifier
       case Failure(exception) =>

@@ -17,7 +17,8 @@ class IdentifiersDaoTest
     extends FunSpec
     with fixtures.IdentifiersDatabase
     with Matchers
-    with IdentifiersGenerators with SqlIdentifiersGenerators{
+    with IdentifiersGenerators
+    with SqlIdentifiersGenerators {
 
   def withIdentifiersDao[R](
     testWith: TestWith[(IdentifiersDao, IdentifiersTable), R]): R =
@@ -199,97 +200,108 @@ class IdentifiersDaoTest
 
       withIdentifiersDao {
         case (identifiersDao, _) =>
-          val triedLookup = for{
-            _ <-identifiersDao.saveIdentifiers(List(identifier))
-            lookupResult <-identifiersDao.lookupIds(List(sourceIdentifier))
-          } yield(lookupResult)
+          val triedLookup = for {
+            _ <- identifiersDao.saveIdentifiers(List(identifier))
+            lookupResult <- identifiersDao.lookupIds(List(sourceIdentifier))
+          } yield (lookupResult)
 
-          triedLookup shouldBe a [Right[_,_]]
-          triedLookup.right.get.found shouldBe Map(sourceIdentifier->identifier)
+          triedLookup shouldBe a[Right[_, _]]
+          triedLookup.right.get.found shouldBe Map(
+            sourceIdentifier -> identifier)
           triedLookup.right.get.notFound shouldBe empty
       }
     }
 
     it("retrieves multiple ids from the identifiers database") {
-      val identifiersMap = (1 to 3).map {_ =>
+      val identifiersMap = (1 to 3).map { _ =>
         val sourceIdentifier = createSourceIdentifier
-        val identifier = createSQLIdentifierWith(sourceIdentifier = sourceIdentifier)
+        val identifier =
+          createSQLIdentifierWith(sourceIdentifier = sourceIdentifier)
         (sourceIdentifier, identifier)
       }.toMap
 
       withIdentifiersDao {
         case (identifiersDao, _) =>
-          val triedLookup = for{
-            _ <-identifiersDao.saveIdentifiers(identifiersMap.values.toList)
-            lookupResult <-identifiersDao.lookupIds(identifiersMap.keys.toList)
-          } yield(lookupResult)
+          val triedLookup = for {
+            _ <- identifiersDao.saveIdentifiers(identifiersMap.values.toList)
+            lookupResult <- identifiersDao.lookupIds(identifiersMap.keys.toList)
+          } yield (lookupResult)
 
-          triedLookup shouldBe a [Right[_,_]]
-        triedLookup.right.get.found shouldBe identifiersMap
-        triedLookup.right.get.notFound shouldBe empty
-      }
-    }
-
-    it("matches correctly the ids to the sourceIdentifier when the sourceIdentifiers have overlapping values") {
-      val sourceIdentifier = createSourceIdentifier
-      val overlappingSourceIdentifier = sourceIdentifier.copy(ontologyType = "Item")
-      val sourceIdentifiers = List(sourceIdentifier, overlappingSourceIdentifier)
-      val identifiers = sourceIdentifiers.map (sourceIdentifier =>createSQLIdentifierWith(sourceIdentifier = sourceIdentifier))
-
-      withIdentifiersDao {
-        case (identifiersDao, _) =>
-          val triedLookup = for{
-            _ <-identifiersDao.saveIdentifiers(identifiers)
-            lookupResult <-identifiersDao.lookupIds(sourceIdentifiers)
-          } yield(lookupResult)
-
-          triedLookup shouldBe a [Right[_,_]]
-          triedLookup.right.get.found shouldBe sourceIdentifiers.zip(identifiers).toMap
+          triedLookup shouldBe a[Right[_, _]]
+          triedLookup.right.get.found shouldBe identifiersMap
           triedLookup.right.get.notFound shouldBe empty
       }
     }
 
-    it("retrieves multiple ids and returns the ones it doesn't have in notFound") {
-      val identifiersMap = (1 to 3).map {_ =>
-        val sourceIdentifier = createSourceIdentifier
-        val identifier = createSQLIdentifierWith(sourceIdentifier = sourceIdentifier)
-        (sourceIdentifier, identifier)
-      }.toMap
-      val nonExistingSourceIdentifiers = (1 to 2).map (_ => createSourceIdentifier).toList
+    it(
+      "matches correctly the ids to the sourceIdentifier when the sourceIdentifiers have overlapping values") {
+      val sourceIdentifier = createSourceIdentifier
+      val overlappingSourceIdentifier =
+        sourceIdentifier.copy(ontologyType = "Item")
+      val sourceIdentifiers =
+        List(sourceIdentifier, overlappingSourceIdentifier)
+      val identifiers = sourceIdentifiers.map(sourceIdentifier =>
+        createSQLIdentifierWith(sourceIdentifier = sourceIdentifier))
 
       withIdentifiersDao {
         case (identifiersDao, _) =>
-          val triedLookup = for{
-            _ <-identifiersDao.saveIdentifiers(identifiersMap.values.toList)
-            lookupResult <-identifiersDao.lookupIds(identifiersMap.keys.toList ++ nonExistingSourceIdentifiers)
-          } yield(lookupResult)
+          val triedLookup = for {
+            _ <- identifiersDao.saveIdentifiers(identifiers)
+            lookupResult <- identifiersDao.lookupIds(sourceIdentifiers)
+          } yield (lookupResult)
 
-          triedLookup shouldBe a [Right[_,_]]
+          triedLookup shouldBe a[Right[_, _]]
+          triedLookup.right.get.found shouldBe sourceIdentifiers
+            .zip(identifiers)
+            .toMap
+          triedLookup.right.get.notFound shouldBe empty
+      }
+    }
+
+    it(
+      "retrieves multiple ids and returns the ones it doesn't have in notFound") {
+      val identifiersMap = (1 to 3).map { _ =>
+        val sourceIdentifier = createSourceIdentifier
+        val identifier =
+          createSQLIdentifierWith(sourceIdentifier = sourceIdentifier)
+        (sourceIdentifier, identifier)
+      }.toMap
+      val nonExistingSourceIdentifiers =
+        (1 to 2).map(_ => createSourceIdentifier).toList
+
+      withIdentifiersDao {
+        case (identifiersDao, _) =>
+          val triedLookup = for {
+            _ <- identifiersDao.saveIdentifiers(identifiersMap.values.toList)
+            lookupResult <- identifiersDao.lookupIds(
+              identifiersMap.keys.toList ++ nonExistingSourceIdentifiers)
+          } yield (lookupResult)
+
+          triedLookup shouldBe a[Right[_, _]]
 
           triedLookup.right.get.found shouldBe identifiersMap
           triedLookup.right.get.notFound should contain theSameElementsAs (nonExistingSourceIdentifiers)
       }
     }
 
-  it("returns all of the sourceIdentifiers as notFound if it can't find any of the identifiers") {
-      val sourceIdentifiers = (1 to 3).map (_ => createSourceIdentifier).toList
+    it(
+      "returns all of the sourceIdentifiers as notFound if it can't find any of the identifiers") {
+      val sourceIdentifiers = (1 to 3).map(_ => createSourceIdentifier).toList
 
       withIdentifiersDao {
         case (identifiersDao, _) =>
-
-
           val triedLookup = identifiersDao.lookupIds(
             sourceIdentifiers
           )
           triedLookup.right.get.found shouldBe empty
-          triedLookup.right.get.notFound should contain theSameElementsAs(sourceIdentifiers)
+          triedLookup.right.get.notFound should contain theSameElementsAs (sourceIdentifiers)
       }
     }
   }
 
-  describe("saveIdentifiers"){
+  describe("saveIdentifiers") {
 
-    it("saves a single identifier in the database"){
+    it("saves a single identifier in the database") {
       val identifier = createSQLIdentifier
 
       withIdentifiersDao {
@@ -311,67 +323,73 @@ class IdentifiersDaoTest
       }
     }
 
-    it("saves multiple identifiers in the database"){
-      val ids = (1 to 3).map{_ =>
+    it("saves multiple identifiers in the database") {
+      val ids = (1 to 3).map { _ =>
         val sourceIdentifier = createSourceIdentifier
         (sourceIdentifier, Identifier(createCanonicalId, sourceIdentifier))
       }.toMap
 
       withIdentifiersDao {
         case (identifiersDao, _) =>
-
           val result = for {
-           insertResult <-  identifiersDao.saveIdentifiers(ids.values.toList)
-           lookupResult <- identifiersDao.lookupIds(ids.keys.toList)
-          } yield (insertResult,lookupResult)
+            insertResult <- identifiersDao.saveIdentifiers(ids.values.toList)
+            lookupResult <- identifiersDao.lookupIds(ids.keys.toList)
+          } yield (insertResult, lookupResult)
 
-          result shouldBe a[Right[_,_]]
-          val (insertResult,lookupResult) = result.right.get
+          result shouldBe a[Right[_, _]]
+          val (insertResult, lookupResult) = result.right.get
           lookupResult.found shouldBe ids
-          insertResult.succeeded should contain theSameElementsAs(lookupResult.found.values)
+          insertResult.succeeded should contain theSameElementsAs (lookupResult.found.values)
       }
     }
 
-    it("fails saving the identifiers if the canonical id is already present"){
-      val ids = (1 to 5).map{_ =>
+    it("fails saving the identifiers if the canonical id is already present") {
+      val ids = (1 to 5).map { _ =>
         val sourceIdentifier = createSourceIdentifier
         (sourceIdentifier, Identifier(createCanonicalId, sourceIdentifier))
       }.toMap
       val identifiers = ids.values.toList
-      val duplicatedIdentifier1 = createSQLIdentifierWith(canonicalId = identifiers.apply(1).CanonicalId)
-      val duplicatedIdentifier2 = createSQLIdentifierWith(canonicalId = identifiers.apply(3).CanonicalId)
+      val duplicatedIdentifier1 =
+        createSQLIdentifierWith(canonicalId = identifiers.apply(1).CanonicalId)
+      val duplicatedIdentifier2 =
+        createSQLIdentifierWith(canonicalId = identifiers.apply(3).CanonicalId)
 
       withIdentifiersDao {
         case (identifiersDao, _) =>
-
           val result = for {
-            _<- identifiersDao.saveIdentifiers(List(duplicatedIdentifier1, duplicatedIdentifier2))
-           insertResult <-  identifiersDao.saveIdentifiers(identifiers)
+            _ <- identifiersDao.saveIdentifiers(
+              List(duplicatedIdentifier1, duplicatedIdentifier2))
+            insertResult <- identifiersDao.saveIdentifiers(identifiers)
           } yield (insertResult)
 
-          result shouldBe a[Left[_,_]]
+          result shouldBe a[Left[_, _]]
           result.left.get.exception shouldBe a[BatchUpdateException]
-          result.left.get.failed should contain theSameElementsAs(identifiers.filter(i => i.CanonicalId == duplicatedIdentifier1.CanonicalId || i.CanonicalId == duplicatedIdentifier2.CanonicalId))
-          result.left.get.succeeded should contain theSameElementsAs(identifiers.filterNot(i => i.CanonicalId == duplicatedIdentifier1.CanonicalId || i.CanonicalId == duplicatedIdentifier2.CanonicalId))
+          result.left.get.failed should contain theSameElementsAs (identifiers
+            .filter(i =>
+              i.CanonicalId == duplicatedIdentifier1.CanonicalId || i.CanonicalId == duplicatedIdentifier2.CanonicalId))
+          result.left.get.succeeded should contain theSameElementsAs (identifiers
+            .filterNot(i =>
+              i.CanonicalId == duplicatedIdentifier1.CanonicalId || i.CanonicalId == duplicatedIdentifier2.CanonicalId))
 
           val lookupResult = identifiersDao.lookupIds(ids.keys.toList).right.get
-          lookupResult.found.values should contain theSameElementsAs(result.left.get.succeeded)
+          lookupResult.found.values should contain theSameElementsAs (result.left.get.succeeded)
       }
     }
 
-    it("fails saving the identifiers if the same OntologyType,SourceName, and SourceId are already present"){
+    it(
+      "fails saving the identifiers if the same OntologyType,SourceName, and SourceId are already present") {
       val identifier = createSQLIdentifier
       val duplicateIdentifier = identifier.copy(CanonicalId = createCanonicalId)
 
       withIdentifiersDao {
         case (identifiersDao, _) =>
-
           val result = for {
-            _<- identifiersDao.saveIdentifiers(List(identifier))
-           insertResult <-  identifiersDao.saveIdentifiers(List(duplicateIdentifier))
+            _ <- identifiersDao.saveIdentifiers(List(identifier))
+            insertResult <- identifiersDao.saveIdentifiers(
+              List(duplicateIdentifier))
           } yield (insertResult)
 
-          result shouldBe a[Left[_,_]]
+          result shouldBe a[Left[_, _]]
           result.left.get.exception shouldBe a[BatchUpdateException]
           result.left.get.failed shouldBe List(duplicateIdentifier)
       }
@@ -393,17 +411,19 @@ class IdentifiersDaoTest
       withIdentifiersDao {
         case (identifiersDao, _) =>
           val result = for {
-            insertResult<- identifiersDao.saveIdentifiers(List(identifier1, identifier2))
+            insertResult <- identifiersDao.saveIdentifiers(
+              List(identifier1, identifier2))
           } yield (insertResult)
 
-          result shouldBe a[Right[_,_]]
+          result shouldBe a[Right[_, _]]
       }
     }
 
     it(
       "saves records with different SourceId but the same OntologyType and SourceSystem") {
       val sourceIdentifier1 = createSourceIdentifier
-      val sourceIdentifier2 = sourceIdentifier1.copy(value = randomAlphanumeric(10))
+      val sourceIdentifier2 =
+        sourceIdentifier1.copy(value = randomAlphanumeric(10))
 
       val identifier1 = createSQLIdentifierWith(
         sourceIdentifier = sourceIdentifier1
@@ -416,10 +436,11 @@ class IdentifiersDaoTest
       withIdentifiersDao {
         case (identifiersDao, _) =>
           val result = for {
-            insertResult<- identifiersDao.saveIdentifiers(List(identifier1, identifier2))
+            insertResult <- identifiersDao.saveIdentifiers(
+              List(identifier1, identifier2))
           } yield (insertResult)
 
-          result shouldBe a[Right[_,_]]
+          result shouldBe a[Right[_, _]]
       }
     }
   }

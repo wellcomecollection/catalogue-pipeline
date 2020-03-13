@@ -6,9 +6,9 @@ import uk.ac.wellcome.platform.idminter.models.Identifier
 
 trait SqlIdentifiersGenerators extends IdentifiersGenerators {
   def createSQLIdentifierWith(
-                               canonicalId: String = createCanonicalId,
-                               sourceIdentifier: SourceIdentifier = createSourceIdentifier
-                             ): Identifier =
+    canonicalId: String = createCanonicalId,
+    sourceIdentifier: SourceIdentifier = createSourceIdentifier
+  ): Identifier =
     Identifier(
       canonicalId = canonicalId,
       sourceIdentifier = sourceIdentifier

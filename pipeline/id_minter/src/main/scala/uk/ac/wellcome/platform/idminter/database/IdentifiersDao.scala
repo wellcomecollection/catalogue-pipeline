@@ -1,6 +1,10 @@
 package uk.ac.wellcome.platform.idminter.database
 
-import java.sql.{BatchUpdateException, SQLIntegrityConstraintViolationException, Statement}
+import java.sql.{
+  BatchUpdateException,
+  SQLIntegrityConstraintViolationException,
+  Statement
+}
 
 import grizzled.slf4j.Logging
 import scalikejdbc._
@@ -13,18 +17,22 @@ import scala.concurrent.blocking
 import scala.util.{Failure, Success, Try}
 
 class IdentifiersDao(db: DB, identifiers: IdentifiersTable) extends Logging {
-  case class LookupResult(found: Map[SourceIdentifier,Identifier], notFound: List[SourceIdentifier])
+  case class LookupResult(found: Map[SourceIdentifier, Identifier],
+                          notFound: List[SourceIdentifier])
   case class LookupError(e: Throwable)
-  case class InsertError(failed:List[Identifier], exception: Throwable, succeeded: List[Identifier])
+  case class InsertError(failed: List[Identifier],
+                         exception: Throwable,
+                         succeeded: List[Identifier])
   case class InsertResult(succeeded: List[Identifier])
 
   implicit val session = AutoSession(db.settingsProvider)
 
   def lookupIds(sourceIdentifiers: Seq[SourceIdentifier])
-    : Either[LookupError,LookupResult] = {
+    : Either[LookupError, LookupResult] = {
     val tr = Try {
       debug(s"Matching ($sourceIdentifiers)")
-      val sqlParametersToSourceIdentifier = buildSqlQueryParameters(sourceIdentifiers)
+      val sqlParametersToSourceIdentifier =
+        buildSqlQueryParameters(sourceIdentifiers)
 
       blocking {
 
@@ -33,18 +41,24 @@ class IdentifiersDao(db: DB, identifiers: IdentifiersTable) extends Logging {
 
           select
             .from(identifiers as i)
-            .where.in((i.OntologyType, i.SourceSystem, i.SourceId), sqlParametersToSourceIdentifier.keys.toList)
+            .where
+            .in(
+              (i.OntologyType, i.SourceSystem, i.SourceId),
+              sqlParametersToSourceIdentifier.keys.toList)
 
         }.map(rs => {
-          val foundParameter = buildSqlParametersFromResult(i, rs)
-          sqlParametersToSourceIdentifier.remove(foundParameter) match {
-            case Some(sourceIdentifier) => (sourceIdentifier,Identifier(i)(rs))
-            case None =>
-              // this should be impossible in practice
-              throw new RuntimeException("The values returned by the query could not be matched to a sourceIdentifier")
-          }
+            val foundParameter = buildSqlParametersFromResult(i, rs)
+            sqlParametersToSourceIdentifier.remove(foundParameter) match {
+              case Some(sourceIdentifier) =>
+                (sourceIdentifier, Identifier(i)(rs))
+              case None =>
+                // this should be impossible in practice
+                throw new RuntimeException(
+                  "The values returned by the query could not be matched to a sourceIdentifier")
+            }
 
-        }).list()
+          })
+          .list()
         debug(s"Executing:'${query.statement}'")
         val result = query.apply().toMap
 
@@ -57,19 +71,22 @@ class IdentifiersDao(db: DB, identifiers: IdentifiersTable) extends Logging {
     }
   }
 
-  def saveIdentifiers(ids: List[Identifier]): Either[InsertError,InsertResult] = {
-    val tried =Try {
-      val values = ids.map(i => Seq(i.CanonicalId, i.OntologyType, i.SourceSystem, i.SourceId))
+  def saveIdentifiers(
+    ids: List[Identifier]): Either[InsertError, InsertResult] = {
+    val tried = Try {
+      val values = ids.map(i =>
+        Seq(i.CanonicalId, i.OntologyType, i.SourceSystem, i.SourceId))
       blocking {
         debug(s"Putting new identifier $ids")
         withSQL {
           insert
-            .into(identifiers).namedValues(
-            identifiers.column.CanonicalId -> sqls.?,
-            identifiers.column.OntologyType -> sqls.?,
-            identifiers.column.SourceSystem -> sqls.?,
-            identifiers.column.SourceId -> sqls.?
-          )
+            .into(identifiers)
+            .namedValues(
+              identifiers.column.CanonicalId -> sqls.?,
+              identifiers.column.OntologyType -> sqls.?,
+              identifiers.column.SourceSystem -> sqls.?,
+              identifiers.column.SourceId -> sqls.?
+            )
         }.batch(values: _*).apply()
         InsertResult(ids)
       }
@@ -78,36 +95,51 @@ class IdentifiersDao(db: DB, identifiers: IdentifiersTable) extends Logging {
       case Success(r) => Right(r)
       case Failure(e) if e.isInstanceOf[BatchUpdateException] =>
         val exception = e.asInstanceOf[BatchUpdateException]
-        val groupedResult = ids.zip(exception.getUpdateCounts).groupBy{
+        val groupedResult = ids.zip(exception.getUpdateCounts).groupBy {
           case (_, Statement.EXECUTE_FAILED) => Statement.EXECUTE_FAILED
-          case (_, _) => Statement.SUCCESS_NO_INFO
+          case (_, _)                        => Statement.SUCCESS_NO_INFO
         }
-        val failedIdentifiers = groupedResult.getOrElse(Statement.EXECUTE_FAILED, Nil).map { case (identifier, _) => identifier }
-        val succeededIdentifiers = groupedResult.getOrElse(Statement.SUCCESS_NO_INFO, Nil).map { case (identifier, _) => identifier }
+        val failedIdentifiers =
+          groupedResult.getOrElse(Statement.EXECUTE_FAILED, Nil).map {
+            case (identifier, _) => identifier
+          }
+        val succeededIdentifiers =
+          groupedResult.getOrElse(Statement.SUCCESS_NO_INFO, Nil).map {
+            case (identifier, _) => identifier
+          }
         Left(InsertError(failedIdentifiers, e, succeededIdentifiers))
       case Failure(exception) => Left(InsertError(ids, exception, Nil))
     }
   }
 
-
-  private def buildSqlQueryParameters(sourceIdentifiers: Seq[SourceIdentifier]) = {
-    mutable.Map(sourceIdentifiers.map(sourceIdentifier => (buildSqlParametersFromSourceIdentifier(sourceIdentifier) -> sourceIdentifier)): _ *)
+  private def buildSqlQueryParameters(
+    sourceIdentifiers: Seq[SourceIdentifier]) = {
+    mutable.Map(sourceIdentifiers.map(sourceIdentifier =>
+      (buildSqlParametersFromSourceIdentifier(sourceIdentifier) -> sourceIdentifier)): _*)
   }
 
-  private def buildSqlParametersFromSourceIdentifier(sourceIdentifier: SourceIdentifier) = {
-    (sourceIdentifier.ontologyType, sourceIdentifier.identifierType.id, sourceIdentifier.value)
+  private def buildSqlParametersFromSourceIdentifier(
+    sourceIdentifier: SourceIdentifier) = {
+    (
+      sourceIdentifier.ontologyType,
+      sourceIdentifier.identifierType.id,
+      sourceIdentifier.value)
   }
 
-  private def buildSqlParametersFromResult(i: SyntaxProvider[Identifier], rs: WrappedResultSet) = {
-    (rs.string(i.resultName.OntologyType), rs.string(i.resultName.SourceSystem), rs.string(i.resultName.SourceId))
+  private def buildSqlParametersFromResult(i: SyntaxProvider[Identifier],
+                                           rs: WrappedResultSet) = {
+    (
+      rs.string(i.resultName.OntologyType),
+      rs.string(i.resultName.SourceSystem),
+      rs.string(i.resultName.SourceId))
   }
 
   /* An unidentified record from the transformer can give us a list of
-     * identifiers from the source systems, and an ontology type (e.g. "Work").
-     *
-     * This method looks for existing IDs that have matching ontology type and
-     * source identifiers.
-     */
+   * identifiers from the source systems, and an ontology type (e.g. "Work").
+   *
+   * This method looks for existing IDs that have matching ontology type and
+   * source identifiers.
+   */
   def lookupId(
     sourceIdentifier: SourceIdentifier
   ): Try[Option[Identifier]] = Try {
