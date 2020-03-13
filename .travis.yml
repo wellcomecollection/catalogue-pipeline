@@ -79,6 +79,7 @@ cache:
     - pipeline/transformer/transformer_miro/target
     - pipeline/transformer/transformer_sierra/target
     - pipeline/transformer/transformer_mets/target
+    - pipeline/transformer/transformer_calm/target
 
     - reindexer/reindex_worker/target
 
