@@ -39,7 +39,9 @@ class IdentifiersDao(db: DB, identifiers: IdentifiersTable) extends Logging {
           val foundParameter = buildSqlParametersFromResult(i, rs)
           sqlParametersToSourceIdentifier.remove(foundParameter) match {
             case Some(sourceIdentifier) => (sourceIdentifier,Identifier(i)(rs))
-            case None => ???
+            case None =>
+              // this should be impossible in practice
+              throw new RuntimeException("The values returned by the query could not be matched to a sourceIdentifier")
           }
 
         }).list()

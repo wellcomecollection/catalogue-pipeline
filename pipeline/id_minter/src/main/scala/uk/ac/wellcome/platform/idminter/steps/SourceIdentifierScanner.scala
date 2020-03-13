@@ -20,7 +20,7 @@ object SourceIdentifierScanner extends Logging {
           identifiers.get(sourceIdentifier) match {
             case Some(identifier) =>
               root.obj.modify(json => ("canonicalId", Json.fromString(identifier.CanonicalId)) +: json)(inputJson)
-            case None => ???
+            case None => throw new RuntimeException(s"Could not find $sourceIdentifier in $identifiers")
           }
 
       case None => ???
