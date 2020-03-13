@@ -22,6 +22,7 @@ import scala.util.{Failure, Success, Try}
 class InferenceManagerWorkerService[Destination, Id](
   msgStream: BigMessageStream[MergedImage[Id]],
   msgSender: BigMessageSender[Destination, AugmentedImage[Id]],
+  inferrerAdapter: InferrerAdapter[MergedImage[Id], InferrerResponse],
   inferrerClientFlow: Flow[(HttpRequest, (Message, MergedImage[Id])),
                            (Try[HttpResponse], (Message, MergedImage[Id])),
                            HostConnectionPool]
@@ -44,7 +45,8 @@ class InferenceManagerWorkerService[Destination, Id](
 
   private def createRequest =
     Flow[(Message, MergedImage[Id])].map {
-      case (msg, image) => (InferrerRequests.createRequest(image), (msg, image))
+      case (msg, image) =>
+        (inferrerAdapter.createRequest(image), (msg, image))
     }
 
   private def unmarshalResponse =
@@ -53,7 +55,9 @@ class InferenceManagerWorkerService[Destination, Id](
         case (tryResponse, (msg, image)) =>
           tryResponse match {
             case Success(response) =>
-              InferrerRequests.parseResponse(response).map((msg, image, _))
+              inferrerAdapter
+                .parseResponse(response)
+                .map((msg, image, _))
             case Failure(exception) =>
               Future.failed(exception)
           }

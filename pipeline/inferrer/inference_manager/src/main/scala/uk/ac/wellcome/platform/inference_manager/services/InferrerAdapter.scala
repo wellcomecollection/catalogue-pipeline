@@ -1,13 +1,6 @@
 package uk.ac.wellcome.platform.inference_manager.services
 
-import akka.http.scaladsl.model.Uri.Query
-import akka.http.scaladsl.model.{
-  HttpMethods,
-  HttpRequest,
-  HttpResponse,
-  StatusCodes,
-  Uri
-}
+import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.Materializer
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
@@ -18,12 +11,19 @@ import uk.ac.wellcome.platform.inference_manager.models.InferrerResponse
 
 import scala.concurrent.Future
 
-object InferrerRequests {
-  def createRequest[Id](image: MergedImage[Id]): HttpRequest =
+trait InferrerAdapter[Input, Output] {
+  def createRequest(input: Input): HttpRequest
+  def parseResponse(response: HttpResponse)(
+    implicit mat: Materializer): Future[Output]
+}
+
+object FeatureVectorInferrerAdapter
+    extends InferrerAdapter[MergedImage[_], InferrerResponse] {
+  def createRequest(image: MergedImage[_]): HttpRequest =
     HttpRequest(
       method = HttpMethods.GET,
       uri = Uri("/feature-vectors/").withQuery(
-        Query(image.location.url match {
+        Uri.Query(image.location.url match {
           case iiifUrl if iiifUrl.endsWith("json") => "iiif_url" -> iiifUrl
           case imageUrl                            => "image_url" -> imageUrl
         })
@@ -31,7 +31,7 @@ object InferrerRequests {
     )
 
   def parseResponse(response: HttpResponse)(
-    implicit materializer: Materializer): Future[InferrerResponse] =
+    implicit mat: Materializer): Future[InferrerResponse] =
     response.status match {
       case StatusCodes.OK =>
         Unmarshal(response.entity).to[InferrerResponse]
