@@ -2,11 +2,7 @@ package uk.ac.wellcome.platform.merger.rules
 
 import cats.data.NonEmptyList
 
-import uk.ac.wellcome.models.work.internal.{
-  SourceIdentifier,
-  TransformedBaseWork,
-  UnidentifiedWork
-}
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.logging.MergerLogging
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
@@ -25,8 +21,10 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
       miroIdsRule(target, sources) getOrElse Nil
     val physicalDigitalIds =
       physicalDigitalIdsRule(target, sources) getOrElse Nil
+    val calmIds =
+      calmIdsRule(target, sources) getOrElse Nil
     FieldMergeResult(
-      fieldData = (physicalDigitalIds ++ miroIds).distinct match {
+      fieldData = (physicalDigitalIds ++ miroIds ++ calmIds).distinct match {
         case Nil          => target.otherIdentifiers
         case nonEmptyList => nonEmptyList
       },
@@ -64,6 +62,21 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
       sources: NonEmptyList[TransformedBaseWork]): List[SourceIdentifier] = {
       debug(s"Merging physical and digital IDs from ${describeWorks(sources)}")
       target.data.otherIdentifiers ++ sources.toList.flatMap(_.identifiers)
+    }
+  }
+
+  private val calmIdsRule = new PartialRule {
+    val isDefinedForTarget: WorkPredicate = WorkPredicates.sierraWork
+    val isDefinedForSource: WorkPredicate = WorkPredicates.calmWork
+
+    override def rule(
+      target: UnidentifiedWork,
+      sources: NonEmptyList[TransformedBaseWork]): List[SourceIdentifier] = {
+      debug(s"Merging physical and digital IDs from ${describeWorks(sources)}")
+      target.data.otherIdentifiers ++ sources
+        .toList
+        .flatMap(_.identifiers)
+        .filterNot(_.identifierType == IdentifierType("sierra-system-number"))
     }
   }
 }
