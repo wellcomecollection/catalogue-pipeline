@@ -1,6 +1,6 @@
 module "vhs_miro_migration" {
-  source = "./vhs"
+  source = "./modules/vhs"
   name   = "miro-migration"
 
-  read_principals = ["${local.read_principles}"]
+  read_principals = local.read_principles
 }
