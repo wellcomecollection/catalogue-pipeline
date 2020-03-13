@@ -35,7 +35,7 @@ jobs:
       script: ./.travis/run_job.py transformer_sierra
     - name: transformer_mets
       script: ./.travis/run_job.py transformer_mets
-    - name: transformer_mets
+    - name: transformer_calm
       script: ./.travis/run_job.py transformer_calm
     - name: sierra_reader
       script: ./.travis/run_job.py sierra_reader
