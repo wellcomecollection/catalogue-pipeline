@@ -8,8 +8,12 @@ import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
 
 /*
- * The otherIdentifiers field is made up of all of the identifiers on the sources,
- * except for any Sierra identifiers on Miro sources, as these may be incorrect
+ * The otherIdentifiers field is made up of all of the identifiers on the sources:
+ * except for any Sierra identifiers on Miro sources, as these may be incorrect.
+ *
+ * - Calm IDs
+ * - Miro IDs
+ * - Digital sierra IDs
  */
 object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
   type FieldData = List[SourceIdentifier]

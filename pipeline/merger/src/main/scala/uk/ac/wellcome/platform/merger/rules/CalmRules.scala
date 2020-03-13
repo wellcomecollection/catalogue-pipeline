@@ -7,6 +7,13 @@ import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import uk.ac.wellcome.platform.merger.logging.MergerLogging
 import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
 
+/*
+ * Rule used for fields where we want to always use the Calm data if it
+ * exists.
+ *
+ * Implementations should provide a getData function which returns the
+ * fields data when given the work.
+ */
 trait UseCalmWhenExistsRule extends FieldMergeRule with MergerLogging {
 
   protected val getData: TransformedBaseWork => FieldData

@@ -473,7 +473,8 @@ class PlatformMergerTest
         language = Some(Language("en.gb", "English")),
         notes = List(FindingAids("here")),
         workType = Some(WorkType.ArchiveItem),
-        items = List(Item(None, List(calmLocation)))
+        items = List(Item(None, List(calmLocation))),
+        edition = Some("Should not be merged")
       )
     )
 
@@ -490,5 +491,6 @@ class PlatformMergerTest
     work.data.language shouldBe calmWork.data.language
     work.data.notes shouldBe calmWork.data.notes
     work.data.workType shouldBe calmWork.data.workType
+    work.data.edition shouldBe None
   }
 }

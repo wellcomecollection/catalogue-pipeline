@@ -31,9 +31,9 @@ trait FieldMergeRule {
   protected type FieldData
   protected type MergeState = State[Set[TransformedBaseWork], FieldData]
 
-  def apply(targets: UnidentifiedWork,
+  def apply(target: UnidentifiedWork,
             sources: Seq[TransformedBaseWork]): MergeState =
-    merge(targets, sources) match {
+    merge(target, sources) match {
       case FieldMergeResult(field, ruleRedirects) =>
         State(existingRedirects =>
           (existingRedirects ++ ruleRedirects.toSet, field))
