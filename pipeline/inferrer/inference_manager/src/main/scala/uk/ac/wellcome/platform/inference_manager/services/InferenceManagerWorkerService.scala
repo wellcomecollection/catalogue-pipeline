@@ -8,23 +8,17 @@ import akka.stream.scaladsl.Flow
 import com.amazonaws.services.sqs.model.Message
 import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.bigmessaging.message.BigMessageStream
-import uk.ac.wellcome.models.work.internal.{
-  AugmentedImage,
-  InferredData,
-  MergedImage
-}
-import uk.ac.wellcome.platform.inference_manager.models.InferrerResponse
 import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
-class InferenceManagerWorkerService[Destination, Id](
-  msgStream: BigMessageStream[MergedImage[Id]],
-  msgSender: BigMessageSender[Destination, AugmentedImage[Id]],
-  inferrerAdapter: InferrerAdapter[MergedImage[Id], InferrerResponse],
-  inferrerClientFlow: Flow[(HttpRequest, (Message, MergedImage[Id])),
-                           (Try[HttpResponse], (Message, MergedImage[Id])),
+class InferenceManagerWorkerService[Destination, Input, Output](
+  msgStream: BigMessageStream[Input],
+  msgSender: BigMessageSender[Destination, Output],
+  inferrerAdapter: InferrerAdapter[Input, Output],
+  inferrerClientFlow: Flow[(HttpRequest, (Message, Input)),
+                           (Try[HttpResponse], (Message, Input)),
                            HostConnectionPool]
 )(implicit ec: ExecutionContext, materializer: Materializer)
     extends Runnable {
@@ -38,47 +32,39 @@ class InferenceManagerWorkerService[Destination, Id](
       _.via(createRequest)
         .via(inferrerClientFlow)
         .via(unmarshalResponse)
-        .via(augmentImage)
-        .via(sendAugmentedImage)
+        .via(augmentInput)
+        .via(sendAugmented)
         .map { case (msg, _) => msg }
     )
 
   private def createRequest =
-    Flow[(Message, MergedImage[Id])].map {
-      case (msg, image) =>
-        (inferrerAdapter.createRequest(image), (msg, image))
+    Flow[(Message, Input)].map {
+      case (msg, input) =>
+        (inferrerAdapter.createRequest(input), (msg, input))
     }
 
   private def unmarshalResponse =
-    Flow[(Try[HttpResponse], (Message, MergedImage[Id]))]
+    Flow[(Try[HttpResponse], (Message, Input))]
       .mapAsync(parallelism) {
-        case (tryResponse, (msg, image)) =>
+        case (tryResponse, (msg, input)) =>
           tryResponse match {
             case Success(response) =>
               inferrerAdapter
                 .parseResponse(response)
-                .map((msg, image, _))
+                .map((msg, input, _))
             case Failure(exception) =>
               Future.failed(exception)
           }
       }
 
-  private def augmentImage =
-    Flow[(Message, MergedImage[Id], InferrerResponse)].map {
-      case (msg, image, InferrerResponse(features, lsh_encoded_features)) =>
-        val augmentedImage = image.augment {
-          val (features1, features2) = features.splitAt(features.size / 2)
-          InferredData(
-            features1 = features1,
-            features2 = features2,
-            lshEncodedFeatures = lsh_encoded_features
-          )
-        }
-        (msg, augmentedImage)
+  private def augmentInput =
+    Flow[(Message, Input, inferrerAdapter.InferrerResponse)].map {
+      case (msg, input, response) =>
+        (msg, inferrerAdapter.augmentInput(input, response))
     }
 
-  private def sendAugmentedImage =
-    Flow[(Message, AugmentedImage[Id])].mapAsync(parallelism) {
+  private def sendAugmented =
+    Flow[(Message, Output)].mapAsync(parallelism) {
       case (msg, image) =>
         Future.fromTry { msgSender.sendT(image) }.map((msg, _))
     }

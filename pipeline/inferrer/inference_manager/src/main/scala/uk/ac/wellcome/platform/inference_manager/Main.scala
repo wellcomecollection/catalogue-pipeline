@@ -21,6 +21,11 @@ import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import scala.concurrent.ExecutionContext
 
 object Main extends WellcomeTypesafeApp {
+  // This inference manager operates on images
+  type Input = MergedImage[Minted]
+  type Output = AugmentedImage[Minted]
+  val inferrerAdapter = FeatureVectorInferrerAdapter
+
   runWithConfig { config: Config =>
     implicit val actorSystem: ActorSystem = AkkaBuilder.buildActorSystem()
     implicit val executionContext: ExecutionContext =
@@ -29,18 +34,16 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildActorMaterializer()
     implicit val s3Client: AmazonS3 = S3Builder.buildS3Client(config)
 
-    implicit val msgStore = S3TypedStore[AugmentedImage[Minted]]
+    implicit val msgStore = S3TypedStore[Output]
 
     val inferrerClientFlow =
       Http()
-        .cachedHostConnectionPool[(Message, MergedImage[Minted])]("localhost")
+        .cachedHostConnectionPool[(Message, Input)]("localhost")
 
     new InferenceManagerWorkerService(
-      msgStream =
-        BigMessagingBuilder.buildMessageStream[MergedImage[Minted]](config),
-      msgSender = BigMessagingBuilder
-        .buildBigMessageSender[AugmentedImage[Minted]](config),
-      inferrerAdapter = FeatureVectorInferrerAdapter,
+      msgStream = BigMessagingBuilder.buildMessageStream[Input](config),
+      msgSender = BigMessagingBuilder.buildBigMessageSender[Output](config),
+      inferrerAdapter = inferrerAdapter,
       inferrerClientFlow = inferrerClientFlow
     )
   }
