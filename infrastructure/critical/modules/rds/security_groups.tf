@@ -1,5 +1,5 @@
 resource "aws_security_group" "database_sg" {
-  description = "controls direct access to application instances"
+  description = "Allows connection to RDS instance via TCP and egress to the world"
   vpc_id      = var.vpc_id
   name        = "${var.database_name}_database_sg"
 
