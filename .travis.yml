@@ -35,6 +35,8 @@ jobs:
       script: ./.travis/run_job.py transformer_sierra
     - name: transformer_mets
       script: ./.travis/run_job.py transformer_mets
+    - name: transformer_calm
+      script: ./.travis/run_job.py transformer_calm
     - name: sierra_reader
       script: ./.travis/run_job.py sierra_reader
     - name: sierra_bib_merger
@@ -77,6 +79,7 @@ cache:
     - pipeline/transformer/transformer_miro/target
     - pipeline/transformer/transformer_sierra/target
     - pipeline/transformer/transformer_mets/target
+    - pipeline/transformer/transformer_calm/target
 
     - reindexer/reindex_worker/target
 
