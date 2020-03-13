@@ -19,9 +19,15 @@ class OtherIdentifiersRuleTest
     id = "123",
     data = WorkData(
       otherIdentifiers = List(
-        SourceIdentifier(value = "a", identifierType = IdentifierType("calm-ref-no")),
-        SourceIdentifier(value = "b", identifierType = IdentifierType("calm-altref-no")),
-        SourceIdentifier(value = "c", identifierType = IdentifierType("sierra-system-number")),
+        SourceIdentifier(
+          value = "a",
+          identifierType = IdentifierType("calm-ref-no")),
+        SourceIdentifier(
+          value = "b",
+          identifierType = IdentifierType("calm-altref-no")),
+        SourceIdentifier(
+          value = "c",
+          identifierType = IdentifierType("sierra-system-number")),
       )
     )
   )

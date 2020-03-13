@@ -5,10 +5,7 @@ import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 
-class CalmRulesTest
-    extends FunSpec
-    with Matchers
-    with WorksGenerators {
+class CalmRulesTest extends FunSpec with Matchers with WorksGenerators {
 
   val target = createSierraPhysicalWork
   val calmWork = createUnidentifiedCalmWork(

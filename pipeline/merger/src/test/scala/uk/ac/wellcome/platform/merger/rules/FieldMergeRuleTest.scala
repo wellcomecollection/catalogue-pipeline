@@ -24,7 +24,8 @@ class FieldMergeRuleTest
     override val isDefinedForSource: WorkPredicate = _ => true
 
     override def rule(target: UnidentifiedWork,
-                      sources: NonEmptyList[TransformedBaseWork]): FieldData = ()
+                      sources: NonEmptyList[TransformedBaseWork]): FieldData =
+      ()
   }
   val sourceTitleIsA = new PartialRule {
     override val isDefinedForTarget: WorkPredicate = _ => true
@@ -32,7 +33,8 @@ class FieldMergeRuleTest
       work => work.data.title.contains("A")
 
     override def rule(target: UnidentifiedWork,
-                      sources: NonEmptyList[TransformedBaseWork]): FieldData = ()
+                      sources: NonEmptyList[TransformedBaseWork]): FieldData =
+      ()
   }
 
   val workWithTitleA = createUnidentifiedWorkWith(title = Some("A"))
@@ -47,8 +49,7 @@ class FieldMergeRuleTest
 
     it(
       "is a partial function that is defined only if at least one source satisfies isDefinedForSource") {
-      sourceTitleIsA(
-        workWithTitleB, List(workWithTitleA, workWithTitleB)).isDefined shouldBe true
+      sourceTitleIsA(workWithTitleB, List(workWithTitleA, workWithTitleB)).isDefined shouldBe true
       sourceTitleIsA(workWithTitleB, List(workWithTitleB)).isDefined shouldBe false
     }
 
@@ -59,8 +60,9 @@ class FieldMergeRuleTest
         override val isDefinedForSource: WorkPredicate =
           work => work.data.title.contains("A")
 
-        override def rule(target: UnidentifiedWork,
-                          sources: NonEmptyList[TransformedBaseWork]): FieldData = {
+        override def rule(
+          target: UnidentifiedWork,
+          sources: NonEmptyList[TransformedBaseWork]): FieldData = {
           sources.toList should contain(workWithTitleA)
           sources.toList should not contain workWithTitleB
           None

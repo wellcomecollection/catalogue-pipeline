@@ -77,8 +77,7 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
       target: UnidentifiedWork,
       sources: NonEmptyList[TransformedBaseWork]): List[SourceIdentifier] = {
       debug(s"Merging physical and digital IDs from ${describeWorks(sources)}")
-      target.data.otherIdentifiers ++ sources
-        .toList
+      target.data.otherIdentifiers ++ sources.toList
         .flatMap(_.identifiers)
         .filterNot(_.identifierType == IdentifierType("sierra-system-number"))
     }
