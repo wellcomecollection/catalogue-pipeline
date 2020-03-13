@@ -1,4 +1,7 @@
 package uk.ac.wellcome.platform.merger.rules
+
+import cats.data.{NonEmptyList, State}
+
 import uk.ac.wellcome.models.work.internal.{
   TransformedBaseWork,
   UnidentifiedWork
@@ -26,30 +29,36 @@ import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
 trait FieldMergeRule {
   protected final type Params = (UnidentifiedWork, Seq[TransformedBaseWork])
   protected type FieldData
+  protected type MergeState = State[Set[TransformedBaseWork], FieldData]
+
+  def apply(target: UnidentifiedWork,
+            sources: Seq[TransformedBaseWork]): MergeState =
+    merge(target, sources) match {
+      case FieldMergeResult(field, ruleRedirects) =>
+        State(existingRedirects =>
+          (existingRedirects ++ ruleRedirects.toSet, field))
+    }
 
   def merge(target: UnidentifiedWork,
             sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData]
 
-  protected val identityOnTarget: PartialFunction[Params, UnidentifiedWork] = {
-    case (target, _) => target
-  }
-
-  protected trait PartialRule extends PartialFunction[Params, FieldData] {
+  protected trait PartialRule {
     val isDefinedForTarget: WorkPredicate
     val isDefinedForSource: WorkPredicate
 
-    def rule(target: UnidentifiedWork,
-             sources: Seq[TransformedBaseWork]): FieldData
+    protected def rule(target: UnidentifiedWork,
+                       sources: NonEmptyList[TransformedBaseWork]): FieldData
 
-    override def apply(params: Params): FieldData =
-      params match {
-        case (target, sources) =>
-          rule(target, sources.filter(isDefinedForSource))
+    def apply(target: UnidentifiedWork,
+              sources: Seq[TransformedBaseWork]): Option[FieldData] =
+      (isDefinedForTarget(target), sources.filter(isDefinedForSource)) match {
+        case (true, head +: tail) =>
+          Some(rule(target, NonEmptyList(head, tail.toList)))
+        case _ => None
       }
 
-    override def isDefinedAt(params: Params): Boolean = params match {
-      case (target, sources) =>
-        isDefinedForTarget(target) && sources.exists(isDefinedForSource)
-    }
+    def apply(target: UnidentifiedWork,
+              source: TransformedBaseWork): Option[FieldData] =
+      apply(target, List(source))
   }
 }

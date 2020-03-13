@@ -2,12 +2,9 @@ package uk.ac.wellcome.platform.merger.services
 
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.models.work.internal.{
-  TransformedBaseWork,
-  UnidentifiedRedirectedWork,
-  UnidentifiedWork
-}
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.models.{FieldMergeResult, MergeResult}
+import uk.ac.wellcome.platform.merger.rules.FieldMergeRule
 
 class MergerTest extends FunSpec with Matchers with WorksGenerators {
   val inputWorks =
@@ -18,6 +15,29 @@ class MergerTest extends FunSpec with Matchers with WorksGenerators {
   val mergedOtherIdentifiers =
     (0 to 3).map(_ => createSierraSystemSourceIdentifier).toList
 
+  object TestItemsRule extends FieldMergeRule {
+    type FieldData = List[Item[Unminted]]
+
+    override def merge(
+      target: UnidentifiedWork,
+      sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData] =
+      FieldMergeResult(
+        fieldData = mergedTargetItems,
+        redirects = List(sources.tail.head)
+      )
+  }
+
+  object TestOtherIdentifiersRule extends FieldMergeRule {
+    type FieldData = List[SourceIdentifier]
+
+    override def merge(
+      target: UnidentifiedWork,
+      sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData] =
+      FieldMergeResult(
+        fieldData = mergedOtherIdentifiers,
+        redirects = sources.tail.tail)
+  }
+
   object TestMerger extends Merger {
     override protected def findTarget(
       works: Seq[TransformedBaseWork]): Option[UnidentifiedWork] =
@@ -25,20 +45,10 @@ class MergerTest extends FunSpec with Matchers with WorksGenerators {
 
     override protected def createMergeResult(
       target: UnidentifiedWork,
-      sources: Seq[TransformedBaseWork]): RedirectsAccumulator[MergeResult] =
+      sources: Seq[TransformedBaseWork]): MergeState =
       for {
-        items <- accumulateRedirects(
-          FieldMergeResult(
-            fieldData = mergedTargetItems,
-            redirects = List(sources.tail.head)
-          )
-        )
-        otherIdentifiers <- accumulateRedirects(
-          FieldMergeResult(
-            fieldData = mergedOtherIdentifiers,
-            redirects = sources.tail.tail
-          )
-        )
+        items <- TestItemsRule(target, sources)
+        otherIdentifiers <- TestOtherIdentifiersRule(target, sources)
       } yield
         MergeResult(
           mergedTarget = target withData { data =>

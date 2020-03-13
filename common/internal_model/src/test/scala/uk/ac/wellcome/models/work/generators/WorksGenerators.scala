@@ -206,6 +206,18 @@ trait WorksGenerators
       items = items
     )
 
+  def createUnidentifiedCalmWork(data: WorkData[Unminted] = WorkData(),
+                                 id: String = randomAlphanumeric(6),
+                                 version: Int = 0) =
+    UnidentifiedWork(
+      sourceIdentifier = SourceIdentifier(
+        value = id,
+        identifierType = IdentifierType("calm-record-id"),
+      ),
+      version = version,
+      data = data,
+    )
+
   def createUnidentifiedInvisibleMetsWorkWith(
     sourceIdentifier: SourceIdentifier = createMetsSourceIdentifier,
     items: List[Item[Unminted]] = List(createDigitalItem),

@@ -1,4 +1,8 @@
 package uk.ac.wellcome.platform.merger.rules
+
+import scala.util.Try
+import cats.data.NonEmptyList
+
 import uk.ac.wellcome.models.work.internal.{
   Location,
   TransformedBaseWork,
@@ -7,8 +11,6 @@ import uk.ac.wellcome.models.work.internal.{
 import uk.ac.wellcome.platform.merger.logging.MergerLogging
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
-
-import scala.util.Try
 
 /*
  * Thumbnails are chosen preferentially off of METS works, falling back to
@@ -22,8 +24,9 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
     target: UnidentifiedWork,
     sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData] =
     FieldMergeResult(
-      fieldData = (getMetsThumbnail orElse getMinMiroThumbnail orElse
-        (identityOnTarget andThen (_.data.thumbnail)))((target, sources)),
+      fieldData = getMetsThumbnail(target, sources)
+        orElse getMinMiroThumbnail(target, sources)
+        getOrElse target.data.thumbnail,
       redirects = Nil
     )
 
@@ -34,9 +37,9 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
         WorkPredicates.singleItemDigitalMets
 
       def rule(target: UnidentifiedWork,
-               sources: Seq[TransformedBaseWork]): FieldData = {
-        debug(s"Choosing METS thumbnail from ${describeWorks(sources)}")
-        sources.headOption.flatMap(_.data.thumbnail)
+               sources: NonEmptyList[TransformedBaseWork]): FieldData = {
+        debug(s"Choosing METS thumbnail from ${describeWork(sources.head)}")
+        sources.head.data.thumbnail
       }
     }
 
@@ -46,10 +49,10 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
       val isDefinedForSource: WorkPredicate = WorkPredicates.singleItemMiro
 
       def rule(target: UnidentifiedWork,
-               sources: Seq[TransformedBaseWork]): FieldData = {
-        val minMiroSource = Try(sources.min(MiroIdOrdering)).toOption
+               sources: NonEmptyList[TransformedBaseWork]): FieldData = {
+        val minMiroSource = Try(sources.toList.min(MiroIdOrdering)).toOption
         minMiroSource.foreach { source =>
-          debug(s"Choosing METS thumbnail from ${describeWork(source)}")
+          debug(s"Choosing Miro thumbnail from ${describeWork(source)}")
         }
         minMiroSource.flatMap(_.data.thumbnail)
       }

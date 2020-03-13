@@ -14,6 +14,7 @@ object WorkPredicates {
   val sierraWork: WorkPredicate = identifierTypeId("sierra-system-number")
   val metsWork: WorkPredicate = identifierTypeId("mets")
   val miroWork: WorkPredicate = identifierTypeId("miro-image-number")
+  val calmWork: WorkPredicate = identifierTypeId("calm-record-id")
 
   val singleItem: WorkPredicate = work => work.data.items.size == 1
 

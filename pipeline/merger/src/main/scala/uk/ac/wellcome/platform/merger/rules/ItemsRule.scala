@@ -1,19 +1,14 @@
 package uk.ac.wellcome.platform.merger.rules
 
-import uk.ac.wellcome.models.work.internal.{
-  DigitalLocation,
-  Item,
-  Location,
-  TransformedBaseWork,
-  UnidentifiedWork,
-  Unminted
-}
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.logging.MergerLogging
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import uk.ac.wellcome.platform.merger.rules.WorkPredicates.{
   WorkPredicate,
   WorkPredicateOps
 }
+
+import cats.data.NonEmptyList
 
 /*
  * Items are merged as follows:
@@ -30,22 +25,60 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     target: UnidentifiedWork,
     sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData] =
     FieldMergeResult(
-      fieldData = (mergeMetsItems orElse mergeMiroPhysicalAndDigitalItems
-        orElse (identityOnTarget andThen (_.data.items)))((target, sources)),
+      fieldData = mergeItems(target, sources),
       redirects = sources.filter { source =>
-        (mergeMetsItems orElse mergeMiroPhysicalAndDigitalItems)
-          .isDefinedAt((target, List(source)))
+        (mergeMetsItems(target, source) orElse mergeMiroPhysicalAndDigitalItems(
+          target,
+          source)).isDefined
       }
     )
 
-  private lazy val mergeMetsItems = new PartialRule {
+  private def mergeItems(target: UnidentifiedWork,
+                         sources: Seq[TransformedBaseWork]): FieldData = {
+    // TODO: for now we don't merge any calm items: want to get this merged,
+    // and waiting for jtweed to write up the item rules
+    val mergedTarget = target
+    // val mergedTarget = mergeCalmItems(target, sources)
+    //   .map(items => target.withData(_.copy(items = items)))
+    //   .getOrElse(target)
+    mergeMetsItems(mergedTarget, sources)
+      .orElse(mergeMiroPhysicalAndDigitalItems(mergedTarget, sources))
+      .getOrElse(mergedTarget.data.items)
+  }
+
+  // private val mergeCalmItems = new PartialRule {
+  //   val isDefinedForTarget: WorkPredicate = WorkPredicates.sierraWork
+  //   val isDefinedForSource: WorkPredicate = WorkPredicates.calmWork
+
+  //   def rule(target: UnidentifiedWork,
+  //            sources: NonEmptyList[TransformedBaseWork]): FieldData = {
+
+  //     // The Calm transformer always creates a single item with a physical
+  //     // location so this is safe
+  //     val calmLocation = sources.head.data.items.head.locations.head
+
+  //     target.data.items match {
+  //       case List(item) =>
+  //         List(
+  //           item.copy(
+  //             locations = mergeLocations(calmLocation, item.locations)
+  //           )
+  //         )
+  //     }
+  //   }
+
+  //   def mergeLocations(calmLocation: Location,
+  //                      sierraLocations: List[Location]): List[Location] = List(calmLocation)
+  // }
+
+  private val mergeMetsItems = new PartialRule {
     val isDefinedForTarget: WorkPredicate = WorkPredicates.sierraWork
     val isDefinedForSource: WorkPredicate = WorkPredicates.singleItemDigitalMets
 
     def rule(target: UnidentifiedWork,
-             sources: Seq[TransformedBaseWork]): FieldData = {
+             sources: NonEmptyList[TransformedBaseWork]): FieldData = {
       val sierraItems = target.data.items
-      val metsItems = sources.flatMap(_.data.items)
+      val metsItems = sources.toList.flatMap(_.data.items)
       val metsUrls = metsItems.flatMap(_.locations).collect {
         case DigitalLocation(url, _, _, _, _, _) => url
       }
@@ -65,14 +98,14 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     }
   }
 
-  private lazy val mergeMiroPhysicalAndDigitalItems = new PartialRule {
+  private val mergeMiroPhysicalAndDigitalItems = new PartialRule {
     val isDefinedForTarget: WorkPredicate = WorkPredicates.sierraWork
     val isDefinedForSource
       : WorkPredicate = WorkPredicates.miroWork or WorkPredicates.digitalSierra
 
     def rule(target: UnidentifiedWork,
-             sources: Seq[TransformedBaseWork]): FieldData =
-      (target.data.items, sources.partition(WorkPredicates.miroWork)) match {
+             sources: NonEmptyList[TransformedBaseWork]): FieldData =
+      (target.data.items, sources.toList.partition(WorkPredicates.miroWork)) match {
         case (List(sierraSingleItem), (miroSources, sierraSources)) =>
           List(
             sierraSingleItem.copy(

@@ -144,13 +144,13 @@ class ImagesRuleTest
     it("creates images from every source") {
       val target = createSierraDigitalWork
       val sources = (1 to 5).map(_ => createMiroWork)
-      testRule.apply((target, sources)) should have length 5
+      testRule(target, sources).get should have length 5
     }
 
     it("sets the target as the parentWork") {
       val target = createSierraDigitalWork
       val sources = (1 to 5).map(_ => createMiroWork)
-      forAll(testRule.apply((target, sources))) {
+      forAll(testRule.apply(target, sources).get) {
         _.parentWork.allSourceIdentifiers should
           contain(target.sourceIdentifier)
       }

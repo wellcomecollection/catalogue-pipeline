@@ -1,25 +1,17 @@
 package uk.ac.wellcome.platform.merger.services
 
+import cats.data.State
+
 import uk.ac.wellcome.models.work.internal.{
   IdentifiableRedirect,
   TransformedBaseWork,
   UnidentifiedRedirectedWork,
   UnidentifiedWork
 }
-import uk.ac.wellcome.platform.merger.rules.{
-  ImagesRule,
-  ItemsRule,
-  OtherIdentifiersRule,
-  ThumbnailRule,
-  WorkPredicates
-}
-import cats.data.State
+import uk.ac.wellcome.platform.merger.rules._
+import uk.ac.wellcome.platform.merger.rules.CalmRules._
 import uk.ac.wellcome.platform.merger.logging.MergerLogging
-import uk.ac.wellcome.platform.merger.models.{
-  FieldMergeResult,
-  MergeResult,
-  MergerOutcome
-}
+import uk.ac.wellcome.platform.merger.models.{MergeResult, MergerOutcome}
 
 /*
  * The implementor of a Merger must provide:
@@ -36,15 +28,14 @@ import uk.ac.wellcome.platform.merger.models.{
  * - all redirected sources
  * - any other works untouched
  */
-abstract class Merger extends MergerLogging {
-  type RedirectsAccumulator[T] = State[Set[TransformedBaseWork], T]
+trait Merger extends MergerLogging {
+  type MergeState = State[Set[TransformedBaseWork], MergeResult]
 
   protected def findTarget(
     works: Seq[TransformedBaseWork]): Option[UnidentifiedWork]
 
-  protected def createMergeResult(
-    target: UnidentifiedWork,
-    sources: Seq[TransformedBaseWork]): RedirectsAccumulator[MergeResult]
+  protected def createMergeResult(target: UnidentifiedWork,
+                                  sources: Seq[TransformedBaseWork]): MergeState
 
   protected def getTargetAndSources(works: Seq[TransformedBaseWork])
     : Option[(UnidentifiedWork, Seq[TransformedBaseWork])] =
@@ -79,14 +70,6 @@ abstract class Merger extends MergerLogging {
           )
       }
       .getOrElse(MergerOutcome(works, Nil))
-
-  protected def accumulateRedirects[T](
-    merged: => FieldMergeResult[T]): RedirectsAccumulator[T] =
-    merged match {
-      case FieldMergeResult(field, ruleRedirects) =>
-        State(existingRedirects =>
-          (existingRedirects ++ ruleRedirects.toSet, field))
-    }
 
   private def redirectSourceToTarget(target: UnidentifiedWork)(
     source: TransformedBaseWork): UnidentifiedRedirectedWork =
@@ -131,32 +114,44 @@ object PlatformMerger extends Merger {
 
   override def createMergeResult(
     target: UnidentifiedWork,
-    sources: Seq[TransformedBaseWork]): RedirectsAccumulator[MergeResult] =
-    sources match {
-      case Nil =>
-        State.pure(
-          MergeResult(target, images = ImagesRule.merge(target).fieldData)
+    sources: Seq[TransformedBaseWork]): MergeState =
+    if (sources.isEmpty)
+      State.pure(
+        MergeResult(target, images = ImagesRule.merge(target).fieldData)
+      )
+    else
+      for {
+        items <- ItemsRule(target, sources)
+        thumbnail <- ThumbnailRule(target, sources)
+        otherIdentifiers <- OtherIdentifiersRule(target, sources)
+        images <- ImagesRule(target, sources)
+        title <- TitleRule(target, sources)
+        workType <- WorkTypeRule(target, sources)
+        collection <- CollectionRule(target, sources)
+        physicalDescription <- PhysicalDescriptionRule(target, sources)
+        contributors <- ContributorsRule(target, sources)
+        subjects <- SubjectsRule(target, sources)
+        language <- LanguageRule(target, sources)
+        notes <- NotesRule(target, sources)
+      } yield
+        MergeResult(
+          mergedTarget = target withData { data =>
+            data.copy(
+              items = items,
+              thumbnail = thumbnail,
+              otherIdentifiers = otherIdentifiers,
+              images = images.map(_.toUnmerged),
+              title = title,
+              workType = workType,
+              collection = collection,
+              physicalDescription = physicalDescription,
+              contributors = contributors,
+              subjects = subjects,
+              language = language,
+              notes = notes,
+              merged = true
+            )
+          },
+          images = images
         )
-      case _ =>
-        for {
-          items <- accumulateRedirects(ItemsRule.merge(target, sources))
-          thumbnail <- accumulateRedirects(ThumbnailRule.merge(target, sources))
-          otherIdentifiers <- accumulateRedirects(
-            OtherIdentifiersRule.merge(target, sources))
-          images <- accumulateRedirects(ImagesRule.merge(target, sources))
-        } yield
-          MergeResult(
-            mergedTarget = target withData { data =>
-              data.copy(
-                items = items,
-                thumbnail = thumbnail,
-                otherIdentifiers = otherIdentifiers,
-                images = images.map(_.toUnmerged),
-                merged = true
-              )
-            },
-            images = images
-          )
-    }
-
 }
