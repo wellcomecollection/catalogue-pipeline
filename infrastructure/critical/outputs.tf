@@ -84,21 +84,3 @@ output "vhs_sierra_items_bucket_name" {
 output "vhs_sierra_items_assumable_read_role" {
   value = module.vhs_sierra_items.assumable_read_role
 }
-
-# Calm Hybrid Store
-output "vhs_calm_read_policy" {
-  value = module.vhs_calm.read_policy
-}
-
-output "vhs_calm_table_name" {
-  value = module.vhs_calm.table_name
-}
-
-output "vhs_calm_bucket_name" {
-  value = module.vhs_calm.bucket_name
-}
-
-output "vhs_calm_assumable_read_role" {
-  value = module.vhs_calm.assumable_read_role
-}
-
