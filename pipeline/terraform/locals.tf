@@ -20,9 +20,9 @@ locals {
   mets_adapter_topic_arn = data.terraform_remote_state.mets_adapter.outputs.mets_adapter_topic_arn
 
   # Calm adapter VHS
-  vhs_calm_read_policy            = data.terraform_remote_state.catalogue_infra_critical.outputs.vhs_calm_read_policy
-  vhs_calm_sourcedata_bucket_name = data.terraform_remote_state.catalogue_infra_critical.outputs.vhs_calm_bucket_name
-  vhs_calm_sourcedata_table_name  = data.terraform_remote_state.catalogue_infra_critical.outputs.vhs_calm_table_name
+  vhs_calm_read_policy            = data.terraform_remote_state.calm_adapter.outputs.vhs_read_policy
+  vhs_calm_sourcedata_bucket_name = data.terraform_remote_state.calm_adapter.outputs.vhs_bucket_name
+  vhs_calm_sourcedata_table_name  = data.terraform_remote_state.calm_adapter.outputs.vhs_table_name
 
   # Calm adapter topics
   calm_adapter_topic_arn = data.terraform_remote_state.calm_adapter.outputs.calm_adapter_topic_arn

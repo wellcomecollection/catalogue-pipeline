@@ -20,7 +20,6 @@ module "task_definition" {
   secret_env_vars = local.secret_env_vars
   launch_type = "FARGATE"
   aws_region = local.aws_region
-  use_awslogs = true
 }
 
 module "scaling" {
