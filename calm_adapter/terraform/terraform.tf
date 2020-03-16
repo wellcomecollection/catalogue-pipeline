@@ -21,4 +21,16 @@ data "terraform_remote_state" "shared_infra" {
   }
 }
 
+data "terraform_remote_state" "critical_infra" {
+  backend = "s3"
+
+  config = {
+    role_arn = "arn:aws:iam::760097843905:role/platform-read_only"
+
+    bucket = "wellcomecollection-platform-infra"
+    key    = "terraform/catalogue/infrastructure/critical.tfstate"
+    region = "eu-west-1"
+  }
+}
+
 data "aws_caller_identity" "current" {}
