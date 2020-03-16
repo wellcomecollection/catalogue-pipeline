@@ -56,7 +56,7 @@ class FeatureVectorInferrerAdapterTest
         lsh_encoded_features = lshEncodedFeatures
       )
       val augmentedImage =
-        FeatureVectorInferrerAdapter.augmentInput(image, response)
+        FeatureVectorInferrerAdapter.augmentInput(image, Some(response))
       inside(augmentedImage) {
         case AugmentedImage(id, location, parentWork, fullText, inferredData) =>
           id should be(image.id)

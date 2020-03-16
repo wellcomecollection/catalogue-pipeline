@@ -58,7 +58,7 @@ class InferenceManagerWorkerService[Destination, Input, Output](
       }
 
   private def augmentInput =
-    Flow[(Message, Input, inferrerAdapter.InferrerResponse)].map {
+    Flow[(Message, Input, Option[inferrerAdapter.InferrerResponse])].map {
       case (msg, input, response) =>
         (msg, inferrerAdapter.augmentInput(input, response))
     }

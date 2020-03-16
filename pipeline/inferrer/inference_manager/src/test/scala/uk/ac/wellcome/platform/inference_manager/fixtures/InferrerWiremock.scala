@@ -4,18 +4,33 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.{MappingBuilder, WireMock}
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import uk.ac.wellcome.fixtures.TestWith
 
-import scala.util.{Random, Try}
+import scala.util.Random
 
-trait InferrerWiremockImplementation {
+trait InferrerStubs {
   val stubs: Seq[MappingBuilder]
 }
 
-object FeatureVectorInferrerMock extends InferrerWiremockImplementation {
-  val stubs = Seq(imageStub, iiifStub)
+object FeatureVectorInferrerMock extends InferrerStubs {
+  val stubs = Seq(
+    imageStub,
+    iiifStub,
+    imageWithStatusStub("extremely_cursed_image", 500),
+    imageWithStatusStub("lost_image", 404),
+    imageWithStatusStub("malformed_image_url", 400)
+  )
 
-  private def rootStub =
+  private lazy val imageStub =
+    getRootStub.withQueryParam("image_url", matching(".+"))
+  private lazy val iiifStub =
+    getRootStub.withQueryParam("iiif_url", matching(".+"))
+
+  private def imageWithStatusStub(imageUrl: String, status: Int) =
+    get(urlPathEqualTo("/feature-vectors/"))
+      .withQueryParam("image_url", equalTo(imageUrl))
+      .willReturn(aResponse().withStatus(status))
+
+  private def getRootStub =
     get(urlPathEqualTo("/feature-vectors/"))
       .willReturn(
         aResponse()
@@ -29,33 +44,33 @@ object FeatureVectorInferrerMock extends InferrerWiremockImplementation {
           |}""".stripMargin)
       )
 
-  private lazy val imageStub =
-    rootStub.withQueryParam("image_url", matching(".+"))
-  private lazy val iiifStub =
-    rootStub.withQueryParam("iiif_url", matching(".+"))
-
   def randomFeatureVector: List[Float] = List.fill(4096)(Random.nextFloat)
 
   def randomLshVector: List[String] =
     List.fill(256)(s"${Random.nextInt(256)}-${Random.nextInt(32)}")
 }
 
-trait InferrerWiremock {
-  def withInferrerService[R](inferrer: InferrerWiremockImplementation)(
-    testWith: TestWith[Int, R]): R = {
-    val server = new WireMockServer(
+class InferrerWiremock(inferrer: InferrerStubs) {
+  lazy private val server = {
+    val _server = new WireMockServer(
       WireMockConfiguration
         .wireMockConfig()
         .dynamicPort()
     )
-    server.start()
     inferrer.stubs.foreach { stub =>
-      server.addStubMapping(stub.build())
+      _server.addStubMapping(stub.build())
     }
-    val port = server.port()
+    _server
+  }
+
+  lazy val port: Int = server.port()
+
+  def start(): Unit = {
+    server.start()
     WireMock.configureFor("localhost", port)
-    val result = Try(testWith(port))
+  }
+
+  def stop(): Unit = {
     server.stop()
-    result.get
   }
 }

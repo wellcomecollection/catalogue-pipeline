@@ -4,6 +4,7 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.Materializer
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import grizzled.slf4j.Logging
 import io.circe.Decoder
 import io.circe.generic.semiauto.deriveDecoder
 import uk.ac.wellcome.models.work.internal.{
@@ -16,24 +17,26 @@ import uk.ac.wellcome.platform.inference_manager.models.FeatureVectorInferrerRes
 
 import scala.concurrent.Future
 
-trait InferrerAdapter[Input, Output] {
+trait InferrerAdapter[Input, Output] extends Logging {
   type InferrerResponse
 
   def createRequest(input: Input): HttpRequest
-  def augmentInput(input: Input, inferrerResponse: InferrerResponse): Output
+  def augmentInput(input: Input,
+                   inferrerResponse: Option[InferrerResponse]): Output
 
   def parseResponse(response: HttpResponse)(
-    implicit mat: Materializer): Future[InferrerResponse] =
+    implicit mat: Materializer): Future[Option[InferrerResponse]] =
     response.status match {
       case StatusCodes.OK =>
-        Unmarshal(response.entity).to[InferrerResponse]
+        Unmarshal(response.entity).to[Some[InferrerResponse]]
       case StatusCodes.BadRequest =>
         Future.failed(new Exception("Bad request"))
       case StatusCodes.NotFound =>
         Future.failed(new Exception("Entity not found"))
       case statusCode =>
-        Future.failed(
-          new Exception(s"Request failed with code ${statusCode.value}"))
+        warn(
+          s"Request failed non-deterministically with code ${statusCode.value}")
+        Future.successful(None)
     }
 
   implicit val responseDecoder: Decoder[InferrerResponse]
@@ -54,10 +57,12 @@ object FeatureVectorInferrerAdapter
       )
     )
 
-  def augmentInput(image: MergedImage[Minted],
-                   inferrerResponse: InferrerResponse): AugmentedImage[Minted] =
+  def augmentInput(
+    image: MergedImage[Minted],
+    inferrerResponse: Option[InferrerResponse]): AugmentedImage[Minted] =
     inferrerResponse match {
-      case FeatureVectorInferrerResponse(features, lsh_encoded_features) =>
+      case Some(
+          FeatureVectorInferrerResponse(features, lsh_encoded_features)) =>
         val (features1, features2) = features.splitAt(features.size / 2)
         image.augment {
           InferredData(
@@ -66,6 +71,7 @@ object FeatureVectorInferrerAdapter
             lshEncodedFeatures = lsh_encoded_features
           )
         }
+      case None => image.augmentWithNone
     }
 
   implicit val responseDecoder: Decoder[InferrerResponse] = deriveDecoder

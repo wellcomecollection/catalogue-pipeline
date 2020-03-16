@@ -19,13 +19,11 @@ import uk.ac.wellcome.storage.store.memory.MemoryTypedStore
 import uk.ac.wellcome.storage.streaming.Codec
 
 trait InferenceManagerWorkerServiceFixture[Input, Output]
-    extends BigMessagingFixture
-    with InferrerWiremock {
-  def withWorkerService[R](
-    queue: Queue,
-    topic: Topic,
-    adapter: InferrerAdapter[Input, Output],
-    inferrerWiremockImplementation: InferrerWiremockImplementation)(
+    extends BigMessagingFixture {
+  def withWorkerService[R](queue: Queue,
+                           topic: Topic,
+                           adapter: InferrerAdapter[Input, Output],
+                           inferrerPort: Int)(
     testWith: TestWith[InferenceManagerWorkerService[SNSConfig, Input, Output],
                        R])(implicit decoder: Decoder[Input],
                            encoder: Encoder[Output],
@@ -38,23 +36,20 @@ trait InferenceManagerWorkerServiceFixture[Input, Output]
             implicit val typedStoreT: MemoryTypedStore[ObjectLocation, Input] =
               MemoryTypedStoreCompanion[ObjectLocation, Input]()
             withBigMessageStream[Input, R](queue) { msgStream =>
-              withInferrerService(inferrerWiremockImplementation) { port =>
-                val workerService = new InferenceManagerWorkerService(
-                  msgStream = msgStream,
-                  msgSender = msgSender,
-                  inferrerAdapter = adapter,
-                  inferrerClientFlow = Http()
-                    .cachedHostConnectionPool[(Message, Input)](
-                      "localhost",
-                      port)
-                )
-                workerService.run()
-                testWith(workerService)
-              }
+              val workerService = new InferenceManagerWorkerService(
+                msgStream = msgStream,
+                msgSender = msgSender,
+                inferrerAdapter = adapter,
+                inferrerClientFlow = Http()
+                  .cachedHostConnectionPool[(Message, Input)](
+                    "localhost",
+                    inferrerPort)
+              )
+              workerService.run()
+              testWith(workerService)
             }
           }
         }
       }
     }
-
 }
