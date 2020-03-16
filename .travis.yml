@@ -47,6 +47,8 @@ jobs:
       script: ./.travis/run_job.py mets_adapter
     - name: calm_adapter
       script: ./.travis/run_job.py calm_adapter
+    - name: inference_manager
+      script: ./.travis/run_job.py inference_manager
     - name: snapshot_generator
       script: ./.travis/run_job.py snapshot_generator
     - name: lambda-test
