@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.merger.rules
 
 import org.scalatest.{FunSpec, Inside, Matchers}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.models.work.internal.{DigitalLocation, License}
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 
 class ItemsRuleTest
@@ -28,6 +28,7 @@ class ItemsRuleTest
     )
   )
   val miroWork = createMiroWork
+  val calmWork = createUnidentifiedCalmWork()
 
   it(
     "merges locations from digital Sierra items into single-item physical Sierra works") {
@@ -77,4 +78,31 @@ class ItemsRuleTest
     }
   }
 
+  it("Merges physical locations from Calm works into physical Sierra works") {
+    inside(ItemsRule.merge(physicalSierra, List(calmWork))) {
+      case FieldMergeResult(items, _) =>
+        items should have size 1
+        items.head.locations shouldBe List(
+          calmWork.data.items.head.locations.head
+        )
+    }
+  }
+
+  it("Merges physical locations from Calm works into digital Sierra works") {
+    inside(ItemsRule.merge(digitalSierra, List(calmWork))) {
+      case FieldMergeResult(items, _) =>
+        items should have size 1
+        items.head.locations shouldBe List(
+          calmWork.data.items.head.locations.head,
+          digitalSierra.data.items.head.locations.head
+        )
+    }
+  }
+
+  it("Merges physical locations from Calm works into multi-item Sierra works") {
+    inside(ItemsRule.merge(multiItemPhysicalSierra, List(calmWork))) {
+      case FieldMergeResult(items, _) =>
+        items shouldBe calmWork.data.items ++ multiItemPhysicalSierra.data.items
+    }
+  }
 }

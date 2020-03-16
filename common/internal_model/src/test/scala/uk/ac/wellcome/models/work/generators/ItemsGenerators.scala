@@ -81,6 +81,16 @@ trait ItemsGenerators extends IdentifiersGenerators {
       locations = List(createDigitalLocationWith(license = license))
     )
 
+  def createCalmItem =
+    createUnidentifiableItemWith(
+      locations = List(
+        createPhysicalLocationWith(
+          locationType = LocationType("scmac"),
+          label = "Closed stores Arch. & MSS",
+        )
+      )
+    )
+
   private def defaultLocation = createDigitalLocationWith()
 
   private def defaultLocationUrl =

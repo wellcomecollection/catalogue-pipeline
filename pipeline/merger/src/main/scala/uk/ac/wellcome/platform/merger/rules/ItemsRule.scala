@@ -35,41 +35,41 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
 
   private def mergeItems(target: UnidentifiedWork,
                          sources: Seq[TransformedBaseWork]): FieldData = {
-    // TODO: for now we don't merge any calm items: want to get this merged,
-    // and waiting for jtweed to write up the item rules
-    val mergedTarget = target
-    // val mergedTarget = mergeCalmItems(target, sources)
-    //   .map(items => target.withData(_.copy(items = items)))
-    //   .getOrElse(target)
+    // TODO: the merging behaviour here is temporary until jtweed confirms the
+    // exact rules
+    val mergedTarget = mergeCalmItems(target, sources)
+      .map(items => target.withData(_.copy(items = items)))
+      .getOrElse(target)
     mergeMetsItems(mergedTarget, sources)
       .orElse(mergeMiroPhysicalAndDigitalItems(mergedTarget, sources))
       .getOrElse(mergedTarget.data.items)
   }
 
-  // private val mergeCalmItems = new PartialRule {
-  //   val isDefinedForTarget: WorkPredicate = WorkPredicates.sierraWork
-  //   val isDefinedForSource: WorkPredicate = WorkPredicates.calmWork
+  private val mergeCalmItems = new PartialRule {
+    val isDefinedForTarget: WorkPredicate = WorkPredicates.sierraWork
+    val isDefinedForSource: WorkPredicate = WorkPredicates.calmWork
 
-  //   def rule(target: UnidentifiedWork,
-  //            sources: NonEmptyList[TransformedBaseWork]): FieldData = {
+    def rule(target: UnidentifiedWork,
+             sources: NonEmptyList[TransformedBaseWork]): FieldData = {
 
-  //     // The Calm transformer always creates a single item with a physical
-  //     // location so this is safe
-  //     val calmLocation = sources.head.data.items.head.locations.head
+      // The Calm transformer always creates a single item with a physical
+      // location so this is safe
+      val calmItem = sources.head.data.items.head
+      val calmLocation = calmItem.locations.head
 
-  //     target.data.items match {
-  //       case List(item) =>
-  //         List(
-  //           item.copy(
-  //             locations = mergeLocations(calmLocation, item.locations)
-  //           )
-  //         )
-  //     }
-  //   }
-
-  //   def mergeLocations(calmLocation: Location,
-  //                      sierraLocations: List[Location]): List[Location] = List(calmLocation)
-  // }
+      target.data.items match {
+        case List(sierraItem) =>
+          List(
+            sierraItem.copy(
+              locations = calmLocation :: sierraItem.locations.collect {
+                case location: DigitalLocation => location
+              }
+            )
+          )
+        case items => calmItem :: items
+      }
+    }
+  }
 
   private val mergeMetsItems = new PartialRule {
     val isDefinedForTarget: WorkPredicate = WorkPredicates.sierraWork
