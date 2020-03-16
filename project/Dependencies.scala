@@ -335,7 +335,8 @@ object CatalogueDependencies {
 
   // Inference  manager
   val inferenceManagerDependencies: Seq[ModuleID] =
-    ExternalDependencies.akkaHttpDependencies
+    ExternalDependencies.akkaHttpDependencies ++
+      ExternalDependencies.wireMockDependencies
 
   // Snapshots stack
 

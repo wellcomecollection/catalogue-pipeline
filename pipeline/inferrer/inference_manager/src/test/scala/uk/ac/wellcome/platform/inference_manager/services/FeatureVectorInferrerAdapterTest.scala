@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.inference_manager.services
 
-import akka.http.scaladsl.model.{HttpMethods, HttpRequest, HttpResponse}
+import akka.http.scaladsl.model.{HttpMethods, HttpRequest}
 import org.scalatest.{FunSpec, Inside, Matchers, OptionValues}
 import uk.ac.wellcome.models.work.generators.ImageGenerators
 import uk.ac.wellcome.models.work.internal.{AugmentedImage, InferredData}

@@ -38,7 +38,7 @@ object Main extends WellcomeTypesafeApp {
 
     val inferrerClientFlow =
       Http()
-        .cachedHostConnectionPool[(Message, Input)]("localhost")
+        .cachedHostConnectionPool[(Message, Input)]("localhost", 80)
 
     new InferenceManagerWorkerService(
       msgStream = BigMessagingBuilder.buildMessageStream[Input](config),

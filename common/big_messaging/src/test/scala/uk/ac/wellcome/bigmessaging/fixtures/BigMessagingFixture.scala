@@ -96,7 +96,7 @@ trait BigMessagingFixture
           store.getOrElse(MemoryTypedStoreCompanion[ObjectLocation, T]())
         override val namespace: String = bucket.name
         override implicit val encoder: Encoder[T] = encoderT
-        override val maxMessageSize: Int = 10000
+        override val maxMessageSize: Int = Int.MaxValue
       }
       testWith(sender)
     }
