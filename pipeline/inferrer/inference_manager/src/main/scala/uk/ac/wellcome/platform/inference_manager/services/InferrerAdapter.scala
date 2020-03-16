@@ -9,7 +9,8 @@ import io.circe.generic.semiauto.deriveDecoder
 import uk.ac.wellcome.models.work.internal.{
   AugmentedImage,
   InferredData,
-  MergedImage
+  MergedImage,
+  Minted
 }
 import uk.ac.wellcome.platform.inference_manager.models.FeatureVectorInferrerResponse
 
@@ -35,14 +36,14 @@ trait InferrerAdapter[Input, Output] {
           new Exception(s"Request failed with code ${statusCode.value}"))
     }
 
-  implicit val responseDecoder: Decoder[InferrerResponse] = deriveDecoder
+  implicit val responseDecoder: Decoder[InferrerResponse]
 }
 
 object FeatureVectorInferrerAdapter
-    extends InferrerAdapter[MergedImage[_], AugmentedImage[_]] {
+    extends InferrerAdapter[MergedImage[Minted], AugmentedImage[Minted]] {
   type InferrerResponse = FeatureVectorInferrerResponse
 
-  def createRequest(image: MergedImage[_]): HttpRequest =
+  def createRequest(image: MergedImage[Minted]): HttpRequest =
     HttpRequest(
       method = HttpMethods.GET,
       uri = Uri("/feature-vectors/").withQuery(
@@ -53,8 +54,8 @@ object FeatureVectorInferrerAdapter
       )
     )
 
-  def augmentInput(image: MergedImage[_],
-                   inferrerResponse: InferrerResponse): AugmentedImage[_] =
+  def augmentInput(image: MergedImage[Minted],
+                   inferrerResponse: InferrerResponse): AugmentedImage[Minted] =
     inferrerResponse match {
       case FeatureVectorInferrerResponse(features, lsh_encoded_features) =>
         val (features1, features2) = features.splitAt(features.size / 2)
@@ -66,4 +67,6 @@ object FeatureVectorInferrerAdapter
           )
         }
     }
+
+  implicit val responseDecoder: Decoder[InferrerResponse] = deriveDecoder
 }

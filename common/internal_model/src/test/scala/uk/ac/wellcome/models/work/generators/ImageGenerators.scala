@@ -3,8 +3,10 @@ package uk.ac.wellcome.models.work.generators
 import uk.ac.wellcome.models.work.internal.{
   DigitalLocation,
   Identifiable,
+  Identified,
   IdentifierType,
   MergedImage,
+  Minted,
   SourceIdentifier,
   UnmergedImage,
   Unminted
@@ -33,4 +35,19 @@ trait ImageGenerators extends IdentifiersGenerators with ItemsGenerators {
     )
 
   def createMergedImage: MergedImage[Unminted] = createMergedImageWith()
+
+  implicit class ImageIdOps(val image: MergedImage[Unminted]) {
+    val toMinted: MergedImage[Minted] = MergedImage(
+      id = Identified(
+        canonicalId = createCanonicalId,
+        sourceIdentifier = image.id.allSourceIdentifiers.head
+      ),
+      location = image.location,
+      parentWork = Identified(
+        canonicalId = createCanonicalId,
+        sourceIdentifier = image.parentWork.allSourceIdentifiers.head
+      ),
+      fullText = image.fullText
+    )
+  }
 }
