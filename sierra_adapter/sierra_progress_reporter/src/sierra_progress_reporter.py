@@ -63,19 +63,6 @@ def process_report(s3_client, bucket, resource_type):
             raise IncompleteReportError(resource_type)
 
 
-def prepare_present_report(s3_client, bucket, resource_type):
-    """
-    Generate a report for windows that are present.
-    """
-    yield ""
-    yield f"*{resource_type} windows*"
-
-    for iv in get_consolidated_report(s3_client, bucket, resource_type):
-        yield f"{iv.start.isoformat()} – {iv.end.isoformat()}"
-
-    yield ""
-
-
 # https://stackoverflow.com/q/6822725/1558022
 def window(seq, n=2):
     """
@@ -93,8 +80,22 @@ def window(seq, n=2):
         yield result
 
 
-def print_report(s3_client, bucket, resource_type):
-    print("\n".join(prepare_present_report(s3_client, bucket, resource_type)))
+def prepare_missing_report(s3_client, bucket, resource_type):
+    """
+    Generate a report for windows that are missing.
+    """
+    yield ""
+    yield f"*missing {resource_type} windows*"
+
+    for iv1, iv2 in window(build_report(s3_client, bucket, resource_type)):
+        missing_start = iv1.end
+        missing_end = iv2.start
+        if missing_start.date() == missing_end.date():
+            yield f"{missing_start.date()}: {missing_start.strftime('%H:%M:%S')} — {missing_end.strftime('%H:%M:%S')}"
+        else:
+            yield f"{missing_start.strftime('%Y-%m-%d %H:%M:%S')} — {missing_end.strftime('%Y-%m-%d %H:%M:%S')}"
+
+    yield ""
 
 
 def consolidate_windows(s3_client, bucket, resource_type):
@@ -137,12 +138,6 @@ def main(event=None, _ctxt=None):
     error_lines = []
 
     for resource_type in ("bibs", "items"):
-        consolidate_windows(
-            s3_client=s3_client,
-            bucket=bucket,
-            resource_type=resource_type
-        )
-
         try:
             process_report(
                 s3_client=s3_client, bucket=bucket, resource_type=resource_type
@@ -187,17 +182,3 @@ def main(event=None, _ctxt=None):
             headers={"Content-Type": "application/json"},
         )
         resp.raise_for_status()
-
-
-if __name__ == "__main__":
-    s3_client = boto3.client("s3")
-    bucket = "wellcomecollection-platform-adapters-sierra"
-
-    for resource_type in ("bibs", "items"):
-        consolidate_windows(
-            s3_client=s3_client,
-            bucket=bucket,
-            resource_type=resource_type
-        )
-
-        print_report(s3_client=s3_client, bucket=bucket, resource_type=resource_type)
