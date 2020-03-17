@@ -17,6 +17,7 @@ import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.typesafe.S3Builder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
+import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 
 import scala.concurrent.ExecutionContext
 
@@ -38,7 +39,10 @@ object Main extends WellcomeTypesafeApp {
 
     val inferrerClientFlow =
       Http()
-        .cachedHostConnectionPool[(Message, Input)]("localhost", 80)
+        .cachedHostConnectionPool[(Message, Input)](
+          config.getOrElse[String]("inferrer.host")("localhost"),
+          config.getOrElse[Int]("inferrer.port")(80)
+        )
 
     new InferenceManagerWorkerService(
       msgStream = BigMessagingBuilder.buildMessageStream[Input](config),

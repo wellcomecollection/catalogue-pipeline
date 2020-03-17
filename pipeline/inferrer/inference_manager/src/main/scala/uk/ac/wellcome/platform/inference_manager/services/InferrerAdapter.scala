@@ -17,9 +17,21 @@ import uk.ac.wellcome.platform.inference_manager.models.FeatureVectorInferrerRes
 
 import scala.concurrent.Future
 
+/*
+ * An InferrerAdapter is specific to the inferrer and the data that is being augmented.
+ * Implementors must provide:
+ * - The type of the inferrer response
+ * - A Decoder for that response
+ * - A function to create an HTTP request from the input data type
+ * - A function to augment input data with a response, returning the output data type
+ *
+ * Additionally, the trait provides the logic for handling different HTTP response statuses
+ */
+
 trait InferrerAdapter[Input, Output] extends Logging {
   type InferrerResponse
 
+  implicit val responseDecoder: Decoder[InferrerResponse]
   def createRequest(input: Input): HttpRequest
   def augmentInput(input: Input,
                    inferrerResponse: Option[InferrerResponse]): Output
@@ -38,10 +50,10 @@ trait InferrerAdapter[Input, Output] extends Logging {
           s"Request failed non-deterministically with code ${statusCode.value}")
         Future.successful(None)
     }
-
-  implicit val responseDecoder: Decoder[InferrerResponse]
 }
 
+// The InferrerAdaptor for feature vectors, consuming MergedImages and
+// augmenting them into AugmentedImages
 object FeatureVectorInferrerAdapter
     extends InferrerAdapter[MergedImage[Minted], AugmentedImage[Minted]] {
   type InferrerResponse = FeatureVectorInferrerResponse
