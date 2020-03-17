@@ -30,7 +30,10 @@ trait InferenceManagerWorkerServiceFixture[Input, Output]
                            codecOut: Codec[Output],
                            codecIn: Codec[Input]): R =
     withLocalS3Bucket { bucket =>
-      withSqsBigMessageSender[Output, R](bucket, topic) { msgSender =>
+      withSqsBigMessageSender[Output, R](
+        bucket,
+        topic,
+        bigMessageThreshold = Int.MaxValue) { msgSender =>
         withActorSystem { implicit actorSystem =>
           withMaterializer(actorSystem) { implicit materializer =>
             implicit val typedStoreT: MemoryTypedStore[ObjectLocation, Input] =
