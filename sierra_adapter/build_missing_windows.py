@@ -43,9 +43,9 @@ def get_missing_windows(report):
     # We're missing any records created between the *end* of window_1
     # and the *start* of window_2, so we use these as the basis for
     # our new window.
-    for (window_1, _), (window_2, _) in sliding_window(report):
-        missing_start = window_1.end - dt.timedelta(seconds=1)
-        missing_end = window_2.start + dt.timedelta(seconds=1)
+    for interval_1, interval_2 in sliding_window(report):
+        missing_start = interval_1.end - dt.timedelta(seconds=1)
+        missing_end = interval_2.start + dt.timedelta(seconds=1)
 
         yield from generate_windows(start=missing_start, end=missing_end, minutes=2)
 
