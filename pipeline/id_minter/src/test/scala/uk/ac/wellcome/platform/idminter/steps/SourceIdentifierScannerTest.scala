@@ -33,7 +33,6 @@ class SourceIdentifierScannerTest
     }
 
     it("retrieves a sourceIdentifiers nested in the json") {
-
       val sourceIdentifiers = (1 to 4).map(_ => createSourceIdentifier)
       val objectWithIdentifier = ClassWithIdentifier(
         sourceIdentifiers.head,
@@ -63,7 +62,7 @@ class SourceIdentifierScannerTest
     }
   }
   describe("update") {
-    it("modifies a json to add a single canonicalId") {
+    it("modifies json to add a single canonicalId in the root") {
       val sourceIdentifier = createSourceIdentifier
       val objectWithIdentifier = ClassWithIdentifier(sourceIdentifier)
       val identifier = Identifier(
@@ -79,6 +78,50 @@ class SourceIdentifierScannerTest
         .get shouldBe ClassWithIdentifierAndCanonicalId(
         sourceIdentifier,
         canonicalId = identifier.CanonicalId)
+    }
+
+    it("modifies json to add multiple nested canonicalIds") {
+      val sourceIdentifiers = (1 to 4).map(_ => createSourceIdentifier)
+      val objectWithIdentifiers = ClassWithIdentifier(
+        sourceIdentifiers.head,
+        List(
+          ClassWithIdentifier(sourceIdentifiers(1)),
+          ClassWithIdentifier(
+            sourceIdentifiers(2),
+            List(ClassWithIdentifier(sourceIdentifiers(3)))))
+      )
+      val identifiers = sourceIdentifiers.map { sourceIdentifier =>
+        sourceIdentifier -> Identifier(createCanonicalId, sourceIdentifier)
+      }.toMap
+      val canonicalIds =
+        sourceIdentifiers.flatMap(identifiers.get).map(_.CanonicalId)
+      val identified = SourceIdentifierScanner.update(
+        objectWithIdentifiers.asJson,
+        identifiers
+      )
+      identified shouldBe a[Success[_]]
+      identified.get
+        .as[ClassWithIdentifierAndCanonicalId]
+        .right
+        .get shouldBe ClassWithIdentifierAndCanonicalId(
+        sourceIdentifiers.head,
+        canonicalIds.head,
+        List(
+          ClassWithIdentifierAndCanonicalId(
+            sourceIdentifiers(1),
+            canonicalIds(1)
+          ),
+          ClassWithIdentifierAndCanonicalId(
+            sourceIdentifiers(2),
+            canonicalIds(2),
+            List(
+              ClassWithIdentifierAndCanonicalId(
+                sourceIdentifiers(3),
+                canonicalIds(3)
+              ))
+          )
+        )
+      )
     }
 
     it(

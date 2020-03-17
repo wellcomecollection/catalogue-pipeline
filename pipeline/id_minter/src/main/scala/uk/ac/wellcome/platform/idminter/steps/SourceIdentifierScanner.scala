@@ -3,6 +3,8 @@ package uk.ac.wellcome.platform.idminter.steps
 import grizzled.slf4j.Logging
 import io.circe.Json
 import io.circe.optics.JsonPath.root
+import io.circe.optics.JsonOptics._
+import monocle.function.Plated
 import uk.ac.wellcome.json.JsonUtil.fromJson
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal.SourceIdentifier
@@ -15,51 +17,54 @@ object SourceIdentifierScanner extends Logging {
   def update(inputJson: Json,
              identifiers: Map[SourceIdentifier, Identifier]): Try[Json] =
     Try {
-      root.sourceIdentifier.json.getOption(inputJson) match {
-        case Some(sourceIdentifierJson) =>
-          val sourceIdentifier = parseSourceIdentifier(sourceIdentifierJson)
-          identifiers.get(sourceIdentifier) match {
-            case Some(identifier) =>
-              root.obj.modify(json =>
-                ("canonicalId", Json.fromString(identifier.CanonicalId)) +: json)(
-                inputJson)
-            case None =>
-              throw new RuntimeException(
-                s"Could not find $sourceIdentifier in $identifiers")
-          }
-
-        case None => ???
-      }
+      // Plated transforms operate on self-similar *children*
+      // so we need to update the root separately
+      val updatedRoot = updateNode(identifiers)(inputJson)
+      Plated.transform[Json](updateNode(identifiers))(updatedRoot)
     }
+
+  private def updateNode(identifiers: Map[SourceIdentifier, Identifier])(
+    node: Json): Json =
+    root.sourceIdentifier.json
+      .getOption(node)
+      .map(parseSourceIdentifier)
+      .map { sourceIdentifier =>
+        identifiers.get(sourceIdentifier) match {
+          case Some(Identifier(canonicalId, _, _, _)) =>
+            root.obj.modify { identifierJson =>
+              ("canonicalId", Json.fromString(canonicalId)) +: identifierJson
+            }(node)
+          case None =>
+            throw new RuntimeException(
+              s"Could not find $sourceIdentifier in $identifiers")
+        }
+      }
+      .getOrElse(node)
 
   def scan(inputJson: Json): Try[List[SourceIdentifier]] =
     Try(
-      iterate(
+      scanIterate(
         root.each.json.getAll(inputJson),
-        findIdentifier(root.sourceIdentifier.json.getOption(inputJson)).toList))
+        root.sourceIdentifier.json
+          .getOption(inputJson)
+          .map(parseSourceIdentifier)
+          .toList
+      )
+    )
 
   @tailrec
-  private def iterate(
+  private def scanIterate(
     children: List[Json],
     identifiers: List[SourceIdentifier]): List[SourceIdentifier] =
     children match {
       case Nil => identifiers
       case headChild :: tailChildren =>
-        iterate(
+        scanIterate(
           root.each.json.getAll(headChild) ++ tailChildren,
-          identifiers ++ findIdentifier(
-            root.sourceIdentifier.json.getOption(headChild)
-          ).toList
+          identifiers ++ root.sourceIdentifier.json
+            .getOption(headChild)
+            .map(parseSourceIdentifier)
         )
-    }
-
-  private def findIdentifier(json: Option[Json]): Option[SourceIdentifier] =
-    json match {
-      case Some(sourceIdentifierJson) =>
-        val sourceIdentifier = parseSourceIdentifier(sourceIdentifierJson)
-        Some(sourceIdentifier)
-
-      case None => None
     }
 
   private def parseSourceIdentifier(
