@@ -29,17 +29,7 @@ def setupProject(
     .dependsOn(dependsOn: _*)
     .settings(libraryDependencies ++= externalDependencies)
 }
-// Temporarily commented out until https://github.com/wellcometrust/platform/issues/3806
-// In order to access our libraries in S3 we need to set the following:
 
-s3CredentialsProvider := { _ =>
-  val builder = new STSAssumeRoleSessionCredentialsProvider.Builder(
-    "arn:aws:iam::760097843905:role/platform-read_only",
-    UUID.randomUUID().toString
-  )
-
-  builder.build()
-}
 lazy val internal_model = setupProject(
   project,
   "common/internal_model",
@@ -193,7 +183,8 @@ lazy val mets_adapter = setupProject(
 
 // CALM adapter
 
-lazy val calm_adapter = setupProject(project,
+lazy val calm_adapter = setupProject(
+  project,
   folder = "calm_adapter/calm_adapter",
   localDependencies = Seq(internal_model, big_messaging_typesafe),
   externalDependencies = CatalogueDependencies.calmAdapterDependencies

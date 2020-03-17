@@ -12,7 +12,6 @@ import uk.ac.wellcome.models.work.internal.SourceIdentifier
 import uk.ac.wellcome.platform.idminter.exceptions.IdMinterException
 import uk.ac.wellcome.platform.idminter.models.{Identifier, IdentifiersTable}
 
-import scala.collection.mutable
 import scala.concurrent.blocking
 import scala.util.{Failure, Success, Try}
 
@@ -29,7 +28,7 @@ class IdentifiersDao(db: DB, identifiers: IdentifiersTable) extends Logging {
 
   def lookupIds(sourceIdentifiers: Seq[SourceIdentifier])
     : Either[LookupError, LookupResult] = {
-    val tr = Try {
+    Try {
       debug(s"Matching ($sourceIdentifiers)")
       val sqlParametersToSourceIdentifier =
         buildSqlQueryParameters(sourceIdentifiers)
@@ -48,7 +47,7 @@ class IdentifiersDao(db: DB, identifiers: IdentifiersTable) extends Logging {
 
         }.map(rs => {
             val foundParameter = buildSqlParametersFromResult(i, rs)
-            sqlParametersToSourceIdentifier.remove(foundParameter) match {
+            sqlParametersToSourceIdentifier.get(foundParameter) match {
               case Some(sourceIdentifier) =>
                 (sourceIdentifier, Identifier(i)(rs))
               case None =>
@@ -58,22 +57,25 @@ class IdentifiersDao(db: DB, identifiers: IdentifiersTable) extends Logging {
             }
 
           })
-          .list()
+          .list
         debug(s"Executing:'${query.statement}'")
-        val result = query.apply().toMap
-
-        LookupResult(result, sqlParametersToSourceIdentifier.values.toList)
+        val foundIdentifiers = query.apply().toMap
+        val notFoundIdentifiers =
+          sqlParametersToSourceIdentifier.values.toSet -- foundIdentifiers.keySet
+        LookupResult(
+          foundIdentifiers,
+          notFoundIdentifiers.toList
+        )
       }
-    }
-    tr match {
+    } match {
       case Success(r) => Right(r)
       case Failure(e) => Left(LookupError(e))
     }
   }
 
   def saveIdentifiers(
-    ids: List[Identifier]): Either[InsertError, InsertResult] = {
-    val tried = Try {
+    ids: List[Identifier]): Either[InsertError, InsertResult] =
+    Try {
       val values = ids.map(i =>
         Seq(i.CanonicalId, i.OntologyType, i.SourceSystem, i.SourceId))
       blocking {
@@ -90,32 +92,36 @@ class IdentifiersDao(db: DB, identifiers: IdentifiersTable) extends Logging {
         }.batch(values: _*).apply()
         InsertResult(ids)
       }
-    }
-    tried match {
+    } match {
       case Success(r) => Right(r)
-      case Failure(e) if e.isInstanceOf[BatchUpdateException] =>
-        val exception = e.asInstanceOf[BatchUpdateException]
-        val groupedResult = ids.zip(exception.getUpdateCounts).groupBy {
-          case (_, Statement.EXECUTE_FAILED) => Statement.EXECUTE_FAILED
-          case (_, _)                        => Statement.SUCCESS_NO_INFO
-        }
-        val failedIdentifiers =
-          groupedResult.getOrElse(Statement.EXECUTE_FAILED, Nil).map {
-            case (identifier, _) => identifier
-          }
-        val succeededIdentifiers =
-          groupedResult.getOrElse(Statement.SUCCESS_NO_INFO, Nil).map {
-            case (identifier, _) => identifier
-          }
-        Left(InsertError(failedIdentifiers, e, succeededIdentifiers))
-      case Failure(exception) => Left(InsertError(ids, exception, Nil))
+      case Failure(exception: BatchUpdateException) =>
+        Left(batchUpdateError(exception, ids))
+      case Failure(exception) =>
+        Left(InsertError(ids, exception, Nil))
     }
+
+  private def batchUpdateError(exception: BatchUpdateException,
+                               ids: List[Identifier]): InsertError = {
+    val groupedResult = ids.zip(exception.getUpdateCounts).groupBy {
+      case (_, Statement.EXECUTE_FAILED) => Statement.EXECUTE_FAILED
+      case (_, _)                        => Statement.SUCCESS_NO_INFO
+    }
+    val failedIdentifiers =
+      groupedResult.getOrElse(Statement.EXECUTE_FAILED, Nil).map {
+        case (identifier, _) => identifier
+      }
+    val succeededIdentifiers =
+      groupedResult.getOrElse(Statement.SUCCESS_NO_INFO, Nil).map {
+        case (identifier, _) => identifier
+      }
+    InsertError(failedIdentifiers, exception, succeededIdentifiers)
   }
 
   private def buildSqlQueryParameters(
     sourceIdentifiers: Seq[SourceIdentifier]) = {
-    mutable.Map(sourceIdentifiers.map(sourceIdentifier =>
-      (buildSqlParametersFromSourceIdentifier(sourceIdentifier) -> sourceIdentifier)): _*)
+    sourceIdentifiers.map { sourceIdentifier =>
+      buildSqlParametersFromSourceIdentifier(sourceIdentifier) -> sourceIdentifier
+    }.toMap
   }
 
   private def buildSqlParametersFromSourceIdentifier(
