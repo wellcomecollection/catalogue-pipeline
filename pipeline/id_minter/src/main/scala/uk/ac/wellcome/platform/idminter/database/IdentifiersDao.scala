@@ -13,21 +13,25 @@ import uk.ac.wellcome.platform.idminter.exceptions.IdMinterException
 import uk.ac.wellcome.platform.idminter.models.{Identifier, IdentifiersTable}
 
 import scala.concurrent.blocking
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 
-class IdentifiersDao(db: DB, identifiers: IdentifiersTable) extends Logging {
+object IdentifiersDao {
   case class LookupResult(found: Map[SourceIdentifier, Identifier],
                           notFound: List[SourceIdentifier])
-  case class LookupError(e: Throwable)
-  case class InsertError(failed: List[Identifier],
-                         exception: Throwable,
-                         succeeded: List[Identifier])
   case class InsertResult(succeeded: List[Identifier])
+
+  case class InsertError(failed: List[Identifier],
+                         e: Throwable,
+                         succeeded: List[Identifier])
+      extends Exception
+}
+
+class IdentifiersDao(db: DB, identifiers: IdentifiersTable) extends Logging {
+  import IdentifiersDao._
 
   implicit val session = AutoSession(db.settingsProvider)
 
-  def lookupIds(sourceIdentifiers: Seq[SourceIdentifier])
-    : Either[LookupError, LookupResult] = {
+  def lookupIds(sourceIdentifiers: Seq[SourceIdentifier]): Try[LookupResult] = {
     Try {
       debug(s"Matching ($sourceIdentifiers)")
       val sqlParametersToSourceIdentifier =
@@ -67,14 +71,11 @@ class IdentifiersDao(db: DB, identifiers: IdentifiersTable) extends Logging {
           notFoundIdentifiers.toList
         )
       }
-    } match {
-      case Success(r) => Right(r)
-      case Failure(e) => Left(LookupError(e))
     }
   }
 
-  def saveIdentifiers(
-    ids: List[Identifier]): Either[InsertError, InsertResult] =
+  @throws(classOf[InsertError])
+  def saveIdentifiers(ids: List[Identifier]): Try[InsertResult] =
     Try {
       val values = ids.map(i =>
         Seq(i.CanonicalId, i.OntologyType, i.SourceSystem, i.SourceId))
@@ -92,16 +93,23 @@ class IdentifiersDao(db: DB, identifiers: IdentifiersTable) extends Logging {
         }.batch(values: _*).apply()
         InsertResult(ids)
       }
-    } match {
-      case Success(r) => Right(r)
-      case Failure(exception: BatchUpdateException) =>
-        Left(batchUpdateError(exception, ids))
-      case Failure(exception) =>
-        Left(InsertError(ids, exception, Nil))
+    } recover {
+      case e: BatchUpdateException =>
+        val insertError = getInsertErrorFromException(e, ids)
+        val failedIds = insertError.failed.map(_.SourceId)
+        val succeededIds = insertError.succeeded.map(_.SourceId)
+        error(
+          s"Batch update failed for [$failedIds], succeeded for [$succeededIds]",
+          e)
+        throw insertError
+      case e =>
+        error(s"Failed inserting IDs: [${ids.map(_.SourceId)}]")
+        throw e
     }
 
-  private def batchUpdateError(exception: BatchUpdateException,
-                               ids: List[Identifier]): InsertError = {
+  private def getInsertErrorFromException(
+    exception: BatchUpdateException,
+    ids: List[Identifier]): InsertError = {
     val groupedResult = ids.zip(exception.getUpdateCounts).groupBy {
       case (_, Statement.EXECUTE_FAILED) => Statement.EXECUTE_FAILED
       case (_, _)                        => Statement.SUCCESS_NO_INFO

@@ -205,10 +205,9 @@ class IdentifiersDaoTest
             lookupResult <- identifiersDao.lookupIds(List(sourceIdentifier))
           } yield (lookupResult)
 
-          triedLookup shouldBe a[Right[_, _]]
-          triedLookup.right.get.found shouldBe Map(
-            sourceIdentifier -> identifier)
-          triedLookup.right.get.notFound shouldBe empty
+          triedLookup shouldBe a[Success[_]]
+          triedLookup.get.found shouldBe Map(sourceIdentifier -> identifier)
+          triedLookup.get.notFound shouldBe empty
       }
     }
 
@@ -227,9 +226,9 @@ class IdentifiersDaoTest
             lookupResult <- identifiersDao.lookupIds(identifiersMap.keys.toList)
           } yield (lookupResult)
 
-          triedLookup shouldBe a[Right[_, _]]
-          triedLookup.right.get.found shouldBe identifiersMap
-          triedLookup.right.get.notFound shouldBe empty
+          triedLookup shouldBe a[Success[_]]
+          triedLookup.get.found shouldBe identifiersMap
+          triedLookup.get.notFound shouldBe empty
       }
     }
 
@@ -250,11 +249,11 @@ class IdentifiersDaoTest
             lookupResult <- identifiersDao.lookupIds(sourceIdentifiers)
           } yield (lookupResult)
 
-          triedLookup shouldBe a[Right[_, _]]
-          triedLookup.right.get.found shouldBe sourceIdentifiers
+          triedLookup shouldBe a[Success[_]]
+          triedLookup.get.found shouldBe sourceIdentifiers
             .zip(identifiers)
             .toMap
-          triedLookup.right.get.notFound shouldBe empty
+          triedLookup.get.notFound shouldBe empty
       }
     }
 
@@ -277,10 +276,10 @@ class IdentifiersDaoTest
               identifiersMap.keys.toList ++ nonExistingSourceIdentifiers)
           } yield (lookupResult)
 
-          triedLookup shouldBe a[Right[_, _]]
+          triedLookup shouldBe a[Success[_]]
 
-          triedLookup.right.get.found shouldBe identifiersMap
-          triedLookup.right.get.notFound should contain theSameElementsAs (nonExistingSourceIdentifiers)
+          triedLookup.get.found shouldBe identifiersMap
+          triedLookup.get.notFound should contain theSameElementsAs (nonExistingSourceIdentifiers)
       }
     }
 
@@ -293,8 +292,8 @@ class IdentifiersDaoTest
           val triedLookup = identifiersDao.lookupIds(
             sourceIdentifiers
           )
-          triedLookup.right.get.found shouldBe empty
-          triedLookup.right.get.notFound should contain theSameElementsAs (sourceIdentifiers)
+          triedLookup.get.found shouldBe empty
+          triedLookup.get.notFound should contain theSameElementsAs (sourceIdentifiers)
       }
     }
   }
@@ -336,8 +335,8 @@ class IdentifiersDaoTest
             lookupResult <- identifiersDao.lookupIds(ids.keys.toList)
           } yield (insertResult, lookupResult)
 
-          result shouldBe a[Right[_, _]]
-          val (insertResult, lookupResult) = result.right.get
+          result shouldBe a[Success[_]]
+          val (insertResult, lookupResult) = result.get
           lookupResult.found shouldBe ids
           insertResult.succeeded should contain theSameElementsAs (lookupResult.found.values)
       }
@@ -362,17 +361,18 @@ class IdentifiersDaoTest
             insertResult <- identifiersDao.saveIdentifiers(identifiers)
           } yield (insertResult)
 
-          result shouldBe a[Left[_, _]]
-          result.left.get.exception shouldBe a[BatchUpdateException]
-          result.left.get.failed should contain theSameElementsAs (identifiers
+          result shouldBe a[Failure[_]]
+          val error = result.failed.get.asInstanceOf[IdentifiersDao.InsertError]
+          error.e shouldBe a[BatchUpdateException]
+          error.failed should contain theSameElementsAs (identifiers
             .filter(i =>
               i.CanonicalId == duplicatedIdentifier1.CanonicalId || i.CanonicalId == duplicatedIdentifier2.CanonicalId))
-          result.left.get.succeeded should contain theSameElementsAs (identifiers
+          error.succeeded should contain theSameElementsAs (identifiers
             .filterNot(i =>
               i.CanonicalId == duplicatedIdentifier1.CanonicalId || i.CanonicalId == duplicatedIdentifier2.CanonicalId))
 
-          val lookupResult = identifiersDao.lookupIds(ids.keys.toList).right.get
-          lookupResult.found.values should contain theSameElementsAs (result.left.get.succeeded)
+          val lookupResult = identifiersDao.lookupIds(ids.keys.toList).get
+          lookupResult.found.values should contain theSameElementsAs (error.succeeded)
       }
     }
 
@@ -389,9 +389,10 @@ class IdentifiersDaoTest
               List(duplicateIdentifier))
           } yield (insertResult)
 
-          result shouldBe a[Left[_, _]]
-          result.left.get.exception shouldBe a[BatchUpdateException]
-          result.left.get.failed shouldBe List(duplicateIdentifier)
+          result shouldBe a[Failure[_]]
+          val error = result.failed.get.asInstanceOf[IdentifiersDao.InsertError]
+          error.e shouldBe a[BatchUpdateException]
+          error.failed shouldBe List(duplicateIdentifier)
       }
     }
 
@@ -415,7 +416,7 @@ class IdentifiersDaoTest
               List(identifier1, identifier2))
           } yield (insertResult)
 
-          result shouldBe a[Right[_, _]]
+          result shouldBe a[Success[_]]
       }
     }
 
@@ -440,7 +441,7 @@ class IdentifiersDaoTest
               List(identifier1, identifier2))
           } yield (insertResult)
 
-          result shouldBe a[Right[_, _]]
+          result shouldBe a[Success[_]]
       }
     }
   }
