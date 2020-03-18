@@ -9,13 +9,18 @@ import uk.ac.wellcome.platform.idminter.config.models.{
   RDSClientConfig
 }
 import uk.ac.wellcome.platform.idminter.database.TableProvisioner
-import uk.ac.wellcome.platform.idminter.steps.IdEmbedder
+import uk.ac.wellcome.platform.idminter.steps.{
+  IdEmbedder,
+  IdentifierGenerator,
+  SourceIdentifierScanner
+}
 import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class IdMinterWorkerService[Destination](
   idEmbedder: IdEmbedder,
+  identifierGenerator: IdentifierGenerator,
   sender: BigMessageSender[Destination, Json],
   messageStream: BigMessageStream[Json],
   rdsClientConfig: RDSClientConfig,
@@ -37,8 +42,13 @@ class IdMinterWorkerService[Destination](
   }
 
   def processMessage(json: Json): Future[Unit] =
-    for {
-      identifiedJson <- idEmbedder.embedId(json)
-      _ <- Future.fromTry { sender.sendT(identifiedJson) }
-    } yield ()
+    Future {
+      for {
+        sourceIdentifiers <- SourceIdentifierScanner.scan(json)
+        canonicalIds <- identifierGenerator.retrieveOrGenerateCanonicalIds(
+          sourceIdentifiers)
+        identifiedJson <- SourceIdentifierScanner.update(json, canonicalIds)
+        _ <- sender.sendT(identifiedJson)
+      } yield ()
+    }
 }

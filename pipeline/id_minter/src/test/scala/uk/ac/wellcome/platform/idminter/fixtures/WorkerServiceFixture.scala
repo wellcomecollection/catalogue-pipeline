@@ -34,12 +34,12 @@ trait WorkerServiceFixture
           implicit val typedStoreT =
             MemoryTypedStoreCompanion[ObjectLocation, Json]()
           withBigMessageStream[Json, R](queue) { messageStream =>
+            val identifierGenerator = new IdentifierGenerator(
+              identifiersDao = identifiersDao
+            )
             val workerService = new IdMinterWorkerService(
-              idEmbedder = new IdEmbedder(
-                identifierGenerator = new IdentifierGenerator(
-                  identifiersDao = identifiersDao
-                )
-              ),
+              idEmbedder = new IdEmbedder(identifierGenerator),
+              identifierGenerator = identifierGenerator,
               sender = bigMessageSender,
               messageStream = messageStream,
               rdsClientConfig = rdsClientConfig,

@@ -51,6 +51,7 @@ object Main extends WellcomeTypesafeApp {
 
     new IdMinterWorkerService(
       idEmbedder = idEmbedder,
+      identifierGenerator = identifierGenerator,
       sender = BigMessagingBuilder.buildBigMessageSender[Json](config),
       messageStream = BigMessagingBuilder.buildMessageStream[Json](config),
       rdsClientConfig = RDSBuilder.buildRDSClientConfig(config),

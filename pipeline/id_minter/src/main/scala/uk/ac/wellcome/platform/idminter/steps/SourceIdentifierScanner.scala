@@ -5,7 +5,6 @@ import io.circe.Json
 import io.circe.optics.JsonPath.root
 import io.circe.optics.JsonOptics._
 import monocle.function.Plated
-import uk.ac.wellcome.json.JsonUtil.fromJson
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal.SourceIdentifier
 import uk.ac.wellcome.platform.idminter.models.Identifier
@@ -43,7 +42,7 @@ object SourceIdentifierScanner extends Logging {
 
   def scan(inputJson: Json): Try[List[SourceIdentifier]] =
     Try(
-      scanIterate(
+      iterate(
         root.each.json.getAll(inputJson),
         root.sourceIdentifier.json
           .getOption(inputJson)
@@ -53,13 +52,13 @@ object SourceIdentifierScanner extends Logging {
     )
 
   @tailrec
-  private def scanIterate(
+  private def iterate(
     children: List[Json],
     identifiers: List[SourceIdentifier]): List[SourceIdentifier] =
     children match {
       case Nil => identifiers
       case headChild :: tailChildren =>
-        scanIterate(
+        iterate(
           root.each.json.getAll(headChild) ++ tailChildren,
           identifiers ++ root.sourceIdentifier.json
             .getOption(headChild)
@@ -69,7 +68,7 @@ object SourceIdentifierScanner extends Logging {
 
   private def parseSourceIdentifier(
     sourceIdentifierJson: Json): SourceIdentifier = {
-    fromJson[SourceIdentifier](sourceIdentifierJson.toString()) match {
+    sourceIdentifierJson.as[SourceIdentifier].toTry match {
       case Success(sourceIdentifier) => sourceIdentifier
       case Failure(exception) =>
         error(s"Error parsing source identifier: $exception")
