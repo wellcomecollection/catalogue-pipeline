@@ -83,7 +83,8 @@ trait BigMessagingFixture
     bucket: Bucket,
     topic: Topic,
     senderSnsClient: AmazonSNS = snsClient,
-    store: Option[MemoryTypedStore[ObjectLocation, T]] = None)(
+    store: Option[MemoryTypedStore[ObjectLocation, T]] = None,
+    bigMessageThreshold: Int = 10000)(
     testWith: TestWith[BigMessageSender[SNSConfig, T], R])(
     implicit
     encoderT: Encoder[T],
@@ -96,7 +97,7 @@ trait BigMessagingFixture
           store.getOrElse(MemoryTypedStoreCompanion[ObjectLocation, T]())
         override val namespace: String = bucket.name
         override implicit val encoder: Encoder[T] = encoderT
-        override val maxMessageSize: Int = 10000
+        override val maxMessageSize: Int = bigMessageThreshold
       }
       testWith(sender)
     }

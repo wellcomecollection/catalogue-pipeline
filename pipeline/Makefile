@@ -5,7 +5,7 @@ STACK_ROOT = pipeline
 
 PROJECT_ID = catalogue_pipeline
 
-SBT_APPS = id_minter ingestor recorder matcher merger
+SBT_APPS = id_minter ingestor recorder matcher merger inference_manager
 
 SBT_DOCKER_LIBRARIES    =
 SBT_NO_DOCKER_LIBRARIES =
