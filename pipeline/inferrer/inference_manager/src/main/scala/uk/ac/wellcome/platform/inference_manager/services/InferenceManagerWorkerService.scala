@@ -46,15 +46,12 @@ class InferenceManagerWorkerService[Destination, Input, Output](
   private def unmarshalResponse =
     Flow[(Try[HttpResponse], (Message, Input))]
       .mapAsync(parallelism) {
-        case (tryResponse, (msg, input)) =>
-          tryResponse match {
-            case Success(response) =>
-              inferrerAdapter
-                .parseResponse(response)
-                .map((msg, input, _))
-            case Failure(exception) =>
-              Future.failed(exception)
-          }
+        case (Success(response), (msg, input)) =>
+          inferrerAdapter
+            .parseResponse(response)
+            .map((msg, input, _))
+        case (Failure(exception), _) =>
+          Future.failed(exception)
       }
 
   private def augmentInput =
