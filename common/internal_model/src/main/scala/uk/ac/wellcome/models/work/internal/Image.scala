@@ -31,13 +31,7 @@ case class MergedImage[Id <: IdState](
       location = location
     )
 
-  def augment(inferredData: => InferredData): AugmentedImage[Id] =
-    augmentWithOption(Some(inferredData))
-
-  def augmentWithNone: AugmentedImage[Id] = augmentWithOption(None)
-
-  private def augmentWithOption(
-    inferredData: => Option[InferredData]): AugmentedImage[Id] =
+  def augment(inferredData: => Option[InferredData]): AugmentedImage[Id] =
     AugmentedImage[Id](
       id = id,
       location = location,

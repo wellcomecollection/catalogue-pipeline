@@ -72,18 +72,17 @@ object FeatureVectorInferrerAdapter
   def augmentInput(
     image: MergedImage[Minted],
     inferrerResponse: Option[InferrerResponse]): AugmentedImage[Minted] =
-    inferrerResponse match {
-      case Some(FeatureVectorInferrerResponse(features, lsh_encoded_features))
-          if features.size == 4096 =>
-        val (features1, features2) = features.splitAt(features.size / 2)
-        image.augment {
+    image.augment {
+      inferrerResponse collect {
+        case FeatureVectorInferrerResponse(features, lsh_encoded_features)
+            if features.size == 4096 =>
+          val (features1, features2) = features.splitAt(features.size / 2)
           InferredData(
             features1 = features1,
             features2 = features2,
             lshEncodedFeatures = lsh_encoded_features
           )
-        }
-      case None => image.augmentWithNone
+      }
     }
 
   implicit val responseDecoder: Decoder[InferrerResponse] = deriveDecoder
