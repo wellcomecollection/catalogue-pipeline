@@ -73,8 +73,8 @@ object FeatureVectorInferrerAdapter
     image: MergedImage[Minted],
     inferrerResponse: Option[InferrerResponse]): AugmentedImage[Minted] =
     inferrerResponse match {
-      case Some(
-          FeatureVectorInferrerResponse(features, lsh_encoded_features)) =>
+      case Some(FeatureVectorInferrerResponse(features, lsh_encoded_features))
+          if features.size == 4096 =>
         val (features1, features2) = features.splitAt(features.size / 2)
         image.augment {
           InferredData(
