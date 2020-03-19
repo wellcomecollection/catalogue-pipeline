@@ -19,10 +19,21 @@ class SourceIdentifierScannerTest
   case class ClassWithIdentifier(
     sourceIdentifier: SourceIdentifier,
     classWithIdentifiers: List[ClassWithIdentifier] = Nil)
+  case class ClassWithIdentifierAndIdentifiedType(
+    sourceIdentifier: SourceIdentifier,
+    identifiedType: String,
+    classWithIdentifiers: List[ClassWithIdentifierAndIdentifiedType] = Nil
+  )
   case class ClassWithIdentifierAndCanonicalId(
     sourceIdentifier: SourceIdentifier,
     canonicalId: String,
     classWithIdentifiers: List[ClassWithIdentifierAndCanonicalId] = Nil)
+  case class ClassWithIdentifierTypeAndCanonicalId(
+    sourceIdentifier: SourceIdentifier,
+    canonicalId: String,
+    `type`: String,
+    classWithIdentifiers: List[ClassWithIdentifierTypeAndCanonicalId] = Nil
+  )
   describe("scan") {
     it("retrieves a sourceIdentifiers at the root of the json") {
       val sourceIdentifier = createSourceIdentifier
@@ -119,6 +130,45 @@ class SourceIdentifierScannerTest
                 sourceIdentifiers(3),
                 canonicalIds(3)
               ))
+          )
+        )
+      )
+    }
+
+    it("replaces identifiedType with type") {
+      val sourceIdentifier1 = createSourceIdentifier
+      val sourceIdentifier2 = createSourceIdentifier
+      val objectWithIdentifiers = ClassWithIdentifierAndIdentifiedType(
+        sourceIdentifier = sourceIdentifier1,
+        identifiedType = "NewType",
+        classWithIdentifiers = List(
+          ClassWithIdentifierAndIdentifiedType(
+            sourceIdentifier = sourceIdentifier2,
+            identifiedType = "AnotherNewType"
+          )
+        )
+      )
+      val identifiers = Map(
+        sourceIdentifier1 -> Identifier(createCanonicalId, sourceIdentifier1),
+        sourceIdentifier2 -> Identifier(createCanonicalId, sourceIdentifier2)
+      )
+      val identified = SourceIdentifierScanner.update(
+        objectWithIdentifiers.asJson,
+        identifiers
+      )
+      identified shouldBe a[Success[_]]
+      identified.get
+        .as[ClassWithIdentifierTypeAndCanonicalId]
+        .right
+        .get shouldBe ClassWithIdentifierTypeAndCanonicalId(
+        sourceIdentifier = sourceIdentifier1,
+        canonicalId = identifiers(sourceIdentifier1).CanonicalId,
+        `type` = "NewType",
+        classWithIdentifiers = List(
+          ClassWithIdentifierTypeAndCanonicalId(
+            sourceIdentifier = sourceIdentifier2,
+            canonicalId = identifiers(sourceIdentifier2).CanonicalId,
+            `type` = "AnotherNewType"
           )
         )
       )

@@ -16,14 +16,28 @@ object SourceIdentifierScanner extends Logging {
   def update(inputJson: Json,
              identifiers: Map[SourceIdentifier, Identifier]): Try[Json] =
     Try {
+      val updateNode =
+        (updateNodeType _) compose addCanonicalIdToNode(identifiers)
       // Plated transforms operate on self-similar *children*
       // so we need to update the root separately
-      val updatedRoot = updateNode(identifiers)(inputJson)
-      Plated.transform[Json](updateNode(identifiers))(updatedRoot)
+      val updatedRoot = updateNode(inputJson)
+      Plated.transform[Json](updateNode)(updatedRoot)
     }
 
-  private def updateNode(identifiers: Map[SourceIdentifier, Identifier])(
-    node: Json): Json =
+  private def updateNodeType(node: Json): Json =
+    root.identifiedType.json
+      .getOption(node)
+      .flatMap(_.asString)
+      .map { identifiedType =>
+        root.obj.modify { obj =>
+          ("type", Json.fromString(identifiedType)) +:
+            obj.remove("identifiedType")
+        }(node)
+      }
+      .getOrElse(node)
+
+  private def addCanonicalIdToNode(
+    identifiers: Map[SourceIdentifier, Identifier])(node: Json): Json =
     root.sourceIdentifier.json
       .getOption(node)
       .map(parseSourceIdentifier)
