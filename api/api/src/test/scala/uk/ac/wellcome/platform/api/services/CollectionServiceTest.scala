@@ -9,6 +9,7 @@ import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.models.work.generators.{
   IdentifiersGenerators,
+  ItemsGenerators,
   WorksGenerators
 }
 
@@ -18,6 +19,7 @@ class CollectionServiceTest
     with ScalaFutures
     with ElasticsearchFixtures
     with IdentifiersGenerators
+    with ItemsGenerators
     with WorksGenerators {
 
   def collectionService(index: Index) =
@@ -148,6 +150,29 @@ class CollectionServiceTest
       whenReady(service.retrieveTree(List("a/e/f"))) { result =>
         result shouldBe a[Left[_, _]]
         result.left.get.getMessage shouldBe "Tree contains duplicate paths: a/e/f/g"
+      }
+    }
+  }
+
+  it("Excludes larger fields from works stored in the tree") {
+    withLocalWorksIndex { index =>
+      val p = work("p") withData (_.copy(items = List(createIdentifiedItem)))
+      val q = work("p/q") withData (_.copy(notes = List(GeneralNote("hi"))))
+      storeWorks(index, List(p, q))
+      val service = collectionService(index)
+      whenReady(service.retrieveTree(List("p/q"))) { result =>
+        result shouldBe Right(
+          CollectionTree(
+            path = "p",
+            work = p.withData(_.copy(items = Nil)),
+            children = List(
+              CollectionTree(
+                path = "p/q",
+                work = q.withData(_.copy(notes = Nil)),
+              )
+            )
+          )
+        )
       }
     }
   }

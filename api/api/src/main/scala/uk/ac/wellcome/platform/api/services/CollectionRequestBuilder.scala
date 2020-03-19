@@ -12,11 +12,21 @@ case class CollectionRequestBuilder(index: Index,
                                     expandedPaths: List[String],
                                     maxNodes: Int = 1000) {
 
+  val excludeFields = List(
+    "data.items",
+    "data.notes",
+    "data.production",
+    "data.subjects",
+    "data.genres",
+    "data.images",
+  )
+
   lazy val request: SearchRequest =
     search(index)
       .query(query)
       .from(0)
       .limit(maxNodes)
+      .sourceExclude(excludeFields)
 
   lazy val query: Query =
     should(expandedPaths.map(expandPathQuery))
