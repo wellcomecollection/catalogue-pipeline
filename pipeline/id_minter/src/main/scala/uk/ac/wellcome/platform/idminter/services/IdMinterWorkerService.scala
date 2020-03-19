@@ -55,23 +55,23 @@ class IdMinterWorkerService[Destination](
     Flow[(Message, Json)].map {
       case (msg, json) =>
         (msg, json, SourceIdentifierScanner.scan(json).get)
-    }
+    }.async
 
   private def synchroniseIds =
     Flow[(Message, Json, List[SourceIdentifier])].map {
       case (msg, json, ids) =>
         (msg, json, identifierGenerator.retrieveOrGenerateCanonicalIds(ids).get)
-    }
+    }.async
 
   private def embedIdentifiers =
     Flow[(Message, Json, Map[SourceIdentifier, Identifier])].map {
       case (msg, json, identifiersTable) =>
         (msg, SourceIdentifierScanner.update(json, identifiersTable).get)
-    }
+    }.async
 
   private def sendMinted =
     Flow[(Message, Json)].map {
       case (msg, json) =>
         (msg, sender.sendT(json).get)
-    }
+    }.async
 }
