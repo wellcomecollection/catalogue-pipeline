@@ -12,6 +12,15 @@ import uk.ac.wellcome.platform.idminter.models.Identifier
 import scala.annotation.tailrec
 import scala.util.{Failure, Success, Try}
 
+/**
+  * SourceIdentifierScanner provides 2 methods:
+  *
+  * - `scan` takes Json and returns all of the sourceIdentifiers that are in it
+  * - `update` takes Json and a map of (SourceIdentifier -> Identifier) and adds
+  *   a canonicalId field next to sourceIdentifiers, as well as replacing
+  *   `identifiedType` fields with `type` fields of the same value.
+  *
+  */
 object SourceIdentifierScanner extends Logging {
   def update(inputJson: Json,
              identifiers: Map[SourceIdentifier, Identifier]): Try[Json] =

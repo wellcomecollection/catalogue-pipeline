@@ -10,6 +10,10 @@ import scala.collection.breakOut
 import scala.util.{Success, Try}
 
 class IdentifierGenerator(identifiersDao: IdentifiersDao) extends Logging {
+  // This function fetches canonicalIds for sourceIdentifiers, and generates
+  // and saves canonicalIds where it can't find existing ones. For this reason
+  // it's important not to run it in situations where there might be a race
+  // condition (IDs being inserted in between lookup and update).
   def retrieveOrGenerateCanonicalIds(sourceIdentifiers: Seq[SourceIdentifier])
     : Try[Map[SourceIdentifier, Identifier]] =
     identifiersDao
