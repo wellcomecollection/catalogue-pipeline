@@ -50,18 +50,23 @@ object SourceIdentifierScanner extends Logging {
     root.sourceIdentifier.json
       .getOption(node)
       .map(parseSourceIdentifier)
-      .map { sourceIdentifier =>
-        identifiers.get(sourceIdentifier) match {
-          case Some(Identifier(canonicalId, _, _, _)) =>
-            root.obj.modify { identifierJson =>
-              ("canonicalId", Json.fromString(canonicalId)) +: identifierJson
-            }(node)
-          case None =>
-            throw new RuntimeException(
-              s"Could not find $sourceIdentifier in $identifiers")
-        }
+      .map(getCanonicalId(identifiers))
+      .map { canonicalId =>
+        root.obj.modify { obj =>
+          ("canonicalId", Json.fromString(canonicalId)) +: obj
+        }(node)
       }
       .getOrElse(node)
+
+  private def getCanonicalId(identifiers: Map[SourceIdentifier, Identifier])(
+    sourceIdentifier: SourceIdentifier): String =
+    identifiers
+      .getOrElse(
+        sourceIdentifier,
+        throw new RuntimeException(
+          s"Could not find $sourceIdentifier in $identifiers")
+      )
+      .CanonicalId
 
   def scan(inputJson: Json): Try[List[SourceIdentifier]] =
     Try(
