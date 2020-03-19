@@ -7,7 +7,7 @@ import uk.ac.wellcome.platform.idminter.models.Identifier
 import uk.ac.wellcome.platform.idminter.utils.Identifiable
 
 import scala.collection.breakOut
-import scala.util.Try
+import scala.util.{Success, Try}
 
 class IdentifierGenerator(identifiersDao: IdentifiersDao) extends Logging {
   def retrieveOrGenerateCanonicalIds(sourceIdentifiers: Seq[SourceIdentifier])
@@ -56,15 +56,19 @@ class IdentifierGenerator(identifiersDao: IdentifiersDao) extends Logging {
 
   private def generateAndSaveCanonicalIds(
     sourceIdentifiers: List[SourceIdentifier]): Try[List[Identifier]] =
-    identifiersDao
-      .saveIdentifiers(
-        sourceIdentifiers.map { id =>
-          Identifier(
-            canonicalId = Identifiable.generate,
-            sourceIdentifier = id
+    sourceIdentifiers match {
+      case Nil => Success(Nil)
+      case _ =>
+        identifiersDao
+          .saveIdentifiers(
+            sourceIdentifiers.map { id =>
+              Identifier(
+                canonicalId = Identifiable.generate,
+                sourceIdentifier = id
+              )
+            }
           )
-        }
-      )
-      .map(_.succeeded)
+          .map(_.succeeded)
+    }
 
 }
