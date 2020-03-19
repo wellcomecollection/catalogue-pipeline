@@ -13,12 +13,11 @@ import uk.ac.wellcome.platform.idminter.config.builders.{
 import uk.ac.wellcome.platform.idminter.database.IdentifiersDao
 import uk.ac.wellcome.platform.idminter.models.IdentifiersTable
 import uk.ac.wellcome.platform.idminter.services.IdMinterWorkerService
-import uk.ac.wellcome.platform.idminter.steps.{IdEmbedder, IdentifierGenerator}
+import uk.ac.wellcome.platform.idminter.steps.IdentifierGenerator
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 
-import scala.concurrent.ExecutionContext
 import uk.ac.wellcome.storage.streaming.Codec._
 import uk.ac.wellcome.storage.typesafe.S3Builder
 
@@ -26,8 +25,6 @@ object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
     implicit val actorSystem: ActorSystem =
       AkkaBuilder.buildActorSystem()
-    implicit val executionContext: ExecutionContext =
-      AkkaBuilder.buildExecutionContext()
     implicit val materializer: ActorMaterializer =
       AkkaBuilder.buildActorMaterializer()
 
@@ -42,15 +39,10 @@ object Main extends WellcomeTypesafeApp {
       )
     )
 
-    val idEmbedder = new IdEmbedder(
-      identifierGenerator = identifierGenerator
-    )
-
     implicit val s3Client: AmazonS3 = S3Builder.buildS3Client(config)
     implicit val s3TypedStore = S3TypedStore[Json]
 
     new IdMinterWorkerService(
-      idEmbedder = idEmbedder,
       identifierGenerator = identifierGenerator,
       sender = BigMessagingBuilder.buildBigMessageSender[Json](config),
       messageStream = BigMessagingBuilder.buildMessageStream[Json](config),

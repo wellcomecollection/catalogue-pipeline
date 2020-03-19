@@ -1,6 +1,5 @@
 package uk.ac.wellcome.platform.idminter.steps
 
-import org.mockito.Matchers.any
 import org.mockito.Matchers.anyListOf
 import org.mockito.Mockito.when
 import org.scalatest.mockito.MockitoSugar
@@ -158,136 +157,11 @@ class IdentifierGeneratorTest
           ontologyType = "Item"
         )
 
-        val triedId = identifierGenerator.retrieveOrGenerateCanonicalId(
-          sourceIdentifier
+        val triedId = identifierGenerator.retrieveOrGenerateCanonicalIds(
+          List(sourceIdentifier)
         )
 
-        val id = triedId.get
-        id should not be (empty)
-
-        val i = identifiersTable.i
-        val maybeIdentifier = withSQL {
-
-          select
-            .from(identifiersTable as i)
-            .where
-            .eq(i.SourceId, sourceIdentifier.value)
-
-        }.map(Identifier(i)).single.apply()
-
-        maybeIdentifier shouldBe defined
-        maybeIdentifier.get shouldBe Identifier(
-          canonicalId = id,
-          sourceIdentifier = sourceIdentifier
-        )
-    }
-  }
-
-  it("queries the database and return a matching canonical id") {
-    val sourceIdentifier = createSourceIdentifier
-    val canonicalId = createCanonicalId
-
-    withIdentifierGenerator() {
-      case (identifierGenerator, identifiersTable) =>
-        implicit val session = AutoSession
-
-        withSQL {
-          insert
-            .into(identifiersTable)
-            .namedValues(
-              identifiersTable.column.CanonicalId -> canonicalId,
-              identifiersTable.column.SourceSystem -> sourceIdentifier.identifierType.id,
-              identifiersTable.column.SourceId -> sourceIdentifier.value,
-              identifiersTable.column.OntologyType -> sourceIdentifier.ontologyType
-            )
-        }.update().apply()
-
-        val triedId = identifierGenerator.retrieveOrGenerateCanonicalId(
-          sourceIdentifier
-        )
-
-        triedId shouldBe Success(canonicalId)
-    }
-  }
-
-  it("generates and saves a new identifier") {
-    val sourceIdentifier = createSourceIdentifier
-
-    withIdentifierGenerator() {
-      case (identifierGenerator, identifiersTable) =>
-        implicit val session = AutoSession
-
-        val triedId = identifierGenerator.retrieveOrGenerateCanonicalId(
-          sourceIdentifier
-        )
-
-        triedId shouldBe a[Success[_]]
-
-        val id = triedId.get
-        id should not be empty
-
-        val i = identifiersTable.i
-
-        val maybeIdentifier = withSQL {
-
-          select
-            .from(identifiersTable as i)
-            .where
-            .eq(i.SourceId, sourceIdentifier.value)
-
-        }.map(Identifier(i)).single.apply()
-
-        maybeIdentifier shouldBe defined
-        maybeIdentifier.get shouldBe Identifier(
-          canonicalId = id,
-          sourceIdentifier = sourceIdentifier
-        )
-    }
-  }
-
-  it("returns a failure if it fails registering a new identifier") {
-    val identifiersDao = mock[IdentifiersDao]
-
-    val sourceIdentifier = createSourceIdentifier
-
-    val triedLookup = identifiersDao.lookupId(
-      sourceIdentifier = sourceIdentifier
-    )
-
-    when(triedLookup)
-      .thenReturn(Success(None))
-
-    val expectedException = new Exception("Noooo")
-
-    when(identifiersDao.saveIdentifier(any[Identifier]()))
-      .thenReturn(Failure(expectedException))
-
-    withIdentifierGenerator(Some(identifiersDao)) {
-      case (identifierGenerator, identifiersTable) =>
-        val triedGeneratingId =
-          identifierGenerator.retrieveOrGenerateCanonicalId(
-            sourceIdentifier
-          )
-
-        triedGeneratingId shouldBe a[Failure[_]]
-        triedGeneratingId.failed.get shouldBe expectedException
-    }
-  }
-
-  it("preserves the ontologyType when generating a new identifier") {
-    withIdentifierGenerator() {
-      case (identifierGenerator, identifiersTable) =>
-        implicit val session = AutoSession
-
-        val sourceIdentifier = createSourceIdentifierWith(
-          ontologyType = "Item"
-        )
-
-        val triedId = identifierGenerator.retrieveOrGenerateCanonicalId(
-          sourceIdentifier
-        )
-
-        val id = triedId.get
+        val id = triedId.get.values.head.CanonicalId
         id should not be (empty)
 
         val i = identifiersTable.i

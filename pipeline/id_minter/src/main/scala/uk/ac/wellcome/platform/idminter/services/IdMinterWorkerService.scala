@@ -14,7 +14,6 @@ import uk.ac.wellcome.platform.idminter.config.models.{
 import uk.ac.wellcome.platform.idminter.database.TableProvisioner
 import uk.ac.wellcome.platform.idminter.models.Identifier
 import uk.ac.wellcome.platform.idminter.steps.{
-  IdEmbedder,
   IdentifierGenerator,
   SourceIdentifierScanner
 }
@@ -23,7 +22,6 @@ import uk.ac.wellcome.typesafe.Runnable
 import scala.concurrent.Future
 
 class IdMinterWorkerService[Destination](
-  idEmbedder: IdEmbedder,
   identifierGenerator: IdentifierGenerator,
   sender: BigMessageSender[Destination, Json],
   messageStream: BigMessageStream[Json],

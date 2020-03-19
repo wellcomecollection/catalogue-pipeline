@@ -24,36 +24,6 @@ class IdentifierGenerator(identifiersDao: IdentifiersDao) extends Logging {
           }
       }
 
-  def retrieveOrGenerateCanonicalId(
-    identifier: SourceIdentifier
-  ): Try[String] =
-    Try {
-      identifiersDao
-        .lookupId(
-          sourceIdentifier = identifier
-        )
-        .flatMap {
-          case Some(id) => Try(id.CanonicalId)
-          case None     => generateAndSaveCanonicalId(identifier)
-        }
-    }.flatten
-
-  private def generateAndSaveCanonicalId(
-    sourceIdentifier: SourceIdentifier
-  ): Try[String] = {
-    val canonicalId = Identifiable.generate
-    identifiersDao
-      .saveIdentifier(
-        Identifier(
-          canonicalId = canonicalId,
-          sourceIdentifier = sourceIdentifier
-        )
-      )
-      .map { _ =>
-        canonicalId
-      }
-  }
-
   private def generateAndSaveCanonicalIds(
     sourceIdentifiers: List[SourceIdentifier]): Try[List[Identifier]] =
     sourceIdentifiers match {

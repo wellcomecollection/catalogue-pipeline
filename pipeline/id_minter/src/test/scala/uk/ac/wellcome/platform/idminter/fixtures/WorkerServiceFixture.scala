@@ -12,12 +12,10 @@ import uk.ac.wellcome.platform.idminter.config.models.IdentifiersTableConfig
 import uk.ac.wellcome.platform.idminter.database.IdentifiersDao
 import uk.ac.wellcome.platform.idminter.models.IdentifiersTable
 import uk.ac.wellcome.platform.idminter.services.IdMinterWorkerService
-import uk.ac.wellcome.platform.idminter.steps.{IdEmbedder, IdentifierGenerator}
+import uk.ac.wellcome.platform.idminter.steps.IdentifierGenerator
 import uk.ac.wellcome.storage.ObjectLocation
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import uk.ac.wellcome.storage.streaming.Codec._
-
-import scala.concurrent.ExecutionContext.Implicits.global
 
 trait WorkerServiceFixture
     extends IdentifiersDatabase
@@ -38,7 +36,6 @@ trait WorkerServiceFixture
               identifiersDao = identifiersDao
             )
             val workerService = new IdMinterWorkerService(
-              idEmbedder = new IdEmbedder(identifierGenerator),
               identifierGenerator = identifierGenerator,
               sender = bigMessageSender,
               messageStream = messageStream,
