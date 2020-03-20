@@ -11,8 +11,9 @@ import scala.concurrent.blocking
 import scala.util.Try
 
 object IdentifiersDao {
-  case class LookupResult(found: Map[SourceIdentifier, Identifier],
-                          notFound: List[SourceIdentifier])
+  case class LookupResult(
+    existingIdentifiers: Map[SourceIdentifier, Identifier],
+    unmintedIdentifiers: List[SourceIdentifier])
   case class InsertResult(succeeded: List[Identifier])
 
   case class InsertError(failed: List[Identifier],
@@ -29,8 +30,11 @@ class IdentifiersDao(db: DB, identifiers: IdentifiersTable) extends Logging {
   def lookupIds(sourceIdentifiers: Seq[SourceIdentifier]): Try[LookupResult] = {
     Try {
       debug(s"Matching ($sourceIdentifiers)")
-      val sqlParametersToSourceIdentifier =
-        buildSqlQueryParameters(sourceIdentifiers)
+      val identifierRows = sourceIdentifiers.map { id =>
+        (id.ontologyType, id.identifierType.id, id.value)
+      }
+      val identifierRowsMap: Map[(String, String, String), SourceIdentifier] =
+        (identifierRows zip sourceIdentifiers).toMap
 
       blocking {
 
@@ -42,28 +46,28 @@ class IdentifiersDao(db: DB, identifiers: IdentifiersTable) extends Logging {
             .where
             .in(
               (i.OntologyType, i.SourceSystem, i.SourceId),
-              sqlParametersToSourceIdentifier.keys.toList)
+              identifierRows
+            )
 
         }.map(rs => {
-            val foundParameter = buildSqlParametersFromResult(i, rs)
-            sqlParametersToSourceIdentifier.get(foundParameter) match {
+            val row = getRowFromResult(i, rs)
+            identifierRowsMap.get(row) match {
               case Some(sourceIdentifier) =>
                 (sourceIdentifier, Identifier(i)(rs))
               case None =>
                 // this should be impossible in practice
                 throw new RuntimeException(
-                  "The values returned by the query could not be matched to a sourceIdentifier")
+                  s"The row $row returned by the query could not be matched to a sourceIdentifier")
             }
 
           })
           .list
         debug(s"Executing:'${query.statement}'")
         val foundIdentifiers = query.apply().toMap
-        val notFoundIdentifiers =
-          sqlParametersToSourceIdentifier.values.toSet -- foundIdentifiers.keySet
+        val otherIdentifiers = sourceIdentifiers.toSet -- foundIdentifiers.keySet
         LookupResult(
-          foundIdentifiers,
-          notFoundIdentifiers.toList
+          existingIdentifiers = foundIdentifiers,
+          unmintedIdentifiers = otherIdentifiers.toList
         )
       }
     }
@@ -120,23 +124,8 @@ class IdentifiersDao(db: DB, identifiers: IdentifiersTable) extends Logging {
     InsertError(failedIdentifiers, exception, succeededIdentifiers)
   }
 
-  private def buildSqlQueryParameters(
-    sourceIdentifiers: Seq[SourceIdentifier]) = {
-    sourceIdentifiers.map { sourceIdentifier =>
-      buildSqlParametersFromSourceIdentifier(sourceIdentifier) -> sourceIdentifier
-    }.toMap
-  }
-
-  private def buildSqlParametersFromSourceIdentifier(
-    sourceIdentifier: SourceIdentifier) = {
-    (
-      sourceIdentifier.ontologyType,
-      sourceIdentifier.identifierType.id,
-      sourceIdentifier.value)
-  }
-
-  private def buildSqlParametersFromResult(i: SyntaxProvider[Identifier],
-                                           rs: WrappedResultSet) = {
+  private def getRowFromResult(i: SyntaxProvider[Identifier],
+                               rs: WrappedResultSet) = {
     (
       rs.string(i.resultName.OntologyType),
       rs.string(i.resultName.SourceSystem),

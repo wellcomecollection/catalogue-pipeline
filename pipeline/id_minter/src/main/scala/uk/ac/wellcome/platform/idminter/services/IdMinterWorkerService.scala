@@ -15,7 +15,7 @@ import uk.ac.wellcome.platform.idminter.database.TableProvisioner
 import uk.ac.wellcome.platform.idminter.models.Identifier
 import uk.ac.wellcome.platform.idminter.steps.{
   IdentifierGenerator,
-  SourceIdentifierScanner
+  SourceIdentifierEmbedder
 }
 import uk.ac.wellcome.typesafe.Runnable
 
@@ -54,7 +54,7 @@ class IdMinterWorkerService[Destination](
   private def extractIdentifiers =
     Flow[(Message, Json)].map {
       case (msg, json) =>
-        (msg, json, SourceIdentifierScanner.scan(json).get)
+        (msg, json, SourceIdentifierEmbedder.scan(json).get)
     }.async
 
   private def synchroniseIds =
@@ -66,7 +66,7 @@ class IdMinterWorkerService[Destination](
   private def embedIdentifiers =
     Flow[(Message, Json, Map[SourceIdentifier, Identifier])].map {
       case (msg, json, identifiersTable) =>
-        (msg, SourceIdentifierScanner.update(json, identifiersTable).get)
+        (msg, SourceIdentifierEmbedder.update(json, identifiersTable).get)
     }.async
 
   private def sendMinted =
