@@ -42,11 +42,11 @@ object Main extends WellcomeTypesafeApp {
     )
     val workSender =
       BigMessagingBuilder.buildBigMessageSender[BaseWork](
-        config.getConfig("work_sender")
+        config.getConfig("work_sender").withFallback(config)
       )
     val imageSender =
       BigMessagingBuilder.buildBigMessageSender[MergedImage[Unminted]](
-        config.getConfig("image_sender")
+        config.getConfig("image_sender").withFallback(config)
       )
 
     new MergerWorkerService(
