@@ -9,6 +9,7 @@ import uk.ac.wellcome.platform.idminter.utils.Identifiable
 import scala.util.{Success, Try}
 
 class IdentifierGenerator(identifiersDao: IdentifiersDao) extends Logging {
+  import IdentifiersDao._
   /*
    * This function fetches canonicalIds for sourceIdentifiers, and generates
    * and saves canonicalIds where it can't find existing ones.
@@ -23,8 +24,7 @@ class IdentifierGenerator(identifiersDao: IdentifiersDao) extends Logging {
     identifiersDao
       .lookupIds(sourceIdentifiers)
       .flatMap {
-        case IdentifiersDao
-              .LookupResult(existingIdentifiersMap, unmintedIdentifiers) =>
+        case LookupResult(existingIdentifiersMap, unmintedIdentifiers) =>
           generateAndSaveCanonicalIds(unmintedIdentifiers).map {
             newIdentifiers =>
               val newIdentifiersMap: Map[SourceIdentifier, Identifier] =
@@ -34,13 +34,13 @@ class IdentifierGenerator(identifiersDao: IdentifiersDao) extends Logging {
       }
 
   private def generateAndSaveCanonicalIds(
-    sourceIdentifiers: List[SourceIdentifier]): Try[List[Identifier]] =
-    sourceIdentifiers match {
+    unmintedIdentifiers: List[SourceIdentifier]): Try[List[Identifier]] =
+    unmintedIdentifiers match {
       case Nil => Success(Nil)
       case _ =>
         identifiersDao
           .saveIdentifiers(
-            sourceIdentifiers.map { id =>
+            unmintedIdentifiers.map { id =>
               Identifier(
                 canonicalId = Identifiable.generate,
                 sourceIdentifier = id

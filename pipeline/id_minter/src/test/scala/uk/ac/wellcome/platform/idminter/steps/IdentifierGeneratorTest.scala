@@ -27,7 +27,8 @@ class IdentifierGeneratorTest
     with IdentifiersGenerators {
 
   def withIdentifierGenerator[R](maybeIdentifiersDao: Option[IdentifiersDao] =
-                                   None)(
+                                   None,
+                                 existingDaoEntries: Seq[Identifier] = Nil)(
     testWith: TestWith[(IdentifierGenerator, IdentifiersTable), R]) =
     withIdentifiersDatabase[R] { identifiersTableConfig =>
       val identifiersTable = new IdentifiersTable(identifiersTableConfig)
@@ -45,36 +46,38 @@ class IdentifierGeneratorTest
       val identifierGenerator = new IdentifierGenerator(identifiersDao)
       eventuallyTableExists(identifiersTableConfig)
 
+      if (existingDaoEntries.nonEmpty) {
+        DB localTx { implicit session =>
+          withSQL {
+            insert
+              .into(identifiersTable)
+              .namedValues(
+                identifiersTable.column.CanonicalId -> sqls.?,
+                identifiersTable.column.OntologyType -> sqls.?,
+                identifiersTable.column.SourceSystem -> sqls.?,
+                identifiersTable.column.SourceId -> sqls.?
+              )
+          }.batch {
+            existingDaoEntries.map { id =>
+              Seq(id.CanonicalId, id.OntologyType, id.SourceSystem, id.SourceId)
+            }: _*
+          }.apply()
+        }
+      }
+
       testWith((identifierGenerator, identifiersTable))
     }
 
   it("queries the database and returns matching canonical IDs") {
     val sourceIdentifiers = (1 to 5).map(_ => createSourceIdentifier).toList
     val canonicalIds = (1 to 5).map(_ => createCanonicalId).toList
-
-    withIdentifierGenerator() {
-      case (identifierGenerator, identifiersTable) =>
-        implicit val session = AutoSession
-
-        val insertParams = (sourceIdentifiers zip canonicalIds).map {
-          case (sourceId, canonicalId) =>
-            List(
-              canonicalId,
-              sourceId.identifierType.id,
-              sourceId.value,
-              sourceId.ontologyType)
-        }
-        withSQL {
-          insert
-            .into(identifiersTable)
-            .namedValues(
-              identifiersTable.column.CanonicalId -> sqls.?,
-              identifiersTable.column.SourceSystem -> sqls.?,
-              identifiersTable.column.SourceId -> sqls.?,
-              identifiersTable.column.OntologyType -> sqls.?
-            )
-        }.batch(insertParams: _*).apply()
-
+    val existingEntries = (sourceIdentifiers zip canonicalIds).map {
+      case (sourceId, canonicalId) => Identifier(
+        canonicalId, sourceId
+      )
+    }
+    withIdentifierGenerator(existingDaoEntries = existingEntries) {
+      case (identifierGenerator, _) =>
         val triedIds =
           identifierGenerator.retrieveOrGenerateCanonicalIds(sourceIdentifiers)
 

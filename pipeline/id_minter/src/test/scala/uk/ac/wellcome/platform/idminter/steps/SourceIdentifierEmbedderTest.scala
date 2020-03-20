@@ -361,7 +361,6 @@ class SourceIdentifierEmbedderTest
     it(
       "fails if it cannot match the identifier to any sourceIdentifier in the json") {
       val sourceIdentifier = createSourceIdentifier
-      val otherSourceIdentifier = createSourceIdentifier
       val jsonString = s"""
         |{
         |  "sourceIdentifier": {
@@ -376,11 +375,10 @@ class SourceIdentifierEmbedderTest
         |}
       """.stripMargin
       val json = parse(jsonString).right.get
-      val identifier =
-        createSQLIdentifierWith(sourceIdentifier = otherSourceIdentifier)
       val identified = SourceIdentifierEmbedder.update(
         json,
-        Map(otherSourceIdentifier -> identifier))
+        Map.empty
+      )
 
       identified shouldBe a[Failure[_]]
     }
