@@ -22,26 +22,22 @@ trait WorkerServiceFixture extends LocalWorksVhs {
                            metrics: Metrics[Future, StandardUnit] =
                              new MemoryMetrics[StandardUnit])(
     testWith: TestWith[MergerWorkerService[SNSConfig, SNSConfig], R]): R =
-    withLocalS3Bucket { worksBucket =>
-      withLocalS3Bucket { imagesBucket =>
-        withSqsBigMessageSender[BaseWork, R](worksBucket, worksTopic) {
-          workSender =>
-            withSqsBigMessageSender[MergedImage[Unminted], R](
-              imagesBucket,
-              imagesTopic) { imageSender =>
-              withActorSystem { implicit actorSystem =>
-                withSQSStream[NotificationMessage, R](queue, metrics) {
-                  sqsStream =>
-                    val workerService = new MergerWorkerService(
-                      sqsStream = sqsStream,
-                      playbackService = new RecorderPlaybackService(vhs),
-                      mergerManager = new MergerManager(PlatformMerger),
-                      workSender = workSender,
-                      imageSender = imageSender
-                    )
-                    workerService.run()
-                    testWith(workerService)
-                }
+    withLocalS3Bucket { bucket =>
+      withSqsBigMessageSender[BaseWork, R](bucket, worksTopic) { workSender =>
+        withSqsBigMessageSender[MergedImage[Unminted], R](bucket, imagesTopic) {
+          imageSender =>
+            withActorSystem { implicit actorSystem =>
+              withSQSStream[NotificationMessage, R](queue, metrics) {
+                sqsStream =>
+                  val workerService = new MergerWorkerService(
+                    sqsStream = sqsStream,
+                    playbackService = new RecorderPlaybackService(vhs),
+                    mergerManager = new MergerManager(PlatformMerger),
+                    workSender = workSender,
+                    imageSender = imageSender
+                  )
+                  workerService.run()
+                  testWith(workerService)
               }
             }
         }
