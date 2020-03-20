@@ -26,7 +26,8 @@ module "merger" {
     messages_bucket_name     = aws_s3_bucket.messages.id
     topic_arn                = module.matcher_topic.arn
     merger_queue_id          = module.merger_queue.url
-    merger_topic_arn         = module.merger_topic.arn
+    merger_works_topic_arn   = module.merger_works_topic.arn
+    merger_images_topic_arn  = module.merger_images_topic.arn
     vhs_recorder_bucket_name = module.vhs_recorder.bucket_name
     vhs_recorder_table_name  = module.vhs_recorder.table_name
     logstash_host            = local.logstash_host
@@ -46,10 +47,18 @@ resource "aws_iam_role_policy" "merger_vhs_recorder_read" {
   policy = module.vhs_recorder.read_policy
 }
 
-module "merger_topic" {
+module "merger_works_topic" {
   source = "../modules/topic"
 
-  name                = "${local.namespace_hyphen}_merger"
+  name                = "${local.namespace_hyphen}_merger_works"
+  role_names          = [module.merger.task_role_name]
+  messages_bucket_arn = aws_s3_bucket.messages.arn
+}
+
+module "merger_images_topic" {
+  source = "../modules/topic"
+
+  name                = "${local.namespace_hyphen}_merger_images"
   role_names          = [module.merger.task_role_name]
   messages_bucket_arn = aws_s3_bucket.messages.arn
 }
