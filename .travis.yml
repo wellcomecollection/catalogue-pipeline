@@ -75,6 +75,7 @@ cache:
 
     - pipeline/id_minter/target
     - pipeline/ingestor/target
+    - pipeline/inferrer/inference_manager/target
     - pipeline/matcher/target
     - pipeline/merger/target
     - pipeline/recorder/target
