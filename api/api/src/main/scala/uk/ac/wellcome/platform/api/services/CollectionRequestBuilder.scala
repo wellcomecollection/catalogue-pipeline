@@ -6,7 +6,7 @@ import com.sksamuel.elastic4s.requests.searches.queries.Query
 import com.sksamuel.elastic4s.requests.searches.SearchRequest
 
 /**
-  * Builds an elasticsearch request for fetching nodes in some Collection tree.
+  * Builds an Elasticsearch request for fetching nodes in some Collection tree.
   */
 case class CollectionRequestBuilder(index: Index,
                                     expandedPaths: List[String],
@@ -32,7 +32,7 @@ case class CollectionRequestBuilder(index: Index,
     should(expandedPaths.map(expandPathQuery))
 
   /**
-    * Get the node at some path, it's direct children, it's ancestors, and the
+    * Get the node at some path, its direct children, its ancestors, and the
     * direct children of those ancestors.
     */
   def expandPathQuery(path: String): Query = {
