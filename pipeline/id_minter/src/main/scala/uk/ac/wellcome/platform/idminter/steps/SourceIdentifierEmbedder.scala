@@ -13,7 +13,7 @@ import scala.annotation.tailrec
 import scala.util.{Failure, Success, Try}
 
 /**
-  * SourceIdentifierScanner provides 2 methods:
+  * SourceIdentifierEmbedder provides 2 methods:
   *
   * - `scan` takes Json and returns all of the sourceIdentifiers that are in it
   * - `update` takes Json and a map of (SourceIdentifier -> Identifier) and adds
@@ -21,14 +21,25 @@ import scala.util.{Failure, Success, Try}
   *   `identifiedType` fields with `type` fields of the same value.
   *
   */
-object SourceIdentifierScanner extends Logging {
+object SourceIdentifierEmbedder extends Logging {
+  def scan(inputJson: Json): Try[List[SourceIdentifier]] =
+    Try(
+      iterate(
+        root.each.json.getAll(inputJson),
+        root.sourceIdentifier.json
+          .getOption(inputJson)
+          .map(parseSourceIdentifier)
+          .toList
+      )
+    )
+
   def update(inputJson: Json,
              identifiers: Map[SourceIdentifier, Identifier]): Try[Json] =
     Try {
       val updateNode =
         (updateNodeType _) compose addCanonicalIdToNode(identifiers)
-      // Plated transforms operate on self-similar *children*
-      // so we need to update the root separately
+      // Plated transforms do not operate on the top-level node of
+      // as structure, so we need to update the root separately
       val updatedRoot = updateNode(inputJson)
       Plated.transform[Json](updateNode)(updatedRoot)
     }
@@ -68,17 +79,6 @@ object SourceIdentifierScanner extends Logging {
       )
       .CanonicalId
 
-  def scan(inputJson: Json): Try[List[SourceIdentifier]] =
-    Try(
-      iterate(
-        root.each.json.getAll(inputJson),
-        root.sourceIdentifier.json
-          .getOption(inputJson)
-          .map(parseSourceIdentifier)
-          .toList
-      )
-    )
-
   @tailrec
   private def iterate(
     children: List[Json],
@@ -99,7 +99,8 @@ object SourceIdentifierScanner extends Logging {
     sourceIdentifierJson.as[SourceIdentifier].toTry match {
       case Success(sourceIdentifier) => sourceIdentifier
       case Failure(exception) =>
-        error(s"Error parsing source identifier: $exception")
+        error(
+          s"Error parsing source identifier: ${sourceIdentifierJson.spaces2}")
         throw exception
     }
 
