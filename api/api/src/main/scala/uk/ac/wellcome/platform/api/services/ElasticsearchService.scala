@@ -8,6 +8,7 @@ import com.sksamuel.elastic4s.{ElasticClient, ElasticError, Response}
 import com.sksamuel.elastic4s.requests.searches.sort.{FieldSort, SortOrder}
 import com.sksamuel.elastic4s.Index
 import grizzled.slf4j.Logging
+
 import uk.ac.wellcome.display.models.{
   AggregationRequest,
   SortRequest,
