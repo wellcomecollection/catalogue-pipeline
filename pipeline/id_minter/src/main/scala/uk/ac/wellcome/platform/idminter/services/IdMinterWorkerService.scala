@@ -1,27 +1,35 @@
 package uk.ac.wellcome.platform.idminter.services
 
 import akka.Done
+import akka.stream.scaladsl.Flow
+import com.amazonaws.services.sqs.model.Message
 import io.circe.Json
 import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.bigmessaging.message.BigMessageStream
+import uk.ac.wellcome.models.work.internal.SourceIdentifier
 import uk.ac.wellcome.platform.idminter.config.models.{
   IdentifiersTableConfig,
   RDSClientConfig
 }
 import uk.ac.wellcome.platform.idminter.database.TableProvisioner
-import uk.ac.wellcome.platform.idminter.steps.IdEmbedder
+import uk.ac.wellcome.platform.idminter.models.Identifier
+import uk.ac.wellcome.platform.idminter.steps.{
+  IdentifierGenerator,
+  SourceIdentifierEmbedder
+}
 import uk.ac.wellcome.typesafe.Runnable
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 class IdMinterWorkerService[Destination](
-  idEmbedder: IdEmbedder,
+  identifierGenerator: IdentifierGenerator,
   sender: BigMessageSender[Destination, Json],
   messageStream: BigMessageStream[Json],
   rdsClientConfig: RDSClientConfig,
   identifiersTableConfig: IdentifiersTableConfig
-)(implicit ec: ExecutionContext)
-    extends Runnable {
+) extends Runnable {
+
+  private val className = this.getClass.getSimpleName
 
   def run(): Future[Done] = {
     val tableProvisioner = new TableProvisioner(
@@ -33,12 +41,37 @@ class IdMinterWorkerService[Destination](
       tableName = identifiersTableConfig.tableName
     )
 
-    messageStream.foreach(this.getClass.getSimpleName, processMessage)
+    messageStream.runStream(
+      className,
+      _.via(extractIdentifiers)
+        .via(synchroniseIds)
+        .via(embedIdentifiers)
+        .via(sendMinted)
+        .map { case (msg, _) => msg }
+    )
   }
 
-  def processMessage(json: Json): Future[Unit] =
-    for {
-      identifiedJson <- idEmbedder.embedId(json)
-      _ <- Future.fromTry { sender.sendT(identifiedJson) }
-    } yield ()
+  private def extractIdentifiers =
+    Flow[(Message, Json)].map {
+      case (msg, json) =>
+        (msg, json, SourceIdentifierEmbedder.scan(json).get)
+    }.async
+
+  private def synchroniseIds =
+    Flow[(Message, Json, List[SourceIdentifier])].map {
+      case (msg, json, ids) =>
+        (msg, json, identifierGenerator.retrieveOrGenerateCanonicalIds(ids).get)
+    }.async
+
+  private def embedIdentifiers =
+    Flow[(Message, Json, Map[SourceIdentifier, Identifier])].map {
+      case (msg, json, identifiersTable) =>
+        (msg, SourceIdentifierEmbedder.update(json, identifiersTable).get)
+    }.async
+
+  private def sendMinted =
+    Flow[(Message, Json)].map {
+      case (msg, json) =>
+        (msg, sender.sendT(json).get)
+    }.async
 }
