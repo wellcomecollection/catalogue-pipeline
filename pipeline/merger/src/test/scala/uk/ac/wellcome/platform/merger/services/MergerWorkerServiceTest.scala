@@ -266,10 +266,13 @@ class MergerWorkerServiceTest
     withVHS { vhs =>
       withLocalSqsQueueAndDlq {
         case QueuePair(queue, dlq) =>
-          withLocalSnsTopic { topic =>
-            val metrics = new MemoryMetrics[StandardUnit]
-            withWorkerService(vhs, queue, topic, metrics) { _ =>
-              testWith((vhs, QueuePair(queue, dlq), topic, metrics))
+          withLocalSnsTopic { worksTopic =>
+            withLocalSnsTopic { imagesTopic =>
+              val metrics = new MemoryMetrics[StandardUnit]
+              withWorkerService(vhs, queue, worksTopic, imagesTopic, metrics) {
+                _ =>
+                  testWith((vhs, QueuePair(queue, dlq), worksTopic, metrics))
+              }
             }
           }
       }
