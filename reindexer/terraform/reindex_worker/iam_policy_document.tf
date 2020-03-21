@@ -17,9 +17,7 @@ data "aws_iam_policy_document" "vhs_read_policy" {
       "dynamodb:BatchGetItem",
     ]
 
-    resources = [
-      "${local.reindexer_tables}",
-    ]
+    resources = local.reindexer_tables
   }
 }
 
@@ -29,9 +27,7 @@ data "aws_iam_policy_document" "sns_publish_policy" {
       "sns:Publish",
     ]
 
-    resources = [
-      "${local.reindexer_topics}",
-    ]
+    resources = local.reindexer_topics
   }
 }
 
