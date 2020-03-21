@@ -8,7 +8,7 @@ resource "aws_cloudwatch_metric_alarm" "queue_high" {
   namespace           = "AWS/SQS"
   metric_name         = "ApproximateNumberOfMessagesVisible"
 
-  dimensions {
+  dimensions = {
     QueueName = "${var.queue_name}"
   }
 

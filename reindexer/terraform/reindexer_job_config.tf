@@ -36,7 +36,7 @@ EOF
 
   count = "${length(local.reindexer_jobs)}"
 
-  vars {
+  vars = {
     id       = "${lookup(local.reindexer_jobs[count.index], "id")}"
     table    = "${lookup(local.reindexer_jobs[count.index], "table")}"
     topicArn = "${lookup(local.reindexer_jobs[count.index], "topic")}"
@@ -53,7 +53,7 @@ data "template_file" "all_reindex_job_config" {
   }
 EOF
 
-  vars {
+  vars = {
     value = "${join(",", data.template_file.single_reindex_job_config.*.rendered)}"
   }
 }
