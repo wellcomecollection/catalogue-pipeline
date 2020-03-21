@@ -13,7 +13,7 @@ module "service" {
   memory = 2048
 
   env_vars = {
-    reindex_jobs_queue_id     = module.reindex_worker_queue.id
+    reindex_jobs_queue_id     = module.reindex_worker_queue.url
     metrics_namespace         = var.namespace
     reindexer_job_config_json = var.reindexer_job_config_json
   }
