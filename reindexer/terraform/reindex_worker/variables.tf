@@ -28,3 +28,9 @@ variable "scale_down_period_in_minutes" {
 }
 
 variable "namespace" {}
+
+variable "vpc_id" {}
+variable "private_subnets" {
+  type = list(string)
+}
+variable "dlq_alarm_arn" {}

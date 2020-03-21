@@ -15,4 +15,8 @@ module "reindex_worker" {
   account_id = "${data.aws_caller_identity.current.account_id}"
 
   namespace = "reindex_worker"
+
+  vpc_id          = local.vpc_id
+  private_subnets = local.private_subnets
+  dlq_alarm_arn   = local.dlq_alarm_arn
 }

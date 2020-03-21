@@ -20,10 +20,10 @@ module "service" {
 
   cluster_name = var.cluster_name
   cluster_arn  = var.cluster_arn
-  vpc_id       = local.vpc_id
+  vpc_id       = var.vpc_id
 
   aws_region = var.aws_region
-  subnets    = local.private_subnets
+  subnets    = var.private_subnets
 
   namespace_id = var.namespace_id
 

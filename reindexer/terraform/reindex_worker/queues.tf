@@ -10,5 +10,5 @@ module "reindex_worker_queue" {
   visibility_timeout_seconds = 600
 
   max_receive_count = 3
-  alarm_topic_arn   = "${local.dlq_alarm_arn}"
+  alarm_topic_arn   = var.dlq_alarm_arn
 }
