@@ -6,8 +6,8 @@ module "reindex_worker" {
 
   reindex_worker_container_image = "${local.reindex_worker_image}"
 
-  ecs_cluster_name = "${aws_ecs_cluster.cluster.name}"
-  ecs_cluster_id   = "${aws_ecs_cluster.cluster.id}"
+  cluster_name = aws_ecs_cluster.cluster.name
+  cluster_arn  = aws_ecs_cluster.cluster.arn
 
   service_egress_security_group_id = "${aws_security_group.service_egress_security_group.id}"
   namespace_id                     = "${aws_service_discovery_private_dns_namespace.reindexer.id}"

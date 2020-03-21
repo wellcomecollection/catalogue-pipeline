@@ -1,53 +1,47 @@
 variable "min_capacity" {
   default = 0
+  type    = number
 }
 
 variable "max_capacity" {
   default = 3
+  type    = number
 }
 
 variable "vpc_id" {}
-variable "ecs_cluster_id" {}
-variable "ecs_cluster_name" {}
+variable "cluster_arn" {}
+variable "cluster_name" {}
 
 variable "service_name" {}
-
-variable "container_port" {
-  default = "80"
-}
 
 variable "source_queue_arn" {}
 variable "source_queue_name" {}
 
 variable "subnets" {
-  type = "list"
+  type = list(string)
 }
 
 variable "launch_type" {
   default = "FARGATE"
 }
 
-variable "task_desired_count" {
+variable "desired_task_count" {
   default = 1
+  type    = number
 }
 
 variable "memory" {
   description = "How much memory to allocate to the app"
-  default     = 1024
+  type        = number
 }
 
 variable "cpu" {
   description = "How much CPU to allocate to the app"
-  default     = 512
+  type        = number
 }
 
 variable "aws_region" {
   description = "AWS Region the task will run in"
-}
-
-variable "container_name" {
-  description = "Internal name of primary container"
-  default     = "app"
 }
 
 variable "container_image" {
@@ -56,24 +50,14 @@ variable "container_image" {
 
 variable "env_vars" {
   description = "Environment variables to pass to the container"
-  type        = "map"
+  type        = map(string)
   default     = {}
 }
 
 variable "security_group_ids" {
-  type    = "list"
-  default = []
+  type = list(string)
 }
 
 variable "namespace_id" {
   default = "ecs"
-}
-
-variable "env_vars_length" {
-  default = 0
-}
-
-variable "command" {
-  type    = "list"
-  default = []
 }

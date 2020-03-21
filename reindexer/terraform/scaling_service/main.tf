@@ -1,48 +1,45 @@
 module "appautoscaling" {
-  source = "git::https://github.com/wellcometrust/terraform-modules.git//autoscaling/app/ecs?ref=v12.1.1"
-  name   = "${module.service.service_name}"
+  source = "github.com/wellcomecollection/terraform-aws-ecs-service.git//autoscaling?ref=v1.5.0"
 
-  cluster_name = "${var.ecs_cluster_name}"
-  service_name = "${module.service.service_name}"
+  name   = module.service.name
 
-  min_capacity = "${var.min_capacity}"
-  max_capacity = "${var.max_capacity}"
+  cluster_name = var.cluster_name
+  service_name = module.service.name
+
+  min_capacity = var.min_capacity
+  max_capacity = var.max_capacity
 }
 
 module "service" {
-  source       = "git::https://github.com/wellcometrust/terraform-modules.git//ecs/modules/service/prebuilt/default?ref=v12.1.1"
-  service_name = "${var.service_name}"
+  source = "github.com/wellcomecollection/terraform-aws-ecs-service.git//service?ref=v1.5.0"
 
-  vpc_id              = "${var.vpc_id}"
-  task_definition_arn = "${module.task.task_definition_arn}"
+  service_name = var.service_name
+  cluster_arn  = var.cluster_arn
 
-  security_group_ids = ["${var.security_group_ids}"]
-  subnets            = ["${var.subnets}"]
+  desired_task_count = var.desired_task_count
 
-  container_port = "${var.container_port}"
-  ecs_cluster_id = "${var.ecs_cluster_id}"
+  task_definition_arn = module.task.arn
 
-  task_desired_count = "${var.task_desired_count}"
-  namespace_id       = "${var.namespace_id}"
+  subnets = var.subnets
 
-  launch_type = "${var.launch_type}"
+  namespace_id = var.namespace_id
+
+  security_group_ids = var.security_group_ids
+
+  launch_type = var.launch_type
 }
 
 module "task" {
-  source = "git::https://github.com/wellcometrust/terraform-modules.git//ecs/modules/task/prebuilt/single_container?ref=v12.1.1"
+  source = "github.com/wellcomecollection/terraform-aws-ecs-service.git//task_definition/single_container?ref=a1b65cf8662f9ca4846b1b21c9172f8e8c07eee3"
 
-  task_name = "${var.service_name}"
+  task_name = var.service_name
 
-  container_port  = "${var.container_port}"
-  container_image = "${var.container_image}"
+  container_image = var.container_image
 
-  memory = "${var.memory}"
-  cpu    = "${var.cpu}"
+  cpu    = var.cpu
+  memory = var.memory
 
-  env_vars        = "${var.env_vars}"
-  env_vars_length = "${var.env_vars_length}"
+  env_vars = var.env_vars
 
-  aws_region = "${var.aws_region}"
-
-  command = "${var.command}"
+  aws_region = var.aws_region
 }
