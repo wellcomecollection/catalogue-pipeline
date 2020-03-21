@@ -1,23 +1,22 @@
 locals {
-  vhs_sierra_table_name         = "${data.terraform_remote_state.catalogue_infra_critical.vhs_sierra_table_name}"
-  vhs_miro_table_name           = "${data.terraform_remote_state.catalogue_infra_critical.vhs_miro_table_name}"
-  vhs_miro_inventory_table_name = "${data.terraform_remote_state.catalogue_infra_critical.vhs_miro_inventory_table_name}"
-  vhs_sierra_items_table_name   = "${data.terraform_remote_state.catalogue_infra_critical.vhs_sierra_items_table_name}"
-  mets_dynamo_table_name        = "${data.terraform_remote_state.catalogue_infra_critical.mets_dynamo_table_name}"
+  vhs_sierra_table_name         = data.terraform_remote_state.catalogue_infra_critical.outputs.vhs_sierra_table_name
+  vhs_miro_table_name           = data.terraform_remote_state.catalogue_infra_critical.outputs.vhs_miro_table_name
+  vhs_miro_inventory_table_name = data.terraform_remote_state.catalogue_infra_critical.outputs.vhs_miro_inventory_table_name
+  vhs_sierra_items_table_name   = data.terraform_remote_state.catalogue_infra_critical.outputs.vhs_sierra_items_table_name
+  mets_dynamo_table_name        = data.terraform_remote_state.catalogue_infra_critical.outputs.mets_dynamo_table_name
 
-  dlq_alarm_arn = "${data.terraform_remote_state.shared_infra.dlq_alarm_arn}"
+  reporting_miro_hybrid_records_topic_arn           = data.terraform_remote_state.shared_infra.outputs.reporting_miro_reindex_topic_arn
+  reporting_miro_inventory_hybrid_records_topic_arn = data.terraform_remote_state.shared_infra.outputs.reporting_miro_inventory_reindex_topic_arn
+  reporting_sierra_hybrid_records_topic_arn         = data.terraform_remote_state.shared_infra.outputs.reporting_sierra_reindex_topic_arn
+  catalogue_miro_hybrid_records_topic_arn           = data.terraform_remote_state.shared_infra.outputs.catalogue_miro_reindex_topic_arn
+  catalogue_sierra_hybrid_records_topic_arn         = data.terraform_remote_state.shared_infra.outputs.catalogue_sierra_reindex_topic_arn
+  catalogue_sierra_items_hybrid_records_topic_arn   = data.terraform_remote_state.shared_infra.outputs.catalogue_sierra_items_reindex_topic_arn
+  mets_reindexer_topic_name                         = module.mets_reindexer_topic.name
+  mets_reindexer_topic_arn                          = module.mets_reindexer_topic.arn
 
-  reporting_miro_hybrid_records_topic_arn           = "${data.terraform_remote_state.shared_infra.reporting_miro_reindex_topic_arn}"
-  reporting_miro_inventory_hybrid_records_topic_arn = "${data.terraform_remote_state.shared_infra.reporting_miro_inventory_reindex_topic_arn}"
-  reporting_sierra_hybrid_records_topic_arn         = "${data.terraform_remote_state.shared_infra.reporting_sierra_reindex_topic_arn}"
-  catalogue_miro_hybrid_records_topic_arn           = "${data.terraform_remote_state.shared_infra.catalogue_miro_reindex_topic_arn}"
-  catalogue_sierra_hybrid_records_topic_arn         = "${data.terraform_remote_state.shared_infra.catalogue_sierra_reindex_topic_arn}"
-  catalogue_sierra_items_hybrid_records_topic_arn   = "${data.terraform_remote_state.shared_infra.catalogue_sierra_items_reindex_topic_arn}"
-  mets_reindexer_topic_name                         = "${module.mets_reindexer_topic.name}"
-  mets_reindexer_topic_arn                          = "${module.mets_reindexer_topic.arn}"
-
-  vpc_id          = "${data.terraform_remote_state.shared_infra.catalogue_vpc_delta_id}"
-  private_subnets = "${data.terraform_remote_state.shared_infra.catalogue_vpc_delta_private_subnets}"
+  vpc_id          = data.terraform_remote_state.shared_infra.outputs.catalogue_vpc_delta_id
+  private_subnets = data.terraform_remote_state.shared_infra.outputs.catalogue_vpc_delta_private_subnets
+  dlq_alarm_arn   = data.terraform_remote_state.shared_infra.outputs.dlq_alarm_arn
 
   # This map defines the possible reindexer configurations.
   #
@@ -28,38 +27,38 @@ locals {
   reindexer_jobs = [
     {
       id    = "sierra--reporting"
-      table = "${local.vhs_sierra_table_name}"
-      topic = "${local.reporting_sierra_hybrid_records_topic_arn}"
+      table = local.vhs_sierra_table_name
+      topic = local.reporting_sierra_hybrid_records_topic_arn
     },
     {
       id    = "sierra--catalogue"
-      table = "${local.vhs_sierra_table_name}"
-      topic = "${local.catalogue_sierra_hybrid_records_topic_arn}"
+      table = local.vhs_sierra_table_name
+      topic = local.catalogue_sierra_hybrid_records_topic_arn
     },
     {
       id    = "miro--reporting"
-      table = "${local.vhs_miro_table_name}"
-      topic = "${local.reporting_miro_hybrid_records_topic_arn}"
+      table = local.vhs_miro_table_name
+      topic = local.reporting_miro_hybrid_records_topic_arn
     },
     {
       id    = "miro--catalogue"
-      table = "${local.vhs_miro_table_name}"
-      topic = "${local.catalogue_miro_hybrid_records_topic_arn}"
+      table = local.vhs_miro_table_name
+      topic = local.catalogue_miro_hybrid_records_topic_arn
     },
     {
       id    = "miro_inventory--reporting"
-      table = "${local.vhs_miro_inventory_table_name}"
-      topic = "${local.reporting_miro_inventory_hybrid_records_topic_arn}"
+      table = local.vhs_miro_inventory_table_name
+      topic = local.reporting_miro_inventory_hybrid_records_topic_arn
     },
     {
       id    = "sierra_items--catalogue"
-      table = "${local.vhs_sierra_items_table_name}"
-      topic = "${local.catalogue_sierra_items_hybrid_records_topic_arn}"
+      table = local.vhs_sierra_items_table_name
+      topic = local.catalogue_sierra_items_hybrid_records_topic_arn
     },
     {
       id    = "mets--catalogue"
-      table = "${local.mets_dynamo_table_name}"
-      topic = "${local.mets_reindexer_topic_arn}"
+      table = local.mets_dynamo_table_name
+      topic = local.mets_reindexer_topic_arn
     },
   ]
 }
