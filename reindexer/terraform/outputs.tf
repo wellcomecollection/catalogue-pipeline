@@ -4,9 +4,9 @@
 # Don't change it without changing the corresponding script code.
 #
 output "topic_arn" {
-  value = "${module.reindex_worker.topic_arn}"
+  value = module.reindex_worker.topic_arn
 }
 
 output "mets_reindexer_topic_name" {
-  value = "${local.mets_reindexer_topic_name}"
+  value = local.mets_reindexer_topic_name
 }

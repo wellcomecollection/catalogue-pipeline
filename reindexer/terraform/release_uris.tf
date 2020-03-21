@@ -1,5 +1,5 @@
 locals {
-  reindex_worker_image = "${module.images.services["reindex_worker"]}"
+  reindex_worker_image = module.images.services["reindex_worker"]
 }
 
 module "images" {

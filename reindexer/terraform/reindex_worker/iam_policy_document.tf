@@ -36,16 +36,16 @@ data "aws_iam_policy_document" "sns_publish_policy" {
 #
 
 data "template_file" "table_name" {
-  count    = "${length(var.reindexer_jobs)}"
+  count    = length(var.reindexer_jobs)
   template = "arn:aws:dynamodb:${var.aws_region}:${var.account_id}:table/$${table}"
 
   vars = {
-    table = "${lookup(var.reindexer_jobs[count.index], "table")}"
+    table = lookup(var.reindexer_jobs[count.index], "table")
   }
 }
 
 locals {
-  reindexer_tables = "${distinct(data.template_file.table_name.*.rendered)}"
+  reindexer_tables = distinct(data.template_file.table_name.*.rendered)
 }
 
 # This block of interpolation syntax gets a list of all the topic ARNs that the
@@ -53,10 +53,10 @@ locals {
 #
 
 data "template_file" "topic_arn" {
-  count    = "${length(var.reindexer_jobs)}"
-  template = "${lookup(var.reindexer_jobs[count.index], "topic")}"
+  count    = length(var.reindexer_jobs)
+  template = lookup(var.reindexer_jobs[count.index], "topic")
 }
 
 locals {
-  reindexer_topics = "${distinct(data.template_file.topic_arn.*.rendered)}"
+  reindexer_topics = distinct(data.template_file.topic_arn.*.rendered)
 }
