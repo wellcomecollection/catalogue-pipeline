@@ -14,7 +14,7 @@ variable "cluster_arn" {}
 variable "namespace_id" {}
 
 variable "reindexer_jobs" {
-  type = list(string)
+  type = list(map(string))
 }
 
 variable "reindexer_job_config_json" {}
