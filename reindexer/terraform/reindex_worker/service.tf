@@ -27,7 +27,6 @@ module "service" {
 
   namespace_id = var.namespace_id
 
-  launch_type = "FARGATE"
-
+  min_capacity = 0
   max_capacity = 7
 }

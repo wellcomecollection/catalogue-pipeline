@@ -1,11 +1,9 @@
 variable "min_capacity" {
-  default = 0
-  type    = number
+  type = number
 }
 
 variable "max_capacity" {
-  default = 3
-  type    = number
+  type = number
 }
 
 variable "vpc_id" {}
@@ -21,13 +19,8 @@ variable "subnets" {
   type = list(string)
 }
 
-variable "launch_type" {
-  default = "FARGATE"
-}
-
 variable "desired_task_count" {
-  default = 1
-  type    = number
+  type = number
 }
 
 variable "memory" {
@@ -58,6 +51,4 @@ variable "security_group_ids" {
   type = list(string)
 }
 
-variable "namespace_id" {
-  default = "ecs"
-}
+variable "namespace_id" {}

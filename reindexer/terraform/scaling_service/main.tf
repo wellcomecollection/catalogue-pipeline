@@ -26,7 +26,7 @@ module "service" {
 
   security_group_ids = var.security_group_ids
 
-  launch_type = var.launch_type
+  launch_type = "FARGATE"
 }
 
 module "task" {
