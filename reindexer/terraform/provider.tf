@@ -1,6 +1,6 @@
 provider "aws" {
   region  = "${var.aws_region}"
-  version = "1.23.0"
+  version = "~> 2.7"
 
   assume_role {
     role_arn = "arn:aws:iam::760097843905:role/platform-developer"
