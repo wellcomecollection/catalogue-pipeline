@@ -19,14 +19,6 @@ variable "reindexer_jobs" {
 
 variable "reindexer_job_config_json" {}
 
-variable "scale_up_period_in_minutes" {
-  default = 1
-}
-
-variable "scale_down_period_in_minutes" {
-  default = 10
-}
-
 variable "namespace" {}
 
 variable "vpc_id" {}
