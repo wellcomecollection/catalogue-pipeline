@@ -1,4 +1,10 @@
+data "aws_ssm_parameter" "mets_adapter_image" {
+  name = "/mets_adapter/images/latest/mets_adapter"
+}
+
 locals {
+  mets_adapter_image = data.aws_ssm_parameter.mets_adapter_image.value
+
  namespace                       = "mets-adapter"
  storage_notifications_topic_arn = data.terraform_remote_state.storage_service.outputs.bag_register_output_topic_arn
  logstash_transit_service_name   = "${local.namespace}_logstash_transit"
