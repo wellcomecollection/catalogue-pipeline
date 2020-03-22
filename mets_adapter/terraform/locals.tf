@@ -12,7 +12,6 @@ locals {
  mets_adapter_table_name = data.terraform_remote_state.catalogue_infra_critical.outputs.mets_dynamo_table_name
 
  # Infra stuff
- account_id = data.aws_caller_identity.current.account_id
  aws_region = "eu-west-1"
 
  infra_bucket    = data.terraform_remote_state.shared_infra.outputs.infra_bucket

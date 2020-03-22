@@ -46,5 +46,3 @@ data "terraform_remote_state" "catalogue_infra_critical" {
     region = "eu-west-1"
   }
 }
-
-data "aws_caller_identity" "current" {}

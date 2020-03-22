@@ -15,7 +15,7 @@ module "task" {
   env_vars = {
     logstash_host             = local.logstash_host
     sns_arn                   = module.mets_adapter_topic.arn
-    queue_id                  = module.queue.id
+    queue_id                  = module.queue.url
     metrics_namespace         = local.namespace
     mets_adapter_dynamo_table = local.mets_adapter_table_name
     bag_api_url               = local.bag_api_url
