@@ -14,7 +14,7 @@ terraform {
 data "terraform_remote_state" "storage_service" {
   backend = "s3"
 
-  config {
+  config = {
     role_arn = "arn:aws:iam::975596993436:role/storage-read_only"
 
     bucket         = "wellcomecollection-storage-infra"
@@ -26,11 +26,11 @@ data "terraform_remote_state" "storage_service" {
 data "terraform_remote_state" "shared_infra" {
   backend = "s3"
 
-  config {
+  config = {
     role_arn = "arn:aws:iam::760097843905:role/platform-read_only"
 
     bucket = "wellcomecollection-platform-infra"
-    key    = "terraform/shared_infra.tfstate"
+    key    = "terraform/platform-infrastructure/shared.tfstate"
     region = "eu-west-1"
   }
 }
@@ -38,7 +38,7 @@ data "terraform_remote_state" "shared_infra" {
 data "terraform_remote_state" "catalogue_infra_critical" {
   backend = "s3"
 
-  config {
+  config = {
     role_arn = "arn:aws:iam::760097843905:role/platform-read_only"
 
     bucket = "wellcomecollection-platform-infra"
