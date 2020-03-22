@@ -5,7 +5,6 @@ module "queue" {
 
   topic_arns = [
     local.storage_notifications_topic_arn,
-    module.temp_test_topic.arn,
   ]
 
   aws_region = local.aws_region
