@@ -61,6 +61,8 @@ class CollectionService(elasticClient: ElasticClient, index: Index)(
       case resp                 => Right(resp.result)
     }
 
+  // Note that the search request should only return work with type
+  // IdentifiedWork due to the fact that we are filtering on data.collection
   private def toWork(hit: SearchHit): Result[IdentifiedWork] =
     fromJson[IdentifiedWork](hit.sourceAsString).toEither
 }
