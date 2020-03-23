@@ -72,7 +72,7 @@ data "terraform_remote_state" "mets_adapter" {
   config = {
     role_arn = "arn:aws:iam::760097843905:role/platform-read_only"
     bucket   = "wellcomecollection-platform-infra"
-    key      = "terraform/mets_adapter.tfstate"
+    key      = "terraform/catalogue/mets_adapter.tfstate"
     region   = "eu-west-1"
   }
 }
@@ -94,7 +94,7 @@ data "terraform_remote_state" "reindexer" {
   config = {
     role_arn = "arn:aws:iam::760097843905:role/platform-read_only"
     bucket   = "wellcomecollection-platform-infra"
-    key      = "terraform/reindexer.tfstate"
+    key      = "terraform/catalogue/reindexer.tfstate"
     region   = "eu-west-1"
   }
 }

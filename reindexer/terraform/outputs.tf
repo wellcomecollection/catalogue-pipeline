@@ -10,3 +10,7 @@ output "topic_arn" {
 output "mets_reindexer_topic_name" {
   value = local.mets_reindexer_topic_name
 }
+
+output "mets_reindexer_topic_arn" {
+  value = local.mets_reindexer_topic_arn
+}
