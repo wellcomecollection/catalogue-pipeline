@@ -13,6 +13,8 @@ jobs:
       script: ./.travis/run_job.py elasticsearch
     - name: big_messaging
       script: ./.travis/run_job.py big_messaging
+    - name: ingestor_common
+      script: ./.travis/run_job.py ingestor_common
 
     - stage: services
       name: api
@@ -21,8 +23,10 @@ jobs:
       script: ./.travis/run_job.py reindex_worker
     - name: id_minter
       script: ./.travis/run_job.py id_minter
-    - name: ingestor
-      script: ./.travis/run_job.py ingestor
+    - name: ingestor_works
+      script: ./.travis/run_job.py ingestor_works
+    - name: ingestor_images
+      script: ./.travis/run_job.py ingestor_images
     - name: matcher
       script: ./.travis/run_job.py matcher
     - name: merger

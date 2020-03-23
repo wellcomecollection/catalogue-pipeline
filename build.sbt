@@ -78,11 +78,25 @@ lazy val id_minter = setupProject(
   externalDependencies = CatalogueDependencies.idminterDependencies
 )
 
-lazy val ingestor = setupProject(
+lazy val ingestor_common = setupProject(
   project,
-  "pipeline/ingestor",
+  "pipeline/ingestor/ingestor_common",
   localDependencies = Seq(elasticsearch_typesafe, big_messaging_typesafe),
   externalDependencies = CatalogueDependencies.ingestorDependencies
+)
+
+lazy val ingestor_works = setupProject(
+  project,
+  "pipeline/ingestor/ingestor_works",
+  localDependencies = Seq(elasticsearch_typesafe, big_messaging_typesafe, ingestor_common),
+  externalDependencies = Seq()
+)
+
+lazy val ingestor_images = setupProject(
+  project,
+  "pipeline/ingestor/ingestor_images",
+  localDependencies = Seq(elasticsearch_typesafe, big_messaging_typesafe, ingestor_common),
+  externalDependencies = Seq()
 )
 
 lazy val matcher = setupProject(

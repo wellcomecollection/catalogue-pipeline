@@ -5,7 +5,7 @@ STACK_ROOT = pipeline
 
 PROJECT_ID = catalogue_pipeline
 
-SBT_APPS = id_minter ingestor recorder matcher merger
+SBT_APPS = id_minter recorder matcher merger
 
 SBT_DOCKER_LIBRARIES    =
 SBT_NO_DOCKER_LIBRARIES =
@@ -20,3 +20,4 @@ $(val $(call stack_setup))
 
 include $(ROOT)/pipeline/transformer/Makefile
 include $(ROOT)/pipeline/inferrer/Makefile
+include $(ROOT)/pipeline/ingestor/Makefile
