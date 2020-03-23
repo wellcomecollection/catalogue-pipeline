@@ -96,33 +96,26 @@ def post_to_slack(slack_message):
 
 def get_reindexer_topic_arn():
     statefile_body = read_from_s3(
-        bucket="wellcomecollection-platform-infra", key="terraform/reindexer.tfstate"
+        bucket="wellcomecollection-platform-infra",
+        key="terraform/catalogue/reindexer.tfstate",
     )
 
     # The structure of the interesting bits of the statefile is:
     #
     #   {
     #       ...
-    #       "modules": [
-    #           {
-    #               "path": ["root"],
-    #               "outputs": {
-    #                   "name_of_output": {
-    #                       "value": "1234567890x",
-    #                       ...
-    #                   },
-    #                   ...
-    #               }
-    #           },
-    #           ...
-    #       ]
+    #       "outputs": {
+    #          "name_of_output": {
+    #              "value": "1234567890x",
+    #              ...
+    #          },
+    #          ...
+    #      }
     #   }
     #
     statefile_data = json.loads(statefile_body)
-    modules = statefile_data["modules"]
-    root_module = [m for m in modules if m["path"] == ["root"]][0]
-    root_outputs = root_module["outputs"]
-    return root_outputs["topic_arn"]["value"]
+    outputs = statefile_data["outputs"]
+    return outputs["topic_arn"]["value"]
 
 
 def publish_messages(job_config_id, topic_arn, parameters):
