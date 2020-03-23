@@ -36,7 +36,7 @@ import uk.ac.wellcome.platform.api.Tracing
   * incremental exploration of the data (akin to exploring a filesystem), due to
   * the fact the whole tree may be rather large.
   */
-class CollectionService(elasticClient: ElasticClient, index: Index)(
+class CollectionService(elasticClient: ElasticClient)(
   implicit ec: ExecutionContext)
     extends Tracing {
 
