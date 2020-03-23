@@ -1,35 +1,32 @@
 module "service" {
   source       = "../scaling_service"
-  service_name = "${var.namespace}"
+  service_name = var.namespace
 
-  task_desired_count = "0"
-  source_queue_name  = "${module.reindex_worker_queue.name}"
-  source_queue_arn   = "${module.reindex_worker_queue.arn}"
+  desired_task_count = 0
+  source_queue_name  = module.reindex_worker_queue.name
+  source_queue_arn   = module.reindex_worker_queue.arn
 
-  container_image    = "${var.reindex_worker_container_image}"
-  security_group_ids = ["${var.service_egress_security_group_id}"]
+  container_image    = var.reindex_worker_container_image
+  security_group_ids = [var.service_egress_security_group_id]
 
   cpu    = 1024
   memory = 2048
 
   env_vars = {
-    reindex_jobs_queue_id     = "${module.reindex_worker_queue.id}"
-    metrics_namespace         = "${var.namespace}"
-    reindexer_job_config_json = "${var.reindexer_job_config_json}"
+    reindex_jobs_queue_id     = module.reindex_worker_queue.url
+    metrics_namespace         = var.namespace
+    reindexer_job_config_json = var.reindexer_job_config_json
   }
 
-  env_vars_length = 3
+  cluster_name = var.cluster_name
+  cluster_arn  = var.cluster_arn
+  vpc_id       = var.vpc_id
 
-  ecs_cluster_name = "${var.ecs_cluster_name}"
-  ecs_cluster_id   = "${var.ecs_cluster_id}"
-  vpc_id           = "${local.vpc_id}"
+  aws_region = var.aws_region
+  subnets    = var.private_subnets
 
-  aws_region = "${var.aws_region}"
-  subnets    = ["${local.private_subnets}"]
+  namespace_id = var.namespace_id
 
-  namespace_id = "${var.namespace_id}"
-
-  launch_type = "FARGATE"
-
+  min_capacity = 0
   max_capacity = 7
 }

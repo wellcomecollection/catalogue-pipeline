@@ -34,12 +34,12 @@ data "template_file" "single_reindex_job_config" {
   }
 EOF
 
-  count = "${length(local.reindexer_jobs)}"
+  count = length(local.reindexer_jobs)
 
-  vars {
-    id       = "${lookup(local.reindexer_jobs[count.index], "id")}"
-    table    = "${lookup(local.reindexer_jobs[count.index], "table")}"
-    topicArn = "${lookup(local.reindexer_jobs[count.index], "topic")}"
+  vars = {
+    id       = lookup(local.reindexer_jobs[count.index], "id")
+    table    = lookup(local.reindexer_jobs[count.index], "table")
+    topicArn = lookup(local.reindexer_jobs[count.index], "topic")
   }
 }
 
@@ -53,8 +53,8 @@ data "template_file" "all_reindex_job_config" {
   }
 EOF
 
-  vars {
-    value = "${join(",", data.template_file.single_reindex_job_config.*.rendered)}"
+  vars = {
+    value = join(",", data.template_file.single_reindex_job_config.*.rendered)
   }
 }
 
@@ -64,9 +64,9 @@ EOF
 # This renders the template, and removes all the whitespace so it can be passed
 # as a single line.
 locals {
-  reindex_job_config_json = "${replace(data.template_file.all_reindex_job_config.rendered, "/\\s/", "")}"
+  reindex_job_config_json = replace(data.template_file.all_reindex_job_config.rendered, "/\\s/", "")
 }
 
 output "reindex_job_config_json" {
-  value = "${local.reindex_job_config_json}"
+  value = local.reindex_job_config_json
 }
