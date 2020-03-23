@@ -30,7 +30,7 @@ module "service" {
 }
 
 module "task" {
-  source = "github.com/wellcomecollection/terraform-aws-ecs-service.git//task_definition/single_container?ref=a1b65cf8662f9ca4846b1b21c9172f8e8c07eee3"
+  source = "github.com/wellcomecollection/terraform-aws-ecs-service.git//task_definition/single_container?ref=v1.5.1"
 
   task_name = var.service_name
 
