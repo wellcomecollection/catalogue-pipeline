@@ -116,7 +116,8 @@ class Router(elasticClient: ElasticClient,
         .findWorkById(id)(index)
         .flatMap {
           case Right(Some(work: IdentifiedWork)) =>
-            retrieveTree(index, work, Nil).map {
+            val expandedPaths = params.expandPaths.getOrElse(Nil)
+            retrieveTree(index, work, expandedPaths).map {
               workFound(work, _, includes)
             }
           case Right(Some(work: IdentifiedRedirectedWork)) =>
