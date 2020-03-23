@@ -96,7 +96,8 @@ def post_to_slack(slack_message):
 
 def get_reindexer_topic_arn():
     statefile_body = read_from_s3(
-        bucket="wellcomecollection-platform-infra", key="terraform/catalogue/reindexer.tfstate"
+        bucket="wellcomecollection-platform-infra",
+        key="terraform/catalogue/reindexer.tfstate",
     )
 
     # The structure of the interesting bits of the statefile is:
