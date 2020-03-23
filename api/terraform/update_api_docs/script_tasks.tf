@@ -4,16 +4,15 @@ data "aws_ssm_parameter" "update_api_docs_image" {
   name = "/catalogue_api/images/latest/update_api_docs"
 }
 
-locals {
-  update_api_docs_image = data.aws_ssm_parameter.update_api_docs_image.value
-}
+module "task" {
+  source = "github.com/wellcomecollection/terraform-aws-ecs-service.git//task_definition/single_container?ref=v1.5.2"
 
-module "update_api_docs" {
-  source        = "../modules/ecs_script_task"
-  task_name     = "update_api_docs"
-  app_uri       = local.update_api_docs_image
-  task_role_arn = "${module.ecs_update_api_docs_iam.task_role_arn}"
+  task_name = "update_api_docs"
+
+  container_image = data.aws_ssm_parameter.update_api_docs_image.value
 
   cpu    = 256
-  memory = 256
+  memory = 512
+
+  aws_region = var.aws_region
 }
