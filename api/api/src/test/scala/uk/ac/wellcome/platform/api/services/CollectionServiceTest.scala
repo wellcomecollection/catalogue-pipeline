@@ -22,8 +22,7 @@ class CollectionServiceTest
     with ItemsGenerators
     with WorksGenerators {
 
-  def collectionService(index: Index) =
-    new CollectionService(elasticClient, index)
+  val service = new CollectionService(elasticClient)
 
   def work(path: String) =
     createIdentifiedWorkWith(
@@ -52,8 +51,7 @@ class CollectionServiceTest
   it("Retrieves a tree with the given path and all ancestors expanded") {
     withLocalWorksIndex { index =>
       storeWorks(index)
-      val service = collectionService(index)
-      whenReady(service.retrieveTree(List("a/b"))) { result =>
+      whenReady(service.retrieveTree(index, List("a/b"))) { result =>
         result shouldBe Right(
           CollectionTree(
             path = "a",
@@ -78,8 +76,7 @@ class CollectionServiceTest
   it("Retrieves a tree with multiple paths and their ancestors expanded") {
     withLocalWorksIndex { index =>
       storeWorks(index)
-      val service = collectionService(index)
-      whenReady(service.retrieveTree(List("a/b", "a/e/f"))) { result =>
+      whenReady(service.retrieveTree(index, List("a/b", "a/e/f"))) { result =>
         result shouldBe Right(
           CollectionTree(
             path = "a",
@@ -116,8 +113,7 @@ class CollectionServiceTest
   it("Only expands by a single depth beyond the given path") {
     withLocalWorksIndex { index =>
       storeWorks(index)
-      val service = collectionService(index)
-      whenReady(service.retrieveTree(List("a"))) { result =>
+      whenReady(service.retrieveTree(index, List("a"))) { result =>
         result shouldBe Right(
           CollectionTree(
             path = "a",
@@ -135,8 +131,7 @@ class CollectionServiceTest
   it("Fails creating a tree when incomplete data") {
     withLocalWorksIndex { index =>
       storeWorks(index)
-      val service = collectionService(index)
-      whenReady(service.retrieveTree(List("x/oops"))) { result =>
+      whenReady(service.retrieveTree(index, List("x/oops"))) { result =>
         result shouldBe a[Left[_, _]]
         result.left.get.getMessage shouldBe "Not all works in collection are connected to root 'x': x/oops/z"
       }
@@ -146,8 +141,7 @@ class CollectionServiceTest
   it("Fails creating a tree when duplicate paths") {
     withLocalWorksIndex { index =>
       storeWorks(index, work("a/e/f/g") :: works)
-      val service = collectionService(index)
-      whenReady(service.retrieveTree(List("a/e/f"))) { result =>
+      whenReady(service.retrieveTree(index, List("a/e/f"))) { result =>
         result shouldBe a[Left[_, _]]
         result.left.get.getMessage shouldBe "Tree contains duplicate paths: a/e/f/g"
       }
@@ -159,8 +153,7 @@ class CollectionServiceTest
       val p = work("p") withData (_.copy(items = List(createIdentifiedItem)))
       val q = work("p/q") withData (_.copy(notes = List(GeneralNote("hi"))))
       storeWorks(index, List(p, q))
-      val service = collectionService(index)
-      whenReady(service.retrieveTree(List("p/q"))) { result =>
+      whenReady(service.retrieveTree(index, List("p/q"))) { result =>
         result shouldBe Right(
           CollectionTree(
             path = "p",

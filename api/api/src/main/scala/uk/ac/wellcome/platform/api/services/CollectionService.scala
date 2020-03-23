@@ -41,8 +41,9 @@ class CollectionService(elasticClient: ElasticClient, index: Index)(
     extends Tracing {
 
   def retrieveTree(
+    index: Index,
     expandedPaths: List[String]): Future[Result[CollectionTree]] =
-    makeEsRequest(expandedPaths)
+    makeEsRequest(index, expandedPaths)
       .map { result =>
         result.left
           .map(_.asException)
@@ -53,6 +54,7 @@ class CollectionService(elasticClient: ElasticClient, index: Index)(
       }
 
   private def makeEsRequest(
+    index: Index,
     paths: List[String]): Future[Either[ElasticError, SearchResponse]] =
     withActiveTrace(elasticClient.execute {
       CollectionRequestBuilder(index, paths).request
