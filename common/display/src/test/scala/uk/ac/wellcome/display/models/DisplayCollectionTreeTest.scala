@@ -128,7 +128,7 @@ class DisplayCollectionTreeTest
       )
   }
 
-  it("creates a display tree non expanded paths None rather than empty list") {
+  it("sets non-expanded paths as None rather than empty list") {
     val a = work("a")
     val b = work("a/b")
     val c = work("a/b/c")
