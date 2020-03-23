@@ -1,4 +1,7 @@
-module "ecr_repository_mets_adapter" {
-  source = "git::https://github.com/wellcometrust/terraform.git//ecr?ref=v1.0.0"
-  name   = "mets_adapter"
+resource "aws_ecr_repository" "mets_adapter" {
+  name = "uk.ac.wellcome/mets_adapter"
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
