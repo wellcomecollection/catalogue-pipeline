@@ -74,9 +74,3 @@ module "data_api" {
     aws.platform_account = "aws.platform_account"
   }
 }
-
-module "api_docs" {
-  source = "./api_docs"
-
-  update_api_docs_release_uri = "${module.latest_images.services["update_api_docs"]}"
-}
