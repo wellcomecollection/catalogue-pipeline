@@ -201,8 +201,8 @@ class WorkIndexerTest
     val works = createIdentifiedWorks(count = 5)
 
     withLocalWorksIndex { index =>
-      val future = workIndexer.indexWorks(
-        works = works,
+      val future = workIndexer.index(
+        documents = works,
         index = index
       )
 
@@ -242,8 +242,8 @@ class WorkIndexerTest
 
     withLocalElasticsearchIndex(config = WorksWithNoEditionIndexConfig) {
       index =>
-        val future = workIndexer.indexWorks(
-          works = works,
+        val future = workIndexer.index(
+          documents = works,
           index = index
         )
 
@@ -264,8 +264,8 @@ class WorkIndexerTest
     } yield result
 
   private def indexWork(work: IdentifiedBaseWork, index: Index) =
-    workIndexer.indexWorks(
-      works = List(work),
+    workIndexer.index(
+      documents = List(work),
       index = index
     )
 

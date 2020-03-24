@@ -15,7 +15,7 @@ import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.{IdentifiedBaseWork, IdentifierType}
-import uk.ac.wellcome.platform.ingestor.config.models.IngestorConfig
+import uk.ac.wellcome.platform.ingestor.models.IngestorConfig
 import uk.ac.wellcome.platform.ingestor.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.storage.ObjectLocation
 

@@ -10,7 +10,7 @@ import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.models.work.internal.IdentifiedBaseWork
-import uk.ac.wellcome.platform.ingestor.config.models.IngestorConfig
+import uk.ac.wellcome.platform.ingestor.models.IngestorConfig
 import uk.ac.wellcome.platform.ingestor.services.IngestorWorkerService
 import uk.ac.wellcome.storage.ObjectLocation
 

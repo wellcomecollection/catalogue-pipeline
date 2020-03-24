@@ -1,80 +1,22 @@
 package uk.ac.wellcome.platform.ingestor.services
 
-import com.sksamuel.elastic4s.{Index, Indexable}
-import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.requests.bulk.{BulkResponse, BulkResponseItem}
-import com.sksamuel.elastic4s.{ElasticClient, Response}
-import com.sksamuel.elastic4s.requests.common.VersionType.ExternalGte
-import grizzled.slf4j.Logging
+import com.sksamuel.elastic4s.ElasticClient
 import uk.ac.wellcome.json.JsonUtil.toJson
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.internal.{
-  IdentifiedBaseWork,
-  IdentifiedInvisibleWork,
-  IdentifiedRedirectedWork,
-  IdentifiedWork
-}
+import uk.ac.wellcome.models.work.internal.{IdentifiedBaseWork, IdentifiedInvisibleWork, IdentifiedRedirectedWork, IdentifiedWork}
+import uk.ac.wellcome.platform.ingestor.Indexer
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 import scala.language.implicitConversions
 
 class WorkIndexer(
-  elasticClient: ElasticClient
-)(implicit ec: ExecutionContext)
-    extends Logging {
+ val  elasticClient: ElasticClient
+)(implicit val ec: ExecutionContext)
+    extends Indexer[IdentifiedBaseWork] {
 
-  implicit object IdentifiedWorkIndexable
-      extends Indexable[IdentifiedBaseWork] {
-    override def json(t: IdentifiedBaseWork): String =
-      toJson(t).get
-  }
+  implicit val indexable = (t: IdentifiedBaseWork) => toJson(t).get
 
-  def indexWorks(works: Seq[IdentifiedBaseWork], index: Index)
-    : Future[Either[Seq[IdentifiedBaseWork], Seq[IdentifiedBaseWork]]] = {
-
-    debug(s"Indexing work ${works.map(_.canonicalId).mkString(", ")}")
-
-    val inserts = works.map { work =>
-      // Elasticsearch are removing types entirely in ES 7, and creating an index
-      // with more than one type in ES 6 is a 400 Error.
-      //
-      // Our prod cluster is already creating a single "type" with the same name
-      // as the index, so do the same here.
-      indexInto(index.name)
-        .version(calculateEsVersion(work))
-        .versionType(ExternalGte)
-        .id(work.canonicalId)
-        .doc(work)
-    }
-
-    elasticClient
-      .execute {
-        bulk(inserts)
-      }
-      .map { response: Response[BulkResponse] =>
-        if (response.isError) {
-          warn(s"Error from Elasticsearch: $response")
-          Left(works)
-        } else {
-          debug(s"Bulk response = $response")
-          val bulkResponse = response.result
-          val actualFailures = bulkResponse.failures.filterNot {
-            isVersionConflictException
-          }
-
-          if (actualFailures.nonEmpty) {
-            val failedIds = actualFailures.map { failure =>
-              error(s"Failed ingesting ${failure.id}: ${failure.error}")
-              failure.id
-            }
-
-            Left(works.filter(w => {
-              failedIds.contains(w.canonicalId)
-            }))
-          } else Right(works)
-        }
-      }
-  }
+  implicit val id = (t: IdentifiedBaseWork) => t.canonicalId
 
   /**
     * When the merger makes the decision to merge some works, it modifies the content of
@@ -96,30 +38,10 @@ class WorkIndexer(
     * We make sure that a merger modified work always wins over other works with the same
     * version, by adding one to work.version * 10.
     */
-  private def calculateEsVersion(work: IdentifiedBaseWork): Int = work match {
+  override def calculateEsVersion(work: IdentifiedBaseWork): Int = work match {
     case w: IdentifiedWork           => (w.version * 10) + w.data.merged
     case w: IdentifiedRedirectedWork => (w.version * 10) + 1
     case w: IdentifiedInvisibleWork  => w.version * 10
   }
-
-  /** Did we try to PUT a document with a lower version than the existing version?
-    *
-    */
-  private def isVersionConflictException(
-    bulkResponseItem: BulkResponseItem): Boolean = {
-    // This error is returned by Elasticsearch when we try to PUT a document
-    // with a lower version than the existing version.
-    val alreadyIndexedWorkHasHigherVersion = bulkResponseItem.error
-      .exists(bulkError =>
-        bulkError.`type`.contains("version_conflict_engine_exception"))
-
-    if (alreadyIndexedWorkHasHigherVersion) {
-      info(
-        s"Skipping ${bulkResponseItem.id} because already indexed work has a higher version (${bulkResponseItem.error}")
-    }
-
-    alreadyIndexedWorkHasHigherVersion
-  }
-
   implicit private def toInteger(bool: Boolean): Int = if (bool) 1 else 0
 }

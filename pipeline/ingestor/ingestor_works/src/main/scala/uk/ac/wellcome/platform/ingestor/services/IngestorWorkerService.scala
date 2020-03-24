@@ -10,7 +10,7 @@ import uk.ac.wellcome.elasticsearch.{
 }
 import uk.ac.wellcome.bigmessaging.message.BigMessageStream
 import uk.ac.wellcome.models.work.internal.IdentifiedBaseWork
-import uk.ac.wellcome.platform.ingestor.config.models.IngestorConfig
+import uk.ac.wellcome.platform.ingestor.models.IngestorConfig
 import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -39,8 +39,8 @@ class IngestorWorkerService(
   private def processMessages(bundles: List[Bundle]): FutureBundles =
     for {
       works <- Future.successful(bundles.map(m => m.work))
-      either <- identifiedWorkIndexer.indexWorks(
-        works = works,
+      either <- identifiedWorkIndexer.index(
+        documents = works,
         index = ingestorConfig.index
       )
     } yield {
