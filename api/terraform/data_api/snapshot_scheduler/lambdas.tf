@@ -27,6 +27,6 @@ resource "aws_lambda_permission" "allow_cloudwatch_trigger" {
 }
 
 resource "aws_cloudwatch_event_target" "event_trigger" {
-  rule  = aws_cloudwatch_event_rule.snapshot_scheduler_rule.id
-  arn   = module.snapshot_scheduler_lambda.arn
+  rule = aws_cloudwatch_event_rule.snapshot_scheduler_rule.id
+  arn  = module.snapshot_scheduler_lambda.arn
 }

@@ -1,7 +1,7 @@
 module "updates_queue" {
-  source      = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
+  source = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
 
-  queue_name  = "sierra_bibs_merger_queue"
+  queue_name = "sierra_bibs_merger_queue"
 
   topic_arns = [var.updates_topic_arn]
 
@@ -16,7 +16,7 @@ module "updates_queue" {
 
   alarm_topic_arn = var.dlq_alarm_arn
 
-  aws_region  = var.aws_region
+  aws_region = var.aws_region
 }
 
 module "scaling_alarm" {

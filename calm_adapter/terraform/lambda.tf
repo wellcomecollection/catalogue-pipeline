@@ -1,15 +1,15 @@
 resource "aws_lambda_function" "window_generator_lambda" {
 
   function_name = "calm_window_generator"
-  description = "Sends windows to the Calm adapter"
+  description   = "Sends windows to the Calm adapter"
 
   role = aws_iam_role.window_generator_role.arn
 
   handler = "lambda.main"
   runtime = "python3.6"
 
-  s3_bucket = data.aws_s3_bucket_object.package.bucket
-  s3_key = data.aws_s3_bucket_object.package.key
+  s3_bucket         = data.aws_s3_bucket_object.package.bucket
+  s3_key            = data.aws_s3_bucket_object.package.key
   s3_object_version = data.aws_s3_bucket_object.package.version_id
 
   environment {
@@ -39,12 +39,12 @@ data "aws_iam_policy_document" "assume_lambda_role" {
 
 data "aws_s3_bucket_object" "package" {
   bucket = local.infra_bucket
-  key = "lambdas/calm_adapter/calm_window_generator.zip"
+  key    = "lambdas/calm_adapter/calm_window_generator.zip"
 }
 
 resource "aws_cloudwatch_event_rule" "window_generator_rule" {
-  name = "calm_window_generator_rule"
-  description = "Starts the calm_window_generator lambda"
+  name                = "calm_window_generator_rule"
+  description         = "Starts the calm_window_generator lambda"
   schedule_expression = "rate(${local.window_generator_interval})"
 }
 

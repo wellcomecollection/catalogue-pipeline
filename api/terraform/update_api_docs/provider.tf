@@ -8,7 +8,7 @@ provider "aws" {
 }
 
 provider "aws" {
-  alias   = "platform"
+  alias = "platform"
 
   region  = var.aws_region
   version = "~> 2.7"
