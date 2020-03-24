@@ -1,5 +1,5 @@
 module "catalogue_api_prod" {
-  source = "./catalogue_api"
+  source = "./modules/catalogue_api_stack"
 
   environment           = "${local.prod_name}"
   api_container_image   = "${module.prod_images.services["api"]}"
@@ -22,7 +22,7 @@ module "catalogue_api_prod" {
 }
 
 module "catalogue_api_staging" {
-  source = "./catalogue_api"
+  source = "./modules/catalogue_api_stack"
 
   environment           = "${local.staging_name}"
   api_container_image   = "${module.staging_images.services["api"]}"
