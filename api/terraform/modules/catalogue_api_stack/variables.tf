@@ -1,15 +1,17 @@
 variable "namespace" {}
 variable "environment" {}
 
-variable "task_desired_count" {}
+variable "desired_task_count" {
+  type = number
+}
 
 variable "subnets" {
-  type = "list"
+  type = list(string)
 }
 
 variable "vpc_id" {}
 
-variable "cluster_name" {}
+variable "cluster_arn" {}
 
 variable "listener_port" {}
 

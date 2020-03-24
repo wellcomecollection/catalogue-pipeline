@@ -1,68 +1,25 @@
-data "aws_ecs_cluster" "cluster" {
-  cluster_name = "${var.cluster_name}"
+locals {
+  sidecar_container_name = "nginx"
 }
 
-module "service" {
-  source = "git::github.com/wellcometrust/terraform.git//ecs/modules/service/prebuilt/rest/tcp?ref=v19.16.3"
+module "task_definition" {
+  source = "github.com/wellcomecollection/terraform-aws-ecs-service.git//task_definition/container_with_sidecar?ref=v1.5.2"
 
-  service_name       = "${var.namespace}"
-  task_desired_count = "${var.task_desired_count}"
-
-  task_definition_arn = "${module.task.task_definition_arn}"
-
-  security_group_ids = ["${local.security_group_ids}"]
-
-  container_name = "sidecar"
-  container_port = "${var.nginx_container_port}"
-
-  ecs_cluster_id = "${data.aws_ecs_cluster.cluster.id}"
-
-  vpc_id  = "${var.vpc_id}"
-  subnets = "${var.subnets}"
-
-  namespace_id = "${var.namespace_id}"
-
-  launch_type = "FARGATE"
-
-  listener_port = "${var.listener_port}"
-  lb_arn        = "${var.lb_arn}"
-
-  # The default deregistration delay is 5 minutes, which means that ECS takes around 5-7 mins
-  # to fully drain connections to and deregister the old task in the course of its blue/green
-  # deployment of an updated service. Reducing this parameter to 90s hence makes deployments faster.
-  target_group_deregistration_delay = 90
-}
-
-module "task" {
-  source = "git::github.com/wellcometrust/terraform.git//ecs/modules/task/prebuilt/container_with_sidecar?ref=v19.6.0"
+  task_name = var.namespace
 
   cpu    = 1024
   memory = 2048
 
-  launch_types = ["FARGATE"]
-
-  app_cpu    = 512
-  app_memory = 1024
-
-  sidecar_cpu    = 512
-  sidecar_memory = 1024
-
-  app_env_vars_length = 3
+  app_container_image = var.container_image
+  app_container_port  = var.container_port
+  app_cpu             = 512
+  app_memory          = 1024
 
   app_env_vars = {
     api_host         = "api.wellcomecollection.org"
-    apm_service_name = "${var.namespace}"
-    logstash_host    = "${var.logstash_host}"
+    apm_service_name = var.namespace
+    logstash_host    = var.logstash_host
   }
-
-  sidecar_env_vars_length = 2
-
-  sidecar_env_vars = {
-    APP_HOST = "localhost"
-    APP_PORT = "${var.container_port}"
-  }
-
-  secret_app_env_vars_length = 7
 
   secret_app_env_vars = {
     es_host        = "catalogue/api/es_host"
@@ -74,16 +31,69 @@ module "task" {
     apm_secret     = "catalogue/api/apm_secret"
   }
 
+  sidecar_container_image = var.nginx_container_image
+  sidecar_container_port  = var.nginx_container_port
+  sidecar_container_name  = local.sidecar_container_name
+  sidecar_cpu             = 512
+  sidecar_memory          = 1024
+
+  sidecar_env_vars = {
+    APP_HOST = "localhost"
+    APP_PORT = var.container_port
+  }
+
   aws_region = "eu-west-1"
-  task_name  = "${var.namespace}"
-
-  app_container_image = "${var.container_image}"
-  app_container_port  = "${var.container_port}"
-
-  sidecar_container_image = "${var.nginx_container_image}"
-  sidecar_container_port  = "${var.nginx_container_port}"
 }
 
-locals {
-  security_group_ids = "${concat(list(var.service_egress_security_group_id, var.interservice_security_group_id), var.security_group_ids)}"
+resource "aws_lb_target_group" "tcp" {
+  # Must only contain alphanumerics and hyphens.
+  name = replace(var.namespace, "_", "-")
+
+  target_type = "ip"
+
+  protocol = "TCP"
+  port     = var.nginx_container_port
+  vpc_id   = var.vpc_id
+
+  # The default deregistration delay is 5 minutes, which means that ECS
+  # takes around 5–7 mins to fully drain connections to and deregister
+  # the old task in the course of its blue/green. deployment of an
+  # updated service.  Reducing this parameter to 90s makes deployments faster.
+  deregistration_delay = 90
+
+  health_check {
+    protocol = "TCP"
+  }
+}
+
+resource "aws_lb_listener" "tcp" {
+  load_balancer_arn = var.lb_arn
+  port              = var.listener_port
+  protocol          = "TCP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.tcp.arn
+  }
+}
+
+module "service" {
+  source = "github.com/wellcomecollection/terraform-aws-ecs-service.git//service?ref=v1.5.2"
+
+  service_name = var.namespace
+  cluster_arn  = var.cluster_arn
+
+  task_definition_arn = module.task_definition.arn
+
+  desired_task_count = var.desired_task_count
+
+  subnets = var.subnets
+
+  namespace_id = var.namespace_id
+
+  security_group_ids = var.security_group_ids
+
+  target_group_arn = aws_lb_target_group.tcp.arn
+  container_name   = local.sidecar_container_name
+  container_port   = var.nginx_container_port
 }

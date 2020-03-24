@@ -8,10 +8,10 @@ resource "aws_cloudwatch_metric_alarm" "alarm_5xx" {
   statistic           = "Sum"
   threshold           = "0"
 
-  dimensions {
-    ApiName = "${local.api_gateway_name}"
+  dimensions = {
+    ApiName = local.api_gateway_name
     Stage   = "prod"
   }
 
-  alarm_actions = ["${local.gateway_server_error_alarm_arn}"]
+  alarm_actions = [local.gateway_server_error_alarm_arn]
 }
