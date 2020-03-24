@@ -19,18 +19,16 @@ resource "aws_api_gateway_method" "root_resource" {
   authorization = "NONE"
 }
 
-module "root_resource_integration" {
-  source = "git::https://github.com/wellcometrust/terraform.git//api_gateway/modules/integration/proxy?ref=v14.2.0"
-
-  api_id        = "${aws_api_gateway_rest_api.api.id}"
-  resource_id   = "${aws_api_gateway_rest_api.api.root_resource_id}"
-  connection_id = "${aws_api_gateway_vpc_link.link.id}"
-
-  hostname    = "www.example.com"
+resource "aws_api_gateway_integration" "root" {
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  resource_id = aws_api_gateway_rest_api.api.root_resource_id
   http_method = aws_api_gateway_method.root_resource.http_method
 
-  forward_port = "$${stageVariables.port}"
-  forward_path = "catalogue/"
+  integration_http_method = "ANY"
+  type                    = "HTTP_PROXY"
+  connection_type         = "VPC_LINK"
+  connection_id           = aws_api_gateway_vpc_link.link.id
+  uri                     = "http://www.example.com:$${stageVariables.port}/catalogue/"
 }
 
 resource "aws_api_gateway_resource" "simple" {
@@ -51,18 +49,16 @@ resource "aws_api_gateway_method" "simple_resource" {
   }
 }
 
-module "simple_integration" {
-  source = "git::https://github.com/wellcometrust/terraform-modules.git//api_gateway/modules/integration/proxy?ref=v14.2.0"
-
-  api_id        = "${aws_api_gateway_rest_api.api.id}"
-  resource_id   = aws_api_gateway_resource.simple.id
-  connection_id = "${aws_api_gateway_vpc_link.link.id}"
-
-  hostname    = "api.wellcomecollection.org"
+resource "aws_api_gateway_integration" "simple" {
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  resource_id = aws_api_gateway_resource.simple.id
   http_method = aws_api_gateway_method.simple_resource.http_method
 
-  forward_port = "$${stageVariables.port}"
-  forward_path = "catalogue/{proxy}"
+  integration_http_method = "ANY"
+  type                    = "HTTP_PROXY"
+  connection_type         = "VPC_LINK"
+  connection_id           = aws_api_gateway_vpc_link.link.id
+  uri                     = "http://api.wellcomecollection.org:$${stageVariables.port}/catalogue/{proxy}"
 
   request_parameters = {
     "integration.request.path.proxy" = "method.request.path.proxy"
