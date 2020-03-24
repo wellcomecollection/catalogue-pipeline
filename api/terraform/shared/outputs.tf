@@ -1,13 +1,9 @@
-output "catalogue_api_nlb_arn" {
-  value = "${module.nlb.arn}"
-}
-
 output "cluster_name" {
   value = "${aws_ecs_cluster.catalogue_api.name}"
 }
 
 output "nlb_arn" {
-  value = "${module.nlb.arn}"
+  value = aws_lb.catalogue_api.arn
 }
 
 output "api_gateway_id" {
