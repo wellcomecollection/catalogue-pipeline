@@ -1,64 +1,67 @@
 # API
 
-resource "aws_api_gateway_rest_api" "api" {
+resource "aws_api_gateway_rest_api" "catalogue_api" {
   name = "Catalogue API"
 
-  endpoint_configuration = {
+  endpoint_configuration {
     types = ["REGIONAL"]
   }
 }
 
 # Resources
 
-module "root_resource_method" {
-  source = "git::https://github.com/wellcometrust/terraform.git//api_gateway/modules/method?ref=v14.2.0"
 
-  api_id      = "${aws_api_gateway_rest_api.api.id}"
-  resource_id = "${aws_api_gateway_rest_api.api.root_resource_id}"
+resource "aws_api_gateway_method" "root_resource" {
+  rest_api_id = aws_api_gateway_rest_api.catalogue_api.id
+  resource_id = aws_api_gateway_rest_api.catalogue_api.root_resource_id
+  http_method = "ANY"
+
+  authorization = "NONE"
 }
 
-module "root_resource_integration" {
-  source = "git::https://github.com/wellcometrust/terraform.git//api_gateway/modules/integration/proxy?ref=v14.2.0"
+resource "aws_api_gateway_integration" "root" {
+  rest_api_id = aws_api_gateway_rest_api.catalogue_api.id
+  resource_id = aws_api_gateway_rest_api.catalogue_api.root_resource_id
+  http_method = aws_api_gateway_method.root_resource.http_method
 
-  api_id        = "${aws_api_gateway_rest_api.api.id}"
-  resource_id   = "${aws_api_gateway_rest_api.api.root_resource_id}"
-  connection_id = "${aws_api_gateway_vpc_link.link.id}"
-
-  hostname    = "www.example.com"
-  http_method = "${module.root_resource_method.http_method}"
-
-  forward_port = "$${stageVariables.port}"
-  forward_path = "catalogue/"
+  integration_http_method = "ANY"
+  type                    = "HTTP_PROXY"
+  connection_type         = "VPC_LINK"
+  connection_id           = aws_api_gateway_vpc_link.link.id
+  uri                     = "http://www.example.com:$${stageVariables.port}/catalogue/"
 }
 
-module "simple_resource" {
-  source = "git::https://github.com/wellcometrust/terraform-modules.git//api_gateway/modules/resource?ref=v14.2.0"
+resource "aws_api_gateway_resource" "simple" {
+  rest_api_id = aws_api_gateway_rest_api.catalogue_api.id
+  parent_id   = aws_api_gateway_rest_api.catalogue_api.root_resource_id
+  path_part   = "{proxy+}"
+}
 
-  api_id = "${aws_api_gateway_rest_api.api.id}"
+resource "aws_api_gateway_method" "simple_resource" {
+  rest_api_id = aws_api_gateway_rest_api.catalogue_api.id
+  resource_id = aws_api_gateway_resource.simple.id
+  http_method = "ANY"
 
-  parent_id = "${aws_api_gateway_rest_api.api.root_resource_id}"
-  path_part = "{proxy+}"
+  authorization = "NONE"
 
   request_parameters = {
     "method.request.path.proxy" = true
   }
 }
 
-module "simple_integration" {
-  source = "git::https://github.com/wellcometrust/terraform-modules.git//api_gateway/modules/integration/proxy?ref=v14.2.0"
+resource "aws_api_gateway_integration" "simple" {
+  rest_api_id = aws_api_gateway_rest_api.catalogue_api.id
+  resource_id = aws_api_gateway_resource.simple.id
+  http_method = aws_api_gateway_method.simple_resource.http_method
 
-  api_id        = "${aws_api_gateway_rest_api.api.id}"
-  resource_id   = "${module.simple_resource.resource_id}"
-  connection_id = "${aws_api_gateway_vpc_link.link.id}"
-
-  hostname    = "api.wellcomecollection.org"
-  http_method = "${module.simple_resource.http_method}"
-
-  forward_port = "$${stageVariables.port}"
-  forward_path = "catalogue/{proxy}"
+  integration_http_method = "ANY"
+  type                    = "HTTP_PROXY"
+  connection_type         = "VPC_LINK"
+  connection_id           = aws_api_gateway_vpc_link.link.id
+  uri                     = "http://api.wellcomecollection.org:$${stageVariables.port}/catalogue/{proxy}"
 
   request_parameters = {
-    integration.request.path.proxy = "method.request.path.proxy"
+    "integration.request.path.proxy" = "method.request.path.proxy"
   }
 }
 
@@ -66,7 +69,7 @@ module "simple_integration" {
 
 resource "aws_api_gateway_vpc_link" "link" {
   name        = "${local.namespace}_vpc_link"
-  target_arns = ["${module.nlb.arn}"]
+  target_arns = [aws_lb.catalogue_api.arn]
 
   lifecycle {
     create_before_destroy = true

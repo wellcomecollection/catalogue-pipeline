@@ -40,10 +40,10 @@ data "aws_iam_policy_document" "allow_catalogue_access" {
   statement {
     principals {
       identifiers = [
-        "${data.aws_iam_role.catalogue_api_prod_execution_role.arn}",
-        "${data.aws_iam_role.catalogue_api_staging_execution_role.arn}",
-        "${data.aws_iam_role.snapshot_generator_execution_role.arn}",
-        "${data.aws_iam_role.update_api_docs_execution_role.arn}",
+        data.aws_iam_role.catalogue_api_prod_execution_role.arn,
+        data.aws_iam_role.catalogue_api_staging_execution_role.arn,
+        data.aws_iam_role.snapshot_generator_execution_role.arn,
+        data.aws_iam_role.update_api_docs_execution_role.arn,
       ]
 
       type = "AWS"
@@ -58,8 +58,9 @@ data "aws_iam_policy_document" "allow_catalogue_access" {
 }
 
 resource "aws_ecr_repository_policy" "catalogue_access_policy" {
-  provider   = "aws.platform"
-  count      = "${length(local.service_repositories)}"
+  provider = aws.platform
+
+  count      = length(local.service_repositories)
   repository = "uk.ac.wellcome/${local.service_repositories[count.index]}"
-  policy     = "${data.aws_iam_policy_document.allow_catalogue_access.json}"
+  policy     = data.aws_iam_policy_document.allow_catalogue_access.json
 }

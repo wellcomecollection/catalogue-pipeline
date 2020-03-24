@@ -24,7 +24,7 @@ module "ecr_repository_update_api_docs" {
 # account and remove these repositories, but that's not done yet.
 
 resource "aws_ecr_repository" "platform_api" {
-  provider = "aws.platform"
+  provider = aws.platform
 
   name = "uk.ac.wellcome/api"
 
@@ -34,7 +34,7 @@ resource "aws_ecr_repository" "platform_api" {
 }
 
 resource "aws_ecr_repository" "platform_nginx_api_gw" {
-  provider = "aws.platform"
+  provider = aws.platform
 
   name = "uk.ac.wellcome/nginx_api-gw"
 
@@ -44,7 +44,7 @@ resource "aws_ecr_repository" "platform_nginx_api_gw" {
 }
 
 resource "aws_ecr_repository" "platform_snapshot_generator" {
-  provider = "aws.platform"
+  provider = aws.platform
 
   name = "uk.ac.wellcome/snapshot_generator"
 
@@ -54,7 +54,7 @@ resource "aws_ecr_repository" "platform_snapshot_generator" {
 }
 
 resource "aws_ecr_repository" "platform_update_api_docs" {
-  provider = "aws.platform"
+  provider = aws.platform
 
   name = "uk.ac.wellcome/update_api_docs"
 
