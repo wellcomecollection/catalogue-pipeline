@@ -2,7 +2,7 @@ module "snapshot_generator" {
   source = "./snapshot_generator"
 
   input_queue_name = module.snapshot_generator_queue.name
-  input_queue_url  = module.snapshot_generator_queue.id
+  input_queue_url  = module.snapshot_generator_queue.url
   output_topic_arn = module.snapshot_complete_topic.arn
 
   cluster_arn  = aws_ecs_cluster.cluster.arn
