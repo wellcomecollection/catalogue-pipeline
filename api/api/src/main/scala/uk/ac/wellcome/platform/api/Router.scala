@@ -247,8 +247,8 @@ class Router(elasticClient: ElasticClient,
     work.data.collection
       .map {
         case Collection(_, path) =>
-          val paths = path :: expandedPaths
-          collectionService.retrieveTree(index, paths).map {
+          val allPaths = path :: expandedPaths
+          collectionService.retrieveTree(index, allPaths).map {
             case Left(err) =>
               // We just log this here rather than raising so as not to bring down
               // the work API when tree retrieval fails
@@ -259,7 +259,7 @@ class Router(elasticClient: ElasticClient,
                 logger.error(s"Ancestors to ${tree.path} not found")
                 None
               } else
-                Some((tree, paths))
+                Some((tree, allPaths))
           }
       }
       .getOrElse(Future.successful(None))
