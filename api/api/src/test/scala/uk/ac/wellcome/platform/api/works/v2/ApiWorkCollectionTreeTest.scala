@@ -78,7 +78,7 @@ class ApiWorkCollectionTreeTest extends ApiV2WorksTestBase {
         insertIntoElasticsearch(index, workA, workB, workC, workD, workE)
         assertJsonResponse(
           routes,
-          s"/$apiPrefix/works/${workB.canonicalId}?include=collection&expandPaths=a/d,a/b/c") {
+          s"/$apiPrefix/works/${workB.canonicalId}?include=collection&_expandPaths=a/d,a/b/c") {
           Status.OK -> s"""
             {
               ${singleWorkResult(apiPrefix)},

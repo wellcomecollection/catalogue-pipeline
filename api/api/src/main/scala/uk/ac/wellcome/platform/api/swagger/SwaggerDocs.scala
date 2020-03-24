@@ -81,7 +81,7 @@ trait SingleWorkSwagger {
         required = false,
       ),
       new Parameter(
-        name = "expandPaths",
+        name = "_expandPaths",
         in = ParameterIn.QUERY,
         description =
           "A comma-separated list of extra paths in the collection hierarchy to expand",

@@ -15,7 +15,7 @@ sealed trait QueryParams
 
 case class SingleWorkParams(
   include: Option[V2WorksIncludes],
-  expandPaths: Option[List[String]],
+  _expandPaths: Option[List[String]],
   _index: Option[String],
 ) extends QueryParams
 
@@ -30,7 +30,7 @@ object SingleWorkParams extends QueryParamsUtils {
     parameter(
       (
         "include".as[V2WorksIncludes].?,
-        "expandPaths".as[List[String]].?,
+        "_expandPaths".as[List[String]].?,
         "_index".as[String].?
       )
     ).tmap((SingleWorkParams.apply _).tupled(_))
