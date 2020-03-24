@@ -1,8 +1,8 @@
 variable "subnets" {
-  type = "list"
+  type = list(string)
 }
 
-variable "cluster_name" {}
+variable "cluster_arn" {}
 
 variable "namespace" {}
 variable "namespace_id" {}
@@ -16,15 +16,14 @@ variable "nginx_container_image" {}
 variable "nginx_container_port" {}
 
 variable "security_group_ids" {
-  type = "list"
+  type = list(string)
 }
-
-variable "service_egress_security_group_id" {}
-variable "interservice_security_group_id" {}
 
 variable "lb_arn" {}
 variable "listener_port" {}
 
-variable "task_desired_count" {}
+variable "desired_task_count" {
+  type = number
+}
 
 variable "logstash_host" {}

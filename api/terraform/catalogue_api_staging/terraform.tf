@@ -14,7 +14,7 @@ terraform {
 data "terraform_remote_state" "catalogue_api_shared" {
   backend = "s3"
 
-  config {
+  config = {
     role_arn = "arn:aws:iam::756629837203:role/catalogue-read_only"
 
     bucket = "wellcomecollection-catalogue-infra-delta"
@@ -26,7 +26,7 @@ data "terraform_remote_state" "catalogue_api_shared" {
 data "terraform_remote_state" "shared_infra" {
   backend = "s3"
 
-  config {
+  config = {
     role_arn = "arn:aws:iam::760097843905:role/platform-read_only"
 
     bucket = "wellcomecollection-platform-infra"

@@ -4,13 +4,13 @@ module "catalogue_api_staging" {
   environment        = "staging"
   domain_name        = "catalogue.api-stage.wellcomecollection.org"
   listener_port      = 8080
-  task_desired_count = 1
+  desired_task_count = 1
 
-  namespace    = "${local.namespace}"
-  vpc_id       = "${local.vpc_id}"
-  subnets      = ["${local.private_subnets}"]
-  cluster_name = "${local.cluster_name}"
-  api_id       = "${local.api_gateway_id}"
+  namespace   = "${local.namespace}"
+  vpc_id      = "${local.vpc_id}"
+  subnets     = local.private_subnets
+  cluster_arn = local.cluster_arn
+  api_id      = "${local.api_gateway_id}"
 
   lb_arn           = "${local.nlb_arn}"
   lb_ingress_sg_id = "${local.service_lb_ingress_security_group_id}"

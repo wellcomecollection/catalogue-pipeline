@@ -1,5 +1,5 @@
-output "cluster_name" {
-  value = aws_ecs_cluster.catalogue_api.name
+output "cluster_arn" {
+  value = aws_ecs_cluster.catalogue_api.arn
 }
 
 output "nlb_arn" {
