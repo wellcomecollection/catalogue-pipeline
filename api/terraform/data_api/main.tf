@@ -1,45 +1,26 @@
-data "aws_ssm_parameter" "snapshot_generator_image" {
-  provider = "aws.platform"
-
-  name = "/catalogue_api/images/latest/snapshot_generator"
-}
-
 module "snapshot_generator" {
-  source = "git::https://github.com/wellcometrust/terraform.git//ecs/prebuilt/scaling?ref=v19.7.2"
+  source = "./snapshot_generator"
 
-  service_name = "snapshot_generator"
-  cluster_id   = "${aws_ecs_cluster.cluster.id}"
-  cluster_name = "${aws_ecs_cluster.cluster.name}"
+  input_queue_name = module.snapshot_generator_queue.name
+  input_queue_url  = module.snapshot_generator_queue.id
+  output_topic_arn = module.snapshot_complete_topic.arn
 
-  subnets = "${local.private_subnets}"
+  cluster_arn  = aws_ecs_cluster.cluster.arn
+  cluster_name = aws_ecs_cluster.cluster.name
 
-  namespace_id    = "${local.service_discovery_namespace}"
-  container_image = "${data.aws_ssm_parameter.snapshot_generator_image.value}"
+  subnets = local.private_subnets
 
-  env_vars_length = 3
+  namespace_id = local.service_discovery_namespace
 
-  env_vars = {
-    queue_url        = "${module.snapshot_generator_queue.id}"
-    topic_arn        = "${module.snapshot_complete_topic.arn}"
-    metric_namespace = "snapshot_generator"
+  security_group_ids = [
+    aws_security_group.service_egress_security_group.id,
+  ]
+
+  aws_region = var.aws_region
+
+  providers = {
+    aws.platform = aws.platform
   }
-
-  secret_env_vars_length = 5
-
-  secret_env_vars = {
-    es_host     = "catalogue/api/es_host"
-    es_port     = "catalogue/api/es_port"
-    es_protocol = "catalogue/api/es_protocol"
-    es_username = "catalogue/api/es_username"
-    es_password = "catalogue/api/es_password"
-  }
-
-  service_egress_security_group_id = "${aws_security_group.service_egress_security_group.id}"
-
-  metric_namespace = "AWS/SQS"
-
-  high_metric_name = "foo"
-  low_metric_name  = "bar"
 }
 
 module "snapshot_scheduler" {
