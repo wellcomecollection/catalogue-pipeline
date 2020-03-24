@@ -1,10 +1,13 @@
 /*data "aws_route53_zone" "dotorg" {
-  provider = "aws.routemaster"
+  provider = aws.routemaster
 
   name = "wellcomecollection.org."
 }*/
 
 locals {
+  # This is the Zone ID for wellcomecollection.org in the routemaster account.
+  # We can't look this up programatically because the role we use doesn't have
+  # the right permissions in that account.
   route53_zone_id = "Z3THRVQ5VDYDMC"
 }
 
