@@ -10,7 +10,9 @@ variable "namespace_id" {}
 variable "vpc_id" {}
 
 variable "container_image" {}
-variable "container_port" {}
+variable "container_port" {
+  type = number
+}
 
 variable "nginx_container_image" {}
 variable "nginx_container_port" {}

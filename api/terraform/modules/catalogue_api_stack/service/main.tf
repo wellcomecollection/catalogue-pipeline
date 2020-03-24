@@ -68,7 +68,7 @@ resource "aws_lb_target_group" "tcp" {
 
 resource "aws_lb_listener" "tcp" {
   load_balancer_arn = var.lb_arn
-  port              = var.nginx_container_port
+  port              = var.listener_port
   protocol          = "TCP"
 
   default_action {
