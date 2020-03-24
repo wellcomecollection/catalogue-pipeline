@@ -1,6 +1,4 @@
 terraform {
-  required_version = ">= 0.9"
-
   backend "s3" {
     role_arn = "arn:aws:iam::756629837203:role/catalogue-developer"
 
