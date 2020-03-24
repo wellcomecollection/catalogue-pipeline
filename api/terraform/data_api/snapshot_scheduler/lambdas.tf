@@ -19,13 +19,7 @@ module "snapshot_scheduler_lambda" {
   log_retention_in_days = 30
 }
 
-resource "random_id" "cloudwatch_trigger_name" {
-  byte_length = 8
-  prefix      = "AllowExecutionFromCloudWatch_${module.snapshot_scheduler_lambda.function_name}_"
-}
-
 resource "aws_lambda_permission" "allow_cloudwatch_trigger" {
-  statement_id  = random_id.cloudwatch_trigger_name.id
   action        = "lambda:InvokeFunction"
   function_name = module.snapshot_scheduler_lambda.function_name
   principal     = "events.amazonaws.com"
