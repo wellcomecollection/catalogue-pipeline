@@ -36,10 +36,16 @@ resource "aws_iam_role_policy" "snapshot_alarms_read_from_bucket" {
   policy = data.aws_iam_policy_document.read_from_snapshots_bucket.json
 }
 
-module "trigger_post_to_slack_dlqs_not_empty" {
-  source = "git::https://github.com/wellcometrust/terraform.git//lambda/trigger_sns?ref=v1.0.0"
+resource "aws_sns_topic_subscription" "lambda_snapshot_slack_alarms" {
+  topic_arn = module.snapshot_alarm_topic.arn
+  protocol  = "lambda"
+  endpoint  = module.lambda_snapshot_slack_alarms.arn
+}
 
-  lambda_function_name = module.lambda_snapshot_slack_alarms.function_name
-  lambda_function_arn  = module.lambda_snapshot_slack_alarms.arn
-  sns_trigger_arn      = module.snapshot_alarm_topic.arn
+resource "aws_lambda_permission" "lambda_snapshot_slack_alarms" {
+  action        = "lambda:InvokeFunction"
+  function_name = module.lambda_snapshot_slack_alarms.arn
+  principal     = "sns.amazonaws.com"
+  source_arn    = module.snapshot_alarm_topic.arn
+  depends_on    = [aws_sns_topic_subscription.lambda_snapshot_slack_alarms]
 }
