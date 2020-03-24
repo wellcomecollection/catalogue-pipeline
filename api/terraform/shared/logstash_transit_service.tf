@@ -6,7 +6,7 @@ module "logstash_transit" {
     "${aws_security_group.interservice.id}",
   ]
 
-  cluster_id   = "${aws_ecs_cluster.cluster.id}"
+  cluster_id   = "${aws_ecs_cluster.catalogue_api.id}"
   namespace_id = "${aws_service_discovery_private_dns_namespace.namespace.id}"
   subnets      = "${local.private_subnets}"
   service_name = "${local.logstash_transit_service_name}"

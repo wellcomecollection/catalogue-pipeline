@@ -15,10 +15,10 @@ module "service" {
 
   container_port = "${local.api_container_port}"
 
-  container_image = "${var.api_container_image}"
+  container_image = "${local.api_container_image}"
   listener_port   = "${var.listener_port}"
 
-  nginx_container_image = "${var.nginx_container_image}"
+  nginx_container_image = "${local.nginx_container_image}"
   nginx_container_port  = "${local.nginx_container_port}"
 
   task_desired_count = "${var.task_desired_count}"

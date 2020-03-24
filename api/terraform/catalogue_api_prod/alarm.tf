@@ -1,5 +1,5 @@
-resource "aws_cloudwatch_metric_alarm" "5xx_alarm" {
-  alarm_name          = "catalogue-api-${local.prod_name}-5xx-alarm"
+resource "aws_cloudwatch_metric_alarm" "alarm_5xx" {
+  alarm_name          = "catalogue-api-prod-5xx-alarm"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
   metric_name         = "5XXError"
@@ -9,8 +9,8 @@ resource "aws_cloudwatch_metric_alarm" "5xx_alarm" {
   threshold           = "0"
 
   dimensions {
-    ApiName = "${aws_api_gateway_rest_api.api.name}"
-    Stage   = "${local.prod_name}"
+    ApiName = "${local.api_gateway_name}"
+    Stage   = "prod"
   }
 
   alarm_actions = ["${local.gateway_server_error_alarm_arn}"]
