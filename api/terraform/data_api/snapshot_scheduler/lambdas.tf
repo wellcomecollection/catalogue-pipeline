@@ -19,10 +19,20 @@ module "snapshot_scheduler_lambda" {
   log_retention_in_days = 30
 }
 
-module "trigger_snapshot_scheduler_lambda" {
-  source                  = "git::https://github.com/wellcometrust/terraform.git//lambda/trigger_cloudwatch?ref=v1.0.0"
-  lambda_function_name    = module.snapshot_scheduler_lambda.function_name
-  lambda_function_arn     = module.snapshot_scheduler_lambda.arn
-  cloudwatch_trigger_arn  = aws_cloudwatch_event_rule.snapshot_scheduler_rule.arn
-  cloudwatch_trigger_name = aws_cloudwatch_event_rule.snapshot_scheduler_rule.id
+resource "random_id" "cloudwatch_trigger_name" {
+  byte_length = 8
+  prefix      = "AllowExecutionFromCloudWatch_${module.snapshot_scheduler_lambda.function_name}_"
+}
+
+resource "aws_lambda_permission" "allow_cloudwatch_trigger" {
+  statement_id  = random_id.cloudwatch_trigger_name.id
+  action        = "lambda:InvokeFunction"
+  function_name = module.snapshot_scheduler_lambda.function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.snapshot_scheduler_rule.arn
+}
+
+resource "aws_cloudwatch_event_target" "event_trigger" {
+  rule  = aws_cloudwatch_event_rule.snapshot_scheduler_rule.id
+  arn   = module.snapshot_scheduler_lambda.arn
 }
