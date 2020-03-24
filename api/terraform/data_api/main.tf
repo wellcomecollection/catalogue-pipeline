@@ -5,8 +5,8 @@ module "snapshot_generator" {
   input_queue_url  = module.snapshot_generator_queue.url
   output_topic_arn = module.snapshot_complete_topic.arn
 
-  cluster_arn  = aws_ecs_cluster.cluster.arn
-  cluster_name = aws_ecs_cluster.cluster.name
+  cluster_arn  = aws_ecs_cluster.data_api.arn
+  cluster_name = aws_ecs_cluster.data_api.name
 
   subnets = local.private_subnets
 

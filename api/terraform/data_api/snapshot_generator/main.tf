@@ -1,5 +1,5 @@
 data "aws_ssm_parameter" "snapshot_generator_image" {
-  provider = "aws.platform"
+  provider = aws.platform
 
   name = "/catalogue_api/images/latest/snapshot_generator"
 }
@@ -11,8 +11,8 @@ module "task_definition" {
 
   container_image = data.aws_ssm_parameter.snapshot_generator_image.value
 
-  cpu    = 512
-  memory = 1024
+  cpu    = 1024
+  memory = 4096
 
   env_vars = {
     queue_url        = var.input_queue_url
