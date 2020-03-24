@@ -7,7 +7,7 @@ terraform {
     role_arn = "arn:aws:iam::756629837203:role/catalogue-developer"
 
     bucket         = "wellcomecollection-catalogue-infra-delta"
-    key            = "terraform/catalogue/api/catalogue_api_staging.tfstate"
+    key            = "terraform/catalogue/api/catalogue_api_prod.tfstate"
     dynamodb_table = "terraform-locktable"
     region         = "eu-west-1"
   }

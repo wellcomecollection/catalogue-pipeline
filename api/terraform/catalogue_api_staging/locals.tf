@@ -10,11 +10,6 @@ locals {
   # the right permissions in that account.
   route53_zone_id = "Z3THRVQ5VDYDMC"
 
-  service_repositories = [
-    "api",
-    "nginx_api-gw",
-  ]
-
   logstash_transit_service_name = "${data.terraform_remote_state.catalogue_api_shared.logstash_transit_service_name}"
   logstash_host                 = "${local.logstash_transit_service_name}.${local.namespace_hyphen}"
 
