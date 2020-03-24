@@ -31,13 +31,18 @@ module "root_resource_integration" {
   forward_path = "catalogue/"
 }
 
-module "simple_resource" {
-  source = "git::https://github.com/wellcometrust/terraform-modules.git//api_gateway/modules/resource?ref=v14.2.0"
+resource "aws_api_gateway_resource" "simple" {
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  parent_id   = aws_api_gateway_rest_api.api.root_resource_id
+  path_part   = "{proxy+}"
+}
 
-  api_id = "${aws_api_gateway_rest_api.api.id}"
+resource "aws_api_gateway_method" "simple" {
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  resource_id = aws_api_gateway_resource.simple.id
+  http_method = "ANY"
 
-  parent_id = "${aws_api_gateway_rest_api.api.root_resource_id}"
-  path_part = "{proxy+}"
+  authorization = "NONE"
 
   request_parameters = {
     "method.request.path.proxy" = true
@@ -48,11 +53,11 @@ module "simple_integration" {
   source = "git::https://github.com/wellcometrust/terraform-modules.git//api_gateway/modules/integration/proxy?ref=v14.2.0"
 
   api_id        = "${aws_api_gateway_rest_api.api.id}"
-  resource_id   = "${module.simple_resource.resource_id}"
+  resource_id   = aws_api_gateway_resource.simple.id
   connection_id = "${aws_api_gateway_vpc_link.link.id}"
 
   hostname    = "api.wellcomecollection.org"
-  http_method = "${module.simple_resource.http_method}"
+  http_method = aws_api_gateway_method.simple_resource.http_method
 
   forward_port = "$${stageVariables.port}"
   forward_path = "catalogue/{proxy}"
