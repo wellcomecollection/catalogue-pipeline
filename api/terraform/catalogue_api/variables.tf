@@ -18,10 +18,6 @@ variable "listener_port" {}
 
 variable "api_id" {}
 
-variable "gateway_depends" {
-  type = "list"
-}
-
 variable "lb_arn" {}
 
 variable "lb_ingress_sg_id" {}

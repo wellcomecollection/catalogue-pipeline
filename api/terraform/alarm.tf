@@ -9,7 +9,7 @@ resource "aws_cloudwatch_metric_alarm" "5xx_alarm" {
   threshold           = "0"
 
   dimensions {
-    ApiName = "${aws_api_gateway_rest_api.api.name}"
+    ApiName = "${local.api_gateway_name}"
     Stage   = "${local.prod_name}"
   }
 
