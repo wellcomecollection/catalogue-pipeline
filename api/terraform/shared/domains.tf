@@ -24,5 +24,5 @@ resource "aws_route53_record" "cert_validation" {
 
 resource "aws_acm_certificate_validation" "catalogue_api_validation" {
   certificate_arn         = "${aws_acm_certificate.catalogue_api.arn}"
-  validation_record_fqdns = ["${aws_route53_record.cert_validation.*.fqdn}"]
+  validation_record_fqdns = aws_route53_record.cert_validation.*.fqdn
 }
