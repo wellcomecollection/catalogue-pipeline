@@ -11,7 +11,7 @@ module "logstash_transit" {
   namespace_id = aws_service_discovery_private_dns_namespace.namespace.id
 
   security_group_ids = [
-    module.egress_security_group.security_group_id,
+    aws_security_group.egress.id,
     aws_security_group.interservice.id,
   ]
 

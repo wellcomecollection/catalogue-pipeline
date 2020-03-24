@@ -1,10 +1,18 @@
-module "egress_security_group" {
-  source = "../modules/egress_security_group"
+resource "aws_security_group" "egress" {
+  name        = "${local.namespace}_catalogue_api_services_egress"
+  description = "Allows all egress traffic from the group"
+  vpc_id      = local.vpc_id
 
-  name = "${local.namespace}_catalogue_api_services"
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
-  vpc_id     = local.vpc_id
-  subnet_ids = local.private_subnets
+  tags = {
+    Name = "${local.namespace}_catalogue_api_services"
+  }
 }
 
 resource "aws_security_group" "interservice" {
