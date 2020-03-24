@@ -25,6 +25,5 @@ variable "interservice_sg_id" {}
 
 variable "domain_name" {}
 variable "certificate_arn" {}
-variable "route53_zone_id" {}
 
 variable "api_gateway_id" {}

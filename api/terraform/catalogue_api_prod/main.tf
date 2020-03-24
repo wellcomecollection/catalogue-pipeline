@@ -20,7 +20,6 @@ module "catalogue_api_prod" {
   interservice_sg_id = "${local.interservice_security_group_id}"
 
   certificate_arn = "${local.certificate_arn}"
-  route53_zone_id = "${local.route53_zone_id}"
 
   api_gateway_id = "${local.api_gateway_id}"
 

@@ -1,3 +1,9 @@
+data "aws_route53_zone" "dotorg" {
+  provider = "aws.routemaster"
+
+  name = "wellcomecollection.org."
+}
+
 resource "aws_acm_certificate" "data_page" {
   provider          = "aws.us_east_1"
   domain_name       = "${var.data_page_url}"
@@ -12,7 +18,7 @@ resource "aws_route53_record" "cert_validation" {
   provider = "aws.routemaster"
   name     = "${aws_acm_certificate.data_page.domain_validation_options.0.resource_record_name}"
   type     = "${aws_acm_certificate.data_page.domain_validation_options.0.resource_record_type}"
-  zone_id  = "${local.route53_zone_id}"
+  zone_id  = "${data.aws_route53_zone.dotorg.id}"
   records  = ["${aws_acm_certificate.data_page.domain_validation_options.0.resource_record_value}"]
   ttl      = 60
 }
@@ -25,7 +31,7 @@ resource "aws_acm_certificate_validation" "catalogue_api_validation" {
 
 resource "aws_route53_record" "data_page" {
   provider = "aws.routemaster"
-  zone_id  = "${local.route53_zone_id}"
+  zone_id  = "${data.aws_route53_zone.dotorg.id}"
   name     = "${var.data_page_url}"
   type     = "A"
 
