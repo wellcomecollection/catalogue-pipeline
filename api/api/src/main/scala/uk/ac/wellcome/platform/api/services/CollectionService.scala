@@ -36,13 +36,14 @@ import uk.ac.wellcome.platform.api.Tracing
   * incremental exploration of the data (akin to exploring a filesystem), due to
   * the fact the whole tree may be rather large.
   */
-class CollectionService(elasticClient: ElasticClient, index: Index)(
+class CollectionService(elasticClient: ElasticClient)(
   implicit ec: ExecutionContext)
     extends Tracing {
 
   def retrieveTree(
+    index: Index,
     expandedPaths: List[String]): Future[Result[CollectionTree]] =
-    makeEsRequest(expandedPaths)
+    makeEsRequest(index, expandedPaths)
       .map { result =>
         result.left
           .map(_.asException)
@@ -53,6 +54,7 @@ class CollectionService(elasticClient: ElasticClient, index: Index)(
       }
 
   private def makeEsRequest(
+    index: Index,
     paths: List[String]): Future[Either[ElasticError, SearchResponse]] =
     withActiveTrace(elasticClient.execute {
       CollectionRequestBuilder(index, paths).request
@@ -61,6 +63,8 @@ class CollectionService(elasticClient: ElasticClient, index: Index)(
       case resp                 => Right(resp.result)
     }
 
+  // Note that the search request should only return work with type
+  // IdentifiedWork due to the fact that we are filtering on data.collection
   private def toWork(hit: SearchHit): Result[IdentifiedWork] =
     fromJson[IdentifiedWork](hit.sourceAsString).toEither
 }

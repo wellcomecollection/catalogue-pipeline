@@ -12,13 +12,22 @@ case class CollectionRequestBuilder(index: Index,
                                     expandedPaths: List[String],
                                     maxNodes: Int = 1000) {
 
-  val excludeFields = List(
-    "data.items",
-    "data.notes",
-    "data.production",
-    "data.subjects",
-    "data.genres",
-    "data.images",
+  // To reduce response size and improve Elasticsearch performance we only
+  // return core fields for works in the tree.
+  val fieldWhitelist = List(
+    "canonicalId",
+    "version",
+    "ontologyType",
+    "sourceIdentifier.identifierType.id",
+    "sourceIdentifier.identifierType.label",
+    "sourceIdentifier.identifierType.ontologyType",
+    "sourceIdentifier.value",
+    "sourceIdentifier.ontologyType",
+    "data.title",
+    "data.alternativeTitles",
+    "data.collection.label",
+    "data.collection.path",
+    "data.ontologyType",
   )
 
   lazy val request: SearchRequest =
@@ -26,7 +35,7 @@ case class CollectionRequestBuilder(index: Index,
       .query(query)
       .from(0)
       .limit(maxNodes)
-      .sourceExclude(excludeFields)
+      .sourceInclude(fieldWhitelist)
 
   lazy val query: Query =
     should(expandedPaths.map(expandPathQuery))

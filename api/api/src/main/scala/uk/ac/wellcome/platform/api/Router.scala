@@ -14,7 +14,13 @@ import akka.http.scaladsl.server.{
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import com.sksamuel.elastic4s.{ElasticClient, ElasticError, Index}
 import io.circe.Printer
-import uk.ac.wellcome.platform.api.services.{ElasticsearchService, WorksService}
+import grizzled.slf4j.Logger
+
+import uk.ac.wellcome.platform.api.services.{
+  CollectionService,
+  ElasticsearchService,
+  WorksService
+}
 import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.platform.api.elasticsearch.ElasticsearchErrorHandler
 import uk.ac.wellcome.platform.api.swagger.SwaggerDocs
@@ -108,20 +114,32 @@ class Router(elasticClient: ElasticClient,
       val includes = params.include.getOrElse(V2WorksIncludes())
       worksService
         .findWorkById(id)(index)
-        .map {
-          case Right(Some(work: IdentifiedWork))           => workFound(work, includes)
-          case Right(Some(work: IdentifiedRedirectedWork)) => workRedirect(work)
-          case Right(Some(_))                              => workGone
-          case Right(None)                                 => workNotFound(id)
-          case Left(err)                                   => elasticError(err)
+        .flatMap {
+          case Right(Some(work: IdentifiedWork)) =>
+            val expandedPaths = params._expandPaths.getOrElse(Nil)
+            retrieveTree(index, work, expandedPaths).map {
+              workFound(work, _, includes)
+            }
+          case Right(Some(work: IdentifiedRedirectedWork)) =>
+            Future.successful(workRedirect(work))
+          case Right(Some(_)) => Future.successful(workGone)
+          case Right(None)    => Future.successful(workNotFound(id))
+          case Left(err)      => Future.successful(elasticError(err))
         }
     })
 
-  def workFound(work: IdentifiedWork, includes: V2WorksIncludes): Route =
+  def workFound(work: IdentifiedWork,
+                tree: Option[(CollectionTree, List[String])],
+                includes: V2WorksIncludes): Route =
     complete(
       ResultResponse(
         context = contextUri,
-        result = DisplayWorkV2(work, includes)
+        result = DisplayWorkV2(work, includes).copy(
+          collectionTree = tree.map {
+            case (tree, expandedPaths) =>
+              DisplayCollectionTree(tree, expandedPaths)
+          }
+        )
       )
     )
 
@@ -222,6 +240,30 @@ class Router(elasticClient: ElasticClient,
       }
     }
 
+  def retrieveTree(index: Index,
+                   work: IdentifiedWork,
+                   expandedPaths: List[String])
+    : Future[Option[(CollectionTree, List[String])]] =
+    work.data.collection
+      .map {
+        case Collection(_, path) =>
+          val allPaths = path :: expandedPaths
+          collectionService.retrieveTree(index, allPaths).map {
+            case Left(err) =>
+              // We just log this here rather than raising so as not to bring down
+              // the work API when tree retrieval fails
+              logger.error("Error retrieving collection tree", err)
+              None
+            case Right(tree) =>
+              if (!tree.isRoot) {
+                logger.error(s"Ancestors to ${tree.path} not found")
+                None
+              } else
+                Some((tree, allPaths))
+          }
+      }
+      .getOrElse(Future.successful(None))
+
   // Directive for getting public URI of the current request, using the host
   // and scheme as per the config.
   // (without this URIs end up looking like https://localhost:8888/..., rather
@@ -245,6 +287,11 @@ class Router(elasticClient: ElasticClient,
 
   lazy val worksService =
     new WorksService(new ElasticsearchService(elasticClient))
+
+  lazy val collectionService =
+    new CollectionService(elasticClient)
+
+  lazy val logger = Logger(this.getClass.getName)
 
   implicit val jsonPrinter: Printer = DisplayJsonUtil.printer
 }

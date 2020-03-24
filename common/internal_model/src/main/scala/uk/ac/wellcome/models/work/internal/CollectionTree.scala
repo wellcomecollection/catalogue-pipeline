@@ -21,6 +21,9 @@ case class CollectionTree(
 
   def pathList: List[String] =
     path :: children.flatMap(_.pathList)
+
+  def isRoot: Boolean =
+    !path.contains("/")
 }
 
 object CollectionTree {
