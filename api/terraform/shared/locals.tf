@@ -10,11 +10,6 @@ locals {
   # the right permissions in that account.
   route53_zone_id = "Z3THRVQ5VDYDMC"
 
-  service_repositories = [
-    "api",
-    "nginx_api-gw",
-  ]
-
   prod_domain_name    = "catalogue.api.wellcomecollection.org"
   staging_domain_name = "catalogue.api-stage.wellcomecollection.org"
 

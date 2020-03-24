@@ -10,6 +10,16 @@
 # NOTE: These roles are hard-coded rather than exported from the task modules
 # because our terraform modules don't expose the execution role.  Adding extra
 # permissions to it like this is an antipattern that those modules don't support.
+
+locals {
+  service_repositories = [
+    "api",
+    "nginx_api-gw",
+    "snapshot_generator",
+    "update_api_docs",
+  ]
+}
+
 data "aws_iam_role" "catalogue_api_prod_execution_role" {
   name = "catalogue_api-prod_execution_role"
 }
@@ -18,12 +28,22 @@ data "aws_iam_role" "catalogue_api_staging_execution_role" {
   name = "catalogue_api-staging_execution_role"
 }
 
+data "aws_iam_role" "snapshot_generator_execution_role" {
+  name = "snapshot_generator_execution_role"
+}
+
+data "aws_iam_role" "update_api_docs_execution_role" {
+  name = "update_api_docs_execution_role"
+}
+
 data "aws_iam_policy_document" "allow_catalogue_access" {
   statement {
     principals {
       identifiers = [
         "${data.aws_iam_role.catalogue_api_prod_execution_role.arn}",
         "${data.aws_iam_role.catalogue_api_staging_execution_role.arn}",
+        "${data.aws_iam_role.snapshot_generator_execution_role.arn}",
+        "${data.aws_iam_role.update_api_docs_execution_role.arn}",
       ]
 
       type = "AWS"
