@@ -7,11 +7,11 @@ output "nlb_arn" {
 }
 
 output "api_gateway_id" {
-  value = aws_api_gateway_rest_api.api.id
+  value = aws_api_gateway_rest_api.catalogue_api.id
 }
 
 output "api_gateway_name" {
-  value = aws_api_gateway_rest_api.api.name
+  value = aws_api_gateway_rest_api.catalogue_api.name
 }
 
 output "certificate_arn" {
