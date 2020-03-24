@@ -10,11 +10,13 @@ resource "aws_api_gateway_rest_api" "api" {
 
 # Resources
 
-module "root_resource_method" {
-  source = "git::https://github.com/wellcometrust/terraform.git//api_gateway/modules/method?ref=v14.2.0"
 
-  api_id      = "${aws_api_gateway_rest_api.api.id}"
-  resource_id = "${aws_api_gateway_rest_api.api.root_resource_id}"
+resource "aws_api_gateway_method" "root_resource" {
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  resource_id = aws_api_gateway_rest_api.api.root_resource_id
+  http_method = "ANY"
+
+  authorization = "NONE"
 }
 
 module "root_resource_integration" {
@@ -25,7 +27,7 @@ module "root_resource_integration" {
   connection_id = "${aws_api_gateway_vpc_link.link.id}"
 
   hostname    = "www.example.com"
-  http_method = "${module.root_resource_method.http_method}"
+  http_method = aws_api_gateway_method.root_resource.http_method
 
   forward_port = "$${stageVariables.port}"
   forward_path = "catalogue/"
@@ -37,7 +39,7 @@ resource "aws_api_gateway_resource" "simple" {
   path_part   = "{proxy+}"
 }
 
-resource "aws_api_gateway_method" "simple" {
+resource "aws_api_gateway_method" "simple_resource" {
   rest_api_id = aws_api_gateway_rest_api.api.id
   resource_id = aws_api_gateway_resource.simple.id
   http_method = "ANY"
