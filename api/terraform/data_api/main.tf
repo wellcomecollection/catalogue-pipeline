@@ -13,7 +13,7 @@ module "snapshot_generator" {
   namespace_id = local.service_discovery_namespace
 
   security_group_ids = [
-    aws_security_group.service_egress_security_group.id,
+    aws_security_group.egress_security_group.id,
   ]
 
   aws_region = var.aws_region
