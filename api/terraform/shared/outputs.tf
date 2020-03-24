@@ -3,7 +3,7 @@ output "catalogue_api_nlb_arn" {
 }
 
 output "cluster_name" {
-  value = "${aws_ecs_cluster.cluster.name}"
+  value = "${aws_ecs_cluster.catalogue_api.name}"
 }
 
 output "nlb_arn" {
