@@ -53,24 +53,3 @@ module "catalogue_api_staging" {
 
   interservice_sg_id = "${aws_security_group.interservice.id}"
 }
-
-module "data_api" {
-  source = "./data_api"
-
-  aws_region   = "${var.aws_region}"
-  infra_bucket = "${local.infra_bucket}"
-
-  snapshot_generator_release_uri = "${module.latest_images.services["snapshot_generator"]}"
-
-  critical_slack_webhook = ""
-
-  vpc_id          = "${local.vpc_id}"
-  private_subnets = ["${local.private_subnets}"]
-  route_zone_id   = "${local.routemaster_router53_zone_id}"
-
-  providers = {
-    aws.us_e1            = "aws.us_e1"
-    aws.routemaster      = "aws.routemaster"
-    aws.platform_account = "aws.platform_account"
-  }
-}
