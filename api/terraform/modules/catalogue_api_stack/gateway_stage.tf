@@ -14,11 +14,7 @@ resource "aws_api_gateway_deployment" "stage" {
 
   variables = local.variables
 
-  # This forces a new deployment (which is necessary) when Gateway config changes
-  # TODO: This is temporarily frozen while the Terraform is rearranged/updated to
-  # Terraform 0.12.  I want to test updating this in the staging API before
-  # changing anything in production.
-  stage_description = "d23817abff23f3a3e383265f51aa4c25"  # "${filemd5("gateway.tf")}"
+  stage_description = filemd5("${path.module}/../../shared/gateway.tf")
 
   lifecycle {
     create_before_destroy = true
