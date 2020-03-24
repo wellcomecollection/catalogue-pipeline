@@ -1,5 +1,5 @@
 resource "aws_lb" "catalogue_api" {
-  name               = local.namespace_hyphen
+  name               = "${local.namespace_hyphen}-nlb"
   internal           = true
   load_balancer_type = "network"
   subnets            = local.private_subnets
