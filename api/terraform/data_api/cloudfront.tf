@@ -1,6 +1,6 @@
 resource "aws_cloudfront_distribution" "data_api" {
   origin {
-    domain_name = "${aws_s3_bucket.public_data.bucket_domain_name}"
+    domain_name = aws_s3_bucket.public_data.bucket_domain_name
     origin_id   = "data_api"
 
     custom_origin_config {
@@ -16,7 +16,7 @@ resource "aws_cloudfront_distribution" "data_api" {
 
   default_root_object = "index.html"
 
-  aliases = ["${var.data_page_url}"]
+  aliases = [var.data_page_url]
 
   default_cache_behavior {
     allowed_methods  = ["GET", "HEAD", "OPTIONS"]
@@ -43,7 +43,7 @@ resource "aws_cloudfront_distribution" "data_api" {
   price_class = "PriceClass_100"
 
   viewer_certificate {
-    acm_certificate_arn      = "${aws_acm_certificate_validation.catalogue_api_validation.certificate_arn}"
+    acm_certificate_arn      = aws_acm_certificate_validation.catalogue_api_validation.certificate_arn
     minimum_protocol_version = "TLSv1"
     ssl_support_method       = "sni-only"
   }

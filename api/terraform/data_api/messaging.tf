@@ -1,31 +1,36 @@
 # Topics
 
 module "snapshot_generator_jobs_topic" {
-  source = "git::https://github.com/wellcometrust/terraform-modules.git//sns?ref=v1.0.0"
+  source = "github.com/wellcomecollection/terraform-aws-sns-topic.git?ref=v1.0.0"
   name   = "snapshot_generator_jobs"
 }
 
 module "snapshot_complete_topic" {
-  source = "git::https://github.com/wellcometrust/terraform-modules.git//sns?ref=v1.0.0"
+  source = "github.com/wellcomecollection/terraform-aws-sns-topic.git?ref=v1.0.0"
   name   = "snapshot_generation_complete"
 }
 
 module "snapshot_alarm_topic" {
-  source = "git::https://github.com/wellcometrust/terraform-modules.git//sns?ref=v1.0.0"
+  source = "github.com/wellcomecollection/terraform-aws-sns-topic.git?ref=v1.0.0"
   name   = "snapshot_alarm"
 }
 
 # Queues
 
 module "snapshot_generator_queue" {
-  source      = "git::https://github.com/wellcometrust/terraform-modules.git//sqs?ref=v8.0.2"
-  queue_name  = "snapshot_generator_queue"
-  aws_region  = "${var.aws_region}"
-  account_id  = "${data.aws_caller_identity.current.account_id}"
-  topic_names = ["${module.snapshot_scheduler.topic_name}"]
+  source = "github.com/wellcomecollection/terraform-aws-sqs.git//queue?ref=v1.1.2"
 
-  alarm_topic_arn            = "${local.dlq_alarm_arn}"
-  visibility_timeout_seconds = 1800
+  queue_name = "snapshot_generator_queue"
+
+  topic_arns = [
+    module.snapshot_scheduler.topic_arn
+  ]
+
+  visibility_timeout_seconds = 30 * 60  # 30 minutes
+
+  alarm_topic_arn = local.dlq_alarm_arn
+
+  aws_region = var.aws_region
 }
 
 # We'll get alarms from the snapshot generator DLQ
@@ -37,13 +42,13 @@ resource "aws_cloudwatch_metric_alarm" "snapshot_scheduler_queue_not_empty" {
   evaluation_periods  = 1
   metric_name         = "ApproximateNumberOfMessagesVisible"
   namespace           = "AWS/SQS"
-  period              = 3600
+  period              = 60 * 60  # 60 minutes
   threshold           = 2
   statistic           = "Average"
 
-  dimensions {
-    QueueName = "${module.snapshot_generator_queue.name}"
+  dimensions = {
+    QueueName = module.snapshot_generator_queue.name
   }
 
-  alarm_actions = ["${module.snapshot_alarm_topic.arn}"]
+  alarm_actions = [module.snapshot_alarm_topic.arn]
 }

@@ -1,3 +1,3 @@
-resource "aws_ecs_cluster" "cluster" {
-  name = "${replace(var.namespace, "_", "-")}"
+resource "aws_ecs_cluster" "data_api" {
+  name = replace(var.namespace, "_", "-")
 }

@@ -1,7 +1,7 @@
-resource "aws_security_group" "service_egress_security_group" {
-  name        = "${var.namespace}-service_egress_security_group"
-  description = "Allow traffic between services"
-  vpc_id      = "${local.vpc_id}"
+resource "aws_security_group" "egress_security_group" {
+  name        = "${var.namespace}-egress_security_group"
+  description = "Allow outbound traffic to the Internet"
+  vpc_id      = local.vpc_id
 
   egress {
     from_port   = 0
@@ -10,7 +10,7 @@ resource "aws_security_group" "service_egress_security_group" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags {
+  tags = {
     Name = "${var.namespace}-egress"
   }
 }
