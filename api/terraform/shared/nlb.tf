@@ -21,7 +21,7 @@ resource "aws_security_group" "service_lb_ingress_security_group" {
     cidr_blocks = ["${data.aws_vpc.vpc.cidr_block}"]
   }
 
-  tags {
+  tags = {
     Name = "${local.namespace}-lb-ingress"
   }
 }

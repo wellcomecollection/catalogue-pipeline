@@ -22,7 +22,7 @@ resource "aws_security_group" "service_egress" {
     ]
   }
 
-  tags {
+  tags = {
     Name = "${local.namespace_hyphen}-egress"
   }
 }
@@ -39,7 +39,7 @@ resource "aws_security_group" "interservice" {
     self      = true
   }
 
-  tags {
+  tags = {
     Name = "${local.namespace_hyphen}-interservice"
   }
 }

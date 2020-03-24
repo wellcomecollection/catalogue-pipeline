@@ -3,7 +3,7 @@
 resource "aws_api_gateway_rest_api" "api" {
   name = "Catalogue API"
 
-  endpoint_configuration = {
+  endpoint_configuration {
     types = ["REGIONAL"]
   }
 }
@@ -58,7 +58,7 @@ module "simple_integration" {
   forward_path = "catalogue/{proxy}"
 
   request_parameters = {
-    integration.request.path.proxy = "method.request.path.proxy"
+    "integration.request.path.proxy" = "method.request.path.proxy"
   }
 }
 

@@ -2,8 +2,8 @@ locals {
   namespace        = "catalogue_api"
   namespace_hyphen = "${replace(local.namespace, "_", "-")}"
 
-  vpc_id          = "${data.terraform_remote_state.shared_infra.catalogue_vpc_id}"
-  private_subnets = "${data.terraform_remote_state.shared_infra.catalogue_vpc_private_subnets}"
+  vpc_id          = data.terraform_remote_state.shared_infra.outputs.catalogue_vpc_id
+  private_subnets = data.terraform_remote_state.shared_infra.outputs.catalogue_vpc_private_subnets
 
   # This is the Zone ID for wellcomecollection.org in the routemaster account.
   # We can't look this up programatically because the role we use doesn't have
