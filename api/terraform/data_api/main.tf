@@ -1,3 +1,9 @@
+data "aws_ssm_parameter" "snapshot_generator_image" {
+  provider = "aws.platform"
+
+  name = "/catalogue_api/images/latest/snapshot_generator"
+}
+
 module "snapshot_generator" {
   source = "git::https://github.com/wellcometrust/terraform.git//ecs/prebuilt/scaling?ref=v19.7.2"
 
@@ -5,10 +11,10 @@ module "snapshot_generator" {
   cluster_id   = "${aws_ecs_cluster.cluster.id}"
   cluster_name = "${aws_ecs_cluster.cluster.name}"
 
-  subnets = "${var.private_subnets}"
+  subnets = "${local.private_subnets}"
 
   namespace_id    = "${local.service_discovery_namespace}"
-  container_image = "${var.snapshot_generator_release_uri}"
+  container_image = "${data.aws_ssm_parameter.snapshot_generator_image.value}"
 
   env_vars_length = 3
 
@@ -40,7 +46,7 @@ module "snapshot_scheduler" {
   source = "./snapshot_scheduler"
 
   lambda_error_alarm_arn = "${local.lambda_error_alarm_arn}"
-  infra_bucket           = "${var.infra_bucket}"
+  infra_bucket           = "${local.infra_bucket}"
 
   public_bucket_name = "${aws_s3_bucket.public_data.id}"
 

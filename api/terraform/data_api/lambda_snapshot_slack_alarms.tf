@@ -1,7 +1,7 @@
 module "lambda_snapshot_slack_alarms" {
   source = "git::https://github.com/wellcometrust/terraform.git//lambda?ref=v10.2.2"
 
-  s3_bucket = "${var.infra_bucket}"
+  s3_bucket = "${local.infra_bucket}"
   s3_key    = "lambdas/data_api/snapshot_slack_alarms.zip"
 
   name        = "snapshot_slack_alarms"

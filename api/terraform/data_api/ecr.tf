@@ -26,7 +26,7 @@ data "aws_iam_policy_document" "allow_snapshot_generator_access" {
 }
 
 resource "aws_ecr_repository_policy" "snapshot_generator_access_policy" {
-  provider   = "aws.platform_account"
+  provider   = "aws.platform"
   repository = "uk.ac.wellcome/snapshot_generator"
   policy     = "${data.aws_iam_policy_document.allow_snapshot_generator_access.json}"
 }
