@@ -26,7 +26,7 @@ module "snapshot_generator_queue" {
     module.snapshot_scheduler.topic_arn
   ]
 
-  visibility_timeout_seconds = 30 * 60  # 30 minutes
+  visibility_timeout_seconds = 30 * 60 # 30 minutes
 
   alarm_topic_arn = local.dlq_alarm_arn
 
@@ -42,7 +42,7 @@ resource "aws_cloudwatch_metric_alarm" "snapshot_scheduler_queue_not_empty" {
   evaluation_periods  = 1
   metric_name         = "ApproximateNumberOfMessagesVisible"
   namespace           = "AWS/SQS"
-  period              = 60 * 60  # 60 minutes
+  period              = 60 * 60 # 60 minutes
   threshold           = 2
   statistic           = "Average"
 

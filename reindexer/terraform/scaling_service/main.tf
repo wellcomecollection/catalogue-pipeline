@@ -1,7 +1,7 @@
 module "appautoscaling" {
   source = "github.com/wellcomecollection/terraform-aws-ecs-service.git//autoscaling?ref=v1.5.0"
 
-  name   = module.service.name
+  name = module.service.name
 
   cluster_name = var.cluster_name
   service_name = module.service.name

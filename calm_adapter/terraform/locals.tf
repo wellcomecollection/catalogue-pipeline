@@ -11,11 +11,11 @@ locals {
   private_subnets = data.terraform_remote_state.shared_infra.outputs.catalogue_vpc_delta_private_subnets
 
   env_vars = {
-    calm_api_url = "https://wt-calm.wellcome.ac.uk/CalmAPI/ContentService.asmx"
-    calm_sqs_url = module.calm_windows_queue.url
-    calm_sns_topic = aws_sns_topic.calm_adapter_topic.arn
+    calm_api_url          = "https://wt-calm.wellcome.ac.uk/CalmAPI/ContentService.asmx"
+    calm_sqs_url          = module.calm_windows_queue.url
+    calm_sns_topic        = aws_sns_topic.calm_adapter_topic.arn
     vhs_dynamo_table_name = module.vhs.table_name
-    vhs_bucket_name = module.vhs.bucket_name
+    vhs_bucket_name       = module.vhs.bucket_name
   }
   secret_env_vars = {
     calm_api_username = "calm_adapter/calm_api/username"
