@@ -21,15 +21,7 @@ import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.models.work.internal.{
-  AccessCondition,
-  AccessStatus,
-  Collection,
-  IdentifiedBaseWork,
-  Person,
-  Subject,
-  Unidentifiable
-}
+import uk.ac.wellcome.models.work.internal._
 
 class IndexConfigTest
     extends FunSpec
@@ -128,6 +120,7 @@ class IndexConfigTest
       Some(
         Collection(
           path = "PATH/FOR/THE/COLLECTION",
+          level = CollectionLevel.Item,
           label = Some("PATH/FOR/THE/COLLECTION")))
 
     withLocalWorksIndex { index =>

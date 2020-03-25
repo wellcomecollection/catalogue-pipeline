@@ -16,6 +16,10 @@ case class DisplayCollectionTree(
   ) path: String,
   @Schema(
     description =
+      "The level of the node. Either Collection, Section, Series, SubSeries or Item"
+  ) level: String,
+  @Schema(
+    description =
       "The work. This only contains a limited set of fields, regardless of the includes."
   ) work: DisplayWorkV2,
   @Schema(
@@ -33,6 +37,13 @@ object DisplayCollectionTree {
             expandedPaths: List[String]): DisplayCollectionTree =
     DisplayCollectionTree(
       path = tree.path,
+      level = tree.level match {
+        case CollectionLevel.Collection => "Collection"
+        case CollectionLevel.Section    => "Section"
+        case CollectionLevel.Series     => "Series"
+        case CollectionLevel.SubSeries  => "SubSeries"
+        case CollectionLevel.Item       => "Item"
+      },
       work = DisplayWorkV2(tree.work),
       label = tree.label,
       children =

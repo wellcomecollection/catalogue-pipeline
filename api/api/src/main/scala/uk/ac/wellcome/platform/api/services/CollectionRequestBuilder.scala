@@ -25,8 +25,9 @@ case class CollectionRequestBuilder(index: Index,
     "sourceIdentifier.ontologyType",
     "data.title",
     "data.alternativeTitles",
-    "data.collection.label",
     "data.collection.path",
+    "data.collection.level.type",
+    "data.collection.label",
     "data.ontologyType",
   )
 

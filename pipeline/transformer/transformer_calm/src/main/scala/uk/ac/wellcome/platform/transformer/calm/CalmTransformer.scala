@@ -38,14 +38,14 @@ object CalmTransformer extends Transformer[CalmRecord] with CalmOps {
     for {
       accessStatus <- accessStatus(record)
       title <- title(record)
-      workType <- workType(record)
-      collection <- collection(record)
+      collectionLevel <- collectionLevel(record)
+      collection <- collection(record, collectionLevel)
       language <- language(record)
     } yield
       WorkData(
         title = Some(title),
         otherIdentifiers = otherIdentifiers(record),
-        workType = Some(workType),
+        workType = Some(workType(collectionLevel)),
         collection = Some(collection),
         subjects = subjects(record),
         language = language,
@@ -90,26 +90,38 @@ object CalmTransformer extends Transformer[CalmRecord] with CalmOps {
       .map(Right(_))
       .getOrElse(Left(new Exception("Title field not found")))
 
-  def workType(record: CalmRecord): Result[WorkType] =
-    record
-      .get("Level")
-      .map {
-        case "Collection" => Right(WorkType.ArchiveCollection)
-        case "Section"    => Right(WorkType.ArchiveSection)
-        case "Series"     => Right(WorkType.ArchiveSeries)
-        case "SubSeries"  => Right(WorkType.ArchiveSubSeries)
-        case "Item"       => Right(WorkType.ArchiveItem)
-        case level        => Left(new Exception(s"Unrecognised work type: $level"))
-      }
-      .getOrElse(Left(new Exception("Level field not found.")))
+  def workType(level: CollectionLevel): WorkType =
+    level match {
+      case CollectionLevel.Collection => WorkType.ArchiveCollection
+      case CollectionLevel.Section    => WorkType.ArchiveSection
+      case CollectionLevel.Series     => WorkType.ArchiveSeries
+      case CollectionLevel.SubSeries  => WorkType.ArchiveSubSeries
+      case CollectionLevel.Item       => WorkType.ArchiveItem
+    }
 
-  def collection(record: CalmRecord): Result[Collection] =
+  def collection(record: CalmRecord,
+                 level: CollectionLevel): Result[Collection] =
     record
       .get("RefNo")
       .map { path =>
-        Right(Collection(label = record.get("AltRefNo"), path = path))
+        Right(
+          Collection(path = path, level = level, label = record.get("AltRefNo"))
+        )
       }
       .getOrElse(Left(new Exception("RefNo field not found")))
+
+  def collectionLevel(record: CalmRecord): Result[CollectionLevel] =
+    record
+      .get("Level")
+      .map {
+        case "Collection" => Right(CollectionLevel.Collection)
+        case "Section"    => Right(CollectionLevel.Section)
+        case "Series"     => Right(CollectionLevel.Series)
+        case "SubSeries"  => Right(CollectionLevel.SubSeries)
+        case "Item"       => Right(CollectionLevel.Item)
+        case level        => Left(new Exception(s"Unrecognised level: $level"))
+      }
+      .getOrElse(Left(new Exception("Level field not found.")))
 
   def items(record: CalmRecord,
             status: Option[AccessStatus]): List[Item[Unminted]] =
