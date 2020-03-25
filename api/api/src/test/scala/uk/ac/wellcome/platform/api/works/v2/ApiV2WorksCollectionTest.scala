@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.api.works.v2
 
 import uk.ac.wellcome.models.work.internal._
 
-class ApiWorkCollectionTreeTest extends ApiV2WorksTestBase {
+class ApiV2WorksCollectionTest extends ApiV2WorksTestBase {
 
   def work(path: String, level: CollectionLevel) =
     createIdentifiedWorkWith(
@@ -41,10 +41,6 @@ class ApiWorkCollectionTreeTest extends ApiV2WorksTestBase {
               "title": "a/b/c",
               "alternativeTitles": [],
               "collection": {
-                "path": "a/b/c",
-                "type": "Collection"
-              },
-              "collectionTree": {
                 "path": "a",
                 "level": "Collection",
                 "work": ${workJson(workA)},
@@ -90,10 +86,6 @@ class ApiWorkCollectionTreeTest extends ApiV2WorksTestBase {
               "title": "a/b",
               "alternativeTitles": [],
               "collection": {
-                "path": "a/b",
-                "type": "Collection"
-              },
-              "collectionTree": {
                 "path": "a",
                 "level": "Collection",
                 "work": ${workJson(workA)},
@@ -146,10 +138,6 @@ class ApiWorkCollectionTreeTest extends ApiV2WorksTestBase {
               "alternativeTitles": [],
               "collection": {
                 "path": "a",
-                "type": "Collection"
-              },
-              "collectionTree": {
-                "path": "a",
                 "level": "Collection",
                 "work": ${workJson(workA)},
                 "children": [
@@ -183,11 +171,7 @@ class ApiWorkCollectionTreeTest extends ApiV2WorksTestBase {
               ${singleWorkResult(apiPrefix)},
               "id": "${workC.canonicalId}",
               "title": "a/b/c",
-              "alternativeTitles": [],
-              "collection": {
-                "path": "a/b/c",
-                "type": "Collection"
-              }
+              "alternativeTitles": []
             }
           """
         }
@@ -206,11 +190,7 @@ class ApiWorkCollectionTreeTest extends ApiV2WorksTestBase {
               ${singleWorkResult(apiPrefix)},
               "id": "${workE.canonicalId}",
               "title": "a/d/e",
-              "alternativeTitles": [],
-              "collection": {
-                "path": "a/d/e",
-                "type": "Collection"
-              }
+              "alternativeTitles": []
             }
           """
         }

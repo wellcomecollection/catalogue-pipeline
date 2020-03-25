@@ -1,23 +1,57 @@
-package uk.ac.wellcome.display.models.v2
+package uk.ac.wellcome.display.models
 
-import io.circe.generic.extras.JsonKey
 import io.swagger.v3.oas.annotations.media.Schema
-import uk.ac.wellcome.models.work.internal.Collection
+
+import uk.ac.wellcome.models.work.internal._
+import uk.ac.wellcome.display.models.v2.DisplayWorkV2
 
 @Schema(
   name = "Collection",
-  description = "A collection that a work is part of"
+  description = "A hierarchical collection of works."
 )
 case class DisplayCollection(
-  @Schema(description = "The label of the collection") label: Option[String],
-  @Schema(description = "Where in the hierarchy a work is in the collection") path: String,
-  @JsonKey("type") @Schema(name = "type") ontologyType: String = "Collection"
+  @Schema(
+    description =
+      "A slash separated path containing the position within the hierarchy."
+  ) path: String,
+  @Schema(
+    description =
+      "The level of the node. Either Collection, Section, Series, SubSeries or Item"
+  ) level: String,
+  @Schema(
+    description =
+      "The work. This only contains a limited set of fields, regardless of the includes."
+  ) work: DisplayWorkV2,
+  @Schema(
+    description = "An optional label for the node."
+  ) label: Option[String] = None,
+  @Schema(
+    description =
+      "An array containing any children. This value is null when a given node has not been expanded."
+  ) children: Option[List[DisplayCollection]] = None,
 )
 
 object DisplayCollection {
-  def apply(collection: Collection): DisplayCollection =
+
+  def apply(tree: CollectionTree,
+            expandedPaths: List[String]): DisplayCollection =
     DisplayCollection(
-      label = collection.label,
-      path = collection.path
+      path = tree.path,
+      level = tree.level match {
+        case CollectionLevel.Collection => "Collection"
+        case CollectionLevel.Section    => "Section"
+        case CollectionLevel.Series     => "Series"
+        case CollectionLevel.Item       => "Item"
+      },
+      work = DisplayWorkV2(tree.work),
+      label = tree.label,
+      children =
+        if (isExpanded(tree.path, expandedPaths))
+          Some(tree.children.map(DisplayCollection(_, expandedPaths)))
+        else
+          None
     )
+
+  private def isExpanded(path: String, expandedPaths: List[String]): Boolean =
+    expandedPaths.exists(_.startsWith(path))
 }

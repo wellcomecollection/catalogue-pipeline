@@ -135,9 +135,9 @@ class Router(elasticClient: ElasticClient,
       ResultResponse(
         context = contextUri,
         result = DisplayWorkV2(work, includes).copy(
-          collectionTree = tree.map {
+          collection = tree.map {
             case (tree, expandedPaths) =>
-              DisplayCollectionTree(tree, expandedPaths)
+              DisplayCollection(tree, expandedPaths)
           }
         )
       )

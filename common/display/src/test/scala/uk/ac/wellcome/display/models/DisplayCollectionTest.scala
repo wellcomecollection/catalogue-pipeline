@@ -6,10 +6,7 @@ import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.display.models.v2.DisplayWorkV2
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 
-class DisplayCollectionTreeTest
-    extends FunSpec
-    with Matchers
-    with WorksGenerators {
+class DisplayCollectionTest extends FunSpec with Matchers with WorksGenerators {
 
   def work(path: String, level: CollectionLevel) =
     createIdentifiedWorkWith(
@@ -20,20 +17,20 @@ class DisplayCollectionTreeTest
     val b = work("a/b", CollectionLevel.Series)
     val c = work("a/b/c", CollectionLevel.Item)
     val tree = CollectionTree(List(a, b, c)).right.get
-    DisplayCollectionTree(tree, List("a/b/c")) shouldBe
-      DisplayCollectionTree(
+    DisplayCollection(tree, List("a/b/c")) shouldBe
+      DisplayCollection(
         path = "a",
         level = "Collection",
         work = DisplayWorkV2(a),
         children = Some(
           List(
-            DisplayCollectionTree(
+            DisplayCollection(
               path = "a/b",
               level = "Series",
               work = DisplayWorkV2(b),
               children = Some(
                 List(
-                  DisplayCollectionTree(
+                  DisplayCollection(
                     path = "a/b/c",
                     level = "Item",
                     work = DisplayWorkV2(c),
@@ -56,14 +53,14 @@ class DisplayCollectionTreeTest
           level = CollectionLevel.Item,
           label = Some("!!!"))))
     val tree = CollectionTree(List(a, b)).right.get
-    DisplayCollectionTree(tree, List("a")) shouldBe
-      DisplayCollectionTree(
+    DisplayCollection(tree, List("a")) shouldBe
+      DisplayCollection(
         path = "a",
         level = "Collection",
         work = DisplayWorkV2(a),
         children = Some(
           List(
-            DisplayCollectionTree(
+            DisplayCollection(
               path = "a/b",
               level = "Item",
               label = Some("!!!"),
@@ -81,20 +78,20 @@ class DisplayCollectionTreeTest
     val d = work("a/d", CollectionLevel.Series)
     val e = work("a/d/e", CollectionLevel.Item)
     val tree = CollectionTree(List(a, b, c, d, e)).right.get
-    DisplayCollectionTree(tree, List("a/b/c", "a/d/e")) shouldBe
-      DisplayCollectionTree(
+    DisplayCollection(tree, List("a/b/c", "a/d/e")) shouldBe
+      DisplayCollection(
         path = "a",
         level = "Collection",
         work = DisplayWorkV2(a),
         children = Some(
           List(
-            DisplayCollectionTree(
+            DisplayCollection(
               path = "a/b",
               level = "Series",
               work = DisplayWorkV2(b),
               children = Some(
                 List(
-                  DisplayCollectionTree(
+                  DisplayCollection(
                     path = "a/b/c",
                     level = "Item",
                     work = DisplayWorkV2(c),
@@ -103,13 +100,13 @@ class DisplayCollectionTreeTest
                 )
               )
             ),
-            DisplayCollectionTree(
+            DisplayCollection(
               path = "a/d",
               level = "Series",
               work = DisplayWorkV2(d),
               children = Some(
                 List(
-                  DisplayCollectionTree(
+                  DisplayCollection(
                     path = "a/d/e",
                     level = "Item",
                     work = DisplayWorkV2(e),
@@ -130,26 +127,26 @@ class DisplayCollectionTreeTest
     val d = work("a/d", CollectionLevel.Item)
     val e = work("a/b/e", CollectionLevel.Item)
     val tree = CollectionTree(List(a, b, c, d, e)).right.get
-    DisplayCollectionTree(tree, List("a/b/c")) shouldBe
-      DisplayCollectionTree(
+    DisplayCollection(tree, List("a/b/c")) shouldBe
+      DisplayCollection(
         path = "a",
         level = "Collection",
         work = DisplayWorkV2(a),
         children = Some(
           List(
-            DisplayCollectionTree(
+            DisplayCollection(
               path = "a/b",
               level = "Series",
               work = DisplayWorkV2(b),
               children = Some(
                 List(
-                  DisplayCollectionTree(
+                  DisplayCollection(
                     path = "a/b/c",
                     level = "Item",
                     work = DisplayWorkV2(c),
                     children = Some(Nil)
                   ),
-                  DisplayCollectionTree(
+                  DisplayCollection(
                     path = "a/b/e",
                     level = "Item",
                     work = DisplayWorkV2(e),
@@ -158,7 +155,7 @@ class DisplayCollectionTreeTest
                 )
               )
             ),
-            DisplayCollectionTree(
+            DisplayCollection(
               path = "a/d",
               level = "Item",
               work = DisplayWorkV2(d),
@@ -176,20 +173,20 @@ class DisplayCollectionTreeTest
     val d = work("a/d", CollectionLevel.Series)
     val e = work("a/d/e", CollectionLevel.Item)
     val tree = CollectionTree(List(a, b, c, d, e)).right.get
-    DisplayCollectionTree(tree, List("a/b")) shouldBe
-      DisplayCollectionTree(
+    DisplayCollection(tree, List("a/b")) shouldBe
+      DisplayCollection(
         path = "a",
         level = "Collection",
         work = DisplayWorkV2(a),
         children = Some(
           List(
-            DisplayCollectionTree(
+            DisplayCollection(
               path = "a/b",
               level = "Series",
               work = DisplayWorkV2(b),
               children = Some(
                 List(
-                  DisplayCollectionTree(
+                  DisplayCollection(
                     path = "a/b/c",
                     level = "Item",
                     work = DisplayWorkV2(c),
@@ -198,7 +195,7 @@ class DisplayCollectionTreeTest
                 )
               )
             ),
-            DisplayCollectionTree(
+            DisplayCollection(
               path = "a/d",
               level = "Series",
               work = DisplayWorkV2(d),
