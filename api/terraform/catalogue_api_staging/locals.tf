@@ -13,6 +13,7 @@ locals {
   cluster_arn     = data.terraform_remote_state.catalogue_api_shared.outputs.cluster_arn
   nlb_arn         = data.terraform_remote_state.catalogue_api_shared.outputs.nlb_arn
 
+  egress_security_group_id             = data.terraform_remote_state.catalogue_api_shared.outputs.egress_security_group_id
   interservice_security_group_id       = data.terraform_remote_state.catalogue_api_shared.outputs.interservice_security_group_id
   service_lb_ingress_security_group_id = data.terraform_remote_state.catalogue_api_shared.outputs.service_lb_ingress_security_group_id
 }

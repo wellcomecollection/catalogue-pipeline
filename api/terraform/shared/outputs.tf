@@ -18,6 +18,10 @@ output "certificate_arn" {
   value = aws_acm_certificate_validation.catalogue_api_validation.certificate_arn
 }
 
+output "egress_security_group_id" {
+  value = aws_security_group.egress.id
+}
+
 output "interservice_security_group_id" {
   value = aws_security_group.interservice.id
 }

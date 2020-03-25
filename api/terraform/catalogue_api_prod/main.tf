@@ -15,6 +15,8 @@ module "catalogue_api_prod" {
   lb_arn           = local.nlb_arn
   lb_ingress_sg_id = local.service_lb_ingress_security_group_id
 
+  egress_security_group_id = local.egress_security_group_id
+
   logstash_host = local.logstash_host
 
   interservice_sg_id = local.interservice_security_group_id

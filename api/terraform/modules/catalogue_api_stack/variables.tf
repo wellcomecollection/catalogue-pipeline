@@ -19,6 +19,8 @@ variable "api_id" {}
 
 variable "lb_arn" {}
 
+variable "egress_security_group_id" {}
+
 variable "lb_ingress_sg_id" {}
 
 variable "logstash_host" {}
