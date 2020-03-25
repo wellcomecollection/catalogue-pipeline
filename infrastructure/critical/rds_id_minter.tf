@@ -20,6 +20,7 @@ module "identifiers_rds_cluster" {
   vpc_subnet_ids     = local.private_subnets_new
   vpc_id             = local.vpc_id_new
   admin_cidr_ingress = local.admin_cidr_ingress
+  instance_class     = "db.t3.medium"
 
   db_access_security_group = [aws_security_group.rds_ingress_security_group.id]
 

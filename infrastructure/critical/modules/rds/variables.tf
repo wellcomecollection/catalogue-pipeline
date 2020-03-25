@@ -21,3 +21,5 @@ variable "admin_cidr_ingress" {}
 variable "db_access_security_group" {
   type = list(string)
 }
+
+variable "instance_class" {}
