@@ -42,6 +42,26 @@ class CollectionTreeTest extends FunSpec with Matchers with WorksGenerators {
     )
   }
 
+  it("carries over collection labels to the tree") {
+    val a = work("a")
+    val b = createIdentifiedWorkWith(
+      collection = Some(Collection(path = "a/b", label = Some("!!!")))
+    )
+    CollectionTree(List(a, b)) shouldBe Right(
+      CollectionTree(
+        path = "a",
+        work = a,
+        children = List(
+          CollectionTree(
+            path = "a/b",
+            work = b,
+            label = Some("!!!")
+          )
+        )
+      )
+    )
+  }
+
   it("errors creating a tree when unconnected works") {
     val x = work("x")
     val y = work("x/y")

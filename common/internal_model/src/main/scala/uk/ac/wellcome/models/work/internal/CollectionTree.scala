@@ -13,7 +13,8 @@ import cats.implicits._
 case class CollectionTree(
   path: String,
   work: IdentifiedWork,
-  children: List[CollectionTree] = Nil
+  children: List[CollectionTree] = Nil,
+  label: Option[String] = None
 ) {
 
   def size: Int =
@@ -41,7 +42,7 @@ object CollectionTree {
     works
       .map { work =>
         work.data.collection match {
-          case Some(Collection(_, path)) => Right((tokenize(path), work))
+          case Some(Collection(_, path)) => Right(tokenize(path) -> work)
           case None =>
             Left(
               new Exception(
@@ -68,13 +69,14 @@ object CollectionTree {
         CollectionTree(
           path = join(path),
           work = work,
+          label = work.data.collection.flatMap(_.label),
           children = children.map {
             case (childPath, childWork) =>
               val childDescendents = descendents.filter {
                 case (path, _) => isDescendentPath(path, childPath)
               }
               apply(
-                NonEmptyList((childPath, childWork), childDescendents),
+                NonEmptyList(childPath -> childWork, childDescendents),
                 childDepth)
           }
         )

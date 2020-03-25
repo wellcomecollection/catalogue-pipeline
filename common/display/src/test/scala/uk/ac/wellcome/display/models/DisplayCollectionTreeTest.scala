@@ -43,6 +43,27 @@ class DisplayCollectionTreeTest
       )
   }
 
+  it("creates a display tree with labels") {
+    val a = work("a")
+    val b = createIdentifiedWorkWith(
+      collection = Some(Collection(path = "a/b", label = Some("!!!"))))
+    val tree = CollectionTree(List(a, b)).right.get
+    DisplayCollectionTree(tree, List("a")) shouldBe
+      DisplayCollectionTree(
+        path = "a",
+        work = DisplayWorkV2(a),
+        children = Some(
+          List(
+            DisplayCollectionTree(
+              path = "a/b",
+              label = Some("!!!"),
+              work = DisplayWorkV2(b),
+            )
+          )
+        )
+      )
+  }
+
   it("creates a display tree with multiple paths expanded") {
     val a = work("a")
     val b = work("a/b")

@@ -19,9 +19,12 @@ case class DisplayCollectionTree(
       "The work. This only contains a limited set of fields, regardless of the includes."
   ) work: DisplayWorkV2,
   @Schema(
+    description = "An optional label for the node."
+  ) label: Option[String] = None,
+  @Schema(
     description =
       "An array containing any children. This value is null when a given node has not been expanded."
-  ) children: Option[List[DisplayCollectionTree]],
+  ) children: Option[List[DisplayCollectionTree]] = None,
 )
 
 object DisplayCollectionTree {
@@ -31,6 +34,7 @@ object DisplayCollectionTree {
     DisplayCollectionTree(
       path = tree.path,
       work = DisplayWorkV2(tree.work),
+      label = tree.label,
       children =
         if (isExpanded(tree.path, expandedPaths))
           Some(tree.children.map(DisplayCollectionTree(_, expandedPaths)))
