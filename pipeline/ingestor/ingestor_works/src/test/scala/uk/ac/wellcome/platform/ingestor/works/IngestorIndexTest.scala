@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.ingestor
+package uk.ac.wellcome.platform.ingestor.works
 
 import com.sksamuel.elastic4s.Index
 import org.scalatest.concurrent.ScalaFutures
@@ -6,7 +6,7 @@ import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
-import uk.ac.wellcome.platform.ingestor.fixtures.WorkerServiceFixture
+import uk.ac.wellcome.platform.ingestor.works.fixtures.WorkerServiceFixture
 
 class IngestorIndexTest
     extends FunSpec

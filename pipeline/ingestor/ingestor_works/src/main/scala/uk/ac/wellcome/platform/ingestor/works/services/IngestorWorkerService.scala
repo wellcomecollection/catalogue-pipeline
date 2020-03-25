@@ -1,16 +1,13 @@
-package uk.ac.wellcome.platform.ingestor.services
+package uk.ac.wellcome.platform.ingestor.works.services
 
 import akka.Done
 import com.amazonaws.services.sqs.model.Message
 import com.sksamuel.elastic4s.ElasticClient
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.elasticsearch.{
-  ElasticsearchIndexCreator,
-  WorksIndexConfig
-}
 import uk.ac.wellcome.bigmessaging.message.BigMessageStream
+import uk.ac.wellcome.elasticsearch.{ElasticsearchIndexCreator, WorksIndexConfig}
 import uk.ac.wellcome.models.work.internal.IdentifiedBaseWork
-import uk.ac.wellcome.platform.ingestor.models.IngestorConfig
+import uk.ac.wellcome.platform.ingestor.common.models.IngestorConfig
 import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.{ExecutionContext, Future}

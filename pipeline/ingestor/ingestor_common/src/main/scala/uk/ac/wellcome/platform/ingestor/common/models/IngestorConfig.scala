@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.ingestor.models
+package uk.ac.wellcome.platform.ingestor.common.models
 
 import com.sksamuel.elastic4s.Index
 

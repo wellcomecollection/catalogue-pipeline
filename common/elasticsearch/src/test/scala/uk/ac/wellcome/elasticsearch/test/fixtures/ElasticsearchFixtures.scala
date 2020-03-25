@@ -8,11 +8,13 @@ import com.sksamuel.elastic4s.requests.get.GetResponse
 import com.sksamuel.elastic4s.requests.indexes.admin.IndexExistsResponse
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import com.sksamuel.elastic4s.{ElasticClient, Response}
+import io.circe.Encoder
 import org.scalactic.source.Position
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{Assertion, Matchers, Suite}
 import uk.ac.wellcome.elasticsearch._
+import uk.ac.wellcome.elasticsearch.model.CanonicalId
 import uk.ac.wellcome.fixtures._
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.utils.JsonAssertions
@@ -121,6 +123,25 @@ trait ElasticsearchFixtures
         getResponse.exists shouldBe true
 
         assertJsonStringsAreEqual(getResponse.sourceAsString, workJson)
+      }
+    }
+
+  def assertElasticsearchEventuallyHas[T](
+                                           index: Index,
+                                           documents: T*)(implicit id: CanonicalId[T], encoder: Encoder[T]): Seq[Assertion] =
+    documents.map { document =>
+      val documentJson = toJson(document).get
+
+      eventually {
+        val response: Response[GetResponse] = elasticClient.execute {
+          get(id.canonicalId(document)).from(index.name)
+        }.await
+
+        val getResponse = response.result
+
+        getResponse.exists shouldBe true
+
+        assertJsonStringsAreEqual(getResponse.sourceAsString, documentJson)
       }
     }
 

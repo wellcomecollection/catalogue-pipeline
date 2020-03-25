@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.ingestor.services
+package uk.ac.wellcome.platform.ingestor.works.services
 
 import com.sksamuel.elastic4s.ElasticClient
 import com.sksamuel.elastic4s.http.JavaClient
@@ -6,17 +6,17 @@ import org.apache.http.HttpHost
 import org.elasticsearch.client.RestClient
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Assertion, FunSpec, Matchers}
-import uk.ac.wellcome.elasticsearch.ElasticCredentials
-import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
-import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
-import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
+import uk.ac.wellcome.elasticsearch.ElasticCredentials
+import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
+import uk.ac.wellcome.messaging.fixtures.SQS
+import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
+import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.{IdentifiedBaseWork, IdentifierType}
-import uk.ac.wellcome.platform.ingestor.models.IngestorConfig
-import uk.ac.wellcome.platform.ingestor.fixtures.WorkerServiceFixture
+import uk.ac.wellcome.platform.ingestor.common.models.IngestorConfig
+import uk.ac.wellcome.platform.ingestor.works.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.storage.ObjectLocation
 
 import scala.concurrent.ExecutionContext.Implicits.global

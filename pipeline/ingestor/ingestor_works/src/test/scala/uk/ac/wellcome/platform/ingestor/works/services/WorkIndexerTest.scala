@@ -1,7 +1,8 @@
-package uk.ac.wellcome.platform.ingestor.services
+package uk.ac.wellcome.platform.ingestor.works.services
 
 import com.sksamuel.elastic4s.ElasticDsl.properties
 import com.sksamuel.elastic4s.Index
+import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 import com.sksamuel.elastic4s.requests.mappings.{ObjectField, TextField}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Assertion, FunSpec, Matchers}
@@ -11,7 +12,6 @@ import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.IdentifiedBaseWork
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 class WorkIndexerTest
     extends FunSpec
@@ -20,74 +20,7 @@ class WorkIndexerTest
     with ElasticsearchFixtures
     with WorksGenerators {
 
-  val workIndexer = new WorkIndexer(elasticClient = elasticClient)
-
-  it("inserts an identified Work into Elasticsearch") {
-    val work = createIdentifiedWork
-
-    withLocalWorksIndex { index =>
-      val future = indexWork(work, index)
-
-      whenReady(future) { result =>
-        result.right.get should contain(work)
-        assertElasticsearchEventuallyHasWork(index = index, work)
-      }
-    }
-  }
-
-  it("only adds one record when the same ID is ingested multiple times") {
-    val work = createIdentifiedWork
-
-    withLocalWorksIndex { index =>
-      val future = Future.sequence(
-        (1 to 2).map(_ => indexWork(work, index))
-      )
-
-      whenReady(future) { _ =>
-        assertElasticsearchEventuallyHasWork(index = index, work)
-      }
-    }
-  }
-
-  it("doesn't add a Work with a lower version") {
-    val work = createIdentifiedWorkWith(version = 3)
-    val olderWork = work.copy(version = 1)
-
-    withLocalWorksIndex { index =>
-      val future = ingestWorkPairInOrder(
-        firstWork = work,
-        secondWork = olderWork,
-        index = index
-      )
-
-      whenReady(future) { result =>
-        assertIngestedWorkIs(
-          result = result,
-          ingestedWork = work,
-          index = index)
-      }
-    }
-  }
-
-  it("replaces a Work with the same version") {
-    val work = createIdentifiedWorkWith(version = 3)
-    val updatedWork = work.copy(
-      data = work.data.copy(title = Some("a different title"))
-    )
-
-    withLocalWorksIndex { index =>
-      val future = ingestWorkPairInOrder(
-        firstWork = work,
-        secondWork = updatedWork,
-        index = index
-      )
-
-      whenReady(future) { result =>
-        result.right.get should contain(updatedWork)
-        assertElasticsearchEventuallyHasWork(index = index, updatedWork)
-      }
-    }
-  }
+  val workIndexer = new WorkIndexer(client = elasticClient)
 
   describe("updating merged / redirected works") {
     it(
@@ -197,27 +130,8 @@ class WorkIndexerTest
     }
   }
 
-  it("inserts a list of works into elasticsearch and returns them") {
-    val works = createIdentifiedWorks(count = 5)
-
-    withLocalWorksIndex { index =>
-      val future = workIndexer.index(
-        documents = works,
-        index = index
-      )
-
-      whenReady(future) { successfullyInserted =>
-        assertElasticsearchEventuallyHasWork(index = index, works: _*)
-        successfullyInserted.right.get should contain theSameElementsAs works
-      }
-    }
-  }
-
   object WorksWithNoEditionIndexConfig extends IndexConfig {
-    import uk.ac.wellcome.elasticsearch.WorksIndexConfig.{
-      fields,
-      analysis => defaultAnalysis
-    }
+    import uk.ac.wellcome.elasticsearch.WorksIndexConfig.{fields, analysis => defaultAnalysis}
 
     val fieldsWithNoEdition = fields.map {
       case data: ObjectField if data.name == "data" =>
@@ -229,7 +143,7 @@ class WorkIndexerTest
     }
 
     val analysis = defaultAnalysis
-    val mapping = properties(fieldsWithNoEdition)
+    val mapping = properties(fieldsWithNoEdition).dynamic(DynamicMapping.Strict)
   }
 
   it("returns a list of Works that weren't indexed correctly") {

@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.ingestor.exceptions
+package uk.ac.wellcome.platform.ingestor.common.exceptions
 
 case class IngestorException(e: Throwable) extends Exception(e.getMessage)
 

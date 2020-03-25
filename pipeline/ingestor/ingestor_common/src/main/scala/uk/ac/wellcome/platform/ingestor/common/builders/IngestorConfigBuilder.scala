@@ -1,8 +1,8 @@
-package uk.ac.wellcome.platform.ingestor.config.builders
+package uk.ac.wellcome.platform.ingestor.common.builders
 
 import com.sksamuel.elastic4s.Index
 import com.typesafe.config.{Config, ConfigException}
-import uk.ac.wellcome.platform.ingestor.models.IngestorConfig
+import uk.ac.wellcome.platform.ingestor.common.models.IngestorConfig
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 
 import scala.concurrent.duration._

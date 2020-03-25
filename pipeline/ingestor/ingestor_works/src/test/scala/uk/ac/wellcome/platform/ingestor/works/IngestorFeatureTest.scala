@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.ingestor
+package uk.ac.wellcome.platform.ingestor.works
 
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{FunSpec, Matchers}
@@ -7,7 +7,7 @@ import uk.ac.wellcome.models.work.internal.IdentifiedBaseWork
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.platform.ingestor.fixtures.WorkerServiceFixture
+import uk.ac.wellcome.platform.ingestor.works.fixtures.WorkerServiceFixture
 
 import scala.collection.JavaConverters._
 

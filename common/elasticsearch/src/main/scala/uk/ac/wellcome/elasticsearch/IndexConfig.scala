@@ -1,16 +1,9 @@
 package uk.ac.wellcome.elasticsearch
 
 import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.requests.analysis.{
-  Analysis,
-  CustomAnalyzer,
-  PathHierarchyTokenizer
-}
-import com.sksamuel.elastic4s.requests.mappings.{
-  FieldDefinition,
-  MappingDefinition,
-  ObjectField
-}
+import com.sksamuel.elastic4s.requests.analysis.{Analysis, CustomAnalyzer, PathHierarchyTokenizer}
+import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
+import com.sksamuel.elastic4s.requests.mappings.{FieldDefinition, MappingDefinition, ObjectField}
 
 trait IndexConfig {
   val mapping: MappingDefinition
@@ -261,6 +254,6 @@ case object WorksIndexConfig extends IndexConfig {
       data
     )
 
-  val mapping = properties(fields)
+  val mapping = properties(fields).dynamic(DynamicMapping.Strict)
 
 }

@@ -1,16 +1,16 @@
-package uk.ac.wellcome.platform.ingestor.services
+package uk.ac.wellcome.platform.ingestor.works.services
 
 import com.sksamuel.elastic4s.ElasticClient
 import uk.ac.wellcome.json.JsonUtil.toJson
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal.{IdentifiedBaseWork, IdentifiedInvisibleWork, IdentifiedRedirectedWork, IdentifiedWork}
-import uk.ac.wellcome.platform.ingestor.Indexer
+import uk.ac.wellcome.platform.ingestor.common.Indexer
 
 import scala.concurrent.ExecutionContext
 import scala.language.implicitConversions
 
 class WorkIndexer(
- val  elasticClient: ElasticClient
+ val  client: ElasticClient
 )(implicit val ec: ExecutionContext)
     extends Indexer[IdentifiedBaseWork] {
 

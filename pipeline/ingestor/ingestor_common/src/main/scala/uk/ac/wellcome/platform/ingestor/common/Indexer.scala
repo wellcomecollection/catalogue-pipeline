@@ -1,19 +1,16 @@
-package uk.ac.wellcome.platform.ingestor
+package uk.ac.wellcome.platform.ingestor.common
 
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.bulk.{BulkResponse, BulkResponseItem}
 import com.sksamuel.elastic4s.requests.common.VersionType.ExternalGte
 import com.sksamuel.elastic4s.{ElasticClient, Index, Indexable, Response}
 import grizzled.slf4j.Logging
+import uk.ac.wellcome.elasticsearch.model.CanonicalId
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait CanonicalId[T]{
-  def canonicalId(t: T): String
-}
-
 trait Indexer[T] extends Logging {
-  val elasticClient: ElasticClient
+  val client: ElasticClient
 
   implicit val ec: ExecutionContext
   implicit val indexable: Indexable[T]
@@ -32,7 +29,7 @@ trait Indexer[T] extends Logging {
         .doc(document)
     }
 
-    elasticClient
+    client
       .execute {
         bulk(inserts)
       }

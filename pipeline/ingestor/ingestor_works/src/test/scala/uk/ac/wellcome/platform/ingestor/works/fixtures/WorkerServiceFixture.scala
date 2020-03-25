@@ -1,17 +1,16 @@
-package uk.ac.wellcome.platform.ingestor.fixtures
+package uk.ac.wellcome.platform.ingestor.works.fixtures
 
-import com.sksamuel.elastic4s.Index
-import com.sksamuel.elastic4s.ElasticClient
+import com.sksamuel.elastic4s.{ElasticClient, Index}
 import org.scalatest.Suite
-import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
-import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
+import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
+import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
+import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal.IdentifiedBaseWork
-import uk.ac.wellcome.platform.ingestor.models.IngestorConfig
-import uk.ac.wellcome.platform.ingestor.services.IngestorWorkerService
+import uk.ac.wellcome.platform.ingestor.common.models.IngestorConfig
+import uk.ac.wellcome.platform.ingestor.works.services.IngestorWorkerService
 import uk.ac.wellcome.storage.ObjectLocation
 
 import scala.concurrent.ExecutionContext.Implicits.global
