@@ -25,9 +25,11 @@ object IdentifiersDao {
 class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
   import IdentifiersDao._
 
-  implicit val session = AutoSession(db.settingsProvider)
+  def withConnection[R](doWork: DBSession => R): R =
+    DB localTx doWork
 
-  def lookupIds(sourceIdentifiers: Seq[SourceIdentifier]): Try[LookupResult] = {
+  def lookupIds(sourceIdentifiers: Seq[SourceIdentifier])(
+    implicit session: DBSession): Try[LookupResult] =
     Try {
       debug(s"Matching ($sourceIdentifiers)")
       val identifierRows = sourceIdentifiers.map { id =>
@@ -71,10 +73,10 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
         )
       }
     }
-  }
 
   @throws(classOf[InsertError])
-  def saveIdentifiers(ids: List[Identifier]): Try[InsertResult] =
+  def saveIdentifiers(ids: List[Identifier])(
+    implicit session: DBSession): Try[InsertResult] =
     Try {
       val values = ids.map(i =>
         Seq(i.CanonicalId, i.OntologyType, i.SourceSystem, i.SourceId))

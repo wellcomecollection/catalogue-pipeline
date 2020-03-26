@@ -19,6 +19,8 @@ class IdentifiersDaoTest
     with IdentifiersGenerators
     with SqlIdentifiersGenerators {
 
+  implicit val session: DBSession = AutoSession
+
   def withIdentifiersDao[R](existingEntries: Seq[Identifier] = Nil)(
     testWith: TestWith[(IdentifiersDao, IdentifiersTable), R]): R =
     withIdentifiersDatabase { identifiersTableConfig =>

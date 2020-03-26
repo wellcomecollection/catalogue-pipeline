@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.idminter.fixtures
 
 import io.circe.Json
-import scalikejdbc.{ConnectionPool, DB}
+import scalikejdbc.{ConnectionPool, ConnectionPoolSettings}
 import uk.ac.wellcome.messaging.sns.SNSConfig
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
@@ -57,14 +57,19 @@ trait WorkerServiceFixture
                            identifiersTableConfig: IdentifiersTableConfig)(
     testWith: TestWith[IdMinterWorkerService[SNSConfig], R]): R = {
     Class.forName("com.mysql.jdbc.Driver")
-    ConnectionPool.singleton(s"jdbc:mysql://$host:$port", username, password)
+    ConnectionPool.singleton(
+      s"jdbc:mysql://$host:$port",
+      username,
+      password,
+      settings = ConnectionPoolSettings(maxSize = maxSize)
+    )
 
     val identifiersDao = new IdentifiersDao(
-      db = DB.connect(),
       identifiers = new IdentifiersTable(
         identifiersTableConfig = identifiersTableConfig
       )
     )
+
     withWorkerService(
       bucket,
       topic,
