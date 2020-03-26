@@ -41,7 +41,7 @@ class CollectionServiceTest
   val workC = work("a/b/c", CollectionLevel.Item)
   val workD = work("a/b/d", CollectionLevel.Item)
   val workE = work("a/e", CollectionLevel.Series)
-  val workF = work("a/e/f", CollectionLevel.SubSeries)
+  val workF = work("a/e/f", CollectionLevel.Series)
   val workG = work("a/e/f/g", CollectionLevel.Item)
   val workX = work("x", CollectionLevel.Collection)
   val workY = work("x/y", CollectionLevel.Series)
@@ -118,7 +118,7 @@ class CollectionServiceTest
                 children = List(
                   CollectionTree(
                     path = "a/e/f",
-                    level = CollectionLevel.SubSeries,
+                    level = CollectionLevel.Series,
                     work = workF,
                     children = List(
                       CollectionTree(

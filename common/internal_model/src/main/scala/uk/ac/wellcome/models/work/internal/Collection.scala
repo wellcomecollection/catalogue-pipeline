@@ -12,6 +12,5 @@ object CollectionLevel {
   object Collection extends CollectionLevel
   object Section extends CollectionLevel
   object Series extends CollectionLevel
-  object SubSeries extends CollectionLevel
   object Item extends CollectionLevel
 }
