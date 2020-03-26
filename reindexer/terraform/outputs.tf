@@ -14,3 +14,11 @@ output "mets_reindexer_topic_name" {
 output "mets_reindexer_topic_arn" {
   value = local.mets_reindexer_topic_arn
 }
+
+output "calm_reindexer_topic_name" {
+  value = local.calm_reindexer_topic_name
+}
+
+output "calm_reindexer_topic_arn" {
+  value = local.calm_reindexer_topic_arn
+}
