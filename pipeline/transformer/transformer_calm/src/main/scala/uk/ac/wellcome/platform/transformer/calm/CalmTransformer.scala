@@ -95,7 +95,6 @@ object CalmTransformer extends Transformer[CalmRecord] with CalmOps {
       case CollectionLevel.Collection => WorkType.ArchiveCollection
       case CollectionLevel.Section    => WorkType.ArchiveSection
       case CollectionLevel.Series     => WorkType.ArchiveSeries
-      case CollectionLevel.SubSeries  => WorkType.ArchiveSubSeries
       case CollectionLevel.Item       => WorkType.ArchiveItem
     }
 
@@ -114,12 +113,18 @@ object CalmTransformer extends Transformer[CalmRecord] with CalmOps {
     record
       .get("Level")
       .map {
-        case "Collection" => Right(CollectionLevel.Collection)
-        case "Section"    => Right(CollectionLevel.Section)
-        case "Series"     => Right(CollectionLevel.Series)
-        case "SubSeries"  => Right(CollectionLevel.SubSeries)
-        case "Item"       => Right(CollectionLevel.Item)
-        case level        => Left(new Exception(s"Unrecognised level: $level"))
+        case "Collection"       => Right(CollectionLevel.Collection)
+        case "Section"          => Right(CollectionLevel.Section)
+        case "SubSection"       => Right(CollectionLevel.Section)
+        case "SubSubSection"    => Right(CollectionLevel.Section)
+        case "SubSubSubSection" => Right(CollectionLevel.Section)
+        case "Series"           => Right(CollectionLevel.Series)
+        case "SubSeries"        => Right(CollectionLevel.Series)
+        case "SubSubSeries"     => Right(CollectionLevel.Series)
+        case "SubSubSubSeries"  => Right(CollectionLevel.Series)
+        case "Item"             => Right(CollectionLevel.Item)
+        case "Piece"            => Right(CollectionLevel.Item)
+        case level              => Left(new Exception(s"Unrecognised level: $level"))
       }
       .getOrElse(Left(new Exception("Level field not found.")))
 

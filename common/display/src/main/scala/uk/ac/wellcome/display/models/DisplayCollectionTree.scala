@@ -41,7 +41,6 @@ object DisplayCollectionTree {
         case CollectionLevel.Collection => "Collection"
         case CollectionLevel.Section    => "Section"
         case CollectionLevel.Series     => "Series"
-        case CollectionLevel.SubSeries  => "SubSeries"
         case CollectionLevel.Item       => "Item"
       },
       work = DisplayWorkV2(tree.work),

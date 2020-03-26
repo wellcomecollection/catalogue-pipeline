@@ -174,11 +174,6 @@ object WorkType extends Enum[WorkType] {
     override val label: String = "Archive series"
   }
 
-  case object ArchiveSubSeries extends Unlinked {
-    override val id: String = "archive-subseries"
-    override val label: String = "Archive sub series"
-  }
-
   case object ArchiveItem extends Unlinked {
     override val id: String = "archive-item"
     override val label: String = "Archive item"
