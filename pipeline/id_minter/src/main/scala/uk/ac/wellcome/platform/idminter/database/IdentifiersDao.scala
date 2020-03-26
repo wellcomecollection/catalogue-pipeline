@@ -22,7 +22,7 @@ object IdentifiersDao {
       extends Exception
 }
 
-class IdentifiersDao(db: DB, identifiers: IdentifiersTable) extends Logging {
+class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
   import IdentifiersDao._
 
   implicit val session = AutoSession(db.settingsProvider)

@@ -29,10 +29,10 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildActorMaterializer()
 
     val identifiersTableConfig = IdentifiersTableBuilder.buildConfig(config)
+    RDSBuilder.buildDB(config)
 
     val identifierGenerator = new IdentifierGenerator(
       identifiersDao = new IdentifiersDao(
-        db = RDSBuilder.buildDB(config),
         identifiers = new IdentifiersTable(
           identifiersTableConfig = identifiersTableConfig
         )

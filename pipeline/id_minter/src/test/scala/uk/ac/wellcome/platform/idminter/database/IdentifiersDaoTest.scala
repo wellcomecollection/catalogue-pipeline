@@ -30,7 +30,7 @@ class IdentifiersDaoTest
           tableName = identifiersTableConfig.tableName
         )
 
-      val identifiersDao = new IdentifiersDao(DB.connect(), identifiersTable)
+      val identifiersDao = new IdentifiersDao(identifiersTable)
 
       eventuallyTableExists(identifiersTableConfig)
 

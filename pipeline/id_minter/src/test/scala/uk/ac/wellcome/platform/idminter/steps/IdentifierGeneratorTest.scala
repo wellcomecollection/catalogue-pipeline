@@ -40,7 +40,7 @@ class IdentifierGeneratorTest
         )
 
       val identifiersDao = maybeIdentifiersDao.getOrElse(
-        new IdentifiersDao(DB.connect(), identifiersTable)
+        new IdentifiersDao(identifiersTable)
       )
 
       val identifierGenerator = new IdentifierGenerator(identifiersDao)
