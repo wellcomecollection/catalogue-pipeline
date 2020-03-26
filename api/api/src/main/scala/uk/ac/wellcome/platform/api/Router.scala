@@ -246,7 +246,7 @@ class Router(elasticClient: ElasticClient,
     : Future[Option[(CollectionTree, List[String])]] =
     work.data.collection
       .map {
-        case Collection(_, path) =>
+        case Collection(path, _, _) =>
           val allPaths = path :: expandedPaths
           collectionService.retrieveTree(index, allPaths).map {
             case Left(err) =>

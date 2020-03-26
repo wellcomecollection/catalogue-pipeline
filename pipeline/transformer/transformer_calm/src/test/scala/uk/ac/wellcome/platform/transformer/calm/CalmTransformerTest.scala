@@ -27,7 +27,11 @@ class CalmTransformerTest extends FunSpec with Matchers {
           title = Some("abc"),
           workType = Some(WorkType.ArchiveCollection),
           collection = Some(
-            Collection(label = Some("a.b.c"), path = "a/b/c")
+            Collection(
+              path = "a/b/c",
+              level = CollectionLevel.Collection,
+              label = Some("a.b.c")
+            )
           ),
           otherIdentifiers = List(
             SourceIdentifier(

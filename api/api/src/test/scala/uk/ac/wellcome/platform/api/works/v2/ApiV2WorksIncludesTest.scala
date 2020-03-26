@@ -484,10 +484,12 @@ class ApiV2WorksIncludesTest
         val works = List(
           createIdentifiedWorkWith(
             canonicalId = "1",
-            collection = Some(Collection(Some("PPMI"), "PP/MI"))),
+            collection =
+              Some(Collection("PP/MI", CollectionLevel.Item, Some("PP/MI")))),
           createIdentifiedWorkWith(
             canonicalId = "2",
-            collection = Some(Collection(Some("CRGH"), "CRGH"))),
+            collection = Some(
+              Collection("CRGH", CollectionLevel.Collection, Some("CRGH")))),
         )
         insertIntoElasticsearch(indexV2, works: _*)
         assertJsonResponse(routes, s"/$apiPrefix/works?include=collection") {
@@ -501,7 +503,7 @@ class ApiV2WorksIncludesTest
                    "title": "${works.head.data.title.get}",
                    "alternativeTitles": [],
                    "collection": {
-                      "label": "PPMI",
+                      "label": "PP/MI",
                       "path": "PP/MI",
                       "type" : "Collection"
                    }
@@ -529,7 +531,8 @@ class ApiV2WorksIncludesTest
     withApi {
       case (indexV2, routes) =>
         val work = createIdentifiedWorkWith(
-          collection = Some(Collection(Some("PPMI"), "PP/MI")))
+          collection =
+            Some(Collection("PP/MI", CollectionLevel.Item, Some("PP/MI"))))
         insertIntoElasticsearch(indexV2, work)
         assertJsonResponse(
           routes,
@@ -541,7 +544,7 @@ class ApiV2WorksIncludesTest
               "title": "${work.data.title.get}",
               "alternativeTitles": [],
               "collection": {
-                "label": "PPMI",
+                "label": "PP/MI",
                 "path": "PP/MI",
                 "type" : "Collection"
               }

@@ -24,9 +24,11 @@ class CollectionServiceTest
 
   val service = new CollectionService(elasticClient)
 
-  def work(path: String) =
+  def work(path: String, level: CollectionLevel) =
     createIdentifiedWorkWith(
-      collection = Some(Collection(path = path)),
+      collection = Some(
+        Collection(path = path, level = level)
+      ),
       title = Some(path),
       sourceIdentifier = createSourceIdentifierWith(value = path)
     )
@@ -34,16 +36,16 @@ class CollectionServiceTest
   def storeWorks(index: Index, works: List[IdentifiedWork] = works) =
     insertIntoElasticsearch(index, works: _*)
 
-  val workA = work("a")
-  val workB = work("a/b")
-  val workC = work("a/b/c")
-  val workD = work("a/b/d")
-  val workE = work("a/e")
-  val workF = work("a/e/f")
-  val workG = work("a/e/f/g")
-  val workX = work("x")
-  val workY = work("x/y")
-  val workZ = work("x/oops/z")
+  val workA = work("a", CollectionLevel.Collection)
+  val workB = work("a/b", CollectionLevel.Series)
+  val workC = work("a/b/c", CollectionLevel.Item)
+  val workD = work("a/b/d", CollectionLevel.Item)
+  val workE = work("a/e", CollectionLevel.Series)
+  val workF = work("a/e/f", CollectionLevel.SubSeries)
+  val workG = work("a/e/f/g", CollectionLevel.Item)
+  val workX = work("x", CollectionLevel.Collection)
+  val workY = work("x/y", CollectionLevel.Series)
+  val workZ = work("x/oops/z", CollectionLevel.Item)
 
   val works =
     List(workA, workB, workC, workD, workE, workF, workG, workX, workY, workZ)
@@ -55,17 +57,28 @@ class CollectionServiceTest
         result shouldBe Right(
           CollectionTree(
             path = "a",
+            level = CollectionLevel.Collection,
             work = workA,
             children = List(
               CollectionTree(
                 path = "a/b",
+                level = CollectionLevel.Series,
                 work = workB,
                 children = List(
-                  CollectionTree(path = "a/b/c", work = workC),
-                  CollectionTree(path = "a/b/d", work = workD),
+                  CollectionTree(
+                    path = "a/b/c",
+                    level = CollectionLevel.Item,
+                    work = workC),
+                  CollectionTree(
+                    path = "a/b/d",
+                    level = CollectionLevel.Item,
+                    work = workD)
                 )
               ),
-              CollectionTree(path = "a/e", work = workE),
+              CollectionTree(
+                path = "a/e",
+                level = CollectionLevel.Series,
+                work = workE),
             )
           )
         )
@@ -80,25 +93,38 @@ class CollectionServiceTest
         result shouldBe Right(
           CollectionTree(
             path = "a",
+            level = CollectionLevel.Collection,
             work = workA,
             children = List(
               CollectionTree(
                 path = "a/b",
+                level = CollectionLevel.Series,
                 work = workB,
                 children = List(
-                  CollectionTree(path = "a/b/c", work = workC),
-                  CollectionTree(path = "a/b/d", work = workD),
+                  CollectionTree(
+                    path = "a/b/c",
+                    level = CollectionLevel.Item,
+                    work = workC),
+                  CollectionTree(
+                    path = "a/b/d",
+                    level = CollectionLevel.Item,
+                    work = workD)
                 )
               ),
               CollectionTree(
                 path = "a/e",
+                level = CollectionLevel.Series,
                 work = workE,
                 children = List(
                   CollectionTree(
                     path = "a/e/f",
+                    level = CollectionLevel.SubSeries,
                     work = workF,
                     children = List(
-                      CollectionTree(path = "a/e/f/g", work = workG)
+                      CollectionTree(
+                        path = "a/e/f/g",
+                        level = CollectionLevel.Item,
+                        work = workG)
                     )
                   ),
                 )
@@ -117,10 +143,19 @@ class CollectionServiceTest
         result shouldBe Right(
           CollectionTree(
             path = "a",
+            level = CollectionLevel.Collection,
             work = workA,
             children = List(
-              CollectionTree(path = "a/b", work = workB),
-              CollectionTree(path = "a/e", work = workE),
+              CollectionTree(
+                path = "a/b",
+                level = CollectionLevel.Series,
+                work = workB,
+              ),
+              CollectionTree(
+                path = "a/e",
+                level = CollectionLevel.Series,
+                work = workE,
+              )
             )
           )
         )
@@ -140,7 +175,7 @@ class CollectionServiceTest
 
   it("Fails creating a tree when duplicate paths") {
     withLocalWorksIndex { index =>
-      storeWorks(index, work("a/e/f/g") :: works)
+      storeWorks(index, work("a/e/f/g", CollectionLevel.Item) :: works)
       whenReady(service.retrieveTree(index, List("a/e/f"))) { result =>
         result shouldBe a[Left[_, _]]
         result.left.get.getMessage shouldBe "Tree contains duplicate paths: a/e/f/g"
@@ -150,17 +185,21 @@ class CollectionServiceTest
 
   it("Excludes larger fields from works stored in the tree") {
     withLocalWorksIndex { index =>
-      val p = work("p") withData (_.copy(items = List(createIdentifiedItem)))
-      val q = work("p/q") withData (_.copy(notes = List(GeneralNote("hi"))))
+      val p = work("p", CollectionLevel.Collection) withData (_.copy(
+        items = List(createIdentifiedItem)))
+      val q = work("p/q", CollectionLevel.Item) withData (_.copy(
+        notes = List(GeneralNote("hi"))))
       storeWorks(index, List(p, q))
       whenReady(service.retrieveTree(index, List("p/q"))) { result =>
         result shouldBe Right(
           CollectionTree(
             path = "p",
+            level = CollectionLevel.Collection,
             work = p.withData(_.copy(items = Nil)),
             children = List(
               CollectionTree(
                 path = "p/q",
+                level = CollectionLevel.Item,
                 work = q.withData(_.copy(notes = Nil)),
               )
             )

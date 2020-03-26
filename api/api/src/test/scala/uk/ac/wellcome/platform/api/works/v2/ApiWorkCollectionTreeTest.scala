@@ -4,18 +4,18 @@ import uk.ac.wellcome.models.work.internal._
 
 class ApiWorkCollectionTreeTest extends ApiV2WorksTestBase {
 
-  def work(path: String) =
+  def work(path: String, level: CollectionLevel) =
     createIdentifiedWorkWith(
-      collection = Some(Collection(path = path)),
+      collection = Some(Collection(path = path, level = level)),
       title = Some(path),
       sourceIdentifier = createSourceIdentifierWith(value = path)
     )
 
-  val workA = work("a")
-  val workB = work("a/b")
-  val workC = work("a/b/c")
-  val workD = work("a/d")
-  val workE = work("a/d/e")
+  val workA = work("a", CollectionLevel.Collection)
+  val workB = work("a/b", CollectionLevel.Series)
+  val workC = work("a/b/c", CollectionLevel.Item)
+  val workD = work("a/d", CollectionLevel.Series)
+  val workE = work("a/d/e", CollectionLevel.Item)
 
   def workJson(work: IdentifiedWork) =
     s"""
@@ -46,14 +46,17 @@ class ApiWorkCollectionTreeTest extends ApiV2WorksTestBase {
               },
               "collectionTree": {
                 "path": "a",
+                "level": "Collection",
                 "work": ${workJson(workA)},
                 "children": [
                   {
                     "path": "a/b",
+                    "level": "Series",
                     "work": ${workJson(workB)},
                     "children": [
                       {
                         "path": "a/b/c",
+                        "level": "Item",
                         "work": ${workJson(workC)},
                         "children": []
                       }
@@ -61,6 +64,7 @@ class ApiWorkCollectionTreeTest extends ApiV2WorksTestBase {
                   },
                   {
                     "path": "a/d",
+                    "level": "Series",
                     "work": ${workJson(workD)}
                   }
                 ]
@@ -91,14 +95,17 @@ class ApiWorkCollectionTreeTest extends ApiV2WorksTestBase {
               },
               "collectionTree": {
                 "path": "a",
+                "level": "Collection",
                 "work": ${workJson(workA)},
                 "children": [
                   {
                     "path": "a/b",
+                    "level": "Series",
                     "work": ${workJson(workB)},
                     "children": [
                       {
                         "path": "a/b/c",
+                        "level": "Item",
                         "work": ${workJson(workC)},
                         "children": []
                       }
@@ -106,10 +113,12 @@ class ApiWorkCollectionTreeTest extends ApiV2WorksTestBase {
                   },
                   {
                     "path": "a/d",
+                    "level": "Series",
                     "work": ${workJson(workD)},
                     "children": [
                       {
                         "path": "a/d/e",
+                        "level": "Item",
                         "work": ${workJson(workE)}
                       }
                     ]
@@ -141,14 +150,17 @@ class ApiWorkCollectionTreeTest extends ApiV2WorksTestBase {
               },
               "collectionTree": {
                 "path": "a",
+                "level": "Collection",
                 "work": ${workJson(workA)},
                 "children": [
                   {
                     "path": "a/b",
+                    "level": "Series",
                     "work": ${workJson(workB)}
                   },
                   {
                     "path": "a/d",
+                    "level": "Series",
                     "work": ${workJson(workD)}
                   }
                 ]
