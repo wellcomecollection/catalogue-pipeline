@@ -15,8 +15,8 @@ import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.{IdentifiedBaseWork, IdentifierType}
+import uk.ac.wellcome.platform.ingestor.common.fixtures.IngestorFixtures
 import uk.ac.wellcome.platform.ingestor.common.models.IngestorConfig
-import uk.ac.wellcome.platform.ingestor.works.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.storage.ObjectLocation
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -28,7 +28,7 @@ class IngestorWorkerServiceTest
     with BigMessagingFixture
     with ElasticsearchFixtures
     with SQS
-    with WorkerServiceFixture
+    with IngestorFixtures
     with WorksGenerators {
 
   it("indexes a Miro identified Work") {

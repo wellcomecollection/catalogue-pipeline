@@ -5,7 +5,7 @@ import com.sksamuel.elastic4s.requests.bulk.{BulkResponse, BulkResponseItem}
 import com.sksamuel.elastic4s.requests.common.VersionType.ExternalGte
 import com.sksamuel.elastic4s.{ElasticClient, Index, Indexable, Response}
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.elasticsearch.model.CanonicalId
+import uk.ac.wellcome.elasticsearch.model.{CanonicalId, Version}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -15,15 +15,17 @@ trait Indexer[T] extends Logging {
   implicit val ec: ExecutionContext
   implicit val indexable: Indexable[T]
   implicit val id: CanonicalId[T]
+  implicit val version: Version[T]
+  val indexName: Index
 
-  final def index(documents: Seq[T], index: Index)
+  final def index(documents: Seq[T])
     : Future[Either[Seq[T], Seq[T]]] = {
 
     debug(s"Indexing ${documents.map(d => id.canonicalId(d)).mkString(", ")}")
 
     val inserts = documents.map { document =>
-      indexInto(index.name)
-        .version(calculateEsVersion(document))
+      indexInto(indexName.name)
+        .version(version.version(document))
         .versionType(ExternalGte)
         .id(id.canonicalId(document))
         .doc(document)
@@ -57,8 +59,6 @@ trait Indexer[T] extends Logging {
         }
       }
   }
-
-  def calculateEsVersion(t: T): Int
 
   /** Did we try to PUT a document with a lower version than the existing version?
     *

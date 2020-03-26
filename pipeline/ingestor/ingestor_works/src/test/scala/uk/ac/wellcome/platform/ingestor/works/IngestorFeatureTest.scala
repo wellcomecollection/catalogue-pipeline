@@ -7,7 +7,7 @@ import uk.ac.wellcome.models.work.internal.IdentifiedBaseWork
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.platform.ingestor.works.fixtures.WorkerServiceFixture
+import uk.ac.wellcome.platform.ingestor.common.fixtures.IngestorFixtures
 
 import scala.collection.JavaConverters._
 
@@ -16,7 +16,7 @@ class IngestorFeatureTest
     with Matchers
     with JsonAssertions
     with ScalaFutures
-    with WorkerServiceFixture
+    with IngestorFixtures
     with ElasticsearchFixtures
     with WorksGenerators {
 

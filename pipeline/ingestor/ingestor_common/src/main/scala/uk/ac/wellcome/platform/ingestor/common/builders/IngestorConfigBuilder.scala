@@ -1,9 +1,7 @@
 package uk.ac.wellcome.platform.ingestor.common.builders
 
-import com.sksamuel.elastic4s.Index
 import com.typesafe.config.{Config, ConfigException}
 import uk.ac.wellcome.platform.ingestor.common.models.IngestorConfig
-import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 
 import scala.concurrent.duration._
 import scala.util.Try
@@ -16,12 +14,9 @@ object IngestorConfigBuilder {
 
     val batchSize = intFromConfig(config, "es.ingest.batchSize")
 
-    val indexName = config.required[String]("es.index")
-
     IngestorConfig(
       batchSize = batchSize,
-      flushInterval = flushInterval,
-      index = Index(indexName)
+      flushInterval = flushInterval
     )
   }
 

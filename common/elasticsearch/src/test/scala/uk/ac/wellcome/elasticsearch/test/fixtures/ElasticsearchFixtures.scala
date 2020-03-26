@@ -61,16 +61,13 @@ trait ElasticsearchFixtures
       testWith(index)
     }
 
-  private val elasticsearchIndexCreator = new ElasticsearchIndexCreator(
-    elasticClient = elasticClient
-  )
-
   def withLocalElasticsearchIndex[R](
     config: IndexConfig,
     index: Index = createIndex): Fixture[Index, R] = fixture[Index, R](
     create = {
-      elasticsearchIndexCreator
-        .create(index = index, config = config)
+      new ElasticsearchIndexCreator(
+        elasticClient = elasticClient, index = index, config = config)
+        .create
         .await
 
       // Elasticsearch is eventually consistent, so the future
@@ -186,6 +183,6 @@ trait ElasticsearchFixtures
     }
   }
 
-  private def createIndex: Index =
+  def createIndex: Index =
     Index(name = (Random.alphanumeric take 10 mkString) toLowerCase)
 }

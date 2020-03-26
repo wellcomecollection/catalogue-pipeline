@@ -1,36 +1,25 @@
 package uk.ac.wellcome.platform.ingestor.common
 
-import com.sksamuel.elastic4s.requests.mappings.MappingDefinition
-import com.sksamuel.elastic4s.{ElasticClient, Indexable}
+import com.sksamuel.elastic4s.{Index, Indexable}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{FunSpec, Matchers}
-import uk.ac.wellcome.elasticsearch.IndexConfig
-import uk.ac.wellcome.elasticsearch.model.CanonicalId
+import uk.ac.wellcome.elasticsearch.model.{CanonicalId, Version}
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
+import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
+import uk.ac.wellcome.platform.ingestor.common.fixtures.{IngestorFixtures, SampleDocument}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
-class IndexerTest extends FunSpec with ScalaFutures with Matchers with IdentifiersGenerators with ElasticsearchFixtures{
-  implicit val canonicalId: CanonicalId[SampleDocument] = (t: SampleDocument) => t.canonicalId
-  case class SampleDocument(version: Int, canonicalId: String, title: String)
-
-  val indexer = new Indexer[SampleDocument]{
-    override val client: ElasticClient = elasticClient
-    override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
-    override implicit val indexable: Indexable[SampleDocument] = (t: SampleDocument) => toJson(t).get
-    override implicit val id: CanonicalId[SampleDocument] = (t: SampleDocument) => t.canonicalId
-
-    override def calculateEsVersion(t: SampleDocument): Int = t.version
-  }
+class IndexerTest extends FunSpec with ScalaFutures with Matchers with IdentifiersGenerators with ElasticsearchFixtures with IngestorFixtures{
 
   it("inserts an identified Work into Elasticsearch") {
     val document = SampleDocument(1, createCanonicalId, randomAlphanumeric(10))
 
-    withLocalElasticsearchIndex(config = NoStrictMapping) { index =>
-      val future = indexer.index(Seq(document), index)
+    withIndexAndIndexer[SampleDocument, Any] { case (index, indexer) =>
+      val future = indexer.index(Seq(document))
 
       whenReady(future) { result =>
         result.right.get should contain(document)
@@ -42,9 +31,9 @@ class IndexerTest extends FunSpec with ScalaFutures with Matchers with Identifie
   it("only adds one record when the same ID is ingested multiple times") {
     val document = SampleDocument(1, createCanonicalId, randomAlphanumeric(10))
 
-    withLocalElasticsearchIndex(config = NoStrictMapping) { index =>
+    withIndexAndIndexer[SampleDocument, Any] { case (index, indexer) =>
       val future = Future.sequence(
-        (1 to 2).map(_ => indexer.index(Seq(document), index))
+        (1 to 2).map(_ => indexer.index(Seq(document)))
       )
 
       whenReady(future) { _ =>
@@ -57,10 +46,10 @@ class IndexerTest extends FunSpec with ScalaFutures with Matchers with Identifie
     val document = SampleDocument(3, createCanonicalId, randomAlphanumeric(10))
     val olderDocument = document.copy(version = 1)
 
-    withLocalElasticsearchIndex(config = NoStrictMapping) { index =>
+    withIndexAndIndexer[SampleDocument, Any] { case (index, indexer) =>
       val future = for {
-        _ <- indexer.index(Seq(document), index)
-        result <- indexer.index(Seq(olderDocument), index)
+        _ <- indexer.index(Seq(document))
+        result <- indexer.index(Seq(olderDocument))
       } yield result
 
       whenReady(future) { result =>
@@ -76,10 +65,10 @@ class IndexerTest extends FunSpec with ScalaFutures with Matchers with Identifie
       title = "A different title"
     )
 
-    withLocalElasticsearchIndex(config = NoStrictMapping) { index =>
+    withIndexAndIndexer[SampleDocument, Any] { case (index, indexer) =>
       val future = for {
-        _ <- indexer.index(Seq(document), index)
-        result <- indexer.index(Seq(updatedDocument), index)
+        _ <- indexer.index(Seq(document))
+        result <- indexer.index(Seq(updatedDocument))
       } yield result
 
       whenReady(future) { result =>
@@ -92,8 +81,8 @@ class IndexerTest extends FunSpec with ScalaFutures with Matchers with Identifie
   it("inserts a list of works into elasticsearch and returns them") {
     val documents = (1 to 5).map(_ => SampleDocument(1, createCanonicalId, randomAlphanumeric(10)))
 
-    withLocalElasticsearchIndex(config = NoStrictMapping) { index =>
-      val future = indexer.index(documents, index)
+    withIndexAndIndexer[SampleDocument, Any] { case (index, indexer) =>
+      val future = indexer.index(documents)
 
       whenReady(future) { successfullyInserted =>
         assertElasticsearchEventuallyHas(index = index, documents: _*)
@@ -102,10 +91,11 @@ class IndexerTest extends FunSpec with ScalaFutures with Matchers with Identifie
     }
   }
 
-  object NoStrictMapping extends IndexConfig {
-    import uk.ac.wellcome.elasticsearch.WorksIndexConfig.{analysis => defaultAnalysis}
-
-    val analysis = defaultAnalysis
-    val mapping = MappingDefinition.empty
+  def withIndexAndIndexer[T, R](testWith: TestWith[(Index,Indexer[T]), R])(implicit i: Indexable[T], c: CanonicalId[T], v: Version[T]) = {
+    withLocalElasticsearchIndex(NoStrictMapping){ index =>
+      withIndexer[T,R](index) { indexer =>
+        testWith((index,indexer))
+      }
+    }
   }
 }

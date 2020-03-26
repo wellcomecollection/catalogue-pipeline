@@ -6,7 +6,7 @@ import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
-import uk.ac.wellcome.platform.ingestor.works.fixtures.WorkerServiceFixture
+import uk.ac.wellcome.platform.ingestor.common.fixtures.IngestorFixtures
 
 class IngestorIndexTest
     extends FunSpec
@@ -15,7 +15,7 @@ class IngestorIndexTest
     with ScalaFutures
     with BigMessagingFixture
     with ElasticsearchFixtures
-    with WorkerServiceFixture {
+    with IngestorFixtures {
 
   it("creates the index at startup if it doesn't already exist") {
     val index = Index("works")
