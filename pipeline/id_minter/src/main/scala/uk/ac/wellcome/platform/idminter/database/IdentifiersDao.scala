@@ -32,25 +32,35 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
     implicit session: DBSession): Try[LookupResult] =
     Try {
       debug(s"Matching ($sourceIdentifiers)")
-      val identifierRows = sourceIdentifiers.map { id =>
-        (id.ontologyType, id.identifierType.id, id.value)
-      }
       val identifierRowsMap: Map[(String, String, String), SourceIdentifier] =
-        (identifierRows zip sourceIdentifiers).toMap
+        sourceIdentifiers.map { id =>
+          (id.ontologyType, id.identifierType.id, id.value) -> id
+        }.toMap
 
       blocking {
 
         val i = identifiers.i
-        val query = withSQL {
+        val matchRow = rowMatcherFromSyntaxProvider(i) _
 
+        // The query is manually constructed like this because using WHERE IN
+        // statements with multiple items causes a full-index scan on MySQL 5.6.
+        // See: https://stackoverflow.com/a/53180813
+        // Therefore, we perform the rewrites here on the client.
+        //
+        // Because of issues in `scalikejdbc`'s typing, it's necessary to
+        // specify the `Nothing` type parameters as done here in order for
+        // the `map` statement to work properly.
+        val query = withSQL[Nothing] {
           select
-            .from(identifiers as i)
+            .from[Nothing](identifiers as i)
             .where
-            .in(
-              (i.OntologyType, i.SourceSystem, i.SourceId),
-              identifierRows
-            )
-
+            .map { query =>
+              sourceIdentifiers.tail.foldLeft(
+                query.withRoundBracket(matchRow(sourceIdentifiers.head))
+              ) { (q, sourceIdentifier) =>
+                q.or.withRoundBracket(matchRow(sourceIdentifier))
+              }
+            }
         }.map(rs => {
             val row = getRowFromResult(i, rs)
             identifierRowsMap.get(row) match {
@@ -125,6 +135,15 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
       }
     InsertError(failedIdentifiers, exception, succeededIdentifiers)
   }
+
+  private def rowMatcherFromSyntaxProvider(i: SyntaxProvider[Identifier])(
+    sourceIdentifier: SourceIdentifier)(query: ConditionSQLBuilder[_]) =
+    query
+      .eq(i.OntologyType, sourceIdentifier.ontologyType)
+      .and
+      .eq(i.SourceSystem, sourceIdentifier.identifierType.id)
+      .and
+      .eq(i.SourceId, sourceIdentifier.value)
 
   private def getRowFromResult(i: SyntaxProvider[Identifier],
                                rs: WrappedResultSet) = {
