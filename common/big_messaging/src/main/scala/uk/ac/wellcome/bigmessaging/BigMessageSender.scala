@@ -58,7 +58,7 @@ trait BigMessageSender[Destination, T] extends Logging {
 
     (for {
       location <- typedStore.put(id)(entry)
-      _ = info(s"Successfully stored message in location: $location")
+      _ = info(s"Successfully stored message in location: ${location.id}")
       notification = RemoteNotification(id)
     } yield notification) match {
       case Right(value) =>
