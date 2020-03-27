@@ -22,6 +22,7 @@ trait IdentifiersDatabase
   val port = 3307
   val username = "root"
   val password = "password"
+  val maxSize = 8
 
   def eventuallyTableExists(tableConfig: IdentifiersTableConfig): Assertion =
     eventually {
@@ -85,7 +86,12 @@ trait IdentifiersDatabase
   def withIdentifiersDatabase[R](
     testWith: TestWith[IdentifiersTableConfig, R]): R = {
     Class.forName("com.mysql.jdbc.Driver")
-    ConnectionPool.singleton(s"jdbc:mysql://$host:$port", username, password)
+    ConnectionPool.singleton(
+      s"jdbc:mysql://$host:$port",
+      username,
+      password,
+      settings = ConnectionPoolSettings(maxSize = maxSize)
+    )
 
     implicit val session = AutoSession
 

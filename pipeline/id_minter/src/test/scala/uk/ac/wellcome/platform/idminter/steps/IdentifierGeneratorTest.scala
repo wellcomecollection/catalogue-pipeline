@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.idminter.steps
 
-import org.mockito.Matchers.anyListOf
+import org.mockito.Matchers.{any, anyListOf}
 import org.mockito.Mockito.when
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSpec, Inspectors, Matchers, OptionValues}
@@ -40,7 +40,7 @@ class IdentifierGeneratorTest
         )
 
       val identifiersDao = maybeIdentifiersDao.getOrElse(
-        new IdentifiersDao(DB.connect(), identifiersTable)
+        new IdentifiersDao(identifiersTable)
       )
 
       val identifierGenerator = new IdentifierGenerator(identifiersDao)
@@ -121,12 +121,15 @@ class IdentifierGeneratorTest
   }
 
   it("returns a failure if it fails registering new identifiers") {
+    implicit val session = AutoSession
     val identifiersDao = mock[IdentifiersDao]
 
     val sourceIdentifiers = (1 to 5).map(_ => createSourceIdentifier).toList
 
-    val triedLookup = identifiersDao.lookupIds(sourceIdentifiers)
+    when(identifiersDao.withConnection(any[DBSession => Any].apply))
+      .thenAnswer(i => i.getArguments.head.asInstanceOf[DBSession => Any](session))
 
+    val triedLookup = identifiersDao.lookupIds(sourceIdentifiers)
     when(triedLookup)
       .thenReturn(
         Success(IdentifiersDao.LookupResult(Map.empty, sourceIdentifiers)))
@@ -134,7 +137,7 @@ class IdentifierGeneratorTest
     val saveException = new Exception("Don't do that please!")
     when(
       identifiersDao.saveIdentifiers(
-        anyListOf(classOf[Identifier]).asScala.toList))
+        anyListOf(classOf[Identifier]).asScala.toList)(any[DBSession]))
       .thenThrow(IdentifiersDao.InsertError(Nil, saveException, Nil))
 
     withIdentifierGenerator(Some(identifiersDao)) {

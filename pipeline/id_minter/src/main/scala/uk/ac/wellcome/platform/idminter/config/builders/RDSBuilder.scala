@@ -2,12 +2,12 @@ package uk.ac.wellcome.platform.idminter.config.builders
 
 import scala.util.Try
 import com.typesafe.config.{Config, ConfigException}
-import scalikejdbc.{ConnectionPool, ConnectionPoolSettings, DB}
+import scalikejdbc.{ConnectionPool, ConnectionPoolSettings}
 import uk.ac.wellcome.platform.idminter.config.models.RDSClientConfig
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 
 object RDSBuilder {
-  def buildDB(config: Config): DB = {
+  def buildDB(config: Config): Unit = {
 
     // Previously this used the config.required[Int] helper, but was found to
     // be broken. See https://github.com/wellcometrust/platform/issues/3824
@@ -22,7 +22,6 @@ object RDSBuilder {
       password = rdsClientConfig.password,
       settings = ConnectionPoolSettings(maxSize = maxSize)
     )
-    DB.connect()
   }
 
   def buildRDSClientConfig(config: Config): RDSClientConfig = {

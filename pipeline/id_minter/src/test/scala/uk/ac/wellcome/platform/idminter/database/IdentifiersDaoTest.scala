@@ -19,6 +19,8 @@ class IdentifiersDaoTest
     with IdentifiersGenerators
     with SqlIdentifiersGenerators {
 
+  implicit val session: DBSession = AutoSession
+
   def withIdentifiersDao[R](existingEntries: Seq[Identifier] = Nil)(
     testWith: TestWith[(IdentifiersDao, IdentifiersTable), R]): R =
     withIdentifiersDatabase { identifiersTableConfig =>
@@ -30,7 +32,7 @@ class IdentifiersDaoTest
           tableName = identifiersTableConfig.tableName
         )
 
-      val identifiersDao = new IdentifiersDao(DB.connect(), identifiersTable)
+      val identifiersDao = new IdentifiersDao(identifiersTable)
 
       eventuallyTableExists(identifiersTableConfig)
 
