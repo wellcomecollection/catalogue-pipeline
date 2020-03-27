@@ -484,12 +484,12 @@ class ApiV2WorksIncludesTest
         val works = List(
           createIdentifiedWorkWith(
             canonicalId = "1",
-            collection =
-              Some(Collection("PP/MI", CollectionLevel.Item, Some("PP/MI")))),
+            collectionPath =
+              Some(CollectionPath("PP/MI", CollectionLevel.Item, Some("PP/MI")))),
           createIdentifiedWorkWith(
             canonicalId = "2",
-            collection = Some(
-              Collection("CRGH", CollectionLevel.Collection, Some("CRGH")))),
+            collectionPath = Some(
+              CollectionPath("CRGH", CollectionLevel.Collection, Some("CRGH")))),
         )
         insertIntoElasticsearch(indexV2, works: _*)
         assertJsonResponse(routes, s"/$apiPrefix/works?include=collection") {
@@ -502,7 +502,7 @@ class ApiV2WorksIncludesTest
                    "id": "${works.head.canonicalId}",
                    "title": "${works.head.data.title.get}",
                    "alternativeTitles": [],
-                   "collection": {
+                   "collectionPath": {
                       "label": "PP/MI",
                       "path": "PP/MI",
                       "type" : "Collection"
@@ -513,7 +513,7 @@ class ApiV2WorksIncludesTest
                    "id": "${works(1).canonicalId}",
                    "title": "${works(1).data.title.get}",
                    "alternativeTitles": [],
-                   "collection": {
+                   "collectionPath": {
                       "label": "CRGH",
                       "path": "CRGH",
                       "type" : "Collection"
@@ -531,8 +531,8 @@ class ApiV2WorksIncludesTest
     withApi {
       case (indexV2, routes) =>
         val work = createIdentifiedWorkWith(
-          collection =
-            Some(Collection("PP/MI", CollectionLevel.Item, Some("PP/MI"))))
+          collectionPath =
+            Some(CollectionPath("PP/MI", CollectionLevel.Item, Some("PP/MI"))))
         insertIntoElasticsearch(indexV2, work)
         assertJsonResponse(
           routes,
@@ -543,10 +543,10 @@ class ApiV2WorksIncludesTest
               "id": "${work.canonicalId}",
               "title": "${work.data.title.get}",
               "alternativeTitles": [],
-              "collection": {
+              "collectionPath": {
                 "label": "PP/MI",
                 "path": "PP/MI",
-                "type" : "Collection"
+                "type" : "CollectionPath"
               }
             }
           """

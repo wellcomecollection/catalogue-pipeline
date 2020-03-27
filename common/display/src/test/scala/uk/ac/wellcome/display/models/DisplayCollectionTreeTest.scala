@@ -13,7 +13,7 @@ class DisplayCollectionTreeTest
 
   def work(path: String, level: CollectionLevel) =
     createIdentifiedWorkWith(
-      collection = Some(Collection(path = path, level = level)))
+      collectionPath = Some(CollectionPath(path = path, level = level)))
 
   it("creates a display tree with a path expanded") {
     val a = work("a", CollectionLevel.Collection)
@@ -50,8 +50,8 @@ class DisplayCollectionTreeTest
   it("creates a display tree with labels") {
     val a = work("a", CollectionLevel.Collection)
     val b = createIdentifiedWorkWith(
-      collection = Some(
-        Collection(
+      collectionPath = Some(
+        CollectionPath(
           path = "a/b",
           level = CollectionLevel.Item,
           label = Some("!!!"))))

@@ -42,8 +42,8 @@ object CollectionTree {
   def apply(works: List[IdentifiedWork]): Result[CollectionTree] =
     works
       .map { work =>
-        work.data.collection match {
-          case Some(Collection(path, _, _)) => Right(tokenize(path) -> work)
+        work.data.collectionPath match {
+          case Some(CollectionPath(path, _, _)) => Right(tokenize(path) -> work)
           case None =>
             Left(
               new Exception(
@@ -70,8 +70,8 @@ object CollectionTree {
         CollectionTree(
           path = join(path),
           work = work,
-          label = work.data.collection.get.label,
-          level = work.data.collection.get.level,
+          label = work.data.collectionPath.get.label,
+          level = work.data.collectionPath.get.level,
           children = children.map {
             case (childPath, childWork) =>
               val childDescendents = descendents.filter {
@@ -89,7 +89,7 @@ object CollectionTree {
     val pathList = tree.pathList
     if (pathList.length < works.length) {
       val unconnected =
-        works.map(_.data.collection.get.path).filterNot(pathList.toSet)
+        works.map(_.data.collectionPath.get.path).filterNot(pathList.toSet)
       Some(
         new Exception(
           s"Not all works in collection are connected to root '${tree.path}': ${unconnected

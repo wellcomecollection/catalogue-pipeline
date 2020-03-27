@@ -1,6 +1,6 @@
 package uk.ac.wellcome.models.work.internal
 
-case class Collection(
+case class CollectionPath(
   path: String,
   level: CollectionLevel,
   label: Option[String] = None,

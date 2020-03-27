@@ -466,7 +466,7 @@ class PlatformMergerTest
     val calmWork = createUnidentifiedCalmWork(
       data = WorkData(
         title = Some("123"),
-        collection = Some(Collection("ref/no", CollectionLevel.Item)),
+        collectionPath = Some(CollectionPath("ref/no", CollectionLevel.Item)),
         physicalDescription = Some("description"),
         contributors = List(Contributor(Agent("agent"), Nil)),
         subjects = List(Subject("subject", Nil)),
@@ -484,7 +484,7 @@ class PlatformMergerTest
     val work = works(1).asInstanceOf[UnidentifiedWork]
     work.sourceIdentifier shouldBe sierraPhysicalWork.sourceIdentifier
     work.data.title shouldBe calmWork.data.title
-    work.data.collection shouldBe calmWork.data.collection
+    work.data.collectionPath shouldBe calmWork.data.collectionPath
     work.data.physicalDescription shouldBe calmWork.data.physicalDescription
     work.data.contributors shouldBe calmWork.data.contributors
     work.data.subjects shouldBe calmWork.data.subjects

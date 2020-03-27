@@ -39,14 +39,14 @@ object CalmTransformer extends Transformer[CalmRecord] with CalmOps {
       accessStatus <- accessStatus(record)
       title <- title(record)
       collectionLevel <- collectionLevel(record)
-      collection <- collection(record, collectionLevel)
+      collectionPath <- collectionPath(record, collectionLevel)
       language <- language(record)
     } yield
       WorkData(
         title = Some(title),
         otherIdentifiers = otherIdentifiers(record),
         workType = Some(workType(collectionLevel)),
-        collection = Some(collection),
+        collectionPath = Some(collectionPath),
         subjects = subjects(record),
         language = language,
         mergeCandidates = mergeCandidates(record),
@@ -98,13 +98,13 @@ object CalmTransformer extends Transformer[CalmRecord] with CalmOps {
       case CollectionLevel.Item       => WorkType.ArchiveItem
     }
 
-  def collection(record: CalmRecord,
-                 level: CollectionLevel): Result[Collection] =
+  def collectionPath(record: CalmRecord,
+                     level: CollectionLevel): Result[CollectionPath] =
     record
       .get("RefNo")
       .map { path =>
         Right(
-          Collection(path = path, level = level, label = record.get("AltRefNo"))
+          CollectionPath(path = path, level = level, label = record.get("AltRefNo"))
         )
       }
       .getOrElse(Left(new Exception("RefNo field not found")))

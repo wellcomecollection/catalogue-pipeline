@@ -26,8 +26,8 @@ class CollectionServiceTest
 
   def work(path: String, level: CollectionLevel) =
     createIdentifiedWorkWith(
-      collection = Some(
-        Collection(path = path, level = level)
+      collectionPath = Some(
+        CollectionPath(path = path, level = level)
       ),
       title = Some(path),
       sourceIdentifier = createSourceIdentifierWith(value = path)

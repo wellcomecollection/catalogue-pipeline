@@ -7,7 +7,7 @@ class CollectionTreeTest extends FunSpec with Matchers with WorksGenerators {
 
   def work(path: String, level: CollectionLevel) =
     createIdentifiedWorkWith(
-      collection = Some(Collection(path = path, level = level)))
+      collectionPath = Some(CollectionPath(path = path, level = level)))
 
   it("creates a tree from a connected list of works") {
     val a = work("a", CollectionLevel.Collection)
@@ -51,8 +51,8 @@ class CollectionTreeTest extends FunSpec with Matchers with WorksGenerators {
   it("carries over collection labels to the tree") {
     val a = work("a", CollectionLevel.Collection)
     val b = createIdentifiedWorkWith(
-      collection = Some(
-        Collection(
+      collectionPath = Some(
+        CollectionPath(
           path = "a/b",
           level = CollectionLevel.Item,
           label = Some("!!!")))
@@ -102,7 +102,7 @@ class CollectionTreeTest extends FunSpec with Matchers with WorksGenerators {
   it("errors creating a tree when not all works are part of a collection") {
     val x = work("x", CollectionLevel.Collection)
     val y = work("x/y", CollectionLevel.Series)
-    val z = createIdentifiedWorkWith(collection = None)
+    val z = createIdentifiedWorkWith(collectionPath = None)
     val result = CollectionTree(List(x, y, z))
     result shouldBe a[Left[_, _]]
   }
