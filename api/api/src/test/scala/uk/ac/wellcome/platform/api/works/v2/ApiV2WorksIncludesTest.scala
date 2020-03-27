@@ -505,7 +505,8 @@ class ApiV2WorksIncludesTest
                    "collectionPath": {
                       "label": "PP/MI",
                       "path": "PP/MI",
-                      "type" : "Collection"
+                      "level": "Item",
+                      "type" : "CollectionPath"
                    }
                  },
                  {
@@ -516,7 +517,8 @@ class ApiV2WorksIncludesTest
                    "collectionPath": {
                       "label": "CRGH",
                       "path": "CRGH",
-                      "type" : "Collection"
+                      "level": "Collection",
+                      "type" : "CollectionPath"
                    }
                 }
               ]
@@ -546,6 +548,7 @@ class ApiV2WorksIncludesTest
               "collectionPath": {
                 "label": "PP/MI",
                 "path": "PP/MI",
+                "level": "Item",
                 "type" : "CollectionPath"
               }
             }

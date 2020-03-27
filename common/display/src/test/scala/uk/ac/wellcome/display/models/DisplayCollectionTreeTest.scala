@@ -3,7 +3,7 @@ package uk.ac.wellcome.display.models
 import org.scalatest.{FunSpec, Matchers}
 
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.display.models.v2.DisplayWorkV2
+import uk.ac.wellcome.display.models.v2._
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 
 class DisplayCollectionTreeTest
@@ -22,20 +22,17 @@ class DisplayCollectionTreeTest
     val tree = CollectionTree(List(a, b, c)).right.get
     DisplayCollectionTree(tree, List("a/b/c")) shouldBe
       DisplayCollectionTree(
-        path = "a",
-        level = "Collection",
+        path = DisplayCollectionPath("a", "Collection"),
         work = DisplayWorkV2(a),
         children = Some(
           List(
             DisplayCollectionTree(
-              path = "a/b",
-              level = "Series",
+              path = DisplayCollectionPath("a/b", "Series"),
               work = DisplayWorkV2(b),
               children = Some(
                 List(
                   DisplayCollectionTree(
-                    path = "a/b/c",
-                    level = "Item",
+                    path = DisplayCollectionPath("a/b/c", "Item"),
                     work = DisplayWorkV2(c),
                     children = Some(Nil)
                   )
@@ -58,15 +55,12 @@ class DisplayCollectionTreeTest
     val tree = CollectionTree(List(a, b)).right.get
     DisplayCollectionTree(tree, List("a")) shouldBe
       DisplayCollectionTree(
-        path = "a",
-        level = "Collection",
+        path = DisplayCollectionPath("a", "Collection"),
         work = DisplayWorkV2(a),
         children = Some(
           List(
             DisplayCollectionTree(
-              path = "a/b",
-              level = "Item",
-              label = Some("!!!"),
+              path = DisplayCollectionPath("a/b", "Item", Some("!!!")),
               work = DisplayWorkV2(b),
             )
           )
@@ -83,20 +77,17 @@ class DisplayCollectionTreeTest
     val tree = CollectionTree(List(a, b, c, d, e)).right.get
     DisplayCollectionTree(tree, List("a/b/c", "a/d/e")) shouldBe
       DisplayCollectionTree(
-        path = "a",
-        level = "Collection",
+        path = DisplayCollectionPath("a", "Collection"),
         work = DisplayWorkV2(a),
         children = Some(
           List(
             DisplayCollectionTree(
-              path = "a/b",
-              level = "Series",
+              path = DisplayCollectionPath("a/b", "Series"),
               work = DisplayWorkV2(b),
               children = Some(
                 List(
                   DisplayCollectionTree(
-                    path = "a/b/c",
-                    level = "Item",
+                    path = DisplayCollectionPath("a/b/c", "Item"),
                     work = DisplayWorkV2(c),
                     children = Some(Nil)
                   )
@@ -104,14 +95,12 @@ class DisplayCollectionTreeTest
               )
             ),
             DisplayCollectionTree(
-              path = "a/d",
-              level = "Series",
+              path = DisplayCollectionPath("a/d", "Series"),
               work = DisplayWorkV2(d),
               children = Some(
                 List(
                   DisplayCollectionTree(
-                    path = "a/d/e",
-                    level = "Item",
+                    path = DisplayCollectionPath("a/d/e", "Item"),
                     work = DisplayWorkV2(e),
                     children = Some(Nil)
                   )
@@ -132,26 +121,22 @@ class DisplayCollectionTreeTest
     val tree = CollectionTree(List(a, b, c, d, e)).right.get
     DisplayCollectionTree(tree, List("a/b/c")) shouldBe
       DisplayCollectionTree(
-        path = "a",
-        level = "Collection",
+        path = DisplayCollectionPath("a", "Collection"),
         work = DisplayWorkV2(a),
         children = Some(
           List(
             DisplayCollectionTree(
-              path = "a/b",
-              level = "Series",
+              path = DisplayCollectionPath("a/b", "Series"),
               work = DisplayWorkV2(b),
               children = Some(
                 List(
                   DisplayCollectionTree(
-                    path = "a/b/c",
-                    level = "Item",
+                    path = DisplayCollectionPath("a/b/c", "Item"),
                     work = DisplayWorkV2(c),
                     children = Some(Nil)
                   ),
                   DisplayCollectionTree(
-                    path = "a/b/e",
-                    level = "Item",
+                    path = DisplayCollectionPath("a/b/e", "Item"),
                     work = DisplayWorkV2(e),
                     children = None
                   ),
@@ -159,8 +144,7 @@ class DisplayCollectionTreeTest
               )
             ),
             DisplayCollectionTree(
-              path = "a/d",
-              level = "Item",
+              path = DisplayCollectionPath("a/d", "Item"),
               work = DisplayWorkV2(d),
               children = None
             )
@@ -178,20 +162,17 @@ class DisplayCollectionTreeTest
     val tree = CollectionTree(List(a, b, c, d, e)).right.get
     DisplayCollectionTree(tree, List("a/b")) shouldBe
       DisplayCollectionTree(
-        path = "a",
-        level = "Collection",
+        path = DisplayCollectionPath("a", "Collection"),
         work = DisplayWorkV2(a),
         children = Some(
           List(
             DisplayCollectionTree(
-              path = "a/b",
-              level = "Series",
+              path = DisplayCollectionPath("a/b", "Series"),
               work = DisplayWorkV2(b),
               children = Some(
                 List(
                   DisplayCollectionTree(
-                    path = "a/b/c",
-                    level = "Item",
+                    path = DisplayCollectionPath("a/b/c", "Item"),
                     work = DisplayWorkV2(c),
                     children = None
                   )
@@ -199,8 +180,7 @@ class DisplayCollectionTreeTest
               )
             ),
             DisplayCollectionTree(
-              path = "a/d",
-              level = "Series",
+              path = DisplayCollectionPath("a/d", "Series"),
               work = DisplayWorkV2(d),
               children = None
             )

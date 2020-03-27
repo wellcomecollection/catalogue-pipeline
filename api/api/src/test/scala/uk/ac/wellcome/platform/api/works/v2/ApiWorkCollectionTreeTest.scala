@@ -42,29 +42,26 @@ class ApiWorkCollectionTreeTest extends ApiV2WorksTestBase {
               "alternativeTitles": [],
               "collectionPath": {
                 "path": "a/b/c",
-                "type": "Collection"
+                "level": "Item",
+                "type": "CollectionPath"
               },
               "collectionTree": {
-                "path": "a",
-                "level": "Collection",
+                "path": { "path": "a", "level": "Collection", "type": "CollectionPath" },
                 "work": ${workJson(workA)},
                 "children": [
                   {
-                    "path": "a/b",
-                    "level": "Series",
+                    "path": { "path": "a/b", "level": "Series", "type": "CollectionPath" },
                     "work": ${workJson(workB)},
                     "children": [
                       {
-                        "path": "a/b/c",
-                        "level": "Item",
+                        "path": { "path": "a/b/c", "level": "Item", "type": "CollectionPath" },
                         "work": ${workJson(workC)},
                         "children": []
                       }
                     ]
                   },
                   {
-                    "path": "a/d",
-                    "level": "Series",
+                    "path": { "path": "a/d", "level": "Series", "type": "CollectionPath" },
                     "work": ${workJson(workD)}
                   }
                 ]
@@ -91,34 +88,30 @@ class ApiWorkCollectionTreeTest extends ApiV2WorksTestBase {
               "alternativeTitles": [],
               "collectionPath": {
                 "path": "a/b",
-                "type": "Collection"
+                "level": "Series",
+                "type": "CollectionPath"
               },
               "collectionTree": {
-                "path": "a",
-                "level": "Collection",
+                "path": { "path": "a", "level": "Collection", "type": "CollectionPath" },
                 "work": ${workJson(workA)},
                 "children": [
                   {
-                    "path": "a/b",
-                    "level": "Series",
+                    "path": { "path": "a/b", "level": "Series", "type": "CollectionPath" },
                     "work": ${workJson(workB)},
                     "children": [
                       {
-                        "path": "a/b/c",
-                        "level": "Item",
+                        "path": { "path": "a/b/c", "level": "Item", "type": "CollectionPath" },
                         "work": ${workJson(workC)},
                         "children": []
                       }
                     ]
                   },
                   {
-                    "path": "a/d",
-                    "level": "Series",
+                    "path": { "path": "a/d", "level": "Series", "type": "CollectionPath" },
                     "work": ${workJson(workD)},
                     "children": [
                       {
-                        "path": "a/d/e",
-                        "level": "Item",
+                        "path": { "path": "a/d/e", "level": "Item", "type": "CollectionPath" },
                         "work": ${workJson(workE)}
                       }
                     ]
@@ -146,21 +139,19 @@ class ApiWorkCollectionTreeTest extends ApiV2WorksTestBase {
               "alternativeTitles": [],
               "collectionPath": {
                 "path": "a",
-                "type": "Collection"
+                "level": "Collection",
+                "type": "CollectionPath"
               },
               "collectionTree": {
-                "path": "a",
-                "level": "Collection",
+                "path": { "path": "a", "level": "Collection", "type": "CollectionPath" },
                 "work": ${workJson(workA)},
                 "children": [
                   {
-                    "path": "a/b",
-                    "level": "Series",
+                    "path": { "path": "a/b", "level": "Series", "type": "CollectionPath" },
                     "work": ${workJson(workB)}
                   },
                   {
-                    "path": "a/d",
-                    "level": "Series",
+                    "path": { "path": "a/d", "level": "Series", "type": "CollectionPath" },
                     "work": ${workJson(workD)}
                   }
                 ]
@@ -186,6 +177,7 @@ class ApiWorkCollectionTreeTest extends ApiV2WorksTestBase {
               "alternativeTitles": [],
               "collectionPath": {
                 "path": "a/b/c",
+                "level": "Item",
                 "type": "CollectionPath"
               }
             }
@@ -209,6 +201,7 @@ class ApiWorkCollectionTreeTest extends ApiV2WorksTestBase {
               "alternativeTitles": [],
               "collectionPath": {
                 "path": "a/d/e",
+                "level": "Item",
                 "type": "CollectionPath"
               }
             }

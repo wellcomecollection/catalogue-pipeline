@@ -9,15 +9,35 @@ import uk.ac.wellcome.models.work.internal._
   description = "A collection that a work is part of"
 )
 case class DisplayCollectionPath(
-  @Schema(description = "The label of the collection") label: Option[String],
-  @Schema(description = "Where in the hierarchy a work is in the collection") path: String,
-  @JsonKey("type") @Schema(name = "type") ontologyType: String = "Collection"
+  @Schema(
+    description = "Where in the hierarchy a work is in the collection"
+  ) path: String,
+  @Schema(
+    description =
+      "The level of the node. Either Collection, Section, Series, SubSeries or Item"
+  ) level: String,
+  @Schema(
+    description = "The label of the collection"
+  ) label: Option[String] = None,
+  @JsonKey("type") @Schema(name = "type") ontologyType: String = "CollectionPath"
 )
 
 object DisplayCollectionPath {
   def apply(collectionPath: CollectionPath): DisplayCollectionPath =
     DisplayCollectionPath(
+      path = collectionPath.path,
+      level = DisplayCollectionLevel(collectionPath.level),
       label = collectionPath.label,
-      path = collectionPath.path
     )
+}
+
+object DisplayCollectionLevel {
+
+  def apply(level: CollectionLevel): String =
+    level match {
+      case CollectionLevel.Collection => "Collection"
+      case CollectionLevel.Section    => "Section"
+      case CollectionLevel.Series     => "Series"
+      case CollectionLevel.Item       => "Item"
+    }
 }

@@ -11,21 +11,19 @@ import cats.implicits._
   * representing its position.
   */
 case class CollectionTree(
-  path: String,
+  path: CollectionPath,
   work: IdentifiedWork,
-  level: CollectionLevel,
-  children: List[CollectionTree] = Nil,
-  label: Option[String] = None
+  children: List[CollectionTree] = Nil
 ) {
 
   def size: Int =
     children.map(_.size).sum + 1
 
   def pathList: List[String] =
-    path :: children.flatMap(_.pathList)
+    path.path :: children.flatMap(_.pathList)
 
   def isRoot: Boolean =
-    !path.contains("/")
+    path.depth == 1
 }
 
 object CollectionTree {
@@ -43,7 +41,7 @@ object CollectionTree {
     works
       .map { work =>
         work.data.collectionPath match {
-          case Some(CollectionPath(path, _, _)) => Right(tokenize(path) -> work)
+          case Some(path) => Right(path -> work)
           case None =>
             Left(
               new Exception(
@@ -59,23 +57,19 @@ object CollectionTree {
         checkTreeErrors(tree, works).map(Left(_)).getOrElse(Right(tree))
       }
 
-  private type Path = List[String]
-
-  private def apply(workMapping: NonEmptyList[(Path, IdentifiedWork)],
+  private def apply(workMapping: NonEmptyList[(CollectionPath, IdentifiedWork)],
                     depth: Int): CollectionTree =
-    workMapping.sortBy { case (path, _) => path.length } match {
+    workMapping.sortBy { case (path, _) => path.tokens.length } match {
       case NonEmptyList((path, work), tail) =>
         val childDepth = depth + 1
-        val (children, descendents) = tail.span(_._1.length == childDepth)
+        val (children, descendents) = tail.span(_._1.depth == childDepth)
         CollectionTree(
-          path = join(path),
+          path = path,
           work = work,
-          label = work.data.collectionPath.get.label,
-          level = work.data.collectionPath.get.level,
           children = children.map {
             case (childPath, childWork) =>
               val childDescendents = descendents.filter {
-                case (path, _) => isDescendentPath(path, childPath)
+                case (path, _) => path.isDescendent(childPath)
               }
               apply(
                 NonEmptyList(childPath -> childWork, childDescendents),
@@ -92,7 +86,7 @@ object CollectionTree {
         works.map(_.data.collectionPath.get.path).filterNot(pathList.toSet)
       Some(
         new Exception(
-          s"Not all works in collection are connected to root '${tree.path}': ${unconnected
+          s"Not all works in collection are connected to root '${tree.path.path}': ${unconnected
             .mkString(",")}"))
     } else if (pathList.length > pathList.toSet.size) {
       val duplicates = pathList.diff(pathList.distinct).distinct
@@ -102,13 +96,4 @@ object CollectionTree {
     } else
       None
   }
-
-  private def tokenize(path: String): Path =
-    path.split("/").toList
-
-  private def join(tokens: List[String]): String =
-    tokens.mkString("/")
-
-  private def isDescendentPath(path: Path, other: Path): Boolean =
-    path.slice(0, other.length) == other
 }

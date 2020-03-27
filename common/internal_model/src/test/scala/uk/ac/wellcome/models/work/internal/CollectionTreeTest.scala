@@ -17,30 +17,25 @@ class CollectionTreeTest extends FunSpec with Matchers with WorksGenerators {
     val e = work("a/b/e", CollectionLevel.Item)
     CollectionTree(List(b, d, a, c, e)) shouldBe Right(
       CollectionTree(
-        path = "a",
-        level = CollectionLevel.Collection,
+        path = CollectionPath("a", CollectionLevel.Collection),
         work = a,
         children = List(
           CollectionTree(
-            path = "a/b",
-            level = CollectionLevel.Series,
+            path = CollectionPath("a/b", CollectionLevel.Series),
             work = b,
             children = List(
               CollectionTree(
-                path = "a/b/c",
-                level = CollectionLevel.Item,
+                path = CollectionPath("a/b/c", CollectionLevel.Item),
                 work = c
               ),
               CollectionTree(
-                path = "a/b/e",
-                level = CollectionLevel.Item,
+                path = CollectionPath("a/b/e", CollectionLevel.Item),
                 work = e
               ),
             ),
           ),
           CollectionTree(
-            path = "a/d",
-            level = CollectionLevel.Series,
+            path = CollectionPath("a/d", CollectionLevel.Series),
             work = d
           )
         )
@@ -59,15 +54,12 @@ class CollectionTreeTest extends FunSpec with Matchers with WorksGenerators {
     )
     CollectionTree(List(a, b)) shouldBe Right(
       CollectionTree(
-        path = "a",
-        level = CollectionLevel.Collection,
+        path = CollectionPath("a", CollectionLevel.Collection),
         work = a,
         children = List(
           CollectionTree(
-            path = "a/b",
-            level = CollectionLevel.Item,
-            work = b,
-            label = Some("!!!")
+            path = CollectionPath("a/b", CollectionLevel.Item, Some("!!!")),
+            work = b
           )
         )
       )

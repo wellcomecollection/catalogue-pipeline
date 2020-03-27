@@ -114,7 +114,7 @@ class IndexConfigTest
   // the potentially fails at PUT index time, we urn this test
   // e.g. copy_to was previously set to `collection.depth`
   // which would not work as the mapping is strict and `collection`
-  // only exists at the `data.collection` level
+  // only exists at the `data.collectionPath` level
   it("puts a work with a collection") {
     val collectionPath =
       Some(
