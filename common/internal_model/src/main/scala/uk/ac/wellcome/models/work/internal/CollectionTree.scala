@@ -84,10 +84,9 @@ object CollectionTree {
     if (pathList.length < works.length) {
       val unconnected =
         works.map(_.data.collectionPath.get.path).filterNot(pathList.toSet)
-      Some(
-        new Exception(
-          s"Not all works in collection are connected to root '${tree.path.path}': ${unconnected
-            .mkString(",")}"))
+      Some(new Exception(
+        s"Not all works in collection are connected to root '${tree.path.path}': ${unconnected
+          .mkString(",")}"))
     } else if (pathList.length > pathList.toSet.size) {
       val duplicates = pathList.diff(pathList.distinct).distinct
       Some(

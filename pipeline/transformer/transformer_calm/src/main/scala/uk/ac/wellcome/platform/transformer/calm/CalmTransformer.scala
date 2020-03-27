@@ -104,7 +104,10 @@ object CalmTransformer extends Transformer[CalmRecord] with CalmOps {
       .get("RefNo")
       .map { path =>
         Right(
-          CollectionPath(path = path, level = level, label = record.get("AltRefNo"))
+          CollectionPath(
+            path = path,
+            level = level,
+            label = record.get("AltRefNo"))
         )
       }
       .getOrElse(Left(new Exception("RefNo field not found")))

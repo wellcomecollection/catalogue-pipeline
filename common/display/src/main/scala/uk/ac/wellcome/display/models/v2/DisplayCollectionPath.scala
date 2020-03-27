@@ -19,7 +19,8 @@ case class DisplayCollectionPath(
   @Schema(
     description = "The label of the collection"
   ) label: Option[String] = None,
-  @JsonKey("type") @Schema(name = "type") ontologyType: String = "CollectionPath"
+  @JsonKey("type") @Schema(name = "type") ontologyType: String =
+    "CollectionPath"
 )
 
 object DisplayCollectionPath {

@@ -58,7 +58,9 @@ case class CollectionRequestBuilder(index: Index,
     */
   def getNodeQuery(path: String): Query =
     must(
-      termQuery(field = "data.collectionPath.depth", value = tokenize(path).length),
+      termQuery(
+        field = "data.collectionPath.depth",
+        value = tokenize(path).length),
       termQuery(field = "data.collectionPath.path", value = path)
     )
 

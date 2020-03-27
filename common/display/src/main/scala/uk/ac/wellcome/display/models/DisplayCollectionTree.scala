@@ -11,8 +11,7 @@ import uk.ac.wellcome.display.models.v2._
 )
 case class DisplayCollectionTree(
   @Schema(
-    description =
-      "A path containing the position within the hierarchy."
+    description = "A path containing the position within the hierarchy."
   ) path: DisplayCollectionPath,
   @Schema(
     description =
@@ -38,6 +37,7 @@ object DisplayCollectionTree {
           None
     )
 
-  private def isExpanded(path: CollectionPath, expandedPaths: List[String]): Boolean =
+  private def isExpanded(path: CollectionPath,
+                         expandedPaths: List[String]): Boolean =
     expandedPaths.exists(_.startsWith(path.path))
 }

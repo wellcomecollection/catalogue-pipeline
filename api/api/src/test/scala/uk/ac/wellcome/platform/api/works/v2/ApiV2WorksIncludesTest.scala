@@ -484,12 +484,15 @@ class ApiV2WorksIncludesTest
         val works = List(
           createIdentifiedWorkWith(
             canonicalId = "1",
-            collectionPath =
-              Some(CollectionPath("PP/MI", CollectionLevel.Item, Some("PP/MI")))),
+            collectionPath = Some(
+              CollectionPath("PP/MI", CollectionLevel.Item, Some("PP/MI")))),
           createIdentifiedWorkWith(
             canonicalId = "2",
             collectionPath = Some(
-              CollectionPath("CRGH", CollectionLevel.Collection, Some("CRGH")))),
+              CollectionPath(
+                "CRGH",
+                CollectionLevel.Collection,
+                Some("CRGH")))),
         )
         insertIntoElasticsearch(indexV2, works: _*)
         assertJsonResponse(routes, s"/$apiPrefix/works?include=collection") {
