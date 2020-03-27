@@ -130,44 +130,7 @@ class WorkIndexerTest
     }
   }
 
-  object WorksWithNoEditionIndexConfig extends IndexConfig {
-    import uk.ac.wellcome.elasticsearch.WorksIndexConfig.{fields, analysis => defaultAnalysis}
 
-    val fieldsWithNoEdition = fields.map {
-      case data: ObjectField if data.name == "data" =>
-        data.copy(fields = data.fields.filter {
-          case edition: TextField if edition.name == "edition" => false
-          case _                                               => true
-        })
-      case field => field
-    }
-
-    val analysis = defaultAnalysis
-    val mapping = properties(fieldsWithNoEdition).dynamic(DynamicMapping.Strict)
-  }
-
-  it("returns a list of Works that weren't indexed correctly") {
-    val validWorks = createIdentifiedInvisibleWorks(count = 5)
-    val notMatchingMappingWork = createIdentifiedWorkWith(
-      edition = Some("An edition")
-    )
-
-    val works = validWorks :+ notMatchingMappingWork
-
-    withLocalElasticsearchIndex(config = WorksWithNoEditionIndexConfig) {
-      index =>
-        val future = workIndexer.index(
-          documents = works,
-          index = index
-        )
-
-        whenReady(future) { result =>
-          assertElasticsearchEventuallyHasWork(index = index, validWorks: _*)
-          assertElasticsearchNeverHasWork(index = index, notMatchingMappingWork)
-          result.left.get should contain only (notMatchingMappingWork)
-        }
-    }
-  }
 
   private def ingestWorkPairInOrder(firstWork: IdentifiedBaseWork,
                                     secondWork: IdentifiedBaseWork,

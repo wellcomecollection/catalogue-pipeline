@@ -29,7 +29,7 @@ class IngestorWorkerServiceTest extends FunSpec with IngestorFixtures with Ident
     }
 
   it("ingests multiple documents"){
-    val documents = (1 to 5).map( _ => SampleDocument(1, createCanonicalId, randomAlphanumeric))
+    val documents = (1 to 250).map( _ => SampleDocument(1, createCanonicalId, randomAlphanumeric))
     withLocalSqsQueueAndDlqAndTimeout(visibilityTimeout = 10) { case QueuePair(queue, dlq) =>
       documents.foreach(document => sendMessage[SampleDocument](queue = queue, obj = document))
       val index = createIndex

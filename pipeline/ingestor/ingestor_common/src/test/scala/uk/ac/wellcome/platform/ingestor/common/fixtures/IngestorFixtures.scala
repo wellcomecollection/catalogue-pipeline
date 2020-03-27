@@ -23,7 +23,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import uk.ac.wellcome.json.JsonUtil._
 
-case class SampleDocument(version: Int, canonicalId: String, title: String)
+case class SampleDocument(version: Int, canonicalId: String, title: String, data: Option[String]= None)
 object SampleDocument {
   implicit val canonicalId: CanonicalId[SampleDocument] = (t: SampleDocument) => t.canonicalId
   implicit val indexable: Indexable[SampleDocument] = (t: SampleDocument) => toJson(t).get
