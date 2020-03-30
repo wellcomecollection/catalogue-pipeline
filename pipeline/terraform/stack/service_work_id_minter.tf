@@ -40,8 +40,8 @@ module "work_id_minter" {
     db_password = "catalogue/id_minter/rds_password"
   }
 
-  // The maximum number of connections to RDS is 45.
-  // Each id minter task is configured to have 4 connections
+  // The maximum number of connections to RDS is 90.
+  // Each id minter task is configured to have 8 connections
   // in the connection pool (see `max_connections` parameter above).
   // To avoid exceeding the maximum nuber of connections to RDS,
   // the maximum capacity for *EACH* id minter  (ie the total
