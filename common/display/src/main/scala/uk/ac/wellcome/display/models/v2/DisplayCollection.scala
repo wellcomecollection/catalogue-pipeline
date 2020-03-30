@@ -4,7 +4,6 @@ import io.circe.generic.extras.JsonKey
 import io.swagger.v3.oas.annotations.media.Schema
 
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.display.models.v2._
 
 @Schema(
   name = "Collection",
