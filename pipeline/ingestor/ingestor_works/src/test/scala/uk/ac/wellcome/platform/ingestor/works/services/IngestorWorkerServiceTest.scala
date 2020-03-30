@@ -1,23 +1,16 @@
 package uk.ac.wellcome.platform.ingestor.works.services
 
-import com.sksamuel.elastic4s.ElasticClient
-import com.sksamuel.elastic4s.http.JavaClient
-import org.apache.http.HttpHost
-import org.elasticsearch.client.RestClient
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Assertion, FunSpec, Matchers}
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
-import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
-import uk.ac.wellcome.elasticsearch.ElasticCredentials
-import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.{IdentifiedBaseWork, IdentifierType}
 import uk.ac.wellcome.platform.ingestor.common.fixtures.IngestorFixtures
-import uk.ac.wellcome.platform.ingestor.common.models.IngestorConfig
-import uk.ac.wellcome.storage.ObjectLocation
+import uk.ac.wellcome.platform.ingestor.works.config.WorksIndexConfig
+import uk.ac.wellcome.platform.ingestor.works.fixtures.IngestorWorksFixtures
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -26,7 +19,7 @@ class IngestorWorkerServiceTest
     with ScalaFutures
     with Matchers
     with BigMessagingFixture
-    with ElasticsearchFixtures
+    with IngestorWorksFixtures
     with SQS
     with IngestorFixtures
     with WorksGenerators {
@@ -126,67 +119,12 @@ class IngestorWorkerServiceTest
     assertWorksIndexedCorrectly(works: _*)
   }
 
-  it("ingests lots of works") {
-    val works = createIdentifiedWorks(count = 250)
-
-    assertWorksIndexedCorrectly(works: _*)
-  }
-
-  it("when we cannot verify an index exists throw an exception") {
-    withLocalWorksIndex { index =>
-      withLocalSqsQueue { queue =>
-        withActorSystem { implicit actorSystem =>
-          {
-            implicit val typedStoreT =
-              MemoryTypedStoreCompanion[ObjectLocation, IdentifiedBaseWork]()
-            withBigMessageStream[IdentifiedBaseWork, Assertion](queue) {
-              messageStream =>
-                import scala.concurrent.duration._
-
-                val brokenRestClient: RestClient = RestClient
-                  .builder(
-                    new HttpHost(
-                      "localhost",
-                      9800,
-                      "http"
-                    )
-                  )
-                  .setHttpClientConfigCallback(
-                    new ElasticCredentials("elastic", "changeme")
-                  )
-                  .build()
-
-                val brokenClient: ElasticClient =
-                  ElasticClient(JavaClient.fromRestClient(brokenRestClient))
-
-                val config = IngestorConfig(
-                  batchSize = 100,
-                  flushInterval = 5.seconds,
-                  index = index
-                )
-
-                val service = new IngestorWorkerService(
-                  elasticClient = brokenClient,
-                  ingestorConfig = config,
-                  messageStream = messageStream
-                )
-
-                whenReady(service.run.failed) { e =>
-                  e shouldBe a[RuntimeException]
-                }
-            }
-          }
-        }
-      }
-    }
-  }
-
   private def assertWorksIndexedCorrectly(
     works: IdentifiedBaseWork*): Assertion =
     withLocalWorksIndex { index =>
       withLocalSqsQueueAndDlqAndTimeout(visibilityTimeout = 10) {
         case QueuePair(queue, dlq) =>
-          withWorkerService(queue, index) { _ =>
+          withWorkerService(queue, index, WorksIndexConfig, new WorkIndexer(elasticClient,index)) { _ =>
             works.map { work =>
               sendMessage[IdentifiedBaseWork](queue = queue, obj = work)
             }

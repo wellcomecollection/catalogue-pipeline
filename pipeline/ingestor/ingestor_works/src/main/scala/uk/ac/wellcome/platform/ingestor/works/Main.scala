@@ -5,12 +5,13 @@ import akka.stream.ActorMaterializer
 import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
 import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
-import uk.ac.wellcome.elasticsearch.{ElasticsearchIndexCreator, WorksIndexConfig}
+import uk.ac.wellcome.elasticsearch.ElasticsearchIndexCreator
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal.IdentifiedBaseWork
 import uk.ac.wellcome.platform.ingestor.common.builders.IngestorConfigBuilder
 import uk.ac.wellcome.platform.ingestor.common.services.IngestorWorkerService
+import uk.ac.wellcome.platform.ingestor.works.config.WorksIndexConfig
 import uk.ac.wellcome.platform.ingestor.works.services.WorkIndexer
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder

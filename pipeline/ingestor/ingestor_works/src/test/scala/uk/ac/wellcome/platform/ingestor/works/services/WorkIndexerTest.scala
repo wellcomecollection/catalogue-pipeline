@@ -1,15 +1,13 @@
 package uk.ac.wellcome.platform.ingestor.works.services
 
-import com.sksamuel.elastic4s.ElasticDsl.properties
 import com.sksamuel.elastic4s.Index
-import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
-import com.sksamuel.elastic4s.requests.mappings.{ObjectField, TextField}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Assertion, FunSpec, Matchers}
-import uk.ac.wellcome.elasticsearch.IndexConfig
-import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
+import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.IdentifiedBaseWork
+import uk.ac.wellcome.platform.ingestor.common.Indexer
+import uk.ac.wellcome.platform.ingestor.works.fixtures.IngestorWorksFixtures
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -17,10 +15,8 @@ class WorkIndexerTest
     extends FunSpec
     with ScalaFutures
     with Matchers
-    with ElasticsearchFixtures
+    with IngestorWorksFixtures
     with WorksGenerators {
-
-  val workIndexer = new WorkIndexer(client = elasticClient)
 
   describe("updating merged / redirected works") {
     it(
@@ -28,8 +24,8 @@ class WorkIndexerTest
       val mergedWork = createIdentifiedWorkWith(version = 3, merged = true)
       val unmergedWork = mergedWork.withData(_.copy(merged = false))
 
-      withLocalWorksIndex { index =>
-        val unmergedWorkInsertFuture = ingestWorkPairInOrder(
+      withWorksIndexAndIndexer{ case (index, indexer) =>
+        val unmergedWorkInsertFuture = ingestWorkPairInOrder(indexer)(
           firstWork = mergedWork,
           secondWork = unmergedWork,
           index = index
@@ -50,8 +46,8 @@ class WorkIndexerTest
         .copy(version = 3)
         .withData(_.copy(merged = true))
 
-      withLocalWorksIndex { index =>
-        val mergedWorkInsertFuture = ingestWorkPairInOrder(
+      withWorksIndexAndIndexer{ case (index, indexer) =>
+        val mergedWorkInsertFuture = ingestWorkPairInOrder(indexer)(
           firstWork = unmergedNewWork,
           secondWork = mergedOldWork,
           index = index
@@ -72,8 +68,8 @@ class WorkIndexerTest
         canonicalId = identifiedNewWork.canonicalId,
         version = 3)
 
-      withLocalWorksIndex { index =>
-        val redirectedWorkInsertFuture = ingestWorkPairInOrder(
+      withWorksIndexAndIndexer{ case (index, indexer) =>
+        val redirectedWorkInsertFuture = ingestWorkPairInOrder(indexer)(
           firstWork = identifiedNewWork,
           secondWork = redirectedOldWork,
           index = index
@@ -93,8 +89,8 @@ class WorkIndexerTest
         canonicalId = redirectedWork.canonicalId,
         version = 3)
 
-      withLocalWorksIndex { index =>
-        val identifiedWorkInsertFuture = ingestWorkPairInOrder(
+      withWorksIndexAndIndexer{ case (index, indexer) =>
+        val identifiedWorkInsertFuture = ingestWorkPairInOrder(indexer)(
           firstWork = redirectedWork,
           secondWork = identifiedWork,
           index = index
@@ -114,8 +110,8 @@ class WorkIndexerTest
         canonicalId = work.canonicalId,
         version = 4)
 
-      withLocalWorksIndex { index =>
-        val invisibleWorkInsertFuture = ingestWorkPairInOrder(
+      withWorksIndexAndIndexer{ case (index, indexer) =>
+        val invisibleWorkInsertFuture = ingestWorkPairInOrder(indexer)(
           firstWork = work,
           secondWork = invisibleWork,
           index = index
@@ -132,19 +128,13 @@ class WorkIndexerTest
 
 
 
-  private def ingestWorkPairInOrder(firstWork: IdentifiedBaseWork,
+  private def ingestWorkPairInOrder(workIndexer: Indexer[IdentifiedBaseWork])(firstWork: IdentifiedBaseWork,
                                     secondWork: IdentifiedBaseWork,
                                     index: Index) =
     for {
-      _ <- indexWork(firstWork, index)
-      result <- indexWork(secondWork, index)
+      _ <- workIndexer.index(documents = List(firstWork))
+      result <- workIndexer.index(documents = List(secondWork))
     } yield result
-
-  private def indexWork(work: IdentifiedBaseWork, index: Index) =
-    workIndexer.index(
-      documents = List(work),
-      index = index
-    )
 
   private def assertIngestedWorkIs(
     result: Either[Seq[IdentifiedBaseWork], Seq[IdentifiedBaseWork]],
@@ -152,5 +142,12 @@ class WorkIndexerTest
     index: Index): Seq[Assertion] = {
     result.isRight shouldBe true
     assertElasticsearchEventuallyHasWork(index = index, ingestedWork)
+  }
+
+  def withWorksIndexAndIndexer[R](testWith: TestWith[(Index,WorkIndexer), R]) = {
+    withLocalWorksIndex { index =>
+      val indexer = new WorkIndexer(elasticClient, index)
+        testWith((index, indexer))
+    }
   }
 }

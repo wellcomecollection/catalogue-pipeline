@@ -1,4 +1,4 @@
-package uk.ac.wellcome.elasticsearch
+package uk.ac.wellcome.platform.ingestor.works.config
 
 import java.time.Instant
 
@@ -16,22 +16,23 @@ import com.sksamuel.elastic4s.requests.indexes.IndexResponse
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import com.sksamuel.elastic4s.{ElasticError, Response}
 import io.circe.Encoder
-import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
+import uk.ac.wellcome.elasticsearch.BadTestObject
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
+import uk.ac.wellcome.platform.ingestor.works.fixtures.IngestorWorksFixtures
 
-class IndexConfigTest
+class WorksIndexConfigTest
     extends FunSpec
-    with ElasticsearchFixtures
+    with IngestorWorksFixtures
     with ScalaFutures
     with Eventually
     with Matchers
     with JsonAssertions
     with ScalaCheckPropertyChecks
-    with WorksGenerators {
+    with WorksGenerators  {
 
   // On failure, scalacheck tries to shrink to the smallest input that causes a failure.
   // With IdentifiedWork, that means that it never actually completes.

@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.ingestor.common.fixtures
 
+import com.sksamuel.elastic4s.requests.analysis.Analysis
 import com.sksamuel.elastic4s.requests.mappings.MappingDefinition
 import com.sksamuel.elastic4s.{ElasticClient, Index, Indexable}
 import io.circe.Decoder
@@ -23,7 +24,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import uk.ac.wellcome.json.JsonUtil._
 
-case class SampleDocument(version: Int, canonicalId: String, title: String, data: Option[String]= None)
+case class SampleDocument(version: Int, canonicalId: String, title: String, data: SampleDocumentData = SampleDocumentData())
+case class SampleDocumentData(stuff: Option[String] = None)
 object SampleDocument {
   implicit val canonicalId: CanonicalId[SampleDocument] = (t: SampleDocument) => t.canonicalId
   implicit val indexable: Indexable[SampleDocument] = (t: SampleDocument) => toJson(t).get
@@ -36,10 +38,10 @@ trait IngestorFixtures
   this: Suite =>
 
 
-  def withIndexer[T,R](i: Index)(testWith: TestWith[Indexer[T], R])(implicit e: ExecutionContext, idx: Indexable[T], canonicalId: CanonicalId[T], v: Version[T]) = {
+  def withIndexer[T,R](i: Index, esClient: ElasticClient = elasticClient)(testWith: TestWith[Indexer[T], R])(implicit e: ExecutionContext, idx: Indexable[T], canonicalId: CanonicalId[T], v: Version[T]) = {
 
       val indexer = new Indexer[T]{
-        override val client: ElasticClient = elasticClient
+        override val client: ElasticClient = esClient
         override implicit val ec: ExecutionContext = e
         override implicit val indexable: Indexable[T] = idx
         override implicit val id: CanonicalId[T] = canonicalId
@@ -80,9 +82,9 @@ trait IngestorFixtures
     }
 
   object NoStrictMapping extends IndexConfig {
-    import uk.ac.wellcome.elasticsearch.WorksIndexConfig.{analysis => defaultAnalysis}
 
-    val analysis = defaultAnalysis
+    val analysis = Analysis(
+      analyzers = List())
     val mapping = MappingDefinition.empty
   }
 }

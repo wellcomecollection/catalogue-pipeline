@@ -56,11 +56,6 @@ trait ElasticsearchFixtures
     ),
     implicitly[Position])
 
-  def withLocalWorksIndex[R](testWith: TestWith[Index, R]): R =
-    withLocalElasticsearchIndex[R](config = WorksIndexConfig) { index =>
-      testWith(index)
-    }
-
   def withLocalElasticsearchIndex[R](
     config: IndexConfig,
     index: Index = createIndex): Fixture[Index, R] = fixture[Index, R](

@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.ingestor.common
 
+import com.sksamuel.elastic4s.requests.analysis.Analysis
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 import com.sksamuel.elastic4s.{Index, Indexable}
 import org.scalatest.concurrent.ScalaFutures
@@ -9,13 +10,13 @@ import uk.ac.wellcome.elasticsearch.model.{CanonicalId, Version}
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
-import uk.ac.wellcome.platform.ingestor.common.fixtures.{IngestorFixtures, SampleDocument}
+import uk.ac.wellcome.models.work.generators.{IdentifiersGenerators, WorksGenerators}
+import uk.ac.wellcome.platform.ingestor.common.fixtures.{IngestorFixtures, SampleDocument, SampleDocumentData}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class IndexerTest extends FunSpec with ScalaFutures with Matchers with IdentifiersGenerators with ElasticsearchFixtures with IngestorFixtures{
+class IndexerTest extends FunSpec with ScalaFutures with Matchers with IdentifiersGenerators with ElasticsearchFixtures with IngestorFixtures with WorksGenerators{
 
   it("inserts an identified Work into Elasticsearch") {
     val document = SampleDocument(1, createCanonicalId, randomAlphanumeric(10))
@@ -95,7 +96,7 @@ class IndexerTest extends FunSpec with ScalaFutures with Matchers with Identifie
 
   it("returns a list of Works that weren't indexed correctly") {
     val validDocuments = (1 to 5).map(_ => SampleDocument(1, createCanonicalId, randomAlphanumeric))
-    val notMatchingMappingDocuments = (1 to 3).map(_ =>SampleDocument(1, createCanonicalId, randomAlphanumeric, Some("blah bluh blih")))
+    val notMatchingMappingDocuments = (1 to 3).map(_ =>SampleDocument(1, createCanonicalId, randomAlphanumeric, SampleDocumentData(Some("blah bluh blih"))))
     val documents = validDocuments ++ notMatchingMappingDocuments
 
     withIndexAndIndexer[SampleDocument, Any](config = StrictWithNoDataIndexConfig) { case (index, indexer) =>
@@ -105,8 +106,8 @@ class IndexerTest extends FunSpec with ScalaFutures with Matchers with Identifie
 
         whenReady(future) { result =>
           assertElasticsearchEventuallyHas(index = index, validDocuments: _*)
-          assertElasticsearchNeverHas[SampleDocument](index = index, notMatchingMappingDocuments:_*)
-          result.left.get should contain only (notMatchingMappingDocuments)
+          assertElasticsearchNeverHas(index = index, notMatchingMappingDocuments:_*)
+          result.left.get should contain only (notMatchingMappingDocuments:_*)
         }
     }
   }
@@ -122,14 +123,15 @@ class IndexerTest extends FunSpec with ScalaFutures with Matchers with Identifie
 
   object StrictWithNoDataIndexConfig extends IndexConfig {
     import com.sksamuel.elastic4s.ElasticDsl._
-    import uk.ac.wellcome.elasticsearch.WorksIndexConfig.{analysis => defaultAnalysis}
 
-    val analysis = defaultAnalysis
+    val analysis = Analysis(
+      analyzers = List())
 
     val title = textField("title")
     val canonicalId = keywordField("canonicalId")
     val version = intField("version")
+    val data = objectField("data")
 
-    val mapping = properties(Seq(title, canonicalId, version)).dynamic(DynamicMapping.Strict)
+    val mapping = properties(Seq(title, canonicalId, version, data)).dynamic(DynamicMapping.Strict)
   }
 }
