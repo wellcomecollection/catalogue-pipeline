@@ -8,6 +8,7 @@ import numpy as np
 from src.aws import put_object_to_s3
 from src.lsh import split_features, train_clusters
 
+
 @click.command()
 @click.option(
     "-n", help="number of groups to split the feature vectors into", default=256
