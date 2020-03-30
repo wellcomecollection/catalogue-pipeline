@@ -43,7 +43,7 @@ case class WorkData[Id <: IdState](
   duration: Option[Int] = None,
   items: List[Item[Id]] = Nil,
   merged: Boolean = false,
-  collection: Option[Collection] = None,
+  collectionPath: Option[CollectionPath] = None,
   images: List[UnmergedImage[Id]] = Nil
 )
 

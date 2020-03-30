@@ -47,7 +47,7 @@ object UseCalmWhenExistsRule {
 
 object CalmRules {
 
-  val CollectionRule = UseCalmWhenExistsRule(_.data.collection)
+  val CollectionPathRule = UseCalmWhenExistsRule(_.data.collectionPath)
 
   val TitleRule = UseCalmWhenExistsRule(_.data.title)
 

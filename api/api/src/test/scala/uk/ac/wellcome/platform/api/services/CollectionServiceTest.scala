@@ -26,8 +26,8 @@ class CollectionServiceTest
 
   def work(path: String, level: CollectionLevel) =
     createIdentifiedWorkWith(
-      collection = Some(
-        Collection(path = path, level = level)
+      collectionPath = Some(
+        CollectionPath(path = path, level = level)
       ),
       title = Some(path),
       sourceIdentifier = createSourceIdentifierWith(value = path)
@@ -56,28 +56,23 @@ class CollectionServiceTest
       whenReady(service.retrieveTree(index, List("a/b"))) { result =>
         result shouldBe Right(
           CollectionTree(
-            path = "a",
-            level = CollectionLevel.Collection,
+            path = CollectionPath("a", CollectionLevel.Collection),
             work = workA,
             children = List(
               CollectionTree(
-                path = "a/b",
-                level = CollectionLevel.Series,
+                path = CollectionPath("a/b", CollectionLevel.Series),
                 work = workB,
                 children = List(
                   CollectionTree(
-                    path = "a/b/c",
-                    level = CollectionLevel.Item,
+                    path = CollectionPath("a/b/c", CollectionLevel.Item),
                     work = workC),
                   CollectionTree(
-                    path = "a/b/d",
-                    level = CollectionLevel.Item,
+                    path = CollectionPath("a/b/d", CollectionLevel.Item),
                     work = workD)
                 )
               ),
               CollectionTree(
-                path = "a/e",
-                level = CollectionLevel.Series,
+                path = CollectionPath("a/e", CollectionLevel.Series),
                 work = workE),
             )
           )
@@ -92,38 +87,31 @@ class CollectionServiceTest
       whenReady(service.retrieveTree(index, List("a/b", "a/e/f"))) { result =>
         result shouldBe Right(
           CollectionTree(
-            path = "a",
-            level = CollectionLevel.Collection,
+            path = CollectionPath("a", CollectionLevel.Collection),
             work = workA,
             children = List(
               CollectionTree(
-                path = "a/b",
-                level = CollectionLevel.Series,
+                path = CollectionPath("a/b", CollectionLevel.Series),
                 work = workB,
                 children = List(
                   CollectionTree(
-                    path = "a/b/c",
-                    level = CollectionLevel.Item,
+                    path = CollectionPath("a/b/c", CollectionLevel.Item),
                     work = workC),
                   CollectionTree(
-                    path = "a/b/d",
-                    level = CollectionLevel.Item,
+                    path = CollectionPath("a/b/d", CollectionLevel.Item),
                     work = workD)
                 )
               ),
               CollectionTree(
-                path = "a/e",
-                level = CollectionLevel.Series,
+                path = CollectionPath("a/e", CollectionLevel.Series),
                 work = workE,
                 children = List(
                   CollectionTree(
-                    path = "a/e/f",
-                    level = CollectionLevel.Series,
+                    path = CollectionPath("a/e/f", CollectionLevel.Series),
                     work = workF,
                     children = List(
                       CollectionTree(
-                        path = "a/e/f/g",
-                        level = CollectionLevel.Item,
+                        path = CollectionPath("a/e/f/g", CollectionLevel.Item),
                         work = workG)
                     )
                   ),
@@ -142,18 +130,15 @@ class CollectionServiceTest
       whenReady(service.retrieveTree(index, List("a"))) { result =>
         result shouldBe Right(
           CollectionTree(
-            path = "a",
-            level = CollectionLevel.Collection,
+            path = CollectionPath("a", CollectionLevel.Collection),
             work = workA,
             children = List(
               CollectionTree(
-                path = "a/b",
-                level = CollectionLevel.Series,
+                path = CollectionPath("a/b", CollectionLevel.Series),
                 work = workB,
               ),
               CollectionTree(
-                path = "a/e",
-                level = CollectionLevel.Series,
+                path = CollectionPath("a/e", CollectionLevel.Series),
                 work = workE,
               )
             )
@@ -193,13 +178,11 @@ class CollectionServiceTest
       whenReady(service.retrieveTree(index, List("p/q"))) { result =>
         result shouldBe Right(
           CollectionTree(
-            path = "p",
-            level = CollectionLevel.Collection,
+            path = CollectionPath("p", CollectionLevel.Collection),
             work = p.withData(_.copy(items = Nil)),
             children = List(
               CollectionTree(
-                path = "p/q",
-                level = CollectionLevel.Item,
+                path = CollectionPath("p/q", CollectionLevel.Item),
                 work = q.withData(_.copy(notes = Nil)),
               )
             )

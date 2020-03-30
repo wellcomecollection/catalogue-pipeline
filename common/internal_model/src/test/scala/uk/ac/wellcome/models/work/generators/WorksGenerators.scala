@@ -158,7 +158,7 @@ trait WorksGenerators
     items: List[Item[Minted]] = Nil,
     version: Int = 1,
     merged: Boolean = false,
-    collection: Option[Collection] = None,
+    collectionPath: Option[CollectionPath] = None,
   ): IdentifiedWork =
     IdentifiedWork(
       canonicalId = canonicalId,
@@ -185,7 +185,7 @@ trait WorksGenerators
         duration = duration,
         items = items,
         merged = merged,
-        collection = collection,
+        collectionPath = collectionPath,
       )
     )
 

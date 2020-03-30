@@ -127,7 +127,7 @@ object PlatformMerger extends Merger {
         images <- ImagesRule(target, sources)
         title <- TitleRule(target, sources)
         workType <- WorkTypeRule(target, sources)
-        collection <- CollectionRule(target, sources)
+        collectionPath <- CollectionPathRule(target, sources)
         physicalDescription <- PhysicalDescriptionRule(target, sources)
         contributors <- ContributorsRule(target, sources)
         subjects <- SubjectsRule(target, sources)
@@ -143,7 +143,7 @@ object PlatformMerger extends Merger {
               images = images.map(_.toUnmerged),
               title = title,
               workType = workType,
-              collection = collection,
+              collectionPath = collectionPath,
               physicalDescription = physicalDescription,
               contributors = contributors,
               subjects = subjects,

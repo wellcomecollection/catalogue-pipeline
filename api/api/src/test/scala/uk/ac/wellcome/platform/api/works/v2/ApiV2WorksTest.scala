@@ -312,31 +312,33 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
       case (indexV2, routes) =>
         val work1Archive1Depth1 = createIdentifiedWorkWith(
           canonicalId = "work1Archive1Depth1",
-          collection = Some(Collection("archive1", CollectionLevel.Collection))
+          collectionPath =
+            Some(CollectionPath("archive1", CollectionLevel.Collection))
         )
         val work2Archive1Depth2 = createIdentifiedWorkWith(
           canonicalId = "work2Archive1Depth2",
-          collection =
-            Some(Collection("archive1/depth2", CollectionLevel.Series))
+          collectionPath =
+            Some(CollectionPath("archive1/depth2", CollectionLevel.Series))
         )
         val work3Archive1Depth3 = createIdentifiedWorkWith(
           canonicalId = "work3Archive1Depth3",
-          collection =
-            Some(Collection("archive1/depth2/depth3", CollectionLevel.Item))
+          collectionPath =
+            Some(CollectionPath("archive1/depth2/depth3", CollectionLevel.Item))
         )
         val work4Archive2Depth1 = createIdentifiedWorkWith(
           canonicalId = "work4Archive2Depth1",
-          collection = Some(Collection("archive2", CollectionLevel.Collection))
+          collectionPath =
+            Some(CollectionPath("archive2", CollectionLevel.Collection))
         )
         val work5Archive2Depth2 = createIdentifiedWorkWith(
           canonicalId = "work5Archive2Depth2",
-          collection =
-            Some(Collection("archive2/depth2", CollectionLevel.Series))
+          collectionPath =
+            Some(CollectionPath("archive2/depth2", CollectionLevel.Series))
         )
         val work6Archive2Depth3 = createIdentifiedWorkWith(
           canonicalId = "work6Archive2Depth3",
-          collection =
-            Some(Collection("archive2/depth2/depth3", CollectionLevel.Item))
+          collectionPath =
+            Some(CollectionPath("archive2/depth2/depth3", CollectionLevel.Item))
         )
         val work7Archiveless = createIdentifiedWorkWith(
           canonicalId = "work7Archiveless",
@@ -403,30 +405,32 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
       case (indexV2, routes) =>
         val work1Depth1 = createIdentifiedWorkWith(
           canonicalId = "1",
-          collection = Some(Collection("/depth1", CollectionLevel.Collection))
+          collectionPath =
+            Some(CollectionPath("/depth1", CollectionLevel.Collection))
         )
         val work2Depth1 = createIdentifiedWorkWith(
           canonicalId = "2",
-          collection = Some(Collection("/depth1", CollectionLevel.Collection))
+          collectionPath =
+            Some(CollectionPath("/depth1", CollectionLevel.Collection))
         )
         val work3Depth2 = createIdentifiedWorkWith(
           canonicalId = "3",
-          collection =
-            Some(Collection("/depth1/depth2", CollectionLevel.Series))
+          collectionPath =
+            Some(CollectionPath("/depth1/depth2", CollectionLevel.Series))
         )
         val work4Depth3 = createIdentifiedWorkWith(
           canonicalId = "4",
-          collection =
-            Some(Collection("/depth1/depth2/depth3", CollectionLevel.Item))
+          collectionPath =
+            Some(CollectionPath("/depth1/depth2/depth3", CollectionLevel.Item))
         )
         val work5Depth3 = createIdentifiedWorkWith(
           canonicalId = "5",
-          collection =
-            Some(Collection("/depth1/depth2/depth3", CollectionLevel.Item))
+          collectionPath =
+            Some(CollectionPath("/depth1/depth2/depth3", CollectionLevel.Item))
         )
         val work6NoDepth = createIdentifiedWorkWith(
           canonicalId = "6",
-          collection = None
+          collectionPath = None
         )
         insertIntoElasticsearch(
           indexV2,

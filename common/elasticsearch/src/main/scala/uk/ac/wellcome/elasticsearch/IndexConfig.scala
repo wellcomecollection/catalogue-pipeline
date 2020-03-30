@@ -237,11 +237,11 @@ case object WorksIndexConfig extends IndexConfig {
       notes,
       intField("duration"),
       booleanField("merged"),
-      objectField("collection").fields(
+      objectField("collectionPath").fields(
         label,
         objectField("level").fields(keywordField("type")),
         textField("path")
-          .copyTo("data.collection.depth")
+          .copyTo("data.collectionPath.depth")
           .analyzer(pathAnalyzer.name)
           .fields(keywordField("keyword")),
         tokenCountField("depth").analyzer("standard")

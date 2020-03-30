@@ -92,9 +92,9 @@ case class DisplayWorkV2(
     description = "The playing time for audiovisual works, in seconds."
   ) duration: Option[Int] = None,
   @Schema(
-    `type` = "Collection",
-    description = "The collection a work is part of."
-  ) collection: Option[DisplayCollection] = None,
+    `type` = "CollectionPath",
+    description = "Where in a collection this work is."
+  ) collectionPath: Option[DisplayCollectionPath] = None,
   @Schema(
     `type` = "CollectionTree",
     description = "The partially expanded collection tree for this work."
@@ -152,9 +152,9 @@ case object DisplayWorkV2 {
           Some(DisplayNote.merge(work.data.notes.map(DisplayNote(_))))
         else None,
       duration = work.data.duration,
-      collection =
+      collectionPath =
         if (includes.collection)
-          work.data.collection.map(DisplayCollection(_))
+          work.data.collectionPath.map(DisplayCollectionPath(_))
         else None
     )
 

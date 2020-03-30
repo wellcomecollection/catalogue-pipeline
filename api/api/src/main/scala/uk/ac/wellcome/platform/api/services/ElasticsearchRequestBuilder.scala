@@ -143,9 +143,9 @@ case class ElasticsearchRequestBuilder(
           field = "data.items.locations.license.id",
           values = licenseIds)
       case CollectionPathFilter(path) =>
-        termQuery(field = "data.collection.path", value = path)
+        termQuery(field = "data.collectionPath.path", value = path)
       case CollectionDepthFilter(depth) =>
-        termQuery(field = "data.collection.depth", value = depth)
+        termQuery(field = "data.collectionPath.depth", value = depth)
 
     }
 

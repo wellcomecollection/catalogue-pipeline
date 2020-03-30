@@ -25,9 +25,9 @@ case class CollectionRequestBuilder(index: Index,
     "sourceIdentifier.ontologyType",
     "data.title",
     "data.alternativeTitles",
-    "data.collection.path",
-    "data.collection.level.type",
-    "data.collection.label",
+    "data.collectionPath.path",
+    "data.collectionPath.level.type",
+    "data.collectionPath.label",
     "data.ontologyType",
   )
 
@@ -58,8 +58,10 @@ case class CollectionRequestBuilder(index: Index,
     */
   def getNodeQuery(path: String): Query =
     must(
-      termQuery(field = "data.collection.depth", value = tokenize(path).length),
-      termQuery(field = "data.collection.path", value = path)
+      termQuery(
+        field = "data.collectionPath.depth",
+        value = tokenize(path).length),
+      termQuery(field = "data.collectionPath.path", value = path)
     )
 
   /**
@@ -68,9 +70,9 @@ case class CollectionRequestBuilder(index: Index,
   def getChildrenQuery(path: String): Query =
     must(
       termQuery(
-        field = "data.collection.depth",
+        field = "data.collectionPath.depth",
         value = tokenize(path).length + 1),
-      termQuery(field = "data.collection.path", value = path)
+      termQuery(field = "data.collectionPath.path", value = path)
     )
 
   def pathAncestors(path: String): List[String] =
