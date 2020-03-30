@@ -2,7 +2,6 @@ import pickle
 
 from datetime import datetime
 import click
-import numpy as np
 
 from src.aws import put_object_to_s3
 from src.lsh import split_features, train_clusters

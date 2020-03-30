@@ -1,5 +1,4 @@
 import os
-from io import BytesIO
 
 import boto3
 from botocore.exceptions import ClientError

@@ -12,7 +12,7 @@ def is_valid_image_url(image_url):
         if (r.status_code == 200) and (r.headers["content-type"] in image_formats):
             return True
         return False
-    except:
+    except Exception:
         return False
 
 
@@ -22,7 +22,7 @@ def is_valid_iiif_url(iiif_url):
         if (r.status_code == 200) and (r.headers["content-type"] == "application/json"):
             return True
         return False
-    except:
+    except Exception:
         return False
 
 

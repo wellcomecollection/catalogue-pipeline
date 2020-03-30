@@ -7,8 +7,6 @@ import numpy as np
 
 from src.aws import put_object_to_s3
 from src.lsh import split_features, train_clusters
-from src.elastic import get_random_feature_vectors
-
 
 @click.command()
 @click.option(
