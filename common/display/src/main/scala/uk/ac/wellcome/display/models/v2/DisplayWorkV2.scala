@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.media.Schema
 
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.models.work.internal.IdentifiedWork
-import uk.ac.wellcome.display.models.DisplayCollectionTree
 
 @Schema(
   name = "Work",
@@ -96,9 +95,9 @@ case class DisplayWorkV2(
     description = "Where in a collection this work is."
   ) collectionPath: Option[DisplayCollectionPath] = None,
   @Schema(
-    `type` = "CollectionTree",
+    `type` = "Collection",
     description = "The partially expanded collection tree for this work."
-  ) collectionTree: Option[DisplayCollectionTree] = None,
+  ) collection: Option[DisplayCollection] = None,
   @JsonKey("type") @Schema(name = "type") ontologyType: String = "Work"
 ) extends DisplayWork
 

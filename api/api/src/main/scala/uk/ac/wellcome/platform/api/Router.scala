@@ -129,15 +129,15 @@ class Router(elasticClient: ElasticClient,
     })
 
   def workFound(work: IdentifiedWork,
-                tree: Option[(CollectionTree, List[String])],
+                tree: Option[(Collection, List[String])],
                 includes: V2WorksIncludes): Route =
     complete(
       ResultResponse(
         context = contextUri,
         result = DisplayWorkV2(work, includes).copy(
-          collectionTree = tree.map {
+          collection = tree.map {
             case (tree, expandedPaths) =>
-              DisplayCollectionTree(tree, expandedPaths)
+              DisplayCollection(tree, expandedPaths)
           }
         )
       )
@@ -243,7 +243,7 @@ class Router(elasticClient: ElasticClient,
   def retrieveTree(index: Index,
                    work: IdentifiedWork,
                    expandedPaths: List[String])
-    : Future[Option[(CollectionTree, List[String])]] =
+    : Future[Option[(Collection, List[String])]] =
     work.data.collectionPath
       .map {
         case CollectionPath(path, _, _) =>

@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.api.works.v2
 
 import uk.ac.wellcome.models.work.internal._
 
-class ApiWorkCollectionTreeTest extends ApiV2WorksTestBase {
+class ApiWorkCollectionTest extends ApiV2WorksTestBase {
 
   def work(path: String, level: CollectionLevel) =
     createIdentifiedWorkWith(
@@ -45,7 +45,7 @@ class ApiWorkCollectionTreeTest extends ApiV2WorksTestBase {
                 "level": "Item",
                 "type": "CollectionPath"
               },
-              "collectionTree": {
+              "collection": {
                 "path": { "path": "a", "level": "Collection", "type": "CollectionPath" },
                 "work": ${workJson(workA)},
                 "children": [
@@ -91,7 +91,7 @@ class ApiWorkCollectionTreeTest extends ApiV2WorksTestBase {
                 "level": "Series",
                 "type": "CollectionPath"
               },
-              "collectionTree": {
+              "collection": {
                 "path": { "path": "a", "level": "Collection", "type": "CollectionPath" },
                 "work": ${workJson(workA)},
                 "children": [
@@ -142,7 +142,7 @@ class ApiWorkCollectionTreeTest extends ApiV2WorksTestBase {
                 "level": "Collection",
                 "type": "CollectionPath"
               },
-              "collectionTree": {
+              "collection": {
                 "path": { "path": "a", "level": "Collection", "type": "CollectionPath" },
                 "work": ${workJson(workA)},
                 "children": [
