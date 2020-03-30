@@ -1,0 +1,7 @@
+boto3==1.9.198
+click==7.0
+elasticsearch==7.5.1
+halo==0.0.26
+numpy==1.17.3
+scikit-learn==0.19.2
+scipy==1.4.1
