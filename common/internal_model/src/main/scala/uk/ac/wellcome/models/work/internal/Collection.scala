@@ -6,14 +6,44 @@ import cats.data.NonEmptyList
 import cats.implicits._
 
 /**
-  * A CollectionTree contains a hierarchical archive or collection of works.
-  * Each work in the hierarchy contains a forward slash separated path
-  * representing its position.
+  * A CollectionPath represents the position of an individual work in a
+  * collection hierarchy.
   */
-case class CollectionTree(
+case class CollectionPath(
+  path: String,
+  level: CollectionLevel,
+  label: Option[String] = None,
+) {
+
+  lazy val tokens: List[String] =
+    path.split("/").toList
+
+  lazy val depth: Int =
+    tokens.length
+
+  def isDescendent(other: CollectionPath): Boolean =
+    tokens.slice(0, other.depth) == other.tokens
+}
+
+sealed trait CollectionLevel
+
+object CollectionLevel {
+  object Collection extends CollectionLevel
+  object Section extends CollectionLevel
+  object Series extends CollectionLevel
+  object Item extends CollectionLevel
+}
+
+/**
+  * A Collection contains a hierarchical archive or collection of works. Each
+  * work in the hierarchy contains a forward slash separated path representing
+  * its position. Note that this is built dynamically from the index by querying
+  * the CollectionPath fields, rather than being stored directly on the model.
+  */
+case class Collection(
   path: CollectionPath,
   work: IdentifiedWork,
-  children: List[CollectionTree] = Nil
+  children: List[Collection] = Nil
 ) {
 
   def size: Int =
@@ -26,10 +56,10 @@ case class CollectionTree(
     path.depth == 1
 }
 
-object CollectionTree {
+object Collection {
 
   /**
-    * Create a CollectionTree from a list of works. This errors given the following
+    * Create a Collection from a list of works. This errors given the following
     * situations:
     *
     *   * If the works do not form a fully connected tree
@@ -37,7 +67,7 @@ object CollectionTree {
     *   * There are works which do not contain a Collection
     *   * The list is empty
     */
-  def apply(works: List[IdentifiedWork]): Result[CollectionTree] =
+  def apply(works: List[IdentifiedWork]): Result[Collection] =
     works
       .map { work =>
         work.data.collectionPath match {
@@ -58,12 +88,12 @@ object CollectionTree {
       }
 
   private def apply(workMapping: NonEmptyList[(CollectionPath, IdentifiedWork)],
-                    depth: Int): CollectionTree =
+                    depth: Int): Collection =
     workMapping.sortBy { case (path, _) => path.tokens.length } match {
       case NonEmptyList((path, work), tail) =>
         val childDepth = depth + 1
         val (children, descendents) = tail.span(_._1.depth == childDepth)
-        CollectionTree(
+        Collection(
           path = path,
           work = work,
           children = children.map {
@@ -78,8 +108,7 @@ object CollectionTree {
         )
     }
 
-  private def checkTreeErrors(tree: CollectionTree,
-                              works: List[IdentifiedWork]) = {
+  private def checkTreeErrors(tree: Collection, works: List[IdentifiedWork]) = {
     val pathList = tree.pathList
     if (pathList.length < works.length) {
       val unconnected =

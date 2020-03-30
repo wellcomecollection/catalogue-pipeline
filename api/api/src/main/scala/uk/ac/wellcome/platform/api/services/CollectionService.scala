@@ -7,13 +7,13 @@ import com.sksamuel.elastic4s.requests.searches.{SearchHit, SearchResponse}
 
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.internal.result._
-import uk.ac.wellcome.models.work.internal.CollectionTree
+import uk.ac.wellcome.models.work.internal.Collection
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil.fromJson
 import uk.ac.wellcome.platform.api.Tracing
 
 /**
-  * Retrieves a CollectionTree given some paths to expand.
+  * Retrieves a Collection given some paths to expand.
   *
   * For example, if asked to expand the path "A/B", it will return a tree
   * consisting of the node A, the child node B, and any children of either of
@@ -40,9 +40,8 @@ class CollectionService(elasticClient: ElasticClient)(
   implicit ec: ExecutionContext)
     extends Tracing {
 
-  def retrieveTree(
-    index: Index,
-    expandedPaths: List[String]): Future[Result[CollectionTree]] =
+  def retrieveTree(index: Index,
+                   expandedPaths: List[String]): Future[Result[Collection]] =
     makeEsRequest(index, expandedPaths)
       .map { result =>
         result.left
@@ -50,7 +49,7 @@ class CollectionService(elasticClient: ElasticClient)(
           .flatMap { searchResponse =>
             searchResponse.hits.hits.toList.map(toWork).toResult
           }
-          .flatMap(CollectionTree(_))
+          .flatMap(Collection(_))
       }
 
   private def makeEsRequest(
