@@ -10,27 +10,24 @@ from src.lsh import LSHEncoder
 logger = get_logstash_logger(__name__)
 
 # Initialise encoder
-logger.info('Initialising LSHEncoder model')
+logger.info("Initialising LSHEncoder model")
 lsh_encoder = LSHEncoder()
 
 # initialise API
-logger.info('Starting API')
+logger.info("Starting API")
 app = FastAPI(
-    title='Feature vector encoder',
-    description='Takes an image url and returns the image\'s feature vector encoded as an LSH string'
+    title="Feature vector encoder",
+    description="Takes an image url and returns the image's feature vector encoded as an LSH string",
 )
-logger.info('API started, awaiting requests')
+logger.info("API started, awaiting requests")
 
 
-@app.get('/feature-vector/')
+@app.get("/feature-vector/")
 def main(image_url: str = None, iiif_url: str = None):
     if (not (image_url or iiif_url)) or (iiif_url and image_url):
-        logger.error(
-            f'client passed image_url: {image_url} iiif_url: {iiif_url}'
-        )
+        logger.error(f"client passed image_url: {image_url} iiif_url: {iiif_url}")
         raise HTTPException(
-            status_code=400,
-            detail='API takes one of: image_url, iiif_url'
+            status_code=400, detail="API takes one of: image_url, iiif_url"
         )
 
     if iiif_url:
@@ -51,14 +48,11 @@ def main(image_url: str = None, iiif_url: str = None):
     features = extract_features(image)
     lsh_encoded_features = lsh_encoder(features)
 
-    logger.info(f'extracted features from url: {image_url}')
+    logger.info(f"extracted features from url: {image_url}")
 
-    return {
-        'features': features.tolist(),
-        'lsh_encoded_features': lsh_encoded_features
-    }
+    return {"features": features.tolist(), "lsh_encoded_features": lsh_encoded_features}
 
 
-@app.get('/healthcheck')
+@app.get("/healthcheck")
 def healthcheck():
-    return {'status': 'healthy'}
+    return {"status": "healthy"}

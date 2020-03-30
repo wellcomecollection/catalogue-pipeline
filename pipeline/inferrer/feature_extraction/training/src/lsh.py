@@ -3,11 +3,7 @@ from sklearn.cluster import KMeans
 
 
 def split_features(feature_vectors, n_groups):
-    feature_groups = np.split(
-        feature_vectors,
-        indices_or_sections=n_groups,
-        axis=1
-    )
+    feature_groups = np.split(feature_vectors, indices_or_sections=n_groups, axis=1)
     return feature_groups
 
 
