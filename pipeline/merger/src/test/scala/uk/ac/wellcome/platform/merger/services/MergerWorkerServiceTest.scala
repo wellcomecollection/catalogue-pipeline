@@ -34,7 +34,7 @@ class MergerWorkerServiceTest
   it(
     "reads matcher result messages, retrieves the works from vhs and sends them to sns") {
     withMergerWorkerServiceFixtures {
-      case (vhs, QueuePair(queue, dlq), topic, metrics) =>
+      case (vhs, QueuePair(queue, dlq), topics, metrics) =>
         val work1 = createUnidentifiedWork
         val work2 = createUnidentifiedWork
         val work3 = createUnidentifiedWork
@@ -53,7 +53,7 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          val worksSent = getMessages[BaseWork](topic)
+          val worksSent = getMessages[BaseWork](topics.works)
           worksSent should contain only (work1, work2, work3)
 
           metrics.incrementedCounts.length should be >= 1
@@ -64,7 +64,7 @@ class MergerWorkerServiceTest
 
   it("sends InvisibleWorks unmerged") {
     withMergerWorkerServiceFixtures {
-      case (vhs, QueuePair(queue, dlq), topic, metrics) =>
+      case (vhs, QueuePair(queue, dlq), topics, metrics) =>
         val work = createUnidentifiedInvisibleWork
 
         val matcherResult = matcherResultWith(Set(Set(work)))
@@ -80,7 +80,7 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          val worksSent = getMessages[BaseWork](topic)
+          val worksSent = getMessages[BaseWork](topics.works)
           worksSent should contain only work
 
           metrics.incrementedCounts.length shouldBe 1
@@ -91,7 +91,7 @@ class MergerWorkerServiceTest
 
   it("fails if the work is not in vhs") {
     withMergerWorkerServiceFixtures {
-      case (_, QueuePair(queue, dlq), topic, metrics) =>
+      case (_, QueuePair(queue, dlq), topics, metrics) =>
         val work = createUnidentifiedWork
 
         val matcherResult = matcherResultWith(Set(Set(work)))
@@ -104,7 +104,7 @@ class MergerWorkerServiceTest
         eventually {
           assertQueueEmpty(queue)
           assertQueueHasSize(dlq, 1)
-          listMessagesReceivedFromSNS(topic) shouldBe empty
+          listMessagesReceivedFromSNS(topics.works) shouldBe empty
 
           metrics.incrementedCounts.length shouldBe 3
           metrics.incrementedCounts.last should endWith("_failure")
@@ -114,7 +114,7 @@ class MergerWorkerServiceTest
 
   it("discards works with newer versions in vhs, sends along the others") {
     withMergerWorkerServiceFixtures {
-      case (vhs, QueuePair(queue, dlq), topic, _) =>
+      case (vhs, QueuePair(queue, dlq), topics, _) =>
         val work = createUnidentifiedWork
         val olderWork = createUnidentifiedWork
         val newerWork = olderWork.copy(version = 2)
@@ -131,7 +131,7 @@ class MergerWorkerServiceTest
         eventually {
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
-          val worksSent = getMessages[BaseWork](topic)
+          val worksSent = getMessages[BaseWork](topics.works)
           worksSent should contain only work
         }
     }
@@ -139,7 +139,7 @@ class MergerWorkerServiceTest
 
   it("discards works with version 0 and sends along the others") {
     withMergerWorkerServiceFixtures {
-      case (vhs, QueuePair(queue, dlq), topic, metrics) =>
+      case (vhs, QueuePair(queue, dlq), topics, metrics) =>
         val versionZeroWork = createUnidentifiedWorkWith(version = 0)
         val work = versionZeroWork
           .copy(version = 1)
@@ -157,7 +157,7 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          val worksSent = getMessages[BaseWork](topic)
+          val worksSent = getMessages[BaseWork](topics.works)
           worksSent should contain only work
 
           metrics.incrementedCounts.length shouldBe 1
@@ -173,7 +173,7 @@ class MergerWorkerServiceTest
     val works = List(physicalWork, digitalWork)
 
     withMergerWorkerServiceFixtures {
-      case (vhs, QueuePair(queue, dlq), topic, _) =>
+      case (vhs, QueuePair(queue, dlq), topics, _) =>
         givenStoredInVhs(vhs, works: _*)
 
         val matcherResult = MatcherResult(
@@ -188,7 +188,7 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          val worksSent = getMessages[BaseWork](topic).distinct
+          val worksSent = getMessages[BaseWork](topics.works).distinct
           worksSent should have size 2
 
           val redirectedWorks = worksSent.collect {
@@ -209,13 +209,64 @@ class MergerWorkerServiceTest
     }
   }
 
+  it("sends an image, a merged work, and redirected works to SQS") {
+    val physicalWork = createSierraPhysicalWork
+    val digitalWork = createSierraDigitalWork
+    val miroWork = createMiroWork
+
+    val works = List(physicalWork, digitalWork, miroWork)
+
+    withMergerWorkerServiceFixtures {
+      case (vhs, QueuePair(queue, dlq), topics, _) =>
+        givenStoredInVhs(vhs, works: _*)
+
+        val matcherResult = MatcherResult(
+          Set(
+            MatchedIdentifiers(worksToWorkIdentifiers(works))
+          )
+        )
+
+        sendNotificationToSQS(queue = queue, message = matcherResult)
+
+        eventually {
+          assertQueueEmpty(queue)
+          assertQueueEmpty(dlq)
+
+          val worksSent = getMessages[BaseWork](topics.works).distinct
+          worksSent should have size 3
+
+          val imagesSent =
+            getMessages[MergedImage[Unminted]](topics.images).distinct
+          imagesSent should have size 1
+
+          val redirectedWorks = worksSent.collect {
+            case work: UnidentifiedRedirectedWork => work
+          }
+          val mergedWorks = worksSent.collect {
+            case work: UnidentifiedWork => work
+          }
+
+          redirectedWorks should have size 2
+          redirectedWorks.map(_.sourceIdentifier) should contain only
+            (digitalWork.sourceIdentifier, miroWork.sourceIdentifier)
+          redirectedWorks.map(_.redirect) should contain only
+            IdentifiableRedirect(physicalWork.sourceIdentifier)
+
+          mergedWorks should have size 1
+          mergedWorks.head.sourceIdentifier shouldBe physicalWork.sourceIdentifier
+
+          imagesSent.head.id shouldBe miroWork.data.images.head.id
+        }
+    }
+  }
+
   it("splits the received works into multiple merged works if required") {
     val workPair1 = List(createSierraPhysicalWork, createSierraDigitalWork)
     val workPair2 = List(createSierraPhysicalWork, createSierraDigitalWork)
     val works = workPair1 ++ workPair2
 
     withMergerWorkerServiceFixtures {
-      case (vhs, QueuePair(queue, dlq), topic, _) =>
+      case (vhs, QueuePair(queue, dlq), topics, _) =>
         givenStoredInVhs(vhs, works: _*)
 
         val matcherResult = MatcherResult(
@@ -230,7 +281,7 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          val worksSent = getMessages[BaseWork](topic).distinct
+          val worksSent = getMessages[BaseWork](topics.works).distinct
           worksSent should have size 4
 
           val redirectedWorks = worksSent.collect {
@@ -260,16 +311,26 @@ class MergerWorkerServiceTest
     }
   }
 
+  case class Topics(works: Topic, images: Topic)
+
   def withMergerWorkerServiceFixtures[R](
-    testWith: TestWith[(VHS, QueuePair, Topic, MemoryMetrics[StandardUnit]), R])
-    : R =
+    testWith: TestWith[(VHS, QueuePair, Topics, MemoryMetrics[StandardUnit]),
+                       R]): R =
     withVHS { vhs =>
       withLocalSqsQueueAndDlq {
         case QueuePair(queue, dlq) =>
-          withLocalSnsTopic { topic =>
-            val metrics = new MemoryMetrics[StandardUnit]
-            withWorkerService(vhs, queue, topic, metrics) { _ =>
-              testWith((vhs, QueuePair(queue, dlq), topic, metrics))
+          withLocalSnsTopic { worksTopic =>
+            withLocalSnsTopic { imagesTopic =>
+              val metrics = new MemoryMetrics[StandardUnit]
+              withWorkerService(vhs, queue, worksTopic, imagesTopic, metrics) {
+                _ =>
+                  testWith(
+                    (
+                      vhs,
+                      QueuePair(queue, dlq),
+                      Topics(worksTopic, imagesTopic),
+                      metrics))
+              }
             }
           }
       }

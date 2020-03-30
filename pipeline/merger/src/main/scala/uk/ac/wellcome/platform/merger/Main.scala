@@ -5,7 +5,12 @@ import akka.stream.ActorMaterializer
 import com.typesafe.config.Config
 
 import scala.concurrent.ExecutionContext
-import uk.ac.wellcome.models.work.internal.{BaseWork, TransformedBaseWork}
+import uk.ac.wellcome.models.work.internal.{
+  BaseWork,
+  MergedImage,
+  TransformedBaseWork,
+  Unminted
+}
 import uk.ac.wellcome.platform.merger.services._
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
@@ -26,22 +31,30 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildActorMaterializer()
     implicit val s3Client =
       S3Builder.buildS3Client(config)
-    implicit val msgStore =
-      S3TypedStore[BaseWork]
+    implicit val workMessageStore = S3TypedStore[BaseWork]
+    implicit val imageMessageStore = S3TypedStore[MergedImage[Unminted]]
 
     val playbackService = new RecorderPlaybackService(
       vhs = VHSBuilder.build[TransformedBaseWork](config)
     )
-
     val mergerManager = new MergerManager(
       mergerRules = PlatformMerger
     )
+    val workSender =
+      BigMessagingBuilder.buildBigMessageSender[BaseWork](
+        config.getConfig("work-sender").withFallback(config)
+      )
+    val imageSender =
+      BigMessagingBuilder.buildBigMessageSender[MergedImage[Unminted]](
+        config.getConfig("image-sender").withFallback(config)
+      )
 
     new MergerWorkerService(
       sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
       playbackService = playbackService,
       mergerManager = mergerManager,
-      workSender = BigMessagingBuilder.buildBigMessageSender[BaseWork](config),
+      workSender = workSender,
+      imageSender = imageSender
     )
   }
 }

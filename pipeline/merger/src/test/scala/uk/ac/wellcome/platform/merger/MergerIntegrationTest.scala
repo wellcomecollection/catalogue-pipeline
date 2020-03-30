@@ -23,25 +23,27 @@ class MergerIntegrationTest
     with WorksGenerators {
 
   it("reads matcher result messages off a queue and deletes them") {
-    withLocalSnsTopic { topic =>
-      withVHS { vhs =>
-        withLocalSqsQueueAndDlq {
-          case QueuePair(queue, dlq) =>
-            withWorkerService(vhs, queue, topic) { _ =>
-              val work = createUnidentifiedWork
+    withLocalSnsTopic { worksTopic =>
+      withLocalSnsTopic { imagesTopic =>
+        withVHS { vhs =>
+          withLocalSqsQueueAndDlq {
+            case QueuePair(queue, dlq) =>
+              withWorkerService(vhs, queue, worksTopic, imagesTopic) { _ =>
+                val work = createUnidentifiedWork
 
-              givenStoredInVhs(vhs, work)
+                givenStoredInVhs(vhs, work)
 
-              val matcherResult = matcherResultWith(Set(Set(work)))
-              sendNotificationToSQS(queue, matcherResult)
+                val matcherResult = matcherResultWith(Set(Set(work)))
+                sendNotificationToSQS(queue, matcherResult)
 
-              eventually {
-                assertQueueEmpty(queue)
-                assertQueueEmpty(dlq)
-                val worksSent = getMessages[TransformedBaseWork](topic)
-                worksSent should contain only work
+                eventually {
+                  assertQueueEmpty(queue)
+                  assertQueueEmpty(dlq)
+                  val worksSent = getMessages[TransformedBaseWork](worksTopic)
+                  worksSent should contain only work
+                }
               }
-            }
+          }
         }
       }
     }
