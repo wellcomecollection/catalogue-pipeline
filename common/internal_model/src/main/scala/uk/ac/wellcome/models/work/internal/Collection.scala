@@ -35,7 +35,7 @@ object CollectionLevel {
 }
 
 /**
-  * A Collection contains a hierarchical archive or collection of works. Each 
+  * A Collection contains a hierarchical archive or collection of works. Each
   * work in the hierarchy contains a forward slash separated path representing
   * its position. Note that this is built dynamically from the index by querying
   * the CollectionPath fields, rather than being stored directly on the model.
@@ -108,8 +108,7 @@ object Collection {
         )
     }
 
-  private def checkTreeErrors(tree: Collection,
-                              works: List[IdentifiedWork]) = {
+  private def checkTreeErrors(tree: Collection, works: List[IdentifiedWork]) = {
     val pathList = tree.pathList
     if (pathList.length < works.length) {
       val unconnected =

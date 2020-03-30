@@ -240,10 +240,10 @@ class Router(elasticClient: ElasticClient,
       }
     }
 
-  def retrieveTree(index: Index,
-                   work: IdentifiedWork,
-                   expandedPaths: List[String])
-    : Future[Option[(Collection, List[String])]] =
+  def retrieveTree(
+    index: Index,
+    work: IdentifiedWork,
+    expandedPaths: List[String]): Future[Option[(Collection, List[String])]] =
     work.data.collectionPath
       .map {
         case CollectionPath(path, _, _) =>

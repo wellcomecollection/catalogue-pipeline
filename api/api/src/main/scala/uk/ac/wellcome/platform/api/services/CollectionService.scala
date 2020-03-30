@@ -40,9 +40,8 @@ class CollectionService(elasticClient: ElasticClient)(
   implicit ec: ExecutionContext)
     extends Tracing {
 
-  def retrieveTree(
-    index: Index,
-    expandedPaths: List[String]): Future[Result[Collection]] =
+  def retrieveTree(index: Index,
+                   expandedPaths: List[String]): Future[Result[Collection]] =
     makeEsRequest(index, expandedPaths)
       .map { result =>
         result.left

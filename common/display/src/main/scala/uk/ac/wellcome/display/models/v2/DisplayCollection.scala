@@ -26,8 +26,7 @@ case class DisplayCollection(
 
 object DisplayCollection {
 
-  def apply(tree: Collection,
-            expandedPaths: List[String]): DisplayCollection =
+  def apply(tree: Collection, expandedPaths: List[String]): DisplayCollection =
     DisplayCollection(
       path = DisplayCollectionPath(tree.path),
       work = DisplayWorkV2(tree.work),
@@ -50,11 +49,10 @@ object DisplayCollection {
 )
 case class DisplayCollectionPath(
   @Schema(
-   description = "Where in the hierarchy a work is in the collection"
+    description = "Where in the hierarchy a work is in the collection"
   ) path: String,
   @Schema(
-    description =
-      "The level of the node."
+    description = "The level of the node."
   ) level: String,
   @Schema(
     description = "The label of the collection"
