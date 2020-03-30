@@ -28,7 +28,7 @@ module "image_id_minter" {
 
     queue_url       = module.image_id_minter_queue.url
     topic_arn       = module.image_id_minter_topic.arn
-    max_connections = 4
+    max_connections = 8
 
     logstash_host = local.logstash_host
   }
