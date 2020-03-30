@@ -25,7 +25,7 @@ module "service" {
 
   security_group_ids = [
     var.lb_ingress_sg_id,
-    aws_security_group.service_egress_security_group.id,
+    var.egress_security_group_id,
     var.interservice_sg_id,
   ]
 
@@ -35,21 +35,4 @@ module "service" {
 resource "aws_service_discovery_private_dns_namespace" "namespace" {
   name = "${var.namespace}-${var.environment}"
   vpc  = var.vpc_id
-}
-
-resource "aws_security_group" "service_egress_security_group" {
-  name        = "${var.namespace}-${var.environment}-service_egress_security_group"
-  description = "Allow any traffic on any port out of the (${var.namespace}-${var.environment}) service"
-  vpc_id      = var.vpc_id
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = var.namespace
-  }
 }
