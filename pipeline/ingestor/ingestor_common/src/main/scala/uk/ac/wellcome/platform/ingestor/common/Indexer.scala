@@ -37,7 +37,7 @@ trait Indexer[T] extends Logging {
       }
       .map { response: Response[BulkResponse] =>
         if (response.isError) {
-          warn(s"Error from Elasticsearch: $response")
+          error(s"Error from Elasticsearch: $response")
           Left(documents)
         } else {
           debug(s"Bulk response = $response")
