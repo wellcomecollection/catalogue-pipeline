@@ -28,7 +28,7 @@ module "image_id_minter" {
 
     queue_url       = module.image_id_minter_queue.url
     topic_arn       = module.image_id_minter_topic.arn
-    max_connections = 8
+    max_connections = local.id_minter_task_max_connections
 
     logstash_host = local.logstash_host
   }
@@ -40,13 +40,12 @@ module "image_id_minter" {
     db_password = "catalogue/id_minter/rds_password"
   }
 
-  // The maximum number of connections to RDS is 90.
-  // Each id minter task is configured to have 8 connections
-  // in the connection pool (see `max_connections` parameter above).
-  // To avoid exceeding the maximum nuber of connections to RDS,
-  // the maximum capacity for *EACH* id minter  (ie the total
-  // maximum capacity of all ID minters) should be no higher than 5
-  max_capacity = 5
+  // The total number of connections to RDS across all tasks from all ID minter
+  // services must not exceed the maximum supported by the RDS instance.
+  max_capacity = floor(
+    local.id_minter_rds_max_connections /
+    (local.id_minter_service_count * local.id_minter_task_max_connections)
+  )
 
 
   subnets             = var.subnets
