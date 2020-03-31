@@ -1,11 +1,21 @@
 package uk.ac.wellcome.elasticsearch
 
-import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.ElasticDsl.{
+  booleanField,
+  dateField,
+  intField,
+  keywordField,
+  objectField,
+  properties,
+  textField,
+  tokenCountField
+}
 import com.sksamuel.elastic4s.requests.analysis.{
   Analysis,
   CustomAnalyzer,
   PathHierarchyTokenizer
 }
+import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 import com.sksamuel.elastic4s.requests.mappings.{
   FieldDefinition,
   MappingDefinition,
@@ -261,6 +271,6 @@ case object WorksIndexConfig extends IndexConfig {
       data
     )
 
-  val mapping = properties(fields)
+  val mapping = properties(fields).dynamic(DynamicMapping.Strict)
 
 }

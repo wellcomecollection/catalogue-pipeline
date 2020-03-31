@@ -12,10 +12,12 @@ import grizzled.slf4j.Logging
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class ElasticsearchIndexCreator(elasticClient: ElasticClient)(
-  implicit ec: ExecutionContext)
+class ElasticsearchIndexCreator(
+  elasticClient: ElasticClient,
+  index: Index,
+  config: IndexConfig)(implicit ec: ExecutionContext)
     extends Logging {
-  def create(index: Index, config: IndexConfig): Future[Unit] = {
+  def create: Future[Unit] = {
 
     create(index = index, mapping = config.mapping, config.analysis)
   }
@@ -26,7 +28,7 @@ class ElasticsearchIndexCreator(elasticClient: ElasticClient)(
     elasticClient
       .execute {
         createIndex(index.name)
-          .mapping { mapping.dynamic(DynamicMapping.Strict) }
+          .mapping { mapping }
           .analysis { analysis }
 
           // Because we have a relatively small number of records (compared

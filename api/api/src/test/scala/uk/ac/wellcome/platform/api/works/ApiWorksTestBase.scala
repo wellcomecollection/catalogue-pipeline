@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.api.works
-import com.sksamuel.elastic4s.{Index, Indexable}
+import com.sksamuel.elastic4s.{ElasticDsl, Index, Indexable}
 import com.sksamuel.elastic4s.ElasticDsl._
-
 import uk.ac.wellcome.display.models.ApiVersions
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
@@ -146,7 +145,7 @@ trait ApiWorksTestBase
         val index = Index(randomAlphanumeric(length = 10))
         elasticClient
           .execute {
-            createIndex(index.name)
+            ElasticDsl.createIndex(index.name)
           }
         eventuallyIndexExists(index)
         index

@@ -1,17 +1,19 @@
 package uk.ac.wellcome.elasticsearch
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.{RequestFailure, Response}
+import com.sksamuel.elastic4s.requests.analysis.Analysis
+import com.sksamuel.elastic4s.requests.indexes.IndexResponse
+import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
+import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
 import org.scalatest.{BeforeAndAfterEach, FunSpec, Matchers}
-import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.requests.analysis.Analysis
-import com.sksamuel.elastic4s.{RequestFailure, Response}
-import com.sksamuel.elastic4s.requests.indexes.IndexResponse
-import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.utils.JsonAssertions
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 case class TestObject(
   id: String,
@@ -52,7 +54,7 @@ class ElasticsearchIndexCreatorTest
         keywordField("id"),
         textField("description"),
         booleanField("visible")
-      ))
+      )).dynamic(DynamicMapping.Strict)
     val analysis = Analysis(Nil)
   }
 
@@ -63,7 +65,7 @@ class ElasticsearchIndexCreatorTest
         textField("description"),
         booleanField("visible"),
         intField("count")
-      ))
+      )).dynamic(DynamicMapping.Strict)
     val analysis = Analysis(Nil)
   }
 
