@@ -1,9 +1,10 @@
 package uk.ac.wellcome.elasticsearch
 
 import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.Response
+import com.sksamuel.elastic4s.{RequestFailure, Response}
 import com.sksamuel.elastic4s.requests.analysis.Analysis
 import com.sksamuel.elastic4s.requests.indexes.IndexResponse
+import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
 import org.scalatest.{BeforeAndAfterEach, FunSpec, Matchers}
@@ -53,7 +54,7 @@ class ElasticsearchIndexCreatorTest
         keywordField("id"),
         textField("description"),
         booleanField("visible")
-      ))
+      )).dynamic(DynamicMapping.Strict)
     val analysis = Analysis(Nil)
   }
 
@@ -64,7 +65,7 @@ class ElasticsearchIndexCreatorTest
         textField("description"),
         booleanField("visible"),
         intField("count")
-      ))
+      )).dynamic(DynamicMapping.Strict)
     val analysis = Analysis(Nil)
   }
 
@@ -89,6 +90,25 @@ class ElasticsearchIndexCreatorTest
             testObjectJson
           )
         }
+      }
+    }
+  }
+
+  it("create an index where inserting a doc of an unexpected type fails") {
+    withLocalElasticsearchIndex(TestIndexConfig) { index =>
+      val badTestObject = BadTestObject("id", 5)
+      val badTestObjectJson = toJson(badTestObject).get
+
+      val future: Future[Response[IndexResponse]] =
+        elasticClient
+          .execute {
+            indexInto(index.name)
+              .doc(badTestObjectJson)
+          }
+
+      whenReady(future) { response =>
+        response.isError shouldBe true
+        response shouldBe a[RequestFailure]
       }
     }
   }
