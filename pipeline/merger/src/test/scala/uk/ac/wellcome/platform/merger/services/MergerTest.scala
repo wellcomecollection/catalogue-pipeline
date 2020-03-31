@@ -22,8 +22,8 @@ class MergerTest extends FunSpec with Matchers with WorksGenerators {
       target: UnidentifiedWork,
       sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData] =
       FieldMergeResult(
-        fieldData = mergedTargetItems,
-        redirects = List(sources.tail.head)
+        data = mergedTargetItems,
+        sources = List(sources.tail.head)
       )
   }
 
@@ -34,8 +34,8 @@ class MergerTest extends FunSpec with Matchers with WorksGenerators {
       target: UnidentifiedWork,
       sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData] =
       FieldMergeResult(
-        fieldData = mergedOtherIdentifiers,
-        redirects = sources.tail.tail)
+        data = mergedOtherIdentifiers,
+        sources = sources.tail.tail)
   }
 
   object TestMerger extends Merger {

@@ -27,15 +27,16 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
       physicalDigitalIdsRule(target, sources) getOrElse Nil
     val calmIds =
       calmIdsRule(target, sources) getOrElse Nil
+
     FieldMergeResult(
-      fieldData = (physicalDigitalIds ++ miroIds ++ calmIds).distinct match {
+      data = (physicalDigitalIds ++ miroIds ++ calmIds).distinct match {
         case Nil          => target.otherIdentifiers
         case nonEmptyList => nonEmptyList
       },
-      redirects = sources.filter { source =>
+      sources = sources.filter { source =>
         (miroIdsRule(target, source) orElse physicalDigitalIdsRule(
           target,
-          source)).isDefined
+          source) orElse calmIdsRule(target, sources)).isDefined
       }
     )
   }
