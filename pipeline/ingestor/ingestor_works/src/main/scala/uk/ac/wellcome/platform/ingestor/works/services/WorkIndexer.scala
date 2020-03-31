@@ -11,7 +11,7 @@ import scala.language.implicitConversions
 
 class WorkIndexer(
  val  client: ElasticClient,
- val indexName: Index
+ val index: Index
 )(implicit val ec: ExecutionContext)
     extends Indexer[IdentifiedBaseWork] {
 

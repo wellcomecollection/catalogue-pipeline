@@ -46,7 +46,7 @@ trait IngestorFixtures
         override implicit val indexable: Indexable[T] = idx
         override implicit val id: CanonicalId[T] = canonicalId
         override implicit val version: Version[T] = v
-        override val indexName: Index = i
+        override val index: Index = i
       }
       testWith(indexer)
   }

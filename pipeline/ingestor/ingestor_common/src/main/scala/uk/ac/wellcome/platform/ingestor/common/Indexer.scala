@@ -16,7 +16,7 @@ trait Indexer[T] extends Logging {
   implicit val indexable: Indexable[T]
   implicit val id: CanonicalId[T]
   implicit val version: Version[T]
-  val indexName: Index
+  val index: Index
 
   final def index(documents: Seq[T])
     : Future[Either[Seq[T], Seq[T]]] = {
@@ -24,7 +24,7 @@ trait Indexer[T] extends Logging {
     debug(s"Indexing ${documents.map(d => id.canonicalId(d)).mkString(", ")}")
 
     val inserts = documents.map { document =>
-      indexInto(indexName.name)
+      indexInto(index.name)
         .version(version.version(document))
         .versionType(ExternalGte)
         .id(id.canonicalId(document))
