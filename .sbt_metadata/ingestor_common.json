@@ -1,0 +1,8 @@
+{
+  "id" : "ingestor_common",
+  "folder" : "pipeline/ingestor/ingestor_common",
+  "dependencyIds" : [
+    "elasticsearch_typesafe",
+    "big_messaging_typesafe"
+  ]
+}
