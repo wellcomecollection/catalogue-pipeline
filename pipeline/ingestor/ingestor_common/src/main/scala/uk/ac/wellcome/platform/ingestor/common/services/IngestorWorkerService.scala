@@ -12,8 +12,8 @@ import uk.ac.wellcome.typesafe.Runnable
 import scala.concurrent.{ExecutionContext, Future}
 
 class IngestorWorkerService[T](
-                              ingestorConfig: IngestorConfig,
-                              indexCreator: ElasticsearchIndexCreator,
+  ingestorConfig: IngestorConfig,
+  indexCreator: ElasticsearchIndexCreator,
   documentIndexer: Indexer[T],
   messageStream: BigMessageStream[T]
 )(implicit

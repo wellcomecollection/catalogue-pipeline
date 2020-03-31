@@ -124,7 +124,11 @@ class IngestorWorkerServiceTest
     withLocalWorksIndex { index =>
       withLocalSqsQueueAndDlqAndTimeout(visibilityTimeout = 10) {
         case QueuePair(queue, dlq) =>
-          withWorkerService(queue, index, WorksIndexConfig, new WorkIndexer(elasticClient,index)) { _ =>
+          withWorkerService(
+            queue,
+            index,
+            WorksIndexConfig,
+            new WorkIndexer(elasticClient, index)) { _ =>
             works.map { work =>
               sendMessage[IdentifiedBaseWork](queue = queue, obj = work)
             }

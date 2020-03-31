@@ -24,14 +24,14 @@ import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
 
 class WorksIndexConfigTest
-  extends FunSpec
+    extends FunSpec
     with ElasticsearchFixtures
     with ScalaFutures
     with Eventually
     with Matchers
     with JsonAssertions
     with ScalaCheckPropertyChecks
-    with WorksGenerators  {
+    with WorksGenerators {
 
   // On failure, scalacheck tries to shrink to the smallest input that causes a failure.
   // With IdentifiedWork, that means that it never actually completes.
@@ -154,8 +154,8 @@ class WorksIndexConfigTest
 
   private def assertObjectIndexed[T](index: Index, t: T)(
     implicit encoder: Encoder[T]): Assertion =
-  // Elasticsearch is eventually consistent so, when the future completes,
-  // the documents won't appear in the search until after a refresh
+    // Elasticsearch is eventually consistent so, when the future completes,
+    // the documents won't appear in the search until after a refresh
     eventually {
       val response: Response[SearchResponse] = elasticClient.execute {
         search(index).matchAllQuery()
@@ -167,4 +167,3 @@ class WorksIndexConfigTest
       assertJsonStringsAreEqual(hits.head.sourceAsString, toJson(t).get)
     }
 }
-

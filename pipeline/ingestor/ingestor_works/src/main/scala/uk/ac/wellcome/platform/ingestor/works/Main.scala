@@ -5,7 +5,10 @@ import akka.stream.ActorMaterializer
 import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
 import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
-import uk.ac.wellcome.elasticsearch.{ElasticsearchIndexCreator, WorksIndexConfig}
+import uk.ac.wellcome.elasticsearch.{
+  ElasticsearchIndexCreator,
+  WorksIndexConfig
+}
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal.IdentifiedBaseWork
@@ -32,8 +35,9 @@ object Main extends WellcomeTypesafeApp {
     val index = Index(indexName)
     new IngestorWorkerService(
       ingestorConfig = IngestorConfigBuilder.buildIngestorConfig(config),
-      documentIndexer = new WorkIndexer(elasticClient,index),
-      indexCreator = new ElasticsearchIndexCreator(elasticClient, index ,WorksIndexConfig),
+      documentIndexer = new WorkIndexer(elasticClient, index),
+      indexCreator =
+        new ElasticsearchIndexCreator(elasticClient, index, WorksIndexConfig),
       messageStream =
         BigMessagingBuilder.buildMessageStream[IdentifiedBaseWork](config)
     )

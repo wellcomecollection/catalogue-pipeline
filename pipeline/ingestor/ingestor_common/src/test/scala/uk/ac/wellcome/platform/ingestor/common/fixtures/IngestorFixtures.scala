@@ -24,39 +24,47 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import uk.ac.wellcome.json.JsonUtil._
 
-case class SampleDocument(version: Int, canonicalId: String, title: String, data: SampleDocumentData = SampleDocumentData())
+case class SampleDocument(version: Int,
+                          canonicalId: String,
+                          title: String,
+                          data: SampleDocumentData = SampleDocumentData())
 case class SampleDocumentData(stuff: Option[String] = None)
 object SampleDocument {
-  implicit val canonicalId: CanonicalId[SampleDocument] = (t: SampleDocument) => t.canonicalId
-  implicit val indexable: Indexable[SampleDocument] = (t: SampleDocument) => toJson(t).get
-  implicit val version: Version[SampleDocument] = (t: SampleDocument) => t.version
+  implicit val canonicalId: CanonicalId[SampleDocument] = (t: SampleDocument) =>
+    t.canonicalId
+  implicit val indexable: Indexable[SampleDocument] = (t: SampleDocument) =>
+    toJson(t).get
+  implicit val version: Version[SampleDocument] = (t: SampleDocument) =>
+    t.version
 }
 
-trait IngestorFixtures
-    extends ElasticsearchFixtures
-    with BigMessagingFixture {
+trait IngestorFixtures extends ElasticsearchFixtures with BigMessagingFixture {
   this: Suite =>
 
+  def withIndexer[T, R](i: Index, esClient: ElasticClient = elasticClient)(
+    testWith: TestWith[Indexer[T], R])(implicit e: ExecutionContext,
+                                       idx: Indexable[T],
+                                       canonicalId: CanonicalId[T],
+                                       v: Version[T]) = {
 
-  def withIndexer[T,R](i: Index, esClient: ElasticClient = elasticClient)(testWith: TestWith[Indexer[T], R])(implicit e: ExecutionContext, idx: Indexable[T], canonicalId: CanonicalId[T], v: Version[T]) = {
-
-      val indexer = new Indexer[T]{
-        override val client: ElasticClient = esClient
-        override implicit val ec: ExecutionContext = e
-        override implicit val indexable: Indexable[T] = idx
-        override implicit val id: CanonicalId[T] = canonicalId
-        override implicit val version: Version[T] = v
-        override val index: Index = i
-      }
-      testWith(indexer)
+    val indexer = new Indexer[T] {
+      override val client: ElasticClient = esClient
+      override implicit val ec: ExecutionContext = e
+      override implicit val indexable: Indexable[T] = idx
+      override implicit val id: CanonicalId[T] = canonicalId
+      override implicit val version: Version[T] = v
+      override val index: Index = i
+    }
+    testWith(indexer)
   }
 
-  def withWorkerService[T,R](queue: Queue,
-                           index: Index,
-                             indexConfig: IndexConfig,
-                             indexer: Indexer[T],
-                           elasticClient: ElasticClient = elasticClient)(
-    testWith: TestWith[IngestorWorkerService[T], R])(implicit dec: Decoder[T], codec: Codec[T]): R =
+  def withWorkerService[T, R](queue: Queue,
+                              index: Index,
+                              indexConfig: IndexConfig,
+                              indexer: Indexer[T],
+                              elasticClient: ElasticClient = elasticClient)(
+    testWith: TestWith[IngestorWorkerService[T], R])(implicit dec: Decoder[T],
+                                                     codec: Codec[T]): R =
     withActorSystem { implicit actorSystem =>
       {
         implicit val typedStoreT =
@@ -68,7 +76,8 @@ trait IngestorFixtures
           )
 
           val workerService = new IngestorWorkerService(
-            indexCreator = new ElasticsearchIndexCreator(elasticClient, index, indexConfig),
+            indexCreator =
+              new ElasticsearchIndexCreator(elasticClient, index, indexConfig),
             documentIndexer = indexer,
             ingestorConfig = ingestorConfig,
             messageStream = messageStream
@@ -83,8 +92,7 @@ trait IngestorFixtures
 
   object NoStrictMapping extends IndexConfig {
 
-    val analysis = Analysis(
-      analyzers = List())
+    val analysis = Analysis(analyzers = List())
     val mapping = MappingDefinition.empty
   }
 }

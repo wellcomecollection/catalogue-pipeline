@@ -18,8 +18,7 @@ trait Indexer[T] extends Logging {
   implicit val version: Version[T]
   val index: Index
 
-  final def index(documents: Seq[T])
-    : Future[Either[Seq[T], Seq[T]]] = {
+  final def index(documents: Seq[T]): Future[Either[Seq[T], Seq[T]]] = {
 
     debug(s"Indexing ${documents.map(d => id.canonicalId(d)).mkString(", ")}")
 

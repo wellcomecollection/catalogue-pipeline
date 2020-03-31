@@ -1,10 +1,9 @@
 package uk.ac.wellcome.elasticsearch.model
 
-
-trait CanonicalId[T]{
+trait CanonicalId[T] {
   def canonicalId(t: T): String
 }
 
-trait Version[T]{
-  def version(t:T):Int
+trait Version[T] {
+  def version(t: T): Int
 }

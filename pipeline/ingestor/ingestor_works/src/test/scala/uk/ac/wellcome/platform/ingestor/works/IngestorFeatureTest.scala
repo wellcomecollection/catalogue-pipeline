@@ -28,7 +28,11 @@ class IngestorFeatureTest
     withLocalSqsQueue { queue =>
       sendMessage[IdentifiedBaseWork](queue = queue, obj = work)
       withLocalWorksIndex { index =>
-        withWorkerService(queue, index, WorksIndexConfig, new WorkIndexer(elasticClient,index)) { _ =>
+        withWorkerService(
+          queue,
+          index,
+          WorksIndexConfig,
+          new WorkIndexer(elasticClient, index)) { _ =>
           assertElasticsearchEventuallyHasWork(index, work)
         }
       }
@@ -43,12 +47,15 @@ class IngestorFeatureTest
     withLocalSqsQueue { queue =>
       sendMessage[IdentifiedBaseWork](queue = queue, obj = work)
       withLocalWorksIndex { index =>
-        withWorkerService(queue, index, WorksIndexConfig, new WorkIndexer(elasticClient,index)) { _ =>
+        withWorkerService(
+          queue,
+          index,
+          WorksIndexConfig,
+          new WorkIndexer(elasticClient, index)) { _ =>
           assertElasticsearchEventuallyHasWork(index, work)
         }
       }
     }
   }
-
 
 }

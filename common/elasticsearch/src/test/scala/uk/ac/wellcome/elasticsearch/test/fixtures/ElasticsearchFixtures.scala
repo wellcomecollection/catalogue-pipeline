@@ -66,9 +66,9 @@ trait ElasticsearchFixtures
     index: Index = createIndex): Fixture[Index, R] = fixture[Index, R](
     create = {
       new ElasticsearchIndexCreator(
-        elasticClient = elasticClient, index = index, config = config)
-        .create
-        .await
+        elasticClient = elasticClient,
+        index = index,
+        config = config).create.await
 
       // Elasticsearch is eventually consistent, so the future
       // completing doesn't actually mean that the index exists yet
@@ -107,13 +107,14 @@ trait ElasticsearchFixtures
   def assertElasticsearchEventuallyHasWork(
     index: Index,
     works: IdentifiedBaseWork*): Seq[Assertion] = {
-    implicit val id: CanonicalId[IdentifiedBaseWork] = (t: IdentifiedBaseWork) => t.canonicalId
+    implicit val id: CanonicalId[IdentifiedBaseWork] =
+      (t: IdentifiedBaseWork) => t.canonicalId
     assertElasticsearchEventuallyHas(index, works: _*)
   }
 
-  def assertElasticsearchEventuallyHas[T](
-                                           index: Index,
-                                           documents: T*)(implicit id: CanonicalId[T], encoder: Encoder[T]): Seq[Assertion] =
+  def assertElasticsearchEventuallyHas[T](index: Index, documents: T*)(
+    implicit id: CanonicalId[T],
+    encoder: Encoder[T]): Seq[Assertion] =
     documents.map { document =>
       val documentJson = toJson(document).get
 
@@ -132,12 +133,13 @@ trait ElasticsearchFixtures
 
   def assertElasticsearchNeverHasWork(index: Index,
                                       works: IdentifiedBaseWork*): Unit = {
-    implicit val id: CanonicalId[IdentifiedBaseWork] = (t: IdentifiedBaseWork) => t.canonicalId
-    assertElasticsearchNeverHas(index, works:_*)
+    implicit val id: CanonicalId[IdentifiedBaseWork] =
+      (t: IdentifiedBaseWork) => t.canonicalId
+    assertElasticsearchNeverHas(index, works: _*)
   }
 
-  def assertElasticsearchNeverHas[T](index: Index,
-                                     documents: T*)(implicit id: CanonicalId[T]): Unit = {
+  def assertElasticsearchNeverHas[T](index: Index, documents: T*)(
+    implicit id: CanonicalId[T]): Unit = {
     // Let enough time pass to account for elasticsearch
     // eventual consistency before asserting
     Thread.sleep(500)

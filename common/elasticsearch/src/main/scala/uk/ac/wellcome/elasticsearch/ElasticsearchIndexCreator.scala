@@ -12,8 +12,10 @@ import grizzled.slf4j.Logging
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class ElasticsearchIndexCreator(elasticClient: ElasticClient, index: Index, config: IndexConfig)(
-  implicit ec: ExecutionContext)
+class ElasticsearchIndexCreator(
+  elasticClient: ElasticClient,
+  index: Index,
+  config: IndexConfig)(implicit ec: ExecutionContext)
     extends Logging {
   def create: Future[Unit] = {
 

@@ -3,15 +3,20 @@ package uk.ac.wellcome.platform.ingestor.works.services
 import com.sksamuel.elastic4s.{ElasticClient, Index}
 import uk.ac.wellcome.json.JsonUtil.toJson
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.internal.{IdentifiedBaseWork, IdentifiedInvisibleWork, IdentifiedRedirectedWork, IdentifiedWork}
+import uk.ac.wellcome.models.work.internal.{
+  IdentifiedBaseWork,
+  IdentifiedInvisibleWork,
+  IdentifiedRedirectedWork,
+  IdentifiedWork
+}
 import uk.ac.wellcome.platform.ingestor.common.Indexer
 
 import scala.concurrent.ExecutionContext
 import scala.language.implicitConversions
 
 class WorkIndexer(
- val  client: ElasticClient,
- val index: Index
+  val client: ElasticClient,
+  val index: Index
 )(implicit val ec: ExecutionContext)
     extends Indexer[IdentifiedBaseWork] {
 
@@ -39,11 +44,11 @@ class WorkIndexer(
     * We make sure that a merger modified work always wins over other works with the same
     * version, by adding one to work.version * 10.
     */
-    implicit val version = {
-      case w: IdentifiedWork => (w.version * 10) + w.data.merged
-      case w: IdentifiedRedirectedWork => (w.version * 10) + 1
-      case w: IdentifiedInvisibleWork => w.version * 10
-    }
+  implicit val version = {
+    case w: IdentifiedWork           => (w.version * 10) + w.data.merged
+    case w: IdentifiedRedirectedWork => (w.version * 10) + 1
+    case w: IdentifiedInvisibleWork  => w.version * 10
+  }
 
   implicit private def toInteger(bool: Boolean): Int = if (bool) 1 else 0
 }
