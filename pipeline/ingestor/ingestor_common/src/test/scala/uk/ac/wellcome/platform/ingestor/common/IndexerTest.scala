@@ -10,15 +10,15 @@ import uk.ac.wellcome.elasticsearch.model.{CanonicalId, Version}
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.models.work.generators.{IdentifiersGenerators, WorksGenerators}
+import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
 import uk.ac.wellcome.platform.ingestor.common.fixtures.{IngestorFixtures, SampleDocument, SampleDocumentData}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class IndexerTest extends FunSpec with ScalaFutures with Matchers with IdentifiersGenerators with ElasticsearchFixtures with IngestorFixtures with WorksGenerators{
+class IndexerTest extends FunSpec with ScalaFutures with Matchers with IdentifiersGenerators with ElasticsearchFixtures with IngestorFixtures{
 
-  it("inserts an identified Work into Elasticsearch") {
+  it("inserts a document into Elasticsearch") {
     val document = SampleDocument(1, createCanonicalId, randomAlphanumeric(10))
 
     withIndexAndIndexer[SampleDocument, Any]() { case (index, indexer) =>
@@ -45,7 +45,7 @@ class IndexerTest extends FunSpec with ScalaFutures with Matchers with Identifie
     }
   }
 
-  it("doesn't add a Work with a lower version") {
+  it("doesn't add a document with a lower version") {
     val document = SampleDocument(3, createCanonicalId, randomAlphanumeric(10))
     val olderDocument = document.copy(version = 1)
 
@@ -62,7 +62,7 @@ class IndexerTest extends FunSpec with ScalaFutures with Matchers with Identifie
     }
   }
 
-  it("replaces a Work with the same version") {
+  it("replaces a document with the same version") {
     val document = SampleDocument(3, createCanonicalId, randomAlphanumeric(10))
     val updatedDocument = document.copy(
       title = "A different title"
@@ -81,7 +81,7 @@ class IndexerTest extends FunSpec with ScalaFutures with Matchers with Identifie
     }
   }
 
-  it("inserts a list of works into elasticsearch and returns them") {
+  it("inserts a list of documents into elasticsearch and returns them") {
     val documents = (1 to 5).map(_ => SampleDocument(1, createCanonicalId, randomAlphanumeric(10)))
 
     withIndexAndIndexer[SampleDocument, Any]() { case (index, indexer) =>
@@ -94,7 +94,7 @@ class IndexerTest extends FunSpec with ScalaFutures with Matchers with Identifie
     }
   }
 
-  it("returns a list of Works that weren't indexed correctly") {
+  it("returns a list of documents that weren't indexed correctly") {
     val validDocuments = (1 to 5).map(_ => SampleDocument(1, createCanonicalId, randomAlphanumeric))
     val notMatchingMappingDocuments = (1 to 3).map(_ =>SampleDocument(1, createCanonicalId, randomAlphanumeric, SampleDocumentData(Some("blah bluh blih"))))
     val documents = validDocuments ++ notMatchingMappingDocuments
