@@ -3,11 +3,11 @@ package uk.ac.wellcome.platform.ingestor.works.services
 import com.sksamuel.elastic4s.Index
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Assertion, FunSpec, Matchers}
+import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.IdentifiedBaseWork
 import uk.ac.wellcome.platform.ingestor.common.Indexer
-import uk.ac.wellcome.platform.ingestor.works.fixtures.IngestorWorksFixtures
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -15,7 +15,7 @@ class WorkIndexerTest
     extends FunSpec
     with ScalaFutures
     with Matchers
-    with IngestorWorksFixtures
+    with ElasticsearchFixtures
     with WorksGenerators {
 
   describe("updating merged / redirected works") {

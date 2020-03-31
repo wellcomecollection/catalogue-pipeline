@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.ingestor.works.config
+package uk.ac.wellcome.elasticsearch
 
 import java.time.Instant
 
@@ -16,17 +16,16 @@ import com.sksamuel.elastic4s.requests.indexes.IndexResponse
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import com.sksamuel.elastic4s.{ElasticError, Response}
 import io.circe.Encoder
-import uk.ac.wellcome.elasticsearch.BadTestObject
+import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.ingestor.works.fixtures.IngestorWorksFixtures
 
 class WorksIndexConfigTest
-    extends FunSpec
-    with IngestorWorksFixtures
+  extends FunSpec
+    with ElasticsearchFixtures
     with ScalaFutures
     with Eventually
     with Matchers
@@ -155,8 +154,8 @@ class WorksIndexConfigTest
 
   private def assertObjectIndexed[T](index: Index, t: T)(
     implicit encoder: Encoder[T]): Assertion =
-    // Elasticsearch is eventually consistent so, when the future completes,
-    // the documents won't appear in the search until after a refresh
+  // Elasticsearch is eventually consistent so, when the future completes,
+  // the documents won't appear in the search until after a refresh
     eventually {
       val response: Response[SearchResponse] = elasticClient.execute {
         search(index).matchAllQuery()
@@ -168,3 +167,4 @@ class WorksIndexConfigTest
       assertJsonStringsAreEqual(hits.head.sourceAsString, toJson(t).get)
     }
 }
+
