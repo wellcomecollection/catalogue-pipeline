@@ -24,7 +24,7 @@ class ImagesRuleTest
   describe("image creation rules") {
     it("creates 1 image from a 1 Miro work") {
       val miroWork = createMiroWork
-      val result = ImagesRule.merge(miroWork).fieldData
+      val result = ImagesRule.merge(miroWork).data
 
       result should have length 1
       result.head.location should be(miroWork.data.images.head.location)
@@ -36,7 +36,7 @@ class ImagesRuleTest
       val n = 3
       val miroWorks = (1 to n).map(_ => createMiroWork).toList
       val sierraWork = createSierraDigitalWork
-      val result = ImagesRule.merge(sierraWork, miroWorks).fieldData
+      val result = ImagesRule.merge(sierraWork, miroWorks).data
 
       result should have length n
       result.map(_.location) should contain theSameElementsAs
@@ -50,7 +50,7 @@ class ImagesRuleTest
       val metsWork = createUnidentifiedInvisibleMetsWorkWith(numImages = n)
       val sierraPictureWork =
         createUnidentifiedSierraWorkWith(workType = Some(WorkType.Pictures))
-      val result = ImagesRule.merge(sierraPictureWork, List(metsWork)).fieldData
+      val result = ImagesRule.merge(sierraPictureWork, List(metsWork)).data
 
       result should have length n
       result.map(_.location) should contain theSameElementsAs
@@ -67,7 +67,7 @@ class ImagesRuleTest
       val sierraPictureWork =
         createUnidentifiedSierraWorkWith(workType = Some(WorkType.Pictures))
       val result =
-        ImagesRule.merge(sierraPictureWork, miroWorks :+ metsWork).fieldData
+        ImagesRule.merge(sierraPictureWork, miroWorks :+ metsWork).data
 
       result should have length n + m
       result.map(_.location) should contain theSameElementsAs
@@ -82,7 +82,7 @@ class ImagesRuleTest
       val metsWork = createUnidentifiedInvisibleMetsWorkWith(numImages = 3)
       val miroWorks = (1 to n).map(_ => createMiroWork).toList
       val sierraWork = createSierraDigitalWork
-      val result = ImagesRule.merge(sierraWork, miroWorks :+ metsWork).fieldData
+      val result = ImagesRule.merge(sierraWork, miroWorks :+ metsWork).data
 
       result should have length n
       result.map(_.location) should contain theSameElementsAs

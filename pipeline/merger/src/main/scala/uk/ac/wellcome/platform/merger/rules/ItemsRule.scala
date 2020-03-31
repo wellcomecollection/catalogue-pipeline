@@ -25,8 +25,8 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     target: UnidentifiedWork,
     sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData] =
     FieldMergeResult(
-      fieldData = mergeItems(target, sources),
-      redirects = sources.filter { source =>
+      data = mergeItems(target, sources),
+      sources = sources.filter { source =>
         (mergeMetsItems(target, source) orElse mergeMiroPhysicalAndDigitalItems(
           target,
           source)).isDefined

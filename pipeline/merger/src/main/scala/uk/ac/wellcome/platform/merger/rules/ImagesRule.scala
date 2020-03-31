@@ -24,14 +24,14 @@ object ImagesRule extends FieldMergeRule {
     target: UnidentifiedWork,
     sources: Seq[TransformedBaseWork] = Nil): FieldMergeResult[FieldData] =
     FieldMergeResult(
-      fieldData = sources match {
+      data = sources match {
         case Nil =>
           getSingleMiroImage.applyOrElse(target, const(Nil))
         case _ :: _ =>
           getPictureImages(target, sources).getOrElse(Nil) ++
             getPairedMiroImages(target, sources).getOrElse(Nil)
       },
-      redirects = Nil
+      sources = Nil
     )
 
   private lazy val getSingleMiroImage
