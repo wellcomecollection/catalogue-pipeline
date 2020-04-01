@@ -21,23 +21,19 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
   override def merge(
     target: UnidentifiedWork,
     sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData] = {
-    val miroIds =
-      miroIdsRule(target, sources) getOrElse Nil
-    val physicalDigitalIds =
-      physicalDigitalIdsRule(target, sources) getOrElse Nil
-    val calmIds =
-      calmIdsRule(target, sources) getOrElse Nil
+
+    val rules = List(miroIdsRule, physicalDigitalIdsRule, calmIdsRule)
+    val ids = rules.flatMap(_(target, sources)).flatten
+    val mergeSources = sources.filter { source =>
+      rules.exists(_(target, source).isDefined)
+    }
 
     FieldMergeResult(
-      data = (physicalDigitalIds ++ miroIds ++ calmIds).distinct match {
+      data = ids.distinct match {
         case Nil          => target.otherIdentifiers
         case nonEmptyList => nonEmptyList
       },
-      sources = sources.filter { source =>
-        (miroIdsRule(target, source) orElse physicalDigitalIdsRule(
-          target,
-          source) orElse calmIdsRule(target, sources)).isDefined
-      }
+      sources = mergeSources
     )
   }
 
