@@ -23,13 +23,15 @@ class MiroImageTest
       transformer.getImage(
         createMiroRecordWith(
           imageNumber = "B0011308"
-        )
+        ),
+        version = 1
       ) shouldBe UnmergedImage(
         sourceIdentifier = SourceIdentifier(
           identifierType = IdentifierType("miro-image-number"),
           ontologyType = "Image",
           value = "B0011308"
         ),
+        version = 1,
         location = DigitalLocation(
           url =
             "https://iiif.wellcomecollection.org/image/B0011308.jpg/info.json",
