@@ -27,7 +27,10 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
       data = getMetsThumbnail(target, sources)
         orElse getMinMiroThumbnail(target, sources)
         getOrElse target.data.thumbnail,
-      sources = Nil
+      sources = getMergedSources(
+        List(getMetsThumbnail, getMinMiroThumbnail),
+        target,
+        sources)
     )
 
   private val getMetsThumbnail =

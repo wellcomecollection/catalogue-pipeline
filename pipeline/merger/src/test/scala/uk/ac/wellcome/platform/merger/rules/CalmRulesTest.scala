@@ -22,7 +22,7 @@ class CalmRulesTest extends FunSpec with Matchers with WorksGenerators {
 
   it("merges from Calm work when it exists") {
     rule.merge(target, List(otherWork, calmWork)) shouldBe
-      FieldMergeResult(Some("123"), Nil)
+      FieldMergeResult(Some("123"), List(calmWork))
   }
 
   it("merges from target work when Calm work doesn't exist") {
@@ -32,6 +32,6 @@ class CalmRulesTest extends FunSpec with Matchers with WorksGenerators {
 
   it("merges from first Calm work when multiple exists") {
     rule.merge(target, List(calmWork, secondCalmWork)) shouldBe
-      FieldMergeResult(Some("123"), Nil)
+      FieldMergeResult(Some("123"), List(calmWork, secondCalmWork))
   }
 }

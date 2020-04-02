@@ -34,13 +34,23 @@ trait FieldMergeRule {
   def apply(target: UnidentifiedWork,
             sources: Seq[TransformedBaseWork]): MergeState =
     merge(target, sources) match {
-      case FieldMergeResult(field, ruleRedirects) =>
-        State(existingRedirects =>
-          (existingRedirects ++ ruleRedirects.toSet, field))
+      case FieldMergeResult(field, mergedSources) =>
+        State(existingMergedSources =>
+          (existingMergedSources ++ mergedSources.toSet, field))
     }
 
   def merge(target: UnidentifiedWork,
             sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData]
+
+  protected def getMergedSources(
+    rules: List[PartialRule],
+    target: UnidentifiedWork,
+    sources: Seq[TransformedBaseWork]): Seq[TransformedBaseWork] = {
+
+    sources.filter { source =>
+      rules.exists(_(target, source).isDefined)
+    }
+  }
 
   protected trait PartialRule {
     val isDefinedForTarget: WorkPredicate
