@@ -32,7 +32,7 @@ object ImagesRule extends FieldMergeRule {
         FieldMergeResult(
           data = getPictureImages(target, sources).getOrElse(Nil) ++
             getPairedMiroImages(target, sources).getOrElse(Nil),
-          sources = getMergedSources(
+          sources = getSourcesToMerge(
             List(getPictureImages, getPairedMiroImages),
             target,
             sources)

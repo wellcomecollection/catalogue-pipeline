@@ -73,6 +73,18 @@ class FieldMergeRuleTest
     }
   }
 
+  describe("getSourcesToMerge") {
+    it("returns only sources that rules would merged") {
+      val rules = List(sourceTitleIsA)
+      val mergedSources = getSourcesToMerge(
+        rules,
+        workWithTitleA,
+        Seq(workWithTitleA, workWithTitleB))
+
+      mergedSources shouldBe Seq(workWithTitleA)
+    }
+  }
+
   // This is here because we are extending ComposedFieldMergeRule
   // to access the private PartialRule trait
   override def merge(

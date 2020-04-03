@@ -27,7 +27,7 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
       data = getMetsThumbnail(target, sources)
         orElse getMinMiroThumbnail(target, sources)
         getOrElse target.data.thumbnail,
-      sources = getMergedSources(
+      sources = getSourcesToMerge(
         List(getMetsThumbnail, getMinMiroThumbnail),
         target,
         sources)

@@ -42,7 +42,7 @@ trait FieldMergeRule {
   def merge(target: UnidentifiedWork,
             sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData]
 
-  protected def getMergedSources(
+  protected def getSourcesToMerge(
     rules: List[PartialRule],
     target: UnidentifiedWork,
     sources: Seq[TransformedBaseWork]): Seq[TransformedBaseWork] = {

@@ -24,7 +24,7 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
     sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData] = {
 
     val rules = List(miroIdsRule, physicalDigitalIdsRule, calmIdsRule)
-    val mergedSources = getMergedSources(rules, target, sources)
+    val mergedSources = getSourcesToMerge(rules, target, sources)
     val ids = rules.flatMap(_(target, sources)).flatten
 
     FieldMergeResult(
