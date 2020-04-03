@@ -22,8 +22,10 @@ trait UseCalmWhenExistsRule extends FieldMergeRule with MergerLogging {
     target: UnidentifiedWork,
     sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData] =
     FieldMergeResult(
-      fieldData = calmRule(target, sources) getOrElse getData(target),
-      redirects = Nil
+      data = calmRule(target, sources) getOrElse getData(target),
+      sources = sources.filter { source =>
+        List(calmRule).exists(_(target, source).isDefined)
+      }
     )
 
   val calmRule =

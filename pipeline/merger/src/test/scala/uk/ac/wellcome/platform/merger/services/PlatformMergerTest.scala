@@ -174,7 +174,7 @@ class PlatformMergerTest
 
     val expectedMergedWork = sierraPhysicalWork.withData { data =>
       data.copy(
-        otherIdentifiers = sierraPhysicalWork.data.otherIdentifiers ++ sierraDigitalWork.identifiers ++ miroWork.identifiers,
+        otherIdentifiers = sierraPhysicalWork.data.otherIdentifiers ++ miroWork.identifiers ++ sierraDigitalWork.identifiers,
         thumbnail = miroWork.data.thumbnail,
         items = List(
           sierraItem.copy(
@@ -208,9 +208,7 @@ class PlatformMergerTest
       expectedMergedWork,
       expectedRedirectedDigitalWork,
       expectedMiroRedirectedWork)
-    result.images should contain theSameElementsAs List(
-      expectedImage
-    )
+    result.images should contain theSameElementsAs List(expectedImage)
   }
 
   it("merges a non-picture Sierra work with a METS work") {
@@ -304,7 +302,7 @@ class PlatformMergerTest
 
     val expectedMergedWork = sierraPhysicalWork.withData { data =>
       data.copy(
-        otherIdentifiers = sierraPhysicalWork.data.otherIdentifiers ++ sierraDigitalWork.identifiers ++ miroWork.identifiers,
+        otherIdentifiers = sierraPhysicalWork.data.otherIdentifiers ++ miroWork.identifiers ++ sierraDigitalWork.identifiers,
         thumbnail = metsWork.data.thumbnail,
         items = List(
           sierraItem.copy(

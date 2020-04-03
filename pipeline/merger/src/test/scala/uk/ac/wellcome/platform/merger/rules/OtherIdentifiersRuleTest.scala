@@ -84,11 +84,13 @@ class OtherIdentifiersRuleTest
     }
   }
 
-  it("merges Calm identifiers") {
+  it("merges Calm identifiers and redirects Calm work to Sierra work") {
     inside(OtherIdentifiersRule.merge(physicalSierra, List(calmWork))) {
-      case FieldMergeResult(otherIdentifiers, _) =>
+      case FieldMergeResult(otherIdentifiers, redirects) =>
         val sierraId = physicalSierra.otherIdentifiers.head.value
         otherIdentifiers.map(_.value) shouldBe List(sierraId, "123", "a", "b")
+
+        redirects shouldBe List(calmWork)
     }
   }
 }

@@ -24,10 +24,13 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
     target: UnidentifiedWork,
     sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData] =
     FieldMergeResult(
-      fieldData = getMetsThumbnail(target, sources)
+      data = getMetsThumbnail(target, sources)
         orElse getMinMiroThumbnail(target, sources)
         getOrElse target.data.thumbnail,
-      redirects = Nil
+      sources = sources.filter { source =>
+        List(getMetsThumbnail, getMinMiroThumbnail).exists(
+          _(target, source).isDefined)
+      }
     )
 
   private val getMetsThumbnail =

@@ -17,11 +17,7 @@ import uk.ac.wellcome.platform.merger.models.{MergeResult, MergerOutcome}
  * The implementor of a Merger must provide:
  * - `findTarget`, which finds the target from the input works
  * - `createMergeResult`, a recipe for creating a merged target and a complete
- *    list of redirects from an input target and a list of sources.
- *
- * The redirects can be implicitly accumulated without duplication or mutation
- * and while preserving referential transparency by using the
- * `accumulateRedirects` helper.
+ *    list of works that should be redirected as a result of any merged fields.
  *
  * Calling `merge` with a list of works will return a new list of works including:
  * - the target work with all fields merged
@@ -57,11 +53,12 @@ trait Merger extends MergerLogging {
       .map {
         case (target, sources) =>
           logIntentions(target, sources)
-          val (toRedirect, result) = createMergeResult(target, sources)
+          val (mergeResultSources, result) = createMergeResult(target, sources)
             .run(Set.empty)
             .value
-          val remaining = sources.toSet -- toRedirect
-          val redirects = toRedirect.map(redirectSourceToTarget(target))
+
+          val remaining = sources.toSet -- mergeResultSources
+          val redirects = mergeResultSources.map(redirectSourceToTarget(target))
           logResult(result, redirects.toList, remaining.toList)
 
           MergerOutcome(
@@ -117,7 +114,7 @@ object PlatformMerger extends Merger {
     sources: Seq[TransformedBaseWork]): MergeState =
     if (sources.isEmpty)
       State.pure(
-        MergeResult(target, images = ImagesRule.merge(target).fieldData)
+        MergeResult(target, images = ImagesRule.merge(target).data)
       )
     else
       for {

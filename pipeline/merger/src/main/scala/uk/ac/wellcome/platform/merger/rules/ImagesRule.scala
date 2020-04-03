@@ -23,16 +23,21 @@ object ImagesRule extends FieldMergeRule {
   override def merge(
     target: UnidentifiedWork,
     sources: Seq[TransformedBaseWork] = Nil): FieldMergeResult[FieldData] =
-    FieldMergeResult(
-      fieldData = sources match {
-        case Nil =>
-          getSingleMiroImage.applyOrElse(target, const(Nil))
-        case _ :: _ =>
-          getPictureImages(target, sources).getOrElse(Nil) ++
-            getPairedMiroImages(target, sources).getOrElse(Nil)
-      },
-      redirects = Nil
-    )
+    sources match {
+      case Nil =>
+        FieldMergeResult(
+          data = getSingleMiroImage.applyOrElse(target, const(Nil)),
+          sources = Nil)
+      case _ :: _ =>
+        FieldMergeResult(
+          data = getPictureImages(target, sources).getOrElse(Nil) ++
+            getPairedMiroImages(target, sources).getOrElse(Nil),
+          sources = sources.filter { source =>
+            List(getPictureImages, getPairedMiroImages).exists(
+              _(target, source).isDefined)
+          }
+        )
+    }
 
   private lazy val getSingleMiroImage
     : PartialFunction[UnidentifiedWork, FieldData] = {

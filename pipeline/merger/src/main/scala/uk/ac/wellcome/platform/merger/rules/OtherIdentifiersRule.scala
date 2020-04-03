@@ -15,27 +15,23 @@ import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
  * - Miro IDs
  * - Digital sierra IDs
  */
+
 object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
   type FieldData = List[SourceIdentifier]
 
   override def merge(
     target: UnidentifiedWork,
     sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData] = {
-    val miroIds =
-      miroIdsRule(target, sources) getOrElse Nil
-    val physicalDigitalIds =
-      physicalDigitalIdsRule(target, sources) getOrElse Nil
-    val calmIds =
-      calmIdsRule(target, sources) getOrElse Nil
+    val rules = List(miroIdsRule, physicalDigitalIdsRule, calmIdsRule)
+    val mergedIds = rules.flatMap(_(target, sources)).flatten.distinct match {
+      case Nil          => target.otherIdentifiers
+      case nonEmptyList => nonEmptyList
+    }
+
     FieldMergeResult(
-      fieldData = (physicalDigitalIds ++ miroIds ++ calmIds).distinct match {
-        case Nil          => target.otherIdentifiers
-        case nonEmptyList => nonEmptyList
-      },
-      redirects = sources.filter { source =>
-        (miroIdsRule(target, source) orElse physicalDigitalIdsRule(
-          target,
-          source)).isDefined
+      data = mergedIds,
+      sources = sources.filter { source =>
+        rules.exists(_(target, source).isDefined)
       }
     )
   }
