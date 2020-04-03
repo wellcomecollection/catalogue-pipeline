@@ -8,33 +8,13 @@ import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 case object ImagesIndexConfig extends IndexConfig {
 
   override val analysis: Analysis = Analysis(List())
-  // This encodes how someone would expect the field to work, but allow querying it in other ways.
-  def textWithKeyword(name: String) =
-    textField(name).fields(keywordField("keyword"))
 
-  def keywordWithText(name: String) =
-    keywordField(name).fields(textField("text"))
-
-  val label = textWithKeyword("label")
-
-  val sourceIdentifierValue = keywordWithText("value")
-
-  val canonicalId = keywordWithText("canonicalId")
   val fullText = textField("fullText")
   def englishTextField(name: String) =
     textField(name).fields(
       keywordField("keyword"),
       textField("english").analyzer("english")
     )
-  def sourceIdentifierFields = Seq(
-    keywordField("ontologyType"),
-    objectField("identifierType").fields(
-      label,
-      keywordField("id"),
-      keywordField("ontologyType")
-    ),
-    sourceIdentifierValue
-  )
 
   def id(fieldName: String = "id") =
     objectField(fieldName).fields(

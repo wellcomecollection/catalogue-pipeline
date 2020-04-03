@@ -1,30 +1,71 @@
 package uk.ac.wellcome.elasticsearch
 
-import com.sksamuel.elastic4s.ElasticDsl.{
-  booleanField,
-  dateField,
-  intField,
-  keywordField,
-  objectField,
-  properties,
-  textField,
-  tokenCountField
-}
-import com.sksamuel.elastic4s.requests.analysis.{
-  Analysis,
-  CustomAnalyzer,
-  PathHierarchyTokenizer
-}
+import com.sksamuel.elastic4s.ElasticDsl.{booleanField, dateField, intField, keywordField, objectField, properties, textField, tokenCountField}
+import com.sksamuel.elastic4s.requests.analysis.{Analysis, CustomAnalyzer, PathHierarchyTokenizer}
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
-import com.sksamuel.elastic4s.requests.mappings.{
-  FieldDefinition,
-  MappingDefinition,
-  ObjectField
-}
+import com.sksamuel.elastic4s.requests.mappings.{FieldDefinition, MappingDefinition, ObjectField}
+import uk.ac.wellcome.elasticsearch.ImagesIndexConfig.englishTextField
 
 trait IndexConfig {
   val mapping: MappingDefinition
   val analysis: Analysis
+
+  // This encodes how someone would expect the field to work, but allow querying it in other ways.
+  def textWithKeyword(name: String) =
+    textField(name).fields(keywordField("keyword"))
+
+  def keywordWithText(name: String) =
+    keywordField(name).fields(textField("text"))
+
+  def sourceIdentifierFields = Seq(
+    keywordField("ontologyType"),
+    objectField("identifierType").fields(
+      label,
+      keywordField("id"),
+      keywordField("ontologyType")
+    ),
+    sourceIdentifierValue
+  )
+
+  def id(fieldName: String = "id") =
+    objectField(fieldName).fields(
+      keywordField("type"),
+      canonicalId,
+      objectField("sourceIdentifier").fields(sourceIdentifierFields),
+      objectField("otherIdentifiers").fields(sourceIdentifierFields)
+    )
+  def location(fieldName: String = "locations") =
+    objectField(fieldName).fields(
+      keywordField("type"),
+      keywordField("ontologyType"),
+      objectField("locationType").fields(
+        label,
+        keywordField("id"),
+        keywordField("ontologyType")
+      ),
+      label,
+      textField("url"),
+      textField("credit"),
+      license,
+      accessConditions
+    )
+  val accessConditions =
+    objectField("accessConditions")
+      .fields(
+        englishTextField("terms"),
+        dateField("to"),
+        objectField("status").fields(keywordField("type"))
+      )
+
+  val license = objectField("license").fields(
+    keywordField("id")
+  )
+
+  val label = textWithKeyword("label")
+
+  val sourceIdentifierValue = keywordWithText("value")
+
+  val canonicalId = keywordWithText("canonicalId")
 }
 
 case object WorksIndexConfig extends IndexConfig {
@@ -38,52 +79,6 @@ case object WorksIndexConfig extends IndexConfig {
     ),
     tokenizers = List(pathTokenizer))
 
-  // `textWithKeyword` and `keywordWithText` are slightly different in the semantics and their use case.
-  // If the intended field type is keyword, but you would like to search it textually, use `keywordWithText` and
-  // visa versa.
-
-  // This encodes how someone would expect the field to work, but allow querying it in other ways.
-  def textWithKeyword(name: String) =
-    textField(name).fields(keywordField("keyword"))
-
-  def keywordWithText(name: String) =
-    keywordField(name).fields(textField("text"))
-
-  val label = textWithKeyword("label")
-
-  val sourceIdentifierValue = keywordWithText("value")
-
-  val canonicalId = keywordWithText("canonicalId")
-
-  val id =
-    objectField("id").fields(
-      keywordField("type"),
-      canonicalId,
-      objectField("sourceIdentifier").fields(sourceIdentifierFields),
-      objectField("otherIdentifiers").fields(sourceIdentifierFields)
-    )
-
-  val license = objectField("license").fields(
-    keywordField("id")
-  )
-
-  val accessConditions =
-    objectField("accessConditions")
-      .fields(
-        englishTextField("terms"),
-        dateField("to"),
-        objectField("status").fields(keywordField("type"))
-      )
-
-  def sourceIdentifierFields = Seq(
-    keywordField("ontologyType"),
-    objectField("identifierType").fields(
-      label,
-      keywordField("id"),
-      keywordField("ontologyType")
-    ),
-    sourceIdentifierValue
-  )
 
   val sourceIdentifier = objectField("sourceIdentifier")
     .fields(sourceIdentifierFields)
@@ -104,25 +99,11 @@ case object WorksIndexConfig extends IndexConfig {
       englishTextField("content")
     )
 
-  def location(fieldName: String = "locations") =
-    objectField(fieldName).fields(
-      keywordField("type"),
-      keywordField("ontologyType"),
-      objectField("locationType").fields(
-        label,
-        keywordField("id"),
-        keywordField("ontologyType")
-      ),
-      label,
-      textField("url"),
-      textField("credit"),
-      license,
-      accessConditions
-    )
+
 
   val period = Seq(
     label,
-    id,
+    id(),
     keywordField("ontologyType"),
     objectField("range").fields(
       label,
@@ -134,19 +115,19 @@ case object WorksIndexConfig extends IndexConfig {
 
   val place = Seq(
     label,
-    id
+    id()
   )
 
   val concept = Seq(
     label,
-    id,
+    id(),
     keywordField("ontologyType"),
     keywordField("type")
   )
 
   val agent = Seq(
     label,
-    id,
+    id(),
     keywordField("type"),
     keywordField("prefix"),
     keywordField("numeration"),
@@ -156,7 +137,7 @@ case object WorksIndexConfig extends IndexConfig {
   val rootConcept = concept ++ agent ++ period
 
   val subject: Seq[FieldDefinition] = Seq(
-    id,
+    id(),
     label,
     keywordField("ontologyType"),
     objectField("concepts").fields(rootConcept)
@@ -178,7 +159,7 @@ case object WorksIndexConfig extends IndexConfig {
   def period(fieldName: String) = labelledTextField(fieldName)
 
   def items(fieldName: String) = objectField(fieldName).fields(
-    id,
+    id(),
     location(),
     englishTextField("title"),
     keywordField("ontologyType")
@@ -196,7 +177,7 @@ case object WorksIndexConfig extends IndexConfig {
   )
 
   val contributors = objectField("contributors").fields(
-    id,
+    id(),
     objectField("agent").fields(agent),
     objectField("roles").fields(
       label,
@@ -220,7 +201,7 @@ case object WorksIndexConfig extends IndexConfig {
   )
 
   val images = objectField("images").fields(
-    id,
+    id(),
     location("location")
   )
 
