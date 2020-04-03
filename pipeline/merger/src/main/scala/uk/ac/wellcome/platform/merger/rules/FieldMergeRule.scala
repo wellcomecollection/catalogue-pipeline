@@ -42,16 +42,6 @@ trait FieldMergeRule {
   def merge(target: UnidentifiedWork,
             sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData]
 
-  protected def getSourcesToMerge(
-    rules: List[PartialRule],
-    target: UnidentifiedWork,
-    sources: Seq[TransformedBaseWork]): Seq[TransformedBaseWork] = {
-
-    sources.filter { source =>
-      rules.exists(_(target, source).isDefined)
-    }
-  }
-
   protected trait PartialRule {
     val isDefinedForTarget: WorkPredicate
     val isDefinedForSource: WorkPredicate
