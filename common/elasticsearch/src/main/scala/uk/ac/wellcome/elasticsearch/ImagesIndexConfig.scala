@@ -16,40 +16,7 @@ case object ImagesIndexConfig extends IndexConfig {
       textField("english").analyzer("english")
     )
 
-  def id(fieldName: String = "id") =
-    objectField(fieldName).fields(
-      keywordField("type"),
-      canonicalId,
-      objectField("sourceIdentifier").fields(sourceIdentifierFields),
-      objectField("otherIdentifiers").fields(sourceIdentifierFields)
-    )
-  def location(fieldName: String = "locations") =
-    objectField(fieldName).fields(
-      keywordField("type"),
-      keywordField("ontologyType"),
-      objectField("locationType").fields(
-        label,
-        keywordField("id"),
-        keywordField("ontologyType")
-      ),
-      label,
-      textField("url"),
-      textField("credit"),
-      license,
-      accessConditions
-    )
-  val accessConditions =
-    objectField("accessConditions")
-      .fields(
-        englishTextField("terms"),
-        dateField("to"),
-        objectField("status").fields(keywordField("type"))
-      )
-
-  val license = objectField("license").fields(
-    keywordField("id")
-  )
-  val inferredData = objectField("inferredData").fields(floatField("features1"), floatField("features2"), keywordField("lshEncodedFeatures"))
+  val inferredData = objectField("inferredData").fields(denseVectorField("features1", 2048), denseVectorField("features2", 2048), keywordField("lshEncodedFeatures"))
 
   override val mapping: MappingDefinition = properties(
     id("id"),
