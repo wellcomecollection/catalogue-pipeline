@@ -34,4 +34,6 @@ module "task_definition" {
   launch_type = var.launch_type
 
   aws_region = "eu-west-1"
+
+  use_awslogs = true
 }
