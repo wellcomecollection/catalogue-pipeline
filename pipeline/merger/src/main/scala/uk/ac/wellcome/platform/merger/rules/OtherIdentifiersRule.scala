@@ -22,7 +22,7 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
   override def merge(
     target: UnidentifiedWork,
     sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData] = {
-    val rules = List(miroIdsRule, physicalDigitalIdsRule, calmIdsRule)
+    val rules = List(miroIdsRule, physicalDigitalSierraIdsRule, calmIdsRule)
     val mergedIds = rules.flatMap(_(target, sources)).flatten.distinct match {
       case Nil          => target.otherIdentifiers
       case nonEmptyList => nonEmptyList
@@ -53,7 +53,7 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
     }
   }
 
-  private val physicalDigitalIdsRule = new PartialRule {
+  private val physicalDigitalSierraIdsRule = new PartialRule {
     val isDefinedForTarget: WorkPredicate = WorkPredicates.physicalSierra
     val isDefinedForSource: WorkPredicate = WorkPredicates.digitalSierra
 
@@ -66,16 +66,16 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
   }
 
   private val calmIdsRule = new PartialRule {
-    val isDefinedForTarget: WorkPredicate = WorkPredicates.sierraWork
-    val isDefinedForSource: WorkPredicate = WorkPredicates.calmWork
+    val isDefinedForTarget: WorkPredicate = WorkPredicates.calmWork
+    val isDefinedForSource: WorkPredicate = WorkPredicates.sierraWork
 
     override def rule(
       target: UnidentifiedWork,
       sources: NonEmptyList[TransformedBaseWork]): List[SourceIdentifier] = {
-      debug(s"Merging physical and digital IDs from ${describeWorks(sources)}")
+      debug(s"Merging Sierra ID into Calm target ${describeWorks(sources)}")
       target.data.otherIdentifiers ++ sources.toList
         .flatMap(_.identifiers)
-        .filterNot(_.identifierType == IdentifierType("sierra-system-number"))
+        .filterNot(_.identifierType == IdentifierType("calm-record-id"))
     }
   }
 }
