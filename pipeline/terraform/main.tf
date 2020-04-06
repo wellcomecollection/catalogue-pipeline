@@ -58,10 +58,10 @@ module "catalogue_pipeline_20200228" {
   read_storage_s3_role_arn          = aws_iam_role.read_storage_s3.arn
 }
 
-module "catalogue_pipeline_20200330" {
+module "catalogue_pipeline_20200406" {
   source = "./stack"
 
-  namespace = "catalogue-20200330"
+  namespace = "catalogue-20200406"
 
   release_label = "latest"
 
@@ -100,7 +100,7 @@ module "catalogue_pipeline_20200330" {
   ]
 
   # Elasticsearch
-  es_works_index = "v2-20200330"
+  es_works_index = "v2-20200406"
 
   # RDS
   rds_ids_access_security_group_id = local.rds_access_security_group_id
