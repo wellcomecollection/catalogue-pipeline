@@ -103,10 +103,11 @@ object PlatformMerger extends Merger {
   override def findTarget(
     works: Seq[TransformedBaseWork]): Option[UnidentifiedWork] =
     works
-      .find(WorkPredicates.physicalSierra)
+      .find(WorkPredicates.calmWork)
+      .orElse(works.find(WorkPredicates.physicalSierra))
       .orElse(works.find(WorkPredicates.sierraWork)) match {
-      case Some(target: UnidentifiedWork) => Some(target)
-      case _                              => None
+      case Some(work: UnidentifiedWork) => Some(work)
+      case _                            => None
     }
 
   override def createMergeResult(

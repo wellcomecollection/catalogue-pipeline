@@ -38,6 +38,29 @@ class PlatformMergerTest
       )
     }
 
+  val calmWork = createUnidentifiedCalmWork(
+    data = WorkData(
+      title = Some("123"),
+      collectionPath = Some(CollectionPath("ref/no", CollectionLevel.Item)),
+      physicalDescription = Some("description"),
+      contributors = List(Contributor(Agent("agent"), Nil)),
+      subjects = List(Subject("subject", Nil)),
+      language = Some(Language("en.gb", "English")),
+      notes = List(FindingAids("here")),
+      workType = Some(WorkType.ArchiveItem),
+      items = List(
+        Item(
+          None,
+          List(
+            PhysicalLocation(
+              locationType = LocationType("scmac"),
+              label = "Closed stores Arch. & MSS",
+              accessConditions = Nil
+            )))),
+      edition = Some("Should not be merged")
+    )
+  )
+
   private val merger = PlatformMerger
 
   it("merges a Sierra physical and Sierra digital work") {
@@ -456,26 +479,6 @@ class PlatformMergerTest
   }
 
   it("merges fields from Calm work if present") {
-    val calmLocation = PhysicalLocation(
-      locationType = LocationType("scmac"),
-      label = "Closed stores Arch. & MSS",
-      accessConditions = Nil
-    )
-    val calmWork = createUnidentifiedCalmWork(
-      data = WorkData(
-        title = Some("123"),
-        collectionPath = Some(CollectionPath("ref/no", CollectionLevel.Item)),
-        physicalDescription = Some("description"),
-        contributors = List(Contributor(Agent("agent"), Nil)),
-        subjects = List(Subject("subject", Nil)),
-        language = Some(Language("en.gb", "English")),
-        notes = List(FindingAids("here")),
-        workType = Some(WorkType.ArchiveItem),
-        items = List(Item(None, List(calmLocation))),
-        edition = Some("Should not be merged")
-      )
-    )
-
     val works = merger.merge(Seq(sierraPhysicalWork, calmWork)).works
 
     works.size shouldBe 2
@@ -490,5 +493,18 @@ class PlatformMergerTest
     work.data.notes shouldBe calmWork.data.notes
     work.data.workType shouldBe calmWork.data.workType
     work.data.edition shouldBe None
+  }
+
+  describe("findTarget") {
+    it(
+      "sets target to `sierraPhysicalWork` when linked with a `digitalSierraWork`") {
+      merger.findTarget(Seq(sierraDigitalWork, sierraPhysicalWork)) should be(
+        Some(sierraPhysicalWork))
+    }
+
+    it("sets target to `calmWork` when linked with any Sierra works") {
+      merger.findTarget(Seq(sierraDigitalWork, sierraPhysicalWork, calmWork)) should be(
+        Some(calmWork))
+    }
   }
 }
