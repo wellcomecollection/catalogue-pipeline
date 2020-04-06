@@ -1,6 +1,7 @@
 package uk.ac.wellcome.platform.merger.services
 
 import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.prop.TableDrivenPropertyChecks.{forAll, _}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.fixtures.ImageFulltextAccess
@@ -495,16 +496,34 @@ class PlatformMergerTest
     work.data.edition shouldBe None
   }
 
+  /**
+    * The hierarchy to how a target is selected is as such:
+    * - Calm work
+    * - Sierra physical work
+    * - Sierra work
+    * - other works e.g. METS / Miro are left unmerged
+    */
   describe("findTarget") {
-    it(
-      "sets target to `sierraPhysicalWork` when linked with a `digitalSierraWork`") {
-      merger.findTarget(Seq(sierraDigitalWork, sierraPhysicalWork)) should be(
-        Some(sierraPhysicalWork))
-    }
+    it("uses the correct order of selecting a target from a list of works") {
+      val seqIncludingCalm =
+        Seq(sierraDigitalWork, miroWork, sierraPhysicalWork, calmWork)
+      val seqIncludingPhysicalSierra =
+        Seq(sierraDigitalWork, miroWork, sierraPhysicalWork)
+      val seqIncludingDigitalSierra = Seq(sierraDigitalWork, miroWork)
+      val seqWithMetsAndMiro = Seq(miroWork, metsWork)
 
-    it("sets target to `calmWork` when linked with any Sierra works") {
-      merger.findTarget(Seq(sierraDigitalWork, sierraPhysicalWork, calmWork)) should be(
-        Some(calmWork))
+      val examples = Table(
+        ("-works-", "-target-"),
+        (seqIncludingCalm, Some(calmWork)),
+        (seqIncludingPhysicalSierra, Some(sierraPhysicalWork)),
+        (seqIncludingDigitalSierra, Some(sierraDigitalWork)),
+        (seqWithMetsAndMiro, None)
+      )
+
+      forAll(examples) {
+        (works: Seq[TransformedBaseWork], target: Option[UnidentifiedWork]) =>
+          merger.findTarget(works) shouldBe target
+      }
     }
   }
 }
