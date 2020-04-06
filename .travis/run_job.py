@@ -111,10 +111,5 @@ if __name__ == "__main__":
 
     make(task)
 
-    if travis_event_type == "push" and travis_build_stage == "Services":
+    if travis_event_type == "push" and travis_build_stage.lower() == "services":
         make(task.replace("test", "publish"))
-    else:
-        print(
-            "Not publishing: event_type=%r and build_stage=%r"
-            % (travis_event_type, travis_build_stage)
-        )
