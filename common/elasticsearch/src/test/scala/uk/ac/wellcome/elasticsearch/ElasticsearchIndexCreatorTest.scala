@@ -1,159 +1,116 @@
 package uk.ac.wellcome.elasticsearch
 
 import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.{RequestFailure, Response}
-import com.sksamuel.elastic4s.requests.analysis.Analysis
 import com.sksamuel.elastic4s.requests.indexes.IndexResponse
-import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
-import com.sksamuel.elastic4s.requests.searches.SearchResponse
-import org.scalatest.concurrent.{Eventually, ScalaFutures}
-import org.scalatest.{BeforeAndAfterEach, FunSpec, Matchers}
+import com.sksamuel.elastic4s.{RequestFailure, Response}
+import org.scalatest.{Assertion, FunSpec, Matchers}
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
-import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.json.utils.JsonAssertions
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-
-case class TestObject(
-  id: String,
-  description: String,
-  visible: Boolean
-)
-
-case class CompatibleTestObject(
-  id: String,
-  description: String,
-  visible: Boolean,
-  count: Int
-)
-
-case class BadTestObject(
-  id: String,
-  weight: Int
-)
 
 class ElasticsearchIndexCreatorTest
     extends FunSpec
     with ElasticsearchFixtures
-    with ScalaFutures
-    with Eventually
-    with Matchers
-    with JsonAssertions
-    with BeforeAndAfterEach {
+    with Matchers {
 
-  val indexFields = Seq(
-    keywordField("id"),
-    textField("description"),
-    booleanField("visible")
-  )
+  it("allows you to index an object that matches the mapping") {
+    val nameMapping = properties(
+      Seq(textField("name"))
+    )
 
-  object TestIndexConfig extends IndexConfig {
-    val mapping = properties(
-      Seq(
-        keywordField("id"),
-        textField("description"),
-        booleanField("visible")
-      )).dynamic(DynamicMapping.Strict)
-    val analysis = Analysis(Nil)
-  }
+    withLocalElasticsearchIndex(nameMapping) { index =>
+      val indexFuture =
+        elasticClient
+          .execute {
+            indexInto(index).doc("""{"name": "James Stagg"}""")
+          }
 
-  object CompatibleTestIndexConfig extends IndexConfig {
-    val mapping = properties(
-      Seq(
-        keywordField("id"),
-        textField("description"),
-        booleanField("visible"),
-        intField("count")
-      )).dynamic(DynamicMapping.Strict)
-    val analysis = Analysis(Nil)
-  }
+      whenReady(indexFuture) { indexResponse =>
+        assertIsSuccess(indexResponse)
 
-  it("creates an index into which doc of the expected type can be put") {
-    withLocalElasticsearchIndex(TestIndexConfig) { index =>
-      val testObject = TestObject("id", "description", true)
-      val testObjectJson = toJson(testObject).get
-
-      eventually {
-        for {
-          _ <- elasticClient.execute(indexInto(index.name).doc(testObjectJson))
-          response: Response[SearchResponse] <- elasticClient
-            .execute {
-              search(index).matchAllQuery()
-            }
-        } yield {
-          val hits = response.result.hits.hits
-          hits should have size 1
-
-          assertJsonStringsAreEqual(
-            hits.head.sourceAsString,
-            testObjectJson
+        eventually {
+          val results = searchT[Map[String, String]](
+            index = index,
+            query = matchAllQuery()
           )
+
+          results shouldBe Seq(Map("name" -> "James Stagg"))
         }
       }
     }
   }
 
-  it("create an index where inserting a doc of an unexpected type fails") {
-    withLocalElasticsearchIndex(TestIndexConfig) { index =>
-      val badTestObject = BadTestObject("id", 5)
-      val badTestObjectJson = toJson(badTestObject).get
+  it("stops you from indexing an object that doesn't match the mapping") {
+    val nameMapping = properties(
+      Seq(textField("name"))
+    )
 
-      val future: Future[Response[IndexResponse]] =
+    withLocalElasticsearchIndex(nameMapping) { index =>
+      val indexFuture =
         elasticClient
           .execute {
-            indexInto(index.name)
-              .doc(badTestObjectJson)
+            indexInto(index).doc("""{"profession": "meterologist"}""")
           }
 
-      whenReady(future) { response =>
+      whenReady(indexFuture) { response =>
         response.isError shouldBe true
         response shouldBe a[RequestFailure]
       }
     }
   }
 
-  it("updates an already existing index with a compatible mapping") {
-    withLocalElasticsearchIndex(TestIndexConfig) { index =>
-      withLocalElasticsearchIndex(CompatibleTestIndexConfig, index = index) {
-        _ =>
-          val compatibleTestObject = CompatibleTestObject(
-            id = "id",
-            description = "description",
-            count = 5,
-            visible = true
-          )
+  it("updates an index with a compatible mapping") {
+    val placeMapping = properties(
+      Seq(textField("name"))
+    )
 
-          val compatibleTestObjectJson = toJson(compatibleTestObject).get
+    val placeWithCountryMapping = properties(
+      Seq(textField("name"), textField("country"))
+    )
 
-          val futureInsert: Future[Response[IndexResponse]] =
+    withLocalElasticsearchIndex(placeMapping) { index =>
+      withLocalElasticsearchIndex(placeWithCountryMapping, index = index) {
+        modifiedIndex =>
+          val indexFuture =
             elasticClient
               .execute {
-                indexInto(index.name)
-                  .doc(compatibleTestObjectJson)
+                indexInto(modifiedIndex)
+                  .doc(
+                    """
+                      |{
+                      |  "name": "Blacksod Point",
+                      |  "country": "Republic of Ireland"
+                      |}""".stripMargin
+                  )
               }
 
-          whenReady(futureInsert) { response =>
-            if (response.isError) { println(response) }
-            response.isError shouldBe false
+          whenReady(indexFuture) { indexResponse: Response[IndexResponse] =>
+            assertIsSuccess(indexResponse)
 
             eventually {
-              val response: Response[SearchResponse] =
-                elasticClient.execute {
-                  search(index).matchAllQuery()
-                }.await
+              val results = searchT[Map[String, String]](
+                index = index,
+                query = matchAllQuery()
+              )
 
-              val hits = response.result.hits.hits
-
-              hits should have size 1
-
-              assertJsonStringsAreEqual(
-                hits.head.sourceAsString,
-                compatibleTestObjectJson
+              results shouldBe Seq(
+                Map(
+                  "name" -> "Blacksod Point",
+                  "country" -> "Republic of Ireland"
+                )
               )
             }
           }
       }
     }
+  }
+
+  private def assertIsSuccess(
+    indexResponse: Response[IndexResponse]): Assertion = {
+    if (indexResponse.isError) {
+      throw indexResponse.error.asException
+    }
+
+    indexResponse.isSuccess shouldBe true
   }
 }
