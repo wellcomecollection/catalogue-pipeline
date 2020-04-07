@@ -34,8 +34,8 @@ resource "aws_ecr_repository" "ecr_repository_merger" {
   name = "uk.ac.wellcome/merger"
 }
 
-resource "aws_ecr_repository" "ecr_repository_ingestor" {
-  name = "uk.ac.wellcome/ingestor"
+resource "aws_ecr_repository" "ecr_repository_ingestor_works" {
+  name = "uk.ac.wellcome/ingestor_works"
 }
 
 resource "aws_ecr_repository" "ecr_repository_elasticdump" {

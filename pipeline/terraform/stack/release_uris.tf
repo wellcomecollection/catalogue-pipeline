@@ -1,6 +1,6 @@
 locals {
   services = [
-    "ingestor",
+    "ingestor_works",
     "matcher",
     "merger",
     "id_minter",
@@ -25,7 +25,7 @@ locals {
   recorder_image           = local.image_ids["recorder"]
   matcher_image            = local.image_ids["matcher"]
   merger_image             = local.image_ids["merger"]
-  ingestor_image           = local.image_ids["ingestor"]
+  ingestor_works_image     = local.image_ids["ingestor_works"]
   transformer_miro_image   = local.image_ids["transformer_miro"]
   transformer_mets_image   = local.image_ids["transformer_mets"]
   transformer_sierra_image = local.image_ids["transformer_sierra"]

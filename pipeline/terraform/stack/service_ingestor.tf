@@ -1,6 +1,6 @@
-module "ingestor_queue" {
+module "ingestor_works_queue" {
   source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
-  queue_name      = "${local.namespace_hyphen}_ingestor"
+  queue_name      = "${local.namespace_hyphen}_ingestor_works"
   topic_arns      = [module.work_id_minter_topic.arn]
   aws_region      = var.aws_region
   alarm_topic_arn = var.dlq_alarm_arn
@@ -8,10 +8,10 @@ module "ingestor_queue" {
 
 # Service
 
-module "ingestor" {
+module "ingestor_works" {
   source          = "../modules/service"
-  service_name    = "${local.namespace_hyphen}_ingestor"
-  container_image = local.ingestor_image
+  service_name    = "${local.namespace_hyphen}_ingestor_works"
+  container_image = local.ingestor_works_image
   security_group_ids = [
     aws_security_group.service_egress.id,
     aws_security_group.interservice.id,
@@ -23,9 +23,9 @@ module "ingestor" {
   namespace_id = aws_service_discovery_private_dns_namespace.namespace.id
 
   env_vars = {
-    metrics_namespace   = "${local.namespace_hyphen}_ingestor"
+    metrics_namespace   = "${local.namespace_hyphen}_ingestor_works"
     es_index            = var.es_works_index
-    ingest_queue_id     = module.ingestor_queue.url
+    ingest_queue_id     = module.ingestor_works_queue.url
     es_ingest_batchSize = 100
     logstash_host       = local.logstash_host
   }
@@ -44,13 +44,13 @@ module "ingestor" {
 
   max_capacity        = 10
   messages_bucket_arn = aws_s3_bucket.messages.arn
-  queue_read_policy   = module.ingestor_queue.read_policy
+  queue_read_policy   = module.ingestor_works_queue.read_policy
 }
 
-module "ingestor_scaling_alarm" {
+module "ingestor_works_scaling_alarm" {
   source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.2"
-  queue_name = module.ingestor_queue.name
+  queue_name = module.ingestor_works_queue.name
 
-  queue_high_actions = [module.ingestor.scale_up_arn]
-  queue_low_actions  = [module.ingestor.scale_down_arn]
+  queue_high_actions = [module.ingestor_works.scale_up_arn]
+  queue_low_actions  = [module.ingestor_works.scale_down_arn]
 }
