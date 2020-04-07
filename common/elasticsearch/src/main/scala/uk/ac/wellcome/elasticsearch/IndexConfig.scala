@@ -186,7 +186,6 @@ case object WorksIndexConfig extends IndexConfig {
 
   def englishTextField(name: String) =
     textField(name).fields(
-      keywordField("keyword"),
       textField("english").analyzer("english")
     )
 
@@ -230,7 +229,10 @@ case object WorksIndexConfig extends IndexConfig {
       otherIdentifiers,
       mergeCandidates,
       workType,
-      englishTextField("title"),
+      textField("title").fields(
+        keywordField("keyword"),
+        textField("english").analyzer("english")
+      ),
       englishTextField("alternativeTitles"),
       englishTextField("description"),
       englishTextField("physicalDescription"),
