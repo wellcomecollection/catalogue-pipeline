@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.ingestor.works
 
-import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.concurrent.ScalaFutures
 import uk.ac.wellcome.elasticsearch.WorksIndexConfig
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.json.utils.JsonAssertions

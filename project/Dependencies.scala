@@ -157,12 +157,17 @@ object ExternalDependencies {
   val elasticsearchDependencies = Seq(
     "org.apache.logging.log4j" % "log4j-core" % versions.apacheLogging,
     "org.apache.logging.log4j" % "log4j-api" % versions.apacheLogging,
-    // Use our version of elastic4s until https://github.com/sksamuel/elastic4s/pull/2049
-    // gets merged and released
-    "uk.ac.wellcome.elastic4s" %% "elastic4s-core" % versions.elastic4s,
-    "uk.ac.wellcome.elastic4s" %% "elastic4s-client-esjava" % versions.elastic4s,
-    "uk.ac.wellcome.elastic4s" %% "elastic4s-http-streams" % versions.elastic4s,
-    "uk.ac.wellcome.elastic4s" %% "elastic4s-testkit" % versions.elastic4s % "test"
+    // This is our version of elastic4s.
+    // Temporarily use it until until https://github.com/sksamuel/elastic4s/pull/2049
+    // gets merged and released.
+    // Also, the new version of elastic4s brings in scalatest_3.1.0 which is not backwards
+    // compatible with scalatest_3.0.1 used here and a newer versio  of akka.
+    // Both need to be updated in the wellcome libraries before being updated here,
+    // so temporarily excluding those form the dependencies
+    "uk.ac.wellcome.elastic4s" %% "elastic4s-core" % versions.elastic4s exclude("org.scalatest", "scalatest_2.12") excludeAll(ExclusionRule("com.typesafe.akka")),
+    "uk.ac.wellcome.elastic4s" %% "elastic4s-client-esjava" % versions.elastic4s exclude("org.scalatest", "scalatest_2.12") excludeAll(ExclusionRule("com.typesafe.akka")),
+    "uk.ac.wellcome.elastic4s" %% "elastic4s-http-streams" % versions.elastic4s exclude("org.scalatest", "scalatest_2.12") excludeAll(ExclusionRule("com.typesafe.akka")),
+    "uk.ac.wellcome.elastic4s" %% "elastic4s-testkit" % versions.elastic4s % "test" exclude("org.scalatest", "scalatest_2.12") excludeAll(ExclusionRule("com.typesafe.akka"))
   )
 
   val mockitoDependencies: Seq[ModuleID] = Seq(
@@ -185,8 +190,8 @@ object ExternalDependencies {
   )
 
   val scalacheckDependencies = Seq(
-    "org.scalacheck" %% "scalacheck" % versions.scalacheck % "test",
-    "com.github.alexarchambault" %% "scalacheck-shapeless_1.13" % versions.scalacheckShapeless % "test"
+    "org.scalacheck" %% "scalacheck" % versions.scalacheck % "test" exclude("org.scalatest", "scalatest"),
+    "com.github.alexarchambault" %% "scalacheck-shapeless_1.13" % versions.scalacheckShapeless % "test" exclude("org.scalatest", "scalatest")
   )
 
   val scalacsvDependencies = Seq(

@@ -20,6 +20,7 @@ import io.circe.Encoder
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{FunSpec, Matchers}
 import org.scalacheck.ScalacheckShapeless._
+import org.scalatest.prop.PropertyChecks
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.utils.JsonAssertions

@@ -10,6 +10,10 @@ trait IndexConfig {
   val mapping: MappingDefinition
   val analysis: Analysis
 
+  // `textWithKeyword` and `keywordWithText` are slightly different in the semantics and their use case.
+  // If the intended field type is keyword, but you would like to search it textually, use `keywordWithText` and
+  // visa versa.
+
   // This encodes how someone would expect the field to work, but allow querying it in other ways.
   def textWithKeyword(name: String) =
     textField(name).fields(keywordField("keyword"))
