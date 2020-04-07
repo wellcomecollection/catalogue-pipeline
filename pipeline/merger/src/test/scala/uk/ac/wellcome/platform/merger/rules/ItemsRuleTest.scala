@@ -59,16 +59,6 @@ class ItemsRuleTest
     }
   }
 
-  it(
-    "merges non-duplicate-URL locations from METS items into single-item Sierra works") {
-    inside(ItemsRule.merge(digitalSierra, List(metsWorkWithSierraUrl))) {
-      case FieldMergeResult(items, _) =>
-        items should have size 1
-        items.head.locations should contain theSameElementsAs
-          metsWorkWithSierraUrl.data.items.head.locations
-    }
-  }
-
   it("Merges items from METS works into multi-item Sierra works") {
     inside(ItemsRule.merge(multiItemPhysicalSierra, List(metsWork))) {
       case FieldMergeResult(items, _) =>

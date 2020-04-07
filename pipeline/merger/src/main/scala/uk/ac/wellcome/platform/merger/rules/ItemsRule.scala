@@ -79,21 +79,17 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
              sources: NonEmptyList[TransformedBaseWork]): FieldData = {
       val sierraItems = target.data.items
       val metsItems = sources.toList.flatMap(_.data.items)
-      val metsUrls = metsItems.flatMap(_.locations).collect {
-        case DigitalLocation(url, _, _, _, _, _) => url
-      }
+
       debug(s"Merging METS items from ${describeWorks(sources)}")
       sierraItems match {
         case List(sierraItem) =>
           List(
             sierraItem.copy(
-              locations = sierraItem.locations.filterNot(hasUrl(metsUrls)) ++
-                metsItems.flatMap(_.locations)
+              locations = sierraItem.locations ++ metsItems.flatMap(_.locations)
             )
           )
         case _ =>
-          sierraItems.filterNot(_.locations.exists(hasUrl(metsUrls))) ++
-            metsItems
+          sierraItems ++ metsItems
       }
     }
   }
@@ -119,11 +115,4 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
           multipleSierraItems ++ sierraSources.flatMap(_.data.items)
       }
   }
-
-  private def hasUrl(matchUrls: Seq[String])(location: Location) =
-    location match {
-      case DigitalLocation(url, _, _, _, _, _) if matchUrls.contains(url) =>
-        true
-      case _ => false
-    }
 }
