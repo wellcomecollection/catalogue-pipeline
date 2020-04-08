@@ -55,7 +55,7 @@ trait WorksGenerators
   def createUnidentifiedInvisibleWorkWith(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     items: List[Item[Unminted]] = Nil,
-    images: List[UnmergedImage[Unminted]] = Nil,
+    images: List[UnmergedImage[Identifiable]] = Nil,
   ): UnidentifiedInvisibleWork =
     UnidentifiedInvisibleWork(
       sourceIdentifier = sourceIdentifier,
@@ -104,7 +104,7 @@ trait WorksGenerators
     edition: Option[String] = None,
     duration: Option[Int] = None,
     items: List[Item[Unminted]] = Nil,
-    images: List[UnmergedImage[Unminted]] = Nil): UnidentifiedWork =
+    images: List[UnmergedImage[Identifiable]] = Nil): UnidentifiedWork =
     UnidentifiedWork(
       sourceIdentifier = sourceIdentifier,
       version = version,
@@ -206,7 +206,7 @@ trait WorksGenerators
       items = items
     )
 
-  def createUnidentifiedCalmWork(data: WorkData[Unminted] = WorkData(
+  def createUnidentifiedCalmWork(data: WorkData[Unminted, Identifiable] = WorkData(
                                    items = List(createCalmItem)
                                  ),
                                  id: String = randomAlphanumeric(6),

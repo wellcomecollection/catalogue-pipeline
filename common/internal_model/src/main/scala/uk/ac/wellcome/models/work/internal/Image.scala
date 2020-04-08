@@ -1,11 +1,11 @@
 package uk.ac.wellcome.models.work.internal
 
-sealed trait BaseImage[+Id <: IdState] extends HasIdState[Id] {
+sealed trait BaseImage[+Id <: pff] extends HasIdState[Id] {
   val id: Id
   val location: DigitalLocation
 }
 
-case class UnmergedImage[Id <: IdState](
+case class UnmergedImage[Id <: pff](
   id: Id,
   location: DigitalLocation
 ) extends BaseImage[Id] {
@@ -19,7 +19,7 @@ case class UnmergedImage[Id <: IdState](
     )
 }
 
-case class MergedImage[Id <: IdState](
+case class MergedImage[Id <: pff](
   id: Id,
   location: DigitalLocation,
   parentWork: Id,
@@ -41,7 +41,7 @@ case class MergedImage[Id <: IdState](
     )
 }
 
-case class AugmentedImage[Id <: IdState](
+case class AugmentedImage[Id <: pff](
   id: Id,
   location: DigitalLocation,
   parentWork: Id,
@@ -59,7 +59,7 @@ case class InferredData(
 
 object UnmergedImage {
   def apply(sourceIdentifier: SourceIdentifier,
-            location: DigitalLocation): UnmergedImage[Unminted] =
+            location: DigitalLocation): UnmergedImage[Identifiable] =
     UnmergedImage(
       id = Identifiable(sourceIdentifier),
       location

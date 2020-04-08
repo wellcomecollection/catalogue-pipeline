@@ -7,12 +7,9 @@ import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.sqs.model.Message
 import com.typesafe.config.Config
 import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
-import uk.ac.wellcome.models.work.internal.{AugmentedImage, MergedImage, Minted}
+import uk.ac.wellcome.models.work.internal.{AugmentedImage, Identified, MergedImage}
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.platform.inference_manager.services.{
-  FeatureVectorInferrerAdapter,
-  InferenceManagerWorkerService
-}
+import uk.ac.wellcome.platform.inference_manager.services.{FeatureVectorInferrerAdapter, InferenceManagerWorkerService}
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.typesafe.S3Builder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
@@ -23,8 +20,8 @@ import scala.concurrent.ExecutionContext
 
 object Main extends WellcomeTypesafeApp {
   // This inference manager operates on images
-  type Input = MergedImage[Minted]
-  type Output = AugmentedImage[Minted]
+  type Input = MergedImage[Identified]
+  type Output = AugmentedImage[Identified]
   val inferrerAdapter = FeatureVectorInferrerAdapter
 
   runWithConfig { config: Config =>

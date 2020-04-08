@@ -34,7 +34,7 @@ object CalmTransformer extends Transformer[CalmRecord] with CalmOps {
       )
     }
 
-  def workData(record: CalmRecord): Result[WorkData[Unminted]] =
+  def workData(record: CalmRecord): Result[WorkData[Unminted, Identifiable]] =
     for {
       accessStatus <- accessStatus(record)
       title <- title(record)

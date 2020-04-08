@@ -58,8 +58,8 @@ object Implicits extends TimeInstances {
   implicit val _dec38: Decoder[Item[Minted]] = deriveDecoder
   implicit val _dec39: Decoder[Contributor[Unminted]] = deriveDecoder
   implicit val _dec40: Decoder[Contributor[Minted]] = deriveDecoder
-  implicit val _dec41: Decoder[WorkData[Unminted]] = deriveDecoder
-  implicit val _dec42: Decoder[WorkData[Minted]] = deriveDecoder
+  implicit val _dec41: Decoder[WorkData[Unminted, Identifiable]] = deriveDecoder
+  implicit val _dec42: Decoder[WorkData[Minted, Identified]] = deriveDecoder
   implicit val _dec43: Decoder[UnidentifiedWork] = deriveDecoder
   implicit val _dec44: Decoder[UnidentifiedInvisibleWork] = deriveDecoder
   implicit val _dec45: Decoder[IdentifiedWork] = deriveDecoder
@@ -68,14 +68,15 @@ object Implicits extends TimeInstances {
   implicit val _dec48: Decoder[IdentifiedBaseWork] = deriveDecoder
   implicit val _dec49: Decoder[BaseWork] = deriveDecoder
   implicit val _dec50: Decoder[SierraTransformable] = deriveDecoder
-  implicit val _dec51: Decoder[UnmergedImage[Unminted]] = deriveDecoder
-  implicit val _dec52: Decoder[UnmergedImage[Minted]] = deriveDecoder
-  implicit val _dec53: Decoder[MergedImage[Unminted]] = deriveDecoder
-  implicit val _dec54: Decoder[MergedImage[Minted]] = deriveDecoder
-  implicit val _dec55: Decoder[BaseImage[Unminted]] = deriveDecoder
-  implicit val _dec56: Decoder[BaseImage[Minted]] = deriveDecoder
-  implicit val _dec57: Decoder[AugmentedImage[Unminted]] = deriveDecoder
-  implicit val _dec58: Decoder[AugmentedImage[Minted]] = deriveDecoder
+  implicit val _dec51: Decoder[UnmergedImage[Identifiable]] = deriveDecoder
+  implicit val _dec52: Decoder[UnmergedImage[Identified]] = deriveDecoder
+  implicit val _dec53: Decoder[MergedImage[Identifiable]] = deriveDecoder
+  implicit val _dec54: Decoder[MergedImage[Identified]] = deriveDecoder
+  implicit val _dec55: Decoder[BaseImage[Identifiable]] = deriveDecoder
+  implicit val _dec56: Decoder[BaseImage[Identified]] = deriveDecoder
+  implicit val _dec57: Decoder[AugmentedImage[Identifiable]] = deriveDecoder
+//  implicit val _dec58: Decoder[AugmentedImage[Minted]] = deriveDecoder
+  implicit val _dec59: Decoder[AugmentedImage[Identified]] = deriveDecoder
 
   implicit val _enc00: Encoder[AccessCondition] = deriveEncoder
   implicit val _enc01: Encoder[Note] = deriveEncoder
@@ -116,8 +117,8 @@ object Implicits extends TimeInstances {
   implicit val _enc38: Encoder[Item[Minted]] = deriveEncoder
   implicit val _enc39: Encoder[Contributor[Unminted]] = deriveEncoder
   implicit val _enc40: Encoder[Contributor[Minted]] = deriveEncoder
-  implicit val _enc41: Encoder[WorkData[Unminted]] = deriveEncoder
-  implicit val _enc42: Encoder[WorkData[Minted]] = deriveEncoder
+  implicit val _enc41: Encoder[WorkData[Unminted, Identifiable]] = deriveEncoder
+  implicit val _enc42: Encoder[WorkData[Minted, Identified]] = deriveEncoder
   implicit val _enc43: Encoder[UnidentifiedWork] = deriveEncoder
   implicit val _enc44: Encoder[UnidentifiedInvisibleWork] = deriveEncoder
   implicit val _enc45: Encoder[IdentifiedWork] = deriveEncoder
@@ -126,12 +127,13 @@ object Implicits extends TimeInstances {
   implicit val _enc48: Encoder[IdentifiedBaseWork] = deriveEncoder
   implicit val _enc49: Encoder[BaseWork] = deriveEncoder
   implicit val _enc50: Encoder[SierraTransformable] = deriveEncoder
-  implicit val _enc51: Encoder[UnmergedImage[Unminted]] = deriveEncoder
-  implicit val _enc52: Encoder[UnmergedImage[Minted]] = deriveEncoder
-  implicit val _enc53: Encoder[MergedImage[Unminted]] = deriveEncoder
-  implicit val _enc54: Encoder[MergedImage[Minted]] = deriveEncoder
-  implicit val _enc55: Encoder[BaseImage[Unminted]] = deriveEncoder
-  implicit val _enc56: Encoder[BaseImage[Minted]] = deriveEncoder
-  implicit val _enc57: Encoder[AugmentedImage[Unminted]] = deriveEncoder
-  implicit val _enc58: Encoder[AugmentedImage[Minted]] = deriveEncoder
+  implicit val _enc51: Encoder[UnmergedImage[Identifiable]] = deriveEncoder
+  implicit val _enc52: Encoder[UnmergedImage[Identified]] = deriveEncoder
+  implicit val _enc53: Encoder[MergedImage[Identifiable]] = deriveEncoder
+  implicit val _enc54: Encoder[MergedImage[Identified]] = deriveEncoder
+  implicit val _enc55: Encoder[BaseImage[Identifiable]] = deriveEncoder
+  implicit val _enc56: Encoder[BaseImage[Identified]] = deriveEncoder
+  implicit val _enc57: Encoder[AugmentedImage[Identifiable]] = deriveEncoder
+//  implicit val _enc58: Encoder[AugmentedImage[Minted]] = deriveEncoder
+  implicit val _enc59: Encoder[AugmentedImage[Identified]] = deriveEncoder
 }

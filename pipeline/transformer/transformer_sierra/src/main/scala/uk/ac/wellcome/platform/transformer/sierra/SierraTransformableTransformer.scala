@@ -91,7 +91,7 @@ class SierraTransformableTransformer(sierraTransformable: SierraTransformable,
       }
 
   def workDataFromBibData(bibId: SierraBibNumber, bibData: SierraBibData) =
-    WorkData(
+    WorkData[Unminted, Identifiable](
       otherIdentifiers = SierraIdentifiers(bibId, bibData),
       mergeCandidates = SierraMergeCandidates(bibId, bibData),
       title = SierraTitle(bibId, bibData),

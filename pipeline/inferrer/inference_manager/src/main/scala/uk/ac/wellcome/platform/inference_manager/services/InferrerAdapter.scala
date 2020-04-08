@@ -7,12 +7,7 @@ import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import grizzled.slf4j.Logging
 import io.circe.Decoder
 import io.circe.generic.semiauto.deriveDecoder
-import uk.ac.wellcome.models.work.internal.{
-  AugmentedImage,
-  InferredData,
-  MergedImage,
-  Minted
-}
+import uk.ac.wellcome.models.work.internal.{AugmentedImage, Identified, InferredData, MergedImage}
 import uk.ac.wellcome.platform.inference_manager.models.FeatureVectorInferrerResponse
 
 import scala.concurrent.Future
@@ -55,10 +50,10 @@ trait InferrerAdapter[Input, Output] extends Logging {
 // The InferrerAdaptor for feature vectors, consuming MergedImages and
 // augmenting them into AugmentedImages
 object FeatureVectorInferrerAdapter
-    extends InferrerAdapter[MergedImage[Minted], AugmentedImage[Minted]] {
+    extends InferrerAdapter[MergedImage[Identified], AugmentedImage[Identified]] {
   type InferrerResponse = FeatureVectorInferrerResponse
 
-  def createRequest(image: MergedImage[Minted]): HttpRequest =
+  def createRequest(image: MergedImage[Identified]): HttpRequest =
     HttpRequest(
       method = HttpMethods.GET,
       uri = Uri("/feature-vectors/").withQuery(
@@ -70,8 +65,8 @@ object FeatureVectorInferrerAdapter
     )
 
   def augmentInput(
-    image: MergedImage[Minted],
-    inferrerResponse: Option[InferrerResponse]): AugmentedImage[Minted] =
+    image: MergedImage[Identified],
+    inferrerResponse: Option[InferrerResponse]): AugmentedImage[Identified] =
     image.augment {
       inferrerResponse collect {
         case FeatureVectorInferrerResponse(features, lsh_encoded_features)

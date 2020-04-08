@@ -1,43 +1,43 @@
 package uk.ac.wellcome.models.work.generators
 
-import uk.ac.wellcome.models.work.internal.{
-  DigitalLocation,
-  Identifiable,
-  Identified,
-  IdentifierType,
-  MergedImage,
-  Minted,
-  SourceIdentifier,
-  UnmergedImage,
-  Unminted
-}
+import uk.ac.wellcome.models.work.internal._
+
+import scala.util.Random
 
 trait ImageGenerators extends IdentifiersGenerators with ItemsGenerators {
   def createUnmergedImageWith(
     location: DigitalLocation = createDigitalLocation,
     identifierType: IdentifierType = IdentifierType("miro-image-number")
-  ): UnmergedImage[Unminted] = UnmergedImage(
+  ): UnmergedImage[Identifiable] = UnmergedImage(
     sourceIdentifier =
       createSourceIdentifierWith(identifierType = identifierType),
     location = location
   )
 
-  def createUnmergedImage: UnmergedImage[Unminted] = createUnmergedImageWith()
+  def createUnmergedImage: UnmergedImage[Identifiable] = createUnmergedImageWith()
 
   def createMergedImageWith(
     location: DigitalLocation = createDigitalLocation,
     identifierType: IdentifierType = IdentifierType("miro-image-number"),
     parentWork: SourceIdentifier = createSierraSystemSourceIdentifier,
-    fullText: Option[String] = None): MergedImage[Unminted] =
+    fullText: Option[String] = None): MergedImage[Identifiable] =
     createUnmergedImageWith(location, identifierType) mergeWith (
       parentWork = Identifiable(parentWork),
       fullText = fullText
     )
 
-  def createMergedImage: MergedImage[Unminted] = createMergedImageWith()
+  def createMergedImage: MergedImage[Identifiable] = createMergedImageWith()
 
-  implicit class ImageIdOps(val image: MergedImage[Unminted]) {
-    val toMinted: MergedImage[Minted] = MergedImage(
+  def createInferredData = {
+    val features1 = (0 until 2048).map(_ => Random.nextFloat()*100).toList
+    val features2 = (0 until 2048).map(_ => Random.nextFloat()*100).toList
+    Some(InferredData(features1, features2, List(randomAlphanumeric(10))))
+  }
+
+  def createAugmentedImage = createMergedImage.toMinted.augment(createInferredData)
+
+  implicit class ImageIdOps(val image: MergedImage[Identifiable]) {
+    val toMinted: MergedImage[Identified] = MergedImage(
       id = Identified(
         canonicalId = createCanonicalId,
         sourceIdentifier = image.id.allSourceIdentifiers.head
