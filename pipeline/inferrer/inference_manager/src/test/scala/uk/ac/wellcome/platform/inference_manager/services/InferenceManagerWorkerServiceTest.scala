@@ -1,13 +1,6 @@
 package uk.ac.wellcome.platform.inference_manager.services
 
-import org.scalatest.{
-  BeforeAndAfterAll,
-  FunSpec,
-  Inside,
-  Inspectors,
-  Matchers,
-  OptionValues
-}
+import org.scalatest.{BeforeAndAfterAll, FunSpec, Inside, Inspectors, Matchers, OptionValues}
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
@@ -19,11 +12,7 @@ import uk.ac.wellcome.models.work.internal.{
 }
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.ImageGenerators
-import uk.ac.wellcome.platform.inference_manager.fixtures.{
-  FeatureVectorInferrerMock,
-  InferenceManagerWorkerServiceFixture,
-  InferrerWiremock
-}
+import uk.ac.wellcome.platform.inference_manager.fixtures.{FeatureVectorInferrerMock, InferenceManagerWorkerServiceFixture, InferrerWiremock}
 
 class InferenceManagerWorkerServiceTest
     extends FunSpec
@@ -61,7 +50,7 @@ class InferenceManagerWorkerServiceTest
           assertQueueEmpty(dlq)
           val augmentedWork = getMessages[AugmentedImage](topic).head
           inside(augmentedWork) {
-            case AugmentedImage(id, _, _, _, inferredData) =>
+            case AugmentedImage(id, _, _, _, _, inferredData) =>
               id should be(image.id)
               inside(inferredData.value) {
                 case InferredData(features1, features2, lshEncodedFeatures) =>
@@ -104,7 +93,7 @@ class InferenceManagerWorkerServiceTest
           assertQueueEmpty(dlq)
           val output = getMessages[AugmentedImage](topic).head
           inside(output) {
-            case AugmentedImage(id, _, _, _, inferredData) =>
+            case AugmentedImage(id, _, _, _, _, inferredData) =>
               id should be(image500.id)
               inferredData should not be defined
           }
