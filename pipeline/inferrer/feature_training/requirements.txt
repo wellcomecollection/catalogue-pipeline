@@ -22,4 +22,5 @@ scipy==1.4.1              # via -r requirements.in
 six==1.12.0               # via halo, python-dateutil
 spinners==0.0.23          # via halo
 termcolor==1.1.0          # via halo
+tqdm==4.44.1              # via -r requirements.in
 urllib3==1.25.7           # via botocore, elasticsearch

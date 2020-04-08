@@ -1,12 +1,11 @@
 import os
-import pickle
 
-from datetime import datetime
 import click
 import numpy as np
+from tqdm import tqdm
 
-from src.aws import put_object_to_s3
-from src.lsh import split_features, train_clusters
+from src.lsh import get_object_for_storage
+from src.storage import store_model
 
 
 @click.command()
@@ -17,36 +16,31 @@ from src.lsh import split_features, train_clusters
     "-m", help="number of clusters to find within each feature group", default=32
 )
 @click.option(
-    "--sample_size", help="number of embeddings to train clusters on", default=25000
+    "--sample-size", help="number of embeddings to train clusters on", default=25000
 )
 @click.option(
-    "--feature_vector_path", help="path to a synced local version of the fvs in s3"
+    "--feature-vector-path", help="path to a synced local version of the fvs in s3"
 )
-def main(n, m, sample_size, feature_vector_path):
+@click.option(
+    "--bucket-name",
+    help="Name of the S3 bucket in which model data is stored",
+    default="wellcomecollection-inferrer-model-core-data"
+)
+def main(n, m, sample_size, feature_vector_path, bucket_name):
     ids = np.random.choice(
         os.listdir(feature_vector_path), size=sample_size, replace=False
     )
 
+    print("Loading feature vectors...")
     feature_vectors = []
-    for id in ids:
+    for id in tqdm(ids, unit="vec"):
         with open(os.path.join(feature_vector_path, id)) as f:
             feature_vectors.append(np.fromfile(f, dtype=np.float32))
 
     feature_vectors = np.stack(feature_vectors)
 
-    model_list = [
-        train_clusters(feature_group, m)
-        for feature_group in split_features(feature_vectors, n)
-    ]
-
-    model_name = datetime.now().strftime("%Y-%m-%d")
-
-    put_object_to_s3(
-        binary_object=pickle.dumps(model_list),
-        key=f"lsh_models/{model_name}.pkl",
-        bucket_name="model-core-data",
-        profile_name="data-dev",
-    )
+    model = get_object_for_storage(feature_vectors, m, n, verbose=True)
+    store_model(bucket_name=bucket_name, **model)
 
 
 if __name__ == "__main__":
