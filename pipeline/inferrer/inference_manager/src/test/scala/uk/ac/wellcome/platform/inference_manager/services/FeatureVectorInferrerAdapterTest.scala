@@ -25,7 +25,7 @@ class FeatureVectorInferrerAdapterTest
       inside(request) {
         case HttpRequest(method, uri, _, _, _) =>
           method should be(HttpMethods.GET)
-          uri.toString() should be(s"/feature-vectors/?image_url=${imageUrl}")
+          uri.toString() should be(s"/feature-vector/?image_url=${imageUrl}")
       }
     }
 
@@ -41,7 +41,7 @@ class FeatureVectorInferrerAdapterTest
       inside(request) {
         case HttpRequest(method, uri, _, _, _) =>
           method should be(HttpMethods.GET)
-          uri.toString() should be(s"/feature-vectors/?iiif_url=${imageUrl}")
+          uri.toString() should be(s"/feature-vector/?iiif_url=${imageUrl}")
       }
     }
   }

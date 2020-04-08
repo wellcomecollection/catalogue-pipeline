@@ -88,7 +88,8 @@ lazy val ingestor_common = setupProject(
 lazy val ingestor_works = setupProject(
   project,
   "pipeline/ingestor/ingestor_works",
-  localDependencies = Seq(elasticsearch_typesafe, big_messaging_typesafe, ingestor_common),
+  localDependencies =
+    Seq(elasticsearch_typesafe, big_messaging_typesafe, ingestor_common),
   externalDependencies = Seq()
 )
 
@@ -202,7 +203,6 @@ lazy val calm_adapter = setupProject(
 )
 
 // Inference manager
-
 lazy val inference_manager = setupProject(
   project,
   folder = "pipeline/inferrer/inference_manager",
