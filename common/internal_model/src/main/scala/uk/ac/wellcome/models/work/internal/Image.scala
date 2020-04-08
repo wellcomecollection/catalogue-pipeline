@@ -1,11 +1,11 @@
 package uk.ac.wellcome.models.work.internal
 
-sealed trait BaseImage[+Id <: pff] extends HasIdState[Id] {
+sealed trait BaseImage[+Id <: WithSourceIdentifier] extends HasIdState[Id] {
   val id: Id
   val location: DigitalLocation
 }
 
-case class UnmergedImage[Id <: pff](
+case class UnmergedImage[Id <: WithSourceIdentifier](
   id: Id,
   location: DigitalLocation
 ) extends BaseImage[Id] {
@@ -19,7 +19,7 @@ case class UnmergedImage[Id <: pff](
     )
 }
 
-case class MergedImage[Id <: pff](
+case class MergedImage[Id <: WithSourceIdentifier](
   id: Id,
   location: DigitalLocation,
   parentWork: Id,

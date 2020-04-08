@@ -22,7 +22,7 @@ sealed trait RedirectedWork extends BaseWork {
   val redirect: Redirect
 }
 
-case class WorkData[Id <: IdState,PP <: pff](
+case class WorkData[Id <: IdState,ImageId <: WithSourceIdentifier](
   title: Option[String] = None,
   otherIdentifiers: List[SourceIdentifier] = Nil,
   mergeCandidates: List[MergeCandidate] = Nil,
@@ -44,7 +44,7 @@ case class WorkData[Id <: IdState,PP <: pff](
   items: List[Item[Id]] = Nil,
   merged: Boolean = false,
   collectionPath: Option[CollectionPath] = None,
-  images: List[UnmergedImage[PP]] = Nil
+  images: List[UnmergedImage[ImageId]] = Nil
 )
 
 case class UnidentifiedWork(
