@@ -10,3 +10,21 @@ sns:
   image: wellcome/fake-sns
   ports:
     - "9292:9292"
+
+inferrer:
+  build: ../feature_inferrer
+  ports:
+    - "3141:80"
+  environment:
+    MODEL_OBJECT_KEY: test-model.pkl
+  volumes:
+    - ../test_data:/app/data
+  links:
+    - "image_server"
+
+image_server:
+  image: nginx
+  expose:
+    - "80"
+  volumes:
+    - ../test_data:/usr/share/nginx/html:ro
