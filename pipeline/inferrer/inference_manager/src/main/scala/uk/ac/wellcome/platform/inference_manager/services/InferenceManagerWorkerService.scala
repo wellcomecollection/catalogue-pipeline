@@ -6,6 +6,7 @@ import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
 import akka.stream.Materializer
 import akka.stream.scaladsl.Flow
 import com.amazonaws.services.sqs.model.Message
+import grizzled.slf4j.Logging
 import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.bigmessaging.message.BigMessageStream
 import uk.ac.wellcome.typesafe.Runnable
@@ -21,10 +22,11 @@ class InferenceManagerWorkerService[Destination, Input, Output](
                            (Try[HttpResponse], (Message, Input)),
                            HostConnectionPool]
 )(implicit ec: ExecutionContext, materializer: Materializer)
-    extends Runnable {
+    extends Runnable
+    with Logging {
 
   val className: String = this.getClass.getSimpleName
-  val parallelism = 2
+  val parallelism = 10
 
   def run(): Future[Done] =
     msgStream.runStream(
@@ -49,6 +51,11 @@ class InferenceManagerWorkerService[Destination, Input, Output](
         case (Success(response), (msg, input)) =>
           inferrerAdapter
             .parseResponse(response)
+            .recover {
+              case e: Exception =>
+                response.discardEntityBytes()
+                throw e
+            }
             .map((msg, input, _))
         case (Failure(exception), _) =>
           Future.failed(exception)
@@ -61,9 +68,12 @@ class InferenceManagerWorkerService[Destination, Input, Output](
     }
 
   private def sendAugmented =
-    Flow[(Message, Output)].mapAsync(parallelism) {
+    Flow[(Message, Output)].map {
       case (msg, image) =>
-        Future.fromTry { msgSender.sendT(image) }.map((msg, _))
+        msgSender
+          .sendT(image)
+          .map((msg, _))
+          .get
     }
 
 }
