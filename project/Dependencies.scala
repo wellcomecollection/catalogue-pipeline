@@ -190,8 +190,8 @@ object ExternalDependencies {
   )
 
   val scalacheckDependencies = Seq(
-    "org.scalacheck" %% "scalacheck" % versions.scalacheck % "test" exclude("org.scalatest", "scalatest"),
-    "com.github.alexarchambault" %% "scalacheck-shapeless_1.13" % versions.scalacheckShapeless % "test" exclude("org.scalatest", "scalatest")
+    "org.scalacheck" %% "scalacheck" % versions.scalacheck % "test",
+    "com.github.alexarchambault" %% "scalacheck-shapeless_1.13" % versions.scalacheckShapeless % "test"
   )
 
   val scalacsvDependencies = Seq(
