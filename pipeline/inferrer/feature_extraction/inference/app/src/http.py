@@ -32,8 +32,4 @@ async def fetch_url_bytes(url):
     async with session.get(url) as response:
         # We need to perform the `read()` here
         # before `response` has been closed
-        return {
-            "object": response,
-            "bytes": await response.read()
-        }
-
+        return {"object": response, "bytes": await response.read()}

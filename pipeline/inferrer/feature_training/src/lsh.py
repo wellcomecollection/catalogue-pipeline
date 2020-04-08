@@ -23,11 +23,12 @@ def get_object_for_storage(feature_vectors, m, n, verbose=False):
 
     with tqdm_joblib(tqdm(total=n, disable=(not verbose), unit="cluster")):
         model_list = Parallel(n_jobs=-1)(
-            delayed(train_clusters)(feature_group, m) for feature_group in feature_groups
+            delayed(train_clusters)(feature_group, m)
+            for feature_group in feature_groups
         )
 
     return {
         "object_binary": pickle.dumps(model_list),
         "name": datetime.now().strftime("%Y-%m-%d"),
-        "prefix": "lsh_model"
+        "prefix": "lsh_model",
     }

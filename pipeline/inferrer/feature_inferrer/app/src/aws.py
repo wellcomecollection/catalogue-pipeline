@@ -22,5 +22,5 @@ def download_object_from_s3(bucket_name, object_key, file_name=None):
     s3_client.download_file(
         Bucket=bucket_name,
         Key=object_key,
-        Filename=(file_name or os.path.basename(object_key))
+        Filename=(file_name or os.path.basename(object_key)),
     )

@@ -22,10 +22,6 @@ def put_ssm_parameter(path, value, description):
 
     print(f"Updating SSM path `{path}` to `{value}`...")
     ssm_client.put_parameter(
-        Name=path,
-        Description=description,
-        Value=value,
-        Type="String",
-        Overwrite=True
+        Name=path, Description=description, Value=value, Type="String", Overwrite=True
     )
     print("Updated SSM.")

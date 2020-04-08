@@ -24,7 +24,7 @@ from src.storage import store_model
 @click.option(
     "--bucket-name",
     help="Name of the S3 bucket in which model data is stored",
-    default="wellcomecollection-inferrer-model-core-data"
+    default="wellcomecollection-inferrer-model-core-data",
 )
 def main(n, m, sample_size, feature_vector_path, bucket_name):
     ids = np.random.choice(

@@ -8,6 +8,7 @@ import sklearn.externals.joblib as joblib
 @contextlib.contextmanager
 def tqdm_joblib(tqdm_object):
     """Context manager to patch joblib to report into tqdm progress bar given as argument"""
+
     class TqdmBatchCompletionCallback:
         def __init__(self, time, index, parallel):
             self.index = index

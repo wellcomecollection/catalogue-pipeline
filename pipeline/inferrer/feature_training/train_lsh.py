@@ -18,7 +18,7 @@ from src.storage import store_model
 @click.option(
     "--bucket-name",
     help="Name of the S3 bucket in which model data is stored",
-    envvar="MODEL_DATA_BUCKET"
+    envvar="MODEL_DATA_BUCKET",
 )
 def main(n, m, sample_size, bucket_name):
     feature_vectors = get_random_feature_vectors(sample_size)
