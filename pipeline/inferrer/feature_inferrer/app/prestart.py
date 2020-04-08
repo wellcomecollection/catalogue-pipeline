@@ -23,7 +23,7 @@ try:
     logger.info("Fetching pretrained LSHEncoder model")
     download_object_from_s3(
         object_key=os.environ["MODEL_OBJECT_KEY"],
-        bucket_name="model-core-data",
+        bucket_name=os.environ["MODEL_DATA_BUCKET"],
         profile_name=profile_name,
     )
     logger.info("Fetched pretrained LSHEncoder model")
