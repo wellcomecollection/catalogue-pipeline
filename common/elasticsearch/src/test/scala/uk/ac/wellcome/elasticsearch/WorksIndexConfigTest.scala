@@ -5,7 +5,6 @@ import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import org.scalacheck.ScalacheckShapeless._
-import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import org.scalacheck.{Arbitrary, Shrink}
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
 import org.scalacheck.Gen.chooseNum
@@ -16,6 +15,7 @@ import com.sksamuel.elastic4s.requests.indexes.IndexResponse
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import com.sksamuel.elastic4s.{ElasticError, Response}
 import io.circe.Encoder
+import org.scalatest.prop.PropertyChecks
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
@@ -30,7 +30,7 @@ class WorksIndexConfigTest
     with Eventually
     with Matchers
     with JsonAssertions
-    with ScalaCheckPropertyChecks
+    with PropertyChecks
     with WorksGenerators {
 
   // On failure, scalacheck tries to shrink to the smallest input that causes a failure.

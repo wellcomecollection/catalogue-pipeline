@@ -21,7 +21,7 @@ import scala.concurrent.ExecutionContext
 object Main extends WellcomeTypesafeApp {
   // This inference manager operates on images
   type Input = MergedImage[Identified]
-  type Output = AugmentedImage[Identified]
+  type Output = AugmentedImage
   val inferrerAdapter = FeatureVectorInferrerAdapter
 
   runWithConfig { config: Config =>

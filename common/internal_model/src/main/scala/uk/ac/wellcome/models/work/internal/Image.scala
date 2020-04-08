@@ -30,24 +30,28 @@ case class MergedImage[Id <: pff](
       id = id,
       location = location
     )
-
-  def augment(inferredData: => Option[InferredData]): AugmentedImage[Id] =
-    AugmentedImage[Id](
-      id = id,
-      location = location,
-      parentWork = parentWork,
-      fullText = fullText,
-      inferredData = inferredData
-    )
 }
 
-case class AugmentedImage[Id <: pff](
-  id: Id,
+object MergedImage {
+  implicit class IdentifiedMergedImageOps(mergedImage: MergedImage[Identified]) {
+    def augment(inferredData: => Option[InferredData]): AugmentedImage =
+      AugmentedImage(
+        id = mergedImage.id,
+        location = mergedImage.location,
+        parentWork = mergedImage.parentWork,
+        fullText = mergedImage.fullText,
+        inferredData = inferredData
+      )
+  }
+}
+
+case class AugmentedImage(
+  id: Identified,
   location: DigitalLocation,
-  parentWork: Id,
+  parentWork: Identified,
   fullText: Option[String] = None,
   inferredData: Option[InferredData] = None
-) extends BaseImage[Id]
+) extends BaseImage[Identified]
 
 case class InferredData(
   // We split the feature vector so that it can fit into

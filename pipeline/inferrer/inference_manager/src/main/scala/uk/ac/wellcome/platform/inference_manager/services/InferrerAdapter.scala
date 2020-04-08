@@ -50,7 +50,7 @@ trait InferrerAdapter[Input, Output] extends Logging {
 // The InferrerAdaptor for feature vectors, consuming MergedImages and
 // augmenting them into AugmentedImages
 object FeatureVectorInferrerAdapter
-    extends InferrerAdapter[MergedImage[Identified], AugmentedImage[Identified]] {
+    extends InferrerAdapter[MergedImage[Identified], AugmentedImage] {
   type InferrerResponse = FeatureVectorInferrerResponse
 
   def createRequest(image: MergedImage[Identified]): HttpRequest =
@@ -66,7 +66,7 @@ object FeatureVectorInferrerAdapter
 
   def augmentInput(
     image: MergedImage[Identified],
-    inferrerResponse: Option[InferrerResponse]): AugmentedImage[Identified] =
+    inferrerResponse: Option[InferrerResponse]): AugmentedImage =
     image.augment {
       inferrerResponse collect {
         case FeatureVectorInferrerResponse(features, lsh_encoded_features)

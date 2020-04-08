@@ -19,7 +19,7 @@ class InferenceManagerWorkerServiceTest
     with BeforeAndAfterAll
     with InferenceManagerWorkerServiceFixture[
       MergedImage[Identified],
-      AugmentedImage[Identified]
+      AugmentedImage
     ] {
 
   val inferrerMock = new InferrerWiremock(FeatureVectorInferrerMock)
@@ -43,9 +43,9 @@ class InferenceManagerWorkerServiceTest
         eventually {
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
-          val augmentedWork = getMessages[AugmentedImage[Identified]](topic).head
+          val augmentedWork = getMessages[AugmentedImage](topic).head
           inside(augmentedWork) {
-            case AugmentedImage(id, _, _, _, _, inferredData) =>
+            case AugmentedImage(id, _, _, _, inferredData) =>
               id should be(image.id)
               inside(inferredData.value) {
                 case InferredData(features1, features2, lshEncodedFeatures) =>
@@ -86,9 +86,9 @@ class InferenceManagerWorkerServiceTest
         eventually {
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
-          val output = getMessages[AugmentedImage[Identified]](topic).head
+          val output = getMessages[AugmentedImage](topic).head
           inside(output) {
-            case AugmentedImage(id, _, _, _, _, inferredData) =>
+            case AugmentedImage(id, _, _, _, inferredData) =>
               id should be(image500.id)
               inferredData should not be defined
           }
