@@ -2,25 +2,13 @@ package uk.ac.wellcome.elasticsearch
 
 import java.time.Instant
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 import org.scalacheck.ScalacheckShapeless._
 import com.sksamuel.elastic4s.ElasticError
 import org.scalacheck.Gen.chooseNum
 import org.scalacheck.{Arbitrary, Shrink}
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
-import org.scalacheck.Gen.chooseNum
-import org.scalatest.{Assertion, FunSpec, Matchers}
-import com.sksamuel.elastic4s.Index
-import com.sksamuel.elastic4s.ElasticDsl.{indexInto, search, _}
-import com.sksamuel.elastic4s.requests.indexes.IndexResponse
-import com.sksamuel.elastic4s.requests.searches.SearchResponse
-import com.sksamuel.elastic4s.{ElasticError, Response}
-import io.circe.Encoder
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{FunSpec, Matchers}
-import org.scalacheck.ScalacheckShapeless._
-import org.scalatest.prop.PropertyChecks
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.utils.JsonAssertions

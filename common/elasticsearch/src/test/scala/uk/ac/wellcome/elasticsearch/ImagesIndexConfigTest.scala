@@ -15,9 +15,7 @@ class ImagesIndexConfigTest extends FunSpec with ImageGenerators with Elasticsea
 
   it("can ingest an image with large image features vectors") {
      withLocalImagesIndex { index =>
-       val features1 = (0 until 2048).map(_ => Random.nextFloat()*100).toList
-       val features2 = (0 until 2048).map(_ => Random.nextFloat()*100).toList
-        val image = createMergedImage.toMinted.augment(Some(InferredData(features1, features2, List(randomAlphanumeric(10)))))
+        val image = createAugmentedImage
         whenReady(indexObject(index, image)) { response =>
           response.isError shouldBe false
           assertObjectIndexed(index, image)
