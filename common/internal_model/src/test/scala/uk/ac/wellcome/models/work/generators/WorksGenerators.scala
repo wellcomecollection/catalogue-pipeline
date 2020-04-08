@@ -206,9 +206,10 @@ trait WorksGenerators
       items = items
     )
 
-  def createUnidentifiedCalmWork(data: WorkData[Unminted, Identifiable] = WorkData(
-                                   items = List(createCalmItem)
-                                 ),
+  def createUnidentifiedCalmWork(data: WorkData[Unminted, Identifiable] =
+                                   WorkData(
+                                     items = List(createCalmItem)
+                                   ),
                                  id: String = randomAlphanumeric(6),
                                  version: Int = 0) =
     UnidentifiedWork(

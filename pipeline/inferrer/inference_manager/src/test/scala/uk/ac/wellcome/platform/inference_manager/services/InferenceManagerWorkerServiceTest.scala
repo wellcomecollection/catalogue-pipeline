@@ -1,13 +1,29 @@
 package uk.ac.wellcome.platform.inference_manager.services
 
-import org.scalatest.{BeforeAndAfterAll, FunSpec, Inside, Inspectors, Matchers, OptionValues}
+import org.scalatest.{
+  BeforeAndAfterAll,
+  FunSpec,
+  Inside,
+  Inspectors,
+  Matchers,
+  OptionValues
+}
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
-import uk.ac.wellcome.models.work.internal.{AugmentedImage, Identified, InferredData, MergedImage}
+import uk.ac.wellcome.models.work.internal.{
+  AugmentedImage,
+  Identified,
+  InferredData,
+  MergedImage
+}
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.ImageGenerators
-import uk.ac.wellcome.platform.inference_manager.fixtures.{FeatureVectorInferrerMock, InferenceManagerWorkerServiceFixture, InferrerWiremock}
+import uk.ac.wellcome.platform.inference_manager.fixtures.{
+  FeatureVectorInferrerMock,
+  InferenceManagerWorkerServiceFixture,
+  InferrerWiremock
+}
 
 class InferenceManagerWorkerServiceTest
     extends FunSpec

@@ -7,7 +7,12 @@ import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import grizzled.slf4j.Logging
 import io.circe.Decoder
 import io.circe.generic.semiauto.deriveDecoder
-import uk.ac.wellcome.models.work.internal.{AugmentedImage, Identified, InferredData, MergedImage}
+import uk.ac.wellcome.models.work.internal.{
+  AugmentedImage,
+  Identified,
+  InferredData,
+  MergedImage
+}
 import uk.ac.wellcome.platform.inference_manager.models.FeatureVectorInferrerResponse
 
 import scala.concurrent.Future
@@ -64,9 +69,8 @@ object FeatureVectorInferrerAdapter
       )
     )
 
-  def augmentInput(
-    image: MergedImage[Identified],
-    inferrerResponse: Option[InferrerResponse]): AugmentedImage =
+  def augmentInput(image: MergedImage[Identified],
+                   inferrerResponse: Option[InferrerResponse]): AugmentedImage =
     image.augment {
       inferrerResponse collect {
         case FeatureVectorInferrerResponse(features, lsh_encoded_features)

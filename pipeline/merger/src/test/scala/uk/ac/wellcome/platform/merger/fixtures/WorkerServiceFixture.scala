@@ -24,22 +24,22 @@ trait WorkerServiceFixture extends LocalWorksVhs {
     testWith: TestWith[MergerWorkerService[SNSConfig, SNSConfig], R]): R =
     withLocalS3Bucket { bucket =>
       withSqsBigMessageSender[BaseWork, R](bucket, worksTopic) { workSender =>
-        withSqsBigMessageSender[MergedImage[Identifiable], R](bucket, imagesTopic) {
-          imageSender =>
-            withActorSystem { implicit actorSystem =>
-              withSQSStream[NotificationMessage, R](queue, metrics) {
-                sqsStream =>
-                  val workerService = new MergerWorkerService(
-                    sqsStream = sqsStream,
-                    playbackService = new RecorderPlaybackService(vhs),
-                    mergerManager = new MergerManager(PlatformMerger),
-                    workSender = workSender,
-                    imageSender = imageSender
-                  )
-                  workerService.run()
-                  testWith(workerService)
-              }
+        withSqsBigMessageSender[MergedImage[Identifiable], R](
+          bucket,
+          imagesTopic) { imageSender =>
+          withActorSystem { implicit actorSystem =>
+            withSQSStream[NotificationMessage, R](queue, metrics) { sqsStream =>
+              val workerService = new MergerWorkerService(
+                sqsStream = sqsStream,
+                playbackService = new RecorderPlaybackService(vhs),
+                mergerManager = new MergerManager(PlatformMerger),
+                workSender = workSender,
+                imageSender = imageSender
+              )
+              workerService.run()
+              testWith(workerService)
             }
+          }
         }
       }
     }

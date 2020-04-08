@@ -33,7 +33,8 @@ case class MergedImage[Id <: WithSourceIdentifier](
 }
 
 object MergedImage {
-  implicit class IdentifiedMergedImageOps(mergedImage: MergedImage[Identified]) {
+  implicit class IdentifiedMergedImageOps(
+    mergedImage: MergedImage[Identified]) {
     def augment(inferredData: => Option[InferredData]): AugmentedImage =
       AugmentedImage(
         id = mergedImage.id,

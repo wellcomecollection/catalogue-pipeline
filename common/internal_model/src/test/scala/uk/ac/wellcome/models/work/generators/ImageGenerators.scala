@@ -14,7 +14,8 @@ trait ImageGenerators extends IdentifiersGenerators with ItemsGenerators {
     location = location
   )
 
-  def createUnmergedImage: UnmergedImage[Identifiable] = createUnmergedImageWith()
+  def createUnmergedImage: UnmergedImage[Identifiable] =
+    createUnmergedImageWith()
 
   def createMergedImageWith(
     location: DigitalLocation = createDigitalLocation,
@@ -29,12 +30,13 @@ trait ImageGenerators extends IdentifiersGenerators with ItemsGenerators {
   def createMergedImage: MergedImage[Identifiable] = createMergedImageWith()
 
   def createInferredData = {
-    val features1 = (0 until 2048).map(_ => Random.nextFloat()*100).toList
-    val features2 = (0 until 2048).map(_ => Random.nextFloat()*100).toList
+    val features1 = (0 until 2048).map(_ => Random.nextFloat() * 100).toList
+    val features2 = (0 until 2048).map(_ => Random.nextFloat() * 100).toList
     Some(InferredData(features1, features2, List(randomAlphanumeric(10))))
   }
 
-  def createAugmentedImage = createMergedImage.toMinted.augment(createInferredData)
+  def createAugmentedImage =
+    createMergedImage.toMinted.augment(createInferredData)
 
   implicit class ImageIdOps(val image: MergedImage[Identifiable]) {
     val toMinted: MergedImage[Identified] = MergedImage(

@@ -22,7 +22,7 @@ sealed trait RedirectedWork extends BaseWork {
   val redirect: Redirect
 }
 
-case class WorkData[Id <: IdState,ImageId <: WithSourceIdentifier](
+case class WorkData[Id <: IdState, ImageId <: WithSourceIdentifier](
   title: Option[String] = None,
   otherIdentifiers: List[SourceIdentifier] = Nil,
   mergeCandidates: List[MergeCandidate] = Nil,
@@ -55,7 +55,8 @@ case class UnidentifiedWork(
   identifiedType: String = classOf[IdentifiedWork].getSimpleName
 ) extends TransformedBaseWork {
 
-  def withData(f: WorkData[Unminted, Identifiable] => WorkData[Unminted, Identifiable]) =
+  def withData(
+    f: WorkData[Unminted, Identifiable] => WorkData[Unminted, Identifiable]) =
     this.copy(data = f(data))
 }
 
@@ -69,7 +70,8 @@ case class IdentifiedWork(
     with MultipleSourceIdentifiers {
   val otherIdentifiers = data.otherIdentifiers
 
-  def withData(f: WorkData[Minted, Identified] => WorkData[Minted, Identified]) =
+  def withData(
+    f: WorkData[Minted, Identified] => WorkData[Minted, Identified]) =
     this.copy(data = f(data))
 }
 
@@ -80,7 +82,8 @@ case class UnidentifiedInvisibleWork(
   identifiedType: String = classOf[IdentifiedInvisibleWork].getSimpleName
 ) extends TransformedBaseWork
     with InvisibleWork {
-  def withData(f: WorkData[Unminted, Identifiable] => WorkData[Unminted, Identifiable]) =
+  def withData(
+    f: WorkData[Unminted, Identifiable] => WorkData[Unminted, Identifiable]) =
     this.copy(data = f(data))
 }
 
@@ -91,7 +94,8 @@ case class IdentifiedInvisibleWork(
   data: WorkData[Minted, Identified]
 ) extends IdentifiedBaseWork
     with InvisibleWork {
-  def withData(f: WorkData[Minted, Identified] => WorkData[Minted, Identified]) =
+  def withData(
+    f: WorkData[Minted, Identified] => WorkData[Minted, Identified]) =
     this.copy(data = f(data))
 }
 
