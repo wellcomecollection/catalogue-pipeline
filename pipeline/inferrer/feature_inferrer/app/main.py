@@ -1,9 +1,11 @@
 from fastapi import FastAPI, HTTPException
 
+import src.http as http
 from src.feature_extraction import extract_features
 from src.image import get_image_from_url, get_image_url_from_iiif_url
 from src.logging import get_logstash_logger
 from src.lsh import LSHEncoder
+
 
 logger = get_logstash_logger(__name__)
 
@@ -21,7 +23,7 @@ logger.info("API started, awaiting requests")
 
 
 @app.get("/feature-vector/")
-def main(image_url: str = None, iiif_url: str = None):
+async def main(image_url: str = None, iiif_url: str = None):
     if (not (image_url or iiif_url)) or (iiif_url and image_url):
         logger.error(f"client passed image_url: {image_url} iiif_url: {iiif_url}")
         raise HTTPException(
@@ -37,7 +39,7 @@ def main(image_url: str = None, iiif_url: str = None):
             raise HTTPException(status_code=400, detail=error_string)
 
     try:
-        image = get_image_from_url(image_url)
+        image = await get_image_from_url(image_url)
     except ValueError as e:
         error_string = str(e)
         logger.error(error_string)
@@ -54,3 +56,13 @@ def main(image_url: str = None, iiif_url: str = None):
 @app.get("/healthcheck")
 def healthcheck():
     return {"status": "healthy"}
+
+
+@app.on_event("startup")
+def on_startup():
+    http.start_persistent_client_session()
+
+
+@app.on_event("shutdown")
+def on_shutdown():
+    http.stop_persistent_client_session()

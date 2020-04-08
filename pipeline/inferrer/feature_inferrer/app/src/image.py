@@ -1,43 +1,28 @@
 from io import BytesIO
 from urllib.parse import unquote_plus
-
-import requests
 from PIL import Image
 
-
-def is_valid_image_url(image_url):
-    image_formats = ["image/png", "image/jpeg", "image/jpg"]
-    try:
-        r = requests.head(image_url)
-        if (r.status_code == 200) and (r.headers["content-type"] in image_formats):
-            return True
-        return False
-    except Exception:
-        return False
+from .http import fetch_url_bytes
 
 
-def is_valid_iiif_url(iiif_url):
-    try:
-        r = requests.head(iiif_url)
-        if (r.status_code == 200) and (r.headers["content-type"] == "application/json"):
-            return True
-        return False
-    except Exception:
-        return False
+def is_valid_image(response):
+    image_formats = ["image/png", "image/jpeg", "image/jpg", "image/jp2"]
+    return (response.status == 200) and (response.content_type in image_formats)
 
 
-def get_image_from_url(image_url):
+async def get_image_from_url(image_url):
     image_url = unquote_plus(image_url)
-    if is_valid_image_url(image_url):
-        r = requests.get(image_url)
-        image = Image.open(BytesIO(r.content))
+    response = await fetch_url_bytes(image_url)
+    if is_valid_image(response["object"]):
+        image_bytes = BytesIO(response["bytes"])
+        image = Image.open(image_bytes)
         return image
     else:
         raise ValueError(f"{image_url} is not a valid image URL")
 
 
 def get_image_url_from_iiif_url(iiif_url):
-    if is_valid_iiif_url(iiif_url):
+    if iiif_url.endswith("info.json"):
         url = unquote_plus(iiif_url)
         image_url = url.replace("info.json", "/full/760,/0/default.jpg")
         return image_url
