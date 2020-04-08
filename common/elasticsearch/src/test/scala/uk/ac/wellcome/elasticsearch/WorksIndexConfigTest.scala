@@ -15,7 +15,7 @@ import com.sksamuel.elastic4s.requests.indexes.IndexResponse
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import com.sksamuel.elastic4s.{ElasticError, Response}
 import io.circe.Encoder
-import org.scalatest.prop.PropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
@@ -30,7 +30,7 @@ class WorksIndexConfigTest
     with Eventually
     with Matchers
     with JsonAssertions
-    with PropertyChecks
+    with ScalaCheckPropertyChecks
     with WorksGenerators {
 
   // On failure, scalacheck tries to shrink to the smallest input that causes a failure.
