@@ -154,6 +154,19 @@ trait ElasticsearchFixtures
       assertJsonStringsAreEqual(hits.head.sourceAsString, toJson(t).get)
     }
 
+  def assertElasticsearchEmpty[T](index: Index): Assertion =
+  // Elasticsearch is eventually consistent so, when the future completes,
+  // the documents won't appear in the search until after a refresh
+    eventually {
+      val response: Response[SearchResponse] = elasticClient.execute {
+        search(index).matchAllQuery()
+      }.await
+
+      val hits = response.result.hits.hits
+
+      hits should have size 0
+    }
+
   def assertElasticsearchNeverHasWork(index: Index,
                                       works: IdentifiedBaseWork*): Unit = {
     implicit val id: CanonicalId[IdentifiedBaseWork] =

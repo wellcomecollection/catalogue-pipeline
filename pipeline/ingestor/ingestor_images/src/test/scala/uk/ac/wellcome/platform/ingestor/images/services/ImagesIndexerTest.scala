@@ -34,4 +34,40 @@ class ImagesIndexerTest extends FunSpec with Matchers with ElasticsearchFixtures
       }
     }
   }
+
+  it("ingests a higher version of the same image"){
+    withLocalImagesIndex { index =>
+      val imagesIndexer = new ImagesIndexer(elasticClient,index)
+      implicit val i = imagesIndexer.id
+      val image = createAugmentedImage
+      val newerImage = image.copy(version = image.version + 1)
+      val result = for {
+        _ <- imagesIndexer.index(List(image))
+        res <- imagesIndexer.index(List(newerImage))
+      } yield res
+      whenReady(result){ r =>
+        r.isRight shouldBe true
+        r.right.get shouldBe List(newerImage)
+        assertElasticsearchEventuallyHas(index = index, newerImage)
+      }
+    }
+  }
+
+  it("doesn't replace a newer version with a lower one"){
+    withLocalImagesIndex { index =>
+      val imagesIndexer = new ImagesIndexer(elasticClient,index)
+      implicit val i = imagesIndexer.id
+      val image = createAugmentedImage
+      val olderImage = image.copy(version = image.version - 1)
+      val result = for {
+        _ <- imagesIndexer.index(List(image))
+        res <- imagesIndexer.index(List(olderImage))
+      } yield res
+      whenReady(result){ r =>
+        r.isRight shouldBe true
+        r.right.get shouldBe List(olderImage)
+        assertElasticsearchEventuallyHas(index = index, image)
+      }
+    }
+  }
 }
