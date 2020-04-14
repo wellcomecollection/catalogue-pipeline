@@ -5,6 +5,7 @@ module "recorder_queue" {
     module.miro_transformer_topic.arn,
     module.sierra_transformer_topic.arn,
     module.mets_transformer_topic.arn,
+    module.calm_transformer_topic.arn,
   ]
   aws_region      = var.aws_region
   alarm_topic_arn = var.dlq_alarm_arn
