@@ -236,7 +236,7 @@ class MergerWorkerServiceTest
           worksSent should have size 3
 
           val imagesSent =
-            getMessages[MergedImage[Unminted]](topics.images).distinct
+            getMessages[MergedImage[Identifiable]](topics.images).distinct
           imagesSent should have size 1
 
           val redirectedWorks = worksSent.collect {

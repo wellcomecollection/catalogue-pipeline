@@ -12,7 +12,7 @@ sealed trait IdentifiedBaseWork extends BaseWork {
 sealed trait TransformedBaseWork
     extends BaseWork
     with MultipleSourceIdentifiers {
-  val data: WorkData[Unminted]
+  val data: WorkData[Unminted, Identifiable]
   val otherIdentifiers = data.otherIdentifiers
 }
 
@@ -22,7 +22,7 @@ sealed trait RedirectedWork extends BaseWork {
   val redirect: Redirect
 }
 
-case class WorkData[Id <: IdState](
+case class WorkData[Id <: IdState, ImageId <: WithSourceIdentifier](
   title: Option[String] = None,
   otherIdentifiers: List[SourceIdentifier] = Nil,
   mergeCandidates: List[MergeCandidate] = Nil,
@@ -44,18 +44,19 @@ case class WorkData[Id <: IdState](
   items: List[Item[Id]] = Nil,
   merged: Boolean = false,
   collectionPath: Option[CollectionPath] = None,
-  images: List[UnmergedImage[Id]] = Nil
+  images: List[UnmergedImage[ImageId]] = Nil
 )
 
 case class UnidentifiedWork(
   version: Int,
   sourceIdentifier: SourceIdentifier,
-  data: WorkData[Unminted],
+  data: WorkData[Unminted, Identifiable],
   ontologyType: String = "Work",
   identifiedType: String = classOf[IdentifiedWork].getSimpleName
 ) extends TransformedBaseWork {
 
-  def withData(f: WorkData[Unminted] => WorkData[Unminted]) =
+  def withData(
+    f: WorkData[Unminted, Identifiable] => WorkData[Unminted, Identifiable]) =
     this.copy(data = f(data))
 }
 
@@ -63,24 +64,26 @@ case class IdentifiedWork(
   canonicalId: String,
   version: Int,
   sourceIdentifier: SourceIdentifier,
-  data: WorkData[Minted],
+  data: WorkData[Minted, Identified],
   ontologyType: String = "Work"
 ) extends IdentifiedBaseWork
     with MultipleSourceIdentifiers {
   val otherIdentifiers = data.otherIdentifiers
 
-  def withData(f: WorkData[Minted] => WorkData[Minted]) =
+  def withData(
+    f: WorkData[Minted, Identified] => WorkData[Minted, Identified]) =
     this.copy(data = f(data))
 }
 
 case class UnidentifiedInvisibleWork(
   version: Int,
   sourceIdentifier: SourceIdentifier,
-  data: WorkData[Unminted],
+  data: WorkData[Unminted, Identifiable],
   identifiedType: String = classOf[IdentifiedInvisibleWork].getSimpleName
 ) extends TransformedBaseWork
     with InvisibleWork {
-  def withData(f: WorkData[Unminted] => WorkData[Unminted]) =
+  def withData(
+    f: WorkData[Unminted, Identifiable] => WorkData[Unminted, Identifiable]) =
     this.copy(data = f(data))
 }
 
@@ -88,10 +91,11 @@ case class IdentifiedInvisibleWork(
   canonicalId: String,
   version: Int,
   sourceIdentifier: SourceIdentifier,
-  data: WorkData[Minted]
+  data: WorkData[Minted, Identified]
 ) extends IdentifiedBaseWork
     with InvisibleWork {
-  def withData(f: WorkData[Minted] => WorkData[Minted]) =
+  def withData(
+    f: WorkData[Minted, Identified] => WorkData[Minted, Identified]) =
     this.copy(data = f(data))
 }
 

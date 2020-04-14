@@ -13,9 +13,9 @@ import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.models.work.internal.{
   AugmentedImage,
+  Identified,
   InferredData,
-  MergedImage,
-  Minted
+  MergedImage
 }
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.ImageGenerators
@@ -34,8 +34,8 @@ class InferenceManagerWorkerServiceTest
     with Inspectors
     with BeforeAndAfterAll
     with InferenceManagerWorkerServiceFixture[
-      MergedImage[Minted],
-      AugmentedImage[Minted]
+      MergedImage[Identified],
+      AugmentedImage
     ] {
 
   val inferrerMock = new InferrerWiremock(FeatureVectorInferrerMock)
@@ -59,7 +59,7 @@ class InferenceManagerWorkerServiceTest
         eventually {
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
-          val augmentedWork = getMessages[AugmentedImage[Minted]](topic).head
+          val augmentedWork = getMessages[AugmentedImage](topic).head
           inside(augmentedWork) {
             case AugmentedImage(id, _, _, _, inferredData) =>
               id should be(image.id)
@@ -102,7 +102,7 @@ class InferenceManagerWorkerServiceTest
         eventually {
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
-          val output = getMessages[AugmentedImage[Minted]](topic).head
+          val output = getMessages[AugmentedImage](topic).head
           inside(output) {
             case AugmentedImage(id, _, _, _, inferredData) =>
               id should be(image500.id)

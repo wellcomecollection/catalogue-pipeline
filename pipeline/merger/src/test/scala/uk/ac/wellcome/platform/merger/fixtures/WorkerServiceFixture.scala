@@ -4,7 +4,7 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import com.amazonaws.services.cloudwatch.model.StandardUnit
 import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.models.work.internal.{BaseWork, MergedImage, Unminted}
+import uk.ac.wellcome.models.work.internal.{BaseWork, Identifiable, MergedImage}
 import uk.ac.wellcome.platform.merger.services._
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig}
@@ -24,22 +24,22 @@ trait WorkerServiceFixture extends LocalWorksVhs {
     testWith: TestWith[MergerWorkerService[SNSConfig, SNSConfig], R]): R =
     withLocalS3Bucket { bucket =>
       withSqsBigMessageSender[BaseWork, R](bucket, worksTopic) { workSender =>
-        withSqsBigMessageSender[MergedImage[Unminted], R](bucket, imagesTopic) {
-          imageSender =>
-            withActorSystem { implicit actorSystem =>
-              withSQSStream[NotificationMessage, R](queue, metrics) {
-                sqsStream =>
-                  val workerService = new MergerWorkerService(
-                    sqsStream = sqsStream,
-                    playbackService = new RecorderPlaybackService(vhs),
-                    mergerManager = new MergerManager(PlatformMerger),
-                    workSender = workSender,
-                    imageSender = imageSender
-                  )
-                  workerService.run()
-                  testWith(workerService)
-              }
+        withSqsBigMessageSender[MergedImage[Identifiable], R](
+          bucket,
+          imagesTopic) { imageSender =>
+          withActorSystem { implicit actorSystem =>
+            withSQSStream[NotificationMessage, R](queue, metrics) { sqsStream =>
+              val workerService = new MergerWorkerService(
+                sqsStream = sqsStream,
+                playbackService = new RecorderPlaybackService(vhs),
+                mergerManager = new MergerManager(PlatformMerger),
+                workSender = workSender,
+                imageSender = imageSender
+              )
+              workerService.run()
+              testWith(workerService)
             }
+          }
         }
       }
     }

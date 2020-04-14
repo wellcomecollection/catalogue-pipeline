@@ -69,7 +69,7 @@ class MiroRecordTransformer
 
       val (title, description) = getTitleAndDescription(miroRecord)
 
-      val data = WorkData[Unminted](
+      val data = WorkData[Unminted, Identifiable](
         otherIdentifiers = getOtherIdentifiers(miroRecord),
         title = Some(title),
         workType = getWorkType,

@@ -5,6 +5,7 @@ sealed trait IdState {
   def maybeCanonicalId: Option[String]
   def allSourceIdentifiers: List[SourceIdentifier]
 }
+sealed trait WithSourceIdentifier extends IdState
 
 /** Parent trait for an ID of an object that is pre minter. */
 sealed trait Unminted extends IdState
@@ -19,7 +20,8 @@ case class Identified(
   sourceIdentifier: SourceIdentifier,
   otherIdentifiers: List[SourceIdentifier] = Nil,
 ) extends IdState
-    with Minted {
+    with Minted
+    with WithSourceIdentifier {
   def maybeCanonicalId = Some(canonicalId)
   def allSourceIdentifiers = sourceIdentifier +: otherIdentifiers
 }
@@ -31,7 +33,8 @@ case class Identifiable(
   otherIdentifiers: List[SourceIdentifier] = Nil,
   identifiedType: String = classOf[Identified].getSimpleName,
 ) extends IdState
-    with Unminted {
+    with Unminted
+    with WithSourceIdentifier {
   def maybeCanonicalId = None
   def allSourceIdentifiers = sourceIdentifier +: otherIdentifiers
 }

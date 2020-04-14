@@ -1,11 +1,11 @@
 package uk.ac.wellcome.models.work.internal
 
-sealed trait BaseImage[+Id <: IdState] extends HasIdState[Id] {
+sealed trait BaseImage[+Id <: WithSourceIdentifier] extends HasIdState[Id] {
   val id: Id
   val location: DigitalLocation
 }
 
-case class UnmergedImage[Id <: IdState](
+case class UnmergedImage[Id <: WithSourceIdentifier](
   id: Id,
   location: DigitalLocation
 ) extends BaseImage[Id] {
@@ -19,7 +19,7 @@ case class UnmergedImage[Id <: IdState](
     )
 }
 
-case class MergedImage[Id <: IdState](
+case class MergedImage[Id <: WithSourceIdentifier](
   id: Id,
   location: DigitalLocation,
   parentWork: Id,
@@ -30,24 +30,29 @@ case class MergedImage[Id <: IdState](
       id = id,
       location = location
     )
-
-  def augment(inferredData: => Option[InferredData]): AugmentedImage[Id] =
-    AugmentedImage[Id](
-      id = id,
-      location = location,
-      parentWork = parentWork,
-      fullText = fullText,
-      inferredData = inferredData
-    )
 }
 
-case class AugmentedImage[Id <: IdState](
-  id: Id,
+object MergedImage {
+  implicit class IdentifiedMergedImageOps(
+    mergedImage: MergedImage[Identified]) {
+    def augment(inferredData: => Option[InferredData]): AugmentedImage =
+      AugmentedImage(
+        id = mergedImage.id,
+        location = mergedImage.location,
+        parentWork = mergedImage.parentWork,
+        fullText = mergedImage.fullText,
+        inferredData = inferredData
+      )
+  }
+}
+
+case class AugmentedImage(
+  id: Identified,
   location: DigitalLocation,
-  parentWork: Id,
+  parentWork: Identified,
   fullText: Option[String] = None,
   inferredData: Option[InferredData] = None
-) extends BaseImage[Id]
+) extends BaseImage[Identified]
 
 case class InferredData(
   // We split the feature vector so that it can fit into
@@ -59,7 +64,7 @@ case class InferredData(
 
 object UnmergedImage {
   def apply(sourceIdentifier: SourceIdentifier,
-            location: DigitalLocation): UnmergedImage[Unminted] =
+            location: DigitalLocation): UnmergedImage[Identifiable] =
     UnmergedImage(
       id = Identifiable(sourceIdentifier),
       location

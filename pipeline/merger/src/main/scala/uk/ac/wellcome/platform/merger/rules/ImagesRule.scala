@@ -7,8 +7,7 @@ import uk.ac.wellcome.models.work.internal.{
   Identifiable,
   MergedImage,
   TransformedBaseWork,
-  UnidentifiedWork,
-  Unminted
+  UnidentifiedWork
 }
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import uk.ac.wellcome.platform.merger.rules.WorkPredicates.{
@@ -18,7 +17,7 @@ import uk.ac.wellcome.platform.merger.rules.WorkPredicates.{
 }
 
 object ImagesRule extends FieldMergeRule {
-  type FieldData = List[MergedImage[Unminted]]
+  type FieldData = List[MergedImage[Identifiable]]
 
   override def merge(
     target: UnidentifiedWork,
@@ -65,7 +64,7 @@ object ImagesRule extends FieldMergeRule {
   trait FlatImageMergeRule extends PartialRule {
     final override def rule(target: UnidentifiedWork,
                             sources: NonEmptyList[TransformedBaseWork])
-      : List[MergedImage[Unminted]] = {
+      : List[MergedImage[Identifiable]] = {
       val works = sources.prepend(target).toList
       works flatMap {
         _.data.images.map {
