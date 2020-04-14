@@ -13,7 +13,7 @@ class ImagesIndexerTest extends FunSpec with Matchers with ElasticsearchFixtures
     withLocalImagesIndex { index =>
       val imagesIndexer = new ImagesIndexer(elasticClient,index)
       implicit val i = imagesIndexer.id
-      val image = createAugmentedImage
+      val image = createAugmentedImage()
       whenReady(imagesIndexer.index(List(image))){ r =>
         r.isRight shouldBe true
         r.right.get shouldBe List(image)
@@ -26,7 +26,7 @@ class ImagesIndexerTest extends FunSpec with Matchers with ElasticsearchFixtures
     withLocalImagesIndex { index =>
       val imagesIndexer = new ImagesIndexer(elasticClient,index)
       implicit val i = imagesIndexer.id
-      val images = (1 to 5).map(_ =>createAugmentedImage)
+      val images = (1 to 5).map(_ =>createAugmentedImage())
       whenReady(imagesIndexer.index(images)){ r =>
         r.isRight shouldBe true
         r.right.get should contain theSameElementsAs images
@@ -39,7 +39,7 @@ class ImagesIndexerTest extends FunSpec with Matchers with ElasticsearchFixtures
     withLocalImagesIndex { index =>
       val imagesIndexer = new ImagesIndexer(elasticClient,index)
       implicit val i = imagesIndexer.id
-      val image = createAugmentedImage
+      val image = createAugmentedImage()
       val newerImage = image.copy(version = image.version + 1)
       val result = for {
         _ <- imagesIndexer.index(List(image))
@@ -57,7 +57,7 @@ class ImagesIndexerTest extends FunSpec with Matchers with ElasticsearchFixtures
     withLocalImagesIndex { index =>
       val imagesIndexer = new ImagesIndexer(elasticClient,index)
       implicit val i = imagesIndexer.id
-      val image = createAugmentedImage
+      val image = createAugmentedImage()
       val olderImage = image.copy(version = image.version - 1)
       val result = for {
         _ <- imagesIndexer.index(List(image))

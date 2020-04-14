@@ -14,8 +14,19 @@ import scala.util.Random
 class ImagesIndexConfigTest extends FunSpec with ImageGenerators with ElasticsearchFixtures with ScalaFutures {
 
   it("can ingest an image with large image features vectors") {
+    withLocalImagesIndex { index =>
+      val image = createAugmentedImage()
+      whenReady(indexObject(index, image)) { response =>
+        response.isError shouldBe false
+        assertObjectIndexed(index, image)
+      }
+
+    }
+  }
+
+    it("can ingest an image without feature vectors") {
      withLocalImagesIndex { index =>
-        val image = createAugmentedImage
+        val image = createAugmentedImage(inferredData = None)
         whenReady(indexObject(index, image)) { response =>
           response.isError shouldBe false
           assertObjectIndexed(index, image)

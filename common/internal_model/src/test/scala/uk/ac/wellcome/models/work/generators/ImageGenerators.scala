@@ -38,8 +38,8 @@ trait ImageGenerators extends IdentifiersGenerators with ItemsGenerators {
     Some(InferredData(features1, features2, List(randomAlphanumeric(10))))
   }
 
-  def createAugmentedImage =
-    createMergedImage.toMinted.augment(createInferredData)
+  def createAugmentedImage(inferredData: Option[InferredData] = createInferredData) =
+    createMergedImage.toMinted.augment(inferredData)
 
   implicit class ImageIdOps(val image: MergedImage[Identifiable]) {
     val toMinted: MergedImage[Identified] = MergedImage(

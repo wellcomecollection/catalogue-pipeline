@@ -19,7 +19,7 @@ import uk.ac.wellcome.json.JsonUtil._
 
 class ImagesIngestorFeatureTest extends FunSpec with ImageGenerators with BigMessagingFixture with ElasticsearchFixtures with IngestorFixtures {
   it("reads an image from the queue, ingests it and deletes the message"){
-    val image = createAugmentedImage
+    val image = createAugmentedImage()
 
     withLocalSqsQueueAndDlqAndTimeout(visibilityTimeout = 10) {case QueuePair(queue, dlq) =>
       sendMessage[AugmentedImage](queue = queue, obj = image)
