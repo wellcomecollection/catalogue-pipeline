@@ -14,19 +14,6 @@ class ItemsRuleTest
   val multiItemPhysicalSierra = createSierraWorkWithTwoPhysicalItems
   val digitalSierra = createSierraDigitalWork
   val metsWork = createUnidentifiedInvisibleMetsWork
-  val metsWorkWithSierraUrl = createUnidentifiedInvisibleMetsWorkWith(
-    items = List(
-      createDigitalItemWith(
-        locations = List(
-          createDigitalLocationWith(
-            url = digitalSierra.data.items.head.locations.head
-              .asInstanceOf[DigitalLocation]
-              .url,
-            license = Some(License.InCopyright)
-          ))
-      )
-    )
-  )
   val miroWork = createMiroWork
   val calmWork = createUnidentifiedCalmWork()
 
