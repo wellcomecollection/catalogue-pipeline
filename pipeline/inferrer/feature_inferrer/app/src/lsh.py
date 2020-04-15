@@ -6,7 +6,9 @@ import numpy as np
 
 class LSHEncoder:
     def __init__(self):
-        model_path = os.path.basename(os.environ["MODEL_OBJECT_KEY"])
+        model_path = os.path.join(
+            "data", os.path.basename(os.environ["MODEL_OBJECT_KEY"])
+        )
         with open(model_path, "rb") as f:
             self.models = pickle.load(f)
 
