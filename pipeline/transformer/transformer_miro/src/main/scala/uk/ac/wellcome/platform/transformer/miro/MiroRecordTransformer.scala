@@ -81,7 +81,7 @@ class MiroRecordTransformer
         contributors = getContributors(miroRecord),
         thumbnail = Some(getThumbnail(miroRecord)),
         items = getItems(miroRecord),
-        images = List(getImage(miroRecord))
+        images = List(getImage(miroRecord, version))
       )
 
       UnidentifiedWork(version, sourceIdentifier, data)

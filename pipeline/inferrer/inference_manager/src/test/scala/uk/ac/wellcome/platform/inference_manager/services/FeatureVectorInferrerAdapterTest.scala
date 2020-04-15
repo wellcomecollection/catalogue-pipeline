@@ -58,16 +58,23 @@ class FeatureVectorInferrerAdapterTest
       val augmentedImage =
         FeatureVectorInferrerAdapter.augmentInput(image, Some(response))
       inside(augmentedImage) {
-        case AugmentedImage(id, location, parentWork, fullText, inferredData) =>
+        case AugmentedImage(
+            id,
+            version,
+            location,
+            parentWork,
+            fullText,
+            inferredData) =>
           id should be(image.id)
+          version should be(image.version)
           location should be(image.location)
           parentWork should be(image.parentWork)
           fullText should be(image.fullText)
           inside(inferredData.value) {
-            case InferredData(features1, features2, lshEncodedFeatures) =>
+            case InferredData(features1, features2, actualLshEncodedFeatures) =>
               features1 should be(features.slice(0, 2048))
               features2 should be(features.slice(2048, 4096))
-              lshEncodedFeatures should be(lshEncodedFeatures)
+              actualLshEncodedFeatures should be(lshEncodedFeatures)
           }
       }
     }

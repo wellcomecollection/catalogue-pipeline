@@ -3,8 +3,8 @@ package uk.ac.wellcome.platform.ingestor.common
 import com.sksamuel.elastic4s.requests.analysis.Analysis
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 import com.sksamuel.elastic4s.{Index, Indexable}
-import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.concurrent.ScalaFutures
 import uk.ac.wellcome.elasticsearch.IndexConfig
 import uk.ac.wellcome.elasticsearch.model.{CanonicalId, Version}
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
@@ -156,7 +156,6 @@ class IndexerTest
     val analysis = Analysis(analyzers = List())
 
     val title = textField("title")
-    val canonicalId = keywordField("canonicalId")
     val version = intField("version")
     val data = objectField("data")
 

@@ -25,6 +25,8 @@ jobs:
       script: ./.travis/run_job.py id_minter
     - name: ingestor_works
       script: ./.travis/run_job.py ingestor_works
+    - name: ingestor_images
+      script: ./.travis/run_job.py ingestor_images
     - name: matcher
       script: ./.travis/run_job.py matcher
     - name: merger
@@ -78,6 +80,7 @@ cache:
     - pipeline/id_minter/target
     - pipeline/ingestor/ingestor_common/target
     - pipeline/ingestor/ingestor_works/target
+    - pipeline/ingestor/ingestor_images/target
     - pipeline/inferrer/inference_manager/target
     - pipeline/matcher/target
     - pipeline/merger/target

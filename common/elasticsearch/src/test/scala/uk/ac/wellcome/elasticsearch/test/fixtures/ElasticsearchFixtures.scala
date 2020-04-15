@@ -5,9 +5,11 @@ import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.cluster.ClusterHealthResponse
 import com.sksamuel.elastic4s.requests.common.VersionType.ExternalGte
 import com.sksamuel.elastic4s.requests.get.GetResponse
+import com.sksamuel.elastic4s.requests.indexes.IndexResponse
 import com.sksamuel.elastic4s.requests.indexes.admin.IndexExistsResponse
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import com.sksamuel.elastic4s.{ElasticClient, Response}
+import grizzled.slf4j.Logging
 import io.circe.Encoder
 import org.scalactic.source.Position
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
@@ -21,6 +23,7 @@ import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.work.internal.IdentifiedBaseWork
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.util.Random
 
 trait ElasticsearchFixtures
@@ -28,7 +31,8 @@ trait ElasticsearchFixtures
     with ScalaFutures
     with Matchers
     with JsonAssertions
-    with IntegrationPatience { this: Suite =>
+    with IntegrationPatience
+    with Logging { this: Suite =>
 
   private val esHost = "localhost"
   private val esPort = 9200
@@ -58,6 +62,11 @@ trait ElasticsearchFixtures
 
   def withLocalWorksIndex[R](testWith: TestWith[Index, R]): R =
     withLocalElasticsearchIndex[R](config = WorksIndexConfig) { index =>
+      testWith(index)
+    }
+
+  def withLocalImagesIndex[R](testWith: TestWith[Index, R]): R =
+    withLocalElasticsearchIndex[R](config = ImagesIndexConfig) { index =>
       testWith(index)
     }
 
@@ -131,6 +140,34 @@ trait ElasticsearchFixtures
       }
     }
 
+  def assertObjectIndexed[T](index: Index, t: T)(
+    implicit encoder: Encoder[T]): Assertion =
+    // Elasticsearch is eventually consistent so, when the future completes,
+    // the documents won't appear in the search until after a refresh
+    eventually {
+      val response: Response[SearchResponse] = elasticClient.execute {
+        search(index).matchAllQuery()
+      }.await
+
+      val hits = response.result.hits.hits
+
+      hits should have size 1
+      assertJsonStringsAreEqual(hits.head.sourceAsString, toJson(t).get)
+    }
+
+  def assertElasticsearchEmpty[T](index: Index): Assertion =
+    // Elasticsearch is eventually consistent so, when the future completes,
+    // the documents won't appear in the search until after a refresh
+    eventually {
+      val response: Response[SearchResponse] = elasticClient.execute {
+        search(index).matchAllQuery()
+      }.await
+
+      val hits = response.result.hits.hits
+
+      hits should have size 0
+    }
+
   def assertElasticsearchNeverHasWork(index: Index,
                                       works: IdentifiedBaseWork*): Unit = {
     implicit val id: CanonicalId[IdentifiedBaseWork] =
@@ -151,6 +188,24 @@ trait ElasticsearchFixtures
 
       response.result.found shouldBe false
     }
+  }
+
+  def indexObject[T](index: Index, t: T)(
+    implicit encoder: Encoder[T]): Future[Response[IndexResponse]] = {
+    val doc = toJson(t).get
+    debug(s"ingesting: $doc")
+    elasticClient
+      .execute {
+
+        indexInto(index.name).doc(doc)
+      }
+      .map { r =>
+        if (r.isError) {
+          error(s"Error from Elasticsearch: $r")
+        }
+        r
+      }
+
   }
 
   def insertIntoElasticsearch(index: Index,

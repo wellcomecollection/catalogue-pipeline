@@ -2,24 +2,17 @@ package uk.ac.wellcome.elasticsearch
 
 import java.time.Instant
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 import org.scalacheck.ScalacheckShapeless._
+import com.sksamuel.elastic4s.ElasticError
+import org.scalacheck.Gen.chooseNum
 import org.scalacheck.{Arbitrary, Shrink}
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
-import org.scalacheck.Gen.chooseNum
-import org.scalatest.{Assertion, FunSpec, Matchers}
-import com.sksamuel.elastic4s.Index
-import com.sksamuel.elastic4s.ElasticDsl.{indexInto, search, _}
-import com.sksamuel.elastic4s.requests.indexes.IndexResponse
-import com.sksamuel.elastic4s.requests.searches.SearchResponse
-import com.sksamuel.elastic4s.{ElasticError, Response}
-import io.circe.Encoder
-import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+import org.scalatest.prop.PropertyChecks
+import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
-import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.utils.JsonAssertions
+import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
 
@@ -30,7 +23,7 @@ class WorksIndexConfigTest
     with Eventually
     with Matchers
     with JsonAssertions
-    with ScalaCheckPropertyChecks
+    with PropertyChecks
     with WorksGenerators {
 
   // On failure, scalacheck tries to shrink to the smallest input that causes a failure.
@@ -144,26 +137,4 @@ class WorksIndexConfigTest
       }
     }
   }
-
-  private def indexObject[T](index: Index, t: T)(
-    implicit encoder: Encoder[T]): Future[Response[IndexResponse]] =
-    elasticClient
-      .execute {
-        indexInto(index.name).doc(toJson(t).get)
-      }
-
-  private def assertObjectIndexed[T](index: Index, t: T)(
-    implicit encoder: Encoder[T]): Assertion =
-    // Elasticsearch is eventually consistent so, when the future completes,
-    // the documents won't appear in the search until after a refresh
-    eventually {
-      val response: Response[SearchResponse] = elasticClient.execute {
-        search(index).matchAllQuery()
-      }.await
-
-      val hits = response.result.hits.hits
-
-      hits should have size 1
-      assertJsonStringsAreEqual(hits.head.sourceAsString, toJson(t).get)
-    }
 }

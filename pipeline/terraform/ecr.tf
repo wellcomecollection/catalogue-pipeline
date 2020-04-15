@@ -46,6 +46,10 @@ resource "aws_ecr_repository" "ecr_repository_feature_inferrer" {
   name = "uk.ac.wellcome/feature_inferrer"
 }
 
+resource "aws_ecr_repository" "ecr_repository_ingestor_images" {
+  name = "uk.ac.wellcome/ingestor_images"
+}
+
 resource "aws_ecr_repository" "ecr_repository_elasticdump" {
   name = "uk.ac.wellcome/elasticdump"
 }

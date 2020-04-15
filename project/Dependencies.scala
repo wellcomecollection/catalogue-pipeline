@@ -96,7 +96,7 @@ object ExternalDependencies {
     val apacheLogging = "2.8.2"
     val aws = "1.11.504"
     val circe = "0.9.0"
-    val elastic4s = "7.3.0"
+    val elastic4s = "7.6.1"
     val fastparse = "2.1.3"
     val swagger = "2.0.10"
     val logback = "1.2.3"
@@ -157,10 +157,17 @@ object ExternalDependencies {
   val elasticsearchDependencies = Seq(
     "org.apache.logging.log4j" % "log4j-core" % versions.apacheLogging,
     "org.apache.logging.log4j" % "log4j-api" % versions.apacheLogging,
-    "com.sksamuel.elastic4s" %% "elastic4s-core" % versions.elastic4s,
-    "com.sksamuel.elastic4s" %% "elastic4s-client-esjava" % versions.elastic4s,
-    "com.sksamuel.elastic4s" %% "elastic4s-http-streams" % versions.elastic4s,
-    "com.sksamuel.elastic4s" %% "elastic4s-testkit" % versions.elastic4s % "test"
+    // This is our version of elastic4s.
+    // Temporarily use it until until https://github.com/sksamuel/elastic4s/pull/2049
+    // gets merged and released.
+    // Also, the new version of elastic4s brings in scalatest_3.1.0 which is not backwards
+    // compatible with scalatest_3.0.1 used here and a newer versio  of akka.
+    // Both need to be updated in the wellcome libraries before being updated here,
+    // so temporarily excluding those form the dependencies
+    "uk.ac.wellcome.elastic4s" %% "elastic4s-core" % versions.elastic4s exclude("org.scalatest", "scalatest_2.12") excludeAll(ExclusionRule("com.typesafe.akka")),
+    "uk.ac.wellcome.elastic4s" %% "elastic4s-client-esjava" % versions.elastic4s exclude("org.scalatest", "scalatest_2.12") excludeAll(ExclusionRule("com.typesafe.akka")),
+    "uk.ac.wellcome.elastic4s" %% "elastic4s-http-streams" % versions.elastic4s exclude("org.scalatest", "scalatest_2.12") excludeAll(ExclusionRule("com.typesafe.akka")),
+    "uk.ac.wellcome.elastic4s" %% "elastic4s-testkit" % versions.elastic4s % "test" exclude("org.scalatest", "scalatest_2.12") excludeAll(ExclusionRule("com.typesafe.akka"))
   )
 
   val mockitoDependencies: Seq[ModuleID] = Seq(

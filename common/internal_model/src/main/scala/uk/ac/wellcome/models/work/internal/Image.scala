@@ -7,12 +7,14 @@ sealed trait BaseImage[+Id <: WithSourceIdentifier] extends HasIdState[Id] {
 
 case class UnmergedImage[Id <: WithSourceIdentifier](
   id: Id,
+  version: Int,
   location: DigitalLocation
 ) extends BaseImage[Id] {
   def mergeWith(parentWork: Id,
                 fullText: Option[String] = None): MergedImage[Id] =
     MergedImage[Id](
       id = id,
+      version = version,
       location = location,
       parentWork = parentWork,
       fullText = fullText
@@ -21,6 +23,7 @@ case class UnmergedImage[Id <: WithSourceIdentifier](
 
 case class MergedImage[Id <: WithSourceIdentifier](
   id: Id,
+  version: Int,
   location: DigitalLocation,
   parentWork: Id,
   fullText: Option[String] = None
@@ -28,6 +31,7 @@ case class MergedImage[Id <: WithSourceIdentifier](
   def toUnmerged: UnmergedImage[Id] =
     UnmergedImage[Id](
       id = id,
+      version = version,
       location = location
     )
 }
@@ -38,6 +42,7 @@ object MergedImage {
     def augment(inferredData: => Option[InferredData]): AugmentedImage =
       AugmentedImage(
         id = mergedImage.id,
+        version = mergedImage.version,
         location = mergedImage.location,
         parentWork = mergedImage.parentWork,
         fullText = mergedImage.fullText,
@@ -48,6 +53,7 @@ object MergedImage {
 
 case class AugmentedImage(
   id: Identified,
+  version: Int,
   location: DigitalLocation,
   parentWork: Identified,
   fullText: Option[String] = None,
@@ -64,9 +70,11 @@ case class InferredData(
 
 object UnmergedImage {
   def apply(sourceIdentifier: SourceIdentifier,
+            version: Int,
             location: DigitalLocation): UnmergedImage[Identifiable] =
     UnmergedImage(
       id = Identifiable(sourceIdentifier),
+      version = version,
       location
     )
 }

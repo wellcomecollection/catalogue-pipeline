@@ -7,10 +7,12 @@ import scala.util.Random
 trait ImageGenerators extends IdentifiersGenerators with ItemsGenerators {
   def createUnmergedImageWith(
     location: DigitalLocation = createDigitalLocation,
+    version: Int = 1,
     identifierType: IdentifierType = IdentifierType("miro-image-number")
   ): UnmergedImage[Identifiable] = UnmergedImage(
     sourceIdentifier =
       createSourceIdentifierWith(identifierType = identifierType),
+    version = version,
     location = location
   )
 
@@ -19,10 +21,11 @@ trait ImageGenerators extends IdentifiersGenerators with ItemsGenerators {
 
   def createMergedImageWith(
     location: DigitalLocation = createDigitalLocation,
+    version: Int = 1,
     identifierType: IdentifierType = IdentifierType("miro-image-number"),
     parentWork: SourceIdentifier = createSierraSystemSourceIdentifier,
     fullText: Option[String] = None): MergedImage[Identifiable] =
-    createUnmergedImageWith(location, identifierType) mergeWith (
+    createUnmergedImageWith(location, version, identifierType) mergeWith (
       parentWork = Identifiable(parentWork),
       fullText = fullText
     )
@@ -35,8 +38,9 @@ trait ImageGenerators extends IdentifiersGenerators with ItemsGenerators {
     Some(InferredData(features1, features2, List(randomAlphanumeric(10))))
   }
 
-  def createAugmentedImage =
-    createMergedImage.toMinted.augment(createInferredData)
+  def createAugmentedImage(
+    inferredData: Option[InferredData] = createInferredData) =
+    createMergedImage.toMinted.augment(inferredData)
 
   implicit class ImageIdOps(val image: MergedImage[Identifiable]) {
     val toMinted: MergedImage[Identified] = MergedImage(
@@ -44,6 +48,7 @@ trait ImageGenerators extends IdentifiersGenerators with ItemsGenerators {
         canonicalId = createCanonicalId,
         sourceIdentifier = image.id.allSourceIdentifiers.head
       ),
+      version = image.version,
       location = image.location,
       parentWork = Identified(
         canonicalId = createCanonicalId,

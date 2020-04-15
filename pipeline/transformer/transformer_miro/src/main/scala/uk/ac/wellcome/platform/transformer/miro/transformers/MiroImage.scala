@@ -26,13 +26,15 @@ trait MiroImage {
     imageUriTemplate.format(iiifImageApiBaseUri, miroId)
   }
 
-  def getImage(miroRecord: MiroRecord): UnmergedImage[Identifiable] =
+  def getImage(miroRecord: MiroRecord,
+               version: Int): UnmergedImage[Identifiable] =
     UnmergedImage(
       sourceIdentifier = SourceIdentifier(
         identifierType = IdentifierType("miro-image-number"),
         ontologyType = "Image",
         value = miroRecord.imageNumber
       ),
+      version = version,
       location = DigitalLocation(
         url = buildImageApiURL(miroRecord.imageNumber, "info"),
         locationType = LocationType("iiif-image")

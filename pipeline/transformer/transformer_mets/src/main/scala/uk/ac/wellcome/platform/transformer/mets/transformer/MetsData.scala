@@ -25,16 +25,20 @@ case class MetsData(
       UnidentifiedInvisibleWork(
         version = version,
         sourceIdentifier = sourceIdentifier,
-        workData(item, thumbnail(sourceIdentifier.value, license, accessStatus))
+        workData(
+          item,
+          thumbnail(sourceIdentifier.value, license, accessStatus),
+          version)
       )
 
   private def workData(item: Item[Unminted],
-                       thumbnail: Option[DigitalLocation]) =
+                       thumbnail: Option[DigitalLocation],
+                       version: Int) =
     WorkData(
       items = List(item),
       mergeCandidates = List(mergeCandidate),
       thumbnail = thumbnail,
-      images = images
+      images = images(version)
     )
 
   private def mergeCandidate = MergeCandidate(
@@ -132,18 +136,20 @@ case class MetsData(
       case _                       => true
     }
 
-  private val images = fileReferences
-    .filter(ImageUtils.isImage)
-    .flatMap { fileReference =>
-      ImageUtils.buildImageUrl(recordIdentifier, fileReference).map { url =>
-        UnmergedImage(
-          ImageUtils
-            .getImageSourceId(recordIdentifier, fileReference.id),
-          DigitalLocation(
-            url = url,
-            locationType = LocationType("iiif-image")
+  private def images(version: Int) =
+    fileReferences
+      .filter(ImageUtils.isImage)
+      .flatMap { fileReference =>
+        ImageUtils.buildImageUrl(recordIdentifier, fileReference).map { url =>
+          UnmergedImage(
+            ImageUtils
+              .getImageSourceId(recordIdentifier, fileReference.id),
+            version = version,
+            DigitalLocation(
+              url = url,
+              locationType = LocationType("iiif-image")
+            )
           )
-        )
+        }
       }
-    }
 }
