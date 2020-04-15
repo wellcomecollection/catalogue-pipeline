@@ -4,6 +4,8 @@ locals {
     "matcher",
     "merger",
     "id_minter",
+    "inference_manager",
+    "feature_inferrer",
     "recorder",
     "transformer_miro",
     "transformer_mets",
@@ -25,6 +27,8 @@ locals {
   recorder_image           = local.image_ids["recorder"]
   matcher_image            = local.image_ids["matcher"]
   merger_image             = local.image_ids["merger"]
+  inference_manager_image  = local.image_ids["inference_manager"]
+  feature_inferrer_image   = local.image_ids["feature_inferrer"]
   ingestor_works_image     = local.image_ids["ingestor_works"]
   transformer_miro_image   = local.image_ids["transformer_miro"]
   transformer_mets_image   = local.image_ids["transformer_mets"]

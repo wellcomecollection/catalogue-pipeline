@@ -38,6 +38,14 @@ resource "aws_ecr_repository" "ecr_repository_ingestor_works" {
   name = "uk.ac.wellcome/ingestor_works"
 }
 
+resource "aws_ecr_repository" "ecr_repository_inference_manager" {
+  name = "uk.ac.wellcome/inference_manager"
+}
+
+resource "aws_ecr_repository" "ecr_repository_feature_inferrer" {
+  name = "uk.ac.wellcome/feature_inferrer"
+}
+
 resource "aws_ecr_repository" "ecr_repository_elasticdump" {
   name = "uk.ac.wellcome/elasticdump"
 }

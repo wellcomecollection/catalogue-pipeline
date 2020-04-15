@@ -56,4 +56,7 @@ module "catalogue_pipeline_20200228" {
   vhs_calm_sourcedata_bucket_name   = local.vhs_calm_sourcedata_bucket_name
   vhs_calm_sourcedata_table_name    = local.vhs_calm_sourcedata_table_name
   read_storage_s3_role_arn          = aws_iam_role.read_storage_s3.arn
+
+  # Inferrer data
+  inferrer_model_data_bucket_name = aws_s3_bucket.inferrer_model_core_data.id
 }
