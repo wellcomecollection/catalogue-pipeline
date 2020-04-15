@@ -40,7 +40,7 @@ module "catalogue_pipeline_20200228" {
   ]
 
   # Elasticsearch
-  es_works_index = "v2-20200228"
+  es_works_index  = "v2-20200228"
   es_images_index = ""
 
   # RDS
@@ -83,28 +83,28 @@ module "catalogue_pipeline_20200414" {
   # reindexer topic names.
 
   sierra_adapter_topic_arns = [
-        local.sierra_reindexer_topic_arn,
-//    local.sierra_merged_bibs_topic_arn,
-//    local.sierra_merged_items_topic_arn,
+    local.sierra_reindexer_topic_arn,
+    //    local.sierra_merged_bibs_topic_arn,
+    //    local.sierra_merged_items_topic_arn,
   ]
 
   miro_adapter_topic_arns = [
-        local.miro_reindexer_topic_arn,
-//    local.miro_updates_topic_arn,
+    local.miro_reindexer_topic_arn,
+    //    local.miro_updates_topic_arn,
   ]
 
   mets_adapter_topic_arns = [
-        local.mets_reindexer_topic_arn,
-//    local.mets_adapter_topic_arn,
+    local.mets_reindexer_topic_arn,
+    //    local.mets_adapter_topic_arn,
   ]
 
   calm_adapter_topic_arns = [
     //    local.calm_reindexer_topic_arn,
-//    local.calm_adapter_topic_arn,
+    //    local.calm_adapter_topic_arn,
   ]
 
   # Elasticsearch
-  es_works_index = "works-20200414"
+  es_works_index  = "works-20200414"
   es_images_index = "images-20200414"
 
   # RDS
