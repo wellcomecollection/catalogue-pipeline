@@ -26,7 +26,8 @@ trait MiroImage {
     imageUriTemplate.format(iiifImageApiBaseUri, miroId)
   }
 
-  def getImage(miroRecord: MiroRecord, version: Int): UnmergedImage[Identifiable] =
+  def getImage(miroRecord: MiroRecord,
+               version: Int): UnmergedImage[Identifiable] =
     UnmergedImage(
       sourceIdentifier = SourceIdentifier(
         identifierType = IdentifierType("miro-image-number"),

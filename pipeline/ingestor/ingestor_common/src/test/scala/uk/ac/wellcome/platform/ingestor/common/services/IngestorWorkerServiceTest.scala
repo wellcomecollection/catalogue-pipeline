@@ -6,11 +6,17 @@ import org.apache.http.HttpHost
 import org.elasticsearch.client.RestClient
 import org.scalatest.FunSpec
 import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
-import uk.ac.wellcome.elasticsearch.{ElasticCredentials, ElasticsearchIndexCreator}
+import uk.ac.wellcome.elasticsearch.{
+  ElasticCredentials,
+  ElasticsearchIndexCreator
+}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
-import uk.ac.wellcome.platform.ingestor.common.fixtures.{IngestorFixtures, SampleDocument}
+import uk.ac.wellcome.platform.ingestor.common.fixtures.{
+  IngestorFixtures,
+  SampleDocument
+}
 import uk.ac.wellcome.platform.ingestor.common.models.IngestorConfig
 import uk.ac.wellcome.storage.ObjectLocation
 

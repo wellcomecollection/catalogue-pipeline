@@ -13,7 +13,10 @@ import uk.ac.wellcome.models.work.internal.{
   MergedImage
 }
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.platform.inference_manager.services.{FeatureVectorInferrerAdapter, InferenceManagerWorkerService}
+import uk.ac.wellcome.platform.inference_manager.services.{
+  FeatureVectorInferrerAdapter,
+  InferenceManagerWorkerService
+}
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.typesafe.S3Builder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp

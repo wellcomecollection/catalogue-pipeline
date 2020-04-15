@@ -1,9 +1,26 @@
 package uk.ac.wellcome.elasticsearch
 
-import com.sksamuel.elastic4s.ElasticDsl.{booleanField, dateField, intField, keywordField, objectField, properties, textField, tokenCountField}
-import com.sksamuel.elastic4s.requests.analysis.{Analysis, CustomAnalyzer, PathHierarchyTokenizer}
+import com.sksamuel.elastic4s.ElasticDsl.{
+  booleanField,
+  dateField,
+  intField,
+  keywordField,
+  objectField,
+  properties,
+  textField,
+  tokenCountField
+}
+import com.sksamuel.elastic4s.requests.analysis.{
+  Analysis,
+  CustomAnalyzer,
+  PathHierarchyTokenizer
+}
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
-import com.sksamuel.elastic4s.requests.mappings.{FieldDefinition, MappingDefinition, ObjectField}
+import com.sksamuel.elastic4s.requests.mappings.{
+  FieldDefinition,
+  MappingDefinition,
+  ObjectField
+}
 import uk.ac.wellcome.elasticsearch.ImagesIndexConfig.englishTextField
 
 trait IndexConfig {
@@ -83,7 +100,6 @@ case object WorksIndexConfig extends IndexConfig {
     ),
     tokenizers = List(pathTokenizer))
 
-
   val sourceIdentifier = objectField("sourceIdentifier")
     .fields(sourceIdentifierFields)
 
@@ -102,8 +118,6 @@ case object WorksIndexConfig extends IndexConfig {
       keywordField("type"),
       englishTextField("content")
     )
-
-
 
   val period = Seq(
     label,

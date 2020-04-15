@@ -16,7 +16,10 @@ case object ImagesIndexConfig extends IndexConfig {
       textField("english").analyzer("english")
     )
 
-  val inferredData = objectField("inferredData").fields(denseVectorField("features1", 2048), denseVectorField("features2", 2048), keywordField("lshEncodedFeatures"))
+  val inferredData = objectField("inferredData").fields(
+    denseVectorField("features1", 2048),
+    denseVectorField("features2", 2048),
+    keywordField("lshEncodedFeatures"))
 
   override val mapping: MappingDefinition = properties(
     id("id"),

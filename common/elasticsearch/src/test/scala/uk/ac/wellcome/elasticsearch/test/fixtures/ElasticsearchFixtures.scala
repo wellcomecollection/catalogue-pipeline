@@ -31,7 +31,8 @@ trait ElasticsearchFixtures
     with ScalaFutures
     with Matchers
     with JsonAssertions
-    with IntegrationPatience with Logging{ this: Suite =>
+    with IntegrationPatience
+    with Logging { this: Suite =>
 
   private val esHost = "localhost"
   private val esPort = 9200
@@ -141,8 +142,8 @@ trait ElasticsearchFixtures
 
   def assertObjectIndexed[T](index: Index, t: T)(
     implicit encoder: Encoder[T]): Assertion =
-  // Elasticsearch is eventually consistent so, when the future completes,
-  // the documents won't appear in the search until after a refresh
+    // Elasticsearch is eventually consistent so, when the future completes,
+    // the documents won't appear in the search until after a refresh
     eventually {
       val response: Response[SearchResponse] = elasticClient.execute {
         search(index).matchAllQuery()
@@ -155,8 +156,8 @@ trait ElasticsearchFixtures
     }
 
   def assertElasticsearchEmpty[T](index: Index): Assertion =
-  // Elasticsearch is eventually consistent so, when the future completes,
-  // the documents won't appear in the search until after a refresh
+    // Elasticsearch is eventually consistent so, when the future completes,
+    // the documents won't appear in the search until after a refresh
     eventually {
       val response: Response[SearchResponse] = elasticClient.execute {
         search(index).matchAllQuery()
@@ -197,12 +198,13 @@ trait ElasticsearchFixtures
       .execute {
 
         indexInto(index.name).doc(doc)
-      }.map{r =>
-      if (r.isError) {
-        error(s"Error from Elasticsearch: $r")
       }
-      r
-    }
+      .map { r =>
+        if (r.isError) {
+          error(s"Error from Elasticsearch: $r")
+        }
+        r
+      }
 
   }
 
