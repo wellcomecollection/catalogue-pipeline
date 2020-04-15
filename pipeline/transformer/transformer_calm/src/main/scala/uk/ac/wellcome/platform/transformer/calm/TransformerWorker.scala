@@ -37,6 +37,11 @@ trait TransformerWorker[In, SenderDest] extends Logging {
   type Result[T] = Either[TransformerWorkerError, T]
   type StoreKey = Version[String, Int]
 
+  sealed trait TransformResult;
+  case class Success(key: StoreKey, work: TransformedBaseWork) extends TransformResult
+  case class Surpress(key: StoreKey) extends TransformResult
+  case class Error(error: TransformerWorkerError) extends TransformResult
+
   def name: String = this.getClass.getSimpleName
   val stream: SQSStream[NotificationMessage]
   val sender: BigMessageSender[SenderDest, TransformedBaseWork]
@@ -44,27 +49,30 @@ trait TransformerWorker[In, SenderDest] extends Logging {
   val transformer: Transformer[In]
   val concurrentTransformations: Int = 2
 
-  def process(
-    message: NotificationMessage): Result[(TransformedBaseWork, StoreKey)] = {
-    for {
+  def process(message: NotificationMessage): TransformResult =
+    (for {
       key <- decodeKey(message)
-      recordAndKey <- getRecord(key)
-      work <- work(recordAndKey._1, key)
-      done <- done(work, key)
-    } yield done
-  }
-
-  private def work(sourceData: In, key: StoreKey): Result[TransformedBaseWork] =
-    transformer(sourceData, key.version) match {
-      case Left(err)     => Left(TransformerError(err.toString, sourceData, key))
-      case Right(result) => Right(result)
+      record <- getRecord(key)
+      shouldTransform = transformer.shouldTransform(record)
+      result <- if (!shouldTransform) Right(Surpress(key)) else for {
+        success <- work(record, key)
+        _ <- done(success)
+      } yield success
+    } yield result) match {
+      case Left(err) => Error(err)
+      case Right(successOrSurpress) =>  successOrSurpress
     }
 
-  private def done(work: TransformedBaseWork,
-                   key: StoreKey): Result[(TransformedBaseWork, StoreKey)] =
-    sender.sendT(work) toEither match {
-      case Left(err) => Left(MessageSendError(err.toString, work, key))
-      case Right(_)  => Right((work, key))
+  private def work(sourceData: In, key: StoreKey): Result[Success] =
+    transformer(sourceData, key.version) match {
+      case Left(err)   => Left(TransformerError(err.toString, sourceData, key))
+      case Right(work) => Right(Success(key, work))
+    }
+
+  private def done(success: Success): Result[Unit] =
+    sender.sendT(success.work) toEither match {
+      case Left(err) => Left(MessageSendError(err.toString, success.work, success.key))
+      case Right(_)  => Right(())
     }
 
   private def decodeKey(message: NotificationMessage): Result[StoreKey] =
@@ -73,10 +81,10 @@ trait TransformerWorker[In, SenderDest] extends Logging {
       case Right(result) => Right(result)
     }
 
-  private def getRecord(key: StoreKey): Result[(In, StoreKey)] =
+  private def getRecord(key: StoreKey): Result[In] =
     store.getLatest(key.id) match {
       case Left(err)                     => Left(StoreReadError(err.toString, key))
-      case Right(Identified(key, entry)) => Right((entry, key))
+      case Right(Identified(_, entry)) => Right(entry)
     }
 
   def run(): Future[Done] =
@@ -86,7 +94,7 @@ trait TransformerWorker[In, SenderDest] extends Logging {
         source.mapAsync(concurrentTransformations) {
           case (message, notification) =>
             process(notification) match {
-              case Left(err) => {
+              case Error(err) => {
                 // We do some slightly nicer logging here to give context to the errors
                 err match {
                   case DecodeKeyError(_, message) =>
@@ -100,8 +108,12 @@ trait TransformerWorker[In, SenderDest] extends Logging {
                 }
                 Future.failed(err)
               }
-              case Right((work, key)) => {
+              case Success(key, work) => {
                 info(s"$name: from $key transformed $work")
+                Future.successful(message)
+              }
+              case Surpress(key) => {
+                info(s"$name: surpressed $key")
                 Future.successful(message)
               }
             }
