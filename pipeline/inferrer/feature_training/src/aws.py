@@ -1,11 +1,12 @@
 import boto3
+from botocore.exceptions import ClientError
 
 
 def get_s3_client():
     try:
         s3_client = boto3.client("s3")
     except ClientError as e:
-        logger.error(f"Failed to create s3 client: {e}")
+        print(f"Failed to create s3 client: {e}")
         raise e
     return s3_client
 
