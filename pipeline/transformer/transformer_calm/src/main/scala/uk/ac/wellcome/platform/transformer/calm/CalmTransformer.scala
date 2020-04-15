@@ -34,6 +34,16 @@ object CalmTransformer extends Transformer[CalmRecord] with CalmOps {
       )
     }
 
+  def shouldTransform(record: CalmRecord): Boolean =
+    record
+      .get("Transmission")
+      .map(_.toLowerCase)
+      .map {
+        case "no" => false
+        case _    => true
+      }
+      .getOrElse(true)
+
   def workData(record: CalmRecord): Result[WorkData[Unminted, Identifiable]] =
     for {
       accessStatus <- accessStatus(record)

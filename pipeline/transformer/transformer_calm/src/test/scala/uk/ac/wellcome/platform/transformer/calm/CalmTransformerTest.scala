@@ -308,6 +308,32 @@ class CalmTransformerTest extends FunSpec with Matchers {
     CalmTransformer(record, version) shouldBe a[Left[_, _]]
   }
 
+  it("surpresses data when Transmission=No") {
+    val a = calmRecord(
+      "Title" -> "abc",
+      "Level" -> "Collection",
+      "RefNo" -> "a/b/c",
+      "AltRefNo" -> "a.b.c",
+      "Transmission" -> "No"
+    )
+    val b = calmRecord(
+      "Title" -> "abc",
+      "Level" -> "Collection",
+      "RefNo" -> "a/b/c",
+      "AltRefNo" -> "a.b.c",
+      "Transmission" -> "Yes"
+    )
+    val c = calmRecord(
+      "Title" -> "abc",
+      "Level" -> "Collection",
+      "RefNo" -> "a/b/c",
+      "AltRefNo" -> "a.b.c",
+    )
+    CalmTransformer.shouldTransform(a) shouldBe false
+    CalmTransformer.shouldTransform(b) shouldBe true
+    CalmTransformer.shouldTransform(c) shouldBe true
+  }
+
   def calmRecord(fields: (String, String)*): CalmRecord =
     CalmRecord(
       id = id,

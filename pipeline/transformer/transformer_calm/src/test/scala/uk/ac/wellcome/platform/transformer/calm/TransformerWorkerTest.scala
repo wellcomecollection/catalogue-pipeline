@@ -30,6 +30,7 @@ import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryVersionedStore}
 trait TestData
 case object ValidTestData extends TestData
 case object InvalidTestData extends TestData
+case object SurpressTestData extends TestData
 
 object TestTransformer extends Transformer[TestData] {
   def apply(data: TestData, version: Int) =
@@ -45,10 +46,14 @@ object TestTransformer extends Transformer[TestData] {
             data = WorkData()
           )
         )
-
-      case InvalidTestData => Left(new Exception("No No No"))
+      case _ => Left(new Exception("No No No"))
     }
 
+  def shouldTransform(data: TestData): Boolean =
+    data match {
+      case SurpressTestData => false
+      case _                => true
+    }
 }
 
 class TestTransformerWorker(
@@ -136,6 +141,27 @@ class TransformerWorkerTest
         Thread.sleep(2000)
 
         assertQueueHasSize(dlq, 1)
+        assertQueueEmpty(queue)
+    }
+  }
+  it(
+    "Surpresses data, removing the message from the queue") {
+
+    withTransformerWorker(
+      records = Map(
+        Version("A", 1) -> ValidTestData,
+        Version("B", 2) -> SurpressTestData,
+        Version("C", 3) -> ValidTestData
+      )
+    ) {
+      case (transformerWorker, QueuePair(queue, dlq), metrics) =>
+        sendNotificationToSQS[Version[String, Int]](queue, Version("A", 1))
+        sendNotificationToSQS[Version[String, Int]](queue, Version("B", 2))
+        sendNotificationToSQS[Version[String, Int]](queue, Version("C", 3))
+
+        Thread.sleep(2000)
+
+        assertQueueEmpty(dlq)
         assertQueueEmpty(queue)
     }
   }
