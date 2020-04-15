@@ -1,6 +1,7 @@
 locals {
   services = [
     "ingestor_works",
+    "ingestor_images",
     "matcher",
     "merger",
     "id_minter",
@@ -30,6 +31,7 @@ locals {
   inference_manager_image  = local.image_ids["inference_manager"]
   feature_inferrer_image   = local.image_ids["feature_inferrer"]
   ingestor_works_image     = local.image_ids["ingestor_works"]
+  ingestor_images_image     = local.image_ids["ingestor_images"]
   transformer_miro_image   = local.image_ids["transformer_miro"]
   transformer_mets_image   = local.image_ids["transformer_mets"]
   transformer_sierra_image = local.image_ids["transformer_sierra"]

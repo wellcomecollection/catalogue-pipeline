@@ -13,6 +13,7 @@ variable "account_id" {}
 variable "dlq_alarm_arn" {}
 
 variable "es_works_index" {}
+variable "es_images_index" {}
 
 variable "rds_ids_access_security_group_id" {}
 
