@@ -31,9 +31,6 @@ object WorkPredicates {
   val physicalSierra: WorkPredicate =
     satisfiesAll(sierraWork, physicalLocationExists)
 
-  val digitalSierra: WorkPredicate =
-    satisfiesAll(sierraWork, singleItem, allDigitalLocations)
-
   val sierraPicture: WorkPredicate =
     satisfiesAll(sierraWork, workType(WorkType.Pictures))
 

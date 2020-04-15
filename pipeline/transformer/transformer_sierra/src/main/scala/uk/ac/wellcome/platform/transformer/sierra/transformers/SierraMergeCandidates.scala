@@ -68,11 +68,9 @@ object SierraMergeCandidates
 
   /** We can merge a single-page Miro and Sierra work if:
     *
-    *   - The Sierra work has type "Picture" or "Digital images"
-    *   - There's exactly one Miro ID in MARC tag 962 subfield $u
-    *     (if there's more than one Miro ID, we can't do a merge).
-    *   - There's exactly one item on the Sierra record (if there's more
-    *     than one item, we don't know where to put the Miro location).
+    *   - The Sierra work has type "Picture", "Digital images", or "3D Object"
+    *   - There's exactly one Miro ID in MARC tag 962$u or 089$a
+    *     (if there's more than one Miro ID in either, we can't do a merge)
     *
     */
   private def getSinglePageMiroMergeCandidates(
@@ -81,6 +79,7 @@ object SierraMergeCandidates
       // The Sierra material type codes we care about are:
       // * k (Pictures)
       // * q (Digital Images)
+      // * r (3D Objects)
       case Some(SierraMaterialType("k")) | Some(SierraMaterialType("q")) | Some(
             SierraMaterialType("r")) =>
         (matching962Ids(bibData), matching089Ids(bibData)) match {
