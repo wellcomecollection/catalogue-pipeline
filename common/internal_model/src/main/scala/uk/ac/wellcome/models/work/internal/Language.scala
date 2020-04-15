@@ -35,12 +35,17 @@ object Language {
       )
       .getLines
       .map(_.split(",", 2).toList)
-      .map { case List(code, label) => (code, label) }
+      .map { case List(code, label) => (code, label.replace("\"", "")) }
       .toList
 
   lazy private val languageCodeMap =
     languageCodes.toMap
 
   lazy private val languageLabelMap =
-    languageCodes.map { case (code, label) => (label, code) }.toMap
+    languageCodes.flatMap {
+      case (code, label) =>
+        // This is so that e.g. we parse both Dutch and Flemish from
+        // "Dutch; Flemish" as nl
+        label.split(";").toList.map(label => (label.trim, code))
+    }.toMap
 }

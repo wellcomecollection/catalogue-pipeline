@@ -11,6 +11,7 @@ trait CalmOps {
       record.data
         .get(key)
         .getOrElse(Nil)
+        .map(_.trim)
         .filter(_.nonEmpty)
 
     def getJoined(key: String, seperator: String = " "): Option[String] =
