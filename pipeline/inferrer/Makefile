@@ -16,4 +16,6 @@ LAMBDAS     =
 TF_NAME =
 TF_PATH =
 
+inference_manager-test: feature_inferrer-build
+
 $(val $(call stack_setup))

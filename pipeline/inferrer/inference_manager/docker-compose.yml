@@ -12,7 +12,7 @@ sns:
     - "9292:9292"
 
 inferrer:
-  build: ../feature_inferrer
+  image: feature_inferrer
   ports:
     - "3141:80"
   environment:
