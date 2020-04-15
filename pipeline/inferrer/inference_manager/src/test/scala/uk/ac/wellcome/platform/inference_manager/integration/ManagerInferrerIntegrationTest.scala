@@ -9,9 +9,9 @@ import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.ImageGenerators
 import uk.ac.wellcome.models.work.internal.{
   AugmentedImage,
+  Identified,
   InferredData,
-  MergedImage,
-  Minted
+  MergedImage
 }
 import uk.ac.wellcome.platform.inference_manager.fixtures.InferenceManagerWorkerServiceFixture
 import uk.ac.wellcome.platform.inference_manager.services.FeatureVectorInferrerAdapter
@@ -26,8 +26,8 @@ class ManagerInferrerIntegrationTest
     with OptionValues
     with Inside
     with InferenceManagerWorkerServiceFixture[
-      MergedImage[Minted],
-      AugmentedImage[Minted]
+      MergedImage[Identified],
+      AugmentedImage
     ] {
 
   it("augments images with feature vectors") {
@@ -47,9 +47,9 @@ class ManagerInferrerIntegrationTest
         eventually {
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
-          val augmentedImage = getMessages[AugmentedImage[Minted]](topic).head
+          val augmentedImage = getMessages[AugmentedImage](topic).head
           inside(augmentedImage) {
-            case AugmentedImage(id, _, _, _, inferredData) =>
+            case AugmentedImage(id, _, _, _, _, inferredData) =>
               id should be(image.id)
               inside(inferredData.value) {
                 case InferredData(features1, features2, lshEncodedFeatures) =>
