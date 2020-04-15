@@ -162,6 +162,50 @@ class CalmTransformerTest extends FunSpec with Matchers {
     )
   }
 
+  it("strips whitespace when transforming language") {
+    val recordA = calmRecord(
+      "Title" -> "abc",
+      "Level" -> "Collection",
+      "RefNo" -> "a/b/c",
+      "AltRefNo" -> "a.b.c",
+      "Language" -> "English "
+    )
+    val recordB = calmRecord(
+      "Title" -> "abc",
+      "Level" -> "Collection",
+      "RefNo" -> "a/b/c",
+      "AltRefNo" -> "a.b.c",
+      "Language" -> "  "
+    )
+    CalmTransformer(recordA, version).right.get.data.language shouldBe Some(
+      Language("en", "English")
+    )
+    CalmTransformer(recordB, version).right.get.data.language shouldBe None
+  }
+
+  it("parses language codes that can have various labels") {
+    val recordA = calmRecord(
+      "Title" -> "abc",
+      "Level" -> "Collection",
+      "RefNo" -> "a/b/c",
+      "AltRefNo" -> "a.b.c",
+      "Language" -> "Dutch"
+    )
+    val recordB = calmRecord(
+      "Title" -> "abc",
+      "Level" -> "Collection",
+      "RefNo" -> "a/b/c",
+      "AltRefNo" -> "a.b.c",
+      "Language" -> "Flemish"
+    )
+    CalmTransformer(recordA, version).right.get.data.language shouldBe Some(
+      Language("nl", "Dutch")
+    )
+    CalmTransformer(recordB, version).right.get.data.language shouldBe Some(
+      Language("nl", "Flemish")
+    )
+  }
+
   it("transforms multiple contributors") {
     val record = calmRecord(
       "Title" -> "abc",
@@ -193,6 +237,16 @@ class CalmTransformerTest extends FunSpec with Matchers {
       TermsOfUse("reproduce at will"),
       ArrangementNote("meet at midnight"),
     )
+  }
+
+  it("ignores case when transforming level") {
+    val record = calmRecord(
+      "Title" -> "abc",
+      "Level" -> "Subseries",
+      "RefNo" -> "a/b/c",
+      "AltRefNo" -> "a.b.c",
+    )
+    CalmTransformer(record, version).right.get.data.collectionPath.get.level shouldBe CollectionLevel.Series
   }
 
   it("errors if invalid access status") {
