@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.inference_manager.integration
 
+import org.scalatest.concurrent.IntegrationPatience
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.{FunSpec, Inside, Matchers, OptionValues}
 import uk.ac.wellcome.fixtures.TestWith
@@ -25,19 +26,21 @@ class ManagerInferrerIntegrationTest
     with ImageGenerators
     with OptionValues
     with Inside
+    with IntegrationPatience
     with InferenceManagerWorkerServiceFixture[
       MergedImage[Identified],
       AugmentedImage
     ] {
 
   it("augments images with feature vectors") {
-    // This is (more than) enough time for the inferrer to have
-    // done its prestart work and be ready to use
-    eventually(Timeout(scaled(90 seconds))) {
-      inferrerIsHealthy shouldBe true
-    }
     withWorkerServiceFixtures {
       case (QueuePair(queue, dlq), topic) =>
+        // This is (more than) enough time for the inferrer to have
+        // done its prestart work and be ready to use
+        eventually(Timeout(scaled(90 seconds))) {
+          inferrerIsHealthy shouldBe true
+        }
+
         val image = createMergedImageWith(
           location = createDigitalLocationWith(
             url = "http://image_server/test-image.jpg"
@@ -73,7 +76,9 @@ class ManagerInferrerIntegrationTest
 
   def withWorkerServiceFixtures[R](
     testWith: TestWith[(QueuePair, Topic), R]): R =
-    withLocalSqsQueueAndDlq { queuePair =>
+    // We would like a timeout longer than 1s here because the inferrer
+    // may need to warm up.
+    withLocalSqsQueueAndDlqAndTimeout(5) { queuePair =>
       withLocalSnsTopic { topic =>
         withWorkerService(
           queuePair.queue,
