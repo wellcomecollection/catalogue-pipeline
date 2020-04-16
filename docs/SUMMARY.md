@@ -19,5 +19,5 @@
 - [Sierra](sierra/README.md)
   - [Sierra IDs](sierra/sierra_ids.md)
 - [Pipeline](pipeline/README.md)
-  - [Merger rules](pipeline/merger_rules.md)
+  - [Merging](pipeline/merging.md)
 - [APM](apm.md)
