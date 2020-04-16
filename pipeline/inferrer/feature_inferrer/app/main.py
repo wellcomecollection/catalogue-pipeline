@@ -1,3 +1,4 @@
+import base64
 from fastapi import FastAPI, HTTPException
 
 import src.http as http
@@ -57,7 +58,7 @@ async def main(image_url: str = None, iiif_url: str = None):
     features = await batch_inferrer_queue.execute(image)
     logger.info(f"extracted features from url: {image_url}")
 
-    return {"features": features["vector"], "lsh_encoded_features": features["lsh"]}
+    return {"features_b64": base64.b64encode(features["vector"]), "lsh_encoded_features": features["lsh"]}
 
 
 @app.get("/healthcheck")
