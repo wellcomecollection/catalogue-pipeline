@@ -130,21 +130,16 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
 
     def rule(target: UnidentifiedWork,
              sources: NonEmptyList[TransformedBaseWork]): FieldData = {
-      val sierraItems = target.data.items
+      // This is safe due to the `singleItemSierra` predicate
+      val sierraItem = target.data.items.head
       val miroItems = sources.toList.flatMap(_.data.items)
 
       debug(s"Merging Miro items from ${describeWorks(sources)}")
-      sierraItems match {
-        case List(sierraItem) =>
-          List(
-            sierraItem.copy(
-              locations = sierraItem.locations ++ miroItems.flatMap(_.locations)
-            )
-          )
-        // This case is unreachable due to the `singleItemSierra` predicate
-        // but hard to enforce in the type system
-        case items => items
-      }
+
+      List(
+        sierraItem.copy(
+          locations = sierraItem.locations ++ miroItems.flatMap(_.locations)
+        ))
     }
   }
 }
