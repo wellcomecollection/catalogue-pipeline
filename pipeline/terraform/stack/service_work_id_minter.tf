@@ -71,7 +71,7 @@ module "work_id_minter_topic" {
 }
 
 module "work_id_minter_scaling_alarm" {
-  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.2"
+  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=8b53ad48ca041851c52d2b8c6f1f9ceba926ef6c"
   queue_name = module.work_id_minter_queue.name
 
   queue_high_actions = [module.work_id_minter.scale_up_arn]

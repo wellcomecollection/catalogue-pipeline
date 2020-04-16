@@ -64,7 +64,7 @@ module "merger_images_topic" {
 }
 
 module "merger_scaling_alarm" {
-  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.2"
+  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=8b53ad48ca041851c52d2b8c6f1f9ceba926ef6c"
   queue_name = module.merger_queue.name
 
   queue_high_actions = [module.merger.scale_up_arn]

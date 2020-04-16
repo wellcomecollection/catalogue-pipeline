@@ -54,7 +54,7 @@ module "mets_transformer_topic" {
 }
 
 module "mets_transformer_scaling_alarm" {
-  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.2"
+  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=8b53ad48ca041851c52d2b8c6f1f9ceba926ef6c"
   queue_name = module.mets_transformer_queue.name
 
   queue_high_actions = [module.mets_transformer.scale_up_arn]
