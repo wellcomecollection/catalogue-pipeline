@@ -87,6 +87,7 @@ trait IndexConfig {
   val sourceIdentifierValue = keywordWithText("value")
 
   val canonicalId = keywordWithText("canonicalId")
+  val version = intField("version")
 }
 
 case object WorksIndexConfig extends IndexConfig {
@@ -220,7 +221,8 @@ case object WorksIndexConfig extends IndexConfig {
 
   val images = objectField("images").fields(
     id(),
-    location("location")
+    location("location"),
+    version
   )
 
   val data: ObjectField =
@@ -264,7 +266,7 @@ case object WorksIndexConfig extends IndexConfig {
     Seq(
       canonicalId,
       keywordField("ontologyType"),
-      intField("version"),
+      version,
       sourceIdentifier,
       objectField("redirect")
         .fields(sourceIdentifier, canonicalId),
