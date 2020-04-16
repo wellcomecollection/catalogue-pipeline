@@ -26,12 +26,12 @@ object FeatureVectorInferrerMock extends InferrerStubs {
     getRootStub.withQueryParam("iiif_url", matching(".+"))
 
   private def imageWithStatusStub(imageUrl: String, status: Int) =
-    get(urlPathEqualTo("/feature-vectors/"))
+    get(urlPathEqualTo("/feature-vector/"))
       .withQueryParam("image_url", equalTo(imageUrl))
       .willReturn(aResponse().withStatus(status))
 
   private def getRootStub =
-    get(urlPathEqualTo("/feature-vectors/"))
+    get(urlPathEqualTo("/feature-vector/"))
       .willReturn(
         aResponse()
           .withStatus(200)

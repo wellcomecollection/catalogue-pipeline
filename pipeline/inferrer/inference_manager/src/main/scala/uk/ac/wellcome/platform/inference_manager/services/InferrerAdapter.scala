@@ -61,7 +61,7 @@ object FeatureVectorInferrerAdapter
   def createRequest(image: MergedImage[Identified]): HttpRequest =
     HttpRequest(
       method = HttpMethods.GET,
-      uri = Uri("/feature-vectors/").withQuery(
+      uri = Uri("/feature-vector/").withQuery(
         Uri.Query(image.location.url match {
           case iiifUrl if iiifUrl.endsWith("json") => "iiif_url" -> iiifUrl
           case imageUrl                            => "image_url" -> imageUrl
