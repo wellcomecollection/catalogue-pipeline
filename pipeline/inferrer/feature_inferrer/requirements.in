@@ -1,4 +1,5 @@
 aiohttp[speedups]==3.6.2
+async-timeout==3.0.1
 boto3==1.12.14
 daiquiri==2.1.1
 fastapi==0.54.1
