@@ -19,9 +19,12 @@ class LSHEncoder:
     def __call__(self, feature_vectors):
         feature_groups = np.split(feature_vectors, len(self.models), axis=1)
 
-        clusters = np.stack([
-            model.predict(feature_group)
-            for model, feature_group in zip(self.models, feature_groups)
-        ], axis=1)
+        clusters = np.stack(
+            [
+                model.predict(feature_group)
+                for model, feature_group in zip(self.models, feature_groups)
+            ],
+            axis=1,
+        )
 
         return [LSHEncoder.encode_for_elasticsearch(c) for c in clusters]

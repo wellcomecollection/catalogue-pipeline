@@ -29,7 +29,9 @@ def batch_infer_features(images):
     return [{"vector": v, "lsh": l} for v, l in zip(vectors, lsh_encoded)]
 
 
-batch_inferrer_queue = BatchExecutionQueue(batch_infer_features, batch_size=16, timeout=0.250)
+batch_inferrer_queue = BatchExecutionQueue(
+    batch_infer_features, batch_size=16, timeout=0.250
+)
 
 
 @app.get("/feature-vector/")
@@ -58,7 +60,10 @@ async def main(image_url: str = None, iiif_url: str = None):
     features = await batch_inferrer_queue.execute(image)
     logger.info(f"extracted features from url: {image_url}")
 
-    return {"features_b64": base64.b64encode(features["vector"]), "lsh_encoded_features": features["lsh"]}
+    return {
+        "features_b64": base64.b64encode(features["vector"]),
+        "lsh_encoded_features": features["lsh"],
+    }
 
 
 @app.get("/healthcheck")

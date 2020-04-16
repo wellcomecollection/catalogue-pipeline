@@ -7,8 +7,8 @@ from src.logging import get_logstash_logger
 
 logger = get_logstash_logger(__name__)
 
-T = TypeVar('T')
-R = TypeVar('R')
+T = TypeVar("T")
+R = TypeVar("R")
 
 
 class BatchExecutionQueue(Generic[T, R]):
@@ -28,7 +28,13 @@ class BatchExecutionQueue(Generic[T, R]):
         batch_size: The maximum size of a batch before it is processed.
         timeout: The time (in seconds) after which an unfilled batch must be processed.
     """
-    def __init__(self, sync_batch_processor: Callable[[List[T]], List[R]], batch_size: int, timeout: float):
+
+    def __init__(
+        self,
+        sync_batch_processor: Callable[[List[T]], List[R]],
+        batch_size: int,
+        timeout: float,
+    ):
         self.sync_batch_processor = sync_batch_processor
         self.batch_size = batch_size
         self.timeout = timeout
@@ -65,8 +71,7 @@ class BatchExecutionQueue(Generic[T, R]):
         queue_processed = asyncio.create_task(self.queue.join())
         try:
             done, _ = await asyncio.wait(
-                [queue_processed, self.task],
-                return_when=asyncio.FIRST_COMPLETED
+                [queue_processed, self.task], return_when=asyncio.FIRST_COMPLETED
             )
         except AttributeError as e:
             logger.error("Execution attempted before worker was started")
@@ -112,5 +117,3 @@ class BatchExecutionQueue(Generic[T, R]):
                     raise e
                 finally:
                     self.__mark_queue_done(len(batch))
-
-
