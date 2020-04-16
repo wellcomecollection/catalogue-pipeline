@@ -24,7 +24,8 @@ class WorksIndexConfigTest
     with Matchers
     with JsonAssertions
     with PropertyChecks
-    with WorksGenerators with ImageGenerators{
+    with WorksGenerators
+    with ImageGenerators {
 
   // On failure, scalacheck tries to shrink to the smallest input that causes a failure.
   // With IdentifiedWork, that means that it never actually completes.
@@ -124,7 +125,7 @@ class WorksIndexConfigTest
     }
   }
 
-  it("can ingest a work with an image"){
+  it("can ingest a work with an image") {
     withLocalWorksIndex { index =>
       val sampleWork = createIdentifiedWorkWith(
         images = List(createUnmergedImage.toIdentified)
