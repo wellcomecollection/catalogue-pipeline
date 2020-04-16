@@ -121,7 +121,8 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
   }
 
   /** We merge the Miro location to the Sierra work with a single item.
-    * If there are multiple items, we don't merge.
+    * If there are multiple items, we don't merge as we wouldn't know
+    * which item to attache the location to.
     */
   private val mergeMiroItems = new PartialRule {
     val isDefinedForTarget: WorkPredicate = WorkPredicates.singleItemSierra
