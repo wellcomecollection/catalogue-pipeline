@@ -38,7 +38,8 @@ trait TransformerWorker[In, SenderDest] extends Logging {
   type StoreKey = Version[String, Int]
 
   sealed trait TransformResult;
-  case class Success(key: StoreKey, work: TransformedBaseWork) extends TransformResult
+  case class Success(key: StoreKey, work: TransformedBaseWork)
+      extends TransformResult
   case class Surpress(key: StoreKey) extends TransformResult
   case class Error(error: TransformerWorkerError) extends TransformResult
 
@@ -54,13 +55,15 @@ trait TransformerWorker[In, SenderDest] extends Logging {
       key <- decodeKey(message)
       record <- getRecord(key)
       shouldTransform = transformer.shouldTransform(record)
-      result <- if (!shouldTransform) Right(Surpress(key)) else for {
-        success <- work(record, key)
-        _ <- done(success)
-      } yield success
+      result <- if (!shouldTransform) Right(Surpress(key))
+      else
+        for {
+          success <- work(record, key)
+          _ <- done(success)
+        } yield success
     } yield result) match {
-      case Left(err) => Error(err)
-      case Right(successOrSurpress) =>  successOrSurpress
+      case Left(err)                => Error(err)
+      case Right(successOrSurpress) => successOrSurpress
     }
 
   private def work(sourceData: In, key: StoreKey): Result[Success] =
@@ -71,8 +74,9 @@ trait TransformerWorker[In, SenderDest] extends Logging {
 
   private def done(success: Success): Result[Unit] =
     sender.sendT(success.work) toEither match {
-      case Left(err) => Left(MessageSendError(err.toString, success.work, success.key))
-      case Right(_)  => Right(())
+      case Left(err) =>
+        Left(MessageSendError(err.toString, success.work, success.key))
+      case Right(_) => Right(())
     }
 
   private def decodeKey(message: NotificationMessage): Result[StoreKey] =
@@ -83,7 +87,7 @@ trait TransformerWorker[In, SenderDest] extends Logging {
 
   private def getRecord(key: StoreKey): Result[In] =
     store.getLatest(key.id) match {
-      case Left(err)                     => Left(StoreReadError(err.toString, key))
+      case Left(err)                   => Left(StoreReadError(err.toString, key))
       case Right(Identified(_, entry)) => Right(entry)
     }
 
