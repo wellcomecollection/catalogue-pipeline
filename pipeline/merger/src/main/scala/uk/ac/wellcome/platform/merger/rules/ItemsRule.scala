@@ -113,11 +113,10 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
   }
 
   /** We merge the Miro location to the Sierra work with a single item.
-    * If there are multiple items, we wouldn't know which one to attach it to
-    * and so don't attach it to any.
+    * If there are multiple items, we don't merge.
     */
   private val mergeMiroItems = new PartialRule {
-    val isDefinedForTarget: WorkPredicate = WorkPredicates.sierraWork
+    val isDefinedForTarget: WorkPredicate = WorkPredicates.singleItemSierra
     val isDefinedForSource: WorkPredicate = WorkPredicates.miroWork
 
     def rule(target: UnidentifiedWork,
@@ -133,8 +132,9 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
               locations = sierraItem.locations ++ miroItems.flatMap(_.locations)
             )
           )
-        case _ =>
-          sierraItems ++ miroItems
+        // This case is unreachable due to the `singleItemSierra` predicate
+        // but hard to enforce in the type system
+        case _ => _
       }
     }
   }
