@@ -12,15 +12,16 @@ class LSHEncoder:
         with open(model_path, "rb") as f:
             self.models = pickle.load(f)
 
-    def encode_for_elasticsearch(self, clusters):
+    @staticmethod
+    def encode_for_elasticsearch(clusters):
         return [f"{i}-{val}" for i, val in enumerate(clusters)]
 
-    def __call__(self, feature_vector):
-        feature_groups = np.split(feature_vector, len(self.models))
+    def __call__(self, feature_vectors):
+        feature_groups = np.split(feature_vectors, len(self.models), axis=1)
 
-        clusters = [
-            model.predict(feature_group.reshape(1, -1))[0]
+        clusters = np.stack([
+            model.predict(feature_group)
             for model, feature_group in zip(self.models, feature_groups)
-        ]
+        ], axis=1)
 
-        return self.encode_for_elasticsearch(clusters)
+        return [LSHEncoder.encode_for_elasticsearch(c) for c in clusters]
