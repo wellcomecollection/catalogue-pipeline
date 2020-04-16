@@ -156,7 +156,6 @@ class IndexerTest
     val analysis = Analysis(analyzers = List())
 
     val title = textField("title")
-    val version = intField("version")
     val data = objectField("data")
 
     val mapping = properties(Seq(title, canonicalId, version, data))
