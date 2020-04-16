@@ -144,8 +144,7 @@ class TransformerWorkerTest
         assertQueueEmpty(queue)
     }
   }
-  it(
-    "Surpresses data, removing the message from the queue") {
+  it("Surpresses data, removing the message from the queue") {
 
     withTransformerWorker(
       records = Map(
