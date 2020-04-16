@@ -3,11 +3,7 @@ package uk.ac.wellcome.platform.merger.rules
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.logging.MergerLogging
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
-import uk.ac.wellcome.platform.merger.rules.WorkPredicates.{
-  WorkPredicate,
-  WorkPredicateOps
-}
-
+import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
 import cats.data.NonEmptyList
 
 /*
@@ -25,12 +21,16 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     target: UnidentifiedWork,
     sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData] = {
     val rules =
-      List(mergeCalmItems, mergeMetsItems, mergeMiroItems, mergeSierraItems)
+      List(mergeCalmItems, mergeMetsItems, mergeMiroItems)
 
-    val items = rules.flatMap(_(target, sources))
+    val items = mergeCalmItems(target, sources)
+      .orElse(mergeMetsItems(target, sources))
+      .orElse(mergeMiroItems(target, sources))
+      .getOrElse(target.data.items)
+
     val mergedSources = sources.filter { source =>
       rules.exists(_(target, source).isDefined)
-    }
+    } ++ getDigitisedCopiesOfSierraWork(target, sources)
 
     FieldMergeResult(
       data = items,
@@ -38,15 +38,35 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     )
   }
 
+  /** This is when we've found a digitised sierra work of a sierra physical work
+    * uk.ac.wellcome.platform.transformer.sierra.transformers.SierraMergeCandidates.get776mergeCandidates
+    *
+    * We get all the digitised SourceIdentifiers from the merge candidates
+    * and search through the sources for them.
+    */
+  private def getDigitisedCopiesOfSierraWork(
+    target: UnidentifiedWork,
+    sources: Seq[TransformedBaseWork]): Seq[TransformedBaseWork] = {
+    target.data.mergeCandidates
+      .filter(_.reason.contains("Physical/digitised Sierra work"))
+      .map(_.identifier)
+      .flatMap(sourceIdentifier =>
+        sources.filter(source => source.sourceIdentifier == sourceIdentifier))
+  }
+
+  /**
+    * If there is 1 Sierra item, we replace the `PhysicalLocation` with
+    * the one from the Calm record.
+    *
+    * Otherwise we add the item to the items list.
+    *
+    * This logic is going to be removed soon as we make the Calm
+    * record the `target`.
+    */
   private val mergeCalmItems = new PartialRule {
     val isDefinedForTarget: WorkPredicate = WorkPredicates.sierraWork
     val isDefinedForSource: WorkPredicate = WorkPredicates.calmWork
 
-    /**
-      * If there is 1 Sierra item, we add the location from the Calm record
-      * else we just append the Calm item as we wouldn't know which item to
-      * augment.
-      */
     def rule(target: UnidentifiedWork,
              sources: NonEmptyList[TransformedBaseWork]): FieldData = {
 
@@ -59,9 +79,12 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
         case List(sierraItem) =>
           List(
             sierraItem.copy(
-              locations = calmLocation :: sierraItem.locations.collect {
-                case location: DigitalLocation => location
-              }
+              // We remove any `PhysicalLocation`s and add the calmLocation
+              // as the only `PhysicalLocation`
+              locations = calmLocation :: sierraItem.locations.filter(_ match {
+                case _: PhysicalLocation => false
+                case _                   => true
+              })
             )
           )
         case multipleItems => calmItem :: multipleItems
@@ -97,21 +120,6 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     }
   }
 
-  /** This is when we've found a digitised sierra work of a sierra physical work
-    * uk.ac.wellcome.platform.transformer.sierra.transformers.SierraMergeCandidates.get776mergeCandidates
-
-    * We actually do nothing, but this is to make sure we make sure
-    * a mergedSource is created.
-    */
-  private val mergeSierraItems = new PartialRule {
-    val isDefinedForTarget: WorkPredicate = WorkPredicates.physicalSierra
-    val isDefinedForSource: WorkPredicate = WorkPredicates.sierraWork
-
-    def rule(target: UnidentifiedWork,
-             sources: NonEmptyList[TransformedBaseWork]): FieldData =
-      target.data.items
-  }
-
   /** We merge the Miro location to the Sierra work with a single item.
     * If there are multiple items, we don't merge.
     */
@@ -134,7 +142,7 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
           )
         // This case is unreachable due to the `singleItemSierra` predicate
         // but hard to enforce in the type system
-        case _ => _
+        case items => items
       }
     }
   }

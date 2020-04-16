@@ -242,6 +242,20 @@ trait WorksGenerators
   def createSierraPhysicalWork: UnidentifiedWork =
     createUnidentifiedSierraWorkWith(items = List(createPhysicalItem))
 
+  def createSierraWorkWithDigitisedMergeCandidate = {
+    val physicalSierraWork = createSierraPhysicalWork
+    val digitisedCopyOfSierraWork = createUnidentifiedSierraWork
+    val physicalSierraWorkWithMergeCandidate = physicalSierraWork.copy(
+      data = physicalSierraWork.data.copy(
+        mergeCandidates = List(
+          MergeCandidate(
+            identifier = digitisedCopyOfSierraWork.sourceIdentifier,
+            reason = Some("Physical/digitised Sierra work")
+          ))))
+
+    (physicalSierraWorkWithMergeCandidate, digitisedCopyOfSierraWork)
+  }
+
   def createSierraDigitalWork: UnidentifiedWork =
     createSierraDigitalWorkWith()
 

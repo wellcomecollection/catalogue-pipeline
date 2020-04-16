@@ -2,7 +2,6 @@ package uk.ac.wellcome.platform.merger.rules
 
 import org.scalatest.{FunSpec, Inside, Matchers}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 
 class ItemsRuleTest
@@ -16,70 +15,84 @@ class ItemsRuleTest
   val metsWork = createUnidentifiedInvisibleMetsWork
   val miroWork = createMiroWork
   val calmWork = createUnidentifiedCalmWork()
+  val (sierraWorkWithMergeCandidate, sierraWorkMergeCandidate) =
+    createSierraWorkWithDigitisedMergeCandidate
 
   it(
-    "merges locations from digital Sierra items into single-item physical Sierra works") {
-    inside(ItemsRule.merge(physicalSierra, List(digitalSierra))) {
-      case FieldMergeResult(items, _) =>
+    "leaves items unchanged and returns a digitised version of a Sierra work as a merged source") {
+    inside(
+      ItemsRule
+        .merge(sierraWorkWithMergeCandidate, List(sierraWorkMergeCandidate))) {
+      case FieldMergeResult(items, mergedSources) =>
         items should have size 1
-        items.head.locations should contain theSameElementsAs
-          physicalSierra.data.items.head.locations ++ digitalSierra.data.items.head.locations
+        items should be(sierraWorkWithMergeCandidate.data.items)
+
+        mergedSources should be(Seq(sierraWorkMergeCandidate))
     }
   }
 
-  it(
-    "merges items from digital Sierra works into multi-item physical Sierra works") {
-    inside(ItemsRule.merge(multiItemPhysicalSierra, List(digitalSierra))) {
-      case FieldMergeResult(items, _) =>
-        items should have size 3
-        items should contain theSameElementsAs
-          multiItemPhysicalSierra.data.items ++ digitalSierra.data.items
-    }
-  }
-
+  // Miro
   it("merges locations from Miro items into single-item Sierra works") {
     inside(ItemsRule.merge(physicalSierra, List(miroWork))) {
-      case FieldMergeResult(items, _) =>
+      case FieldMergeResult(items, mergedSources) =>
         items should have size 1
         items.head.locations should contain theSameElementsAs
           physicalSierra.data.items.head.locations ++ miroWork.data.items.head.locations
+
+        mergedSources should be(Seq(miroWork))
     }
   }
 
-  it("Merges items from METS works into multi-item Sierra works") {
+  it("doesn't merge Miro works into multi-item Sierra works") {
+    inside(ItemsRule.merge(multiItemPhysicalSierra, List(miroWork))) {
+      case FieldMergeResult(items, mergedSources) =>
+        items should be(multiItemPhysicalSierra.data.items)
+        mergedSources should be(Seq())
+    }
+  }
+
+  // METS
+  it("merges item locations in METS work into single-item Sierra works item") {
+    inside(ItemsRule.merge(physicalSierra, List(metsWork))) {
+      case FieldMergeResult(items, mergedSources) =>
+        items should have size 1
+        items.head.locations shouldBe
+          physicalSierra.data.items.head.locations ++
+            metsWork.data.items.head.locations
+
+        mergedSources should be(Seq(metsWork))
+    }
+  }
+
+  it("adds items from METS works into multi-item Sierra works") {
     inside(ItemsRule.merge(multiItemPhysicalSierra, List(metsWork))) {
-      case FieldMergeResult(items, _) =>
-        items should have size 3
+      case FieldMergeResult(items, mergedSources) =>
         items should contain theSameElementsAs
           multiItemPhysicalSierra.data.items ++ metsWork.data.items
+        mergedSources should be(Seq(metsWork))
     }
   }
 
-  it("Merges physical locations from Calm works into physical Sierra works") {
+  // Calm
+  it(
+    "take the PhysicalLocation from Calm work and replace single-item Sierra work item location") {
     inside(ItemsRule.merge(physicalSierra, List(calmWork))) {
-      case FieldMergeResult(items, _) =>
+      case FieldMergeResult(items, mergedSources) =>
         items should have size 1
-        items.head.locations shouldBe List(
-          calmWork.data.items.head.locations.head
-        )
+        items.head.locations should have size 1
+        items.head.locations.head should be(
+          calmWork.data.items.head.locations.head)
+
+        mergedSources should be(Seq(calmWork))
     }
   }
 
-  it("Merges physical locations from Calm works into digital Sierra works") {
-    inside(ItemsRule.merge(digitalSierra, List(calmWork))) {
-      case FieldMergeResult(items, _) =>
-        items should have size 1
-        items.head.locations shouldBe List(
-          calmWork.data.items.head.locations.head,
-          digitalSierra.data.items.head.locations.head
-        )
-    }
-  }
-
-  it("Merges physical locations from Calm works into multi-item Sierra works") {
+  it("adds items from Calm works into multi-item Sierra works") {
     inside(ItemsRule.merge(multiItemPhysicalSierra, List(calmWork))) {
-      case FieldMergeResult(items, _) =>
-        items shouldBe calmWork.data.items ++ multiItemPhysicalSierra.data.items
+      case FieldMergeResult(items, mergedSources) =>
+        items should contain theSameElementsAs
+          multiItemPhysicalSierra.data.items ++ calmWork.data.items
+        mergedSources should be(Seq(calmWork))
     }
   }
 }

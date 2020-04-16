@@ -55,7 +55,7 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
 
   private val physicalDigitalIdsRule = new PartialRule {
     val isDefinedForTarget: WorkPredicate = WorkPredicates.physicalSierra
-    val isDefinedForSource: WorkPredicate = WorkPredicates.digitalSierra
+    val isDefinedForSource: WorkPredicate = WorkPredicates.sierraWork
 
     override def rule(
       target: UnidentifiedWork,
