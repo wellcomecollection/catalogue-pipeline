@@ -18,5 +18,6 @@
   - [Fetching records from Sierra](adapters/fetching_records_from_sierra.md)
 - [Sierra](sierra/README.md)
   - [Sierra IDs](sierra/sierra_ids.md)
-- [Pipeline](pipeline.md)
+- [Pipeline](pipeline/README.md)
+  - [Merger rules](pipeline/merger_rules.md)
 - [APM](apm.md)
