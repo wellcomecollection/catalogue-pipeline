@@ -84,13 +84,4 @@ class WorkPredicatesTest
       }
     }
   }
-
-//  it("selects digital Sierra works") {
-//    forAll(works.filter(WorkPredicates.digitalSierra)) { work =>
-//      work.sourceIdentifier.identifierType.id shouldBe "sierra-system-number"
-//      every(work.data.items.flatMap(_.locations)) should matchPattern {
-//        case _: DigitalLocation =>
-//      }
-//    }
-//  }
 }
