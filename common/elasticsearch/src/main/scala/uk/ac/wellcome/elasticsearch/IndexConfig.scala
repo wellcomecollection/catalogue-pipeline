@@ -55,6 +55,7 @@ trait IndexConfig {
       objectField("sourceIdentifier").fields(sourceIdentifierFields),
       objectField("otherIdentifiers").fields(sourceIdentifierFields)
     )
+
   def location(fieldName: String = "locations") =
     objectField(fieldName).fields(
       keywordField("type"),
@@ -70,11 +71,12 @@ trait IndexConfig {
       license,
       accessConditions
     )
+
   val accessConditions =
     objectField("accessConditions")
       .fields(
         englishTextField("terms"),
-        dateField("to"),
+        textField("to"),
         objectField("status").fields(keywordField("type"))
       )
 
