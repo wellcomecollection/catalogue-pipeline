@@ -23,7 +23,7 @@ case object ImagesIndexConfig extends IndexConfig {
 
   override val mapping: MappingDefinition = properties(
     id("id"),
-    intField("version"),
+    version,
     location("location"),
     id("parentWork"),
     fullText,

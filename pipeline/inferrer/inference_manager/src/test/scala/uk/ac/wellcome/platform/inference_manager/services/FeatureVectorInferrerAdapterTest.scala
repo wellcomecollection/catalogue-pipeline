@@ -19,7 +19,7 @@ class FeatureVectorInferrerAdapterTest
         location = createDigitalLocationWith(
           url = imageUrl
         )
-      ).toMinted
+      ).toIdentified
       val request = FeatureVectorInferrerAdapter.createRequest(image)
 
       inside(request) {
@@ -35,7 +35,7 @@ class FeatureVectorInferrerAdapterTest
         location = createDigitalLocationWith(
           url = imageUrl
         )
-      ).toMinted
+      ).toIdentified
       val request = FeatureVectorInferrerAdapter.createRequest(image)
 
       inside(request) {
@@ -48,7 +48,7 @@ class FeatureVectorInferrerAdapterTest
 
   describe("augmentInput") {
     it("creates an AugmentedImage with the data from the inferrer response") {
-      val image = createMergedImage.toMinted
+      val image = createMergedImage.toIdentified
       val features = (0 until 4096).map(_ / 4096f).toList
       val lshEncodedFeatures = ('a' to 'z').map(_.toString * 3).toList
       val response = FeatureVectorInferrerResponse(

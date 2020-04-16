@@ -13,7 +13,7 @@ import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.generators.WorksGenerators
+import uk.ac.wellcome.models.work.generators.{ImageGenerators, WorksGenerators}
 import uk.ac.wellcome.models.work.internal._
 
 class WorksIndexConfigTest
@@ -24,7 +24,8 @@ class WorksIndexConfigTest
     with Matchers
     with JsonAssertions
     with PropertyChecks
-    with WorksGenerators {
+    with WorksGenerators
+    with ImageGenerators {
 
   // On failure, scalacheck tries to shrink to the smallest input that causes a failure.
   // With IdentifiedWork, that means that it never actually completes.
@@ -118,6 +119,17 @@ class WorksIndexConfigTest
 
     withLocalWorksIndex { index =>
       val sampleWork = createIdentifiedWorkWith(collectionPath = collectionPath)
+      whenReady(indexObject(index, sampleWork)) { _ =>
+        assertObjectIndexed(index, sampleWork)
+      }
+    }
+  }
+
+  it("can ingest a work with an image") {
+    withLocalWorksIndex { index =>
+      val sampleWork = createIdentifiedWorkWith(
+        images = List(createUnmergedImage.toIdentified)
+      )
       whenReady(indexObject(index, sampleWork)) { _ =>
         assertObjectIndexed(index, sampleWork)
       }

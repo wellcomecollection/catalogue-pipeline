@@ -40,10 +40,10 @@ trait ImageGenerators extends IdentifiersGenerators with ItemsGenerators {
 
   def createAugmentedImage(
     inferredData: Option[InferredData] = createInferredData) =
-    createMergedImage.toMinted.augment(inferredData)
+    createMergedImage.toIdentified.augment(inferredData)
 
-  implicit class ImageIdOps(val image: MergedImage[Identifiable]) {
-    val toMinted: MergedImage[Identified] = MergedImage(
+  implicit class MergedImageIdOps(val image: MergedImage[Identifiable]) {
+    val toIdentified: MergedImage[Identified] = MergedImage(
       id = Identified(
         canonicalId = createCanonicalId,
         sourceIdentifier = image.id.allSourceIdentifiers.head
@@ -55,6 +55,17 @@ trait ImageGenerators extends IdentifiersGenerators with ItemsGenerators {
         sourceIdentifier = image.parentWork.allSourceIdentifiers.head
       ),
       fullText = image.fullText
+    )
+  }
+
+  implicit class UnmergedImageIdOps(val image: UnmergedImage[Identifiable]) {
+    val toIdentified: UnmergedImage[Identified] = UnmergedImage(
+      id = Identified(
+        canonicalId = createCanonicalId,
+        sourceIdentifier = image.id.allSourceIdentifiers.head
+      ),
+      version = image.version,
+      location = image.location
     )
   }
 }

@@ -156,6 +156,7 @@ trait WorksGenerators
     language: Option[Language] = None,
     duration: Option[Int] = None,
     items: List[Item[Minted]] = Nil,
+    images: List[UnmergedImage[Identified]] = Nil,
     version: Int = 1,
     merged: Boolean = false,
     collectionPath: Option[CollectionPath] = None,
@@ -184,6 +185,7 @@ trait WorksGenerators
         notes = notes,
         duration = duration,
         items = items,
+        images = images,
         merged = merged,
         collectionPath = collectionPath,
       )

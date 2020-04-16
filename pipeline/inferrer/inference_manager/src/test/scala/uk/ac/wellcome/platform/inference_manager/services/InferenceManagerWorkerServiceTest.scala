@@ -54,7 +54,7 @@ class InferenceManagerWorkerServiceTest
     "reads image messages, augments them with the inferrer, and sends them to SNS") {
     withWorkerServiceFixtures {
       case (QueuePair(queue, dlq), topic) =>
-        val image = createMergedImage.toMinted
+        val image = createMergedImage.toIdentified
         sendMessage(queue, image)
         eventually {
           assertQueueEmpty(queue)
@@ -79,10 +79,10 @@ class InferenceManagerWorkerServiceTest
       case (QueuePair(queue, dlq), _) =>
         val image404 = createMergedImageWith(
           location = createDigitalLocationWith(url = "lost_image")
-        ).toMinted
+        ).toIdentified
         val image400 = createMergedImageWith(
           location = createDigitalLocationWith(url = "malformed_image_url")
-        ).toMinted
+        ).toIdentified
         sendMessage(queue, image404)
         sendMessage(queue, image400)
         eventually {
@@ -97,7 +97,7 @@ class InferenceManagerWorkerServiceTest
       case (QueuePair(queue, dlq), topic) =>
         val image500 = createMergedImageWith(
           location = createDigitalLocationWith(url = "extremely_cursed_image")
-        ).toMinted
+        ).toIdentified
         sendMessage(queue, image500)
         eventually {
           assertQueueEmpty(queue)
