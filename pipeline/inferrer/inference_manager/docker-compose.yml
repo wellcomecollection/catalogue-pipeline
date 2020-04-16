@@ -20,7 +20,7 @@ inferrer:
   volumes:
     - ../test_data:/app/data
   links:
-    - "image_server"
+    - "image_server:image_server"
 
 image_server:
   image: nginx
