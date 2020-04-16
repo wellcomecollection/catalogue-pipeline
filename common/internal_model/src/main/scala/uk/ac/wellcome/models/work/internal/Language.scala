@@ -42,8 +42,10 @@ object Language {
     languageCodes.toMap
 
   lazy private val languageLabelMap =
-    languageCodes
-      .flatMap { case (code, label) =>
-          label.split(";").toList.map(label => (label.trim, code))
-      }.toMap
+    languageCodes.flatMap {
+      case (code, label) =>
+        // This is so that e.g. we parse both Dutch and Flemish from
+        // "Dutch; Flemish" as nl
+        label.split(";").toList.map(label => (label.trim, code))
+    }.toMap
 }
