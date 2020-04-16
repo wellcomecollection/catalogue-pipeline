@@ -42,7 +42,8 @@ object CalmTransformer extends Transformer[CalmRecord] with CalmOps {
         case "no"  => false
         case "yes" => true
         case other =>
-          info(s"Unrecognised value for Transmission field; assuming true: $other")
+          info(
+            s"Unrecognised value for Transmission field; assuming true: $other")
           true
       }
       .getOrElse(true)
