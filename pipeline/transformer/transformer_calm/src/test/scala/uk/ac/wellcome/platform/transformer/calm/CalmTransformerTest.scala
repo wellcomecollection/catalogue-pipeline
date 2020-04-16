@@ -308,7 +308,7 @@ class CalmTransformerTest extends FunSpec with Matchers {
     CalmTransformer(record, version) shouldBe a[Left[_, _]]
   }
 
-  it("surpresses data when Transmission=No") {
+  it("suppresses data when Transmission=No") {
     val a = calmRecord(
       "Title" -> "abc",
       "Level" -> "Collection",
