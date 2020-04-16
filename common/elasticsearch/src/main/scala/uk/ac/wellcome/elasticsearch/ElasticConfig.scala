@@ -9,5 +9,6 @@ case class ElasticConfig(
 object ElasticConfig {
   // We use this to share config across API applications
   // i.e. The API and the snapshot generator.
-  def apply(): ElasticConfig = ElasticConfig(index = Index("v2-20200228"))
+  def apply(): ElasticConfig =
+    ElasticConfig(index = Index("works-20200414"))
 }
