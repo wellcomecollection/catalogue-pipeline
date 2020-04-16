@@ -45,7 +45,7 @@ class ManagerInferrerIntegrationTest
           location = createDigitalLocationWith(
             url = "http://image_server/test-image.jpg"
           )
-        ).toMinted
+        ).toIdentified
         sendMessage(queue, image)
         eventually {
           assertQueueEmpty(queue)
