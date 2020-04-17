@@ -37,7 +37,7 @@ object FeatureVectorInferrerMock extends InferrerStubs {
           .withStatus(200)
           .withHeader("Content-Type", "application/json")
           .withBody(s"""{
-          |  "features": [${randomFeatureVector.mkString(",")}],
+          |  "features_b64": "${Encoding.toBase64(randomFeatureVector)}",
           |  "lsh_encoded_features": [${randomLshVector
                          .map(str => s""""${str}"""")
                          .mkString(", ")}]

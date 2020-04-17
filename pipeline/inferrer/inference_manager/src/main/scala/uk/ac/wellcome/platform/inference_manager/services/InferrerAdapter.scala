@@ -1,5 +1,8 @@
 package uk.ac.wellcome.platform.inference_manager.services
 
+import java.nio.ByteBuffer
+import java.util.Base64
+
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.Materializer
@@ -16,6 +19,7 @@ import uk.ac.wellcome.models.work.internal.{
 import uk.ac.wellcome.platform.inference_manager.models.FeatureVectorInferrerResponse
 
 import scala.concurrent.Future
+import scala.util.{Success, Try}
 
 /*
  * An InferrerAdapter is specific to the inferrer and the data that is being augmented.
@@ -72,17 +76,32 @@ object FeatureVectorInferrerAdapter
   def augmentInput(image: MergedImage[Identified],
                    inferrerResponse: Option[InferrerResponse]): AugmentedImage =
     image.augment {
-      inferrerResponse collect {
-        case FeatureVectorInferrerResponse(features, lsh_encoded_features)
-            if features.size == 4096 =>
-          val (features1, features2) = features.splitAt(features.size / 2)
-          InferredData(
-            features1 = features1,
-            features2 = features2,
-            lshEncodedFeatures = lsh_encoded_features
-          )
+      inferrerResponse flatMap {
+        case FeatureVectorInferrerResponse(
+            features_b64,
+            lsh_encoded_features) =>
+          val features = decodeBase64ToFloatList(features_b64)
+          if (features.size == 4096) {
+            val (features1, features2) = features.splitAt(features.size / 2)
+            Some(
+              InferredData(
+                features1 = features1,
+                features2 = features2,
+                lshEncodedFeatures = lsh_encoded_features
+              )
+            )
+          } else None
       }
     }
+
+  private def decodeBase64ToFloatList(base64str: String): List[Float] = {
+    val buf = ByteBuffer.wrap(Base64.getDecoder.decode(base64str))
+    Stream
+      .continually(Try(buf.getFloat))
+      .takeWhile(_.isSuccess)
+      .collect { case Success(f) => f }
+      .toList
+  }
 
   implicit val responseDecoder: Decoder[InferrerResponse] = deriveDecoder
 }
