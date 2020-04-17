@@ -16,8 +16,7 @@ This is carried out by the transformers of the respective sources data.
 #### How are works currently linked?
 ![How works are currently linked](../.gitbook/assets/merger_linking_works.png)
 
-https://excalidraw.com/#json=5964037271584768,ojtCECzrMrgSJuBp3VCvHw
-
+https://excalidraw.com/#json=6218082506768384,6y0SZ5U20AFChDSaScsxww
 
 ### 2. Merging linked works
 TBD.

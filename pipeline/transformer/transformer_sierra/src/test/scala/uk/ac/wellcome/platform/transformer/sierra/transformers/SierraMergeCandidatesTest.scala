@@ -268,6 +268,30 @@ class SierraMergeCandidatesTest
     }
   }
 
+  describe("Calm/Sierra harvest") {
+    it("Creates a merge candidate from 035a from Calm/Sierra harvest") {
+      val sierraData = createSierraBibDataWith(
+        varFields = List(
+          VarField(
+            marcTag = Some("035"),
+            subfields =
+              List(MarcSubfield("a", "c6f99cad-25f1-4de5-92a6-02f0d1d7bf52"))
+          )))
+
+      val expectedMergeCandidates = List(
+        MergeCandidate(
+          identifier = SourceIdentifier(
+            identifierType = IdentifierType("calm-record-id"),
+            ontologyType = "Work",
+            value = "c6f99cad-25f1-4de5-92a6-02f0d1d7bf52"
+          ),
+          reason = Some("Calm/Sierra harvest")
+        ))
+      SierraMergeCandidates(createSierraBibNumber, sierraData) should be(
+        expectedMergeCandidates)
+    }
+  }
+
   private def createPictureWithUrls(urls: List[String]): SierraBibData =
     createPictureWith(varFields = create962subfieldsWith(urls = urls))
 
