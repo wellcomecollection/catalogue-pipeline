@@ -84,44 +84,7 @@ class SierraItemsTest extends FunSpec with Matchers with SierraDataGenerators {
     getTransformedItems(itemDataMap = itemDataMap) should have size 1
   }
 
-  // Note: the following two tests are for historical reasons -- an old
-  // version of this code used "v"/"e-book" as the distinction for whether
-  // we would add a digital item.
-  //
-  // The current rule (2018-08-09) is to use the presence of the 'dlnk'
-  // location, but I left a modified version of these tests in place to
-  // check the old code wasn't left lying around!
-
-  it(
-    "does not create any items for an e-book record without the 'dlnk' location") {
-    val bibData = createSierraBibDataWith(
-      materialType = Some(createSierraMaterialTypeWith(code = "v"))
-    )
-
-    getTransformedItems(bibData = bibData) shouldBe List()
-  }
-
-  it(
-    "does not create any items for a non e-book record without the 'dlnk' location") {
-    val bibData = createSierraBibDataWith(
-      materialType = Some(createSierraMaterialTypeWith(code = "x"))
-    )
-
-    getTransformedItems(bibData = bibData) shouldBe List()
-  }
-
-  it("ignores a digital item on a bib record without a 'dlnk' location") {
-    val bibData = createSierraBibDataWith(
-      locations = Some(
-        List(
-          SierraSourceLocation("digi", "Digitised Collections")
-        ))
-    )
-
-    getTransformedItems(bibData = bibData) shouldBe List()
-  }
-
-  it("adds a digital item on a bib record with a 'dlnk' location") {
+  it("ignores all digital locations - 'dlnk', 'digi'") {
     val bibId = createSierraBibNumber
     val bibData = createSierraBibDataWith(
       locations = Some(
@@ -131,18 +94,7 @@ class SierraItemsTest extends FunSpec with Matchers with SierraDataGenerators {
         ))
     )
 
-    val expectedItems = List(
-      Item(
-        id = Unidentifiable,
-        locations = List(DigitalLocation(
-          url =
-            s"https://wellcomelibrary.org/iiif/${bibId.withCheckDigit}/manifest",
-          license = None,
-          locationType = LocationType("iiif-presentation")))
-      )
-    )
-
-    getTransformedItems(bibId = bibId, bibData = bibData) shouldBe expectedItems
+    getTransformedItems(bibId = bibId, bibData = bibData) shouldBe List()
   }
 
   it("creates an item with a physical location") {
@@ -163,78 +115,32 @@ class SierraItemsTest extends FunSpec with Matchers with SierraDataGenerators {
     )
   }
 
-  it(
-    "combines a single physical Item and a single digital Item into a single Item") {
-    val sierraLocation = SierraSourceLocation(
-      code = "scmac",
-      name = "Closed stores Arch. & MSS"
-    )
+  it("creates an item with a physical location and ignores digital locations") {
+    val sierraPhysicalLocation1 =
+      SierraSourceLocation("sicon", "Closed stores Iconographic")
 
-    val bibId = createSierraBibNumber
-    val bibData = createSierraBibDataWith(
-      locations = Some(
-        List(
-          SierraSourceLocation("dlnk", "Digitised content")
-        ))
-    )
+    val bibData =
+      createSierraBibDataWith(
+        locations = Some(
+          List(
+            SierraSourceLocation("digi", "Digitised Collections"),
+            SierraSourceLocation("dlnk", "Digitised content"))))
 
     val itemDataMap = Map(
       createSierraItemNumber -> createSierraItemDataWith(
-        location = Some(sierraLocation))
+        location = Some(sierraPhysicalLocation1))
     )
 
-    val result = getTransformedItems(
-      bibId = bibId,
-      bibData = bibData,
-      itemDataMap = itemDataMap)
+    val results =
+      getTransformedItems(bibData = bibData, itemDataMap = itemDataMap)
 
-    result.size shouldBe 1
-    result.head.locations shouldBe List(
-      PhysicalLocation(
-        locationType = LocationType(sierraLocation.code),
-        label = sierraLocation.name
-      ),
-      DigitalLocation(
-        url =
-          s"https://wellcomelibrary.org/iiif/${bibId.withCheckDigit}/manifest",
-        license = None,
-        locationType = LocationType("iiif-presentation")
-      )
-    )
-  }
-
-  it("doesn't combine Items if there's more than one digital item") {
-    val sierraLocation1 = SierraSourceLocation(
-      code = "sicon",
-      name = "Closed stores Iconographic"
-    )
-
-    val sierraLocation2 = SierraSourceLocation(
-      code = "sepbi",
-      name = "Closed stores EPB Biog p.Vol"
-    )
-
-    val bibId = createSierraBibNumber
-    val bibData = createSierraBibDataWith(
-      locations = Some(
-        List(
-          SierraSourceLocation("dlnk", "Digitised content")
-        ))
-    )
-
-    val itemDataMap = Map(
-      createSierraItemNumber -> createSierraItemDataWith(
-        location = Some(sierraLocation1)),
-      createSierraItemNumber -> createSierraItemDataWith(
-        location = Some(sierraLocation2))
-    )
-
-    val result = getTransformedItems(
-      bibId = bibId,
-      bibData = bibData,
-      itemDataMap = itemDataMap)
-
-    result.size shouldBe 3
+    results.head.locations should be(
+      List(
+        PhysicalLocation(
+          locationType = LocationType(sierraPhysicalLocation1.code),
+          label = sierraPhysicalLocation1.name
+        )
+      ))
   }
 
   private def getTransformedItems(
