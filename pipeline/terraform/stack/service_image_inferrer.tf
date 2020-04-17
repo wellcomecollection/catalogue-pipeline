@@ -31,7 +31,7 @@ module "image_inferrer" {
 
   namespace_id = aws_service_discovery_private_dns_namespace.namespace.id
 
-  host_cpu    = 2048
+  host_cpu    = 4096
   host_memory = 8192
 
   manager_container_name  = "inference_manager"
@@ -42,7 +42,7 @@ module "image_inferrer" {
   app_container_name  = "inferrer"
   app_container_image = local.feature_inferrer_image
   app_container_port  = local.inferrer_port
-  app_cpu             = 1536
+  app_cpu             = 3584
   app_memory          = 7680
   app_healthcheck_json = jsonencode({
     command     = ["CMD-SHELL", "curl -f http://localhost:${local.inferrer_port}/healthcheck"],
@@ -66,7 +66,7 @@ module "image_inferrer" {
   }
 
   subnets             = var.subnets
-  max_capacity        = 5
+  max_capacity        = 10
   messages_bucket_arn = aws_s3_bucket.messages.arn
   queue_read_policy   = module.image_inferrer_queue.read_policy
 }
