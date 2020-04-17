@@ -241,6 +241,9 @@ trait WorksGenerators
   def createUnidentifiedSierraWork: UnidentifiedWork =
     createUnidentifiedSierraWorkWith()
 
+  def createSierraWork: UnidentifiedWork =
+    createUnidentifiedSierraWorkWith()
+
   def createSierraPhysicalWork: UnidentifiedWork =
     createUnidentifiedSierraWorkWith(items = List(createPhysicalItem))
 

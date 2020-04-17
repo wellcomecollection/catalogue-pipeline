@@ -4,6 +4,7 @@ import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.fixtures.ImageFulltextAccess
+import org.scalatest.prop.TableDrivenPropertyChecks._
 
 class PlatformMergerTest
     extends FunSpec
@@ -13,17 +14,18 @@ class PlatformMergerTest
   val digitalLocationCCBYNC = createDigitalLocationWith(
     license = Some(License.CCBYNC))
   val digitalLocationNoLicense = digitalLocationCCBYNC.copy(license = None)
-
-  private val sierraPhysicalWork = createSierraPhysicalWork
-  private val multipleItemsSierraWork = createSierraWorkWithTwoPhysicalItems
-  private val sierraDigitalWork = createSierraDigitalWorkWith(
+  val sierraPhysicalWork = createSierraPhysicalWork
+  val multipleItemsSierraWork = createSierraWorkWithTwoPhysicalItems
+  val sierraDigitalWork = createSierraDigitalWorkWith(
     items = List(createDigitalItemWith(List(digitalLocationNoLicense))))
-  private val sierraPictureWork = createUnidentifiedSierraWorkWith(
+  val sierraPictureWork = createUnidentifiedSierraWorkWith(
     items = List(createPhysicalItem),
     workType = Some(WorkType.Pictures)
   )
-  private val miroWork = createMiroWork
-  private val metsWork =
+  val sierraWork = createSierraWork
+  val calmWork = createUnidentifiedCalmWork()
+  val miroWork = createMiroWork
+  val metsWork =
     createUnidentifiedInvisibleMetsWorkWith(
       items = List(createDigitalItemWith(List(digitalLocationCCBYNC)))
     ).withData { data =>
@@ -38,7 +40,30 @@ class PlatformMergerTest
       )
     }
 
-  private val merger = PlatformMerger
+  val merger = PlatformMerger
+
+  it(
+    "uses Calm || Sierra with physical location || Sierra work || nothing as a target") {
+    val worksWithCalm =
+      List(sierraPhysicalWork, sierraWork, calmWork, metsWork, miroWork)
+    val worksWithSierraPhysical =
+      List(sierraPhysicalWork, sierraWork, metsWork, miroWork)
+    val worksWithSierra = List(sierraWork, metsWork, miroWork)
+    val worksWithNone = List(metsWork, miroWork)
+
+    val targetTests = Table(
+      ("-works-", "-target-"),
+      (worksWithCalm, Some(calmWork)),
+      (worksWithSierraPhysical, Some(sierraPhysicalWork)),
+      (worksWithSierra, Some(sierraWork)),
+      (worksWithNone, None)
+    )
+
+    forAll(targetTests) {
+      case (works, target) =>
+        merger.findTarget(works) should be(target)
+    }
+  }
 
   it("merges a Sierra physical work with a single-page Miro work") {
     val result = merger.merge(
