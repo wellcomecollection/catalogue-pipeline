@@ -40,40 +40,6 @@ class PlatformMergerTest
 
   private val merger = PlatformMerger
 
-  it("merges a Sierra physical and Sierra digital work") {
-    val result = merger.merge(
-      works = Seq(sierraPhysicalWork, sierraDigitalWork)
-    )
-
-    result.works.size shouldBe 2
-
-    val physicalItem = sierraPhysicalWork.data.items.head
-    val digitalItem = sierraDigitalWork.data.items.head
-
-    val expectedMergedWork = sierraPhysicalWork.withData { data =>
-      data.copy(
-        merged = true,
-        otherIdentifiers = sierraPhysicalWork.data.otherIdentifiers ++ sierraDigitalWork.identifiers,
-        items = List(
-          physicalItem.copy(
-            locations = physicalItem.locations ++ digitalItem.locations
-          )
-        )
-      )
-    }
-
-    val expectedRedirectedWork =
-      UnidentifiedRedirectedWork(
-        sourceIdentifier = sierraDigitalWork.sourceIdentifier,
-        version = sierraDigitalWork.version,
-        redirect = IdentifiableRedirect(sierraPhysicalWork.sourceIdentifier)
-      )
-
-    result.works should contain theSameElementsAs List(
-      expectedMergedWork,
-      expectedRedirectedWork)
-  }
-
   it("merges a Sierra physical work with a single-page Miro work") {
     val result = merger.merge(
       works = Seq(sierraPhysicalWork, miroWork)
@@ -158,57 +124,6 @@ class PlatformMergerTest
     result.images should contain theSameElementsAs List(
       expectedImage
     )
-  }
-
-  it(
-    "merges a physical Sierra work and a digital Sierra work with a single-page Miro work") {
-    val result = merger.merge(
-      works = Seq(sierraPhysicalWork, sierraDigitalWork, miroWork)
-    )
-
-    result.works.size shouldBe 3
-
-    val sierraItem = sierraPhysicalWork.data.items.head
-    val digitalItem = sierraDigitalWork.data.items.head
-    val miroItem = miroWork.data.items.head
-
-    val expectedMergedWork = sierraPhysicalWork.withData { data =>
-      data.copy(
-        otherIdentifiers = sierraPhysicalWork.data.otherIdentifiers ++ miroWork.identifiers ++ sierraDigitalWork.identifiers,
-        thumbnail = miroWork.data.thumbnail,
-        items = List(
-          sierraItem.copy(
-            locations = sierraItem.locations ++ digitalItem.locations ++ miroItem.locations
-          )
-        ),
-        images = miroWork.data.images,
-        merged = true
-      )
-    }
-
-    val expectedRedirectedDigitalWork =
-      UnidentifiedRedirectedWork(
-        sourceIdentifier = sierraDigitalWork.sourceIdentifier,
-        version = sierraDigitalWork.version,
-        redirect = IdentifiableRedirect(sierraPhysicalWork.sourceIdentifier)
-      )
-
-    val expectedMiroRedirectedWork =
-      UnidentifiedRedirectedWork(
-        sourceIdentifier = miroWork.sourceIdentifier,
-        version = miroWork.version,
-        redirect = IdentifiableRedirect(sierraPhysicalWork.sourceIdentifier))
-
-    val expectedImage = miroWork.data.images.head mergeWith (
-      parentWork = Identifiable(sierraPhysicalWork.sourceIdentifier),
-      fullText = createFulltext(List(sierraPhysicalWork, miroWork))
-    )
-
-    result.works should contain theSameElementsAs List(
-      expectedMergedWork,
-      expectedRedirectedDigitalWork,
-      expectedMiroRedirectedWork)
-    result.images should contain theSameElementsAs List(expectedImage)
   }
 
   it("merges a non-picture Sierra work with a METS work") {
@@ -377,39 +292,6 @@ class PlatformMergerTest
     result.works should contain theSameElementsAs List(
       expectedMergedWork,
       expectedMetsRedirectedWork)
-    result.images shouldBe empty
-  }
-
-  it("merges a multiple items physical Sierra work with a digital work") {
-    val result = merger.merge(
-      works = Seq(multipleItemsSierraWork, sierraDigitalWork)
-    )
-
-    result.works.size shouldBe 2
-
-    val sierraItems =
-      multipleItemsSierraWork.data.items
-    val digitalItem = sierraDigitalWork.data.items.head
-
-    val expectedMergedWork = multipleItemsSierraWork.withData { data =>
-      data.copy(
-        otherIdentifiers = multipleItemsSierraWork.data.otherIdentifiers ++ sierraDigitalWork.identifiers,
-        items = sierraItems :+ digitalItem,
-        merged = true
-      )
-    }
-
-    val expectedRedirectedDigitalWork =
-      UnidentifiedRedirectedWork(
-        sourceIdentifier = sierraDigitalWork.sourceIdentifier,
-        version = sierraDigitalWork.version,
-        redirect =
-          IdentifiableRedirect(multipleItemsSierraWork.sourceIdentifier)
-      )
-
-    result.works should contain theSameElementsAs List(
-      expectedMergedWork,
-      expectedRedirectedDigitalWork)
     result.images shouldBe empty
   }
 
