@@ -7,11 +7,11 @@ from src.logging import get_logstash_logger
 
 logger = get_logstash_logger(__name__)
 
-T = TypeVar("T")
-R = TypeVar("R")
+Input = TypeVar("Input")
+Result = TypeVar("Result")
 
 
-class BatchExecutionQueue(Generic[T, R]):
+class BatchExecutionQueue(Generic[Input, Result]):
     """
     This class is a helper for batching calls to some processing function, calling that function
     when a given batch sized is reached or when a given timeout occurs - whichever happens first.
@@ -31,7 +31,7 @@ class BatchExecutionQueue(Generic[T, R]):
 
     def __init__(
         self,
-        sync_batch_processor: Callable[[List[T]], List[R]],
+        sync_batch_processor: Callable[[List[Input]], List[Result]],
         batch_size: int,
         timeout: float,
     ):
@@ -39,7 +39,7 @@ class BatchExecutionQueue(Generic[T, R]):
         self.batch_size = batch_size
         self.timeout = timeout
         self.queue = asyncio.Queue(batch_size)
-        self.output: Dict[UUID, R] = {}
+        self.output: Dict[UUID, Result] = {}
 
     def __del__(self):
         self.stop_worker()
@@ -53,7 +53,7 @@ class BatchExecutionQueue(Generic[T, R]):
         self.task.cancel()
         del self.task
 
-    async def execute(self, input: Generic[T]) -> Generic[R]:
+    async def execute(self, input: Generic[Input]) -> Generic[Result]:
         """When called with a single input to the batch processor, this asynchronously returns the
         associated output, or raises an exception if the batch processing failed."""
 
@@ -61,7 +61,7 @@ class BatchExecutionQueue(Generic[T, R]):
         # resolve in the same order that they joined, so we need a way to match calls to
         # `execute` with batch processor outputs, even though the processor is order-preserving.
         #
-        # So that we don't have to constrain the input (T) to be a hashable object, or rely
+        # So that we don't have to constrain the input to be a hashable object, or rely
         # on complex and confusing counters alongside the queue, we instead generate a UUID
         # for each call, and use that as a key for looking up outputs.
         execution_id = uuid4()
@@ -94,7 +94,7 @@ class BatchExecutionQueue(Generic[T, R]):
         # This implementation is based upon:
         # http://blog.mathieu-leplatre.info/some-python-3-asyncio-snippets.html#consume-queue-in-batches
         while True:
-            batch: List[(UUID, T)] = []
+            batch: List[(UUID, Input)] = []
             try:
                 with timeout(self.timeout):
                     while len(batch) < self.batch_size:
@@ -109,7 +109,7 @@ class BatchExecutionQueue(Generic[T, R]):
             if batch:
                 try:
                     ids, inputs = zip(*batch)
-                    results: List[R] = self.sync_batch_processor(inputs)
+                    results: List[Result] = self.sync_batch_processor(inputs)
                     assert len(results) == len(inputs)
                     self.output.update(dict(zip(ids, results)))
                 except Exception as e:
