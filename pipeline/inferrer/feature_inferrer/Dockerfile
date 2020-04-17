@@ -7,10 +7,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # As the VGG model is a large external dependency, we build
 # it into the image rather than fetching it at runtime.
-COPY ./app/fetch_vgg.py /
+COPY fetch_vgg.py /
 RUN python ./fetch_vgg.py
 
-COPY ./app ./gunicorn.conf.py ./start.sh /
+COPY gunicorn.conf.py start.sh prestart.py /
+COPY app /app
 
 ENV PYTHONPATH=/app
 
