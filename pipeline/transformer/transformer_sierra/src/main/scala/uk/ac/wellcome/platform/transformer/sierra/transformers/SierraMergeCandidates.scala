@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 import uk.ac.wellcome.models.work.internal.{
   IdentifierType,
   MergeCandidate,
-  SourceIdentifier
+  SourceIdentifier,
 }
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData,
@@ -18,17 +18,19 @@ import uk.ac.wellcome.platform.transformer.sierra.transformers.parsers.{
 
 import scala.util.matching.Regex
 
-object SierraMergeCandidates
-    extends SierraTransformer
-    with SierraQueryOps
-    with WellcomeImagesURLParser
-    with MiroIdParser {
-
+/**
+  * We create two parsers here as there is a dependency on the Sierra _Work_
+  * data. One for when we have a single item, and one for when we have many.
+  *
+  * If there is a single item we assume that this is the only item that the
+  * Miro image could be associated with.
+  *
+  * If we have multiple items, we assume it is definitely associated with
+  * one of them, but we're unsure of which. We thus don't create a
+  * `mergeCandidate` to avoid certain duplication.
+  */
+trait SierraMergeCandidates extends SierraTransformer with SierraQueryOps {
   type Output = List[MergeCandidate]
-
-  def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
-    get776mergeCandidates(bibData) ++
-      getSinglePageMiroMergeCandidates(bibData)
 
   // This regex matches any string starting with (UkLW), followed by
   // any number of spaces, and then captures everything after the
@@ -42,7 +44,7 @@ object SierraMergeCandidates
     * bib number as a merge candidate.
     *
     */
-  private def get776mergeCandidates(
+  protected def get776mergeCandidates(
     bibData: SierraBibData): List[MergeCandidate] =
     bibData
       .subfieldsWithTag("776" -> "w")
@@ -65,6 +67,20 @@ object SierraMergeCandidates
         )
       case _ => Nil
     }
+}
+
+object SierraWithSingleItemMergeCandidates extends SierraMergeCandidates {
+  def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
+    get776mergeCandidates(bibData)
+}
+
+object SierraWithMultiItemsMergeCandidates
+    extends SierraMergeCandidates
+    with WellcomeImagesURLParser
+    with MiroIdParser {
+  def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
+    get776mergeCandidates(bibData) ++
+      getSinglePageMiroMergeCandidates(bibData)
 
   /** We can merge a single-page Miro and Sierra work if:
     *

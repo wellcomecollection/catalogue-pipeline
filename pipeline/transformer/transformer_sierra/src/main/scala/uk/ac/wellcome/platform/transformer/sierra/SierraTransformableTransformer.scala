@@ -90,10 +90,15 @@ class SierraTransformableTransformer(sierraTransformable: SierraTransformable,
           )
       }
 
-  def workDataFromBibData(bibId: SierraBibNumber, bibData: SierraBibData) =
+  def workDataFromBibData(bibId: SierraBibNumber, bibData: SierraBibData) = {
+    val items = SierraItems(itemDataMap)(bibId, bibData)
+    val mergeCandidates = items match {
+      case List(_) => SierraWithSingleItemMergeCandidates(bibId, bibData)
+      case _ :: _  => SierraWithMultiItemsMergeCandidates(bibId, bibData)
+    }
     WorkData[Unminted, Identifiable](
       otherIdentifiers = SierraIdentifiers(bibId, bibData),
-      mergeCandidates = SierraMergeCandidates(bibId, bibData),
+      mergeCandidates = mergeCandidates,
       title = SierraTitle(bibId, bibData),
       alternativeTitles = SierraAlternativeTitles(bibId, bibData),
       workType = SierraWorkType(bibId, bibData),
@@ -108,8 +113,9 @@ class SierraTransformableTransformer(sierraTransformable: SierraTransformable,
       edition = SierraEdition(bibId, bibData),
       notes = SierraNotes(bibId, bibData),
       duration = SierraDuration(bibId, bibData),
-      items = SierraItems(itemDataMap)(bibId, bibData)
+      items = items
     )
+  }
 
   lazy val bibId = sierraTransformable.sierraId
 

@@ -120,31 +120,35 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     }
   }
 
-  /** We merge the Miro location to the Sierra work with a single item
-    * as we assume that this is the only item that the Miro image
-    * could be associated with.
+  /**
+    * If we have a single item, we then assume that the MIRO items MUST
+    * be associated with that item.
     *
-    * If we have multiple items, we assume it is definitely associated with
-    * one of the Sierra items, but unsure of which. We thus don't append it
-    * to the Sierra items to avoid certain duplication, and leave the works
-    * unmerged.
+    * If not, we just add the append the MIRO items to the list.
+    *
+    * Note: The Sierra transformer currently only ever send us Sierra works with single item.
     */
   private val mergeMiroItems = new PartialRule {
-    val isDefinedForTarget: WorkPredicate = WorkPredicates.singleItemSierra
+    val isDefinedForTarget: WorkPredicate = WorkPredicates.sierraWork
     val isDefinedForSource: WorkPredicate = WorkPredicates.miroWork
 
     def rule(target: UnidentifiedWork,
              sources: NonEmptyList[TransformedBaseWork]): FieldData = {
-      // This is safe due to the `singleItemSierra` predicate
-      val sierraItem = target.data.items.head
+      val sierraItems = target.data.items
       val miroItems = sources.toList.flatMap(_.data.items)
 
       debug(s"Merging Miro items from ${describeWorks(sources)}")
 
-      List(
-        sierraItem.copy(
-          locations = sierraItem.locations ++ miroItems.flatMap(_.locations)
-        ))
+      sierraItems match {
+        case List(sierraItem) =>
+          List(
+            sierraItem.copy(
+              locations = sierraItem.locations ++ miroItems.flatMap(_.locations)
+            ))
+
+        case multipleItems =>
+          multipleItems ++ miroItems
+      }
     }
   }
 }

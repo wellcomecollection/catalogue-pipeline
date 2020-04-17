@@ -78,4 +78,18 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
         .filterNot(_.identifierType == IdentifierType("sierra-system-number"))
     }
   }
+
+  private val calmIdssRule = new PartialRule {
+    val isDefinedForTarget: WorkPredicate = WorkPredicates.calmWork
+    val isDefinedForSource: WorkPredicate = WorkPredicates.sierraWork
+
+    override def rule(
+      target: UnidentifiedWork,
+      sources: NonEmptyList[TransformedBaseWork]): List[SourceIdentifier] = {
+      debug(s"Merging physical and digital IDs from ${describeWorks(sources)}")
+      target.data.otherIdentifiers ++ sources.toList
+        .flatMap(_.identifiers)
+        .filterNot(_.identifierType == IdentifierType("sierra-system-number"))
+    }
+  }
 }
