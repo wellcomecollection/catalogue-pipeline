@@ -28,7 +28,8 @@ object SierraMergeCandidates
 
   def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
     get776mergeCandidates(bibData) ++
-      getSinglePageMiroMergeCandidates(bibData)
+      getSinglePageMiroMergeCandidates(bibData) ++ get035CalmMergeCandidates(
+      bibData)
 
   // This regex matches any string starting with (UkLW), followed by
   // any number of spaces, and then captures everything after the
@@ -97,6 +98,29 @@ object SierraMergeCandidates
         }
       case _ => Nil
     }
+
+  /** When we harvest the Calm data into Sierra, the `RecordID` is stored in
+    * Marcfield 035$a
+    *
+    * e.g. `https://search.wellcomelibrary.org/iii/encore/record/C__Rb1971204?marcData=Y`
+    *
+    */
+  private def get035CalmMergeCandidates(
+    bibData: SierraBibData): List[MergeCandidate] =
+    bibData
+      .subfieldsWithTag("035" -> "a")
+      .contents
+      .map { recordId =>
+        MergeCandidate(
+          identifier = SourceIdentifier(
+            identifierType = IdentifierType("calm-record-id"),
+            ontologyType = "Work",
+            value = recordId
+          ),
+          reason = Some("Calm/Sierra harvest")
+        )
+      }
+      .distinct
 
   private def matching962Ids(bibData: SierraBibData) =
     bibData
