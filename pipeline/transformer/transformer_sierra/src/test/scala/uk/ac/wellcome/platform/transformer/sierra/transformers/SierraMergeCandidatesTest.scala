@@ -16,6 +16,7 @@ import uk.ac.wellcome.platform.transformer.sierra.generators.{
   MarcGenerators,
   SierraDataGenerators
 }
+import org.scalatest.prop.TableDrivenPropertyChecks._
 
 class SierraMergeCandidatesTest
     extends FunSpec
@@ -269,28 +270,42 @@ class SierraMergeCandidatesTest
   }
 
   describe("Calm/Sierra harvest") {
-    it("Creates a merge candidate from 035a from Calm/Sierra harvest") {
-      val sierraData = createSierraBibDataWith(
-        varFields = List(
-          VarField(
-            marcTag = Some("035"),
-            subfields =
-              List(MarcSubfield("a", "c6f99cad-25f1-4de5-92a6-02f0d1d7bf52"))
-          )))
+    it("Creates merge candidates from 035a from Calm/Sierra harvest") {
+      val ids = (1 to 5).map(_ => randomAlphanumeric(36).toString)
+      val calmMergeCandidates = ids map createCalmMergeCandidate
 
-      val expectedMergeCandidates = List(
-        MergeCandidate(
-          identifier = SourceIdentifier(
-            identifierType = IdentifierType("calm-record-id"),
-            ontologyType = "Work",
-            value = "c6f99cad-25f1-4de5-92a6-02f0d1d7bf52"
-          ),
-          reason = Some("Calm/Sierra harvest")
-        ))
-      SierraMergeCandidates(createSierraBibNumber, sierraData) should be(
-        expectedMergeCandidates)
+      val examples = Table(
+        ("-bibData-", "-mergeCandidates-", "-test-"),
+        (bibDataWith035(ids.take(1)), calmMergeCandidates.take(1), "Single"),
+        (bibDataWith035(ids.take(5)), calmMergeCandidates.take(5), "Multiple"),
+        (bibDataWith035(ids ++ ids), calmMergeCandidates.take(5), "Dedupes"),
+      )
+
+      forAll(examples) { (bibData, mergeCandidates, clue) =>
+        withClue(clue) {
+          SierraMergeCandidates(createSierraBibNumber, bibData) should be(
+            mergeCandidates)
+        }
+      }
     }
   }
+
+  private def bibDataWith035(calmIds: Seq[String]) =
+    createSierraBibDataWith(
+      varFields = List(
+        VarField(
+          marcTag = Some("035"),
+          subfields = calmIds.map(MarcSubfield("a", _)).toList
+        )))
+
+  private def createCalmMergeCandidate(calmId: String) = MergeCandidate(
+    identifier = SourceIdentifier(
+      identifierType = IdentifierType("calm-record-id"),
+      ontologyType = "Work",
+      value = calmId
+    ),
+    reason = Some("Calm/Sierra harvest")
+  )
 
   private def createPictureWithUrls(urls: List[String]): SierraBibData =
     createPictureWith(varFields = create962subfieldsWith(urls = urls))
