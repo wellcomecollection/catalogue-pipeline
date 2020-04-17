@@ -4,6 +4,7 @@ import akka.http.scaladsl.model.{HttpMethods, HttpRequest}
 import org.scalatest.{FunSpec, Inside, Matchers, OptionValues}
 import uk.ac.wellcome.models.work.generators.ImageGenerators
 import uk.ac.wellcome.models.work.internal.{AugmentedImage, InferredData}
+import uk.ac.wellcome.platform.inference_manager.fixtures.Encoding
 import uk.ac.wellcome.platform.inference_manager.models.FeatureVectorInferrerResponse
 
 class FeatureVectorInferrerAdapterTest
@@ -50,9 +51,10 @@ class FeatureVectorInferrerAdapterTest
     it("creates an AugmentedImage with the data from the inferrer response") {
       val image = createMergedImage.toIdentified
       val features = (0 until 4096).map(_ / 4096f).toList
+      val featuresB64 = Encoding.toBase64(features)
       val lshEncodedFeatures = ('a' to 'z').map(_.toString * 3).toList
       val response = FeatureVectorInferrerResponse(
-        features = features,
+        features_b64 = featuresB64,
         lsh_encoded_features = lshEncodedFeatures
       )
       val augmentedImage =

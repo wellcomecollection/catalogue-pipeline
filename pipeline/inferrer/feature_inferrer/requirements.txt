@@ -6,7 +6,7 @@
 #
 aiodns==2.0.0             # via aiohttp
 aiohttp[speedups]==3.6.2  # via -r requirements.in
-async-timeout==3.0.1      # via aiohttp
+async-timeout==3.0.1      # via -r requirements.in, aiohttp
 attrs==19.3.0             # via aiohttp
 boto3==1.12.14            # via -r requirements.in
 botocore==1.15.14         # via boto3, s3transfer
@@ -17,22 +17,33 @@ cffi==1.14.0              # via brotlipy, pycares
 chardet==3.0.4            # via aiohttp, requests
 daiquiri==2.1.1           # via -r requirements.in
 docutils==0.15.2          # via botocore
-idna==2.9                 # via requests, yarl
+fastapi==0.54.1           # via -r requirements.in
+gunicorn==20.0.4          # via -r requirements.in
+h11==0.9.0                # via uvicorn
+httptools==0.1.1          # via uvicorn
+idna==2.9                 # via yarl
 jmespath==0.9.5           # via boto3, botocore
 multidict==4.7.5          # via aiohttp, yarl
 numpy==1.18.1             # via -r requirements.in, scipy, torchvision
 pillow==7.0.0             # via -r requirements.in, torchvision
 pycares==3.1.1            # via aiodns
 pycparser==2.20           # via cffi
+pydantic==1.4             # via fastapi
 python-dateutil==2.8.1    # via botocore
 python-json-logger==0.1.11  # via daiquiri
 python-logstash==0.4.6    # via -r requirements.in
-requests==2.23.0          # via -r requirements.in
 s3transfer==0.3.3         # via boto3
 scikit-learn==0.19.2      # via -r requirements.in
 scipy==1.4.1              # via -r requirements.in
 six==1.14.0               # via python-dateutil, torchvision
+starlette==0.13.2         # via fastapi
 torch==1.4.0              # via -r requirements.in, torchvision
 torchvision==0.5.0        # via -r requirements.in
-urllib3==1.25.8           # via botocore, requests
+urllib3==1.25.8           # via botocore
+uvicorn==0.11.3           # via -r requirements.in
+uvloop==0.14.0            # via uvicorn
+websockets==8.1           # via uvicorn
 yarl==1.4.2               # via aiohttp
+
+# The following packages are considered to be unsafe in a requirements file:
+# setuptools
