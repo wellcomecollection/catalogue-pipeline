@@ -7,7 +7,7 @@ class CollectionTest extends FunSpec with Matchers with WorksGenerators {
 
   def work(path: String, level: CollectionLevel) =
     createIdentifiedWorkWith(
-      collectionPath = Some(CollectionPath(path = path, level = level)))
+      collectionPath = Some(CollectionPath(path = path, level = Some(level))))
 
   it("creates a tree from a connected list of works") {
     val a = work("a", CollectionLevel.Collection)
@@ -17,26 +17,26 @@ class CollectionTest extends FunSpec with Matchers with WorksGenerators {
     val e = work("a/b/e", CollectionLevel.Item)
     Collection(List(b, d, a, c, e)) shouldBe Right(
       Collection(
-        path = CollectionPath("a", CollectionLevel.Collection),
-        work = a,
+        path = CollectionPath("a", Some(CollectionLevel.Collection)),
+        work = Some(a),
         children = List(
           Collection(
-            path = CollectionPath("a/b", CollectionLevel.Series),
-            work = b,
+            path = CollectionPath("a/b", Some(CollectionLevel.Series)),
+            work = Some(b),
             children = List(
               Collection(
-                path = CollectionPath("a/b/c", CollectionLevel.Item),
-                work = c
+                path = CollectionPath("a/b/c", Some(CollectionLevel.Item)),
+                work = Some(c)
               ),
               Collection(
-                path = CollectionPath("a/b/e", CollectionLevel.Item),
-                work = e
+                path = CollectionPath("a/b/e", Some(CollectionLevel.Item)),
+                work = Some(e)
               ),
             ),
           ),
           Collection(
-            path = CollectionPath("a/d", CollectionLevel.Series),
-            work = d
+            path = CollectionPath("a/d", Some(CollectionLevel.Series)),
+            work = Some(d)
           )
         )
       )
@@ -49,30 +49,65 @@ class CollectionTest extends FunSpec with Matchers with WorksGenerators {
       collectionPath = Some(
         CollectionPath(
           path = "a/b",
-          level = CollectionLevel.Item,
+          level = Some(CollectionLevel.Item),
           label = Some("!!!")))
     )
     Collection(List(a, b)) shouldBe Right(
       Collection(
-        path = CollectionPath("a", CollectionLevel.Collection),
-        work = a,
+        path = CollectionPath("a", Some(CollectionLevel.Collection)),
+        work = Some(a),
         children = List(
           Collection(
-            path = CollectionPath("a/b", CollectionLevel.Item, Some("!!!")),
-            work = b
+            path =
+              CollectionPath("a/b", Some(CollectionLevel.Item), Some("!!!")),
+            work = Some(b)
           )
         )
       )
     )
   }
 
-  it("errors creating a tree when unconnected works") {
+  it("creates a tree from an unconnected list of works when shared root") {
+    val b = work("a/b", CollectionLevel.Series)
+    val c = work("a/b/c", CollectionLevel.Item)
+    val e = work("a/d/e", CollectionLevel.Item)
+    Collection(List(b, c, e)) shouldBe Right(
+      Collection(
+        path = CollectionPath("a"),
+        work = None,
+        children = List(
+          Collection(
+            path = CollectionPath("a/b", Some(CollectionLevel.Series)),
+            work = Some(b),
+            children = List(
+              Collection(
+                path = CollectionPath("a/b/c", Some(CollectionLevel.Item)),
+                work = Some(c)
+              )
+            ),
+          ),
+          Collection(
+            path = CollectionPath("a/d"),
+            work = None,
+            children = List(
+              Collection(
+                path = CollectionPath("a/d/e", Some(CollectionLevel.Item)),
+                work = Some(e)
+              )
+            )
+          )
+        )
+      )
+    )
+  }
+
+  it("errors creating a tree when works have different roots") {
     val x = work("x", CollectionLevel.Collection)
     val y = work("x/y", CollectionLevel.Series)
-    val z = work("x/a/z", CollectionLevel.Item)
+    val z = work("z/z/z", CollectionLevel.Item)
     val result = Collection(List(x, y, z))
     result shouldBe a[Left[_, _]]
-    result.left.get.getMessage shouldBe "Not all works in collection are connected to root 'x': x/a/z"
+    result.left.get.getMessage shouldBe "Multiple root paths not permitted: x, z"
   }
 
   it("errors creating a tree when duplicate paths") {
