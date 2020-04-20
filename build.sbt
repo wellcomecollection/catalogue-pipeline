@@ -96,7 +96,8 @@ lazy val ingestor_works = setupProject(
 lazy val ingestor_images = setupProject(
   project,
   "pipeline/ingestor/ingestor_images",
-  localDependencies = Seq(elasticsearch_typesafe, big_messaging_typesafe, ingestor_common),
+  localDependencies =
+    Seq(elasticsearch_typesafe, big_messaging_typesafe, ingestor_common),
   externalDependencies = Seq()
 )
 
