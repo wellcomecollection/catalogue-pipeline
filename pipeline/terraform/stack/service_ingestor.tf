@@ -48,7 +48,7 @@ module "ingestor_works" {
 }
 
 module "ingestor_works_scaling_alarm" {
-  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.2"
+  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.3"
   queue_name = module.ingestor_works_queue.name
 
   queue_high_actions = [module.ingestor_works.scale_up_arn]
