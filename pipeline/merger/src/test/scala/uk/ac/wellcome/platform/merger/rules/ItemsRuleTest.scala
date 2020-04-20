@@ -74,25 +74,36 @@ class ItemsRuleTest
   }
 
   // Calm
-  it(
-    "take the PhysicalLocation from Calm work and replace single-item Sierra work item location") {
-    inside(ItemsRule.merge(physicalSierra, List(calmWork))) {
+  it("Adds Sierra item IDs to Calm item") {
+    inside(ItemsRule.merge(calmWork, List(physicalSierra))) {
       case FieldMergeResult(items, mergedSources) =>
         items should have size 1
-        items.head.locations should have size 1
-        items.head.locations.head should be(
-          calmWork.data.items.head.locations.head)
+        items.head.id should be(physicalSierra.data.items.head.id)
 
-        mergedSources should be(Seq(calmWork))
+        mergedSources should be(Seq(physicalSierra))
     }
   }
 
-  it("adds items from Calm works into multi-item Sierra works") {
-    inside(ItemsRule.merge(multiItemPhysicalSierra, List(calmWork))) {
+  it("Adds the METS item location to the Calm item") {
+    inside(ItemsRule.merge(calmWork, List(metsWork))) {
       case FieldMergeResult(items, mergedSources) =>
-        items should contain theSameElementsAs
-          multiItemPhysicalSierra.data.items ++ calmWork.data.items
-        mergedSources should be(Seq(calmWork))
+        items should have size 1
+        items.head.locations should contain theSameElementsAs (calmWork.data.items.head.locations ++ metsWork.data.items.head.locations)
+
+        mergedSources should be(Seq(metsWork))
+    }
+  }
+
+  it("Adds Sierra item IDs and the METS item location to a Calm work") {
+    inside(ItemsRule.merge(calmWork, List(physicalSierra, metsWork))) {
+      case FieldMergeResult(items, mergedSources) =>
+        items should have size 1
+        items.head.id should be(physicalSierra.data.items.head.id)
+        items.head.locations should contain theSameElementsAs (calmWork.data.items.head.locations ++ metsWork.data.items.head.locations)
+
+        mergedSources should contain theSameElementsAs Seq(
+          metsWork,
+          physicalSierra)
     }
   }
 }
