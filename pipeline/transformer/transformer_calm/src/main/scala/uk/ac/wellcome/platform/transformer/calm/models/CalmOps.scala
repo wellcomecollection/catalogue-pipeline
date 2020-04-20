@@ -9,15 +9,14 @@ trait CalmOps {
 
     def getList(key: String): List[String] =
       record.data
-        .get(key)
-        .getOrElse(Nil)
+        .getOrElse(key, Nil)
         .map(_.trim)
         .filter(_.nonEmpty)
 
-    def getJoined(key: String, seperator: String = " "): Option[String] =
+    def getJoined(key: String, separator: String = " "): Option[String] =
       getList(key) match {
         case Nil   => None
-        case items => Some(items.mkString(seperator))
+        case items => Some(items.mkString(separator))
       }
   }
 }
