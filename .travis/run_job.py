@@ -1,22 +1,13 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8
 
+import argparse
 import os
 import subprocess
 import sys
 
 from git_utils import get_changed_paths, git
 from sbt_dependency_tree import Repository
-
-
-def get_project_name():
-    """Gets the project name either from the first argument of the
-    command or from the environment
-    """
-    try:
-        return sys.argv[1]
-    except IndexError:
-        return os.environ["SBT_PROJECT"]
 
 
 def check_call(cmd):
@@ -86,30 +77,35 @@ if __name__ == "__main__":
 
     travis_event_type = os.environ["TRAVIS_EVENT_TYPE"]
     travis_build_stage = os.environ["TRAVIS_BUILD_STAGE_NAME"]
+    travis_commit_range = os.environ["TRAVIS_COMMIT_RANGE"]
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("project_name", default=os.environ["SBT_PROJECT"])
+    parser.add_argument("--changes-in", nargs="*")
+    args = parser.parse_args()
 
     try:
         # If it's not an sbt task, we always run it no matter what.
         task = os.environ["TASK"]
     except KeyError:
-        sbt_project_name = get_project_name()
-
-        repo = Repository(".sbt_metadata")
+        task = f"{args.project_name}-test"
 
         if travis_event_type == "pull_request":
-            changed_paths = get_changed_paths("HEAD", "master")
+            changed_paths = get_changed_paths("HEAD", "master", globs=args.changes_in)
         else:
             git("fetch", "origin")
-            changed_paths = get_changed_paths(os.environ["TRAVIS_COMMIT_RANGE"])
+            changed_paths = get_changed_paths(travis_commit_range, globs=args.changes_in)
 
-        if should_run_sbt_project(repo, sbt_project_name, changed_paths=changed_paths):
-            task = "%s-test" % sbt_project_name
-        else:
-            print(
-                "Nothing in this patch affects %s, so skipping tests" % sbt_project_name
-            )
-            sys.exit(0)
+        sbt_repo = Repository(".sbt_metadata")
+        try:
+            if not should_run_sbt_project(sbt_repo, args.project_name, changed_paths):
+                print(f"Nothing in this patch affects {args.project_name}, so skipping tests")
+                sys.exit(0)
+        except KeyError:
+            if args.changes_in and not changed_paths:
+                print(f"Nothing in this patch affects the files {args.changes_in}, so skipping tests")
+                sys.exit(0)
 
     make(task)
-
     if travis_event_type == "push" and travis_build_stage.lower() == "services":
         make(task.replace("test", "publish"))
