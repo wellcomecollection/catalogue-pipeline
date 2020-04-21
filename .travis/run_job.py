@@ -90,12 +90,13 @@ if __name__ == "__main__":
 
         task = f"{args.project_name}-test"
 
+        change_globs = args.changes_in + [".travis.yml"] if args.changes_in else None
         if travis_event_type == "pull_request":
-            changed_paths = get_changed_paths("HEAD", "master", globs=args.changes_in)
+            changed_paths = get_changed_paths("HEAD", "master", globs=change_globs)
         else:
             git("fetch", "origin")
             changed_paths = get_changed_paths(
-                travis_commit_range, globs=args.changes_in
+                travis_commit_range, globs=change_globs
             )
 
         sbt_repo = Repository(".sbt_metadata")
