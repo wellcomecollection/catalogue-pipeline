@@ -95,9 +95,7 @@ if __name__ == "__main__":
             changed_paths = get_changed_paths("HEAD", "master", globs=change_globs)
         else:
             git("fetch", "origin")
-            changed_paths = get_changed_paths(
-                travis_commit_range, globs=change_globs
-            )
+            changed_paths = get_changed_paths(travis_commit_range, globs=change_globs)
 
         sbt_repo = Repository(".sbt_metadata")
         try:
