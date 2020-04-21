@@ -31,7 +31,8 @@ trait UseCalmWhenExistsRule extends FieldMergeRule with MergerLogging {
   val calmRule =
     new PartialRule {
       val isDefinedForTarget: WorkPredicate = WorkPredicates.sierraWork
-      val isDefinedForSource: WorkPredicate = WorkPredicates.calmWork
+      val isDefinedForSource: WorkPredicate =
+        WorkPredicates.singlePhysicalItemCalmWork
 
       def rule(sierraWork: UnidentifiedWork,
                calmWorks: NonEmptyList[TransformedBaseWork]): FieldData =

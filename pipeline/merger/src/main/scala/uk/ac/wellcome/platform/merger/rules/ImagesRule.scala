@@ -40,7 +40,7 @@ object ImagesRule extends FieldMergeRule {
 
   private lazy val getSingleMiroImage
     : PartialFunction[UnidentifiedWork, FieldData] = {
-    case target if WorkPredicates.miroWork(target) =>
+    case target if WorkPredicates.singleDigitalItemMiroWork(target) =>
       target.data.images.map {
         _.mergeWith(
           parentWork = Identifiable(target.sourceIdentifier),
@@ -52,13 +52,14 @@ object ImagesRule extends FieldMergeRule {
   private lazy val getPictureImages = new FlatImageMergeRule {
     val isDefinedForTarget: WorkPredicate = WorkPredicates.sierraPicture
     val isDefinedForSource
-      : WorkPredicate = WorkPredicates.metsWork or WorkPredicates.miroWork
+      : WorkPredicate = WorkPredicates.singleDigitalItemMetsWork or WorkPredicates.singleDigitalItemMiroWork
   }
 
   private lazy val getPairedMiroImages = new FlatImageMergeRule {
     val isDefinedForTarget: WorkPredicate =
       WorkPredicates.sierraWork and not(WorkPredicates.sierraPicture)
-    val isDefinedForSource: WorkPredicate = WorkPredicates.miroWork
+    val isDefinedForSource: WorkPredicate =
+      WorkPredicates.singleDigitalItemMiroWork
   }
 
   trait FlatImageMergeRule extends PartialRule {

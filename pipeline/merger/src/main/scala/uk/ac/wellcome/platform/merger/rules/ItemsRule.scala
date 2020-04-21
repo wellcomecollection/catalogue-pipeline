@@ -69,7 +69,8 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     */
   private val mergeMetsIntoSingleItemSierraTarget = new PartialRule {
     val isDefinedForTarget: WorkPredicate = WorkPredicates.singleItemSierra
-    val isDefinedForSource: WorkPredicate = WorkPredicates.metsWork
+    val isDefinedForSource: WorkPredicate =
+      WorkPredicates.singleDigitalItemMetsWork
 
     def rule(target: UnidentifiedWork,
              sources: NonEmptyList[TransformedBaseWork]): FieldData = {
@@ -91,7 +92,8 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     */
   private val mergeMiroIntoSingleItemSierraTarget = new PartialRule {
     val isDefinedForTarget: WorkPredicate = WorkPredicates.singleItemSierra
-    val isDefinedForSource: WorkPredicate = WorkPredicates.miroWork
+    val isDefinedForSource: WorkPredicate =
+      WorkPredicates.singleDigitalItemMiroWork
 
     def rule(target: UnidentifiedWork,
              sources: NonEmptyList[TransformedBaseWork]): FieldData = {
@@ -119,7 +121,8 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     */
   private val mergeIntoMultiItemSierraTarget = new PartialRule {
     val isDefinedForTarget: WorkPredicate = WorkPredicates.multiItemSierra
-    val isDefinedForSource: WorkPredicate = WorkPredicates.metsWork
+    val isDefinedForSource: WorkPredicate =
+      WorkPredicates.singleDigitalItemMetsWork
 
     def rule(target: UnidentifiedWork,
              sources: NonEmptyList[TransformedBaseWork]): FieldData =
@@ -134,17 +137,18 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     * We merge that into the Calm item.
     */
   private val mergeIntoCalmTarget = new PartialRule {
-    val isDefinedForTarget: WorkPredicate = WorkPredicates.calmWork
+    val isDefinedForTarget: WorkPredicate =
+      WorkPredicates.singlePhysicalItemCalmWork
     val isDefinedForSource
-      : WorkPredicate = WorkPredicates.metsWork or WorkPredicates.sierraWork
+      : WorkPredicate = WorkPredicates.singleDigitalItemMetsWork or WorkPredicates.sierraWork
 
     def rule(target: UnidentifiedWork,
              sources: NonEmptyList[TransformedBaseWork]): FieldData = {
 
-      // The calmWork predicate ensures this is safe
+      // The calm Work predicate ensures this is safe
       val calmItem = target.data.items.head
 
-      val metsSources = sources.filter(WorkPredicates.metsWork)
+      val metsSources = sources.filter(WorkPredicates.singleDigitalItemMetsWork)
       val metsDigitalLocations =
         metsSources.flatMap(_.data.items.flatMap(_.locations))
 

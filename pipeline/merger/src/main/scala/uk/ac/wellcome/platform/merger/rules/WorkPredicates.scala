@@ -11,27 +11,40 @@ import uk.ac.wellcome.models.work.internal.{
 object WorkPredicates {
   type WorkPredicate = TransformedBaseWork => Boolean
 
-  val sierraWork: WorkPredicate = identifierTypeId("sierra-system-number")
-  val metsWork: WorkPredicate = identifierTypeId("mets")
-  val miroWork: WorkPredicate = identifierTypeId("miro-image-number")
+  private val sierraIdentified: WorkPredicate = identifierTypeId(
+    "sierra-system-number")
+  private val metsIdentified: WorkPredicate = identifierTypeId("mets")
+  private val calmIdentified: WorkPredicate = identifierTypeId("calm-record-id")
+  private val miroIdentified: WorkPredicate = identifierTypeId(
+    "miro-image-number")
 
+  val sierraWork: WorkPredicate = sierraIdentified
   val singleItem: WorkPredicate = work => work.data.items.size == 1
   val multiItem: WorkPredicate = work => work.data.items.size > 1
 
-  // All calm works return 1 item with 1 location, this checks that.
-  val calmWork: WorkPredicate = satisfiesAll(
-    identifierTypeId("calm-record-id"),
+  /**
+    * This is the shape in which we expect the works from the transformers.
+    * We're specific here as the merging rules often rely on the shape of the
+    * transformers outputs.
+    */
+  val singlePhysicalItemCalmWork: WorkPredicate = satisfiesAll(
+    calmIdentified,
     singleItem,
-    singleLocation
+    singleLocation,
+    allPhysicalLocations
   )
 
-  val singleItemDigitalMets: WorkPredicate = satisfiesAll(
-    metsWork,
+  val singleDigitalItemMetsWork: WorkPredicate = satisfiesAll(
+    metsIdentified,
     singleItem,
     allDigitalLocations
   )
 
-  val singleItemMiro: WorkPredicate = satisfiesAll(miroWork, singleItem)
+  val singleDigitalItemMiroWork: WorkPredicate = satisfiesAll(
+    miroIdentified,
+    singleItem,
+    allDigitalLocations
+  )
 
   val singleItemSierra: WorkPredicate = satisfiesAll(sierraWork, singleItem)
   val multiItemSierra: WorkPredicate = satisfiesAll(sierraWork, multiItem)
@@ -57,6 +70,14 @@ object WorkPredicates {
       item.locations.forall {
         case _: DigitalLocation => true
         case _                  => false
+      }
+    }
+
+  private def allPhysicalLocations(work: TransformedBaseWork): Boolean =
+    work.data.items.forall { item =>
+      item.locations.forall {
+        case _: PhysicalLocation => true
+        case _                   => false
       }
     }
 
