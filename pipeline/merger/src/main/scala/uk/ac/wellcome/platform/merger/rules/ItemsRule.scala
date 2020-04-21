@@ -12,8 +12,11 @@ import cats.data.NonEmptyList
 /**
   * Items are merged as follows
   *
-  * Miro and METS item locations merged onto Sierra with single item
-  * METS item added to Sierra with multiple items
+  * * Sierra - Single items
+  *   * METS works
+  *   * Miro works
+  * * Sierra - Multi item
+  *   * METS works
   */
 object ItemsRule extends FieldMergeRule with MergerLogging {
   type FieldData = List[Item[Unminted]]
