@@ -111,7 +111,8 @@ class CollectionServiceTest
                     work = Some(workF),
                     children = List(
                       Collection(
-                        path = CollectionPath("a/e/f/g", Some(CollectionLevel.Item)),
+                        path =
+                          CollectionPath("a/e/f/g", Some(CollectionLevel.Item)),
                         work = Some(workG))
                     )
                   ),
@@ -162,7 +163,8 @@ class CollectionServiceTest
                 work = None,
                 children = List(
                   Collection(
-                    path = CollectionPath("x/missing/z", Some(CollectionLevel.Item)),
+                    path =
+                      CollectionPath("x/missing/z", Some(CollectionLevel.Item)),
                     work = Some(workZ),
                   )
                 )

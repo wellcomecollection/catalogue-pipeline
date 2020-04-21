@@ -485,7 +485,10 @@ class ApiV2WorksIncludesTest
           createIdentifiedWorkWith(
             canonicalId = "1",
             collectionPath = Some(
-              CollectionPath("PP/MI", Some(CollectionLevel.Item), Some("PP/MI")))),
+              CollectionPath(
+                "PP/MI",
+                Some(CollectionLevel.Item),
+                Some("PP/MI")))),
           createIdentifiedWorkWith(
             canonicalId = "2",
             collectionPath = Some(
@@ -536,8 +539,8 @@ class ApiV2WorksIncludesTest
     withApi {
       case (indexV2, routes) =>
         val work = createIdentifiedWorkWith(
-          collectionPath =
-            Some(CollectionPath("PP/MI", Some(CollectionLevel.Item), Some("PP/MI"))))
+          collectionPath = Some(
+            CollectionPath("PP/MI", Some(CollectionLevel.Item), Some("PP/MI"))))
         insertIntoElasticsearch(indexV2, work)
         assertJsonResponse(
           routes,

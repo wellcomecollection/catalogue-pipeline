@@ -317,13 +317,15 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
         )
         val work2Archive1Depth2 = createIdentifiedWorkWith(
           canonicalId = "work2Archive1Depth2",
-          collectionPath =
-            Some(CollectionPath("archive1/depth2", Some(CollectionLevel.Series)))
+          collectionPath = Some(
+            CollectionPath("archive1/depth2", Some(CollectionLevel.Series)))
         )
         val work3Archive1Depth3 = createIdentifiedWorkWith(
           canonicalId = "work3Archive1Depth3",
-          collectionPath =
-            Some(CollectionPath("archive1/depth2/depth3", Some(CollectionLevel.Item)))
+          collectionPath = Some(
+            CollectionPath(
+              "archive1/depth2/depth3",
+              Some(CollectionLevel.Item)))
         )
         val work4Archive2Depth1 = createIdentifiedWorkWith(
           canonicalId = "work4Archive2Depth1",
@@ -332,13 +334,15 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
         )
         val work5Archive2Depth2 = createIdentifiedWorkWith(
           canonicalId = "work5Archive2Depth2",
-          collectionPath =
-            Some(CollectionPath("archive2/depth2", Some(CollectionLevel.Series)))
+          collectionPath = Some(
+            CollectionPath("archive2/depth2", Some(CollectionLevel.Series)))
         )
         val work6Archive2Depth3 = createIdentifiedWorkWith(
           canonicalId = "work6Archive2Depth3",
-          collectionPath =
-            Some(CollectionPath("archive2/depth2/depth3", Some(CollectionLevel.Item)))
+          collectionPath = Some(
+            CollectionPath(
+              "archive2/depth2/depth3",
+              Some(CollectionLevel.Item)))
         )
         val work7Archiveless = createIdentifiedWorkWith(
           canonicalId = "work7Archiveless",
@@ -420,13 +424,13 @@ class ApiV2WorksTest extends ApiV2WorksTestBase {
         )
         val work4Depth3 = createIdentifiedWorkWith(
           canonicalId = "4",
-          collectionPath =
-            Some(CollectionPath("/depth1/depth2/depth3", Some(CollectionLevel.Item)))
+          collectionPath = Some(
+            CollectionPath("/depth1/depth2/depth3", Some(CollectionLevel.Item)))
         )
         val work5Depth3 = createIdentifiedWorkWith(
           canonicalId = "5",
-          collectionPath =
-            Some(CollectionPath("/depth1/depth2/depth3", Some(CollectionLevel.Item)))
+          collectionPath = Some(
+            CollectionPath("/depth1/depth2/depth3", Some(CollectionLevel.Item)))
         )
         val work6NoDepth = createIdentifiedWorkWith(
           canonicalId = "6",
