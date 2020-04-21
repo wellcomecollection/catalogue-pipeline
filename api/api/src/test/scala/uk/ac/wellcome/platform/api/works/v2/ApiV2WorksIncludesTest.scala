@@ -485,13 +485,13 @@ class ApiV2WorksIncludesTest
           createIdentifiedWorkWith(
             canonicalId = "1",
             collectionPath = Some(
-              CollectionPath("PP/MI", CollectionLevel.Item, Some("PP/MI")))),
+              CollectionPath("PP/MI", Some(CollectionLevel.Item), Some("PP/MI")))),
           createIdentifiedWorkWith(
             canonicalId = "2",
             collectionPath = Some(
               CollectionPath(
                 "CRGH",
-                CollectionLevel.Collection,
+                Some(CollectionLevel.Collection),
                 Some("CRGH")))),
         )
         insertIntoElasticsearch(indexV2, works: _*)
@@ -537,7 +537,7 @@ class ApiV2WorksIncludesTest
       case (indexV2, routes) =>
         val work = createIdentifiedWorkWith(
           collectionPath =
-            Some(CollectionPath("PP/MI", CollectionLevel.Item, Some("PP/MI"))))
+            Some(CollectionPath("PP/MI", Some(CollectionLevel.Item), Some("PP/MI"))))
         insertIntoElasticsearch(indexV2, work)
         assertJsonResponse(
           routes,
@@ -553,6 +553,26 @@ class ApiV2WorksIncludesTest
                 "path": "PP/MI",
                 "level": "Item",
                 "type" : "CollectionPath"
+              },
+              "collection" : {
+                "path" : { "path" : "PP", "type" : "CollectionPath" },
+                "children" : [
+                  {
+                    "path" : {
+                      "label" : "PP/MI",
+                      "level" : "Item",
+                      "path" : "PP/MI",
+                      "type" : "CollectionPath"
+                    },
+                    "work" : {
+                      "id": "${work.canonicalId}",
+                      "title": "${work.data.title.get}",
+                      "alternativeTitles" : [],
+                      "type" : "Work"
+                    },
+                    "children" : []
+                  }
+                ]
               }
             }
           """

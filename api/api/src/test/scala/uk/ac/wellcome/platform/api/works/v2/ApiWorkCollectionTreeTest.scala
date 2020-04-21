@@ -6,7 +6,7 @@ class ApiWorkCollectionTest extends ApiV2WorksTestBase {
 
   def work(path: String, level: CollectionLevel) =
     createIdentifiedWorkWith(
-      collectionPath = Some(CollectionPath(path = path, level = level)),
+      collectionPath = Some(CollectionPath(path = path, level = Some(level))),
       title = Some(path),
       sourceIdentifier = createSourceIdentifierWith(value = path)
     )
@@ -162,7 +162,7 @@ class ApiWorkCollectionTest extends ApiV2WorksTestBase {
     }
   }
 
-  it("still returns the work when the collection tree cannot be generated") {
+  it("still generates the collection tree when missing nodes") {
     withApi {
       case (index, routes) =>
         insertIntoElasticsearch(index, workA, workC, workD, workE)
@@ -179,30 +179,26 @@ class ApiWorkCollectionTest extends ApiV2WorksTestBase {
                 "path": "a/b/c",
                 "level": "Item",
                 "type": "CollectionPath"
-              }
-            }
-          """
-        }
-    }
-  }
-
-  it("does not include the collection tree when the root node is non existent") {
-    withApi {
-      case (index, routes) =>
-        insertIntoElasticsearch(index, workB, workC, workD, workE)
-        assertJsonResponse(
-          routes,
-          s"/$apiPrefix/works/${workE.canonicalId}?include=collection") {
-          Status.OK -> s"""
-            {
-              ${singleWorkResult(apiPrefix)},
-              "id": "${workE.canonicalId}",
-              "title": "a/d/e",
-              "alternativeTitles": [],
-              "collectionPath": {
-                "path": "a/d/e",
-                "level": "Item",
-                "type": "CollectionPath"
+              },
+              "collection": {
+                "path": { "path": "a", "level": "Collection", "type": "CollectionPath" },
+                "work": ${workJson(workA)},
+                "children": [
+                  {
+                    "path": { "path": "a/b", "type": "CollectionPath" },
+                    "children": [
+                      {
+                        "path": { "path": "a/b/c", "level": "Item", "type": "CollectionPath" },
+                        "work": ${workJson(workC)},
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "path": { "path": "a/d", "level": "Series", "type": "CollectionPath" },
+                    "work": ${workJson(workD)}
+                  }
+                ]
               }
             }
           """

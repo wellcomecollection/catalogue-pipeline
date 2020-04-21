@@ -44,7 +44,11 @@ case class Collection(
   path: CollectionPath,
   work: Option[IdentifiedWork],
   children: List[Collection] = Nil
-)
+) {
+
+  def isRoot: Boolean =
+    path.depth == 1
+}
 
 object Collection {
 
