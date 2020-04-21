@@ -110,8 +110,7 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
              sources: NonEmptyList[TransformedBaseWork]): FieldData = {
 
       val sierraItems = target.data.items
-      val metsItems =
-        sources.filter(WorkPredicates.metsWork).flatMap(_.data.items)
+      val metsItems = sources.toList.flatMap(_.data.items)
 
       sierraItems ++ metsItems
     }
