@@ -11,7 +11,6 @@ import uk.ac.wellcome.models.work.internal.{
 object WorkPredicates {
   type WorkPredicate = TransformedBaseWork => Boolean
 
-  val allWorks: WorkPredicate = _ => true
   val sierraWork: WorkPredicate = identifierTypeId("sierra-system-number")
   val metsWork: WorkPredicate = identifierTypeId("mets")
   val miroWork: WorkPredicate = identifierTypeId("miro-image-number")
