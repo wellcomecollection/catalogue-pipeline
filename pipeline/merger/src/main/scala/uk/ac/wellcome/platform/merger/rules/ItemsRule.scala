@@ -33,8 +33,8 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
 
     val items =
       mergeIntoCalmTarget(target, sources)
-        .orElse(mergeMetsIntoSingleItemSierraTarget(target, sources).orElse(
-          mergeMiroIntoSingleItemSierraTarget(target, sources)))
+        .orElse(mergeMetsIntoSingleItemSierraTarget(target, sources)
+          .orElse(mergeMiroIntoSingleItemSierraTarget(target, sources)))
         .orElse(mergeIntoMultiItemSierraTarget(target, sources))
         .getOrElse(target.data.items)
 
