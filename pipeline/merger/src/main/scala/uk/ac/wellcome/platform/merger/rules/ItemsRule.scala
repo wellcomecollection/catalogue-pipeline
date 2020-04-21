@@ -3,7 +3,10 @@ package uk.ac.wellcome.platform.merger.rules
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.logging.MergerLogging
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
-import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
+import uk.ac.wellcome.platform.merger.rules.WorkPredicates.{
+  WorkPredicate,
+  WorkPredicateOps
+}
 import cats.data.NonEmptyList
 
 /*
@@ -23,14 +26,19 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     val rules =
       List(mergeCalmItems, mergeMetsItems, mergeMiroItems)
 
-    val items = mergeCalmItems(target, sources)
-      .orElse(mergeMetsItems(target, sources))
-      .orElse(mergeMiroItems(target, sources))
-      .getOrElse(target.data.items)
+    val items =
+      mergeIntoCalmTarget(target, sources)
+        .orElse(mergeCalmItems(target, sources))
+        .orElse(mergeMetsItems(target, sources))
+        .orElse(mergeMiroItems(target, sources))
+        .getOrElse(target.data.items)
+
+    val calmMergedSources =
+      sources.filter(mergeIntoCalmTarget(target, _).isDefined)
 
     val mergedSources = sources.filter { source =>
       rules.exists(_(target, source).isDefined)
-    } ++ getDigitisedCopiesOfSierraWork(target, sources)
+    } ++ getDigitisedCopiesOfSierraWork(target, sources) ++ calmMergedSources
 
     FieldMergeResult(
       data = items,
@@ -144,6 +152,40 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
       List(
         sierraItem.copy(
           locations = sierraItem.locations ++ miroItems.flatMap(_.locations)
+        ))
+    }
+  }
+
+  /**
+    * Sierra records are created from the Sierra / Calm harvest.
+    * We merge the Sierra item ID into the Calm item.
+    *
+    * If an item is digitised via METS, it is linked to the Sierra record.
+    * We merge that into the Calm item.
+    */
+  private val mergeIntoCalmTarget = new PartialRule {
+    val isDefinedForTarget: WorkPredicate = WorkPredicates.calmWork
+    val isDefinedForSource
+      : WorkPredicate = WorkPredicates.metsWork or WorkPredicates.sierraWork
+
+    def rule(target: UnidentifiedWork,
+             sources: NonEmptyList[TransformedBaseWork]): FieldData = {
+
+      // The calmWork predicate ensures this is safe
+      val calmItem = target.data.items.head
+
+      val metsSources = sources.filter(WorkPredicates.metsWork)
+      val metsDigitalLocations =
+        metsSources.flatMap(_.data.items.flatMap(_.locations))
+
+      val sierraSources = sources.filter(WorkPredicates.sierraWork)
+      val sierraItemId =
+        sierraSources.flatMap(_.data.items.map(_.id)).headOption
+
+      List(
+        calmItem.copy(
+          locations = calmItem.locations ++ metsDigitalLocations,
+          id = sierraItemId.getOrElse(Unidentifiable)
         ))
     }
   }

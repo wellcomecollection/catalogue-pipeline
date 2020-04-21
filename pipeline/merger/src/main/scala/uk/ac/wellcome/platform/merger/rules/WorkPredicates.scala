@@ -14,9 +14,15 @@ object WorkPredicates {
   val sierraWork: WorkPredicate = identifierTypeId("sierra-system-number")
   val metsWork: WorkPredicate = identifierTypeId("mets")
   val miroWork: WorkPredicate = identifierTypeId("miro-image-number")
-  val calmWork: WorkPredicate = identifierTypeId("calm-record-id")
 
   val singleItem: WorkPredicate = work => work.data.items.size == 1
+
+  // All calm works return 1 item with 1 location, this checks that.
+  val calmWork: WorkPredicate = satisfiesAll(
+    identifierTypeId("calm-record-id"),
+    singleItem,
+    singleLocation
+  )
 
   val singleItemDigitalMets: WorkPredicate = satisfiesAll(
     metsWork,
@@ -50,6 +56,11 @@ object WorkPredicates {
         case _: DigitalLocation => true
         case _                  => false
       }
+    }
+
+  private def singleLocation(work: TransformedBaseWork): Boolean =
+    work.data.items.forall { item =>
+      item.locations.size == 1
     }
 
   private def identifierTypeId(id: String)(work: TransformedBaseWork): Boolean =
