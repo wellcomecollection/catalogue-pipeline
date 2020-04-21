@@ -31,7 +31,7 @@ class ItemsRuleTest
     }
   }
 
-  // Miro
+  // Sierra single item
   it("merges locations from Miro items into single-item Sierra works") {
     inside(ItemsRule.merge(physicalSierra, List(miroWork))) {
       case FieldMergeResult(items, mergedSources) =>
@@ -43,15 +43,6 @@ class ItemsRuleTest
     }
   }
 
-  it("doesn't merge Miro works into multi-item Sierra works") {
-    inside(ItemsRule.merge(multiItemPhysicalSierra, List(miroWork))) {
-      case FieldMergeResult(items, mergedSources) =>
-        items should be(multiItemPhysicalSierra.data.items)
-        mergedSources should be(Seq())
-    }
-  }
-
-  // METS
   it("merges item locations in METS work into single-item Sierra works item") {
     inside(ItemsRule.merge(physicalSierra, List(metsWork))) {
       case FieldMergeResult(items, mergedSources) =>
@@ -61,6 +52,15 @@ class ItemsRuleTest
             metsWork.data.items.head.locations
 
         mergedSources should be(Seq(metsWork))
+    }
+  }
+
+  // Sierra multi items
+  it("doesn't merge Miro works into multi-item Sierra works") {
+    inside(ItemsRule.merge(multiItemPhysicalSierra, List(miroWork))) {
+      case FieldMergeResult(items, mergedSources) =>
+        items should be(multiItemPhysicalSierra.data.items)
+        mergedSources should be(Seq())
     }
   }
 

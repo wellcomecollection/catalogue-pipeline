@@ -24,21 +24,20 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     target: UnidentifiedWork,
     sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData] = {
     val rules =
-      List(mergeCalmItems, mergeMetsItems, mergeMiroItems)
+      List(
+        mergeIntoCalmTarget,
+        mergeIntoSingleItemSierraTarget,
+        mergeIntoMultiItemSierraTarget)
 
     val items =
       mergeIntoCalmTarget(target, sources)
-        .orElse(mergeCalmItems(target, sources))
-        .orElse(mergeMetsItems(target, sources))
-        .orElse(mergeMiroItems(target, sources))
+        .orElse(mergeIntoSingleItemSierraTarget(target, sources))
+        .orElse(mergeIntoMultiItemSierraTarget(target, sources))
         .getOrElse(target.data.items)
-
-    val calmMergedSources =
-      sources.filter(mergeIntoCalmTarget(target, _).isDefined)
 
     val mergedSources = sources.filter { source =>
       rules.exists(_(target, source).isDefined)
-    } ++ getDigitisedCopiesOfSierraWork(target, sources) ++ calmMergedSources
+    } ++ getDigitisedCopiesOfSierraWork(target, sources)
 
     FieldMergeResult(
       data = items,
@@ -63,96 +62,60 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
   }
 
   /**
-    * If there is 1 Sierra item, we replace the `PhysicalLocation` with
-    * the one from the Calm record.
+    * Miro: we merge the location into the Sierra work with a single item
+    * as we assume that this is the only item that the Miro image
+    * could be associated with.
     *
-    * Otherwise we add the item to the items list.
-    *
-    * This logic is going to be removed soon as we make the Calm
-    * record the `target`.
+    * METS: As there is only 1 Sierra work, we assume that the METS work
+    * iss associated with that and merge the locations onto the Sierra item.
     */
-  private val mergeCalmItems = new PartialRule {
-    val isDefinedForTarget: WorkPredicate = WorkPredicates.sierraWork
-    val isDefinedForSource: WorkPredicate = WorkPredicates.calmWork
+  private val mergeIntoSingleItemSierraTarget = new PartialRule {
+    val isDefinedForTarget: WorkPredicate = WorkPredicates.singleItemSierra
+    val isDefinedForSource
+      : WorkPredicate = WorkPredicates.metsWork or WorkPredicates.miroWork
 
     def rule(target: UnidentifiedWork,
              sources: NonEmptyList[TransformedBaseWork]): FieldData = {
 
-      // The Calm transformer always creates a single item with a physical
-      // location so this is safe
-      val calmItem = sources.head.data.items.head
-      val calmLocation = calmItem.locations.head
+      // This is safe due to the `singleItemSierra` predicate
+      val sierraItem = target.data.items.head
 
-      target.data.items match {
-        case List(sierraItem) =>
-          List(
-            sierraItem.copy(
-              // We remove any `PhysicalLocation`s and add the calmLocation
-              // as the only `PhysicalLocation`
-              locations = calmLocation :: sierraItem.locations.filter(_ match {
-                case _: PhysicalLocation => false
-                case _                   => true
-              })
-            )
-          )
-        case multipleItems => calmItem :: multipleItems
-      }
+      val metsSources = sources.filter(WorkPredicates.metsWork)
+      val metsItemLocations =
+        metsSources.flatMap(_.data.items).flatMap(_.locations)
+
+      val miroSources = sources.filter(WorkPredicates.miroWork)
+      val miroItemLocations =
+        miroSources.flatMap(_.data.items).flatMap(_.locations)
+
+      List(
+        sierraItem.copy(
+          locations = sierraItem.locations ++ metsItemLocations ++ miroItemLocations
+        ))
     }
   }
 
   /**
-    * If there is 1 Sierra item, we add the location from the METS record
-    * else we just append METS items as we wouldn't know which item to
-    * augment.
-    */
-  private val mergeMetsItems = new PartialRule {
-    val isDefinedForTarget: WorkPredicate = WorkPredicates.sierraWork
-    val isDefinedForSource: WorkPredicate = WorkPredicates.singleItemDigitalMets
-
-    def rule(target: UnidentifiedWork,
-             sources: NonEmptyList[TransformedBaseWork]): FieldData = {
-      val sierraItems = target.data.items
-      val metsItems = sources.toList.flatMap(_.data.items)
-
-      debug(s"Merging METS items from ${describeWorks(sources)}")
-      sierraItems match {
-        case List(sierraItem) =>
-          List(
-            sierraItem.copy(
-              locations = sierraItem.locations ++ metsItems.flatMap(_.locations)
-            )
-          )
-        case multipleItems =>
-          multipleItems ++ metsItems
-      }
-    }
-  }
-
-  /** We merge the Miro location to the Sierra work with a single item
-    * as we assume that this is the only item that the Miro image
-    * could be associated with.
-    *
-    * If we have multiple items, we assume it is definitely associated with
+    * Miro: we assume the linked Miro work is definitely associated with
     * one of the Sierra items, but unsure of which. We thus don't append it
     * to the Sierra items to avoid certain duplication, and leave the works
     * unmerged.
+    *
+    * METS: As we are unsure which item the METS work is associated with
+    * we add it to the list of items.
     */
-  private val mergeMiroItems = new PartialRule {
-    val isDefinedForTarget: WorkPredicate = WorkPredicates.singleItemSierra
-    val isDefinedForSource: WorkPredicate = WorkPredicates.miroWork
+  private val mergeIntoMultiItemSierraTarget = new PartialRule {
+    val isDefinedForTarget: WorkPredicate = WorkPredicates.multiItem
+    val isDefinedForSource: WorkPredicate = WorkPredicates.metsWork
 
     def rule(target: UnidentifiedWork,
              sources: NonEmptyList[TransformedBaseWork]): FieldData = {
-      // This is safe due to the `singleItemSierra` predicate
-      val sierraItem = target.data.items.head
-      val miroItems = sources.toList.flatMap(_.data.items)
 
-      debug(s"Merging Miro items from ${describeWorks(sources)}")
+      val sierraItems = target.data.items
+      val metsItems =
+        sources.filter(WorkPredicates.metsWork).flatMap(_.data.items)
 
-      List(
-        sierraItem.copy(
-          locations = sierraItem.locations ++ miroItems.flatMap(_.locations)
-        ))
+      sierraItems ++ metsItems
     }
   }
 
