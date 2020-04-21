@@ -79,15 +79,15 @@ if __name__ == "__main__":
     travis_build_stage = os.environ["TRAVIS_BUILD_STAGE_NAME"]
     travis_commit_range = os.environ["TRAVIS_COMMIT_RANGE"]
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("project_name", default=os.environ.get("SBT_PROJECT"))
-    parser.add_argument("--changes-in", nargs="*")
-    args = parser.parse_args()
-
     try:
         # If it's not an sbt task, we always run it no matter what.
         task = os.environ["TASK"]
     except KeyError:
+        parser = argparse.ArgumentParser()
+        parser.add_argument("project_name", default=os.environ.get("SBT_PROJECT"))
+        parser.add_argument("--changes-in", nargs="*")
+        args = parser.parse_args()
+
         task = f"{args.project_name}-test"
 
         if travis_event_type == "pull_request":
