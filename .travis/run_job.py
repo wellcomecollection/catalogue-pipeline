@@ -80,7 +80,7 @@ if __name__ == "__main__":
     travis_commit_range = os.environ["TRAVIS_COMMIT_RANGE"]
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("project_name", default=os.environ["SBT_PROJECT"])
+    parser.add_argument("project_name", default=os.environ.get("SBT_PROJECT"))
     parser.add_argument("--changes-in", nargs="*")
     args = parser.parse_args()
 
