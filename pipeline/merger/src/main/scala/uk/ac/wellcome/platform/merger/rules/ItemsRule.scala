@@ -9,12 +9,12 @@ import uk.ac.wellcome.platform.merger.rules.WorkPredicates.{
 }
 import cats.data.NonEmptyList
 
-/*
- * Items are merged as follows
- *
- * Miro and METS item locations merged onto Sierra with single item
- * METS item added to Sierra with multiple items
- */
+/**
+  * Items are merged as follows
+  *
+  * Miro and METS item locations merged onto Sierra with single item
+  * METS item added to Sierra with multiple items
+  */
 object ItemsRule extends FieldMergeRule with MergerLogging {
   type FieldData = List[Item[Unminted]]
 
@@ -24,12 +24,14 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     val rules =
       List(
         mergeIntoCalmTarget,
-        mergeIntoSingleItemSierraTarget,
+        mergeMetsIntoSingleItemSierraTarget,
+        mergeMiroIntoSingleItemSierraTarget,
         mergeIntoMultiItemSierraTarget)
 
     val items =
       mergeIntoCalmTarget(target, sources)
-        .orElse(mergeIntoSingleItemSierraTarget(target, sources))
+        .orElse(mergeMetsIntoSingleItemSierraTarget(target, sources).orElse(
+          mergeMiroIntoSingleItemSierraTarget(target, sources)))
         .orElse(mergeIntoMultiItemSierraTarget(target, sources))
         .getOrElse(target.data.items)
 
@@ -59,20 +61,12 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
         sources.filter(source => source.sourceIdentifier == sourceIdentifier))
   }
 
-  /**
-    * Miro: we merge the location into the Sierra work with a single item
-    * as we assume that this is the only item that the Miro image
-    * could be associated with.
-    *
-    * METS: As there is only 1 Sierra work, we assume that the METS work
+  /** When there is only 1 Sierra item, we assume that the METS work item
     * is associated with that and merge the locations onto the Sierra item.
-    *
-    * METS overrides Miro
     */
-  private val mergeIntoSingleItemSierraTarget = new PartialRule {
+  private val mergeMetsIntoSingleItemSierraTarget = new PartialRule {
     val isDefinedForTarget: WorkPredicate = WorkPredicates.singleItemSierra
-    val isDefinedForSource
-      : WorkPredicate = WorkPredicates.metsWork or WorkPredicates.miroWork
+    val isDefinedForSource: WorkPredicate = WorkPredicates.metsWork
 
     def rule(target: UnidentifiedWork,
              sources: NonEmptyList[TransformedBaseWork]): FieldData = {
@@ -80,24 +74,33 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
       // This is safe due to the `singleItemSierra` predicate
       val sierraItem = target.data.items.head
 
-      val metsItemLocations = sources
-        .filter(WorkPredicates.metsWork)
-        .flatMap(_.data.items)
-        .flatMap(_.locations)
+      List(
+        sierraItem.copy(
+          locations = sierraItem.locations ++ sources.toList
+            .flatMap(_.data.items)
+            .flatMap(_.locations)
+        ))
+    }
+  }
 
-      val miroItemLocations = sources
-        .filter(WorkPredicates.miroWork)
-        .flatMap(_.data.items)
-        .flatMap(_.locations)
+  /** When there is only 1 Sierra item, we assume that the Miro work item
+    * is associated with that and merge the locations onto the Sierra item.
+    */
+  private val mergeMiroIntoSingleItemSierraTarget = new PartialRule {
+    val isDefinedForTarget: WorkPredicate = WorkPredicates.singleItemSierra
+    val isDefinedForSource: WorkPredicate = WorkPredicates.miroWork
 
-      val itemLocationsToMerge = metsItemLocations match {
-        case _ :: _ => metsItemLocations
-        case Nil    => miroItemLocations
-      }
+    def rule(target: UnidentifiedWork,
+             sources: NonEmptyList[TransformedBaseWork]): FieldData = {
+
+      // This is safe due to the `singleItemSierra` predicate
+      val sierraItem = target.data.items.head
 
       List(
         sierraItem.copy(
-          locations = sierraItem.locations ++ itemLocationsToMerge
+          locations = sierraItem.locations ++ sources.toList
+            .flatMap(_.data.items)
+            .flatMap(_.locations)
         ))
     }
   }

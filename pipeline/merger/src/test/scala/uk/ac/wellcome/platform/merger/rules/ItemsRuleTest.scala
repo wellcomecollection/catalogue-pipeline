@@ -55,6 +55,19 @@ class ItemsRuleTest
     }
   }
 
+  it(
+    "override Miro merging with METS merging into single-item Sierra works item") {
+    inside(ItemsRule.merge(physicalSierra, List(miroWork, metsWork))) {
+      case FieldMergeResult(items, mergedSources) =>
+        items should have size 1
+        items.head.locations shouldBe
+          physicalSierra.data.items.head.locations ++
+            metsWork.data.items.head.locations
+
+        mergedSources should contain theSameElementsAs (Seq(metsWork, miroWork))
+    }
+  }
+
   // Sierra multi items
   it("doesn't merge Miro works into multi-item Sierra works") {
     inside(ItemsRule.merge(multiItemPhysicalSierra, List(miroWork))) {
