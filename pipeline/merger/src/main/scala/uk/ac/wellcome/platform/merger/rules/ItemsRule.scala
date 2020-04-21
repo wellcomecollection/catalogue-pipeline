@@ -77,18 +77,12 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
 
       // This is safe due to the `singleItemSierra` predicate
       val sierraItem = target.data.items.head
-
-      val metsSources = sources.filter(WorkPredicates.metsWork)
-      val metsItemLocations =
-        metsSources.flatMap(_.data.items).flatMap(_.locations)
-
-      val miroSources = sources.filter(WorkPredicates.miroWork)
-      val miroItemLocations =
-        miroSources.flatMap(_.data.items).flatMap(_.locations)
+      val sourcesItemLocations =
+        sources.toList.flatMap(_.data.items).flatMap(_.locations)
 
       List(
         sierraItem.copy(
-          locations = sierraItem.locations ++ metsItemLocations ++ miroItemLocations
+          locations = sierraItem.locations ++ sourcesItemLocations
         ))
     }
   }
