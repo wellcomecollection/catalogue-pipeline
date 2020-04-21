@@ -11,7 +11,7 @@ import cats.implicits._
   */
 case class CollectionPath(
   path: String,
-  level: CollectionLevel,
+  level: Option[CollectionLevel] = None,
   label: Option[String] = None,
 ) {
 
@@ -42,15 +42,9 @@ object CollectionLevel {
   */
 case class Collection(
   path: CollectionPath,
-  work: IdentifiedWork,
+  work: Option[IdentifiedWork],
   children: List[Collection] = Nil
 ) {
-
-  def size: Int =
-    children.map(_.size).sum + 1
-
-  def pathList: List[String] =
-    path.path :: children.flatMap(_.pathList)
 
   def isRoot: Boolean =
     path.depth == 1
@@ -62,7 +56,7 @@ object Collection {
     * Create a Collection from a list of works. This errors given the following
     * situations:
     *
-    *   * If the works do not form a fully connected tree
+    *   * If the works are not all connected to the same root
     *   * The given list contains works with duplicate paths.
     *   * There are works which do not contain a Collection
     *   * The list is empty
@@ -71,7 +65,7 @@ object Collection {
     works
       .map { work =>
         work.data.collectionPath match {
-          case Some(path) => Right(path -> work)
+          case Some(_) => Right(work)
           case None =>
             Left(
               new Exception(
@@ -79,16 +73,46 @@ object Collection {
         }
       }
       .toResult
-      .flatMap {
-        case head :: tail => Right(apply(NonEmptyList(head, tail), depth = 1))
-        case Nil          => Left(new Exception("Cannot create empty tree"))
-      }
-      .flatMap { tree =>
-        checkTreeErrors(tree, works).map(Left(_)).getOrElse(Right(tree))
+      .map(getWorkMapping(_))
+      .flatMap { mapping =>
+        checkErrors(works, mapping).map(Left(_)).getOrElse {
+          mapping match {
+            case head :: tail =>
+              Right(apply(NonEmptyList(head, tail), depth = 1))
+            case Nil => Left(new Exception("Cannot create empty tree"))
+          }
+        }
       }
 
-  private def apply(workMapping: NonEmptyList[(CollectionPath, IdentifiedWork)],
-                    depth: Int): Collection =
+  private def getWorkMapping(works: List[IdentifiedWork])
+    : List[(CollectionPath, Option[IdentifiedWork])] = {
+    val partialMapping = works
+      .map(work => work.data.collectionPath.get.path -> work)
+      .toMap
+    partialMapping.keys
+      .flatMap(path => path :: ancestorPaths(path))
+      .toList
+      .sorted
+      .distinct
+      .map { path =>
+        val work = partialMapping.get(path)
+        work
+          .map(_.data.collectionPath.get)
+          .getOrElse(CollectionPath(path)) -> work
+      }
+  }
+
+  private def ancestorPaths(path: String): List[String] =
+    path.split("/").toList match {
+      case parentTokens :+ _ if parentTokens.nonEmpty =>
+        val parent = parentTokens.mkString("/")
+        parent :: ancestorPaths(parent)
+      case _ => Nil
+    }
+
+  private def apply(
+    workMapping: NonEmptyList[(CollectionPath, Option[IdentifiedWork])],
+    depth: Int): Collection =
     workMapping.sortBy { case (path, _) => path.tokens.length } match {
       case NonEmptyList((path, work), tail) =>
         val childDepth = depth + 1
@@ -108,20 +132,22 @@ object Collection {
         )
     }
 
-  private def checkTreeErrors(tree: Collection, works: List[IdentifiedWork]) = {
-    val pathList = tree.pathList
-    if (pathList.length < works.length) {
-      val unconnected =
-        works.map(_.data.collectionPath.get.path).filterNot(pathList.toSet)
-      Some(new Exception(
-        s"Not all works in collection are connected to root '${tree.path.path}': ${unconnected
-          .mkString(",")}"))
-    } else if (pathList.length > pathList.toSet.size) {
-      val duplicates = pathList.diff(pathList.distinct).distinct
+  private def checkErrors(
+    works: List[IdentifiedWork],
+    mapping: List[(CollectionPath, Option[IdentifiedWork])]) = {
+    val rootPaths = mapping.map { case (path, _) => path.tokens.head }.distinct
+    val workPaths = works.map(_.data.collectionPath.get.path)
+    val duplicates = workPaths.diff(workPaths.distinct).distinct
+    if (rootPaths.length > 1) {
+      Some(
+        new Exception(
+          s"Multiple root paths not permitted: ${rootPaths.mkString(", ")}"))
+    } else if (duplicates.nonEmpty) {
       Some(
         new Exception(
           s"Tree contains duplicate paths: ${duplicates.mkString(",")}"))
-    } else
+    } else {
       None
+    }
   }
 }

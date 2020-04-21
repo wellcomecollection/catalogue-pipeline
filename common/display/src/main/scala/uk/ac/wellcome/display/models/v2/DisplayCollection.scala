@@ -16,7 +16,7 @@ case class DisplayCollection(
   @Schema(
     description =
       "The work. This only contains a limited set of fields, regardless of the includes."
-  ) work: DisplayWorkV2,
+  ) work: Option[DisplayWorkV2] = None,
   @Schema(
     description =
       "An array containing any children. This value is null when a given node has not been expanded."
@@ -28,7 +28,7 @@ object DisplayCollection {
   def apply(tree: Collection, expandedPaths: List[String]): DisplayCollection =
     DisplayCollection(
       path = DisplayCollectionPath(tree.path),
-      work = DisplayWorkV2(tree.work),
+      work = tree.work.map(DisplayWorkV2(_)),
       children =
         if (isExpanded(tree.path, expandedPaths))
           Some(tree.children.map(DisplayCollection(_, expandedPaths)))
@@ -52,7 +52,7 @@ case class DisplayCollectionPath(
   ) path: String,
   @Schema(
     description = "The level of the node."
-  ) level: String,
+  ) level: Option[String] = None,
   @Schema(
     description = "The label of the collection"
   ) label: Option[String] = None,
@@ -64,7 +64,7 @@ object DisplayCollectionPath {
   def apply(collectionPath: CollectionPath): DisplayCollectionPath =
     DisplayCollectionPath(
       path = collectionPath.path,
-      level = DisplayCollectionLevel(collectionPath.level),
+      level = collectionPath.level.map(DisplayCollectionLevel(_)),
       label = collectionPath.label,
     )
 }

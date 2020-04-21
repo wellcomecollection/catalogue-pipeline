@@ -106,7 +106,7 @@ object CalmTransformer extends Transformer[CalmRecord] with CalmOps {
         Right(
           CollectionPath(
             path = path,
-            level = level,
+            level = Some(level),
             label = record.get("AltRefNo"))
         )
       }
