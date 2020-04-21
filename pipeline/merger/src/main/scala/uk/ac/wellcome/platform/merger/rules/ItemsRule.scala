@@ -134,15 +134,12 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     def rule(target: UnidentifiedWork,
              sources: NonEmptyList[TransformedBaseWork]): FieldData = {
 
-      // As the Calm transformer always adds 1 item with 1 location, this is safe
+      // The calmWork predicate ensures this is safe
       val calmItem = target.data.items.head
 
       val metsSources = sources.filter(WorkPredicates.metsWork)
       val metsDigitalLocations =
-        metsSources.flatMap(_.data.items.flatMap(_.locations.filter(_ match {
-          case _: DigitalLocation => true
-          case _                  => false
-        })))
+        metsSources.flatMap(_.data.items.flatMap(_.locations))
 
       val sierraSources = sources.filter(WorkPredicates.sierraWork)
       val sierraItemId =

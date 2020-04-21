@@ -19,8 +19,8 @@ trait CalmRetriever {
   * To retrieve records from the CALM API multiple requests are needed, each
   * containing a SOAP document with the request data. An initial request is
   * first made which searches for the number of hits. The API is stateful, with
-  * the response including a session cookie which is used on subsequenet
-  * requests, one for each of the indvidual records.
+  * the response including a session cookie which is used on subsequent
+  * requests, one for each of the individual records.
   */
 class HttpCalmRetriever(url: String,
                         username: String,
@@ -102,18 +102,16 @@ class HttpCalmRetriever(url: String,
 
   def parseCookie(resp: HttpResponse): Cookie =
     resp.headers
-      .collect {
+      .collectFirst {
         case `Set-Cookie`(cookie) => Cookie(cookie.pair)
       }
-      .headOption
       .getOrElse(
         throw new Exception("Session cookie not found in CALM response"))
 
   def parseTimestamp(resp: HttpResponse): Instant =
     resp.headers
-      .collect {
+      .collectFirst {
         case `Date`(dateTime) => Instant.ofEpochMilli(dateTime.clicks)
       }
-      .headOption
       .getOrElse(throw new Exception("Timestamp not found in CALM response"))
 }
