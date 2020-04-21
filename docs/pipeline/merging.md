@@ -30,11 +30,29 @@ Merging works consist of a few steps
 
 Below are diagrams of the merging rules
 
-### Calm items
+### Items
+
+#### Calm
 
 ![How we merge items into calm](../.gitbook/assets/merger_items_into_calm_target.png)
 
 [View on Excalidraw][merging-items-into-calm-target]
 
-[linked-works-diagram]: https://excalidraw.com/#json=6218082506768384,6y0SZ5U20AFChDSaScsxww  "How we link works"
-[merging-items-into-calm-target]: https://excalidraw.com/#json=5992885962932224,PmNI_PpnKnm0slrY_MJ0jg  "How we merge items into calm target"
+#### Sierra single item
+
+![How we merge items into sierra single item](../.gitbook/assets/merger_items_into_sierra_single_item_target.png)
+
+[View on Excalidraw][merging-items-into-sierra-single-item-target]
+
+#### Sierra multi item
+
+![How we merge items into sierra multi item](../.gitbook/assets/merger_items_into_sierra_multi_item_target.png)
+
+[View on Excalidraw][merging-items-into-sierra-multi-item-target]
+
+---
+
+[linked-works-diagram]:                         https://excalidraw.com/#json=6218082506768384,6y0SZ5U20AFChDSaScsxww "How we link works"
+[merging-items-into-calm-target]:               https://excalidraw.com/#json=5992885962932224,PmNI_PpnKnm0slrY_MJ0jg "How we merge items into calm target"
+[merging-items-into-sierra-single-item-target]: https://excalidraw.com/#json=4647141444157440,xNIaaYYJpX1p6HG6zSMDHQ "How we merge items into Sierra single item target"
+[merging-items-into-multi-single-item-target]:  https://excalidraw.com/#json=4842487856234496,rOhr0AgAV_O0i6lwx0bWKQ "How we merge items into Sierra multi item target"

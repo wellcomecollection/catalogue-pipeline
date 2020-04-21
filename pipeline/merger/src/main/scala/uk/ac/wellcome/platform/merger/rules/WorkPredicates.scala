@@ -16,6 +16,7 @@ object WorkPredicates {
   val miroWork: WorkPredicate = identifierTypeId("miro-image-number")
 
   val singleItem: WorkPredicate = work => work.data.items.size == 1
+  val multiItem: WorkPredicate = work => work.data.items.size > 1
 
   // All calm works return 1 item with 1 location, this checks that.
   val calmWork: WorkPredicate = satisfiesAll(
@@ -33,6 +34,7 @@ object WorkPredicates {
   val singleItemMiro: WorkPredicate = satisfiesAll(miroWork, singleItem)
 
   val singleItemSierra: WorkPredicate = satisfiesAll(sierraWork, singleItem)
+  val multiItemSierra: WorkPredicate = satisfiesAll(sierraWork, multiItem)
 
   val physicalSierra: WorkPredicate =
     satisfiesAll(sierraWork, physicalLocationExists)
