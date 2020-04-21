@@ -114,7 +114,7 @@ class WorksIndexConfigTest
       Some(
         CollectionPath(
           path = "PATH/FOR/THE/COLLECTION",
-          level = CollectionLevel.Item,
+          level = Some(CollectionLevel.Item),
           label = Some("PATH/FOR/THE/COLLECTION")))
 
     withLocalWorksIndex { index =>
