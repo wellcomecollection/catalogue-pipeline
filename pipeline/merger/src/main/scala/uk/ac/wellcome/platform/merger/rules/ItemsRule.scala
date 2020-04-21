@@ -10,12 +10,10 @@ import uk.ac.wellcome.platform.merger.rules.WorkPredicates.{
 import cats.data.NonEmptyList
 
 /*
- * Items are merged as follows:
+ * Items are merged as follows
  *
- * - The items from digital Sierra works and METS works are added to the items of multi-item
- *   physical Sierra works, or their locations are added to those of single-item
- *   physical Sierra works.
- * - Miro locations are added to single-item Sierra locations.
+ * Miro and METS item locations merged onto Sierra with single item
+ * METS item added to Sierra with multiple items
  */
 object ItemsRule extends FieldMergeRule with MergerLogging {
   type FieldData = List[Item[Unminted]]
