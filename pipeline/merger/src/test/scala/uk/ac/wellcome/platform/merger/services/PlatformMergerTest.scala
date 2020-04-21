@@ -346,7 +346,8 @@ class PlatformMergerTest
     val calmWork = createUnidentifiedCalmWork(
       data = WorkData(
         title = Some("123"),
-        collectionPath = Some(CollectionPath("ref/no", CollectionLevel.Item)),
+        collectionPath =
+          Some(CollectionPath("ref/no", Some(CollectionLevel.Item))),
         physicalDescription = Some("description"),
         contributors = List(Contributor(Agent("agent"), Nil)),
         subjects = List(Subject("subject", Nil)),
