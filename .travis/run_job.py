@@ -105,7 +105,7 @@ if __name__ == "__main__":
                     f"Nothing in this patch affects {args.project_name}, so skipping tests"
                 )
                 sys.exit(0)
-        except KeyError:
+        except (FileNotFoundError, KeyError):
             if args.changes_in and not changed_paths:
                 print(
                     f"Nothing in this patch affects the files {args.changes_in}, so skipping tests"
