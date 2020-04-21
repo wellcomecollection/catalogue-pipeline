@@ -582,4 +582,25 @@ class ApiV2WorksIncludesTest
         }
     }
   }
+
+  it(
+    "doesn't include collection on the single work endpoint if we don't pass ?include=collection") {
+    withApi {
+      case (indexV2, routes) =>
+        val work = createIdentifiedWorkWith(
+          collectionPath = Some(
+            CollectionPath("PP/MI", Some(CollectionLevel.Item), Some("PP/MI"))))
+        insertIntoElasticsearch(indexV2, work)
+        assertJsonResponse(routes, s"/$apiPrefix/works/${work.canonicalId}") {
+          Status.OK -> s"""
+            {
+              ${singleWorkResult(apiPrefix)},
+              "id": "${work.canonicalId}",
+              "title": "${work.data.title.get}",
+              "alternativeTitles": []
+            }
+          """
+        }
+    }
+  }
 }

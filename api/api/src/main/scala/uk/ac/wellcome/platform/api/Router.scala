@@ -86,7 +86,7 @@ class Router(elasticClient: ElasticClient,
   }
 
   def multipleWorks(params: MultipleWorksParams): Future[Route] =
-    transactFuture("GET /works")({
+    transactFuture("GET /works") {
       val searchOptions = params.searchOptions(apiConfig)
       val index = params._index.map(Index(_)).getOrElse(elasticConfig.index)
       worksService
@@ -106,27 +106,30 @@ class Router(elasticClient: ElasticClient,
               )
             }
         }
-    })
+    }
 
   def singleWork(id: String, params: SingleWorkParams): Future[Route] =
-    transactFuture("GET /works/{workId}")({
+    transactFuture("GET /works/{workId}") {
       val index = params._index.map(Index(_)).getOrElse(elasticConfig.index)
       val includes = params.include.getOrElse(V2WorksIncludes())
       worksService
         .findWorkById(id)(index)
         .flatMap {
           case Right(Some(work: IdentifiedWork)) =>
-            val expandedPaths = params._expandPaths.getOrElse(Nil)
-            retrieveTree(index, work, expandedPaths).map {
-              workFound(work, _, includes)
-            }
+            if (includes.collection) {
+              val expandedPaths = params._expandPaths.getOrElse(Nil)
+              retrieveTree(index, work, expandedPaths).map {
+                workFound(work, _, includes)
+              }
+            } else
+              Future.successful(workFound(work, None, includes))
           case Right(Some(work: IdentifiedRedirectedWork)) =>
             Future.successful(workRedirect(work))
           case Right(Some(_)) => Future.successful(workGone)
           case Right(None)    => Future.successful(workNotFound(id))
           case Left(err)      => Future.successful(elasticError(err))
         }
-    })
+    }
 
   def workFound(work: IdentifiedWork,
                 tree: Option[(Collection, List[String])],
@@ -254,12 +257,7 @@ class Router(elasticClient: ElasticClient,
               // the work API when tree retrieval fails
               logger.error("Error retrieving collection tree", err)
               None
-            case Right(tree) =>
-              if (!tree.isRoot) {
-                logger.error(s"Ancestors to ${tree.path} not found")
-                None
-              } else
-                Some((tree, allPaths))
+            case Right(tree) => Some((tree, allPaths))
           }
       }
       .getOrElse(Future.successful(None))
