@@ -94,16 +94,22 @@ if __name__ == "__main__":
             changed_paths = get_changed_paths("HEAD", "master", globs=args.changes_in)
         else:
             git("fetch", "origin")
-            changed_paths = get_changed_paths(travis_commit_range, globs=args.changes_in)
+            changed_paths = get_changed_paths(
+                travis_commit_range, globs=args.changes_in
+            )
 
         sbt_repo = Repository(".sbt_metadata")
         try:
             if not should_run_sbt_project(sbt_repo, args.project_name, changed_paths):
-                print(f"Nothing in this patch affects {args.project_name}, so skipping tests")
+                print(
+                    f"Nothing in this patch affects {args.project_name}, so skipping tests"
+                )
                 sys.exit(0)
         except KeyError:
             if args.changes_in and not changed_paths:
-                print(f"Nothing in this patch affects the files {args.changes_in}, so skipping tests")
+                print(
+                    f"Nothing in this patch affects the files {args.changes_in}, so skipping tests"
+                )
                 sys.exit(0)
 
     make(task)
