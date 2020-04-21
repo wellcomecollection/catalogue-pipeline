@@ -29,7 +29,7 @@ class CalmTransformerTest extends FunSpec with Matchers {
           collectionPath = Some(
             CollectionPath(
               path = "a/b/c",
-              level = CollectionLevel.Collection,
+              level = Some(CollectionLevel.Collection),
               label = Some("a.b.c")
             )
           ),
@@ -246,7 +246,9 @@ class CalmTransformerTest extends FunSpec with Matchers {
       "RefNo" -> "a/b/c",
       "AltRefNo" -> "a.b.c",
     )
-    CalmTransformer(record, version).right.get.data.collectionPath.get.level shouldBe CollectionLevel.Series
+    CalmTransformer(record, version).right.get.data.collectionPath.get.level shouldBe Some(
+      CollectionLevel.Series
+    )
   }
 
   it("errors if invalid access status") {
