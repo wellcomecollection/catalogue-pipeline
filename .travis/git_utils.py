@@ -14,7 +14,7 @@ def git(*args):
         sys.exit(err.returncode)
 
 
-def get_changed_paths(*args, globs=[]):
+def get_changed_paths(*args, globs=None):
     """
     Returns a set of changed paths in a given commit range.
 

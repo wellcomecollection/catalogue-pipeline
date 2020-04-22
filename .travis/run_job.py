@@ -90,7 +90,11 @@ if __name__ == "__main__":
 
         task = f"{args.project_name}-test"
 
-        change_globs = args.changes_in + [".travis.yml"] if args.changes_in else None
+        if args.changes_in:
+            change_globs = args.changes_in + [".travis.yml"]
+        else:
+            change_globs = None
+
         if travis_event_type == "pull_request":
             changed_paths = get_changed_paths("HEAD", "master", globs=change_globs)
         else:
