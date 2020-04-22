@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.inference_manager.services
 
-import java.nio.ByteBuffer
+import java.nio.{ByteBuffer, ByteOrder}
 import java.util.Base64
 
 import akka.http.scaladsl.model._
@@ -95,7 +95,11 @@ object FeatureVectorInferrerAdapter
     }
 
   private def decodeBase64ToFloatList(base64str: String): List[Float] = {
-    val buf = ByteBuffer.wrap(Base64.getDecoder.decode(base64str))
+    // The JVM is big-endian whereas Python has encoded this with
+    // little-endian ordering, so we need to manually set the order
+    val buf = ByteBuffer
+      .wrap(Base64.getDecoder.decode(base64str))
+      .order(ByteOrder.LITTLE_ENDIAN)
     Stream
       .continually(Try(buf.getFloat))
       .takeWhile(_.isSuccess)
