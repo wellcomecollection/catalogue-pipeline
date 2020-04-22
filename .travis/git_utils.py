@@ -14,16 +14,15 @@ def git(*args):
         sys.exit(err.returncode)
 
 
-# Root of the Git repository
-ROOT = git("rev-parse", "--show-toplevel")
-
-
-def get_changed_paths(*args):
+def get_changed_paths(*args, globs=None):
     """
     Returns a set of changed paths in a given commit range.
 
-    :param commit_range: Arguments to pass to ``git diff``.
+    :param args: Arguments to pass to ``git diff``.
+    :param globs: List of file globs to include in changed paths.
     """
+    if globs:
+        args = list(args) + ["--", *globs]
     diff_output = git("diff", "--name-only", *args)
 
     return set([line.strip() for line in diff_output.splitlines()])

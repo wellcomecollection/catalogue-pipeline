@@ -53,8 +53,10 @@ jobs:
       script: ./.travis/run_job.py mets_adapter
     - name: calm_adapter
       script: ./.travis/run_job.py calm_adapter
-    - name: inference_manager
-      script: ./.travis/run_job.py inference_manager
+    - name: inferrer
+      script:
+        - ./.travis/run_job.py inference_manager
+        - ./.travis/run_job.py feature_inferrer --changes-in pipeline/inferrer/feature_inferrer
     - name: snapshot_generator
       script: ./.travis/run_job.py snapshot_generator
     - name: lambda-test
@@ -124,12 +126,14 @@ install:
   # See https://github.com/travis-ci/travis-ci/issues/6534
   - sudo sysctl -w vm.max_map_count=262144
 
-language: sh
 
 services:
   - docker
 
-dist: trusty
+dist: bionic
+
+language: python
+python: "3.7"
 
 branches:
   only:
