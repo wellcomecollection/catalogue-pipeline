@@ -40,32 +40,19 @@ class WorkPredicatesTest
     }
   }
 
-  it("selects METS works") {
-    forAll(works.filter(WorkPredicates.metsWork)) { work =>
+  it("selects singleDigitalItemMetsWork works") {
+    forAll(works.filter(WorkPredicates.singleDigitalItemMetsWork)) { work =>
       work.sourceIdentifier.identifierType.id shouldBe "mets"
+      work.data.items should have size 1
+      work.data.items.head.locations.head shouldBe a[DigitalLocation]
     }
   }
 
-  it("selects Miro works") {
-    forAll(works.filter(WorkPredicates.miroWork)) { work =>
+  it("selects singleDigitalItemMiroWork works") {
+    forAll(works.filter(WorkPredicates.singleDigitalItemMiroWork)) { work =>
       work.sourceIdentifier.identifierType.id shouldBe "miro-image-number"
-    }
-  }
-
-  it("selects single-item digital METS works") {
-    forAll(works.filter(WorkPredicates.singleItemDigitalMets)) { work =>
-      work.sourceIdentifier.identifierType.id shouldBe "mets"
-      work.data.items should have length 1
-      every(work.data.items.head.locations) should matchPattern {
-        case _: DigitalLocation =>
-      }
-    }
-  }
-
-  it("selects single-item Miro works") {
-    forAll(works.filter(WorkPredicates.singleItemMiro)) { work =>
-      work.sourceIdentifier.identifierType.id shouldBe "miro-image-number"
-      work.data.items should have length 1
+      work.data.items should have size 1
+      work.data.items.head.locations.head shouldBe a[DigitalLocation]
     }
   }
 

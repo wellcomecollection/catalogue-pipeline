@@ -41,7 +41,8 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
 
   private val miroIdsRule = new PartialRule {
     val isDefinedForTarget: WorkPredicate = WorkPredicates.singleItemSierra
-    val isDefinedForSource: WorkPredicate = WorkPredicates.singleItemMiro
+    val isDefinedForSource: WorkPredicate =
+      WorkPredicates.singleDigitalItemMiroWork
 
     override def rule(
       target: UnidentifiedWork,
@@ -67,7 +68,8 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
 
   private val calmIdsRule = new PartialRule {
     val isDefinedForTarget: WorkPredicate = WorkPredicates.sierraWork
-    val isDefinedForSource: WorkPredicate = WorkPredicates.calmWork
+    val isDefinedForSource: WorkPredicate =
+      WorkPredicates.singlePhysicalItemCalmWork
 
     override def rule(
       target: UnidentifiedWork,
