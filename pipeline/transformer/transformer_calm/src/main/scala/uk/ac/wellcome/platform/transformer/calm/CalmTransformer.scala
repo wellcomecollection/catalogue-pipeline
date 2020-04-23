@@ -1,9 +1,11 @@
 package uk.ac.wellcome.platform.transformer.calm
 
+import grizzled.slf4j.Logging
+
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.internal.result._
 
-object CalmTransformer extends Transformer[CalmRecord] with CalmOps {
+object CalmTransformer extends Transformer[CalmRecord] with CalmOps with Logging {
 
   val identifierMapping = Map(
     "RefNo" -> CalmIdentifierTypes.refNo,
@@ -26,13 +28,37 @@ object CalmTransformer extends Transformer[CalmRecord] with CalmOps {
   )
 
   def apply(record: CalmRecord, version: Int): Result[TransformedBaseWork] =
-    workData(record) map { data =>
-      UnidentifiedWork(
-        sourceIdentifier = sourceIdentifier(record),
-        version = version,
-        data = data
+    if (shouldSuppress(record))
+      Right(
+        UnidentifiedInvisibleWork(
+          sourceIdentifier = sourceIdentifier(record),
+          version = version,
+          data = workData(record).getOrElse(WorkData())
+        )
       )
-    }
+    else
+      workData(record) map { data =>
+        UnidentifiedWork(
+          sourceIdentifier = sourceIdentifier(record),
+          version = version,
+          data = data
+        )
+      }
+
+  def shouldSuppress(record: CalmRecord): Boolean =
+    record
+      .get("Transmission")
+      .map { value =>
+        value.toLowerCase match {
+          case "no"  => true
+          case "yes" => false
+          case _ =>
+            info(
+              s"Unrecognised value for Transmission field; assuming 'Yes': $value")
+            false
+        }
+      }
+      .getOrElse(false)
 
   def workData(record: CalmRecord): Result[WorkData[Unminted, Identifiable]] =
     for {
