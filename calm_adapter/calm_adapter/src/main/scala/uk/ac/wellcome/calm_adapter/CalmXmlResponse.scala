@@ -75,10 +75,9 @@ object CalmSearchResponse {
       .toEither
 }
 
-case class CalmSummaryResponse(
-  val root: Elem,
-  retrievedAt: Instant,
-  suppressedFields: Set[String] = Set.empty)
+case class CalmSummaryResponse(val root: Elem,
+                               retrievedAt: Instant,
+                               suppressedFields: Set[String] = Set.empty)
     extends CalmXmlResponse[CalmRecord] {
 
   val responseTag = "SummaryHeaderResponse"
@@ -131,16 +130,18 @@ case class CalmSummaryResponse(
 
 object CalmSummaryResponse {
 
-  def apply(str: String,
-            retrievedAt: Instant,
-            suppressedFields: Set[String]): Either[Throwable, CalmSummaryResponse] =
+  def apply(
+    str: String,
+    retrievedAt: Instant,
+    suppressedFields: Set[String]): Either[Throwable, CalmSummaryResponse] =
     Try(XML.loadString(str))
       .map(CalmSummaryResponse(_, retrievedAt, suppressedFields))
       .toEither
 
-  def apply(bytes: Array[Byte],
-            retrievedAt: Instant,
-            suppressedFields: Set[String]): Either[Throwable, CalmSummaryResponse] =
+  def apply(
+    bytes: Array[Byte],
+    retrievedAt: Instant,
+    suppressedFields: Set[String]): Either[Throwable, CalmSummaryResponse] =
     Try(XML.load(new java.io.ByteArrayInputStream(bytes)))
       .map(CalmSummaryResponse(_, retrievedAt, suppressedFields))
       .toEither
