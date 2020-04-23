@@ -6,9 +6,7 @@ All data comes from an external data source, e.g. [Sierra and it's adapter](sier
 
 The flow of data is as follows:
 
-```text
-(Data source queue) => Transformer => Recorder => ID Minter => Matcher => Merger => Ingestor
-```
+![Pipeline diagram](https://user-images.githubusercontent.com/4429247/80081224-914c6b00-854a-11ea-94e4-5d2618b7b6b1.png)
 
 Each service in the pipeline has an input of an SNS topic that it subscribes to and after it has worked on that message, pushes its result to a SQS queue.
 
@@ -37,15 +35,19 @@ Searches for potential merge candidates, and records them on the Work.
 
 ### [Merger](https://github.com/wellcomecollection/catalogue/tree/864b998aae9ed3fe40515edfef061c7c7371f721/pipeline/merger/README.md)
 
-Runs some [rules](https://github.com/wellcomecollection/catalogue/tree/864b998aae9ed3fe40515edfef061c7c7371f721/pipeline/merger/src/test/scala/uk/ac/wellcome/platform/merger/rules/README.md) on the merge candidates and decides if it is a valid merge.
+Runs some [rules](https://github.com/wellcomecollection/catalogue/tree/864b998aae9ed3fe40515edfef061c7c7371f721/pipeline/merger/src/test/scala/uk/ac/wellcome/platform/merger/rules/README.md) on the merge candidates and decides if it is a valid merge. Extracts images from works and sends them to the images branch of the pipeline.
 
-### [ID Minter](https://github.com/wellcomecollection/catalogue/tree/864b998aae9ed3fe40515edfef061c7c7371f721/pipeline/id_minter/README.md)
+### [ID Minters](https://github.com/wellcomecollection/catalogue/tree/864b998aae9ed3fe40515edfef061c7c7371f721/pipeline/id_minter/README.md)
 
-Each Unidentified Work has an ID minted for it, using a source ID and avoiding dupes.
+Each Unidentified Work or Image has an ID minted for it, using a source ID and avoiding dupes.
 
-### [Ingestor](https://github.com/wellcomecollection/catalogue/tree/864b998aae9ed3fe40515edfef061c7c7371f721/pipeline/ingestor/README.md)
+### [Inferrer](https://github.com/wellcomecollection/catalogue/tree/master/pipeline/inferrer)
 
-Inserts a work into our query index - Elasticsearch.
+Infers data from the image (currently, this data is a feature vector) and attaches that to the image. Composed of 2 coupled services as detailed in [this RFC](https://github.com/wellcomecollection/docs/tree/master/rfcs/021-data_science_in_the_pipeline).
+
+### [Ingestors](https://github.com/wellcomecollection/catalogue/tree/864b998aae9ed3fe40515edfef061c7c7371f721/pipeline/ingestor/README.md)
+
+Inserts a work or image into our query index - Elasticsearch.
 
 ## Releasing
 
