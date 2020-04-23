@@ -25,7 +25,8 @@ trait CalmRetriever {
 class HttpCalmRetriever(url: String,
                         username: String,
                         password: String,
-                        concurrentHttpConnections: Int = 2)(
+                        concurrentHttpConnections: Int = 2,
+                        suppressedFields: Set[String] = Set.empty)(
   implicit
   ec: ExecutionContext,
   materializer: ActorMaterializer,
@@ -97,7 +98,7 @@ class HttpCalmRetriever(url: String,
   val summaryResponseParser = new CalmResponseParser[CalmRecord] {
     def parseXml(resp: HttpResponse,
                  bytes: Array[Byte]): Result[CalmXmlResponse[CalmRecord]] =
-      CalmSummaryResponse(bytes, parseTimestamp(resp))
+      CalmSummaryResponse(bytes, parseTimestamp(resp), suppressedFields)
   }
 
   def parseCookie(resp: HttpResponse): Cookie =

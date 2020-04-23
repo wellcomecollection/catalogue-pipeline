@@ -42,6 +42,10 @@ object Main extends WellcomeTypesafeApp {
       url = config.required[String]("calm.api.url"),
       username = config.required[String]("calm.api.username"),
       password = config.required[String]("calm.api.password"),
+      suppressedFields = config
+        .required[String]("calm.suppressedFields")
+        .split(",")
+        .toSet
     )
 
   def calmStore(config: Config) =
