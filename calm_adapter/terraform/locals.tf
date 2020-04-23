@@ -20,6 +20,7 @@ locals {
   secret_env_vars = {
     calm_api_username = "calm_adapter/calm_api/username"
     calm_api_password = "calm_adapter/calm_api/password"
+    suppressed_fields = "calm_adapter/suppressed_fields"
   }
 
   window_generator_interval = "60 minutes"

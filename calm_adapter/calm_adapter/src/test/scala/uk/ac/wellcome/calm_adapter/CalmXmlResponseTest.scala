@@ -6,11 +6,11 @@ import akka.http.scaladsl.model.headers.{Cookie, HttpCookiePair}
 
 class CalmXmlResponseTest extends FunSpec with Matchers {
 
-  describe("CALM search response") {
+  describe("Calm search response") {
 
     val cookie = Cookie(List(HttpCookiePair("key", "value")))
 
-    it("parses the number of hits from a CALM search response") {
+    it("parses the number of hits from a Calm search response") {
       val xml =
         <soap:Envelope
             xmlns:soap="http://www.w3.org/2003/05/soap-envelope"
@@ -57,11 +57,11 @@ class CalmXmlResponseTest extends FunSpec with Matchers {
     }
   }
 
-  describe("CALM suummary response") {
+  describe("Calm summary response") {
 
     val retrievedAt = Instant.ofEpochSecond(123456)
 
-    it("parses a calm record CALM search response") {
+    it("parses a record from a Calm summary response") {
       val xml =
         <soap:Envelope
             xmlns:soap="http://www.w3.org/2003/05/soap-envelope"
@@ -93,6 +93,38 @@ class CalmXmlResponseTest extends FunSpec with Matchers {
             "RefNo" -> List("WT/B/2/5/2/3"),
             "Date" -> List("September 1996-April 2002  "),
             "Modified" -> List("30/01/2020"),
+            "RecordID" -> List("123")
+          ),
+          retrievedAt
+        )
+      )
+    }
+
+    it("filters suppressed fields from a Calm summary response") {
+      val xml =
+        <soap:Envelope
+            xmlns:soap="http://www.w3.org/2003/05/soap-envelope"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+          <soap:Body>
+            <SummaryHeaderResponse xmlns="http://ds.co.uk/cs/webservices/">
+              <SummaryHeaderResult>
+                <SummaryList>
+                  <Summary>
+                    <RefNo>WT/B/2/5/2/3</RefNo>
+                    <RecordID>123</RecordID>
+                    <Sensitive>dont-show</Sensitive>
+                  </Summary>
+                </SummaryList>
+              </SummaryHeaderResult>
+            </SummaryHeaderResponse>
+          </soap:Body>
+        </soap:Envelope>
+      CalmSummaryResponse(xml, retrievedAt, Set("Sensitive")).parse shouldBe Right(
+        CalmRecord(
+          "123",
+          Map(
+            "RefNo" -> List("WT/B/2/5/2/3"),
             "RecordID" -> List("123")
           ),
           retrievedAt
