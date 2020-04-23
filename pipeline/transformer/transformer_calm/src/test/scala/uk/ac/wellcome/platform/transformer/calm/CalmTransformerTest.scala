@@ -258,7 +258,8 @@ class CalmTransformerTest extends FunSpec with Matchers {
       "RefNo" -> "a/b/c",
       "Transmission" -> "No"
     )
-    CalmTransformer(recordA, version).right.get shouldBe a[UnidentifiedInvisibleWork]
+    CalmTransformer(recordA, version).right.get shouldBe a[
+      UnidentifiedInvisibleWork]
     val recordB = calmRecord(
       "Title" -> "abc",
       "Level" -> "Collection",

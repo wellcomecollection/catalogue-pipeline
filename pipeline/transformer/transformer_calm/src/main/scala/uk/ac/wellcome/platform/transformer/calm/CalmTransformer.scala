@@ -5,7 +5,10 @@ import grizzled.slf4j.Logging
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.internal.result._
 
-object CalmTransformer extends Transformer[CalmRecord] with CalmOps with Logging {
+object CalmTransformer
+    extends Transformer[CalmRecord]
+    with CalmOps
+    with Logging {
 
   val identifierMapping = Map(
     "RefNo" -> CalmIdentifierTypes.refNo,
