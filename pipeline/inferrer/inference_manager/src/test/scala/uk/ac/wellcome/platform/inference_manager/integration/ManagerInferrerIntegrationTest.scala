@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.inference_manager.integration
 
 import org.scalatest.concurrent.IntegrationPatience
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
-import org.scalatest.{FunSpec, Inside, Matchers, OptionValues}
+import org.scalatest.{FunSpec, Inside, Inspectors, Matchers, OptionValues}
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
@@ -26,6 +26,7 @@ class ManagerInferrerIntegrationTest
     with ImageGenerators
     with OptionValues
     with Inside
+    with Inspectors
     with IntegrationPatience
     with InferenceManagerWorkerServiceFixture[
       MergedImage[Identified],
@@ -58,6 +59,7 @@ class ManagerInferrerIntegrationTest
                 case InferredData(features1, features2, lshEncodedFeatures) =>
                   features1 should have length 2048
                   features2 should have length 2048
+                  forAll(features1 ++ features2) { _.isNaN shouldBe false }
                   every(lshEncodedFeatures) should fullyMatch regex """(\d+)-(\d+)"""
               }
           }

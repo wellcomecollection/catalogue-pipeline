@@ -14,7 +14,7 @@ try:
     download_object_from_s3(
         bucket_name=bucket,
         object_key=key,
-        file_name=os.path.join("data", os.path.basename(key)),
+        file_name=os.path.join("app/data", os.path.basename(key)),
     )
     logger.info("Fetched pretrained LSHEncoder model")
 except KeyError:

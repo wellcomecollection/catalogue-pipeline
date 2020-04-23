@@ -1,7 +1,7 @@
 module "ingestor_images_queue" {
   source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
   queue_name      = "${local.namespace_hyphen}_ingestor_images"
-  topic_arns      = [module.image_id_minter_topic.arn]
+  topic_arns      = [module.image_inferrer_topic.arn]
   aws_region      = var.aws_region
   alarm_topic_arn = var.dlq_alarm_arn
 }

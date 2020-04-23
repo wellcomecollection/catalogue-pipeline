@@ -51,7 +51,7 @@ class FeatureVectorInferrerAdapterTest
     it("creates an AugmentedImage with the data from the inferrer response") {
       val image = createMergedImage.toIdentified
       val features = (0 until 4096).map(_ / 4096f).toList
-      val featuresB64 = Encoding.toBase64(features)
+      val featuresB64 = Encoding.toLittleEndianBase64(features)
       val lshEncodedFeatures = ('a' to 'z').map(_.toString * 3).toList
       val response = FeatureVectorInferrerResponse(
         features_b64 = featuresB64,
