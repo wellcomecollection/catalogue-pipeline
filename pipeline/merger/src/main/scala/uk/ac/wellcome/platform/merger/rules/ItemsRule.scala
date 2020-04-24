@@ -7,6 +7,7 @@ import uk.ac.wellcome.platform.merger.rules.WorkPredicates.{
   WorkPredicate,
   WorkPredicateOps
 }
+import uk.ac.wellcome.platform.merger.models.Sources.SourcesOps
 import cats.data.NonEmptyList
 
 /**
@@ -40,28 +41,12 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
 
     val mergedSources = sources.filter { source =>
       rules.exists(_(target, source).isDefined)
-    } ++ getDigitisedCopiesOfSierraWork(target, sources)
+    } ++ sources.findFirstLinkedDigitisedSierraWorkFor(target)
 
     FieldMergeResult(
       data = items,
       sources = mergedSources
     )
-  }
-
-  /** This is when we've found a digitised sierra work of a sierra physical work
-    * uk.ac.wellcome.platform.transformer.sierra.transformers.SierraMergeCandidates.get776mergeCandidates
-    *
-    * We get all the digitised SourceIdentifiers from the merge candidates
-    * and search through the sources for them.
-    */
-  private def getDigitisedCopiesOfSierraWork(
-    target: UnidentifiedWork,
-    sources: Seq[TransformedBaseWork]): Seq[TransformedBaseWork] = {
-    target.data.mergeCandidates
-      .filter(_.reason.contains("Physical/digitised Sierra work"))
-      .map(_.identifier)
-      .flatMap(sourceIdentifier =>
-        sources.filter(source => source.sourceIdentifier == sourceIdentifier))
   }
 
   /** When there is only 1 Sierra item, we assume that the METS work item

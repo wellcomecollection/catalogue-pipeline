@@ -8,10 +8,10 @@ import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 class CalmRulesTest extends FunSpec with Matchers with WorksGenerators {
 
   val target = createSierraPhysicalWork
-  val calmWork = createUnidentifiedCalmWork(
+  val calmWork = createUnidentifiedCalmWorkWith(
     data = WorkData(title = Some("123"))
   )
-  val secondCalmWork = createUnidentifiedCalmWork(
+  val secondCalmWork = createUnidentifiedCalmWorkWith(
     data = WorkData(title = Some("456"))
   )
   val otherWork = createUnidentifiedWorkWith(

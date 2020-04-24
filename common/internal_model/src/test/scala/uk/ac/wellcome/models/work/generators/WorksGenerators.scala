@@ -160,6 +160,7 @@ trait WorksGenerators
     version: Int = 1,
     merged: Boolean = false,
     collectionPath: Option[CollectionPath] = None,
+    mergeCandidates: List[MergeCandidate] = Nil
   ): IdentifiedWork =
     IdentifiedWork(
       canonicalId = canonicalId,
@@ -167,7 +168,7 @@ trait WorksGenerators
       version = version,
       data = WorkData(
         otherIdentifiers = otherIdentifiers,
-        mergeCandidates = List(),
+        mergeCandidates = mergeCandidates,
         title = title,
         alternativeTitles = alternativeTitles,
         workType = workType,
@@ -200,20 +201,23 @@ trait WorksGenerators
 
   def createUnidentifiedSierraWorkWith(
     workType: Option[WorkType] = None,
-    items: List[Item[Unminted]] = Nil): UnidentifiedWork =
+    items: List[Item[Unminted]] = Nil,
+    mergeCandidates: List[MergeCandidate] = Nil,
+  ): UnidentifiedWork =
     createUnidentifiedWorkWith(
       sourceIdentifier = createSierraSystemSourceIdentifier,
       workType = workType,
       otherIdentifiers = List(createSierraSystemSourceIdentifier),
-      items = items
+      items = items,
+      mergeCandidates = mergeCandidates
     )
 
-  def createUnidentifiedCalmWork(data: WorkData[Unminted, Identifiable] =
-                                   WorkData(
-                                     items = List(createCalmItem)
-                                   ),
-                                 id: String = randomAlphanumeric(6),
-                                 version: Int = 0) =
+  def createUnidentifiedCalmWorkWith(data: WorkData[Unminted, Identifiable] =
+                                       WorkData(
+                                         items = List(createCalmItem)
+                                       ),
+                                     id: String = randomAlphanumeric(6),
+                                     version: Int = 0) =
     UnidentifiedWork(
       sourceIdentifier = SourceIdentifier(
         value = id,
@@ -222,6 +226,8 @@ trait WorksGenerators
       version = version,
       data = data,
     )
+
+  val createUnidentifiedCalmWork = createUnidentifiedCalmWorkWith()
 
   def createUnidentifiedInvisibleMetsWorkWith(
     sourceIdentifier: SourceIdentifier = createMetsSourceIdentifier,

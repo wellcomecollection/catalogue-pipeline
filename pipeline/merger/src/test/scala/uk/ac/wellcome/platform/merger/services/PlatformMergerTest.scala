@@ -343,7 +343,7 @@ class PlatformMergerTest
       label = "Closed stores Arch. & MSS",
       accessConditions = Nil
     )
-    val calmWork = createUnidentifiedCalmWork(
+    val calmWork = createUnidentifiedCalmWorkWith(
       data = WorkData(
         title = Some("123"),
         collectionPath =

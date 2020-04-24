@@ -4,6 +4,7 @@ import uk.ac.wellcome.models.work.internal.{
   DigitalLocation,
   IdentifierType,
   PhysicalLocation,
+  SourceIdentifier,
   TransformedBaseWork,
   WorkType
 }
@@ -56,6 +57,10 @@ object WorkPredicates {
     satisfiesAll(sierraWork, workType(WorkType.Pictures))
 
   def not(pred: WorkPredicate): WorkPredicate = !pred(_)
+
+  def sierraWorkWithId(id: SourceIdentifier)(
+    work: TransformedBaseWork): Boolean =
+    work.sourceIdentifier == id
 
   private def physicalLocationExists(work: TransformedBaseWork): Boolean =
     work.data.items.exists { item =>

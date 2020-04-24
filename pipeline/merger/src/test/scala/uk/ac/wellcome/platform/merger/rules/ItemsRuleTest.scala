@@ -14,7 +14,7 @@ class ItemsRuleTest
   val digitalSierra = createSierraDigitalWork
   val metsWork = createUnidentifiedInvisibleMetsWork
   val miroWork = createMiroWork
-  val calmWork = createUnidentifiedCalmWork()
+  val calmWork = createUnidentifiedCalmWork
   val (sierraWorkWithMergeCandidate, sierraWorkMergeCandidate) =
     createSierraWorkWithDigitisedMergeCandidate
 
