@@ -219,3 +219,16 @@ lazy val snapshot_generator = setupProject(
   localDependencies = Seq(internal_model, display, elasticsearch_typesafe),
   externalDependencies = CatalogueDependencies.snapshotGeneratorDependencies
 )
+
+/**
+ * To download form the wellcome maven repo in s3 locally, uncomment this
+ **/
+//import java.util.UUID
+//import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider
+//s3CredentialsProvider := { _ =>
+//  val builder = new STSAssumeRoleSessionCredentialsProvider.Builder(
+//    "arn:aws:iam::760097843905:role/platform-read_only",
+//    UUID.randomUUID().toString
+//  )
+//  builder.build()
+//}

@@ -84,8 +84,7 @@ final case class CoreQuery(q: String, shouldQueries: Seq[Query])
   * but we use the AND operator and a double boost on the
   * `BaseAndQuery` as AND should always score higher.
   */
-case class BaseOrQuery(q: String) extends ElasticsearchPartialQuery {
-  val minimumShouldMatch = "60%"
+trait BaseQueryConfig {
   val searchFields: Seq[(String, Option[Double])] = Seq(
     ("data.subjects.concepts.label", None),
     ("data.genres.concepts.label", None),
@@ -98,14 +97,20 @@ case class BaseOrQuery(q: String) extends ElasticsearchPartialQuery {
     ("data.language.label", None),
     ("data.edition", None),
     ("data.notes.content.english", None),
+    ("data.collectionPath.path", None),
+    ("data.collectionPath.label", None),
   )
-
+}
+case class BaseOrQuery(q: String)
+    extends ElasticsearchPartialQuery
+    with BaseQueryConfig {
+  val minimumShouldMatch = "60%"
   val fields = searchFields map {
     case (field, boost) =>
       FieldWithOptionalBoost(field = field, boost = boost)
   }
 
-  lazy val elasticQuery = MultiMatchQuery(
+  lazy val elasticQuery: MultiMatchQuery = MultiMatchQuery(
     text = q,
     fields = fields,
     minimumShouldMatch = Some(minimumShouldMatch),
@@ -114,28 +119,17 @@ case class BaseOrQuery(q: String) extends ElasticsearchPartialQuery {
   )
 }
 
-case class BaseAndQuery(q: String) extends ElasticsearchPartialQuery {
+case class BaseAndQuery(q: String)
+    extends ElasticsearchPartialQuery
+    with BaseQueryConfig {
   val minimumShouldMatch = "60%"
-  val searchFields: Seq[(String, Option[Double])] = Seq(
-    ("data.subjects.concepts.label", None),
-    ("data.genres.concepts.label", None),
-    ("data.contributors.agent.label", None),
-    ("data.title.english", None),
-    ("data.description.english", None),
-    ("data.alternativeTitles.english", None),
-    ("data.physicalDescription.english", None),
-    ("data.production.*.label", None),
-    ("data.language.label", None),
-    ("data.edition", None),
-    ("data.notes.content.english", None),
-  )
 
   val fields = searchFields map {
     case (field, boost) =>
       FieldWithOptionalBoost(field = field, boost = boost)
   }
 
-  lazy val elasticQuery = MultiMatchQuery(
+  lazy val elasticQuery: MultiMatchQuery = MultiMatchQuery(
     text = q,
     fields = fields,
     minimumShouldMatch = Some(minimumShouldMatch),
