@@ -31,6 +31,11 @@ class Router(elasticClient: ElasticClient,
               path("works" / Segment) { workId: String =>
                 SingleWorkParams.parse { worksController.singleWork(workId, _) }
               },
+              path("images" / Segment) { imageId: String =>
+                SingleImageParams.parse {
+                  imagesController.singleImage(imageId, _)
+                }
+              },
               path("context.json") {
                 getFromResource("context-v2.json")
               },
@@ -66,6 +71,9 @@ class Router(elasticClient: ElasticClient,
 
   lazy val worksController =
     new WorksController(elasticClient, apiConfig, elasticConfig)
+
+  lazy val imagesController =
+    new ImagesController(elasticClient, apiConfig, elasticConfig)
 
   def swagger: Route = get {
     complete(
