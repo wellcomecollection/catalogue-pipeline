@@ -48,7 +48,7 @@ Below are diagrams of the merging rules
 
 ![How we merge items into sierra multi item](../.gitbook/assets/merger_items_into_sierra_multi_item_target.png)
 
-[View on Excalidraw][merging-items-into-sierra-multi-item-target]
+[View on Excalidraw][merging-items-into-multi-single-item-target]
 
 ---
 
