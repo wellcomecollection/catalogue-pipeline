@@ -21,13 +21,7 @@ import uk.ac.wellcome.platform.api.services.{
   ElasticsearchService,
   WorksService
 }
-import uk.ac.wellcome.platform.api.{
-  MultipleWorksParams,
-  MultipleWorksResponse,
-  ResultResponse,
-  SingleWorkParams,
-  Tracing
-}
+import uk.ac.wellcome.platform.api.Tracing
 
 import scala.concurrent.{ExecutionContext, Future}
 

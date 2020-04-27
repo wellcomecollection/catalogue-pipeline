@@ -18,7 +18,6 @@ import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import io.circe.Printer
 import uk.ac.wellcome.display.json.DisplayJsonUtil
 import uk.ac.wellcome.display.models.ApiVersions
-import uk.ac.wellcome.platform.api.ResultResponse
 import uk.ac.wellcome.platform.api.elasticsearch.ElasticsearchErrorHandler
 
 import scala.concurrent.Future

@@ -18,7 +18,7 @@ import grizzled.slf4j.Logging
 import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.display.models.v2._
-import uk.ac.wellcome.platform.api.MultipleWorksResponse
+import uk.ac.wellcome.platform.api.rest.MultipleWorksResponse
 
 class SwaggerDocs(apiConfig: ApiConfig) extends Logging {
 

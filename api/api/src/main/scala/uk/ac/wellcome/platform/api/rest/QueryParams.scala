@@ -1,15 +1,14 @@
-package uk.ac.wellcome.platform.api
+package uk.ac.wellcome.platform.api.rest
 
 import java.time.LocalDate
 
-import io.circe.Decoder
-import io.circe.java8.time.TimeInstances
 import akka.http.scaladsl.server.{Directives, ValidationRejection}
 import akka.http.scaladsl.unmarshalling.Unmarshaller
+import io.circe.java8.time.TimeInstances
 import io.circe.{Decoder, Json}
-import uk.ac.wellcome.platform.api.services.WorksSearchOptions
-import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.display.models._
+import uk.ac.wellcome.platform.api.models._
+import uk.ac.wellcome.platform.api.services.WorksSearchOptions
 
 sealed trait QueryParams
 

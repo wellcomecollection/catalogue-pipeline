@@ -13,7 +13,7 @@ import com.sksamuel.elastic4s.ElasticClient
 import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.platform.api.swagger.SwaggerDocs
 import uk.ac.wellcome.platform.api.models._
-import uk.ac.wellcome.platform.api.rest.{CustomDirectives, WorksController}
+import uk.ac.wellcome.platform.api.rest._
 
 class Router(elasticClient: ElasticClient,
              elasticConfig: ElasticConfig,
