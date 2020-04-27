@@ -5,6 +5,7 @@ import org.scalatest.Matchers
 import akka.http.scaladsl.model.ContentTypes
 import io.circe.Json
 import uk.ac.wellcome.platform.api.models.SearchQueryType
+import uk.ac.wellcome.platform.api.rest.{MultipleWorksParams, SingleWorkParams}
 import uk.ac.wellcome.platform.api.works.v2.ApiV2WorksTestBase
 
 class ApiSwaggerTest extends ApiV2WorksTestBase with Matchers {

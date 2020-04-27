@@ -1,17 +1,15 @@
-package uk.ac.wellcome.platform.api
+package uk.ac.wellcome.platform.api.rest
 
-import io.circe.generic.extras.semiauto.deriveEncoder
-import io.circe.generic.extras.JsonKey
-import io.circe.{Encoder, Json}
 import akka.http.scaladsl.model.Uri
+import io.circe.generic.extras.JsonKey
+import io.circe.generic.extras.semiauto.deriveEncoder
+import io.circe.{Encoder, Json}
 import io.swagger.v3.oas.annotations.media.Schema
-
-import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.display.models.v2._
-import uk.ac.wellcome.display.models.Implicits._
-import uk.ac.wellcome.platform.api.services.WorksSearchOptions
 import uk.ac.wellcome.display.json.DisplayJsonUtil._
+import uk.ac.wellcome.platform.api.models._
+import uk.ac.wellcome.platform.api.services.WorksSearchOptions
 
 case class ResultResponse[T: Encoder](
   @JsonKey("@context") context: String,
@@ -53,8 +51,6 @@ case class MultipleWorksResponse(
 )
 
 object MultipleWorksResponse {
-
-  import DisplayAggregations.{encoder => aggsEncoder}
   implicit val encoder: Encoder[MultipleWorksResponse] = deriveEncoder
 
   def apply(resultList: ResultList,
