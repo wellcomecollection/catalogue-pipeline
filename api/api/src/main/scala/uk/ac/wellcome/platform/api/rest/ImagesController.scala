@@ -7,7 +7,10 @@ import uk.ac.wellcome.display.models.Implicits._
 import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.platform.api.Tracing
 import uk.ac.wellcome.platform.api.models.ApiConfig
-import uk.ac.wellcome.platform.api.services.ImagesService
+import uk.ac.wellcome.platform.api.services.{
+  ElasticsearchService,
+  ImagesService
+}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -42,5 +45,6 @@ class ImagesController(
       }
     }
 
-  private lazy val imagesService = new ImagesService(elasticClient)
+  private lazy val imagesService = new ImagesService(
+    new ElasticsearchService(elasticClient))
 }
