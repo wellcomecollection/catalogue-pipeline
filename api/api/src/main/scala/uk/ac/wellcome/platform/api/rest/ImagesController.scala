@@ -21,7 +21,8 @@ class ImagesController(
   def singleImage(id: String, params: SingleImageParams): Route =
     getWithFuture {
       transactFuture("GET /images/{imageId}") {
-        val index = params._index.map(Index(_)).getOrElse(elasticConfig.index)
+        val index =
+          params._index.map(Index(_)).getOrElse(elasticConfig.imagesIndex)
         imagesService
           .findImageById(id)(index)
           .flatMap {

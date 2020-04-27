@@ -60,6 +60,13 @@ trait ElasticsearchFixtures
     ),
     implicitly[Position])
 
+  def withLocalIndices[R](testWith: TestWith[ElasticConfig, R]): R =
+    withLocalWorksIndex { worksIndex =>
+      withLocalImagesIndex { imagesIndex =>
+        testWith(ElasticConfig(worksIndex, imagesIndex))
+      }
+    }
+
   def withLocalWorksIndex[R](testWith: TestWith[Index, R]): R =
     withLocalElasticsearchIndex[R](config = WorksIndexConfig) { index =>
       testWith(index)
