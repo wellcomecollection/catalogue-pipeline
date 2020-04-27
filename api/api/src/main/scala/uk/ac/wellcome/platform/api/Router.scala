@@ -3,7 +3,6 @@ package uk.ac.wellcome.platform.api
 import scala.concurrent.ExecutionContext
 import akka.http.scaladsl.model.{HttpEntity, MediaTypes}
 import akka.http.scaladsl.server.{
-  Directives,
   MalformedQueryParamRejection,
   RejectionHandler,
   Route,
@@ -18,8 +17,7 @@ import uk.ac.wellcome.platform.api.rest._
 class Router(elasticClient: ElasticClient,
              elasticConfig: ElasticConfig,
              implicit val apiConfig: ApiConfig)(implicit ec: ExecutionContext)
-    extends Directives
-    with CustomDirectives {
+    extends CustomDirectives {
 
   def routes: Route = handleRejections(rejectionHandler) {
     ignoreTrailingSlash {
