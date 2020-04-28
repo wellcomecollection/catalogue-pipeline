@@ -40,7 +40,7 @@ class OtherIdentifiersRuleTest
           physicalSierra :: nothingWork :: metsWorks ++ miroWorks)) {
       case FieldMergeResult(otherIdentifiers, mergedSources) =>
         otherIdentifiers should contain theSameElementsAs physicalSierra.sourceIdentifier :: miroWorks
-          .map(_.sourceIdentifier) ++ metsWorks.map(_.sourceIdentifier) ++ calmWork.identifiers
+          .map(_.sourceIdentifier) ++ metsWorks.map(_.sourceIdentifier) ++ calmWork.otherIdentifiers
 
         mergedSources should contain theSameElementsAs (physicalSierra :: metsWorks ++ miroWorks)
     }
@@ -53,7 +53,7 @@ class OtherIdentifiersRuleTest
         .merge(physicalSierra, nothingWork :: metsWorks ++ miroWorks)) {
       case FieldMergeResult(otherIdentifiers, mergedSources) =>
         otherIdentifiers should contain theSameElementsAs miroWorks
-          .map(_.sourceIdentifier) ++ physicalSierra.identifiers
+          .map(_.sourceIdentifier) ++ physicalSierra.otherIdentifiers
 
         mergedSources should contain theSameElementsAs (metsWorks ++ miroWorks)
     }
@@ -67,7 +67,7 @@ class OtherIdentifiersRuleTest
           nothingWork :: metsWorks ++ miroWorks)) {
       case FieldMergeResult(otherIdentifiers, mergedSources) =>
         otherIdentifiers should contain theSameElementsAs metsWorks.map(
-          _.sourceIdentifier) ++ sierraWorkWithTwoPhysicalItems.identifiers
+          _.sourceIdentifier) ++ sierraWorkWithTwoPhysicalItems.otherIdentifiers
 
         mergedSources should contain theSameElementsAs (metsWorks)
     }
@@ -80,7 +80,7 @@ class OtherIdentifiersRuleTest
           sierraWithMergeCandidate,
           nothingWork :: mergeCandidate :: miroWorks)) {
       case FieldMergeResult(otherIdentifiers, mergedSources) =>
-        otherIdentifiers should contain theSameElementsAs mergeCandidate.sourceIdentifier :: sierraWithMergeCandidate.identifiers ++ miroWorks
+        otherIdentifiers should contain theSameElementsAs mergeCandidate.sourceIdentifier :: sierraWithMergeCandidate.otherIdentifiers ++ miroWorks
           .map(_.sourceIdentifier)
 
         mergedSources should contain theSameElementsAs (mergeCandidate :: miroWorks)
@@ -102,7 +102,7 @@ class OtherIdentifiersRuleTest
     inside(
       OtherIdentifiersRule.merge(physicalSierra, miroWorksWithOtherSources)) {
       case FieldMergeResult(otherIdentifiers, mergeCandidates) =>
-        otherIdentifiers should contain theSameElementsAs (physicalSierra.identifiers ++ miroWorks
+        otherIdentifiers should contain theSameElementsAs (physicalSierra.otherIdentifiers ++ miroWorks
           .map(_.sourceIdentifier))
 
         mergeCandidates should contain theSameElementsAs (miroWorksWithOtherSources)

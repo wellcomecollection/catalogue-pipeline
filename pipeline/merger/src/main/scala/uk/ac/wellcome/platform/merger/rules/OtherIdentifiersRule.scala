@@ -47,7 +47,7 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
       (mergeIntoCalmTarget(target, sources)
         .orElse(singleItemSierraIds)
         .orElse(mergeIntoMultiItemSierraTarget(target, sources))
-        .getOrElse(target.identifiers) ++ digitisedSierraIds).distinct
+        .getOrElse(target.otherIdentifiers) ++ digitisedSierraIds).distinct
 
     val mergedSources = sources.filter { source =>
       rules.exists(_(target, source).isDefined)
@@ -66,7 +66,7 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
 
     def rule(target: UnidentifiedWork,
              sources: NonEmptyList[TransformedBaseWork]): FieldData =
-      target.identifiers
+      target.otherIdentifiers
   }
 
   private val mergeMiroIntoSingleItemSierraTarget = new PartialRule {
@@ -76,7 +76,7 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
 
     def rule(target: UnidentifiedWork,
              sources: NonEmptyList[TransformedBaseWork]): FieldData =
-      target.identifiers ++ sources.toList.map(_.sourceIdentifier)
+      target.otherIdentifiers ++ sources.toList.map(_.sourceIdentifier)
   }
 
   private val mergeIntoMultiItemSierraTarget = new PartialRule {
@@ -86,7 +86,7 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
 
     def rule(target: UnidentifiedWork,
              sources: NonEmptyList[TransformedBaseWork]): FieldData =
-      target.identifiers ++ sources.toList.map(_.sourceIdentifier)
+      target.otherIdentifiers ++ sources.toList.map(_.sourceIdentifier)
   }
 
   private val mergeIntoCalmTarget = new PartialRule {
@@ -97,7 +97,7 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
 
     def rule(target: UnidentifiedWork,
              sources: NonEmptyList[TransformedBaseWork]): FieldData =
-      target.identifiers ++ sources.toList.map(_.sourceIdentifier)
+      target.otherIdentifiers ++ sources.toList.map(_.sourceIdentifier)
   }
 
   private val mergeDigitalIntoPhysicalSierraTarget =
@@ -109,7 +109,7 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
 
         def rule(target: UnidentifiedWork,
                  sources: NonEmptyList[TransformedBaseWork]): FieldData =
-          target.identifiers ++ sources.toList.map(_.sourceIdentifier)
+          target.otherIdentifiers ++ sources.toList.map(_.sourceIdentifier)
 
     }
 }
