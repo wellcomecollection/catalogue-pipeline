@@ -1,8 +1,9 @@
-package uk.ac.wellcome.platform.api.works.v2
+package uk.ac.wellcome.platform.api.works
 
+import akka.http.scaladsl.model.headers.LinkParams.title
 import uk.ac.wellcome.models.work.internal._
 
-class ApiWorkCollectionTest extends ApiV2WorksTestBase {
+class ApiWorkCollectionTest extends ApiWorksTestBase {
 
   def work(path: String, level: CollectionLevel) =
     createIdentifiedWorkWith(

@@ -1,9 +1,10 @@
-package uk.ac.wellcome.platform.api.works.v2
+package uk.ac.wellcome.platform.api.works
 
+import akka.http.scaladsl.model.headers.LinkParams.title
 import uk.ac.wellcome.models.work.internal.WorkType.{Books, Journals, Pictures}
 import uk.ac.wellcome.models.work.internal._
 
-class ApiV2WorksAggregationsTest extends ApiV2WorksTestBase {
+class WorksAggregationsTest extends ApiWorksTestBase {
 
   it("supports fetching the workType aggregation") {
     withApi {
@@ -70,7 +71,7 @@ class ApiV2WorksAggregationsTest extends ApiV2WorksTestBase {
                       },
                       "count" : 1,
                       "type" : "AggregationBucket"
-                    } 
+                    }
                   ]
                 }
               },

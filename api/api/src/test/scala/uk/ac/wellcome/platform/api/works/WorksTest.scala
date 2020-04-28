@@ -1,8 +1,8 @@
-package uk.ac.wellcome.platform.api.works.v2
+package uk.ac.wellcome.platform.api.works
 
 import uk.ac.wellcome.models.work.internal._
 
-class ApiV2WorksTest extends ApiV2WorksTestBase {
+class WorksTest extends ApiWorksTestBase {
 
   it("returns a list of works") {
     withApi {

@@ -1,9 +1,10 @@
-package uk.ac.wellcome.platform.api.works
+package uk.ac.wellcome.platform.api
+
+import akka.http.scaladsl.model.StatusCodes._
+import uk.ac.wellcome.display.models.ApiVersions
+import uk.ac.wellcome.platform.api.works.ApiWorksTestBase
 
 import scala.io.Source
-import akka.http.scaladsl.model.StatusCodes._
-
-import uk.ac.wellcome.display.models.ApiVersions
 
 class ApiContextTest extends ApiWorksTestBase {
 

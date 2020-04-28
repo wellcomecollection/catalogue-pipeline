@@ -1,8 +1,8 @@
-package uk.ac.wellcome.platform.api.works.v2
+package uk.ac.wellcome.platform.api.works
 
 import uk.ac.wellcome.models.work.internal.IdentifiedBaseWork
 
-class ApiV2WorksTestInvisible extends ApiV2WorksTestBase {
+class WorksTestInvisible extends ApiWorksTestBase {
 
   val deletedWork = createIdentifiedInvisibleWork
 

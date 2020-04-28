@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.api.works.v2
+package uk.ac.wellcome.platform.api.works
 
 import uk.ac.wellcome.models.work.generators.{
   ProductionEventGenerators,
@@ -6,8 +6,8 @@ import uk.ac.wellcome.models.work.generators.{
 }
 import uk.ac.wellcome.models.work.internal._
 
-class ApiV2WorksIncludesTest
-    extends ApiV2WorksTestBase
+class WorksIncludesTest
+    extends ApiWorksTestBase
     with ProductionEventGenerators
     with SubjectGenerators {
 

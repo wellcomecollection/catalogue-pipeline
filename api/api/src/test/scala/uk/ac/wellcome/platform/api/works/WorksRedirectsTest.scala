@@ -1,6 +1,6 @@
-package uk.ac.wellcome.platform.api.works.v2
+package uk.ac.wellcome.platform.api.works
 
-class ApiV2RedirectsTest extends ApiV2WorksTestBase {
+class ApiV2RedirectsTest extends ApiWorksTestBase {
 
   val redirectedWork = createIdentifiedRedirectedWork
   val redirectId = redirectedWork.redirect.canonicalId

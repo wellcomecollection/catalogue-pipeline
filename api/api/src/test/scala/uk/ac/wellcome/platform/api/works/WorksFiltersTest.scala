@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.api.works.v2
+package uk.ac.wellcome.platform.api.works
 
 import uk.ac.wellcome.models.work.internal.WorkType.{
   Books,
@@ -9,7 +9,7 @@ import uk.ac.wellcome.models.work.internal._
 
 import scala.util.Random
 
-class ApiV2FiltersTest extends ApiV2WorksTestBase {
+class WorksFiltersTest extends ApiWorksTestBase {
   it("combines multiple filters") {
     val work1 = createIdentifiedWorkWith(
       genres = List(createGenreWith(label = "horror")),
