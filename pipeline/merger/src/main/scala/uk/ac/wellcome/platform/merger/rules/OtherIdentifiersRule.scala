@@ -29,7 +29,7 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
       .findFirstLinkedDigitisedSierraWorkFor(target)
       .map(_.sourceIdentifier)
       .map(mergeDigitalIntoPhysicalSierraTarget)
-      .flatMap(pr => pr(target, sources))
+      .flatMap(rule => rule(target, sources))
       .getOrElse(Nil)
 
     val rules =
