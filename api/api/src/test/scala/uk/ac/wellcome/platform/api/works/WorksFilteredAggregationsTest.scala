@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.api.works
 
+import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.models.work.internal.Language
 import uk.ac.wellcome.models.work.internal.WorkType._
 
@@ -7,7 +8,7 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
 
   it("filters aggregations with filters that are not paired to the aggregation") {
     withApi {
-      case (indexV2, routes) =>
+      case (ElasticConfig(worksIndex, _), routes) =>
         val works = List(
           (Books, Language("dogs", "Bark")),
           (Journals, Language("cats", "Meow")),
@@ -29,7 +30,7 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
             )
         }
 
-        insertIntoElasticsearch(indexV2, works: _*)
+        insertIntoElasticsearch(worksIndex, works: _*)
         assertJsonResponse(
           routes,
           s"/$apiPrefix/works?query=rambutan&workType=a&aggregations=language") {
@@ -77,7 +78,7 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
 
   it("filters results but not aggregations paired with an applied filter") {
     withApi {
-      case (indexV2, routes) =>
+      case (ElasticConfig(worksIndex, _), routes) =>
         val works = List(
           (Books, Language("dogs", "Bark")),
           (Journals, Language("cats", "Meow")),
@@ -99,7 +100,7 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
             )
         }
 
-        insertIntoElasticsearch(indexV2, works: _*)
+        insertIntoElasticsearch(worksIndex, works: _*)
         assertJsonResponse(
           routes,
           s"/$apiPrefix/works?query=rambutan&workType=a&aggregations=workType") {

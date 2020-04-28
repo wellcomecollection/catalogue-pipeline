@@ -15,6 +15,7 @@ trait ApiTestBase extends ApiFixture with RandomStrings {
   val apiScheme = "https"
   val apiHost = "api-testing.local"
   val apiName = "catalogue"
+  val apiPrefix: String = getApiPrefix(ApiVersions.v2)
 
   def contextUrl(apiPrefix: String): String =
     s"$apiScheme://$apiHost/$apiPrefix/context.json"

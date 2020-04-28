@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.api.works
 
+import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.models.work.internal.WorkType.{
   Books,
   CDRoms,
@@ -27,8 +28,8 @@ class WorksFiltersTest extends ApiWorksTestBase {
     val works = Seq(work1, work2, work3)
 
     withApi {
-      case (indexV2, routes) =>
-        insertIntoElasticsearch(indexV2, works: _*)
+      case (ElasticConfig(worksIndex, _), routes) =>
+        insertIntoElasticsearch(worksIndex, works: _*)
         assertJsonResponse(
           routes,
           s"/$apiPrefix/works?genres.label=horror&subjects.label=england") {
@@ -80,8 +81,8 @@ class WorksFiltersTest extends ApiWorksTestBase {
 
     it("when listing works") {
       withApi {
-        case (indexV2, routes) =>
-          insertIntoElasticsearch(indexV2, works: _*)
+        case (ElasticConfig(worksIndex, _), routes) =>
+          insertIntoElasticsearch(worksIndex, works: _*)
 
           assertJsonResponse(
             routes,
@@ -113,8 +114,8 @@ class WorksFiltersTest extends ApiWorksTestBase {
 
     it("when searching works") {
       withApi {
-        case (indexV2, routes) =>
-          insertIntoElasticsearch(indexV2, works: _*)
+        case (ElasticConfig(worksIndex, _), routes) =>
+          insertIntoElasticsearch(worksIndex, works: _*)
 
           assertJsonResponse(
             routes,
@@ -164,8 +165,8 @@ class WorksFiltersTest extends ApiWorksTestBase {
 
     it("when listing works") {
       withApi {
-        case (indexV2, routes) =>
-          insertIntoElasticsearch(indexV2, works: _*)
+        case (ElasticConfig(worksIndex, _), routes) =>
+          insertIntoElasticsearch(worksIndex, works: _*)
 
           assertJsonResponse(
             routes,
@@ -179,8 +180,8 @@ class WorksFiltersTest extends ApiWorksTestBase {
 
     it("filters by multiple workTypes") {
       withApi {
-        case (indexV2, routes) =>
-          insertIntoElasticsearch(indexV2, works: _*)
+        case (ElasticConfig(worksIndex, _), routes) =>
+          insertIntoElasticsearch(worksIndex, works: _*)
 
           assertJsonResponse(
             routes,
@@ -194,8 +195,8 @@ class WorksFiltersTest extends ApiWorksTestBase {
 
     it("when searching works") {
       withApi {
-        case (indexV2, routes) =>
-          insertIntoElasticsearch(indexV2, works: _*)
+        case (ElasticConfig(worksIndex, _), routes) =>
+          insertIntoElasticsearch(worksIndex, works: _*)
 
           assertJsonResponse(
             routes,
@@ -217,8 +218,8 @@ class WorksFiltersTest extends ApiWorksTestBase {
 
     it("filters by date range") {
       withApi {
-        case (indexV2, routes) =>
-          insertIntoElasticsearch(indexV2, work1, work2, work3)
+        case (ElasticConfig(worksIndex, _), routes) =>
+          insertIntoElasticsearch(worksIndex, work1, work2, work3)
           assertJsonResponse(
             routes,
             s"/$apiPrefix/works?production.dates.from=1900-01-01&production.dates.to=1960-01-01") {
@@ -229,8 +230,8 @@ class WorksFiltersTest extends ApiWorksTestBase {
 
     it("filters by from date") {
       withApi {
-        case (indexV2, routes) =>
-          insertIntoElasticsearch(indexV2, work1, work2, work3)
+        case (ElasticConfig(worksIndex, _), routes) =>
+          insertIntoElasticsearch(worksIndex, work1, work2, work3)
           assertJsonResponse(
             routes,
             s"/$apiPrefix/works?production.dates.from=1900-01-01") {
@@ -241,8 +242,8 @@ class WorksFiltersTest extends ApiWorksTestBase {
 
     it("filters by to date") {
       withApi {
-        case (indexV2, routes) =>
-          insertIntoElasticsearch(indexV2, work1, work2, work3)
+        case (ElasticConfig(worksIndex, _), routes) =>
+          insertIntoElasticsearch(worksIndex, work1, work2, work3)
           assertJsonResponse(
             routes,
             s"/$apiPrefix/works?production.dates.to=1960-01-01") {
@@ -253,8 +254,8 @@ class WorksFiltersTest extends ApiWorksTestBase {
 
     it("errors on invalid date") {
       withApi {
-        case (indexV2, routes) =>
-          insertIntoElasticsearch(indexV2, work1, work2, work3)
+        case (ElasticConfig(worksIndex, _), routes) =>
+          insertIntoElasticsearch(worksIndex, work1, work2, work3)
           assertJsonResponse(
             routes,
             s"/$apiPrefix/works?production.dates.from=1900-01-01&production.dates.to=INVALID") {
@@ -284,8 +285,8 @@ class WorksFiltersTest extends ApiWorksTestBase {
 
     it("filters by language") {
       withApi {
-        case (indexV2, routes) =>
-          insertIntoElasticsearch(indexV2, works: _*)
+        case (ElasticConfig(worksIndex, _), routes) =>
+          insertIntoElasticsearch(worksIndex, works: _*)
           assertJsonResponse(routes, s"/$apiPrefix/works?language=eng") {
             Status.OK -> worksListResponse(apiPrefix, works = Seq(englishWork))
           }
@@ -294,8 +295,8 @@ class WorksFiltersTest extends ApiWorksTestBase {
 
     it("filters by multiple comma seperated languages") {
       withApi {
-        case (indexV2, routes) =>
-          insertIntoElasticsearch(indexV2, works: _*)
+        case (ElasticConfig(worksIndex, _), routes) =>
+          insertIntoElasticsearch(worksIndex, works: _*)
           assertJsonResponse(routes, s"/$apiPrefix/works?language=eng,ger") {
             Status.OK -> worksListResponse(
               apiPrefix,
@@ -333,8 +334,8 @@ class WorksFiltersTest extends ApiWorksTestBase {
 
     it("filters by genre with partial match") {
       withApi {
-        case (indexV2, routes) =>
-          insertIntoElasticsearch(indexV2, works: _*)
+        case (ElasticConfig(worksIndex, _), routes) =>
+          insertIntoElasticsearch(worksIndex, works: _*)
           assertJsonResponse(routes, s"/$apiPrefix/works?genres.label=horrible") {
             Status.OK -> worksListResponse(
               apiPrefix,
@@ -345,8 +346,8 @@ class WorksFiltersTest extends ApiWorksTestBase {
 
     it("filters by genre using multiple terms") {
       withApi {
-        case (indexV2, routes) =>
-          insertIntoElasticsearch(indexV2, works: _*)
+        case (ElasticConfig(worksIndex, _), routes) =>
+          insertIntoElasticsearch(worksIndex, works: _*)
           assertJsonResponse(
             routes,
             s"/$apiPrefix/works?genres.label=horrible%20heartwarming") {
@@ -390,8 +391,8 @@ class WorksFiltersTest extends ApiWorksTestBase {
 
     it("filters by subjects") {
       withApi {
-        case (indexV2, routes) =>
-          insertIntoElasticsearch(indexV2, works: _*)
+        case (ElasticConfig(worksIndex, _), routes) =>
+          insertIntoElasticsearch(worksIndex, works: _*)
           assertJsonResponse(routes, s"/$apiPrefix/works?subjects.label=paris") {
             Status.OK -> worksListResponse(
               apiPrefix,
@@ -403,8 +404,8 @@ class WorksFiltersTest extends ApiWorksTestBase {
 
     it("filters by subjects using multiple terms") {
       withApi {
-        case (indexV2, routes) =>
-          insertIntoElasticsearch(indexV2, works: _*)
+        case (ElasticConfig(worksIndex, _), routes) =>
+          insertIntoElasticsearch(worksIndex, works: _*)
           assertJsonResponse(
             routes,
             s"/$apiPrefix/works?subjects.label=19th%20century%20paris") {
@@ -428,8 +429,8 @@ class WorksFiltersTest extends ApiWorksTestBase {
 
     it("filters by license") {
       withApi {
-        case (indexV2, routes) =>
-          insertIntoElasticsearch(indexV2, works: _*)
+        case (ElasticConfig(worksIndex, _), routes) =>
+          insertIntoElasticsearch(worksIndex, works: _*)
           assertJsonResponse(routes, s"/$apiPrefix/works?license=cc-by") {
             Status.OK -> worksListResponse(
               apiPrefix = apiPrefix,
@@ -441,8 +442,8 @@ class WorksFiltersTest extends ApiWorksTestBase {
 
     it("filters by multiple licenses") {
       withApi {
-        case (indexV2, routes) =>
-          insertIntoElasticsearch(indexV2, works: _*)
+        case (ElasticConfig(worksIndex, _), routes) =>
+          insertIntoElasticsearch(worksIndex, works: _*)
           assertJsonResponse(
             routes,
             s"/$apiPrefix/works?license=cc-by,cc-by-nc") {

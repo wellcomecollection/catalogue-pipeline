@@ -1,15 +1,16 @@
 package uk.ac.wellcome.platform.api.works
 
+import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.models.work.internal._
 
 class WorksTest extends ApiWorksTestBase {
 
   it("returns a list of works") {
     withApi {
-      case (indexV2, routes) =>
+      case (ElasticConfig(worksIndex, _), routes) =>
         val works = createIdentifiedWorks(count = 3).sortBy { _.canonicalId }
 
-        insertIntoElasticsearch(indexV2, works: _*)
+        insertIntoElasticsearch(worksIndex, works: _*)
 
         assertJsonResponse(routes, s"/$apiPrefix/works") {
           Status.OK -> worksListResponse(apiPrefix, works = works)
@@ -19,10 +20,10 @@ class WorksTest extends ApiWorksTestBase {
 
   it("returns a single work when requested with id") {
     withApi {
-      case (indexV2, routes) =>
+      case (ElasticConfig(worksIndex, _), routes) =>
         val work = createIdentifiedWork
 
-        insertIntoElasticsearch(indexV2, work)
+        insertIntoElasticsearch(worksIndex, work)
 
         assertJsonResponse(routes, s"/$apiPrefix/works/${work.canonicalId}") {
           Status.OK -> s"""
@@ -39,12 +40,12 @@ class WorksTest extends ApiWorksTestBase {
 
   it("returns optional fields when they exist") {
     withApi {
-      case (indexV2, routes) =>
+      case (ElasticConfig(worksIndex, _), routes) =>
         val work = createIdentifiedWorkWith(
           duration = Some(3600),
           edition = Some("Special edition"),
         )
-        insertIntoElasticsearch(indexV2, work)
+        insertIntoElasticsearch(worksIndex, work)
         assertJsonResponse(routes, s"/$apiPrefix/works/${work.canonicalId}") {
           Status.OK -> s"""
             {
@@ -63,10 +64,10 @@ class WorksTest extends ApiWorksTestBase {
   it(
     "returns the requested page of results when requested with page & pageSize") {
     withApi {
-      case (indexV2, routes) =>
+      case (ElasticConfig(worksIndex, _), routes) =>
         val works = createIdentifiedWorks(count = 3).sortBy { _.canonicalId }
 
-        insertIntoElasticsearch(indexV2, works: _*)
+        insertIntoElasticsearch(worksIndex, works: _*)
 
         assertJsonResponse(routes, s"/$apiPrefix/works?page=2&pageSize=1") {
           Status.OK -> s"""
@@ -121,7 +122,7 @@ class WorksTest extends ApiWorksTestBase {
 
   it("ignores parameters that are unused when making an API request") {
     withApi {
-      case (indexV2, routes) =>
+      case (_, routes) =>
         assertJsonResponse(routes, s"/$apiPrefix/works?foo=bar") {
           Status.OK -> emptyJsonResult(apiPrefix)
         }
@@ -130,14 +131,14 @@ class WorksTest extends ApiWorksTestBase {
 
   it("returns matching results if doing a full-text search") {
     withApi {
-      case (indexV2, routes) =>
+      case (ElasticConfig(worksIndex, _), routes) =>
         val workDodo = createIdentifiedWorkWith(
           title = Some("A drawing of a dodo")
         )
         val workMouse = createIdentifiedWorkWith(
           title = Some("A mezzotint of a mouse")
         )
-        insertIntoElasticsearch(indexV2, workDodo, workMouse)
+        insertIntoElasticsearch(worksIndex, workDodo, workMouse)
 
         assertJsonResponse(routes, s"/$apiPrefix/works?query=cat") {
           Status.OK -> emptyJsonResult(apiPrefix)
@@ -151,10 +152,10 @@ class WorksTest extends ApiWorksTestBase {
 
   it("searches different indices with the ?_index query parameter") {
     withApi {
-      case (indexV2, routes) =>
+      case (ElasticConfig(worksIndex, _), routes) =>
         withLocalWorksIndex { altIndex =>
           val work = createIdentifiedWork
-          insertIntoElasticsearch(indexV2, work)
+          insertIntoElasticsearch(worksIndex, work)
 
           val altWork = createIdentifiedWork
           insertIntoElasticsearch(index = altIndex, altWork)
@@ -188,12 +189,12 @@ class WorksTest extends ApiWorksTestBase {
 
   it("looks up works in different indices with the ?_index query parameter") {
     withApi {
-      case (indexV2, routes) =>
+      case (ElasticConfig(worksIndex, _), routes) =>
         withLocalWorksIndex { altIndex =>
           val work = createIdentifiedWorkWith(
             title = Some("Playing with pangolins")
           )
-          insertIntoElasticsearch(indexV2, work)
+          insertIntoElasticsearch(worksIndex, work)
 
           val altWork = createIdentifiedWorkWith(
             title = Some("Playing with pangolins")
@@ -215,7 +216,7 @@ class WorksTest extends ApiWorksTestBase {
 
   it("shows the thumbnail field if available") {
     withApi {
-      case (indexV2, routes) =>
+      case (ElasticConfig(worksIndex, _), routes) =>
         val work = createIdentifiedWorkWith(
           thumbnail = Some(
             DigitalLocation(
@@ -224,7 +225,7 @@ class WorksTest extends ApiWorksTestBase {
               license = Some(License.CCBY)
             ))
         )
-        insertIntoElasticsearch(indexV2, work)
+        insertIntoElasticsearch(worksIndex, work)
 
         assertJsonResponse(routes, s"/$apiPrefix/works") {
           Status.OK -> s"""
@@ -247,7 +248,7 @@ class WorksTest extends ApiWorksTestBase {
 
   it("supports production date sorting") {
     withApi {
-      case (indexV2, routes) =>
+      case (ElasticConfig(worksIndex, _), routes) =>
         val work1 = createDatedWork(
           canonicalId = "1",
           dateLabel = "1900"
@@ -268,7 +269,7 @@ class WorksTest extends ApiWorksTestBase {
           canonicalId = "5",
           dateLabel = "1098"
         )
-        insertIntoElasticsearch(indexV2, work1, work2, work3, work4, work5)
+        insertIntoElasticsearch(worksIndex, work1, work2, work3, work4, work5)
 
         assertJsonResponse(routes, s"/$apiPrefix/works?sort=production.dates") {
           Status.OK -> worksListResponse(
@@ -281,7 +282,7 @@ class WorksTest extends ApiWorksTestBase {
 
   it("supports sorting of dates in descending order") {
     withApi {
-      case (indexV2, routes) =>
+      case (ElasticConfig(worksIndex, _), routes) =>
         val work1 = createDatedWork(
           canonicalId = "1",
           dateLabel = "1900"
@@ -294,7 +295,7 @@ class WorksTest extends ApiWorksTestBase {
           canonicalId = "3",
           dateLabel = "1904"
         )
-        insertIntoElasticsearch(indexV2, work1, work2, work3)
+        insertIntoElasticsearch(worksIndex, work1, work2, work3)
 
         assertJsonResponse(
           routes,
@@ -309,7 +310,7 @@ class WorksTest extends ApiWorksTestBase {
 
   it("supports filtering on collection") {
     withApi {
-      case (indexV2, routes) =>
+      case (ElasticConfig(worksIndex, _), routes) =>
         val work1Archive1Depth1 = createIdentifiedWorkWith(
           canonicalId = "work1Archive1Depth1",
           collectionPath =
@@ -349,7 +350,7 @@ class WorksTest extends ApiWorksTestBase {
         )
 
         insertIntoElasticsearch(
-          indexV2,
+          worksIndex,
           work1Archive1Depth1,
           work2Archive1Depth2,
           work3Archive1Depth3,
@@ -406,7 +407,7 @@ class WorksTest extends ApiWorksTestBase {
 
   it("supports filtering collection on depth") {
     withApi {
-      case (indexV2, routes) =>
+      case (ElasticConfig(worksIndex, _), routes) =>
         val work1Depth1 = createIdentifiedWorkWith(
           canonicalId = "1",
           collectionPath =
@@ -437,7 +438,7 @@ class WorksTest extends ApiWorksTestBase {
           collectionPath = None
         )
         insertIntoElasticsearch(
-          indexV2,
+          worksIndex,
           work1Depth1,
           work2Depth1,
           work3Depth2,

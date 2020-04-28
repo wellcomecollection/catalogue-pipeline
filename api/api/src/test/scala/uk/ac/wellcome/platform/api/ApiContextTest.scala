@@ -10,7 +10,7 @@ class ApiContextTest extends ApiWorksTestBase {
 
   it("returns a context for v2") {
     withApi {
-      case (index, routes) =>
+      case (_, routes) =>
         val path = s"/${getApiPrefix(ApiVersions.v2)}/context.json"
         assertJsonResponse(routes, path)(
           OK ->
