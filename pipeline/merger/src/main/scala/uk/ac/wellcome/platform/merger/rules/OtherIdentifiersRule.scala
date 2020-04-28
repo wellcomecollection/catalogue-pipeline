@@ -8,7 +8,7 @@ import uk.ac.wellcome.platform.merger.rules.WorkPredicates.{
   WorkPredicate,
   WorkPredicateOps
 }
-import uk.ac.wellcome.platform.merger.models.Sources.SourcesOps
+import uk.ac.wellcome.platform.merger.models.Sources.findFirstLinkedDigitisedSierraWorkFor
 import cats.implicits._
 
 /**
@@ -25,8 +25,7 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
 
     // We have to do the check if there a digitised linked work before the rule
     // as the condition relies on the target and sources.
-    val digitisedSierraIds = sources
-      .findFirstLinkedDigitisedSierraWorkFor(target)
+    val digitisedSierraIds = findFirstLinkedDigitisedSierraWorkFor(target, sources)
       .map(_.sourceIdentifier)
       .map(mergeDigitalIntoPhysicalSierraTarget)
       .flatMap(rule => rule(target, sources))
@@ -51,7 +50,7 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
 
     val mergedSources = sources.filter { source =>
       rules.exists(_(target, source).isDefined)
-    } ++ sources.findFirstLinkedDigitisedSierraWorkFor(target)
+    } ++ findFirstLinkedDigitisedSierraWorkFor(target, sources)
 
     FieldMergeResult(
       data = ids,

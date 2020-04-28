@@ -7,7 +7,7 @@ import uk.ac.wellcome.platform.merger.rules.WorkPredicates.{
   WorkPredicate,
   WorkPredicateOps
 }
-import uk.ac.wellcome.platform.merger.models.Sources.SourcesOps
+import uk.ac.wellcome.platform.merger.models.Sources.findFirstLinkedDigitisedSierraWorkFor
 import cats.data.NonEmptyList
 
 /**
@@ -41,7 +41,7 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
 
     val mergedSources = sources.filter { source =>
       rules.exists(_(target, source).isDefined)
-    } ++ sources.findFirstLinkedDigitisedSierraWorkFor(target)
+    } ++ findFirstLinkedDigitisedSierraWorkFor(target, sources)
 
     FieldMergeResult(
       data = items,

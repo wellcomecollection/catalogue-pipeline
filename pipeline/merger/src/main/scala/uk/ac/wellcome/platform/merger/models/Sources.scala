@@ -6,16 +6,13 @@ import uk.ac.wellcome.models.work.internal.{
 }
 
 object Sources {
-  type Sources = Seq[TransformedBaseWork]
-
-  implicit class SourcesOps(val sources: Sources) {
     def findFirstLinkedDigitisedSierraWorkFor(
-      target: UnidentifiedWork): Option[TransformedBaseWork] =
-      target.data.mergeCandidates
+      target: UnidentifiedWork, sources: Seq[TransformedBaseWork]): Option[TransformedBaseWork] = {
+
+      val digitisedLinkedSourceIds = target.data.mergeCandidates
         .filter(_.reason.contains("Physical/digitised Sierra work"))
         .map(_.identifier)
-        .flatMap(sourceIdentifier =>
-          sources.filter(source => source.sourceIdentifier == sourceIdentifier))
-        .headOption
-  }
+
+      sources.find(digitisedLinkedSourceIds.contains)
+    }
 }
