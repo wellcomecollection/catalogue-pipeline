@@ -4,6 +4,7 @@ import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.fixtures.ImageFulltextAccess
+import org.scalatest.prop.TableDrivenPropertyChecks._
 
 class PlatformMergerTest
     extends FunSpec
@@ -37,8 +38,30 @@ class PlatformMergerTest
         )
       )
     }
+  val calmWork = createUnidentifiedCalmWork()
 
   private val merger = PlatformMerger
+
+  it("finds Calm || Sierra with physical item || Sierra work || Nothing as a target") {
+    val worksWithCalmTarget = Seq(sierraDigitalWork, calmWork, sierraPhysicalWork, metsWork, miroWork)
+    val worksWithSierraPhysicalTarget = Seq(sierraDigitalWork, sierraPhysicalWork, metsWork, miroWork)
+    val worksWithSierraTarget = Seq(sierraDigitalWork, metsWork, miroWork)
+    val worksWithNoTarget = Seq(metsWork, miroWork)
+
+    val examples = Table(
+      ("-works-", "-target-", "-clue-"),
+      (worksWithCalmTarget, Some(calmWork), "Calm"),
+      (worksWithSierraPhysicalTarget, Some(sierraPhysicalWork), "Sierra with physical item"),
+      (worksWithSierraTarget, Some(sierraDigitalWork), "Sierra"),
+      (worksWithNoTarget, None, "Non"),
+    )
+
+    forAll(examples) { (works: Seq[TransformedBaseWork], target: Option[UnidentifiedWork], clue: String) =>
+      withClue(clue) {
+        merger.findTarget(works) should be (target)
+      }
+    }
+  }
 
   it("merges a Sierra physical work with a single-page Miro work") {
     val result = merger.merge(
