@@ -25,11 +25,12 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
 
     // We have to do the check if there a digitised linked work before the rule
     // as the condition relies on the target and sources.
-    val digitisedSierraIds = findFirstLinkedDigitisedSierraWorkFor(target, sources)
-      .map(_.sourceIdentifier)
-      .map(mergeDigitalIntoPhysicalSierraTarget)
-      .flatMap(rule => rule(target, sources))
-      .getOrElse(Nil)
+    val digitisedSierraIds =
+      findFirstLinkedDigitisedSierraWorkFor(target, sources)
+        .map(_.sourceIdentifier)
+        .map(mergeDigitalIntoPhysicalSierraTarget)
+        .flatMap(rule => rule(target, sources))
+        .getOrElse(Nil)
 
     val rules =
       List(

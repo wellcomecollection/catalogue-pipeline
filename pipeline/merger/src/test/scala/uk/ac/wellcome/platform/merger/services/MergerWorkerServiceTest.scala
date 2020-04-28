@@ -214,7 +214,8 @@ class MergerWorkerServiceTest
       createSierraWorkWithDigitisedMergeCandidate
     val miroWork = createMiroWork
 
-    val works = List(sierraWorkWithMergeCandidate, sierraWorkMergeCandidate, miroWork)
+    val works =
+      List(sierraWorkWithMergeCandidate, sierraWorkMergeCandidate, miroWork)
 
     withMergerWorkerServiceFixtures {
       case (vhs, QueuePair(queue, dlq), topics, _) =>
@@ -265,8 +266,10 @@ class MergerWorkerServiceTest
       createSierraWorkWithDigitisedMergeCandidate
     val (sierraWorkWithMergeCandidate2, sierraWorkMergeCandidate2) =
       createSierraWorkWithDigitisedMergeCandidate
-    val workPair1 = List(sierraWorkWithMergeCandidate1, sierraWorkMergeCandidate1)
-    val workPair2 = List(sierraWorkWithMergeCandidate2, sierraWorkMergeCandidate2)
+    val workPair1 =
+      List(sierraWorkWithMergeCandidate1, sierraWorkMergeCandidate1)
+    val workPair2 =
+      List(sierraWorkWithMergeCandidate2, sierraWorkMergeCandidate2)
     val works = workPair1 ++ workPair2
 
     withMergerWorkerServiceFixtures {

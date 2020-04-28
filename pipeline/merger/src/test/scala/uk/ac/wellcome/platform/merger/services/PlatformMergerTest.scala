@@ -23,13 +23,14 @@ class PlatformMergerTest
           sierraDigitised.sourceIdentifier,
           Some("Physical/digitised Sierra work")))
     ))
-  private val multipleItemsSierraWork = createSierraWorkWithTwoPhysicalItems.copy(
-    data = createSierraWorkWithTwoPhysicalItems.data.copy(
-      mergeCandidates = List(
-        MergeCandidate(
-          sierraDigitised.sourceIdentifier,
-          Some("Physical/digitised Sierra work")))
-    ))
+  private val multipleItemsSierraWork =
+    createSierraWorkWithTwoPhysicalItems.copy(
+      data = createSierraWorkWithTwoPhysicalItems.data.copy(
+        mergeCandidates = List(
+          MergeCandidate(
+            sierraDigitised.sourceIdentifier,
+            Some("Physical/digitised Sierra work")))
+      ))
   private val sierraDigitalWork = createSierraDigitalWorkWith(
     items = List(createDigitalItemWith(List(digitalLocationNoLicense))))
   private val sierraPictureWork = createUnidentifiedSierraWorkWith(
@@ -310,7 +311,7 @@ class PlatformMergerTest
 
   it("merges a multiple items physical Sierra work with a METS work") {
     val result = merger.merge(
-        works = Seq(multipleItemsSierraWork, metsWork)
+      works = Seq(multipleItemsSierraWork, metsWork)
     )
 
     result.works.size shouldBe 2
@@ -375,9 +376,10 @@ class PlatformMergerTest
         redirect =
           IdentifiableRedirect(multipleItemsSierraWork.sourceIdentifier))
 
-
-
-    result.works should contain theSameElementsAs List(expectedMergedWork, expectedRedirectedDigitalWork, expectedMetsRedirectedWork)
+    result.works should contain theSameElementsAs List(
+      expectedMergedWork,
+      expectedRedirectedDigitalWork,
+      expectedMetsRedirectedWork)
 
     result.images shouldBe empty
   }
