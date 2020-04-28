@@ -35,7 +35,11 @@ class SwaggerDocs(apiConfig: ApiConfig) extends Logging {
     .title("Catalogue")
 
   val apiClasses: Set[Class[_]] =
-    Set(classOf[SingleWorkSwagger], classOf[MultipleWorksSwagger])
+    Set(
+      classOf[SingleWorkSwagger],
+      classOf[MultipleWorksSwagger],
+      classOf[SingleImageSwagger]
+    )
 
   val openAPI = new OpenAPI()
     .info(info)
@@ -46,6 +50,62 @@ class SwaggerDocs(apiConfig: ApiConfig) extends Logging {
 
   val json: String =
     Json.pretty(new Reader(config).read(apiClasses.asJava))
+}
+
+@Path("/images/{id}")
+trait SingleImageSwagger {
+
+  @GET
+  @Tag(name = "Images")
+  @Operation(
+    summary = "/images/{id}",
+    description = "Returns a single image",
+    tags = Array("Images"),
+    parameters = Array(
+      new Parameter(
+        name = "id",
+        in = ParameterIn.PATH,
+        description = "The image to return",
+        required = true
+      )
+    )
+  )
+  @ApiResponse(
+    responseCode = "200",
+    description = "The image",
+    content = Array(
+      new Content(schema = new Schema(implementation = classOf[DisplayImage]))
+    )
+  )
+  @ApiResponse(
+    responseCode = "400",
+    description = "Bad Request Error",
+    content = Array(
+      new Content(schema = new Schema(implementation = classOf[DisplayError]))
+    )
+  )
+  @ApiResponse(
+    responseCode = "404",
+    description = "Not Found Error",
+    content = Array(
+      new Content(schema = new Schema(implementation = classOf[DisplayError]))
+    )
+  )
+  @ApiResponse(
+    responseCode = "410",
+    description = "Gone Error",
+    content = Array(
+      new Content(schema = new Schema(implementation = classOf[DisplayError]))
+    )
+  )
+  @ApiResponse(
+    responseCode = "500",
+    description = "Internal Server Error",
+    content = Array(
+      new Content(schema = new Schema(implementation = classOf[DisplayError]))
+    )
+  )
+  def getImage(): Unit
 }
 
 @Path("/works/{id}")

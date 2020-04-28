@@ -13,7 +13,7 @@ import uk.ac.wellcome.models.work.internal.IdentifiedWork
 )
 case class DisplayWorkV2(
   @Schema(
-    readOnly = true,
+    accessMode = Schema.AccessMode.READ_ONLY,
     description = "The canonical identifier given to a thing.") id: String,
   @Schema(
     description =
