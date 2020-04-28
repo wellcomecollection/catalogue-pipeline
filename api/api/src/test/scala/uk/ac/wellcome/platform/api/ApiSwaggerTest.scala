@@ -5,12 +5,17 @@ import org.scalatest.Matchers
 import akka.http.scaladsl.model.ContentTypes
 import io.circe.Json
 import uk.ac.wellcome.platform.api.models.SearchQueryType
-import uk.ac.wellcome.platform.api.rest.{MultipleWorksParams, SingleWorkParams}
+import uk.ac.wellcome.platform.api.rest.{
+  MultipleWorksParams,
+  SingleImageParams,
+  SingleWorkParams
+}
 import uk.ac.wellcome.platform.api.works.ApiWorksTestBase
 
 class ApiSwaggerTest extends ApiWorksTestBase with Matchers {
-  val worksEndoint = "/works"
+  val worksEndpoint = "/works"
   val workEndpoint = "/works/{id}"
+  val imageEndpoint = "/images/{id}"
   it("should return valid json object") {
     checkSwaggerJson { json =>
       json.isObject shouldBe true
@@ -57,7 +62,7 @@ class ApiSwaggerTest extends ApiWorksTestBase with Matchers {
 
   it("should contain multiple work endpoints in paths") {
     checkSwaggerJson { json =>
-      val endpoint = getEndpoint(json, worksEndoint)
+      val endpoint = getEndpoint(json, worksEndpoint)
 
       getKey(endpoint, "description").isEmpty shouldBe false
       getKey(endpoint, "summary").isEmpty shouldBe false
@@ -66,6 +71,21 @@ class ApiSwaggerTest extends ApiWorksTestBase with Matchers {
       val numRouteParams = 0
       numParams shouldBe Some(
         getNumPublicQueryParams[MultipleWorksParams] + numRouteParams
+      )
+    }
+  }
+
+  it("should contain single image endpoint in paths") {
+    checkSwaggerJson { json =>
+      val endpoint = getEndpoint(json, imageEndpoint)
+
+      getKey(endpoint, "description").isEmpty shouldBe false
+      getKey(endpoint, "summary").isEmpty shouldBe false
+      val numParams = getKey(endpoint, "parameters")
+        .flatMap(params => getLength(params))
+      val numRouteParams = 1
+      numParams shouldBe Some(
+        getNumPublicQueryParams[SingleImageParams] + numRouteParams
       )
     }
   }
@@ -129,7 +149,7 @@ class ApiSwaggerTest extends ApiWorksTestBase with Matchers {
   it("should contain `_queryType parameter with valid `allowedValues`") {
     checkSwaggerJson { json =>
       val _queryType =
-        getParameter(getEndpoint(json, worksEndoint), "_queryType")
+        getParameter(getEndpoint(json, worksEndpoint), "_queryType")
 
       val queryTypeAllowedValues =
         _queryType.get.hcursor
