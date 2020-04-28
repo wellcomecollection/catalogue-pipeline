@@ -15,8 +15,22 @@ class PlatformMergerTest
     license = Some(License.CCBYNC))
   val digitalLocationNoLicense = digitalLocationCCBYNC.copy(license = None)
 
-  private val sierraPhysicalWork = createSierraPhysicalWork
-  private val multipleItemsSierraWork = createSierraWorkWithTwoPhysicalItems
+  val sierraDigitised = createUnidentifiedSierraWork
+  val sierraPhysicalWork = createSierraPhysicalWork.copy(
+    data = createSierraPhysicalWork.data.copy(
+      mergeCandidates = List(
+        MergeCandidate(
+          sierraDigitised.sourceIdentifier,
+          Some("Physical/digitised Sierra work")))
+    ))
+  private val multipleItemsSierraWork =
+    createSierraWorkWithTwoPhysicalItems.copy(
+      data = createSierraWorkWithTwoPhysicalItems.data.copy(
+        mergeCandidates = List(
+          MergeCandidate(
+            sierraDigitised.sourceIdentifier,
+            Some("Physical/digitised Sierra work")))
+      ))
   private val sierraDigitalWork = createSierraDigitalWorkWith(
     items = List(createDigitalItemWith(List(digitalLocationNoLicense))))
   private val sierraPictureWork = createUnidentifiedSierraWorkWith(
@@ -38,7 +52,7 @@ class PlatformMergerTest
         )
       )
     }
-  val calmWork = createUnidentifiedCalmWork()
+  val calmWork = createUnidentifiedCalmWork
 
   private val merger = PlatformMerger
 
@@ -239,7 +253,7 @@ class PlatformMergerTest
   it(
     "merges a physical non-picture Sierra work with a digital Sierra work, a single-page Miro work and a METS work") {
     val result = merger.merge(
-      works = Seq(sierraPhysicalWork, sierraDigitalWork, miroWork, metsWork)
+      works = Seq(sierraPhysicalWork, sierraDigitised, miroWork, metsWork)
     )
 
     result.works.size shouldBe 4
@@ -249,7 +263,7 @@ class PlatformMergerTest
 
     val expectedMergedWork = sierraPhysicalWork.withData { data =>
       data.copy(
-        otherIdentifiers = sierraPhysicalWork.data.otherIdentifiers ++ miroWork.identifiers ++ sierraDigitalWork.identifiers,
+        otherIdentifiers = sierraPhysicalWork.data.otherIdentifiers ++ miroWork.identifiers ++ sierraDigitised.identifiers,
         thumbnail = metsWork.data.thumbnail,
         items = List(
           sierraItem.copy(
@@ -263,8 +277,8 @@ class PlatformMergerTest
 
     val expectedRedirectedDigitalWork =
       UnidentifiedRedirectedWork(
-        sourceIdentifier = sierraDigitalWork.sourceIdentifier,
-        version = sierraDigitalWork.version,
+        sourceIdentifier = sierraDigitised.sourceIdentifier,
+        version = sierraDigitised.version,
         redirect = IdentifiableRedirect(sierraPhysicalWork.sourceIdentifier)
       )
 
@@ -330,7 +344,7 @@ class PlatformMergerTest
   it(
     "merges a multiple items physical Sierra work with a digital Sierra work and a METS work") {
     val result = merger.merge(
-      works = Seq(multipleItemsSierraWork, sierraDigitalWork, metsWork)
+      works = Seq(multipleItemsSierraWork, sierraDigitised, metsWork)
     )
 
     result.works.size shouldBe 3
@@ -340,7 +354,7 @@ class PlatformMergerTest
 
     val expectedMergedWork = multipleItemsSierraWork.withData { data =>
       data.copy(
-        otherIdentifiers = multipleItemsSierraWork.data.otherIdentifiers ++ sierraDigitalWork.identifiers,
+        otherIdentifiers = multipleItemsSierraWork.data.otherIdentifiers ++ sierraDigitised.identifiers,
         thumbnail = metsWork.data.thumbnail,
         items = sierraItems :+ metsItem,
         merged = true
@@ -349,8 +363,8 @@ class PlatformMergerTest
 
     val expectedRedirectedDigitalWork =
       UnidentifiedRedirectedWork(
-        sourceIdentifier = sierraDigitalWork.sourceIdentifier,
-        version = sierraDigitalWork.version,
+        sourceIdentifier = sierraDigitised.sourceIdentifier,
+        version = sierraDigitised.version,
         redirect =
           IdentifiableRedirect(multipleItemsSierraWork.sourceIdentifier)
       )
@@ -366,6 +380,7 @@ class PlatformMergerTest
       expectedMergedWork,
       expectedRedirectedDigitalWork,
       expectedMetsRedirectedWork)
+
     result.images shouldBe empty
   }
 }
