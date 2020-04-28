@@ -1,9 +1,9 @@
-package uk.ac.wellcome.platform.api.works.v2
+package uk.ac.wellcome.platform.api.works
 
 import uk.ac.wellcome.models.work.internal.Language
 import uk.ac.wellcome.models.work.internal.WorkType._
 
-class ApiV2FilteredAggregationsTest extends ApiV2WorksTestBase {
+class WorksFilteredAggregationsTest extends ApiWorksTestBase {
 
   it("filters aggregations with filters that are not paired to the aggregation") {
     withApi {

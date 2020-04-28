@@ -1,4 +1,6 @@
-package uk.ac.wellcome.platform.api.works
+package uk.ac.wellcome.platform.api
+
+import uk.ac.wellcome.platform.api.works.ApiWorksTestBase
 
 class ApiErrorsTest extends ApiWorksTestBase {
 
