@@ -18,4 +18,16 @@ TF_PATH =
 
 inference_manager-test: feature_inferrer-build
 
+inference_manager-integration-only:
+	$(ROOT)/docker_run.py --dind --sbt --root -- \
+		--net host \
+		wellcome/sbt_wrapper \
+		"project inference_manager" ";dockerComposeUp;testOnly **.integration.*;dockerComposeStop"
+
+TEST_OVERRIDE = feature_inferrer
+feature_inferrer-test: feature_inferrer-build
+	$(ROOT)/docker_run.py --dind -- feature_inferrer \
+		python -m compileall /app
+	$(MAKE) inference_manager-integration-only
+
 $(val $(call stack_setup))

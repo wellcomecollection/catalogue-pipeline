@@ -12,7 +12,7 @@ import uk.ac.wellcome.models.work.generators.{
   SubjectGenerators,
   WorksGenerators
 }
-import uk.ac.wellcome.models.work.internal.IdentifiedBaseWork
+import uk.ac.wellcome.models.work.internal.{CollectionPath, IdentifiedBaseWork}
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
 import uk.ac.wellcome.platform.api.models.{SearchQuery, SearchQueryType}
 import uk.ac.wellcome.models.Implicits._
@@ -326,6 +326,36 @@ class FreeTextQueryTest
 
         assertResultsMatchForAllowedQueryTypes(index, query, List(matchingWork))
       }
+    }
+
+    it("Searches for collection in collectionPath.path") {
+      withLocalWorksIndex { index =>
+        val matchingWork = createIdentifiedWorkWith(
+          collectionPath = Some(CollectionPath("PPCPB", label = Some("PP/CRI")))
+        )
+        val notMatchingWork = createIdentifiedWorkWith(
+          collectionPath =
+            Some(CollectionPath("NUFFINK", label = Some("NUF/FINK")))
+        )
+        val query = "PPCPB"
+        insertIntoElasticsearch(index, matchingWork, notMatchingWork)
+        assertResultsMatchForAllowedQueryTypes(index, query, List(matchingWork))
+      }
+    }
+  }
+
+  it("Searches for collection in collectionPath.label") {
+    withLocalWorksIndex { index =>
+      val matchingWork = createIdentifiedWorkWith(
+        collectionPath = Some(CollectionPath("PPCPB", label = Some("PP/CRI")))
+      )
+      val notMatchingWork = createIdentifiedWorkWith(
+        collectionPath =
+          Some(CollectionPath("NUFFINK", label = Some("NUF/FINK")))
+      )
+      val query = "PP/CRI"
+      insertIntoElasticsearch(index, matchingWork, notMatchingWork)
+      assertResultsMatchForAllowedQueryTypes(index, query, List(matchingWork))
     }
   }
 

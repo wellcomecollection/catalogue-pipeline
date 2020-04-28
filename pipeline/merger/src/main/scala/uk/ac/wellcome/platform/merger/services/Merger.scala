@@ -9,7 +9,6 @@ import uk.ac.wellcome.models.work.internal.{
   UnidentifiedWork
 }
 import uk.ac.wellcome.platform.merger.rules._
-import uk.ac.wellcome.platform.merger.rules.CalmRules._
 import uk.ac.wellcome.platform.merger.logging.MergerLogging
 import uk.ac.wellcome.platform.merger.models.{MergeResult, MergerOutcome}
 
@@ -103,7 +102,8 @@ object PlatformMerger extends Merger {
   override def findTarget(
     works: Seq[TransformedBaseWork]): Option[UnidentifiedWork] =
     works
-      .find(WorkPredicates.physicalSierra)
+      .find(WorkPredicates.singlePhysicalItemCalmWork)
+      .orElse(works.find(WorkPredicates.physicalSierra))
       .orElse(works.find(WorkPredicates.sierraWork)) match {
       case Some(target: UnidentifiedWork) => Some(target)
       case _                              => None
@@ -122,14 +122,6 @@ object PlatformMerger extends Merger {
         thumbnail <- ThumbnailRule(target, sources)
         otherIdentifiers <- OtherIdentifiersRule(target, sources)
         images <- ImagesRule(target, sources)
-        title <- TitleRule(target, sources)
-        workType <- WorkTypeRule(target, sources)
-        collectionPath <- CollectionPathRule(target, sources)
-        physicalDescription <- PhysicalDescriptionRule(target, sources)
-        contributors <- ContributorsRule(target, sources)
-        subjects <- SubjectsRule(target, sources)
-        language <- LanguageRule(target, sources)
-        notes <- NotesRule(target, sources)
       } yield
         MergeResult(
           mergedTarget = target withData { data =>
@@ -138,14 +130,6 @@ object PlatformMerger extends Merger {
               thumbnail = thumbnail,
               otherIdentifiers = otherIdentifiers,
               images = images.map(_.toUnmerged),
-              title = title,
-              workType = workType,
-              collectionPath = collectionPath,
-              physicalDescription = physicalDescription,
-              contributors = contributors,
-              subjects = subjects,
-              language = language,
-              notes = notes,
               merged = true
             )
           },

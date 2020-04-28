@@ -35,7 +35,9 @@ trait ImageGenerators extends IdentifiersGenerators with ItemsGenerators {
   def createInferredData = {
     val features1 = (0 until 2048).map(_ => Random.nextFloat() * 100).toList
     val features2 = (0 until 2048).map(_ => Random.nextFloat() * 100).toList
-    Some(InferredData(features1, features2, List(randomAlphanumeric(10))))
+    val lshEncodedFeatures =
+      (0 until 256).map(_ => randomAlphanumeric(3)).toList
+    Some(InferredData(features1, features2, lshEncodedFeatures))
   }
 
   def createAugmentedImage(

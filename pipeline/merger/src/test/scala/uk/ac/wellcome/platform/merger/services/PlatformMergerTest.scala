@@ -4,6 +4,7 @@ import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.fixtures.ImageFulltextAccess
+import org.scalatest.prop.TableDrivenPropertyChecks._
 
 class PlatformMergerTest
     extends FunSpec
@@ -50,8 +51,39 @@ class PlatformMergerTest
         )
       )
     }
+  val calmWork = createUnidentifiedCalmWork
 
   private val merger = PlatformMerger
+
+  it(
+    "finds Calm || Sierra with physical item || Sierra work || Nothing as a target") {
+    val worksWithCalmTarget =
+      Seq(sierraDigitalWork, calmWork, sierraPhysicalWork, metsWork, miroWork)
+    val worksWithSierraPhysicalTarget =
+      Seq(sierraDigitalWork, sierraPhysicalWork, metsWork, miroWork)
+    val worksWithSierraTarget = Seq(sierraDigitalWork, metsWork, miroWork)
+    val worksWithNoTarget = Seq(metsWork, miroWork)
+
+    val examples = Table(
+      ("-works-", "-target-", "-clue-"),
+      (worksWithCalmTarget, Some(calmWork), "Calm"),
+      (
+        worksWithSierraPhysicalTarget,
+        Some(sierraPhysicalWork),
+        "Sierra with physical item"),
+      (worksWithSierraTarget, Some(sierraDigitalWork), "Sierra"),
+      (worksWithNoTarget, None, "Non"),
+    )
+
+    forAll(examples) {
+      (works: Seq[TransformedBaseWork],
+       target: Option[UnidentifiedWork],
+       clue: String) =>
+        withClue(clue) {
+          merger.findTarget(works) should be(target)
+        }
+    }
+  }
 
   it("merges a Sierra physical work with a single-page Miro work") {
     val result = merger.merge(
@@ -345,48 +377,8 @@ class PlatformMergerTest
 
 
 
-    result.works should contain (expectedMergedWork)
-    println(expectedMergedWork)
-    println(expectedRedirectedDigitalWork)
-    println(expectedMetsRedirectedWork)
-//    result.images shouldBe empty
-  }
+    result.works should contain theSameElementsAs List(expectedMergedWork, expectedRedirectedDigitalWork, expectedMetsRedirectedWork)
 
-  it("merges fields from Calm work if present") {
-    val calmLocation = PhysicalLocation(
-      locationType = LocationType("scmac"),
-      label = "Closed stores Arch. & MSS",
-      accessConditions = Nil
-    )
-    val calmWork = createUnidentifiedCalmWorkWith(
-      data = WorkData(
-        title = Some("123"),
-        collectionPath =
-          Some(CollectionPath("ref/no", Some(CollectionLevel.Item))),
-        physicalDescription = Some("description"),
-        contributors = List(Contributor(Agent("agent"), Nil)),
-        subjects = List(Subject("subject", Nil)),
-        language = Some(Language("en.gb", "English")),
-        notes = List(FindingAids("here")),
-        workType = Some(WorkType.ArchiveItem),
-        items = List(Item(None, List(calmLocation))),
-        edition = Some("Should not be merged")
-      )
-    )
-
-    val works = merger.merge(Seq(sierraPhysicalWork, calmWork)).works
-
-    works.size shouldBe 2
-    val work = works(1).asInstanceOf[UnidentifiedWork]
-    work.sourceIdentifier shouldBe sierraPhysicalWork.sourceIdentifier
-    work.data.title shouldBe calmWork.data.title
-    work.data.collectionPath shouldBe calmWork.data.collectionPath
-    work.data.physicalDescription shouldBe calmWork.data.physicalDescription
-    work.data.contributors shouldBe calmWork.data.contributors
-    work.data.subjects shouldBe calmWork.data.subjects
-    work.data.language shouldBe calmWork.data.language
-    work.data.notes shouldBe calmWork.data.notes
-    work.data.workType shouldBe calmWork.data.workType
-    work.data.edition shouldBe None
+    result.images shouldBe empty
   }
 }

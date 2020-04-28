@@ -264,8 +264,10 @@ define __python_ssm_target
 $(1)-build:
 	$(call build_image,$(1),$(2))
 
+ifneq ($(TEST_OVERRIDE), $(1))
 $(1)-test:
 	$(call test_python,$(STACK_ROOT)/$(1))
+endif
 
 $(1)-publish: $(1)-build
 	$(call publish_service_ssm,$(1),$(3),$(4),$(5))

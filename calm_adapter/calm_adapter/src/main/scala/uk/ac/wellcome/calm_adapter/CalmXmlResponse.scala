@@ -75,7 +75,9 @@ object CalmSearchResponse {
       .toEither
 }
 
-case class CalmSummaryResponse(val root: Elem, retrievedAt: Instant)
+case class CalmSummaryResponse(val root: Elem,
+                               retrievedAt: Instant,
+                               suppressedFields: Set[String] = Set.empty)
     extends CalmXmlResponse[CalmRecord] {
 
   val responseTag = "SummaryHeaderResponse"
@@ -120,6 +122,7 @@ case class CalmSummaryResponse(val root: Elem, retrievedAt: Instant)
   def toMapping(nodes: NodeSeq): Map[String, List[String]] =
     nodes
       .map(node => node.label -> node.text)
+      .filterNot { case (name, _) => suppressedFields.contains(name) }
       .groupBy(_._1)
       .mapValues(_.map(_._2).toList)
       .toMap
@@ -127,13 +130,19 @@ case class CalmSummaryResponse(val root: Elem, retrievedAt: Instant)
 
 object CalmSummaryResponse {
 
-  def apply(str: String,
-            retrievedAt: Instant): Either[Throwable, CalmSummaryResponse] =
-    Try(XML.loadString(str)).map(CalmSummaryResponse(_, retrievedAt)).toEither
+  def apply(
+    str: String,
+    retrievedAt: Instant,
+    suppressedFields: Set[String]): Either[Throwable, CalmSummaryResponse] =
+    Try(XML.loadString(str))
+      .map(CalmSummaryResponse(_, retrievedAt, suppressedFields))
+      .toEither
 
-  def apply(bytes: Array[Byte],
-            retrievedAt: Instant): Either[Throwable, CalmSummaryResponse] =
+  def apply(
+    bytes: Array[Byte],
+    retrievedAt: Instant,
+    suppressedFields: Set[String]): Either[Throwable, CalmSummaryResponse] =
     Try(XML.load(new java.io.ByteArrayInputStream(bytes)))
-      .map(CalmSummaryResponse(_, retrievedAt))
+      .map(CalmSummaryResponse(_, retrievedAt, suppressedFields))
       .toEither
 }
