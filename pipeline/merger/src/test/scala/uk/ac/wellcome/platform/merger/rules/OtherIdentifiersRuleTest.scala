@@ -59,20 +59,6 @@ class OtherIdentifiersRuleTest
     }
   }
 
-  it("merges METS source IDs into Sierra work with multi items") {
-    inside(
-      OtherIdentifiersRule
-        .merge(
-          sierraWorkWithTwoPhysicalItems,
-          nothingWork :: metsWorks ++ miroWorks)) {
-      case FieldMergeResult(otherIdentifiers, mergedSources) =>
-        otherIdentifiers should contain theSameElementsAs metsWorks.map(
-          _.sourceIdentifier) ++ sierraWorkWithTwoPhysicalItems.otherIdentifiers
-
-        mergedSources should contain theSameElementsAs (metsWorks)
-    }
-  }
-
   it("appends a linked digitised Sierra work sourceIdentifiers") {
     inside(
       OtherIdentifiersRule
@@ -80,7 +66,7 @@ class OtherIdentifiersRuleTest
           sierraWithMergeCandidate,
           nothingWork :: mergeCandidate :: miroWorks)) {
       case FieldMergeResult(otherIdentifiers, mergedSources) =>
-        otherIdentifiers should contain theSameElementsAs mergeCandidate.sourceIdentifier :: sierraWithMergeCandidate.otherIdentifiers ++ miroWorks
+        otherIdentifiers should contain theSameElementsAs mergeCandidate.identifiers ++ sierraWithMergeCandidate.otherIdentifiers ++ miroWorks
           .map(_.sourceIdentifier)
 
         mergedSources should contain theSameElementsAs (mergeCandidate :: miroWorks)

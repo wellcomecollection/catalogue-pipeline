@@ -86,7 +86,7 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
 
     def rule(target: UnidentifiedWork,
              sources: NonEmptyList[TransformedBaseWork]): FieldData =
-      target.otherIdentifiers ++ sources.toList.map(_.sourceIdentifier)
+      target.otherIdentifiers
   }
 
   private val mergeIntoCalmTarget = new PartialRule {
@@ -109,7 +109,6 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
 
         def rule(target: UnidentifiedWork,
                  sources: NonEmptyList[TransformedBaseWork]): FieldData =
-          target.otherIdentifiers ++ sources.toList.map(_.sourceIdentifier)
-
+          target.otherIdentifiers ++ sources.toList.flatMap(_.identifiers)
     }
 }
