@@ -1,11 +1,13 @@
 package uk.ac.wellcome.display.models.v2
 
+import io.circe.generic.extras.JsonKey
 import uk.ac.wellcome.models.work.internal.AugmentedImage
 
 case class DisplayImage(
   id: String,
   location: DisplayDigitalLocationV2,
-  parentWork: String
+  parentWork: String,
+  @JsonKey("type") ontologyType: String = "Image"
 )
 
 object DisplayImage {

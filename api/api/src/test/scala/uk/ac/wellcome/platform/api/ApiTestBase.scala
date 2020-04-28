@@ -2,6 +2,7 @@ package uk.ac.wellcome.platform.api
 
 import com.sksamuel.elastic4s.{ElasticDsl, Index}
 import com.sksamuel.elastic4s.ElasticDsl._
+import org.scalatest.Assertion
 import uk.ac.wellcome.display.models.ApiVersions
 import uk.ac.wellcome.fixtures._
 import uk.ac.wellcome.models.generators.RandomStrings
@@ -92,4 +93,28 @@ trait ApiTestBase extends ApiFixture with RandomStrings {
       },
       destroy = eventuallyDeleteIndex
     )
+
+  def assertIsBadRequest(path: String, description: String): Assertion =
+    withApi {
+      case (_, routes) =>
+        assertJsonResponse(routes, s"/$apiPrefix$path")(
+          Status.BadRequest ->
+            badRequest(
+              apiPrefix = apiPrefix,
+              description = description
+            )
+        )
+    }
+
+  def assertIsNotFound(path: String, description: String): Assertion =
+    withApi {
+      case (_, routes) =>
+        assertJsonResponse(routes, s"/$apiPrefix$path")(
+          Status.NotFound ->
+            notFound(
+              apiPrefix = apiPrefix,
+              description = description
+            )
+        )
+    }
 }
