@@ -359,42 +359,4 @@ class PlatformMergerTest
       expectedMetsRedirectedWork)
     result.images shouldBe empty
   }
-
-  it("merges fields from Calm work if present") {
-    val calmLocation = PhysicalLocation(
-      locationType = LocationType("scmac"),
-      label = "Closed stores Arch. & MSS",
-      accessConditions = Nil
-    )
-    val calmWork = createUnidentifiedCalmWork(
-      data = WorkData(
-        title = Some("123"),
-        collectionPath =
-          Some(CollectionPath("ref/no", Some(CollectionLevel.Item))),
-        physicalDescription = Some("description"),
-        contributors = List(Contributor(Agent("agent"), Nil)),
-        subjects = List(Subject("subject", Nil)),
-        language = Some(Language("en.gb", "English")),
-        notes = List(FindingAids("here")),
-        workType = Some(WorkType.ArchiveItem),
-        items = List(Item(None, List(calmLocation))),
-        edition = Some("Should not be merged")
-      )
-    )
-
-    val works = merger.merge(Seq(sierraPhysicalWork, calmWork)).works
-
-    works.size shouldBe 2
-    val work = works(1).asInstanceOf[UnidentifiedWork]
-    work.sourceIdentifier shouldBe sierraPhysicalWork.sourceIdentifier
-    work.data.title shouldBe calmWork.data.title
-    work.data.collectionPath shouldBe calmWork.data.collectionPath
-    work.data.physicalDescription shouldBe calmWork.data.physicalDescription
-    work.data.contributors shouldBe calmWork.data.contributors
-    work.data.subjects shouldBe calmWork.data.subjects
-    work.data.language shouldBe calmWork.data.language
-    work.data.notes shouldBe calmWork.data.notes
-    work.data.workType shouldBe calmWork.data.workType
-    work.data.edition shouldBe None
-  }
 }
