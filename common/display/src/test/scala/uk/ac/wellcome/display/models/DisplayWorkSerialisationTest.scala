@@ -19,7 +19,7 @@ class DisplayWorkSerialisationTest
     with SubjectGenerators
     with WorksGenerators {
 
-  it("serialises a DisplayWorkV2") {
+  it("serialises a DisplayWork") {
     val work = createIdentifiedWorkWith(
       workType = Some(Books),
       description = Some(randomAlphanumeric(100)),
@@ -85,7 +85,7 @@ class DisplayWorkSerialisationTest
     )
   }
 
-  it("includes credit information in DisplayWorkV2 serialisation") {
+  it("includes credit information in DisplayWork serialisation") {
     val location = DigitalLocation(
       locationType = LocationType("thumbnail-image"),
       url = "",
@@ -132,7 +132,7 @@ class DisplayWorkSerialisationTest
   }
 
   it(
-    "includes subject information in DisplayWorkV2 serialisation with the subjects include") {
+    "includes subject information in DisplayWork serialisation with the subjects include") {
     val workWithSubjects = createIdentifiedWorkWith(
       subjects = (1 to 3).map { _ =>
         createSubject
@@ -159,7 +159,7 @@ class DisplayWorkSerialisationTest
   }
 
   it(
-    "includes production information in DisplayWorkV2 serialisation with the production include") {
+    "includes production information in DisplayWork serialisation with the production include") {
     val workWithProduction = createIdentifiedWorkWith(
       production = createProductionEventList(count = 3)
     )
@@ -184,7 +184,7 @@ class DisplayWorkSerialisationTest
   }
 
   it(
-    "includes the contributors in DisplayWorkV2 serialisation with the contribuotrs include") {
+    "includes the contributors in DisplayWork serialisation with the contribuotrs include") {
     val work = createIdentifiedWorkWith(
       workType = Some(EBooks),
       description = Some(randomAlphanumeric(100)),
@@ -216,7 +216,7 @@ class DisplayWorkSerialisationTest
   }
 
   it(
-    "includes genre information in DisplayWorkV2 serialisation with the genres include") {
+    "includes genre information in DisplayWork serialisation with the genres include") {
     val work = createIdentifiedWorkWith(
       genres = List(
         Genre(
@@ -283,7 +283,7 @@ class DisplayWorkSerialisationTest
     )
   }
 
-  it("includes a list of identifiers on DisplayWorkV2") {
+  it("includes a list of identifiers on DisplayWork") {
     val otherIdentifier = createSourceIdentifier
     val work = createIdentifiedWorkWith(
       otherIdentifiers = List(otherIdentifier)

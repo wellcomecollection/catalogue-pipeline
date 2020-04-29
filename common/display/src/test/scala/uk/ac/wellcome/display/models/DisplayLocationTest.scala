@@ -10,8 +10,8 @@ import uk.ac.wellcome.models.work.internal.{
 
 class DisplayLocationTest extends FunSpec with Matchers {
 
-  describe("DisplayDigitalLocationV2") {
-    it("reads a DigitalLocation as a DisplayDigitalLocationV2") {
+  describe("DisplayDigitalLocation") {
+    it("reads a DigitalLocation as a DisplayDigitalLocation") {
       val thumbnailUrl = "https://iiif.example.org/V0000001/default.jpg"
       val locationType = LocationType("thumbnail-image")
 
@@ -49,8 +49,8 @@ class DisplayLocationTest extends FunSpec with Matchers {
     }
   }
 
-  describe("DisplayPhysicalLocationV2") {
-    it("creates a DisplayPhysicalLocationV2 from a PhysicalLocation") {
+  describe("DisplayPhysicalLocation") {
+    it("creates a DisplayPhysicalLocation from a PhysicalLocation") {
       val locationType = LocationType("sgmed")
       val locationLabel = "The collection of cold cauldrons"
       val physicalLocation =
@@ -64,8 +64,8 @@ class DisplayLocationTest extends FunSpec with Matchers {
     }
   }
 
-  describe("DisplayDigitalLocationV2") {
-    it("creates a DisplayDigitalLocationV2 from a DigitalLocation") {
+  describe("DisplayDigitalLocation") {
+    it("creates a DisplayDigitalLocation from a DigitalLocation") {
       val locationType = LocationType("iiif-image")
       val url = "https://wellcomelibrary.org/iiif/b2201508/manifest"
 

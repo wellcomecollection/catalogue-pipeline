@@ -48,7 +48,7 @@ case class DisplayWork(
       "Relates a work to its author, compiler, editor, artist or other entity responsible for its coming into existence in the form that it has."
   ) contributors: Option[List[DisplayContributor]] = None,
   @Schema(
-    `type` = "List[uk.ac.wellcome.display.models.DisplayIdentifierV2]",
+    `type` = "List[uk.ac.wellcome.Display.models.DisplayIdentifier]",
     description =
       "Relates the item to a unique system-generated identifier that governs interaction between systems and is regarded as canonical within the Wellcome data ecosystem."
   ) identifiers: Option[List[DisplayIdentifier]] = None,
@@ -61,12 +61,12 @@ case class DisplayWork(
       "Relates a work to the genre that describes the work's content."
   ) genres: Option[List[DisplayGenre]] = None,
   @Schema(
-    `type` = "uk.ac.wellcome.display.models.DisplayLocationV2",
+    `type` = "uk.ac.wellcome.Display.models.DisplayLocation",
     description =
       "Relates any thing to the location of a representative thumbnail image"
   ) thumbnail: Option[DisplayLocation] = None,
   @Schema(
-    `type` = "List[uk.ac.wellcome.display.models.DisplayItemV2]",
+    `type` = "List[uk.ac.wellcome.Display.models.DisplayItem]",
     description = "List of items related to this work."
   ) items: Option[List[DisplayItem]] = None,
   @Schema(

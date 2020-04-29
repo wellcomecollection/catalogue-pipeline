@@ -117,7 +117,7 @@ class DisplayWorkTest
   it("gets the workType from a Work") {
     val workType = Videos
 
-    val expectedDisplayWorkV2 = DisplayWorkType(
+    val expectedDisplayWork = DisplayWorkType(
       id = workType.id,
       label = workType.label
     )
@@ -127,7 +127,7 @@ class DisplayWorkTest
     )
 
     val displayWork = DisplayWork(work)
-    displayWork.workType shouldBe Some(expectedDisplayWorkV2)
+    displayWork.workType shouldBe Some(expectedDisplayWork)
   }
 
   it("gets the language from a Work") {

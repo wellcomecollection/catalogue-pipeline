@@ -41,10 +41,10 @@ class SnapshotGeneratorFeatureTest
 
   it("completes a snapshot generation") {
     withFixtures {
-      case (queue, topic, indexV2, _, publicBucket: Bucket) =>
+      case (queue, topic, worksIndex, _, publicBucket: Bucket) =>
         val works = createIdentifiedWorks(count = 3)
 
-        insertIntoElasticsearch(indexV2, works: _*)
+        insertIntoElasticsearch(worksIndex, works: _*)
 
         val publicObjectKey = "target.txt.gz"
 
@@ -112,10 +112,10 @@ class SnapshotGeneratorFeatureTest
       withMaterializer(actorSystem) { implicit materializer =>
         withLocalSqsQueue { queue =>
           withLocalSnsTopic { topic =>
-            withLocalWorksIndex { indexV2 =>
+            withLocalWorksIndex { worksIndex =>
               withLocalS3Bucket { bucket =>
-                withWorkerService(queue, topic, indexV2) { _ =>
-                  testWith((queue, topic, indexV2, indexV2, bucket))
+                withWorkerService(queue, topic, worksIndex) { _ =>
+                  testWith((queue, topic, worksIndex, worksIndex, bucket))
                 }
               }
             }

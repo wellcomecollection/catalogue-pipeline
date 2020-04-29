@@ -14,7 +14,7 @@ case class DisplayImage(
     description = "The canonical identifier given to a thing."
   ) id: String,
   @Schema(
-    `type` = "uk.ac.wellcome.display.models.DisplayDigitalLocationV2",
+    `type` = "uk.ac.wellcome.Display.models.DisplayDigitalLocation",
     description = "The location which provides access to the image"
   ) location: DisplayDigitalLocation,
   @Schema(

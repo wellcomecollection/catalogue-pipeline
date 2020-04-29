@@ -59,7 +59,7 @@ class SnapshotServiceTest
       }
     }
 
-  it("completes a V2 snapshot generation") {
+  it("completes a snapshot generation") {
     withFixtures {
       case (snapshotService: SnapshotService, worksIndex, publicBucket) =>
         val visibleWorks = createIdentifiedWorks(count = 4)

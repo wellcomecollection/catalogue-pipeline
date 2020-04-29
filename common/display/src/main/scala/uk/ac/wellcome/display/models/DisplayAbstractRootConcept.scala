@@ -65,7 +65,7 @@ case class DisplayConcept(
     description = "The canonical identifier given to a thing"
   ) id: Option[String] = None,
   @Schema(
-    `type` = "List[uk.ac.wellcome.display.models.DisplayIdentifierV2]",
+    `type` = "List[uk.ac.wellcome.Display.models.DisplayIdentifier]",
     description =
       "Relates the item to a unique system-generated identifier that governs interaction between systems and is regarded as canonical within the Wellcome data ecosystem."
   ) identifiers: Option[List[DisplayIdentifier]] = None,
@@ -85,7 +85,7 @@ case class DisplayPeriod(
     description = "The canonical identifier given to a thing"
   ) id: Option[String] = None,
   @Schema(
-    `type` = "List[uk.ac.wellcome.display.models.DisplayIdentifierV2]",
+    `type` = "List[uk.ac.wellcome.Display.models.DisplayIdentifier]",
     description =
       "Relates the item to a unique system-generated identifier that governs interaction between systems and is regarded as canonical within the Wellcome data ecosystem."
   ) identifiers: Option[List[DisplayIdentifier]] = None,
@@ -111,7 +111,7 @@ case class DisplayPlace(
     description = "The canonical identifier given to a thing"
   ) id: Option[String] = None,
   @Schema(
-    `type` = "List[uk.ac.wellcome.display.models.DisplayIdentifierV2]",
+    `type` = "List[uk.ac.wellcome.Display.models.DisplayIdentifier]",
     description =
       "Relates the item to a unique system-generated identifier that governs interaction between systems and is regarded as canonical within the Wellcome data ecosystem."
   ) identifiers: Option[List[DisplayIdentifier]] = None,
@@ -188,7 +188,7 @@ case class DisplayPerson(
     description = "The canonical identifier given to a thing.") id: Option[
     String],
   @Schema(
-    `type` = "List[uk.ac.wellcome.display.models.DisplayIdentifierV2]",
+    `type` = "List[uk.ac.wellcome.Display.models.DisplayIdentifier]",
     description =
       "Relates the item to a unique system-generated identifier that governs interaction between systems and is regarded as canonical within the Wellcome data ecosystem."
   ) identifiers: Option[List[DisplayIdentifier]],
@@ -216,7 +216,7 @@ case class DisplayOrganisation(
     description = "The canonical identifier given to a thing.") id: Option[
     String],
   @Schema(
-    `type` = "List[uk.ac.wellcome.display.models.DisplayIdentifierV2]",
+    `type` = "List[uk.ac.wellcome.Display.models.DisplayIdentifier]",
     description =
       "Relates the item to a unique system-generated identifier that governs interaction between systems and is regarded as canonical within the Wellcome data ecosystem."
   ) identifiers: Option[List[DisplayIdentifier]],
@@ -233,7 +233,7 @@ case class DisplayMeeting(
     description = "The canonical identifier given to a thing.") id: Option[
     String],
   @Schema(
-    `type` = "List[uk.ac.wellcome.display.models.DisplayIdentifierV2]",
+    `type` = "List[uk.ac.wellcome.Display.models.DisplayIdentifier]",
     description =
       "Relates the item to a unique system-generated identifier that governs interaction between systems and is regarded as canonical within the Wellcome data ecosystem."
   ) identifiers: Option[List[DisplayIdentifier]],

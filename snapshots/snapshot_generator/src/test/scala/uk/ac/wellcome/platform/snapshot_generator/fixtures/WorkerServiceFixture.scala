@@ -18,12 +18,12 @@ trait WorkerServiceFixture
     with SnapshotServiceFixture
     with SNS
     with SQS { this: Suite =>
-  def withWorkerService[R](queue: Queue, topic: Topic, indexV2: Index)(
+  def withWorkerService[R](queue: Queue, topic: Topic, worksIndex: Index)(
     testWith: TestWith[SnapshotGeneratorWorkerService, R])(
     implicit actorSystem: ActorSystem,
     materializer: ActorMaterializer): R =
     withS3AkkaClient { s3AkkaClient =>
-      withSnapshotService(s3AkkaClient, indexV2) { snapshotService =>
+      withSnapshotService(s3AkkaClient, worksIndex) { snapshotService =>
         withSQSStream[NotificationMessage, R](queue) { sqsStream =>
           withSNSWriter(topic) { snsWriter =>
             val workerService = new SnapshotGeneratorWorkerService(
