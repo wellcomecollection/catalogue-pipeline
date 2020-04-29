@@ -4,8 +4,7 @@ import akka.stream.scaladsl.{Sink, Source}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.akka.fixtures.Akka
-import uk.ac.wellcome.display.models.V2WorksIncludes
-import uk.ac.wellcome.display.models.v2.DisplayWorkV2
+import uk.ac.wellcome.display.models.{DisplayWorkV2, V2WorksIncludes}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 
 class IdentifiedWorkToVisibleDisplayWorkFlowTest

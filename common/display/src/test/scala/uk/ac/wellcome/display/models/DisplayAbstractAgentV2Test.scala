@@ -1,6 +1,7 @@
-package uk.ac.wellcome.display.models.v2
+package uk.ac.wellcome.display.models
 
 import org.scalatest.{FunSpec, Matchers}
+import uk.ac.wellcome.display.models
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
 import uk.ac.wellcome.models.work.internal._
 
@@ -41,7 +42,7 @@ class DisplayAbstractAgentV2Test
 
     it(
       "converts an Identified Agent to a DisplayAgentV2 (includesIdentifiers = true)") {
-      val expectedAgent = DisplayAgentV2(
+      val expectedAgent = models.DisplayAgentV2(
         id = Some(canonicalId),
         identifiers = Some((List(sourceIdentifier) ++ otherIdentifiers).map {
           DisplayIdentifierV2(_)
@@ -102,7 +103,7 @@ class DisplayAbstractAgentV2Test
 
     it(
       "converts an Identified Person to a DisplayPersonV2 (includesIdentifiers = true)") {
-      val expectedPerson = DisplayPersonV2(
+      val expectedPerson = models.DisplayPersonV2(
         id = Some(canonicalId),
         identifiers = Some((List(sourceIdentifier) ++ otherIdentifiers).map {
           DisplayIdentifierV2(_)
@@ -158,7 +159,7 @@ class DisplayAbstractAgentV2Test
 
     it(
       "converts an Identified Organisation to a DisplayOrganisationV2 (includesIdentifiers = true)") {
-      val expectedOrganisation = DisplayOrganisationV2(
+      val expectedOrganisation = models.DisplayOrganisationV2(
         id = Some(canonicalId),
         identifiers = Some((List(sourceIdentifier) ++ otherIdentifiers).map {
           DisplayIdentifierV2(_)
@@ -203,7 +204,7 @@ class DisplayAbstractAgentV2Test
     it(
       "converts an Identified Meeting to a DisplayMeetingV2 (includesIdentifiers = true)") {
       DisplayAbstractAgentV2(identifiedMeeting, includesIdentifiers = true) shouldBe
-        DisplayMeetingV2(
+        models.DisplayMeetingV2(
           id = Some(canonicalId),
           identifiers = Some((List(sourceIdentifier) ++ otherIdentifiers).map {
             DisplayIdentifierV2(_)

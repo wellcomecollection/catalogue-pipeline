@@ -1,20 +1,18 @@
-package uk.ac.wellcome.display.models.v2
+package uk.ac.wellcome.display.models
 
 import java.time.Instant
 
 import org.scalacheck.Arbitrary
 import org.scalacheck.Gen.chooseNum
+import org.scalacheck.ScalacheckShapeless._
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{FunSpec, Matchers}
-import org.scalacheck.ScalacheckShapeless._
-
-import uk.ac.wellcome.display.models._
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.generators.{
   ProductionEventGenerators,
   WorksGenerators
 }
 import uk.ac.wellcome.models.work.internal.WorkType.Videos
+import uk.ac.wellcome.models.work.internal._
 
 class DisplayWorkV2Test
     extends FunSpec

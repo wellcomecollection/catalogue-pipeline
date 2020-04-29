@@ -1,7 +1,6 @@
-package uk.ac.wellcome.display.models.v2
+package uk.ac.wellcome.display.models
 
 import org.scalatest.FunSpec
-import uk.ac.wellcome.display.models.V2WorksIncludes
 import uk.ac.wellcome.display.models.Implicits._
 import uk.ac.wellcome.display.test.util.JsonMapperTestUtil
 import uk.ac.wellcome.models.work.generators.{

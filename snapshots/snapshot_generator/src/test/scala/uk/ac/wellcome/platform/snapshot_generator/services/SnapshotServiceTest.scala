@@ -14,8 +14,11 @@ import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.display.json.DisplayJsonUtil
 import uk.ac.wellcome.display.json.DisplayJsonUtil._
-import uk.ac.wellcome.display.models.v2.DisplayWorkV2
-import uk.ac.wellcome.display.models.{ApiVersions, V2WorksIncludes}
+import uk.ac.wellcome.display.models.{
+  ApiVersions,
+  DisplayWorkV2,
+  V2WorksIncludes
+}
 import uk.ac.wellcome.elasticsearch.ElasticClientBuilder
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.platform.snapshot_generator.fixtures.{

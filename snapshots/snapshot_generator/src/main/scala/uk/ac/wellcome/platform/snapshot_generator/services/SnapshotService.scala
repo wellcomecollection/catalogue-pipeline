@@ -10,9 +10,7 @@ import akka.util.ByteString
 import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.ElasticClient
 import grizzled.slf4j.Logging
-
-import uk.ac.wellcome.display.models._
-import uk.ac.wellcome.display.models.v2.DisplayWorkV2
+import uk.ac.wellcome.display.models.{DisplayWorkV2, _}
 import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.models.work.internal.IdentifiedWork
 import uk.ac.wellcome.platform.snapshot_generator.flow.{

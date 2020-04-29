@@ -8,8 +8,10 @@ import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.display.models.ApiVersions
-import uk.ac.wellcome.display.models.v2.DisplayV2SerialisationTestBase
+import uk.ac.wellcome.display.models.{
+  ApiVersions,
+  DisplayV2SerialisationTestBase
+}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic

@@ -4,14 +4,15 @@ import io.circe.generic.extras.semiauto._
 import io.circe.Encoder
 import io.circe.generic.extras.JsonKey
 import io.swagger.v3.oas.annotations.media.Schema
-
-import uk.ac.wellcome.display.models.{DisplayLanguage, DisplayWorkType}
-import uk.ac.wellcome.display.models.v2.{
+import uk.ac.wellcome.display.models.{
   DisplayGenre,
+  DisplayLanguage,
   DisplayLicenseV2,
   DisplayPeriod,
-  DisplaySubject
+  DisplaySubject,
+  DisplayWorkType
 }
+import uk.ac.wellcome.display.models.v2.DisplaySubject
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.display.models.Implicits._
 import uk.ac.wellcome.display.json.DisplayJsonUtil._
