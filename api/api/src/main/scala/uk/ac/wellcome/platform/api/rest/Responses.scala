@@ -6,7 +6,6 @@ import io.circe.generic.extras.semiauto.deriveEncoder
 import io.circe.{Encoder, Json}
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.ac.wellcome.display.models._
-import uk.ac.wellcome.display.models.v2._
 import uk.ac.wellcome.display.json.DisplayJsonUtil._
 import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.platform.api.services.WorksSearchOptions

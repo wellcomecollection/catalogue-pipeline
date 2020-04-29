@@ -6,7 +6,6 @@ import com.sksamuel.elastic4s.{ElasticClient, Index}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import grizzled.slf4j.Logger
 import uk.ac.wellcome.display.models._
-import uk.ac.wellcome.display.models.v2._
 import uk.ac.wellcome.display.models.Implicits._
 import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.models.work.internal.{

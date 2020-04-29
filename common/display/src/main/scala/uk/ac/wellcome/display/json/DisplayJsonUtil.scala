@@ -3,24 +3,7 @@ package uk.ac.wellcome.display.json
 import io.circe.generic.extras.{AutoDerivation, Configuration}
 import io.circe.{Encoder, Printer}
 import io.circe.syntax._
-import uk.ac.wellcome.display.models.{
-  DisplayAbstractAgentV2,
-  DisplayAbstractConcept,
-  DisplayAbstractRootConcept,
-  DisplayAgentV2,
-  DisplayConcept,
-  DisplayDigitalLocationV2,
-  DisplayLocationV2,
-  DisplayMeetingV2,
-  DisplayOrganisationV2,
-  DisplayPeriod,
-  DisplayPersonV2,
-  DisplayPhysicalLocationV2,
-  DisplayPlace,
-  DisplayWork,
-  DisplayWorkV2
-}
-import uk.ac.wellcome.display.models.v2._
+import uk.ac.wellcome.display.models._
 
 /** Format JSON objects as suitable for display.
   *

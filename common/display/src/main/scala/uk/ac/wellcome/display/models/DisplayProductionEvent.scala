@@ -15,7 +15,7 @@ case class DisplayProductionEvent(
   @Schema agents: List[DisplayAbstractAgentV2],
   @Schema dates: List[DisplayPeriod],
   @Schema(
-    `type` = "uk.ac.wellcome.display.models.v2.DisplayAbstractConcept"
+    `type` = "uk.ac.wellcome.display.models.DisplayAbstractConcept"
   ) function: Option[DisplayAbstractConcept],
   @JsonKey("type") @Schema(name = "type") ontologyType: String =
     "ProductionEvent"

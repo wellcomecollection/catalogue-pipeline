@@ -12,7 +12,6 @@ import uk.ac.wellcome.display.models.{
   DisplaySubject,
   DisplayWorkType
 }
-import uk.ac.wellcome.display.models.v2.DisplaySubject
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.display.models.Implicits._
 import uk.ac.wellcome.display.json.DisplayJsonUtil._

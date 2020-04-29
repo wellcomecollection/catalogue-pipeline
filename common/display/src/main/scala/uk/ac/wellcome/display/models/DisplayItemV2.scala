@@ -15,7 +15,7 @@ case class DisplayItemV2(
     description = "The canonical identifier given to a thing.") id: Option[
     String],
   @Schema(
-    `type` = "List[uk.ac.wellcome.display.models.v2.DisplayIdentifierV2]",
+    `type` = "List[uk.ac.wellcome.display.models.DisplayIdentifierV2]",
     description =
       "Relates the item to a unique system-generated identifier that governs interaction between systems and is regarded as canonical within the Wellcome data ecosystem."
   ) identifiers: Option[List[DisplayIdentifierV2]] = None,

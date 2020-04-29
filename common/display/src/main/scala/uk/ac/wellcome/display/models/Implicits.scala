@@ -4,9 +4,6 @@ import io.circe.generic.extras.semiauto._
 import io.circe.{Decoder, Encoder}
 import io.circe.java8.time.TimeInstances
 
-import uk.ac.wellcome.display.json.DisplayJsonUtil._
-import uk.ac.wellcome.display.models.v2._
-
 object Implicits extends TimeInstances {
 
   // Cache these here to improve compilation times (otherwise they are

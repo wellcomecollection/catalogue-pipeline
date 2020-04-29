@@ -39,7 +39,7 @@ case class DisplayWorkV2(
     description = "Recording written text on a (usually visual) work."
   ) lettering: Option[String] = None,
   @Schema(
-    `type` = "uk.ac.wellcome.display.models.v2.DisplayPeriod",
+    `type` = "uk.ac.wellcome.display.models.DisplayPeriod",
     description =
       "Relates the creation of a work to a date, when the date of creation does not cover a range."
   ) createdDate: Option[DisplayPeriod] = None,
@@ -48,7 +48,7 @@ case class DisplayWorkV2(
       "Relates a work to its author, compiler, editor, artist or other entity responsible for its coming into existence in the form that it has."
   ) contributors: Option[List[DisplayContributor]] = None,
   @Schema(
-    `type` = "List[uk.ac.wellcome.display.models.v2.DisplayIdentifierV2]",
+    `type` = "List[uk.ac.wellcome.display.models.DisplayIdentifierV2]",
     description =
       "Relates the item to a unique system-generated identifier that governs interaction between systems and is regarded as canonical within the Wellcome data ecosystem."
   ) identifiers: Option[List[DisplayIdentifierV2]] = None,
@@ -61,12 +61,12 @@ case class DisplayWorkV2(
       "Relates a work to the genre that describes the work's content."
   ) genres: Option[List[DisplayGenre]] = None,
   @Schema(
-    `type` = "uk.ac.wellcome.display.models.v2.DisplayLocationV2",
+    `type` = "uk.ac.wellcome.display.models.DisplayLocationV2",
     description =
       "Relates any thing to the location of a representative thumbnail image"
   ) thumbnail: Option[DisplayLocationV2] = None,
   @Schema(
-    `type` = "List[uk.ac.wellcome.display.models.v2.DisplayItemV2]",
+    `type` = "List[uk.ac.wellcome.display.models.DisplayItemV2]",
     description = "List of items related to this work."
   ) items: Option[List[DisplayItemV2]] = None,
   @Schema(

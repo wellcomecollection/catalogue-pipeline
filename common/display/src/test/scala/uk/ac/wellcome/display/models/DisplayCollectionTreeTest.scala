@@ -3,7 +3,7 @@ package uk.ac.wellcome.display.models
 import org.scalatest.{FunSpec, Matchers}
 
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.display.models.v2._
+import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 
 class DisplayCollectionTest extends FunSpec with Matchers with WorksGenerators {
