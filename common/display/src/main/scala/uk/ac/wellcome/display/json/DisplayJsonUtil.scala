@@ -59,10 +59,6 @@ trait DisplayJsonUtil extends AutoDerivation {
     case digitalLocation: DisplayDigitalLocation   => digitalLocation.asJson
     case physicalLocation: DisplayPhysicalLocation => physicalLocation.asJson
   }
-
-  implicit val displayWorkEncoder: Encoder[DisplayWork] = {
-    case work: DisplayWork => work.asJson
-  }
 }
 
 object DisplayJsonUtil extends DisplayJsonUtil

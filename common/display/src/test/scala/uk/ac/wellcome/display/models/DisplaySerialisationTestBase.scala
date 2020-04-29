@@ -1,7 +1,7 @@
 package uk.ac.wellcome.display.models
 
 import org.scalatest.Suite
-import uk.ac.wellcome.json.JsonUtil.toJson
+import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.internal._
 
 trait DisplaySerialisationTestBase {
@@ -71,10 +71,6 @@ trait DisplaySerialisationTestBase {
         "accessConditions": ${accessConditions(loc.accessConditions)}
        }
      """
-
-  def locationType(locType: LocationType): String
-
-  def license(license: License): String
 
   def accessConditions(conds: List[AccessCondition]) =
     s"[${conds.map(accessCondition).mkString(",")}]"

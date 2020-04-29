@@ -1,7 +1,7 @@
 package uk.ac.wellcome.display.models
 
 import org.scalatest.FunSpec
-import uk.ac.wellcome.display.models.Implicits._
+import Implicits._
 import uk.ac.wellcome.display.test.util.JsonMapperTestUtil
 import uk.ac.wellcome.models.work.generators.{
   ProductionEventGenerators,
