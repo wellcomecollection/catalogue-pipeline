@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import uk.ac.wellcome.display.models.{
   DisplayGenre,
   DisplayLanguage,
-  DisplayLicenseV2,
+  DisplayLicense,
   DisplayPeriod,
   DisplaySubject,
   DisplayWorkType
@@ -39,7 +39,7 @@ case class DisplayAggregations(
   ) language: Option[DisplayAggregation[DisplayLanguage]],
   @Schema(
     description = "License aggregation on a set of results."
-  ) license: Option[DisplayAggregation[DisplayLicenseV2]],
+  ) license: Option[DisplayAggregation[DisplayLicense]],
   @JsonKey("type") @Schema(name = "type") ontologyType: String = "Aggregations"
 )
 
@@ -85,7 +85,7 @@ object DisplayAggregations {
         aggs.subjects,
         subject => DisplaySubject(subject, false)
       ),
-      license = displayAggregation(aggs.license, DisplayLicenseV2.apply),
+      license = displayAggregation(aggs.license, DisplayLicense.apply),
     )
 
   private def displayAggregation[T, D](

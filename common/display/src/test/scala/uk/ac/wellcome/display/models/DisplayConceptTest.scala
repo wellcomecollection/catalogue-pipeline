@@ -54,7 +54,7 @@ class DisplayConceptTest
       ),
       expectedDisplayConcept = DisplayConcept(
         id = Some("dj4kndg5"),
-        identifiers = Some(List(DisplayIdentifierV2(sourceIdentifier))),
+        identifiers = Some(List(DisplayIdentifier(sourceIdentifier))),
         label = "darkness"
       )
     )
@@ -73,7 +73,7 @@ class DisplayConceptTest
       ),
       expectedDisplayConcept = DisplayPeriod(
         id = Some("nrzbm3ah"),
-        identifiers = Some(List(DisplayIdentifierV2(sourceIdentifier))),
+        identifiers = Some(List(DisplayIdentifier(sourceIdentifier))),
         label = "never"
       )
     )
@@ -91,7 +91,7 @@ class DisplayConceptTest
       ),
       expectedDisplayConcept = DisplayPlace(
         id = Some("axtswq4z"),
-        identifiers = Some(List(DisplayIdentifierV2(sourceIdentifier))),
+        identifiers = Some(List(DisplayIdentifier(sourceIdentifier))),
         label = "anywhere"
       )
     )

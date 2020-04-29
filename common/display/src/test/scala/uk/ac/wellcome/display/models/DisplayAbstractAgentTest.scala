@@ -1,11 +1,10 @@
 package uk.ac.wellcome.display.models
 
 import org.scalatest.{FunSpec, Matchers}
-import uk.ac.wellcome.display.models
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
 import uk.ac.wellcome.models.work.internal._
 
-class DisplayAbstractAgentV2Test
+class DisplayAbstractAgentTest
     extends FunSpec
     with Matchers
     with IdentifiersGenerators {
@@ -24,7 +23,7 @@ class DisplayAbstractAgentV2Test
 
     val identifiedAgent = Agent(label = label, id = identified)
 
-    val expectedUnidentifiedAgent: DisplayAgentV2 = DisplayAgentV2(
+    val expectedUnidentifiedAgent: DisplayAgent = DisplayAgent(
       id = None,
       identifiers = None,
       label = label
@@ -32,36 +31,36 @@ class DisplayAbstractAgentV2Test
 
     it(
       "converts an Unidentifiable Agent to a DisplayAgentV2 (includesIdentifiers = true)") {
-      DisplayAbstractAgentV2(unidentifiedAgent, includesIdentifiers = true) shouldBe expectedUnidentifiedAgent
+      DisplayAbstractAgent(unidentifiedAgent, includesIdentifiers = true) shouldBe expectedUnidentifiedAgent
     }
 
     it(
       "converts an Unidentifiable Agent to a DisplayAgentV2 (includesIdentifiers = false)") {
-      DisplayAbstractAgentV2(unidentifiedAgent, includesIdentifiers = false) shouldBe expectedUnidentifiedAgent
+      DisplayAbstractAgent(unidentifiedAgent, includesIdentifiers = false) shouldBe expectedUnidentifiedAgent
     }
 
     it(
       "converts an Identified Agent to a DisplayAgentV2 (includesIdentifiers = true)") {
-      val expectedAgent = models.DisplayAgentV2(
+      val expectedAgent = models.DisplayAgent(
         id = Some(canonicalId),
         identifiers = Some((List(sourceIdentifier) ++ otherIdentifiers).map {
-          DisplayIdentifierV2(_)
+          DisplayIdentifier(_)
         }),
         label = label
       )
 
-      DisplayAbstractAgentV2(identifiedAgent, includesIdentifiers = true) shouldBe expectedAgent
+      DisplayAbstractAgent(identifiedAgent, includesIdentifiers = true) shouldBe expectedAgent
     }
 
     it(
       "converts an Identified Agent to a DisplayAgentV2 (includesIdentifiers = false)") {
-      val expectedAgent = DisplayAgentV2(
+      val expectedAgent = DisplayAgent(
         id = Some(canonicalId),
         identifiers = None,
         label = label
       )
 
-      DisplayAbstractAgentV2(identifiedAgent, includesIdentifiers = false) shouldBe expectedAgent
+      DisplayAbstractAgent(identifiedAgent, includesIdentifiers = false) shouldBe expectedAgent
     }
   }
 
@@ -83,7 +82,7 @@ class DisplayAbstractAgentV2Test
       numeration = Some(numeration)
     )
 
-    val expectedUnidentifiedPerson: DisplayPersonV2 = DisplayPersonV2(
+    val expectedUnidentifiedPerson: DisplayPerson = DisplayPerson(
       id = None,
       identifiers = None,
       label = label,
@@ -93,32 +92,32 @@ class DisplayAbstractAgentV2Test
 
     it(
       "converts an Unidentifiable Person to a DisplayPersonV2 (includesIdentifiers = true)") {
-      DisplayAbstractAgentV2(unidentifiedPerson, includesIdentifiers = true) shouldBe expectedUnidentifiedPerson
+      DisplayAbstractAgent(unidentifiedPerson, includesIdentifiers = true) shouldBe expectedUnidentifiedPerson
     }
 
     it(
       "converts an Unidentifiable Person to a DisplayPersonV2 (includesIdentifiers = false)") {
-      DisplayAbstractAgentV2(unidentifiedPerson, includesIdentifiers = false) shouldBe expectedUnidentifiedPerson
+      DisplayAbstractAgent(unidentifiedPerson, includesIdentifiers = false) shouldBe expectedUnidentifiedPerson
     }
 
     it(
       "converts an Identified Person to a DisplayPersonV2 (includesIdentifiers = true)") {
-      val expectedPerson = models.DisplayPersonV2(
+      val expectedPerson = models.DisplayPerson(
         id = Some(canonicalId),
         identifiers = Some((List(sourceIdentifier) ++ otherIdentifiers).map {
-          DisplayIdentifierV2(_)
+          DisplayIdentifier(_)
         }),
         label = label,
         prefix = Some(prefix),
         numeration = Some(numeration)
       )
 
-      DisplayAbstractAgentV2(identifiedPerson, includesIdentifiers = true) shouldBe expectedPerson
+      DisplayAbstractAgent(identifiedPerson, includesIdentifiers = true) shouldBe expectedPerson
     }
 
     it(
       "converts an Identified Person to a DisplayPersonV2 (includesIdentifiers = false)") {
-      val expectedPerson = DisplayPersonV2(
+      val expectedPerson = DisplayPerson(
         id = Some(canonicalId),
         identifiers = None,
         label = label,
@@ -126,7 +125,7 @@ class DisplayAbstractAgentV2Test
         numeration = Some(numeration)
       )
 
-      DisplayAbstractAgentV2(identifiedPerson, includesIdentifiers = false) shouldBe expectedPerson
+      DisplayAbstractAgent(identifiedPerson, includesIdentifiers = false) shouldBe expectedPerson
     }
   }
 
@@ -136,8 +135,8 @@ class DisplayAbstractAgentV2Test
 
     val identifiedOrganisation = Organisation(label = label, id = identified)
 
-    val expectedUnidentifiedOrganisation: DisplayOrganisationV2 =
-      DisplayOrganisationV2(
+    val expectedUnidentifiedOrganisation: DisplayOrganisation =
+      DisplayOrganisation(
         id = None,
         identifiers = None,
         label = label
@@ -145,42 +144,38 @@ class DisplayAbstractAgentV2Test
 
     it(
       "converts an Unidentifiable Organisation to a DisplayOrganisationV2 (includesIdentifiers = true)") {
-      DisplayAbstractAgentV2(
-        unidentifiedOrganisation,
-        includesIdentifiers = true) shouldBe expectedUnidentifiedOrganisation
+      DisplayAbstractAgent(unidentifiedOrganisation, includesIdentifiers = true) shouldBe expectedUnidentifiedOrganisation
     }
 
     it(
       "converts an Unidentifiable Organisation to a DisplayOrganisationV2 (includesIdentifiers = false)") {
-      DisplayAbstractAgentV2(
+      DisplayAbstractAgent(
         unidentifiedOrganisation,
         includesIdentifiers = false) shouldBe expectedUnidentifiedOrganisation
     }
 
     it(
       "converts an Identified Organisation to a DisplayOrganisationV2 (includesIdentifiers = true)") {
-      val expectedOrganisation = models.DisplayOrganisationV2(
+      val expectedOrganisation = models.DisplayOrganisation(
         id = Some(canonicalId),
         identifiers = Some((List(sourceIdentifier) ++ otherIdentifiers).map {
-          DisplayIdentifierV2(_)
+          DisplayIdentifier(_)
         }),
         label = label
       )
 
-      DisplayAbstractAgentV2(identifiedOrganisation, includesIdentifiers = true) shouldBe expectedOrganisation
+      DisplayAbstractAgent(identifiedOrganisation, includesIdentifiers = true) shouldBe expectedOrganisation
     }
 
     it(
       "converts an Identified Organisation to a DisplayOrganisationV2 (includesIdentifiers = false)") {
-      val expectedOrganisation = DisplayOrganisationV2(
+      val expectedOrganisation = DisplayOrganisation(
         id = Some(canonicalId),
         identifiers = None,
         label = label
       )
 
-      DisplayAbstractAgentV2(
-        identifiedOrganisation,
-        includesIdentifiers = false) shouldBe expectedOrganisation
+      DisplayAbstractAgent(identifiedOrganisation, includesIdentifiers = false) shouldBe expectedOrganisation
     }
   }
 
@@ -191,23 +186,23 @@ class DisplayAbstractAgentV2Test
 
     it(
       "converts an Unidentifiable Meeting to a DisplayMeetingV2 (includesIdentifiers = true)") {
-      DisplayAbstractAgentV2(unidentifiedMeeting, includesIdentifiers = true) shouldBe
-        DisplayMeetingV2(None, None, label)
+      DisplayAbstractAgent(unidentifiedMeeting, includesIdentifiers = true) shouldBe
+        DisplayMeeting(None, None, label)
     }
 
     it(
       "converts an Unidentifiable Meeting to a DisplayOrganisationV2 (includesIdentifiers = false)") {
-      DisplayAbstractAgentV2(unidentifiedMeeting, includesIdentifiers = false) shouldBe
-        DisplayMeetingV2(None, None, label)
+      DisplayAbstractAgent(unidentifiedMeeting, includesIdentifiers = false) shouldBe
+        DisplayMeeting(None, None, label)
     }
 
     it(
       "converts an Identified Meeting to a DisplayMeetingV2 (includesIdentifiers = true)") {
-      DisplayAbstractAgentV2(identifiedMeeting, includesIdentifiers = true) shouldBe
-        models.DisplayMeetingV2(
+      DisplayAbstractAgent(identifiedMeeting, includesIdentifiers = true) shouldBe
+        models.DisplayMeeting(
           id = Some(canonicalId),
           identifiers = Some((List(sourceIdentifier) ++ otherIdentifiers).map {
-            DisplayIdentifierV2(_)
+            DisplayIdentifier(_)
           }),
           label = label
         )
@@ -215,8 +210,8 @@ class DisplayAbstractAgentV2Test
 
     it(
       "converts an Identified Meeting to a DisplayMeetingV2 (includesIdentifiers = false)") {
-      DisplayAbstractAgentV2(identifiedMeeting, includesIdentifiers = false) shouldBe
-        DisplayMeetingV2(
+      DisplayAbstractAgent(identifiedMeeting, includesIdentifiers = false) shouldBe
+        DisplayMeeting(
           id = Some(canonicalId),
           identifiers = None,
           label = label

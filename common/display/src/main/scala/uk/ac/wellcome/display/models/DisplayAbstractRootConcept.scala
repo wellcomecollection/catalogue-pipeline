@@ -9,7 +9,7 @@ import uk.ac.wellcome.models.work.internal._
 )
 sealed trait DisplayAbstractRootConcept {
   val id: Option[String]
-  val identifiers: Option[List[DisplayIdentifierV2]]
+  val identifiers: Option[List[DisplayIdentifier]]
   val label: String
 }
 
@@ -18,7 +18,7 @@ object DisplayAbstractRootConcept {
             includesIdentifiers: Boolean): DisplayAbstractRootConcept =
     abstractConcept match {
       case agent: AbstractAgent[Minted] =>
-        DisplayAbstractAgentV2(agent, includesIdentifiers)
+        DisplayAbstractAgent(agent, includesIdentifiers)
       case concept: AbstractConcept[Minted] =>
         DisplayAbstractConcept(concept, includesIdentifiers)
     }
@@ -68,7 +68,7 @@ case class DisplayConcept(
     `type` = "List[uk.ac.wellcome.display.models.DisplayIdentifierV2]",
     description =
       "Relates the item to a unique system-generated identifier that governs interaction between systems and is regarded as canonical within the Wellcome data ecosystem."
-  ) identifiers: Option[List[DisplayIdentifierV2]] = None,
+  ) identifiers: Option[List[DisplayIdentifier]] = None,
   @Schema(
     `type` = "String"
   ) label: String,
@@ -88,7 +88,7 @@ case class DisplayPeriod(
     `type` = "List[uk.ac.wellcome.display.models.DisplayIdentifierV2]",
     description =
       "Relates the item to a unique system-generated identifier that governs interaction between systems and is regarded as canonical within the Wellcome data ecosystem."
-  ) identifiers: Option[List[DisplayIdentifierV2]] = None,
+  ) identifiers: Option[List[DisplayIdentifier]] = None,
   @Schema(
     `type` = "String"
   ) label: String,
@@ -114,7 +114,7 @@ case class DisplayPlace(
     `type` = "List[uk.ac.wellcome.display.models.DisplayIdentifierV2]",
     description =
       "Relates the item to a unique system-generated identifier that governs interaction between systems and is regarded as canonical within the Wellcome data ecosystem."
-  ) identifiers: Option[List[DisplayIdentifierV2]] = None,
+  ) identifiers: Option[List[DisplayIdentifier]] = None,
   @Schema(
     `type` = "String"
   ) label: String,
@@ -130,21 +130,21 @@ case object DisplayPlace {
 @Schema(
   name = "Agent"
 )
-sealed trait DisplayAbstractAgentV2 extends DisplayAbstractRootConcept
+sealed trait DisplayAbstractAgent extends DisplayAbstractRootConcept
 
-case object DisplayAbstractAgentV2 extends GetIdentifiers {
+case object DisplayAbstractAgent extends GetIdentifiers {
 
   def apply(agent: AbstractAgent[Minted],
-            includesIdentifiers: Boolean): DisplayAbstractAgentV2 =
+            includesIdentifiers: Boolean): DisplayAbstractAgent =
     agent match {
       case Agent(id, label) =>
-        DisplayAgentV2(
+        DisplayAgent(
           id = id.maybeCanonicalId,
           label = label,
           identifiers = getIdentifiers(id, includesIdentifiers),
         )
       case Person(id, label, prefix, numeration) =>
-        DisplayPersonV2(
+        DisplayPerson(
           id = id.maybeCanonicalId,
           label = label,
           numeration = numeration,
@@ -152,13 +152,13 @@ case object DisplayAbstractAgentV2 extends GetIdentifiers {
           identifiers = getIdentifiers(id, includesIdentifiers)
         )
       case Organisation(id, label) =>
-        DisplayOrganisationV2(
+        DisplayOrganisation(
           id = id.maybeCanonicalId,
           label = label,
           identifiers = getIdentifiers(id, includesIdentifiers),
         )
       case Meeting(id, label) =>
-        DisplayMeetingV2(
+        DisplayMeeting(
           id = id.maybeCanonicalId,
           label = label,
           identifiers = getIdentifiers(id, includesIdentifiers),
@@ -169,19 +169,19 @@ case object DisplayAbstractAgentV2 extends GetIdentifiers {
 @Schema(
   name = "Agent"
 )
-case class DisplayAgentV2(
+case class DisplayAgent(
   id: Option[String],
-  identifiers: Option[List[DisplayIdentifierV2]],
+  identifiers: Option[List[DisplayIdentifier]],
   @Schema(
     description = "The name of the agent"
   ) label: String,
   @JsonKey("type") @Schema(name = "type") ontologyType: String = "Agent"
-) extends DisplayAbstractAgentV2
+) extends DisplayAbstractAgent
 
 @Schema(
   name = "Person"
 )
-case class DisplayPersonV2(
+case class DisplayPerson(
   @Schema(
     `type` = "String",
     readOnly = true,
@@ -191,7 +191,7 @@ case class DisplayPersonV2(
     `type` = "List[uk.ac.wellcome.display.models.DisplayIdentifierV2]",
     description =
       "Relates the item to a unique system-generated identifier that governs interaction between systems and is regarded as canonical within the Wellcome data ecosystem."
-  ) identifiers: Option[List[DisplayIdentifierV2]],
+  ) identifiers: Option[List[DisplayIdentifier]],
   @Schema(
     description = "The name of the person"
   ) label: String,
@@ -204,12 +204,12 @@ case class DisplayPersonV2(
     description = "The numeration of the person"
   ) numeration: Option[String] = None,
   @JsonKey("type") @Schema(name = "type") ontologyType: String = "Person")
-    extends DisplayAbstractAgentV2
+    extends DisplayAbstractAgent
 
 @Schema(
   name = "Organisation"
 )
-case class DisplayOrganisationV2(
+case class DisplayOrganisation(
   @Schema(
     `type` = "String",
     readOnly = true,
@@ -219,14 +219,14 @@ case class DisplayOrganisationV2(
     `type` = "List[uk.ac.wellcome.display.models.DisplayIdentifierV2]",
     description =
       "Relates the item to a unique system-generated identifier that governs interaction between systems and is regarded as canonical within the Wellcome data ecosystem."
-  ) identifiers: Option[List[DisplayIdentifierV2]],
+  ) identifiers: Option[List[DisplayIdentifier]],
   @Schema(
     description = "The name of the organisation"
   ) label: String,
   @JsonKey("type") @Schema(name = "type") ontologyType: String = "Organisation")
-    extends DisplayAbstractAgentV2
+    extends DisplayAbstractAgent
 
-case class DisplayMeetingV2(
+case class DisplayMeeting(
   @Schema(
     `type` = "String",
     readOnly = true,
@@ -236,18 +236,18 @@ case class DisplayMeetingV2(
     `type` = "List[uk.ac.wellcome.display.models.DisplayIdentifierV2]",
     description =
       "Relates the item to a unique system-generated identifier that governs interaction between systems and is regarded as canonical within the Wellcome data ecosystem."
-  ) identifiers: Option[List[DisplayIdentifierV2]],
+  ) identifiers: Option[List[DisplayIdentifier]],
   @Schema(
     description = "The name of the meeting"
   ) label: String,
   @JsonKey("type") @Schema(name = "type") ontologyType: String = "Meeting")
-    extends DisplayAbstractAgentV2
+    extends DisplayAbstractAgent
 
 trait GetIdentifiers {
 
   protected def getIdentifiers(id: IdState, includesIdentifiers: Boolean) =
     if (includesIdentifiers)
-      Option(id.allSourceIdentifiers.map(DisplayIdentifierV2(_)))
+      Option(id.allSourceIdentifiers.map(DisplayIdentifier(_)))
         .filter(_.nonEmpty)
     else
       None

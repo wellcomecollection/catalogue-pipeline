@@ -50,7 +50,7 @@ class WorksController(
                   MultipleWorksResponse(
                     resultList,
                     searchOptions,
-                    params.include.getOrElse(V2WorksIncludes()),
+                    params.include.getOrElse(WorksIncludes()),
                     uri,
                     contextUri
                   )
@@ -65,7 +65,7 @@ class WorksController(
       transactFuture("GET /works/{workId}") {
         val index =
           params._index.map(Index(_)).getOrElse(elasticConfig.worksIndex)
-        val includes = params.include.getOrElse(V2WorksIncludes())
+        val includes = params.include.getOrElse(WorksIncludes())
         worksService
           .findWorkById(id)(index)
           .flatMap {
@@ -116,11 +116,11 @@ class WorksController(
 
   def workFound(work: IdentifiedWork,
                 tree: Option[(Collection, List[String])],
-                includes: V2WorksIncludes): Route =
+                includes: WorksIncludes): Route =
     complete(
       ResultResponse(
         context = contextUri,
-        result = DisplayWorkV2(work, includes).copy(
+        result = DisplayWork(work, includes).copy(
           collection = tree.map {
             case (tree, expandedPaths) =>
               DisplayCollection(tree, expandedPaths)

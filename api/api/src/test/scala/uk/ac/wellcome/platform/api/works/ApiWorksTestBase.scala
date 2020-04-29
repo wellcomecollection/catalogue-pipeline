@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.api.works
 import com.sksamuel.elastic4s.Indexable
-import uk.ac.wellcome.display.models.DisplayV2SerialisationTestBase
+import uk.ac.wellcome.display.models.DisplaySerialisationTestBase
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.generators._
@@ -9,7 +9,7 @@ import uk.ac.wellcome.platform.api.ApiTestBase
 
 trait ApiWorksTestBase
     extends ApiTestBase
-    with DisplayV2SerialisationTestBase
+    with DisplaySerialisationTestBase
     with WorksGenerators
     with GenreGenerators
     with SubjectGenerators {

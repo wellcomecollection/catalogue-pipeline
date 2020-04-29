@@ -12,7 +12,7 @@ import uk.ac.wellcome.models.work.internal._
 case class DisplayProductionEvent(
   @Schema label: String,
   @Schema places: List[DisplayPlace],
-  @Schema agents: List[DisplayAbstractAgentV2],
+  @Schema agents: List[DisplayAbstractAgent],
   @Schema dates: List[DisplayPeriod],
   @Schema(
     `type` = "uk.ac.wellcome.display.models.DisplayAbstractConcept"
@@ -28,7 +28,7 @@ object DisplayProductionEvent {
       label = productionEvent.label,
       places = productionEvent.places.map { DisplayPlace(_) },
       agents = productionEvent.agents.map {
-        DisplayAbstractAgentV2(_, includesIdentifiers = includesIdentifiers)
+        DisplayAbstractAgent(_, includesIdentifiers = includesIdentifiers)
       },
       dates = productionEvent.dates.map { DisplayPeriod(_) },
       function = productionEvent.function.map { concept =>

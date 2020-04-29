@@ -16,7 +16,7 @@ case class DisplayImage(
   @Schema(
     `type` = "uk.ac.wellcome.display.models.DisplayDigitalLocationV2",
     description = "The location which provides access to the image"
-  ) location: DisplayDigitalLocationV2,
+  ) location: DisplayDigitalLocation,
   @Schema(
     description = "The work to which the image relates"
   ) parentWork: String,
@@ -28,7 +28,7 @@ object DisplayImage {
   def apply(image: AugmentedImage): DisplayImage =
     new DisplayImage(
       id = image.id.canonicalId,
-      location = DisplayDigitalLocationV2(image.location),
+      location = DisplayDigitalLocation(image.location),
       parentWork = image.parentWork.canonicalId
     )
 

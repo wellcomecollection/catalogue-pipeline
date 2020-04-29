@@ -10,7 +10,7 @@ import uk.ac.wellcome.models.work.internal._
 )
 case class DisplaySubject(
   id: Option[String] = None,
-  identifiers: Option[List[DisplayIdentifierV2]] = None,
+  identifiers: Option[List[DisplayIdentifier]] = None,
   @Schema(description = "A label given to a thing.") label: String,
   @Schema(description = "Relates a subject to a list of concepts.") concepts: List[
     DisplayAbstractRootConcept],

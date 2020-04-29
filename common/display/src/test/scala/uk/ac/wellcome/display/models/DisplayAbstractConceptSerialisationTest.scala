@@ -8,7 +8,7 @@ import uk.ac.wellcome.models.work.internal._
 
 class DisplayAbstractConceptSerialisationTest
     extends FunSpec
-    with DisplayV2SerialisationTestBase
+    with DisplaySerialisationTestBase
     with JsonMapperTestUtil
     with IdentifiersGenerators {
 

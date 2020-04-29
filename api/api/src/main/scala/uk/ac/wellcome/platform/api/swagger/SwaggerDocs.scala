@@ -152,7 +152,7 @@ trait SingleWorkSwagger {
     responseCode = "200",
     description = "The work",
     content = Array(
-      new Content(schema = new Schema(implementation = classOf[DisplayWorkV2]))
+      new Content(schema = new Schema(implementation = classOf[DisplayWork]))
     )
   )
   @ApiResponse(

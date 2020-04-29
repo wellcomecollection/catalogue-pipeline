@@ -11,9 +11,9 @@ import uk.ac.wellcome.models.work.generators.{
 import uk.ac.wellcome.models.work.internal.WorkType.{Books, EBooks}
 import uk.ac.wellcome.models.work.internal._
 
-class DisplayWorkV2SerialisationTest
+class DisplayWorkSerialisationTest
     extends FunSpec
-    with DisplayV2SerialisationTestBase
+    with DisplaySerialisationTestBase
     with JsonMapperTestUtil
     with ProductionEventGenerators
     with SubjectGenerators
@@ -40,7 +40,7 @@ class DisplayWorkV2SerialisationTest
       |}
     """.stripMargin
 
-    assertObjectMapsToJson(DisplayWorkV2(work), expectedJson = expectedJson)
+    assertObjectMapsToJson(DisplayWork(work), expectedJson = expectedJson)
   }
 
   it("renders an item if the items include is present") {
@@ -59,7 +59,7 @@ class DisplayWorkV2SerialisationTest
     """.stripMargin
 
     assertObjectMapsToJson(
-      DisplayWorkV2(work, includes = V2WorksIncludes(items = true)),
+      DisplayWork(work, includes = WorksIncludes(items = true)),
       expectedJson = expectedJson
     )
   }
@@ -80,7 +80,7 @@ class DisplayWorkV2SerialisationTest
     """.stripMargin
 
     assertObjectMapsToJson(
-      DisplayWorkV2(work, includes = V2WorksIncludes(items = true)),
+      DisplayWork(work, includes = WorksIncludes(items = true)),
       expectedJson = expectedJson
     )
   }
@@ -123,9 +123,9 @@ class DisplayWorkV2SerialisationTest
     """.stripMargin
 
     assertObjectMapsToJson(
-      DisplayWorkV2(
+      DisplayWork(
         workWithCopyright,
-        includes = V2WorksIncludes(items = true)
+        includes = WorksIncludes(items = true)
       ),
       expectedJson = expectedJson
     )
@@ -150,9 +150,9 @@ class DisplayWorkV2SerialisationTest
     """.stripMargin
 
     assertObjectMapsToJson(
-      DisplayWorkV2(
+      DisplayWork(
         workWithSubjects,
-        includes = V2WorksIncludes(subjects = true)
+        includes = WorksIncludes(subjects = true)
       ),
       expectedJson = expectedJson
     )
@@ -175,9 +175,9 @@ class DisplayWorkV2SerialisationTest
     """.stripMargin
 
     assertObjectMapsToJson(
-      DisplayWorkV2(
+      DisplayWork(
         workWithProduction,
-        includes = V2WorksIncludes(production = true)
+        includes = WorksIncludes(production = true)
       ),
       expectedJson = expectedJson
     )
@@ -210,7 +210,7 @@ class DisplayWorkV2SerialisationTest
     """.stripMargin
 
     assertObjectMapsToJson(
-      DisplayWorkV2(work, includes = V2WorksIncludes(contributors = true)),
+      DisplayWork(work, includes = WorksIncludes(contributors = true)),
       expectedJson = expectedJson
     )
   }
@@ -237,7 +237,7 @@ class DisplayWorkV2SerialisationTest
     """.stripMargin
 
     assertObjectMapsToJson(
-      DisplayWorkV2(work, includes = V2WorksIncludes(genres = true)),
+      DisplayWork(work, includes = WorksIncludes(genres = true)),
       expectedJson = expectedJson
     )
   }
@@ -278,7 +278,7 @@ class DisplayWorkV2SerialisationTest
     """.stripMargin
 
     assertObjectMapsToJson(
-      DisplayWorkV2(work, includes = V2WorksIncludes(notes = true)),
+      DisplayWork(work, includes = WorksIncludes(notes = true)),
       expectedJson = expectedJson
     )
   }
@@ -303,7 +303,7 @@ class DisplayWorkV2SerialisationTest
     """.stripMargin
 
     assertObjectMapsToJson(
-      DisplayWorkV2(work, includes = V2WorksIncludes(identifiers = true)),
+      DisplayWork(work, includes = WorksIncludes(identifiers = true)),
       expectedJson = expectedJson
     )
   }
@@ -324,7 +324,7 @@ class DisplayWorkV2SerialisationTest
     """.stripMargin
 
     assertObjectMapsToJson(
-      DisplayWorkV2(work, includes = V2WorksIncludes(identifiers = true)),
+      DisplayWork(work, includes = WorksIncludes(identifiers = true)),
       expectedJson = expectedJson
     )
   }
@@ -350,7 +350,7 @@ class DisplayWorkV2SerialisationTest
     """.stripMargin
 
     assertObjectMapsToJson(
-      DisplayWorkV2(work, includes = V2WorksIncludes()),
+      DisplayWork(work, includes = WorksIncludes()),
       expectedJson = expectedJson
     )
   }

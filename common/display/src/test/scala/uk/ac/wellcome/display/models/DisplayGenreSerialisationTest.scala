@@ -6,9 +6,9 @@ import uk.ac.wellcome.display.test.util.JsonMapperTestUtil
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
 import uk.ac.wellcome.models.work.internal._
 
-class DisplayGenreV2SerialisationTest
+class DisplayGenreSerialisationTest
     extends FunSpec
-    with DisplayV2SerialisationTestBase
+    with DisplaySerialisationTestBase
     with JsonMapperTestUtil
     with IdentifiersGenerators {
 

@@ -14,11 +14,7 @@ import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.display.json.DisplayJsonUtil
 import uk.ac.wellcome.display.json.DisplayJsonUtil._
-import uk.ac.wellcome.display.models.{
-  ApiVersions,
-  DisplayWorkV2,
-  V2WorksIncludes
-}
+import uk.ac.wellcome.display.models.{ApiVersions, DisplayWork, WorksIncludes}
 import uk.ac.wellcome.elasticsearch.ElasticClientBuilder
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.platform.snapshot_generator.fixtures.{
@@ -93,7 +89,7 @@ class SnapshotServiceTest
           val contents = readGzipFile(downloadFile.getPath)
           val expectedContents = visibleWorks
             .map {
-              DisplayWorkV2(_, includes = V2WorksIncludes.includeAll())
+              DisplayWork(_, includes = WorksIncludes.includeAll())
             }
             .map {
               DisplayJsonUtil.toJson(_)
@@ -142,7 +138,7 @@ class SnapshotServiceTest
           val contents = readGzipFile(downloadFile.getPath)
           val expectedContents = works
             .map {
-              DisplayWorkV2(_, includes = V2WorksIncludes.includeAll())
+              DisplayWork(_, includes = WorksIncludes.includeAll())
             }
             .map {
               DisplayJsonUtil.toJson(_)
