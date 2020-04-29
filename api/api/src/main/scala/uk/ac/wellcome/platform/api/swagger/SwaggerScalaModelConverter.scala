@@ -16,7 +16,6 @@ import io.swagger.v3.core.util.Json
 
 import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.display.models._
-import uk.ac.wellcome.display.models.v2._
 
 /** Custom swagger model converter, used for resolving Scala types into OpenAPI schemas.
   *  https://github.com/swagger-api/swagger-core/wiki/Swagger-2.X---Extensions#extending-core-resolver
@@ -81,7 +80,7 @@ class SwaggerScalaModelConverter extends AbstractModelConverter(Json.mapper()) {
     else if (cls == classOf[DisplayPeriod]) "Period"
     else if (cls == classOf[DisplaySubject]) "Subject"
     else if (cls == classOf[DisplayLanguage]) "Language"
-    else if (cls == classOf[DisplayLicenseV2]) "License"
+    else if (cls == classOf[DisplayLicense]) "License"
     else throw new IllegalArgumentException(s"Unknown class $cls")
   }
 

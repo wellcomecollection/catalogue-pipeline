@@ -1,4 +1,4 @@
-package uk.ac.wellcome.display.models.v2
+package uk.ac.wellcome.display.models
 
 import io.circe.generic.extras.JsonKey
 import io.swagger.v3.oas.annotations.media.Schema
@@ -12,10 +12,10 @@ import uk.ac.wellcome.models.work.internal._
 case class DisplayProductionEvent(
   @Schema label: String,
   @Schema places: List[DisplayPlace],
-  @Schema agents: List[DisplayAbstractAgentV2],
+  @Schema agents: List[DisplayAbstractAgent],
   @Schema dates: List[DisplayPeriod],
   @Schema(
-    `type` = "uk.ac.wellcome.display.models.v2.DisplayAbstractConcept"
+    `type` = "uk.ac.wellcome.display.models.DisplayAbstractConcept"
   ) function: Option[DisplayAbstractConcept],
   @JsonKey("type") @Schema(name = "type") ontologyType: String =
     "ProductionEvent"
@@ -28,7 +28,7 @@ object DisplayProductionEvent {
       label = productionEvent.label,
       places = productionEvent.places.map { DisplayPlace(_) },
       agents = productionEvent.agents.map {
-        DisplayAbstractAgentV2(_, includesIdentifiers = includesIdentifiers)
+        DisplayAbstractAgent(_, includesIdentifiers = includesIdentifiers)
       },
       dates = productionEvent.dates.map { DisplayPeriod(_) },
       function = productionEvent.function.map { concept =>

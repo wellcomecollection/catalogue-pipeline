@@ -4,17 +4,9 @@ import io.circe.generic.extras.semiauto._
 import io.circe.Encoder
 import io.circe.generic.extras.JsonKey
 import io.swagger.v3.oas.annotations.media.Schema
-
-import uk.ac.wellcome.display.models.{DisplayLanguage, DisplayWorkType}
-import uk.ac.wellcome.display.models.v2.{
-  DisplayGenre,
-  DisplayLicenseV2,
-  DisplayPeriod,
-  DisplaySubject
-}
-import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.display.models.Implicits._
+import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.display.json.DisplayJsonUtil._
+import uk.ac.wellcome.models.work.internal._
 
 @Schema(
   name = "Aggregations",
@@ -39,7 +31,7 @@ case class DisplayAggregations(
   ) language: Option[DisplayAggregation[DisplayLanguage]],
   @Schema(
     description = "License aggregation on a set of results."
-  ) license: Option[DisplayAggregation[DisplayLicenseV2]],
+  ) license: Option[DisplayAggregation[DisplayLicense]],
   @JsonKey("type") @Schema(name = "type") ontologyType: String = "Aggregations"
 )
 
@@ -85,7 +77,7 @@ object DisplayAggregations {
         aggs.subjects,
         subject => DisplaySubject(subject, false)
       ),
-      license = displayAggregation(aggs.license, DisplayLicenseV2.apply),
+      license = displayAggregation(aggs.license, DisplayLicense.apply),
     )
 
   private def displayAggregation[T, D](

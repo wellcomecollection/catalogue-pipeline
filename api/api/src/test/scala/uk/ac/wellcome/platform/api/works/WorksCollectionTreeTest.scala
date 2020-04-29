@@ -1,6 +1,5 @@
 package uk.ac.wellcome.platform.api.works
 
-import akka.http.scaladsl.model.headers.LinkParams.title
 import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.models.work.internal._
 

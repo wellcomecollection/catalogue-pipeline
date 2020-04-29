@@ -9,7 +9,7 @@ import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.platform.api.services.WorksSearchOptions
 
 case class SingleWorkParams(
-  include: Option[V2WorksIncludes],
+  include: Option[WorksIncludes],
   _expandPaths: Option[List[String]],
   _index: Option[String],
 ) extends QueryParams
@@ -24,7 +24,7 @@ object SingleWorkParams extends QueryParamsUtils {
   def parse =
     parameter(
       (
-        "include".as[V2WorksIncludes].?,
+        "include".as[WorksIncludes].?,
         "_expandPaths".as[List[String]].?,
         "_index".as[String].?
       )
@@ -33,7 +33,7 @@ object SingleWorkParams extends QueryParamsUtils {
   implicit val decodePaths: Decoder[List[String]] =
     decodeCommaSeparated
 
-  implicit val includesDecoder: Decoder[V2WorksIncludes] =
+  implicit val includesDecoder: Decoder[WorksIncludes] =
     decodeOneOfCommaSeparated(
       "identifiers" -> WorkInclude.Identifiers,
       "items" -> WorkInclude.Items,
@@ -43,7 +43,7 @@ object SingleWorkParams extends QueryParamsUtils {
       "production" -> WorkInclude.Production,
       "notes" -> WorkInclude.Notes,
       "collection" -> WorkInclude.Collection,
-    ).emap(values => Right(V2WorksIncludes(values)))
+    ).emap(values => Right(WorksIncludes(values)))
 }
 
 case class MultipleWorksParams(
@@ -57,7 +57,7 @@ case class MultipleWorksParams(
   `genres.label`: Option[GenreFilter],
   `subjects.label`: Option[SubjectFilter],
   license: Option[LicenseFilter],
-  include: Option[V2WorksIncludes],
+  include: Option[WorksIncludes],
   aggregations: Option[List[AggregationRequest]],
   sort: Option[List[SortRequest]],
   sortOrder: Option[SortingOrder],
@@ -132,7 +132,7 @@ object MultipleWorksParams extends QueryParamsUtils {
         "genres.label".as[GenreFilter].?,
         "subjects.label".as[SubjectFilter].?,
         "license".as[LicenseFilter].?,
-        "include".as[V2WorksIncludes].?,
+        "include".as[WorksIncludes].?,
         "aggregations".as[List[AggregationRequest]].?,
         "sort".as[List[SortRequest]].?,
         "sortOrder".as[SortingOrder].?,

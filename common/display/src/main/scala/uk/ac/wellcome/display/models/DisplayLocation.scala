@@ -1,4 +1,4 @@
-package uk.ac.wellcome.display.models.v2
+package uk.ac.wellcome.display.models
 
 import io.circe.generic.extras.JsonKey
 import io.swagger.v3.oas.annotations.media.Schema
@@ -7,23 +7,22 @@ import uk.ac.wellcome.models.work.internal.{
   Location,
   PhysicalLocation
 }
-import uk.ac.wellcome.display.models.DisplayAccessCondition
 
 @Schema(
   name = "Location",
   description = "A location that provides access to an item",
   discriminatorProperty = "type",
   allOf =
-    Array(classOf[DisplayDigitalLocationV2], classOf[DisplayPhysicalLocationV2])
+    Array(classOf[DisplayDigitalLocation], classOf[DisplayPhysicalLocation])
 )
-sealed trait DisplayLocationV2
+sealed trait DisplayLocation
 
-object DisplayLocationV2 {
-  def apply(location: Location): DisplayLocationV2 = location match {
+object DisplayLocation {
+  def apply(location: Location): DisplayLocation = location match {
     case digitalLocation: DigitalLocation =>
-      DisplayDigitalLocationV2(digitalLocation)
+      DisplayDigitalLocation(digitalLocation)
     case physicalLocation: PhysicalLocation =>
-      DisplayPhysicalLocationV2(physicalLocation)
+      DisplayPhysicalLocation(physicalLocation)
   }
 }
 
@@ -31,7 +30,7 @@ object DisplayLocationV2 {
   name = "DigitalLocation",
   description = "A digital location that provides access to an item"
 )
-case class DisplayDigitalLocationV2(
+case class DisplayDigitalLocation(
   @Schema(
     description = "The type of location that an item is accessible from.",
     allowableValues = Array("thumbnail-image", "iiif-image")
@@ -47,21 +46,21 @@ case class DisplayDigitalLocationV2(
   @Schema(
     description =
       "The specific license under which the work in question is released to the public - for example, one of the forms of Creative Commons - if it is a precise license to which a link can be made."
-  ) license: Option[DisplayLicenseV2] = None,
+  ) license: Option[DisplayLicense] = None,
   @Schema(
     description = "Information about any access restrictions placed on the work"
   ) accessConditions: List[DisplayAccessCondition] = Nil,
   @JsonKey("type") @Schema(name = "type") ontologyType: String =
     "DigitalLocation"
-) extends DisplayLocationV2
+) extends DisplayLocation
 
-object DisplayDigitalLocationV2 {
-  def apply(location: DigitalLocation): DisplayDigitalLocationV2 =
-    DisplayDigitalLocationV2(
+object DisplayDigitalLocation {
+  def apply(location: DigitalLocation): DisplayDigitalLocation =
+    DisplayDigitalLocation(
       locationType = DisplayLocationType(location.locationType),
       url = location.url,
       credit = location.credit,
-      license = location.license.map(DisplayLicenseV2(_)),
+      license = location.license.map(DisplayLicense(_)),
       accessConditions =
         location.accessConditions.map(DisplayAccessCondition(_))
     )
@@ -71,7 +70,7 @@ object DisplayDigitalLocationV2 {
   name = "PhysicalLocation",
   description = "A physical location that provides access to an item"
 )
-case class DisplayPhysicalLocationV2(
+case class DisplayPhysicalLocation(
   @Schema(
     description = "The type of location that an item is accessible from.",
   ) locationType: DisplayLocationType,
@@ -84,11 +83,11 @@ case class DisplayPhysicalLocationV2(
   ) accessConditions: List[DisplayAccessCondition] = Nil,
   @JsonKey("type") @Schema(name = "type") ontologyType: String =
     "PhysicalLocation"
-) extends DisplayLocationV2
+) extends DisplayLocation
 
-object DisplayPhysicalLocationV2 {
-  def apply(location: PhysicalLocation): DisplayPhysicalLocationV2 =
-    DisplayPhysicalLocationV2(
+object DisplayPhysicalLocation {
+  def apply(location: PhysicalLocation): DisplayPhysicalLocation =
+    DisplayPhysicalLocation(
       locationType = DisplayLocationType(location.locationType),
       label = location.label,
       accessConditions =

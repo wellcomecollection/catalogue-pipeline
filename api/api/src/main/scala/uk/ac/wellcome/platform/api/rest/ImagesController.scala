@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.api.rest
 
 import akka.http.scaladsl.server.Route
 import com.sksamuel.elastic4s.{ElasticClient, Index}
-import uk.ac.wellcome.display.models.v2._
+import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.display.models.Implicits._
 import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.platform.api.Tracing

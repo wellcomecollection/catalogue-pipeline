@@ -1,37 +1,36 @@
-package uk.ac.wellcome.display.models.v2
+package uk.ac.wellcome.display.models
 
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.models.work.generators.ItemsGenerators
 
-class DisplayItemV2Test extends FunSpec with Matchers with ItemsGenerators {
+class DisplayItemTest extends FunSpec with Matchers with ItemsGenerators {
 
-  it("reads an identified Item as a DisplayItemV2") {
+  it("reads an identified Item as a displayItem") {
     val item = createIdentifiedItem
 
-    val displayItemV2 = DisplayItemV2(
+    val displayItem = DisplayItem(
       item = item,
       includesIdentifiers = true
     )
 
-    displayItemV2.id shouldBe Some(item.id.canonicalId)
-    displayItemV2.locations shouldBe List(
-      DisplayLocationV2(item.locations.head))
-    displayItemV2.identifiers shouldBe Some(
-      List(DisplayIdentifierV2(item.id.sourceIdentifier)))
-    displayItemV2.ontologyType shouldBe "Item"
+    displayItem.id shouldBe Some(item.id.canonicalId)
+    displayItem.locations shouldBe List(DisplayLocation(item.locations.head))
+    displayItem.identifiers shouldBe Some(
+      List(DisplayIdentifier(item.id.sourceIdentifier)))
+    displayItem.ontologyType shouldBe "Item"
   }
-  it("parses an unidentified Item as a DisplayItemV2") {
+  it("parses an unidentified Item as a displayItem") {
     val item = createUnidentifiableItemWith()
 
-    val displayItemV2 = DisplayItemV2(
+    val displayItem = DisplayItem(
       item = item,
       includesIdentifiers = true
     )
 
-    displayItemV2 shouldBe DisplayItemV2(
+    displayItem shouldBe DisplayItem(
       id = None,
       identifiers = None,
-      locations = List(DisplayLocationV2(item.locations.head)))
+      locations = List(DisplayLocation(item.locations.head)))
   }
 
   it("parses an unidentified Item without any locations") {
@@ -39,46 +38,46 @@ class DisplayItemV2Test extends FunSpec with Matchers with ItemsGenerators {
       locations = List()
     )
 
-    val displayItemV2 = DisplayItemV2(
+    val displayItem = DisplayItem(
       item = item,
       includesIdentifiers = true
     )
 
-    displayItemV2.locations shouldBe List()
+    displayItem.locations shouldBe List()
   }
 
   it("parses an Item without any extra identifiers") {
     val item = createIdentifiedItem
 
-    val displayItemV2 = DisplayItemV2(
+    val displayItem = DisplayItem(
       item = item,
       includesIdentifiers = true
     )
 
-    displayItemV2.identifiers shouldBe Some(
-      List(DisplayIdentifierV2(item.id.sourceIdentifier)))
+    displayItem.identifiers shouldBe Some(
+      List(DisplayIdentifier(item.id.sourceIdentifier)))
   }
 
   it("parses an identified Item without any locations") {
     val item = createIdentifiedItemWith(locations = List())
 
-    val displayItemV2 = DisplayItemV2(
+    val displayItem = DisplayItem(
       item = item,
       includesIdentifiers = true
     )
 
-    displayItemV2.locations shouldBe List()
+    displayItem.locations shouldBe List()
   }
 
   it("parses an identified Item with title") {
     val title = Some("Nice item")
     val item = createIdentifiedItemWith(title = title)
 
-    val displayItemV2 = DisplayItemV2(
+    val displayItem = DisplayItem(
       item = item,
       includesIdentifiers = true
     )
 
-    displayItemV2.title shouldBe title
+    displayItem.title shouldBe title
   }
 }

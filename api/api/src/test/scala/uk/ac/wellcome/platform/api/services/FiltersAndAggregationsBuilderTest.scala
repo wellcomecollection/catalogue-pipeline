@@ -8,13 +8,7 @@ import com.sksamuel.elastic4s.requests.searches.aggs.{
 import com.sksamuel.elastic4s.requests.searches.queries.{BoolQuery, Query}
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.display.models.AggregationRequest
-import uk.ac.wellcome.platform.api.models.{
-  GenreFilter,
-  IdentifiedWorkFilter,
-  LanguageFilter,
-  WorkFilter,
-  WorkTypeFilter
-}
+import uk.ac.wellcome.platform.api.models._
 
 class FiltersAndAggregationsBuilderTest extends FunSpec with Matchers {
 

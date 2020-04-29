@@ -10,9 +10,7 @@ import akka.util.ByteString
 import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.ElasticClient
 import grizzled.slf4j.Logging
-
-import uk.ac.wellcome.display.models._
-import uk.ac.wellcome.display.models.v2.DisplayWorkV2
+import uk.ac.wellcome.display.models.{DisplayWork, _}
 import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.models.work.internal.IdentifiedWork
 import uk.ac.wellcome.platform.snapshot_generator.flow.{
@@ -52,7 +50,7 @@ class SnapshotService(akkaS3Client: S3Client,
           publicBucketName = publicBucketName,
           publicObjectKey = publicObjectKey,
           index = elasticConfig.worksIndex,
-          toDisplayWork = DisplayWorkV2.apply(_, V2WorksIncludes.includeAll())
+          toDisplayWork = DisplayWork.apply(_, WorksIncludes.includeAll())
         )
     }
 

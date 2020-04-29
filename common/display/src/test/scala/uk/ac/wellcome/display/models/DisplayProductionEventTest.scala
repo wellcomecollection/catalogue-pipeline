@@ -1,4 +1,4 @@
-package uk.ac.wellcome.display.models.v2
+package uk.ac.wellcome.display.models
 
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.models.work.generators.ProductionEventGenerators
@@ -25,7 +25,7 @@ class DisplayProductionEventTest
       label = "London, Macmillan, 2005",
       places = List(DisplayPlace(label = "London")),
       agents = List(
-        DisplayAgentV2(
+        DisplayAgent(
           id = None,
           identifiers = None,
           label = "Macmillan"

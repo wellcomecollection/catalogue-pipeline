@@ -1,4 +1,4 @@
-package uk.ac.wellcome.display.models.v2
+package uk.ac.wellcome.display.models
 
 import io.circe.generic.extras.JsonKey
 import io.swagger.v3.oas.annotations.media.Schema
@@ -9,7 +9,7 @@ import uk.ac.wellcome.models.work.internal.{Contributor, Minted}
   description = "A contributor"
 )
 case class DisplayContributor(
-  @Schema(description = "The agent.") agent: DisplayAbstractAgentV2,
+  @Schema(description = "The agent.") agent: DisplayAbstractAgent,
   @Schema(description = "The list of contribution roles.") roles: List[
     DisplayContributionRole],
   @JsonKey("type") @Schema(name = "type") ontologyType: String = "Contributor"
@@ -19,7 +19,7 @@ object DisplayContributor {
   def apply(contributor: Contributor[Minted],
             includesIdentifiers: Boolean): DisplayContributor =
     DisplayContributor(
-      agent = DisplayAbstractAgentV2(
+      agent = DisplayAbstractAgent(
         contributor.agent,
         includesIdentifiers = includesIdentifiers),
       roles = contributor.roles.map { DisplayContributionRole(_) }

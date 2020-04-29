@@ -1,4 +1,4 @@
-package uk.ac.wellcome.display.models.v2
+package uk.ac.wellcome.display.models
 
 import io.circe.generic.extras.JsonKey
 import io.swagger.v3.oas.annotations.media.Schema
@@ -14,9 +14,9 @@ case class DisplayImage(
     description = "The canonical identifier given to a thing."
   ) id: String,
   @Schema(
-    `type` = "uk.ac.wellcome.display.models.v2.DisplayDigitalLocationV2",
+    `type` = "uk.ac.wellcome.Display.models.DisplayDigitalLocation",
     description = "The location which provides access to the image"
-  ) location: DisplayDigitalLocationV2,
+  ) location: DisplayDigitalLocation,
   @Schema(
     description = "The work to which the image relates"
   ) parentWork: String,
@@ -28,7 +28,7 @@ object DisplayImage {
   def apply(image: AugmentedImage): DisplayImage =
     new DisplayImage(
       id = image.id.canonicalId,
-      location = DisplayDigitalLocationV2(image.location),
+      location = DisplayDigitalLocation(image.location),
       parentWork = image.parentWork.canonicalId
     )
 

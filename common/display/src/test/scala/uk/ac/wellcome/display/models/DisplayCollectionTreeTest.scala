@@ -3,7 +3,6 @@ package uk.ac.wellcome.display.models
 import org.scalatest.{FunSpec, Matchers}
 
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.display.models.v2._
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 
 class DisplayCollectionTest extends FunSpec with Matchers with WorksGenerators {
@@ -20,17 +19,17 @@ class DisplayCollectionTest extends FunSpec with Matchers with WorksGenerators {
     DisplayCollection(tree, List("a/b/c")) shouldBe
       DisplayCollection(
         path = DisplayCollectionPath("a", Some("Collection")),
-        work = Some(DisplayWorkV2(a)),
+        work = Some(DisplayWork(a)),
         children = Some(
           List(
             DisplayCollection(
               path = DisplayCollectionPath("a/b", Some("Series")),
-              work = Some(DisplayWorkV2(b)),
+              work = Some(DisplayWork(b)),
               children = Some(
                 List(
                   DisplayCollection(
                     path = DisplayCollectionPath("a/b/c", Some("Item")),
-                    work = Some(DisplayWorkV2(c)),
+                    work = Some(DisplayWork(c)),
                     children = Some(Nil)
                   )
                 )
@@ -53,12 +52,12 @@ class DisplayCollectionTest extends FunSpec with Matchers with WorksGenerators {
     DisplayCollection(tree, List("a")) shouldBe
       DisplayCollection(
         path = DisplayCollectionPath("a", Some("Collection")),
-        work = Some(DisplayWorkV2(a)),
+        work = Some(DisplayWork(a)),
         children = Some(
           List(
             DisplayCollection(
               path = DisplayCollectionPath("a/b", Some("Item"), Some("!!!")),
-              work = Some(DisplayWorkV2(b)),
+              work = Some(DisplayWork(b)),
             )
           )
         )
@@ -75,17 +74,17 @@ class DisplayCollectionTest extends FunSpec with Matchers with WorksGenerators {
     DisplayCollection(tree, List("a/b/c", "a/d/e")) shouldBe
       DisplayCollection(
         path = DisplayCollectionPath("a", Some("Collection")),
-        work = Some(DisplayWorkV2(a)),
+        work = Some(DisplayWork(a)),
         children = Some(
           List(
             DisplayCollection(
               path = DisplayCollectionPath("a/b", Some("Series")),
-              work = Some(DisplayWorkV2(b)),
+              work = Some(DisplayWork(b)),
               children = Some(
                 List(
                   DisplayCollection(
                     path = DisplayCollectionPath("a/b/c", Some("Item")),
-                    work = Some(DisplayWorkV2(c)),
+                    work = Some(DisplayWork(c)),
                     children = Some(Nil)
                   )
                 )
@@ -93,12 +92,12 @@ class DisplayCollectionTest extends FunSpec with Matchers with WorksGenerators {
             ),
             DisplayCollection(
               path = DisplayCollectionPath("a/d", Some("Series")),
-              work = Some(DisplayWorkV2(d)),
+              work = Some(DisplayWork(d)),
               children = Some(
                 List(
                   DisplayCollection(
                     path = DisplayCollectionPath("a/d/e", Some("Item")),
-                    work = Some(DisplayWorkV2(e)),
+                    work = Some(DisplayWork(e)),
                     children = Some(Nil)
                   )
                 )
@@ -119,22 +118,22 @@ class DisplayCollectionTest extends FunSpec with Matchers with WorksGenerators {
     DisplayCollection(tree, List("a/b/c")) shouldBe
       DisplayCollection(
         path = DisplayCollectionPath("a", Some("Collection")),
-        work = Some(DisplayWorkV2(a)),
+        work = Some(DisplayWork(a)),
         children = Some(
           List(
             DisplayCollection(
               path = DisplayCollectionPath("a/b", Some("Series")),
-              work = Some(DisplayWorkV2(b)),
+              work = Some(DisplayWork(b)),
               children = Some(
                 List(
                   DisplayCollection(
                     path = DisplayCollectionPath("a/b/c", Some("Item")),
-                    work = Some(DisplayWorkV2(c)),
+                    work = Some(DisplayWork(c)),
                     children = Some(Nil)
                   ),
                   DisplayCollection(
                     path = DisplayCollectionPath("a/b/e", Some("Item")),
-                    work = Some(DisplayWorkV2(e)),
+                    work = Some(DisplayWork(e)),
                     children = None
                   ),
                 )
@@ -142,7 +141,7 @@ class DisplayCollectionTest extends FunSpec with Matchers with WorksGenerators {
             ),
             DisplayCollection(
               path = DisplayCollectionPath("a/d", Some("Item")),
-              work = Some(DisplayWorkV2(d)),
+              work = Some(DisplayWork(d)),
               children = None
             )
           )
@@ -160,17 +159,17 @@ class DisplayCollectionTest extends FunSpec with Matchers with WorksGenerators {
     DisplayCollection(tree, List("a/b")) shouldBe
       DisplayCollection(
         path = DisplayCollectionPath("a", Some("Collection")),
-        work = Some(DisplayWorkV2(a)),
+        work = Some(DisplayWork(a)),
         children = Some(
           List(
             DisplayCollection(
               path = DisplayCollectionPath("a/b", Some("Series")),
-              work = Some(DisplayWorkV2(b)),
+              work = Some(DisplayWork(b)),
               children = Some(
                 List(
                   DisplayCollection(
                     path = DisplayCollectionPath("a/b/c", Some("Item")),
-                    work = Some(DisplayWorkV2(c)),
+                    work = Some(DisplayWork(c)),
                     children = None
                   )
                 )
@@ -178,7 +177,7 @@ class DisplayCollectionTest extends FunSpec with Matchers with WorksGenerators {
             ),
             DisplayCollection(
               path = DisplayCollectionPath("a/d", Some("Series")),
-              work = Some(DisplayWorkV2(d)),
+              work = Some(DisplayWork(d)),
               children = None
             )
           )

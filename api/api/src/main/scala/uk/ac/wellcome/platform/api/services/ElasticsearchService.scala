@@ -9,11 +9,7 @@ import com.sksamuel.elastic4s.requests.searches.sort.{FieldSort, SortOrder}
 import com.sksamuel.elastic4s.Index
 import grizzled.slf4j.Logging
 
-import uk.ac.wellcome.display.models.{
-  AggregationRequest,
-  SortRequest,
-  SortingOrder
-}
+import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.platform.api.Tracing
 import uk.ac.wellcome.platform.api.models._
 

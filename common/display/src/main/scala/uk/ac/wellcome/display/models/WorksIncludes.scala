@@ -13,9 +13,7 @@ object WorkInclude {
   case object Collection extends WorkInclude
 }
 
-trait WorksIncludes
-
-case class V2WorksIncludes(includes: List[WorkInclude]) extends WorksIncludes {
+case class WorksIncludes(includes: List[WorkInclude]) {
   def identifiers = includes.contains(WorkInclude.Identifiers)
   def items = includes.contains(WorkInclude.Items)
   def subjects = includes.contains(WorkInclude.Subjects)
@@ -26,7 +24,7 @@ case class V2WorksIncludes(includes: List[WorkInclude]) extends WorksIncludes {
   def collection = includes.contains(WorkInclude.Collection)
 }
 
-object V2WorksIncludes {
+object WorksIncludes {
 
   import WorkInclude._
 
@@ -39,7 +37,7 @@ object V2WorksIncludes {
     production: Boolean = false,
     notes: Boolean = false,
     collection: Boolean = false,
-  ): V2WorksIncludes = V2WorksIncludes(
+  ): WorksIncludes = WorksIncludes(
     List(
       if (identifiers) Some(Identifiers) else None,
       if (items) Some(Items) else None,
@@ -52,7 +50,7 @@ object V2WorksIncludes {
     ).flatten
   )
 
-  def includeAll(): V2WorksIncludes = V2WorksIncludes(
+  def includeAll(): WorksIncludes = WorksIncludes(
     true, true, true, true, true, true, true, true
   )
 }

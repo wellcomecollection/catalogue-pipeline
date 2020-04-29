@@ -3,9 +3,7 @@ package uk.ac.wellcome.display.json
 import io.circe.generic.extras.{AutoDerivation, Configuration}
 import io.circe.{Encoder, Printer}
 import io.circe.syntax._
-
-import uk.ac.wellcome.display.models.DisplayWork
-import uk.ac.wellcome.display.models.v2._
+import uk.ac.wellcome.display.models._
 
 /** Format JSON objects as suitable for display.
   *
@@ -38,11 +36,11 @@ trait DisplayJsonUtil extends AutoDerivation {
   // It is the "recommended: approach in the Circe docs:
   // https://circe.github.io/circe/codecs/adt.html
 
-  implicit val abstractAgentEncoder: Encoder[DisplayAbstractAgentV2] = {
-    case agent: DisplayAgentV2               => agent.asJson
-    case person: DisplayPersonV2             => person.asJson
-    case organisation: DisplayOrganisationV2 => organisation.asJson
-    case meeting: DisplayMeetingV2           => meeting.asJson
+  implicit val abstractAgentEncoder: Encoder[DisplayAbstractAgent] = {
+    case agent: DisplayAgent               => agent.asJson
+    case person: DisplayPerson             => person.asJson
+    case organisation: DisplayOrganisation => organisation.asJson
+    case meeting: DisplayMeeting           => meeting.asJson
   }
 
   implicit val abstractConceptEncoder: Encoder[DisplayAbstractConcept] = {
@@ -53,17 +51,13 @@ trait DisplayJsonUtil extends AutoDerivation {
 
   implicit val abstractRootConceptEncoder
     : Encoder[DisplayAbstractRootConcept] = {
-    case agent: DisplayAbstractAgentV2   => agent.asJson
+    case agent: DisplayAbstractAgent     => agent.asJson
     case concept: DisplayAbstractConcept => concept.asJson
   }
 
-  implicit val locationV2Encoder: Encoder[DisplayLocationV2] = {
-    case digitalLocation: DisplayDigitalLocationV2   => digitalLocation.asJson
-    case physicalLocation: DisplayPhysicalLocationV2 => physicalLocation.asJson
-  }
-
-  implicit val displayWorkEncoder: Encoder[DisplayWork] = {
-    case work: DisplayWorkV2 => work.asJson
+  implicit val locationEncoder: Encoder[DisplayLocation] = {
+    case digitalLocation: DisplayDigitalLocation   => digitalLocation.asJson
+    case physicalLocation: DisplayPhysicalLocation => physicalLocation.asJson
   }
 }
 

@@ -6,7 +6,6 @@ import io.circe.generic.extras.semiauto.deriveEncoder
 import io.circe.{Encoder, Json}
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.ac.wellcome.display.models._
-import uk.ac.wellcome.display.models.v2._
 import uk.ac.wellcome.display.json.DisplayJsonUtil._
 import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.platform.api.services.WorksSearchOptions
@@ -44,7 +43,7 @@ case class MultipleWorksResponse(
   pageSize: Int,
   totalPages: Int,
   totalResults: Int,
-  results: List[DisplayWorkV2],
+  results: List[DisplayWork],
   prevPage: Option[String] = None,
   nextPage: Option[String] = None,
   aggregations: Option[DisplayAggregations] = None
@@ -55,13 +54,13 @@ object MultipleWorksResponse {
 
   def apply(resultList: ResultList,
             searchOptions: WorksSearchOptions,
-            includes: V2WorksIncludes,
+            includes: WorksIncludes,
             requestUri: Uri,
             contextUri: String): MultipleWorksResponse =
     MultipleWorksResponse(
       resultList = DisplayResultList(
         resultList,
-        DisplayWorkV2.apply,
+        DisplayWork.apply,
         searchOptions.pageSize,
         includes,
       ),
@@ -70,7 +69,7 @@ object MultipleWorksResponse {
       contextUri = contextUri
     )
 
-  def apply(resultList: DisplayResultList[DisplayWorkV2],
+  def apply(resultList: DisplayResultList[DisplayWork],
             currentPage: Int,
             requestUri: Uri,
             contextUri: String): MultipleWorksResponse =

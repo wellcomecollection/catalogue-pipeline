@@ -1,8 +1,7 @@
-package uk.ac.wellcome.display.models.v2
+package uk.ac.wellcome.display.models
 
 import io.circe.generic.extras.JsonKey
 import io.swagger.v3.oas.annotations.media.Schema
-
 import uk.ac.wellcome.models.work.internal._
 
 @Schema(
@@ -16,7 +15,7 @@ case class DisplayCollection(
   @Schema(
     description =
       "The work. This only contains a limited set of fields, regardless of the includes."
-  ) work: Option[DisplayWorkV2] = None,
+  ) work: Option[DisplayWork] = None,
   @Schema(
     description =
       "An array containing any children. This value is null when a given node has not been expanded."
@@ -28,7 +27,7 @@ object DisplayCollection {
   def apply(tree: Collection, expandedPaths: List[String]): DisplayCollection =
     DisplayCollection(
       path = DisplayCollectionPath(tree.path),
-      work = tree.work.map(DisplayWorkV2(_)),
+      work = tree.work.map(DisplayWork(_)),
       children =
         if (isExpanded(tree.path, expandedPaths))
           Some(tree.children.map(DisplayCollection(_, expandedPaths)))
