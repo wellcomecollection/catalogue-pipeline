@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.circe.generic.extras.JsonKey
 import io.circe.Encoder
 import io.circe.generic.extras.semiauto._
+import uk.ac.wellcome.display.json.DisplayJsonUtil._
 
 @Schema(
   name = "Error"

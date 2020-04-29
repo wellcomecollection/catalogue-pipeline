@@ -5,6 +5,7 @@ import io.circe.Encoder
 import io.circe.generic.extras.JsonKey
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.ac.wellcome.display.models._
+import uk.ac.wellcome.display.json.DisplayJsonUtil._
 import uk.ac.wellcome.models.work.internal._
 
 @Schema(
