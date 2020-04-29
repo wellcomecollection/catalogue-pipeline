@@ -12,7 +12,7 @@ import uk.ac.wellcome.platform.api.services.{
   ImagesService
 }
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 class ImagesController(
   elasticClient: ElasticClient,
@@ -28,19 +28,17 @@ class ImagesController(
           params._index.map(Index(_)).getOrElse(elasticConfig.imagesIndex)
         imagesService
           .findImageById(id)(index)
-          .flatMap {
+          .map {
             case Right(Some(image)) =>
-              Future.successful(
-                complete(
-                  ResultResponse(
-                    context = contextUri,
-                    result = DisplayImage(image)
-                  )
+              complete(
+                ResultResponse(
+                  context = contextUri,
+                  result = DisplayImage(image)
                 )
               )
             case Right(None) =>
-              Future.successful(notFound(s"Image not found for identifier $id"))
-            case Left(err) => Future.successful(elasticError(err))
+              notFound(s"Image not found for identifier $id")
+            case Left(err) => elasticError(err)
           }
       }
     }
