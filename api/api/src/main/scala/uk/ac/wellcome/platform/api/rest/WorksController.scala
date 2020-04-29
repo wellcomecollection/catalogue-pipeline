@@ -8,12 +8,7 @@ import grizzled.slf4j.Logger
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.display.models.Implicits._
 import uk.ac.wellcome.elasticsearch.ElasticConfig
-import uk.ac.wellcome.models.work.internal.{
-  Collection,
-  CollectionPath,
-  IdentifiedRedirectedWork,
-  IdentifiedWork
-}
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.models.ApiConfig
 import uk.ac.wellcome.platform.api.services.{
   CollectionService,

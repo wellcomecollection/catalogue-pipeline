@@ -3,12 +3,7 @@ package uk.ac.wellcome.platform.api
 import java.util.concurrent.TimeUnit
 
 import akka.actor.ActorSystem
-import akka.dispatch.{
-  Dispatcher,
-  DispatcherPrerequisites,
-  MessageDispatcher,
-  MessageDispatcherConfigurator
-}
+import akka.dispatch._
 import co.elastic.apm.api.{ElasticApm, Transaction}
 import co.elastic.apm.attach.ElasticApmAttacher
 import com.typesafe.config.Config

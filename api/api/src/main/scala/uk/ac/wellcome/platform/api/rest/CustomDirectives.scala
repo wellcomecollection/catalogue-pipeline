@@ -1,17 +1,8 @@
 package uk.ac.wellcome.platform.api.rest
 
-import akka.http.scaladsl.model.StatusCodes.{
-  BadRequest,
-  Gone,
-  InternalServerError,
-  NotFound
-}
+import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.model.Uri
-import uk.ac.wellcome.platform.api.models.{
-  ApiConfig,
-  DisplayError,
-  ErrorVariant
-}
+import uk.ac.wellcome.platform.api.models._
 import akka.http.scaladsl.server.{Directive, Directives, Route}
 import com.sksamuel.elastic4s.ElasticError
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport

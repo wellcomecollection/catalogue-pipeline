@@ -15,11 +15,7 @@ import com.sksamuel.elastic4s.requests.searches.queries.{
 }
 import com.sksamuel.elastic4s.requests.searches.sort.{FieldSort, SortOrder}
 import com.sksamuel.elastic4s.{ElasticDate, Index}
-import uk.ac.wellcome.display.models.{
-  AggregationRequest,
-  ProductionDateSortRequest,
-  SortingOrder
-}
+import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.platform.api.elasticsearch.ElasticsearchComboQuery
 import uk.ac.wellcome.platform.api.models._
 

@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.api.works
 
 import uk.ac.wellcome.elasticsearch.ElasticConfig
 
-class ApiV2RedirectsTest extends ApiWorksTestBase {
+class WorksRedirectsTest extends ApiWorksTestBase {
 
   val redirectedWork = createIdentifiedRedirectedWork
   val redirectId = redirectedWork.redirect.canonicalId

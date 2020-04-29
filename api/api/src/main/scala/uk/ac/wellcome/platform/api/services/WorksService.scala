@@ -7,19 +7,9 @@ import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.ElasticError
 import com.sksamuel.elastic4s.requests.get.GetResponse
 import com.sksamuel.elastic4s.requests.searches.{SearchHit, SearchResponse}
-import uk.ac.wellcome.display.models.{
-  AggregationRequest,
-  SortRequest,
-  SortingOrder
-}
+import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.models.work.internal.{IdentifiedBaseWork, IdentifiedWork}
-import uk.ac.wellcome.platform.api.models.{
-  Aggregations,
-  ResultList,
-  SearchQuery,
-  SearchQueryType,
-  WorkFilter
-}
+import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
 
