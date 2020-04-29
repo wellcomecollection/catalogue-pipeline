@@ -43,6 +43,8 @@ class ImagesController(
       }
     }
 
+  def multipleImages(params: MultipleImagesParams): Route = ???
+
   private lazy val imagesService = new ImagesService(
     new ElasticsearchService(elasticClient))
 }

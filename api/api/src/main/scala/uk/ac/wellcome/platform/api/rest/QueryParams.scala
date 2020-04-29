@@ -2,12 +2,34 @@ package uk.ac.wellcome.platform.api.rest
 
 import java.time.LocalDate
 
-import akka.http.scaladsl.server.Directives
+import akka.http.scaladsl.server.{Directive, Directives, ValidationRejection}
 import akka.http.scaladsl.unmarshalling.Unmarshaller
 import io.circe.java8.time.TimeInstances
 import io.circe.{Decoder, Json}
+import uk.ac.wellcome.platform.api.models.LicenseFilter
+import uk.ac.wellcome.platform.api.rest.MultipleWorksParams.decodeCommaSeparated
 
 trait QueryParams
+
+trait Paginated { this: QueryParams =>
+  val page: Option[Int]
+  val pageSize: Option[Int]
+
+  def paginationErrors: List[String] =
+    List(
+      page
+        .filterNot(_ >= 1)
+        .map(_ => "page: must be greater than 1"),
+      pageSize
+        .filterNot(size => size >= 1 && size <= 100)
+        .map(_ => "pageSize: must be between 1 and 100")
+    ).flatten
+}
+
+object CommonDecoders {
+  implicit val licenseFilter: Decoder[LicenseFilter] =
+    decodeCommaSeparated.emap(strs => Right(LicenseFilter(strs)))
+}
 
 trait QueryParamsUtils extends Directives with TimeInstances {
 
@@ -70,4 +92,13 @@ trait QueryParamsUtils extends Directives with TimeInstances {
         s"${values.mkString("'", "', '", "'")} are not valid values. $oneOfMsg"
     }
   }
+
+  def validated[T <: QueryParams](errors: List[String],
+                                  params: T): Directive[Tuple1[T]] =
+    errors match {
+      case Nil => provide(params)
+      case errs =>
+        reject(ValidationRejection(errs.mkString(", ")))
+          .toDirective[Tuple1[T]]
+    }
 }
