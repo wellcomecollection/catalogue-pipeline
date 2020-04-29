@@ -269,7 +269,7 @@ class WorksErrorsTest extends ApiWorksTestBase {
     // By creating an index without a mapping, we don't have a canonicalId field
     // to sort on.  Trying to query this index of these will trigger one such exception!
     withApi {
-      case (index, routes) =>
+      case (_, routes) =>
         withEmptyIndex { index =>
           val path = s"/${getApiPrefix()}/works?_index=${index.name}"
           assertJsonResponse(routes, path)(
@@ -287,28 +287,4 @@ class WorksErrorsTest extends ApiWorksTestBase {
         }
     }
   }
-
-  def assertIsBadRequest(path: String, description: String) =
-    withApi {
-      case (index, routes) =>
-        assertJsonResponse(routes, s"/$apiPrefix$path")(
-          Status.BadRequest ->
-            badRequest(
-              apiPrefix = apiPrefix,
-              description = description
-            )
-        )
-    }
-
-  def assertIsNotFound(path: String, description: String) =
-    withApi {
-      case (index, routes) =>
-        assertJsonResponse(routes, s"/$apiPrefix$path")(
-          Status.NotFound ->
-            notFound(
-              apiPrefix = apiPrefix,
-              description = description
-            )
-        )
-    }
 }

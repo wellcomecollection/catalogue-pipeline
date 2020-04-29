@@ -1,6 +1,5 @@
 package uk.ac.wellcome.platform.api.works
 import com.sksamuel.elastic4s.Indexable
-import uk.ac.wellcome.display.models.ApiVersions
 import uk.ac.wellcome.display.models.v2.DisplayV2SerialisationTestBase
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
@@ -14,8 +13,6 @@ trait ApiWorksTestBase
     with WorksGenerators
     with GenreGenerators
     with SubjectGenerators {
-
-  val apiPrefix: String = getApiPrefix(ApiVersions.v2)
 
   implicit object IdentifiedWorkIndexable extends Indexable[IdentifiedWork] {
     override def json(t: IdentifiedWork): String =

@@ -2,6 +2,7 @@ package uk.ac.wellcome.elasticsearch.test.fixtures
 
 import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.requests.bulk.BulkResponse
 import com.sksamuel.elastic4s.requests.cluster.ClusterHealthResponse
 import com.sksamuel.elastic4s.requests.common.VersionType.ExternalGte
 import com.sksamuel.elastic4s.requests.get.GetResponse
@@ -20,7 +21,7 @@ import uk.ac.wellcome.elasticsearch.model.CanonicalId
 import uk.ac.wellcome.fixtures._
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.utils.JsonAssertions
-import uk.ac.wellcome.models.work.internal.IdentifiedBaseWork
+import uk.ac.wellcome.models.work.internal.{AugmentedImage, IdentifiedBaseWork}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -59,6 +60,13 @@ trait ElasticsearchFixtures
       interval = scaled(Span(150, Millis))
     ),
     implicitly[Position])
+
+  def withLocalIndices[R](testWith: TestWith[ElasticConfig, R]): R =
+    withLocalWorksIndex { worksIndex =>
+      withLocalImagesIndex { imagesIndex =>
+        testWith(ElasticConfig(worksIndex, imagesIndex))
+      }
+    }
 
   def withLocalWorksIndex[R](testWith: TestWith[Index, R]): R =
     withLocalElasticsearchIndex[R](config = WorksIndexConfig) { index =>
@@ -223,16 +231,38 @@ trait ElasticsearchFixtures
         }
       )
     )
+    assertInserted(result, works, index)
+  }
 
+  def insertImagesIntoElasticsearch(index: Index,
+                                    images: AugmentedImage*): Assertion = {
+    val result = elasticClient.execute(
+      bulk(
+        images.map { image =>
+          val jsonDoc = toJson(image).get
+
+          indexInto(index.name)
+            .version(image.version)
+            .versionType(ExternalGte)
+            .id(image.id.canonicalId)
+            .doc(jsonDoc)
+        }
+      )
+    )
+    assertInserted(result, images, index)
+  }
+
+  private def assertInserted[T](result: Future[Response[BulkResponse]],
+                                docs: Seq[T],
+                                index: Index): Assertion =
     whenReady(result) { _ =>
       eventually {
         val response: Response[SearchResponse] = elasticClient.execute {
           search(index.name).matchAllQuery().trackTotalHits(true)
         }.await
-        response.result.totalHits shouldBe works.size
+        response.result.totalHits shouldBe docs.size
       }
     }
-  }
 
   def createIndex: Index =
     Index(name = (Random.alphanumeric take 10 mkString) toLowerCase)

@@ -7,12 +7,10 @@ import akka.http.scaladsl.model.headers.Host
 import akka.http.scaladsl.server.Route
 import io.circe.parser.parse
 import io.circe.Json
-import com.sksamuel.elastic4s.Index
-
+import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.platform.api.Router
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
-import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.platform.api.models.ApiConfig
 
 trait ApiFixture
@@ -31,11 +29,11 @@ trait ApiFixture
     securedConnection = if (apiScheme == "https") true else false
   )
 
-  def withApi[R](testWith: TestWith[(Index, Route), R]): R =
-    withLocalWorksIndex { indexV2 =>
+  def withApi[R](testWith: TestWith[(ElasticConfig, Route), R]): R =
+    withLocalIndices { elasticConfig =>
       val router = new Router(
         elasticClient,
-        ElasticConfig(index = indexV2),
+        elasticConfig,
         ApiConfig(
           host = apiHost,
           scheme = apiScheme,
@@ -44,7 +42,7 @@ trait ApiFixture
           contextSuffix = "context.json"
         )
       )
-      testWith((indexV2, router.routes))
+      testWith((elasticConfig, router.routes))
     }
 
   def assertJsonResponse(routes: Route, path: String)(

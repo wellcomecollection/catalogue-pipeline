@@ -39,7 +39,8 @@ class WorksController(
     getWithFuture {
       transactFuture("GET /works") {
         val searchOptions = params.searchOptions(apiConfig)
-        val index = params._index.map(Index(_)).getOrElse(elasticConfig.index)
+        val index =
+          params._index.map(Index(_)).getOrElse(elasticConfig.worksIndex)
         worksService
           .listOrSearchWorks(index, searchOptions)
           .map {
@@ -63,7 +64,8 @@ class WorksController(
   def singleWork(id: String, params: SingleWorkParams): Route =
     getWithFuture {
       transactFuture("GET /works/{workId}") {
-        val index = params._index.map(Index(_)).getOrElse(elasticConfig.index)
+        val index =
+          params._index.map(Index(_)).getOrElse(elasticConfig.worksIndex)
         val includes = params.include.getOrElse(V2WorksIncludes())
         worksService
           .findWorkById(id)(index)

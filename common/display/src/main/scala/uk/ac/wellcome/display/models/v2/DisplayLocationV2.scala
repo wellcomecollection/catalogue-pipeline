@@ -20,20 +20,10 @@ sealed trait DisplayLocationV2
 
 object DisplayLocationV2 {
   def apply(location: Location): DisplayLocationV2 = location match {
-    case DigitalLocation(url, locType, license, credit, accessConditions, _) =>
-      DisplayDigitalLocationV2(
-        locationType = DisplayLocationType(locType),
-        url = url,
-        credit = credit,
-        license = license.map(DisplayLicenseV2(_)),
-        accessConditions = accessConditions.map(DisplayAccessCondition(_))
-      )
-    case PhysicalLocation(locationType, label, accessConditions, _) =>
-      DisplayPhysicalLocationV2(
-        locationType = DisplayLocationType(locationType),
-        label = label,
-        accessConditions = accessConditions.map(DisplayAccessCondition(_))
-      )
+    case digitalLocation: DigitalLocation =>
+      DisplayDigitalLocationV2(digitalLocation)
+    case physicalLocation: PhysicalLocation =>
+      DisplayPhysicalLocationV2(physicalLocation)
   }
 }
 
@@ -65,6 +55,18 @@ case class DisplayDigitalLocationV2(
     "DigitalLocation"
 ) extends DisplayLocationV2
 
+object DisplayDigitalLocationV2 {
+  def apply(location: DigitalLocation): DisplayDigitalLocationV2 =
+    DisplayDigitalLocationV2(
+      locationType = DisplayLocationType(location.locationType),
+      url = location.url,
+      credit = location.credit,
+      license = location.license.map(DisplayLicenseV2(_)),
+      accessConditions =
+        location.accessConditions.map(DisplayAccessCondition(_))
+    )
+}
+
 @Schema(
   name = "PhysicalLocation",
   description = "A physical location that provides access to an item"
@@ -83,3 +85,13 @@ case class DisplayPhysicalLocationV2(
   @JsonKey("type") @Schema(name = "type") ontologyType: String =
     "PhysicalLocation"
 ) extends DisplayLocationV2
+
+object DisplayPhysicalLocationV2 {
+  def apply(location: PhysicalLocation): DisplayPhysicalLocationV2 =
+    DisplayPhysicalLocationV2(
+      locationType = DisplayLocationType(location.locationType),
+      label = location.label,
+      accessConditions =
+        location.accessConditions.map(DisplayAccessCondition(_))
+    )
+}

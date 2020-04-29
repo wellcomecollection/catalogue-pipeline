@@ -1,5 +1,7 @@
 package uk.ac.wellcome.platform.api.works
 
+import uk.ac.wellcome.elasticsearch.ElasticConfig
+
 class ApiV2RedirectsTest extends ApiWorksTestBase {
 
   val redirectedWork = createIdentifiedRedirectedWork
@@ -7,8 +9,8 @@ class ApiV2RedirectsTest extends ApiWorksTestBase {
 
   it("returns a TemporaryRedirect if looking up a redirected work") {
     withApi {
-      case (indexV2, routes) => {
-        insertIntoElasticsearch(indexV2, redirectedWork)
+      case (ElasticConfig(worksIndex, _), routes) => {
+        insertIntoElasticsearch(worksIndex, redirectedWork)
         val path = s"/$apiPrefix/works/${redirectedWork.canonicalId}"
         assertRedirectResponse(routes, path) {
           Status.Found ->
@@ -20,8 +22,8 @@ class ApiV2RedirectsTest extends ApiWorksTestBase {
 
   it("preserves query parameters on a 302 Redirect") {
     withApi {
-      case (indexV2, routes) => {
-        insertIntoElasticsearch(indexV2, redirectedWork)
+      case (ElasticConfig(worksIndex, _), routes) => {
+        insertIntoElasticsearch(worksIndex, redirectedWork)
         val path =
           s"/$apiPrefix/works/${redirectedWork.canonicalId}?include=identifiers"
         assertRedirectResponse(routes, path) {

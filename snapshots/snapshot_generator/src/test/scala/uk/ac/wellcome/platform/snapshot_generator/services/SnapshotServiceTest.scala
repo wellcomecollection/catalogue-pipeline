@@ -47,11 +47,11 @@ class SnapshotServiceTest
     withActorSystem { implicit actorSystem =>
       withMaterializer(actorSystem) { implicit materializer =>
         withS3AkkaClient { s3Client =>
-          withLocalWorksIndex { indexV2 =>
+          withLocalWorksIndex { worksIndex =>
             withLocalS3Bucket { bucket =>
-              withSnapshotService(s3Client, indexV2) { snapshotService =>
+              withSnapshotService(s3Client, worksIndex) { snapshotService =>
                 {
-                  testWith((snapshotService, indexV2, bucket))
+                  testWith((snapshotService, worksIndex, bucket))
                 }
               }
             }
@@ -62,13 +62,13 @@ class SnapshotServiceTest
 
   it("completes a V2 snapshot generation") {
     withFixtures {
-      case (snapshotService: SnapshotService, indexV2, publicBucket) =>
+      case (snapshotService: SnapshotService, worksIndex, publicBucket) =>
         val visibleWorks = createIdentifiedWorks(count = 4)
         val notVisibleWorks = createIdentifiedInvisibleWorks(count = 2)
 
         val works = visibleWorks ++ notVisibleWorks
 
-        insertIntoElasticsearch(indexV2, works: _*)
+        insertIntoElasticsearch(worksIndex, works: _*)
 
         val publicObjectKey = "target.txt.gz"
 
@@ -111,14 +111,14 @@ class SnapshotServiceTest
 
   it("completes a snapshot generation of an index with more than 10000 items") {
     withFixtures {
-      case (snapshotService: SnapshotService, indexV2, publicBucket) =>
+      case (snapshotService: SnapshotService, worksIndex, publicBucket) =>
         val works = (1 to 11000).map { id =>
           createIdentifiedWorkWith(
             title = Some(randomAlphanumeric(length = 1500))
           )
         }
 
-        insertIntoElasticsearch(indexV2, works: _*)
+        insertIntoElasticsearch(worksIndex, works: _*)
 
         val publicObjectKey = "target.txt.gz"
         val snapshotJob = SnapshotJob(
@@ -159,10 +159,10 @@ class SnapshotServiceTest
 
   it("returns a failed future if the S3 upload fails") {
     withFixtures {
-      case (snapshotService: SnapshotService, indexV2, _) =>
+      case (snapshotService: SnapshotService, worksIndex, _) =>
         val works = createIdentifiedWorks(count = 3)
 
-        insertIntoElasticsearch(indexV2, works: _*)
+        insertIntoElasticsearch(worksIndex, works: _*)
 
         val snapshotJob = SnapshotJob(
           publicBucketName = "wrongBukkit",
@@ -192,7 +192,7 @@ class SnapshotServiceTest
 
           withSnapshotService(
             s3Client,
-            indexV2 = "wrong-index",
+            worksIndex = "wrong-index",
             elasticClient = brokenElasticClient) { brokenSnapshotService =>
             val snapshotJob = SnapshotJob(
               publicBucketName = "bukkit",
@@ -226,7 +226,7 @@ class SnapshotServiceTest
       withActorSystem { implicit actorSystem =>
         withMaterializer(actorSystem) { implicit materializer =>
           withS3AkkaClient(endpoint = "") { s3Client =>
-            withSnapshotService(s3Client, indexV2 = "indexv2") {
+            withSnapshotService(s3Client, worksIndex = "worksIndex") {
               snapshotService =>
                 snapshotService.buildLocation(
                   bucketName = "bukkit",

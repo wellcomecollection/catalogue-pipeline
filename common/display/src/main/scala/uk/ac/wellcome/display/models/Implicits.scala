@@ -24,6 +24,7 @@ object Implicits extends TimeInstances {
   implicit val _enc09: Encoder[DisplayItemV2] = deriveEncoder
   implicit val _enc10: Encoder[DisplayNote] = deriveEncoder
   implicit val _enc11: Encoder[DisplayWorkV2] = deriveEncoder
+  implicit val _enc12: Encoder[DisplayImage] = deriveEncoder
 
   implicit val _dec00: Decoder[DisplayAccessCondition] = deriveDecoder
   implicit val _dec01: Decoder[DisplayLanguage] = deriveDecoder
@@ -37,4 +38,5 @@ object Implicits extends TimeInstances {
   implicit val _dec09: Decoder[DisplayItemV2] = deriveDecoder
   implicit val _dec10: Decoder[DisplayNote] = deriveDecoder
   implicit val _dec11: Decoder[DisplayWorkV2] = deriveDecoder
+  implicit val _dec12: Decoder[DisplayImage] = deriveDecoder
 }

@@ -1,6 +1,7 @@
 package uk.ac.wellcome.platform.api.works
 
 import akka.http.scaladsl.model.headers.LinkParams.title
+import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.models.work.internal._
 
 class ApiWorkCollectionTest extends ApiWorksTestBase {
@@ -30,8 +31,8 @@ class ApiWorkCollectionTest extends ApiWorksTestBase {
 
   it("includes collection tree when requested") {
     withApi {
-      case (index, routes) =>
-        insertIntoElasticsearch(index, workA, workB, workC, workD, workE)
+      case (ElasticConfig(worksIndex, _), routes) =>
+        insertIntoElasticsearch(worksIndex, workA, workB, workC, workD, workE)
         assertJsonResponse(
           routes,
           s"/$apiPrefix/works/${workC.canonicalId}?include=collection") {
@@ -76,8 +77,8 @@ class ApiWorkCollectionTest extends ApiWorksTestBase {
   it(
     "includes collection tree and additional multiple expanded paths when requested ") {
     withApi {
-      case (index, routes) =>
-        insertIntoElasticsearch(index, workA, workB, workC, workD, workE)
+      case (ElasticConfig(worksIndex, _), routes) =>
+        insertIntoElasticsearch(worksIndex, workA, workB, workC, workD, workE)
         assertJsonResponse(
           routes,
           s"/$apiPrefix/works/${workB.canonicalId}?include=collection&_expandPaths=a/d,a/b/c") {
@@ -127,8 +128,8 @@ class ApiWorkCollectionTest extends ApiWorksTestBase {
 
   it("does not expand tree more than one level deep") {
     withApi {
-      case (index, routes) =>
-        insertIntoElasticsearch(index, workA, workB, workC, workD, workE)
+      case (ElasticConfig(worksIndex, _), routes) =>
+        insertIntoElasticsearch(worksIndex, workA, workB, workC, workD, workE)
         assertJsonResponse(
           routes,
           s"/$apiPrefix/works/${workA.canonicalId}?include=collection") {
@@ -165,8 +166,8 @@ class ApiWorkCollectionTest extends ApiWorksTestBase {
 
   it("still generates the collection tree when missing nodes") {
     withApi {
-      case (index, routes) =>
-        insertIntoElasticsearch(index, workA, workC, workD, workE)
+      case (ElasticConfig(worksIndex, _), routes) =>
+        insertIntoElasticsearch(worksIndex, workA, workC, workD, workE)
         assertJsonResponse(
           routes,
           s"/$apiPrefix/works/${workC.canonicalId}?include=collection") {

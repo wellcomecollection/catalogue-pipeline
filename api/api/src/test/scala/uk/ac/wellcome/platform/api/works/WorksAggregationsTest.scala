@@ -1,6 +1,7 @@
 package uk.ac.wellcome.platform.api.works
 
 import akka.http.scaladsl.model.headers.LinkParams.title
+import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.models.work.internal.WorkType.{Books, Journals, Pictures}
 import uk.ac.wellcome.models.work.internal._
 
@@ -8,7 +9,7 @@ class WorksAggregationsTest extends ApiWorksTestBase {
 
   it("supports fetching the workType aggregation") {
     withApi {
-      case (indexV2, routes) =>
+      case (ElasticConfig(worksIndex, _), routes) =>
         val work1 = createIdentifiedWorkWith(
           canonicalId = "1",
           title = Some("Working with wombats"),
@@ -34,7 +35,7 @@ class WorksAggregationsTest extends ApiWorksTestBase {
           title = Some("Working with wombats"),
           workType = Some(Journals)
         )
-        insertIntoElasticsearch(indexV2, work1, work2, work3, work4, work5)
+        insertIntoElasticsearch(worksIndex, work1, work2, work3, work4, work5)
 
         assertJsonResponse(routes, s"/$apiPrefix/works?aggregations=workType") {
           Status.OK -> s"""
@@ -90,7 +91,7 @@ class WorksAggregationsTest extends ApiWorksTestBase {
 
   it("supports fetching the genre aggregation") {
     withApi {
-      case (indexV2, routes) =>
+      case (ElasticConfig(worksIndex, _), routes) =>
         val concept0 = Concept("conceptLabel")
         val concept1 = Place("placeLabel")
         val concept2 = Period(
@@ -115,7 +116,7 @@ class WorksAggregationsTest extends ApiWorksTestBase {
           genres = List(genre)
         )
 
-        insertIntoElasticsearch(indexV2, work1)
+        insertIntoElasticsearch(worksIndex, work1)
 
         assertJsonResponse(routes, s"/$apiPrefix/works?aggregations=genres") {
           Status.OK -> s"""
@@ -165,11 +166,11 @@ class WorksAggregationsTest extends ApiWorksTestBase {
 
   it("supports aggregating on dates by from year") {
     withApi {
-      case (indexV2, routes) =>
+      case (ElasticConfig(worksIndex, _), routes) =>
         val works = List("1st May 1970", "1970", "1976", "1970-1979")
           .map(label => createDatedWork(dateLabel = label))
           .sortBy(_.canonicalId)
-        insertIntoElasticsearch(indexV2, works: _*)
+        insertIntoElasticsearch(worksIndex, works: _*)
         assertJsonResponse(
           routes,
           s"/$apiPrefix/works?aggregations=production.dates") {
@@ -222,8 +223,8 @@ class WorksAggregationsTest extends ApiWorksTestBase {
       createIdentifiedWorkWith(language = None)
     ).sortBy(_.canonicalId)
     withApi {
-      case (indexV2, routes) =>
-        insertIntoElasticsearch(indexV2, works: _*)
+      case (ElasticConfig(worksIndex, _), routes) =>
+        insertIntoElasticsearch(worksIndex, works: _*)
         assertJsonResponse(routes, s"/$apiPrefix/works?aggregations=language") {
           Status.OK -> s"""
             {
@@ -282,8 +283,8 @@ class WorksAggregationsTest extends ApiWorksTestBase {
       createIdentifiedWorkWith(subjects = Nil)
     ).sortBy(_.canonicalId)
     withApi {
-      case (indexV2, routes) =>
-        insertIntoElasticsearch(indexV2, works: _*)
+      case (ElasticConfig(worksIndex, _), routes) =>
+        insertIntoElasticsearch(worksIndex, works: _*)
         assertJsonResponse(routes, s"/$apiPrefix/works?aggregations=subjects") {
           Status.OK -> s"""
             {
@@ -330,8 +331,8 @@ class WorksAggregationsTest extends ApiWorksTestBase {
       createLicensedWork("D", Nil)
     )
     withApi {
-      case (indexV2, routes) =>
-        insertIntoElasticsearch(indexV2, works: _*)
+      case (ElasticConfig(worksIndex, _), routes) =>
+        insertIntoElasticsearch(worksIndex, works: _*)
         assertJsonResponse(routes, s"/$apiPrefix/works?aggregations=license") {
           Status.OK -> s"""
             {

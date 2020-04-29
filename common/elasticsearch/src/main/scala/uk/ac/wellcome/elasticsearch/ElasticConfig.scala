@@ -3,12 +3,16 @@ package uk.ac.wellcome.elasticsearch
 import com.sksamuel.elastic4s.Index
 
 case class ElasticConfig(
-  index: Index
+  worksIndex: Index,
+  imagesIndex: Index
 )
 
 object ElasticConfig {
   // We use this to share config across API applications
   // i.e. The API and the snapshot generator.
   def apply(): ElasticConfig =
-    ElasticConfig(index = Index("works-20200414"))
+    ElasticConfig(
+      worksIndex = Index("works-20200414"),
+      imagesIndex = Index("images-20200414")
+    )
 }
