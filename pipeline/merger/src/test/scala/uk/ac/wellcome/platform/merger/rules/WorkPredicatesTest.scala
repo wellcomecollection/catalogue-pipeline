@@ -1,12 +1,10 @@
 package uk.ac.wellcome.platform.merger.rules
 
+import org.scalatest.Inspectors
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.models.work.internal.{
-  DigitalLocation,
-  PhysicalLocation,
-  TransformedBaseWork,
-}
+import uk.ac.wellcome.models.work.internal.{DigitalLocation, PhysicalLocation, TransformedBaseWork}
 
 class WorkPredicatesTest
     extends AnyFunSpec

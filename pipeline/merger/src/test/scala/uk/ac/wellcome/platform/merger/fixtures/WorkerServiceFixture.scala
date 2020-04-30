@@ -1,8 +1,9 @@
 package uk.ac.wellcome.platform.merger.fixtures
 
+import software.amazon.awssdk.services.cloudwatch.model.StandardUnit
+
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
-import com.amazonaws.services.cloudwatch.model.StandardUnit
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.work.internal.{BaseWork, Identifiable, MergedImage}
 import uk.ac.wellcome.platform.merger.services._

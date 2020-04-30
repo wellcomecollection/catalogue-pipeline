@@ -1,15 +1,11 @@
 package uk.ac.wellcome.platform.merger
 
-import org.scalatest.FunSpec
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
+import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
-import uk.ac.wellcome.platform.merger.fixtures.{
-  MatcherResultFixture,
-  WorkerServiceFixture
-}
+import uk.ac.wellcome.platform.merger.fixtures.{MatcherResultFixture, WorkerServiceFixture}
 import uk.ac.wellcome.models.Implicits._
-
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 
