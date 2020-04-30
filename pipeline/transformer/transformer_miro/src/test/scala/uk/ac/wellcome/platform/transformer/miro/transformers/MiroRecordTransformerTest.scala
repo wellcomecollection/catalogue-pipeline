@@ -1,5 +1,7 @@
 package uk.ac.wellcome.platform.transformer.miro.transformers
 
+import org.scalatest.Assertion
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators

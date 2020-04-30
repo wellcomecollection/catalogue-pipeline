@@ -8,6 +8,6 @@ import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 
 object Implicits {
 
-  implicit val encoder: Encoder[MiroRecord] = deriveEncoder
-  implicit val decoder: Decoder[MiroRecord] = deriveDecoder
+  implicit val encoder: Encoder[MiroRecord] = deriveConfiguredEncoder
+  implicit val decoder: Decoder[MiroRecord] = deriveConfiguredDecoder
 }

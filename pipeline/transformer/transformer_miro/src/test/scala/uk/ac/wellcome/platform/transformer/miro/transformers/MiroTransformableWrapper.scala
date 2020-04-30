@@ -1,10 +1,8 @@
 package uk.ac.wellcome.platform.transformer.miro.transformers
 
-import org.scalatest.{Assertion, Matchers, Suite}
-import uk.ac.wellcome.models.work.internal.{
-  TransformedBaseWork,
-  UnidentifiedWork
-}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.{Assertion, Suite}
+import uk.ac.wellcome.models.work.internal.{TransformedBaseWork, UnidentifiedWork}
 import uk.ac.wellcome.platform.transformer.miro.MiroRecordTransformer
 import uk.ac.wellcome.platform.transformer.miro.exceptions.MiroTransformerException
 import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata

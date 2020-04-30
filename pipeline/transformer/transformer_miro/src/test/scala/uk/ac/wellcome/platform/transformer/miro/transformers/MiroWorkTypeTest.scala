@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.transformer.miro.transformers
 
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
 class MiroWorkTypeTest extends AnyFunSpec with Matchers {

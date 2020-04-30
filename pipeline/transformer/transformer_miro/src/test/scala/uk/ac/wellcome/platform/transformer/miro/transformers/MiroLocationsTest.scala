@@ -1,11 +1,8 @@
 package uk.ac.wellcome.platform.transformer.miro.transformers
 
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.internal.{
-  DigitalLocation,
-  License,
-  LocationType
-}
+import uk.ac.wellcome.models.work.internal.{DigitalLocation, License, LocationType}
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 
 class MiroLocationsTest
