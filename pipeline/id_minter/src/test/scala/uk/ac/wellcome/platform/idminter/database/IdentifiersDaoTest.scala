@@ -2,6 +2,7 @@ package uk.ac.wellcome.platform.idminter.database
 
 import java.sql.BatchUpdateException
 
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import scalikejdbc._
 import uk.ac.wellcome.fixtures.TestWith

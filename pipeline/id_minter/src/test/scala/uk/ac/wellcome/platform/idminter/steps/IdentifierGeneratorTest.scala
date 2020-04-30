@@ -2,14 +2,13 @@ package uk.ac.wellcome.platform.idminter.steps
 
 import org.mockito.Matchers.{any, anyListOf}
 import org.mockito.Mockito.when
-import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{FunSpec, Inspectors, Matchers, OptionValues}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
+import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.{Inspectors, OptionValues}
 import scalikejdbc._
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
-import uk.ac.wellcome.platform.idminter.database.{
-  IdentifiersDao,
-  TableProvisioner
-}
+import uk.ac.wellcome.platform.idminter.database.{IdentifiersDao, TableProvisioner}
 import uk.ac.wellcome.platform.idminter.fixtures
 import uk.ac.wellcome.platform.idminter.models.{Identifier, IdentifiersTable}
 import uk.ac.wellcome.fixtures.TestWith

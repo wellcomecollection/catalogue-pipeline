@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.idminter.utils
 
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
 class IdentifiableTest extends AnyFunSpec with Matchers {

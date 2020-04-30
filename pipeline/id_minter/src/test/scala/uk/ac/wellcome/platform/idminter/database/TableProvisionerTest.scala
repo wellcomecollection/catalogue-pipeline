@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.idminter.database
 
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.platform.idminter.fixtures
 
