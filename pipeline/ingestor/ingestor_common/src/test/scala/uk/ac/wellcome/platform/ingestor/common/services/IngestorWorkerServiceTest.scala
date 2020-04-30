@@ -4,23 +4,17 @@ import com.sksamuel.elastic4s.ElasticClient
 import com.sksamuel.elastic4s.http.JavaClient
 import org.apache.http.HttpHost
 import org.elasticsearch.client.RestClient
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
+import software.amazon.awssdk.services.sqs.model.{GetQueueAttributesRequest, QueueAttributeName}
 import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
-import uk.ac.wellcome.elasticsearch.{
-  ElasticCredentials,
-  ElasticsearchIndexCreator
-}
+import uk.ac.wellcome.elasticsearch.{ElasticCredentials, ElasticsearchIndexCreator}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
-import uk.ac.wellcome.platform.ingestor.common.fixtures.{
-  IngestorFixtures,
-  SampleDocument
-}
+import uk.ac.wellcome.platform.ingestor.common.fixtures.{IngestorFixtures, SampleDocument}
 import uk.ac.wellcome.platform.ingestor.common.models.IngestorConfig
 import uk.ac.wellcome.storage.ObjectLocation
 
-import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class IngestorWorkerServiceTest
@@ -115,13 +109,12 @@ class IngestorWorkerServiceTest
 
           eventually {
             sqsClient
-              .getQueueAttributes(
-                queue.url,
-                List("ApproximateNumberOfMessagesNotVisible").asJava
-              )
-              .getAttributes
+              .getQueueAttributes {builder: GetQueueAttributesRequest.Builder =>
+                builder.queueUrl(queue.url).attributeNames(QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES_NOT_VISIBLE)
+              }
+              .attributes()
               .get(
-                "ApproximateNumberOfMessagesNotVisible"
+                QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES_NOT_VISIBLE
               ) shouldBe "1"
           }
         }

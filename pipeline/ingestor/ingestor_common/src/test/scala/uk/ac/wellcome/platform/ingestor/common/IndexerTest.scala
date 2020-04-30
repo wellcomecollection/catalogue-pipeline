@@ -5,17 +5,14 @@ import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 import com.sksamuel.elastic4s.{Index, Indexable}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.elasticsearch.IndexConfig
 import uk.ac.wellcome.elasticsearch.model.{CanonicalId, Version}
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
-import uk.ac.wellcome.platform.ingestor.common.fixtures.{
-  IngestorFixtures,
-  SampleDocument,
-  SampleDocumentData
-}
+import uk.ac.wellcome.platform.ingestor.common.fixtures.{IngestorFixtures, SampleDocument, SampleDocumentData}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

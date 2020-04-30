@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.ingestor.common.services
 
 import akka.Done
-import com.amazonaws.services.sqs.model.Message
+import software.amazon.awssdk.services.sqs.model.Message
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.bigmessaging.message.BigMessageStream
 import uk.ac.wellcome.elasticsearch.ElasticsearchIndexCreator
