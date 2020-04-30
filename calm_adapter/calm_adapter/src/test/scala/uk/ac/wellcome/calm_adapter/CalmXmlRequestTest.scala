@@ -3,6 +3,8 @@ package uk.ac.wellcome.calm_adapter
 import scala.xml.Elem
 import scala.xml.Utility.trim
 import java.time.LocalDate
+
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
 class CalmXmlRequestTest extends AnyFunSpec with Matchers {

@@ -2,7 +2,9 @@ package uk.ac.wellcome.calm_adapter
 
 import org.scalatest.matchers.should.Matchers
 import java.time.Instant
+
 import akka.http.scaladsl.model.headers.{Cookie, HttpCookiePair}
+import org.scalatest.funspec.AnyFunSpec
 
 class CalmXmlResponseTest extends AnyFunSpec with Matchers {
 

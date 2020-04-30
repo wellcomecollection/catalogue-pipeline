@@ -3,8 +3,7 @@ package uk.ac.wellcome.calm_adapter
 import scala.concurrent.ExecutionContext
 import com.typesafe.config.Config
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
-
+import akka.stream.Materializer
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
@@ -21,8 +20,8 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildExecutionContext()
     implicit val actorSystem: ActorSystem =
       AkkaBuilder.buildActorSystem()
-    implicit val materializer: ActorMaterializer =
-      AkkaBuilder.buildActorMaterializer()
+    implicit val materializer: Materializer =
+      AkkaBuilder.buildMaterializer()
     implicit val httpClient: CalmHttpClient =
       new CalmAkkaHttpClient()
 
@@ -36,7 +35,7 @@ object Main extends WellcomeTypesafeApp {
 
   def calmRetriever(config: Config)(implicit
                                     ec: ExecutionContext,
-                                    materializer: ActorMaterializer,
+                                    materializer: Materializer,
                                     httpClient: CalmHttpClient) =
     new HttpCalmRetriever(
       url = config.required[String]("calm.api.url"),

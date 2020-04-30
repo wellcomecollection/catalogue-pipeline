@@ -5,9 +5,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.concurrent.ScalaFutures
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import akka.http.scaladsl.model._
-
+import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.akka.fixtures.Akka
 
@@ -62,7 +62,7 @@ class CalmHttpClientTest
     }
 
   class CalmHttpTestClient(var responses: List[HttpResponse])(
-    implicit materializer: ActorMaterializer)
+    implicit materializer: Materializer)
       extends CalmHttpClientWithBackoff(
         minBackoff,
         maxBackoff,

@@ -3,6 +3,7 @@ package uk.ac.wellcome.calm_adapter
 import org.scalatest.matchers.should.Matchers
 import java.time.Instant
 
+import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryVersionedStore}
 import uk.ac.wellcome.storage.maxima.Maxima
 import uk.ac.wellcome.storage.maxima.memory.MemoryMaxima

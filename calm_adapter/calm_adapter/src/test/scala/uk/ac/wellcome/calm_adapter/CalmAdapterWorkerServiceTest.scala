@@ -4,10 +4,11 @@ import scala.util.{Failure, Try}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.reflectiveCalls
 import java.time.{Instant, LocalDate}
+
 import org.scalatest.matchers.should.Matchers
 import akka.stream.scaladsl._
 import io.circe.Encoder
-
+import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
