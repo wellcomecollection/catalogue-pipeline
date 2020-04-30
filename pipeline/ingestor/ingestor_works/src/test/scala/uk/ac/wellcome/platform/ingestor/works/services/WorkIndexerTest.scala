@@ -1,7 +1,9 @@
 package uk.ac.wellcome.platform.ingestor.works.services
 
 import com.sksamuel.elastic4s.Index
+import org.scalatest.Assertion
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
