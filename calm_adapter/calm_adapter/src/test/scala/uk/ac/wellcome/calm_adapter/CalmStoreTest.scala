@@ -1,6 +1,6 @@
 package uk.ac.wellcome.calm_adapter
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import java.time.Instant
 
 import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryVersionedStore}
@@ -8,7 +8,7 @@ import uk.ac.wellcome.storage.maxima.Maxima
 import uk.ac.wellcome.storage.maxima.memory.MemoryMaxima
 import uk.ac.wellcome.storage.{StoreReadError, Version}
 
-class CalmStoreTest extends FunSpec with Matchers {
+class CalmStoreTest extends AnyFunSpec with Matchers {
 
   type Key = Version[String, Int]
 

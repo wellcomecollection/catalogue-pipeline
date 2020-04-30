@@ -5,7 +5,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.xml.XML
 import java.time.{Instant, LocalDate}
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import org.scalatest.concurrent.ScalaFutures
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl._
@@ -16,7 +16,7 @@ import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 
 class CalmRetrieverTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with ScalaFutures
     with Akka {

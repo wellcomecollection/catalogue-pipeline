@@ -1,8 +1,9 @@
 package uk.ac.wellcome.models.work.internal
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class LocationTypeTest extends FunSpec with Matchers {
+class LocationTypeTest extends AnyFunSpec with Matchers {
   it("looks up a location type") {
     LocationType("arch") shouldBe LocationType(
       id = "arch",

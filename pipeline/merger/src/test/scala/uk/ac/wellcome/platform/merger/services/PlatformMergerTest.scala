@@ -1,13 +1,13 @@
 package uk.ac.wellcome.platform.merger.services
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.fixtures.ImageFulltextAccess
 import org.scalatest.prop.TableDrivenPropertyChecks._
 
 class PlatformMergerTest
-    extends FunSpec
+    extends AnyFunSpec
     with WorksGenerators
     with Matchers
     with ImageFulltextAccess {

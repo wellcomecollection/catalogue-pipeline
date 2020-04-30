@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.ingestor.works
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import org.scalatest.concurrent.ScalaFutures
 import uk.ac.wellcome.elasticsearch.WorksIndexConfig
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
@@ -14,7 +14,7 @@ import uk.ac.wellcome.platform.ingestor.works.services.WorkIndexer
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class IngestorFeatureTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with JsonAssertions
     with ScalaFutures

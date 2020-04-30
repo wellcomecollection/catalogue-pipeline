@@ -2,19 +2,17 @@ package uk.ac.wellcome.bigmessaging.message
 
 import java.util.concurrent.ConcurrentLinkedDeque
 
-import com.amazonaws.services.cloudwatch.model.StandardUnit
-import uk.ac.wellcome.messaging.sns.{SNSConfig}
-import com.amazonaws.services.sns.model.{
-  SubscribeRequest,
-  SubscribeResult,
-  UnsubscribeRequest
-}
+import org.scalatest.Assertion
+import uk.ac.wellcome.messaging.sns.SNSConfig
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.{Assertion, FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
+import software.amazon.awssdk.services.cloudwatch.model.StandardUnit
+import software.amazon.awssdk.services.sns.model.{SubscribeRequest, SubscribeResponse, UnsubscribeRequest}
 import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
-import uk.ac.wellcome.fixtures.{fixture, Fixture, TestWith}
+import uk.ac.wellcome.fixtures.{Fixture, TestWith, fixture}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
@@ -27,7 +25,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class BigMessagingFixtureIntegrationTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with BigMessagingFixture
     with Eventually
@@ -74,17 +72,17 @@ class BigMessagingFixtureIntegrationTest
     }
 
   def withLocalStackSubscription[R](queue: Queue,
-                                    topic: Topic): Fixture[SubscribeResult, R] =
-    fixture[SubscribeResult, R](
+                                    topic: Topic): Fixture[SubscribeResponse, R] =
+    fixture[SubscribeResponse, R](
       create = {
-        val subRequest = new SubscribeRequest(topic.arn, "sqs", queue.arn)
+        val subRequest = SubscribeRequest.builder().topicArn(topic.arn).protocol("sqs").endpoint(queue.arn).build()
         info(s"Subscribing queue ${queue.arn} to topic ${topic.arn}")
 
         localStackSnsClient.subscribe(subRequest)
       },
       destroy = { subscribeResult =>
         val unsubscribeRequest =
-          new UnsubscribeRequest(subscribeResult.getSubscriptionArn)
+          UnsubscribeRequest.builder.subscriptionArn(subscribeResult.subscriptionArn()).build()
         localStackSnsClient.unsubscribe(unsubscribeRequest)
       }
     )

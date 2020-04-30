@@ -1,12 +1,12 @@
 package uk.ac.wellcome.models.parse
 
-import org.scalatest.{FunSpec, Matchers}
-
+import org.scalatest.matchers.should.Matchers
 import java.time.LocalDate
 
+import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.models.work.internal.InstantRange
 
-class Marc008DateParserTest extends FunSpec with Matchers {
+class Marc008DateParserTest extends AnyFunSpec with Matchers {
 
   it("parses single date") {
     Marc008DateParser("s1757    ") shouldBe Some(

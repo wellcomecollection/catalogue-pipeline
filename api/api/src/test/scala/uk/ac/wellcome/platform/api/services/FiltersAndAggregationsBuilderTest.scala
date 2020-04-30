@@ -6,11 +6,11 @@ import com.sksamuel.elastic4s.requests.searches.aggs.{
   FilterAggregation
 }
 import com.sksamuel.elastic4s.requests.searches.queries.{BoolQuery, Query}
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.display.models.AggregationRequest
 import uk.ac.wellcome.platform.api.models._
 
-class FiltersAndAggregationsBuilderTest extends FunSpec with Matchers {
+class FiltersAndAggregationsBuilderTest extends AnyFunSpec with Matchers {
 
   describe("filter discrimination") {
     it("separates paired and unpaired filters") {

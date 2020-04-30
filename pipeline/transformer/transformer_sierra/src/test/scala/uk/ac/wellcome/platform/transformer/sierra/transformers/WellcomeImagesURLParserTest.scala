@@ -1,10 +1,10 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.platform.transformer.sierra.transformers.parsers.WellcomeImagesURLParser
 
 /** All of these test cases are based on real examples from the Sierra data. */
-class WellcomeImagesURLParserTest extends FunSpec with Matchers {
+class WellcomeImagesURLParserTest extends AnyFunSpec with Matchers {
 
   val miroIDexamples = List(
     "L0046161",

@@ -1,8 +1,8 @@
 package uk.ac.wellcome.elasticsearch
 
 import com.sksamuel.elastic4s.ElasticError
-import org.scalatest.FunSpec
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.Implicits._
@@ -12,7 +12,7 @@ import uk.ac.wellcome.models.work.internal.InferredData
 import scala.util.Random
 
 class ImagesIndexConfigTest
-    extends FunSpec
+    extends AnyFunSpec
     with ImageGenerators
     with ElasticsearchFixtures
     with ScalaFutures {

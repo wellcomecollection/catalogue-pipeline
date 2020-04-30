@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.merger.services
 
 import cats.data.State
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.{
   BaseWork,
@@ -12,7 +12,7 @@ import uk.ac.wellcome.models.work.internal.{
 }
 import uk.ac.wellcome.platform.merger.models.{MergeResult, MergerOutcome}
 
-class MergerManagerTest extends FunSpec with Matchers with WorksGenerators {
+class MergerManagerTest extends AnyFunSpec with Matchers with WorksGenerators {
 
   it("performs a merge with a single work") {
     val work = createUnidentifiedWork

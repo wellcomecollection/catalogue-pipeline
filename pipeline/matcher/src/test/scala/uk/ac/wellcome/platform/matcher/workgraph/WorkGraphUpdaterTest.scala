@@ -1,11 +1,11 @@
 package uk.ac.wellcome.platform.matcher.workgraph
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.matcher.WorkNode
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
 import uk.ac.wellcome.platform.matcher.models._
 
-class WorkGraphUpdaterTest extends FunSpec with Matchers with MatcherFixtures {
+class WorkGraphUpdaterTest extends AnyFunSpec with Matchers with MatcherFixtures {
 
   // An existing graph of works is updated by changing the links of a single work.
   // The change may result in new compound works which are identified by the LinkedWorkGraphUpdater

@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.reindex.reindex_worker.services
 
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryIndividualMessageSender
@@ -10,7 +10,7 @@ import uk.ac.wellcome.platform.reindex.reindex_worker.models.CompleteReindexPara
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
 
 class ReindexWorkerServiceTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with ScalaFutures
     with WorkerServiceFixture {

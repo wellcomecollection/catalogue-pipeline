@@ -4,7 +4,7 @@ import scala.util.{Failure, Try}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.reflectiveCalls
 import java.time.{Instant, LocalDate}
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import akka.stream.scaladsl._
 import io.circe.Encoder
 
@@ -20,7 +20,7 @@ import uk.ac.wellcome.storage.maxima.memory.MemoryMaxima
 import uk.ac.wellcome.json.JsonUtil._
 
 class CalmAdapterWorkerServiceTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with Akka
     with SQS

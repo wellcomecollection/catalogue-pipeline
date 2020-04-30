@@ -1,9 +1,10 @@
 package uk.ac.wellcome.models.work.internal
 
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.prop.TableDrivenPropertyChecks._
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 
-class PeriodTest extends FunSpec with Matchers {
+class PeriodTest extends AnyFunSpec with Matchers {
   it("should add a range to a when there id a parsable label") {
     forAll(
       Table(

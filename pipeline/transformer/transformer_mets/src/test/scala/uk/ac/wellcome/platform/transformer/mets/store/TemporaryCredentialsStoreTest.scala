@@ -12,7 +12,7 @@ import uk.ac.wellcome.storage.store.TypedStoreEntry
 import scala.util.Right
 
 class TemporaryCredentialsStoreTest
-    extends FunSpec
+    extends AnyFunSpec
     with LocalStackS3Fixtures
     with STSFixtures
     with Akka {

@@ -9,7 +9,7 @@ import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.bigmessaging.memory.MemoryBigMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
@@ -66,7 +66,7 @@ trait TestJsonCodecs {
 }
 
 class TransformerWorkerTest
-    extends FunSpec
+    extends AnyFunSpec
     with ScalaFutures
     with Matchers
     with Akka

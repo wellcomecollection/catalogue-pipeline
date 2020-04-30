@@ -9,7 +9,7 @@ import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.ElasticClient
 import com.sksamuel.elastic4s.http.JavaClientExceptionWrapper
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.display.json.DisplayJsonUtil
@@ -30,7 +30,7 @@ import uk.ac.wellcome.storage.fixtures.S3
 import uk.ac.wellcome.storage.fixtures.S3.Bucket
 
 class SnapshotServiceTest
-    extends FunSpec
+    extends AnyFunSpec
     with ScalaFutures
     with Matchers
     with Akka

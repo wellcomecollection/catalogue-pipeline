@@ -10,7 +10,7 @@ import uk.ac.wellcome.storage.fixtures.LocalVersionedHybridStore
 import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
 
 class SierraItemMergerUpdaterServiceTest
-    extends FunSpec
+    extends AnyFunSpec
     with IntegrationPatience
     with ScalaFutures
     with LocalVersionedHybridStore

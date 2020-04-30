@@ -1,23 +1,21 @@
 package uk.ac.wellcome.bigmessaging
 
 import io.circe.Encoder
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.bigmessaging.memory.MemoryBigMessageSender
-import uk.ac.wellcome.bigmessaging.message.{
-  InlineNotification,
-  MessageNotification,
-  RemoteNotification
-}
+import uk.ac.wellcome.bigmessaging.message.{InlineNotification, MessageNotification, RemoteNotification}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.storage.streaming.Codec._
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.storage.store.TypedStoreEntry
 import uk.ac.wellcome.storage.{Identified, ObjectLocation}
+
 import scala.util.{Failure, Success}
 
 class BigMessageSenderTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with BigMessagingFixture {
   case class Shape(colour: String, sides: Int)

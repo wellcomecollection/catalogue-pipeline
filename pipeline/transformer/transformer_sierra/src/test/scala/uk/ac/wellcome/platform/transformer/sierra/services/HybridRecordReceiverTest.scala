@@ -8,7 +8,7 @@ import org.mockito.Mockito.when
 import org.mockito.Matchers.any
 import com.amazonaws.services.sns.AmazonSNS
 import com.amazonaws.services.sns.model.PublishRequest
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 
 import uk.ac.wellcome.json.exceptions.JsonDecodingError
 import uk.ac.wellcome.models.transformable.SierraTransformable
@@ -25,7 +25,7 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 
 class HybridRecordReceiverTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with BigMessagingFixture
     with Eventually

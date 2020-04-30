@@ -1,8 +1,9 @@
 package uk.ac.wellcome.models.transformable.sierra
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class SierraRecordNumberTest extends FunSpec with Matchers {
+class SierraRecordNumberTest extends AnyFunSpec with Matchers {
   describe("withCheckDigit") {
     it("handles a bib example from the Sierra docs") {
       SierraBibNumber("1024364").withCheckDigit shouldBe "b10243641"

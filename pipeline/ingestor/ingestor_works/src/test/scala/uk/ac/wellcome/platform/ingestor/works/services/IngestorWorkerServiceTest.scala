@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.ingestor.works.services
 
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{Assertion, FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.elasticsearch.WorksIndexConfig
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
@@ -15,7 +15,7 @@ import uk.ac.wellcome.platform.ingestor.common.fixtures.IngestorFixtures
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class IngestorWorkerServiceTest
-    extends FunSpec
+    extends AnyFunSpec
     with ScalaFutures
     with Matchers
     with BigMessagingFixture

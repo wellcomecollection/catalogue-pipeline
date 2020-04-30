@@ -3,7 +3,7 @@ package uk.ac.wellcome.mets_adapter.services
 import scala.util.{Failure, Try}
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import io.circe.Encoder
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
@@ -17,7 +17,7 @@ import uk.ac.wellcome.storage.{Identified, Version}
 import uk.ac.wellcome.json.JsonUtil._
 
 class MetsAdapterWorkerServiceTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with Akka
     with SQS

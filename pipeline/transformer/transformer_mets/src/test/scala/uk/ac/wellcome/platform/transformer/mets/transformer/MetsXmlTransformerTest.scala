@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.transformer.mets.transformer
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import org.apache.commons.io.IOUtils
 import uk.ac.wellcome.mets_adapter.models.MetsLocation
 import uk.ac.wellcome.models.work.internal.License
@@ -8,7 +8,7 @@ import uk.ac.wellcome.platform.transformer.mets.fixtures.MetsGenerators
 import uk.ac.wellcome.storage.store.memory.MemoryStore
 import uk.ac.wellcome.storage.ObjectLocation
 
-class MetsXmlTransformerTest extends FunSpec with Matchers with MetsGenerators {
+class MetsXmlTransformerTest extends AnyFunSpec with Matchers with MetsGenerators {
 
   it("should transform METS XML") {
     val xml = loadXmlFile("/b30246039.xml")

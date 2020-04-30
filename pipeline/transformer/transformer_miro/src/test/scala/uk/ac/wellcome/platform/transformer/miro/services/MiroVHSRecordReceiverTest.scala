@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.transformer.miro.services
 import scala.util.Try
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import scala.util.Try
 
 import uk.ac.wellcome.models.work.generators.WorksGenerators
@@ -23,7 +23,7 @@ import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 
 class MiroVHSRecordReceiverTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with BigMessagingFixture
     with Eventually

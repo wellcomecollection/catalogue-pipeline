@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.recorder.services
 
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
@@ -16,7 +16,7 @@ import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 
 class RecorderWorkerServiceTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with ScalaFutures
     with BigMessagingFixture

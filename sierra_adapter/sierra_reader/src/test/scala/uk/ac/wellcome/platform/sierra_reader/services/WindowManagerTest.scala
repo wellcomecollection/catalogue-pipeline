@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.sierra_reader.services
 
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 import uk.ac.wellcome.models.transformable.sierra.test.utils.SierraGenerators
@@ -18,7 +18,7 @@ import uk.ac.wellcome.fixtures.TestWith
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class WindowManagerTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with S3
     with ScalaFutures

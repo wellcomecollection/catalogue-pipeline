@@ -1,8 +1,8 @@
 package uk.ac.wellcome.mets_adapter.models
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 
-class BagTest extends FunSpec with Matchers {
+class BagTest extends AnyFunSpec with Matchers {
 
   describe("METS path") {
     it("parses METS file from Bag") {

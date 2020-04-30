@@ -7,14 +7,14 @@ import akka.stream.scaladsl.{FileIO, Flow, Keep, Sink, Source}
 import akka.stream.{ActorMaterializer, IOResult, Materializer}
 import akka.util.ByteString
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.platform.snapshot_generator.test.utils.GzipUtils
 
 import scala.concurrent.Future
 
 class StringToGzipFlowTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with Akka
     with GzipUtils

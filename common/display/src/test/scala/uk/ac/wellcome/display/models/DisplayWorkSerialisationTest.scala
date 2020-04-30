@@ -1,18 +1,13 @@
 package uk.ac.wellcome.display.models
 
-import org.scalatest.FunSpec
-import Implicits._
+import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.display.test.util.JsonMapperTestUtil
-import uk.ac.wellcome.models.work.generators.{
-  ProductionEventGenerators,
-  SubjectGenerators,
-  WorksGenerators
-}
+import uk.ac.wellcome.models.work.generators.{ProductionEventGenerators, SubjectGenerators, WorksGenerators}
 import uk.ac.wellcome.models.work.internal.WorkType.{Books, EBooks}
 import uk.ac.wellcome.models.work.internal._
 
 class DisplayWorkSerialisationTest
-    extends FunSpec
+    extends AnyFunSpec
     with DisplaySerialisationTestBase
     with JsonMapperTestUtil
     with ProductionEventGenerators

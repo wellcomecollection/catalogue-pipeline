@@ -8,7 +8,7 @@ import uk.ac.wellcome.platform.inference_manager.fixtures.Encoding
 import uk.ac.wellcome.platform.inference_manager.models.FeatureVectorInferrerResponse
 
 class FeatureVectorInferrerAdapterTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with ImageGenerators
     with Inside

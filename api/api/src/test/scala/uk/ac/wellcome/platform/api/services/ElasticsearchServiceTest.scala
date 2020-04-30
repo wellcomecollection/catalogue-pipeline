@@ -3,34 +3,22 @@ package uk.ac.wellcome.platform.api.services
 import com.sksamuel.elastic4s.{ElasticError, Index}
 import com.sksamuel.elastic4s.requests.searches.{SearchHit, SearchResponse}
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.generators.{
-  ContributorGenerators,
-  GenreGenerators,
-  SubjectGenerators,
-  WorksGenerators
-}
-import uk.ac.wellcome.models.work.internal.WorkType.{
-  Books,
-  CDRoms,
-  ManuscriptsAsian
-}
+import uk.ac.wellcome.models.work.generators.{ContributorGenerators, GenreGenerators, SubjectGenerators, WorksGenerators}
+import uk.ac.wellcome.models.work.internal.WorkType.{Books, CDRoms, ManuscriptsAsian}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
-import uk.ac.wellcome.platform.api.models.{
-  ItemLocationTypeFilter,
-  SearchQuery,
-  WorkTypeFilter
-}
+import uk.ac.wellcome.platform.api.models.{ItemLocationTypeFilter, SearchQuery, WorkTypeFilter}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Random
 
 class ElasticsearchServiceTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with ElasticsearchFixtures
     with ScalaFutures

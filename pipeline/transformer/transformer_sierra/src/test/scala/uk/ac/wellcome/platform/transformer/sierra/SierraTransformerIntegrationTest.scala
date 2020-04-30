@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.transformer.sierra
 
 import org.scalatest.concurrent.IntegrationPatience
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 
 import uk.ac.wellcome.models.transformable.sierra.test.utils.SierraGenerators
 import uk.ac.wellcome.models.transformable.SierraTransformable
@@ -25,7 +25,7 @@ import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 
 class SierraTransformerIntegrationTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with IntegrationPatience
     with BigMessagingFixture

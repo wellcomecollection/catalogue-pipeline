@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.merger.services
 import com.amazonaws.services.cloudwatch.model.StandardUnit
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 
 import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
@@ -21,7 +21,7 @@ import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 
 class MergerWorkerServiceTest
-    extends FunSpec
+    extends AnyFunSpec
     with ScalaFutures
     with IntegrationPatience
     with BigMessagingFixture

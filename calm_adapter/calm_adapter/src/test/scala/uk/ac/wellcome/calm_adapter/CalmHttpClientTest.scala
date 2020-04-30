@@ -3,7 +3,7 @@ package uk.ac.wellcome.calm_adapter
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import org.scalatest.concurrent.ScalaFutures
 import akka.stream.ActorMaterializer
 import akka.http.scaladsl.model._
@@ -12,7 +12,7 @@ import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.akka.fixtures.Akka
 
 class CalmHttpClientTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with Akka
     with ScalaFutures {

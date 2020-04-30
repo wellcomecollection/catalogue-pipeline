@@ -1,10 +1,10 @@
 package uk.ac.wellcome.platform.api.models
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 
 import uk.ac.wellcome.models.work.internal.Period
 
-class DateAggregationMergerTest extends FunSpec with Matchers {
+class DateAggregationMergerTest extends AnyFunSpec with Matchers {
 
   it("aggregates by decade when too many buckets") {
     val aggregation = Aggregation(

@@ -4,7 +4,7 @@ import java.time.Instant
 
 import io.circe.parser.parse
 import org.scalatest.compatible.Assertion
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil.toJson
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.transformable.sierra.{
@@ -15,7 +15,7 @@ import uk.ac.wellcome.models.transformable.sierra.{
 import uk.ac.wellcome.models.transformable.sierra.test.utils.SierraGenerators
 
 class SierraRecordParserTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with JsonAssertions
     with SierraGenerators {

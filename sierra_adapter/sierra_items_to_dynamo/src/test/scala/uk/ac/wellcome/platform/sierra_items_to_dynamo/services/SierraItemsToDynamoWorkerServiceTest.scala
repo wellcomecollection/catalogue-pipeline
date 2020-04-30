@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.sierra_items_to_dynamo.services
 
 import org.mockito.Mockito.{never, verify}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
-import org.scalatest.{Assertion, FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
@@ -18,7 +18,7 @@ import uk.ac.wellcome.storage.dynamo._
 import uk.ac.wellcome.storage.vhs.EmptyMetadata
 
 class SierraItemsToDynamoWorkerServiceTest
-    extends FunSpec
+    extends AnyFunSpec
     with SNS
     with SQS
     with Matchers

@@ -1,10 +1,10 @@
 package uk.ac.wellcome.calm_adapter
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import java.time.Instant
 import akka.http.scaladsl.model.headers.{Cookie, HttpCookiePair}
 
-class CalmXmlResponseTest extends FunSpec with Matchers {
+class CalmXmlResponseTest extends AnyFunSpec with Matchers {
 
   describe("Calm search response") {
 

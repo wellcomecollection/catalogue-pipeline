@@ -1,7 +1,6 @@
 package uk.ac.wellcome.models
 
 import io.circe.generic.extras.semiauto._
-import io.circe.java8.time.TimeInstances
 import io.circe._
 
 import uk.ac.wellcome.models.work.internal._
@@ -10,7 +9,7 @@ import uk.ac.wellcome.models.transformable.SierraTransformable._
 import uk.ac.wellcome.models.matcher.MatcherResult
 import uk.ac.wellcome.json.JsonUtil._
 
-object Implicits extends TimeInstances {
+object Implicits {
 
   // Cache these here to improve compilation times (otherwise they are
   // re-derived every time they are required).

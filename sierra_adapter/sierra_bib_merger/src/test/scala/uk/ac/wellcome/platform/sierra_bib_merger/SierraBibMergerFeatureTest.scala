@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.sierra_bib_merger
 
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.models.transformable.SierraTransformable
@@ -14,7 +14,7 @@ import uk.ac.wellcome.storage.fixtures.LocalVersionedHybridStore
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class SierraBibMergerFeatureTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with Eventually
     with MockitoSugar

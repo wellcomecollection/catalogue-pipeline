@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.idminter.database
 
 import java.sql.BatchUpdateException
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import scalikejdbc._
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
@@ -13,7 +13,7 @@ import uk.ac.wellcome.platform.idminter.models.{Identifier, IdentifiersTable}
 import scala.util.{Failure, Success}
 
 class IdentifiersDaoTest
-    extends FunSpec
+    extends AnyFunSpec
     with fixtures.IdentifiersDatabase
     with Matchers
     with IdentifiersGenerators

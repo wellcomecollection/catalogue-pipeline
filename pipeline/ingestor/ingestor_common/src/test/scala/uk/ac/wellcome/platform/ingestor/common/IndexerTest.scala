@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.ingestor.common
 import com.sksamuel.elastic4s.requests.analysis.Analysis
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 import com.sksamuel.elastic4s.{Index, Indexable}
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import org.scalatest.concurrent.ScalaFutures
 import uk.ac.wellcome.elasticsearch.IndexConfig
 import uk.ac.wellcome.elasticsearch.model.{CanonicalId, Version}
@@ -21,7 +21,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class IndexerTest
-    extends FunSpec
+    extends AnyFunSpec
     with ScalaFutures
     with Matchers
     with IdentifiersGenerators

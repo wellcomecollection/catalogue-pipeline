@@ -1,9 +1,9 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers.parsers
 
 import org.scalatest.prop.TableDrivenPropertyChecks._
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 
-class MiroIdParserTest extends FunSpec with Matchers with MiroIdParser {
+class MiroIdParserTest extends AnyFunSpec with Matchers with MiroIdParser {
 
   it("parses miroIds") {
     forAll(

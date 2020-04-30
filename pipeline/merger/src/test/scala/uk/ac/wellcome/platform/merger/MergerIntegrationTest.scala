@@ -14,7 +14,7 @@ import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 
 class MergerIntegrationTest
-    extends FunSpec
+    extends AnyFunSpec
     with BigMessagingFixture
     with IntegrationPatience
     with ScalaFutures

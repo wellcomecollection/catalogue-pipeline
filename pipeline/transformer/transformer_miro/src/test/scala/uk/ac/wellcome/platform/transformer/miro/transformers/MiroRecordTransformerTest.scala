@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.transformer.miro.transformers
 
 import org.scalatest.prop.TableDrivenPropertyChecks._
-import org.scalatest.{Assertion, FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
@@ -9,7 +9,7 @@ import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 
 class MiroRecordTransformerTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with IdentifiersGenerators
     with MiroRecordGenerators

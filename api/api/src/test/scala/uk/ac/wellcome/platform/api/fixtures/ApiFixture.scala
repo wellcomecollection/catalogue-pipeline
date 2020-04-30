@@ -14,7 +14,7 @@ import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.platform.api.models.ApiConfig
 
 trait ApiFixture
-    extends FunSpec
+    extends AnyFunSpec
     with ScalatestRouteTest
     with ElasticsearchFixtures {
 

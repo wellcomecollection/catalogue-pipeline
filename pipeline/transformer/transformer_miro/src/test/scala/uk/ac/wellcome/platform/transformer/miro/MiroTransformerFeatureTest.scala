@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.transformer.miro
 
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
@@ -21,7 +21,7 @@ import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 
 class MiroTransformerFeatureTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with Akka
     with BigMessagingFixture

@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.api
 
 import scala.reflect.runtime.universe._
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 import akka.http.scaladsl.model.ContentTypes
 import io.circe.Json
 import uk.ac.wellcome.platform.api.models.SearchQueryType

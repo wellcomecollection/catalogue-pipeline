@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.sierra_items_to_dynamo
 
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.{Assertion, FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.transformable.sierra.test.utils.SierraGenerators
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
@@ -11,7 +11,7 @@ import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
 import uk.ac.wellcome.storage.fixtures.LocalDynamoDb.Table
 
 class SierraItemsToDynamoFeatureTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with Eventually
     with IntegrationPatience

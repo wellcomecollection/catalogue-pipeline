@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.api.elasticsearch
 
 import com.sksamuel.elastic4s.ElasticDsl.search
 import com.sksamuel.elastic4s.Index
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import org.scalatest.concurrent.ScalaFutures
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.models.work.generators.{
@@ -23,7 +23,7 @@ import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.searches.sort.SortOrder
 
 class QueryVariantsTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with ElasticsearchFixtures
     with ScalaFutures

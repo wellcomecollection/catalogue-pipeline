@@ -3,10 +3,10 @@ package uk.ac.wellcome.bigmessaging.message
 import akka.actor.ActorSystem
 import akka.stream.scaladsl.Source
 import akka.{Done, NotUsed}
-import com.amazonaws.services.cloudwatch.model.StandardUnit
-import com.amazonaws.services.sqs.AmazonSQSAsync
-import com.amazonaws.services.sqs.model.Message
 import io.circe.Decoder
+import software.amazon.awssdk.services.cloudwatch.model.StandardUnit
+import software.amazon.awssdk.services.sqs.SqsAsyncClient
+import software.amazon.awssdk.services.sqs.model.Message
 import uk.ac.wellcome.bigmessaging.BigMessageReader
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
@@ -18,7 +18,7 @@ import uk.ac.wellcome.storage.store.TypedStore
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
-class BigMessageStream[T](sqsClient: AmazonSQSAsync,
+class BigMessageStream[T](sqsClient: SqsAsyncClient,
                           sqsConfig: SQSConfig,
                           metrics: Metrics[Future, StandardUnit])(
   implicit

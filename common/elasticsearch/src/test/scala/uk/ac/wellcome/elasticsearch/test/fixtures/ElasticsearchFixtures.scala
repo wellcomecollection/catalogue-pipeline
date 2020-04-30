@@ -1,6 +1,5 @@
 package uk.ac.wellcome.elasticsearch.test.fixtures
 
-import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.bulk.BulkResponse
 import com.sksamuel.elastic4s.requests.cluster.ClusterHealthResponse
@@ -9,13 +8,14 @@ import com.sksamuel.elastic4s.requests.get.GetResponse
 import com.sksamuel.elastic4s.requests.indexes.IndexResponse
 import com.sksamuel.elastic4s.requests.indexes.admin.IndexExistsResponse
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
-import com.sksamuel.elastic4s.{ElasticClient, Response}
+import com.sksamuel.elastic4s.{ElasticClient, Index, Response}
 import grizzled.slf4j.Logging
 import io.circe.Encoder
-import org.scalactic.source.Position
+import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
-import org.scalatest.time.{Millis, Seconds, Span}
-import org.scalatest.{Assertion, Matchers, Suite}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.time.{Seconds, Span}
+import org.scalatest.{Assertion, Suite}
 import uk.ac.wellcome.elasticsearch._
 import uk.ac.wellcome.elasticsearch.model.CanonicalId
 import uk.ac.wellcome.fixtures._
@@ -48,18 +48,13 @@ trait ElasticsearchFixtures
 
   // Elasticsearch takes a while to start up so check that it actually started
   // before running tests.
-  eventually {
+  eventually(Timeout(Span(40, Seconds))) {
     val response: Response[ClusterHealthResponse] = elasticClient
       .execute(clusterHealth())
       .await
 
     response.result.numberOfNodes shouldBe 1
-  }(
-    PatienceConfig(
-      timeout = scaled(Span(40, Seconds)),
-      interval = scaled(Span(150, Millis))
-    ),
-    implicitly[Position])
+  }
 
   def withLocalIndices[R](testWith: TestWith[ElasticConfig, R]): R =
     withLocalWorksIndex { worksIndex =>

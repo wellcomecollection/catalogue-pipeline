@@ -4,7 +4,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 
 import uk.ac.wellcome.models.matcher.MatcherResult
 import uk.ac.wellcome.models.work.generators.WorksGenerators
@@ -17,7 +17,7 @@ import uk.ac.wellcome.storage.locking.dynamo.{
 }
 
 class WorkMatcherConcurrencyTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with MatcherFixtures
     with ScalaFutures

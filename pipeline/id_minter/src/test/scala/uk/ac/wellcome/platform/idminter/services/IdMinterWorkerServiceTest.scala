@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.idminter.services
 
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import scalikejdbc._
 import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
@@ -14,7 +14,7 @@ import uk.ac.wellcome.platform.idminter.fixtures
 import uk.ac.wellcome.platform.idminter.fixtures.WorkerServiceFixture
 
 class IdMinterWorkerServiceTest
-    extends FunSpec
+    extends AnyFunSpec
     with SQS
     with SNS
     with BigMessagingFixture

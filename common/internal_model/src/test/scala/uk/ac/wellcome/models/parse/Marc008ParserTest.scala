@@ -1,17 +1,12 @@
 package uk.ac.wellcome.models.parse
 
-import org.scalatest.{FunSpec, Matchers}
-
+import org.scalatest.matchers.should.Matchers
 import java.time.LocalDate
 
-import uk.ac.wellcome.models.work.internal.{
-  InstantRange,
-  Period,
-  Place,
-  ProductionEvent
-}
+import org.scalatest.funspec.AnyFunSpec
+import uk.ac.wellcome.models.work.internal.{InstantRange, Period, Place, ProductionEvent}
 
-class Marc008ParserTest extends FunSpec with Matchers {
+class Marc008ParserTest extends AnyFunSpec with Matchers {
 
   it("parses marc strings to ProductionEvent") {
     Marc008Parser("790922s1757    enk||||      o00||||eng ccam   ") shouldBe

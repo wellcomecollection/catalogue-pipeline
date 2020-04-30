@@ -5,8 +5,9 @@ import java.time.Instant
 import org.scalacheck.Arbitrary
 import org.scalacheck.Gen.chooseNum
 import org.scalacheck.ScalacheckShapeless._
-import org.scalatest.prop.PropertyChecks
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import uk.ac.wellcome.models.work.generators.{
   ProductionEventGenerators,
   WorksGenerators
@@ -15,11 +16,11 @@ import uk.ac.wellcome.models.work.internal.WorkType.Videos
 import uk.ac.wellcome.models.work.internal._
 
 class DisplayWorkTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with ProductionEventGenerators
     with WorksGenerators
-    with PropertyChecks {
+    with ScalaCheckPropertyChecks {
 
   // We use this for the scalacheck of the java.time.Instant type
   // We could just import the library, but I might wait until we need more

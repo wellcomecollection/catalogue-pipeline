@@ -18,7 +18,7 @@ import scala.util.{Failure, Success}
 import scala.collection.JavaConverters._
 
 class IdentifierGeneratorTest
-    extends FunSpec
+    extends AnyFunSpec
     with fixtures.IdentifiersDatabase
     with Matchers
     with Inspectors

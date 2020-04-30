@@ -1,9 +1,9 @@
 package uk.ac.wellcome.platform.transformer.miro.transformers
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.platform.transformer.miro.exceptions.ShouldNotTransformException
 
-class MiroContributorCodesTest extends FunSpec with Matchers {
+class MiroContributorCodesTest extends AnyFunSpec with Matchers {
   it("looks up a contributor code in the general map") {
     transformer.lookupContributorCode(miroId = "B0000001", code = "CSP") shouldBe Some(
       "Wellcome Collection")

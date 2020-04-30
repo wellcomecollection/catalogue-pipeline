@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.merger.rules
 
-import org.scalatest.{FunSpec, Inspectors, Matchers}
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.{
   DigitalLocation,
@@ -9,7 +9,7 @@ import uk.ac.wellcome.models.work.internal.{
 }
 
 class WorkPredicatesTest
-    extends FunSpec
+    extends AnyFunSpec
     with WorksGenerators
     with Matchers
     with Inspectors {

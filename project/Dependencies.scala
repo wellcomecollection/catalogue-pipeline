@@ -2,16 +2,16 @@ import sbt._
 
 object WellcomeDependencies {
   lazy val versions = new {
-    val fixtures = "1.0.0"
-    val json = "1.1.1"
+    val fixtures = "1.2.0"
+    val json = "2.1.0"
     val messaging = "1.6.0"
     val monitoring = "2.0.0"
     val storage = "3.6.0"
-    val typesafe = "1.0.0"
+    val typesafe = "2.0.0"
 
-    val newMessaging = "5.3.1"
-    val newMonitoring = "2.3.0"
-    val newStorage = "7.20.0"
+    val newMessaging = "9.1.0"
+    val newMonitoring = "4.0.0"
+    val newStorage = "8.1.0"
 
     val sierraStreamsSource = "0.4"
   }
@@ -95,17 +95,16 @@ object ExternalDependencies {
     val apacheCommons = "3.7"
     val apacheLogging = "2.8.2"
     val aws = "1.11.504"
-    val circe = "0.9.0"
+    val circe = "0.13.0"
     val elastic4s = "7.6.1"
     val fastparse = "2.1.3"
     val swagger = "2.0.10"
     val logback = "1.2.3"
     val mockito = "1.9.5"
-    val scalacheck = "1.13.4"
     val scalacheckShapeless = "1.1.6"
     val scalacsv = "1.3.5"
     val scalaGraph = "1.12.5"
-    val scalatest = "3.0.1"
+    val scalatest = "3.1.1"
     val logstashLogback = "6.1"
     val scribeJava = "6.8.1"
     val apm = "1.12.0"
@@ -186,11 +185,11 @@ object ExternalDependencies {
   )
 
   val awsSTSDependencies = Seq(
-    "com.amazonaws" % "aws-java-sdk-sts" % versions.aws,
+    "com.amazonaws" % "aws-java-sdk-sts" % versions.aws
   )
 
   val scalacheckDependencies = Seq(
-    "org.scalacheck" %% "scalacheck" % versions.scalacheck % "test",
+    "org.scalatestplus" %% "scalacheck-1-14" % "3.1.1.1" % "test",
     "com.github.alexarchambault" %% "scalacheck-shapeless_1.13" % versions.scalacheckShapeless % "test"
   )
 
@@ -213,7 +212,7 @@ object ExternalDependencies {
     "io.swagger.core.v3" % "swagger-integration" % versions.swagger,
     "io.swagger.core.v3" % "swagger-jaxrs2" % versions.swagger,
     "javax.ws.rs" % "javax.ws.rs-api" % "2.0.1",
-    "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.8.8",
+    "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.8.8"
   )
 
   val parseDependencies = Seq(
@@ -240,6 +239,7 @@ object CatalogueDependencies {
     ExternalDependencies.scalacsvDependencies ++
       WellcomeDependencies.jsonLibrary ++
       ExternalDependencies.parseDependencies ++
+      ExternalDependencies.scalacheckDependencies ++
       ExternalDependencies.enumeratumDependencies
 
   val displayModelDependencies =

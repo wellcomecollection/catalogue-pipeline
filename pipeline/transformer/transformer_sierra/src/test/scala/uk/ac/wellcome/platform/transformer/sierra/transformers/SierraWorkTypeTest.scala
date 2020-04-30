@@ -1,12 +1,12 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal.WorkType.Books
 import uk.ac.wellcome.platform.transformer.sierra.generators.SierraDataGenerators
 import uk.ac.wellcome.platform.transformer.sierra.source.SierraMaterialType
 
 class SierraWorkTypeTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with SierraDataGenerators {
 

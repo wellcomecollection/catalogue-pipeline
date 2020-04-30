@@ -6,7 +6,7 @@ import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 
 class MiroRecordTransformerContributorsTest
-    extends FunSpec
+    extends AnyFunSpec
     with MiroRecordGenerators
     with MiroTransformableWrapper {
   it("if not image_creator field is present") {

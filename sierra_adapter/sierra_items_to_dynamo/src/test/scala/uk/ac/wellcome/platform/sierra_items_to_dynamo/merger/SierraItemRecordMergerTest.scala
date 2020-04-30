@@ -1,10 +1,10 @@
 package uk.ac.wellcome.platform.sierra_items_to_dynamo.merger
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.transformable.sierra.test.utils.SierraGenerators
 
 class SierraItemRecordMergerTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with SierraGenerators {
 

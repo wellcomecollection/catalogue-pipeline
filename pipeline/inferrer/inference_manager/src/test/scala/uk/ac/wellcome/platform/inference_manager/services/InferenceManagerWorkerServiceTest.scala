@@ -26,7 +26,7 @@ import uk.ac.wellcome.platform.inference_manager.fixtures.{
 }
 
 class InferenceManagerWorkerServiceTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with ImageGenerators
     with Inside

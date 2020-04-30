@@ -3,9 +3,9 @@ package uk.ac.wellcome.calm_adapter
 import scala.xml.Elem
 import scala.xml.Utility.trim
 import java.time.LocalDate
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 
-class CalmXmlRequestTest extends FunSpec with Matchers {
+class CalmXmlRequestTest extends AnyFunSpec with Matchers {
 
   it("generates a CALM search request for a particular modified date") {
     val query = CalmQuery.ModifiedDate(LocalDate.of(2008, 10, 2))

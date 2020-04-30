@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.matcher.services
 
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil.fromJson
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS
@@ -17,7 +17,7 @@ import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
 import uk.ac.wellcome.models.Implicits._
 
 class MatcherWorkerServiceTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with Eventually
     with IntegrationPatience

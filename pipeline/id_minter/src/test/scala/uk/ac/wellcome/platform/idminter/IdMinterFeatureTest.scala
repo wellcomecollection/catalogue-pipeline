@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.idminter
 
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
@@ -13,7 +13,7 @@ import uk.ac.wellcome.models.Implicits._
 import scala.collection.JavaConverters._
 
 class IdMinterFeatureTest
-    extends FunSpec
+    extends AnyFunSpec
     with SQS
     with SNS
     with BigMessagingFixture

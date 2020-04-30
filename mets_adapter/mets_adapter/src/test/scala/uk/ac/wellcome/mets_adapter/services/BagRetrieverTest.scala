@@ -8,7 +8,7 @@ import com.github.tomakehurst.wiremock.http.Fault
 import org.mockito.Mockito
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{FunSpec, Inside, Matchers}
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.mets_adapter.models._
@@ -18,7 +18,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class BagRetrieverTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with BagsWiremock
     with Inside

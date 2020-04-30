@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.transformable.SierraTransformable
 import uk.ac.wellcome.models.transformable.sierra.test.utils.SierraGenerators
 import uk.ac.wellcome.models.transformable.sierra.{
@@ -18,7 +18,7 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.internal.WorkType.{Books, Pictures}
 
 class SierraTransformableTransformerTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with MarcGenerators
     with SierraGenerators

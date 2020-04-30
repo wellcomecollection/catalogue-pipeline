@@ -14,7 +14,7 @@ import uk.ac.wellcome.platform.merger.rules.ImagesRule.FlatImageMergeRule
 import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
 
 class ImagesRuleTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with WorksGenerators
     with PrivateMethodTester

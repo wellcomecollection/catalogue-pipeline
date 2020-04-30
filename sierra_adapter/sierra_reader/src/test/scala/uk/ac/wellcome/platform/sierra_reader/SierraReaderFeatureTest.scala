@@ -1,13 +1,13 @@
 package uk.ac.wellcome.platform.sierra_reader
 
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.platform.sierra_reader.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.storage.fixtures.S3
 
 class SierraReaderFeatureTest
-    extends FunSpec
+    extends AnyFunSpec
     with S3
     with SQS
     with Eventually

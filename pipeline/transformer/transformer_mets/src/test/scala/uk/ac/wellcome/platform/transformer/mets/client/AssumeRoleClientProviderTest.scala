@@ -6,7 +6,7 @@ import org.mockito.Mockito
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer
 import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.platform.transformer.mets.fixtures.{
@@ -18,7 +18,7 @@ import scala.collection.mutable
 import scala.concurrent.duration._
 
 class AssumeRoleClientProviderTest
-    extends FunSpec
+    extends AnyFunSpec
     with Akka
     with STSFixtures
     with Matchers

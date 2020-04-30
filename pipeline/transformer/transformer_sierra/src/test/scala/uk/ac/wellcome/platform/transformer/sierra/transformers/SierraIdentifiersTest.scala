@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal.{IdentifierType, SourceIdentifier}
 import uk.ac.wellcome.platform.transformer.sierra.generators.{
   MarcGenerators,
@@ -9,7 +9,7 @@ import uk.ac.wellcome.platform.transformer.sierra.generators.{
 import uk.ac.wellcome.platform.transformer.sierra.source.MarcSubfield
 
 class SierraIdentifiersTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with MarcGenerators
     with SierraDataGenerators {

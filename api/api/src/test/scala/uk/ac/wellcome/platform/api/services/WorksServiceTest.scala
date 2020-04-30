@@ -5,7 +5,7 @@ import java.time.format.DateTimeFormatter
 
 import com.sksamuel.elastic4s.{ElasticError, Index}
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{Assertion, FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.display.models.AggregationRequest
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.models.work.generators.{
@@ -27,7 +27,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class WorksServiceTest
-    extends FunSpec
+    extends AnyFunSpec
     with ElasticsearchFixtures
     with Matchers
     with ScalaFutures

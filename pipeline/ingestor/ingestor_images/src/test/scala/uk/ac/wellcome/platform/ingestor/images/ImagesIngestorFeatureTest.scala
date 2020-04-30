@@ -17,7 +17,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import uk.ac.wellcome.json.JsonUtil._
 
 class ImagesIngestorFeatureTest
-    extends FunSpec
+    extends AnyFunSpec
     with ImageGenerators
     with BigMessagingFixture
     with ElasticsearchFixtures

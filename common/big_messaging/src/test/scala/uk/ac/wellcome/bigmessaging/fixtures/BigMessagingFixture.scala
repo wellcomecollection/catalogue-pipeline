@@ -1,11 +1,11 @@
 package uk.ac.wellcome.bigmessaging.fixtures
 
 import akka.actor.ActorSystem
-import com.amazonaws.services.cloudwatch.model.StandardUnit
-import com.amazonaws.services.sns.AmazonSNS
-import com.amazonaws.services.sqs.model.SendMessageResult
 import io.circe.{Decoder, Encoder}
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
+import software.amazon.awssdk.services.cloudwatch.model.StandardUnit
+import software.amazon.awssdk.services.sns.SnsClient
+import software.amazon.awssdk.services.sqs.model.SendMessageResponse
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
@@ -18,22 +18,13 @@ import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.sns.{SNSConfig, SNSMessageSender}
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
-import uk.ac.wellcome.storage.{
-  Identified,
-  ObjectLocation,
-  StoreWriteError,
-  WriteError
-}
+import uk.ac.wellcome.storage.{Identified, ObjectLocation, StoreWriteError, WriteError}
 import uk.ac.wellcome.storage.fixtures.S3Fixtures
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import uk.ac.wellcome.storage.store.TypedStore
-import uk.ac.wellcome.storage.store.memory.{
-  MemoryStore,
-  MemoryStreamStore,
-  MemoryStreamStoreEntry,
-  MemoryTypedStore
-}
+import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryStreamStore, MemoryStreamStoreEntry, MemoryTypedStore}
 import uk.ac.wellcome.storage.streaming.Codec
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Success
 
@@ -73,18 +64,18 @@ trait BigMessagingFixture
     *
     */
   def sendMessage[T](queue: Queue, obj: T)(
-    implicit encoder: Encoder[T]): SendMessageResult =
+    implicit encoder: Encoder[T]): SendMessageResponse =
     sendNotificationToSQS[MessageNotification](
       queue = queue,
       message = InlineNotification(jsonString = toJson(obj).get)
     )
 
   def withSqsBigMessageSender[T, R](
-    bucket: Bucket,
-    topic: Topic,
-    senderSnsClient: AmazonSNS = snsClient,
-    store: Option[MemoryTypedStore[ObjectLocation, T]] = None,
-    bigMessageThreshold: Int = 10000)(
+                                     bucket: Bucket,
+                                     topic: Topic,
+                                     senderSnsClient:SnsClient = snsClient,
+                                     store: Option[MemoryTypedStore[ObjectLocation, T]] = None,
+                                     bigMessageThreshold: Int = 10000)(
     testWith: TestWith[BigMessageSender[SNSConfig, T], R])(
     implicit
     encoderT: Encoder[T],
@@ -102,7 +93,7 @@ trait BigMessagingFixture
       testWith(sender)
     }
 
-  def withSnsMessageSender[R](topic: Topic, snsClient: AmazonSNS = snsClient)(
+  def withSnsMessageSender[R](topic: Topic, snsClient: SnsClient = snsClient)(
     testWith: TestWith[MessageSender[SNSConfig], R]): R =
     testWith(
       new SNSMessageSender(

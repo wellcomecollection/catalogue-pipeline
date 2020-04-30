@@ -1,19 +1,17 @@
 package uk.ac.wellcome.bigmessaging
 
 import io.circe.Decoder
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.bigmessaging.memory.MemoryBigMessageSender
-import uk.ac.wellcome.bigmessaging.message.{
-  InlineNotification,
-  RemoteNotification
-}
+import uk.ac.wellcome.bigmessaging.message.{InlineNotification, RemoteNotification}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.storage.ObjectLocation
 import uk.ac.wellcome.storage.store.TypedStore
 
 import scala.util.Success
 
-class BigMessageIntegrationTest extends FunSpec with Matchers {
+class BigMessageIntegrationTest extends AnyFunSpec with Matchers {
   case class Shape(colour: String, sides: Int)
 
   val yellowPentagon = Shape(colour = "yellow", sides = 5)

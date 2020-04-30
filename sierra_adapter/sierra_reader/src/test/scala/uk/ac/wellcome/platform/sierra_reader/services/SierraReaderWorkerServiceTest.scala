@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.sierra_reader.services
 
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 import org.scalatest.FunSpec
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.json.JsonUtil._
@@ -16,7 +16,7 @@ import uk.ac.wellcome.storage.fixtures.S3
 import uk.ac.wellcome.storage.fixtures.S3.Bucket
 
 class SierraReaderWorkerServiceTest
-    extends FunSpec
+    extends AnyFunSpec
     with S3
     with SQS
     with Akka

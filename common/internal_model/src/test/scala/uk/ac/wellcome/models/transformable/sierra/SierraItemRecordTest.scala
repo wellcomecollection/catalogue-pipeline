@@ -1,12 +1,13 @@
 package uk.ac.wellcome.models.transformable.sierra
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.transformable.sierra.test.utils.SierraGenerators
-
 import java.time.Instant
 
-class SierraItemRecordTest extends FunSpec with Matchers with SierraGenerators {
+import org.scalatest.funspec.AnyFunSpec
+
+class SierraItemRecordTest extends AnyFunSpec with Matchers with SierraGenerators {
 
   it("can cast a SierraItemRecord to JSON and back again") {
     val originalRecord = createSierraItemRecord
@@ -40,7 +41,7 @@ class SierraItemRecordTest extends FunSpec with Matchers with SierraGenerators {
   it("throws an exception for invalid JSON") {
     assertCreatingFromDataFails(
       data = "not a json string",
-      expectedMessage = "expected null got n (line 1, column 1)"
+      expectedMessage = "expected null got 'not a ...' (line 1, column 1)"
     )
   }
 
@@ -62,7 +63,7 @@ class SierraItemRecordTest extends FunSpec with Matchers with SierraGenerators {
   it("throws an exception when bibIds is not a list") {
     assertCreatingFromDataFails(
       data = """{"bibIds":"blah"}""",
-      expectedMessage = "CanBuildFrom for A: DownField(bibIds)"
+      expectedMessage = "C[A]: DownField(bibIds)"
     )
   }
 
@@ -78,6 +79,7 @@ class SierraItemRecordTest extends FunSpec with Matchers with SierraGenerators {
       )
     }
 
-    caught.getMessage shouldBe s"Error parsing bibIds from JSON <<$data>> (uk.ac.wellcome.json.exceptions.JsonDecodingError: $expectedMessage)"
+    val message1 = caught.getMessage
+    message1 shouldBe s"Error parsing bibIds from JSON <<$data>> (uk.ac.wellcome.json.exceptions.JsonDecodingError: $expectedMessage)"
   }
 }
