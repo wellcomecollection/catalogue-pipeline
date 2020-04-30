@@ -89,8 +89,9 @@ object WellcomeDependencies {
 
 object ExternalDependencies {
   lazy val versions = new {
-    val akkaHttp = "10.1.0"
-    val akkaHttpCirce = "1.20.0"
+    val akka = "2.6.4"
+    val akkaHttp = "10.1.11"
+    val akkaHttpCirce = "1.32.0"
     val akkaStreamAlpakka = "0.20"
     val apacheCommons = "3.7"
     val apacheLogging = "2.8.2"
@@ -132,8 +133,9 @@ object ExternalDependencies {
   )
 
   val akkaHttpDependencies = Seq(
+    "com.typesafe.akka" %% "akka-testkit" % versions.akka % "test",
     "com.typesafe.akka" %% "akka-http" % versions.akkaHttp,
-    "com.typesafe.akka" %% "akka-http-testkit" % versions.akkaHttp,
+    "com.typesafe.akka" %% "akka-http-testkit" % versions.akkaHttp % "test",
     "de.heikoseeberger" %% "akka-http-circe" % versions.akkaHttpCirce
   )
 
