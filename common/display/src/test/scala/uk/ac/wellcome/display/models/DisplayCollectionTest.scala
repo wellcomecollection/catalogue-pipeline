@@ -9,6 +9,8 @@ class DisplayCollectionTest extends FunSpec with Matchers with WorksGenerators {
 
   def work(path: String, level: CollectionLevel) =
     createIdentifiedWorkWith(
+      title = Some(path),
+      sourceIdentifier = createSourceIdentifierWith(value = path),
       collectionPath = Some(CollectionPath(path = path, level = Some(level))))
 
   it("creates a display tree with a path expanded") {
@@ -154,8 +156,7 @@ class DisplayCollectionTest extends FunSpec with Matchers with WorksGenerators {
     val b = work("a/b", CollectionLevel.Series)
     val c = work("a/b/c", CollectionLevel.Item)
     val d = work("a/d", CollectionLevel.Series)
-    val e = work("a/d/e", CollectionLevel.Item)
-    val tree = Collection(List(a, b, c, d, e)).right.get
+    val tree = Collection(List(a, b, c, d)).right.get
     DisplayCollection(tree, List("a/b")) shouldBe
       DisplayCollection(
         path = DisplayCollectionPath("a", Some("Collection")),
@@ -179,6 +180,40 @@ class DisplayCollectionTest extends FunSpec with Matchers with WorksGenerators {
               path = DisplayCollectionPath("a/d", Some("Series")),
               work = Some(DisplayWork(d)),
               children = None
+            )
+          )
+        )
+      )
+  }
+
+  it("doesn't set expanded to paths sharing the same prefix as expanded") {
+    val a = work("a", CollectionLevel.Collection)
+    val b = work("a/b", CollectionLevel.Series)
+    val b0 = work("a/b0", CollectionLevel.Series)
+    val b1 = work("a/b0/b1", CollectionLevel.Item)
+    val tree = Collection(List(a, b, b0, b1)).right.get
+    DisplayCollection(tree, List("a/b0")) shouldBe
+      DisplayCollection(
+        path = DisplayCollectionPath("a", Some("Collection")),
+        work = Some(DisplayWork(a)),
+        children = Some(
+          List(
+            DisplayCollection(
+              path = DisplayCollectionPath("a/b", Some("Series")),
+              work = Some(DisplayWork(b)),
+              children = None
+            ),
+            DisplayCollection(
+              path = DisplayCollectionPath("a/b0", Some("Series")),
+              work = Some(DisplayWork(b0)),
+              children = Some(
+                List(
+                  DisplayCollection(
+                    path = DisplayCollectionPath("a/b0/b1", Some("Item")),
+                    work = Some(DisplayWork(b1))
+                  )
+                )
+              )
             )
           )
         )
