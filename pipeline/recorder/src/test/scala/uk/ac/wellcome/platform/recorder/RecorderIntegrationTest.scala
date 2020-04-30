@@ -1,16 +1,14 @@
 package uk.ac.wellcome.platform.recorder
 
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType
-
 import org.scalatest.concurrent.IntegrationPatience
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
-
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.recorder.fixtures.WorkerServiceFixture
-
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.bigmessaging.typesafe.VHSBuilder
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures

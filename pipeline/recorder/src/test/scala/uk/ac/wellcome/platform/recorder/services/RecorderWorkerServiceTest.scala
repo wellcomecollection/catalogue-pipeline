@@ -1,17 +1,15 @@
 package uk.ac.wellcome.platform.recorder.services
 
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.recorder.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.utils.JsonAssertions
-
 import uk.ac.wellcome.storage.ObjectLocation
-
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 

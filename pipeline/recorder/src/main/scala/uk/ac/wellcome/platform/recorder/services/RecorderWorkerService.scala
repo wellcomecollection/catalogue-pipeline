@@ -42,10 +42,10 @@ class RecorderWorkerService[MsgDestination](
     val result =
       store.upsert(work.sourceIdentifier.toString)(createEntry(work)) {
         case HybridStoreEntry(existingWork, _) =>
-          createEntry(
+          Right(createEntry(
             if (existingWork.version > work.version) { existingWork } else {
               work
-            })
+            }))
       }
     result match {
       case Right(Identified(key, _)) => Success(key)
