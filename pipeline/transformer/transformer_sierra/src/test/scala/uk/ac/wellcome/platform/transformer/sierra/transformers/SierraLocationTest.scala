@@ -1,19 +1,11 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.internal.{
-  AccessCondition,
-  AccessStatus,
-  DigitalLocation,
-  LocationType,
-  PhysicalLocation
-}
+import uk.ac.wellcome.models.work.internal.{AccessCondition, AccessStatus, DigitalLocation, LocationType, PhysicalLocation}
 import uk.ac.wellcome.platform.transformer.sierra.exceptions.SierraTransformerException
 import uk.ac.wellcome.platform.transformer.sierra.source.sierra.SierraSourceLocation
-import uk.ac.wellcome.platform.transformer.sierra.source.{
-  MarcSubfield,
-  VarField
-}
+import uk.ac.wellcome.platform.transformer.sierra.source.{MarcSubfield, VarField}
 import uk.ac.wellcome.platform.transformer.sierra.generators.SierraDataGenerators
 
 class SierraLocationTest

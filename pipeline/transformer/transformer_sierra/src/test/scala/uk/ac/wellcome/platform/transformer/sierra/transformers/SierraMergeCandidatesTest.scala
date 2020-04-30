@@ -1,21 +1,10 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.internal.{
-  IdentifierType,
-  MergeCandidate,
-  SourceIdentifier
-}
-import uk.ac.wellcome.platform.transformer.sierra.source.{
-  MarcSubfield,
-  SierraBibData,
-  SierraMaterialType,
-  VarField
-}
-import uk.ac.wellcome.platform.transformer.sierra.generators.{
-  MarcGenerators,
-  SierraDataGenerators
-}
+import uk.ac.wellcome.models.work.internal.{IdentifierType, MergeCandidate, SourceIdentifier}
+import uk.ac.wellcome.platform.transformer.sierra.source.{MarcSubfield, SierraBibData, SierraMaterialType, VarField}
+import uk.ac.wellcome.platform.transformer.sierra.generators.{MarcGenerators, SierraDataGenerators}
 import org.scalatest.prop.TableDrivenPropertyChecks._
 
 class SierraMergeCandidatesTest

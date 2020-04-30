@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers.parsers
 
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import org.scalatest.matchers.should.Matchers
 

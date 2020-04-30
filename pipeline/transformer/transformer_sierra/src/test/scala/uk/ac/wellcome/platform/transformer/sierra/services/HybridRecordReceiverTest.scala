@@ -6,22 +6,18 @@ import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatestplus.mockito.MockitoSugar
 import org.mockito.Mockito.when
 import org.mockito.Matchers.any
-import com.amazonaws.services.sns.AmazonSNS
-import com.amazonaws.services.sns.model.PublishRequest
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-
+import software.amazon.awssdk.services.sns.SnsClient
+import software.amazon.awssdk.services.sns.model.PublishRequest
 import uk.ac.wellcome.json.exceptions.JsonDecodingError
 import uk.ac.wellcome.models.transformable.SierraTransformable
 import uk.ac.wellcome.models.transformable.sierra.test.utils.SierraGenerators
 import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.models.work.internal.{
-  TransformedBaseWork,
-  UnidentifiedWork
-}
+import uk.ac.wellcome.models.work.internal.{TransformedBaseWork, UnidentifiedWork}
 import uk.ac.wellcome.platform.transformer.sierra.fixtures.BackwardsCompatHybridRecordReceiverFixture
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
-
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 
 class HybridRecordReceiverTest
@@ -226,8 +222,8 @@ class HybridRecordReceiverTest
     }
   }
 
-  private def mockSnsClientFailPublishMessage: AmazonSNS = {
-    val mockSNSClient = mock[AmazonSNS]
+  private def mockSnsClientFailPublishMessage: SnsClient = {
+    val mockSNSClient = mock[SnsClient]
     when(mockSNSClient.publish(any[PublishRequest]))
       .thenThrow(new RuntimeException("Failed publishing message"))
     mockSNSClient

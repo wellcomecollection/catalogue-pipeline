@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.transformer.sierra.source
 
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.utils.JsonAssertions
