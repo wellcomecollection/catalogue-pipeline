@@ -2,18 +2,15 @@ package uk.ac.wellcome.platform.inference_manager.integration
 
 import org.scalatest.concurrent.IntegrationPatience
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
-import org.scalatest.{FunSpec, Inside, Inspectors, Matchers, OptionValues}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.{Inside, Inspectors, OptionValues}
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.ImageGenerators
-import uk.ac.wellcome.models.work.internal.{
-  AugmentedImage,
-  Identified,
-  InferredData,
-  MergedImage
-}
+import uk.ac.wellcome.models.work.internal.{AugmentedImage, Identified, InferredData, MergedImage}
 import uk.ac.wellcome.platform.inference_manager.fixtures.InferenceManagerWorkerServiceFixture
 import uk.ac.wellcome.platform.inference_manager.services.FeatureVectorInferrerAdapter
 
@@ -21,7 +18,7 @@ import scala.concurrent.duration._
 import scala.io.Source
 
 class ManagerInferrerIntegrationTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with ImageGenerators
     with OptionValues
