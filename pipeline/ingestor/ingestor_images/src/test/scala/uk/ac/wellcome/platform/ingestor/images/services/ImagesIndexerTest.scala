@@ -1,10 +1,12 @@
 package uk.ac.wellcome.platform.ingestor.images.services
 
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.models.work.generators.ImageGenerators
 import uk.ac.wellcome.models.Implicits._
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class ImagesIndexerTest

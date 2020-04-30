@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.ingestor.images
 
-import org.scalatest.FunSpec
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.time.{Seconds, Span}
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.elasticsearch.ImagesIndexConfig
