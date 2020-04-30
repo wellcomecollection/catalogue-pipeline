@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.api.works
 import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.models.work.internal._
 
-class ApiWorkCollectionTest extends ApiWorksTestBase {
+class WorksCollectionTest extends ApiWorksTestBase {
 
   def work(path: String, level: CollectionLevel) =
     createIdentifiedWorkWith(
