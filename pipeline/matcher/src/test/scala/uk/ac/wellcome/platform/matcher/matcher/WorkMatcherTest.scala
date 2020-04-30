@@ -6,16 +6,13 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import org.mockito.Matchers.any
 import org.mockito.Mockito.when
+import org.scalatest.EitherValues
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.matchers.should.Matchers
 import org.scanamo.syntax._
-import uk.ac.wellcome.models.matcher.{
-  MatchedIdentifiers,
-  MatcherResult,
-  WorkIdentifier,
-  WorkNode
-}
+import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult, WorkIdentifier, WorkNode}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.MergeCandidate
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException

@@ -3,11 +3,11 @@ package uk.ac.wellcome.platform.matcher.storage
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.matchers.should.Matchers
 import org.mockito.Matchers.any
 import org.mockito.Mockito.when
-
+import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.models.matcher.WorkNode
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
 import uk.ac.wellcome.platform.matcher.models.{WorkGraph, WorkUpdate}

@@ -1,5 +1,7 @@
 package uk.ac.wellcome.platform.matcher.storage
 
+import org.scalatest.Inside
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.bigmessaging.EmptyMetadata
 import uk.ac.wellcome.bigmessaging.fixtures.VHSFixture

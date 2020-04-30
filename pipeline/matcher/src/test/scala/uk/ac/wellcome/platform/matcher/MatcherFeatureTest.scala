@@ -1,17 +1,13 @@
 package uk.ac.wellcome.platform.matcher
 
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.bigmessaging.EmptyMetadata
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.matcher.{
-  MatchedIdentifiers,
-  MatcherResult,
-  WorkIdentifier,
-  WorkNode
-}
+import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult, WorkIdentifier, WorkNode}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures

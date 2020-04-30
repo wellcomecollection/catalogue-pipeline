@@ -3,18 +3,15 @@ package uk.ac.wellcome.platform.matcher.matcher
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.matchers.should.Matchers
-
 import uk.ac.wellcome.models.matcher.MatcherResult
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.MergeCandidate
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
-import uk.ac.wellcome.storage.locking.dynamo.{
-  DynamoLockingService,
-  ExpiringLock
-}
+import uk.ac.wellcome.storage.locking.dynamo.{DynamoLockingService, ExpiringLock}
 
 class WorkMatcherConcurrencyTest
     extends AnyFunSpec
