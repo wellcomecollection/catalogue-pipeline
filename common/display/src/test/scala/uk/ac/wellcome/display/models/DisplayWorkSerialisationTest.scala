@@ -5,6 +5,7 @@ import uk.ac.wellcome.display.test.util.JsonMapperTestUtil
 import uk.ac.wellcome.models.work.generators.{ProductionEventGenerators, SubjectGenerators, WorksGenerators}
 import uk.ac.wellcome.models.work.internal.WorkType.{Books, EBooks}
 import uk.ac.wellcome.models.work.internal._
+import Implicits._
 
 class DisplayWorkSerialisationTest
     extends AnyFunSpec

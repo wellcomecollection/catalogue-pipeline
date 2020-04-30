@@ -1,7 +1,8 @@
 package uk.ac.wellcome.platform.api.services
 
 import com.sksamuel.elastic4s.{ElasticError, Index}
-import org.scalatest.{AsyncFunSpec, EitherValues, OptionValues}
+import org.scalatest.funspec.AsyncFunSpec
+import org.scalatest.{EitherValues, OptionValues}
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.models.work.generators.ImageGenerators
 

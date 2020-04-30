@@ -30,7 +30,7 @@ case class DisplayError(
 
 object DisplayError {
 
-  implicit val encoder: Encoder[DisplayError] = deriveEncoder
+  implicit val encoder: Encoder[DisplayError] = deriveConfiguredEncoder
 
   def apply(error: Error): DisplayError = DisplayError(
     errorType = error.errorType,

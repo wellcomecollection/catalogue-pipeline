@@ -4,7 +4,6 @@ import java.time.LocalDate
 
 import akka.http.scaladsl.server.{Directive, Directives, ValidationRejection}
 import akka.http.scaladsl.unmarshalling.Unmarshaller
-import io.circe.java8.time.TimeInstances
 import io.circe.{Decoder, Json}
 import uk.ac.wellcome.platform.api.models.LicenseFilter
 import uk.ac.wellcome.platform.api.rest.MultipleWorksParams.decodeCommaSeparated
@@ -16,7 +15,7 @@ object CommonDecoders {
     decodeCommaSeparated.emap(strs => Right(LicenseFilter(strs)))
 }
 
-trait QueryParamsUtils extends Directives with TimeInstances {
+trait QueryParamsUtils extends Directives{
 
   implicit def unmarshaller[T](
     implicit decoder: Decoder[T]): Unmarshaller[String, T] =
@@ -28,7 +27,7 @@ trait QueryParamsUtils extends Directives with TimeInstances {
     }
 
   implicit val decodeLocalDate: Decoder[LocalDate] =
-    decodeLocalDateDefault.withErrorMessage(
+    Decoder.decodeLocalDate.withErrorMessage(
       "Invalid date encoding. Expected YYYY-MM-DD"
     )
 

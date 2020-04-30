@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.api.models
 
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
 class ErrorTest extends AnyFunSpec with Matchers {

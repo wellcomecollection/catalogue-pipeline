@@ -4,14 +4,10 @@ import com.sksamuel.elastic4s.{ElasticError, Index}
 import com.sksamuel.elastic4s.requests.searches.{SearchHit, SearchResponse}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.json.JsonUtil.fromJson
-import uk.ac.wellcome.models.work.generators.{
-  ContributorGenerators,
-  GenreGenerators,
-  SubjectGenerators,
-  WorksGenerators
-}
+import uk.ac.wellcome.models.work.generators.{ContributorGenerators, GenreGenerators, SubjectGenerators, WorksGenerators}
 import uk.ac.wellcome.models.work.internal.{CollectionPath, IdentifiedBaseWork}
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
 import uk.ac.wellcome.platform.api.models.{SearchQuery, SearchQueryType}

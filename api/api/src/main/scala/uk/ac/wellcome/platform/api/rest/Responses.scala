@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.api.rest
 
 import akka.http.scaladsl.model.Uri
 import io.circe.generic.extras.JsonKey
-import io.circe.generic.extras.semiauto.deriveEncoder
+import io.circe.generic.extras.semiauto.deriveConfiguredEncoder
 import io.circe.{Encoder, Json}
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.ac.wellcome.display.models._
@@ -23,7 +23,7 @@ object ResultResponse {
 
   // Flattens the 'result' field into the rest of the object
   implicit def encoder[T: Encoder]: Encoder[ResultResponse[T]] =
-    deriveEncoder[ResultResponse[T]].mapJson { json =>
+    deriveConfiguredEncoder[ResultResponse[T]].mapJson { json =>
       json.asObject
         .flatMap { obj =>
           obj.toMap
@@ -55,7 +55,7 @@ case class DisplayResultList[DisplayResult, DisplayAggs](
 
 object DisplayResultList {
   implicit def encoder[R: Encoder, A: Encoder]
-    : Encoder[DisplayResultList[R, A]] = deriveEncoder
+    : Encoder[DisplayResultList[R, A]] = deriveConfiguredEncoder
 
   def apply(
     resultList: ResultList[IdentifiedWork, Aggregations],

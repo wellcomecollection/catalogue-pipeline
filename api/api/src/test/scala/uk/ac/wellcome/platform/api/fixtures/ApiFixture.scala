@@ -1,12 +1,12 @@
 package uk.ac.wellcome.platform.api.fixtures
 
-import org.scalatest.FunSpec
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.http.scaladsl.model.{ContentTypes, StatusCode}
 import akka.http.scaladsl.model.headers.Host
 import akka.http.scaladsl.server.Route
 import io.circe.parser.parse
 import io.circe.Json
+import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.platform.api.Router

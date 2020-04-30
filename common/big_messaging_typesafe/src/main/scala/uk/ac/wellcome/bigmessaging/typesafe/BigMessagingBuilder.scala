@@ -1,7 +1,7 @@
 package uk.ac.wellcome.bigmessaging.typesafe
 
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import com.amazonaws.services.s3.AmazonS3
 import com.typesafe.config.Config
 import io.circe.{Decoder, Encoder}
@@ -10,7 +10,7 @@ import uk.ac.wellcome.bigmessaging.message.BigMessageStream
 import uk.ac.wellcome.messaging.sns.SNSConfig
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.messaging.MessageSender
-import uk.ac.wellcome.monitoring.typesafe.MetricsBuilder
+import uk.ac.wellcome.monitoring.typesafe.CloudWatchBuilder
 import uk.ac.wellcome.storage.ObjectLocation
 import uk.ac.wellcome.storage.s3.S3Config
 import uk.ac.wellcome.storage.store.TypedStore
@@ -25,7 +25,7 @@ object BigMessagingBuilder {
   def buildMessageStream[T](config: Config)(
     implicit actorSystem: ActorSystem,
     decoderT: Decoder[T],
-    materializer: ActorMaterializer,
+    materializer: Materializer,
     codecT: Codec[T]): BigMessageStream[T] = {
 
     implicit val executionContext: ExecutionContext =
@@ -39,7 +39,7 @@ object BigMessagingBuilder {
       sqsClient = SQSBuilder.buildSQSAsyncClient(config),
       sqsConfig =
         SQSBuilder.buildSQSConfig(config, namespace = "message.reader"),
-      metrics = MetricsBuilder.buildMetricsSender(config)
+      metrics = CloudWatchBuilder.buildCloudWatchMetrics(config)
     )
   }
 

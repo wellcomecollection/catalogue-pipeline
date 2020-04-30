@@ -4,7 +4,9 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 import com.sksamuel.elastic4s.{ElasticError, Index}
+import org.scalatest.Assertion
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.display.models.AggregationRequest
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures

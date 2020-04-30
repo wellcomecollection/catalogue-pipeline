@@ -62,7 +62,7 @@ case class DisplayAggregationBucket[T](
 
 object DisplayAggregations {
 
-  implicit def encoder: Encoder[DisplayAggregations] = deriveEncoder
+  implicit def encoder: Encoder[DisplayAggregations] = deriveConfiguredEncoder
 
   def apply(aggs: Aggregations): DisplayAggregations =
     DisplayAggregations(

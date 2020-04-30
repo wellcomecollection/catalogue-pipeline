@@ -5,22 +5,17 @@ import com.sksamuel.elastic4s.Index
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.concurrent.ScalaFutures
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
-import uk.ac.wellcome.models.work.generators.{
-  ContributorGenerators,
-  GenreGenerators,
-  SubjectGenerators,
-  WorksGenerators
-}
+import uk.ac.wellcome.models.work.generators.{ContributorGenerators, GenreGenerators, SubjectGenerators, WorksGenerators}
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
 import uk.ac.wellcome.platform.api.services.{
   ElasticsearchService,
   WorksRequestBuilder
 }
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Random
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.searches.sort.SortOrder
+import org.scalatest.funspec.AnyFunSpec
 
 class QueryVariantsTest
     extends AnyFunSpec
