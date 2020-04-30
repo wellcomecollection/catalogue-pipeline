@@ -1,11 +1,8 @@
 package uk.ac.wellcome.platform.transformer.mets.store
 
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.akka.fixtures.Akka
-import uk.ac.wellcome.platform.transformer.mets.fixtures.{
-  LocalStackS3Fixtures,
-  STSFixtures
-}
+import uk.ac.wellcome.platform.transformer.mets.fixtures.{LocalStackS3Fixtures, STSFixtures}
 import uk.ac.wellcome.storage.{Identified, ObjectLocation}
 import uk.ac.wellcome.storage.store.TypedStoreEntry
 

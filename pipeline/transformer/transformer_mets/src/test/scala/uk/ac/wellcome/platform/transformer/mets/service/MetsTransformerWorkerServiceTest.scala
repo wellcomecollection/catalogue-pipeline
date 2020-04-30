@@ -2,8 +2,8 @@ package uk.ac.wellcome.platform.transformer.mets.service
 
 import com.amazonaws.auth.BasicSessionCredentials
 import com.amazonaws.services.s3.AmazonS3
-import org.scalatest.FunSpec
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.Implicits._
@@ -16,11 +16,7 @@ import uk.ac.wellcome.mets_adapter.models.MetsLocation
 import uk.ac.wellcome.models.generators.RandomStrings
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.mets.client.ClientFactory
-import uk.ac.wellcome.platform.transformer.mets.fixtures.{
-  LocalStackS3Fixtures,
-  MetsGenerators,
-  STSFixtures
-}
+import uk.ac.wellcome.platform.transformer.mets.fixtures.{LocalStackS3Fixtures, MetsGenerators, STSFixtures}
 import uk.ac.wellcome.platform.transformer.mets.store.TemporaryCredentialsStore
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore

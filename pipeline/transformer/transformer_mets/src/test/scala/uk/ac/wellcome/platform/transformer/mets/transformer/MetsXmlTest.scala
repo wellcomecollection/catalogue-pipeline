@@ -1,6 +1,7 @@
 package uk.ac.wellcome.platform.transformer.mets.transformer
 
 import org.apache.commons.io.IOUtils
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.platform.transformer.mets.fixtures.MetsGenerators
 

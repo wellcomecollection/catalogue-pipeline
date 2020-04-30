@@ -2,6 +2,7 @@ package uk.ac.wellcome.platform.transformer.mets.transformer
 
 import org.scalatest.matchers.should.Matchers
 import org.apache.commons.io.IOUtils
+import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.mets_adapter.models.MetsLocation
 import uk.ac.wellcome.models.work.internal.License
 import uk.ac.wellcome.platform.transformer.mets.fixtures.MetsGenerators
