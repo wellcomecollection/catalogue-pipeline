@@ -4,8 +4,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import akka.http.scaladsl.model.headers.OAuth2BearerToken
 import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.mets_adapter.fixtures.BagsWiremock
 

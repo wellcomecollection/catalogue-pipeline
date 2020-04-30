@@ -1,5 +1,6 @@
 package uk.ac.wellcome.mets_adapter.models
 
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
 class BagTest extends AnyFunSpec with Matchers {
