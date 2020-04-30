@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.sierra_reader.services
 import java.time.Instant
 
 import akka.Done
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.PutObjectResult
 import grizzled.slf4j.Logging

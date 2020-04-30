@@ -1,8 +1,9 @@
 package uk.ac.wellcome.platform.transformer.calm
 
 import java.time.Instant
-import org.scalatest.matchers.should.Matchers
 
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal._
 
 class CalmTransformerTest extends AnyFunSpec with Matchers {

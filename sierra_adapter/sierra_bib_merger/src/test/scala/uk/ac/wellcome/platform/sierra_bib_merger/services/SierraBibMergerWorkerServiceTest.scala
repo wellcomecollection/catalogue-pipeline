@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.sierra_bib_merger.services
 
 import org.mockito.Mockito.{never, verify}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.fixtures.{Messaging, SQS}

@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.transformer.miro.services
 
 import scala.util.Try
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.matchers.should.Matchers
 import scala.util.Try
 

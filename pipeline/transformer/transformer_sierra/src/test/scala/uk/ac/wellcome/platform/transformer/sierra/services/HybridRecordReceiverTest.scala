@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.transformer.sierra.services
 import scala.util.{Random, Try}
 import scala.concurrent.ExecutionException
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.mockito.Mockito.when
 import org.mockito.Matchers.any
 import com.amazonaws.services.sns.AmazonSNS

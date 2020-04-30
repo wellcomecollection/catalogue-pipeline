@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.snapshot_generator.services
 import scala.concurrent.{ExecutionContext, Future}
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.Uri
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import akka.stream.alpakka.s3.scaladsl.{MultipartUploadResult, S3Client}
 import akka.stream.scaladsl.{Sink, Source}
 import akka.util.ByteString

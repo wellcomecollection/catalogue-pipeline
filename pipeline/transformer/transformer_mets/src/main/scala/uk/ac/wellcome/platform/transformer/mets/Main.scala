@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.transformer.mets
 
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClientBuilder
@@ -36,8 +36,8 @@ object Main extends WellcomeTypesafeApp with AWSClientConfigBuilder {
       AkkaBuilder.buildExecutionContext()
     implicit val actorSystem: ActorSystem =
       AkkaBuilder.buildActorSystem()
-    implicit val materializer: ActorMaterializer =
-      AkkaBuilder.buildActorMaterializer()
+    implicit val materializer: Materializer =
+      AkkaBuilder.buildMaterializer()
     implicit val s3Client =
       S3Builder.buildS3Client(config)
     implicit val msgStore =

@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.snapshot_generator.fixtures
 
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import akka.stream.alpakka.s3.scaladsl.S3Client
 import uk.ac.wellcome.config.models.AWSClientConfig
 import uk.ac.wellcome.platform.snapshot_generator.config.builders.AkkaS3Builder

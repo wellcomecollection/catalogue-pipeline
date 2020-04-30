@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.snapshot_generator.config.builders
 
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import akka.stream.alpakka.s3.impl.ListBucketVersion2
 import akka.stream.alpakka.s3.{MemoryBufferType, S3Settings}
 import akka.stream.alpakka.s3.scaladsl.S3Client

@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.sierra_items_to_dynamo
 
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import com.typesafe.config.Config
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
@@ -23,8 +23,8 @@ object Main extends WellcomeTypesafeApp {
     implicit val actorSystem: ActorSystem = AkkaBuilder.buildActorSystem()
     implicit val executionContext: ExecutionContext =
       AkkaBuilder.buildExecutionContext()
-    implicit val materializer: ActorMaterializer =
-      AkkaBuilder.buildActorMaterializer()
+    implicit val materializer: Materializer =
+      AkkaBuilder.buildMaterializer()
 
     val versionedHybridStore =
       VHSBuilder.buildVHS[SierraItemRecord, EmptyMetadata](config)

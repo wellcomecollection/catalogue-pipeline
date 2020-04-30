@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.snapshot_generator.fixtures
 
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import com.sksamuel.elastic4s.Index
 import org.scalatest.Suite
 import uk.ac.wellcome.messaging.sns.NotificationMessage
