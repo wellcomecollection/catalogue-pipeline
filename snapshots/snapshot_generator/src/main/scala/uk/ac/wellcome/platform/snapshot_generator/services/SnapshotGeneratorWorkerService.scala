@@ -24,8 +24,9 @@ class SnapshotGeneratorWorkerService(
       snapshotJob <- Future.fromTry(fromJson[SnapshotJob](message.body))
       completedSnapshotJob <- snapshotService.generateSnapshot(
         snapshotJob = snapshotJob)
-      _ <- Future.fromTry(snsWriter.sendT(
-        completedSnapshotJob
-      ))
+      _ <- Future.fromTry(
+        snsWriter.sendT(
+          completedSnapshotJob
+        ))
     } yield ()
 }

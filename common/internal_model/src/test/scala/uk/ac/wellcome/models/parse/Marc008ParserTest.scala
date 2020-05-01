@@ -4,7 +4,12 @@ import org.scalatest.matchers.should.Matchers
 import java.time.LocalDate
 
 import org.scalatest.funspec.AnyFunSpec
-import uk.ac.wellcome.models.work.internal.{InstantRange, Period, Place, ProductionEvent}
+import uk.ac.wellcome.models.work.internal.{
+  InstantRange,
+  Period,
+  Place,
+  ProductionEvent
+}
 
 class Marc008ParserTest extends AnyFunSpec with Matchers {
 

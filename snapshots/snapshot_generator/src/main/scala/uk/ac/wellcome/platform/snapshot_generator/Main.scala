@@ -33,8 +33,13 @@ object Main extends WellcomeTypesafeApp {
 
     new SnapshotGeneratorWorkerService(
       snapshotService = snapshotService,
-      sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config)(actorSystem, materializer, executionContext),
-      snsWriter = SNSBuilder.buildSNSMessageSender(config, subject = s"source: ${this.getClass.getSimpleName}.processMessage",
+      sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config)(
+        actorSystem,
+        materializer,
+        executionContext),
+      snsWriter = SNSBuilder.buildSNSMessageSender(
+        config,
+        subject = s"source: ${this.getClass.getSimpleName}.processMessage",
       )
     )
   }

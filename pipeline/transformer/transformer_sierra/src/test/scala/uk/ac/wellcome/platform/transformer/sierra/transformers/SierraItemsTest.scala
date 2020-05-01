@@ -2,13 +2,23 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.transformable.sierra.{SierraBibNumber, SierraItemNumber}
+import uk.ac.wellcome.models.transformable.sierra.{
+  SierraBibNumber,
+  SierraItemNumber
+}
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.transformer.sierra.source.{SierraBibData, SierraItemData, VarField}
+import uk.ac.wellcome.platform.transformer.sierra.source.{
+  SierraBibData,
+  SierraItemData,
+  VarField
+}
 import uk.ac.wellcome.platform.transformer.sierra.source.sierra.SierraSourceLocation
 import uk.ac.wellcome.platform.transformer.sierra.generators.SierraDataGenerators
 
-class SierraItemsTest extends AnyFunSpec with Matchers with SierraDataGenerators {
+class SierraItemsTest
+    extends AnyFunSpec
+    with Matchers
+    with SierraDataGenerators {
 
   it("creates both forms of the Sierra ID in 'identifiers'") {
     val itemData = createSierraItemData

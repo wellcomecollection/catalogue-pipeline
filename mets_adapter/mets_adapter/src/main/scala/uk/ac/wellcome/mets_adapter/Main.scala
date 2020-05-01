@@ -11,7 +11,13 @@ import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import uk.ac.wellcome.mets_adapter.services.{BagRetriever, HttpBagRetriever, MetsAdapterWorkerService, MetsStore, TokenService}
+import uk.ac.wellcome.mets_adapter.services.{
+  BagRetriever,
+  HttpBagRetriever,
+  MetsAdapterWorkerService,
+  MetsStore,
+  TokenService
+}
 import uk.ac.wellcome.storage.store.dynamo.DynamoSingleVersionStore
 import uk.ac.wellcome.storage.typesafe.DynamoBuilder
 

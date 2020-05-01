@@ -6,7 +6,10 @@ import com.amazonaws.services.s3.AmazonS3
 import com.typesafe.config.Config
 import io.circe.Json
 import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
-import uk.ac.wellcome.platform.idminter.config.builders.{IdentifiersTableBuilder, RDSBuilder}
+import uk.ac.wellcome.platform.idminter.config.builders.{
+  IdentifiersTableBuilder,
+  RDSBuilder
+}
 import uk.ac.wellcome.platform.idminter.database.IdentifiersDao
 import uk.ac.wellcome.platform.idminter.models.IdentifiersTable
 import uk.ac.wellcome.platform.idminter.services.IdMinterWorkerService

@@ -19,7 +19,8 @@ class AssumeRoleClientProvider[T](
   ec: ExecutionContext) {
   private val client = new AtomicReference[T]
 
-  actorSystem.scheduler.scheduleWithFixedDelay(0 milliseconds, interval)(() => refreshClient())
+  actorSystem.scheduler.scheduleWithFixedDelay(0 milliseconds, interval)(() =>
+    refreshClient())
 
   def getClient: Either[Throwable, T] = {
     Option(client.get()) match {

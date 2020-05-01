@@ -6,7 +6,10 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.memory.MemoryIndividualMessageSender
 import uk.ac.wellcome.platform.reindex.reindex_worker.fixtures.WorkerServiceFixture
-import uk.ac.wellcome.platform.reindex.reindex_worker.models.{CompleteReindexParameters, PartialReindexParameters}
+import uk.ac.wellcome.platform.reindex.reindex_worker.models.{
+  CompleteReindexParameters,
+  PartialReindexParameters
+}
 
 class ReindexWorkerFeatureTest
     extends AnyFunSpec

@@ -2,7 +2,12 @@ package uk.ac.wellcome.display.models
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.internal.{DigitalLocation, License, LocationType, PhysicalLocation}
+import uk.ac.wellcome.models.work.internal.{
+  DigitalLocation,
+  License,
+  LocationType,
+  PhysicalLocation
+}
 
 class DisplayLocationTest extends AnyFunSpec with Matchers {
 

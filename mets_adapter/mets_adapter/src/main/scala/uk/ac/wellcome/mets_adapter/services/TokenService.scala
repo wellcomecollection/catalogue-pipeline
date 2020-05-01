@@ -30,7 +30,8 @@ class TokenService(url: String,
   private val client = Client(config)
   private val token = new AtomicReference[OAuth2BearerToken]
 
-  actorSystem.scheduler.scheduleWithFixedDelay(0 milliseconds, interval)(() => refreshToken())
+  actorSystem.scheduler.scheduleWithFixedDelay(0 milliseconds, interval)(() =>
+    refreshToken())
 
   private def refreshToken() =
     client

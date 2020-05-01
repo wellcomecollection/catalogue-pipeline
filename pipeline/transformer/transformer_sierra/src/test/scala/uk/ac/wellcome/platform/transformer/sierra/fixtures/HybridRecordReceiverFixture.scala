@@ -4,7 +4,13 @@ import software.amazon.awssdk.services.sns.SnsClient
 
 import scala.util.Random
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
-import uk.ac.wellcome.platform.transformer.sierra.services.{BackwardsCompatHybridRecordReceiver, BackwardsCompatObjectLocation, HybridRecord, UpcomingHybridRecordReceiver, UpcomingMsg}
+import uk.ac.wellcome.platform.transformer.sierra.services.{
+  BackwardsCompatHybridRecordReceiver,
+  BackwardsCompatObjectLocation,
+  HybridRecord,
+  UpcomingHybridRecordReceiver,
+  UpcomingMsg
+}
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
@@ -16,7 +22,12 @@ import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig}
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import uk.ac.wellcome.storage.store.{HybridStoreEntry, Store, TypedStoreEntry}
 import uk.ac.wellcome.storage.store.memory.MemoryStore
-import uk.ac.wellcome.storage.{ObjectLocation, StoreReadError, StoreWriteError, Version}
+import uk.ac.wellcome.storage.{
+  ObjectLocation,
+  StoreReadError,
+  StoreWriteError,
+  Version
+}
 
 trait BackwardsCompatHybridRecordReceiverFixture extends BigMessagingFixture {
 

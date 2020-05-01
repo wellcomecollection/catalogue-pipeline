@@ -4,7 +4,11 @@ import akka.actor.ActorSystem
 import akka.stream.Materializer
 import com.sksamuel.elastic4s.Index
 import org.scalatest.Suite
-import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig, SNSMessageSender}
+import uk.ac.wellcome.messaging.sns.{
+  NotificationMessage,
+  SNSConfig,
+  SNSMessageSender
+}
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
@@ -40,7 +44,8 @@ trait WorkerServiceFixture
       }
     }
 
-  def withSNSMessageSender[R](topic: Topic)(testWith: TestWith[SNSMessageSender,R]): R = {
+  def withSNSMessageSender[R](topic: Topic)(
+    testWith: TestWith[SNSMessageSender, R]): R = {
     testWith(new SNSMessageSender(snsClient, SNSConfig(topic.arn), ""))
   }
 }

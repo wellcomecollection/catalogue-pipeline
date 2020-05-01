@@ -11,7 +11,11 @@ import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.models.work.generators.{GenreGenerators, SubjectGenerators, WorksGenerators}
+import uk.ac.wellcome.models.work.generators.{
+  GenreGenerators,
+  SubjectGenerators,
+  WorksGenerators
+}
 
 class AggregationsTest
     extends AnyFunSpec

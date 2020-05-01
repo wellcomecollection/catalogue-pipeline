@@ -8,11 +8,15 @@ import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import software.amazon.awssdk.services.cloudwatch.model.StandardUnit
-import software.amazon.awssdk.services.sns.model.{SubscribeRequest, SubscribeResponse, UnsubscribeRequest}
+import software.amazon.awssdk.services.sns.model.{
+  SubscribeRequest,
+  SubscribeResponse,
+  UnsubscribeRequest
+}
 import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
-import uk.ac.wellcome.fixtures.{Fixture, TestWith, fixture}
+import uk.ac.wellcome.fixtures.{fixture, Fixture, TestWith}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
@@ -71,18 +75,26 @@ class BigMessagingFixtureIntegrationTest
         }
     }
 
-  def withLocalStackSubscription[R](queue: Queue,
-                                    topic: Topic): Fixture[SubscribeResponse, R] =
+  def withLocalStackSubscription[R](
+    queue: Queue,
+    topic: Topic): Fixture[SubscribeResponse, R] =
     fixture[SubscribeResponse, R](
       create = {
-        val subRequest = SubscribeRequest.builder().topicArn(topic.arn).protocol("sqs").endpoint(queue.arn).build()
+        val subRequest = SubscribeRequest
+          .builder()
+          .topicArn(topic.arn)
+          .protocol("sqs")
+          .endpoint(queue.arn)
+          .build()
         info(s"Subscribing queue ${queue.arn} to topic ${topic.arn}")
 
         localStackSnsClient.subscribe(subRequest)
       },
       destroy = { subscribeResult =>
         val unsubscribeRequest =
-          UnsubscribeRequest.builder.subscriptionArn(subscribeResult.subscriptionArn()).build()
+          UnsubscribeRequest.builder
+            .subscriptionArn(subscribeResult.subscriptionArn())
+            .build()
         localStackSnsClient.unsubscribe(unsubscribeRequest)
       }
     )

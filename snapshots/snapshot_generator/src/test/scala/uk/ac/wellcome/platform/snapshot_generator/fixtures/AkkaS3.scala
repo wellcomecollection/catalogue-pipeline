@@ -9,8 +9,8 @@ import uk.ac.wellcome.fixtures.TestWith
 
 trait AkkaS3 extends S3Fixtures {
 
-  def withS3AkkaSettings[R](endpoint: String)(testWith: TestWith[S3Settings, R])(
-    implicit actorSystem: ActorSystem): R = {
+  def withS3AkkaSettings[R](endpoint: String)(
+    testWith: TestWith[S3Settings, R])(implicit actorSystem: ActorSystem): R = {
     val s3AkkaClient = AkkaS3Builder.buildAkkaS3Settings(
       awsClientConfig = AWSClientConfig(
         accessKey = Some(accessKey),

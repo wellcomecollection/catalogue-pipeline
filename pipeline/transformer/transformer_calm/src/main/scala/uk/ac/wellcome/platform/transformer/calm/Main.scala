@@ -15,7 +15,10 @@ import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.typesafe.S3Builder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
-import uk.ac.wellcome.typesafe.config.builders.{AWSClientConfigBuilder, AkkaBuilder}
+import uk.ac.wellcome.typesafe.config.builders.{
+  AWSClientConfigBuilder,
+  AkkaBuilder
+}
 
 import scala.concurrent.ExecutionContext
 

@@ -14,13 +14,19 @@ import grizzled.slf4j.Logging
 import uk.ac.wellcome.display.models.{DisplayWork, _}
 import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.models.work.internal.IdentifiedWork
-import uk.ac.wellcome.platform.snapshot_generator.flow.{DisplayWorkToJsonStringFlow, IdentifiedWorkToVisibleDisplayWork, StringToGzipFlow}
-import uk.ac.wellcome.platform.snapshot_generator.models.{CompletedSnapshotJob, SnapshotJob}
+import uk.ac.wellcome.platform.snapshot_generator.flow.{
+  DisplayWorkToJsonStringFlow,
+  IdentifiedWorkToVisibleDisplayWork,
+  StringToGzipFlow
+}
+import uk.ac.wellcome.platform.snapshot_generator.models.{
+  CompletedSnapshotJob,
+  SnapshotJob
+}
 import uk.ac.wellcome.platform.snapshot_generator.source.ElasticsearchWorksSource
 
-class SnapshotService(
-                     akkaS3Settings: S3Settings,
-                       elasticClient: ElasticClient,
+class SnapshotService(akkaS3Settings: S3Settings,
+                      elasticClient: ElasticClient,
                       elasticConfig: ElasticConfig)(
   implicit actorSystem: ActorSystem,
   materializer: Materializer,
@@ -85,9 +91,10 @@ class SnapshotService(
 
     val s3Sink: Sink[ByteString, Future[MultipartUploadResult]] =
       S3.multipartUpload(
-        bucket = publicBucketName,
-        key = publicObjectKey
-      ).withAttributes(S3Attributes.settings(akkaS3Settings))
+          bucket = publicBucketName,
+          key = publicObjectKey
+        )
+        .withAttributes(S3Attributes.settings(akkaS3Settings))
 
     gzipContent.runWith(s3Sink)
   }

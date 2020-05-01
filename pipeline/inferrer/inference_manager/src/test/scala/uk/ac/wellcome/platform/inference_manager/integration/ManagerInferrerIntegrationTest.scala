@@ -10,7 +10,12 @@ import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.ImageGenerators
-import uk.ac.wellcome.models.work.internal.{AugmentedImage, Identified, InferredData, MergedImage}
+import uk.ac.wellcome.models.work.internal.{
+  AugmentedImage,
+  Identified,
+  InferredData,
+  MergedImage
+}
 import uk.ac.wellcome.platform.inference_manager.fixtures.InferenceManagerWorkerServiceFixture
 import uk.ac.wellcome.platform.inference_manager.services.FeatureVectorInferrerAdapter
 

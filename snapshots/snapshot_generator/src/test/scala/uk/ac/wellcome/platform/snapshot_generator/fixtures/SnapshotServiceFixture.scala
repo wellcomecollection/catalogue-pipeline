@@ -22,9 +22,8 @@ trait SnapshotServiceFixture extends ElasticsearchFixtures { this: Suite =>
   def withSnapshotService[R](s3AkkaSettings: S3Settings,
                              worksIndex: Index,
                              elasticClient: ElasticClient = elasticClient)(
-    testWith: TestWith[SnapshotService, R])(
-    implicit actorSystem: ActorSystem,
-    materializer: Materializer): R = {
+    testWith: TestWith[SnapshotService, R])(implicit actorSystem: ActorSystem,
+                                            materializer: Materializer): R = {
     val elasticConfig = ElasticConfig(worksIndex, Index(""))
 
     val snapshotService = new SnapshotService(

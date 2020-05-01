@@ -6,7 +6,10 @@ import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
 import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
-import uk.ac.wellcome.elasticsearch.{ElasticsearchIndexCreator, ImagesIndexConfig}
+import uk.ac.wellcome.elasticsearch.{
+  ElasticsearchIndexCreator,
+  ImagesIndexConfig
+}
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal.AugmentedImage
 import uk.ac.wellcome.platform.ingestor.common.builders.IngestorConfigBuilder

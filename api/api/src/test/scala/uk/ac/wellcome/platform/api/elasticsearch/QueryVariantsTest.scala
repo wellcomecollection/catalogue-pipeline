@@ -5,7 +5,12 @@ import com.sksamuel.elastic4s.Index
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.concurrent.ScalaFutures
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
-import uk.ac.wellcome.models.work.generators.{ContributorGenerators, GenreGenerators, SubjectGenerators, WorksGenerators}
+import uk.ac.wellcome.models.work.generators.{
+  ContributorGenerators,
+  GenreGenerators,
+  SubjectGenerators,
+  WorksGenerators
+}
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
 import uk.ac.wellcome.platform.api.services.{
   ElasticsearchService,

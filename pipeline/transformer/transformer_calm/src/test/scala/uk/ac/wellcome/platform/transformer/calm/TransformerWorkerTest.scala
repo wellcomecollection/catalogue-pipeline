@@ -14,7 +14,12 @@ import uk.ac.wellcome.bigmessaging.memory.MemoryBigMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.internal.{SourceIdentifier, TransformedBaseWork, UnidentifiedWork, WorkData}
+import uk.ac.wellcome.models.work.internal.{
+  SourceIdentifier,
+  TransformedBaseWork,
+  UnidentifiedWork,
+  WorkData
+}
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 import uk.ac.wellcome.storage.Version
 import uk.ac.wellcome.storage.maxima.Maxima

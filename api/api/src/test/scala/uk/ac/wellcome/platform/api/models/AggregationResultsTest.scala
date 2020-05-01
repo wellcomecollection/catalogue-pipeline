@@ -1,11 +1,19 @@
 package uk.ac.wellcome.platform.api.models
 
 import com.sksamuel.elastic4s.requests.common.Shards
-import com.sksamuel.elastic4s.requests.searches.{SearchHits, SearchResponse, Total}
+import com.sksamuel.elastic4s.requests.searches.{
+  SearchHits,
+  SearchResponse,
+  Total
+}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal.WorkType
-import uk.ac.wellcome.models.work.internal.WorkType.{Books, ManuscriptsAsian, Music}
+import uk.ac.wellcome.models.work.internal.WorkType.{
+  Books,
+  ManuscriptsAsian,
+  Music
+}
 
 class AggregationResultsTest extends AnyFunSpec with Matchers {
   it("destructures a single aggregation result") {

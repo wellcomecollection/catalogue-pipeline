@@ -5,7 +5,10 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 
-class DisplayCollectionTest extends AnyFunSpec with Matchers with WorksGenerators {
+class DisplayCollectionTest
+    extends AnyFunSpec
+    with Matchers
+    with WorksGenerators {
 
   def work(path: String, level: CollectionLevel) =
     createIdentifiedWorkWith(

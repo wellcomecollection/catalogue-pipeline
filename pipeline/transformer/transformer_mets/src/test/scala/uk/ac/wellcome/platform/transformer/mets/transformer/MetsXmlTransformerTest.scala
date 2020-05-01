@@ -9,7 +9,10 @@ import uk.ac.wellcome.platform.transformer.mets.fixtures.MetsGenerators
 import uk.ac.wellcome.storage.store.memory.MemoryStore
 import uk.ac.wellcome.storage.ObjectLocation
 
-class MetsXmlTransformerTest extends AnyFunSpec with Matchers with MetsGenerators {
+class MetsXmlTransformerTest
+    extends AnyFunSpec
+    with Matchers
+    with MetsGenerators {
 
   it("should transform METS XML") {
     val xml = loadXmlFile("/b30246039.xml")

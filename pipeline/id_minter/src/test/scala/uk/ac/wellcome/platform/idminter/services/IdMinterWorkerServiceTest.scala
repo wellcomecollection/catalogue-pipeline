@@ -7,7 +7,10 @@ import org.scalatest.matchers.should.Matchers
 import scalikejdbc._
 import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
-import uk.ac.wellcome.platform.idminter.database.{FieldDescription, IdentifiersDao}
+import uk.ac.wellcome.platform.idminter.database.{
+  FieldDescription,
+  IdentifiersDao
+}
 import uk.ac.wellcome.platform.idminter.fixtures
 import uk.ac.wellcome.platform.idminter.fixtures.WorkerServiceFixture
 

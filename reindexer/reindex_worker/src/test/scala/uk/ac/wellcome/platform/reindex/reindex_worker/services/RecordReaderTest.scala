@@ -5,8 +5,15 @@ import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.platform.reindex.reindex_worker.fixtures.{RecordReaderFixture, ReindexableTable}
-import uk.ac.wellcome.platform.reindex.reindex_worker.models.{CompleteReindexParameters, PartialReindexParameters, SpecificReindexParameters}
+import uk.ac.wellcome.platform.reindex.reindex_worker.fixtures.{
+  RecordReaderFixture,
+  ReindexableTable
+}
+import uk.ac.wellcome.platform.reindex.reindex_worker.models.{
+  CompleteReindexParameters,
+  PartialReindexParameters,
+  SpecificReindexParameters
+}
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
 
 class RecordReaderTest

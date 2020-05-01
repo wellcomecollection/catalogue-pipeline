@@ -54,11 +54,14 @@ object AkkaS3Builder extends AWSClientConfigBuilder with Logging {
   private def akkaS3Settings(credentialsProvider: AWSCredentialsProvider,
                              regionProvider: AwsRegionProvider,
                              endpointUrl: Option[String])(
-                              implicit actorSystem: ActorSystem): S3Settings = {
-    val settings = S3Settings().withCredentialsProvider(credentialsProvider).withS3RegionProvider(regionProvider).withPathStyleAccess(true)
+    implicit actorSystem: ActorSystem): S3Settings = {
+    val settings = S3Settings()
+      .withCredentialsProvider(credentialsProvider)
+      .withS3RegionProvider(regionProvider)
+      .withPathStyleAccess(true)
     endpointUrl match {
       case Some(e) => settings.withEndpointUrl(e)
-      case None => settings
+      case None    => settings
     }
   }
 }

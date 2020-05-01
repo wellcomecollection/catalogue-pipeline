@@ -8,7 +8,10 @@ import org.scalatest.matchers.should.Matchers
 
 import scala.util.Try
 import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.models.work.internal.{TransformedBaseWork, UnidentifiedWork}
+import uk.ac.wellcome.models.work.internal.{
+  TransformedBaseWork,
+  UnidentifiedWork
+}
 import uk.ac.wellcome.platform.transformer.miro.exceptions.MiroTransformerException
 import uk.ac.wellcome.platform.transformer.miro.fixtures.MiroVHSRecordReceiverFixture
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators

@@ -5,7 +5,10 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.platform.transformer.sierra.exceptions.ShouldNotTransformException
 import uk.ac.wellcome.platform.transformer.sierra.generators.SierraDataGenerators
 
-class SierraTitleTest extends AnyFunSpec with Matchers with SierraDataGenerators {
+class SierraTitleTest
+    extends AnyFunSpec
+    with Matchers
+    with SierraDataGenerators {
 
   it("passes through the title from the bib record") {
     val title = "Tickling a tiny turtle in Tenerife"

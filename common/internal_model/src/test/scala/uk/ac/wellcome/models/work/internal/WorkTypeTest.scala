@@ -6,7 +6,10 @@ import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.utils.JsonAssertions
 
-class WorkTypeTest extends AnyFunSpec with JsonAssertions with ScalaCheckPropertyChecks{
+class WorkTypeTest
+    extends AnyFunSpec
+    with JsonAssertions
+    with ScalaCheckPropertyChecks {
 
   it("serialises WorkType to JSON") {
     forAll { workType: WorkType =>

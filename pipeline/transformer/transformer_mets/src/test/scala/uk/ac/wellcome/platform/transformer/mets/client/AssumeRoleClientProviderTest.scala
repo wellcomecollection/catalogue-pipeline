@@ -10,7 +10,10 @@ import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.platform.transformer.mets.fixtures.{LocalStackS3Fixtures, STSFixtures}
+import uk.ac.wellcome.platform.transformer.mets.fixtures.{
+  LocalStackS3Fixtures,
+  STSFixtures
+}
 
 import scala.collection.mutable
 import scala.concurrent.duration._

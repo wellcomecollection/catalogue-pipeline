@@ -12,7 +12,11 @@ import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
-import uk.ac.wellcome.platform.ingestor.common.fixtures.{IngestorFixtures, SampleDocument, SampleDocumentData}
+import uk.ac.wellcome.platform.ingestor.common.fixtures.{
+  IngestorFixtures,
+  SampleDocument,
+  SampleDocumentData
+}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

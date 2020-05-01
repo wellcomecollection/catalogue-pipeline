@@ -1,6 +1,10 @@
 package uk.ac.wellcome.platform.api.services
 
-import com.sksamuel.elastic4s.requests.searches.aggs.{AbstractAggregation, Aggregation, FilterAggregation}
+import com.sksamuel.elastic4s.requests.searches.aggs.{
+  AbstractAggregation,
+  Aggregation,
+  FilterAggregation
+}
 import com.sksamuel.elastic4s.requests.searches.queries.{BoolQuery, Query}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers

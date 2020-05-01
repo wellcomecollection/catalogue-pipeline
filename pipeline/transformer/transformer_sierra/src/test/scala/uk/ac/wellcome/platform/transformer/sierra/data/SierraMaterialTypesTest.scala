@@ -2,7 +2,10 @@ package uk.ac.wellcome.platform.transformer.sierra.data
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.internal.WorkType.{Books, StudentDissertations}
+import uk.ac.wellcome.models.work.internal.WorkType.{
+  Books,
+  StudentDissertations
+}
 import uk.ac.wellcome.platform.transformer.sierra.exceptions.SierraTransformerException
 
 class SierraMaterialTypesTest extends AnyFunSpec with Matchers {

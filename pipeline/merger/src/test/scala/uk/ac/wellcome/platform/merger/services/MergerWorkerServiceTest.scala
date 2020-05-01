@@ -8,7 +8,10 @@ import software.amazon.awssdk.services.cloudwatch.model.StandardUnit
 import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.merger.fixtures.{MatcherResultFixture, WorkerServiceFixture}
+import uk.ac.wellcome.platform.merger.fixtures.{
+  MatcherResultFixture,
+  WorkerServiceFixture
+}
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture

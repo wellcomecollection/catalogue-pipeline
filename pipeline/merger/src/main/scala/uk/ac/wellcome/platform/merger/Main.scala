@@ -5,7 +5,12 @@ import akka.stream.Materializer
 import com.typesafe.config.Config
 
 import scala.concurrent.ExecutionContext
-import uk.ac.wellcome.models.work.internal.{BaseWork, Identifiable, MergedImage, TransformedBaseWork}
+import uk.ac.wellcome.models.work.internal.{
+  BaseWork,
+  Identifiable,
+  MergedImage,
+  TransformedBaseWork
+}
 import uk.ac.wellcome.platform.merger.services._
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
