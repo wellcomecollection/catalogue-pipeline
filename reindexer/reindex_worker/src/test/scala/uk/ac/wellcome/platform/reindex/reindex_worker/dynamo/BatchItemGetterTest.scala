@@ -1,6 +1,7 @@
 package uk.ac.wellcome.platform.reindex.reindex_worker.dynamo
 
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.platform.reindex.reindex_worker.fixtures.ReindexDynamoFixtures
