@@ -9,6 +9,7 @@ import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.ElasticClient
 import com.sksamuel.elastic4s.http.JavaClientExceptionWrapper
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
@@ -17,17 +18,11 @@ import uk.ac.wellcome.display.json.DisplayJsonUtil._
 import uk.ac.wellcome.display.models.{ApiVersions, DisplayWork, WorksIncludes}
 import uk.ac.wellcome.elasticsearch.ElasticClientBuilder
 import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.platform.snapshot_generator.fixtures.{
-  AkkaS3,
-  SnapshotServiceFixture
-}
-import uk.ac.wellcome.platform.snapshot_generator.models.{
-  CompletedSnapshotJob,
-  SnapshotJob
-}
+import uk.ac.wellcome.platform.snapshot_generator.fixtures.{AkkaS3, SnapshotServiceFixture}
+import uk.ac.wellcome.platform.snapshot_generator.models.{CompletedSnapshotJob, SnapshotJob}
 import uk.ac.wellcome.platform.snapshot_generator.test.utils.GzipUtils
-import uk.ac.wellcome.storage.fixtures.S3
-import uk.ac.wellcome.storage.fixtures.S3.Bucket
+import uk.ac.wellcome.storage.fixtures.S3Fixtures
+import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 
 class SnapshotServiceTest
     extends AnyFunSpec
@@ -35,7 +30,7 @@ class SnapshotServiceTest
     with Matchers
     with Akka
     with AkkaS3
-    with S3
+    with S3Fixtures
     with GzipUtils
     with IntegrationPatience
     with SnapshotServiceFixture
@@ -45,10 +40,10 @@ class SnapshotServiceTest
     testWith: TestWith[(SnapshotService, Index, Bucket), R]): R =
     withActorSystem { implicit actorSystem =>
       withMaterializer(actorSystem) { implicit materializer =>
-        withS3AkkaClient { s3Client =>
+        withS3AkkaSettings { s3Settings =>
           withLocalWorksIndex { worksIndex =>
             withLocalS3Bucket { bucket =>
-              withSnapshotService(s3Client, worksIndex) { snapshotService =>
+              withSnapshotService(s3Settings, worksIndex) { snapshotService =>
                 {
                   testWith((snapshotService, worksIndex, bucket))
                 }
@@ -180,7 +175,7 @@ class SnapshotServiceTest
   it("returns a failed future if it fails reading from elasticsearch") {
     withActorSystem { implicit actorSystem =>
       withMaterializer(actorSystem) { implicit materializer =>
-        withS3AkkaClient { s3Client =>
+        withS3AkkaSettings { s3Settings =>
           val brokenElasticClient: ElasticClient = ElasticClientBuilder.create(
             hostname = "localhost",
             port = 8888,
@@ -190,7 +185,7 @@ class SnapshotServiceTest
           )
 
           withSnapshotService(
-            s3Client,
+            s3Settings,
             worksIndex = "wrong-index",
             elasticClient = brokenElasticClient) { brokenSnapshotService =>
             val snapshotJob = SnapshotJob(
@@ -224,8 +219,8 @@ class SnapshotServiceTest
     it("creates the correct object location with the default S3 endpoint") {
       withActorSystem { implicit actorSystem =>
         withMaterializer(actorSystem) { implicit materializer =>
-          withS3AkkaClient(endpoint = "") { s3Client =>
-            withSnapshotService(s3Client, worksIndex = "worksIndex") {
+          withS3AkkaSettings(endpoint = "") { s3Settings =>
+            withSnapshotService(s3Settings, worksIndex = "worksIndex") {
               snapshotService =>
                 snapshotService.buildLocation(
                   bucketName = "bukkit",

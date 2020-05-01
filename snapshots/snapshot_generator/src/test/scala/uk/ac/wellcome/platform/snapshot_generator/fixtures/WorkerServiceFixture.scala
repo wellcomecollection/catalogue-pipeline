@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import akka.stream.Materializer
 import com.sksamuel.elastic4s.Index
 import org.scalatest.Suite
-import uk.ac.wellcome.messaging.sns.NotificationMessage
+import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig, SNSMessageSender}
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
@@ -21,15 +21,15 @@ trait WorkerServiceFixture
   def withWorkerService[R](queue: Queue, topic: Topic, worksIndex: Index)(
     testWith: TestWith[SnapshotGeneratorWorkerService, R])(
     implicit actorSystem: ActorSystem,
-    materializer: ActorMaterializer): R =
-    withS3AkkaClient { s3AkkaClient =>
+    materializer: Materializer): R =
+    withS3AkkaSettings { s3AkkaClient =>
       withSnapshotService(s3AkkaClient, worksIndex) { snapshotService =>
         withSQSStream[NotificationMessage, R](queue) { sqsStream =>
-          withSNSWriter(topic) { snsWriter =>
+          withSNSMessageSender(topic) { messageSender =>
             val workerService = new SnapshotGeneratorWorkerService(
               snapshotService = snapshotService,
               sqsStream = sqsStream,
-              snsWriter = snsWriter
+              snsWriter = messageSender
             )
 
             workerService.run()
@@ -39,4 +39,8 @@ trait WorkerServiceFixture
         }
       }
     }
+
+  def withSNSMessageSender[R](topic: Topic)(testWith: TestWith[SNSMessageSender,R]): R = {
+    testWith(new SNSMessageSender(snsClient, SNSConfig(topic.arn), ""))
+  }
 }

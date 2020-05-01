@@ -26,15 +26,16 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildMaterializer()
 
     val snapshotService = new SnapshotService(
-      akkaS3Client = AkkaS3Builder.buildAkkaS3Client(config),
+      akkaS3Settings = AkkaS3Builder.buildAkkaS3Settings(config),
       elasticClient = ElasticBuilder.buildElasticClient(config),
       elasticConfig = ElasticConfig()
     )
 
     new SnapshotGeneratorWorkerService(
       snapshotService = snapshotService,
-      sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
-      snsWriter = SNSBuilder.buildSNSWriter(config)
+      sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config)(actorSystem, materializer, executionContext),
+      snsWriter = SNSBuilder.buildSNSMessageSender(config, subject = s"source: ${this.getClass.getSimpleName}.processMessage",
+      )
     )
   }
 }

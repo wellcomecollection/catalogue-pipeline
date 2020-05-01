@@ -92,7 +92,7 @@ object ExternalDependencies {
     val akka = "2.6.4"
     val akkaHttp = "10.1.11"
     val akkaHttpCirce = "1.32.0"
-    val akkaStreamAlpakka = "0.20"
+    val akkaStreamAlpakka = "1.1.2"
     val apacheCommons = "3.7"
     val apacheLogging = "2.8.2"
     val aws = "1.11.504"
@@ -352,6 +352,7 @@ object CatalogueDependencies {
 
   val snapshotGeneratorDependencies: Seq[ModuleID] =
     ExternalDependencies.mockitoDependencies ++
-      WellcomeDependencies.messagingTypesafeLibrary ++
+      WellcomeDependencies.newMessagingTypesafeLibrary ++
+      WellcomeDependencies.newStorageLibrary ++
       ExternalDependencies.alpakkaS3Dependencies
 }

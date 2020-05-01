@@ -1,23 +1,22 @@
 package uk.ac.wellcome.platform.snapshot_generator.fixtures
 
 import akka.actor.ActorSystem
-import akka.stream.Materializer
-import akka.stream.alpakka.s3.scaladsl.S3Client
+import akka.stream.alpakka.s3.S3Settings
 import uk.ac.wellcome.config.models.AWSClientConfig
 import uk.ac.wellcome.platform.snapshot_generator.config.builders.AkkaS3Builder
-import uk.ac.wellcome.storage.fixtures.S3
+import uk.ac.wellcome.storage.fixtures.S3Fixtures
 import uk.ac.wellcome.fixtures.TestWith
 
-trait AkkaS3 extends S3 {
+trait AkkaS3 extends S3Fixtures {
 
-  def withS3AkkaClient[R](endpoint: String)(testWith: TestWith[S3Client, R])(
-    implicit actorSystem: ActorSystem,
-    materializer: ActorMaterializer): R = {
-    val s3AkkaClient = AkkaS3Builder.buildAkkaS3Client(
+  def withS3AkkaSettings[R](endpoint: String)(testWith: TestWith[S3Settings, R])(
+    implicit actorSystem: ActorSystem): R = {
+    val s3AkkaClient = AkkaS3Builder.buildAkkaS3Settings(
       awsClientConfig = AWSClientConfig(
         accessKey = Some(accessKey),
         secretKey = Some(secretKey),
         endpoint = Some(endpoint),
+        maxConnections = None,
         region = "localhost"
       )
     )
@@ -25,10 +24,9 @@ trait AkkaS3 extends S3 {
     testWith(s3AkkaClient)
   }
 
-  def withS3AkkaClient[R](testWith: TestWith[S3Client, R])(
-    implicit actorSystem: ActorSystem,
-    materializer: ActorMaterializer): R =
-    withS3AkkaClient(endpoint = localS3EndpointUrl) { s3AkkaClient =>
+  def withS3AkkaSettings[R](testWith: TestWith[S3Settings, R])(
+    implicit actorSystem: ActorSystem): R =
+    withS3AkkaSettings(endpoint = localS3EndpointUrl) { s3AkkaClient =>
       testWith(s3AkkaClient)
     }
 }
