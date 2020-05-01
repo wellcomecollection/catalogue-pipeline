@@ -17,7 +17,7 @@ import javax.ws.rs.{GET, Path}
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.display.models._
-import uk.ac.wellcome.platform.api.rest.MultipleWorksResponse
+import uk.ac.wellcome.platform.api.rest.DisplayResultList
 
 class SwaggerDocs(apiConfig: ApiConfig) extends Logging {
 
@@ -355,7 +355,8 @@ trait MultipleWorksSwagger {
     description = "The works",
     content = Array(
       new Content(
-        schema = new Schema(implementation = classOf[MultipleWorksResponse]))
+        schema = new Schema(implementation =
+          classOf[DisplayResultList[DisplayWork, DisplayAggregations]]))
     )
   )
   @ApiResponse(

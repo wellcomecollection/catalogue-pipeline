@@ -1,6 +1,12 @@
 package uk.ac.wellcome.platform.api.rest
 
-import uk.ac.wellcome.platform.api.models.LicenseFilter
+import uk.ac.wellcome.platform.api.models.{
+  ApiConfig,
+  DocumentFilter,
+  LicenseFilter,
+  SearchQuery
+}
+import uk.ac.wellcome.platform.api.services.ImagesSearchOptions
 
 case class SingleImageParams(
   _index: Option[String]
@@ -16,9 +22,22 @@ case class MultipleImagesParams(
   page: Option[Int],
   pageSize: Option[Int],
   query: Option[String],
-  license: Option[LicenseFilter]
+  license: Option[LicenseFilter],
+  _index: Option[String]
 ) extends QueryParams
-    with Paginated
+    with Paginated {
+
+  def searchOptions(apiConfig: ApiConfig): ImagesSearchOptions =
+    ImagesSearchOptions(
+      searchQuery = query.map(SearchQuery(_)),
+      filters = filters,
+      pageSize = pageSize.getOrElse(apiConfig.defaultPageSize),
+      pageNumber = page.getOrElse(1)
+    )
+
+  private def filters: List[DocumentFilter] =
+    List(license).flatten
+}
 
 object MultipleImagesParams extends QueryParamsUtils {
   import CommonDecoders.licenseFilter
@@ -30,6 +49,7 @@ object MultipleImagesParams extends QueryParamsUtils {
         "pageSize".as[Int].?,
         "query".as[String].?,
         "license".as[LicenseFilter].?,
+        "_index".as[String].?
       )
     ).tflatMap { args =>
       val params = (MultipleImagesParams.apply _).tupled(args)

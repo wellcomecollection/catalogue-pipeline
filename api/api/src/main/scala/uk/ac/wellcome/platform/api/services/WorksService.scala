@@ -14,7 +14,7 @@ import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
 
 case class WorksSearchOptions(
-  filters: List[WorkFilter] = Nil,
+  filters: List[DocumentFilter] = Nil,
   pageSize: Int = 10,
   pageNumber: Int = 1,
   aggregations: List[AggregationRequest] = Nil,
@@ -41,7 +41,7 @@ class WorksService(searchService: ElasticsearchService)(
       }
 
   def listOrSearchWorks(index: Index, searchOptions: WorksSearchOptions)
-    : Future[Either[ElasticError, ResultList]] =
+    : Future[Either[ElasticError, ResultList[IdentifiedWork, Aggregations]]] =
     searchOptions.searchQuery match {
       case Some(_) =>
         searchWorks(index, searchOptions)
@@ -50,7 +50,7 @@ class WorksService(searchService: ElasticsearchService)(
     }
 
   def listWorks(index: Index, worksSearchOptions: WorksSearchOptions)
-    : Future[Either[ElasticError, ResultList]] =
+    : Future[Either[ElasticError, ResultList[IdentifiedWork, Aggregations]]] =
     searchService
       .listResults(index, toElasticsearchQueryOptions(worksSearchOptions))
       .map { result: Either[ElasticError, SearchResponse] =>
@@ -58,7 +58,7 @@ class WorksService(searchService: ElasticsearchService)(
       }
 
   def searchWorks(index: Index, worksSearchOptions: WorksSearchOptions)
-    : Future[Either[ElasticError, ResultList]] =
+    : Future[Either[ElasticError, ResultList[IdentifiedWork, Aggregations]]] =
     searchService
       .queryResults(index, toElasticsearchQueryOptions(worksSearchOptions))
       .map { result: Either[ElasticError, SearchResponse] =>
@@ -128,7 +128,8 @@ class WorksService(searchService: ElasticsearchService)(
     )
   }
 
-  private def createResultList(searchResponse: SearchResponse): ResultList = {
+  private def createResultList(searchResponse: SearchResponse)
+    : ResultList[IdentifiedWork, Aggregations] = {
     ResultList(
       results = searchResponseToWorks(searchResponse),
       totalResults = searchResponse.totalHits.toInt,

@@ -5,7 +5,7 @@ import uk.ac.wellcome.display.models.{
   SortRequest,
   SortingOrder
 }
-import uk.ac.wellcome.platform.api.models.{SearchQuery, WorkFilter}
+import uk.ac.wellcome.platform.api.models.{DocumentFilter, SearchQuery}
 import uk.ac.wellcome.platform.api.services.{
   ElasticsearchQueryOptions,
   WorksSearchOptions
@@ -13,7 +13,7 @@ import uk.ac.wellcome.platform.api.services.{
 
 trait SearchOptionsGenerators {
   def createElasticsearchQueryOptionsWith(
-    filters: List[WorkFilter] = Nil,
+    filters: List[DocumentFilter] = Nil,
     limit: Int = 10,
     from: Int = 0,
     aggregations: List[AggregationRequest] = Nil,
@@ -35,7 +35,7 @@ trait SearchOptionsGenerators {
     createElasticsearchQueryOptionsWith()
 
   def createWorksSearchOptionsWith(
-    filters: List[WorkFilter] = Nil,
+    filters: List[DocumentFilter] = Nil,
     pageSize: Int = 10,
     pageNumber: Int = 1,
     aggregations: List[AggregationRequest] = Nil,

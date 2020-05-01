@@ -81,7 +81,7 @@ case class MultipleWorksParams(
       sortOrder = sortOrder.getOrElse(SortingOrder.Ascending),
     )
 
-  private def filters: List[WorkFilter] =
+  private def filters: List[DocumentFilter] =
     List(
       workType,
       `items.locations.locationType`,

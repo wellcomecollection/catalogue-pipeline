@@ -26,7 +26,7 @@ class WorksController(
     extends Tracing
     with CustomDirectives
     with FailFastCirceSupport {
-  import MultipleWorksResponse.encoder
+  import DisplayResultList.encoder
   import ResultResponse.encoder
 
   def multipleWorks(params: MultipleWorksParams): Route =
@@ -42,7 +42,7 @@ class WorksController(
             case Right(resultList) =>
               extractPublicUri { uri =>
                 complete(
-                  MultipleWorksResponse(
+                  DisplayResultList(
                     resultList,
                     searchOptions,
                     params.include.getOrElse(WorksIncludes()),

@@ -110,7 +110,7 @@ case class ElasticsearchRequestBuilder(
         .map(buildWorkFilterQuery)
     }
 
-  private def buildWorkFilterQuery(workFilter: WorkFilter): Query =
+  private def buildWorkFilterQuery(workFilter: DocumentFilter): Query =
     workFilter match {
       case IdentifiedWorkFilter =>
         termQuery(field = "type", value = "IdentifiedWork")
