@@ -3,15 +3,15 @@ miro-library-reference,Miro library reference
 wellcome-library-videodisk-number,Wellcome library videodisk number
 sierra-system-number,Sierra system number
 sierra-identifier,Sierra identifier
-calm-ref-no,CALM ref no
-calm-altref-no,CALM alter no
 lc-gmgpc,Library of Congress Thesaurus for Graphic Materials
 lc-subjects,Library of Congress Subject Headings (LCSH)
 lc-names,Library of Congress Name authority records
 nlm-mesh,Medical Subject Headings (MESH) identifier
-calm-record-id,CALM record identifier
 preservica-guid,Perservica GUID
-calm-authority-code,CALM authority code
+calm-ref-no,Calm RefNo
+calm-altref-no,Calm AltRefNo
+calm-record-id,Calm RecordIdentifier
+calm-authority-code,Calm Authority Code
 isbn,International Standard Book Number
 issn,ISSN
 mets,METS
