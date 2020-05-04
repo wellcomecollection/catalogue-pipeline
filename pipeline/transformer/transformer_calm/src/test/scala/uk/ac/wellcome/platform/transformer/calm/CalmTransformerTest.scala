@@ -154,12 +154,13 @@ class CalmTransformerTest extends FunSpec with Matchers {
       "Date" -> "1980-1991"
     )
     CalmTransformer(record, version).right.get.data.production shouldBe
-      List(ProductionEvent(
-        dates = List(Period("1980-1991")),
-        label = "1980-1991",
-        places = Nil,
-        agents = Nil,
-        function = None))
+      List(
+        ProductionEvent(
+          dates = List(Period("1980-1991")),
+          label = "1980-1991",
+          places = Nil,
+          agents = Nil,
+          function = None))
   }
 
   it("transforms subjects") {

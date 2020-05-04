@@ -50,16 +50,17 @@ object CalmTransformer
 
   def shouldSuppress(record: CalmRecord): Boolean =
     record
-      .get("Transmission").exists { value =>
-      value.toLowerCase match {
-        case "no" => true
-        case "yes" => false
-        case _ =>
-          info(
-            s"Unrecognised value for Transmission field; assuming 'Yes': $value")
-          false
+      .get("Transmission")
+      .exists { value =>
+        value.toLowerCase match {
+          case "no"  => true
+          case "yes" => false
+          case _ =>
+            info(
+              s"Unrecognised value for Transmission field; assuming 'Yes': $value")
+            false
+        }
       }
-    }
 
   def workData(record: CalmRecord): Result[WorkData[Unminted, Identifiable]] =
     for {
@@ -208,12 +209,14 @@ object CalmTransformer
   def production(record: CalmRecord): List[ProductionEvent[Unminted]] = {
     record.getList("Date") match {
       case Nil => Nil
-      case dates => List(ProductionEvent(
-        dates = dates.map(Period(_)),
-        label = dates.mkString(" "),
-        places = Nil,
-        agents = Nil,
-        function = None))
+      case dates =>
+        List(
+          ProductionEvent(
+            dates = dates.map(Period(_)),
+            label = dates.mkString(" "),
+            places = Nil,
+            agents = Nil,
+            function = None))
     }
   }
 
