@@ -6,6 +6,6 @@ module "vhs" {
 }
 
 resource "aws_iam_role_policy" "vhs_readwrite" {
-  role   = module.task_definition.task_role_name
+  role   = module.worker.task_role_name
   policy = module.vhs.full_access_policy
 }
