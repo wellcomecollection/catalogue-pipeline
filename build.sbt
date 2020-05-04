@@ -1,4 +1,7 @@
 import java.io.File
+import java.util.UUID
+
+import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider
 
 def setupProject(
   project: Project,
@@ -25,6 +28,15 @@ def setupProject(
     .enablePlugins(JavaAppPackaging)
     .dependsOn(dependsOn: _*)
     .settings(libraryDependencies ++= externalDependencies)
+}
+
+s3CredentialsProvider := { _ =>
+  val builder = new STSAssumeRoleSessionCredentialsProvider.Builder(
+    "arn:aws:iam::760097843905:role/platform-read_only",
+    UUID.randomUUID().toString
+  )
+
+  builder.build()
 }
 
 lazy val internal_model = setupProject(
@@ -137,7 +149,7 @@ lazy val transformer_miro = setupProject(
 lazy val transformer_sierra = setupProject(
   project,
   folder = "pipeline/transformer/transformer_sierra",
-  localDependencies = Seq(internal_model, big_messaging_typesafe),
+  localDependencies = Seq(internal_model, big_messaging_typesafe, sierra_adapter_common),
   externalDependencies = CatalogueDependencies.sierraTransformerDependencies
 )
 
@@ -160,7 +172,6 @@ lazy val transformer_calm = setupProject(
 lazy val sierra_adapter_common = setupProject(
   project,
   "sierra_adapter/common",
-  localDependencies = Seq(internal_model),
   externalDependencies = CatalogueDependencies.sierraAdapterCommonDependencies)
 
 lazy val sierra_reader = setupProject(

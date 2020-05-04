@@ -6,14 +6,11 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
-import uk.ac.wellcome.models.transformable.sierra.SierraItemRecord
 import uk.ac.wellcome.models.transformable.sierra.test.utils.SierraGenerators
 import uk.ac.wellcome.monitoring.fixtures.MetricsSenderFixture
-import uk.ac.wellcome.platform.sierra_items_to_dynamo.fixtures.{
-  SierraItemRecordVHSFixture,
-  WorkerServiceFixture
-}
+import uk.ac.wellcome.platform.sierra_items_to_dynamo.fixtures.{SierraItemRecordVHSFixture, WorkerServiceFixture}
 import uk.ac.wellcome.platform.sierra_items_to_dynamo.merger.SierraItemRecordMerger
+import uk.ac.wellcome.sierra_adapter.model.SierraItemRecord
 import uk.ac.wellcome.storage.dynamo._
 import uk.ac.wellcome.storage.vhs.EmptyMetadata
 

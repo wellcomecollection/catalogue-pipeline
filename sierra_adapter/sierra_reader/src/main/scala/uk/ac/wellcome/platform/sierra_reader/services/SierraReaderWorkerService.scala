@@ -3,32 +3,22 @@ package uk.ac.wellcome.platform.sierra_reader.services
 import java.time.Instant
 
 import akka.Done
-import akka.stream.Materializer
+import akka.stream.ActorMaterializer
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.PutObjectResult
 import grizzled.slf4j.Logging
 import io.circe.Json
 import uk.ac.wellcome.messaging.sqs._
 import uk.ac.wellcome.platform.sierra_reader.flow.SierraRecordWrapperFlow
-import uk.ac.wellcome.platform.sierra_reader.models.{
-  SierraResourceTypes,
-  WindowStatus
-}
+import uk.ac.wellcome.platform.sierra_reader.models.{SierraResourceTypes, WindowStatus}
 import uk.ac.wellcome.sierra.{SierraSource, ThrottleRate}
 import uk.ac.wellcome.storage.s3.S3Config
 import io.circe.syntax._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.models.transformable.sierra.{
-  AbstractSierraRecord,
-  SierraBibRecord,
-  SierraItemRecord
-}
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.platform.sierra_reader.config.models.{
-  ReaderConfig,
-  SierraAPIConfig
-}
+import uk.ac.wellcome.platform.sierra_reader.config.models.{ReaderConfig, SierraAPIConfig}
 import uk.ac.wellcome.platform.sierra_reader.sink.SequentialS3Sink
+import uk.ac.wellcome.sierra_adapter.model.{AbstractSierraRecord, SierraBibRecord, SierraItemRecord}
 import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.{ExecutionContext, Future}

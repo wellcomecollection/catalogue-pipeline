@@ -3,13 +3,8 @@ package uk.ac.wellcome.platform.transformer.sierra
 import org.scalatest.concurrent.IntegrationPatience
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.transformable.sierra.test.utils.SierraGenerators
-import uk.ac.wellcome.models.transformable.SierraTransformable
 import uk.ac.wellcome.models.work.internal.UnidentifiedWork
-import uk.ac.wellcome.platform.transformer.sierra.services.{
-  HybridRecord,
-  SierraTransformerWorkerService
-}
+import uk.ac.wellcome.platform.transformer.sierra.services.{HybridRecord, SierraTransformerWorkerService}
 import uk.ac.wellcome.platform.transformer.sierra.fixtures.BackwardsCompatHybridRecordReceiverFixture
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.Implicits._

@@ -20,7 +20,6 @@ object Common {
       "-Ypartial-unification",
       "-Xcheckinit"
     ),
-    parallelExecution in Test := false,
-    libraryDependencies ++= CatalogueDependencies.commonDependencies
+    parallelExecution in Test := false
   )
 }

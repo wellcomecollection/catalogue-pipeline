@@ -1,18 +1,15 @@
 package uk.ac.wellcome.platform.transformer.sierra.services
 
 import grizzled.slf4j.Logging
+
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 import io.circe.Decoder
-
-import uk.ac.wellcome.models.transformable.SierraTransformable
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.json.JsonUtil._
-
 import uk.ac.wellcome.bigmessaging.EmptyMetadata
 import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-
 import uk.ac.wellcome.storage.store.{HybridStoreEntry, Store, TypedStoreEntry}
 import uk.ac.wellcome.storage.{Identified, ObjectLocation, Version}
 

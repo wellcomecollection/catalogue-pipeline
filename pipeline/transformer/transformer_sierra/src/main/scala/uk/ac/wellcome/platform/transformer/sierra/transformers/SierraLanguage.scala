@@ -2,7 +2,6 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import uk.ac.wellcome.models.work.internal.Language
 import uk.ac.wellcome.platform.transformer.sierra.source.SierraBibData
-import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 
 object SierraLanguage extends SierraTransformer {
 

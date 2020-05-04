@@ -1,21 +1,14 @@
-package uk.ac.wellcome.models.transformable.sierra.test.utils
+package uk.ac.wellcome.sierra_adapter.model
 
 import java.time.Instant
 
-import uk.ac.wellcome.models.transformable.SierraTransformable
-import uk.ac.wellcome.models.transformable.sierra.{
-  SierraBibNumber,
-  SierraBibRecord,
-  SierraItemNumber,
-  SierraItemRecord
-}
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
 
 import scala.util.Random
 
-trait SierraGenerators extends IdentifiersGenerators {
-
+trait SierraGenerators {
+  def randomAlphanumeric(length: Int): String =
+    (Random.alphanumeric take length mkString) toLowerCase
   // A lot of Sierra tests (e.g. mergers) check the behaviour when merging
   // a record with a newer version, or vice versa.  Provide two dates here
   // for convenience.

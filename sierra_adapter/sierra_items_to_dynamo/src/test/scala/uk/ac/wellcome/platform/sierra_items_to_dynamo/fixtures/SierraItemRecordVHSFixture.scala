@@ -1,13 +1,13 @@
 package uk.ac.wellcome.platform.sierra_items_to_dynamo.fixtures
 
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.models.transformable.sierra.SierraItemRecord
 import uk.ac.wellcome.storage.ObjectStore
 import uk.ac.wellcome.storage.fixtures.LocalDynamoDb.Table
 import uk.ac.wellcome.storage.fixtures.LocalVersionedHybridStore
 import uk.ac.wellcome.storage.fixtures.S3.Bucket
 import uk.ac.wellcome.storage.vhs.{EmptyMetadata, VersionedHybridStore}
 import uk.ac.wellcome.fixtures.TestWith
+import uk.ac.wellcome.sierra_adapter.model.SierraItemRecord
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

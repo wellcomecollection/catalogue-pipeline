@@ -1,9 +1,9 @@
 package uk.ac.wellcome.platform.sierra_reader.services
 
-import org.scalatest.matchers.should.Matchers
+import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.platform.sierra_reader.exceptions.SierraReaderException
 
-class WindowExtractorTest extends AnyFunSpec with Matchers {
+class WindowExtractorTest extends FunSpec with Matchers {
 
   it("extracts a valid message window from a json string") {
     val start = "2013-12-10T17:16:35Z"

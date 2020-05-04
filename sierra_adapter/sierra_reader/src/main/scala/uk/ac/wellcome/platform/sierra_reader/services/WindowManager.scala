@@ -3,10 +3,10 @@ package uk.ac.wellcome.platform.sierra_reader.services
 import com.amazonaws.services.s3.AmazonS3
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.models.transformable.sierra.UntypedSierraRecordNumber
 import uk.ac.wellcome.platform.sierra_reader.config.models.ReaderConfig
 import uk.ac.wellcome.platform.sierra_reader.exceptions.SierraReaderException
 import uk.ac.wellcome.platform.sierra_reader.models.WindowStatus
+import uk.ac.wellcome.sierra_adapter.model.UntypedSierraRecordNumber
 import uk.ac.wellcome.storage.s3.S3Config
 
 import scala.collection.JavaConverters._

@@ -1,12 +1,8 @@
 package uk.ac.wellcome.platform.transformer.sierra.generators
 
-import uk.ac.wellcome.models.transformable.sierra.test.utils.SierraGenerators
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
 import uk.ac.wellcome.platform.transformer.sierra.source._
-import uk.ac.wellcome.platform.transformer.sierra.source.sierra.{
-  SierraSourceLanguage,
-  SierraSourceLocation
-}
+import uk.ac.wellcome.platform.transformer.sierra.source.sierra.{SierraSourceLanguage, SierraSourceLocation}
 
 trait SierraDataGenerators extends IdentifiersGenerators with SierraGenerators {
   def createSierraBibDataWith(

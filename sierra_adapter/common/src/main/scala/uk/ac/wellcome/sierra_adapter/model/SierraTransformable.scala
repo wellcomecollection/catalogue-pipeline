@@ -1,12 +1,6 @@
-package uk.ac.wellcome.models.transformable
+package uk.ac.wellcome.sierra_adapter.model
 
 import io.circe.{KeyDecoder, KeyEncoder}
-import uk.ac.wellcome.models.transformable.sierra.{
-  SierraBibNumber,
-  SierraBibRecord,
-  SierraItemNumber,
-  SierraItemRecord
-}
 
 case class SierraTransformable(
   sierraId: SierraBibNumber,

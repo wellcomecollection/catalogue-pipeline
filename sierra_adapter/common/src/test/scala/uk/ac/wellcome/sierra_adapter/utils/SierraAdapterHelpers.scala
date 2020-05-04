@@ -5,19 +5,15 @@ import org.scalatest.Assertion
 import uk.ac.wellcome.fixtures._
 import uk.ac.wellcome.messaging.fixtures.{MessageInfo, Messaging}
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
-import uk.ac.wellcome.models.transformable.SierraTransformable
-import uk.ac.wellcome.models.transformable.SierraTransformable._
+import uk.ac.wellcome.sierra_adapter.model.SierraTransformable._
 import uk.ac.wellcome.storage.ObjectStore
 import uk.ac.wellcome.storage.dynamo._
 import uk.ac.wellcome.storage.fixtures.LocalDynamoDb.Table
 import uk.ac.wellcome.storage.fixtures.LocalVersionedHybridStore
 import uk.ac.wellcome.storage.fixtures.S3.Bucket
-import uk.ac.wellcome.storage.vhs.{
-  EmptyMetadata,
-  HybridRecord,
-  VersionedHybridStore
-}
+import uk.ac.wellcome.storage.vhs.{EmptyMetadata, HybridRecord, VersionedHybridStore}
 import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.sierra_adapter.model.SierraTransformable
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

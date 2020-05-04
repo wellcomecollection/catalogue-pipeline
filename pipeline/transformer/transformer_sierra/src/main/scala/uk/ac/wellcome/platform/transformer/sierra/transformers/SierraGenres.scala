@@ -1,18 +1,7 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
-import uk.ac.wellcome.models.work.internal.{
-  AbstractConcept,
-  Concept,
-  Genre,
-  Unminted
-}
-import uk.ac.wellcome.platform.transformer.sierra.source.{
-  MarcSubfield,
-  SierraBibData,
-  SierraQueryOps,
-  VarField
-}
-import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
+import uk.ac.wellcome.models.work.internal.{AbstractConcept, Concept, Genre, Unminted}
+import uk.ac.wellcome.platform.transformer.sierra.source.{MarcSubfield, SierraBibData, SierraQueryOps, VarField}
 
 // Populate wwork:genres
 //

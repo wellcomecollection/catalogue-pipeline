@@ -2,13 +2,16 @@ import sbt._
 
 object WellcomeDependencies {
   lazy val versions = new {
-    val fixtures = "1.2.0"
-    val json = "2.1.0"
+    val fixtures = "1.0.0"
+    val json = "1.1.1"
     val messaging = "1.6.0"
     val monitoring = "2.0.0"
     val storage = "3.6.0"
-    val typesafe = "2.0.0"
+    val typesafe = "1.0.0"
 
+    val newTypesafe = "2.0.0"
+    val newFixtures = "1.2.0"
+    val newJson = "2.1.0"
     val newMessaging = "9.1.0"
     val newMonitoring = "4.0.0"
     val newStorage = "8.1.0"
@@ -21,9 +24,19 @@ object WellcomeDependencies {
     version = versions.json
   )
 
+  val newJsonLibrary: Seq[ModuleID] = library(
+    name = "json",
+    version = versions.newJson
+  )
+
   val fixturesLibrary: Seq[ModuleID] = library(
     name = "fixtures",
     version = versions.fixtures
+  )
+
+  val newFixturesLibrary: Seq[ModuleID] = library(
+    name = "fixtures",
+    version = versions.newFixtures
   )
 
   val messagingLibrary: Seq[ModuleID] = library(
@@ -55,6 +68,11 @@ object WellcomeDependencies {
     name = "storage",
     version = versions.newStorage
   )
+
+  val newTypesafeLibrary: Seq[ModuleID] = library(
+    name = "typesafe-app",
+    version = versions.newTypesafe
+  ) ++ newFixturesLibrary
 
   val typesafeLibrary: Seq[ModuleID] = library(
     name = "typesafe-app",
@@ -96,7 +114,8 @@ object ExternalDependencies {
     val apacheCommons = "3.7"
     val apacheLogging = "2.8.2"
     val aws = "1.11.504"
-    val circe = "0.13.0"
+    val circe = "0.9.0"
+    val newCirce = "0.13.0"
     val elastic4s = "7.6.1"
     val fastparse = "2.1.3"
     val swagger = "2.0.10"
@@ -106,7 +125,8 @@ object ExternalDependencies {
     val scalacheckShapeless = "1.1.6"
     val scalacsv = "1.3.5"
     val scalaGraph = "1.12.5"
-    val scalatest = "3.1.1"
+    val scalatest = "3.0.1"
+    val newScalatest = "3.1.1"
     val logstashLogback = "6.1"
     val scribeJava = "6.8.1"
     val apm = "1.12.0"
@@ -152,6 +172,10 @@ object ExternalDependencies {
     "org.apache.commons" % "commons-lang3" % versions.apacheCommons
   )
 
+  val newCirceOpticsDependencies = Seq(
+    "io.circe" %% "circe-optics" % versions.newCirce
+  )
+
   val circeOpticsDependencies = Seq(
     "io.circe" %% "circe-optics" % versions.circe
   )
@@ -172,9 +196,12 @@ object ExternalDependencies {
     "uk.ac.wellcome.elastic4s" %% "elastic4s-testkit" % versions.elastic4s % "test" exclude("org.scalatest", "scalatest_2.12") excludeAll(ExclusionRule("com.typesafe.akka"))
   )
 
-  val mockitoDependencies: Seq[ModuleID] = Seq(
+  val newMockitoDependencies: Seq[ModuleID] = Seq(
     "org.mockito" % "mockito-core" % versions.mockito % "test",
     "org.scalatestplus" %% "mockito-1-10" % versions.scalatestplusMockito % "test" )
+
+  val mockitoDependencies: Seq[ModuleID] = Seq(
+    "org.mockito" % "mockito-core" % versions.mockito % "test")
 
   val wireMockDependencies = Seq(
     "com.github.tomakehurst" % "wiremock" % "2.25.1" % Test
@@ -202,6 +229,10 @@ object ExternalDependencies {
 
   val scalaGraphDependencies = Seq(
     "org.scala-graph" %% "graph-core" % versions.scalaGraph
+  )
+
+  val newScalatestDependencies = Seq(
+    "org.scalatest" %% "scalatest" % versions.newScalatest % "test"
   )
 
   val scalatestDependencies = Seq(
@@ -233,14 +264,9 @@ object ExternalDependencies {
 }
 
 object CatalogueDependencies {
-  val commonDependencies =
-    ExternalDependencies.scalatestDependencies ++
-      ExternalDependencies.logbackDependencies ++
-      ExternalDependencies.javaxDependencies
-
   val internalModelDependencies =
     ExternalDependencies.scalacsvDependencies ++
-      WellcomeDependencies.jsonLibrary ++
+      WellcomeDependencies.newJsonLibrary ++
       ExternalDependencies.parseDependencies ++
       ExternalDependencies.scalacheckDependencies ++
       ExternalDependencies.enumeratumDependencies
@@ -252,77 +278,77 @@ object CatalogueDependencies {
   val elasticsearchDependencies: Seq[ModuleID] =
     ExternalDependencies.elasticsearchDependencies ++
       ExternalDependencies.scalacheckDependencies ++
-      WellcomeDependencies.fixturesLibrary
+      WellcomeDependencies.newFixturesLibrary
 
   val bigMessagingDependencies: Seq[ModuleID] =
     ExternalDependencies.scalatestDependencies ++
-      WellcomeDependencies.typesafeLibrary ++
+      WellcomeDependencies.newTypesafeLibrary ++
       WellcomeDependencies.newMonitoringLibrary ++
       WellcomeDependencies.newMessagingLibrary ++
       WellcomeDependencies.newStorageLibrary ++
-      WellcomeDependencies.fixturesLibrary
+      WellcomeDependencies.newFixturesLibrary
 
   val bigMessagingTypesafeDependencies: Seq[ModuleID] =
     WellcomeDependencies.newStorageTypesafeLibrary ++
       WellcomeDependencies.newMessagingTypesafeLibrary
 
   val elasticsearchTypesafeDependencies: Seq[ModuleID] =
-    WellcomeDependencies.typesafeLibrary
+    WellcomeDependencies.newTypesafeLibrary
 
   val apiDependencies: Seq[ModuleID] =
     ExternalDependencies.akkaHttpDependencies ++
       ExternalDependencies.apmDependencies ++
-      ExternalDependencies.circeOpticsDependencies ++
-      WellcomeDependencies.typesafeLibrary
+      ExternalDependencies.newCirceOpticsDependencies ++
+      WellcomeDependencies.newTypesafeLibrary
 
   val idminterDependencies: Seq[ModuleID] =
-    ExternalDependencies.mockitoDependencies ++
+    ExternalDependencies.newMockitoDependencies ++
       ExternalDependencies.mySqlDependencies ++
-      ExternalDependencies.circeOpticsDependencies
+      ExternalDependencies.newCirceOpticsDependencies
 
   val ingestorDependencies: Seq[ModuleID] =
-    ExternalDependencies.mockitoDependencies
+    ExternalDependencies.newMockitoDependencies
 
   val matcherDependencies: Seq[ModuleID] =
-    ExternalDependencies.mockitoDependencies ++
+    ExternalDependencies.newMockitoDependencies ++
       ExternalDependencies.scalaGraphDependencies
 
   val mergerDependencies: Seq[ModuleID] =
-    ExternalDependencies.mockitoDependencies
+    ExternalDependencies.newMockitoDependencies
 
   val miroTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies ++
-      ExternalDependencies.mockitoDependencies
+      ExternalDependencies.newMockitoDependencies
 
   val recorderDependencies: Seq[ModuleID] =
-    ExternalDependencies.mockitoDependencies
+    ExternalDependencies.newMockitoDependencies
 
   val reindexWorkerDependencies: Seq[ModuleID] = Nil
 
   val sierraTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies ++
-      ExternalDependencies.mockitoDependencies
+      ExternalDependencies.newMockitoDependencies
 
   val metsTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies ++
-      ExternalDependencies.mockitoDependencies ++
+      ExternalDependencies.newMockitoDependencies ++
       ExternalDependencies.wireMockDependencies ++
       ExternalDependencies.akkaHttpDependencies ++
       ExternalDependencies.scribeJavaDependencies ++
       ExternalDependencies.scalaXmlDependencies ++
       ExternalDependencies.awsSTSDependencies ++
-      WellcomeDependencies.typesafeLibrary
+      WellcomeDependencies.newTypesafeLibrary
 
   val calmTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies ++
-      ExternalDependencies.mockitoDependencies
+      ExternalDependencies.newMockitoDependencies
 
   // METS adapter
 
   val metsAdapterDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies ++
       ExternalDependencies.akkaHttpDependencies ++
-      ExternalDependencies.mockitoDependencies ++
+      ExternalDependencies.newMockitoDependencies ++
       ExternalDependencies.wireMockDependencies ++
       ExternalDependencies.scribeJavaDependencies
 
@@ -336,6 +362,8 @@ object CatalogueDependencies {
 
   val sierraAdapterCommonDependencies: Seq[ModuleID] =
     ExternalDependencies.mockitoDependencies ++
+    ExternalDependencies.scalatestDependencies ++
+  WellcomeDependencies.jsonLibrary ++
       WellcomeDependencies.messagingTypesafeLibrary
 
   val sierraReaderDependencies: Seq[ModuleID] =
@@ -351,7 +379,7 @@ object CatalogueDependencies {
   // Snapshots stack
 
   val snapshotGeneratorDependencies: Seq[ModuleID] =
-    ExternalDependencies.mockitoDependencies ++
+    ExternalDependencies.newMockitoDependencies ++
       WellcomeDependencies.newMessagingTypesafeLibrary ++
       WellcomeDependencies.newStorageLibrary ++
       ExternalDependencies.alpakkaS3Dependencies

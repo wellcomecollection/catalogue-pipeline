@@ -1,14 +1,8 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
-import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.sierra.exceptions.CataloguingException
-import uk.ac.wellcome.platform.transformer.sierra.source.{
-  MarcSubfield,
-  SierraBibData,
-  SierraQueryOps,
-  VarField
-}
+import uk.ac.wellcome.platform.transformer.sierra.source.{MarcSubfield, SierraBibData, SierraQueryOps, VarField}
 import uk.ac.wellcome.models.parse.Marc008Parser
 
 object SierraProduction extends SierraTransformer with SierraQueryOps {

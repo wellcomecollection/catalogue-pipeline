@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.transformable.SierraTransformable
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.transformer.sierra.SierraTransformableTransformer
 import uk.ac.wellcome.platform.transformer.sierra.exceptions.SierraTransformerException

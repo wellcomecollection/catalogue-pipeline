@@ -1,14 +1,12 @@
-package uk.ac.wellcome.models.transformable.sierra
+package uk.ac.wellcome.sierra_adapter.model
 
-import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.models.transformable.sierra.test.utils.SierraGenerators
 import java.time.Instant
 
-import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.{FunSpec, Matchers}
+import uk.ac.wellcome.json.JsonUtil._
 
 class SierraItemRecordTest
-    extends AnyFunSpec
+    extends FunSpec
     with Matchers
     with SierraGenerators {
 
@@ -44,7 +42,7 @@ class SierraItemRecordTest
   it("throws an exception for invalid JSON") {
     assertCreatingFromDataFails(
       data = "not a json string",
-      expectedMessage = "expected null got 'not a ...' (line 1, column 1)"
+      expectedMessage = "expected null got n (line 1, column 1)"
     )
   }
 
@@ -66,7 +64,7 @@ class SierraItemRecordTest
   it("throws an exception when bibIds is not a list") {
     assertCreatingFromDataFails(
       data = """{"bibIds":"blah"}""",
-      expectedMessage = "C[A]: DownField(bibIds)"
+      expectedMessage = "CanBuildFrom for A: DownField(bibIds)"
     )
   }
 

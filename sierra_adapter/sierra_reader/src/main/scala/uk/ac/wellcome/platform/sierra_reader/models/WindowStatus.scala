@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.sierra_reader.models
 
-import uk.ac.wellcome.models.transformable.sierra.UntypedSierraRecordNumber
+import uk.ac.wellcome.sierra_adapter.model.UntypedSierraRecordNumber
 
 case class WindowStatus(
   id: Option[UntypedSierraRecordNumber],

@@ -1,15 +1,8 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
-import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 import uk.ac.wellcome.models.work.internal.{Subject, Unminted}
 import uk.ac.wellcome.platform.transformer.sierra.source.SierraBibData
-import uk.ac.wellcome.platform.transformer.sierra.transformers.subjects.{
-  SierraBrandNameSubjects,
-  SierraConceptSubjects,
-  SierraMeetingSubjects,
-  SierraOrganisationSubjects,
-  SierraPersonSubjects
-}
+import uk.ac.wellcome.platform.transformer.sierra.transformers.subjects.{SierraBrandNameSubjects, SierraConceptSubjects, SierraMeetingSubjects, SierraOrganisationSubjects, SierraPersonSubjects}
 
 object SierraSubjects extends SierraTransformer {
 

@@ -2,10 +2,7 @@ package uk.ac.wellcome.models
 
 import io.circe.generic.extras.semiauto._
 import io.circe._
-
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.models.transformable.SierraTransformable
-import uk.ac.wellcome.models.transformable.SierraTransformable._
 import uk.ac.wellcome.models.matcher.MatcherResult
 import uk.ac.wellcome.json.JsonUtil._
 
@@ -77,7 +74,6 @@ object Implicits {
   implicit val _dec47: Decoder[TransformedBaseWork] = deriveConfiguredDecoder
   implicit val _dec48: Decoder[IdentifiedBaseWork] = deriveConfiguredDecoder
   implicit val _dec49: Decoder[BaseWork] = deriveConfiguredDecoder
-  implicit val _dec50: Decoder[SierraTransformable] = deriveConfiguredDecoder
   implicit val _dec51: Decoder[UnmergedImage[Identifiable]] =
     deriveConfiguredDecoder
   implicit val _dec52: Decoder[UnmergedImage[Identified]] =
@@ -150,7 +146,6 @@ object Implicits {
   implicit val _enc47: Encoder[TransformedBaseWork] = deriveConfiguredEncoder
   implicit val _enc48: Encoder[IdentifiedBaseWork] = deriveConfiguredEncoder
   implicit val _enc49: Encoder[BaseWork] = deriveConfiguredEncoder
-  implicit val _enc50: Encoder[SierraTransformable] = deriveConfiguredEncoder
   implicit val _enc51: Encoder[UnmergedImage[Identifiable]] =
     deriveConfiguredEncoder
   implicit val _enc52: Encoder[UnmergedImage[Identified]] =
