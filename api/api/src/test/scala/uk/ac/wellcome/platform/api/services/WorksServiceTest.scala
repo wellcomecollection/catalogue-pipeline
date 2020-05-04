@@ -119,9 +119,9 @@ class WorksServiceTest
     }
 
     it("returns a Left[ElasticError] if there's an Elasticsearch error") {
-      val future = worksService.listWorks(
+      val future = worksService.listOrSearchWorks(
         index = Index("doesnotexist"),
-        worksSearchOptions = defaultWorksSearchOptions
+        searchOptions = defaultWorksSearchOptions
       )
 
       whenReady(future) { result =>
@@ -326,9 +326,9 @@ class WorksServiceTest
     }
 
     it("returns a Left[ElasticError] if there's an Elasticsearch error") {
-      val future = worksService.searchWorks(
+      val future = worksService.listOrSearchWorks(
         index = Index("doesnotexist"),
-        worksSearchOptions =
+        searchOptions =
           createWorksSearchOptionsWith(searchQuery = Some(SearchQuery("cat")))
       )
 
@@ -421,7 +421,7 @@ class WorksServiceTest
     worksSearchOptions: WorksSearchOptions = createWorksSearchOptions
   ): Assertion =
     assertResultIsCorrect(
-      worksService.listWorks
+      worksService.listOrSearchWorks
     )(
       allWorks,
       expectedWorks,
@@ -437,7 +437,7 @@ class WorksServiceTest
     worksSearchOptions: WorksSearchOptions
   ): Assertion =
     assertResultIsCorrect(
-      worksService.searchWorks
+      worksService.listOrSearchWorks
     )(
       allWorks,
       expectedWorks,

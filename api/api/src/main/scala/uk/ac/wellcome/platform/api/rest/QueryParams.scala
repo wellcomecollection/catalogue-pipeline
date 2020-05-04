@@ -11,21 +11,6 @@ import uk.ac.wellcome.platform.api.rest.MultipleWorksParams.decodeCommaSeparated
 
 trait QueryParams
 
-trait Paginated { this: QueryParams =>
-  val page: Option[Int]
-  val pageSize: Option[Int]
-
-  def paginationErrors: List[String] =
-    List(
-      page
-        .filterNot(_ >= 1)
-        .map(_ => "page: must be greater than 1"),
-      pageSize
-        .filterNot(size => size >= 1 && size <= 100)
-        .map(_ => "pageSize: must be between 1 and 100")
-    ).flatten
-}
-
 object CommonDecoders {
   implicit val licenseFilter: Decoder[LicenseFilter] =
     decodeCommaSeparated.emap(strs => Right(LicenseFilter(strs)))

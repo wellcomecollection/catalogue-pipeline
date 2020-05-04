@@ -62,69 +62,36 @@ object DisplayResultList {
     searchOptions: WorksSearchOptions,
     includes: WorksIncludes,
     requestUri: Uri,
-    contextUri: String): DisplayResultList[DisplayWork, DisplayAggregations] = {
-    val totalPages =
-      getTotalPages(resultList.totalResults, searchOptions.pageSize)
-    val prevPage =
-      pageLink(searchOptions.pageNumber - 1, totalPages, requestUri)
-    val nextPage =
-      pageLink(searchOptions.pageNumber + 1, totalPages, requestUri)
-    DisplayResultList(
-      context = contextUri,
-      pageSize = searchOptions.pageSize,
-      totalPages = totalPages,
-      totalResults = resultList.totalResults,
-      results = resultList.results.map(DisplayWork.apply(_, includes)),
-      prevPage = prevPage,
-      nextPage = nextPage,
-      aggregations = resultList.aggregations.map(DisplayAggregations.apply)
-    )
-  }
+    contextUri: String): DisplayResultList[DisplayWork, DisplayAggregations] =
+    PaginationResponse(resultList, searchOptions, requestUri) match {
+      case PaginationResponse(totalPages, prevPage, nextPage) =>
+        DisplayResultList(
+          context = contextUri,
+          pageSize = searchOptions.pageSize,
+          totalPages = totalPages,
+          totalResults = resultList.totalResults,
+          results = resultList.results.map(DisplayWork.apply(_, includes)),
+          prevPage = prevPage,
+          nextPage = nextPage,
+          aggregations = resultList.aggregations.map(DisplayAggregations.apply)
+        )
+    }
 
   def apply(resultList: ResultList[AugmentedImage, Unit],
             searchOptions: ImagesSearchOptions,
             requestUri: Uri,
-            contextUri: String): DisplayResultList[DisplayImage, Unit] = {
-    val totalPages =
-      getTotalPages(resultList.totalResults, searchOptions.pageSize)
-    val prevPage =
-      pageLink(searchOptions.pageNumber - 1, totalPages, requestUri)
-    val nextPage =
-      pageLink(searchOptions.pageNumber + 1, totalPages, requestUri)
-    DisplayResultList(
-      context = contextUri,
-      pageSize = searchOptions.pageSize,
-      totalPages = totalPages,
-      totalResults = resultList.totalResults,
-      results = resultList.results.map(DisplayImage.apply),
-      prevPage = prevPage,
-      nextPage = nextPage,
-      aggregations = resultList.aggregations
-    )
-  }
-
-  private def pageLink(page: Int,
-                       totalPages: Int,
-                       requestUri: Uri): Option[String] =
-    if (pageInBounds(page, totalPages))
-      Some(
-        requestUri
-          .withQuery(
-            pageQuery(page, requestUri.query())
-          )
-          .toString
-      )
-    else
-      None
-
-  private def pageQuery(page: Int, previousQuery: Uri.Query) =
-    Uri.Query(
-      previousQuery.toMap.updated("page", page.toString)
-    )
-
-  private def pageInBounds(page: Int, totalPages: Int) =
-    page > 0 && page <= totalPages
-
-  private def getTotalPages(totalResults: Int, pageSize: Int): Int =
-    Math.ceil(totalResults.toDouble / pageSize).toInt
+            contextUri: String): DisplayResultList[DisplayImage, Unit] =
+    PaginationResponse(resultList, searchOptions, requestUri) match {
+      case PaginationResponse(totalPages, prevPage, nextPage) =>
+        DisplayResultList(
+          context = contextUri,
+          pageSize = searchOptions.pageSize,
+          totalPages = totalPages,
+          totalResults = resultList.totalResults,
+          results = resultList.results.map(DisplayImage.apply),
+          prevPage = prevPage,
+          nextPage = nextPage,
+          aggregations = resultList.aggregations
+        )
+    }
 }

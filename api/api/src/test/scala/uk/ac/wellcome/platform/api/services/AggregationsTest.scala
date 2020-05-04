@@ -170,7 +170,7 @@ class AggregationsTest
             SubjectFilter(subjectQuery)
           )
         )
-        whenReady(worksService.listWorks(index, searchOptions)) { res =>
+        whenReady(worksService.listOrSearchWorks(index, searchOptions)) { res =>
           val results = res.right.get.results
           results.map(_.data.workType.get) should contain only WorkType.Books
           results.map(_.data.subjects.head.label) should contain only subjectQuery
@@ -182,6 +182,6 @@ class AggregationsTest
   private def aggregationQuery(index: Index,
                                searchOptions: WorksSearchOptions) =
     worksService
-      .listWorks(index, searchOptions)
+      .listOrSearchWorks(index, searchOptions)
       .map(_.right.get.aggregations.get)
 }
