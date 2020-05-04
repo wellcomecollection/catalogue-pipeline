@@ -6,7 +6,7 @@ import uk.ac.wellcome.models.work.internal.AugmentedImage
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.platform.api.models.{
   DocumentFilter,
-  ImagesResultList,
+  ResultList,
   SearchQuery
 }
 
@@ -44,7 +44,7 @@ class ImagesService(searchService: ElasticsearchService)(
       }
 
   def listOrSearchImages(index: Index, searchOptions: ImagesSearchOptions)
-    : Future[Either[ElasticError, ImagesResultList]] =
+    : Future[Either[ElasticError, ResultList[AugmentedImage, Unit]]] =
     ???
 
 }

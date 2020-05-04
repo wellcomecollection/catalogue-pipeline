@@ -355,8 +355,7 @@ trait MultipleWorksSwagger {
     description = "The works",
     content = Array(
       new Content(
-        schema = new Schema(implementation =
-          classOf[DisplayResultList[DisplayWork, DisplayAggregations]]))
+        schema = new Schema(implementation = classOf[DisplayWorksResultList]))
     )
   )
   @ApiResponse(
@@ -388,4 +387,26 @@ trait MultipleWorksSwagger {
     )
   )
   def getWorks(): Unit
+
+  /*
+   * We can't give Schema#implementation a classOf[DisplayResultList[DisplayWork, DisplayAggregations]
+   * because the parameters will be erased by the JVM: we need to create a concrete class
+   * from which Swagger can derive the schema.
+   *
+   * This requires that the mandatory case class fields are filled with dummy data, and
+   * that the top level @Schema annotation is defined for this new class.
+   */
+
+  @Schema(
+    name = "WorksResultList",
+    description = "A paginated list of works."
+  )
+  class DisplayWorksResultList
+      extends DisplayResultList[DisplayWork, DisplayAggregations](
+        context = "",
+        pageSize = 0,
+        totalPages = 0,
+        totalResults = 0,
+        results = Nil)
+  val _ = new DisplayWorksResultList
 }

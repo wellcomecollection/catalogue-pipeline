@@ -9,7 +9,10 @@ import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.display.json.DisplayJsonUtil._
 import uk.ac.wellcome.models.work.internal.{AugmentedImage, IdentifiedWork}
 import uk.ac.wellcome.platform.api.models._
-import uk.ac.wellcome.platform.api.services.WorksSearchOptions
+import uk.ac.wellcome.platform.api.services.{
+  ImagesSearchOptions,
+  WorksSearchOptions
+}
 
 case class ResultResponse[T: Encoder](
   @JsonKey("@context") context: String,
@@ -51,8 +54,8 @@ case class DisplayResultList[DisplayResult, DisplayAggs](
 )
 
 object DisplayResultList {
-  implicit val encoder: Encoder[DisplayResultList[DisplayWork, Aggregations]] =
-    deriveEncoder
+  implicit def encoder[R: Encoder, A: Encoder]
+    : Encoder[DisplayResultList[R, A]] = deriveEncoder
 
   def apply(
     resultList: ResultList[IdentifiedWork, Aggregations],
@@ -78,12 +81,10 @@ object DisplayResultList {
     )
   }
 
-  def apply(
-    resultList: ResultList[AugmentedImage, Aggregations],
-    searchOptions: WorksSearchOptions,
-    includes: WorksIncludes,
-    requestUri: Uri,
-    contextUri: String): DisplayResultList[DisplayWork, DisplayAggregations] = {
+  def apply(resultList: ResultList[AugmentedImage, Unit],
+            searchOptions: ImagesSearchOptions,
+            requestUri: Uri,
+            contextUri: String): DisplayResultList[DisplayImage, Unit] = {
     val totalPages =
       getTotalPages(resultList.totalResults, searchOptions.pageSize)
     val prevPage =
@@ -95,10 +96,10 @@ object DisplayResultList {
       pageSize = searchOptions.pageSize,
       totalPages = totalPages,
       totalResults = resultList.totalResults,
-      results = resultList.results.map(DisplayWork.apply(_, includes)),
+      results = resultList.results.map(DisplayImage.apply),
       prevPage = prevPage,
       nextPage = nextPage,
-      aggregations = resultList.aggregations.map(DisplayAggregations.apply)
+      aggregations = resultList.aggregations
     )
   }
 

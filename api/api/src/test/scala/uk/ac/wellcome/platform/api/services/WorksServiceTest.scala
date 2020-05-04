@@ -12,7 +12,7 @@ import uk.ac.wellcome.models.work.generators.{
   ProductionEventGenerators,
   WorksGenerators
 }
-import uk.ac.wellcome.models.work.internal.IdentifiedBaseWork
+import uk.ac.wellcome.models.work.internal.{IdentifiedBaseWork, IdentifiedWork}
 import uk.ac.wellcome.models.work.internal.WorkType.{
   ArchivesAndManuscripts,
   Audio,
@@ -446,9 +446,8 @@ class WorksServiceTest
       worksSearchOptions)
 
   private def assertResultIsCorrect(
-    partialSearchFunction: (
-      Index,
-      WorksSearchOptions) => Future[Either[ElasticError, ResultList]]
+    partialSearchFunction: (Index, WorksSearchOptions) => Future[
+      Either[ElasticError, ResultList[IdentifiedWork, Aggregations]]]
   )(
     allWorks: Seq[IdentifiedBaseWork],
     expectedWorks: Seq[IdentifiedBaseWork],
