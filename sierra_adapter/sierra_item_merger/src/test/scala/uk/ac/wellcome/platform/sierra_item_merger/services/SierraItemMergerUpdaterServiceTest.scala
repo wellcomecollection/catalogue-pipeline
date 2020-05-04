@@ -3,14 +3,14 @@ package uk.ac.wellcome.platform.sierra_item_merger.services
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.FunSpec
 import uk.ac.wellcome.messaging.fixtures.SQS
-import uk.ac.wellcome.models.transformable.sierra.test.utils.SierraGenerators
 import uk.ac.wellcome.platform.sierra_item_merger.fixtures.SierraItemMergerFixtures
+import uk.ac.wellcome.sierra_adapter.model.SierraGenerators
 import uk.ac.wellcome.storage.fixtures.LocalDynamoDb.Table
 import uk.ac.wellcome.storage.fixtures.LocalVersionedHybridStore
 import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
 
 class SierraItemMergerUpdaterServiceTest
-    extends AnyFunSpec
+    extends FunSpec
     with IntegrationPatience
     with ScalaFutures
     with LocalVersionedHybridStore

@@ -1,6 +1,7 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import uk.ac.wellcome.platform.transformer.sierra.source.{SierraBibData, SierraQueryOps}
+import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 
 // Populate wwork:lettering.
 //

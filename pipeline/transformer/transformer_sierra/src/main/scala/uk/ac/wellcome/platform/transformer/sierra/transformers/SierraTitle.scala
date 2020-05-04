@@ -2,6 +2,7 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import uk.ac.wellcome.platform.transformer.sierra.exceptions.ShouldNotTransformException
 import uk.ac.wellcome.platform.transformer.sierra.source.SierraBibData
+import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 
 object SierraTitle extends SierraTransformer {
 

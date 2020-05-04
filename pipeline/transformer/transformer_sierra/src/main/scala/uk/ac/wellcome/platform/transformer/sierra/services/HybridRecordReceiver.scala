@@ -10,6 +10,7 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.bigmessaging.EmptyMetadata
 import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
+import uk.ac.wellcome.sierra_adapter.model.SierraTransformable
 import uk.ac.wellcome.storage.store.{HybridStoreEntry, Store, TypedStoreEntry}
 import uk.ac.wellcome.storage.{Identified, ObjectLocation, Version}
 

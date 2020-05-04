@@ -1,9 +1,9 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.models.transformable.sierra.SierraItemNumber
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.sierra.source.{SierraBibData, SierraItemData, SierraQueryOps}
+import uk.ac.wellcome.sierra_adapter.model.{SierraBibNumber, SierraItemNumber}
 
 case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
     extends SierraTransformer
