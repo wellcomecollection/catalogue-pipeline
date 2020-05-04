@@ -50,18 +50,16 @@ object CalmTransformer
 
   def shouldSuppress(record: CalmRecord): Boolean =
     record
-      .get("Transmission")
-      .map { value =>
-        value.toLowerCase match {
-          case "no"  => true
-          case "yes" => false
-          case _ =>
-            info(
-              s"Unrecognised value for Transmission field; assuming 'Yes': $value")
-            false
-        }
+      .get("Transmission").exists { value =>
+      value.toLowerCase match {
+        case "no" => true
+        case "yes" => false
+        case _ =>
+          info(
+            s"Unrecognised value for Transmission field; assuming 'Yes': $value")
+          false
       }
-      .getOrElse(false)
+    }
 
   def workData(record: CalmRecord): Result[WorkData[Unminted, Identifiable]] =
     for {
@@ -81,6 +79,7 @@ object CalmTransformer
         mergeCandidates = mergeCandidates(record),
         items = items(record, accessStatus),
         contributors = contributors(record),
+        description = description(record),
         physicalDescription = physicalDescription(record),
         notes = notes(record)
       )
@@ -195,6 +194,14 @@ object CalmTransformer
       .get("AccessStatus")
       .map(AccessStatus(_))
       .toResult
+
+  def description(record: CalmRecord): Option[String] =
+    record.getList("Description") match {
+      case Nil  => None
+      case strs => Some(strs.mkString(" "))
+    }
+
+
 
   def physicalDescription(record: CalmRecord): Option[String] =
     (record.getList("Extent") ++ record.getList("UserWrapped6")) match {

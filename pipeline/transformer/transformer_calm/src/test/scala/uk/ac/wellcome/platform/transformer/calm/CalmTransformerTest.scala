@@ -120,6 +120,18 @@ class CalmTransformerTest extends FunSpec with Matchers {
     )
   }
 
+  it("transforms description") {
+    val record = calmRecord(
+      "Title" -> "abc",
+      "Level" -> "Collection",
+      "RefNo" -> "a/b/c",
+      "AltRefNo" -> "a.b.c",
+      "Description" -> "description of the thing",
+    )
+    CalmTransformer(record, version).right.get.data.description shouldBe
+      Some("description of the thing")
+  }
+
   it("transforms physical description") {
     val record = calmRecord(
       "Title" -> "abc",
