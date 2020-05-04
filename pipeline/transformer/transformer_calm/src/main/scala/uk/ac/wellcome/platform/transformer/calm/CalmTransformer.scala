@@ -81,6 +81,7 @@ object CalmTransformer
         contributors = contributors(record),
         description = description(record),
         physicalDescription = physicalDescription(record),
+        production = production(record),
         notes = notes(record)
       )
 
@@ -196,12 +197,7 @@ object CalmTransformer
       .toResult
 
   def description(record: CalmRecord): Option[String] =
-    record.getList("Description") match {
-      case Nil  => None
-      case strs => Some(strs.mkString(" "))
-    }
-
-
+    record.getJoined("Description")
 
   def physicalDescription(record: CalmRecord): Option[String] =
     (record.getList("Extent") ++ record.getList("UserWrapped6")) match {
@@ -209,13 +205,25 @@ object CalmTransformer
       case strs => Some(strs.mkString(" "))
     }
 
+  def production(record: CalmRecord): List[ProductionEvent[Unminted]] = {
+    record.getList("Date") match {
+      case Nil => Nil
+      case list => List(ProductionEvent(
+        dates = list.map(Period(_)),
+        label = list.mkString(" "),
+        places = Nil,
+        agents = Nil,
+        function = None))
+    }
+  }
+
   def subjects(record: CalmRecord): List[Subject[Unminted]] =
     record.getList("Subject").map(Subject(_, Nil))
 
   def language(record: CalmRecord): Result[Option[Language]] =
     record
       .get("Language")
-      .map(Language.fromLabel(_))
+      .map(Language.fromLabel)
       .toResult
 
   def contributors(record: CalmRecord): List[Contributor[Unminted]] =
