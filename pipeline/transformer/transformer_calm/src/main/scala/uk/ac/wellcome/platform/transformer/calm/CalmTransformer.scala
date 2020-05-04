@@ -208,9 +208,9 @@ object CalmTransformer
   def production(record: CalmRecord): List[ProductionEvent[Unminted]] = {
     record.getList("Date") match {
       case Nil => Nil
-      case list => List(ProductionEvent(
-        dates = list.map(Period(_)),
-        label = list.mkString(" "),
+      case dates => List(ProductionEvent(
+        dates = dates.map(Period(_)),
+        label = dates.mkString(" "),
         places = Nil,
         agents = Nil,
         function = None))
