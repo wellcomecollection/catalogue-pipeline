@@ -5,6 +5,18 @@ import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 
 class ImagesTest extends ApiImagesTestBase with ElasticsearchFixtures {
 
+  it("returns a list of images") {
+    withApi {
+      case (ElasticConfig(_, imagesIndex), routes) =>
+        val images =
+          (1 to 5).map(_ => createAugmentedImage()).sortBy(_.id.canonicalId)
+        insertImagesIntoElasticsearch(imagesIndex, images: _*)
+        assertJsonResponse(routes, s"/$apiPrefix/images") {
+          Status.OK -> imagesListResponse(images)
+        }
+    }
+  }
+
   it("returns a single image when requested with ID") {
     withApi {
       case (ElasticConfig(_, imagesIndex), routes) =>
@@ -18,7 +30,7 @@ class ImagesTest extends ApiImagesTestBase with ElasticsearchFixtures {
              |{
              |  $singleImageResult,
              |  "id": "${image.id.canonicalId}",
-             |  "location": ${location(image.location)},
+             |  "location": ${digitalLocation(image.location)},
              |  "parentWork": "${image.parentWork.canonicalId}"
              |}""".stripMargin
         }

@@ -73,5 +73,5 @@ class ImagesController(
     }
 
   private lazy val imagesService = new ImagesService(
-    new ElasticsearchService(elasticClient))
+    new ElasticsearchService(elasticClient, "id.canonicalId"))
 }

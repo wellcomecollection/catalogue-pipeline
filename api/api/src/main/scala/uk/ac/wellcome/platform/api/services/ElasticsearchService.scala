@@ -23,7 +23,8 @@ case class ElasticsearchQueryOptions(filters: List[DocumentFilter],
                                      sortOrder: SortingOrder,
                                      searchQuery: Option[SearchQuery])
 
-class ElasticsearchService(elasticClient: ElasticClient)(
+class ElasticsearchService(elasticClient: ElasticClient,
+                           sortKey: String = "canonicalId")(
   implicit ec: ExecutionContext
 ) extends Logging
     with Tracing {
@@ -37,7 +38,7 @@ class ElasticsearchService(elasticClient: ElasticClient)(
   def listResults: (Index, ElasticsearchQueryOptions) => Future[
     Either[ElasticError, SearchResponse]] =
     executeSearch(
-      sortDefinitions = List(fieldSort("canonicalId").order(SortOrder.ASC))
+      sortDefinitions = List(fieldSort(sortKey).order(SortOrder.ASC))
     )
 
   def queryResults: (Index, ElasticsearchQueryOptions) => Future[
@@ -45,7 +46,7 @@ class ElasticsearchService(elasticClient: ElasticClient)(
     executeSearch(
       sortDefinitions = List(
         fieldSort("_score").order(SortOrder.DESC),
-        fieldSort("canonicalId").order(SortOrder.ASC))
+        fieldSort(sortKey).order(SortOrder.ASC))
     )
 
   /** Given a set of query options, build a SearchDefinition for Elasticsearch
