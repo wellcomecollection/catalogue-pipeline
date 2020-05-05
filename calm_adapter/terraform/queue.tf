@@ -8,6 +8,6 @@ module "calm_windows_queue" {
 }
 
 resource "aws_iam_role_policy" "read_from_queue" {
-  role   = module.task_definition.task_role_name
+  role   = module.worker.task_role_name
   policy = module.calm_windows_queue.read_policy
 }
