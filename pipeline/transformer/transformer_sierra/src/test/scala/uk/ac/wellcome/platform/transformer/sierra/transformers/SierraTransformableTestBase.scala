@@ -4,6 +4,7 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.transformer.sierra.SierraTransformableTransformer
 import uk.ac.wellcome.platform.transformer.sierra.exceptions.SierraTransformerException
+import uk.ac.wellcome.sierra_adapter.model.SierraTransformable
 
 import scala.util.Try
 

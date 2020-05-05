@@ -12,6 +12,7 @@ import uk.ac.wellcome.bigmessaging.fixtures.{BigMessagingFixture, VHSFixture}
 import uk.ac.wellcome.bigmessaging.EmptyMetadata
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig}
+import uk.ac.wellcome.sierra_adapter.model.SierraTransformable
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import uk.ac.wellcome.storage.store.{HybridStoreEntry, Store, TypedStoreEntry}
 import uk.ac.wellcome.storage.store.memory.MemoryStore

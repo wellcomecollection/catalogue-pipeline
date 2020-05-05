@@ -17,6 +17,7 @@ import uk.ac.wellcome.platform.transformer.sierra.fixtures.BackwardsCompatHybrid
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
+import uk.ac.wellcome.sierra_adapter.model.{SierraGenerators, SierraTransformable}
 
 class HybridRecordReceiverTest
     extends AnyFunSpec

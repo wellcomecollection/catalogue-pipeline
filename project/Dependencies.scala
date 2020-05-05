@@ -281,7 +281,7 @@ object CatalogueDependencies {
       WellcomeDependencies.newFixturesLibrary
 
   val bigMessagingDependencies: Seq[ModuleID] =
-    ExternalDependencies.scalatestDependencies ++
+    ExternalDependencies.newScalatestDependencies ++
       WellcomeDependencies.newTypesafeLibrary ++
       WellcomeDependencies.newMonitoringLibrary ++
       WellcomeDependencies.newMessagingLibrary ++
@@ -362,7 +362,7 @@ object CatalogueDependencies {
 
   val sierraAdapterCommonDependencies: Seq[ModuleID] =
     ExternalDependencies.mockitoDependencies ++
-    ExternalDependencies.scalatestDependencies ++
+    ExternalDependencies. scalatestDependencies ++
   WellcomeDependencies.jsonLibrary ++
       WellcomeDependencies.messagingTypesafeLibrary
 

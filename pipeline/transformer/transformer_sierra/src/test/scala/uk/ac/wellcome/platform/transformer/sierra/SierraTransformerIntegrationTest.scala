@@ -13,9 +13,12 @@ import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig}
+import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
+import uk.ac.wellcome.sierra_adapter.model.{SierraGenerators, SierraTransformable}
 import uk.ac.wellcome.storage.streaming.Codec._
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
+import uk.ac.wellcome.platform.transformer.sierra.model.SierraTransformableImplicits._
 
 class SierraTransformerIntegrationTest
     extends AnyFunSpec
@@ -23,7 +26,7 @@ class SierraTransformerIntegrationTest
     with IntegrationPatience
     with BigMessagingFixture
     with BackwardsCompatHybridRecordReceiverFixture
-    with SierraGenerators {
+    with SierraGenerators with IdentifiersGenerators{
 
   it("transforms sierra records and publishes the result to the given topic") {
     withLocalSnsTopic { topic =>

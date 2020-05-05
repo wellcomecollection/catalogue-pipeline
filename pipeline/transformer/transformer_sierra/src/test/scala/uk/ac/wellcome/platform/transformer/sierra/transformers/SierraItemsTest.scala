@@ -2,11 +2,11 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.transformable.sierra.SierraItemNumber
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.sierra.source.{SierraBibData, SierraItemData, VarField}
 import uk.ac.wellcome.platform.transformer.sierra.source.sierra.SierraSourceLocation
 import uk.ac.wellcome.platform.transformer.sierra.generators.SierraDataGenerators
+import uk.ac.wellcome.sierra_adapter.model.{SierraBibNumber, SierraItemNumber}
 
 class SierraItemsTest
     extends AnyFunSpec
