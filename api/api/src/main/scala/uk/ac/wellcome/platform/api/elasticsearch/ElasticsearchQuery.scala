@@ -48,44 +48,8 @@ object ElasticsearchComboQuery {
     }
 }
 
-case class BoolBoostersQuery(q: String) extends ElasticsearchComboQuery {
-  val elasticQuery =
-    CoreQuery(q, BoolBoostedQuery(q).elasticQuery.should).elasticQuery
-}
-
-case class PhraserBeamQuery(q: String) extends ElasticsearchComboQuery {
-  val elasticQuery =
-    CoreQuery(
-      q,
-      PhraseMatchQuery(q).elasticQuery.should ++
-        Seq(BaseAndQuery(q).elasticQuery)).elasticQuery
-}
-
-/**
-  * `ComboQuery`s _should_ implement this class as it wraps core
-  * functionality that we wouldn't want to break.
-  *
-  * We haven't enforced this in the type system as we _might_ want
-  * to try more extreme tests that don't implement this.
-  */
-final case class CoreQuery(q: String, shouldQueries: Seq[Query])
-    extends ElasticsearchPartialQuery {
-
-  lazy val elasticQuery = must(
-    should(
-      List(BaseOrQuery(q).elasticQuery, IdQuery(q).elasticQuery) ++
-        shouldQueries: _*
-    )
-  )
-}
-
-/**
-  * The `BaseAndQuery` & `BaseOrQuery` are almost identical,
-  * but we use the AND operator and a double boost on the
-  * `BaseAndQuery` as AND should always score higher.
-  */
-trait BaseQueryConfig {
-  val searchFields: Seq[(String, Option[Double])] = Seq(
+object QueryConfig {
+  val baseWorksFields = Seq(
     ("data.subjects.concepts.label", None),
     ("data.genres.concepts.label", None),
     ("data.contributors.agent.label", None),
@@ -100,10 +64,63 @@ trait BaseQueryConfig {
     ("data.collectionPath.path", None),
     ("data.collectionPath.label", None),
   )
+
+  val baseImagesFields = Seq(
+    ("fullText", None)
+  )
 }
-case class BaseOrQuery(q: String)
-    extends ElasticsearchPartialQuery
-    with BaseQueryConfig {
+
+case class BoolBoostersQuery(q: String) extends ElasticsearchComboQuery {
+  val elasticQuery =
+    CoreWorksQuery(q, BoolBoostedQuery(q).elasticQuery.should).elasticQuery
+}
+
+case class PhraserBeamQuery(q: String) extends ElasticsearchComboQuery {
+  val elasticQuery =
+    CoreWorksQuery(
+      q,
+      PhraseMatchQuery(q).elasticQuery.should ++
+        Seq(BaseAndQuery(q, QueryConfig.baseWorksFields).elasticQuery)).elasticQuery
+}
+
+case class CoreImagesQuery(q: String) extends ElasticsearchComboQuery {
+  val elasticQuery = must(
+    should(
+      List(
+        BaseOrQuery(q, QueryConfig.baseImagesFields).elasticQuery,
+        ImageIdQuery(q).elasticQuery
+      )
+    )
+  )
+}
+
+/**
+  * `ComboQuery`s _should_ implement this class as it wraps core
+  * functionality that we wouldn't want to break.
+  *
+  * We haven't enforced this in the type system as we _might_ want
+  * to try more extreme tests that don't implement this.
+  */
+final case class CoreWorksQuery(q: String, shouldQueries: Seq[Query])
+    extends ElasticsearchPartialQuery {
+
+  lazy val elasticQuery = must(
+    should(
+      List(
+        BaseOrQuery(q, QueryConfig.baseWorksFields).elasticQuery,
+        WorkIdQuery(q).elasticQuery) ++
+        shouldQueries: _*
+    )
+  )
+}
+
+/**
+  * The `BaseAndQuery` & `BaseOrQuery` are almost identical,
+  * but we use the AND operator and a double boost on the
+  * `BaseAndQuery` as AND should always score higher.
+  */
+case class BaseOrQuery(q: String, searchFields: Seq[(String, Option[Double])])
+    extends ElasticsearchPartialQuery {
   val minimumShouldMatch = "60%"
   val fields = searchFields map {
     case (field, boost) =>
@@ -119,9 +136,8 @@ case class BaseOrQuery(q: String)
   )
 }
 
-case class BaseAndQuery(q: String)
-    extends ElasticsearchPartialQuery
-    with BaseQueryConfig {
+case class BaseAndQuery(q: String, searchFields: Seq[(String, Option[Double])])
+    extends ElasticsearchPartialQuery {
   val minimumShouldMatch = "60%"
 
   val fields = searchFields map {
@@ -139,7 +155,7 @@ case class BaseAndQuery(q: String)
   )
 }
 
-final case class IdQuery(q: String) extends ElasticsearchPartialQuery {
+final case class WorkIdQuery(q: String) extends ElasticsearchPartialQuery {
   lazy val idFields = Seq(
     "canonicalId.text",
     "sourceIdentifier.value.text",
@@ -147,6 +163,20 @@ final case class IdQuery(q: String) extends ElasticsearchPartialQuery {
     "data.items.id.canonicalId.text",
     "data.items.id.sourceIdentifier.value.text",
     "data.items.id.otherIdentifiers.value.text",
+  )
+  lazy val elasticQuery =
+    MultiMatchQuery(
+      fields = idFields.map(FieldWithOptionalBoost(_, None)),
+      text = q,
+      `type` = Some(MultiMatchQueryBuilderType.CROSS_FIELDS)
+    )
+}
+
+final case class ImageIdQuery(q: String) extends ElasticsearchPartialQuery {
+  lazy val idFields = Seq(
+    "id.canonicalId.text",
+    "id.sourceIdentifier.value.text",
+    "parentWork.text"
   )
   lazy val elasticQuery =
     MultiMatchQuery(

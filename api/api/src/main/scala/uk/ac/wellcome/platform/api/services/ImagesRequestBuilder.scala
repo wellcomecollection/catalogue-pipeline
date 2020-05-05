@@ -4,6 +4,7 @@ import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s._
 import com.sksamuel.elastic4s.requests.searches._
 import com.sksamuel.elastic4s.requests.searches.sort._
+import uk.ac.wellcome.platform.api.elasticsearch.CoreImagesQuery
 
 object ImagesRequestBuilder extends ElasticsearchRequestBuilder {
 
@@ -11,6 +12,16 @@ object ImagesRequestBuilder extends ElasticsearchRequestBuilder {
 
   def request(queryOptions: ElasticsearchQueryOptions,
               index: Index,
-              scored: Boolean): SearchRequest = ???
-
+              scored: Boolean): SearchRequest =
+    search(index)
+      .query(
+        queryOptions.searchQuery
+          .map { q =>
+            CoreImagesQuery(q.query).elasticQuery
+          }
+          .getOrElse(boolQuery)
+      )
+      .sortBy(idSort)
+      .limit(queryOptions.limit)
+      .from(queryOptions.from)
 }

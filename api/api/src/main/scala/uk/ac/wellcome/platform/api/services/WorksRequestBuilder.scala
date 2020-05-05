@@ -86,7 +86,8 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
   }
 
   private def sort(implicit queryOptions: ElasticsearchQueryOptions) =
-    queryOptions.sortBy
+    idSort +:
+      queryOptions.sortBy
       .map {
         case ProductionDateSortRequest => "data.production.dates.range.from"
       }
