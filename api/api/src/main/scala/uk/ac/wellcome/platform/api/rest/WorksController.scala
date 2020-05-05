@@ -13,6 +13,7 @@ import uk.ac.wellcome.platform.api.models.ApiConfig
 import uk.ac.wellcome.platform.api.services.{
   CollectionService,
   ElasticsearchService,
+  WorksRequestBuilder,
   WorksService
 }
 import uk.ac.wellcome.platform.api.Tracing
@@ -128,7 +129,7 @@ class WorksController(
     new CollectionService(elasticClient)
 
   private lazy val worksService = new WorksService(
-    new ElasticsearchService(elasticClient))
+    new ElasticsearchService(elasticClient, WorksRequestBuilder))
 
   private lazy val logger = Logger(this.getClass.getName)
 }

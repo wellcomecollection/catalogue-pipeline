@@ -51,10 +51,12 @@ class ImagesService(searchService: ElasticsearchService)(
 
   def listOrSearchImages(index: Index, searchOptions: ImagesSearchOptions)
     : Future[Either[ElasticError, ResultList[AugmentedImage, Unit]]] =
-    (searchOptions.searchQuery match {
-      case Some(_) => searchService.queryResults
-      case None    => searchService.listResults
-    })(index, toElasticsearchQueryOptions(searchOptions))
+    searchService
+      .executeSearch(
+        queryOptions = toElasticsearchQueryOptions(searchOptions),
+        index = index,
+        scored = searchOptions.searchQuery.isDefined
+      )
       .map { _.map(createResultList) }
 
   def toElasticsearchQueryOptions(

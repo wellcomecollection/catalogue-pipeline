@@ -10,6 +10,7 @@ import uk.ac.wellcome.platform.api.Tracing
 import uk.ac.wellcome.platform.api.models.ApiConfig
 import uk.ac.wellcome.platform.api.services.{
   ElasticsearchService,
+  ImagesRequestBuilder,
   ImagesService
 }
 
@@ -73,5 +74,5 @@ class ImagesController(
     }
 
   private lazy val imagesService = new ImagesService(
-    new ElasticsearchService(elasticClient, "id.canonicalId"))
+    new ElasticsearchService(elasticClient, ImagesRequestBuilder))
 }

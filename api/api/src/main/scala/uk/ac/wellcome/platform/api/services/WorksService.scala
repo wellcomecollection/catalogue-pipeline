@@ -46,17 +46,19 @@ class WorksService(searchService: ElasticsearchService)(
 
   def listOrSearchWorks(index: Index, searchOptions: WorksSearchOptions)
     : Future[Either[ElasticError, ResultList[IdentifiedWork, Aggregations]]] =
-    (searchOptions.searchQuery match {
-      case Some(_) => searchService.queryResults
-      case None    => searchService.listResults
-    })(index, toElasticsearchQueryOptions(searchOptions))
+    searchService
+      .executeSearch(
+        queryOptions = toElasticsearchQueryOptions(searchOptions),
+        index = index,
+        scored = searchOptions.searchQuery.isDefined
+      )
       .map { _.map(createResultList) }
 
   private def toElasticsearchQueryOptions(
     worksSearchOptions: WorksSearchOptions): ElasticsearchQueryOptions =
     ElasticsearchQueryOptions(
       searchQuery = worksSearchOptions.searchQuery,
-      filters = IdentifiedWorkFilter :: worksSearchOptions.filters,
+      filters = worksSearchOptions.filters,
       limit = worksSearchOptions.pageSize,
       aggregations = worksSearchOptions.aggregations,
       sortBy = worksSearchOptions.sortBy,

@@ -24,7 +24,7 @@ case class ElasticsearchQueryOptions(filters: List[DocumentFilter],
                                      searchQuery: Option[SearchQuery])
 
 class ElasticsearchService(elasticClient: ElasticClient,
-                           sortKey: String = "canonicalId")(
+                           requestBuilder: ElasticsearchRequestBuilder)(
   implicit ec: ExecutionContext
 ) extends Logging
     with Tracing {
@@ -35,38 +35,20 @@ class ElasticsearchService(elasticClient: ElasticClient,
       get(canonicalId).from(index.name)
     }).map { toEither }
 
-  def listResults: (Index, ElasticsearchQueryOptions) => Future[
-    Either[ElasticError, SearchResponse]] =
-    executeSearch(
-      sortDefinitions = List(fieldSort(sortKey).order(SortOrder.ASC))
-    )
-
-  def queryResults: (Index, ElasticsearchQueryOptions) => Future[
-    Either[ElasticError, SearchResponse]] =
-    executeSearch(
-      sortDefinitions = List(
-        fieldSort("_score").order(SortOrder.DESC),
-        fieldSort(sortKey).order(SortOrder.ASC))
-    )
-
   /** Given a set of query options, build a SearchDefinition for Elasticsearch
     * using the elastic4s query DSL, then execute the search.
     */
-  private def executeSearch(
-    sortDefinitions: List[FieldSort]
-  )(index: Index, queryOptions: ElasticsearchQueryOptions)
-    : Future[Either[ElasticError, SearchResponse]] =
+  def executeSearch(
+    queryOptions: ElasticsearchQueryOptions,
+    index: Index,
+    scored: Boolean): Future[Either[ElasticError, SearchResponse]] =
     spanFuture(
       name = "ElasticSearch#executeSearch",
       spanType = "request",
       subType = "elastic",
       action = "query")({
 
-      val searchRequest = ElasticsearchRequestBuilder(
-        index,
-        sortDefinitions,
-        queryOptions
-      ).request
+      val searchRequest = requestBuilder.request(queryOptions, index, scored)
 
       debug(s"Sending ES request: ${searchRequest.show}")
       val transaction = Tracing.currentTransaction
