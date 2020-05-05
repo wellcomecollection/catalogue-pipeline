@@ -106,7 +106,7 @@ case class ElasticsearchRequestBuilder(
     }
     .getOrElse { boolQuery }
     .filter {
-      (IdentifiedWorkFilter :: filteredAggregationBuilder.unpairedFilters)
+      filteredAggregationBuilder.unpairedFilters
         .map(buildWorkFilterQuery)
     }
 

@@ -357,21 +357,6 @@ class ElasticsearchServiceTest
       }
     }
 
-    it("does not list works that have visible=false") {
-      withLocalWorksIndex { index =>
-        val visibleWorks = createIdentifiedWorks(count = 8)
-        val invisibleWorks = createIdentifiedInvisibleWorks(count = 2)
-
-        val works = visibleWorks ++ invisibleWorks
-        insertIntoElasticsearch(index, works: _*)
-
-        assertListResultsAreCorrect(
-          index = index,
-          expectedWorks = visibleWorks
-        )
-      }
-    }
-
     it("filters list results by workType") {
       withLocalWorksIndex { index =>
         val work1 = createIdentifiedWorkWith(

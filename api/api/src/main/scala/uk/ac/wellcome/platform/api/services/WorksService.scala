@@ -56,7 +56,7 @@ class WorksService(searchService: ElasticsearchService)(
     worksSearchOptions: WorksSearchOptions): ElasticsearchQueryOptions =
     ElasticsearchQueryOptions(
       searchQuery = worksSearchOptions.searchQuery,
-      filters = worksSearchOptions.filters,
+      filters = IdentifiedWorkFilter :: worksSearchOptions.filters,
       limit = worksSearchOptions.pageSize,
       aggregations = worksSearchOptions.aggregations,
       sortBy = worksSearchOptions.sortBy,
