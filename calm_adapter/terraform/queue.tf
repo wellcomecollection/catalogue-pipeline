@@ -20,7 +20,7 @@ module "scaling_alarm" {
     module.worker.scale_up_arn
   ]
 
-  queue_low_actions  = [
+  queue_low_actions = [
     module.worker.scale_down_arn
   ]
 }
