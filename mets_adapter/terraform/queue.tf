@@ -11,3 +11,16 @@ module "queue" {
 
   alarm_topic_arn = local.dlq_alarm_arn
 }
+
+module "scaling_alarm" {
+  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.2"
+  queue_name = module.queue.name
+
+  queue_high_actions = [
+    module.worker.scale_up_arn
+  ]
+
+  queue_low_actions  = [
+    module.worker.scale_down_arn
+  ]
+}
