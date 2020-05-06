@@ -30,7 +30,7 @@ class ImagesTest extends ApiImagesTestBase with ElasticsearchFixtures {
              |{
              |  $singleImageResult,
              |  "id": "${image.id.canonicalId}",
-             |  "location": ${digitalLocation(image.location)},
+             |  "locations": [${digitalLocation(image.location)}],
              |  "parentWork": "${image.parentWork.canonicalId}"
              |}""".stripMargin
         }
@@ -87,7 +87,7 @@ class ImagesTest extends ApiImagesTestBase with ElasticsearchFixtures {
                  |{
                  |  $singleImageResult,
                  |  "id": "${defaultImage.id.canonicalId}",
-                 |  "location": ${location(defaultImage.location)},
+                 |  "locations": [${location(defaultImage.location)}],
                  |  "parentWork": "${defaultImage.parentWork.canonicalId}"
                  |}""".stripMargin
           }
@@ -100,7 +100,7 @@ class ImagesTest extends ApiImagesTestBase with ElasticsearchFixtures {
                  |{
                  |  $singleImageResult,
                  |  "id": "${alternativeImage.id.canonicalId}",
-                 |  "location": ${location(alternativeImage.location)},
+                 |  "locations": [${location(alternativeImage.location)}],
                  |  "parentWork": "${alternativeImage.parentWork.canonicalId}"
                  |}""".stripMargin
           }
