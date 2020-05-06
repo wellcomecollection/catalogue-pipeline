@@ -48,8 +48,8 @@ object CalmTransformer
         )
       }
 
-  def shouldSuppress(record: CalmRecord): Boolean =
-    record
+  def shouldSuppress(record: CalmRecord): Boolean = {
+    val shouldNotTransmit = record
       .get("Transmission")
       .exists { value =>
         value.toLowerCase match {
@@ -61,6 +61,19 @@ object CalmTransformer
             false
         }
       }
+
+    // This is just while the source data in Calm is being amended to not include this Level.
+    // We'd like them to go through so as not to clog up the DLQ as this is _not_
+    // an error, but a known state of the source data.
+    val isGroupOfPieces = record.get("Level").exists { value =>
+      value.toLowerCase match {
+        case "group of pieces" => true
+        case _                 => false
+      }
+    }
+
+    shouldNotTransmit || isGroupOfPieces
+  }
 
   def workData(record: CalmRecord): Result[WorkData[Unminted, Identifiable]] =
     for {
