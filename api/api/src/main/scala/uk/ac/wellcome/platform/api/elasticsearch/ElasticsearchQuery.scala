@@ -156,7 +156,7 @@ case class BaseAndQuery(q: String, searchFields: Seq[(String, Option[Double])])
 }
 
 final case class WorkIdQuery(q: String) extends ElasticsearchPartialQuery {
-  lazy val idFields = Seq(
+  val idFields = Seq(
     "canonicalId.text",
     "sourceIdentifier.value.text",
     "data.otherIdentifiers.value.text",
@@ -173,7 +173,7 @@ final case class WorkIdQuery(q: String) extends ElasticsearchPartialQuery {
 }
 
 final case class ImageIdQuery(q: String) extends ElasticsearchPartialQuery {
-  lazy val idFields = Seq(
+  val idFields = Seq(
     "id.canonicalId.text",
     "id.sourceIdentifier.value.text",
     "parentWork.text"
