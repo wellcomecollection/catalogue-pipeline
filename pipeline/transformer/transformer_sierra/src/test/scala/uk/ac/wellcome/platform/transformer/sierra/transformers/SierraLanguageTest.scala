@@ -26,7 +26,7 @@ class SierraLanguageTest
 
     SierraLanguage(createSierraBibNumber, bibData) shouldBe Some(
       Language(
-        id = "eng",
+        id = Some("eng"),
         label = "English"
       ))
   }

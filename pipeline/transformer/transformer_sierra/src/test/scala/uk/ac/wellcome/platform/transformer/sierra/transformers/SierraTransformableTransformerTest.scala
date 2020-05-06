@@ -465,7 +465,7 @@ class SierraTransformableTransformerTest
          |}""".stripMargin
 
     val expectedLanguage = Language(
-      id = "fra",
+      id = Some("fra"),
       label = "French"
     )
 

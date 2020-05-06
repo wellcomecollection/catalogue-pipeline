@@ -59,7 +59,7 @@ trait ApiWorksTestBase
   def languageResponse(language: Language): String =
     s"""
       | "language": {
-      |   "id": "${language.id}",
+      |   ${language.id.map(lang => s""""id": "$lang",""").getOrElse("")}
       |   "label": "${language.label}",
       |   "type": "Language"
       | },

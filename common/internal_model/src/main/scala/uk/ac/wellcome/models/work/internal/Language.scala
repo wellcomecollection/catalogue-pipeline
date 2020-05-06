@@ -5,8 +5,8 @@ import scala.io.Source
 import uk.ac.wellcome.models.work.internal.result.Result
 
 case class Language(
-  id: String,
   label: String,
+  id: Option[String],
   ontologyType: String = "Language"
 )
 
@@ -15,18 +15,16 @@ object Language {
   def fromCode(code: String): Result[Language] =
     languageCodeMap
       .get(code)
-      .map(label => Right(Language(code, label)))
+      .map(label => Right(Language(label, Some(code))))
       .getOrElse {
         Left(new Exception(s"Invalid ISO 693-2 language code: $code"))
       }
 
   def fromLabel(label: String): Result[Language] =
-    languageLabelMap
-      .get(label)
-      .map(code => Right(Language(code, label)))
-      .getOrElse {
-        Left(new Exception(s"Unrecognised language label: $label"))
-      }
+    languageLabelMap.get(label) match {
+      case Some(code) => Right(Language(label, Some(code)))
+      case None       => Right(Language(label, None))
+    }
 
   private def languageCodes: List[(String, String)] =
     Source
