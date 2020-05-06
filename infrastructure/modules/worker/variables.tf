@@ -57,6 +57,16 @@ variable "memory" {
   default = 1024
 }
 
+variable "app_cpu" {
+  type    = number
+  default = 512
+}
+
+variable "app_memory" {
+  type    = number
+  default = 1024
+}
+
 variable "use_fargate_spot" {
   type    = bool
   default = false
@@ -64,5 +74,16 @@ variable "use_fargate_spot" {
 
 variable "security_group_ids" {
   type    = list(string)
+  default = []
+}
+
+variable "port" {
+  // Leaving this as the default will not expose a port on the container
+  type    = number
+  default = -1
+}
+
+variable "extra_container_definitions" {
+  type    = list(any)
   default = []
 }

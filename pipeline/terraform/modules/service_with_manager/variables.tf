@@ -58,13 +58,15 @@ variable "app_container_port" {
   default = 80
 }
 
-variable "app_container_name" {}
+variable "app_container_name" {
+  type = string
+}
 
 variable "app_env_vars" {
   type = map(string)
 }
 
-variable "secret_app_env_vars" {
+variable "app_secret_env_vars" {
   type    = map(string)
   default = {}
 }

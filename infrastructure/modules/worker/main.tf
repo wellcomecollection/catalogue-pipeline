@@ -33,10 +33,10 @@ module "task_definition" {
   launch_types = ["FARGATE"]
   task_name    = var.name
 
-  container_definitions = [
+  container_definitions = concat([
     module.log_router_container.container_definition,
     module.app_container.container_definition
-  ]
+  ], var.extra_container_definitions)
 }
 
 module "app_container" {
@@ -45,8 +45,17 @@ module "app_container" {
   name  = var.name
   image = var.image
 
+  cpu    = var.app_cpu
+  memory = var.app_memory
+
   environment = var.env_vars
   secrets     = var.secret_env_vars
+
+  port_mappings = var.port == -1 ? [] : [{
+    containerPort = var.port
+    hostPort      = 0
+    protocol      = "tcp"
+  }]
 
   log_configuration = module.log_router_container.container_log_configuration
 }

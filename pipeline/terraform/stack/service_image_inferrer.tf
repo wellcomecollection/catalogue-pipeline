@@ -2,7 +2,6 @@ locals {
   inferrer_host                  = "localhost"
   inferrer_port                  = 80
   inferrer_model_key_config_name = "lsh_model"
-  logstash_port                  = 514
   //  High inferrer throughput comes at the cost of the latency distribution
   // having heavy tails - this stops some unfortunate messages from being
   // put on the DLQ when they are consumed but not processed.
@@ -57,11 +56,8 @@ module "image_inferrer" {
     topic_arn            = module.image_inferrer_topic.arn
     messages_bucket_name = aws_s3_bucket.messages.id
     queue_url            = module.image_inferrer_queue.url
-    logstash_host        = local.logstash_host
   }
   app_env_vars = {
-    LOGSTASH_HOST     = local.logstash_host
-    LOGSTASH_PORT     = local.logstash_port
     MODEL_OBJECT_KEY  = data.aws_ssm_parameter.model_data_key.value
     MODEL_DATA_BUCKET = var.inferrer_model_data_bucket_name
   }
