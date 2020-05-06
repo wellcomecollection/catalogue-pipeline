@@ -3,11 +3,11 @@ data "aws_ecs_cluster" "cluster" {
 }
 
 module "sierra_reader_service" {
-  source = "../modules/scaling_worker"
+  source = "../../../infrastructure/modules/worker"
 
-  service_name = local.service_name
+  name = local.service_name
 
-  container_image = var.container_image
+  image = var.container_image
 
   env_vars = {
     resource_type     = var.resource_type

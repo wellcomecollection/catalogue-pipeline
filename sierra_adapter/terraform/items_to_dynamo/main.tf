@@ -3,11 +3,11 @@ data "aws_ecs_cluster" "cluster" {
 }
 
 module "sierra_to_dynamo_service" {
-  source = "../modules/scaling_worker"
+  source = "../../../infrastructure/modules/worker"
 
-  service_name = "sierra_items_to_dynamo"
+  name = "sierra_items_to_dynamo"
 
-  container_image = var.container_image
+  image = var.container_image
 
   env_vars = {
     demultiplexer_queue_url = module.demultiplexer_queue.url
