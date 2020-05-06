@@ -9,7 +9,6 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import software.amazon.awssdk.services.cloudwatch.model.StandardUnit
 import software.amazon.awssdk.services.sns.model.{SubscribeRequest, SubscribeResponse, UnsubscribeRequest}
-import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
@@ -17,7 +16,6 @@ import uk.ac.wellcome.fixtures.{Fixture, TestWith, fixture}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
-import uk.ac.wellcome.messaging.sqs.SQSClientFactory
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 import uk.ac.wellcome.storage.ObjectLocation
 import uk.ac.wellcome.storage.store.memory.MemoryTypedStore
@@ -103,7 +101,6 @@ class BigMessagingFixtureIntegrationTest
                        R]): R = {
     withLocalStackMessageStreamFixtures[R] {
       case (queue, messageStream, store) =>
-        println(s"******** $queue *******")
         withLocalS3Bucket { bucket =>
           withLocalStackSnsTopic { topic =>
             withLocalStackSubscription(queue, topic) { _ =>
@@ -137,11 +134,4 @@ class BigMessagingFixtureIntegrationTest
         }
       }
     }
-
-  val localStackSqsAsyncClient: SqsAsyncClient = SQSClientFactory.createAsyncClient(
-    region = "localhost",
-    endpoint = "http://localhost:4576",
-    accessKey = "access",
-    secretKey = "secret"
-  )
 }

@@ -12,7 +12,7 @@ object WellcomeDependencies {
     val newTypesafe = "2.0.0"
     val newFixtures = "1.2.0"
     val newJson = "2.1.0"
-    val newMessaging = "9.1.0"
+    val newMessaging = "9.2.1"
     val newMonitoring = "4.0.0"
     val newStorage = "8.1.0"
 
