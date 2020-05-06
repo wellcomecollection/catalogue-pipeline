@@ -3,11 +3,11 @@ data "aws_ecs_cluster" "cluster" {
 }
 
 module "sierra_merger_service" {
-  source = "../modules/scaling_worker"
+  source = "../../../infrastructure/modules/worker"
 
-  service_name = "sierra_bib_merger"
+  name = "sierra_bib_merger"
 
-  container_image = var.container_image
+  image = var.container_image
 
   env_vars = {
     windows_queue_url = module.updates_queue.url

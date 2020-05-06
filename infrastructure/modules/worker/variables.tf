@@ -56,3 +56,13 @@ variable "memory" {
   type    = number
   default = 1024
 }
+
+variable "use_fargate_spot" {
+  type    = bool
+  default = false
+}
+
+variable "security_group_ids" {
+  type    = list(string)
+  default = []
+}
