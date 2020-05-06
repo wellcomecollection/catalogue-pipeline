@@ -43,7 +43,7 @@ object MultipleImagesParams extends QueryParamsUtils {
         "page".as[Int].?,
         "pageSize".as[Int].?,
         "query".as[String].?,
-        "license".as[LicenseFilter].?,
+        "locations.license".as[LicenseFilter].?,
         "_index".as[String].?
       )
     ).tflatMap { args =>
