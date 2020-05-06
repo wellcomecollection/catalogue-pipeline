@@ -31,7 +31,6 @@ module "recorder" {
     vhs_recorder_dynamo_table_name = module.vhs_recorder.table_name
     vhs_recorder_bucket_name       = module.vhs_recorder.bucket_name
     sns_topic                      = module.recorder_topic.arn
-    logstash_host                  = local.logstash_host
   }
 
   secret_env_vars = {}

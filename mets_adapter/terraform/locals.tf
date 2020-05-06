@@ -7,8 +7,6 @@ locals {
 
   namespace                       = "mets-adapter"
   storage_notifications_topic_arn = data.terraform_remote_state.storage_service.outputs.bag_register_output_topic_arn
-  logstash_transit_service_name   = "${local.namespace}_logstash_transit"
-  logstash_host                   = "${local.logstash_transit_service_name}.${local.namespace}"
 
   bag_api_url = "https://api.wellcomecollection.org/storage/v1/bags"
   oauth_url   = "https://auth.wellcomecollection.org/oauth2/token"

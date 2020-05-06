@@ -27,7 +27,6 @@ module "ingestor_works" {
     es_index            = var.es_works_index
     ingest_queue_id     = module.ingestor_works_queue.url
     es_ingest_batchSize = 100
-    logstash_host       = local.logstash_host
   }
 
   secret_env_vars = {

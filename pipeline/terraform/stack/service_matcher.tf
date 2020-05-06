@@ -42,8 +42,6 @@ module "matcher" {
 
     vhs_recorder_dynamo_table_name = "${module.vhs_recorder.table_name}"
     vhs_recorder_bucket_name       = "${module.vhs_recorder.bucket_name}"
-
-    logstash_host = local.logstash_host
   }
 
   secret_env_vars = {}

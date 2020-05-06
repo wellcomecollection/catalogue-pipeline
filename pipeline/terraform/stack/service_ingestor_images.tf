@@ -28,7 +28,6 @@ module "ingestor_images" {
     es_index            = var.es_images_index
     ingest_queue_id     = module.ingestor_images_queue.url
     es_ingest_batchSize = 100
-    logstash_host       = local.logstash_host
   }
 
   secret_env_vars = {

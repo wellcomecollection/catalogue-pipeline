@@ -29,8 +29,6 @@ module "image_id_minter" {
     queue_url       = module.image_id_minter_queue.url
     topic_arn       = module.image_id_minter_topic.arn
     max_connections = local.id_minter_task_max_connections
-
-    logstash_host = local.logstash_host
   }
 
   secret_env_vars = {
