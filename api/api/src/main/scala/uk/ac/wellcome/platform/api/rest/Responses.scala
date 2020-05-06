@@ -39,7 +39,7 @@ object ResultResponse {
 
 @Schema(
   name = "ResultList",
-  description = "A paginated list of documents."
+  description = "A paginated list of results."
 )
 case class DisplayResultList[DisplayResult, DisplayAggs](
   @JsonKey("@context") context: String,
