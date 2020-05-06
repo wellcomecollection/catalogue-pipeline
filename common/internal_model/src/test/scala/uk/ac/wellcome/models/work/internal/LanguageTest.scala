@@ -2,7 +2,7 @@ package uk.ac.wellcome.models.work.internal
 import org.scalatest.{FunSpec, Matchers}
 
 class LanguageTest extends FunSpec with Matchers {
-  it("get's labels for known code or errors") {
+  it("gets labels for known code or errors") {
     val withValidCode = Language.fromCode("yo")
     val withInvalidCode = Language.fromCode("no such code")
 
