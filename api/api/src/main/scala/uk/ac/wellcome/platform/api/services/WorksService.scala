@@ -55,7 +55,7 @@ class WorksService(searchService: ElasticsearchService)(
       .map { _.map(createResultList) }
 
   private def toElasticsearchQueryOptions(
-    worksSearchOptions: WorksSearchOptions): ElasticsearchQueryOptions =
+    worksSearchOptions: WorksSearchOptions) =
     ElasticsearchQueryOptions(
       searchQuery = worksSearchOptions.searchQuery,
       filters = worksSearchOptions.filters,

@@ -14,7 +14,7 @@ import uk.ac.wellcome.platform.api.models._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-case class ElasticsearchQueryOptions(filters: List[WorkFilter],
+case class ElasticsearchQueryOptions(filters: List[DocumentFilter],
                                      limit: Int,
                                      from: Int,
                                      aggregations: List[AggregationRequest],

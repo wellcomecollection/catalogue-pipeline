@@ -6,7 +6,7 @@ import uk.ac.wellcome.display.models.SortingOrder
 import uk.ac.wellcome.json.JsonUtil.fromJson
 import uk.ac.wellcome.models.work.internal.AugmentedImage
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.platform.api.models.{ResultList, SearchQuery, WorkFilter}
+import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.platform.api.rest.{
   PaginatedSearchOptions,
   PaginationQuery
@@ -17,7 +17,7 @@ import scala.util.{Failure, Success}
 
 case class ImagesSearchOptions(
   searchQuery: Option[SearchQuery] = None,
-  filters: List[WorkFilter] = Nil,
+  filters: List[ImageFilter] = Nil,
   pageSize: Int = 10,
   pageNumber: Int = 1
 ) extends PaginatedSearchOptions

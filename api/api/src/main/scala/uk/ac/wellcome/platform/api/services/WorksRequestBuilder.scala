@@ -17,14 +17,14 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
   def request(queryOptions: ElasticsearchQueryOptions,
               index: Index,
               scored: Boolean = false): SearchRequest = {
-    implicit val q: ElasticsearchQueryOptions = queryOptions
+    implicit val q = queryOptions
     search(index)
       .aggs { filteredAggregationBuilder.filteredAggregations }
       .query { filteredQuery }
       .postFilter { postFilterQuery }
       .sortBy {
         if (scored) {
-          sort :+ fieldSort("_score").order(SortOrder.ASC)
+          sort :+ scoreSort(SortOrder.DESC)
         } else {
           sort
         }
@@ -37,7 +37,7 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
     implicit queryOptions: ElasticsearchQueryOptions) =
     new FiltersAndAggregationsBuilder(
       queryOptions.aggregations,
-      queryOptions.filters,
+      queryOptions.filters.collect { case filter: WorkFilter => filter },
       toAggregation,
       buildWorkFilterQuery
     )

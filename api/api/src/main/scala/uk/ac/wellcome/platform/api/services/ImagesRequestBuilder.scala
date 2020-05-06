@@ -3,8 +3,10 @@ package uk.ac.wellcome.platform.api.services
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s._
 import com.sksamuel.elastic4s.requests.searches._
+import com.sksamuel.elastic4s.requests.searches.queries.Query
 import com.sksamuel.elastic4s.requests.searches.sort._
 import uk.ac.wellcome.platform.api.elasticsearch.CoreImagesQuery
+import uk.ac.wellcome.platform.api.models.{ImageFilter, LicenseFilter}
 
 object ImagesRequestBuilder extends ElasticsearchRequestBuilder {
 
@@ -20,8 +22,23 @@ object ImagesRequestBuilder extends ElasticsearchRequestBuilder {
             CoreImagesQuery(q.query).elasticQuery
           }
           .getOrElse(boolQuery)
+          .filter(queryOptions.filters.collect {
+            case filter: ImageFilter => buildImageFilterQuery(filter)
+          })
       )
-      .sortBy(idSort)
+      .sortBy {
+        if (scored) {
+          List(scoreSort(SortOrder.DESC), idSort)
+        } else {
+          List(idSort)
+        }
+      }
       .limit(queryOptions.limit)
       .from(queryOptions.from)
+
+  def buildImageFilterQuery(imageFilter: ImageFilter): Query =
+    imageFilter match {
+      case LicenseFilter(licenseIds) =>
+        termsQuery(field = "location.license.id", values = licenseIds)
+    }
 }

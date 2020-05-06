@@ -41,6 +41,7 @@ trait ImageGenerators extends IdentifiersGenerators with ItemsGenerators {
   }
 
   def createAugmentedImageWith(
+    id: String = createCanonicalId,
     inferredData: Option[InferredData] = createInferredData,
     location: DigitalLocation = createDigitalLocation,
     version: Int = 1,
@@ -54,34 +55,48 @@ trait ImageGenerators extends IdentifiersGenerators with ItemsGenerators {
       identifierType,
       parentWork,
       fullText
-    ).toIdentified.augment(inferredData)
+    ).toIdentifiedWith(id).augment(inferredData)
 
   def createAugmentedImage(): AugmentedImage = createAugmentedImageWith()
 
-  implicit class MergedImageIdOps(val image: MergedImage[Identifiable]) {
-    val toIdentified: MergedImage[Identified] = MergedImage(
-      id = Identified(
-        canonicalId = createCanonicalId,
-        sourceIdentifier = image.id.allSourceIdentifiers.head
-      ),
-      version = image.version,
-      location = image.location,
-      parentWork = Identified(
-        canonicalId = createCanonicalId,
-        sourceIdentifier = image.parentWork.allSourceIdentifiers.head
-      ),
-      fullText = image.fullText
+  def createLicensedImage(license: License): AugmentedImage =
+    createAugmentedImageWith(
+      location = createDigitalLocationWith(license = Some(license))
     )
+
+  implicit class MergedImageIdOps(val image: MergedImage[Identifiable]) {
+    def toIdentifiedWith(
+      id: String = createCanonicalId,
+      parentId: String = createCanonicalId): MergedImage[Identified] =
+      MergedImage(
+        id = Identified(
+          canonicalId = id,
+          sourceIdentifier = image.id.allSourceIdentifiers.head
+        ),
+        version = image.version,
+        location = image.location,
+        parentWork = Identified(
+          canonicalId = parentId,
+          sourceIdentifier = image.parentWork.allSourceIdentifiers.head
+        ),
+        fullText = image.fullText
+      )
+
+    val toIdentified: MergedImage[Identified] = toIdentifiedWith()
   }
 
   implicit class UnmergedImageIdOps(val image: UnmergedImage[Identifiable]) {
-    val toIdentified: UnmergedImage[Identified] = UnmergedImage(
-      id = Identified(
-        canonicalId = createCanonicalId,
-        sourceIdentifier = image.id.allSourceIdentifiers.head
-      ),
-      version = image.version,
-      location = image.location
-    )
+    def toIdentifiedWith(
+      id: String = createCanonicalId): UnmergedImage[Identified] =
+      UnmergedImage(
+        id = Identified(
+          canonicalId = id,
+          sourceIdentifier = image.id.allSourceIdentifiers.head
+        ),
+        version = image.version,
+        location = image.location
+      )
+
+    val toIdentified: UnmergedImage[Identified] = toIdentifiedWith()
   }
 }

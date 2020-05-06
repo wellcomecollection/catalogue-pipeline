@@ -41,12 +41,15 @@ class ImagesTest extends ApiImagesTestBase with ElasticsearchFixtures {
     withApi {
       case (ElasticConfig(_, imagesIndex), routes) =>
         val baguetteImage = createAugmentedImageWith(
+          id = "a",
           fullText = Some("Baguette is a French bread style")
         )
         val focacciaImage = createAugmentedImageWith(
+          id = "b",
           fullText = Some("A Ligurian style of bread, Focaccia")
         )
         val mantouImage = createAugmentedImageWith(
+          id = "c",
           fullText =
             Some("Mantou is a steamed bread associated with Northern China")
         )
@@ -58,7 +61,8 @@ class ImagesTest extends ApiImagesTestBase with ElasticsearchFixtures {
 
         assertJsonResponse(routes, s"/$apiPrefix/images?query=bread") {
           Status.OK -> imagesListResponse(
-            List(mantouImage, focacciaImage, baguetteImage))
+            List(baguetteImage, focacciaImage, mantouImage)
+          )
         }
         assertJsonResponse(routes, s"/$apiPrefix/images?query=focaccia") {
           Status.OK -> imagesListResponse(List(focacciaImage))
