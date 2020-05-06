@@ -306,21 +306,41 @@ class CalmTransformerTest extends FunSpec with Matchers {
     CalmTransformer(recordC, version).right.get shouldBe a[UnidentifiedWork]
   }
 
-  it("transforms to invisible work when WorkData not parsable") {
-    val recordA = calmRecord(
-      "Level" -> "UnknownLevel",
+  it("transforms to invisible work when Level=Group of Pieces") {
+    val record = calmRecord(
+      "Title" -> "abc",
+      "Level" -> "Group of Pieces",
+      "RefNo" -> "a/b/c"
+    )
+    CalmTransformer(record, version).right.get shouldBe a[
+      UnidentifiedInvisibleWork]
+  }
+
+  it("uses empty WorkData for suppressed works when not parsable") {
+    val record = calmRecord(
+      "Level" -> "Invalid",
       "RefNo" -> "a/b/c",
       "Transmission" -> "No"
     )
-    CalmTransformer(recordA, version) shouldBe Right(
+
+    CalmTransformer(record, version) shouldBe Right(
       UnidentifiedInvisibleWork(
         version = version,
         sourceIdentifier = SourceIdentifier(
           value = id,
-          identifierType = CalmIdentifierTypes.recordId),
-        data = WorkData()
-      )
+          identifierType = CalmIdentifierTypes.recordId
+        ),
+        data = WorkData())
     )
+  }
+
+  it("errors with invalid Level") {
+    val record = calmRecord(
+      "Level" -> "UnknownLevel",
+      "RefNo" -> "a/b/c"
+    )
+
+    CalmTransformer(record, version) shouldBe a[Left[_, _]]
   }
 
   it("errors if invalid access status") {
