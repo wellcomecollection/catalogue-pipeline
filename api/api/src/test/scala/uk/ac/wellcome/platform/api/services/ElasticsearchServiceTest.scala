@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.api.services
 import com.sksamuel.elastic4s.{ElasticError, Index}
 import com.sksamuel.elastic4s.requests.searches.{SearchHit, SearchResponse}
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{Assertion, FunSpec, Matchers}
+import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.Implicits._
@@ -41,211 +41,12 @@ class ElasticsearchServiceTest
     with ContributorGenerators {
 
   val searchService = new ElasticsearchService(
-    elasticClient = elasticClient
+    elasticClient = elasticClient,
+    WorksRequestBuilder
   )
 
   val defaultQueryOptions: ElasticsearchQueryOptions =
     createElasticsearchQueryOptions
-
-  describe("queryResults") {
-    describe("Failures") {
-      it("returns a Left[ElasticError] if Elasticsearch returns an error") {
-        val future = searchService
-          .queryResults(Index("doesnotexist"), defaultQueryOptions)
-
-        whenReady(future) { response =>
-          response.isLeft shouldBe true
-          response.left.get shouldBe a[ElasticError]
-        }
-      }
-    }
-
-    describe("Sorting") {
-      it("returns results in consistent sort order") {
-        withLocalWorksIndex { index =>
-          val title =
-            s"ABBA ${Random.alphanumeric.filterNot(_.equals('A')) take 10 mkString}"
-
-          // We have a secondary sort on canonicalId in ElasticsearchService.
-          // Since every work has the same title, we expect them to be returned in
-          // ID order when we search for "A".
-          val works = (1 to 5)
-            .map { _ =>
-              createIdentifiedWorkWith(title = Some(title))
-            }
-            .sortBy(_.canonicalId)
-
-          insertIntoElasticsearch(index, works: _*)
-
-          (1 to 10).foreach { _ =>
-            val searchResponseFuture = searchService
-              .queryResults(
-                index,
-                createElasticsearchQueryOptionsWith(
-                  searchQuery = Some(SearchQuery("abba"))))
-
-            whenReady(searchResponseFuture) { response =>
-              searchResponseToWorks(response) shouldBe works
-            }
-          }
-        }
-      }
-
-      it("sorts results with no SearchQuery by canonicalId") {
-        withLocalWorksIndex { index =>
-          val work1 = createIdentifiedWorkWith(canonicalId = "000Z")
-          val work2 = createIdentifiedWorkWith(canonicalId = "000Y")
-          val work3 = createIdentifiedWorkWith(canonicalId = "000X")
-
-          insertIntoElasticsearch(index, work1, work2, work3)
-
-          assertListResultsAreCorrect(
-            index = index,
-            expectedWorks = List(work3, work2, work1)
-          )
-        }
-      }
-    }
-
-    describe("Filters") {
-      it("filters search results by workType") {
-        withLocalWorksIndex { index =>
-          val workWithCorrectWorkType = createIdentifiedWorkWith(
-            title = Some("Animated artichokes"),
-            workType = Some(ManuscriptsAsian)
-          )
-          val workWithWrongTitle = createIdentifiedWorkWith(
-            title = Some("Bouncing bananas"),
-            workType = Some(ManuscriptsAsian)
-          )
-          val workWithWrongWorkType = createIdentifiedWorkWith(
-            title = Some("Animated artichokes"),
-            workType = Some(CDRoms)
-          )
-
-          insertIntoElasticsearch(
-            index,
-            workWithCorrectWorkType,
-            workWithWrongTitle,
-            workWithWrongWorkType)
-
-          assertSearchResultsAreCorrect(
-            index = index,
-            queryOptions = createElasticsearchQueryOptionsWith(
-              searchQuery = Some(SearchQuery("artichokes")),
-              filters = List(WorkTypeFilter(Seq("b")))
-            ),
-            expectedWorks = List(workWithCorrectWorkType)
-          )
-        }
-      }
-
-      it("filters search results with multiple workTypes") {
-        withLocalWorksIndex { index =>
-          val work1 = createIdentifiedWorkWith(
-            title = Some("Animated artichokes"),
-            workType = Some(ManuscriptsAsian)
-          )
-          val workWithWrongTitle = createIdentifiedWorkWith(
-            title = Some("Bouncing bananas"),
-            workType = Some(ManuscriptsAsian)
-          )
-          val work2 = createIdentifiedWorkWith(
-            title = Some("Animated artichokes"),
-            workType = Some(CDRoms)
-          )
-          val workWithWrongType = createIdentifiedWorkWith(
-            title = Some("Animated artichokes"),
-            workType = Some(Books)
-          )
-
-          insertIntoElasticsearch(
-            index,
-            work1,
-            workWithWrongTitle,
-            work2,
-            workWithWrongType)
-
-          assertSearchResultsAreCorrect(
-            index = index,
-            queryOptions = createElasticsearchQueryOptionsWith(
-              searchQuery = Some(SearchQuery("artichokes")),
-              filters = List(WorkTypeFilter(List("b", "m")))
-            ),
-            expectedWorks = List(work1, work2)
-          )
-        }
-      }
-
-      it("filters results by item locationType") {
-        withLocalWorksIndex { index =>
-          val work = createIdentifiedWorkWith(
-            title = Some("Tumbling tangerines"),
-            items = List(
-              createItemWithLocationType(LocationType("iiif-image")),
-              createItemWithLocationType(LocationType("acqi"))
-            )
-          )
-
-          val notMatchingWork = createIdentifiedWorkWith(
-            title = Some("Tumbling tangerines"),
-            items = List(
-              createItemWithLocationType(LocationType("acqi"))
-            )
-          )
-
-          insertIntoElasticsearch(index, work, notMatchingWork)
-
-          assertSearchResultsAreCorrect(
-            index = index,
-            queryOptions = createElasticsearchQueryOptionsWith(
-              searchQuery = Some(SearchQuery("tangerines")),
-              filters = List(ItemLocationTypeFilter(Seq("iiif-image")))
-            ),
-            expectedWorks = List(work)
-          )
-        }
-      }
-
-      it("filters results by multiple item locationTypes") {
-        withLocalWorksIndex { index =>
-          val work = createIdentifiedWorkWith(
-            title = Some("Tumbling tangerines"),
-            items = List(
-              createItemWithLocationType(LocationType("iiif-image")),
-              createItemWithLocationType(LocationType("acqi"))
-            )
-          )
-
-          val notMatchingWork = createIdentifiedWorkWith(
-            title = Some("Tumbling tangerines"),
-            items = List(
-              createItemWithLocationType(LocationType("acqi"))
-            )
-          )
-
-          val work2 = createIdentifiedWorkWith(
-            title = Some("Tumbling tangerines"),
-            items = List(
-              createItemWithLocationType(LocationType("digit"))
-            )
-          )
-
-          insertIntoElasticsearch(index, work, notMatchingWork, work2)
-
-          assertSearchResultsAreCorrect(
-            index = index,
-            queryOptions = createElasticsearchQueryOptionsWith(
-              searchQuery = Some(SearchQuery("tangerines")),
-              filters = List(ItemLocationTypeFilter(
-                locationTypeIds = List("iiif-image", "digit")))
-            ),
-            expectedWorks = List(work, work2)
-          )
-        }
-      }
-    }
-  }
 
   describe("findResultById") {
     it("finds a result by ID") {
@@ -276,7 +77,7 @@ class ElasticsearchServiceTest
     }
   }
 
-  describe("listResults") {
+  describe("executeSearch") {
     it("returns everything if we ask for a limit > result size") {
       withLocalWorksIndex { index =>
         val works = populateElasticsearch(index)
@@ -285,7 +86,7 @@ class ElasticsearchServiceTest
           limit = works.length + 1
         )
 
-        assertListResultsAreCorrect(
+        assertResultsAreCorrect(
           index = index,
           queryOptions = queryOptions,
           expectedWorks = works
@@ -299,7 +100,7 @@ class ElasticsearchServiceTest
 
         val queryOptions = createElasticsearchQueryOptionsWith(limit = 4)
 
-        assertListResultsAreCorrect(
+        assertResultsAreCorrect(
           index = index,
           queryOptions = queryOptions,
           expectedWorks = works.slice(0, 4)
@@ -316,7 +117,7 @@ class ElasticsearchServiceTest
           from = 3
         )
 
-        assertListResultsAreCorrect(
+        assertResultsAreCorrect(
           index = index,
           queryOptions = queryOptions,
           expectedWorks = works.slice(3, 7)
@@ -333,7 +134,7 @@ class ElasticsearchServiceTest
           from = 5
         )
 
-        assertListResultsAreCorrect(
+        assertResultsAreCorrect(
           index = index,
           queryOptions = queryOptions,
           expectedWorks = works.slice(5, 10)
@@ -349,10 +150,57 @@ class ElasticsearchServiceTest
           from = works.length * 2
         )
 
-        assertListResultsAreCorrect(
+        assertResultsAreCorrect(
           index = index,
           queryOptions = queryOptions,
           expectedWorks = List()
+        )
+      }
+    }
+
+    it("returns results in consistent sort order") {
+      withLocalWorksIndex { index =>
+        val title =
+          s"ABBA ${Random.alphanumeric.filterNot(_.equals('A')) take 10 mkString}"
+
+        // We have a secondary sort on canonicalId in ElasticsearchService.
+        // Since every work has the same title, we expect them to be returned in
+        // ID order when we search for "A".
+        val works = (1 to 5)
+          .map { _ =>
+            createIdentifiedWorkWith(title = Some(title))
+          }
+          .sortBy(_.canonicalId)
+
+        insertIntoElasticsearch(index, works: _*)
+
+        (1 to 10).foreach { _ =>
+          val searchResponseFuture = searchService
+            .executeSearch(
+              createElasticsearchQueryOptionsWith(
+                searchQuery = Some(SearchQuery("abba"))),
+              index,
+              scored = true)
+
+          whenReady(searchResponseFuture) { response =>
+            searchResponseToWorks(response) shouldBe works
+          }
+        }
+      }
+    }
+
+    it("sorts by canonicalId when scored = false") {
+      withLocalWorksIndex { index =>
+        val work1 = createIdentifiedWorkWith(canonicalId = "000Z")
+        val work2 = createIdentifiedWorkWith(canonicalId = "000Y")
+        val work3 = createIdentifiedWorkWith(canonicalId = "000X")
+
+        insertIntoElasticsearch(index, work1, work2, work3)
+
+        assertResultsAreCorrect(
+          index = index,
+          expectedWorks = List(work3, work2, work1),
+          scored = Some(false)
         )
       }
     }
@@ -375,7 +223,7 @@ class ElasticsearchServiceTest
           filters = List(WorkTypeFilter(Seq("b")))
         )
 
-        assertListResultsAreCorrect(
+        assertResultsAreCorrect(
           index = index,
           queryOptions = queryOptions,
           expectedWorks = List(work1, work2)
@@ -409,7 +257,7 @@ class ElasticsearchServiceTest
           filters = List(WorkTypeFilter(List("b", "a")))
         )
 
-        assertListResultsAreCorrect(
+        assertResultsAreCorrect(
           index = index,
           queryOptions = queryOptions,
           expectedWorks = List(work1, work2, work3)
@@ -417,9 +265,81 @@ class ElasticsearchServiceTest
       }
     }
 
+    it("filters results by item locationType") {
+      withLocalWorksIndex { index =>
+        val work = createIdentifiedWorkWith(
+          title = Some("Tumbling tangerines"),
+          items = List(
+            createItemWithLocationType(LocationType("iiif-image")),
+            createItemWithLocationType(LocationType("acqi"))
+          )
+        )
+
+        val notMatchingWork = createIdentifiedWorkWith(
+          title = Some("Tumbling tangerines"),
+          items = List(
+            createItemWithLocationType(LocationType("acqi"))
+          )
+        )
+
+        insertIntoElasticsearch(index, work, notMatchingWork)
+
+        assertResultsAreCorrect(
+          index = index,
+          queryOptions = createElasticsearchQueryOptionsWith(
+            searchQuery = Some(SearchQuery("tangerines")),
+            filters = List(ItemLocationTypeFilter(Seq("iiif-image")))
+          ),
+          expectedWorks = List(work)
+        )
+      }
+    }
+
+    it("filters results by multiple item locationTypes") {
+      withLocalWorksIndex { index =>
+        val work = createIdentifiedWorkWith(
+          title = Some("Tumbling tangerines"),
+          items = List(
+            createItemWithLocationType(LocationType("iiif-image")),
+            createItemWithLocationType(LocationType("acqi"))
+          )
+        )
+
+        val notMatchingWork = createIdentifiedWorkWith(
+          title = Some("Tumbling tangerines"),
+          items = List(
+            createItemWithLocationType(LocationType("acqi"))
+          )
+        )
+
+        val work2 = createIdentifiedWorkWith(
+          title = Some("Tumbling tangerines"),
+          items = List(
+            createItemWithLocationType(LocationType("digit"))
+          )
+        )
+
+        insertIntoElasticsearch(index, work, notMatchingWork, work2)
+
+        assertResultsAreCorrect(
+          index = index,
+          queryOptions = createElasticsearchQueryOptionsWith(
+            searchQuery = Some(SearchQuery("tangerines")),
+            filters = List(
+              ItemLocationTypeFilter(
+                locationTypeIds = List("iiif-image", "digit")))
+          ),
+          expectedWorks = List(work, work2)
+        )
+      }
+    }
+
     it("returns a Left[ElasticError] if Elasticsearch returns an error") {
       val future = searchService
-        .listResults(Index("doesnotexist"), defaultQueryOptions)
+        .executeSearch(
+          defaultQueryOptions,
+          Index("doesnotexist"),
+          scored = false)
 
       whenReady(future) { response =>
         response.isLeft shouldBe true
@@ -453,32 +373,25 @@ class ElasticsearchServiceTest
   }
 
   private def searchResults(index: Index,
-                            queryOptions: ElasticsearchQueryOptions) = {
+                            queryOptions: ElasticsearchQueryOptions,
+                            scored: Boolean) = {
     val searchResponseFuture =
-      searchService.queryResults(index, queryOptions)
+      searchService.executeSearch(queryOptions, index, scored)
     whenReady(searchResponseFuture) { response =>
       searchResponseToWorks(response)
     }
   }
 
-  private def assertSearchResultsAreCorrect(
-    index: Index,
-    queryOptions: ElasticsearchQueryOptions,
-    expectedWorks: List[IdentifiedWork]) = {
-    searchResults(index, queryOptions) should contain theSameElementsAs expectedWorks
-  }
-
-  private def assertListResultsAreCorrect(
-    index: Index,
-    queryOptions: ElasticsearchQueryOptions = createElasticsearchQueryOptions,
-    expectedWorks: Seq[IdentifiedWork]
-  ): Assertion = {
-    val listResponseFuture = searchService
-      .listResults(index, queryOptions)
-
-    whenReady(listResponseFuture) { response =>
-      searchResponseToWorks(response) should contain theSameElementsAs expectedWorks
-    }
+  private def assertResultsAreCorrect(index: Index,
+                                      queryOptions: ElasticsearchQueryOptions =
+                                        createElasticsearchQueryOptions,
+                                      expectedWorks: List[IdentifiedWork],
+                                      scored: Option[Boolean] = None) = {
+    searchResults(
+      index,
+      queryOptions,
+      scored
+        .getOrElse(queryOptions.searchQuery.isDefined)) should contain theSameElementsAs expectedWorks
   }
 
   private def searchResponseToWorks(

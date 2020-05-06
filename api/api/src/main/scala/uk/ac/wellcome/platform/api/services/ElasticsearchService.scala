@@ -5,7 +5,6 @@ import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.get.GetResponse
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import com.sksamuel.elastic4s.{ElasticClient, ElasticError, Response}
-import com.sksamuel.elastic4s.requests.searches.sort.{FieldSort, SortOrder}
 import com.sksamuel.elastic4s.Index
 import grizzled.slf4j.Logging
 

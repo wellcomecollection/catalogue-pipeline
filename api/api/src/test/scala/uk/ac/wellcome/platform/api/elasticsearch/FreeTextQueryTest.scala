@@ -18,7 +18,8 @@ import uk.ac.wellcome.platform.api.models.{SearchQuery, SearchQueryType}
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.platform.api.services.{
   ElasticsearchQueryOptions,
-  ElasticsearchService
+  ElasticsearchService,
+  WorksRequestBuilder
 }
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -35,7 +36,8 @@ class FreeTextQueryTest
     with ContributorGenerators {
 
   val searchService = new ElasticsearchService(
-    elasticClient = elasticClient
+    elasticClient = elasticClient,
+    WorksRequestBuilder
   )
 
   describe("Free text query functionality") {
@@ -378,7 +380,7 @@ class FreeTextQueryTest
   private def searchResults(index: Index,
                             queryOptions: ElasticsearchQueryOptions) = {
     val searchResponseFuture =
-      searchService.queryResults(index, queryOptions)
+      searchService.executeSearch(queryOptions, index, scored = true)
     whenReady(searchResponseFuture) { response =>
       searchResponseToWorks(response)
     }

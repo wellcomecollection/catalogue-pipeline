@@ -14,9 +14,10 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
 
   val idSort: FieldSort = fieldSort("canonicalId").order(SortOrder.ASC)
 
-  def request(implicit queryOptions: ElasticsearchQueryOptions,
+  def request(queryOptions: ElasticsearchQueryOptions,
               index: Index,
-              scored: Boolean = false): SearchRequest =
+              scored: Boolean = false): SearchRequest = {
+    implicit val q: ElasticsearchQueryOptions = queryOptions
     search(index)
       .aggs { filteredAggregationBuilder.filteredAggregations }
       .query { filteredQuery }
@@ -30,6 +31,7 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
       }
       .limit { queryOptions.limit }
       .from { queryOptions.from }
+  }
 
   private def filteredAggregationBuilder(
     implicit queryOptions: ElasticsearchQueryOptions) =
@@ -86,12 +88,11 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
   }
 
   private def sort(implicit queryOptions: ElasticsearchQueryOptions) =
-    idSort +:
-      queryOptions.sortBy
+    queryOptions.sortBy
       .map {
         case ProductionDateSortRequest => "data.production.dates.range.from"
       }
-      .map { FieldSort(_).order(sortOrder) }
+      .map { FieldSort(_).order(sortOrder) } :+ idSort
 
   private def sortOrder(implicit queryOptions: ElasticsearchQueryOptions) =
     queryOptions.sortOrder match {
@@ -113,7 +114,7 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
       }
       .getOrElse { boolQuery }
       .filter {
-        filteredAggregationBuilder.unpairedFilters
+        (IdentifiedWorkFilter :: filteredAggregationBuilder.unpairedFilters)
           .map(buildWorkFilterQuery)
       }
 
