@@ -51,7 +51,7 @@ object CalmTransformer
   def shouldSuppress(record: CalmRecord): Boolean =
     record
       .get("Transmission")
-      .map { value =>
+      .exists { value =>
         value.toLowerCase match {
           case "no"  => true
           case "yes" => false
@@ -61,7 +61,6 @@ object CalmTransformer
             false
         }
       }
-      .getOrElse(false)
 
   def workData(record: CalmRecord): Result[WorkData[Unminted, Identifiable]] =
     for {
@@ -81,7 +80,9 @@ object CalmTransformer
         mergeCandidates = mergeCandidates(record),
         items = items(record, accessStatus),
         contributors = contributors(record),
+        description = description(record),
         physicalDescription = physicalDescription(record),
+        production = production(record),
         notes = notes(record)
       )
 
@@ -196,11 +197,28 @@ object CalmTransformer
       .map(AccessStatus(_))
       .toResult
 
+  def description(record: CalmRecord): Option[String] =
+    record.getJoined("Description")
+
   def physicalDescription(record: CalmRecord): Option[String] =
     (record.getList("Extent") ++ record.getList("UserWrapped6")) match {
       case Nil  => None
       case strs => Some(strs.mkString(" "))
     }
+
+  def production(record: CalmRecord): List[ProductionEvent[Unminted]] = {
+    record.getList("Date") match {
+      case Nil => Nil
+      case dates =>
+        List(
+          ProductionEvent(
+            dates = dates.map(Period(_)),
+            label = dates.mkString(" "),
+            places = Nil,
+            agents = Nil,
+            function = None))
+    }
+  }
 
   def subjects(record: CalmRecord): List[Subject[Unminted]] =
     record.getList("Subject").map(Subject(_, Nil))
@@ -208,7 +226,7 @@ object CalmTransformer
   def language(record: CalmRecord): Result[Option[Language]] =
     record
       .get("Language")
-      .map(Language.fromLabel(_))
+      .map(Language.fromLabel)
       .toResult
 
   def contributors(record: CalmRecord): List[Contributor[Unminted]] =
