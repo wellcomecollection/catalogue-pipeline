@@ -5,6 +5,7 @@ import io.circe.{Decoder, Encoder}
 import org.scalatest.matchers.should.Matchers
 import software.amazon.awssdk.services.cloudwatch.model.StandardUnit
 import software.amazon.awssdk.services.sns.SnsClient
+import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import software.amazon.awssdk.services.sqs.model.SendMessageResponse
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.bigmessaging.BigMessageSender
@@ -18,21 +19,11 @@ import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.sns.{SNSConfig, SNSMessageSender}
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
-import uk.ac.wellcome.storage.{
-  Identified,
-  ObjectLocation,
-  StoreWriteError,
-  WriteError
-}
+import uk.ac.wellcome.storage.{Identified, ObjectLocation, StoreWriteError, WriteError}
 import uk.ac.wellcome.storage.fixtures.S3Fixtures
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import uk.ac.wellcome.storage.store.TypedStore
-import uk.ac.wellcome.storage.store.memory.{
-  MemoryStore,
-  MemoryStreamStore,
-  MemoryStreamStoreEntry,
-  MemoryTypedStore
-}
+import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryStreamStore, MemoryStreamStoreEntry, MemoryTypedStore}
 import uk.ac.wellcome.storage.streaming.Codec
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -48,15 +39,15 @@ trait BigMessagingFixture
   case class ExampleObject(name: String)
 
   def withBigMessageStream[T, R](queue: SQS.Queue,
-                                 metrics: MemoryMetrics[StandardUnit] =
-                                   new MemoryMetrics[StandardUnit]())(
+                                                            metrics: MemoryMetrics[StandardUnit] =
+                                   new MemoryMetrics[StandardUnit](), sqsClient: SqsAsyncClient = asyncSqsClient)(
     testWith: TestWith[BigMessageStream[T], R])(
     implicit
     actorSystem: ActorSystem,
     decoderT: Decoder[T],
     typedStoreT: TypedStore[ObjectLocation, T]): R = {
     val stream = new BigMessageStream[T](
-      sqsClient = asyncSqsClient,
+      sqsClient = sqsClient,
       sqsConfig = createSQSConfigWith(queue),
       metrics = metrics
     )
