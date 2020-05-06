@@ -40,9 +40,23 @@ trait ImageGenerators extends IdentifiersGenerators with ItemsGenerators {
     Some(InferredData(features1, features2, lshEncodedFeatures))
   }
 
-  def createAugmentedImage(
-    inferredData: Option[InferredData] = createInferredData) =
-    createMergedImage.toIdentified.augment(inferredData)
+  def createAugmentedImageWith(
+    inferredData: Option[InferredData] = createInferredData,
+    location: DigitalLocation = createDigitalLocation,
+    version: Int = 1,
+    identifierType: IdentifierType = IdentifierType("miro-image-number"),
+    parentWork: SourceIdentifier = createSierraSystemSourceIdentifier,
+    fullText: Option[String] = None
+  ) =
+    createMergedImageWith(
+      location,
+      version,
+      identifierType,
+      parentWork,
+      fullText
+    ).toIdentified.augment(inferredData)
+
+  def createAugmentedImage(): AugmentedImage = createAugmentedImageWith()
 
   implicit class MergedImageIdOps(val image: MergedImage[Identifiable]) {
     val toIdentified: MergedImage[Identified] = MergedImage(

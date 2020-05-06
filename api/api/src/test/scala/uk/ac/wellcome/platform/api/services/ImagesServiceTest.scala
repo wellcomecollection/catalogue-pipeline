@@ -13,7 +13,8 @@ class ImagesServiceTest
     with OptionValues {
 
   val elasticsearchService = new ElasticsearchService(
-    elasticClient = elasticClient
+    elasticClient = elasticClient,
+    ImagesRequestBuilder
   )
 
   val imagesService = new ImagesService(

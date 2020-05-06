@@ -30,7 +30,7 @@ class ImagesIndexConfigTest
 
   it("can ingest an image without feature vectors") {
     withLocalImagesIndex { index =>
-      val image = createAugmentedImage(inferredData = None)
+      val image = createAugmentedImageWith(inferredData = None)
       whenReady(indexObject(index, image)) { response =>
         response.isError shouldBe false
         assertObjectIndexed(index, image)

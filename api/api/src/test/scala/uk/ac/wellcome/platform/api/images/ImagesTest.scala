@@ -37,6 +37,35 @@ class ImagesTest extends ApiImagesTestBase with ElasticsearchFixtures {
     }
   }
 
+  it("returns matching results when using full-text search") {
+    withApi {
+      case (ElasticConfig(_, imagesIndex), routes) =>
+        val baguetteImage = createAugmentedImageWith(
+          fullText = Some("Baguette is a French bread style")
+        )
+        val focacciaImage = createAugmentedImageWith(
+          fullText = Some("A Ligurian style of bread, Focaccia")
+        )
+        val mantouImage = createAugmentedImageWith(
+          fullText =
+            Some("Mantou is a steamed bread associated with Northern China")
+        )
+        insertImagesIntoElasticsearch(
+          imagesIndex,
+          baguetteImage,
+          focacciaImage,
+          mantouImage)
+
+        assertJsonResponse(routes, s"/$apiPrefix/images?query=bread") {
+          Status.OK -> imagesListResponse(
+            List(mantouImage, focacciaImage, baguetteImage))
+        }
+        assertJsonResponse(routes, s"/$apiPrefix/images?query=focaccia") {
+          Status.OK -> imagesListResponse(List(focacciaImage))
+        }
+    }
+  }
+
   it("searches different indices with the _index parameter") {
     withApi {
       case (ElasticConfig(_, defaultIndex), routes) =>
