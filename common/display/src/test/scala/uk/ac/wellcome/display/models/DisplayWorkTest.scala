@@ -132,7 +132,7 @@ class DisplayWorkTest
 
   it("gets the language from a Work") {
     val language = Language(
-      id = "bsl",
+      id = Some("bsl"),
       label = "British Sign Language"
     )
 
