@@ -120,9 +120,9 @@ class FiltersAndAggregationsBuilderTest extends FunSpec with Matchers {
   private def requestToAggregation(request: AggregationRequest): Aggregation =
     MockAggregation("cabbage", request)
 
-  private def filterToQuery(filter: DocumentFilter): Query = MockQuery(filter)
+  private def filterToQuery(filter: WorkFilter): Query = MockQuery(filter)
 
-  private case class MockQuery(filter: DocumentFilter) extends Query
+  private case class MockQuery(filter: WorkFilter) extends Query
 
   private case class MockAggregation(name: String,
                                      request: AggregationRequest,

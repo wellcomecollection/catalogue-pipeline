@@ -30,13 +30,13 @@ import scala.collection.immutable._
   */
 class FiltersAndAggregationsBuilder(
   aggregationRequests: List[AggregationRequest],
-  filters: List[DocumentFilter],
+  filters: List[WorkFilter],
   requestToAggregation: AggregationRequest => Aggregation,
-  filterToQuery: DocumentFilter => Query) {
+  filterToQuery: WorkFilter => Query) {
 
-  lazy val unpairedFilters: List[DocumentFilter] =
+  lazy val unpairedFilters: List[WorkFilter] =
     filterSets.getOrElse(FilterCategory.Unpaired, List())
-  lazy val pairedFilters: List[DocumentFilter] =
+  lazy val pairedFilters: List[WorkFilter] =
     filterSets.getOrElse(FilterCategory.Paired, List())
 
   lazy val filteredAggregations: List[AbstractAggregation] =
@@ -57,7 +57,7 @@ class FiltersAndAggregationsBuilder(
       }
     }
 
-  private lazy val filterSets: Map[FilterCategory, List[DocumentFilter]] =
+  private lazy val filterSets: Map[FilterCategory, List[WorkFilter]] =
     filters.groupBy {
       pairedAggregationRequest(_) match {
         case Some(aggregationRequest)
@@ -68,7 +68,7 @@ class FiltersAndAggregationsBuilder(
     }
 
   private def pairedFilter(
-    aggregationRequest: AggregationRequest): Option[DocumentFilter] =
+    aggregationRequest: AggregationRequest): Option[WorkFilter] =
     pairedFilters.find {
       pairedAggregationRequest(_) match {
         case Some(agg) => agg == aggregationRequest
@@ -78,7 +78,7 @@ class FiltersAndAggregationsBuilder(
 
   // This pattern matching defines the pairings of filters <-> aggregations
   private def pairedAggregationRequest(
-    filter: DocumentFilter): Option[AggregationRequest] = filter match {
+    filter: WorkFilter): Option[AggregationRequest] = filter match {
     case _: ItemLocationTypeFilter => None
     case _: WorkTypeFilter         => Some(AggregationRequest.WorkType)
     case _: DateRangeFilter        => None

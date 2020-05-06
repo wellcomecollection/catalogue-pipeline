@@ -18,7 +18,7 @@ import uk.ac.wellcome.platform.api.rest.{
 }
 
 case class WorksSearchOptions(
-  filters: List[DocumentFilter] = Nil,
+  filters: List[WorkFilter] = Nil,
   pageSize: Int = 10,
   pageNumber: Int = 1,
   aggregations: List[AggregationRequest] = Nil,

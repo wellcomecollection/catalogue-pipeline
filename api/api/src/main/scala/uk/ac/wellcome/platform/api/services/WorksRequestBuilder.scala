@@ -118,7 +118,7 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
           .map(buildWorkFilterQuery)
       }
 
-  private def buildWorkFilterQuery(workFilter: DocumentFilter): Query =
+  private def buildWorkFilterQuery(workFilter: WorkFilter): Query =
     workFilter match {
       case IdentifiedWorkFilter =>
         termQuery(field = "type", value = "IdentifiedWork")

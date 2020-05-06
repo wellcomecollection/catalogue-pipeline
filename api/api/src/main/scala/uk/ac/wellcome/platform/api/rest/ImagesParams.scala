@@ -2,9 +2,9 @@ package uk.ac.wellcome.platform.api.rest
 
 import uk.ac.wellcome.platform.api.models.{
   ApiConfig,
-  DocumentFilter,
   LicenseFilter,
-  SearchQuery
+  SearchQuery,
+  WorkFilter
 }
 import uk.ac.wellcome.platform.api.services.ImagesSearchOptions
 
@@ -35,7 +35,7 @@ case class MultipleImagesParams(
       pageNumber = page.getOrElse(1)
     )
 
-  private def filters: List[DocumentFilter] =
+  private def filters: List[WorkFilter] =
     List(license).flatten
 }
 
