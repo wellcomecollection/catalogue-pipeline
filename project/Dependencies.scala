@@ -119,7 +119,6 @@ object ExternalDependencies {
     val elastic4s = "7.6.1"
     val fastparse = "2.1.3"
     val swagger = "2.0.10"
-    val logback = "1.2.3"
     val mockito = "1.9.5"
     val scalatestplusMockito = "3.1.0.0"
     val scalacheckShapeless = "1.1.6"
@@ -128,7 +127,6 @@ object ExternalDependencies {
     val scalatest = "3.0.1"
     val newScalatest = "3.1.1"
     val logstashLogback = "6.1"
-    val scribeJava = "6.8.1"
     val apm = "1.12.0"
     val enumeratum = "1.5.13"
     val enumeratumScalacheck = "1.5.16"
@@ -140,13 +138,6 @@ object ExternalDependencies {
 
   val scribeJavaDependencies = Seq(
     "com.github.dakatsuka" %% "akka-http-oauth2-client" % "0.2.0")
-
-  val logbackDependencies = Seq(
-    "ch.qos.logback" % "logback-classic" % versions.logback,
-    "ch.qos.logback" % "logback-core" % versions.logback,
-    "ch.qos.logback" % "logback-access" % versions.logback,
-    "net.logstash.logback" % "logstash-logback-encoder" % versions.logstashLogback
-  )
 
   val apmDependencies = Seq(
     "co.elastic.apm" % "apm-agent-attach" % versions.apm,
@@ -164,9 +155,6 @@ object ExternalDependencies {
     "com.lightbend.akka" %% "akka-stream-alpakka-s3" % versions.akkaStreamAlpakka
   )
 
-  val alpakkaSnsDependencies = Seq(
-    "com.lightbend.akka" %% "akka-stream-alpakka-sns" % versions.akkaStreamAlpakka
-  )
 
   val apacheCommonsDependencies = Seq(
     "org.apache.commons" % "commons-lang3" % versions.apacheCommons
@@ -251,11 +239,6 @@ object ExternalDependencies {
 
   val parseDependencies = Seq(
     "com.lihaoyi" %% "fastparse" % versions.fastparse
-  )
-
-  val javaxDependencies = Seq(
-    "javax.xml.bind" % "jaxb-api" % "2.3.0",
-    "com.sun.xml.bind" % "jaxb-ri" % "2.3.0"
   )
 
   val scalaXmlDependencies = Seq(
