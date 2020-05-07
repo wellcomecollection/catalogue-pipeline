@@ -1,10 +1,12 @@
 package uk.ac.wellcome.platform.sierra_item_merger.services
 
-import uk.ac.wellcome.models.transformable.SierraTransformable
-import uk.ac.wellcome.models.transformable.sierra.SierraItemRecord
 import uk.ac.wellcome.platform.sierra_item_merger.exceptions.SierraItemMergerException
 import uk.ac.wellcome.platform.sierra_item_merger.links.ItemLinker
 import uk.ac.wellcome.platform.sierra_item_merger.links.ItemUnlinker
+import uk.ac.wellcome.sierra_adapter.model.{
+  SierraItemRecord,
+  SierraTransformable
+}
 import uk.ac.wellcome.storage.dynamo._
 import uk.ac.wellcome.storage.vhs.{
   EmptyMetadata,

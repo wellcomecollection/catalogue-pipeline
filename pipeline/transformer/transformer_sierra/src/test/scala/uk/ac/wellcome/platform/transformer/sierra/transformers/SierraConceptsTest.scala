@@ -1,11 +1,12 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.sierra.generators.MarcGenerators
 import uk.ac.wellcome.platform.transformer.sierra.source.MarcSubfield
 
-class SierraConceptsTest extends FunSpec with Matchers with MarcGenerators {
+class SierraConceptsTest extends AnyFunSpec with Matchers with MarcGenerators {
 
   it("extracts identifiers from subfield 0") {
     val concept =

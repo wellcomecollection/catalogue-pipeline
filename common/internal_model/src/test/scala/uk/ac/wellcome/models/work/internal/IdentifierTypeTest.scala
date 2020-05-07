@@ -1,8 +1,9 @@
 package uk.ac.wellcome.models.work.internal
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class IdentifierTypeTest extends FunSpec with Matchers {
+class IdentifierTypeTest extends AnyFunSpec with Matchers {
   it("looks up an identifier type in the CSV") {
     IdentifierType("miro-image-number") shouldBe IdentifierType(
       id = "miro-image-number",

@@ -5,7 +5,8 @@ import java.io.File
 import com.amazonaws.services.s3.model.GetObjectRequest
 import com.sksamuel.elastic4s.Index
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.display.models.{ApiVersions, DisplaySerialisationTestBase}
@@ -21,15 +22,15 @@ import uk.ac.wellcome.platform.snapshot_generator.models.{
   SnapshotJob
 }
 import uk.ac.wellcome.platform.snapshot_generator.test.utils.GzipUtils
-import uk.ac.wellcome.storage.fixtures.S3
-import uk.ac.wellcome.storage.fixtures.S3.Bucket
+import uk.ac.wellcome.storage.fixtures.S3Fixtures
+import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 
 class SnapshotGeneratorFeatureTest
-    extends FunSpec
+    extends AnyFunSpec
     with Eventually
     with Matchers
     with Akka
-    with S3
+    with S3Fixtures
     with SNS
     with SQS
     with GzipUtils

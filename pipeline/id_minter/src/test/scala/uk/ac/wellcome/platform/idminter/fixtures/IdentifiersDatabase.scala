@@ -1,6 +1,7 @@
 package uk.ac.wellcome.platform.idminter.fixtures
 
-import org.scalatest.{Assertion, Matchers}
+import org.scalatest.Assertion
+import org.scalatest.matchers.should.Matchers
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import scalikejdbc.{AutoSession, ConnectionPool, DB, SQLSyntax}
 import uk.ac.wellcome.fixtures.TestWith

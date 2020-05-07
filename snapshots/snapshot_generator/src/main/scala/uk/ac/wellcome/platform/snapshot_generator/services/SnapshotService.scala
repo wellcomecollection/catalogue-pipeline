@@ -3,8 +3,9 @@ package uk.ac.wellcome.platform.snapshot_generator.services
 import scala.concurrent.{ExecutionContext, Future}
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.Uri
-import akka.stream.ActorMaterializer
-import akka.stream.alpakka.s3.scaladsl.{MultipartUploadResult, S3Client}
+import akka.stream.Materializer
+import akka.stream.alpakka.s3.{MultipartUploadResult, S3Attributes, S3Settings}
+import akka.stream.alpakka.s3.scaladsl.S3
 import akka.stream.scaladsl.{Sink, Source}
 import akka.util.ByteString
 import com.sksamuel.elastic4s.Index
@@ -24,15 +25,15 @@ import uk.ac.wellcome.platform.snapshot_generator.models.{
 }
 import uk.ac.wellcome.platform.snapshot_generator.source.ElasticsearchWorksSource
 
-class SnapshotService(akkaS3Client: S3Client,
+class SnapshotService(akkaS3Settings: S3Settings,
                       elasticClient: ElasticClient,
                       elasticConfig: ElasticConfig)(
   implicit actorSystem: ActorSystem,
-  materializer: ActorMaterializer,
+  materializer: Materializer,
   ec: ExecutionContext
 ) extends Logging {
 
-  val s3Endpoint = akkaS3Client.s3Settings.endpointUrl.getOrElse("s3:/")
+  val s3Endpoint = akkaS3Settings.endpointUrl.getOrElse("s3:/")
 
   def buildLocation(bucketName: String, objectKey: String): Uri =
     Uri(s"$s3Endpoint/$bucketName/$objectKey")
@@ -89,10 +90,11 @@ class SnapshotService(akkaS3Client: S3Client,
       .via(StringToGzipFlow())
 
     val s3Sink: Sink[ByteString, Future[MultipartUploadResult]] =
-      akkaS3Client.multipartUpload(
-        bucket = publicBucketName,
-        key = publicObjectKey
-      )
+      S3.multipartUpload(
+          bucket = publicBucketName,
+          key = publicObjectKey
+        )
+        .withAttributes(S3Attributes.settings(akkaS3Settings))
 
     gzipContent.runWith(s3Sink)
   }

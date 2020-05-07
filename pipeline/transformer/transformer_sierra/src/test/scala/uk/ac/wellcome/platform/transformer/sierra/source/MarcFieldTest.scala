@@ -1,10 +1,11 @@
 package uk.ac.wellcome.platform.transformer.sierra.source
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.utils.JsonAssertions
 
-class MarcFieldTest extends FunSpec with Matchers with JsonAssertions {
+class MarcFieldTest extends AnyFunSpec with Matchers with JsonAssertions {
 
   it("reads a JSON string as a long-form VarField") {
     val jsonString = s"""{

@@ -1,6 +1,7 @@
 package uk.ac.wellcome.platform.transformer.miro.transformers
 
-import org.scalatest.{Assertion, Matchers, Suite}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.{Assertion, Suite}
 import uk.ac.wellcome.models.work.internal.{
   TransformedBaseWork,
   UnidentifiedWork

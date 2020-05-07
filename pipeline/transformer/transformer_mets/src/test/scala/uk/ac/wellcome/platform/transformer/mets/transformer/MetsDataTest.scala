@@ -1,11 +1,13 @@
 package uk.ac.wellcome.platform.transformer.mets.transformer
 
-import org.scalatest.{FunSpec, Inside, Matchers}
+import org.scalatest.Inside
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.generators.RandomStrings
 import uk.ac.wellcome.models.work.internal._
 
 class MetsDataTest
-    extends FunSpec
+    extends AnyFunSpec
     with RandomStrings
     with Matchers
     with Inside {

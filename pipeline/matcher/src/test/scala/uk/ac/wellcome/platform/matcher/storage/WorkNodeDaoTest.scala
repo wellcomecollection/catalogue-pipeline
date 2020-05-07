@@ -2,24 +2,23 @@ package uk.ac.wellcome.platform.matcher.storage
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.matchers.should.Matchers
 import org.mockito.Matchers.any
 import org.mockito.Mockito.when
 import javax.naming.ConfigurationException
-
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.model._
+import org.scalatest.funspec.AnyFunSpec
 import org.scanamo.syntax._
 import org.scanamo.auto._
-
 import uk.ac.wellcome.models.matcher.WorkNode
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
 import uk.ac.wellcome.storage.dynamo.DynamoConfig
 
 class WorkNodeDaoTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with MockitoSugar
     with ScalaFutures

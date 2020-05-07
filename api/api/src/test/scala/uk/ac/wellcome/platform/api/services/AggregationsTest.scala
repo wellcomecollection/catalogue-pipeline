@@ -3,9 +3,10 @@ package uk.ac.wellcome.platform.api.services
 import java.time.LocalDate
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import org.scalatest.concurrent.ScalaFutures
 import com.sksamuel.elastic4s.Index
+import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.platform.api.models._
@@ -17,7 +18,7 @@ import uk.ac.wellcome.models.work.generators.{
 }
 
 class AggregationsTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with ScalaFutures
     with ElasticsearchFixtures

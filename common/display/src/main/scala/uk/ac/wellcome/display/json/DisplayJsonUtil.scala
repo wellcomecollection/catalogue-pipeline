@@ -25,7 +25,7 @@ trait DisplayJsonUtil extends AutoDerivation {
 
   def toJson[T](value: T)(implicit encoder: Encoder[T]): String = {
     assert(encoder != null)
-    printer.pretty(value.asJson)
+    printer.print(value.asJson)
   }
 
   // Circe wants to add a type discriminator, and we don't want it to!  Doing so

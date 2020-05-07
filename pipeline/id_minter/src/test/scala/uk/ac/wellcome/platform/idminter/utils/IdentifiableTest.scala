@@ -1,8 +1,9 @@
 package uk.ac.wellcome.platform.idminter.utils
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class IdentifiableTest extends FunSpec with Matchers {
+class IdentifiableTest extends AnyFunSpec with Matchers {
 
   it("generates an 8-char string, with no ambiguous characters") {
     (1 to 100).map { _ =>

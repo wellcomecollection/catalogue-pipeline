@@ -1,5 +1,7 @@
 package uk.ac.wellcome.platform.merger.rules
-import org.scalatest.{FunSpec, Inside, Matchers}
+import org.scalatest.Inside
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.{
   DigitalLocation,
@@ -9,7 +11,7 @@ import uk.ac.wellcome.models.work.internal.{
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 
 class ThumbnailRuleTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with WorksGenerators
     with Inside {

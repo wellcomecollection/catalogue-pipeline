@@ -1,15 +1,15 @@
 package uk.ac.wellcome.platform.transformer.calm
 
-import com.amazonaws.services.cloudwatch.model.StandardUnit
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto._
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
-
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
+import software.amazon.awssdk.services.cloudwatch.model.StandardUnit
 import uk.ac.wellcome.bigmessaging.memory.MemoryBigMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
@@ -66,7 +66,7 @@ trait TestJsonCodecs {
 }
 
 class TransformerWorkerTest
-    extends FunSpec
+    extends AnyFunSpec
     with ScalaFutures
     with Matchers
     with Akka

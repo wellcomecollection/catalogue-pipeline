@@ -4,7 +4,7 @@ import akka.Done
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSWriter}
 import uk.ac.wellcome.messaging.sqs.SQSStream
-import uk.ac.wellcome.models.transformable.sierra.SierraBibRecord
+import uk.ac.wellcome.sierra_adapter.model.SierraBibRecord
 import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.{ExecutionContext, Future}

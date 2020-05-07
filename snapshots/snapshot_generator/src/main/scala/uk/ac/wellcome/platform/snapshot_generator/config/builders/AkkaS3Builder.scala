@@ -1,10 +1,7 @@
 package uk.ac.wellcome.platform.snapshot_generator.config.builders
 
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
-import akka.stream.alpakka.s3.impl.ListBucketVersion2
-import akka.stream.alpakka.s3.{MemoryBufferType, S3Settings}
-import akka.stream.alpakka.s3.scaladsl.S3Client
+import akka.stream.alpakka.s3.S3Settings
 import com.amazonaws.auth.{
   AWSCredentialsProvider,
   AWSStaticCredentialsProvider,
@@ -19,29 +16,14 @@ import uk.ac.wellcome.typesafe.config.builders.AWSClientConfigBuilder
 
 object AkkaS3Builder extends AWSClientConfigBuilder with Logging {
 
-  def buildAkkaS3Client(config: Config)(
-    implicit actorSystem: ActorSystem,
-    materializer: ActorMaterializer): S3Client =
-    buildAkkaS3Client(
+  def buildAkkaS3Settings(config: Config)(
+    implicit actorSystem: ActorSystem): S3Settings =
+    buildAkkaS3Settings(
       buildAWSClientConfig(config, namespace = "s3")
     )
 
-  def akkaS3Settings(credentialsProvider: AWSCredentialsProvider,
-                     regionProvider: AwsRegionProvider,
-                     endpointUrl: Option[String]): S3Settings =
-    new S3Settings(
-      bufferType = MemoryBufferType,
-      proxy = None,
-      credentialsProvider = credentialsProvider,
-      s3RegionProvider = regionProvider,
-      pathStyleAccess = true,
-      endpointUrl = endpointUrl,
-      listBucketApiVersion = ListBucketVersion2
-    )
-
-  def buildAkkaS3Client(awsClientConfig: AWSClientConfig)(
-    implicit actorSystem: ActorSystem,
-    materializer: ActorMaterializer): S3Client = {
+  def buildAkkaS3Settings(awsClientConfig: AWSClientConfig)(
+    implicit actorSystem: ActorSystem): S3Settings = {
     val regionProvider =
       new AwsRegionProvider {
         def getRegion: String = awsClientConfig.region
@@ -62,13 +44,24 @@ object AkkaS3Builder extends AWSClientConfigBuilder with Logging {
       case None    => None
     }
 
-    val settings = akkaS3Settings(
+    akkaS3Settings(
       credentialsProvider = credentialsProvider,
       regionProvider = regionProvider,
       endpointUrl = endpointUrl
     )
+  }
 
-    debug(s"creating S3 Akka client with settings=[$settings]")
-    new S3Client(settings)
+  private def akkaS3Settings(credentialsProvider: AWSCredentialsProvider,
+                             regionProvider: AwsRegionProvider,
+                             endpointUrl: Option[String])(
+    implicit actorSystem: ActorSystem): S3Settings = {
+    val settings = S3Settings()
+      .withCredentialsProvider(credentialsProvider)
+      .withS3RegionProvider(regionProvider)
+      .withPathStyleAccess(true)
+    endpointUrl match {
+      case Some(e) => settings.withEndpointUrl(e)
+      case None    => settings
+    }
   }
 }

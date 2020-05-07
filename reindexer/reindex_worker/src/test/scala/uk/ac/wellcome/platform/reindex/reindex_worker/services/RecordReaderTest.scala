@@ -2,7 +2,8 @@ package uk.ac.wellcome.platform.reindex.reindex_worker.services
 
 import com.amazonaws.services.dynamodbv2.model._
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.platform.reindex.reindex_worker.fixtures.{
   RecordReaderFixture,
@@ -16,7 +17,7 @@ import uk.ac.wellcome.platform.reindex.reindex_worker.models.{
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
 
 class RecordReaderTest
-    extends FunSpec
+    extends AnyFunSpec
     with ScalaFutures
     with Matchers
     with RecordReaderFixture

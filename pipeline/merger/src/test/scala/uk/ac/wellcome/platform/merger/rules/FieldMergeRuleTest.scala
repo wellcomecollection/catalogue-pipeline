@@ -1,8 +1,8 @@
 package uk.ac.wellcome.platform.merger.rules
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import cats.data.NonEmptyList
-
+import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.{
   TransformedBaseWork,
@@ -12,7 +12,7 @@ import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
 
 class FieldMergeRuleTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with FieldMergeRule
     with WorksGenerators {

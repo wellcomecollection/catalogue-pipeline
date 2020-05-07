@@ -1,21 +1,12 @@
-package uk.ac.wellcome.models.transformable.sierra.test.utils
+package uk.ac.wellcome.sierra_adapter.model
 
 import java.time.Instant
 
-import uk.ac.wellcome.models.transformable.SierraTransformable
-import uk.ac.wellcome.models.transformable.sierra.{
-  SierraBibNumber,
-  SierraBibRecord,
-  SierraItemNumber,
-  SierraItemRecord
-}
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
 
 import scala.util.Random
 
-trait SierraGenerators extends IdentifiersGenerators {
-
+trait SierraGenerators {
   // A lot of Sierra tests (e.g. mergers) check the behaviour when merging
   // a record with a newer version, or vice versa.  Provide two dates here
   // for convenience.
@@ -67,20 +58,13 @@ trait SierraGenerators extends IdentifiersGenerators {
 
   def createSierraItemRecordWith(
     id: SierraItemNumber = createSierraItemNumber,
-    data: String = "",
+    data: (SierraItemNumber, Instant, List[SierraBibNumber]) => String =
+      defaultItemData,
     modifiedDate: Instant = Instant.now,
     bibIds: List[SierraBibNumber] = List(),
     unlinkedBibIds: List[SierraBibNumber] = List()
   ): SierraItemRecord = {
-    val recordData = if (data == "") {
-      s"""
-         |{
-         |  "id": "$id",
-         |  "updatedDate": "${modifiedDate.toString}",
-         |  "bibIds": ${toJson(bibIds).get}
-         |}
-         |""".stripMargin
-    } else data
+    val recordData = data(id, modifiedDate, bibIds)
 
     SierraItemRecord(
       id = id,
@@ -90,6 +74,17 @@ trait SierraGenerators extends IdentifiersGenerators {
       unlinkedBibIds = unlinkedBibIds
     )
   }
+
+  private def defaultItemData(id: SierraItemNumber,
+                              modifiedDate: Instant,
+                              bibIds: List[SierraBibNumber]) =
+    s"""
+       |{
+       |  "id": "$id",
+       |  "updatedDate": "${modifiedDate.toString}",
+       |  "bibIds": ${toJson(bibIds.map(_.recordNumber)).get}
+       |}
+       |""".stripMargin
 
   def createSierraItemRecord: SierraItemRecord = createSierraItemRecordWith()
 
@@ -108,4 +103,7 @@ trait SierraGenerators extends IdentifiersGenerators {
 
   def createSierraTransformable: SierraTransformable =
     createSierraTransformableWith()
+
+  private def randomAlphanumeric(length: Int): String =
+    (Random.alphanumeric take length mkString) toLowerCase
 }

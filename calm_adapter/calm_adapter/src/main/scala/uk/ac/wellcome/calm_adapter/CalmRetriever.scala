@@ -2,8 +2,9 @@ package uk.ac.wellcome.calm_adapter
 
 import scala.concurrent.{ExecutionContext, Future}
 import java.time.Instant
+
 import akka.NotUsed
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import akka.stream.scaladsl._
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers._
@@ -29,7 +30,7 @@ class HttpCalmRetriever(url: String,
                         suppressedFields: Set[String] = Set.empty)(
   implicit
   ec: ExecutionContext,
-  materializer: ActorMaterializer,
+  materializer: Materializer,
   httpClient: CalmHttpClient)
     extends CalmRetriever {
 
@@ -37,7 +38,7 @@ class HttpCalmRetriever(url: String,
 
   def apply(query: CalmQuery): Source[CalmRecord, NotUsed] =
     Source
-      .fromFuture(callApi(CalmSearchRequest(query), searchResponseParser))
+      .future(callApi(CalmSearchRequest(query), searchResponseParser))
       .mapConcat {
         case CalmSession(numHits, cookie) =>
           (0 until numHits).map(pos => (pos, cookie))

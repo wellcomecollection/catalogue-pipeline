@@ -2,13 +2,14 @@ package uk.ac.wellcome.platform.snapshot_generator.flow
 
 import akka.stream.scaladsl.{Sink, Source}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.display.models.{DisplayWork, WorksIncludes}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 
 class IdentifiedWorkToVisibleDisplayWorkFlowTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with Akka
     with ScalaFutures

@@ -1,6 +1,8 @@
 package uk.ac.wellcome.platform.matcher.storage
 
-import org.scalatest.{FunSpec, Inside, Matchers}
+import org.scalatest.Inside
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.bigmessaging.EmptyMetadata
 import uk.ac.wellcome.bigmessaging.fixtures.VHSFixture
 import uk.ac.wellcome.models.work.generators.WorksGenerators
@@ -11,7 +13,7 @@ import uk.ac.wellcome.storage.Version
 import uk.ac.wellcome.storage.store.HybridStoreEntry
 
 class WorkStoreTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with VHSFixture[TransformedBaseWork]
     with WorksGenerators

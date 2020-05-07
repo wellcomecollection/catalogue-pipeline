@@ -1,14 +1,16 @@
 package uk.ac.wellcome.platform.inference_manager.services
 
 import akka.http.scaladsl.model.{HttpMethods, HttpRequest}
-import org.scalatest.{FunSpec, Inside, Matchers, OptionValues}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.{Inside, OptionValues}
 import uk.ac.wellcome.models.work.generators.ImageGenerators
 import uk.ac.wellcome.models.work.internal.{AugmentedImage, InferredData}
 import uk.ac.wellcome.platform.inference_manager.fixtures.Encoding
 import uk.ac.wellcome.platform.inference_manager.models.FeatureVectorInferrerResponse
 
 class FeatureVectorInferrerAdapterTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with ImageGenerators
     with Inside

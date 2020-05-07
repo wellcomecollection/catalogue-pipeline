@@ -1,6 +1,7 @@
 package uk.ac.wellcome.platform.transformer.miro.transformers
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
 import uk.ac.wellcome.models.work.internal.{
   DigitalLocation,
@@ -12,7 +13,7 @@ import uk.ac.wellcome.models.work.internal.{
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 
 class MiroImageTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with IdentifiersGenerators
     with MiroRecordGenerators {

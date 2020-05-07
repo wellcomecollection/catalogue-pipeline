@@ -1,9 +1,10 @@
 package uk.ac.wellcome.display.models
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal.License
 
-class DisplayLicenseTest extends FunSpec with Matchers {
+class DisplayLicenseTest extends AnyFunSpec with Matchers {
   it("reads a License as a DisplayLicense") {
     val displayLicense = DisplayLicense(License.CCBY)
 

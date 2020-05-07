@@ -4,7 +4,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 import akka.actor.ActorSystem
 import akka.stream.scaladsl._
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import akka.http.scaladsl._
 import akka.http.scaladsl.model._
 
@@ -19,7 +19,7 @@ abstract class CalmHttpClientWithBackoff(
   randomFactor: Double = 0.2,
   maxRestarts: Int = 10)(implicit
                          ec: ExecutionContext,
-                         materializer: ActorMaterializer)
+                         materializer: Materializer)
     extends CalmHttpClient {
 
   def apply(request: HttpRequest): Future[HttpResponse] =
@@ -31,7 +31,7 @@ abstract class CalmHttpClientWithBackoff(
         maxRestarts = maxRestarts
       ) { () =>
         Source
-          .fromFuture(singleRequest(request))
+          .future(singleRequest(request))
           .map { resp =>
             resp.status match {
               case StatusCodes.OK => resp
@@ -58,7 +58,7 @@ class CalmAkkaHttpClient(minBackoff: FiniteDuration = 100 milliseconds,
                          maxRestarts: Int = 10)(implicit
                                                 ec: ExecutionContext,
                                                 actorSystem: ActorSystem,
-                                                materializer: ActorMaterializer)
+                                                materializer: Materializer)
     extends CalmHttpClientWithBackoff(
       minBackoff,
       maxBackoff,

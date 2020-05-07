@@ -1,13 +1,8 @@
 package uk.ac.wellcome.platform.inference_manager.services
 
-import org.scalatest.{
-  BeforeAndAfterAll,
-  FunSpec,
-  Inside,
-  Inspectors,
-  Matchers,
-  OptionValues
-}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.{BeforeAndAfterAll, Inside, Inspectors, OptionValues}
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
@@ -26,7 +21,7 @@ import uk.ac.wellcome.platform.inference_manager.fixtures.{
 }
 
 class InferenceManagerWorkerServiceTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with ImageGenerators
     with Inside

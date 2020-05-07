@@ -3,8 +3,6 @@ package uk.ac.wellcome.platform.sierra_reader.services
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
-import uk.ac.wellcome.models.transformable.sierra.test.utils.SierraGenerators
 import uk.ac.wellcome.platform.sierra_reader.config.models.ReaderConfig
 import uk.ac.wellcome.platform.sierra_reader.exceptions.SierraReaderException
 import uk.ac.wellcome.platform.sierra_reader.models.{
@@ -14,6 +12,7 @@ import uk.ac.wellcome.platform.sierra_reader.models.{
 import uk.ac.wellcome.storage.fixtures.S3
 import uk.ac.wellcome.storage.fixtures.S3.Bucket
 import uk.ac.wellcome.fixtures.TestWith
+import uk.ac.wellcome.sierra_adapter.model.{SierraBibNumber, SierraGenerators}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

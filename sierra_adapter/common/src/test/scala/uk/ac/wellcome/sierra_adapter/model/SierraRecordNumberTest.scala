@@ -1,4 +1,4 @@
-package uk.ac.wellcome.models.transformable.sierra
+package uk.ac.wellcome.sierra_adapter.model
 
 import org.scalatest.{FunSpec, Matchers}
 

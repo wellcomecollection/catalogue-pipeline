@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.inference_manager.fixtures
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import akka.http.scaladsl.Http
-import com.amazonaws.services.sqs.model.Message
+import software.amazon.awssdk.services.sqs.model.Message
 import io.circe.{Decoder, Encoder}
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion

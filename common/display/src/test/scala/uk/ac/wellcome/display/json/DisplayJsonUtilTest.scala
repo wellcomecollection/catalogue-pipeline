@@ -1,10 +1,11 @@
 package uk.ac.wellcome.display.json
 
 import io.circe.generic.auto._
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.utils.JsonAssertions
 
-class DisplayJsonUtilTest extends FunSpec with Matchers with JsonAssertions {
+class DisplayJsonUtilTest extends AnyFunSpec with Matchers with JsonAssertions {
   case class Shape(
     name: String,
     colours: Option[List[String]],

@@ -4,7 +4,7 @@ import scala.util.Success
 import scala.concurrent.ExecutionContext
 import akka.Done
 import akka.stream.scaladsl._
-import com.amazonaws.services.sqs.model.{Message => SQSMessage}
+import software.amazon.awssdk.services.sqs.model.{Message => SQSMessage}
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSMessageSender}

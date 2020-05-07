@@ -1,7 +1,8 @@
 package uk.ac.wellcome.platform.matcher
 
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.bigmessaging.EmptyMetadata
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
@@ -19,7 +20,7 @@ import uk.ac.wellcome.storage.store.HybridStoreEntry
 import uk.ac.wellcome.storage.{Identified, Version}
 
 class MatcherFeatureTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with Eventually
     with IntegrationPatience

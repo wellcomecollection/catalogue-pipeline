@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.idminter
 
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import com.amazonaws.services.s3.AmazonS3
 import com.typesafe.config.Config
 import io.circe.Json
@@ -17,7 +17,6 @@ import uk.ac.wellcome.platform.idminter.steps.IdentifierGenerator
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
-
 import uk.ac.wellcome.storage.streaming.Codec._
 import uk.ac.wellcome.storage.typesafe.S3Builder
 
@@ -25,8 +24,8 @@ object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
     implicit val actorSystem: ActorSystem =
       AkkaBuilder.buildActorSystem()
-    implicit val materializer: ActorMaterializer =
-      AkkaBuilder.buildActorMaterializer()
+    implicit val materializer: Materializer =
+      AkkaBuilder.buildMaterializer()
 
     val identifiersTableConfig = IdentifiersTableBuilder.buildConfig(config)
     RDSBuilder.buildDB(config)

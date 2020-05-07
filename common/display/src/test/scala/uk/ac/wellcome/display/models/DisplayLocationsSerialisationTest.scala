@@ -1,13 +1,14 @@
 package uk.ac.wellcome.display.models
 
-import org.scalatest.{Assertion, FunSpec}
+import org.scalatest.Assertion
+import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.display.json.DisplayJsonUtil._
 import uk.ac.wellcome.display.test.util.JsonMapperTestUtil
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
 
 class DisplayLocationsSerialisationTest
-    extends FunSpec
+    extends AnyFunSpec
     with DisplaySerialisationTestBase
     with JsonMapperTestUtil
     with WorksGenerators {

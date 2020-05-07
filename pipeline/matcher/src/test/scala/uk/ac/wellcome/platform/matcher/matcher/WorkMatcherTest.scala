@@ -6,9 +6,11 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import org.mockito.Matchers.any
 import org.mockito.Mockito.when
+import org.scalatest.EitherValues
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{EitherValues, FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.matchers.should.Matchers
 import org.scanamo.syntax._
 import uk.ac.wellcome.models.matcher.{
   MatchedIdentifiers,
@@ -25,7 +27,7 @@ import uk.ac.wellcome.platform.matcher.storage.WorkGraphStore
 import uk.ac.wellcome.storage.locking.dynamo.DynamoLockingService
 
 class WorkMatcherTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with MatcherFixtures
     with ScalaFutures

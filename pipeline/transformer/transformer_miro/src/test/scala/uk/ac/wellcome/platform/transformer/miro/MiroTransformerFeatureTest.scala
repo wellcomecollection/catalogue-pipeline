@@ -1,8 +1,8 @@
 package uk.ac.wellcome.platform.transformer.miro
 
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.{FunSpec, Matchers}
-
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.platform.transformer.miro.fixtures.MiroVHSRecordReceiverFixture
@@ -12,16 +12,14 @@ import uk.ac.wellcome.platform.transformer.miro.services.MiroTransformerWorkerSe
 import uk.ac.wellcome.models.work.internal.UnidentifiedWork
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
-
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
-
 import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig}
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 
 class MiroTransformerFeatureTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with Akka
     with BigMessagingFixture

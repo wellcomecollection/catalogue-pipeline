@@ -1,10 +1,11 @@
 package uk.ac.wellcome.platform.transformer.miro.transformers
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal.License
 import uk.ac.wellcome.platform.transformer.miro.exceptions.ShouldNotTransformException
 
-class MiroLicensesTest extends FunSpec with Matchers {
+class MiroLicensesTest extends AnyFunSpec with Matchers {
   it("finds a recognised license") {
     chooseLicense(Some("CC-0")) shouldBe License.CC0
   }

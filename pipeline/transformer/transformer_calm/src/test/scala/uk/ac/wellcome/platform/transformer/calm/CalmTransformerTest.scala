@@ -1,11 +1,12 @@
 package uk.ac.wellcome.platform.transformer.calm
 
 import java.time.Instant
-import org.scalatest.{FunSpec, Matchers}
 
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal._
 
-class CalmTransformerTest extends FunSpec with Matchers {
+class CalmTransformerTest extends AnyFunSpec with Matchers {
 
   val version = 3
   val id = "123"

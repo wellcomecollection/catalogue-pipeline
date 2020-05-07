@@ -1,8 +1,9 @@
 package uk.ac.wellcome.platform.api.models
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class ErrorTest extends FunSpec with Matchers {
+class ErrorTest extends AnyFunSpec with Matchers {
   it("creates an HTTP 404 error response") {
     val description = "Work not found for identifier 1234"
     val error: Error =

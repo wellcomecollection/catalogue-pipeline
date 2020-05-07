@@ -1,14 +1,15 @@
 package uk.ac.wellcome.platform.reindex.reindex_worker.services
 
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.messaging.memory.MemoryIndividualMessageSender
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Random, Try}
 
-class BulkMessageSenderTest extends FunSpec with Matchers with ScalaFutures {
+class BulkMessageSenderTest extends AnyFunSpec with Matchers with ScalaFutures {
 
   def createMessages(count: Int = 5): Seq[String] =
     (1 to count).map { _ =>

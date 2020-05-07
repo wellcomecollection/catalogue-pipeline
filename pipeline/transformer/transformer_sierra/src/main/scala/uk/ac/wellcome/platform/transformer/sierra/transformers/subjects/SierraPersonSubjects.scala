@@ -6,7 +6,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   VarField
 }
 import uk.ac.wellcome.platform.transformer.sierra.transformers.SierraAgents
-import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
+import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 
 // Populate wwork:subject
 //

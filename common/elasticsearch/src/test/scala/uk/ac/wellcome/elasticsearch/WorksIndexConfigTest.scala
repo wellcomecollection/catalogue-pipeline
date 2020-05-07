@@ -7,8 +7,9 @@ import com.sksamuel.elastic4s.ElasticError
 import org.scalacheck.Gen.chooseNum
 import org.scalacheck.{Arbitrary, Shrink}
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
-import org.scalatest.prop.PropertyChecks
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.utils.JsonAssertions
@@ -17,13 +18,13 @@ import uk.ac.wellcome.models.work.generators.{ImageGenerators, WorksGenerators}
 import uk.ac.wellcome.models.work.internal._
 
 class WorksIndexConfigTest
-    extends FunSpec
+    extends AnyFunSpec
     with ElasticsearchFixtures
     with ScalaFutures
     with Eventually
     with Matchers
     with JsonAssertions
-    with PropertyChecks
+    with ScalaCheckPropertyChecks
     with WorksGenerators
     with ImageGenerators {
 

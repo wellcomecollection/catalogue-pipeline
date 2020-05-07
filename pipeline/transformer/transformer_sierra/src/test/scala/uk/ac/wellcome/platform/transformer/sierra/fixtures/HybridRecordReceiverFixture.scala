@@ -1,8 +1,8 @@
 package uk.ac.wellcome.platform.transformer.sierra.fixtures
 
-import scala.util.Random
-import com.amazonaws.services.sns.AmazonSNS
+import software.amazon.awssdk.services.sns.SnsClient
 
+import scala.util.Random
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.transformer.sierra.services.{
   BackwardsCompatHybridRecordReceiver,
@@ -14,14 +14,11 @@ import uk.ac.wellcome.platform.transformer.sierra.services.{
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
-
-import uk.ac.wellcome.models.transformable.SierraTransformable
-
 import uk.ac.wellcome.bigmessaging.fixtures.{BigMessagingFixture, VHSFixture}
 import uk.ac.wellcome.bigmessaging.EmptyMetadata
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig}
-
+import uk.ac.wellcome.sierra_adapter.model.SierraTransformable
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import uk.ac.wellcome.storage.store.{HybridStoreEntry, Store, TypedStoreEntry}
 import uk.ac.wellcome.storage.store.memory.MemoryStore
@@ -39,7 +36,7 @@ trait BackwardsCompatHybridRecordReceiverFixture extends BigMessagingFixture {
   def withHybridRecordReceiver[R](store: SierraStore,
                                   topic: Topic,
                                   bucket: Bucket,
-                                  snsClient: AmazonSNS = snsClient)(
+                                  snsClient: SnsClient = snsClient)(
     testWith: TestWith[BackwardsCompatHybridRecordReceiver[SNSConfig], R]): R =
     withSqsBigMessageSender[TransformedBaseWork, R](bucket, topic, snsClient) {
       msgSender =>
@@ -102,7 +99,7 @@ trait UpcomingHybridRecordReceiverFixture
   def withHybridRecordReceiver[R](vhs: VHS,
                                   topic: Topic,
                                   bucket: Bucket,
-                                  snsClient: AmazonSNS = snsClient)(
+                                  snsClient: SnsClient = snsClient)(
     testWith: TestWith[UpcomingHybridRecordReceiver[SNSConfig], R]): R =
     withSqsBigMessageSender[TransformedBaseWork, R](bucket, topic, snsClient) {
       msgSender =>

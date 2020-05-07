@@ -4,17 +4,18 @@ import java.io.File
 import java.nio.file.Paths
 
 import akka.stream.scaladsl.{FileIO, Flow, Keep, Sink, Source}
-import akka.stream.{ActorMaterializer, IOResult, Materializer}
+import akka.stream.{IOResult, Materializer}
 import akka.util.ByteString
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.platform.snapshot_generator.test.utils.GzipUtils
 
 import scala.concurrent.Future
 
 class StringToGzipFlowTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with Akka
     with GzipUtils
@@ -24,7 +25,7 @@ class StringToGzipFlowTest
   it("produces a gzip-compressed file from the lines") {
     withActorSystem { actorSystem =>
       implicit val materializer: Materializer =
-        ActorMaterializer()(actorSystem)
+        Materializer(actorSystem)
 
       val flow = StringToGzipFlow()
 

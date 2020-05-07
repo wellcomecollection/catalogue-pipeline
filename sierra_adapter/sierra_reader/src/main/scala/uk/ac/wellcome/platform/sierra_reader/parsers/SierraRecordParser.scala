@@ -5,7 +5,7 @@ import java.time.{Instant, LocalDate, LocalTime, ZoneOffset}
 
 import io.circe.Json
 import io.circe.optics.JsonPath.root
-import uk.ac.wellcome.models.transformable.sierra.AbstractSierraRecord
+import uk.ac.wellcome.sierra_adapter.model.AbstractSierraRecord
 
 object SierraRecordParser {
   def apply[T <: AbstractSierraRecord](

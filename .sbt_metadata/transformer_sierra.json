@@ -3,6 +3,7 @@
   "folder" : "pipeline/transformer/transformer_sierra",
   "dependencyIds" : [
     "internal_model",
-    "big_messaging_typesafe"
+    "big_messaging_typesafe",
+    "sierra_adapter_common"
   ]
 }

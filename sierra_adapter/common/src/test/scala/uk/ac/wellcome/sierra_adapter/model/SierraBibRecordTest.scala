@@ -1,7 +1,6 @@
-package uk.ac.wellcome.models.transformable.sierra
+package uk.ac.wellcome.sierra_adapter.model
 
 import org.scalatest.{FunSpec, Matchers}
-import uk.ac.wellcome.models.transformable.sierra.test.utils.SierraGenerators
 import uk.ac.wellcome.json.JsonUtil._
 
 class SierraBibRecordTest extends FunSpec with Matchers with SierraGenerators {

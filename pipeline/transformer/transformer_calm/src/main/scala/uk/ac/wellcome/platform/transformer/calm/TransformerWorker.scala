@@ -1,8 +1,8 @@
 package uk.ac.wellcome.platform.transformer.calm
 
 import akka.Done
-import com.amazonaws.services.sqs.model.Message
 import grizzled.slf4j.Logging
+import software.amazon.awssdk.services.sqs.model.Message
 import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage

@@ -1,12 +1,15 @@
 package uk.ac.wellcome.models.work.internal
 
 import enumeratum.scalacheck._
-import org.scalatest.FunSpec
-import org.scalatest.prop.PropertyChecks
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.utils.JsonAssertions
 
-class WorkTypeTest extends FunSpec with JsonAssertions with PropertyChecks {
+class WorkTypeTest
+    extends AnyFunSpec
+    with JsonAssertions
+    with ScalaCheckPropertyChecks {
 
   it("serialises WorkType to JSON") {
     forAll { workType: WorkType =>

@@ -1,13 +1,13 @@
 package uk.ac.wellcome.calm_adapter
 
 import java.time.LocalDate
+
 import scala.concurrent.{ExecutionContext, Future}
 import akka.Done
 import akka.stream.scaladsl._
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import grizzled.slf4j.Logging
-import com.amazonaws.services.sqs.model.{Message => SQSMessage}
-
+import software.amazon.awssdk.services.sqs.model.{Message => SQSMessage}
 import uk.ac.wellcome.typesafe.Runnable
 import uk.ac.wellcome.storage.Version
 import uk.ac.wellcome.messaging.sqs.SQSStream
@@ -34,7 +34,7 @@ class CalmAdapterWorkerService(msgStream: SQSStream[NotificationMessage],
                                concurrentWindows: Int = 2)(
   implicit
   val ec: ExecutionContext,
-  materializer: ActorMaterializer)
+  materializer: Materializer)
     extends Runnable
     with FlowOps
     with Logging {

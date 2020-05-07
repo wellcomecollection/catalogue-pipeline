@@ -1,9 +1,9 @@
 package uk.ac.wellcome.sierra_adapter.config.builders
 
 import com.typesafe.config.Config
-import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.models.transformable.SierraTransformable
-import uk.ac.wellcome.models.transformable.SierraTransformable._
+
+import uk.ac.wellcome.sierra_adapter.model.SierraTransformable
+import uk.ac.wellcome.sierra_adapter.model.Implicits._
 import uk.ac.wellcome.storage.ObjectStore
 import uk.ac.wellcome.storage.s3.S3StorageBackend
 import uk.ac.wellcome.storage.typesafe.{DynamoBuilder, S3Builder, VHSBuilder}

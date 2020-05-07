@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.matcher
 import java.time.Duration
 
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import com.typesafe.config.Config
 import org.scanamo.auto._
 import org.scanamo.time.JavaTimeFormats._
@@ -36,8 +36,8 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildActorSystem()
     implicit val executionContext: ExecutionContext =
       AkkaBuilder.buildExecutionContext()
-    implicit val materializer: ActorMaterializer =
-      AkkaBuilder.buildActorMaterializer()
+    implicit val materializer: Materializer =
+      AkkaBuilder.buildMaterializer()
 
     val dynamoClient = DynamoBuilder.buildDynamoClient(config)
 

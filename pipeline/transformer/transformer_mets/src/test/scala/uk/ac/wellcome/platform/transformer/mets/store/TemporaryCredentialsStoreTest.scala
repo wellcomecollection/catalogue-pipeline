@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.transformer.mets.store
 
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.platform.transformer.mets.fixtures.{
   LocalStackS3Fixtures,
@@ -12,7 +12,7 @@ import uk.ac.wellcome.storage.store.TypedStoreEntry
 import scala.util.Right
 
 class TemporaryCredentialsStoreTest
-    extends FunSpec
+    extends AnyFunSpec
     with LocalStackS3Fixtures
     with STSFixtures
     with Akka {

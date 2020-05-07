@@ -2,7 +2,9 @@ package uk.ac.wellcome.platform.inference_manager.integration
 
 import org.scalatest.concurrent.IntegrationPatience
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
-import org.scalatest.{FunSpec, Inside, Inspectors, Matchers, OptionValues}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.{Inside, Inspectors, OptionValues}
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
@@ -21,7 +23,7 @@ import scala.concurrent.duration._
 import scala.io.Source
 
 class ManagerInferrerIntegrationTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with ImageGenerators
     with OptionValues

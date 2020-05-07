@@ -1,6 +1,8 @@
 package uk.ac.wellcome.platform.transformer.miro.transformers
 
-import org.scalatest.{Assertion, FunSpec, Matchers}
+import org.scalatest.Assertion
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
@@ -12,7 +14,7 @@ import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
   *  names, etc.) -- these tests will become more complicated.
   */
 class MiroSubjectsTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with MiroRecordGenerators
     with MiroTransformableWrapper {

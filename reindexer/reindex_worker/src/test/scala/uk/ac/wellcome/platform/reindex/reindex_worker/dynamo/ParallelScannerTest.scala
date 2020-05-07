@@ -1,8 +1,10 @@
 package uk.ac.wellcome.platform.reindex.reindex_worker.dynamo
 
 import com.amazonaws.services.dynamodbv2.model.AmazonDynamoDBException
+import org.scalatest.Assertion
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{Assertion, FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.platform.reindex.reindex_worker.fixtures.ReindexDynamoFixtures
 
@@ -10,7 +12,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class ParallelScannerTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with ScalaFutures
     with ReindexDynamoFixtures {

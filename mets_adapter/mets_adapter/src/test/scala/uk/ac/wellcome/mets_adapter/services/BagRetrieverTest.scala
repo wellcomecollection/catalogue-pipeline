@@ -2,13 +2,15 @@ package uk.ac.wellcome.mets_adapter.services
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.headers.OAuth2BearerToken
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.http.Fault
 import org.mockito.Mockito
+import org.scalatest.Inside
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{FunSpec, Inside, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.mets_adapter.models._
@@ -18,7 +20,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class BagRetrieverTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with BagsWiremock
     with Inside
@@ -133,7 +135,7 @@ class BagRetrieverTest
 
   def withBagRetriever[R](tokenService: TokenService)(
     testWith: TestWith[BagRetriever, R])(implicit actorSystem: ActorSystem,
-                                         materializer: ActorMaterializer) =
+                                         materializer: Materializer) =
     withBagsService("localhost") { port =>
       testWith(
         new HttpBagRetriever(
@@ -144,7 +146,7 @@ class BagRetrieverTest
 
   def withBagRetriever[R](testWith: TestWith[BagRetriever, R])(
     implicit actorSystem: ActorSystem,
-    materializer: ActorMaterializer) =
+    materializer: Materializer) =
     withBagsService("localhost") { port =>
       withTokenService(
         s"http://localhost:$port",
@@ -164,7 +166,7 @@ class BagRetrieverTest
                           secret: String,
                           scope: String)(testWith: TestWith[TokenService, R])(
     implicit actorSystem: ActorSystem,
-    materializer: ActorMaterializer) {
+    materializer: Materializer) {
     testWith(new TokenService(url, clientId, secret, scope))
   }
 }

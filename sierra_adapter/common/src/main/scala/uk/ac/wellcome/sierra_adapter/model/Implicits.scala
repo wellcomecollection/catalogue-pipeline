@@ -1,25 +1,10 @@
-package uk.ac.wellcome.models.transformable
+package uk.ac.wellcome.sierra_adapter.model
 
-import io.circe.{KeyDecoder, KeyEncoder}
-import uk.ac.wellcome.models.transformable.sierra.{
-  SierraBibNumber,
-  SierraBibRecord,
-  SierraItemNumber,
-  SierraItemRecord
-}
+import io.circe.generic.extras.semiauto._
+import io.circe._
+import uk.ac.wellcome.json.JsonUtil._
 
-case class SierraTransformable(
-  sierraId: SierraBibNumber,
-  maybeBibRecord: Option[SierraBibRecord] = None,
-  itemRecords: Map[SierraItemNumber, SierraItemRecord] = Map()
-)
-
-object SierraTransformable {
-  def apply(bibRecord: SierraBibRecord): SierraTransformable =
-    SierraTransformable(
-      sierraId = bibRecord.id,
-      maybeBibRecord = Some(bibRecord))
-
+object Implicits {
   // Because the [[SierraTransformable.itemRecords]] field is keyed by
   // [[SierraItemNumber]] in our case class, but JSON only supports string
   // keys, we need to turn the ID into a string when storing as JSON.
@@ -32,4 +17,8 @@ object SierraTransformable {
 
   implicit val keyDecoder: KeyDecoder[SierraItemNumber] =
     (key: String) => Some(SierraItemNumber(key))
+
+  implicit val _dec01: Decoder[SierraTransformable] = deriveDecoder
+
+  implicit val _enc01: Encoder[SierraTransformable] = deriveEncoder
 }

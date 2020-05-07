@@ -1,6 +1,7 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.platform.transformer.sierra.generators.{
   MarcGenerators,
   SierraDataGenerators
@@ -12,7 +13,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
 }
 
 class SierraDurationTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with MarcGenerators
     with SierraDataGenerators {

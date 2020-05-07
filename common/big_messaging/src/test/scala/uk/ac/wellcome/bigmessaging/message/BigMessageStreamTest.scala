@@ -3,9 +3,10 @@ package uk.ac.wellcome.bigmessaging.message
 import java.util.concurrent.ConcurrentLinkedQueue
 
 import akka.stream.scaladsl.Flow
-import com.amazonaws.services.cloudwatch.model.StandardUnit
 import io.circe.Decoder
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
+import software.amazon.awssdk.services.cloudwatch.model.StandardUnit
 import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
@@ -20,7 +21,7 @@ import scala.concurrent.Future
 import scala.util.Random
 
 class BigMessageStreamTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with BigMessagingFixture {
 

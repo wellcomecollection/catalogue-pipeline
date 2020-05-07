@@ -1,11 +1,12 @@
 package uk.ac.wellcome.display.models
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.ProductionEventGenerators
 import uk.ac.wellcome.models.work.internal._
 
 class DisplayProductionEventTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with ProductionEventGenerators {
   it("serialises a DisplayProductionEvent from a ProductionEvent") {

@@ -2,9 +2,9 @@ package uk.ac.wellcome.platform.inference_manager
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import com.amazonaws.services.s3.AmazonS3
-import com.amazonaws.services.sqs.model.Message
+import software.amazon.awssdk.services.sqs.model.Message
 import com.typesafe.config.Config
 import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
 import uk.ac.wellcome.models.work.internal.{
@@ -35,8 +35,8 @@ object Main extends WellcomeTypesafeApp {
     implicit val actorSystem: ActorSystem = AkkaBuilder.buildActorSystem()
     implicit val executionContext: ExecutionContext =
       AkkaBuilder.buildExecutionContext()
-    implicit val materializer: ActorMaterializer =
-      AkkaBuilder.buildActorMaterializer()
+    implicit val materializer: Materializer =
+      AkkaBuilder.buildMaterializer()
     implicit val s3Client: AmazonS3 = S3Builder.buildS3Client(config)
 
     implicit val msgStore = S3TypedStore[Output]

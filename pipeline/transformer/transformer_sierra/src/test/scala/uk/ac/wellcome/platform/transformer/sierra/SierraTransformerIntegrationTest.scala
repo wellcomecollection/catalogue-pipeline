@@ -1,36 +1,39 @@
 package uk.ac.wellcome.platform.transformer.sierra
 
 import org.scalatest.concurrent.IntegrationPatience
-import org.scalatest.{FunSpec, Matchers}
-
-import uk.ac.wellcome.models.transformable.sierra.test.utils.SierraGenerators
-import uk.ac.wellcome.models.transformable.SierraTransformable
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal.UnidentifiedWork
 import uk.ac.wellcome.platform.transformer.sierra.services.{
   HybridRecord,
-  SierraTransformerWorkerService,
+  SierraTransformerWorkerService
 }
 import uk.ac.wellcome.platform.transformer.sierra.fixtures.BackwardsCompatHybridRecordReceiverFixture
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
-
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig}
-
+import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
+import uk.ac.wellcome.sierra_adapter.model.{
+  SierraGenerators,
+  SierraTransformable
+}
 import uk.ac.wellcome.storage.streaming.Codec._
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
+import uk.ac.wellcome.platform.transformer.sierra.model.SierraTransformableImplicits._
 
 class SierraTransformerIntegrationTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with IntegrationPatience
     with BigMessagingFixture
     with BackwardsCompatHybridRecordReceiverFixture
-    with SierraGenerators {
+    with SierraGenerators
+    with IdentifiersGenerators {
 
   it("transforms sierra records and publishes the result to the given topic") {
     withLocalSnsTopic { topic =>

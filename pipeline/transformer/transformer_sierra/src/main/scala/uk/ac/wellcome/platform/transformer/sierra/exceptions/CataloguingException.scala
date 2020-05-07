@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.transformer.sierra.exceptions
 
-import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
+import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 
 // Thrown if the data has a cataloguing error -- that is, the transformer
 // cannot handle it without a change in the source data.

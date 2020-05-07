@@ -1,15 +1,15 @@
 package uk.ac.wellcome.platform.ingestor.works
 
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
 import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
+import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.elasticsearch.{
   ElasticsearchIndexCreator,
   WorksIndexConfig
 }
-import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal.IdentifiedBaseWork
 import uk.ac.wellcome.platform.ingestor.common.builders.IngestorConfigBuilder
@@ -27,8 +27,8 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildActorSystem()
     implicit val executionContext: ExecutionContext =
       AkkaBuilder.buildExecutionContext()
-    implicit val materializer: ActorMaterializer =
-      AkkaBuilder.buildActorMaterializer()
+    implicit val materializer: Materializer =
+      AkkaBuilder.buildMaterializer()
 
     val indexName = config.required[String]("es.index")
     val elasticClient = ElasticBuilder.buildElasticClient(config)

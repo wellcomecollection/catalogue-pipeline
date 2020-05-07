@@ -1,7 +1,8 @@
 package uk.ac.wellcome.platform.reindex.reindex_worker
 
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.memory.MemoryIndividualMessageSender
 import uk.ac.wellcome.platform.reindex.reindex_worker.fixtures.WorkerServiceFixture
@@ -11,7 +12,7 @@ import uk.ac.wellcome.platform.reindex.reindex_worker.models.{
 }
 
 class ReindexWorkerFeatureTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with Eventually
     with IntegrationPatience

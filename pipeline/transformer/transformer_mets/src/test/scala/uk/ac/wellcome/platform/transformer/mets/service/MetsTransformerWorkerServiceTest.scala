@@ -2,8 +2,8 @@ package uk.ac.wellcome.platform.transformer.mets.service
 
 import com.amazonaws.auth.BasicSessionCredentials
 import com.amazonaws.services.s3.AmazonS3
-import org.scalatest.FunSpec
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.Implicits._
@@ -29,7 +29,7 @@ import uk.ac.wellcome.storage.store.{TypedStoreEntry, VersionedStore}
 import uk.ac.wellcome.storage.{Identified, ObjectLocation, Version}
 
 class MetsTransformerWorkerServiceTest
-    extends FunSpec
+    extends AnyFunSpec
     with BigMessagingFixture
     with MetsGenerators
     with RandomStrings

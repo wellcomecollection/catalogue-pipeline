@@ -1,6 +1,7 @@
 package uk.ac.wellcome.platform.idminter.database
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.platform.idminter.fixtures
 
 case class FieldDescription(field: String,
@@ -9,7 +10,7 @@ case class FieldDescription(field: String,
                             key: String)
 
 class TableProvisionerTest
-    extends FunSpec
+    extends AnyFunSpec
     with fixtures.IdentifiersDatabase
     with Matchers {
 

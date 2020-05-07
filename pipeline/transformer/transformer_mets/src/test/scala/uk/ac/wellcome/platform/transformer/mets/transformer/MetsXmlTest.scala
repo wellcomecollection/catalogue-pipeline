@@ -1,10 +1,11 @@
 package uk.ac.wellcome.platform.transformer.mets.transformer
 
 import org.apache.commons.io.IOUtils
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.platform.transformer.mets.fixtures.MetsGenerators
 
-class MetsXmlTest extends FunSpec with Matchers with MetsGenerators {
+class MetsXmlTest extends AnyFunSpec with Matchers with MetsGenerators {
 
   val xml = loadXmlFile("/b30246039.xml")
 

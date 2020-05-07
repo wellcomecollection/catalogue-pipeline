@@ -13,12 +13,13 @@ import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.utils.JsonAssertions
-import uk.ac.wellcome.models.transformable.sierra.{
+import uk.ac.wellcome.sierra_adapter.model.{
   AbstractSierraRecord,
+  SierraBibNumber,
   SierraBibRecord,
+  SierraGenerators,
   SierraItemRecord
 }
-import uk.ac.wellcome.models.transformable.sierra.test.utils.SierraGenerators
 
 class SierraRecordWrapperFlowTest
     extends FunSpec
@@ -94,8 +95,8 @@ class SierraRecordWrapperFlowTest
 
         val expectedRecord = createSierraItemRecordWith(
           id = id,
-          data = jsonString,
-          modifiedDate = Instant.parse(updatedDate)
+          modifiedDate = Instant.parse(updatedDate),
+          bibIds = bibIds.map(SierraBibNumber).toList
         )
 
         val json = parse(jsonString).right.get

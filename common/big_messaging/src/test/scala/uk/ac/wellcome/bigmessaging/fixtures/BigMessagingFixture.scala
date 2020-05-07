@@ -1,11 +1,12 @@
 package uk.ac.wellcome.bigmessaging.fixtures
 
 import akka.actor.ActorSystem
-import com.amazonaws.services.cloudwatch.model.StandardUnit
-import com.amazonaws.services.sns.AmazonSNS
-import com.amazonaws.services.sqs.model.SendMessageResult
 import io.circe.{Decoder, Encoder}
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
+import software.amazon.awssdk.services.cloudwatch.model.StandardUnit
+import software.amazon.awssdk.services.sns.SnsClient
+import software.amazon.awssdk.services.sqs.SqsAsyncClient
+import software.amazon.awssdk.services.sqs.model.SendMessageResponse
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
@@ -34,6 +35,7 @@ import uk.ac.wellcome.storage.store.memory.{
   MemoryTypedStore
 }
 import uk.ac.wellcome.storage.streaming.Codec
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Success
 
@@ -48,14 +50,15 @@ trait BigMessagingFixture
 
   def withBigMessageStream[T, R](queue: SQS.Queue,
                                  metrics: MemoryMetrics[StandardUnit] =
-                                   new MemoryMetrics[StandardUnit]())(
+                                   new MemoryMetrics[StandardUnit](),
+                                 sqsClient: SqsAsyncClient = asyncSqsClient)(
     testWith: TestWith[BigMessageStream[T], R])(
     implicit
     actorSystem: ActorSystem,
     decoderT: Decoder[T],
     typedStoreT: TypedStore[ObjectLocation, T]): R = {
     val stream = new BigMessageStream[T](
-      sqsClient = asyncSqsClient,
+      sqsClient = sqsClient,
       sqsConfig = createSQSConfigWith(queue),
       metrics = metrics
     )
@@ -73,7 +76,7 @@ trait BigMessagingFixture
     *
     */
   def sendMessage[T](queue: Queue, obj: T)(
-    implicit encoder: Encoder[T]): SendMessageResult =
+    implicit encoder: Encoder[T]): SendMessageResponse =
     sendNotificationToSQS[MessageNotification](
       queue = queue,
       message = InlineNotification(jsonString = toJson(obj).get)
@@ -82,7 +85,7 @@ trait BigMessagingFixture
   def withSqsBigMessageSender[T, R](
     bucket: Bucket,
     topic: Topic,
-    senderSnsClient: AmazonSNS = snsClient,
+    senderSnsClient: SnsClient = snsClient,
     store: Option[MemoryTypedStore[ObjectLocation, T]] = None,
     bigMessageThreshold: Int = 10000)(
     testWith: TestWith[BigMessageSender[SNSConfig, T], R])(
@@ -102,7 +105,7 @@ trait BigMessagingFixture
       testWith(sender)
     }
 
-  def withSnsMessageSender[R](topic: Topic, snsClient: AmazonSNS = snsClient)(
+  def withSnsMessageSender[R](topic: Topic, snsClient: SnsClient = snsClient)(
     testWith: TestWith[MessageSender[SNSConfig], R]): R =
     testWith(
       new SNSMessageSender(

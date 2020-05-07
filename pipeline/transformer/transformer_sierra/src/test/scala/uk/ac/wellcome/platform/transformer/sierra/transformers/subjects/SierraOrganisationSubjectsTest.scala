@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers.subjects
 
-import org.scalatest.{FunSpec, Matchers}
-import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.sierra.exceptions.CataloguingException
 import uk.ac.wellcome.platform.transformer.sierra.generators.SierraDataGenerators
@@ -10,9 +10,10 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData,
   VarField
 }
+import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 
 class SierraOrganisationSubjectsTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with SierraDataGenerators {
   it("returns an empty list if there are no instances of MARC tag 610") {

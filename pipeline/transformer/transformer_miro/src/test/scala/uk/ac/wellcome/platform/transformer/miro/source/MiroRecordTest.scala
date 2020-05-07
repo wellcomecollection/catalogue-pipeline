@@ -1,10 +1,11 @@
 package uk.ac.wellcome.platform.transformer.miro.source
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.platform.transformer.miro.Implicits._
 
-class MiroRecordTest extends FunSpec with Matchers {
+class MiroRecordTest extends AnyFunSpec with Matchers {
 
   // This is based on failures we've seen in the pipeline.
   // Examples: L0068740, V0014729.

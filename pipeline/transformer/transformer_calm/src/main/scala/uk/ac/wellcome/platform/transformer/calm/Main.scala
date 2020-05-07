@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.transformer.calm
 
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import com.typesafe.config.Config
 import uk.ac.wellcome.bigmessaging.VHSWrapper
 import uk.ac.wellcome.bigmessaging.typesafe.{BigMessagingBuilder, VHSBuilder}
@@ -29,8 +29,8 @@ object Main extends WellcomeTypesafeApp with AWSClientConfigBuilder {
       AkkaBuilder.buildExecutionContext()
     implicit val actorSystem: ActorSystem =
       AkkaBuilder.buildActorSystem()
-    implicit val materializer: ActorMaterializer =
-      AkkaBuilder.buildActorMaterializer()
+    implicit val materializer: Materializer =
+      AkkaBuilder.buildMaterializer()
     implicit val s3Client =
       S3Builder.buildS3Client(config)
     implicit val msgStore =

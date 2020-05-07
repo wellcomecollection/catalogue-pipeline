@@ -1,10 +1,11 @@
 package uk.ac.wellcome.models.work.internal.text
 
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.prop.TableDrivenPropertyChecks._
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.text.TextNormalisation._
 
-class textNormalisationTest extends FunSpec with Matchers {
+class textNormalisationTest extends AnyFunSpec with Matchers {
   describe("trimTrailing") {
     it("removes trailing character") {
       val examples = Table(

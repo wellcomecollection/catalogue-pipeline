@@ -1,12 +1,14 @@
 package uk.ac.wellcome.platform.merger.rules
 
-import org.scalatest.{FunSpec, Inside, Inspectors, Matchers}
+import org.scalatest.{Inside, Inspectors}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 
 class OtherIdentifiersRuleTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with WorksGenerators
     with Inside

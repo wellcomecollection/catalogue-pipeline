@@ -1,10 +1,9 @@
-package uk.ac.wellcome.models.transformable.sierra
+package uk.ac.wellcome.sierra_adapter.model
+
+import java.time.Instant
 
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.models.transformable.sierra.test.utils.SierraGenerators
-
-import java.time.Instant
 
 class SierraItemRecordTest extends FunSpec with Matchers with SierraGenerators {
 
@@ -78,6 +77,7 @@ class SierraItemRecordTest extends FunSpec with Matchers with SierraGenerators {
       )
     }
 
-    caught.getMessage shouldBe s"Error parsing bibIds from JSON <<$data>> (uk.ac.wellcome.json.exceptions.JsonDecodingError: $expectedMessage)"
+    val message1 = caught.getMessage
+    message1 shouldBe s"Error parsing bibIds from JSON <<$data>> (uk.ac.wellcome.json.exceptions.JsonDecodingError: $expectedMessage)"
   }
 }

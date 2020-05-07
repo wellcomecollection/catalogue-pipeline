@@ -10,11 +10,11 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraMaterialType,
   SierraQueryOps
 }
-import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 import uk.ac.wellcome.platform.transformer.sierra.transformers.parsers.{
   MiroIdParser,
   WellcomeImagesURLParser
 }
+import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 
 import scala.util.matching.Regex
 

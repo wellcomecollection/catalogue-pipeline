@@ -10,6 +10,6 @@ object ApiVersions extends Enumeration {
   val v2 = Value("v2")
   val default = v2
 
-  implicit val decoder = Decoder.enumDecoder(ApiVersions)
-  implicit val encoder = Encoder.enumEncoder(ApiVersions)
+  implicit val decoder = Decoder.decodeEnumeration(ApiVersions)
+  implicit val encoder = Encoder.encodeEnumeration(ApiVersions)
 }

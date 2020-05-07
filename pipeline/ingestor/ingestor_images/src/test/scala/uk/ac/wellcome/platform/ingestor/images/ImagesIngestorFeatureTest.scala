@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.ingestor.images
 
-import org.scalatest.FunSpec
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.time.{Seconds, Span}
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.elasticsearch.ImagesIndexConfig
@@ -17,7 +17,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import uk.ac.wellcome.json.JsonUtil._
 
 class ImagesIngestorFeatureTest
-    extends FunSpec
+    extends AnyFunSpec
     with ImageGenerators
     with BigMessagingFixture
     with ElasticsearchFixtures

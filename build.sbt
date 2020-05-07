@@ -26,7 +26,6 @@ def setupProject(
     .dependsOn(dependsOn: _*)
     .settings(libraryDependencies ++= externalDependencies)
 }
-
 lazy val internal_model = setupProject(
   project,
   "common/internal_model",
@@ -137,7 +136,7 @@ lazy val transformer_miro = setupProject(
 lazy val transformer_sierra = setupProject(
   project,
   folder = "pipeline/transformer/transformer_sierra",
-  localDependencies = Seq(internal_model, big_messaging_typesafe),
+  localDependencies = Seq(internal_model, big_messaging_typesafe, sierra_adapter_common),
   externalDependencies = CatalogueDependencies.sierraTransformerDependencies
 )
 
@@ -160,7 +159,6 @@ lazy val transformer_calm = setupProject(
 lazy val sierra_adapter_common = setupProject(
   project,
   "sierra_adapter/common",
-  localDependencies = Seq(internal_model),
   externalDependencies = CatalogueDependencies.sierraAdapterCommonDependencies)
 
 lazy val sierra_reader = setupProject(

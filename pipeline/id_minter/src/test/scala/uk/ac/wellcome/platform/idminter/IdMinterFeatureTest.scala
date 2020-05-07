@@ -1,7 +1,12 @@
 package uk.ac.wellcome.platform.idminter
 
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
+import software.amazon.awssdk.services.sqs.model.{
+  GetQueueAttributesRequest,
+  QueueAttributeName
+}
 import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
@@ -13,7 +18,7 @@ import uk.ac.wellcome.models.Implicits._
 import scala.collection.JavaConverters._
 
 class IdMinterFeatureTest
-    extends FunSpec
+    extends AnyFunSpec
     with SQS
     with SNS
     with BigMessagingFixture
@@ -157,11 +162,13 @@ class IdMinterFeatureTest
     Thread.sleep(2000)
 
     sqsClient
-      .getQueueAttributes(
-        queue.url,
-        List("ApproximateNumberOfMessagesNotVisible").asJava
-      )
-      .getAttributes
-      .get("ApproximateNumberOfMessagesNotVisible") shouldBe "1"
+      .getQueueAttributes { builder: GetQueueAttributesRequest.Builder =>
+        builder
+          .queueUrl(queue.url)
+          .attributeNames(List(
+            QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES_NOT_VISIBLE).asJava)
+      }
+      .attributes()
+      .get(QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES_NOT_VISIBLE) shouldBe "1"
   }
 }

@@ -3,10 +3,10 @@ package uk.ac.wellcome.platform.sierra_item_merger
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.messaging.fixtures.SQS
-import uk.ac.wellcome.models.transformable.sierra.test.utils.SierraGenerators
 import uk.ac.wellcome.storage.fixtures.LocalVersionedHybridStore
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.platform.sierra_item_merger.fixtures.SierraItemMergerFixtures
+import uk.ac.wellcome.sierra_adapter.model.SierraGenerators
 import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
 
 class SierraItemMergerFeatureTest
