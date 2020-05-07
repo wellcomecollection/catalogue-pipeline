@@ -8,6 +8,19 @@ module "calm_windows_queue" {
 }
 
 resource "aws_iam_role_policy" "read_from_queue" {
-  role   = module.task_definition.task_role_name
+  role   = module.worker.task_role_name
   policy = module.calm_windows_queue.read_policy
+}
+
+module "scaling_alarm" {
+  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.2"
+  queue_name = module.calm_windows_queue.name
+
+  queue_high_actions = [
+    module.worker.scale_up_arn
+  ]
+
+  queue_low_actions = [
+    module.worker.scale_down_arn
+  ]
 }

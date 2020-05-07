@@ -1,7 +1,5 @@
 locals {
-  namespace                     = "calm-adapter"
-  logstash_transit_service_name = "${local.namespace}_logstash_transit"
-  logstash_host                 = "${local.logstash_transit_service_name}.${local.namespace}"
+  namespace = "calm-adapter"
 
   infra_bucket    = data.terraform_remote_state.shared_infra.outputs.infra_bucket
   account_id      = data.aws_caller_identity.current.account_id

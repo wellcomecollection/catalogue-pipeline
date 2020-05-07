@@ -120,6 +120,18 @@ class CalmTransformerTest extends FunSpec with Matchers {
     )
   }
 
+  it("transforms description") {
+    val record = calmRecord(
+      "Title" -> "abc",
+      "Level" -> "Collection",
+      "RefNo" -> "a/b/c",
+      "AltRefNo" -> "a.b.c",
+      "Description" -> "description of the thing",
+    )
+    CalmTransformer(record, version).right.get.data.description shouldBe
+      Some("description of the thing")
+  }
+
   it("transforms physical description") {
     val record = calmRecord(
       "Title" -> "abc",
@@ -131,6 +143,24 @@ class CalmTransformerTest extends FunSpec with Matchers {
     )
     CalmTransformer(record, version).right.get.data.physicalDescription shouldBe
       Some("long thing")
+  }
+
+  it("transforms production dates") {
+    val record = calmRecord(
+      "Title" -> "abc",
+      "Level" -> "Collection",
+      "RefNo" -> "a/b/c",
+      "AltRefNo" -> "a.b.c",
+      "Date" -> "1980-1991"
+    )
+    CalmTransformer(record, version).right.get.data.production shouldBe
+      List(
+        ProductionEvent(
+          dates = List(Period("1980-1991")),
+          label = "1980-1991",
+          places = Nil,
+          agents = Nil,
+          function = None))
   }
 
   it("transforms subjects") {
@@ -158,7 +188,7 @@ class CalmTransformerTest extends FunSpec with Matchers {
       "Language" -> "English"
     )
     CalmTransformer(record, version).right.get.data.language shouldBe Some(
-      Language("en", "English")
+      Language("English", Some("en"))
     )
   }
 
@@ -178,7 +208,7 @@ class CalmTransformerTest extends FunSpec with Matchers {
       "Language" -> "  "
     )
     CalmTransformer(recordA, version).right.get.data.language shouldBe Some(
-      Language("en", "English")
+      Language("English", Some("en"))
     )
     CalmTransformer(recordB, version).right.get.data.language shouldBe None
   }
@@ -199,10 +229,10 @@ class CalmTransformerTest extends FunSpec with Matchers {
       "Language" -> "Flemish"
     )
     CalmTransformer(recordA, version).right.get.data.language shouldBe Some(
-      Language("nl", "Dutch")
+      Language("Dutch", Some("nl"))
     )
     CalmTransformer(recordB, version).right.get.data.language shouldBe Some(
-      Language("nl", "Flemish")
+      Language("Flemish", Some("nl"))
     )
   }
 
@@ -276,21 +306,41 @@ class CalmTransformerTest extends FunSpec with Matchers {
     CalmTransformer(recordC, version).right.get shouldBe a[UnidentifiedWork]
   }
 
-  it("transforms to invisible work when WorkData not parsable") {
-    val recordA = calmRecord(
-      "Level" -> "UnknownLevel",
+  it("transforms to invisible work when Level=Group of Pieces") {
+    val record = calmRecord(
+      "Title" -> "abc",
+      "Level" -> "Group of Pieces",
+      "RefNo" -> "a/b/c"
+    )
+    CalmTransformer(record, version).right.get shouldBe a[
+      UnidentifiedInvisibleWork]
+  }
+
+  it("uses empty WorkData for suppressed works when not parsable") {
+    val record = calmRecord(
+      "Level" -> "Invalid",
       "RefNo" -> "a/b/c",
       "Transmission" -> "No"
     )
-    CalmTransformer(recordA, version) shouldBe Right(
+
+    CalmTransformer(record, version) shouldBe Right(
       UnidentifiedInvisibleWork(
         version = version,
         sourceIdentifier = SourceIdentifier(
           value = id,
-          identifierType = CalmIdentifierTypes.recordId),
-        data = WorkData()
-      )
+          identifierType = CalmIdentifierTypes.recordId
+        ),
+        data = WorkData())
     )
+  }
+
+  it("errors with invalid Level") {
+    val record = calmRecord(
+      "Level" -> "UnknownLevel",
+      "RefNo" -> "a/b/c"
+    )
+
+    CalmTransformer(record, version) shouldBe a[Left[_, _]]
   }
 
   it("errors if invalid access status") {
@@ -341,7 +391,7 @@ class CalmTransformerTest extends FunSpec with Matchers {
     CalmTransformer(record, version) shouldBe a[Left[_, _]]
   }
 
-  it("errors if language not recognised") {
+  it("does not add language code if language not recognised") {
     val record = calmRecord(
       "Title" -> "abc",
       "Level" -> "Collection",
@@ -349,7 +399,8 @@ class CalmTransformerTest extends FunSpec with Matchers {
       "AltRefNo" -> "a.b.c",
       "Language" -> "Lolol"
     )
-    CalmTransformer(record, version) shouldBe a[Left[_, _]]
+    CalmTransformer(record, version).right.get.data.language shouldBe Some(
+      Language("Lolol", None))
   }
 
   def calmRecord(fields: (String, String)*): CalmRecord =

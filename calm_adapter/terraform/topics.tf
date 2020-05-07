@@ -15,7 +15,7 @@ data "aws_iam_policy_document" "publish_to_adapter_topic" {
 }
 
 resource "aws_iam_role_policy" "adapter_policy" {
-  role   = module.task_definition.task_role_name
+  role   = module.worker.task_role_name
   policy = data.aws_iam_policy_document.publish_to_adapter_topic.json
 }
 

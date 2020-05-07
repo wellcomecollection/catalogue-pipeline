@@ -208,16 +208,15 @@ class WorksAggregationsTest extends ApiWorksTestBase {
   }
 
   it("supports aggregating on language") {
-
     val works = List(
       createIdentifiedWorkWith(
-        language = Some(Language("eng", "English"))
+        language = Some(Language("English", Some("eng")))
       ),
       createIdentifiedWorkWith(
-        language = Some(Language("ger", "German"))
+        language = Some(Language("German", Some("ger")))
       ),
       createIdentifiedWorkWith(
-        language = Some(Language("ger", "German"))
+        language = Some(Language("German", Some("ger")))
       ),
       createIdentifiedWorkWith(language = None)
     ).sortBy(_.canonicalId)
@@ -235,8 +234,8 @@ class WorksAggregationsTest extends ApiWorksTestBase {
                   "buckets": [
                     {
                       "data" : {
-                        "label": "German",
                         "id": "ger",
+                        "label": "German",
                         "type": "Language"
                       },
                       "count" : 2,
@@ -244,8 +243,8 @@ class WorksAggregationsTest extends ApiWorksTestBase {
                     },
                     {
                       "data" : {
-                        "label": "English",
                         "id": "eng",
+                        "label": "English",
                         "type": "Language"
                       },
                       "count" : 1,

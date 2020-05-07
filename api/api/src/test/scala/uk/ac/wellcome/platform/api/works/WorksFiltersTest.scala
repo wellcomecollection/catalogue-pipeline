@@ -273,12 +273,12 @@ class WorksFiltersTest extends ApiWorksTestBase {
     val englishWork = createIdentifiedWorkWith(
       canonicalId = "1",
       title = Some("Caterpiller"),
-      language = Some(Language("eng", "English"))
+      language = Some(Language("English", Some("eng")))
     )
     val germanWork = createIdentifiedWorkWith(
       canonicalId = "2",
       title = Some("Ubergang"),
-      language = Some(Language("ger", "German"))
+      language = Some(Language("German", Some("ger")))
     )
     val noLanguageWork = createIdentifiedWorkWith(title = Some("£@@!&$"))
     val works = List(englishWork, germanWork, noLanguageWork)

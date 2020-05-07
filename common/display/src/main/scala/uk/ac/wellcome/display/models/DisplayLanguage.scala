@@ -12,7 +12,7 @@ import uk.ac.wellcome.models.work.internal.Language
 case class DisplayLanguage(
   @Schema(
     description = "An ISO 639-2 language code."
-  ) id: String,
+  ) id: Option[String],
   @Schema(
     description = "The name of a language"
   ) label: String,

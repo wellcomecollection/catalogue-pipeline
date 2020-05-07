@@ -29,15 +29,15 @@ object DisplayCollection {
       path = DisplayCollectionPath(tree.path),
       work = tree.work.map(DisplayWork(_)),
       children =
-        if (isExpanded(tree.path, expandedPaths))
+        if (isExpanded(tree, expandedPaths))
           Some(tree.children.map(DisplayCollection(_, expandedPaths)))
         else
           None
     )
 
-  private def isExpanded(path: CollectionPath,
+  private def isExpanded(tree: Collection,
                          expandedPaths: List[String]): Boolean =
-    expandedPaths.exists(_.startsWith(path.path))
+    tree.children.nonEmpty || expandedPaths.contains(tree.path.path)
 }
 
 @Schema(

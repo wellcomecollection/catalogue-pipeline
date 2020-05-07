@@ -10,16 +10,16 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
     withApi {
       case (ElasticConfig(worksIndex, _), routes) =>
         val works = List(
-          (Books, Language("dogs", "Bark")),
-          (Journals, Language("cats", "Meow")),
-          (Pictures, Language("ducks", "Quack")),
-          (Audio, Language("dogs", "Bark")),
-          (Books, Language("dogs", "Bark")),
-          (Books, Language("dogs", "Bark")),
-          (Journals, Language("ducks", "Quack")),
-          (Books, Language("cats", "Meow")),
-          (Journals, Language("ducks", "Quack")),
-          (Audio, Language("frogs", "Croak"))
+          (Books, Language("Bark", Some("dogs"))),
+          (Journals, Language("Meow", Some("cats"))),
+          (Pictures, Language("Quack", Some("ducks"))),
+          (Audio, Language("Bark", Some("dogs"))),
+          (Books, Language("Bark", Some("dogs"))),
+          (Books, Language("Bark", Some("dogs"))),
+          (Journals, Language("Quack", Some("ducks"))),
+          (Books, Language("Meow", Some("cats"))),
+          (Journals, Language("Quack", Some("ducks"))),
+          (Audio, Language("Croak", Some("frogs")))
         ).zipWithIndex.map {
           case ((workType, language), i) =>
             createIdentifiedWorkWith(
@@ -80,16 +80,16 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
     withApi {
       case (ElasticConfig(worksIndex, _), routes) =>
         val works = List(
-          (Books, Language("dogs", "Bark")),
-          (Journals, Language("cats", "Meow")),
-          (Pictures, Language("ducks", "Quack")),
-          (Audio, Language("dogs", "Bark")),
-          (Books, Language("dogs", "Bark")),
-          (Books, Language("dogs", "Bark")),
-          (Journals, Language("ducks", "Quack")),
-          (Books, Language("cats", "Meow")),
-          (Journals, Language("ducks", "Quack")),
-          (Audio, Language("frogs", "Croak"))
+          (Books, Language("Bark", Some("dogs"))),
+          (Journals, Language("Meow", Some("cats"))),
+          (Pictures, Language("Quack", Some("ducks"))),
+          (Audio, Language("Bark", Some("dogs"))),
+          (Books, Language("Bark", Some("dogs"))),
+          (Books, Language("Bark", Some("dogs"))),
+          (Journals, Language("Quack", Some("ducks"))),
+          (Books, Language("Meow", Some("cats"))),
+          (Journals, Language("Quack", Some("ducks"))),
+          (Audio, Language("Croak", Some("frogs")))
         ).zipWithIndex.map {
           case ((workType, language), i) =>
             createIdentifiedWorkWith(
