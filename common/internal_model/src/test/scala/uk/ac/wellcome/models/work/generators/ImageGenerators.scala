@@ -26,7 +26,7 @@ trait ImageGenerators extends IdentifiersGenerators with ItemsGenerators {
     parentWork: SourceIdentifier = createSierraSystemSourceIdentifier,
     fullText: Option[String] = None): MergedImage[Identifiable] =
     createUnmergedImageWith(location, version, identifierType) mergeWith (
-      parentWork = Identifiable(parentWork),
+      sourceWork = Identifiable(parentWork),
       fullText = fullText
     )
 
@@ -75,9 +75,11 @@ trait ImageGenerators extends IdentifiersGenerators with ItemsGenerators {
         ),
         version = image.version,
         location = image.location,
-        parentWork = Identified(
-          canonicalId = parentId,
-          sourceIdentifier = image.parentWork.allSourceIdentifiers.head
+        source = SourceWork(
+          Identified(
+            canonicalId = parentId,
+            sourceIdentifier = image.source.id.sourceIdentifier
+          )
         ),
         fullText = image.fullText
       )

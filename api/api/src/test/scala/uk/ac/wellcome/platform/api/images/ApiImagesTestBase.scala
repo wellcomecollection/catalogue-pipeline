@@ -22,7 +22,10 @@ trait ApiImagesTestBase
        |    "type": "Image",
        |    "id": "${image.id.canonicalId}",
        |    "locations": [${location(image.location)}],
-       |    "parentWork": "${image.parentWork.canonicalId}"
+       |    "source": {
+       |      "id": "${image.source.id.canonicalId}",
+       |      "type": "Work"
+       |    }
        |  }
      """.stripMargin
 

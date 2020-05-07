@@ -18,8 +18,9 @@ case class DisplayImage(
     description = "The locations which provide access to the image"
   ) locations: Seq[DisplayDigitalLocation],
   @Schema(
-    description = "The work to which the image relates"
-  ) parentWork: String,
+    `type` = "uk.ac.wellcone.Display.models.DisplayImageSource",
+    description = "A description of the image's source"
+  ) source: DisplayImageSource,
   @JsonKey("type") @Schema(name = "type") ontologyType: String = "Image"
 )
 
@@ -29,7 +30,7 @@ object DisplayImage {
     new DisplayImage(
       id = image.id.canonicalId,
       locations = Seq(DisplayDigitalLocation(image.location)),
-      parentWork = image.parentWork.canonicalId
+      source = DisplayImageSource(image.source)
     )
 
 }

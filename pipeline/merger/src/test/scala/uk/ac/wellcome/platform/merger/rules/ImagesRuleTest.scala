@@ -28,7 +28,7 @@ class ImagesRuleTest
 
       result should have length 1
       result.head.location should be(miroWork.data.images.head.location)
-      result.head.parentWork.allSourceIdentifiers.head should
+      result.head.source.id.sourceIdentifier should
         be(miroWork.sourceIdentifier)
     }
 
@@ -41,7 +41,7 @@ class ImagesRuleTest
       result should have length n
       result.map(_.location) should contain theSameElementsAs
         miroWorks.map(_.data.images.head.location)
-      result.flatMap(_.parentWork.allSourceIdentifiers) should contain only sierraWork.sourceIdentifier
+      result.map(_.source.id.sourceIdentifier) should contain only sierraWork.sourceIdentifier
     }
 
     it(
@@ -55,7 +55,7 @@ class ImagesRuleTest
       result should have length n
       result.map(_.location) should contain theSameElementsAs
         metsWork.data.images.map(_.location)
-      result.flatMap(_.parentWork.allSourceIdentifiers) should contain only sierraPictureWork.sourceIdentifier
+      result.map(_.source.id.sourceIdentifier) should contain only sierraPictureWork.sourceIdentifier
     }
 
     it(
@@ -73,7 +73,7 @@ class ImagesRuleTest
       result.map(_.location) should contain theSameElementsAs
         metsWork.data.images.map(_.location) ++
           miroWorks.map(_.data.images.head.location)
-      result.flatMap(_.parentWork.allSourceIdentifiers) should contain only sierraPictureWork.sourceIdentifier
+      result.map(_.source.id.sourceIdentifier) should contain only sierraPictureWork.sourceIdentifier
     }
 
     it(
@@ -87,7 +87,7 @@ class ImagesRuleTest
       result should have length n
       result.map(_.location) should contain theSameElementsAs
         miroWorks.map(_.data.images.head.location)
-      result.flatMap(_.parentWork.allSourceIdentifiers) should contain only sierraWork.sourceIdentifier
+      result.map(_.source.id.sourceIdentifier) should contain only sierraWork.sourceIdentifier
     }
   }
 
@@ -151,8 +151,7 @@ class ImagesRuleTest
       val target = createSierraDigitalWork
       val sources = (1 to 5).map(_ => createMiroWork)
       forAll(testRule.apply(target, sources).get) {
-        _.parentWork.allSourceIdentifiers should
-          contain(target.sourceIdentifier)
+        _.source.id.sourceIdentifier should be(target.sourceIdentifier)
       }
     }
   }
