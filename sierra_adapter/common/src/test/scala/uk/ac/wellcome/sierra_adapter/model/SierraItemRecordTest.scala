@@ -5,10 +5,7 @@ import java.time.Instant
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.json.JsonUtil._
 
-class SierraItemRecordTest
-    extends FunSpec
-    with Matchers
-    with SierraGenerators {
+class SierraItemRecordTest extends FunSpec with Matchers with SierraGenerators {
 
   it("can cast a SierraItemRecord to JSON and back again") {
     val originalRecord = createSierraItemRecord

@@ -58,7 +58,8 @@ trait SierraGenerators {
 
   def createSierraItemRecordWith(
     id: SierraItemNumber = createSierraItemNumber,
-    data: (SierraItemNumber, Instant, List[SierraBibNumber]) => String = defaultItemData,
+    data: (SierraItemNumber, Instant, List[SierraBibNumber]) => String =
+      defaultItemData,
     modifiedDate: Instant = Instant.now,
     bibIds: List[SierraBibNumber] = List(),
     unlinkedBibIds: List[SierraBibNumber] = List()
@@ -74,7 +75,9 @@ trait SierraGenerators {
     )
   }
 
-  private def defaultItemData(id: SierraItemNumber, modifiedDate: Instant, bibIds: List[SierraBibNumber]) =
+  private def defaultItemData(id: SierraItemNumber,
+                              modifiedDate: Instant,
+                              bibIds: List[SierraBibNumber]) =
     s"""
        |{
        |  "id": "$id",

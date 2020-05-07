@@ -26,7 +26,9 @@ class CalmAdapterWorkerServiceTest
     with Matchers
     with Akka
     with SQS
-    with SNS with Eventually with IntegrationPatience{
+    with SNS
+    with Eventually
+    with IntegrationPatience {
 
   type Key = Version[String, Int]
 
@@ -53,7 +55,8 @@ class CalmAdapterWorkerServiceTest
             Version("C", 0) -> recordC,
             Version("C", 1) -> recordC.copy(published = true)
           )
-          retriever.previousQuery shouldBe Some(CalmQuery.ModifiedDate(queryDate))
+          retriever.previousQuery shouldBe Some(
+            CalmQuery.ModifiedDate(queryDate))
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
           getMessages(topic) shouldBe List(

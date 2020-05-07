@@ -2,7 +2,6 @@ package uk.ac.wellcome.sierra_adapter.model
 
 import org.scalatest.{FunSpec, Matchers}
 
-
 class SierraTransformableTest
     extends FunSpec
     with Matchers

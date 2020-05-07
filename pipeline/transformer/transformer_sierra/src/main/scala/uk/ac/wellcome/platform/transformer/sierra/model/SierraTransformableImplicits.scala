@@ -4,7 +4,10 @@ import io.circe._
 import io.circe.generic.extras.semiauto._
 import uk.ac.wellcome.json.JsonUtil._
 import io.circe.{Decoder, Encoder, KeyDecoder, KeyEncoder}
-import uk.ac.wellcome.sierra_adapter.model.{SierraItemNumber, SierraTransformable}
+import uk.ac.wellcome.sierra_adapter.model.{
+  SierraItemNumber,
+  SierraTransformable
+}
 
 // This is basically equivalent to uk.ac.wellcome.sierra_adapter.model.Implicits
 // but it needs to be duplicated here because the sierra adapter uses circe 0.9.0

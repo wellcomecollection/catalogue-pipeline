@@ -1,7 +1,10 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers.subjects
 
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.transformer.sierra.source.{MarcSubfield, VarField}
+import uk.ac.wellcome.platform.transformer.sierra.source.{
+  MarcSubfield,
+  VarField
+}
 import uk.ac.wellcome.platform.transformer.sierra.transformers.SierraAgents
 import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 

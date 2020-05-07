@@ -13,7 +13,7 @@ object Implicits {
   // https://circe.github.io/circe/codecs/custom-codecs.html#custom-key-types
   //
   implicit val keyEncoder: KeyEncoder[SierraItemNumber] =
-  (key: SierraItemNumber) => key.withoutCheckDigit
+    (key: SierraItemNumber) => key.withoutCheckDigit
 
   implicit val keyDecoder: KeyDecoder[SierraItemNumber] =
     (key: String) => Some(SierraItemNumber(key))

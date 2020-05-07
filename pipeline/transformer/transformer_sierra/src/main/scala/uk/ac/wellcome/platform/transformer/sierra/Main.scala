@@ -6,7 +6,10 @@ import com.typesafe.config.Config
 
 import scala.concurrent.ExecutionContext
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
-import uk.ac.wellcome.platform.transformer.sierra.services.{BackwardsCompatHybridRecordReceiver, SierraTransformerWorkerService}
+import uk.ac.wellcome.platform.transformer.sierra.services.{
+  BackwardsCompatHybridRecordReceiver,
+  SierraTransformerWorkerService
+}
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.models.Implicits._

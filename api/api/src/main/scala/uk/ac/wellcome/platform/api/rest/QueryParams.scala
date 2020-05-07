@@ -15,7 +15,7 @@ object CommonDecoders {
     decodeCommaSeparated.emap(strs => Right(LicenseFilter(strs)))
 }
 
-trait QueryParamsUtils extends Directives{
+trait QueryParamsUtils extends Directives {
 
   implicit def unmarshaller[T](
     implicit decoder: Decoder[T]): Unmarshaller[String, T] =

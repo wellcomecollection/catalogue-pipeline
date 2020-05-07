@@ -4,7 +4,11 @@ import uk.ac.wellcome.platform.sierra_items_to_dynamo.merger.SierraItemRecordMer
 import uk.ac.wellcome.sierra_adapter.model.SierraItemRecord
 import uk.ac.wellcome.storage.ObjectStore
 import uk.ac.wellcome.storage.dynamo._
-import uk.ac.wellcome.storage.vhs.{EmptyMetadata, VHSIndexEntry, VersionedHybridStore}
+import uk.ac.wellcome.storage.vhs.{
+  EmptyMetadata,
+  VHSIndexEntry,
+  VersionedHybridStore
+}
 
 import scala.concurrent.Future
 

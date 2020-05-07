@@ -7,7 +7,13 @@ import org.scalatest.compatible.Assertion
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.json.JsonUtil.toJson
 import uk.ac.wellcome.json.utils.JsonAssertions
-import uk.ac.wellcome.sierra_adapter.model.{AbstractSierraRecord, SierraBibNumber, SierraBibRecord, SierraGenerators, SierraItemRecord}
+import uk.ac.wellcome.sierra_adapter.model.{
+  AbstractSierraRecord,
+  SierraBibNumber,
+  SierraBibRecord,
+  SierraGenerators,
+  SierraItemRecord
+}
 
 class SierraRecordParserTest
     extends FunSpec

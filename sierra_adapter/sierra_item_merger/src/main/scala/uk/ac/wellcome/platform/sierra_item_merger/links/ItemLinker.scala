@@ -1,6 +1,9 @@
 package uk.ac.wellcome.platform.sierra_item_merger.links
 
-import uk.ac.wellcome.sierra_adapter.model.{SierraItemRecord, SierraTransformable}
+import uk.ac.wellcome.sierra_adapter.model.{
+  SierraItemRecord,
+  SierraTransformable
+}
 
 object ItemLinker {
 

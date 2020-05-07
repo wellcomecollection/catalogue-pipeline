@@ -7,8 +7,14 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
-import uk.ac.wellcome.platform.sierra_item_merger.services.{SierraItemMergerUpdaterService, SierraItemMergerWorkerService}
-import uk.ac.wellcome.sierra_adapter.model.{SierraItemRecord, SierraTransformable}
+import uk.ac.wellcome.platform.sierra_item_merger.services.{
+  SierraItemMergerUpdaterService,
+  SierraItemMergerWorkerService
+}
+import uk.ac.wellcome.sierra_adapter.model.{
+  SierraItemRecord,
+  SierraTransformable
+}
 import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
 import uk.ac.wellcome.storage.ObjectStore
 import uk.ac.wellcome.storage.fixtures.LocalDynamoDb.Table

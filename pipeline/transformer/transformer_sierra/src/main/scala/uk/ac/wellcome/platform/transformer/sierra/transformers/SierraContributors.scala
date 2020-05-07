@@ -1,7 +1,11 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.transformer.sierra.source.{MarcSubfield, SierraBibData, SierraQueryOps}
+import uk.ac.wellcome.platform.transformer.sierra.source.{
+  MarcSubfield,
+  SierraBibData,
+  SierraQueryOps
+}
 import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 
 /* Populate wwork:contributors. Rules:

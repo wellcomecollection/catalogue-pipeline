@@ -12,7 +12,14 @@ import uk.ac.wellcome.platform.transformer.sierra.generators.MarcGenerators
 import uk.ac.wellcome.platform.transformer.sierra.source.MarcSubfield
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.internal.WorkType.{Books, Pictures}
-import uk.ac.wellcome.sierra_adapter.model.{SierraBibNumber, SierraBibRecord, SierraGenerators, SierraItemNumber, SierraItemRecord, SierraTransformable}
+import uk.ac.wellcome.sierra_adapter.model.{
+  SierraBibNumber,
+  SierraBibRecord,
+  SierraGenerators,
+  SierraItemNumber,
+  SierraItemRecord,
+  SierraTransformable
+}
 
 class SierraTransformableTransformerTest
     extends AnyFunSpec
@@ -21,7 +28,6 @@ class SierraTransformableTransformerTest
     with SierraGenerators
     with SierraTransformableTestBase
     with WorksGenerators {
-
 
   it("performs a transformation on a work with physical items") {
     val itemRecords = List(
@@ -85,7 +91,9 @@ class SierraTransformableTransformerTest
     val itemId = createSierraItemNumber
     val locationType = LocationType("sgmed")
     val locationLabel = "A museum of mermaids"
-    def itemData(itemId: SierraItemNumber, modifiedDate: Instant, bibIds: List[SierraBibNumber]) =
+    def itemData(itemId: SierraItemNumber,
+                 modifiedDate: Instant,
+                 bibIds: List[SierraBibNumber]) =
       s"""
          |{
          |  "id": "$itemId",
@@ -140,7 +148,9 @@ class SierraTransformableTransformerTest
     val itemId = createSierraItemNumber
     val locationType = LocationType("sgmed")
     val locationLabel = "A museum of mermaids"
-    def itemData(itemId: SierraItemNumber, modifiedDate: Instant, bibIds: List[SierraBibNumber]) =
+    def itemData(itemId: SierraItemNumber,
+                 modifiedDate: Instant,
+                 bibIds: List[SierraBibNumber]) =
       s"""
          |{
          |  "id": "$itemId",
@@ -866,7 +876,7 @@ class SierraTransformableTransformerTest
         maybeBibRecord = Some(bibRecord),
         itemRecords = Map(
           createSierraItemNumber -> createSierraItemRecordWith(
-            data = (_, _ ,_) => "Not valid JSON")
+            data = (_, _, _) => "Not valid JSON")
         )
       )
 
@@ -887,7 +897,7 @@ class SierraTransformableTransformerTest
         itemRecords = Map(
           createSierraItemNumber -> createSierraItemRecord,
           createSierraItemNumber -> createSierraItemRecordWith(
-            data = (_, _ ,_) => "Not valid JSON"),
+            data = (_, _, _) => "Not valid JSON"),
           createSierraItemNumber -> createSierraItemRecord
         )
       )
@@ -927,11 +937,15 @@ class SierraTransformableTransformerTest
     createSierraItemRecordWith(data = defaultItemRecordData)
   }
 
-  def defaultItemRecordData(id: SierraItemNumber, modifiedDate: Instant, bibIds: List[SierraBibNumber]) =   s"""
+  def defaultItemRecordData(id: SierraItemNumber,
+                            modifiedDate: Instant,
+                            bibIds: List[SierraBibNumber]) =
+    s"""
                                                                                                                |{
                                                                                                                |  "id": "$id",
                                                                                                                |  "updatedDate": "${modifiedDate.toString}",
-                                                                                                               |  "bibIds": ${toJson(bibIds).get}
+                                                                                                               |  "bibIds": ${toJson(
+         bibIds).get}
                                                                                                                |}
                                                                                                                |""".stripMargin
   private def transformDataToWork(id: SierraBibNumber,

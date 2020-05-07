@@ -1,7 +1,10 @@
 package uk.ac.wellcome.platform.sierra_bib_merger.merger
 
 import org.scalatest.{FunSpec, Matchers}
-import uk.ac.wellcome.sierra_adapter.model.{SierraGenerators, SierraTransformable}
+import uk.ac.wellcome.sierra_adapter.model.{
+  SierraGenerators,
+  SierraTransformable
+}
 
 class BibMergerTest extends FunSpec with Matchers with SierraGenerators {
 

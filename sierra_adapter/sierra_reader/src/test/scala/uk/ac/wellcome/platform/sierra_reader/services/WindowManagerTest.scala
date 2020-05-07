@@ -5,7 +5,10 @@ import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.platform.sierra_reader.config.models.ReaderConfig
 import uk.ac.wellcome.platform.sierra_reader.exceptions.SierraReaderException
-import uk.ac.wellcome.platform.sierra_reader.models.{SierraResourceTypes, WindowStatus}
+import uk.ac.wellcome.platform.sierra_reader.models.{
+  SierraResourceTypes,
+  WindowStatus
+}
 import uk.ac.wellcome.storage.fixtures.S3
 import uk.ac.wellcome.storage.fixtures.S3.Bucket
 import uk.ac.wellcome.fixtures.TestWith

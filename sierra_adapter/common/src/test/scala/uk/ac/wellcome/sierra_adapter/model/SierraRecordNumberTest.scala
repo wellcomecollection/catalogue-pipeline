@@ -2,7 +2,6 @@ package uk.ac.wellcome.sierra_adapter.model
 
 import org.scalatest.{FunSpec, Matchers}
 
-
 class SierraRecordNumberTest extends FunSpec with Matchers {
   describe("withCheckDigit") {
     it("handles a bib example from the Sierra docs") {

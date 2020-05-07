@@ -6,7 +6,10 @@ import com.typesafe.config.Config
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import uk.ac.wellcome.platform.sierra_item_merger.services.{SierraItemMergerUpdaterService, SierraItemMergerWorkerService}
+import uk.ac.wellcome.platform.sierra_item_merger.services.{
+  SierraItemMergerUpdaterService,
+  SierraItemMergerWorkerService
+}
 import uk.ac.wellcome.sierra_adapter.config.builders.SierraTransformableVHSBuilder
 import uk.ac.wellcome.sierra_adapter.model.SierraItemRecord
 import uk.ac.wellcome.storage.typesafe.S3Builder

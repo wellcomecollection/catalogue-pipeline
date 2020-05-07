@@ -1,8 +1,19 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
-import uk.ac.wellcome.models.work.internal.{IdentifierType, MergeCandidate, SourceIdentifier}
-import uk.ac.wellcome.platform.transformer.sierra.source.{SierraBibData, SierraMaterialType, SierraQueryOps}
-import uk.ac.wellcome.platform.transformer.sierra.transformers.parsers.{MiroIdParser, WellcomeImagesURLParser}
+import uk.ac.wellcome.models.work.internal.{
+  IdentifierType,
+  MergeCandidate,
+  SourceIdentifier
+}
+import uk.ac.wellcome.platform.transformer.sierra.source.{
+  SierraBibData,
+  SierraMaterialType,
+  SierraQueryOps
+}
+import uk.ac.wellcome.platform.transformer.sierra.transformers.parsers.{
+  MiroIdParser,
+  WellcomeImagesURLParser
+}
 import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 
 import scala.util.matching.Regex

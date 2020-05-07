@@ -19,11 +19,21 @@ import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.sns.{SNSConfig, SNSMessageSender}
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
-import uk.ac.wellcome.storage.{Identified, ObjectLocation, StoreWriteError, WriteError}
+import uk.ac.wellcome.storage.{
+  Identified,
+  ObjectLocation,
+  StoreWriteError,
+  WriteError
+}
 import uk.ac.wellcome.storage.fixtures.S3Fixtures
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import uk.ac.wellcome.storage.store.TypedStore
-import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryStreamStore, MemoryStreamStoreEntry, MemoryTypedStore}
+import uk.ac.wellcome.storage.store.memory.{
+  MemoryStore,
+  MemoryStreamStore,
+  MemoryStreamStoreEntry,
+  MemoryTypedStore
+}
 import uk.ac.wellcome.storage.streaming.Codec
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -39,8 +49,9 @@ trait BigMessagingFixture
   case class ExampleObject(name: String)
 
   def withBigMessageStream[T, R](queue: SQS.Queue,
-                                                            metrics: MemoryMetrics[StandardUnit] =
-                                   new MemoryMetrics[StandardUnit](), sqsClient: SqsAsyncClient = asyncSqsClient)(
+                                 metrics: MemoryMetrics[StandardUnit] =
+                                   new MemoryMetrics[StandardUnit](),
+                                 sqsClient: SqsAsyncClient = asyncSqsClient)(
     testWith: TestWith[BigMessageStream[T], R])(
     implicit
     actorSystem: ActorSystem,

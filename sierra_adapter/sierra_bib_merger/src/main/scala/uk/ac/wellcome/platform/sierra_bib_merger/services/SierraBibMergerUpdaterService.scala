@@ -1,9 +1,16 @@
 package uk.ac.wellcome.platform.sierra_bib_merger.services
 
 import uk.ac.wellcome.platform.sierra_bib_merger.merger.BibMerger
-import uk.ac.wellcome.sierra_adapter.model.{SierraBibRecord, SierraTransformable}
+import uk.ac.wellcome.sierra_adapter.model.{
+  SierraBibRecord,
+  SierraTransformable
+}
 import uk.ac.wellcome.storage.dynamo._
-import uk.ac.wellcome.storage.vhs.{EmptyMetadata, VHSIndexEntry, VersionedHybridStore}
+import uk.ac.wellcome.storage.vhs.{
+  EmptyMetadata,
+  VHSIndexEntry,
+  VersionedHybridStore
+}
 import uk.ac.wellcome.storage.ObjectStore
 
 import scala.concurrent.Future
