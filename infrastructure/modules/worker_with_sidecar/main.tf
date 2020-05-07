@@ -1,10 +1,10 @@
 module "worker" {
   source = "../worker"
 
-  name  = var.name
+  name = var.name
 
-  cpu             = var.cpu
-  memory          = var.memory
+  cpu    = var.cpu
+  memory = var.memory
 
   cluster_name       = var.cluster_name
   cluster_arn        = var.cluster_arn
