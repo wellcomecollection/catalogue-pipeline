@@ -86,9 +86,10 @@ class IngestorWorkerServiceTest
             indexer,
             elasticClient) { _ =>
             assertElasticsearchEventuallyHas(index = index, documents: _*)
-
-            assertQueueEmpty(queue)
-            assertQueueEmpty(dlq)
+            eventually {
+              assertQueueEmpty(queue)
+              assertQueueEmpty(dlq)
+            }
           }
         }
     }
