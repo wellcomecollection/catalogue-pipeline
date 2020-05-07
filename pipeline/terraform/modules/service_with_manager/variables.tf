@@ -19,10 +19,6 @@ variable "desired_task_count" {
   default = 1
 }
 
-variable "launch_type" {
-  default = "FARGATE"
-}
-
 variable "security_group_ids" {
   type    = list(string)
   default = []
@@ -53,18 +49,15 @@ variable "queue_read_policy" {}
 
 variable "app_container_image" {}
 
-variable "app_container_port" {
-  type    = number
-  default = 80
+variable "app_container_name" {
+  type = string
 }
-
-variable "app_container_name" {}
 
 variable "app_env_vars" {
   type = map(string)
 }
 
-variable "secret_app_env_vars" {
+variable "app_secret_env_vars" {
   type    = map(string)
   default = {}
 }
@@ -92,7 +85,7 @@ variable "manager_env_vars" {
   type = map(string)
 }
 
-variable "secret_manager_env_vars" {
+variable "manager_secret_env_vars" {
   type    = map(string)
   default = {}
 }

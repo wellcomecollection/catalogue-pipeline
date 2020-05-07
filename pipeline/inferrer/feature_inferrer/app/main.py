@@ -5,10 +5,10 @@ import src.http as http
 from src.batching import BatchExecutionQueue
 from src.feature_extraction import extract_features
 from src.image import get_image_from_url, get_image_url_from_iiif_url
-from src.logging import get_logstash_logger
+from src.logging import get_logger
 from src.lsh import LSHEncoder
 
-logger = get_logstash_logger(__name__)
+logger = get_logger(__name__)
 
 # Initialise encoder
 logger.info("Initialising LSHEncoder model")

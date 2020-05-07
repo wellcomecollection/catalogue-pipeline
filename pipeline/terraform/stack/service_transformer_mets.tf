@@ -28,7 +28,6 @@ module "mets_transformer" {
 
     mets_adapter_dynamo_table_name = var.mets_adapter_table_name
     assume_role_arn                = var.read_storage_s3_role_arn
-    logstash_host                  = local.logstash_host
   }
 
   secret_env_vars = {}

@@ -2,10 +2,6 @@ variable "name" {
   type = string
 }
 
-variable "image" {
-  type = string
-}
-
 variable "cluster_name" {
   type = string
 }
@@ -22,12 +18,12 @@ variable "subnets" {
   type = list(string)
 }
 
-variable "env_vars" {
+variable "app_env_vars" {
   type    = map(string)
   default = {}
 }
 
-variable "secret_env_vars" {
+variable "app_secret_env_vars" {
   type    = map(string)
   default = {}
 }
@@ -57,16 +53,6 @@ variable "memory" {
   default = 1024
 }
 
-variable "app_cpu" {
-  type    = number
-  default = 512
-}
-
-variable "app_memory" {
-  type    = number
-  default = 1024
-}
-
 variable "use_fargate_spot" {
   type    = bool
   default = false
@@ -77,7 +63,53 @@ variable "security_group_ids" {
   default = []
 }
 
-variable "extra_container_definitions" {
-  type    = list(any)
-  default = []
+variable "app_image" {
+  type = string
+}
+
+variable "app_name" {
+  type = string
+}
+
+variable "app_cpu" {
+  type    = number
+  default = 512
+}
+
+variable "app_memory" {
+  type    = number
+  default = 1024
+}
+
+variable "sidecar_image" {
+  type = string
+}
+
+variable "sidecar_name" {
+  type = string
+}
+
+variable "sidecar_env_vars" {
+  type    = map(string)
+  default = {}
+}
+
+variable "sidecar_secret_env_vars" {
+  type    = map(string)
+  default = {}
+}
+
+variable "sidecar_cpu" {
+  type    = number
+  default = 512
+}
+
+variable "sidecar_memory" {
+  type    = number
+  default = 1024
+}
+
+variable "app_healthcheck" {
+  type    = string
+  default = ""
 }

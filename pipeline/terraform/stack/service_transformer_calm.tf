@@ -27,7 +27,6 @@ module "calm_transformer" {
     messages_bucket_name = aws_s3_bucket.messages.id
     vhs_calm_bucket_name = var.vhs_calm_sourcedata_bucket_name
     vhs_calm_table_name  = var.vhs_calm_sourcedata_table_name
-    logstash_host        = local.logstash_host
   }
 
   secret_env_vars = {}

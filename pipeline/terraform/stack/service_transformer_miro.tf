@@ -25,7 +25,6 @@ module "miro_transformer" {
     transformer_queue_id = module.miro_transformer_queue.url
     metrics_namespace    = "${local.namespace_hyphen}_miro_transformer"
     messages_bucket_name = aws_s3_bucket.messages.id
-    logstash_host        = local.logstash_host
   }
 
   secret_env_vars = {}

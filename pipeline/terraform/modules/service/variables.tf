@@ -6,7 +6,6 @@ variable "subnets" {
   type = list(string)
 }
 
-variable "aws_region" {}
 variable "namespace_id" {}
 variable "container_image" {}
 
@@ -34,10 +33,6 @@ variable "max_capacity" {
 variable "desired_task_count" {
   type    = number
   default = 1
-}
-
-variable "launch_type" {
-  default = "FARGATE"
 }
 
 variable "cpu" {
