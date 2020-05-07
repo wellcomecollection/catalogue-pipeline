@@ -8,6 +8,7 @@ import java.time.{Instant, LocalDate}
 import org.scalatest.matchers.should.Matchers
 import akka.stream.scaladsl._
 import io.circe.Encoder
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
@@ -25,7 +26,7 @@ class CalmAdapterWorkerServiceTest
     with Matchers
     with Akka
     with SQS
-    with SNS {
+    with SNS with Eventually with IntegrationPatience{
 
   type Key = Version[String, Int]
 
@@ -43,23 +44,24 @@ class CalmAdapterWorkerServiceTest
     withCalmAdapterWorkerService(retriever, store) {
       case (calmAdapter, QueuePair(queue, dlq), topic) =>
         sendNotificationToSQS(queue, CalmWindow(queryDate))
-        Thread.sleep(1500)
-        store.entries shouldBe Map(
-          Version("A", 0) -> recordA,
-          Version("A", 1) -> recordA.copy(published = true),
-          Version("B", 0) -> recordB,
-          Version("B", 1) -> recordB.copy(published = true),
-          Version("C", 0) -> recordC,
-          Version("C", 1) -> recordC.copy(published = true)
-        )
-        retriever.previousQuery shouldBe Some(CalmQuery.ModifiedDate(queryDate))
-        assertQueueEmpty(queue)
-        assertQueueEmpty(dlq)
-        getMessages(topic) shouldBe List(
-          Version("A", 0),
-          Version("B", 0),
-          Version("C", 0)
-        )
+        eventually {
+          store.entries shouldBe Map(
+            Version("A", 0) -> recordA,
+            Version("A", 1) -> recordA.copy(published = true),
+            Version("B", 0) -> recordB,
+            Version("B", 1) -> recordB.copy(published = true),
+            Version("C", 0) -> recordC,
+            Version("C", 1) -> recordC.copy(published = true)
+          )
+          retriever.previousQuery shouldBe Some(CalmQuery.ModifiedDate(queryDate))
+          assertQueueEmpty(queue)
+          assertQueueEmpty(dlq)
+          getMessages(topic) shouldBe List(
+            Version("A", 0),
+            Version("B", 0),
+            Version("C", 0)
+          )
+        }
     }
   }
 
@@ -69,7 +71,7 @@ class CalmAdapterWorkerServiceTest
     withCalmAdapterWorkerService(retriever, store) {
       case (calmAdapter, QueuePair(queue, dlq), topic) =>
         sendNotificationToSQS(queue, CalmWindow(queryDate))
-        Thread.sleep(500)
+        Thread.sleep(1500)
         store.entries shouldBe Map.empty
         assertQueueEmpty(queue)
         assertQueueEmpty(dlq)
