@@ -1,8 +1,9 @@
 package uk.ac.wellcome.platform.transformer.calm
 
 import java.time.Instant
-import org.scalatest.{FunSpec, Matchers}
 
+import org.scalatest.{FunSpec, Matchers}
+import uk.ac.wellcome.models.work.internal.InvisibilityReason.{CalmInvalidLevel, CalmNoTransmission}
 import uk.ac.wellcome.models.work.internal._
 
 class CalmTransformerTest extends FunSpec with Matchers {
@@ -330,17 +331,18 @@ class CalmTransformerTest extends FunSpec with Matchers {
           value = id,
           identifierType = CalmIdentifierTypes.recordId
         ),
-        data = WorkData())
+        data = WorkData(),
+        reasons = List(CalmNoTransmission, CalmInvalidLevel("Invalid")))
     )
   }
 
-  it("errors with invalid Level") {
+  it("returns a invisible work with invalid level") {
     val record = calmRecord(
       "Level" -> "UnknownLevel",
       "RefNo" -> "a/b/c"
     )
 
-    CalmTransformer(record, version) shouldBe a[Left[_, _]]
+    CalmTransformer(record, version).right.get shouldBe a[UnidentifiedInvisibleWork]
   }
 
   it("errors if invalid access status") {
@@ -366,6 +368,7 @@ class CalmTransformerTest extends FunSpec with Matchers {
   it("errors if no workType") {
     val record = calmRecord(
       "Title" -> "abc",
+      "Level" -> "Collection",
       "RefNo" -> "a/b/c",
       "AltRefNo" -> "a.b.c",
     )
@@ -375,7 +378,7 @@ class CalmTransformerTest extends FunSpec with Matchers {
   it("errors if invalid workType") {
     val record = calmRecord(
       "Title" -> "abc",
-      "Level" -> "TopLevel",
+      "Level" -> "Collection",
       "RefNo" -> "a/b/c",
       "AltRefNo" -> "a.b.c",
     )
@@ -402,6 +405,7 @@ class CalmTransformerTest extends FunSpec with Matchers {
     CalmTransformer(record, version).right.get.data.language shouldBe Some(
       Language("Lolol", None))
   }
+
 
   def calmRecord(fields: (String, String)*): CalmRecord =
     CalmRecord(

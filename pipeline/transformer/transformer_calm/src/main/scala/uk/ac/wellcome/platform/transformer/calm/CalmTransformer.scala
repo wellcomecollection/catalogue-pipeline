@@ -1,9 +1,11 @@
 package uk.ac.wellcome.platform.transformer.calm
 
 import grizzled.slf4j.Logging
-
+import uk.ac.wellcome.models.work.internal.InvisibilityReason.{CalmInvalidLevel, CalmMissingLevel, CalmNoTransmission}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.internal.result._
+
+
 
 object CalmTransformer
     extends Transformer[CalmRecord]
@@ -31,48 +33,47 @@ object CalmTransformer
   )
 
   def apply(record: CalmRecord, version: Int): Result[TransformedBaseWork] =
-    if (shouldSuppress(record))
-      Right(
-        UnidentifiedInvisibleWork(
-          sourceIdentifier = sourceIdentifier(record),
-          version = version,
-          data = workData(record).getOrElse(WorkData())
-        )
-      )
-    else
-      workData(record) map { data =>
+    suppressionReasons(record) match {
+      case Nil => workData(record) map { data =>
         UnidentifiedWork(
           sourceIdentifier = sourceIdentifier(record),
           version = version,
           data = data
         )
       }
+      case reasons => Right(
+        UnidentifiedInvisibleWork(
+          sourceIdentifier = sourceIdentifier(record),
+          version = version,
+          data = workData(record).getOrElse(WorkData()),
+          reasons = reasons
+        )
+      )
+    }
 
-  def shouldSuppress(record: CalmRecord): Boolean = {
+  def suppressionReasons(record: CalmRecord): List[InvisibilityReason] = {
     val shouldNotTransmit = record
       .get("Transmission")
-      .exists { value =>
+      .flatMap { value =>
         value.toLowerCase match {
-          case "no"  => true
-          case "yes" => false
+          case "no"  => Some(CalmNoTransmission)
+          case "yes" => None
           case _ =>
             info(
               s"Unrecognised value for Transmission field; assuming 'Yes': $value")
-            false
+            None
         }
       }
 
-    // This is just while the source data in Calm is being amended to not include this Level.
-    // We'd like them to go through so as not to clog up the DLQ as this is _not_
-    // an error, but a known state of the source data.
-    val isGroupOfPieces = record.get("Level").exists { value =>
-      value.toLowerCase match {
-        case "group of pieces" => true
-        case _                 => false
+    val levelMissingOrInvalid = record.get("Level") match {
+      case Some(level) => collectionLevel(record) match {
+        case Right(_) => None
+        case Left(_) => Some(CalmInvalidLevel(level))
       }
+      case None => Some(CalmMissingLevel)
     }
 
-    shouldNotTransmit || isGroupOfPieces
+    (shouldNotTransmit ++ levelMissingOrInvalid).toList
   }
 
   def workData(record: CalmRecord): Result[WorkData[Unminted, Identifiable]] =

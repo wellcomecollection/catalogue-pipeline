@@ -1,5 +1,6 @@
 package uk.ac.wellcome.models.work.generators
 
+import uk.ac.wellcome.models.work.internal.InvisibilityReason.MetsSource
 import uk.ac.wellcome.models.work.internal._
 
 trait WorksGenerators
@@ -56,11 +57,13 @@ trait WorksGenerators
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     items: List[Item[Unminted]] = Nil,
     images: List[UnmergedImage[Identifiable]] = Nil,
+    reasons: List[InvisibilityReason] = Nil
   ): UnidentifiedInvisibleWork =
     UnidentifiedInvisibleWork(
       sourceIdentifier = sourceIdentifier,
       data = WorkData(items = items, images = images),
-      version = 1
+      version = 1,
+      reasons = reasons
     )
 
   def createUnidentifiedInvisibleWork: UnidentifiedInvisibleWork =
@@ -69,13 +72,15 @@ trait WorksGenerators
   def createIdentifiedInvisibleWorkWith(
     canonicalId: String = createCanonicalId,
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    version: Int = 1
+    version: Int = 1,
+    reasons: List[InvisibilityReason] = Nil
   ): IdentifiedInvisibleWork =
     IdentifiedInvisibleWork(
       sourceIdentifier = sourceIdentifier,
       version = version,
       canonicalId = canonicalId,
-      data = WorkData()
+      data = WorkData(),
+      reasons = reasons
     )
 
   def createIdentifiedInvisibleWork: IdentifiedInvisibleWork =
@@ -234,14 +239,15 @@ trait WorksGenerators
     items: List[Item[Unminted]] = List(createDigitalItem),
     numImages: Int = 1): UnidentifiedInvisibleWork =
     createUnidentifiedInvisibleWorkWith(
-      sourceIdentifier = createMetsSourceIdentifier,
+      sourceIdentifier = sourceIdentifier,
       items = items,
       images = (1 to numImages).map { _ =>
         createUnmergedImageWith(
           location = createDigitalLocation,
           identifierType = IdentifierType("mets-image")
         )
-      }.toList
+      }.toList,
+      reasons = List(MetsSource)
     )
 
   def createUnidentifiedSierraWork: UnidentifiedWork =

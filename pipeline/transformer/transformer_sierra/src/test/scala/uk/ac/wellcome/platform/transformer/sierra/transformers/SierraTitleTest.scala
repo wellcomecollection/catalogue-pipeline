@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import org.scalatest.{FunSpec, Matchers}
-import uk.ac.wellcome.platform.transformer.sierra.exceptions.ShouldNotTransformException
+import uk.ac.wellcome.platform.transformer.sierra.exceptions.TitleMissingException
 import uk.ac.wellcome.platform.transformer.sierra.generators.SierraDataGenerators
 
 class SierraTitleTest extends FunSpec with Matchers with SierraDataGenerators {
@@ -16,7 +16,7 @@ class SierraTitleTest extends FunSpec with Matchers with SierraDataGenerators {
 
   it("throws a ShouldNotTransform exception if bibData has no title") {
     val bibData = createSierraBibDataWith(title = None)
-    val caught = intercept[ShouldNotTransformException] {
+    val caught = intercept[TitleMissingException] {
       SierraTitle(createSierraBibNumber, bibData)
     }
     caught.getMessage shouldBe "Sierra record has no title!"

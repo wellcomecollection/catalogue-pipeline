@@ -75,6 +75,7 @@ object Implicits extends TimeInstances {
   implicit val _dec55: Decoder[BaseImage[Identifiable]] = deriveDecoder
   implicit val _dec56: Decoder[BaseImage[Identified]] = deriveDecoder
   implicit val _dec57: Decoder[AugmentedImage] = deriveDecoder
+  implicit val _dec58: Decoder[InvisibilityReason] = deriveDecoder
 
   implicit val _enc00: Encoder[AccessCondition] = deriveEncoder
   implicit val _enc01: Encoder[Note] = deriveEncoder
@@ -132,4 +133,5 @@ object Implicits extends TimeInstances {
   implicit val _enc55: Encoder[BaseImage[Identifiable]] = deriveEncoder
   implicit val _enc56: Encoder[BaseImage[Identified]] = deriveEncoder
   implicit val _enc57: Encoder[AugmentedImage] = deriveEncoder
+  implicit val _enc58: Encoder[InvisibilityReason] = deriveEncoder
 }

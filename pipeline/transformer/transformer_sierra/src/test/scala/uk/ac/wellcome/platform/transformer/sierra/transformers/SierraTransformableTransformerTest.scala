@@ -3,11 +3,7 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.models.transformable.SierraTransformable
 import uk.ac.wellcome.models.transformable.sierra.test.utils.SierraGenerators
-import uk.ac.wellcome.models.transformable.sierra.{
-  SierraBibNumber,
-  SierraBibRecord,
-  SierraItemRecord
-}
+import uk.ac.wellcome.models.transformable.sierra.{SierraBibNumber, SierraBibRecord, SierraItemRecord}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.sierra.SierraTransformableTransformer
@@ -15,6 +11,7 @@ import uk.ac.wellcome.platform.transformer.sierra.exceptions.SierraTransformerEx
 import uk.ac.wellcome.platform.transformer.sierra.generators.MarcGenerators
 import uk.ac.wellcome.platform.transformer.sierra.source.MarcSubfield
 import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.models.work.internal.InvisibilityReason.SierraTitleMissing
 import uk.ac.wellcome.models.work.internal.WorkType.{Books, Pictures}
 
 class SierraTransformableTransformerTest
@@ -833,7 +830,8 @@ class SierraTransformableTransformerTest
     )
 
     assertTransformReturnsInvisibleWork(
-      maybeBibRecord = Some(bibRecord)
+      maybeBibRecord = Some(bibRecord),
+      reasons = List(SierraTitleMissing)
     )
   }
 
@@ -937,7 +935,8 @@ class SierraTransformableTransformerTest
 
   private def assertTransformReturnsInvisibleWork(
     maybeBibRecord: Option[SierraBibRecord],
-    itemRecords: List[SierraItemRecord] = List()) = {
+    itemRecords: List[SierraItemRecord] = Nil,
+    reasons: List[InvisibilityReason] = Nil) = {
     val id = createSierraBibNumber
 
     val sierraTransformable = createSierraTransformableWith(
@@ -949,13 +948,14 @@ class SierraTransformableTransformerTest
     val triedMaybeWork =
       SierraTransformableTransformer(sierraTransformable, version = 1)
     triedMaybeWork.isSuccess shouldBe true
-
+println(triedMaybeWork)
     triedMaybeWork.get shouldBe UnidentifiedInvisibleWork(
       sourceIdentifier = createSierraSystemSourceIdentifierWith(
         value = id.withCheckDigit
       ),
       version = 1,
-      data = WorkData()
+      data = WorkData(),
+      reasons = reasons
     )
   }
 

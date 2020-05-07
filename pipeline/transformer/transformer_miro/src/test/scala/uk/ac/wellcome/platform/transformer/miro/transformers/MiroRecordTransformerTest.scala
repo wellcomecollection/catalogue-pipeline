@@ -3,6 +3,7 @@ package uk.ac.wellcome.platform.transformer.miro.transformers
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import org.scalatest.{Assertion, FunSpec, Matchers}
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
+import uk.ac.wellcome.models.work.internal.InvisibilityReason.MiroShouldNotTransform
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
@@ -327,7 +328,8 @@ class MiroRecordTransformerTest
         value = miroRecord.imageNumber
       ),
       version = 1,
-      data = WorkData()
+      data = WorkData(),
+      reasons = List(MiroShouldNotTransform)
     )
   }
 

@@ -79,6 +79,7 @@ case class UnidentifiedInvisibleWork(
   version: Int,
   sourceIdentifier: SourceIdentifier,
   data: WorkData[Unminted, Identifiable],
+  reasons: List[InvisibilityReason],
   identifiedType: String = classOf[IdentifiedInvisibleWork].getSimpleName
 ) extends TransformedBaseWork
     with InvisibleWork {
@@ -91,6 +92,7 @@ case class IdentifiedInvisibleWork(
   canonicalId: String,
   version: Int,
   sourceIdentifier: SourceIdentifier,
+  reasons: List[InvisibilityReason],
   data: WorkData[Minted, Identified]
 ) extends IdentifiedBaseWork
     with InvisibleWork {

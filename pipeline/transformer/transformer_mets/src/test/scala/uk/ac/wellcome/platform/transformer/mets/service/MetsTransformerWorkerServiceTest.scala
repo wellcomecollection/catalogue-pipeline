@@ -14,13 +14,10 @@ import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.mets_adapter.models.MetsLocation
 import uk.ac.wellcome.models.generators.RandomStrings
+import uk.ac.wellcome.models.work.internal.InvisibilityReason.MetsSource
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.mets.client.ClientFactory
-import uk.ac.wellcome.platform.transformer.mets.fixtures.{
-  LocalStackS3Fixtures,
-  MetsGenerators,
-  STSFixtures
-}
+import uk.ac.wellcome.platform.transformer.mets.fixtures.{LocalStackS3Fixtures, MetsGenerators, STSFixtures}
 import uk.ac.wellcome.platform.transformer.mets.store.TemporaryCredentialsStore
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
@@ -113,7 +110,8 @@ class MetsTransformerWorkerServiceTest
             reason = Some("METS work")
           )
         )
-      )
+      ),
+      reasons = List(MetsSource)
     )
     expectedWork
   }

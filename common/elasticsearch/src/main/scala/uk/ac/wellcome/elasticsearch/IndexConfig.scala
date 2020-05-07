@@ -273,7 +273,12 @@ case object WorksIndexConfig extends IndexConfig {
       objectField("redirect")
         .fields(sourceIdentifier, canonicalId),
       keywordField("type"),
-      data
+      data,
+      // This is used for invisible works
+      objectField("reason").fields(
+        keywordField("type"),
+        textField("info")
+      )
     )
 
   val mapping = properties(fields).dynamic(DynamicMapping.Strict)

@@ -3,24 +3,15 @@ package uk.ac.wellcome.platform.transformer.sierra
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.exceptions.JsonDecodingError
 import uk.ac.wellcome.models.transformable.SierraTransformable
-import uk.ac.wellcome.models.transformable.sierra.{
-  SierraBibNumber,
-  SierraBibRecord,
-  SierraItemNumber
-}
+import uk.ac.wellcome.models.transformable.sierra.{SierraBibNumber, SierraBibRecord, SierraItemNumber}
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.transformer.sierra.exceptions.{
-  ShouldNotTransformException,
-  SierraTransformerException
-}
-import uk.ac.wellcome.platform.transformer.sierra.source.{
-  SierraBibData,
-  SierraItemData
-}
+import uk.ac.wellcome.platform.transformer.sierra.exceptions.{RecordDeletedException, RecordSuppressedException, SierraTransformerException, TitleMissingException}
+import uk.ac.wellcome.platform.transformer.sierra.source.{SierraBibData, SierraItemData}
 import uk.ac.wellcome.platform.transformer.sierra.transformers._
 import uk.ac.wellcome.platform.transformer.sierra.source.SierraMaterialType._
-
 import grizzled.slf4j.Logging
+import uk.ac.wellcome.models.work.internal.InvisibilityReason.{SierraDeleted, SierraSuppressed, SierraTitleMissing}
+
 import scala.util.{Failure, Success, Try}
 
 object SierraTransformableTransformer {
@@ -49,7 +40,8 @@ class SierraTransformableTransformer(sierraTransformable: SierraTransformable,
           UnidentifiedInvisibleWork(
             sourceIdentifier = sourceIdentifier,
             version = version,
-            data = WorkData()
+            data = WorkData(),
+            reasons = List()
           )
         )
       }
@@ -68,9 +60,14 @@ class SierraTransformableTransformer(sierraTransformable: SierraTransformable,
   def workFromBibRecord(bibRecord: SierraBibRecord): Try[TransformedBaseWork] =
     fromJson[SierraBibData](bibRecord.data)
       .map { bibData =>
-        if (bibData.deleted || bibData.suppressed) {
-          throw new ShouldNotTransformException(
-            s"Sierra record $bibId is either deleted or suppressed!"
+        if (bibData.deleted) {
+          throw new RecordDeletedException(
+            s"Sierra record $bibId is deleted!"
+          )
+        }
+        if (bibData.suppressed) {
+          throw new RecordSuppressedException(
+            s"Sierra record $bibId is suppressed!"
           )
         }
         val data = workDataFromBibData(bibId, bibData)
@@ -81,12 +78,30 @@ class SierraTransformableTransformer(sierraTransformable: SierraTransformable,
           throw SierraTransformerException(
             s"Unable to parse bib data for ${bibRecord.id} as JSON: <<${bibRecord.data}>>"
           )
-        case e: ShouldNotTransformException =>
+        case e: RecordDeletedException =>
           debug(s"Should not transform $bibId: ${e.getMessage}")
           UnidentifiedInvisibleWork(
             sourceIdentifier = sourceIdentifier,
             version = version,
-            data = WorkData()
+            data = WorkData(),
+            reasons = List(SierraDeleted)
+          )
+        case e: RecordSuppressedException =>
+          debug(s"Should not transform $bibId: ${e.getMessage}")
+          UnidentifiedInvisibleWork(
+            sourceIdentifier = sourceIdentifier,
+            version = version,
+            data = WorkData(),
+            reasons = List(SierraSuppressed)
+          )
+
+        case e: TitleMissingException =>
+          debug(s"Should not transform $bibId: ${e.getMessage}")
+          UnidentifiedInvisibleWork(
+            sourceIdentifier = sourceIdentifier,
+            version = version,
+            data = WorkData(),
+            reasons = List(SierraTitleMissing)
           )
       }
 

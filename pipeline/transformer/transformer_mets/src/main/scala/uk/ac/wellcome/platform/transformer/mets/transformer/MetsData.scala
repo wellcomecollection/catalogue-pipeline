@@ -4,6 +4,7 @@ import cats.syntax.traverse._
 import cats.instances.either._
 import cats.instances.option._
 import org.apache.commons.lang3.StringUtils.equalsIgnoreCase
+import uk.ac.wellcome.models.work.internal.InvisibilityReason.MetsSource
 import uk.ac.wellcome.models.work.internal._
 
 case class MetsData(
@@ -28,7 +29,8 @@ case class MetsData(
         workData(
           item,
           thumbnail(sourceIdentifier.value, license, accessStatus),
-          version)
+          version),
+        reasons = List(MetsSource)
       )
 
   private def workData(item: Item[Unminted],

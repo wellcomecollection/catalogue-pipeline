@@ -2,6 +2,7 @@ package uk.ac.wellcome.platform.transformer.mets.transformer
 
 import org.scalatest.{FunSpec, Inside, Matchers}
 import uk.ac.wellcome.models.generators.RandomStrings
+import uk.ac.wellcome.models.work.internal.InvisibilityReason.MetsSource
 import uk.ac.wellcome.models.work.internal._
 
 class MetsDataTest
@@ -43,7 +44,8 @@ class MetsDataTest
             reason = Some("METS work")
           )
         )
-      )
+      ),
+      reasons = List(MetsSource)
     )
   }
 
@@ -77,8 +79,9 @@ class MetsDataTest
             ),
             reason = Some("METS work")
           )
-        )
-      )
+        ),
+      ),
+      reasons = List(MetsSource)
     )
   }
 

@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
-import uk.ac.wellcome.platform.transformer.sierra.exceptions.ShouldNotTransformException
+import uk.ac.wellcome.platform.transformer.sierra.exceptions.TitleMissingException
 import uk.ac.wellcome.platform.transformer.sierra.source.SierraBibData
 import uk.ac.wellcome.models.transformable.sierra.SierraBibNumber
 
@@ -17,5 +17,5 @@ object SierraTitle extends SierraTransformer {
   def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
     Some(
       bibData.title.getOrElse(
-        throw new ShouldNotTransformException(s"Sierra record has no title!")))
+        throw new TitleMissingException(s"Sierra record has no title!")))
 }
