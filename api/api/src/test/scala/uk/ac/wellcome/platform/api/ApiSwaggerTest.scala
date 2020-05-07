@@ -6,6 +6,7 @@ import akka.http.scaladsl.model.ContentTypes
 import io.circe.Json
 import uk.ac.wellcome.platform.api.models.SearchQueryType
 import uk.ac.wellcome.platform.api.rest.{
+  MultipleImagesParams,
   MultipleWorksParams,
   SingleImageParams,
   SingleWorkParams
@@ -16,6 +17,7 @@ class ApiSwaggerTest extends ApiWorksTestBase with Matchers {
   val worksEndpoint = "/works"
   val workEndpoint = "/works/{id}"
   val imageEndpoint = "/images/{id}"
+  val imagesEndpoint = "/images"
   it("should return valid json object") {
     checkSwaggerJson { json =>
       json.isObject shouldBe true
@@ -86,6 +88,21 @@ class ApiSwaggerTest extends ApiWorksTestBase with Matchers {
       val numRouteParams = 1
       numParams shouldBe Some(
         getNumPublicQueryParams[SingleImageParams] + numRouteParams
+      )
+    }
+  }
+
+  it("should contain multiple images endpoint in paths") {
+    checkSwaggerJson { json =>
+      val endpoint = getEndpoint(json, imagesEndpoint)
+
+      getKey(endpoint, "description").isEmpty shouldBe false
+      getKey(endpoint, "summary").isEmpty shouldBe false
+      val numParams = getKey(endpoint, "parameters")
+        .flatMap(params => getLength(params))
+      val numRouteParams = 0
+      numParams shouldBe Some(
+        getNumPublicQueryParams[MultipleImagesParams] + numRouteParams
       )
     }
   }
