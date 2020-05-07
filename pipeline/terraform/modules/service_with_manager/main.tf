@@ -14,12 +14,13 @@ module "worker" {
 
   security_group_ids = var.security_group_ids
 
-  app_name            = var.app_container_name
-  app_image           = var.app_container_image
-  app_cpu             = var.app_cpu
-  app_memory          = var.app_memory
-  app_env_vars        = var.app_env_vars
-  app_secret_env_vars = var.app_secret_env_vars
+  app_name             = var.app_container_name
+  app_image            = var.app_container_image
+  app_cpu              = var.app_cpu
+  app_memory           = var.app_memory
+  app_env_vars         = var.app_env_vars
+  app_secret_env_vars  = var.app_secret_env_vars
+  app_healthcheck_json = var.app_healthcheck_json
 
   sidecar_image           = var.manager_container_image
   sidecar_name            = var.manager_container_name

@@ -6,7 +6,6 @@ variable "subnets" {
   type = list(string)
 }
 
-variable "aws_region" {}
 variable "namespace_id" {}
 variable "container_image" {}
 

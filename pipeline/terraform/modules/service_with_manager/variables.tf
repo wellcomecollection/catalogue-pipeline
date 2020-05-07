@@ -19,10 +19,6 @@ variable "desired_task_count" {
   default = 1
 }
 
-variable "launch_type" {
-  default = "FARGATE"
-}
-
 variable "security_group_ids" {
   type    = list(string)
   default = []
