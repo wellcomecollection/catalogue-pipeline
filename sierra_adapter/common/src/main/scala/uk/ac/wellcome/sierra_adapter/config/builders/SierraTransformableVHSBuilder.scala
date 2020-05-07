@@ -1,7 +1,6 @@
 package uk.ac.wellcome.sierra_adapter.config.builders
 
 import com.typesafe.config.Config
-
 import uk.ac.wellcome.sierra_adapter.model.SierraTransformable
 import uk.ac.wellcome.sierra_adapter.model.Implicits._
 import uk.ac.wellcome.storage.ObjectStore
