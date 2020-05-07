@@ -17,7 +17,7 @@ module "worker" {
   env_vars        = var.app_env_vars
   secret_env_vars = var.app_secret_env_vars
   app_cpu         = var.app_cpu
-  app_memory      = var.app_cpu
+  app_memory      = var.app_memory
 
   desired_task_count = var.desired_task_count
   min_capacity       = var.min_capacity

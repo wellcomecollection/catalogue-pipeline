@@ -17,7 +17,7 @@ module "worker" {
   app_name            = var.app_container_name
   app_image           = var.app_container_image
   app_cpu             = var.app_cpu
-  app_memory          = var.host_memory
+  app_memory          = var.app_memory
   app_env_vars        = var.app_env_vars
   app_secret_env_vars = var.app_secret_env_vars
 
