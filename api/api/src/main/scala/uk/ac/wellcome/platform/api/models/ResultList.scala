@@ -1,9 +1,7 @@
 package uk.ac.wellcome.platform.api.models
 
-import uk.ac.wellcome.models.work.internal.IdentifiedWork
-
-case class ResultList(
-  results: List[IdentifiedWork],
+case class ResultList[Result, Aggs](
+  results: List[Result],
   totalResults: Int,
-  aggregations: Option[Aggregations]
+  aggregations: Option[Aggs]
 )

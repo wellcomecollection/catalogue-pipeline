@@ -2,12 +2,19 @@ package uk.ac.wellcome.platform.api.rest
 
 import java.time.LocalDate
 
-import akka.http.scaladsl.server.Directives
+import akka.http.scaladsl.server.{Directive, Directives, ValidationRejection}
 import akka.http.scaladsl.unmarshalling.Unmarshaller
 import io.circe.java8.time.TimeInstances
 import io.circe.{Decoder, Json}
+import uk.ac.wellcome.platform.api.models.LicenseFilter
+import uk.ac.wellcome.platform.api.rest.MultipleWorksParams.decodeCommaSeparated
 
 trait QueryParams
+
+object CommonDecoders {
+  implicit val licenseFilter: Decoder[LicenseFilter] =
+    decodeCommaSeparated.emap(strs => Right(LicenseFilter(strs)))
+}
 
 trait QueryParamsUtils extends Directives with TimeInstances {
 
@@ -70,4 +77,13 @@ trait QueryParamsUtils extends Directives with TimeInstances {
         s"${values.mkString("'", "', '", "'")} are not valid values. $oneOfMsg"
     }
   }
+
+  def validated[T <: QueryParams](errors: List[String],
+                                  params: T): Directive[Tuple1[T]] =
+    errors match {
+      case Nil => provide(params)
+      case errs =>
+        reject(ValidationRejection(errs.mkString(", ")))
+          .toDirective[Tuple1[T]]
+    }
 }

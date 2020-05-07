@@ -31,6 +31,9 @@ class Router(elasticClient: ElasticClient,
               path("works" / Segment) { workId: String =>
                 SingleWorkParams.parse { worksController.singleWork(workId, _) }
               },
+              path("images") {
+                MultipleImagesParams.parse { imagesController.multipleImages }
+              },
               path("images" / Segment) { imageId: String =>
                 SingleImageParams.parse {
                   imagesController.singleImage(imageId, _)

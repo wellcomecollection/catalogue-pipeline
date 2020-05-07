@@ -5,7 +5,6 @@ import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.get.GetResponse
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import com.sksamuel.elastic4s.{ElasticClient, ElasticError, Response}
-import com.sksamuel.elastic4s.requests.searches.sort.{FieldSort, SortOrder}
 import com.sksamuel.elastic4s.Index
 import grizzled.slf4j.Logging
 
@@ -15,7 +14,7 @@ import uk.ac.wellcome.platform.api.models._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-case class ElasticsearchQueryOptions(filters: List[WorkFilter],
+case class ElasticsearchQueryOptions(filters: List[DocumentFilter],
                                      limit: Int,
                                      from: Int,
                                      aggregations: List[AggregationRequest],
@@ -23,7 +22,8 @@ case class ElasticsearchQueryOptions(filters: List[WorkFilter],
                                      sortOrder: SortingOrder,
                                      searchQuery: Option[SearchQuery])
 
-class ElasticsearchService(elasticClient: ElasticClient)(
+class ElasticsearchService(elasticClient: ElasticClient,
+                           requestBuilder: ElasticsearchRequestBuilder)(
   implicit ec: ExecutionContext
 ) extends Logging
     with Tracing {
@@ -34,38 +34,23 @@ class ElasticsearchService(elasticClient: ElasticClient)(
       get(canonicalId).from(index.name)
     }).map { toEither }
 
-  def listResults: (Index, ElasticsearchQueryOptions) => Future[
-    Either[ElasticError, SearchResponse]] =
-    executeSearch(
-      sortDefinitions = List(fieldSort("canonicalId").order(SortOrder.ASC))
-    )
-
-  def queryResults: (Index, ElasticsearchQueryOptions) => Future[
-    Either[ElasticError, SearchResponse]] =
-    executeSearch(
-      sortDefinitions = List(
-        fieldSort("_score").order(SortOrder.DESC),
-        fieldSort("canonicalId").order(SortOrder.ASC))
-    )
-
   /** Given a set of query options, build a SearchDefinition for Elasticsearch
     * using the elastic4s query DSL, then execute the search.
     */
-  private def executeSearch(
-    sortDefinitions: List[FieldSort]
-  )(index: Index, queryOptions: ElasticsearchQueryOptions)
-    : Future[Either[ElasticError, SearchResponse]] =
+  def executeSearch(
+    queryOptions: ElasticsearchQueryOptions,
+    index: Index): Future[Either[ElasticError, SearchResponse]] =
     spanFuture(
       name = "ElasticSearch#executeSearch",
       spanType = "request",
       subType = "elastic",
       action = "query")({
 
-      val searchRequest = ElasticsearchRequestBuilder(
+      val searchRequest = requestBuilder.request(
+        queryOptions,
         index,
-        sortDefinitions,
-        queryOptions
-      ).request
+        scored = queryOptions.searchQuery.isDefined
+      )
 
       debug(s"Sending ES request: ${searchRequest.show}")
       val transaction = Tracing.currentTransaction

@@ -12,7 +12,11 @@ import uk.ac.wellcome.models.work.generators.{
   WorksGenerators
 }
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
-import uk.ac.wellcome.platform.api.services.ElasticsearchService
+import uk.ac.wellcome.platform.api.services.{
+  ElasticsearchService,
+  WorksRequestBuilder
+}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Random
 import com.sksamuel.elastic4s.ElasticDsl._
@@ -30,7 +34,8 @@ class QueryVariantsTest
     with ContributorGenerators {
 
   val searchService = new ElasticsearchService(
-    elasticClient = elasticClient
+    elasticClient = elasticClient,
+    WorksRequestBuilder
   )
 
   /**

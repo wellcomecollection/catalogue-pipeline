@@ -7,8 +7,12 @@ import io.circe.{Encoder, Json}
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.display.json.DisplayJsonUtil._
+import uk.ac.wellcome.models.work.internal.{AugmentedImage, IdentifiedWork}
 import uk.ac.wellcome.platform.api.models._
-import uk.ac.wellcome.platform.api.services.WorksSearchOptions
+import uk.ac.wellcome.platform.api.services.{
+  ImagesSearchOptions,
+  WorksSearchOptions
+}
 
 case class ResultResponse[T: Encoder](
   @JsonKey("@context") context: String,
@@ -35,75 +39,59 @@ object ResultResponse {
 
 @Schema(
   name = "ResultList",
-  description = "A paginated list of works."
+  description = "A paginated list of results."
 )
-case class MultipleWorksResponse(
+case class DisplayResultList[DisplayResult, DisplayAggs](
   @JsonKey("@context") context: String,
-  @JsonKey("type") @Schema(name = "type") ontologyType: String,
+  @JsonKey("type") @Schema(name = "type") ontologyType: String = "ResultList",
   pageSize: Int,
   totalPages: Int,
   totalResults: Int,
-  results: List[DisplayWork],
+  results: List[DisplayResult],
   prevPage: Option[String] = None,
   nextPage: Option[String] = None,
-  aggregations: Option[DisplayAggregations] = None
+  aggregations: Option[DisplayAggs] = None
 )
 
-object MultipleWorksResponse {
-  implicit val encoder: Encoder[MultipleWorksResponse] = deriveEncoder
+object DisplayResultList {
+  implicit def encoder[R: Encoder, A: Encoder]
+    : Encoder[DisplayResultList[R, A]] = deriveEncoder
 
-  def apply(resultList: ResultList,
-            searchOptions: WorksSearchOptions,
-            includes: WorksIncludes,
+  def apply(
+    resultList: ResultList[IdentifiedWork, Aggregations],
+    searchOptions: WorksSearchOptions,
+    includes: WorksIncludes,
+    requestUri: Uri,
+    contextUri: String): DisplayResultList[DisplayWork, DisplayAggregations] =
+    PaginationResponse(resultList, searchOptions, requestUri) match {
+      case PaginationResponse(totalPages, prevPage, nextPage) =>
+        DisplayResultList(
+          context = contextUri,
+          pageSize = searchOptions.pageSize,
+          totalPages = totalPages,
+          totalResults = resultList.totalResults,
+          results = resultList.results.map(DisplayWork.apply(_, includes)),
+          prevPage = prevPage,
+          nextPage = nextPage,
+          aggregations = resultList.aggregations.map(DisplayAggregations.apply)
+        )
+    }
+
+  def apply(resultList: ResultList[AugmentedImage, Unit],
+            searchOptions: ImagesSearchOptions,
             requestUri: Uri,
-            contextUri: String): MultipleWorksResponse =
-    MultipleWorksResponse(
-      resultList = DisplayResultList(
-        resultList,
-        DisplayWork.apply,
-        searchOptions.pageSize,
-        includes,
-      ),
-      currentPage = searchOptions.pageNumber,
-      requestUri = requestUri,
-      contextUri = contextUri
-    )
-
-  def apply(resultList: DisplayResultList[DisplayWork],
-            currentPage: Int,
-            requestUri: Uri,
-            contextUri: String): MultipleWorksResponse =
-    MultipleWorksResponse(
-      context = contextUri,
-      ontologyType = resultList.ontologyType,
-      pageSize = resultList.pageSize,
-      totalPages = resultList.totalPages,
-      totalResults = resultList.totalResults,
-      results = resultList.results,
-      prevPage = pageLink(currentPage - 1, resultList.totalPages, requestUri),
-      nextPage = pageLink(currentPage + 1, resultList.totalPages, requestUri),
-      aggregations = resultList.aggregations,
-    )
-
-  private def pageLink(page: Int,
-                       totalPages: Int,
-                       requestUri: Uri): Option[String] =
-    if (pageInBounds(page, totalPages))
-      Some(
-        requestUri
-          .withQuery(
-            pageQuery(page, requestUri.query())
-          )
-          .toString
-      )
-    else
-      None
-
-  private def pageQuery(page: Int, previousQuery: Uri.Query) =
-    Uri.Query(
-      previousQuery.toMap.updated("page", page.toString)
-    )
-
-  private def pageInBounds(page: Int, totalPages: Int) =
-    page > 0 && page <= totalPages
+            contextUri: String): DisplayResultList[DisplayImage, Unit] =
+    PaginationResponse(resultList, searchOptions, requestUri) match {
+      case PaginationResponse(totalPages, prevPage, nextPage) =>
+        DisplayResultList(
+          context = contextUri,
+          pageSize = searchOptions.pageSize,
+          totalPages = totalPages,
+          totalResults = resultList.totalResults,
+          results = resultList.results.map(DisplayImage.apply),
+          prevPage = prevPage,
+          nextPage = nextPage,
+          aggregations = resultList.aggregations
+        )
+    }
 }

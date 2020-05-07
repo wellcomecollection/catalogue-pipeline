@@ -12,7 +12,7 @@ import uk.ac.wellcome.models.work.generators.{
   ProductionEventGenerators,
   WorksGenerators
 }
-import uk.ac.wellcome.models.work.internal.IdentifiedBaseWork
+import uk.ac.wellcome.models.work.internal.{IdentifiedBaseWork, IdentifiedWork}
 import uk.ac.wellcome.models.work.internal.WorkType.{
   ArchivesAndManuscripts,
   Audio,
@@ -36,7 +36,8 @@ class WorksServiceTest
     with ProductionEventGenerators {
 
   val elasticsearchService = new ElasticsearchService(
-    elasticClient = elasticClient
+    elasticClient = elasticClient,
+    WorksRequestBuilder
   )
 
   val worksService = new WorksService(
@@ -45,11 +46,11 @@ class WorksServiceTest
 
   val defaultWorksSearchOptions = createWorksSearchOptions
 
-  describe("listWorks") {
+  describe("listOrSearchWorks") {
     it("gets records in Elasticsearch") {
       val works = createIdentifiedWorks(count = 2)
 
-      assertListResultIsCorrect(
+      assertListOrSearchResultIsCorrect(
         allWorks = works,
         expectedWorks = works,
         expectedTotalResults = 2
@@ -57,7 +58,7 @@ class WorksServiceTest
     }
 
     it("returns 0 pages when no results are available") {
-      assertListResultIsCorrect(
+      assertListOrSearchResultIsCorrect(
         allWorks = Seq(),
         expectedWorks = Seq(),
         expectedTotalResults = 0
@@ -65,11 +66,23 @@ class WorksServiceTest
     }
 
     it("returns an empty result set when asked for a page that does not exist") {
-      assertListResultIsCorrect(
+      assertListOrSearchResultIsCorrect(
         allWorks = createIdentifiedWorks(count = 3),
         expectedWorks = Seq(),
         expectedTotalResults = 3,
         worksSearchOptions = createWorksSearchOptionsWith(pageNumber = 4)
+      )
+    }
+
+    it("does not list invisible works") {
+      val visibleWorks = createIdentifiedWorks(3)
+      val invisibleWorks = createIdentifiedInvisibleWorks(3)
+
+      assertListOrSearchResultIsCorrect(
+        allWorks = visibleWorks ++ invisibleWorks,
+        expectedWorks = visibleWorks,
+        expectedTotalResults = visibleWorks.size,
+        worksSearchOptions = createWorksSearchOptions
       )
     }
 
@@ -84,7 +97,7 @@ class WorksServiceTest
         workType = Some(CDRoms)
       )
 
-      assertListResultIsCorrect(
+      assertListOrSearchResultIsCorrect(
         allWorks = Seq(work1, work2, workWithWrongWorkType),
         expectedWorks = Seq(work1, work2),
         expectedTotalResults = 2,
@@ -108,7 +121,7 @@ class WorksServiceTest
         workType = Some(CDRoms)
       )
 
-      assertListResultIsCorrect(
+      assertListOrSearchResultIsCorrect(
         allWorks = Seq(work1, work2, work3, workWithWrongWorkType),
         expectedWorks = Seq(work1, work2, work3),
         expectedTotalResults = 3,
@@ -119,14 +132,128 @@ class WorksServiceTest
     }
 
     it("returns a Left[ElasticError] if there's an Elasticsearch error") {
-      val future = worksService.listWorks(
+      val future = worksService.listOrSearchWorks(
         index = Index("doesnotexist"),
-        worksSearchOptions = defaultWorksSearchOptions
+        searchOptions = defaultWorksSearchOptions
       )
 
       whenReady(future) { result =>
         result.isLeft shouldBe true
         result.left.get shouldBe a[ElasticError]
+      }
+    }
+
+    it("only finds results that match a query if doing a full-text search") {
+      val workDodo = createIdentifiedWorkWith(
+        title = Some("A drawing of a dodo")
+      )
+      val workMouse = createIdentifiedWorkWith(
+        title = Some("A mezzotint of a mouse")
+      )
+
+      assertListOrSearchResultIsCorrect(
+        allWorks = List(workDodo, workMouse),
+        expectedWorks = List(),
+        expectedTotalResults = 0,
+        worksSearchOptions =
+          createWorksSearchOptionsWith(searchQuery = Some(SearchQuery("cat")))
+      )
+
+      assertListOrSearchResultIsCorrect(
+        allWorks = List(workDodo, workMouse),
+        expectedWorks = List(workDodo),
+        expectedTotalResults = 1,
+        worksSearchOptions =
+          createWorksSearchOptionsWith(searchQuery = Some(SearchQuery("dodo")))
+      )
+    }
+
+    it("doesn't throw an exception if passed an invalid query string") {
+      val workEmu = createIdentifiedWorkWith(
+        title = Some("An etching of an emu")
+      )
+
+      // unmatched quotes are a lexical error in the Elasticsearch parser
+      assertListOrSearchResultIsCorrect(
+        allWorks = List(workEmu),
+        expectedWorks = List(workEmu),
+        expectedTotalResults = 1,
+        worksSearchOptions = createWorksSearchOptionsWith(
+          searchQuery = Some(SearchQuery("emu \"")))
+      )
+    }
+  }
+
+  describe("simple query string syntax") {
+    it("uses only PHRASE simple query syntax") {
+      val work = createIdentifiedWorkWith(
+        title = Some(
+          "+a -title | with (all the simple) query~4 syntax operators in it*")
+      )
+
+      assertListOrSearchResultIsCorrect(
+        allWorks = List(work),
+        expectedWorks = List(work),
+        expectedTotalResults = 1,
+        worksSearchOptions = createWorksSearchOptionsWith(
+          searchQuery = Some(SearchQuery(
+            "+a -title | with (all the simple) query~4 syntax operators in it*")))
+      )
+    }
+
+    it(
+      "doesn't throw a too_many_clauses exception when passed a query that creates too many clauses") {
+      val work = createIdentifiedWorkWith(
+        title = Some("(a b c d e) h")
+      )
+
+      // This query uses precedence and would exceed the default 1024 clauses
+      assertListOrSearchResultIsCorrect(
+        allWorks = List(work),
+        expectedWorks = List(work),
+        expectedTotalResults = 1,
+        worksSearchOptions = createWorksSearchOptionsWith(
+          searchQuery = Some(SearchQuery("(a b c d e) h")))
+      )
+    }
+
+    it("aggregates workTypes") {
+      withLocalWorksIndex { index =>
+        val work1 = createIdentifiedWorkWith(
+          workType = Some(Books)
+        )
+        val work2 = createIdentifiedWorkWith(
+          workType = Some(Books)
+        )
+        val work3 = createIdentifiedWorkWith(
+          workType = Some(Audio)
+        )
+        val work4 = createIdentifiedWorkWith(
+          workType = Some(ArchivesAndManuscripts)
+        )
+
+        val worksSearchOptions =
+          createWorksSearchOptionsWith(
+            aggregations = List(AggregationRequest.WorkType))
+
+        val expectedAggregations = Aggregations(
+          Some(
+            Aggregation(
+              List(
+                AggregationBucket(data = Books, count = 2),
+                AggregationBucket(data = ArchivesAndManuscripts, count = 1),
+                AggregationBucket(data = Audio, count = 1),
+              ))),
+          None
+        )
+
+        assertListOrSearchResultIsCorrect(
+          allWorks = List(work1, work2, work3, work4),
+          expectedWorks = List(work1, work2, work3, work4),
+          expectedTotalResults = 4,
+          expectedAggregations = Some(expectedAggregations),
+          worksSearchOptions = worksSearchOptions
+        )
       }
     }
   }
@@ -150,7 +277,7 @@ class WorksServiceTest
 
     it("filters records by date range") {
 
-      assertListResultIsCorrect(
+      assertListOrSearchResultIsCorrect(
         allWorks = allWorks,
         expectedWorks = Seq(work2),
         expectedTotalResults = 1,
@@ -161,7 +288,7 @@ class WorksServiceTest
     }
 
     it("filters records by from date") {
-      assertListResultIsCorrect(
+      assertListOrSearchResultIsCorrect(
         allWorks = allWorks,
         expectedWorks = Seq(work2, work3),
         expectedTotalResults = 2,
@@ -172,7 +299,7 @@ class WorksServiceTest
     }
 
     it("filters records by to date") {
-      assertListResultIsCorrect(
+      assertListOrSearchResultIsCorrect(
         allWorks = allWorks,
         expectedWorks = Seq(work1, work2),
         expectedTotalResults = 2,
@@ -230,190 +357,7 @@ class WorksServiceTest
     }
   }
 
-  describe("searchWorks") {
-    it("only finds results that match a query if doing a full-text search") {
-      val workDodo = createIdentifiedWorkWith(
-        title = Some("A drawing of a dodo")
-      )
-      val workMouse = createIdentifiedWorkWith(
-        title = Some("A mezzotint of a mouse")
-      )
-
-      assertSearchResultIsCorrect(
-        allWorks = List(workDodo, workMouse),
-        expectedWorks = List(),
-        expectedTotalResults = 0,
-        worksSearchOptions =
-          createWorksSearchOptionsWith(searchQuery = Some(SearchQuery("cat")))
-      )
-
-      assertSearchResultIsCorrect(
-        allWorks = List(workDodo, workMouse),
-        expectedWorks = List(workDodo),
-        expectedTotalResults = 1,
-        worksSearchOptions =
-          createWorksSearchOptionsWith(searchQuery = Some(SearchQuery("dodo")))
-      )
-    }
-
-    it("doesn't throw an exception if passed an invalid query string") {
-      val workEmu = createIdentifiedWorkWith(
-        title = Some("An etching of an emu")
-      )
-
-      // unmatched quotes are a lexical error in the Elasticsearch parser
-      assertSearchResultIsCorrect(
-        allWorks = List(workEmu),
-        expectedWorks = List(workEmu),
-        expectedTotalResults = 1,
-        worksSearchOptions = createWorksSearchOptionsWith(
-          searchQuery = Some(SearchQuery("emu \"")))
-      )
-    }
-
-    it("filters searches by workType") {
-      val matchingWork = createIdentifiedWorkWith(
-        title = Some("Animated artichokes"),
-        workType = Some(ManuscriptsAsian)
-      )
-      val workWithWrongTitle = createIdentifiedWorkWith(
-        title = Some("Bouncing bananas"),
-        workType = Some(ManuscriptsAsian)
-      )
-      val workWithWrongWorkType = createIdentifiedWorkWith(
-        title = Some("Animated artichokes"),
-        workType = Some(CDRoms)
-      )
-
-      assertSearchResultIsCorrect(
-        allWorks = List(matchingWork, workWithWrongTitle, workWithWrongWorkType),
-        expectedWorks = List(matchingWork),
-        expectedTotalResults = 1,
-        worksSearchOptions = createWorksSearchOptionsWith(
-          searchQuery = Some(SearchQuery("artichokes")),
-          filters = List(WorkTypeFilter(Seq("b")))
-        )
-      )
-    }
-
-    it("filters searches by multiple workTypes") {
-      val work1 = createIdentifiedWorkWith(
-        title = Some("Animated artichokes"),
-        workType = Some(ManuscriptsAsian)
-      )
-      val workWithWrongTitle = createIdentifiedWorkWith(
-        title = Some("Bouncing bananas"),
-        workType = Some(ManuscriptsAsian)
-      )
-      val work2 = createIdentifiedWorkWith(
-        title = Some("Animated artichokes"),
-        workType = Some(CDRoms)
-      )
-      val workWithWrongWorkType = createIdentifiedWorkWith(
-        title = Some("Animated artichokes"),
-        workType = Some(Books)
-      )
-
-      assertSearchResultIsCorrect(
-        allWorks = List(work1, workWithWrongTitle, work2, workWithWrongWorkType),
-        expectedWorks = List(work1, work2),
-        expectedTotalResults = 2,
-        worksSearchOptions = createWorksSearchOptionsWith(
-          searchQuery = Some(SearchQuery("artichokes")),
-          filters = List(WorkTypeFilter(List("b", "m")))
-        )
-      )
-    }
-
-    it("returns a Left[ElasticError] if there's an Elasticsearch error") {
-      val future = worksService.searchWorks(
-        index = Index("doesnotexist"),
-        worksSearchOptions =
-          createWorksSearchOptionsWith(searchQuery = Some(SearchQuery("cat")))
-      )
-
-      whenReady(future) { result =>
-        result.isLeft shouldBe true
-        result.left.get shouldBe a[ElasticError]
-      }
-    }
-
-    // See: https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html#simple-query-string-syntax
-    describe("simple query string syntax") {
-      it("uses only PHRASE simple query syntax") {
-        val work = createIdentifiedWorkWith(
-          title = Some(
-            "+a -title | with (all the simple) query~4 syntax operators in it*")
-        )
-
-        assertSearchResultIsCorrect(
-          allWorks = List(work),
-          expectedWorks = List(work),
-          expectedTotalResults = 1,
-          worksSearchOptions = createWorksSearchOptionsWith(
-            searchQuery = Some(SearchQuery(
-              "+a -title | with (all the simple) query~4 syntax operators in it*")))
-        )
-      }
-
-      it("doesn't throw a too_many_clauses exception when passed a query that creates too many clauses") {
-        val work = createIdentifiedWorkWith(
-          title = Some("(a b c d e) h")
-        )
-
-        // This query uses precedence and would exceed the default 1024 clauses
-        assertSearchResultIsCorrect(
-          allWorks = List(work),
-          expectedWorks = List(work),
-          expectedTotalResults = 1,
-          worksSearchOptions = createWorksSearchOptionsWith(
-            searchQuery = Some(SearchQuery("(a b c d e) h")))
-        )
-      }
-
-      it("aggregates workTypes") {
-        withLocalWorksIndex { index =>
-          val work1 = createIdentifiedWorkWith(
-            workType = Some(Books)
-          )
-          val work2 = createIdentifiedWorkWith(
-            workType = Some(Books)
-          )
-          val work3 = createIdentifiedWorkWith(
-            workType = Some(Audio)
-          )
-          val work4 = createIdentifiedWorkWith(
-            workType = Some(ArchivesAndManuscripts)
-          )
-
-          val worksSearchOptions =
-            createWorksSearchOptionsWith(
-              aggregations = List(AggregationRequest.WorkType))
-
-          val expectedAggregations = Aggregations(
-            Some(
-              Aggregation(
-                List(
-                  AggregationBucket(data = Books, count = 2),
-                  AggregationBucket(data = ArchivesAndManuscripts, count = 1),
-                  AggregationBucket(data = Audio, count = 1),
-                ))),
-            None
-          )
-
-          assertListResultIsCorrect(
-            allWorks = List(work1, work2, work3, work4),
-            expectedWorks = List(work1, work2, work3, work4),
-            expectedTotalResults = 4,
-            expectedAggregations = Some(expectedAggregations),
-            worksSearchOptions = worksSearchOptions
-          )
-        }
-      }
-    }
-  }
-
-  private def assertListResultIsCorrect(
+  private def assertListOrSearchResultIsCorrect(
     allWorks: Seq[IdentifiedBaseWork],
     expectedWorks: Seq[IdentifiedBaseWork],
     expectedTotalResults: Int,
@@ -421,23 +365,7 @@ class WorksServiceTest
     worksSearchOptions: WorksSearchOptions = createWorksSearchOptions
   ): Assertion =
     assertResultIsCorrect(
-      worksService.listWorks
-    )(
-      allWorks,
-      expectedWorks,
-      expectedTotalResults,
-      expectedAggregations,
-      worksSearchOptions)
-
-  private def assertSearchResultIsCorrect(
-    allWorks: Seq[IdentifiedBaseWork],
-    expectedWorks: Seq[IdentifiedBaseWork],
-    expectedTotalResults: Int,
-    expectedAggregations: Option[Aggregations] = None,
-    worksSearchOptions: WorksSearchOptions
-  ): Assertion =
-    assertResultIsCorrect(
-      worksService.searchWorks
+      worksService.listOrSearchWorks
     )(
       allWorks,
       expectedWorks,
@@ -446,9 +374,8 @@ class WorksServiceTest
       worksSearchOptions)
 
   private def assertResultIsCorrect(
-    partialSearchFunction: (
-      Index,
-      WorksSearchOptions) => Future[Either[ElasticError, ResultList]]
+    partialSearchFunction: (Index, WorksSearchOptions) => Future[
+      Either[ElasticError, ResultList[IdentifiedWork, Aggregations]]]
   )(
     allWorks: Seq[IdentifiedBaseWork],
     expectedWorks: Seq[IdentifiedBaseWork],

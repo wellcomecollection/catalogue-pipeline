@@ -2,7 +2,6 @@ package uk.ac.wellcome.platform.api.rest
 
 import java.time.LocalDate
 
-import akka.http.scaladsl.server.ValidationRejection
 import io.circe.Decoder
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.platform.api.models._
@@ -66,7 +65,8 @@ case class MultipleWorksParams(
   `collection.depth`: Option[CollectionDepthFilter],
   _queryType: Option[SearchQueryType],
   _index: Option[String],
-) extends QueryParams {
+) extends QueryParams
+    with Paginated {
 
   def searchOptions(apiConfig: ApiConfig): WorksSearchOptions =
     WorksSearchOptions(
@@ -80,16 +80,6 @@ case class MultipleWorksParams(
       sortBy = sort.getOrElse(Nil),
       sortOrder = sortOrder.getOrElse(SortingOrder.Ascending),
     )
-
-  def validationErrors: List[String] =
-    List(
-      page
-        .filterNot(_ >= 1)
-        .map(_ => "page: must be greater than 1"),
-      pageSize
-        .filterNot(size => size >= 1 && size <= 100)
-        .map(_ => "pageSize: must be between 1 and 100")
-    ).flatten
 
   private def filters: List[WorkFilter] =
     List(
@@ -113,6 +103,7 @@ case class MultipleWorksParams(
 
 object MultipleWorksParams extends QueryParamsUtils {
   import SingleWorkParams.includesDecoder
+  import CommonDecoders.licenseFilter
 
   // This is a custom akka-http directive which extracts MultipleWorksParams
   // data from the query string, returning an invalid response when any given
@@ -144,12 +135,7 @@ object MultipleWorksParams extends QueryParamsUtils {
       )
     ).tflatMap { args =>
       val params = (MultipleWorksParams.apply _).tupled(args)
-      params.validationErrors match {
-        case Nil => provide(params)
-        case errs =>
-          reject(ValidationRejection(errs.mkString(", ")))
-            .toDirective[Tuple1[MultipleWorksParams]]
-      }
+      validated(params.paginationErrors, params)
     }
 
   implicit val workTypeFilter: Decoder[WorkTypeFilter] =
@@ -166,9 +152,6 @@ object MultipleWorksParams extends QueryParamsUtils {
 
   implicit val subjectFilter: Decoder[SubjectFilter] =
     Decoder.decodeString.emap(str => Right(SubjectFilter(str)))
-
-  implicit val licenseFilter: Decoder[LicenseFilter] =
-    decodeCommaSeparated.emap(strs => Right(LicenseFilter(strs)))
 
   implicit val collectionsPathFilter: Decoder[CollectionPathFilter] =
     Decoder.decodeString.emap(str => Right(CollectionPathFilter(str)))

@@ -13,6 +13,7 @@ import uk.ac.wellcome.platform.api.models.ApiConfig
 import uk.ac.wellcome.platform.api.services.{
   CollectionService,
   ElasticsearchService,
+  WorksRequestBuilder,
   WorksService
 }
 import uk.ac.wellcome.platform.api.Tracing
@@ -26,7 +27,7 @@ class WorksController(
     extends Tracing
     with CustomDirectives
     with FailFastCirceSupport {
-  import MultipleWorksResponse.encoder
+  import DisplayResultList.encoder
   import ResultResponse.encoder
 
   def multipleWorks(params: MultipleWorksParams): Route =
@@ -42,7 +43,7 @@ class WorksController(
             case Right(resultList) =>
               extractPublicUri { uri =>
                 complete(
-                  MultipleWorksResponse(
+                  DisplayResultList(
                     resultList,
                     searchOptions,
                     params.include.getOrElse(WorksIncludes()),
@@ -128,7 +129,7 @@ class WorksController(
     new CollectionService(elasticClient)
 
   private lazy val worksService = new WorksService(
-    new ElasticsearchService(elasticClient))
+    new ElasticsearchService(elasticClient, WorksRequestBuilder))
 
   private lazy val logger = Logger(this.getClass.getName)
 }

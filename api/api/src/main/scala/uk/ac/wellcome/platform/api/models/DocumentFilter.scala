@@ -2,7 +2,9 @@ package uk.ac.wellcome.platform.api.models
 
 import java.time.LocalDate
 
-sealed trait WorkFilter
+sealed trait DocumentFilter
+sealed trait WorkFilter extends DocumentFilter
+sealed trait ImageFilter extends DocumentFilter
 
 case class ItemLocationTypeFilter(locationTypeIds: Seq[String])
     extends WorkFilter
@@ -21,7 +23,9 @@ case class GenreFilter(genreQuery: String) extends WorkFilter
 
 case class SubjectFilter(subjectQuery: String) extends WorkFilter
 
-case class LicenseFilter(licenseIds: Seq[String]) extends WorkFilter
+case class LicenseFilter(licenseIds: Seq[String])
+    extends WorkFilter
+    with ImageFilter
 
 case class CollectionPathFilter(path: String) extends WorkFilter
 
