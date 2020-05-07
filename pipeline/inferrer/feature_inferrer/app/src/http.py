@@ -1,8 +1,8 @@
 import aiohttp
 
-from .logging import get_logstash_logger
+from .logging import get_logger
 
-logger = get_logstash_logger(__name__)
+logger = get_logger(__name__)
 
 _session_store = {}
 

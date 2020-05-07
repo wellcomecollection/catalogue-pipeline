@@ -3,9 +3,9 @@ import os
 import boto3
 from botocore.exceptions import ClientError
 
-from .logging import get_logstash_logger
+from .logging import get_logger
 
-logger = get_logstash_logger(__name__)
+logger = get_logger(__name__)
 
 
 def get_s3_client():

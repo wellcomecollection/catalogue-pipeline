@@ -2,10 +2,10 @@ import asyncio
 from uuid import UUID, uuid4
 from typing import Callable, Dict, Generic, List, TypeVar
 from async_timeout import timeout
-from src.logging import get_logstash_logger
+from src.logging import get_logger
 
 
-logger = get_logstash_logger(__name__)
+logger = get_logger(__name__)
 
 Input = TypeVar("Input")
 Result = TypeVar("Result")

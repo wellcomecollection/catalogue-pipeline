@@ -3,9 +3,9 @@ import os
 from botocore.exceptions import ClientError
 
 from src.aws import download_object_from_s3
-from src.logging import get_logstash_logger
+from src.logging import get_logger
 
-logger = get_logstash_logger("prestart")
+logger = get_logger("prestart")
 
 try:
     logger.info("Fetching pretrained LSHEncoder model")

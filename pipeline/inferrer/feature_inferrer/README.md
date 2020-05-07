@@ -13,7 +13,5 @@ curl "http://0.0.0.0/feature-vector/?image_url=SOME_ENCODED_IMAGE_URL"
 
 ## environment variables
 
-- `LOGSTASH_HOST` is the IP address for the logstash instance
-- `LOGSTASH_PORT` is the port for the logstash instance
 - `MODEL_OBJECT_KEY` is the s3 key for the pickled `LSHEncoder()` model
 - `MODEL_DATA_BUCKET` is the s3 bucket in which model data is stored
