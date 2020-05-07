@@ -43,7 +43,7 @@ class CalmAdapterWorkerServiceTest
     withCalmAdapterWorkerService(retriever, store) {
       case (calmAdapter, QueuePair(queue, dlq), topic) =>
         sendNotificationToSQS(queue, CalmWindow(queryDate))
-        Thread.sleep(500)
+        Thread.sleep(1500)
         store.entries shouldBe Map(
           Version("A", 0) -> recordA,
           Version("A", 1) -> recordA.copy(published = true),
