@@ -89,7 +89,7 @@ variable "manager_env_vars" {
   type = map(string)
 }
 
-variable "secret_manager_env_vars" {
+variable "manager_secret_env_vars" {
   type    = map(string)
   default = {}
 }

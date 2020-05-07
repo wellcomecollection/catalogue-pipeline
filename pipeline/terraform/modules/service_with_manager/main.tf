@@ -26,7 +26,7 @@ module "worker" {
   sidecar_cpu             = var.manager_cpu
   sidecar_memory          = var.manager_memory
   sidecar_env_vars        = var.manager_env_vars
-  sidecar_secret_env_vars = var.secret_manager_env_vars
+  sidecar_secret_env_vars = var.manager_secret_env_vars
 
   cpu    = var.host_cpu
   memory = var.host_memory
