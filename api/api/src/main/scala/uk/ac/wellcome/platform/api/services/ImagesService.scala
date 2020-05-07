@@ -50,8 +50,7 @@ class ImagesService(searchService: ElasticsearchService)(
     searchService
       .executeSearch(
         queryOptions = toElasticsearchQueryOptions(searchOptions),
-        index = index,
-        scored = searchOptions.searchQuery.isDefined
+        index = index
       )
       .map { _.map(createResultList) }
 

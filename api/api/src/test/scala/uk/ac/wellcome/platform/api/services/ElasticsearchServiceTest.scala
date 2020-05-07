@@ -179,8 +179,7 @@ class ElasticsearchServiceTest
             .executeSearch(
               createElasticsearchQueryOptionsWith(
                 searchQuery = Some(SearchQuery("abba"))),
-              index,
-              scored = true)
+              index)
 
           whenReady(searchResponseFuture) { response =>
             searchResponseToWorks(response) shouldBe works
@@ -338,9 +337,8 @@ class ElasticsearchServiceTest
       val future = searchService
         .executeSearch(
           defaultQueryOptions,
-          Index("doesnotexist"),
-          scored = false)
-
+          Index("doesnotexist")
+        )
       whenReady(future) { response =>
         response.isLeft shouldBe true
         response.left.get shouldBe a[ElasticError]
@@ -373,10 +371,9 @@ class ElasticsearchServiceTest
   }
 
   private def searchResults(index: Index,
-                            queryOptions: ElasticsearchQueryOptions,
-                            scored: Boolean) = {
+                            queryOptions: ElasticsearchQueryOptions) = {
     val searchResponseFuture =
-      searchService.executeSearch(queryOptions, index, scored)
+      searchService.executeSearch(queryOptions, index)
     whenReady(searchResponseFuture) { response =>
       searchResponseToWorks(response)
     }
@@ -387,11 +384,7 @@ class ElasticsearchServiceTest
                                         createElasticsearchQueryOptions,
                                       expectedWorks: List[IdentifiedWork],
                                       scored: Option[Boolean] = None) = {
-    searchResults(
-      index,
-      queryOptions,
-      scored
-        .getOrElse(queryOptions.searchQuery.isDefined)) should contain theSameElementsAs expectedWorks
+    searchResults(index, queryOptions) should contain theSameElementsAs expectedWorks
   }
 
   private def searchResponseToWorks(

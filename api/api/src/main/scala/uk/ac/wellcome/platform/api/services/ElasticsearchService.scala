@@ -39,15 +39,18 @@ class ElasticsearchService(elasticClient: ElasticClient,
     */
   def executeSearch(
     queryOptions: ElasticsearchQueryOptions,
-    index: Index,
-    scored: Boolean): Future[Either[ElasticError, SearchResponse]] =
+    index: Index): Future[Either[ElasticError, SearchResponse]] =
     spanFuture(
       name = "ElasticSearch#executeSearch",
       spanType = "request",
       subType = "elastic",
       action = "query")({
 
-      val searchRequest = requestBuilder.request(queryOptions, index, scored)
+      val searchRequest = requestBuilder.request(
+        queryOptions,
+        index,
+        scored = queryOptions.searchQuery.isDefined
+      )
 
       debug(s"Sending ES request: ${searchRequest.show}")
       val transaction = Tracing.currentTransaction

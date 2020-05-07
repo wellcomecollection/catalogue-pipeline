@@ -380,7 +380,7 @@ class FreeTextQueryTest
   private def searchResults(index: Index,
                             queryOptions: ElasticsearchQueryOptions) = {
     val searchResponseFuture =
-      searchService.executeSearch(queryOptions, index, scored = true)
+      searchService.executeSearch(queryOptions, index)
     whenReady(searchResponseFuture) { response =>
       searchResponseToWorks(response)
     }
