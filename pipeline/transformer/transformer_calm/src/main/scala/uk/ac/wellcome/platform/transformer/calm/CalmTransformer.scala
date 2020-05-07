@@ -1,11 +1,13 @@
 package uk.ac.wellcome.platform.transformer.calm
 
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.models.work.internal.InvisibilityReason.{CalmInvalidLevel, CalmMissingLevel, CalmNoTransmission}
+import uk.ac.wellcome.models.work.internal.InvisibilityReason.{
+  CalmInvalidLevel,
+  CalmMissingLevel,
+  CalmNoTransmission
+}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.internal.result._
-
-
 
 object CalmTransformer
     extends Transformer[CalmRecord]
@@ -34,21 +36,23 @@ object CalmTransformer
 
   def apply(record: CalmRecord, version: Int): Result[TransformedBaseWork] =
     suppressionReasons(record) match {
-      case Nil => workData(record) map { data =>
-        UnidentifiedWork(
-          sourceIdentifier = sourceIdentifier(record),
-          version = version,
-          data = data
+      case Nil =>
+        workData(record) map { data =>
+          UnidentifiedWork(
+            sourceIdentifier = sourceIdentifier(record),
+            version = version,
+            data = data
+          )
+        }
+      case reasons =>
+        Right(
+          UnidentifiedInvisibleWork(
+            sourceIdentifier = sourceIdentifier(record),
+            version = version,
+            data = workData(record).getOrElse(WorkData()),
+            reasons = reasons
+          )
         )
-      }
-      case reasons => Right(
-        UnidentifiedInvisibleWork(
-          sourceIdentifier = sourceIdentifier(record),
-          version = version,
-          data = workData(record).getOrElse(WorkData()),
-          reasons = reasons
-        )
-      )
     }
 
   def suppressionReasons(record: CalmRecord): List[InvisibilityReason] = {
@@ -66,10 +70,11 @@ object CalmTransformer
       }
 
     val levelMissingOrInvalid = record.get("Level") match {
-      case Some(level) => collectionLevel(record) match {
-        case Right(_) => None
-        case Left(_) => Some(CalmInvalidLevel(level))
-      }
+      case Some(level) =>
+        collectionLevel(record) match {
+          case Right(_) => None
+          case Left(_)  => Some(CalmInvalidLevel(level))
+        }
       case None => Some(CalmMissingLevel)
     }
 

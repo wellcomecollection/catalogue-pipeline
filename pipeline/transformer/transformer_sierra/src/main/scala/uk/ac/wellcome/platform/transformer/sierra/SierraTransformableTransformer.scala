@@ -3,14 +3,30 @@ package uk.ac.wellcome.platform.transformer.sierra
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.exceptions.JsonDecodingError
 import uk.ac.wellcome.models.transformable.SierraTransformable
-import uk.ac.wellcome.models.transformable.sierra.{SierraBibNumber, SierraBibRecord, SierraItemNumber}
+import uk.ac.wellcome.models.transformable.sierra.{
+  SierraBibNumber,
+  SierraBibRecord,
+  SierraItemNumber
+}
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.transformer.sierra.exceptions.{RecordDeletedException, RecordSuppressedException, SierraTransformerException, TitleMissingException}
-import uk.ac.wellcome.platform.transformer.sierra.source.{SierraBibData, SierraItemData}
+import uk.ac.wellcome.platform.transformer.sierra.exceptions.{
+  RecordDeletedException,
+  RecordSuppressedException,
+  SierraTransformerException,
+  TitleMissingException
+}
+import uk.ac.wellcome.platform.transformer.sierra.source.{
+  SierraBibData,
+  SierraItemData
+}
 import uk.ac.wellcome.platform.transformer.sierra.transformers._
 import uk.ac.wellcome.platform.transformer.sierra.source.SierraMaterialType._
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.models.work.internal.InvisibilityReason.{SierraDeleted, SierraSuppressed, SierraTitleMissing}
+import uk.ac.wellcome.models.work.internal.InvisibilityReason.{
+  SierraDeleted,
+  SierraSuppressed,
+  SierraTitleMissing
+}
 
 import scala.util.{Failure, Success, Try}
 

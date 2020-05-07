@@ -3,7 +3,11 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 import org.scalatest.{FunSpec, Matchers}
 import uk.ac.wellcome.models.transformable.SierraTransformable
 import uk.ac.wellcome.models.transformable.sierra.test.utils.SierraGenerators
-import uk.ac.wellcome.models.transformable.sierra.{SierraBibNumber, SierraBibRecord, SierraItemRecord}
+import uk.ac.wellcome.models.transformable.sierra.{
+  SierraBibNumber,
+  SierraBibRecord,
+  SierraItemRecord
+}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.sierra.SierraTransformableTransformer
@@ -948,7 +952,7 @@ class SierraTransformableTransformerTest
     val triedMaybeWork =
       SierraTransformableTransformer(sierraTransformable, version = 1)
     triedMaybeWork.isSuccess shouldBe true
-println(triedMaybeWork)
+    println(triedMaybeWork)
     triedMaybeWork.get shouldBe UnidentifiedInvisibleWork(
       sourceIdentifier = createSierraSystemSourceIdentifierWith(
         value = id.withCheckDigit

@@ -3,7 +3,10 @@ package uk.ac.wellcome.platform.transformer.calm
 import java.time.Instant
 
 import org.scalatest.{FunSpec, Matchers}
-import uk.ac.wellcome.models.work.internal.InvisibilityReason.{CalmInvalidLevel, CalmNoTransmission}
+import uk.ac.wellcome.models.work.internal.InvisibilityReason.{
+  CalmInvalidLevel,
+  CalmNoTransmission
+}
 import uk.ac.wellcome.models.work.internal._
 
 class CalmTransformerTest extends FunSpec with Matchers {
@@ -332,7 +335,8 @@ class CalmTransformerTest extends FunSpec with Matchers {
           identifierType = CalmIdentifierTypes.recordId
         ),
         data = WorkData(),
-        reasons = List(CalmNoTransmission, CalmInvalidLevel("Invalid")))
+        reasons = List(CalmNoTransmission, CalmInvalidLevel("Invalid"))
+      )
     )
   }
 
@@ -342,7 +346,8 @@ class CalmTransformerTest extends FunSpec with Matchers {
       "RefNo" -> "a/b/c"
     )
 
-    CalmTransformer(record, version).right.get shouldBe a[UnidentifiedInvisibleWork]
+    CalmTransformer(record, version).right.get shouldBe a[
+      UnidentifiedInvisibleWork]
   }
 
   it("errors if invalid access status") {
@@ -405,7 +410,6 @@ class CalmTransformerTest extends FunSpec with Matchers {
     CalmTransformer(record, version).right.get.data.language shouldBe Some(
       Language("Lolol", None))
   }
-
 
   def calmRecord(fields: (String, String)*): CalmRecord =
     CalmRecord(
