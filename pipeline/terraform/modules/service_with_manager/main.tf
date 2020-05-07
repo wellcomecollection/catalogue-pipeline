@@ -20,7 +20,6 @@ module "worker" {
   app_memory          = var.host_memory
   app_env_vars        = var.app_env_vars
   app_secret_env_vars = var.app_secret_env_vars
-  app_port            = var.app_container_port
 
   sidecar_image           = var.manager_container_image
   sidecar_name            = var.manager_container_name

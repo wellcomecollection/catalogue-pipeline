@@ -71,12 +71,6 @@ variable "app_name" {
   type = string
 }
 
-variable "app_port" {
-  // Leaving this as the default, -1, will not expose a port on the container
-  type    = number
-  default = -1
-}
-
 variable "app_cpu" {
   type    = number
   default = 512

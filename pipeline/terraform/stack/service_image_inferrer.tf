@@ -41,7 +41,6 @@ module "image_inferrer" {
 
   app_container_name  = "inferrer"
   app_container_image = local.feature_inferrer_image
-  app_container_port  = local.inferrer_port
   app_cpu             = 3584
   app_memory          = 7680
   app_healthcheck_json = jsonencode({

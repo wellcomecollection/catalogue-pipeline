@@ -14,7 +14,6 @@ module "worker" {
   use_fargate_spot   = var.use_fargate_spot
 
   image           = var.app_image
-  port            = var.app_port
   env_vars        = var.app_env_vars
   secret_env_vars = var.app_secret_env_vars
   app_cpu         = var.app_cpu

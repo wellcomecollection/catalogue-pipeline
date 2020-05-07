@@ -51,12 +51,6 @@ module "app_container" {
   environment = var.env_vars
   secrets     = var.secret_env_vars
 
-  port_mappings = var.port == -1 ? [] : [{
-    containerPort = var.port
-    hostPort      = 0
-    protocol      = "tcp"
-  }]
-
   log_configuration = module.log_router_container.container_log_configuration
 }
 

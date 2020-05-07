@@ -77,12 +77,6 @@ variable "security_group_ids" {
   default = []
 }
 
-variable "port" {
-  // Leaving this as the default will not expose a port on the container
-  type    = number
-  default = -1
-}
-
 variable "extra_container_definitions" {
   type    = list(any)
   default = []

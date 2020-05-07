@@ -53,11 +53,6 @@ variable "queue_read_policy" {}
 
 variable "app_container_image" {}
 
-variable "app_container_port" {
-  type    = number
-  default = 80
-}
-
 variable "app_container_name" {
   type = string
 }
