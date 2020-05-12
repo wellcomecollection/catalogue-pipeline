@@ -255,6 +255,12 @@ trait MultipleWorksSwagger {
         required = false
       ),
       new Parameter(
+        name = "identifiers",
+        in = ParameterIn.QUERY,
+        description = "Filter the work by identifiers.",
+        required = false
+      ),
+      new Parameter(
         name = "license",
         in = ParameterIn.QUERY,
         description = "Filter the work by license.",
