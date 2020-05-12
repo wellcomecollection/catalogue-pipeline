@@ -118,7 +118,8 @@ class IngestorWorkerServiceTest
             val messagesNotVisible =
               getQueueAttribute(
                 queue,
-                attributeName = "QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES_NOT_VISIBLE"
+                attributeName =
+                  "QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES_NOT_VISIBLE"
               )
 
             messagesNotVisible shouldBe "1"
