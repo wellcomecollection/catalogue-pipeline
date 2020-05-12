@@ -2,6 +2,8 @@ package uk.ac.wellcome.models.work.internal
 
 import uk.ac.wellcome.models.work.internal.result.Result
 
+case class UnknownAccessStatus(status: String) extends Throwable
+
 case class AccessCondition(
   status: Option[AccessStatus] = None,
   terms: Option[String] = None,
@@ -53,6 +55,6 @@ object AccessStatus {
       case status if status.startsWith("permission required") =>
         Right(AccessStatus.PermissionRequired)
       case status =>
-        Left(new Exception(s"Unrecognised access status: $status"))
+        Left(UnknownAccessStatus(status))
     }
 }

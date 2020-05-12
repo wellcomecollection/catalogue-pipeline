@@ -307,44 +307,28 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
     CalmTransformer(recordC, version).right.get shouldBe a[UnidentifiedWork]
   }
 
-  it("transforms to invisible work when Level=Group of Pieces") {
-    val record = calmRecord(
-      "Title" -> "abc",
-      "Level" -> "Group of Pieces",
+  it(
+    "Returns UnidentifiedInvisibleWorkWork when missing required source fields") {
+    val noTitle = calmRecord(
+      "Level" -> "Collection",
       "RefNo" -> "a/b/c"
     )
-    CalmTransformer(record, version).right.get shouldBe a[
-      UnidentifiedInvisibleWork]
-  }
-
-  it("uses empty WorkData for suppressed works when not parsable") {
-    val record = calmRecord(
-      "Level" -> "Invalid",
-      "RefNo" -> "a/b/c",
-      "Transmission" -> "No"
-    )
-
-    CalmTransformer(record, version) shouldBe Right(
-      UnidentifiedInvisibleWork(
-        version = version,
-        sourceIdentifier = SourceIdentifier(
-          value = id,
-          identifierType = CalmIdentifierTypes.recordId
-        ),
-        data = WorkData())
-    )
-  }
-
-  it("errors with invalid Level") {
-    val record = calmRecord(
-      "Level" -> "UnknownLevel",
+    val noLevel = calmRecord(
+      "Title" -> "Stay calm",
       "RefNo" -> "a/b/c"
     )
+    val noRefNo = calmRecord(
+      "Title" -> "Stay calm",
+      "Level" -> "Collection"
+    )
 
-    CalmTransformer(record, version) shouldBe a[Left[_, _]]
+    List(noTitle, noLevel, noRefNo) map { record =>
+      CalmTransformer(record, version).right.get shouldBe a[
+        UnidentifiedInvisibleWork]
+    }
   }
 
-  it("errors if invalid access status") {
+  it("returns a UnidentifiedInvisibleWork if invalid access status") {
     val record = calmRecord(
       "Title" -> "abc",
       "Level" -> "Collection",
@@ -352,44 +336,49 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "AltRefNo" -> "a.b.c",
       "AccessStatus" -> "AAH",
     )
-    CalmTransformer(record, version) shouldBe a[Left[_, _]]
+    CalmTransformer(record, version).right.get shouldBe a[
+      UnidentifiedInvisibleWork]
   }
 
-  it("errors if no title") {
+  it("returns a UnidentifiedInvisibleWork if no title") {
     val record = calmRecord(
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
       "AltRefNo" -> "a.b.c",
     )
-    CalmTransformer(record, version) shouldBe a[Left[_, _]]
+    CalmTransformer(record, version).right.get shouldBe a[
+      UnidentifiedInvisibleWork]
   }
 
-  it("errors if no workType") {
+  it("returns a UnidentifiedInvisibleWork if no workType") {
     val record = calmRecord(
       "Title" -> "abc",
       "RefNo" -> "a/b/c",
       "AltRefNo" -> "a.b.c",
     )
-    CalmTransformer(record, version) shouldBe a[Left[_, _]]
+    CalmTransformer(record, version).right.get shouldBe a[
+      UnidentifiedInvisibleWork]
   }
 
-  it("errors if invalid workType") {
+  it("returns a UnidentifiedInvisibleWork if invalid workType") {
     val record = calmRecord(
       "Title" -> "abc",
       "Level" -> "TopLevel",
       "RefNo" -> "a/b/c",
       "AltRefNo" -> "a.b.c",
     )
-    CalmTransformer(record, version) shouldBe a[Left[_, _]]
+    CalmTransformer(record, version).right.get shouldBe a[
+      UnidentifiedInvisibleWork]
   }
 
-  it("errors if no RefNo") {
+  it("returns a UnidentifiedInvisibleWork if no RefNo") {
     val record = calmRecord(
       "Title" -> "abc",
       "Level" -> "Collection",
       "AltRefNo" -> "a.b.c",
     )
-    CalmTransformer(record, version) shouldBe a[Left[_, _]]
+    CalmTransformer(record, version).right.get shouldBe a[
+      UnidentifiedInvisibleWork]
   }
 
   it("does not add language code if language not recognised") {
