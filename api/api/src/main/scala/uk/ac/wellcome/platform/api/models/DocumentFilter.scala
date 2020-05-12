@@ -27,6 +27,8 @@ case class LicenseFilter(licenseIds: Seq[String])
     extends WorkFilter
     with ImageFilter
 
+case class IdentifiersFilter(values: List[String]) extends WorkFilter
+
 case class CollectionPathFilter(path: String) extends WorkFilter
 
 case class CollectionDepthFilter(depth: Int) extends WorkFilter

@@ -2,7 +2,6 @@ package uk.ac.wellcome.platform.merger.rules
 
 import scala.Function.const
 import cats.data.NonEmptyList
-
 import uk.ac.wellcome.models.work.internal.{
   Identifiable,
   MergedImage,
@@ -43,7 +42,7 @@ object ImagesRule extends FieldMergeRule {
     case target if WorkPredicates.singleDigitalItemMiroWork(target) =>
       target.data.images.map {
         _.mergeWith(
-          parentWork = Identifiable(target.sourceIdentifier),
+          sourceWork = Identifiable(target.sourceIdentifier),
           fullText = createFulltext(List(target))
         )
       }
@@ -70,7 +69,7 @@ object ImagesRule extends FieldMergeRule {
       works flatMap {
         _.data.images.map {
           _.mergeWith(
-            parentWork = Identifiable(target.sourceIdentifier),
+            sourceWork = Identifiable(target.sourceIdentifier),
             fullText = createFulltext(works)
           )
         }

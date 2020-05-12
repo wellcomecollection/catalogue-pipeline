@@ -33,10 +33,10 @@ module "task_definition" {
   launch_types = ["FARGATE"]
   task_name    = var.name
 
-  container_definitions = concat([
+  container_definitions = [
     module.log_router_container.container_definition,
     module.app_container.container_definition
-  ], var.extra_container_definitions)
+  ]
 }
 
 module "app_container" {

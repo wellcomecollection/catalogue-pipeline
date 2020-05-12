@@ -36,7 +36,6 @@ module "recorder" {
   secret_env_vars = {}
 
   subnets             = var.subnets
-  aws_region          = var.aws_region
   max_capacity        = 10
   messages_bucket_arn = aws_s3_bucket.messages.arn
   queue_read_policy   = module.recorder_queue.read_policy

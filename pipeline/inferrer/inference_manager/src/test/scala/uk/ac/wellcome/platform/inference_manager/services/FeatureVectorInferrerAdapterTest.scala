@@ -72,7 +72,7 @@ class FeatureVectorInferrerAdapterTest
           id should be(image.id)
           version should be(image.version)
           location should be(image.location)
-          parentWork should be(image.parentWork)
+          parentWork should be(image.source)
           fullText should be(image.fullText)
           inside(inferredData.value) {
             case InferredData(features1, features2, actualLshEncodedFeatures) =>

@@ -21,11 +21,17 @@ case object ImagesIndexConfig extends IndexConfig {
     denseVectorField("features2", 2048),
     keywordField("lshEncodedFeatures"))
 
+  val source = objectField("source").fields(
+    id("id"),
+    keywordField("type"),
+    keywordField("ontologyType")
+  )
+
   override val mapping: MappingDefinition = properties(
     id("id"),
     version,
     location("location"),
-    id("parentWork"),
+    source,
     fullText,
     inferredData
   ).dynamic(DynamicMapping.Strict)
