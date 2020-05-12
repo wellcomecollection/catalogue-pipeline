@@ -274,7 +274,10 @@ case object WorksIndexConfig extends IndexConfig {
         .fields(sourceIdentifier, canonicalId),
       keywordField("type"),
       data,
-      objectField("reasons")
+      objectField("reasons").fields(
+        keywordField("type"),
+        keywordField("info")
+      )
     )
 
   val mapping = properties(fields).dynamic(DynamicMapping.Strict)
