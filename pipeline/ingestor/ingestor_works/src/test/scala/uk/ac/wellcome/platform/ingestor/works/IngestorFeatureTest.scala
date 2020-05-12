@@ -26,7 +26,7 @@ class IngestorFeatureTest
   it("ingests a Miro work") {
     val work = createIdentifiedWork
 
-    withLocalSqsQueue { queue =>
+    withLocalSqsQueue() { queue =>
       sendMessage[IdentifiedBaseWork](queue = queue, obj = work)
       withLocalWorksIndex { index =>
         withWorkerService(
@@ -45,7 +45,7 @@ class IngestorFeatureTest
       sourceIdentifier = createSierraSystemSourceIdentifier
     )
 
-    withLocalSqsQueue { queue =>
+    withLocalSqsQueue() { queue =>
       sendMessage[IdentifiedBaseWork](queue = queue, obj = work)
       withLocalWorksIndex { index =>
         withWorkerService(

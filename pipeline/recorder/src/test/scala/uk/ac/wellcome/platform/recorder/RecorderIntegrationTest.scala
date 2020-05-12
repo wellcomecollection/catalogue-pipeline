@@ -35,7 +35,7 @@ class RecorderIntegrationTest
   }
 
   it("saves received works to VHS, and puts the VHS key on the queue") {
-    withLocalSqsQueue { queue =>
+    withLocalSqsQueue() { queue =>
       withLocalS3Bucket { bucket =>
         withLocalDynamoDbTable { table =>
           withLocalSnsTopic { topic =>

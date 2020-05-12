@@ -30,7 +30,7 @@ class IngestorWorkerServiceTest
 
   it("creates the index at startup if it doesn't already exist") {
     val index = createIndex
-    withLocalSqsQueue { queue =>
+    withLocalSqsQueue() { queue =>
       withIndexer[SampleDocument, Any](index) { indexer =>
         withWorkerService[SampleDocument, Any](
           queue,
@@ -93,7 +93,7 @@ class IngestorWorkerServiceTest
   }
 
   it("does not delete a message from the queue if it fails processing") {
-    withLocalSqsQueue { queue =>
+    withLocalSqsQueue() { queue =>
       val index = createIndex
       withIndexer[SampleDocument, Any](index) { indexer =>
         withWorkerService[SampleDocument, Any](
@@ -130,7 +130,7 @@ class IngestorWorkerServiceTest
 
   it("when we cannot verify an index exists throw an exception") {
     val index = createIndex
-    withLocalSqsQueue { queue =>
+    withLocalSqsQueue() { queue =>
       withActorSystem { implicit actorSystem =>
         implicit val typedStoreT =
           MemoryTypedStoreCompanion[ObjectLocation, SampleDocument]()

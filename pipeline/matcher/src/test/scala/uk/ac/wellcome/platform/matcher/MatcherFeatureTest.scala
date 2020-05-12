@@ -29,7 +29,7 @@ class MatcherFeatureTest
 
   it("processes a message with a simple UnidentifiedWork with no linked works") {
     withLocalSnsTopic { topic =>
-      withLocalSqsQueue { queue =>
+      withLocalSqsQueue() { queue =>
         withVHS { vhs =>
           withWorkerService(vhs, queue, topic) { _ =>
             val work = createUnidentifiedWork

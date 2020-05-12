@@ -31,7 +31,7 @@ class MatcherWorkerServiceTest
 
   it("creates a work without identifiers") {
     withLocalSnsTopic { topic =>
-      withLocalSqsQueue { queue =>
+      withLocalSqsQueue() { queue =>
         withVHS { vhs =>
           withWorkerService(vhs, queue, topic) { _ =>
             // Work Av1 created without any matched works
@@ -55,7 +55,7 @@ class MatcherWorkerServiceTest
   it(
     "sends an invisible work as a single matched result with no other matched identifiers") {
     withLocalSnsTopic { topic =>
-      withLocalSqsQueue { queue =>
+      withLocalSqsQueue() { queue =>
         withVHS { vhs =>
           withWorkerService(vhs, queue, topic) { _ =>
             val invisibleWork = createUnidentifiedInvisibleWork
@@ -83,7 +83,7 @@ class MatcherWorkerServiceTest
   it(
     "work A with one link to B and no existing works returns a single matched work") {
     withLocalSnsTopic { topic =>
-      withLocalSqsQueue { queue =>
+      withLocalSqsQueue() { queue =>
         withVHS { vhs =>
           withWorkerService(vhs, queue, topic) { _ =>
             // Work Av1
@@ -115,7 +115,7 @@ class MatcherWorkerServiceTest
   it(
     "matches a work with one link then matches the combined work to a new work") {
     withLocalSnsTopic { topic =>
-      withLocalSqsQueue { queue =>
+      withLocalSqsQueue() { queue =>
         withVHS { vhs =>
           withWorkerService(vhs, queue, topic) { _ =>
             // Work Av1
@@ -204,7 +204,7 @@ class MatcherWorkerServiceTest
 
   it("breaks matched works into individual works") {
     withLocalSnsTopic { topic =>
-      withLocalSqsQueue { queue =>
+      withLocalSqsQueue() { queue =>
         withVHS { vhs =>
           withWorkerService(vhs, queue, topic) { _ =>
             // Work Av1

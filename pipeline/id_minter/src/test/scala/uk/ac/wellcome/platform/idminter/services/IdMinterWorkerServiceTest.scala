@@ -27,7 +27,7 @@ class IdMinterWorkerServiceTest
     with WorkerServiceFixture {
 
   it("creates the Identifiers table in MySQL upon startup") {
-    withLocalSqsQueue { queue =>
+    withLocalSqsQueue() { queue =>
       withLocalSnsTopic { topic =>
         withIdentifiersDatabase { identifiersTableConfig =>
           withLocalS3Bucket { bucket =>

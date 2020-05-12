@@ -24,7 +24,7 @@ class RecorderWorkerServiceTest
     with WorksGenerators {
 
   it("records an UnidentifiedWork") {
-    withLocalSqsQueue { queue =>
+    withLocalSqsQueue() { queue =>
       withMemoryMessageSender { msgSender =>
         withVHS { vhs =>
           withWorkerService(queue, vhs, msgSender) { service =>
@@ -40,7 +40,7 @@ class RecorderWorkerServiceTest
   }
 
   it("stores UnidentifiedInvisibleWorks") {
-    withLocalSqsQueue { queue =>
+    withLocalSqsQueue() { queue =>
       withMemoryMessageSender { msgSender =>
         withVHS { vhs =>
           withWorkerService(queue, vhs, msgSender) { service =>
@@ -56,7 +56,7 @@ class RecorderWorkerServiceTest
   }
 
   it("doesn't overwrite a newer work with an older work") {
-    withLocalSqsQueue { queue =>
+    withLocalSqsQueue() { queue =>
       withMemoryMessageSender { msgSender =>
         withVHS { vhs =>
           withWorkerService(queue, vhs, msgSender) { service =>
@@ -76,7 +76,7 @@ class RecorderWorkerServiceTest
   }
 
   it("overwrites an older work with an newer work") {
-    withLocalSqsQueue { queue =>
+    withLocalSqsQueue() { queue =>
       withMemoryMessageSender { msgSender =>
         withVHS { vhs =>
           withWorkerService(queue, vhs, msgSender) { service =>
@@ -119,7 +119,7 @@ class RecorderWorkerServiceTest
   }
 
   it("sends the VHS key to the queue") {
-    withLocalSqsQueue { queue =>
+    withLocalSqsQueue() { queue =>
       withMemoryMessageSender { msgSender =>
         withVHS { vhs =>
           withWorkerService(queue, vhs, msgSender) { service =>

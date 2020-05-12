@@ -37,7 +37,7 @@ class SierraTransformerIntegrationTest
 
   it("transforms sierra records and publishes the result to the given topic") {
     withLocalSnsTopic { topic =>
-      withLocalSqsQueue { queue =>
+      withLocalSqsQueue() { queue =>
         withLocalS3Bucket { storageBucket =>
           withLocalS3Bucket { messagingBucket =>
             val store = S3TypedStore[SierraTransformable]
