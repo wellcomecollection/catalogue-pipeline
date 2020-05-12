@@ -45,10 +45,10 @@ module "image_inferrer" {
   app_memory          = 7680
   app_healthcheck = {
     command     = ["CMD-SHELL", "curl -f http://localhost:${local.inferrer_port}/healthcheck"],
-    interval = 30,
-    retries = 3,
+    interval    = 30,
+    retries     = 3,
     startPeriod = 30,
-    timeout = 5
+    timeout     = 5
   }
 
   manager_env_vars = {

@@ -38,7 +38,7 @@ module "ingestor_works" {
   }
 
 
-  subnets    = var.subnets
+  subnets = var.subnets
 
   max_capacity        = 10
   messages_bucket_arn = aws_s3_bucket.messages.arn
