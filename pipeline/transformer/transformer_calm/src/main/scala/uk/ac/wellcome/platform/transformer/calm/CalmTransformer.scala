@@ -1,8 +1,7 @@
 package uk.ac.wellcome.platform.transformer.calm
 
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.models.work.internal.UntransformableReason._
-import uk.ac.wellcome.models.work.internal.SuppressedReason._
+import uk.ac.wellcome.models.work.internal.InvisibilityReason._
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.internal.result._
 import uk.ac.wellcome.platform.transformer.calm.models.CalmTransformerException
@@ -40,7 +39,7 @@ object CalmTransformer
           sourceIdentifier = sourceIdentifier(record),
           version = version,
           data = workData(record).getOrElse(WorkData()),
-          reasons = List(SuppressedFromCalm)
+          invisibilityReasons = List(SuppressedFromSource("Calm"))
         )
       )
     } else {
@@ -61,20 +60,23 @@ object CalmTransformer
                   sourceIdentifier = sourceIdentifier(record),
                   version = version,
                   data = WorkData(),
-                  reasons = List(knownErrToUntransformableReason(knownErr))))
+                  invisibilityReasons =
+                    List(knownErrToUntransformableReason(knownErr))))
             case UnknownAccessStatus(status) =>
-              Right(UnidentifiedInvisibleWork(
-                sourceIdentifier = sourceIdentifier(record),
-                version = version,
-                data = WorkData(),
-                reasons = List(InvalidValueInSourceField("Calm:AccessStatus"))))
+              Right(
+                UnidentifiedInvisibleWork(
+                  sourceIdentifier = sourceIdentifier(record),
+                  version = version,
+                  data = WorkData(),
+                  invisibilityReasons =
+                    List(InvalidValueInSourceField("Calm:AccessStatus"))))
             case err: Exception => Left(err)
           }
       }
     }
 
   private def knownErrToUntransformableReason(
-    err: CalmTransformerException): UntransformableReason =
+    err: CalmTransformerException): InvisibilityReason =
     err match {
       case TitleMissing      => SourceFieldMissing("Calm:Title")
       case RefNoMissing      => SourceFieldMissing("Calm:RefNo")
