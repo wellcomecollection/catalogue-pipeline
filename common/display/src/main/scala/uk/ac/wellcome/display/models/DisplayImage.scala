@@ -15,11 +15,12 @@ case class DisplayImage(
   ) id: String,
   @Schema(
     `type` = "uk.ac.wellcome.Display.models.DisplayDigitalLocation",
-    description = "The location which provides access to the image"
-  ) location: DisplayDigitalLocation,
+    description = "The locations which provide access to the image"
+  ) locations: Seq[DisplayDigitalLocation],
   @Schema(
-    description = "The work to which the image relates"
-  ) parentWork: String,
+    `type` = "uk.ac.wellcone.Display.models.DisplayImageSource",
+    description = "A description of the image's source"
+  ) source: DisplayImageSource,
   @JsonKey("type") @Schema(name = "type") ontologyType: String = "Image"
 )
 
@@ -28,8 +29,8 @@ object DisplayImage {
   def apply(image: AugmentedImage): DisplayImage =
     new DisplayImage(
       id = image.id.canonicalId,
-      location = DisplayDigitalLocation(image.location),
-      parentWork = image.parentWork.canonicalId
+      locations = Seq(DisplayDigitalLocation(image.location)),
+      source = DisplayImageSource(image.source)
     )
 
 }

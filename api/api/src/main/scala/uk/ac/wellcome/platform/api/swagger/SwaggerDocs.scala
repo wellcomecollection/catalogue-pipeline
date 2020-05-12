@@ -37,7 +37,8 @@ class SwaggerDocs(apiConfig: ApiConfig) extends Logging {
     Set(
       classOf[SingleWorkSwagger],
       classOf[MultipleWorksSwagger],
-      classOf[SingleImageSwagger]
+      classOf[SingleImageSwagger],
+      classOf[MultipleImagesSwagger]
     )
 
   val openAPI = new OpenAPI()
@@ -184,6 +185,101 @@ trait SingleWorkSwagger {
     )
   )
   def getWork(): Unit
+}
+
+@Path("/images")
+trait MultipleImagesSwagger {
+  @GET
+  @Tag(name = "Images")
+  @Operation(
+    summary = "/images",
+    description = "Returns a paginated list of images",
+    parameters = Array(
+      new Parameter(
+        name = "query",
+        in = ParameterIn.QUERY,
+        description = "Full-text search query",
+        required = false
+      ),
+      new Parameter(
+        name = "locations.license",
+        in = ParameterIn.QUERY,
+        description = "Filter the image by license.",
+        schema = new Schema(
+          allowableValues = Array(
+            "cc-by",
+            "cc-by-nc",
+            "cc-by-nc-nd",
+            "cc-0",
+            "pdm",
+            "copyright-not-cleared")),
+        required = false
+      ),
+      new Parameter(
+        name = "page",
+        in = ParameterIn.QUERY,
+        description = "The page to return from the result list",
+        required = false
+      ),
+      new Parameter(
+        name = "pageSize",
+        in = ParameterIn.QUERY,
+        description = "The number of images to return per page (default: 10)",
+        required = false
+      ),
+    )
+  )
+  @ApiResponse(
+    responseCode = "200",
+    description = "The images",
+    content = Array(
+      new Content(
+        schema = new Schema(implementation = classOf[DisplayImagesResultList]))
+    )
+  )
+  @ApiResponse(
+    responseCode = "400",
+    description = "Bad Request Error",
+    content = Array(
+      new Content(schema = new Schema(implementation = classOf[DisplayError]))
+    )
+  )
+  @ApiResponse(
+    responseCode = "404",
+    description = "Not Found Error",
+    content = Array(
+      new Content(schema = new Schema(implementation = classOf[DisplayError]))
+    )
+  )
+  @ApiResponse(
+    responseCode = "410",
+    description = "Gone Error",
+    content = Array(
+      new Content(schema = new Schema(implementation = classOf[DisplayError]))
+    )
+  )
+  @ApiResponse(
+    responseCode = "500",
+    description = "Internal Server Error",
+    content = Array(
+      new Content(schema = new Schema(implementation = classOf[DisplayError]))
+    )
+  )
+  def getImages(): Unit
+
+  // See comment on equivalent code in MultipleWorksSwagger re why this has to exist
+  @Schema(
+    name = "ImagesResultList",
+    description = "A paginated list of images."
+  )
+  class DisplayImagesResultList
+      extends DisplayResultList[DisplayImage, Unit](
+        context = "",
+        pageSize = 0,
+        totalPages = 0,
+        totalResults = 0,
+        results = Nil)
+  val _ = new DisplayImagesResultList
 }
 
 @Path("/works")

@@ -21,8 +21,11 @@ trait ApiImagesTestBase
        |  {
        |    "type": "Image",
        |    "id": "${image.id.canonicalId}",
-       |    "location": ${location(image.location)},
-       |    "parentWork": "${image.parentWork.canonicalId}"
+       |    "locations": [${location(image.location)}],
+       |    "source": {
+       |      "id": "${image.source.id.canonicalId}",
+       |      "type": "Work"
+       |    }
        |  }
      """.stripMargin
 

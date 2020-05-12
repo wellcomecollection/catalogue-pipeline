@@ -12,7 +12,9 @@ class ImagesFiltersTest extends ApiImagesTestBase {
       withApi {
         case (ElasticConfig(_, imagesIndex), routes) =>
           insertImagesIntoElasticsearch(imagesIndex, ccByImage, ccByNcImage)
-          assertJsonResponse(routes, s"/$apiPrefix/images?license=cc-by") {
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/images?locations.license=cc-by") {
             Status.OK -> imagesListResponse(
               images = Seq(ccByImage)
             )
