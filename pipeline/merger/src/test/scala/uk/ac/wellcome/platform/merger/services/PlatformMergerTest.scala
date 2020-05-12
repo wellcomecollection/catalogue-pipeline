@@ -117,7 +117,7 @@ class PlatformMergerTest
         redirect = IdentifiableRedirect(sierraPhysicalWork.sourceIdentifier))
 
     val expectedImage = miroWork.data.images.head mergeWith (
-      parentWork = Identifiable(sierraPhysicalWork.sourceIdentifier),
+      sourceWork = Identifiable(sierraPhysicalWork.sourceIdentifier),
       fullText = createFulltext(List(sierraPhysicalWork, miroWork))
     )
 
@@ -160,7 +160,7 @@ class PlatformMergerTest
         redirect = IdentifiableRedirect(sierraDigitalWork.sourceIdentifier))
 
     val expectedImage = miroWork.data.images.head mergeWith (
-      parentWork = Identifiable(sierraDigitalWork.sourceIdentifier),
+      sourceWork = Identifiable(sierraDigitalWork.sourceIdentifier),
       fullText = createFulltext(List(sierraDigitalWork, miroWork))
     )
 
@@ -238,7 +238,7 @@ class PlatformMergerTest
       )
 
     val expectedImage = metsWork.data.images.head mergeWith (
-      parentWork = Identifiable(sierraPictureWork.sourceIdentifier),
+      sourceWork = Identifiable(sierraPictureWork.sourceIdentifier),
       fullText = createFulltext(List(sierraPictureWork, metsWork))
     )
 
@@ -295,7 +295,7 @@ class PlatformMergerTest
         redirect = IdentifiableRedirect(sierraPhysicalWork.sourceIdentifier))
 
     val expectedImage = miroWork.data.images.head mergeWith (
-      parentWork = Identifiable(sierraPhysicalWork.sourceIdentifier),
+      sourceWork = Identifiable(sierraPhysicalWork.sourceIdentifier),
       fullText = createFulltext(List(sierraPhysicalWork, miroWork))
     )
 
