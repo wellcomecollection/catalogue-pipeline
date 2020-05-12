@@ -110,6 +110,6 @@ variable "sidecar_memory" {
 }
 
 variable "app_healthcheck" {
-  type    = string
-  default = ""
+  type    = any
+  default = null
 }

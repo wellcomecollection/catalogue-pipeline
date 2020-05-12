@@ -47,7 +47,6 @@ module "image_id_minter" {
 
 
   subnets             = var.subnets
-  aws_region          = var.aws_region
   messages_bucket_arn = aws_s3_bucket.messages.arn
   queue_read_policy   = module.image_id_minter_queue.read_policy
 

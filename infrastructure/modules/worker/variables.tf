@@ -76,8 +76,3 @@ variable "security_group_ids" {
   type    = list(string)
   default = []
 }
-
-variable "extra_container_definitions" {
-  type    = list(any)
-  default = []
-}
