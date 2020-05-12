@@ -99,7 +99,7 @@ class RecorderWorkerServiceTest
   }
 
   it("fails if saving to the store fails") {
-    withLocalSqsQueueAndDlq {
+    withLocalSqsQueuePair() {
       case SQS.QueuePair(queue, dlq) =>
         withMemoryMessageSender { msgSender =>
           withBrokenVHS { vhs =>

@@ -124,7 +124,7 @@ class IngestorWorkerServiceTest
   private def assertWorksIndexedCorrectly(
     works: IdentifiedBaseWork*): Assertion =
     withLocalWorksIndex { index =>
-      withLocalSqsQueueAndDlqAndTimeout(visibilityTimeout = 10) {
+      withLocalSqsQueuePair(visibilityTimeout = 10) {
         case QueuePair(queue, dlq) =>
           withWorkerService(
             queue,

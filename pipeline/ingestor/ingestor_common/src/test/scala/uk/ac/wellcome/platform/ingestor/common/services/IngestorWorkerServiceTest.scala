@@ -46,7 +46,7 @@ class IngestorWorkerServiceTest
 
   it("ingests a single document") {
     val document = SampleDocument(1, createCanonicalId, randomAlphanumeric)
-    withLocalSqsQueueAndDlqAndTimeout(visibilityTimeout = 10) {
+    withLocalSqsQueuePair(visibilityTimeout = 10) {
       case QueuePair(queue, dlq) =>
         sendMessage[SampleDocument](queue = queue, obj = document)
         val index = createIndex
@@ -70,7 +70,7 @@ class IngestorWorkerServiceTest
   it("ingests lots of documents") {
     val documents = (1 to 250).map(_ =>
       SampleDocument(1, createCanonicalId, randomAlphanumeric))
-    withLocalSqsQueueAndDlqAndTimeout(visibilityTimeout = 10) {
+    withLocalSqsQueuePair(visibilityTimeout = 10) {
       case QueuePair(queue, dlq) =>
         documents.foreach(document =>
           sendMessage[SampleDocument](queue = queue, obj = document))

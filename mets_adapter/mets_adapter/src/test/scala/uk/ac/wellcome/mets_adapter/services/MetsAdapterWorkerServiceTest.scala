@@ -165,7 +165,7 @@ class MetsAdapterWorkerServiceTest
     testWith: TestWith[(MetsAdapterWorkerService, QueuePair, SNS.Topic), R]) =
     withActorSystem { implicit actorSystem =>
       withLocalSnsTopic { topic =>
-        withLocalSqsQueueAndDlq {
+        withLocalSqsQueuePair() {
           case QueuePair(queue, dlq) =>
             withSQSStream[NotificationMessage, R](queue) { stream =>
               val workerService = new MetsAdapterWorkerService(

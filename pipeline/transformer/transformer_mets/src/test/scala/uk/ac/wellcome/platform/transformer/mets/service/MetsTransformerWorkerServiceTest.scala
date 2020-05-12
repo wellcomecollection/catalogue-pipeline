@@ -124,7 +124,7 @@ class MetsTransformerWorkerServiceTest
                         Topic,
                         VersionedStore[String, Int, MetsLocation]),
                        R]): R =
-    withLocalSqsQueueAndDlq {
+    withLocalSqsQueuePair() {
       case queuePair @ QueuePair(queue, _) =>
         withLocalSnsTopic { topic =>
           withLocalS3Bucket { messagingBucket =>

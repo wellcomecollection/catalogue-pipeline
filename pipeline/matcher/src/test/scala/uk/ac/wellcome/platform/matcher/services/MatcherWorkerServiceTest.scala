@@ -276,7 +276,7 @@ class MatcherWorkerServiceTest
 
   it("does not match a lower version") {
     withLocalSnsTopic { topic =>
-      withLocalSqsQueueAndDlq {
+      withLocalSqsQueuePair() {
         case QueuePair(queue, dlq) =>
           withVHS { vhs =>
             withWorkerService(vhs, queue, topic) { _ =>
@@ -318,7 +318,7 @@ class MatcherWorkerServiceTest
 
   it("does not match an existing version with different information") {
     withLocalSnsTopic { topic =>
-      withLocalSqsQueueAndDlq {
+      withLocalSqsQueuePair() {
         case QueuePair(queue, dlq) =>
           withVHS { vhs =>
             withWorkerService(vhs, queue, topic) { _ =>

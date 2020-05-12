@@ -326,7 +326,7 @@ class BigMessageStreamTest
     typedStore: TypedStore[ObjectLocation, ExampleObject] =
       MemoryTypedStoreCompanion[ObjectLocation, ExampleObject]): R =
     withActorSystem { implicit actorSystem =>
-      withLocalSqsQueueAndDlq {
+      withLocalSqsQueuePair() {
         case queuePair @ QueuePair(queue, _) =>
           val metrics = new MemoryMetrics[StandardUnit]()
           withBigMessageStream[ExampleObject, R](queue, metrics) { stream =>

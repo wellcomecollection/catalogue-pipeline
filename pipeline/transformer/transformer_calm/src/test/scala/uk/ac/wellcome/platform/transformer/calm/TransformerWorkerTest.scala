@@ -146,7 +146,7 @@ class TransformerWorkerTest
                         MemoryMetrics[StandardUnit]),
                        R]) =
     withActorSystem { implicit actorSystem =>
-      withLocalSqsQueueAndDlq {
+      withLocalSqsQueuePair() {
         case QueuePair(queue, dlq) =>
           val metrics = new MemoryMetrics[StandardUnit]()
           withSQSStream[NotificationMessage, R](queue, metrics) { stream =>

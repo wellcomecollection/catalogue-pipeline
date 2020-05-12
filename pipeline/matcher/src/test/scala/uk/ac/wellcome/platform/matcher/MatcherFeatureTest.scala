@@ -60,7 +60,7 @@ class MatcherFeatureTest
   it(
     "does not process a message if the work version is older than that already stored in the graph store") {
     withLocalSnsTopic { topic =>
-      withLocalSqsQueueAndDlq {
+      withLocalSqsQueuePair() {
         case QueuePair(queue, dlq) =>
           withWorkGraphTable { graphTable =>
             withVHS { vhs =>
@@ -97,7 +97,7 @@ class MatcherFeatureTest
   it(
     "does not process a message if the work version is older than that already stored in vhs") {
     withLocalSnsTopic { topic =>
-      withLocalSqsQueueAndDlq {
+      withLocalSqsQueuePair() {
         case QueuePair(queue, dlq) =>
           withWorkGraphTable { graphTable =>
             withVHS { vhs: VHS =>
