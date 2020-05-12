@@ -43,10 +43,13 @@ module "image_inferrer" {
   app_container_image = local.feature_inferrer_image
   app_cpu             = 3584
   app_memory          = 7680
-  app_healthcheck_json = jsonencode({
+  app_healthcheck = {
     command     = ["CMD-SHELL", "curl -f http://localhost:${local.inferrer_port}/healthcheck"],
-    startPeriod = 30
-  })
+    interval = 30,
+    retries = 3,
+    startPeriod = 30,
+    timeout = 5
+  }
 
   manager_env_vars = {
     inferrer_host        = local.inferrer_host

@@ -52,6 +52,8 @@ module "app_container" {
   environment = var.app_env_vars
   secrets     = var.app_secret_env_vars
 
+  healthcheck = var.app_healthcheck
+
   log_configuration = module.log_router_container.container_log_configuration
 }
 
@@ -73,7 +75,7 @@ module "sidecar_container" {
   environment = var.sidecar_env_vars
   secrets     = var.sidecar_secret_env_vars
 
-  depends = var.app_healthcheck == "" ? [] : [{
+  depends = var.app_healthcheck == null ? [] : [{
     containerName = var.name
     condition     = "HEALTHY"
   }]
