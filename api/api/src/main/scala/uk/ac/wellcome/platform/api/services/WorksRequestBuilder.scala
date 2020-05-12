@@ -146,6 +146,14 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
         termsQuery(
           field = "data.items.locations.license.id",
           values = licenseIds)
+      case IdentifiersFilter(identifiers) =>
+        should(
+          termsQuery(field = "sourceIdentifier.value", values = identifiers),
+          termsQuery(
+            field = "data.otherIdentifiers.value",
+            values = identifiers)
+        )
+
       case CollectionPathFilter(path) =>
         termQuery(field = "data.collectionPath.path", value = path)
       case CollectionDepthFilter(depth) =>

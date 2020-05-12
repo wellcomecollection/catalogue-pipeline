@@ -61,6 +61,7 @@ case class MultipleWorksParams(
   sort: Option[List[SortRequest]],
   sortOrder: Option[SortingOrder],
   query: Option[String],
+  identifiers: Option[IdentifiersFilter],
   collection: Option[CollectionPathFilter],
   `collection.depth`: Option[CollectionDepthFilter],
   _queryType: Option[SearchQueryType],
@@ -89,6 +90,7 @@ case class MultipleWorksParams(
       language,
       `genres.label`,
       `subjects.label`,
+      identifiers,
       collection,
       `collection.depth`,
       license
@@ -128,6 +130,7 @@ object MultipleWorksParams extends QueryParamsUtils {
         "sort".as[List[SortRequest]].?,
         "sortOrder".as[SortingOrder].?,
         "query".as[String].?,
+        "identifiers".as[IdentifiersFilter].?,
         "collection".as[CollectionPathFilter].?,
         "collection.depth".as[CollectionDepthFilter].?,
         "_queryType".as[SearchQueryType].?,
@@ -152,6 +155,9 @@ object MultipleWorksParams extends QueryParamsUtils {
 
   implicit val subjectFilter: Decoder[SubjectFilter] =
     Decoder.decodeString.emap(str => Right(SubjectFilter(str)))
+
+  implicit val identifiersFilter: Decoder[IdentifiersFilter] =
+    decodeCommaSeparated.emap(strs => Right(IdentifiersFilter(strs)))
 
   implicit val collectionsPathFilter: Decoder[CollectionPathFilter] =
     Decoder.decodeString.emap(str => Right(CollectionPathFilter(str)))
