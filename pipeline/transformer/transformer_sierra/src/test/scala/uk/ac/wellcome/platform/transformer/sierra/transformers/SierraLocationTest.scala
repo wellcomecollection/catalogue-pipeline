@@ -7,7 +7,8 @@ import uk.ac.wellcome.models.work.internal.{
   AccessStatus,
   DigitalLocation,
   LocationType,
-  PhysicalLocation
+  PhysicalLocation,
+  UnknownAccessStatus
 }
 import uk.ac.wellcome.platform.transformer.sierra.exceptions.SierraTransformerException
 import uk.ac.wellcome.platform.transformer.sierra.source.sierra.SierraSourceLocation
@@ -316,7 +317,7 @@ class SierraLocationTest
           )
         )
       )
-      assertThrows[Exception] {
+      assertThrows[UnknownAccessStatus] {
         transformer.getPhysicalLocation(itemData, bibData)
       }
     }
