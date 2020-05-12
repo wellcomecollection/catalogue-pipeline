@@ -455,4 +455,110 @@ class WorksFiltersTest extends ApiWorksTestBase {
       }
     }
   }
+
+  describe("Identifiers filter") {
+    val unknownWork = createIdentifiedWork
+
+    it("filters by a sourceIdentifier") {
+      withApi {
+        case (ElasticConfig(worksIndex, _), routes) =>
+          val work =
+            createIdentifiedWorkWith(sourceIdentifier = createSourceIdentifier)
+          insertIntoElasticsearch(worksIndex, unknownWork, work)
+
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works?identifiers=${work.sourceIdentifier.value}") {
+            Status.OK -> worksListResponse(
+              apiPrefix = apiPrefix,
+              works = Seq(work).sortBy(_.canonicalId)
+            )
+          }
+      }
+    }
+
+    it("filters by multiple sourceIdentifiers") {
+      withApi {
+        case (ElasticConfig(worksIndex, _), routes) =>
+          val work1 =
+            createIdentifiedWorkWith(sourceIdentifier = createSourceIdentifier)
+          val work2 =
+            createIdentifiedWorkWith(sourceIdentifier = createSourceIdentifier)
+
+          insertIntoElasticsearch(worksIndex, unknownWork, work1, work2)
+
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works?identifiers=${work1.sourceIdentifier.value},${work2.sourceIdentifier.value}") {
+            Status.OK -> worksListResponse(
+              apiPrefix = apiPrefix,
+              works = Seq(work1, work2).sortBy(_.canonicalId)
+            )
+          }
+      }
+    }
+
+    it("filters by an otherIdentifier") {
+      withApi {
+        case (ElasticConfig(worksIndex, _), routes) =>
+          val work =
+            createIdentifiedWorkWith(
+              otherIdentifiers = List(createSourceIdentifier))
+          insertIntoElasticsearch(worksIndex, unknownWork, work)
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works?identifiers=${work.otherIdentifiers.head.value}") {
+            Status.OK -> worksListResponse(
+              apiPrefix = apiPrefix,
+              works = Seq(work).sortBy(_.canonicalId)
+            )
+          }
+      }
+    }
+
+    it("filters by multiple otherIdentifiers") {
+      withApi {
+        case (ElasticConfig(worksIndex, _), routes) =>
+          val work1 =
+            createIdentifiedWorkWith(
+              otherIdentifiers = List(createSourceIdentifier))
+
+          val work2 =
+            createIdentifiedWorkWith(
+              otherIdentifiers = List(createSourceIdentifier))
+
+          insertIntoElasticsearch(worksIndex, unknownWork, work1, work2)
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works?identifiers=${work1.otherIdentifiers.head.value},${work2.otherIdentifiers.head.value}") {
+            Status.OK -> worksListResponse(
+              apiPrefix = apiPrefix,
+              works = Seq(work1, work2).sortBy(_.canonicalId)
+            )
+          }
+      }
+    }
+
+    it("filters by mixed identifiers") {
+      withApi {
+        case (ElasticConfig(worksIndex, _), routes) =>
+          val work1 =
+            createIdentifiedWork
+
+          val work2 =
+            createIdentifiedWorkWith(
+              otherIdentifiers = List(createSourceIdentifier))
+
+          insertIntoElasticsearch(worksIndex, unknownWork, work1, work2)
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works?identifiers=${work1.sourceIdentifier.value},${work2.otherIdentifiers.head.value}") {
+            Status.OK -> worksListResponse(
+              apiPrefix = apiPrefix,
+              works = Seq(work1, work2).sortBy(_.canonicalId)
+            )
+          }
+      }
+    }
+  }
 }
