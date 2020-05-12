@@ -274,7 +274,7 @@ case object WorksIndexConfig extends IndexConfig {
         .fields(sourceIdentifier, canonicalId),
       keywordField("type"),
       data,
-      objectField("reasons").fields(
+      objectField("invisibilityReasons").fields(
         keywordField("type"),
         keywordField("info")
       )
