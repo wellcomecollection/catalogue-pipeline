@@ -1,9 +1,11 @@
 package uk.ac.wellcome.platform.transformer.calm
 
 import grizzled.slf4j.Logging
-
+import uk.ac.wellcome.models.work.internal.InvisibilityReason._
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.internal.result._
+import uk.ac.wellcome.platform.transformer.calm.models.CalmTransformerException
+import uk.ac.wellcome.platform.transformer.calm.models.CalmTransformerException._
 
 object CalmTransformer
     extends Transformer[CalmRecord]
@@ -31,25 +33,59 @@ object CalmTransformer
   )
 
   def apply(record: CalmRecord, version: Int): Result[TransformedBaseWork] =
-    if (shouldSuppress(record))
+    if (shouldSuppress(record)) {
       Right(
         UnidentifiedInvisibleWork(
           sourceIdentifier = sourceIdentifier(record),
           version = version,
-          data = workData(record).getOrElse(WorkData())
+          data = workData(record).getOrElse(WorkData()),
+          invisibilityReasons = List(SuppressedFromSource("Calm"))
         )
       )
-    else
-      workData(record) map { data =>
-        UnidentifiedWork(
-          sourceIdentifier = sourceIdentifier(record),
-          version = version,
-          data = data
-        )
-      }
+    } else {
+      workData(record) match {
+        case Right(data) =>
+          Right(
+            UnidentifiedWork(
+              sourceIdentifier = sourceIdentifier(record),
+              version = version,
+              data = data
+            ))
 
-  def shouldSuppress(record: CalmRecord): Boolean = {
-    val shouldNotTransmit = record
+        case Left(err) =>
+          err match {
+            case knownErr: CalmTransformerException =>
+              Right(
+                UnidentifiedInvisibleWork(
+                  sourceIdentifier = sourceIdentifier(record),
+                  version = version,
+                  data = WorkData(),
+                  invisibilityReasons =
+                    List(knownErrToUntransformableReason(knownErr))))
+            case UnknownAccessStatus(status) =>
+              Right(
+                UnidentifiedInvisibleWork(
+                  sourceIdentifier = sourceIdentifier(record),
+                  version = version,
+                  data = WorkData(),
+                  invisibilityReasons =
+                    List(InvalidValueInSourceField("Calm:AccessStatus"))))
+            case err: Exception => Left(err)
+          }
+      }
+    }
+
+  private def knownErrToUntransformableReason(
+    err: CalmTransformerException): InvisibilityReason =
+    err match {
+      case TitleMissing      => SourceFieldMissing("Calm:Title")
+      case RefNoMissing      => SourceFieldMissing("Calm:RefNo")
+      case LevelMissing      => SourceFieldMissing("Calm:Level")
+      case UnrecognisedLevel => InvalidValueInSourceField("Calm:Level")
+    }
+
+  def shouldSuppress(record: CalmRecord): Boolean =
+    record
       .get("Transmission")
       .exists { value =>
         value.toLowerCase match {
@@ -61,19 +97,6 @@ object CalmTransformer
             false
         }
       }
-
-    // This is just while the source data in Calm is being amended to not include this Level.
-    // We'd like them to go through so as not to clog up the DLQ as this is _not_
-    // an error, but a known state of the source data.
-    val isGroupOfPieces = record.get("Level").exists { value =>
-      value.toLowerCase match {
-        case "group of pieces" => true
-        case _                 => false
-      }
-    }
-
-    shouldNotTransmit || isGroupOfPieces
-  }
 
   def workData(record: CalmRecord): Result[WorkData[Unminted, Identifiable]] =
     for {
@@ -131,7 +154,7 @@ object CalmTransformer
     record
       .get("Title")
       .map(Right(_))
-      .getOrElse(Left(new Exception("Title field not found")))
+      .getOrElse(Left(TitleMissing))
 
   def workType(level: CollectionLevel): WorkType =
     level match {
@@ -153,7 +176,7 @@ object CalmTransformer
             label = record.get("AltRefNo"))
         )
       }
-      .getOrElse(Left(new Exception("RefNo field not found")))
+      .getOrElse(Left(RefNoMissing))
 
   def collectionLevel(record: CalmRecord): Result[CollectionLevel] =
     record
@@ -171,9 +194,9 @@ object CalmTransformer
         case "subsubsubseries"  => Right(CollectionLevel.Series)
         case "item"             => Right(CollectionLevel.Item)
         case "piece"            => Right(CollectionLevel.Item)
-        case level              => Left(new Exception(s"Unrecognised level: $level"))
+        case level              => Left(UnrecognisedLevel)
       }
-      .getOrElse(Left(new Exception("Level field not found.")))
+      .getOrElse(Left(LevelMissing))
 
   def items(record: CalmRecord,
             status: Option[AccessStatus]): List[Item[Unminted]] =

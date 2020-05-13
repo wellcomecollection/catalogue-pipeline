@@ -155,7 +155,6 @@ object ExternalDependencies {
     "com.lightbend.akka" %% "akka-stream-alpakka-s3" % versions.akkaStreamAlpakka
   )
 
-
   val apacheCommonsDependencies = Seq(
     "org.apache.commons" % "commons-lang3" % versions.apacheCommons
   )
@@ -178,15 +177,19 @@ object ExternalDependencies {
     // compatible with scalatest_3.0.1 used here and a newer versio  of akka.
     // Both need to be updated in the wellcome libraries before being updated here,
     // so temporarily excluding those form the dependencies
-    "uk.ac.wellcome.elastic4s" %% "elastic4s-core" % versions.elastic4s exclude("org.scalatest", "scalatest_2.12") excludeAll(ExclusionRule("com.typesafe.akka")),
-    "uk.ac.wellcome.elastic4s" %% "elastic4s-client-esjava" % versions.elastic4s exclude("org.scalatest", "scalatest_2.12") excludeAll(ExclusionRule("com.typesafe.akka")),
-    "uk.ac.wellcome.elastic4s" %% "elastic4s-http-streams" % versions.elastic4s exclude("org.scalatest", "scalatest_2.12") excludeAll(ExclusionRule("com.typesafe.akka")),
-    "uk.ac.wellcome.elastic4s" %% "elastic4s-testkit" % versions.elastic4s % "test" exclude("org.scalatest", "scalatest_2.12") excludeAll(ExclusionRule("com.typesafe.akka"))
+    "uk.ac.wellcome.elastic4s" %% "elastic4s-core" % versions.elastic4s exclude ("org.scalatest", "scalatest_2.12") excludeAll (ExclusionRule(
+      "com.typesafe.akka")),
+    "uk.ac.wellcome.elastic4s" %% "elastic4s-client-esjava" % versions.elastic4s exclude ("org.scalatest", "scalatest_2.12") excludeAll (ExclusionRule(
+      "com.typesafe.akka")),
+    "uk.ac.wellcome.elastic4s" %% "elastic4s-http-streams" % versions.elastic4s exclude ("org.scalatest", "scalatest_2.12") excludeAll (ExclusionRule(
+      "com.typesafe.akka")),
+    "uk.ac.wellcome.elastic4s" %% "elastic4s-testkit" % versions.elastic4s % "test" exclude ("org.scalatest", "scalatest_2.12") excludeAll (ExclusionRule(
+      "com.typesafe.akka"))
   )
 
   val newMockitoDependencies: Seq[ModuleID] = Seq(
     "org.mockito" % "mockito-core" % versions.mockito % "test",
-    "org.scalatestplus" %% "mockito-1-10" % versions.scalatestplusMockito % "test" )
+    "org.scalatestplus" %% "mockito-1-10" % versions.scalatestplusMockito % "test")
 
   val mockitoDependencies: Seq[ModuleID] = Seq(
     "org.mockito" % "mockito-core" % versions.mockito % "test")
@@ -345,8 +348,8 @@ object CatalogueDependencies {
 
   val sierraAdapterCommonDependencies: Seq[ModuleID] =
     ExternalDependencies.mockitoDependencies ++
-    ExternalDependencies. scalatestDependencies ++
-  WellcomeDependencies.jsonLibrary ++
+      ExternalDependencies.scalatestDependencies ++
+      WellcomeDependencies.jsonLibrary ++
       WellcomeDependencies.messagingTypesafeLibrary
 
   val sierraReaderDependencies: Seq[ModuleID] =

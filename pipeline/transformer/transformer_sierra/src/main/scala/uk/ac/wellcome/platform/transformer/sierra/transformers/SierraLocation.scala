@@ -61,7 +61,7 @@ trait SierraLocation extends SierraQueryOps {
       }
 
   private def getAccessStatus(varfield: VarField): Option[AccessStatus] =
-    if (varfield.indicator1 == Some("0"))
+    if (varfield.indicator1.contains("0"))
       Some(AccessStatus.Open)
     else
       varfield
