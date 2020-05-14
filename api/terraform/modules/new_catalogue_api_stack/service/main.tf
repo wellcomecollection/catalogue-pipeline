@@ -27,7 +27,7 @@ module "app_container" {
 
   log_configuration = module.log_router_container.container_log_configuration
 
-  cpu = 512
+  cpu    = 512
   memory = 1024
 }
 

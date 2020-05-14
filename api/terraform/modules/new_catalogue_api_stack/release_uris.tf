@@ -5,5 +5,5 @@ data "aws_ssm_parameter" "api_container_image" {
 }
 
 locals {
-  api_container_image   = data.aws_ssm_parameter.api_container_image.value
+  api_container_image = data.aws_ssm_parameter.api_container_image.value
 }

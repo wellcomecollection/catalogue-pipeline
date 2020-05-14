@@ -5,19 +5,19 @@ locals {
 module "service" {
   source = "./service"
 
-  service_name = local.namespaced_env
+  service_name                   = local.namespaced_env
   service_discovery_namespace_id = aws_service_discovery_private_dns_namespace.namespace.id
 
-  subnets     = var.subnets
-  cluster_arn = var.cluster_arn
-  vpc_id      = var.vpc_id
-  load_balancer_arn      = var.lb_arn
+  subnets           = var.subnets
+  cluster_arn       = var.cluster_arn
+  vpc_id            = var.vpc_id
+  load_balancer_arn = var.lb_arn
 
   container_port = local.api_container_port
 
   container_image = local.api_container_image
 
-  load_balancer_listener_port   = var.listener_port
+  load_balancer_listener_port = var.listener_port
 
   desired_task_count = var.desired_task_count
 
