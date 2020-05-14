@@ -160,7 +160,7 @@ lazy val transformer_calm = setupProject(
 lazy val sierra_adapter_common = setupProject(
   project,
   "sierra_adapter/common",
-  localDependencies = Seq(big_messaging),
+  localDependencies = Seq(big_messaging_typesafe),
   externalDependencies = CatalogueDependencies.sierraAdapterCommonDependencies)
 
 lazy val sierra_reader = setupProject(

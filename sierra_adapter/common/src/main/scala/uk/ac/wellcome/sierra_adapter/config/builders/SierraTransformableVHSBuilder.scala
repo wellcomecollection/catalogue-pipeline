@@ -1,32 +1,20 @@
 package uk.ac.wellcome.sierra_adapter.config.builders
 
 import com.typesafe.config.Config
-import uk.ac.wellcome.sierra_adapter.model.SierraTransformable
+import uk.ac.wellcome.bigmessaging.VHSWrapper
+import uk.ac.wellcome.bigmessaging.typesafe.VHSBuilder
 import uk.ac.wellcome.sierra_adapter.model.Implicits._
-import uk.ac.wellcome.storage.ObjectStore
-import uk.ac.wellcome.storage.s3.S3StorageBackend
-import uk.ac.wellcome.storage.typesafe.{DynamoBuilder, S3Builder, VHSBuilder}
-import uk.ac.wellcome.storage.vhs.{EmptyMetadata, VersionedHybridStore}
-import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
-
-import scala.concurrent.ExecutionContext
+import uk.ac.wellcome.sierra_adapter.model.SierraTransformable
+import uk.ac.wellcome.storage.store.VersionedStore
 
 object SierraTransformableVHSBuilder {
-  type SierraVHS = VersionedHybridStore[SierraTransformable,
-                                        EmptyMetadata,
-                                        ObjectStore[SierraTransformable]]
-  def buildSierraVHS(config: Config): SierraVHS = {
-    implicit val executionContext: ExecutionContext =
-      AkkaBuilder.buildExecutionContext()
 
-    implicit val storageBackend: S3StorageBackend = new S3StorageBackend(
-      s3Client = S3Builder.buildS3Client(config)
-    )
+  def buildSierraVHS(config: Config): VersionedStore[String, Int, SierraTransformable] = {
 
-    new SierraVHS(
-      vhsConfig = VHSBuilder.buildVHSConfig(config),
-      objectStore = ObjectStore[SierraTransformable],
-      dynamoDbClient = DynamoBuilder.buildDynamoClient(config)
+    new VersionedStore(
+      new VHSWrapper(
+        VHSBuilder.build[SierraTransformable](config)
+      )
     )
   }
 }
