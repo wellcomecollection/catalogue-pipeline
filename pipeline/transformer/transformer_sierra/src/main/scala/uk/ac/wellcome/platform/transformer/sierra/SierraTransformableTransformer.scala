@@ -13,6 +13,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
 }
 import uk.ac.wellcome.platform.transformer.sierra.transformers._
 import uk.ac.wellcome.platform.transformer.sierra.source.SierraMaterialType._
+import uk.ac.wellcome.platform.transformer.sierra.source.SierraBibData._
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.sierra_adapter.model.{
   SierraBibNumber,
@@ -20,7 +21,6 @@ import uk.ac.wellcome.sierra_adapter.model.{
   SierraItemNumber,
   SierraTransformable
 }
-
 import scala.util.{Failure, Success, Try}
 
 object SierraTransformableTransformer {
@@ -65,7 +65,7 @@ class SierraTransformableTransformer(sierraTransformable: SierraTransformable,
           throw e
       }
 
-  def workFromBibRecord(bibRecord: SierraBibRecord): Try[TransformedBaseWork] =
+  def workFromBibRecord(bibRecord: SierraBibRecord): Try[TransformedBaseWork] = {
     fromJson[SierraBibData](bibRecord.data)
       .map { bibData =>
         if (bibData.deleted || bibData.suppressed) {
@@ -89,6 +89,7 @@ class SierraTransformableTransformer(sierraTransformable: SierraTransformable,
             data = WorkData()
           )
       }
+  }
 
   def workDataFromBibData(bibId: SierraBibNumber, bibData: SierraBibData) =
     WorkData[Unminted, Identifiable](
