@@ -71,7 +71,7 @@ class SierraTransformableTransformerTest
          |}
          |""".stripMargin
     val sierraTransformable = createSierraTransformableWith(
-      maybeBibRecord = Some(createSierraBibRecordWith(number,data)),
+      maybeBibRecord = Some(createSierraBibRecordWith(number, data)),
     )
 
     val work = transformToWork(sierraTransformable)
