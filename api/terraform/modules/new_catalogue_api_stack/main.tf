@@ -5,21 +5,21 @@ locals {
 module "service" {
   source = "./service"
 
-  namespace    = local.namespaced_env
-  namespace_id = aws_service_discovery_private_dns_namespace.namespace.id
+  service_name = local.namespaced_env
+  service_discovery_namespace_id = aws_service_discovery_private_dns_namespace.namespace.id
 
   subnets     = var.subnets
   cluster_arn = var.cluster_arn
   vpc_id      = var.vpc_id
-  lb_arn      = var.lb_arn
+  load_balancer_arn      = var.lb_arn
 
   container_port = local.api_container_port
 
   container_image = local.api_container_image
-  listener_port   = var.listener_port
 
-  nginx_container_image = local.nginx_container_image
-  nginx_container_port  = local.nginx_container_port
+  load_balancer_listener_port   = var.listener_port
+
+  # nginx_container_image = local.nginx_container_image
 
   desired_task_count = var.desired_task_count
 
@@ -28,8 +28,6 @@ module "service" {
     var.egress_security_group_id,
     var.interservice_sg_id,
   ]
-
-  logstash_host = var.logstash_host
 }
 
 resource "aws_service_discovery_private_dns_namespace" "namespace" {
