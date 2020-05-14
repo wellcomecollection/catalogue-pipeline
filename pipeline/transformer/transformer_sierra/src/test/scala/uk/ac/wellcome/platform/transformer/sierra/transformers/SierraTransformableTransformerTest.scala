@@ -59,6 +59,30 @@ class SierraTransformableTransformerTest
 
     actualIdentifiers should contain theSameElementsAs expectedIdentifiers
   }
+  it("performs a transformation on a work with empty code in the lang field") {
+    val number = createSierraBibNumber
+    val data =
+      s"""
+         |{
+         |  "id": "$number",
+         |  "lang": {
+         |    "code": " "
+         |  }
+         |}
+         |""".stripMargin
+    val sierraTransformable = createSierraTransformableWith(
+      maybeBibRecord = Some(createSierraBibRecordWith(number, data)),
+    )
+
+    val work = transformToWork(sierraTransformable)
+
+    val language = work
+      .asInstanceOf[UnidentifiedInvisibleWork]
+      .data
+      .language
+
+    language shouldBe None
+  }
 
   it("trims whitespace from the materialType code") {
     val id = createSierraBibNumber
