@@ -1,25 +1,23 @@
 package uk.ac.wellcome.platform.sierra_reader.services
 
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.platform.sierra_reader.config.models.ReaderConfig
 import uk.ac.wellcome.platform.sierra_reader.exceptions.SierraReaderException
-import uk.ac.wellcome.platform.sierra_reader.models.{
-  SierraResourceTypes,
-  WindowStatus
-}
-import uk.ac.wellcome.storage.fixtures.S3
-import uk.ac.wellcome.storage.fixtures.S3.Bucket
+import uk.ac.wellcome.platform.sierra_reader.models.{SierraResourceTypes, WindowStatus}
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.sierra_adapter.model.{SierraBibNumber, SierraGenerators}
+import uk.ac.wellcome.storage.fixtures.S3Fixtures
+import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class WindowManagerTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
-    with S3
+    with S3Fixtures
     with ScalaFutures
     with IntegrationPatience
     with SierraGenerators {

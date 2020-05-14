@@ -4,19 +4,14 @@ import java.time.Instant
 
 import io.circe.parser.parse
 import org.scalatest.compatible.Assertion
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil.toJson
 import uk.ac.wellcome.json.utils.JsonAssertions
-import uk.ac.wellcome.sierra_adapter.model.{
-  AbstractSierraRecord,
-  SierraBibNumber,
-  SierraBibRecord,
-  SierraGenerators,
-  SierraItemRecord
-}
+import uk.ac.wellcome.sierra_adapter.model.{AbstractSierraRecord, SierraBibNumber, SierraBibRecord, SierraGenerators, SierraItemRecord}
 
 class SierraRecordParserTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
     with JsonAssertions
     with SierraGenerators {

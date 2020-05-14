@@ -4,20 +4,23 @@ import akka.Done
 import akka.stream.scaladsl.{Sink, Source}
 import io.circe.Json
 import io.circe.parser._
+import org.scalatest.BeforeAndAfterAll
 import org.scalatest.compatible.Assertion
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import org.scalatest.{BeforeAndAfterAll, FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.storage.fixtures.S3
-import uk.ac.wellcome.storage.fixtures.S3.Bucket
+import uk.ac.wellcome.storage.ObjectLocation
+import uk.ac.wellcome.storage.fixtures.S3Fixtures
+import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 
 import scala.concurrent.Future
 
 class SequentialS3SinkTest
-    extends FunSpec
+    extends AnyFunSpec
     with Matchers
-    with S3
+    with S3Fixtures
     with Akka
     with BeforeAndAfterAll
     with ScalaFutures
@@ -112,4 +115,6 @@ class SequentialS3SinkTest
       }
     }
   }
+
+  def getJsonFromS3(bucket: Bucket, key: String): Json = getJsonFromS3(ObjectLocation(bucket.name, key))
 }

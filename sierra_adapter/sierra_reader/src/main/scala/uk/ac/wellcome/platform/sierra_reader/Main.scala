@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.sierra_reader
 
 import akka.actor.ActorSystem
-import akka.stream.{ActorMaterializer, Materializer}
+import akka.stream.Materializer
 import com.typesafe.config.Config
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.SQSBuilder

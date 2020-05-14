@@ -2,21 +2,18 @@ package uk.ac.wellcome.platform.sierra_reader.fixtures
 
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
-import uk.ac.wellcome.platform.sierra_reader.config.models.{
-  ReaderConfig,
-  SierraAPIConfig
-}
+import uk.ac.wellcome.messaging.sns.NotificationMessage
+import uk.ac.wellcome.platform.sierra_reader.config.models.{ReaderConfig, SierraAPIConfig}
 import uk.ac.wellcome.platform.sierra_reader.models.SierraResourceTypes
 import uk.ac.wellcome.platform.sierra_reader.services.SierraReaderWorkerService
-import uk.ac.wellcome.storage.fixtures.S3
-import uk.ac.wellcome.storage.fixtures.S3.Bucket
+import uk.ac.wellcome.storage.fixtures.S3Fixtures
+import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-trait WorkerServiceFixture extends Akka with SQS with S3 {
+trait WorkerServiceFixture extends Akka with SQS with S3Fixtures {
   def withWorkerService[R](bucket: Bucket,
                            queue: Queue,
                            readerConfig: ReaderConfig = bibsReaderConfig,
