@@ -26,6 +26,9 @@ module "app_container" {
   secrets     = var.secrets
 
   log_configuration = module.log_router_container.container_log_configuration
+
+  cpu = 512
+  memory = 1024
 }
 
 module "app_container_secrets_permissions" {
@@ -37,8 +40,8 @@ module "app_container_secrets_permissions" {
 module "task_definition" {
   source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/task_definition?ref=v2.4.0"
 
-  cpu    = var.cpu
-  memory = var.memory
+  cpu    = 1024
+  memory = 2048
 
   container_definitions = [
     module.log_router_container.container_definition,
