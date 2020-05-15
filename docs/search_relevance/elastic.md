@@ -2,11 +2,14 @@
 
 ## Who we are and what we’re doing
 
-At the Wellcome Collection, a part of the Wellcome Trust, we are aiming to maximise the Trust’s impact on human health by understanding the social and cultural contexts of science and health.
+[Wellcome Collection](https://wellcomecollection.org/) is a free museum and library that aims to challenge how we all think and feel about health.  
+We're Wellcome Collection's platform team - we build digital services to preserve the collections in perpetuity, and make those collections accessible to people everywhere. The collection data we present is all licensed as openly as possible, and we make all of our code, our plans and our processes available on [github](https://github.com/wellcomecollection/).
 
-[The platform team](https://github.com/wellcometrust/platform) are building services with the aim to [preserve our collections](https://github.com/wellcometrust/storage-service) in perpetuity, as well as make those services accessible via [APIs](https://developers.wellcomecollection.org/catalogue), [a website](https://wellcomecollection.org/works), and making the [data available to others](https://developers.wellcomecollection.org/datasets).
+We've spent the last few years building ETL pipelines to draw data out of the systems used by museum cataloguers and librarians to document our collection, and present that data in a JSON format which makes sense for our website and external developers (You can use our APIs to build whatever you want! Check out [developers.wellcomecollection.org](developers.wellcomecollection.org)).
 
-After setting up an [ETL](https://en.wikipedia.org/wiki/Extract,_transform,_load) [pipeline ending in Elasticsearch](https://www.elastic.co/elasticon/tour/2019/london/improving-search-at-wellcome-collection), our next challenge was to find items within the collection a person was looking for.
+The last stage in those pipelines is an Elasticsearch index, which we use to store a cleaned and enriched version of our collections data for public consumption. We use elasticsearch indexes in our [collections search](https://wellcomecollection.org/works) to match researchers' queries to relevant and interesting material.
+
+In 2019, we gave [a talk at Elastic{ON}](https://www.elastic.co/elasticon/tour/2019/london/improving-search-at-wellcome-collection) about why elastic has been great for us. In this article we'll dig further into the technical process we use to develop and optimise queries, and how a multi-faceted approach to user research helps us match the shape of our queries to our users' intentions when they search.
 
 ## Finding what people are looking for
 
