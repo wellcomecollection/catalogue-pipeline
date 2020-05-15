@@ -1,5 +1,5 @@
 module "catalogue_api_staging" {
-  source = "../modules/catalogue_api_stack"
+  source = "../modules/new_catalogue_api_stack"
 
   environment        = "staging"
   domain_name        = "catalogue.api-stage.wellcomecollection.org"
