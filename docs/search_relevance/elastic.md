@@ -1,6 +1,6 @@
-## Elastic @ Wellcome Collection
+# Optimising queries for user intent at Wellcome Collection
 
-# Who we are and what we’re doing
+## Who we are and what we’re doing
 
 [Wellcome Collection](https://wellcomecollection.org/) is a free museum and library that aims to challenge how we all think and feel about health.  
 We're Wellcome Collection's platform team - we build digital services to preserve the collections in perpetuity, and make those collections accessible to people everywhere. The collection data we present is all licensed as openly as possible, and we make all of our code, our plans and our processes available on [github](https://github.com/wellcomecollection/).
@@ -28,11 +28,17 @@ It was clear from the search logs that we were serving two broad classes of user
 
 Meeting these intentions had to be paired with users' expectations of a single search bar which us capable of meeting all their needs. If we were going to deliver that subtle balance of precision and recall, we would have to tune our queries carefully.
 
+## Tracking user behaviour
+
+Collecting data is a necessary part of optimising our queries. While the insight from behavioural data is valuable, we don't believe that bigger data is necessarily better - we think it would be foolish to start collecting data without first establishing which questions we wanted to answer, and wrong to collect data that we don't need. By restricting the data we collect to just enough to answer specific questions, we're able to iterate quickly while limiting risks to our users.
+
+Having established a set of questions about how search was being used and was performing, we set up [segment](https://segment.com/) and [kinesis](https://aws.amazon.com/kinesis/) to pipe a narrow set of actions on our website into a elastic cluster specifically for reporting, separate from our catalogue indexes.
+
+[Kibana]() allows our team of developers, analysts, and data scientists to build and access dashboards, keeping track of those key metrics on which we make decisions about which parts of the query to tune.
+
 ## Matching user intentions
 
-[documenting hypothesised intentions and how we meet them](https://docs.wellcomecollection.org/catalogue/search_relevance/intentions-and-expectations)
-
-The next process was to create a set of our researcher’s intentions and expectations. We could then easily think about how we might create Elasticsearch queries that would satisfy these expectations.
+With a set of questions and a way of answering them in place, we could really start breaking apart user intentions, and [explicitly documenting our hypotheses](https://docs.wellcomecollection.org/catalogue/search_relevance/intentions-and-expectations)
 
 While our data is structured, it is not currently highly structured. For instance - from the source systems we can transform certain fields into our “contributors” field. The structure of the source data was often free text, and thus inferring anything as an identifier for that specific contributor would be impossible. [BETTER EXPLANATION]
 
@@ -56,22 +62,9 @@ Each expectation is written as a separate query making it easy to test and reaso
 }
 ```
 
-# Serendipity and exploration
+## Coming soon
 
-Talk about image similarity stuff (Harrison’s nice use of Elastic’s relevance to do this)
-
-# Tracking user behaviour
-
-didn't want to collect every interaction without even establishing what questions we wanted to answer
-built a narrow pipe to a seperate ES cluster, pulling only what we needed.
-ethically cleaner, and allows us to move faster.
-
-Using website, segment, kinesis and elastic
-Not to do with thinking we’ve done it, but measuring
-Kibana for data scientists / analysts / dev
-
-# Coming soon
-
-Relevance more focussed on exploration (images)
-Highly structured data from entity focused indexes
-Measuring specific queries
+- Serendipitous exploration - Talk about image similarity stuff (Harrison’s nice use of Elastic’s relevance to do this)
+- Relevance more focussed on exploration (images)
+- Highly structured data from entity focused indexes
+- Measuring specific queries
