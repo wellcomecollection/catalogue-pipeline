@@ -80,7 +80,7 @@ It's important to note that our queries aren't perfect yet, and that's the point
 
 ## What comes next?
 
-Tagging results with the sub-queries that they matched.
+One aspect of the intention-matching approach which we haven't yet taken advantage of is the ability to log which results matched which sub-queries (if any), and therefore which sub-queries are most effective. Our current metrics are aggregates of all sub-queries, but being able to observe and tune every part of the user-query-result loop is hugely desirable.
 
 ## Things we should do separate posts on
 
