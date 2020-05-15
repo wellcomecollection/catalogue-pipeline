@@ -13,9 +13,9 @@ In 2019, we gave [a talk at Elastic{ON}](https://www.elastic.co/elasticon/tour/2
 
 ## What are our users trying to do?
 
-We started with an inhereted set of users' search behaviours and intentions from the previous version of our site, [wellcomelibrary.org](https://wellcomelibrary.org).
+We started with an inherited set of users' search behaviours and intentions from the previous version of our site, [wellcomelibrary.org](https://wellcomelibrary.org).
 
-A few of the most prominent behaviours which carried over to the new site were:
+Some of the most prominent behaviours which carried over to the new site were:
 
 - Searching for a specific work with a known title, like ["A popular history of astronomy during the nineteenth century"](https://wellcomecollection.org/works?query=A%20popular%20history%20of%20astronomy%20during%20the%20nineteenth%20century)
 - Searching for a known subject, like ["alchemy"](https://wellcomecollection.org/works?query=alchemy)
@@ -30,41 +30,61 @@ Meeting these intentions had to be paired with users' expectations of a single s
 
 ## Tracking user behaviour
 
-Collecting data is a necessary part of optimising our queries. While the insight from behavioural data is valuable, we don't believe that bigger data is necessarily better - we think it would be foolish to start collecting data without first establishing which questions we wanted to answer, and wrong to collect data that we don't need. By restricting the data we collect to just enough to answer specific questions, we're able to iterate quickly while limiting risks to our users.
+Collecting data is a necessary part of optimising our queries. While the insight from behavioural data is valuable, we don't believe that bigger data is necessarily better - we think it would be foolish to start collecting data without first establishing which questions we wanted to answer, and wrong to collect data that we don't need. For example, we see no need to personlalise users' results so our search logs are kept entirely anonymous.
 
-Having established a set of questions about how search was being used and was performing, we set up [segment](https://segment.com/) and [kinesis](https://aws.amazon.com/kinesis/) to pipe a narrow set of actions on our website into a elastic cluster specifically for reporting, separate from our catalogue indexes.
+By restricting the data we collect to just enough to answer specific questions, we're able to iterate quickly while limiting risks to our users.
 
-[Kibana]() allows our team of developers, analysts, and data scientists to build and access dashboards, keeping track of those key metrics on which we make decisions about which parts of the query to tune.
+Having established a set of questions about how search was being used and was performing, we set up [Segment](https://segment.com/) and [Kinesis](https://aws.amazon.com/kinesis/) to pipe a narrow set of actions on our website into a elastic cluster specifically for reporting, separate from our catalogue indexes.
+
+Running [Kibana](https://www.elastic.co/kibana) on top of those indexes allows our team of developers, analysts, and data scientists to build and access dashboards, keeping track of key metrics on which we make decisions about how our queries will be tuned.
+
+## User research
+
+Search logs alone aren't enough to get a clear picture of how and why researchers behave the way they do. We combine the anonymous aggregate behavioural data with face-to-face interviews with researchers to build the clearest possible picture of how our users expect search to work, and to build the most direct set of intentions to match.
 
 ## Matching user intentions
 
-With a set of questions and a way of answering them in place, we could really start breaking apart user intentions, and [explicitly documenting our hypotheses](https://docs.wellcomecollection.org/catalogue/search_relevance/intentions-and-expectations)
+With a set of questions and a way of answering them in place, we could really start breaking apart user intentions, and [explicitly documenting our hypotheses](https://docs.wellcomecollection.org/catalogue/search_relevance/intentions-and-expectations) about how people expect search to work.
 
-While our data is structured, it is not currently highly structured. For instance - from the source systems we can transform certain fields into our “contributors” field. The structure of the source data was often free text, and thus inferring anything as an identifier for that specific contributor would be impossible. [BETTER EXPLANATION]
+We use a layered approach to constructing queries, stacking a set of highly boosted `bool_query`s on top of a broad, minimally boosted base query. The base query ensures that we always return _something_ for a sensible query, and each layer in the stack of `bool_query`s addresses a specific intention.
 
-To this end we would have to rely mainly on Elasticsearch’s powerful text analysis queries rather than filters.
+In our case, `match` queries have become most commonly used layer in that stack because of their versatility.
 
-[CLUNKY FLOW ☝️]
-
-Each expectation is written as a separate query making it easy to test and reason about. The powerful match query was used in most cases. For example - knowing that someone might be searching for a specific title, which we know is stored in the “title” and “alternativeTitles” fields. We also knew that a person might be searching from memory, and might get it slightly wrong, especially spelling as some titles are in archain languages. This could easily be expressed as:
+The advantage of this layered approach is most clearly demonstrated when we see a user displaying one clear intention, eg exactly searching for a work's title.  
+We match the intention by running a match query against our `"title"` and `"alternativeTitle"` fields. We also know that a user might not express the match perfectly when searching from memory, especially as we hold works from a wide range of languages and time-periods. This intention can be expressed as:
 
 ```json
 {
   "query": {
     "multi_match": {
       "query": "Die Radioaktivität",
-      "fields": ["title", "alternativeTitles"], // <-- they might be searching for either
+      "operator": "and",
+      "fields": ["title", "alternativeTitles"], // <-- Could be searching for either
       "minimum_should_match": "80%", // <-- Might not get it completely correct
-      "operator": "and", // <-- Order in a title is important
       "fuzziness": "AUTO" // <-- Allows for typos
     }
   }
 }
 ```
 
-## Coming soon
+<!-- I think this json should probably be beefed up to show a base query and a dummy second bool query -->
 
-- Serendipitous exploration - Talk about image similarity stuff (Harrison’s nice use of Elastic’s relevance to do this)
-- Relevance more focussed on exploration (images)
+As well as matching the base query, if their query matches one of our intention blocks, we unambiguously boost the block of matching results to the top of the results list.  
+If no clear intentions are matched, we still return a generic set of results. At the same time, their query is logged so that we have the opportunity to spot patterns of matching behaviour in the future.  
+By keeping each block deliberately narrow and matched to an unambiguous intention, we minimise the chance that they clash or interfere with one another.  
+The layers are also easily refined and extended - there's no reason why we can't add a subsequent block to only match exact titles, to serve a user who intends to look for a copy-and-pasted title.
+
+This modular approach allows us to optimise each intention separately. By testing an individual addition or change to our stack of queries, we can incrementally test and improve performance for each intention. If we see no improvement or a reduction in performance, the candidate query is also easily removed.
+
+It's important to note that our queries aren't perfect yet, and that's the point. This approach allows us to continuously refine a more perfect query.
+
+## What comes next?
+
+Tagging results with the sub-queries that they matched.
+
+## Things we should do separate posts on
+
+- hierarchical search, and matching archives like paths
+- serendipitous exploration and image similarity in elasticsearch
+- Relevance more focussed on exploration (images)?
 - Highly structured data from entity focused indexes
-- Measuring specific queries
