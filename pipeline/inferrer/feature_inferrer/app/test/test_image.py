@@ -3,12 +3,13 @@ from src.image import get_image_url_from_iiif_url
 
 
 class TestImage(unittest.TestCase):
-
     def test_iiif_parse_dlcs(self):
         image_id = "b28047345_0009.jp2"
         test_url = f"https://dlcs.io/iiif-img/wellcome/5/{image_id}/info.json"
         result = get_image_url_from_iiif_url(test_url)
-        expected = f"https://dlcs.io/thumbs/wellcome/5/{image_id}/full/!400,400/0/default.jpg"
+        expected = (
+            f"https://dlcs.io/thumbs/wellcome/5/{image_id}/full/!400,400/0/default.jpg"
+        )
         self.assertEqual(result, expected)
 
     def test_iiif_parse_other(self):
@@ -24,5 +25,5 @@ class TestImage(unittest.TestCase):
             get_image_url_from_iiif_url(test_url)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
