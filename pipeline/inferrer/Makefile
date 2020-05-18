@@ -26,8 +26,9 @@ inference_manager-integration-only:
 
 TEST_OVERRIDE = feature_inferrer
 feature_inferrer-test: feature_inferrer-build
-	$(ROOT)/docker_run.py --dind -- feature_inferrer \
-		python -m compileall /app
+	$(ROOT)/docker_run.py --dind -- \
+		feature_inferrer \
+		python -m unittest discover -s /app/test
 	$(MAKE) inference_manager-integration-only
 
 $(val $(call stack_setup))
