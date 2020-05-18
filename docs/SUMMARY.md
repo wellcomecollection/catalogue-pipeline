@@ -1,7 +1,7 @@
 # Table of contents
 
 - [Catalogue](README.md)
-- [Search relevance](search_relevance/README.md)
+- [Search](search/README.md)
   - [Intentions & expectations](search_relevance/intentions-and-expectations.md)
   - [Relevance tests](search_relevance/tests/README.md)
     - [Test 1 - Explicit feedback](search_relevance/tests/001_explicit_feedback.md)
