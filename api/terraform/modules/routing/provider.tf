@@ -1,5 +1,5 @@
 provider "aws" {
-  region  = var.aws_region
+  region  = "eu-west-1"
   version = "~> 2.7"
 
   assume_role {
@@ -10,7 +10,7 @@ provider "aws" {
 provider "aws" {
   alias = "platform"
 
-  region  = var.aws_region
+  region  = "eu-west-1"
   version = "~> 2.7"
 
   assume_role {
