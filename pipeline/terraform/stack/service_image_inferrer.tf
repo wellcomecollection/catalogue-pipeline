@@ -64,8 +64,11 @@ module "image_inferrer" {
     MODEL_DATA_BUCKET = var.inferrer_model_data_bucket_name
   }
 
-  subnets             = var.subnets
-  max_capacity        = 10
+  subnets = var.subnets
+
+  # Any higher than this currently causes latency spikes from Loris
+  max_capacity = 8
+
   messages_bucket_arn = aws_s3_bucket.messages.arn
   queue_read_policy   = module.image_inferrer_queue.read_policy
 }
