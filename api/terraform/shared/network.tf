@@ -3,6 +3,16 @@ resource "aws_service_discovery_private_dns_namespace" "namespace" {
   vpc  = local.vpc_id
 }
 
+resource "aws_service_discovery_private_dns_namespace" "staging_namespace" {
+  name = "catalogue_api-staging"
+  vpc  = local.vpc_id
+}
+
+resource "aws_service_discovery_private_dns_namespace" "prod_namespace" {
+  name = "catalogue_api-prod"
+  vpc  = local.vpc_id
+}
+
 module "interface_endpoints" {
   source = "../modules/interface_endpoints"
 

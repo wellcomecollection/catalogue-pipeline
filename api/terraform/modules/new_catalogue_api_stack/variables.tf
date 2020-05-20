@@ -24,3 +24,5 @@ variable "lb_ingress_sg_id" {}
 variable "logstash_host" {}
 
 variable "interservice_sg_id" {}
+
+variable "service_discovery_namespace_id" {}

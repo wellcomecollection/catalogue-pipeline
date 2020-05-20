@@ -31,3 +31,5 @@ variable "domain_name" {}
 variable "certificate_arn" {}
 
 variable "api_gateway_id" {}
+
+variable "service_discovery_namespace_id" {}
