@@ -25,6 +25,8 @@ module "catalogue_api_prod" {
 
   api_gateway_id = local.api_gateway_id
 
+  service_discovery_namespace_id = local.service_discovery_namespace_id
+
   providers = {
     aws.platform    = aws.platform
     aws.routemaster = aws.routemaster

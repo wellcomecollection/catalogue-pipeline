@@ -18,4 +18,6 @@ locals {
   egress_security_group_id             = data.terraform_remote_state.catalogue_api_shared.outputs.egress_security_group_id
   interservice_security_group_id       = data.terraform_remote_state.catalogue_api_shared.outputs.interservice_security_group_id
   service_lb_ingress_security_group_id = data.terraform_remote_state.catalogue_api_shared.outputs.service_lb_ingress_security_group_id
+
+  service_discovery_namespace_id = data.terraform_remote_state.catalogue_api_shared.outputs.prod_namespace
 }

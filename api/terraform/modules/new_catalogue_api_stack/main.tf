@@ -6,7 +6,7 @@ module "service" {
   source = "./service"
 
   service_name                   = local.namespaced_env
-  service_discovery_namespace_id = aws_service_discovery_private_dns_namespace.namespace.id
+  service_discovery_namespace_id = var.service_discovery_namespace_id
 
   subnets           = var.subnets
   cluster_arn       = var.cluster_arn
@@ -42,9 +42,4 @@ module "service" {
     apm_server_url = "catalogue/api/apm_server_url"
     apm_secret     = "catalogue/api/apm_secret"
   }
-}
-
-resource "aws_service_discovery_private_dns_namespace" "namespace" {
-  name = "${var.namespace}-${var.environment}"
-  vpc  = var.vpc_id
 }

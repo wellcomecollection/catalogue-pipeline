@@ -6,7 +6,7 @@ module "service" {
   source = "./service"
 
   namespace    = local.namespaced_env
-  namespace_id = aws_service_discovery_private_dns_namespace.namespace.id
+  namespace_id = var.service_discovery_namespace_id
 
   subnets     = var.subnets
   cluster_arn = var.cluster_arn
@@ -30,9 +30,4 @@ module "service" {
   ]
 
   logstash_host = var.logstash_host
-}
-
-resource "aws_service_discovery_private_dns_namespace" "namespace" {
-  name = "${var.namespace}-${var.environment}"
-  vpc  = var.vpc_id
 }
