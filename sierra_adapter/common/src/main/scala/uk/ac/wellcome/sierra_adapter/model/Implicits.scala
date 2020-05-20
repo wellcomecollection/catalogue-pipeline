@@ -19,6 +19,8 @@ object Implicits {
     (key: String) => Some(SierraItemNumber(key))
 
   implicit val _dec01: Decoder[SierraTransformable] = deriveConfiguredDecoder
+  implicit val _dec02: Decoder[SierraItemRecord] = deriveConfiguredDecoder
 
   implicit val _enc01: Encoder[SierraTransformable] = deriveConfiguredEncoder
+  implicit val _enc02: Encoder[SierraItemRecord] = deriveConfiguredEncoder
 }
