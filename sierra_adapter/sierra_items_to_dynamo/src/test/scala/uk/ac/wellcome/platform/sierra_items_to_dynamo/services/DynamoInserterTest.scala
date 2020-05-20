@@ -38,7 +38,7 @@ class DynamoInserterTest
       modifiedDate = newerDate,
       bibIds = List(createSierraBibNumber)
     )
-    val store = createStore(Map(Version(newRecord.id.withCheckDigit, 1) -> newRecord))
+    val store = createStore(Map(Version(newRecord.id.withoutCheckDigit, 1) -> newRecord))
     val dynamoInserter = new DynamoInserter(store)
 
     val oldRecord = createSierraItemRecordWith(
@@ -61,7 +61,7 @@ class DynamoInserterTest
       modifiedDate = olderDate,
       bibIds = List(createSierraBibNumber)
     )
-    val store = createStore(Map(Version(oldRecord.id.withCheckDigit, 1) -> oldRecord))
+    val store = createStore(Map(Version(oldRecord.id.withoutCheckDigit, 1) -> oldRecord))
     val dynamoInserter = new DynamoInserter(store)
 
     val newRecord = createSierraItemRecordWith(
@@ -87,7 +87,7 @@ class DynamoInserterTest
       modifiedDate = olderDate,
       bibIds = bibIds
     )
-    val store = createStore(Map(Version(oldRecord.id.withCheckDigit, 1) -> oldRecord))
+    val store = createStore(Map(Version(oldRecord.id.withoutCheckDigit, 1) -> oldRecord))
 
     val dynamoInserter = new DynamoInserter(store)
 
@@ -116,7 +116,7 @@ class DynamoInserterTest
       modifiedDate = olderDate,
       bibIds = List(bibIds(0), bibIds(1), bibIds(2))
     )
-    val store = createStore(Map(Version(oldRecord.id.withCheckDigit, 1) -> oldRecord))
+    val store = createStore(Map(Version(oldRecord.id.withoutCheckDigit, 1) -> oldRecord))
     val dynamoInserter = new DynamoInserter(store)
 
     val newRecord = createSierraItemRecordWith(
@@ -143,7 +143,7 @@ class DynamoInserterTest
       bibIds = List(bibIds(0), bibIds(1), bibIds(2)),
       unlinkedBibIds = List(bibIds(4))
     )
-    val store = createStore(Map(Version(oldRecord.id.withCheckDigit, 1) -> oldRecord))
+    val store = createStore(Map(Version(oldRecord.id.withoutCheckDigit, 1) -> oldRecord))
     val dynamoInserter = new DynamoInserter(store)
 
     val newRecord = createSierraItemRecordWith(
