@@ -9,10 +9,6 @@ locals {
   # We can't look this up programatically because the role we use doesn't have
   # the right permissions in that account.
   route53_zone_id = "Z3THRVQ5VDYDMC"
-
-  variables = {
-    port = var.listener_port
-  }
 }
 
 resource "aws_api_gateway_domain_name" "catalogue_api" {
@@ -53,7 +49,9 @@ resource "aws_api_gateway_deployment" "stage" {
   # See https://github.com/terraform-providers/terraform-provider-aws/issues/2918#issuecomment-356684239
   stage_name = ""
 
-  variables = local.variables
+  variables = {
+    port = var.listener_port
+  }
 
   stage_description = filemd5("${path.module}/../../shared/gateway.tf")
 
@@ -66,5 +64,7 @@ resource "aws_api_gateway_stage" "stage" {
   stage_name    = var.environment
   rest_api_id   = var.api_id
   deployment_id = aws_api_gateway_deployment.stage.id
-  variables     = local.variables
+  variables = {
+    port = var.listener_port
+  }
 }
