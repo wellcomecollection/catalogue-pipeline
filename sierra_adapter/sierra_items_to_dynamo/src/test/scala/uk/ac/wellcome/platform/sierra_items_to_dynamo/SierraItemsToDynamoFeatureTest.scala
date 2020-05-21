@@ -7,6 +7,7 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.platform.sierra_items_to_dynamo.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.sierra_adapter.model.SierraGenerators
 import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
+import uk.ac.wellcome.storage.Version
 
 class SierraItemsToDynamoFeatureTest
     extends AnyFunSpec
@@ -32,7 +33,7 @@ class SierraItemsToDynamoFeatureTest
 
               eventually {
                 assertStoredAndSent(
-                  id = itemRecord.id.withoutCheckDigit,
+                  id = Version(itemRecord.id.withoutCheckDigit, 0),
                   t = itemRecord,
                   store = store,
                   messageSender

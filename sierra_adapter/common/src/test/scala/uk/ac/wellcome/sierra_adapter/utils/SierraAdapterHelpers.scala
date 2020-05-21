@@ -1,15 +1,15 @@
 package uk.ac.wellcome.sierra_adapter.utils
 
-import io.circe.Decoder
 import org.scalatest.Assertion
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.bigmessaging.memory.MemoryBigMessageSender
 import uk.ac.wellcome.fixtures._
+import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.sierra_adapter.model.SierraTransformable
 import uk.ac.wellcome.storage.Version
 import uk.ac.wellcome.storage.maxima.memory.MemoryMaxima
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryVersionedStore}
+import uk.ac.wellcome.json.JsonUtil._
 
 trait SierraAdapterHelpers extends Matchers {
   type SierraVHS = VersionedStore[String, Int, SierraTransformable]
@@ -35,9 +35,8 @@ trait SierraAdapterHelpers extends Matchers {
     store.getLatest(id).right.get.identifiedT shouldBe t
 
 
-  def assertStoredAndSent[T](id: String,t: T, store: VersionedStore[String, Int, T], messageSender: MemoryBigMessageSender[T])(
-    implicit decoder: Decoder[T]): Assertion = {
-    assertStored(id,t, store)
-    messageSender.getMessages[T] should contain(t)
+  def assertStoredAndSent[T](id: Version[String, Int],t: T, store: VersionedStore[String, Int, T], messageSender: MemoryMessageSender): Assertion = {
+    assertStored(id.id,t, store)
+    messageSender.getMessages[Version[String,Int]] should contain(id)
   }
 }
