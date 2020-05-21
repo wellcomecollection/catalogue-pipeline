@@ -1,7 +1,7 @@
 variable "namespace" {}
 variable "environment" {}
 variable "instance" {
-  type = string
+  type    = string
   default = ""
 }
 
