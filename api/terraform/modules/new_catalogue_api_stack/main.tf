@@ -1,5 +1,6 @@
 locals {
-  namespaced_env = "${var.namespace}-${var.environment}"
+  suffix         = var.instance != "" ? "-${var.instance}" : ""
+  namespaced_env = "${var.namespace}-${var.environment}${local.suffix}"
 }
 
 module "service" {

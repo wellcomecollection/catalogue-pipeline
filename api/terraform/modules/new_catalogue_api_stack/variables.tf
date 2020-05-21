@@ -1,5 +1,9 @@
 variable "namespace" {}
 variable "environment" {}
+variable "instance" {
+  type    = string
+  default = ""
+}
 
 variable "desired_task_count" {
   type = number
