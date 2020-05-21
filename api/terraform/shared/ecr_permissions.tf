@@ -44,6 +44,7 @@ data "aws_iam_policy_document" "allow_catalogue_access" {
         data.aws_iam_role.catalogue_api_staging_execution_role.arn,
         data.aws_iam_role.snapshot_generator_execution_role.arn,
         data.aws_iam_role.update_api_docs_execution_role.arn,
+        "arn:aws:iam::756629837203:root"
       ]
 
       type = "AWS"
