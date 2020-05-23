@@ -18,7 +18,7 @@ class DynamoInserterTest
     with SierraGenerators with SierraAdapterHelpers {
 
   it("inserts an ItemRecord into the VHS") {
-    val store = createStore()
+    val store = createStore[SierraItemRecord]()
     withDynamoInserter(store) { dynamoInserter =>
       val record = createSierraItemRecord
 

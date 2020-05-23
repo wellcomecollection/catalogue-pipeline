@@ -70,7 +70,7 @@ class SierraItemsToDynamoWorkerServiceTest
 
 
   it("records a failure if it receives an invalid message") {
-    val store = createStore()
+    val store = createStore[SierraItemRecord]()
     val mockMetricsSender = mock[Metrics[Future, StandardUnit]]
         withLocalSqsQueueAndDlq {
           case QueuePair(queue, dlq) =>

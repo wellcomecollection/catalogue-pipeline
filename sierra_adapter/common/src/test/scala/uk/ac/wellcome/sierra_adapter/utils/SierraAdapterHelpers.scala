@@ -2,7 +2,6 @@ package uk.ac.wellcome.sierra_adapter.utils
 
 import org.scalatest.Assertion
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.fixtures._
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.sierra_adapter.model.SierraTransformable
 import uk.ac.wellcome.storage.Version
@@ -14,9 +13,8 @@ import uk.ac.wellcome.json.JsonUtil._
 trait SierraAdapterHelpers extends Matchers {
   type SierraVHS = VersionedStore[String, Int, SierraTransformable]
 
-  def withSierraVHS[R](
-    testWith: TestWith[SierraVHS, R]): R =
-    testWith(new MemoryVersionedStore(new MemoryStore(Map[Version[String, Int],SierraTransformable]()) with MemoryMaxima[String, SierraTransformable]))
+  def createStore[T](data: Map[Version[String, Int],T]= Map[Version[String, Int],T]()): MemoryVersionedStore[String, T] =
+    new MemoryVersionedStore(new MemoryStore(data) with MemoryMaxima[String, T])
 
 
   def storeInVHS(transformable: SierraTransformable,

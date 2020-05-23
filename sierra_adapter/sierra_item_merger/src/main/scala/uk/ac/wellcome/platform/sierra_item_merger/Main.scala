@@ -3,13 +3,15 @@ package uk.ac.wellcome.platform.sierra_item_merger
 import akka.actor.ActorSystem
 import akka.stream.Materializer
 import com.typesafe.config.Config
+import uk.ac.wellcome.bigmessaging.VHSWrapper
+import uk.ac.wellcome.bigmessaging.typesafe.VHSBuilder
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.platform.sierra_item_merger.services.{SierraItemMergerUpdaterService, SierraItemMergerWorkerService}
 import uk.ac.wellcome.sierra_adapter.config.builders.SierraTransformableVHSBuilder
 import uk.ac.wellcome.sierra_adapter.model.SierraItemRecord
-import uk.ac.wellcome.storage.typesafe.S3Builder
+import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 
@@ -33,8 +35,10 @@ object Main extends WellcomeTypesafeApp {
     new SierraItemMergerWorkerService(
       sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
       sierraItemMergerUpdaterService = updaterService,
-      objectStore = S3Builder.buildObjectStore[SierraItemRecord](config),
-      snsWriter = SNSBuilder.buildSNSWriter(config)
+      itemRecordStore = new VersionedStore(
+        new VHSWrapper(
+          VHSBuilder.build[SierraItemRecord](config))),
+      snsWriter = SNSBuilder.buildSNSMessageSender(config, subject = "Sierra item merger")
     )
   }
 }
