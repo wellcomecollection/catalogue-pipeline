@@ -16,22 +16,8 @@ trait SierraAdapterHelpers extends Matchers {
   def createStore[T](data: Map[Version[String, Int],T]= Map[Version[String, Int],T]()): MemoryVersionedStore[String, T] =
     new MemoryVersionedStore(new MemoryStore(data) with MemoryMaxima[String, T])
 
-
-  def storeInVHS(transformable: SierraTransformable,
-                 hybridStore: SierraVHS): hybridStore.WriteEither =
-    hybridStore.putLatest(transformable.sierraId.withoutCheckDigit)(transformable)
-
-  def storeInVHS(transformables: List[SierraTransformable],
-                 hybridStore: SierraVHS): Seq[hybridStore.WriteEither] =
-
-      transformables.map { t =>
-        storeInVHS(t, hybridStore = hybridStore)
-      }
-
-
   def assertStored[T](id: String, t: T, store: VersionedStore[String, Int, T]): Assertion =
     store.getLatest(id).right.get.identifiedT shouldBe t
-
 
   def assertStoredAndSent[T](id: Version[String, Int],t: T, store: VersionedStore[String, Int, T], messageSender: MemoryMessageSender): Assertion = {
     assertStored(id.id,t, store)
