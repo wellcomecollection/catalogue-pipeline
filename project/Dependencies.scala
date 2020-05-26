@@ -72,8 +72,7 @@ object ExternalDependencies {
     val apacheCommons = "3.7"
     val apacheLogging = "2.8.2"
     val aws = "1.11.504"
-    val circe = "0.9.0"
-    val newCirce = "0.13.0"
+    val circe = "0.13.0"
     val elastic4s = "7.6.1"
     val fastparse = "2.1.3"
     val swagger = "2.0.10"
@@ -82,7 +81,7 @@ object ExternalDependencies {
     val scalacheckShapeless = "1.1.6"
     val scalacsv = "1.3.5"
     val scalaGraph = "1.12.5"
-    val newScalatest = "3.1.1"
+    val scalatest = "3.1.1"
     val apm = "1.12.0"
     val enumeratum = "1.5.13"
     val enumeratumScalacheck = "1.5.16"
@@ -116,10 +115,6 @@ object ExternalDependencies {
     "org.apache.commons" % "commons-lang3" % versions.apacheCommons
   )
 
-  val newCirceOpticsDependencies = Seq(
-    "io.circe" %% "circe-optics" % versions.newCirce
-  )
-
   val circeOpticsDependencies = Seq(
     "io.circe" %% "circe-optics" % versions.circe
   )
@@ -130,10 +125,6 @@ object ExternalDependencies {
     // This is our version of elastic4s.
     // Temporarily use it until until https://github.com/sksamuel/elastic4s/pull/2049
     // gets merged and released.
-    // Also, the new version of elastic4s brings in scalatest_3.1.0 which is not backwards
-    // compatible with scalatest_3.0.1 used here and a newer versio  of akka.
-    // Both need to be updated in the wellcome libraries before being updated here,
-    // so temporarily excluding those form the dependencies
     "uk.ac.wellcome.elastic4s" %% "elastic4s-core" % versions.elastic4s,
     "uk.ac.wellcome.elastic4s" %% "elastic4s-client-esjava" % versions.elastic4s,
     "uk.ac.wellcome.elastic4s" %% "elastic4s-http-streams" % versions.elastic4s,
@@ -173,7 +164,7 @@ object ExternalDependencies {
   )
 
   val scalatestDependencies = Seq(
-    "org.scalatest" %% "scalatest" % versions.newScalatest % "test"
+    "org.scalatest" %% "scalatest" % versions.scalatest % "test"
   )
 
   val swaggerDependencies = Seq(
@@ -234,13 +225,13 @@ object CatalogueDependencies {
   val apiDependencies: Seq[ModuleID] =
     ExternalDependencies.akkaHttpDependencies ++
       ExternalDependencies.apmDependencies ++
-      ExternalDependencies.newCirceOpticsDependencies ++
+      ExternalDependencies.circeOpticsDependencies ++
       WellcomeDependencies.typesafeLibrary
 
   val idminterDependencies: Seq[ModuleID] =
     ExternalDependencies.mockitoDependencies ++
       ExternalDependencies.mySqlDependencies ++
-      ExternalDependencies.newCirceOpticsDependencies
+      ExternalDependencies.circeOpticsDependencies
 
   val ingestorDependencies: Seq[ModuleID] =
     ExternalDependencies.mockitoDependencies
