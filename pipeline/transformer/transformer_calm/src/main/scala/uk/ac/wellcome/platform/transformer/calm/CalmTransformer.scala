@@ -62,7 +62,7 @@ object CalmTransformer
                   data = WorkData(),
                   invisibilityReasons =
                     List(knownErrToUntransformableReason(knownErr))))
-            case UnknownAccessStatus(status) =>
+            case unknownStatus: UnknownAccessStatus =>
               Right(
                 UnidentifiedInvisibleWork(
                   sourceIdentifier = sourceIdentifier(record),

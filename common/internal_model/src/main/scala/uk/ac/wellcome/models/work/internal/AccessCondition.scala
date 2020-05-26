@@ -1,8 +1,6 @@
 package uk.ac.wellcome.models.work.internal
 
-import uk.ac.wellcome.models.work.internal.result.Result
-
-case class UnknownAccessStatus(status: String) extends Throwable
+class UnknownAccessStatus(status: String) extends Exception(status)
 
 case class AccessCondition(
   status: Option[AccessStatus] = None,
@@ -34,9 +32,11 @@ object AccessStatus {
 
   case object PermissionRequired extends AccessStatus
 
-  def apply(str: String): Result[AccessStatus] =
+  def apply(str: String): Either[Exception, AccessStatus] =
     str.toLowerCase match {
       case status if status.startsWith("open with advisory") =>
+        Right(AccessStatus.OpenWithAdvisory)
+      case status if status.startsWith("requires registration") =>
         Right(AccessStatus.OpenWithAdvisory)
       case status if status.startsWith("open") =>
         Right(AccessStatus.Open)
@@ -46,15 +46,19 @@ object AccessStatus {
         Right(AccessStatus.Restricted)
       case status if status.startsWith("certain restrictions apply") =>
         Right(AccessStatus.Restricted)
+      case status if status.startsWith("clinical images") =>
+        Right(AccessStatus.Restricted)
       case status if status.startsWith("closed") =>
         Right(AccessStatus.Closed)
       case status if status.startsWith("missing") =>
         Right(AccessStatus.Unavailable)
+      case status if status.startsWith("in copyright") =>
+        Right(AccessStatus.LicensedResources)
       case status if status.startsWith("temporarily unavailable") =>
         Right(AccessStatus.Unavailable)
       case status if status.startsWith("permission required") =>
         Right(AccessStatus.PermissionRequired)
       case status =>
-        Left(UnknownAccessStatus(status))
+        Left(new UnknownAccessStatus(status))
     }
 }

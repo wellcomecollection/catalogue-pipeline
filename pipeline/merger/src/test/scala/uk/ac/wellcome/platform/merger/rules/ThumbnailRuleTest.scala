@@ -4,6 +4,8 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.{
+  AccessCondition,
+  AccessStatus,
   DigitalLocation,
   License,
   LocationType
@@ -15,8 +17,11 @@ class ThumbnailRuleTest
     with Matchers
     with WorksGenerators
     with Inside {
+
   val physicalSierraWork = createSierraPhysicalWork
+
   val digitalSierraWork = createSierraDigitalWork
+
   val metsWork = createUnidentifiedWorkWith(
     sourceIdentifier = createMetsSourceIdentifier,
     items = List(createDigitalItem),
@@ -28,6 +33,7 @@ class ThumbnailRuleTest
       )
     )
   )
+
   val miroWorks = (0 to 3)
     .map { i =>
       f"V$i%04d"
@@ -53,6 +59,23 @@ class ThumbnailRuleTest
         )
       )
     }
+
+  val restrictedDigitalWork =
+    createUnidentifiedSierraWorkWith(
+      items = List(
+        createUnidentifiableItemWith(
+          locations = List(
+            createDigitalLocationWith(
+              accessConditions = List(
+                AccessCondition(
+                  status = Some(AccessStatus.Restricted)
+                )
+              )
+            )
+          )
+        )
+      )
+    )
 
   it(
     "chooses the METS thumbnail from a single-item digital METS work for a digital Sierra target") {
@@ -89,6 +112,13 @@ class ThumbnailRuleTest
           .minBy(_.sourceIdentifier.value)
           .data
           .thumbnail
+    }
+  }
+
+  it("suppresses thumbnails when restricted access status") {
+    inside(ThumbnailRule.merge(restrictedDigitalWork, miroWorks :+ metsWork)) {
+      case FieldMergeResult(thumbnail, _) =>
+        thumbnail shouldBe None
     }
   }
 

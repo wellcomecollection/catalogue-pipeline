@@ -3,6 +3,15 @@ package uk.ac.wellcome.models.work.internal
 sealed trait Location {
   val locationType: LocationType
   val accessConditions: List[AccessCondition]
+
+  def isRestrictedOrClosed =
+    accessConditions.exists { accessCondition =>
+      accessCondition.status match {
+        case Some(AccessStatus.Restricted) => true
+        case Some(AccessStatus.Closed)     => true
+        case _                             => false
+      }
+    }
 }
 
 case class DigitalLocation(
