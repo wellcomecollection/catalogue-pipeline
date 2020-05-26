@@ -60,9 +60,7 @@ class SierraTransformerIntegrationTest
                 sendSqsMessage(
                   queue = queue,
                   obj = createHybridRecordNotificationWith(
-                    sierraTransformable,
-                    store,
-                    namespace = storageBucket.name,
+                    sierraTransformable
                   )
                 )
                 eventually {

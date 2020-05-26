@@ -47,16 +47,9 @@ trait BackwardsCompatHybridRecordReceiverFixture extends BigMessagingFixture {
 
   def createHybridRecordNotificationWith(
     sierraTransformable: SierraTransformable,
-    store: SierraStore,
-    namespace: String = "test",
     version: Int = 1): NotificationMessage = {
 
-    val hybridRecord = createHybridRecordWith(
-      sierraTransformable,
-      store,
-      namespace = namespace,
-      version = version
-    )
+    val hybridRecord = Version(sierraTransformable.sierraId.withoutCheckDigit, version)
     createNotificationMessageWith(
       message = hybridRecord
     )

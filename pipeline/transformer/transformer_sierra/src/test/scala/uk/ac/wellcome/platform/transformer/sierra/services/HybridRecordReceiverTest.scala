@@ -49,8 +49,7 @@ class HybridRecordReceiverTest
       withLocalS3Bucket { bucket =>
         withSierraStore { store =>
           val sqsMessage = createHybridRecordNotificationWith(
-            createSierraTransformable,
-            store
+            createSierraTransformable
           )
 
           withHybridRecordReceiver(store, topic, bucket) { recordReceiver =>
@@ -79,7 +78,6 @@ class HybridRecordReceiverTest
         withSierraStore { store =>
           val notification = createHybridRecordNotificationWith(
             createSierraTransformable,
-            store,
             version = version
           )
 
@@ -183,8 +181,7 @@ class HybridRecordReceiverTest
       withLocalS3Bucket { bucket =>
         withSierraStore { store =>
           val failingSqsMessage = createHybridRecordNotificationWith(
-            createSierraTransformable,
-            store
+            createSierraTransformable
           )
 
           withHybridRecordReceiver(store, topic, bucket) { recordReceiver =>
@@ -207,8 +204,7 @@ class HybridRecordReceiverTest
       withLocalS3Bucket { bucket =>
         withSierraStore { store =>
           val message = createHybridRecordNotificationWith(
-            createSierraTransformable,
-            store
+            createSierraTransformable
           )
 
           withHybridRecordReceiver(
