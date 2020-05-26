@@ -1,33 +1,29 @@
 package uk.ac.wellcome.platform.sierra_bib_merger.services
 
 import org.mockito.Mockito.{never, verify}
-import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{FunSpec, Matchers}
-import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
-import uk.ac.wellcome.messaging.fixtures.{Messaging, SQS}
-import uk.ac.wellcome.monitoring.MetricsSender
-import uk.ac.wellcome.monitoring.fixtures.MetricsSenderFixture
-import uk.ac.wellcome.platform.sierra_bib_merger.fixtures.WorkerServiceFixture
-import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
-import uk.ac.wellcome.storage.fixtures.{LocalVersionedHybridStore, S3}
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
+import org.scalatestplus.mockito.MockitoSugar
+import software.amazon.awssdk.services.cloudwatch.model.StandardUnit
 import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.sierra_adapter.model.SierraGenerators
+import uk.ac.wellcome.messaging.fixtures.SQS
+import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
+import uk.ac.wellcome.monitoring.Metrics
+import uk.ac.wellcome.platform.sierra_bib_merger.fixtures.WorkerServiceFixture
+import uk.ac.wellcome.sierra_adapter.model.{SierraGenerators, SierraTransformable}
+import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
+
+import scala.concurrent.Future
 
 class SierraBibMergerWorkerServiceTest
-    extends FunSpec
+    extends AnyFunSpec
     with MockitoSugar
-    with ScalaFutures
     with Matchers
     with SQS
-    with MetricsSenderFixture
-    with S3
-    with Messaging
-    with LocalVersionedHybridStore
-    with IntegrationPatience
     with SierraAdapterHelpers
     with SierraGenerators
-    with WorkerServiceFixture {
+    with WorkerServiceFixture with Eventually with IntegrationPatience{
 
   it(
     "records a failure if the message on the queue does not represent a SierraRecord") {
@@ -48,20 +44,16 @@ class SierraBibMergerWorkerServiceTest
   }
 
   private def withWorkerServiceFixtures[R](
-    testWith: TestWith[(MetricsSender, QueuePair), R]) =
-    withMockMetricsSender { metricsSender =>
-      withLocalSnsTopic { topic =>
-        withLocalSqsQueueAndDlq {
-          case queuePair @ QueuePair(queue, _) =>
-            withLocalDynamoDbTable { table =>
-              withLocalS3Bucket { storageBucket =>
-                withWorkerService(storageBucket, table, queue, topic) { _ =>
-                  testWith((metricsSender, queuePair))
-                }
-              }
-            }
+    testWith: TestWith[(Metrics[Future, StandardUnit], QueuePair), R]) = {
+    val metricsSender = mock[Metrics[Future, StandardUnit]]
+    withLocalSqsQueueAndDlq {
+      case queuePair@QueuePair(queue, _) =>
+        val store = createStore[SierraTransformable]()
+        withWorkerService(store, queue) { _ =>
+          testWith((metricsSender, queuePair))
         }
-      }
     }
+
+  }
 
 }

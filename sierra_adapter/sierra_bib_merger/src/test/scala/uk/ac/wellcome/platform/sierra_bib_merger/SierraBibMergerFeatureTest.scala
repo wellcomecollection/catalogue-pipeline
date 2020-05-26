@@ -1,221 +1,177 @@
 package uk.ac.wellcome.platform.sierra_bib_merger
 
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
-import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
+import org.scalatestplus.mockito.MockitoSugar
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.platform.sierra_bib_merger.fixtures.WorkerServiceFixture
-import uk.ac.wellcome.sierra_adapter.model.{
-  SierraGenerators,
-  SierraTransformable
-}
+import uk.ac.wellcome.sierra_adapter.model.{SierraGenerators, SierraTransformable}
 import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
-import uk.ac.wellcome.storage.fixtures.LocalVersionedHybridStore
-
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.ac.wellcome.storage.Version
 
 class SierraBibMergerFeatureTest
-    extends FunSpec
+  extends AnyFunSpec
     with Matchers
     with Eventually
     with MockitoSugar
     with IntegrationPatience
     with ScalaFutures
     with SQS
-    with LocalVersionedHybridStore
     with SierraGenerators
     with SierraAdapterHelpers
     with WorkerServiceFixture {
 
   it("stores a bib in the hybrid store") {
+    val store = createStore[SierraTransformable]()
     withLocalSqsQueue { queue =>
-      withLocalSnsTopic { topic =>
-        withLocalS3Bucket { bucket =>
-          withLocalDynamoDbTable { table =>
-            withWorkerService(bucket, table, queue, topic) { _ =>
-              val bibRecord = createSierraBibRecord
+      withWorkerService(store, queue) { case (_, messageSender) =>
+        val bibRecord = createSierraBibRecord
 
-              sendNotificationToSQS(queue = queue, message = bibRecord)
+        sendNotificationToSQS(queue = queue, message = bibRecord)
 
-              val expectedSierraTransformable =
-                SierraTransformable(bibRecord = bibRecord)
+        val expectedSierraTransformable =
+          SierraTransformable(bibRecord = bibRecord)
 
-              eventually {
-                assertStoredAndSent(
-                  transformable = expectedSierraTransformable,
-                  topic = topic,
-                  table = table
-                )
-              }
-            }
-          }
+        eventually {
+          assertStoredAndSent(
+            Version(expectedSierraTransformable.sierraId.withoutCheckDigit, 0),
+            expectedSierraTransformable,
+            store, messageSender
+          )
         }
       }
     }
   }
 
   it("stores multiple bibs from SQS") {
+    val store = createStore[SierraTransformable]()
     withLocalSqsQueue { queue =>
-      withLocalSnsTopic { topic =>
-        withLocalS3Bucket { bucket =>
-          withLocalDynamoDbTable { table =>
-            withWorkerService(bucket, table, queue, topic) { _ =>
-              val record1 = createSierraBibRecord
-              sendNotificationToSQS(queue = queue, message = record1)
+      withWorkerService(store, queue) { case (_, messageSender) =>
+        val record1 = createSierraBibRecord
+        sendNotificationToSQS(queue = queue, message = record1)
 
-              val expectedTransformable1 =
-                SierraTransformable(bibRecord = record1)
+        val expectedTransformable1 =
+          SierraTransformable(bibRecord = record1)
 
-              val record2 = createSierraBibRecord
+        val record2 = createSierraBibRecord
 
-              sendNotificationToSQS(queue = queue, message = record2)
+        sendNotificationToSQS(queue = queue, message = record2)
 
-              val expectedTransformable2 =
-                SierraTransformable(bibRecord = record2)
+        val expectedTransformable2 =
+          SierraTransformable(bibRecord = record2)
 
-              eventually {
-                assertStoredAndSent(
-                  transformable = expectedTransformable1,
-                  topic = topic,
-                  table = table
-                )
-                assertStoredAndSent(
-                  transformable = expectedTransformable2,
-                  topic = topic,
-                  table = table
-                )
-              }
-            }
-          }
+        eventually {
+          assertStoredAndSent(
+            Version(expectedTransformable1.sierraId.withoutCheckDigit, 0),
+            expectedTransformable1,
+            store,
+            messageSender
+          )
+          assertStoredAndSent(
+            Version(expectedTransformable2.sierraId.withoutCheckDigit, 0),
+            expectedTransformable2,
+            store,
+            messageSender
+          )
         }
       }
     }
   }
 
   it("updates a bib if a newer version is sent to SQS") {
+    val oldBibRecord = createSierraBibRecordWith(
+      modifiedDate = olderDate
+    )
+
+    val oldTransformable =
+      SierraTransformable(bibRecord = oldBibRecord)
+    val store = createStore[SierraTransformable](Map(Version(oldTransformable.sierraId.withoutCheckDigit, 0) -> oldTransformable))
     withLocalSqsQueue { queue =>
-      withLocalSnsTopic { topic =>
-        withLocalS3Bucket { bucket =>
-          withLocalDynamoDbTable { table =>
-            withWorkerService(bucket, table, queue, topic) { _ =>
-              withSierraVHS(bucket, table) { hybridStore =>
-                val oldBibRecord = createSierraBibRecordWith(
-                  modifiedDate = olderDate
-                )
+      withWorkerService(store, queue) { case (_, messageSender) =>
 
-                val oldTransformable =
-                  SierraTransformable(bibRecord = oldBibRecord)
+        val newBibRecord = createSierraBibRecordWith(
+          id = oldBibRecord.id,
+          modifiedDate = newerDate
+        )
 
-                val newBibRecord = createSierraBibRecordWith(
-                  id = oldBibRecord.id,
-                  modifiedDate = newerDate
-                )
+        sendNotificationToSQS(queue = queue, message = newBibRecord)
 
-                storeInVHS(
-                  transformable = oldTransformable,
-                  hybridStore = hybridStore
-                ).map { _ =>
-                  sendNotificationToSQS(queue = queue, message = newBibRecord)
-                }
+        val expectedTransformable =
+          SierraTransformable(bibRecord = newBibRecord)
 
-                val expectedTransformable =
-                  SierraTransformable(bibRecord = newBibRecord)
-
-                eventually {
-                  assertStoredAndSent(
-                    transformable = expectedTransformable,
-                    topic = topic,
-                    table = table
-                  )
-                }
-              }
-            }
-          }
+        eventually {
+          assertStoredAndSent(
+            Version(oldTransformable.sierraId.withoutCheckDigit, 1),
+            expectedTransformable,
+            store,
+            messageSender
+          )
         }
       }
     }
   }
+
 
   it("does not update a bib if an older version is sent to SQS") {
+    val newBibRecord = createSierraBibRecordWith(
+      modifiedDate = newerDate
+    )
+
+    val expectedTransformable =
+      SierraTransformable(bibRecord = newBibRecord)
+    val key = Version(expectedTransformable.sierraId.withoutCheckDigit, 0)
+    val store = createStore[SierraTransformable](Map(key -> expectedTransformable))
     withLocalSqsQueue { queue =>
-      withLocalSnsTopic { topic =>
-        withLocalS3Bucket { bucket =>
-          withLocalDynamoDbTable { table =>
-            withWorkerService(bucket, table, queue, topic) { _ =>
-              withSierraVHS(bucket, table) { hybridStore =>
-                val newBibRecord = createSierraBibRecordWith(
-                  modifiedDate = newerDate
-                )
+      withWorkerService(store, queue) { case (_, messageSender) =>
 
-                val expectedTransformable =
-                  SierraTransformable(bibRecord = newBibRecord)
+        val oldBibRecord = createSierraBibRecordWith(
+          id = newBibRecord.id,
+          modifiedDate = olderDate
+        )
 
-                val oldBibRecord = createSierraBibRecordWith(
-                  id = newBibRecord.id,
-                  modifiedDate = olderDate
-                )
+        sendNotificationToSQS(queue = queue, message = oldBibRecord)
 
-                storeInVHS(
-                  transformable = expectedTransformable,
-                  hybridStore = hybridStore
-                ).map { _ =>
-                  sendNotificationToSQS(queue = queue, message = oldBibRecord)
-                }
+        // Wait so there's enough time for this update to have gone through (if it was going to).
+        Thread.sleep(5000)
 
-                // Blocking in Scala is generally a bad idea; we do it here so there's
-                // enough time for this update to have gone through (if it was going to).
-                Thread.sleep(5000)
-
-                assertStoredAndSent(
-                  transformable = expectedTransformable,
-                  topic = topic,
-                  table = table
-                )
-              }
-            }
-          }
-        }
+        assertStoredAndSent(
+          key.copy(version = 1),
+          expectedTransformable,
+          store, messageSender
+        )
       }
     }
   }
+
 
   it("stores a bib from SQS if the ID already exists but no bibData") {
+    val transformable = createSierraTransformableWith(
+      maybeBibRecord = None
+    )
+    val store = createStore[SierraTransformable](Map(Version(transformable.sierraId.withoutCheckDigit, 0) -> transformable))
     withLocalSqsQueue { queue =>
-      withLocalSnsTopic { topic =>
-        withLocalS3Bucket { bucket =>
-          withLocalDynamoDbTable { table =>
-            withWorkerService(bucket, table, queue, topic) { _ =>
-              withSierraVHS(bucket, table) { hybridStore =>
-                val transformable = createSierraTransformableWith(
-                  maybeBibRecord = None
-                )
+      withWorkerService(store, queue) { case (_, messageSender) =>
 
-                val bibRecord =
-                  createSierraBibRecordWith(id = transformable.sierraId)
+        val bibRecord =
+          createSierraBibRecordWith(id = transformable.sierraId)
 
-                storeInVHS(
-                  transformable = transformable,
-                  hybridStore = hybridStore
-                ).map { _ =>
-                  sendNotificationToSQS(queue = queue, message = bibRecord)
-                }
+        sendNotificationToSQS(queue = queue, message = bibRecord)
 
-                val expectedTransformable =
-                  SierraTransformable(bibRecord = bibRecord)
+        val expectedTransformable =
+          SierraTransformable(bibRecord = bibRecord)
 
-                eventually {
-                  assertStoredAndSent(
-                    transformable = expectedTransformable,
-                    topic = topic,
-                    table = table
-                  )
-                }
-              }
-            }
-          }
+        eventually {
+          assertStoredAndSent(
+            Version(transformable.sierraId.withoutCheckDigit, 1),
+            expectedTransformable,
+            store,
+            messageSender
+          )
         }
       }
     }
   }
+
 }

@@ -14,10 +14,10 @@ import cats.implicits._
 import scala.concurrent.Future
 
 class SierraItemMergerWorkerService[Destination](
-  sqsStream: SQSStream[NotificationMessage],
-  sierraItemMergerUpdaterService: SierraItemMergerUpdaterService,
-  itemRecordStore: VersionedStore[String, Int, SierraItemRecord],
-  snsWriter: MessageSender[Destination]
+                                                  sqsStream: SQSStream[NotificationMessage],
+                                                  sierraItemMergerUpdaterService: SierraItemMergerUpdaterService,
+                                                  itemRecordStore: VersionedStore[String, Int, SierraItemRecord],
+                                                  messageSender: MessageSender[Destination]
 )
     extends Runnable {
 
@@ -34,7 +34,7 @@ class SierraItemMergerWorkerService[Destination](
 
   private def sendKeys(updatedKeys: List[Version[String, Int]]): Either[Throwable, List[Unit]] = {
     val tries: List[Either[Throwable, Unit]] = updatedKeys.par.map { key =>
-      snsWriter.sendT(key).toEither
+      messageSender.sendT(key).toEither
     }.toList
     tries.sequence
   }

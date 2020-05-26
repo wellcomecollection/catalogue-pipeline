@@ -1,34 +1,17 @@
 package uk.ac.wellcome.platform.sierra_bib_merger.services
 
 import uk.ac.wellcome.platform.sierra_bib_merger.merger.BibMerger
-import uk.ac.wellcome.sierra_adapter.model.{
-  SierraBibRecord,
-  SierraTransformable
-}
-import uk.ac.wellcome.storage.dynamo._
-import uk.ac.wellcome.storage.vhs.{
-  EmptyMetadata,
-  VHSIndexEntry,
-  VersionedHybridStore
-}
-import uk.ac.wellcome.storage.ObjectStore
-
-import scala.concurrent.Future
+import uk.ac.wellcome.sierra_adapter.model.{SierraBibRecord, SierraTransformable}
+import uk.ac.wellcome.storage.Version
+import uk.ac.wellcome.storage.store.VersionedStore
 
 class SierraBibMergerUpdaterService(
-  versionedHybridStore: VersionedHybridStore[SierraTransformable,
-                                             EmptyMetadata,
-                                             ObjectStore[SierraTransformable]]
+                                     versionedHybridStore: VersionedStore[String, Int, SierraTransformable]
 ) {
 
-  def update(bibRecord: SierraBibRecord): Future[VHSIndexEntry[EmptyMetadata]] =
-    versionedHybridStore
-      .updateRecord(id = bibRecord.id.withoutCheckDigit)(
-        ifNotExisting = (SierraTransformable(bibRecord), EmptyMetadata()))(
-        ifExisting = (existingSierraTransformable, existingMetadata) => {
-          (
-            BibMerger.mergeBibRecord(existingSierraTransformable, bibRecord),
-            existingMetadata)
-        }
-      )
+  def update(bibRecord: SierraBibRecord): Either[Throwable, Version[String, Int]] =
+    versionedHybridStore.upsert(bibRecord.id.withoutCheckDigit)(SierraTransformable(bibRecord)){existingSierraTransformable=>
+      Right(BibMerger.mergeBibRecord(existingSierraTransformable, bibRecord))
+    }.map{id => id.id}.left.map(err=> err.e)
+
 }

@@ -29,7 +29,7 @@ object Main extends WellcomeTypesafeApp {
 
     new SierraBibMergerWorkerService(
       sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
-      snsWriter = SNSBuilder.buildSNSMessageSender(config),
+      messageSender = SNSBuilder.buildSNSMessageSender(config, subject = "Sierra bib merger"),
       sierraBibMergerUpdaterService = updaterService
     )
   }

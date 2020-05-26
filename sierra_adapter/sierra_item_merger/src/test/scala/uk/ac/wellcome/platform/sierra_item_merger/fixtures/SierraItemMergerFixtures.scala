@@ -36,7 +36,7 @@ trait SierraItemMergerFixtures
                 sqsStream = sqsStream,
                 sierraItemMergerUpdaterService = updaterService,
                 itemRecordStore = itemRecordStore,
-                snsWriter = snsWriter
+                messageSender = snsWriter
               )
 
               testWith((workerService, snsWriter))

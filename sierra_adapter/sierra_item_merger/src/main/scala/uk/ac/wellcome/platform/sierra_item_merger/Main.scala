@@ -38,7 +38,7 @@ object Main extends WellcomeTypesafeApp {
       itemRecordStore = new VersionedStore(
         new VHSWrapper(
           VHSBuilder.build[SierraItemRecord](config))),
-      snsWriter = SNSBuilder.buildSNSMessageSender(config, subject = "Sierra item merger")
+      messageSender = SNSBuilder.buildSNSMessageSender(config, subject = "Sierra item merger")
     )
   }
 }
