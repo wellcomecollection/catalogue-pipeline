@@ -50,8 +50,8 @@ class SierraTransformerWorkerServiceTest
                     """.stripMargin
         )
       )
-      val key = id.withoutCheckDigit
-      val store = createStore[SierraTransformable](Map(Version(key, 0) -> sierraTransformable))
+      val key = Version(id.withoutCheckDigit, 0)
+      val store = createStore[SierraTransformable](Map(key -> sierraTransformable))
       val sender = new MemoryBigMessageSender[TransformedBaseWork]()
       withWorkerService(store, sender, queue) {
         _ =>
@@ -67,7 +67,7 @@ class SierraTransformerWorkerServiceTest
 
             val sierraIdentifier =
               createSierraIdentifierSourceIdentifierWith(
-                value = key
+                value = id.withoutCheckDigit
               )
 
             val works = sender.getMessages[UnidentifiedWork]
@@ -92,7 +92,10 @@ class SierraTransformerWorkerServiceTest
     val store = createStore(Map(key -> transformable))
     val sender = new MemoryBigMessageSender[TransformedBaseWork]()
     withLocalSqsQueue { queue =>
-      withWorkerService(store, sender, queue) { s =>
+
+      sendNotificationToSQS(queue, key)
+
+      withWorkerService(store, sender, queue) { _ =>
         eventually {
           val works = sender.getMessages[TransformedBaseWork]
           works.size should be >= 1
@@ -166,7 +169,7 @@ class SierraTransformerWorkerServiceTest
     val store = createStore(Map(key -> transformable))
     val sender = new MemoryBigMessageSender[TransformedBaseWork]()
     withLocalSqsQueueAndDlq { case QueuePair(queue, dlq) =>
-
+      sendNotificationToSQS(queue, key)
           withBrokenWorkerService(store, sender, queue) { recordReceiver =>
             eventually {
               assertQueueEmpty(queue)
@@ -185,7 +188,7 @@ class SierraTransformerWorkerServiceTest
       override def sendT(t: TransformedBaseWork): Try[MessageNotification] = Failure(new Exception("BOOM!"))
     }
     withLocalSqsQueueAndDlq { case QueuePair(queue, dlq) =>
-
+      sendNotificationToSQS(queue, key)
       withWorkerService(store, sender, queue) { recordReceiver =>
         eventually {
           assertQueueEmpty(queue)
