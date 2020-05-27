@@ -2,8 +2,7 @@
   "id" : "transformer_calm",
   "folder" : "pipeline/transformer/transformer_calm",
   "dependencyIds" : [
-    "internal_model",
-    "big_messaging_typesafe",
+    "transformer_common",
     "calm_adapter"
   ]
 }

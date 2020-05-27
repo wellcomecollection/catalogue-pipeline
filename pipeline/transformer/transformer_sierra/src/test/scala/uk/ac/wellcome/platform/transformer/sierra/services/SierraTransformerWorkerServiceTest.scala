@@ -13,7 +13,7 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
 import uk.ac.wellcome.models.work.internal.{TransformedBaseWork, UnidentifiedWork}
-import uk.ac.wellcome.platform.transformer.sierra.flgfadk.Transformer
+import uk.ac.wellcome.transformer.common.worker.Transformer
 import uk.ac.wellcome.sierra_adapter.model.{SierraGenerators, SierraTransformable}
 import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
 import uk.ac.wellcome.storage.maxima.memory.MemoryMaxima

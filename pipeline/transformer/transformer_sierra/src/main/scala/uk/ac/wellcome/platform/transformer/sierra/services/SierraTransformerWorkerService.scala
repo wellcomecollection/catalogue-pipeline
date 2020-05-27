@@ -5,10 +5,10 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.transformer.sierra.SierraTransformableTransformer
-import uk.ac.wellcome.platform.transformer.sierra.flgfadk.TransformerWorker
 import uk.ac.wellcome.sierra_adapter.model.SierraTransformable
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.typesafe.Runnable
+import uk.ac.wellcome.transformer.common.worker.TransformerWorker
 
 class SierraTransformerWorkerService[MsgDestination](
                                                              val stream: SQSStream[NotificationMessage],
