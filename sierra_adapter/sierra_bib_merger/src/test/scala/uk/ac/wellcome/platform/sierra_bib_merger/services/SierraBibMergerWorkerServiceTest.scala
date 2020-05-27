@@ -11,7 +11,10 @@ import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.monitoring.Metrics
 import uk.ac.wellcome.platform.sierra_bib_merger.fixtures.WorkerServiceFixture
-import uk.ac.wellcome.sierra_adapter.model.{SierraGenerators, SierraTransformable}
+import uk.ac.wellcome.sierra_adapter.model.{
+  SierraGenerators,
+  SierraTransformable
+}
 import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
 
 import scala.concurrent.Future
@@ -23,7 +26,9 @@ class SierraBibMergerWorkerServiceTest
     with SQS
     with SierraAdapterHelpers
     with SierraGenerators
-    with WorkerServiceFixture with Eventually with IntegrationPatience{
+    with WorkerServiceFixture
+    with Eventually
+    with IntegrationPatience {
 
   it(
     "records a failure if the message on the queue does not represent a SierraRecord") {
@@ -47,7 +52,7 @@ class SierraBibMergerWorkerServiceTest
     testWith: TestWith[(Metrics[Future, StandardUnit], QueuePair), R]) = {
     val metricsSender = mock[Metrics[Future, StandardUnit]]
     withLocalSqsQueueAndDlq {
-      case queuePair@QueuePair(queue, _) =>
+      case queuePair @ QueuePair(queue, _) =>
         val store = createStore[SierraTransformable]()
         withWorkerService(store, queue) { _ =>
           testWith((metricsSender, queuePair))

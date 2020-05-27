@@ -14,25 +14,32 @@ import cats.implicits._
 import scala.concurrent.Future
 
 class SierraItemMergerWorkerService[Destination](
-                                                  sqsStream: SQSStream[NotificationMessage],
-                                                  sierraItemMergerUpdaterService: SierraItemMergerUpdaterService,
-                                                  itemRecordStore: VersionedStore[String, Int, SierraItemRecord],
-                                                  messageSender: MessageSender[Destination]
-)
-    extends Runnable {
+  sqsStream: SQSStream[NotificationMessage],
+  sierraItemMergerUpdaterService: SierraItemMergerUpdaterService,
+  itemRecordStore: VersionedStore[String, Int, SierraItemRecord],
+  messageSender: MessageSender[Destination]
+) extends Runnable {
 
   private def process(message: NotificationMessage): Future[Unit] =
     Future.fromTry {
       val f: Either[Throwable, Unit] = for {
         key <- fromJson[Version[String, Int]](message.body).toEither
-        itemRecord <- itemRecordStore.get(key).map(id => id.identifiedT).left.map(id => id.e)
-        updatedKeys <- sierraItemMergerUpdaterService.update(itemRecord).left.map(id => id.e)
+        itemRecord <- itemRecordStore
+          .get(key)
+          .map(id => id.identifiedT)
+          .left
+          .map(id => id.e)
+        updatedKeys <- sierraItemMergerUpdaterService
+          .update(itemRecord)
+          .left
+          .map(id => id.e)
         _ <- sendKeys(updatedKeys)
-        }yield ()
+      } yield ()
       f.toTry
     }
 
-  private def sendKeys(updatedKeys: List[Version[String, Int]]): Either[Throwable, List[Unit]] = {
+  private def sendKeys(
+    updatedKeys: List[Version[String, Int]]): Either[Throwable, List[Unit]] = {
     val tries: List[Either[Throwable, Unit]] = updatedKeys.par.map { key =>
       messageSender.sendT(key).toEither
     }.toList

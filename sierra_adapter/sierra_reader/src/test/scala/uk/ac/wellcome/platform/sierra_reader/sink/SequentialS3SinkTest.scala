@@ -116,5 +116,6 @@ class SequentialS3SinkTest
     }
   }
 
-  def getJsonFromS3(bucket: Bucket, key: String): Json = getJsonFromS3(ObjectLocation(bucket.name, key))
+  def getJsonFromS3(bucket: Bucket, key: String): Json =
+    getJsonFromS3(ObjectLocation(bucket.name, key))
 }

@@ -9,12 +9,16 @@ class DynamoInserter(
   versionedHybridStore: VersionedStore[String, Int, SierraItemRecord]) {
   def insertIntoDynamo(
     record: SierraItemRecord): Either[Throwable, Version[String, Int]] =
-    versionedHybridStore.upsert(record.id.withoutCheckDigit)(record) {
-      existingRecord: SierraItemRecord =>
-        Right(
-          SierraItemRecordMerger
-            .mergeItems(
-              existingRecord = existingRecord,
-              updatedRecord = record))
-    }.map(id => id.id).left.map(_.e)
+    versionedHybridStore
+      .upsert(record.id.withoutCheckDigit)(record) {
+        existingRecord: SierraItemRecord =>
+          Right(
+            SierraItemRecordMerger
+              .mergeItems(
+                existingRecord = existingRecord,
+                updatedRecord = record))
+      }
+      .map(id => id.id)
+      .left
+      .map(_.e)
 }

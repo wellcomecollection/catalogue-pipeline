@@ -6,12 +6,16 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.platform.sierra_item_merger.fixtures.SierraItemMergerFixtures
-import uk.ac.wellcome.sierra_adapter.model.{SierraGenerators, SierraItemRecord, SierraTransformable}
+import uk.ac.wellcome.sierra_adapter.model.{
+  SierraGenerators,
+  SierraItemRecord,
+  SierraTransformable
+}
 import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
 import uk.ac.wellcome.storage.Version
 
 class SierraItemMergerFeatureTest
-  extends AnyFunSpec
+    extends AnyFunSpec
     with Matchers
     with Eventually
     with IntegrationPatience
@@ -22,13 +26,13 @@ class SierraItemMergerFeatureTest
 
   it("stores an item from SQS") {
     withLocalSqsQueue { queue =>
-
       val bibId = createSierraBibNumber
       val itemRecord = createSierraItemRecordWith(
         bibIds = List(bibId)
       )
       val key = Version(itemRecord.id.withoutCheckDigit, 0)
-      val itemRecordStore = createStore[SierraItemRecord](Map(key -> itemRecord))
+      val itemRecordStore =
+        createStore[SierraItemRecord](Map(key -> itemRecord))
       val sierraTransformableStore = createStore[SierraTransformable]()
       withSierraWorkerService(queue, itemRecordStore, sierraTransformableStore) {
         case (service, messageSender) =>
@@ -45,7 +49,9 @@ class SierraItemMergerFeatureTest
 
           eventually {
             assertStoredAndSent(
-              Version(expectedSierraTransformable.sierraId.withoutCheckDigit, 0),
+              Version(
+                expectedSierraTransformable.sierraId.withoutCheckDigit,
+                0),
               expectedSierraTransformable,
               sierraTransformableStore,
               messageSender
@@ -57,7 +63,6 @@ class SierraItemMergerFeatureTest
 
   it("stores multiple items from SQS") {
     withLocalSqsQueue { queue =>
-
       val bibId1 = createSierraBibNumber
       val itemRecord1 = createSierraItemRecordWith(
         bibIds = List(bibId1)
@@ -69,7 +74,8 @@ class SierraItemMergerFeatureTest
         bibIds = List(bibId2)
       )
       val key2 = Version(itemRecord2.id.withoutCheckDigit, 0)
-      val itemRecordStore = createStore[SierraItemRecord](Map(key1 -> itemRecord1, key2 -> itemRecord2))
+      val itemRecordStore = createStore[SierraItemRecord](
+        Map(key1 -> itemRecord1, key2 -> itemRecord2))
       val sierraTransformableStore = createStore[SierraTransformable]()
       withSierraWorkerService(queue, itemRecordStore, sierraTransformableStore) {
         case (service, messageSender) =>
@@ -109,7 +115,6 @@ class SierraItemMergerFeatureTest
     }
   }
 
-
   it("sends a notification for every transformable which changes") {
     withLocalSqsQueue { queue =>
       val bibIds = createSierraBibNumbers(3)
@@ -117,7 +122,8 @@ class SierraItemMergerFeatureTest
         bibIds = bibIds
       )
       val key = Version(itemRecord.id.withoutCheckDigit, 0)
-      val itemRecordStore = createStore[SierraItemRecord](Map(key -> itemRecord))
+      val itemRecordStore =
+        createStore[SierraItemRecord](Map(key -> itemRecord))
       val sierraTransformableStore = createStore[SierraTransformable]()
       withSierraWorkerService(queue, itemRecordStore, sierraTransformableStore) {
         case (service, messageSender) =>
@@ -136,7 +142,10 @@ class SierraItemMergerFeatureTest
           eventually {
             expectedTransformables.map { tranformable =>
               assertStoredAndSent(
-                Version(tranformable.sierraId.withoutCheckDigit, 0), tranformable, sierraTransformableStore, messageSender
+                Version(tranformable.sierraId.withoutCheckDigit, 0),
+                tranformable,
+                sierraTransformableStore,
+                messageSender
               )
             }
           }

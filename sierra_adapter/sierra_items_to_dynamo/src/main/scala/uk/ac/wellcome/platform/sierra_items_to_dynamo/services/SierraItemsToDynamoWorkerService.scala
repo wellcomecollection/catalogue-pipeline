@@ -12,19 +12,18 @@ import uk.ac.wellcome.typesafe.Runnable
 import scala.concurrent.Future
 
 class SierraItemsToDynamoWorkerService[Destination](
-                                        sqsStream: SQSStream[NotificationMessage],
-                                        dynamoInserter: DynamoInserter,
-                                        messageSender: MessageSender[Destination]
-)
-    extends Runnable {
+  sqsStream: SQSStream[NotificationMessage],
+  dynamoInserter: DynamoInserter,
+  messageSender: MessageSender[Destination]
+) extends Runnable {
 
   private def process(message: NotificationMessage) =
-    Future.fromTry{
+    Future.fromTry {
       for {
         itemRecord <- fromJson[SierraItemRecord](message.body)
         key <- dynamoInserter.insertIntoDynamo(itemRecord).toTry
         _ <- messageSender.sendT[Version[String, Int]](key)
-    } yield ()
+      } yield ()
     }
 
   def run(): Future[Done] =

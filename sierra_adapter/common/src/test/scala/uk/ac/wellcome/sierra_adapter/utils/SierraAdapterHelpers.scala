@@ -13,14 +13,21 @@ import uk.ac.wellcome.json.JsonUtil._
 trait SierraAdapterHelpers extends Matchers {
   type SierraVHS = VersionedStore[String, Int, SierraTransformable]
 
-  def createStore[T](data: Map[Version[String, Int],T]= Map[Version[String, Int],T]()): MemoryVersionedStore[String, T] =
+  def createStore[T](
+    data: Map[Version[String, Int], T] = Map[Version[String, Int], T]())
+    : MemoryVersionedStore[String, T] =
     new MemoryVersionedStore(new MemoryStore(data) with MemoryMaxima[String, T])
 
-  def assertStored[T](id: String, t: T, store: VersionedStore[String, Int, T]): Assertion =
+  def assertStored[T](id: String,
+                      t: T,
+                      store: VersionedStore[String, Int, T]): Assertion =
     store.getLatest(id).right.get.identifiedT shouldBe t
 
-  def assertStoredAndSent[T](id: Version[String, Int],t: T, store: VersionedStore[String, Int, T], messageSender: MemoryMessageSender): Assertion = {
-    assertStored(id.id,t, store)
-    messageSender.getMessages[Version[String,Int]] should contain(id)
+  def assertStoredAndSent[T](id: Version[String, Int],
+                             t: T,
+                             store: VersionedStore[String, Int, T],
+                             messageSender: MemoryMessageSender): Assertion = {
+    assertStored(id.id, t, store)
+    messageSender.getMessages[Version[String, Int]] should contain(id)
   }
 }

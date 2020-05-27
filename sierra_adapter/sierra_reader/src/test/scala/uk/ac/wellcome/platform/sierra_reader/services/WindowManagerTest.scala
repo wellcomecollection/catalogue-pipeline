@@ -6,7 +6,10 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.platform.sierra_reader.config.models.ReaderConfig
 import uk.ac.wellcome.platform.sierra_reader.exceptions.SierraReaderException
-import uk.ac.wellcome.platform.sierra_reader.models.{SierraResourceTypes, WindowStatus}
+import uk.ac.wellcome.platform.sierra_reader.models.{
+  SierraResourceTypes,
+  WindowStatus
+}
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.sierra_adapter.model.{SierraBibNumber, SierraGenerators}
 import uk.ac.wellcome.storage.fixtures.S3Fixtures

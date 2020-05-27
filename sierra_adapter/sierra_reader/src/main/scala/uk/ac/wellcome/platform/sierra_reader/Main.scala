@@ -5,7 +5,10 @@ import akka.stream.Materializer
 import com.typesafe.config.Config
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.SQSBuilder
-import uk.ac.wellcome.platform.sierra_reader.config.builders.{ReaderConfigBuilder, SierraAPIConfigBuilder}
+import uk.ac.wellcome.platform.sierra_reader.config.builders.{
+  ReaderConfigBuilder,
+  SierraAPIConfigBuilder
+}
 import uk.ac.wellcome.platform.sierra_reader.services.SierraReaderWorkerService
 import uk.ac.wellcome.storage.typesafe.S3Builder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp

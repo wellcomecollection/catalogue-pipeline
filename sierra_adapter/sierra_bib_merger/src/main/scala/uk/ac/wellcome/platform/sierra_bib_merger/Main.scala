@@ -5,7 +5,10 @@ import akka.stream.Materializer
 import com.typesafe.config.Config
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import uk.ac.wellcome.platform.sierra_bib_merger.services.{SierraBibMergerUpdaterService, SierraBibMergerWorkerService}
+import uk.ac.wellcome.platform.sierra_bib_merger.services.{
+  SierraBibMergerUpdaterService,
+  SierraBibMergerWorkerService
+}
 import uk.ac.wellcome.sierra_adapter.config.builders.SierraVHSBuilder
 import uk.ac.wellcome.sierra_adapter.model.SierraTransformable
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
@@ -31,7 +34,8 @@ object Main extends WellcomeTypesafeApp {
 
     new SierraBibMergerWorkerService(
       sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
-      messageSender = SNSBuilder.buildSNSMessageSender(config, subject = "Sierra bib merger"),
+      messageSender =
+        SNSBuilder.buildSNSMessageSender(config, subject = "Sierra bib merger"),
       sierraBibMergerUpdaterService = updaterService
     )
   }

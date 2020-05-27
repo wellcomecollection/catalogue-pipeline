@@ -13,7 +13,6 @@ import uk.ac.wellcome.storage.ObjectLocation
 import uk.ac.wellcome.storage.fixtures.S3Fixtures
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 
-
 class SierraReaderWorkerServiceTest
     extends AnyFunSpec
     with S3Fixtures
@@ -157,11 +156,13 @@ class SierraReaderWorkerServiceTest
 
   private def getBibRecordsFromS3(bucket: Bucket,
                                   key: String): List[SierraBibRecord] =
-    getObjectFromS3[List[SierraBibRecord]](ObjectLocation(namespace = bucket.name, path = key))
+    getObjectFromS3[List[SierraBibRecord]](
+      ObjectLocation(namespace = bucket.name, path = key))
 
   private def getItemRecordsFromS3(bucket: Bucket,
                                    key: String): List[SierraItemRecord] =
-    getObjectFromS3[List[SierraItemRecord]](ObjectLocation(namespace = bucket.name, path = key))
+    getObjectFromS3[List[SierraItemRecord]](
+      ObjectLocation(namespace = bucket.name, path = key))
 
   it("returns a SierraReaderException if it receives an invalid message") {
     val body =

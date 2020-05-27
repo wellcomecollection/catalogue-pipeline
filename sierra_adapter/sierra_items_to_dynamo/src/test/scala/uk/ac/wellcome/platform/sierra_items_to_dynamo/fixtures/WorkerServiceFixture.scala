@@ -15,12 +15,19 @@ import uk.ac.wellcome.storage.store.VersionedStore
 
 import scala.concurrent.Future
 
-trait WorkerServiceFixture extends SNS with SQS with DynamoInserterFixture with Akka {
+trait WorkerServiceFixture
+    extends SNS
+    with SQS
+    with DynamoInserterFixture
+    with Akka {
 
   def withWorkerService[R](queue: Queue,
                            store: VersionedStore[String, Int, SierraItemRecord],
-                           metricsSender: Metrics[Future, StandardUnit] = new MemoryMetrics())(
-    testWith: TestWith[(SierraItemsToDynamoWorkerService[String], MemoryMessageSender), R]): R =
+                           metricsSender: Metrics[Future, StandardUnit] =
+                             new MemoryMetrics())(
+    testWith: TestWith[(SierraItemsToDynamoWorkerService[String],
+                        MemoryMessageSender),
+                       R]): R =
     withActorSystem { implicit actorSystem =>
       withSQSStream[NotificationMessage, R](queue, metricsSender) { sqsStream =>
         withDynamoInserter(store) { dynamoInserter =>
@@ -39,8 +46,7 @@ trait WorkerServiceFixture extends SNS with SQS with DynamoInserterFixture with 
       }
     }
 
-  def withSNSMessageSender[R](
-    testWith: TestWith[MemoryMessageSender, R]): R = {
+  def withSNSMessageSender[R](testWith: TestWith[MemoryMessageSender, R]): R = {
     testWith(new MemoryMessageSender)
   }
 }

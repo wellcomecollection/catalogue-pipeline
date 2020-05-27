@@ -7,11 +7,12 @@ import uk.ac.wellcome.storage.store.VersionedStore
 
 trait DynamoInserterFixture {
 
-  def withDynamoInserter[R](store: VersionedStore[String, Int, SierraItemRecord])(
-    testWith: TestWith[DynamoInserter, R]): R ={
-      val dynamoInserter = new DynamoInserter(
-        versionedHybridStore = store
-      )
-      testWith(dynamoInserter)
-    }
+  def withDynamoInserter[R](
+    store: VersionedStore[String, Int, SierraItemRecord])(
+    testWith: TestWith[DynamoInserter, R]): R = {
+    val dynamoInserter = new DynamoInserter(
+      versionedHybridStore = store
+    )
+    testWith(dynamoInserter)
+  }
 }

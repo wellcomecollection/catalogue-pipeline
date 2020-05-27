@@ -27,7 +27,9 @@ class SierraItemsToDynamoWorkerServiceTest
     with IntegrationPatience
     with ScalaFutures
     with SierraGenerators
-    with WorkerServiceFixture with SierraAdapterHelpers with MockitoSugar{
+    with WorkerServiceFixture
+    with SierraAdapterHelpers
+    with MockitoSugar {
 
   it("reads a sierra record from SQS and inserts it into DynamoDB") {
     val bibIds = createSierraBibNumbers(count = 5)
@@ -51,49 +53,47 @@ class SierraItemsToDynamoWorkerServiceTest
       existingRecord = record1,
       updatedRecord = record2
     )
-    val store = createStore(Map(Version(record1.id.withoutCheckDigit, 1)-> record1))
+    val store =
+      createStore(Map(Version(record1.id.withoutCheckDigit, 1) -> record1))
 
-          withLocalSqsQueue { queue =>
-              withWorkerService(queue, store) { _ =>
-                sendNotificationToSQS(queue = queue, message = record2)
+    withLocalSqsQueue { queue =>
+      withWorkerService(queue, store) { _ =>
+        sendNotificationToSQS(queue = queue, message = record2)
 
-                eventually {
-                  assertStored[SierraItemRecord](
-                    record1.id.withoutCheckDigit,
-                    expectedRecord,
-                    store
-                  )
-                }
-              }
-            }
-          }
-
+        eventually {
+          assertStored[SierraItemRecord](
+            record1.id.withoutCheckDigit,
+            expectedRecord,
+            store
+          )
+        }
+      }
+    }
+  }
 
   it("records a failure if it receives an invalid message") {
     val store = createStore[SierraItemRecord]()
     val mockMetricsSender = mock[Metrics[Future, StandardUnit]]
-        withLocalSqsQueueAndDlq {
-          case QueuePair(queue, dlq) =>
-                withWorkerService(
-                  queue,
-                  store, mockMetricsSender) { _ =>
-                  val body =
-                    """
+    withLocalSqsQueueAndDlq {
+      case QueuePair(queue, dlq) =>
+        withWorkerService(queue, store, mockMetricsSender) { _ =>
+          val body =
+            """
                     |{
                     | "something": "something"
                     |}
                   """.stripMargin
 
-                  sendNotificationToSQS(queue = queue, body = body)
+          sendNotificationToSQS(queue = queue, body = body)
 
-                  eventually {
-                    assertQueueEmpty(queue)
-                    assertQueueHasSize(dlq, size = 1)
-                    verify(mockMetricsSender, never()).incrementCount(
-                      "SierraItemsToDynamoWorkerService_ProcessMessage_failure")
-                  }
-                }
-              }
-            }
+          eventually {
+            assertQueueEmpty(queue)
+            assertQueueHasSize(dlq, size = 1)
+            verify(mockMetricsSender, never()).incrementCount(
+              "SierraItemsToDynamoWorkerService_ProcessMessage_failure")
+          }
+        }
+    }
+  }
 
 }

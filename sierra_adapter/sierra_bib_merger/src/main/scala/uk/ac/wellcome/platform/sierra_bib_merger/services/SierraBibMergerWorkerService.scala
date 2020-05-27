@@ -11,11 +11,10 @@ import uk.ac.wellcome.typesafe.Runnable
 import scala.concurrent.Future
 
 class SierraBibMergerWorkerService[Destination](
-                                    sqsStream: SQSStream[NotificationMessage],
-                                    messageSender: MessageSender[Destination],
-                                    sierraBibMergerUpdaterService: SierraBibMergerUpdaterService
-)
-    extends Runnable {
+  sqsStream: SQSStream[NotificationMessage],
+  messageSender: MessageSender[Destination],
+  sierraBibMergerUpdaterService: SierraBibMergerUpdaterService
+) extends Runnable {
   private def process(message: NotificationMessage): Future[Unit] =
     Future.fromTry(for {
       bibRecord <- fromJson[SierraBibRecord](message.body)

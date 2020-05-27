@@ -8,9 +8,15 @@ import uk.ac.wellcome.bigmessaging.typesafe.VHSBuilder
 import uk.ac.wellcome.sierra_adapter.model.Implicits._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import uk.ac.wellcome.platform.sierra_item_merger.services.{SierraItemMergerUpdaterService, SierraItemMergerWorkerService}
+import uk.ac.wellcome.platform.sierra_item_merger.services.{
+  SierraItemMergerUpdaterService,
+  SierraItemMergerWorkerService
+}
 import uk.ac.wellcome.sierra_adapter.config.builders.SierraVHSBuilder
-import uk.ac.wellcome.sierra_adapter.model.{SierraItemRecord, SierraTransformable}
+import uk.ac.wellcome.sierra_adapter.model.{
+  SierraItemRecord,
+  SierraTransformable
+}
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
@@ -36,9 +42,9 @@ object Main extends WellcomeTypesafeApp {
       sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
       sierraItemMergerUpdaterService = updaterService,
       itemRecordStore = new VersionedStore(
-        new VHSWrapper(
-          VHSBuilder.build[SierraItemRecord](config))),
-      messageSender = SNSBuilder.buildSNSMessageSender(config, subject = "Sierra item merger")
+        new VHSWrapper(VHSBuilder.build[SierraItemRecord](config))),
+      messageSender =
+        SNSBuilder.buildSNSMessageSender(config, subject = "Sierra item merger")
     )
   }
 }

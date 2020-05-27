@@ -11,11 +11,12 @@ import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryVersionedStore}
 import uk.ac.wellcome.storage.{UpdateNotApplied, Version}
 
 class DynamoInserterTest
-  extends AnyFunSpec
+    extends AnyFunSpec
     with Matchers
     with MockitoSugar
     with DynamoInserterFixture
-    with SierraGenerators with SierraAdapterHelpers {
+    with SierraGenerators
+    with SierraAdapterHelpers {
 
   it("inserts an ItemRecord into the VHS") {
     val store = createStore[SierraItemRecord]()
@@ -32,13 +33,13 @@ class DynamoInserterTest
     }
   }
 
-
   it("does not overwrite new data with old data") {
     val newRecord = createSierraItemRecordWith(
       modifiedDate = newerDate,
       bibIds = List(createSierraBibNumber)
     )
-    val store = createStore(Map(Version(newRecord.id.withoutCheckDigit, 1) -> newRecord))
+    val store =
+      createStore(Map(Version(newRecord.id.withoutCheckDigit, 1) -> newRecord))
     val dynamoInserter = new DynamoInserter(store)
 
     val oldRecord = createSierraItemRecordWith(
@@ -55,13 +56,13 @@ class DynamoInserterTest
     )
   }
 
-
   it("overwrites old data with new data") {
     val oldRecord = createSierraItemRecordWith(
       modifiedDate = olderDate,
       bibIds = List(createSierraBibNumber)
     )
-    val store = createStore(Map(Version(oldRecord.id.withoutCheckDigit, 1) -> oldRecord))
+    val store =
+      createStore(Map(Version(oldRecord.id.withoutCheckDigit, 1) -> oldRecord))
     val dynamoInserter = new DynamoInserter(store)
 
     val newRecord = createSierraItemRecordWith(
@@ -78,7 +79,6 @@ class DynamoInserterTest
       store
     )
 
-
   }
 
   it("records unlinked bibIds") {
@@ -87,7 +87,8 @@ class DynamoInserterTest
       modifiedDate = olderDate,
       bibIds = bibIds
     )
-    val store = createStore(Map(Version(oldRecord.id.withoutCheckDigit, 1) -> oldRecord))
+    val store =
+      createStore(Map(Version(oldRecord.id.withoutCheckDigit, 1) -> oldRecord))
 
     val dynamoInserter = new DynamoInserter(store)
 
@@ -107,7 +108,6 @@ class DynamoInserterTest
 
   }
 
-
   it("adds new bibIds and records unlinked bibIds in the same update") {
 
     val bibIds = createSierraBibNumbers(count = 4)
@@ -116,7 +116,8 @@ class DynamoInserterTest
       modifiedDate = olderDate,
       bibIds = List(bibIds(0), bibIds(1), bibIds(2))
     )
-    val store = createStore(Map(Version(oldRecord.id.withoutCheckDigit, 1) -> oldRecord))
+    val store =
+      createStore(Map(Version(oldRecord.id.withoutCheckDigit, 1) -> oldRecord))
     val dynamoInserter = new DynamoInserter(store)
 
     val newRecord = createSierraItemRecordWith(
@@ -143,7 +144,8 @@ class DynamoInserterTest
       bibIds = List(bibIds(0), bibIds(1), bibIds(2)),
       unlinkedBibIds = List(bibIds(4))
     )
-    val store = createStore(Map(Version(oldRecord.id.withoutCheckDigit, 1) -> oldRecord))
+    val store =
+      createStore(Map(Version(oldRecord.id.withoutCheckDigit, 1) -> oldRecord))
     val dynamoInserter = new DynamoInserter(store)
 
     val newRecord = createSierraItemRecordWith(
@@ -155,7 +157,8 @@ class DynamoInserterTest
 
     dynamoInserter.insertIntoDynamo(newRecord)
 
-    val actualRecord = store.getLatest(oldRecord.id.withoutCheckDigit).right.get.identifiedT
+    val actualRecord =
+      store.getLatest(oldRecord.id.withoutCheckDigit).right.get.identifiedT
 
     actualRecord.unlinkedBibIds shouldBe List(bibIds(4), bibIds(0))
   }
@@ -165,16 +168,18 @@ class DynamoInserterTest
       modifiedDate = newerDate
     )
     val exception = new RuntimeException("AAAAARGH!")
-    val failingStore = new MemoryVersionedStore(new MemoryStore(Map[Version[String, Int], SierraItemRecord]()) with MemoryMaxima[String, SierraItemRecord]) {
-      override def upsert(id: String)(t: SierraItemRecord)(f: UpdateFunction): UpdateEither = {
+    val failingStore = new MemoryVersionedStore(
+      new MemoryStore(Map[Version[String, Int], SierraItemRecord]())
+      with MemoryMaxima[String, SierraItemRecord]) {
+      override def upsert(id: String)(t: SierraItemRecord)(
+        f: UpdateFunction): UpdateEither = {
         Left(UpdateNotApplied(exception))
       }
     }
 
     withDynamoInserter(failingStore) { dynamoInserter =>
-
       val either = dynamoInserter.insertIntoDynamo(record)
-      either shouldBe a[Left[_,_]]
+      either shouldBe a[Left[_, _]]
       either.left.get shouldBe exception
     }
   }

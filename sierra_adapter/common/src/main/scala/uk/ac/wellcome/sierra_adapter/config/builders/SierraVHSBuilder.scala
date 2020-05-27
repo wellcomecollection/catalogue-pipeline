@@ -8,7 +8,8 @@ import uk.ac.wellcome.storage.streaming.Codec
 
 object SierraVHSBuilder {
 
-  def buildSierraVHS[T](config: Config)(implicit codec: Codec[T]): VersionedStore[String, Int, T] = {
+  def buildSierraVHS[T](config: Config)(
+    implicit codec: Codec[T]): VersionedStore[String, Int, T] = {
 
     new VersionedStore(
       new VHSWrapper(

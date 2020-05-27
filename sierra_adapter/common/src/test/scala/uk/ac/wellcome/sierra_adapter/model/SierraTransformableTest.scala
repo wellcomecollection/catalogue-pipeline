@@ -3,7 +3,6 @@ package uk.ac.wellcome.sierra_adapter.model
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-
 class SierraTransformableTest
     extends AnyFunSpec
     with Matchers

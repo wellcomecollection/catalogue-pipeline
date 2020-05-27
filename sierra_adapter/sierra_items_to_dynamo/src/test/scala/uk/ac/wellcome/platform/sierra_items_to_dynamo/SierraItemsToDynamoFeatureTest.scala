@@ -19,28 +19,29 @@ class SierraItemsToDynamoFeatureTest
     with WorkerServiceFixture {
 
   it("reads items from Sierra and adds them to DynamoDB") {
-      val store = createStore[SierraItemRecord]()
-        withLocalSqsQueue { queue =>
-            withWorkerService(queue, store) { case (_, messageSender) =>
-              val itemRecord = createSierraItemRecordWith(
-                bibIds = List(createSierraBibNumber)
-              )
+    val store = createStore[SierraItemRecord]()
+    withLocalSqsQueue { queue =>
+      withWorkerService(queue, store) {
+        case (_, messageSender) =>
+          val itemRecord = createSierraItemRecordWith(
+            bibIds = List(createSierraBibNumber)
+          )
 
-              sendNotificationToSQS(
-                queue = queue,
-                message = itemRecord
-              )
+          sendNotificationToSQS(
+            queue = queue,
+            message = itemRecord
+          )
 
-              eventually {
-                assertStoredAndSent(
-                  id = Version(itemRecord.id.withoutCheckDigit, 0),
-                  t = itemRecord,
-                  store = store,
-                  messageSender
-                )
-              }
-            }
+          eventually {
+            assertStoredAndSent(
+              id = Version(itemRecord.id.withoutCheckDigit, 0),
+              t = itemRecord,
+              store = store,
+              messageSender
+            )
           }
-        }
+      }
+    }
+  }
 
 }
