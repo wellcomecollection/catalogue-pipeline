@@ -1,24 +1,20 @@
 package uk.ac.wellcome.platform.transformer.sierra.services
 
-import akka.Done
-import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
+import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.transformer.sierra.SierraTransformableTransformer
+import uk.ac.wellcome.platform.transformer.sierra.flgfadk.TransformerWorker
+import uk.ac.wellcome.sierra_adapter.model.SierraTransformable
+import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.typesafe.Runnable
 
-import scala.concurrent.Future
+class SierraTransformerWorkerService[MsgDestination](
+                                                             val stream: SQSStream[NotificationMessage],
+                                                             val sender: BigMessageSender[MsgDestination, TransformedBaseWork],
+                                                             val store: VersionedStore[String, Int, SierraTransformable],
+) extends Runnable with TransformerWorker[SierraTransformable, MsgDestination]{
 
-class SierraTransformerWorkerService[MsgDestination, MsgIn](
-  messageReceiver: HybridRecordReceiver[MsgDestination, MsgIn],
-  sqsStream: SQSStream[NotificationMessage]
-) extends Runnable {
-
-  def run(): Future[Done] =
-    sqsStream.foreach(this.getClass.getSimpleName, processMessage)
-
-  private def processMessage(message: NotificationMessage): Future[Unit] =
-    messageReceiver.receiveMessage(
-      message,
-      SierraTransformableTransformer.apply)
+      override val transformer = (input: SierraTransformable, version: Int) => SierraTransformableTransformer.apply(input, version).toEither
 }
