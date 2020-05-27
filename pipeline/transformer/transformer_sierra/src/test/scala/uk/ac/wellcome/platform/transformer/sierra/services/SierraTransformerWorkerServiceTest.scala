@@ -50,8 +50,8 @@ class SierraTransformerWorkerServiceTest
                     """.stripMargin
         )
       )
-      val key = id.withoutCheckDigit
-      val store = createStore[SierraTransformable](Map(Version(key, 0) -> sierraTransformable))
+      val key = Version(id.withoutCheckDigit, 0)
+      val store = createStore[SierraTransformable](Map(key -> sierraTransformable))
       val sender = new MemoryBigMessageSender[TransformedBaseWork]()
       withWorkerService(store, sender, queue) {
         _ =>
@@ -67,7 +67,7 @@ class SierraTransformerWorkerServiceTest
 
             val sierraIdentifier =
               createSierraIdentifierSourceIdentifierWith(
-                value = key
+                value = id.withoutCheckDigit
               )
 
             val works = sender.getMessages[UnidentifiedWork]
@@ -92,6 +92,7 @@ class SierraTransformerWorkerServiceTest
     val store = createStore(Map(key -> transformable))
     val sender = new MemoryBigMessageSender[TransformedBaseWork]()
     withLocalSqsQueue { queue =>
+
       sendNotificationToSQS(queue, key)
 
       withWorkerService(store, sender, queue) { _ =>
