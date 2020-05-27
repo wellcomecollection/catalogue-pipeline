@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.transformer.sierra.flgfadk
+package uk.ac.wellcome.transformer.common.worker
 
 import akka.Done
 import grizzled.slf4j.Logging
