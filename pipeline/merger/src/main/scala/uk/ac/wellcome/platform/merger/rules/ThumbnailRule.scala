@@ -16,6 +16,10 @@ import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
  * Thumbnails are chosen preferentially off of METS works, falling back to
  * Miro. If there are multiple Miro sources, the one with the lexicographically
  * minimal ID is chosen.
+ *
+ * If any of the locations forming the work from any source are marked as
+ * restricted or closed, we supress the thumbnail to be sure we are not
+ * displaying something we are not meant to.
  */
 object ThumbnailRule extends FieldMergeRule with MergerLogging {
   type FieldData = Option[Location]
@@ -24,16 +28,23 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
     target: UnidentifiedWork,
     sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData] =
     FieldMergeResult(
-      data = getMetsThumbnail(target, sources)
-        orElse getMinMiroThumbnail(target, sources)
-        getOrElse target.data.thumbnail,
+      data = getThumbnail(target, sources),
       sources = sources.filter { source =>
         List(getMetsThumbnail, getMinMiroThumbnail).exists(
           _(target, source).isDefined)
       }
     )
 
-  private val getMetsThumbnail =
+  def getThumbnail(target: UnidentifiedWork,
+                   sources: Seq[TransformedBaseWork]): Option[Location] =
+    if (shouldSuppressThumbnail(target, sources))
+      None
+    else
+      getMetsThumbnail(target, sources)
+        .orElse(getMinMiroThumbnail(target, sources))
+        .getOrElse(target.data.thumbnail)
+
+  val getMetsThumbnail =
     new PartialRule {
       val isDefinedForTarget: WorkPredicate = WorkPredicates.sierraWork
       val isDefinedForSource: WorkPredicate =
@@ -46,7 +57,7 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
       }
     }
 
-  private val getMinMiroThumbnail =
+  val getMinMiroThumbnail =
     new PartialRule {
       val isDefinedForTarget: WorkPredicate = WorkPredicates.singleItemSierra
       val isDefinedForSource: WorkPredicate =
@@ -70,6 +81,14 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
               x.sourceIdentifier.value compare y.sourceIdentifier.value
             case _ => 0
           }
+      }
+    }
+
+  def shouldSuppressThumbnail(target: UnidentifiedWork,
+                              sources: Seq[TransformedBaseWork]) =
+    (target :: sources.toList).exists { work =>
+      work.data.items.exists { item =>
+        item.locations.exists(_.isRestrictedOrClosed)
       }
     }
 }
