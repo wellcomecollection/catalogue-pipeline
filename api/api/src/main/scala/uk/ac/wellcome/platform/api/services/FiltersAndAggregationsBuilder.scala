@@ -90,6 +90,7 @@ class FiltersAndAggregationsBuilder(
     case _: IdentifiersFilter      => None
     case _: CollectionPathFilter   => None
     case _: CollectionDepthFilter  => None
+    case _: AccessStatusFilter     => None
   }
 
   private sealed trait FilterCategory
