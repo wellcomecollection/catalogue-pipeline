@@ -6,9 +6,11 @@ import com.typesafe.config.Config
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.platform.sierra_bib_merger.services.{SierraBibMergerUpdaterService, SierraBibMergerWorkerService}
-import uk.ac.wellcome.sierra_adapter.config.builders.SierraTransformableVHSBuilder
+import uk.ac.wellcome.sierra_adapter.config.builders.SierraVHSBuilder
+import uk.ac.wellcome.sierra_adapter.model.SierraTransformable
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
+import uk.ac.wellcome.sierra_adapter.model.Implicits._
 
 import scala.concurrent.ExecutionContext
 
@@ -21,7 +23,7 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildMaterializer()
 
     val versionedHybridStore =
-      SierraTransformableVHSBuilder.buildSierraVHS(config)
+      SierraVHSBuilder.buildSierraVHS[SierraTransformable](config)
 
     val updaterService = new SierraBibMergerUpdaterService(
       versionedHybridStore = versionedHybridStore
