@@ -23,7 +23,7 @@ import uk.ac.wellcome.storage.typesafe.S3Builder
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
-    import uk.ac.wellcome.platform.transformer.sierra.model.SierraTransformableImplicits._
+    import uk.ac.wellcome.sierra_adapter.model.Implicits._
 
     implicit val actorSystem: ActorSystem =
       AkkaBuilder.buildActorSystem()
