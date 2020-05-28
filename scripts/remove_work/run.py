@@ -13,6 +13,7 @@ import os
 import sys
 
 import boto3
+import click
 import requests
 
 
@@ -48,7 +49,7 @@ def catalogue_client(service_name):
     )
 
 
-def remove_image_from_es_indexes(catalogue_id):
+def remove_image_from_es_indexes(catalogue_id, indices):
     print("*** Removing the image from our Elasticsearch indexes")
 
     ecs_client = catalogue_client("ecs")
@@ -103,7 +104,7 @@ def remove_image_from_es_indexes(catalogue_id):
             app_secrets["es_port"],
         )
 
-        for index_name in [app_env_vars["es_index_v2"]]:
+        for index_name in indices:
             print("··· Looking up %s in index %s" % (catalogue_id, index_name))
             resp = requests.get(
                 f"{es_host}{index_name}/_doc/{catalogue_id}", auth=es_auth
@@ -144,6 +145,17 @@ def remove_image_from_es_indexes(catalogue_id):
 
             assert existing_work["type"] == "IdentifiedWork"
 
+            # It's necessary to fill in the data field so that Circe can
+            # decode IdentifiedInvisibleWorks
+            blank_data = {}
+            for key, value in existing_work["data"].items():
+                if isinstance(value, list):
+                    blank_data[key] = []
+                elif isinstance(value, bool):
+                    blank_data[key] = False
+                else:
+                    blank_data[key] = None
+
             new_work = {
                 "canonicalId": existing_work["canonicalId"],
                 "sourceIdentifier": existing_work["sourceIdentifier"],
@@ -151,6 +163,7 @@ def remove_image_from_es_indexes(catalogue_id):
                 # We bump the version so any in-flight works won't overwrite
                 # this one.
                 "version": existing_work["version"] + 1,
+                "data": blank_data
             }
 
             print("··· Replacing work with an IdentifiedInvisibleWork")
@@ -285,11 +298,13 @@ def update_miro_inventory(miro_id):
     resp = dynamodb_client.put_item(TableName="vhs-miro-migration", Item=item)
 
 
-if __name__ == "__main__":
-    catalogue_id = sys.argv[1]
+@click.command()
+@click.argument("catalogue_id")
+@click.option("-i", "--index", multiple=True, required=True)
+def main(catalogue_id, index):
     print("*** Suppressing Miro ID %s" % catalogue_id)
 
-    miro_id = remove_image_from_es_indexes(catalogue_id=catalogue_id)
+    miro_id = remove_image_from_es_indexes(catalogue_id=catalogue_id, indices=index)
     assert miro_id is not None, "Don't know the Miro ID!"
     print("*** Detected Miro ID as %s" % miro_id)
 
@@ -302,3 +317,8 @@ if __name__ == "__main__":
     print(
         "*** You also need to (manually) create a CloudFront invalidation for the /works page on wellcomecollection.org"
     )
+
+
+if __name__ == "__main__":
+    main()
+
