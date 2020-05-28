@@ -21,7 +21,6 @@ import uk.ac.wellcome.sierra_adapter.model.{
   SierraGenerators,
   SierraTransformable
 }
-import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
 import uk.ac.wellcome.storage.maxima.memory.MemoryMaxima
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryVersionedStore}
@@ -37,7 +36,6 @@ class SierraTransformerWorkerServiceTest
     with IntegrationPatience
     with BigMessagingFixture
     with SierraGenerators
-    with SierraAdapterHelpers
     with IdentifiersGenerators {
 
   it("transforms sierra records and publishes the result to the given topic") {
@@ -258,5 +256,8 @@ class SierraTransformerWorkerServiceTest
         Left(StoreReadError(new Error("BOOM!")))
     }
   }
-
+  def createStore[T](
+                      data: Map[Version[String, Int], T] = Map[Version[String, Int], T]())
+  : MemoryVersionedStore[String, T] =
+    new MemoryVersionedStore(new MemoryStore(data) with MemoryMaxima[String, T])
 }
