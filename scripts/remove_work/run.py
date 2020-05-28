@@ -10,9 +10,9 @@ import getpass
 import hashlib
 import json
 import os
-import sys
 
 import boto3
+import click
 import requests
 
 
@@ -48,7 +48,7 @@ def catalogue_client(service_name):
     )
 
 
-def remove_image_from_es_indexes(catalogue_id):
+def remove_image_from_es_indexes(catalogue_id, indices):
     print("*** Removing the image from our Elasticsearch indexes")
 
     ecs_client = catalogue_client("ecs")
@@ -71,11 +71,9 @@ def remove_image_from_es_indexes(catalogue_id):
     print("··· Getting the task definitions for the catalogue API")
     resp = ecs_client.list_services(cluster="catalogue-api")
     service_arns = resp["serviceArns"]
-    assert len(service_arns) == 2
 
     resp = ecs_client.describe_services(cluster="catalogue-api", services=service_arns)
     services = resp["services"]
-    assert len(services) == 2
     task_definitions = [service["taskDefinition"] for service in services]
 
     miro_id = None
@@ -84,14 +82,14 @@ def remove_image_from_es_indexes(catalogue_id):
     for td in task_definitions:
         resp = ecs_client.describe_task_definition(taskDefinition=td)
         container_definitions = resp["taskDefinition"]["containerDefinitions"]
-        assert len(container_definitions) == 2
-
         app_containers = [cd for cd in container_definitions if cd["name"] == "app"]
         assert len(app_containers) == 1
 
-        app_env_vars = {e["name"]: e["value"] for e in app_containers[0]["environment"]}
-
         app_secrets = {s["name"]: s["valueFrom"] for s in app_containers[0]["secrets"]}
+
+        # This TD is not for the API
+        if "es_host" not in app_secrets:
+            continue
 
         for name, value_from in app_secrets.items():
             resp = ssm_client.get_parameter(Name=value_from, WithDecryption=True)
@@ -105,7 +103,7 @@ def remove_image_from_es_indexes(catalogue_id):
             app_secrets["es_port"],
         )
 
-        for index_name in [app_env_vars["es_index_v2"]]:
+        for index_name in indices:
             print("··· Looking up %s in index %s" % (catalogue_id, index_name))
             resp = requests.get(
                 f"{es_host}{index_name}/_doc/{catalogue_id}", auth=es_auth
@@ -146,6 +144,17 @@ def remove_image_from_es_indexes(catalogue_id):
 
             assert existing_work["type"] == "IdentifiedWork"
 
+            # It's necessary to fill in the data field so that Circe can
+            # decode IdentifiedInvisibleWorks
+            blank_data = {}
+            for key, value in existing_work["data"].items():
+                if isinstance(value, list):
+                    blank_data[key] = []
+                elif isinstance(value, bool):
+                    blank_data[key] = False
+                else:
+                    blank_data[key] = None
+
             new_work = {
                 "canonicalId": existing_work["canonicalId"],
                 "sourceIdentifier": existing_work["sourceIdentifier"],
@@ -153,6 +162,7 @@ def remove_image_from_es_indexes(catalogue_id):
                 # We bump the version so any in-flight works won't overwrite
                 # this one.
                 "version": existing_work["version"] + 1,
+                "data": blank_data,
             }
 
             print("··· Replacing work with an IdentifiedInvisibleWork")
@@ -287,11 +297,13 @@ def update_miro_inventory(miro_id):
     resp = dynamodb_client.put_item(TableName="vhs-miro-migration", Item=item)
 
 
-if __name__ == "__main__":
-    catalogue_id = sys.argv[1]
+@click.command()
+@click.argument("catalogue_id")
+@click.option("-i", "--index", multiple=True, required=True)
+def main(catalogue_id, index):
     print("*** Suppressing Miro ID %s" % catalogue_id)
 
-    miro_id = remove_image_from_es_indexes(catalogue_id=catalogue_id)
+    miro_id = remove_image_from_es_indexes(catalogue_id=catalogue_id, indices=index)
     assert miro_id is not None, "Don't know the Miro ID!"
     print("*** Detected Miro ID as %s" % miro_id)
 
@@ -304,3 +316,7 @@ if __name__ == "__main__":
     print(
         "*** You also need to (manually) create a CloudFront invalidation for the /works page on wellcomecollection.org"
     )
+
+
+if __name__ == "__main__":
+    main()
