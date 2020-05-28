@@ -11,10 +11,12 @@ import uk.ac.wellcome.typesafe.Runnable
 import uk.ac.wellcome.transformer.common.worker.TransformerWorker
 
 class SierraTransformerWorkerService[MsgDestination](
-                                                             val stream: SQSStream[NotificationMessage],
-                                                             val sender: BigMessageSender[MsgDestination, TransformedBaseWork],
-                                                             val store: VersionedStore[String, Int, SierraTransformable],
-) extends Runnable with TransformerWorker[SierraTransformable, MsgDestination]{
+  val stream: SQSStream[NotificationMessage],
+  val sender: BigMessageSender[MsgDestination, TransformedBaseWork],
+  val store: VersionedStore[String, Int, SierraTransformable],
+) extends Runnable
+    with TransformerWorker[SierraTransformable, MsgDestination] {
 
-      override val transformer = (input: SierraTransformable, version: Int) => SierraTransformableTransformer.apply(input, version).toEither
+  override val transformer = (input: SierraTransformable, version: Int) =>
+    SierraTransformableTransformer.apply(input, version).toEither
 }
