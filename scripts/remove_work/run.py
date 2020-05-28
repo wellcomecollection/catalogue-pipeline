@@ -71,11 +71,9 @@ def remove_image_from_es_indexes(catalogue_id):
     print("··· Getting the task definitions for the catalogue API")
     resp = ecs_client.list_services(cluster="catalogue-api")
     service_arns = resp["serviceArns"]
-    assert len(service_arns) == 2
 
     resp = ecs_client.describe_services(cluster="catalogue-api", services=service_arns)
     services = resp["services"]
-    assert len(services) == 2
     task_definitions = [service["taskDefinition"] for service in services]
 
     miro_id = None
@@ -84,14 +82,14 @@ def remove_image_from_es_indexes(catalogue_id):
     for td in task_definitions:
         resp = ecs_client.describe_task_definition(taskDefinition=td)
         container_definitions = resp["taskDefinition"]["containerDefinitions"]
-        assert len(container_definitions) == 2
-
         app_containers = [cd for cd in container_definitions if cd["name"] == "app"]
         assert len(app_containers) == 1
 
-        app_env_vars = {e["name"]: e["value"] for e in app_containers[0]["environment"]}
-
         app_secrets = {s["name"]: s["valueFrom"] for s in app_containers[0]["secrets"]}
+
+        # This TD is not for the API
+        if "es_host" not in app_secrets:
+            continue
 
         for name, value_from in app_secrets.items():
             resp = ssm_client.get_parameter(Name=value_from, WithDecryption=True)
