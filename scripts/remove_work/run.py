@@ -163,7 +163,7 @@ def remove_image_from_es_indexes(catalogue_id, indices):
                 # We bump the version so any in-flight works won't overwrite
                 # this one.
                 "version": existing_work["version"] + 1,
-                "data": blank_data
+                "data": blank_data,
             }
 
             print("··· Replacing work with an IdentifiedInvisibleWork")
@@ -321,4 +321,3 @@ def main(catalogue_id, index):
 
 if __name__ == "__main__":
     main()
-
