@@ -561,4 +561,60 @@ class WorksFiltersTest extends ApiWorksTestBase {
       }
     }
   }
+
+  describe("Access status filter") {
+
+    def work(status: AccessStatus) =
+      createIdentifiedWorkWith(
+        items = List(
+          createIdentifiedItemWith(
+            locations = List(
+              createDigitalLocationWith(
+                accessConditions = List(
+                  AccessCondition(
+                    status = Some(status)
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
+
+    val workA = work(AccessStatus.Restricted)
+    val workB = work(AccessStatus.Restricted)
+    val workC = work(AccessStatus.Closed)
+    val workD = work(AccessStatus.Open)
+    val workE = work(AccessStatus.OpenWithAdvisory)
+
+    it("includes works by access status") {
+      withApi {
+        case (ElasticConfig(worksIndex, _), routes) =>
+          insertIntoElasticsearch(worksIndex, workA, workB, workC, workD, workE)
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works?items.locations.accessConditions.status=restricted,closed") {
+            Status.OK -> worksListResponse(
+              apiPrefix = apiPrefix,
+              works = Seq(workA, workB, workC).sortBy(_.canonicalId)
+            )
+          }
+      }
+    }
+
+    it("excludes works by access status") {
+      withApi {
+        case (ElasticConfig(worksIndex, _), routes) =>
+          insertIntoElasticsearch(worksIndex, workA, workB, workC, workD, workE)
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works?items.locations.accessConditions.status=!restricted,!closed") {
+            Status.OK -> worksListResponse(
+              apiPrefix = apiPrefix,
+              works = Seq(workD, workE).sortBy(_.canonicalId)
+            )
+          }
+      }
+    }
+  }
 }

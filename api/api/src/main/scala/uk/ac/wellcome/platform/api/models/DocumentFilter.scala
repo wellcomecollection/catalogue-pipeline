@@ -60,5 +60,6 @@ case class AccessStatusFilter(val include: List[AccessStatus],
                               val exclude: List[AccessStatus])
     extends WorkFilter
     with IncludeExcludeFilter[AccessStatus] {
-  def toElasticString(status: AccessStatus) = status.getClass.getSimpleName
+  def toElasticString(status: AccessStatus) =
+    status.getClass.getSimpleName.stripSuffix("$")
 }

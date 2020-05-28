@@ -156,7 +156,6 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
       case filter @ AccessStatusFilter(_, _) =>
         filter.toElasticQuery(
           "data.items.locations.accessConditions.status.type")
-
       case CollectionPathFilter(path) =>
         termQuery(field = "data.collectionPath.path", value = path)
       case CollectionDepthFilter(depth) =>
