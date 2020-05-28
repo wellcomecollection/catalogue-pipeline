@@ -10,7 +10,6 @@ import getpass
 import hashlib
 import json
 import os
-import sys
 
 import boto3
 import click
