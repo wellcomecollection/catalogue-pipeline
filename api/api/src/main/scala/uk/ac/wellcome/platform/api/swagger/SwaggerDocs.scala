@@ -357,6 +357,21 @@ trait MultipleWorksSwagger {
         required = false
       ),
       new Parameter(
+        name = "identifiers",
+        in = ParameterIn.QUERY,
+        description = "Filter the work by access status.",
+        schema = new Schema(
+          allowableValues = Array(
+            "open",
+            "open-with-advisory",
+            "restricted",
+            "closed",
+            "licensed-resources",
+            "unavailable",
+            "permission-required")),
+        required = false
+      ),
+      new Parameter(
         name = "license",
         in = ParameterIn.QUERY,
         description = "Filter the work by license.",
