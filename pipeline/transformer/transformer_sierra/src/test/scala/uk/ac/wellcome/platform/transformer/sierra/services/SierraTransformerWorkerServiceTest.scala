@@ -257,7 +257,7 @@ class SierraTransformerWorkerServiceTest
     }
   }
   def createStore[T](
-                      data: Map[Version[String, Int], T] = Map[Version[String, Int], T]())
-  : MemoryVersionedStore[String, T] =
+    data: Map[Version[String, Int], T] = Map[Version[String, Int], T]())
+    : MemoryVersionedStore[String, T] =
     new MemoryVersionedStore(new MemoryStore(data) with MemoryMaxima[String, T])
 }
