@@ -40,4 +40,3 @@ class QueryParamsTest extends AnyFunSpec with Matchers {
     }
   }
 }
-

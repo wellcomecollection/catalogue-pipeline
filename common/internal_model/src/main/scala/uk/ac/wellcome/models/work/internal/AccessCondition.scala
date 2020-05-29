@@ -14,7 +14,7 @@ case class AccessCondition(
     }
 }
 
-sealed trait AccessStatus { this: AccessStatus => 
+sealed trait AccessStatus { this: AccessStatus =>
 
   def name = this.getClass.getSimpleName.stripSuffix("$")
 }

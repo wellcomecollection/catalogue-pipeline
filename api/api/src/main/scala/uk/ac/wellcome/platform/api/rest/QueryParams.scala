@@ -52,8 +52,7 @@ trait QueryParamsUtils extends Directives {
     val mapping = values.toMap
     val validStrs = values.map(_._1).toList
     decodeCommaSeparated.emap { strs =>
-      mapStringsToValues(strs, mapping)
-        .left
+      mapStringsToValues(strs, mapping).left
         .map { invalidStrs =>
           invalidValuesMsg(invalidStrs, validStrs)
         }
@@ -71,7 +70,7 @@ trait QueryParamsUtils extends Directives {
         val excludes = mapStringsToValues(excludeStrs.map(_.tail), mapping);
         (includes, excludes) match {
           case (Right(includes), Right(excludes)) => Right((includes, excludes))
-          case _ => 
+          case _ =>
             val invalidStrs = (
               includes.left.getOrElse(Nil) ++ excludes.left.getOrElse(Nil)
             ).distinct
@@ -100,8 +99,9 @@ trait QueryParamsUtils extends Directives {
           .toDirective[Tuple1[T]]
     }
 
-  def mapStringsToValues[T](strs: List[String],
-                            mapping: Map[String, T]): Either[List[String], List[T]] = {
+  def mapStringsToValues[T](
+    strs: List[String],
+    mapping: Map[String, T]): Either[List[String], List[T]] = {
     val results = strs.map { str =>
       mapping
         .get(str)
@@ -111,7 +111,7 @@ trait QueryParamsUtils extends Directives {
     val invalid = results.collect { case Left(error) => error }
     val valid = results.collect { case Right(value)  => value }
     (invalid, valid) match {
-      case (Nil, results) => Right(results)
+      case (Nil, results)     => Right(results)
       case (invalidValues, _) => Left(invalidValues)
     }
   }
