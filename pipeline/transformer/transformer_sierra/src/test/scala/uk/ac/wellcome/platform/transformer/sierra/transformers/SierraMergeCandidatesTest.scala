@@ -272,7 +272,7 @@ class SierraMergeCandidatesTest
   }
 
   describe("Calm/Sierra harvest") {
-    it("Assumes UUIDs in 035$a are from calm and attaches the merge candidate") {
+    it("Assumes UUIDs in 035 a are from calm and attaches the merge candidate") {
       def calmId = randomUUID.toString
 
       val calmIds = (1 to 5).map(_ => calmId)
