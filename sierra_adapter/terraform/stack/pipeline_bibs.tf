@@ -1,15 +1,3 @@
-module "bibs_window_generator" {
-  source = "./../sierra_window_generator"
-
-  resource_type = "bibs"
-
-  window_length_minutes    = 16
-  trigger_interval_minutes = 7
-
-  lambda_error_alarm_arn = var.lambda_error_alarm_arn
-  infra_bucket           = var.infra_bucket
-}
-
 
 module "bibs_reader" {
   source = "./../sierra_reader"
@@ -17,7 +5,7 @@ module "bibs_reader" {
   resource_type = "bibs"
 
   bucket_name       = "${aws_s3_bucket.sierra_adapter.id}"
-  windows_topic_arn = module.bibs_window_generator.topic_arn
+  windows_topic_arns = var.bibs_windows_topic_arns
 
   sierra_fields = local.sierra_bibs_fields
 

@@ -1,22 +1,10 @@
-module "items_window_generator" {
-  source = "./sierra_window_generator"
-
-  resource_type = "items"
-
-  window_length_minutes    = 31
-  trigger_interval_minutes = 15
-
-  lambda_error_alarm_arn = local.lambda_error_alarm_arn
-  infra_bucket           = var.infra_bucket
-}
-
 module "items_reader" {
   source = "./sierra_reader"
 
   resource_type = "items"
 
   bucket_name       = aws_s3_bucket.sierra_adapter.id
-  windows_topic_arn = module.items_window_generator.topic_arn
+  windows_topic_arns = module.items_window_generator.topic_arn
 
   sierra_fields = local.sierra_items_fields
 
@@ -34,7 +22,7 @@ module "items_reader" {
   infra_bucket = var.infra_bucket
 
   namespace_id = aws_service_discovery_private_dns_namespace.namespace.id
-  namespace = ""
+  namespace = var.namespace
   subnets      = local.private_subnets
 
   service_egress_security_group_id = aws_security_group.egress_security_group.id
@@ -59,7 +47,7 @@ module "items_to_dynamo" {
   dlq_alarm_arn = local.dlq_alarm_arn
 
   namespace_id = aws_service_discovery_private_dns_namespace.namespace.id
-  namespace = ""
+  namespace = var.namespace
   subnets      = local.private_subnets
 
   service_egress_security_group_id = aws_security_group.egress_security_group.id
@@ -90,7 +78,7 @@ module "items_merger" {
   bucket_name = local.vhs_bucket_name
 
   namespace_id = aws_service_discovery_private_dns_namespace.namespace.id
-  namespace = ""
+  namespace = var.namespace
   subnets      = local.private_subnets
 
   sierra_items_bucket = local.vhs_sierra_items_bucket_name

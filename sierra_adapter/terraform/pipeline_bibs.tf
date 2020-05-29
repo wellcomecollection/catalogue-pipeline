@@ -1,22 +1,10 @@
-module "bibs_window_generator" {
-  source = "./sierra_window_generator"
-
-  resource_type = "bibs"
-
-  window_length_minutes    = 16
-  trigger_interval_minutes = 7
-
-  lambda_error_alarm_arn = local.lambda_error_alarm_arn
-  infra_bucket           = var.infra_bucket
-}
-
 module "bibs_reader" {
   source = "./sierra_reader"
 
   resource_type = "bibs"
 
   bucket_name       = "wellcomecollection-platform-adapters-sierra"
-  windows_topic_arn = module.bibs_window_generator.topic_arn
+  windows_topic_arns = module.bibs_window_generator.topic_arn
 
   sierra_fields = local.sierra_bibs_fields
 
@@ -34,7 +22,7 @@ module "bibs_reader" {
   infra_bucket = var.infra_bucket
 
   namespace_id = aws_service_discovery_private_dns_namespace.namespace.id
-  namespace = ""
+  namespace = var.namespace
   subnets      = local.private_subnets
 
   service_egress_security_group_id = aws_security_group.egress_security_group.id
@@ -61,7 +49,7 @@ module "bibs_merger" {
   bucket_name = local.vhs_bucket_name
 
   namespace_id = aws_service_discovery_private_dns_namespace.namespace.id
-  namespace = ""
+  namespace = var.namespace
   subnets      = local.private_subnets
 
   service_egress_security_group_id = aws_security_group.egress_security_group.id

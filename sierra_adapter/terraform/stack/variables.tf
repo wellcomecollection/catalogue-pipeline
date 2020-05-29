@@ -7,3 +7,5 @@ variable "dlq_alarm_arn" {}
 variable "private_subnets" {}
 variable "egress_security_group_id" {}
 variable "interservice_security_group_id" {}
+variable "bibs_windows_topic_arns" {}
+variable "items_windows_topic_arns" {}

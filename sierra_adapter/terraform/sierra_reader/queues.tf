@@ -1,8 +1,8 @@
 module "windows_queue" {
   source = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
 
-  queue_name = "sierra_${var.resource_type}_windows"
-  topic_arns = [var.windows_topic_arn]
+  queue_name = "${var.namespace}-sierra_${var.resource_type}_windows"
+  topic_arns = var.windows_topic_arns
 
   # Ensure that messages are spread around -- if we get a timeout from the
   # Sierra API, we don't retry _too_ quickly.

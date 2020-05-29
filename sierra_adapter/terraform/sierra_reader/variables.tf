@@ -1,7 +1,7 @@
 variable "resource_type" {}
 
 variable "bucket_name" {}
-variable "windows_topic_arn" {}
+variable "windows_topic_arns" {}
 
 variable "sierra_fields" {}
 

@@ -77,7 +77,7 @@ if __name__ == "__main__":
         total=math.ceil((end - start).total_seconds() / 60 / (minutes - 1)),
     ):
         client.publish(
-            TopicArn=f"arn:aws:sns:eu-west-1:760097843905:sierra_{resource}_windows",
+            TopicArn=f"arn:aws:sns:eu-west-1:760097843905:sierra_{resource}_reharvest_windows",
             Message=json.dumps(window),
             Subject=f"Window sent by {__file__}",
         )

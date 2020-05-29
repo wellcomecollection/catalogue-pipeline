@@ -8,4 +8,5 @@ module "progress_reporter" {
   infra_bucket = var.infra_bucket
 
   lambda_error_alarm_arn = local.lambda_error_alarm_arn
+  namespace = var.namespace
 }

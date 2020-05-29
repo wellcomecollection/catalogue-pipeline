@@ -1,7 +1,7 @@
 module "demultiplexer_queue" {
   source = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
 
-  queue_name = "sierra_demultiplexed_items"
+  queue_name = "${var.namespace}-sierra_demultiplexed_items"
   topic_arns = [var.demultiplexer_topic_arn]
 
   max_receive_count = 10

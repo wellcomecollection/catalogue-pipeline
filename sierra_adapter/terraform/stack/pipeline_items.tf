@@ -1,22 +1,10 @@
-module "items_window_generator" {
-  source = "./../sierra_window_generator"
-
-  resource_type = "items"
-
-  window_length_minutes    = 31
-  trigger_interval_minutes = 15
-
-  lambda_error_alarm_arn = var.lambda_error_alarm_arn
-  infra_bucket           = var.infra_bucket
-}
-
 module "items_reader" {
   source = "./../sierra_reader"
 
   resource_type = "items"
 
   bucket_name       = aws_s3_bucket.sierra_adapter.id
-  windows_topic_arn = module.items_window_generator.topic_arn
+  windows_topic_arns = var.items_windows_topic_arns
 
   sierra_fields = local.sierra_items_fields
 
