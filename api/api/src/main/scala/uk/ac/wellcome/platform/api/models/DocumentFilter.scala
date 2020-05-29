@@ -1,5 +1,7 @@
 package uk.ac.wellcome.platform.api.models
 
+import uk.ac.wellcome.models.work.internal.AccessStatus
+
 import java.time.LocalDate
 
 sealed trait DocumentFilter
@@ -32,3 +34,7 @@ case class IdentifiersFilter(values: List[String]) extends WorkFilter
 case class CollectionPathFilter(path: String) extends WorkFilter
 
 case class CollectionDepthFilter(depth: Int) extends WorkFilter
+
+case class AccessStatusFilter(includes: List[AccessStatus],
+                              excludes: List[AccessStatus])
+    extends WorkFilter

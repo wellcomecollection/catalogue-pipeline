@@ -6,6 +6,7 @@ import io.circe.Decoder
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.platform.api.services.WorksSearchOptions
+import uk.ac.wellcome.models.work.internal.AccessStatus
 
 case class SingleWorkParams(
   include: Option[WorksIncludes],
@@ -62,6 +63,7 @@ case class MultipleWorksParams(
   sortOrder: Option[SortingOrder],
   query: Option[String],
   identifiers: Option[IdentifiersFilter],
+  `items.locations.accessConditions.status`: Option[AccessStatusFilter],
   collection: Option[CollectionPathFilter],
   `collection.depth`: Option[CollectionDepthFilter],
   _queryType: Option[SearchQueryType],
@@ -91,6 +93,7 @@ case class MultipleWorksParams(
       `genres.label`,
       `subjects.label`,
       identifiers,
+      `items.locations.accessConditions.status`,
       collection,
       `collection.depth`,
       license
@@ -131,6 +134,7 @@ object MultipleWorksParams extends QueryParamsUtils {
         "sortOrder".as[SortingOrder].?,
         "query".as[String].?,
         "identifiers".as[IdentifiersFilter].?,
+        "items.locations.accessConditions.status".as[AccessStatusFilter].?,
         "collection".as[CollectionPathFilter].?,
         "collection.depth".as[CollectionDepthFilter].?,
         "_queryType".as[SearchQueryType].?,
@@ -158,6 +162,19 @@ object MultipleWorksParams extends QueryParamsUtils {
 
   implicit val identifiersFilter: Decoder[IdentifiersFilter] =
     decodeCommaSeparated.emap(strs => Right(IdentifiersFilter(strs)))
+
+  implicit val accessStatusFilter: Decoder[AccessStatusFilter] =
+    decodeIncludesAndExcludes(
+      "open" -> AccessStatus.Open,
+      "open-with-advisory" -> AccessStatus.OpenWithAdvisory,
+      "restricted" -> AccessStatus.Restricted,
+      "closed" -> AccessStatus.Closed,
+      "licensed-resources" -> AccessStatus.LicensedResources,
+      "unavailable" -> AccessStatus.Unavailable,
+      "permission-required" -> AccessStatus.PermissionRequired,
+    ).emap {
+      case (includes, excludes) => Right(AccessStatusFilter(includes, excludes))
+    }
 
   implicit val collectionsPathFilter: Decoder[CollectionPathFilter] =
     Decoder.decodeString.emap(str => Right(CollectionPathFilter(str)))

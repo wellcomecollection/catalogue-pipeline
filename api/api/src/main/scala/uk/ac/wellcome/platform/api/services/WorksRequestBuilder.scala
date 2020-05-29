@@ -12,6 +12,8 @@ import uk.ac.wellcome.platform.api.models._
 
 object WorksRequestBuilder extends ElasticsearchRequestBuilder {
 
+  import ElasticsearchRequestBuilder._
+
   val idSort: FieldSort = fieldSort("canonicalId").order(SortOrder.ASC)
 
   def request(queryOptions: ElasticsearchQueryOptions,
@@ -153,7 +155,12 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
             field = "data.otherIdentifiers.value",
             values = identifiers)
         )
-
+      case AccessStatusFilter(includes, excludes) =>
+        includesExcludesQuery(
+          field = "data.items.locations.accessConditions.status.type",
+          includes = includes.map(_.name),
+          excludes = excludes.map(_.name),
+        )
       case CollectionPathFilter(path) =>
         termQuery(field = "data.collectionPath.path", value = path)
       case CollectionDepthFilter(depth) =>

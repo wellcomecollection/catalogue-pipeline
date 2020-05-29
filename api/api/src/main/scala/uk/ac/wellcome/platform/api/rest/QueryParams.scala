@@ -48,23 +48,36 @@ trait QueryParamsUtils extends Directives {
   def decodeOneWithDefaultOf[T](default: T, values: (String, T)*): Decoder[T] =
     Decoder.decodeString.map { values.toMap.getOrElse(_, default) }
 
-  def decodeOneOfCommaSeparated[T](values: (String, T)*): Decoder[List[T]] =
+  def decodeOneOfCommaSeparated[T](values: (String, T)*): Decoder[List[T]] = {
+    val mapping = values.toMap
+    val validStrs = values.map(_._1).toList
     decodeCommaSeparated.emap { strs =>
-      val mapping = values.toMap
-      val results = strs.map { str =>
-        mapping
-          .get(str)
-          .map(Right(_))
-          .getOrElse(Left(str))
-      }
-      val invalid = results.collect { case Left(error) => error }
-      val valid = results.collect { case Right(value)  => value }
-      (invalid, valid) match {
-        case (Nil, results) => Right(results)
-        case (invalidValues, _) =>
-          Left(invalidValuesMsg(invalidValues, values.map(_._1).toList))
-      }
+      mapStringsToValues(strs, mapping).left
+        .map { invalidStrs =>
+          invalidValuesMsg(invalidStrs, validStrs)
+        }
     }
+  }
+
+  def decodeIncludesAndExcludes[T](
+    values: (String, T)*): Decoder[(List[T], List[T])] = {
+    val mapping = values.toMap
+    val validStrs = values.map(_._1).toList
+    decodeCommaSeparated
+      .emap { strs =>
+        val (excludeStrs, includeStrs) = strs.partition(_.startsWith("!"));
+        val includes = mapStringsToValues(includeStrs, mapping);
+        val excludes = mapStringsToValues(excludeStrs.map(_.tail), mapping);
+        (includes, excludes) match {
+          case (Right(includes), Right(excludes)) => Right((includes, excludes))
+          case _ =>
+            val invalidStrs = (
+              includes.left.getOrElse(Nil) ++ excludes.left.getOrElse(Nil)
+            ).distinct
+            Left(invalidValuesMsg(invalidStrs, validStrs))
+        }
+      }
+  }
 
   def invalidValuesMsg(values: List[String],
                        validValues: List[String]): String = {
@@ -85,4 +98,23 @@ trait QueryParamsUtils extends Directives {
         reject(ValidationRejection(errs.mkString(", ")))
           .toDirective[Tuple1[T]]
     }
+
+  def mapStringsToValues[T](
+    strs: List[String],
+    mapping: Map[String, T]): Either[List[String], List[T]] = {
+    val results = strs.map { str =>
+      mapping
+        .get(str)
+        .map(Right(_))
+        .getOrElse(Left(str))
+    }
+    val invalid = results.collect { case Left(error) => error }
+    val valid = results.collect { case Right(value)  => value }
+    (invalid, valid) match {
+      case (Nil, results)     => Right(results)
+      case (invalidValues, _) => Left(invalidValues)
+    }
+  }
 }
+
+object QueryParamsUtils extends QueryParamsUtils
