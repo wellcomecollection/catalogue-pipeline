@@ -4,8 +4,7 @@ module "updates_queue" {
   queue_name = "sierra_items_merger_queue"
 
   topic_arns = [
-    var.updates_topic_arn,
-    var.reindexed_items_topic_arn,
+    var.updates_topic_arn
   ]
 
   # Ensure that messages are spread around -- if the merger has an error

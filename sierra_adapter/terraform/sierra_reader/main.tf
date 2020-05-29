@@ -1,7 +1,3 @@
-data "aws_ecs_cluster" "cluster" {
-  cluster_name = var.cluster_name
-}
-
 module "sierra_reader_service" {
   source = "../../../infrastructure/modules/worker"
 
@@ -33,7 +29,7 @@ module "sierra_reader_service" {
   namespace_id = var.namespace_id
 
   cluster_name = var.cluster_name
-  cluster_arn  = data.aws_ecs_cluster.cluster.id
+  cluster_arn  = var.cluster_arn
 
   subnets = var.subnets
 

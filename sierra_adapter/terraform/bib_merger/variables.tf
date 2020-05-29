@@ -1,6 +1,7 @@
 variable "merged_dynamo_table_name" {}
 variable "updates_topic_arn" {}
 variable "cluster_name" {}
+variable "cluster_arn" {}
 variable "vpc_id" {}
 
 variable "container_image" {}
@@ -19,5 +20,6 @@ variable "subnets" {
 }
 
 variable "namespace_id" {}
+variable "namespace" {}
 variable "interservice_security_group_id" {}
 variable "service_egress_security_group_id" {}
