@@ -278,8 +278,6 @@ class SierraMergeCandidatesTest
       val calmIds = (1 to 5).map(_ => calmId)
       val calmMergeCandidates = calmIds map createCalmMergeCandidate
       val otherIds = (1 to 5).map(_.toString)
-
-      println(calmIds)
       val examples = Table(
         ("-bibData-", "-mergeCandidates-", "-test-"),
         (
