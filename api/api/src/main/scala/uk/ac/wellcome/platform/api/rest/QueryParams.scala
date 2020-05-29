@@ -71,12 +71,11 @@ trait QueryParamsUtils extends Directives {
         val excludes = mapStringsToValues(excludeStrs.map(_.tail), mapping);
         (includes, excludes) match {
           case (Right(includes), Right(excludes)) => Right((includes, excludes))
-          case _ => Left(
-            invalidValuesMsg(
-              includes.left.getOrElse(Nil) ++ includes.left.getOrElse(Nil),
-              validStrs
-            )
-          )
+          case _ => 
+            val invalidStrs = (
+              includes.left.getOrElse(Nil) ++ excludes.left.getOrElse(Nil)
+            ).distinct
+            Left(invalidValuesMsg(invalidStrs, validStrs))
         }
       }
   }
@@ -117,3 +116,5 @@ trait QueryParamsUtils extends Directives {
     }
   }
 }
+
+object QueryParamsUtils extends QueryParamsUtils
