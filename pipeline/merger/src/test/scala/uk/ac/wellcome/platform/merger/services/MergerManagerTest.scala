@@ -43,14 +43,24 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorksGenerators {
     }
   }
 
-  it("returns the works unmerged if any of the work entries are None") {
+  it("merges all available works and ignores None") {
     val expectedWorks = createUnidentifiedWorks(3)
 
     val maybeWorks = expectedWorks.map { Some(_) } ++ List(None)
 
     val result = mergerManager.applyMerge(maybeWorks = maybeWorks.toList)
 
-    result.works should contain theSameElementsAs expectedWorks
+    val redirectedWorks = expectedWorks.tail.map(
+      work =>
+        UnidentifiedRedirectedWork(
+          sourceIdentifier = work.sourceIdentifier,
+          version = work.version,
+          redirect = IdentifiableRedirect(expectedWorks.head.sourceIdentifier)
+      ))
+
+    result.works.head shouldBe expectedWorks.head
+
+    result.works.tail shouldBe redirectedWorks
   }
 
   val mergerRules = new Merger {
