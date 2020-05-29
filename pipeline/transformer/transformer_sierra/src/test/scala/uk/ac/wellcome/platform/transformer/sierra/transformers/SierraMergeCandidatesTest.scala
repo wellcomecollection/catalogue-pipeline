@@ -18,6 +18,7 @@ import uk.ac.wellcome.platform.transformer.sierra.generators.{
   SierraDataGenerators
 }
 import org.scalatest.prop.TableDrivenPropertyChecks._
+import java.util.UUID.randomUUID
 
 class SierraMergeCandidatesTest
     extends AnyFunSpec
@@ -271,15 +272,33 @@ class SierraMergeCandidatesTest
   }
 
   describe("Calm/Sierra harvest") {
-    it("Creates merge candidates from 035a from Calm/Sierra harvest") {
-      val ids = (1 to 5).map(_ => randomAlphanumeric(36).toString)
-      val calmMergeCandidates = ids map createCalmMergeCandidate
+    it("Assumes UUIDs in 035$a are from calm and attaches the merge candidate") {
+      def calmId = randomUUID.toString
 
+      val calmIds = (1 to 5).map(_ => calmId)
+      val calmMergeCandidates = calmIds map createCalmMergeCandidate
+      val otherIds = (1 to 5).map(_.toString)
+
+      println(calmIds)
       val examples = Table(
         ("-bibData-", "-mergeCandidates-", "-test-"),
-        (bibDataWith035(ids.take(1)), calmMergeCandidates.take(1), "Single"),
-        (bibDataWith035(ids.take(5)), calmMergeCandidates.take(5), "Multiple"),
-        (bibDataWith035(ids ++ ids), calmMergeCandidates.take(5), "Dedupes"),
+        (
+          bibDataWith035(calmIds.take(1)),
+          calmMergeCandidates.take(1),
+          "Single Calm ID"),
+        (
+          bibDataWith035(calmIds.take(5)),
+          calmMergeCandidates.take(5),
+          "Multiple Calm IDs"),
+        (
+          bibDataWith035(calmIds ++ calmIds),
+          calmMergeCandidates.take(5),
+          "Duped Calm IDs"),
+        (
+          bibDataWith035(otherIds ++ calmIds),
+          calmMergeCandidates.take(5),
+          "Mixed Calm and not Calm IDs"),
+        (bibDataWith035(otherIds), Nil, "No calm IDs"),
       )
 
       forAll(examples) { (bibData, mergeCandidates, clue) =>
