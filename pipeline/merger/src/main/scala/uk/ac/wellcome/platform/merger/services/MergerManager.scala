@@ -9,20 +9,10 @@ class MergerManager(mergerRules: Merger) {
     * merging function, apply the function to these works.
     *
     * If we got an incomplete list of results from VHS (for example,
-    * wrong versions), we skip the merge and return the original works.
+    * wrong versions), we just merge which works are available.
     */
   def applyMerge(
     maybeWorks: Seq[Option[TransformedBaseWork]]): MergerOutcome = {
-    val transformedBaseWorks = maybeWorks
-      .collect {
-        case Some(transformedBaseWork: TransformedBaseWork) =>
-          transformedBaseWork
-      }
-
-    if (transformedBaseWorks.size == maybeWorks.size) {
-      mergerRules.merge(transformedBaseWorks)
-    } else {
-      MergerOutcome(maybeWorks.flatten, Nil)
-    }
+    mergerRules.merge(maybeWorks.flatten)
   }
 }

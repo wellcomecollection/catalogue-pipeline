@@ -88,7 +88,7 @@ class MergerWorkerServiceTest
     }
   }
 
-  it("fails if the work is not in vhs") {
+  it("skips if the work is not in vhs") {
     withMergerWorkerServiceFixtures {
       case (_, QueuePair(queue, dlq), topics, metrics) =>
         val work = createUnidentifiedWork
@@ -102,11 +102,11 @@ class MergerWorkerServiceTest
 
         eventually {
           assertQueueEmpty(queue)
-          assertQueueHasSize(dlq, 1)
+          assertQueueEmpty(dlq)
           listMessagesReceivedFromSNS(topics.works) shouldBe empty
 
-          metrics.incrementedCounts.length shouldBe 3
-          metrics.incrementedCounts.last should endWith("_failure")
+          metrics.incrementedCounts.length shouldBe 1
+          metrics.incrementedCounts.last should endWith("_success")
         }
     }
   }

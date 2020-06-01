@@ -39,7 +39,14 @@ class RecorderPlaybackService(
     * If the work is present in VHS but has a different version to what
     * we're expecting, this method returns [[None]].
     *
-    * If the work is missing from VHS, it throws [[NoSuchElementException]].
+    * If the work is missing from VHS, we return [[None]]. This can
+    * occur due to a work not having been recorded yet, but will be in
+    * the future.
+    *
+    * e.g. We reindex from Sierra, which would have some merge candidates
+    * referencing Calm, METS etc, which haven't been indexed yet.
+    *
+    * The merger should merge what it can from a list of identifiers.
     */
   private def getWorkForIdentifier(
     workIdentifier: WorkIdentifier): Option[TransformedBaseWork] =
@@ -50,14 +57,17 @@ class RecorderPlaybackService(
             if (work.version == version) {
               Some(work)
             } else {
-              debug(
+              info(
                 s"VHS version = ${work.version}, identifier version = ${version}, so discarding work")
               None
             }
           case Left(NoVersionExistsError(_)) =>
-            throw new NoSuchElementException(s"Work ${id} is not in VHS!")
+            info(s"identifier $id missing from VHS")
+            None
           case Left(readError) => throw readError.e
         }
-      case _ => None
+      case WorkIdentifier(id, None) =>
+        info(s"identifier $id did not have a version, skipping")
+        None
     }
 }

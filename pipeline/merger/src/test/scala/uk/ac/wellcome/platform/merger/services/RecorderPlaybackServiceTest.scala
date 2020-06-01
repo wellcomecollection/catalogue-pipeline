@@ -29,13 +29,15 @@ class RecorderPlaybackServiceTest
     }
   }
 
-  it("throws an error if asked to fetch a missing entry") {
-    val work = createUnidentifiedWork
+  it("returns None if asked to fetch a missing entry") {
+    val work1 = createUnidentifiedWork
+    val work2 = createUnidentifiedWork
 
     withVHS { vhs =>
-      whenReady(fetchAllWorks(vhs = vhs, work).failed) { result =>
-        result shouldBe a[NoSuchElementException]
-        result.getMessage shouldBe s"Work ${work.sourceIdentifier} is not in VHS!"
+      givenStoredInVhs(vhs, work1)
+
+      whenReady(fetchAllWorks(vhs = vhs, work1, work2)) { result =>
+        result shouldBe Seq(Some(work1), None)
       }
     }
   }
