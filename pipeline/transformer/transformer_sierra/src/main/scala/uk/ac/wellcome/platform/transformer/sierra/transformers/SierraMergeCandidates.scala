@@ -1,5 +1,7 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
+import java.util.UUID
+
 import uk.ac.wellcome.models.work.internal.{
   IdentifierType,
   MergeCandidate,
@@ -16,6 +18,7 @@ import uk.ac.wellcome.platform.transformer.sierra.transformers.parsers.{
 }
 import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 
+import scala.util.Try
 import scala.util.matching.Regex
 
 object SierraMergeCandidates
@@ -100,22 +103,29 @@ object SierraMergeCandidates
     }
 
   /** When we harvest the Calm data into Sierra, the `RecordID` is stored in
-    * Marcfield 035$a
+    * Marcfield 035$a.
     *
-    * e.g. `https://search.wellcomelibrary.org/iii/encore/record/C__Rb1971204?marcData=Y`
+    * Calm IDs follow the UUID spec
     *
+    * e.g: f5217b45-b742-472b-95c3-f136d5de1104
+    * see: `https://search.wellcomelibrary.org/iii/encore/record/C__Rb1971204?marcData=Y`
+    *
+    * This field is also used for other "system control numbers" from UKMHL, LSHTM etc.
+    * e.g: (OCoLC)927468903, (lshtm)a60032
+    * see: `https://search.wellcomelibrary.org/iii/encore/record/C__Rb1187988?marcData=Y`
     */
   private def get035CalmMergeCandidates(
     bibData: SierraBibData): List[MergeCandidate] =
     bibData
       .subfieldsWithTag("035" -> "a")
       .contents
+      .flatMap(str => Try(UUID.fromString(str)).toOption)
       .map { recordId =>
         MergeCandidate(
           identifier = SourceIdentifier(
             identifierType = IdentifierType("calm-record-id"),
             ontologyType = "Work",
-            value = recordId
+            value = recordId.toString
           ),
           reason = Some("Calm/Sierra harvest")
         )
