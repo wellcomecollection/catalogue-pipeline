@@ -85,6 +85,18 @@ object CalmTransformer
     }
 
   def shouldSuppress(record: CalmRecord): Boolean =
+    transmissionIsNo(record) match {
+      case true  => true
+      case false =>
+        // Records prefixed with AMSG (Archives and Manuscripts Resource Guides)
+        // are not actual archives but instead guides for researchers, so we
+        // suppress them here.
+        record
+          .get("RefNo")
+          .exists(_.startsWith("AMSG"))
+    }
+
+  def transmissionIsNo(record: CalmRecord): Boolean =
     record
       .get("Transmission")
       .exists { value =>

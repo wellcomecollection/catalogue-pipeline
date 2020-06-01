@@ -393,6 +393,51 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       Language("Lolol", None))
   }
 
+  it("suppresses Archives and Manuscrupts Resource Guide works") {
+    import InvisibilityReason._
+    val record = calmRecord(
+      "Title" -> "Should suppress",
+      "Level" -> "Section",
+      "RefNo" -> "AMSG/X/Y",
+    )
+    CalmTransformer(record, version) shouldBe Right(
+      UnidentifiedInvisibleWork(
+        sourceIdentifier = SourceIdentifier(
+          value = id,
+          identifierType = CalmIdentifierTypes.recordId),
+        version = version,
+        data = WorkData(
+          title = Some("Should suppress"),
+          workType = Some(WorkType.ArchiveSection),
+          collectionPath = Some(
+            CollectionPath(
+              path = "AMSG/X/Y",
+              level = Some(CollectionLevel.Section),
+            )
+          ),
+          otherIdentifiers = List(
+            SourceIdentifier(
+              value = "AMSG/X/Y",
+              identifierType = CalmIdentifierTypes.refNo),
+          ),
+          items = List(
+            Item(
+              title = None,
+              locations = List(
+                PhysicalLocation(
+                  locationType = LocationType("scmac"),
+                  label = "Closed stores Arch. & MSS",
+                  accessConditions = Nil
+                )
+              )
+            )
+          )
+        ),
+        invisibilityReasons = List(SuppressedFromSource("Calm"))
+      )
+    )
+  }
+
   def calmRecord(fields: (String, String)*): CalmRecord =
     CalmRecord(
       id = id,
