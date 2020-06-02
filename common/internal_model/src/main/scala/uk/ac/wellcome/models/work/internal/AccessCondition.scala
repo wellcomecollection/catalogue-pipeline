@@ -55,10 +55,12 @@ object AccessStatus {
         Right(AccessStatus.Closed)
       case status if status.startsWith("missing") =>
         Right(AccessStatus.Unavailable)
-      case status if status.startsWith("in copyright") =>
-        Right(AccessStatus.LicensedResources)
       case status if status.startsWith("temporarily unavailable") =>
         Right(AccessStatus.Unavailable)
+      case status if status.startsWith("deaccessioned") =>
+        Right(AccessStatus.Unavailable)
+      case status if status.startsWith("in copyright") =>
+        Right(AccessStatus.LicensedResources)
       case status if status.startsWith("permission required") =>
         Right(AccessStatus.PermissionRequired)
       case status =>
