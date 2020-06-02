@@ -7,7 +7,7 @@ module "service" {
   subnets                        = var.subnets
   service_discovery_namespace_id = var.namespace_id
   launch_type                    = "FARGATE"
-  desired_task_count             = var.desired_task_count
+  desired_task_count             = 10
   security_group_ids             = var.security_group_ids
   use_fargate_spot               = var.use_fargate_spot
 }
