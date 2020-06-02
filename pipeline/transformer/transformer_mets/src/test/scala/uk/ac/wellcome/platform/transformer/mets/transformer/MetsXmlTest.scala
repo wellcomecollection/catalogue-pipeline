@@ -64,21 +64,46 @@ class MetsXmlTest extends AnyFunSpec with Matchers with MetsGenerators {
     MetsXml(xmlMultipleDistinctLicense).accessConditionDz shouldBe a[Left[_, _]]
   }
 
-  it("parses all file IDs from XML") {
-    MetsXml(xml).right.get.physicalFileIds should contain theSameElementsAs List(
-      "FILE_0001_OBJECTS",
-      "FILE_0002_OBJECTS",
-      "FILE_0003_OBJECTS",
-      "FILE_0004_OBJECTS",
-      "FILE_0005_OBJECTS",
-      "FILE_0006_OBJECTS"
+  it("parses file references mapping from XML") {
+    MetsXml(xml).right.get.fileReferencesMapping("b30246039") shouldBe List(
+      "PHYS_0001" -> FileReference(
+        id = "FILE_0001_OBJECTS",
+        location = "b30246039_0001.jp2",
+        listedMimeType = Some("image/jp2")
+      ),
+      "PHYS_0002" -> FileReference(
+        id = "FILE_0002_OBJECTS",
+        location = "b30246039_0002.jp2",
+        listedMimeType = Some("image/jp2")
+      ),
+      "PHYS_0003" -> FileReference(
+        id = "FILE_0003_OBJECTS",
+        location = "b30246039_0003.jp2",
+        listedMimeType = Some("image/jp2")
+      ),
+      "PHYS_0004" -> FileReference(
+        id = "FILE_0004_OBJECTS",
+        location = "b30246039_0004.jp2",
+        listedMimeType = Some("image/jp2")
+      ),
+      "PHYS_0005" -> FileReference(
+        id = "FILE_0005_OBJECTS",
+        location = "b30246039_0005.jp2",
+        listedMimeType = Some("image/jp2")
+      ),
+      "PHYS_0006" -> FileReference(
+        id = "FILE_0006_OBJECTS",
+        location = "b30246039_0006.jp2",
+        listedMimeType = Some("image/jp2")
+      )
     )
   }
 
   it("parses thumbnail from XML") {
     MetsXml(xml).right.get
-      .physicalFileReferences("b30246039")
+      .fileReferencesMapping("b30246039")
       .head
+      ._2
       .location shouldBe "b30246039_0001.jp2"
   }
 
@@ -88,15 +113,17 @@ class MetsXmlTest extends AnyFunSpec with Matchers with MetsGenerators {
       fileSec = fileSec(filePrefix = "b30246039"),
       structMap = structMap)
     MetsXml(str).getRight
-      .physicalFileReferences("b30246039")
+      .fileReferencesMapping("b30246039")
       .head
+      ._2
       .location shouldBe "b30246039_0001.jp2"
   }
 
   it("parses thumbnail using ORDER attrib when non-sequential order") {
     MetsXml(xmlNonSequentialOrder("b30246039")).getRight
-      .physicalFileReferences("b30246039")
+      .fileReferencesMapping("b30246039")
       .head
+      ._2
       .location shouldBe "b30246039_0001.jp2"
   }
 
@@ -108,8 +135,9 @@ class MetsXmlTest extends AnyFunSpec with Matchers with MetsGenerators {
         recordIdentifier = bnumber,
         fileSec = fileSec(filePrefix),
         structMap = structMap)).getRight
-      .physicalFileReferences(bnumber)
+      .fileReferencesMapping(bnumber)
       .head
+      ._2
       .location shouldBe s"${bnumber}_${filePrefix}_0001.jp2"
   }
 
@@ -121,14 +149,15 @@ class MetsXmlTest extends AnyFunSpec with Matchers with MetsGenerators {
         recordIdentifier = bnumber,
         fileSec = fileSec(filePrefix),
         structMap = structMap)).getRight
-      .physicalFileReferences(bnumber)
+      .fileReferencesMapping(bnumber)
       .head
+      ._2
       .location shouldBe s"${filePrefix}_0001.jp2"
   }
 
   it("cannot parse thumbnail when invalid file ID") {
     MetsXml(xmlInvalidFileId("b30246039")).getRight
-      .physicalFileReferences("b30246039")
+      .fileReferencesMapping("b30246039")
       .headOption shouldBe None
   }
 

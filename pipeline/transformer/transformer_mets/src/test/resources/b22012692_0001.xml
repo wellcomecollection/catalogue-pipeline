@@ -312,10 +312,15 @@
         <mets:fptr FILEID="FILE_0002_OBJECTS" />
         <mets:fptr FILEID="FILE_0002_ALTO" />
       </mets:div>
+      <mets:div ADMID="AMD_0005" ID="PHYS_0005" ORDER="5" ORDERLABEL=" - " TYPE="page">
+        <mets:fptr FILEID="FILE_0005_OBJECTS" />
+        <mets:fptr FILEID="FILE_0005_ALTO" />
+      </mets:div>
     </mets:div>
   </mets:structMap>
   <mets:structLink>
     <mets:smLink xlink:from="LOG_0003" xlink:to="PHYS_0001" />
     <mets:smLink xlink:from="LOG_0003" xlink:to="PHYS_0002" />
+    <mets:smLink xlink:from="LOG_0005" xlink:to="PHYS_0005" />
   </mets:structLink>
 </mets:mets>
