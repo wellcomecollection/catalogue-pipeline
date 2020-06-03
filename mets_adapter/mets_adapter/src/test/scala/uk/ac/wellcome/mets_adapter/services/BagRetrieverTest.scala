@@ -75,13 +75,11 @@ class BagRetrieverTest
         .when(tokenService.getToken)
         .thenReturn(Future.successful(OAuth2BearerToken("not-valid-token")))
       withBagRetriever(tokenService) { bagRetriever =>
-        whenReady(getBag(bagRetriever, "digitised", "b30246039").failed) {
-          e =>
-            e shouldBe a[Throwable]
-            verify(
-              1,
-              getRequestedFor(
-                urlEqualTo("/storage/v1/bags/digitised/b30246039")))
+        whenReady(getBag(bagRetriever, "digitised", "b30246039").failed) { e =>
+          e shouldBe a[Throwable]
+          verify(
+            1,
+            getRequestedFor(urlEqualTo("/storage/v1/bags/digitised/b30246039")))
         }
       }
     }
@@ -93,8 +91,7 @@ class BagRetrieverTest
         stubFor(
           get(urlMatching("/storage/v1/bags/digitised/this-shall-crash"))
             .willReturn(aResponse().withStatus(500)))
-        whenReady(
-          getBag(bagRetriever, "digitised", "this-shall-crash").failed) {
+        whenReady(getBag(bagRetriever, "digitised", "this-shall-crash").failed) {
           _ shouldBe a[Throwable]
         }
       }
@@ -106,9 +103,10 @@ class BagRetrieverTest
       withBagRetriever { bagRetriever =>
         stubFor(
           get(urlMatching("/storage/v1/bags/digitised/this-will-fault"))
-            .willReturn(aResponse()
-              .withStatus(200)
-              .withFault(Fault.CONNECTION_RESET_BY_PEER)))
+            .willReturn(
+              aResponse()
+                .withStatus(200)
+                .withFault(Fault.CONNECTION_RESET_BY_PEER)))
         whenReady(getBag(bagRetriever, "digitised", "this-will-fault").failed) {
           _ shouldBe a[Throwable]
         }
@@ -116,7 +114,9 @@ class BagRetrieverTest
     }
   }
 
-  def getBag(bagRetriever: BagRetriever, space: String, externalIdentifier: String): Future[Bag] =
+  def getBag(bagRetriever: BagRetriever,
+             space: String,
+             externalIdentifier: String): Future[Bag] =
     bagRetriever.getBag(space = space, externalIdentifier = externalIdentifier)
 
   def withBagRetriever[R](tokenService: TokenService)(

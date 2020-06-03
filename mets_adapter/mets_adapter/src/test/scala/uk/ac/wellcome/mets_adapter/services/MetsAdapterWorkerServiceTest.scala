@@ -162,7 +162,8 @@ class MetsAdapterWorkerServiceTest
                            store: VersionedStore[String, Int, MetsLocation],
                            createMsgSender: SNS.Topic => SNSMessageSender =
                              createMsgSender)(
-    testWith: TestWith[(MetsAdapterWorkerService, QueuePair, SNS.Topic), R]): R =
+    testWith: TestWith[(MetsAdapterWorkerService, QueuePair, SNS.Topic), R])
+    : R =
     withActorSystem { implicit actorSystem =>
       withLocalSnsTopic { topic =>
         withLocalSqsQueueAndDlq {

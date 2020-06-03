@@ -34,9 +34,8 @@ class HttpBagRetriever(baseUrl: String, tokenService: TokenService)(
     for {
       token <- tokenService.getToken
 
-      httpRequest =
-        HttpRequest(uri = requestUri)
-          .addHeader(Authorization(token))
+      httpRequest = HttpRequest(uri = requestUri)
+        .addHeader(Authorization(token))
 
       response <- Http().singleRequest(httpRequest)
       maybeBag <- {
