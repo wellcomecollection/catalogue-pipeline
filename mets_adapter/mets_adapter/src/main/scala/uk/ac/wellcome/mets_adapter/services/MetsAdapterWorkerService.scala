@@ -63,30 +63,30 @@ class MetsAdapterWorkerService(
     Flow[(SQSMessage, NotificationMessage)]
       .map {
         case (msg, NotificationMessage(body)) =>
-          (msg, fromJson[IngestUpdate](body).toEither)
+          (msg, fromJson[BagRegistrationNotification](body).toEither)
       }
       .via(catchErrors)
       .map {
-        case (msg, update) =>
-          (Context(msg, update.context.externalIdentifier), update)
+        case (msg, notification) =>
+          (Context(msg, notification.externalIdentifier), notification)
       }
 
   def filterDigitised =
-    Flow[(Context, IngestUpdate)]
+    Flow[(Context, BagRegistrationNotification)]
       .map {
-        case (ctx, update) if update.context.storageSpace == "digitised" =>
-          (ctx, Some(update))
+        case (ctx, notification) if notification.space == "digitised" =>
+          (ctx, Some(notification))
         case (ctx, _) => (ctx, None)
       }
 
   def retrieveBag =
-    Flow[(Context, Option[IngestUpdate])]
+    Flow[(Context, Option[BagRegistrationNotification])]
       .mapWithContextAsync(concurrentHttpConnections) {
-        case (_, update) =>
+        case (_, notification) =>
           bagRetriever
             .getBag(
-              space = update.context.storageSpace,
-              externalIdentifier = update.context.externalIdentifier
+              space = notification.space,
+              externalIdentifier = notification.externalIdentifier
             )
             .transform(result => Success(result.toEither))
       }

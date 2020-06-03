@@ -44,60 +44,67 @@ class MetsAdapterWorkerServiceTest
         Future.successful(bag)
     }
 
+  val space = "digitised"
+  val externalIdentifier = "123"
+  val notification: BagRegistrationNotification = createBagRegistrationNotificationWith(
+    space = space,
+    externalIdentifier = externalIdentifier
+  )
+
   it("processes ingest updates and store and publish METS data") {
     val vhs = createStore()
     withWorkerService(bagRetriever, vhs) {
       case (_, QueuePair(queue, dlq), topic) =>
-        sendNotificationToSQS(queue, ingestUpdate("digitised", "123"))
+        sendNotificationToSQS(queue, notification)
         assertQueueEmpty(queue)
         assertQueueEmpty(dlq)
-        getMessages(topic) shouldEqual List(Version("123", 1))
-        vhs.getLatest("123") shouldBe Right(
-          Identified(Version("123", 1), metsLocation())
+        getMessages(topic) shouldEqual List(Version(externalIdentifier, 1))
+        vhs.getLatest(id = externalIdentifier) shouldBe Right(
+          Identified(Version(externalIdentifier, 1), metsLocation())
         )
     }
   }
 
   it("publishes new METS data when old version exists in the store") {
-    val vhs = createStore(Map(Version("123", 0) -> "old-data"))
+    val vhs = createStore(Map(Version(externalIdentifier, 0) -> "old-data"))
     withWorkerService(bagRetriever, vhs) {
       case (_, QueuePair(queue, dlq), topic) =>
-        sendNotificationToSQS(queue, ingestUpdate("digitised", "123"))
+        sendNotificationToSQS(queue, notification)
         Thread.sleep(2000)
         assertQueueEmpty(queue)
         assertQueueEmpty(dlq)
         getMessages(topic) shouldEqual List(Version("123", 1))
-        vhs.getLatest("123") shouldBe Right(
-          Identified(Version("123", 1), metsLocation())
+        vhs.getLatest(id = externalIdentifier) shouldBe Right(
+          Identified(Version(externalIdentifier, 1), metsLocation())
         )
     }
   }
 
   it("re-publishes existing data when current version exists in the store") {
-    val vhs = createStore(Map(Version("123", 1) -> "existing-data"))
+    val vhs = createStore(Map(Version(externalIdentifier, 1) -> "existing-data"))
     withWorkerService(bagRetriever, vhs) {
       case (_, QueuePair(queue, dlq), topic) =>
-        sendNotificationToSQS(queue, ingestUpdate("digitised", "123"))
+        sendNotificationToSQS(queue, notification)
         assertQueueEmpty(queue)
         assertQueueEmpty(dlq)
         getMessages(topic) shouldEqual List(Version("123", 1))
-        vhs.getLatest("123") shouldBe Right(
-          Identified(Version("123", 1), metsLocation("existing-data"))
+        vhs.getLatest(id = externalIdentifier) shouldBe Right(
+          Identified(Version(externalIdentifier, 1), metsLocation("existing-data"))
         )
     }
   }
 
   it("ignores messages when greater version exists in the store") {
-    val vhs = createStore(Map(Version("123", 2) -> "existing-data"))
+    val vhs = createStore(Map(Version(externalIdentifier, 2) -> "existing-data"))
     withWorkerService(bagRetriever, vhs) {
       case (_, QueuePair(queue, dlq), topic) =>
-        sendNotificationToSQS(queue, ingestUpdate("digitised", "123"))
+        sendNotificationToSQS(queue, notification)
         Thread.sleep(2000)
         assertQueueEmpty(queue)
-        assertQueueHasSize(dlq, 1)
+        assertQueueHasSize(dlq, size = 1)
         getMessages(topic) shouldEqual Nil
-        vhs.getLatest("123") shouldBe Right(
-          Identified(Version("123", 2), metsLocation("existing-data"))
+        vhs.getLatest(id = externalIdentifier) shouldBe Right(
+          Identified(Version(externalIdentifier, 2), metsLocation("existing-data"))
         )
     }
   }
@@ -110,12 +117,12 @@ class MetsAdapterWorkerServiceTest
     }
     withWorkerService(brokenBagRetriever, vhs) {
       case (_, QueuePair(queue, dlq), topic) =>
-        sendNotificationToSQS(queue, ingestUpdate("digitised", "123"))
+        sendNotificationToSQS(queue, notification)
         Thread.sleep(2000)
         assertQueueEmpty(queue)
-        assertQueueHasSize(dlq, 1)
+        assertQueueHasSize(dlq, size = 1)
         getMessages(topic) shouldEqual Nil
-        vhs.getLatest("123") shouldBe a[Left[_, _]]
+        vhs.getLatest(id = externalIdentifier) shouldBe a[Left[_, _]]
     }
   }
 
@@ -123,12 +130,12 @@ class MetsAdapterWorkerServiceTest
     val vhs = createStore()
     withWorkerService(bagRetriever, vhs, createBrokenMsgSender) {
       case (_, QueuePair(queue, dlq), topic) =>
-        sendNotificationToSQS(queue, ingestUpdate("digitised", "123"))
+        sendNotificationToSQS(queue, notification)
         Thread.sleep(2000)
         assertQueueEmpty(queue)
-        assertQueueHasSize(dlq, 1)
+        assertQueueHasSize(dlq, size = 1)
         getMessages(topic) shouldEqual Nil
-        vhs.getLatest("123") shouldBe a[Right[_, _]]
+        vhs.getLatest(id = externalIdentifier) shouldBe a[Right[_, _]]
     }
   }
 
@@ -137,7 +144,7 @@ class MetsAdapterWorkerServiceTest
     val vhs = createStore()
     withWorkerService(bagRetriever, vhs) {
       case (_, QueuePair(queue, dlq), topic) =>
-        sendSqsMessage(queue, ingestUpdate("digitised", "123"))
+        sendSqsMessage(queue, createBagRegistrationNotificationWith("digitised", "123"))
         Thread.sleep(2000)
         assertQueueEmpty(queue)
         assertQueueHasSize(dlq, 1)
@@ -147,14 +154,20 @@ class MetsAdapterWorkerServiceTest
 
   it("doesn't process the update when storageSpace isn't equal to 'digitised'") {
     val vhs = createStore()
+
+    val notification = createBagRegistrationNotificationWith(
+      space = "something-different",
+      externalIdentifier = "123"
+    )
+
     withWorkerService(bagRetriever, vhs) {
       case (_, QueuePair(queue, dlq), topic) =>
-        sendNotificationToSQS(queue, ingestUpdate("something-different", "123"))
+        sendNotificationToSQS(queue, notification)
         Thread.sleep(2000)
         assertQueueEmpty(queue)
         assertQueueEmpty(dlq)
         getMessages(topic) shouldEqual Nil
-        vhs.getLatest("123") shouldBe a[Left[_, _]]
+        vhs.getLatest(id = externalIdentifier) shouldBe a[Left[_, _]]
     }
   }
 
@@ -210,6 +223,6 @@ class MetsAdapterWorkerServiceTest
       .map(msgInfo => fromJson[Version[String, Int]](msgInfo.message).get)
       .toList
 
-  def ingestUpdate(space: String, id: String) =
-    IngestUpdate(IngestUpdateContext(space, id))
+  def createBagRegistrationNotificationWith(space: String, externalIdentifier: String): BagRegistrationNotification =
+    BagRegistrationNotification(space = space, externalIdentifier = externalIdentifier)
 }
