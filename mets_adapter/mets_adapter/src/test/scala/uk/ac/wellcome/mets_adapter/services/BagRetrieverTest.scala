@@ -128,14 +128,12 @@ class BagRetrieverTest
     }
   }
 
-  def getBag(bagRetriever: BagRetriever, space: String, bagId: String) =
-    bagRetriever.getBag(
-      IngestUpdate(IngestUpdateContext(space, bagId))
-    )
+  def getBag(bagRetriever: BagRetriever, space: String, externalIdentifier: String): Future[Bag] =
+    bagRetriever.getBag(space = space, externalIdentifier = externalIdentifier)
 
   def withBagRetriever[R](tokenService: TokenService)(
     testWith: TestWith[BagRetriever, R])(implicit actorSystem: ActorSystem,
-                                         materializer: Materializer) =
+                                         materializer: Materializer): R =
     withBagsService("localhost") { port =>
       testWith(
         new HttpBagRetriever(
@@ -146,7 +144,7 @@ class BagRetrieverTest
 
   def withBagRetriever[R](testWith: TestWith[BagRetriever, R])(
     implicit actorSystem: ActorSystem,
-    materializer: Materializer) =
+    materializer: Materializer): Unit =
     withBagsService("localhost") { port =>
       withTokenService(
         s"http://localhost:$port",

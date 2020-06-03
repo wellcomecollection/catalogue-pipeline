@@ -3,7 +3,7 @@ package uk.ac.wellcome.mets_adapter.services
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.model.headers.{Authorization, OAuth2BearerToken}
+import akka.http.scaladsl.model.headers.Authorization
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.Materializer
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
@@ -14,10 +14,10 @@ import uk.ac.wellcome.mets_adapter.models._
 import scala.concurrent.{ExecutionContext, Future}
 
 trait BagRetriever {
-  def getBag(update: IngestUpdate): Future[Bag]
+  def getBag(space: String, externalIdentifier: String): Future[Bag]
 }
 
-class HttpBagRetriever(url: String, tokenService: TokenService)(
+class HttpBagRetriever(baseUrl: String, tokenService: TokenService)(
   implicit
   actorSystem: ActorSystem,
   materializer: Materializer,
@@ -25,24 +25,26 @@ class HttpBagRetriever(url: String, tokenService: TokenService)(
     extends BagRetriever
     with Logging {
 
-  def getBag(update: IngestUpdate): Future[Bag] = {
-    debug(s"Executing request to ${generateUrl(update)}")
+  def getBag(space: String, externalIdentifier: String): Future[Bag] = {
+    // Construct a URL to request a bag from the storage service.
+    // See https://github.com/wellcomecollection/docs/tree/master/rfcs/002-archival_storage#bags
+    val requestUri = Uri(s"$baseUrl/$space/$externalIdentifier")
+
+    debug(s"Making request to $requestUri")
     for {
       token <- tokenService.getToken
-      response <- Http().singleRequest(generateRequest(update, token))
+
+      httpRequest =
+        HttpRequest(uri = requestUri)
+          .addHeader(Authorization(token))
+
+      response <- Http().singleRequest(httpRequest)
       maybeBag <- {
         debug(s"Received response ${response.status}")
         handleResponse(response)
       }
     } yield maybeBag
   }
-
-  private def generateUrl(update: IngestUpdate) =
-    s"$url/${update.context.storageSpace}/${update.context.externalIdentifier}"
-
-  private def generateRequest(update: IngestUpdate,
-                              token: OAuth2BearerToken): HttpRequest =
-    HttpRequest(uri = generateUrl(update)).addHeader(Authorization(token))
 
   private def handleResponse(response: HttpResponse): Future[Bag] =
     response.status match {

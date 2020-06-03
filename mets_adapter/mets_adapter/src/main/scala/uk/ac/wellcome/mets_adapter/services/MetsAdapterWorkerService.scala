@@ -82,15 +82,18 @@ class MetsAdapterWorkerService(
   def retrieveBag =
     Flow[(Context, Option[IngestUpdate])]
       .mapWithContextAsync(concurrentHttpConnections) {
-        case (ctx, update) =>
+        case (_, update) =>
           bagRetriever
-            .getBag(update)
+            .getBag(
+              space = update.context.storageSpace,
+              externalIdentifier = update.context.externalIdentifier
+            )
             .transform(result => Success(result.toEither))
       }
 
   def parseMetsLocation =
     Flow[(Context, Option[Bag])]
-      .mapWithContext { case (ctx, bag) => bag.metsLocation }
+      .mapWithContext { case (_, bag) => bag.metsLocation }
 
   def storeMetsLocation =
     Flow[(Context, Option[MetsLocation])]
@@ -104,6 +107,6 @@ class MetsAdapterWorkerService(
   def publishKey =
     Flow[(Context, Option[Version[String, Int]])]
       .mapWithContext {
-        case (ctx, data) => msgSender.sendT(data).toEither.right.map(_ => data)
+        case (_, data) => msgSender.sendT(data).toEither.right.map(_ => data)
       }
 }

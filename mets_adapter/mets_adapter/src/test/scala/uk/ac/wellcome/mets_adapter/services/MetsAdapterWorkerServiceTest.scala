@@ -40,7 +40,7 @@ class MetsAdapterWorkerServiceTest
 
   val bagRetriever =
     new BagRetriever {
-      def getBag(update: IngestUpdate): Future[Bag] =
+      def getBag(space: String, externalIdentifier: String): Future[Bag] =
         Future.successful(bag)
     }
 
@@ -105,7 +105,7 @@ class MetsAdapterWorkerServiceTest
   it("should not store / publish anything when bag retrieval fails") {
     val vhs = createStore()
     val brokenBagRetriever = new BagRetriever {
-      def getBag(update: IngestUpdate): Future[Bag] =
+      def getBag(space: String, externalIdentifier: String): Future[Bag] =
         Future.failed(new Exception("Failed retrieving bag"))
     }
     withWorkerService(brokenBagRetriever, vhs) {
