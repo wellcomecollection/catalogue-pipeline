@@ -46,10 +46,11 @@ class MetsAdapterWorkerServiceTest
 
   val space = "digitised"
   val externalIdentifier = "123"
-  val notification: BagRegistrationNotification = createBagRegistrationNotificationWith(
-    space = space,
-    externalIdentifier = externalIdentifier
-  )
+  val notification: BagRegistrationNotification =
+    createBagRegistrationNotificationWith(
+      space = space,
+      externalIdentifier = externalIdentifier
+    )
 
   it("processes ingest updates and store and publish METS data") {
     val vhs = createStore()
@@ -81,7 +82,8 @@ class MetsAdapterWorkerServiceTest
   }
 
   it("re-publishes existing data when current version exists in the store") {
-    val vhs = createStore(Map(Version(externalIdentifier, 1) -> "existing-data"))
+    val vhs =
+      createStore(Map(Version(externalIdentifier, 1) -> "existing-data"))
     withWorkerService(bagRetriever, vhs) {
       case (_, QueuePair(queue, dlq), topic) =>
         sendNotificationToSQS(queue, notification)
@@ -89,13 +91,16 @@ class MetsAdapterWorkerServiceTest
         assertQueueEmpty(dlq)
         getMessages(topic) shouldEqual List(Version("123", 1))
         vhs.getLatest(id = externalIdentifier) shouldBe Right(
-          Identified(Version(externalIdentifier, 1), metsLocation("existing-data"))
+          Identified(
+            Version(externalIdentifier, 1),
+            metsLocation("existing-data"))
         )
     }
   }
 
   it("ignores messages when greater version exists in the store") {
-    val vhs = createStore(Map(Version(externalIdentifier, 2) -> "existing-data"))
+    val vhs =
+      createStore(Map(Version(externalIdentifier, 2) -> "existing-data"))
     withWorkerService(bagRetriever, vhs) {
       case (_, QueuePair(queue, dlq), topic) =>
         sendNotificationToSQS(queue, notification)
@@ -104,7 +109,9 @@ class MetsAdapterWorkerServiceTest
         assertQueueHasSize(dlq, size = 1)
         getMessages(topic) shouldEqual Nil
         vhs.getLatest(id = externalIdentifier) shouldBe Right(
-          Identified(Version(externalIdentifier, 2), metsLocation("existing-data"))
+          Identified(
+            Version(externalIdentifier, 2),
+            metsLocation("existing-data"))
         )
     }
   }
@@ -144,7 +151,9 @@ class MetsAdapterWorkerServiceTest
     val vhs = createStore()
     withWorkerService(bagRetriever, vhs) {
       case (_, QueuePair(queue, dlq), topic) =>
-        sendSqsMessage(queue, createBagRegistrationNotificationWith("digitised", "123"))
+        sendSqsMessage(
+          queue,
+          createBagRegistrationNotificationWith("digitised", "123"))
         Thread.sleep(2000)
         assertQueueEmpty(queue)
         assertQueueHasSize(dlq, 1)
@@ -223,6 +232,10 @@ class MetsAdapterWorkerServiceTest
       .map(msgInfo => fromJson[Version[String, Int]](msgInfo.message).get)
       .toList
 
-  def createBagRegistrationNotificationWith(space: String, externalIdentifier: String): BagRegistrationNotification =
-    BagRegistrationNotification(space = space, externalIdentifier = externalIdentifier)
+  def createBagRegistrationNotificationWith(
+    space: String,
+    externalIdentifier: String): BagRegistrationNotification =
+    BagRegistrationNotification(
+      space = space,
+      externalIdentifier = externalIdentifier)
 }
