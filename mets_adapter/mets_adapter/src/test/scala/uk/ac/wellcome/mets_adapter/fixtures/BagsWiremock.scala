@@ -9,7 +9,6 @@ import uk.ac.wellcome.fixtures.TestWith
 import scala.util.Try
 
 trait BagsWiremock { this: Suite =>
-
   def withBagsService[R](host: String)(testWith: TestWith[Int, R]): R = {
     val wireMockServer = new WireMockServer(
       WireMockConfiguration

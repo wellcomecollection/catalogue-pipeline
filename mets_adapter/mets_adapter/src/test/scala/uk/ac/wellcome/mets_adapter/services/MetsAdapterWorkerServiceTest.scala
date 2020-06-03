@@ -40,14 +40,14 @@ class MetsAdapterWorkerServiceTest
 
   val bagRetriever =
     new BagRetriever {
-      def getBag(update: IngestUpdate): Future[Bag] =
+      def getBag(space: String, externalIdentifier: String): Future[Bag] =
         Future.successful(bag)
     }
 
   it("processes ingest updates and store and publish METS data") {
     val vhs = createStore()
     withWorkerService(bagRetriever, vhs) {
-      case (workerService, QueuePair(queue, dlq), topic) =>
+      case (_, QueuePair(queue, dlq), topic) =>
         sendNotificationToSQS(queue, ingestUpdate("digitised", "123"))
         assertQueueEmpty(queue)
         assertQueueEmpty(dlq)
@@ -61,7 +61,7 @@ class MetsAdapterWorkerServiceTest
   it("publishes new METS data when old version exists in the store") {
     val vhs = createStore(Map(Version("123", 0) -> "old-data"))
     withWorkerService(bagRetriever, vhs) {
-      case (workerService, QueuePair(queue, dlq), topic) =>
+      case (_, QueuePair(queue, dlq), topic) =>
         sendNotificationToSQS(queue, ingestUpdate("digitised", "123"))
         Thread.sleep(2000)
         assertQueueEmpty(queue)
@@ -76,7 +76,7 @@ class MetsAdapterWorkerServiceTest
   it("re-publishes existing data when current version exists in the store") {
     val vhs = createStore(Map(Version("123", 1) -> "existing-data"))
     withWorkerService(bagRetriever, vhs) {
-      case (workerService, QueuePair(queue, dlq), topic) =>
+      case (_, QueuePair(queue, dlq), topic) =>
         sendNotificationToSQS(queue, ingestUpdate("digitised", "123"))
         assertQueueEmpty(queue)
         assertQueueEmpty(dlq)
@@ -90,7 +90,7 @@ class MetsAdapterWorkerServiceTest
   it("ignores messages when greater version exists in the store") {
     val vhs = createStore(Map(Version("123", 2) -> "existing-data"))
     withWorkerService(bagRetriever, vhs) {
-      case (workerService, QueuePair(queue, dlq), topic) =>
+      case (_, QueuePair(queue, dlq), topic) =>
         sendNotificationToSQS(queue, ingestUpdate("digitised", "123"))
         Thread.sleep(2000)
         assertQueueEmpty(queue)
@@ -105,11 +105,11 @@ class MetsAdapterWorkerServiceTest
   it("should not store / publish anything when bag retrieval fails") {
     val vhs = createStore()
     val brokenBagRetriever = new BagRetriever {
-      def getBag(update: IngestUpdate): Future[Bag] =
+      def getBag(space: String, externalIdentifier: String): Future[Bag] =
         Future.failed(new Exception("Failed retrieving bag"))
     }
     withWorkerService(brokenBagRetriever, vhs) {
-      case (workerService, QueuePair(queue, dlq), topic) =>
+      case (_, QueuePair(queue, dlq), topic) =>
         sendNotificationToSQS(queue, ingestUpdate("digitised", "123"))
         Thread.sleep(2000)
         assertQueueEmpty(queue)
@@ -121,8 +121,8 @@ class MetsAdapterWorkerServiceTest
 
   it("should store METS data if publishing fails") {
     val vhs = createStore()
-    withWorkerService(bagRetriever, vhs, createBrokenMsgSender(_)) {
-      case (workerService, QueuePair(queue, dlq), topic) =>
+    withWorkerService(bagRetriever, vhs, createBrokenMsgSender) {
+      case (_, QueuePair(queue, dlq), topic) =>
         sendNotificationToSQS(queue, ingestUpdate("digitised", "123"))
         Thread.sleep(2000)
         assertQueueEmpty(queue)
@@ -136,7 +136,7 @@ class MetsAdapterWorkerServiceTest
     "sends message to the dlq if message is not wrapped in NotificationMessage") {
     val vhs = createStore()
     withWorkerService(bagRetriever, vhs) {
-      case (workerService, QueuePair(queue, dlq), topic) =>
+      case (_, QueuePair(queue, dlq), topic) =>
         sendSqsMessage(queue, ingestUpdate("digitised", "123"))
         Thread.sleep(2000)
         assertQueueEmpty(queue)
@@ -148,7 +148,7 @@ class MetsAdapterWorkerServiceTest
   it("doesn't process the update when storageSpace isn't equal to 'digitised'") {
     val vhs = createStore()
     withWorkerService(bagRetriever, vhs) {
-      case (workerService, QueuePair(queue, dlq), topic) =>
+      case (_, QueuePair(queue, dlq), topic) =>
         sendNotificationToSQS(queue, ingestUpdate("something-different", "123"))
         Thread.sleep(2000)
         assertQueueEmpty(queue)
@@ -161,8 +161,9 @@ class MetsAdapterWorkerServiceTest
   def withWorkerService[R](bagRetriever: BagRetriever,
                            store: VersionedStore[String, Int, MetsLocation],
                            createMsgSender: SNS.Topic => SNSMessageSender =
-                             createMsgSender(_))(
-    testWith: TestWith[(MetsAdapterWorkerService, QueuePair, SNS.Topic), R]) =
+                             createMsgSender)(
+    testWith: TestWith[(MetsAdapterWorkerService, QueuePair, SNS.Topic), R])
+    : R =
     withActorSystem { implicit actorSystem =>
       withLocalSnsTopic { topic =>
         withLocalSqsQueueAndDlq {
@@ -181,14 +182,14 @@ class MetsAdapterWorkerServiceTest
       }
     }
 
-  def createMsgSender(topic: SNS.Topic) =
+  def createMsgSender(topic: SNS.Topic): SNSMessageSender =
     new SNSMessageSender(
       snsClient = snsClient,
       snsConfig = createSNSConfigWith(topic),
       subject = "SNSMessageSender"
     )
 
-  def createBrokenMsgSender(topic: SNS.Topic) =
+  def createBrokenMsgSender(topic: SNS.Topic): SNSMessageSender =
     new SNSMessageSender(
       snsClient = snsClient,
       snsConfig = createSNSConfigWith(topic),
@@ -204,7 +205,7 @@ class MetsAdapterWorkerServiceTest
   def metsLocation(file: String = "mets.xml", version: Int = 1) =
     MetsLocation("bucket", "root", version, file, Nil)
 
-  def getMessages(topic: SNS.Topic) =
+  def getMessages(topic: SNS.Topic): List[Version[String, Int]] =
     listMessagesReceivedFromSNS(topic)
       .map(msgInfo => fromJson[Version[String, Int]](msgInfo.message).get)
       .toList
