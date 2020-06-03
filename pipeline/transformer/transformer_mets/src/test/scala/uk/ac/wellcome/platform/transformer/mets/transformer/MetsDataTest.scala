@@ -200,8 +200,8 @@ class MetsDataTest
     val metsData = MetsData(
       recordIdentifier = randomAlphanumeric(10),
       accessConditionDz = Some("CC-BY-NC"),
-      fileReferences = List(
-        FileReference("l", "location.jp2", Some("image/jp2"))
+      fileReferencesMapping = List(
+        "id" -> FileReference("l", "location.jp2", Some("image/jp2"))
       )
     )
     val result = metsData.toWork(1)
@@ -215,13 +215,34 @@ class MetsDataTest
     )
   }
 
+  it("creates a invisible work with a title page thumbnail") {
+    val metsData = MetsData(
+      recordIdentifier = randomAlphanumeric(10),
+      accessConditionDz = Some("CC-BY-NC"),
+      fileReferencesMapping = List(
+        "id" -> FileReference("l", "location.jp2", Some("image/jp2")),
+        "title-id" -> FileReference("l", "title.jp2", Some("image/jp2"))
+      ),
+      titlePageId = Some("title-id")
+    )
+    val result = metsData.toWork(1)
+    result shouldBe a[Right[_, _]]
+    result.right.get.data.thumbnail shouldBe Some(
+      DigitalLocation(
+        s"https://dlcs.io/thumbs/wellcome/5/title.jp2/full/!200,200/0/default.jpg",
+        LocationType("thumbnail-image"),
+        license = Some(License.CCBYNC)
+      )
+    )
+  }
+
   it("creates a invisible work without a thumbnail for restricted works") {
     val metsData = MetsData(
       recordIdentifier = randomAlphanumeric(10),
       accessConditionDz = Some("CC-BY-NC"),
       accessConditionStatus = Some("restricted"),
-      fileReferences = List(
-        FileReference("l", "location.jp2", Some("image/jp2"))
+      fileReferencesMapping = List(
+        "id" -> FileReference("l", "location.jp2", Some("image/jp2"))
       )
     )
     val result = metsData.toWork(1)
@@ -235,8 +256,8 @@ class MetsDataTest
     val metsData = MetsData(
       recordIdentifier = bnumber,
       accessConditionDz = Some("CC-BY-NC"),
-      fileReferences = List(
-        FileReference("l", "location.pdf")
+      fileReferencesMapping = List(
+        "id" -> FileReference("l", "location.pdf")
       )
     )
     val result = metsData.toWork(1)
@@ -254,8 +275,8 @@ class MetsDataTest
     val metsData = MetsData(
       recordIdentifier = randomAlphanumeric(10),
       accessConditionDz = Some("CC-BY-NC"),
-      fileReferences = List(
-        FileReference("v", "video.mpg", Some("video/mpeg"))
+      fileReferencesMapping = List(
+        "id" -> FileReference("v", "video.mpg", Some("video/mpeg"))
       )
     )
     val result = metsData.toWork(1)
@@ -267,8 +288,8 @@ class MetsDataTest
     val metsData = MetsData(
       recordIdentifier = randomAlphanumeric(10),
       accessConditionDz = Some("CC-BY-NC"),
-      fileReferences = List(
-        FileReference("v", "video.mp3", Some("audio/x-mpeg-3"))
+      fileReferencesMapping = List(
+        "id" -> FileReference("v", "video.mp3", Some("audio/x-mpeg-3"))
       )
     )
     val result = metsData.toWork(1)
@@ -280,8 +301,8 @@ class MetsDataTest
     val metsData = MetsData(
       recordIdentifier = randomAlphanumeric(10),
       accessConditionDz = Some("CC-BY-NC"),
-      fileReferences = List(
-        FileReference("l", "location.jp2", Some("image/jp2"))
+      fileReferencesMapping = List(
+        "id" -> FileReference("l", "location.jp2", Some("image/jp2"))
       )
     )
     val result = metsData.toWork(1)
@@ -313,12 +334,12 @@ class MetsDataTest
     val result = MetsData(
       recordIdentifier = "ID",
       accessConditionDz = Some("CC-BY-NC"),
-      fileReferences = List(
-        FileReference("A", "location1.jp2", Some("image/jp2")),
-        FileReference("B", "location2.jp2", Some("image/jp2")),
-        FileReference("C", "location3.jp2", Some("image/jp2")),
-        FileReference("D", "location4.jp2", Some("application/pdf")),
-        FileReference("E", "location4.jp2", Some("video/mpeg"))
+      fileReferencesMapping = List(
+        "A" -> FileReference("A", "location1.jp2", Some("image/jp2")),
+        "B" -> FileReference("B", "location2.jp2", Some("image/jp2")),
+        "C" -> FileReference("C", "location3.jp2", Some("image/jp2")),
+        "D" -> FileReference("D", "location4.jp2", Some("application/pdf")),
+        "E" -> FileReference("E", "location4.jp2", Some("video/mpeg"))
       )
     ).toWork(1)
     result shouldBe a[Right[_, _]]

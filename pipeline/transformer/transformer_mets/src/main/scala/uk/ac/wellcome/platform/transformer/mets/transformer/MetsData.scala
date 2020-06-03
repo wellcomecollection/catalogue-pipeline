@@ -11,7 +11,8 @@ case class MetsData(
   accessConditionDz: Option[String] = None,
   accessConditionStatus: Option[String] = None,
   accessConditionUsage: Option[String] = None,
-  fileReferences: List[FileReference] = Nil
+  fileReferencesMapping: List[(String, FileReference)] = Nil,
+  titlePageId: Option[String] = None
 ) {
 
   def toWork(version: Int): Either[Throwable, UnidentifiedInvisibleWork] =
@@ -30,6 +31,9 @@ case class MetsData(
           thumbnail(sourceIdentifier.value, license, accessStatus),
           version)
       )
+
+  private lazy val fileReferences: List[FileReference] =
+    fileReferencesMapping.map { case (_, fileReference) => fileReference }
 
   private def workData(item: Item[Unminted],
                        thumbnail: Option[DigitalLocation],
@@ -104,11 +108,20 @@ case class MetsData(
       ontologyType = "Work",
       value = recordIdentifier)
 
+  private def titlePageFileReference: Option[FileReference] =
+    titlePageId
+      .flatMap { titleId =>
+        fileReferencesMapping.collectFirst {
+          case (id, fileReference) if id == titleId => fileReference
+        }
+      }
+
   private def thumbnail(bnumber: String,
                         license: Option[License],
                         accessStatus: Option[AccessStatus]) =
     for {
-      fileReference <- fileReferences.find(ImageUtils.isThumbnail)
+      fileReference <- titlePageFileReference
+        .orElse(fileReferences.find(ImageUtils.isThumbnail))
       url <- ImageUtils.buildThumbnailUrl(bnumber, fileReference)
       if accessStatus.forall(shouldCreateThumbnail)
     } yield

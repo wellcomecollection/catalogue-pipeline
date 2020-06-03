@@ -3,7 +3,6 @@ package uk.ac.wellcome.platform.transformer.mets.transformer
 import java.net.URLConnection
 
 import scala.util.Try
-import scala.collection.immutable.ListMap
 import scala.xml.{Elem, NodeSeq, XML}
 
 case class FileReference(id: String,
@@ -134,6 +133,37 @@ case class MetsXml(root: Elem) {
     }
   }
 
+  /** Here we use the the items defined in the physicalStructMap to look up
+    * file IDs in the (normalised) fileObjects mapping
+    */
+  def fileReferencesMapping(bnumber: String): List[(String, FileReference)] =
+    physicalFileIdsMapping.par.flatMap {
+      case (id, fileId) =>
+        getFileReferences(fileId)
+          .map(ref => (id, normaliseLocation(bnumber, ref)))
+    }.toList
+
+  /** Returns the first href to a manifestation in the logical structMap
+    */
+  def firstManifestationFilename: Either[Exception, String] =
+    logicalStructMapForMultipleManifestations.headOption match {
+      case Some((_, name)) => Right(name)
+      case None =>
+        Left(
+          new Exception("Could not parse any manifestation locations")
+        )
+    }
+
+  /** Returns the physical ID for the TitlePage element if it exists. */
+  def titlePageId: Option[String] =
+    logicalStructMapForType
+      .collectFirst { case (id, "TitlePage") => id }
+      .flatMap { id =>
+        structLink.collectFirst {
+          case (from, to) if from == id => to
+        }
+      }
+
   /** Valid METS documents should contain a physicalStructMap section, with the
     *  bottom most divs each representing a physical page, and linking to files
     *  in the corresponding fileSec structures:
@@ -153,37 +183,18 @@ case class MetsXml(root: Elem) {
     *
     *  For this input we would expect the following output:
     *
-    *  List("FILE_0001_OBJECTS", "FILE_0002_OBJECTS")
+    *  Seq("PHYS_0001" -> "FILE_0001_OBJECTS", "PHYS_0002" -> "FILE_0002_OBJECTS")
     */
-  def physicalFileIds: List[String] =
+  private def physicalFileIdsMapping: Seq[(String, String)] =
     (root \ "structMap")
       .filterByAttribute("TYPE", "PHYSICAL")
       .descendentsWithTag("div")
       .sortByAttribute("ORDER")
-      .flatMap { node =>
-        (node \ "fptr").headOption.map(_ \@ "FILEID")
-      }
-      .toList
-
-  /** Here we use the the items defined in the physicalStructMap to look up
-    * file IDs in the (normalised) fileObjects mapping
-    */
-  def physicalFileReferences(bnumber: String): List[FileReference] =
-    physicalFileIds.par
-      .flatMap(getFileReference)
-      .map(normaliseLocation(bnumber))
-      .toList
-
-  /** Returns the first href to a manifestation in the logical structMap
-    */
-  def firstManifestationFilename: Either[Exception, String] =
-    logicalStructMapForMultipleManifestations.headOption match {
-      case Some((_, name)) => Right(name)
-      case None =>
-        Left(
-          new Exception("Could not parse any manifestation locations")
-        )
-    }
+      .toMapping(
+        keyAttrib = "ID",
+        valueNode = Some("fptr"),
+        valueAttrib = "FILEID"
+      )
 
   /** Filenames in DLCS are always prefixed with the bnumber (uppercase or lowercase) to ensure uniqueness.
     * However they might not be prefixed with the bnumber in the METS file.
@@ -191,17 +202,14 @@ case class MetsXml(root: Elem) {
     *  - strip the "objects/" part of the location
     *  - prepend the bnumber followed by an underscore if it's not already present (uppercase or lowercase)
     */
-  private def normaliseLocation(
-    bnumber: String): FileReference => FileReference = {
-    fileReference: FileReference =>
-      fileReference.copy(
-        location = fileReference.location.replaceFirst("objects/", "") match {
-          case fileName
-              if fileName.toLowerCase.startsWith(bnumber.toLowerCase) =>
-            fileName
-          case fileName => s"${bnumber}_$fileName"
-        })
-  }
+  private def normaliseLocation(bnumber: String,
+                                fileReference: FileReference): FileReference =
+    fileReference.copy(
+      location = fileReference.location.replaceFirst("objects/", "") match {
+        case fileName if fileName.toLowerCase.startsWith(bnumber.toLowerCase) =>
+          fileName
+        case fileName => s"${bnumber}_$fileName"
+      })
 
   /** The METS XML contains locations of associated files, contained in a
     *  mapping with the following format:
@@ -220,7 +228,7 @@ case class MetsXml(root: Elem) {
     *  For the id "FILE_0002_OBJECTS", this function would return:
     *  FileReference("FILE_0002_OBJECTS", "objects/b30246039_0002.jp2", Some("image/jp2"))
     */
-  private def getFileReference(id: String) =
+  private def getFileReferences(id: String): Seq[FileReference] =
     for {
       fileGrp <- root \ "fileSec" \ "fileGrp"
       objects <- fileGrp.find(_ \@ "USE" == "OBJECTS")
@@ -236,7 +244,7 @@ case class MetsXml(root: Elem) {
         Option(file \@ "MIMETYPE").filter(_.nonEmpty)
       )
 
-  /** Valid METS documents should contain a logicalStructMap section. When this
+  /** Valid METS documents should contain a LOGICAL structMap section. When this
     *  is data containing multiple manifestations, we can expect the map to
     *  include links to the other XML files:
     *
@@ -253,11 +261,10 @@ case class MetsXml(root: Elem) {
     *
     *  For this input we would expect the following output:
     *
-    *  Map("LOG_0000" -> "b22012692_0001.xml",
+    *  Seq("LOG_0000" -> "b22012692_0001.xml",
     *      "LOG_0002" -> "b22012692_0003.xml")
     */
-  private def logicalStructMapForMultipleManifestations
-    : ListMap[String, String] =
+  private def logicalStructMapForMultipleManifestations: Seq[(String, String)] =
     (root \ "structMap")
       .filterByAttribute("TYPE", "LOGICAL")
       .childrenWithTag("div")
@@ -266,8 +273,58 @@ case class MetsXml(root: Elem) {
       .sortByAttribute("ORDER")
       .toMapping(
         keyAttrib = "ID",
-        valueNode = "mptr",
+        valueNode = Some("mptr"),
         valueAttrib = "{http://www.w3.org/1999/xlink}href"
+      )
+
+  /** Valid METS documents should contain a LOGICAL structMap section, with
+    *  descendent divs containing an ID and a TYPE attribute:
+    *
+    * <mets:structMap TYPE="LOGICAL">
+    *   <mets:div ADMID="AMD" DMDID="DMDLOG_0000" ID="LOG_0000" LABEL="[Report 1942] /" TYPE="Monograph">
+    *     <mets:div ID="LOG_0001" TYPE="Cover" />
+    *     <mets:div ID="LOG_0002" TYPE="TitlePage" />
+    *   </mets:div>
+    *  </mets:structMap>
+    *
+    *  For this input we would expect the following output:
+    *
+    *  Seq("LOG_0000" -> "Monographl",
+    *      "LOG_0001" -> "Cover")
+    *      "LOG_0002" -> "TitlePage")
+    */
+  private def logicalStructMapForType: Seq[(String, String)] =
+    (root \ "structMap")
+      .filterByAttribute("TYPE", "LOGICAL")
+      .descendentsWithTag("div")
+      .toMapping(
+        keyAttrib = "ID",
+        valueAttrib = "TYPE"
+      )
+
+  /** The structLink sections maps the logical and physical IDs represented
+    *  in the document:
+    *
+    *  <mets:structLink>
+    *    <mets:smLink xlink:from="LOG_0000" xlink:to="PHYS_0001" />
+    *    <mets:smLink xlink:from="LOG_0000" xlink:to="PHYS_0002" />
+    *    <mets:smLink xlink:from="LOG_0001" xlink:to="PHYS_0001" />
+    *    <mets:smLink xlink:from="LOG_0002" xlink:to="PHYS_0003" />
+    *  </mets:structLink>
+    *
+    *  For this input we would expect the following output:
+    *
+    *  Seq("LOG_0000" -> "PHYS_0001",
+    *      "LOG_0000" -> "PHYS_0002",
+    *      "LOG_0001" -> "PHYS_0001",
+    *      "LOG_0002" -> "PHYS_0003")
+    */
+  private def structLink: Seq[(String, String)] =
+    (root \ "structLink")
+      .childrenWithTag("smLink")
+      .toMapping(
+        keyAttrib = "{http://www.w3.org/1999/xlink}from",
+        valueAttrib = "{http://www.w3.org/1999/xlink}to"
       )
 
   implicit class NodeSeqOps(nodes: NodeSeq) {
@@ -284,20 +341,22 @@ case class MetsXml(root: Elem) {
     def sortByAttribute(attrib: String) =
       nodes.sortBy(_ \@ attrib)
 
-    def toMapping(keyAttrib: String, valueNode: String, valueAttrib: String) = {
-      val mappings = nodes
+    def toMapping(keyAttrib: String,
+                  valueAttrib: String,
+                  valueNode: Option[String] = None): Seq[(String, String)] =
+      nodes
         .map { node =>
           val key = node \@ keyAttrib
-          val value = (node \ valueNode).headOption.map(_ \@ valueAttrib)
+          val value = valueNode
+            .flatMap(tag => (node \ tag).headOption)
+            .orElse(Some(node))
+            .map(_ \@ valueAttrib)
           (key, value)
         }
         .collect {
           case (key, Some(value)) if key.nonEmpty && value.nonEmpty =>
             (key, value)
         }
-      // Return a ListMap here over standard Map to preserve ordering
-      ListMap(mappings: _*)
-    }
   }
 }
 
