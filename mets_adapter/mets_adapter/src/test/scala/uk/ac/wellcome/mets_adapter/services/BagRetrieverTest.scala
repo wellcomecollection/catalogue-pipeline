@@ -2,7 +2,6 @@ package uk.ac.wellcome.mets_adapter.services
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.headers.OAuth2BearerToken
-import akka.stream.Materializer
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.http.Fault
 import org.mockito.Mockito
@@ -31,26 +30,24 @@ class BagRetrieverTest
 
   it("gets a bag from the storage service") {
     withActorSystem { implicit actorSystem =>
-      withMaterializer(actorSystem) { implicit materializer =>
-        withBagRetriever { bagRetriever =>
-          whenReady(getBag(bagRetriever, "digitised", "b30246039")) {
-            case Bag(_, BagManifest(files), BagLocation(bucket, path), _) =>
-              verify(
-                moreThanOrExactly(1),
-                postRequestedFor(urlEqualTo("/oauth2/token"))
-                  .withRequestBody(matching(".*client_id=client.*"))
-                  .withRequestBody(matching(".*client_secret=secret.*"))
-              )
+      withBagRetriever { bagRetriever =>
+        whenReady(getBag(bagRetriever, "digitised", "b30246039")) {
+          case Bag(_, BagManifest(files), BagLocation(bucket, path), _) =>
+            verify(
+              moreThanOrExactly(1),
+              postRequestedFor(urlEqualTo("/oauth2/token"))
+                .withRequestBody(matching(".*client_id=client.*"))
+                .withRequestBody(matching(".*client_secret=secret.*"))
+            )
 
-              verify(
-                getRequestedFor(
-                  urlEqualTo("/storage/v1/bags/digitised/b30246039")))
-              files.head shouldBe BagFile(
-                "data/b30246039.xml",
-                "v1/data/b30246039.xml")
-              bucket shouldBe "wellcomecollection-storage"
-              path shouldBe "digitised/b30246039"
-          }
+            verify(
+              getRequestedFor(
+                urlEqualTo("/storage/v1/bags/digitised/b30246039")))
+            files.head shouldBe BagFile(
+              "data/b30246039.xml",
+              "v1/data/b30246039.xml")
+            bucket shouldBe "wellcomecollection-storage"
+            path shouldBe "digitised/b30246039"
         }
       }
     }
@@ -58,16 +55,14 @@ class BagRetrieverTest
 
   it("fails if the bag does not exist in the storage service") {
     withActorSystem { implicit actorSystem =>
-      withMaterializer(actorSystem) { implicit materializer =>
-        withBagRetriever { bagRetriever =>
-          whenReady(getBag(bagRetriever, "digitised", "not-existing").failed) {
-            e =>
-              e shouldBe a[Throwable]
-              verify(
-                1,
-                getRequestedFor(
-                  urlEqualTo("/storage/v1/bags/digitised/not-existing")))
-          }
+      withBagRetriever { bagRetriever =>
+        whenReady(getBag(bagRetriever, "digitised", "not-existing").failed) {
+          e =>
+            e shouldBe a[Throwable]
+            verify(
+              1,
+              getRequestedFor(
+                urlEqualTo("/storage/v1/bags/digitised/not-existing")))
         }
       }
     }
@@ -75,20 +70,18 @@ class BagRetrieverTest
 
   it("does not retry if the storage service responds with unauthorized") {
     withActorSystem { implicit actorSystem =>
-      withMaterializer(actorSystem) { implicit materializer =>
-        val tokenService = mock[TokenService]
-        Mockito
-          .when(tokenService.getToken)
-          .thenReturn(Future.successful(OAuth2BearerToken("not-valid-token")))
-        withBagRetriever(tokenService) { bagRetriever =>
-          whenReady(getBag(bagRetriever, "digitised", "b30246039").failed) {
-            e =>
-              e shouldBe a[Throwable]
-              verify(
-                1,
-                getRequestedFor(
-                  urlEqualTo("/storage/v1/bags/digitised/b30246039")))
-          }
+      val tokenService = mock[TokenService]
+      Mockito
+        .when(tokenService.getToken)
+        .thenReturn(Future.successful(OAuth2BearerToken("not-valid-token")))
+      withBagRetriever(tokenService) { bagRetriever =>
+        whenReady(getBag(bagRetriever, "digitised", "b30246039").failed) {
+          e =>
+            e shouldBe a[Throwable]
+            verify(
+              1,
+              getRequestedFor(
+                urlEqualTo("/storage/v1/bags/digitised/b30246039")))
         }
       }
     }
@@ -96,15 +89,13 @@ class BagRetrieverTest
 
   it("returns a failed future if the storage service responds with 500") {
     withActorSystem { implicit actorSystem =>
-      withMaterializer(actorSystem) { implicit materializer =>
-        withBagRetriever { bagRetriever =>
-          stubFor(
-            get(urlMatching("/storage/v1/bags/digitised/this-shall-crash"))
-              .willReturn(aResponse().withStatus(500)))
-          whenReady(
-            getBag(bagRetriever, "digitised", "this-shall-crash").failed) { e =>
-            e shouldBe a[Throwable]
-          }
+      withBagRetriever { bagRetriever =>
+        stubFor(
+          get(urlMatching("/storage/v1/bags/digitised/this-shall-crash"))
+            .willReturn(aResponse().withStatus(500)))
+        whenReady(
+          getBag(bagRetriever, "digitised", "this-shall-crash").failed) {
+          _ shouldBe a[Throwable]
         }
       }
     }
@@ -112,17 +103,14 @@ class BagRetrieverTest
 
   it("returns a failed future if the storage service response has a fault") {
     withActorSystem { implicit actorSystem =>
-      withMaterializer(actorSystem) { implicit materializer =>
-        withBagRetriever { bagRetriever =>
-          stubFor(
-            get(urlMatching("/storage/v1/bags/digitised/this-will-fault"))
-              .willReturn(aResponse()
-                .withStatus(200)
-                .withFault(Fault.CONNECTION_RESET_BY_PEER)))
-          whenReady(getBag(bagRetriever, "digitised", "this-will-fault").failed) {
-            e =>
-              e shouldBe a[Throwable]
-          }
+      withBagRetriever { bagRetriever =>
+        stubFor(
+          get(urlMatching("/storage/v1/bags/digitised/this-will-fault"))
+            .willReturn(aResponse()
+              .withStatus(200)
+              .withFault(Fault.CONNECTION_RESET_BY_PEER)))
+        whenReady(getBag(bagRetriever, "digitised", "this-will-fault").failed) {
+          _ shouldBe a[Throwable]
         }
       }
     }
@@ -132,8 +120,7 @@ class BagRetrieverTest
     bagRetriever.getBag(space = space, externalIdentifier = externalIdentifier)
 
   def withBagRetriever[R](tokenService: TokenService)(
-    testWith: TestWith[BagRetriever, R])(implicit actorSystem: ActorSystem,
-                                         materializer: Materializer): R =
+    testWith: TestWith[BagRetriever, R])(implicit actorSystem: ActorSystem): R =
     withBagsService("localhost") { port =>
       testWith(
         new HttpBagRetriever(
@@ -143,8 +130,7 @@ class BagRetrieverTest
     }
 
   def withBagRetriever[R](testWith: TestWith[BagRetriever, R])(
-    implicit actorSystem: ActorSystem,
-    materializer: Materializer): Unit =
+    implicit actorSystem: ActorSystem): Unit =
     withBagsService("localhost") { port =>
       withTokenService(
         s"http://localhost:$port",
@@ -163,8 +149,6 @@ class BagRetrieverTest
                           clientId: String,
                           secret: String,
                           scope: String)(testWith: TestWith[TokenService, R])(
-    implicit actorSystem: ActorSystem,
-    materializer: Materializer) {
+    implicit actorSystem: ActorSystem): R =
     testWith(new TokenService(url, clientId, secret, scope))
-  }
 }

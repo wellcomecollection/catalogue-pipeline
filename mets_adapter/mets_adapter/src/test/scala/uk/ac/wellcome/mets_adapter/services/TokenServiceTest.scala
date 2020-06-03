@@ -21,25 +21,23 @@ class TokenServiceTest
   it("requests a token to the storage service") {
     withBagsService("localhost") { port =>
       withActorSystem { implicit actorSystem =>
-        withMaterializer(actorSystem) { implicit mat =>
-          val tokenService = new TokenService(
-            s"http://localhost:$port",
-            "client",
-            "secret",
-            "https://api.wellcomecollection.org/scope")
+        val tokenService = new TokenService(
+          url = s"http://localhost:$port",
+          clientId = "client",
+          secret = "secret",
+          scope = "https://api.wellcomecollection.org/scope")
 
-          whenReady(tokenService.getToken) { token =>
-            token shouldBe OAuth2BearerToken("token")
-          }
+        whenReady(tokenService.getToken) {
+          _ shouldBe OAuth2BearerToken("token")
+        }
 
-          eventually {
-            verify(
-              moreThan(1),
-              postRequestedFor(urlEqualTo("/oauth2/token"))
-                .withRequestBody(matching(".*client_id=client.*"))
-                .withRequestBody(matching(".*client_secret=secret.*"))
-            )
-          }
+        eventually {
+          verify(
+            moreThan(1),
+            postRequestedFor(urlEqualTo("/oauth2/token"))
+              .withRequestBody(matching(".*client_id=client.*"))
+              .withRequestBody(matching(".*client_secret=secret.*"))
+          )
         }
       }
     }
@@ -49,17 +47,14 @@ class TokenServiceTest
     "returns a failed future if it cannot get a token from the storage service") {
     withBagsService("localhost") { port =>
       withActorSystem { implicit actorSystem =>
-        withMaterializer(actorSystem) { implicit mat =>
-          val tokenService = new TokenService(
-            s"http://localhost:$port",
-            "wrongclient",
-            "wrongsecret",
-            "https://api.wellcomecollection.org/scope")
+        val tokenService = new TokenService(
+          s"http://localhost:$port",
+          "wrongclient",
+          "wrongsecret",
+          "https://api.wellcomecollection.org/scope")
 
-          whenReady(tokenService.getToken.failed) { throwable =>
-            throwable shouldBe a[Throwable]
-          }
-
+        whenReady(tokenService.getToken.failed) {
+          _ shouldBe a[Throwable]
         }
       }
     }
