@@ -85,7 +85,7 @@ object CalmTransformer
     }
 
   def shouldSuppress(record: CalmRecord): Boolean =
-    transmissionIsNo(record) match {
+    catalogueStatusIsSuppressible(record) match {
       case true  => true
       case false =>
         // Records prefixed with AMSG (Archives and Manuscripts Resource Guides)
@@ -96,17 +96,17 @@ object CalmTransformer
           .exists(_.startsWith("AMSG"))
     }
 
-  def transmissionIsNo(record: CalmRecord): Boolean =
+  // We suppress unless CatalogueStatus exists and is valid
+  def catalogueStatusIsSuppressible(record: CalmRecord): Boolean =
     record
-      .get("Transmission")
-      .exists { value =>
-        value.toLowerCase match {
-          case "no"  => true
-          case "yes" => false
-          case _ =>
-            info(
-              s"Unrecognised value for Transmission field; assuming 'Yes': $value")
+      .get("CatalogueStatus")
+      .forall { value =>
+        value.toLowerCase.trim match {
+          // As much as it might not look like it, these values mean it should
+          // not be suppressed.
+          case "catalogued" | "not yet available" | "partially catalogued" =>
             false
+          case _ => true
         }
       }
 

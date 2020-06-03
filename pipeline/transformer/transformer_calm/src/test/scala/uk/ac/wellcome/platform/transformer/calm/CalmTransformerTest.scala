@@ -4,6 +4,7 @@ import java.time.Instant
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.prop.TableDrivenPropertyChecks._
 import uk.ac.wellcome.models.work.internal._
 
 class CalmTransformerTest extends AnyFunSpec with Matchers {
@@ -282,29 +283,66 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
     )
   }
 
-  it("transforms to invisible work when Transmission=No") {
+  it("transforms to invisible work when CatalogueStatus is suppressible") {
     val recordA = calmRecord(
       "Title" -> "abc",
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
-      "Transmission" -> "No"
+      "CatalogueStatus" -> "Catalogued"
     )
-    CalmTransformer(recordA, version).right.get shouldBe a[
-      UnidentifiedInvisibleWork]
     val recordB = calmRecord(
       "Title" -> "abc",
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
-      "Transmission" -> "Yes"
+      "CatalogueStatus" -> "Not yet available"
     )
-    CalmTransformer(recordB, version).right.get shouldBe a[UnidentifiedWork]
     val recordC = calmRecord(
       "Title" -> "abc",
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
-      "Transmission" -> "SomethingElse"
+      "CatalogueStatus" -> "Partially catalogued"
     )
-    CalmTransformer(recordC, version).right.get shouldBe a[UnidentifiedWork]
+    val recordD = calmRecord(
+      "Title" -> "abc",
+      "Level" -> "Collection",
+      "RefNo" -> "a/b/c",
+      "CatalogueStatus" -> "   caTAlogued  "
+    )
+    val recordE = calmRecord(
+      "Title" -> "abc",
+      "Level" -> "Collection",
+      "RefNo" -> "a/b/c",
+      "CatalogueStatus" -> "pArtialLy catalogued "
+    )
+    val suppressibleRecordA = calmRecord(
+      "Title" -> "abc",
+      "Level" -> "Collection",
+      "RefNo" -> "a/b/c",
+      "CatalogueStatus" -> "Blonk"
+    )
+    val suppressibleRecordB = calmRecord(
+      "Title" -> "abc",
+      "Level" -> "Collection",
+      "RefNo" -> "a/b/c",
+    )
+
+    val examples = Table(
+      ("-record-", "-suppressed-"),
+      (recordA, false),
+      (recordB, false),
+      (recordC, false),
+      (recordD, false),
+      (recordE, false),
+      (suppressibleRecordA, true),
+      (suppressibleRecordB, true)
+    )
+
+    forAll(examples) { (record, suppressed) =>
+      CalmTransformer(record, version).right.get match {
+        case _: UnidentifiedInvisibleWork => suppressed shouldBe true
+        case _: UnidentifiedWork          => suppressed shouldBe false
+      }
+    }
   }
 
   it(
