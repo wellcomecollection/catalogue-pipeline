@@ -154,6 +154,7 @@ case class MetsXml(root: Elem) {
         )
     }
 
+  /** Returns the physical ID for the TitlePage element if it exists. */
   def titlePageId: Option[String] =
     logicalStructMapForType
       .collectFirst { case (id, "TitlePage") => id }
@@ -260,7 +261,7 @@ case class MetsXml(root: Elem) {
     *
     *  For this input we would expect the following output:
     *
-    *  Map("LOG_0000" -> "b22012692_0001.xml",
+    *  Seq("LOG_0000" -> "b22012692_0001.xml",
     *      "LOG_0002" -> "b22012692_0003.xml")
     */
   private def logicalStructMapForMultipleManifestations: Seq[(String, String)] =
@@ -276,6 +277,22 @@ case class MetsXml(root: Elem) {
         valueAttrib = "{http://www.w3.org/1999/xlink}href"
       )
 
+  /** Valid METS documents should contain a LOGICAL structMap section, with
+    *  descendent divs containing an ID and a TYPE attribute:
+    *
+    * <mets:structMap TYPE="LOGICAL">
+    *   <mets:div ADMID="AMD" DMDID="DMDLOG_0000" ID="LOG_0000" LABEL="[Report 1942] /" TYPE="Monograph">
+    *     <mets:div ID="LOG_0001" TYPE="Cover" />
+    *     <mets:div ID="LOG_0002" TYPE="TitlePage" />
+    *   </mets:div>
+    *  </mets:structMap>
+    *
+    *  For this input we would expect the following output:
+    *
+    *  Seq("LOG_0000" -> "Monographl",
+    *      "LOG_0001" -> "Cover")
+    *      "LOG_0002" -> "TitlePage")
+    */
   private def logicalStructMapForType: Seq[(String, String)] =
     (root \ "structMap")
       .filterByAttribute("TYPE", "LOGICAL")
@@ -285,12 +302,29 @@ case class MetsXml(root: Elem) {
         valueAttrib = "TYPE"
       )
 
+  /** The structLink sections maps the logical and physical IDs represented
+    *  in the document:
+    *
+    *  <mets:structLink>
+    *    <mets:smLink xlink:from="LOG_0000" xlink:to="PHYS_0001" />
+    *    <mets:smLink xlink:from="LOG_0000" xlink:to="PHYS_0002" />
+    *    <mets:smLink xlink:from="LOG_0001" xlink:to="PHYS_0001" />
+    *    <mets:smLink xlink:from="LOG_0002" xlink:to="PHYS_0003" />
+    *  </mets:structLink>
+    *
+    *  For this input we would expect the following output:
+    *
+    *  Seq("LOG_0000" -> "PHYS_0001",
+    *      "LOG_0000" -> "PHYS_0002",
+    *      "LOG_0001" -> "PHYS_0001",
+    *      "LOG_0002" -> "PHYS_0003")
+    */
   private def structLink: Seq[(String, String)] =
     (root \ "structLink")
       .childrenWithTag("smLink")
       .toMapping(
-        keyAttrib = "from",
-        valueAttrib = "to"
+        keyAttrib = "{http://www.w3.org/1999/xlink}from",
+        valueAttrib = "{http://www.w3.org/1999/xlink}to"
       )
 
   implicit class NodeSeqOps(nodes: NodeSeq) {

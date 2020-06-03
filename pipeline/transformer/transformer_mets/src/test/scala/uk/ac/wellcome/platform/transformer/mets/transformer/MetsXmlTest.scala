@@ -99,6 +99,10 @@ class MetsXmlTest extends AnyFunSpec with Matchers with MetsGenerators {
     )
   }
 
+  it("parses title page ID from the XML when present") {
+    MetsXml(xml).right.get.titlePageId shouldBe Some("PHYS_0006")
+  }
+
   it("parses thumbnail from XML") {
     MetsXml(xml).right.get
       .fileReferencesMapping("b30246039")
@@ -270,38 +274,34 @@ class MetsXmlTest extends AnyFunSpec with Matchers with MetsGenerators {
     metsXmlWith(
       recordIdentifier,
       fileSec = fileSec(recordIdentifier),
-      structMap = {
-        <mets:structMap TYPE="PHYSICAL">
-        <mets:div DMDID="DMDPHYS_0000" ID="PHYS_0000" TYPE="physSequence">
-          <mets:div ADMID="AMD_0002" ID="PHYS_0002" ORDER="2" TYPE="page">
-            <mets:fptr FILEID="FILE_0002_OBJECTS" />
+      structMap = <mets:structMap TYPE="PHYSICAL">
+          <mets:div DMDID="DMDPHYS_0000" ID="PHYS_0000" TYPE="physSequence">
+            <mets:div ADMID="AMD_0002" ID="PHYS_0002" ORDER="2" TYPE="page">
+              <mets:fptr FILEID="FILE_0002_OBJECTS" />
+            </mets:div>
+            <mets:div ADMID="AMD_0001" ID="PHYS_0001" ORDER="1" TYPE="page">
+              <mets:fptr FILEID="FILE_0001_OBJECTS" />
+              <mets:fptr FILEID="FILE_0001_ALTO" />
+            </mets:div>
           </mets:div>
-          <mets:div ADMID="AMD_0001" ID="PHYS_0001" ORDER="1" TYPE="page">
-            <mets:fptr FILEID="FILE_0001_OBJECTS" />
-            <mets:fptr FILEID="FILE_0001_ALTO" />
-          </mets:div>
-        </mets:div>
-      </mets:structMap>
-      }
+        </mets:structMap>
     )
 
   def xmlInvalidFileId(recordIdentifier: String) =
     metsXmlWith(
       recordIdentifier,
       fileSec = fileSec(recordIdentifier),
-      structMap = {
-        <mets:structMap TYPE="PHYSICAL">
-        <mets:div DMDID="DMDPHYS_0000" ID="PHYS_0000" TYPE="physSequence">
-          <mets:div ADMID="AMD_0001" ID="PHYS_0001" ORDER="1" TYPE="page">
-            <mets:fptr FILEID="OOPS" />
-            <mets:fptr FILEID="FILE_0001_ALTO" />
+      structMap = <mets:structMap TYPE="PHYSICAL">
+          <mets:div DMDID="DMDPHYS_0000" ID="PHYS_0000" TYPE="physSequence">
+            <mets:div ADMID="AMD_0001" ID="PHYS_0001" ORDER="1" TYPE="page">
+              <mets:fptr FILEID="OOPS" />
+              <mets:fptr FILEID="FILE_0001_ALTO" />
+            </mets:div>
+            <mets:div ADMID="AMD_0002" ID="PHYS_0002" ORDER="2" TYPE="page">
+              <mets:fptr FILEID="OH DEAR" />
+            </mets:div>
           </mets:div>
-          <mets:div ADMID="AMD_0002" ID="PHYS_0002" ORDER="2" TYPE="page">
-            <mets:fptr FILEID="OH DEAR" />
-          </mets:div>
-        </mets:div>
-      </mets:structMap>
-      }
+        </mets:structMap>
     )
 
   def loadXmlFile(path: String) =

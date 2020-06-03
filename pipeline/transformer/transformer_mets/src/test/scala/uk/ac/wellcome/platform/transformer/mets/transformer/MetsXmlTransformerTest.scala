@@ -22,7 +22,8 @@ class MetsXmlTransformerTest
         accessConditionDz = Some("CC-BY-NC"),
         accessConditionStatus = Some("Open"),
         accessConditionUsage = Some("Some terms"),
-        fileReferencesMapping = createFileReferences(6, "b30246039")
+        fileReferencesMapping = createFileReferences(6, "b30246039"),
+        titlePageId = Some("PHYS_0006")
       )
     )
   }
@@ -42,7 +43,8 @@ class MetsXmlTransformerTest
         recordIdentifier = "b22012692",
         accessConditionDz = Some("PDM"),
         accessConditionStatus = Some("Open"),
-        fileReferencesMapping = createFileReferences(2, "b22012692", Some(1))
+        fileReferencesMapping = createFileReferences(2, "b22012692", Some(1)),
+        titlePageId = Some("PHYS_0005")
       )
     )
   }
@@ -65,7 +67,7 @@ class MetsXmlTransformerTest
         recordIdentifier = "b30246039",
         accessConditionDz = Some("INC"),
         accessConditionStatus = None,
-        fileReferencesMapping = createFileReferences(2, "b30246039")
+        fileReferencesMapping = createFileReferences(2, "b30246039"),
       )
     )
   }
@@ -106,16 +108,14 @@ class MetsXmlTransformerTest
     bumber: String,
     manifestN: Option[Int] = None): List[(String, FileReference)] =
     (1 to n).toList.map { i =>
-      (
-        f"PHYS_$i%04d",
-        FileReference(
-          f"FILE_$i%04d_OBJECTS",
-          manifestN match {
-            case None    => f"$bumber%s_$i%04d.jp2"
-            case Some(n) => f"$bumber%s_$n%04d_$i%04d.jp2"
-          },
-          Some("image/jp2")
-        ))
+      f"PHYS_$i%04d" -> FileReference(
+        f"FILE_$i%04d_OBJECTS",
+        manifestN match {
+          case None    => f"$bumber%s_$i%04d.jp2"
+          case Some(n) => f"$bumber%s_$n%04d_$i%04d.jp2"
+        },
+        Some("image/jp2")
+      )
     }
 
   def loadXmlFile(path: String) =

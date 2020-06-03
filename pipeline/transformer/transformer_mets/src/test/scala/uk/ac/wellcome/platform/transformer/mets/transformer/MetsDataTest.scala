@@ -215,6 +215,27 @@ class MetsDataTest
     )
   }
 
+  it("creates a invisible work with a title page thumbnail") {
+    val metsData = MetsData(
+      recordIdentifier = randomAlphanumeric(10),
+      accessConditionDz = Some("CC-BY-NC"),
+      fileReferencesMapping = List(
+        "id" -> FileReference("l", "location.jp2", Some("image/jp2")),
+        "title-id" -> FileReference("l", "title.jp2", Some("image/jp2"))
+      ),
+      titlePageId = Some("title-id")
+    )
+    val result = metsData.toWork(1)
+    result shouldBe a[Right[_, _]]
+    result.right.get.data.thumbnail shouldBe Some(
+      DigitalLocation(
+        s"https://dlcs.io/thumbs/wellcome/5/title.jp2/full/!200,200/0/default.jpg",
+        LocationType("thumbnail-image"),
+        license = Some(License.CCBYNC)
+      )
+    )
+  }
+
   it("creates a invisible work without a thumbnail for restricted works") {
     val metsData = MetsData(
       recordIdentifier = randomAlphanumeric(10),

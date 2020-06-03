@@ -381,7 +381,7 @@
   <mets:structMap TYPE="LOGICAL">
     <mets:div ADMID="AMD" DMDID="DMDLOG_0000" ID="LOG_0000" LABEL="[Report 1942] /" TYPE="Monograph">
       <mets:div ID="LOG_0001" TYPE="Cover" />
-      <mets:div ID="LOG_0002" TYPE="Cover" />
+      <mets:div ID="LOG_0002" TYPE="TitlePage" />
     </mets:div>
   </mets:structMap>
   <mets:structMap TYPE="PHYSICAL">
