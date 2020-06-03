@@ -62,12 +62,12 @@ module "catalogue_pipeline_20200414" {
   inferrer_model_data_bucket_name = aws_s3_bucket.inferrer_model_core_data.id
 }
 
-module "catalogue_pipeline_20200513" {
+module "catalogue_pipeline_20200528" {
   source = "./stack"
 
-  namespace = "catalogue-20200513"
+  namespace = "catalogue-20200528"
 
-  release_label = "stage"
+  release_label = "latest"
 
   account_id      = data.aws_caller_identity.current.account_id
   aws_region      = local.aws_region
@@ -104,8 +104,8 @@ module "catalogue_pipeline_20200513" {
   ]
 
   # Elasticsearch
-  es_works_index  = "works-20200513"
-  es_images_index = "images-20200513"
+  es_works_index  = "works-20200528"
+  es_images_index = "images-20200528"
 
   # RDS
   rds_ids_access_security_group_id = local.rds_access_security_group_id
