@@ -7,12 +7,13 @@ import akka.stream.scaladsl._
 import software.amazon.awssdk.services.sqs.model.{Message => SQSMessage}
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.messaging.sqs.SQSStream
-import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSMessageSender}
+import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.typesafe.Runnable
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.mets_adapter.models._
 import uk.ac.wellcome.storage.Version
 import uk.ac.wellcome.bigmessaging.FlowOps
+import uk.ac.wellcome.messaging.MessageSender
 
 import scala.concurrent.Future
 
@@ -25,9 +26,9 @@ import scala.concurrent.Future
   *  - Store the METS data in the VHS
   *  - Publish the VHS key to SNS
   */
-class MetsAdapterWorkerService(
+class MetsAdapterWorkerService[Destination](
   msgStream: SQSStream[NotificationMessage],
-  msgSender: SNSMessageSender,
+  msgSender: MessageSender[Destination],
   bagRetriever: BagRetriever,
   metsStore: MetsStore,
   concurrentHttpConnections: Int = 6,

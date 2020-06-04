@@ -13,7 +13,7 @@ import uk.ac.wellcome.mets_adapter.models._
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
-import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSMessageSender}
+import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig, SNSMessageSender}
 import uk.ac.wellcome.storage.{Identified, Version}
 import uk.ac.wellcome.json.JsonUtil._
 
@@ -184,7 +184,7 @@ class MetsAdapterWorkerServiceTest
                            store: VersionedStore[String, Int, MetsLocation],
                            createMsgSender: SNS.Topic => SNSMessageSender =
                              createMsgSender)(
-    testWith: TestWith[(MetsAdapterWorkerService, QueuePair, SNS.Topic), R])
+    testWith: TestWith[(MetsAdapterWorkerService[SNSConfig], QueuePair, SNS.Topic), R])
     : R =
     withActorSystem { implicit actorSystem =>
       withLocalSnsTopic { topic =>
