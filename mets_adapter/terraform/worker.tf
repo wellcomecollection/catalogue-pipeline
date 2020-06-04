@@ -20,8 +20,6 @@ module "worker" {
   min_capacity       = 0
   max_capacity       = 10
   desired_task_count = 0
-  cpu                = 256
-  memory             = 512
 
   cluster_name = aws_ecs_cluster.cluster.name
   cluster_arn  = aws_ecs_cluster.cluster.arn

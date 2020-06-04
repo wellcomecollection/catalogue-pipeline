@@ -6,7 +6,7 @@ locals {
   mets_adapter_image = data.aws_ssm_parameter.mets_adapter_image.value
 
   namespace                       = "mets-adapter"
-  storage_notifications_topic_arn = data.terraform_remote_state.storage_service.outputs.bag_register_output_topic_arn
+  storage_notifications_topic_arn = data.terraform_remote_state.storage_service.outputs.registered_bag_notifications_topic_arn
 
   bag_api_url = "https://api.wellcomecollection.org/storage/v1/bags"
   oauth_url   = "https://auth.wellcomecollection.org/oauth2/token"
