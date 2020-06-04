@@ -85,7 +85,7 @@ object CalmTransformer
     }
 
   def shouldSuppress(record: CalmRecord): Boolean =
-    catalogueStatusIsSuppressible(record) match {
+    catalogueStatusSuppressesRecord(record) match {
       case true  => true
       case false =>
         // Records prefixed with AMSG (Archives and Manuscripts Resource Guides)
@@ -97,7 +97,7 @@ object CalmTransformer
     }
 
   // We suppress unless CatalogueStatus exists and is valid
-  def catalogueStatusIsSuppressible(record: CalmRecord): Boolean =
+  def catalogueStatusSuppressesRecord(record: CalmRecord): Boolean =
     record
       .get("CatalogueStatus")
       .forall { value =>
