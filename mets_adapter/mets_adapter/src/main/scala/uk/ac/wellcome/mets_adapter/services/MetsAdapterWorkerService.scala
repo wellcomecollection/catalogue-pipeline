@@ -84,7 +84,8 @@ class MetsAdapterWorkerService[Destination](
         case (ctx, notification) if notification.space == "digitised" =>
           (ctx, Some(notification))
         case (ctx, notification) =>
-          info(s"Skipping notification $notification because it is not in the digitised space")
+          info(
+            s"Skipping notification $notification because it is not in the digitised space")
           (ctx, None)
       }
 

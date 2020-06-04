@@ -62,7 +62,8 @@ class MetsAdapterWorkerServiceTest
         assertQueueEmpty(queue)
         assertQueueEmpty(dlq)
 
-        messageSender.getMessages[Version[String, Int]]() shouldBe Seq(expectedVersion)
+        messageSender.getMessages[Version[String, Int]]() shouldBe Seq(
+          expectedVersion)
 
         vhs.getLatest(id = externalIdentifier) shouldBe Right(
           Identified(expectedVersion, metsLocation())
@@ -79,7 +80,8 @@ class MetsAdapterWorkerServiceTest
         assertQueueEmpty(queue)
         assertQueueEmpty(dlq)
 
-        messageSender.getMessages[Version[String, Int]]() shouldBe Seq(expectedVersion)
+        messageSender.getMessages[Version[String, Int]]() shouldBe Seq(
+          expectedVersion)
 
         vhs.getLatest(id = externalIdentifier) shouldBe Right(
           Identified(expectedVersion, metsLocation())
@@ -96,7 +98,8 @@ class MetsAdapterWorkerServiceTest
         assertQueueEmpty(queue)
         assertQueueEmpty(dlq)
 
-        messageSender.getMessages[Version[String, Int]]() shouldBe Seq(expectedVersion)
+        messageSender.getMessages[Version[String, Int]]() shouldBe Seq(
+          expectedVersion)
 
         vhs.getLatest(id = externalIdentifier) shouldBe Right(
           Identified(expectedVersion, metsLocation("existing-data"))
@@ -205,9 +208,12 @@ class MetsAdapterWorkerServiceTest
 
   def withWorkerService[R](bagRetriever: BagRetriever,
                            store: VersionedStore[String, Int, MetsLocation],
-                           messageSender: MemoryMessageSender = new MemoryMessageSender())(
-    testWith: TestWith[(MetsAdapterWorkerService[String], QueuePair, MemoryMessageSender), R])
-    : R =
+                           messageSender: MemoryMessageSender =
+                             new MemoryMessageSender())(
+    testWith: TestWith[(MetsAdapterWorkerService[String],
+                        QueuePair,
+                        MemoryMessageSender),
+                       R]): R =
     withActorSystem { implicit actorSystem =>
       withLocalSqsQueueAndDlq {
         case QueuePair(queue, dlq) =>
