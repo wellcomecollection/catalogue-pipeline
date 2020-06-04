@@ -1,7 +1,7 @@
-module "sierra-adapter-20200529" {
+module "sierra-adapter-20200604" {
   source = "./stack"
 
-  namespace = "sierra-adapter-20200529"
+  namespace = "sierra-adapter-20200604"
   release_label = "latest"
 
   dlq_alarm_arn = local.dlq_alarm_arn

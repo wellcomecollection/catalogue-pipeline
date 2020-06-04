@@ -15,9 +15,6 @@ module "sierra_to_dynamo_service" {
     topic_arn = module.sierra_to_dynamo_updates_topic.arn
   }
 
-  cpu    = 256
-  memory = 512
-
   min_capacity = 0
   max_capacity = 3
 

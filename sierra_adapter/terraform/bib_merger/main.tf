@@ -14,9 +14,6 @@ module "sierra_merger_service" {
     topic_arn         = module.sierra_bib_merger_results.arn
   }
 
-  cpu    = 256
-  memory = 512
-
   min_capacity = 0
   max_capacity = 3
 

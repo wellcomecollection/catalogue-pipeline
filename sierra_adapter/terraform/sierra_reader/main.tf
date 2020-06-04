@@ -20,9 +20,6 @@ module "sierra_reader_service" {
     sierra_oauth_key    = "sierra_adapter/sierra_api_key"
   }
 
-  cpu    = 256
-  memory = 512
-
   min_capacity = 0
   max_capacity = 3
 
