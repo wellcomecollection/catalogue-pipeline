@@ -108,9 +108,10 @@ case class MetsData(
         }
       }
 
-  private def thumbnail(bnumber: String,
-                        license: Option[License],
-                        accessStatus: Option[AccessStatus]) =
+  private def thumbnail(
+    bnumber: String,
+    license: Option[License],
+    accessStatus: Option[AccessStatus]): Option[DigitalLocation] =
     for {
       fileReference <- titlePageFileReference
         .orElse(fileReferences.find(ImageUtils.isThumbnail))
@@ -130,7 +131,9 @@ case class MetsData(
       case _                       => true
     }
 
-  private def images(version: Int, accessStatus: Option[AccessStatus]) =
+  private def images(
+    version: Int,
+    accessStatus: Option[AccessStatus]): List[UnmergedImage[Identifiable]] =
     if (accessStatus.forall(shouldCreateDigitalLocation)) {
       fileReferences
         .filter(ImageUtils.isImage)
