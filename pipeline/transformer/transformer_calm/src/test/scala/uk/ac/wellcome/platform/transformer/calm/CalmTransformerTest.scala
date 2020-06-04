@@ -18,6 +18,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
       "AltRefNo" -> "a.b.c",
+      "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(record, version) shouldBe Right(
       UnidentifiedWork(
@@ -67,6 +68,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "RefNo" -> "a/b/c",
       "AltRefNo" -> "a.b.c",
       "BNumber" -> "b456",
+      "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(record, version).right.get.data.otherIdentifiers shouldBe
       List(
@@ -89,6 +91,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "RefNo" -> "a/b/c",
       "AltRefNo" -> "a.b.c",
       "BNumber" -> "b456",
+      "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(record, version).right.get.data.mergeCandidates shouldBe
       List(
@@ -111,6 +114,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "UserDate1" -> "10/10/2050",
       "AccessConditions" -> "nope.",
       "AccessConditions" -> "nope.",
+      "CatalogueStatus" -> "Catalogued"
     )
     val item = CalmTransformer(record, version).right.get.data.items.head
     item.locations.head.accessConditions shouldBe List(
@@ -129,6 +133,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "RefNo" -> "a/b/c",
       "AltRefNo" -> "a.b.c",
       "Description" -> "description of the thing",
+      "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(record, version).right.get.data.description shouldBe
       Some("description of the thing")
@@ -142,6 +147,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "AltRefNo" -> "a.b.c",
       "Extent" -> "long",
       "UserWrapped6" -> "thing",
+      "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(record, version).right.get.data.physicalDescription shouldBe
       Some("long thing")
@@ -173,6 +179,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "AltRefNo" -> "a.b.c",
       "Subject" -> "botany",
       "Subject" -> "anatomy",
+      "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(record, version).right.get.data.subjects should contain
     allOf(
@@ -187,7 +194,8 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
       "AltRefNo" -> "a.b.c",
-      "Language" -> "English"
+      "Language" -> "English",
+      "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(record, version).right.get.data.language shouldBe Some(
       Language("English", Some("en"))
@@ -200,14 +208,16 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
       "AltRefNo" -> "a.b.c",
-      "Language" -> "English "
+      "Language" -> "English ",
+      "CatalogueStatus" -> "Catalogued"
     )
     val recordB = calmRecord(
       "Title" -> "abc",
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
       "AltRefNo" -> "a.b.c",
-      "Language" -> "  "
+      "Language" -> "  ",
+      "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(recordA, version).right.get.data.language shouldBe Some(
       Language("English", Some("en"))
@@ -221,14 +231,16 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
       "AltRefNo" -> "a.b.c",
-      "Language" -> "Dutch"
+      "Language" -> "Dutch",
+      "CatalogueStatus" -> "Catalogued"
     )
     val recordB = calmRecord(
       "Title" -> "abc",
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
       "AltRefNo" -> "a.b.c",
-      "Language" -> "Flemish"
+      "Language" -> "Flemish",
+      "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(recordA, version).right.get.data.language shouldBe Some(
       Language("Dutch", Some("nl"))
@@ -245,7 +257,8 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "RefNo" -> "a/b/c",
       "AltRefNo" -> "a.b.c",
       "CreatorName" -> "Bebop",
-      "CreatorName" -> "Rocksteady"
+      "CreatorName" -> "Rocksteady",
+      "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(record, version).right.get.data.contributors should contain
     allOf(
@@ -262,7 +275,8 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "AltRefNo" -> "a.b.c",
       "Copyright" -> "no copyright",
       "ReproductionConditions" -> "reproduce at will",
-      "Arrangement" -> "meet at midnight"
+      "Arrangement" -> "meet at midnight",
+      "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(record, version).right.get.data.notes should contain allOf (
       CopyrightNote("no copyright"),
@@ -277,6 +291,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "Level" -> "Subseries",
       "RefNo" -> "a/b/c",
       "AltRefNo" -> "a.b.c",
+      "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(record, version).right.get.data.collectionPath.get.level shouldBe Some(
       CollectionLevel.Series
@@ -349,15 +364,18 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
     "Returns UnidentifiedInvisibleWorkWork when missing required source fields") {
     val noTitle = calmRecord(
       "Level" -> "Collection",
-      "RefNo" -> "a/b/c"
+      "RefNo" -> "a/b/c",
+      "CatalogueStatus" -> "Catalogued"
     )
     val noLevel = calmRecord(
       "Title" -> "Stay calm",
-      "RefNo" -> "a/b/c"
+      "RefNo" -> "a/b/c",
+      "CatalogueStatus" -> "Catalogued"
     )
     val noRefNo = calmRecord(
       "Title" -> "Stay calm",
-      "Level" -> "Collection"
+      "Level" -> "Collection",
+      "CatalogueStatus" -> "Catalogued"
     )
 
     List(noTitle, noLevel, noRefNo) map { record =>
@@ -373,6 +391,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "RefNo" -> "a/b/c",
       "AltRefNo" -> "a.b.c",
       "AccessStatus" -> "AAH",
+      "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(record, version).right.get shouldBe a[
       UnidentifiedInvisibleWork]
@@ -383,6 +402,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
       "AltRefNo" -> "a.b.c",
+      "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(record, version).right.get shouldBe a[
       UnidentifiedInvisibleWork]
@@ -393,6 +413,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "Title" -> "abc",
       "RefNo" -> "a/b/c",
       "AltRefNo" -> "a.b.c",
+      "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(record, version).right.get shouldBe a[
       UnidentifiedInvisibleWork]
@@ -404,6 +425,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "Level" -> "TopLevel",
       "RefNo" -> "a/b/c",
       "AltRefNo" -> "a.b.c",
+      "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(record, version).right.get shouldBe a[
       UnidentifiedInvisibleWork]
@@ -414,6 +436,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "Title" -> "abc",
       "Level" -> "Collection",
       "AltRefNo" -> "a.b.c",
+      "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(record, version).right.get shouldBe a[
       UnidentifiedInvisibleWork]
@@ -425,7 +448,8 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
       "AltRefNo" -> "a.b.c",
-      "Language" -> "Lolol"
+      "Language" -> "Lolol",
+      "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(record, version).right.get.data.language shouldBe Some(
       Language("Lolol", None))
@@ -437,6 +461,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "Title" -> "Should suppress",
       "Level" -> "Section",
       "RefNo" -> "AMSG/X/Y",
+      "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(record, version) shouldBe Right(
       UnidentifiedInvisibleWork(
