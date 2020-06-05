@@ -26,24 +26,16 @@ case class MetsData(
       UnidentifiedInvisibleWork(
         version = version,
         sourceIdentifier = sourceIdentifier,
-        workData(
-          item,
-          thumbnail(sourceIdentifier.value, license, accessStatus),
-          version)
+        data = WorkData(
+          items = List(item),
+          mergeCandidates = List(mergeCandidate),
+          thumbnail = thumbnail(sourceIdentifier.value, license, accessStatus),
+          images = images(version, accessStatus)
+        )
       )
 
   private lazy val fileReferences: List[FileReference] =
     fileReferencesMapping.map { case (_, fileReference) => fileReference }
-
-  private def workData(item: Item[Unminted],
-                       thumbnail: Option[DigitalLocation],
-                       version: Int) =
-    WorkData(
-      items = List(item),
-      mergeCandidates = List(mergeCandidate),
-      thumbnail = thumbnail,
-      images = images(version)
-    )
 
   private def mergeCandidate = MergeCandidate(
     identifier = SourceIdentifier(
@@ -116,14 +108,15 @@ case class MetsData(
         }
       }
 
-  private def thumbnail(bnumber: String,
-                        license: Option[License],
-                        accessStatus: Option[AccessStatus]) =
+  private def thumbnail(
+    bnumber: String,
+    license: Option[License],
+    accessStatus: Option[AccessStatus]): Option[DigitalLocation] =
     for {
       fileReference <- titlePageFileReference
         .orElse(fileReferences.find(ImageUtils.isThumbnail))
       url <- ImageUtils.buildThumbnailUrl(bnumber, fileReference)
-      if accessStatus.forall(shouldCreateThumbnail)
+      if accessStatus.forall(shouldCreateDigitalLocation)
     } yield
       DigitalLocation(
         url = url,
@@ -131,27 +124,34 @@ case class MetsData(
         license = license
       )
 
-  private def shouldCreateThumbnail(accessStatus: AccessStatus) =
+  private def shouldCreateDigitalLocation(accessStatus: AccessStatus) =
     accessStatus match {
       case AccessStatus.Restricted => false
       case AccessStatus.Closed     => false
       case _                       => true
     }
 
-  private def images(version: Int) =
-    fileReferences
-      .filter(ImageUtils.isImage)
-      .flatMap { fileReference =>
-        ImageUtils.buildImageUrl(recordIdentifier, fileReference).map { url =>
-          UnmergedImage(
-            ImageUtils
-              .getImageSourceId(recordIdentifier, fileReference.id),
-            version = version,
-            DigitalLocation(
-              url = url,
-              locationType = LocationType("iiif-image")
+  private def images(
+    version: Int,
+    accessStatus: Option[AccessStatus]): List[UnmergedImage[Identifiable]] =
+    if (accessStatus.forall(shouldCreateDigitalLocation)) {
+      fileReferences
+        .filter(ImageUtils.isImage)
+        .flatMap { fileReference =>
+          ImageUtils.buildImageUrl(recordIdentifier, fileReference).map { url =>
+            UnmergedImage(
+              ImageUtils
+                .getImageSourceId(recordIdentifier, fileReference.id),
+              version = version,
+              DigitalLocation(
+                url = url,
+                locationType = LocationType("iiif-image")
+              )
             )
-          )
+          }
         }
-      }
+    } else {
+      Nil
+    }
+
 }
