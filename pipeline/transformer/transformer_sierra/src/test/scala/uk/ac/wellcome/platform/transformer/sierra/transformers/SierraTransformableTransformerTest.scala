@@ -778,7 +778,7 @@ class SierraTransformableTransformerTest
     )
   }
 
-  it("extracts merge candidates from 962 subfield $$u if material type is k") {
+  it("extracts merge candidates from 962 subfield $$u") {
     val id = createSierraBibNumber
     val miroId = "V0021476"
     val data =
@@ -799,8 +799,7 @@ class SierraTransformableTransformerTest
          |         }
          |       ]
          |     }
-         |   ],
-         |   "materialType": {"code": "k"}
+         |   ]
          | }
       """.stripMargin
 
@@ -808,43 +807,7 @@ class SierraTransformableTransformerTest
     work.data.mergeCandidates shouldBe List(
       MergeCandidate(
         identifier = createMiroSourceIdentifierWith(value = miroId),
-        reason = Some("Single page Miro/Sierra work")
-      )
-    )
-  }
-
-  it(
-    "extracts merge candidates from 962 subfield $$u if material type is k followed by spaces") {
-    val id = createSierraBibNumber
-    val miroId = "V0021476"
-    val data =
-      s"""
-         | {
-         |   "id": "$id",
-         |   "title": "Loosely lamenting the lemons of London",
-         |   "varFields": [
-         |     {
-         |       "fieldTag": "",
-         |       "marcTag": "962",
-         |       "ind1": " ",
-         |       "ind2": " ",
-         |       "subfields": [
-         |         {
-         |           "tag": "u",
-         |           "content": "http://wellcomeimages.org/indexplus/image/$miroId.html"
-         |         }
-         |       ]
-         |     }
-         |   ],
-         |   "materialType": {"code": "k  "}
-         | }
-      """.stripMargin
-
-    val work = transformDataToUnidentifiedWork(id = id, data = data)
-    work.data.mergeCandidates shouldBe List(
-      MergeCandidate(
-        identifier = createMiroSourceIdentifierWith(value = miroId),
-        reason = Some("Single page Miro/Sierra work")
+        reason = Some("Miro/Sierra work")
       )
     )
   }
