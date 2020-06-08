@@ -144,6 +144,23 @@ class SierraItemsTest
       ))
   }
 
+  it("sorts items by sierra-identifier") {
+    val itemData = Map(
+      SierraItemNumber("0000002") -> createSierraItemData,
+      SierraItemNumber("0000001") -> createSierraItemData,
+      SierraItemNumber("0000004") -> createSierraItemData,
+      SierraItemNumber("0000003") -> createSierraItemData,
+    )
+    getTransformedItems(itemDataMap = itemData)
+      .map(_.id.asInstanceOf[Identifiable].otherIdentifiers.head.value) shouldBe
+      List(
+        "0000001",
+        "0000002",
+        "0000003",
+        "0000004"
+      )
+  }
+
   private def getTransformedItems(
     bibId: SierraBibNumber = createSierraBibNumber,
     bibData: SierraBibData = createSierraBibData,
