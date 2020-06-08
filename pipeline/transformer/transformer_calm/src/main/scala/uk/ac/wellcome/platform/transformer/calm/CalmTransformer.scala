@@ -165,6 +165,7 @@ object CalmTransformer
   def title(record: CalmRecord): Result[String] =
     record
       .get("Title")
+      .map(NormaliseText(_))
       .map(Right(_))
       .getOrElse(Left(TitleMissing))
 
@@ -246,12 +247,12 @@ object CalmTransformer
       .toResult
 
   def description(record: CalmRecord): Option[String] =
-    record.getJoined("Description")
+    record.getJoined("Description").map(NormaliseText(_))
 
   def physicalDescription(record: CalmRecord): Option[String] =
     (record.getList("Extent") ++ record.getList("UserWrapped6")) match {
       case Nil  => None
-      case strs => Some(strs.mkString(" "))
+      case strs => Some(NormaliseText(strs.mkString(" ")))
     }
 
   def production(record: CalmRecord): List[ProductionEvent[Unminted]] = {
@@ -284,6 +285,10 @@ object CalmTransformer
 
   def notes(record: CalmRecord): List[Note] =
     notesMapping.flatMap {
-      case (key, createNote) => record.getList(key).map(createNote)
+      case (key, createNote) =>
+        record
+          .getList(key)
+          .map(NormaliseText(_))
+          .map(createNote)
     }
 }
