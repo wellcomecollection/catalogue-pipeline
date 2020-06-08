@@ -7,12 +7,13 @@ import akka.stream.scaladsl._
 import software.amazon.awssdk.services.sqs.model.{Message => SQSMessage}
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.messaging.sqs.SQSStream
-import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSMessageSender}
+import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.typesafe.Runnable
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.mets_adapter.models._
 import uk.ac.wellcome.storage.Version
 import uk.ac.wellcome.bigmessaging.FlowOps
+import uk.ac.wellcome.messaging.MessageSender
 
 import scala.concurrent.Future
 
@@ -25,9 +26,9 @@ import scala.concurrent.Future
   *  - Store the METS data in the VHS
   *  - Publish the VHS key to SNS
   */
-class MetsAdapterWorkerService(
+class MetsAdapterWorkerService[Destination](
   msgStream: SQSStream[NotificationMessage],
-  msgSender: SNSMessageSender,
+  msgSender: MessageSender[Destination],
   bagRetriever: BagRetriever,
   metsStore: MetsStore,
   concurrentHttpConnections: Int = 6,
@@ -68,15 +69,24 @@ class MetsAdapterWorkerService(
       .via(catchErrors)
       .map {
         case (msg, notification) =>
+          info(s"Processing notification $notification")
           (Context(msg, notification.externalIdentifier), notification)
       }
 
+  // Bags in the storage service are grouped by "space", e.g. "digitised" or
+  // "born-digital".
+  //
+  // For the catalogue pipeline, we're only interested in the digitised content,
+  // so we can discard everything else.
   def filterDigitised =
     Flow[(Context, BagRegistrationNotification)]
       .map {
         case (ctx, notification) if notification.space == "digitised" =>
           (ctx, Some(notification))
-        case (ctx, _) => (ctx, None)
+        case (ctx, notification) =>
+          info(
+            s"Skipping notification $notification because it is not in the digitised space")
+          (ctx, None)
       }
 
   def retrieveBag =
