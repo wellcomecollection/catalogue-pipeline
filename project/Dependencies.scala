@@ -181,6 +181,11 @@ object ExternalDependencies {
     "com.lihaoyi" %% "fastparse" % versions.fastparse
   )
 
+  val javaxDependencies = Seq(
+    "javax.xml.bind" % "jaxb-api" % "2.3.0",
+    "com.sun.xml.bind" % "jaxb-ri" % "2.3.0"
+  )
+
   val scalaXmlDependencies = Seq(
     "org.scala-lang.modules" %% "scala-xml" % "1.2.0"
   )
@@ -292,7 +297,8 @@ object CatalogueDependencies {
     ExternalDependencies.mockitoDependencies ++
   WellcomeDependencies.storageTypesafeLibrary ++
   WellcomeDependencies.messagingTypesafeLibrary ++
-  WellcomeDependencies.jsonLibrary
+  WellcomeDependencies.jsonLibrary ++
+      ExternalDependencies.javaxDependencies
 
   val sierraReaderDependencies: Seq[ModuleID] =
     WellcomeDependencies.sierraStreamsSourceLibrary ++
