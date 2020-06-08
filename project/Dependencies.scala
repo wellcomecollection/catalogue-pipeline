@@ -130,6 +130,7 @@ object ExternalDependencies {
     val apm = "1.12.0"
     val enumeratum = "1.5.13"
     val enumeratumScalacheck = "1.5.16"
+    val jsoup = "1.13.1"
   }
   val enumeratumDependencies = Seq(
     "com.beachape" %% "enumeratum" % versions.enumeratum,
@@ -247,6 +248,10 @@ object ExternalDependencies {
   val scalaXmlDependencies = Seq(
     "org.scala-lang.modules" %% "scala-xml" % "1.2.0"
   )
+
+  val jsoupDependencies = Seq(
+    "org.jsoup" % "jsoup" % versions.jsoup
+  )
 }
 
 object CatalogueDependencies {
@@ -327,7 +332,8 @@ object CatalogueDependencies {
 
   val calmTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies ++
-      ExternalDependencies.newMockitoDependencies
+      ExternalDependencies.newMockitoDependencies ++
+      ExternalDependencies.jsoupDependencies
 
   // METS adapter
 
