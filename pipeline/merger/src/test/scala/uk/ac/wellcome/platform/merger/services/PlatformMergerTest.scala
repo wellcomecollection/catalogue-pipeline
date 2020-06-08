@@ -87,7 +87,7 @@ class PlatformMergerTest
     }
   }
 
-  it("merges a Sierra physical work with a single-page Miro work") {
+  it("merges a Sierra physical work with a Miro work") {
     val result = merger.merge(
       works = Seq(sierraPhysicalWork, miroWork)
     )
@@ -171,6 +171,25 @@ class PlatformMergerTest
     result.images should contain theSameElementsAs List(
       expectedImage
     )
+  }
+
+  it("does not merge a sierra work with multiple items with a linked Miro work") {
+    val result = merger.merge(
+      works = Seq(multipleItemsSierraWork, miroWork)
+    )
+
+    result.works.size shouldBe 2
+
+    val expectedMergedWork = multipleItemsSierraWork.withData { data =>
+      data.copy(
+        images = miroWork.data.images,
+        merged = true
+      )
+    }
+
+    result.works should contain theSameElementsAs Seq(
+      miroWork,
+      expectedMergedWork)
   }
 
   it("merges a non-picture Sierra work with a METS work") {
