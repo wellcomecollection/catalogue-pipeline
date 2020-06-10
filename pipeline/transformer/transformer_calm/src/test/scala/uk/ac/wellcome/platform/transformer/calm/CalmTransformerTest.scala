@@ -181,10 +181,9 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "Subject" -> "anatomy",
       "CatalogueStatus" -> "Catalogued"
     )
-    CalmTransformer(record, version).right.get.data.subjects should contain
-    allOf(
-      Subject("botany", Nil),
-      Subject("anatomy", Nil)
+    CalmTransformer(record, version).right.get.data.subjects should contain theSameElementsAs List(
+      Subject("anatomy", List(Concept("anatomy"))),
+      Subject("botany", List(Concept("botany")))
     )
   }
 
@@ -260,8 +259,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "CreatorName" -> "Rocksteady",
       "CatalogueStatus" -> "Catalogued"
     )
-    CalmTransformer(record, version).right.get.data.contributors should contain
-    allOf(
+    CalmTransformer(record, version).right.get.data.contributors should contain theSameElementsAs List(
       Contributor(Agent("Bebop"), Nil),
       Contributor(Agent("Rocksteady"), Nil),
     )
@@ -278,7 +276,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "Arrangement" -> "meet at midnight",
       "CatalogueStatus" -> "Catalogued"
     )
-    CalmTransformer(record, version).right.get.data.notes should contain allOf (
+    CalmTransformer(record, version).right.get.data.notes should contain theSameElementsAs List(
       CopyrightNote("no copyright"),
       TermsOfUse("reproduce at will"),
       ArrangementNote("meet at midnight"),
