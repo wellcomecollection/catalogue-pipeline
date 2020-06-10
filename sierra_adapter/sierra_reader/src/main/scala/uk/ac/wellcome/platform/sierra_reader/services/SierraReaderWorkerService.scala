@@ -11,12 +11,22 @@ import io.circe.syntax._
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs._
-import uk.ac.wellcome.platform.sierra_reader.config.models.{ReaderConfig, SierraAPIConfig}
+import uk.ac.wellcome.platform.sierra_reader.config.models.{
+  ReaderConfig,
+  SierraAPIConfig
+}
 import uk.ac.wellcome.platform.sierra_reader.flow.SierraRecordWrapperFlow
-import uk.ac.wellcome.platform.sierra_reader.models.{SierraResourceTypes, WindowStatus}
+import uk.ac.wellcome.platform.sierra_reader.models.{
+  SierraResourceTypes,
+  WindowStatus
+}
 import uk.ac.wellcome.platform.sierra_reader.sink.SequentialS3Sink
 import uk.ac.wellcome.sierra.{SierraSource, ThrottleRate}
-import uk.ac.wellcome.sierra_adapter.model.{AbstractSierraRecord, SierraBibRecord, SierraItemRecord}
+import uk.ac.wellcome.sierra_adapter.model.{
+  AbstractSierraRecord,
+  SierraBibRecord,
+  SierraItemRecord
+}
 import uk.ac.wellcome.storage.{Identified, ObjectLocation}
 import uk.ac.wellcome.storage.s3.S3Config
 import uk.ac.wellcome.storage.store.TypedStoreEntry
@@ -35,7 +45,7 @@ class SierraReaderWorkerService(
 )(implicit ec: ExecutionContext, materializer: Materializer)
     extends Logging
     with Runnable {
-implicit val s = s3client
+  implicit val s = s3client
   val windowManager = new WindowManager(
     s3client = s3client,
     s3Config = s3Config,
@@ -57,9 +67,8 @@ implicit val s = s3client
       _ <- runSierraStream(window = window, windowStatus = windowStatus)
     } yield ()
 
-  private def runSierraStream(
-    window: String,
-    windowStatus: WindowStatus): Future[Identified[ObjectLocation, TypedStoreEntry[String]]] = {
+  private def runSierraStream(window: String, windowStatus: WindowStatus)
+    : Future[Identified[ObjectLocation, TypedStoreEntry[String]]] = {
 
     info(s"Running the stream with window=$window and status=$windowStatus")
 
@@ -95,14 +104,17 @@ implicit val s = s3client
     // This serves as a marker that the window is complete, so we can audit
     // our S3 bucket to see which windows were never successfully completed.
     outcome.map { _ =>
+      val key =
+        s"windows_${readerConfig.resourceType.toString}_complete/${windowManager
+          .buildWindowLabel(window)}"
 
-        val key = s"windows_${readerConfig.resourceType.toString}_complete/${
-          windowManager
-            .buildWindowLabel(window)
-        }"
-
-      S3TypedStore[String].put(ObjectLocation(s3Config.bucketName,key))(
-        TypedStoreEntry("", Map())).left.map{_.e}.toTry.get
+      S3TypedStore[String]
+        .put(ObjectLocation(s3Config.bucketName, key))(
+          TypedStoreEntry("", Map()))
+        .left
+        .map { _.e }
+        .toTry
+        .get
     }
   }
 

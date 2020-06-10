@@ -19,8 +19,13 @@ object SequentialS3Sink {
         // Zero-pad the index to four digits for easy sorting,
         // e.g. "1" ~> "0001", "25" ~> "0025"
         val key = f"$keyPrefix${index + offset}%04d.json"
-        store.put(ObjectLocation(bucketName,key))(
-          TypedStoreEntry(json.noSpaces, Map())).left.map(_.e).toTry.get
+        store
+          .put(ObjectLocation(bucketName, key))(
+            TypedStoreEntry(json.noSpaces, Map()))
+          .left
+          .map(_.e)
+          .toTry
+          .get
       }
     }
 }
