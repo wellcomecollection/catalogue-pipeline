@@ -27,9 +27,10 @@ object ImagesRule extends FieldMergeRule {
         FieldMergeResult(
           data = getPictureImages(target, sources).getOrElse(Nil) ++
             getPairedMiroImages(target, sources).getOrElse(Nil),
-          sources = List(getPictureImages, getPairedMiroImages)
-            .flatMap(_.mergedSources(target, sources))
-            .distinct
+          // The images rule here is the exception where we don't want to redirect works as they have
+          // not technically been merged. This rule might change as the rules about merging items
+          // loosens up.
+          sources = List()
         )
     }
 

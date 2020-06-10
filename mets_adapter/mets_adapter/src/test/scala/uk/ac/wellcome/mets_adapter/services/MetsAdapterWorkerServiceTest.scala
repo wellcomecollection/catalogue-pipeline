@@ -7,22 +7,22 @@ import org.scalatest.matchers.should.Matchers
 import io.circe.Encoder
 import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
+import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.mets_adapter.models._
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
-import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSMessageSender}
+import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.storage.{Identified, Version}
 import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 
 class MetsAdapterWorkerServiceTest
     extends AnyFunSpec
     with Matchers
     with Akka
-    with SQS
-    with SNS {
+    with SQS {
 
   val bag = Bag(
     BagInfo("external-identifier"),
@@ -52,16 +52,21 @@ class MetsAdapterWorkerServiceTest
       externalIdentifier = externalIdentifier
     )
 
+  val expectedVersion = Version(externalIdentifier, version = 1)
+
   it("processes ingest updates and store and publish METS data") {
     val vhs = createStore()
     withWorkerService(bagRetriever, vhs) {
-      case (_, QueuePair(queue, dlq), topic) =>
+      case (_, QueuePair(queue, dlq), messageSender) =>
         sendNotificationToSQS(queue, notification)
         assertQueueEmpty(queue)
         assertQueueEmpty(dlq)
-        getMessages(topic) shouldEqual List(Version(externalIdentifier, 1))
+
+        messageSender.getMessages[Version[String, Int]]() shouldBe Seq(
+          expectedVersion)
+
         vhs.getLatest(id = externalIdentifier) shouldBe Right(
-          Identified(Version(externalIdentifier, 1), metsLocation())
+          Identified(expectedVersion, metsLocation())
         )
     }
   }
@@ -69,14 +74,17 @@ class MetsAdapterWorkerServiceTest
   it("publishes new METS data when old version exists in the store") {
     val vhs = createStore(Map(Version(externalIdentifier, 0) -> "old-data"))
     withWorkerService(bagRetriever, vhs) {
-      case (_, QueuePair(queue, dlq), topic) =>
+      case (_, QueuePair(queue, dlq), messageSender) =>
         sendNotificationToSQS(queue, notification)
         Thread.sleep(2000)
         assertQueueEmpty(queue)
         assertQueueEmpty(dlq)
-        getMessages(topic) shouldEqual List(Version("123", 1))
+
+        messageSender.getMessages[Version[String, Int]]() shouldBe Seq(
+          expectedVersion)
+
         vhs.getLatest(id = externalIdentifier) shouldBe Right(
-          Identified(Version(externalIdentifier, 1), metsLocation())
+          Identified(expectedVersion, metsLocation())
         )
     }
   }
@@ -85,15 +93,16 @@ class MetsAdapterWorkerServiceTest
     val vhs =
       createStore(Map(Version(externalIdentifier, 1) -> "existing-data"))
     withWorkerService(bagRetriever, vhs) {
-      case (_, QueuePair(queue, dlq), topic) =>
+      case (_, QueuePair(queue, dlq), messageSender) =>
         sendNotificationToSQS(queue, notification)
         assertQueueEmpty(queue)
         assertQueueEmpty(dlq)
-        getMessages(topic) shouldEqual List(Version("123", 1))
+
+        messageSender.getMessages[Version[String, Int]]() shouldBe Seq(
+          expectedVersion)
+
         vhs.getLatest(id = externalIdentifier) shouldBe Right(
-          Identified(
-            Version(externalIdentifier, 1),
-            metsLocation("existing-data"))
+          Identified(expectedVersion, metsLocation("existing-data"))
         )
     }
   }
@@ -102,12 +111,14 @@ class MetsAdapterWorkerServiceTest
     val vhs =
       createStore(Map(Version(externalIdentifier, 2) -> "existing-data"))
     withWorkerService(bagRetriever, vhs) {
-      case (_, QueuePair(queue, dlq), topic) =>
+      case (_, QueuePair(queue, dlq), messageSender) =>
         sendNotificationToSQS(queue, notification)
         Thread.sleep(2000)
         assertQueueEmpty(queue)
         assertQueueHasSize(dlq, size = 1)
-        getMessages(topic) shouldEqual Nil
+
+        messageSender.messages shouldBe empty
+
         vhs.getLatest(id = externalIdentifier) shouldBe Right(
           Identified(
             Version(externalIdentifier, 2),
@@ -122,26 +133,42 @@ class MetsAdapterWorkerServiceTest
       def getBag(space: String, externalIdentifier: String): Future[Bag] =
         Future.failed(new Exception("Failed retrieving bag"))
     }
-    withWorkerService(brokenBagRetriever, vhs) {
-      case (_, QueuePair(queue, dlq), topic) =>
+
+    val brokenMessageSender = new MemoryMessageSender {
+      override def sendT[T](t: T)(implicit encoder: Encoder[T]): Try[Unit] =
+        Failure(new Throwable("BOOM!"))
+    }
+
+    withWorkerService(brokenBagRetriever, vhs, brokenMessageSender) {
+      case (_, QueuePair(queue, dlq), messageSender) =>
         sendNotificationToSQS(queue, notification)
         Thread.sleep(2000)
         assertQueueEmpty(queue)
         assertQueueHasSize(dlq, size = 1)
-        getMessages(topic) shouldEqual Nil
+
+        messageSender.messages shouldBe empty
+
         vhs.getLatest(id = externalIdentifier) shouldBe a[Left[_, _]]
     }
   }
 
   it("should store METS data if publishing fails") {
     val vhs = createStore()
-    withWorkerService(bagRetriever, vhs, createBrokenMsgSender) {
-      case (_, QueuePair(queue, dlq), topic) =>
+
+    val brokenMessageSender = new MemoryMessageSender {
+      override def sendT[T](t: T)(implicit encoder: Encoder[T]): Try[Unit] =
+        Failure(new Throwable("BOOM!"))
+    }
+
+    withWorkerService(bagRetriever, vhs, brokenMessageSender) {
+      case (_, QueuePair(queue, dlq), messageSender) =>
         sendNotificationToSQS(queue, notification)
         Thread.sleep(2000)
         assertQueueEmpty(queue)
         assertQueueHasSize(dlq, size = 1)
-        getMessages(topic) shouldEqual Nil
+
+        messageSender.messages shouldBe empty
+
         vhs.getLatest(id = externalIdentifier) shouldBe a[Right[_, _]]
     }
   }
@@ -150,14 +177,13 @@ class MetsAdapterWorkerServiceTest
     "sends message to the dlq if message is not wrapped in NotificationMessage") {
     val vhs = createStore()
     withWorkerService(bagRetriever, vhs) {
-      case (_, QueuePair(queue, dlq), topic) =>
-        sendSqsMessage(
-          queue,
-          createBagRegistrationNotificationWith("digitised", "123"))
+      case (_, QueuePair(queue, dlq), messageSender) =>
+        sendSqsMessage(queue, notification)
         Thread.sleep(2000)
         assertQueueEmpty(queue)
         assertQueueHasSize(dlq, 1)
-        getMessages(topic) shouldEqual Nil
+
+        messageSender.messages shouldBe empty
     }
   }
 
@@ -170,55 +196,38 @@ class MetsAdapterWorkerServiceTest
     )
 
     withWorkerService(bagRetriever, vhs) {
-      case (_, QueuePair(queue, dlq), topic) =>
+      case (_, QueuePair(queue, dlq), messageSender) =>
         sendNotificationToSQS(queue, notification)
         Thread.sleep(2000)
         assertQueueEmpty(queue)
         assertQueueEmpty(dlq)
-        getMessages(topic) shouldEqual Nil
+        messageSender.messages shouldBe empty
         vhs.getLatest(id = externalIdentifier) shouldBe a[Left[_, _]]
     }
   }
 
   def withWorkerService[R](bagRetriever: BagRetriever,
                            store: VersionedStore[String, Int, MetsLocation],
-                           createMsgSender: SNS.Topic => SNSMessageSender =
-                             createMsgSender)(
-    testWith: TestWith[(MetsAdapterWorkerService, QueuePair, SNS.Topic), R])
-    : R =
+                           messageSender: MemoryMessageSender =
+                             new MemoryMessageSender())(
+    testWith: TestWith[(MetsAdapterWorkerService[String],
+                        QueuePair,
+                        MemoryMessageSender),
+                       R]): R =
     withActorSystem { implicit actorSystem =>
-      withLocalSnsTopic { topic =>
-        withLocalSqsQueueAndDlq {
-          case QueuePair(queue, dlq) =>
-            withSQSStream[NotificationMessage, R](queue) { stream =>
-              val workerService = new MetsAdapterWorkerService(
-                stream,
-                createMsgSender(topic),
-                bagRetriever,
-                new MetsStore(store)
-              )
-              workerService.run()
-              testWith((workerService, QueuePair(queue, dlq), topic))
-            }
-        }
+      withLocalSqsQueueAndDlq {
+        case QueuePair(queue, dlq) =>
+          withSQSStream[NotificationMessage, R](queue) { stream =>
+            val workerService = new MetsAdapterWorkerService(
+              msgStream = stream,
+              msgSender = messageSender,
+              bagRetriever = bagRetriever,
+              metsStore = new MetsStore(store)
+            )
+            workerService.run()
+            testWith((workerService, QueuePair(queue, dlq), messageSender))
+          }
       }
-    }
-
-  def createMsgSender(topic: SNS.Topic): SNSMessageSender =
-    new SNSMessageSender(
-      snsClient = snsClient,
-      snsConfig = createSNSConfigWith(topic),
-      subject = "SNSMessageSender"
-    )
-
-  def createBrokenMsgSender(topic: SNS.Topic): SNSMessageSender =
-    new SNSMessageSender(
-      snsClient = snsClient,
-      snsConfig = createSNSConfigWith(topic),
-      subject = "BrokenSNSMessageSender"
-    ) {
-      override def sendT[T](item: T)(implicit encoder: Encoder[T]): Try[Unit] =
-        Failure(new Exception("Waaah I couldn't send message"))
     }
 
   def createStore(data: Map[Version[String, Int], String] = Map.empty) =
@@ -226,11 +235,6 @@ class MetsAdapterWorkerServiceTest
 
   def metsLocation(file: String = "mets.xml", version: Int = 1) =
     MetsLocation("bucket", "root", version, file, Nil)
-
-  def getMessages(topic: SNS.Topic): List[Version[String, Int]] =
-    listMessagesReceivedFromSNS(topic)
-      .map(msgInfo => fromJson[Version[String, Int]](msgInfo.message).get)
-      .toList
 
   def createBagRegistrationNotificationWith(
     space: String,

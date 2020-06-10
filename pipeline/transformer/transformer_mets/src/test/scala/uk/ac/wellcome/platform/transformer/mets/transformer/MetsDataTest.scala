@@ -351,6 +351,20 @@ class MetsDataTest
       "ID/C")
   }
 
+  it("creates a work without images for restricted access statuses") {
+    val result = MetsData(
+      recordIdentifier = "ID",
+      accessConditionDz = Some("CC-BY-NC"),
+      accessConditionStatus = Some("Restricted files"),
+      fileReferencesMapping = List(
+        "A" -> FileReference("A", "location1.jp2", Some("image/jp2")),
+        "B" -> FileReference("B", "location2.jp2", Some("image/jp2"))
+      )
+    ).toWork(1)
+    result shouldBe a[Right[_, _]]
+    result.right.get.data.images shouldBe empty
+  }
+
   it("creates a work with a single accessCondition including usage terms") {
     val result = MetsData(
       recordIdentifier = "ID",
