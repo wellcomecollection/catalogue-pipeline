@@ -18,8 +18,10 @@ class ImagesRuleTest
     with Inspectors
     with ImageFulltextAccess {
   describe("image creation rules") {
-    it("creates 1 image from a 1 Miro work") {
-      val miroWork = createMiroWork
+    it("creates 1 image from a 1 non-historical-library Miro work") {
+      val miroWork = createMiroWorkWith(
+        sourceIdentifier = createNonHistoricalLibraryMiroSourceIdentifier
+      )
       val result = ImagesRule.merge(miroWork).data
 
       result should have length 1
