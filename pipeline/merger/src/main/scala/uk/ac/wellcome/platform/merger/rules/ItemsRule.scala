@@ -23,13 +23,6 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
   override def merge(
     target: UnidentifiedWork,
     sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData] = {
-    val rules =
-      List(
-        mergeIntoCalmTarget,
-        mergeMetsIntoSingleItemSierraTarget,
-        mergeSingleMiroIntoSingleItemSierraTarget,
-        mergeIntoMultiItemSierraTarget)
-
     val items =
       mergeIntoCalmTarget(target, sources)
         .orElse(mergeMetsIntoSingleItemSierraTarget(target, sources)
@@ -37,9 +30,15 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
         .orElse(mergeIntoMultiItemSierraTarget(target, sources))
         .getOrElse(target.data.items)
 
-    val mergedSources = sources.filter { source =>
-      rules.exists(_(target, source).isDefined)
-    } ++ findFirstLinkedDigitisedSierraWorkFor(target, sources)
+    val mergedSources = (
+      List(
+        mergeIntoCalmTarget,
+        mergeMetsIntoSingleItemSierraTarget,
+        mergeSingleMiroIntoSingleItemSierraTarget,
+        mergeIntoMultiItemSierraTarget)
+        .flatMap(_.mergedSources(target, sources)) ++
+        findFirstLinkedDigitisedSierraWorkFor(target, sources)
+    ).distinct
 
     FieldMergeResult(
       data = items,

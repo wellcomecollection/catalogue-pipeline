@@ -27,10 +27,9 @@ object ImagesRule extends FieldMergeRule {
         FieldMergeResult(
           data = getPictureImages(target, sources).getOrElse(Nil) ++
             getPairedMiroImages(target, sources).getOrElse(Nil),
-          sources = sources.filter { source =>
-            List(getPictureImages, getPairedMiroImages).exists(
-              _(target, source).isDefined)
-          }
+          sources = List(getPictureImages, getPairedMiroImages)
+            .flatMap(_.mergedSources(target, sources))
+            .distinct
         )
     }
 

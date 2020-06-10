@@ -30,13 +30,6 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
         .flatMap(rule => rule(target, sources))
         .getOrElse(Nil)
 
-    val rules =
-      List(
-        mergeIntoCalmTarget,
-        mergeMetsIntoSingleItemSierraTarget,
-        mergeSingleMiroIntoPictureSierraTarget,
-        mergeIntoMultiItemSierraTarget)
-
     val singleItemSierraIds =
       mergeMetsIntoSingleItemSierraTarget(target, sources) |+|
         mergeSingleMiroIntoPictureSierraTarget(target, sources)
@@ -47,13 +40,19 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
         .orElse(mergeIntoMultiItemSierraTarget(target, sources))
         .getOrElse(target.otherIdentifiers) ++ digitisedSierraIds).distinct
 
-    val mergedSources = sources.filter { source =>
-      rules.exists(_(target, source).isDefined)
-    } ++ findFirstLinkedDigitisedSierraWorkFor(target, sources)
+    val mergedSources = (
+      List(
+        mergeIntoCalmTarget,
+        mergeMetsIntoSingleItemSierraTarget,
+        mergeSingleMiroIntoPictureSierraTarget,
+        mergeIntoMultiItemSierraTarget)
+        .flatMap(_.mergedSources(target, sources)) ++
+        findFirstLinkedDigitisedSierraWorkFor(target, sources)
+    ).distinct
 
     FieldMergeResult(
       data = ids,
-      sources = mergedSources.distinct
+      sources = mergedSources
     )
   }
 
