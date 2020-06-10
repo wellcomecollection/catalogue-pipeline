@@ -24,6 +24,11 @@ class OtherIdentifiersRuleTest
     items = List(createPhysicalItem),
     workType = Some(WorkType.Pictures)
   )
+  val physicalMapsSierra = physicalSierra.copy(
+    data = physicalSierra.data.copy(
+      workType = Some(WorkType.Maps)
+    )
+  )
   val sierraWorkWithTwoPhysicalItems = createSierraWorkWithTwoPhysicalItems
   val calmWork =
     createUnidentifiedCalmWork
@@ -62,6 +67,28 @@ class OtherIdentifiersRuleTest
           miroWork.sourceIdentifier :: physicalSierra.otherIdentifiers
 
         mergedSources should contain theSameElementsAs (metsWorks :+ miroWork)
+    }
+  }
+
+  it("does not merge any Miro source IDs when there is more than 1 Miro work") {
+    val miroWork2 = createMiroWork
+    inside(
+      OtherIdentifiersRule
+        .merge(physicalSierra, List(nothingWork, miroWork, miroWork2))) {
+      case FieldMergeResult(otherIdentifiers, mergedSources) =>
+        otherIdentifiers should contain theSameElementsAs physicalSierra.otherIdentifiers
+        mergedSources shouldBe empty
+    }
+  }
+
+  it(
+    "does not merge any Miro source IDs into Sierra works with workType != picture/digital image/3D object") {
+    inside(
+      OtherIdentifiersRule
+        .merge(physicalMapsSierra, List(nothingWork, miroWork))) {
+      case FieldMergeResult(otherIdentifiers, mergedSources) =>
+        otherIdentifiers should contain theSameElementsAs physicalMapsSierra.otherIdentifiers
+        mergedSources shouldBe empty
     }
   }
 

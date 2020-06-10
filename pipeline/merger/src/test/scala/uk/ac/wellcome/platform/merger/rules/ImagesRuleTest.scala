@@ -18,7 +18,7 @@ class ImagesRuleTest
     with Inspectors
     with ImageFulltextAccess {
   describe("image creation rules") {
-    it("creates 1 image from a 1 non-historical-library Miro work") {
+    it("creates 1 image from a single non-historical-library Miro work") {
       val miroWork = createMiroWorkWith(
         sourceIdentifier = createNonHistoricalLibraryMiroSourceIdentifier
       )
@@ -28,6 +28,15 @@ class ImagesRuleTest
       result.head.location should be(miroWork.data.images.head.location)
       result.head.source.id.sourceIdentifier should
         be(miroWork.sourceIdentifier)
+    }
+
+    it("does not create an image from a single historical-library Miro work") {
+      val miroWork = createMiroWorkWith(
+        sourceIdentifier = createHistoricalLibraryMiroSourceIdentifier
+      )
+      val result = ImagesRule.merge(miroWork).data
+
+      result shouldBe empty
     }
 
     it("creates n images from n Miro works and a single Sierra work") {

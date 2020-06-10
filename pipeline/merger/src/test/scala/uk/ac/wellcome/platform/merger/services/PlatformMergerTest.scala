@@ -22,7 +22,8 @@ class PlatformMergerTest
       mergeCandidates = List(
         MergeCandidate(
           sierraDigitised.sourceIdentifier,
-          Some("Physical/digitised Sierra work")))
+          Some("Physical/digitised Sierra work"))),
+      workType = Some(WorkType.`3DObjects`)
     ))
   private val multipleItemsSierraWork =
     createSierraWorkWithTwoPhysicalItems.copy(
@@ -32,13 +33,17 @@ class PlatformMergerTest
             sierraDigitised.sourceIdentifier,
             Some("Physical/digitised Sierra work")))
       ))
-  private val sierraDigitalWork = createSierraDigitalWorkWith(
-    items = List(createDigitalItemWith(List(digitalLocationNoLicense))))
+  private val sierraDigitalWork = createUnidentifiedSierraWorkWith(
+    items = List(createDigitalItemWith(List(digitalLocationNoLicense))),
+    workType = Some(WorkType.DigitalImages)
+  )
   private val sierraPictureWork = createUnidentifiedSierraWorkWith(
     items = List(createPhysicalItem),
     workType = Some(WorkType.Pictures)
   )
-  private val miroWork = createMiroWork
+  private val miroWork = createMiroWorkWith(
+    sourceIdentifier = createNonHistoricalLibraryMiroSourceIdentifier
+  )
   private val metsWork =
     createUnidentifiedInvisibleMetsWorkWith(
       items = List(createDigitalItemWith(List(digitalLocationCCBYNC)))
@@ -87,7 +92,8 @@ class PlatformMergerTest
     }
   }
 
-  it("merges a Sierra physical work with a single-page Miro work") {
+  it(
+    "merges a Sierra picture/digital image/3D object physical work with a non-historical-library Miro work") {
     val result = merger.merge(
       works = Seq(sierraPhysicalWork, miroWork)
     )
@@ -130,7 +136,8 @@ class PlatformMergerTest
     )
   }
 
-  it("merges a Sierra digital work with a single-page Miro work") {
+  it(
+    "merges a Sierra Sierra picture/digital image/3D object digital work with a non-historical-library Miro work") {
     val result = merger.merge(
       works = Seq(sierraDigitalWork, miroWork)
     )
@@ -252,7 +259,7 @@ class PlatformMergerTest
   }
 
   it(
-    "merges a physical non-picture Sierra work with a digital Sierra work, a single-page Miro work and a METS work") {
+    "merges a 3D object physical Sierra work with a digital Sierra work, a non-historical-library Miro work and a METS work") {
     val result = merger.merge(
       works = Seq(sierraPhysicalWork, sierraDigitised, miroWork, metsWork)
     )

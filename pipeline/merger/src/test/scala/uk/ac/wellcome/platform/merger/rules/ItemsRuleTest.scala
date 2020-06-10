@@ -17,6 +17,11 @@ class ItemsRuleTest
       workType = Some(WorkType.Pictures)
     )
   )
+  val physicalMapsSierra = physicalPictureSierra.copy(
+    data = physicalPictureSierra.data.copy(
+      workType = Some(WorkType.Maps)
+    )
+  )
   val multiItemPhysicalSierra = createSierraWorkWithTwoPhysicalItems
   val digitalSierra = createSierraDigitalWork
   val metsWork = createUnidentifiedInvisibleMetsWork
@@ -59,6 +64,24 @@ class ItemsRuleTest
             metsWork.data.items.head.locations
 
         mergedSources should be(Seq(metsWork))
+    }
+  }
+
+  it("does not merge any Miro sources when there are several of them") {
+    inside(
+      ItemsRule.merge(physicalPictureSierra, List(miroWork, createMiroWork))) {
+      case FieldMergeResult(items, mergedSources) =>
+        items shouldEqual physicalPictureSierra.data.items
+        mergedSources shouldBe empty
+    }
+  }
+
+  it(
+    "does not merge a Miro source into a Sierra work with workType != picture/digital image/3D object") {
+    inside(ItemsRule.merge(physicalMapsSierra, List(miroWork))) {
+      case FieldMergeResult(items, mergedSources) =>
+        items shouldEqual physicalMapsSierra.data.items
+        mergedSources shouldBe empty
     }
   }
 
