@@ -6,10 +6,7 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.platform.sierra_reader.config.models.ReaderConfig
 import uk.ac.wellcome.platform.sierra_reader.exceptions.SierraReaderException
-import uk.ac.wellcome.platform.sierra_reader.models.{
-  SierraResourceTypes,
-  WindowStatus
-}
+import uk.ac.wellcome.platform.sierra_reader.models.{SierraResourceTypes, WindowStatus}
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.sierra_adapter.model.{SierraBibNumber, SierraGenerators}
 import uk.ac.wellcome.storage.fixtures.S3Fixtures
@@ -39,10 +36,12 @@ class WindowManagerTest
     testWith(windowManager)
   }
 
+  val startDateTime = "2013-01-01T00:00:00+00:00"
+  val endDateTime = "2014-01-01T00:00:00+00:00"
   it("returns an empty ID and offset 0 if there isn't a window in progress") {
     withLocalS3Bucket { bucket =>
       withWindowManager(bucket) { windowManager =>
-        val result = windowManager.getCurrentStatus("[2013,2014]")
+        val result = windowManager.getCurrentStatus(s"[$startDateTime,$endDateTime]")
 
         whenReady(result) {
           _ shouldBe WindowStatus(id = None, offset = 0)
@@ -57,7 +56,7 @@ class WindowManagerTest
   it("finds the ID if there is a window in progress") {
     withLocalS3Bucket { bucket =>
       withWindowManager(bucket) { windowManager =>
-        val prefix = windowManager.buildWindowShard("[2013,2014]")
+        val prefix = windowManager.buildWindowShard(s"[$startDateTime,$endDateTime]")
 
         // We pre-populate S3 with files as if they'd come from a prior run of the reader.
         s3Client.putObject(bucket.name, s"$prefix/0000.json", "[]")
@@ -72,7 +71,7 @@ class WindowManagerTest
           toJson(List(record)).get
         )
 
-        val result = windowManager.getCurrentStatus("[2013,2014]")
+        val result = windowManager.getCurrentStatus(s"[$startDateTime,$endDateTime]")
 
         whenReady(result) {
           _ shouldBe WindowStatus(id = "1794166", offset = 2)
@@ -84,10 +83,10 @@ class WindowManagerTest
   it("throws an error if it finds invalid JSON in the bucket") {
     withLocalS3Bucket { bucket =>
       withWindowManager(bucket) { windowManager =>
-        val prefix = windowManager.buildWindowShard("[2013,2014]")
+        val prefix = windowManager.buildWindowShard(s"[$startDateTime,$endDateTime]")
         s3Client.putObject(bucket.name, s"$prefix/0000.json", "not valid")
 
-        val result = windowManager.getCurrentStatus("[2013,2014]")
+        val result = windowManager.getCurrentStatus(s"[$startDateTime,$endDateTime]")
 
         whenReady(result.failed) {
           _ shouldBe a[SierraReaderException]
@@ -99,11 +98,11 @@ class WindowManagerTest
   it("throws an error if it finds empty JSON in the bucket") {
     withLocalS3Bucket { bucket =>
       withWindowManager(bucket) { windowManager =>
-        val prefix = windowManager.buildWindowShard("[2013,2014]")
+        val prefix = windowManager.buildWindowShard(s"[$startDateTime,$endDateTime]")
 
         s3Client.putObject(bucket.name, s"$prefix/0000.json", "[]")
 
-        val result = windowManager.getCurrentStatus("[2013,2014]")
+        val result = windowManager.getCurrentStatus(s"[$startDateTime,$endDateTime]")
 
         whenReady(result.failed) {
           _ shouldBe a[SierraReaderException]
@@ -115,11 +114,11 @@ class WindowManagerTest
   it("throws an error if it finds a misnamed file in the bucket") {
     withLocalS3Bucket { bucket =>
       withWindowManager(bucket) { windowManager =>
-        val prefix = windowManager.buildWindowShard("[2013,2014]")
+        val prefix = windowManager.buildWindowShard(s"[$startDateTime,$endDateTime]")
 
         s3Client.putObject(bucket.name, s"$prefix/000x.json", "[]")
 
-        val result = windowManager.getCurrentStatus("[2013,2014]")
+        val result = windowManager.getCurrentStatus(s"[$startDateTime,$endDateTime]")
 
         whenReady(result.failed) {
           _ shouldBe a[SierraReaderException]

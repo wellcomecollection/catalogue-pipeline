@@ -1,5 +1,8 @@
 package uk.ac.wellcome.platform.sierra_reader.services
 
+import java.time.format.DateTimeFormatter
+import java.time.{Instant, ZoneOffset}
+
 import com.amazonaws.services.s3.AmazonS3
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.json.JsonUtil._
@@ -75,14 +78,19 @@ class WindowManager(
   def buildWindowShard(window: String) =
     s"records_${readerConfig.resourceType.toString}/${buildWindowLabel(window)}/"
 
-  def buildWindowLabel(window: String) =
-    // Window is a string like [2013-12-01T01:01:01Z,2013-12-01T01:01:01Z].
+  def buildWindowLabel(window: String) = {
+    // Window is a string like [2013-12-01T01:01:01+00:00,2013-12-01T01:01:01+00:00].
     // We discard the square braces, colons and comma so we get slightly nicer filenames.
-    window
+    val dateTimes = window
       .replaceAll("\\[", "")
-      .replaceAll("\\]", "")
-      .replaceAll(":", "-")
-      .replaceAll(",", "__")
+      .replaceAll("\\]", "").split(",")
+
+      dateTimes.map(dateTime => {
+        val accessor = DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(dateTime)
+        val instant = Instant.from(accessor).atOffset(ZoneOffset.UTC)
+        DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH-mm-ssX").format(instant)
+      }).mkString("__")
+  }
 
   // The contents of our S3 files should be an array of either SierraBibRecord
   // or SierraItemRecord; we want to get the last ID of the current contents
