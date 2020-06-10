@@ -269,7 +269,14 @@ object CalmTransformer
   }
 
   def subjects(record: CalmRecord): List[Subject[Unminted]] =
-    record.getList("Subject").map(Subject(_, Nil))
+    record
+      .getList("Subject")
+      .map { label =>
+        Subject(
+          label = label,
+          concepts = List(Concept(label))
+        )
+      }
 
   def language(record: CalmRecord): Result[Option[Language]] =
     record
