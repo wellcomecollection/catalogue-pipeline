@@ -1,10 +1,11 @@
 package uk.ac.wellcome.platform.merger.services
 
 import cats.data.State
-
 import uk.ac.wellcome.models.work.internal.{
   IdentifiableRedirect,
+  InvisibilityReason,
   TransformedBaseWork,
+  UnidentifiedInvisibleWork,
   UnidentifiedRedirectedWork,
   UnidentifiedWork
 }
@@ -114,7 +115,10 @@ object PlatformMerger extends Merger {
     sources: Seq[TransformedBaseWork]): MergeState =
     if (sources.isEmpty)
       State.pure(
-        MergeResult(target, images = ImagesRule.merge(target).data)
+        MergeResult(
+          mergedTarget = suppressHistoricalLibraryMiro(target),
+          images = ImagesRule.merge(target).data
+        )
       )
     else
       for {
@@ -135,4 +139,19 @@ object PlatformMerger extends Merger {
           },
           images = images
         )
+
+  def suppressHistoricalLibraryMiro(
+    target: UnidentifiedWork): TransformedBaseWork =
+    if (WorkPredicates.historicalLibraryMiro(target)) {
+      UnidentifiedInvisibleWork(
+        version = target.version,
+        sourceIdentifier = target.sourceIdentifier,
+        data = target.data,
+        invisibilityReasons = List(
+          InvisibilityReason.UnlinkedHistoricalLibraryMiro()
+        )
+      )
+    } else {
+      target
+    }
 }
