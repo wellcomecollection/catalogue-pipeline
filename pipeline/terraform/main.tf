@@ -1,7 +1,7 @@
-module "catalogue_pipeline_20200528" {
+module "catalogue_pipeline_20200609" {
   source = "./stack"
 
-  namespace = "catalogue-20200528"
+  namespace = "catalogue-20200609"
 
   release_label = "prod"
 
@@ -40,8 +40,8 @@ module "catalogue_pipeline_20200528" {
   ]
 
   # Elasticsearch
-  es_works_index  = "works-20200528"
-  es_images_index = "images-20200528"
+  es_works_index  = "works-20200609"
+  es_images_index = "images-20200609"
 
   # RDS
   rds_ids_access_security_group_id = local.rds_access_security_group_id
