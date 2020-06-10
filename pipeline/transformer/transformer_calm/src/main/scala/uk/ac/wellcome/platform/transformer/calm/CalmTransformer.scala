@@ -165,7 +165,6 @@ object CalmTransformer
   def title(record: CalmRecord): Result[String] =
     record
       .get("Title")
-      .map(NormaliseText(_))
       .map(Right(_))
       .getOrElse(Left(TitleMissing))
 
