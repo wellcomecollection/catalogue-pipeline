@@ -3,7 +3,7 @@ module "items_reader" {
 
   resource_type = "items"
 
-  bucket_name       = aws_s3_bucket.sierra_adapter.id
+  bucket_name        = aws_s3_bucket.sierra_adapter.id
   windows_topic_arns = module.items_window_generator.topic_arn
 
   sierra_fields = local.sierra_items_fields
@@ -13,7 +13,7 @@ module "items_reader" {
   container_image = local.sierra_reader_image
 
   cluster_name = aws_ecs_cluster.cluster.name
-  cluster_arn = aws_ecs_cluster.cluster.arn
+  cluster_arn  = aws_ecs_cluster.cluster.arn
   vpc_id       = local.vpc_id
 
   dlq_alarm_arn          = local.dlq_alarm_arn
@@ -22,7 +22,7 @@ module "items_reader" {
   infra_bucket = var.infra_bucket
 
   namespace_id = aws_service_discovery_private_dns_namespace.namespace.id
-  namespace = var.namespace
+  namespace    = var.namespace
   subnets      = local.private_subnets
 
   service_egress_security_group_id = aws_security_group.egress_security_group.id
@@ -41,13 +41,13 @@ module "items_to_dynamo" {
   vhs_sierra_items_bucket_name        = local.vhs_sierra_items_bucket_name
 
   cluster_name = aws_ecs_cluster.cluster.name
-  cluster_arn = aws_ecs_cluster.cluster.arn
+  cluster_arn  = aws_ecs_cluster.cluster.arn
   vpc_id       = local.vpc_id
 
   dlq_alarm_arn = local.dlq_alarm_arn
 
   namespace_id = aws_service_discovery_private_dns_namespace.namespace.id
-  namespace = var.namespace
+  namespace    = var.namespace
   subnets      = local.private_subnets
 
   service_egress_security_group_id = aws_security_group.egress_security_group.id
@@ -65,10 +65,10 @@ module "items_merger" {
 
   merged_dynamo_table_name = local.vhs_table_name
 
-  updates_topic_arn         = module.items_to_dynamo.topic_arn
+  updates_topic_arn = module.items_to_dynamo.topic_arn
 
   cluster_name = aws_ecs_cluster.cluster.name
-  cluster_arn = aws_ecs_cluster.cluster.arn
+  cluster_arn  = aws_ecs_cluster.cluster.arn
   vpc_id       = local.vpc_id
 
   dlq_alarm_arn = local.dlq_alarm_arn
@@ -78,7 +78,7 @@ module "items_merger" {
   bucket_name = local.vhs_bucket_name
 
   namespace_id = aws_service_discovery_private_dns_namespace.namespace.id
-  namespace = var.namespace
+  namespace    = var.namespace
   subnets      = local.private_subnets
 
   sierra_items_bucket = local.vhs_sierra_items_bucket_name

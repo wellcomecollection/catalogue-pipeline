@@ -3,7 +3,7 @@ module "bibs_reader" {
 
   resource_type = "bibs"
 
-  bucket_name       = "wellcomecollection-platform-adapters-sierra"
+  bucket_name        = "wellcomecollection-platform-adapters-sierra"
   windows_topic_arns = module.bibs_window_generator.topic_arn
 
   sierra_fields = local.sierra_bibs_fields
@@ -13,7 +13,7 @@ module "bibs_reader" {
   container_image = local.sierra_reader_image
 
   cluster_name = aws_ecs_cluster.cluster.name
-  cluster_arn = aws_ecs_cluster.cluster.arn
+  cluster_arn  = aws_ecs_cluster.cluster.arn
   vpc_id       = local.vpc_id
 
   dlq_alarm_arn          = local.dlq_alarm_arn
@@ -22,7 +22,7 @@ module "bibs_reader" {
   infra_bucket = var.infra_bucket
 
   namespace_id = aws_service_discovery_private_dns_namespace.namespace.id
-  namespace = var.namespace
+  namespace    = var.namespace
   subnets      = local.private_subnets
 
   service_egress_security_group_id = aws_security_group.egress_security_group.id
@@ -39,7 +39,7 @@ module "bibs_merger" {
   updates_topic_arn = module.bibs_reader.topic_arn
 
   cluster_name = aws_ecs_cluster.cluster.name
-  cluster_arn = aws_ecs_cluster.cluster.arn
+  cluster_arn  = aws_ecs_cluster.cluster.arn
   vpc_id       = local.vpc_id
 
   dlq_alarm_arn = local.dlq_alarm_arn
@@ -49,7 +49,7 @@ module "bibs_merger" {
   bucket_name = local.vhs_bucket_name
 
   namespace_id = aws_service_discovery_private_dns_namespace.namespace.id
-  namespace = var.namespace
+  namespace    = var.namespace
   subnets      = local.private_subnets
 
   service_egress_security_group_id = aws_security_group.egress_security_group.id
