@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.merger.rules
 
+import scala.Function.const
 import cats.data.{NonEmptyList, State}
 
 import uk.ac.wellcome.models.work.internal.{
@@ -45,14 +46,20 @@ trait FieldMergeRule {
   protected trait PartialRule {
     val isDefinedForTarget: WorkPredicate
     val isDefinedForSource: WorkPredicate
+    val isDefinedForSourceList: Seq[TransformedBaseWork] => Boolean =
+      const(true)
 
     protected def rule(target: UnidentifiedWork,
                        sources: NonEmptyList[TransformedBaseWork]): FieldData
 
     def apply(target: UnidentifiedWork,
               sources: Seq[TransformedBaseWork]): Option[FieldData] =
-      (isDefinedForTarget(target), sources.filter(isDefinedForSource)) match {
-        case (true, head +: tail) =>
+      (
+        isDefinedForTarget(target),
+        isDefinedForSourceList(sources),
+        sources.filter(isDefinedForSource)
+      ) match {
+        case (true, true, head +: tail) =>
           Some(rule(target, NonEmptyList(head, tail.toList)))
         case _ => None
       }

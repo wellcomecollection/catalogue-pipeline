@@ -18,9 +18,12 @@ class OtherIdentifiersRuleTest
       identifierType = IdentifierType("fake", "fake"),
       value = "fake"
     ))
-  val miroWorks = (0 to 3).map(_ => createMiroWork).toList
+  val miroWork = createMiroWork
   val metsWorks = (0 to 3).map(_ => createUnidentifiedInvisibleMetsWork).toList
-  val physicalSierra = createSierraPhysicalWork
+  val physicalSierra = createUnidentifiedSierraWorkWith(
+    items = List(createPhysicalItem),
+    workType = Some(WorkType.Pictures)
+  )
   val sierraWorkWithTwoPhysicalItems = createSierraWorkWithTwoPhysicalItems
   val calmWork =
     createUnidentifiedCalmWork
@@ -39,25 +42,26 @@ class OtherIdentifiersRuleTest
       OtherIdentifiersRule
         .merge(
           calmWork,
-          physicalSierra :: nothingWork :: metsWorks ++ miroWorks)) {
+          physicalSierra :: nothingWork :: miroWork :: metsWorks)) {
       case FieldMergeResult(otherIdentifiers, mergedSources) =>
-        otherIdentifiers should contain theSameElementsAs physicalSierra.sourceIdentifier :: miroWorks
-          .map(_.sourceIdentifier) ++ metsWorks.map(_.sourceIdentifier) ++ calmWork.otherIdentifiers
+        otherIdentifiers should contain theSameElementsAs
+          List(physicalSierra.sourceIdentifier, miroWork.sourceIdentifier) ++
+            metsWorks.map(_.sourceIdentifier) ++ calmWork.otherIdentifiers
 
-        mergedSources should contain theSameElementsAs (physicalSierra :: metsWorks ++ miroWorks)
+        mergedSources should contain theSameElementsAs (physicalSierra :: miroWork :: metsWorks)
     }
   }
 
   it(
-    "merges Miro source IDs into Sierra work with single item with METS and miro merge candidates") {
+    "merges a Miro source ID into single-item Sierra work with METS and a single miro merge candidates") {
     inside(
       OtherIdentifiersRule
-        .merge(physicalSierra, nothingWork :: metsWorks ++ miroWorks)) {
+        .merge(physicalSierra, nothingWork :: miroWork :: metsWorks)) {
       case FieldMergeResult(otherIdentifiers, mergedSources) =>
-        otherIdentifiers should contain theSameElementsAs miroWorks
-          .map(_.sourceIdentifier) ++ physicalSierra.otherIdentifiers
+        otherIdentifiers should contain theSameElementsAs
+          miroWork.sourceIdentifier :: physicalSierra.otherIdentifiers
 
-        mergedSources should contain theSameElementsAs (metsWorks ++ miroWorks)
+        mergedSources should contain theSameElementsAs (metsWorks :+ miroWork)
     }
   }
 
@@ -66,34 +70,37 @@ class OtherIdentifiersRuleTest
       OtherIdentifiersRule
         .merge(
           sierraWithMergeCandidate,
-          nothingWork :: mergeCandidate :: miroWorks)) {
+          List(nothingWork, miroWork, mergeCandidate))) {
       case FieldMergeResult(otherIdentifiers, mergedSources) =>
-        otherIdentifiers should contain theSameElementsAs mergeCandidate.identifiers ++ sierraWithMergeCandidate.otherIdentifiers ++ miroWorks
-          .map(_.sourceIdentifier)
+        otherIdentifiers should contain theSameElementsAs
+          miroWork.sourceIdentifier :: mergeCandidate.identifiers ++
+            sierraWithMergeCandidate.otherIdentifiers
 
-        mergedSources should contain theSameElementsAs (mergeCandidate :: miroWorks)
+        mergedSources should contain theSameElementsAs List(
+          miroWork,
+          mergeCandidate)
     }
   }
 
   it("only merges miro source identifiers") {
-    val miroWorksWithOtherSources = miroWorks.map(
-      miroWork =>
-        miroWork.copy(
-          data = miroWork.data.copy(
-            otherIdentifiers = List(
-              SourceIdentifier(
-                identifierType = IdentifierType("miro-library-reference"),
-                ontologyType = "Work",
-                value = randomAlphanumeric(32)
-              ))
-          )))
+    val miroWorkWithOtherSources = miroWork.copy(
+      data = miroWork.data.copy(
+        otherIdentifiers = List(
+          SourceIdentifier(
+            identifierType = IdentifierType("miro-library-reference"),
+            ontologyType = "Work",
+            value = randomAlphanumeric(32)
+          ))
+      ))
     inside(
-      OtherIdentifiersRule.merge(physicalSierra, miroWorksWithOtherSources)) {
+      OtherIdentifiersRule
+        .merge(physicalSierra, List(miroWorkWithOtherSources))) {
       case FieldMergeResult(otherIdentifiers, mergeCandidates) =>
-        otherIdentifiers should contain theSameElementsAs (physicalSierra.otherIdentifiers ++ miroWorks
-          .map(_.sourceIdentifier))
+        otherIdentifiers should contain theSameElementsAs
+          (miroWork.sourceIdentifier :: physicalSierra.otherIdentifiers)
 
-        mergeCandidates should contain theSameElementsAs (miroWorksWithOtherSources)
+        mergeCandidates should contain theSameElementsAs List(
+          miroWorkWithOtherSources)
     }
   }
 
