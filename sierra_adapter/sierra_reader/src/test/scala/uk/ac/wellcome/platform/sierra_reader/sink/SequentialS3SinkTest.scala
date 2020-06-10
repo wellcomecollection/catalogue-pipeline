@@ -14,6 +14,7 @@ import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.storage.ObjectLocation
 import uk.ac.wellcome.storage.fixtures.S3Fixtures
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
+import uk.ac.wellcome.storage.store.s3.S3TypedStore
 
 import scala.concurrent.Future
 
@@ -29,7 +30,7 @@ class SequentialS3SinkTest
   private def withSink(bucket: Bucket, keyPrefix: String, offset: Int = 0)(
     testWith: TestWith[Sink[(Json, Long), Future[Done]], Assertion]) = {
     val sink = SequentialS3Sink(
-      s3Client,
+      S3TypedStore[String],
       bucketName = bucket.name,
       keyPrefix = keyPrefix,
       offset = offset
