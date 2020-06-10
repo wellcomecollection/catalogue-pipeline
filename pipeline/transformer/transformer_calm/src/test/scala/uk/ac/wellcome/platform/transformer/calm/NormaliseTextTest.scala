@@ -39,6 +39,11 @@ class NormaliseTextTest extends AnyFunSpec with Matchers {
     NormaliseText(str) shouldBe """A <a href="http://example.location" rel="nofollow">link</a>"""
   }
 
+  it("does not escape symbols") {
+    val str = "Ampersand & some other symbols like >."
+    NormaliseText(str) shouldBe str
+  }
+
   it("strips whole html document, removing recurring empty lines") {
     val str =
       """

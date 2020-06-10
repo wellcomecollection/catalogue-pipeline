@@ -2,8 +2,8 @@ package uk.ac.wellcome.platform.transformer.calm
 
 import org.jsoup.Jsoup
 import org.jsoup.safety.Whitelist
-
 import org.jsoup.nodes.Document.OutputSettings
+import org.jsoup.parser.Parser
 
 object NormaliseText {
 
@@ -30,6 +30,7 @@ object NormaliseText {
         case (previousStrs :+ "", "") => previousStrs :+ ""
         case (previousStrs, str)      => previousStrs :+ str
       }
+      .map(Parser.unescapeEntities(_, false))
       .mkString("\n")
       .trim
   }
