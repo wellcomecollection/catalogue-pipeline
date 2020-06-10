@@ -11,7 +11,7 @@ import cats.data.NonEmptyList
   *
   * * Sierra - Single items
   *   * METS works
-  *   * Miro works
+  *   * Single Miro works, only if the Sierra work has workType Picture/Digital Image/3D Object
   * * Sierra - Multi item
   *   * METS works
   */
@@ -71,6 +71,8 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
   /** When there is only 1 Sierra item and 1 Miro item, we assume that the
     * Miro work item is associated with the Sierra item and merge the
     * locations onto the Sierra item.
+    *
+    * This is restricted to the case that the Sierra work is a Picture/Digital Image/3D Object
     */
   private val mergeSingleMiroIntoSingleItemSierraTarget = new PartialRule {
     val isDefinedForTarget
