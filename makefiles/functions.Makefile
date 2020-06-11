@@ -255,7 +255,7 @@ endef
 #
 # Args:
 #	$1 - Name of the ECS service.
-#	$2 - Path to the associated Dockerfile.
+#	$2 - Path to th`e associated Dockerfile.
 #	$3 - Stack name
 #   $4 - ECS Base URI
 #   $5 - Registry ID
@@ -264,7 +264,7 @@ define __python_ssm_target
 $(1)-build:
 	$(call build_image,$(1),$(2))
 
-ifneq ($(TEST_OVERRIDE), $(1))
+ifneq ($(filter $$(1),$$(TEST_OVERRIDE)),)
 $(1)-test:
 	$(call test_python,$(STACK_ROOT)/$(1))
 endif
