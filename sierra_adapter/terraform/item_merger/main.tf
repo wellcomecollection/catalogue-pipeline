@@ -6,13 +6,13 @@ module "sierra_merger_service" {
   image = var.container_image
 
   env_vars = {
-    windows_queue_url   = module.updates_queue.url
-    metrics_namespace = local.service_name
-    sierra_vhs_dynamo_table_name   = var.sierra_transformable_vhs_dynamo_table_name
-    sierra_vhs_bucket_name         = var.sierra_transformable_vhs_bucket_name
-    items_vhs_bucket = var.sierra_items_vhs_bucket_name
-    items_vhs_dynamo_table_name = var.sierra_items_vhs_dynamo_table_name
-    topic_arn           = module.sierra_item_merger_results.arn
+    windows_queue_url            = module.updates_queue.url
+    metrics_namespace            = local.service_name
+    sierra_vhs_dynamo_table_name = var.sierra_transformable_vhs_dynamo_table_name
+    sierra_vhs_bucket_name       = var.sierra_transformable_vhs_bucket_name
+    items_vhs_bucket             = var.sierra_items_vhs_bucket_name
+    items_vhs_dynamo_table_name  = var.sierra_items_vhs_dynamo_table_name
+    topic_arn                    = module.sierra_item_merger_results.arn
 
     # The item merger has to write lots of S3 objects, and we've seen issues
     # where we exhaust the HTTP connection pool.  Turning down the parallelism
