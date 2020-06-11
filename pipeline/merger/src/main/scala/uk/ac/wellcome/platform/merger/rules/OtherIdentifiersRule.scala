@@ -36,17 +36,17 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
       List(
         mergeIntoCalmTarget,
         mergeMetsIntoSingleItemSierraTarget,
-        mergeMiroIntoSingleItemSierraTarget,
-        mergeIntoMultiItemSierraTarget)
+        mergeMiroIntoSingleOrZeroItemSierraTarget,
+        mergeMetsIntoMultiItemSierraTarget)
 
     val singleItemSierraIds =
       mergeMetsIntoSingleItemSierraTarget(target, sources) |+|
-        mergeMiroIntoSingleItemSierraTarget(target, sources)
+        mergeMiroIntoSingleOrZeroItemSierraTarget(target, sources)
 
     val ids =
       (mergeIntoCalmTarget(target, sources)
         .orElse(singleItemSierraIds)
-        .orElse(mergeIntoMultiItemSierraTarget(target, sources))
+        .orElse(mergeMetsIntoMultiItemSierraTarget(target, sources))
         .getOrElse(target.otherIdentifiers) ++ digitisedSierraIds).distinct
 
     val mergedSources = sources.filter { source =>
@@ -69,8 +69,9 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
       target.otherIdentifiers
   }
 
-  private val mergeMiroIntoSingleItemSierraTarget = new PartialRule {
-    val isDefinedForTarget: WorkPredicate = WorkPredicates.singleItemSierra
+  private val mergeMiroIntoSingleOrZeroItemSierraTarget = new PartialRule {
+    val isDefinedForTarget: WorkPredicate =
+      WorkPredicates.singleItemSierra or WorkPredicates.zeroItemSierra
     val isDefinedForSource: WorkPredicate =
       WorkPredicates.singleDigitalItemMiroWork
 
@@ -79,7 +80,7 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
       target.otherIdentifiers ++ sources.toList.map(_.sourceIdentifier)
   }
 
-  private val mergeIntoMultiItemSierraTarget = new PartialRule {
+  private val mergeMetsIntoMultiItemSierraTarget = new PartialRule {
     val isDefinedForTarget: WorkPredicate = WorkPredicates.multiItemSierra
     val isDefinedForSource: WorkPredicate =
       WorkPredicates.singleDigitalItemMetsWork

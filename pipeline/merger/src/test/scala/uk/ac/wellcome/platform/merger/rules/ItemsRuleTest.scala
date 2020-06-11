@@ -33,6 +33,11 @@ class ItemsRuleTest
     }
   }
 
+  // Sierra zero item
+  it("merges the item from Miro works into zero-item Sierra works") {}
+
+  it("merges the item from METS works into zero-item Sierra works") {}
+
   // Sierra single item
   it("merges locations from Miro items into single-item Sierra works") {
     inside(ItemsRule.merge(physicalSierra, List(miroWork))) {
