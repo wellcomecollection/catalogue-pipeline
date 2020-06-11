@@ -7,10 +7,11 @@ module "sierra_merger_service" {
 
   env_vars = {
     windows_queue_url   = module.updates_queue.url
-    metrics_namespace   = local.service_name
-    dynamo_table_name   = var.merged_dynamo_table_name
-    bucket_name         = var.bucket_name
-    sierra_items_bucket = var.sierra_items_bucket
+    metrics_namespace = local.service_name
+    sierra_vhs_dynamo_table_name   = var.sierra_transformable_vhs_dynamo_table_name
+    sierra_vhs_bucket_name         = var.sierra_transformable_vhs_bucket_name
+    items_vhs_bucket = var.sierra_items_vhs_bucket_name
+    items_vhs_dynamo_table_name = var.sierra_items_vhs_dynamo_table_name
     topic_arn           = module.sierra_item_merger_results.arn
 
     # The item merger has to write lots of S3 objects, and we've seen issues

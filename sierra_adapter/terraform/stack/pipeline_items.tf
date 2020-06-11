@@ -59,9 +59,7 @@ module "items_merger" {
 
   container_image = local.sierra_item_merger_image
 
-  merged_dynamo_table_name = module.vhs_sierra.table_name
-
-  updates_topic_arn = module.items_to_dynamo.topic_arn
+  updates_topic_arn         = module.items_to_dynamo.topic_arn
 
   cluster_name = aws_ecs_cluster.cluster.name
   cluster_arn  = aws_ecs_cluster.cluster.arn
@@ -69,15 +67,17 @@ module "items_merger" {
 
   dlq_alarm_arn = var.dlq_alarm_arn
 
-  vhs_full_access_policy = module.vhs_sierra.full_access_policy
+  sierra_transformable_vhs_full_access_policy = module.vhs_sierra.full_access_policy
+  sierra_transformable_vhs_dynamo_table_name = module.vhs_sierra.table_name
+  sierra_transformable_vhs_bucket_name = module.vhs_sierra.bucket_name
 
-  bucket_name = module.vhs_sierra.bucket_name
+  sierra_items_vhs_bucket_name = module.vhs_sierra_items.bucket_name
+  sierra_items_vhs_dynamo_table_name = module.vhs_sierra_items.table_name
+  sierra_items_vhs_read_policy = module.vhs_sierra_items.read_policy
 
   namespace_id = aws_service_discovery_private_dns_namespace.namespace.id
   namespace    = local.namespace_hyphen
   subnets      = var.private_subnets
-
-  sierra_items_bucket = module.vhs_sierra_items.bucket_name
 
   service_egress_security_group_id = var.egress_security_group_id
   interservice_security_group_id   = var.interservice_security_group_id
