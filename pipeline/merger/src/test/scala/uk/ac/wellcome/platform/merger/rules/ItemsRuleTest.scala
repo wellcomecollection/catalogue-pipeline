@@ -12,6 +12,7 @@ class ItemsRuleTest
     with WorksGenerators
     with Inside {
   val physicalSierra = createSierraPhysicalWork
+  val zeroItemPhysicalSierra = createUnidentifiedSierraWork
   val multiItemPhysicalSierra = createSierraWorkWithTwoPhysicalItems
   val digitalSierra = createSierraDigitalWork
   val metsWork = createUnidentifiedInvisibleMetsWork
@@ -34,9 +35,23 @@ class ItemsRuleTest
   }
 
   // Sierra zero item
-  it("merges the item from Miro works into zero-item Sierra works") {}
+  it("merges the item from Miro works into zero-item Sierra works") {
+    inside(ItemsRule.merge(zeroItemPhysicalSierra, List(miroWork))) {
+      case FieldMergeResult(items, mergedSources) =>
+        items should have size 1
+        items.head shouldBe miroWork.data.items.head
+        mergedSources should be(Seq(miroWork))
+    }
+  }
 
-  it("merges the item from METS works into zero-item Sierra works") {}
+  it("merges the item from METS works into zero-item Sierra works") {
+    inside(ItemsRule.merge(zeroItemPhysicalSierra, List(metsWork))) {
+      case FieldMergeResult(items, mergedSources) =>
+        items should have size 1
+        items.head shouldBe metsWork.data.items.head
+        mergedSources should be(Seq(metsWork))
+    }
+  }
 
   // Sierra single item
   it("merges locations from Miro items into single-item Sierra works") {
