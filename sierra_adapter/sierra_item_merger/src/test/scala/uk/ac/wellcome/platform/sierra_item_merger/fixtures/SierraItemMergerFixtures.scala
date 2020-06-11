@@ -16,6 +16,7 @@ import uk.ac.wellcome.sierra_adapter.model.{
 }
 import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
 import uk.ac.wellcome.storage.store.VersionedStore
+import scala.concurrent.ExecutionContext.Implicits.global
 
 trait SierraItemMergerFixtures
     extends Akka

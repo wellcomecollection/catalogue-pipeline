@@ -9,41 +9,45 @@ import uk.ac.wellcome.sierra_adapter.model.SierraItemRecord
 import uk.ac.wellcome.storage.Version
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.typesafe.Runnable
-import cats.implicits._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class SierraItemMergerWorkerService[Destination](
   sqsStream: SQSStream[NotificationMessage],
   sierraItemMergerUpdaterService: SierraItemMergerUpdaterService,
   itemRecordStore: VersionedStore[String, Int, SierraItemRecord],
   messageSender: MessageSender[Destination]
-) extends Runnable {
+) (implicit ec: ExecutionContext)extends Runnable {
 
-  private def process(message: NotificationMessage): Future[Unit] =
-    Future.fromTry {
-      val f: Either[Throwable, Unit] = for {
-        key <- fromJson[Version[String, Int]](message.body).toEither
-        itemRecord <- itemRecordStore
-          .get(key)
-          .map(id => id.identifiedT)
-          .left
-          .map(id => id.e)
-        updatedKeys <- sierraItemMergerUpdaterService
-          .update(itemRecord)
-          .left
-          .map(id => id.e)
-        _ <- sendKeys(updatedKeys)
-      } yield ()
-      f.toTry
+  private def process(message: NotificationMessage): Future[Unit] = {
+
+    val f= for {
+      key <- fromJson[Version[String, Int]](message.body).toEither
+      itemRecord <- itemRecordStore
+        .get(key)
+        .map(id => id.identifiedT)
+        .left
+        .map(id => id.e)
+      updatedKeys <- sierraItemMergerUpdaterService
+        .update(itemRecord)
+        .left
+        .map(id => id.e)
+    } yield (updatedKeys)
+    Future.fromTry(f.toTry).flatMap{ updatedKeys =>
+      sendKeys(updatedKeys)
     }
+  }
 
   private def sendKeys(
-    updatedKeys: List[Version[String, Int]]): Either[Throwable, List[Unit]] = {
-    val tries: List[Either[Throwable, Unit]] = updatedKeys.par.map { key =>
-      messageSender.sendT(key).toEither
-    }.toList
-    tries.sequence
+    updatedKeys: Seq[Version[String, Int]]) = {
+    Future.sequence {
+      updatedKeys
+        .map { key =>
+          Future.fromTry {
+            messageSender.sendT(key)
+          }
+        }
+    }.map(_ =>())
   }
 
   def run(): Future[Done] =
