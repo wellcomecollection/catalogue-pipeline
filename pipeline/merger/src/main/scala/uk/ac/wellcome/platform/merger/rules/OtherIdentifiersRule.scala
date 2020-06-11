@@ -45,9 +45,10 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
         mergeIntoCalmTarget,
         mergeMetsIntoSingleItemSierraTarget,
         mergeSingleMiroIntoPictureSierraTarget,
-        mergeIntoMultiItemSierraTarget)
-        .flatMap(_.mergedSources(target, sources)) ++
-        findFirstLinkedDigitisedSierraWorkFor(target, sources)
+        mergeIntoMultiItemSierraTarget
+      ).flatMap { rule =>
+        rule.mergedSources(target, sources)
+      } ++ findFirstLinkedDigitisedSierraWorkFor(target, sources)
     ).distinct
 
     FieldMergeResult(

@@ -29,9 +29,12 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
     sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData] =
     FieldMergeResult(
       data = getThumbnail(target, sources),
-      sources = List(getMetsThumbnail, getMinMiroThumbnail)
-        .flatMap(_.mergedSources(target, sources))
-        .distinct
+      sources = List(
+        getMetsThumbnail,
+        getMinMiroThumbnail
+      ).flatMap { rule =>
+        rule.mergedSources(target, sources))
+      }.distinct
     )
 
   def getThumbnail(target: UnidentifiedWork,

@@ -424,7 +424,7 @@ class PlatformMergerTest
     result.works.head
       .asInstanceOf[UnidentifiedInvisibleWork]
       .invisibilityReasons
-      .head shouldBe InvisibilityReason.UnlinkedHistoricalLibraryMiro()
+      .head shouldBe InvisibilityReason.UnlinkedHistoricalLibraryMiro
     result.images shouldBe empty
   }
 

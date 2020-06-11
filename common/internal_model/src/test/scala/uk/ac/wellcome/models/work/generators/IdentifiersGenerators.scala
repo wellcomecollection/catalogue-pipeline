@@ -54,14 +54,14 @@ trait IdentifiersGenerators extends RandomStrings {
       identifierType = IdentifierType("isbn")
     )
 
-  private val MIRO_ID_PREFIXES: Seq[Char] = Seq(
+  private val miroIdPrefixes: Seq[Char] = Seq(
     'C', 'L', 'V', 'W', 'N', 'M', 'B', 'A', 'S', 'F', 'D'
   )
 
   private def randomCharFrom(list: Char*) =
     list(Random.nextInt(list.size))
 
-  def randomMiroId(prefix: Char = randomCharFrom(MIRO_ID_PREFIXES: _*),
+  def randomMiroId(prefix: Char = randomCharFrom(miroIdPrefixes: _*),
                    length: Int = 8): String =
     s"%c%0${length - 1}d".format(
       prefix,
@@ -88,7 +88,7 @@ trait IdentifiersGenerators extends RandomStrings {
 
   def createNonHistoricalLibraryMiroSourceIdentifier: SourceIdentifier =
     createMiroSourceIdentifierWith(
-      value = randomMiroId(prefix = randomCharFrom(MIRO_ID_PREFIXES.filter {
+      value = randomMiroId(prefix = randomCharFrom(miroIdPrefixes.filter {
         case 'L' | 'M' => false
         case _         => true
       }: _*)))

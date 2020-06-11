@@ -148,7 +148,7 @@ object PlatformMerger extends Merger {
         sourceIdentifier = target.sourceIdentifier,
         data = target.data,
         invisibilityReasons = List(
-          InvisibilityReason.UnlinkedHistoricalLibraryMiro()
+          InvisibilityReason.UnlinkedHistoricalLibraryMiro
         )
       )
     } else {
