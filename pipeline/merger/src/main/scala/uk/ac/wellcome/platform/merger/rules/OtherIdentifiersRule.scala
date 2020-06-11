@@ -12,9 +12,13 @@ import uk.ac.wellcome.platform.merger.models.Sources.findFirstLinkedDigitisedSie
 import cats.implicits._
 
 /**
-  * This rule replicates the matching functionality within the ItemsRule.
-  * If any of those Rules are matched, the IDs are added to the target.
-  * IDs are then deduped in the merge.
+  * Identifiers are merged as follows:
+  *
+  * - All source identifiers are merged into Calm works
+  * - Miro identifiers are merged into single or zero item Sierra works
+  * - Sierra works with linked digitised Sierra works have the first
+  *   of these linked IDs merged into them
+  * - METS identifiers are not merged as they are not useful
   */
 object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
   type FieldData = List[SourceIdentifier]
@@ -22,51 +26,23 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
   override def merge(
     target: UnidentifiedWork,
     sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData] = {
-
-    // We have to do the check if there a digitised linked work before the rule
-    // as the condition relies on the target and sources.
-    val digitisedSierraIds =
-      findFirstLinkedDigitisedSierraWorkFor(target, sources)
-        .map(_.sourceIdentifier)
-        .map(mergeDigitalIntoPhysicalSierraTarget)
-        .flatMap(rule => rule(target, sources))
-        .getOrElse(Nil)
-
-    val rules =
-      List(
-        mergeIntoCalmTarget,
-        mergeMetsIntoSingleItemSierraTarget,
-        mergeMiroIntoSingleOrZeroItemSierraTarget,
-        mergeMetsIntoMultiItemSierraTarget)
-
-    val singleItemSierraIds =
-      mergeMetsIntoSingleItemSierraTarget(target, sources) |+|
-        mergeMiroIntoSingleOrZeroItemSierraTarget(target, sources)
-
-    val ids =
-      (mergeIntoCalmTarget(target, sources)
-        .orElse(singleItemSierraIds)
-        .orElse(mergeMetsIntoMultiItemSierraTarget(target, sources))
-        .getOrElse(target.otherIdentifiers) ++ digitisedSierraIds).distinct
+    val ids = (
+      mergeDigitalIntoPhysicalSierraTarget(target, sources) |+|
+        mergeIntoCalmTarget(target, sources)
+          .orElse(mergeMiroIntoSingleOrZeroItemSierraTarget(target, sources))
+    ).getOrElse(target.otherIdentifiers).distinct
 
     val mergedSources = sources.filter { source =>
-      rules.exists(_(target, source).isDefined)
+      List(
+        mergeIntoCalmTarget,
+        mergeMiroIntoSingleOrZeroItemSierraTarget
+      ).exists(_(target, source).isDefined)
     } ++ findFirstLinkedDigitisedSierraWorkFor(target, sources)
 
     FieldMergeResult(
       data = ids,
       sources = mergedSources.distinct
     )
-  }
-
-  private val mergeMetsIntoSingleItemSierraTarget = new PartialRule {
-    val isDefinedForTarget: WorkPredicate = WorkPredicates.singleItemSierra
-    val isDefinedForSource: WorkPredicate =
-      WorkPredicates.singleDigitalItemMetsWork
-
-    def rule(target: UnidentifiedWork,
-             sources: NonEmptyList[TransformedBaseWork]): FieldData =
-      target.otherIdentifiers
   }
 
   private val mergeMiroIntoSingleOrZeroItemSierraTarget = new PartialRule {
@@ -80,16 +56,6 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
       target.otherIdentifiers ++ sources.toList.map(_.sourceIdentifier)
   }
 
-  private val mergeMetsIntoMultiItemSierraTarget = new PartialRule {
-    val isDefinedForTarget: WorkPredicate = WorkPredicates.multiItemSierra
-    val isDefinedForSource: WorkPredicate =
-      WorkPredicates.singleDigitalItemMetsWork
-
-    def rule(target: UnidentifiedWork,
-             sources: NonEmptyList[TransformedBaseWork]): FieldData =
-      target.otherIdentifiers
-  }
-
   private val mergeIntoCalmTarget = new PartialRule {
     val isDefinedForTarget: WorkPredicate =
       WorkPredicates.singlePhysicalItemCalmWork
@@ -101,15 +67,14 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
       target.otherIdentifiers ++ sources.toList.map(_.sourceIdentifier)
   }
 
-  private val mergeDigitalIntoPhysicalSierraTarget =
-    (linkedSierraSourceId: SourceIdentifier) =>
-      new PartialRule {
-        val isDefinedForTarget: WorkPredicate = WorkPredicates.physicalSierra
-        val isDefinedForSource: WorkPredicate =
-          WorkPredicates.sierraWorkWithId(linkedSierraSourceId)
+  private val mergeDigitalIntoPhysicalSierraTarget = new PartialRule {
+    val isDefinedForTarget: WorkPredicate = WorkPredicates.physicalSierra
+    val isDefinedForSource: WorkPredicate = WorkPredicates.sierraWork
 
-        def rule(target: UnidentifiedWork,
-                 sources: NonEmptyList[TransformedBaseWork]): FieldData =
-          target.otherIdentifiers ++ sources.toList.flatMap(_.identifiers)
-    }
+    def rule(target: UnidentifiedWork,
+             sources: NonEmptyList[TransformedBaseWork]): FieldData =
+      findFirstLinkedDigitisedSierraWorkFor(target, sources.toList)
+        .map(target.otherIdentifiers ++ _.identifiers)
+        .getOrElse(Nil)
+  }
 }
