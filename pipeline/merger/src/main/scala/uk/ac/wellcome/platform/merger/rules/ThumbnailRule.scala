@@ -33,7 +33,7 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
         getMetsThumbnail,
         getMinMiroThumbnail
       ).flatMap { rule =>
-        rule.mergedSources(target, sources))
+        rule.mergedSources(target, sources)
       }.distinct
     )
 

@@ -64,6 +64,15 @@ trait FieldMergeRule {
               source: TransformedBaseWork): Option[FieldData] =
       apply(target, List(source))
 
+    /*
+     * This gets the list of sources that a partial rule can merge, given a
+     * target and a complete list of sources.
+     *
+     * For this list to be non-empty the following must be satisfied:
+     * - `isDefinedForTarget(target)` is `true`
+     * - `isDefinedForSourceList(sources)` is `true`
+     * - `isDefinedForSource(source)` is `true` for at least one element of `sources`
+     */
     def mergedSources(
       target: UnidentifiedWork,
       sources: Seq[TransformedBaseWork]): Seq[TransformedBaseWork] =
