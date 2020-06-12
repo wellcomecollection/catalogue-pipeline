@@ -1,17 +1,17 @@
 data "aws_ssm_parameter" "sierra_bib_merger" {
-  name = "/sierra_adapter/images/latest/sierra_bib_merger"
+  name = "/sierra_adapter/images/${var.release_label}/sierra_bib_merger"
 }
 
 data "aws_ssm_parameter" "sierra_item_merger" {
-  name = "/sierra_adapter/images/latest/sierra_item_merger"
+  name = "/sierra_adapter/images/${var.release_label}/sierra_item_merger"
 }
 
 data "aws_ssm_parameter" "sierra_items_to_dynamo" {
-  name = "/sierra_adapter/images/latest/sierra_items_to_dynamo"
+  name = "/sierra_adapter/images/${var.release_label}/sierra_items_to_dynamo"
 }
 
 data "aws_ssm_parameter" "sierra_reader" {
-  name = "/sierra_adapter/images/latest/sierra_reader"
+  name = "/sierra_adapter/images/${var.release_label}/sierra_reader"
 }
 
 locals {

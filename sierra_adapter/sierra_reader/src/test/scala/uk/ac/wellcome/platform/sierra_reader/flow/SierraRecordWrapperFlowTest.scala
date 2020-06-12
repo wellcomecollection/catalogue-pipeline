@@ -8,7 +8,8 @@ import io.circe.Json
 import io.circe.parser._
 import org.scalatest.compatible.Assertion
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
@@ -22,7 +23,7 @@ import uk.ac.wellcome.sierra_adapter.model.{
 }
 
 class SierraRecordWrapperFlowTest
-    extends FunSpec
+    extends AnyFunSpec
     with Akka
     with ScalaFutures
     with IntegrationPatience

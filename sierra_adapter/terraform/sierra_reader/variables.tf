@@ -1,7 +1,7 @@
 variable "resource_type" {}
 
 variable "bucket_name" {}
-variable "windows_topic_arn" {}
+variable "windows_topic_arns" {}
 
 variable "sierra_fields" {}
 
@@ -10,6 +10,7 @@ variable "sierra_api_url" {}
 variable "container_image" {}
 
 variable "cluster_name" {}
+variable "cluster_arn" {}
 variable "vpc_id" {}
 
 variable "dlq_alarm_arn" {}
@@ -26,5 +27,6 @@ variable "subnets" {
 }
 
 variable "namespace_id" {}
+variable "namespace" {}
 variable "interservice_security_group_id" {}
 variable "service_egress_security_group_id" {}

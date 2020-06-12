@@ -20,6 +20,7 @@ object WorkPredicates {
     "miro-image-number")
 
   val sierraWork: WorkPredicate = sierraIdentified
+  val zeroItem: WorkPredicate = work => work.data.items.isEmpty
   val singleItem: WorkPredicate = work => work.data.items.size == 1
   val multiItem: WorkPredicate = work => work.data.items.size > 1
 
@@ -47,6 +48,7 @@ object WorkPredicates {
     allDigitalLocations
   )
 
+  val zeroItemSierra: WorkPredicate = satisfiesAll(sierraWork, zeroItem)
   val singleItemSierra: WorkPredicate = satisfiesAll(sierraWork, singleItem)
   val multiItemSierra: WorkPredicate = satisfiesAll(sierraWork, multiItem)
 

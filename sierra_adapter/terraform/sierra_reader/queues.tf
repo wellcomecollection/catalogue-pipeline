@@ -1,8 +1,8 @@
 module "windows_queue" {
   source = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
 
-  queue_name = "sierra_${var.resource_type}_windows"
-  topic_arns = [var.windows_topic_arn]
+  queue_name = "${var.namespace}-sierra_${var.resource_type}_windows"
+  topic_arns = var.windows_topic_arns
 
   # Ensure that messages are spread around -- if we get a timeout from the
   # Sierra API, we don't retry _too_ quickly.
@@ -20,7 +20,7 @@ module "windows_queue" {
 
 module "scaling_alarm" {
   source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.2"
-  queue_name = "sierra_${var.resource_type}_windows"
+  queue_name = module.windows_queue.name
 
   queue_high_actions = [module.sierra_reader_service.scale_up_arn]
   queue_low_actions  = [module.sierra_reader_service.scale_down_arn]

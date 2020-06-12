@@ -21,6 +21,7 @@ class OtherIdentifiersRuleTest
   val miroWorks = (0 to 3).map(_ => createMiroWork).toList
   val metsWorks = (0 to 3).map(_ => createUnidentifiedInvisibleMetsWork).toList
   val physicalSierra = createSierraPhysicalWork
+  val zeroItemPhysicalSierra = createUnidentifiedSierraWork
   val sierraWorkWithTwoPhysicalItems = createSierraWorkWithTwoPhysicalItems
   val calmWork =
     createUnidentifiedCalmWork
@@ -48,6 +49,16 @@ class OtherIdentifiersRuleTest
     }
   }
 
+  it("merges Miro source IDs into a Sierra work with zero items") {
+    inside(OtherIdentifiersRule.merge(zeroItemPhysicalSierra, miroWorks)) {
+      case FieldMergeResult(otherIdentifiers, mergedSources) =>
+        otherIdentifiers should contain theSameElementsAs
+          miroWorks.map(_.sourceIdentifier) ++ zeroItemPhysicalSierra.otherIdentifiers
+
+        mergedSources should contain theSameElementsAs miroWorks
+    }
+  }
+
   it(
     "merges Miro source IDs into Sierra work with single item with METS and miro merge candidates") {
     inside(
@@ -57,7 +68,7 @@ class OtherIdentifiersRuleTest
         otherIdentifiers should contain theSameElementsAs miroWorks
           .map(_.sourceIdentifier) ++ physicalSierra.otherIdentifiers
 
-        mergedSources should contain theSameElementsAs (metsWorks ++ miroWorks)
+        mergedSources should contain theSameElementsAs miroWorks
     }
   }
 
@@ -97,14 +108,14 @@ class OtherIdentifiersRuleTest
     }
   }
 
-  it("does not merge any METS IDs and have them as a merged source") {
+  it("does not merge any METS IDs") {
     inside(OtherIdentifiersRule.merge(physicalSierra, metsWorks)) {
       case FieldMergeResult(otherIdentifiers, mergedSources) =>
         forAll(otherIdentifiers) { id =>
           id.identifierType.id should not be ("mets")
         }
 
-        mergedSources should be(metsWorks)
+        mergedSources shouldBe empty
     }
   }
 }

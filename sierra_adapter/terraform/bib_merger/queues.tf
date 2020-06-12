@@ -1,7 +1,7 @@
 module "updates_queue" {
   source = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
 
-  queue_name = "sierra_bibs_merger_queue"
+  queue_name = "${var.namespace}-sierra_bibs_merger_queue"
 
   topic_arns = [var.updates_topic_arn]
 
@@ -21,7 +21,7 @@ module "updates_queue" {
 
 module "scaling_alarm" {
   source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.2"
-  queue_name = "sierra_bibs_merger_queue"
+  queue_name = module.updates_queue.name
 
   queue_high_actions = [module.sierra_merger_service.scale_up_arn]
   queue_low_actions  = [module.sierra_merger_service.scale_down_arn]
