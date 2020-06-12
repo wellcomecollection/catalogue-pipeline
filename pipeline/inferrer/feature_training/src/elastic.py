@@ -3,24 +3,23 @@ import random
 import numpy as np
 from elasticsearch import Elasticsearch, helpers
 
-# The fields in the image documents which contain the feature vectors
-FEATURE_VECTOR_FIELDS = ["inferredData.features1", "inferredData.features2"]
-
 
 def get_random_documents(es_client, index_name, n):
     docs_count = es_client.count(index=index_name)["count"]
-    iterator = helpers.scan(
+    id_iterator = helpers.scan(
         client=es_client,
         index=index_name,
-        query={
-            "query": {"match_all": {}},
-            "_source": FEATURE_VECTOR_FIELDS
-        }
+        query={"query": {"match_all": {}}, "stored_fields": []}
     )
     iterator_indices = set(random.sample(range(docs_count), n))
-    sample = [doc for n, doc in enumerate(iterator) if n in iterator_indices]
+    ids_sample = [doc["_id"] for n, doc in enumerate(id_iterator) if n in iterator_indices]
+    docs = es_client.mget(
+        index=index_name,
+        body={"ids": ids_sample},
+        request_timeout=120.0
+    )
 
-    return sample
+    return docs["docs"]
 
 
 def get_random_feature_vectors(n_documents):
@@ -37,11 +36,13 @@ def get_random_feature_vectors(n_documents):
         es_client, os.environ["ES_INDEX"], n_documents
     )
 
-    docs = [doc["_source"]["doc"] for doc in documents["docs"]]
     feature_vectors = np.stack(
         [
-            np.concatenate([doc[field] for field in FEATURE_VECTOR_FIELDS], axis=0)
-            for doc in docs
+            np.concatenate([
+                doc["_source"]["inferredData"]["features1"],
+                doc["_source"]["inferredData"]["features2"]
+            ], axis=0)
+            for doc in documents
         ]
     )
 

@@ -9,6 +9,7 @@ N_GROUPS = 256
 # The number of clusters to find within each feature group
 N_CLUSTERS = 256
 
+
 @click.command()
 @click.option(
     "--sample_size", help="number of embeddings to train clusters on", default=25000
