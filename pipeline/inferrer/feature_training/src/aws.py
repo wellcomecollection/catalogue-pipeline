@@ -1,5 +1,13 @@
 import boto3
+import os
+import requests
 from botocore.exceptions import ClientError
+
+
+def get_ecs_container_metadata():
+    endpoint = os.environ["ECS_CONTAINER_METADATA_URI_V4"]
+    req = requests.get(endpoint)
+    return req.json()
 
 
 def get_s3_client():

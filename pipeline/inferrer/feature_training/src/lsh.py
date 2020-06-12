@@ -1,9 +1,11 @@
 import pickle
 import numpy as np
+import subprocess
 from datetime import datetime
 from sklearn.cluster import KMeans
 from sklearn.externals.joblib import Parallel, delayed
 from tqdm import tqdm
+from .aws import get_ecs_container_metadata
 from .parallel import tqdm_joblib
 
 
@@ -15,6 +17,25 @@ def split_features(feature_vectors, n_groups):
 def train_clusters(feature_group, m):
     clustering_alg = KMeans(n_clusters=m).fit(feature_group)
     return clustering_alg
+
+
+def get_object_name():
+    timestamp = datetime.now().isoformat()
+    try:
+        container_metadata = get_ecs_container_metadata()
+        image = container_metadata["Image"]
+        tag = image.split(":")[1]
+    except Exception as e:
+        try:
+            tag = subprocess.check_output([
+                'git', 'rev-parse', 'HEAD'
+            ]).decode('ascii').strip()
+        except Exception as e:
+            raise Exception(
+                "Could not fetch ECS image tag or find local git hash"
+            )
+
+    return f"{tag}/{timestamp}"
 
 
 def get_object_for_storage(feature_vectors, m, n, verbose=False):
@@ -29,6 +50,6 @@ def get_object_for_storage(feature_vectors, m, n, verbose=False):
 
     return {
         "object_binary": pickle.dumps(model_list),
-        "name": datetime.now().strftime("%Y-%m-%d"),
+        "name": get_object_name(),
         "prefix": "lsh_model",
     }
