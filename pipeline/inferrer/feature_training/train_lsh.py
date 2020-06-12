@@ -18,11 +18,16 @@ N_CLUSTERS = 256
     help="Name of the S3 bucket in which model data is stored",
     envvar="MODEL_DATA_BUCKET",
 )
-def main(sample_size, bucket_name):
+@click.option(
+    "--ssm-path",
+    help="The path of the SSM parameter in which to store the model key",
+    envvar="MODEL_SSM_PATH",
+)
+def main(sample_size, bucket_name, ssm_path):
     feature_vectors = get_random_feature_vectors(sample_size)
 
     model = get_object_for_storage(feature_vectors, N_CLUSTERS, N_GROUPS)
-    store_model(bucket_name=bucket_name, **model)
+    store_model(bucket_name=bucket_name, ssm_path=ssm_path, **model)
 
 
 if __name__ == "__main__":

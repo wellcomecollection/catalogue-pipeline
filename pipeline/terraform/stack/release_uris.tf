@@ -22,6 +22,14 @@ data "aws_ssm_parameter" "image_ids" {
   name = "/catalogue_pipeline/images/${var.release_label}/${local.services[count.index]}"
 }
 
+data "aws_ssm_parameter" "inferrer_lsh_model_key" {
+  name = "/catalogue_pipeline/config/models/${var.release_label}/lsh_model"
+}
+
+data "aws_ssm_parameter" "latest_lsh_model_key" {
+  name = "/catalogue_pipeline/config/models/latest/lsh_model"
+}
+
 locals {
   image_ids = zipmap(local.services, data.aws_ssm_parameter.image_ids.*.value)
 

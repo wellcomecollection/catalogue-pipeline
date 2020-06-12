@@ -5,6 +5,7 @@ locals {
 
   env_vars = {
     MODEL_DATA_BUCKET = var.inferrer_model_data_bucket_name,
+    MODEL_SSM_PATH    = data.aws_ssm_parameter.latest_lsh_model_key.name
     ES_INDEX          = var.es_images_index
   }
 
@@ -54,12 +55,21 @@ module "task_definition_image_training" {
 
 resource "aws_iam_role_policy" "write_model_artifact" {
   role   = module.task_definition_image_training.task_role_name
-  policy = data.aws_iam_policy_document.allow_model_write
+  policy = data.aws_iam_policy_document.allow_model_write.json
 }
 
 data "aws_iam_policy_document" "allow_model_write" {
   statement {
-    // Actions  = write s3, ssm
-    // Resources = model bucket, ssm
+    actions = [
+      "s3:PutObject",
+      "s3:ListBucket",
+      "ssm:PutParameter"
+    ]
+
+    resources = [
+      "arn:aws:s3:::${var.inferrer_model_data_bucket_name}",
+      "arn:aws:s3:::${var.inferrer_model_data_bucket_name}/*",
+      data.aws_ssm_parameter.latest_lsh_model_key.arn
+    ]
   }
 }
