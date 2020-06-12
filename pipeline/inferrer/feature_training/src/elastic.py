@@ -30,10 +30,11 @@ def get_random_feature_vectors(n_documents):
     es_client = Elasticsearch(
         host=os.environ["ES_HOST"],
         http_auth=(os.environ["ES_USERNAME"], os.environ["ES_PASSWORD"]),
+        use_ssl=(os.getenv("ES_PROTOCOL", "https") == "https")
     )
 
     documents = get_random_documents(
-        es_client, os.environ["ES_INDEX_NAME"], n_documents
+        es_client, os.environ["ES_INDEX"], n_documents
     )
 
     docs = [doc["_source"]["doc"] for doc in documents["docs"]]
