@@ -61,6 +61,33 @@ class SierraItemMergerFeatureTest
     }
   }
 
+  it("drops the message if the version in the items VHS has advanced") {
+    withLocalSqsQueue { queue =>
+      val bibId = createSierraBibNumber
+      val itemRecord = createSierraItemRecordWith(
+        bibIds = List(bibId)
+      )
+      val id = itemRecord.id.withoutCheckDigit
+      val key = Version(id, 0)
+      val itemRecordStore =
+        createStore[SierraItemRecord](Map(key.copy(version = 1) -> itemRecord))
+      val sierraTransformableStore = createStore[SierraTransformable]()
+      withSierraWorkerService(queue, itemRecordStore, sierraTransformableStore) {
+        case (service, messageSender) =>
+          service.run()
+
+          sendNotificationToSQS(queue = queue, key)
+
+          Thread.sleep(500)
+
+          eventually {
+            itemRecordStore.getLatest(id).right.get.id.version shouldBe 1
+            messageSender.getMessages[Version[String, Int]] shouldBe empty
+          }
+      }
+    }
+  }
+
   it("stores multiple items from SQS") {
     withLocalSqsQueue { queue =>
       val bibId1 = createSierraBibNumber
