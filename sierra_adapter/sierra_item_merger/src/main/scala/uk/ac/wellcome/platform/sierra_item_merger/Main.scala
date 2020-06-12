@@ -5,11 +5,17 @@ import akka.stream.Materializer
 import com.typesafe.config.Config
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import uk.ac.wellcome.platform.sierra_item_merger.services.{SierraItemMergerUpdaterService, SierraItemMergerWorkerService}
+import uk.ac.wellcome.platform.sierra_item_merger.services.{
+  SierraItemMergerUpdaterService,
+  SierraItemMergerWorkerService
+}
 import uk.ac.wellcome.platform.sierra_item_merger.store.ItemStore
 import uk.ac.wellcome.sierra_adapter.config.builders.SierraVHSBuilder
 import uk.ac.wellcome.sierra_adapter.model.Implicits._
-import uk.ac.wellcome.sierra_adapter.model.{SierraItemRecord, SierraTransformable}
+import uk.ac.wellcome.sierra_adapter.model.{
+  SierraItemRecord,
+  SierraTransformable
+}
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 
@@ -24,7 +30,9 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildMaterializer()
 
     val stransformableStore =
-      SierraVHSBuilder.buildSierraVHS[SierraTransformable](config, namespace = "vhs-sierra-transformable")
+      SierraVHSBuilder.buildSierraVHS[SierraTransformable](
+        config,
+        namespace = "vhs-sierra-transformable")
 
     val updaterService = new SierraItemMergerUpdaterService(
       versionedHybridStore = stransformableStore
@@ -33,7 +41,9 @@ object Main extends WellcomeTypesafeApp {
     new SierraItemMergerWorkerService(
       sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
       sierraItemMergerUpdaterService = updaterService,
-      itemRecordStore = new ItemStore(SierraVHSBuilder.buildSierraVHS[SierraItemRecord](config,namespace = "vhs-items")),
+      itemRecordStore = new ItemStore(
+        SierraVHSBuilder
+          .buildSierraVHS[SierraItemRecord](config, namespace = "vhs-items")),
       messageSender =
         SNSBuilder.buildSNSMessageSender(config, subject = "Sierra item merger")
     )

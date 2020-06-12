@@ -108,12 +108,13 @@ class SierraReaderWorkerService(
         s"windows_${readerConfig.resourceType.toString}_complete/${windowManager
           .buildWindowLabel(window)}"
 
-      Future.fromTry(S3TypedStore[String]
-        .put(ObjectLocation(s3Config.bucketName, key))(
-          TypedStoreEntry("", Map()))
-        .left
-        .map { _.e }
-        .toTry)
+      Future.fromTry(
+        S3TypedStore[String]
+          .put(ObjectLocation(s3Config.bucketName, key))(
+            TypedStoreEntry("", Map()))
+          .left
+          .map { _.e }
+          .toTry)
     }
   }
 
