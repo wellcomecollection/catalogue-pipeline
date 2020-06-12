@@ -1,5 +1,5 @@
 import os
-
+import random
 import numpy as np
 from elasticsearch import Elasticsearch, helpers
 
@@ -7,42 +7,32 @@ from elasticsearch import Elasticsearch, helpers
 FEATURE_VECTOR_FIELDS = ["inferredData.features1", "inferredData.features2"]
 
 
-def get_all_ids(es_client, index_name):
-    response = helpers.scan(
+def get_random_documents(es_client, index_name, n):
+    docs_count = es_client.count(index=index_name)["count"]
+    iterator = helpers.scan(
         client=es_client,
         index=index_name,
         query={
             "query": {"match_all": {}},
-            "_source": []
-        },
+            "_source": FEATURE_VECTOR_FIELDS
+        }
     )
+    iterator_indices = set(random.sample(range(docs_count), n))
+    sample = [doc for n, doc in enumerate(iterator) if n in iterator_indices]
 
-    return [hit["_id"] for hit in list(response)]
-
-
-def get_random_documents(es_client, index_name, n):
-    all_ids = get_all_ids(es_client, index_name)
-    if len(all_ids) > n:
-        query_ids = np.random.choice(all_ids, n, replace=False).tolist()
-    else:
-        query_ids = all_ids
-
-    response = es_client.mget(
-        index=index_name,
-        body={"ids": query_ids},
-        _source=FEATURE_VECTOR_FIELDS
-    )
-
-    return response
+    return sample
 
 
 def get_random_feature_vectors(n_documents):
     es_client = Elasticsearch(
         host=os.environ["ES_HOST"],
+        port=os.environ["ES_PORT"],
         http_auth=(os.environ["ES_USERNAME"], os.environ["ES_PASSWORD"]),
+        scheme=os.environ["ES_PROTOCOL"],
         use_ssl=(os.getenv("ES_PROTOCOL", "https") == "https")
     )
 
+    print(f"Fetching {n_documents} random documents")
     documents = get_random_documents(
         es_client, os.environ["ES_INDEX"], n_documents
     )
