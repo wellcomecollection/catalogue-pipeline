@@ -27,13 +27,13 @@ def get_object_name():
         tag = image.split(":")[1]
     except Exception as e:
         try:
-            tag = subprocess.check_output([
-                'git', 'rev-parse', 'HEAD'
-            ]).decode('ascii').strip()
-        except Exception as e:
-            raise Exception(
-                "Could not fetch ECS image tag or find local git hash"
+            tag = (
+                subprocess.check_output(["git", "rev-parse", "HEAD"])
+                .decode("ascii")
+                .strip()
             )
+        except Exception as e:
+            raise Exception("Could not fetch ECS image tag or find local git hash")
 
     return f"{tag}/{timestamp}"
 
