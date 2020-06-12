@@ -255,7 +255,7 @@ endef
 #
 # Args:
 #	$1 - Name of the ECS service.
-#	$2 - Path to th`e associated Dockerfile.
+#	$2 - Path to the associated Dockerfile.
 #	$3 - Stack name
 #   $4 - ECS Base URI
 #   $5 - Registry ID
