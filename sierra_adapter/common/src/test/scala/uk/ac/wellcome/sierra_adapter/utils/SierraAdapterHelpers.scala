@@ -1,89 +1,33 @@
 package uk.ac.wellcome.sierra_adapter.utils
 
-import io.circe.Decoder
 import org.scalatest.Assertion
-import uk.ac.wellcome.fixtures._
-import uk.ac.wellcome.messaging.fixtures.{MessageInfo, Messaging}
-import uk.ac.wellcome.messaging.fixtures.SNS.Topic
-import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.sierra_adapter.model.Implicits._
-import uk.ac.wellcome.storage.ObjectStore
-import uk.ac.wellcome.storage.dynamo._
-import uk.ac.wellcome.storage.fixtures.LocalDynamoDb.Table
-import uk.ac.wellcome.storage.fixtures.LocalVersionedHybridStore
-import uk.ac.wellcome.storage.fixtures.S3.Bucket
-import uk.ac.wellcome.storage.vhs.{
-  EmptyMetadata,
-  HybridRecord,
-  VersionedHybridStore
-}
+import org.scalatest.matchers.should.Matchers
+import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.sierra_adapter.model.SierraTransformable
+import uk.ac.wellcome.storage.Version
+import uk.ac.wellcome.storage.maxima.memory.MemoryMaxima
+import uk.ac.wellcome.storage.store.VersionedStore
+import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryVersionedStore}
+import uk.ac.wellcome.json.JsonUtil._
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+trait SierraAdapterHelpers extends Matchers {
+  type SierraVHS = VersionedStore[String, Int, SierraTransformable]
 
-trait SierraAdapterHelpers extends LocalVersionedHybridStore with Messaging {
-  type SierraVHS = VersionedHybridStore[SierraTransformable,
-                                        EmptyMetadata,
-                                        ObjectStore[SierraTransformable]]
+  def createStore[T](
+    data: Map[Version[String, Int], T] = Map[Version[String, Int], T]())
+    : MemoryVersionedStore[String, T] =
+    new MemoryVersionedStore(new MemoryStore(data) with MemoryMaxima[String, T])
 
-  def withSierraVHS[R](bucket: Bucket, table: Table)(
-    testWith: TestWith[SierraVHS, R]): R =
-    withTypeVHS[SierraTransformable, EmptyMetadata, R](
-      bucket = bucket,
-      table = table) { vhs =>
-      testWith(vhs)
-    }
+  def assertStored[T](id: String,
+                      t: T,
+                      store: VersionedStore[String, Int, T]): Assertion =
+    store.getLatest(id).right.get.identifiedT shouldBe t
 
-  def storeInVHS(transformable: SierraTransformable,
-                 hybridStore: SierraVHS): Future[Unit] =
-    hybridStore
-      .updateRecord(id = transformable.sierraId.withoutCheckDigit)(
-        ifNotExisting = (transformable, EmptyMetadata()))(
-        ifExisting = (t, m) =>
-          throw new RuntimeException(
-            s"Found record ${transformable.sierraId}, but VHS should be empty")
-      )
-      .map(_ => ())
-
-  def storeInVHS(transformables: List[SierraTransformable],
-                 hybridStore: SierraVHS): Future[List[Unit]] =
-    Future.sequence(
-      transformables.map { t =>
-        storeInVHS(t, hybridStore = hybridStore)
-      }
-    )
-
-  def assertStored(transformable: SierraTransformable,
-                   table: Table): Assertion =
-    assertStored[SierraTransformable](
-      table = table,
-      id = transformable.sierraId.withoutCheckDigit,
-      record = transformable
-    )
-
-  def assertStoredAndSent[T](t: T, id: String, topic: Topic, table: Table)(
-    implicit decoder: Decoder[T]): Assertion = {
-    val hybridRecord = getHybridRecord(table, id = id)
-
-    val storedTransformable = getObjectFromS3[T](
-      bucket = Bucket(hybridRecord.location.namespace),
-      key = hybridRecord.location.key
-    )
-    storedTransformable shouldBe t
-
-    listMessagesReceivedFromSNS(topic).map { info: MessageInfo =>
-      fromJson[HybridRecord](info.message).get
-    } should contain(hybridRecord)
+  def assertStoredAndSent[T](id: Version[String, Int],
+                             t: T,
+                             store: VersionedStore[String, Int, T],
+                             messageSender: MemoryMessageSender): Assertion = {
+    assertStored(id.id, t, store)
+    messageSender.getMessages[Version[String, Int]] should contain(id)
   }
-
-  def assertStoredAndSent(transformable: SierraTransformable,
-                          topic: Topic,
-                          table: Table): Assertion =
-    assertStoredAndSent[SierraTransformable](
-      transformable,
-      id = transformable.sierraId.withoutCheckDigit,
-      topic = topic,
-      table = table
-    )
 }

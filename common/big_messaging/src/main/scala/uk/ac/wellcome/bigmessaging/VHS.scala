@@ -44,10 +44,7 @@ class VHSInternalStore[T, Metadata](
 
   override protected def createTypeStoreId(
     id: Version[String, Int]): ObjectLocation =
-    prefix.asLocation(
-      id.id.toString,
-      id.version.toString,
-      UUID.randomUUID().toString)
+    prefix.asLocation(id.id, id.version.toString, UUID.randomUUID().toString)
 }
 
 /** There are times when we want to be able to abstract away the fact that we

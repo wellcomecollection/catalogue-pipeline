@@ -1,20 +1,21 @@
 package uk.ac.wellcome.platform.sierra_reader.services
 
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
-import org.scalatest.Matchers
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.platform.sierra_reader.exceptions.SierraReaderException
 import uk.ac.wellcome.platform.sierra_reader.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.sierra_adapter.model.{SierraBibRecord, SierraItemRecord}
-import uk.ac.wellcome.storage.fixtures.S3
-import uk.ac.wellcome.storage.fixtures.S3.Bucket
+import uk.ac.wellcome.storage.ObjectLocation
+import uk.ac.wellcome.storage.fixtures.S3Fixtures
+import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 
 class SierraReaderWorkerServiceTest
-    extends FunSpec
-    with S3
+    extends AnyFunSpec
+    with S3Fixtures
     with SQS
     with Akka
     with Eventually
@@ -155,11 +156,13 @@ class SierraReaderWorkerServiceTest
 
   private def getBibRecordsFromS3(bucket: Bucket,
                                   key: String): List[SierraBibRecord] =
-    getObjectFromS3[List[SierraBibRecord]](bucket, key)
+    getObjectFromS3[List[SierraBibRecord]](
+      ObjectLocation(namespace = bucket.name, path = key))
 
   private def getItemRecordsFromS3(bucket: Bucket,
                                    key: String): List[SierraItemRecord] =
-    getObjectFromS3[List[SierraItemRecord]](bucket, key)
+    getObjectFromS3[List[SierraItemRecord]](
+      ObjectLocation(namespace = bucket.name, path = key))
 
   it("returns a SierraReaderException if it receives an invalid message") {
     val body =
