@@ -1,8 +1,8 @@
 resource "aws_s3_bucket" "sierra_adapter" {
-  bucket = "wellcomecollection-platform-adapters-sierra"
+  bucket = "wellcomecollection-platform-${local.namespace_hyphen}"
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 
   lifecycle_rule {

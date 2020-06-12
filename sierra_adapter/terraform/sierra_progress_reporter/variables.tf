@@ -5,3 +5,5 @@ variable "slack_access_token" {}
 variable "infra_bucket" {}
 
 variable "lambda_error_alarm_arn" {}
+variable "namespace" {
+}
