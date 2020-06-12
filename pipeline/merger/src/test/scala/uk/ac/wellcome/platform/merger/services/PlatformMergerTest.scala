@@ -24,6 +24,7 @@ class PlatformMergerTest
           sierraDigitised.sourceIdentifier,
           Some("Physical/digitised Sierra work")))
     ))
+  val zeroItemSierraWork = createUnidentifiedSierraWork
   private val multipleItemsSierraWork =
     createSierraWorkWithTwoPhysicalItems.copy(
       data = createSierraWorkWithTwoPhysicalItems.data.copy(
@@ -125,6 +126,42 @@ class PlatformMergerTest
     result.works should contain theSameElementsAs List(
       expectedMergedWork,
       expectedRedirectedWork)
+    result.images should contain theSameElementsAs List(
+      expectedImage
+    )
+  }
+
+  it("merges a zero-item Sierra work with a Miro work") {
+    val result = merger.merge(
+      works = Seq(zeroItemSierraWork, miroWork)
+    )
+
+    result.works.size shouldBe 2
+
+    val expectedMergedWork = zeroItemSierraWork.withData { data =>
+      data.copy(
+        otherIdentifiers = data.otherIdentifiers ++ miroWork.identifiers,
+        thumbnail = miroWork.data.thumbnail,
+        items = miroWork.data.items,
+        images = miroWork.data.images,
+        merged = true
+      )
+    }
+    val expectedRedirectedWork =
+      UnidentifiedRedirectedWork(
+        sourceIdentifier = miroWork.sourceIdentifier,
+        version = miroWork.version,
+        redirect = IdentifiableRedirect(zeroItemSierraWork.sourceIdentifier)
+      )
+    val expectedImage = miroWork.data.images.head mergeWith (
+      sourceWork = Identifiable(zeroItemSierraWork.sourceIdentifier),
+      fullText = createFulltext(List(zeroItemSierraWork, miroWork))
+    )
+
+    result.works should contain theSameElementsAs List(
+      expectedMergedWork,
+      expectedRedirectedWork
+    )
     result.images should contain theSameElementsAs List(
       expectedImage
     )
@@ -283,7 +320,7 @@ class PlatformMergerTest
 
     val expectedMergedWork = sierraPhysicalWork.withData { data =>
       data.copy(
-        otherIdentifiers = sierraPhysicalWork.data.otherIdentifiers ++ miroWork.identifiers ++ sierraDigitised.identifiers,
+        otherIdentifiers = sierraPhysicalWork.data.otherIdentifiers ++ sierraDigitised.identifiers ++ miroWork.identifiers,
         thumbnail = metsWork.data.thumbnail,
         items = List(
           sierraItem.copy(
