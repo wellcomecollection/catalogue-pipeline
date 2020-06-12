@@ -62,8 +62,27 @@ def train_new_model(pipeline_name):
 
 
 @cli.command()
-def deploy_model():
-    pass
+@click.option(
+    "--from-label", help="The release label to deploy from", default="latest"
+)
+@click.option(
+    "--to-label", help="The release label to deploy to", required=True
+)
+def deploy_model(from_label, to_label):
+    ssm_path_template = "/catalogue_pipeline/config/models/%s/lsh_model"
+    ssm_client = session.client("ssm")
+    from_value = ssm_client.get_parameter(
+        Name=(ssm_path_template % from_label)
+    )["Parameter"]["Value"]
+
+    print(f"Updating {to_label} to '{from_value}'...")
+    ssm_client.put_parameter(
+        Name=(ssm_path_template % to_label),
+        Value=from_value,
+        Overwrite=True,
+        Type="String"
+    )
+    print(f"Updated {to_label} to '{from_value}'")
 
 
 if __name__ == "__main__":
