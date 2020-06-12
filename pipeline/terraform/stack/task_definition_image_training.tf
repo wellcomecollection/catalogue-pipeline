@@ -73,3 +73,15 @@ data "aws_iam_policy_document" "allow_model_write" {
     ]
   }
 }
+
+module "app_permissions" {
+  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v2.4.1"
+  secrets   = local.secret_env_vars
+  role_name = module.task_definition_image_training.task_execution_role_name
+}
+
+module "log_router_permissions" {
+  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v2.4.1"
+  secrets   = module.log_router_container.shared_secrets_logging
+  role_name = module.task_definition_image_training.task_execution_role_name
+}
