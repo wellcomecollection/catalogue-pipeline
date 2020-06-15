@@ -9,7 +9,7 @@ import uk.ac.wellcome.bigmessaging.message.{
   RemoteNotification
 }
 import uk.ac.wellcome.storage.{Identified, NotFoundError, ObjectLocation}
-import uk.ac.wellcome.storage.store.{TypedStore, TypedStoreEntry}
+import uk.ac.wellcome.storage.store.TypedStore
 
 import scala.util.{Failure, Success, Try}
 
@@ -27,7 +27,7 @@ trait BigMessageReader[T] extends Logging {
 
       case remoteNotification: RemoteNotification => {
         typedStore.get(remoteNotification.location) match {
-          case Right(Identified(_, TypedStoreEntry(value, _))) =>
+          case Right(Identified(_, value)) =>
             Success(value)
           case Left(_: NotFoundError) =>
             Failure(new Exception(s"Nothing at ${remoteNotification.location}"))

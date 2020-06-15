@@ -13,7 +13,6 @@ import uk.ac.wellcome.bigmessaging.message.{
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.storage.streaming.Codec._
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.storage.store.TypedStoreEntry
 import uk.ac.wellcome.storage.{Identified, ObjectLocation}
 
 import scala.util.{Failure, Success}
@@ -55,9 +54,10 @@ class BigMessageSenderTest
     val location = notification.asInstanceOf[RemoteNotification].location
 
     sender.typedStore.get(location) shouldBe Right(
-      Identified[ObjectLocation, TypedStoreEntry[Shape]](
+      Identified[ObjectLocation, Shape](
         location,
-        TypedStoreEntry(redSquare, Map.empty)))
+        redSquare)
+    )
   }
 
   it("gives distinct keys when sending the same message twice") {

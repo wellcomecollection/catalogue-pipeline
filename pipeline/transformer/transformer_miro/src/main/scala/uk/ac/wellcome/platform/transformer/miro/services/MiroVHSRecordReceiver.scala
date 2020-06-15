@@ -14,7 +14,7 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 
-import uk.ac.wellcome.storage.store.{Store, TypedStoreEntry}
+import uk.ac.wellcome.storage.store.Store
 import uk.ac.wellcome.storage.{Identified, ObjectLocation}
 
 // In future we should just receive the ID and version from the adapter as the
@@ -30,7 +30,7 @@ case class BackwardsCompatObjectLocation(namespace: String, key: String)
 
 class MiroVHSRecordReceiver[MsgDestination](
   msgSender: BigMessageSender[MsgDestination, TransformedBaseWork],
-  store: Store[ObjectLocation, TypedStoreEntry[MiroRecord]])(
+  store: Store[ObjectLocation, MiroRecord])(
   implicit ec: ExecutionContext)
     extends Logging {
 
@@ -68,7 +68,7 @@ class MiroVHSRecordReceiver[MsgDestination](
     record match {
       case HybridRecord(_, _, BackwardsCompatObjectLocation(namespace, path)) =>
         store.get(ObjectLocation(namespace, path)) match {
-          case Right(Identified(_, TypedStoreEntry(miroRecord, _))) =>
+          case Right(Identified(_, miroRecord)) =>
             Success(miroRecord)
           case Left(error) => Failure(error.e)
         }

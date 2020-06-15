@@ -13,7 +13,7 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.exceptions.JsonDecodingError
 import uk.ac.wellcome.storage.ObjectLocation
 import uk.ac.wellcome.storage.generators.ObjectLocationGenerators
-import uk.ac.wellcome.storage.store.{TypedStore, TypedStoreEntry}
+import uk.ac.wellcome.storage.store.TypedStore
 
 import scala.util.{Failure, Success}
 
@@ -40,7 +40,7 @@ class BigMessageReaderTest
     val reader = createReader(store)
     val objectLocation = createObjectLocation
 
-    store.put(objectLocation)(TypedStoreEntry(blueTriangle, Map.empty))
+    store.put(objectLocation)(blueTriangle)
 
     val notification = RemoteNotification(objectLocation)
 

@@ -29,7 +29,6 @@ import uk.ac.wellcome.sierra_adapter.model.{
 }
 import uk.ac.wellcome.storage.{Identified, ObjectLocation}
 import uk.ac.wellcome.storage.s3.S3Config
-import uk.ac.wellcome.storage.store.TypedStoreEntry
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.typesafe.Runnable
 
@@ -68,7 +67,7 @@ class SierraReaderWorkerService(
     } yield ()
 
   private def runSierraStream(window: String, windowStatus: WindowStatus)
-    : Future[Identified[ObjectLocation, TypedStoreEntry[String]]] = {
+    : Future[Identified[ObjectLocation, String]] = {
 
     info(s"Running the stream with window=$window and status=$windowStatus")
 
@@ -110,8 +109,7 @@ class SierraReaderWorkerService(
 
       Future.fromTry(
         S3TypedStore[String]
-          .put(ObjectLocation(s3Config.bucketName, key))(
-            TypedStoreEntry("", Map()))
+          .put(ObjectLocation(s3Config.bucketName, key))("")
           .left
           .map { _.e }
           .toTry)

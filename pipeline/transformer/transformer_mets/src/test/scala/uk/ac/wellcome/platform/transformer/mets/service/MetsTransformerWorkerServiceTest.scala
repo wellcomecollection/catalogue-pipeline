@@ -25,7 +25,7 @@ import uk.ac.wellcome.platform.transformer.mets.store.TemporaryCredentialsStore
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
-import uk.ac.wellcome.storage.store.{TypedStoreEntry, VersionedStore}
+import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.{Identified, ObjectLocation, Version}
 
 class MetsTransformerWorkerServiceTest
@@ -173,8 +173,7 @@ class MetsTransformerWorkerServiceTest
     val rootPath = "data"
     val key = for {
       _ <- S3TypedStore[String].put(
-        ObjectLocation(metsBucket.name, s"$rootPath/$name"))(
-        TypedStoreEntry(mets, Map()))
+        ObjectLocation(metsBucket.name, s"$rootPath/$name"))(mets)
       entry = MetsLocation(metsBucket.name, rootPath, 1, name, List())
       key <- dynamoStore.put(Version(name, version))(entry)
     } yield key

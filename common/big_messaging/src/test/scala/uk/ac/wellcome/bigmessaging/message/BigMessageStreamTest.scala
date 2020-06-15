@@ -15,7 +15,7 @@ import uk.ac.wellcome.messaging.fixtures.SQS.{Queue, QueuePair}
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 import uk.ac.wellcome.storage.streaming.Codec._
 import uk.ac.wellcome.storage.ObjectLocation
-import uk.ac.wellcome.storage.store.{TypedStore, TypedStoreEntry}
+import uk.ac.wellcome.storage.store.TypedStore
 import scala.collection.immutable.Map
 import scala.concurrent.Future
 import scala.util.Random
@@ -101,8 +101,7 @@ class BigMessageStreamTest
     val s3key = Random.alphanumeric take 10 mkString
     val location = ObjectLocation(namespace = randomAlphanumeric, path = s3key)
 
-    typedStore.put(location)(
-      TypedStoreEntry(exampleObject, metadata = Map.empty))
+    typedStore.put(location)(exampleObject)
 
     sendNotificationToSQS[MessageNotification](
       queue = queue,
