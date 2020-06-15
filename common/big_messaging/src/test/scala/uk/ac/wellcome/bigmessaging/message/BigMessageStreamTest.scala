@@ -7,16 +7,14 @@ import io.circe.Decoder
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import software.amazon.awssdk.services.cloudwatch.model.StandardUnit
-import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.messaging.fixtures.SQS.{Queue, QueuePair}
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
-import uk.ac.wellcome.storage.streaming.Codec._
 import uk.ac.wellcome.storage.ObjectLocation
-import uk.ac.wellcome.storage.store.TypedStore
-import scala.collection.immutable.Map
+import uk.ac.wellcome.storage.store.Store
+import uk.ac.wellcome.storage.store.memory.MemoryStore
 import scala.concurrent.Future
 import scala.util.Random
 
@@ -58,15 +56,15 @@ class BigMessageStreamTest
 
   describe("large messages (>256KB)") {
     it("reads messages off a queue, processes them and deletes them") {
-      implicit val typedStore: TypedStore[ObjectLocation, ExampleObject] =
-        MemoryTypedStoreCompanion[ObjectLocation, ExampleObject]
+      implicit val store: Store[ObjectLocation, ExampleObject] =
+        new MemoryStore(Map.empty)
 
       withMessageStreamFixtures {
         case (messageStream, QueuePair(queue, dlq), _) => {
           val messages = createMessages(count = 3)
 
           messages.foreach { exampleObject =>
-            sendRemoteNotification(typedStore, queue, exampleObject)
+            sendRemoteNotification(store, queue, exampleObject)
           }
 
           val received = new ConcurrentLinkedQueue[ExampleObject]()
@@ -94,14 +92,14 @@ class BigMessageStreamTest
     )
 
   private def sendRemoteNotification(
-    typedStore: TypedStore[ObjectLocation, ExampleObject],
+    store: Store[ObjectLocation, ExampleObject],
     queue: Queue,
     exampleObject: ExampleObject,
   ): Unit = {
     val s3key = Random.alphanumeric take 10 mkString
     val location = ObjectLocation(namespace = randomAlphanumeric, path = s3key)
 
-    typedStore.put(location)(exampleObject)
+    store.put(location)(exampleObject)
 
     sendNotificationToSQS[MessageNotification](
       queue = queue,
@@ -322,10 +320,10 @@ class BigMessageStreamTest
                        R]
   )(implicit
     decoderT: Decoder[ExampleObject],
-    typedStore: TypedStore[ObjectLocation, ExampleObject] =
-      MemoryTypedStoreCompanion[ObjectLocation, ExampleObject]): R =
+    store: Store[ObjectLocation, ExampleObject] =
+      new MemoryStore(Map.empty)): R =
     withActorSystem { implicit actorSystem =>
-      withLocalSqsQueueAndDlq {
+      withLocalSqsQueuePair() {
         case queuePair @ QueuePair(queue, _) =>
           val metrics = new MemoryMetrics[StandardUnit]()
           withBigMessageStream[ExampleObject, R](queue, metrics) { stream =>

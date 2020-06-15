@@ -4,7 +4,6 @@ import io.circe.Decoder
 import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
 import uk.ac.wellcome.bigmessaging.message.{
   InlineNotification,
   RemoteNotification
@@ -13,7 +12,8 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.exceptions.JsonDecodingError
 import uk.ac.wellcome.storage.ObjectLocation
 import uk.ac.wellcome.storage.generators.ObjectLocationGenerators
-import uk.ac.wellcome.storage.store.TypedStore
+import uk.ac.wellcome.storage.store.Store
+import uk.ac.wellcome.storage.store.memory.MemoryStore
 
 import scala.util.{Failure, Success}
 
@@ -26,17 +26,16 @@ class BigMessageReaderTest
 
   val blueTriangle = Shape(colour = "blue", sides = 3)
 
-  def createReader(typedStoreShape: TypedStore[ObjectLocation, Shape] =
-                     MemoryTypedStoreCompanion[ObjectLocation, Shape]())(
+  def createReader(shapeStore: Store[ObjectLocation, Shape] = new MemoryStore(Map.empty))(
     implicit decoderS: Decoder[Shape]): BigMessageReader[Shape] =
     new BigMessageReader[Shape] {
-      override val typedStore: TypedStore[ObjectLocation, Shape] =
-        typedStoreShape
+      override val store: Store[ObjectLocation, Shape] =
+        shapeStore
       override implicit val decoder: Decoder[Shape] = decoderS
     }
 
   it("reads a large message from the object store") {
-    val store = MemoryTypedStoreCompanion[ObjectLocation, Shape]()
+    val store = new MemoryStore(Map.empty[ObjectLocation, Shape])
     val reader = createReader(store)
     val objectLocation = createObjectLocation
 

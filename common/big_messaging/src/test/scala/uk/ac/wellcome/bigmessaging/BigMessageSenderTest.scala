@@ -11,7 +11,6 @@ import uk.ac.wellcome.bigmessaging.message.{
   RemoteNotification
 }
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.storage.streaming.Codec._
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.storage.{Identified, ObjectLocation}
 
@@ -53,7 +52,7 @@ class BigMessageSenderTest
     notification shouldBe a[RemoteNotification]
     val location = notification.asInstanceOf[RemoteNotification].location
 
-    sender.typedStore.get(location) shouldBe Right(
+    sender.store.get(location) shouldBe Right(
       Identified[ObjectLocation, Shape](
         location,
         redSquare)
@@ -137,8 +136,7 @@ class BigMessageSenderTest
     val sender = new MemoryBigMessageSender[Shape](
       maxSize = 1
     ) {
-      val memoryTypedStore = createBrokenPutMemoryTypedStore[Shape]
-      override val typedStore = memoryTypedStore
+      override val store = createBrokenPutStore[Shape]
     }
 
     val result = sender.sendT(redSquare)

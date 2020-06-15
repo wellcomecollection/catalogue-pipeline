@@ -9,24 +9,23 @@ import uk.ac.wellcome.bigmessaging.message.{
   RemoteNotification
 }
 import uk.ac.wellcome.storage.{Identified, NotFoundError, ObjectLocation}
-import uk.ac.wellcome.storage.store.TypedStore
+import uk.ac.wellcome.storage.store.Store
 
 import scala.util.{Failure, Success, Try}
 
 trait BigMessageReader[T] extends Logging {
-  val typedStore: TypedStore[ObjectLocation, T]
+  val store: Store[ObjectLocation, T]
 
   implicit val decoder: Decoder[T]
 
-  // TODO: Turn this into an Either[ReadError, T] to match the underlying pattern in TypedStore
-  // See: https://github.com/wellcometrust/scala-storage/blob/master/storage/src/main/scala/uk/ac/wellcome/storage/store/Store.scala#L8
+  // TODO: Turn this into an Either[ReadError, T] to match the underlying pattern in Store
   def read(notification: MessageNotification): Try[T] =
     notification match {
       case inlineNotification: InlineNotification =>
         fromJson[T](inlineNotification.jsonString)
 
       case remoteNotification: RemoteNotification => {
-        typedStore.get(remoteNotification.location) match {
+        store.get(remoteNotification.location) match {
           case Right(Identified(_, value)) =>
             Success(value)
           case Left(_: NotFoundError) =>

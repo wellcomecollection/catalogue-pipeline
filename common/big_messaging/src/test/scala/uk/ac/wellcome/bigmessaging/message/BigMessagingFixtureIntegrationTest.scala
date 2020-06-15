@@ -15,15 +15,14 @@ import software.amazon.awssdk.services.sns.model.{
 }
 import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
-import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
 import uk.ac.wellcome.fixtures.{fixture, Fixture, TestWith}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 import uk.ac.wellcome.storage.ObjectLocation
-import uk.ac.wellcome.storage.store.memory.MemoryTypedStore
-import uk.ac.wellcome.storage.streaming.Codec._
+import uk.ac.wellcome.storage.store.Store
+import uk.ac.wellcome.storage.store.memory.MemoryStore
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -124,19 +123,19 @@ class BigMessagingFixtureIntegrationTest
   def withLocalStackMessageStreamFixtures[R](
     testWith: TestWith[(Queue,
                         BigMessageStream[ExampleObject],
-                        MemoryTypedStore[ObjectLocation, ExampleObject]),
+                        Store[ObjectLocation, ExampleObject]),
                        R]): R =
     withActorSystem { implicit actorSystem =>
       val metrics = new MemoryMetrics[StandardUnit]()
-      implicit val typedStoreT =
-        MemoryTypedStoreCompanion[ObjectLocation, ExampleObject]()
+      implicit val storeT: Store[ObjectLocation, ExampleObject] =
+        new MemoryStore(Map.empty)
 
       withLocalStackSqsQueue { queue =>
         withBigMessageStream[ExampleObject, R](
           queue,
           metrics,
           localStackSqsAsyncClient) { messageStream =>
-          testWith((queue, messageStream, typedStoreT))
+          testWith((queue, messageStream, storeT))
         }
       }
     }

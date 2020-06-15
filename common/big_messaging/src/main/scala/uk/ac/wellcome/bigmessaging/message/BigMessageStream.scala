@@ -13,7 +13,7 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.{SQSConfig, SQSStream}
 import uk.ac.wellcome.monitoring.Metrics
 import uk.ac.wellcome.storage.ObjectLocation
-import uk.ac.wellcome.storage.store.TypedStore
+import uk.ac.wellcome.storage.store.Store
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
@@ -24,11 +24,11 @@ class BigMessageStream[T](sqsClient: SqsAsyncClient,
   implicit
   actorSystem: ActorSystem,
   decoderT: Decoder[T],
-  typedStoreT: TypedStore[ObjectLocation, T],
+  storeT: Store[ObjectLocation, T],
   ec: ExecutionContext) {
 
   private val bigMessageReader = new BigMessageReader[T] {
-    override val typedStore: TypedStore[ObjectLocation, T] = typedStoreT
+    override val store: Store[ObjectLocation, T] = storeT
     override implicit val decoder: Decoder[T] = decoderT
   }
 

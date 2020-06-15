@@ -9,7 +9,6 @@ import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import software.amazon.awssdk.services.sqs.model.SendMessageResponse
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.bigmessaging.BigMessageSender
-import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
 import uk.ac.wellcome.bigmessaging.message._
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
@@ -27,14 +26,8 @@ import uk.ac.wellcome.storage.{
 }
 import uk.ac.wellcome.storage.fixtures.S3Fixtures
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
-import uk.ac.wellcome.storage.store.TypedStore
-import uk.ac.wellcome.storage.store.memory.{
-  MemoryStore,
-  MemoryStreamStore,
-  MemoryStreamStoreEntry,
-  MemoryTypedStore
-}
-import uk.ac.wellcome.storage.streaming.Codec
+import uk.ac.wellcome.storage.store.Store
+import uk.ac.wellcome.storage.store.memory.MemoryStore
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Success
@@ -56,7 +49,7 @@ trait BigMessagingFixture
     implicit
     actorSystem: ActorSystem,
     decoderT: Decoder[T],
-    typedStoreT: TypedStore[ObjectLocation, T]): R = {
+    storeT: Store[ObjectLocation, T]): R = {
     val stream = new BigMessageStream[T](
       sqsClient = sqsClient,
       sqsConfig = createSQSConfigWith(queue),
@@ -86,18 +79,17 @@ trait BigMessagingFixture
     bucket: Bucket,
     topic: Topic,
     senderSnsClient: SnsClient = snsClient,
-    store: Option[MemoryTypedStore[ObjectLocation, T]] = None,
+    storeT: Option[Store[ObjectLocation, T]] = None,
     bigMessageThreshold: Int = 10000)(
     testWith: TestWith[BigMessageSender[SNSConfig, T], R])(
     implicit
-    encoderT: Encoder[T],
-    codecT: Codec[T]): R =
+    encoderT: Encoder[T]): R =
     withSnsMessageSender(topic, senderSnsClient) { snsMessageSender =>
       val sender = new BigMessageSender[SNSConfig, T] {
         override val messageSender: MessageSender[SNSConfig] =
           snsMessageSender
-        override val typedStore: MemoryTypedStore[ObjectLocation, T] =
-          store.getOrElse(MemoryTypedStoreCompanion[ObjectLocation, T]())
+        override val store: Store[ObjectLocation, T] =
+          storeT.getOrElse(new MemoryStore(Map.empty))
         override val namespace: String = bucket.name
         override implicit val encoder: Encoder[T] = encoderT
         override val maxMessageSize: Int = bigMessageThreshold
@@ -135,22 +127,12 @@ trait BigMessagingFixture
   /** The `.put` method on this store has been overriden to always
     * return a `Left[StoreWriteError]`
     */
-  def createBrokenPutMemoryTypedStore[T]()(implicit codecT: Codec[T]) = {
-    val memoryStore =
-      new MemoryStore[ObjectLocation, MemoryStreamStoreEntry](Map.empty) {
-        override def put(id: ObjectLocation)(t: MemoryStreamStoreEntry)
-          : Either[WriteError,
-                   Identified[ObjectLocation, MemoryStreamStoreEntry]] = {
-          Left(StoreWriteError(new Throwable("BOOM!")))
-        }
+  def createBrokenPutStore[T] =
+    new MemoryStore[ObjectLocation, T](Map.empty) {
+      override def put(id: ObjectLocation)(t: T)
+        : Either[WriteError,
+                 Identified[ObjectLocation, T]] = {
+        Left(StoreWriteError(new Throwable("BOOM!")))
       }
-
-    implicit val memoryStreamStore =
-      new MemoryStreamStore[ObjectLocation](memoryStore)
-
-    val memoryTypedStore =
-      new MemoryTypedStore[ObjectLocation, T](Map.empty)
-
-    memoryTypedStore
-  }
+    }
 }
