@@ -35,14 +35,14 @@ def get_intervals(keys):
         end = end.strip("Z")
         try:
             yield Interval(
-                start=dt.datetime.strptime(start, "%Y-%m-%dT%H-%M-%S.%f+00-00"),
-                end=dt.datetime.strptime(end, "%Y-%m-%dT%H-%M-%S.%f+00-00"),
+                start=dt.datetime.strptime(start, "%Y-%m-%dT%H-%M-%S.%f"),
+                end=dt.datetime.strptime(end, "%Y-%m-%dT%H-%M-%S.%f"),
                 key=k,
             )
         except ValueError:
             yield Interval(
-                start=dt.datetime.strptime(start, "%Y-%m-%dT%H-%M-%S+00-00"),
-                end=dt.datetime.strptime(end, "%Y-%m-%dT%H-%M-%S+00-00"),
+                start=dt.datetime.strptime(start, "%Y-%m-%dT%H-%M-%S"),
+                end=dt.datetime.strptime(end, "%Y-%m-%dT%H-%M-%S"),
                 key=k,
             )
 
