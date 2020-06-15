@@ -3,6 +3,8 @@ module "lambda" {
 
   name = "${var.namespace}-sierra_progress_reporter"
 
+  module_name ="sierra_progress_reporter"
+
   s3_bucket = var.infra_bucket
   s3_key    = "lambdas/sierra_adapter/sierra_progress_reporter.zip"
 
