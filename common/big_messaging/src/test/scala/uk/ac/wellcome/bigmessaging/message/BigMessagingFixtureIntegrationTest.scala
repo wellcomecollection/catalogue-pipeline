@@ -1,6 +1,9 @@
 package uk.ac.wellcome.bigmessaging.message
 
 import java.util.concurrent.ConcurrentLinkedDeque
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.util.Random
 
 import org.scalatest.Assertion
 import uk.ac.wellcome.messaging.sns.SNSConfig
@@ -13,19 +16,22 @@ import software.amazon.awssdk.services.sns.model.{
   SubscribeResponse,
   UnsubscribeRequest
 }
+import software.amazon.awssdk.services.sqs.{SqsAsyncClient, SqsClient}
+import software.amazon.awssdk.services.sqs.model._
+
 import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.fixtures.{fixture, Fixture, TestWith}
 import uk.ac.wellcome.json.JsonUtil._
+
+import uk.ac.wellcome.messaging.sqs.SQSClientFactory
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
+
 import uk.ac.wellcome.storage.ObjectLocation
 import uk.ac.wellcome.storage.store.Store
 import uk.ac.wellcome.storage.store.memory.MemoryStore
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 class BigMessagingFixtureIntegrationTest
     extends AnyFunSpec
@@ -33,6 +39,27 @@ class BigMessagingFixtureIntegrationTest
     with BigMessagingFixture
     with Eventually
     with IntegrationPatience {
+
+  val sqsAccessKey = "access"
+  val sqsSecretKey = "secret"
+
+  def localStackEndpoint(queue: Queue) =
+    s"sqs://${queue.name}"
+
+  val localStackSqsClient: SqsClient = SQSClientFactory.createSyncClient(
+    region = "localhost",
+    endpoint = "http://localhost:4576",
+    accessKey = sqsAccessKey,
+    secretKey = sqsSecretKey
+  )
+
+  val localStackSqsAsyncClient: SqsAsyncClient =
+    SQSClientFactory.createAsyncClient(
+      region = "localhost",
+      endpoint = "http://localhost:4576",
+      accessKey = sqsAccessKey,
+      secretKey = sqsSecretKey
+    )
 
   def createMessage(size: Int) = ExampleObject("a" * size)
 
@@ -130,7 +157,7 @@ class BigMessagingFixtureIntegrationTest
       implicit val storeT: Store[ObjectLocation, ExampleObject] =
         new MemoryStore(Map.empty)
 
-      withLocalStackSqsQueue { queue =>
+      withLocalStackSqsQueue() { queue =>
         withBigMessageStream[ExampleObject, R](
           queue,
           metrics,
@@ -139,4 +166,41 @@ class BigMessagingFixtureIntegrationTest
         }
       }
     }
+
+  def withLocalStackSqsQueue[R](
+    queueName: String = Random.alphanumeric take 10 mkString,
+  ): Fixture[Queue, R] =
+    fixture[Queue, R](
+      create = {
+        val response = localStackSqsClient.createQueue {
+          builder: CreateQueueRequest.Builder =>
+            builder.queueName(queueName)
+        }
+
+        val arn = localStackSqsClient
+          .getQueueAttributes { builder =>
+            builder
+              .queueUrl(response.queueUrl())
+              .attributeNames(QueueAttributeName.QUEUE_ARN)
+          }
+          .attributes()
+          .get(QueueAttributeName.QUEUE_ARN)
+
+        val queue = Queue(
+          url = response.queueUrl(),
+          arn = arn,
+          visibilityTimeout = 1
+        )
+
+        queue
+      },
+      destroy = { queue =>
+        localStackSqsClient.purgeQueue { builder: PurgeQueueRequest.Builder =>
+          builder.queueUrl(queue.url)
+        }
+        localStackSqsClient.deleteQueue { builder: DeleteQueueRequest.Builder =>
+          builder.queueUrl(queue.url)
+        }
+      }
+    )
 }
