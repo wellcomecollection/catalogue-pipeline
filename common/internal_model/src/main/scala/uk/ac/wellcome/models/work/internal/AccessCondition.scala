@@ -51,6 +51,8 @@ object AccessStatus {
         Right(AccessStatus.Restricted)
       case status if status.startsWith("clinical images") =>
         Right(AccessStatus.Restricted)
+      case status if status.startsWith("by appointment") =>
+        Right(AccessStatus.Restricted)
       case status if status.startsWith("closed") =>
         Right(AccessStatus.Closed)
       case status if status.startsWith("missing") =>

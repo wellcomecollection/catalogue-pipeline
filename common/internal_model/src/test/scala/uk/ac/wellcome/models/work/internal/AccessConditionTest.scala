@@ -5,7 +5,7 @@ import org.scalatest.matchers.should.Matchers
 
 class AccessConditionTest extends AnyFunSpec with Matchers {
   it("creates restricted access condition") {
-    val restrictedValues = List("Restricted", "Restricted access (Data Protection Act)", "Cannot Be Produced - View Digitised Version", "Certain restrictions apply.")
+    val restrictedValues = List("Restricted", "Restricted access (Data Protection Act)", "Cannot Be Produced - View Digitised Version", "Certain restrictions apply.", "By Appointment.")
     restrictedValues.foreach { str =>
       AccessStatus.apply(str) shouldBe Right(AccessStatus.Restricted)
     }
