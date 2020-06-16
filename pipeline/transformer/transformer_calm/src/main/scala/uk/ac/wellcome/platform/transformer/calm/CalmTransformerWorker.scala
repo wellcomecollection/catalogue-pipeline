@@ -6,6 +6,7 @@ import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.typesafe.Runnable
+import uk.ac.wellcome.transformer.common.worker.TransformerWorker
 
 class CalmTransformerWorker(
   val stream: SQSStream[NotificationMessage],

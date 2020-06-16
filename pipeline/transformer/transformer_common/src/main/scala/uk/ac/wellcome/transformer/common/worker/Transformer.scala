@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.transformer.calm
+package uk.ac.wellcome.transformer.common.worker
 
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.models.work.internal.result.Result
