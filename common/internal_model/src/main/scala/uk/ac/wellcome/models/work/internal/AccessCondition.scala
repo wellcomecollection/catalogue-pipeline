@@ -64,6 +64,6 @@ object AccessStatus {
       case status if status.startsWith("permission required") =>
         Right(AccessStatus.PermissionRequired)
       case status =>
-        Left(new UnknownAccessStatus(status))
+        Left(new UnknownAccessStatus(str))
     }
 }
