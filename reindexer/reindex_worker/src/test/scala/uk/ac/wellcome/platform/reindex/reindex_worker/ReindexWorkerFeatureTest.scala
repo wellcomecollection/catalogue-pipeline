@@ -20,7 +20,7 @@ class ReindexWorkerFeatureTest
     with WorkerServiceFixture {
 
   it("sends a notification for every record that needs a reindex") {
-    withLocalSqsQueue { queue =>
+    withLocalSqsQueue() { queue =>
       withLocalDynamoDbTable { table =>
         val messageSender = new MemoryIndividualMessageSender()
         val destination = createDestination
@@ -46,7 +46,7 @@ class ReindexWorkerFeatureTest
   }
 
   it("can handle a partial reindex of the table") {
-    withLocalSqsQueue { queue =>
+    withLocalSqsQueue() { queue =>
       withLocalDynamoDbTable { table =>
         val messageSender = new MemoryIndividualMessageSender()
         val destination = createDestination

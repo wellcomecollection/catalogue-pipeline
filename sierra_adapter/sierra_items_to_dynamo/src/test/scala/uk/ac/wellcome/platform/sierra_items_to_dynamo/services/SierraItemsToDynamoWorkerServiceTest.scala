@@ -56,7 +56,7 @@ class SierraItemsToDynamoWorkerServiceTest
     val store =
       createStore(Map(Version(record1.id.withoutCheckDigit, 1) -> record1))
 
-    withLocalSqsQueue { queue =>
+    withLocalSqsQueue() { queue =>
       withWorkerService(queue, store) { _ =>
         sendNotificationToSQS(queue = queue, message = record2)
 
@@ -74,7 +74,7 @@ class SierraItemsToDynamoWorkerServiceTest
   it("records a failure if it receives an invalid message") {
     val store = createStore[SierraItemRecord]()
     val mockMetricsSender = mock[Metrics[Future, StandardUnit]]
-    withLocalSqsQueueAndDlq {
+    withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
         withWorkerService(queue, store, mockMetricsSender) { _ =>
           val body =

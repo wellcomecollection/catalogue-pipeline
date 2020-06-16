@@ -27,7 +27,6 @@ import uk.ac.wellcome.storage.ObjectLocation
 import uk.ac.wellcome.storage.store.Store
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import uk.ac.wellcome.storage.store.memory.MemoryStore
-import uk.ac.wellcome.storage.streaming.Codec._
 
 trait MiroVHSRecordReceiverFixture
     extends BigMessagingFixture

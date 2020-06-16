@@ -34,7 +34,7 @@ class MiroTransformerFeatureTest
     val title = "A guide for a giraffe"
 
     withLocalSnsTopic { topic =>
-      withLocalSqsQueue { queue =>
+      withLocalSqsQueue() { queue =>
         withLocalS3Bucket { storageBucket =>
           withLocalS3Bucket { messageBucket =>
             val miroHybridRecordMessage =
@@ -68,7 +68,7 @@ class MiroTransformerFeatureTest
   // were written to the same s3 key because of the hashing algorithm clashing
   it("sends different messages for different miro records") {
     withLocalSnsTopic { topic =>
-      withLocalSqsQueue { queue =>
+      withLocalSqsQueue() { queue =>
         withLocalS3Bucket { storageBucket =>
           val miroHybridRecordMessage1 =
             createHybridRecordNotificationWith(

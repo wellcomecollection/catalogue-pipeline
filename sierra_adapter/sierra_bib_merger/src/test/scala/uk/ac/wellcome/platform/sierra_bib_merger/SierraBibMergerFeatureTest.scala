@@ -28,7 +28,7 @@ class SierraBibMergerFeatureTest
 
   it("stores a bib in the hybrid store") {
     val store = createStore[SierraTransformable]()
-    withLocalSqsQueue { queue =>
+    withLocalSqsQueue() { queue =>
       withWorkerService(store, queue) {
         case (_, messageSender) =>
           val bibRecord = createSierraBibRecord
@@ -54,7 +54,7 @@ class SierraBibMergerFeatureTest
 
   it("stores multiple bibs from SQS") {
     val store = createStore[SierraTransformable]()
-    withLocalSqsQueue { queue =>
+    withLocalSqsQueue() { queue =>
       withWorkerService(store, queue) {
         case (_, messageSender) =>
           val record1 = createSierraBibRecord
@@ -98,7 +98,7 @@ class SierraBibMergerFeatureTest
     val store = createStore[SierraTransformable](Map(Version(
       oldTransformable.sierraId.withoutCheckDigit,
       0) -> oldTransformable))
-    withLocalSqsQueue { queue =>
+    withLocalSqsQueue() { queue =>
       withWorkerService(store, queue) {
         case (_, messageSender) =>
           val newBibRecord = createSierraBibRecordWith(
@@ -133,7 +133,7 @@ class SierraBibMergerFeatureTest
     val key = Version(expectedTransformable.sierraId.withoutCheckDigit, 0)
     val store =
       createStore[SierraTransformable](Map(key -> expectedTransformable))
-    withLocalSqsQueue { queue =>
+    withLocalSqsQueue() { queue =>
       withWorkerService(store, queue) {
         case (_, messageSender) =>
           val oldBibRecord = createSierraBibRecordWith(
@@ -163,7 +163,7 @@ class SierraBibMergerFeatureTest
     val store = createStore[SierraTransformable](
       Map(
         Version(transformable.sierraId.withoutCheckDigit, 0) -> transformable))
-    withLocalSqsQueue { queue =>
+    withLocalSqsQueue() { queue =>
       withWorkerService(store, queue) {
         case (_, messageSender) =>
           val bibRecord =
