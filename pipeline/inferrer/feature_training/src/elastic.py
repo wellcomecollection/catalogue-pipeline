@@ -4,6 +4,23 @@ import numpy as np
 from elasticsearch import Elasticsearch, helpers
 
 
+def get_documents_from_es_in_batches(es_client, index_name, ids, batch_size=5_000):
+    id_batches = [
+        ids[i:i + batch_size]
+        for i in range(0, len(ids), batch_size)
+    ]
+
+    docs = []
+    for id_batch in id_batches:
+        docs.extend = es_client.mget(
+            index=index_name,
+            body={"ids": id_batch},
+            request_timeout=120.0
+        )["docs"]
+
+    return docs
+
+
 def get_random_documents(es_client, index_name, n):
     docs_count = es_client.count(index=index_name)["count"]
     id_iterator = helpers.scan(
@@ -15,11 +32,8 @@ def get_random_documents(es_client, index_name, n):
     ids_sample = [
         doc["_id"] for n, doc in enumerate(id_iterator) if n in iterator_indices
     ]
-    docs = es_client.mget(
-        index=index_name, body={"ids": ids_sample}, request_timeout=120.0
-    )
-
-    return docs["docs"]
+    docs = get_documents_from_es_in_batches(es_client, index_name, ids_sample)
+    return docs
 
 
 def get_random_feature_vectors(n_documents):
@@ -32,7 +46,8 @@ def get_random_feature_vectors(n_documents):
     )
 
     print(f"Fetching {n_documents} random documents")
-    documents = get_random_documents(es_client, os.environ["ES_INDEX"], n_documents)
+    documents = get_random_documents(
+        es_client, os.environ["ES_INDEX"], n_documents)
 
     feature_vectors = np.stack(
         [
