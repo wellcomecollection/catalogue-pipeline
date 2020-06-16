@@ -62,7 +62,8 @@ trait IngestorFixtures extends ElasticsearchFixtures with BigMessagingFixture {
                               indexConfig: IndexConfig,
                               indexer: Indexer[T],
                               elasticClient: ElasticClient = elasticClient)(
-    testWith: TestWith[IngestorWorkerService[T], R])(implicit dec: Decoder[T]): R =
+    testWith: TestWith[IngestorWorkerService[T], R])(
+    implicit dec: Decoder[T]): R =
     withActorSystem { implicit actorSystem =>
       {
         implicit val store =

@@ -66,8 +66,9 @@ class SierraReaderWorkerService(
       _ <- runSierraStream(window = window, windowStatus = windowStatus)
     } yield ()
 
-  private def runSierraStream(window: String, windowStatus: WindowStatus)
-    : Future[Identified[ObjectLocation, String]] = {
+  private def runSierraStream(
+    window: String,
+    windowStatus: WindowStatus): Future[Identified[ObjectLocation, String]] = {
 
     info(s"Running the stream with window=$window and status=$windowStatus")
 

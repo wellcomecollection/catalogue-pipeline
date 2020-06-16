@@ -320,8 +320,8 @@ class BigMessageStreamTest
                        R]
   )(implicit
     decoderT: Decoder[ExampleObject],
-    store: Store[ObjectLocation, ExampleObject] =
-      new MemoryStore(Map.empty)): R =
+    store: Store[ObjectLocation, ExampleObject] = new MemoryStore(Map.empty))
+    : R =
     withActorSystem { implicit actorSystem =>
       withLocalSqsQueuePair() {
         case queuePair @ QueuePair(queue, _) =>

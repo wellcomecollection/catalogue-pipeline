@@ -26,7 +26,8 @@ class BigMessageReaderTest
 
   val blueTriangle = Shape(colour = "blue", sides = 3)
 
-  def createReader(shapeStore: Store[ObjectLocation, Shape] = new MemoryStore(Map.empty))(
+  def createReader(shapeStore: Store[ObjectLocation, Shape] = new MemoryStore(
+                     Map.empty))(
     implicit decoderS: Decoder[Shape]): BigMessageReader[Shape] =
     new BigMessageReader[Shape] {
       override val store: Store[ObjectLocation, Shape] =

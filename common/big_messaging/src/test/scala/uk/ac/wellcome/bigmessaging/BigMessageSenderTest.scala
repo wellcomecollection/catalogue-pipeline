@@ -53,9 +53,7 @@ class BigMessageSenderTest
     val location = notification.asInstanceOf[RemoteNotification].location
 
     sender.store.get(location) shouldBe Right(
-      Identified[ObjectLocation, Shape](
-        location,
-        redSquare)
+      Identified[ObjectLocation, Shape](location, redSquare)
     )
   }
 

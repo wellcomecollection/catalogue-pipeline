@@ -75,12 +75,12 @@ trait BigMessagingFixture
       message = InlineNotification(jsonString = toJson(obj).get)
     )
 
-  def withSqsBigMessageSender[T, R](
-    bucket: Bucket,
-    topic: Topic,
-    senderSnsClient: SnsClient = snsClient,
-    storeT: Option[Store[ObjectLocation, T]] = None,
-    bigMessageThreshold: Int = 10000)(
+  def withSqsBigMessageSender[T, R](bucket: Bucket,
+                                    topic: Topic,
+                                    senderSnsClient: SnsClient = snsClient,
+                                    storeT: Option[Store[ObjectLocation, T]] =
+                                      None,
+                                    bigMessageThreshold: Int = 10000)(
     testWith: TestWith[BigMessageSender[SNSConfig, T], R])(
     implicit
     encoderT: Encoder[T]): R =
@@ -129,9 +129,8 @@ trait BigMessagingFixture
     */
   def createBrokenPutStore[T] =
     new MemoryStore[ObjectLocation, T](Map.empty) {
-      override def put(id: ObjectLocation)(t: T)
-        : Either[WriteError,
-                 Identified[ObjectLocation, T]] = {
+      override def put(id: ObjectLocation)(
+        t: T): Either[WriteError, Identified[ObjectLocation, T]] = {
         Left(StoreWriteError(new Throwable("BOOM!")))
       }
     }

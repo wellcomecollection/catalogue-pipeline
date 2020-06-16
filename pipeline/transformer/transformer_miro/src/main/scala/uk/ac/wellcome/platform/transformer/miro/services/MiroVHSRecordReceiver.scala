@@ -30,8 +30,7 @@ case class BackwardsCompatObjectLocation(namespace: String, key: String)
 
 class MiroVHSRecordReceiver[MsgDestination](
   msgSender: BigMessageSender[MsgDestination, TransformedBaseWork],
-  store: Store[ObjectLocation, MiroRecord])(
-  implicit ec: ExecutionContext)
+  store: Store[ObjectLocation, MiroRecord])(implicit ec: ExecutionContext)
     extends Logging {
 
   def receiveMessage(message: NotificationMessage,
