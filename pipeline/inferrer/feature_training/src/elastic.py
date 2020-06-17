@@ -4,11 +4,9 @@ import numpy as np
 from elasticsearch import Elasticsearch, helpers
 
 
-def get_documents_from_es_in_batches(es_client, index_name, ids, batch_size=5_000):
-    id_batches = [
-        ids[i:i + batch_size]
-        for i in range(0, len(ids), batch_size)
-    ]
+def get_documents_from_es_in_batches(es_client, index_name, ids, batch_size=5000):
+    id_batches = [ids[i: i + batch_size]
+                  for i in range(0, len(ids), batch_size)]
 
     docs = []
     for id_batch in id_batches:
@@ -19,7 +17,6 @@ def get_documents_from_es_in_batches(es_client, index_name, ids, batch_size=5_00
                 request_timeout=120.0
             )["docs"]
         )
-
     return docs
 
 
