@@ -10,8 +10,7 @@ from .parallel import tqdm_joblib
 
 
 def split_features(feature_vectors, n_groups):
-    feature_groups = np.split(
-        feature_vectors, indices_or_sections=n_groups, axis=1)
+    feature_groups = np.split(feature_vectors, indices_or_sections=n_groups, axis=1)
     return feature_groups
 
 
@@ -34,8 +33,7 @@ def get_object_name():
                 .strip()
             )
         except Exception:
-            raise Exception(
-                "Could not fetch ECS image tag or find local git hash")
+            raise Exception("Could not fetch ECS image tag or find local git hash")
 
     return f"{tag}/{timestamp}"
 
