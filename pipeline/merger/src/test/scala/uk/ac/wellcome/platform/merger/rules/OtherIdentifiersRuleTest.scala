@@ -24,6 +24,10 @@ class OtherIdentifiersRuleTest
     items = List(createPhysicalItem),
     workType = Some(WorkType.Pictures)
   )
+  val zeroItemPhysicalSierra = createUnidentifiedSierraWorkWith(
+    items = Nil,
+    workType = Some(WorkType.Pictures)
+  )
   val physicalMapsSierra = physicalSierra.copy(
     data = physicalSierra.data.copy(
       workType = Some(WorkType.Maps)
@@ -81,6 +85,16 @@ class OtherIdentifiersRuleTest
     }
   }
 
+  it("merges Miro source IDs into a Sierra work with zero items") {
+    inside(OtherIdentifiersRule.merge(zeroItemPhysicalSierra, List(miroWork))) {
+      case FieldMergeResult(otherIdentifiers, mergedSources) =>
+        otherIdentifiers should contain theSameElementsAs
+          miroWork.sourceIdentifier :: zeroItemPhysicalSierra.otherIdentifiers
+
+        mergedSources should contain theSameElementsAs List(miroWork)
+    }
+  }
+
   it(
     "does not merge any Miro source IDs into Sierra works with workType != picture/digital image/3D object") {
     inside(
@@ -131,14 +145,14 @@ class OtherIdentifiersRuleTest
     }
   }
 
-  it("does not merge any METS IDs and have them as a merged source") {
+  it("does not merge any METS IDs") {
     inside(OtherIdentifiersRule.merge(physicalSierra, metsWorks)) {
       case FieldMergeResult(otherIdentifiers, mergedSources) =>
         forAll(otherIdentifiers) { id =>
           id.identifierType.id should not be ("mets")
         }
 
-        mergedSources should be(metsWorks)
+        mergedSources shouldBe empty
     }
   }
 }

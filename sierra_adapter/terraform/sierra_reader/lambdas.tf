@@ -5,7 +5,7 @@ module "s3_demultiplexer_lambda" {
   module_name = "s3_demultiplexer"
 
   description     = "Split JSON bundles of ${var.resource_type} and send them to SNS"
-  name            = "s3_${var.resource_type}_demultiplexer"
+  name            = "${var.namespace}-s3_${var.resource_type}_demultiplexer"
   alarm_topic_arn = var.lambda_error_alarm_arn
 
   environment_variables = {

@@ -14,8 +14,7 @@ import tqdm
 
 SOURCES = {
     "miro": "vhs-sourcedata-miro",
-    "sierra": "vhs-sourcedata-sierra",
-    "sierra-items": "vhs-sourcedata-sierra-items",
+    "sierra": "vhs-sierra-sierra-adapter-20200604",
     "mets": "mets-adapter-store",
     "calm": "vhs-calm-adapter",
 }

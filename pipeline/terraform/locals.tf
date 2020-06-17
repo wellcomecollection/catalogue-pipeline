@@ -4,9 +4,9 @@ locals {
   storage_bucket         = "wellcomecollection-storage"
 
   # Sierra adapter VHS
-  vhs_sierra_read_policy            = data.terraform_remote_state.catalogue_infra_critical.outputs.vhs_sierra_read_policy
-  vhs_sierra_sourcedata_bucket_name = data.terraform_remote_state.catalogue_infra_critical.outputs.vhs_sierra_bucket_name
-  vhs_sierra_sourcedata_table_name  = data.terraform_remote_state.catalogue_infra_critical.outputs.vhs_sierra_table_name
+  vhs_sierra_read_policy            = data.terraform_remote_state.sierra_adapter.outputs.vhs_read_policy
+  vhs_sierra_sourcedata_bucket_name = data.terraform_remote_state.sierra_adapter.outputs.vhs_bucket_name
+  vhs_sierra_sourcedata_table_name  = data.terraform_remote_state.sierra_adapter.outputs.vhs_table_name
 
   # Sierra adapter topics
   sierra_merged_items_topic_arn = data.terraform_remote_state.sierra_adapter.outputs.merged_items_topic_arn

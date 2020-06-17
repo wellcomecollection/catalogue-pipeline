@@ -9,7 +9,7 @@ import cats.data.NonEmptyList
 /**
   * Items are merged as follows
   *
-  * * Sierra - Single items
+  * * Sierra - Single items or zero items
   *   * METS works
   *   * Single Miro works, only if the Sierra work has workType Picture/Digital Image/3D Object
   * * Sierra - Multi item
@@ -25,17 +25,16 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData] = {
     val items =
       mergeIntoCalmTarget(target, sources)
-        .orElse(mergeMetsIntoSingleItemSierraTarget(target, sources)
-          .orElse(mergeSingleMiroIntoSingleItemSierraTarget(target, sources)))
-        .orElse(mergeIntoMultiItemSierraTarget(target, sources))
+        .orElse(mergeMetsIntoSierraTarget(target, sources))
+        .orElse(
+          mergeSingleMiroIntoSingleOrZeroItemSierraTarget(target, sources))
         .getOrElse(target.data.items)
 
     val mergedSources = (
       List(
         mergeIntoCalmTarget,
-        mergeMetsIntoSingleItemSierraTarget,
-        mergeSingleMiroIntoSingleItemSierraTarget,
-        mergeIntoMultiItemSierraTarget
+        mergeMetsIntoSierraTarget,
+        mergeSingleMiroIntoSingleOrZeroItemSierraTarget
       ).flatMap { rule =>
         rule.mergedSources(target, sources)
       } ++ findFirstLinkedDigitisedSierraWorkFor(target, sources)
@@ -49,71 +48,64 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
 
   /** When there is only 1 Sierra item, we assume that the METS work item
     * is associated with that and merge the locations onto the Sierra item.
+    *
+    * Otherwise (including if there are no Sierra items) we append the METS
+    * item to the Sierra items
     */
-  private val mergeMetsIntoSingleItemSierraTarget = new PartialRule {
-    val isDefinedForTarget: WorkPredicate = singleItemSierra
+  private val mergeMetsIntoSierraTarget = new PartialRule {
+    val isDefinedForTarget: WorkPredicate = sierraWork
     val isDefinedForSource: WorkPredicate = singleDigitalItemMetsWork
 
     def rule(target: UnidentifiedWork,
-             sources: NonEmptyList[TransformedBaseWork]): FieldData = {
-
-      // This is safe due to the `singleItemSierra` predicate
-      val sierraItem = target.data.items.head
-
-      List(
-        sierraItem.copy(
-          locations = sierraItem.locations ++ sources.toList
-            .flatMap(_.data.items)
-            .flatMap(_.locations)
-        ))
-    }
+             sources: NonEmptyList[TransformedBaseWork]): FieldData =
+      target.data.items match {
+        case List(sierraItem) =>
+          List(
+            sierraItem.copy(
+              locations = sierraItem.locations ++ sources.toList
+                .flatMap(_.data.items)
+                .flatMap(_.locations)
+            )
+          )
+        case _ => target.data.items ++ sources.toList.flatMap(_.data.items)
+      }
   }
 
   /** When there is only 1 Sierra item and 1 Miro item, we assume that the
     * Miro work item is associated with the Sierra item and merge the
     * locations onto the Sierra item.
     *
-    * This is restricted to the case that the Sierra work is a Picture/Digital Image/3D Object
-    */
-  private val mergeSingleMiroIntoSingleItemSierraTarget = new PartialRule {
-    val isDefinedForTarget
-      : WorkPredicate = singleItemSierra and sierraPictureDigitalImageOr3DObject
-    val isDefinedForSource: WorkPredicate = singleDigitalItemMiroWork
-    override val isDefinedForSourceList: Seq[TransformedBaseWork] => Boolean =
-      _.count(singleDigitalItemMiroWork) == 1
-
-    def rule(target: UnidentifiedWork,
-             sources: NonEmptyList[TransformedBaseWork]): FieldData = {
-
-      // This is safe due to the `singleItemSierra` predicate
-      val sierraItem = target.data.items.head
-
-      List(
-        sierraItem.copy(
-          locations = sierraItem.locations ++ sources.toList
-            .flatMap(_.data.items)
-            .flatMap(_.locations)
-        ))
-    }
-  }
-
-  /**
-    * Miro: we assume the linked Miro work is definitely associated with
-    * one of the Sierra items, but unsure of which. We thus don't append it
-    * to the Sierra items to avoid certain duplication, and leave the works
-    * unmerged.
+    * When there are no Sierra items, we add the Miro item.
     *
-    * METS: As we are unsure which item the METS work is associated with
-    * we add it to the list of items.
+    * This is restricted to the case that the Sierra work is a Picture/Digital Image/3D Object
+    *
+    * When there are multiple Sierra items, we assume the linked Miro work
+    * is definitely associated with * one of them, but unsure of which.
+    * Thus we don't append it to the Sierra items to avoid certain duplication,
+    * and leave the works unmerged.
     */
-  private val mergeIntoMultiItemSierraTarget = new PartialRule {
-    val isDefinedForTarget: WorkPredicate = multiItemSierra
-    val isDefinedForSource: WorkPredicate = singleDigitalItemMetsWork
+  private val mergeSingleMiroIntoSingleOrZeroItemSierraTarget =
+    new PartialRule {
+      val isDefinedForTarget
+        : WorkPredicate = (singleItemSierra or zeroItemSierra) and sierraPictureDigitalImageOr3DObject
+      val isDefinedForSource: WorkPredicate = singleDigitalItemMiroWork
+      override val isDefinedForSourceList: Seq[TransformedBaseWork] => Boolean =
+        _.count(singleDigitalItemMiroWork) == 1
 
-    def rule(target: UnidentifiedWork,
-             sources: NonEmptyList[TransformedBaseWork]): FieldData =
-      target.data.items ++ sources.toList.flatMap(_.data.items)
-  }
+      def rule(target: UnidentifiedWork,
+               sources: NonEmptyList[TransformedBaseWork]): FieldData =
+        target.data.items match {
+          case List(sierraItem) =>
+            List(
+              sierraItem.copy(
+                locations = sierraItem.locations ++ sources.toList
+                  .flatMap(_.data.items)
+                  .flatMap(_.locations)
+              )
+            )
+          case _ => sources.toList.flatMap(_.data.items)
+        }
+    }
 
   /**
     * Sierra records are created from the Sierra / Calm harvest.

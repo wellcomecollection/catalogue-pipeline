@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.transformer.calm
+package uk.ac.wellcome.transformer.common.worker
 
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto._
@@ -15,6 +15,7 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal.{
+  IdentifierType,
   SourceIdentifier,
   TransformedBaseWork,
   UnidentifiedWork,
@@ -39,7 +40,7 @@ object TestTransformer extends Transformer[TestData] {
           UnidentifiedWork(
             sourceIdentifier = SourceIdentifier(
               value = "id",
-              identifierType = CalmIdentifierTypes.recordId,
+              identifierType = IdentifierType("miro-image-number"),
               ontologyType = "IdentifierType"),
             version = version,
             data = WorkData()

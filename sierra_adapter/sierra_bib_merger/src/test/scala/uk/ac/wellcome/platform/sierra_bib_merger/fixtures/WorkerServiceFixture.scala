@@ -2,19 +2,17 @@ package uk.ac.wellcome.platform.sierra_bib_merger.fixtures
 
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
+import uk.ac.wellcome.messaging.memory.MemoryMessageSender
+import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.platform.sierra_bib_merger.services.{
   SierraBibMergerUpdaterService,
   SierraBibMergerWorkerService
 }
+import uk.ac.wellcome.sierra_adapter.model.SierraTransformable
 import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
-import uk.ac.wellcome.storage.fixtures.LocalDynamoDb.Table
-import uk.ac.wellcome.storage.fixtures.S3.Bucket
-
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.ac.wellcome.storage.store.VersionedStore
 
 trait WorkerServiceFixture
     extends Akka
@@ -22,29 +20,27 @@ trait WorkerServiceFixture
     with SNS
     with SQS {
   def withWorkerService[R](
-    bucket: Bucket,
-    table: Table,
-    queue: Queue,
-    topic: Topic)(testWith: TestWith[SierraBibMergerWorkerService, R]): R =
+    store: VersionedStore[String, Int, SierraTransformable],
+    queue: Queue)(testWith: TestWith[(SierraBibMergerWorkerService[String],
+                                      MemoryMessageSender),
+                                     R]): R =
     withActorSystem { implicit actorSystem =>
-      withSierraVHS(bucket, table) { versionedHybridStore =>
-        val updaterService = new SierraBibMergerUpdaterService(
-          versionedHybridStore = versionedHybridStore
+      val updaterService = new SierraBibMergerUpdaterService(
+        versionedHybridStore = store
+      )
+
+      withSQSStream[NotificationMessage, R](queue) { sqsStream =>
+        val messageSender = new MemoryMessageSender
+        val workerService = new SierraBibMergerWorkerService(
+          sqsStream = sqsStream,
+          messageSender = messageSender,
+          sierraBibMergerUpdaterService = updaterService
         )
 
-        withSQSStream[NotificationMessage, R](queue) { sqsStream =>
-          withSNSWriter(topic) { snsWriter =>
-            val workerService = new SierraBibMergerWorkerService(
-              sqsStream = sqsStream,
-              snsWriter = snsWriter,
-              sierraBibMergerUpdaterService = updaterService
-            )
+        workerService.run()
 
-            workerService.run()
-
-            testWith(workerService)
-          }
-        }
+        testWith((workerService, messageSender))
       }
     }
+
 }

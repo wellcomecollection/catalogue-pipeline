@@ -10,7 +10,10 @@ import uk.ac.wellcome.models.work.internal.{
 }
 import uk.ac.wellcome.platform.merger.logging.MergerLogging
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
-import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
+import uk.ac.wellcome.platform.merger.rules.WorkPredicates.{
+  WorkPredicate,
+  WorkPredicateOps
+}
 
 /*
  * Thumbnails are chosen preferentially off of METS works, falling back to
@@ -61,7 +64,8 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
 
   val getMinMiroThumbnail =
     new PartialRule {
-      val isDefinedForTarget: WorkPredicate = WorkPredicates.singleItemSierra
+      val isDefinedForTarget: WorkPredicate =
+        WorkPredicates.singleItemSierra or WorkPredicates.zeroItemSierra
       val isDefinedForSource: WorkPredicate =
         WorkPredicates.singleDigitalItemMiroWork
 

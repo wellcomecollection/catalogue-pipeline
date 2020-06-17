@@ -26,6 +26,7 @@ def setupProject(
     .dependsOn(dependsOn: _*)
     .settings(libraryDependencies ++= externalDependencies)
 }
+
 lazy val internal_model = setupProject(
   project,
   "common/internal_model",
@@ -126,31 +127,38 @@ lazy val reindex_worker = setupProject(
   localDependencies = Seq(big_messaging_typesafe),
   externalDependencies = CatalogueDependencies.reindexWorkerDependencies)
 
+
+lazy val transformer_common = setupProject(
+  project,
+  "pipeline/transformer/transformer_common",
+  localDependencies = Seq(internal_model, big_messaging_typesafe)
+)
+
 lazy val transformer_miro = setupProject(
   project,
   folder = "pipeline/transformer/transformer_miro",
-  localDependencies = Seq(internal_model, big_messaging_typesafe),
+  localDependencies = Seq(transformer_common),
   externalDependencies = CatalogueDependencies.miroTransformerDependencies
 )
 
 lazy val transformer_sierra = setupProject(
   project,
   folder = "pipeline/transformer/transformer_sierra",
-  localDependencies = Seq(internal_model, big_messaging_typesafe, sierra_adapter_common),
+  localDependencies = Seq(transformer_common, sierra_adapter_common),
   externalDependencies = CatalogueDependencies.sierraTransformerDependencies
 )
 
 lazy val transformer_mets = setupProject(
   project,
   folder = "pipeline/transformer/transformer_mets",
-  localDependencies = Seq(internal_model, big_messaging_typesafe, mets_adapter),
+  localDependencies = Seq(transformer_common, mets_adapter),
   externalDependencies = CatalogueDependencies.metsTransformerDependencies
 )
 
 lazy val transformer_calm = setupProject(
   project,
   folder = "pipeline/transformer/transformer_calm",
-  localDependencies = Seq(internal_model, big_messaging_typesafe, calm_adapter),
+  localDependencies = Seq(transformer_common, calm_adapter),
   externalDependencies = CatalogueDependencies.calmTransformerDependencies
 )
 
@@ -159,6 +167,7 @@ lazy val transformer_calm = setupProject(
 lazy val sierra_adapter_common = setupProject(
   project,
   "sierra_adapter/common",
+  localDependencies = Seq(big_messaging_typesafe),
   externalDependencies = CatalogueDependencies.sierraAdapterCommonDependencies)
 
 lazy val sierra_reader = setupProject(

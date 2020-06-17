@@ -6,6 +6,7 @@ import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.internal.result._
 import uk.ac.wellcome.platform.transformer.calm.models.CalmTransformerException
 import uk.ac.wellcome.platform.transformer.calm.models.CalmTransformerException._
+import uk.ac.wellcome.transformer.common.worker.Transformer
 
 object CalmTransformer
     extends Transformer[CalmRecord]
@@ -165,7 +166,6 @@ object CalmTransformer
   def title(record: CalmRecord): Result[String] =
     record
       .get("Title")
-      .map(NormaliseText(_))
       .map(Right(_))
       .getOrElse(Left(TitleMissing))
 
@@ -270,7 +270,14 @@ object CalmTransformer
   }
 
   def subjects(record: CalmRecord): List[Subject[Unminted]] =
-    record.getList("Subject").map(Subject(_, Nil))
+    record
+      .getList("Subject")
+      .map { label =>
+        Subject(
+          label = label,
+          concepts = List(Concept(label))
+        )
+      }
 
   def language(record: CalmRecord): Result[Option[Language]] =
     record
