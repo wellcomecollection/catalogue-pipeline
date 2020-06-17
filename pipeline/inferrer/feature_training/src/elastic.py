@@ -12,11 +12,13 @@ def get_documents_from_es_in_batches(es_client, index_name, ids, batch_size=5_00
 
     docs = []
     for id_batch in id_batches:
-        docs.extend = es_client.mget(
-            index=index_name,
-            body={"ids": id_batch},
-            request_timeout=120.0
-        )["docs"]
+        docs.extend(
+            es_client.mget(
+                index=index_name,
+                body={"ids": id_batch},
+                request_timeout=120.0
+            )["docs"]
+        )
 
     return docs
 
