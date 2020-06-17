@@ -20,7 +20,7 @@ class SierraItemsToDynamoFeatureTest
 
   it("reads items from Sierra and adds them to DynamoDB") {
     val store = createStore[SierraItemRecord]()
-    withLocalSqsQueue { queue =>
+    withLocalSqsQueue() { queue =>
       withWorkerService(queue, store) {
         case (_, messageSender) =>
           val itemRecord = createSierraItemRecordWith(

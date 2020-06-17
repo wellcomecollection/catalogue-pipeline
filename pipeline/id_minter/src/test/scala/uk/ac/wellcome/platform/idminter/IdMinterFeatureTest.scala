@@ -30,7 +30,7 @@ class IdMinterFeatureTest
     with WorksGenerators {
 
   it("mints the same IDs where source identifiers match") {
-    withLocalSqsQueue { queue =>
+    withLocalSqsQueue() { queue =>
       withLocalSnsTopic { topic =>
         withLocalS3Bucket { bucket =>
           withIdentifiersDatabase { identifiersTableConfig =>
@@ -68,7 +68,7 @@ class IdMinterFeatureTest
   }
 
   it("mints an identifier for a UnidentifiedInvisibleWork") {
-    withLocalSqsQueue { queue =>
+    withLocalSqsQueue() { queue =>
       withLocalSnsTopic { topic =>
         withLocalS3Bucket { bucket =>
           withIdentifiersDatabase { identifiersTableConfig =>
@@ -97,7 +97,7 @@ class IdMinterFeatureTest
   }
 
   it("mints an identifier for a UnidentifiedRedirectedWork") {
-    withLocalSqsQueue { queue =>
+    withLocalSqsQueue() { queue =>
       withLocalSnsTopic { topic =>
         withLocalS3Bucket { bucket =>
           withIdentifiersDatabase { identifiersTableConfig =>
@@ -128,7 +128,7 @@ class IdMinterFeatureTest
   }
 
   it("continues if something fails processing a message") {
-    withLocalSqsQueue { queue =>
+    withLocalSqsQueue() { queue =>
       withLocalSnsTopic { topic =>
         withIdentifiersDatabase { identifiersTableConfig =>
           withLocalS3Bucket { bucket =>

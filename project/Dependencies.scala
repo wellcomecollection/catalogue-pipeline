@@ -1,13 +1,16 @@
 import sbt._
 
 object WellcomeDependencies {
+
+  val defaultVersion = "10.0.4"
+
   lazy val versions = new {
-    val typesafe = "2.0.0"
-    val fixtures = "1.2.0"
-    val json = "2.1.0"
-    val messaging = "9.2.1"
-    val monitoring = "4.0.0"
-    val storage = "8.1.0"
+    val typesafe = defaultVersion
+    val fixtures = defaultVersion
+    val json = defaultVersion
+    val messaging = defaultVersion
+    val monitoring = defaultVersion
+    val storage = defaultVersion
 
     val sierraStreamsSource = "2.0.0"
   }
@@ -38,7 +41,7 @@ object WellcomeDependencies {
   )
 
   val typesafeLibrary: Seq[ModuleID] = library(
-    name = "typesafe-app",
+    name = "typesafe_app",
     version = versions.typesafe
   ) ++ fixturesLibrary
 

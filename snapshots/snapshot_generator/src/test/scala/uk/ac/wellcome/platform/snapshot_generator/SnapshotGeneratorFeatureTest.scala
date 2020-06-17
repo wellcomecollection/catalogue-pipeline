@@ -111,7 +111,7 @@ class SnapshotGeneratorFeatureTest
     testWith: TestWith[(Queue, Topic, Index, Index, Bucket), R]) =
     withActorSystem { implicit actorSystem =>
       withMaterializer(actorSystem) { implicit materializer =>
-        withLocalSqsQueue { queue =>
+        withLocalSqsQueue() { queue =>
           withLocalSnsTopic { topic =>
             withLocalWorksIndex { worksIndex =>
               withLocalS3Bucket { bucket =>

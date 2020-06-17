@@ -10,7 +10,7 @@ import uk.ac.wellcome.bigmessaging.message.{
 }
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.storage.ObjectLocation
-import uk.ac.wellcome.storage.store.TypedStore
+import uk.ac.wellcome.storage.store.Store
 
 import scala.util.Success
 
@@ -23,8 +23,8 @@ class BigMessageIntegrationTest extends AnyFunSpec with Matchers {
     : (MemoryBigMessageSender[Shape], BigMessageReader[Shape]) = {
     val sender = new MemoryBigMessageSender[Shape](maxSize = maxSize)
     val reader = new BigMessageReader[Shape] {
-      override val typedStore: TypedStore[ObjectLocation, Shape] =
-        sender.typedStore
+      override val store: Store[ObjectLocation, Shape] =
+        sender.store
       override implicit val decoder: Decoder[Shape] = decoderS
     }
 

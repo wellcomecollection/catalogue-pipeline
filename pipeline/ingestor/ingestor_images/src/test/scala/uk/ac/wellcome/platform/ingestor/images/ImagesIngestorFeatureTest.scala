@@ -25,7 +25,7 @@ class ImagesIngestorFeatureTest
   it("reads an image from the queue, ingests it and deletes the message") {
     val image = createAugmentedImage()
 
-    withLocalSqsQueueAndDlqAndTimeout(visibilityTimeout = 10) {
+    withLocalSqsQueuePair(visibilityTimeout = 10) {
       case QueuePair(queue, dlq) =>
         sendMessage[AugmentedImage](queue = queue, obj = image)
         withLocalImagesIndex { index =>
@@ -44,7 +44,7 @@ class ImagesIngestorFeatureTest
     case class Something(something: String, somethingElse: Int)
     val wrongMessage = Something("abcd", 3)
 
-    withLocalSqsQueueAndDlq {
+    withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
         sendMessage[Something](queue = queue, obj = wrongMessage)
         withLocalImagesIndex { index =>

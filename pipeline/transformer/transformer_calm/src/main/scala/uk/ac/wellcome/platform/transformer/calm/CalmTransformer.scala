@@ -6,6 +6,7 @@ import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.internal.result._
 import uk.ac.wellcome.platform.transformer.calm.models.CalmTransformerException
 import uk.ac.wellcome.platform.transformer.calm.models.CalmTransformerException._
+import uk.ac.wellcome.transformer.common.worker.Transformer
 
 object CalmTransformer
     extends Transformer[CalmRecord]

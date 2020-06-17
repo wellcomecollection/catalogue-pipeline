@@ -2,8 +2,7 @@
   "id" : "transformer_mets",
   "folder" : "pipeline/transformer/transformer_mets",
   "dependencyIds" : [
-    "internal_model",
-    "big_messaging_typesafe",
+    "transformer_common",
     "mets_adapter"
   ]
 }

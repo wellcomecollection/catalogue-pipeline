@@ -15,6 +15,8 @@ jobs:
       script: ./.travis/run_job.py big_messaging
     - name: ingestor_common
       script: ./.travis/run_job.py ingestor_common
+    - name: transformer_common
+      script: ./.travis/run_job.py transformer_common
 
     - stage: services
       name: api
@@ -89,6 +91,7 @@ cache:
     - pipeline/matcher/target
     - pipeline/merger/target
     - pipeline/recorder/target
+    - pipeline/transformer/transformer_common/target
     - pipeline/transformer/transformer_miro/target
     - pipeline/transformer/transformer_sierra/target
     - pipeline/transformer/transformer_mets/target

@@ -6,8 +6,8 @@ import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.bigmessaging.message.InlineNotification
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.storage.ObjectLocation
-import uk.ac.wellcome.storage.store.memory.MemoryTypedStore
-import uk.ac.wellcome.storage.streaming.Codec
+import uk.ac.wellcome.storage.store.Store
+import uk.ac.wellcome.storage.store.memory.MemoryStore
 
 class MemoryBigMessageSender[T](
   maxSize: Int = Int.MaxValue,
@@ -16,15 +16,14 @@ class MemoryBigMessageSender[T](
 )(
   implicit
   val encoder: Encoder[T],
-  codecT: Codec[T]
 ) extends BigMessageSender[String, T] {
 
   override val messageSender: MemoryMessageSender = new MemoryMessageSender {
     override val destination: String = messageDestination
   }
 
-  override val typedStore: MemoryTypedStore[ObjectLocation, T] =
-    MemoryTypedStoreCompanion[ObjectLocation, T]()
+  override val store: Store[ObjectLocation, T] =
+    new MemoryStore(Map.empty)
 
   override val namespace: String = storeNamespace
   override val maxMessageSize: Int = maxSize

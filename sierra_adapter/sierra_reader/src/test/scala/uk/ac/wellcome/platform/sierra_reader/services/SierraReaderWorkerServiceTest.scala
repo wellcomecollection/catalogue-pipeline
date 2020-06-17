@@ -35,7 +35,7 @@ class SierraReaderWorkerServiceTest
       """.stripMargin
 
     withLocalS3Bucket { bucket =>
-      withLocalSqsQueue { queue =>
+      withLocalSqsQueue() { queue =>
         withWorkerService(
           bucket,
           queue,
@@ -72,7 +72,7 @@ class SierraReaderWorkerServiceTest
       """.stripMargin
 
     withLocalS3Bucket { bucket =>
-      withLocalSqsQueue { queue =>
+      withLocalSqsQueue() { queue =>
         withWorkerService(bucket, queue, readerConfig = itemsReaderConfig) {
           service =>
             sendNotificationToSQS(queue = queue, body = body)
@@ -111,7 +111,7 @@ class SierraReaderWorkerServiceTest
       """.stripMargin
 
     withLocalS3Bucket { bucket =>
-      withLocalSqsQueue { queue =>
+      withLocalSqsQueue() { queue =>
         withWorkerService(bucket, queue, readerConfig = itemsReaderConfig) {
           service =>
             // Do a complete run of the reader -- this gives us a set of JSON files
@@ -175,7 +175,7 @@ class SierraReaderWorkerServiceTest
     val notificationMessage = createNotificationMessageWith(body = body)
 
     withLocalS3Bucket { bucket =>
-      withLocalSqsQueue { queue =>
+      withLocalSqsQueue() { queue =>
         withWorkerService(bucket, queue, readerConfig = itemsReaderConfig) {
           service =>
             whenReady(service.processMessage(notificationMessage).failed) {
@@ -199,7 +199,7 @@ class SierraReaderWorkerServiceTest
     val notificationMessage = createNotificationMessageWith(body = body)
 
     withLocalS3Bucket { bucket =>
-      withLocalSqsQueue { queue =>
+      withLocalSqsQueue() { queue =>
         withWorkerService(
           bucket,
           queue,

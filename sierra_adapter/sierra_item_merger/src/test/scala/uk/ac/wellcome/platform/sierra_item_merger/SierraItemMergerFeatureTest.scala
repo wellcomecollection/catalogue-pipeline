@@ -25,7 +25,7 @@ class SierraItemMergerFeatureTest
     with SierraItemMergerFixtures {
 
   it("stores an item from SQS") {
-    withLocalSqsQueue { queue =>
+    withLocalSqsQueue() { queue =>
       val bibId = createSierraBibNumber
       val itemRecord = createSierraItemRecordWith(
         bibIds = List(bibId)
@@ -62,7 +62,7 @@ class SierraItemMergerFeatureTest
   }
 
   it("drops the message if the version in the items VHS has advanced") {
-    withLocalSqsQueue { queue =>
+    withLocalSqsQueue() { queue =>
       val bibId = createSierraBibNumber
       val itemRecord = createSierraItemRecordWith(
         bibIds = List(bibId)
@@ -89,7 +89,7 @@ class SierraItemMergerFeatureTest
   }
 
   it("stores multiple items from SQS") {
-    withLocalSqsQueue { queue =>
+    withLocalSqsQueue() { queue =>
       val bibId1 = createSierraBibNumber
       val itemRecord1 = createSierraItemRecordWith(
         bibIds = List(bibId1)
@@ -143,7 +143,7 @@ class SierraItemMergerFeatureTest
   }
 
   it("sends a notification for every transformable which changes") {
-    withLocalSqsQueue { queue =>
+    withLocalSqsQueue() { queue =>
       val bibIds = createSierraBibNumbers(3)
       val itemRecord = createSierraItemRecordWith(
         bibIds = bibIds

@@ -6,7 +6,6 @@ import com.sksamuel.elastic4s.{ElasticClient, Index, Indexable}
 import io.circe.Decoder
 import org.scalatest.Suite
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
-import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
 import uk.ac.wellcome.elasticsearch.model.{CanonicalId, Version}
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.elasticsearch.{ElasticsearchIndexCreator, IndexConfig}
@@ -17,7 +16,7 @@ import uk.ac.wellcome.platform.ingestor.common.Indexer
 import uk.ac.wellcome.platform.ingestor.common.models.IngestorConfig
 import uk.ac.wellcome.platform.ingestor.common.services.IngestorWorkerService
 import uk.ac.wellcome.storage.ObjectLocation
-import uk.ac.wellcome.storage.streaming.Codec
+import uk.ac.wellcome.storage.store.memory.MemoryStore
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -63,12 +62,12 @@ trait IngestorFixtures extends ElasticsearchFixtures with BigMessagingFixture {
                               indexConfig: IndexConfig,
                               indexer: Indexer[T],
                               elasticClient: ElasticClient = elasticClient)(
-    testWith: TestWith[IngestorWorkerService[T], R])(implicit dec: Decoder[T],
-                                                     codec: Codec[T]): R =
+    testWith: TestWith[IngestorWorkerService[T], R])(
+    implicit dec: Decoder[T]): R =
     withActorSystem { implicit actorSystem =>
       {
-        implicit val typedStoreT =
-          MemoryTypedStoreCompanion[ObjectLocation, T]()
+        implicit val store =
+          new MemoryStore[ObjectLocation, T](Map.empty)
         withBigMessageStream[T, R](queue) { messageStream =>
           val ingestorConfig = IngestorConfig(
             batchSize = 100,

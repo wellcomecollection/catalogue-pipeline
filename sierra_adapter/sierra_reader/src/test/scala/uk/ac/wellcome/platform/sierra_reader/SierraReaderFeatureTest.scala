@@ -18,7 +18,7 @@ class SierraReaderFeatureTest
 
   it("reads bibs from Sierra and writes files to S3") {
     withLocalS3Bucket { bucket =>
-      withLocalSqsQueue { queue =>
+      withLocalSqsQueue() { queue =>
         withWorkerService(bucket, queue) { service =>
           service.run()
 

@@ -6,8 +6,8 @@ import uk.ac.wellcome.messaging.sns.SNSConfig
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
+import uk.ac.wellcome.storage.store.memory.MemoryStore
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
-import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
 import uk.ac.wellcome.platform.idminter.config.models.IdentifiersTableConfig
 import uk.ac.wellcome.platform.idminter.database.IdentifiersDao
 import uk.ac.wellcome.platform.idminter.models.IdentifiersTable
@@ -15,7 +15,6 @@ import uk.ac.wellcome.platform.idminter.services.IdMinterWorkerService
 import uk.ac.wellcome.platform.idminter.steps.IdentifierGenerator
 import uk.ac.wellcome.storage.ObjectLocation
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
-import uk.ac.wellcome.storage.streaming.Codec._
 
 trait WorkerServiceFixture
     extends IdentifiersDatabase
@@ -29,8 +28,8 @@ trait WorkerServiceFixture
     withActorSystem { implicit actorSystem =>
       withSqsBigMessageSender[Json, R](bucket, topic) { bigMessageSender =>
         {
-          implicit val typedStoreT =
-            MemoryTypedStoreCompanion[ObjectLocation, Json]()
+          implicit val store =
+            new MemoryStore[ObjectLocation, Json](Map.empty)
           withBigMessageStream[Json, R](queue) { messageStream =>
             val identifierGenerator = new IdentifierGenerator(
               identifiersDao = identifiersDao

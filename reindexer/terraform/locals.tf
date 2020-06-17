@@ -3,10 +3,9 @@ data "aws_ssm_parameter" "image" {
 }
 
 locals {
-  vhs_sierra_table_name         = data.terraform_remote_state.catalogue_infra_critical.outputs.vhs_sierra_table_name
+  vhs_sierra_table_name         = data.terraform_remote_state.sierra_adapter.outputs.vhs_table_name
   vhs_miro_table_name           = data.terraform_remote_state.catalogue_infra_critical.outputs.vhs_miro_table_name
   vhs_miro_inventory_table_name = data.terraform_remote_state.catalogue_infra_critical.outputs.vhs_miro_inventory_table_name
-  vhs_sierra_items_table_name   = data.terraform_remote_state.catalogue_infra_critical.outputs.vhs_sierra_items_table_name
   mets_dynamo_table_name        = data.terraform_remote_state.catalogue_infra_critical.outputs.mets_dynamo_table_name
   vhs_calm_table_name           = data.terraform_remote_state.calm_adapter.outputs.vhs_table_name
 
@@ -15,7 +14,6 @@ locals {
   reporting_sierra_hybrid_records_topic_arn         = data.terraform_remote_state.shared_infra.outputs.reporting_sierra_reindex_topic_arn
   catalogue_miro_hybrid_records_topic_arn           = data.terraform_remote_state.shared_infra.outputs.catalogue_miro_reindex_topic_arn
   catalogue_sierra_hybrid_records_topic_arn         = data.terraform_remote_state.shared_infra.outputs.catalogue_sierra_reindex_topic_arn
-  catalogue_sierra_items_hybrid_records_topic_arn   = data.terraform_remote_state.shared_infra.outputs.catalogue_sierra_items_reindex_topic_arn
   mets_reindexer_topic_name                         = module.mets_reindexer_topic.name
   mets_reindexer_topic_arn                          = module.mets_reindexer_topic.arn
   calm_reindexer_topic_name                         = module.calm_reindexer_topic.name
@@ -58,11 +56,6 @@ locals {
       id    = "miro_inventory--reporting"
       table = local.vhs_miro_inventory_table_name
       topic = local.reporting_miro_inventory_hybrid_records_topic_arn
-    },
-    {
-      id    = "sierra_items--catalogue"
-      table = local.vhs_sierra_items_table_name
-      topic = local.catalogue_sierra_items_hybrid_records_topic_arn
     },
     {
       id    = "mets--catalogue"
