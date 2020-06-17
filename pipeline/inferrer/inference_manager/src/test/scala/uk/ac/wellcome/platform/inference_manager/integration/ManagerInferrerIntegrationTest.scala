@@ -82,7 +82,7 @@ class ManagerInferrerIntegrationTest
     testWith: TestWith[(QueuePair, Topic), R]): R =
     // We would like a timeout longer than 1s here because the inferrer
     // may need to warm up.
-    withLocalSqsQueueAndDlqAndTimeout(5) { queuePair =>
+    withLocalSqsQueuePair(visibilityTimeout = 5) { queuePair =>
       withLocalSnsTopic { topic =>
         withWorkerService(
           queuePair.queue,

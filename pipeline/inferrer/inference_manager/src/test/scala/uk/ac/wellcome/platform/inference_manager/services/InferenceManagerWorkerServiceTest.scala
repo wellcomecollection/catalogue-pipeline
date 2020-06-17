@@ -109,7 +109,7 @@ class InferenceManagerWorkerServiceTest
 
   def withWorkerServiceFixtures[R](
     testWith: TestWith[(QueuePair, Topic), R]): R =
-    withLocalSqsQueueAndDlq { queuePair =>
+    withLocalSqsQueuePair() { queuePair =>
       withLocalSnsTopic { topic =>
         withWorkerService(
           queuePair.queue,

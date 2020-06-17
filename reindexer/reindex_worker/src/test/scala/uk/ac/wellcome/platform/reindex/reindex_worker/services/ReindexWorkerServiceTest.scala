@@ -21,7 +21,7 @@ class ReindexWorkerServiceTest
       val messageSender = new MemoryIndividualMessageSender()
       val destination = createDestination
 
-      withLocalSqsQueueAndDlq {
+      withLocalSqsQueuePair() {
         case QueuePair(queue, dlq) =>
           withWorkerService(messageSender, queue, table, destination) { _ =>
             val reindexParameters = CompleteReindexParameters(
@@ -53,7 +53,7 @@ class ReindexWorkerServiceTest
       val messageSender = new MemoryIndividualMessageSender()
       val destination = createDestination
 
-      withLocalSqsQueueAndDlq {
+      withLocalSqsQueuePair() {
         case QueuePair(queue, dlq) =>
           withWorkerService(messageSender, queue, table, destination) { _ =>
             sendNotificationToSQS(
@@ -76,7 +76,7 @@ class ReindexWorkerServiceTest
     val messageSender = new MemoryIndividualMessageSender()
     val destination = createDestination
 
-    withLocalSqsQueueAndDlq {
+    withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
         withWorkerService(messageSender, queue, badTable, destination) { _ =>
           sendNotificationToSQS(queue = queue, message = createReindexRequest)
@@ -96,7 +96,7 @@ class ReindexWorkerServiceTest
       val messageSender = new MemoryIndividualMessageSender()
       val destination = createDestination
 
-      withLocalSqsQueueAndDlq {
+      withLocalSqsQueuePair() {
         case QueuePair(queue, dlq) =>
           withWorkerService(
             messageSender,
@@ -125,7 +125,7 @@ class ReindexWorkerServiceTest
         val destination1 = createDestination
         val destination2 = createDestination
 
-        withLocalSqsQueueAndDlq {
+        withLocalSqsQueuePair() {
           case QueuePair(queue, dlq) =>
             val records1 = createRecords(table1, count = 3)
             val records2 = createRecords(table2, count = 5)

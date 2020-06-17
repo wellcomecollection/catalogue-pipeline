@@ -47,7 +47,7 @@ trait WorkerServiceFixture extends LocalWorksVhs {
 
   def withWorkerService[R](vhs: VHS)(
     testWith: TestWith[MergerWorkerService[SNSConfig, SNSConfig], R]): R =
-    withLocalSqsQueue { queue =>
+    withLocalSqsQueue() { queue =>
       withLocalSnsTopic { worksTopic =>
         withLocalSnsTopic { imagesTopic =>
           withWorkerService(vhs, queue, worksTopic, imagesTopic) {

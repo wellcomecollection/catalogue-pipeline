@@ -25,7 +25,7 @@ class MergerIntegrationTest
     withLocalSnsTopic { worksTopic =>
       withLocalSnsTopic { imagesTopic =>
         withVHS { vhs =>
-          withLocalSqsQueueAndDlq {
+          withLocalSqsQueuePair() {
             case QueuePair(queue, dlq) =>
               withWorkerService(vhs, queue, worksTopic, imagesTopic) { _ =>
                 val work = createUnidentifiedWork

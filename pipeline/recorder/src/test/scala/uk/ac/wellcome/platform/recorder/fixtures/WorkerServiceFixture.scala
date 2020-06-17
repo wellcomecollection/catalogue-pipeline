@@ -6,12 +6,12 @@ import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.recorder.services.RecorderWorkerService
 
 import uk.ac.wellcome.bigmessaging.EmptyMetadata
-import uk.ac.wellcome.bigmessaging.memory.MemoryTypedStoreCompanion
 import uk.ac.wellcome.bigmessaging.fixtures.VHSFixture
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.MessageSender
 
 import uk.ac.wellcome.storage.{Identified, ObjectLocation, Version}
+import uk.ac.wellcome.storage.store.memory.MemoryStore
 import uk.ac.wellcome.storage.store.HybridStoreEntry
 
 trait WorkerServiceFixture extends VHSFixture[TransformedBaseWork] {
@@ -21,8 +21,8 @@ trait WorkerServiceFixture extends VHSFixture[TransformedBaseWork] {
                               msgSender: MessageSender[D])(
     testWith: TestWith[RecorderWorkerService[D], R]): R =
     withActorSystem { implicit actorSystem =>
-      implicit val streamStore =
-        MemoryTypedStoreCompanion[ObjectLocation, TransformedBaseWork]()
+      implicit val store =
+        new MemoryStore[ObjectLocation, TransformedBaseWork](Map.empty)
       withBigMessageStream[TransformedBaseWork, R](queue = queue) { msgStream =>
         val workerService = new RecorderWorkerService(vhs, msgStream, msgSender)
         workerService.run()

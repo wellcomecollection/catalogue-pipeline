@@ -323,7 +323,7 @@ class MergerWorkerServiceTest
     testWith: TestWith[(VHS, QueuePair, Topics, MemoryMetrics[StandardUnit]),
                        R]): R =
     withVHS { vhs =>
-      withLocalSqsQueueAndDlq {
+      withLocalSqsQueuePair() {
         case QueuePair(queue, dlq) =>
           withLocalSnsTopic { worksTopic =>
             withLocalSnsTopic { imagesTopic =>

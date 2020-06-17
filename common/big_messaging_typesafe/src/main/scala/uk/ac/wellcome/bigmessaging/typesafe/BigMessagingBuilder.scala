@@ -13,7 +13,7 @@ import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.monitoring.typesafe.CloudWatchBuilder
 import uk.ac.wellcome.storage.ObjectLocation
 import uk.ac.wellcome.storage.s3.S3Config
-import uk.ac.wellcome.storage.store.TypedStore
+import uk.ac.wellcome.storage.store.Store
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.streaming.Codec
 import uk.ac.wellcome.storage.typesafe.S3Builder
@@ -33,7 +33,7 @@ object BigMessagingBuilder {
 
     implicit val s3Client: AmazonS3 = S3Builder.buildS3Client(config)
 
-    implicit val typedStore: S3TypedStore[T] = S3TypedStore[T]
+    implicit val store: Store[ObjectLocation, T] = S3TypedStore[T]
 
     new BigMessageStream[T](
       sqsClient = SQSBuilder.buildSQSAsyncClient(config),
@@ -46,7 +46,7 @@ object BigMessagingBuilder {
   def buildBigMessageSender[T](config: Config)(
     implicit
     encoderT: Encoder[T],
-    s3TypedStore: S3TypedStore[T]
+    storeT: Store[ObjectLocation, T]
   ): BigMessageSender[SNSConfig, T] = {
 
     val s3Config: S3Config =
@@ -60,7 +60,7 @@ object BigMessagingBuilder {
           subject = "Sent from MessageWriter"
         )
 
-      override val typedStore: TypedStore[ObjectLocation, T] = s3TypedStore
+      override val store: Store[ObjectLocation, T] = storeT
       override val namespace: String = s3Config.bucketName
 
       implicit val encoder: Encoder[T] = encoderT

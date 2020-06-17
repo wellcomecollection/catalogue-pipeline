@@ -51,7 +51,7 @@ class SierraBibMergerWorkerServiceTest
   private def withWorkerServiceFixtures[R](
     testWith: TestWith[(Metrics[Future, StandardUnit], QueuePair), R]) = {
     val metricsSender = mock[Metrics[Future, StandardUnit]]
-    withLocalSqsQueueAndDlq {
+    withLocalSqsQueuePair() {
       case queuePair @ QueuePair(queue, _) =>
         val store = createStore[SierraTransformable]()
         withWorkerService(store, queue) { _ =>

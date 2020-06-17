@@ -7,7 +7,6 @@ import uk.ac.wellcome.platform.transformer.mets.fixtures.{
   STSFixtures
 }
 import uk.ac.wellcome.storage.{Identified, ObjectLocation}
-import uk.ac.wellcome.storage.store.TypedStoreEntry
 
 import scala.util.Right
 
@@ -23,7 +22,7 @@ class TemporaryCredentialsStoreTest
       withLocalStackS3Bucket { bucket =>
         val location = ObjectLocation(bucket.name, "file.txt")
         val content = "Rudolph the red node reindeer"
-        localStackS3Store.put(location)(TypedStoreEntry(content, Map()))
+        localStackS3Store.put(location)(content)
         withAssumeRoleClientProvider(roleArn)(testS3ClientBuilder) {
           assumeRoleClientProvider =>
             val result = new TemporaryCredentialsStore[String](
