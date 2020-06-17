@@ -58,6 +58,17 @@ object WorkPredicates {
   val sierraPicture: WorkPredicate =
     satisfiesAll(sierraWork, workType(WorkType.Pictures))
 
+  val sierraPictureDigitalImageOr3DObject: WorkPredicate =
+    satisfiesAll(
+      sierraWork,
+      workType(WorkType.DigitalImages) _ or
+        workType(WorkType.`3DObjects`) or
+        workType(WorkType.Pictures)
+    )
+
+  val historicalLibraryMiro: WorkPredicate = singleDigitalItemMiroWork and
+    sourceIdentifierSatisfies(_.matches("^[LM].+"))
+
   def not(pred: WorkPredicate): WorkPredicate = !pred(_)
 
   def sierraWorkWithId(id: SourceIdentifier)(
@@ -92,6 +103,9 @@ object WorkPredicates {
     work.data.items.forall { item =>
       item.locations.size == 1
     }
+
+  private def sourceIdentifierSatisfies(pred: String => Boolean)(
+    work: TransformedBaseWork): Boolean = pred(work.sourceIdentifier.value)
 
   private def identifierTypeId(id: String)(work: TransformedBaseWork): Boolean =
     work.sourceIdentifier.identifierType == IdentifierType(id)

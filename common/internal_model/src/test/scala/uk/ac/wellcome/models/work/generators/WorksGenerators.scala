@@ -281,10 +281,11 @@ trait WorksGenerators
   def createUnidentifiedInvisibleMetsWork: UnidentifiedInvisibleWork =
     createUnidentifiedInvisibleMetsWorkWith()
 
-  def createMiroWorkWith(
-    otherIdentifiers: List[SourceIdentifier] = List()): UnidentifiedWork =
+  def createMiroWorkWith(otherIdentifiers: List[SourceIdentifier] = List(),
+                         sourceIdentifier: SourceIdentifier =
+                           createMiroSourceIdentifier): UnidentifiedWork =
     createUnidentifiedWorkWith(
-      sourceIdentifier = createMiroSourceIdentifier,
+      sourceIdentifier = sourceIdentifier,
       otherIdentifiers = otherIdentifiers,
       thumbnail = Some(
         DigitalLocation(
