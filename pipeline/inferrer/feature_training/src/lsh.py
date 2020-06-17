@@ -25,14 +25,14 @@ def get_object_name():
         container_metadata = get_ecs_container_metadata()
         image = container_metadata["Image"]
         tag = image.split(":")[1]
-    except Exception as e:
+    except Exception:
         try:
             tag = (
                 subprocess.check_output(["git", "rev-parse", "HEAD"])
                 .decode("ascii")
                 .strip()
             )
-        except Exception as e:
+        except Exception:
             raise Exception("Could not fetch ECS image tag or find local git hash")
 
     return f"{tag}/{timestamp}"
