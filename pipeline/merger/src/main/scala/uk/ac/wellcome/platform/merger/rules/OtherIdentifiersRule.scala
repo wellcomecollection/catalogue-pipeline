@@ -31,16 +31,18 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
             mergeSingleMiroIntoSingleOrZeroItemSierraTarget(target, sources))
     ).getOrElse(target.otherIdentifiers).distinct
 
-    val mergedSources = sources.filter { source =>
+    val mergedSources = (
       List(
         mergeIntoCalmTarget,
         mergeSingleMiroIntoSingleOrZeroItemSierraTarget
-      ).exists(_(target, source).isDefined)
-    } ++ findFirstLinkedDigitisedSierraWorkFor(target, sources)
+      ).flatMap { rule =>
+        rule.mergedSources(target, sources)
+      } ++ findFirstLinkedDigitisedSierraWorkFor(target, sources)
+    ).distinct
 
     FieldMergeResult(
       data = ids,
-      sources = mergedSources.distinct
+      sources = mergedSources
     )
   }
 

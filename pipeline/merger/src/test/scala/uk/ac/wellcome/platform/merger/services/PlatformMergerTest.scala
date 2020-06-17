@@ -25,7 +25,10 @@ class PlatformMergerTest
           Some("Physical/digitised Sierra work"))),
       workType = Some(WorkType.`3DObjects`)
     ))
-  val zeroItemSierraWork = createUnidentifiedSierraWork
+  val zeroItemSierraWork = createUnidentifiedSierraWorkWith(
+    items = Nil,
+    workType = Some(WorkType.Pictures)
+  )
   private val multipleItemsSierraWork =
     createSierraWorkWithTwoPhysicalItems.copy(
       data = createSierraWorkWithTwoPhysicalItems.data.copy(

@@ -70,7 +70,7 @@ class OtherIdentifiersRuleTest
         otherIdentifiers should contain theSameElementsAs
           miroWork.sourceIdentifier :: physicalSierra.otherIdentifiers
 
-        mergedSources should contain theSameElementsAs (metsWorks :+ miroWork)
+        mergedSources should contain only miroWork
     }
   }
 
