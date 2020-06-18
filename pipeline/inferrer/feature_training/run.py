@@ -22,7 +22,7 @@ def get_subnet():
 
 
 def get_kibana_logs_url(task_arn):
-    return f"https://logging.wellcomecollection.org/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-1d,to:now))&_a=(columns:!(ecs_task_arn),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'978cbc80-af0d-11ea-b454-cb894ee8b269',key:ecs_task_arn.keyword,negate:!f,params:(query:'{task_arn}'),type:phrase),query:(match_phrase:(ecs_task_arn.keyword:'{task_arn}')))),index:'978cbc80-af0d-11ea-b454-cb894ee8b269',interval:auto,query:(language:kuery,query:''),sort:!())"
+    return f"https://logging.wellcomecollection.org/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-1d,to:now))&_a=(columns:!(_source),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'978cbc80-af0d-11ea-b454-cb894ee8b269',key:ecs_task_arn.keyword,negate:!f,params:(query:'{task_arn}'),type:phrase),query:(match_phrase:(ecs_task_arn.keyword:'{task_arn}')))),index:'978cbc80-af0d-11ea-b454-cb894ee8b269',interval:auto,query:(language:kuery,query:''),sort:!())"
 
 
 @click.group()
