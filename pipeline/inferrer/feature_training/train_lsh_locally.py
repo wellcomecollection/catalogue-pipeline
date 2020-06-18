@@ -16,7 +16,7 @@ from src.storage import store_model
     "-m", help="number of clusters to find within each feature group", default=256
 )
 @click.option(
-    "--sample-size", help="number of embeddings to train clusters on", default=25000
+    "--sample-size", help="number of embeddings to train clusters on", default=10000
 )
 @click.option(
     "--feature-vector-path", help="path to a synced local version of the fvs in s3"

@@ -12,7 +12,7 @@ N_CLUSTERS = 256
 
 @click.command()
 @click.option(
-    "--sample_size", help="number of embeddings to train clusters on", default=25000
+    "--sample-size", help="number of embeddings to train clusters on", default=10000
 )
 @click.option(
     "--bucket-name",
@@ -27,7 +27,7 @@ N_CLUSTERS = 256
 def main(sample_size, bucket_name, ssm_path):
     feature_vectors = get_random_feature_vectors(sample_size)
 
-    model = get_object_for_storage(feature_vectors, N_CLUSTERS, N_GROUPS)
+    model = get_object_for_storage(feature_vectors, N_CLUSTERS, N_GROUPS, tty=False)
     store_model(bucket_name=bucket_name, ssm_path=ssm_path, **model)
 
 

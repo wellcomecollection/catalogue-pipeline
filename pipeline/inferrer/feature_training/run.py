@@ -21,6 +21,10 @@ def get_subnet():
     return subnets["Subnets"][0]["SubnetId"]
 
 
+def get_kibana_logs_url(pipeline_name):
+    return f"https://logging.wellcomecollection.org/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-30m,to:now))&_a=(columns:!(log),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'978cbc80-af0d-11ea-b454-cb894ee8b269',key:service_name.keyword,negate:!f,params:(query:{pipeline_name}),type:phrase),query:(match_phrase:(service_name.keyword:{pipeline_name}_image_training)))),index:'978cbc80-af0d-11ea-b454-cb894ee8b269',interval:auto,query:(language:kuery,query:''),sort:!())"
+
+
 @click.group()
 def cli():
     pass
@@ -46,8 +50,11 @@ def train_new_model(pipeline_name):
                 "assignPublicIp": "ENABLED",
             }
         },
+        platformVersion="1.4.0",
     )
     print(f"Successfully started training task [{res['tasks'][0]['taskArn']}]")
+    print("You can follow the logs at:")
+    print(get_kibana_logs_url(pipeline_name))
 
 
 @cli.command()
