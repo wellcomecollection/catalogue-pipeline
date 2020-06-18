@@ -21,8 +21,8 @@ def get_subnet():
     return subnets["Subnets"][0]["SubnetId"]
 
 
-def get_kibana_logs_url(pipeline_name):
-    return f"https://logging.wellcomecollection.org/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-30m,to:now))&_a=(columns:!(log),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'978cbc80-af0d-11ea-b454-cb894ee8b269',key:service_name.keyword,negate:!f,params:(query:{pipeline_name}),type:phrase),query:(match_phrase:(service_name.keyword:{pipeline_name}_image_training)))),index:'978cbc80-af0d-11ea-b454-cb894ee8b269',interval:auto,query:(language:kuery,query:''),sort:!())"
+def get_kibana_logs_url(task_arn):
+    return f"https://logging.wellcomecollection.org/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-1d,to:now))&_a=(columns:!(ecs_task_arn),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'978cbc80-af0d-11ea-b454-cb894ee8b269',key:ecs_task_arn.keyword,negate:!f,params:(query:'{task_arn}'),type:phrase),query:(match_phrase:(ecs_task_arn.keyword:'{task_arn}')))),index:'978cbc80-af0d-11ea-b454-cb894ee8b269',interval:auto,query:(language:kuery,query:''),sort:!())"
 
 
 @click.group()
@@ -63,18 +63,17 @@ def train_new_model(pipeline_name):
 def deploy_model(from_label, to_label):
     ssm_path_template = "/catalogue_pipeline/config/models/%s/lsh_model"
     ssm_client = session.client("ssm")
-    from_value = ssm_client.get_parameter(Name=(ssm_path_template % from_label))[
-        "Parameter"
-    ]["Value"]
+    from_ssm_parameter = ssm_client.get_parameter(Name=(ssm_path_template % from_label))
+    from_value = from_ssm_parameter["Parameter"]["Value"]
 
-    print(f"Updating {to_label} to '{from_value}'...")
+    print(f"Updating {to_label} to {from_value!r}...")
     ssm_client.put_parameter(
         Name=(ssm_path_template % to_label),
         Value=from_value,
         Overwrite=True,
         Type="String",
     )
-    print(f"Updated {to_label} to '{from_value}'")
+    print(f"Updated {to_label} to {from_value!r}")
 
 
 if __name__ == "__main__":

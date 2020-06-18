@@ -9,8 +9,9 @@ logger = get_logger(__name__)
 
 def get_ecs_container_metadata():
     endpoint = os.environ["ECS_CONTAINER_METADATA_URI_V4"]
-    req = requests.get(endpoint)
-    return req.json()
+    resp = requests.get(endpoint)
+    resp.raise_for_status()
+    return resp.json()
 
 
 def get_s3_client():
@@ -24,7 +25,7 @@ def get_s3_client():
 
 def put_object_to_s3(binary_object, key, bucket_name):
     s3_client = get_s3_client()
-    logger.info("Uploading object to S3...")
+    logger.info("Uploading object to S3 bucket %r with key %r...", bucket_name, key)
     s3_client.put_object(Bucket=bucket_name, Key=key, Body=binary_object)
     logger.info("Uploaded object to S3.")
 
@@ -32,7 +33,7 @@ def put_object_to_s3(binary_object, key, bucket_name):
 def put_ssm_parameter(path, value, description):
     ssm_client = boto3.client("ssm")
 
-    logger.info(f"Updating SSM path `{path}` to `{value}`...")
+    logger.info("Updating SSM path %r to %r...", path, value)
     ssm_client.put_parameter(
         Name=path, Description=description, Value=value, Type="String", Overwrite=True
     )
