@@ -44,7 +44,7 @@ def main(n, m, sample_size, feature_vector_path, bucket_name, ssm_path):
 
     feature_vectors = np.stack(feature_vectors)
 
-    model = get_object_for_storage(feature_vectors, m, n, verbose=True)
+    model = get_object_for_storage(feature_vectors, m, n)
     store_model(bucket_name=bucket_name, ssm_path=ssm_path, **model)
 
 

@@ -2,6 +2,9 @@ import os
 import random
 import numpy as np
 from elasticsearch import Elasticsearch, helpers
+from .logging import get_logger
+
+logger = get_logger(__name__)
 
 
 def get_documents_from_es_in_batches(es_client, index_name, ids, batch_size=5000):
@@ -41,7 +44,7 @@ def get_random_feature_vectors(n_documents):
         use_ssl=(os.getenv("ES_PROTOCOL", "https") == "https"),
     )
 
-    print(f"Fetching {n_documents} random documents")
+    logger.info(f"Fetching {n_documents} random documents")
     documents = get_random_documents(es_client, os.environ["ES_INDEX"], n_documents)
 
     feature_vectors = np.stack(
