@@ -12,6 +12,10 @@
             {
                 "id": "prod",
                 "name": "Production"
+            },
+            {
+                "id": "miro_merging_test",
+                "name": "Miro merging test"
             }
         ],
         "name": "Catalogue pipeline",
