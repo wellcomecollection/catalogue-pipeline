@@ -1,5 +1,7 @@
-resource "aws_sns_topic" "calm_adapter_topic" {
-  name = "calm-records"
+module "calm_adapter_topic" {
+  source                         = "github.com/wellcomecollection/terraform-aws-sns-topic.git?ref=v1.0.0"
+  name                           = "calm-records"
+  cross_account_subscription_ids = ["269807742353"]
 }
 
 data "aws_iam_policy_document" "publish_to_adapter_topic" {
@@ -9,7 +11,7 @@ data "aws_iam_policy_document" "publish_to_adapter_topic" {
     ]
 
     resources = [
-      aws_sns_topic.calm_adapter_topic.arn
+      module.calm_adapter_topic.arn
     ]
   }
 }
