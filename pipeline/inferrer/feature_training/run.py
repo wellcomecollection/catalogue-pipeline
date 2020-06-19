@@ -52,9 +52,10 @@ def train_new_model(pipeline_name):
         },
         platformVersion="1.4.0",
     )
-    print(f"Successfully started training task [{res['tasks'][0]['taskArn']}]")
+    task_arn = res["tasks"][0]["taskArn"]
+    print(f"Successfully started training task [{task_arn}]")
     print("You can follow the logs at:")
-    print(get_kibana_logs_url(pipeline_name))
+    print(get_kibana_logs_url(task_arn))
 
 
 @cli.command()
