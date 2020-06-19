@@ -59,6 +59,8 @@ jobs:
       script:
         - ./.travis/run_job.py inference_manager
         - ./.travis/run_job.py feature_inferrer --changes-in pipeline/inferrer/feature_inferrer
+    - name: feature_training
+      script: ./.travis/run_job.py feature_training --changes-in pipeline/inferrer/feature_training
     - name: snapshot_generator
       script: ./.travis/run_job.py snapshot_generator
     - name: lambda-test

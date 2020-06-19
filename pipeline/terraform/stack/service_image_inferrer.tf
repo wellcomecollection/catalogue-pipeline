@@ -1,7 +1,6 @@
 locals {
-  inferrer_host                  = "localhost"
-  inferrer_port                  = 80
-  inferrer_model_key_config_name = "lsh_model"
+  inferrer_host = "localhost"
+  inferrer_port = 80
   //  High inferrer throughput comes at the cost of the latency distribution
   // having heavy tails - this stops some unfortunate messages from being
   // put on the DLQ when they are consumed but not processed.
@@ -60,7 +59,7 @@ module "image_inferrer" {
     queue_url            = module.image_inferrer_queue.url
   }
   app_env_vars = {
-    MODEL_OBJECT_KEY  = data.aws_ssm_parameter.model_data_key.value
+    MODEL_OBJECT_KEY  = data.aws_ssm_parameter.inferrer_lsh_model_key.value
     MODEL_DATA_BUCKET = var.inferrer_model_data_bucket_name
   }
 
@@ -71,10 +70,6 @@ module "image_inferrer" {
 
   messages_bucket_arn = aws_s3_bucket.messages.arn
   queue_read_policy   = module.image_inferrer_queue.read_policy
-}
-
-data "aws_ssm_parameter" "model_data_key" {
-  name = "/catalogue_pipeline/config/inferrer/model_object/${local.inferrer_model_key_config_name}"
 }
 
 resource "aws_iam_role_policy" "read_inferrer_data" {

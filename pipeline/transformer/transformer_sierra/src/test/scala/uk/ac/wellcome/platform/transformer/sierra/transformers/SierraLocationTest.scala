@@ -7,8 +7,7 @@ import uk.ac.wellcome.models.work.internal.{
   AccessStatus,
   DigitalLocation,
   LocationType,
-  PhysicalLocation,
-  UnknownAccessStatus
+  PhysicalLocation
 }
 import uk.ac.wellcome.platform.transformer.sierra.exceptions.SierraTransformerException
 import uk.ac.wellcome.platform.transformer.sierra.source.sierra.SierraSourceLocation
@@ -92,32 +91,6 @@ class SierraLocationTest
       )
     }
 
-    it("strips punctuation from access condition if present") {
-      val bibData = createSierraBibDataWith(
-        varFields = List(
-          VarField(
-            marcTag = Some("506"),
-            subfields = List(
-              MarcSubfield("f", "Open."),
-              MarcSubfield("g", "2099-12-31"),
-            )
-          )
-        )
-      )
-      transformer.getPhysicalLocation(itemData, bibData) shouldBe Some(
-        PhysicalLocation(
-          locationType = locationType,
-          label = label,
-          accessConditions = List(
-            AccessCondition(
-              status = Some(AccessStatus.Open),
-              to = Some("2099-12-31")
-            ),
-          )
-        )
-      )
-    }
-
     it("adds 'Open' access condition if ind1 is 0") {
       val bibData = createSierraBibDataWith(
         varFields = List(
@@ -161,133 +134,6 @@ class SierraLocationTest
     }
 
     it(
-      "maps Restricted access (Data Protection Act) to restricted access status") {
-      val bibData = createSierraBibDataWith(
-        varFields = List(
-          VarField(
-            marcTag = Some("506"),
-            subfields = List(
-              MarcSubfield("f", "Restricted access (Data Protection Act)")
-            )
-          )
-        )
-      )
-      transformer.getPhysicalLocation(itemData, bibData) shouldBe Some(
-        PhysicalLocation(
-          locationType = locationType,
-          label = label,
-          accessConditions =
-            List(AccessCondition(Some(AccessStatus.Restricted)))
-        )
-      )
-    }
-
-    it("maps Cannot Be Produced. to restricted access status") {
-      val bibData = createSierraBibDataWith(
-        varFields = List(
-          VarField(
-            marcTag = Some("506"),
-            subfields = List(
-              MarcSubfield("f", "Cannot Be Produced - View Digitised Version")
-            )
-          )
-        )
-      )
-      transformer.getPhysicalLocation(itemData, bibData) shouldBe Some(
-        PhysicalLocation(
-          locationType = locationType,
-          label = label,
-          accessConditions =
-            List(AccessCondition(Some(AccessStatus.Restricted)))
-        )
-      )
-    }
-
-    it("maps Certain restrictions apply. to restricted access status") {
-      val bibData = createSierraBibDataWith(
-        varFields = List(
-          VarField(
-            marcTag = Some("506"),
-            subfields = List(
-              MarcSubfield("f", "Certain restrictions apply.")
-            )
-          )
-        )
-      )
-      transformer.getPhysicalLocation(itemData, bibData) shouldBe Some(
-        PhysicalLocation(
-          locationType = locationType,
-          label = label,
-          accessConditions =
-            List(AccessCondition(Some(AccessStatus.Restricted)))
-        )
-      )
-    }
-
-    it("maps Missing. to unavailable access status") {
-      val bibData = createSierraBibDataWith(
-        varFields = List(
-          VarField(
-            marcTag = Some("506"),
-            subfields = List(
-              MarcSubfield("f", "Missing.")
-            )
-          )
-        )
-      )
-      transformer.getPhysicalLocation(itemData, bibData) shouldBe Some(
-        PhysicalLocation(
-          locationType = locationType,
-          label = label,
-          accessConditions =
-            List(AccessCondition(Some(AccessStatus.Unavailable)))
-        )
-      )
-    }
-
-    it("maps Temporarily Unavailable. to unavailable access status") {
-      val bibData = createSierraBibDataWith(
-        varFields = List(
-          VarField(
-            marcTag = Some("506"),
-            subfields = List(
-              MarcSubfield("f", "Temporarily Unavailable.")
-            )
-          )
-        )
-      )
-      transformer.getPhysicalLocation(itemData, bibData) shouldBe Some(
-        PhysicalLocation(
-          locationType = locationType,
-          label = label,
-          accessConditions =
-            List(AccessCondition(Some(AccessStatus.Unavailable)))
-        )
-      )
-    }
-
-    it("maps Permission Required. to unavailable access status") {
-      val bibData = createSierraBibDataWith(
-        varFields = List(
-          VarField(
-            marcTag = Some("506"),
-            subfields = List(
-              MarcSubfield("f", "Permission Required.")
-            )
-          )
-        )
-      )
-      transformer.getPhysicalLocation(itemData, bibData) shouldBe Some(
-        PhysicalLocation(
-          locationType = locationType,
-          label = label,
-          accessConditions =
-            List(AccessCondition(Some(AccessStatus.PermissionRequired)))
-        )
-      )
-    }
-
-    it(
       "does not add an access condition if none of the relevant subfields are present") {
       val bibData = createSierraBibDataWith(
         varFields = List(
@@ -308,19 +154,6 @@ class SierraLocationTest
       )
     }
 
-    it("errors if invalid AccessStatus") {
-      val bibData = createSierraBibDataWith(
-        varFields = List(
-          VarField(
-            marcTag = Some("506"),
-            subfields = List(MarcSubfield("f", "Oopsy"))
-          )
-        )
-      )
-      assertThrows[UnknownAccessStatus] {
-        transformer.getPhysicalLocation(itemData, bibData)
-      }
-    }
   }
 
   describe("Digital locations") {

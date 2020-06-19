@@ -7,6 +7,7 @@ locals {
     "id_minter",
     "inference_manager",
     "feature_inferrer",
+    "feature_training",
     "recorder",
     "transformer_miro",
     "transformer_mets",
@@ -21,6 +22,14 @@ data "aws_ssm_parameter" "image_ids" {
   name = "/catalogue_pipeline/images/${var.release_label}/${local.services[count.index]}"
 }
 
+data "aws_ssm_parameter" "inferrer_lsh_model_key" {
+  name = "/catalogue_pipeline/config/models/${var.release_label}/lsh_model"
+}
+
+data "aws_ssm_parameter" "latest_lsh_model_key" {
+  name = "/catalogue_pipeline/config/models/latest/lsh_model"
+}
+
 locals {
   image_ids = zipmap(local.services, data.aws_ssm_parameter.image_ids.*.value)
 
@@ -30,6 +39,7 @@ locals {
   merger_image             = local.image_ids["merger"]
   inference_manager_image  = local.image_ids["inference_manager"]
   feature_inferrer_image   = local.image_ids["feature_inferrer"]
+  feature_training_image   = local.image_ids["feature_training"]
   ingestor_works_image     = local.image_ids["ingestor_works"]
   ingestor_images_image    = local.image_ids["ingestor_images"]
   transformer_miro_image   = local.image_ids["transformer_miro"]

@@ -35,35 +35,43 @@ object AccessStatus {
 
   case object PermissionRequired extends AccessStatus
 
-  def apply(str: String): Either[Exception, AccessStatus] =
-    str.toLowerCase match {
-      case status if status.startsWith("open with advisory") =>
+  def apply(status: String): Either[Exception, AccessStatus] =
+    status.toLowerCase match {
+      case lowerCaseStatus
+          if lowerCaseStatus.startsWith("open with advisory") =>
         Right(AccessStatus.OpenWithAdvisory)
-      case status if status.startsWith("requires registration") =>
+      case lowerCaseStatus
+          if lowerCaseStatus.startsWith("requires registration") =>
         Right(AccessStatus.OpenWithAdvisory)
-      case status if status.startsWith("open") =>
+      case lowerCaseStatus if lowerCaseStatus.startsWith("open") =>
         Right(AccessStatus.Open)
-      case status if status.startsWith("restricted") =>
+      case lowerCaseStatus if lowerCaseStatus.startsWith("restricted") =>
         Right(AccessStatus.Restricted)
-      case status if status.startsWith("cannot be produced") =>
+      case lowerCaseStatus
+          if lowerCaseStatus.startsWith("cannot be produced") =>
         Right(AccessStatus.Restricted)
-      case status if status.startsWith("certain restrictions apply") =>
+      case lowerCaseStatus
+          if lowerCaseStatus.startsWith("certain restrictions apply") =>
         Right(AccessStatus.Restricted)
-      case status if status.startsWith("clinical images") =>
+      case lowerCaseStatus if lowerCaseStatus.startsWith("clinical images") =>
         Right(AccessStatus.Restricted)
-      case status if status.startsWith("closed") =>
+      case lowerCaseStatus if lowerCaseStatus.startsWith("by appointment") =>
+        Right(AccessStatus.Restricted)
+      case lowerCaseStatus if lowerCaseStatus.startsWith("closed") =>
         Right(AccessStatus.Closed)
-      case status if status.startsWith("missing") =>
+      case lowerCaseStatus if lowerCaseStatus.startsWith("missing") =>
         Right(AccessStatus.Unavailable)
-      case status if status.startsWith("temporarily unavailable") =>
+      case lowerCaseStatus
+          if lowerCaseStatus.startsWith("temporarily unavailable") =>
         Right(AccessStatus.Unavailable)
-      case status if status.startsWith("deaccessioned") =>
+      case lowerCaseStatus if lowerCaseStatus.startsWith("deaccessioned") =>
         Right(AccessStatus.Unavailable)
-      case status if status.startsWith("in copyright") =>
+      case lowerCaseStatus if lowerCaseStatus.startsWith("in copyright") =>
         Right(AccessStatus.LicensedResources)
-      case status if status.startsWith("permission required") =>
+      case lowerCaseStatus
+          if lowerCaseStatus.startsWith("permission required") =>
         Right(AccessStatus.PermissionRequired)
-      case status =>
+      case _ =>
         Left(new UnknownAccessStatus(status))
     }
 }

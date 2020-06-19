@@ -13,10 +13,10 @@ from src.storage import store_model
     "-n", help="number of groups to split the feature vectors into", default=256
 )
 @click.option(
-    "-m", help="number of clusters to find within each feature group", default=32
+    "-m", help="number of clusters to find within each feature group", default=256
 )
 @click.option(
-    "--sample-size", help="number of embeddings to train clusters on", default=25000
+    "--sample-size", help="number of embeddings to train clusters on", default=10000
 )
 @click.option(
     "--feature-vector-path", help="path to a synced local version of the fvs in s3"
@@ -26,7 +26,12 @@ from src.storage import store_model
     help="Name of the S3 bucket in which model data is stored",
     default="wellcomecollection-inferrer-model-core-data",
 )
-def main(n, m, sample_size, feature_vector_path, bucket_name):
+@click.option(
+    "--ssm-path",
+    help="The path of the SSM parameter in which to store the model key",
+    default="/catalogue_pipeline/config/models/latest/lsh_model",
+)
+def main(n, m, sample_size, feature_vector_path, bucket_name, ssm_path):
     ids = np.random.choice(
         os.listdir(feature_vector_path), size=sample_size, replace=False
     )
@@ -39,8 +44,8 @@ def main(n, m, sample_size, feature_vector_path, bucket_name):
 
     feature_vectors = np.stack(feature_vectors)
 
-    model = get_object_for_storage(feature_vectors, m, n, verbose=True)
-    store_model(bucket_name=bucket_name, **model)
+    model = get_object_for_storage(feature_vectors, m, n)
+    store_model(bucket_name=bucket_name, ssm_path=ssm_path, **model)
 
 
 if __name__ == "__main__":
