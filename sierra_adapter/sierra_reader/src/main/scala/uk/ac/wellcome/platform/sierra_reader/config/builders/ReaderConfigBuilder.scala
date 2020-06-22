@@ -10,7 +10,7 @@ import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 
 object ReaderConfigBuilder {
   def buildReaderConfig(config: Config): ReaderConfig = {
-    val resourceType = config.required[String]("reader.resourceType") match {
+    val resourceType = config.requireString("reader.resourceType") match {
       case s: String if s == bibs.toString  => bibs
       case s: String if s == items.toString => items
       case s: String =>
@@ -20,9 +20,10 @@ object ReaderConfigBuilder {
 
     ReaderConfig(
       resourceType = resourceType,
-      fields = config.required[String]("reader.fields"),
-      batchSize =
-        config.getOrElse[String]("reader.batchSize")(default = "50").toInt
+      fields = config.requireString("reader.fields"),
+      batchSize = config
+        .getIntOption("reader.batchSize")
+        .getOrElse(10)
     )
   }
 }

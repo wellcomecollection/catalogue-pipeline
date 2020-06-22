@@ -30,7 +30,7 @@ object Main extends WellcomeTypesafeApp {
     implicit val materializer: Materializer =
       AkkaBuilder.buildMaterializer()
 
-    val indexName = config.required[String]("es.index")
+    val indexName = config.requireString("es.index")
     val elasticClient = ElasticBuilder.buildElasticClient(config)
     val index = Index(indexName)
     new IngestorWorkerService(

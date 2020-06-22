@@ -54,12 +54,12 @@ object Main extends WellcomeTypesafeApp {
     materializer: Materializer,
     ec: ExecutionContext): BagRetriever =
     new HttpBagRetriever(
-      config.required[String]("bags.api.url"),
+      config.requireString("bags.api.url"),
       new TokenService(
-        config.required[String]("bags.oauth.url"),
-        config.required[String]("bags.oauth.client_id"),
-        config.required[String]("bags.oauth.secret"),
-        config.required[String]("bags.api.url"),
+        config.requireString("bags.oauth.url"),
+        config.requireString("bags.oauth.client_id"),
+        config.requireString("bags.oauth.secret"),
+        config.requireString("bags.api.url"),
         20 minutes
       )
     )

@@ -7,8 +7,8 @@ import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 object SierraAPIConfigBuilder {
   def buildSierraConfig(config: Config): SierraAPIConfig =
     SierraAPIConfig(
-      apiURL = config.required[String]("sierra.apiURL"),
-      oauthKey = config.required[String]("sierra.oauthKey"),
-      oauthSec = config.required[String]("sierra.oauthSecret")
+      apiURL = config.requireString("sierra.apiURL"),
+      oauthKey = config.requireString("sierra.oauthKey"),
+      oauthSec = config.requireString("sierra.oauthSecret")
     )
 }

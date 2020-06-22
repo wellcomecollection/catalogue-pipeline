@@ -21,8 +21,6 @@ module "ingestor_images" {
   cluster_name = aws_ecs_cluster.cluster.name
   cluster_arn  = aws_ecs_cluster.cluster.arn
 
-  namespace_id = aws_service_discovery_private_dns_namespace.namespace.id
-
   env_vars = {
     metrics_namespace   = "${local.namespace_hyphen}_ingestor_images"
     es_index            = var.es_images_index

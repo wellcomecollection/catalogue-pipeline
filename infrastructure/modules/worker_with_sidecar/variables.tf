@@ -11,7 +11,8 @@ variable "cluster_arn" {
 }
 
 variable "namespace_id" {
-  type = string
+  type    = string
+  default = null
 }
 
 variable "subnets" {

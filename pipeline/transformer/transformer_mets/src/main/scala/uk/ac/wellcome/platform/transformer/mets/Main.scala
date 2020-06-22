@@ -53,7 +53,7 @@ object Main extends WellcomeTypesafeApp with AWSClientConfigBuilder {
       buildAWSClientConfig(config, namespace = "storage"))
     val assumeRoleS3ClientProvider = new AssumeRoleClientProvider[AmazonS3](
       stsClient,
-      config.required[String]("aws.s3.storage.role.arn"),
+      config.requireString("aws.s3.storage.role.arn"),
       20 minutes)(s3ClientFactory)
     val temporaryCredentialsStore =
       new TemporaryCredentialsStore[String](assumeRoleS3ClientProvider)

@@ -44,8 +44,12 @@ object Main extends WellcomeTypesafeApp {
     val inferrerClientFlow =
       Http()
         .cachedHostConnectionPool[(Message, Input)](
-          config.getOrElse[String]("inferrer.host")("localhost"),
-          config.getOrElse[String]("inferrer.port")("80").toInt
+          config
+            .getStringOption("inferrer.host")
+            .getOrElse("localhost"),
+          config
+            .getIntOption("inferrer.port")
+            .getOrElse(80)
         )
 
     new InferenceManagerWorkerService(

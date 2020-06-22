@@ -9,8 +9,6 @@ module "worker" {
 
   subnets = var.subnets
 
-  namespace_id = var.namespace_id
-
   cluster_name = var.cluster_name
   cluster_arn  = var.cluster_arn
 

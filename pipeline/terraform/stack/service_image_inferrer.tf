@@ -28,8 +28,6 @@ module "image_inferrer" {
   cluster_name = aws_ecs_cluster.cluster.name
   cluster_arn  = aws_ecs_cluster.cluster.arn
 
-  namespace_id = aws_service_discovery_private_dns_namespace.namespace.id
-
   host_cpu    = 4096
   host_memory = 8192
 

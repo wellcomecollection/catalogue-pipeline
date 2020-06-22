@@ -11,7 +11,7 @@ locals {
   env_vars = {
     calm_api_url          = "https://wt-calm.wellcome.ac.uk/CalmAPI/ContentService.asmx"
     calm_sqs_url          = module.calm_windows_queue.url
-    calm_sns_topic        = aws_sns_topic.calm_adapter_topic.arn
+    calm_sns_topic        = module.calm_adapter_topic.arn
     vhs_dynamo_table_name = module.vhs.table_name
     vhs_bucket_name       = module.vhs.bucket_name
   }
