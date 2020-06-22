@@ -71,6 +71,8 @@ object AccessStatus {
       case lowerCaseStatus
           if lowerCaseStatus.startsWith("permission required") =>
         Right(AccessStatus.PermissionRequired)
+      case lowerCaseStatus if lowerCaseStatus.startsWith("donor permission") =>
+        Right(AccessStatus.PermissionRequired)
       case _ =>
         Left(new UnknownAccessStatus(status))
     }
