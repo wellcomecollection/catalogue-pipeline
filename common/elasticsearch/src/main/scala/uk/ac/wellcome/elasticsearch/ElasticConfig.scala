@@ -12,7 +12,7 @@ object ElasticConfig {
   // i.e. The API and the snapshot generator.
   def apply(): ElasticConfig =
     ElasticConfig(
-      worksIndex = Index("works-20200615"),
-      imagesIndex = Index("images-20200615")
+      worksIndex = Index("works-20200619"),
+      imagesIndex = Index("images-20200619")
     )
 }
