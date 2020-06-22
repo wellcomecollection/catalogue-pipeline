@@ -6,7 +6,6 @@ variable "subnets" {
   type = list(string)
 }
 
-variable "namespace_id" {}
 variable "container_image" {}
 
 variable "secret_env_vars" {

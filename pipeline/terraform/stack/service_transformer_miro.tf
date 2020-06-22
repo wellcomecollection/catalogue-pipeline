@@ -18,8 +18,6 @@ module "miro_transformer" {
   cluster_name = aws_ecs_cluster.cluster.name
   cluster_arn  = aws_ecs_cluster.cluster.arn
 
-  namespace_id = aws_service_discovery_private_dns_namespace.namespace.id
-
   env_vars = {
     sns_arn              = module.miro_transformer_topic.arn
     transformer_queue_id = module.miro_transformer_queue.url

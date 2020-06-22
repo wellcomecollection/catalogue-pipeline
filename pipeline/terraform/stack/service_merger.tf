@@ -19,8 +19,6 @@ module "merger" {
   cluster_name = aws_ecs_cluster.cluster.name
   cluster_arn  = aws_ecs_cluster.cluster.arn
 
-  namespace_id = aws_service_discovery_private_dns_namespace.namespace.id
-
   env_vars = {
     metrics_namespace        = "${local.namespace_hyphen}_merger"
     messages_bucket_name     = aws_s3_bucket.messages.id

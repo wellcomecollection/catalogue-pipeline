@@ -2,9 +2,6 @@ variable "subnets" {
   type = list(string)
 }
 
-variable "namespace_id" {
-}
-
 variable "cluster_name" {
 }
 
