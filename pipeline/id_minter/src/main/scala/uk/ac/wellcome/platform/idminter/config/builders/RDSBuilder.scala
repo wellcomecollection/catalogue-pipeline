@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.idminter.config.builders
 
-import scala.util.Try
-import com.typesafe.config.{Config, ConfigException}
+import com.typesafe.config.Config
 import scalikejdbc.{ConnectionPool, ConnectionPoolSettings}
 import uk.ac.wellcome.platform.idminter.config.models.RDSClientConfig
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
