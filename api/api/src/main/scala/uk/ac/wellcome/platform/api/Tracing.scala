@@ -34,10 +34,15 @@ object Tracing {
     ElasticApmAttacher.attach(
       Map(
         "application_packages" -> "uk.ac.wellcome",
-        "service_name" -> config.getOrElse("apm.service.name")("catalogue-api"),
-        "server_urls" -> config.getOrElse("apm.server.url")(
-          "http://localhost:9200"),
-        "secret_token" -> config.getOrElse[String]("apm.secret")(""),
+        "service_name" -> config
+          .getStringOption("apm.service.name")
+          .getOrElse("catalogue-api"),
+        "server_urls" -> config
+          .getStringOption("apm.server.url")
+          .getOrElse("http://localhost:9200"),
+        "secret_token" -> config
+          .getStringOption("apm.secret")
+          .getOrElse(""),
         "span_frames_min_duration" -> "250ms"
       ).asJava)
     actorSystem.dispatchers.registerConfigurator(

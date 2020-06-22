@@ -31,13 +31,20 @@ object Main extends WellcomeTypesafeApp {
 
     val apiConfig =
       ApiConfig(
-        host = config.getOrElse[String]("api.host")(default = "localhost"),
-        scheme = config.getOrElse[String]("api.scheme")(default = "https"),
-        defaultPageSize = config.getOrElse[Int]("api.pageSize")(default = 10),
+        host = config
+          .getStringOption("api.host")
+          .getOrElse("localhost"),
+        scheme = config
+          .getStringOption("api.scheme")
+          .getOrElse("https"),
+        defaultPageSize = config
+          .getIntOption("api.pageSize")
+          .getOrElse(10),
         pathPrefix =
-          s"${config.getOrElse[String]("api.apiName")(default = "catalogue")}",
-        contextSuffix = config.getOrElse[String]("api.context.suffix")(
-          default = "context.json"),
+          s"${config.getStringOption("api.apiName").getOrElse("catalogue")}",
+        contextSuffix = config
+          .getStringOption("api.context.suffix")
+          .getOrElse("context.json"),
       )
 
     val router = new Router(elasticClient, elasticConfig, apiConfig)

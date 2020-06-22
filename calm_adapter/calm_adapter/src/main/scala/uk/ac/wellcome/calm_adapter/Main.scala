@@ -38,11 +38,11 @@ object Main extends WellcomeTypesafeApp {
                                     materializer: Materializer,
                                     httpClient: CalmHttpClient) =
     new HttpCalmRetriever(
-      url = config.required[String]("calm.api.url"),
-      username = config.required[String]("calm.api.username"),
-      password = config.required[String]("calm.api.password"),
+      url = config.requireString("calm.api.url"),
+      username = config.requireString("calm.api.username"),
+      password = config.requireString("calm.api.password"),
       suppressedFields = config
-        .required[String]("calm.suppressedFields")
+        .requireString("calm.suppressedFields")
         .split(",")
         .toSet
     )

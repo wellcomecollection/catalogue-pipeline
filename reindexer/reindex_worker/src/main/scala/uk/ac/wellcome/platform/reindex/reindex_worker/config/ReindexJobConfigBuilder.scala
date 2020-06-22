@@ -10,7 +10,7 @@ import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 object ReindexJobConfigBuilder extends Logging {
   def buildReindexJobConfigMap(
     config: Config): Map[String, ReindexJobConfig[SNSConfig]] = {
-    val jsonString = config.required[String]("reindexer.jobConfig")
+    val jsonString = config.requireString("reindexer.jobConfig")
     val configMap =
       fromJson[Map[String, ReindexJobConfig[SNSConfig]]](jsonString).getOrElse(
         throw new RuntimeException(
