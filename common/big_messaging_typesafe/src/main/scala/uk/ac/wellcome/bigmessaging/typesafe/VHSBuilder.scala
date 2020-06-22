@@ -90,8 +90,12 @@ object VHSBuilder {
 
   private def buildObjectLocationPrefix(config: Config, namespace: String) =
     ObjectLocationPrefix(
-      namespace = config.required(s"aws.${namespace}.s3.bucketName"),
-      path = config.getOrElse(s"aws.${namespace}.s3.globalPrefix")(default = ""))
+      namespace = config
+        .requireString(s"aws.${namespace}.s3.bucketName"),
+      path = config
+        .getStringOption(s"aws.${namespace}.s3.globalPrefix")
+        .getOrElse("")
+    )
 
   private def createIndexStore[Metadata](dynamoClient: AmazonDynamoDB,
                                          dynamoConfig: DynamoConfig)(

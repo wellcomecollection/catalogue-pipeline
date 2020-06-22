@@ -6,8 +6,8 @@ import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 
 object IdentifiersTableBuilder {
   def buildConfig(config: Config): IdentifiersTableConfig = {
-    val database = config.required[String]("aws.rds.identifiers.database")
-    val tableName = config.required[String]("aws.rds.identifiers.table")
+    val database = config.requireString("aws.rds.identifiers.database")
+    val tableName = config.requireString("aws.rds.identifiers.table")
 
     IdentifiersTableConfig(
       database = database,
