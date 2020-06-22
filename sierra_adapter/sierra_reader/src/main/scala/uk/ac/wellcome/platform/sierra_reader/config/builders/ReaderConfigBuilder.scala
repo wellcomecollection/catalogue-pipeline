@@ -21,10 +21,9 @@ object ReaderConfigBuilder {
     ReaderConfig(
       resourceType = resourceType,
       fields = config.requireString("reader.fields"),
-      batchSize =
-        config
-          .getIntOption("reader.batchSize")
-          .getOrElse(10)
+      batchSize = config
+        .getIntOption("reader.batchSize")
+        .getOrElse(10)
     )
   }
 }
