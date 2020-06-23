@@ -43,17 +43,31 @@ class IdMinterWorkerService[Destination](
   }
 
   def processMessage(json: Json): Future[Unit] = Future fromTry {
-    val result = for {
+    for {
       sourceIdentifiers <- SourceIdentifierEmbedder.scan(json)
-      mintedIdentifiers <- identifierGenerator.retrieveOrGenerateCanonicalIds(
-        sourceIdentifiers)
+      mintedIdentifiers <- withTimeWarning(
+        thresholdMillis = 10000L,
+        jsonStr = json.noSpaces
+      ) {
+        identifierGenerator.retrieveOrGenerateCanonicalIds(sourceIdentifiers)
+      }
       updatedJson <- SourceIdentifierEmbedder.update(json, mintedIdentifiers)
       _ <- sender.sendT(updatedJson)
     } yield ()
-    result.recover {
-      case e =>
-        error(s"Error processing message: ${e.getMessage}", e)
-        throw e
+  }
+
+  def withTimeWarning[R](thresholdMillis: Long, jsonStr: String)(f: => R): R = {
+    val start = System.currentTimeMillis()
+    val result = f
+    val end = System.currentTimeMillis()
+
+    val duration = end - start
+    if (duration > thresholdMillis) {
+      warn(
+        f"Long-running query took $duration%d milliseconds for json $jsonStr%s",
+      )
     }
+
+    result
   }
 }
