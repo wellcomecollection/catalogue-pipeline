@@ -10,23 +10,20 @@ case class UnmergedImage[Id <: WithSourceIdentifier](
   version: Int,
   location: DigitalLocation
 ) extends BaseImage[Id] {
-  def mergeWith(sourceWork: Id,
-                fullText: Option[String] = None): MergedImage[Id] =
+  def mergeWith[SourceId <: IdState](sourceWork: Id,sourceData: WorkData[Unminted,Id]): MergedImage[Id] =
     MergedImage[Id](
       id = id,
       version = version,
       location = location,
-      source = SourceWork(sourceWork),
-      fullText = fullText
+      source = SourceWorks(SourceWork(id, sourceData), None)
     )
 }
 
 case class MergedImage[Id <: WithSourceIdentifier](
-  id: Id,
-  version: Int,
-  location: DigitalLocation,
-  source: ImageSource[Id],
-  fullText: Option[String] = None
+                                                                               id: Id,
+                                                                               version: Int,
+                                                                               location: DigitalLocation,
+                                                                               source: ImageSource[Id]
 ) extends BaseImage[Id] {
   def toUnmerged: UnmergedImage[Id] =
     UnmergedImage[Id](
@@ -45,7 +42,6 @@ object MergedImage {
         version = mergedImage.version,
         location = mergedImage.location,
         source = mergedImage.source,
-        fullText = mergedImage.fullText,
         inferredData = inferredData
       )
   }
@@ -56,7 +52,6 @@ case class AugmentedImage(
   version: Int,
   location: DigitalLocation,
   source: ImageSource[Identified],
-  fullText: Option[String] = None,
   inferredData: Option[InferredData] = None
 ) extends BaseImage[Identified]
 
