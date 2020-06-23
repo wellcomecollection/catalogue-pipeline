@@ -1,17 +1,13 @@
 package uk.ac.wellcome.platform.matcher.storage
 
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.bigmessaging.EmptyMetadata
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.models.VersionExpectedConflictException
-import uk.ac.wellcome.storage.store.{HybridStoreEntry, VersionedStore}
+import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.{Identified, Version}
 
-class WorkStore(
-  store: VersionedStore[String,
-                        Int,
-                        HybridStoreEntry[TransformedBaseWork, EmptyMetadata]])
+class WorkStore(store: VersionedStore[String, Int, TransformedBaseWork])
     extends Logging {
   def getWork(
     key: Version[String, Int]): Either[Throwable, TransformedBaseWork] =
@@ -19,8 +15,8 @@ class WorkStore(
       case Left(err) =>
         error(s"Error fetching $key from VHS")
         Left(err.e)
-      case Right(Identified(id, entry)) if id.version == key.version =>
-        Right(entry.t)
+      case Right(Identified(id, work)) if id.version == key.version =>
+        Right(work)
       case Right(Identified(id, _)) if id.version > key.version =>
         // If the same message gets delivered to the recorder twice in quick succession,
         // the version in the recorder VHS has advanced. This is an expected case

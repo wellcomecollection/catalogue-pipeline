@@ -3,14 +3,12 @@ package uk.ac.wellcome.platform.matcher.storage
 import org.scalatest.Inside
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.bigmessaging.EmptyMetadata
 import uk.ac.wellcome.bigmessaging.fixtures.VHSFixture
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.models.VersionExpectedConflictException
 import uk.ac.wellcome.storage.Version
-import uk.ac.wellcome.storage.store.HybridStoreEntry
 
 class WorkStoreTest
     extends AnyFunSpec
@@ -23,8 +21,7 @@ class WorkStoreTest
       val workStore = new WorkStore(vhs)
       val expectedWork = createUnidentifiedWork
       val actualWork = for {
-        key <- vhs.put(Version("b12345678", 1))(
-          HybridStoreEntry(expectedWork, EmptyMetadata()))
+        key <- vhs.put(Version("b12345678", 1))(expectedWork)
         work <- workStore.getWork(key.id)
       } yield (work)
       actualWork shouldBe Right(expectedWork)
@@ -47,8 +44,7 @@ class WorkStoreTest
       val workStore = new WorkStore(vhs)
       val expectedWork = createUnidentifiedWork
       val actualWork = for {
-        _ <- vhs.put(Version("b12345678", 2))(
-          HybridStoreEntry(expectedWork, EmptyMetadata()))
+        _ <- vhs.put(Version("b12345678", 2))(expectedWork)
         work <- workStore.getWork(Version("b12345678", 1))
       } yield (work)
       inside(actualWork) {
@@ -64,8 +60,7 @@ class WorkStoreTest
       val workStore = new WorkStore(vhs)
       val expectedWork = createUnidentifiedWork
       val actualWork = for {
-        _ <- vhs.put(Version("b12345678", 1))(
-          HybridStoreEntry(expectedWork, EmptyMetadata()))
+        _ <- vhs.put(Version("b12345678", 1))(expectedWork)
         work <- workStore.getWork(Version("b12345678", 2))
       } yield (work)
       actualWork shouldBe a[Left[_, _]]
