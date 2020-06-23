@@ -7,10 +7,7 @@ import uk.ac.wellcome.platform.matcher.models.VersionExpectedConflictException
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.{Identified, Version}
 
-class WorkStore(
-  store: VersionedStore[String,
-                        Int,
-                        TransformedBaseWork])
+class WorkStore(store: VersionedStore[String, Int, TransformedBaseWork])
     extends Logging {
   def getWork(
     key: Version[String, Int]): Either[Throwable, TransformedBaseWork] =

@@ -35,10 +35,7 @@ trait WorkerServiceFixture extends VHSFixture[TransformedBaseWork] {
 
     val id = work.sourceIdentifier.toString
     vhs.getLatest(id) shouldBe
-      Right(
-        Identified(
-          Version(id, expectedVhsVersion),
-          work))
+      Right(Identified(Version(id, expectedVhsVersion), work))
     Version(id, expectedVhsVersion)
   }
 

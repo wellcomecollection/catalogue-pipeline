@@ -8,24 +8,21 @@ import uk.ac.wellcome.storage.store.{
   TypedStore,
   VersionedHybridStore
 }
-import uk.ac.wellcome.storage.{
-  ObjectLocation,
-  ObjectLocationPrefix,
-  Version
-}
+import uk.ac.wellcome.storage.{ObjectLocation, ObjectLocationPrefix, Version}
 import uk.ac.wellcome.storage.maxima.Maxima
 
 class VHS[T](val hybridStore: VHSInternalStore[T])
-  extends VersionedHybridStore[
-    String,
-    Int,
-    ObjectLocation,
-    T,
-  ](hybridStore)
+    extends VersionedHybridStore[
+      String,
+      Int,
+      ObjectLocation,
+      T,
+    ](hybridStore)
 
 class VHSInternalStore[T](
   prefix: ObjectLocationPrefix,
-  indexStore: Store[Version[String, Int], ObjectLocation] with Maxima[String, Int],
+  indexStore: Store[Version[String, Int], ObjectLocation] with Maxima[String,
+                                                                      Int],
   dataStore: TypedStore[ObjectLocation, T]
 ) extends HybridStoreWithMaxima[String, Int, ObjectLocation, T] {
 

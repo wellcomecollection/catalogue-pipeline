@@ -17,9 +17,7 @@ import scala.concurrent.{ExecutionContext, Future}
   *
   */
 class RecorderPlaybackService(
-  vhs: VersionedStore[String,
-                      Int,
-                      TransformedBaseWork])(
+  vhs: VersionedStore[String, Int, TransformedBaseWork])(
   implicit ec: ExecutionContext)
     extends Logging {
 

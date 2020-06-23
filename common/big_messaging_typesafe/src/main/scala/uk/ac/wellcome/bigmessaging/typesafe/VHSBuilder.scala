@@ -33,8 +33,7 @@ object VHSBuilder {
   def build[T](objectLocationPrefix: ObjectLocationPrefix,
                dynamoConfig: DynamoConfig,
                dynamoClient: AmazonDynamoDB,
-               s3Client: AmazonS3)(
-    implicit codec: Codec[T]): VHS[T] = {
+               s3Client: AmazonS3)(implicit codec: Codec[T]): VHS[T] = {
     implicit val s3 = s3Client;
     new VHS(
       new VHSInternalStore(
