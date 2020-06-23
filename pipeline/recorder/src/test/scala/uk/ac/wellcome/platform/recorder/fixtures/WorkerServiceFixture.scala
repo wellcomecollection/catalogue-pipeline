@@ -5,14 +5,12 @@ import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.recorder.services.RecorderWorkerService
 
-import uk.ac.wellcome.bigmessaging.EmptyMetadata
 import uk.ac.wellcome.bigmessaging.fixtures.VHSFixture
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.MessageSender
 
 import uk.ac.wellcome.storage.{Identified, ObjectLocation, Version}
 import uk.ac.wellcome.storage.store.memory.MemoryStore
-import uk.ac.wellcome.storage.store.HybridStoreEntry
 
 trait WorkerServiceFixture extends VHSFixture[TransformedBaseWork] {
 
@@ -40,7 +38,7 @@ trait WorkerServiceFixture extends VHSFixture[TransformedBaseWork] {
       Right(
         Identified(
           Version(id, expectedVhsVersion),
-          HybridStoreEntry(work, EmptyMetadata())))
+          work))
     Version(id, expectedVhsVersion)
   }
 

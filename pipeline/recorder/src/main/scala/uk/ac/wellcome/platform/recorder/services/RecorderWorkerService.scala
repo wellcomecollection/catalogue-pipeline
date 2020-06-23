@@ -8,17 +8,14 @@ import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.typesafe.Runnable
 import uk.ac.wellcome.json.JsonUtil._
 
-import uk.ac.wellcome.bigmessaging.EmptyMetadata
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.bigmessaging.message.BigMessageStream
 
-import uk.ac.wellcome.storage.store.{HybridStoreEntry, VersionedStore}
+import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.{Identified, Version}
 
 class RecorderWorkerService[MsgDestination](
-  store: VersionedStore[String,
-                        Int,
-                        HybridStoreEntry[TransformedBaseWork, EmptyMetadata]],
+  store: VersionedStore[String, Int, TransformedBaseWork],
   messageStream: BigMessageStream[TransformedBaseWork],
   msgSender: MessageSender[MsgDestination])
     extends Runnable {
@@ -34,19 +31,17 @@ class RecorderWorkerService[MsgDestination](
       } yield ()
     }
 
-  private def createEntry(work: TransformedBaseWork) =
-    HybridStoreEntry(work, EmptyMetadata())
-
   private def storeWork(
     work: TransformedBaseWork): Try[Version[String, Int]] = {
     val result =
-      store.upsert(work.sourceIdentifier.toString)(createEntry(work)) {
-        case HybridStoreEntry(existingWork, _) =>
-          Right(createEntry(if (existingWork.version > work.version) {
-            existingWork
-          } else {
-            work
-          }))
+      store.upsert(work.sourceIdentifier.toString)(work) {
+        case existingWork =>
+          Right(
+            if (existingWork.version > work.version)
+              existingWork
+            else
+              work
+          )
       }
     result match {
       case Right(Identified(key, _)) => Success(key)

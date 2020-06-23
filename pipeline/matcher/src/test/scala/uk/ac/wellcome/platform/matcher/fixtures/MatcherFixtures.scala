@@ -25,7 +25,6 @@ import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig}
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.bigmessaging.fixtures.{BigMessagingFixture, VHSFixture}
-import uk.ac.wellcome.bigmessaging.EmptyMetadata
 import uk.ac.wellcome.storage.dynamo._
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
 import uk.ac.wellcome.storage.fixtures.S3Fixtures
@@ -35,7 +34,6 @@ import uk.ac.wellcome.storage.locking.dynamo.{
   ExpiringLock
 }
 import uk.ac.wellcome.storage.Identified
-import uk.ac.wellcome.storage.store.HybridStoreEntry
 
 trait MatcherFixtures
     extends BigMessagingFixture
@@ -127,9 +125,8 @@ trait MatcherFixtures
   }
 
   def sendWork(work: TransformedBaseWork, vhs: VHS, queue: SQS.Queue): Any = {
-    val entry = HybridStoreEntry(work, EmptyMetadata())
     val id = work.sourceIdentifier.toString
-    val key = vhs.putLatest(id)(entry) match {
+    val key = vhs.putLatest(id)(work) match {
       case Left(err)                 => throw new Exception(s"Failed storing work in VHS: $err")
       case Right(Identified(key, _)) => key
     }

@@ -3,7 +3,6 @@ package uk.ac.wellcome.platform.matcher
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.bigmessaging.EmptyMetadata
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.models.Implicits._
@@ -14,9 +13,7 @@ import uk.ac.wellcome.models.matcher.{
   WorkNode
 }
 import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
-import uk.ac.wellcome.storage.store.HybridStoreEntry
 import uk.ac.wellcome.storage.{Identified, Version}
 
 class MatcherFeatureTest
@@ -104,13 +101,9 @@ class MatcherFeatureTest
               withWorkerService(vhs, queue, topic, graphTable) { _ =>
                 val workv2 = createUnidentifiedWorkWith(version = 2)
 
-                val entry =
-                  HybridStoreEntry[TransformedBaseWork, EmptyMetadata](
-                    workv2,
-                    EmptyMetadata())
                 val key = vhs.put(
                   Version(workv2.sourceIdentifier.toString, workv2.version))(
-                  entry) match {
+                  workv2) match {
                   case Left(err) =>
                     throw new Exception(s"Failed storing work in VHS: $err")
                   case Right(Identified(key, _)) => key
