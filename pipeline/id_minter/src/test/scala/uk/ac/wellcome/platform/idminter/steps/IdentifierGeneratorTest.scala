@@ -12,6 +12,7 @@ import uk.ac.wellcome.platform.idminter.database.{IdentifiersDao, TableProvision
 import uk.ac.wellcome.platform.idminter.fixtures
 import uk.ac.wellcome.platform.idminter.models.{Identifier, IdentifiersTable}
 import uk.ac.wellcome.fixtures.TestWith
+import uk.ac.wellcome.models.work.internal.SourceIdentifier
 
 import scala.util.{Failure, Success}
 import scala.collection.JavaConverters._
@@ -120,15 +121,12 @@ class IdentifierGeneratorTest
   }
 
   it("returns a failure if it fails registering new identifiers") {
-    implicit val session = AutoSession
     val identifiersDao = mock[IdentifiersDao]
-
     val sourceIdentifiers = (1 to 5).map(_ => createSourceIdentifier).toList
 
-    when(identifiersDao.withConnection(any[DBSession => Any].apply))
-      .thenAnswer(i => i.getArguments.head.asInstanceOf[DBSession => Any](session))
-
-    val triedLookup = identifiersDao.lookupIds(sourceIdentifiers)
+    val triedLookup = identifiersDao.lookupIds(
+      anyListOf(classOf[SourceIdentifier]).asScala.toList
+    )(any[DBSession])
     when(triedLookup)
       .thenReturn(
         Success(IdentifiersDao.LookupResult(Map.empty, sourceIdentifiers)))

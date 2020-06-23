@@ -27,11 +27,8 @@ object IdentifiersDao {
 class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
   import IdentifiersDao._
 
-  def withConnection[R](doWork: DBSession => R): R =
-    DB localTx doWork
-
   def lookupIds(sourceIdentifiers: Seq[SourceIdentifier])(
-    implicit session: DBSession): Try[LookupResult] =
+    implicit session: DBSession = readOnlySession): Try[LookupResult] =
     Try {
       debug(s"Matching ($sourceIdentifiers)")
       val distinctIdentifiers = sourceIdentifiers.distinct
@@ -94,7 +91,8 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
 
   @throws(classOf[InsertError])
   def saveIdentifiers(ids: List[Identifier])(
-    implicit session: DBSession): Try[InsertResult] =
+    implicit session: DBSession = NamedAutoSession('primary)
+  ): Try[InsertResult] =
     Try {
       val values = ids.map(i =>
         Seq(i.CanonicalId, i.OntologyType, i.SourceSystem, i.SourceId))
@@ -160,4 +158,15 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
       rs.string(i.resultName.SourceSystem),
       rs.string(i.resultName.SourceId))
   }
+
+  private lazy val sessions = Iterator
+    .continually(
+      List(
+        ReadOnlyNamedAutoSession('replica),
+        ReadOnlyNamedAutoSession('primary)
+      ))
+    .flatten
+
+  private def readOnlySession = sessions.next()
+
 }

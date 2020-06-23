@@ -10,7 +10,7 @@ class TableProvisioner(rdsClientConfig: RDSClientConfig) {
   def provision(database: String, tableName: String): Unit = {
     val flyway = new Flyway()
     flyway.setDataSource(
-      s"jdbc:mysql://${rdsClientConfig.host}:${rdsClientConfig.port}/$database",
+      s"jdbc:mysql://${rdsClientConfig.primaryHost}:${rdsClientConfig.port}/$database",
       rdsClientConfig.username,
       rdsClientConfig.password
     )
