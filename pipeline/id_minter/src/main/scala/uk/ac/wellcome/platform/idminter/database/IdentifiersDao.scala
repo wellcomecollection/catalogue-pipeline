@@ -11,6 +11,8 @@ import scala.concurrent.blocking
 import scala.util.Try
 
 object IdentifiersDao {
+  final val maxSelectSize = 50
+
   case class LookupResult(
     existingIdentifiers: Map[SourceIdentifier, Identifier],
     unmintedIdentifiers: List[SourceIdentifier])
@@ -32,56 +34,62 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
     implicit session: DBSession): Try[LookupResult] =
     Try {
       debug(s"Matching ($sourceIdentifiers)")
+      val distinctIdentifiers = sourceIdentifiers.distinct
       val identifierRowsMap: Map[(String, String, String), SourceIdentifier] =
-        sourceIdentifiers.map { id =>
+        distinctIdentifiers.map { id =>
           (id.ontologyType, id.identifierType.id, id.value) -> id
         }.toMap
 
-      blocking {
+      val foundIdentifiers =
+        distinctIdentifiers
+          .grouped(maxSelectSize)
+          .flatMap { identifierBatch =>
+            blocking {
+              val i = identifiers.i
+              val matchRow = rowMatcherFromSyntaxProvider(i) _
 
-        val i = identifiers.i
-        val matchRow = rowMatcherFromSyntaxProvider(i) _
+              // The query is manually constructed like this because using WHERE IN
+              // statements with multiple items causes a full-index scan on MySQL 5.6.
+              // See: https://stackoverflow.com/a/53180813
+              // Therefore, we perform the rewrites here on the client.
+              //
+              // Because of issues in `scalikejdbc`'s typing, it's necessary to
+              // specify the `Nothing` type parameters as done here in order for
+              // the `map` statement to work properly.
+              val query = withSQL[Nothing] {
+                select
+                  .from[Nothing](identifiers as i)
+                  .where
+                  .map { query =>
+                    identifierBatch.tail.foldLeft(
+                      query.withRoundBracket(matchRow(identifierBatch.head))
+                    ) { (q, sourceIdentifier) =>
+                      q.or.withRoundBracket(matchRow(sourceIdentifier))
+                    }
+                  }
+              }.map(rs => {
+                  val row = getRowFromResult(i, rs)
+                  identifierRowsMap.get(row) match {
+                    case Some(sourceIdentifier) =>
+                      (sourceIdentifier, Identifier(i)(rs))
+                    case None =>
+                      // this should be impossible in practice
+                      throw new RuntimeException(
+                        s"The row $row returned by the query could not be matched to a sourceIdentifier")
+                  }
 
-        // The query is manually constructed like this because using WHERE IN
-        // statements with multiple items causes a full-index scan on MySQL 5.6.
-        // See: https://stackoverflow.com/a/53180813
-        // Therefore, we perform the rewrites here on the client.
-        //
-        // Because of issues in `scalikejdbc`'s typing, it's necessary to
-        // specify the `Nothing` type parameters as done here in order for
-        // the `map` statement to work properly.
-        val query = withSQL[Nothing] {
-          select
-            .from[Nothing](identifiers as i)
-            .where
-            .map { query =>
-              sourceIdentifiers.tail.foldLeft(
-                query.withRoundBracket(matchRow(sourceIdentifiers.head))
-              ) { (q, sourceIdentifier) =>
-                q.or.withRoundBracket(matchRow(sourceIdentifier))
-              }
+                })
+                .list
+              debug(s"Executing:'${query.statement}'")
+              query.apply()
             }
-        }.map(rs => {
-            val row = getRowFromResult(i, rs)
-            identifierRowsMap.get(row) match {
-              case Some(sourceIdentifier) =>
-                (sourceIdentifier, Identifier(i)(rs))
-              case None =>
-                // this should be impossible in practice
-                throw new RuntimeException(
-                  s"The row $row returned by the query could not be matched to a sourceIdentifier")
-            }
-
-          })
-          .list
-        debug(s"Executing:'${query.statement}'")
-        val foundIdentifiers = query.apply().toMap
-        val otherIdentifiers = sourceIdentifiers.toSet -- foundIdentifiers.keySet
-        LookupResult(
-          existingIdentifiers = foundIdentifiers,
-          unmintedIdentifiers = otherIdentifiers.toList
-        )
-      }
+          }
+      val existingIdentifiers = foundIdentifiers.toMap
+      val otherIdentifiers = distinctIdentifiers.toSet -- existingIdentifiers.keySet
+      LookupResult(
+        existingIdentifiers = existingIdentifiers,
+        unmintedIdentifiers = otherIdentifiers.toList
+      )
     }
 
   @throws(classOf[InsertError])

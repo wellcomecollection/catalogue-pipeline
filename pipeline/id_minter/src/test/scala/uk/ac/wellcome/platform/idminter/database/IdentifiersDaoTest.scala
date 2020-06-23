@@ -95,6 +95,25 @@ class IdentifiersDaoTest
       }
     }
 
+    it("retrieves multiple IDs in batches from the identifiers database") {
+      val nIdentifiers = 2*IdentifiersDao.maxSelectSize + 1
+      val identifiersMap = (1 to nIdentifiers).map { _ =>
+        val sourceIdentifier = createSourceIdentifier
+        val identifier =
+          createSQLIdentifierWith(sourceIdentifier = sourceIdentifier)
+        (sourceIdentifier, identifier)
+      }.toMap
+
+      withIdentifiersDao(existingEntries = identifiersMap.values.toSeq) {
+        case (identifiersDao, _) =>
+          val triedLookup = identifiersDao.lookupIds(identifiersMap.keys.toList)
+
+          triedLookup shouldBe a[Success[_]]
+          triedLookup.get.existingIdentifiers shouldBe identifiersMap
+          triedLookup.get.unmintedIdentifiers shouldBe empty
+      }
+    }
+
     it(
       "matches ids based on all fields on the SourceIdentifier (same value, different ontology type)") {
       val workSourceIdentifier = createSourceIdentifierWith(
