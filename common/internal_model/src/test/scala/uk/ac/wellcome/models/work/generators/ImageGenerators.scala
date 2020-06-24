@@ -9,34 +9,34 @@ trait ImageGenerators extends IdentifiersGenerators with ItemsGenerators {
     location: DigitalLocation = createDigitalLocation,
     version: Int = 1,
     identifierType: IdentifierType = IdentifierType("miro-image-number")
-  ): UnmergedImage[Identifiable] = UnmergedImage(
+  ): UnmergedImage[Identifiable, Unminted] = UnmergedImage(
     sourceIdentifier =
       createSourceIdentifierWith(identifierType = identifierType),
     version = version,
     location = location
   )
 
-  def createUnmergedImage: UnmergedImage[Identifiable] =
+  def createUnmergedImage: UnmergedImage[Identifiable, Unminted] =
     createUnmergedImageWith()
 
   def createMergedImageWith(
     location: DigitalLocation = createDigitalLocation,
     version: Int = 1,
     identifierType: IdentifierType = IdentifierType("miro-image-number"),
-    parentWork: SourceIdentifier = createSierraSystemSourceIdentifier): MergedImage[Identifiable] =
+    parentWork: SourceIdentifier = createSierraSystemSourceIdentifier): MergedImage[Identifiable, Unminted] =
     createUnmergedImageWith(location, version, identifierType) mergeWith (
       sourceWork = Identifiable(parentWork),
       WorkData()
     )
 
-  def createMergedImage: MergedImage[Identifiable] = createMergedImageWith()
+  def createMergedImage: MergedImage[Identifiable, Unminted] = createMergedImageWith()
 
   def createIdentifiedMergedImageWith(
                                        imageId: Identified = Identified(createCanonicalId, createSourceIdentifier),
                                        workId: Identified= Identified(createCanonicalId, createSourceIdentifier),
     location: DigitalLocation = createDigitalLocation,
-    version: Int = 1): MergedImage[Identified] = {
-    MergedImage[Identified](imageId, version, location , SourceWorks[Identified, Minted](SourceWork(workId, WorkData[Minted, Identified]()), None))
+    version: Int = 1): MergedImage[Identified, Minted] = {
+    MergedImage[Identified, Minted](imageId, version, location , SourceWorks[Identified, Minted](SourceWork(workId, WorkData[Minted, Identified]()), None))
 //    createUnmergedImageWith(location, version, identifierType) mergeWith (
 //      sourceWork = Identified(createCanonicalId,parentWork),
 //      WorkData()
@@ -95,9 +95,9 @@ trait ImageGenerators extends IdentifiersGenerators with ItemsGenerators {
     }
   }
 
-  implicit class UnmergedImageIdOps(val image: UnmergedImage[Identifiable]) {
+  implicit class UnmergedImageIdOps(val image: UnmergedImage[Identifiable, Unminted]) {
     def toIdentifiedWith(
-      id: String = createCanonicalId): UnmergedImage[Identified] =
+      id: String = createCanonicalId): UnmergedImage[Identified, Minted] =
       UnmergedImage(
         id = Identified(
           canonicalId = id,
@@ -107,6 +107,6 @@ trait ImageGenerators extends IdentifiersGenerators with ItemsGenerators {
         location = image.location
       )
 
-    val toIdentified: UnmergedImage[Identified] = toIdentifiedWith()
+    val toIdentified: UnmergedImage[Identified, Minted] = toIdentifiedWith()
   }
 }

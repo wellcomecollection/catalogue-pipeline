@@ -55,7 +55,7 @@ trait WorksGenerators
   def createUnidentifiedInvisibleWorkWith(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     items: List[Item[Unminted]] = Nil,
-    images: List[UnmergedImage[Identifiable]] = Nil,
+    images: List[UnmergedImage[Identifiable, Unminted]] = Nil,
   ): UnidentifiedInvisibleWork =
     UnidentifiedInvisibleWork(
       sourceIdentifier = sourceIdentifier,
@@ -104,7 +104,7 @@ trait WorksGenerators
     edition: Option[String] = None,
     duration: Option[Int] = None,
     items: List[Item[Unminted]] = Nil,
-    images: List[UnmergedImage[Identifiable]] = Nil): UnidentifiedWork =
+    images: List[UnmergedImage[Identifiable, Unminted]] = Nil): UnidentifiedWork =
     UnidentifiedWork(
       sourceIdentifier = sourceIdentifier,
       version = version,
@@ -156,7 +156,7 @@ trait WorksGenerators
     language: Option[Language] = None,
     duration: Option[Int] = None,
     items: List[Item[Minted]] = Nil,
-    images: List[UnmergedImage[Identified]] = Nil,
+    images: List[UnmergedImage[Identified, Minted]] = Nil,
     version: Int = 1,
     merged: Boolean = false,
     collectionPath: Option[CollectionPath] = None,

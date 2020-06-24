@@ -44,7 +44,7 @@ case class WorkData[Id <: IdState, ImageId <: WithSourceIdentifier](
   items: List[Item[Id]] = Nil,
   merged: Boolean = false,
   collectionPath: Option[CollectionPath] = None,
-  images: List[UnmergedImage[ImageId]] = Nil
+  images: List[UnmergedImage[ImageId, Id]] = Nil
 )
 
 case class UnidentifiedWork(
