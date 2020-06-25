@@ -4,7 +4,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{Inspectors, OptionValues, PrivateMethodTester}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.models.work.internal.WorkType
+import uk.ac.wellcome.models.work.internal.{Identifiable, SourceWorks, Unminted, WorkType}
 import uk.ac.wellcome.platform.merger.rules.ImagesRule.FlatImageMergeRule
 import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
 
@@ -22,7 +22,9 @@ class ImagesRuleTest
 
       result should have length 1
       result.head.location should be(miroWork.data.images.head.location)
-      result.head.source.id.sourceIdentifier should
+      val source = result.head.source
+      source shouldBe a [SourceWorks[_,_]]
+      source.asInstanceOf[SourceWorks[Identifiable, Unminted]].canonicalWork.id.sourceIdentifier should
         be(miroWork.sourceIdentifier)
     }
 
@@ -35,7 +37,7 @@ class ImagesRuleTest
       result should have length n
       result.map(_.location) should contain theSameElementsAs
         miroWorks.map(_.data.images.head.location)
-      result.map(_.source.id.sourceIdentifier) should contain only sierraWork.sourceIdentifier
+      result.map{image => image.source.asInstanceOf[SourceWorks[Identifiable, Unminted]].canonicalWork.id.sourceIdentifier } should contain only sierraWork.sourceIdentifier
     }
 
     it(
@@ -49,7 +51,7 @@ class ImagesRuleTest
       result should have length n
       result.map(_.location) should contain theSameElementsAs
         metsWork.data.images.map(_.location)
-      result.map(_.source.id.sourceIdentifier) should contain only sierraPictureWork.sourceIdentifier
+      result.map{image => image.source.asInstanceOf[SourceWorks[Identifiable, Unminted]].canonicalWork.id.sourceIdentifier } should contain only sierraPictureWork.sourceIdentifier
     }
 
     it(
@@ -67,7 +69,7 @@ class ImagesRuleTest
       result.map(_.location) should contain theSameElementsAs
         metsWork.data.images.map(_.location) ++
           miroWorks.map(_.data.images.head.location)
-      result.map(_.source.id.sourceIdentifier) should contain only sierraPictureWork.sourceIdentifier
+      result.map{image => image.source.asInstanceOf[SourceWorks[Identifiable, Unminted]].canonicalWork.id.sourceIdentifier } should contain only sierraPictureWork.sourceIdentifier
     }
 
     it(
@@ -81,34 +83,7 @@ class ImagesRuleTest
       result should have length n
       result.map(_.location) should contain theSameElementsAs
         miroWorks.map(_.data.images.head.location)
-      result.map(_.source.id.sourceIdentifier) should contain only sierraWork.sourceIdentifier
-    }
-  }
-
-  describe("fulltext field population") {
-    val work = createUnidentifiedWorkWith(
-      title = Some("destructive durian"),
-      description = Some("boisterous banana"),
-      physicalDescription = Some("abrasive apple"),
-      lettering = Some("ruminating rhubarb")
-    )
-
-    it("adds the fields from all of the works passed") {
-      val works = (0 to 5) map { i =>
-        createUnidentifiedWorkWith(
-          title = Some(s"title ${i}"),
-          description = Some(s"description ${i}"),
-          physicalDescription = Some(s"physicalDescription ${i}"),
-          lettering = Some(s"lettering ${i}")
-        )
-      }
-      val fullText = createFulltext(works)
-      (0 to 5) foreach { i =>
-        fullText.value should include(s"title ${i}")
-        fullText.value should include(s"description ${i}")
-        fullText.value should include(s"physicalDescription ${i}")
-        fullText.value should include(s"lettering ${i}")
-      }
+      result.map{image => image.source.asInstanceOf[SourceWorks[Identifiable, Unminted]].canonicalWork.id.sourceIdentifier } should contain only sierraWork.sourceIdentifier
     }
   }
 
@@ -128,7 +103,7 @@ class ImagesRuleTest
       val target = createSierraDigitalWork
       val sources = (1 to 5).map(_ => createMiroWork)
       forAll(testRule.apply(target, sources).get) {
-        _.source.id.sourceIdentifier should be(target.sourceIdentifier)
+        _.source.asInstanceOf[SourceWorks[Identifiable,Unminted]].canonicalWork.id.sourceIdentifier should be(target.sourceIdentifier)
       }
     }
   }

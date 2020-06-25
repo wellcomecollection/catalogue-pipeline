@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.merger.rules
 
 import scala.Function.const
 import cats.data.NonEmptyList
-import uk.ac.wellcome.models.work.internal.{Identifiable, MergedImage, TransformedBaseWork, UnidentifiedWork, Unminted, WorkData}
+import uk.ac.wellcome.models.work.internal.{Identifiable, MergedImage, TransformedBaseWork, UnidentifiedWork, Unminted}
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import uk.ac.wellcome.platform.merger.rules.WorkPredicates.{WorkPredicate, WorkPredicateOps, not}
 
@@ -34,7 +34,7 @@ object ImagesRule extends FieldMergeRule {
       target.data.images.map {
         _.mergeWith(
           sourceWork = Identifiable(target.sourceIdentifier),
-          sourceData = WorkData()
+          sourceData = target.data
         )
       }
   }
@@ -61,7 +61,7 @@ object ImagesRule extends FieldMergeRule {
         _.data.images.map {
           _.mergeWith(
             sourceWork = Identifiable(target.sourceIdentifier),
-            sourceData = WorkData()
+            sourceData = target.data
           )
         }
       }
