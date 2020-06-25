@@ -45,29 +45,10 @@ class IdMinterWorkerService[Destination](
   def processMessage(json: Json): Future[Unit] = Future fromTry {
     for {
       sourceIdentifiers <- SourceIdentifierEmbedder.scan(json)
-      mintedIdentifiers <- withTimeWarning(
-        thresholdMillis = 10000L,
-        jsonStr = json.noSpaces
-      ) {
-        identifierGenerator.retrieveOrGenerateCanonicalIds(sourceIdentifiers)
-      }
+      mintedIdentifiers <- identifierGenerator.retrieveOrGenerateCanonicalIds(
+        sourceIdentifiers)
       updatedJson <- SourceIdentifierEmbedder.update(json, mintedIdentifiers)
       _ <- sender.sendT(updatedJson)
     } yield ()
-  }
-
-  def withTimeWarning[R](thresholdMillis: Long, jsonStr: String)(f: => R): R = {
-    val start = System.currentTimeMillis()
-    val result = f
-    val end = System.currentTimeMillis()
-
-    val duration = end - start
-    if (duration > thresholdMillis) {
-      warn(
-        f"Long-running query took $duration%d milliseconds for json $jsonStr%s",
-      )
-    }
-
-    result
   }
 }

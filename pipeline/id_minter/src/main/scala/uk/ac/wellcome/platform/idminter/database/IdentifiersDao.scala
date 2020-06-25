@@ -11,8 +11,6 @@ import scala.concurrent.blocking
 import scala.util.Try
 
 object IdentifiersDao {
-  final val maxSelectSize = 50
-
   case class LookupResult(
     existingIdentifiers: Map[SourceIdentifier, Identifier],
     unmintedIdentifiers: List[SourceIdentifier])
@@ -38,49 +36,50 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
         }.toMap
 
       val foundIdentifiers =
-        distinctIdentifiers
-          .grouped(maxSelectSize)
-          .flatMap { identifierBatch =>
-            blocking {
-              val i = identifiers.i
-              val matchRow = rowMatcherFromSyntaxProvider(i) _
+        withTimeWarning(thresholdMillis = 10000L, distinctIdentifiers) {
+          batchSourceIdentifiers(distinctIdentifiers)
+            .flatMap { identifierBatch =>
+              blocking {
+                val i = identifiers.i
+                val matchRow = rowMatcherFromSyntaxProvider(i) _
 
-              // The query is manually constructed like this because using WHERE IN
-              // statements with multiple items causes a full-index scan on MySQL 5.6.
-              // See: https://stackoverflow.com/a/53180813
-              // Therefore, we perform the rewrites here on the client.
-              //
-              // Because of issues in `scalikejdbc`'s typing, it's necessary to
-              // specify the `Nothing` type parameters as done here in order for
-              // the `map` statement to work properly.
-              val query = withSQL[Nothing] {
-                select
-                  .from[Nothing](identifiers as i)
-                  .where
-                  .map { query =>
-                    identifierBatch.tail.foldLeft(
-                      query.withRoundBracket(matchRow(identifierBatch.head))
-                    ) { (q, sourceIdentifier) =>
-                      q.or.withRoundBracket(matchRow(sourceIdentifier))
+                // The query is manually constructed like this because using WHERE IN
+                // statements with multiple items causes a full-index scan on MySQL 5.6.
+                // See: https://stackoverflow.com/a/53180813
+                // Therefore, we perform the rewrites here on the client.
+                //
+                // Because of issues in `scalikejdbc`'s typing, it's necessary to
+                // specify the `Nothing` type parameters as done here in order for
+                // the `map` statement to work properly.
+                val query = withSQL[Nothing] {
+                  select
+                    .from[Nothing](identifiers as i)
+                    .where
+                    .map { query =>
+                      identifierBatch.tail.foldLeft(
+                        query.withRoundBracket(matchRow(identifierBatch.head))
+                      ) { (q, sourceIdentifier) =>
+                        q.or.withRoundBracket(matchRow(sourceIdentifier))
+                      }
                     }
-                  }
-              }.map(rs => {
-                  val row = getRowFromResult(i, rs)
-                  identifierRowsMap.get(row) match {
-                    case Some(sourceIdentifier) =>
-                      (sourceIdentifier, Identifier(i)(rs))
-                    case None =>
-                      // this should be impossible in practice
-                      throw new RuntimeException(
-                        s"The row $row returned by the query could not be matched to a sourceIdentifier")
-                  }
+                }.map(rs => {
+                    val row = getRowFromResult(i, rs)
+                    identifierRowsMap.get(row) match {
+                      case Some(sourceIdentifier) =>
+                        (sourceIdentifier, Identifier(i)(rs))
+                      case None =>
+                        // this should be impossible in practice
+                        throw new RuntimeException(
+                          s"The row $row returned by the query could not be matched to a sourceIdentifier")
+                    }
 
-                })
-                .list
-              debug(s"Executing:'${query.statement}'")
-              query.apply()
+                  })
+                  .list
+                debug(s"Executing:'${query.statement}'")
+                query.apply()
+              }
             }
-          }
+        }
       val existingIdentifiers = foundIdentifiers.toMap
       val otherIdentifiers = distinctIdentifiers.toSet -- existingIdentifiers.keySet
       LookupResult(
@@ -159,14 +158,37 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
       rs.string(i.resultName.SourceId))
   }
 
-  private lazy val sessions = Iterator
-    .continually(
-      List(
-        ReadOnlyNamedAutoSession('replica),
-        ReadOnlyNamedAutoSession('primary)
-      ))
+  private lazy val poolNames = Iterator
+    .continually(List('replica, 'primary))
     .flatten
 
-  private def readOnlySession = sessions.next()
+  private def readOnlySession = ReadOnlyNamedAutoSession(poolNames.next)
 
+  private def batchSourceIdentifiers(
+    sourceIdentifiers: Seq[SourceIdentifier]): Seq[Seq[SourceIdentifier]] = {
+    val idTypes =
+      sourceIdentifiers.groupBy(i => (i.ontologyType, i.identifierType.id))
+    if (idTypes.values.exists(_.size > 1) && idTypes.size > 1) {
+      idTypes.values.toSeq
+    } else {
+      Seq(sourceIdentifiers)
+    }
+  }
+
+  private def withTimeWarning[R](
+    thresholdMillis: Long,
+    identifiers: Seq[SourceIdentifier])(f: => R): R = {
+    val start = System.currentTimeMillis()
+    val result = f
+    val end = System.currentTimeMillis()
+
+    val duration = end - start
+    if (duration > thresholdMillis) {
+      warn(
+        s"Query for ${identifiers.size} identifiers (first: ${identifiers.head.value}) took $duration milliseconds",
+      )
+    }
+
+    result
+  }
 }

@@ -134,7 +134,7 @@ trait IdentifiersDatabase
 
       testWith(identifiersTableConfig)
     } finally {
-      DB localTx { implicit session =>
+      NamedDB('primary) localTx { implicit session =>
         sql"DROP DATABASE IF EXISTS $identifiersDatabase".execute().apply()
       }
 

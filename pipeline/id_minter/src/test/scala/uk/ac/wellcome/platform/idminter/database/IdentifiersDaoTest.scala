@@ -38,7 +38,7 @@ class IdentifiersDaoTest
       eventuallyTableExists(identifiersTableConfig)
 
       if (existingEntries.nonEmpty) {
-        DB localTx { implicit session =>
+        NamedDB('primary) localTx { implicit session =>
           withSQL {
             insert
               .into(identifiersTable)
@@ -79,25 +79,6 @@ class IdentifiersDaoTest
 
     it("retrieves multiple ids from the identifiers database") {
       val identifiersMap = (1 to 3).map { _ =>
-        val sourceIdentifier = createSourceIdentifier
-        val identifier =
-          createSQLIdentifierWith(sourceIdentifier = sourceIdentifier)
-        (sourceIdentifier, identifier)
-      }.toMap
-
-      withIdentifiersDao(existingEntries = identifiersMap.values.toSeq) {
-        case (identifiersDao, _) =>
-          val triedLookup = identifiersDao.lookupIds(identifiersMap.keys.toList)
-
-          triedLookup shouldBe a[Success[_]]
-          triedLookup.get.existingIdentifiers shouldBe identifiersMap
-          triedLookup.get.unmintedIdentifiers shouldBe empty
-      }
-    }
-
-    it("retrieves multiple IDs in batches from the identifiers database") {
-      val nIdentifiers = 2*IdentifiersDao.maxSelectSize + 1
-      val identifiersMap = (1 to nIdentifiers).map { _ =>
         val sourceIdentifier = createSourceIdentifier
         val identifier =
           createSQLIdentifierWith(sourceIdentifier = sourceIdentifier)
