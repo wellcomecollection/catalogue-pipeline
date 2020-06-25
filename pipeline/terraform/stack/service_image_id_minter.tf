@@ -50,8 +50,8 @@ module "image_id_minter" {
   messages_bucket_arn = aws_s3_bucket.messages.arn
   queue_read_policy   = module.image_id_minter_queue.read_policy
 
-  cpu    = 512
-  memory = 1024
+  cpu    = 1024
+  memory = 2048
 }
 
 # Output topic
