@@ -133,7 +133,7 @@ case class MetsData(
 
   private def images(
     version: Int,
-    accessStatus: Option[AccessStatus]): List[UnmergedImage[Identifiable]] =
+    accessStatus: Option[AccessStatus]): List[UnmergedImage[Identifiable, Unminted]] =
     if (accessStatus.forall(shouldCreateDigitalLocation)) {
       fileReferences
         .filter(ImageUtils.isImage)

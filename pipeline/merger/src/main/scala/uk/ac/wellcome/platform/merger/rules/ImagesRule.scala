@@ -2,21 +2,12 @@ package uk.ac.wellcome.platform.merger.rules
 
 import scala.Function.const
 import cats.data.NonEmptyList
-import uk.ac.wellcome.models.work.internal.{
-  Identifiable,
-  MergedImage,
-  TransformedBaseWork,
-  UnidentifiedWork
-}
+import uk.ac.wellcome.models.work.internal.{Identifiable, MergedImage, TransformedBaseWork, UnidentifiedWork, Unminted, WorkData}
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
-import uk.ac.wellcome.platform.merger.rules.WorkPredicates.{
-  not,
-  WorkPredicate,
-  WorkPredicateOps
-}
+import uk.ac.wellcome.platform.merger.rules.WorkPredicates.{WorkPredicate, WorkPredicateOps, not}
 
 object ImagesRule extends FieldMergeRule {
-  type FieldData = List[MergedImage[Identifiable]]
+  type FieldData = List[MergedImage[Identifiable, Unminted]]
 
   override def merge(
     target: UnidentifiedWork,
@@ -43,7 +34,7 @@ object ImagesRule extends FieldMergeRule {
       target.data.images.map {
         _.mergeWith(
           sourceWork = Identifiable(target.sourceIdentifier),
-          fullText = createFulltext(List(target))
+          sourceData = WorkData()
         )
       }
   }
@@ -64,32 +55,32 @@ object ImagesRule extends FieldMergeRule {
   trait FlatImageMergeRule extends PartialRule {
     final override def rule(target: UnidentifiedWork,
                             sources: NonEmptyList[TransformedBaseWork])
-      : List[MergedImage[Identifiable]] = {
+      : List[MergedImage[Identifiable, Unminted]] = {
       val works = sources.prepend(target).toList
       works flatMap {
         _.data.images.map {
           _.mergeWith(
             sourceWork = Identifiable(target.sourceIdentifier),
-            fullText = createFulltext(works)
+            sourceData = WorkData()
           )
         }
       }
     }
   }
 
-  private def createFulltext(works: Seq[TransformedBaseWork]): Option[String] =
-    works
-      .map(_.data)
-      .flatMap { data =>
-        List(
-          data.title,
-          data.description,
-          data.physicalDescription,
-          data.lettering
-        )
-      }
-      .flatten match {
-      case Nil    => None
-      case fields => Some(fields.mkString(" "))
-    }
+//  private def createFulltext(works: Seq[TransformedBaseWork]): Option[String] =
+//    works
+//      .map(_.data)
+//      .flatMap { data =>
+//        List(
+//          data.title,
+//          data.description,
+//          data.physicalDescription,
+//          data.lettering
+//        )
+//      }
+//      .flatten match {
+//      case Nil    => None
+//      case fields => Some(fields.mkString(" "))
+//    }
 }

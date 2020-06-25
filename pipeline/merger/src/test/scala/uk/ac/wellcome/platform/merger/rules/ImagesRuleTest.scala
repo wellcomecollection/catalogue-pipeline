@@ -5,7 +5,6 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.{Inspectors, OptionValues, PrivateMethodTester}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.WorkType
-import uk.ac.wellcome.platform.merger.fixtures.ImageFulltextAccess
 import uk.ac.wellcome.platform.merger.rules.ImagesRule.FlatImageMergeRule
 import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
 
@@ -15,8 +14,7 @@ class ImagesRuleTest
     with WorksGenerators
     with PrivateMethodTester
     with OptionValues
-    with Inspectors
-    with ImageFulltextAccess {
+    with Inspectors {
   describe("image creation rules") {
     it("creates 1 image from a 1 Miro work") {
       val miroWork = createMiroWork
@@ -94,23 +92,6 @@ class ImagesRuleTest
       physicalDescription = Some("abrasive apple"),
       lettering = Some("ruminating rhubarb")
     )
-
-    it("adds the title field") {
-      createFulltext(List(work)).value should include(work.data.title.get)
-    }
-
-    it("adds the description field") {
-      createFulltext(List(work)).value should include(work.data.description.get)
-    }
-
-    it("adds the physical description field") {
-      createFulltext(List(work)).value should
-        include(work.data.physicalDescription.get)
-    }
-
-    it("adds the lettering field") {
-      createFulltext(List(work)).value should include(work.data.lettering.get)
-    }
 
     it("adds the fields from all of the works passed") {
       val works = (0 to 5) map { i =>
