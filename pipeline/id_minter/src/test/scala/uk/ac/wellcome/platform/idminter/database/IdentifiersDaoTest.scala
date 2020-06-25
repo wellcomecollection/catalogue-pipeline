@@ -20,7 +20,7 @@ class IdentifiersDaoTest
     with IdentifiersGenerators
     with SqlIdentifiersGenerators {
 
-  implicit val session: DBSession = AutoSession
+  implicit val session: DBSession = NamedAutoSession('primary)
 
   def withIdentifiersDao[R](existingEntries: Seq[Identifier] = Nil)(
     testWith: TestWith[(IdentifiersDao, IdentifiersTable), R]): R =
@@ -165,7 +165,7 @@ class IdentifiersDaoTest
 
       withIdentifiersDao() {
         case (identifiersDao, identifiersTable) =>
-          implicit val session = AutoSession
+          implicit val session = NamedAutoSession('primary)
 
           identifiersDao.saveIdentifiers(List(identifier))
           val maybeIdentifier = withSQL {

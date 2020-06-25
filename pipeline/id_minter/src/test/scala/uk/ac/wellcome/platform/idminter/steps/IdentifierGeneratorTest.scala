@@ -47,7 +47,7 @@ class IdentifierGeneratorTest
       eventuallyTableExists(identifiersTableConfig)
 
       if (existingDaoEntries.nonEmpty) {
-        DB localTx { implicit session =>
+        NamedDB('primary) localTx { implicit session =>
           withSQL {
             insert
               .into(identifiersTable)
@@ -95,7 +95,7 @@ class IdentifierGeneratorTest
 
     withIdentifierGenerator() {
       case (identifierGenerator, identifiersTable) =>
-        implicit val session = AutoSession
+        implicit val session = NamedAutoSession('primary)
 
         val triedIds = identifierGenerator.retrieveOrGenerateCanonicalIds(
           sourceIdentifiers
@@ -154,7 +154,7 @@ class IdentifierGeneratorTest
   it("preserves the ontologyType when generating new identifiers") {
     withIdentifierGenerator() {
       case (identifierGenerator, identifiersTable) =>
-        implicit val session = AutoSession
+        implicit val session = NamedAutoSession('primary)
 
         val sourceIdentifier = createSourceIdentifierWith(
           ontologyType = "Item"

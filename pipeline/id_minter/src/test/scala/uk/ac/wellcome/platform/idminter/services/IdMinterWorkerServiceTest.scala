@@ -44,7 +44,7 @@ class IdMinterWorkerServiceTest
                 SQLSyntax.createUnsafely(identifiersTableConfig.tableName)
 
               eventually {
-                val fields = DB readOnly { implicit session =>
+                val fields = NamedDB('primary) readOnly { implicit session =>
                   sql"DESCRIBE $database.$table"
                     .map(
                       rs =>

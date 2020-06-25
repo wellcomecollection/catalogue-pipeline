@@ -3,7 +3,6 @@ package uk.ac.wellcome.platform.idminter.fixtures
 import org.scalatest.Assertion
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import scalikejdbc.{ConnectionPool, DB, SQLSyntax}
 import uk.ac.wellcome.fixtures.TestWith
 import scalikejdbc._
 import uk.ac.wellcome.platform.idminter.config.models.{
@@ -30,7 +29,7 @@ trait IdentifiersDatabase
       val database: SQLSyntax = SQLSyntax.createUnsafely(tableConfig.database)
       val table: SQLSyntax = SQLSyntax.createUnsafely(tableConfig.tableName)
 
-      val fields = DB readOnly { implicit session =>
+      val fields = NamedDB('primary) readOnly { implicit session =>
         sql"DESCRIBE $database.$table"
           .map(
             rs =>
@@ -87,7 +86,6 @@ trait IdentifiersDatabase
 
   def withIdentifiersDatabase[R](
     testWith: TestWith[IdentifiersTableConfig, R]): R = {
-    Class.forName("com.mysql.jdbc.Driver")
     ConnectionPool.add(
       'primary,
       s"jdbc:mysql://$host:$port",
