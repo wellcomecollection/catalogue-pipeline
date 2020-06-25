@@ -162,14 +162,30 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
     .continually(List('replica, 'primary))
     .flatten
 
+  // Round-robin between the replica and the primary for SELECTs
   private def readOnlySession = ReadOnlyNamedAutoSession(poolNames.next)
 
+  // In MySQL 5.6, the optimiser isn't able to optimise huge index range scans,
+  // so we batch the sourceIdentifiers ourselves to prevent these scans.
+  //
+  // Remember that there is a composite index, (ontologyType, sourceSystem, sourceId)
+  // Call the first 2 keys of this the "ID type". A huge range scan happens when
+  // the following conditions are satisfied:
+  //
+  // - there are multiple ID types present in the source identifiers
+  // - there are more than one source IDs for more than one of these ID types
+  //
+  // This batching is not necessarily optimal but using it is many, many orders
+  // of magnitude faster than not using it.
   private def batchSourceIdentifiers(
     sourceIdentifiers: Seq[SourceIdentifier]): Seq[Seq[SourceIdentifier]] = {
-    val idTypes =
-      sourceIdentifiers.groupBy(i => (i.ontologyType, i.identifierType.id))
-    if (idTypes.values.exists(_.size > 1) && idTypes.size > 1) {
-      idTypes.values.toSeq
+    val idTypeGroups =
+      sourceIdentifiers
+        .groupBy(i => (i.ontologyType, i.identifierType.id))
+        .values
+    val nIdTypeScans = idTypeGroups.count(_.size > 1)
+    if (idTypeGroups.size > 1 && nIdTypeScans > 1) {
+      idTypeGroups.toSeq
     } else {
       Seq(sourceIdentifiers)
     }
