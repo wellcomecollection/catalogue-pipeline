@@ -1,11 +1,13 @@
 package uk.ac.wellcome.platform.api.services
 
+import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import com.sksamuel.elastic4s.{ElasticError, Index}
 import uk.ac.wellcome.display.models.SortingOrder
 import uk.ac.wellcome.json.JsonUtil.fromJson
 import uk.ac.wellcome.models.work.internal.AugmentedImage
 import uk.ac.wellcome.models.Implicits._
+import uk.ac.wellcome.platform.api.Tracing
 import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.platform.api.rest.{
   PaginatedSearchOptions,
@@ -23,7 +25,10 @@ case class ImagesSearchOptions(
 ) extends PaginatedSearchOptions
 
 class ImagesService(searchService: ElasticsearchService)(
-  implicit ec: ExecutionContext) {
+  implicit ec: ExecutionContext)
+    extends Tracing {
+
+  private val nVisuallySimilarImages = 5
 
   def findImageById(id: String)(
     index: Index): Future[Either[ElasticError, Option[AugmentedImage]]] =
@@ -53,6 +58,40 @@ class ImagesService(searchService: ElasticsearchService)(
         index = index
       )
       .map { _.map(createResultList) }
+
+  def retrieveSimilarImages(
+    index: Index,
+    image: AugmentedImage): Future[List[AugmentedImage]] =
+    spanFuture(
+      name = "ImagesService#retrieveSimilarImages",
+      spanType = "request",
+      subType = "elastic",
+      action = "query") {
+      val transaction = Tracing.currentTransaction
+      withActiveTrace(
+        searchService.elasticClient
+          .execute {
+            ImagesRequestBuilder.requestVisuallySimilar(
+              index = index,
+              id = image.id.canonicalId,
+              n = nVisuallySimilarImages
+            )
+          }
+          .map { response =>
+            if (response.isError) Left(response.error)
+            else Right(response.result)
+          }
+          .map {
+            _.map { res =>
+              transaction.addLabel("elasticTook", res.took)
+              res
+            }
+          }
+      ).map {
+        _.map { _.hits.hits.map(hit => jsonTo(hit.sourceAsString)).toList }
+          .getOrElse(Nil)
+      }
+    }
 
   def toElasticsearchQueryOptions(
     options: ImagesSearchOptions): ElasticsearchQueryOptions =

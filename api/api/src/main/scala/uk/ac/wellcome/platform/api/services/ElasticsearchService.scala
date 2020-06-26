@@ -22,7 +22,7 @@ case class ElasticsearchQueryOptions(filters: List[DocumentFilter],
                                      sortOrder: SortingOrder,
                                      searchQuery: Option[SearchQuery])
 
-class ElasticsearchService(elasticClient: ElasticClient,
+class ElasticsearchService(val elasticClient: ElasticClient,
                            requestBuilder: ElasticsearchRequestBuilder)(
   implicit ec: ExecutionContext
 ) extends Logging
