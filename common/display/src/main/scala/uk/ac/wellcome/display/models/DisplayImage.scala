@@ -21,6 +21,10 @@ case class DisplayImage(
     `type` = "uk.ac.wellcone.Display.models.DisplayImageSource",
     description = "A description of the image's source"
   ) source: DisplayImageSource,
+  @Schema(
+    `type` = "Image",
+    description = "A list of visually similar images"
+  ) visuallySimilar: Option[Seq[DisplayImage]],
   @JsonKey("type") @Schema(name = "type") ontologyType: String = "Image"
 )
 
@@ -30,7 +34,12 @@ object DisplayImage {
     new DisplayImage(
       id = image.id.canonicalId,
       locations = Seq(DisplayDigitalLocation(image.location)),
-      source = DisplayImageSource(image.source)
+      source = DisplayImageSource(image.source),
+      visuallySimilar = None
     )
 
+  def apply(image: AugmentedImage, similar: Seq[AugmentedImage]): DisplayImage =
+    DisplayImage(image).copy(
+      visuallySimilar = Some(similar.map(DisplayImage.apply))
+    )
 }
