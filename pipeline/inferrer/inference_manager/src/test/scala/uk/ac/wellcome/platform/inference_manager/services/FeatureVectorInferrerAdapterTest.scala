@@ -18,11 +18,11 @@ class FeatureVectorInferrerAdapterTest
   describe("createRequest") {
     it("creates a request with the image_url parameter for image locations") {
       val imageUrl = "http://images.com/bananas/cavendish.jp2"
-      val image = createMergedImageWith(
+      val image = createIdentifiedMergedImageWith(
         location = createDigitalLocationWith(
           url = imageUrl
         )
-      ).toIdentified
+      )
       val request = FeatureVectorInferrerAdapter.createRequest(image)
 
       inside(request) {
@@ -34,11 +34,11 @@ class FeatureVectorInferrerAdapterTest
 
     it("creates a request with the iiif_url parameter for IIIF locations") {
       val imageUrl = "http://images.com/apples/braeburn/info.json"
-      val image = createMergedImageWith(
+      val image = createIdentifiedMergedImageWith(
         location = createDigitalLocationWith(
           url = imageUrl
         )
-      ).toIdentified
+      )
       val request = FeatureVectorInferrerAdapter.createRequest(image)
 
       inside(request) {
@@ -51,7 +51,7 @@ class FeatureVectorInferrerAdapterTest
 
   describe("augmentInput") {
     it("creates an AugmentedImage with the data from the inferrer response") {
-      val image = createMergedImage.toIdentified
+      val image = createIdentifiedMergedImageWith()
       val features = (0 until 4096).map(_ / 4096f).toList
       val featuresB64 = Encoding.toLittleEndianBase64(features)
       val lshEncodedFeatures = ('a' to 'z').map(_.toString * 3).toList
@@ -67,13 +67,11 @@ class FeatureVectorInferrerAdapterTest
             version,
             location,
             parentWork,
-            fullText,
             inferredData) =>
           id should be(image.id)
           version should be(image.version)
           location should be(image.location)
           parentWork should be(image.source)
-          fullText should be(image.fullText)
           inside(inferredData.value) {
             case InferredData(features1, features2, actualLshEncodedFeatures) =>
               features1 should be(features.slice(0, 2048))
