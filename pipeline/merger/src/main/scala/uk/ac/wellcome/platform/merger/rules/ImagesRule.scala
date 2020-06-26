@@ -33,11 +33,12 @@ object ImagesRule extends FieldMergeRule {
     case target if WorkPredicates.singleDigitalItemMiroWork(target) =>
       target.data.images.map {
         _.mergeWith(
-          sourceWork = Identifiable(target.sourceIdentifier),
-          sourceData = target.data
+          target.toSourceWork,
+          None
         )
       }
   }
+
 
   private lazy val getPictureImages = new FlatImageMergeRule {
     val isDefinedForTarget: WorkPredicate = WorkPredicates.sierraPicture
@@ -60,27 +61,12 @@ object ImagesRule extends FieldMergeRule {
       works flatMap {
         _.data.images.map {
           _.mergeWith(
-            sourceWork = Identifiable(target.sourceIdentifier),
-            sourceData = target.data
+            target.toSourceWork,
+            Some(sources.head.toSourceWork)
           )
         }
       }
     }
   }
 
-//  private def createFulltext(works: Seq[TransformedBaseWork]): Option[String] =
-//    works
-//      .map(_.data)
-//      .flatMap { data =>
-//        List(
-//          data.title,
-//          data.description,
-//          data.physicalDescription,
-//          data.lettering
-//        )
-//      }
-//      .flatten match {
-//      case Nil    => None
-//      case fields => Some(fields.mkString(" "))
-//    }
 }

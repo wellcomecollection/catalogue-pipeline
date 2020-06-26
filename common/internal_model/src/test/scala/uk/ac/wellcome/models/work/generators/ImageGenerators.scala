@@ -4,7 +4,7 @@ import uk.ac.wellcome.models.work.internal._
 
 import scala.util.Random
 
-trait ImageGenerators extends IdentifiersGenerators with ItemsGenerators {
+trait ImageGenerators extends IdentifiersGenerators with ItemsGenerators with WorksGenerators {
   def createUnmergedImageWith(
     location: DigitalLocation = createDigitalLocation,
     version: Int = 1,
@@ -19,14 +19,27 @@ trait ImageGenerators extends IdentifiersGenerators with ItemsGenerators {
   def createUnmergedImage: UnmergedImage[Identifiable, Unminted] =
     createUnmergedImageWith()
 
+  def createUnmergedMiroImage = createUnmergedImageWith(
+            location = DigitalLocation(
+              url = "https://iiif.wellcomecollection.org/V01234.jpg",
+              locationType = LocationType("iiif-image"),
+              license = Some(License.CCBY)
+            )
+          )
+
+  def createUnmergedMetsImage = createUnmergedImageWith(
+      location = createDigitalLocation,
+      identifierType = IdentifierType("mets-image")
+    )
+
   def createMergedImageWith(
     location: DigitalLocation = createDigitalLocation,
     version: Int = 1,
     identifierType: IdentifierType = IdentifierType("miro-image-number"),
-    parentWork: SourceIdentifier = createSierraSystemSourceIdentifier): MergedImage[Identifiable, Unminted] =
+    parentWork: UnidentifiedWork = createUnidentifiedSierraWorkWith()): MergedImage[Identifiable, Unminted] =
     createUnmergedImageWith(location, version, identifierType) mergeWith (
-      sourceWork = Identifiable(parentWork),
-      WorkData()
+      parentWork.toSourceWork,
+      None
     )
 
   def createMergedImage: MergedImage[Identifiable, Unminted] = createMergedImageWith()

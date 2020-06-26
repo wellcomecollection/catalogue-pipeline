@@ -16,6 +16,12 @@ sealed trait TransformedBaseWork
   val otherIdentifiers = data.otherIdentifiers
 }
 
+object TransformedBaseWork{
+  implicit class WorkToSourceWork(work: TransformedBaseWork){
+    def toSourceWork: SourceWork[Identifiable, Unminted] = SourceWork[Identifiable, Unminted](Identifiable(work.sourceIdentifier), work.data)
+  }
+}
+
 sealed trait InvisibleWork extends BaseWork
 
 sealed trait RedirectedWork extends BaseWork {

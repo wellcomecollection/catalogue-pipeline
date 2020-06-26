@@ -3,15 +3,15 @@ package uk.ac.wellcome.platform.merger.rules
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{Inspectors, OptionValues, PrivateMethodTester}
-import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.models.work.internal.{Identifiable, SourceWorks, Unminted, WorkType}
+import uk.ac.wellcome.models.work.internal.{Identifiable, SourceWorks, UnidentifiedInvisibleWork, Unminted, WorkType}
+import uk.ac.wellcome.platform.merger.generators.WorksWithImagesGenerators
 import uk.ac.wellcome.platform.merger.rules.ImagesRule.FlatImageMergeRule
 import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
 
 class ImagesRuleTest
     extends AnyFunSpec
     with Matchers
-    with WorksGenerators
+    with WorksWithImagesGenerators
     with PrivateMethodTester
     with OptionValues
     with Inspectors {
@@ -24,20 +24,30 @@ class ImagesRuleTest
       result.head.location should be(miroWork.data.images.head.location)
       val source = result.head.source
       source shouldBe a [SourceWorks[_,_]]
-      source.asInstanceOf[SourceWorks[Identifiable, Unminted]].canonicalWork.id.sourceIdentifier should
-        be(miroWork.sourceIdentifier)
+      val sourceWorks = source.asInstanceOf[SourceWorks[Identifiable, Unminted]]
+      sourceWorks.canonicalWork.id.sourceIdentifier should be(miroWork.sourceIdentifier)
+      sourceWorks.redirectedWork should be(None)
     }
 
     it("creates n images from n Miro works and a single Sierra work") {
       val n = 3
-      val miroWorks = (1 to n).map(_ => createMiroWork).toList
+      val miroWorks = (1 to n).map(_ => {
+        val work = createMiroWork
+        (work.sourceIdentifier-> work)
+      }).toMap
       val sierraWork = createSierraDigitalWork
-      val result = ImagesRule.merge(sierraWork, miroWorks).data
+      val result = ImagesRule.merge(sierraWork, miroWorks.values.toList).data
 
-      result should have length n
-      result.map(_.location) should contain theSameElementsAs
-        miroWorks.map(_.data.images.head.location)
-      result.map{image => image.source.asInstanceOf[SourceWorks[Identifiable, Unminted]].canonicalWork.id.sourceIdentifier } should contain only sierraWork.sourceIdentifier
+      result.foreach{ image =>
+        val imageSource = image.source.asInstanceOf[SourceWorks[Identifiable, Unminted]]
+        val identifier = imageSource.canonicalWork.id.sourceIdentifier
+        identifier shouldBe sierraWork.sourceIdentifier
+        imageSource.redirectedWork shouldBe defined
+        val redirectedSource = imageSource.redirectedWork.get
+        val miroWork = miroWorks(redirectedSource.id.sourceIdentifier)
+        image.location shouldBe miroWork.data.images.head.location
+        redirectedSource.data shouldBe miroWork.data
+      }
     }
 
     it(
@@ -107,4 +117,8 @@ class ImagesRuleTest
       }
     }
   }
+
+  def createUnidentifiedInvisibleMetsWorkWith(numImages: Int): UnidentifiedInvisibleWork = createUnidentifiedInvisibleMetsWorkWith(images = (1 to numImages).map { _ =>
+    createUnmergedMetsImage
+  }.toList)
 }

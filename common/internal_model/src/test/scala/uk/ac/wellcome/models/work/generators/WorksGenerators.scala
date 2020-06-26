@@ -4,8 +4,7 @@ import uk.ac.wellcome.models.work.internal._
 
 trait WorksGenerators
     extends ItemsGenerators
-    with ProductionEventGenerators
-    with ImageGenerators {
+    with ProductionEventGenerators {
 
   private def createTitle: String = randomAlphanumeric(length = 100)
 
@@ -231,17 +230,11 @@ trait WorksGenerators
 
   def createUnidentifiedInvisibleMetsWorkWith(
     sourceIdentifier: SourceIdentifier = createMetsSourceIdentifier,
-    items: List[Item[Unminted]] = List(createDigitalItem),
-    numImages: Int = 1): UnidentifiedInvisibleWork =
+    items: List[Item[Unminted]] = List(createDigitalItem),images: List[UnmergedImage[Identifiable, Unminted]]): UnidentifiedInvisibleWork =
     createUnidentifiedInvisibleWorkWith(
-      sourceIdentifier = createMetsSourceIdentifier,
+      sourceIdentifier = sourceIdentifier,
       items = items,
-      images = (1 to numImages).map { _ =>
-        createUnmergedImageWith(
-          location = createDigitalLocation,
-          identifierType = IdentifierType("mets-image")
-        )
-      }.toList
+      images = images
     )
 
   def createUnidentifiedSierraWork: UnidentifiedWork =
@@ -278,14 +271,11 @@ trait WorksGenerators
     : UnidentifiedWork =
     createUnidentifiedSierraWorkWith(items = items)
 
-  def createUnidentifiedInvisibleMetsWork: UnidentifiedInvisibleWork =
-    createUnidentifiedInvisibleMetsWorkWith()
-
   def createMiroWorkWith(
-    otherIdentifiers: List[SourceIdentifier] = List()): UnidentifiedWork =
+    images: List[UnmergedImage[Identifiable, Unminted]]): UnidentifiedWork =
     createUnidentifiedWorkWith(
       sourceIdentifier = createMiroSourceIdentifier,
-      otherIdentifiers = otherIdentifiers,
+      otherIdentifiers = List(),
       thumbnail = Some(
         DigitalLocation(
           url = "https://iiif.wellcomecollection.org/V01234.jpg",
@@ -295,18 +285,7 @@ trait WorksGenerators
       items = List(
         createUnidentifiableItemWith(locations = List(
           createDigitalLocationWith(locationType = createImageLocationType)))),
-      images = List(
-        createUnmergedImageWith(
-          location = DigitalLocation(
-            url = "https://iiif.wellcomecollection.org/V01234.jpg",
-            locationType = LocationType("iiif-image"),
-            license = Some(License.CCBY)
-          )
-        ))
-    )
-
-  def createMiroWork: UnidentifiedWork =
-    createMiroWorkWith()
+      images = images    )
 
   def createIsbnWork: UnidentifiedWork =
     createUnidentifiedWorkWith(

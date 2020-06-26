@@ -12,3 +12,5 @@ case class SourceWork[Id <: WithSourceIdentifier, DataId <: IdState](
                                                data: WorkData[DataId, Id],
                                                    ontologyType: String = "Work",
                                                  )
+
+
