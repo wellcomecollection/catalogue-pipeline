@@ -173,7 +173,7 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
   // the following conditions are satisfied:
   //
   // - there are multiple ID types present in the source identifiers
-  // - there are more than one source IDs for more than one of these ID types
+  // - there are more than one source IDs for any of these ID types
   //
   // This batching is not necessarily optimal but using it is many, many orders
   // of magnitude faster than not using it.
@@ -183,8 +183,7 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
       sourceIdentifiers
         .groupBy(i => (i.ontologyType, i.identifierType.id))
         .values
-    val nIdTypeScans = idTypeGroups.count(_.size > 1)
-    if (idTypeGroups.size > 1 && nIdTypeScans > 1) {
+    if (idTypeGroups.size > 1 && idTypeGroups.exists(_.size > 1)) {
       idTypeGroups.toSeq
     } else {
       Seq(sourceIdentifiers)
