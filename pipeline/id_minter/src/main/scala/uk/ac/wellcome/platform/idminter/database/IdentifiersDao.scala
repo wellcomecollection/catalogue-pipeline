@@ -25,68 +25,73 @@ object IdentifiersDao {
 class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
   import IdentifiersDao._
 
-  def withConnection[R](doWork: DBSession => R): R =
-    DB localTx doWork
-
   def lookupIds(sourceIdentifiers: Seq[SourceIdentifier])(
-    implicit session: DBSession): Try[LookupResult] =
+    implicit session: DBSession = readOnlySession): Try[LookupResult] =
     Try {
       debug(s"Matching ($sourceIdentifiers)")
+      val distinctIdentifiers = sourceIdentifiers.distinct
       val identifierRowsMap: Map[(String, String, String), SourceIdentifier] =
-        sourceIdentifiers.map { id =>
+        distinctIdentifiers.map { id =>
           (id.ontologyType, id.identifierType.id, id.value) -> id
         }.toMap
 
-      blocking {
+      val foundIdentifiers =
+        withTimeWarning(thresholdMillis = 10000L, distinctIdentifiers) {
+          batchSourceIdentifiers(distinctIdentifiers)
+            .flatMap { identifierBatch =>
+              blocking {
+                val i = identifiers.i
+                val matchRow = rowMatcherFromSyntaxProvider(i) _
 
-        val i = identifiers.i
-        val matchRow = rowMatcherFromSyntaxProvider(i) _
+                // The query is manually constructed like this because using WHERE IN
+                // statements with multiple items causes a full-index scan on MySQL 5.6.
+                // See: https://stackoverflow.com/a/53180813
+                // Therefore, we perform the rewrites here on the client.
+                //
+                // Because of issues in `scalikejdbc`'s typing, it's necessary to
+                // specify the `Nothing` type parameters as done here in order for
+                // the `map` statement to work properly.
+                val query = withSQL[Nothing] {
+                  select
+                    .from[Nothing](identifiers as i)
+                    .where
+                    .map { query =>
+                      identifierBatch.tail.foldLeft(
+                        query.withRoundBracket(matchRow(identifierBatch.head))
+                      ) { (q, sourceIdentifier) =>
+                        q.or.withRoundBracket(matchRow(sourceIdentifier))
+                      }
+                    }
+                }.map(rs => {
+                    val row = getRowFromResult(i, rs)
+                    identifierRowsMap.get(row) match {
+                      case Some(sourceIdentifier) =>
+                        (sourceIdentifier, Identifier(i)(rs))
+                      case None =>
+                        // this should be impossible in practice
+                        throw new RuntimeException(
+                          s"The row $row returned by the query could not be matched to a sourceIdentifier")
+                    }
 
-        // The query is manually constructed like this because using WHERE IN
-        // statements with multiple items causes a full-index scan on MySQL 5.6.
-        // See: https://stackoverflow.com/a/53180813
-        // Therefore, we perform the rewrites here on the client.
-        //
-        // Because of issues in `scalikejdbc`'s typing, it's necessary to
-        // specify the `Nothing` type parameters as done here in order for
-        // the `map` statement to work properly.
-        val query = withSQL[Nothing] {
-          select
-            .from[Nothing](identifiers as i)
-            .where
-            .map { query =>
-              sourceIdentifiers.tail.foldLeft(
-                query.withRoundBracket(matchRow(sourceIdentifiers.head))
-              ) { (q, sourceIdentifier) =>
-                q.or.withRoundBracket(matchRow(sourceIdentifier))
+                  })
+                  .list
+                debug(s"Executing:'${query.statement}'")
+                query.apply()
               }
             }
-        }.map(rs => {
-            val row = getRowFromResult(i, rs)
-            identifierRowsMap.get(row) match {
-              case Some(sourceIdentifier) =>
-                (sourceIdentifier, Identifier(i)(rs))
-              case None =>
-                // this should be impossible in practice
-                throw new RuntimeException(
-                  s"The row $row returned by the query could not be matched to a sourceIdentifier")
-            }
-
-          })
-          .list
-        debug(s"Executing:'${query.statement}'")
-        val foundIdentifiers = query.apply().toMap
-        val otherIdentifiers = sourceIdentifiers.toSet -- foundIdentifiers.keySet
-        LookupResult(
-          existingIdentifiers = foundIdentifiers,
-          unmintedIdentifiers = otherIdentifiers.toList
-        )
-      }
+        }
+      val existingIdentifiers = foundIdentifiers.toMap
+      val otherIdentifiers = distinctIdentifiers.toSet -- existingIdentifiers.keySet
+      LookupResult(
+        existingIdentifiers = existingIdentifiers,
+        unmintedIdentifiers = otherIdentifiers.toList
+      )
     }
 
   @throws(classOf[InsertError])
   def saveIdentifiers(ids: List[Identifier])(
-    implicit session: DBSession): Try[InsertResult] =
+    implicit session: DBSession = NamedAutoSession('primary)
+  ): Try[InsertResult] =
     Try {
       val values = ids.map(i =>
         Seq(i.CanonicalId, i.OntologyType, i.SourceSystem, i.SourceId))
@@ -151,5 +156,54 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
       rs.string(i.resultName.OntologyType),
       rs.string(i.resultName.SourceSystem),
       rs.string(i.resultName.SourceId))
+  }
+
+  private lazy val poolNames = Iterator
+    .continually(List('replica, 'primary))
+    .flatten
+
+  // Round-robin between the replica and the primary for SELECTs
+  private def readOnlySession = ReadOnlyNamedAutoSession(poolNames.next)
+
+  // In MySQL 5.6, the optimiser isn't able to optimise huge index range scans,
+  // so we batch the sourceIdentifiers ourselves to prevent these scans.
+  //
+  // Remember that there is a composite index, (ontologyType, sourceSystem, sourceId)
+  // Call the first 2 keys of this the "ID type". A huge range scan happens when
+  // the following conditions are satisfied:
+  //
+  // - there are multiple ID types present in the source identifiers
+  // - there are more than one source IDs for any of these ID types
+  //
+  // This batching is not necessarily optimal but using it is many, many orders
+  // of magnitude faster than not using it.
+  private def batchSourceIdentifiers(
+    sourceIdentifiers: Seq[SourceIdentifier]): Seq[Seq[SourceIdentifier]] = {
+    val idTypeGroups =
+      sourceIdentifiers
+        .groupBy(i => (i.ontologyType, i.identifierType.id))
+        .values
+    if (idTypeGroups.size > 1 && idTypeGroups.exists(_.size > 1)) {
+      idTypeGroups.toSeq
+    } else {
+      Seq(sourceIdentifiers)
+    }
+  }
+
+  private def withTimeWarning[R](
+    thresholdMillis: Long,
+    identifiers: Seq[SourceIdentifier])(f: => R): R = {
+    val start = System.currentTimeMillis()
+    val result = f
+    val end = System.currentTimeMillis()
+
+    val duration = end - start
+    if (duration > thresholdMillis) {
+      warn(
+        s"Query for ${identifiers.size} identifiers (first: ${identifiers.head.value}) took $duration milliseconds",
+      )
+    }
+
+    result
   }
 }

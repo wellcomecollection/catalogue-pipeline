@@ -3,7 +3,6 @@ package uk.ac.wellcome.platform.idminter.fixtures
 import org.scalatest.Assertion
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import scalikejdbc.{AutoSession, ConnectionPool, DB, SQLSyntax}
 import uk.ac.wellcome.fixtures.TestWith
 import scalikejdbc._
 import uk.ac.wellcome.platform.idminter.config.models.{
@@ -30,7 +29,7 @@ trait IdentifiersDatabase
       val database: SQLSyntax = SQLSyntax.createUnsafely(tableConfig.database)
       val table: SQLSyntax = SQLSyntax.createUnsafely(tableConfig.tableName)
 
-      val fields = DB readOnly { implicit session =>
+      val fields = NamedDB('primary) readOnly { implicit session =>
         sql"DESCRIBE $database.$table"
           .map(
             rs =>
@@ -78,7 +77,8 @@ trait IdentifiersDatabase
   }
 
   val rdsClientConfig = RDSClientConfig(
-    host = host,
+    primaryHost = host,
+    replicaHost = host,
     port = port,
     username = username,
     password = password
@@ -86,15 +86,22 @@ trait IdentifiersDatabase
 
   def withIdentifiersDatabase[R](
     testWith: TestWith[IdentifiersTableConfig, R]): R = {
-    Class.forName("com.mysql.jdbc.Driver")
-    ConnectionPool.singleton(
+    ConnectionPool.add(
+      'primary,
+      s"jdbc:mysql://$host:$port",
+      username,
+      password,
+      settings = ConnectionPoolSettings(maxSize = maxSize)
+    )
+    ConnectionPool.add(
+      'replica,
       s"jdbc:mysql://$host:$port",
       username,
       password,
       settings = ConnectionPoolSettings(maxSize = maxSize)
     )
 
-    implicit val session = AutoSession
+    implicit val session = NamedAutoSession('primary)
 
     // Something in our MySQL Docker image gets upset by some database names,
     // and throws an error of the form:
@@ -125,7 +132,7 @@ trait IdentifiersDatabase
 
       testWith(identifiersTableConfig)
     } finally {
-      DB localTx { implicit session =>
+      NamedDB('primary) localTx { implicit session =>
         sql"DROP DATABASE IF EXISTS $identifiersDatabase".execute().apply()
       }
 

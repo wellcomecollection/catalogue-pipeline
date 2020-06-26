@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.idminter.steps
 
 import grizzled.slf4j.Logging
-import scalikejdbc.DBSession
 import uk.ac.wellcome.models.work.internal.SourceIdentifier
 import uk.ac.wellcome.platform.idminter.database.IdentifiersDao
 import uk.ac.wellcome.platform.idminter.models.Identifier
@@ -22,23 +21,20 @@ class IdentifierGenerator(identifiersDao: IdentifiersDao) extends Logging {
    */
   def retrieveOrGenerateCanonicalIds(sourceIdentifiers: Seq[SourceIdentifier])
     : Try[Map[SourceIdentifier, Identifier]] =
-    identifiersDao.withConnection { implicit session =>
-      identifiersDao
-        .lookupIds(sourceIdentifiers)
-        .flatMap {
-          case LookupResult(existingIdentifiersMap, unmintedIdentifiers) =>
-            generateAndSaveCanonicalIds(unmintedIdentifiers).map {
-              newIdentifiers =>
-                val newIdentifiersMap: Map[SourceIdentifier, Identifier] =
-                  (unmintedIdentifiers zip newIdentifiers).toMap
-                existingIdentifiersMap ++ newIdentifiersMap
-            }
-        }
-    }
+    identifiersDao
+      .lookupIds(sourceIdentifiers)
+      .flatMap {
+        case LookupResult(existingIdentifiersMap, unmintedIdentifiers) =>
+          generateAndSaveCanonicalIds(unmintedIdentifiers).map {
+            newIdentifiers =>
+              val newIdentifiersMap: Map[SourceIdentifier, Identifier] =
+                (unmintedIdentifiers zip newIdentifiers).toMap
+              existingIdentifiersMap ++ newIdentifiersMap
+          }
+      }
 
   private def generateAndSaveCanonicalIds(
-    unmintedIdentifiers: List[SourceIdentifier])(
-    implicit session: DBSession): Try[List[Identifier]] =
+    unmintedIdentifiers: List[SourceIdentifier]): Try[List[Identifier]] =
     unmintedIdentifiers match {
       case Nil => Success(Nil)
       case _ =>
