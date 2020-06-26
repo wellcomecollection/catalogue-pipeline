@@ -1,16 +1,28 @@
 package uk.ac.wellcome.platform.api.rest
 
+import io.circe.Decoder
+import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.platform.api.services.ImagesSearchOptions
 
 case class SingleImageParams(
+  include: Option[SingleImageIncludes],
   _index: Option[String]
 ) extends QueryParams
 
 object SingleImageParams extends QueryParamsUtils {
   def parse =
-    parameter("_index".as[String].?)
-      .map(SingleImageParams.apply)
+    parameter(
+      (
+        "include".as[SingleImageIncludes].?,
+        "_index".as[String].?
+      )
+    ).tmap((SingleImageParams.apply _).tupled(_))
+
+  implicit val includesDecoder: Decoder[SingleImageIncludes] =
+    decodeOneOfCommaSeparated(
+      "visuallySimilar" -> ImageInclude.VisuallySimilar,
+    ).emap(values => Right(SingleImageIncludes(values)))
 }
 
 case class MultipleImagesParams(

@@ -67,6 +67,15 @@ trait SingleImageSwagger {
         in = ParameterIn.PATH,
         description = "The image to return",
         required = true
+      ),
+      new Parameter(
+        name = "include",
+        in = ParameterIn.QUERY,
+        description = "A comma-separated list of extra fields to include",
+        schema = new Schema(
+          allowableValues = Array("visuallySimilar")
+        ),
+        required = false
       )
     )
   )

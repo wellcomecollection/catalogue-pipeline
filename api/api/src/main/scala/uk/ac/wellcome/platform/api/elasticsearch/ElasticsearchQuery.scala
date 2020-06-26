@@ -297,8 +297,7 @@ final case class BoolBoostedQuery(q: String) extends ElasticsearchPartialQuery {
 final case class ImageSimilarityQuery(q: String, index: Index)
     extends ElasticsearchQuery {
   private final val lshFields = List("inferredData.lshEncodedFeatures")
-
-  lazy val documentRef = DocumentRef(index = index, id = q)
+  private lazy val documentRef = DocumentRef(index, q)
 
   lazy val elasticQuery =
     moreLikeThisQuery(lshFields)
