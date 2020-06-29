@@ -135,10 +135,10 @@ def publish_messages(job_config_id, topic_arn, parameters):
 @click.command()
 @click.option(
     "--src",
-    type=click.Choice(SOURCES.keys()),
+    type=click.Choice(["all"] + list(SOURCES.keys())),
     required=True,
     prompt="Which source do you want to reindex?",
-    help="Name of the source to reindex",
+    help="Name of the source to reindex, or all to reindex all sources",
 )
 @click.option(
     "--dst",
@@ -154,12 +154,15 @@ def publish_messages(job_config_id, topic_arn, parameters):
     prompt="Every record (complete), just a few (partial), or specific records (specific)?",
     help="Should this reindex send every record (complete), just a few (partial), or specific records (specific)?",
 )
-@click.option(
-    "--reason",
-    prompt="Why are you running this reindex?",
-    help="The reason to run this reindex",
-)
-def start_reindex(src, dst, mode, reason):
+@click.pass_context
+def start_reindex(ctx, src, dst, mode):
+    if src == "all" and mode == "complete":
+        for source in SOURCES.keys():
+            ctx.invoke(start_reindex, src=source, dst=dst, mode=mode)
+        sys.exit(0)
+    elif src == "all" and mode != "complete":
+        sys.exit("All-source reindexes only support --mode=complete")
+
     print(f"Starting a reindex {src!r} ~> {dst!r}")
 
     if mode == "complete":
