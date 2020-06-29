@@ -211,6 +211,19 @@ trait WorksGenerators
       mergeCandidates = mergeCandidates
     )
 
+  def createIdentifiedSierraWorkWith(
+    workType: Option[WorkType] = None,
+    items: List[Item[Minted]] = Nil,
+    mergeCandidates: List[MergeCandidate] = Nil,
+  ): IdentifiedWork =
+    createIdentifiedWorkWith(
+      sourceIdentifier = createSierraSystemSourceIdentifier,
+      workType = workType,
+      otherIdentifiers = List(createSierraSystemSourceIdentifier),
+      items = items,
+      mergeCandidates = mergeCandidates
+    )
+
   def createUnidentifiedCalmWorkWith(data: WorkData[Unminted, Identifiable] =
                                        WorkData(
                                          items = List(createCalmItem)

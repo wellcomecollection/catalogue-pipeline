@@ -36,20 +36,21 @@ trait ImageGenerators extends IdentifiersGenerators with ItemsGenerators with Wo
     location: DigitalLocation = createDigitalLocation,
     version: Int = 1,
     identifierType: IdentifierType = IdentifierType("miro-image-number"),
-    parentWork: UnidentifiedWork = createUnidentifiedSierraWorkWith()): MergedImage[Identifiable, Unminted] =
+    parentWork: UnidentifiedWork = createUnidentifiedSierraWorkWith(), redirectedWork: Option[TransformedBaseWork] = Some(createMiroWorkWith(Nil))): MergedImage[Identifiable, Unminted] =
     createUnmergedImageWith(location, version, identifierType) mergeWith (
       parentWork.toSourceWork,
-      None
+      redirectedWork.map(_.toSourceWork)
     )
 
   def createMergedImage: MergedImage[Identifiable, Unminted] = createMergedImageWith()
 
   def createIdentifiedMergedImageWith(
                                        imageId: Identified = Identified(createCanonicalId, createSourceIdentifier),
-                                       workId: Identified= Identified(createCanonicalId, createSourceIdentifier),
     location: DigitalLocation = createDigitalLocation,
-    version: Int = 1): MergedImage[Identified, Minted] = {
-    MergedImage[Identified, Minted](imageId, version, location , SourceWorks[Identified, Minted](SourceWork(workId, WorkData[Minted, Identified]()), None))
+    version: Int = 1,
+                                       parentWork: IdentifiedWork = createIdentifiedSierraWorkWith(),
+                                       redirectedWork: Option[IdentifiedWork]=Some(createIdentifiedSierraWorkWith())): MergedImage[Identified, Minted] = {
+    MergedImage[Identified, Minted](imageId, version, location , SourceWorks[Identified, Minted](parentWork.toSourceWork, redirectedWork.map(_.toSourceWork)))
 //    createUnmergedImageWith(location, version, identifierType) mergeWith (
 //      sourceWork = Identified(createCanonicalId,parentWork),
 //      WorkData()
@@ -69,16 +70,15 @@ trait ImageGenerators extends IdentifiersGenerators with ItemsGenerators with Wo
 
   def createAugmentedImageWith(
      imageId: Identified = Identified(createCanonicalId, createSourceIdentifierWith(IdentifierType("miro-image-number"))),
-    workId: Identified= Identified(createCanonicalId, createSierraSystemSourceIdentifier),
+     parentWork: IdentifiedWork = createIdentifiedSierraWorkWith(),
     inferredData: Option[InferredData] = createInferredData,
     location: DigitalLocation = createDigitalLocation,
     version: Int = 1,
   ) =
     createIdentifiedMergedImageWith(
       imageId,
-      workId,
       location,
-      version
+      version,parentWork
     ).augment(inferredData)
 
   def createAugmentedImage(): AugmentedImage = createAugmentedImageWith()

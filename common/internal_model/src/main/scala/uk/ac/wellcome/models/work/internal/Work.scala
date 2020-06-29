@@ -81,6 +81,13 @@ case class IdentifiedWork(
     this.copy(data = f(data))
 }
 
+
+object IdentifiedWork{
+  implicit class WorkToSourceWork(work: IdentifiedWork){
+    def toSourceWork: SourceWork[Identified, Minted] = SourceWork[Identified, Minted](Identified(work.canonicalId,work.sourceIdentifier, work.otherIdentifiers), work.data)
+  }
+}
+
 case class UnidentifiedInvisibleWork(
   version: Int,
   sourceIdentifier: SourceIdentifier,

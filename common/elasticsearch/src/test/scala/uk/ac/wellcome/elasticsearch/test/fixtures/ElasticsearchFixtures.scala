@@ -199,7 +199,6 @@ trait ElasticsearchFixtures
     debug(s"ingesting: $doc")
     elasticClient
       .execute {
-
         indexInto(index.name).doc(doc)
       }
       .map { r =>
