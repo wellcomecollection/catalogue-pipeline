@@ -45,14 +45,18 @@ trait ApiFixture
       testWith((elasticConfig, router.routes))
     }
 
-  def assertJsonResponse(routes: Route, path: String)(
-    expectedResponse: (StatusCode, String)) =
+  def assertJsonResponse(
+    routes: Route,
+    path: String,
+    unordered: Boolean = false)(expectedResponse: (StatusCode, String)) =
     eventually {
       expectedResponse match {
         case (expectedStatus, expectedJson) =>
           Get(path) ~> routes ~> check {
             contentType shouldEqual ContentTypes.`application/json`
-            parseJson(responseAs[String]) shouldEqual parseJson(expectedJson)
+            parseJson(responseAs[String], unordered) shouldEqual parseJson(
+              expectedJson,
+              unordered)
             status shouldEqual expectedStatus
           }
       }
@@ -70,17 +74,30 @@ trait ApiFixture
       }
     }
 
-  def parseJson(string: String) =
-    parse(string).left.map(_ => s"Invalid JSON").right.map(sortedJson)
+  def parseJson(string: String, unordered: Boolean = false) =
+    parse(string).left
+      .map(_ => s"Invalid JSON")
+      .right
+      .map(sortedJson(unordered))
 
-  def sortedJson(json: Json): Json =
+  def sortedJson(unordered: Boolean)(json: Json): Json =
     json.arrayOrObject(
       json,
-      array => Json.arr(array.map(sortedJson): _*),
+      array => {
+        val arr = array.map(sortedJson(unordered))
+        if (unordered) {
+          Json.arr(arr.sortBy(_.toString): _*)
+        } else {
+          Json.arr(arr: _*)
+        }
+      },
       obj =>
         Json.obj(
           obj.toList
-            .map { case (key, value) => (key, sortedJson(value)) }
+            .map {
+              case (key, value) =>
+                (key, sortedJson(unordered)(value))
+            }
             .sortBy(tup => tup._1): _*
       )
     )

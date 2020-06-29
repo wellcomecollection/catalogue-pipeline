@@ -10,7 +10,7 @@ import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.platform.api.models.ApiConfig
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
-import uk.ac.wellcome.typesafe.{Runnable, WellcomeTypesafeApp}
+import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 
 import scala.concurrent.{ExecutionContext, Promise}
 
@@ -49,11 +49,9 @@ object Main extends WellcomeTypesafeApp {
 
     val router = new Router(elasticClient, elasticConfig, apiConfig)
 
-    new Runnable {
-      def run() =
-        Http()
-          .bindAndHandle(router.routes, "0.0.0.0", 8888)
-          .flatMap(_ => Promise[Done].future)
-    }
+    () =>
+      Http()
+        .bindAndHandle(router.routes, "0.0.0.0", 8888)
+        .flatMap(_ => Promise[Done].future)
   }
 }

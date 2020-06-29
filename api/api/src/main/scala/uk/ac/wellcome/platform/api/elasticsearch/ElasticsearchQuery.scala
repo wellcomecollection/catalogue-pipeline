@@ -1,7 +1,8 @@
 package uk.ac.wellcome.platform.api.elasticsearch
 
-import com.sksamuel.elastic4s.ElasticDsl.{must, should}
-import com.sksamuel.elastic4s.requests.common.Operator
+import com.sksamuel.elastic4s.ElasticDsl.{moreLikeThisQuery, must, should}
+import com.sksamuel.elastic4s.Index
+import com.sksamuel.elastic4s.requests.common.{DocumentRef, Operator}
 import com.sksamuel.elastic4s.requests.searches.queries.{BoolQuery, Query}
 import com.sksamuel.elastic4s.requests.searches.queries.matches.{
   FieldWithOptionalBoost,
@@ -291,4 +292,19 @@ final case class BoolBoostedQuery(q: String) extends ElasticsearchPartialQuery {
     must(ContributorQuery(q).elasticQuery).boost(2000),
     must(TitleQuery(q).elasticQuery).boost(1000)
   )
+}
+
+final case class ImageSimilarityQuery(q: String, index: Index)
+    extends ElasticsearchQuery {
+  private final val lshFields = List("inferredData.lshEncodedFeatures")
+  private lazy val documentRef = DocumentRef(index, q)
+
+  lazy val elasticQuery =
+    moreLikeThisQuery(lshFields)
+      .likeDocs(List(documentRef))
+      .copy(
+        minTermFreq = Some(1),
+        maxQueryTerms = Some(1000),
+        minShouldMatch = Some("1")
+      )
 }

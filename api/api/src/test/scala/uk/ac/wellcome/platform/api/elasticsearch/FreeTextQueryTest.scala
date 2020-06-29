@@ -36,10 +36,7 @@ class FreeTextQueryTest
     with WorksGenerators
     with ContributorGenerators {
 
-  val searchService = new ElasticsearchService(
-    elasticClient = elasticClient,
-    WorksRequestBuilder
-  )
+  val searchService = new ElasticsearchService(elasticClient)
 
   describe("Free text query functionality") {
 
@@ -381,7 +378,7 @@ class FreeTextQueryTest
   private def searchResults(index: Index,
                             queryOptions: ElasticsearchQueryOptions) = {
     val searchResponseFuture =
-      searchService.executeSearch(queryOptions, index)
+      searchService.executeSearch(queryOptions, WorksRequestBuilder, index)
     whenReady(searchResponseFuture) { response =>
       searchResponseToWorks(response)
     }

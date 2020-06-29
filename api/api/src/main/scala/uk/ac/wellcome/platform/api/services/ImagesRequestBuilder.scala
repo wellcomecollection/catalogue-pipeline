@@ -5,7 +5,10 @@ import com.sksamuel.elastic4s._
 import com.sksamuel.elastic4s.requests.searches._
 import com.sksamuel.elastic4s.requests.searches.queries.Query
 import com.sksamuel.elastic4s.requests.searches.sort._
-import uk.ac.wellcome.platform.api.elasticsearch.CoreImagesQuery
+import uk.ac.wellcome.platform.api.elasticsearch.{
+  CoreImagesQuery,
+  ImageSimilarityQuery
+}
 import uk.ac.wellcome.platform.api.models.{ImageFilter, LicenseFilter}
 
 object ImagesRequestBuilder extends ElasticsearchRequestBuilder {
@@ -41,4 +44,9 @@ object ImagesRequestBuilder extends ElasticsearchRequestBuilder {
       case LicenseFilter(licenseIds) =>
         termsQuery(field = "location.license.id", values = licenseIds)
     }
+
+  def requestVisuallySimilar(index: Index, id: String, n: Int): SearchRequest =
+    search(index)
+      .query(ImageSimilarityQuery(q = id, index = index).elasticQuery)
+      .size(n)
 }

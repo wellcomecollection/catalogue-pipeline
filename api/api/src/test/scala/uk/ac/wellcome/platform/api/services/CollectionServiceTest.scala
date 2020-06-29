@@ -22,7 +22,7 @@ class CollectionServiceTest
     with ItemsGenerators
     with WorksGenerators {
 
-  val service = new CollectionService(elasticClient)
+  val service = new CollectionService(new ElasticsearchService(elasticClient))
 
   def work(path: String, level: CollectionLevel) =
     createIdentifiedWorkWith(

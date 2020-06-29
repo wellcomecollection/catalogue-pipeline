@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.api.rest
 
 import akka.http.scaladsl.model.StatusCodes.Found
 import akka.http.scaladsl.server.Route
-import com.sksamuel.elastic4s.{ElasticClient, Index}
+import com.sksamuel.elastic4s.Index
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import grizzled.slf4j.Logger
 import uk.ac.wellcome.display.models._
@@ -13,7 +13,6 @@ import uk.ac.wellcome.platform.api.models.ApiConfig
 import uk.ac.wellcome.platform.api.services.{
   CollectionService,
   ElasticsearchService,
-  WorksRequestBuilder,
   WorksService
 }
 import uk.ac.wellcome.platform.api.Tracing
@@ -21,7 +20,7 @@ import uk.ac.wellcome.platform.api.Tracing
 import scala.concurrent.{ExecutionContext, Future}
 
 class WorksController(
-  elasticClient: ElasticClient,
+  elasticsearchService: ElasticsearchService,
   implicit val apiConfig: ApiConfig,
   elasticConfig: ElasticConfig)(implicit ec: ExecutionContext)
     extends Tracing
@@ -126,10 +125,9 @@ class WorksController(
     )
 
   private lazy val collectionService =
-    new CollectionService(elasticClient)
+    new CollectionService(elasticsearchService)
 
-  private lazy val worksService = new WorksService(
-    new ElasticsearchService(elasticClient, WorksRequestBuilder))
+  private lazy val worksService = new WorksService(elasticsearchService)
 
   private lazy val logger = Logger(this.getClass.getName)
 }

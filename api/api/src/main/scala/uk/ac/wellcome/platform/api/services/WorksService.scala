@@ -35,7 +35,7 @@ class WorksService(searchService: ElasticsearchService)(
   def findWorkById(canonicalId: String)(
     index: Index): Future[Either[ElasticError, Option[IdentifiedBaseWork]]] =
     searchService
-      .findResultById(canonicalId)(index)
+      .executeGet(canonicalId)(index)
       .map { result: Either[ElasticError, GetResponse] =>
         result.map { response: GetResponse =>
           if (response.exists)
@@ -49,6 +49,7 @@ class WorksService(searchService: ElasticsearchService)(
     searchService
       .executeSearch(
         queryOptions = toElasticsearchQueryOptions(searchOptions),
+        requestBuilder = WorksRequestBuilder,
         index = index
       )
       .map { _.map(createResultList) }
