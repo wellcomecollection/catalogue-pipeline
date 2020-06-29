@@ -71,10 +71,12 @@ class ImagesService(searchService: ElasticsearchService)(
           n = nVisuallySimilarImages
         )
       )
-      .map {
-        _.map {
-          _.hits.hits.map(hit => jsonTo(hit.sourceAsString)).toList
-        }.getOrElse(Nil)
+      .map { result =>
+        result
+          .map { response =>
+            response.hits.hits.map(hit => jsonTo(hit.sourceAsString)).toList
+          }
+          .getOrElse(Nil)
       }
 
   def toElasticsearchQueryOptions(

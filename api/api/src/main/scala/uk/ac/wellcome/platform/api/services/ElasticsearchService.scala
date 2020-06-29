@@ -61,8 +61,8 @@ class ElasticsearchService(elasticClient: ElasticClient)(
       val transaction = Tracing.currentTransaction
       withActiveTrace(elasticClient.execute(request))
         .map(toEither)
-        .map {
-          _.map { res =>
+        .map { responseOrError =>
+          responseOrError.map { res =>
             transaction.addLabel("elasticTook", res.took)
             res
           }
