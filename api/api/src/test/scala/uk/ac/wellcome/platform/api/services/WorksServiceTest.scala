@@ -37,10 +37,7 @@ class WorksServiceTest
     with WorksGenerators
     with ProductionEventGenerators {
 
-  val elasticsearchService = new ElasticsearchService(
-    elasticClient = elasticClient,
-    WorksRequestBuilder
-  )
+  val elasticsearchService = new ElasticsearchService(elasticClient)
 
   val worksService = new WorksService(
     searchService = elasticsearchService

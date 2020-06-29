@@ -27,7 +27,7 @@ class AggregationsTest
     with WorksGenerators {
 
   val worksService = new WorksService(
-    searchService = new ElasticsearchService(elasticClient, WorksRequestBuilder)
+    searchService = new ElasticsearchService(elasticClient)
   )
 
   it("returns more than 10 workType aggregations") {

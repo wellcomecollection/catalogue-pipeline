@@ -13,10 +13,7 @@ class ImagesServiceTest
     with EitherValues
     with OptionValues {
 
-  val elasticsearchService = new ElasticsearchService(
-    elasticClient = elasticClient,
-    ImagesRequestBuilder
-  )
+  val elasticsearchService = new ElasticsearchService(elasticClient)
 
   val imagesService = new ImagesService(
     elasticsearchService

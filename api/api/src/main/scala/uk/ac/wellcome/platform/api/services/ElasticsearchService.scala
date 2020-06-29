@@ -3,11 +3,9 @@ package uk.ac.wellcome.platform.api.services
 import co.elastic.apm.api.Transaction
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.get.GetResponse
-import com.sksamuel.elastic4s.requests.searches.SearchResponse
-import com.sksamuel.elastic4s.{ElasticClient, ElasticError, Response}
-import com.sksamuel.elastic4s.Index
+import com.sksamuel.elastic4s.requests.searches.{SearchRequest, SearchResponse}
+import com.sksamuel.elastic4s.{ElasticClient, ElasticError, Index, Response}
 import grizzled.slf4j.Logging
-
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.platform.api.Tracing
 import uk.ac.wellcome.platform.api.models._
@@ -22,13 +20,12 @@ case class ElasticsearchQueryOptions(filters: List[DocumentFilter],
                                      sortOrder: SortingOrder,
                                      searchQuery: Option[SearchQuery])
 
-class ElasticsearchService(val elasticClient: ElasticClient,
-                           requestBuilder: ElasticsearchRequestBuilder)(
+class ElasticsearchService(elasticClient: ElasticClient)(
   implicit ec: ExecutionContext
 ) extends Logging
     with Tracing {
 
-  def findResultById(canonicalId: String)(
+  def executeGet(canonicalId: String)(
     index: Index): Future[Either[ElasticError, GetResponse]] =
     withActiveTrace(elasticClient.execute {
       get(canonicalId).from(index.name)
@@ -39,34 +36,38 @@ class ElasticsearchService(val elasticClient: ElasticClient,
     */
   def executeSearch(
     queryOptions: ElasticsearchQueryOptions,
-    index: Index): Future[Either[ElasticError, SearchResponse]] =
-    spanFuture(
-      name = "ElasticSearch#executeSearch",
-      spanType = "request",
-      subType = "elastic",
-      action = "query")({
-
-      val searchRequest = requestBuilder.request(
+    requestBuilder: ElasticsearchRequestBuilder,
+    index: Index): Future[Either[ElasticError, SearchResponse]] = {
+    val searchRequest = requestBuilder
+      .request(
         queryOptions,
         index,
         scored = queryOptions.searchQuery.isDefined
       )
+      .trackTotalHits(true)
+    Tracing.currentTransaction.addQueryOptionLabels(queryOptions)
+    executeSearchRequest(searchRequest)
+  }
 
-      debug(s"Sending ES request: ${searchRequest.show}")
+  def executeSearchRequest(
+    request: SearchRequest): Future[Either[ElasticError, SearchResponse]] =
+    spanFuture(
+      name = "ElasticSearch#executeQuery",
+      spanType = "request",
+      subType = "elastic",
+      action = "query"
+    ) {
+      debug(s"Sending ES request: ${request.show}")
       val transaction = Tracing.currentTransaction
-        .addQueryOptionLabels(queryOptions)
-
-      withActiveTrace(
-        elasticClient
-          .execute { searchRequest.trackTotalHits(true) })
-        .map { toEither }
+      withActiveTrace(elasticClient.execute(request))
+        .map(toEither)
         .map {
           _.map { res =>
             transaction.addLabel("elasticTook", res.took)
             res
           }
         }
-    })
+    }
 
   private def toEither[T](response: Response[T]): Either[ElasticError, T] =
     if (response.isError) {

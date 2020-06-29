@@ -13,6 +13,7 @@ import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.platform.api.swagger.SwaggerDocs
 import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.platform.api.rest._
+import uk.ac.wellcome.platform.api.services.ElasticsearchService
 
 class Router(elasticClient: ElasticClient,
              elasticConfig: ElasticConfig,
@@ -72,11 +73,13 @@ class Router(elasticClient: ElasticClient,
     }
   }
 
+  lazy val elasticsearchService = new ElasticsearchService(elasticClient)
+
   lazy val worksController =
-    new WorksController(elasticClient, apiConfig, elasticConfig)
+    new WorksController(elasticsearchService, apiConfig, elasticConfig)
 
   lazy val imagesController =
-    new ImagesController(elasticClient, apiConfig, elasticConfig)
+    new ImagesController(elasticsearchService, apiConfig, elasticConfig)
 
   def swagger: Route = get {
     complete(

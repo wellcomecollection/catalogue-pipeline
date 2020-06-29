@@ -33,7 +33,7 @@ class ImagesService(searchService: ElasticsearchService)(
   def findImageById(id: String)(
     index: Index): Future[Either[ElasticError, Option[AugmentedImage]]] =
     searchService
-      .findResultById(id)(index)
+      .executeGet(id)(index)
       .map {
         _.map { response =>
           if (response.exists) {
@@ -55,6 +55,7 @@ class ImagesService(searchService: ElasticsearchService)(
     searchService
       .executeSearch(
         queryOptions = toElasticsearchQueryOptions(searchOptions),
+        requestBuilder = ImagesRequestBuilder,
         index = index
       )
       .map { _.map(createResultList) }
@@ -62,36 +63,19 @@ class ImagesService(searchService: ElasticsearchService)(
   def retrieveSimilarImages(
     index: Index,
     image: AugmentedImage): Future[List[AugmentedImage]] =
-    spanFuture(
-      name = "ImagesService#retrieveSimilarImages",
-      spanType = "request",
-      subType = "elastic",
-      action = "query") {
-      val transaction = Tracing.currentTransaction
-      withActiveTrace(
-        searchService.elasticClient
-          .execute {
-            ImagesRequestBuilder.requestVisuallySimilar(
-              index = index,
-              id = image.id.canonicalId,
-              n = nVisuallySimilarImages
-            )
-          }
-          .map { response =>
-            if (response.isError) Left(response.error)
-            else Right(response.result)
-          }
-          .map {
-            _.map { res =>
-              transaction.addLabel("elasticTook", res.took)
-              res
-            }
-          }
-      ).map {
-        _.map { _.hits.hits.map(hit => jsonTo(hit.sourceAsString)).toList }
-          .getOrElse(Nil)
+    searchService
+      .executeSearchRequest(
+        ImagesRequestBuilder.requestVisuallySimilar(
+          index = index,
+          id = image.id.canonicalId,
+          n = nVisuallySimilarImages
+        )
+      )
+      .map {
+        _.map {
+          _.hits.hits.map(hit => jsonTo(hit.sourceAsString)).toList
+        }.getOrElse(Nil)
       }
-    }
 
   def toElasticsearchQueryOptions(
     options: ImagesSearchOptions): ElasticsearchQueryOptions =
