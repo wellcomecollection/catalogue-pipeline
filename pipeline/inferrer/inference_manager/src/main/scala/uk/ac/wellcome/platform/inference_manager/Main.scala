@@ -7,9 +7,17 @@ import com.amazonaws.services.s3.AmazonS3
 import software.amazon.awssdk.services.sqs.model.Message
 import com.typesafe.config.Config
 import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
-import uk.ac.wellcome.models.work.internal.{AugmentedImage, Identified, MergedImage, Minted}
+import uk.ac.wellcome.models.work.internal.{
+  AugmentedImage,
+  Identified,
+  MergedImage,
+  Minted
+}
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.platform.inference_manager.services.{FeatureVectorInferrerAdapter, InferenceManagerWorkerService}
+import uk.ac.wellcome.platform.inference_manager.services.{
+  FeatureVectorInferrerAdapter,
+  InferenceManagerWorkerService
+}
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.typesafe.S3Builder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp

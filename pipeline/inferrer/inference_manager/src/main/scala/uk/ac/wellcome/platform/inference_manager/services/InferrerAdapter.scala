@@ -10,7 +10,13 @@ import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import grizzled.slf4j.Logging
 import io.circe.Decoder
 import io.circe.generic.semiauto.deriveDecoder
-import uk.ac.wellcome.models.work.internal.{AugmentedImage, Identified, InferredData, MergedImage, Minted}
+import uk.ac.wellcome.models.work.internal.{
+  AugmentedImage,
+  Identified,
+  InferredData,
+  MergedImage,
+  Minted
+}
 import uk.ac.wellcome.platform.inference_manager.models.FeatureVectorInferrerResponse
 
 import scala.concurrent.Future

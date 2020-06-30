@@ -7,7 +7,10 @@ import uk.ac.wellcome.platform.merger.generators.WorksWithImagesGenerators
 import uk.ac.wellcome.platform.merger.models.{FieldMergeResult, MergeResult}
 import uk.ac.wellcome.platform.merger.rules.FieldMergeRule
 
-class MergerTest extends AnyFunSpec with Matchers with WorksWithImagesGenerators {
+class MergerTest
+    extends AnyFunSpec
+    with Matchers
+    with WorksWithImagesGenerators {
   val inputWorks =
     (0 to 5).map(_ => createSierraDigitalWork) ++
       (0 to 5).map(_ => createMiroWork) ++

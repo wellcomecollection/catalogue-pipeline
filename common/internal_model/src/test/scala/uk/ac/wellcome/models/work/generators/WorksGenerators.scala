@@ -2,9 +2,7 @@ package uk.ac.wellcome.models.work.generators
 
 import uk.ac.wellcome.models.work.internal._
 
-trait WorksGenerators
-    extends ItemsGenerators
-    with ProductionEventGenerators {
+trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
 
   private def createTitle: String = randomAlphanumeric(length = 100)
 
@@ -103,7 +101,8 @@ trait WorksGenerators
     edition: Option[String] = None,
     duration: Option[Int] = None,
     items: List[Item[Unminted]] = Nil,
-    images: List[UnmergedImage[Identifiable, Unminted]] = Nil): UnidentifiedWork =
+    images: List[UnmergedImage[Identifiable, Unminted]] = Nil)
+    : UnidentifiedWork =
     UnidentifiedWork(
       sourceIdentifier = sourceIdentifier,
       version = version,
@@ -243,7 +242,9 @@ trait WorksGenerators
 
   def createUnidentifiedInvisibleMetsWorkWith(
     sourceIdentifier: SourceIdentifier = createMetsSourceIdentifier,
-    items: List[Item[Unminted]] = List(createDigitalItem),images: List[UnmergedImage[Identifiable, Unminted]]): UnidentifiedInvisibleWork =
+    items: List[Item[Unminted]] = List(createDigitalItem),
+    images: List[UnmergedImage[Identifiable, Unminted]])
+    : UnidentifiedInvisibleWork =
     createUnidentifiedInvisibleWorkWith(
       sourceIdentifier = sourceIdentifier,
       items = items,
@@ -298,7 +299,8 @@ trait WorksGenerators
       items = List(
         createUnidentifiableItemWith(locations = List(
           createDigitalLocationWith(locationType = createImageLocationType)))),
-      images = images    )
+      images = images
+    )
 
   def createIsbnWork: UnidentifiedWork =
     createUnidentifiedWorkWith(

@@ -80,7 +80,12 @@ object QueryConfig {
     ("data.notes.content.english", None),
     ("data.collectionPath.path", None),
     ("data.collectionPath.label", None),
-  ).flatMap { case (field, boost) => Seq((s"source.canonicalWork.$field", boost), (s"source.redirectedWork.$field", boost)) }
+  ).flatMap {
+    case (field, boost) =>
+      Seq(
+        (s"source.canonicalWork.$field", boost),
+        (s"source.redirectedWork.$field", boost))
+  }
 }
 
 case class BoolBoostersQuery(q: String) extends ElasticsearchComboQuery {

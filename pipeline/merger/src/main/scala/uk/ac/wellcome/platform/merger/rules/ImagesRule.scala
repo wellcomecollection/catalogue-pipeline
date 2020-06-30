@@ -2,9 +2,19 @@ package uk.ac.wellcome.platform.merger.rules
 
 import scala.Function.const
 import cats.data.NonEmptyList
-import uk.ac.wellcome.models.work.internal.{Identifiable, MergedImage, TransformedBaseWork, UnidentifiedWork, Unminted}
+import uk.ac.wellcome.models.work.internal.{
+  Identifiable,
+  MergedImage,
+  TransformedBaseWork,
+  UnidentifiedWork,
+  Unminted
+}
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
-import uk.ac.wellcome.platform.merger.rules.WorkPredicates.{WorkPredicate, WorkPredicateOps, not}
+import uk.ac.wellcome.platform.merger.rules.WorkPredicates.{
+  not,
+  WorkPredicate,
+  WorkPredicateOps
+}
 
 object ImagesRule extends FieldMergeRule {
   type FieldData = List[MergedImage[Identifiable, Unminted]]
@@ -38,7 +48,6 @@ object ImagesRule extends FieldMergeRule {
         )
       }
   }
-
 
   private lazy val getPictureImages = new FlatImageMergeRule {
     val isDefinedForTarget: WorkPredicate = WorkPredicates.sierraPicture

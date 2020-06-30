@@ -8,7 +8,8 @@ import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 
 class ItemsRuleTest
     extends AnyFunSpec
-    with Matchers with WorksWithImagesGenerators
+    with Matchers
+    with WorksWithImagesGenerators
     with Inside {
   val physicalSierra = createSierraPhysicalWork
   val zeroItemPhysicalSierra = createUnidentifiedSierraWork

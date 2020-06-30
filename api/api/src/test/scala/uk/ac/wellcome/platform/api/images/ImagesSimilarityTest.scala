@@ -37,7 +37,8 @@ class ImagesSimilarityTest extends ApiImagesTestBase {
     withApi {
       case (ElasticConfig(_, imagesIndex), routes) =>
         val focacciaImage = createAugmentedImageWith(
-          parentWork = createIdentifiedWorkWith(title = Some("A Ligurian style of bread, Focaccia"))
+          parentWork = createIdentifiedWorkWith(
+            title = Some("A Ligurian style of bread, Focaccia"))
         )
         insertImagesIntoElasticsearch(imagesIndex, focacciaImage)
 

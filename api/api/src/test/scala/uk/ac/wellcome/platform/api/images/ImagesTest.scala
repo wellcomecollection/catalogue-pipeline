@@ -46,15 +46,19 @@ class ImagesTest extends ApiImagesTestBase with ElasticsearchFixtures {
       case (ElasticConfig(_, imagesIndex), routes) =>
         val baguetteImage = createAugmentedImageWith(
           imageId = Identified("a", createSourceIdentifier),
-          parentWork = createIdentifiedWorkWith(title = Some("Baguette is a French bread style"))
+          parentWork = createIdentifiedWorkWith(
+            title = Some("Baguette is a French bread style"))
         )
         val focacciaImage = createAugmentedImageWith(
           imageId = Identified("b", createSourceIdentifier),
-          parentWork = createIdentifiedWorkWith(title = Some("A Ligurian style of bread, Focaccia"))
+          parentWork = createIdentifiedWorkWith(
+            title = Some("A Ligurian style of bread, Focaccia"))
         )
         val mantouImage = createAugmentedImageWith(
           imageId = Identified("c", createSourceIdentifier),
-          parentWork = createIdentifiedWorkWith(title = Some("Mantou is a steamed bread associated with Northern China"))
+          parentWork = createIdentifiedWorkWith(
+            title =
+              Some("Mantou is a steamed bread associated with Northern China"))
         )
         insertImagesIntoElasticsearch(
           imagesIndex,
@@ -78,16 +82,20 @@ class ImagesTest extends ApiImagesTestBase with ElasticsearchFixtures {
       case (ElasticConfig(_, imagesIndex), routes) =>
         val baguetteImage = createAugmentedImageWith(
           imageId = Identified("a", createSourceIdentifier),
-          parentWork = createIdentifiedWorkWith(title = Some("Baguette is a French bread style"))
+          parentWork = createIdentifiedWorkWith(
+            title = Some("Baguette is a French bread style"))
         )
         val focacciaImage = createAugmentedImageWith(
           imageId = Identified("b", createSourceIdentifier),
-          parentWork = createIdentifiedWorkWith(title = Some("A Ligurian style of bread, Focaccia"))
+          parentWork = createIdentifiedWorkWith(
+            title = Some("A Ligurian style of bread, Focaccia"))
         )
         val schiacciataImage = createAugmentedImageWith(
           imageId = Identified("c", createSourceIdentifier),
-          parentWork = createIdentifiedWorkWith(title = Some("Schiacciata is a Tuscan focaccia")),
-          redirectedWork = Some(createIdentifiedWorkWith(title = Some("A Tuscan bread")))
+          parentWork = createIdentifiedWorkWith(
+            title = Some("Schiacciata is a Tuscan focaccia")),
+          redirectedWork =
+            Some(createIdentifiedWorkWith(title = Some("A Tuscan bread")))
         )
         insertImagesIntoElasticsearch(
           imagesIndex,

@@ -84,7 +84,8 @@ object Implicits {
     deriveConfiguredDecoder
   implicit val _dec55: Decoder[BaseImage[Identifiable, Unminted]] =
     deriveConfiguredDecoder
-  implicit val _dec56: Decoder[BaseImage[Identified, Minted]] = deriveConfiguredDecoder
+  implicit val _dec56: Decoder[BaseImage[Identified, Minted]] =
+    deriveConfiguredDecoder
   implicit val _dec57: Decoder[AugmentedImage] = deriveConfiguredDecoder
 
   implicit val _enc00: Encoder[AccessCondition] = deriveConfiguredEncoder
@@ -156,6 +157,7 @@ object Implicits {
     deriveConfiguredEncoder
   implicit val _enc55: Encoder[BaseImage[Identifiable, Unminted]] =
     deriveConfiguredEncoder
-  implicit val _enc56: Encoder[BaseImage[Identified, Minted]] = deriveConfiguredEncoder
+  implicit val _enc56: Encoder[BaseImage[Identified, Minted]] =
+    deriveConfiguredEncoder
   implicit val _enc57: Encoder[AugmentedImage] = deriveConfiguredEncoder
 }

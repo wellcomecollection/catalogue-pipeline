@@ -14,14 +14,17 @@ case object ImagesIndexConfig extends IndexConfig {
     denseVectorField("features2", 2048),
     keywordField("lshEncodedFeatures"))
 
-  private def sourceWork(canonicalWork: String): ObjectField = objectField(canonicalWork).fields(
-    id("id"),
-    WorksIndexConfig.data(textField("path")),
-    keywordField("ontologyType"),
-    keywordField("type")
-  )
+  private def sourceWork(canonicalWork: String): ObjectField =
+    objectField(canonicalWork).fields(
+      id("id"),
+      WorksIndexConfig.data(textField("path")),
+      keywordField("ontologyType"),
+      keywordField("type")
+    )
   val source = objectField("source").fields(
-    sourceWork("canonicalWork"), sourceWork("redirectedWork"), keywordField("type")
+    sourceWork("canonicalWork"),
+    sourceWork("redirectedWork"),
+    keywordField("type")
   )
 
   override val mapping: MappingDefinition = properties(

@@ -1,10 +1,26 @@
 package uk.ac.wellcome.elasticsearch
 
-import com.sksamuel.elastic4s.ElasticDsl.{booleanField, dateField, intField, keywordField, objectField, properties, textField, tokenCountField}
-import com.sksamuel.elastic4s.requests.analysis.{Analysis, CustomAnalyzer, PathHierarchyTokenizer}
-import com.sksamuel.elastic4s.requests.mappings.{FieldDefinition, ObjectField, TextField}
+import com.sksamuel.elastic4s.ElasticDsl.{
+  booleanField,
+  dateField,
+  intField,
+  keywordField,
+  objectField,
+  properties,
+  textField,
+  tokenCountField
+}
+import com.sksamuel.elastic4s.requests.analysis.{
+  Analysis,
+  CustomAnalyzer,
+  PathHierarchyTokenizer
+}
+import com.sksamuel.elastic4s.requests.mappings.{
+  FieldDefinition,
+  ObjectField,
+  TextField
+}
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
-
 
 case object WorksIndexConfig extends IndexConfig {
   // Analysis

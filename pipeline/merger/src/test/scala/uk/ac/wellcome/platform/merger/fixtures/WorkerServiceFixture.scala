@@ -5,7 +5,12 @@ import software.amazon.awssdk.services.cloudwatch.model.StandardUnit
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.models.work.internal.{BaseWork, Identifiable, MergedImage, Unminted}
+import uk.ac.wellcome.models.work.internal.{
+  BaseWork,
+  Identifiable,
+  MergedImage,
+  Unminted
+}
 import uk.ac.wellcome.platform.merger.services._
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig}

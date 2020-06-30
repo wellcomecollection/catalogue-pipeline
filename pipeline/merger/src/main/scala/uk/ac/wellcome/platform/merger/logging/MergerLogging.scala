@@ -2,7 +2,12 @@ package uk.ac.wellcome.platform.merger.logging
 
 import grizzled.slf4j.Logging
 import cats.data.NonEmptyList
-import uk.ac.wellcome.models.work.internal.{BaseImage, BaseWork, Identifiable, Unminted}
+import uk.ac.wellcome.models.work.internal.{
+  BaseImage,
+  BaseWork,
+  Identifiable,
+  Unminted
+}
 
 trait MergerLogging extends Logging {
   def describeWork(work: BaseWork): String =

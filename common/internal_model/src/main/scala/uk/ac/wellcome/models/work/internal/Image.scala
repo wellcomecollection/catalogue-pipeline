@@ -1,6 +1,7 @@
 package uk.ac.wellcome.models.work.internal
 
-sealed trait BaseImage[+Id <: WithSourceIdentifier, DataId <: IdState] extends HasIdState[Id] {
+sealed trait BaseImage[+Id <: WithSourceIdentifier, DataId <: IdState]
+    extends HasIdState[Id] {
   val id: Id
   val location: DigitalLocation
 }
@@ -10,20 +11,22 @@ case class UnmergedImage[Id <: WithSourceIdentifier, DataId <: IdState](
   version: Int,
   location: DigitalLocation
 ) extends BaseImage[Id, DataId] {
-  def mergeWith(canonicalWork: SourceWork[Id, DataId], redirectedWork: Option[SourceWork[Id, DataId]]): MergedImage[Id, DataId] =
+  def mergeWith(
+    canonicalWork: SourceWork[Id, DataId],
+    redirectedWork: Option[SourceWork[Id, DataId]]): MergedImage[Id, DataId] =
     MergedImage[Id, DataId](
       id = id,
       version = version,
       location = location,
-      source = SourceWorks[Id, DataId](canonicalWork,redirectedWork)
+      source = SourceWorks[Id, DataId](canonicalWork, redirectedWork)
     )
 }
 
 case class MergedImage[Id <: WithSourceIdentifier, DataId <: IdState](
-                                                                               id: Id,
-                                                                               version: Int,
-                                                                               location: DigitalLocation,
-                                                                               source: ImageSource[Id, DataId]
+  id: Id,
+  version: Int,
+  location: DigitalLocation,
+  source: ImageSource[Id, DataId]
 ) extends BaseImage[Id, DataId] {
   def toUnmerged: UnmergedImage[Id, DataId] =
     UnmergedImage[Id, DataId](

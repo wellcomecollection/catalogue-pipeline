@@ -1,6 +1,11 @@
 package uk.ac.wellcome.platform.merger.models
 
-import uk.ac.wellcome.models.work.internal.{BaseWork, Identifiable, MergedImage, Unminted}
+import uk.ac.wellcome.models.work.internal.{
+  BaseWork,
+  Identifiable,
+  MergedImage,
+  Unminted
+}
 
 /*
  * MergerOutcome is the final output of the merger:

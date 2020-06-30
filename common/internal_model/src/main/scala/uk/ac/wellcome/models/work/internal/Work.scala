@@ -16,9 +16,12 @@ sealed trait TransformedBaseWork
   val otherIdentifiers = data.otherIdentifiers
 }
 
-object TransformedBaseWork{
-  implicit class WorkToSourceWork(work: TransformedBaseWork){
-    def toSourceWork: SourceWork[Identifiable, Unminted] = SourceWork[Identifiable, Unminted](Identifiable(work.sourceIdentifier), work.data)
+object TransformedBaseWork {
+  implicit class WorkToSourceWork(work: TransformedBaseWork) {
+    def toSourceWork: SourceWork[Identifiable, Unminted] =
+      SourceWork[Identifiable, Unminted](
+        Identifiable(work.sourceIdentifier),
+        work.data)
   }
 }
 
@@ -81,10 +84,15 @@ case class IdentifiedWork(
     this.copy(data = f(data))
 }
 
-
-object IdentifiedWork{
-  implicit class WorkToSourceWork(work: IdentifiedWork){
-    def toSourceWork: SourceWork[Identified, Minted] = SourceWork[Identified, Minted](Identified(work.canonicalId,work.sourceIdentifier, work.otherIdentifiers), work.data)
+object IdentifiedWork {
+  implicit class WorkToSourceWork(work: IdentifiedWork) {
+    def toSourceWork: SourceWork[Identified, Minted] =
+      SourceWork[Identified, Minted](
+        Identified(
+          work.canonicalId,
+          work.sourceIdentifier,
+          work.otherIdentifiers),
+        work.data)
   }
 }
 
