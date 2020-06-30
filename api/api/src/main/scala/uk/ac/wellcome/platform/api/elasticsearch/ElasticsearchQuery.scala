@@ -67,20 +67,20 @@ object QueryConfig {
   )
 
   val baseImagesFields = Seq(
-    ("source.canonicalWork.data.subjects.concepts.label", None),
-    ("source.canonicalWork.data.genres.concepts.label", None),
-    ("source.canonicalWork.data.contributors.agent.label", None),
-    ("source.canonicalWork.data.title.english", None),
-    ("source.canonicalWork.data.description.english", None),
-    ("source.canonicalWork.data.alternativeTitles.english", None),
-    ("source.canonicalWork.data.physicalDescription.english", None),
-    ("source.canonicalWork.data.production.*.label", None),
-    ("source.canonicalWork.data.language.label", None),
-    ("source.canonicalWork.data.edition", None),
-    ("source.canonicalWork.data.notes.content.english", None),
-    ("source.canonicalWork.data.collectionPath.path", None),
-    ("source.canonicalWork.data.collectionPath.label", None)
-  )
+    ("data.subjects.concepts.label", None),
+    ("data.genres.concepts.label", None),
+    ("data.contributors.agent.label", None),
+    ("data.title.english", None),
+    ("data.description.english", None),
+    ("data.alternativeTitles.english", None),
+    ("data.physicalDescription.english", None),
+    ("data.production.*.label", None),
+    ("data.language.label", None),
+    ("data.edition", None),
+    ("data.notes.content.english", None),
+    ("data.collectionPath.path", None),
+    ("data.collectionPath.label", None),
+  ).flatMap { case (field, boost) => Seq((s"source.canonicalWork.$field", boost), (s"source.redirectedWork.$field", boost)) }
 }
 
 case class BoolBoostersQuery(q: String) extends ElasticsearchComboQuery {

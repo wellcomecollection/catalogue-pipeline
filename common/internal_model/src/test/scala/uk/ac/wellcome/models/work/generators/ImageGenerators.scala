@@ -49,13 +49,7 @@ trait ImageGenerators extends IdentifiersGenerators with ItemsGenerators with Wo
     location: DigitalLocation = createDigitalLocation,
     version: Int = 1,
                                        parentWork: IdentifiedWork = createIdentifiedSierraWorkWith(),
-                                       redirectedWork: Option[IdentifiedWork]=Some(createIdentifiedSierraWorkWith())): MergedImage[Identified, Minted] = {
-    MergedImage[Identified, Minted](imageId, version, location , SourceWorks[Identified, Minted](parentWork.toSourceWork, redirectedWork.map(_.toSourceWork)))
-//    createUnmergedImageWith(location, version, identifierType) mergeWith (
-//      sourceWork = Identified(createCanonicalId,parentWork),
-//      WorkData()
-//    )
-  }
+                                       redirectedWork: Option[IdentifiedWork]=Some(createIdentifiedSierraWorkWith())): MergedImage[Identified, Minted] = MergedImage[Identified, Minted](imageId, version, location , SourceWorks[Identified, Minted](parentWork.toSourceWork, redirectedWork.map(_.toSourceWork)))
 
   def createInferredData = {
     val features1 = (0 until 2048).map(_ => Random.nextFloat() * 100).toList
@@ -71,6 +65,7 @@ trait ImageGenerators extends IdentifiersGenerators with ItemsGenerators with Wo
   def createAugmentedImageWith(
      imageId: Identified = Identified(createCanonicalId, createSourceIdentifierWith(IdentifierType("miro-image-number"))),
      parentWork: IdentifiedWork = createIdentifiedSierraWorkWith(),
+     redirectedWork: Option[IdentifiedWork] = Some(createIdentifiedWork),
     inferredData: Option[InferredData] = createInferredData,
     location: DigitalLocation = createDigitalLocation,
     version: Int = 1,
@@ -78,7 +73,7 @@ trait ImageGenerators extends IdentifiersGenerators with ItemsGenerators with Wo
     createIdentifiedMergedImageWith(
       imageId,
       location,
-      version,parentWork
+      version,parentWork, redirectedWork
     ).augment(inferredData)
 
   def createAugmentedImage(): AugmentedImage = createAugmentedImageWith()

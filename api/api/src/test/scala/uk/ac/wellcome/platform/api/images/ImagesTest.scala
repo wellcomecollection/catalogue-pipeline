@@ -41,7 +41,7 @@ class ImagesTest extends ApiImagesTestBase with ElasticsearchFixtures {
     }
   }
 
-  it("returns matching results when using full-text search") {
+  it("returns matching results when using work data") {
     withApi {
       case (ElasticConfig(_, imagesIndex), routes) =>
         val baguetteImage = createAugmentedImageWith(
@@ -69,6 +69,36 @@ class ImagesTest extends ApiImagesTestBase with ElasticsearchFixtures {
         }
         assertJsonResponse(routes, s"/$apiPrefix/images?query=focaccia") {
           Status.OK -> imagesListResponse(List(focacciaImage))
+        }
+    }
+  }
+
+  it("returns matching results when using workdata from the redirected work") {
+    withApi {
+      case (ElasticConfig(_, imagesIndex), routes) =>
+        val baguetteImage = createAugmentedImageWith(
+          imageId = Identified("a", createSourceIdentifier),
+          parentWork = createIdentifiedWorkWith(title = Some("Baguette is a French bread style"))
+        )
+        val focacciaImage = createAugmentedImageWith(
+          imageId = Identified("b", createSourceIdentifier),
+          parentWork = createIdentifiedWorkWith(title = Some("A Ligurian style of bread, Focaccia"))
+        )
+        val schiacciataImage = createAugmentedImageWith(
+          imageId = Identified("c", createSourceIdentifier),
+          parentWork = createIdentifiedWorkWith(title = Some("Schiacciata is a Tuscan focaccia")),
+          redirectedWork = Some(createIdentifiedWorkWith(title = Some("A Tuscan bread")))
+        )
+        insertImagesIntoElasticsearch(
+          imagesIndex,
+          baguetteImage,
+          focacciaImage,
+          schiacciataImage)
+
+        assertJsonResponse(routes, s"/$apiPrefix/images?query=bread") {
+          Status.OK -> imagesListResponse(
+            List(baguetteImage, focacciaImage, schiacciataImage)
+          )
         }
     }
   }
