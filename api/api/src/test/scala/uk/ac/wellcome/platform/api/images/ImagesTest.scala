@@ -2,6 +2,7 @@ package uk.ac.wellcome.platform.api.images
 
 import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
+import uk.ac.wellcome.models.work.internal.Identified
 
 class ImagesTest extends ApiImagesTestBase with ElasticsearchFixtures {
 
@@ -44,17 +45,16 @@ class ImagesTest extends ApiImagesTestBase with ElasticsearchFixtures {
     withApi {
       case (ElasticConfig(_, imagesIndex), routes) =>
         val baguetteImage = createAugmentedImageWith(
-          id = "a",
-          fullText = Some("Baguette is a French bread style")
+          imageId = Identified("a", createSourceIdentifier),
+          parentWork = createIdentifiedWorkWith(title = Some("Baguette is a French bread style"))
         )
         val focacciaImage = createAugmentedImageWith(
-          id = "b",
-          fullText = Some("A Ligurian style of bread, Focaccia")
+          imageId = Identified("b", createSourceIdentifier),
+          parentWork = createIdentifiedWorkWith(title = Some("A Ligurian style of bread, Focaccia"))
         )
         val mantouImage = createAugmentedImageWith(
-          id = "c",
-          fullText =
-            Some("Mantou is a steamed bread associated with Northern China")
+          imageId = Identified("c", createSourceIdentifier),
+          parentWork = createIdentifiedWorkWith(title = Some("Mantou is a steamed bread associated with Northern China"))
         )
         insertImagesIntoElasticsearch(
           imagesIndex,

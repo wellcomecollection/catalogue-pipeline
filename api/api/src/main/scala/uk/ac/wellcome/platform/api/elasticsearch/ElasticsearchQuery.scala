@@ -67,7 +67,19 @@ object QueryConfig {
   )
 
   val baseImagesFields = Seq(
-    ("fullText", None)
+    ("source.canonicalWork.data.subjects.concepts.label", None),
+    ("source.canonicalWork.data.genres.concepts.label", None),
+    ("source.canonicalWork.data.contributors.agent.label", None),
+    ("source.canonicalWork.data.title.english", None),
+    ("source.canonicalWork.data.description.english", None),
+    ("source.canonicalWork.data.alternativeTitles.english", None),
+    ("source.canonicalWork.data.physicalDescription.english", None),
+    ("source.canonicalWork.data.production.*.label", None),
+    ("source.canonicalWork.data.language.label", None),
+    ("source.canonicalWork.data.edition", None),
+    ("source.canonicalWork.data.notes.content.english", None),
+    ("source.canonicalWork.data.collectionPath.path", None),
+    ("source.canonicalWork.data.collectionPath.label", None)
   )
 }
 
