@@ -78,11 +78,6 @@ object Implicits {
     deriveConfiguredDecoder
   implicit val _dec52: Decoder[UnmergedImage[Identified, Minted]] =
     deriveConfiguredDecoder
-
-
-  implicit val feg: Decoder[ImageSource[Identifiable, Unminted]] = deriveConfiguredDecoder
-  implicit val dshd: Decoder[ImageSource[Identified, Minted]] = deriveConfiguredDecoder
-
   implicit val _dec53: Decoder[MergedImage[Identifiable, Unminted]] =
     deriveConfiguredDecoder
   implicit val _dec54: Decoder[MergedImage[Identified, Minted]] =
