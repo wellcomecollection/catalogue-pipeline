@@ -2,10 +2,7 @@ package uk.ac.wellcome.models.work.generators
 
 import uk.ac.wellcome.models.work.internal._
 
-trait WorksGenerators
-    extends ItemsGenerators
-    with ProductionEventGenerators
-    with ImageGenerators {
+trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
 
   private def createTitle: String = randomAlphanumeric(length = 100)
 
@@ -55,7 +52,7 @@ trait WorksGenerators
   def createUnidentifiedInvisibleWorkWith(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     items: List[Item[Unminted]] = Nil,
-    images: List[UnmergedImage[Identifiable]] = Nil,
+    images: List[UnmergedImage[Identifiable, Unminted]] = Nil,
   ): UnidentifiedInvisibleWork =
     UnidentifiedInvisibleWork(
       sourceIdentifier = sourceIdentifier,
@@ -104,7 +101,8 @@ trait WorksGenerators
     edition: Option[String] = None,
     duration: Option[Int] = None,
     items: List[Item[Unminted]] = Nil,
-    images: List[UnmergedImage[Identifiable]] = Nil): UnidentifiedWork =
+    images: List[UnmergedImage[Identifiable, Unminted]] = Nil)
+    : UnidentifiedWork =
     UnidentifiedWork(
       sourceIdentifier = sourceIdentifier,
       version = version,
@@ -156,7 +154,7 @@ trait WorksGenerators
     language: Option[Language] = None,
     duration: Option[Int] = None,
     items: List[Item[Minted]] = Nil,
-    images: List[UnmergedImage[Identified]] = Nil,
+    images: List[UnmergedImage[Identified, Minted]] = Nil,
     version: Int = 1,
     merged: Boolean = false,
     collectionPath: Option[CollectionPath] = None,
@@ -212,6 +210,19 @@ trait WorksGenerators
       mergeCandidates = mergeCandidates
     )
 
+  def createIdentifiedSierraWorkWith(
+    workType: Option[WorkType] = None,
+    items: List[Item[Minted]] = Nil,
+    mergeCandidates: List[MergeCandidate] = Nil,
+  ): IdentifiedWork =
+    createIdentifiedWorkWith(
+      sourceIdentifier = createSierraSystemSourceIdentifier,
+      workType = workType,
+      otherIdentifiers = List(createSierraSystemSourceIdentifier),
+      items = items,
+      mergeCandidates = mergeCandidates
+    )
+
   def createUnidentifiedCalmWorkWith(data: WorkData[Unminted, Identifiable] =
                                        WorkData(
                                          items = List(createCalmItem)
@@ -232,16 +243,12 @@ trait WorksGenerators
   def createUnidentifiedInvisibleMetsWorkWith(
     sourceIdentifier: SourceIdentifier = createMetsSourceIdentifier,
     items: List[Item[Unminted]] = List(createDigitalItem),
-    numImages: Int = 1): UnidentifiedInvisibleWork =
+    images: List[UnmergedImage[Identifiable, Unminted]])
+    : UnidentifiedInvisibleWork =
     createUnidentifiedInvisibleWorkWith(
-      sourceIdentifier = createMetsSourceIdentifier,
+      sourceIdentifier = sourceIdentifier,
       items = items,
-      images = (1 to numImages).map { _ =>
-        createUnmergedImageWith(
-          location = createDigitalLocation,
-          identifierType = IdentifierType("mets-image")
-        )
-      }.toList
+      images = images
     )
 
   def createUnidentifiedSierraWork: UnidentifiedWork =
@@ -278,14 +285,11 @@ trait WorksGenerators
     : UnidentifiedWork =
     createUnidentifiedSierraWorkWith(items = items)
 
-  def createUnidentifiedInvisibleMetsWork: UnidentifiedInvisibleWork =
-    createUnidentifiedInvisibleMetsWorkWith()
-
   def createMiroWorkWith(
-    otherIdentifiers: List[SourceIdentifier] = List()): UnidentifiedWork =
+    images: List[UnmergedImage[Identifiable, Unminted]]): UnidentifiedWork =
     createUnidentifiedWorkWith(
       sourceIdentifier = createMiroSourceIdentifier,
-      otherIdentifiers = otherIdentifiers,
+      otherIdentifiers = List(),
       thumbnail = Some(
         DigitalLocation(
           url = "https://iiif.wellcomecollection.org/V01234.jpg",
@@ -295,18 +299,8 @@ trait WorksGenerators
       items = List(
         createUnidentifiableItemWith(locations = List(
           createDigitalLocationWith(locationType = createImageLocationType)))),
-      images = List(
-        createUnmergedImageWith(
-          location = DigitalLocation(
-            url = "https://iiif.wellcomecollection.org/V01234.jpg",
-            locationType = LocationType("iiif-image"),
-            license = Some(License.CCBY)
-          )
-        ))
+      images = images
     )
-
-  def createMiroWork: UnidentifiedWork =
-    createMiroWorkWith()
 
   def createIsbnWork: UnidentifiedWork =
     createUnidentifiedWorkWith(

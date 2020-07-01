@@ -2,12 +2,15 @@ package uk.ac.wellcome.platform.merger.services
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
+import uk.ac.wellcome.platform.merger.generators.WorksWithImagesGenerators
 import uk.ac.wellcome.platform.merger.models.{FieldMergeResult, MergeResult}
 import uk.ac.wellcome.platform.merger.rules.FieldMergeRule
 
-class MergerTest extends AnyFunSpec with Matchers with WorksGenerators {
+class MergerTest
+    extends AnyFunSpec
+    with Matchers
+    with WorksWithImagesGenerators {
   val inputWorks =
     (0 to 5).map(_ => createSierraDigitalWork) ++
       (0 to 5).map(_ => createMiroWork) ++

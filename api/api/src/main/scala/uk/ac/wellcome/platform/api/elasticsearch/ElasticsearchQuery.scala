@@ -67,8 +67,25 @@ object QueryConfig {
   )
 
   val baseImagesFields = Seq(
-    ("fullText", None)
-  )
+    ("data.subjects.concepts.label", None),
+    ("data.genres.concepts.label", None),
+    ("data.contributors.agent.label", None),
+    ("data.title.english", None),
+    ("data.description.english", None),
+    ("data.alternativeTitles.english", None),
+    ("data.physicalDescription.english", None),
+    ("data.production.*.label", None),
+    ("data.language.label", None),
+    ("data.edition", None),
+    ("data.notes.content.english", None),
+    ("data.collectionPath.path", None),
+    ("data.collectionPath.label", None),
+  ).flatMap {
+    case (field, boost) =>
+      Seq(
+        (s"source.canonicalWork.$field", boost),
+        (s"source.redirectedWork.$field", boost))
+  }
 }
 
 case class BoolBoostersQuery(q: String) extends ElasticsearchComboQuery {

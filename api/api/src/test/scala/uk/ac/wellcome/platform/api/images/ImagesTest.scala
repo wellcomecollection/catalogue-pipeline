@@ -2,6 +2,7 @@ package uk.ac.wellcome.platform.api.images
 
 import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
+import uk.ac.wellcome.models.work.internal.Identified
 
 class ImagesTest extends ApiImagesTestBase with ElasticsearchFixtures {
 
@@ -40,21 +41,24 @@ class ImagesTest extends ApiImagesTestBase with ElasticsearchFixtures {
     }
   }
 
-  it("returns matching results when using full-text search") {
+  it("returns matching results when using work data") {
     withApi {
       case (ElasticConfig(_, imagesIndex), routes) =>
         val baguetteImage = createAugmentedImageWith(
-          id = "a",
-          fullText = Some("Baguette is a French bread style")
+          imageId = Identified("a", createSourceIdentifier),
+          parentWork = createIdentifiedWorkWith(
+            title = Some("Baguette is a French bread style"))
         )
         val focacciaImage = createAugmentedImageWith(
-          id = "b",
-          fullText = Some("A Ligurian style of bread, Focaccia")
+          imageId = Identified("b", createSourceIdentifier),
+          parentWork = createIdentifiedWorkWith(
+            title = Some("A Ligurian style of bread, Focaccia"))
         )
         val mantouImage = createAugmentedImageWith(
-          id = "c",
-          fullText =
-            Some("Mantou is a steamed bread associated with Northern China")
+          imageId = Identified("c", createSourceIdentifier),
+          parentWork = createIdentifiedWorkWith(
+            title =
+              Some("Mantou is a steamed bread associated with Northern China"))
         )
         insertImagesIntoElasticsearch(
           imagesIndex,
@@ -69,6 +73,40 @@ class ImagesTest extends ApiImagesTestBase with ElasticsearchFixtures {
         }
         assertJsonResponse(routes, s"/$apiPrefix/images?query=focaccia") {
           Status.OK -> imagesListResponse(List(focacciaImage))
+        }
+    }
+  }
+
+  it("returns matching results when using workdata from the redirected work") {
+    withApi {
+      case (ElasticConfig(_, imagesIndex), routes) =>
+        val baguetteImage = createAugmentedImageWith(
+          imageId = Identified("a", createSourceIdentifier),
+          parentWork = createIdentifiedWorkWith(
+            title = Some("Baguette is a French bread style"))
+        )
+        val focacciaImage = createAugmentedImageWith(
+          imageId = Identified("b", createSourceIdentifier),
+          parentWork = createIdentifiedWorkWith(
+            title = Some("A Ligurian style of bread, Focaccia"))
+        )
+        val schiacciataImage = createAugmentedImageWith(
+          imageId = Identified("c", createSourceIdentifier),
+          parentWork = createIdentifiedWorkWith(
+            title = Some("Schiacciata is a Tuscan focaccia")),
+          redirectedWork =
+            Some(createIdentifiedWorkWith(title = Some("A Tuscan bread")))
+        )
+        insertImagesIntoElasticsearch(
+          imagesIndex,
+          baguetteImage,
+          focacciaImage,
+          schiacciataImage)
+
+        assertJsonResponse(routes, s"/$apiPrefix/images?query=bread") {
+          Status.OK -> imagesListResponse(
+            List(baguetteImage, focacciaImage, schiacciataImage)
+          )
         }
     }
   }

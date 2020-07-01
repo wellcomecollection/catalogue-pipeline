@@ -6,7 +6,8 @@ import uk.ac.wellcome.models.work.internal.{
   Identifiable,
   MergedImage,
   TransformedBaseWork,
-  UnidentifiedWork
+  UnidentifiedWork,
+  Unminted
 }
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import uk.ac.wellcome.platform.merger.rules.WorkPredicates.{
@@ -16,7 +17,7 @@ import uk.ac.wellcome.platform.merger.rules.WorkPredicates.{
 }
 
 object ImagesRule extends FieldMergeRule {
-  type FieldData = List[MergedImage[Identifiable]]
+  type FieldData = List[MergedImage[Identifiable, Unminted]]
 
   override def merge(
     target: UnidentifiedWork,
@@ -42,8 +43,8 @@ object ImagesRule extends FieldMergeRule {
     case target if WorkPredicates.singleDigitalItemMiroWork(target) =>
       target.data.images.map {
         _.mergeWith(
-          sourceWork = Identifiable(target.sourceIdentifier),
-          fullText = createFulltext(List(target))
+          target.toSourceWork,
+          None
         )
       }
   }
@@ -64,32 +65,17 @@ object ImagesRule extends FieldMergeRule {
   trait FlatImageMergeRule extends PartialRule {
     final override def rule(target: UnidentifiedWork,
                             sources: NonEmptyList[TransformedBaseWork])
-      : List[MergedImage[Identifiable]] = {
+      : List[MergedImage[Identifiable, Unminted]] = {
       val works = sources.prepend(target).toList
       works flatMap {
         _.data.images.map {
           _.mergeWith(
-            sourceWork = Identifiable(target.sourceIdentifier),
-            fullText = createFulltext(works)
+            target.toSourceWork,
+            Some(sources.head.toSourceWork)
           )
         }
       }
     }
   }
 
-  private def createFulltext(works: Seq[TransformedBaseWork]): Option[String] =
-    works
-      .map(_.data)
-      .flatMap { data =>
-        List(
-          data.title,
-          data.description,
-          data.physicalDescription,
-          data.lettering
-        )
-      }
-      .flatten match {
-      case Nil    => None
-      case fields => Some(fields.mkString(" "))
-    }
 }

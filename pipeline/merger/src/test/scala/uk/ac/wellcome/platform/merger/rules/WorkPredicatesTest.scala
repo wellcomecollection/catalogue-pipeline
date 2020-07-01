@@ -3,16 +3,16 @@ package uk.ac.wellcome.platform.merger.rules
 import org.scalatest.Inspectors
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.{
   DigitalLocation,
   PhysicalLocation,
   TransformedBaseWork
 }
+import uk.ac.wellcome.platform.merger.generators.WorksWithImagesGenerators
 
 class WorkPredicatesTest
     extends AnyFunSpec
-    with WorksGenerators
+    with WorksWithImagesGenerators
     with Matchers
     with Inspectors {
   val works: Seq[TransformedBaseWork] = List(
@@ -20,8 +20,8 @@ class WorkPredicatesTest
     createMiroWork,
     createUnidentifiedInvisibleMetsWork,
     createUnidentifiedInvisibleMetsWorkWith(
-      sourceIdentifier = createMetsSourceIdentifier,
-      items = (0 to 3).map(_ => createDigitalItem).toList
+      items = (0 to 3).map(_ => createDigitalItem).toList,
+      images = List(createUnmergedMetsImage)
     ),
     createUnidentifiedWorkWith(
       sourceIdentifier = createMiroSourceIdentifier,
