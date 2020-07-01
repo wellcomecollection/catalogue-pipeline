@@ -1,9 +1,10 @@
 module "work_id_minter_queue" {
-  source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
-  queue_name      = "${local.namespace_hyphen}_work_id_minter"
-  topic_arns      = [module.merger_works_topic.arn]
-  aws_region      = var.aws_region
-  alarm_topic_arn = var.dlq_alarm_arn
+  source                     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
+  queue_name                 = "${local.namespace_hyphen}_work_id_minter"
+  topic_arns                 = [module.merger_works_topic.arn]
+  aws_region                 = var.aws_region
+  alarm_topic_arn            = var.dlq_alarm_arn
+  visibility_timeout_seconds = 120
 }
 
 module "work_id_minter" {
@@ -30,10 +31,11 @@ module "work_id_minter" {
   }
 
   secret_env_vars = {
-    cluster_url = "catalogue/id_minter/rds_host"
-    db_port     = "catalogue/id_minter/rds_port"
-    db_username = "catalogue/id_minter/rds_user"
-    db_password = "catalogue/id_minter/rds_password"
+    cluster_url          = "catalogue/id_minter/rds_host"
+    cluster_url_readonly = "catalogue/id_minter/rds_host_readonly"
+    db_port              = "catalogue/id_minter/rds_port"
+    db_username          = "catalogue/id_minter/rds_user"
+    db_password          = "catalogue/id_minter/rds_password"
   }
 
   // The total number of connections to RDS across all tasks from all ID minter
@@ -48,8 +50,8 @@ module "work_id_minter" {
   messages_bucket_arn = aws_s3_bucket.messages.arn
   queue_read_policy   = module.work_id_minter_queue.read_policy
 
-  cpu    = 512
-  memory = 1024
+  cpu    = 1024
+  memory = 2048
 }
 
 # Output topic

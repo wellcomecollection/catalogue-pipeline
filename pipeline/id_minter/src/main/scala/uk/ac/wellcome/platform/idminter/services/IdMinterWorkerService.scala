@@ -43,17 +43,12 @@ class IdMinterWorkerService[Destination](
   }
 
   def processMessage(json: Json): Future[Unit] = Future fromTry {
-    val result = for {
+    for {
       sourceIdentifiers <- SourceIdentifierEmbedder.scan(json)
       mintedIdentifiers <- identifierGenerator.retrieveOrGenerateCanonicalIds(
         sourceIdentifiers)
       updatedJson <- SourceIdentifierEmbedder.update(json, mintedIdentifiers)
       _ <- sender.sendT(updatedJson)
     } yield ()
-    result.recover {
-      case e =>
-        error(s"Error processing message: ${e.getMessage}", e)
-        throw e
-    }
   }
 }

@@ -4,9 +4,8 @@ import grizzled.slf4j.Logging
 import uk.ac.wellcome.models.matcher.WorkIdentifier
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 
-import uk.ac.wellcome.bigmessaging.EmptyMetadata
 import uk.ac.wellcome.storage.{Identified, NoVersionExistsError}
-import uk.ac.wellcome.storage.store.{HybridStoreEntry, VersionedStore}
+import uk.ac.wellcome.storage.store.VersionedStore
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -18,9 +17,7 @@ import scala.concurrent.{ExecutionContext, Future}
   *
   */
 class RecorderPlaybackService(
-  vhs: VersionedStore[String,
-                      Int,
-                      HybridStoreEntry[TransformedBaseWork, EmptyMetadata]])(
+  vhs: VersionedStore[String, Int, TransformedBaseWork])(
   implicit ec: ExecutionContext)
     extends Logging {
 
@@ -46,7 +43,7 @@ class RecorderPlaybackService(
     workIdentifier match {
       case WorkIdentifier(id, Some(version)) =>
         vhs.getLatest(workIdentifier.identifier) match {
-          case Right(Identified(_, HybridStoreEntry(work, _))) =>
+          case Right(Identified(_, work)) =>
             if (work.version == version) {
               Some(work)
             } else {

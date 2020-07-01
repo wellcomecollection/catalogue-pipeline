@@ -41,10 +41,7 @@ class ElasticsearchServiceTest
     with WorksGenerators
     with ContributorGenerators {
 
-  val searchService = new ElasticsearchService(
-    elasticClient = elasticClient,
-    WorksRequestBuilder
-  )
+  val searchService = new ElasticsearchService(elasticClient)
 
   val defaultQueryOptions: ElasticsearchQueryOptions =
     createElasticsearchQueryOptions
@@ -57,7 +54,7 @@ class ElasticsearchServiceTest
         insertIntoElasticsearch(index, work)
 
         val searchResultFuture =
-          searchService.findResultById(canonicalId = work.canonicalId)(index)
+          searchService.executeGet(canonicalId = work.canonicalId)(index)
 
         whenReady(searchResultFuture) { result =>
           val returnedWork =
@@ -69,7 +66,7 @@ class ElasticsearchServiceTest
 
     it("returns a Left[ElasticError] if Elasticsearch returns an error") {
       val future = searchService
-        .findResultById("1234")(Index("doesnotexist"))
+        .executeGet("1234")(Index("doesnotexist"))
 
       whenReady(future) { response =>
         response.isLeft shouldBe true
@@ -180,6 +177,7 @@ class ElasticsearchServiceTest
             .executeSearch(
               createElasticsearchQueryOptionsWith(
                 searchQuery = Some(SearchQuery("abba"))),
+              WorksRequestBuilder,
               index)
 
           whenReady(searchResponseFuture) { response =>
@@ -338,6 +336,7 @@ class ElasticsearchServiceTest
       val future = searchService
         .executeSearch(
           defaultQueryOptions,
+          WorksRequestBuilder,
           Index("doesnotexist")
         )
       whenReady(future) { response =>
@@ -374,7 +373,7 @@ class ElasticsearchServiceTest
   private def searchResults(index: Index,
                             queryOptions: ElasticsearchQueryOptions) = {
     val searchResponseFuture =
-      searchService.executeSearch(queryOptions, index)
+      searchService.executeSearch(queryOptions, WorksRequestBuilder, index)
     whenReady(searchResponseFuture) { response =>
       searchResponseToWorks(response)
     }

@@ -8,8 +8,6 @@ import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import uk.ac.wellcome.storage.store.VersionedStore
-import uk.ac.wellcome.bigmessaging.VHSWrapper
 import uk.ac.wellcome.bigmessaging.typesafe.VHSBuilder
 import uk.ac.wellcome.json.JsonUtil._
 
@@ -49,10 +47,6 @@ object Main extends WellcomeTypesafeApp {
 
   def calmStore(config: Config) =
     new CalmStore(
-      new VersionedStore(
-        new VHSWrapper(
-          VHSBuilder.build[CalmRecord](config)
-        )
-      )
+      VHSBuilder.build[CalmRecord](config)
     )
 }

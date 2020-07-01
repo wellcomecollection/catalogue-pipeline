@@ -35,8 +35,11 @@ trait ImageGenerators extends IdentifiersGenerators with ItemsGenerators {
   def createInferredData = {
     val features1 = (0 until 2048).map(_ => Random.nextFloat() * 100).toList
     val features2 = (0 until 2048).map(_ => Random.nextFloat() * 100).toList
+    def randIdx = Random.nextInt(256)
     val lshEncodedFeatures =
-      (0 until 256).map(_ => randomAlphanumeric(3)).toList
+      (0 until 256)
+        .map(_ => s"$randIdx-$randIdx")
+        .toList
     Some(InferredData(features1, features2, lshEncodedFeatures))
   }
 
@@ -63,6 +66,26 @@ trait ImageGenerators extends IdentifiersGenerators with ItemsGenerators {
     createAugmentedImageWith(
       location = createDigitalLocationWith(license = Some(license))
     )
+
+  // Create a set of images with intersecting LSH lists to ensure
+  // that similarity queries will return something
+  def createVisuallySimilarImages(n: Int): Seq[AugmentedImage] = {
+    val baseFeatures = createInferredData.get.lshEncodedFeatures
+    val similarFeatures = (2 to n).map { n =>
+      val mergeIdx = n % baseFeatures.size
+      baseFeatures.drop(mergeIdx) ++
+        createInferredData.get.lshEncodedFeatures.take(mergeIdx)
+    }
+    (similarFeatures :+ baseFeatures).map { features =>
+      createAugmentedImageWith(
+        inferredData = createInferredData.map {
+          _.copy(
+            lshEncodedFeatures = features
+          )
+        }
+      )
+    }
+  }
 
   implicit class MergedImageIdOps(val image: MergedImage[Identifiable]) {
     def toIdentifiedWith(

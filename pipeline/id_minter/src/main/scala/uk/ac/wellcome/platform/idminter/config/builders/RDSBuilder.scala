@@ -11,18 +11,32 @@ object RDSBuilder {
     val maxSize = config.requireInt("aws.rds.maxConnections")
 
     val rdsClientConfig = buildRDSClientConfig(config)
+    val connectionPoolSettings = ConnectionPoolSettings(
+      maxSize = maxSize,
+      connectionTimeoutMillis = 120000L
+    )
 
-    Class.forName("com.mysql.jdbc.Driver")
-    ConnectionPool.singleton(
-      s"jdbc:mysql://${rdsClientConfig.host}:${rdsClientConfig.port}",
+    ConnectionPool.add(
+      name = 'primary,
+      url =
+        s"jdbc:mysql://${rdsClientConfig.primaryHost}:${rdsClientConfig.port}",
       user = rdsClientConfig.username,
       password = rdsClientConfig.password,
-      settings = ConnectionPoolSettings(maxSize = maxSize)
+      settings = connectionPoolSettings
+    )
+    ConnectionPool.add(
+      name = 'replica,
+      url =
+        s"jdbc:mysql://${rdsClientConfig.replicaHost}:${rdsClientConfig.port}",
+      user = rdsClientConfig.username,
+      password = rdsClientConfig.password,
+      settings = connectionPoolSettings
     )
   }
 
   def buildRDSClientConfig(config: Config): RDSClientConfig = {
-    val host = config.requireString("aws.rds.host")
+    val primaryHost = config.requireString("aws.rds.primary_host")
+    val replicaHost = config.requireString("aws.rds.replica_host")
 
     val port = config
       .getIntOption("aws.rds.port")
@@ -32,7 +46,8 @@ object RDSBuilder {
     val password = config.requireString("aws.rds.password")
 
     RDSClientConfig(
-      host = host,
+      primaryHost = primaryHost,
+      replicaHost = replicaHost,
       port = port,
       username = username,
       password = password

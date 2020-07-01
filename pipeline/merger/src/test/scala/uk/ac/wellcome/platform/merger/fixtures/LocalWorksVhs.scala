@@ -5,9 +5,7 @@ import org.scalatest.concurrent.{Eventually, ScalaFutures}
 
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.bigmessaging.fixtures.VHSFixture
-import uk.ac.wellcome.bigmessaging.EmptyMetadata
 import uk.ac.wellcome.storage.Identified
-import uk.ac.wellcome.storage.store.HybridStoreEntry
 
 trait LocalWorksVhs
     extends VHSFixture[TransformedBaseWork]
@@ -16,12 +14,11 @@ trait LocalWorksVhs
 
   def givenStoredInVhs(vhs: VHS, works: TransformedBaseWork*): Seq[Assertion] =
     works.map { work =>
-      val entry = HybridStoreEntry(work, EmptyMetadata())
-      vhs.init(work.sourceIdentifier.toString)(entry)
+      vhs.init(work.sourceIdentifier.toString)(work)
 
       vhs.getLatest(work.sourceIdentifier.toString) match {
         case Left(error) => throw new Error(s"${error}")
-        case Right(Identified(_, HybridStoreEntry(storedWork, _))) =>
+        case Right(Identified(_, storedWork)) =>
           storedWork shouldBe work
       }
     }
