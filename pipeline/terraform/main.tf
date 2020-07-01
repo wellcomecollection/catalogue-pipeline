@@ -64,10 +64,10 @@ module "catalogue_pipeline_20200626" {
 
 # This is for the more liberal Miro merging test which also suppresses
 # "historical library" works - don't accidentally deploy it!
-module "catalogue_pipeline_20200620" {
+module "catalogue_pipeline_20200701" {
   source = "./stack"
 
-  namespace = "catalogue-20200620"
+  namespace = "catalogue-20200701"
 
   release_label = "miro_merging_test"
 
@@ -106,8 +106,8 @@ module "catalogue_pipeline_20200620" {
   ]
 
   # Elasticsearch
-  es_works_index  = "works-20200620"
-  es_images_index = "images-20200620"
+  es_works_index  = "works-20200701"
+  es_images_index = "images-20200701"
 
   # RDS
   rds_ids_access_security_group_id = local.rds_access_security_group_id
