@@ -36,8 +36,7 @@ object ImagesRule extends FieldMergeRule {
 
   private lazy val getSingleMiroImage
     : PartialFunction[UnidentifiedWork, FieldData] = {
-    case target
-        if (singleDigitalItemMiroWork and not(historicalLibraryMiro))(target) =>
+    case target if singleDigitalItemMiroWork(target) =>
       target.data.images.map {
         _.mergeWith(
           sourceWork = Identifiable(target.sourceIdentifier),

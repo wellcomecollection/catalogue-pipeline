@@ -48,9 +48,6 @@ class PlatformMergerTest
   private val miroWork = createMiroWorkWith(
     sourceIdentifier = createNonHistoricalLibraryMiroSourceIdentifier
   )
-  private val historicalLibraryMiroWork = createMiroWorkWith(
-    sourceIdentifier = createHistoricalLibraryMiroSourceIdentifier
-  )
   private val metsWork =
     createUnidentifiedInvisibleMetsWorkWith(
       items = List(createDigitalItemWith(List(digitalLocationCCBYNC)))
@@ -451,20 +448,6 @@ class PlatformMergerTest
       expectedRedirectedDigitalWork,
       expectedMetsRedirectedWork)
 
-    result.images shouldBe empty
-  }
-
-  it(
-    "suppresses a single historical library Miro target and creates no images for it") {
-    val result = merger.merge(List(historicalLibraryMiroWork))
-
-    result.works should have length 1
-    result.works.head shouldBe an[UnidentifiedInvisibleWork]
-    result.works.head.sourceIdentifier shouldBe historicalLibraryMiroWork.sourceIdentifier
-    result.works.head
-      .asInstanceOf[UnidentifiedInvisibleWork]
-      .invisibilityReasons
-      .head shouldBe InvisibilityReason.UnlinkedHistoricalLibraryMiro
     result.images shouldBe empty
   }
 
