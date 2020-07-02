@@ -238,7 +238,7 @@ class FreeTextQueryTest
       }
     }
 
-    it("matches if there is extra terms in the query") {
+    it("matches IDs that are part of a query") {
       withLocalWorksIndex { index =>
         val work1 = createIdentifiedWorkWith(
           canonicalId = "AbCDeF1234"
@@ -251,29 +251,6 @@ class FreeTextQueryTest
         insertIntoElasticsearch(index, work1, work2)
 
         assertResultsMatchForAllowedQueryTypes(index, query, List(work1, work2))
-      }
-    }
-
-    it("puts ID matches at the top of the results") {
-      withLocalWorksIndex { index =>
-        val workWithMatchingTitle = createIdentifiedWorkWith(
-          title = Some("Standing on wrong side of horse")
-        )
-        val workWithMatchingId = createIdentifiedWorkWith(
-          canonicalId = "AbCDeF1234"
-        )
-
-        val query = "abcdef1234 Standing on wrong side of horse"
-
-        insertIntoElasticsearch(
-          index,
-          workWithMatchingTitle,
-          workWithMatchingId)
-
-        assertResultsMatchForAllowedQueryTypes(
-          index,
-          query,
-          List(workWithMatchingId, workWithMatchingTitle))
       }
     }
 
