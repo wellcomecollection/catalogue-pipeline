@@ -128,7 +128,7 @@ module "catalogue_pipeline_20200620" {
   inferrer_model_data_bucket_name = aws_s3_bucket.inferrer_model_core_data.id
 }
 
-  module "catalogue_pipeline_20200701-2" {
+module "catalogue_pipeline_20200701-2" {
   source = "./stack"
 
   namespace = "catalogue-20200701-2"
