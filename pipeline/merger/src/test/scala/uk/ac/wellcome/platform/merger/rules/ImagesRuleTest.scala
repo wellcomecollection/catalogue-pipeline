@@ -30,15 +30,6 @@ class ImagesRuleTest
         be(miroWork.sourceIdentifier)
     }
 
-    it("does not create an image from a single historical-library Miro work") {
-      val miroWork = createMiroWorkWith(
-        sourceIdentifier = createHistoricalLibraryMiroSourceIdentifier
-      )
-      val result = ImagesRule.merge(miroWork).data
-
-      result shouldBe empty
-    }
-
     it("creates n images from n Miro works and a single Sierra work") {
       val n = 3
       val miroWorks = (1 to n).map(_ => createMiroWork).toList
