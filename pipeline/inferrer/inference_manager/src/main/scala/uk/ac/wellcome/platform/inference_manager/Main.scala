@@ -10,7 +10,8 @@ import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
 import uk.ac.wellcome.models.work.internal.{
   AugmentedImage,
   Identified,
-  MergedImage
+  MergedImage,
+  Minted
 }
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.platform.inference_manager.services.{
@@ -27,7 +28,7 @@ import scala.concurrent.ExecutionContext
 
 object Main extends WellcomeTypesafeApp {
   // This inference manager operates on images
-  type Input = MergedImage[Identified]
+  type Input = MergedImage[Identified, Minted]
   type Output = AugmentedImage
   val inferrerAdapter = FeatureVectorInferrerAdapter
 

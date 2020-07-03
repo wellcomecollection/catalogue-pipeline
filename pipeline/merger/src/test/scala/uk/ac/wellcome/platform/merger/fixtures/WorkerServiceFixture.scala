@@ -5,7 +5,12 @@ import software.amazon.awssdk.services.cloudwatch.model.StandardUnit
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.models.work.internal.{BaseWork, Identifiable, MergedImage}
+import uk.ac.wellcome.models.work.internal.{
+  BaseWork,
+  Identifiable,
+  MergedImage,
+  Unminted
+}
 import uk.ac.wellcome.platform.merger.services._
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig}
@@ -25,7 +30,7 @@ trait WorkerServiceFixture extends LocalWorksVhs {
     testWith: TestWith[MergerWorkerService[SNSConfig, SNSConfig], R]): R =
     withLocalS3Bucket { bucket =>
       withSqsBigMessageSender[BaseWork, R](bucket, worksTopic) { workSender =>
-        withSqsBigMessageSender[MergedImage[Identifiable], R](
+        withSqsBigMessageSender[MergedImage[Identifiable, Unminted], R](
           bucket,
           imagesTopic) { imageSender =>
           withActorSystem { implicit actorSystem =>
