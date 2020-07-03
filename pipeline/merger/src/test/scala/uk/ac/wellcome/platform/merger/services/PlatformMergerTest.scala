@@ -44,7 +44,8 @@ class PlatformMergerTest
     workType = Some(WorkType.Pictures)
   )
   private val miroWork = createMiroWorkWith(
-    sourceIdentifier = createNonHistoricalLibraryMiroSourceIdentifier
+    sourceIdentifier = createNonHistoricalLibraryMiroSourceIdentifier,
+    images = List(createUnmergedMiroImage)
   )
   private val metsWork =
     createUnidentifiedInvisibleMetsWorkWith(
@@ -457,8 +458,8 @@ class PlatformMergerTest
     result.works.head shouldBe miroWork
     result.images should have length 1
     result.images.head shouldBe miroWork.data.images.head.mergeWith(
-      sourceWork = Identifiable(miroWork.sourceIdentifier),
-      fullText = createFulltext(List(miroWork))
+      canonicalWork = miroWork.toSourceWork,
+      redirectedWork = None
     )
   }
 }

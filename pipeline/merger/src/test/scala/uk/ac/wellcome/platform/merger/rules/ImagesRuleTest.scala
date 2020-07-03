@@ -24,7 +24,8 @@ class ImagesRuleTest
   describe("image creation rules") {
     it("creates 1 image from a single non-historical-library Miro work") {
       val miroWork = createMiroWorkWith(
-        sourceIdentifier = createNonHistoricalLibraryMiroSourceIdentifier
+        sourceIdentifier = createNonHistoricalLibraryMiroSourceIdentifier,
+        images = List(createUnmergedMiroImage)
       )
       val result = ImagesRule.merge(miroWork).data
 

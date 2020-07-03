@@ -19,9 +19,13 @@ class WorkPredicatesTest
   val works: Seq[TransformedBaseWork] = List(
     createUnidentifiedSierraWork,
     createMiroWorkWith(
-      sourceIdentifier = createNonHistoricalLibraryMiroSourceIdentifier),
+      sourceIdentifier = createNonHistoricalLibraryMiroSourceIdentifier,
+      images = List(createUnmergedMiroImage)
+    ),
     createMiroWorkWith(
-      sourceIdentifier = createHistoricalLibraryMiroSourceIdentifier),
+      sourceIdentifier = createHistoricalLibraryMiroSourceIdentifier,
+      images = List(createUnmergedMiroImage)
+    ),
     createUnidentifiedInvisibleMetsWork,
     createUnidentifiedInvisibleMetsWorkWith(
       items = (0 to 3).map(_ => createDigitalItem).toList,
