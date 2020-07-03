@@ -14,7 +14,8 @@ import uk.ac.wellcome.models.work.internal.{
   AugmentedImage,
   Identified,
   InferredData,
-  MergedImage
+  MergedImage,
+  Minted
 }
 import uk.ac.wellcome.platform.inference_manager.fixtures.InferenceManagerWorkerServiceFixture
 import uk.ac.wellcome.platform.inference_manager.services.FeatureVectorInferrerAdapter
@@ -31,7 +32,7 @@ class ManagerInferrerIntegrationTest
     with Inspectors
     with IntegrationPatience
     with InferenceManagerWorkerServiceFixture[
-      MergedImage[Identified],
+      MergedImage[Identified, Minted],
       AugmentedImage
     ] {
 
@@ -44,18 +45,18 @@ class ManagerInferrerIntegrationTest
           inferrerIsHealthy shouldBe true
         }
 
-        val image = createMergedImageWith(
+        val image = createIdentifiedMergedImageWith(
           location = createDigitalLocationWith(
             url = "http://image_server/test-image.jpg"
           )
-        ).toIdentified
+        )
         sendMessage(queue, image)
         eventually {
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
           val augmentedImage = getMessages[AugmentedImage](topic).head
           inside(augmentedImage) {
-            case AugmentedImage(id, _, _, _, _, inferredData) =>
+            case AugmentedImage(id, _, _, _, inferredData) =>
               id should be(image.id)
               inside(inferredData.value) {
                 case InferredData(features1, features2, lshEncodedFeatures) =>

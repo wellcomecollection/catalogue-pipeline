@@ -9,7 +9,8 @@ import uk.ac.wellcome.models.work.internal.{
   BaseWork,
   Identifiable,
   MergedImage,
-  TransformedBaseWork
+  TransformedBaseWork,
+  Unminted
 }
 import uk.ac.wellcome.platform.merger.services._
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
@@ -32,7 +33,8 @@ object Main extends WellcomeTypesafeApp {
     implicit val s3Client =
       S3Builder.buildS3Client(config)
     implicit val workMessageStore = S3TypedStore[BaseWork]
-    implicit val imageMessageStore = S3TypedStore[MergedImage[Identifiable]]
+    implicit val imageMessageStore =
+      S3TypedStore[MergedImage[Identifiable, Unminted]]
 
     val playbackService = new RecorderPlaybackService(
       vhs = VHSBuilder.build[TransformedBaseWork](config)
@@ -45,9 +47,10 @@ object Main extends WellcomeTypesafeApp {
         config.getConfig("work-sender").withFallback(config)
       )
     val imageSender =
-      BigMessagingBuilder.buildBigMessageSender[MergedImage[Identifiable]](
-        config.getConfig("image-sender").withFallback(config)
-      )
+      BigMessagingBuilder
+        .buildBigMessageSender[MergedImage[Identifiable, Unminted]](
+          config.getConfig("image-sender").withFallback(config)
+        )
 
     new MergerWorkerService(
       sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),

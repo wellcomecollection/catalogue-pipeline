@@ -67,8 +67,25 @@ object QueryConfig {
   )
 
   val baseImagesFields = Seq(
-    ("fullText", None)
-  )
+    ("data.subjects.concepts.label", None),
+    ("data.genres.concepts.label", None),
+    ("data.contributors.agent.label", None),
+    ("data.title.english", None),
+    ("data.description.english", None),
+    ("data.alternativeTitles.english", None),
+    ("data.physicalDescription.english", None),
+    ("data.production.*.label", None),
+    ("data.language.label", None),
+    ("data.edition", None),
+    ("data.notes.content.english", None),
+    ("data.collectionPath.path", None),
+    ("data.collectionPath.label", None),
+  ).flatMap {
+    case (field, boost) =>
+      Seq(
+        (s"source.canonicalWork.$field", boost),
+        (s"source.redirectedWork.$field", boost))
+  }
 }
 
 case class BoolBoostersQuery(q: String) extends ElasticsearchComboQuery {
@@ -78,17 +95,14 @@ case class BoolBoostersQuery(q: String) extends ElasticsearchComboQuery {
 
 case class PhraserBeamQuery(q: String) extends ElasticsearchComboQuery {
   val elasticQuery =
-    CoreWorksQuery(
-      q,
-      PhraseMatchQuery(q).elasticQuery.should ++
-        Seq(BaseAndQuery(q, QueryConfig.baseWorksFields).elasticQuery)).elasticQuery
+    CoreWorksQuery(q, PhraseMatchQuery(q).elasticQuery.should).elasticQuery
 }
 
 case class CoreImagesQuery(q: String) extends ElasticsearchComboQuery {
   val elasticQuery = must(
     should(
       List(
-        BaseOrQuery(q, QueryConfig.baseImagesFields).elasticQuery,
+        BaseAndQuery(q, QueryConfig.baseImagesFields).elasticQuery,
         ImageIdQuery(q).elasticQuery
       )
     )
@@ -108,32 +122,10 @@ final case class CoreWorksQuery(q: String, shouldQueries: Seq[Query])
   lazy val elasticQuery = must(
     should(
       List(
-        BaseOrQuery(q, QueryConfig.baseWorksFields).elasticQuery,
+        BaseAndQuery(q, QueryConfig.baseWorksFields).elasticQuery,
         WorkIdQuery(q).elasticQuery) ++
         shouldQueries: _*
     )
-  )
-}
-
-/**
-  * The `BaseAndQuery` & `BaseOrQuery` are almost identical,
-  * but we use the AND operator and a double boost on the
-  * `BaseAndQuery` as AND should always score higher.
-  */
-case class BaseOrQuery(q: String, searchFields: Seq[(String, Option[Double])])
-    extends ElasticsearchPartialQuery {
-  val minimumShouldMatch = "60%"
-  val fields = searchFields map {
-    case (field, boost) =>
-      FieldWithOptionalBoost(field = field, boost = boost)
-  }
-
-  lazy val elasticQuery: MultiMatchQuery = MultiMatchQuery(
-    text = q,
-    fields = fields,
-    minimumShouldMatch = Some(minimumShouldMatch),
-    `type` = Some(MultiMatchQueryBuilderType.CROSS_FIELDS),
-    operator = Some(Operator.OR)
   )
 }
 

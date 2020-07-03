@@ -10,7 +10,8 @@ import uk.ac.wellcome.models.work.internal.{
   AugmentedImage,
   Identified,
   InferredData,
-  MergedImage
+  MergedImage,
+  Minted
 }
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.ImageGenerators
@@ -29,7 +30,7 @@ class InferenceManagerWorkerServiceTest
     with Inspectors
     with BeforeAndAfterAll
     with InferenceManagerWorkerServiceFixture[
-      MergedImage[Identified],
+      MergedImage[Identified, Minted],
       AugmentedImage
     ] {
 
@@ -49,14 +50,14 @@ class InferenceManagerWorkerServiceTest
     "reads image messages, augments them with the inferrer, and sends them to SNS") {
     withWorkerServiceFixtures {
       case (QueuePair(queue, dlq), topic) =>
-        val image = createMergedImage.toIdentified
+        val image = createIdentifiedMergedImageWith()
         sendMessage(queue, image)
         eventually {
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
           val augmentedWork = getMessages[AugmentedImage](topic).head
           inside(augmentedWork) {
-            case AugmentedImage(id, _, _, _, _, inferredData) =>
+            case AugmentedImage(id, _, _, _, inferredData) =>
               id should be(image.id)
               inside(inferredData.value) {
                 case InferredData(features1, features2, lshEncodedFeatures) =>
@@ -72,12 +73,12 @@ class InferenceManagerWorkerServiceTest
   it("places images that fail inference deterministically on the DLQ") {
     withWorkerServiceFixtures {
       case (QueuePair(queue, dlq), _) =>
-        val image404 = createMergedImageWith(
+        val image404 = createIdentifiedMergedImageWith(
           location = createDigitalLocationWith(url = "lost_image")
-        ).toIdentified
-        val image400 = createMergedImageWith(
+        )
+        val image400 = createIdentifiedMergedImageWith(
           location = createDigitalLocationWith(url = "malformed_image_url")
-        ).toIdentified
+        )
         sendMessage(queue, image404)
         sendMessage(queue, image400)
         eventually {
@@ -90,16 +91,16 @@ class InferenceManagerWorkerServiceTest
   it("allows images that fail inference nondeterministically to pass through") {
     withWorkerServiceFixtures {
       case (QueuePair(queue, dlq), topic) =>
-        val image500 = createMergedImageWith(
+        val image500 = createIdentifiedMergedImageWith(
           location = createDigitalLocationWith(url = "extremely_cursed_image")
-        ).toIdentified
+        )
         sendMessage(queue, image500)
         eventually {
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
           val output = getMessages[AugmentedImage](topic).head
           inside(output) {
-            case AugmentedImage(id, _, _, _, _, inferredData) =>
+            case AugmentedImage(id, _, _, _, inferredData) =>
               id should be(image500.id)
               inferredData should not be defined
           }

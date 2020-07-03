@@ -2,16 +2,14 @@ package uk.ac.wellcome.platform.merger.services
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.merger.fixtures.ImageFulltextAccess
 import org.scalatest.prop.TableDrivenPropertyChecks._
+import uk.ac.wellcome.models.work.internal._
+import uk.ac.wellcome.platform.merger.generators.WorksWithImagesGenerators
 
 class PlatformMergerTest
     extends AnyFunSpec
-    with WorksGenerators
-    with Matchers
-    with ImageFulltextAccess {
+    with WorksWithImagesGenerators
+    with Matchers {
   val digitalLocationCCBYNC = createDigitalLocationWith(
     license = Some(License.CCBYNC))
   val digitalLocationNoLicense = digitalLocationCCBYNC.copy(license = None)
@@ -50,7 +48,8 @@ class PlatformMergerTest
   )
   private val metsWork =
     createUnidentifiedInvisibleMetsWorkWith(
-      items = List(createDigitalItemWith(List(digitalLocationCCBYNC)))
+      items = List(createDigitalItemWith(List(digitalLocationCCBYNC))),
+      images = List(createUnmergedMetsImage)
     ).withData { data =>
       data.copy(
         thumbnail = Some(
@@ -128,8 +127,8 @@ class PlatformMergerTest
         redirect = IdentifiableRedirect(sierraPhysicalWork.sourceIdentifier))
 
     val expectedImage = miroWork.data.images.head mergeWith (
-      sourceWork = Identifiable(sierraPhysicalWork.sourceIdentifier),
-      fullText = createFulltext(List(sierraPhysicalWork, miroWork))
+      canonicalWork = sierraPhysicalWork.toSourceWork,
+      redirectedWork = Some(miroWork.toSourceWork)
     )
 
     result.works should contain theSameElementsAs List(
@@ -163,8 +162,8 @@ class PlatformMergerTest
         redirect = IdentifiableRedirect(zeroItemSierraWork.sourceIdentifier)
       )
     val expectedImage = miroWork.data.images.head mergeWith (
-      sourceWork = Identifiable(zeroItemSierraWork.sourceIdentifier),
-      fullText = createFulltext(List(zeroItemSierraWork, miroWork))
+      canonicalWork = zeroItemSierraWork.toSourceWork,
+      redirectedWork = Some(miroWork.toSourceWork)
     )
 
     result.works should contain theSameElementsAs List(
@@ -208,8 +207,8 @@ class PlatformMergerTest
         redirect = IdentifiableRedirect(sierraDigitalWork.sourceIdentifier))
 
     val expectedImage = miroWork.data.images.head mergeWith (
-      sourceWork = Identifiable(sierraDigitalWork.sourceIdentifier),
-      fullText = createFulltext(List(sierraDigitalWork, miroWork))
+      canonicalWork = sierraDigitalWork.toSourceWork,
+      redirectedWork = Some(miroWork.toSourceWork)
     )
 
     result.works should contain theSameElementsAs List(
@@ -305,8 +304,8 @@ class PlatformMergerTest
       )
 
     val expectedImage = metsWork.data.images.head mergeWith (
-      sourceWork = Identifiable(sierraPictureWork.sourceIdentifier),
-      fullText = createFulltext(List(sierraPictureWork, metsWork))
+      canonicalWork = sierraPictureWork.toSourceWork,
+      redirectedWork = Some(metsWork.toSourceWork)
     )
 
     result.works should contain theSameElementsAs List(
@@ -362,8 +361,8 @@ class PlatformMergerTest
         redirect = IdentifiableRedirect(sierraPhysicalWork.sourceIdentifier))
 
     val expectedImage = miroWork.data.images.head mergeWith (
-      sourceWork = Identifiable(sierraPhysicalWork.sourceIdentifier),
-      fullText = createFulltext(List(sierraPhysicalWork, miroWork))
+      canonicalWork = sierraPhysicalWork.toSourceWork,
+      redirectedWork = Some(miroWork.toSourceWork)
     )
 
     result.works should contain theSameElementsAs List(
