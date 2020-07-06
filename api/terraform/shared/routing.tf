@@ -1,4 +1,3 @@
-
 module "staging_routing" {
   source          = "../modules/routing"
   environment     = "staging"
@@ -7,6 +6,10 @@ module "staging_routing" {
   domain_name     = "catalogue.api-stage.wellcomecollection.org"
   certificate_arn = aws_acm_certificate_validation.catalogue_api_validation.certificate_arn
   aws_region      = "eu-west-1"
+
+  providers = {
+    aws.dns = aws.dns
+  }
 }
 
 module "prod_routing" {
@@ -17,4 +20,8 @@ module "prod_routing" {
   domain_name     = "catalogue.api.wellcomecollection.org"
   certificate_arn = aws_acm_certificate_validation.catalogue_api_validation.certificate_arn
   aws_region      = "eu-west-1"
+
+  providers = {
+    aws.dns = aws.dns
+  }
 }
