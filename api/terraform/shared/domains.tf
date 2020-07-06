@@ -14,7 +14,7 @@ locals {
 
 data "aws_route53_zone" "dotorg" {
   provider = aws.dns
-  name = "wellcomecollection.org."
+  name     = "wellcomecollection.org."
 }
 
 resource "aws_route53_record" "cert_validation" {

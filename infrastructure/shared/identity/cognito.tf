@@ -20,7 +20,7 @@ provider "aws" {
 }
 
 resource "aws_acm_certificate" "id" {
-  provider  = aws.us_east_1
+  provider = aws.us_east_1
 
   domain_name       = "id.wellcomecollection.org"
   validation_method = "DNS"
@@ -36,11 +36,11 @@ data "aws_route53_zone" "weco_zone" {
 resource "aws_route53_record" "cert_validation" {
   provider = aws.dns
 
-  name     = aws_acm_certificate.id.domain_validation_options[0].resource_record_name
-  type     = aws_acm_certificate.id.domain_validation_options[0].resource_record_type
-  zone_id  = data.aws_route53_zone.weco_zone.id
-  records  = [aws_acm_certificate.id.domain_validation_options[0].resource_record_value]
-  ttl      = 60
+  name    = aws_acm_certificate.id.domain_validation_options[0].resource_record_name
+  type    = aws_acm_certificate.id.domain_validation_options[0].resource_record_type
+  zone_id = data.aws_route53_zone.weco_zone.id
+  records = [aws_acm_certificate.id.domain_validation_options[0].resource_record_value]
+  ttl     = 60
 }
 
 resource "aws_acm_certificate_validation" "id_cert" {
