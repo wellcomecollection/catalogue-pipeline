@@ -1,5 +1,5 @@
 module "catalogue_api_prod_20200520" {
-  source = "../modules/new_catalogue_api_stack"
+  source = "../modules/stack"
 
   environment        = "prod"
   instance           = "20200520"
@@ -23,7 +23,6 @@ module "catalogue_api_prod_20200520" {
   service_discovery_namespace_id = local.service_discovery_namespace_id
 
   providers = {
-    aws.platform    = aws.platform
-    aws.routemaster = aws.routemaster
+    aws.platform = aws.platform
   }
 }
