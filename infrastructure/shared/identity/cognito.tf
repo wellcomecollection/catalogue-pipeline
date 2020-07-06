@@ -1,17 +1,17 @@
 # Route 53
 provider "aws" {
   region  = "eu-west-1"
-  alias   = "routemaster"
+  alias   = "dns"
   version = "~> 2.35"
 
   assume_role {
-    role_arn = "arn:aws:iam::250790015188:role/wellcomecollection-assume_role_hosted_zone_update"
+    role_arn = "arn:aws:iam::267269328833:role/wellcomecollection-assume_role_hosted_zone_update"
   }
 }
 
 provider "aws" {
   region  = "us-east-1"
-  alias   = "aws_us_1"
+  alias   = "us_east_1"
   version = "~> 2.35"
 
   assume_role {
@@ -20,33 +20,39 @@ provider "aws" {
 }
 
 resource "aws_acm_certificate" "id" {
+  provider  = aws.us_east_1
+
   domain_name       = "id.wellcomecollection.org"
   validation_method = "DNS"
-  provider          = "aws.aws_us_1"
 }
 
 data "aws_route53_zone" "weco_zone" {
+  provider = aws.dns
+
   name         = "wellcomecollection.org."
   private_zone = false
-  provider     = "aws.routemaster"
 }
 
 resource "aws_route53_record" "cert_validation" {
+  provider = aws.dns
+
   name     = aws_acm_certificate.id.domain_validation_options[0].resource_record_name
   type     = aws_acm_certificate.id.domain_validation_options[0].resource_record_type
   zone_id  = data.aws_route53_zone.weco_zone.id
   records  = [aws_acm_certificate.id.domain_validation_options[0].resource_record_value]
   ttl      = 60
-  provider = "aws.routemaster"
 }
 
 resource "aws_acm_certificate_validation" "id_cert" {
+  provider = aws.us_east_1
+
   certificate_arn         = aws_acm_certificate.id.arn
   validation_record_fqdns = [aws_route53_record.cert_validation.fqdn]
-  provider                = "aws.aws_us_1"
 }
 
 resource "aws_route53_record" "cognito_cloudfront_distribution" {
+  provider = aws.dns
+
   name    = "id.wellcomecollection.org"
   type    = "A"
   zone_id = data.aws_route53_zone.weco_zone.id
@@ -56,7 +62,6 @@ resource "aws_route53_record" "cognito_cloudfront_distribution" {
     zone_id                = "Z2FDTNDATAQYW2"
     evaluate_target_health = true
   }
-  provider = "aws.routemaster"
 }
 
 # Cognito
@@ -144,7 +149,7 @@ resource "aws_cognito_user_pool_client" "web_auth_test" {
   allowed_oauth_scopes                 = concat(["openid", "email"], aws_cognito_resource_server.stacks_api.scope_identifiers)
   explicit_auth_flows                  = ["USER_PASSWORD_AUTH"]
 
-  user_pool_id    = "${aws_cognito_user_pool.pool.id}"
+  user_pool_id    = aws_cognito_user_pool.pool.id
   generate_secret = false
 
   callback_urls                = ["http://localhost:3000/works/auth-code"]
