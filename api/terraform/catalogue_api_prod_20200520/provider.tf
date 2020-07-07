@@ -17,14 +17,3 @@ provider "aws" {
     role_arn = "arn:aws:iam::760097843905:role/platform-developer"
   }
 }
-
-provider "aws" {
-  alias = "routemaster"
-
-  region  = "eu-west-1"
-  version = "~> 2.7"
-
-  assume_role {
-    role_arn = "arn:aws:iam::250790015188:role/wellcomecollection-assume_role_hosted_zone_update"
-  }
-}

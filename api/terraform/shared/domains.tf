@@ -12,13 +12,18 @@ locals {
   validation_opts = aws_acm_certificate.catalogue_api.domain_validation_options
 }
 
+data "aws_route53_zone" "dotorg" {
+  provider = aws.dns
+  name     = "wellcomecollection.org."
+}
+
 resource "aws_route53_record" "cert_validation" {
-  provider = aws.routemaster
+  provider = aws.dns
 
   count   = length(local.validation_opts)
   name    = lookup(local.validation_opts[count.index], "resource_record_name")
   type    = lookup(local.validation_opts[count.index], "resource_record_type")
-  zone_id = local.route53_zone_id
+  zone_id = data.aws_route53_zone.dotorg.id
   records = [lookup(local.validation_opts[count.index], "resource_record_value")]
   ttl     = 60
 }

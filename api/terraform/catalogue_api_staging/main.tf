@@ -1,5 +1,5 @@
 module "catalogue_api_staging" {
-  source = "../modules/new_catalogue_api_stack"
+  source = "../modules/stack"
 
   environment        = "staging"
   listener_port      = 1234
@@ -22,7 +22,6 @@ module "catalogue_api_staging" {
   interservice_sg_id = local.interservice_security_group_id
 
   providers = {
-    aws.platform    = aws.platform
-    aws.routemaster = aws.routemaster
+    aws.platform = aws.platform
   }
 }
