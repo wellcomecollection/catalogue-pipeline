@@ -1,6 +1,7 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import uk.ac.wellcome.platform.transformer.sierra.source.{
+  MarcSubfield,
   SierraBibData,
   SierraQueryOps
 }
@@ -15,6 +16,9 @@ import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 //
 // 246 is only used when indicator2 is not equal to 6, as this is used for
 // the work:lettering field
+//
+// If there exists a $5 subfield with contents `UkLW`, this is Wellcome
+// Library specific and should be excluded.
 object SierraAlternativeTitles extends SierraTransformer with SierraQueryOps {
 
   type Output = List[String]
@@ -25,5 +29,12 @@ object SierraAlternativeTitles extends SierraTransformer with SierraQueryOps {
       .filterNot { varfield =>
         varfield.marcTag.contains("246") && varfield.indicator2.contains("6")
       }
-      .flatMap(_.subfields.contentString(" "))
+      .flatMap { varfield =>
+        varfield.subfields
+          .filter {
+            case MarcSubfield("5", "UkLW") => false
+            case _                         => true
+          }
+          .contentString(" ")
+      }
 }

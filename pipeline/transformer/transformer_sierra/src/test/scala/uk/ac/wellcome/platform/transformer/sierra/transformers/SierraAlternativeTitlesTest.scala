@@ -79,6 +79,20 @@ class SierraAlternativeTitlesTest
     getAlternativeTitles(varFields) shouldBe List("A", "B")
   }
 
+  it("should not include a subfield tagged 5 with content UkLW") {
+    val varFields = List(
+      createVarFieldWith(
+        "246",
+        "1",
+        List(
+          MarcSubfield(tag = "a", content = "A"),
+          MarcSubfield(tag = "5", content = "UkLW")
+        )
+      )
+    )
+    getAlternativeTitles(varFields) shouldBe List("A")
+  }
+
   private def getAlternativeTitles(varFields: List[VarField]) =
     SierraAlternativeTitles(
       createSierraBibNumber,
