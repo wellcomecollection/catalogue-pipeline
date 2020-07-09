@@ -79,7 +79,7 @@ class SierraAlternativeTitlesTest
     getAlternativeTitles(varFields) shouldBe List("A", "B")
   }
 
-  it("should not include a subfield tagged 5 with content UkLW") {
+  it("omits a subfield $5 with content UkLW") {
     val varFields = List(
       createVarFieldWith(
         "246",
