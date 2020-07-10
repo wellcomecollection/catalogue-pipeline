@@ -1,4 +1,21 @@
 {
+    "mets_adapter":  {
+        "environments":  [
+            {
+                "id": "stage",
+                "name": "Staging"
+            },
+            {
+                "id": "prod",
+                "name": "Production"
+            }
+        ],
+        "name": "METS Adapter",
+        "role_arn": "arn:aws:iam::760097843905:role/platform-developer",
+        "aws_region_name": "eu-west-1",
+        "github_repository": "wellcometrust/catalogue",
+        "tf_stack_root": "mets_adapter/terraform"
+    },
     "catalogue_pipeline":  {
         "environments":  [
             {
