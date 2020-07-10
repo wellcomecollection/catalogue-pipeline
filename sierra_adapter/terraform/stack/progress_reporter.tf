@@ -1,7 +1,7 @@
 module "progress_reporter" {
   source = "./../sierra_progress_reporter"
 
-  trigger_interval_minutes = 240
+  trigger_interval_minutes = 900
   s3_adapter_bucket_name   = aws_s3_bucket.sierra_adapter.id
   slack_access_token       = local.critical_slack_webhook
 
