@@ -11,7 +11,7 @@
             }
         ],
         "name": "METS Adapter",
-        "role_arn": "arn:aws:iam::760097843905:role/platform-developer",
+        "role_arn": "arn:aws:iam::760097843905:role/platform-ci",
         "aws_region_name": "eu-west-1",
         "github_repository": "wellcometrust/catalogue",
         "tf_stack_root": "mets_adapter/terraform"
@@ -36,7 +36,7 @@
             }
         ],
         "name": "Catalogue pipeline",
-        "role_arn": "arn:aws:iam::760097843905:role/platform-developer",
+        "role_arn": "arn:aws:iam::760097843905:role/platform-ci",
         "aws_region_name": "eu-west-1",
         "github_repository": "wellcometrust/catalogue",
         "tf_stack_root": "pipeline/terraform"
@@ -57,7 +57,7 @@
             }
         ],
         "name": "Catalogue API",
-        "role_arn": "arn:aws:iam::760097843905:role/platform-developer",
+        "role_arn": "arn:aws:iam::760097843905:role/platform-ci",
         "aws_region_name": "eu-west-1",
         "github_repository": "wellcometrust/catalogue",
         "tf_stack_root": "api/terraform"
