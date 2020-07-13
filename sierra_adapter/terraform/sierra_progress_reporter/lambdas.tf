@@ -10,7 +10,7 @@ module "lambda" {
 
   description     = "Run progress reports against the Sierra reader"
   alarm_topic_arn = var.lambda_error_alarm_arn
-  timeout         = 300
+  timeout         = 900
 
   environment_variables = {
     BUCKET        = var.s3_adapter_bucket_name
