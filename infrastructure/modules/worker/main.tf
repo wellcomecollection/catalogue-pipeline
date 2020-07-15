@@ -18,8 +18,8 @@ module "service" {
   propagate_tags = "SERVICE"
 
   tags = {
-    "deployment:service": local.deployment_service_name
-    "deployment:env": var.deployment_service_env
+    "deployment:service" : local.deployment_service_name
+    "deployment:env" : var.deployment_service_env
   }
 }
 

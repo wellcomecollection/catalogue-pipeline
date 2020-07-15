@@ -79,10 +79,10 @@ variable "security_group_ids" {
 }
 
 variable "deployment_service_name" {
-  type = string
+  type    = string
   default = ""
 }
 variable "deployment_service_env" {
-  type = string
+  type    = string
   default = "prod"
 }
