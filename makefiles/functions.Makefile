@@ -84,7 +84,7 @@ define publish_service_ssm
     	    --aws --dind -- \
                 wellcome/weco-deploy:3.1.0  \
                 --project-id="$(2)" \
-                -v \
+                --verbose \
                 publish \
                 --service-id="$(1)"
 endef
