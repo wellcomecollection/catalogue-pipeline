@@ -80,9 +80,11 @@ variable "security_group_ids" {
 
 variable "deployment_service_name" {
   type = string
+  description = "Used by weco-deploy to determine which services to deploy, by default this value will be set to var.name"
   default = ""
 }
 variable "deployment_service_env" {
   type = string
+  description = "Used by weco-deploy to determine which services to deploy in conjunction with deployment_service_name"
   default = "prod"
 }
