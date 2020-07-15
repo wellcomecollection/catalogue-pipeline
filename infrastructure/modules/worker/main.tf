@@ -1,4 +1,5 @@
 locals {
+  # Override the default service name if requested
   deployment_service_name = var.deployment_service_name == "" ? var.name : var.deployment_service_name
 }
 
@@ -18,8 +19,8 @@ module "service" {
   propagate_tags = "SERVICE"
 
   tags = {
-    "deployment:service": local.deployment_service_name
-    "deployment:env": var.deployment_service_env
+    "deployment:service" = local.deployment_service_name
+    "deployment:env"     = var.deployment_service_env
   }
 }
 
