@@ -77,3 +77,12 @@ variable "security_group_ids" {
   type    = list(string)
   default = []
 }
+
+variable "deployment_service_name" {
+  type = string
+  default = ""
+}
+variable "deployment_service_env" {
+  type = string
+  default = "prod"
+}

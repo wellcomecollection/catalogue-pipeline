@@ -2,12 +2,15 @@
     "mets_adapter":  {
         "environments":  [
             {
-                "id": "stage",
-                "name": "Staging"
-            },
-            {
                 "id": "prod",
                 "name": "Production"
+            }
+        ],
+        "image_repositories": [
+            {
+                "id": "mets_adapter",
+                "namespace" : "uk.ac.wellcome",
+                "account_id": "760097843905"
             }
         ],
         "name": "METS Adapter",
