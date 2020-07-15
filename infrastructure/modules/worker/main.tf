@@ -19,7 +19,7 @@ module "service" {
 
   tags = {
     "deployment:service" = local.deployment_service_name
-    "deployment:env"       = var.deployment_service_env
+    "deployment:env"     = var.deployment_service_env
   }
 }
 
