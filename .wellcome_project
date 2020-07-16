@@ -18,7 +18,54 @@
         "role_arn": "arn:aws:iam::760097843905:role/platform-ci",
         "aws_region_name": "eu-west-1",
         "github_repository": "wellcometrust/catalogue",
-        "tf_stack_root": "mets_adapter/terraform"
+        "tf_stack_root": "unused"
+    },
+    "calm_adapter":  {
+        "environments":  [
+            {
+                "id": "prod",
+                "name": "Production"
+            }
+        ],
+        "image_repositories": [
+            {
+                "id": "calm_adapter",
+                "namespace" : "uk.ac.wellcome",
+                "account_id": "760097843905",
+                "services": ["calm-adapter"]
+            }
+        ],
+        "name": "Calm Adapter",
+        "role_arn": "arn:aws:iam::760097843905:role/platform-ci",
+        "aws_region_name": "eu-west-1",
+        "github_repository": "wellcometrust/catalogue",
+        "tf_stack_root": "unused"
+    },
+    "sierra_adapter":  {
+        "environments":  [
+            {
+                "id": "prod",
+                "name": "Production"
+            }
+        ]
+        "name": "Sierra Adapter",
+        "role_arn": "arn:aws:iam::760097843905:role/platform-ci",
+        "aws_region_name": "eu-west-1",
+        "github_repository": "wellcometrust/catalogue",
+        "tf_stack_root": "unused"
+    },
+    "reindexer":  {
+        "environments":  [
+            {
+                "id": "prod",
+                "name": "Production"
+            }
+        ]
+        "name": "Reindexer",
+        "role_arn": "arn:aws:iam::760097843905:role/platform-ci",
+        "aws_region_name": "eu-west-1",
+        "github_repository": "wellcometrust/catalogue",
+        "tf_stack_root": "unused"
     },
     "catalogue_pipeline":  {
         "environments":  [
@@ -35,14 +82,10 @@
         "role_arn": "arn:aws:iam::760097843905:role/platform-ci",
         "aws_region_name": "eu-west-1",
         "github_repository": "wellcometrust/catalogue",
-        "tf_stack_root": "pipeline/terraform"
+        "tf_stack_root": "unused"
     },
     "catalogue_api":  {
         "environments":  [
-            {
-                "id": "latest",
-                "name": "Latest"
-            },
             {
                 "id": "staging",
                 "name": "Staging"
@@ -56,6 +99,6 @@
         "role_arn": "arn:aws:iam::760097843905:role/platform-ci",
         "aws_region_name": "eu-west-1",
         "github_repository": "wellcometrust/catalogue",
-        "tf_stack_root": "api/terraform"
+        "tf_stack_root": "unused"
     }
 }
