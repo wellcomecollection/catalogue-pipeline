@@ -1,104 +1,108 @@
 {
-    "mets_adapter":  {
-        "environments":  [
-            {
-                "id": "prod",
-                "name": "Production"
-            }
-        ],
-        "image_repositories": [
-            {
-                "id": "mets_adapter",
-                "namespace" : "uk.ac.wellcome",
-                "account_id": "760097843905",
-                "services": ["mets-adapter"]
-            }
-        ],
-        "name": "METS Adapter",
-        "role_arn": "arn:aws:iam::760097843905:role/platform-ci",
-        "aws_region_name": "eu-west-1",
-        "github_repository": "wellcometrust/catalogue",
-        "tf_stack_root": "unused"
-    },
-    "calm_adapter":  {
-        "environments":  [
-            {
-                "id": "prod",
-                "name": "Production"
-            }
-        ],
-        "image_repositories": [
-            {
-                "id": "calm_adapter",
-                "namespace" : "uk.ac.wellcome",
-                "account_id": "760097843905",
-                "services": ["calm-adapter"]
-            }
-        ],
-        "name": "Calm Adapter",
-        "role_arn": "arn:aws:iam::760097843905:role/platform-ci",
-        "aws_region_name": "eu-west-1",
-        "github_repository": "wellcometrust/catalogue",
-        "tf_stack_root": "unused"
-    },
-    "sierra_adapter":  {
-        "environments":  [
-            {
-                "id": "prod",
-                "name": "Production"
-            }
+  "mets_adapter": {
+    "environments": [
+      {
+        "id": "prod",
+        "name": "Production"
+      }
+    ],
+    "image_repositories": [
+      {
+        "id": "mets_adapter",
+        "namespace": "uk.ac.wellcome",
+        "account_id": "760097843905",
+        "services": [
+          "mets-adapter"
         ]
-        "name": "Sierra Adapter",
-        "role_arn": "arn:aws:iam::760097843905:role/platform-ci",
-        "aws_region_name": "eu-west-1",
-        "github_repository": "wellcometrust/catalogue",
-        "tf_stack_root": "unused"
-    },
-    "reindexer":  {
-        "environments":  [
-            {
-                "id": "prod",
-                "name": "Production"
-            }
+      }
+    ],
+    "name": "METS Adapter",
+    "role_arn": "arn:aws:iam::760097843905:role/platform-ci",
+    "aws_region_name": "eu-west-1",
+    "github_repository": "wellcometrust/catalogue",
+    "tf_stack_root": "unused"
+  },
+  "calm_adapter": {
+    "environments": [
+      {
+        "id": "prod",
+        "name": "Production"
+      }
+    ],
+    "image_repositories": [
+      {
+        "id": "calm_adapter",
+        "namespace": "uk.ac.wellcome",
+        "account_id": "760097843905",
+        "services": [
+          "calm-adapter"
         ]
-        "name": "Reindexer",
-        "role_arn": "arn:aws:iam::760097843905:role/platform-ci",
-        "aws_region_name": "eu-west-1",
-        "github_repository": "wellcometrust/catalogue",
-        "tf_stack_root": "unused"
-    },
-    "catalogue_pipeline":  {
-        "environments":  [
-           {
-                "id": "prod",
-                "name": "Production"
-            },
-            {
-                "id": "miro_merging_test",
-                "name": "Miro merging test"
-            }
-        ],
-        "name": "Catalogue pipeline",
-        "role_arn": "arn:aws:iam::760097843905:role/platform-ci",
-        "aws_region_name": "eu-west-1",
-        "github_repository": "wellcometrust/catalogue",
-        "tf_stack_root": "unused"
-    },
-    "catalogue_api":  {
-        "environments":  [
-            {
-                "id": "staging",
-                "name": "Staging"
-            },
-            {
-                "id": "prod",
-                "name": "Production"
-            }
-        ],
-        "name": "Catalogue API",
-        "role_arn": "arn:aws:iam::760097843905:role/platform-ci",
-        "aws_region_name": "eu-west-1",
-        "github_repository": "wellcometrust/catalogue",
-        "tf_stack_root": "unused"
-    }
+      }
+    ],
+    "name": "Calm Adapter",
+    "role_arn": "arn:aws:iam::760097843905:role/platform-ci",
+    "aws_region_name": "eu-west-1",
+    "github_repository": "wellcometrust/catalogue",
+    "tf_stack_root": "unused"
+  },
+  "sierra_adapter": {
+    "environments": [
+      {
+        "id": "prod",
+        "name": "Production"
+      }
+    ],
+    "name": "Sierra Adapter",
+    "role_arn": "arn:aws:iam::760097843905:role/platform-ci",
+    "aws_region_name": "eu-west-1",
+    "github_repository": "wellcometrust/catalogue",
+    "tf_stack_root": "unused"
+  },
+  "reindexer": {
+    "environments": [
+      {
+        "id": "prod",
+        "name": "Production"
+      }
+    ],
+    "name": "Reindexer",
+    "role_arn": "arn:aws:iam::760097843905:role/platform-ci",
+    "aws_region_name": "eu-west-1",
+    "github_repository": "wellcometrust/catalogue",
+    "tf_stack_root": "unused"
+  },
+  "catalogue_pipeline": {
+    "environments": [
+      {
+        "id": "prod",
+        "name": "Production"
+      },
+      {
+        "id": "miro_merging_test",
+        "name": "Miro merging test"
+      }
+    ],
+    "name": "Catalogue pipeline",
+    "role_arn": "arn:aws:iam::760097843905:role/platform-ci",
+    "aws_region_name": "eu-west-1",
+    "github_repository": "wellcometrust/catalogue",
+    "tf_stack_root": "unused"
+  },
+  "catalogue_api": {
+    "environments": [
+      {
+        "id": "staging",
+        "name": "Staging"
+      },
+      {
+        "id": "prod",
+        "name": "Production"
+      }
+    ],
+    "name": "Catalogue API",
+    "role_arn": "arn:aws:iam::760097843905:role/platform-ci",
+    "aws_region_name": "eu-west-1",
+    "github_repository": "wellcometrust/catalogue",
+    "tf_stack_root": "unused"
+  }
 }
