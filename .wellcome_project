@@ -22,15 +22,7 @@
     },
     "catalogue_pipeline":  {
         "environments":  [
-            {
-                "id": "latest",
-                "name": "Latest"
-            },
-            {
-                "id": "stage",
-                "name": "Staging"
-            },
-            {
+           {
                 "id": "prod",
                 "name": "Production"
             },
