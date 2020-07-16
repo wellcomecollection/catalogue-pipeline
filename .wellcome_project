@@ -10,7 +10,8 @@
             {
                 "id": "mets_adapter",
                 "namespace" : "uk.ac.wellcome",
-                "account_id": "760097843905"
+                "account_id": "760097843905",
+                "services": ["mets-adapter"]
             }
         ],
         "name": "METS Adapter",
