@@ -161,7 +161,9 @@ case object WorksIndexConfig extends IndexConfig {
       workType,
       title,
       englishTextField("alternativeTitles"),
-      englishTextField("description"),
+      textField("description").fields(
+        textField("english").analyzer("english")
+      ),
       englishTextField("physicalDescription"),
       englishTextField("lettering"),
       objectField("createdDate").fields(period),
