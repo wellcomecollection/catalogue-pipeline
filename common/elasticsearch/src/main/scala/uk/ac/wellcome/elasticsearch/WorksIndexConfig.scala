@@ -10,11 +10,6 @@ import com.sksamuel.elastic4s.ElasticDsl.{
   textField,
   tokenCountField
 }
-import com.sksamuel.elastic4s.requests.analysis.{
-  Analysis,
-  CustomAnalyzer,
-  PathHierarchyTokenizer
-}
 import com.sksamuel.elastic4s.requests.mappings.{
   FieldDefinition,
   ObjectField,
@@ -23,16 +18,10 @@ import com.sksamuel.elastic4s.requests.mappings.{
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 
 case object WorksIndexConfig extends IndexConfig {
-  // Analysis
-  val pathTokenizer = PathHierarchyTokenizer("path_hierarchy_tokenizer")
-  val pathAnalyzer =
-    CustomAnalyzer("path_hierarchy_analyzer", pathTokenizer.name, Nil, Nil)
-  val analysis = Analysis(
-    analyzers = List(
-      pathAnalyzer
-    ),
-    tokenizers = List(pathTokenizer))
+  import WorksAnalysis._
+  val analysis = WorksAnalysis()
 
+  // Fields
   val sourceIdentifier = objectField("sourceIdentifier")
     .fields(sourceIdentifierFields)
 
@@ -44,6 +33,14 @@ case object WorksIndexConfig extends IndexConfig {
       label,
       keywordField("ontologyType"),
       keywordField("id")
+    )
+
+  val title = textField("title")
+    .analyzer(asciifoldingAnalyzer.name)
+    .fields(
+      keywordField("keyword"),
+      textField("english").analyzer(englishAnalyzer.name),
+      textField("shingles").analyzer(shingleAsciifoldingAnalyzer.name)
     )
 
   val notes = objectField("notes")
@@ -162,7 +159,7 @@ case object WorksIndexConfig extends IndexConfig {
       otherIdentifiers,
       mergeCandidates,
       workType,
-      englishTextField("title"),
+      title,
       englishTextField("alternativeTitles"),
       englishTextField("description"),
       englishTextField("physicalDescription"),
