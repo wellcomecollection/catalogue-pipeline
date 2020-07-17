@@ -7,7 +7,7 @@ import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 
 case object ImagesIndexConfig extends IndexConfig {
 
-  override val analysis: Analysis = Analysis(List())
+  override val analysis: Analysis = WorksAnalysis()
 
   val inferredData = objectField("inferredData").fields(
     denseVectorField("features1", 2048),
@@ -28,7 +28,7 @@ case object ImagesIndexConfig extends IndexConfig {
   )
 
   override val mapping: MappingDefinition = properties(
-    id("id"),
+    id(),
     version,
     location("location"),
     source,
