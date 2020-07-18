@@ -1,58 +1,57 @@
 mets_adapter:
   environments:
-  - id: prod
-    name: Production
+    - id: prod
+      name: Production
   image_repositories:
-  - id: mets_adapter
-    namespace: uk.ac.wellcome
-    account_id: '760097843905'
-    services:
-    - mets-adapter
+    - id: mets_adapter
+      namespace: uk.ac.wellcome
+      account_id: '760097843905'
+      services:
+        - mets-adapter
   name: METS Adapter
   role_arn: arn:aws:iam::760097843905:role/platform-ci
   aws_region_name: eu-west-1
-  github_repository: wellcometrust/catalogue
 
 calm_adapter:
   environments:
-  - id: prod
-    name: Production
+    - id: prod
+      name: Production
   image_repositories:
-  - id: calm_adapter
-    namespace: uk.ac.wellcome
-    account_id: '760097843905'
-    services:
-    - calm-adapter
+    - id: calm_adapter
+      namespace: uk.ac.wellcome
+      account_id: '760097843905'
+      services:
+        - calm-adapter
   name: Calm Adapter
   role_arn: arn:aws:iam::760097843905:role/platform-ci
   aws_region_name: eu-west-1
 
 sierra_adapter:
   environments:
-  - id: prod
-    name: Production
+    - id: prod
+      name: Production
   image_repositories:
     - id: sierra_bib_merger
       namespace: uk.ac.wellcome
       account_id: '760097843905'
       services:
-      - bibs-merger
+        - bibs-merger
     - id: sierra_item_merger
       namespace: uk.ac.wellcome
       account_id: '760097843905'
       services:
-      - bibs-merger
+        - bibs-merger
     - id: sierra_items_to_dynamo
       namespace: uk.ac.wellcome
       account_id: '760097843905'
       services:
-      - items-to-dynamo
+        - items-to-dynamo
     - id: sierra_reader
       namespace: uk.ac.wellcome
       account_id: '760097843905'
       services:
-      - items-reader
-      - bibs-reader
+        - items-reader
+        - bibs-reader
   name: Sierra Adapter
   role_arn: arn:aws:iam::760097843905:role/platform-ci
   aws_region_name: eu-west-1
@@ -60,8 +59,8 @@ sierra_adapter:
 
 reindexer:
   environments:
-  - id: prod
-    name: Production
+    - id: prod
+      name: Production
   name: Reindexer
   role_arn: arn:aws:iam::760097843905:role/platform-ci
   aws_region_name: eu-west-1
@@ -69,10 +68,10 @@ reindexer:
 
 catalogue_pipeline:
   environments:
-  - id: prod
-    name: Production
-  - id: miro_merging_test
-    name: Miro merging test
+    - id: prod
+      name: Production
+    - id: miro_merging_test
+      name: Miro merging test
   name: Catalogue pipeline
   role_arn: arn:aws:iam::760097843905:role/platform-ci
   aws_region_name: eu-west-1
@@ -80,10 +79,10 @@ catalogue_pipeline:
 
 catalogue_api:
   environments:
-  - id: staging
-    name: Staging
-  - id: prod
-    name: Production
+    - id: staging
+      name: Staging
+    - id: prod
+      name: Production
   name: Catalogue API
   role_arn: arn:aws:iam::760097843905:role/platform-ci
   aws_region_name: eu-west-1
