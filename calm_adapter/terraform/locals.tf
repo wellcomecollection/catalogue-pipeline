@@ -8,6 +8,8 @@ locals {
   vpc_id          = data.terraform_remote_state.shared_infra.outputs.catalogue_vpc_delta_id
   private_subnets = data.terraform_remote_state.shared_infra.outputs.catalogue_vpc_delta_private_subnets
 
+  calm_adapter_image = "${aws_ecr_repository.ecr_repository_calm_adapter.repository_url}:env.prod"
+
   env_vars = {
     calm_api_url          = "https://wt-calm.wellcome.ac.uk/CalmAPI/ContentService.asmx"
     calm_sqs_url          = module.calm_windows_queue.url
