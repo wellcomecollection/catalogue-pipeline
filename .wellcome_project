@@ -40,7 +40,7 @@ sierra_adapter:
       namespace: uk.ac.wellcome
       account_id: '760097843905'
       services:
-        - bibs-merger
+        - items-merger
     - id: sierra_items_to_dynamo
       namespace: uk.ac.wellcome
       account_id: '760097843905'
