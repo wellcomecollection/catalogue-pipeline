@@ -35,7 +35,7 @@ module "calm_transformer" {
 
   queue_read_policy = module.calm_transformer_queue.read_policy
 
-  deployment_service_env = var.release_label
+  deployment_service_env  = var.release_label
   deployment_service_name = "calm-transformer"
 }
 
