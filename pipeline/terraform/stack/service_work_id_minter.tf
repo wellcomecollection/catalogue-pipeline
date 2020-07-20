@@ -53,7 +53,7 @@ module "work_id_minter" {
   cpu    = 1024
   memory = 2048
 
-  deployment_service_env = var.release_label
+  deployment_service_env  = var.release_label
   deployment_service_name = "work-id-minter"
 }
 
