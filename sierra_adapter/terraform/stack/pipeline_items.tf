@@ -27,6 +27,9 @@ module "items_reader" {
 
   service_egress_security_group_id = var.egress_security_group_id
   interservice_security_group_id   = var.interservice_security_group_id
+
+  deployment_service_env  = var.deployment_env
+  deployment_service_name = "items-reader"
 }
 
 module "items_to_dynamo" {
@@ -52,6 +55,9 @@ module "items_to_dynamo" {
 
   service_egress_security_group_id = var.egress_security_group_id
   interservice_security_group_id   = var.interservice_security_group_id
+
+  deployment_service_env  = var.deployment_env
+  deployment_service_name = "items-to-dynamo"
 }
 
 module "items_merger" {
@@ -81,4 +87,7 @@ module "items_merger" {
 
   service_egress_security_group_id = var.egress_security_group_id
   interservice_security_group_id   = var.interservice_security_group_id
+
+  deployment_service_env  = var.deployment_env
+  deployment_service_name = "items-merger"
 }
