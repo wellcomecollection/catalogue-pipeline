@@ -34,6 +34,9 @@ module "calm_transformer" {
   messages_bucket_arn = aws_s3_bucket.messages.arn
 
   queue_read_policy = module.calm_transformer_queue.read_policy
+
+  deployment_service_env  = var.release_label
+  deployment_service_name = "calm-transformer"
 }
 
 resource "aws_iam_role_policy" "calm_transformer_vhs_calm_adapter_read" {

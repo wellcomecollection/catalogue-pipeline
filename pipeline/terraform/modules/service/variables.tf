@@ -48,3 +48,10 @@ variable "min_capacity" {
   type    = number
   default = 0
 }
+
+variable "deployment_service_env" {
+  type = string
+}
+variable "deployment_service_name" {
+  type = string
+}

@@ -48,6 +48,9 @@ module "matcher" {
   max_capacity        = 10
   messages_bucket_arn = aws_s3_bucket.messages.arn
   queue_read_policy   = module.matcher_queue.read_policy
+
+  deployment_service_env  = var.release_label
+  deployment_service_name = "matcher"
 }
 
 resource "aws_iam_role_policy" "matcher_vhs_recorder_read" {
