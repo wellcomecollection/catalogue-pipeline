@@ -37,6 +37,9 @@ module "mets_transformer" {
 
   cpu    = 1024
   memory = 2048
+
+  deployment_service_env = var.release_label
+  deployment_service_name = "mets-transformer"
 }
 
 module "mets_transformer_topic" {

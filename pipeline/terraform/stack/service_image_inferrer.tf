@@ -68,6 +68,9 @@ module "image_inferrer" {
 
   messages_bucket_arn = aws_s3_bucket.messages.arn
   queue_read_policy   = module.image_inferrer_queue.read_policy
+
+  deployment_service_env = var.release_label
+  deployment_service_name =  "image-inferrer"
 }
 
 resource "aws_iam_role_policy" "read_inferrer_data" {

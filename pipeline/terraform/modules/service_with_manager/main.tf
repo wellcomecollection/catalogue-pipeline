@@ -32,4 +32,7 @@ module "worker" {
 
   min_capacity = var.min_capacity
   max_capacity = var.max_capacity
+
+  deployment_service_env  = var.deployment_service_env
+  deployment_service_name = var.deployment_service_name
 }

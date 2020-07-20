@@ -72,6 +72,63 @@ catalogue_pipeline:
       name: Production
     - id: miro_merging_test
       name: Miro merging test
+  image_repositories:
+    - id: id_minter
+      namespace: uk.ac.wellcome
+      account_id: '760097843905'
+      services:
+        - image-id-minter
+        - work-id-minter
+    - id: inference_manager
+      namespace: uk.ac.wellcome
+      account_id: '760097843905'
+      services:
+        - image-inferrer
+    - id: matcher
+      namespace: uk.ac.wellcome
+      account_id: '760097843905'
+      services:
+        - matcher
+    - id: merger
+      namespace: uk.ac.wellcome
+      account_id: '760097843905'
+      services:
+        - merger
+    - id: recorder
+      namespace: uk.ac.wellcome
+      account_id: '760097843905'
+      services:
+        - recorder
+    - id: ingestor_images
+      namespace: uk.ac.wellcome
+      account_id: '760097843905'
+      services:
+        - image-ingestor
+    - id: ingestor_works
+      namespace: uk.ac.wellcome
+      account_id: '760097843905'
+      services:
+        - work-ingestor
+    - id: transformer_calm
+      namespace: uk.ac.wellcome
+      account_id: '760097843905'
+      services:
+        - calm-transformer
+    - id: transformer_mets
+      namespace: uk.ac.wellcome
+      account_id: '760097843905'
+      services:
+        - mets-transformer
+    - id: transformer_miro
+      namespace: uk.ac.wellcome
+      account_id: '760097843905'
+      services:
+        - miro-transformer
+    - id: transformer_sierra
+      namespace: uk.ac.wellcome
+      account_id: '760097843905'
+      services:
+        - sierra-transformer
   name: Catalogue pipeline
   role_arn: arn:aws:iam::760097843905:role/platform-ci
   aws_region_name: eu-west-1
