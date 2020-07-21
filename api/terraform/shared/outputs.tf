@@ -30,10 +30,6 @@ output "service_lb_ingress_security_group_id" {
   value = aws_security_group.service_lb_ingress_security_group.id
 }
 
-output "logstash_transit_service_name" {
-  value = local.logstash_transit_service_name
-}
-
 output "staging_namespace" {
   value = aws_service_discovery_private_dns_namespace.staging_namespace.id
 }

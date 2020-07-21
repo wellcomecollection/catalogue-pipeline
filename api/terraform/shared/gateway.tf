@@ -10,7 +10,6 @@ resource "aws_api_gateway_rest_api" "catalogue_api" {
 
 # Resources
 
-
 resource "aws_api_gateway_method" "root_resource" {
   rest_api_id = aws_api_gateway_rest_api.catalogue_api.id
   resource_id = aws_api_gateway_rest_api.catalogue_api.root_resource_id
