@@ -31,6 +31,19 @@ data "aws_iam_policy_document" "sns_publish_policy" {
   }
 }
 
+data "aws_iam_policy_document" "read_from_queue" {
+  statement {
+    actions = [
+      "sqs:DeleteMessage",
+      "sqs:ReceiveMessage",
+    ]
+
+    resources = [
+      module.reindexer_queue.arn,
+    ]
+  }
+}
+
 # This block of interpolation syntax gets a list of all the table ARNs that the
 # reindexer is configured to be able to read from.
 #
