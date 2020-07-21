@@ -37,3 +37,7 @@ output "staging_namespace" {
 output "prod_namespace" {
   value = aws_service_discovery_private_dns_namespace.prod_namespace.id
 }
+
+output "api_repository_url" {
+  value = aws_ecr_repository.platform_api.repository_url
+}

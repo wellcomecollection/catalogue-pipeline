@@ -1,7 +1,7 @@
 module "catalogue_api_prod_20200520" {
   source = "../modules/stack"
 
-  environment        = "prod"
+  environment        = local.environment
   instance           = "20200721"
   listener_port      = 8081
   desired_task_count = 3
@@ -19,6 +19,8 @@ module "catalogue_api_prod_20200520" {
   interservice_sg_id = local.interservice_security_group_id
 
   service_discovery_namespace_id = local.service_discovery_namespace_id
+
+  api_container_image = local.api_container_image
 
   providers = {
     aws.platform = aws.platform
