@@ -16,8 +16,6 @@ module "catalogue_api_prod_20200520" {
 
   egress_security_group_id = local.egress_security_group_id
 
-  logstash_host = local.logstash_host
-
   interservice_sg_id = local.interservice_security_group_id
 
   service_discovery_namespace_id = local.service_discovery_namespace_id
