@@ -9,6 +9,9 @@ module "service" {
   service_name                   = local.namespaced_env
   service_discovery_namespace_id = var.service_discovery_namespace_id
 
+  deployment_service_env  = var.environment
+  deployment_service_name = "catalogue-api"
+
   subnets           = var.subnets
   cluster_arn       = var.cluster_arn
   vpc_id            = var.vpc_id
