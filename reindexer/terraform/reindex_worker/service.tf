@@ -1,5 +1,5 @@
 module "service" {
-  source       = "../../../infrastructure/modules/worker"
+  source = "../../../infrastructure/modules/worker"
 
   name = var.service_name
 
@@ -22,7 +22,7 @@ module "service" {
   cluster_name = var.cluster_name
   cluster_arn  = var.cluster_arn
 
-  subnets    = var.private_subnets
+  subnets = var.private_subnets
 
   desired_task_count = 0
   min_capacity       = 0
