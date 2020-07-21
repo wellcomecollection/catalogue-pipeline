@@ -31,7 +31,6 @@ module "service" {
   environment = {
     api_host         = "api.wellcomecollection.org"
     apm_service_name = var.namespace
-    logstash_host    = var.logstash_host
   }
 
   secrets = {
