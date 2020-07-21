@@ -23,9 +23,14 @@ trait IndexConfig {
   def keywordWithText(name: String) =
     keywordField(name).fields(textField("text"))
 
-  def englishTextField(name: String) =
+  def englishTextKeywordField(name: String) =
     textField(name).fields(
       keywordField("keyword"),
+      textField("english").analyzer("english")
+    )
+
+  def englishTextField(name: String) =
+    textField(name).fields(
       textField("english").analyzer("english")
     )
 
@@ -66,7 +71,7 @@ trait IndexConfig {
   val accessConditions =
     objectField("accessConditions")
       .fields(
-        englishTextField("terms"),
+        englishTextKeywordField("terms"),
         textField("to"),
         objectField("status").fields(keywordField("type"))
       )
