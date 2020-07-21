@@ -7,7 +7,4 @@ locals {
 
   prod_domain_name    = "catalogue.api.wellcomecollection.org"
   staging_domain_name = "catalogue.api-stage.wellcomecollection.org"
-
-  logstash_transit_service_name = "${local.namespace_hyphen}_logstash_transit"
-  logstash_host                 = "${local.logstash_transit_service_name}.${local.namespace_hyphen}"
 }
