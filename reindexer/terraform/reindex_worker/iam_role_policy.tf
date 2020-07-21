@@ -15,5 +15,5 @@ resource "aws_iam_role_policy" "allow_publish_to_sns" {
 
 resource "aws_iam_role_policy" "allow_queue_read" {
   role   = module.service.task_role_name
-  policy = data.aws_iam_policy_document.read_from_queue.json
+  policy = module.reindexer_queue.read_policy
 }
