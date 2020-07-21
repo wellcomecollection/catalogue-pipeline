@@ -5,13 +5,19 @@
     </encoder>
   </appender>
 
-  <root level="${log_level:-INFO}">
+  <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+    <queueSize>8192</queueSize>
+    <neverBlock>true</neverBlock>
     <appender-ref ref="STDOUT"/>
+  </appender>
+
+  <root level="${log_level:-INFO}">
+    <appender-ref ref="ASYNC"/>
   </root>
 
   <!-- reduce external logging -->
   <logger name="org.apache.http" level="ERROR"/>
   <logger name="io.netty" level="ERROR"/>
   <logger name="com.amazonaws" level="WARN"/>
-  <logger name="software.amazon" level="WARN"/
+  <logger name="software.amazon.awssdk" level="WARN"/>
 </configuration>
