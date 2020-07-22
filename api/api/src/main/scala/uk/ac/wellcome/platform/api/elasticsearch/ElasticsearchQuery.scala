@@ -166,11 +166,23 @@ final case class WorkIdQuery(q: String) extends ElasticsearchPartialQuery {
 }
 
 final case class ImageIdQuery(q: String) extends ElasticsearchPartialQuery {
+  private val sourceWorkIdFields = Seq(
+    "id.canonicalId.text",
+    "id.sourceIdentifier.value.text",
+    "id.otherIdentifiers.value.text"
+  )
+
   val idFields = Seq(
     "id.canonicalId.text",
     "id.sourceIdentifier.value.text",
-    "parentWork.text"
+  ) ++ sourceWorkIdFields.flatMap(
+    subField =>
+      Seq(
+        s"source.canonicalWork.$subField",
+        s"source.redirectedWork.$subField"
+    )
   )
+
   lazy val elasticQuery =
     MultiMatchQuery(
       fields = idFields.map(FieldWithOptionalBoost(_, None)),

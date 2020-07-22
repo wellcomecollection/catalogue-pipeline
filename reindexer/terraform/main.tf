@@ -17,6 +17,6 @@ module "reindex_worker" {
   private_subnets = local.private_subnets
   dlq_alarm_arn   = local.dlq_alarm_arn
 
-  service_env  = "prod"
+  service_env  = local.environment
   service_name = "reindexer"
 }
