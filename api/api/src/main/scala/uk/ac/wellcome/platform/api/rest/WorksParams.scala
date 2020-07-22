@@ -43,6 +43,7 @@ object SingleWorkParams extends QueryParamsUtils {
       "production" -> WorkInclude.Production,
       "notes" -> WorkInclude.Notes,
       "collection" -> WorkInclude.Collection,
+      "images" -> WorkInclude.Images,
     ).emap(values => Right(WorksIncludes(values)))
 }
 
