@@ -109,7 +109,7 @@ case object WorksIndexConfig extends IndexConfig {
   def items(fieldName: String) = objectField(fieldName).fields(
     id(),
     location(),
-    englishTextField("title"),
+    englishTextKeywordField("title"),
     keywordField("ontologyType")
   )
 
@@ -160,12 +160,10 @@ case object WorksIndexConfig extends IndexConfig {
       mergeCandidates,
       workType,
       title,
-      englishTextField("alternativeTitles"),
-      textField("description").fields(
-        textField("english").analyzer("english")
-      ),
-      englishTextField("physicalDescription"),
-      englishTextField("lettering"),
+      englishTextKeywordField("alternativeTitles"),
+      englishTextField("description"),
+      englishTextKeywordField("physicalDescription"),
+      englishTextKeywordField("lettering"),
       objectField("createdDate").fields(period),
       contributors,
       subjects,

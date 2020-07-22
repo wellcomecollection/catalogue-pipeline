@@ -6,9 +6,6 @@ locals {
   private_subnets                = data.terraform_remote_state.shared_infra.outputs.catalogue_vpc_private_subnets
   gateway_server_error_alarm_arn = data.terraform_remote_state.shared_infra.outputs.gateway_server_error_alarm_arn
 
-  logstash_transit_service_name = data.terraform_remote_state.catalogue_api_shared.outputs.logstash_transit_service_name
-  logstash_host                 = "${local.logstash_transit_service_name}.${local.namespace_hyphen}"
-
   api_gateway_id   = data.terraform_remote_state.catalogue_api_shared.outputs.api_gateway_id
   api_gateway_name = data.terraform_remote_state.catalogue_api_shared.outputs.api_gateway_name
   certificate_arn  = data.terraform_remote_state.catalogue_api_shared.outputs.certificate_arn

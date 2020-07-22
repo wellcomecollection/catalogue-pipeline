@@ -41,6 +41,31 @@ class ImagesTest extends ApiImagesTestBase with ElasticsearchFixtures {
     }
   }
 
+  it("returns only linked images when a source work ID is requested") {
+    withApi {
+      case (ElasticConfig(_, imagesIndex), routes) =>
+        val parentWork = createIdentifiedSierraWorkWith()
+        val workImages =
+          (0 to 3)
+            .map(_ => createAugmentedImageWith(parentWork = parentWork))
+            .toList
+        val otherImage = createAugmentedImage()
+        insertImagesIntoElasticsearch(imagesIndex, otherImage :: workImages: _*)
+        assertJsonResponse(
+          routes,
+          s"/$apiPrefix/images?query=${parentWork.canonicalId}",
+          unordered = true) {
+          Status.OK -> imagesListResponse(workImages)
+        }
+        assertJsonResponse(
+          routes,
+          s"/$apiPrefix/images?query=${parentWork.sourceIdentifier.value}",
+          unordered = true) {
+          Status.OK -> imagesListResponse(workImages)
+        }
+    }
+  }
+
   it("returns matching results when using work data") {
     withApi {
       case (ElasticConfig(_, imagesIndex), routes) =>

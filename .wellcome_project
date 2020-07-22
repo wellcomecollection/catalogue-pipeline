@@ -61,6 +61,12 @@ reindexer:
   environments:
     - id: prod
       name: Production
+  image_repositories:
+    - id: reindex_worker
+      namespace: uk.ac.wellcome
+      account_id: '760097843905'
+      services:
+        - reindexer
   name: Reindexer
   role_arn: arn:aws:iam::760097843905:role/platform-ci
   aws_region_name: eu-west-1

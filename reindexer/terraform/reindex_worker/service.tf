@@ -1,32 +1,38 @@
 module "service" {
-  source       = "../scaling_service"
-  service_name = var.namespace
+  source = "../../../infrastructure/modules/worker"
 
-  desired_task_count = 0
-  source_queue_name  = module.reindex_worker_queue.name
-  source_queue_arn   = module.reindex_worker_queue.arn
+  name = var.service_name
 
-  container_image    = var.reindex_worker_container_image
+  deployment_service_env  = var.service_env
+  deployment_service_name = var.service_name
+
+  image = var.reindex_worker_container_image
+
   security_group_ids = [var.service_egress_security_group_id]
 
   cpu    = 1024
   memory = 2048
 
   env_vars = {
-    reindex_jobs_queue_id     = module.reindex_worker_queue.url
-    metrics_namespace         = var.namespace
+    reindex_jobs_queue_id     = module.reindexer_queue.url
+    metrics_namespace         = var.service_name
     reindexer_job_config_json = var.reindexer_job_config_json
   }
 
   cluster_name = var.cluster_name
   cluster_arn  = var.cluster_arn
-  vpc_id       = var.vpc_id
 
-  aws_region = var.aws_region
-  subnets    = var.private_subnets
+  subnets = var.private_subnets
 
-  namespace_id = var.namespace_id
+  desired_task_count = 0
+  min_capacity       = 0
+  max_capacity       = 7
+}
 
-  min_capacity = 0
-  max_capacity = 7
+module "ingestor_works_scaling_alarm" {
+  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.3"
+  queue_name = module.reindexer_queue.name
+
+  queue_high_actions = [module.service.scale_up_arn]
+  queue_low_actions  = [module.service.scale_down_arn]
 }

@@ -2,8 +2,8 @@ module "catalogue_api_prod_20200520" {
   source = "../modules/stack"
 
   environment        = "prod"
-  instance           = "20200520"
-  listener_port      = 8080
+  instance           = "20200721"
+  listener_port      = 8081
   desired_task_count = 3
 
   namespace   = local.namespace
@@ -15,8 +15,6 @@ module "catalogue_api_prod_20200520" {
   lb_ingress_sg_id = local.service_lb_ingress_security_group_id
 
   egress_security_group_id = local.egress_security_group_id
-
-  logstash_host = local.logstash_host
 
   interservice_sg_id = local.interservice_security_group_id
 
