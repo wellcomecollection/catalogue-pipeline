@@ -61,4 +61,3 @@ module "catalogue_pipeline_20200717" {
   # Inferrer data
   inferrer_model_data_bucket_name = aws_s3_bucket.inferrer_model_core_data.id
 }
-
