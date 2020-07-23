@@ -81,6 +81,7 @@ class SnapshotGeneratorFeatureTest
               |  "production": [ ],
               |  "alternativeTitles": [ ],
               |  "notes": [ ],
+              |  "images": [ ],
               |  "type": "Work"
               |}""".stripMargin
           }

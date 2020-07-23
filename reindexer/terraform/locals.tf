@@ -1,8 +1,6 @@
-data "aws_ssm_parameter" "image" {
-  name = "/reindexer/images/latest/reindex_worker"
-}
-
 locals {
+  environment = "prod"
+
   vhs_sierra_table_name         = data.terraform_remote_state.sierra_adapter.outputs.vhs_table_name
   vhs_miro_table_name           = data.terraform_remote_state.catalogue_infra_critical.outputs.vhs_miro_table_name
   vhs_miro_inventory_table_name = data.terraform_remote_state.catalogue_infra_critical.outputs.vhs_miro_inventory_table_name
@@ -23,7 +21,7 @@ locals {
   private_subnets = data.terraform_remote_state.shared_infra.outputs.catalogue_vpc_delta_private_subnets
   dlq_alarm_arn   = data.terraform_remote_state.shared_infra.outputs.dlq_alarm_arn
 
-  reindex_worker_image = data.aws_ssm_parameter.image.value
+  reindex_worker_image = "${module.ecr_repository_reindex_worker.repository_url}:env.${local.environment}"
 
   # This map defines the possible reindexer configurations.
   #

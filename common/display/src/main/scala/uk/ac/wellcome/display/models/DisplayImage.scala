@@ -18,7 +18,7 @@ case class DisplayImage(
     description = "The locations which provide access to the image"
   ) locations: Seq[DisplayDigitalLocation],
   @Schema(
-    `type` = "uk.ac.wellcone.Display.models.DisplayImageSource",
+    `type` = "uk.ac.wellcome.Display.models.DisplayImageSource",
     description = "A description of the image's source"
   ) source: DisplayImageSource,
   @Schema(

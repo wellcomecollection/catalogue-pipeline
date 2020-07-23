@@ -96,6 +96,10 @@ case class DisplayWork(
     `type` = "Collection",
     description = "The partially expanded collection tree for this work."
   ) collection: Option[DisplayCollection] = None,
+  @Schema(
+    `type` = "List[uk.ac.wellcome.display.models.DisplayImageWorkInclude]",
+    description = "Identifiers of images that are sourced from this work"
+  ) images: Option[List[DisplayWorkImageInclude]] = None,
   @JsonKey("type") @Schema(name = "type") ontologyType: String = "Work"
 )
 
@@ -152,6 +156,10 @@ case object DisplayWork {
       collectionPath =
         if (includes.collection)
           work.data.collectionPath.map(DisplayCollectionPath(_))
+        else None,
+      images =
+        if (includes.images)
+          Some(work.data.images.map(DisplayWorkImageInclude(_)))
         else None
     )
 
