@@ -1,16 +1,22 @@
 package uk.ac.wellcome.platform.api.services
 
+import scala.concurrent.{ExecutionContext, Future}
+
 import co.elastic.apm.api.Transaction
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.get.GetResponse
-import com.sksamuel.elastic4s.requests.searches.{SearchRequest, SearchResponse}
+import com.sksamuel.elastic4s.requests.searches.{
+  MultiSearchRequest,
+  MultiSearchResponse,
+  SearchRequest,
+  SearchResponse
+}
 import com.sksamuel.elastic4s.{ElasticClient, ElasticError, Index, Response}
 import grizzled.slf4j.Logging
+
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.platform.api.Tracing
 import uk.ac.wellcome.platform.api.models._
-
-import scala.concurrent.{ExecutionContext, Future}
 
 case class ElasticsearchQueryOptions(filters: List[DocumentFilter],
                                      limit: Int,
@@ -52,7 +58,7 @@ class ElasticsearchService(elasticClient: ElasticClient)(
   def executeSearchRequest(
     request: SearchRequest): Future[Either[ElasticError, SearchResponse]] =
     spanFuture(
-      name = "ElasticSearch#executeQuery",
+      name = "ElasticSearch#executeSearchRequest",
       spanType = "request",
       subType = "elastic",
       action = "query"
@@ -65,6 +71,35 @@ class ElasticsearchService(elasticClient: ElasticClient)(
           responseOrError.map { res =>
             transaction.addLabel("elasticTook", res.took)
             res
+          }
+        }
+    }
+
+  def executeMultiSearchRequest(request: MultiSearchRequest)
+    : Future[Either[ElasticError, List[SearchResponse]]] =
+    spanFuture(
+      name = "ElasticSearch#executeMultiSearchRequest",
+      spanType = "request",
+      subType = "elastic",
+      action = "query"
+    ) {
+      debug(s"Sending ES multirequest: ${request.show}")
+      val transaction = Tracing.currentTransaction
+      withActiveTrace(elasticClient.execute(request))
+        .map(toEither)
+        .map { response =>
+          response.right.flatMap {
+            case MultiSearchResponse(items) =>
+              val results = items.map(_.response)
+              val error = results.collectFirst { case Left(err) => err }
+              error match {
+                case Some(err) => Left(err)
+                case None =>
+                  val responses = results.collect { case Right(resp) => resp }.toList
+                  val took = responses.map(_.took).sum
+                  transaction.addLabel("elasticTook", took)
+                  Right(responses)
+              }
           }
         }
     }

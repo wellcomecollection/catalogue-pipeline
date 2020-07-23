@@ -6,6 +6,7 @@ import com.sksamuel.elastic4s.requests.searches._
 import com.sksamuel.elastic4s.requests.searches.aggs._
 import com.sksamuel.elastic4s.requests.searches.queries._
 import com.sksamuel.elastic4s.requests.searches.sort._
+
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.platform.api.elasticsearch.ElasticsearchComboQuery
 import uk.ac.wellcome.platform.api.models._
