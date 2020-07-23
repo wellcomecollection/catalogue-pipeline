@@ -2,6 +2,7 @@ package uk.ac.wellcome.platform.api.works
 
 import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.models.work.generators.{
+  ImageGenerators,
   ProductionEventGenerators,
   SubjectGenerators
 }
@@ -10,7 +11,8 @@ import uk.ac.wellcome.models.work.internal._
 class WorksIncludesTest
     extends ApiWorksTestBase
     with ProductionEventGenerators
-    with SubjectGenerators {
+    with SubjectGenerators
+    with ImageGenerators {
 
   it(
     "includes a list of identifiers on a list endpoint if we pass ?include=identifiers") {
@@ -599,6 +601,74 @@ class WorksIncludesTest
               "id": "${work.canonicalId}",
               "title": "${work.data.title.get}",
               "alternativeTitles": []
+            }
+          """
+        }
+    }
+  }
+
+  it(
+    "includes a list of images on the list endpoint if we pass ?include=images") {
+    withApi {
+      case (ElasticConfig(worksIndex, _), routes) =>
+        val works = List(
+          createIdentifiedWorkWith(
+            canonicalId = "A",
+            images = (1 to 3).map(_ => createUnmergedImage.toIdentified).toList
+          ),
+          createIdentifiedWorkWith(
+            canonicalId = "B",
+            images = (1 to 3).map(_ => createUnmergedImage.toIdentified).toList
+          )
+        )
+
+        insertIntoElasticsearch(worksIndex, works: _*)
+
+        assertJsonResponse(routes, s"/$apiPrefix/works?include=images") {
+          Status.OK -> s"""
+            {
+              ${resultList(apiPrefix, totalResults = 2)},
+              "results": [
+                {
+                  "type": "Work",
+                  "id": "${works.head.canonicalId}",
+                  "title": "${works.head.data.title.get}",
+                  "alternativeTitles": [],
+                  "images": [${workImageIncludes(works.head.data.images)}]
+                },
+                {
+                  "type": "Work",
+                  "id": "${works(1).canonicalId}",
+                  "title": "${works(1).data.title.get}",
+                  "alternativeTitles": [],
+                  "images": [${workImageIncludes(works(1).data.images)}]
+                }
+              ]
+            }
+          """
+        }
+    }
+  }
+
+  it(
+    "includes a list of images on a single work endpoint if we pass ?include=images") {
+    withApi {
+      case (ElasticConfig(worksIndex, _), routes) =>
+        val images = (1 to 3).map(_ => createUnmergedImage.toIdentified).toList
+        val work = createIdentifiedWorkWith(images = images)
+
+        insertIntoElasticsearch(worksIndex, work)
+
+        assertJsonResponse(
+          routes,
+          s"/$apiPrefix/works/${work.canonicalId}?include=images") {
+          Status.OK -> s"""
+            {
+              ${singleWorkResult(apiPrefix)},
+              "id": "${work.canonicalId}",
+              "title": "${work.data.title.get}",
+              "alternativeTitles": [],
+              "images": [${workImageIncludes(images)}]
             }
           """
         }

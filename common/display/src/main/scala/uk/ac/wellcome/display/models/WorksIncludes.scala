@@ -11,6 +11,7 @@ object WorkInclude {
   case object Production extends WorkInclude
   case object Notes extends WorkInclude
   case object Collection extends WorkInclude
+  case object Images extends WorkInclude
 }
 
 case class WorksIncludes(includes: List[WorkInclude]) {
@@ -22,6 +23,7 @@ case class WorksIncludes(includes: List[WorkInclude]) {
   def production = includes.contains(WorkInclude.Production)
   def notes = includes.contains(WorkInclude.Notes)
   def collection = includes.contains(WorkInclude.Collection)
+  def images = includes.contains(WorkInclude.Images)
 }
 
 object WorksIncludes {
@@ -37,6 +39,7 @@ object WorksIncludes {
     production: Boolean = false,
     notes: Boolean = false,
     collection: Boolean = false,
+    images: Boolean = false,
   ): WorksIncludes = WorksIncludes(
     List(
       if (identifiers) Some(Identifiers) else None,
@@ -47,10 +50,11 @@ object WorksIncludes {
       if (production) Some(Production) else None,
       if (notes) Some(Notes) else None,
       if (collection) Some(Collection) else None,
+      if (images) Some(Images) else None,
     ).flatten
   )
 
   def includeAll(): WorksIncludes = WorksIncludes(
-    true, true, true, true, true, true, true, true
+    true, true, true, true, true, true, true, true, true
   )
 }

@@ -3,6 +3,7 @@ package uk.ac.wellcome.display.models
 import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.display.test.util.JsonMapperTestUtil
 import uk.ac.wellcome.models.work.generators.{
+  ImageGenerators,
   ProductionEventGenerators,
   SubjectGenerators,
   WorksGenerators
@@ -17,7 +18,8 @@ class DisplayWorkSerialisationTest
     with JsonMapperTestUtil
     with ProductionEventGenerators
     with SubjectGenerators
-    with WorksGenerators {
+    with WorksGenerators
+    with ImageGenerators {
 
   it("serialises a DisplayWork") {
     val work = createIdentifiedWorkWith(
@@ -326,6 +328,27 @@ class DisplayWorkSerialisationTest
     assertObjectMapsToJson(
       DisplayWork(work, includes = WorksIncludes(identifiers = true)),
       expectedJson = expectedJson
+    )
+  }
+
+  it("includes image stubs with the images include") {
+    val work = createIdentifiedWorkWith(
+      images = (1 to 3).map(_ => createUnmergedImage.toIdentified).toList
+    )
+
+    val expectedJson = s"""
+      |{
+      | "type": "Work",
+      | "id": "${work.canonicalId}",
+      | "title": "${work.data.title.get}",
+      | "alternativeTitles": [],
+      | "images": [${workImageIncludes(work.data.images)}]
+      |}
+    """.stripMargin
+
+    assertObjectMapsToJson(
+      DisplayWork(work, includes = WorksIncludes(images = true)),
+      expectedJson
     )
   }
 
