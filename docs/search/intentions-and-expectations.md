@@ -1,4 +1,8 @@
-# Query design
+---
+description: Ideas on users' search intentions
+---
+
+# Hypotheses
 
 Each intention is mapped to a query within Elastic.
 
@@ -53,11 +57,10 @@ Searching for an exact, ordered set of tokens, in quotation marks
 * Phrases are defined by tokens wrapped in quotation marks and should be matched exactly
 * Works matching individual tokens in the phrase should not be matched by this query
 
-#### Examples and analysis of 3-word searches (quoted percentages of total 653)
+#### Examples and analysis of 3-word searches \(quoted percentages of total 653\)
 
-* CITY OF WESTMINSTER: place names (8%)
-* glasgow royal infirmary: institutions + place names (2%)
-
+* CITY OF WESTMINSTER: place names \(8%\)
+* glasgow royal infirmary: institutions + place names \(2%\)
 * `The ocean as a health resort : a practical handbook of the sea for the use of tourists and health-seekers`- [https://wellcomecollection.org/works/uxxaqdkg](https://wellcomecollection.org/works/uxxaqdkg) should be the only result returned by this query
 
 ### Synonymous names and subjects
@@ -108,11 +111,10 @@ Searching for works with structurally important features in the query. Most usef
 * Searching for an exact title should show that title at the top of the list
 * Occurrences of ordered tokens matching the query should appear before the matches which occur in a different order 
 
-#### Examples and analysis of 3-word searches (quoted percentages of total 653) 
+#### Examples and analysis of 3-word searches \(quoted percentages of total 653\)
 
-* ORIGIN OF SPECIES: titles without quotation marks (9%)
-* "MEDICAL TIMES GAZETTE": titles with quotation marks (0.5%)
-
+* ORIGIN OF SPECIES: titles without quotation marks \(9%\)
+* "MEDICAL TIMES GAZETTE": titles with quotation marks \(0.5%\)
 * `east london` - [https://wellcomecollection.org/works/ufw89pqr](https://wellcomecollection.org/works/ufw89pqr) above [https://wellcomecollection.org/works/pabxvfqu](https://wellcomecollection.org/works/pabxvfqu)
 * `The ocean as a health resort : a practical handbook of the sea for the use of tourists and health-seekers`- [https://wellcomecollection.org/works/uxxaqdkg](https://wellcomecollection.org/works/uxxaqdkg) at the top of the list, with other works further down
 
@@ -194,11 +196,11 @@ Searching for works that have certain subjects associated with it.
 
   contributed towards are first results
 
-#### Examples and analysis of 3-word initial searches (quoted percentages of total 653)
+#### Examples and analysis of 3-word initial searches \(quoted percentages of total 653\)
 
-* A K JOHNSON: contributor consists of 3 words (25%)
-* "Holloway, Thomas, 1748-1827.": contributor combined with date (18%)
-* john snow map: contributor combined with other entity (3%)
+* A K JOHNSON: contributor consists of 3 words \(25%\)
+* "Holloway, Thomas, 1748-1827.": contributor combined with date \(18%\)
+* john snow map: contributor combined with other entity \(3%\)
 
 ### Subjects
 
@@ -220,11 +222,11 @@ Searching for works that have certain subjects associated with it.
 
   contributed towards are first results
 
-#### Examples and analysis of 3-word initial searches (quoted percentages of total 653)
+#### Examples and analysis of 3-word initial searches \(quoted percentages of total 653\)
 
-* Royal Astronomical Society: 3-word subjects with no quotation marks used, so no phrase matching (24%)
+* Royal Astronomical Society: 3-word subjects with no quotation marks used, so no phrase matching \(24%\)
 * cholera, london, patient: 3 distinct subjects but expectation is that first term will be boosted
-* "Colour vision defects." 2 subjects but spanning unequal word counts (4%)
+* "Colour vision defects." 2 subjects but spanning unequal word counts \(4%\)
 
 ### Genres
 
@@ -246,10 +248,10 @@ Searching for works that have certain genres associated with it.
 
   contributed towards are first results
 
-#### Examples and analysis of 3-word initial searches (quoted percentages of total 653)
+#### Examples and analysis of 3-word initial searches \(quoted percentages of total 653\)
 
-* Lithographs human anatomy: genres combined with other entities (3%)
-* paintings still life: queries including genres (4%)
+* Lithographs human anatomy: genres combined with other entities \(3%\)
+* paintings still life: queries including genres \(4%\)
 
 ### General
 
@@ -283,3 +285,4 @@ Searching the catalogue for general information
 #### Examples
 
 TBD
+
