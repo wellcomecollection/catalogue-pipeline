@@ -58,7 +58,7 @@ class ElasticsearchService(elasticClient: ElasticClient)(
   def executeSearchRequest(
     request: SearchRequest): Future[Either[ElasticError, SearchResponse]] =
     spanFuture(
-      name = "ElasticSearch#executeQuery",
+      name = "ElasticSearch#executeSearchRequest",
       spanType = "request",
       subType = "elastic",
       action = "query"
@@ -78,7 +78,7 @@ class ElasticsearchService(elasticClient: ElasticClient)(
   def executeMultiSearchRequest(request: MultiSearchRequest)
     : Future[Either[ElasticError, List[SearchResponse]]] =
     spanFuture(
-      name = "ElasticSearch#executeQuery",
+      name = "ElasticSearch#executeMultiSearchRequest",
       spanType = "request",
       subType = "elastic",
       action = "query"
@@ -95,13 +95,10 @@ class ElasticsearchService(elasticClient: ElasticClient)(
               error match {
                 case Some(err) => Left(err)
                 case None =>
-                  Right(
-                    results.collect {
-                      case Right(resp) =>
-                        transaction.addLabel("elasticTook", resp.took)
-                        resp
-                    }.toList
-                  )
+                  val responses = results.collect { case Right(resp) => resp }.toList
+                  val took = responses.map(_.took).sum
+                  transaction.addLabel("elasticTook", took)
+                  Right(responses)
               }
           }
         }
