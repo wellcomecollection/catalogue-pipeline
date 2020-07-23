@@ -100,6 +100,22 @@ case class DisplayWork(
     `type` = "List[uk.ac.wellcome.display.models.DisplayImageWorkInclude]",
     description = "Identifiers of images that are sourced from this work"
   ) images: Option[List[DisplayWorkImageInclude]] = None,
+  @Schema(
+    `type` = "List[Work]",
+    description = "Child works."
+  ) parts: Option[List[DisplayWork]] = None,
+  @Schema(
+    `type` = "List[Work]",
+    description = "Ancestor works."
+  ) partOf: Option[List[DisplayWork]] = None,
+  @Schema(
+    `type` = "List[Work]",
+    description = "Sibling works earlier in a series."
+  ) preceededBy: Option[List[DisplayWork]] = None,
+  @Schema(
+    `type` = "List[Work]",
+    description = "Sibling works later in a series."
+  ) suceededBy: Option[List[DisplayWork]] = None,
   @JsonKey("type") @Schema(name = "type") ontologyType: String = "Work"
 )
 
