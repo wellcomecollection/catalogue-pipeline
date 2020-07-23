@@ -4,13 +4,11 @@ mets_adapter:
       name: Production
   image_repositories:
     - id: mets_adapter
-      namespace: uk.ac.wellcome
-      account_id: '760097843905'
       services:
-        - mets-adapter
+        - id: mets-adapter
   name: METS Adapter
   role_arn: arn:aws:iam::760097843905:role/platform-ci
-  aws_region_name: eu-west-1
+  github_repository: wellcometrust/catalogue
 
 calm_adapter:
   environments:
@@ -18,13 +16,11 @@ calm_adapter:
       name: Production
   image_repositories:
     - id: calm_adapter
-      namespace: uk.ac.wellcome
-      account_id: '760097843905'
       services:
-        - calm-adapter
+        - id: calm-adapter
   name: Calm Adapter
   role_arn: arn:aws:iam::760097843905:role/platform-ci
-  aws_region_name: eu-west-1
+  github_repository: wellcometrust/catalogue
 
 sierra_adapter:
   environments:
@@ -32,29 +28,20 @@ sierra_adapter:
       name: Production
   image_repositories:
     - id: sierra_bib_merger
-      namespace: uk.ac.wellcome
-      account_id: '760097843905'
       services:
-        - bibs-merger
+        - id: bibs-merger
     - id: sierra_item_merger
-      namespace: uk.ac.wellcome
-      account_id: '760097843905'
       services:
-        - items-merger
+        - id: items-merger
     - id: sierra_items_to_dynamo
-      namespace: uk.ac.wellcome
-      account_id: '760097843905'
       services:
-        - items-to-dynamo
+        - id: items-to-dynamo
     - id: sierra_reader
-      namespace: uk.ac.wellcome
-      account_id: '760097843905'
       services:
-        - items-reader
-        - bibs-reader
+        - id: items-reader
+        - id: bibs-reader
   name: Sierra Adapter
   role_arn: arn:aws:iam::760097843905:role/platform-ci
-  aws_region_name: eu-west-1
   github_repository: wellcometrust/catalogue
 
 reindexer:
@@ -63,13 +50,10 @@ reindexer:
       name: Production
   image_repositories:
     - id: reindex_worker
-      namespace: uk.ac.wellcome
-      account_id: '760097843905'
       services:
-        - reindexer
+        - id: reindexer
   name: Reindexer
   role_arn: arn:aws:iam::760097843905:role/platform-ci
-  aws_region_name: eu-west-1
   github_repository: wellcometrust/catalogue
 
 catalogue_pipeline:
@@ -80,69 +64,44 @@ catalogue_pipeline:
       name: Latest
   image_repositories:
     - id: id_minter
-      namespace: uk.ac.wellcome
-      account_id: '760097843905'
       services:
-        - image-id-minter
-        - work-id-minter
+        - id: image-id-minter
+        - id: work-id-minter
     - id: inference_manager
-      namespace: uk.ac.wellcome
-      account_id: '760097843905'
       services:
-        - image-inferrer
+        - id: image-inferrer
     - id: feature_inferrer
-      namespace: uk.ac.wellcome
-      account_id: '760097843905'
       services:
-        - image-inferrer
+        - id: image-inferrer
     - id: matcher
-      namespace: uk.ac.wellcome
-      account_id: '760097843905'
       services:
-        - matcher
+        - id: matcher
     - id: merger
-      namespace: uk.ac.wellcome
-      account_id: '760097843905'
       services:
-        - merger
+        - id: merger
     - id: recorder
-      namespace: uk.ac.wellcome
-      account_id: '760097843905'
       services:
-        - recorder
+        - id: recorder
     - id: ingestor_images
-      namespace: uk.ac.wellcome
-      account_id: '760097843905'
       services:
-        - image-ingestor
+        - id: image-ingestor
     - id: ingestor_works
-      namespace: uk.ac.wellcome
-      account_id: '760097843905'
       services:
-        - work-ingestor
+        - id: work-ingestor
     - id: transformer_calm
-      namespace: uk.ac.wellcome
-      account_id: '760097843905'
       services:
-        - calm-transformer
+        - id: calm-transformer
     - id: transformer_mets
-      namespace: uk.ac.wellcome
-      account_id: '760097843905'
       services:
-        - mets-transformer
+        - id: mets-transformer
     - id: transformer_miro
-      namespace: uk.ac.wellcome
-      account_id: '760097843905'
       services:
-        - miro-transformer
+        - id: miro-transformer
     - id: transformer_sierra
-      namespace: uk.ac.wellcome
-      account_id: '760097843905'
       services:
-        - sierra-transformer
+        - id: sierra-transformer
   name: Catalogue pipeline
   role_arn: arn:aws:iam::760097843905:role/platform-ci
-  aws_region_name: eu-west-1
   github_repository: wellcometrust/catalogue
 
 catalogue_api:
@@ -151,7 +110,13 @@ catalogue_api:
       name: Staging
     - id: prod
       name: Production
+  image_repositories:
+    - id: api
+      namespace: uk.ac.wellcome
+      account_id: '760097843905'
+      services:
+        - id: catalogue-api
+          role_arn: arn:aws:iam::756629837203:role/catalogue-ci
   name: Catalogue API
   role_arn: arn:aws:iam::760097843905:role/platform-ci
-  aws_region_name: eu-west-1
   github_repository: wellcometrust/catalogue

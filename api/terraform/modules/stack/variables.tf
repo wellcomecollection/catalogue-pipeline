@@ -28,3 +28,7 @@ variable "lb_ingress_sg_id" {}
 variable "interservice_sg_id" {}
 
 variable "service_discovery_namespace_id" {}
+
+variable "api_container_image" {
+  type = string
+}

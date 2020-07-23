@@ -1,6 +1,9 @@
 locals {
+  api_container_port = 8888
+
   suffix         = var.instance != "" ? "-${var.instance}" : ""
   namespaced_env = "${var.namespace}-${var.environment}${local.suffix}"
+
 }
 
 module "service" {
@@ -19,7 +22,7 @@ module "service" {
 
   container_port = local.api_container_port
 
-  container_image = local.api_container_image
+  container_image = var.api_container_image
 
   load_balancer_listener_port = var.listener_port
 
