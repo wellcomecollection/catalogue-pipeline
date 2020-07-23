@@ -6,7 +6,7 @@ import uk.ac.wellcome.models.work.internal.{Identified, Minted, UnmergedImage}
 
 @Schema(
   name = "Image",
-  description = "A partial Image included on a work"
+  description = "An Image stub included on a work"
 )
 case class DisplayWorkImageInclude(
   @Schema(description = "The image ID") id: String,
