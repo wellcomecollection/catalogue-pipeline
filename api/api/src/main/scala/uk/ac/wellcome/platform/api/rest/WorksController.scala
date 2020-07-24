@@ -13,9 +13,9 @@ import uk.ac.wellcome.platform.api.models.ApiConfig
 import uk.ac.wellcome.platform.api.services.{
   CollectionService,
   ElasticsearchService,
-  WorksService,
   RelatedWorkService,
-  RelatedWorks
+  RelatedWorks,
+  WorksService
 }
 import uk.ac.wellcome.platform.api.Tracing
 
@@ -71,8 +71,7 @@ class WorksController(
                 retrieveRelatedWorks(index, work).map { relatedWorks =>
                   workFound(work, relatedWorks, None, includes)
                 }
-              }
-              else if (includes.collection) {
+              } else if (includes.collection) {
                 val expandedPaths = params._expandPaths.getOrElse(Nil)
                 retrieveTree(index, work, expandedPaths).map { tree =>
                   workFound(work, None, tree, includes)
@@ -142,22 +141,26 @@ class WorksController(
             case (tree, expandedPaths) =>
               DisplayCollection(tree, expandedPaths)
           },
-          parts = if (includes.parts)
-            relatedWorks.map { relatedWorks =>
-              relatedWorks.parts.map(DisplayWork(_))
-            } else None,
-          partOf = if (includes.partOf)
-            relatedWorks.map { relatedWorks =>
-              relatedWorks.partOf.map(DisplayWork(_))
-            } else None,
-          precededBy = if (includes.precededBy)
-            relatedWorks.map { relatedWorks =>
-              relatedWorks.precededBy.map(DisplayWork(_))
-            } else None,
-          succeededBy = if (includes.succeededBy)
-            relatedWorks.map { relatedWorks =>
-              relatedWorks.succeededBy.map(DisplayWork(_))
-            } else None,
+          parts =
+            if (includes.parts)
+              relatedWorks.map { relatedWorks =>
+                relatedWorks.parts.map(DisplayWork(_))
+              } else None,
+          partOf =
+            if (includes.partOf)
+              relatedWorks.map { relatedWorks =>
+                relatedWorks.partOf.map(DisplayWork(_))
+              } else None,
+          precededBy =
+            if (includes.precededBy)
+              relatedWorks.map { relatedWorks =>
+                relatedWorks.precededBy.map(DisplayWork(_))
+              } else None,
+          succeededBy =
+            if (includes.succeededBy)
+              relatedWorks.map { relatedWorks =>
+                relatedWorks.succeededBy.map(DisplayWork(_))
+              } else None,
         )
       )
     )

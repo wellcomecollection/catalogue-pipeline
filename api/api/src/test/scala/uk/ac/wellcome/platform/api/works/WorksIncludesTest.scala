@@ -189,7 +189,8 @@ class WorksIncludesTest
   }
 
   describe("genre includes") {
-    it("includes a list of genres on a list endpoint if we pass ?include=genres") {
+    it(
+      "includes a list of genres on a list endpoint if we pass ?include=genres") {
       withApi {
         case (ElasticConfig(worksIndex, _), routes) =>
           val genres1 = List(Genre("ornithology", List(Concept("ornithology"))))
@@ -495,9 +496,9 @@ class WorksIncludesTest
     }
   }
 
-
   describe("collection includes") {
-    it("includes collection on the list endpoint if we pass ?include=collection") {
+    it(
+      "includes collection on the list endpoint if we pass ?include=collection") {
       withApi {
         case (ElasticConfig(worksIndex, _), routes) =>
           val works = List(
@@ -557,9 +558,8 @@ class WorksIncludesTest
       "includes collection on the single work endpoint if we pass ?include=collection") {
       withApi {
         case (ElasticConfig(worksIndex, _), routes) =>
-          val work = createIdentifiedWorkWith(
-            collectionPath = Some(
-              CollectionPath("PP/MI", Some(CollectionLevel.Item), Some("PP/MI"))))
+          val work = createIdentifiedWorkWith(collectionPath = Some(
+            CollectionPath("PP/MI", Some(CollectionLevel.Item), Some("PP/MI"))))
           insertIntoElasticsearch(worksIndex, work)
           assertJsonResponse(
             routes,
@@ -632,11 +632,13 @@ class WorksIncludesTest
           val works = List(
             createIdentifiedWorkWith(
               canonicalId = "A",
-              images = (1 to 3).map(_ => createUnmergedImage.toIdentified).toList
+              images =
+                (1 to 3).map(_ => createUnmergedImage.toIdentified).toList
             ),
             createIdentifiedWorkWith(
               canonicalId = "B",
-              images = (1 to 3).map(_ => createUnmergedImage.toIdentified).toList
+              images =
+                (1 to 3).map(_ => createUnmergedImage.toIdentified).toList
             )
           )
 
@@ -672,7 +674,8 @@ class WorksIncludesTest
       "includes a list of images on a single work endpoint if we pass ?include=images") {
       withApi {
         case (ElasticConfig(worksIndex, _), routes) =>
-          val images = (1 to 3).map(_ => createUnmergedImage.toIdentified).toList
+          val images =
+            (1 to 3).map(_ => createUnmergedImage.toIdentified).toList
           val work = createIdentifiedWorkWith(images = images)
 
           insertIntoElasticsearch(worksIndex, work)
@@ -712,12 +715,13 @@ class WorksIncludesTest
       insertIntoElasticsearch(index, workA, workB, workC, workD, workE)
 
     it("includes parts") {
-      withApi { case (ElasticConfig(index, _), routes) =>
-        storeWorks(index)
-        assertJsonResponse(
-          routes,
-          s"/$apiPrefix/works/${workC.canonicalId}?include=parts") {
-          Status.OK -> s"""
+      withApi {
+        case (ElasticConfig(index, _), routes) =>
+          storeWorks(index)
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works/${workC.canonicalId}?include=parts") {
+            Status.OK -> s"""
             {
               ${singleWorkResult(apiPrefix)},
               "id": "${workC.canonicalId}",
@@ -731,17 +735,18 @@ class WorksIncludesTest
               }]
             }
           """
-        }
+          }
       }
     }
 
     it("includes partOf") {
-      withApi { case (ElasticConfig(index, _), routes) =>
-        storeWorks(index)
-        assertJsonResponse(
-          routes,
-          s"/$apiPrefix/works/${workC.canonicalId}?include=partOf") {
-          Status.OK -> s"""
+      withApi {
+        case (ElasticConfig(index, _), routes) =>
+          storeWorks(index)
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works/${workC.canonicalId}?include=partOf") {
+            Status.OK -> s"""
             {
               ${singleWorkResult(apiPrefix)},
               "id": "${workC.canonicalId}",
@@ -755,17 +760,18 @@ class WorksIncludesTest
               }]
             }
           """
-        }
+          }
       }
     }
 
     it("includes precededBy") {
-      withApi { case (ElasticConfig(index, _), routes) =>
-        storeWorks(index)
-        assertJsonResponse(
-          routes,
-          s"/$apiPrefix/works/${workC.canonicalId}?include=precededBy") {
-          Status.OK -> s"""
+      withApi {
+        case (ElasticConfig(index, _), routes) =>
+          storeWorks(index)
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works/${workC.canonicalId}?include=precededBy") {
+            Status.OK -> s"""
             {
               ${singleWorkResult(apiPrefix)},
               "id": "${workC.canonicalId}",
@@ -779,17 +785,18 @@ class WorksIncludesTest
               }]
             }
           """
-        }
+          }
       }
     }
 
     it("includes succeededBy") {
-      withApi { case (ElasticConfig(index, _), routes) =>
-        storeWorks(index)
-        assertJsonResponse(
-          routes,
-          s"/$apiPrefix/works/${workC.canonicalId}?include=succeededBy") {
-          Status.OK -> s"""
+      withApi {
+        case (ElasticConfig(index, _), routes) =>
+          storeWorks(index)
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works/${workC.canonicalId}?include=succeededBy") {
+            Status.OK -> s"""
             {
               ${singleWorkResult(apiPrefix)},
               "id": "${workC.canonicalId}",
@@ -803,7 +810,7 @@ class WorksIncludesTest
               }]
             }
           """
-        }
+          }
       }
     }
   }
