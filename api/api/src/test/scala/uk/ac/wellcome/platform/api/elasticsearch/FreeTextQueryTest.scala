@@ -15,8 +15,9 @@ import uk.ac.wellcome.models.work.generators.{
 }
 import uk.ac.wellcome.models.work.internal.{CollectionPath, IdentifiedBaseWork}
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
-import uk.ac.wellcome.platform.api.models.{SearchQuery, SearchQueryType}
+import uk.ac.wellcome.platform.api.models.{SearchQuery}
 import uk.ac.wellcome.models.Implicits._
+import uk.ac.wellcome.platform.api.models.SearchQueryType.PhraserBeam
 import uk.ac.wellcome.platform.api.services.{
   ElasticsearchQueryOptions,
   ElasticsearchService,
@@ -340,16 +341,16 @@ class FreeTextQueryTest
     index: Index,
     query: String,
     matches: List[IdentifiedBaseWork]) = {
-    SearchQueryType.allowed foreach { queryType =>
-      val results = searchResults(
-        index,
-        queryOptions = createElasticsearchQueryOptionsWith(
-          searchQuery = Some(SearchQuery(query, queryType))))
 
-      withClue(s"Using: ${queryType.name}") {
-        results should contain theSameElementsAs (matches)
-      }
+    val results = searchResults(
+      index,
+      queryOptions = createElasticsearchQueryOptionsWith(
+        searchQuery = Some(SearchQuery(query, PhraserBeam))))
+
+    withClue(s"Using: PhraserBeam") {
+      results should contain theSameElementsAs (matches)
     }
+
   }
 
   private def searchResults(index: Index,

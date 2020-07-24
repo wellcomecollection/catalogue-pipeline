@@ -13,9 +13,11 @@ import uk.ac.wellcome.models.work.generators.{
 }
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
 import uk.ac.wellcome.platform.api.services.ElasticsearchService
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Random
 import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.requests.searches.queries.Query
 import com.sksamuel.elastic4s.requests.searches.sort.SortOrder
 import org.scalatest.funspec.AnyFunSpec
 
@@ -108,7 +110,7 @@ class QueryVariantsTest
           * BoolBoosted multiplies the tf/idf score, so the nuance within each tier is respected.
           * BoolBoosted is the boss of you.
           */
-        whenReady(elasticQuery(index, BoolBoostedQuery("Rain"))) { resp =>
+        whenReady(elasticQuery(index, WorksMultiMatcher("Rain"))) { resp =>
           resp.hits.hits.map(_.id).toList should be(
             List(
               "5",
@@ -140,7 +142,7 @@ class QueryVariantsTest
                   title = Some(s._2))): _*
         )
 
-        whenReady(elasticQuery(index, PhraserBeamQuery("Krishna"))) { resp =>
+        whenReady(elasticQuery(index, WorksPhraserBeam("Krishna"))) { resp =>
           resp.hits.hits.map(_.id).toList should be(
             List(
               "4ExactMatch",
@@ -152,10 +154,10 @@ class QueryVariantsTest
     }
   }
 
-  private def elasticQuery(index: Index, query: ElasticsearchQuery) = {
+  private def elasticQuery(index: Index, query: Query) = {
     val request = search(index)
       .query(
-        query.elasticQuery
+        query
       )
       .sortBy(
         fieldSort("_score").order(SortOrder.DESC),
