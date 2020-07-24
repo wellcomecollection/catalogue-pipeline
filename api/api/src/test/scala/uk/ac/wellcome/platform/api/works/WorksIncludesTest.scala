@@ -1,5 +1,7 @@
 package uk.ac.wellcome.platform.api.works
 
+import com.sksamuel.elastic4s.Index
+
 import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.models.work.generators.{
   ImageGenerators,
@@ -688,6 +690,120 @@ class WorksIncludesTest
               }
             """
           }
+      }
+    }
+  }
+
+  describe("relation includes") {
+    def work(path: String) =
+      createIdentifiedWorkWith(
+        collectionPath = Some(CollectionPath(path = path)),
+        title = Some(path),
+        sourceIdentifier = createSourceIdentifierWith(value = path)
+      )
+
+    val workA = work("a")
+    val workB = work("a/b")
+    val workC = work("a/c")
+    val workD = work("a/d")
+    val workE = work("a/c/e")
+
+    def storeWorks(index: Index) =
+      insertIntoElasticsearch(index, workA, workB, workC, workD, workE)
+
+    it("includes parts") {
+      withApi { case (ElasticConfig(index, _), routes) =>
+        storeWorks(index)
+        assertJsonResponse(
+          routes,
+          s"/$apiPrefix/works/${workC.canonicalId}?include=parts") {
+          Status.OK -> s"""
+            {
+              ${singleWorkResult(apiPrefix)},
+              "id": "${workC.canonicalId}",
+              "title": "a/c",
+              "alternativeTitles": [],
+              "parts": [{
+                "id": "${workE.canonicalId}",
+                "title": "a/c/e",
+                "alternativeTitles": [],
+                "type": "Work"
+              }]
+            }
+          """
+        }
+      }
+    }
+
+    it("includes partOf") {
+      withApi { case (ElasticConfig(index, _), routes) =>
+        storeWorks(index)
+        assertJsonResponse(
+          routes,
+          s"/$apiPrefix/works/${workC.canonicalId}?include=partOf") {
+          Status.OK -> s"""
+            {
+              ${singleWorkResult(apiPrefix)},
+              "id": "${workC.canonicalId}",
+              "title": "a/c",
+              "alternativeTitles": [],
+              "partOf": [{
+                "id": "${workA.canonicalId}",
+                "title": "a",
+                "alternativeTitles": [],
+                "type": "Work"
+              }]
+            }
+          """
+        }
+      }
+    }
+
+    it("includes precededBy") {
+      withApi { case (ElasticConfig(index, _), routes) =>
+        storeWorks(index)
+        assertJsonResponse(
+          routes,
+          s"/$apiPrefix/works/${workC.canonicalId}?include=precededBy") {
+          Status.OK -> s"""
+            {
+              ${singleWorkResult(apiPrefix)},
+              "id": "${workC.canonicalId}",
+              "title": "a/c",
+              "alternativeTitles": [],
+              "precededBy": [{
+                "id": "${workB.canonicalId}",
+                "title": "a/b",
+                "alternativeTitles": [],
+                "type": "Work"
+              }]
+            }
+          """
+        }
+      }
+    }
+
+    it("includes succeededBy") {
+      withApi { case (ElasticConfig(index, _), routes) =>
+        storeWorks(index)
+        assertJsonResponse(
+          routes,
+          s"/$apiPrefix/works/${workC.canonicalId}?include=succeededBy") {
+          Status.OK -> s"""
+            {
+              ${singleWorkResult(apiPrefix)},
+              "id": "${workC.canonicalId}",
+              "title": "a/c",
+              "alternativeTitles": [],
+              "succeededBy": [{
+                "id": "${workD.canonicalId}",
+                "title": "a/d",
+                "alternativeTitles": [],
+                "type": "Work"
+              }]
+            }
+          """
+        }
       }
     }
   }
