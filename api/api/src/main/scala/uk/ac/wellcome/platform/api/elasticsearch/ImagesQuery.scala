@@ -11,9 +11,7 @@ import com.sksamuel.elastic4s.requests.searches.queries.matches.{
   MultiMatchQuery
 }
 
-trait ImagesQuery
-
-case object ImagesMultiMatcher extends ImagesQuery {
+case object ImagesMultiMatcher {
   def apply(q: String): BoolQuery = {
     val fields = Seq(
       "data.subjects.concepts.label",
@@ -71,7 +69,7 @@ case object ImagesMultiMatcher extends ImagesQuery {
   }
 }
 
-case object ImagesSimilarity extends ImagesQuery {
+case object ImagesSimilarity {
   def apply(q: String, index: Index): Query = {
     val lshFields = List("inferredData.lshEncodedFeatures")
     val documentRef = DocumentRef(index, q)
@@ -84,5 +82,4 @@ case object ImagesSimilarity extends ImagesQuery {
         minShouldMatch = Some("1")
       )
   }
-
 }

@@ -13,9 +13,7 @@ import com.sksamuel.elastic4s.requests.searches.queries.matches.{
   MultiMatchQuery
 }
 
-trait WorksQuery
-
-case object WorksMultiMatcher extends WorksQuery {
+case object WorksMultiMatcher {
   def apply(q: String): BoolQuery = {
     boolQuery().should(
       prefixQuery("data.title.keyword", q).boost(1000),
@@ -49,7 +47,7 @@ case object WorksMultiMatcher extends WorksQuery {
   }
 }
 
-case object WorksPhraserBeam extends WorksQuery {
+case object WorksPhraserBeam {
   def apply(q: String): BoolQuery = {
     val fields = Seq(
       "data.subjects.concepts.label",
