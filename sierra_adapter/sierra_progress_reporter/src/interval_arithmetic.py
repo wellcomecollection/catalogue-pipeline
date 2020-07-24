@@ -21,6 +21,11 @@ class Interval:
     __str__ = __repr__
 
 
+def strip_timestamp(timestamp):
+    # The timezone offset may or may not be present, remove it if it's there
+    return timestamp.strip("Z").replace("+00-00", "")
+
+
 def get_intervals(keys):
     """
     Generate the intervals completed for a particular resource type.
@@ -31,8 +36,8 @@ def get_intervals(keys):
     for k in keys:
         name = os.path.basename(k)
         start, end = name.split("__")
-        start = start.strip("Z")
-        end = end.strip("Z")
+        start = strip_timestamp(start)
+        end = strip_timestamp(end)
         try:
             yield Interval(
                 start=dt.datetime.strptime(start, "%Y-%m-%dT%H-%M-%S.%f"),

@@ -31,6 +31,9 @@ module "miro_transformer" {
   max_capacity        = 10
   messages_bucket_arn = aws_s3_bucket.messages.arn
   queue_read_policy   = module.miro_transformer_queue.read_policy
+
+  deployment_service_env  = var.release_label
+  deployment_service_name = "miro-transformer"
 }
 
 resource "aws_iam_role_policy" "miro_transformer_vhs_miro_adapter_read" {

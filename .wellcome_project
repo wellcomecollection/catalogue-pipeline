@@ -1,48 +1,122 @@
-{
-    "catalogue_pipeline":  {
-        "environments":  [
-            {
-                "id": "latest",
-                "name": "Latest"
-            },
-            {
-                "id": "stage",
-                "name": "Staging"
-            },
-            {
-                "id": "prod",
-                "name": "Production"
-            },
-            {
-                "id": "miro_merging_test",
-                "name": "Miro merging test"
-            }
-        ],
-        "name": "Catalogue pipeline",
-        "role_arn": "arn:aws:iam::760097843905:role/platform-developer",
-        "aws_region_name": "eu-west-1",
-        "github_repository": "wellcometrust/catalogue",
-        "tf_stack_root": "pipeline/terraform"
-    },
-    "catalogue_api":  {
-        "environments":  [
-            {
-                "id": "latest",
-                "name": "Latest"
-            },
-            {
-                "id": "staging",
-                "name": "Staging"
-            },
-            {
-                "id": "prod",
-                "name": "Production"
-            }
-        ],
-        "name": "Catalogue API",
-        "role_arn": "arn:aws:iam::760097843905:role/platform-developer",
-        "aws_region_name": "eu-west-1",
-        "github_repository": "wellcometrust/catalogue",
-        "tf_stack_root": "api/terraform"
-    }
-}
+mets_adapter:
+  environments:
+    - id: prod
+      name: Production
+  image_repositories:
+    - id: mets_adapter
+      services:
+        - id: mets-adapter
+  name: METS Adapter
+  role_arn: arn:aws:iam::760097843905:role/platform-ci
+  github_repository: wellcometrust/catalogue
+
+calm_adapter:
+  environments:
+    - id: prod
+      name: Production
+  image_repositories:
+    - id: calm_adapter
+      services:
+        - id: calm-adapter
+  name: Calm Adapter
+  role_arn: arn:aws:iam::760097843905:role/platform-ci
+  github_repository: wellcometrust/catalogue
+
+sierra_adapter:
+  environments:
+    - id: prod
+      name: Production
+  image_repositories:
+    - id: sierra_bib_merger
+      services:
+        - id: bibs-merger
+    - id: sierra_item_merger
+      services:
+        - id: items-merger
+    - id: sierra_items_to_dynamo
+      services:
+        - id: items-to-dynamo
+    - id: sierra_reader
+      services:
+        - id: items-reader
+        - id: bibs-reader
+  name: Sierra Adapter
+  role_arn: arn:aws:iam::760097843905:role/platform-ci
+  github_repository: wellcometrust/catalogue
+
+reindexer:
+  environments:
+    - id: prod
+      name: Production
+  image_repositories:
+    - id: reindex_worker
+      services:
+        - id: reindexer
+  name: Reindexer
+  role_arn: arn:aws:iam::760097843905:role/platform-ci
+  github_repository: wellcometrust/catalogue
+
+catalogue_pipeline:
+  environments:
+    - id: prod
+      name: Production
+    - id: latest
+      name: Latest
+  image_repositories:
+    - id: id_minter
+      services:
+        - id: image-id-minter
+        - id: work-id-minter
+    - id: inference_manager
+      services:
+        - id: image-inferrer
+    - id: feature_inferrer
+      services:
+        - id: image-inferrer
+    - id: matcher
+      services:
+        - id: matcher
+    - id: merger
+      services:
+        - id: merger
+    - id: recorder
+      services:
+        - id: recorder
+    - id: ingestor_images
+      services:
+        - id: image-ingestor
+    - id: ingestor_works
+      services:
+        - id: work-ingestor
+    - id: transformer_calm
+      services:
+        - id: calm-transformer
+    - id: transformer_mets
+      services:
+        - id: mets-transformer
+    - id: transformer_miro
+      services:
+        - id: miro-transformer
+    - id: transformer_sierra
+      services:
+        - id: sierra-transformer
+  name: Catalogue pipeline
+  role_arn: arn:aws:iam::760097843905:role/platform-ci
+  github_repository: wellcometrust/catalogue
+
+catalogue_api:
+  environments:
+    - id: staging
+      name: Staging
+    - id: prod
+      name: Production
+  image_repositories:
+    - id: api
+      namespace: uk.ac.wellcome
+      account_id: '760097843905'
+      services:
+        - id: catalogue-api
+          role_arn: arn:aws:iam::756629837203:role/catalogue-ci
+  name: Catalogue API
+  role_arn: arn:aws:iam::760097843905:role/platform-ci
+  github_repository: wellcometrust/catalogue

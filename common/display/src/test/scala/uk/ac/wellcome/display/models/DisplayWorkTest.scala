@@ -9,6 +9,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import uk.ac.wellcome.models.work.generators.{
+  ImageGenerators,
   ProductionEventGenerators,
   WorksGenerators
 }
@@ -20,6 +21,7 @@ class DisplayWorkTest
     with Matchers
     with ProductionEventGenerators
     with WorksGenerators
+    with ImageGenerators
     with ScalaCheckPropertyChecks {
 
   // We use this for the scalacheck of the java.time.Instant type
@@ -318,7 +320,8 @@ class DisplayWorkTest
             )
           )
         )
-      )
+      ),
+      images = (1 to 5).map(_ => createUnmergedImage.toIdentified).toList
     )
 
     describe("omits identifiers if WorksIncludes.identifiers is false") {
@@ -426,6 +429,16 @@ class DisplayWorkTest
             includes = WorksIncludes(identifiers = true, genres = true))
         displayWork.genres.get.head.concepts.head.identifiers shouldBe Some(
           List(DisplayIdentifier(conceptSourceIdentifier)))
+      }
+
+      it("images") {
+        val displayWork = DisplayWork(
+          work,
+          includes = WorksIncludes(images = true)
+        )
+        displayWork.images.get
+          .map(_.id) should contain theSameElementsAs
+          work.data.images.map(_.id.canonicalId)
       }
     }
   }

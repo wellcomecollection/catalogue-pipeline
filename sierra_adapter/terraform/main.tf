@@ -14,4 +14,6 @@ module "sierra-adapter-20200604" {
   vpc_id                   = local.vpc_id
   bibs_windows_topic_arns  = [module.bibs_window_generator.topic_arn, module.bibs_reharvest_topic.arn]
   items_windows_topic_arns = [module.items_window_generator.topic_arn, module.items_reharvest_topic.arn]
+
+  deployment_env = "prod"
 }

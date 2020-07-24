@@ -3,7 +3,7 @@ data "aws_ssm_parameter" "mets_adapter_image" {
 }
 
 locals {
-  mets_adapter_image = data.aws_ssm_parameter.mets_adapter_image.value
+  mets_adapter_image = "${aws_ecr_repository.mets_adapter.repository_url}:env.prod"
 
   namespace                       = "mets-adapter"
   storage_notifications_topic_arn = data.terraform_remote_state.storage_service.outputs.registered_bag_notifications_topic_arn

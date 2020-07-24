@@ -10,13 +10,13 @@ module "reindex_worker" {
   cluster_arn  = aws_ecs_cluster.cluster.arn
 
   service_egress_security_group_id = aws_security_group.service_egress_security_group.id
-  namespace_id                     = aws_service_discovery_private_dns_namespace.reindexer.id
 
   account_id = data.aws_caller_identity.current.account_id
-
-  namespace = "reindex_worker"
 
   vpc_id          = local.vpc_id
   private_subnets = local.private_subnets
   dlq_alarm_arn   = local.dlq_alarm_arn
+
+  service_env  = local.environment
+  service_name = "reindexer"
 }

@@ -1,8 +1,10 @@
-
 module "sierra_merger_service" {
   source = "../../../infrastructure/modules/worker"
 
   name = local.service_name
+
+  deployment_service_env  = var.deployment_service_env
+  deployment_service_name = var.deployment_service_name
 
   image = var.container_image
 

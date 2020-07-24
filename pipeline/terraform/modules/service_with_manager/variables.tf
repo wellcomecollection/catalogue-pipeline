@@ -97,3 +97,10 @@ variable "manager_memory" {
   default = 1024
 }
 
+variable "deployment_service_env" {
+  type = string
+}
+
+variable "deployment_service_name" {
+  type = string
+}

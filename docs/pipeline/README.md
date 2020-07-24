@@ -6,7 +6,7 @@ Our ingest pipeline is made up of a number of steps, which are illustrated below
   <thead>
     <tr>
       <th style="text-align:left">
-        <img src="../.gitbook/assets/adapters.png" alt/>
+        <img src="../.gitbook/assets/adapters (1).png" alt/>
       </th>
       <th style="text-align:left">
         <p>We have a series of data sources (for now, catalogue data from Calm and
@@ -21,7 +21,7 @@ Our ingest pipeline is made up of a number of steps, which are illustrated below
   <tbody>
     <tr>
       <td style="text-align:left">
-        <img src="../.gitbook/assets/transformers.png" alt/>
+        <img src="../.gitbook/assets/transformers (1).png" alt/>
       </td>
       <td style="text-align:left">
         <p>The DynamoDB tables present a consistent interface to the data. In particular,
@@ -34,7 +34,7 @@ Our ingest pipeline is made up of a number of steps, which are illustrated below
     </tr>
     <tr>
       <td style="text-align:left">
-        <img src="../.gitbook/assets/id_minter.png" alt/>
+        <img src="../.gitbook/assets/id_minter (1).png" alt/>
       </td>
       <td style="text-align:left">
         <p>Each data source has its own identifiers. These may overlap or be inconsistent
@@ -48,7 +48,7 @@ Our ingest pipeline is made up of a number of steps, which are illustrated below
     </tr>
     <tr>
       <td style="text-align:left">
-        <img src="../.gitbook/assets/ingestor.png" alt/>
+        <img src="../.gitbook/assets/ingestor (1).png" alt/>
       </td>
       <td style="text-align:left">In turn, we have an <b>ingestor</b> that reads items from the queue of identified
         records, and indexes them into Elasticsearch. This is the search index
@@ -56,3 +56,4 @@ Our ingest pipeline is made up of a number of steps, which are illustrated below
     </tr>
   </tbody>
 </table>
+
