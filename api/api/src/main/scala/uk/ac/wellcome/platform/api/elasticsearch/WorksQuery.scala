@@ -13,12 +13,10 @@ import com.sksamuel.elastic4s.requests.searches.queries.matches.{
   MultiMatchQuery
 }
 
-trait WorksQuery {
-  def apply(q: String): BoolQuery
-}
+trait WorksQuery
 
 case object WorksMultiMatcher extends WorksQuery {
-  override def apply(q: String): BoolQuery = {
+  def apply(q: String): BoolQuery = {
     boolQuery().should(
       prefixQuery("data.title.keyword", q).boost(1000),
       MultiMatchQuery(
