@@ -44,6 +44,10 @@ object SingleWorkParams extends QueryParamsUtils {
       "notes" -> WorkInclude.Notes,
       "collection" -> WorkInclude.Collection,
       "images" -> WorkInclude.Images,
+      "parts" -> WorkInclude.Parts,
+      "partOf" -> WorkInclude.PartOf,
+      "precededBy" -> WorkInclude.PrecededBy,
+      "succeededBy" -> WorkInclude.SucceededBy,
     ).emap(values => Right(WorksIncludes(values)))
 }
 

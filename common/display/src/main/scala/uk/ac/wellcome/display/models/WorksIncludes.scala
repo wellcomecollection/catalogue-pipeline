@@ -14,8 +14,8 @@ object WorkInclude {
   case object Images extends WorkInclude
   case object Parts extends WorkInclude
   case object PartOf extends WorkInclude
-  case object PreceededBy extends WorkInclude
-  case object SuceededBy extends WorkInclude
+  case object PrecededBy extends WorkInclude
+  case object SucceededBy extends WorkInclude
 }
 
 case class WorksIncludes(includes: List[WorkInclude]) {
@@ -30,9 +30,9 @@ case class WorksIncludes(includes: List[WorkInclude]) {
   def images = includes.contains(WorkInclude.Images)
   def parts = includes.contains(WorkInclude.Parts)
   def partOf = includes.contains(WorkInclude.PartOf)
-  def preceededBy = includes.contains(WorkInclude.PreceededBy)
-  def suceededBy = includes.contains(WorkInclude.SuceededBy)
-  def anyRelation = parts || partOf || preceededBy || suceededBy
+  def precededBy = includes.contains(WorkInclude.PrecededBy)
+  def succeededBy = includes.contains(WorkInclude.SucceededBy)
+  def anyRelation = parts || partOf || precededBy || succeededBy
 }
 
 object WorksIncludes {
@@ -51,8 +51,8 @@ object WorksIncludes {
     images: Boolean = false,
     parts: Boolean = false,
     partOf: Boolean = false,
-    preceededBy: Boolean = false,
-    suceededBy: Boolean = false,
+    precededBy: Boolean = false,
+    succeededBy: Boolean = false,
   ): WorksIncludes = WorksIncludes(
     List(
       if (identifiers) Some(Identifiers) else None,
@@ -66,8 +66,8 @@ object WorksIncludes {
       if (images) Some(Images) else None,
       if (parts) Some(Parts) else None,
       if (partOf) Some(PartOf) else None,
-      if (preceededBy) Some(PreceededBy) else None,
-      if (suceededBy) Some(SuceededBy) else None,
+      if (precededBy) Some(PrecededBy) else None,
+      if (succeededBy) Some(SucceededBy) else None,
     ).flatten
   )
 

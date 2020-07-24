@@ -111,11 +111,11 @@ case class DisplayWork(
   @Schema(
     `type` = "List[Work]",
     description = "Sibling works earlier in a series."
-  ) preceededBy: Option[List[DisplayWork]] = None,
+  ) precededBy: Option[List[DisplayWork]] = None,
   @Schema(
     `type` = "List[Work]",
     description = "Sibling works later in a series."
-  ) suceededBy: Option[List[DisplayWork]] = None,
+  ) succeededBy: Option[List[DisplayWork]] = None,
   @JsonKey("type") @Schema(name = "type") ontologyType: String = "Work"
 )
 

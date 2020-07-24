@@ -16,8 +16,8 @@ import uk.ac.wellcome.platform.api.Tracing
 case class RelatedWorks(
   parts: List[IdentifiedWork],
   partOf: List[IdentifiedWork],
-  preceededBy: List[IdentifiedWork],
-  suceededBy: List[IdentifiedWork],
+  precededBy: List[IdentifiedWork],
+  succeededBy: List[IdentifiedWork],
 )
 
 class RelatedWorkService(elasticsearchService: ElasticsearchService)(
@@ -65,7 +65,7 @@ class RelatedWorkService(elasticsearchService: ElasticsearchService)(
                              siblings: List[IdentifiedWork],
                              ancestors: List[IdentifiedWork]): RelatedWorks = {
     val mainPath = tokenizePath(path)
-    val (preceededBy, suceededBy) = siblings.sortBy(tokenizePath).partition {
+    val (precededBy, succeededBy) = siblings.sortBy(tokenizePath).partition {
       work =>
         tokenizePath(work) match {
           case None => true
@@ -76,8 +76,8 @@ class RelatedWorkService(elasticsearchService: ElasticsearchService)(
     RelatedWorks(
       parts = children.sortBy(tokenizePath),
       partOf = ancestors.sortBy(tokenizePath),
-      preceededBy = preceededBy,
-      suceededBy = suceededBy
+      precededBy = precededBy,
+      succeededBy = succeededBy
     )
   }
 

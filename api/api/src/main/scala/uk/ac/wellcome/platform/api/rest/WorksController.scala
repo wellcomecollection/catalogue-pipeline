@@ -142,18 +142,22 @@ class WorksController(
             case (tree, expandedPaths) =>
               DisplayCollection(tree, expandedPaths)
           },
-          parts = relatedWorks.map { relatedWorks =>
-            relatedWorks.parts.map(DisplayWork(_))
-          },
-          partOf = relatedWorks.map { relatedWorks =>
-            relatedWorks.partOf.map(DisplayWork(_))
-          },
-          preceededBy = relatedWorks.map { relatedWorks =>
-            relatedWorks.preceededBy.map(DisplayWork(_))
-          },
-          suceededBy = relatedWorks.map { relatedWorks =>
-            relatedWorks.suceededBy.map(DisplayWork(_))
-          },
+          parts = if (includes.parts)
+            relatedWorks.map { relatedWorks =>
+              relatedWorks.parts.map(DisplayWork(_))
+            } else None,
+          partOf = if (includes.partOf)
+            relatedWorks.map { relatedWorks =>
+              relatedWorks.partOf.map(DisplayWork(_))
+            } else None,
+          precededBy = if (includes.precededBy)
+            relatedWorks.map { relatedWorks =>
+              relatedWorks.precededBy.map(DisplayWork(_))
+            } else None,
+          succeededBy = if (includes.succeededBy)
+            relatedWorks.map { relatedWorks =>
+              relatedWorks.succeededBy.map(DisplayWork(_))
+            } else None,
         )
       )
     )
