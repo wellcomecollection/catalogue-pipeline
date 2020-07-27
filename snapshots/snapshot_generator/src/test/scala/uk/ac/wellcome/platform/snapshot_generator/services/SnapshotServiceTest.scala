@@ -45,15 +45,11 @@ class SnapshotServiceTest
   def withFixtures[R](
     testWith: TestWith[(SnapshotService, Index, Bucket), R]): R =
     withActorSystem { implicit actorSystem =>
-      withMaterializer(actorSystem) { implicit materializer =>
-        withS3AkkaSettings { s3Settings =>
-          withLocalWorksIndex { worksIndex =>
-            withLocalS3Bucket { bucket =>
-              withSnapshotService(s3Settings, worksIndex) { snapshotService =>
-                {
-                  testWith((snapshotService, worksIndex, bucket))
-                }
-              }
+      withS3AkkaSettings { s3Settings =>
+        withLocalWorksIndex { worksIndex =>
+          withLocalS3Bucket { bucket =>
+            withSnapshotService(s3Settings, worksIndex) { snapshotService =>
+              testWith((snapshotService, worksIndex, bucket))
             }
           }
         }
@@ -180,31 +176,29 @@ class SnapshotServiceTest
 
   it("returns a failed future if it fails reading from elasticsearch") {
     withActorSystem { implicit actorSystem =>
-      withMaterializer(actorSystem) { implicit materializer =>
-        withS3AkkaSettings { s3Settings =>
-          val brokenElasticClient: ElasticClient = ElasticClientBuilder.create(
-            hostname = "localhost",
-            port = 8888,
-            protocol = "http",
-            username = "elastic",
-            password = "changeme"
+      withS3AkkaSettings { s3Settings =>
+        val brokenElasticClient: ElasticClient = ElasticClientBuilder.create(
+          hostname = "localhost",
+          port = 8888,
+          protocol = "http",
+          username = "elastic",
+          password = "changeme"
+        )
+
+        withSnapshotService(
+          s3Settings,
+          worksIndex = "wrong-index",
+          elasticClient = brokenElasticClient) { brokenSnapshotService =>
+          val snapshotJob = SnapshotJob(
+            publicBucketName = "bukkit",
+            publicObjectKey = "target.json.gz",
+            apiVersion = ApiVersions.v2
           )
 
-          withSnapshotService(
-            s3Settings,
-            worksIndex = "wrong-index",
-            elasticClient = brokenElasticClient) { brokenSnapshotService =>
-            val snapshotJob = SnapshotJob(
-              publicBucketName = "bukkit",
-              publicObjectKey = "target.json.gz",
-              apiVersion = ApiVersions.v2
-            )
+          val future = brokenSnapshotService.generateSnapshot(snapshotJob)
 
-            val future = brokenSnapshotService.generateSnapshot(snapshotJob)
-
-            whenReady(future.failed) { result =>
-              result shouldBe a[JavaClientExceptionWrapper]
-            }
+          whenReady(future.failed) { result =>
+            result shouldBe a[JavaClientExceptionWrapper]
           }
         }
       }
@@ -224,15 +218,13 @@ class SnapshotServiceTest
 
     it("creates the correct object location with the default S3 endpoint") {
       withActorSystem { implicit actorSystem =>
-        withMaterializer(actorSystem) { implicit materializer =>
-          withS3AkkaSettings(endpoint = "") { s3Settings =>
-            withSnapshotService(s3Settings, worksIndex = "worksIndex") {
-              snapshotService =>
-                snapshotService.buildLocation(
-                  bucketName = "bukkit",
-                  objectKey = "snapshot.json.gz"
-                ) shouldBe Uri("s3://bukkit/snapshot.json.gz")
-            }
+        withS3AkkaSettings(endpoint = "") { s3Settings =>
+          withSnapshotService(s3Settings, worksIndex = "worksIndex") {
+            snapshotService =>
+              snapshotService.buildLocation(
+                bucketName = "bukkit",
+                objectKey = "snapshot.json.gz"
+              ) shouldBe Uri("s3://bukkit/snapshot.json.gz")
           }
         }
       }

@@ -109,16 +109,14 @@ class SnapshotGeneratorFeatureTest
   }
 
   def withFixtures[R](
-    testWith: TestWith[(Queue, Topic, Index, Index, Bucket), R]) =
+    testWith: TestWith[(Queue, Topic, Index, Index, Bucket), R]): R =
     withActorSystem { implicit actorSystem =>
-      withMaterializer(actorSystem) { implicit materializer =>
-        withLocalSqsQueue() { queue =>
-          withLocalSnsTopic { topic =>
-            withLocalWorksIndex { worksIndex =>
-              withLocalS3Bucket { bucket =>
-                withWorkerService(queue, topic, worksIndex) { _ =>
-                  testWith((queue, topic, worksIndex, worksIndex, bucket))
-                }
+      withLocalSqsQueue() { queue =>
+        withLocalSnsTopic { topic =>
+          withLocalWorksIndex { worksIndex =>
+            withLocalS3Bucket { bucket =>
+              withWorkerService(queue, topic, worksIndex) { _ =>
+                testWith((queue, topic, worksIndex, worksIndex, bucket))
               }
             }
           }
