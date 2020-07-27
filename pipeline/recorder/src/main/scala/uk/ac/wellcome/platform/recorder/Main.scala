@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.recorder
 
 import akka.actor.ActorSystem
-import akka.stream.Materializer
 import com.typesafe.config.Config
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
@@ -12,12 +11,9 @@ import uk.ac.wellcome.messaging.typesafe.SNSBuilder
 import uk.ac.wellcome.bigmessaging.typesafe.{BigMessagingBuilder, VHSBuilder}
 
 object Main extends WellcomeTypesafeApp {
-
   runWithConfig { config: Config =>
     implicit val actorSystem: ActorSystem =
       AkkaBuilder.buildActorSystem()
-    implicit val materializer: Materializer =
-      AkkaBuilder.buildMaterializer()
 
     new RecorderWorkerService(
       store = VHSBuilder.build[TransformedBaseWork](config),

@@ -1,7 +1,6 @@
 package uk.ac.wellcome.bigmessaging.typesafe
 
 import akka.actor.ActorSystem
-import akka.stream.Materializer
 import com.amazonaws.services.s3.AmazonS3
 import com.typesafe.config.Config
 import io.circe.{Decoder, Encoder}
@@ -25,7 +24,6 @@ object BigMessagingBuilder {
   def buildMessageStream[T](config: Config)(
     implicit actorSystem: ActorSystem,
     decoderT: Decoder[T],
-    materializer: Materializer,
     codecT: Codec[T]): BigMessageStream[T] = {
 
     implicit val executionContext: ExecutionContext =
