@@ -119,4 +119,5 @@ catalogue_api:
           role_arn: arn:aws:iam::756629837203:role/catalogue-ci
   name: Catalogue API
   role_arn: arn:aws:iam::760097843905:role/platform-ci
+  aws_region_name: eu-west-1
   github_repository: wellcometrust/catalogue
