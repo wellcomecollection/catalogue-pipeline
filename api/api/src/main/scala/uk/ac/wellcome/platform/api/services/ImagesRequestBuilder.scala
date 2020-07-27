@@ -6,8 +6,8 @@ import com.sksamuel.elastic4s.requests.searches._
 import com.sksamuel.elastic4s.requests.searches.queries.Query
 import com.sksamuel.elastic4s.requests.searches.sort._
 import uk.ac.wellcome.platform.api.elasticsearch.{
-  CoreImagesQuery,
-  ImageSimilarityQuery
+  ImagesMultiMatcher,
+  ImagesSimilarity
 }
 import uk.ac.wellcome.platform.api.models.{ImageFilter, LicenseFilter}
 
@@ -22,7 +22,7 @@ object ImagesRequestBuilder extends ElasticsearchRequestBuilder {
       .query(
         queryOptions.searchQuery
           .map { q =>
-            CoreImagesQuery(q.query).elasticQuery
+            ImagesMultiMatcher(q.query)
           }
           .getOrElse(boolQuery)
           .filter(queryOptions.filters.collect {
@@ -47,6 +47,6 @@ object ImagesRequestBuilder extends ElasticsearchRequestBuilder {
 
   def requestVisuallySimilar(index: Index, id: String, n: Int): SearchRequest =
     search(index)
-      .query(ImageSimilarityQuery(q = id, index = index).elasticQuery)
+      .query(ImagesSimilarity(q = id, index = index))
       .size(n)
 }

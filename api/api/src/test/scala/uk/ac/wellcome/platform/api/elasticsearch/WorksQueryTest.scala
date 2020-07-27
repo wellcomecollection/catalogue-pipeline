@@ -17,6 +17,7 @@ import uk.ac.wellcome.models.work.internal.{CollectionPath, IdentifiedBaseWork}
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
 import uk.ac.wellcome.platform.api.models.{SearchQuery, SearchQueryType}
 import uk.ac.wellcome.models.Implicits._
+import uk.ac.wellcome.platform.api.models.SearchQueryType.PhraserBeam
 import uk.ac.wellcome.platform.api.services.{
   ElasticsearchQueryOptions,
   ElasticsearchService,
@@ -25,7 +26,7 @@ import uk.ac.wellcome.platform.api.services.{
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class FreeTextQueryTest
+class WorksQueryTest
     extends AnyFunSpec
     with Matchers
     with ElasticsearchFixtures
@@ -39,30 +40,6 @@ class FreeTextQueryTest
   val searchService = new ElasticsearchService(elasticClient)
 
   describe("Free text query functionality") {
-
-    it("should use the english analyser for titles") {
-      withLocalWorksIndex { index =>
-        val works = List(
-          "Vlad the impaler",
-          "Dad the impala",
-        ).map { t =>
-          createIdentifiedWorkWith(title = Some(t))
-        }
-
-        insertIntoElasticsearch(index, works: _*)
-
-        // If we search the non-english analysed fields with the base query
-        // `the` would in the search as we're using the `OR` operator
-        // and would be matched in both examples above as the root field
-        // (not `field` rather than `field.english`, see `WorksIndex.scala`)
-        // does not use the english analyser.
-
-        // We wouldn't want to use the english analyser at query time though
-        // as we would lose detail used in other where we use exact matching
-        val query = "vlad the impaler"
-        assertResultsMatchForAllowedQueryTypes(index, query, List(works.head))
-      }
-    }
 
     it("searches the canonicalId") {
       withLocalWorksIndex { index =>
@@ -340,11 +317,12 @@ class FreeTextQueryTest
     index: Index,
     query: String,
     matches: List[IdentifiedBaseWork]) = {
-    SearchQueryType.allowed foreach { queryType =>
+
+    SearchQueryType.allowed map { queryType =>
       val results = searchResults(
         index,
         queryOptions = createElasticsearchQueryOptionsWith(
-          searchQuery = Some(SearchQuery(query, queryType))))
+          searchQuery = Some(SearchQuery(query, PhraserBeam))))
 
       withClue(s"Using: ${queryType.name}") {
         results should contain theSameElementsAs (matches)
