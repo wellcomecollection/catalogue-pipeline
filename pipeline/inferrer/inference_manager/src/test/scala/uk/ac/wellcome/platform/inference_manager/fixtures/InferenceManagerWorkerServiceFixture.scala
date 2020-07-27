@@ -31,22 +31,20 @@ trait InferenceManagerWorkerServiceFixture[Input, Output]
         topic,
         bigMessageThreshold = Int.MaxValue) { msgSender =>
         withActorSystem { implicit actorSystem =>
-          withMaterializer(actorSystem) { implicit materializer =>
-            implicit val store: MemoryStore[ObjectLocation, Input] =
-              new MemoryStore[ObjectLocation, Input](Map.empty)
-            withBigMessageStream[Input, R](queue) { msgStream =>
-              val workerService = new InferenceManagerWorkerService(
-                msgStream = msgStream,
-                msgSender = msgSender,
-                inferrerAdapter = adapter,
-                inferrerClientFlow = Http()
-                  .cachedHostConnectionPool[(Message, Input)](
-                    "localhost",
-                    inferrerPort)
-              )
-              workerService.run()
-              testWith(workerService)
-            }
+          implicit val store: MemoryStore[ObjectLocation, Input] =
+            new MemoryStore[ObjectLocation, Input](Map.empty)
+          withBigMessageStream[Input, R](queue) { msgStream =>
+            val workerService = new InferenceManagerWorkerService(
+              msgStream = msgStream,
+              msgSender = msgSender,
+              inferrerAdapter = adapter,
+              inferrerClientFlow = Http()
+                .cachedHostConnectionPool[(Message, Input)](
+                "localhost",
+                inferrerPort)
+            )
+            workerService.run()
+            testWith(workerService)
           }
         }
       }
