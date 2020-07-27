@@ -8,7 +8,6 @@ import com.sksamuel.elastic4s.requests.searches.queries._
 import com.sksamuel.elastic4s.requests.searches.sort._
 
 import uk.ac.wellcome.display.models._
-import uk.ac.wellcome.platform.api.elasticsearch.ElasticsearchComboQuery
 import uk.ac.wellcome.platform.api.models._
 
 object WorksRequestBuilder extends ElasticsearchRequestBuilder {
@@ -112,8 +111,9 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
   private def filteredQuery(
     implicit queryOptions: ElasticsearchQueryOptions): BoolQuery =
     queryOptions.searchQuery
-      .map { searchQuery =>
-        ElasticsearchComboQuery(searchQuery).elasticQuery
+      .map {
+        case SearchQuery(query, queryType) =>
+          queryType.toEsQuery(query)
       }
       .getOrElse { boolQuery }
       .filter {

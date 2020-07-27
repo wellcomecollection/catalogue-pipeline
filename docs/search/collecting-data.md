@@ -1,4 +1,4 @@
-# Collecting data
+# What data do we collect
 
 Collecting feedback and data on how our services are being used helps iterate and improve them over time.
 
@@ -8,12 +8,12 @@ We restrict the data we collect only answer specific questions that we have. Thi
 
 What we track is primarily split into two interactions
 
-* What has a person searched for
-* How have the interacted with the results
+- What has a person searched for
+- How have the interacted with the results
 
 Examples of the data we store for these are
 
-```javascript
+```js
 // A search request
 {
   "event": "Search",
@@ -59,7 +59,7 @@ Examples of the data we store for these are
 }
 ```
 
-## Identification and anonymisation
+## Identification and anonymisation
 
 We store no personably identifiable information with each interaction collected.
 
@@ -73,5 +73,6 @@ Data is collected on the frontend via [Segment's analytics.js](https://segment.c
 
 We currently retain anonymised data in perpetuity.
 
-This document does not include general data collection across wellcomecollection.org, but for work on the [catalogue search](https://wellcomecollection.org/works).
+---
 
+This document does not include general data collection across wellcomecollection.org, but for work on the [catalogue search](https://wellcomecollection.org/works).

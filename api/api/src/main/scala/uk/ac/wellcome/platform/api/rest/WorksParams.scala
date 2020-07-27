@@ -207,7 +207,7 @@ object MultipleWorksParams extends QueryParamsUtils {
   implicit val _queryTypeDecoder: Decoder[SearchQueryType] =
     decodeOneWithDefaultOf(
       SearchQueryType.default,
-      "BoolBoosted" -> SearchQueryType.BoolBoosted,
       "PhraserBeam" -> SearchQueryType.PhraserBeam,
+      "MultiMatcher" -> SearchQueryType.MultiMatcher,
     )
 }

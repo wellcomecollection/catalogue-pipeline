@@ -82,7 +82,7 @@ endef
 define publish_service_ssm
 	$(ROOT)/docker_run.py \
     	    --aws --dind -- \
-                wellcome/weco-deploy:4.1.0 \
+                wellcome/weco-deploy:5.0.2 \
                 --project-id="$(2)" \
                 --verbose \
                 publish \
