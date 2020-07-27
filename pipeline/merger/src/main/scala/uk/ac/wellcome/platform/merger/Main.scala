@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.merger
 
 import akka.actor.ActorSystem
-import akka.stream.Materializer
 import com.typesafe.config.Config
 
 import scala.concurrent.ExecutionContext
@@ -28,8 +27,7 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildActorSystem()
     implicit val executionContext: ExecutionContext =
       AkkaBuilder.buildExecutionContext()
-    implicit val materializer: Materializer =
-      AkkaBuilder.buildMaterializer()
+
     implicit val s3Client =
       S3Builder.buildS3Client(config)
     implicit val workMessageStore = S3TypedStore[BaseWork]
