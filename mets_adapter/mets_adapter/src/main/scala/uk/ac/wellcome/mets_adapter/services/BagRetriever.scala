@@ -20,7 +20,6 @@ trait BagRetriever {
 class HttpBagRetriever(baseUrl: String, tokenService: TokenService)(
   implicit
   actorSystem: ActorSystem,
-  materializer: Materializer,
   executionContext: ExecutionContext)
     extends BagRetriever
     with Logging {

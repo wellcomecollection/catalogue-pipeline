@@ -3,7 +3,6 @@ package uk.ac.wellcome.mets_adapter
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import akka.actor.ActorSystem
-import akka.stream.Materializer
 import com.typesafe.config.Config
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import org.scanamo.auto._
@@ -27,8 +26,7 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildExecutionContext()
     implicit val actorSystem: ActorSystem =
       AkkaBuilder.buildActorSystem()
-    implicit val materializer: Materializer =
-      AkkaBuilder.buildMaterializer()
+
     implicit val dynamoClilent: AmazonDynamoDB =
       DynamoBuilder.buildDynamoClient(config)
 
@@ -51,7 +49,6 @@ object Main extends WellcomeTypesafeApp {
   private def buildBagRetriever(config: Config)(
     implicit
     actorSystem: ActorSystem,
-    materializer: Materializer,
     ec: ExecutionContext): BagRetriever =
     new HttpBagRetriever(
       config.requireString("bags.api.url"),
