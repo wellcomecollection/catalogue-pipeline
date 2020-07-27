@@ -67,7 +67,7 @@ class BigMessageReaderTest
   it("fails if the remote notification refers to a non-existent location") {
     val reader = createReader()
 
-    val notification = MemoryRemoteNotification(createMemoryLocation)
+    val notification = MemoryRemoteNotification(location = MemoryLocation("does-not", "exist"))
 
     val result = reader.read(notification)
 
