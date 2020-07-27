@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.sierra_reader.services
 import java.time.Instant
 
 import akka.Done
-import akka.stream.Materializer
+import akka.actor.ActorSystem
 import com.amazonaws.services.s3.AmazonS3
 import grizzled.slf4j.Logging
 import io.circe.Json
@@ -11,22 +11,12 @@ import io.circe.syntax._
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs._
-import uk.ac.wellcome.platform.sierra_reader.config.models.{
-  ReaderConfig,
-  SierraAPIConfig
-}
+import uk.ac.wellcome.platform.sierra_reader.config.models.{ReaderConfig, SierraAPIConfig}
 import uk.ac.wellcome.platform.sierra_reader.flow.SierraRecordWrapperFlow
-import uk.ac.wellcome.platform.sierra_reader.models.{
-  SierraResourceTypes,
-  WindowStatus
-}
+import uk.ac.wellcome.platform.sierra_reader.models.{SierraResourceTypes, WindowStatus}
 import uk.ac.wellcome.platform.sierra_reader.sink.SequentialS3Sink
 import uk.ac.wellcome.sierra.{SierraSource, ThrottleRate}
-import uk.ac.wellcome.sierra_adapter.model.{
-  AbstractSierraRecord,
-  SierraBibRecord,
-  SierraItemRecord
-}
+import uk.ac.wellcome.sierra_adapter.model.{AbstractSierraRecord, SierraBibRecord, SierraItemRecord}
 import uk.ac.wellcome.storage.{Identified, ObjectLocation}
 import uk.ac.wellcome.storage.s3.S3Config
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
@@ -41,7 +31,7 @@ class SierraReaderWorkerService(
   s3Config: S3Config,
   readerConfig: ReaderConfig,
   sierraAPIConfig: SierraAPIConfig
-)(implicit ec: ExecutionContext, materializer: Materializer)
+)(implicit actorSystem: ActorSystem, ec: ExecutionContext)
     extends Logging
     with Runnable {
   implicit val s = s3client
