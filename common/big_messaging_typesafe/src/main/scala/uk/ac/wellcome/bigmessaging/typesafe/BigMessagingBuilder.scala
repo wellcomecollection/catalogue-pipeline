@@ -6,13 +6,12 @@ import com.amazonaws.services.s3.AmazonS3
 import com.typesafe.config.Config
 import io.circe.{Decoder, Encoder}
 import uk.ac.wellcome.bigmessaging.BigMessageSender
-import uk.ac.wellcome.bigmessaging.message.BigMessageStream
+import uk.ac.wellcome.bigmessaging.message.{BigMessageStream, RemoteNotification, S3RemoteNotification}
 import uk.ac.wellcome.messaging.sns.SNSConfig
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.monitoring.typesafe.CloudWatchBuilder
-import uk.ac.wellcome.storage.ObjectLocation
-import uk.ac.wellcome.storage.s3.S3Config
+import uk.ac.wellcome.storage.s3.{S3Config, S3ObjectLocation}
 import uk.ac.wellcome.storage.store.Store
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.streaming.Codec
@@ -26,16 +25,16 @@ object BigMessagingBuilder {
     implicit actorSystem: ActorSystem,
     decoderT: Decoder[T],
     materializer: Materializer,
-    codecT: Codec[T]): BigMessageStream[T] = {
+    codecT: Codec[T]): BigMessageStream[S3ObjectLocation, T] = {
 
     implicit val executionContext: ExecutionContext =
       AkkaBuilder.buildExecutionContext()
 
     implicit val s3Client: AmazonS3 = S3Builder.buildS3Client(config)
 
-    implicit val store: Store[ObjectLocation, T] = S3TypedStore[T]
+    implicit val store: Store[S3ObjectLocation, T] = S3TypedStore[T]
 
-    new BigMessageStream[T](
+    new BigMessageStream[S3ObjectLocation, T](
       sqsClient = SQSBuilder.buildSQSAsyncClient(config),
       sqsConfig =
         SQSBuilder.buildSQSConfig(config, namespace = "message.reader"),
@@ -46,13 +45,13 @@ object BigMessagingBuilder {
   def buildBigMessageSender[T](config: Config)(
     implicit
     encoderT: Encoder[T],
-    storeT: Store[ObjectLocation, T]
-  ): BigMessageSender[SNSConfig, T] = {
+    storeT: Store[S3ObjectLocation, T]
+  ): BigMessageSender[S3ObjectLocation, SNSConfig, T] = {
 
     val s3Config: S3Config =
       S3Builder.buildS3Config(config, namespace = "message.writer")
 
-    new BigMessageSender[SNSConfig, T] {
+    new BigMessageSender[S3ObjectLocation, SNSConfig, T] {
       override val messageSender: MessageSender[SNSConfig] =
         SNSBuilder.buildSNSMessageSender(
           config,
@@ -60,7 +59,7 @@ object BigMessagingBuilder {
           subject = "Sent from MessageWriter"
         )
 
-      override val store: Store[ObjectLocation, T] = storeT
+      override val store: Store[S3ObjectLocation, T] = storeT
       override val namespace: String = s3Config.bucketName
 
       implicit val encoder: Encoder[T] = encoderT
@@ -76,6 +75,12 @@ object BigMessagingBuilder {
       // https://aws.amazon.com/sns/faqs/
       //
       override val maxMessageSize: Int = 250 * 1000
+
+      override def createLocation(namespace: String, key: String): S3ObjectLocation =
+        S3ObjectLocation(namespace, key)
+
+      override def createNotification(location: S3ObjectLocation): RemoteNotification[S3ObjectLocation] =
+        S3RemoteNotification(location)
     }
   }
 }
