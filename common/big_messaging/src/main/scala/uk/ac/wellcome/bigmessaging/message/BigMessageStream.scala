@@ -12,23 +12,23 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.{SQSConfig, SQSStream}
 import uk.ac.wellcome.monitoring.Metrics
-import uk.ac.wellcome.storage.ObjectLocation
 import uk.ac.wellcome.storage.store.Store
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
-class BigMessageStream[T](sqsClient: SqsAsyncClient,
-                          sqsConfig: SQSConfig,
-                          metrics: Metrics[Future, StandardUnit])(
+class BigMessageStream[Location, T](
+  sqsClient: SqsAsyncClient,
+  sqsConfig: SQSConfig,
+  metrics: Metrics[Future, StandardUnit])(
   implicit
   actorSystem: ActorSystem,
   decoderT: Decoder[T],
-  storeT: Store[ObjectLocation, T],
+  storeT: Store[Location, T],
   ec: ExecutionContext) {
 
-  private val bigMessageReader = new BigMessageReader[T] {
-    override val store: Store[ObjectLocation, T] = storeT
+  private val bigMessageReader = new BigMessageReader[Location, T] {
+    override val store: Store[Location, T] = storeT
     override implicit val decoder: Decoder[T] = decoderT
   }
 

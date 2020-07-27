@@ -1,35 +1,28 @@
 package uk.ac.wellcome.bigmessaging.message
 
 import java.util.concurrent.ConcurrentLinkedDeque
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.Random
-
 import org.scalatest.Assertion
 import uk.ac.wellcome.messaging.sns.SNSConfig
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import software.amazon.awssdk.services.cloudwatch.model.StandardUnit
-import software.amazon.awssdk.services.sns.model.{
-  SubscribeRequest,
-  SubscribeResponse,
-  UnsubscribeRequest
-}
+import software.amazon.awssdk.services.sns.model.{SubscribeRequest, SubscribeResponse, UnsubscribeRequest}
 import software.amazon.awssdk.services.sqs.{SqsAsyncClient, SqsClient}
 import software.amazon.awssdk.services.sqs.model._
-
 import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
-import uk.ac.wellcome.fixtures.{fixture, Fixture, TestWith}
+import uk.ac.wellcome.fixtures.{Fixture, TestWith, fixture}
 import uk.ac.wellcome.json.JsonUtil._
-
 import uk.ac.wellcome.messaging.sqs.SQSClientFactory
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
-
-import uk.ac.wellcome.storage.ObjectLocation
+import uk.ac.wellcome.storage.providers.memory.MemoryLocation
 import uk.ac.wellcome.storage.store.Store
 import uk.ac.wellcome.storage.store.memory.MemoryStore
 
@@ -126,8 +119,8 @@ class BigMessagingFixtureIntegrationTest
     )
 
   private def withLocalStackBigMessageSenderMessageStream[R](
-    testWith: TestWith[(BigMessageStream[ExampleObject],
-                        BigMessageSender[SNSConfig, ExampleObject]),
+    testWith: TestWith[(BigMessageStream[MemoryLocation, ExampleObject],
+                        BigMessageSender[MemoryLocation, SNSConfig, ExampleObject]),
                        R]): R = {
     withLocalStackMessageStreamFixtures[R] {
       case (queue, messageStream, store) =>
@@ -149,13 +142,13 @@ class BigMessagingFixtureIntegrationTest
 
   def withLocalStackMessageStreamFixtures[R](
     testWith: TestWith[(Queue,
-                        BigMessageStream[ExampleObject],
-                        Store[ObjectLocation, ExampleObject]),
+                        BigMessageStream[MemoryLocation, ExampleObject],
+                        Store[MemoryLocation, ExampleObject]),
                        R]): R =
     withActorSystem { implicit actorSystem =>
       val metrics = new MemoryMetrics[StandardUnit]()
-      implicit val storeT: Store[ObjectLocation, ExampleObject] =
-        new MemoryStore(Map.empty)
+      implicit val storeT: Store[MemoryLocation, ExampleObject] =
+        new MemoryStore(initialEntries = Map.empty)
 
       withLocalStackSqsQueue() { queue =>
         withBigMessageStream[ExampleObject, R](

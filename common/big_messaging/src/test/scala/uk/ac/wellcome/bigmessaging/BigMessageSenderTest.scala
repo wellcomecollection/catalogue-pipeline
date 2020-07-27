@@ -5,14 +5,11 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.bigmessaging.memory.MemoryBigMessageSender
-import uk.ac.wellcome.bigmessaging.message.{
-  InlineNotification,
-  MessageNotification,
-  RemoteNotification
-}
+import uk.ac.wellcome.bigmessaging.message.{InlineNotification, MemoryRemoteNotification, MessageNotification}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.storage.{Identified, ObjectLocation}
+import uk.ac.wellcome.storage.Identified
+import uk.ac.wellcome.storage.providers.memory.MemoryLocation
 
 import scala.util.{Failure, Success}
 
@@ -49,11 +46,11 @@ class BigMessageSenderTest
     sender.messages should have size 1
     val notification =
       fromJson[MessageNotification](sender.messages.head.body).get
-    notification shouldBe a[RemoteNotification]
-    val location = notification.asInstanceOf[RemoteNotification].location
+    notification shouldBe a[MemoryRemoteNotification]
+    val location = notification.asInstanceOf[MemoryRemoteNotification].location
 
     sender.store.get(location) shouldBe Right(
-      Identified[ObjectLocation, Shape](location, redSquare)
+      Identified[MemoryLocation, Shape](location, redSquare)
     )
   }
 
@@ -73,7 +70,7 @@ class BigMessageSenderTest
         .map { msg =>
           fromJson[MessageNotification](msg.body).get
         }
-        .map { _.asInstanceOf[RemoteNotification].location }
+        .map { _.asInstanceOf[MemoryRemoteNotification].location }
 
     locations.distinct should have size 2
   }
@@ -89,8 +86,8 @@ class BigMessageSenderTest
     sender.messages should have size 1
     val notification =
       fromJson[MessageNotification](sender.messages.head.body).get
-    notification shouldBe a[RemoteNotification]
-    val location = notification.asInstanceOf[RemoteNotification].location
+    notification shouldBe a[MemoryRemoteNotification]
+    val location = notification.asInstanceOf[MemoryRemoteNotification].location
 
     location.namespace shouldBe "squares"
   }
@@ -106,8 +103,8 @@ class BigMessageSenderTest
     sender.messages should have size 1
     val notification =
       fromJson[MessageNotification](sender.messages.head.body).get
-    notification shouldBe a[RemoteNotification]
-    val location = notification.asInstanceOf[RemoteNotification].location
+    notification shouldBe a[MemoryRemoteNotification]
+    val location = notification.asInstanceOf[MemoryRemoteNotification].location
 
     location.path should startWith("squares/")
   }

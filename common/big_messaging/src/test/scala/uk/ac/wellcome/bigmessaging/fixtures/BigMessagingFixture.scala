@@ -18,14 +18,10 @@ import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.sns.{SNSConfig, SNSMessageSender}
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
-import uk.ac.wellcome.storage.{
-  Identified,
-  ObjectLocation,
-  StoreWriteError,
-  WriteError
-}
+import uk.ac.wellcome.storage.{Identified, StoreWriteError, WriteError}
 import uk.ac.wellcome.storage.fixtures.S3Fixtures
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
+import uk.ac.wellcome.storage.providers.memory.MemoryLocation
 import uk.ac.wellcome.storage.store.Store
 import uk.ac.wellcome.storage.store.memory.MemoryStore
 
@@ -41,16 +37,17 @@ trait BigMessagingFixture
 
   case class ExampleObject(name: String)
 
-  def withBigMessageStream[T, R](queue: SQS.Queue,
-                                 metrics: MemoryMetrics[StandardUnit] =
-                                   new MemoryMetrics[StandardUnit](),
-                                 sqsClient: SqsAsyncClient = asyncSqsClient)(
-    testWith: TestWith[BigMessageStream[T], R])(
+  def withBigMessageStream[T, R](
+    queue: SQS.Queue,
+    metrics: MemoryMetrics[StandardUnit] = new MemoryMetrics[StandardUnit](),
+    sqsClient: SqsAsyncClient = asyncSqsClient
+  )(
+    testWith: TestWith[BigMessageStream[MemoryLocation, T], R])(
     implicit
     actorSystem: ActorSystem,
     decoderT: Decoder[T],
-    storeT: Store[ObjectLocation, T]): R = {
-    val stream = new BigMessageStream[T](
+    storeT: Store[MemoryLocation, T]): R = {
+    val stream = new BigMessageStream[MemoryLocation, T](
       sqsClient = sqsClient,
       sqsConfig = createSQSConfigWith(queue),
       metrics = metrics
@@ -78,21 +75,27 @@ trait BigMessagingFixture
   def withSqsBigMessageSender[T, R](bucket: Bucket,
                                     topic: Topic,
                                     senderSnsClient: SnsClient = snsClient,
-                                    storeT: Option[Store[ObjectLocation, T]] =
+                                    storeT: Option[Store[MemoryLocation, T]] =
                                       None,
                                     bigMessageThreshold: Int = 10000)(
-    testWith: TestWith[BigMessageSender[SNSConfig, T], R])(
+    testWith: TestWith[BigMessageSender[MemoryLocation, SNSConfig, T], R])(
     implicit
     encoderT: Encoder[T]): R =
     withSnsMessageSender(topic, senderSnsClient) { snsMessageSender =>
-      val sender = new BigMessageSender[SNSConfig, T] {
+      val sender = new BigMessageSender[MemoryLocation, SNSConfig, T] {
         override val messageSender: MessageSender[SNSConfig] =
           snsMessageSender
-        override val store: Store[ObjectLocation, T] =
+        override val store: Store[MemoryLocation, T] =
           storeT.getOrElse(new MemoryStore(Map.empty))
         override val namespace: String = bucket.name
         override implicit val encoder: Encoder[T] = encoderT
         override val maxMessageSize: Int = bigMessageThreshold
+
+        override def createLocation(namespace: String, key: String): MemoryLocation =
+          MemoryLocation(namespace = namespace, path = key)
+
+        override def createNotification(location: MemoryLocation): RemoteNotification[MemoryLocation] =
+          MemoryRemoteNotification(location)
       }
       testWith(sender)
     }
@@ -113,7 +116,7 @@ trait BigMessagingFixture
   def getMessages[T](topic: Topic)(implicit decoder: Decoder[T]): List[T] =
     listMessagesReceivedFromSNS(topic).map { messageInfo =>
       fromJson[MessageNotification](messageInfo.message) match {
-        case Success(RemoteNotification(location)) =>
+        case Success(S3RemoteNotification(location)) =>
           getObjectFromS3[T](location)
         case Success(InlineNotification(jsonString)) =>
           fromJson[T](jsonString).get
@@ -127,10 +130,10 @@ trait BigMessagingFixture
   /** The `.put` method on this store has been overriden to always
     * return a `Left[StoreWriteError]`
     */
-  def createBrokenPutStore[T] =
-    new MemoryStore[ObjectLocation, T](Map.empty) {
-      override def put(id: ObjectLocation)(
-        t: T): Either[WriteError, Identified[ObjectLocation, T]] = {
+  def createBrokenPutStore[T]: MemoryStore[MemoryLocation, T] =
+    new MemoryStore[MemoryLocation, T](Map.empty) {
+      override def put(id: MemoryLocation)(
+        t: T): Either[WriteError, Identified[MemoryLocation, T]] = {
         Left(StoreWriteError(new Throwable("BOOM!")))
       }
     }

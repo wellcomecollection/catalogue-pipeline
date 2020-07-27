@@ -12,14 +12,13 @@ import uk.ac.wellcome.bigmessaging.message.{
   RemoteNotification
 }
 import uk.ac.wellcome.messaging.MessageSender
-import uk.ac.wellcome.storage.ObjectLocation
 import uk.ac.wellcome.storage.store.Store
 
 import scala.util.{Failure, Success, Try}
 
-trait BigMessageSender[Destination, T] extends Logging {
+trait BigMessageSender[Location, Destination, T] extends Logging {
   val messageSender: MessageSender[Destination]
-  val store: Store[ObjectLocation, T]
+  val store: Store[Location, T]
 
   val namespace: String
 
@@ -52,12 +51,15 @@ trait BigMessageSender[Destination, T] extends Logging {
       _ <- messageSender.sendT[MessageNotification](notification)
     } yield notification
 
-  private def createRemoteNotification(t: T): Try[RemoteNotification] = {
-    val id = ObjectLocation(namespace, getKey)
+  def createLocation(namespace: String, key: String): Location
+  def createNotification(location: Location): RemoteNotification[Location]
+
+  private def createRemoteNotification(t: T): Try[RemoteNotification[Location]] = {
+    val location = createLocation(namespace = namespace, key = getKey)
     (for {
-      location <- store.put(id)(t)
-      _ = info(s"Successfully stored message in location: ${location.id}")
-      notification = RemoteNotification(id)
+      putResult <- store.put(location)(t)
+      _ = info(s"Successfully stored message in location: ${putResult.id}")
+      notification = createNotification(location)
     } yield notification) match {
       case Right(value) =>
         Success(value)

@@ -12,18 +12,21 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.messaging.fixtures.SQS.{Queue, QueuePair}
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
-import uk.ac.wellcome.storage.ObjectLocation
+import uk.ac.wellcome.storage.generators.MemoryLocationGenerators
+import uk.ac.wellcome.storage.providers.memory.MemoryLocation
 import uk.ac.wellcome.storage.store.Store
 import uk.ac.wellcome.storage.store.memory.MemoryStore
+
 import scala.concurrent.Future
 import scala.util.Random
 
 class BigMessageStreamTest
     extends AnyFunSpec
     with Matchers
+    with MemoryLocationGenerators
     with BigMessagingFixture {
 
-  def process(list: ConcurrentLinkedQueue[ExampleObject])(o: ExampleObject) = {
+  def process(list: ConcurrentLinkedQueue[ExampleObject])(o: ExampleObject): Future[Unit] = {
     list.add(o)
     Future.successful(())
   }
@@ -56,7 +59,7 @@ class BigMessageStreamTest
 
   describe("large messages (>256KB)") {
     it("reads messages off a queue, processes them and deletes them") {
-      implicit val store: Store[ObjectLocation, ExampleObject] =
+      implicit val store: Store[MemoryLocation, ExampleObject] =
         new MemoryStore(Map.empty)
 
       withMessageStreamFixtures {
@@ -92,18 +95,18 @@ class BigMessageStreamTest
     )
 
   private def sendRemoteNotification(
-    store: Store[ObjectLocation, ExampleObject],
+    store: Store[MemoryLocation, ExampleObject],
     queue: Queue,
     exampleObject: ExampleObject,
   ): Unit = {
-    val s3key = Random.alphanumeric take 10 mkString
-    val location = ObjectLocation(namespace = randomAlphanumeric, path = s3key)
+    val path = Random.alphanumeric take 10 mkString
+    val location = MemoryLocation(namespace = randomAlphanumeric, path = path)
 
     store.put(location)(exampleObject)
 
     sendNotificationToSQS[MessageNotification](
       queue = queue,
-      message = RemoteNotification(location)
+      message = MemoryRemoteNotification(location)
     )
   }
 
@@ -158,15 +161,11 @@ class BigMessageStreamTest
       case (messageStream, QueuePair(queue, dlq), metrics) =>
         val streamName = "test-stream"
 
-        // Do NOT put S3 object here
-        val objectLocation = ObjectLocation(
-          namespace = "bukkit",
-          path = "path.json"
-        )
+        val location = createMemoryLocation
 
         sendNotificationToSQS[MessageNotification](
           queue = queue,
-          message = RemoteNotification(objectLocation)
+          message = MemoryRemoteNotification(location)
         )
 
         val received = new ConcurrentLinkedQueue[ExampleObject]()
@@ -314,13 +313,13 @@ class BigMessageStreamTest
   }
 
   private def withMessageStreamFixtures[R](
-    testWith: TestWith[(BigMessageStream[ExampleObject],
+    testWith: TestWith[(BigMessageStream[MemoryLocation, ExampleObject],
                         QueuePair,
                         MemoryMetrics[StandardUnit]),
                        R]
   )(implicit
     decoderT: Decoder[ExampleObject],
-    store: Store[ObjectLocation, ExampleObject] = new MemoryStore(Map.empty))
+    store: Store[MemoryLocation, ExampleObject] = new MemoryStore(Map.empty))
     : R =
     withActorSystem { implicit actorSystem =>
       withLocalSqsQueuePair() {
