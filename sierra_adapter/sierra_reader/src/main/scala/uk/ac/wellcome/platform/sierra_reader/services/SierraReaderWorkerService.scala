@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.sierra_reader.services
 import java.time.Instant
 
 import akka.Done
-import akka.stream.Materializer
+import akka.actor.ActorSystem
 import com.amazonaws.services.s3.AmazonS3
 import grizzled.slf4j.Logging
 import io.circe.Json
@@ -41,7 +41,7 @@ class SierraReaderWorkerService(
   s3Config: S3Config,
   readerConfig: ReaderConfig,
   sierraAPIConfig: SierraAPIConfig
-)(implicit ec: ExecutionContext, materializer: Materializer)
+)(implicit actorSystem: ActorSystem, ec: ExecutionContext)
     extends Logging
     with Runnable {
   implicit val s = s3client

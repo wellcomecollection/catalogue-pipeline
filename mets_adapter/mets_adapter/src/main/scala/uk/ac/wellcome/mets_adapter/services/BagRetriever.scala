@@ -5,7 +5,6 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.Authorization
 import akka.http.scaladsl.unmarshalling.Unmarshal
-import akka.stream.Materializer
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import grizzled.slf4j.Logging
 import io.circe.generic.auto._
@@ -20,7 +19,6 @@ trait BagRetriever {
 class HttpBagRetriever(baseUrl: String, tokenService: TokenService)(
   implicit
   actorSystem: ActorSystem,
-  materializer: Materializer,
   executionContext: ExecutionContext)
     extends BagRetriever
     with Logging {

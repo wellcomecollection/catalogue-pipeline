@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.snapshot_generator
 
 import akka.actor.ActorSystem
-import akka.stream.Materializer
 import com.typesafe.config.Config
 import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
@@ -22,8 +21,6 @@ object Main extends WellcomeTypesafeApp {
     implicit val actorSystem: ActorSystem = AkkaBuilder.buildActorSystem()
     implicit val executionContext: ExecutionContext =
       AkkaBuilder.buildExecutionContext()
-    implicit val materializer: Materializer =
-      AkkaBuilder.buildMaterializer()
 
     val snapshotService = new SnapshotService(
       akkaS3Settings = AkkaS3Builder.buildAkkaS3Settings(config),
@@ -33,10 +30,7 @@ object Main extends WellcomeTypesafeApp {
 
     new SnapshotGeneratorWorkerService(
       snapshotService = snapshotService,
-      sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config)(
-        actorSystem,
-        materializer,
-        executionContext),
+      sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
       snsWriter = SNSBuilder.buildSNSMessageSender(
         config,
         subject = s"source: ${this.getClass.getSimpleName}.processMessage",

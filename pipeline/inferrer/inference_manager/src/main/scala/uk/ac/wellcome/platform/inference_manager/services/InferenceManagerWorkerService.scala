@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.inference_manager.services
 import akka.Done
 import akka.http.scaladsl.Http.HostConnectionPool
 import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
-import akka.stream.Materializer
+import akka.actor.ActorSystem
 import akka.stream.scaladsl.Flow
 import software.amazon.awssdk.services.sqs.model.Message
 import grizzled.slf4j.Logging
@@ -21,7 +21,7 @@ class InferenceManagerWorkerService[Destination, Input, Output](
   inferrerClientFlow: Flow[(HttpRequest, (Message, Input)),
                            (Try[HttpResponse], (Message, Input)),
                            HostConnectionPool]
-)(implicit ec: ExecutionContext, materializer: Materializer)
+)(implicit actorSystem: ActorSystem, ec: ExecutionContext)
     extends Runnable
     with Logging {
 

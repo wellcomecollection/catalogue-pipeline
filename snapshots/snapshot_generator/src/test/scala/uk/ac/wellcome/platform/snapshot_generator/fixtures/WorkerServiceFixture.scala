@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.snapshot_generator.fixtures
 
 import akka.actor.ActorSystem
-import akka.stream.Materializer
 import com.sksamuel.elastic4s.Index
 import org.scalatest.Suite
 import uk.ac.wellcome.messaging.sns.{
@@ -24,8 +23,7 @@ trait WorkerServiceFixture
     with SQS { this: Suite =>
   def withWorkerService[R](queue: Queue, topic: Topic, worksIndex: Index)(
     testWith: TestWith[SnapshotGeneratorWorkerService, R])(
-    implicit actorSystem: ActorSystem,
-    materializer: Materializer): R =
+    implicit actorSystem: ActorSystem): R =
     withS3AkkaSettings { s3AkkaClient =>
       withSnapshotService(s3AkkaClient, worksIndex) { snapshotService =>
         withSQSStream[NotificationMessage, R](queue) { sqsStream =>

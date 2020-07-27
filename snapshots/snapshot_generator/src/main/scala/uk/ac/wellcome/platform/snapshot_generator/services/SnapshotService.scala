@@ -3,7 +3,6 @@ package uk.ac.wellcome.platform.snapshot_generator.services
 import scala.concurrent.{ExecutionContext, Future}
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.Uri
-import akka.stream.Materializer
 import akka.stream.alpakka.s3.{MultipartUploadResult, S3Attributes, S3Settings}
 import akka.stream.alpakka.s3.scaladsl.S3
 import akka.stream.scaladsl.{Sink, Source}
@@ -29,7 +28,6 @@ class SnapshotService(akkaS3Settings: S3Settings,
                       elasticClient: ElasticClient,
                       elasticConfig: ElasticConfig)(
   implicit actorSystem: ActorSystem,
-  materializer: Materializer,
   ec: ExecutionContext
 ) extends Logging {
 
