@@ -11,12 +11,16 @@ import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import software.amazon.awssdk.services.cloudwatch.model.StandardUnit
-import software.amazon.awssdk.services.sns.model.{SubscribeRequest, SubscribeResponse, UnsubscribeRequest}
+import software.amazon.awssdk.services.sns.model.{
+  SubscribeRequest,
+  SubscribeResponse,
+  UnsubscribeRequest
+}
 import software.amazon.awssdk.services.sqs.{SqsAsyncClient, SqsClient}
 import software.amazon.awssdk.services.sqs.model._
 import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
-import uk.ac.wellcome.fixtures.{Fixture, TestWith, fixture}
+import uk.ac.wellcome.fixtures.{fixture, Fixture, TestWith}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sqs.SQSClientFactory
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
@@ -119,9 +123,10 @@ class BigMessagingFixtureIntegrationTest
     )
 
   private def withLocalStackBigMessageSenderMessageStream[R](
-    testWith: TestWith[(BigMessageStream[MemoryLocation, ExampleObject],
-                        BigMessageSender[MemoryLocation, SNSConfig, ExampleObject]),
-                       R]): R = {
+    testWith: TestWith[
+      (BigMessageStream[MemoryLocation, ExampleObject],
+       BigMessageSender[MemoryLocation, SNSConfig, ExampleObject]),
+      R]): R = {
     withLocalStackMessageStreamFixtures[R] {
       case (queue, messageStream, store) =>
         withLocalS3Bucket { bucket =>

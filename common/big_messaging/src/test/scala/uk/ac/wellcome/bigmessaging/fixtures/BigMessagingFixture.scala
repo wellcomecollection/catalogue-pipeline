@@ -41,8 +41,7 @@ trait BigMessagingFixture
     queue: SQS.Queue,
     metrics: MemoryMetrics[StandardUnit] = new MemoryMetrics[StandardUnit](),
     sqsClient: SqsAsyncClient = asyncSqsClient
-  )(
-    testWith: TestWith[BigMessageStream[MemoryLocation, T], R])(
+  )(testWith: TestWith[BigMessageStream[MemoryLocation, T], R])(
     implicit
     actorSystem: ActorSystem,
     decoderT: Decoder[T],
@@ -91,10 +90,12 @@ trait BigMessagingFixture
         override implicit val encoder: Encoder[T] = encoderT
         override val maxMessageSize: Int = bigMessageThreshold
 
-        override def createLocation(namespace: String, key: String): MemoryLocation =
+        override def createLocation(namespace: String,
+                                    key: String): MemoryLocation =
           MemoryLocation(namespace = namespace, path = key)
 
-        override def createNotification(location: MemoryLocation): RemoteNotification[MemoryLocation] =
+        override def createNotification(
+          location: MemoryLocation): RemoteNotification[MemoryLocation] =
           MemoryRemoteNotification(location)
       }
       testWith(sender)

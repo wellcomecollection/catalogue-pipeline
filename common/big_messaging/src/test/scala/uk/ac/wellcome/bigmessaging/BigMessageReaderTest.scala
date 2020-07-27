@@ -4,7 +4,10 @@ import io.circe.Decoder
 import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.bigmessaging.message.{InlineNotification, MemoryRemoteNotification}
+import uk.ac.wellcome.bigmessaging.message.{
+  InlineNotification,
+  MemoryRemoteNotification
+}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.exceptions.JsonDecodingError
 import uk.ac.wellcome.storage.generators.MemoryLocationGenerators
@@ -24,8 +27,8 @@ class BigMessageReaderTest
   val blueTriangle = Shape(colour = "blue", sides = 3)
 
   def createReader(shapeStore: Store[MemoryLocation, Shape] = new MemoryStore(
-                     Map.empty))(
-    implicit decoderS: Decoder[Shape]): BigMessageReader[MemoryLocation, Shape] =
+                     Map.empty))(implicit decoderS: Decoder[Shape])
+    : BigMessageReader[MemoryLocation, Shape] =
     new BigMessageReader[MemoryLocation, Shape] {
       override val store: Store[MemoryLocation, Shape] =
         shapeStore
@@ -67,7 +70,8 @@ class BigMessageReaderTest
   it("fails if the remote notification refers to a non-existent location") {
     val reader = createReader()
 
-    val notification = MemoryRemoteNotification(location = MemoryLocation("does-not", "exist"))
+    val notification =
+      MemoryRemoteNotification(location = MemoryLocation("does-not", "exist"))
 
     val result = reader.read(notification)
 

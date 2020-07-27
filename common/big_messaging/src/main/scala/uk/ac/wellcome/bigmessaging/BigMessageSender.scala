@@ -54,7 +54,8 @@ trait BigMessageSender[Location, Destination, T] extends Logging {
   def createLocation(namespace: String, key: String): Location
   def createNotification(location: Location): RemoteNotification[Location]
 
-  private def createRemoteNotification(t: T): Try[RemoteNotification[Location]] = {
+  private def createRemoteNotification(
+    t: T): Try[RemoteNotification[Location]] = {
     val location = createLocation(namespace = namespace, key = getKey)
     (for {
       putResult <- store.put(location)(t)

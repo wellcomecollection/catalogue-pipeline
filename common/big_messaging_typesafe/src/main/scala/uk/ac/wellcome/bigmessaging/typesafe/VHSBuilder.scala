@@ -25,17 +25,17 @@ object VHSBuilder {
     implicit codec: Codec[T]
   ): VHS[S3ObjectLocation, T] = {
     implicit val s3Client: AmazonS3 = S3Builder.buildS3Client(config)
-    implicit val dynamoClient: AmazonDynamoDB = DynamoBuilder.buildDynamoClient(config)
+    implicit val dynamoClient: AmazonDynamoDB =
+      DynamoBuilder.buildDynamoClient(config)
 
     VHSBuilder.build(
       prefix = buildS3ObjectLocationPrefix(config, namespace = namespace),
-      dynamoConfig = DynamoBuilder.buildDynamoConfig(config, namespace = namespace),
+      dynamoConfig =
+        DynamoBuilder.buildDynamoConfig(config, namespace = namespace),
     )
   }
 
-
-  def build[T](prefix: S3ObjectLocationPrefix,
-               dynamoConfig: DynamoConfig)(
+  def build[T](prefix: S3ObjectLocationPrefix, dynamoConfig: DynamoConfig)(
     implicit
     codec: Codec[T],
     dynamoClient: AmazonDynamoDB,
@@ -57,6 +57,7 @@ object VHSBuilder {
         .getOrElse("")
     )
 
-  private def createIndexStore(dynamoConfig: DynamoConfig)(implicit dynamoClient: AmazonDynamoDB): IndexStore =
+  private def createIndexStore(dynamoConfig: DynamoConfig)(
+    implicit dynamoClient: AmazonDynamoDB): IndexStore =
     new DynamoHashStore[String, Int, S3ObjectLocation](dynamoConfig)
 }

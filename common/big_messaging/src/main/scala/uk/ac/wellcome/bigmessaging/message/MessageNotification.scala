@@ -19,7 +19,9 @@ sealed trait RemoteNotification[Location] extends MessageNotification {
   val location: Location
 }
 
-case class MemoryRemoteNotification(location: MemoryLocation) extends RemoteNotification[MemoryLocation]
-case class S3RemoteNotification(location: S3ObjectLocation) extends RemoteNotification[S3ObjectLocation]
+case class MemoryRemoteNotification(location: MemoryLocation)
+    extends RemoteNotification[MemoryLocation]
+case class S3RemoteNotification(location: S3ObjectLocation)
+    extends RemoteNotification[S3ObjectLocation]
 
 case class InlineNotification(jsonString: String) extends MessageNotification

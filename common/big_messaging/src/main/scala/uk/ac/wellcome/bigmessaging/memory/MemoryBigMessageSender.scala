@@ -2,7 +2,11 @@ package uk.ac.wellcome.bigmessaging.memory
 
 import io.circe.{Decoder, Encoder}
 import uk.ac.wellcome.bigmessaging.BigMessageSender
-import uk.ac.wellcome.bigmessaging.message.{InlineNotification, MemoryRemoteNotification, RemoteNotification}
+import uk.ac.wellcome.bigmessaging.message.{
+  InlineNotification,
+  MemoryRemoteNotification,
+  RemoteNotification
+}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.storage.providers.memory.MemoryLocation
@@ -40,6 +44,7 @@ class MemoryBigMessageSender[T](
   override def createLocation(namespace: String, key: String): MemoryLocation =
     MemoryLocation(namespace = namespace, path = key)
 
-  override def createNotification(location: MemoryLocation): RemoteNotification[MemoryLocation] =
+  override def createNotification(
+    location: MemoryLocation): RemoteNotification[MemoryLocation] =
     MemoryRemoteNotification(location)
 }

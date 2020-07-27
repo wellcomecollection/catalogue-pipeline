@@ -5,7 +5,11 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.bigmessaging.memory.MemoryBigMessageSender
-import uk.ac.wellcome.bigmessaging.message.{InlineNotification, MemoryRemoteNotification, MessageNotification}
+import uk.ac.wellcome.bigmessaging.message.{
+  InlineNotification,
+  MemoryRemoteNotification,
+  MessageNotification
+}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.storage.Identified

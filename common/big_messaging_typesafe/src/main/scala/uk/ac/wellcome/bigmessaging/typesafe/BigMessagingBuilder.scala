@@ -6,7 +6,11 @@ import com.amazonaws.services.s3.AmazonS3
 import com.typesafe.config.Config
 import io.circe.{Decoder, Encoder}
 import uk.ac.wellcome.bigmessaging.BigMessageSender
-import uk.ac.wellcome.bigmessaging.message.{BigMessageStream, RemoteNotification, S3RemoteNotification}
+import uk.ac.wellcome.bigmessaging.message.{
+  BigMessageStream,
+  RemoteNotification,
+  S3RemoteNotification
+}
 import uk.ac.wellcome.messaging.sns.SNSConfig
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.messaging.MessageSender
@@ -76,10 +80,12 @@ object BigMessagingBuilder {
       //
       override val maxMessageSize: Int = 250 * 1000
 
-      override def createLocation(namespace: String, key: String): S3ObjectLocation =
+      override def createLocation(namespace: String,
+                                  key: String): S3ObjectLocation =
         S3ObjectLocation(namespace, key)
 
-      override def createNotification(location: S3ObjectLocation): RemoteNotification[S3ObjectLocation] =
+      override def createNotification(
+        location: S3ObjectLocation): RemoteNotification[S3ObjectLocation] =
         S3RemoteNotification(location)
     }
   }

@@ -4,7 +4,10 @@ import io.circe.Decoder
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.bigmessaging.memory.MemoryBigMessageSender
-import uk.ac.wellcome.bigmessaging.message.{InlineNotification, RemoteNotification}
+import uk.ac.wellcome.bigmessaging.message.{
+  InlineNotification,
+  RemoteNotification
+}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.storage.providers.memory.MemoryLocation
 import uk.ac.wellcome.storage.store.Store
@@ -16,8 +19,10 @@ class BigMessageIntegrationTest extends AnyFunSpec with Matchers {
 
   val yellowPentagon = Shape(colour = "yellow", sides = 5)
 
-  def createPair(maxSize: Int)(implicit decoderS: Decoder[Shape])
-    : (MemoryBigMessageSender[Shape], BigMessageReader[MemoryLocation, Shape]) = {
+  def createPair(maxSize: Int)(
+    implicit decoderS: Decoder[Shape]): (MemoryBigMessageSender[Shape],
+                                         BigMessageReader[MemoryLocation,
+                                                          Shape]) = {
     val sender = new MemoryBigMessageSender[Shape](maxSize = maxSize)
     val reader = new BigMessageReader[MemoryLocation, Shape] {
       override val store: Store[MemoryLocation, Shape] =
