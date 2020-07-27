@@ -3,7 +3,6 @@ package uk.ac.wellcome.platform.api
 import akka.Done
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.stream.Materializer
 import com.typesafe.config.Config
 import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
@@ -15,14 +14,11 @@ import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import scala.concurrent.{ExecutionContext, Promise}
 
 object Main extends WellcomeTypesafeApp {
-
   runWithConfig { config: Config =>
     implicit val actorSystem: ActorSystem =
       AkkaBuilder.buildActorSystem()
     implicit val executionContext: ExecutionContext =
       AkkaBuilder.buildExecutionContext()
-    implicit val materializer: Materializer =
-      AkkaBuilder.buildMaterializer()
 
     Tracing.init(config)
     val elasticClient = ElasticBuilder.buildElasticClient(config)
