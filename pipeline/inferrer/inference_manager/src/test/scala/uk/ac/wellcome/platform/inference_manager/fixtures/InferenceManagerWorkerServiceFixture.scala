@@ -40,8 +40,8 @@ trait InferenceManagerWorkerServiceFixture[Input, Output]
               inferrerAdapter = adapter,
               inferrerClientFlow = Http()
                 .cachedHostConnectionPool[(Message, Input)](
-                "localhost",
-                inferrerPort)
+                  "localhost",
+                  inferrerPort)
             )
             workerService.run()
             testWith(workerService)
