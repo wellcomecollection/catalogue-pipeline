@@ -1,49 +1,43 @@
 package uk.ac.wellcome.platform.merger
 
-import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
+import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
+import uk.ac.wellcome.messaging.memory.MemoryMessageSender
+import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
-import uk.ac.wellcome.platform.merger.fixtures.{
-  MatcherResultFixture,
-  WorkerServiceFixture
-}
-import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
-import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
+import uk.ac.wellcome.platform.merger.fixtures.{MatcherResultFixture, WorkerServiceFixture}
 
 class MergerIntegrationTest
     extends AnyFunSpec
-    with BigMessagingFixture
+    with Eventually
     with IntegrationPatience
-    with ScalaFutures
     with MatcherResultFixture
     with WorkerServiceFixture
     with WorksGenerators {
 
   it("reads matcher result messages off a queue and deletes them") {
-    withLocalSnsTopic { worksTopic =>
-      withLocalSnsTopic { imagesTopic =>
-        withVHS { vhs =>
-          withLocalSqsQueuePair() {
-            case QueuePair(queue, dlq) =>
-              withWorkerService(vhs, queue, worksTopic, imagesTopic) { _ =>
-                val work = createUnidentifiedWork
+    val workSender = new MemoryMessageSender()
 
-                givenStoredInVhs(vhs, work)
+    withVHS { vhs =>
+      withLocalSqsQueuePair() {
+        case QueuePair(queue, dlq) =>
+          withWorkerService(vhs, queue, workSender) { _ =>
+            val work = createUnidentifiedWork
 
-                val matcherResult = matcherResultWith(Set(Set(work)))
-                sendNotificationToSQS(queue, matcherResult)
+            givenStoredInVhs(vhs, work)
 
-                eventually {
-                  assertQueueEmpty(queue)
-                  assertQueueEmpty(dlq)
-                  val worksSent = getMessages[TransformedBaseWork](worksTopic)
-                  worksSent should contain only work
-                }
-              }
+            val matcherResult = matcherResultWith(Set(Set(work)))
+            sendNotificationToSQS(queue, matcherResult)
+
+            eventually {
+              assertQueueEmpty(queue)
+              assertQueueEmpty(dlq)
+
+              workSender.getMessages[TransformedBaseWork] should contain only work
+            }
           }
-        }
       }
     }
   }
