@@ -135,7 +135,7 @@ class SierraTransformerWorkerServiceTest
         val store = createStore[SierraTransformable]()
         val sender = new MemoryBigMessageSender[TransformedBaseWork]()
         sendNotificationToSQS(queue, Version(randomAlphanumeric, 1))
-        withWorkerService(store, sender, queue) { recordReceiver =>
+        withWorkerService(store, sender, queue) { _ =>
           eventually {
             assertQueueEmpty(queue)
             assertQueueHasSize(dlq, 1)
@@ -155,7 +155,7 @@ class SierraTransformerWorkerServiceTest
           """{
           |"not a key": true
           |}""".stripMargin)
-        withWorkerService(store, sender, queue) { recordReceiver =>
+        withWorkerService(store, sender, queue) { _ =>
           eventually {
             assertQueueEmpty(queue)
             assertQueueHasSize(dlq, 1)
@@ -173,7 +173,7 @@ class SierraTransformerWorkerServiceTest
     withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
         sendNotificationToSQS(queue, key)
-        withBrokenWorkerService(store, sender, queue) { recordReceiver =>
+        withBrokenWorkerService(store, sender, queue) { _ =>
           eventually {
             assertQueueEmpty(queue)
             assertQueueHasSize(dlq, 1)
@@ -194,7 +194,7 @@ class SierraTransformerWorkerServiceTest
     withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
         sendNotificationToSQS(queue, key)
-        withWorkerService(store, sender, queue) { recordReceiver =>
+        withWorkerService(store, sender, queue) { _ =>
           eventually {
             assertQueueEmpty(queue)
             assertQueueHasSize(dlq, 1)
@@ -242,7 +242,7 @@ class SierraTransformerWorkerServiceTest
       }
     }
 
-  private def brokenStore = {
+  private def brokenStore: MemoryVersionedStore[String, SierraTransformable] = {
     new MemoryVersionedStore[String, SierraTransformable](
       new MemoryStore(Map[Version[String, Int], SierraTransformable]())
       with MemoryMaxima[String, SierraTransformable]) {

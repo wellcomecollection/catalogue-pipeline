@@ -6,10 +6,8 @@ import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryVersionedStore}
 import uk.ac.wellcome.storage.{StoreReadError, StoreWriteError, Version}
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.maxima.memory.MemoryMaxima
-import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 
-trait VHSFixture[T] extends BigMessagingFixture {
-
+trait VHSFixture[T] {
   type VHS = VersionedStore[String, Int, T]
 
   type InternalStore =
@@ -33,9 +31,4 @@ trait VHSFixture[T] extends BigMessagingFixture {
 
   def withBrokenVHS[R](testWith: TestWith[VHS, R]): R =
     testWith(new BrokenMemoryVHS())
-
-  def withMemoryMessageSender[R](
-    testWith: TestWith[MemoryMessageSender, R]): R = {
-    testWith(new MemoryMessageSender())
-  }
 }

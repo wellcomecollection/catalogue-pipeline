@@ -97,11 +97,11 @@ trait BigMessagingFixture
       testWith(sender)
     }
 
-  def withSnsMessageSender[R](topic: Topic, snsClient: SnsClient = snsClient)(
+  private def withSnsMessageSender[R](topic: Topic, senderSnsClient: SnsClient)(
     testWith: TestWith[MessageSender[SNSConfig], R]): R =
     testWith(
       new SNSMessageSender(
-        snsClient = snsClient,
+        snsClient = senderSnsClient,
         snsConfig = createSNSConfigWith(topic),
         subject = "Sent in BigMessagingFixture"
       )

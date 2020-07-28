@@ -3,29 +3,18 @@ package uk.ac.wellcome.platform.idminter
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import software.amazon.awssdk.services.sqs.model.{
-  GetQueueAttributesRequest,
-  QueueAttributeName
-}
-import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
-import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
+import software.amazon.awssdk.services.sqs.model.QueueAttributeName
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.platform.idminter.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.models.Implicits._
 
-import scala.collection.JavaConverters._
-
 class IdMinterFeatureTest
     extends AnyFunSpec
-    with SQS
-    with SNS
-    with BigMessagingFixture
-    with fixtures.IdentifiersDatabase
+    with Matchers
     with IntegrationPatience
     with Eventually
-    with Matchers
     with WorkerServiceFixture
     with WorksGenerators {
 
@@ -161,14 +150,9 @@ class IdMinterFeatureTest
     // TODO Write this test using dead letter queues once https://github.com/adamw/elasticmq/issues/69 is closed
     Thread.sleep(2000)
 
-    sqsClient
-      .getQueueAttributes { builder: GetQueueAttributesRequest.Builder =>
-        builder
-          .queueUrl(queue.url)
-          .attributeNames(List(
-            QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES_NOT_VISIBLE).asJava)
-      }
-      .attributes()
-      .get(QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES_NOT_VISIBLE) shouldBe "1"
+    getQueueAttribute(
+      queue,
+      attributeName =
+        QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES_NOT_VISIBLE) shouldBe "1"
   }
 }

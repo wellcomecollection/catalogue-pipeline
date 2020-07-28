@@ -1,6 +1,7 @@
 package uk.ac.wellcome.platform.merger.fixtures
 
 import software.amazon.awssdk.services.cloudwatch.model.StandardUnit
+import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -19,7 +20,7 @@ import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.monitoring.Metrics
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 
-trait WorkerServiceFixture extends LocalWorksVhs {
+trait WorkerServiceFixture extends LocalWorksVhs with BigMessagingFixture {
 
   def withWorkerService[R](vhs: VHS,
                            queue: Queue,

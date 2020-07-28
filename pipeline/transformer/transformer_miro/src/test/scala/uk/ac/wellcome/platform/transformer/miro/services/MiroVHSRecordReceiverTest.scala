@@ -1,12 +1,9 @@
 package uk.ac.wellcome.platform.transformer.miro.services
 
-import scala.util.Try
-import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
+import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
-import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.matchers.should.Matchers
 
-import scala.util.Try
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.{
   TransformedBaseWork,
@@ -20,16 +17,14 @@ import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
-import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
+
+import scala.util.Try
 
 class MiroVHSRecordReceiverTest
     extends AnyFunSpec
     with Matchers
-    with BigMessagingFixture
-    with Eventually
     with MiroVHSRecordReceiverFixture
     with IntegrationPatience
-    with MockitoSugar
     with ScalaFutures
     with MiroRecordGenerators
     with WorksGenerators {
@@ -49,7 +44,7 @@ class MiroVHSRecordReceiverTest
   it("receives a message and sends it to SNS client") {
     withLocalSnsTopic { topic =>
       withLocalS3Bucket { bucket =>
-        val message = createHybridRecordNotificationWith()
+        val message = createHybridRecordNotification
 
         withMiroVHSRecordReceiver(topic, bucket) { recordReceiver =>
           val future = recordReceiver.receiveMessage(message, transformToWork)
@@ -99,7 +94,7 @@ class MiroVHSRecordReceiverTest
   ignore("returns a failed future if there's no MiroMetadata") {
     withLocalSnsTopic { topic =>
       withLocalS3Bucket { bucket =>
-        val incompleteMessage = createHybridRecordNotificationWith()
+        val incompleteMessage = createHybridRecordNotification
 
         withMiroVHSRecordReceiver(topic, bucket) { recordReceiver =>
           val future =
@@ -135,15 +130,14 @@ class MiroVHSRecordReceiverTest
   it("fails if it's unable to perform a transformation") {
     withLocalSnsTopic { topic =>
       withLocalS3Bucket { bucket =>
-        val message =
-          createHybridRecordNotificationWith()
+        val message = createHybridRecordNotification
 
         withMiroVHSRecordReceiver(topic, bucket) { recordReceiver =>
           val future =
             recordReceiver.receiveMessage(message, failingTransformToWork)
 
-          whenReady(future.failed) { x =>
-            x shouldBe a[TestException]
+          whenReady(future.failed) {
+            _ shouldBe a[TestException]
           }
         }
       }
@@ -152,7 +146,7 @@ class MiroVHSRecordReceiverTest
 
   it("fails if it's unable to publish the work") {
     withLocalS3Bucket { bucket =>
-      val message = createHybridRecordNotificationWith()
+      val message = createHybridRecordNotification
 
       withMiroVHSRecordReceiver(Topic("no-such-topic"), bucket) {
         recordReceiver =>

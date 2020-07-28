@@ -2,18 +2,20 @@ package uk.ac.wellcome.calm_adapter
 
 import java.time.LocalDate
 
-import scala.concurrent.{ExecutionContext, Future}
 import akka.Done
-import akka.stream.scaladsl._
 import akka.stream.Materializer
+import akka.stream.scaladsl._
 import grizzled.slf4j.Logging
 import software.amazon.awssdk.services.sqs.model.{Message => SQSMessage}
-import uk.ac.wellcome.typesafe.Runnable
-import uk.ac.wellcome.storage.Version
-import uk.ac.wellcome.messaging.sqs.SQSStream
-import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSMessageSender}
-import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.bigmessaging.FlowOps
+import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.messaging.MessageSender
+import uk.ac.wellcome.messaging.sns.NotificationMessage
+import uk.ac.wellcome.messaging.sqs.SQSStream
+import uk.ac.wellcome.storage.Version
+import uk.ac.wellcome.typesafe.Runnable
+
+import scala.concurrent.{ExecutionContext, Future}
 
 case class CalmWindow(date: LocalDate)
 
@@ -27,14 +29,14 @@ case class CalmWindow(date: LocalDate)
   *   currently in  the store
   * - Publish the VHS key to SNS
   */
-class CalmAdapterWorkerService(msgStream: SQSStream[NotificationMessage],
-                               msgSender: SNSMessageSender,
-                               calmRetriever: CalmRetriever,
-                               calmStore: CalmStore,
-                               concurrentWindows: Int = 2)(
-  implicit
-  val ec: ExecutionContext,
-  materializer: Materializer)
+class CalmAdapterWorkerService[Destination](
+  msgStream: SQSStream[NotificationMessage],
+  messageSender: MessageSender[Destination],
+  calmRetriever: CalmRetriever,
+  calmStore: CalmStore,
+  concurrentWindows: Int = 2)(implicit
+                              val ec: ExecutionContext,
+                              materializer: Materializer)
     extends Runnable
     with FlowOps
     with Logging {
@@ -89,7 +91,7 @@ class CalmAdapterWorkerService(msgStream: SQSStream[NotificationMessage],
     Flow[Result[Option[(Key, CalmRecord)]]]
       .map {
         case Right(Some((key, record))) =>
-          msgSender.sendT(key).toEither.right.map(_ => Some(key -> record))
+          messageSender.sendT(key).toEither.right.map(_ => Some(key -> record))
         case Right(None) => Right(None)
         case err         => err
       }

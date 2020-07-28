@@ -38,7 +38,7 @@ trait MiroVHSRecordReceiverFixture
 
   def withMiroVHSRecordReceiver[R](topic: Topic, bucket: Bucket)(
     testWith: TestWith[MiroVHSRecordReceiver[SNSConfig], R]): R = {
-    withSqsBigMessageSender[TransformedBaseWork, R](bucket, topic, snsClient) {
+    withSqsBigMessageSender[TransformedBaseWork, R](bucket, topic) {
       msgSender =>
         val recordReceiver = new MiroVHSRecordReceiver(msgSender, store)
         testWith(recordReceiver)
@@ -63,6 +63,9 @@ trait MiroVHSRecordReceiverFixture
        """.stripMargin
     )
   }
+
+  def createHybridRecordNotification: NotificationMessage =
+    createHybridRecordNotificationWith()
 
   def createHybridRecordWith(
     miroRecord: MiroRecord = createMiroRecord,

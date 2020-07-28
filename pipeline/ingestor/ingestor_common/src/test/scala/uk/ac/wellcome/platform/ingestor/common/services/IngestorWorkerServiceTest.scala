@@ -5,10 +5,7 @@ import com.sksamuel.elastic4s.http.JavaClient
 import org.apache.http.HttpHost
 import org.elasticsearch.client.RestClient
 import org.scalatest.funspec.AnyFunSpec
-import software.amazon.awssdk.services.sqs.model.{
-  GetQueueAttributesRequest,
-  QueueAttributeName
-}
+import software.amazon.awssdk.services.sqs.model.QueueAttributeName
 import uk.ac.wellcome.elasticsearch.{
   ElasticCredentials,
   ElasticsearchIndexCreator
@@ -118,18 +115,10 @@ class IngestorWorkerServiceTest
           Thread.sleep(2000)
 
           eventually {
-            sqsClient
-              .getQueueAttributes {
-                builder: GetQueueAttributesRequest.Builder =>
-                  builder
-                    .queueUrl(queue.url)
-                    .attributeNames(
-                      QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES_NOT_VISIBLE)
-              }
-              .attributes()
-              .get(
-                QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES_NOT_VISIBLE
-              ) shouldBe "1"
+            getQueueAttribute(
+              queue,
+              attributeName =
+                QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES_NOT_VISIBLE) shouldBe "1"
           }
         }
       }

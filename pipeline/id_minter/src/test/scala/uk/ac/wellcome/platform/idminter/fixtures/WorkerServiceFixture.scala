@@ -21,7 +21,8 @@ trait WorkerServiceFixture
     with BigMessagingFixture {
   def withWorkerService[R](bucket: Bucket,
                            topic: Topic,
-                           queue: Queue,
+                           queue: Queue =
+                             Queue("url://q", "arn::q", visibilityTimeout = 1),
                            identifiersDao: IdentifiersDao,
                            identifiersTableConfig: IdentifiersTableConfig)(
     testWith: TestWith[IdMinterWorkerService[SNSConfig], R]): R =
