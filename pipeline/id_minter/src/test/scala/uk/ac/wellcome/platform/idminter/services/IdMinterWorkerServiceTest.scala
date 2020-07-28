@@ -17,38 +17,35 @@ class IdMinterWorkerServiceTest
     with WorkerServiceFixture {
 
   it("creates the Identifiers table in MySQL upon startup") {
-    withLocalSqsQueue() { queue =>
-      withLocalSnsTopic { topic =>
-        withIdentifiersDatabase { identifiersTableConfig =>
-          withLocalS3Bucket { bucket =>
-            val identifiersDao = mock[IdentifiersDao]
-            withWorkerService(
-              bucket,
-              topic,
-              queue,
-              identifiersDao,
-              identifiersTableConfig) { _ =>
-              val database: SQLSyntax =
-                SQLSyntax.createUnsafely(identifiersTableConfig.database)
-              val table: SQLSyntax =
-                SQLSyntax.createUnsafely(identifiersTableConfig.tableName)
+    withLocalSnsTopic { topic =>
+      withIdentifiersDatabase { identifiersTableConfig =>
+        withLocalS3Bucket { bucket =>
+          val identifiersDao = mock[IdentifiersDao]
+          withWorkerService(
+            bucket,
+            topic,
+            identifiersDao = identifiersDao,
+            identifiersTableConfig = identifiersTableConfig) { _ =>
+            val database: SQLSyntax =
+              SQLSyntax.createUnsafely(identifiersTableConfig.database)
+            val table: SQLSyntax =
+              SQLSyntax.createUnsafely(identifiersTableConfig.tableName)
 
-              eventually {
-                val fields = NamedDB('primary) readOnly { implicit session =>
-                  sql"DESCRIBE $database.$table"
-                    .map(
-                      rs =>
-                        FieldDescription(
-                          rs.string("Field"),
-                          rs.string("Type"),
-                          rs.string("Null"),
-                          rs.string("Key")))
-                    .list()
-                    .apply()
-                }
-
-                fields.length should be > 0
+            eventually {
+              val fields = NamedDB('primary) readOnly { implicit session =>
+                sql"DESCRIBE $database.$table"
+                  .map(
+                    rs =>
+                      FieldDescription(
+                        rs.string("Field"),
+                        rs.string("Type"),
+                        rs.string("Null"),
+                        rs.string("Key")))
+                  .list()
+                  .apply()
               }
+
+              fields.length should be > 0
             }
           }
         }
