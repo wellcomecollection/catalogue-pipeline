@@ -7,7 +7,12 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult, WorkIdentifier, WorkNode}
+import uk.ac.wellcome.models.matcher.{
+  MatchedIdentifiers,
+  MatcherResult,
+  WorkIdentifier,
+  WorkNode
+}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
 import uk.ac.wellcome.storage.{Identified, Version}
@@ -39,7 +44,8 @@ class MatcherFeatureTest
           sendWork(work, vhs, queue)
 
           eventually {
-            messageSender.getMessages[MatcherResult].distinct shouldBe Seq(expectedResult)
+            messageSender.getMessages[MatcherResult].distinct shouldBe Seq(
+              expectedResult)
           }
         }
       }
@@ -79,7 +85,7 @@ class MatcherFeatureTest
               messageSender.messages shouldBe empty
             }
           }
-      }
+        }
     }
   }
 
@@ -109,7 +115,7 @@ class MatcherFeatureTest
               messageSender.messages shouldBe empty
             }
           }
-      }
+        }
     }
   }
 }

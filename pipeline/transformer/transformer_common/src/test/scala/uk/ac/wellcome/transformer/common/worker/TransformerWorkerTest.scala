@@ -13,7 +13,10 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.models.work.internal.{TransformedBaseWork, UnidentifiedWork}
+import uk.ac.wellcome.models.work.internal.{
+  TransformedBaseWork,
+  UnidentifiedWork
+}
 import uk.ac.wellcome.storage.Version
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
@@ -53,30 +56,32 @@ class TransformerWorkerTest
       Version("C", 3) -> ValidTestData
     )
 
-    withLocalSqsQueuePair() { case QueuePair(queue, dlq) =>
-      withWorker(queue, records = records) { _ =>
-        sendNotificationToSQS[Version[String, Int]](queue, Version("A", 1))
-        sendNotificationToSQS[Version[String, Int]](queue, Version("B", 2))
-        sendNotificationToSQS[Version[String, Int]](queue, Version("C", 3))
+    withLocalSqsQueuePair() {
+      case QueuePair(queue, dlq) =>
+        withWorker(queue, records = records) { _ =>
+          sendNotificationToSQS[Version[String, Int]](queue, Version("A", 1))
+          sendNotificationToSQS[Version[String, Int]](queue, Version("B", 2))
+          sendNotificationToSQS[Version[String, Int]](queue, Version("C", 3))
 
-        Thread.sleep(500)
+          Thread.sleep(500)
 
-        assertQueueEmpty(dlq)
-        assertQueueEmpty(queue)
-      }
+          assertQueueEmpty(dlq)
+          assertQueueEmpty(queue)
+        }
     }
   }
 
   it("sends failed messages to the DLQ if it can't read from store") {
-    withLocalSqsQueuePair() { case QueuePair(queue, dlq) =>
-      withWorker(queue, records = Map.empty) { _ =>
-        sendNotificationToSQS[Version[String, Int]](queue, Version("A", 1))
+    withLocalSqsQueuePair() {
+      case QueuePair(queue, dlq) =>
+        withWorker(queue, records = Map.empty) { _ =>
+          sendNotificationToSQS[Version[String, Int]](queue, Version("A", 1))
 
-        Thread.sleep(2000)
+          Thread.sleep(2000)
 
-        assertQueueHasSize(dlq, size = 1)
-        assertQueueEmpty(queue)
-      }
+          assertQueueHasSize(dlq, size = 1)
+          assertQueueEmpty(queue)
+        }
     }
   }
 
@@ -87,17 +92,18 @@ class TransformerWorkerTest
       Version("C", 3) -> InvalidTestData
     )
 
-    withLocalSqsQueuePair() { case QueuePair(queue, dlq) =>
-      withWorker(queue, records = records) { _ =>
-        sendNotificationToSQS[Version[String, Int]](queue, Version("A", 1))
-        sendNotificationToSQS[Version[String, Int]](queue, Version("B", 2))
-        sendNotificationToSQS[Version[String, Int]](queue, Version("C", 3))
+    withLocalSqsQueuePair() {
+      case QueuePair(queue, dlq) =>
+        withWorker(queue, records = records) { _ =>
+          sendNotificationToSQS[Version[String, Int]](queue, Version("A", 1))
+          sendNotificationToSQS[Version[String, Int]](queue, Version("B", 2))
+          sendNotificationToSQS[Version[String, Int]](queue, Version("C", 3))
 
-        Thread.sleep(2000)
+          Thread.sleep(2000)
 
-        assertQueueHasSize(dlq, size = 1)
-        assertQueueEmpty(queue)
-      }
+          assertQueueHasSize(dlq, size = 1)
+          assertQueueEmpty(queue)
+        }
     }
   }
 

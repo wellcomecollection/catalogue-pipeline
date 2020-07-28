@@ -115,7 +115,10 @@ class IngestorWorkerServiceTest
           Thread.sleep(2000)
 
           eventually {
-            getQueueAttribute(queue, attributeName = QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES_NOT_VISIBLE) shouldBe "1"
+            getQueueAttribute(
+              queue,
+              attributeName =
+                QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES_NOT_VISIBLE) shouldBe "1"
           }
         }
       }

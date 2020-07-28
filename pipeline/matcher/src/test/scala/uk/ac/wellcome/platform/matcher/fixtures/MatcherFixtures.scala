@@ -17,7 +17,11 @@ import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher
 import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, WorkNode}
 import uk.ac.wellcome.platform.matcher.services.MatcherWorkerService
-import uk.ac.wellcome.platform.matcher.storage.{WorkGraphStore, WorkNodeDao, WorkStore}
+import uk.ac.wellcome.platform.matcher.storage.{
+  WorkGraphStore,
+  WorkNodeDao,
+  WorkStore
+}
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.bigmessaging.fixtures.VHSFixture
@@ -25,7 +29,11 @@ import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.storage.dynamo._
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
 import uk.ac.wellcome.storage.fixtures.S3Fixtures
-import uk.ac.wellcome.storage.locking.dynamo.{DynamoLockDaoFixtures, DynamoLockingService, ExpiringLock}
+import uk.ac.wellcome.storage.locking.dynamo.{
+  DynamoLockDaoFixtures,
+  DynamoLockingService,
+  ExpiringLock
+}
 import uk.ac.wellcome.storage.Identified
 
 trait MatcherFixtures
@@ -49,11 +57,11 @@ trait MatcherFixtures
       testWith(table)
     }
 
-  def withWorkerService[R](vhs: VHS,
-                           queue: SQS.Queue,
-                           messageSender: MemoryMessageSender,
-                           graphTable: Table)(
-    testWith: TestWith[MatcherWorkerService[String], R]): R =
+  def withWorkerService[R](
+    vhs: VHS,
+    queue: SQS.Queue,
+    messageSender: MemoryMessageSender,
+    graphTable: Table)(testWith: TestWith[MatcherWorkerService[String], R]): R =
     withLockTable { lockTable =>
       withWorkGraphStore(graphTable) { workGraphStore =>
         withWorkMatcher(workGraphStore, lockTable) { workMatcher =>
@@ -73,7 +81,9 @@ trait MatcherFixtures
       }
     }
 
-  def withWorkerService[R](vhs: VHS, queue: SQS.Queue, messageSender: MemoryMessageSender)(
+  def withWorkerService[R](vhs: VHS,
+                           queue: SQS.Queue,
+                           messageSender: MemoryMessageSender)(
     testWith: TestWith[MatcherWorkerService[String], R]): R =
     withWorkGraphTable { graphTable =>
       withWorkerService(vhs, queue, messageSender, graphTable) { service =>

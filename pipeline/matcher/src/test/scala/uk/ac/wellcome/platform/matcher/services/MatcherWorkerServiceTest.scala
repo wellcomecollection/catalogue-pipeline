@@ -7,7 +7,11 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult, WorkIdentifier}
+import uk.ac.wellcome.models.matcher.{
+  MatchedIdentifiers,
+  MatcherResult,
+  WorkIdentifier
+}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
@@ -40,7 +44,9 @@ class MatcherWorkerServiceTest
     withLocalSqsQueue() { implicit queue =>
       withVHS { implicit vhs =>
         withWorkerService(vhs, queue, messageSender) { _ =>
-          processAndAssertMatchedWorkIs(updatedWork, expectedResult = expectedMatchedWorks)
+          processAndAssertMatchedWorkIs(
+            updatedWork,
+            expectedResult = expectedMatchedWorks)
         }
       }
     }
@@ -61,7 +67,9 @@ class MatcherWorkerServiceTest
     withLocalSqsQueue() { implicit queue =>
       withVHS { implicit vhs =>
         withWorkerService(vhs, queue, messageSender) { _ =>
-          processAndAssertMatchedWorkIs(invisibleWork, expectedResult = expectedMatchedWorks)
+          processAndAssertMatchedWorkIs(
+            invisibleWork,
+            expectedResult = expectedMatchedWorks)
         }
       }
     }
@@ -89,13 +97,14 @@ class MatcherWorkerServiceTest
       )
     )
 
-
     implicit val messageSender: MemoryMessageSender = new MemoryMessageSender()
 
     withLocalSqsQueue() { implicit queue =>
       withVHS { implicit vhs =>
         withWorkerService(vhs, queue, messageSender) { _ =>
-          processAndAssertMatchedWorkIs(workAv1, expectedResult = expectedMatchedWorks)
+          processAndAssertMatchedWorkIs(
+            workAv1,
+            expectedResult = expectedMatchedWorks)
         }
       }
     }
@@ -110,7 +119,8 @@ class MatcherWorkerServiceTest
     val expectedMatchedWorksAv1 = MatcherResult(
       Set(
         MatchedIdentifiers(
-          identifiers = Set(WorkIdentifier("sierra-system-number/A", version = 1))
+          identifiers =
+            Set(WorkIdentifier("sierra-system-number/A", version = 1))
         )
       )
     )
@@ -122,7 +132,8 @@ class MatcherWorkerServiceTest
     val expectedMatchedWorksBv1 = MatcherResult(
       Set(
         MatchedIdentifiers(
-          identifiers = Set(WorkIdentifier("sierra-system-number/B", version = 1))
+          identifiers =
+            Set(WorkIdentifier("sierra-system-number/B", version = 1))
         )
       )
     )
@@ -152,7 +163,8 @@ class MatcherWorkerServiceTest
       MatcherResult(
         Set(
           MatchedIdentifiers(
-            identifiers = Set(WorkIdentifier("sierra-system-number/C", version = 1))
+            identifiers =
+              Set(WorkIdentifier("sierra-system-number/C", version = 1))
           )
         )
       )
@@ -201,7 +213,8 @@ class MatcherWorkerServiceTest
     val expectedMatchedWorksAv1 = MatcherResult(
       Set(
         MatchedIdentifiers(
-          identifiers = Set(WorkIdentifier("sierra-system-number/A", version = 1))
+          identifiers =
+            Set(WorkIdentifier("sierra-system-number/A", version = 1))
         )
       )
     )
@@ -215,7 +228,8 @@ class MatcherWorkerServiceTest
     val expectedMatchedWorksBv1 = MatcherResult(
       Set(
         MatchedIdentifiers(
-          identifiers = Set(WorkIdentifier("sierra-system-number/B", version = 1))
+          identifiers =
+            Set(WorkIdentifier("sierra-system-number/B", version = 1))
         )
       )
     )
@@ -249,10 +263,12 @@ class MatcherWorkerServiceTest
       MatcherResult(
         Set(
           MatchedIdentifiers(
-            identifiers = Set(WorkIdentifier("sierra-system-number/A", version = 3))
+            identifiers =
+              Set(WorkIdentifier("sierra-system-number/A", version = 3))
           ),
           MatchedIdentifiers(
-            identifiers = Set(WorkIdentifier("sierra-system-number/B", version = 1))
+            identifiers =
+              Set(WorkIdentifier("sierra-system-number/B", version = 1))
           )
         )
       )
@@ -264,8 +280,12 @@ class MatcherWorkerServiceTest
         withWorkerService(vhs, queue, messageSender) { _ =>
           processAndAssertMatchedWorkIs(workAv1, expectedMatchedWorksAv1)
           processAndAssertMatchedWorkIs(workBv1, expectedMatchedWorksBv1)
-          processAndAssertMatchedWorkIs(workAv2MatchedToB, expectedMatchedWorksAv2MatchedToB)
-          processAndAssertMatchedWorkIs(workAv3WithNoMatchingWorks, expectedMatchedWorksAv3)
+          processAndAssertMatchedWorkIs(
+            workAv2MatchedToB,
+            expectedMatchedWorksAv2MatchedToB)
+          processAndAssertMatchedWorkIs(
+            workAv3WithNoMatchingWorks,
+            expectedMatchedWorksAv3)
         }
       }
     }
@@ -280,36 +300,40 @@ class MatcherWorkerServiceTest
     val expectedMatchedWorkAv2 = MatcherResult(
       Set(
         MatchedIdentifiers(
-          identifiers = Set(WorkIdentifier("sierra-system-number/A", version = 2))
+          identifiers =
+            Set(WorkIdentifier("sierra-system-number/A", version = 2))
         )
       )
     )
 
     implicit val messageSender: MemoryMessageSender = new MemoryMessageSender()
 
-    withLocalSqsQueuePair() { case QueuePair(queue, dlq) =>
-      implicit val q: SQS.Queue = queue
+    withLocalSqsQueuePair() {
+      case QueuePair(queue, dlq) =>
+        implicit val q: SQS.Queue = queue
 
-      withVHS { implicit vhs =>
-        withWorkerService(vhs, queue, messageSender) { _ =>
-          processAndAssertMatchedWorkIs(workAv2, expectedMatchedWorkAv2)
+        withVHS { implicit vhs =>
+          withWorkerService(vhs, queue, messageSender) { _ =>
+            processAndAssertMatchedWorkIs(workAv2, expectedMatchedWorkAv2)
 
-          // Work V1 is sent but not matched
-          val workAv1 = createUnidentifiedWorkWith(
-            sourceIdentifier = identifierA,
-            version = 1
-          )
+            // Work V1 is sent but not matched
+            val workAv1 = createUnidentifiedWorkWith(
+              sourceIdentifier = identifierA,
+              version = 1
+            )
 
-          sendWork(workAv1, vhs, queue)
-          eventually {
-            noMessagesAreWaitingIn(queue)
-            noMessagesAreWaitingIn(dlq)
+            sendWork(workAv1, vhs, queue)
+            eventually {
+              noMessagesAreWaitingIn(queue)
+              noMessagesAreWaitingIn(dlq)
 
-            messageSender.getMessages[MatcherResult].last shouldBe expectedMatchedWorkAv2
+              messageSender
+                .getMessages[MatcherResult]
+                .last shouldBe expectedMatchedWorkAv2
+            }
+
           }
-
         }
-      }
     }
   }
 
@@ -322,40 +346,40 @@ class MatcherWorkerServiceTest
     val expectedMatchedWorkAv2 = MatcherResult(
       Set(
         MatchedIdentifiers(
-          identifiers = Set(WorkIdentifier("sierra-system-number/A", version = 2)
-          )
+          identifiers =
+            Set(WorkIdentifier("sierra-system-number/A", version = 2))
         )
       )
     )
 
     implicit val messageSender: MemoryMessageSender = new MemoryMessageSender()
 
-    withLocalSqsQueuePair() { case QueuePair(queue, dlq) =>
-      implicit val q: SQS.Queue = queue
+    withLocalSqsQueuePair() {
+      case QueuePair(queue, dlq) =>
+        implicit val q: SQS.Queue = queue
 
-      withVHS { implicit vhs =>
-        withWorkerService(vhs, queue, messageSender) { _ =>
-          processAndAssertMatchedWorkIs(workAv2, expectedMatchedWorkAv2)
+        withVHS { implicit vhs =>
+          withWorkerService(vhs, queue, messageSender) { _ =>
+            processAndAssertMatchedWorkIs(workAv2, expectedMatchedWorkAv2)
 
-          // Work V1 is sent but not matched
-          val differentWorkAv2 = createUnidentifiedWorkWith(
-            sourceIdentifier = identifierA,
-            mergeCandidates = List(MergeCandidate(identifierB)),
-            version = 2)
+            // Work V1 is sent but not matched
+            val differentWorkAv2 = createUnidentifiedWorkWith(
+              sourceIdentifier = identifierA,
+              mergeCandidates = List(MergeCandidate(identifierB)),
+              version = 2)
 
-          sendWork(differentWorkAv2, vhs, queue)
-          eventually {
-            assertQueueEmpty(queue)
-            assertQueueHasSize(dlq, 1)
+            sendWork(differentWorkAv2, vhs, queue)
+            eventually {
+              assertQueueEmpty(queue)
+              assertQueueHasSize(dlq, 1)
+            }
           }
         }
-      }
     }
   }
 
-  private def processAndAssertMatchedWorkIs(
-    workToMatch: TransformedBaseWork,
-    expectedResult: MatcherResult)(
+  private def processAndAssertMatchedWorkIs(workToMatch: TransformedBaseWork,
+                                            expectedResult: MatcherResult)(
     implicit
     vhs: VHS,
     queue: SQS.Queue,

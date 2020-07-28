@@ -117,7 +117,8 @@ class RecorderWorkerServiceTest
           eventually {
             val id = work.sourceIdentifier.toString
 
-            messageSender.getMessages[Version[String, Int]] shouldBe Seq(Version(id, 0))
+            messageSender.getMessages[Version[String, Int]] shouldBe Seq(
+              Version(id, 0))
           }
         }
       }

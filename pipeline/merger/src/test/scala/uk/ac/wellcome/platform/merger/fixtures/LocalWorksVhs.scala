@@ -6,9 +6,7 @@ import uk.ac.wellcome.bigmessaging.fixtures.VHSFixture
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.storage.Identified
 
-trait LocalWorksVhs
-    extends VHSFixture[TransformedBaseWork]
-    with Matchers {
+trait LocalWorksVhs extends VHSFixture[TransformedBaseWork] with Matchers {
 
   def givenStoredInVhs(vhs: VHS, works: TransformedBaseWork*): Seq[Assertion] =
     works.map { work =>

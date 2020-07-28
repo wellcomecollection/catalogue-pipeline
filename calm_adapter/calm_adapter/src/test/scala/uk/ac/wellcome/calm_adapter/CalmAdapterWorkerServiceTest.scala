@@ -13,7 +13,10 @@ import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
-import uk.ac.wellcome.messaging.memory.{MemoryIndividualMessageSender, MemoryMessageSender}
+import uk.ac.wellcome.messaging.memory.{
+  MemoryIndividualMessageSender,
+  MemoryMessageSender
+}
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.storage.Version
 import uk.ac.wellcome.storage.maxima.Maxima
@@ -105,7 +108,8 @@ class CalmAdapterWorkerServiceTest
     val brokenMessageSender = new MemoryMessageSender() {
       override val underlying: MemoryIndividualMessageSender =
         new MemoryIndividualMessageSender() {
-          override def sendT[T](t: T)(subject: String, destination: String)(implicit encoder: Encoder[T]): Try[Unit] =
+          override def sendT[T](t: T)(subject: String, destination: String)(
+            implicit encoder: Encoder[T]): Try[Unit] =
             if (t.asInstanceOf[Version[String, Int]].id == "B")
               Failure(new Exception("Waaah I couldn't send message"))
             else
@@ -139,7 +143,7 @@ class CalmAdapterWorkerServiceTest
             )
             calmAdapter.run()
             testWith((calmAdapter, QueuePair(queue, dlq)))
-        }
+          }
       }
     }
 

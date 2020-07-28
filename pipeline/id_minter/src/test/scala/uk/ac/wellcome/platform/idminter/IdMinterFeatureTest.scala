@@ -150,6 +150,9 @@ class IdMinterFeatureTest
     // TODO Write this test using dead letter queues once https://github.com/adamw/elasticmq/issues/69 is closed
     Thread.sleep(2000)
 
-    getQueueAttribute(queue, attributeName = QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES_NOT_VISIBLE) shouldBe "1"
+    getQueueAttribute(
+      queue,
+      attributeName =
+        QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES_NOT_VISIBLE) shouldBe "1"
   }
 }

@@ -34,10 +34,9 @@ class CalmAdapterWorkerService[Destination](
   messageSender: MessageSender[Destination],
   calmRetriever: CalmRetriever,
   calmStore: CalmStore,
-  concurrentWindows: Int = 2)(
-  implicit
-  val ec: ExecutionContext,
-  materializer: Materializer)
+  concurrentWindows: Int = 2)(implicit
+                              val ec: ExecutionContext,
+                              materializer: Materializer)
     extends Runnable
     with FlowOps
     with Logging {

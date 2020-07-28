@@ -78,8 +78,7 @@ class MiroTransformerFeatureTest
     val miroHybridRecordMessage2 =
       createHybridRecordNotificationWith(
         createMiroRecordWith(
-          title = Some(
-            "Greenfield Sluder, Tonsillectomy..., use of guillotine"),
+          title = Some("Greenfield Sluder, Tonsillectomy..., use of guillotine"),
           description = Some("Use of the guillotine"),
           copyrightCleared = Some("Y"),
           imageNumber = "L0023034",

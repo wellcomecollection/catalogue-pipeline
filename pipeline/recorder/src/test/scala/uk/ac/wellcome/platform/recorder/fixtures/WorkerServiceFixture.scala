@@ -11,17 +11,20 @@ import uk.ac.wellcome.platform.recorder.services.RecorderWorkerService
 import uk.ac.wellcome.storage.store.memory.MemoryStore
 import uk.ac.wellcome.storage.{Identified, ObjectLocation, Version}
 
-trait WorkerServiceFixture extends VHSFixture[TransformedBaseWork] with BigMessagingFixture {
-  def withWorkerService[R](
-    queue: Queue,
-    vhs: VHS,
-    messageSender: MemoryMessageSender = new MemoryMessageSender())(
+trait WorkerServiceFixture
+    extends VHSFixture[TransformedBaseWork]
+    with BigMessagingFixture {
+  def withWorkerService[R](queue: Queue,
+                           vhs: VHS,
+                           messageSender: MemoryMessageSender =
+                             new MemoryMessageSender())(
     testWith: TestWith[RecorderWorkerService[String], R]): R =
     withActorSystem { implicit actorSystem =>
       implicit val store =
         new MemoryStore[ObjectLocation, TransformedBaseWork](Map.empty)
       withBigMessageStream[TransformedBaseWork, R](queue = queue) { msgStream =>
-        val workerService = new RecorderWorkerService(vhs, msgStream, messageSender)
+        val workerService =
+          new RecorderWorkerService(vhs, msgStream, messageSender)
         workerService.run()
         testWith(workerService)
       }
@@ -38,7 +41,8 @@ trait WorkerServiceFixture extends VHSFixture[TransformedBaseWork] with BigMessa
     Version(id, expectedVhsVersion)
   }
 
-  def assertWorkNotStored[T <: TransformedBaseWork](vhs: VHS, work: T): Assertion = {
+  def assertWorkNotStored[T <: TransformedBaseWork](vhs: VHS,
+                                                    work: T): Assertion = {
     val id = work.sourceIdentifier.toString
     vhs.getLatest(id) shouldBe a[Left[_, _]]
   }
