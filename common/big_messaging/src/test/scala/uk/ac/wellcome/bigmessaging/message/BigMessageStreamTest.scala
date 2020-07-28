@@ -23,7 +23,7 @@ class BigMessageStreamTest
     with Matchers
     with BigMessagingFixture {
 
-  def process(list: ConcurrentLinkedQueue[ExampleObject])(o: ExampleObject) = {
+  def process(list: ConcurrentLinkedQueue[ExampleObject])(o: ExampleObject): Future[Unit] = {
     list.add(o)
     Future.successful(())
   }
