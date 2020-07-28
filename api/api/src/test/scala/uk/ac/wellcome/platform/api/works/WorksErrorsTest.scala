@@ -7,7 +7,7 @@ class WorksErrorsTest extends ApiWorksTestBase {
       assertIsBadRequest(
         "/works?include=foo",
         description =
-          "include: 'foo' is not a valid value. Please choose one of: ['identifiers', 'items', 'subjects', 'genres', 'contributors', 'production', 'notes', 'collection', 'images']"
+          "include: 'foo' is not a valid value. Please choose one of: ['identifiers', 'items', 'subjects', 'genres', 'contributors', 'production', 'notes', 'collection', 'images', 'parts', 'partOf', 'precededBy', 'succeededBy']"
       )
     }
 
@@ -15,7 +15,7 @@ class WorksErrorsTest extends ApiWorksTestBase {
       assertIsBadRequest(
         "/works?include=foo,bar",
         description =
-          "include: 'foo', 'bar' are not valid values. Please choose one of: ['identifiers', 'items', 'subjects', 'genres', 'contributors', 'production', 'notes', 'collection', 'images']"
+          "include: 'foo', 'bar' are not valid values. Please choose one of: ['identifiers', 'items', 'subjects', 'genres', 'contributors', 'production', 'notes', 'collection', 'images', 'parts', 'partOf', 'precededBy', 'succeededBy']"
       )
     }
 
@@ -23,7 +23,7 @@ class WorksErrorsTest extends ApiWorksTestBase {
       assertIsBadRequest(
         "/works?include=foo,identifiers,bar",
         description =
-          "include: 'foo', 'bar' are not valid values. Please choose one of: ['identifiers', 'items', 'subjects', 'genres', 'contributors', 'production', 'notes', 'collection', 'images']"
+          "include: 'foo', 'bar' are not valid values. Please choose one of: ['identifiers', 'items', 'subjects', 'genres', 'contributors', 'production', 'notes', 'collection', 'images', 'parts', 'partOf', 'precededBy', 'succeededBy']"
       )
     }
 
@@ -31,7 +31,7 @@ class WorksErrorsTest extends ApiWorksTestBase {
       assertIsBadRequest(
         "/works/nfdn7wac?include=foo",
         description =
-          "include: 'foo' is not a valid value. Please choose one of: ['identifiers', 'items', 'subjects', 'genres', 'contributors', 'production', 'notes', 'collection', 'images']"
+          "include: 'foo' is not a valid value. Please choose one of: ['identifiers', 'items', 'subjects', 'genres', 'contributors', 'production', 'notes', 'collection', 'images', 'parts', 'partOf', 'precededBy', 'succeededBy']"
       )
     }
   }
