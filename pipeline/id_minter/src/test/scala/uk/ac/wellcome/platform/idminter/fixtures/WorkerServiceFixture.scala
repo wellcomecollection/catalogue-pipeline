@@ -15,11 +15,11 @@ import uk.ac.wellcome.platform.idminter.steps.IdentifierGenerator
 trait WorkerServiceFixture
     extends IdentifiersDatabase
     with BigMessagingFixture {
-  def withWorkerService[R](messageSender: MemoryMessageSender = new MemoryMessageSender(),
-                           queue: Queue =
-                             Queue("url://q", "arn::q", visibilityTimeout = 1),
-                           identifiersDao: IdentifiersDao,
-                           identifiersTableConfig: IdentifiersTableConfig)(
+  def withWorkerService[R](
+    messageSender: MemoryMessageSender = new MemoryMessageSender(),
+    queue: Queue = Queue("url://q", "arn::q", visibilityTimeout = 1),
+    identifiersDao: IdentifiersDao,
+    identifiersTableConfig: IdentifiersTableConfig)(
     testWith: TestWith[IdMinterWorkerService[String], R]): R =
     withActorSystem { implicit actorSystem =>
       withBigMessageStream[Json, R](queue) { messageStream =>

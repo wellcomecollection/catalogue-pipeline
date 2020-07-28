@@ -15,12 +15,13 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 trait WorkerServiceFixture extends LocalWorksVhs with SQS with Akka {
-  def withWorkerService[R](vhs: VHS,
-                           queue: Queue,
-                           workSender: MemoryMessageSender,
-                           imageSender: MemoryMessageSender = new MemoryMessageSender(),
-                           metrics: Metrics[Future, StandardUnit] = new MemoryMetrics[StandardUnit])(
-                            testWith: TestWith[MergerWorkerService[String, String], R]): R =
+  def withWorkerService[R](
+    vhs: VHS,
+    queue: Queue,
+    workSender: MemoryMessageSender,
+    imageSender: MemoryMessageSender = new MemoryMessageSender(),
+    metrics: Metrics[Future, StandardUnit] = new MemoryMetrics[StandardUnit])(
+    testWith: TestWith[MergerWorkerService[String, String], R]): R =
     withActorSystem { implicit actorSystem =>
       withSQSStream[NotificationMessage, R](queue, metrics) { sqsStream =>
         val workerService = new MergerWorkerService(
@@ -43,9 +44,8 @@ trait WorkerServiceFixture extends LocalWorksVhs with SQS with Akka {
       val workSender = new MemoryMessageSender()
       val imageSender = new MemoryMessageSender()
 
-      withWorkerService(vhs, queue, workSender, imageSender) {
-        workerService =>
-          testWith(workerService)
+      withWorkerService(vhs, queue, workSender, imageSender) { workerService =>
+        testWith(workerService)
       }
     }
 }

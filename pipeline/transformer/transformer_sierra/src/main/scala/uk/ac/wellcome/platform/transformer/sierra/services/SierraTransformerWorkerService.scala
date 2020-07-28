@@ -16,6 +16,7 @@ class SierraTransformerWorkerService[MsgDestination](
 ) extends Runnable
     with TransformerWorker[SierraTransformable, MsgDestination] {
 
-  override val transformer: Transformer[SierraTransformable] = (input: SierraTransformable, version: Int) =>
-    SierraTransformableTransformer.apply(input, version).toEither
+  override val transformer: Transformer[SierraTransformable] =
+    (input: SierraTransformable, version: Int) =>
+      SierraTransformableTransformer.apply(input, version).toEither
 }

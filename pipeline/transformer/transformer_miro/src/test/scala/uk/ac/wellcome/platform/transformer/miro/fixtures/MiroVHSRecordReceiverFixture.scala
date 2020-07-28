@@ -25,7 +25,8 @@ trait MiroVHSRecordReceiverFixture extends MiroRecordGenerators with SQS {
 
   private val store: MiroStore = new MemoryStore(Map.empty)
 
-  def createRecordReceiverWith(messageSender: MemoryMessageSender): MiroVHSRecordReceiver[String] =
+  def createRecordReceiverWith(
+    messageSender: MemoryMessageSender): MiroVHSRecordReceiver[String] =
     new MiroVHSRecordReceiver(messageSender, store)
 
   def createHybridRecordNotificationWith(

@@ -16,13 +16,15 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 class InferenceManagerWorkerService[Destination, Input, Output](
-                                                                 msgStream: BigMessageStream[Input],
-                                                                 messageSender: MessageSender[Destination],
-                                                                 inferrerAdapter: InferrerAdapter[Input, Output],
-                                                                 inferrerClientFlow: Flow[(HttpRequest, (Message, Input)),
+  msgStream: BigMessageStream[Input],
+  messageSender: MessageSender[Destination],
+  inferrerAdapter: InferrerAdapter[Input, Output],
+  inferrerClientFlow: Flow[(HttpRequest, (Message, Input)),
                            (Try[HttpResponse], (Message, Input)),
                            HostConnectionPool]
-)(implicit actorSystem: ActorSystem, ec: ExecutionContext, encoder: Encoder[Output])
+)(implicit actorSystem: ActorSystem,
+  ec: ExecutionContext,
+  encoder: Encoder[Output])
     extends Runnable
     with Logging {
 

@@ -7,7 +7,10 @@ import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
-import uk.ac.wellcome.platform.merger.fixtures.{MatcherResultFixture, WorkerServiceFixture}
+import uk.ac.wellcome.platform.merger.fixtures.{
+  MatcherResultFixture,
+  WorkerServiceFixture
+}
 
 class MergerIntegrationTest
     extends AnyFunSpec
@@ -35,7 +38,8 @@ class MergerIntegrationTest
               assertQueueEmpty(queue)
               assertQueueEmpty(dlq)
 
-              workSender.getMessages[TransformedBaseWork] should contain only work
+              workSender
+                .getMessages[TransformedBaseWork] should contain only work
             }
           }
       }

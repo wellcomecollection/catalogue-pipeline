@@ -3,7 +3,11 @@ package uk.ac.wellcome.bigmessaging
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
-import uk.ac.wellcome.bigmessaging.message.{InlineNotification, MessageNotification, RemoteNotification}
+import uk.ac.wellcome.bigmessaging.message.{
+  InlineNotification,
+  MessageNotification,
+  RemoteNotification
+}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 
@@ -20,16 +24,17 @@ class BigMessageSenderTest
   it("sends an inline notification if the message is small") {
     withLocalS3Bucket { bucket =>
       withLocalSnsTopic { topic =>
-        withSqsBigMessageSender(bucket, topic, maxMessageSize = Int.MaxValue) { sender =>
-          sender.sendT(redSquare) shouldBe a[Success[_]]
+        withSqsBigMessageSender(bucket, topic, maxMessageSize = Int.MaxValue) {
+          sender =>
+            sender.sendT(redSquare) shouldBe a[Success[_]]
 
-          val messages = getMessages[MessageNotification](topic)
+            val messages = getMessages[MessageNotification](topic)
 
-          messages should have size 1
-          messages.head shouldBe a[InlineNotification]
+            messages should have size 1
+            messages.head shouldBe a[InlineNotification]
 
-          val notification = messages.head.asInstanceOf[InlineNotification]
-          fromJson[Shape](notification.jsonString).get shouldBe redSquare
+            val notification = messages.head.asInstanceOf[InlineNotification]
+            fromJson[Shape](notification.jsonString).get shouldBe redSquare
         }
       }
     }

@@ -5,7 +5,10 @@ import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.models.work.internal.{TransformedBaseWork, UnidentifiedWork}
+import uk.ac.wellcome.models.work.internal.{
+  TransformedBaseWork,
+  UnidentifiedWork
+}
 import uk.ac.wellcome.platform.transformer.miro.exceptions.MiroTransformerException
 import uk.ac.wellcome.platform.transformer.miro.fixtures.MiroVHSRecordReceiverFixture
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
@@ -86,7 +89,8 @@ class MiroVHSRecordReceiverTest
     val messageSender = new MemoryMessageSender()
     val recordReceiver = createRecordReceiverWith(messageSender)
 
-    val future = recordReceiver.receiveMessage(incompleteMessage, transformToWork)
+    val future =
+      recordReceiver.receiveMessage(incompleteMessage, transformToWork)
 
     whenReady(future.failed) {
       _ shouldBe a[MiroTransformerException]
@@ -101,7 +105,8 @@ class MiroVHSRecordReceiverTest
     val messageSender = new MemoryMessageSender()
     val recordReceiver = createRecordReceiverWith(messageSender)
 
-    val future = recordReceiver.receiveMessage(incompleteMessage, transformToWork)
+    val future =
+      recordReceiver.receiveMessage(incompleteMessage, transformToWork)
 
     whenReady(future.failed) {
       _ shouldBe a[MiroTransformerException]

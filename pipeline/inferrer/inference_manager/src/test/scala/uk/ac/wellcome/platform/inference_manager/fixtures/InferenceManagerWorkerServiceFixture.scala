@@ -7,7 +7,10 @@ import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.platform.inference_manager.services.{InferenceManagerWorkerService, InferrerAdapter}
+import uk.ac.wellcome.platform.inference_manager.services.{
+  InferenceManagerWorkerService,
+  InferrerAdapter
+}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -28,8 +31,8 @@ trait InferenceManagerWorkerServiceFixture[Input, Output]
           inferrerAdapter = adapter,
           inferrerClientFlow = Http()
             .cachedHostConnectionPool[(Message, Input)](
-            "localhost",
-            inferrerPort)
+              "localhost",
+              inferrerPort)
         )
 
         workerService.run()

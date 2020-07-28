@@ -12,7 +12,10 @@ import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
-import uk.ac.wellcome.platform.merger.fixtures.{MatcherResultFixture, WorkerServiceFixture}
+import uk.ac.wellcome.platform.merger.fixtures.{
+  MatcherResultFixture,
+  WorkerServiceFixture
+}
 import uk.ac.wellcome.platform.merger.generators.WorksWithImagesGenerators
 
 class MergerWorkerServiceTest
@@ -47,7 +50,8 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          senders.works.getMessages[BaseWork] should contain only (work1, work2, work3)
+          senders.works
+            .getMessages[BaseWork] should contain only (work1, work2, work3)
 
           metrics.incrementedCounts.length should be >= 1
           metrics.incrementedCounts.last should endWith("_success")
@@ -96,7 +100,7 @@ class MergerWorkerServiceTest
         eventually {
           assertQueueEmpty(queue)
           assertQueueHasSize(dlq, size = 1)
-          
+
           senders.works.messages shouldBe empty
 
           metrics.incrementedCounts.length shouldBe 3
@@ -230,7 +234,9 @@ class MergerWorkerServiceTest
           worksSent should have size 3
 
           val imagesSent =
-            senders.images.getMessages[MergedImage[Identifiable, Unminted]].distinct
+            senders.images
+              .getMessages[MergedImage[Identifiable, Unminted]]
+              .distinct
           imagesSent should have size 1
 
           val redirectedWorks = worksSent.collect {
@@ -324,11 +330,10 @@ class MergerWorkerServiceTest
 
           val metrics = new MemoryMetrics[StandardUnit]
 
-          withWorkerService(vhs, queue, workSender, imageSender, metrics) {
-            _ =>
-              testWith(
-                (vhs, queuePair, Senders(workSender, imageSender), metrics)
-              )
+          withWorkerService(vhs, queue, workSender, imageSender, metrics) { _ =>
+            testWith(
+              (vhs, queuePair, Senders(workSender, imageSender), metrics)
+            )
           }
       }
     }

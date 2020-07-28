@@ -131,19 +131,20 @@ class MetsTransformerWorkerServiceTest
           withMemoryStore { versionedStore =>
             withActorSystem { implicit actorSystem =>
               withSQSStream[NotificationMessage, R](queue) { sqsStream =>
-                withAssumeRoleClientProvider(roleArn)(BypassCredentialsClientFactory) {
-                  assumeRoleclientProvider =>
-                    val workerService = new MetsTransformerWorkerService(
-                      sqsStream,
-                      messageSender,
-                      versionedStore,
-                      new TemporaryCredentialsStore[String](assumeRoleclientProvider)
-                    )
+                withAssumeRoleClientProvider(roleArn)(
+                  BypassCredentialsClientFactory) { assumeRoleclientProvider =>
+                  val workerService = new MetsTransformerWorkerService(
+                    sqsStream,
+                    messageSender,
+                    versionedStore,
+                    new TemporaryCredentialsStore[String](
+                      assumeRoleclientProvider)
+                  )
 
-                    workerService.run()
+                  workerService.run()
 
-                    testWith(
-                      (queuePair, metsBucket, messageSender, versionedStore))
+                  testWith(
+                    (queuePair, metsBucket, messageSender, versionedStore))
                 }
               }
             }

@@ -92,7 +92,9 @@ class MiroTransformerFeatureTest
         sendSqsMessage(queue = queue, obj = miroHybridRecordMessage2)
 
         eventually {
-          messageSender.getMessages[UnidentifiedWork].distinct should have size 2
+          messageSender
+            .getMessages[UnidentifiedWork]
+            .distinct should have size 2
         }
       }
     }

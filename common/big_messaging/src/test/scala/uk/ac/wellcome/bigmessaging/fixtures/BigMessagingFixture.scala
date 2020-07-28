@@ -22,7 +22,12 @@ import uk.ac.wellcome.storage.fixtures.S3Fixtures
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import uk.ac.wellcome.storage.store.Store
 import uk.ac.wellcome.storage.store.memory.MemoryStore
-import uk.ac.wellcome.storage.{Identified, ObjectLocation, StoreWriteError, WriteError}
+import uk.ac.wellcome.storage.{
+  Identified,
+  ObjectLocation,
+  StoreWriteError,
+  WriteError
+}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Success
@@ -44,7 +49,8 @@ trait BigMessagingFixture
     implicit
     actorSystem: ActorSystem,
     decoderT: Decoder[T],
-    storeT: Store[ObjectLocation, T] = new MemoryStore[ObjectLocation, T](Map.empty)): R = {
+    storeT: Store[ObjectLocation, T] =
+      new MemoryStore[ObjectLocation, T](Map.empty)): R = {
     val stream = new BigMessageStream[T](
       sqsClient = sqsClient,
       sqsConfig = createSQSConfigWith(queue),

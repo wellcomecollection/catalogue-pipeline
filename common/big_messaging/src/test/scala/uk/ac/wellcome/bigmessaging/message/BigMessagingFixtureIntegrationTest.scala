@@ -134,11 +134,9 @@ class BigMessagingFixtureIntegrationTest
         withLocalS3Bucket { bucket =>
           withLocalStackSnsTopic { topic =>
             withLocalStackSubscription(queue, topic) { _ =>
-              withSqsBigMessageSender(
-                bucket,
-                topic,
-                localStackSnsClient) { messageWriter =>
-                testWith((messageStream, messageWriter))
+              withSqsBigMessageSender(bucket, topic, localStackSnsClient) {
+                messageWriter =>
+                  testWith((messageStream, messageWriter))
               }
             }
           }
