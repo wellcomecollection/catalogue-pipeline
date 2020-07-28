@@ -139,7 +139,7 @@ class CalmAdapterWorkerServiceTest
               stream,
               messageSender = messageSender,
               retriever,
-              new CalmStore(MemoryVersionedStore(initialEntries = Map.empty))
+              new CalmStore(new MemoryVersionedStore(store))
             )
             calmAdapter.run()
             testWith((calmAdapter, QueuePair(queue, dlq)))
