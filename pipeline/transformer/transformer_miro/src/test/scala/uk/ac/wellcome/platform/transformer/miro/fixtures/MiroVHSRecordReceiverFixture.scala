@@ -64,6 +64,9 @@ trait MiroVHSRecordReceiverFixture
     )
   }
 
+  def createHybridRecordNotification: NotificationMessage =
+    createHybridRecordNotificationWith()
+
   def createHybridRecordWith(
     miroRecord: MiroRecord = createMiroRecord,
     miroMetadata: MiroMetadata = MiroMetadata(isClearedForCatalogueAPI = true),
