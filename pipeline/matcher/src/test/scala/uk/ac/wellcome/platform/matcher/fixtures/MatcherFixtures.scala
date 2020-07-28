@@ -10,33 +10,27 @@ import org.scanamo.error.DynamoReadError
 import org.scanamo.query.UniqueKey
 import org.scanamo.semiauto._
 import org.scanamo.time.JavaTimeFormats._
+import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher
 import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, WorkNode}
 import uk.ac.wellcome.platform.matcher.services.MatcherWorkerService
-import uk.ac.wellcome.platform.matcher.storage.{
-  WorkGraphStore,
-  WorkNodeDao,
-  WorkStore
-}
-import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig}
-import uk.ac.wellcome.messaging.fixtures.SNS.Topic
+import uk.ac.wellcome.platform.matcher.storage.{WorkGraphStore, WorkNodeDao, WorkStore}
+import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.fixtures.SQS
-import uk.ac.wellcome.bigmessaging.fixtures.{BigMessagingFixture, VHSFixture}
+import uk.ac.wellcome.bigmessaging.fixtures.VHSFixture
+import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.storage.dynamo._
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
 import uk.ac.wellcome.storage.fixtures.S3Fixtures
-import uk.ac.wellcome.storage.locking.dynamo.{
-  DynamoLockDaoFixtures,
-  DynamoLockingService,
-  ExpiringLock
-}
+import uk.ac.wellcome.storage.locking.dynamo.{DynamoLockDaoFixtures, DynamoLockingService, ExpiringLock}
 import uk.ac.wellcome.storage.Identified
 
 trait MatcherFixtures
-    extends BigMessagingFixture
+    extends SQS
+    with Akka
     with DynamoLockDaoFixtures
     with LocalWorkGraphDynamoDb
     with VHSFixture[TransformedBaseWork]
@@ -57,34 +51,32 @@ trait MatcherFixtures
 
   def withWorkerService[R](vhs: VHS,
                            queue: SQS.Queue,
-                           topic: Topic,
+                           messageSender: MemoryMessageSender,
                            graphTable: Table)(
-    testWith: TestWith[MatcherWorkerService[SNSConfig], R]): R =
-    withSnsMessageSender(topic) { msgSender =>
-      withActorSystem { implicit actorSystem =>
-        withLockTable { lockTable =>
-          withWorkGraphStore(graphTable) { workGraphStore =>
-            withWorkMatcher(workGraphStore, lockTable) { workMatcher =>
-              withSQSStream[NotificationMessage, R](queue) { msgStream =>
-                val workerService =
-                  new MatcherWorkerService(
-                    new WorkStore(vhs),
-                    msgStream,
-                    msgSender,
-                    workMatcher)
-                workerService.run()
-                testWith(workerService)
-              }
+    testWith: TestWith[MatcherWorkerService[String], R]): R =
+    withLockTable { lockTable =>
+      withWorkGraphStore(graphTable) { workGraphStore =>
+        withWorkMatcher(workGraphStore, lockTable) { workMatcher =>
+          withActorSystem { implicit actorSystem =>
+            withSQSStream[NotificationMessage, R](queue) { msgStream =>
+              val workerService =
+                new MatcherWorkerService(
+                  new WorkStore(vhs),
+                  msgStream,
+                  messageSender,
+                  workMatcher)
+              workerService.run()
+              testWith(workerService)
             }
           }
         }
       }
     }
 
-  def withWorkerService[R](vhs: VHS, queue: SQS.Queue, topic: Topic)(
-    testWith: TestWith[MatcherWorkerService[SNSConfig], R]): R =
+  def withWorkerService[R](vhs: VHS, queue: SQS.Queue, messageSender: MemoryMessageSender)(
+    testWith: TestWith[MatcherWorkerService[String], R]): R =
     withWorkGraphTable { graphTable =>
-      withWorkerService(vhs, queue, topic, graphTable) { service =>
+      withWorkerService(vhs, queue, messageSender, graphTable) { service =>
         testWith(service)
       }
     }
