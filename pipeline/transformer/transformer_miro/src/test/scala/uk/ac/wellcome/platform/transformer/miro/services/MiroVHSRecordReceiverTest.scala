@@ -136,8 +136,8 @@ class MiroVHSRecordReceiverTest
           val future =
             recordReceiver.receiveMessage(message, failingTransformToWork)
 
-          whenReady(future.failed) { x =>
-            x shouldBe a[TestException]
+          whenReady(future.failed) {
+            _ shouldBe a[TestException]
           }
         }
       }
