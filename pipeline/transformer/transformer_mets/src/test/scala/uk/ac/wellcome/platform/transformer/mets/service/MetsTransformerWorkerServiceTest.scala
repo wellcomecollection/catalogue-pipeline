@@ -134,8 +134,7 @@ class MetsTransformerWorkerServiceTest
                   withSQSStream[NotificationMessage, R](queue) { sqsStream =>
                     withSqsBigMessageSender[TransformedBaseWork, R](
                       messagingBucket,
-                      topic,
-                      snsClient) { messageSender =>
+                      topic) { messageSender =>
                       withAssumeRoleClientProvider(roleArn)(
                         BypassCredentialsClientFactory) {
                         assumeRoleclientProvider =>
