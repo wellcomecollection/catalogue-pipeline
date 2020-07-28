@@ -26,7 +26,9 @@ class VHSInternalStore[T](
   dataStore: TypedStore[ObjectLocation, T]
 ) extends HybridStoreWithMaxima[String, Int, ObjectLocation, T] {
 
-  override val indexedStore: Store[Version[String, Int], ObjectLocation] with Maxima[String, Int] = indexStore
+  override val indexedStore
+    : Store[Version[String, Int], ObjectLocation] with Maxima[String, Int] =
+    indexStore
   override val typedStore: TypedStore[ObjectLocation, T] = dataStore
 
   override protected def createTypeStoreId(
