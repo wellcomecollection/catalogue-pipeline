@@ -59,8 +59,8 @@ class RelatedWorkServiceTest
           RelatedWorks(
             parts = List(workD, workE),
             partOf = List(workA),
-            preceededBy = List(work1),
-            suceededBy = List(work3, work4),
+            precededBy = List(work1),
+            succeededBy = List(work3, work4),
           )
         )
       }
@@ -76,8 +76,8 @@ class RelatedWorkServiceTest
           RelatedWorks(
             parts = Nil,
             partOf = List(workA, work2, workE),
-            preceededBy = Nil,
-            suceededBy = Nil,
+            precededBy = Nil,
+            succeededBy = Nil,
           )
         )
       }
@@ -92,8 +92,8 @@ class RelatedWorkServiceTest
           RelatedWorks(
             parts = Nil,
             partOf = List(workA, workE),
-            preceededBy = Nil,
-            suceededBy = Nil,
+            precededBy = Nil,
+            succeededBy = Nil,
           )
         )
       }
@@ -116,8 +116,8 @@ class RelatedWorkServiceTest
               workP.withData(_.copy(items = Nil)),
               workQ.withData(_.copy(notes = Nil)),
             ),
-            preceededBy = Nil,
-            suceededBy = Nil,
+            precededBy = Nil,
+            succeededBy = Nil,
           )
         )
       }
@@ -133,8 +133,8 @@ class RelatedWorkServiceTest
           RelatedWorks(
             parts = Nil,
             partOf = Nil,
-            preceededBy = Nil,
-            suceededBy = Nil
+            precededBy = Nil,
+            succeededBy = Nil
           )
         )
       }
