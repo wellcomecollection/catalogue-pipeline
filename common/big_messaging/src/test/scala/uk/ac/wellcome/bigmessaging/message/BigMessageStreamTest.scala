@@ -324,7 +324,7 @@ class BigMessageStreamTest
     store: Store[ObjectLocation, ExampleObject] = new MemoryStore(Map.empty))
     : R =
     withActorSystem { implicit actorSystem =>
-      withLocalSqsQueuePair() {
+      withLocalSqsQueuePair(visibilityTimeout = 5) {
         case queuePair @ QueuePair(queue, _) =>
           val metrics = new MemoryMetrics[StandardUnit]()
           withBigMessageStream[ExampleObject, R](queue, metrics) { stream =>

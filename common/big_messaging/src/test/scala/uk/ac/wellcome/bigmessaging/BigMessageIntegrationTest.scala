@@ -4,10 +4,7 @@ import io.circe.Decoder
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
-import uk.ac.wellcome.bigmessaging.message.{
-  InlineNotification,
-  RemoteNotification
-}
+import uk.ac.wellcome.bigmessaging.message.MessageNotification
 import uk.ac.wellcome.bigmessaging.s3.S3BigMessageSender
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
@@ -54,7 +51,11 @@ class BigMessageIntegrationTest
         case (sender, reader) =>
           sender.sendT(yellowPentagon) shouldBe a[Success[_]]
 
-          val notification = getMessages[InlineNotification](topic).head
+          val messages: Seq[MessageNotification] =
+            listMessagesReceivedFromSNS(topic)
+              .map { msg => fromJson[MessageNotification](msg.message).get }
+
+          val notification = messages.head
           reader.read(notification) shouldBe Success(yellowPentagon)
       }
     }
@@ -66,7 +67,11 @@ class BigMessageIntegrationTest
         case (sender, reader) =>
           sender.sendT(yellowPentagon) shouldBe a[Success[_]]
 
-          val notification = getMessages[RemoteNotification](topic).head
+          val messages: Seq[MessageNotification] =
+            listMessagesReceivedFromSNS(topic)
+              .map { msg => fromJson[MessageNotification](msg.message).get }
+
+          val notification = messages.head
           reader.read(notification) shouldBe Success(yellowPentagon)
       }
     }

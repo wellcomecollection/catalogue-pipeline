@@ -28,7 +28,9 @@ class BigMessageSenderTest
           sender =>
             sender.sendT(redSquare) shouldBe a[Success[_]]
 
-            val messages = getMessages[MessageNotification](topic)
+            val messages: Seq[MessageNotification] =
+              listMessagesReceivedFromSNS(topic)
+                .map { msg => fromJson[MessageNotification](msg.message).get }
 
             messages should have size 1
             messages.head shouldBe a[InlineNotification]
@@ -46,10 +48,12 @@ class BigMessageSenderTest
         withSqsBigMessageSender(bucket, topic, maxMessageSize = 1) { sender =>
           sender.sendT(redSquare) shouldBe a[Success[_]]
 
-          val messages = getMessages[MessageNotification](topic)
+          val messages: Seq[MessageNotification] =
+            listMessagesReceivedFromSNS(topic)
+              .map { msg => fromJson[MessageNotification](msg.message).get }
 
           messages should have size 1
-          messages.head shouldBe a[InlineNotification]
+          messages.head shouldBe a[RemoteNotification]
 
           val location = messages.head.asInstanceOf[RemoteNotification].location
 
@@ -67,7 +71,9 @@ class BigMessageSenderTest
           Thread.sleep(2000)
           sender.sendT(redSquare) shouldBe a[Success[_]]
 
-          val messages = getMessages[RemoteNotification](topic)
+          val messages: Seq[RemoteNotification] =
+            listMessagesReceivedFromSNS(topic)
+              .map { msg => fromJson[RemoteNotification](msg.message).get }
 
           messages.map { _.location }.distinct should have size 2
         }
@@ -81,7 +87,9 @@ class BigMessageSenderTest
         withSqsBigMessageSender(bucket, topic, maxMessageSize = 1) { sender =>
           sender.sendT(redSquare) shouldBe a[Success[_]]
 
-          val messages = getMessages[RemoteNotification](topic)
+          val messages: Seq[RemoteNotification] =
+            listMessagesReceivedFromSNS(topic)
+              .map { msg => fromJson[RemoteNotification](msg.message).get }
 
           messages.head.location.namespace shouldBe bucket.name
         }
@@ -95,8 +103,6 @@ class BigMessageSenderTest
     withLocalS3Bucket { bucket =>
       withSqsBigMessageSender(bucket, badTopic, maxMessageSize = 1) { sender =>
         sender.sendT(redSquare) shouldBe a[Failure[_]]
-
-        listKeysInBucket(bucket) shouldBe empty
       }
     }
   }
