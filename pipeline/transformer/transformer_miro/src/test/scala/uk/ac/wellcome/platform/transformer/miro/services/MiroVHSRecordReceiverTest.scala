@@ -1,12 +1,9 @@
 package uk.ac.wellcome.platform.transformer.miro.services
 
-import scala.util.Try
-import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
+import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
-import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.matchers.should.Matchers
 
-import scala.util.Try
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.{
   TransformedBaseWork,
@@ -20,16 +17,14 @@ import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
-import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
+
+import scala.util.Try
 
 class MiroVHSRecordReceiverTest
     extends AnyFunSpec
     with Matchers
-    with BigMessagingFixture
-    with Eventually
     with MiroVHSRecordReceiverFixture
     with IntegrationPatience
-    with MockitoSugar
     with ScalaFutures
     with MiroRecordGenerators
     with WorksGenerators {
