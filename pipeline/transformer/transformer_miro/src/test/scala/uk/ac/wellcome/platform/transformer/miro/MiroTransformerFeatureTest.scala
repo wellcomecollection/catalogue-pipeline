@@ -29,29 +29,27 @@ class MiroTransformerFeatureTest
     val miroID = "M0000001"
     val title = "A guide for a giraffe"
 
+    val miroHybridRecordMessage =
+      createHybridRecordNotificationWith(
+        createMiroRecordWith(title = Some(title), imageNumber = miroID)
+      )
+
     withLocalSnsTopic { topic =>
       withLocalSqsQueue() { queue =>
-        withLocalS3Bucket { storageBucket =>
-          withLocalS3Bucket { messageBucket =>
-            val miroHybridRecordMessage =
-              createHybridRecordNotificationWith(
-                createMiroRecordWith(title = Some(title), imageNumber = miroID)
-              )
+        withLocalS3Bucket { messageBucket =>
+          sendSqsMessage(
+            queue = queue,
+            obj = miroHybridRecordMessage
+          )
 
-            sendSqsMessage(
-              queue = queue,
-              obj = miroHybridRecordMessage
-            )
+          withWorkerService(topic, messageBucket, queue) { _ =>
+            eventually {
+              val works = getMessages[UnidentifiedWork](topic)
+              works.length shouldBe >=(1)
 
-            withWorkerService(topic, messageBucket, queue) { _ =>
-              eventually {
-                val works = getMessages[UnidentifiedWork](topic)
-                works.length shouldBe >=(1)
-
-                works.map { actualWork =>
-                  actualWork.identifiers.head.value shouldBe miroID
-                  actualWork.data.title shouldBe Some(title)
-                }
+              works.map { actualWork =>
+                actualWork.identifiers.head.value shouldBe miroID
+                actualWork.data.title shouldBe Some(title)
               }
             }
           }
@@ -63,45 +61,44 @@ class MiroTransformerFeatureTest
   // This is based on a specific bug that we found where different records
   // were written to the same s3 key because of the hashing algorithm clashing
   it("sends different messages for different miro records") {
+    val miroHybridRecordMessage1 =
+      createHybridRecordNotificationWith(
+        createMiroRecordWith(
+          title = Some("Antonio Dionisi"),
+          description = Some("Antonio Dionisi"),
+          physFormat = Some("Book"),
+          copyrightCleared = Some("Y"),
+          imageNumber = "L0011975",
+          useRestrictions = Some("CC-BY"),
+          innopacID = Some("12917175"),
+          creditLine = Some("Wellcome Library, London")
+        )
+      )
+
+    val miroHybridRecordMessage2 =
+      createHybridRecordNotificationWith(
+        createMiroRecordWith(
+          title = Some(
+            "Greenfield Sluder, Tonsillectomy..., use of guillotine"),
+          description = Some("Use of the guillotine"),
+          copyrightCleared = Some("Y"),
+          imageNumber = "L0023034",
+          useRestrictions = Some("CC-BY"),
+          innopacID = Some("12074536"),
+          creditLine = Some("Wellcome Library, London")
+        )
+      )
+
     withLocalSnsTopic { topic =>
       withLocalSqsQueue() { queue =>
-        withLocalS3Bucket { storageBucket =>
-          val miroHybridRecordMessage1 =
-            createHybridRecordNotificationWith(
-              createMiroRecordWith(
-                title = Some("Antonio Dionisi"),
-                description = Some("Antonio Dionisi"),
-                physFormat = Some("Book"),
-                copyrightCleared = Some("Y"),
-                imageNumber = "L0011975",
-                useRestrictions = Some("CC-BY"),
-                innopacID = Some("12917175"),
-                creditLine = Some("Wellcome Library, London")
-              )
-            )
-          val miroHybridRecordMessage2 =
-            createHybridRecordNotificationWith(
-              createMiroRecordWith(
-                title = Some(
-                  "Greenfield Sluder, Tonsillectomy..., use of guillotine"),
-                description = Some("Use of the guillotine"),
-                copyrightCleared = Some("Y"),
-                imageNumber = "L0023034",
-                useRestrictions = Some("CC-BY"),
-                innopacID = Some("12074536"),
-                creditLine = Some("Wellcome Library, London")
-              )
-            )
+        withLocalS3Bucket { messageBucket =>
+          withWorkerService(topic, messageBucket, queue) { _ =>
+            sendSqsMessage(queue = queue, obj = miroHybridRecordMessage1)
+            sendSqsMessage(queue = queue, obj = miroHybridRecordMessage2)
 
-          withLocalS3Bucket { messageBucket =>
-            withWorkerService(topic, messageBucket, queue) { _ =>
-              sendSqsMessage(queue = queue, obj = miroHybridRecordMessage1)
-              sendSqsMessage(queue = queue, obj = miroHybridRecordMessage2)
-
-              eventually {
-                val works = getMessages[UnidentifiedWork](topic)
-                works.distinct.length shouldBe 2
-              }
+            eventually {
+              val works = getMessages[UnidentifiedWork](topic)
+              works.distinct.length shouldBe 2
             }
           }
         }
