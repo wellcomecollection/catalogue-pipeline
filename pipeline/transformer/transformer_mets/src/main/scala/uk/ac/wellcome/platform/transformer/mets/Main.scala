@@ -6,19 +6,16 @@ import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClientBuilder
 import com.typesafe.config.Config
 import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
-import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.SQSBuilder
 import uk.ac.wellcome.mets_adapter.models.MetsLocation
-import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.transformer.mets.client.{
   AmazonS3ClientFactory,
   AssumeRoleClientProvider
 }
 import uk.ac.wellcome.platform.transformer.mets.service.MetsTransformerWorkerService
 import uk.ac.wellcome.storage.store.dynamo.DynamoSingleVersionStore
-import uk.ac.wellcome.storage.store.s3.S3TypedStore
-import uk.ac.wellcome.storage.typesafe.{DynamoBuilder, S3Builder}
+import uk.ac.wellcome.storage.typesafe.DynamoBuilder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 
@@ -35,11 +32,8 @@ object Main extends WellcomeTypesafeApp with AWSClientConfigBuilder {
       AkkaBuilder.buildExecutionContext()
     implicit val actorSystem: ActorSystem =
       AkkaBuilder.buildActorSystem()
-    implicit val s3Client =
-      S3Builder.buildS3Client(config)
-    implicit val msgStore =
-      S3TypedStore[TransformedBaseWork]
-    implicit val dynamoClilent: AmazonDynamoDB =
+
+    implicit val dynamoClient: AmazonDynamoDB =
       DynamoBuilder.buildDynamoClient(config)
 
     val stsClient = AWSSecurityTokenServiceClientBuilder
@@ -57,8 +51,7 @@ object Main extends WellcomeTypesafeApp with AWSClientConfigBuilder {
 
     new MetsTransformerWorkerService(
       SQSBuilder.buildSQSStream[NotificationMessage](config),
-      messageSender = BigMessagingBuilder
-        .buildBigMessageSender[TransformedBaseWork](config),
+      messageSender = BigMessagingBuilder.buildBigMessageSender(config),
       adapterStore = new DynamoSingleVersionStore[String, MetsLocation](
         DynamoBuilder.buildDynamoConfig(config, namespace = "mets")
       ),

@@ -1,23 +1,22 @@
 package uk.ac.wellcome.platform.transformer.mets.service
 
-import scala.concurrent.Future
 import akka.Done
 import grizzled.slf4j.Logging
-
-import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig}
+import uk.ac.wellcome.messaging.MessageSender
+import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.mets_adapter.models.MetsLocation
-import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.transformer.mets.transformer.MetsXmlTransformer
 import uk.ac.wellcome.storage.store.{Readable, VersionedStore}
 import uk.ac.wellcome.storage.{Identified, ObjectLocation, Version}
 import uk.ac.wellcome.typesafe.Runnable
 
-class MetsTransformerWorkerService(
+import scala.concurrent.Future
+
+class MetsTransformerWorkerService[Destination](
   msgStream: SQSStream[NotificationMessage],
-  messageSender: BigMessageSender[SNSConfig, TransformedBaseWork],
+  messageSender: MessageSender[Destination],
   adapterStore: VersionedStore[String, Int, MetsLocation],
   metsXmlStore: Readable[ObjectLocation, String]
 ) extends Runnable
@@ -44,7 +43,7 @@ class MetsTransformerWorkerService(
     })
   }
 
-  private def process(key: Version[String, Int]) =
+  private def process(key: Version[String, Int]): Either[Throwable, Unit] =
     for {
       metsLocation <- getMetsLocation(key)
       metsData <- xmlTransformer.transform(metsLocation)
