@@ -3,17 +3,14 @@ package uk.ac.wellcome.platform.transformer.miro.services
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 import grizzled.slf4j.Logging
-
 import uk.ac.wellcome.json.exceptions.JsonDecodingError
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.transformer.miro.exceptions.MiroTransformerException
 import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 import uk.ac.wellcome.json.JsonUtil._
-
-import uk.ac.wellcome.bigmessaging.BigMessageSender
+import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-
 import uk.ac.wellcome.storage.store.Store
 import uk.ac.wellcome.storage.{Identified, ObjectLocation}
 
@@ -29,7 +26,7 @@ case class HybridRecord(
 case class BackwardsCompatObjectLocation(namespace: String, key: String)
 
 class MiroVHSRecordReceiver[MsgDestination](
-  msgSender: BigMessageSender[MsgDestination, TransformedBaseWork],
+  messageSender: MessageSender[MsgDestination],
   store: Store[ObjectLocation, MiroRecord])(implicit ec: ExecutionContext)
     extends Logging {
 
@@ -46,7 +43,7 @@ class MiroVHSRecordReceiver[MsgDestination](
         metadata <- fromJson[MiroMetadata](message.body)
         record <- getRecord(hybridRecord)
         work <- transformToWork(record, metadata, hybridRecord.version)
-        msgNotification <- msgSender.sendT(work)
+        msgNotification <- messageSender.sendT(work)
         _ = debug(
           s"Published work: ${work.sourceIdentifier} with message $msgNotification")
       } yield msgNotification

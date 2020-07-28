@@ -3,6 +3,7 @@ package uk.ac.wellcome.platform.transformer.miro
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.platform.transformer.miro.fixtures.MiroVHSRecordReceiverFixture
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
@@ -11,10 +12,9 @@ import uk.ac.wellcome.platform.transformer.miro.services.MiroTransformerWorkerSe
 import uk.ac.wellcome.models.work.internal.UnidentifiedWork
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
-import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig}
-import uk.ac.wellcome.messaging.fixtures.SNS.Topic
+import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
+import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 
 class MiroTransformerFeatureTest
     extends AnyFunSpec
@@ -23,7 +23,8 @@ class MiroTransformerFeatureTest
     with IntegrationPatience
     with MiroRecordGenerators
     with MiroTransformableWrapper
-    with MiroVHSRecordReceiverFixture {
+    with MiroVHSRecordReceiverFixture
+    with Akka {
 
   it("transforms miro records and publishes the result to the given topic") {
     val miroID = "M0000001"
@@ -34,24 +35,19 @@ class MiroTransformerFeatureTest
         createMiroRecordWith(title = Some(title), imageNumber = miroID)
       )
 
-    withLocalSnsTopic { topic =>
-      withLocalSqsQueue() { queue =>
-        withLocalS3Bucket { messageBucket =>
-          sendSqsMessage(
-            queue = queue,
-            obj = miroHybridRecordMessage
-          )
+    val messageSender = new MemoryMessageSender()
 
-          withWorkerService(topic, messageBucket, queue) { _ =>
-            eventually {
-              val works = getMessages[UnidentifiedWork](topic)
-              works.length shouldBe >=(1)
+    withLocalSqsQueue() { queue =>
+      sendSqsMessage(queue, miroHybridRecordMessage)
 
-              works.map { actualWork =>
-                actualWork.identifiers.head.value shouldBe miroID
-                actualWork.data.title shouldBe Some(title)
-              }
-            }
+      withWorkerService(messageSender, queue) { _ =>
+        eventually {
+          val works = messageSender.getMessages[UnidentifiedWork]
+          works.length shouldBe >=(1)
+
+          works.map { actualWork =>
+            actualWork.identifiers.head.value shouldBe miroID
+            actualWork.data.title shouldBe Some(title)
           }
         }
       }
@@ -88,38 +84,33 @@ class MiroTransformerFeatureTest
         )
       )
 
-    withLocalSnsTopic { topic =>
-      withLocalSqsQueue() { queue =>
-        withLocalS3Bucket { messageBucket =>
-          withWorkerService(topic, messageBucket, queue) { _ =>
-            sendSqsMessage(queue = queue, obj = miroHybridRecordMessage1)
-            sendSqsMessage(queue = queue, obj = miroHybridRecordMessage2)
+    val messageSender = new MemoryMessageSender()
 
-            eventually {
-              val works = getMessages[UnidentifiedWork](topic)
-              works.distinct.length shouldBe 2
-            }
-          }
+    withLocalSqsQueue() { queue =>
+      withWorkerService(messageSender, queue) { _ =>
+        sendSqsMessage(queue = queue, obj = miroHybridRecordMessage1)
+        sendSqsMessage(queue = queue, obj = miroHybridRecordMessage2)
+
+        eventually {
+          messageSender.getMessages[UnidentifiedWork].distinct should have size 2
         }
       }
     }
   }
 
-  def withWorkerService[R](topic: Topic, bucket: Bucket, queue: Queue)(
-    testWith: TestWith[MiroTransformerWorkerService[SNSConfig], R]): R =
-    withMiroVHSRecordReceiver(topic, bucket) { recordReceiver =>
-      withActorSystem { implicit actorSystem =>
-        withSQSStream[NotificationMessage, R](queue) { sqsStream =>
-          val workerService = new MiroTransformerWorkerService(
-            vhsRecordReceiver = recordReceiver,
-            miroTransformer = new MiroRecordTransformer,
-            sqsStream = sqsStream
-          )
+  def withWorkerService[R](messageSender: MemoryMessageSender, queue: Queue)(
+    testWith: TestWith[MiroTransformerWorkerService[String], R]): R =
+    withActorSystem { implicit actorSystem =>
+      withSQSStream[NotificationMessage, R](queue) { sqsStream =>
+        val workerService = new MiroTransformerWorkerService(
+          vhsRecordReceiver = createRecordReceiverWith(messageSender),
+          miroTransformer = new MiroRecordTransformer,
+          sqsStream = sqsStream
+        )
 
-          workerService.run()
+        workerService.run()
 
-          testWith(workerService)
-        }
+        testWith(workerService)
       }
     }
 }
