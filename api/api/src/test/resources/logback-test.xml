@@ -10,8 +10,12 @@
   </root>
 
   <logger name="com.sksamuel.elastic4s" level="INFO" />
-  <logger name="org.apache.http" level="WARN" />
-  <logger name="io.netty" level="WARN" />
   <logger name="io.swagger" level="WARN" />
   <logger name="uk.ac.wellcome.platform.api.Server" level="WARN" />
+
+  <!-- reduce external logging -->
+  <logger name="org.apache.http" level="ERROR"/>
+  <logger name="io.netty" level="ERROR"/>
+  <logger name="com.amazonaws" level="WARN"/>
+  <logger name="software.amazon.awssdk" level="WARN"/>
 </configuration>
