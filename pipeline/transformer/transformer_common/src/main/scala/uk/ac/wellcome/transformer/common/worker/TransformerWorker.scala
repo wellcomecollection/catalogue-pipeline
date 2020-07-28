@@ -3,8 +3,8 @@ package uk.ac.wellcome.transformer.common.worker
 import akka.Done
 import grizzled.slf4j.Logging
 import software.amazon.awssdk.services.sqs.model.Message
-import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
@@ -39,7 +39,7 @@ trait TransformerWorker[In, SenderDest] extends Logging {
 
   def name: String = this.getClass.getSimpleName
   val stream: SQSStream[NotificationMessage]
-  val sender: BigMessageSender[SenderDest, TransformedBaseWork]
+  val sender: MessageSender[SenderDest]
   val store: VersionedStore[String, Int, In]
   val transformer: Transformer[In]
   val concurrentTransformations: Int = 2
