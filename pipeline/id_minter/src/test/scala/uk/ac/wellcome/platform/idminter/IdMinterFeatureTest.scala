@@ -4,8 +4,6 @@ import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import software.amazon.awssdk.services.sqs.model.QueueAttributeName
-import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
-import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.generators.WorksGenerators
@@ -14,13 +12,9 @@ import uk.ac.wellcome.models.Implicits._
 
 class IdMinterFeatureTest
     extends AnyFunSpec
-    with SQS
-    with SNS
-    with BigMessagingFixture
-    with fixtures.IdentifiersDatabase
+    with Matchers
     with IntegrationPatience
     with Eventually
-    with Matchers
     with WorkerServiceFixture
     with WorksGenerators {
 
