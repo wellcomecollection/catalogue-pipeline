@@ -6,6 +6,7 @@ import com.typesafe.config.Config
 import io.circe.{Decoder, Encoder}
 import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.bigmessaging.message.BigMessageStream
+import uk.ac.wellcome.bigmessaging.s3.S3IndividualBigMessageSender
 import uk.ac.wellcome.messaging.sns.SNSConfig
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.messaging.MessageSender
@@ -41,39 +42,33 @@ object BigMessagingBuilder {
     )
   }
 
-  def buildBigMessageSender[T](config: Config)(
-    implicit
-    encoderT: Encoder[T],
-    storeT: Store[ObjectLocation, T]
-  ): BigMessageSender[SNSConfig, T] = {
+  def buildBigMessageSender(config: Config): BigMessageSender[SNSConfig] = {
+    implicit val s3Client: AmazonS3 = S3Builder.buildS3Client(config)
 
     val s3Config: S3Config =
       S3Builder.buildS3Config(config, namespace = "message.writer")
 
-    new BigMessageSender[SNSConfig, T] {
-      override val messageSender: MessageSender[SNSConfig] =
-        SNSBuilder.buildSNSMessageSender(
-          config,
-          namespace = "message.writer",
-          subject = "Sent from MessageWriter"
-        )
+    val snsMessageSender = SNSBuilder.buildSNSIndividualMessageSender(config)
 
-      override val store: Store[ObjectLocation, T] = storeT
-      override val namespace: String = s3Config.bucketName
+    new BigMessageSender[SNSConfig](
+      new S3IndividualBigMessageSender(
+        bucketName = s3Config.bucketName,
+        snsMessageSender = snsMessageSender,
 
-      implicit val encoder: Encoder[T] = encoderT
-
-      // If the encoded message is less than 250KB, we can send it inline
-      // in SNS/SQS (although the limit is 256KB, there's a bit of overhead
-      // caused by the notification wrapper, so we're conservative).
-      //
-      // Max SQS message size:
-      // https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-limits.html#limits-messages
-      //
-      // Max SNS message size:
-      // https://aws.amazon.com/sns/faqs/
-      //
-      override val maxMessageSize: Int = 250 * 1000
-    }
+        // If the encoded message is less than 250KB, we can send it inline
+        // in SNS/SQS (although the limit is 256KB, there's a bit of overhead
+        // caused by the notification wrapper, so we're conservative).
+        //
+        // Max SQS message size:
+        // https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-limits.html#limits-messages
+        //
+        // Max SNS message size:
+        // https://aws.amazon.com/sns/faqs/
+        //
+        maxMessageSize = 250 * 1000
+      ),
+      subject = "Sent by S3IndividualBigMessageSender",
+      destination = SNSBuilder.buildSNSConfig(config)
+    )
   }
 }
