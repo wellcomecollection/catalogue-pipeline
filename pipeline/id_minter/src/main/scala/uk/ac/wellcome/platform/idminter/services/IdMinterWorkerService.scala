@@ -3,8 +3,8 @@ package uk.ac.wellcome.platform.idminter.services
 import akka.Done
 import grizzled.slf4j.Logging
 import io.circe.Json
-import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.bigmessaging.message.BigMessageStream
+import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.platform.idminter.config.models.{
   IdentifiersTableConfig,
   RDSClientConfig
@@ -20,7 +20,7 @@ import scala.concurrent.Future
 
 class IdMinterWorkerService[Destination](
   identifierGenerator: IdentifierGenerator,
-  sender: BigMessageSender[Destination, Json],
+  sender: MessageSender[Destination],
   messageStream: BigMessageStream[Json],
   rdsClientConfig: RDSClientConfig,
   identifiersTableConfig: IdentifiersTableConfig

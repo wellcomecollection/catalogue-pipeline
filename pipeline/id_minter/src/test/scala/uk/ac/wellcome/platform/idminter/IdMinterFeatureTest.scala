@@ -5,6 +5,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import software.amazon.awssdk.services.sqs.model.QueueAttributeName
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
+import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.platform.idminter.fixtures.WorkerServiceFixture
@@ -19,36 +20,33 @@ class IdMinterFeatureTest
     with WorksGenerators {
 
   it("mints the same IDs where source identifiers match") {
+    val messageSender = new MemoryMessageSender()
+
     withLocalSqsQueue() { queue =>
-      withLocalSnsTopic { topic =>
-        withLocalS3Bucket { bucket =>
-          withIdentifiersDatabase { identifiersTableConfig =>
-            withWorkerService(bucket, topic, queue, identifiersTableConfig) {
-              _ =>
-                eventuallyTableExists(identifiersTableConfig)
-                val work = createUnidentifiedWork
+      withIdentifiersDatabase { identifiersTableConfig =>
+        withWorkerService(messageSender, queue, identifiersTableConfig) { _ =>
+          eventuallyTableExists(identifiersTableConfig)
+          val work = createUnidentifiedWork
 
-                val messageCount = 5
+          val messageCount = 5
 
-                (1 to messageCount).foreach { _ =>
-                  sendMessage(queue = queue, obj = work)
-                }
+          (1 to messageCount).foreach { _ =>
+            sendMessage(queue = queue, obj = work)
+          }
 
-                eventually {
-                  val works = getMessages[IdentifiedBaseWork](topic)
-                  works.length shouldBe >=(messageCount)
+          eventually {
+            val works = messageSender.getMessages[IdentifiedBaseWork]
+            works.length shouldBe >=(messageCount)
 
-                  works.map(_.canonicalId).distinct should have size 1
-                  works.foreach { receivedWork =>
-                    receivedWork
-                      .asInstanceOf[IdentifiedWork]
-                      .sourceIdentifier shouldBe work.sourceIdentifier
-                    receivedWork
-                      .asInstanceOf[IdentifiedWork]
-                      .data
-                      .title shouldBe work.data.title
-                  }
-                }
+            works.map(_.canonicalId).distinct should have size 1
+            works.foreach { receivedWork =>
+              receivedWork
+                .asInstanceOf[IdentifiedWork]
+                .sourceIdentifier shouldBe work.sourceIdentifier
+              receivedWork
+                .asInstanceOf[IdentifiedWork]
+                .data
+                .title shouldBe work.data.title
             }
           }
         }
@@ -57,28 +55,25 @@ class IdMinterFeatureTest
   }
 
   it("mints an identifier for a UnidentifiedInvisibleWork") {
+    val messageSender = new MemoryMessageSender()
+
     withLocalSqsQueue() { queue =>
-      withLocalSnsTopic { topic =>
-        withLocalS3Bucket { bucket =>
-          withIdentifiersDatabase { identifiersTableConfig =>
-            withWorkerService(bucket, topic, queue, identifiersTableConfig) {
-              _ =>
-                eventuallyTableExists(identifiersTableConfig)
-                val work = createUnidentifiedInvisibleWork
+      withIdentifiersDatabase { identifiersTableConfig =>
+        withWorkerService(messageSender, queue, identifiersTableConfig) { _ =>
+          eventuallyTableExists(identifiersTableConfig)
+          val work = createUnidentifiedInvisibleWork
 
-                sendMessage(queue = queue, obj = work)
+          sendMessage(queue = queue, obj = work)
 
-                eventually {
-                  val works = getMessages[IdentifiedBaseWork](topic)
-                  works.length shouldBe >=(1)
+          eventually {
+            val works = messageSender.getMessages[IdentifiedBaseWork]
+            works.length shouldBe >=(1)
 
-                  val receivedWork = works.head
-                  val invisibleWork =
-                    receivedWork.asInstanceOf[IdentifiedInvisibleWork]
-                  invisibleWork.sourceIdentifier shouldBe work.sourceIdentifier
-                  invisibleWork.canonicalId shouldNot be(empty)
-                }
-            }
+            val receivedWork = works.head
+            val invisibleWork =
+              receivedWork.asInstanceOf[IdentifiedInvisibleWork]
+            invisibleWork.sourceIdentifier shouldBe work.sourceIdentifier
+            invisibleWork.canonicalId shouldNot be(empty)
           }
         }
       }
@@ -86,30 +81,27 @@ class IdMinterFeatureTest
   }
 
   it("mints an identifier for a UnidentifiedRedirectedWork") {
+    val messageSender = new MemoryMessageSender()
+
     withLocalSqsQueue() { queue =>
-      withLocalSnsTopic { topic =>
-        withLocalS3Bucket { bucket =>
-          withIdentifiersDatabase { identifiersTableConfig =>
-            withWorkerService(bucket, topic, queue, identifiersTableConfig) {
-              _ =>
-                eventuallyTableExists(identifiersTableConfig)
+      withIdentifiersDatabase { identifiersTableConfig =>
+        withWorkerService(messageSender, queue, identifiersTableConfig) { _ =>
+          eventuallyTableExists(identifiersTableConfig)
 
-                val work = createUnidentifiedRedirectedWork
+          val work = createUnidentifiedRedirectedWork
 
-                sendMessage(queue = queue, obj = work)
+          sendMessage(queue = queue, obj = work)
 
-                eventually {
-                  val works = getMessages[IdentifiedBaseWork](topic)
-                  works.length shouldBe >=(1)
+          eventually {
+            val works = messageSender.getMessages[IdentifiedBaseWork]
+            works.length shouldBe >=(1)
 
-                  val receivedWork = works.head
-                  val redirectedWork =
-                    receivedWork.asInstanceOf[IdentifiedRedirectedWork]
-                  redirectedWork.sourceIdentifier shouldBe work.sourceIdentifier
-                  redirectedWork.canonicalId shouldNot be(empty)
-                  redirectedWork.redirect.canonicalId shouldNot be(empty)
-                }
-            }
+            val receivedWork = works.head
+            val redirectedWork =
+              receivedWork.asInstanceOf[IdentifiedRedirectedWork]
+            redirectedWork.sourceIdentifier shouldBe work.sourceIdentifier
+            redirectedWork.canonicalId shouldNot be(empty)
+            redirectedWork.redirect.canonicalId shouldNot be(empty)
           }
         }
       }
@@ -117,25 +109,21 @@ class IdMinterFeatureTest
   }
 
   it("continues if something fails processing a message") {
+    val messageSender = new MemoryMessageSender()
+
     withLocalSqsQueue() { queue =>
-      withLocalSnsTopic { topic =>
-        withIdentifiersDatabase { identifiersTableConfig =>
-          withLocalS3Bucket { bucket =>
-            withWorkerService(bucket, topic, queue, identifiersTableConfig) {
-              _ =>
-                sendInvalidJSONto(queue)
+      withIdentifiersDatabase { identifiersTableConfig =>
+        withWorkerService(messageSender, queue, identifiersTableConfig) { _ =>
+          sendInvalidJSONto(queue)
 
-                val work = createUnidentifiedWork
+          val work = createUnidentifiedWork
 
-                sendMessage(queue = queue, obj = work)
+          sendMessage(queue = queue, obj = work)
 
-                eventually {
-                  val snsMessages = listMessagesReceivedFromSNS(topic)
-                  snsMessages.size should be >= 1
+          eventually {
+            messageSender.messages should not be empty
 
-                  assertMessageIsNotDeleted(queue)
-                }
-            }
+            assertMessageIsNotDeleted(queue)
           }
         }
       }

@@ -44,7 +44,7 @@ trait BigMessagingFixture
     implicit
     actorSystem: ActorSystem,
     decoderT: Decoder[T],
-    storeT: Store[ObjectLocation, T]): R = {
+    storeT: Store[ObjectLocation, T] = new MemoryStore[ObjectLocation, T](Map.empty)): R = {
     val stream = new BigMessageStream[T](
       sqsClient = sqsClient,
       sqsConfig = createSQSConfigWith(queue),
