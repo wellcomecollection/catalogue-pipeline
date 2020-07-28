@@ -27,24 +27,24 @@ trait IndividualBigMessageSender[Destination] extends IndividualMessageSender[De
       notification <- if (encodedInlineNotification
         .getBytes("UTF-8")
         .length > maxMessageSize) {
-        createRemoteNotification(body)
+        createRemoteNotification(body, destination)
       } else {
         Success(inlineNotification)
       }
 
-      _ <- underlying.sendT[MessageNotification](notification)
-    } yield notification
+      _ <- underlying.sendT[MessageNotification](notification)(subject, destination)
+    } yield ()
   }
 
   private val dateFormat = new SimpleDateFormat("YYYY/MM/dd")
 
-  protected def getKey: String = {
+  private def getKey(destination: Destination): String = {
     val currentTime = new Date()
-    s"${underlying.destination}/${dateFormat.format(currentTime)}/${currentTime.getTime.toString}"
+    s"$destination/${dateFormat.format(currentTime)}/${currentTime.getTime.toString}"
   }
 
-  private def createRemoteNotification(body: String): Try[RemoteNotification] = {
-    val location = ObjectLocation(namespace, getKey)
+  private def createRemoteNotification(body: String, destination: Destination): Try[RemoteNotification] = {
+    val location = ObjectLocation(namespace, getKey(destination))
 
     val notification =
       for {

@@ -29,7 +29,7 @@ trait InferenceManagerWorkerServiceFixture[Input, Output]
       withSqsBigMessageSender[Output, R](
         bucket,
         topic,
-        bigMessageThreshold = Int.MaxValue) { msgSender =>
+        maxMessageSize = Int.MaxValue) { msgSender =>
         withActorSystem { implicit actorSystem =>
           implicit val store: MemoryStore[ObjectLocation, Input] =
             new MemoryStore[ObjectLocation, Input](Map.empty)

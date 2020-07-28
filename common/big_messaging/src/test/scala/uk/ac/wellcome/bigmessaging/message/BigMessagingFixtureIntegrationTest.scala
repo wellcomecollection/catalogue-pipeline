@@ -127,7 +127,7 @@ class BigMessagingFixtureIntegrationTest
 
   private def withLocalStackBigMessageSenderMessageStream[R](
     testWith: TestWith[(BigMessageStream[ExampleObject],
-                        BigMessageSender[SNSConfig, ExampleObject]),
+                        BigMessageSender[SNSConfig]),
                        R]): R = {
     withLocalStackMessageStreamFixtures[R] {
       case (queue, messageStream, store) =>
@@ -137,8 +137,7 @@ class BigMessagingFixtureIntegrationTest
               withSqsBigMessageSender(
                 bucket,
                 topic,
-                localStackSnsClient,
-                Some(store)) { messageWriter =>
+                localStackSnsClient) { messageWriter =>
                 testWith((messageStream, messageWriter))
               }
             }

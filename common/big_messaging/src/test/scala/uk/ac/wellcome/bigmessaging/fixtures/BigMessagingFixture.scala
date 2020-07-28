@@ -10,24 +10,19 @@ import software.amazon.awssdk.services.sqs.model.SendMessageResponse
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.bigmessaging.message._
+import uk.ac.wellcome.bigmessaging.s3.S3BigMessageSender
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
-import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
-import uk.ac.wellcome.messaging.sns.{SNSConfig, SNSMessageSender}
+import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
+import uk.ac.wellcome.messaging.sns.SNSConfig
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
-import uk.ac.wellcome.storage.{
-  Identified,
-  ObjectLocation,
-  StoreWriteError,
-  WriteError
-}
 import uk.ac.wellcome.storage.fixtures.S3Fixtures
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import uk.ac.wellcome.storage.store.Store
 import uk.ac.wellcome.storage.store.memory.MemoryStore
+import uk.ac.wellcome.storage.{Identified, ObjectLocation, StoreWriteError, WriteError}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Success
@@ -78,32 +73,13 @@ trait BigMessagingFixture
   def withSqsBigMessageSender[T, R](bucket: Bucket,
                                     topic: Topic,
                                     senderSnsClient: SnsClient = snsClient,
-                                    storeT: Option[Store[ObjectLocation, T]] =
-                                      None,
-                                    bigMessageThreshold: Int = 10000)(
-    testWith: TestWith[BigMessageSender[SNSConfig, T], R])(
-    implicit
-    encoderT: Encoder[T]): R =
-    withSnsMessageSender(topic, senderSnsClient) { snsMessageSender =>
-      val sender = new BigMessageSender[SNSConfig, T] {
-        override val messageSender: MessageSender[SNSConfig] =
-          snsMessageSender
-        override val store: Store[ObjectLocation, T] =
-          storeT.getOrElse(new MemoryStore(Map.empty))
-        override val namespace: String = bucket.name
-        override implicit val encoder: Encoder[T] = encoderT
-        override val maxMessageSize: Int = bigMessageThreshold
-      }
-      testWith(sender)
-    }
-
-  private def withSnsMessageSender[R](topic: Topic, senderSnsClient: SnsClient)(
-    testWith: TestWith[MessageSender[SNSConfig], R]): R =
+                                    maxMessageSize: Int = 10000)(
+    testWith: TestWith[BigMessageSender[SNSConfig], R]): R =
     testWith(
-      new SNSMessageSender(
-        snsClient = senderSnsClient,
+      S3BigMessageSender(
+        bucketName = bucket.name,
         snsConfig = createSNSConfigWith(topic),
-        subject = "Sent in BigMessagingFixture"
+        maxMessageSize = maxMessageSize
       )
     )
 
