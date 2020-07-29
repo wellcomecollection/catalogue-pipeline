@@ -1,25 +1,16 @@
 package uk.ac.wellcome.platform.inference_manager.services
 
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{BeforeAndAfterAll, Inside, Inspectors, OptionValues}
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.models.work.internal.{
-  AugmentedImage,
-  Identified,
-  InferredData,
-  MergedImage,
-  Minted
-}
+import uk.ac.wellcome.models.work.internal.{AugmentedImage, Identified, InferredData, MergedImage, Minted}
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.ImageGenerators
-import uk.ac.wellcome.platform.inference_manager.fixtures.{
-  FeatureVectorInferrerMock,
-  InferenceManagerWorkerServiceFixture,
-  InferrerWiremock
-}
+import uk.ac.wellcome.platform.inference_manager.fixtures.{FeatureVectorInferrerMock, InferenceManagerWorkerServiceFixture, InferrerWiremock}
 
 class InferenceManagerWorkerServiceTest
     extends AnyFunSpec
@@ -29,6 +20,8 @@ class InferenceManagerWorkerServiceTest
     with OptionValues
     with Inspectors
     with BeforeAndAfterAll
+    with Eventually
+    with IntegrationPatience
     with InferenceManagerWorkerServiceFixture[
       MergedImage[Identified, Minted],
       AugmentedImage

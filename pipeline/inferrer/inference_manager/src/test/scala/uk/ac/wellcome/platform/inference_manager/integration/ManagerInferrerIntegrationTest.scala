@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.inference_manager.integration
 
-import org.scalatest.concurrent.IntegrationPatience
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -10,13 +10,7 @@ import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.ImageGenerators
-import uk.ac.wellcome.models.work.internal.{
-  AugmentedImage,
-  Identified,
-  InferredData,
-  MergedImage,
-  Minted
-}
+import uk.ac.wellcome.models.work.internal.{AugmentedImage, Identified, InferredData, MergedImage, Minted}
 import uk.ac.wellcome.platform.inference_manager.fixtures.InferenceManagerWorkerServiceFixture
 import uk.ac.wellcome.platform.inference_manager.services.FeatureVectorInferrerAdapter
 
@@ -30,6 +24,7 @@ class ManagerInferrerIntegrationTest
     with OptionValues
     with Inside
     with Inspectors
+    with Eventually
     with IntegrationPatience
     with InferenceManagerWorkerServiceFixture[
       MergedImage[Identified, Minted],
