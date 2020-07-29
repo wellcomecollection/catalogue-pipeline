@@ -67,7 +67,7 @@ class BigMessageStreamTest
   describe("large messages (>256KB)") {
     it("reads messages off a queue, processes them and deletes them") {
       implicit val store: Store[ObjectLocation, ExampleObject] =
-        new MemoryStore(Map.empty)
+        new MemoryStore(initialEntries = Map.empty)
 
       withMessageStreamFixtures {
         case (messageStream, QueuePair(queue, dlq), _) => {
@@ -330,7 +330,7 @@ class BigMessageStreamTest
                        R]
   )(implicit
     decoderT: Decoder[ExampleObject],
-    store: Store[ObjectLocation, ExampleObject] = new MemoryStore(Map.empty))
+    store: Store[ObjectLocation, ExampleObject] = new MemoryStore(initialEntries = Map.empty))
     : R =
     withActorSystem { implicit actorSystem =>
       withLocalSqsQueuePair(visibilityTimeout = 5) {
