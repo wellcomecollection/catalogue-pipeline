@@ -43,7 +43,7 @@ case object WorksMultiMatcher {
           ("data.notes.content", None),
         ).map(f => FieldWithOptionalBoost(f._1, f._2.map(_.toDouble)))
       )
-    )
+    ).minimumShouldMatch(1)
   }
 }
 

@@ -17,7 +17,6 @@ import uk.ac.wellcome.models.work.internal.{CollectionPath, IdentifiedBaseWork}
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
 import uk.ac.wellcome.platform.api.models.{SearchQuery, SearchQueryType}
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.platform.api.models.SearchQueryType.PhraserBeam
 import uk.ac.wellcome.platform.api.services.{
   ElasticsearchQueryOptions,
   ElasticsearchService,
@@ -313,6 +312,20 @@ class WorksQueryTest
     }
   }
 
+  it("Shouldn't return all the results if queried") {
+    withLocalWorksIndex { index =>
+      val matchingWork = createIdentifiedWorkWith(
+        title = Some("Matching")
+      )
+      val notMatchingWork = createIdentifiedWorkWith(
+        title = Some("No thanks")
+      )
+      val query = "Matching"
+      insertIntoElasticsearch(index, matchingWork, notMatchingWork)
+      assertResultsMatchForAllowedQueryTypes(index, query, List(matchingWork))
+    }
+  }
+
   private def assertResultsMatchForAllowedQueryTypes(
     index: Index,
     query: String,
@@ -322,9 +335,10 @@ class WorksQueryTest
       val results = searchResults(
         index,
         queryOptions = createElasticsearchQueryOptionsWith(
-          searchQuery = Some(SearchQuery(query, PhraserBeam))))
+          searchQuery = Some(SearchQuery(query, queryType))))
 
       withClue(s"Using: ${queryType.name}") {
+        results.size shouldBe matches.size
         results should contain theSameElementsAs (matches)
       }
     }
