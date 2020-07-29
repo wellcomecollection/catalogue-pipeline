@@ -35,10 +35,8 @@ case object WorksIndexConfig extends IndexConfig {
       keywordField("id")
     )
 
-  val title = textField("title")
-    .analyzer(asciifoldingAnalyzer.name)
+  val title = asciifoldingTextFieldWithKeyword("title")
     .fields(
-      keywordField("keyword"),
       textField("english").analyzer(englishAnalyzer.name),
       textField("shingles").analyzer(shingleAsciifoldingAnalyzer.name)
     )
