@@ -12,11 +12,8 @@ import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
-import uk.ac.wellcome.platform.ingestor.common.fixtures.{
-  IngestorFixtures,
-  SampleDocument,
-  SampleDocumentData
-}
+import uk.ac.wellcome.platform.ingestor.common.fixtures.{IngestorFixtures, SampleDocument, SampleDocumentData}
+import uk.ac.wellcome.storage.generators.RandomThings
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -27,7 +24,8 @@ class IndexerTest
     with Matchers
     with IdentifiersGenerators
     with ElasticsearchFixtures
-    with IngestorFixtures {
+    with IngestorFixtures
+    with RandomThings {
 
   it("inserts a document into Elasticsearch") {
     val document = SampleDocument(1, createCanonicalId, randomAlphanumeric(10))
