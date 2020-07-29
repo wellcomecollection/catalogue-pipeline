@@ -26,9 +26,9 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
       .postFilter { postFilterQuery }
       .sortBy {
         if (scored) {
-          sort :+ scoreSort(SortOrder.DESC)
+          sort :+ scoreSort(SortOrder.DESC) :+ idSort
         } else {
-          sort
+          sort :+ idSort
         }
       }
       .limit { queryOptions.limit }
@@ -94,7 +94,7 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
       .map {
         case ProductionDateSortRequest => "data.production.dates.range.from"
       }
-      .map { FieldSort(_).order(sortOrder) } :+ idSort
+      .map { FieldSort(_).order(sortOrder) }
 
   private def sortOrder(implicit queryOptions: ElasticsearchQueryOptions) =
     queryOptions.sortOrder match {

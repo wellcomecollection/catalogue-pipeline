@@ -203,6 +203,28 @@ class ElasticsearchServiceTest
       }
     }
 
+    it("sorts by score then canonicalId when scored = true") {
+      withLocalWorksIndex { index =>
+        val work1 =
+          createIdentifiedWorkWith(canonicalId = "000Z", title = Some("match"))
+        val work2 = createIdentifiedWorkWith(
+          canonicalId = "000Y",
+          title = Some("match stick"))
+        val work3 =
+          createIdentifiedWorkWith(canonicalId = "000X", title = Some("match"))
+
+        insertIntoElasticsearch(index, work1, work2, work3)
+
+        assertResultsAreCorrect(
+          queryOptions = createElasticsearchQueryOptionsWith(
+            searchQuery = Some(SearchQuery("match"))),
+          index = index,
+          expectedWorks = List(work3, work1, work2),
+          scored = Some(true)
+        )
+      }
+    }
+
     it("filters list results by workType") {
       withLocalWorksIndex { index =>
         val work1 = createIdentifiedWorkWith(
