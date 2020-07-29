@@ -48,10 +48,9 @@ object WorksAnalysis {
       lang = "possessive_english")
 
   val asciifoldingAnalyzer = CustomAnalyzer(
-    "shingle_asciifolding_analyzer",
+    "asciifolding_analyzer",
     tokenizer = "standard",
-    tokenFilters =
-      List("lowercase", shingleTokenFilter.name, asciiFoldingTokenFilter.name),
+    tokenFilters = List("lowercase", asciiFoldingTokenFilter.name),
     charFilters = Nil
   )
 
