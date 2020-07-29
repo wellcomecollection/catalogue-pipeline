@@ -31,11 +31,15 @@ trait IndividualBigMessageSender[Destination]
     for {
       encodedInlineNotification <- toJson(inlineNotification)
 
-      notification <- if (encodedInlineNotification
-                            .getBytes("UTF-8")
-                            .length > maxMessageSize) {
+      encodedLength = encodedInlineNotification.getBytes("UTF-8").length
+
+      _ = debug(s"Length of encoded notification: $encodedLength")
+
+      notification <- if (encodedLength > maxMessageSize) {
+        debug(s"Message is longer than $maxMessageSize; sending a remote notification")
         createRemoteNotification(body, destination)
       } else {
+        debug(s"Message is shorter than $maxMessageSize; sending an inline notification")
         Success(inlineNotification)
       }
 

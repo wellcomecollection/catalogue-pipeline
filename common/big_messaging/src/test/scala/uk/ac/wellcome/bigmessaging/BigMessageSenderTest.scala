@@ -31,7 +31,7 @@ class BigMessageSenderTest
   it("sends an inline notification if the message is small") {
     withLocalS3Bucket { bucket =>
       withLocalSnsTopic { topic =>
-        val sender = createBigMessageSenderWith(bucket, topic, maxMessageSize = 1)
+        val sender = createBigMessageSenderWith(bucket, topic, maxMessageSize = Int.MaxValue)
 
         sender.sendT(redSquare) shouldBe a[Success[_]]
 
