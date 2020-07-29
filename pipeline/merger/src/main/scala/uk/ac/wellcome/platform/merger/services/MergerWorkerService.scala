@@ -1,19 +1,14 @@
 package uk.ac.wellcome.platform.merger.services
 
 import akka.Done
+import io.circe.Encoder
 
 import scala.concurrent.{ExecutionContext, Future}
 import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult}
-import uk.ac.wellcome.models.work.internal.{
-  BaseWork,
-  Identifiable,
-  MergedImage,
-  Unminted
-}
 import uk.ac.wellcome.typesafe.Runnable
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.bigmessaging.BigMessageSender
+import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 
@@ -21,9 +16,8 @@ class MergerWorkerService[WorkDestination, ImageDestination](
   sqsStream: SQSStream[NotificationMessage],
   playbackService: RecorderPlaybackService,
   mergerManager: MergerManager,
-  workSender: BigMessageSender[WorkDestination, BaseWork],
-  imageSender: BigMessageSender[ImageDestination,
-                                MergedImage[Identifiable, Unminted]]
+  workSender: MessageSender[WorkDestination],
+  imageSender: MessageSender[ImageDestination]
 )(implicit ec: ExecutionContext)
     extends Runnable {
 
@@ -50,8 +44,8 @@ class MergerWorkerService[WorkDestination, ImageDestination](
     } yield ()
 
   private def sendMessages[Destination, T](
-    sender: BigMessageSender[Destination, T],
-    items: Seq[T]) =
+    sender: MessageSender[Destination],
+    items: Seq[T])(implicit encoder: Encoder[T]): Future[Seq[Unit]] =
     Future.sequence(
       items.map { item =>
         Future.fromTry(sender.sendT(item))

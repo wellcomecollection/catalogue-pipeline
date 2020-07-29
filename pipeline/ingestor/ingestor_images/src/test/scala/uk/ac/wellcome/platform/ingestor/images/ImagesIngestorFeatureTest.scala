@@ -53,7 +53,7 @@ class ImagesIngestorFeatureTest
             assertElasticsearchEmpty(index)
             eventually(Timeout(Span(5, Seconds))) {
               assertQueueEmpty(queue)
-              assertQueueHasSize(dlq, 1)
+              assertQueueHasSize(dlq, size = 1)
             }
           }
         }

@@ -28,7 +28,6 @@ import uk.ac.wellcome.bigmessaging.fixtures.VHSFixture
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.storage.dynamo._
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
-import uk.ac.wellcome.storage.fixtures.S3Fixtures
 import uk.ac.wellcome.storage.locking.dynamo.{
   DynamoLockDaoFixtures,
   DynamoLockingService,
@@ -41,8 +40,7 @@ trait MatcherFixtures
     with Akka
     with DynamoLockDaoFixtures
     with LocalWorkGraphDynamoDb
-    with VHSFixture[TransformedBaseWork]
-    with S3Fixtures {
+    with VHSFixture[TransformedBaseWork] {
 
   implicit val workNodeFormat: DynamoFormat[WorkNode] = deriveDynamoFormat
   implicit val lockFormat: DynamoFormat[ExpiringLock] = deriveDynamoFormat

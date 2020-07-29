@@ -1,10 +1,9 @@
 package uk.ac.wellcome.platform.transformer.miro.fixtures
 
-import scala.util.Random
-import scala.concurrent.ExecutionContext.Implicits.global
-
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.models.work.internal.TransformedBaseWork
+import uk.ac.wellcome.messaging.fixtures.SQS
+import uk.ac.wellcome.messaging.memory.MemoryMessageSender
+import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
 import uk.ac.wellcome.platform.transformer.miro.services.{
@@ -13,37 +12,22 @@ import uk.ac.wellcome.platform.transformer.miro.services.{
   MiroVHSRecordReceiver
 }
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
-import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.json.JsonUtil._
-
-import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
-
-import uk.ac.wellcome.messaging.fixtures.SNS.Topic
-import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
-import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig}
-
 import uk.ac.wellcome.storage.ObjectLocation
 import uk.ac.wellcome.storage.store.Store
-import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import uk.ac.wellcome.storage.store.memory.MemoryStore
 
-trait MiroVHSRecordReceiverFixture
-    extends BigMessagingFixture
-    with MiroRecordGenerators {
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.Random
+
+trait MiroVHSRecordReceiverFixture extends MiroRecordGenerators with SQS {
 
   type MiroStore = Store[ObjectLocation, MiroRecord]
 
   private val store: MiroStore = new MemoryStore(Map.empty)
 
-  def withMiroVHSRecordReceiver[R](topic: Topic, bucket: Bucket)(
-    testWith: TestWith[MiroVHSRecordReceiver[SNSConfig], R]): R = {
-    withSqsBigMessageSender[TransformedBaseWork, R](bucket, topic) {
-      msgSender =>
-        val recordReceiver = new MiroVHSRecordReceiver(msgSender, store)
-        testWith(recordReceiver)
-    }
-  }
+  def createRecordReceiverWith(
+    messageSender: MemoryMessageSender): MiroVHSRecordReceiver[String] =
+    new MiroVHSRecordReceiver(messageSender, store)
 
   def createHybridRecordNotificationWith(
     miroRecord: MiroRecord = createMiroRecord,

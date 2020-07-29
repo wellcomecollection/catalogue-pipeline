@@ -4,19 +4,15 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
-import uk.ac.wellcome.bigmessaging.memory.MemoryBigMessageSender
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.{Queue, QueuePair}
 import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
+import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
-import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.models.work.internal.{
-  TransformedBaseWork,
-  UnidentifiedWork
-}
+import uk.ac.wellcome.models.work.internal.UnidentifiedWork
 import uk.ac.wellcome.storage.Version
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
@@ -35,7 +31,7 @@ object TestTransformer extends Transformer[TestData] with WorksGenerators {
 
 class TestTransformerWorker(
   val stream: SQSStream[NotificationMessage],
-  val sender: MemoryBigMessageSender[TransformedBaseWork],
+  val sender: MemoryMessageSender,
   val store: VersionedStore[String, Int, TestData]
 ) extends TransformerWorker[TestData, String] {
   val transformer: Transformer[TestData] = TestTransformer
@@ -116,7 +112,7 @@ class TransformerWorkerTest
 
         val worker = new TestTransformerWorker(
           stream = stream,
-          sender = new MemoryBigMessageSender[TransformedBaseWork](),
+          sender = new MemoryMessageSender(),
           store = store
         )
 

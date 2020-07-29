@@ -7,13 +7,12 @@ import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.storage.Identified
 
 trait LocalWorksVhs extends VHSFixture[TransformedBaseWork] with Matchers {
-
   def givenStoredInVhs(vhs: VHS, works: TransformedBaseWork*): Seq[Assertion] =
     works.map { work =>
       vhs.init(work.sourceIdentifier.toString)(work)
 
       vhs.getLatest(work.sourceIdentifier.toString) match {
-        case Left(error) => throw new Error(s"${error}")
+        case Left(error) => throw new Error(s"$error")
         case Right(Identified(_, storedWork)) =>
           storedWork shouldBe work
       }

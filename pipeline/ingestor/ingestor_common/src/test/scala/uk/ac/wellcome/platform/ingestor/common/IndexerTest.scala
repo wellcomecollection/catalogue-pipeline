@@ -17,6 +17,7 @@ import uk.ac.wellcome.platform.ingestor.common.fixtures.{
   SampleDocument,
   SampleDocumentData
 }
+import uk.ac.wellcome.storage.generators.RandomThings
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -27,7 +28,8 @@ class IndexerTest
     with Matchers
     with IdentifiersGenerators
     with ElasticsearchFixtures
-    with IngestorFixtures {
+    with IngestorFixtures
+    with RandomThings {
 
   it("inserts a document into Elasticsearch") {
     val document = SampleDocument(1, createCanonicalId, randomAlphanumeric(10))

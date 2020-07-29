@@ -7,8 +7,9 @@ import akka.actor.ActorSystem
 import akka.stream.scaladsl.Flow
 import software.amazon.awssdk.services.sqs.model.Message
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.bigmessaging.BigMessageSender
+import io.circe.Encoder
 import uk.ac.wellcome.bigmessaging.message.BigMessageStream
+import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -16,12 +17,14 @@ import scala.util.{Failure, Success, Try}
 
 class InferenceManagerWorkerService[Destination, Input, Output](
   msgStream: BigMessageStream[Input],
-  msgSender: BigMessageSender[Destination, Output],
+  messageSender: MessageSender[Destination],
   inferrerAdapter: InferrerAdapter[Input, Output],
   inferrerClientFlow: Flow[(HttpRequest, (Message, Input)),
                            (Try[HttpResponse], (Message, Input)),
                            HostConnectionPool]
-)(implicit actorSystem: ActorSystem, ec: ExecutionContext)
+)(implicit actorSystem: ActorSystem,
+  ec: ExecutionContext,
+  encoder: Encoder[Output])
     extends Runnable
     with Logging {
 
@@ -70,7 +73,7 @@ class InferenceManagerWorkerService[Destination, Input, Output](
   private def sendAugmented =
     Flow[(Message, Output)].map {
       case (msg, image) =>
-        msgSender
+        messageSender
           .sendT(image)
           .map((msg, _))
           .get
