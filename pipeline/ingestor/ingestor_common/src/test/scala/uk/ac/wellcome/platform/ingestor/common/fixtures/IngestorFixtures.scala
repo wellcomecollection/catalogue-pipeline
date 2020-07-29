@@ -16,8 +16,6 @@ import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.platform.ingestor.common.Indexer
 import uk.ac.wellcome.platform.ingestor.common.models.IngestorConfig
 import uk.ac.wellcome.platform.ingestor.common.services.IngestorWorkerService
-import uk.ac.wellcome.storage.ObjectLocation
-import uk.ac.wellcome.storage.store.memory.MemoryStore
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -45,7 +43,7 @@ trait IngestorFixtures extends ElasticsearchFixtures with BigMessagingFixture wi
     testWith: TestWith[Indexer[T], R])(implicit e: ExecutionContext,
                                        idx: Indexable[T],
                                        canonicalId: CanonicalId[T],
-                                       v: Version[T]) = {
+                                       v: Version[T]): R = {
 
     val indexer = new Indexer[T] {
       override val client: ElasticClient = esClient
@@ -89,8 +87,7 @@ trait IngestorFixtures extends ElasticsearchFixtures with BigMessagingFixture wi
     }
 
   object NoStrictMapping extends IndexConfig {
-
-    val analysis = Analysis(analyzers = List())
-    val mapping = MappingDefinition.empty
+    val analysis: Analysis = Analysis(analyzers = List())
+    val mapping: MappingDefinition = MappingDefinition.empty
   }
 }

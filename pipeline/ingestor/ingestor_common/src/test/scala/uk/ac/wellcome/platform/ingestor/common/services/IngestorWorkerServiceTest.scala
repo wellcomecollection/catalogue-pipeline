@@ -18,8 +18,6 @@ import uk.ac.wellcome.platform.ingestor.common.fixtures.{
   SampleDocument
 }
 import uk.ac.wellcome.platform.ingestor.common.models.IngestorConfig
-import uk.ac.wellcome.storage.ObjectLocation
-import uk.ac.wellcome.storage.store.memory.MemoryStore
 import uk.ac.wellcome.storage.generators.RandomThings
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -131,8 +129,6 @@ class IngestorWorkerServiceTest
     val index = createIndex
     withLocalSqsQueue() { queue =>
       withActorSystem { implicit actorSystem =>
-        implicit val store =
-          new MemoryStore[ObjectLocation, SampleDocument](Map.empty)
         withBigMessageStream[SampleDocument, Any](queue) { messageStream =>
           import scala.concurrent.duration._
 
