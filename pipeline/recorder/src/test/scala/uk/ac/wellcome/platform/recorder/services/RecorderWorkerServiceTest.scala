@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.recorder.services
 
-import org.scalatest.concurrent.Eventually
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil._
@@ -17,6 +17,7 @@ class RecorderWorkerServiceTest
     extends AnyFunSpec
     with Matchers
     with Eventually
+    with IntegrationPatience
     with WorkerServiceFixture
     with JsonAssertions
     with WorksGenerators {
@@ -109,7 +110,7 @@ class RecorderWorkerServiceTest
           sendMessage[TransformedBaseWork](queue = queue, obj = work)
           eventually {
             assertQueueEmpty(queue)
-            assertQueueHasSize(dlq, 1)
+            assertQueueHasSize(dlq, size = 1)
 
             assertWorkNotStored(brokenVhs, work)
 
