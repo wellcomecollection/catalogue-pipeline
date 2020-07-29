@@ -527,6 +527,7 @@ class WorksIncludesTest
                      "type": "Work",
                      "id": "${works.head.canonicalId}",
                      "title": "${works.head.data.title.get}",
+                     "referenceNumber": "PP/MI",
                      "alternativeTitles": [],
                      "collectionPath": {
                         "label": "PP/MI",
@@ -539,6 +540,7 @@ class WorksIncludesTest
                      "type": "Work",
                      "id": "${works(1).canonicalId}",
                      "title": "${works(1).data.title.get}",
+                     "referenceNumber": "CRGH",
                      "alternativeTitles": [],
                      "collectionPath": {
                         "label": "CRGH",
@@ -569,6 +571,7 @@ class WorksIncludesTest
                 ${singleWorkResult(apiPrefix)},
                 "id": "${work.canonicalId}",
                 "title": "${work.data.title.get}",
+                "referenceNumber": "PP/MI",
                 "alternativeTitles": [],
                 "collectionPath": {
                   "label": "PP/MI",
@@ -589,6 +592,7 @@ class WorksIncludesTest
                       "work" : {
                         "id": "${work.canonicalId}",
                         "title": "${work.data.title.get}",
+                        "referenceNumber": "PP/MI",
                         "alternativeTitles" : [],
                         "type" : "Work"
                       },
@@ -617,6 +621,7 @@ class WorksIncludesTest
               ${singleWorkResult(apiPrefix)},
               "id": "${work.canonicalId}",
               "title": "${work.data.title.get}",
+              "referenceNumber": "PP/MI",
               "alternativeTitles": []
             }
           """
