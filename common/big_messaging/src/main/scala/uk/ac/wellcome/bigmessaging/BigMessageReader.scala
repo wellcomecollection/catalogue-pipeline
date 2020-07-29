@@ -2,19 +2,20 @@ package uk.ac.wellcome.bigmessaging
 
 import grizzled.slf4j.Logging
 import io.circe.Decoder
-import uk.ac.wellcome.json.JsonUtil.fromJson
 import uk.ac.wellcome.bigmessaging.message.{
   InlineNotification,
   MessageNotification,
   RemoteNotification
 }
-import uk.ac.wellcome.storage.{Identified, NotFoundError, ObjectLocation}
+import uk.ac.wellcome.json.JsonUtil.fromJson
+import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.Store
+import uk.ac.wellcome.storage.{Identified, NotFoundError}
 
 import scala.util.{Failure, Success, Try}
 
 trait BigMessageReader[T] extends Logging {
-  val store: Store[ObjectLocation, T]
+  val store: Store[S3ObjectLocation, T]
 
   implicit val decoder: Decoder[T]
 

@@ -11,7 +11,7 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
-import uk.ac.wellcome.storage.ObjectLocation
+import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.Store
 import uk.ac.wellcome.storage.store.memory.MemoryStore
 
@@ -26,8 +26,8 @@ trait BigMessagingFixture extends SQS {
     implicit
     actorSystem: ActorSystem,
     decoderT: Decoder[T],
-    storeT: Store[ObjectLocation, T] =
-      new MemoryStore[ObjectLocation, T](Map.empty)): R = {
+    storeT: Store[S3ObjectLocation, T] =
+      new MemoryStore[S3ObjectLocation, T](initialEntries = Map.empty)): R = {
     val stream = new BigMessageStream[T](
       sqsClient = sqsClient,
       sqsConfig = createSQSConfigWith(queue),

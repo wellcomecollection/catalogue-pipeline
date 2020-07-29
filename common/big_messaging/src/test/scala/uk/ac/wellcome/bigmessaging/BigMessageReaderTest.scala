@@ -10,8 +10,8 @@ import uk.ac.wellcome.bigmessaging.message.{
 }
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.exceptions.JsonDecodingError
-import uk.ac.wellcome.storage.ObjectLocation
-import uk.ac.wellcome.storage.generators.ObjectLocationGenerators
+import uk.ac.wellcome.storage.generators.S3ObjectLocationGenerators
+import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.Store
 import uk.ac.wellcome.storage.store.memory.MemoryStore
 
@@ -21,24 +21,24 @@ class BigMessageReaderTest
     extends AnyFunSpec
     with Matchers
     with EitherValues
-    with ObjectLocationGenerators {
+    with S3ObjectLocationGenerators {
   case class Shape(colour: String, sides: Int)
 
   val blueTriangle = Shape(colour = "blue", sides = 3)
 
-  def createReader(shapeStore: Store[ObjectLocation, Shape] = new MemoryStore(
+  def createReader(shapeStore: Store[S3ObjectLocation, Shape] = new MemoryStore(
                      Map.empty))(
     implicit decoderS: Decoder[Shape]): BigMessageReader[Shape] =
     new BigMessageReader[Shape] {
-      override val store: Store[ObjectLocation, Shape] =
+      override val store: Store[S3ObjectLocation, Shape] =
         shapeStore
       override implicit val decoder: Decoder[Shape] = decoderS
     }
 
   it("reads a large message from the object store") {
-    val store = new MemoryStore(Map.empty[ObjectLocation, Shape])
+    val store = new MemoryStore(Map.empty[S3ObjectLocation, Shape])
     val reader = createReader(store)
-    val objectLocation = createObjectLocation
+    val objectLocation = createS3ObjectLocation
 
     store.put(objectLocation)(blueTriangle)
 
@@ -71,7 +71,7 @@ class BigMessageReaderTest
     val reader = createReader()
 
     val notification = RemoteNotification(
-      location = ObjectLocation("does-not", "exist")
+      location = S3ObjectLocation("does-not", "exist")
     )
 
     val result = reader.read(notification)
@@ -79,6 +79,6 @@ class BigMessageReaderTest
     result shouldBe a[Failure[_]]
     val err = result.failed.get
     err shouldBe a[Throwable]
-    err.getMessage shouldBe "Nothing at does-not/exist"
+    err.getMessage shouldBe "Nothing at s3://does-not/exist"
   }
 }

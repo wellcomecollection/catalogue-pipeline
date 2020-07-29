@@ -1,10 +1,11 @@
 package uk.ac.wellcome.platform.transformer.mets.transformer
 
 import uk.ac.wellcome.storage.store.Readable
-import uk.ac.wellcome.storage.{Identified, ObjectLocation}
+import uk.ac.wellcome.storage.Identified
 import uk.ac.wellcome.mets_adapter.models.MetsLocation
+import uk.ac.wellcome.storage.s3.S3ObjectLocation
 
-class MetsXmlTransformer(store: Readable[ObjectLocation, String]) {
+class MetsXmlTransformer(store: Readable[S3ObjectLocation, String]) {
 
   type Result[T] = Either[Throwable, T]
 
@@ -35,7 +36,7 @@ class MetsXmlTransformer(store: Readable[ObjectLocation, String]) {
 
   private def transformWithManifestations(
     root: MetsXml,
-    manifestations: List[ObjectLocation]): Result[MetsData] =
+    manifestations: List[S3ObjectLocation]): Result[MetsData] =
     for {
       id <- root.recordIdentifier
       firstManifestation <- getFirstManifestation(root, manifestations)
@@ -54,11 +55,11 @@ class MetsXmlTransformer(store: Readable[ObjectLocation, String]) {
 
   private def getFirstManifestation(
     root: MetsXml,
-    manifestations: List[ObjectLocation]): Result[MetsXml] =
+    manifestations: List[S3ObjectLocation]): Result[MetsXml] =
     root.firstManifestationFilename
       .flatMap { name =>
-        manifestations.find(m =>
-          m.path.endsWith(name) || m.path.endsWith(s"$name.xml")) match {
+        manifestations.find(loc =>
+          loc.key.endsWith(name) || loc.key.endsWith(s"$name.xml")) match {
           case Some(location) => Right(location)
           case None =>
             Left(
@@ -69,7 +70,7 @@ class MetsXmlTransformer(store: Readable[ObjectLocation, String]) {
       }
       .flatMap(getMetsXml)
 
-  private def getMetsXml(location: ObjectLocation): Result[MetsXml] =
+  private def getMetsXml(location: S3ObjectLocation): Result[MetsXml] =
     store
       .get(location)
       .left

@@ -11,8 +11,9 @@ import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
+import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.Store
-import uk.ac.wellcome.storage.{Identified, ObjectLocation}
+import uk.ac.wellcome.storage.Identified
 
 // In future we should just receive the ID and version from the adapter as the
 // S3 specific `location` field is an implementation detail we should not be
@@ -27,7 +28,7 @@ case class BackwardsCompatObjectLocation(namespace: String, key: String)
 
 class MiroVHSRecordReceiver[MsgDestination](
   messageSender: MessageSender[MsgDestination],
-  store: Store[ObjectLocation, MiroRecord])(implicit ec: ExecutionContext)
+  store: Store[S3ObjectLocation, MiroRecord])(implicit ec: ExecutionContext)
     extends Logging {
 
   def receiveMessage(message: NotificationMessage,
@@ -62,8 +63,8 @@ class MiroVHSRecordReceiver[MsgDestination](
 
   private def getRecord(record: HybridRecord): Try[MiroRecord] =
     record match {
-      case HybridRecord(_, _, BackwardsCompatObjectLocation(namespace, path)) =>
-        store.get(ObjectLocation(namespace, path)) match {
+      case HybridRecord(_, _, BackwardsCompatObjectLocation(bucket, key)) =>
+        store.get(S3ObjectLocation(bucket, key)) match {
           case Right(Identified(_, miroRecord)) =>
             Success(miroRecord)
           case Left(error) => Failure(error.e)

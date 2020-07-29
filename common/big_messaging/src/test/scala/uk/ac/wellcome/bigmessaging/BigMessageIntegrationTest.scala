@@ -11,8 +11,8 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SNS
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.sns.SNSConfig
-import uk.ac.wellcome.storage.ObjectLocation
 import uk.ac.wellcome.storage.fixtures.S3Fixtures
+import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.Store
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.streaming.Codec
@@ -41,7 +41,7 @@ class BigMessageIntegrationTest
       )
 
       val reader = new BigMessageReader[Shape] {
-        override val store: Store[ObjectLocation, Shape] =
+        override val store: Store[S3ObjectLocation, Shape] =
           S3TypedStore[Shape]
         override implicit val decoder: Decoder[Shape] = decoderS
       }

@@ -7,13 +7,13 @@ import org.scalatest.funspec.AnyFunSpec
 import software.amazon.awssdk.services.sqs.model.SendMessageResponse
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.mets_adapter.models.MetsLocation
+import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.generators.RandomStrings
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.mets.client.ClientFactory
@@ -24,10 +24,11 @@ import uk.ac.wellcome.platform.transformer.mets.fixtures.{
 }
 import uk.ac.wellcome.platform.transformer.mets.store.TemporaryCredentialsStore
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
+import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.store.VersionedStore
-import uk.ac.wellcome.storage.{Identified, ObjectLocation, Version}
+import uk.ac.wellcome.storage.{Identified, Version}
 
 class MetsTransformerWorkerServiceTest
     extends AnyFunSpec
@@ -166,7 +167,7 @@ class MetsTransformerWorkerServiceTest
     val rootPath = "data"
     val key = for {
       _ <- S3TypedStore[String].put(
-        ObjectLocation(metsBucket.name, s"$rootPath/$name"))(mets)
+        S3ObjectLocation(metsBucket.name, key = s"$rootPath/$name"))(mets)
       entry = MetsLocation(metsBucket.name, rootPath, 1, name, List())
       key <- dynamoStore.put(Version(name, version))(entry)
     } yield key

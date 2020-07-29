@@ -112,7 +112,7 @@ class BigMessageSenderTest
               fromJson[RemoteNotification](msg.message).get
             }
 
-        messages.head.location.namespace shouldBe bucket.name
+        messages.head.location.bucket shouldBe bucket.name
       }
     }
   }
