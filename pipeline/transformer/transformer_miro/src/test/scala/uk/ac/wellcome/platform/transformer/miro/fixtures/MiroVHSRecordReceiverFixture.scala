@@ -63,8 +63,7 @@ trait MiroVHSRecordReceiverFixture extends MiroRecordGenerators with SQS {
     HybridRecord(
       id = id,
       version = version,
-      location =
-        BackwardsCompatObjectLocation(location.bucket, location.key)
+      location = BackwardsCompatObjectLocation(location.bucket, location.key)
     )
   }
 }
