@@ -7,7 +7,10 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.SQSBuilder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
-import uk.ac.wellcome.typesafe.config.builders.{AWSClientConfigBuilder, AkkaBuilder}
+import uk.ac.wellcome.typesafe.config.builders.{
+  AWSClientConfigBuilder,
+  AkkaBuilder
+}
 
 import scala.concurrent.ExecutionContext
 
