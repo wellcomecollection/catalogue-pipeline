@@ -27,8 +27,8 @@ import uk.ac.wellcome.sierra_adapter.model.{
   SierraBibRecord,
   SierraItemRecord
 }
-import uk.ac.wellcome.storage.{Identified, ObjectLocation}
-import uk.ac.wellcome.storage.s3.S3Config
+import uk.ac.wellcome.storage.Identified
+import uk.ac.wellcome.storage.s3.{S3Config, S3ObjectLocation}
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.typesafe.Runnable
 
@@ -68,7 +68,7 @@ class SierraReaderWorkerService(
 
   private def runSierraStream(
     window: String,
-    windowStatus: WindowStatus): Future[Identified[ObjectLocation, String]] = {
+    windowStatus: WindowStatus): Future[Identified[S3ObjectLocation, String]] = {
 
     info(s"Running the stream with window=$window and status=$windowStatus")
 
@@ -110,7 +110,7 @@ class SierraReaderWorkerService(
 
       Future.fromTry(
         S3TypedStore[String]
-          .put(ObjectLocation(s3Config.bucketName, key))("")
+          .put(S3ObjectLocation(bucket = s3Config.bucketName, key = key))("")
           .left
           .map { _.e }
           .toTry)
