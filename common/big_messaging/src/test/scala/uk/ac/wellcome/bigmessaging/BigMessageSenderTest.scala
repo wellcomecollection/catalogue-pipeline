@@ -31,13 +31,18 @@ class BigMessageSenderTest
   it("sends an inline notification if the message is small") {
     withLocalS3Bucket { bucket =>
       withLocalSnsTopic { topic =>
-        val sender = createBigMessageSenderWith(bucket, topic, maxMessageSize = Int.MaxValue)
+        val sender = createBigMessageSenderWith(
+          bucket,
+          topic,
+          maxMessageSize = Int.MaxValue)
 
         sender.sendT(redSquare) shouldBe a[Success[_]]
 
         val messages: Seq[MessageNotification] =
           listMessagesReceivedFromSNS(topic)
-            .map { msg => fromJson[MessageNotification](msg.message).get }
+            .map { msg =>
+              fromJson[MessageNotification](msg.message).get
+            }
 
         messages should have size 1
         messages.head shouldBe a[InlineNotification]
@@ -51,13 +56,16 @@ class BigMessageSenderTest
   it("sends a remote notification is the message is too big") {
     withLocalS3Bucket { bucket =>
       withLocalSnsTopic { topic =>
-        val sender = createBigMessageSenderWith(bucket, topic, maxMessageSize = 1)
+        val sender =
+          createBigMessageSenderWith(bucket, topic, maxMessageSize = 1)
 
         sender.sendT(redSquare) shouldBe a[Success[_]]
 
         val messages: Seq[MessageNotification] =
           listMessagesReceivedFromSNS(topic)
-            .map { msg => fromJson[MessageNotification](msg.message).get }
+            .map { msg =>
+              fromJson[MessageNotification](msg.message).get
+            }
 
         messages should have size 1
         messages.head shouldBe a[RemoteNotification]
@@ -72,7 +80,8 @@ class BigMessageSenderTest
   it("gives distinct keys when sending the same message twice") {
     withLocalS3Bucket { bucket =>
       withLocalSnsTopic { topic =>
-        val sender = createBigMessageSenderWith(bucket, topic, maxMessageSize = 1)
+        val sender =
+          createBigMessageSenderWith(bucket, topic, maxMessageSize = 1)
 
         sender.sendT(redSquare) shouldBe a[Success[_]]
         Thread.sleep(2000)
@@ -80,7 +89,9 @@ class BigMessageSenderTest
 
         val messages: Seq[RemoteNotification] =
           listMessagesReceivedFromSNS(topic)
-            .map { msg => fromJson[RemoteNotification](msg.message).get }
+            .map { msg =>
+              fromJson[RemoteNotification](msg.message).get
+            }
 
         messages.map { _.location }.distinct should have size 2
       }
@@ -90,13 +101,16 @@ class BigMessageSenderTest
   it("uses the namespace when storing messages in the store") {
     withLocalS3Bucket { bucket =>
       withLocalSnsTopic { topic =>
-        val sender = createBigMessageSenderWith(bucket, topic, maxMessageSize = 1)
+        val sender =
+          createBigMessageSenderWith(bucket, topic, maxMessageSize = 1)
 
         sender.sendT(redSquare) shouldBe a[Success[_]]
 
         val messages: Seq[RemoteNotification] =
           listMessagesReceivedFromSNS(topic)
-            .map { msg => fromJson[RemoteNotification](msg.message).get }
+            .map { msg =>
+              fromJson[RemoteNotification](msg.message).get
+            }
 
         messages.head.location.namespace shouldBe bucket.name
       }
@@ -116,7 +130,8 @@ class BigMessageSenderTest
     val badBucket = createBucket
 
     withLocalSnsTopic { topic =>
-      val sender = createBigMessageSenderWith(badBucket, topic, maxMessageSize = 1)
+      val sender =
+        createBigMessageSenderWith(badBucket, topic, maxMessageSize = 1)
 
       sender.sendT(redSquare) shouldBe a[Failure[_]]
 
@@ -125,7 +140,9 @@ class BigMessageSenderTest
   }
 
   def createBigMessageSenderWith(
-    bucket: Bucket, topic: Topic, maxMessageSize: Int = 10000
+    bucket: Bucket,
+    topic: Topic,
+    maxMessageSize: Int = 10000
   ): BigMessageSender[SNSConfig] =
     S3BigMessageSender(
       bucketName = bucket.name,

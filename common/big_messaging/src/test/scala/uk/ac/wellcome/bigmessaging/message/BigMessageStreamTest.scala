@@ -15,7 +15,10 @@ import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.messaging.fixtures.SQS.{Queue, QueuePair}
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 import uk.ac.wellcome.storage.ObjectLocation
-import uk.ac.wellcome.storage.generators.{ObjectLocationGenerators, RandomThings}
+import uk.ac.wellcome.storage.generators.{
+  ObjectLocationGenerators,
+  RandomThings
+}
 import uk.ac.wellcome.storage.store.Store
 import uk.ac.wellcome.storage.store.memory.MemoryStore
 
@@ -324,8 +327,8 @@ class BigMessageStreamTest
                        R]
   )(implicit
     decoderT: Decoder[ExampleObject],
-    store: Store[ObjectLocation, ExampleObject] = new MemoryStore(initialEntries = Map.empty))
-    : R =
+    store: Store[ObjectLocation, ExampleObject] = new MemoryStore(
+      initialEntries = Map.empty)): R =
     withActorSystem { implicit actorSystem =>
       withLocalSqsQueuePair(visibilityTimeout = 5) {
         case queuePair @ QueuePair(queue, _) =>

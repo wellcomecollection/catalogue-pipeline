@@ -36,10 +36,12 @@ trait IndividualBigMessageSender[Destination]
       _ = debug(s"Length of encoded notification: $encodedLength")
 
       notification <- if (encodedLength > maxMessageSize) {
-        debug(s"Message is longer than $maxMessageSize; sending a remote notification")
+        debug(
+          s"Message is longer than $maxMessageSize; sending a remote notification")
         createRemoteNotification(body, destination)
       } else {
-        debug(s"Message is shorter than $maxMessageSize; sending an inline notification")
+        debug(
+          s"Message is shorter than $maxMessageSize; sending an inline notification")
         Success(inlineNotification)
       }
 

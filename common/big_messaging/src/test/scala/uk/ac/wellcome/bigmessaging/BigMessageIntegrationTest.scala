@@ -57,7 +57,9 @@ class BigMessageIntegrationTest
 
           val messages: Seq[MessageNotification] =
             listMessagesReceivedFromSNS(topic)
-              .map { msg => fromJson[MessageNotification](msg.message).get }
+              .map { msg =>
+                fromJson[MessageNotification](msg.message).get
+              }
 
           val notification = messages.head
           reader.read(notification) shouldBe Success(yellowPentagon)
@@ -73,7 +75,9 @@ class BigMessageIntegrationTest
 
           val messages: Seq[MessageNotification] =
             listMessagesReceivedFromSNS(topic)
-              .map { msg => fromJson[MessageNotification](msg.message).get }
+              .map { msg =>
+                fromJson[MessageNotification](msg.message).get
+              }
 
           val notification = messages.head
           reader.read(notification) shouldBe Success(yellowPentagon)

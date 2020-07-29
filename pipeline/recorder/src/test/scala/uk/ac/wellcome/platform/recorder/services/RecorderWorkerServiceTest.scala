@@ -92,7 +92,8 @@ class RecorderWorkerServiceTest
     val messageSender = new MemoryMessageSender()
 
     class BrokenMemoryVHS extends MemoryVHS() {
-      override def put(id: Version[String, Int])(item: TransformedBaseWork): WriteEither =
+      override def put(id: Version[String, Int])(
+        item: TransformedBaseWork): WriteEither =
         Left(StoreWriteError(new Error("BOOM!")))
 
       override def get(id: Version[String, Int]): ReadEither =
