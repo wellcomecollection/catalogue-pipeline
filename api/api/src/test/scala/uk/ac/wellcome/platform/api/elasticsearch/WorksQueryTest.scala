@@ -17,7 +17,6 @@ import uk.ac.wellcome.models.work.internal.{CollectionPath, IdentifiedBaseWork}
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
 import uk.ac.wellcome.platform.api.models.{SearchQuery, SearchQueryType}
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.platform.api.models.SearchQueryType.PhraserBeam
 import uk.ac.wellcome.platform.api.services.{
   ElasticsearchQueryOptions,
   ElasticsearchService,
@@ -322,9 +321,10 @@ class WorksQueryTest
       val results = searchResults(
         index,
         queryOptions = createElasticsearchQueryOptionsWith(
-          searchQuery = Some(SearchQuery(query, PhraserBeam))))
+          searchQuery = Some(SearchQuery(query, queryType))))
 
       withClue(s"Using: ${queryType.name}") {
+        results.size shouldBe matches.size
         results should contain theSameElementsAs (matches)
       }
     }
