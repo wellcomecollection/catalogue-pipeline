@@ -8,8 +8,9 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.mets_adapter.models.MetsLocation
 import uk.ac.wellcome.platform.transformer.mets.transformer.MetsXmlTransformer
+import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.{Readable, VersionedStore}
-import uk.ac.wellcome.storage.{Identified, ObjectLocation, Version}
+import uk.ac.wellcome.storage.{Identified, Version}
 import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.Future
@@ -18,7 +19,7 @@ class MetsTransformerWorkerService[Destination](
   msgStream: SQSStream[NotificationMessage],
   messageSender: MessageSender[Destination],
   adapterStore: VersionedStore[String, Int, MetsLocation],
-  metsXmlStore: Readable[ObjectLocation, String]
+  metsXmlStore: Readable[S3ObjectLocation, String]
 ) extends Runnable
     with Logging {
 
