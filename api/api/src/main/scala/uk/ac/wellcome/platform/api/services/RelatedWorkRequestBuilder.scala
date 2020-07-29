@@ -57,7 +57,7 @@ case class RelatedWorkRequestBuilder(index: Index,
             pathQuery(parent, depth),
             not(termQuery(field = "data.collectionPath.path", value = path))
           )
-        case None => boolQuery()
+        case None => matchNoneQuery()
       }
     )
 
@@ -66,9 +66,13 @@ case class RelatedWorkRequestBuilder(index: Index,
     */
   lazy val ancestorsRequest: SearchRequest =
     relatedWorksRequest(
-      should(
-        ancestors.map(ancestor => pathQuery(ancestor, pathDepth(ancestor)))
-      )
+      ancestors match {
+        case Nil => matchNoneQuery()
+        case ancestors =>
+          should(
+            ancestors.map(ancestor => pathQuery(ancestor, pathDepth(ancestor)))
+          )
+      }
     )
 
   lazy val ancestors: List[String] =
