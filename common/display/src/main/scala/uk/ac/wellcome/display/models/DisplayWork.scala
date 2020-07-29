@@ -23,6 +23,11 @@ case class DisplayWork(
   ) alternativeTitles: List[String],
   @Schema(
     `type` = "String",
+    description =
+      "The identifier used by researchers to cite or refer to a work."
+  ) referenceNumber: Option[String] = None,
+  @Schema(
+    `type` = "String",
     description = "A description given to a thing."
   ) description: Option[String] = None,
   @Schema(
@@ -126,6 +131,7 @@ case object DisplayWork {
       id = work.canonicalId,
       title = work.data.title,
       alternativeTitles = work.data.alternativeTitles,
+      referenceNumber = work.data.collectionPath.flatMap(_.label),
       description = work.data.description,
       physicalDescription = work.data.physicalDescription,
       lettering = work.data.lettering,
