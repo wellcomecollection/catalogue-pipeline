@@ -4,24 +4,33 @@ import java.util.concurrent.ConcurrentLinkedQueue
 
 import akka.stream.scaladsl.Flow
 import io.circe.Decoder
+import org.scalatest.concurrent.Eventually
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import software.amazon.awssdk.services.cloudwatch.model.StandardUnit
+import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.messaging.fixtures.SQS.{Queue, QueuePair}
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 import uk.ac.wellcome.storage.ObjectLocation
+import uk.ac.wellcome.storage.generators.RandomThings
 import uk.ac.wellcome.storage.store.Store
 import uk.ac.wellcome.storage.store.memory.MemoryStore
+
 import scala.concurrent.Future
 import scala.util.Random
 
 class BigMessageStreamTest
     extends AnyFunSpec
     with Matchers
-    with BigMessagingFixture {
+    with Eventually
+    with Akka
+    with BigMessagingFixture
+    with RandomThings {
+
+  case class ExampleObject(name: String)
 
   def process(list: ConcurrentLinkedQueue[ExampleObject])(
     o: ExampleObject): Future[Unit] = {

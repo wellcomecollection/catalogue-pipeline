@@ -3,19 +3,18 @@ package uk.ac.wellcome.platform.inference_manager.fixtures
 import akka.http.scaladsl.Http
 import io.circe.{Decoder, Encoder}
 import software.amazon.awssdk.services.sqs.model.Message
+import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.platform.inference_manager.services.{
-  InferenceManagerWorkerService,
-  InferrerAdapter
-}
+import uk.ac.wellcome.platform.inference_manager.services.{InferenceManagerWorkerService, InferrerAdapter}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 trait InferenceManagerWorkerServiceFixture[Input, Output]
-    extends BigMessagingFixture {
+    extends BigMessagingFixture
+    with Akka {
   def withWorkerService[R](queue: Queue,
                            messageSender: MemoryMessageSender,
                            adapter: InferrerAdapter[Input, Output],

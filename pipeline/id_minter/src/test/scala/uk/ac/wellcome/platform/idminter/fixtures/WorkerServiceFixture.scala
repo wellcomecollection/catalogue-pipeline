@@ -2,6 +2,7 @@ package uk.ac.wellcome.platform.idminter.fixtures
 
 import io.circe.Json
 import scalikejdbc.{ConnectionPool, ConnectionPoolSettings}
+import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
@@ -14,7 +15,8 @@ import uk.ac.wellcome.platform.idminter.steps.IdentifierGenerator
 
 trait WorkerServiceFixture
     extends IdentifiersDatabase
-    with BigMessagingFixture {
+    with BigMessagingFixture
+    with Akka {
   def withWorkerService[R](
     messageSender: MemoryMessageSender = new MemoryMessageSender(),
     queue: Queue = Queue("url://q", "arn::q", visibilityTimeout = 1),

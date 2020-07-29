@@ -8,9 +8,11 @@ import uk.ac.wellcome.bigmessaging.message.MessageNotification
 import uk.ac.wellcome.bigmessaging.s3.S3BigMessageSender
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.messaging.fixtures.SNS
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.sns.SNSConfig
 import uk.ac.wellcome.storage.ObjectLocation
+import uk.ac.wellcome.storage.fixtures.S3Fixtures
 import uk.ac.wellcome.storage.store.Store
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.streaming.Codec
@@ -20,7 +22,9 @@ import scala.util.Success
 class BigMessageIntegrationTest
     extends AnyFunSpec
     with Matchers
-    with BigMessagingFixture {
+    with BigMessagingFixture
+    with SNS
+    with S3Fixtures {
   case class Shape(colour: String, sides: Int)
 
   val yellowPentagon = Shape(colour = "yellow", sides = 5)

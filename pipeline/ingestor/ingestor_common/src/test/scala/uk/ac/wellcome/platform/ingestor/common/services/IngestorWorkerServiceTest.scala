@@ -20,13 +20,15 @@ import uk.ac.wellcome.platform.ingestor.common.fixtures.{
 import uk.ac.wellcome.platform.ingestor.common.models.IngestorConfig
 import uk.ac.wellcome.storage.ObjectLocation
 import uk.ac.wellcome.storage.store.memory.MemoryStore
+import uk.ac.wellcome.storage.generators.RandomThings
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class IngestorWorkerServiceTest
     extends AnyFunSpec
     with IngestorFixtures
-    with IdentifiersGenerators {
+    with IdentifiersGenerators
+    with RandomThings {
 
   it("creates the index at startup if it doesn't already exist") {
     val index = createIndex

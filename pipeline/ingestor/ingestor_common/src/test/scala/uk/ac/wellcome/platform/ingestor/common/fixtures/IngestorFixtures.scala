@@ -5,6 +5,7 @@ import com.sksamuel.elastic4s.requests.mappings.MappingDefinition
 import com.sksamuel.elastic4s.{ElasticClient, Index, Indexable}
 import io.circe.Decoder
 import org.scalatest.Suite
+import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.elasticsearch.model.{CanonicalId, Version}
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
@@ -37,7 +38,7 @@ object SampleDocument {
     t.version
 }
 
-trait IngestorFixtures extends ElasticsearchFixtures with BigMessagingFixture {
+trait IngestorFixtures extends ElasticsearchFixtures with BigMessagingFixture with Akka {
   this: Suite =>
 
   def withIndexer[T, R](i: Index, esClient: ElasticClient = elasticClient)(
@@ -66,8 +67,6 @@ trait IngestorFixtures extends ElasticsearchFixtures with BigMessagingFixture {
     implicit dec: Decoder[T]): R =
     withActorSystem { implicit actorSystem =>
       {
-        implicit val store =
-          new MemoryStore[ObjectLocation, T](Map.empty)
         withBigMessageStream[T, R](queue) { messageStream =>
           val ingestorConfig = IngestorConfig(
             batchSize = 100,
