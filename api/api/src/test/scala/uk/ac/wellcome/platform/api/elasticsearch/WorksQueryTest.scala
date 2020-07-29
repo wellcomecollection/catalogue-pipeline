@@ -312,20 +312,6 @@ class WorksQueryTest
     }
   }
 
-  it("Shouldn't return all the results if queried") {
-    withLocalWorksIndex { index =>
-      val matchingWork = createIdentifiedWorkWith(
-        title = Some("Matching")
-      )
-      val notMatchingWork = createIdentifiedWorkWith(
-        title = Some("No thanks")
-      )
-      val query = "Matching"
-      insertIntoElasticsearch(index, matchingWork, notMatchingWork)
-      assertResultsMatchForAllowedQueryTypes(index, query, List(matchingWork))
-    }
-  }
-
   private def assertResultsMatchForAllowedQueryTypes(
     index: Index,
     query: String,
