@@ -12,7 +12,7 @@ import uk.ac.wellcome.platform.transformer.miro.services.{
   MiroVHSRecordReceiver
 }
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
-import uk.ac.wellcome.storage.ObjectLocation
+import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.Store
 import uk.ac.wellcome.storage.store.memory.MemoryStore
 
@@ -21,9 +21,9 @@ import scala.util.Random
 
 trait MiroVHSRecordReceiverFixture extends MiroRecordGenerators with SQS {
 
-  type MiroStore = Store[ObjectLocation, MiroRecord]
+  type MiroStore = Store[S3ObjectLocation, MiroRecord]
 
-  private val store: MiroStore = new MemoryStore(Map.empty)
+  private val store: MiroStore = new MemoryStore(initialEntries = Map.empty)
 
   def createRecordReceiverWith(
     messageSender: MemoryMessageSender): MiroVHSRecordReceiver[String] =
@@ -57,14 +57,14 @@ trait MiroVHSRecordReceiverFixture extends MiroRecordGenerators with SQS {
     version: Int = 1,
     namespace: String = "test",
     id: String = Random.alphanumeric take 10 mkString): HybridRecord = {
-    val location = ObjectLocation(namespace, id)
+    val location = S3ObjectLocation(namespace, id)
 
     store.put(location)(miroRecord)
     HybridRecord(
       id = id,
       version = version,
       location =
-        BackwardsCompatObjectLocation(location.namespace, location.path)
+        BackwardsCompatObjectLocation(location.bucket, location.key)
     )
   }
 }
