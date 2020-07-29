@@ -79,6 +79,6 @@ class BigMessageReaderTest
     result shouldBe a[Failure[_]]
     val err = result.failed.get
     err shouldBe a[Throwable]
-    err.getMessage shouldBe "Nothing at does-not/exist"
+    err.getMessage shouldBe "Nothing at s3://does-not/exist"
   }
 }
