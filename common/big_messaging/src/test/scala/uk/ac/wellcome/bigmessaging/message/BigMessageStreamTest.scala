@@ -4,7 +4,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
 
 import akka.stream.scaladsl.Flow
 import io.circe.Decoder
-import org.scalatest.concurrent.Eventually
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import software.amazon.awssdk.services.cloudwatch.model.StandardUnit
@@ -15,19 +15,20 @@ import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.messaging.fixtures.SQS.{Queue, QueuePair}
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 import uk.ac.wellcome.storage.ObjectLocation
-import uk.ac.wellcome.storage.generators.RandomThings
+import uk.ac.wellcome.storage.generators.{ObjectLocationGenerators, RandomThings}
 import uk.ac.wellcome.storage.store.Store
 import uk.ac.wellcome.storage.store.memory.MemoryStore
 
 import scala.concurrent.Future
-import scala.util.Random
 
 class BigMessageStreamTest
     extends AnyFunSpec
     with Matchers
     with Eventually
+    with IntegrationPatience
     with Akka
     with BigMessagingFixture
+    with ObjectLocationGenerators
     with RandomThings {
 
   case class ExampleObject(name: String)
@@ -106,8 +107,7 @@ class BigMessageStreamTest
     queue: Queue,
     exampleObject: ExampleObject,
   ): Unit = {
-    val s3key = Random.alphanumeric take 10 mkString
-    val location = ObjectLocation(namespace = randomAlphanumeric, path = s3key)
+    val location = createObjectLocation
 
     store.put(location)(exampleObject)
 
@@ -168,15 +168,9 @@ class BigMessageStreamTest
       case (messageStream, QueuePair(queue, dlq), metrics) =>
         val streamName = "test-stream"
 
-        // Do NOT put S3 object here
-        val objectLocation = ObjectLocation(
-          namespace = "bukkit",
-          path = "path.json"
-        )
-
         sendNotificationToSQS[MessageNotification](
           queue = queue,
-          message = RemoteNotification(objectLocation)
+          message = RemoteNotification(createObjectLocation)
         )
 
         val received = new ConcurrentLinkedQueue[ExampleObject]()
@@ -187,9 +181,9 @@ class BigMessageStreamTest
 
         eventually {
           metrics.incrementedCounts shouldBe Seq(
-            "test-stream_ProcessMessage_failure",
-            "test-stream_ProcessMessage_failure",
-            "test-stream_ProcessMessage_failure"
+            s"${streamName}_ProcessMessage_failure",
+            s"${streamName}_ProcessMessage_failure",
+            s"${streamName}_ProcessMessage_failure"
           )
 
           received shouldBe empty
