@@ -14,11 +14,11 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.messaging.fixtures.SQS.{Queue, QueuePair}
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
-import uk.ac.wellcome.storage.ObjectLocation
 import uk.ac.wellcome.storage.generators.{
-  ObjectLocationGenerators,
-  RandomThings
+  RandomThings,
+  S3ObjectLocationGenerators
 }
+import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.Store
 import uk.ac.wellcome.storage.store.memory.MemoryStore
 
@@ -31,7 +31,7 @@ class BigMessageStreamTest
     with IntegrationPatience
     with Akka
     with BigMessagingFixture
-    with ObjectLocationGenerators
+    with S3ObjectLocationGenerators
     with RandomThings {
 
   case class ExampleObject(name: String)
@@ -70,7 +70,7 @@ class BigMessageStreamTest
 
   describe("large messages (>256KB)") {
     it("reads messages off a queue, processes them and deletes them") {
-      implicit val store: Store[ObjectLocation, ExampleObject] =
+      implicit val store: Store[S3ObjectLocation, ExampleObject] =
         new MemoryStore(initialEntries = Map.empty)
 
       withMessageStreamFixtures {
@@ -106,11 +106,11 @@ class BigMessageStreamTest
     )
 
   private def sendRemoteNotification(
-    store: Store[ObjectLocation, ExampleObject],
+    store: Store[S3ObjectLocation, ExampleObject],
     queue: Queue,
     exampleObject: ExampleObject,
   ): Unit = {
-    val location = createObjectLocation
+    val location = createS3ObjectLocation
 
     store.put(location)(exampleObject)
 
@@ -173,7 +173,7 @@ class BigMessageStreamTest
 
         sendNotificationToSQS[MessageNotification](
           queue = queue,
-          message = RemoteNotification(createObjectLocation)
+          message = RemoteNotification(createS3ObjectLocation)
         )
 
         val received = new ConcurrentLinkedQueue[ExampleObject]()
@@ -327,7 +327,7 @@ class BigMessageStreamTest
                        R]
   )(implicit
     decoderT: Decoder[ExampleObject],
-    store: Store[ObjectLocation, ExampleObject] = new MemoryStore(
+    store: Store[S3ObjectLocation, ExampleObject] = new MemoryStore(
       initialEntries = Map.empty)): R =
     withActorSystem { implicit actorSystem =>
       withLocalSqsQueuePair(visibilityTimeout = 5) {

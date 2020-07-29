@@ -11,7 +11,7 @@ import uk.ac.wellcome.bigmessaging.message.{
 }
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.IndividualMessageSender
-import uk.ac.wellcome.storage.ObjectLocation
+import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.Store
 
 import scala.util.{Failure, Success, Try}
@@ -20,7 +20,7 @@ trait IndividualBigMessageSender[Destination]
     extends IndividualMessageSender[Destination]
     with Logging {
   val underlying: IndividualMessageSender[Destination]
-  val store: Store[ObjectLocation, String]
+  val store: Store[S3ObjectLocation, String]
   val maxMessageSize: Int
   val namespace: String
 
@@ -61,7 +61,7 @@ trait IndividualBigMessageSender[Destination]
   private def createRemoteNotification(
     body: String,
     destination: Destination): Try[RemoteNotification] = {
-    val location = ObjectLocation(namespace, getKey(destination))
+    val location = S3ObjectLocation(namespace, getKey(destination))
 
     val notification =
       for {
