@@ -11,8 +11,7 @@ import uk.ac.wellcome.bigmessaging.s3.S3BigMessageSender
 import uk.ac.wellcome.messaging.sns.SNSConfig
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.monitoring.typesafe.CloudWatchBuilder
-import uk.ac.wellcome.storage.ObjectLocation
-import uk.ac.wellcome.storage.s3.S3Config
+import uk.ac.wellcome.storage.s3.{S3Config, S3ObjectLocation}
 import uk.ac.wellcome.storage.store.Store
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.streaming.Codec
@@ -32,7 +31,7 @@ object BigMessagingBuilder {
 
     implicit val s3Client: AmazonS3 = S3Builder.buildS3Client(config)
 
-    implicit val store: Store[ObjectLocation, T] = S3TypedStore[T]
+    implicit val store: Store[S3ObjectLocation, T] = S3TypedStore[T]
 
     new BigMessageStream[T](
       sqsClient = SQSBuilder.buildSQSAsyncClient(config),
