@@ -84,6 +84,21 @@ class RelatedWorkServiceTest
     }
   }
 
+  it("Retrieves relations correctly from root position") {
+    withLocalWorksIndex { index =>
+      storeWorks(index)
+      whenReady(service.retrieveRelatedWorks(index, workA)) { result =>
+        result.right.get shouldBe
+          RelatedWorks(
+            parts = List(work1, work2, work3, work4),
+            partOf = Nil,
+            precededBy = Nil,
+            succeededBy = Nil
+          )
+      }
+    }
+  }
+
   it("Ignores missing ancestors") {
     withLocalWorksIndex { index =>
       storeWorks(index, List(workA, workB, workC, workD, workE, workF))
