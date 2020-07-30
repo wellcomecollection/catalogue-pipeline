@@ -166,35 +166,16 @@ class WorksQueryTest
       }
     }
 
-    it("matches when searching for multiple IDs") {
-      withLocalWorksIndex { index =>
-        val work1 = createIdentifiedWorkWith(
-          canonicalId = "abc123"
-        )
-        val work2 = createIdentifiedWorkWith(
-          canonicalId = "123abc"
-        )
-        val query = "abc123 123abc"
-
-        insertIntoElasticsearch(index, work1, work2)
-
-        assertResultsMatchForAllowedQueryTypes(index, query, List(work1, work2))
-      }
-    }
-
     it("doesn't match on partial IDs") {
       withLocalWorksIndex { index =>
         val work1 = createIdentifiedWorkWith(
-          canonicalId = "abcdefg"
-        )
-        val work2 = createIdentifiedWorkWith(
           canonicalId = "1234567"
         )
-        val query = "123 abcdefg"
+        val query = "123"
 
-        insertIntoElasticsearch(index, work1, work2)
+        insertIntoElasticsearch(index, work1)
 
-        assertResultsMatchForAllowedQueryTypes(index, query, List(work1))
+        assertResultsMatchForAllowedQueryTypes(index, query, List())
       }
     }
 
@@ -203,28 +184,59 @@ class WorksQueryTest
         val work1 = createIdentifiedWorkWith(
           canonicalId = "AbCDeF1234"
         )
-        val work2 = createIdentifiedWorkWith(
-          canonicalId = "12345Ef"
+        val nonMatchingWork = createIdentifiedWorkWith(
+          canonicalId = "bloopybloop"
         )
-        val query = "abcdef1234 12345ef"
+        val query = "abcdef1234"
 
-        insertIntoElasticsearch(index, work1, work2)
+        insertIntoElasticsearch(index, work1, nonMatchingWork)
 
-        assertResultsMatchForAllowedQueryTypes(index, query, List(work1, work2))
+        assertResultsMatchForAllowedQueryTypes(index, query, List(work1))
       }
     }
 
-    it("matches IDs that are part of a query") {
+    it("matches multiple IDs") {
       withLocalWorksIndex { index =>
         val work1 = createIdentifiedWorkWith(
           canonicalId = "AbCDeF1234"
         )
         val work2 = createIdentifiedWorkWith(
-          canonicalId = "12345Ef"
+          canonicalId = "rstYui786"
         )
-        val query = "abcdef1234 12345ef hats, dogs and dolomites"
+        val nonMatchingWork = createIdentifiedWorkWith(
+          canonicalId = "bloopybloop"
+        )
+        val query = "abcdef1234 rstyui786"
 
-        insertIntoElasticsearch(index, work1, work2)
+        insertIntoElasticsearch(index, work1, work2, nonMatchingWork)
+
+        assertResultsMatchForAllowedQueryTypes(index, query, List(work1, work2))
+      }
+    }
+
+    it("doesn't match partially matching IDs") {
+      withLocalWorksIndex { index =>
+        val work1 = createIdentifiedWorkWith(
+          canonicalId = "AbCDeF1234"
+        )
+        val work2 = createIdentifiedWorkWith(
+          canonicalId = "rstYui786"
+        )
+        val nonMatchingWork1 = createIdentifiedWorkWith(
+          canonicalId = "bloopybloop"
+        )
+        // We've put spaces in this as some Miro IDs are sentences
+        val nonMatchingWork2 = createIdentifiedWorkWith(
+          canonicalId = "Oxford english dictionary"
+        )
+        val query = "abcdef1234 rstyui786 Oxford"
+
+        insertIntoElasticsearch(
+          index,
+          work1,
+          work2,
+          nonMatchingWork1,
+          nonMatchingWork2)
 
         assertResultsMatchForAllowedQueryTypes(index, query, List(work1, work2))
       }

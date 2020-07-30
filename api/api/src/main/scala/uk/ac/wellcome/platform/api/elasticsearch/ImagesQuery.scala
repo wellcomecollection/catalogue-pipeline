@@ -32,14 +32,14 @@ case object ImagesMultiMatcher {
     } map (FieldWithOptionalBoost(_, None))
 
     val sourceWorkIdFields = Seq(
-      "id.canonicalId.text",
-      "id.sourceIdentifier.value.text",
-      "id.otherIdentifiers.value.text"
+      "id.canonicalId",
+      "id.sourceIdentifier.value",
+      "id.otherIdentifiers.value"
     )
 
     val idFields = (Seq(
-      "id.canonicalId.text",
-      "id.sourceIdentifier.value.text",
+      "id.canonicalId",
+      "id.sourceIdentifier.value",
     ) ++ sourceWorkIdFields
       .flatMap(
         subField =>

@@ -8,7 +8,7 @@ import com.sksamuel.elastic4s.ElasticDsl.{
 }
 import com.sksamuel.elastic4s.requests.analysis.Analysis
 import com.sksamuel.elastic4s.requests.mappings.MappingDefinition
-import uk.ac.wellcome.elasticsearch.WorksAnalysis.asciifoldingAnalyzer
+import uk.ac.wellcome.elasticsearch.WorksAnalysis._
 trait IndexConfig {
   val mapping: MappingDefinition
   val analysis: Analysis
@@ -34,6 +34,9 @@ trait IndexConfig {
     textField(name).fields(
       textField("english").analyzer("english")
     )
+
+  def lowercaseKeyword(name: String) =
+    keywordField(name).normalizer(lowercaseNormalizer.name)
 
   def asciifoldingTextFieldWithKeyword(name: String) =
     textWithKeyword(name)
@@ -87,8 +90,8 @@ trait IndexConfig {
 
   val label = asciifoldingTextFieldWithKeyword("label")
 
-  val sourceIdentifierValue = keywordWithText("value")
+  val sourceIdentifierValue = lowercaseKeyword("value")
 
-  val canonicalId = keywordWithText("canonicalId")
+  val canonicalId = lowercaseKeyword("canonicalId")
   val version = intField("version")
 }
