@@ -22,12 +22,12 @@ case object WorksMultiMatcher {
           `type` = Some(BEST_FIELDS),
           operator = Some(OR),
           fields = Seq(
-            ("canonicalId.text", Some(1000)),
-            ("sourceIdentifier.value.text", Some(1000)),
-            ("data.otherIdentifiers.value.text", Some(1000)),
-            ("data.items.id.canonicalId.text", Some(1000)),
-            ("data.items.id.sourceIdentifier.value.text", Some(1000)),
-            ("data.items.id.otherIdentifiers.value.text", Some(1000)),
+            ("canonicalId", Some(1000)),
+            ("sourceIdentifier.value", Some(1000)),
+            ("data.otherIdentifiers.value", Some(1000)),
+            ("data.items.id.canonicalId", Some(1000)),
+            ("data.items.id.sourceIdentifier.value", Some(1000)),
+            ("data.items.id.otherIdentifiers.value", Some(1000)),
           ).map(f => FieldWithOptionalBoost(f._1, f._2.map(_.toDouble)))
         ),
         prefixQuery("data.title.keyword", q).boost(1000),
@@ -77,12 +77,12 @@ case object WorksPhraserBeam {
     ).map(FieldWithOptionalBoost(_, None))
 
     val idFields = Seq(
-      "canonicalId.text",
-      "sourceIdentifier.value.text",
-      "data.otherIdentifiers.value.text",
-      "data.items.id.canonicalId.text",
-      "data.items.id.sourceIdentifier.value.text",
-      "data.items.id.otherIdentifiers.value.text",
+      "canonicalId",
+      "sourceIdentifier.value",
+      "data.otherIdentifiers.value",
+      "data.items.id.canonicalId",
+      "data.items.id.sourceIdentifier.value",
+      "data.items.id.otherIdentifiers.value",
     ).map(FieldWithOptionalBoost(_, None))
 
     boolQuery().must(

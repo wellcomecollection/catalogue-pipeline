@@ -3,6 +3,7 @@ import com.sksamuel.elastic4s.json.{XContentBuilder, XContentFactory}
 import com.sksamuel.elastic4s.requests.analysis.{
   Analysis,
   CustomAnalyzer,
+  CustomNormalizer,
   PathHierarchyTokenizer,
   ShingleTokenFilter,
   StemmerTokenFilter,
@@ -54,6 +55,12 @@ object WorksAnalysis {
     charFilters = Nil
   )
 
+  val lowercaseNormalizer = CustomNormalizer(
+    "lowercase_normalizer",
+    tokenFilters = List("lowercase", asciiFoldingTokenFilter.name),
+    charFilters = Nil
+  )
+
   val englishAnalyzer = CustomAnalyzer(
     "english_analyzer",
     tokenizer = "standard",
@@ -86,7 +93,8 @@ object WorksAnalysis {
         shingleTokenFilter,
         englishStemmerTokenFilter,
         englishPossessiveStemmerTokenFilter),
-      tokenizers = List(pathTokenizer)
+      tokenizers = List(pathTokenizer),
+      normalizers = List(lowercaseNormalizer)
     )
 
   }

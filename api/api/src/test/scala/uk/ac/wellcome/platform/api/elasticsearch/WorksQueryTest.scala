@@ -166,35 +166,16 @@ class WorksQueryTest
       }
     }
 
-    it("matches when searching for multiple IDs") {
-      withLocalWorksIndex { index =>
-        val work1 = createIdentifiedWorkWith(
-          canonicalId = "abc123"
-        )
-        val work2 = createIdentifiedWorkWith(
-          canonicalId = "123abc"
-        )
-        val query = "abc123 123abc"
-
-        insertIntoElasticsearch(index, work1, work2)
-
-        assertResultsMatchForAllowedQueryTypes(index, query, List(work1, work2))
-      }
-    }
-
     it("doesn't match on partial IDs") {
       withLocalWorksIndex { index =>
         val work1 = createIdentifiedWorkWith(
-          canonicalId = "abcdefg"
-        )
-        val work2 = createIdentifiedWorkWith(
           canonicalId = "1234567"
         )
-        val query = "123 abcdefg"
+        val query = "123"
 
-        insertIntoElasticsearch(index, work1, work2)
+        insertIntoElasticsearch(index, work1)
 
-        assertResultsMatchForAllowedQueryTypes(index, query, List(work1))
+        assertResultsMatchForAllowedQueryTypes(index, query, List())
       }
     }
 
@@ -203,30 +184,14 @@ class WorksQueryTest
         val work1 = createIdentifiedWorkWith(
           canonicalId = "AbCDeF1234"
         )
-        val work2 = createIdentifiedWorkWith(
-          canonicalId = "12345Ef"
+        val nonMatchingWork = createIdentifiedWorkWith(
+          canonicalId = "bloopybloop"
         )
-        val query = "abcdef1234 12345ef"
+        val query = "abcdef1234"
 
-        insertIntoElasticsearch(index, work1, work2)
+        insertIntoElasticsearch(index, work1, nonMatchingWork)
 
-        assertResultsMatchForAllowedQueryTypes(index, query, List(work1, work2))
-      }
-    }
-
-    it("matches IDs that are part of a query") {
-      withLocalWorksIndex { index =>
-        val work1 = createIdentifiedWorkWith(
-          canonicalId = "AbCDeF1234"
-        )
-        val work2 = createIdentifiedWorkWith(
-          canonicalId = "12345Ef"
-        )
-        val query = "abcdef1234 12345ef hats, dogs and dolomites"
-
-        insertIntoElasticsearch(index, work1, work2)
-
-        assertResultsMatchForAllowedQueryTypes(index, query, List(work1, work2))
+        assertResultsMatchForAllowedQueryTypes(index, query, List(work1))
       }
     }
 
