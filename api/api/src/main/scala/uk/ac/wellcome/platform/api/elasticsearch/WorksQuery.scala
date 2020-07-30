@@ -12,6 +12,7 @@ import com.sksamuel.elastic4s.requests.searches.queries.matches.{
   FieldWithOptionalBoost,
   MultiMatchQuery
 }
+import uk.ac.wellcome.elasticsearch.WorksAnalysis.whitespaceAnalyzer
 
 case object WorksMultiMatcher {
   def apply(q: String): BoolQuery = {
@@ -21,6 +22,7 @@ case object WorksMultiMatcher {
           q,
           `type` = Some(BEST_FIELDS),
           operator = Some(OR),
+          analyzer = Some(whitespaceAnalyzer.name),
           fields = Seq(
             ("canonicalId", Some(1000)),
             ("sourceIdentifier.value", Some(1000)),
@@ -98,7 +100,8 @@ case object WorksPhraserBeam {
         MultiMatchQuery(
           fields = idFields,
           text = q,
-          `type` = Some(CROSS_FIELDS)
+          `type` = Some(CROSS_FIELDS),
+          analyzer = Some(whitespaceAnalyzer.name),
         ),
         MultiMatchQuery(
           text = q,

@@ -55,12 +55,6 @@ object WorksAnalysis {
     charFilters = Nil
   )
 
-  val lowercaseNormalizer = CustomNormalizer(
-    "lowercase_normalizer",
-    tokenFilters = List("lowercase", asciiFoldingTokenFilter.name),
-    charFilters = Nil
-  )
-
   val englishAnalyzer = CustomAnalyzer(
     "english_analyzer",
     tokenizer = "standard",
@@ -80,13 +74,27 @@ object WorksAnalysis {
     charFilters = Nil
   )
 
+  val whitespaceAnalyzer = CustomAnalyzer(
+    "whitespace_analyzer",
+    tokenizer = "whitespace",
+    tokenFilters = Nil,
+    charFilters = Nil,
+  )
+
+  val lowercaseNormalizer = CustomNormalizer(
+    "lowercase_normalizer",
+    tokenFilters = List("lowercase", asciiFoldingTokenFilter.name),
+    charFilters = Nil
+  )
+
   def apply(): Analysis = {
     Analysis(
       analyzers = List(
         pathAnalyzer,
         asciifoldingAnalyzer,
         shingleAsciifoldingAnalyzer,
-        englishAnalyzer
+        englishAnalyzer,
+        whitespaceAnalyzer,
       ),
       tokenFilters = List(
         asciiFoldingTokenFilter,

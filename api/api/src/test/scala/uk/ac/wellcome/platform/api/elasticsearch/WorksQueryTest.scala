@@ -195,6 +195,53 @@ class WorksQueryTest
       }
     }
 
+    it("matches multiple IDs") {
+      withLocalWorksIndex { index =>
+        val work1 = createIdentifiedWorkWith(
+          canonicalId = "AbCDeF1234"
+        )
+        val work2 = createIdentifiedWorkWith(
+          canonicalId = "rstYui786"
+        )
+        val nonMatchingWork = createIdentifiedWorkWith(
+          canonicalId = "bloopybloop"
+        )
+        val query = "abcdef1234 rstyui786"
+
+        insertIntoElasticsearch(index, work1, work2, nonMatchingWork)
+
+        assertResultsMatchForAllowedQueryTypes(index, query, List(work1, work2))
+      }
+    }
+
+    it("doesn't match partially matching IDs") {
+      withLocalWorksIndex { index =>
+        val work1 = createIdentifiedWorkWith(
+          canonicalId = "AbCDeF1234"
+        )
+        val work2 = createIdentifiedWorkWith(
+          canonicalId = "rstYui786"
+        )
+        val nonMatchingWork1 = createIdentifiedWorkWith(
+          canonicalId = "bloopybloop"
+        )
+        // We've put spaces in this as some Miro IDs are sentences
+        val nonMatchingWork2 = createIdentifiedWorkWith(
+          canonicalId = "Oxford english dictionary"
+        )
+        val query = "abcdef1234 rstyui786 Oxford"
+
+        insertIntoElasticsearch(
+          index,
+          work1,
+          work2,
+          nonMatchingWork1,
+          nonMatchingWork2)
+
+        assertResultsMatchForAllowedQueryTypes(index, query, List(work1, work2))
+      }
+    }
+
     it("Searches for contributors") {
       withLocalWorksIndex { index =>
         val matchingWork = createIdentifiedWorkWith(
