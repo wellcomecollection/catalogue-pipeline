@@ -21,10 +21,8 @@ import uk.ac.wellcome.storage.Identified
 case class HybridRecord(
   id: String,
   version: Int,
-  location: BackwardsCompatObjectLocation
+  location: S3ObjectLocation
 )
-
-case class BackwardsCompatObjectLocation(namespace: String, key: String)
 
 class MiroVHSRecordReceiver[MsgDestination](
   messageSender: MessageSender[MsgDestination],
@@ -62,12 +60,8 @@ class MiroVHSRecordReceiver[MsgDestination](
   }
 
   private def getRecord(record: HybridRecord): Try[MiroRecord] =
-    record match {
-      case HybridRecord(_, _, BackwardsCompatObjectLocation(bucket, key)) =>
-        store.get(S3ObjectLocation(bucket, key)) match {
-          case Right(Identified(_, miroRecord)) =>
-            Success(miroRecord)
-          case Left(error) => Failure(error.e)
-        }
+    store.get(record.location) match {
+      case Right(Identified(_, miroRecord)) => Success(miroRecord)
+      case Left(error)                      => Failure(error.e)
     }
 }

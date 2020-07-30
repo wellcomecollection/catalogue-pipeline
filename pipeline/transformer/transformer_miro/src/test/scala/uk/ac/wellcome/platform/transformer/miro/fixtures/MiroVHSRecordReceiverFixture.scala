@@ -7,7 +7,6 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
 import uk.ac.wellcome.platform.transformer.miro.services.{
-  BackwardsCompatObjectLocation,
   HybridRecord,
   MiroVHSRecordReceiver
 }
@@ -60,10 +59,7 @@ trait MiroVHSRecordReceiverFixture extends MiroRecordGenerators with SQS {
     val location = S3ObjectLocation(namespace, id)
 
     store.put(location)(miroRecord)
-    HybridRecord(
-      id = id,
-      version = version,
-      location = BackwardsCompatObjectLocation(location.bucket, location.key)
-    )
+
+    HybridRecord(id = id, version = version, location = location)
   }
 }
