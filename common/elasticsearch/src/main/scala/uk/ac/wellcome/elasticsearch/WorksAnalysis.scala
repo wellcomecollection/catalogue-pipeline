@@ -83,7 +83,7 @@ object WorksAnalysis {
 
   val lowercaseNormalizer = CustomNormalizer(
     "lowercase_normalizer",
-    tokenFilters = List("lowercase", asciiFoldingTokenFilter.name),
+    tokenFilters = List("lowercase"),
     charFilters = Nil
   )
 
