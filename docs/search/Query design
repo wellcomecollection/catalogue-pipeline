@@ -1,0 +1,15 @@
+# Boosting
+
+Boosting works by taking words or “tokens" used in the query and locating these amongst the tokens contained in fields. Matching criteria return a higher or “boosted” test score than other matched fields. Search results are ordered by descending test scores.
+
+Example
+
+{
+  "query": {
+    "multi_match" : {
+      "query" : "oil painting of urine",
+      "fields" : ["*", "subjects*^4", "genres*^4", "title^3"],
+      "type": "cross_fields"
+    }
+  }
+}
