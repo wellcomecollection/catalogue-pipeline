@@ -1,4 +1,6 @@
-# Boosting
+# Query design
+
+## Boosting
 
 Boosting works by taking words or “tokens" used in the query and locating these amongst the tokens contained in fields. Matching criteria return a higher or “boosted” test score than other matched fields. Search results are ordered by descending test scores.
 
