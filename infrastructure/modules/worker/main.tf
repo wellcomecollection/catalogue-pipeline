@@ -30,7 +30,7 @@ module "autoscaling" {
   name = var.name
 
   cluster_name = var.cluster_name
-  service_name = var.name
+  service_name = module.service.name
 
   min_capacity = var.min_capacity
   max_capacity = var.max_capacity
