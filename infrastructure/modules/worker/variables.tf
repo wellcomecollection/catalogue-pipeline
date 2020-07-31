@@ -73,6 +73,19 @@ variable "use_fargate_spot" {
   default = false
 }
 
+variable "launch_type" {
+  type    = string
+  default = "FARGATE"
+}
+
+variable "capacity_provider_strategies" {
+  type = list(object({
+    capacity_provider = string
+    weight            = number
+  }))
+  default = []
+}
+
 variable "security_group_ids" {
   type    = list(string)
   default = []

@@ -12,6 +12,9 @@ module "worker" {
   cluster_name = var.cluster_name
   cluster_arn  = var.cluster_arn
 
+  launch_type                  = var.launch_type
+  capacity_provider_strategies = var.capacity_provider_strategies
+
   desired_task_count = var.desired_task_count
 
   security_group_ids = var.security_group_ids

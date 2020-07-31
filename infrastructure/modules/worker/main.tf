@@ -4,17 +4,18 @@ locals {
 }
 
 module "service" {
-  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/service?ref=v3.0.0"
+  source = "../../../../terraform-aws-ecs-service/modules/service"
 
   task_definition_arn            = module.task_definition.arn
   service_name                   = var.name
   cluster_arn                    = var.cluster_arn
   subnets                        = var.subnets
   service_discovery_namespace_id = var.namespace_id
-  launch_type                    = "FARGATE"
+  launch_type                    = var.launch_type
   desired_task_count             = var.desired_task_count
   security_group_ids             = var.security_group_ids
   use_fargate_spot               = var.use_fargate_spot
+  capacity_provider_strategies   = var.capacity_provider_strategies
 
   propagate_tags = "SERVICE"
 
@@ -42,7 +43,7 @@ module "task_definition" {
   cpu    = var.cpu
   memory = var.memory
 
-  launch_types = ["FARGATE"]
+  launch_types = [var.launch_type]
   task_name    = var.name
 
   container_definitions = [

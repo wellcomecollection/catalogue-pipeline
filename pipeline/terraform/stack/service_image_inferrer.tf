@@ -28,6 +28,12 @@ module "image_inferrer" {
   cluster_name = aws_ecs_cluster.cluster.name
   cluster_arn  = aws_ecs_cluster.cluster.arn
 
+  launch_type = "EC2"
+  capacity_provider_strategies = [{
+    capacity_provider = module.inference_capacity_provider.name
+    weight            = 1
+  }]
+
   host_cpu    = 4096
   host_memory = 8192
 
