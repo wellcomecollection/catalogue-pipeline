@@ -2,6 +2,9 @@
 
 - [Catalogue](README.md)
 - [Search](search/README.md)
+- [Hypotheses](search/hypotheses/README.md)
+- [Analysis](search/analysis/README.md)
+- [Query design](search/query-design/README.md)
   - [Intentions & expectations](search/intentions-and-expectations.md)
   - [Relevance tests](search/tests/README.md)
     - [Test 1 - Explicit feedback](search/tests/001_explicit_feedback.md)
