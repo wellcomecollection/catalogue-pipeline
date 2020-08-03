@@ -33,6 +33,10 @@ module "image_inferrer" {
     capacity_provider = module.inference_capacity_provider.name
     weight            = 1
   }]
+  ordered_placement_strategies = [{
+    type = "spread"
+    field = "host"
+  }]
 
   host_cpu    = 4096
   host_memory = 8192

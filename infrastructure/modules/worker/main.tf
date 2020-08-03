@@ -16,6 +16,7 @@ module "service" {
   security_group_ids             = var.security_group_ids
   use_fargate_spot               = var.use_fargate_spot
   capacity_provider_strategies   = var.capacity_provider_strategies
+  ordered_placement_strategies   = var.ordered_placement_strategies
 
   propagate_tags = "SERVICE"
 

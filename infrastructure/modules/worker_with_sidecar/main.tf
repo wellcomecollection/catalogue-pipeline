@@ -16,6 +16,7 @@ module "service" {
   security_group_ids             = var.security_group_ids
   use_fargate_spot               = var.use_fargate_spot
   capacity_provider_strategies   = var.capacity_provider_strategies
+  ordered_placement_strategies   = var.ordered_placement_strategies
 
   tags = {
     "deployment:service" = local.deployment_service_name
@@ -41,7 +42,7 @@ module "task_definition" {
   cpu    = var.cpu
   memory = var.memory
 
-  launch_types = ["FARGATE"]
+  launch_types = [var.launch_type]
   task_name    = var.name
 
   container_definitions = [

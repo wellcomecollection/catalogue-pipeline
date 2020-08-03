@@ -10,6 +10,7 @@ module "worker" {
 
   launch_type                  = var.launch_type
   capacity_provider_strategies = var.capacity_provider_strategies
+  ordered_placement_strategies = var.ordered_placement_strategies
 
   desired_task_count = var.desired_task_count
 

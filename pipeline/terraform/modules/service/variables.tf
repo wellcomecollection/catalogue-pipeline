@@ -62,6 +62,14 @@ variable "capacity_provider_strategies" {
   default = []
 }
 
+variable "ordered_placement_strategies" {
+  type = list(object({
+    type  = string
+    field = string
+  }))
+  default = []
+}
+
 variable "deployment_service_env" {
   type = string
 }
