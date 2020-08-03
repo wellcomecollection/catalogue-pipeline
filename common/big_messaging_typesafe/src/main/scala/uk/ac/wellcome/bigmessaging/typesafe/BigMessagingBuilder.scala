@@ -51,7 +51,8 @@ object BigMessagingBuilder {
 
     S3BigMessageSender(
       bucketName = s3Config.bucketName,
-      snsConfig = SNSBuilder.buildSNSConfig(config),
+      snsConfig =
+        SNSBuilder.buildSNSConfig(config, namespace = "message.writer"),
       // If the encoded message is less than 250KB, we can send it inline
       // in SNS/SQS (although the limit is 256KB, there's a bit of overhead
       // caused by the notification wrapper, so we're conservative).
