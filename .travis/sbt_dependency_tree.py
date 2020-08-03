@@ -63,7 +63,8 @@ class Repository:
     def lookup_path(self, path):
         """Which project, if any, is this path associated with?"""
         for project in self.projects.values():
-            if path.startswith(project.folder):
+            """We check with a / at the end to make sure we don't match partial folder names"""
+            if path.startswith(f'{project.folder}/'):
                 return project
         else:
             raise KeyError("No project associated with %r!" % path)
