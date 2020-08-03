@@ -92,7 +92,7 @@ module "catalogue_pipeline_20200727" {
   ]
 
   miro_adapter_topic_arns = [
-    //    local.miro_reindexer_topic_arn,
+    local.miro_reindexer_topic_arn,
     local.miro_updates_topic_arn,
   ]
 
