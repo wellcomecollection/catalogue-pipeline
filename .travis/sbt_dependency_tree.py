@@ -64,7 +64,7 @@ class Repository:
         """Which project, if any, is this path associated with?"""
         for project in self.projects.values():
             """We check with a / at the end to make sure we don't match partial folder names"""
-            if path.startswith(f'{project.folder}/'):
+            if path.startswith(f"{project.folder}/"):
                 return project
         else:
             raise KeyError("No project associated with %r!" % path)
