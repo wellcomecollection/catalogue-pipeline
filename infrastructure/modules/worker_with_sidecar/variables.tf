@@ -115,6 +115,27 @@ variable "app_healthcheck" {
   default = null
 }
 
+variable "launch_type" {
+  type    = string
+  default = "FARGATE"
+}
+
+variable "capacity_provider_strategies" {
+  type = list(object({
+    capacity_provider = string
+    weight            = number
+  }))
+  default = []
+}
+
+variable "ordered_placement_strategies" {
+  type = list(object({
+    type  = string
+    field = string
+  }))
+  default = []
+}
+
 variable "deployment_service_name" {
   type        = string
   description = "Used by weco-deploy to determine which services to deploy, if unset the value used will be var.name"
