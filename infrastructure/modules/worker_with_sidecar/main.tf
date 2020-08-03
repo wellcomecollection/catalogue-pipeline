@@ -4,7 +4,7 @@ locals {
 }
 
 module "service" {
-  source = "../../../../terraform-aws-ecs-service/modules/service"
+  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/service?ref=v3.1.0"
 
   task_definition_arn            = module.task_definition.arn
   service_name                   = var.name
@@ -25,7 +25,7 @@ module "service" {
 }
 
 module "autoscaling" {
-  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/autoscaling?ref=v3.0.0"
+  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/autoscaling?ref=v3.1.0"
 
   name = var.name
 
@@ -37,7 +37,7 @@ module "autoscaling" {
 }
 
 module "task_definition" {
-  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/task_definition?ref=v3.0.0"
+  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/task_definition?ref=v3.1.0"
 
   cpu    = var.cpu
   memory = var.memory
@@ -53,7 +53,7 @@ module "task_definition" {
 }
 
 module "app_container" {
-  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/container_definition?ref=v3.0.0"
+  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/container_definition?ref=v3.1.0"
 
   name  = var.name
   image = var.app_image
@@ -70,13 +70,13 @@ module "app_container" {
 }
 
 module "app_permissions" {
-  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v3.0.0"
+  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v3.1.0"
   secrets   = var.app_secret_env_vars
   role_name = module.task_definition.task_execution_role_name
 }
 
 module "sidecar_container" {
-  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/container_definition?ref=v3.0.0"
+  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/container_definition?ref=v3.1.0"
 
   name  = var.sidecar_name
   image = var.sidecar_image
@@ -96,19 +96,19 @@ module "sidecar_container" {
 }
 
 module "sidecar_permissions" {
-  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v3.0.0"
+  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v3.1.0"
   secrets   = var.sidecar_secret_env_vars
   role_name = module.task_definition.task_execution_role_name
 }
 
 
 module "log_router_container" {
-  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/firelens?ref=v3.0.0"
+  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/firelens?ref=v3.1.0"
   namespace = var.name
 }
 
 module "log_router_permissions" {
-  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v3.0.0"
+  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v3.1.0"
   secrets   = data.terraform_remote_state.shared_infra.outputs.shared_secrets_logging
   role_name = module.task_definition.task_execution_role_name
 }
