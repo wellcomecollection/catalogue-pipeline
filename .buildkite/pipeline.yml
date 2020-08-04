@@ -4,3 +4,9 @@ steps:
   - wait
   - command: make api-test
   - command: make reindex_worker-test
+  - command: make ingestor_works-test
+  - command: make ingestor_images-test
+  - command: make id_minter-test
+  - command: make matcher-test
+  - command: make merger-test
+  - command: make recorder-test
