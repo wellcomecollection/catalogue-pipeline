@@ -1,3 +1,6 @@
 steps:
   - label: "Format"
     command: make format
+  - wait
+  - label: "Test API"
+    command: make api-test
