@@ -7,24 +7,30 @@ import akka.actor.ActorSystem
 import akka.stream.scaladsl.Flow
 import software.amazon.awssdk.services.sqs.model.Message
 import grizzled.slf4j.Logging
-import io.circe.Encoder
 import uk.ac.wellcome.bigmessaging.message.BigMessageStream
 import uk.ac.wellcome.messaging.MessageSender
+import uk.ac.wellcome.models.work.internal.{
+  AugmentedImage,
+  Identified,
+  MergedImage,
+  Minted
+}
+import uk.ac.wellcome.models.Implicits._
+import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
 import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
-class InferenceManagerWorkerService[Destination, Input, Output](
-  msgStream: BigMessageStream[Input],
+class InferenceManagerWorkerService[Destination](
+  msgStream: BigMessageStream[MergedImage[Identified, Minted]],
   messageSender: MessageSender[Destination],
-  inferrerAdapter: InferrerAdapter[Input, Output],
-  inferrerClientFlow: Flow[(HttpRequest, (Message, Input)),
-                           (Try[HttpResponse], (Message, Input)),
+  imageDownloader: ImageDownloader,
+  inferrerAdapter: InferrerAdapter[DownloadedImage, AugmentedImage],
+  inferrerClientFlow: Flow[(HttpRequest, (Message, DownloadedImage)),
+                           (Try[HttpResponse], (Message, DownloadedImage)),
                            HostConnectionPool]
-)(implicit actorSystem: ActorSystem,
-  ec: ExecutionContext,
-  encoder: Encoder[Output])
+)(implicit actorSystem: ActorSystem, ec: ExecutionContext)
     extends Runnable
     with Logging {
 
@@ -34,7 +40,8 @@ class InferenceManagerWorkerService[Destination, Input, Output](
   def run(): Future[Done] =
     msgStream.runStream(
       className,
-      _.via(createRequest)
+      _.via(imageDownloader.download)
+        .via(createRequest)
         .via(inferrerClientFlow)
         .via(unmarshalResponse)
         .via(augmentInput)
@@ -43,14 +50,19 @@ class InferenceManagerWorkerService[Destination, Input, Output](
     )
 
   private def createRequest =
-    Flow[(Message, Input)].map {
-      case (msg, input) =>
-        (inferrerAdapter.createRequest(input), (msg, input))
+    Flow[(Message, DownloadedImage)].map {
+      case (msg, image) =>
+        (inferrerAdapter.createRequest(image), (msg, image))
     }
 
   private def unmarshalResponse =
-    Flow[(Try[HttpResponse], (Message, Input))]
-      .mapAsync(parallelism) {
+    Flow[(Try[HttpResponse], (Message, DownloadedImage))]
+      .map {
+        case result @ (_, (_, image)) =>
+          image.delete()
+          result
+      }
+      .mapAsyncUnordered(parallelism) {
         case (Success(response), (msg, input)) =>
           inferrerAdapter
             .parseResponse(response)
@@ -65,13 +77,14 @@ class InferenceManagerWorkerService[Destination, Input, Output](
       }
 
   private def augmentInput =
-    Flow[(Message, Input, Option[inferrerAdapter.InferrerResponse])].map {
-      case (msg, input, response) =>
-        (msg, inferrerAdapter.augmentInput(input, response))
-    }
+    Flow[(Message, DownloadedImage, Option[inferrerAdapter.InferrerResponse])]
+      .map {
+        case (msg, image, response) =>
+          msg -> inferrerAdapter.augmentInput(image, response)
+      }
 
   private def sendAugmented =
-    Flow[(Message, Output)].map {
+    Flow[(Message, AugmentedImage)].map {
       case (msg, image) =>
         messageSender
           .sendT(image)

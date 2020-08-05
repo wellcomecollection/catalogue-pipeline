@@ -1,5 +1,7 @@
 package uk.ac.wellcome.platform.inference_manager.services
 
+import java.nio.file.Paths
+
 import akka.http.scaladsl.model.{HttpMethods, HttpRequest}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -7,7 +9,10 @@ import org.scalatest.{Inside, OptionValues}
 import uk.ac.wellcome.models.work.generators.ImageGenerators
 import uk.ac.wellcome.models.work.internal.{AugmentedImage, InferredData}
 import uk.ac.wellcome.platform.inference_manager.fixtures.Encoding
-import uk.ac.wellcome.platform.inference_manager.models.FeatureVectorInferrerResponse
+import uk.ac.wellcome.platform.inference_manager.models.{
+  DownloadedImage,
+  FeatureVectorInferrerResponse
+}
 
 class FeatureVectorInferrerAdapterTest
     extends AnyFunSpec
@@ -16,42 +21,28 @@ class FeatureVectorInferrerAdapterTest
     with Inside
     with OptionValues {
   describe("createRequest") {
-    it("creates a request with the image_url parameter for image locations") {
-      val imageUrl = "http://images.com/bananas/cavendish.jp2"
-      val image = createIdentifiedMergedImageWith(
-        location = createDigitalLocationWith(
-          url = imageUrl
-        )
+    it("creates a request with the image_url parameter as a local path") {
+      val downloadedImage = DownloadedImage(
+        image = createIdentifiedMergedImageWith(),
+        path = Paths.get("/", "a", "b", "c.jpg")
       )
-      val request = FeatureVectorInferrerAdapter.createRequest(image)
+      val request = FeatureVectorInferrerAdapter.createRequest(downloadedImage)
 
       inside(request) {
         case HttpRequest(method, uri, _, _, _) =>
           method should be(HttpMethods.GET)
-          uri.toString() should be(s"/feature-vector/?image_url=${imageUrl}")
-      }
-    }
-
-    it("creates a request with the iiif_url parameter for IIIF locations") {
-      val imageUrl = "http://images.com/apples/braeburn/info.json"
-      val image = createIdentifiedMergedImageWith(
-        location = createDigitalLocationWith(
-          url = imageUrl
-        )
-      )
-      val request = FeatureVectorInferrerAdapter.createRequest(image)
-
-      inside(request) {
-        case HttpRequest(method, uri, _, _, _) =>
-          method should be(HttpMethods.GET)
-          uri.toString() should be(s"/feature-vector/?iiif_url=${imageUrl}")
+          uri.toString() should be(
+            s"/feature-vector/?image_url=file://${downloadedImage.path}")
       }
     }
   }
 
   describe("augmentInput") {
     it("creates an AugmentedImage with the data from the inferrer response") {
-      val image = createIdentifiedMergedImageWith()
+      val downloadedImage = DownloadedImage(
+        image = createIdentifiedMergedImageWith(),
+        path = Paths.get("a", "b", "c.jpg")
+      )
       val features = (0 until 4096).map(_ / 4096f).toList
       val featuresB64 = Encoding.toLittleEndianBase64(features)
       val lshEncodedFeatures = ('a' to 'z').map(_.toString * 3).toList
@@ -60,13 +51,15 @@ class FeatureVectorInferrerAdapterTest
         lsh_encoded_features = lshEncodedFeatures
       )
       val augmentedImage =
-        FeatureVectorInferrerAdapter.augmentInput(image, Some(response))
+        FeatureVectorInferrerAdapter.augmentInput(
+          downloadedImage,
+          Some(response))
       inside(augmentedImage) {
         case AugmentedImage(id, version, location, parentWork, inferredData) =>
-          id should be(image.id)
-          version should be(image.version)
-          location should be(image.location)
-          parentWork should be(image.source)
+          id should be(downloadedImage.image.id)
+          version should be(downloadedImage.image.version)
+          location should be(downloadedImage.image.location)
+          parentWork should be(downloadedImage.image.source)
           inside(inferredData.value) {
             case InferredData(features1, features2, actualLshEncodedFeatures) =>
               features1 should be(features.slice(0, 2048))

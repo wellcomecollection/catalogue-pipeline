@@ -7,13 +7,7 @@ import org.scalatest.{BeforeAndAfterAll, Inside, Inspectors, OptionValues}
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.models.work.internal.{
-  AugmentedImage,
-  Identified,
-  InferredData,
-  MergedImage,
-  Minted
-}
+import uk.ac.wellcome.models.work.internal.{AugmentedImage, InferredData}
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.ImageGenerators
 import uk.ac.wellcome.platform.inference_manager.fixtures.{
@@ -32,10 +26,7 @@ class InferenceManagerWorkerServiceTest
     with BeforeAndAfterAll
     with Eventually
     with IntegrationPatience
-    with InferenceManagerWorkerServiceFixture[
-      MergedImage[Identified, Minted],
-      AugmentedImage
-    ] {
+    with InferenceManagerWorkerServiceFixture {
 
   val inferrerMock = new InferrerWiremock(FeatureVectorInferrerMock)
 
