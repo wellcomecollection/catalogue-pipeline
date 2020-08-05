@@ -46,7 +46,6 @@ class MergerWorkerServiceTest
           message = matcherResult
         )
 
-
         eventually {
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
