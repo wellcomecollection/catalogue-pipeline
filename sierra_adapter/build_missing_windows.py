@@ -20,7 +20,7 @@ from build_windows import generate_windows  # noqa
 from sierra_progress_reporter import build_report  # noqa
 
 
-BUCKET = "wellcomecollection-platform-adapters-sierra"
+BUCKET = "wellcomecollection-platform-sierra-adapter-20200604"
 
 
 def sliding_window(iterable):
