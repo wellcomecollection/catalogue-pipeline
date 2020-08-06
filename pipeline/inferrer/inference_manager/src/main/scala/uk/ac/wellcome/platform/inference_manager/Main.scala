@@ -25,7 +25,7 @@ object Main extends WellcomeTypesafeApp {
     implicit val executionContext: ExecutionContext =
       AkkaBuilder.buildExecutionContext()
 
-    val imageDownloader = new ImageDownloader(
+    val imageDownloader = ImageDownloader(
       config
         .getStringOption("shared.images-root")
         .getOrElse("/tmp")

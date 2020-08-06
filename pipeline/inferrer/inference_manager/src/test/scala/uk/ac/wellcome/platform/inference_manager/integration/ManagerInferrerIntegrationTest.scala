@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.inference_manager.integration
 
+import akka.http.scaladsl.Http
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.funspec.AnyFunSpec
@@ -11,8 +12,16 @@ import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.ImageGenerators
 import uk.ac.wellcome.models.work.internal.{AugmentedImage, InferredData}
-import uk.ac.wellcome.platform.inference_manager.fixtures.InferenceManagerWorkerServiceFixture
-import uk.ac.wellcome.platform.inference_manager.services.FeatureVectorInferrerAdapter
+import uk.ac.wellcome.platform.inference_manager.fixtures.{
+  InferenceManagerWorkerServiceFixture,
+  MemoryFileWriter
+}
+import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
+import uk.ac.wellcome.platform.inference_manager.services.{
+  FeatureVectorInferrerAdapter,
+  MergedIdentifiedImage,
+  MessagePair
+}
 
 import scala.concurrent.duration._
 import scala.io.Source
@@ -79,13 +88,23 @@ class ManagerInferrerIntegrationTest
     // may need to warm up.
     withLocalSqsQueuePair(visibilityTimeout = 5) { queuePair =>
       val messageSender = new MemoryMessageSender()
+      val fileWriter = new MemoryFileWriter()
 
-      withWorkerService(
-        queuePair.queue,
-        messageSender,
-        FeatureVectorInferrerAdapter,
-        localInferrerPort) { _ =>
-        testWith((queuePair, messageSender))
+      withActorSystem { implicit actorSystem =>
+        withWorkerService(
+          queuePair.queue,
+          messageSender,
+          FeatureVectorInferrerAdapter,
+          fileWriter = fileWriter,
+          inferrerRequestPool =
+            Http().cachedHostConnectionPool[MessagePair[DownloadedImage]](
+              "localhost",
+              localInferrerPort),
+          imageRequestPool =
+            Http().superPool[MessagePair[MergedIdentifiedImage]]()
+        ) { _ =>
+          testWith((queuePair, messageSender))
+        }
       }
     }
 }

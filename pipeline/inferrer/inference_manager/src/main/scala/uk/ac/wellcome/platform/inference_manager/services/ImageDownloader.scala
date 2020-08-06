@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.inference_manager.services
 
 import java.nio.file.{Files, Path, Paths}
 
-import akka.NotUsed
+import akka.{Done, NotUsed}
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{
@@ -21,18 +21,16 @@ import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
+trait FileWriter {
+  def write(implicit materializer: Materializer)
+    : Sink[(ByteString, Path), Future[IOResult]]
+  def delete(implicit materializer: Materializer): Sink[Path, Future[Done]]
+}
+
 class ImageDownloader(root: String = "/",
                       requestPool: RequestPoolFlow[MergedIdentifiedImage],
-                      fileWriter: Sink[(ByteString, Path), Future[IOResult]])(
-  implicit actorSystem: ActorSystem,
-  ec: ExecutionContext) {
-
-  def this(root: String)(implicit actorSystem: ActorSystem,
-                         ec: ExecutionContext) =
-    this(
-      root,
-      fileWriter = ImageDownloader.defaultFileWriter,
-      requestPool = Http().superPool[MessagePair[MergedIdentifiedImage]]())
+                      fileWriter: FileWriter)(implicit actorSystem: ActorSystem,
+                                              ec: ExecutionContext) {
 
   private val parallelism = 10
 
@@ -47,6 +45,9 @@ class ImageDownloader(root: String = "/",
         case (message, image, path) =>
           message -> DownloadedImage(image, path)
       }
+
+  def delete: Sink[DownloadedImage, Future[Done]] =
+    Flow[DownloadedImage].map(_.path).toMat(fileWriter.delete)(Keep.right)
 
   def getLocalImagePath(image: MergedIdentifiedImage): Path =
     Paths.get(root, image.id.canonicalId, "default.jpg").toAbsolutePath
@@ -69,7 +70,7 @@ class ImageDownloader(root: String = "/",
       val path = getLocalImagePath(image)
       response.entity.dataBytes
         .map(file => file -> path)
-        .runWith(fileWriter)
+        .runWith(fileWriter.write)
         .map { _ =>
           (msg, image, path)
         }
@@ -106,8 +107,8 @@ class ImageDownloader(root: String = "/",
     }
 }
 
-object ImageDownloader {
-  def defaultFileWriter(implicit materializer: Materializer)
+object DefaultFileWriter extends FileWriter {
+  def write(implicit materializer: Materializer)
     : Sink[(ByteString, Path), Future[IOResult]] =
     Flow[(ByteString, Path)]
       .map {
@@ -119,4 +120,24 @@ object ImageDownloader {
       }
       .toMat(Sink.head)(Keep.right)
       .mapMaterializedValue(_.flatten)
+
+  def delete(implicit materializer: Materializer): Sink[Path, Future[Done]] =
+    Sink.foreach[Path](deletePath)
+
+  // Delete path and directories above it until deletion fails (the directory is not empty)
+  @scala.annotation.tailrec
+  private def deletePath(path: Path): Unit =
+    if (path.toFile.delete) {
+      deletePath(path.getParent)
+    }
+}
+
+object ImageDownloader {
+  def apply(root: String)(implicit actorSystem: ActorSystem,
+                          ec: ExecutionContext) =
+    new ImageDownloader(
+      root,
+      fileWriter = DefaultFileWriter,
+      requestPool = Http().superPool[MessagePair[MergedIdentifiedImage]]()
+    )
 }

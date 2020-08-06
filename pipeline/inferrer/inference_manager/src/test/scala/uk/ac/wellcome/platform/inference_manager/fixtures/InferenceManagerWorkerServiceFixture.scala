@@ -1,13 +1,6 @@
 package uk.ac.wellcome.platform.inference_manager.fixtures
 
-import java.nio.file.Path
-
-import akka.http.scaladsl.Http
-import akka.stream.IOResult
-import akka.stream.scaladsl.Sink
-import akka.util.ByteString
 import io.circe.Decoder
-import software.amazon.awssdk.services.sqs.model.Message
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.fixtures.TestWith
@@ -21,7 +14,7 @@ import uk.ac.wellcome.models.work.internal.{
 }
 import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
 import uk.ac.wellcome.platform.inference_manager.services.{
-  HostRequestPoolFlow,
+  FileWriter,
   ImageDownloader,
   InferenceManagerWorkerService,
   InferrerAdapter,
@@ -30,7 +23,6 @@ import uk.ac.wellcome.platform.inference_manager.services.{
 }
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 trait InferenceManagerWorkerServiceFixture
     extends BigMessagingFixture
@@ -39,7 +31,8 @@ trait InferenceManagerWorkerServiceFixture
     queue: Queue,
     messageSender: MemoryMessageSender,
     adapter: InferrerAdapter[DownloadedImage, AugmentedImage],
-    inferrerRequestPool: HostRequestPoolFlow[DownloadedImage],
+    fileWriter: FileWriter,
+    inferrerRequestPool: RequestPoolFlow[DownloadedImage],
     imageRequestPool: RequestPoolFlow[MergedIdentifiedImage])(
     testWith: TestWith[InferenceManagerWorkerService[String], R])(
     implicit decoder: Decoder[MergedIdentifiedImage]): R =
@@ -51,7 +44,7 @@ trait InferenceManagerWorkerServiceFixture
             messageSender = messageSender,
             inferrerAdapter = adapter,
             imageDownloader = new ImageDownloader(
-              fileWriter = mockFileWriter,
+              fileWriter = fileWriter,
               requestPool = imageRequestPool),
             requestPool = inferrerRequestPool
           )
@@ -62,6 +55,4 @@ trait InferenceManagerWorkerServiceFixture
       }
     }
 
-  private def mockFileWriter: Sink[(ByteString, Path), Future[IOResult]] =
-    Sink.ignore.mapMaterializedValue(_.map(_ => IOResult(1)))
 }

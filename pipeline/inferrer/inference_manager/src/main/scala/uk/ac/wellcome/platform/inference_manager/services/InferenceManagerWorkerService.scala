@@ -1,10 +1,9 @@
 package uk.ac.wellcome.platform.inference_manager.services
 
 import akka.Done
-import akka.http.scaladsl.Http.HostConnectionPool
-import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
+import akka.http.scaladsl.model.HttpResponse
 import akka.actor.ActorSystem
-import akka.stream.scaladsl.Flow
+import akka.stream.scaladsl.{Flow, Source}
 import software.amazon.awssdk.services.sqs.model.Message
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.bigmessaging.message.BigMessageStream
@@ -22,7 +21,7 @@ class InferenceManagerWorkerService[Destination](
   messageSender: MessageSender[Destination],
   imageDownloader: ImageDownloader,
   inferrerAdapter: InferrerAdapter[DownloadedImage, AugmentedImage],
-  requestPool: HostRequestPoolFlow[DownloadedImage]
+  requestPool: RequestPoolFlow[DownloadedImage]
 )(implicit actorSystem: ActorSystem, ec: ExecutionContext)
     extends Runnable
     with Logging {
@@ -52,7 +51,7 @@ class InferenceManagerWorkerService[Destination](
     Flow[(Try[HttpResponse], MessagePair[DownloadedImage])]
       .map {
         case result @ (_, (_, image)) =>
-          image.delete()
+          imageDownloader.delete.runWith(Source.single(image))
           result
       }
       .mapAsyncUnordered(parallelism) {

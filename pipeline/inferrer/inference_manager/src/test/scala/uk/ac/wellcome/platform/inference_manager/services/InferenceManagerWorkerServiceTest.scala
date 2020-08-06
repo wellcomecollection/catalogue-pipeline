@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.inference_manager.services
 
+import akka.http.scaladsl.model.HttpResponse
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -11,10 +12,13 @@ import uk.ac.wellcome.models.work.internal.{AugmentedImage, InferredData}
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.ImageGenerators
 import uk.ac.wellcome.platform.inference_manager.fixtures.{
-  FeatureVectorInferrerMock,
   InferenceManagerWorkerServiceFixture,
-  InferrerWiremock
+  MemoryFileWriter,
+  RequestPoolFixtures,
+  RequestPoolMock,
+  Responses
 }
+import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
 
 class InferenceManagerWorkerServiceTest
     extends AnyFunSpec
@@ -26,24 +30,15 @@ class InferenceManagerWorkerServiceTest
     with BeforeAndAfterAll
     with Eventually
     with IntegrationPatience
-    with InferenceManagerWorkerServiceFixture {
-
-  val inferrerMock = new InferrerWiremock(FeatureVectorInferrerMock)
-
-  override def beforeAll(): Unit = {
-    inferrerMock.start()
-    super.beforeAll()
-  }
-
-  override def afterAll(): Unit = {
-    inferrerMock.stop()
-    super.afterAll()
-  }
+    with InferenceManagerWorkerServiceFixture
+    with RequestPoolFixtures {
 
   it(
     "reads image messages, augments them with the inferrer, and sends them to SNS") {
-    withWorkerServiceFixtures {
-      case (QueuePair(queue, dlq), messageSender) =>
+    withResponsesAndFixtures(
+      inferrer = _ => Some(Responses.featureInferrerResponse),
+      images = _ => Some(Responses.imageResponse)) {
+      case (QueuePair(queue, dlq), messageSender, _, _) =>
         val image = createIdentifiedMergedImageWith()
         sendMessage(queue, image)
         eventually {
@@ -67,8 +62,8 @@ class InferenceManagerWorkerServiceTest
   }
 
   it("places images that fail inference deterministically on the DLQ") {
-    withWorkerServiceFixtures {
-      case (QueuePair(queue, dlq), _) =>
+    withResponsesAndFixtures(Function.const(None), Function.const(None)) {
+      case (QueuePair(queue, dlq), _, _, _) =>
         val image404 = createIdentifiedMergedImageWith(
           location = createDigitalLocationWith(url = "lost_image")
         )
@@ -85,8 +80,8 @@ class InferenceManagerWorkerServiceTest
   }
 
   it("allows images that fail inference nondeterministically to pass through") {
-    withWorkerServiceFixtures {
-      case (QueuePair(queue, dlq), messageSender) =>
+    withResponsesAndFixtures(Function.const(None), Function.const(None)) {
+      case (QueuePair(queue, dlq), messageSender, _, _) =>
         val image500 = createIdentifiedMergedImageWith(
           location = createDigitalLocationWith(url = "extremely_cursed_image")
         )
@@ -106,16 +101,48 @@ class InferenceManagerWorkerServiceTest
     }
   }
 
+  def withResponsesAndFixtures[R](inferrer: String => Option[HttpResponse],
+                                  images: String => Option[HttpResponse])(
+    testWith: TestWith[(QueuePair,
+                        MemoryMessageSender,
+                        RequestPoolMock[DownloadedImage],
+                        RequestPoolMock[MergedIdentifiedImage]),
+                       R]): R =
+    withResponses(inferrer, images) {
+      case (inferrerMock, imagesMock) =>
+        withWorkerServiceFixtures(inferrerMock.pool, imagesMock.pool) {
+          case (queuePair, sender) =>
+            testWith((queuePair, sender, inferrerMock, imagesMock))
+        }
+    }
+
+  def withResponses[R](inferrer: String => Option[HttpResponse],
+                       images: String => Option[HttpResponse])(
+    testWith: TestWith[(RequestPoolMock[DownloadedImage],
+                        RequestPoolMock[MergedIdentifiedImage]),
+                       R]): R =
+    withResponsePool[DownloadedImage, R](inferrer) { inferrerPoolMock =>
+      withResponsePool[MergedIdentifiedImage, R](images) { imagesPoolMock =>
+        testWith((inferrerPoolMock, imagesPoolMock))
+      }
+    }
+
   def withWorkerServiceFixtures[R](
+    inferrerRequestPool: RequestPoolFlow[DownloadedImage],
+    imageRequestPool: RequestPoolFlow[MergedIdentifiedImage])(
     testWith: TestWith[(QueuePair, MemoryMessageSender), R]): R =
     withLocalSqsQueuePair() { queuePair =>
       val messageSender = new MemoryMessageSender()
+      val fileWriter = new MemoryFileWriter()
 
       withWorkerService(
-        queuePair.queue,
-        messageSender,
-        FeatureVectorInferrerAdapter,
-        inferrerMock.port) { _ =>
+        queue = queuePair.queue,
+        messageSender = messageSender,
+        adapter = FeatureVectorInferrerAdapter,
+        fileWriter = fileWriter,
+        inferrerRequestPool = inferrerRequestPool,
+        imageRequestPool = imageRequestPool
+      ) { _ =>
         testWith((queuePair, messageSender))
       }
     }
