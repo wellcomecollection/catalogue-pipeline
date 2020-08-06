@@ -21,9 +21,12 @@ import uk.ac.wellcome.models.work.internal.{
 }
 import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
 import uk.ac.wellcome.platform.inference_manager.services.{
+  HostRequestPoolFlow,
   ImageDownloader,
   InferenceManagerWorkerService,
-  InferrerAdapter
+  InferrerAdapter,
+  MergedIdentifiedImage,
+  RequestPoolFlow
 }
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -36,9 +39,10 @@ trait InferenceManagerWorkerServiceFixture
     queue: Queue,
     messageSender: MemoryMessageSender,
     adapter: InferrerAdapter[DownloadedImage, AugmentedImage],
-    inferrerPort: Int)(
+    inferrerRequestPool: HostRequestPoolFlow[DownloadedImage],
+    imageRequestPool: RequestPoolFlow[MergedIdentifiedImage])(
     testWith: TestWith[InferenceManagerWorkerService[String], R])(
-    implicit decoder: Decoder[MergedImage[Identified, Minted]]): R =
+    implicit decoder: Decoder[MergedIdentifiedImage]): R =
     withActorSystem { implicit actorSystem =>
       withBigMessageStream[MergedImage[Identified, Minted], R](queue) {
         msgStream =>
@@ -46,11 +50,10 @@ trait InferenceManagerWorkerServiceFixture
             msgStream = msgStream,
             messageSender = messageSender,
             inferrerAdapter = adapter,
-            imageDownloader = new ImageDownloader(fileWriter = mockFileWriter),
-            inferrerClientFlow = Http()
-              .cachedHostConnectionPool[(Message, DownloadedImage)](
-                "localhost",
-                inferrerPort)
+            imageDownloader = new ImageDownloader(
+              fileWriter = mockFileWriter,
+              requestPool = imageRequestPool),
+            requestPool = inferrerRequestPool
           )
 
           workerService.run()

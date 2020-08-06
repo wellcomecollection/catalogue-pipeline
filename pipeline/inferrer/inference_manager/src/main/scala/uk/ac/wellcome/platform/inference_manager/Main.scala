@@ -2,16 +2,16 @@ package uk.ac.wellcome.platform.inference_manager
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import software.amazon.awssdk.services.sqs.model.Message
 import com.typesafe.config.Config
 import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
-import uk.ac.wellcome.models.work.internal.{Identified, MergedImage, Minted}
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
 import uk.ac.wellcome.platform.inference_manager.services.{
   FeatureVectorInferrerAdapter,
   ImageDownloader,
-  InferenceManagerWorkerService
+  InferenceManagerWorkerService,
+  MergedIdentifiedImage,
+  MessagePair
 }
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
@@ -34,7 +34,7 @@ object Main extends WellcomeTypesafeApp {
 
     val inferrerClientFlow =
       Http()
-        .cachedHostConnectionPool[(Message, DownloadedImage)](
+        .cachedHostConnectionPool[MessagePair[DownloadedImage]](
           config
             .getStringOption("inferrer.host")
             .getOrElse("localhost"),
@@ -45,11 +45,11 @@ object Main extends WellcomeTypesafeApp {
 
     new InferenceManagerWorkerService(
       msgStream = BigMessagingBuilder
-        .buildMessageStream[MergedImage[Identified, Minted]](config),
+        .buildMessageStream[MergedIdentifiedImage](config),
       messageSender = BigMessagingBuilder.buildBigMessageSender(config),
       imageDownloader = imageDownloader,
       inferrerAdapter = inferrerAdapter,
-      inferrerClientFlow = inferrerClientFlow
+      requestPool = inferrerClientFlow
     )
   }
 }

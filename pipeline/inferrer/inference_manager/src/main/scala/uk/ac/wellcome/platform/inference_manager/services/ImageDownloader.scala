@@ -16,53 +16,52 @@ import akka.stream.{IOResult, Materializer}
 import akka.stream.scaladsl.{FileIO, Flow, Keep, Sink, Source}
 import akka.util.ByteString
 import software.amazon.awssdk.services.sqs.model.Message
-import uk.ac.wellcome.models.work.internal.{Identified, MergedImage, Minted}
-import uk.ac.wellcome.platform.inference_manager.models
 import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 class ImageDownloader(root: String = "/",
+                      requestPool: RequestPoolFlow[MergedIdentifiedImage],
                       fileWriter: Sink[(ByteString, Path), Future[IOResult]])(
   implicit actorSystem: ActorSystem,
   ec: ExecutionContext) {
 
   def this(root: String)(implicit actorSystem: ActorSystem,
                          ec: ExecutionContext) =
-    this(root, fileWriter = ImageDownloader.defaultFileWriter)
-
-  lazy private val imageRequestPool =
-    Http().superPool[(Message, MergedImage[Identified, Minted])]()
+    this(
+      root,
+      fileWriter = ImageDownloader.defaultFileWriter,
+      requestPool = Http().superPool[MessagePair[MergedIdentifiedImage]]())
 
   private val parallelism = 10
 
-  def download: Flow[(Message, MergedImage[Identified, Minted]),
-                     (Message, DownloadedImage),
+  def download: Flow[MessagePair[MergedIdentifiedImage],
+                     MessagePair[DownloadedImage],
                      NotUsed] =
-    Flow[(Message, MergedImage[Identified, Minted])]
+    Flow[MessagePair[MergedIdentifiedImage]]
       .map(createImageFileRequest)
-      .via(imageRequestPool)
+      .via(requestPool)
       .mapAsyncUnordered(parallelism)(saveImageFile)
       .map {
         case (message, image, path) =>
-          message -> models.DownloadedImage(image, path)
+          message -> DownloadedImage(image, path)
       }
 
-  def getLocalImagePath(image: MergedImage[Identified, Minted]): Path =
+  def getLocalImagePath(image: MergedIdentifiedImage): Path =
     Paths.get(root, image.id.canonicalId, "default.jpg").toAbsolutePath
 
-  private def createImageFileRequest: PartialFunction[
-    (Message, MergedImage[Identified, Minted]),
-    (HttpRequest, (Message, MergedImage[Identified, Minted]))] = {
+  private def createImageFileRequest
+    : PartialFunction[MessagePair[MergedIdentifiedImage],
+                      (HttpRequest, MessagePair[MergedIdentifiedImage])] = {
     case (msg, image) =>
       val uri = getImageUri(image.location.url)
       (HttpRequest(method = HttpMethods.GET, uri = uri), (msg, image))
   }
 
   private def saveImageFile: PartialFunction[
-    (Try[HttpResponse], (Message, MergedImage[Identified, Minted])),
-    Future[(Message, MergedImage[Identified, Minted], Path)]
+    (Try[HttpResponse], MessagePair[MergedIdentifiedImage]),
+    Future[(Message, MergedIdentifiedImage, Path)]
   ] = {
     case (
         Success(response @ HttpResponse(StatusCodes.OK, _, _, _)),
