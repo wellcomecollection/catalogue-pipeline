@@ -7,6 +7,10 @@ import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.mets_adapter.models.MetsLocation
+import uk.ac.wellcome.models.work.internal.{
+  TransformedBaseWork,
+  UnidentifiedInvisibleWork
+}
 import uk.ac.wellcome.platform.transformer.mets.transformer.MetsXmlTransformer
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.{Readable, VersionedStore}
@@ -49,7 +53,7 @@ class MetsTransformerWorkerService[Destination](
       metsLocation <- getMetsLocation(key)
       metsData <- xmlTransformer.transform(metsLocation)
       work <- metsData.toWork(key.version)
-      _ <- messageSender.sendT(work).toEither
+      _ <- messageSender.sendT[TransformedBaseWork](work).toEither
     } yield ()
 
   private def getMetsLocation(key: Version[String, Int]): Result[MetsLocation] =
