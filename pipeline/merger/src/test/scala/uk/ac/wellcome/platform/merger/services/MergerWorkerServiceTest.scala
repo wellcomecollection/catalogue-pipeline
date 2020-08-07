@@ -50,11 +50,11 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          metrics.incrementedCounts.length should be >= 1
-          metrics.incrementedCounts.last should endWith("_success")
-
           senders.works
             .getMessages[BaseWork] should contain only (work1, work2, work3)
+
+          metrics.incrementedCounts.length should be >= 1
+          metrics.incrementedCounts.last should endWith("_success")
         }
     }
   }
