@@ -5,6 +5,7 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalatest.matchers.should.Matchers
 import io.circe.Encoder
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS
@@ -22,7 +23,9 @@ class MetsAdapterWorkerServiceTest
     extends AnyFunSpec
     with Matchers
     with Akka
-    with SQS {
+    with SQS
+    with Eventually
+    with IntegrationPatience {
 
   val bag = Bag(
     BagInfo("external-identifier"),
@@ -59,15 +62,18 @@ class MetsAdapterWorkerServiceTest
     withWorkerService(bagRetriever, vhs) {
       case (_, QueuePair(queue, dlq), messageSender) =>
         sendNotificationToSQS(queue, notification)
-        assertQueueEmpty(queue)
-        assertQueueEmpty(dlq)
 
-        messageSender.getMessages[Version[String, Int]]() shouldBe Seq(
-          expectedVersion)
+        eventually {
+          assertQueueEmpty(queue)
+          assertQueueEmpty(dlq)
 
-        vhs.getLatest(id = externalIdentifier) shouldBe Right(
-          Identified(expectedVersion, metsLocation())
-        )
+          messageSender.getMessages[Version[String, Int]]() shouldBe Seq(
+            expectedVersion)
+
+          vhs.getLatest(id = externalIdentifier) shouldBe Right(
+            Identified(expectedVersion, metsLocation())
+          )
+        }
     }
   }
 
