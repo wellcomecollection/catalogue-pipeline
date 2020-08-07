@@ -85,6 +85,22 @@ class MetsTransformerWorkerServiceTest
     }
   }
 
+  it("sends messages that can be decoded as a TransformedBaseWork") {
+
+    val identifier = randomAlphanumeric(10)
+    val version = randomInt(1, 10)
+    val str = metsXmlWith(identifier, Some(License.CCBYNC))
+
+    withWorkerService {
+      case (QueuePair(queue, _), metsBucket, messageSender, dynamoStore) =>
+        sendWork(str, "mets.xml", dynamoStore, metsBucket, queue, version)
+        eventually {
+          val works = messageSender.getMessages[TransformedBaseWork]
+          works.head shouldBe expectedWork(identifier, version)
+        }
+    }
+  }
+
   private def expectedWork(identifier: String, version: Int): InvisibleWork = {
     val expectedUrl =
       s"https://wellcomelibrary.org/iiif/$identifier/manifest"
