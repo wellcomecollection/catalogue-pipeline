@@ -74,73 +74,25 @@ def should_run_sbt_project(repo, project_name, changed_paths):
 
 
 if __name__ == "__main__":
-    is_ci = os.environ.get("CI") == "true" or False
-
-    if is_ci:
-        print("Detected CI environment")
-    else:
-        print("Detected NOT running in CI environment")
-
-    # Ensure we are up to date
-    git("fetch", "--all")
-
     default_branch = git("symbolic-ref", "refs/remotes/origin/HEAD").split("/")[-1]
-
-    if is_ci:
-        current_branch = os.environ.get("BUILDKITE_BRANCH")
-    else:
-        current_branch = git("rev-parse", "--abbrev-ref", "HEAD")
-
-    print(f"Found default remote branch: {default_branch}")
-    print(f"Current local branch: {current_branch}")
-
-    ref_head_default_local = git("show-ref", f"refs/heads/{default_branch}", "-s")
-    ref_head_current_local = git("show-ref", f"refs/heads/{current_branch}", "-s")
 
     ref_head_default_remote = git(
         "show-ref", f"refs/remotes/origin/{default_branch}", "-s"
     )
-    ref_head_current_remote = git(
-        "show-ref", f"refs/remotes/origin/{current_branch}", "-s"
-    )
 
-    local_default_synced = ref_head_default_local == ref_head_default_remote
-    local_current_synced = ref_head_current_local == ref_head_current_remote
+    ref_head_current = git("rev-parse", "HEAD")
 
-    if not local_default_synced:
-        print(f"Local default branch ({default_branch}) is out of sync with remote")
-        sys.exit(1)
-
-    if not local_current_synced:
-        print(
-            f"WARNING! Local current branch ({current_branch}) is out of sync with remote"
-        )
-        if is_ci:
-            print("Cannot continue in CI environment, out of date, cancelling build.")
-            sys.exit(0)
-
-    ref_head_default = ref_head_default_local
-    ref_head_current = ref_head_current_local
-
-    print(f"Default branch from origin: {default_branch}")
-    print(f"Current branch: {current_branch}")
-
-    is_change_request = default_branch != current_branch
-
-    if is_change_request:
-        print(f"Detected change request: {default_branch} != {current_branch}")
-    else:
-        print(f"Detected change in default branch: {default_branch}")
+    is_change_request = os.environ.get("BUILDKITE_PULL_REQUEST") != "false"
 
     commit_range = None
-    is_change_from_default_head = ref_head_default != ref_head_current
+    is_change_from_default_head = ref_head_default_remote != ref_head_current
 
     if is_change_from_default_head:
-        commit_range = f"{ref_head_default}..{ref_head_current}"
+        commit_range = f"{ref_head_default_remote}..{ref_head_current}"
         print(f"Detected commit range: {commit_range}")
     else:
         print(
-            f"Detected no changes between default branch HEAD and current branch HEAD: {ref_head_default}"
+            f"Detected no changes between default branch HEAD and current branch HEAD: {ref_head_default_remote}"
         )
 
     attempt_publish = (not is_change_request) and is_change_from_default_head
