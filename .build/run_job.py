@@ -85,7 +85,11 @@ if __name__ == "__main__":
     git("remote", "update")
 
     default_branch = git("symbolic-ref", "refs/remotes/origin/HEAD").split("/")[-1]
-    current_branch = git("rev-parse", "--abbrev-ref", "HEAD")
+
+    if is_ci:
+        current_branch = os.environ.get("BUILDKITE_BRANCH")
+    else:
+        current_branch = git("rev-parse", "--abbrev-ref", "HEAD")
 
     print(f"Found default remote branch: {default_branch}")
     print(f"Current local branch: {current_branch}")
