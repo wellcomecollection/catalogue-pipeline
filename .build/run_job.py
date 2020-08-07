@@ -84,14 +84,18 @@ if __name__ == "__main__":
     # Ensure we are up to date
     git("remote", "update")
 
-    default_branch = git("symbolic-ref", "refs/remotes/origin/HEAD").split('/')[-1]
+    default_branch = git("symbolic-ref", "refs/remotes/origin/HEAD").split("/")[-1]
     current_branch = git("rev-parse", "--abbrev-ref", "HEAD")
 
     ref_head_default_local = git("show-ref", f"refs/heads/{default_branch}", "-s")
     ref_head_current_local = git("show-ref", f"refs/heads/{current_branch}", "-s")
 
-    ref_head_default_remote= git("show-ref", f"refs/remotes/origin/{default_branch}", "-s")
-    ref_head_current_remote = git("show-ref", f"refs/remotes/origin/{current_branch}", "-s")
+    ref_head_default_remote = git(
+        "show-ref", f"refs/remotes/origin/{default_branch}", "-s"
+    )
+    ref_head_current_remote = git(
+        "show-ref", f"refs/remotes/origin/{current_branch}", "-s"
+    )
 
     local_default_synced = ref_head_default_local == ref_head_default_remote
     local_current_synced = ref_head_current_local == ref_head_current_remote
@@ -101,8 +105,10 @@ if __name__ == "__main__":
         sys.exit(1)
 
     if not local_current_synced:
-        print(f"WARNING! Local current branch ({current_branch}) is out of sync with remote")
-        if(is_ci):
+        print(
+            f"WARNING! Local current branch ({current_branch}) is out of sync with remote"
+        )
+        if is_ci:
             print("Cannot continue in CI environment, out of date, cancelling build.")
             sys.exit(0)
 
@@ -126,7 +132,9 @@ if __name__ == "__main__":
         commit_range = f"{ref_head_default}..{ref_head_current}"
         print(f"Detected commit range: {commit_range}")
     else:
-        print(f"Detected no changes between default branch HEAD and current branch HEAD: {ref_head_default}")
+        print(
+            f"Detected no changes between default branch HEAD and current branch HEAD: {ref_head_default}"
+        )
 
     attempt_publish = (not is_change_request) and is_change_from_default_head
 
