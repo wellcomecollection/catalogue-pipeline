@@ -87,6 +87,9 @@ if __name__ == "__main__":
     default_branch = git("symbolic-ref", "refs/remotes/origin/HEAD").split("/")[-1]
     current_branch = git("rev-parse", "--abbrev-ref", "HEAD")
 
+    print(f"Found default remote branch: {default_branch}")
+    print(f"Current local branch: {current_branch}")
+
     ref_head_default_local = git("show-ref", f"refs/heads/{default_branch}", "-s")
     ref_head_current_local = git("show-ref", f"refs/heads/{current_branch}", "-s")
 
