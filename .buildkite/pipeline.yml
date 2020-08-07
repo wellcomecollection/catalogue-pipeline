@@ -2,7 +2,7 @@ steps:
 #  - label: "Format"
 #    command: make format
 #  - wait
-  - command: git remote update
+  - command: git show-ref refs/heads/HEAD -s
   - command: .build/run_job.py api
 #  - command: make reindex_worker-test
 #  - command: make ingestor_works-test
