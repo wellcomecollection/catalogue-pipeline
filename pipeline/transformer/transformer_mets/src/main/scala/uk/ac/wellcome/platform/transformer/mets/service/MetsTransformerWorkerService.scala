@@ -53,6 +53,8 @@ class MetsTransformerWorkerService[Destination](
       metsLocation <- getMetsLocation(key)
       metsData <- xmlTransformer.transform(metsLocation)
       work <- metsData.toWork(key.version)
+      // We send the generic type param to `sendT` so it serialises uses the
+      // discriminator `type` when read by the recorder.
       _ <- messageSender.sendT[TransformedBaseWork](work).toEither
     } yield ()
 
