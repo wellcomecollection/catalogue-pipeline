@@ -82,8 +82,7 @@ if __name__ == "__main__":
         print("Detected NOT running in CI environment")
 
     # Ensure we are up to date
-    git("fetch")
-    git("remote", "update")
+    git("fetch", "--all")
 
     default_branch = git("symbolic-ref", "refs/remotes/origin/HEAD").split("/")[-1]
 
