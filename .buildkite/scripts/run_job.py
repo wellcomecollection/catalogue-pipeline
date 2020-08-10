@@ -92,18 +92,15 @@ if __name__ == "__main__":
     default_branch_name = remote_default_branch()
 
     commit_range = None
+    local_head = local_current_head()
 
     is_change_to_default_branch = current_branch_name == default_branch_name
 
     if is_change_to_default_branch:
         latest_sha = get_sha1_for_tag("latest")
-        local_head = local_current_head()
-
         commit_range = f"{latest_sha}..{local_head}"
     else:
         remote_head = remote_default_head()
-        local_head = local_current_head()
-
         commit_range = f"{remote_head}..{local_head}"
 
     print(f"Branch: {current_branch_name}")
