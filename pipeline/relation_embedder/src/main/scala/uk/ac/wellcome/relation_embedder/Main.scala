@@ -22,4 +22,3 @@ object Main extends WellcomeTypesafeApp {
     )
   }
 }
-

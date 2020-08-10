@@ -11,8 +11,7 @@ import uk.ac.wellcome.messaging.sqs.SQSStream
 class RelationEmbedderWorkerService[MsgDestination](
   sqsStream: SQSStream[NotificationMessage],
   msgSender: MessageSender[MsgDestination]
-)
-    extends Runnable {
+) extends Runnable {
 
   def run(): Future[Done] =
     ???
