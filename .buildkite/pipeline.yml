@@ -30,4 +30,4 @@ steps:
 #  - command: .buildkite/scripts/run_job.py feature_inferrer --changes-in pipeline/inferrer/feature_inferrer
 #  - command: .buildkite/scripts/run_job.py snapshot_generator
   - wait
-  - command: .buildkite/scripts/build_complete.py
+  - command: .buildkite/scripts/complete_build.py

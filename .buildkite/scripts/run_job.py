@@ -6,7 +6,8 @@ import os
 import subprocess
 import sys
 
-from git_utils import get_changed_paths, git, remote_default_head, remote_default_branch, local_current_head, get_sha1_for_tag
+import git_utils as git
+
 from sbt_dependency_tree import Repository
 
 
@@ -73,37 +74,21 @@ def should_run_sbt_project(repo, project_name, changed_paths):
     return False
 
 
-def current_branch():
-    return os.environ["BUILDKITE_BRANCH"]
-
-
-def get_commit_range():
-    """Provide commit range between remote default head, and local head."""
-    remote_head = remote_default_head()
-    local_head = local_current_head()
-
-    return f"{remote_head}..{local_head}"
-
-
 if __name__ == "__main__":
     # Get git metadata
 
-    current_branch_name = current_branch()
-    default_branch_name = remote_default_branch()
-
     commit_range = None
-    local_head = local_current_head()
+    local_head = git.local_current_head()
 
-    is_change_to_default_branch = True #current_branch_name == default_branch_name
-
-    if is_change_to_default_branch:
-        latest_sha = get_sha1_for_tag("latest")
+    if git.is_default_branch():
+        latest_sha = git.get_sha1_for_tag("latest")
         commit_range = f"{latest_sha}..{local_head}"
     else:
-        remote_head = remote_default_head()
+        remote_head = git.remote_default_head()
         commit_range = f"{remote_head}..{local_head}"
 
-    print(f"Branch: {current_branch_name}")
+    print(f"Working in branch: {git.current_branch()}")
+    print(f"On default branch: {git.is_default_branch()}")
     print(f"Commit range: {commit_range}")
 
     # Parse script args
@@ -113,20 +98,14 @@ if __name__ == "__main__":
     parser.add_argument("--changes-in", nargs="*")
     args = parser.parse_args()
 
-    # Get change_globs
+    # Get changed_paths
 
     if args.changes_in:
         change_globs = args.changes_in + [".buildkite/pipeline.yml"]
     else:
         change_globs = None
 
-    # Get changed_paths
-
-    if is_change_to_default_branch:
-        changed_paths = get_changed_paths("HEAD", "master", globs=change_globs)
-    else:
-        git("fetch", "origin")
-        changed_paths = get_changed_paths(commit_range, globs=change_globs)
+    changed_paths = git.get_changed_paths(commit_range, globs=change_globs)
 
     # Determine whether we should build this project
 
@@ -144,5 +123,5 @@ if __name__ == "__main__":
 
     make(f"{args.project_name}-test")
 
-    if is_change_to_default_branch:
+    if git.is_default_branch():
         make(f"{args.project_name}-publish")
