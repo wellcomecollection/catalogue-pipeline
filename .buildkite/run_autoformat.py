@@ -80,7 +80,7 @@ if __name__ == "__main__":
         # We checkout the branch before we add the commit, so we don't
         # include the merge commit that Travis makes.
         git("fetch", "ssh-origin")
-        git("checkout", branch_name())
+        git("checkout", "--track", f"origin/{branch_name()}")
 
         git("add", "--verbose", "--update")
         git("commit", "-m", "Apply auto-formatting rules")
