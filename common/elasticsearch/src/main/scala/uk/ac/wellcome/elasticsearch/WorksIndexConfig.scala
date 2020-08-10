@@ -37,6 +37,7 @@ case object WorksIndexConfig extends IndexConfig {
 
   val title = asciifoldingTextFieldWithKeyword("title")
     .fields(
+      keywordField("keyword"),
       textField("english").analyzer(englishAnalyzer.name),
       textField("shingles").analyzer(shingleAsciifoldingAnalyzer.name)
     )
@@ -107,7 +108,7 @@ case object WorksIndexConfig extends IndexConfig {
   def items(fieldName: String) = objectField(fieldName).fields(
     id(),
     location(),
-    englishTextKeywordField("title"),
+    title,
     keywordField("ontologyType")
   )
 
