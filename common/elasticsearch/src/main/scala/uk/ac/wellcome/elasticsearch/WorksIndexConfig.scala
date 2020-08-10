@@ -108,7 +108,7 @@ case object WorksIndexConfig extends IndexConfig {
   def items(fieldName: String) = objectField(fieldName).fields(
     id(),
     location(),
-    title,
+    englishTextKeywordField("title"),
     keywordField("ontologyType")
   )
 
