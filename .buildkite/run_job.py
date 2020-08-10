@@ -6,7 +6,7 @@ import os
 import subprocess
 import sys
 
-from git_utils import get_changed_paths, git
+from git_utils import get_changed_paths, git, remote_default_head, remote_default_branch, local_current_head, get_sha1_for_tag
 from sbt_dependency_tree import Repository
 
 
@@ -73,65 +73,77 @@ def should_run_sbt_project(repo, project_name, changed_paths):
     return False
 
 
+def current_branch():
+    return os.environ["BUILDKITE_BRANCH"]
+
+
+def get_commit_range():
+    """Provide commit range between remote default head, and local head."""
+    remote_head = remote_default_head()
+    local_head = local_current_head()
+
+    return f"{remote_head}..{local_head}"
+
+
 if __name__ == "__main__":
-    default_branch = git("symbolic-ref", "refs/remotes/origin/HEAD").split("/")[-1]
 
-    ref_head_default_remote = git(
-        "show-ref", f"refs/remotes/origin/{default_branch}", "-s"
-    )
+    foo = get_sha1_for_tag("foo")
+    print(foo)
+    sys.exit(1)
 
-    ref_head_current = git("rev-parse", "HEAD")
+    # Get git metadata
 
-    is_change_request = os.environ.get("BUILDKITE_PULL_REQUEST") != "false"
+    current_branch_name = current_branch()
+    default_branch_name = remote_default_branch()
 
     commit_range = None
-    is_change_from_default_head = ref_head_default_remote != ref_head_current
 
-    if is_change_from_default_head:
-        commit_range = f"{ref_head_default_remote}..{ref_head_current}"
-        print(f"Detected commit range: {commit_range}")
+    is_change_to_default_branch = current_branch_name == default_branch_name
+
+    if is_change_to_default_branch:
+        print(f"Change to default branch ({default_branch_name}) detected.")
     else:
-        print(
-            f"Detected no changes between default branch HEAD and current branch HEAD: {ref_head_default_remote}"
-        )
+        commit_range = get_commit_range()
+        print(f"Changes in branch ({current_branch_name}) detected.")
+        print(f"Detected commit range: {commit_range}")
 
-    attempt_publish = (not is_change_request) and is_change_from_default_head
-
-    if attempt_publish:
-        print("Running in default branch and changes detected, will attempt publish")
+    # Parse script args
 
     parser = argparse.ArgumentParser()
     parser.add_argument("project_name", default=os.environ.get("SBT_PROJECT"))
     parser.add_argument("--changes-in", nargs="*")
     args = parser.parse_args()
 
-    task = f"{args.project_name}-test"
+    # Get change_globs
 
     if args.changes_in:
         change_globs = args.changes_in + [".travis.yml"]
     else:
         change_globs = None
 
-    if is_change_request:
+    # Get changed_paths
+
+    if is_change_to_default_branch:
         changed_paths = get_changed_paths("HEAD", "master", globs=change_globs)
     else:
         git("fetch", "origin")
         changed_paths = get_changed_paths(commit_range, globs=change_globs)
 
+    # Determine whether we should build this project
+
     sbt_repo = Repository(".sbt_metadata")
     try:
         if not should_run_sbt_project(sbt_repo, args.project_name, changed_paths):
-            print(
-                f"Nothing in this patch affects {args.project_name}, so skipping tests"
-            )
+            print(f"Nothing in this patch affects {args.project_name}, so stopping.")
             sys.exit(0)
     except (FileNotFoundError, KeyError):
         if args.changes_in and not changed_paths:
-            print(
-                f"Nothing in this patch affects the files {args.changes_in}, so skipping tests"
-            )
+            print(f"Nothing in this patch affects the files {args.changes_in}, so stopping.")
             sys.exit(0)
 
-    make(task)
-    if attempt_publish:
-        make(task.replace("test", "publish"))
+    # Perform make tasks
+
+    make(f"{args.project_name}-test")
+
+    if is_change_to_default_branch:
+        make(f"{args.project_name}-publish")
