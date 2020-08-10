@@ -251,6 +251,10 @@ object CatalogueDependencies {
   val mergerDependencies: Seq[ModuleID] =
     ExternalDependencies.mockitoDependencies
 
+  val relationEmbedderDependencies: Seq[ModuleID] =
+    WellcomeDependencies.storageTypesafeLibrary ++
+      WellcomeDependencies.messagingTypesafeLibrary
+
   val miroTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies ++
       ExternalDependencies.mockitoDependencies
