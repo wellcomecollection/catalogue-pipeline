@@ -1,6 +1,6 @@
 steps:
-#  - label: "Format"
-#    command: make format
+  - command: .buildkite/run_autoformat.py
+  - wait
   - command: .buildkite/run_job.py internal_model
   - command: .buildkite/run_job.py display
   - command: .buildkite/run_job.py elasticsearch
