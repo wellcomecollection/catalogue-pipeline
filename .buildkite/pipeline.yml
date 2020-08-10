@@ -1,31 +1,33 @@
 steps:
-#  - command: .buildkite/run_autoformat.py
-#  - wait
-  - command: .buildkite/run_job.py internal_model
-#  - command: .buildkite/run_job.py display
-#  - command: .buildkite/run_job.py elasticsearch
-#  - command: .buildkite/run_job.py big_messaging
-#  - command: .buildkite/run_job.py ingestor_common
-#  - command: .buildkite/run_job.py transformer_common
-#  - wait
-#  - command: .buildkite/run_job.py api
-#  - command: .buildkite/run_job.py reindex_worker
-#  - command: .buildkite/run_job.py ingestor_works
-#  - command: .buildkite/run_job.py ingestor_images
-#  - command: .buildkite/run_job.py id_minter
-#  - command: .buildkite/run_job.py matcher
-#  - command: .buildkite/run_job.py merger
-#  - command: .buildkite/run_job.py recorder
-#  - command: .buildkite/run_job.py transformer_miro
-#  - command: .buildkite/run_job.py transformer_sierra
-#  - command: .buildkite/run_job.py transformer_mets
-#  - command: .buildkite/run_job.py transformer_calm
-#  - command: .buildkite/run_job.py sierra_reader
-#  - command: .buildkite/run_job.py sierra_bib_merger
-#  - command: .buildkite/run_job.py sierra_item_merger
-#  - command: .buildkite/run_job.py sierra_items_to_dynamo
-#  - command: .buildkite/run_job.py mets_adapter
-#  - command: .buildkite/run_job.py calm_adapter
-#  - command: .buildkite/run_job.py inference_manager
-#  - command: .buildkite/run_job.py feature_inferrer --changes-in pipeline/inferrer/feature_inferrer
-#  - command: .buildkite/run_job.py snapshot_generator
+  - command: .buildkite/scripts/run_autoformat.py
+  - wait
+  - command: .buildkite/scripts/run_job.py internal_model
+  - command: .buildkite/scripts/run_job.py display
+  - command: .buildkite/scripts/run_job.py elasticsearch
+  - command: .buildkite/scripts/run_job.py big_messaging
+  - command: .buildkite/scripts/run_job.py ingestor_common
+  - command: .buildkite/scripts/run_job.py transformer_common
+  - wait
+  - command: .buildkite/scripts/run_job.py api
+  - command: .buildkite/scripts/run_job.py reindex_worker
+  - command: .buildkite/scripts/run_job.py ingestor_works
+  - command: .buildkite/scripts/run_job.py ingestor_images
+  - command: .buildkite/scripts/run_job.py id_minter
+  - command: .buildkite/scripts/run_job.py matcher
+  - command: .buildkite/scripts/run_job.py merger
+  - command: .buildkite/scripts/run_job.py recorder
+  - command: .buildkite/scripts/run_job.py transformer_miro
+  - command: .buildkite/scripts/run_job.py transformer_sierra
+  - command: .buildkite/scripts/run_job.py transformer_mets
+  - command: .buildkite/scripts/run_job.py transformer_calm
+  - command: .buildkite/scripts/run_job.py sierra_reader
+  - command: .buildkite/scripts/run_job.py sierra_bib_merger
+  - command: .buildkite/scripts/run_job.py sierra_item_merger
+  - command: .buildkite/scripts/run_job.py sierra_items_to_dynamo
+  - command: .buildkite/scripts/run_job.py mets_adapter
+  - command: .buildkite/scripts/run_job.py calm_adapter
+  - command: .buildkite/scripts/run_job.py inference_manager
+  - command: .buildkite/scripts/run_job.py feature_inferrer --changes-in pipeline/inferrer/feature_inferrer
+  - command: .buildkite/scripts/run_job.py snapshot_generator
+  - wait
+  - command: .buildkite/scripts/build_complete.py

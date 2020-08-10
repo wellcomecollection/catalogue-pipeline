@@ -20,5 +20,9 @@ if __name__ == "__main__":
     is_change_to_default_branch = current_branch_name == default_branch_name
 
     if is_change_to_default_branch:
+        print(f"Successful completion on {current_branch_name}, tagging latest.")
         git('tag', 'latest', '--force')
         git('push', 'origin', 'latest', '--force')
+        print("Done.")
+    else:
+        print(f"Successful completion on {current_branch_name}, nothing to do.")
