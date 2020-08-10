@@ -86,11 +86,6 @@ def get_commit_range():
 
 
 if __name__ == "__main__":
-
-    foo = get_sha1_for_tag("foo")
-    print(foo)
-    sys.exit(1)
-
     # Get git metadata
 
     current_branch_name = current_branch()
@@ -101,11 +96,18 @@ if __name__ == "__main__":
     is_change_to_default_branch = current_branch_name == default_branch_name
 
     if is_change_to_default_branch:
-        print(f"Change to default branch ({default_branch_name}) detected.")
+        latest_sha = get_sha1_for_tag("latest")
+        local_head = local_current_head()
+
+        commit_range = f"{latest_sha}..{local_head}"
     else:
-        commit_range = get_commit_range()
-        print(f"Changes in branch ({current_branch_name}) detected.")
-        print(f"Detected commit range: {commit_range}")
+        remote_head = remote_default_head()
+        local_head = local_current_head()
+
+        commit_range = f"{remote_head}..{local_head}"
+
+    print(f"Branch: {current_branch_name}")
+    print(f"Commit range: {commit_range}")
 
     # Parse script args
 
@@ -117,7 +119,7 @@ if __name__ == "__main__":
     # Get change_globs
 
     if args.changes_in:
-        change_globs = args.changes_in + [".travis.yml"]
+        change_globs = args.changes_in + [".buildkite/pipeline.yml"]
     else:
         change_globs = None
 

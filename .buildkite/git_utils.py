@@ -10,7 +10,6 @@ def git(*args):
     try:
         return subprocess.check_output(cmd).decode("utf8").strip()
     except subprocess.CalledProcessError as err:
-        print(err)
         sys.exit(err.returncode)
 
 
