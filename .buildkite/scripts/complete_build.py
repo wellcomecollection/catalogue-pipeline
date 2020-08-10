@@ -12,8 +12,8 @@ if __name__ == "__main__":
 
     if git.is_default_branch():
         print(f"Successful completion on {branch_name}, tagging latest.")
-        git.git('tag', 'latest', '--force')
-        git.git('push', 'origin', 'latest', '--force')
+        git.git("tag", "latest", "--force")
+        git.git("push", "origin", "latest", "--force")
         print("Done.")
     else:
         print(f"Successful completion on {branch_name}, nothing to do.")

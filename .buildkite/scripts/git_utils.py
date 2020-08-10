@@ -35,23 +35,17 @@ def remote_default_branch():
 
 def remote_default_head():
     """Inspect refs to discover default branch HEAD @ remote origin."""
-    return git(
-        "show-ref", f"refs/remotes/origin/{remote_default_branch()}", "-s"
-    )
+    return git("show-ref", f"refs/remotes/origin/{remote_default_branch()}", "-s")
 
 
 def local_current_head():
     """Use rev-parse to discover hash for current commit AKA HEAD (from .git/HEAD)."""
-    return git(
-        "rev-parse", "HEAD"
-    )
+    return git("rev-parse", "HEAD")
 
 
 def get_sha1_for_tag(tag):
     git("fetch")
-    return git(
-        "show-ref", "-s", tag
-    )
+    return git("show-ref", "-s", tag)
 
 
 def current_branch():
@@ -62,4 +56,4 @@ def is_default_branch():
     current_branch_name = current_branch()
     default_branch_name = remote_default_branch()
 
-    return True #current_branch_name == default_branch_name
+    return True  # current_branch_name == default_branch_name

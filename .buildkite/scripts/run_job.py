@@ -116,7 +116,9 @@ if __name__ == "__main__":
             sys.exit(0)
     except (FileNotFoundError, KeyError):
         if args.changes_in and not changed_paths:
-            print(f"Nothing in this patch affects the files {args.changes_in}, so stopping.")
+            print(
+                f"Nothing in this patch affects the files {args.changes_in}, so stopping."
+            )
             sys.exit(0)
 
     # Perform make tasks
