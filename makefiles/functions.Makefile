@@ -98,7 +98,7 @@ endef
 define sbt_test
 	$(ROOT)/docker_run.py --dind --sbt --root -- \
 		--net host \
-		wellcome/sbt_wrapper:buildkite \
+		wellcome/sbt_wrapper \
 		"project $(1)" ";dockerComposeUp;test;dockerComposeStop"
 endef
 
