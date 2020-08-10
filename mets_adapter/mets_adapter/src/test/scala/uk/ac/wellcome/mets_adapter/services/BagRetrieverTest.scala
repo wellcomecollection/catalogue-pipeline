@@ -106,11 +106,7 @@ class BagRetrieverTest
             .willReturn(
               aResponse()
                 .withStatus(200)
-                // Simulate an immediately returning Fault
-                // Fault.CONNECTION_RESET_BY_PEER can cause an extended wait
-                // which can cause this test to fail in some environments
-                .withFault(Fault.RANDOM_DATA_THEN_CLOSE)))
-
+                .withFault(Fault.CONNECTION_RESET_BY_PEER)))
         whenReady(getBag(bagRetriever, "digitised", "this-will-fault").failed) {
           _ shouldBe a[Throwable]
         }
