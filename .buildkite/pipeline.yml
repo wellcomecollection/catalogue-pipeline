@@ -1,7 +1,13 @@
 steps:
 #  - label: "Format"
 #    command: make format
-#  - wait
+  - command: .buildkite/run_job.py internal_model
+  - command: .buildkite/run_job.py display
+  - command: .buildkite/run_job.py elasticsearch
+  - command: .buildkite/run_job.py big_messaging
+  - command: .buildkite/run_job.py ingestor_common
+  - command: .buildkite/run_job.py transformer_common
+  - wait
   - command: .buildkite/run_job.py api
   - command: .buildkite/run_job.py reindex_worker
   - command: .buildkite/run_job.py ingestor_works
@@ -21,4 +27,5 @@ steps:
   - command: .buildkite/run_job.py mets_adapter
   - command: .buildkite/run_job.py calm_adapter
   - command: .buildkite/run_job.py inference_manager
+  - command: .buildkite/run_job.py feature_inferrer --changes-in pipeline/inferrer/feature_inferrer
   - command: .buildkite/run_job.py snapshot_generator
