@@ -94,7 +94,7 @@ if __name__ == "__main__":
     commit_range = None
     local_head = local_current_head()
 
-    is_change_to_default_branch = current_branch_name == default_branch_name
+    is_change_to_default_branch = True #current_branch_name == default_branch_name
 
     if is_change_to_default_branch:
         latest_sha = get_sha1_for_tag("latest")
