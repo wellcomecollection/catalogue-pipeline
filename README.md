@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/wellcomecollection/catalogue.svg?branch=master)](https://travis-ci.org/wellcomecollection/catalogue)
 
+[![Build status](https://badge.buildkite.com/0ca819db1215b66ecb17019d8ee5331d8e537094d051141219.svg)](https://buildkite.com/wellcome-collection/catalogue)
 
 ## Purpose
 
