@@ -77,7 +77,7 @@ if __name__ == "__main__":
         )
 
         # We checkout the branch before we add the commit, so we don't
-        # include the merge commit that Travis makes.
+        # include the merge commit that Buildkite makes.
         git("fetch", "ssh-origin")
         git("checkout", "--track", f"origin/{branch_name()}")
 
@@ -85,7 +85,7 @@ if __name__ == "__main__":
         git("commit", "-m", "Apply auto-formatting rules")
         git("push", "ssh-origin", "HEAD:%s" % branch_name())
 
-        # We exit here to fail the build, so Travis will skip to the next
+        # We exit here to fail the build, so Buildkite will skip to the next
         # build, which includes the autoformat commit.
         sys.exit(1)
     else:

@@ -34,8 +34,8 @@ def should_run_sbt_project(repo, project_name, changed_paths):
 
     interesting_paths = [p for p in changed_paths if not p.startswith(".sbt_metadata")]
 
-    if ".travis.yml" in interesting_paths:
-        print("*** Relevant: .travis.yml")
+    if ".buildkite/pipeline.yml" in interesting_paths:
+        print("*** Relevant: .buildkite/pipeline.yml")
         return True
     if "build.sbt" in interesting_paths:
         print("*** Relevant: build.sbt")
@@ -45,7 +45,7 @@ def should_run_sbt_project(repo, project_name, changed_paths):
         return True
 
     for path in interesting_paths:
-        if path.startswith((".travis", "docs/")):
+        if path.startswith((".buildkite", "docs/")):
             continue
 
         if path.endswith(".tf"):
