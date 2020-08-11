@@ -12,7 +12,7 @@ import akka.http.scaladsl.model.{
 import scala.util.Random
 
 object Responses {
-  def featureInferrerResponse: HttpResponse = jsonResponse(
+  def featureInferrer: HttpResponse = json(
     s"""{
       "features_b64": "${Encoding.toLittleEndianBase64(randomFeatureVector)}",
       "lsh_encoded_features": [${randomLshVector
@@ -26,7 +26,7 @@ object Responses {
   def randomLshVector: List[String] =
     List.fill(256)(s"${Random.nextInt(256)}-${Random.nextInt(32)}")
 
-  def jsonResponse(json: String): HttpResponse =
+  def json(json: String): HttpResponse =
     HttpResponse(
       status = StatusCodes.OK,
       entity = HttpEntity.apply(
@@ -35,18 +35,24 @@ object Responses {
       )
     )
 
-  def imageResponse: HttpResponse =
+  def randomImageBytes: Array[Byte] = {
+    val arr = Array.fill(32)(0x00.toByte)
+    Random.nextBytes(arr)
+    arr
+  }
+
+  def image: HttpResponse =
     HttpResponse(
       status = StatusCodes.OK,
       entity = HttpEntity.apply(
         contentType = ContentType(MediaTypes.`image/jpeg`),
-        bytes = Array.fill(32)(0xFF.toByte)
+        bytes = randomImageBytes
       )
     )
 
-  def badRequestResponse: HttpResponse =
+  def badRequest: HttpResponse =
     HttpResponse(status = StatusCodes.BadRequest)
 
-  def serverErrorResponse: HttpResponse =
+  def serverError: HttpResponse =
     HttpResponse(status = StatusCodes.InternalServerError)
 }

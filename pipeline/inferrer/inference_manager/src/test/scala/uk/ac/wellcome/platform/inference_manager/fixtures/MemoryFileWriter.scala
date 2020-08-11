@@ -4,27 +4,27 @@ import java.nio.file.Path
 import java.util.concurrent.ConcurrentHashMap
 
 import akka.Done
-import akka.stream.{IOResult, Materializer}
-import akka.stream.scaladsl.Sink
+import akka.stream.IOResult
+import akka.stream.scaladsl.{Flow, Keep, Sink}
 import akka.util.ByteString
+import grizzled.slf4j.Logging
 import uk.ac.wellcome.platform.inference_manager.services.FileWriter
 
 import scala.concurrent.Future
 import scala.collection.JavaConverters._
 import scala.collection._
 
-class MemoryFileWriter extends FileWriter {
+class MemoryFileWriter extends FileWriter with Logging {
   val files: concurrent.Map[Path, ByteString] =
     new ConcurrentHashMap[Path, ByteString].asScala
 
-  def write(implicit materializer: Materializer)
-    : Sink[(ByteString, Path), Future[IOResult]] =
-    Sink
-      .foreach[(ByteString, Path)] {
-        case (file, path) => files.put(path, file)
-      }
-      .mapMaterializedValue(_ => Future.successful(IOResult(1)))
+  def write(path: Path): Sink[ByteString, Future[IOResult]] =
+    Flow[ByteString]
+      .map(files.put(path, _))
+      .toMat(Sink.fold(IOResult(0L))({ (result, _) =>
+        IOResult(result.count + 1)
+      }))(Keep.right)
 
-  def delete(implicit materializer: Materializer): Sink[Path, Future[Done]] =
+  def delete: Sink[Path, Future[Done]] =
     Sink.foreach[Path](files.remove(_))
 }
