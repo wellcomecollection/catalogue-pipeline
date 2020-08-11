@@ -9,25 +9,45 @@ import scala.util.Try
 package object services {
   type MergedIdentifiedImage = MergedImage[Identified, Minted]
 
-  type RequestPoolFlow[T, Ctx] =
-    Flow[(HttpRequest, (T, Ctx)), (Try[HttpResponse], (T, Ctx)), _]
+  // Because request pool flows cannot be FlowWithContexts, we have to manually
+  // attach both the "usual" context object (the RequestCtx) and the context from
+  // the FlowWithContext (the FlowCtx).
+  //
+  // See the docs for information on the purpose of this "context" element
+  // https://doc.akka.io/docs/akka-http/current/client-side/host-level.html#using-a-host-connection-pool
+  type RequestPoolFlow[RequestCtx, FlowCtx] =
+    Flow[(HttpRequest, (RequestCtx, FlowCtx)),
+         (Try[HttpResponse], (RequestCtx, FlowCtx)),
+         _]
 
-  implicit class RequestPoolFlowOps[T, Ctx](
-    requestPool: RequestPoolFlow[T, Ctx]) {
-    def asContextFlow
-      : FlowWithContext[(HttpRequest, T), Ctx, (Try[HttpResponse], T), Ctx, _] =
+  // This is a helper to make a RequestPoolFlow behave as a FlowWithContext
+  // using the space we made for FlowCtx in the type above.
+  implicit class RequestPoolFlowOps[RequestCtx, FlowCtx](
+    requestPool: RequestPoolFlow[RequestCtx, FlowCtx]) {
+    type Input = (HttpRequest, RequestCtx)
+    type IntermediateInput = (HttpRequest, (RequestCtx, FlowCtx))
+    type Output = (Try[HttpResponse], RequestCtx)
+    type IntermediateOutput = (Try[HttpResponse], (RequestCtx, FlowCtx))
+
+    def asContextFlow: FlowWithContext[Input, FlowCtx, Output, FlowCtx, _] =
       requestPool
-        .asFlowWithContext[(HttpRequest, T), Ctx, Ctx] { (input, ctx) =>
-          (input, ctx) match {
-            case ((req, t), ctx) =>
-              (req, (t, ctx))
-          }
-        } {
-          case (_, (_, ctx)) => ctx
+        .asFlowWithContext[Input, FlowCtx, FlowCtx](collapseRequestContext)(
+          extractFlowContext)
+        .map[(Try[HttpResponse], RequestCtx)] {
+          case (triedResponse, (requestCtx, _)) =>
+            (triedResponse, requestCtx)
         }
-        .map[(Try[HttpResponse], T)] {
-          case (triedResponse, (t, _)) =>
-            (triedResponse, t)
-        }
+
+    private def collapseRequestContext(in: Input,
+                                       flowCtx: FlowCtx): IntermediateInput =
+      in match {
+        case (req, requestCtx) => (req, (requestCtx, flowCtx))
+      }
+
+    private def extractFlowContext(
+      requestPoolOut: IntermediateOutput): FlowCtx =
+      requestPoolOut match {
+        case (_, (_, extractableFlowCtx)) => extractableFlowCtx
+      }
   }
 }
