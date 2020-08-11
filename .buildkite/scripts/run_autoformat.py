@@ -11,7 +11,7 @@ import sys
 
 from commands import make, git
 from git_utils import get_changed_paths
-from provider import current_branch
+from provider import current_branch, repo
 
 
 if __name__ == "__main__":
@@ -26,13 +26,7 @@ if __name__ == "__main__":
 
         git("config", "user.name", "Buildkite on behalf of Wellcome Collection")
         git("config", "user.email", "wellcomedigitalplatform@wellcome.ac.uk")
-
-        git(
-            "remote",
-            "add",
-            "ssh-origin",
-            "git@github.com:wellcomecollection/catalogue.git",
-        )
+        git("remote", "add", "ssh-origin", repo())
 
         # We checkout the branch before we add the commit, so we don't
         # include the merge commit that Buildkite makes.

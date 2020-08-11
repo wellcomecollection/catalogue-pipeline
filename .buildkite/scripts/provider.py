@@ -14,3 +14,7 @@ def is_default_branch():
     default_branch_name = remote_default_branch()
 
     return current_branch_name == default_branch_name
+
+
+def repo():
+    return os.environ["BUILDKITE_REPO"]
