@@ -11,7 +11,7 @@ def check_call(cmd):
     """
     print("*** Running %r" % " ".join(cmd))
     try:
-        return subprocess.check_call(cmd)
+        return subprocess.check_output(cmd).decode("utf8").strip()
     except subprocess.CalledProcessError as err:
         sys.exit(err.returncode)
 
