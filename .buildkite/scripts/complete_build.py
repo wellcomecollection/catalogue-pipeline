@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8
 
-import git_utils as git
+from commands import git
+from git_utils import current_branch, is_default_branch
 
 
 if __name__ == "__main__":
-    # Get git metadata
-    branch_name = git.current_branch()
+    branch_name = current_branch()
 
-    if git.is_default_branch():
+    if is_default_branch():
         print(f"Successful completion on {branch_name}, tagging latest.")
-        git.git("tag", "latest", "--force")
-        git.git("push", "origin", "latest", "--force")
+
+        git("tag", "latest", "--force")
+        git("push", "origin", "latest", "--force")
+
         print("Done.")
     else:
         print(f"Successful completion on {branch_name}, nothing to do.")
