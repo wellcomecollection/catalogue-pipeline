@@ -14,7 +14,7 @@ def get_changed_paths(*args, globs=None):
         args = list(args) + ["--", *globs]
     diff_output = git("diff", "--name-only", *args)
 
-    return {line.strip() for line in diff_output.splitlines()}
+    return set([line.strip() for line in diff_output.splitlines()])
 
 
 def remote_default_branch():

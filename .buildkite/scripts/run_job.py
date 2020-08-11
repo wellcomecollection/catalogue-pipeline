@@ -6,7 +6,8 @@ import os
 import sys
 
 from commands import make
-from git_utils import *
+from git_utils import local_current_head, get_sha1_for_tag, remote_default_head, get_changed_paths
+from provider import current_branch, is_default_branch
 from sbt_dependency_tree import Repository
 
 
@@ -53,6 +54,7 @@ def should_run_sbt_project(repo, project_name, changed_paths):
         print("*** Not significant: %s" % path)
 
     return False
+
 
 if __name__ == "__main__":
     # Get git metadata
@@ -105,5 +107,5 @@ if __name__ == "__main__":
 
     make(f"{args.project_name}-test")
 
-    if git.is_default_branch():
+    if is_default_branch():
         make(f"{args.project_name}-publish")
