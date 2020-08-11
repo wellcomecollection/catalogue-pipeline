@@ -2,7 +2,7 @@
 # -*- encoding: utf-8
 
 from commands import git
-from git_utils import current_branch, is_default_branch
+from provider import current_branch, is_default_branch
 
 
 if __name__ == "__main__":
