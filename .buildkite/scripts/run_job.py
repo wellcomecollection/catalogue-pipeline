@@ -6,7 +6,12 @@ import os
 import sys
 
 from commands import make
-from git_utils import local_current_head, get_sha1_for_tag, remote_default_head, get_changed_paths
+from git_utils import (
+    local_current_head,
+    get_sha1_for_tag,
+    remote_default_head,
+    get_changed_paths,
+)
 from provider import current_branch, is_default_branch
 from sbt_dependency_tree import Repository
 
