@@ -30,8 +30,9 @@ class Project:
             return True
         if other in self.dependencies:
             return True
-        for d in self.dependencies:
-            return d.depends_on(other)
+        if any(d.depends_on(other) for d in self.dependencies):
+            return True
+
         return False
 
 
