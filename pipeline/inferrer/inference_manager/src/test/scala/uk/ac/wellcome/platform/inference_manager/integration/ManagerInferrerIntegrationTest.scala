@@ -6,6 +6,7 @@ import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{Inside, Inspectors, OptionValues}
+import software.amazon.awssdk.services.sqs.model.Message
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
@@ -19,8 +20,7 @@ import uk.ac.wellcome.platform.inference_manager.fixtures.{
 import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
 import uk.ac.wellcome.platform.inference_manager.services.{
   FeatureVectorInferrerAdapter,
-  MergedIdentifiedImage,
-  MessagePair
+  MergedIdentifiedImage
 }
 
 import scala.concurrent.duration._
@@ -97,11 +97,11 @@ class ManagerInferrerIntegrationTest
           FeatureVectorInferrerAdapter,
           fileWriter = fileWriter,
           inferrerRequestPool =
-            Http().cachedHostConnectionPool[MessagePair[DownloadedImage]](
+            Http().cachedHostConnectionPool[(DownloadedImage, Message)](
               "localhost",
               localInferrerPort),
           imageRequestPool =
-            Http().superPool[MessagePair[MergedIdentifiedImage]]()
+            Http().superPool[(MergedIdentifiedImage, Message)]()
         ) { _ =>
           testWith((queuePair, messageSender))
         }

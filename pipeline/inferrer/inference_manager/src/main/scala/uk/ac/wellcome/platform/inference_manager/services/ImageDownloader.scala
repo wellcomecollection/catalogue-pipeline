@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.inference_manager.services
 
-import java.nio.file.{Files, Path, Paths}
+import java.nio.file.{Path, Paths}
 
 import akka.{Done, NotUsed}
 import akka.actor.ActorSystem
@@ -12,8 +12,9 @@ import akka.http.scaladsl.model.{
   StatusCodes,
   Uri
 }
+import akka.stream.scaladsl.FlowWithContext
 import akka.stream.{IOResult, Materializer}
-import akka.stream.scaladsl.{FileIO, Flow, Keep, Sink, Source}
+import akka.stream.scaladsl.{FileIO, Flow, Keep, Sink}
 import akka.util.ByteString
 import software.amazon.awssdk.services.sqs.model.Message
 import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
@@ -22,28 +23,30 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 trait FileWriter {
-  def write(implicit materializer: Materializer)
-    : Sink[(ByteString, Path), Future[IOResult]]
-  def delete(implicit materializer: Materializer): Sink[Path, Future[Done]]
+  def write(path: Path): Sink[ByteString, Future[IOResult]]
+  def delete: Sink[Path, Future[Done]]
 }
 
-class ImageDownloader(root: String = "/",
-                      requestPool: RequestPoolFlow[MergedIdentifiedImage],
-                      fileWriter: FileWriter)(implicit actorSystem: ActorSystem,
-                                              ec: ExecutionContext) {
+class ImageDownloader[Ctx](
+  root: String = "/",
+  requestPool: RequestPoolFlow[MergedIdentifiedImage, Ctx],
+  fileWriter: FileWriter)(implicit materializer: Materializer) {
+
+  implicit val ec: ExecutionContext = materializer.executionContext
 
   private val parallelism = 10
 
-  def download: Flow[MessagePair[MergedIdentifiedImage],
-                     MessagePair[DownloadedImage],
-                     NotUsed] =
-    Flow[MessagePair[MergedIdentifiedImage]]
+  def download: FlowWithContext[MergedIdentifiedImage,
+                                Ctx,
+                                DownloadedImage,
+                                Ctx,
+                                NotUsed] =
+    FlowWithContext[MergedIdentifiedImage, Ctx]
       .map(createImageFileRequest)
-      .via(requestPool)
-      .mapAsyncUnordered(parallelism)(saveImageFile)
+      .via(requestPool.asContextFlow)
+      .mapAsync(parallelism)(saveImageFile)
       .map {
-        case (message, image, path) =>
-          message -> DownloadedImage(image, path)
+        case (image, path) => DownloadedImage(image, path)
       }
 
   def delete: Sink[DownloadedImage, Future[Done]] =
@@ -52,27 +55,22 @@ class ImageDownloader(root: String = "/",
   def getLocalImagePath(image: MergedIdentifiedImage): Path =
     Paths.get(root, image.id.canonicalId, "default.jpg").toAbsolutePath
 
-  private def createImageFileRequest
-    : PartialFunction[MessagePair[MergedIdentifiedImage],
-                      (HttpRequest, MessagePair[MergedIdentifiedImage])] = {
-    case (msg, image) =>
-      val uri = getImageUri(image.location.url)
-      (HttpRequest(method = HttpMethods.GET, uri = uri), (msg, image))
+  private def createImageFileRequest(
+    image: MergedIdentifiedImage): (HttpRequest, MergedIdentifiedImage) = {
+    val uri = getImageUri(image.location.url)
+    (HttpRequest(method = HttpMethods.GET, uri = uri), image)
   }
 
   private def saveImageFile: PartialFunction[
-    (Try[HttpResponse], MessagePair[MergedIdentifiedImage]),
-    Future[(Message, MergedIdentifiedImage, Path)]
+    (Try[HttpResponse], MergedIdentifiedImage),
+    Future[(MergedIdentifiedImage, Path)]
   ] = {
-    case (
-        Success(response @ HttpResponse(StatusCodes.OK, _, _, _)),
-        (msg, image)) =>
+    case (Success(response @ HttpResponse(StatusCodes.OK, _, _, _)), image) =>
       val path = getLocalImagePath(image)
       response.entity.dataBytes
-        .map(file => file -> path)
-        .runWith(fileWriter.write)
+        .runWith(fileWriter.write(path))
         .map { _ =>
-          (msg, image, path)
+          (image, path)
         }
     case (Success(failedResponse), _) =>
       failedResponse.discardEntityBytes()
@@ -108,20 +106,10 @@ class ImageDownloader(root: String = "/",
 }
 
 object DefaultFileWriter extends FileWriter {
-  def write(implicit materializer: Materializer)
-    : Sink[(ByteString, Path), Future[IOResult]] =
-    Flow[(ByteString, Path)]
-      .map {
-        case (file, path) =>
-          Files.createDirectories(path)
-          Source
-            .single(file)
-            .runWith(FileIO.toPath(path))
-      }
-      .toMat(Sink.head)(Keep.right)
-      .mapMaterializedValue(_.flatten)
+  def write(path: Path): Sink[ByteString, Future[IOResult]] =
+    FileIO.toPath(path)
 
-  def delete(implicit materializer: Materializer): Sink[Path, Future[Done]] =
+  def delete: Sink[Path, Future[Done]] =
     Sink.foreach[Path](deletePath)
 
   // Delete path and directories above it until deletion fails (the directory is not empty)
@@ -133,11 +121,10 @@ object DefaultFileWriter extends FileWriter {
 }
 
 object ImageDownloader {
-  def apply(root: String)(implicit actorSystem: ActorSystem,
-                          ec: ExecutionContext) =
+  def apply(root: String)(implicit actorSystem: ActorSystem) =
     new ImageDownloader(
       root,
       fileWriter = DefaultFileWriter,
-      requestPool = Http().superPool[MessagePair[MergedIdentifiedImage]]()
+      requestPool = Http().superPool[(MergedIdentifiedImage, Message)]()
     )
 }

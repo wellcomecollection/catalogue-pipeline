@@ -1,6 +1,7 @@
 package uk.ac.wellcome.platform.inference_manager.fixtures
 
 import io.circe.Decoder
+import software.amazon.awssdk.services.sqs.model.Message
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.fixtures.TestWith
@@ -32,8 +33,8 @@ trait InferenceManagerWorkerServiceFixture
     messageSender: MemoryMessageSender,
     adapter: InferrerAdapter[DownloadedImage, AugmentedImage],
     fileWriter: FileWriter,
-    inferrerRequestPool: RequestPoolFlow[DownloadedImage],
-    imageRequestPool: RequestPoolFlow[MergedIdentifiedImage])(
+    inferrerRequestPool: RequestPoolFlow[DownloadedImage, Message],
+    imageRequestPool: RequestPoolFlow[MergedIdentifiedImage, Message])(
     testWith: TestWith[InferenceManagerWorkerService[String], R])(
     implicit decoder: Decoder[MergedIdentifiedImage]): R =
     withActorSystem { implicit actorSystem =>

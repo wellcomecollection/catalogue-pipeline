@@ -5,21 +5,18 @@ import java.util.concurrent.ConcurrentHashMap
 import akka.http.scaladsl.model.{HttpRequest, HttpResponse, StatusCodes, Uri}
 import akka.stream.scaladsl.Flow
 import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.platform.inference_manager.services.{
-  MessagePair,
-  RequestPoolFlow
-}
+import uk.ac.wellcome.platform.inference_manager.services.RequestPoolFlow
 
 import scala.collection.JavaConverters._
 import scala.collection._
 import scala.util.Try
 
-class RequestPoolMock[T](matchResponse: Uri => Option[HttpResponse]) {
+class RequestPoolMock[T, Ctx](matchResponse: Uri => Option[HttpResponse]) {
   val requests: concurrent.Map[HttpRequest, Unit] =
     new ConcurrentHashMap[HttpRequest, Unit].asScala
 
-  def pool: RequestPoolFlow[T] =
-    Flow[(HttpRequest, MessagePair[T])].map {
+  def pool: RequestPoolFlow[T, Ctx] =
+    Flow[(HttpRequest, (T, Ctx))].map {
       case (request, messagePair) =>
         requests.put(request, ())
         Try(
@@ -30,12 +27,12 @@ class RequestPoolMock[T](matchResponse: Uri => Option[HttpResponse]) {
 }
 
 object RequestPoolMock {
-  def apply[T](matchResponse: String => Option[HttpResponse]) =
-    new RequestPoolMock[T](uri => matchResponse(uri.toString))
+  def apply[T, Ctx](matchResponse: String => Option[HttpResponse]) =
+    new RequestPoolMock[T, Ctx](uri => matchResponse(uri.toString))
 }
 
 trait RequestPoolFixtures {
-  def withResponsePool[T, R](matchResponse: String => Option[HttpResponse])(
-    testWith: TestWith[RequestPoolMock[T], R]): R =
-    testWith(RequestPoolMock[T](matchResponse))
+  def withRequestPool[T, Ctx, R](matchResponse: String => Option[HttpResponse])(
+    testWith: TestWith[RequestPoolMock[T, Ctx], R]): R =
+    testWith(RequestPoolMock[T, Ctx](matchResponse))
 }

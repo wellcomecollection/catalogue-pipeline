@@ -3,6 +3,7 @@ package uk.ac.wellcome.platform.inference_manager
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import com.typesafe.config.Config
+import software.amazon.awssdk.services.sqs.model.Message
 import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
@@ -10,8 +11,7 @@ import uk.ac.wellcome.platform.inference_manager.services.{
   FeatureVectorInferrerAdapter,
   ImageDownloader,
   InferenceManagerWorkerService,
-  MergedIdentifiedImage,
-  MessagePair
+  MergedIdentifiedImage
 }
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
@@ -34,7 +34,7 @@ object Main extends WellcomeTypesafeApp {
 
     val inferrerClientFlow =
       Http()
-        .cachedHostConnectionPool[MessagePair[DownloadedImage]](
+        .cachedHostConnectionPool[(DownloadedImage, Message)](
           config
             .getStringOption("inferrer.host")
             .getOrElse("localhost"),
