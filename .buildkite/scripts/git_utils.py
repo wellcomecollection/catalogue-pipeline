@@ -1,17 +1,6 @@
 # -*- encoding: utf-8
 
-import os
-import subprocess
-import sys
-
-
-def git(*args):
-    """Run a Git command and return its output."""
-    cmd = ["git"] + list(args)
-    try:
-        return subprocess.check_output(cmd).decode("utf8").strip()
-    except subprocess.CalledProcessError as err:
-        sys.exit(err.returncode)
+from commands import git
 
 
 def get_changed_paths(*args, globs=None):
@@ -25,7 +14,7 @@ def get_changed_paths(*args, globs=None):
         args = list(args) + ["--", *globs]
     diff_output = git("diff", "--name-only", *args)
 
-    return set([line.strip() for line in diff_output.splitlines()])
+    return {line.strip() for line in diff_output.splitlines()}
 
 
 def remote_default_branch():
@@ -44,16 +33,6 @@ def local_current_head():
 
 
 def get_sha1_for_tag(tag):
+    """Use show-ref to discover the hash for a given tag (fetch first so we have all remote tags)."""
     git("fetch")
-    return git("show-ref", "-s", tag)
-
-
-def current_branch():
-    return os.environ["BUILDKITE_BRANCH"]
-
-
-def is_default_branch():
-    current_branch_name = current_branch()
-    default_branch_name = remote_default_branch()
-
-    return current_branch_name == default_branch_name
+    return git("show-ref", "--hash", tag)

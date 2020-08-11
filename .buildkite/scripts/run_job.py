@@ -3,30 +3,17 @@
 
 import argparse
 import os
-import subprocess
 import sys
 
-import git_utils as git
-
+from commands import make
+from git_utils import (
+    local_current_head,
+    get_sha1_for_tag,
+    remote_default_head,
+    get_changed_paths,
+)
+from provider import current_branch, is_default_branch
 from sbt_dependency_tree import Repository
-
-
-def check_call(cmd):
-    """
-    A wrapped version of subprocess.check_call() that doesn't print a
-    traceback if the command errors.
-    """
-    print("*** Running %r" % " ".join(cmd))
-    try:
-        return subprocess.check_call(cmd)
-    except subprocess.CalledProcessError as err:
-        print(err)
-        sys.exit(err.returncode)
-
-
-def make(*args):
-    """Run a Make command, and check it completes successfully."""
-    check_call(["make"] + list(args))
 
 
 def should_run_sbt_project(repo, project_name, changed_paths):
@@ -48,7 +35,7 @@ def should_run_sbt_project(repo, project_name, changed_paths):
         if path.startswith((".buildkite", "docs/")):
             continue
 
-        if path.endswith(".tf"):
+        if path.endswith((".py", ".tf", ".md")):
             continue
 
         if path.endswith("Makefile"):
@@ -78,17 +65,17 @@ if __name__ == "__main__":
     # Get git metadata
 
     commit_range = None
-    local_head = git.local_current_head()
+    local_head = local_current_head()
 
-    if git.is_default_branch():
-        latest_sha = git.get_sha1_for_tag("latest")
+    if is_default_branch():
+        latest_sha = get_sha1_for_tag("latest")
         commit_range = f"{latest_sha}..{local_head}"
     else:
-        remote_head = git.remote_default_head()
+        remote_head = remote_default_head()
         commit_range = f"{remote_head}..{local_head}"
 
-    print(f"Working in branch: {git.current_branch()}")
-    print(f"On default branch: {git.is_default_branch()}")
+    print(f"Working in branch: {current_branch()}")
+    print(f"On default branch: {is_default_branch()}")
     print(f"Commit range: {commit_range}")
 
     # Parse script args
@@ -105,7 +92,7 @@ if __name__ == "__main__":
     else:
         change_globs = None
 
-    changed_paths = git.get_changed_paths(commit_range, globs=change_globs)
+    changed_paths = get_changed_paths(commit_range, globs=change_globs)
 
     # Determine whether we should build this project
 
@@ -125,5 +112,5 @@ if __name__ == "__main__":
 
     make(f"{args.project_name}-test")
 
-    if git.is_default_branch():
+    if is_default_branch():
         make(f"{args.project_name}-publish")

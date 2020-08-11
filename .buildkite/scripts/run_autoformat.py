@@ -7,53 +7,11 @@ In particular, it runs the 'make format' task, and if there are any changes,
 it pushes a new commit to your pull request and aborts the current build.
 """
 
-import os
-import subprocess
 import sys
 
-
-def branch_name():
-    """Return the name of the branch under test."""
-    return os.environ["BUILDKITE_BRANCH"]
-
-
-def check_call(cmd):
-    """
-    A wrapped version of subprocess.check_call() that doesn't print a
-    traceback if the command errors.
-    """
-    print("*** Running %r" % " ".join(cmd))
-    try:
-        return subprocess.check_call(cmd)
-    except subprocess.CalledProcessError as err:
-        print(err)
-        sys.exit(err.returncode)
-
-
-def git(*args):
-    """Run a Git command and return its output."""
-    cmd = ["git"] + list(args)
-    try:
-        return subprocess.check_output(cmd).decode("utf8").strip()
-    except subprocess.CalledProcessError as err:
-        print(err)
-        sys.exit(err.returncode)
-
-
-def make(*args):
-    """Run a Make command, and check it completes successfully."""
-    check_call(["make"] + list(args))
-
-
-def get_changed_paths(*args):
-    """
-    Returns a set of changed paths in a given commit range.
-
-    :param commit_range: Arguments to pass to ``git diff``.
-    """
-    diff_output = git("diff", "--name-only", *args)
-
-    return set([line.strip() for line in diff_output.splitlines()])
+from commands import make, git
+from git_utils import get_changed_paths
+from provider import current_branch, repo
 
 
 if __name__ == "__main__":
@@ -66,24 +24,18 @@ if __name__ == "__main__":
     if get_changed_paths():
         print("*** There were changes from formatting, creating a commit")
 
-        git("config", "user.name", "Buildkite on behalf of Wellcome")
+        git("config", "user.name", "Buildkite on behalf of Wellcome Collection")
         git("config", "user.email", "wellcomedigitalplatform@wellcome.ac.uk")
-
-        git(
-            "remote",
-            "add",
-            "ssh-origin",
-            "git@github.com:wellcomecollection/catalogue.git",
-        )
+        git("remote", "add", "ssh-origin", repo())
 
         # We checkout the branch before we add the commit, so we don't
         # include the merge commit that Buildkite makes.
         git("fetch", "ssh-origin")
-        git("checkout", "--track", f"origin/{branch_name()}")
+        git("checkout", "--track", f"origin/{current_branch()}")
 
         git("add", "--verbose", "--update")
         git("commit", "-m", "Apply auto-formatting rules")
-        git("push", "ssh-origin", "HEAD:%s" % branch_name())
+        git("push", "ssh-origin", f"HEAD:{current_branch()}")
 
         # We exit here to fail the build, so Buildkite will skip to the next
         # build, which includes the autoformat commit.
