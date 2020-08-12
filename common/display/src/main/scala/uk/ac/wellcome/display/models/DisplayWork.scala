@@ -23,6 +23,11 @@ case class DisplayWork(
   ) alternativeTitles: List[String],
   @Schema(
     `type` = "String",
+    description =
+      "The identifier used by researchers to cite or refer to a work."
+  ) referenceNumber: Option[String] = None,
+  @Schema(
+    `type` = "String",
     description = "A description given to a thing."
   ) description: Option[String] = None,
   @Schema(
@@ -100,6 +105,22 @@ case class DisplayWork(
     `type` = "List[uk.ac.wellcome.display.models.DisplayImageWorkInclude]",
     description = "Identifiers of images that are sourced from this work"
   ) images: Option[List[DisplayWorkImageInclude]] = None,
+  @Schema(
+    `type` = "List[Work]",
+    description = "Child works."
+  ) parts: Option[List[DisplayWork]] = None,
+  @Schema(
+    `type` = "List[Work]",
+    description = "Ancestor works."
+  ) partOf: Option[List[DisplayWork]] = None,
+  @Schema(
+    `type` = "List[Work]",
+    description = "Sibling works earlier in a series."
+  ) precededBy: Option[List[DisplayWork]] = None,
+  @Schema(
+    `type` = "List[Work]",
+    description = "Sibling works later in a series."
+  ) succeededBy: Option[List[DisplayWork]] = None,
   @JsonKey("type") @Schema(name = "type") ontologyType: String = "Work"
 )
 
@@ -110,6 +131,7 @@ case object DisplayWork {
       id = work.canonicalId,
       title = work.data.title,
       alternativeTitles = work.data.alternativeTitles,
+      referenceNumber = work.data.collectionPath.flatMap(_.label),
       description = work.data.description,
       physicalDescription = work.data.physicalDescription,
       lettering = work.data.lettering,

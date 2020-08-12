@@ -3,6 +3,7 @@ import com.sksamuel.elastic4s.json.{XContentBuilder, XContentFactory}
 import com.sksamuel.elastic4s.requests.analysis.{
   Analysis,
   CustomAnalyzer,
+  CustomNormalizer,
   PathHierarchyTokenizer,
   ShingleTokenFilter,
   StemmerTokenFilter,
@@ -48,10 +49,9 @@ object WorksAnalysis {
       lang = "possessive_english")
 
   val asciifoldingAnalyzer = CustomAnalyzer(
-    "shingle_asciifolding_analyzer",
+    "asciifolding_analyzer",
     tokenizer = "standard",
-    tokenFilters =
-      List("lowercase", shingleTokenFilter.name, asciiFoldingTokenFilter.name),
+    tokenFilters = List("lowercase", asciiFoldingTokenFilter.name),
     charFilters = Nil
   )
 
@@ -74,20 +74,35 @@ object WorksAnalysis {
     charFilters = Nil
   )
 
+  val whitespaceAnalyzer = CustomAnalyzer(
+    "whitespace_analyzer",
+    tokenizer = "whitespace",
+    tokenFilters = Nil,
+    charFilters = Nil,
+  )
+
+  val lowercaseNormalizer = CustomNormalizer(
+    "lowercase_normalizer",
+    tokenFilters = List("lowercase"),
+    charFilters = Nil
+  )
+
   def apply(): Analysis = {
     Analysis(
       analyzers = List(
         pathAnalyzer,
         asciifoldingAnalyzer,
         shingleAsciifoldingAnalyzer,
-        englishAnalyzer
+        englishAnalyzer,
+        whitespaceAnalyzer,
       ),
       tokenFilters = List(
         asciiFoldingTokenFilter,
         shingleTokenFilter,
         englishStemmerTokenFilter,
         englishPossessiveStemmerTokenFilter),
-      tokenizers = List(pathTokenizer)
+      tokenizers = List(pathTokenizer),
+      normalizers = List(lowercaseNormalizer)
     )
 
   }

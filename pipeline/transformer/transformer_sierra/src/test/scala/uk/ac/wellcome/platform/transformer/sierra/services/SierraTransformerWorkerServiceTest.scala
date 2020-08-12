@@ -1,12 +1,10 @@
 package uk.ac.wellcome.platform.transformer.sierra.services
 
-import org.scalatest.concurrent.IntegrationPatience
+import io.circe.Encoder
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.bigmessaging.BigMessageSender
-import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
-import uk.ac.wellcome.bigmessaging.memory.MemoryBigMessageSender
-import uk.ac.wellcome.bigmessaging.message.MessageNotification
+import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.{Queue, QueuePair}
 import uk.ac.wellcome.messaging.sns.NotificationMessage
@@ -26,16 +24,22 @@ import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryVersionedStore}
 import uk.ac.wellcome.storage.{StoreReadError, StoreWriteError, Version}
 import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.messaging.fixtures.SQS
+import uk.ac.wellcome.messaging.memory.MemoryMessageSender
+import uk.ac.wellcome.storage.generators.RandomThings
 
 import scala.util.{Failure, Try}
 
 class SierraTransformerWorkerServiceTest
     extends AnyFunSpec
     with Matchers
+    with Eventually
     with IntegrationPatience
-    with BigMessagingFixture
     with SierraGenerators
-    with IdentifiersGenerators {
+    with Akka
+    with SQS
+    with IdentifiersGenerators
+    with RandomThings {
 
   it("transforms sierra records and publishes the result to the given topic") {
     withLocalSqsQueue() { queue =>
@@ -56,12 +60,11 @@ class SierraTransformerWorkerServiceTest
       val key = Version(id.withoutCheckDigit, 0)
       val store =
         createStore[SierraTransformable](Map(key -> sierraTransformable))
-      val sender = new MemoryBigMessageSender[TransformedBaseWork]()
+      val sender = new MemoryMessageSender()
       withWorkerService(store, sender, queue) { _ =>
         sendNotificationToSQS(queue, key)
 
         eventually {
-
           val sourceIdentifier =
             createSierraSystemSourceIdentifierWith(
               value = id.withCheckDigit
@@ -92,7 +95,7 @@ class SierraTransformerWorkerServiceTest
     val transformable = createSierraTransformable
     val key = Version(transformable.sierraId.withoutCheckDigit, version)
     val store = createStore(Map(key -> transformable))
-    val sender = new MemoryBigMessageSender[TransformedBaseWork]()
+    val sender = new MemoryMessageSender()
     withLocalSqsQueue() { queue =>
       sendNotificationToSQS(queue, key)
 
@@ -117,29 +120,30 @@ class SierraTransformerWorkerServiceTest
         sendNotificationToSQS(queue, Version(randomAlphanumeric, 1))
 
         val store = brokenStore
-        val sender = new MemoryBigMessageSender[TransformedBaseWork]()
+        val sender = new MemoryMessageSender()
         withWorkerService(store, sender, queue) { _ =>
           eventually {
             assertQueueEmpty(queue)
-            assertQueueHasSize(dlq, 1)
-            sender.getMessages[TransformedBaseWork].toList shouldBe Nil
+            assertQueueHasSize(dlq, size = 1)
+
+            sender.messages shouldBe empty
           }
         }
     }
   }
 
   it("fails if the record does not exist in store") {
-
     withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
         val store = createStore[SierraTransformable]()
-        val sender = new MemoryBigMessageSender[TransformedBaseWork]()
+        val sender = new MemoryMessageSender()
         sendNotificationToSQS(queue, Version(randomAlphanumeric, 1))
-        withWorkerService(store, sender, queue) { recordReceiver =>
+        withWorkerService(store, sender, queue) { _ =>
           eventually {
             assertQueueEmpty(queue)
-            assertQueueHasSize(dlq, 1)
-            sender.getMessages[TransformedBaseWork].toList shouldBe Nil
+            assertQueueHasSize(dlq, size = 1)
+
+            sender.messages shouldBe empty
           }
         }
     }
@@ -149,17 +153,18 @@ class SierraTransformerWorkerServiceTest
     withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
         val store = createStore[SierraTransformable]()
-        val sender = new MemoryBigMessageSender[TransformedBaseWork]()
+        val sender = new MemoryMessageSender()
         sendNotificationToSQS(
           queue,
           """{
           |"not a key": true
           |}""".stripMargin)
-        withWorkerService(store, sender, queue) { recordReceiver =>
+        withWorkerService(store, sender, queue) { _ =>
           eventually {
             assertQueueEmpty(queue)
-            assertQueueHasSize(dlq, 1)
-            sender.getMessages[TransformedBaseWork].toList shouldBe Nil
+            assertQueueHasSize(dlq, size = 1)
+
+            sender.messages shouldBe empty
           }
         }
     }
@@ -169,15 +174,16 @@ class SierraTransformerWorkerServiceTest
     val transformable = createSierraTransformable
     val key = Version(transformable.sierraId.withoutCheckDigit, 0)
     val store = createStore(Map(key -> transformable))
-    val sender = new MemoryBigMessageSender[TransformedBaseWork]()
+    val sender = new MemoryMessageSender()
     withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
         sendNotificationToSQS(queue, key)
-        withBrokenWorkerService(store, sender, queue) { recordReceiver =>
+        withBrokenWorkerService(store, sender, queue) { _ =>
           eventually {
             assertQueueEmpty(queue)
             assertQueueHasSize(dlq, 1)
-            sender.getMessages[TransformedBaseWork].toList shouldBe Nil
+
+            sender.messages shouldBe empty
           }
         }
     }
@@ -187,18 +193,20 @@ class SierraTransformerWorkerServiceTest
     val transformable = createSierraTransformable
     val key = Version(transformable.sierraId.withoutCheckDigit, 0)
     val store = createStore(Map(key -> transformable))
-    val sender = new MemoryBigMessageSender[TransformedBaseWork] {
-      override def sendT(t: TransformedBaseWork): Try[MessageNotification] =
+    val brokenSender = new MemoryMessageSender() {
+      override def sendT[T](t: T)(implicit encoder: Encoder[T]): Try[Unit] =
         Failure(new Exception("BOOM!"))
     }
+
     withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
         sendNotificationToSQS(queue, key)
-        withWorkerService(store, sender, queue) { recordReceiver =>
+        withWorkerService(store, brokenSender, queue) { _ =>
           eventually {
             assertQueueEmpty(queue)
             assertQueueHasSize(dlq, 1)
-            sender.getMessages[TransformedBaseWork].toList shouldBe Nil
+
+            brokenSender.messages shouldBe empty
           }
         }
     }
@@ -206,7 +214,7 @@ class SierraTransformerWorkerServiceTest
 
   def withWorkerService[R](
     store: VersionedStore[String, Int, SierraTransformable],
-    sender: BigMessageSender[String, TransformedBaseWork],
+    sender: MemoryMessageSender,
     queue: Queue)(
     testWith: TestWith[SierraTransformerWorkerService[String], R]): R =
     withActorSystem { implicit actorSystem =>
@@ -223,7 +231,7 @@ class SierraTransformerWorkerServiceTest
 
   def withBrokenWorkerService[R](
     store: VersionedStore[String, Int, SierraTransformable],
-    sender: BigMessageSender[String, TransformedBaseWork],
+    sender: MemoryMessageSender,
     queue: Queue)(
     testWith: TestWith[SierraTransformerWorkerService[String], R]): R =
     withActorSystem { implicit actorSystem =>
@@ -242,7 +250,7 @@ class SierraTransformerWorkerServiceTest
       }
     }
 
-  private def brokenStore = {
+  private def brokenStore: MemoryVersionedStore[String, SierraTransformable] = {
     new MemoryVersionedStore[String, SierraTransformable](
       new MemoryStore(Map[Version[String, Int], SierraTransformable]())
       with MemoryMaxima[String, SierraTransformable]) {

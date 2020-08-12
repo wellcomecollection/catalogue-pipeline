@@ -24,17 +24,15 @@ class ElasticsearchSourceTest
 
   it("outputs the entire content of the index") {
     withActorSystem { implicit actorSystem =>
-      withMaterializer(actorSystem) { implicit materializer =>
-        withLocalWorksIndex { index =>
-          val works = createIdentifiedWorks(count = 10)
-          insertIntoElasticsearch(index, works: _*)
+      withLocalWorksIndex { index =>
+        val works = createIdentifiedWorks(count = 10)
+        insertIntoElasticsearch(index, works: _*)
 
-          withSource(index) { source =>
-            val future = source.runWith(Sink.seq)
+        withSource(index) { source =>
+          val future = source.runWith(Sink.seq)
 
-            whenReady(future) { result =>
-              result should contain theSameElementsAs works
-            }
+          whenReady(future) { result =>
+            result should contain theSameElementsAs works
           }
         }
       }
@@ -43,20 +41,18 @@ class ElasticsearchSourceTest
 
   it("filters non visible works") {
     withActorSystem { implicit actorSystem =>
-      withMaterializer(actorSystem) { implicit materializer =>
-        withLocalWorksIndex { index =>
-          val visibleWorks = createIdentifiedWorks(count = 10)
-          val invisibleWorks = createIdentifiedInvisibleWorks(count = 3)
+      withLocalWorksIndex { index =>
+        val visibleWorks = createIdentifiedWorks(count = 10)
+        val invisibleWorks = createIdentifiedInvisibleWorks(count = 3)
 
-          val works = visibleWorks ++ invisibleWorks
-          insertIntoElasticsearch(index, works: _*)
+        val works = visibleWorks ++ invisibleWorks
+        insertIntoElasticsearch(index, works: _*)
 
-          withSource(index) { source =>
-            val future = source.runWith(Sink.seq)
+        withSource(index) { source =>
+          val future = source.runWith(Sink.seq)
 
-            whenReady(future) { result =>
-              result should contain theSameElementsAs visibleWorks
-            }
+          whenReady(future) { result =>
+            result should contain theSameElementsAs visibleWorks
           }
         }
       }

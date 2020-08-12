@@ -28,8 +28,18 @@ module "image_inferrer" {
   cluster_name = aws_ecs_cluster.cluster.name
   cluster_arn  = aws_ecs_cluster.cluster.arn
 
-  host_cpu    = 4096
-  host_memory = 8192
+  launch_type = "EC2"
+  capacity_provider_strategies = [{
+    capacity_provider = module.inference_capacity_provider.name
+    weight            = 1
+  }]
+  ordered_placement_strategies = [{
+    type  = "spread"
+    field = "host"
+  }]
+
+  host_cpu    = null
+  host_memory = null
 
   manager_container_name  = "inference_manager"
   manager_container_image = local.inference_manager_image
@@ -39,7 +49,7 @@ module "image_inferrer" {
   app_container_name  = "inferrer"
   app_container_image = local.feature_inferrer_image
   app_cpu             = 3584
-  app_memory          = 7680
+  app_memory          = 7000
   app_healthcheck = {
     command     = ["CMD-SHELL", "curl -f http://localhost:${local.inferrer_port}/healthcheck"],
     interval    = 30,

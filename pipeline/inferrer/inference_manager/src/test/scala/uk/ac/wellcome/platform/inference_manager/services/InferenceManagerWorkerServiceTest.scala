@@ -1,11 +1,12 @@
 package uk.ac.wellcome.platform.inference_manager.services
 
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{BeforeAndAfterAll, Inside, Inspectors, OptionValues}
 import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
+import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.work.internal.{
   AugmentedImage,
   Identified,
@@ -29,6 +30,8 @@ class InferenceManagerWorkerServiceTest
     with OptionValues
     with Inspectors
     with BeforeAndAfterAll
+    with Eventually
+    with IntegrationPatience
     with InferenceManagerWorkerServiceFixture[
       MergedImage[Identified, Minted],
       AugmentedImage
@@ -49,13 +52,15 @@ class InferenceManagerWorkerServiceTest
   it(
     "reads image messages, augments them with the inferrer, and sends them to SNS") {
     withWorkerServiceFixtures {
-      case (QueuePair(queue, dlq), topic) =>
+      case (QueuePair(queue, dlq), messageSender) =>
         val image = createIdentifiedMergedImageWith()
         sendMessage(queue, image)
         eventually {
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
-          val augmentedWork = getMessages[AugmentedImage](topic).head
+
+          val augmentedWork = messageSender.getMessages[AugmentedImage].head
+
           inside(augmentedWork) {
             case AugmentedImage(id, _, _, _, inferredData) =>
               id should be(image.id)
@@ -90,7 +95,7 @@ class InferenceManagerWorkerServiceTest
 
   it("allows images that fail inference nondeterministically to pass through") {
     withWorkerServiceFixtures {
-      case (QueuePair(queue, dlq), topic) =>
+      case (QueuePair(queue, dlq), messageSender) =>
         val image500 = createIdentifiedMergedImageWith(
           location = createDigitalLocationWith(url = "extremely_cursed_image")
         )
@@ -98,7 +103,9 @@ class InferenceManagerWorkerServiceTest
         eventually {
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
-          val output = getMessages[AugmentedImage](topic).head
+
+          val output = messageSender.getMessages[AugmentedImage].head
+
           inside(output) {
             case AugmentedImage(id, _, _, _, inferredData) =>
               id should be(image500.id)
@@ -109,16 +116,16 @@ class InferenceManagerWorkerServiceTest
   }
 
   def withWorkerServiceFixtures[R](
-    testWith: TestWith[(QueuePair, Topic), R]): R =
+    testWith: TestWith[(QueuePair, MemoryMessageSender), R]): R =
     withLocalSqsQueuePair() { queuePair =>
-      withLocalSnsTopic { topic =>
-        withWorkerService(
-          queuePair.queue,
-          topic,
-          FeatureVectorInferrerAdapter,
-          inferrerMock.port) { _ =>
-          testWith((queuePair, topic))
-        }
+      val messageSender = new MemoryMessageSender()
+
+      withWorkerService(
+        queuePair.queue,
+        messageSender,
+        FeatureVectorInferrerAdapter,
+        inferrerMock.port) { _ =>
+        testWith((queuePair, messageSender))
       }
     }
 }

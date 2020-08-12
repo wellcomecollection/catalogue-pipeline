@@ -11,9 +11,9 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.storage.ObjectLocation
 import uk.ac.wellcome.storage.fixtures.S3Fixtures
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
+import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 
 import scala.concurrent.Future
@@ -118,5 +118,5 @@ class SequentialS3SinkTest
   }
 
   def getJsonFromS3(bucket: Bucket, key: String): Json =
-    getJsonFromS3(ObjectLocation(bucket.name, key))
+    getJsonFromS3(S3ObjectLocation(bucket.name, key))
 }

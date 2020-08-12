@@ -1,32 +1,37 @@
 package uk.ac.wellcome.calm_adapter
 
-import scala.util.{Failure, Try}
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.language.reflectiveCalls
 import java.time.{Instant, LocalDate}
 
-import org.scalatest.matchers.should.Matchers
+import akka.NotUsed
 import akka.stream.scaladsl._
 import io.circe.Encoder
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
+import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
-import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSMessageSender}
-import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryVersionedStore}
+import uk.ac.wellcome.messaging.memory.{
+  MemoryIndividualMessageSender,
+  MemoryMessageSender
+}
+import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.storage.Version
 import uk.ac.wellcome.storage.maxima.Maxima
 import uk.ac.wellcome.storage.maxima.memory.MemoryMaxima
-import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryVersionedStore}
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.language.reflectiveCalls
+import scala.util.{Failure, Try}
 
 class CalmAdapterWorkerServiceTest
     extends AnyFunSpec
     with Matchers
     with Akka
     with SQS
-    with SNS
     with Eventually
     with IntegrationPatience {
 
@@ -43,8 +48,10 @@ class CalmAdapterWorkerServiceTest
   it("should process an incoming window, storing records and publishing keys") {
     val store = dataStore()
     val retriever = calmRetriever(List(recordA, recordB, recordC))
-    withCalmAdapterWorkerService(retriever, store) {
-      case (calmAdapter, QueuePair(queue, dlq), topic) =>
+    val messageSender = new MemoryMessageSender()
+
+    withCalmAdapterWorkerService(retriever, store, messageSender) {
+      case (_, QueuePair(queue, dlq)) =>
         sendNotificationToSQS(queue, CalmWindow(queryDate))
         eventually {
           store.entries shouldBe Map(
@@ -59,7 +66,8 @@ class CalmAdapterWorkerServiceTest
             CalmQuery.ModifiedDate(queryDate))
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
-          getMessages(topic) shouldBe List(
+
+          messageSender.getMessages[Version[String, Int]] shouldBe List(
             Version("A", 0),
             Version("B", 0),
             Version("C", 0)
@@ -71,21 +79,23 @@ class CalmAdapterWorkerServiceTest
   it("should complete successfully when no records returned from the query") {
     val store = dataStore()
     val retriever = calmRetriever(Nil)
-    withCalmAdapterWorkerService(retriever, store) {
-      case (calmAdapter, QueuePair(queue, dlq), topic) =>
+    val messageSender = new MemoryMessageSender()
+
+    withCalmAdapterWorkerService(retriever, store, messageSender) {
+      case (_, QueuePair(queue, dlq)) =>
         sendNotificationToSQS(queue, CalmWindow(queryDate))
         Thread.sleep(1500)
         store.entries shouldBe Map.empty
         assertQueueEmpty(queue)
         assertQueueEmpty(dlq)
-        getMessages(topic) shouldBe Nil
+
+        messageSender.messages shouldBe empty
     }
   }
 
   it("should send the message to the DLQ if publishing of any record fails") {
-    val store = dataStore()
     val retriever = new CalmRetriever {
-      def apply(query: CalmQuery) = {
+      def apply(query: CalmQuery): Source[CalmRecord, NotUsed] = {
         val timestamp = Instant.now
         val records = List(
           CalmRecord("A", Map.empty, timestamp),
@@ -95,65 +105,52 @@ class CalmAdapterWorkerServiceTest
         Source.fromIterator(() => records.toIterator)
       }
     }
-    val createBrokenMsgSender = (topic: SNS.Topic) =>
-      new SNSMessageSender(
-        snsClient = snsClient,
-        snsConfig = createSNSConfigWith(topic),
-        subject = "BrokenSNSMessageSender"
-      ) {
-        override def sendT[T](item: T)(
-          implicit encoder: Encoder[T]): Try[Unit] = {
-          if (item.asInstanceOf[Version[String, Int]].id == "B")
-            Failure(new Exception("Waaah I couldn't send message"))
-          else
-            super.sendT(item)
+    val brokenMessageSender = new MemoryMessageSender() {
+      override val underlying: MemoryIndividualMessageSender =
+        new MemoryIndividualMessageSender() {
+          override def sendT[T](t: T)(subject: String, destination: String)(
+            implicit encoder: Encoder[T]): Try[Unit] =
+            if (t.asInstanceOf[Version[String, Int]].id == "B")
+              Failure(new Exception("Waaah I couldn't send message"))
+            else
+              super.sendT(t)(subject, destination)
         }
     }
-    withCalmAdapterWorkerService(retriever, store, createBrokenMsgSender(_)) {
-      case (calmAdapter, QueuePair(queue, dlq), topic) =>
+
+    withCalmAdapterWorkerService(retriever, messageSender = brokenMessageSender) {
+      case (_, QueuePair(queue, dlq)) =>
         sendNotificationToSQS(queue, CalmWindow(queryDate))
         Thread.sleep(2000)
         assertQueueEmpty(queue)
-        assertQueueHasSize(dlq, 1)
+        assertQueueHasSize(dlq, size = 1)
     }
   }
 
   def withCalmAdapterWorkerService[R](
     retriever: CalmRetriever,
-    store: MemoryStore[Key, CalmRecord] with Maxima[String, Int],
-    createMsgSender: SNS.Topic => SNSMessageSender = createMsgSender(_))(
-    testWith: TestWith[(CalmAdapterWorkerService, QueuePair, SNS.Topic), R]) =
+    store: MemoryStore[Key, CalmRecord] with Maxima[String, Int] = dataStore(),
+    messageSender: MemoryMessageSender = new MemoryMessageSender())(
+    testWith: TestWith[(CalmAdapterWorkerService[String], QueuePair), R]): R =
     withActorSystem { implicit actorSystem =>
-      withLocalSnsTopic { topic =>
-        withLocalSqsQueuePair() {
-          case QueuePair(queue, dlq) =>
-            withSQSStream[NotificationMessage, R](queue) { stream =>
-              withMaterializer { implicit materializer =>
-                val calmAdapter = new CalmAdapterWorkerService(
-                  stream,
-                  createMsgSender(topic),
-                  retriever,
-                  new CalmStore(new MemoryVersionedStore(store))
-                )
-                calmAdapter.run()
-                testWith((calmAdapter, QueuePair(queue, dlq), topic))
-              }
-            }
-        }
+      withLocalSqsQueuePair() {
+        case QueuePair(queue, dlq) =>
+          withSQSStream[NotificationMessage, R](queue) { stream =>
+            val calmAdapter = new CalmAdapterWorkerService(
+              stream,
+              messageSender = messageSender,
+              retriever,
+              new CalmStore(new MemoryVersionedStore(store))
+            )
+            calmAdapter.run()
+            testWith((calmAdapter, QueuePair(queue, dlq)))
+          }
       }
     }
-
-  def createMsgSender(topic: SNS.Topic) =
-    new SNSMessageSender(
-      snsClient = snsClient,
-      snsConfig = createSNSConfigWith(topic),
-      subject = "SNSMessageSender"
-    )
 
   def calmRetriever(records: List[CalmRecord]) =
     new CalmRetriever {
       var previousQuery: Option[CalmQuery] = None
-      def apply(query: CalmQuery) = {
+      def apply(query: CalmQuery): Source[CalmRecord, NotUsed] = {
         previousQuery = Some(query)
         Source.fromIterator(() => records.toIterator)
       }
@@ -161,9 +158,4 @@ class CalmAdapterWorkerServiceTest
 
   def dataStore(entries: (Key, CalmRecord)*) =
     new MemoryStore(entries.toMap) with MemoryMaxima[String, CalmRecord]
-
-  def getMessages(topic: SNS.Topic) =
-    listMessagesReceivedFromSNS(topic)
-      .map(msgInfo => fromJson[Version[String, Int]](msgInfo.message).get)
-      .toList
 }

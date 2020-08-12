@@ -40,6 +40,27 @@ variable "min_capacity" {
   default = 0
 }
 
+variable "launch_type" {
+  type    = string
+  default = "FARGATE"
+}
+
+variable "capacity_provider_strategies" {
+  type = list(object({
+    capacity_provider = string
+    weight            = number
+  }))
+  default = []
+}
+
+variable "ordered_placement_strategies" {
+  type = list(object({
+    type  = string
+    field = string
+  }))
+  default = []
+}
+
 variable "messages_bucket_arn" {}
 
 variable "queue_read_policy" {}

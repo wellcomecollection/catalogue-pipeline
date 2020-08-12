@@ -4,7 +4,7 @@ import java.io.File
 import java.nio.file.Paths
 
 import akka.stream.scaladsl.{FileIO, Flow, Keep, Sink, Source}
-import akka.stream.{IOResult, Materializer}
+import akka.stream.IOResult
 import akka.util.ByteString
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
@@ -23,10 +23,7 @@ class StringToGzipFlowTest
     with IntegrationPatience {
 
   it("produces a gzip-compressed file from the lines") {
-    withActorSystem { actorSystem =>
-      implicit val materializer: Materializer =
-        Materializer(actorSystem)
-
+    withActorSystem { implicit actorSystem =>
       val flow = StringToGzipFlow()
 
       val expectedLines = List(

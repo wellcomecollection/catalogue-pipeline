@@ -2,45 +2,22 @@ package uk.ac.wellcome.bigmessaging.fixtures
 
 import akka.actor.ActorSystem
 import io.circe.{Decoder, Encoder}
-import org.scalatest.matchers.should.Matchers
 import software.amazon.awssdk.services.cloudwatch.model.StandardUnit
-import software.amazon.awssdk.services.sns.SnsClient
 import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import software.amazon.awssdk.services.sqs.model.SendMessageResponse
-import uk.ac.wellcome.akka.fixtures.Akka
-import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.bigmessaging.message._
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.messaging.MessageSender
-import uk.ac.wellcome.messaging.fixtures.SNS.Topic
-import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
+import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
-import uk.ac.wellcome.messaging.sns.{SNSConfig, SNSMessageSender}
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
-import uk.ac.wellcome.storage.{
-  Identified,
-  ObjectLocation,
-  StoreWriteError,
-  WriteError
-}
-import uk.ac.wellcome.storage.fixtures.S3Fixtures
-import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
+import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.Store
 import uk.ac.wellcome.storage.store.memory.MemoryStore
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.Success
 
-trait BigMessagingFixture
-    extends Akka
-    with Matchers
-    with SQS
-    with SNS
-    with S3Fixtures {
-
-  case class ExampleObject(name: String)
-
+trait BigMessagingFixture extends SQS {
   def withBigMessageStream[T, R](queue: SQS.Queue,
                                  metrics: MemoryMetrics[StandardUnit] =
                                    new MemoryMetrics[StandardUnit](),
@@ -49,7 +26,8 @@ trait BigMessagingFixture
     implicit
     actorSystem: ActorSystem,
     decoderT: Decoder[T],
-    storeT: Store[ObjectLocation, T]): R = {
+    storeT: Store[S3ObjectLocation, T] =
+      new MemoryStore[S3ObjectLocation, T](initialEntries = Map.empty)): R = {
     val stream = new BigMessageStream[T](
       sqsClient = sqsClient,
       sqsConfig = createSQSConfigWith(queue),
@@ -74,64 +52,4 @@ trait BigMessagingFixture
       queue = queue,
       message = InlineNotification(jsonString = toJson(obj).get)
     )
-
-  def withSqsBigMessageSender[T, R](bucket: Bucket,
-                                    topic: Topic,
-                                    senderSnsClient: SnsClient = snsClient,
-                                    storeT: Option[Store[ObjectLocation, T]] =
-                                      None,
-                                    bigMessageThreshold: Int = 10000)(
-    testWith: TestWith[BigMessageSender[SNSConfig, T], R])(
-    implicit
-    encoderT: Encoder[T]): R =
-    withSnsMessageSender(topic, senderSnsClient) { snsMessageSender =>
-      val sender = new BigMessageSender[SNSConfig, T] {
-        override val messageSender: MessageSender[SNSConfig] =
-          snsMessageSender
-        override val store: Store[ObjectLocation, T] =
-          storeT.getOrElse(new MemoryStore(Map.empty))
-        override val namespace: String = bucket.name
-        override implicit val encoder: Encoder[T] = encoderT
-        override val maxMessageSize: Int = bigMessageThreshold
-      }
-      testWith(sender)
-    }
-
-  def withSnsMessageSender[R](topic: Topic, snsClient: SnsClient = snsClient)(
-    testWith: TestWith[MessageSender[SNSConfig], R]): R =
-    testWith(
-      new SNSMessageSender(
-        snsClient = snsClient,
-        snsConfig = createSNSConfigWith(topic),
-        subject = "Sent in BigMessagingFixture"
-      )
-    )
-
-  /** Given a topic ARN which has received notifications containing pointers
-    * to objects in S3, return the unpacked objects.
-    */
-  def getMessages[T](topic: Topic)(implicit decoder: Decoder[T]): List[T] =
-    listMessagesReceivedFromSNS(topic).map { messageInfo =>
-      fromJson[MessageNotification](messageInfo.message) match {
-        case Success(RemoteNotification(location)) =>
-          getObjectFromS3[T](location)
-        case Success(InlineNotification(jsonString)) =>
-          fromJson[T](jsonString).get
-        case _ =>
-          throw new RuntimeException(
-            s"Unrecognised message: ${messageInfo.message}"
-          )
-      }
-    }.toList
-
-  /** The `.put` method on this store has been overriden to always
-    * return a `Left[StoreWriteError]`
-    */
-  def createBrokenPutStore[T] =
-    new MemoryStore[ObjectLocation, T](Map.empty) {
-      override def put(id: ObjectLocation)(
-        t: T): Either[WriteError, Identified[ObjectLocation, T]] = {
-        Left(StoreWriteError(new Throwable("BOOM!")))
-      }
-    }
 }

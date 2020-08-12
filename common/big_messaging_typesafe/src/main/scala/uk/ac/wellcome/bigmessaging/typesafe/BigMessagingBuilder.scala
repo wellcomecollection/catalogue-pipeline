@@ -1,18 +1,17 @@
 package uk.ac.wellcome.bigmessaging.typesafe
 
 import akka.actor.ActorSystem
-import akka.stream.Materializer
 import com.amazonaws.services.s3.AmazonS3
 import com.typesafe.config.Config
-import io.circe.{Decoder, Encoder}
+import io.circe.Decoder
+import software.amazon.awssdk.services.sns.SnsClient
 import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.bigmessaging.message.BigMessageStream
+import uk.ac.wellcome.bigmessaging.s3.S3BigMessageSender
 import uk.ac.wellcome.messaging.sns.SNSConfig
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.monitoring.typesafe.CloudWatchBuilder
-import uk.ac.wellcome.storage.ObjectLocation
-import uk.ac.wellcome.storage.s3.S3Config
+import uk.ac.wellcome.storage.s3.{S3Config, S3ObjectLocation}
 import uk.ac.wellcome.storage.store.Store
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.streaming.Codec
@@ -25,7 +24,6 @@ object BigMessagingBuilder {
   def buildMessageStream[T](config: Config)(
     implicit actorSystem: ActorSystem,
     decoderT: Decoder[T],
-    materializer: Materializer,
     codecT: Codec[T]): BigMessageStream[T] = {
 
     implicit val executionContext: ExecutionContext =
@@ -33,7 +31,7 @@ object BigMessagingBuilder {
 
     implicit val s3Client: AmazonS3 = S3Builder.buildS3Client(config)
 
-    implicit val store: Store[ObjectLocation, T] = S3TypedStore[T]
+    implicit val store: Store[S3ObjectLocation, T] = S3TypedStore[T]
 
     new BigMessageStream[T](
       sqsClient = SQSBuilder.buildSQSAsyncClient(config),
@@ -43,28 +41,18 @@ object BigMessagingBuilder {
     )
   }
 
-  def buildBigMessageSender[T](config: Config)(
-    implicit
-    encoderT: Encoder[T],
-    storeT: Store[ObjectLocation, T]
-  ): BigMessageSender[SNSConfig, T] = {
+  def buildBigMessageSender(config: Config): BigMessageSender[SNSConfig] = {
+    implicit val s3Client: AmazonS3 = S3Builder.buildS3Client(config)
 
     val s3Config: S3Config =
       S3Builder.buildS3Config(config, namespace = "message.writer")
 
-    new BigMessageSender[SNSConfig, T] {
-      override val messageSender: MessageSender[SNSConfig] =
-        SNSBuilder.buildSNSMessageSender(
-          config,
-          namespace = "message.writer",
-          subject = "Sent from MessageWriter"
-        )
+    implicit val snsClient: SnsClient = SNSBuilder.buildSNSClient(config)
 
-      override val store: Store[ObjectLocation, T] = storeT
-      override val namespace: String = s3Config.bucketName
-
-      implicit val encoder: Encoder[T] = encoderT
-
+    S3BigMessageSender(
+      bucketName = s3Config.bucketName,
+      snsConfig =
+        SNSBuilder.buildSNSConfig(config, namespace = "message.writer"),
       // If the encoded message is less than 250KB, we can send it inline
       // in SNS/SQS (although the limit is 256KB, there's a bit of overhead
       // caused by the notification wrapper, so we're conservative).
@@ -75,7 +63,7 @@ object BigMessagingBuilder {
       // Max SNS message size:
       // https://aws.amazon.com/sns/faqs/
       //
-      override val maxMessageSize: Int = 250 * 1000
-    }
+      maxMessageSize = 250 * 1000
+    )
   }
 }

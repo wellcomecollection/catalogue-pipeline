@@ -57,8 +57,7 @@ class CalmAkkaHttpClient(minBackoff: FiniteDuration = 100 milliseconds,
                          randomFactor: Double = 0.2,
                          maxRestarts: Int = 10)(implicit
                                                 ec: ExecutionContext,
-                                                actorSystem: ActorSystem,
-                                                materializer: Materializer)
+                                                actorSystem: ActorSystem)
     extends CalmHttpClientWithBackoff(
       minBackoff,
       maxBackoff,

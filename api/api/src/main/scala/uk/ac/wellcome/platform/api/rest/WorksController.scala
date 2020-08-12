@@ -13,6 +13,8 @@ import uk.ac.wellcome.platform.api.models.ApiConfig
 import uk.ac.wellcome.platform.api.services.{
   CollectionService,
   ElasticsearchService,
+  RelatedWorkService,
+  RelatedWorks,
   WorksService
 }
 import uk.ac.wellcome.platform.api.Tracing
@@ -65,13 +67,17 @@ class WorksController(
           .findWorkById(id)(index)
           .flatMap {
             case Right(Some(work: IdentifiedWork)) =>
-              if (includes.collection) {
+              if (includes.anyRelation) {
+                retrieveRelatedWorks(index, work).map { relatedWorks =>
+                  workFound(work, relatedWorks, None, includes)
+                }
+              } else if (includes.collection) {
                 val expandedPaths = params._expandPaths.getOrElse(Nil)
-                retrieveTree(index, work, expandedPaths).map {
-                  workFound(work, _, includes)
+                retrieveTree(index, work, expandedPaths).map { tree =>
+                  workFound(work, None, tree, includes)
                 }
               } else
-                Future.successful(workFound(work, None, includes))
+                Future.successful(workFound(work, None, None, includes))
             case Right(Some(work: IdentifiedRedirectedWork)) =>
               Future.successful(workRedirect(work))
             case Right(Some(_)) =>
@@ -103,6 +109,20 @@ class WorksController(
       }
       .getOrElse(Future.successful(None))
 
+  private def retrieveRelatedWorks(
+    index: Index,
+    work: IdentifiedWork): Future[Option[RelatedWorks]] =
+    relatedWorkService
+      .retrieveRelatedWorks(index, work)
+      .map {
+        case Left(err) =>
+          // We just log this here rather than raising so as not to bring down
+          // the work API when related work retrieval fails
+          logger.error("Error retrieving related works", err)
+          None
+        case Right(relatedWorks) => Some(relatedWorks)
+      }
+
   def workRedirect(work: IdentifiedRedirectedWork): Route =
     extractPublicUri { uri =>
       val newPath = (work.redirect.canonicalId :: uri.path.reverse.tail).reverse
@@ -110,6 +130,7 @@ class WorksController(
     }
 
   def workFound(work: IdentifiedWork,
+                relatedWorks: Option[RelatedWorks],
                 tree: Option[(Collection, List[String])],
                 includes: WorksIncludes): Route =
     complete(
@@ -119,13 +140,36 @@ class WorksController(
           collection = tree.map {
             case (tree, expandedPaths) =>
               DisplayCollection(tree, expandedPaths)
-          }
+          },
+          parts =
+            if (includes.parts)
+              relatedWorks.map { relatedWorks =>
+                relatedWorks.parts.map(DisplayWork(_))
+              } else None,
+          partOf =
+            if (includes.partOf)
+              relatedWorks.map { relatedWorks =>
+                relatedWorks.partOf.map(DisplayWork(_))
+              } else None,
+          precededBy =
+            if (includes.precededBy)
+              relatedWorks.map { relatedWorks =>
+                relatedWorks.precededBy.map(DisplayWork(_))
+              } else None,
+          succeededBy =
+            if (includes.succeededBy)
+              relatedWorks.map { relatedWorks =>
+                relatedWorks.succeededBy.map(DisplayWork(_))
+              } else None,
         )
       )
     )
 
   private lazy val collectionService =
     new CollectionService(elasticsearchService)
+
+  private lazy val relatedWorkService =
+    new RelatedWorkService(elasticsearchService)
 
   private lazy val worksService = new WorksService(elasticsearchService)
 

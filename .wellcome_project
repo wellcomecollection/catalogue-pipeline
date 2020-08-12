@@ -62,6 +62,8 @@ catalogue_pipeline:
       name: Production
     - id: latest
       name: Latest
+    - id: miro_merging_test
+      name: Miro merging test
   image_repositories:
     - id: id_minter
       services:

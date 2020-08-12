@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.sierra_reader.sink
 import akka.Done
 import akka.stream.scaladsl.Sink
 import io.circe.Json
-import uk.ac.wellcome.storage.ObjectLocation
+import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 
 import scala.concurrent.Future
@@ -19,7 +19,7 @@ object SequentialS3Sink {
         // e.g. "1" ~> "0001", "25" ~> "0025"
         val key = f"$keyPrefix${index + offset}%04d.json"
         store
-          .put(ObjectLocation(bucketName, key))(json.noSpaces)
+          .put(S3ObjectLocation(bucketName, key))(json.noSpaces)
           .left
           .map(_.e)
           .toTry

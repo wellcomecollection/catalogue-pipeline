@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.ingestor.images
 
 import akka.actor.ActorSystem
-import akka.stream.Materializer
 import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
 import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
@@ -27,8 +26,6 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildActorSystem()
     implicit val executionContext: ExecutionContext =
       AkkaBuilder.buildExecutionContext()
-    implicit val materializer: Materializer =
-      AkkaBuilder.buildMaterializer()
 
     val indexName = config.requireString("es.index")
     val elasticClient = ElasticBuilder.buildElasticClient(config)

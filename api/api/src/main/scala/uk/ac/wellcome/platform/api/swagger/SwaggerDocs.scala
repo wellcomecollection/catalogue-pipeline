@@ -470,7 +470,7 @@ trait MultipleWorksSwagger {
           "Which query should we use search the works? Used predominantly for internal testing of relevancy. Considered Unstable.",
         schema = new Schema(
           `type` = "enum",
-          allowableValues = Array("PhraserBeam", "MultiMatcher"),
+          allowableValues = Array("MultiMatcher"),
         ),
         required = false
       )

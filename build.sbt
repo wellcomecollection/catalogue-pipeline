@@ -114,6 +114,12 @@ lazy val merger = setupProject(
   localDependencies = Seq(internal_model, big_messaging_typesafe),
   externalDependencies = CatalogueDependencies.mergerDependencies)
 
+lazy val relation_embedder = setupProject(
+  project,
+  "pipeline/relation_embedder",
+  localDependencies = Seq(internal_model),
+  externalDependencies = CatalogueDependencies.relationEmbedderDependencies)
+
 lazy val recorder = setupProject(
   project,
   "pipeline/recorder",
@@ -126,7 +132,6 @@ lazy val reindex_worker = setupProject(
   "reindexer/reindex_worker",
   localDependencies = Seq(big_messaging_typesafe),
   externalDependencies = CatalogueDependencies.reindexWorkerDependencies)
-
 
 lazy val transformer_common = setupProject(
   project,
@@ -168,7 +173,8 @@ lazy val sierra_adapter_common = setupProject(
   project,
   "sierra_adapter/common",
   localDependencies = Seq(big_messaging_typesafe),
-  externalDependencies = CatalogueDependencies.sierraAdapterCommonDependencies)
+  externalDependencies = CatalogueDependencies.sierraAdapterCommonDependencies
+)
 
 lazy val sierra_reader = setupProject(
   project,
@@ -228,7 +234,7 @@ lazy val snapshot_generator = setupProject(
 )
 
 /**
- * To download form the wellcome maven repo in s3 locally, uncomment this
+  * To download form the wellcome maven repo in s3 locally, uncomment this
  **/
 //import java.util.UUID
 //import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider

@@ -6,7 +6,7 @@ import uk.ac.wellcome.platform.transformer.mets.fixtures.{
   LocalStackS3Fixtures,
   STSFixtures
 }
-import uk.ac.wellcome.storage.{Identified, ObjectLocation}
+import uk.ac.wellcome.storage.Identified
 
 import scala.util.Right
 
@@ -20,7 +20,7 @@ class TemporaryCredentialsStoreTest
   it("gets a file from s3 using temporary credentials") {
     withActorSystem { implicit actorSystem =>
       withLocalStackS3Bucket { bucket =>
-        val location = ObjectLocation(bucket.name, "file.txt")
+        val location = createS3ObjectLocationWith(bucket)
         val content = "Rudolph the red node reindeer"
         localStackS3Store.put(location)(content)
         withAssumeRoleClientProvider(roleArn)(testS3ClientBuilder) {

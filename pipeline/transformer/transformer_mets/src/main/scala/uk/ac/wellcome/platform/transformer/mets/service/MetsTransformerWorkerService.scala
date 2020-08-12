@@ -1,25 +1,26 @@
 package uk.ac.wellcome.platform.transformer.mets.service
 
-import scala.concurrent.Future
 import akka.Done
 import grizzled.slf4j.Logging
-
-import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig}
+import uk.ac.wellcome.messaging.MessageSender
+import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.mets_adapter.models.MetsLocation
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.transformer.mets.transformer.MetsXmlTransformer
+import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.{Readable, VersionedStore}
-import uk.ac.wellcome.storage.{Identified, ObjectLocation, Version}
+import uk.ac.wellcome.storage.{Identified, Version}
 import uk.ac.wellcome.typesafe.Runnable
 
-class MetsTransformerWorkerService(
+import scala.concurrent.Future
+
+class MetsTransformerWorkerService[Destination](
   msgStream: SQSStream[NotificationMessage],
-  messageSender: BigMessageSender[SNSConfig, TransformedBaseWork],
+  messageSender: MessageSender[Destination],
   adapterStore: VersionedStore[String, Int, MetsLocation],
-  metsXmlStore: Readable[ObjectLocation, String]
+  metsXmlStore: Readable[S3ObjectLocation, String]
 ) extends Runnable
     with Logging {
 
@@ -44,12 +45,14 @@ class MetsTransformerWorkerService(
     })
   }
 
-  private def process(key: Version[String, Int]) =
+  private def process(key: Version[String, Int]): Either[Throwable, Unit] =
     for {
       metsLocation <- getMetsLocation(key)
       metsData <- xmlTransformer.transform(metsLocation)
       work <- metsData.toWork(key.version)
-      _ <- messageSender.sendT(work).toEither
+      // We send the generic type param to `sendT` so it serialises uses the
+      // discriminator `type` when read by the recorder.
+      _ <- messageSender.sendT[TransformedBaseWork](work).toEither
     } yield ()
 
   private def getMetsLocation(key: Version[String, Int]): Result[MetsLocation] =

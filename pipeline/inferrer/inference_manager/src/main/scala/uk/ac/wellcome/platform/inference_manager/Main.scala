@@ -2,8 +2,6 @@ package uk.ac.wellcome.platform.inference_manager
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.stream.Materializer
-import com.amazonaws.services.s3.AmazonS3
 import software.amazon.awssdk.services.sqs.model.Message
 import com.typesafe.config.Config
 import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
@@ -18,8 +16,6 @@ import uk.ac.wellcome.platform.inference_manager.services.{
   FeatureVectorInferrerAdapter,
   InferenceManagerWorkerService
 }
-import uk.ac.wellcome.storage.store.s3.S3TypedStore
-import uk.ac.wellcome.storage.typesafe.S3Builder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
@@ -36,11 +32,6 @@ object Main extends WellcomeTypesafeApp {
     implicit val actorSystem: ActorSystem = AkkaBuilder.buildActorSystem()
     implicit val executionContext: ExecutionContext =
       AkkaBuilder.buildExecutionContext()
-    implicit val materializer: Materializer =
-      AkkaBuilder.buildMaterializer()
-    implicit val s3Client: AmazonS3 = S3Builder.buildS3Client(config)
-
-    implicit val msgStore = S3TypedStore[Output]
 
     val inferrerClientFlow =
       Http()
@@ -55,7 +46,7 @@ object Main extends WellcomeTypesafeApp {
 
     new InferenceManagerWorkerService(
       msgStream = BigMessagingBuilder.buildMessageStream[Input](config),
-      msgSender = BigMessagingBuilder.buildBigMessageSender[Output](config),
+      messageSender = BigMessagingBuilder.buildBigMessageSender(config),
       inferrerAdapter = inferrerAdapter,
       inferrerClientFlow = inferrerClientFlow
     )

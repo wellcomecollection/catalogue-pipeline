@@ -5,10 +5,7 @@ import com.sksamuel.elastic4s.http.JavaClient
 import org.apache.http.HttpHost
 import org.elasticsearch.client.RestClient
 import org.scalatest.funspec.AnyFunSpec
-import software.amazon.awssdk.services.sqs.model.{
-  GetQueueAttributesRequest,
-  QueueAttributeName
-}
+import software.amazon.awssdk.services.sqs.model.QueueAttributeName
 import uk.ac.wellcome.elasticsearch.{
   ElasticCredentials,
   ElasticsearchIndexCreator
@@ -21,15 +18,15 @@ import uk.ac.wellcome.platform.ingestor.common.fixtures.{
   SampleDocument
 }
 import uk.ac.wellcome.platform.ingestor.common.models.IngestorConfig
-import uk.ac.wellcome.storage.ObjectLocation
-import uk.ac.wellcome.storage.store.memory.MemoryStore
+import uk.ac.wellcome.storage.generators.RandomThings
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class IngestorWorkerServiceTest
     extends AnyFunSpec
     with IngestorFixtures
-    with IdentifiersGenerators {
+    with IdentifiersGenerators
+    with RandomThings {
 
   it("creates the index at startup if it doesn't already exist") {
     val index = createIndex
@@ -118,18 +115,10 @@ class IngestorWorkerServiceTest
           Thread.sleep(2000)
 
           eventually {
-            sqsClient
-              .getQueueAttributes {
-                builder: GetQueueAttributesRequest.Builder =>
-                  builder
-                    .queueUrl(queue.url)
-                    .attributeNames(
-                      QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES_NOT_VISIBLE)
-              }
-              .attributes()
-              .get(
-                QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES_NOT_VISIBLE
-              ) shouldBe "1"
+            getQueueAttribute(
+              queue,
+              attributeName =
+                QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES_NOT_VISIBLE) shouldBe "1"
           }
         }
       }
@@ -140,8 +129,6 @@ class IngestorWorkerServiceTest
     val index = createIndex
     withLocalSqsQueue() { queue =>
       withActorSystem { implicit actorSystem =>
-        implicit val store =
-          new MemoryStore[ObjectLocation, SampleDocument](Map.empty)
         withBigMessageStream[SampleDocument, Any](queue) { messageStream =>
           import scala.concurrent.duration._
 

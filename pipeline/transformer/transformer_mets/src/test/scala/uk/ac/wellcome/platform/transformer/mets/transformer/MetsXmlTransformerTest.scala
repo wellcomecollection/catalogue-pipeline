@@ -6,8 +6,8 @@ import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.mets_adapter.models.MetsLocation
 import uk.ac.wellcome.models.work.internal.License
 import uk.ac.wellcome.platform.transformer.mets.fixtures.MetsGenerators
+import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.memory.MemoryStore
-import uk.ac.wellcome.storage.ObjectLocation
 
 class MetsXmlTransformerTest
     extends AnyFunSpec
@@ -96,7 +96,7 @@ class MetsXmlTransformerTest
       (manifestations ++ root
         .map(content => "root.xml" -> Some(content))).collect {
         case (file, Some(content)) =>
-          ObjectLocation("bucket", s"path/$file") -> content
+          S3ObjectLocation("bucket", key = s"path/$file") -> content
       }
     )
 
