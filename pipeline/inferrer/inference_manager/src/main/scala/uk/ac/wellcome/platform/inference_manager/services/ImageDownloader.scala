@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.inference_manager.services
 
-import java.nio.file.{Path, Paths}
+import java.nio.file.{Files, Path, Paths}
 
 import akka.{Done, NotUsed}
 import akka.actor.ActorSystem
@@ -28,9 +28,9 @@ trait FileWriter {
 }
 
 class ImageDownloader[Ctx](
-  root: String = "/",
   requestPool: RequestPoolFlow[MergedIdentifiedImage, Ctx],
-  fileWriter: FileWriter)(implicit materializer: Materializer) {
+  fileWriter: FileWriter,
+  root: String = "/")(implicit materializer: Materializer) {
 
   implicit val ec: ExecutionContext = materializer.executionContext
 
@@ -105,17 +105,22 @@ class ImageDownloader[Ctx](
     }
 }
 
-object DefaultFileWriter extends FileWriter {
-  def write(path: Path): Sink[ByteString, Future[IOResult]] =
+class DefaultFileWriter(root: String) extends FileWriter {
+  def write(path: Path): Sink[ByteString, Future[IOResult]] = {
+    path.getParent.toFile.mkdirs()
     FileIO.toPath(path)
+  }
 
   def delete: Sink[Path, Future[Done]] =
     Sink.foreach[Path](deletePath)
 
+  private val rootPath = Paths.get(root)
+
   // Delete path and directories above it until deletion fails (the directory is not empty)
+  // or all directories up to the root have been deleted
   @scala.annotation.tailrec
   private def deletePath(path: Path): Unit =
-    if (path.toFile.delete) {
+    if (path.toFile.delete && !Files.isSameFile(path.getParent, rootPath)) {
       deletePath(path.getParent)
     }
 }
@@ -123,8 +128,8 @@ object DefaultFileWriter extends FileWriter {
 object ImageDownloader {
   def apply(root: String)(implicit actorSystem: ActorSystem) =
     new ImageDownloader(
-      root,
-      fileWriter = DefaultFileWriter,
+      root = root,
+      fileWriter = new DefaultFileWriter(root),
       requestPool = Http().superPool[(MergedIdentifiedImage, Message)]()
     )
 }

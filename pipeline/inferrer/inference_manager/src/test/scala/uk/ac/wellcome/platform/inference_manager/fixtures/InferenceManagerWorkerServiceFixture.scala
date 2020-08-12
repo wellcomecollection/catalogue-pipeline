@@ -34,7 +34,8 @@ trait InferenceManagerWorkerServiceFixture
     adapter: InferrerAdapter[DownloadedImage, AugmentedImage],
     fileWriter: FileWriter,
     inferrerRequestPool: RequestPoolFlow[DownloadedImage, Message],
-    imageRequestPool: RequestPoolFlow[MergedIdentifiedImage, Message])(
+    imageRequestPool: RequestPoolFlow[MergedIdentifiedImage, Message],
+    fileRoot: String = "/")(
     testWith: TestWith[InferenceManagerWorkerService[String], R])(
     implicit decoder: Decoder[MergedIdentifiedImage]): R =
     withActorSystem { implicit actorSystem =>
@@ -45,6 +46,7 @@ trait InferenceManagerWorkerServiceFixture
             messageSender = messageSender,
             inferrerAdapter = adapter,
             imageDownloader = new ImageDownloader(
+              root = fileRoot,
               fileWriter = fileWriter,
               requestPool = imageRequestPool),
             requestPool = inferrerRequestPool
