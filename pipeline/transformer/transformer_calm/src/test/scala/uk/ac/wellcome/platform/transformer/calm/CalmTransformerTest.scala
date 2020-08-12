@@ -171,14 +171,14 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
           function = None))
   }
 
-  it("transforms subjects") {
+  it("transforms subjects, stripping all HTML") {
     val record = calmRecord(
       "Title" -> "abc",
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
       "AltRefNo" -> "a.b.c",
-      "Subject" -> "botany",
-      "Subject" -> "anatomy",
+      "Subject" -> "<p>botany",
+      "Subject" -> "<i>anatomy</i>",
       "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(record, version).right.get.data.subjects should contain theSameElementsAs List(
@@ -198,6 +198,20 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
     )
     CalmTransformer(record, version).right.get.data.language shouldBe Some(
       Language("English", Some("en"))
+    )
+  }
+
+  it("only preserves i HTML tags when transforming title") {
+    val record = calmRecord(
+      "Title" -> "<p> The <i>title</i> of the <strong>work</strong>",
+      "Level" -> "Collection",
+      "RefNo" -> "a/b/c",
+      "AltRefNo" -> "a.b.c",
+      "Language" -> "English",
+      "CatalogueStatus" -> "Catalogued"
+    )
+    CalmTransformer(record, version).right.get.data.title shouldBe Some(
+      "The <i>title</i> of the work"
     )
   }
 
