@@ -274,8 +274,8 @@ object CalmTransformer
     record
       .getList("Subject")
       .map { label =>
-        val normalisedLabel = NormaliseText(label,
-                                            whitelist = NormaliseText.none)
+        val normalisedLabel =
+          NormaliseText(label, whitelist = NormaliseText.none)
         Subject(
           label = normalisedLabel,
           concepts = List(Concept(normalisedLabel))
