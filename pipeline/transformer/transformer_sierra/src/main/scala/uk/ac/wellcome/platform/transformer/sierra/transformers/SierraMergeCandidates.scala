@@ -9,7 +9,6 @@ import uk.ac.wellcome.models.work.internal.{
 }
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData,
-  SierraMaterialType,
   SierraQueryOps
 }
 import uk.ac.wellcome.platform.transformer.sierra.transformers.parsers.{
@@ -70,37 +69,15 @@ object SierraMergeCandidates
       case _ => Nil
     }
 
-  /** We can merge a single-page Miro and Sierra work if:
-    *
-    *   - The Sierra work has type "Picture", "Digital images", or "3D Object"
-    *   - There's exactly one Miro ID in MARC tag 962$u or 089$a
-    *     (if there's more than one Miro ID in either, we can't do a merge)
-    *
-    */
+  /*
+   * We always try to merge all linked Miro and Sierra works
+   */
   private def getSinglePageMiroMergeCandidates(
     bibData: SierraBibData): List[MergeCandidate] =
-    bibData.materialType match {
-      // The Sierra material type codes we care about are:
-      // * k (Pictures)
-      // * q (Digital Images)
-      // * r (3D Objects)
-      case Some(SierraMaterialType("k")) | Some(SierraMaterialType("q")) | Some(
-            SierraMaterialType("r")) =>
-        (matching962Ids(bibData), matching089Ids(bibData)) match {
-          case (List(miroId), _) =>
-            List(
-              miroMergeCandidate(miroId, "Single page Miro/Sierra work")
-            )
-          case (List(), List(miroId)) =>
-            List(
-              miroMergeCandidate(
-                miroId,
-                "Single page Miro/Sierra work (secondary source)")
-            )
-          case _ => Nil
-        }
-      case _ => Nil
-    }
+    (matching089Ids(bibData) ++ matching962Ids(bibData)).distinct
+      .map {
+        miroMergeCandidate(_, "Miro/Sierra work")
+      }
 
   /** When we harvest the Calm data into Sierra, the `RecordID` is stored in
     * Marcfield 035$a.

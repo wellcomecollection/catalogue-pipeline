@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.merger.services
 
 import cats.data.State
-
 import uk.ac.wellcome.models.work.internal.{
   IdentifiableRedirect,
   TransformedBaseWork,
@@ -114,7 +113,10 @@ object PlatformMerger extends Merger {
     sources: Seq[TransformedBaseWork]): MergeState =
     if (sources.isEmpty)
       State.pure(
-        MergeResult(target, images = ImagesRule.merge(target).data)
+        MergeResult(
+          mergedTarget = target,
+          images = ImagesRule.merge(target).data
+        )
       )
     else
       for {

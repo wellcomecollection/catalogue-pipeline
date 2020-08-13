@@ -10,13 +10,10 @@ import uk.ac.wellcome.models.work.internal.{
   Unminted
 }
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
-import uk.ac.wellcome.platform.merger.rules.WorkPredicates.{
-  not,
-  WorkPredicate,
-  WorkPredicateOps
-}
 
 object ImagesRule extends FieldMergeRule {
+  import WorkPredicates._
+
   type FieldData = List[MergedImage[Identifiable, Unminted]]
 
   override def merge(
@@ -40,7 +37,7 @@ object ImagesRule extends FieldMergeRule {
 
   private lazy val getSingleMiroImage
     : PartialFunction[UnidentifiedWork, FieldData] = {
-    case target if WorkPredicates.singleDigitalItemMiroWork(target) =>
+    case target if singleDigitalItemMiroWork(target) =>
       target.data.images.map {
         _.mergeWith(
           target.toSourceWork,
@@ -50,16 +47,14 @@ object ImagesRule extends FieldMergeRule {
   }
 
   private lazy val getPictureImages = new FlatImageMergeRule {
-    val isDefinedForTarget: WorkPredicate = WorkPredicates.sierraPicture
+    val isDefinedForTarget: WorkPredicate = sierraPicture
     val isDefinedForSource
-      : WorkPredicate = WorkPredicates.singleDigitalItemMetsWork or WorkPredicates.singleDigitalItemMiroWork
+      : WorkPredicate = singleDigitalItemMetsWork or singleDigitalItemMiroWork
   }
 
   private lazy val getPairedMiroImages = new FlatImageMergeRule {
-    val isDefinedForTarget: WorkPredicate =
-      WorkPredicates.sierraWork and not(WorkPredicates.sierraPicture)
-    val isDefinedForSource: WorkPredicate =
-      WorkPredicates.singleDigitalItemMiroWork
+    val isDefinedForTarget: WorkPredicate = sierraWork and not(sierraPicture)
+    val isDefinedForSource: WorkPredicate = singleDigitalItemMiroWork
   }
 
   trait FlatImageMergeRule extends PartialRule {
