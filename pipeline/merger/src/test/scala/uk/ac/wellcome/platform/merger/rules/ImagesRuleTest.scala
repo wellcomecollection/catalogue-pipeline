@@ -22,8 +22,11 @@ class ImagesRuleTest
     with OptionValues
     with Inspectors {
   describe("image creation rules") {
-    it("creates 1 image from a 1 Miro work") {
-      val miroWork = createMiroWork
+    it("creates 1 image from a single non-historical-library Miro work") {
+      val miroWork = createMiroWorkWith(
+        sourceIdentifier = createNonHistoricalLibraryMiroSourceIdentifier,
+        images = List(createUnmergedMiroImage)
+      )
       val result = ImagesRule.merge(miroWork).data
 
       result should have length 1

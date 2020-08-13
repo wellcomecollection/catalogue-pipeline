@@ -166,6 +166,7 @@ object CalmTransformer
   def title(record: CalmRecord): Result[String] =
     record
       .get("Title")
+      .map(NormaliseText(_, whitelist = NormaliseText.onlyItalics))
       .map(Right(_))
       .getOrElse(Left(TitleMissing))
 
@@ -273,9 +274,11 @@ object CalmTransformer
     record
       .getList("Subject")
       .map { label =>
+        val normalisedLabel =
+          NormaliseText(label, whitelist = NormaliseText.none)
         Subject(
-          label = label,
-          concepts = List(Concept(label))
+          label = normalisedLabel,
+          concepts = List(Concept(normalisedLabel))
         )
       }
 

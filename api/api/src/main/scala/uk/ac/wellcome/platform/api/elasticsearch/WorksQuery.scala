@@ -3,11 +3,7 @@ package uk.ac.wellcome.platform.api.elasticsearch
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.common.Operator.{AND, OR}
 import com.sksamuel.elastic4s.requests.searches.queries.BoolQuery
-import com.sksamuel.elastic4s.requests.searches.queries.matches.MultiMatchQueryBuilderType.{
-  BEST_FIELDS,
-  CROSS_FIELDS,
-  PHRASE
-}
+import com.sksamuel.elastic4s.requests.searches.queries.matches.MultiMatchQueryBuilderType.BEST_FIELDS
 import com.sksamuel.elastic4s.requests.searches.queries.matches.{
   FieldWithOptionalBoost,
   MultiMatchQuery
@@ -57,91 +53,5 @@ case object WorksMultiMatcher {
         )
       )
       .minimumShouldMatch(1)
-  }
-}
-
-case object WorksPhraserBeam {
-  def apply(q: String): BoolQuery = {
-    val fields = Seq(
-      "data.subjects.concepts.label",
-      "data.genres.concepts.label",
-      "data.contributors.agent.label",
-      "data.title.english",
-      "data.description.english",
-      "data.alternativeTitles.english",
-      "data.physicalDescription.english",
-      "data.production.*.label",
-      "data.language.label",
-      "data.edition",
-      "data.notes.content.english",
-      "data.collectionPath.path",
-      "data.collectionPath.label",
-    ).map(FieldWithOptionalBoost(_, None))
-
-    val idFields = Seq(
-      "canonicalId",
-      "sourceIdentifier.value",
-      "data.otherIdentifiers.value",
-      "data.items.id.canonicalId",
-      "data.items.id.sourceIdentifier.value",
-      "data.items.id.otherIdentifiers.value",
-    ).map(FieldWithOptionalBoost(_, None))
-
-    boolQuery().must(
-      should(
-        MultiMatchQuery(
-          text = q,
-          fields = fields,
-          minimumShouldMatch = Some("60%"),
-          `type` = Some(CROSS_FIELDS),
-          operator = Some(AND),
-          boost = Some(2) // Double the OR query
-        ),
-        MultiMatchQuery(
-          fields = idFields,
-          text = q,
-          `type` = Some(CROSS_FIELDS),
-          analyzer = Some(whitespaceAnalyzer.name),
-        ),
-        MultiMatchQuery(
-          text = q,
-          `type` = Some(PHRASE),
-          fields = Seq(
-            FieldWithOptionalBoost("data.title.keyword", Some(5000)),
-            FieldWithOptionalBoost("data.title.english", Some(2000))
-          )
-        ),
-        MultiMatchQuery(
-          text = q,
-          `type` = Some(PHRASE),
-          fields = Seq(
-            FieldWithOptionalBoost(
-              "data.genres.concepts.label.keyword",
-              Some(5000)),
-            FieldWithOptionalBoost("data.genres.concepts.label", Some(2000))
-          )
-        ),
-        MultiMatchQuery(
-          text = q,
-          `type` = Some(PHRASE),
-          fields = Seq(
-            FieldWithOptionalBoost(
-              "data.subjects.concepts.label.keyword",
-              Some(5000)),
-            FieldWithOptionalBoost("data.subjects.concepts.label", Some(2000))
-          )
-        ),
-        MultiMatchQuery(
-          text = q,
-          `type` = Some(PHRASE),
-          fields = Seq(
-            FieldWithOptionalBoost(
-              "data.contributors.agent.label.keyword",
-              Some(5000)),
-            FieldWithOptionalBoost("data.contributors.agent.label", Some(2000))
-          )
-        )
-      )
-    )
   }
 }

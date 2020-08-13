@@ -7,17 +7,25 @@ import org.jsoup.parser.Parser
 
 object NormaliseText {
 
-  /* The whitelist allows the following text nodes (with appropriate
+  /* The basic whitelist allows the following text nodes (with appropriate
    * attributes):
    *
    * a, b, blockquote, br, cite, code, dd, dl, dt, em, i, li, ol, p, pre, q,
    * small, span, strike, strong, sub, sup, u, ul
    */
-  private val whitelist = Whitelist.basic()
+  val basic = Whitelist.basic()
+
+  /* The none whitelist prevents all HTML tags
+   */
+  val none = Whitelist.none()
+
+  /* The onlyItalics whitelist prevents all HTML tags apart from i
+   */
+  val onlyItalics = Whitelist.none().addTags("i")
 
   private val settings = new OutputSettings().prettyPrint(false)
 
-  def apply(str: String): String = {
+  def apply(str: String, whitelist: Whitelist = basic): String =
     Jsoup
       .clean(str, "", whitelist, settings)
       .linesIterator
@@ -33,7 +41,6 @@ object NormaliseText {
       .map(Parser.unescapeEntities(_, false))
       .mkString("\n")
       .trim
-  }
 
   implicit class StringOps(str: String) {
     def trimRight =

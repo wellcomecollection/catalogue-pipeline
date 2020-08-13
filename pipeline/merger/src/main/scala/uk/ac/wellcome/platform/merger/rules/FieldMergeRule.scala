@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.merger.rules
 
+import scala.Function.const
 import cats.data.{NonEmptyList, State}
 
 import uk.ac.wellcome.models.work.internal.{
@@ -45,14 +46,16 @@ trait FieldMergeRule {
   protected trait PartialRule {
     val isDefinedForTarget: WorkPredicate
     val isDefinedForSource: WorkPredicate
+    val isDefinedForSourceList: Seq[TransformedBaseWork] => Boolean =
+      const(true)
 
     protected def rule(target: UnidentifiedWork,
                        sources: NonEmptyList[TransformedBaseWork]): FieldData
 
     def apply(target: UnidentifiedWork,
               sources: Seq[TransformedBaseWork]): Option[FieldData] =
-      (isDefinedForTarget(target), sources.filter(isDefinedForSource)) match {
-        case (true, head +: tail) =>
+      mergedSources(target, sources) match {
+        case head +: tail =>
           Some(rule(target, NonEmptyList(head, tail.toList)))
         case _ => None
       }
@@ -60,5 +63,23 @@ trait FieldMergeRule {
     def apply(target: UnidentifiedWork,
               source: TransformedBaseWork): Option[FieldData] =
       apply(target, List(source))
+
+    /*
+     * This gets the list of sources that a partial rule can merge, given a
+     * target and a complete list of sources.
+     *
+     * For this list to be non-empty the following must be satisfied:
+     * - `isDefinedForTarget(target)` is `true`
+     * - `isDefinedForSourceList(sources)` is `true`
+     * - `isDefinedForSource(source)` is `true` for at least one element of `sources`
+     */
+    def mergedSources(
+      target: UnidentifiedWork,
+      sources: Seq[TransformedBaseWork]): Seq[TransformedBaseWork] =
+      if (isDefinedForSourceList(sources) && isDefinedForTarget(target)) {
+        sources.filter(isDefinedForSource)
+      } else {
+        Nil
+      }
   }
 }

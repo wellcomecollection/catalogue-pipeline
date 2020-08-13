@@ -285,11 +285,13 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     : UnidentifiedWork =
     createUnidentifiedSierraWorkWith(items = items)
 
-  def createMiroWorkWith(
-    images: List[UnmergedImage[Identifiable, Unminted]]): UnidentifiedWork =
+  def createMiroWorkWith(images: List[UnmergedImage[Identifiable, Unminted]],
+                         otherIdentifiers: List[SourceIdentifier] = Nil,
+                         sourceIdentifier: SourceIdentifier =
+                           createMiroSourceIdentifier): UnidentifiedWork =
     createUnidentifiedWorkWith(
-      sourceIdentifier = createMiroSourceIdentifier,
-      otherIdentifiers = List(),
+      sourceIdentifier = sourceIdentifier,
+      otherIdentifiers = otherIdentifiers,
       thumbnail = Some(
         DigitalLocation(
           url = "https://iiif.wellcomecollection.org/V01234.jpg",

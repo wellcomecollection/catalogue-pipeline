@@ -2,7 +2,7 @@ import sbt._
 
 object WellcomeDependencies {
 
-  val defaultVersion = "19.1.0"
+  val defaultVersion = "19.3.1"
 
   lazy val versions = new {
     val typesafe = defaultVersion
@@ -250,6 +250,10 @@ object CatalogueDependencies {
 
   val mergerDependencies: Seq[ModuleID] =
     ExternalDependencies.mockitoDependencies
+
+  val relationEmbedderDependencies: Seq[ModuleID] =
+    WellcomeDependencies.storageTypesafeLibrary ++
+      WellcomeDependencies.messagingTypesafeLibrary
 
   val miroTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies ++

@@ -14,7 +14,8 @@ class MiroIdParserTest extends AnyFunSpec with Matchers with MiroIdParser {
         ("V 1234567", "V1234567"),
         ("V 1", "V0000001"),
         ("V 12345", "V0012345"),
-        ("L 12345", "L0012345")
+        ("L 12345", "L0012345"),
+        ("V 12345 ER", "V0012345ER")
       )) { (miroId, expectedParsedId) =>
       parse089MiroId(miroId) shouldBe Some(expectedParsedId)
     }

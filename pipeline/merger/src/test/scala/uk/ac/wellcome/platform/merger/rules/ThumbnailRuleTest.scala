@@ -125,7 +125,7 @@ class ThumbnailRuleTest
   it("returns redirects of merged thumbnails") {
     inside(ThumbnailRule.merge(digitalSierraWork, miroWorks :+ metsWork)) {
       case FieldMergeResult(_, redirects) =>
-        redirects shouldBe miroWorks :+ metsWork
+        redirects should contain theSameElementsAs miroWorks :+ metsWork
     }
   }
 }
