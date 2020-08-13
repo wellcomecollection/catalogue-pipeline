@@ -1,6 +1,7 @@
 package uk.ac.wellcome.platform.inference_manager.integration
 
 import java.io.File
+import java.nio.file.Paths
 
 import akka.http.scaladsl.Http
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
@@ -61,9 +62,9 @@ class ManagerInferrerIntegrationTest
           val augmentedImage = messageSender.getMessages[AugmentedImage].head
 
           inside(augmentedImage) {
-            case AugmentedImage(id, _, _, _, inferredData) =>
+            case AugmentedImage(id, _, _, _, Some(inferredData)) =>
               id should be(image.id)
-              inside(inferredData.value) {
+              inside(inferredData) {
                 case InferredData(features1, features2, lshEncodedFeatures) =>
                   features1 should have length 2048
                   features2 should have length 2048
@@ -91,9 +92,8 @@ class ManagerInferrerIntegrationTest
     // may need to warm up.
     withLocalSqsQueuePair(visibilityTimeout = 5) { queuePair =>
       val messageSender = new MemoryMessageSender()
-      val root = new File("/tmp/managerInferrerIntegrationTest")
+      val root = Paths.get("integration-tmp").toFile
       root.mkdir()
-      root.deleteOnExit()
       withActorSystem { implicit actorSystem =>
         withWorkerService(
           queuePair.queue,
@@ -108,7 +108,11 @@ class ManagerInferrerIntegrationTest
             Http().superPool[(MergedIdentifiedImage, Message)](),
           fileRoot = root.getPath
         ) { _ =>
-          testWith((queuePair, messageSender, root))
+          try {
+            testWith((queuePair, messageSender, root))
+          } finally {
+            root.delete()
+          }
         }
       }
     }

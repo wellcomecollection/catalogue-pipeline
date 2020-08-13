@@ -11,7 +11,8 @@ inferrer:
     MODEL_OBJECT_KEY: test-model.pkl
   volumes:
     - ../test_data:/app/data
-    - /tmp/managerInferrerIntegrationTest:/tmp/managerInferrerIntegrationTest
+    - $ROOT:$ROOT
+
   links:
     - "image_server:image_server"
 
