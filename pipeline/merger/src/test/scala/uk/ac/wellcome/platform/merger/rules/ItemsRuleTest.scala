@@ -110,7 +110,7 @@ class ItemsRuleTest
   }
 
   it(
-    "override Miro merging with METS merging into single-item Sierra works item") {
+    "override Miro merging with METS merging into single-item physical Sierra works items") {
     inside(ItemsRule.merge(physicalPictureSierra, List(miroWork, metsWork))) {
       case FieldMergeResult(items, mergedSources) =>
         items should have size 1
