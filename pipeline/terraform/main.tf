@@ -62,15 +62,13 @@ module "catalogue_pipeline_20200811" {
   inferrer_model_data_bucket_name = aws_s3_bucket.inferrer_model_core_data.id
 }
 
-// DO NOT DEPLOY TO PROD
-// DO NOT REMOVE
-// This is a test pipeline for more aggressive merging of Miro/Sierra works
-module "catalogue_pipeline_20200727" {
+
+module "catalogue_pipeline_20200813" {
   source = "./stack"
 
-  namespace = "catalogue-20200727"
+  namespace = "catalogue-20200813"
 
-  release_label = "miro_merging_test"
+  release_label = "latest"
 
   account_id      = data.aws_caller_identity.current.account_id
   aws_region      = local.aws_region
@@ -107,8 +105,8 @@ module "catalogue_pipeline_20200727" {
   ]
 
   # Elasticsearch
-  es_works_index  = "works-20200727"
-  es_images_index = "images-20200727"
+  es_works_index  = "works-20200813"
+  es_images_index = "images-20200813"
 
   # RDS
   rds_ids_access_security_group_id = local.rds_access_security_group_id
