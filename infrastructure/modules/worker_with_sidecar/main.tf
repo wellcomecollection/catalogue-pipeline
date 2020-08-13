@@ -50,6 +50,7 @@ module "task_definition" {
     module.app_container.container_definition,
     module.sidecar_container.container_definition
   ]
+  volumes = var.volumes
 }
 
 module "app_container" {
@@ -67,6 +68,8 @@ module "app_container" {
   healthcheck = var.app_healthcheck
 
   log_configuration = module.log_router_container.container_log_configuration
+
+  mount_points = var.app_mount_points
 }
 
 module "app_permissions" {
@@ -93,6 +96,8 @@ module "sidecar_container" {
   }]
 
   log_configuration = module.log_router_container.container_log_configuration
+
+  mount_points = var.sidecar_mount_points
 }
 
 module "sidecar_permissions" {

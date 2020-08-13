@@ -61,6 +61,30 @@ variable "ordered_placement_strategies" {
   default = []
 }
 
+variable "volumes" {
+  type = list(object({
+    name      = string
+    host_path = string
+  }))
+  default = []
+}
+
+variable "app_mount_points" {
+  type = list(object({
+    containerPath = string
+    sourceVolume  = string
+  }))
+  default = []
+}
+
+variable "manager_mount_points" {
+  type = list(object({
+    containerPath = string
+    sourceVolume  = string
+  }))
+  default = []
+}
+
 variable "messages_bucket_arn" {}
 
 variable "queue_read_policy" {}
