@@ -1,3 +1,7 @@
+locals {
+  lock_timeout = 900
+}
+
 module "matcher_queue" {
   source     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
   queue_name = "${local.namespace_hyphen}_matcher"
@@ -7,10 +11,10 @@ module "matcher_queue" {
   aws_region      = var.aws_region
   alarm_topic_arn = var.dlq_alarm_arn
 
-  // The records in the locktable expire after 3 minutes
+  // The records in the locktable expire after local.lock_timeout
   // The matcher is able to override locks that have expired
   // Wait slightly longer to make sure locks are expired
-  visibility_timeout_seconds = 210
+  visibility_timeout_seconds = local.lock_timeout + 30
 }
 
 # Service
@@ -37,6 +41,8 @@ module "matcher" {
     dynamo_index            = "work-sets-index"
     dynamo_lock_table       = "${aws_dynamodb_table.matcher_lock_table.id}"
     dynamo_lock_table_index = "context-ids-index"
+
+    dynamo_lock_timeout = local.lock_timeout + 30
 
     vhs_recorder_dynamo_table_name = "${module.vhs_recorder.table_name}"
     vhs_recorder_bucket_name       = "${module.vhs_recorder.bucket_name}"
