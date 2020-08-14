@@ -17,7 +17,13 @@ variable "es_images_index" {}
 
 variable "rds_ids_access_security_group_id" {}
 
-variable "release_label" {}
+variable "release_label" {
+  type = string
+  validation {
+    condition     = var.release_label == "stage" || var.release_label == "prod"
+    error_message = "The release_label must be either stage or prod."
+  }
+}
 
 # Miro
 variable "miro_adapter_topic_arns" {
