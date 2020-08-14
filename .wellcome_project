@@ -60,10 +60,8 @@ catalogue_pipeline:
   environments:
     - id: prod
       name: Production
-    - id: latest
-      name: Latest
-    - id: miro_merging_test
-      name: Miro merging test
+    - id: stage
+      name: Staging
   image_repositories:
     - id: id_minter
       services:
