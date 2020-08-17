@@ -59,9 +59,6 @@ module "app_container" {
   name  = var.name
   image = var.image
 
-  cpu    = var.app_cpu
-  memory = var.app_memory
-
   environment = var.env_vars
   secrets     = var.secret_env_vars
 
