@@ -2,6 +2,7 @@
   "id" : "relation_embedder",
   "folder" : "pipeline/relation_embedder",
   "dependencyIds" : [
-    "internal_model"
+    "internal_model",
+    "elasticsearch",
   ]
 }
