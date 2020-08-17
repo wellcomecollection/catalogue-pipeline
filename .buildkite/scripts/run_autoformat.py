@@ -83,7 +83,7 @@ if __name__ == "__main__":
 
         git("add", "--verbose", "--update")
         git("commit", "-m", "Apply auto-formatting rules")
-        git("push", "ssh-origin", "HEAD:%s" % branch_name())
+        git("push", "ssh-origin", f"HEAD:{branch_name()}")
 
         # We exit here to fail the build, so Buildkite will skip to the next
         # build, which includes the autoformat commit.
