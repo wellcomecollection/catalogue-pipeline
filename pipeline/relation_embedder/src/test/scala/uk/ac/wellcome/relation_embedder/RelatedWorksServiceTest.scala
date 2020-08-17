@@ -1,0 +1,134 @@
+package uk.ac.wellcome.relation_embedder
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.concurrent.ScalaFutures
+import com.sksamuel.elastic4s.Index
+import org.scalatest.funspec.AnyFunSpec
+import uk.ac.wellcome.models.work.internal._
+import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
+import uk.ac.wellcome.models.work.generators.{
+  IdentifiersGenerators,
+  ItemsGenerators,
+  WorksGenerators
+}
+
+class RelatedWorksServiceTest
+    extends AnyFunSpec
+    with Matchers
+    with ScalaFutures
+    with ElasticsearchFixtures
+    with IdentifiersGenerators
+    with ItemsGenerators
+    with WorksGenerators {
+
+  def service(index: Index) =
+    new PathQueryRelatedWorksService(elasticClient, index)
+
+  def work(path: String) =
+    createIdentifiedWorkWith(
+      collectionPath = Some(
+        CollectionPath(path = path)
+      ),
+      title = Some(path),
+      sourceIdentifier = createSourceIdentifierWith(value = path)
+    )
+
+  def storeWorks(index: Index, works: List[IdentifiedWork] = works) =
+    insertIntoElasticsearch(index, works: _*)
+
+  val workA = work("a")
+  val work1 = work("a/1")
+  val workB = work("a/1/b")
+  val workC = work("a/1/c")
+  val work2 = work("a/2")
+  val workD = work("a/2/d")
+  val workE = work("a/2/e")
+  val workF = work("a/2/e/f")
+  val work3 = work("a/3")
+  val work4 = work("a/4")
+
+  val works =
+    List(workA, workB, workC, workD, workE, workF, work4, work3, work2, work1)
+
+  def relatedWork(work: IdentifiedWork) =
+    RelatedWork(work.sourceIdentifier.toString)
+
+  it(
+    "Retrieves a related works for the given path with children and siblings sorted correctly") {
+    withLocalWorksIndex { index =>
+      storeWorks(index)
+      whenReady(service(index)(work2)) { result =>
+        result shouldBe
+          RelatedWorks(
+            parts = List(relatedWork(workD), relatedWork(workE)),
+            partOf = List(relatedWork(workA)),
+            precededBy = List(relatedWork(work1)),
+            succeededBy = List(relatedWork(work3), relatedWork(work4)),
+          )
+      }
+    }
+  }
+
+  it(
+    "Retrieves a related works for the given path with ancestors sorted correctly") {
+    withLocalWorksIndex { index =>
+      storeWorks(index)
+      whenReady(service(index)(workF)) { relatedWorks =>
+        relatedWorks shouldBe
+          RelatedWorks(
+            parts = Nil,
+            partOf = List(relatedWork(workA), relatedWork(work2), relatedWork(workE)),
+            precededBy = Nil,
+            succeededBy = Nil,
+          )
+      }
+    }
+  }
+
+  it("Retrieves relations correctly from root position") {
+    withLocalWorksIndex { index =>
+      storeWorks(index)
+      whenReady(service(index)(workA)) { relatedWorks =>
+        relatedWorks shouldBe
+          RelatedWorks(
+            parts = List(relatedWork(work1), relatedWork(work2), relatedWork(work3), relatedWork(work4)),
+            partOf = Nil,
+            precededBy = Nil,
+            succeededBy = Nil
+          )
+      }
+    }
+  }
+
+  it("Ignores missing ancestors") {
+    withLocalWorksIndex { index =>
+      storeWorks(index, List(workA, workB, workC, workD, workE, workF))
+      whenReady(service(index)(workF)) { result =>
+        result shouldBe
+          RelatedWorks(
+            parts = Nil,
+            partOf = List(relatedWork(workA), relatedWork(workE)),
+            precededBy = Nil,
+            succeededBy = Nil,
+          )
+      }
+    }
+  }
+
+  it("Returns no related works when work is not part of a collection") {
+    withLocalWorksIndex { index =>
+      val workX = createIdentifiedWork
+      storeWorks(index, List(workA, work1, workX))
+      whenReady(service(index)(workX)) { result =>
+        result shouldBe
+          RelatedWorks(
+            parts = Nil,
+            partOf = Nil,
+            precededBy = Nil,
+            succeededBy = Nil
+          )
+      }
+    }
+  }
+}
