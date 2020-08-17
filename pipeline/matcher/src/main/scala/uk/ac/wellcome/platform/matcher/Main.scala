@@ -26,6 +26,7 @@ import uk.ac.wellcome.storage.locking.dynamo.{
   DynamoLockingService
 }
 import uk.ac.wellcome.storage.typesafe.DynamoBuilder
+import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 
 import scala.concurrent.ExecutionContext
 
@@ -49,7 +50,12 @@ object Main extends WellcomeTypesafeApp {
       dynamoClient,
       DynamoLockDaoConfig(
         DynamoBuilder.buildDynamoConfig(config, namespace = "locking.service"),
-        Duration.ofSeconds(180)
+        Duration.ofSeconds(
+          config
+            .getIntOption("aws.locking.service.dynamo.timeout")
+            .getOrElse(180)
+            .toLong
+        )
       )
     )
 
