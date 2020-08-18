@@ -78,7 +78,8 @@ class RelatedWorksServiceTest
         relatedWorks shouldBe
           RelatedWorks(
             parts = Nil,
-            partOf = List(relatedWork(workA), relatedWork(work2), relatedWork(workE)),
+            partOf =
+              List(relatedWork(workA), relatedWork(work2), relatedWork(workE)),
             precededBy = Nil,
             succeededBy = Nil,
           )
@@ -92,7 +93,11 @@ class RelatedWorksServiceTest
       whenReady(service(index)(workA)) { relatedWorks =>
         relatedWorks shouldBe
           RelatedWorks(
-            parts = List(relatedWork(work1), relatedWork(work2), relatedWork(work3), relatedWork(work4)),
+            parts = List(
+              relatedWork(work1),
+              relatedWork(work2),
+              relatedWork(work3),
+              relatedWork(work4)),
             partOf = Nil,
             precededBy = Nil,
             succeededBy = Nil
