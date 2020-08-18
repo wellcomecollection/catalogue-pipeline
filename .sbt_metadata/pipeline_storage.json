@@ -2,7 +2,6 @@
   "id" : "pipeline_storage",
   "folder" : "common/pipeline_storage",
   "dependencyIds" : [
-    "elasticsearch_typesafe",
-    "big_messaging_typesafe"
+    "elasticsearch_typesafe"
   ]
 }

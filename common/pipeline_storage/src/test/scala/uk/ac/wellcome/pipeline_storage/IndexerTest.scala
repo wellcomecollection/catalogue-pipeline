@@ -16,7 +16,6 @@ import uk.ac.wellcome.pipeline_storage.fixtures.{
   SampleDocument,
   SampleDocumentData
 }
-import uk.ac.wellcome.storage.generators.RandomThings
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -27,11 +26,10 @@ class IndexerTest
     with Matchers
     with IdentifiersGenerators
     with ElasticsearchFixtures
-    with IngestorFixtures
-    with RandomThings {
+    with IngestorFixtures {
 
   it("inserts a document into Elasticsearch") {
-    val document = SampleDocument(1, createCanonicalId, randomAlphanumeric(10))
+    val document = SampleDocument(1, createCanonicalId, "document")
 
     withIndexAndIndexer[SampleDocument, Any]() {
       case (index, indexer) =>
@@ -45,7 +43,7 @@ class IndexerTest
   }
 
   it("only adds one record when the same ID is ingested multiple times") {
-    val document = SampleDocument(1, createCanonicalId, randomAlphanumeric(10))
+    val document = SampleDocument(1, createCanonicalId, "document")
 
     withIndexAndIndexer[SampleDocument, Any]() {
       case (index, indexer) =>
@@ -60,7 +58,7 @@ class IndexerTest
   }
 
   it("doesn't add a document with a lower version") {
-    val document = SampleDocument(3, createCanonicalId, randomAlphanumeric(10))
+    val document = SampleDocument(3, createCanonicalId, "document")
     val olderDocument = document.copy(version = 1)
 
     withIndexAndIndexer[SampleDocument, Any]() {
@@ -78,7 +76,7 @@ class IndexerTest
   }
 
   it("replaces a document with the same version") {
-    val document = SampleDocument(3, createCanonicalId, randomAlphanumeric(10))
+    val document = SampleDocument(3, createCanonicalId, "document")
     val updatedDocument = document.copy(
       title = "A different title"
     )
@@ -98,8 +96,8 @@ class IndexerTest
   }
 
   it("inserts a list of documents into elasticsearch and returns them") {
-    val documents = (1 to 5).map(_ =>
-      SampleDocument(1, createCanonicalId, randomAlphanumeric(10)))
+    val documents = (1 to 5).map(i =>
+      SampleDocument(1, createCanonicalId, f"document $i"))
 
     withIndexAndIndexer[SampleDocument, Any]() {
       case (index, indexer) =>
@@ -113,14 +111,14 @@ class IndexerTest
   }
 
   it("returns a list of documents that weren't indexed correctly") {
-    val validDocuments = (1 to 5).map(_ =>
-      SampleDocument(1, createCanonicalId, randomAlphanumeric))
+    val validDocuments = (1 to 5).map(i =>
+      SampleDocument(1, createCanonicalId, f"document $i"))
     val notMatchingMappingDocuments = (1 to 3).map(
-      _ =>
+      i =>
         SampleDocument(
           1,
           createCanonicalId,
-          randomAlphanumeric,
+          f"document $i",
           SampleDocumentData(Some("blah bluh blih"))))
     val documents = validDocuments ++ notMatchingMappingDocuments
 

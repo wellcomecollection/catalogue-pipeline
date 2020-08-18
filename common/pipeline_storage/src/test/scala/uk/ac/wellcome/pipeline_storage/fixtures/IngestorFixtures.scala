@@ -3,23 +3,16 @@ package uk.ac.wellcome.pipeline_storage.fixtures
 import com.sksamuel.elastic4s.requests.analysis.Analysis
 import com.sksamuel.elastic4s.requests.mappings.MappingDefinition
 import com.sksamuel.elastic4s.{ElasticClient, Index, Indexable}
-import io.circe.Decoder
 import org.scalatest.Suite
 import uk.ac.wellcome.akka.fixtures.Akka
-import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.elasticsearch.model.{CanonicalId, Version}
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
-import uk.ac.wellcome.elasticsearch.{ElasticsearchIndexCreator, IndexConfig}
+import uk.ac.wellcome.elasticsearch.IndexConfig
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil.toJson
-import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.pipeline_storage.Indexer
-import uk.ac.wellcome.pipeline_storage.models.IngestorConfig
-import uk.ac.wellcome.pipeline_storage.services.IngestorWorkerService
 
 import scala.concurrent.ExecutionContext
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
 import uk.ac.wellcome.json.JsonUtil._
 
 case class SampleDocument(version: Int,
@@ -38,7 +31,6 @@ object SampleDocument {
 
 trait IngestorFixtures
     extends ElasticsearchFixtures
-    with BigMessagingFixture
     with Akka {
   this: Suite =>
 
@@ -58,36 +50,6 @@ trait IngestorFixtures
     }
     testWith(indexer)
   }
-
-  def withWorkerService[T, R](queue: Queue,
-                              index: Index,
-                              indexConfig: IndexConfig,
-                              indexer: Indexer[T],
-                              elasticClient: ElasticClient = elasticClient)(
-    testWith: TestWith[IngestorWorkerService[T], R])(
-    implicit dec: Decoder[T]): R =
-    withActorSystem { implicit actorSystem =>
-      {
-        withBigMessageStream[T, R](queue) { messageStream =>
-          val ingestorConfig = IngestorConfig(
-            batchSize = 100,
-            flushInterval = 5 seconds
-          )
-
-          val workerService = new IngestorWorkerService(
-            indexCreator =
-              new ElasticsearchIndexCreator(elasticClient, index, indexConfig),
-            documentIndexer = indexer,
-            ingestorConfig = ingestorConfig,
-            messageStream = messageStream
-          )
-
-          workerService.run()
-
-          testWith(workerService)
-        }
-      }
-    }
 
   object NoStrictMapping extends IndexConfig {
     val analysis: Analysis = Analysis(analyzers = List())
