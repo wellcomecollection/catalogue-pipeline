@@ -43,7 +43,7 @@ module "matcher" {
     dynamo_lock_table       = "${aws_dynamodb_table.matcher_lock_table.id}"
     dynamo_lock_table_index = "context-ids-index"
 
-    dynamo_lock_timeout = local.lock_timeout + 30
+    dynamo_lock_timeout = local.lock_timeout
 
     vhs_recorder_dynamo_table_name = "${module.vhs_recorder.table_name}"
     vhs_recorder_bucket_name       = "${module.vhs_recorder.bucket_name}"
