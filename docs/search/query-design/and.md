@@ -1,0 +1,1 @@
+Requires all words or “tokens” present in the query to be present in the matching field. This is a much more restrictive strategy and significantly reduces room for user error and serendipitous discovery but may increase overall trust in search. 
