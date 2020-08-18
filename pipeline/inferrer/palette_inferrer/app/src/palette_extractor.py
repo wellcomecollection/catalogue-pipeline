@@ -22,15 +22,9 @@ class PaletteExtractor:
         a specified level of precision, and normalises the relative intensity 
         of colour in each chunk
         """
-        histogram, _ = np.histogramdd(
-            sample=lab_pixels,
-            bins=(n_bins, n_bins, n_bins)
-        )
+        histogram, _ = np.histogramdd(sample=lab_pixels, bins=(n_bins, n_bins, n_bins))
 
-        normalised_histogram = (
-            histogram * 10 /
-            histogram.max()
-        ).astype(int)
+        normalised_histogram = (histogram * 10 / histogram.max()).astype(int)
 
         flat_values = normalised_histogram.reshape(-1)
         return flat_values
@@ -44,8 +38,7 @@ class PaletteExtractor:
             bin_count
             for precision_level in precision_levels
             for bin_count in self.get_colour_histogram(
-                lab_pixels=lab_pixels,
-                n_bins=precision_level
+                lab_pixels=lab_pixels, n_bins=precision_level
             )
         ]
 

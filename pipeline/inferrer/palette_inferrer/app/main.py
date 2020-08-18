@@ -27,8 +27,7 @@ batch_inferrer_queue = BatchExecutionQueue(
 @app.get("/palette/")
 async def main(image_url: str = None, iiif_url: str = None):
     if (not (image_url or iiif_url)) or (iiif_url and image_url):
-        logger.error(
-            f"client passed image_url: {image_url} iiif_url: {iiif_url}")
+        logger.error(f"client passed image_url: {image_url} iiif_url: {iiif_url}")
         raise HTTPException(
             status_code=400, detail="API takes one of: image_url, iiif_url"
         )
