@@ -1,0 +1,1 @@
+The presence of any of the words or “tokens” used in a query in the matched field makes it a valid result for inclusion. This introduces a lot of noise into the list of results due to being overly permissive.
