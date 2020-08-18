@@ -18,8 +18,8 @@ class PaletteExtractor:
 
     def get_colour_histogram(self, lab_pixels, n_bins):
         """
-        bins image pixels into n^3 chunks of perceptually-even colour space at 
-        a specified level of precision, and normalises the relative intensity 
+        bins image pixels into n^3 chunks of perceptually-even colour space at
+        a specified level of precision, and normalises the relative intensity
         of colour in each chunk
         """
         histogram, _ = np.histogramdd(sample=lab_pixels, bins=(n_bins, n_bins, n_bins))

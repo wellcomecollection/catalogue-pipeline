@@ -1,4 +1,3 @@
-import base64
 from fastapi import FastAPI, HTTPException
 
 import src.http as http
