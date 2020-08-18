@@ -1,11 +1,13 @@
-# Expectations:
+# Concepts, subject, and another field
+
+## Expectations:
 
 *	User searches for concept or subject along with {concept/subject} {contributor} {keywords} {workType} {genre} {date} {fuzzy date} to refine this search
 *	Users expect works with exact match for reference number and matches for other information to appear first in results. 
 *	Works that mention the reference number in other fields should follow the exact match in the search results 
 
 
-# Example: 
+## Examples: 
 
 *	Botany, 16th Century
 *	Hong kong 1870

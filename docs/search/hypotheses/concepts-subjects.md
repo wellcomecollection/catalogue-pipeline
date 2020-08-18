@@ -1,4 +1,6 @@
-# Expectations:
+# Concepts and subjects
+
+## Expectations:
 
 *	Users expect search to be able to locate works about a concept/subject 
 *	Users expect search to also deliver works that are conceptually similar or items related to the search term; for example, in the case of beer, also beer bottles, labels, breweries
@@ -6,7 +8,7 @@
 *	These types of keyword searches may coincide with controlled vocabularies (LCSH, MeSH, LC Genres, other thesauri that users know)
 
 
-# Examples:
+## Examples:
 
 *	Beer
 *	funerary urn

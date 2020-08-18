@@ -1,4 +1,6 @@
-# Expectations:
+# Contributor with another field
+
+## Expectations:
 
 *	User searches for contributor along with {title phrase} {keywords} {workType} {genre} {date} {fuzzy date} to refine this search. 
 *	Users expect all contributor+ matches to be grouped together instead of spread across many pages; to look at them as a set 
@@ -6,7 +8,7 @@
 *	Returns matches at top of results
 
 
-# Examples: 
+## Examples: 
 
 *	Florence Nightingale 1855
 *	mary bishop thistles

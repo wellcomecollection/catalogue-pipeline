@@ -1,4 +1,6 @@
-# Expectations:
+# Contributors
+
+## Expectations:
 
 *	Users expect search to locate works by or about a person/organisation
 *	Users expect search results to return a list of contributor with an exact or close-enough name match
@@ -8,7 +10,7 @@
 *	Inclusion of titles, honorifics and middle names/initials can pose problems when we’re tuning for precision over recall
 
 
-# Examples:
+## Examples:
 
 *	Frederic Cayley Robinson
 *	Levasseur

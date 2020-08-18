@@ -1,10 +1,12 @@
-# Expectations:
+# Titles
+
+## Expectations:
 
 *	Users expect that when the exact title is searched for, it is the first result
 *	Users expect that when a partial title is searched for, it is the first result
 
 
-# Examples:
+## Examples:
 
 *	origin of species
 *	oxford dictionary of national biography (the online resource of the oxford dictionary of national biography)

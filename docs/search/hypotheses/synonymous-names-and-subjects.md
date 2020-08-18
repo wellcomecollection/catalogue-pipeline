@@ -1,3 +1,5 @@
+# Synonymous names and subjects
+
 # Expectations:
 
 *	Users expect searching for a name should return works by the author or about the person, even if the structure of the name is recorded differently in the catalogue

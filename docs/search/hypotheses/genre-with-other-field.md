@@ -1,11 +1,13 @@
-# Expectations:
+# Genres with another field 
+
+## Expectations:
 
 *	User searches for genre along with {concept/subject} {contributor} {keywords} {workType} {date} {fuzzy date} to refine this search
 *	Users expect works with exact match for reference number and matches for other information to appear first in results. 
 *	Works that mention the reference number in other fields should follow the exact match in the search results 
 
 
-# Examples: 
+## Examples: 
 
 *	medieval woodcut prints
 *	Contraception zine - (a zine with the title 'contraception zine')

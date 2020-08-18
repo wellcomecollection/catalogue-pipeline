@@ -1,4 +1,6 @@
-# Research questions:
+# Further research and design considerations
+
+## Research questions:
 
 *	What a new researcher thinks they’re searching (full text; webpages; records for materials/objects; digitised copies)
 *	What people think will happen when they click on a subject, genre or contributor tag
@@ -6,7 +8,7 @@
   *	Does it narrow search to {my search} + {oil paintings} 
 *	What constitutes a ‘failed’ search for a user? One hypothesis is that too many results may result in the user leaving before they’ve got what they need (fatigue, not enough time to look through the results list)
 
-# Feature ideas:
+## Feature ideas:
 
 *	Highlighting matched search terms within work
 *	Browsing a list of sequential reference numbers
@@ -22,7 +24,7 @@
 *	Better handling of zero results
 
 
-# Further feedback from William Schupbach
+## Further feedback from William Schupbach
 
 The phrase "by or about" appears a couple of times, but, if we start with persons, at the moment we have three options: find works by X; find works about X; find any mention of X.  That's very useful. 
 
