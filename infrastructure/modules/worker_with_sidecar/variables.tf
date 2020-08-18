@@ -136,6 +136,30 @@ variable "ordered_placement_strategies" {
   default = []
 }
 
+variable "volumes" {
+  type = list(object({
+    name      = string
+    host_path = string
+  }))
+  default = []
+}
+
+variable "app_mount_points" {
+  type = list(object({
+    containerPath = string
+    sourceVolume  = string
+  }))
+  default = []
+}
+
+variable "sidecar_mount_points" {
+  type = list(object({
+    containerPath = string
+    sourceVolume  = string
+  }))
+  default = []
+}
+
 variable "deployment_service_name" {
   type        = string
   description = "Used by weco-deploy to determine which services to deploy, if unset the value used will be var.name"

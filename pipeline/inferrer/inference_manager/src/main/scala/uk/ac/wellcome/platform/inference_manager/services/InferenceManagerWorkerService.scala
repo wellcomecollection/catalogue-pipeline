@@ -1,30 +1,28 @@
 package uk.ac.wellcome.platform.inference_manager.services
 
 import akka.Done
-import akka.http.scaladsl.Http.HostConnectionPool
-import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
+import akka.http.scaladsl.model.HttpResponse
 import akka.actor.ActorSystem
-import akka.stream.scaladsl.Flow
-import software.amazon.awssdk.services.sqs.model.Message
+import akka.stream.scaladsl.{FlowWithContext, Source}
 import grizzled.slf4j.Logging
-import io.circe.Encoder
+import software.amazon.awssdk.services.sqs.model.Message
 import uk.ac.wellcome.bigmessaging.message.BigMessageStream
 import uk.ac.wellcome.messaging.MessageSender
+import uk.ac.wellcome.models.work.internal.AugmentedImage
+import uk.ac.wellcome.models.Implicits._
+import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
 import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
-class InferenceManagerWorkerService[Destination, Input, Output](
-  msgStream: BigMessageStream[Input],
+class InferenceManagerWorkerService[Destination](
+  msgStream: BigMessageStream[MergedIdentifiedImage],
   messageSender: MessageSender[Destination],
-  inferrerAdapter: InferrerAdapter[Input, Output],
-  inferrerClientFlow: Flow[(HttpRequest, (Message, Input)),
-                           (Try[HttpResponse], (Message, Input)),
-                           HostConnectionPool]
-)(implicit actorSystem: ActorSystem,
-  ec: ExecutionContext,
-  encoder: Encoder[Output])
+  imageDownloader: ImageDownloader[Message],
+  inferrerAdapter: InferrerAdapter[DownloadedImage, AugmentedImage],
+  requestPool: RequestPoolFlow[DownloadedImage, Message]
+)(implicit actorSystem: ActorSystem, ec: ExecutionContext)
     extends Runnable
     with Logging {
 
@@ -34,24 +32,35 @@ class InferenceManagerWorkerService[Destination, Input, Output](
   def run(): Future[Done] =
     msgStream.runStream(
       className,
-      _.via(createRequest)
-        .via(inferrerClientFlow)
+      _.asSourceWithContext {
+        case (message, _) => message
+      }.map {
+          case (_, image) => image
+        }
+        .via(imageDownloader.download)
+        .via(createRequest)
+        .via(requestPool.asContextFlow)
         .via(unmarshalResponse)
         .via(augmentInput)
         .via(sendAugmented)
-        .map { case (msg, _) => msg }
+        .asSource
+        .map { case (_, msg) => msg }
     )
 
-  private def createRequest =
-    Flow[(Message, Input)].map {
-      case (msg, input) =>
-        (inferrerAdapter.createRequest(input), (msg, input))
+  private def createRequest[Ctx] =
+    FlowWithContext[DownloadedImage, Ctx].map { image =>
+      (inferrerAdapter.createRequest(image), image)
     }
 
-  private def unmarshalResponse =
-    Flow[(Try[HttpResponse], (Message, Input))]
+  private def unmarshalResponse[Ctx] =
+    FlowWithContext[(Try[HttpResponse], DownloadedImage), Ctx]
+      .map {
+        case result @ (_, image) =>
+          imageDownloader.delete.runWith(Source.single(image))
+          result
+      }
       .mapAsync(parallelism) {
-        case (Success(response), (msg, input)) =>
+        case (Success(response), image) =>
           inferrerAdapter
             .parseResponse(response)
             .recover {
@@ -59,24 +68,23 @@ class InferenceManagerWorkerService[Destination, Input, Output](
                 response.discardEntityBytes()
                 throw e
             }
-            .map((msg, input, _))
+            .map((image, _))
         case (Failure(exception), _) =>
           Future.failed(exception)
       }
 
-  private def augmentInput =
-    Flow[(Message, Input, Option[inferrerAdapter.InferrerResponse])].map {
-      case (msg, input, response) =>
-        (msg, inferrerAdapter.augmentInput(input, response))
-    }
+  private def augmentInput[Ctx] =
+    FlowWithContext[
+      (DownloadedImage, Option[inferrerAdapter.InferrerResponse]),
+      Ctx]
+      .map {
+        case (image, response) =>
+          inferrerAdapter.augmentInput(image, response)
+      }
 
-  private def sendAugmented =
-    Flow[(Message, Output)].map {
-      case (msg, image) =>
-        messageSender
-          .sendT(image)
-          .map((msg, _))
-          .get
-    }
+  private def sendAugmented[Ctx] =
+    FlowWithContext[AugmentedImage, Ctx]
+      .map(messageSender.sendT[AugmentedImage])
+      .map(_.get)
 
 }

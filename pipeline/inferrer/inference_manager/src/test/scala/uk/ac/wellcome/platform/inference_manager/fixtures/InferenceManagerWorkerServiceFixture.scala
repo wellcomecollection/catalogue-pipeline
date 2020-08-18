@@ -1,45 +1,61 @@
 package uk.ac.wellcome.platform.inference_manager.fixtures
 
-import akka.http.scaladsl.Http
-import io.circe.{Decoder, Encoder}
+import io.circe.Decoder
 import software.amazon.awssdk.services.sqs.model.Message
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
+import uk.ac.wellcome.models.work.internal.{
+  AugmentedImage,
+  Identified,
+  MergedImage,
+  Minted
+}
+import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
 import uk.ac.wellcome.platform.inference_manager.services.{
+  FileWriter,
+  ImageDownloader,
   InferenceManagerWorkerService,
-  InferrerAdapter
+  InferrerAdapter,
+  MergedIdentifiedImage,
+  RequestPoolFlow
 }
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-trait InferenceManagerWorkerServiceFixture[Input, Output]
+trait InferenceManagerWorkerServiceFixture
     extends BigMessagingFixture
     with Akka {
-  def withWorkerService[R](queue: Queue,
-                           messageSender: MemoryMessageSender,
-                           adapter: InferrerAdapter[Input, Output],
-                           inferrerPort: Int)(
-    testWith: TestWith[InferenceManagerWorkerService[String, Input, Output],
-                       R])(implicit decoder: Decoder[Input],
-                           encoder: Encoder[Output]): R =
+  def withWorkerService[R](
+    queue: Queue,
+    messageSender: MemoryMessageSender,
+    adapter: InferrerAdapter[DownloadedImage, AugmentedImage],
+    fileWriter: FileWriter,
+    inferrerRequestPool: RequestPoolFlow[DownloadedImage, Message],
+    imageRequestPool: RequestPoolFlow[MergedIdentifiedImage, Message],
+    fileRoot: String = "/")(
+    testWith: TestWith[InferenceManagerWorkerService[String], R])(
+    implicit decoder: Decoder[MergedIdentifiedImage]): R =
     withActorSystem { implicit actorSystem =>
-      withBigMessageStream[Input, R](queue) { msgStream =>
-        val workerService = new InferenceManagerWorkerService(
-          msgStream = msgStream,
-          messageSender = messageSender,
-          inferrerAdapter = adapter,
-          inferrerClientFlow = Http()
-            .cachedHostConnectionPool[(Message, Input)](
-              "localhost",
-              inferrerPort)
-        )
+      withBigMessageStream[MergedImage[Identified, Minted], R](queue) {
+        msgStream =>
+          val workerService = new InferenceManagerWorkerService(
+            msgStream = msgStream,
+            messageSender = messageSender,
+            inferrerAdapter = adapter,
+            imageDownloader = new ImageDownloader(
+              root = fileRoot,
+              fileWriter = fileWriter,
+              requestPool = imageRequestPool),
+            requestPool = inferrerRequestPool
+          )
 
-        workerService.run()
+          workerService.run()
 
-        testWith(workerService)
+          testWith(workerService)
       }
     }
+
 }

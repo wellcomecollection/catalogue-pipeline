@@ -11,6 +11,7 @@ module "worker" {
   launch_type                  = var.launch_type
   capacity_provider_strategies = var.capacity_provider_strategies
   ordered_placement_strategies = var.ordered_placement_strategies
+  volumes                      = var.volumes
 
   desired_task_count = var.desired_task_count
 
@@ -23,6 +24,7 @@ module "worker" {
   app_env_vars        = var.app_env_vars
   app_secret_env_vars = var.app_secret_env_vars
   app_healthcheck     = var.app_healthcheck
+  app_mount_points    = var.app_mount_points
 
   sidecar_image           = var.manager_container_image
   sidecar_name            = var.manager_container_name
@@ -30,6 +32,7 @@ module "worker" {
   sidecar_memory          = var.manager_memory
   sidecar_env_vars        = var.manager_env_vars
   sidecar_secret_env_vars = var.manager_secret_env_vars
+  sidecar_mount_points    = var.manager_mount_points
 
   cpu    = var.host_cpu
   memory = var.host_memory
