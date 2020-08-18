@@ -34,7 +34,8 @@ trait RelatedWorksService {
 }
 
 class PathQueryRelatedWorksService(elasticClient: ElasticClient, index: Index)(
-  implicit ec: ExecutionContext) extends RelatedWorksService {
+  implicit ec: ExecutionContext)
+    extends RelatedWorksService {
 
   type PathToken = Either[Int, String]
 
