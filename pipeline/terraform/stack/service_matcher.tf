@@ -1,5 +1,5 @@
 locals {
-  lock_timeout = 900
+  lock_timeout = 240
 }
 
 module "matcher_queue" {
@@ -15,6 +15,7 @@ module "matcher_queue" {
   // The matcher is able to override locks that have expired
   // Wait slightly longer to make sure locks are expired
   visibility_timeout_seconds = local.lock_timeout + 30
+  max_receive_count          = 20
 }
 
 # Service
