@@ -26,7 +26,7 @@ if __name__ == "__main__":
 
         git("config", "user.name", "Buildkite on behalf of Wellcome Collection")
         git("config", "user.email", "wellcomedigitalplatform@wellcome.ac.uk")
-        git("remote", "add", "ssh-origin", repo())
+        git("remote", "add", "ssh-origin", repo(), exit_on_error=False)
 
         # We checkout the branch before we add the commit, so we don't
         # include the merge commit that Buildkite makes.
