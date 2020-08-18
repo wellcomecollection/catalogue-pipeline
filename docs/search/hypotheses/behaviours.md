@@ -1,9 +1,11 @@
-# Expectations:
+# Behaviours
+
+## Expectations:
 
 *	Experienced searchers use special characters or regular expressions to make searches more powerful.
 
 
-# Examples:
+## Examples:
 
 *	Use quote marks to isolate a phrase 
 *	Assume quotemarks take priority over ANDing a string of terms 
