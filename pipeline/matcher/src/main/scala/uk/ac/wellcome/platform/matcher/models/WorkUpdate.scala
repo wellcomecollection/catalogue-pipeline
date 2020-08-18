@@ -4,7 +4,9 @@ import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 
 case class WorkUpdate(workId: String,
                       version: Int,
-                      referencedWorkIds: Set[String])
+                      referencedWorkIds: Set[String]) {
+  lazy val ids: Set[String] = referencedWorkIds + workId
+}
 
 case object WorkUpdate {
   def apply(work: TransformedBaseWork): WorkUpdate = {

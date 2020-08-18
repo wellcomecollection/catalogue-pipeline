@@ -4,8 +4,6 @@ import java.time.Duration
 
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
-import org.scanamo.auto._
-import org.scanamo.time.JavaTimeFormats._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.work.internal.TransformedBaseWork
 import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher
