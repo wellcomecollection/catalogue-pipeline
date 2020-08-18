@@ -39,7 +39,9 @@ class WorkMatcher(
       for {
         graphBeforeUpdate <- workGraphStore.findAffectedWorks(update)
         updatedGraph = WorkGraphUpdater.update(update, graphBeforeUpdate)
-        _ <- withLocks(update, graphBeforeUpdate.nodes.map(_.componentId)) {
+        _ <- withLocks(
+          update,
+          getGraphComponentIds(graphBeforeUpdate, updatedGraph)) {
           // We are returning empty set here, as LockingService is tied to a
           // single `Out` type, here set to `Set[MatchedIdentifiers]`.
           // See issue here: https://github.com/wellcometrust/platform/issues/3873
@@ -50,6 +52,10 @@ class WorkMatcher(
       }
     }
   }
+
+  private def getGraphComponentIds(graphBefore: WorkGraph,
+                                   graphAfter: WorkGraph): Set[String] =
+    graphBefore.nodes.map(_.componentId) ++ graphAfter.nodes.map(_.componentId)
 
   private def withLocks(update: WorkUpdate, ids: Set[String])(
     f: => Future[Out]): Future[Out] =
