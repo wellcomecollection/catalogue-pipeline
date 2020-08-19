@@ -34,7 +34,7 @@ class ElasticsearchService(elasticClient: ElasticClient)(
   def executeGet(canonicalId: String)(
     index: Index): Future[Either[ElasticError, GetResponse]] =
     withActiveTrace(elasticClient.execute {
-      get(canonicalId).from(index.name)
+      get(index, canonicalId)
     }).map { toEither }
 
   /** Given a set of query options, build a SearchDefinition for Elasticsearch

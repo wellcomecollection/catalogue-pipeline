@@ -1,7 +1,7 @@
 package uk.ac.wellcome.elasticsearch
 
 import com.sksamuel.elastic4s.ElasticDsl.{keywordField, _}
-import com.sksamuel.elastic4s.requests.analysis.Analysis
+import com.sksamuel.elastic4s.analysis.Analysis
 import com.sksamuel.elastic4s.requests.mappings.{MappingDefinition, ObjectField}
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 

@@ -1,27 +1,13 @@
 package uk.ac.wellcome.elasticsearch
-import com.sksamuel.elastic4s.json.{XContentBuilder, XContentFactory}
-import com.sksamuel.elastic4s.requests.analysis.{
+import com.sksamuel.elastic4s.analysis.{
   Analysis,
   CustomAnalyzer,
   CustomNormalizer,
   PathHierarchyTokenizer,
   ShingleTokenFilter,
   StemmerTokenFilter,
-  TokenFilter
 }
-
-// TODO: Patch back to elastic4s
-case class AsciiFoldingTokenFilter(override val name: String,
-                                   preserveOriginal: Option[Boolean] = None)
-    extends TokenFilter {
-
-  override def build: XContentBuilder = {
-    val b = XContentFactory.jsonBuilder()
-    b.field("type", "asciifolding")
-    preserveOriginal.foreach(b.field("preserve_original", _))
-    b
-  }
-}
+import uk.ac.wellcome.elasticsearch.elastic4s.AsciiFoldingTokenFilter
 
 object WorksAnalysis {
   // Analysis

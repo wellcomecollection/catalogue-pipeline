@@ -1,14 +1,19 @@
 package uk.ac.wellcome.elasticsearch
 
-import com.sksamuel.elastic4s.Index
-import com.sksamuel.elastic4s.ElasticDsl.{createIndex, _}
-import com.sksamuel.elastic4s.requests.analysis.Analysis
-import com.sksamuel.elastic4s.requests.indexes.CreateIndexResponse
-import com.sksamuel.elastic4s.requests.indexes.PutMappingResponse
-import com.sksamuel.elastic4s.{ElasticClient, Response}
+import com.sksamuel.elastic4s.ElasticApi.createIndex
+import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.analysis.Analysis
+import com.sksamuel.elastic4s.requests.indexes.{
+  CreateIndexResponse,
+  PutMappingResponse
+}
+import com.sksamuel.elastic4s.requests.mappings.MappingDefinition
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
-import com.sksamuel.elastic4s.requests.mappings.{MappingDefinition}
+import com.sksamuel.elastic4s.{ElasticClient, Index, Response}
 import grizzled.slf4j.Logging
+import uk.ac.wellcome.elasticsearch.elastic4s.searchtemplate.PutSearchTemplateRequest
+import uk.ac.wellcome.elasticsearch.elastic4s.WecoElasticDsl._
+import uk.ac.wellcome.elasticsearch.model.SearchTemplate
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -17,19 +22,24 @@ class ElasticsearchIndexCreator(
   index: Index,
   config: IndexConfig)(implicit ec: ExecutionContext)
     extends Logging {
-  def create: Future[Unit] = {
 
-    create(index = index, mapping = config.mapping, config.analysis)
+  def create: Future[Unit] = {
+    create(
+      index = index,
+      mapping = config.mapping,
+      config.analysis,
+      config.searchTemplate)
   }
 
   private def create(index: Index,
                      mapping: MappingDefinition,
-                     analysis: Analysis): Future[Unit] =
+                     analysis: Analysis,
+                     searchTemplate: Option[SearchTemplate]): Future[Unit] =
     elasticClient
       .execute {
         createIndex(index.name)
-          .mapping { mapping }
-          .analysis { analysis }
+          .mapping(mapping)
+          .analysis(analysis)
 
           // Because we have a relatively small number of records (compared
           // to what Elasticsearch usually expects), we can get weird results
@@ -61,7 +71,23 @@ class ElasticsearchIndexCreator(
             )
           }
         } else {
-          Future.successful(response)
+          searchTemplate.map { template =>
+            elasticClient.execute {
+              // We use an index namespace on templates to know
+              // which index they will work against
+              PutSearchTemplateRequest(
+                s"${index.name}__${template.id}",
+                template.query)
+            } map { response =>
+              if (response.isError) {
+                Future.failed(
+                  throw new RuntimeException(
+                    s"Failed creating search template ${template.id}: ${response.error}"
+                  )
+                )
+              }
+            }
+          } getOrElse Future.successful(response)
         }
       }
       .map { _ =>

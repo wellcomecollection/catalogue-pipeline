@@ -132,7 +132,7 @@ trait ElasticsearchFixtures
 
       eventually {
         val response: Response[GetResponse] = elasticClient.execute {
-          get(id.canonicalId(document)).from(index.name)
+          get(index, id.canonicalId(document))
         }.await
 
         val getResponse = response.result
@@ -186,7 +186,7 @@ trait ElasticsearchFixtures
 
     documents.foreach { document =>
       val response: Response[GetResponse] = elasticClient
-        .execute(get(id.canonicalId(document)).from(index.name))
+        .execute(get(index, id.canonicalId(document)))
         .await
 
       response.result.found shouldBe false

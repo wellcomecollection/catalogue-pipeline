@@ -6,12 +6,15 @@ import com.sksamuel.elastic4s.ElasticDsl.{
   objectField,
   textField
 }
-import com.sksamuel.elastic4s.requests.analysis.Analysis
+import com.sksamuel.elastic4s.analysis.Analysis
 import com.sksamuel.elastic4s.requests.mappings.MappingDefinition
 import uk.ac.wellcome.elasticsearch.WorksAnalysis._
+import uk.ac.wellcome.elasticsearch.model.SearchTemplate
+
 trait IndexConfig {
   val mapping: MappingDefinition
   val analysis: Analysis
+  val searchTemplate: Option[SearchTemplate] = None
 
   // `textWithKeyword` and `keywordWithText` are slightly different in the semantics and their use case.
   // If the intended field type is keyword, but you would like to search it textually, use `keywordWithText` and

@@ -50,8 +50,7 @@ object WellcomeDependencies {
     version = versions.storage
   )
 
-  val messagingTypesafeLibrary
-    : Seq[ModuleID] = messagingLibrary ++ library(
+  val messagingTypesafeLibrary: Seq[ModuleID] = messagingLibrary ++ library(
     name = "messaging_typesafe",
     version = versions.messaging
   ) ++ monitoringLibrary
@@ -76,7 +75,7 @@ object ExternalDependencies {
     val apacheLogging = "2.8.2"
     val aws = "1.11.504"
     val circe = "0.13.0"
-    val elastic4s = "7.6.1"
+    val elastic4s = "7.8.1"
     val fastparse = "2.1.3"
     val swagger = "2.0.10"
     val mockito = "1.9.5"
@@ -125,13 +124,10 @@ object ExternalDependencies {
   val elasticsearchDependencies = Seq(
     "org.apache.logging.log4j" % "log4j-core" % versions.apacheLogging,
     "org.apache.logging.log4j" % "log4j-api" % versions.apacheLogging,
-    // This is our version of elastic4s.
-    // Temporarily use it until until https://github.com/sksamuel/elastic4s/pull/2049
-    // gets merged and released.
-    "uk.ac.wellcome.elastic4s" %% "elastic4s-core" % versions.elastic4s,
-    "uk.ac.wellcome.elastic4s" %% "elastic4s-client-esjava" % versions.elastic4s,
-    "uk.ac.wellcome.elastic4s" %% "elastic4s-http-streams" % versions.elastic4s,
-    "uk.ac.wellcome.elastic4s" %% "elastic4s-testkit" % versions.elastic4s % "test"
+    "com.sksamuel.elastic4s" %% "elastic4s-core" % versions.elastic4s,
+    "com.sksamuel.elastic4s" %% "elastic4s-client-esjava" % versions.elastic4s,
+    "com.sksamuel.elastic4s" %% "elastic4s-http-streams" % versions.elastic4s,
+    "com.sksamuel.elastic4s" %% "elastic4s-testkit" % versions.elastic4s % "test"
   )
 
   val mockitoDependencies: Seq[ModuleID] = Seq(
@@ -302,9 +298,9 @@ object CatalogueDependencies {
 
   val sierraAdapterCommonDependencies: Seq[ModuleID] =
     ExternalDependencies.mockitoDependencies ++
-  WellcomeDependencies.storageTypesafeLibrary ++
-  WellcomeDependencies.messagingTypesafeLibrary ++
-  WellcomeDependencies.jsonLibrary ++
+      WellcomeDependencies.storageTypesafeLibrary ++
+      WellcomeDependencies.messagingTypesafeLibrary ++
+      WellcomeDependencies.jsonLibrary ++
       ExternalDependencies.javaxDependencies
 
   val sierraReaderDependencies: Seq[ModuleID] =

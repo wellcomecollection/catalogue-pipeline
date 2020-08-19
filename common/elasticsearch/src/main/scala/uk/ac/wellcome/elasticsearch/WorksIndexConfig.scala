@@ -1,21 +1,13 @@
 package uk.ac.wellcome.elasticsearch
 
-import com.sksamuel.elastic4s.ElasticDsl.{
-  booleanField,
-  dateField,
-  intField,
-  keywordField,
-  objectField,
-  properties,
-  textField,
-  tokenCountField
-}
+import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.mappings.{
   FieldDefinition,
   ObjectField,
   TextField
 }
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
+import uk.ac.wellcome.elasticsearch.model.SearchTemplate
 
 case object WorksIndexConfig extends IndexConfig {
   import WorksAnalysis._
@@ -202,4 +194,12 @@ case object WorksIndexConfig extends IndexConfig {
 
   val mapping = properties(fields).dynamic(DynamicMapping.Strict)
 
+  // This needs quite a lot of work, but gives us what we need to
+  // start working pulling scripts out. We should probably pull it
+  // from uk.ac.wellcome.platform.api.services.WorksIndexConfig
+  override val searchTemplate = Some(
+    SearchTemplate(
+      "multi_matcher_search_query",
+      WorksMultiMatcher("{{query}}").filter(
+        termQuery(field = "type", value = "IdentifiedWork"))))
 }

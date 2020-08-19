@@ -1,8 +1,8 @@
 package uk.ac.wellcome.elasticsearch
 
 import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.analysis.Analysis
 import com.sksamuel.elastic4s.{RequestFailure, Response}
-import com.sksamuel.elastic4s.requests.analysis.Analysis
 import com.sksamuel.elastic4s.requests.indexes.IndexResponse
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
@@ -58,6 +58,7 @@ class ElasticsearchIndexCreatorTest
         booleanField("visible")
       )).dynamic(DynamicMapping.Strict)
     val analysis = Analysis(Nil)
+    val queries = Nil
   }
 
   object CompatibleTestIndexConfig extends IndexConfig {
@@ -69,6 +70,13 @@ class ElasticsearchIndexCreatorTest
         intField("count")
       )).dynamic(DynamicMapping.Strict)
     val analysis = Analysis(Nil)
+    val queries = Nil
+  }
+
+  it("saves an index's queries with it") {
+    withLocalElasticsearchIndex(WorksIndexConfig) { index =>
+      println(index)
+    }
   }
 
   it("creates an index into which doc of the expected type can be put") {
