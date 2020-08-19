@@ -1,5 +1,5 @@
 locals {
-  lock_timeout = 900
+  lock_timeout = 240
 }
 
 module "matcher_queue" {
@@ -15,6 +15,7 @@ module "matcher_queue" {
   // The matcher is able to override locks that have expired
   // Wait slightly longer to make sure locks are expired
   visibility_timeout_seconds = local.lock_timeout + 30
+  max_receive_count          = 20
 }
 
 # Service
@@ -42,7 +43,7 @@ module "matcher" {
     dynamo_lock_table       = "${aws_dynamodb_table.matcher_lock_table.id}"
     dynamo_lock_table_index = "context-ids-index"
 
-    dynamo_lock_timeout = local.lock_timeout + 30
+    dynamo_lock_timeout = local.lock_timeout
 
     vhs_recorder_dynamo_table_name = "${module.vhs_recorder.table_name}"
     vhs_recorder_bucket_name       = "${module.vhs_recorder.bucket_name}"

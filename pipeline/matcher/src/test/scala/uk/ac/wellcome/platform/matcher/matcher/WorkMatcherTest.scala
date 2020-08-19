@@ -136,17 +136,17 @@ class WorkMatcherTest
               "sierra-system-number/A",
               1,
               List("sierra-system-number/B"),
-              "sierra-system-number/A+sierra-system-number/B")
+              ciHash("sierra-system-number/A+sierra-system-number/B"))
             val existingWorkB = WorkNode(
               "sierra-system-number/B",
               1,
               Nil,
-              "sierra-system-number/A+sierra-system-number/B")
+              ciHash("sierra-system-number/A+sierra-system-number/B"))
             val existingWorkC = WorkNode(
               "sierra-system-number/C",
               1,
               Nil,
-              "sierra-system-number/C")
+              ciHash("sierra-system-number/C"))
             put(dynamoClient, graphTable.name)(existingWorkA)
             put(dynamoClient, graphTable.name)(existingWorkB)
             put(dynamoClient, graphTable.name)(existingWorkC)
@@ -246,7 +246,8 @@ class WorkMatcherTest
                 mergeCandidates = List(MergeCandidate(identifierB))
               )
               val failedLock = for {
-                _ <- Future.successful(lockDao.lock(idC, UUID.randomUUID))
+                _ <- Future.successful(
+                  lockDao.lock(componentId, UUID.randomUUID))
                 result <- workMatcher.matchWork(work)
               } yield result
               whenReady(failedLock.failed) { failedMatch =>

@@ -2,7 +2,7 @@ import sbt._
 
 object WellcomeDependencies {
 
-  val defaultVersion = "19.3.1"
+  val defaultVersion = "19.5.0"
 
   lazy val versions = new {
     val typesafe = defaultVersion
@@ -50,8 +50,7 @@ object WellcomeDependencies {
     version = versions.storage
   )
 
-  val messagingTypesafeLibrary
-    : Seq[ModuleID] = messagingLibrary ++ library(
+  val messagingTypesafeLibrary: Seq[ModuleID] = messagingLibrary ++ library(
     name = "messaging_typesafe",
     version = versions.messaging
   ) ++ monitoringLibrary
@@ -302,9 +301,9 @@ object CatalogueDependencies {
 
   val sierraAdapterCommonDependencies: Seq[ModuleID] =
     ExternalDependencies.mockitoDependencies ++
-  WellcomeDependencies.storageTypesafeLibrary ++
-  WellcomeDependencies.messagingTypesafeLibrary ++
-  WellcomeDependencies.jsonLibrary ++
+      WellcomeDependencies.storageTypesafeLibrary ++
+      WellcomeDependencies.messagingTypesafeLibrary ++
+      WellcomeDependencies.jsonLibrary ++
       ExternalDependencies.javaxDependencies
 
   val sierraReaderDependencies: Seq[ModuleID] =

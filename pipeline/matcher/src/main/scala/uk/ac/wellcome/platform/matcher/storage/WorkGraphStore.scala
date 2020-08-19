@@ -8,16 +8,13 @@ import uk.ac.wellcome.platform.matcher.models.{WorkGraph, WorkUpdate}
 
 class WorkGraphStore(workNodeDao: WorkNodeDao)(implicit _ec: ExecutionContext) {
 
-  def findAffectedWorks(workUpdate: WorkUpdate): Future[WorkGraph] = {
-    val directlyAffectedWorkIds = workUpdate.referencedWorkIds + workUpdate.workId
-
+  def findAffectedWorks(workUpdate: WorkUpdate): Future[WorkGraph] =
     for {
-      directlyAffectedWorks <- workNodeDao.get(directlyAffectedWorkIds)
+      directlyAffectedWorks <- workNodeDao.get(workUpdate.ids)
       affectedComponentIds = directlyAffectedWorks.map(workNode =>
         workNode.componentId)
       affectedWorks <- workNodeDao.getByComponentIds(affectedComponentIds)
     } yield WorkGraph(affectedWorks)
-  }
 
   def put(graph: WorkGraph)
     : Future[Set[Option[Either[DynamoReadError, WorkNode]]]] = {
