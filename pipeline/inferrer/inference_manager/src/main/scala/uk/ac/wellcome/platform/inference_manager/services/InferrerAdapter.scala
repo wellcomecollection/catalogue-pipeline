@@ -48,9 +48,8 @@ trait InferrerAdapter[Input, Output] extends Logging {
       case StatusCodes.NotFound =>
         Future.failed(new Exception("Entity not found"))
       case statusCode =>
-        warn(
-          s"Request failed non-deterministically with code ${statusCode.value}")
-        Future.successful(None)
+        Future.failed(
+          new Exception(s"Request failed with code ${statusCode.value}"))
     }
 }
 
