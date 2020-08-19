@@ -96,8 +96,8 @@ class IndexerTest
   }
 
   it("inserts a list of documents into elasticsearch and returns them") {
-    val documents = (1 to 5).map(i =>
-      SampleDocument(1, createCanonicalId, f"document $i"))
+    val documents =
+      (1 to 5).map(i => SampleDocument(1, createCanonicalId, f"document $i"))
 
     withIndexAndIndexer[SampleDocument, Any]() {
       case (index, indexer) =>
@@ -111,8 +111,8 @@ class IndexerTest
   }
 
   it("returns a list of documents that weren't indexed correctly") {
-    val validDocuments = (1 to 5).map(i =>
-      SampleDocument(1, createCanonicalId, f"document $i"))
+    val validDocuments =
+      (1 to 5).map(i => SampleDocument(1, createCanonicalId, f"document $i"))
     val notMatchingMappingDocuments = (1 to 3).map(
       i =>
         SampleDocument(

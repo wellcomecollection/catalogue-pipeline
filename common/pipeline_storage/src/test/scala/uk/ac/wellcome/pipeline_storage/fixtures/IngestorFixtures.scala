@@ -29,9 +29,7 @@ object SampleDocument {
     t.version
 }
 
-trait IngestorFixtures
-    extends ElasticsearchFixtures
-    with Akka {
+trait IngestorFixtures extends ElasticsearchFixtures with Akka {
   this: Suite =>
 
   def withIndexer[T, R](i: Index, esClient: ElasticClient = elasticClient)(
