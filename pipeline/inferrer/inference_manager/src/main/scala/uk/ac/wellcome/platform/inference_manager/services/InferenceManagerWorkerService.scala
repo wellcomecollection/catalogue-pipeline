@@ -10,6 +10,7 @@ import uk.ac.wellcome.bigmessaging.message.BigMessageStream
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.models.work.internal.AugmentedImage
 import uk.ac.wellcome.models.Implicits._
+import uk.ac.wellcome.platform.inference_manager.adapters.InferrerAdapter
 import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
 import uk.ac.wellcome.typesafe.Runnable
 

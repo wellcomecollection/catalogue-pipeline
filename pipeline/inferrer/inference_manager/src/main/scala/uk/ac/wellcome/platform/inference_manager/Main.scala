@@ -6,9 +6,9 @@ import com.typesafe.config.Config
 import software.amazon.awssdk.services.sqs.model.Message
 import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
 import uk.ac.wellcome.models.Implicits._
+import uk.ac.wellcome.platform.inference_manager.adapters.FeatureVectorInferrerAdapter
 import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
 import uk.ac.wellcome.platform.inference_manager.services.{
-  FeatureVectorInferrerAdapter,
   ImageDownloader,
   InferenceManagerWorkerService,
   MergedIdentifiedImage

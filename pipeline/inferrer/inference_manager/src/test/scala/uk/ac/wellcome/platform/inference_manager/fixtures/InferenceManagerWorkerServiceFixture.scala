@@ -13,12 +13,12 @@ import uk.ac.wellcome.models.work.internal.{
   MergedImage,
   Minted
 }
+import uk.ac.wellcome.platform.inference_manager.adapters.InferrerAdapter
 import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
 import uk.ac.wellcome.platform.inference_manager.services.{
   FileWriter,
   ImageDownloader,
   InferenceManagerWorkerService,
-  InferrerAdapter,
   MergedIdentifiedImage,
   RequestPoolFlow
 }
