@@ -6,8 +6,7 @@ If you do need to fill in some gaps manually, this document explains how to do i
 
 ## What have we ingested?
 
-If you want to see how many records we've already pulled in, there's a script that reports the current adapter progress:
-
+ad
 ```text
 $ python sierra_adapter/report_adapter_progress.py
 
