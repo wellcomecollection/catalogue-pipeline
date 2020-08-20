@@ -1,37 +1,37 @@
-package uk.ac.wellcome.platform.ingestor.common
-
-import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
-import com.sksamuel.elastic4s.{Index, Indexable}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.funspec.AnyFunSpec
-import uk.ac.wellcome.elasticsearch.{IndexConfig, WorksAnalysis}
-import uk.ac.wellcome.elasticsearch.model.{CanonicalId, Version}
-import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
-import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
-import uk.ac.wellcome.platform.ingestor.common.fixtures.{
-  IngestorFixtures,
-  SampleDocument,
-  SampleDocumentData
-}
-import uk.ac.wellcome.storage.generators.RandomThings
+package uk.ac.wellcome.pipeline_storage
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class IndexerTest
+import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
+import com.sksamuel.elastic4s.Index
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.funspec.AnyFunSpec
+import io.circe.Encoder
+
+import uk.ac.wellcome.elasticsearch.{IndexConfig, WorksAnalysis}
+import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
+import uk.ac.wellcome.fixtures.TestWith
+import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
+import uk.ac.wellcome.pipeline_storage.fixtures.{
+  ElasticIndexerFixtures,
+  SampleDocument,
+  SampleDocumentData
+}
+
+class ElasticIndexerTest
     extends AnyFunSpec
     with ScalaFutures
     with Matchers
     with IdentifiersGenerators
     with ElasticsearchFixtures
-    with IngestorFixtures
-    with RandomThings {
+    with ElasticIndexerFixtures {
+
+  import SampleDocument._
 
   it("inserts a document into Elasticsearch") {
-    val document = SampleDocument(1, createCanonicalId, randomAlphanumeric(10))
+    val document = SampleDocument(1, createCanonicalId, "document")
 
     withIndexAndIndexer[SampleDocument, Any]() {
       case (index, indexer) =>
@@ -45,7 +45,7 @@ class IndexerTest
   }
 
   it("only adds one record when the same ID is ingested multiple times") {
-    val document = SampleDocument(1, createCanonicalId, randomAlphanumeric(10))
+    val document = SampleDocument(1, createCanonicalId, "document")
 
     withIndexAndIndexer[SampleDocument, Any]() {
       case (index, indexer) =>
@@ -60,7 +60,7 @@ class IndexerTest
   }
 
   it("doesn't add a document with a lower version") {
-    val document = SampleDocument(3, createCanonicalId, randomAlphanumeric(10))
+    val document = SampleDocument(3, createCanonicalId, "document")
     val olderDocument = document.copy(version = 1)
 
     withIndexAndIndexer[SampleDocument, Any]() {
@@ -78,7 +78,7 @@ class IndexerTest
   }
 
   it("replaces a document with the same version") {
-    val document = SampleDocument(3, createCanonicalId, randomAlphanumeric(10))
+    val document = SampleDocument(3, createCanonicalId, "document")
     val updatedDocument = document.copy(
       title = "A different title"
     )
@@ -98,8 +98,8 @@ class IndexerTest
   }
 
   it("inserts a list of documents into elasticsearch and returns them") {
-    val documents = (1 to 5).map(_ =>
-      SampleDocument(1, createCanonicalId, randomAlphanumeric(10)))
+    val documents =
+      (1 to 5).map(i => SampleDocument(1, createCanonicalId, f"document $i"))
 
     withIndexAndIndexer[SampleDocument, Any]() {
       case (index, indexer) =>
@@ -113,14 +113,14 @@ class IndexerTest
   }
 
   it("returns a list of documents that weren't indexed correctly") {
-    val validDocuments = (1 to 5).map(_ =>
-      SampleDocument(1, createCanonicalId, randomAlphanumeric))
+    val validDocuments =
+      (1 to 5).map(i => SampleDocument(1, createCanonicalId, f"document $i"))
     val notMatchingMappingDocuments = (1 to 3).map(
-      _ =>
+      i =>
         SampleDocument(
           1,
           createCanonicalId,
-          randomAlphanumeric,
+          f"document $i",
           SampleDocumentData(Some("blah bluh blih"))))
     val documents = validDocuments ++ notMatchingMappingDocuments
 
@@ -142,15 +142,13 @@ class IndexerTest
   }
 
   def withIndexAndIndexer[T, R](config: IndexConfig = NoStrictMapping)(
-    testWith: TestWith[(Index, Indexer[T]), R])(implicit i: Indexable[T],
-                                                c: CanonicalId[T],
-                                                v: Version[T]) = {
+    testWith: TestWith[(Index, Indexer[T]), R])(implicit encoder: Encoder[T],
+                                                indexable: Indexable[T]) =
     withLocalElasticsearchIndex(config) { index =>
-      withIndexer[T, R](index) { indexer =>
+      withElasticIndexer[T, R](index) { indexer =>
         testWith((index, indexer))
       }
     }
-  }
 
   object StrictWithNoDataIndexConfig extends IndexConfig {
     import com.sksamuel.elastic4s.ElasticDsl._

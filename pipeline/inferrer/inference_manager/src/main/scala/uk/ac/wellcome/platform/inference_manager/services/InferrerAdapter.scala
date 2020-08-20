@@ -10,14 +10,11 @@ import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import grizzled.slf4j.Logging
 import io.circe.Decoder
 import io.circe.generic.semiauto.deriveDecoder
-import uk.ac.wellcome.models.work.internal.{
-  AugmentedImage,
-  Identified,
-  InferredData,
-  MergedImage,
-  Minted
+import uk.ac.wellcome.models.work.internal.{AugmentedImage, InferredData}
+import uk.ac.wellcome.platform.inference_manager.models.{
+  DownloadedImage,
+  FeatureVectorInferrerResponse
 }
-import uk.ac.wellcome.platform.inference_manager.models.FeatureVectorInferrerResponse
 
 import scala.concurrent.Future
 import scala.util.{Success, Try}
@@ -60,23 +57,27 @@ trait InferrerAdapter[Input, Output] extends Logging {
 // The InferrerAdaptor for feature vectors, consuming MergedImages and
 // augmenting them into AugmentedImages
 object FeatureVectorInferrerAdapter
-    extends InferrerAdapter[MergedImage[Identified, Minted], AugmentedImage] {
+    extends InferrerAdapter[DownloadedImage, AugmentedImage] {
   type InferrerResponse = FeatureVectorInferrerResponse
 
-  def createRequest(image: MergedImage[Identified, Minted]): HttpRequest =
+  def createRequest(image: DownloadedImage): HttpRequest =
     HttpRequest(
       method = HttpMethods.GET,
       uri = Uri("/feature-vector/").withQuery(
-        Uri.Query(image.location.url match {
-          case iiifUrl if iiifUrl.endsWith("json") => "iiif_url" -> iiifUrl
-          case imageUrl                            => "image_url" -> imageUrl
-        })
+        Uri.Query(
+          "image_url" -> Uri
+            .from(
+              scheme = "file",
+              path = image.pathString
+            )
+            .toString
+        )
       )
     )
 
-  def augmentInput(image: MergedImage[Identified, Minted],
+  def augmentInput(downloadedImage: DownloadedImage,
                    inferrerResponse: Option[InferrerResponse]): AugmentedImage =
-    image.augment {
+    downloadedImage.image.augment {
       inferrerResponse flatMap {
         case FeatureVectorInferrerResponse(
             features_b64,

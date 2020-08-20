@@ -35,11 +35,27 @@ class WorkMatcher(
 
   private def doMatch(work: TransformedBaseWork): Future[Out] = {
     val update = WorkUpdate(work)
-    val updateAffectedIdentifiers = update.referencedWorkIds + update.workId
-    withLocks(update, updateAffectedIdentifiers) {
-      withUpdateLocked(update, updateAffectedIdentifiers)
+    withLocks(update, update.ids) {
+      for {
+        graphBeforeUpdate <- workGraphStore.findAffectedWorks(update)
+        updatedGraph = WorkGraphUpdater.update(update, graphBeforeUpdate)
+        _ <- withLocks(
+          update,
+          getGraphComponentIds(graphBeforeUpdate, updatedGraph)) {
+          // We are returning empty set here, as LockingService is tied to a
+          // single `Out` type, here set to `Set[MatchedIdentifiers]`.
+          // See issue here: https://github.com/wellcometrust/platform/issues/3873
+          workGraphStore.put(updatedGraph).map(_ => Set.empty)
+        }
+      } yield {
+        convertToIdentifiersList(updatedGraph)
+      }
     }
   }
+
+  private def getGraphComponentIds(graphBefore: WorkGraph,
+                                   graphAfter: WorkGraph): Set[String] =
+    graphBefore.nodes.map(_.componentId) ++ graphAfter.nodes.map(_.componentId)
 
   private def withLocks(update: WorkUpdate, ids: Set[String])(
     f: => Future[Out]): Future[Out] =
@@ -60,25 +76,6 @@ class WorkMatcher(
       case FailedProcess(_, e)   => e
       case _                     => new RuntimeException(failure.toString)
     }
-
-  private def withUpdateLocked(
-    update: WorkUpdate,
-    updateAffectedIdentifiers: Set[String]): Future[Out] = {
-    for {
-      graphBeforeUpdate <- workGraphStore.findAffectedWorks(update)
-      updatedGraph = WorkGraphUpdater.update(update, graphBeforeUpdate)
-      _ <- withLocks(
-        update,
-        graphBeforeUpdate.nodes.map(_.id) -- updateAffectedIdentifiers) {
-        // We are returning empty set here, as LockingService is tied to a
-        // single `Out` type, here set to `Set[MatchedIdentifiers]`.
-        // See issue here: https://github.com/wellcometrust/platform/issues/3873
-        workGraphStore.put(updatedGraph).map(_ => Set.empty)
-      }
-    } yield {
-      convertToIdentifiersList(updatedGraph)
-    }
-  }
 
   private def convertToIdentifiersList(graph: WorkGraph) = {
     groupBySetId(graph).map {

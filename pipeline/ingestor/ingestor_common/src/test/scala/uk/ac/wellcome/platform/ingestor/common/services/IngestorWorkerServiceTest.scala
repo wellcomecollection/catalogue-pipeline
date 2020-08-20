@@ -1,11 +1,14 @@
 package uk.ac.wellcome.platform.ingestor.common.services
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 import com.sksamuel.elastic4s.ElasticClient
 import com.sksamuel.elastic4s.http.JavaClient
 import org.apache.http.HttpHost
 import org.elasticsearch.client.RestClient
 import org.scalatest.funspec.AnyFunSpec
 import software.amazon.awssdk.services.sqs.model.QueueAttributeName
+
 import uk.ac.wellcome.elasticsearch.{
   ElasticCredentials,
   ElasticsearchIndexCreator
@@ -13,14 +16,10 @@ import uk.ac.wellcome.elasticsearch.{
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
-import uk.ac.wellcome.platform.ingestor.common.fixtures.{
-  IngestorFixtures,
-  SampleDocument
-}
+import uk.ac.wellcome.platform.ingestor.common.fixtures.IngestorFixtures
 import uk.ac.wellcome.platform.ingestor.common.models.IngestorConfig
 import uk.ac.wellcome.storage.generators.RandomThings
-
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.ac.wellcome.pipeline_storage.fixtures.SampleDocument
 
 class IngestorWorkerServiceTest
     extends AnyFunSpec
@@ -31,7 +30,7 @@ class IngestorWorkerServiceTest
   it("creates the index at startup if it doesn't already exist") {
     val index = createIndex
     withLocalSqsQueue() { queue =>
-      withIndexer[SampleDocument, Any](index) { indexer =>
+      withElasticIndexer[SampleDocument, Any](index) { indexer =>
         withWorkerService[SampleDocument, Any](
           queue,
           index,
@@ -50,7 +49,7 @@ class IngestorWorkerServiceTest
       case QueuePair(queue, dlq) =>
         sendMessage[SampleDocument](queue = queue, obj = document)
         val index = createIndex
-        withIndexer[SampleDocument, Any](index) { indexer =>
+        withElasticIndexer[SampleDocument, Any](index) { indexer =>
           withWorkerService[SampleDocument, Any](
             queue,
             index,
@@ -75,7 +74,7 @@ class IngestorWorkerServiceTest
         documents.foreach(document =>
           sendMessage[SampleDocument](queue = queue, obj = document))
         val index = createIndex
-        withIndexer[SampleDocument, Any](index) { indexer =>
+        withElasticIndexer[SampleDocument, Any](index) { indexer =>
           withWorkerService[SampleDocument, Any](
             queue,
             index,
@@ -95,7 +94,7 @@ class IngestorWorkerServiceTest
   it("does not delete a message from the queue if it fails processing") {
     withLocalSqsQueue() { queue =>
       val index = createIndex
-      withIndexer[SampleDocument, Any](index) { indexer =>
+      withElasticIndexer[SampleDocument, Any](index) { indexer =>
         withWorkerService[SampleDocument, Any](
           queue,
           index,
@@ -152,20 +151,21 @@ class IngestorWorkerServiceTest
             batchSize = 100,
             flushInterval = 5.seconds
           )
-          withIndexer[SampleDocument, Any](index, brokenClient) { indexer =>
-            val service = new IngestorWorkerService(
-              ingestorConfig = config,
-              indexCreator = new ElasticsearchIndexCreator(
-                brokenClient,
-                index,
-                NoStrictMapping),
-              messageStream = messageStream,
-              documentIndexer = indexer
-            )
+          withElasticIndexer[SampleDocument, Any](index, brokenClient) {
+            indexer =>
+              val service = new IngestorWorkerService(
+                ingestorConfig = config,
+                indexCreator = new ElasticsearchIndexCreator(
+                  brokenClient,
+                  index,
+                  NoStrictMapping),
+                messageStream = messageStream,
+                documentIndexer = indexer
+              )
 
-            whenReady(service.run.failed) { e =>
-              e shouldBe a[RuntimeException]
-            }
+              whenReady(service.run.failed) { e =>
+                e shouldBe a[RuntimeException]
+              }
           }
         }
       }

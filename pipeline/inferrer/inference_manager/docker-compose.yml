@@ -11,12 +11,14 @@ inferrer:
     MODEL_OBJECT_KEY: test-model.pkl
   volumes:
     - ../test_data:/app/data
+    - $ROOT:$ROOT
+
   links:
     - "image_server:image_server"
 
 image_server:
   image: nginx
-  expose:
-    - "80"
+  ports:
+    - "2718:80"
   volumes:
     - ../test_data:/usr/share/nginx/html:ro

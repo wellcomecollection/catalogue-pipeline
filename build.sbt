@@ -64,6 +64,13 @@ lazy val big_messaging_typesafe = setupProject(
   externalDependencies = CatalogueDependencies.bigMessagingTypesafeDependencies
 )
 
+lazy val pipeline_storage = setupProject(
+  project,
+  "common/pipeline_storage",
+  localDependencies = Seq(elasticsearch_typesafe),
+  externalDependencies = CatalogueDependencies.pipelineStorageDependencies
+)
+
 lazy val api = setupProject(
   project,
   "api/api",
@@ -82,7 +89,7 @@ lazy val id_minter = setupProject(
 lazy val ingestor_common = setupProject(
   project,
   "pipeline/ingestor/ingestor_common",
-  localDependencies = Seq(elasticsearch_typesafe, big_messaging_typesafe),
+  localDependencies = Seq(elasticsearch_typesafe, big_messaging_typesafe, pipeline_storage),
   externalDependencies = CatalogueDependencies.ingestorDependencies
 )
 

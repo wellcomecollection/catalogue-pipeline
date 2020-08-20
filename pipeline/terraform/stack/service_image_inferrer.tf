@@ -5,6 +5,8 @@ locals {
   // having heavy tails - this stops some unfortunate messages from being
   // put on the DLQ when they are consumed but not processed.
   queue_visibility_timeout = 60
+  shared_storage_name      = "shared_storage"
+  shared_storage_path      = "/data"
 }
 
 module "image_inferrer_queue" {
@@ -37,6 +39,10 @@ module "image_inferrer" {
     type  = "spread"
     field = "host"
   }]
+  volumes = [{
+    name      = local.shared_storage_name,
+    host_path = null
+  }]
 
   host_cpu    = null
   host_memory = null
@@ -45,6 +51,10 @@ module "image_inferrer" {
   manager_container_image = local.inference_manager_image
   manager_cpu             = 512
   manager_memory          = 512
+  manager_mount_points = [{
+    containerPath = local.shared_storage_path,
+    sourceVolume  = local.shared_storage_name
+  }]
 
   app_container_name  = "inferrer"
   app_container_image = local.feature_inferrer_image
@@ -57,6 +67,10 @@ module "image_inferrer" {
     startPeriod = 30,
     timeout     = 5
   }
+  app_mount_points = [{
+    containerPath = local.shared_storage_path,
+    sourceVolume  = local.shared_storage_name
+  }]
 
   manager_env_vars = {
     inferrer_host        = local.inferrer_host
