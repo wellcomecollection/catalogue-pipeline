@@ -7,31 +7,7 @@ However, there are several optional features of a Sierra ID:
 * A leading period \(`.`\)
 * A one-character tag to identify the type -- for example, `b` for a bibliographic record, or `i` for an item record.
 
-  Note that bibs and items have overlapping namespaces -- so we need this prefix to unambiguously identify a record if we don't have more context. For example, `1234567` could be a bib or an item.
-
-* An eighth [check digit](https://en.wikipedia.org/wiki/Check_digit).
-
-Unfortunately, the presentation \(and searchability\) of a Sierra ID is inconsistent between different systems.
-
-## Current uses
-
-| Usage | Leading period? | Record type? | Check digit? |
-| :--- | :---: | :---: | :---: |
-| Sierra API | · | · | · |
-| Sierra client display | · | ✔ | ✔ |
-| Sierra client search | · | ✔ | ✔ |
-| Encore URL | · | ✔ | · |
-| Encore display | ✔ | ✔ | ✔ |
-| Encore search | · | · | · |
-| OPAC URL | · | ✔ | · |
-| OPAC display | ✔ | ✔ | ✔ |
-| OPAC search | · | · | · |
-| Viewer page URL \(canonical\) | · | ✔ | ✔ |
-| Viewer page URL \(redirect\) | · | ✔ | · |
-| Internet Archive URL | · | ✔ | ✔ |
-| Internet Archive page | · | ✔ | ✔ |
-| Goobi | · | ✔ | ✔ |
-| METS filename | · | ✔ | ✔ |
+  Note that bibs and items have overlapping names
 | METS identifier | · | ✔ | ✔ |
 | Asset filename | · | ✔ | ✔ |
 | Miro XML exports | inconsistent | ✔ | · |
