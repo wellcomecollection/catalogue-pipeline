@@ -2,14 +2,18 @@ package uk.ac.wellcome.elasticsearch
 
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.analysis.Analysis
-import com.sksamuel.elastic4s.{RequestFailure, Response}
+import com.sksamuel.elastic4s.{Index, RequestFailure, Response}
 import com.sksamuel.elastic4s.requests.indexes.IndexResponse
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
-import com.sksamuel.elastic4s.requests.searches.SearchResponse
+import com.sksamuel.elastic4s.requests.searches.{
+  GetSearchTemplateRequest,
+  SearchResponse
+}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import uk.ac.wellcome.elasticsearch.model.SearchTemplate
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.utils.JsonAssertions
@@ -73,15 +77,23 @@ class ElasticsearchIndexCreatorTest
     val queries = Nil
   }
 
-  it("saves an index's queries with it") {
-    withLocalElasticsearchIndex(WorksIndexConfig) { index =>
-      println(index)
-    }
+  object IndexConfigWithSearchTemplate extends IndexConfig {
+    val mapping = properties(
+      Seq(
+        keywordField("id"),
+        textField("description"),
+        booleanField("visible"),
+        intField("count")
+      )).dynamic(DynamicMapping.Strict)
+    val analysis = Analysis(Nil)
+    val queries = Nil
+    override val searchTemplate: Option[SearchTemplate] = Some(
+      SearchTemplate("search_template", matchAllQuery()))
   }
 
   it("creates an index into which doc of the expected type can be put") {
     withLocalElasticsearchIndex(TestIndexConfig) { index =>
-      val testObject = TestObject("id", "description", true)
+      val testObject = TestObject("id", "description", visible = true)
       val testObjectJson = toJson(testObject).get
 
       eventually {
@@ -163,6 +175,22 @@ class ElasticsearchIndexCreatorTest
               )
             }
           }
+      }
+    }
+  }
+
+  it("saves an index with a search template") {
+    val index = Index("index_with_search_template")
+
+    withLocalElasticsearchIndex(IndexConfigWithSearchTemplate, index) { index =>
+      val templateReq = elasticClient.execute {
+        GetSearchTemplateRequest(
+          s"${index.name}__${IndexConfigWithSearchTemplate.searchTemplate.get.id}")
+      }
+
+      whenReady(templateReq) { response =>
+        response.status shouldBe 200
+        response.isError shouldBe false
       }
     }
   }
