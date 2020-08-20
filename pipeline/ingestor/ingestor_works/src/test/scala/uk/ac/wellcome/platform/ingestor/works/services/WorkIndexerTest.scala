@@ -1,17 +1,19 @@
 package uk.ac.wellcome.platform.ingestor.works.services
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import com.sksamuel.elastic4s.Index
 import org.scalatest.Assertion
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.IdentifiedBaseWork
-import uk.ac.wellcome.platform.ingestor.common.Indexer
-
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.ac.wellcome.pipeline_storage.ElasticIndexer
+import uk.ac.wellcome.pipeline_storage.Indexable.workIndexable
+import uk.ac.wellcome.models.Implicits._
 
 class WorkIndexerTest
     extends AnyFunSpec
@@ -133,7 +135,7 @@ class WorkIndexerTest
     }
   }
 
-  private def ingestWorkPairInOrder(workIndexer: Indexer[IdentifiedBaseWork])(
+  private def ingestWorkPairInOrder(workIndexer: ElasticIndexer[IdentifiedBaseWork])(
     firstWork: IdentifiedBaseWork,
     secondWork: IdentifiedBaseWork,
     index: Index) =
@@ -151,9 +153,9 @@ class WorkIndexerTest
   }
 
   def withWorksIndexAndIndexer[R](
-    testWith: TestWith[(Index, WorkIndexer), R]) = {
+    testWith: TestWith[(Index, ElasticIndexer[IdentifiedBaseWork]), R]) = {
     withLocalWorksIndex { index =>
-      val indexer = new WorkIndexer(elasticClient, index)
+      val indexer = new ElasticIndexer(elasticClient, index)
       testWith((index, indexer))
     }
   }

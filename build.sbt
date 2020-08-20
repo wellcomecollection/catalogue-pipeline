@@ -88,7 +88,7 @@ lazy val id_minter = setupProject(
 lazy val ingestor_common = setupProject(
   project,
   "pipeline/ingestor/ingestor_common",
-  localDependencies = Seq(elasticsearch_typesafe, big_messaging_typesafe),
+  localDependencies = Seq(elasticsearch_typesafe, big_messaging_typesafe, pipeline_storage),
   externalDependencies = CatalogueDependencies.ingestorDependencies
 )
 

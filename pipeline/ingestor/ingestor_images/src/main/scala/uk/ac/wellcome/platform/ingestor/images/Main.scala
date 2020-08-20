@@ -11,9 +11,10 @@ import uk.ac.wellcome.elasticsearch.{
 }
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal.AugmentedImage
+import uk.ac.wellcome.pipeline_storage.ElasticIndexer
+import uk.ac.wellcome.pipeline_storage.Indexable.imageIndexable
 import uk.ac.wellcome.platform.ingestor.common.builders.IngestorConfigBuilder
 import uk.ac.wellcome.platform.ingestor.common.services.IngestorWorkerService
-import uk.ac.wellcome.platform.ingestor.images.services.ImagesIndexer
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
@@ -32,7 +33,7 @@ object Main extends WellcomeTypesafeApp {
     val index = Index(indexName)
     new IngestorWorkerService(
       ingestorConfig = IngestorConfigBuilder.buildIngestorConfig(config),
-      documentIndexer = new ImagesIndexer(elasticClient, index),
+      documentIndexer = new ElasticIndexer(elasticClient, index),
       indexCreator =
         new ElasticsearchIndexCreator(elasticClient, index, ImagesIndexConfig),
       messageStream =
