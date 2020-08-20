@@ -19,8 +19,11 @@ async def get_image_from_url(image_url):
 
 
 async def get_local_image(path):
-    async with AIOFile(path, "rb") as afp:
-        return await afp.read()
+    try:
+        async with AIOFile(path, "rb") as afp:
+            return await afp.read()
+    except FileNotFoundError:
+        return ValueError(f"{path} does not exist")
 
 
 def is_valid_image(response):
