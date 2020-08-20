@@ -27,23 +27,12 @@ There's a lot of interesting discussion to be had about different search modalit
 We're collecting data in two distinct ways:
 
 * **Implicit data collection:** users know that their data might be used to understand aggregate user behaviour, but their behaviour on the site is driven by another motive.
-
-The larger of the two major datasets we are using is passively collected while users carry out searches and look through pages of results.
-
-We track:
-
-* The search query parameters, such as the search terms and page number
-* The works they click on and its position in the result set
+he result set
 * Whether they're on the Wellcome staff network as we want to be able to distinguish between internal and external users
 * The toggles and A/B tests that are enabled or disabled
 
 This data is aggregated under an anonymous session id.
-
-We can collect lots of this data \(100,000s of actions logged so far\), but it lacks any contextual information and unpicking a user's motivation for an action is hard. Collecting explict feedback \(below\) should solve this problem.
-
-* **Explicit data collection:** users are told that they are part of an experiment, and providing us with information is their primary motive.
-
-Some of the data we've used to measure search relevance is collected in sessions with internal users who know the collection well and the kind of things that people / researchers might be looking for, following a set of instructions to obtain data in a useful format.
+elevance is collected in sessions with internal users who know the collection well and the kind of things that people / researchers might be looking for, following a set of instructions to obtain data in a useful format.
 
 This data is small \(20-50 rows per person, per session, with ~10 people taking part\), but can be deeply contextualised by talking to the people who took part.
 
