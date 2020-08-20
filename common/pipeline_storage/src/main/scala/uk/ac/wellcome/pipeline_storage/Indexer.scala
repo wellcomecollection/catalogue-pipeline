@@ -63,12 +63,12 @@ object Indexable {
         * wins over other works with the same version, by adding one to
         * work.version * 10.
         */
-      def version(work: IdentifiedBaseWork) = 
+      def version(work: IdentifiedBaseWork) =
         work match {
           case w: IdentifiedWork           => (w.version * 10) + w.data.merged
           case w: IdentifiedRedirectedWork => (w.version * 10) + 1
           case w: IdentifiedInvisibleWork  => w.version * 10
-      }
+        }
 
       implicit private def toInteger(bool: Boolean): Int = if (bool) 1 else 0
     }

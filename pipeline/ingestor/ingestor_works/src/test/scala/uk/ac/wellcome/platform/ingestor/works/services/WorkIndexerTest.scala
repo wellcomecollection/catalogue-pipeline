@@ -135,7 +135,8 @@ class WorkIndexerTest
     }
   }
 
-  private def ingestWorkPairInOrder(workIndexer: ElasticIndexer[IdentifiedBaseWork])(
+  private def ingestWorkPairInOrder(
+    workIndexer: ElasticIndexer[IdentifiedBaseWork])(
     firstWork: IdentifiedBaseWork,
     secondWork: IdentifiedBaseWork,
     index: Index) =

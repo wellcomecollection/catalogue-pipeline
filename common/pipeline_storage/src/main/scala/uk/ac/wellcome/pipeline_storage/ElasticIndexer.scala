@@ -10,10 +10,11 @@ import com.sksamuel.elastic4s.circe._
 import io.circe.Encoder
 import grizzled.slf4j.Logging
 
-class ElasticIndexer[T: Indexable](
-  client: ElasticClient, index: Index)(
-  implicit ec: ExecutionContext, encoder: Encoder[T])
-    extends Indexer[T] with Logging {
+class ElasticIndexer[T: Indexable](client: ElasticClient, index: Index)(
+  implicit ec: ExecutionContext,
+  encoder: Encoder[T])
+    extends Indexer[T]
+    with Logging {
 
   final def index(documents: Seq[T]): Future[Either[Seq[T], Seq[T]]] = {
 
@@ -76,4 +77,3 @@ class ElasticIndexer[T: Indexable](
   }
 
 }
-

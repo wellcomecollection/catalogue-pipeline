@@ -35,12 +35,12 @@ object SampleDocument {
 trait ElasticIndexerFixtures extends ElasticsearchFixtures with Akka {
   this: Suite =>
 
-  def withElasticIndexer[T, R](idx: Index, esClient: ElasticClient = elasticClient)(
-    testWith: TestWith[ElasticIndexer[T], R])(
-    implicit
-    ec: ExecutionContext,
-    encoder: Encoder[T],
-    indexable: Indexable[T]): R =
+  def withElasticIndexer[T, R](idx: Index,
+                               esClient: ElasticClient = elasticClient)(
+    testWith: TestWith[ElasticIndexer[T], R])(implicit
+                                              ec: ExecutionContext,
+                                              encoder: Encoder[T],
+                                              indexable: Indexable[T]): R =
     testWith(new ElasticIndexer[T](esClient, idx))
 
   object NoStrictMapping extends IndexConfig {
@@ -48,6 +48,7 @@ trait ElasticIndexerFixtures extends ElasticsearchFixtures with Akka {
     val mapping: MappingDefinition = MappingDefinition.empty
   }
 
-  implicit def canonicalId[T](implicit indexable: Indexable[T]): CanonicalId[T] =
+  implicit def canonicalId[T](
+    implicit indexable: Indexable[T]): CanonicalId[T] =
     (doc: T) => indexable.id(doc)
 }

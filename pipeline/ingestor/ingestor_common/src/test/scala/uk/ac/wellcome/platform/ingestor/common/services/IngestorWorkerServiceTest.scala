@@ -151,20 +151,21 @@ class IngestorWorkerServiceTest
             batchSize = 100,
             flushInterval = 5.seconds
           )
-          withElasticIndexer[SampleDocument, Any](index, brokenClient) { indexer =>
-            val service = new IngestorWorkerService(
-              ingestorConfig = config,
-              indexCreator = new ElasticsearchIndexCreator(
-                brokenClient,
-                index,
-                NoStrictMapping),
-              messageStream = messageStream,
-              documentIndexer = indexer
-            )
+          withElasticIndexer[SampleDocument, Any](index, brokenClient) {
+            indexer =>
+              val service = new IngestorWorkerService(
+                ingestorConfig = config,
+                indexCreator = new ElasticsearchIndexCreator(
+                  brokenClient,
+                  index,
+                  NoStrictMapping),
+                messageStream = messageStream,
+                documentIndexer = indexer
+              )
 
-            whenReady(service.run.failed) { e =>
-              e shouldBe a[RuntimeException]
-            }
+              whenReady(service.run.failed) { e =>
+                e shouldBe a[RuntimeException]
+              }
           }
         }
       }
