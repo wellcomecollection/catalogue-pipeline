@@ -1,81 +1,75 @@
 package uk.ac.wellcome.pipeline_storage
 
-import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.requests.bulk.{BulkResponse, BulkResponseItem}
-import com.sksamuel.elastic4s.requests.common.VersionType.ExternalGte
-import com.sksamuel.elastic4s.{ElasticClient, Index, Indexable, Response}
-import grizzled.slf4j.Logging
-import uk.ac.wellcome.elasticsearch.model.{CanonicalId, Version}
+import scala.concurrent.Future
+import scala.language.implicitConversions
 
-import scala.concurrent.{ExecutionContext, Future}
+import uk.ac.wellcome.models.work.internal._
 
-trait Indexer[T] extends Logging {
-  val client: ElasticClient
+abstract class Indexer[T: Indexable] {
 
-  implicit val ec: ExecutionContext
-  implicit val indexable: Indexable[T]
-  implicit val id: CanonicalId[T]
-  implicit val version: Version[T]
-  val index: Index
+  protected val indexable: Indexable[T] = implicitly
 
-  final def index(documents: Seq[T]): Future[Either[Seq[T], Seq[T]]] = {
-
-    debug(s"Indexing ${documents.map(d => id.canonicalId(d)).mkString(", ")}")
-
-    val inserts = documents.map { document =>
-      indexInto(index.name)
-        .version(version.version(document))
-        .versionType(ExternalGte)
-        .id(id.canonicalId(document))
-        .doc(document)
-    }
-
-    client
-      .execute {
-        bulk(inserts)
-      }
-      .map { response: Response[BulkResponse] =>
-        if (response.isError) {
-          error(s"Error from Elasticsearch: $response")
-          Left(documents)
-        } else {
-          debug(s"Bulk response = $response")
-          val bulkResponse = response.result
-          val actualFailures = bulkResponse.failures.filterNot {
-            isVersionConflictException
-          }
-
-          if (actualFailures.nonEmpty) {
-            val failedIds = actualFailures.map { failure =>
-              error(s"Failed ingesting ${failure.id}: ${failure.error}")
-              failure.id
-            }
-
-            Left(documents.filter(d => {
-              failedIds.contains(id.canonicalId(d))
-            }))
-          } else Right(documents)
-        }
-      }
-  }
-
-  /** Did we try to PUT a document with a lower version than the existing version?
+  /** Indexes the given documents into the store
     *
+    * @param documents The documents to be indexed
+    * @return A future either containing a Left with the failed documents or a
+    *         Right with the succesfully indexed documents
     */
-  private def isVersionConflictException(
-    bulkResponseItem: BulkResponseItem): Boolean = {
-    // This error is returned by Elasticsearch when we try to PUT a document
-    // with a lower version than the existing version.
-    val alreadyIndexedHasHigherVersion = bulkResponseItem.error
-      .exists(bulkError =>
-        bulkError.`type`.contains("version_conflict_engine_exception"))
+  def index(documents: Seq[T]): Future[Either[Seq[T], Seq[T]]]
+}
 
-    if (alreadyIndexedHasHigherVersion) {
-      info(
-        s"Skipping ${bulkResponseItem.id} because already indexed item has a higher version (${bulkResponseItem.error}")
+trait Indexable[T] {
+  def id(document: T): String
+
+  def version(document: T): Int
+}
+
+object Indexable {
+
+  implicit val imageIndexable: Indexable[AugmentedImage] =
+    new Indexable[AugmentedImage] {
+      def id(image: AugmentedImage) =
+        image.id.canonicalId
+      def version(image: AugmentedImage) =
+        image.version
     }
 
-    alreadyIndexedHasHigherVersion
-  }
+  implicit val workIndexable: Indexable[IdentifiedBaseWork] =
+    new Indexable[IdentifiedBaseWork] {
 
+      def id(work: IdentifiedBaseWork) =
+        work.canonicalId
+
+      /**
+        * When the merger makes the decision to merge some works, it modifies
+        * the content of the affected works. Despite the content of these works
+        * being modified, their version remains the same. Instead, the merger
+        * sets the merged flag to true for the target work and changes the type
+        * of the other works to redirected.
+        *
+        * When we ingest those works, we need to make sure that the merger
+        * modified works are never overridden by unmerged works for the same
+        * version still running through the pipeline.
+        * We also need to make sure that, if a work is modified by a source in
+        * such a way that it shouldn't be merged (or redirected) anymore, the
+        * new unmerged version is ingested and never replaced by the previous
+        * merged version still running through the pipeline.
+        *
+        * We can do that by ingesting works into Elasticsearch with a version
+        * derived by a combination of work version, merged flag and work type.
+        * More specifically, by multiplying the work version by 10, we make sure
+        * that a new version of a work always wins over previous versions
+        * (merged or unmerged). We make sure that a merger modified work always
+        * wins over other works with the same version, by adding one to
+        * work.version * 10.
+        */
+      def version(work: IdentifiedBaseWork) =
+        work match {
+          case w: IdentifiedWork           => (w.version * 10) + w.data.merged
+          case w: IdentifiedRedirectedWork => (w.version * 10) + 1
+          case w: IdentifiedInvisibleWork  => w.version * 10
+        }
+
+      implicit private def toInteger(bool: Boolean): Int = if (bool) 1 else 0
+    }
 }

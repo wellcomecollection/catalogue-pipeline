@@ -130,6 +130,7 @@ object ExternalDependencies {
     "uk.ac.wellcome.elastic4s" %% "elastic4s-core" % versions.elastic4s,
     "uk.ac.wellcome.elastic4s" %% "elastic4s-client-esjava" % versions.elastic4s,
     "uk.ac.wellcome.elastic4s" %% "elastic4s-http-streams" % versions.elastic4s,
+    "uk.ac.wellcome.elastic4s" %% "elastic4s-json-circe" % versions.elastic4s,
     "uk.ac.wellcome.elastic4s" %% "elastic4s-testkit" % versions.elastic4s % "test"
   )
 
