@@ -5,7 +5,11 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.models.work.generators.ImageGenerators
+import uk.ac.wellcome.models.work.internal.AugmentedImage
+import uk.ac.wellcome.pipeline_storage.ElasticIndexer
+import uk.ac.wellcome.pipeline_storage.Indexable.imageIndexable
 import uk.ac.wellcome.models.Implicits._
+import uk.ac.wellcome.pipeline_storage.fixtures.ElasticIndexerFixtures
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -14,12 +18,13 @@ class ImagesIndexerTest
     with Matchers
     with ElasticsearchFixtures
     with ScalaFutures
+    with ElasticIndexerFixtures
     with ImageGenerators {
 
   it("ingests an image") {
     withLocalImagesIndex { index =>
-      val imagesIndexer = new ImagesIndexer(elasticClient, index)
-      implicit val i = imagesIndexer.id
+      val imagesIndexer =
+        new ElasticIndexer[AugmentedImage](elasticClient, index)
       val image = createAugmentedImage()
       whenReady(imagesIndexer.index(List(image))) { r =>
         r.isRight shouldBe true
@@ -31,8 +36,8 @@ class ImagesIndexerTest
 
   it("ingests a list of images") {
     withLocalImagesIndex { index =>
-      val imagesIndexer = new ImagesIndexer(elasticClient, index)
-      implicit val i = imagesIndexer.id
+      val imagesIndexer =
+        new ElasticIndexer[AugmentedImage](elasticClient, index)
       val images = (1 to 5).map(_ => createAugmentedImage())
       whenReady(imagesIndexer.index(images)) { r =>
         r.isRight shouldBe true
@@ -44,8 +49,8 @@ class ImagesIndexerTest
 
   it("ingests a higher version of the same image") {
     withLocalImagesIndex { index =>
-      val imagesIndexer = new ImagesIndexer(elasticClient, index)
-      implicit val i = imagesIndexer.id
+      val imagesIndexer =
+        new ElasticIndexer[AugmentedImage](elasticClient, index)
       val image = createAugmentedImage()
       val newerImage = image.copy(version = image.version + 1)
       val result = for {
@@ -62,8 +67,8 @@ class ImagesIndexerTest
 
   it("doesn't replace a newer version with a lower one") {
     withLocalImagesIndex { index =>
-      val imagesIndexer = new ImagesIndexer(elasticClient, index)
-      implicit val i = imagesIndexer.id
+      val imagesIndexer =
+        new ElasticIndexer[AugmentedImage](elasticClient, index)
       val image = createAugmentedImage()
       val olderImage = image.copy(version = image.version - 1)
       val result = for {

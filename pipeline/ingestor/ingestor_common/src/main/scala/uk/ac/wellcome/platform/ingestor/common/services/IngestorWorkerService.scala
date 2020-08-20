@@ -5,7 +5,7 @@ import software.amazon.awssdk.services.sqs.model.Message
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.bigmessaging.message.BigMessageStream
 import uk.ac.wellcome.elasticsearch.ElasticsearchIndexCreator
-import uk.ac.wellcome.platform.ingestor.common.Indexer
+import uk.ac.wellcome.pipeline_storage.Indexer
 import uk.ac.wellcome.platform.ingestor.common.models.IngestorConfig
 import uk.ac.wellcome.typesafe.Runnable
 

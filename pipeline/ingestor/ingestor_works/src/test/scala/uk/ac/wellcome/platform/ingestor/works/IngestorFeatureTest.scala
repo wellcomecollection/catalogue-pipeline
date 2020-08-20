@@ -10,7 +10,9 @@ import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.IdentifiedBaseWork
 import uk.ac.wellcome.platform.ingestor.common.fixtures.IngestorFixtures
-import uk.ac.wellcome.platform.ingestor.works.services.WorkIndexer
+import uk.ac.wellcome.pipeline_storage.ElasticIndexer
+import uk.ac.wellcome.pipeline_storage.Indexable.workIndexable
+import uk.ac.wellcome.models.Implicits._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -33,7 +35,7 @@ class IngestorFeatureTest
           queue,
           index,
           WorksIndexConfig,
-          new WorkIndexer(elasticClient, index)) { _ =>
+          new ElasticIndexer[IdentifiedBaseWork](elasticClient, index)) { _ =>
           assertElasticsearchEventuallyHasWork(index, work)
         }
       }
@@ -52,7 +54,7 @@ class IngestorFeatureTest
           queue,
           index,
           WorksIndexConfig,
-          new WorkIndexer(elasticClient, index)) { _ =>
+          new ElasticIndexer[IdentifiedBaseWork](elasticClient, index)) { _ =>
           assertElasticsearchEventuallyHasWork(index, work)
         }
       }

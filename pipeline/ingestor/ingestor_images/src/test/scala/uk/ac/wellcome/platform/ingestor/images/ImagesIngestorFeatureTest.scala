@@ -11,7 +11,8 @@ import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.ImageGenerators
 import uk.ac.wellcome.models.work.internal.AugmentedImage
 import uk.ac.wellcome.platform.ingestor.common.fixtures.IngestorFixtures
-import uk.ac.wellcome.platform.ingestor.images.services.ImagesIndexer
+import uk.ac.wellcome.pipeline_storage.ElasticIndexer
+import uk.ac.wellcome.pipeline_storage.Indexable.imageIndexable
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import uk.ac.wellcome.json.JsonUtil._
@@ -29,8 +30,7 @@ class ImagesIngestorFeatureTest
       case QueuePair(queue, dlq) =>
         sendMessage[AugmentedImage](queue = queue, obj = image)
         withLocalImagesIndex { index =>
-          val indexer = new ImagesIndexer(elasticClient, index)
-          implicit val id = indexer.id
+          val indexer = new ElasticIndexer[AugmentedImage](elasticClient, index)
           withWorkerService(queue, index, ImagesIndexConfig, indexer) { _ =>
             assertElasticsearchEventuallyHas(index, image)
             assertQueueEmpty(queue)
@@ -48,7 +48,7 @@ class ImagesIngestorFeatureTest
       case QueuePair(queue, dlq) =>
         sendMessage[Something](queue = queue, obj = wrongMessage)
         withLocalImagesIndex { index =>
-          val indexer = new ImagesIndexer(elasticClient, index)
+          val indexer = new ElasticIndexer[AugmentedImage](elasticClient, index)
           withWorkerService(queue, index, ImagesIndexConfig, indexer) { _ =>
             assertElasticsearchEmpty(index)
             eventually(Timeout(Span(5, Seconds))) {

@@ -63,49 +63,32 @@ class InferenceManagerWorkerServiceTest
     }
   }
 
-  it("places images that fail inference deterministically on the DLQ") {
+  it("places images that fail inference on the DLQ") {
     val image404 = createIdentifiedMergedImageWith(
       location = createDigitalLocationWith(url = "lost_image")
     )
     val image400 = createIdentifiedMergedImageWith(
       location = createDigitalLocationWith(url = "malformed_image_url")
     )
+    val image500 = createIdentifiedMergedImageWith(
+      location = createDigitalLocationWith(url = "extremely_cursed_image")
+    )
     withResponsesAndFixtures(
       inferrer = url =>
         if (url.contains(image400.id.canonicalId)) {
           Some(Responses.badRequest)
+        } else if (url.contains(image500.id.canonicalId)) {
+          Some(Responses.serverError)
         } else None,
-      images = _ => Some(Responses.image)) {
+      images = _ => Some(Responses.image)
+    ) {
       case (QueuePair(queue, dlq), _, _, _) =>
         sendMessage(queue, image404)
         sendMessage(queue, image400)
-        eventually {
-          assertQueueEmpty(queue)
-          assertQueueHasSize(dlq, 2)
-        }
-    }
-  }
-
-  it("allows images that fail inference nondeterministically to pass through") {
-    withResponsesAndFixtures(
-      inferrer = _ => Some(Responses.serverError),
-      images = _ => Some(Responses.image)) {
-      case (QueuePair(queue, dlq), messageSender, _, _) =>
-        val image500 = createIdentifiedMergedImageWith(
-          location = createDigitalLocationWith(url = "extremely_cursed_image")
-        )
         sendMessage(queue, image500)
         eventually {
           assertQueueEmpty(queue)
-          assertQueueEmpty(dlq)
-
-          val output = messageSender.getMessages[AugmentedImage].head
-
-          inside(output) {
-            case AugmentedImage(id, _, _, _, inferredData) =>
-              id should be(image500.id)
-              inferredData should not be defined
-          }
+          assertQueueHasSize(dlq, 3)
         }
     }
   }

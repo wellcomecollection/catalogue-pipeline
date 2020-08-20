@@ -1,32 +1,30 @@
-package uk.ac.wellcome.platform.ingestor.common
+package uk.ac.wellcome.pipeline_storage
+
+import scala.concurrent.{ExecutionContext, Future}
 
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.bulk.{BulkResponse, BulkResponseItem}
 import com.sksamuel.elastic4s.requests.common.VersionType.ExternalGte
-import com.sksamuel.elastic4s.{ElasticClient, Index, Indexable, Response}
+import com.sksamuel.elastic4s.{ElasticClient, Index, Response}
+import com.sksamuel.elastic4s.circe._
+import io.circe.Encoder
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.elasticsearch.model.{CanonicalId, Version}
 
-import scala.concurrent.{ExecutionContext, Future}
-
-trait Indexer[T] extends Logging {
-  val client: ElasticClient
-
-  implicit val ec: ExecutionContext
-  implicit val indexable: Indexable[T]
-  implicit val id: CanonicalId[T]
-  implicit val version: Version[T]
-  val index: Index
+class ElasticIndexer[T: Indexable](client: ElasticClient, index: Index)(
+  implicit ec: ExecutionContext,
+  encoder: Encoder[T])
+    extends Indexer[T]
+    with Logging {
 
   final def index(documents: Seq[T]): Future[Either[Seq[T], Seq[T]]] = {
 
-    debug(s"Indexing ${documents.map(d => id.canonicalId(d)).mkString(", ")}")
+    debug(s"Indexing ${documents.map(doc => indexable.id(doc)).mkString(", ")}")
 
     val inserts = documents.map { document =>
       indexInto(index.name)
-        .version(version.version(document))
+        .version(indexable.version(document))
         .versionType(ExternalGte)
-        .id(id.canonicalId(document))
+        .id(indexable.id(document))
         .doc(document)
     }
 
@@ -51,8 +49,8 @@ trait Indexer[T] extends Logging {
               failure.id
             }
 
-            Left(documents.filter(d => {
-              failedIds.contains(id.canonicalId(d))
+            Left(documents.filter(doc => {
+              failedIds.contains(indexable.id(doc))
             }))
           } else Right(documents)
         }

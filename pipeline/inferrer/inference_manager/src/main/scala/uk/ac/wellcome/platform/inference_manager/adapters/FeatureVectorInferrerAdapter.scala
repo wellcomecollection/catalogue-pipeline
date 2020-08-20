@@ -14,6 +14,40 @@ import uk.ac.wellcome.platform.inference_manager.models.{
 
 import scala.util.{Success, Try}
 
+/*
+ * An InferrerAdapter is specific to the inferrer and the data that is being augmented.
+ * Implementors must provide:
+ * - The type of the inferrer response
+ * - A Decoder for that response
+ * - A function to create an HTTP request from the input data type
+ * - A function to augment input data with a response, returning the output data type
+ *
+ * Additionally, the trait provides the logic for handling different HTTP response statuses
+ */
+
+trait InferrerAdapter[Input, Output] extends Logging {
+  type InferrerResponse
+
+  implicit val responseDecoder: Decoder[InferrerResponse]
+  def createRequest(input: Input): HttpRequest
+  def augmentInput(input: Input,
+                   inferrerResponse: Option[InferrerResponse]): Output
+
+  def parseResponse(response: HttpResponse)(
+    implicit mat: Materializer): Future[Option[InferrerResponse]] =
+    response.status match {
+      case StatusCodes.OK =>
+        Unmarshal(response.entity).to[Some[InferrerResponse]]
+      case StatusCodes.BadRequest =>
+        Future.failed(new Exception("Bad request"))
+      case StatusCodes.NotFound =>
+        Future.failed(new Exception("Entity not found"))
+      case statusCode =>
+        Future.failed(
+          new Exception(s"Request failed with code ${statusCode.value}"))
+    }
+}
+
 // The InferrerAdaptor for feature vectors, consuming MergedImages and
 // augmenting them into AugmentedImages
 object FeatureVectorInferrerAdapter

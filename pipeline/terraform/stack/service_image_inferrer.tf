@@ -79,6 +79,7 @@ module "image_inferrer" {
     topic_arn            = module.image_inferrer_topic.arn
     messages_bucket_name = aws_s3_bucket.messages.id
     queue_url            = module.image_inferrer_queue.url
+    images_root          = local.shared_storage_path
   }
   app_env_vars = {
     MODEL_OBJECT_KEY  = data.aws_ssm_parameter.inferrer_lsh_model_key.value
@@ -88,7 +89,7 @@ module "image_inferrer" {
   subnets = var.subnets
 
   # Any higher than this currently causes latency spikes from Loris
-  max_capacity = 8
+  max_capacity = 6
 
   messages_bucket_arn = aws_s3_bucket.messages.arn
   queue_read_policy   = module.image_inferrer_queue.read_policy

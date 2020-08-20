@@ -5,6 +5,7 @@ steps:
   - command: .buildkite/scripts/run_job.py display
   - command: .buildkite/scripts/run_job.py elasticsearch
   - command: .buildkite/scripts/run_job.py big_messaging
+  - command: .buildkite/scripts/run_job.py pipeline_storage
   - command: .buildkite/scripts/run_job.py ingestor_common
   - command: .buildkite/scripts/run_job.py transformer_common
   - wait
