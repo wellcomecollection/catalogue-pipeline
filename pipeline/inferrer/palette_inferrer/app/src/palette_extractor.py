@@ -1,45 +1,63 @@
 import numpy as np
-from skimage.color import rgb2lab
-from .logging import get_logger
-
-logger = get_logger(__name__)
+from sklearn.cluster import KMeans
 
 
-class PaletteExtractor:
-    def __init__(self):
-        pass
+class PaletteEncoder:
+    def __init__(self, palette_size, precision_levels):
+        self.palette_size = palette_size
+        self.precision_levels = precision_levels
+
+    def get_significant_colours(self, image, p=0.5):
+        """
+        extract n significant colours from the image pixels by taking the 
+        centres of n kmeans clusters of the image's pixels arranged in colour 
+        space.
+        The biggest cluster is counted n^p times, the second largest (n-1)^p
+        times, ..., and the smallest cluster counted once.
+        """
+        pixels = np.array(image).reshape(-1, 3)
+        clusterer = KMeans(n_clusters=self.palette_size).fit(pixels)
+        colours = clusterer.cluster_centers_[::-1]
+        significant_colours = []
+        for val, colour in enumerate(colours):
+            significant_colours.extend([colour] * int(val ** p))
+
+        return np.stack(significant_colours)
+
+    def get_colour_histogram(self, colours, precision):
+        """
+        get the bins in which the images' significant colours are found at a 
+        specified level of precision
+        """
+        bins = np.linspace(0, 256, precision + 1)
+        histogram, _ = np.histogramdd(
+            sample=colours,
+            bins=[bins, bins, bins]
+        )
+        bin_counts = histogram.reshape(-1)
+        return bin_counts
 
     def encode_for_elasticsearch(self, flat_values):
+        """
+        turn a list of bin counts into a list of strings for elasticsearch
+        """
         encoded_list = []
         for index, value in enumerate(flat_values):
-            encoded_list.extend([str(index)] * value)
-
+            encoded_list.extend([str(index)] * int(value))
         return encoded_list
 
-    def get_colour_histogram(self, lab_pixels, n_bins):
-        """
-        bins image pixels into n^3 chunks of perceptually-even colour space at
-        a specified level of precision, and normalises the relative intensity
-        of colour in each chunk
-        """
-        histogram, _ = np.histogramdd(sample=lab_pixels, bins=(n_bins, n_bins, n_bins))
-
-        normalised_histogram = (histogram * 10 / histogram.max()).astype(int)
-
-        flat_values = normalised_histogram.reshape(-1)
-        return flat_values
-
-    def __call__(self, image, precision_levels=[2, 4, 8]):
+    def __call__(self, image):
         """
         extract presence of colour in the image at multiple precision levels
         """
-        lab_pixels = rgb2lab(image).reshape(-1, 3)
-        combined_results = [
+        colours = self.get_significant_colours(image)
+        combined_results = np.array([
             bin_count
-            for precision_level in precision_levels
+            for precision in self.precision_levels
             for bin_count in self.get_colour_histogram(
-                lab_pixels=lab_pixels, n_bins=precision_level
+                colours=colours,
+                precision=precision
             )
-        ]
+        ])
 
         return self.encode_for_elasticsearch(combined_results)
