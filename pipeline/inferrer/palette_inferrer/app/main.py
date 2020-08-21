@@ -1,7 +1,7 @@
 import base64
 
-import weco_datascience.http as http
 from fastapi import FastAPI, HTTPException
+from weco_datascience import http
 from weco_datascience.batching import BatchExecutionQueue
 from weco_datascience.image import (get_image_from_url,
                                     get_image_url_from_iiif_url)

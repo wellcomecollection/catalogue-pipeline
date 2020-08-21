@@ -2,8 +2,8 @@ import os
 
 from botocore.exceptions import ClientError
 
-from src.aws import download_object_from_s3
-from src.logging import get_logger
+from weco_datascience.aws import download_object_from_s3
+from weco_datascience.logging import get_logger
 
 logger = get_logger("prestart")
 
