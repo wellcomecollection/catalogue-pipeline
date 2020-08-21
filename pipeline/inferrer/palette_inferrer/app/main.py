@@ -26,14 +26,7 @@ batch_inferrer_queue = BatchExecutionQueue(
 
 
 @app.get("/palette/")
-async def main(query_url: str):
-    try:
-        image_url = get_image_url_from_iiif_url(query_url)
-    except ValueError as e:
-        error_string = str(e)
-        logger.error(error_string)
-        raise HTTPException(status_code=400, detail=error_string)
-
+async def main(image_url: str):
     try:
         image = await get_image_from_url(image_url, size=100)
     except ValueError as e:

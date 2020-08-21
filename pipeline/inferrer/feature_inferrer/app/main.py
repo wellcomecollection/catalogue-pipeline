@@ -37,22 +37,7 @@ batch_inferrer_queue = BatchExecutionQueue(
 
 
 @app.get("/feature-vector/")
-async def main(image_url: str = None, iiif_url: str = None):
-    if (not (image_url or iiif_url)) or (iiif_url and image_url):
-        logger.error(
-            f"client passed image_url: {image_url} iiif_url: {iiif_url}")
-        raise HTTPException(
-            status_code=400, detail="API takes one of: image_url, iiif_url"
-        )
-
-    if iiif_url:
-        try:
-            image_url = get_image_url_from_iiif_url(iiif_url)
-        except ValueError as e:
-            error_string = str(e)
-            logger.error(error_string)
-            raise HTTPException(status_code=400, detail=error_string)
-
+async def main(image_url: str):
     try:
         image = await get_image_from_url(image_url)
     except ValueError as e:
