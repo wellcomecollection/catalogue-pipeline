@@ -3,8 +3,7 @@ import base64
 from fastapi import FastAPI, HTTPException
 from weco_datascience import http
 from weco_datascience.batching import BatchExecutionQueue
-from weco_datascience.image import (get_image_from_url,
-                                    get_image_url_from_iiif_url)
+from weco_datascience.image import get_image_from_url, get_image_url_from_iiif_url
 from weco_datascience.logging import get_logger
 
 from .palette_encoder import PaletteEncoder
@@ -21,8 +20,7 @@ app = FastAPI(title="Palette extractor", description="extracts palettes")
 logger.info("API started, awaiting requests")
 
 
-batch_inferrer_queue = BatchExecutionQueue(
-    palette_encoder, batch_size=16, timeout=0.5)
+batch_inferrer_queue = BatchExecutionQueue(palette_encoder, batch_size=16, timeout=0.5)
 
 
 @app.get("/palette/")
