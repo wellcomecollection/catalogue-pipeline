@@ -15,7 +15,7 @@ class ElasticRetriever[T](client: ElasticClient, index: Index)(
     extends Retriever[T]
     with Logging {
 
-  final def retrieve(id: String): Future[T] =
+  final def apply(id: String): Future[T] =
     client
       .execute {
         get(index, id)

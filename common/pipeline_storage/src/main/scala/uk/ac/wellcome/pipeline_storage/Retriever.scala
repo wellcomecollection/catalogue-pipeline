@@ -10,5 +10,5 @@ trait Retriever[T] {
     * @param expectedVersion Optionally includes an expected version to check
     * @return The document
     */
-  def retrieve(id: String): Future[T]
+  def apply(id: String): Future[T]
 }
