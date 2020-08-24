@@ -7,8 +7,13 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{Inside, OptionValues}
 import uk.ac.wellcome.models.work.generators.ImageGenerators
+import uk.ac.wellcome.models.work.internal.InferredData
 import uk.ac.wellcome.platform.inference_manager.adapters.FeatureVectorInferrerAdapter
-import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
+import uk.ac.wellcome.platform.inference_manager.fixtures.Encoding
+import uk.ac.wellcome.platform.inference_manager.models.{
+  DownloadedImage,
+  FeatureVectorInferrerResponse
+}
 
 class FeatureVectorInferrerAdapterTest
     extends AnyFunSpec
@@ -35,34 +40,22 @@ class FeatureVectorInferrerAdapterTest
     }
   }
 
-//  describe("augmentInput") {
-//    it("creates an AugmentedImage with the data from the inferrer response") {
-//      val downloadedImage = DownloadedImage(
-//        image = createIdentifiedMergedImageWith(),
-//        path = Paths.get("a", "b", "c.jpg")
-//      )
-//      val features = (0 until 4096).map(_ / 4096f).toList
-//      val featuresB64 = Encoding.toLittleEndianBase64(features)
-//      val lshEncodedFeatures = ('a' to 'z').map(_.toString * 3).toList
-//      val response = FeatureVectorInferrerResponse(
-//        features_b64 = featuresB64,
-//        lsh_encoded_features = lshEncodedFeatures
-//      )
-//      val augmentedImage =
-//        adapter.augment(downloadedImage, Some(response))
-//      inside(augmentedImage) {
-//        case AugmentedImage(id, version, location, parentWork, inferredData) =>
-//          id should be(downloadedImage.image.id)
-//          version should be(downloadedImage.image.version)
-//          location should be(downloadedImage.image.location)
-//          parentWork should be(downloadedImage.image.source)
-//          inside(inferredData.value) {
-//            case InferredData(features1, features2, actualLshEncodedFeatures, _) =>
-//              features1 should be(features.slice(0, 2048))
-//              features2 should be(features.slice(2048, 4096))
-//              actualLshEncodedFeatures should be(lshEncodedFeatures)
-//          }
-//      }
-//    }
-//  }
+  describe("augment") {
+    it("augments InferredData with the data from the inferrer response") {
+      val features = (0 until 4096).map(_ / 4096f).toList
+      val featuresB64 = Encoding.toLittleEndianBase64(features)
+      val lshEncodedFeatures = ('a' to 'z').map(_.toString * 3).toList
+      val response = FeatureVectorInferrerResponse(
+        features_b64 = featuresB64,
+        lsh_encoded_features = lshEncodedFeatures
+      )
+      val inferredData = adapter.augment(InferredData.empty, response)
+      inside(inferredData) {
+        case InferredData(features1, features2, actualLshEncodedFeatures, _) =>
+          features1 should be(features.slice(0, 2048))
+          features2 should be(features.slice(2048, 4096))
+          actualLshEncodedFeatures should be(lshEncodedFeatures)
+      }
+    }
+  }
 }
