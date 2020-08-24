@@ -1,10 +1,15 @@
 package uk.ac.wellcome.platform.inference_manager.adapters
 
+import akka.http.scaladsl.model.Uri.Authority
 import akka.http.scaladsl.model.{HttpRequest, HttpResponse, StatusCodes}
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.Materializer
 import grizzled.slf4j.Logging
 import io.circe.Decoder
+import software.amazon.awssdk.services.sqs.model.Message
+import uk.ac.wellcome.models.work.internal.{AugmentedImage, InferredData}
+import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
+import uk.ac.wellcome.platform.inference_manager.services.RequestPoolFlow
 
 import scala.concurrent.Future
 
@@ -18,26 +23,29 @@ import scala.concurrent.Future
  *
  * Additionally, the trait provides the logic for handling different HTTP response statuses
  */
-trait InferrerAdapter[Input, Output] extends Logging {
-  type InferrerResponse
+trait InferrerResponse
 
-  implicit val responseDecoder: Decoder[InferrerResponse]
-  def createRequest(input: Input): HttpRequest
-  def augmentInput(input: Input,
-                   inferrerResponse: Option[InferrerResponse]): Output
+trait InferrerAdapter extends Logging {
+  type Response <: InferrerResponse
+
+  implicit val responseDecoder: Decoder[Response]
+
+  val hostAuthority: Authority
+  def createRequest(image: DownloadedImage): HttpRequest
+  def augment(inferredData: InferredData,
+              inferrerResponse: Response): InferredData
 
   def parseResponse(response: HttpResponse)(
-    implicit mat: Materializer): Future[Option[InferrerResponse]] =
+    implicit mat: Materializer): Future[Response] =
     response.status match {
       case StatusCodes.OK =>
-        Unmarshal(response.entity).to[Some[InferrerResponse]]
+        Unmarshal(response.entity).to[Response]
       case StatusCodes.BadRequest =>
         Future.failed(new Exception("Bad request"))
       case StatusCodes.NotFound =>
         Future.failed(new Exception("Entity not found"))
       case statusCode =>
-        warn(
-          s"Request failed non-deterministically with code ${statusCode.value}")
-        Future.successful(None)
+        Future.failed(
+          new Exception(s"Request failed with code ${statusCode.value}"))
     }
 }
