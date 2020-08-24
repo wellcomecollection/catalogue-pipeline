@@ -1,9 +1,14 @@
 package uk.ac.wellcome.pipeline_storage
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Success, Failure}
+import scala.util.{Failure, Success}
 
-import com.sksamuel.elastic4s.{ElasticClient, Index, RequestSuccess, RequestFailure}
+import com.sksamuel.elastic4s.{
+  ElasticClient,
+  Index,
+  RequestFailure,
+  RequestSuccess
+}
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.circe._
 import io.circe.Decoder
@@ -24,7 +29,7 @@ class ElasticRetriever[T](client: ElasticClient, index: Index)(
         case RequestFailure(_, _, _, error) => Future.failed(error.asException)
         case RequestSuccess(_, _, _, response) =>
           response.safeTo[T] match {
-            case Success(item) => Future.successful(item)
+            case Success(item)  => Future.successful(item)
             case Failure(error) => Future.failed(error)
           }
       }
