@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.inference_manager.services
 
 import akka.Done
-import akka.http.scaladsl.model.{HttpResponse, Uri}
+import akka.http.scaladsl.model.HttpResponse
 import akka.actor.ActorSystem
 import akka.stream.scaladsl.{Flow, FlowWithContext, Source}
 import grizzled.slf4j.Logging
@@ -18,7 +18,14 @@ import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
 import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration._
 import scala.util.{Failure, Success, Try}
+
+case class AdapterResponseBundle[ImageType](
+  image: ImageType,
+  adapter: InferrerAdapter,
+  response: InferrerResponse
+)
 
 class InferenceManagerWorkerService[Destination](
   msgStream: BigMessageStream[MergedIdentifiedImage],
@@ -32,9 +39,7 @@ class InferenceManagerWorkerService[Destination](
 
   val className: String = this.getClass.getSimpleName
   val parallelism = 10
-
-  lazy val adapters: Map[Uri.Authority, InferrerAdapter] =
-    inferrerAdapters.map(adapter => adapter.hostAuthority -> adapter).toMap
+  val maxInferrerWait = 30 seconds
 
   def run(): Future[Done] =
     msgStream.runStream(
@@ -82,42 +87,37 @@ class InferenceManagerWorkerService[Destination](
                 response.discardEntityBytes()
                 throw e
             }
-            .map((image, adapter, _))
+            .map { response =>
+              AdapterResponseBundle(
+                image,
+                adapter,
+                response
+              )
+            }
         case (Failure(exception), _) =>
           Future.failed(exception)
       }
 
   private def collectAndAugment[Ctx] =
-    FlowWithContext[(DownloadedImage, InferrerAdapter, InferrerResponse), Ctx]
+    FlowWithContext[AdapterResponseBundle[DownloadedImage], Ctx]
       .via {
-        Flow[((DownloadedImage, InferrerAdapter, InferrerResponse), Ctx)]
-          .groupBy(inferrerAdapters.size, _ match {
-            case ((downloadedImage, _, _), _) =>
+        Flow[(AdapterResponseBundle[DownloadedImage], Ctx)]
+          .groupBy(parallelism, _ match {
+            case (AdapterResponseBundle(downloadedImage, _, _), _) =>
               downloadedImage.image.id.canonicalId
           })
-          .map {
-            case ((downloadedImage, adapter, response), ctx) =>
-              val augmentedImage =
-                downloadedImage.image.augment(Some(InferredData.empty))
-              ((augmentedImage, adapter, response), ctx)
-          }
-          .reduce {
-            case (
-                ((combinedAugmentedImage, _, _), ctx),
-                ((_, adapter, response), _)) =>
-              val inferredData = combinedAugmentedImage.inferredData.map {
-                previousInferredData =>
-                  response match {
-                    case adapterResponse: adapter.Response =>
-                      adapter.augment(previousInferredData, adapterResponse)
-                  }
-              }
-              val nextImage =
-                combinedAugmentedImage.copy(inferredData = inferredData)
-              ((nextImage, adapter, response), ctx)
-          }
-          .map {
-            case ((image, _, _), ctx) => (image, ctx)
+          .groupedWithin(inferrerAdapters.size, maxInferrerWait)
+          .map { elements =>
+            val inferredData = elements.foldLeft(InferredData.empty) {
+              case (data, (AdapterResponseBundle(_, adapter, response), _)) =>
+                adapter.augment(data, response.asInstanceOf[adapter.Response])
+            }
+            elements.head match {
+              case (
+                  AdapterResponseBundle(DownloadedImage(image, _), _, _),
+                  ctx) =>
+                (image.augment(Some(inferredData)), ctx)
+            }
           }
           .mergeSubstreams
       }

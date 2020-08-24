@@ -1,15 +1,13 @@
 package uk.ac.wellcome.platform.inference_manager.adapters
 
-import akka.http.scaladsl.model.Uri.Authority
 import akka.http.scaladsl.model.{HttpRequest, HttpResponse, StatusCodes}
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.Materializer
+import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import grizzled.slf4j.Logging
 import io.circe.Decoder
-import software.amazon.awssdk.services.sqs.model.Message
-import uk.ac.wellcome.models.work.internal.{AugmentedImage, InferredData}
+import uk.ac.wellcome.models.work.internal.InferredData
 import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
-import uk.ac.wellcome.platform.inference_manager.services.RequestPoolFlow
 
 import scala.concurrent.Future
 
@@ -30,7 +28,6 @@ trait InferrerAdapter extends Logging {
 
   implicit val responseDecoder: Decoder[Response]
 
-  val hostAuthority: Authority
   def createRequest(image: DownloadedImage): HttpRequest
   def augment(inferredData: InferredData,
               inferrerResponse: Response): InferredData

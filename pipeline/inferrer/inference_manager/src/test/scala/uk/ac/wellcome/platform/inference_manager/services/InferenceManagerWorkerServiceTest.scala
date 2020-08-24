@@ -12,7 +12,10 @@ import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.work.internal.{AugmentedImage, InferredData}
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.ImageGenerators
-import uk.ac.wellcome.platform.inference_manager.adapters.FeatureVectorInferrerAdapter
+import uk.ac.wellcome.platform.inference_manager.adapters.{
+  FeatureVectorInferrerAdapter,
+  InferrerAdapter
+}
 import uk.ac.wellcome.platform.inference_manager.fixtures.{
   InferenceManagerWorkerServiceFixture,
   MemoryFileWriter,
@@ -53,7 +56,11 @@ class InferenceManagerWorkerServiceTest
             case AugmentedImage(id, _, _, _, inferredData) =>
               id should be(image.id)
               inside(inferredData.value) {
-                case InferredData(features1, features2, lshEncodedFeatures) =>
+                case InferredData(
+                    features1,
+                    features2,
+                    lshEncodedFeatures,
+                    _) =>
                   features1 should have length 2048
                   features2 should have length 2048
                   every(lshEncodedFeatures) should fullyMatch regex """(\d+)-(\d+)"""
@@ -110,11 +117,12 @@ class InferenceManagerWorkerServiceTest
 
   def withResponsesAndFixtures[R](inferrer: String => Option[HttpResponse],
                                   images: String => Option[HttpResponse])(
-    testWith: TestWith[(QueuePair,
-                        MemoryMessageSender,
-                        RequestPoolMock[DownloadedImage, Message],
-                        RequestPoolMock[MergedIdentifiedImage, Message]),
-                       R]): R =
+    testWith: TestWith[
+      (QueuePair,
+       MemoryMessageSender,
+       RequestPoolMock[(DownloadedImage, InferrerAdapter), Message],
+       RequestPoolMock[MergedIdentifiedImage, Message]),
+      R]): R =
     withResponses(inferrer, images) {
       case (inferrerMock, imagesMock) =>
         withWorkerServiceFixtures(inferrerMock.pool, imagesMock.pool) {
@@ -125,18 +133,21 @@ class InferenceManagerWorkerServiceTest
 
   def withResponses[R](inferrer: String => Option[HttpResponse],
                        images: String => Option[HttpResponse])(
-    testWith: TestWith[(RequestPoolMock[DownloadedImage, Message],
-                        RequestPoolMock[MergedIdentifiedImage, Message]),
-                       R]): R =
-    withRequestPool[DownloadedImage, Message, R](inferrer) { inferrerPoolMock =>
-      withRequestPool[MergedIdentifiedImage, Message, R](images) {
-        imagesPoolMock =>
-          testWith((inferrerPoolMock, imagesPoolMock))
-      }
+    testWith: TestWith[
+      (RequestPoolMock[(DownloadedImage, InferrerAdapter), Message],
+       RequestPoolMock[MergedIdentifiedImage, Message]),
+      R]): R =
+    withRequestPool[(DownloadedImage, InferrerAdapter), Message, R](inferrer) {
+      inferrerPoolMock =>
+        withRequestPool[MergedIdentifiedImage, Message, R](images) {
+          imagesPoolMock =>
+            testWith((inferrerPoolMock, imagesPoolMock))
+        }
     }
 
   def withWorkerServiceFixtures[R](
-    inferrerRequestPool: RequestPoolFlow[DownloadedImage, Message],
+    inferrerRequestPool: RequestPoolFlow[(DownloadedImage, InferrerAdapter),
+                                         Message],
     imageRequestPool: RequestPoolFlow[MergedIdentifiedImage, Message])(
     testWith: TestWith[(QueuePair, MemoryMessageSender), R]): R =
     withLocalSqsQueuePair() { queuePair =>
@@ -146,7 +157,7 @@ class InferenceManagerWorkerServiceTest
       withWorkerService(
         queue = queuePair.queue,
         messageSender = messageSender,
-        adapter = FeatureVectorInferrerAdapter,
+        adapter = new FeatureVectorInferrerAdapter("feature_inferrer", 80),
         fileWriter = fileWriter,
         inferrerRequestPool = inferrerRequestPool,
         imageRequestPool = imageRequestPool

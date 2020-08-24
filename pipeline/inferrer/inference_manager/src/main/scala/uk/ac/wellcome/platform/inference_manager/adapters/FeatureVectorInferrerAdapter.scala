@@ -20,9 +20,7 @@ class FeatureVectorInferrerAdapter(val host: String, port: Int)
     extends InferrerAdapter {
   type Response = FeatureVectorInferrerResponse
 
-  val hostAuthority: Uri.Authority = Uri(s"$host:$port").authority
-
-  def createRequest(ifuncmage: DownloadedImage): HttpRequest =
+  def createRequest(image: DownloadedImage): HttpRequest =
     HttpRequest(
       method = HttpMethods.GET,
       uri = Uri("/feature-vector/")
@@ -38,6 +36,7 @@ class FeatureVectorInferrerAdapter(val host: String, port: Int)
         )
         .withHost(host)
         .withPort(port)
+        .withScheme("http")
     )
 
   def augment(inferredData: InferredData,
