@@ -10,10 +10,7 @@ logger = get_logger(__name__)
 
 # Initialise encoder
 logger.info("Initialising PaletteEncoder model")
-palette_encoder = PaletteEncoder(
-    palette_size=5,
-    precision_levels=[4, 6, 8],
-)
+palette_encoder = PaletteEncoder(palette_size=5, precision_levels=[4, 6, 8])
 
 # initialise API
 logger.info("Starting API")
@@ -21,9 +18,7 @@ app = FastAPI(title="Palette extractor", description="extracts palettes")
 logger.info("API started, awaiting requests")
 
 
-batch_inferrer_queue = BatchExecutionQueue(
-    palette_encoder, batch_size=16, timeout=0.5
-)
+batch_inferrer_queue = BatchExecutionQueue(palette_encoder, batch_size=16, timeout=0.5)
 
 
 @app.get("/palette/")

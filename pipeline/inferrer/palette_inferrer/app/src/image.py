@@ -56,6 +56,4 @@ def get_image_url_from_iiif_url(iiif_url, input_size=224):
         # https://iiif.io/api/image/1.0/#4-2-size
         return str(image.size(width=400, height=400, exact=True))
 
-    return str(
-        image.size(width=input_size, height=input_size, exact=False)
-    )
+    return str(image.size(width=input_size, height=input_size, exact=False))

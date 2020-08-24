@@ -30,10 +30,7 @@ class PaletteEncoder:
         specified level of precision
         """
         bins = np.linspace(0, 256, precision + 1)
-        histogram, _ = np.histogramdd(
-            sample=colours,
-            bins=[bins, bins, bins]
-        )
+        histogram, _ = np.histogramdd(sample=colours, bins=[bins, bins, bins])
         bin_counts = histogram.reshape(-1)
         return bin_counts
 
@@ -51,13 +48,14 @@ class PaletteEncoder:
         extract presence of colour in the image at multiple precision levels
         """
         colours = self.get_significant_colours(image)
-        combined_results = np.array([
-            bin_count
-            for precision in self.precision_levels
-            for bin_count in self.get_colour_histogram(
-                colours=colours,
-                precision=precision
-            )
-        ])
+        combined_results = np.array(
+            [
+                bin_count
+                for precision in self.precision_levels
+                for bin_count in self.get_colour_histogram(
+                    colours=colours, precision=precision
+                )
+            ]
+        )
 
         return self.encode_for_elasticsearch(combined_results)
