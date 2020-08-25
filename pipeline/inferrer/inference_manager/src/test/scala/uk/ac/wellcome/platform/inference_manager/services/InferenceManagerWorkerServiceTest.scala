@@ -40,7 +40,7 @@ class InferenceManagerWorkerServiceTest
     with RequestPoolFixtures {
 
   it(
-    "reads image messages, augments them with the inferrer, and sends them to SNS") {
+    "reads image messages, augments them with the inferrers, and sends them to SNS") {
     withResponsesAndFixtures(
       inferrer = req =>
         if (req.contains("feature_inferrer")) {

@@ -42,7 +42,7 @@ class ManagerInferrerIntegrationTest
     with IntegrationPatience
     with InferenceManagerWorkerServiceFixture {
 
-  it("augments images with feature vectors") {
+  it("augments images with feature and palette vectors") {
     withWorkerServiceFixtures {
       case (QueuePair(queue, dlq), messageSender, rootDir) =>
         // This is (more than) enough time for the inferrer to have

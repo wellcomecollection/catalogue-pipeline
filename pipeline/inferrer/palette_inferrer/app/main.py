@@ -4,7 +4,7 @@ import src.http as http
 from src.batching import BatchExecutionQueue
 from src.image import get_image_from_url, get_image_url_from_iiif_url
 from src.logging import get_logger
-from src.palette_extractor import PaletteEncoder
+from src.palette_encoder import PaletteEncoder
 
 logger = get_logger(__name__)
 
@@ -31,10 +31,8 @@ batch_inferrer_queue = BatchExecutionQueue(
 async def main(query_url: str):
     try:
         image_url = get_image_url_from_iiif_url(query_url)
-    except ValueError as e:
-        error_string = str(e)
-        logger.error(error_string)
-        raise HTTPException(status_code=400, detail=error_string)
+    except ValueError:
+        image_url = query_url
 
     try:
         image = await get_image_from_url(image_url, size=100)

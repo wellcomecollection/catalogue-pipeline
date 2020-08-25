@@ -22,7 +22,7 @@ class PaletteInferrerAdapterTest
   val adapter = new PaletteInferrerAdapter("palette_inferrer", 80)
 
   describe("createRequest") {
-    it("creates a request with the image_url parameter as a local path") {
+    it("creates a request with the query_url parameter as a local path") {
       val downloadedImage = DownloadedImage(
         image = createIdentifiedMergedImageWith(),
         path = Paths.get("/", "a", "b", "c.jpg")
@@ -33,7 +33,7 @@ class PaletteInferrerAdapterTest
         case HttpRequest(method, uri, _, _, _) =>
           method should be(HttpMethods.GET)
           uri.toString() should be(
-            s"http://palette_inferrer:80/palette/?image_url=file://${downloadedImage.path}")
+            s"http://palette_inferrer:80/palette/?query_url=file://${downloadedImage.path}")
       }
     }
   }

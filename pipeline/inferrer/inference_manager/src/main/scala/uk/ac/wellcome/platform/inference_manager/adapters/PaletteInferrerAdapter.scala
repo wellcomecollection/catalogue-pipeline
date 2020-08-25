@@ -18,7 +18,7 @@ class PaletteInferrerAdapter(host: String, port: Int) extends InferrerAdapter {
       uri = Uri("/palette/")
         .withQuery(
           Uri.Query(
-            "image_url" -> Uri
+            "query_url" -> Uri
               .from(scheme = "file", path = image.pathString)
               .toString
           ))
