@@ -40,7 +40,7 @@ class PaletteInferrerAdapterTest
 
   describe("augment") {
     it("augments InferredData with the data from the inferrer response") {
-      val palette = (0 to 100).map(n => f"$n%03d").toList
+      val palette = (0 to 25).map(n => f"$n%03d").toList
       val response = PaletteInferrerResponse(
         palette = palette
       )

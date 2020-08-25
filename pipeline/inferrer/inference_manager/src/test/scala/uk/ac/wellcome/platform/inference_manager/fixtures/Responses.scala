@@ -30,7 +30,7 @@ object Responses {
   )
 
   def randomPaletteVector: List[String] =
-    List.fill(100)(List.fill(3)(Random.nextInt(10)).mkString(""))
+    List.fill(25)(List.fill(3)(Random.nextInt(10)).mkString(""))
 
   def randomFeatureVector: List[Float] = List.fill(4096)(Random.nextFloat)
 
