@@ -26,7 +26,7 @@ class FeatureVectorInferrerAdapter(val host: String, port: Int)
       uri = Uri("/feature-vector/")
         .withQuery(
           Uri.Query(
-            "image_url" -> Uri
+            "query_url" -> Uri
               .from(
                 scheme = "file",
                 path = image.pathString
