@@ -156,8 +156,7 @@ class RelatedWorkServiceTest
     }
   }
 
-  it(
-    "Sorts works consisting of paths with an alphanumeric mixture of tokens") {
+  it("Sorts works consisting of paths with an alphanumeric mixture of tokens") {
     withLocalWorksIndex { index =>
       val workA = work("a", CollectionLevel.Collection)
       val workB1 = work("a/B1", CollectionLevel.Series)

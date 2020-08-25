@@ -123,8 +123,7 @@ class PathQueryRelatedWorksService(elasticClient: ElasticClient, index: Index)(
 
   private def tokenizePath(path: String): TokenizedPath =
     path.split("/").toList.map { str =>
-      """\d+|\D+"""
-        .r
+      """\d+|\D+""".r
         .findAllIn(str)
         .toList
         .map { token =>
@@ -159,7 +158,7 @@ class PathQueryRelatedWorksService(elasticClient: ElasticClient, index: Index)(
       @tailrec
       override def compare(a: PathToken, b: PathToken): Int =
         (a, b) match {
-          case (Nil, Nil)   => 0
+          case (Nil, Nil) => 0
           case (Nil, _)   => 1
           case (_, Nil)   => -1
           case (aHead :: aTail, bHead :: bTail) =>

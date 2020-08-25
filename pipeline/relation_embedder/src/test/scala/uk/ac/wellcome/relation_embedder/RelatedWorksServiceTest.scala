@@ -137,8 +137,7 @@ class RelatedWorksServiceTest
     }
   }
 
-  it(
-    "Sorts works consisting of paths with an alphanumeric mixture of tokens") {
+  it("Sorts works consisting of paths with an alphanumeric mixture of tokens") {
     withLocalWorksIndex { index =>
       val workA = work("a")
       val workB1 = work("a/B1")
@@ -148,7 +147,10 @@ class RelatedWorksServiceTest
       whenReady(service(index)(workA)) { result =>
         result shouldBe
           RelatedWorks(
-            parts = List(relatedWork(workB1), relatedWork(workB2), relatedWork(workB10)),
+            parts = List(
+              relatedWork(workB1),
+              relatedWork(workB2),
+              relatedWork(workB10)),
             partOf = Nil,
             precededBy = Nil,
             succeededBy = Nil,
