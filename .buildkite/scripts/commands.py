@@ -24,7 +24,7 @@ def _subprocess_run(cmd, exit_on_error=True):
     if return_code != 0 and exit_on_error:
         sys.exit(return_code)
 
-    return "\n".join(output).strip()
+    return "".join(output).strip()
 
 
 def make(*args):
