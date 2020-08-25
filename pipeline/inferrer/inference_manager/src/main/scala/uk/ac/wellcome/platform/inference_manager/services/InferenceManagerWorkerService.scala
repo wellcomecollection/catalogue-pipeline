@@ -99,14 +99,13 @@ class InferenceManagerWorkerService[Destination](
           Future.failed(exception)
       }
 
-  private def collectAndAugment[Ctx] =
+  private def collectAndAugment[Ctx <: Message] =
     FlowWithContext[AdapterResponseBundle[DownloadedImage], Ctx]
       .via {
         Flow[(AdapterResponseBundle[DownloadedImage], Ctx)]
           .groupBy(parallelism, _ match {
-            case (AdapterResponseBundle(downloadedImage, _, _), _) =>
-              downloadedImage.image.id.canonicalId
-          })
+            case (_, msg) => msg.messageId()
+          }, allowClosedSubstreamRecreation = true)
           .groupedWithin(inferrerAdapters.size, maxInferrerWait)
           .map { elements =>
             elements.filter {

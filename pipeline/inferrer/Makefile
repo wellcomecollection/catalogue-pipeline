@@ -20,7 +20,7 @@ TEST_OVERRIDE := feature_inferrer feature_training palette_inferrer
 
 inference_manager-test: feature_inferrer-build palette_inferrer-build
 
-inference_manager-integration-only:
+inference_manager-integration-only: feature_inferrer-build palette_inferrer-build
 	$(ROOT)/docker_run.py --dind --sbt --root -- \
 		--net host \
 		wellcome/sbt_wrapper \

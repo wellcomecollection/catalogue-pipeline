@@ -93,6 +93,43 @@ class InferenceManagerWorkerServiceTest
     }
   }
 
+  it("correctly handles messages that are received more than once") {
+    withResponsesAndFixtures(
+      inferrer = req =>
+        if (req.contains("feature_inferrer")) {
+          Some(Responses.featureInferrer)
+        } else if (req.contains("palette_inferrer")) {
+          Some(Responses.paletteInferrer)
+        } else None,
+      images = _ => Some(Responses.image)
+    ) {
+      case (QueuePair(queue, dlq), messageSender, _, _) =>
+        val image = createIdentifiedMergedImageWith()
+        (1 to 3).foreach(_ => sendMessage(queue, image))
+        eventually {
+          assertQueueEmpty(queue)
+          assertQueueEmpty(dlq)
+
+          forAll(messageSender.getMessages[AugmentedImage]) { image =>
+            inside(image) {
+              case AugmentedImage(_, _, _, _, inferredData) =>
+                inside(inferredData.value) {
+                  case InferredData(
+                      features1,
+                      features2,
+                      lshEncodedFeatures,
+                      palette) =>
+                    features1 should have length 2048
+                    features2 should have length 2048
+                    every(lshEncodedFeatures) should fullyMatch regex """(\d+)-(\d+)"""
+                    every(palette) should fullyMatch regex """\d+"""
+                }
+            }
+          }
+        }
+    }
+  }
+
   it("places images that fail inference on the DLQ") {
     val image404 = createIdentifiedMergedImageWith(
       location = createDigitalLocationWith(url = "lost_image")
