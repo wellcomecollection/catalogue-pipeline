@@ -88,7 +88,8 @@ lazy val id_minter = setupProject(
 lazy val ingestor_common = setupProject(
   project,
   "pipeline/ingestor/ingestor_common",
-  localDependencies = Seq(elasticsearch_typesafe, big_messaging_typesafe, pipeline_storage),
+  localDependencies =
+    Seq(elasticsearch_typesafe, big_messaging_typesafe, pipeline_storage),
   externalDependencies = CatalogueDependencies.ingestorDependencies
 )
 
@@ -125,7 +126,8 @@ lazy val relation_embedder = setupProject(
   project,
   "pipeline/relation_embedder",
   localDependencies = Seq(internal_model, elasticsearch),
-  externalDependencies = CatalogueDependencies.relationEmbedderDependencies)
+  externalDependencies = CatalogueDependencies.relationEmbedderDependencies
+)
 
 lazy val recorder = setupProject(
   project,
