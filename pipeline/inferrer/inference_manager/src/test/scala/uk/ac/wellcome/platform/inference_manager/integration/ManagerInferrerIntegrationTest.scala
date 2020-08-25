@@ -18,7 +18,8 @@ import uk.ac.wellcome.models.work.generators.ImageGenerators
 import uk.ac.wellcome.models.work.internal.{AugmentedImage, InferredData}
 import uk.ac.wellcome.platform.inference_manager.adapters.{
   FeatureVectorInferrerAdapter,
-  InferrerAdapter
+  InferrerAdapter,
+  PaletteInferrerAdapter
 }
 import uk.ac.wellcome.platform.inference_manager.fixtures.InferenceManagerWorkerServiceFixture
 import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
@@ -47,7 +48,7 @@ class ManagerInferrerIntegrationTest
         // This is (more than) enough time for the inferrer to have
         // done its prestart work and be ready to use
         eventually(Timeout(scaled(90 seconds))) {
-          inferrerIsHealthy shouldBe true
+          inferrersAreHealthy shouldBe true
         }
 
         val image = createIdentifiedMergedImageWith(
@@ -72,26 +73,33 @@ class ManagerInferrerIntegrationTest
                     features1,
                     features2,
                     lshEncodedFeatures,
-                    _) =>
+                    palette) =>
                   features1 should have length 2048
                   features2 should have length 2048
                   forAll(features1 ++ features2) { _.isNaN shouldBe false }
                   every(lshEncodedFeatures) should fullyMatch regex """(\d+)-(\d+)"""
+                  every(palette) should fullyMatch regex """\d+"""
               }
           }
         }
     }
   }
 
-  val localInferrerPort = 3141
+  val localInferrerPorts: Map[String, Int] = Map(
+    "feature" -> 3141,
+    "palette" -> 3142
+  )
   val localImageServerPort = 2718
 
-  def inferrerIsHealthy: Boolean = {
-    val source =
-      Source.fromURL(s"http://localhost:$localInferrerPort/healthcheck")
-    try source.mkString.nonEmpty
-    catch { case _: Exception => false } finally source.close()
-  }
+  def inferrersAreHealthy: Boolean =
+    localInferrerPorts.values.forall { port =>
+      val source =
+        Source.fromURL(s"http://localhost:$port/healthcheck")
+      try source.mkString.nonEmpty
+      catch {
+        case _: Exception => false
+      } finally source.close()
+    }
 
   def withWorkerServiceFixtures[R](
     testWith: TestWith[(QueuePair, MemoryMessageSender, File), R]): R =
@@ -105,7 +113,15 @@ class ManagerInferrerIntegrationTest
         withWorkerService(
           queuePair.queue,
           messageSender,
-          new FeatureVectorInferrerAdapter("localhost", localInferrerPort),
+          adapters = Set(
+            new FeatureVectorInferrerAdapter(
+              "localhost",
+              localInferrerPorts("feature")),
+            new PaletteInferrerAdapter(
+              "localhost",
+              localInferrerPorts("palette")
+            ),
+          ),
           fileWriter = new DefaultFileWriter(root.getPath),
           inferrerRequestPool =
             Http().superPool[((DownloadedImage, InferrerAdapter), Message)](),

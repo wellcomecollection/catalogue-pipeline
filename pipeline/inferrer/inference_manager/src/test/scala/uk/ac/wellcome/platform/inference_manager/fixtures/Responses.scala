@@ -21,6 +21,17 @@ object Responses {
     }""".stripMargin
   )
 
+  def paletteInferrer: HttpResponse = json(
+    s"""{
+       "palette": [${randomPaletteVector
+      .map(str => s""""${str}"""")
+      .mkString(", ")}]
+       }"""
+  )
+
+  def randomPaletteVector: List[String] =
+    List.fill(100)(List.fill(3)(Random.nextInt(10)).mkString(""))
+
   def randomFeatureVector: List[Float] = List.fill(4096)(Random.nextFloat)
 
   def randomLshVector: List[String] =

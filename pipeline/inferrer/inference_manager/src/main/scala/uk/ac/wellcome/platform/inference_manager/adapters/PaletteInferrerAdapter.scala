@@ -15,7 +15,7 @@ class PaletteInferrerAdapter(host: String, port: Int) extends InferrerAdapter {
   def createRequest(image: DownloadedImage): HttpRequest =
     HttpRequest(
       method = HttpMethods.GET,
-      uri = Uri("/palette")
+      uri = Uri("/palette/")
         .withQuery(
           Uri.Query(
             "image_url" -> Uri

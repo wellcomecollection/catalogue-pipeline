@@ -26,7 +26,7 @@ trait InferenceManagerWorkerServiceFixture
   def withWorkerService[R](
     queue: Queue,
     messageSender: MemoryMessageSender,
-    adapter: InferrerAdapter,
+    adapters: Set[InferrerAdapter],
     fileWriter: FileWriter,
     inferrerRequestPool: RequestPoolFlow[(DownloadedImage, InferrerAdapter),
                                          Message],
@@ -40,7 +40,7 @@ trait InferenceManagerWorkerServiceFixture
           val workerService = new InferenceManagerWorkerService(
             msgStream = msgStream,
             messageSender = messageSender,
-            inferrerAdapters = Set(adapter),
+            inferrerAdapters = adapters,
             imageDownloader = new ImageDownloader(
               root = fileRoot,
               fileWriter = fileWriter,

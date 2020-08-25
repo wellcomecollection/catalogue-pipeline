@@ -14,7 +14,8 @@ import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.ImageGenerators
 import uk.ac.wellcome.platform.inference_manager.adapters.{
   FeatureVectorInferrerAdapter,
-  InferrerAdapter
+  InferrerAdapter,
+  PaletteInferrerAdapter
 }
 import uk.ac.wellcome.platform.inference_manager.fixtures.{
   InferenceManagerWorkerServiceFixture,
@@ -41,8 +42,14 @@ class InferenceManagerWorkerServiceTest
   it(
     "reads image messages, augments them with the inferrer, and sends them to SNS") {
     withResponsesAndFixtures(
-      inferrer = _ => Some(Responses.featureInferrer),
-      images = _ => Some(Responses.image)) {
+      inferrer = req =>
+        if (req.contains("feature_inferrer")) {
+          Some(Responses.featureInferrer)
+        } else if (req.contains("palette_inferrer")) {
+          Some(Responses.paletteInferrer)
+        } else None,
+      images = _ => Some(Responses.image)
+    ) {
       case (QueuePair(queue, dlq), messageSender, _, _) =>
         val image = createIdentifiedMergedImageWith()
         sendMessage(queue, image)
@@ -60,10 +67,11 @@ class InferenceManagerWorkerServiceTest
                     features1,
                     features2,
                     lshEncodedFeatures,
-                    _) =>
+                    palette) =>
                   features1 should have length 2048
                   features2 should have length 2048
                   every(lshEncodedFeatures) should fullyMatch regex """(\d+)-(\d+)"""
+                  every(palette) should fullyMatch regex """\d+"""
               }
           }
         }
@@ -157,7 +165,10 @@ class InferenceManagerWorkerServiceTest
       withWorkerService(
         queue = queuePair.queue,
         messageSender = messageSender,
-        adapter = new FeatureVectorInferrerAdapter("feature_inferrer", 80),
+        adapters = Set(
+          new FeatureVectorInferrerAdapter("feature_inferrer", 80),
+          new PaletteInferrerAdapter("palette_inferrer", 80),
+        ),
         fileWriter = fileWriter,
         inferrerRequestPool = inferrerRequestPool,
         imageRequestPool = imageRequestPool
