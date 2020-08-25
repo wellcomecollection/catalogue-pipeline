@@ -18,7 +18,7 @@ shared_infra/.releases
 .pytest-cache
 .pytest_cache
 
-# Files which are encrypted before they're sent to Travis
+# Files which could contain secrets we do not want in the repo
 secrets
 secrets.zip
 id_rsa
