@@ -24,7 +24,7 @@ import scala.util.{Failure, Success, Try}
 case class AdapterResponseBundle[ImageType](
   image: ImageType,
   adapter: InferrerAdapter,
-  response: InferrerResponse
+  response: Try[InferrerResponse]
 )
 
 class InferenceManagerWorkerService[Destination](
@@ -82,10 +82,11 @@ class InferenceManagerWorkerService[Destination](
         case (Success(response), (image, adapter)) =>
           adapter
             .parseResponse(response)
+            .map(Success(_))
             .recover {
               case e: Exception =>
                 response.discardEntityBytes()
-                throw e
+                Failure(e)
             }
             .map { response =>
               AdapterResponseBundle(
@@ -108,18 +109,26 @@ class InferenceManagerWorkerService[Destination](
           })
           .groupedWithin(inferrerAdapters.size, maxInferrerWait)
           .map { elements =>
+            elements.filter {
+              case (AdapterResponseBundle(_, _, Failure(_)), _) => false
+              case _                                            => true
+            }
+          }
+          .map { elements =>
             if (elements.size != inferrerAdapters.size) {
               val failedInferrers =
                 inferrerAdapters.map(_.getClass.getSimpleName) --
                   elements.map(_._1.adapter.getClass.getSimpleName).toSet
               throw new Exception(
-                s"Did not receive responses from all $failedInferrers within $maxInferrerWait")
+                s"Did not receive responses from $failedInferrers within $maxInferrerWait")
             }
             elements
           }
           .map { elements =>
             val inferredData = elements.foldLeft(InferredData.empty) {
-              case (data, (AdapterResponseBundle(_, adapter, response), _)) =>
+              case (
+                  data,
+                  (AdapterResponseBundle(_, adapter, Success(response)), _)) =>
                 adapter.augment(data, response.asInstanceOf[adapter.Response])
             }
             elements.head match {
