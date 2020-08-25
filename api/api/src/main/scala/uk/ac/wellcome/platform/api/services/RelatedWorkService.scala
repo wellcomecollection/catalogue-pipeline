@@ -24,9 +24,9 @@ class RelatedWorkService(elasticsearchService: ElasticsearchService)(
   implicit ec: ExecutionContext)
     extends Tracing {
 
-  type PathToken = Either[Int, String]
-
   type TokenizedPath = List[PathToken]
+  type PathToken = List[PathTokenPart]
+  type PathTokenPart = Either[Int, String]
 
   def retrieveRelatedWorks(index: Index,
                            work: IdentifiedWork): Future[Result[RelatedWorks]] =
@@ -83,7 +83,13 @@ class RelatedWorkService(elasticsearchService: ElasticsearchService)(
 
   private def tokenizePath(path: String): TokenizedPath =
     path.split("/").toList.map { str =>
-      Try(str.toInt).map(Left(_)).getOrElse(Right(str))
+      """\d+|\D+"""
+        .r
+        .findAllIn(str)
+        .toList
+        .map { token =>
+          Try(token.toInt).map(Left(_)).getOrElse(Right(token))
+        }
     }
 
   private def tokenizePath(work: IdentifiedWork): Option[TokenizedPath] =
@@ -110,7 +116,24 @@ class RelatedWorkService(elasticsearchService: ElasticsearchService)(
 
   implicit val pathTokenOrdering: Ordering[PathToken] =
     new Ordering[PathToken] {
+      @tailrec
       override def compare(a: PathToken, b: PathToken): Int =
+        (a, b) match {
+          case (Nil, Nil)   => 0
+          case (Nil, _)   => 1
+          case (_, Nil)   => -1
+          case (aHead :: aTail, bHead :: bTail) =>
+            val comparison = pathTokenPartOrdering.compare(aHead, bHead)
+            if (comparison == 0)
+              compare(aTail, bTail)
+            else
+              comparison
+        }
+    }
+
+  implicit val pathTokenPartOrdering: Ordering[PathTokenPart] =
+    new Ordering[PathTokenPart] {
+      override def compare(a: PathTokenPart, b: PathTokenPart): Int =
         (a, b) match {
           case (Left(a), Left(b))   => a.compareTo(b)
           case (Right(a), Right(b)) => a.compareTo(b)

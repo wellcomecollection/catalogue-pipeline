@@ -155,4 +155,25 @@ class RelatedWorkServiceTest
       }
     }
   }
+
+  it(
+    "Sorts works consisting of paths with an alphanumeric mixture of tokens") {
+    withLocalWorksIndex { index =>
+      val workA = work("a", CollectionLevel.Collection)
+      val workB1 = work("a/B1", CollectionLevel.Series)
+      val workB2 = work("a/B2", CollectionLevel.Item)
+      val workB10 = work("a/B10", CollectionLevel.Item)
+      storeWorks(index, List(workA, workB2, workB1, workB10))
+      whenReady(service.retrieveRelatedWorks(index, workA)) { result =>
+        result shouldBe Right(
+          RelatedWorks(
+            parts = List(workB1, workB2, workB10),
+            partOf = Nil,
+            precededBy = Nil,
+            succeededBy = Nil,
+          )
+        )
+      }
+    }
+  }
 }
