@@ -108,6 +108,16 @@ class InferenceManagerWorkerService[Destination](
           })
           .groupedWithin(inferrerAdapters.size, maxInferrerWait)
           .map { elements =>
+            if (elements.size != inferrerAdapters.size) {
+              val failedInferrers =
+                inferrerAdapters.map(_.getClass.getSimpleName) --
+                  elements.map(_._1.adapter.getClass.getSimpleName).toSet
+              throw new Exception(
+                s"Did not receive responses from all $failedInferrers within $maxInferrerWait")
+            }
+            elements
+          }
+          .map { elements =>
             val inferredData = elements.foldLeft(InferredData.empty) {
               case (data, (AdapterResponseBundle(_, adapter, response), _)) =>
                 adapter.augment(data, response.asInstanceOf[adapter.Response])
