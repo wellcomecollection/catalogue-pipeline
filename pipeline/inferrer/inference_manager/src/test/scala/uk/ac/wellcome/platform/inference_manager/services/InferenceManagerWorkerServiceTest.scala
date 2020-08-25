@@ -41,38 +41,53 @@ class InferenceManagerWorkerServiceTest
 
   it(
     "reads image messages, augments them with the inferrers, and sends them to SNS") {
+    val images = (1 to 5)
+      .map(_ => createIdentifiedMergedImageWith())
+      .map(image => image.id -> image)
+      .toMap
     withResponsesAndFixtures(
       inferrer = req =>
-        if (req.contains("feature_inferrer")) {
-          Some(Responses.featureInferrer)
-        } else if (req.contains("palette_inferrer")) {
-          Some(Responses.paletteInferrer)
-        } else None,
+        images.keys
+          .map(_.canonicalId)
+          .find(req.contains(_))
+          .flatMap { id =>
+            if (req.contains("feature_inferrer")) {
+              // Using the ID to seed the random generators means we can make
+              // sure that collected responses are correctly matched to the
+              // images upon which the inference was performed
+              Some(Responses.featureInferrerDeterministic(id.hashCode))
+            } else if (req.contains("palette_inferrer")) {
+              Some(Responses.paletteInferrerDeterministic(id.hashCode))
+            } else None
+        },
       images = _ => Some(Responses.image)
     ) {
       case (QueuePair(queue, dlq), messageSender, _, _) =>
-        val image = createIdentifiedMergedImageWith()
-        sendMessage(queue, image)
+        images.values.foreach(image => sendMessage(queue, image))
         eventually {
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          val augmentedWork = messageSender.getMessages[AugmentedImage].head
-
-          inside(augmentedWork) {
-            case AugmentedImage(id, _, _, _, inferredData) =>
-              id should be(image.id)
-              inside(inferredData.value) {
-                case InferredData(
-                    features1,
-                    features2,
-                    lshEncodedFeatures,
-                    palette) =>
-                  features1 should have length 2048
-                  features2 should have length 2048
-                  every(lshEncodedFeatures) should fullyMatch regex """(\d+)-(\d+)"""
-                  every(palette) should fullyMatch regex """\d+"""
-              }
+          forAll(messageSender.getMessages[AugmentedImage]) { image =>
+            inside(image) {
+              case AugmentedImage(id, _, _, _, inferredData) =>
+                images should contain key id
+                val seed = id.canonicalId.hashCode
+                inside(inferredData.value) {
+                  case InferredData(
+                      features1,
+                      features2,
+                      lshEncodedFeatures,
+                      palette) =>
+                    val featureVector =
+                      Responses.randomFeatureVector(seed)
+                    features1 should be(featureVector.slice(0, 2048))
+                    features2 should be(featureVector.slice(2048, 4096))
+                    lshEncodedFeatures should be(
+                      Responses.randomLshVector(seed))
+                    palette should be(Responses.randomPaletteVector(seed))
+                }
+            }
           }
         }
     }

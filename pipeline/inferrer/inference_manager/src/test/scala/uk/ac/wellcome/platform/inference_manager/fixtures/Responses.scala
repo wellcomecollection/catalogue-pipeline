@@ -12,30 +12,40 @@ import akka.http.scaladsl.model.{
 import scala.util.Random
 
 object Responses {
-  def featureInferrer: HttpResponse = json(
+  def featureInferrerDeterministic(seed: Int): HttpResponse = json(
     s"""{
-      "features_b64": "${Encoding.toLittleEndianBase64(randomFeatureVector)}",
-      "lsh_encoded_features": [${randomLshVector
+      "features_b64": "${Encoding.toLittleEndianBase64(
+         randomFeatureVector(seed))}",
+      "lsh_encoded_features": [${randomLshVector(seed)
          .map(str => s""""${str}"""")
          .mkString(", ")}]
     }""".stripMargin
   )
 
-  def paletteInferrer: HttpResponse = json(
+  def featureInferrer: HttpResponse =
+    featureInferrerDeterministic(Random.nextInt())
+
+  def paletteInferrerDeterministic(seed: Int): HttpResponse = json(
     s"""{
-       "palette": [${randomPaletteVector
+       "palette": [${randomPaletteVector(seed)
       .map(str => s""""${str}"""")
       .mkString(", ")}]
        }"""
   )
 
-  def randomPaletteVector: List[String] =
-    List.fill(25)(List.fill(3)(Random.nextInt(10)).mkString(""))
+  def paletteInferrer: HttpResponse =
+    paletteInferrerDeterministic(Random.nextInt())
 
-  def randomFeatureVector: List[Float] = List.fill(4096)(Random.nextFloat)
+  def randomPaletteVector(seed: Int): List[String] =
+    List.fill(25)(List.fill(3)(new Random(seed).nextInt(10)).mkString(""))
 
-  def randomLshVector: List[String] =
-    List.fill(256)(s"${Random.nextInt(256)}-${Random.nextInt(32)}")
+  def randomFeatureVector(seed: Int): List[Float] =
+    List.fill(4096)(new Random(seed).nextFloat)
+
+  def randomLshVector(seed: Int): List[String] = {
+    val random = new Random(seed)
+    List.fill(256)(s"${random.nextInt(256)}-${random.nextInt(32)}")
+  }
 
   def json(json: String): HttpResponse =
     HttpResponse(
@@ -46,9 +56,9 @@ object Responses {
       )
     )
 
-  def randomImageBytes: Array[Byte] = {
+  def randomImageBytes(random: Random = Random): Array[Byte] = {
     val arr = Array.fill(32)(0x00.toByte)
-    Random.nextBytes(arr)
+    random.nextBytes(arr)
     arr
   }
 
@@ -57,7 +67,7 @@ object Responses {
       status = StatusCodes.OK,
       entity = HttpEntity.apply(
         contentType = ContentType(MediaTypes.`image/jpeg`),
-        bytes = randomImageBytes
+        bytes = randomImageBytes()
       )
     )
 
