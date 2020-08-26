@@ -1,12 +1,15 @@
 locals {
-  inferrer_host = "localhost"
-  inferrer_port = 80
+  feature_inferrer_port = 3141
+  palette_inferrer_port = 3142
   //  High inferrer throughput comes at the cost of the latency distribution
   // having heavy tails - this stops some unfortunate messages from being
   // put on the DLQ when they are consumed but not processed.
   queue_visibility_timeout = 60
   shared_storage_name      = "shared_storage"
   shared_storage_path      = "/data"
+
+  total_cpu    = 3584
+  total_memory = 7000
 }
 
 module "image_inferrer_queue" {
@@ -59,9 +62,10 @@ module "image_inferrer" {
   apps = {
     feature_inferrer = {
       image  = local.feature_inferrer_image
-      cpu    = 3584
-      memory = 7000
+      cpu    = floor(0.75 * local.total_cpu)
+      memory = floor(0.75 * local.total_memory)
       env_vars = {
+        PORT              = local.feature_inferrer_port
         MODEL_OBJECT_KEY  = data.aws_ssm_parameter.inferrer_lsh_model_key.value
         MODEL_DATA_BUCKET = var.inferrer_model_data_bucket_name
       }
@@ -71,7 +75,27 @@ module "image_inferrer" {
         sourceVolume  = local.shared_storage_name
       }]
       healthcheck = {
-        command     = ["CMD-SHELL", "curl -f http://localhost:${local.inferrer_port}/healthcheck"],
+        command     = ["CMD-SHELL", "curl -f http://localhost:${local.feature_inferrer_port}/healthcheck"],
+        interval    = 30,
+        retries     = 3,
+        startPeriod = 30,
+        timeout     = 5
+      }
+    }
+    palette_inferrer = {
+      image  = local.palette_inferrer_image
+      cpu    = floor(0.25 * local.total_cpu)
+      memory = floor(0.25 * local.total_memory)
+      env_vars = {
+        PORT = local.palette_inferrer_port
+      }
+      secret_env_vars = {}
+      mount_points = [{
+        containerPath = local.shared_storage_path,
+        sourceVolume  = local.shared_storage_name
+      }]
+      healthcheck = {
+        command     = ["CMD-SHELL", "curl -f http://localhost:${local.palette_inferrer_port}/healthcheck"],
         interval    = 30,
         retries     = 3,
         startPeriod = 30,
@@ -81,13 +105,15 @@ module "image_inferrer" {
   }
 
   manager_env_vars = {
-    inferrer_host        = local.inferrer_host
-    inferrer_port        = local.inferrer_port
-    metrics_namespace    = "${local.namespace_hyphen}_image_inferrer"
-    topic_arn            = module.image_inferrer_topic.arn
-    messages_bucket_name = aws_s3_bucket.messages.id
-    queue_url            = module.image_inferrer_queue.url
-    images_root          = local.shared_storage_path
+    feature_inferrer_host = "localhost"
+    feature_inferrer_port = local.feature_inferrer_port
+    palette_inferrer_host = "localhost"
+    palette_inferrer_port = local.palette_inferrer_port
+    metrics_namespace     = "${local.namespace_hyphen}_image_inferrer"
+    topic_arn             = module.image_inferrer_topic.arn
+    messages_bucket_name  = aws_s3_bucket.messages.id
+    queue_url             = module.image_inferrer_queue.url
+    images_root           = local.shared_storage_path
   }
 
   subnets = var.subnets
