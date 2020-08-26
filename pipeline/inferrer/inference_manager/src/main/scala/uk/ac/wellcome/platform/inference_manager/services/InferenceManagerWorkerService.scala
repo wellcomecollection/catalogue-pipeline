@@ -142,7 +142,7 @@ class InferenceManagerWorkerService[Destination](
                 (image.augment(Some(inferredData)), ctx)
             }
           }
-          .mergeSubstreams
+          .mergeSubstreamsWithParallelism(parallelism)
       }
 
   private def sendAugmented[Ctx] =
