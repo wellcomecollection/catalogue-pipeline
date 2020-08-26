@@ -17,9 +17,7 @@ logger.info("Starting API")
 app = FastAPI(title="Palette extractor", description="extracts palettes")
 logger.info("API started, awaiting requests")
 
-batch_inferrer_queue = BatchExecutionQueue(
-    palette_encoder, batch_size=4, timeout=0.5
-)
+batch_inferrer_queue = BatchExecutionQueue(palette_encoder, batch_size=4, timeout=0.5)
 
 
 @app.get("/palette/")
