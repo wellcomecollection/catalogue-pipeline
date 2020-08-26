@@ -19,7 +19,7 @@ module "image_inferrer_queue" {
 }
 
 module "image_inferrer" {
-  source = "../modules/service_with_manager"
+  source = "../modules/services_with_manager"
 
   service_name = "${local.namespace_hyphen}_image_inferrer"
   security_group_ids = [
@@ -56,21 +56,29 @@ module "image_inferrer" {
     sourceVolume  = local.shared_storage_name
   }]
 
-  app_container_name  = "inferrer"
-  app_container_image = local.feature_inferrer_image
-  app_cpu             = 3584
-  app_memory          = 7000
-  app_healthcheck = {
-    command     = ["CMD-SHELL", "curl -f http://localhost:${local.inferrer_port}/healthcheck"],
-    interval    = 30,
-    retries     = 3,
-    startPeriod = 30,
-    timeout     = 5
+  apps = {
+    feature_inferrer = {
+      image  = local.feature_inferrer_image
+      cpu    = 3584
+      memory = 7000
+      env_vars = {
+        MODEL_OBJECT_KEY  = data.aws_ssm_parameter.inferrer_lsh_model_key.value
+        MODEL_DATA_BUCKET = var.inferrer_model_data_bucket_name
+      }
+      secret_env_vars = {}
+      mount_points = [{
+        containerPath = local.shared_storage_path,
+        sourceVolume  = local.shared_storage_name
+      }]
+      healthcheck = {
+        command     = ["CMD-SHELL", "curl -f http://localhost:${local.inferrer_port}/healthcheck"],
+        interval    = 30,
+        retries     = 3,
+        startPeriod = 30,
+        timeout     = 5
+      }
+    }
   }
-  app_mount_points = [{
-    containerPath = local.shared_storage_path,
-    sourceVolume  = local.shared_storage_name
-  }]
 
   manager_env_vars = {
     inferrer_host        = local.inferrer_host
@@ -80,10 +88,6 @@ module "image_inferrer" {
     messages_bucket_name = aws_s3_bucket.messages.id
     queue_url            = module.image_inferrer_queue.url
     images_root          = local.shared_storage_path
-  }
-  app_env_vars = {
-    MODEL_OBJECT_KEY  = data.aws_ssm_parameter.inferrer_lsh_model_key.value
-    MODEL_DATA_BUCKET = var.inferrer_model_data_bucket_name
   }
 
   subnets = var.subnets

@@ -19,16 +19,6 @@ variable "subnets" {
   type = list(string)
 }
 
-variable "app_env_vars" {
-  type    = map(string)
-  default = {}
-}
-
-variable "app_secret_env_vars" {
-  type    = map(string)
-  default = {}
-}
-
 variable "desired_task_count" {
   type    = number
   default = 1
@@ -64,22 +54,19 @@ variable "security_group_ids" {
   default = []
 }
 
-variable "app_image" {
-  type = string
-}
-
-variable "app_name" {
-  type = string
-}
-
-variable "app_cpu" {
-  type    = number
-  default = 512
-}
-
-variable "app_memory" {
-  type    = number
-  default = 1024
+variable "apps" {
+  type = map(object({
+    image           = string,
+    env_vars        = map(string),
+    secret_env_vars = map(string),
+    cpu             = number,
+    memory          = number,
+    healthcheck     = any,
+    mount_points = list(object({
+      containerPath = string,
+      sourceVolume  = string
+    }))
+  }))
 }
 
 variable "sidecar_image" {
@@ -110,11 +97,6 @@ variable "sidecar_memory" {
   default = 1024
 }
 
-variable "app_healthcheck" {
-  type    = any
-  default = null
-}
-
 variable "launch_type" {
   type    = string
   default = "FARGATE"
@@ -140,14 +122,6 @@ variable "volumes" {
   type = list(object({
     name      = string
     host_path = string
-  }))
-  default = []
-}
-
-variable "app_mount_points" {
-  type = list(object({
-    containerPath = string
-    sourceVolume  = string
   }))
   default = []
 }
