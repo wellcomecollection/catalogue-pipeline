@@ -29,7 +29,7 @@ inference_manager-integration-only: feature_inferrer-build palette_inferrer-buil
 feature_inferrer-test: feature_inferrer-build
 	$(ROOT)/docker_run.py --dind -- \
 		feature_inferrer \
-		python -m unittest discover -s /app/test
+		python -m unittest discover -s .
 	$(MAKE) inference_manager-integration-only
 
 feature_training-test: feature_training-build
@@ -39,7 +39,7 @@ feature_training-test: feature_training-build
 palette_inferrer-test: palette_inferrer-build
 	$(ROOT)/docker_run.py --dind -- \
     		palette_inferrer \
-    		python -m unittest discover -s /app/test
+    		python -m unittest discover -s .
 	$(MAKE) inference_manager-integration-only
 
 $(val $(call stack_setup))
