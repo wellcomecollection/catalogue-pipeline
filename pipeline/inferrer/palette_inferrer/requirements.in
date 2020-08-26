@@ -3,4 +3,4 @@ gunicorn==20.0.4
 numpy==1.18.1
 scikit-learn[alldeps]==0.19.2
 uvicorn==0.11.7
-weco-datascience==0.1.2
+weco-datascience==0.1.3

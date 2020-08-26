@@ -8,4 +8,4 @@ scikit-learn[alldeps]==0.19.2
 torch==1.4.0
 torchvision==0.5.0
 uvicorn==0.11.3
-weco_datascience==0.1.2
+weco_datascience==0.1.3
