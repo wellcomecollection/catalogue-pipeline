@@ -7,18 +7,13 @@ import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.models.work.internal.{
-  AugmentedImage,
-  Identified,
-  MergedImage,
-  Minted
-}
+import uk.ac.wellcome.models.work.internal.{Identified, MergedImage, Minted}
+import uk.ac.wellcome.platform.inference_manager.adapters.InferrerAdapter
 import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
 import uk.ac.wellcome.platform.inference_manager.services.{
   FileWriter,
   ImageDownloader,
   InferenceManagerWorkerService,
-  InferrerAdapter,
   MergedIdentifiedImage,
   RequestPoolFlow
 }
@@ -31,9 +26,10 @@ trait InferenceManagerWorkerServiceFixture
   def withWorkerService[R](
     queue: Queue,
     messageSender: MemoryMessageSender,
-    adapter: InferrerAdapter[DownloadedImage, AugmentedImage],
+    adapters: Set[InferrerAdapter],
     fileWriter: FileWriter,
-    inferrerRequestPool: RequestPoolFlow[DownloadedImage, Message],
+    inferrerRequestPool: RequestPoolFlow[(DownloadedImage, InferrerAdapter),
+                                         Message],
     imageRequestPool: RequestPoolFlow[MergedIdentifiedImage, Message],
     fileRoot: String = "/")(
     testWith: TestWith[InferenceManagerWorkerService[String], R])(
@@ -44,7 +40,7 @@ trait InferenceManagerWorkerServiceFixture
           val workerService = new InferenceManagerWorkerService(
             msgStream = msgStream,
             messageSender = messageSender,
-            inferrerAdapter = adapter,
+            inferrerAdapters = adapters,
             imageDownloader = new ImageDownloader(
               root = fileRoot,
               fileWriter = fileWriter,

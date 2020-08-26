@@ -6,9 +6,13 @@ import com.typesafe.config.Config
 import software.amazon.awssdk.services.sqs.model.Message
 import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
 import uk.ac.wellcome.models.Implicits._
+import uk.ac.wellcome.platform.inference_manager.adapters.{
+  FeatureVectorInferrerAdapter,
+  InferrerAdapter,
+  PaletteInferrerAdapter
+}
 import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
 import uk.ac.wellcome.platform.inference_manager.services.{
-  FeatureVectorInferrerAdapter,
   ImageDownloader,
   InferenceManagerWorkerService,
   MergedIdentifiedImage
@@ -30,25 +34,28 @@ object Main extends WellcomeTypesafeApp {
         .getStringOption("shared.images-root")
         .getOrElse("/tmp")
     )
-    val inferrerAdapter = FeatureVectorInferrerAdapter
+
+    val featureInferrerAdapter = new FeatureVectorInferrerAdapter(
+      config.getString("inferrer.feature.host"),
+      config.getInt("inferrer.feature.port")
+    )
+    val paletteInferrerAdapter = new PaletteInferrerAdapter(
+      config.getString("inferrer.palette.host"),
+      config.getInt("inferrer.palette.port")
+    )
 
     val inferrerClientFlow =
-      Http()
-        .cachedHostConnectionPool[(DownloadedImage, Message)](
-          config
-            .getStringOption("inferrer.host")
-            .getOrElse("localhost"),
-          config
-            .getIntOption("inferrer.port")
-            .getOrElse(80)
-        )
+      Http().superPool[((DownloadedImage, InferrerAdapter), Message)]()
 
     new InferenceManagerWorkerService(
       msgStream = BigMessagingBuilder
         .buildMessageStream[MergedIdentifiedImage](config),
       messageSender = BigMessagingBuilder.buildBigMessageSender(config),
       imageDownloader = imageDownloader,
-      inferrerAdapter = inferrerAdapter,
+      inferrerAdapters = Set(
+        featureInferrerAdapter,
+        paletteInferrerAdapter
+      ),
       requestPool = inferrerClientFlow
     )
   }

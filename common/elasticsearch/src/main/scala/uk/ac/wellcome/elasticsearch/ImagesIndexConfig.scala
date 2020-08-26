@@ -12,7 +12,8 @@ case object ImagesIndexConfig extends IndexConfig {
   val inferredData = objectField("inferredData").fields(
     denseVectorField("features1", 2048),
     denseVectorField("features2", 2048),
-    keywordField("lshEncodedFeatures"))
+    keywordField("lshEncodedFeatures"),
+    keywordField("palette"))
 
   private def sourceWork(canonicalWork: String): ObjectField =
     objectField(canonicalWork).fields(
