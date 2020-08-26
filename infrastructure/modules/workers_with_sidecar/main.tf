@@ -1,6 +1,12 @@
 locals {
   # Override the default service name if requested
-  deployment_service_name = var.deployment_service_name == "" ? var.name : var.deployment_service_name
+  deployment_service_name   = var.deployment_service_name == "" ? var.name : var.deployment_service_name
+  all_secret_env_vars       = merge(values(var.apps)[*].secret_env_vars...)
+  app_container_definitions = values(module.app_container)[*].container_definition
+  other_container_definitions = [
+    module.log_router_container.container_definition,
+    module.sidecar_container.container_definition
+  ]
 }
 
 module "service" {
@@ -45,36 +51,33 @@ module "task_definition" {
   launch_types = [var.launch_type]
   task_name    = var.name
 
-  container_definitions = [
-    module.log_router_container.container_definition,
-    module.app_container.container_definition,
-    module.sidecar_container.container_definition
-  ]
-  volumes = var.volumes
+  container_definitions = concat(local.app_container_definitions, local.other_container_definitions)
+  volumes               = var.volumes
 }
 
 module "app_container" {
-  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/container_definition?ref=v3.1.0"
+  source   = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/container_definition?ref=v3.1.0"
+  for_each = var.apps
 
-  name  = var.name
-  image = var.app_image
+  name  = each.key
+  image = each.value.image
 
-  cpu    = var.app_cpu
-  memory = var.app_memory
+  cpu    = each.value.cpu
+  memory = each.value.memory
 
-  environment = var.app_env_vars
-  secrets     = var.app_secret_env_vars
+  environment = each.value.env_vars
+  secrets     = each.value.secret_env_vars
 
-  healthcheck = var.app_healthcheck
+  healthcheck = each.value.healthcheck
 
   log_configuration = module.log_router_container.container_log_configuration
 
-  mount_points = var.app_mount_points
+  mount_points = each.value.mount_points
 }
 
 module "app_permissions" {
   source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v3.1.0"
-  secrets   = var.app_secret_env_vars
+  secrets   = local.all_secret_env_vars
   role_name = module.task_definition.task_execution_role_name
 }
 
@@ -90,10 +93,10 @@ module "sidecar_container" {
   environment = var.sidecar_env_vars
   secrets     = var.sidecar_secret_env_vars
 
-  depends = var.app_healthcheck == null ? [] : [{
-    containerName = var.name
+  depends = [for name, app in var.apps : {
+    containerName = name
     condition     = "HEALTHY"
-  }]
+  } if app.healthcheck != null]
 
   log_configuration = module.log_router_container.container_log_configuration
 

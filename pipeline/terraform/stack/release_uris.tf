@@ -8,18 +8,13 @@ locals {
     "inference_manager",
     "feature_inferrer",
     "feature_training",
+    "palette_inferrer",
     "recorder",
     "transformer_miro",
     "transformer_mets",
     "transformer_sierra",
     "transformer_calm",
   ]
-}
-
-data "aws_ssm_parameter" "image_ids" {
-  count = length(local.services)
-
-  name = "/catalogue_pipeline/images/${var.release_label}/${local.services[count.index]}"
 }
 
 data "aws_ssm_parameter" "inferrer_lsh_model_key" {
@@ -29,7 +24,6 @@ data "aws_ssm_parameter" "inferrer_lsh_model_key" {
 data "aws_ssm_parameter" "latest_lsh_model_key" {
   name = "/catalogue_pipeline/config/models/latest/lsh_model"
 }
-
 
 data "aws_ecr_repository" "service" {
   count = length(local.services)
@@ -47,6 +41,7 @@ locals {
   inference_manager_image  = local.image_ids["inference_manager"]
   feature_inferrer_image   = local.image_ids["feature_inferrer"]
   feature_training_image   = local.image_ids["feature_training"]
+  palette_inferrer_image   = local.image_ids["palette_inferrer"]
   ingestor_works_image     = local.image_ids["ingestor_works"]
   ingestor_images_image    = local.image_ids["ingestor_images"]
   transformer_miro_image   = local.image_ids["transformer_miro"]

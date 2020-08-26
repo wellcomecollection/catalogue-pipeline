@@ -69,14 +69,6 @@ variable "volumes" {
   default = []
 }
 
-variable "app_mount_points" {
-  type = list(object({
-    containerPath = string
-    sourceVolume  = string
-  }))
-  default = []
-}
-
 variable "manager_mount_points" {
   type = list(object({
     containerPath = string
@@ -89,34 +81,19 @@ variable "messages_bucket_arn" {}
 
 variable "queue_read_policy" {}
 
-variable "app_container_image" {}
-
-variable "app_container_name" {
-  type = string
-}
-
-variable "app_env_vars" {
-  type = map(string)
-}
-
-variable "app_secret_env_vars" {
-  type    = map(string)
-  default = {}
-}
-
-variable "app_cpu" {
-  type    = number
-  default = 512
-}
-
-variable "app_memory" {
-  type    = number
-  default = 1024
-}
-
-variable "app_healthcheck" {
-  type    = any
-  default = null
+variable "apps" {
+  type = map(object({
+    image           = string,
+    env_vars        = map(string),
+    secret_env_vars = map(string),
+    cpu             = number,
+    memory          = number,
+    healthcheck     = any,
+    mount_points = list(object({
+      containerPath = string,
+      sourceVolume  = string
+    }))
+  }))
 }
 
 variable "manager_container_image" {}
