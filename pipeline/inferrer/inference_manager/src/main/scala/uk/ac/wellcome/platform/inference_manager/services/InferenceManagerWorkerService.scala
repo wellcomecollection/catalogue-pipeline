@@ -40,6 +40,8 @@ class InferenceManagerWorkerService[Destination](
   val className: String = this.getClass.getSimpleName
   val parallelism = 10
   val maxInferrerWait = 30 seconds
+  val maxOpenRequests = actorSystem.settings.config
+    .getInt("akka.http.host-connection-pool.max-open-requests")
 
   def run(): Future[Done] =
     msgStream.runStream(
@@ -103,7 +105,7 @@ class InferenceManagerWorkerService[Destination](
     FlowWithContext[AdapterResponseBundle[DownloadedImage], Ctx]
       .via {
         Flow[(AdapterResponseBundle[DownloadedImage], Ctx)]
-          .groupBy(parallelism, _ match {
+          .groupBy(maxOpenRequests * inferrerAdapters.size, _ match {
             case (_, msg) => msg.messageId()
           }, allowClosedSubstreamRecreation = true)
           .groupedWithin(inferrerAdapters.size, maxInferrerWait)
