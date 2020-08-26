@@ -75,11 +75,6 @@ class InferenceManagerWorkerService[Destination](
     FlowWithContext[
       (Try[HttpResponse], (DownloadedImage, InferrerAdapter)),
       Ctx]
-      .map {
-        case result @ (_, (image, _)) =>
-          imageDownloader.delete.runWith(Source.single(image))
-          result
-      }
       .mapAsync(parallelism) {
         case (Success(response), (image, adapter)) =>
           adapter
@@ -97,7 +92,8 @@ class InferenceManagerWorkerService[Destination](
                 response
               )
             }
-        case (Failure(exception), _) =>
+        case (Failure(exception), (image, _)) =>
+          imageDownloader.delete.runWith(Source.single(image))
           Future.failed(exception)
       }
 
@@ -109,6 +105,13 @@ class InferenceManagerWorkerService[Destination](
             case (_, msg) => msg.messageId()
           }, allowClosedSubstreamRecreation = true)
           .groupedWithin(inferrerAdapters.size, maxInferrerWait)
+          .map { elements =>
+            elements.foreach {
+              case (AdapterResponseBundle(image, _, _), _) =>
+                imageDownloader.delete.runWith(Source.single(image))
+            }
+            elements
+          }
           .map { elements =>
             elements.filter {
               case (AdapterResponseBundle(_, _, Failure(_)), _) => false
