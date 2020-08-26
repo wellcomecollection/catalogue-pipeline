@@ -9,8 +9,8 @@ class PaletteEncoder:
 
     def get_significant_colours(self, image, p=0.5):
         """
-        extract n significant colours from the image pixels by taking the 
-        centres of n kmeans clusters of the image's pixels arranged in colour 
+        extract n significant colours from the image pixels by taking the
+        centres of n kmeans clusters of the image's pixels arranged in colour
         space.
         The biggest cluster is counted n^p times, the second largest (n-1)^p
         times, ..., and the smallest cluster counted once.
@@ -26,7 +26,7 @@ class PaletteEncoder:
 
     def get_colour_histogram(self, colours, precision):
         """
-        get the bins in which the images' significant colours are found at a 
+        get the bins in which the images' significant colours are found at a
         specified level of precision
         """
         bins = np.linspace(0, 256, precision + 1)

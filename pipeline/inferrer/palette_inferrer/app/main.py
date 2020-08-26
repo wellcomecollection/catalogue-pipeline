@@ -1,5 +1,3 @@
-import base64
-
 from fastapi import FastAPI, HTTPException
 from weco_datascience import http
 from weco_datascience.batching import BatchExecutionQueue
