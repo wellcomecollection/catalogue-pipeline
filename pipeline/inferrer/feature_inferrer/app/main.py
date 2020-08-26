@@ -3,8 +3,7 @@ import base64
 from fastapi import FastAPI, HTTPException
 from weco_datascience import http
 from weco_datascience.batching import BatchExecutionQueue
-from weco_datascience.image import (get_image_from_url,
-                                    get_image_url_from_iiif_url)
+from weco_datascience.image import get_image_from_url
 from weco_datascience.logging import get_logger
 
 from src.feature_extraction import extract_features
@@ -37,16 +36,16 @@ batch_inferrer_queue = BatchExecutionQueue(
 
 
 @app.get("/feature-vector/")
-async def main(image_url: str):
+async def main(query_url: str):
     try:
-        image = await get_image_from_url(image_url)
+        image = await get_image_from_url(query_url)
     except ValueError as e:
         error_string = str(e)
         logger.error(error_string)
         raise HTTPException(status_code=404, detail=error_string)
 
     features = await batch_inferrer_queue.execute(image)
-    logger.info(f"extracted features from url: {image_url}")
+    logger.info(f"extracted features from url: {query_url}")
 
     return {
         "features_b64": base64.b64encode(features["vector"]),

@@ -3,8 +3,7 @@ import base64
 from fastapi import FastAPI, HTTPException
 from weco_datascience import http
 from weco_datascience.batching import BatchExecutionQueue
-from weco_datascience.image import (get_image_from_url,
-                                    get_image_url_from_iiif_url)
+from weco_datascience.image import get_image_from_url
 from weco_datascience.logging import get_logger
 
 from .palette_encoder import PaletteEncoder
@@ -30,16 +29,16 @@ batch_inferrer_queue = BatchExecutionQueue(
 
 
 @app.get("/palette/")
-async def main(image_url: str):
+async def main(query_url: str):
     try:
-        image = await get_image_from_url(image_url, size=100)
+        image = await get_image_from_url(query_url, size=100)
     except ValueError as e:
         error_string = str(e)
         logger.error(error_string)
         raise HTTPException(status_code=404, detail=error_string)
 
     palette = await batch_inferrer_queue.execute(image)
-    logger.info(f"extracted palette from url: {image_url}")
+    logger.info(f"extracted palette from url: {query_url}")
 
     return {"palette": palette}
 
