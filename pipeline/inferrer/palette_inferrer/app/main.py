@@ -22,7 +22,9 @@ def batch_infer_palettes(images):
     return [palette_encoder(image) for image in images]
 
 
-batch_inferrer_queue = BatchExecutionQueue(batch_infer_palettes, batch_size=16, timeout=0.5)
+batch_inferrer_queue = BatchExecutionQueue(
+    batch_infer_palettes, batch_size=16, timeout=0.5
+)
 
 
 @app.get("/palette/")
