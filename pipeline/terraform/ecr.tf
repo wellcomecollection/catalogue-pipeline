@@ -50,6 +50,10 @@ resource "aws_ecr_repository" "ecr_repository_feature_training" {
   name = "uk.ac.wellcome/feature_training"
 }
 
+resource "aws_ecr_repository" "ecr_repository_palette_inferrer" {
+  name = "uk.ac.wellcome/palette_inferrer"
+}
+
 resource "aws_ecr_repository" "ecr_repository_ingestor_images" {
   name = "uk.ac.wellcome/ingestor_images"
 }

@@ -29,6 +29,7 @@ steps:
   - command: .buildkite/scripts/run_job.py calm_adapter
   - command: .buildkite/scripts/run_job.py inference_manager
   - command: .buildkite/scripts/run_job.py feature_inferrer --changes-in pipeline/inferrer/feature_inferrer
+  - command: .buildkite/scripts/run_job.py palette_inferrer --changes-in pipeline/inferrer/palette_inferrer
   - command: .buildkite/scripts/run_job.py snapshot_generator
   - wait
   - command: .buildkite/scripts/complete_build.py

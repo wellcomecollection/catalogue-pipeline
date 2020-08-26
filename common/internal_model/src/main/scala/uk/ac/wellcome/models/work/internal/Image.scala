@@ -63,8 +63,13 @@ case class InferredData(
   // ES's dense vector type (max length 2048)
   features1: List[Float],
   features2: List[Float],
-  lshEncodedFeatures: List[String]
+  lshEncodedFeatures: List[String],
+  palette: List[String]
 )
+
+object InferredData {
+  def empty: InferredData = InferredData(Nil, Nil, Nil, Nil)
+}
 
 object UnmergedImage {
   def apply(sourceIdentifier: SourceIdentifier,

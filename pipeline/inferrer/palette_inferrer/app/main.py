@@ -21,6 +21,10 @@ app = FastAPI(title="Palette extractor", description="extracts palettes")
 logger.info("API started, awaiting requests")
 
 
+def batch_infer_palettes(images):
+    return [palette_encoder(image) for image in images]
+
+
 batch_inferrer_queue = BatchExecutionQueue(
     palette_encoder, batch_size=16, timeout=0.5)
 
@@ -34,9 +38,10 @@ async def main(image_url: str):
         logger.error(error_string)
         raise HTTPException(status_code=404, detail=error_string)
 
-    response = {"palette": palette_encoder(image)}
+    palette = await batch_inferrer_queue.execute(image)
     logger.info(f"extracted palette from url: {image_url}")
-    return response
+
+    return {"palette": palette}
 
 
 @app.get("/healthcheck")

@@ -126,7 +126,7 @@ class ImageDownloaderTest
       val fileWriter = new MemoryFileWriter
       existingFilePaths.foreach { existingFile =>
         fileWriter.files
-          .put(existingFile, ByteString(Responses.randomImageBytes))
+          .put(existingFile, ByteString(Responses.randomImageBytes()))
       }
       val downloader =
         new ImageDownloader(
