@@ -105,6 +105,7 @@ class InferenceManagerWorkerService[Destination](
             case (_, msg) => msg.messageId()
           }, allowClosedSubstreamRecreation = true)
           .groupedWithin(inferrerAdapters.size, maxInferrerWait)
+          .take(1)
           .map { elements =>
             elements.foreach {
               case (AdapterResponseBundle(image, _, _), _) =>
