@@ -26,6 +26,9 @@ case object WorksMultiMatcher {
             ("data.items.id.canonicalId", Some(1000)),
             ("data.items.id.sourceIdentifier.value", Some(1000)),
             ("data.items.id.otherIdentifiers.value", Some(1000)),
+            ("data.images.id.canonicalId", Some(1000)),
+            ("data.images.id.sourceIdentifier.value", Some(1000)),
+            ("data.images.id.otherIdentifiers.value", Some(1000)),
           ).map(f => FieldWithOptionalBoost(f._1, f._2.map(_.toDouble)))
         ),
         prefixQuery("data.title.keyword", q).boost(1000),
