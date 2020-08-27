@@ -27,6 +27,7 @@ h11==0.9.0                # via uvicorn
 httptools==0.1.1          # via uvicorn
 idna==2.9                 # via requests, yarl
 jmespath==0.9.5           # via boto3, botocore
+joblib==0.16.0            # via -r requirements.in
 multidict==4.7.5          # via aiohttp, yarl
 numpy==1.18.1             # via -r requirements.in, scikit-learn, scipy
 piffle==0.3.0             # via weco-datascience

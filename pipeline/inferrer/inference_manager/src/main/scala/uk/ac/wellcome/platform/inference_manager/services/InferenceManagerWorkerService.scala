@@ -40,6 +40,8 @@ class InferenceManagerWorkerService[Destination](
   val className: String = this.getClass.getSimpleName
   val parallelism = 10
   val maxInferrerWait = 30 seconds
+  val maxOpenRequests = actorSystem.settings.config
+    .getInt("akka.http.host-connection-pool.max-open-requests")
 
   def run(): Future[Done] =
     msgStream.runStream(
@@ -73,11 +75,6 @@ class InferenceManagerWorkerService[Destination](
     FlowWithContext[
       (Try[HttpResponse], (DownloadedImage, InferrerAdapter)),
       Ctx]
-      .map {
-        case result @ (_, (image, _)) =>
-          imageDownloader.delete.runWith(Source.single(image))
-          result
-      }
       .mapAsync(parallelism) {
         case (Success(response), (image, adapter)) =>
           adapter
@@ -95,7 +92,8 @@ class InferenceManagerWorkerService[Destination](
                 response
               )
             }
-        case (Failure(exception), _) =>
+        case (Failure(exception), (image, _)) =>
+          imageDownloader.delete.runWith(Source.single(image))
           Future.failed(exception)
       }
 
@@ -103,10 +101,18 @@ class InferenceManagerWorkerService[Destination](
     FlowWithContext[AdapterResponseBundle[DownloadedImage], Ctx]
       .via {
         Flow[(AdapterResponseBundle[DownloadedImage], Ctx)]
-          .groupBy(parallelism, _ match {
+          .groupBy(maxOpenRequests * inferrerAdapters.size, _ match {
             case (_, msg) => msg.messageId()
           }, allowClosedSubstreamRecreation = true)
           .groupedWithin(inferrerAdapters.size, maxInferrerWait)
+          .take(1)
+          .map { elements =>
+            elements.foreach {
+              case (AdapterResponseBundle(image, _, _), _) =>
+                imageDownloader.delete.runWith(Source.single(image))
+            }
+            elements
+          }
           .map { elements =>
             elements.filter {
               case (AdapterResponseBundle(_, _, Failure(_)), _) => false
@@ -137,7 +143,9 @@ class InferenceManagerWorkerService[Destination](
                 (image.augment(Some(inferredData)), ctx)
             }
           }
-          .mergeSubstreams
+          .mergeSubstreamsWithParallelism(
+            maxOpenRequests * inferrerAdapters.size
+          )
       }
 
   private def sendAugmented[Ctx] =

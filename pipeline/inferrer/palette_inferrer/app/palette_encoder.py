@@ -1,11 +1,13 @@
 import numpy as np
 from sklearn.cluster import KMeans
+from joblib import Parallel, delayed
 
 
 class PaletteEncoder:
     def __init__(self, palette_size, precision_levels):
         self.palette_size = palette_size
         self.precision_levels = precision_levels
+        self.delayed_process_image = delayed(self.process_image)
 
     def get_significant_colours(self, image, p=0.5):
         """
@@ -43,7 +45,7 @@ class PaletteEncoder:
             encoded_list.extend([str(index)] * int(value))
         return encoded_list
 
-    def __call__(self, image):
+    def process_image(self, image):
         """
         extract presence of colour in the image at multiple precision levels
         """
@@ -59,3 +61,11 @@ class PaletteEncoder:
         )
 
         return self.encode_for_elasticsearch(combined_results)
+
+    def __call__(self, images):
+        """
+        process images in parallel
+        """
+        return Parallel(n_jobs=-2)(
+            self.delayed_process_image(image) for image in images
+        )
