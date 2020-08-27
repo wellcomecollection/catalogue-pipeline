@@ -57,27 +57,47 @@ class RelatedWorkServiceTest
       whenReady(service.retrieveRelatedWorks(index, work2)) { result =>
         result shouldBe Right(
           RelatedWorks(
-            parts = List(workD, workE),
-            partOf = List(workA),
-            precededBy = List(work1),
-            succeededBy = List(work3, work4),
+            parts = Some(List(RelatedWork(workD), RelatedWork(workE))),
+            partOf =
+              Some(List(RelatedWork(workA, RelatedWorks(partOf = Some(Nil))))),
+            precededBy = Some(List(RelatedWork(work1))),
+            succeededBy = Some(List(RelatedWork(work3), RelatedWork(work4))),
           )
         )
       }
     }
   }
 
-  it(
-    "Retrieves a related works for the given path with ancestors sorted correctly") {
+  it("Retrieves a related works for the given path with nested ancestors") {
     withLocalWorksIndex { index =>
       storeWorks(index)
       whenReady(service.retrieveRelatedWorks(index, workF)) { result =>
         result shouldBe Right(
           RelatedWorks(
-            parts = Nil,
-            partOf = List(workA, work2, workE),
-            precededBy = Nil,
-            succeededBy = Nil,
+            parts = Some(Nil),
+            partOf = Some(
+              List(
+                RelatedWork(
+                  workE,
+                  RelatedWorks.partOf(
+                    RelatedWork(
+                      work2,
+                      RelatedWorks(
+                        partOf = Some(
+                          List(
+                            RelatedWork(
+                              workA,
+                              RelatedWorks(partOf = Some(Nil)))
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            ),
+            precededBy = Some(Nil),
+            succeededBy = Some(Nil),
           )
         )
       }
@@ -90,10 +110,15 @@ class RelatedWorkServiceTest
       whenReady(service.retrieveRelatedWorks(index, workA)) { result =>
         result.right.get shouldBe
           RelatedWorks(
-            parts = List(work1, work2, work3, work4),
-            partOf = Nil,
-            precededBy = Nil,
-            succeededBy = Nil
+            parts = Some(
+              List(
+                RelatedWork(work1),
+                RelatedWork(work2),
+                RelatedWork(work3),
+                RelatedWork(work4))),
+            partOf = Some(Nil),
+            precededBy = Some(Nil),
+            succeededBy = Some(Nil)
           )
       }
     }
@@ -105,10 +130,22 @@ class RelatedWorkServiceTest
       whenReady(service.retrieveRelatedWorks(index, workF)) { result =>
         result shouldBe Right(
           RelatedWorks(
-            parts = Nil,
-            partOf = List(workA, workE),
-            precededBy = Nil,
-            succeededBy = Nil,
+            parts = Some(Nil),
+            partOf = Some(
+              List(
+                RelatedWork(
+                  workE,
+                  RelatedWorks.partOf(
+                    RelatedWork(
+                      workA,
+                      RelatedWorks(partOf = Some(Nil))
+                    )
+                  )
+                )
+              )
+            ),
+            precededBy = Some(Nil),
+            succeededBy = Some(Nil),
           )
         )
       }
@@ -126,13 +163,21 @@ class RelatedWorkServiceTest
       whenReady(service.retrieveRelatedWorks(index, workR)) { result =>
         result shouldBe Right(
           RelatedWorks(
-            parts = Nil,
-            partOf = List(
-              workP.withData(_.copy(items = Nil)),
-              workQ.withData(_.copy(notes = Nil)),
-            ),
-            precededBy = Nil,
-            succeededBy = Nil,
+            parts = Some(Nil),
+            partOf = Some(
+              List(
+                RelatedWork(
+                  workQ.withData(_.copy(notes = Nil)),
+                  RelatedWorks.partOf(
+                    RelatedWork(
+                      workP.withData(_.copy(items = Nil)),
+                      RelatedWorks(partOf = Some(Nil))
+                    )
+                  )
+                ),
+              )),
+            precededBy = Some(Nil),
+            succeededBy = Some(Nil),
           )
         )
       }
@@ -144,14 +189,7 @@ class RelatedWorkServiceTest
       val workX = createIdentifiedWork
       storeWorks(index, List(workA, work1, workX))
       whenReady(service.retrieveRelatedWorks(index, workX)) { result =>
-        result shouldBe Right(
-          RelatedWorks(
-            parts = Nil,
-            partOf = Nil,
-            precededBy = Nil,
-            succeededBy = Nil
-          )
-        )
+        result shouldBe Right(RelatedWorks.nil)
       }
     }
   }
@@ -166,10 +204,14 @@ class RelatedWorkServiceTest
       whenReady(service.retrieveRelatedWorks(index, workA)) { result =>
         result shouldBe Right(
           RelatedWorks(
-            parts = List(workB1, workB2, workB10),
-            partOf = Nil,
-            precededBy = Nil,
-            succeededBy = Nil,
+            parts = Some(
+              List(
+                RelatedWork(workB1),
+                RelatedWork(workB2),
+                RelatedWork(workB10))),
+            partOf = Some(Nil),
+            precededBy = Some(Nil),
+            succeededBy = Some(Nil),
           )
         )
       }

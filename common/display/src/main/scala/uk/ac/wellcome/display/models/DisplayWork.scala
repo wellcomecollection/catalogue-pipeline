@@ -2,7 +2,11 @@ package uk.ac.wellcome.display.models
 
 import io.circe.generic.extras.JsonKey
 import io.swagger.v3.oas.annotations.media.Schema
-import uk.ac.wellcome.models.work.internal.IdentifiedWork
+import uk.ac.wellcome.models.work.internal.{
+  IdentifiedWork,
+  RelatedWork,
+  RelatedWorks
+}
 
 @Schema(
   name = "Work",
@@ -187,4 +191,42 @@ case object DisplayWork {
 
   def apply(work: IdentifiedWork): DisplayWork =
     DisplayWork(work = work, includes = WorksIncludes())
+
+  def apply(work: IdentifiedWork,
+            includes: WorksIncludes,
+            relatedWorks: RelatedWorks): DisplayWork =
+    DisplayWork(work, includes).copy(
+      parts =
+        if (includes.parts)
+          relatedWorks.parts.map { parts =>
+            parts.map {
+              case RelatedWork(work, related) =>
+                DisplayWork(work, includes, related)
+            }
+          } else None,
+      partOf =
+        if (includes.partOf)
+          relatedWorks.partOf.map { partOf =>
+            partOf.map {
+              case RelatedWork(work, related) =>
+                DisplayWork(work, includes, related)
+            }
+          } else None,
+      precededBy =
+        if (includes.precededBy)
+          relatedWorks.precededBy.map { precededBy =>
+            precededBy.map {
+              case RelatedWork(work, related) =>
+                DisplayWork(work, includes, related)
+            }
+          } else None,
+      succeededBy =
+        if (includes.succeededBy)
+          relatedWorks.succeededBy.map { succeededBy =>
+            succeededBy.map {
+              case RelatedWork(work, related) =>
+                DisplayWork(work, includes, related)
+            }
+          } else None,
+    )
 }

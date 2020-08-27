@@ -13,13 +13,6 @@ import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil.fromJson
 import uk.ac.wellcome.platform.api.Tracing
 
-case class RelatedWorks(
-  parts: List[IdentifiedWork],
-  partOf: List[IdentifiedWork],
-  precededBy: List[IdentifiedWork],
-  succeededBy: List[IdentifiedWork],
-)
-
 class RelatedWorkService(elasticsearchService: ElasticsearchService)(
   implicit ec: ExecutionContext)
     extends Tracing {
@@ -31,7 +24,8 @@ class RelatedWorkService(elasticsearchService: ElasticsearchService)(
   def retrieveRelatedWorks(index: Index,
                            work: IdentifiedWork): Future[Result[RelatedWorks]] =
     work.data.collectionPath match {
-      case None => Future.successful(Right(RelatedWorks(Nil, Nil, Nil, Nil)))
+      case None =>
+        Future.successful(Right(RelatedWorks.nil))
       case Some(CollectionPath(path, _, _)) =>
         elasticsearchService
           .executeMultiSearchRequest(
@@ -73,11 +67,21 @@ class RelatedWorkService(elasticsearchService: ElasticsearchService)(
             tokenizedPathOrdering.compare(mainPath, workPath) >= 0
         }
     }
+    val parent = ancestors.sortBy(tokenizePath) match {
+      case head :: tail =>
+        Some(
+          tail.foldLeft(RelatedWork(head, RelatedWorks(partOf = Some(Nil)))) {
+            case (relatedWork, work) =>
+              RelatedWork(work, RelatedWorks.partOf(relatedWork))
+          }
+        )
+      case Nil => None
+    }
     RelatedWorks(
-      parts = children.sortBy(tokenizePath),
-      partOf = ancestors.sortBy(tokenizePath),
-      precededBy = precededBy,
-      succeededBy = succeededBy
+      parts = Some(children.sortBy(tokenizePath).map(RelatedWork(_))),
+      partOf = Some(parent.toList),
+      precededBy = Some(precededBy.map(RelatedWork(_))),
+      succeededBy = Some(succeededBy.map(RelatedWork(_)))
     )
   }
 

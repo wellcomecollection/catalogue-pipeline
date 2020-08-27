@@ -710,14 +710,15 @@ class WorksIncludesTest
         sourceIdentifier = createSourceIdentifierWith(value = path)
       )
 
-    val workA = work("a")
-    val workB = work("a/b")
-    val workC = work("a/c")
-    val workD = work("a/d")
-    val workE = work("a/c/e")
+    val work0 = work("0")
+    val workA = work("0/a")
+    val workB = work("0/a/b")
+    val workC = work("0/a/c")
+    val workD = work("0/a/d")
+    val workE = work("0/a/c/e")
 
     def storeWorks(index: Index) =
-      insertIntoElasticsearch(index, workA, workB, workC, workD, workE)
+      insertIntoElasticsearch(index, work0, workA, workB, workC, workD, workE)
 
     it("includes parts") {
       withApi {
@@ -730,11 +731,11 @@ class WorksIncludesTest
             {
               ${singleWorkResult(apiPrefix)},
               "id": "${workC.canonicalId}",
-              "title": "a/c",
+              "title": "0/a/c",
               "alternativeTitles": [],
               "parts": [{
                 "id": "${workE.canonicalId}",
-                "title": "a/c/e",
+                "title": "0/a/c/e",
                 "alternativeTitles": [],
                 "type": "Work"
               }]
@@ -755,13 +756,20 @@ class WorksIncludesTest
             {
               ${singleWorkResult(apiPrefix)},
               "id": "${workC.canonicalId}",
-              "title": "a/c",
+              "title": "0/a/c",
               "alternativeTitles": [],
               "partOf": [{
                 "id": "${workA.canonicalId}",
-                "title": "a",
+                "title": "0/a",
                 "alternativeTitles": [],
-                "type": "Work"
+                "type": "Work",
+                "partOf": [{
+                  "id": "${work0.canonicalId}",
+                  "title": "0",
+                  "alternativeTitles": [],
+                  "type": "Work",
+                  "partOf": []
+                }]
               }]
             }
           """
@@ -780,11 +788,11 @@ class WorksIncludesTest
             {
               ${singleWorkResult(apiPrefix)},
               "id": "${workC.canonicalId}",
-              "title": "a/c",
+              "title": "0/a/c",
               "alternativeTitles": [],
               "precededBy": [{
                 "id": "${workB.canonicalId}",
-                "title": "a/b",
+                "title": "0/a/b",
                 "alternativeTitles": [],
                 "type": "Work"
               }]
@@ -805,11 +813,11 @@ class WorksIncludesTest
             {
               ${singleWorkResult(apiPrefix)},
               "id": "${workC.canonicalId}",
-              "title": "a/c",
+              "title": "0/a/c",
               "alternativeTitles": [],
               "succeededBy": [{
                 "id": "${workD.canonicalId}",
-                "title": "a/d",
+                "title": "0/a/d",
                 "alternativeTitles": [],
                 "type": "Work"
               }]
