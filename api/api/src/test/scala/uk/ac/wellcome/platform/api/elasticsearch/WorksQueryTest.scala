@@ -10,6 +10,7 @@ import uk.ac.wellcome.json.JsonUtil.fromJson
 import uk.ac.wellcome.models.work.generators.{
   ContributorGenerators,
   GenreGenerators,
+  ImageGenerators,
   SubjectGenerators,
   WorksGenerators
 }
@@ -34,6 +35,7 @@ class WorksQueryTest
     with SubjectGenerators
     with GenreGenerators
     with WorksGenerators
+    with ImageGenerators
     with ContributorGenerators {
 
   val searchService = new ElasticsearchService(elasticClient)
@@ -145,6 +147,50 @@ class WorksQueryTest
             createIdentifiedItemWith(otherIdentifiers =
               List(createSourceIdentifierWith(value = "sourceIdentifier456"))))
         )
+        val query = "sourceIdentifier123"
+
+        insertIntoElasticsearch(index, work, workNotMatching)
+
+        assertResultsMatchForAllowedQueryTypes(index, query, List(work))
+      }
+    }
+
+    it("searches the images.canonicalId as keyword") {
+      withLocalWorksIndex { index =>
+        val work = createIdentifiedWorkWith(
+          canonicalId = "abc123",
+          images = List(
+            createUnmergedImage.toIdentifiedWith(id = "def")
+          ))
+        val workNotMatching = createIdentifiedWorkWith(
+          canonicalId = "123abc",
+          images = List(
+            createUnmergedImage.toIdentifiedWith(id = "def456")
+          )
+        )
+        val query = "def"
+
+        insertIntoElasticsearch(index, work, workNotMatching)
+
+        assertResultsMatchForAllowedQueryTypes(index, query, List(work))
+      }
+    }
+
+    it("searches the images.sourceIdentifiers") {
+      withLocalWorksIndex { index =>
+        val work = createIdentifiedWorkWith(
+          canonicalId = "abc123",
+          images = List(
+            createUnmergedImageWith(identifierValue = "sourceIdentifier123").toIdentified
+          )
+        )
+        val workNotMatching = createIdentifiedWorkWith(
+          canonicalId = "123abc",
+          images = List(
+            createUnmergedImageWith(identifierValue = "sourceIdentifier456").toIdentified
+          )
+        )
+
         val query = "sourceIdentifier123"
 
         insertIntoElasticsearch(index, work, workNotMatching)

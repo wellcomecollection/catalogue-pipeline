@@ -11,10 +11,12 @@ trait ImageGenerators
   def createUnmergedImageWith(
     location: DigitalLocation = createDigitalLocation,
     version: Int = 1,
+    identifierValue: String = randomAlphanumeric(10),
     identifierType: IdentifierType = IdentifierType("miro-image-number")
   ): UnmergedImage[Identifiable, Unminted] = UnmergedImage(
-    sourceIdentifier =
-      createSourceIdentifierWith(identifierType = identifierType),
+    sourceIdentifier = createSourceIdentifierWith(
+      identifierType = identifierType,
+      value = identifierValue),
     version = version,
     location = location
   )
@@ -42,7 +44,7 @@ trait ImageGenerators
     parentWork: UnidentifiedWork = createUnidentifiedSierraWorkWith(),
     redirectedWork: Option[TransformedBaseWork] = Some(createMiroWorkWith(Nil)))
     : MergedImage[Identifiable, Unminted] =
-    createUnmergedImageWith(location, version, identifierType) mergeWith (
+    createUnmergedImageWith(location, version, identifierType = identifierType) mergeWith (
       parentWork.toSourceWork,
       redirectedWork.map(_.toSourceWork)
     )
