@@ -293,6 +293,24 @@ class WorksQueryTest
       }
     }
 
+    it("Searches lettering") {
+      withLocalWorksIndex { index =>
+        val matchingWork = createIdentifiedWorkWith(
+          lettering = Some(
+            "Old Mughal minaret near Shahjahanabad (Delhi), Ghulam Ali Khan, early XIX century")
+        )
+        val notMatchingWork = createIdentifiedWorkWith(
+          lettering = Some("Notmatching")
+        )
+
+        val query = "shahjahanabad"
+
+        insertIntoElasticsearch(index, matchingWork, notMatchingWork)
+
+        assertResultsMatchForAllowedQueryTypes(index, query, List(matchingWork))
+      }
+    }
+
     it("Searches for collection in collectionPath.path") {
       withLocalWorksIndex { index =>
         val matchingWork = createIdentifiedWorkWith(
