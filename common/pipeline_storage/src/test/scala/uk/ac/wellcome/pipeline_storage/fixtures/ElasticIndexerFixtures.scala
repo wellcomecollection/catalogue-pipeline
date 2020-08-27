@@ -1,14 +1,13 @@
 package uk.ac.wellcome.pipeline_storage.fixtures
 
-import scala.concurrent.ExecutionContext
+import com.sksamuel.elastic4s.analysis.Analysis
 
-import com.sksamuel.elastic4s.requests.analysis.Analysis
+import scala.concurrent.ExecutionContext
 import com.sksamuel.elastic4s.requests.mappings.MappingDefinition
 import com.sksamuel.elastic4s.{ElasticClient, Index}
 import org.scalatest.Suite
-import io.circe.Encoder
-import io.circe.generic.semiauto.deriveEncoder
-
+import io.circe.{Decoder, Encoder}
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.elasticsearch.IndexConfig
@@ -30,6 +29,8 @@ object SampleDocument {
   }
 
   implicit val encoder: Encoder[SampleDocument] = deriveEncoder
+
+  implicit val decoder: Decoder[SampleDocument] = deriveDecoder
 }
 
 trait ElasticIndexerFixtures extends ElasticsearchFixtures with Akka {

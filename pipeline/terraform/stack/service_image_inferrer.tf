@@ -1,12 +1,15 @@
 locals {
-  inferrer_host = "localhost"
-  inferrer_port = 80
+  feature_inferrer_port = 3141
+  palette_inferrer_port = 3142
   //  High inferrer throughput comes at the cost of the latency distribution
   // having heavy tails - this stops some unfortunate messages from being
   // put on the DLQ when they are consumed but not processed.
   queue_visibility_timeout = 60
   shared_storage_name      = "shared_storage"
   shared_storage_path      = "/data"
+
+  total_cpu    = 7680
+  total_memory = 7000
 }
 
 module "image_inferrer_queue" {
@@ -19,7 +22,7 @@ module "image_inferrer_queue" {
 }
 
 module "image_inferrer" {
-  source = "../modules/service_with_manager"
+  source = "../modules/services_with_manager"
 
   service_name = "${local.namespace_hyphen}_image_inferrer"
   security_group_ids = [
@@ -56,39 +59,67 @@ module "image_inferrer" {
     sourceVolume  = local.shared_storage_name
   }]
 
-  app_container_name  = "inferrer"
-  app_container_image = local.feature_inferrer_image
-  app_cpu             = 3584
-  app_memory          = 7000
-  app_healthcheck = {
-    command     = ["CMD-SHELL", "curl -f http://localhost:${local.inferrer_port}/healthcheck"],
-    interval    = 30,
-    retries     = 3,
-    startPeriod = 30,
-    timeout     = 5
+  apps = {
+    feature_inferrer = {
+      image  = local.feature_inferrer_image
+      cpu    = floor(0.5 * local.total_cpu)
+      memory = floor(0.5 * local.total_memory)
+      env_vars = {
+        PORT              = local.feature_inferrer_port
+        MODEL_OBJECT_KEY  = data.aws_ssm_parameter.inferrer_lsh_model_key.value
+        MODEL_DATA_BUCKET = var.inferrer_model_data_bucket_name
+      }
+      secret_env_vars = {}
+      mount_points = [{
+        containerPath = local.shared_storage_path,
+        sourceVolume  = local.shared_storage_name
+      }]
+      healthcheck = {
+        command     = ["CMD-SHELL", "curl -f http://localhost:${local.feature_inferrer_port}/healthcheck"],
+        interval    = 30,
+        retries     = 3,
+        startPeriod = 30,
+        timeout     = 5
+      }
+    }
+    palette_inferrer = {
+      image  = local.palette_inferrer_image
+      cpu    = floor(0.5 * local.total_cpu)
+      memory = floor(0.5 * local.total_memory)
+      env_vars = {
+        PORT = local.palette_inferrer_port
+      }
+      secret_env_vars = {}
+      mount_points = [{
+        containerPath = local.shared_storage_path,
+        sourceVolume  = local.shared_storage_name
+      }]
+      healthcheck = {
+        command     = ["CMD-SHELL", "curl -f http://localhost:${local.palette_inferrer_port}/healthcheck"],
+        interval    = 30,
+        retries     = 3,
+        startPeriod = 30,
+        timeout     = 5
+      }
+    }
   }
-  app_mount_points = [{
-    containerPath = local.shared_storage_path,
-    sourceVolume  = local.shared_storage_name
-  }]
 
   manager_env_vars = {
-    inferrer_host        = local.inferrer_host
-    inferrer_port        = local.inferrer_port
-    metrics_namespace    = "${local.namespace_hyphen}_image_inferrer"
-    topic_arn            = module.image_inferrer_topic.arn
-    messages_bucket_name = aws_s3_bucket.messages.id
-    queue_url            = module.image_inferrer_queue.url
-  }
-  app_env_vars = {
-    MODEL_OBJECT_KEY  = data.aws_ssm_parameter.inferrer_lsh_model_key.value
-    MODEL_DATA_BUCKET = var.inferrer_model_data_bucket_name
+    feature_inferrer_host = "localhost"
+    feature_inferrer_port = local.feature_inferrer_port
+    palette_inferrer_host = "localhost"
+    palette_inferrer_port = local.palette_inferrer_port
+    metrics_namespace     = "${local.namespace_hyphen}_image_inferrer"
+    topic_arn             = module.image_inferrer_topic.arn
+    messages_bucket_name  = aws_s3_bucket.messages.id
+    queue_url             = module.image_inferrer_queue.url
+    images_root           = local.shared_storage_path
   }
 
   subnets = var.subnets
 
   # Any higher than this currently causes latency spikes from Loris
-  max_capacity = 8
+  max_capacity = 6
 
   messages_bucket_arn = aws_s3_bucket.messages.arn
   queue_read_policy   = module.image_inferrer_queue.read_policy

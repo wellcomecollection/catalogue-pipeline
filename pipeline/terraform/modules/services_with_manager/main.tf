@@ -1,5 +1,5 @@
 module "worker" {
-  source = "../../../../infrastructure/modules/worker_with_sidecar"
+  source = "../../../../infrastructure/modules/workers_with_sidecar"
 
   name = var.service_name
 
@@ -17,14 +17,7 @@ module "worker" {
 
   security_group_ids = var.security_group_ids
 
-  app_name            = var.app_container_name
-  app_image           = var.app_container_image
-  app_cpu             = var.app_cpu
-  app_memory          = var.app_memory
-  app_env_vars        = var.app_env_vars
-  app_secret_env_vars = var.app_secret_env_vars
-  app_healthcheck     = var.app_healthcheck
-  app_mount_points    = var.app_mount_points
+  apps = var.apps
 
   sidecar_image           = var.manager_container_image
   sidecar_name            = var.manager_container_name

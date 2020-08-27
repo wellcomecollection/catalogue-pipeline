@@ -1,6 +1,7 @@
 package uk.ac.wellcome.elasticsearch
 
 import com.sksamuel.elastic4s.ElasticApi.createIndex
+import com.sksamuel.elastic4s.{ElasticClient, Index, Response}
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.analysis.Analysis
 import com.sksamuel.elastic4s.requests.indexes.{
@@ -9,7 +10,6 @@ import com.sksamuel.elastic4s.requests.indexes.{
 }
 import com.sksamuel.elastic4s.requests.mappings.MappingDefinition
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
-import com.sksamuel.elastic4s.{ElasticClient, Index, Response}
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.elasticsearch.elastic4s.searchtemplate.PutSearchTemplateRequest
 import uk.ac.wellcome.elasticsearch.elastic4s.WecoElasticDsl._

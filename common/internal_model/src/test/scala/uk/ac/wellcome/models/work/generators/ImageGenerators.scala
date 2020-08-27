@@ -73,7 +73,8 @@ trait ImageGenerators
       (0 until 256)
         .map(_ => s"$randIdx-$randIdx")
         .toList
-    Some(InferredData(features1, features2, lshEncodedFeatures))
+    val palette = (0 until 25).map(_ => f"$randIdx%03d").toList
+    Some(InferredData(features1, features2, lshEncodedFeatures, palette))
   }
 
   def createAugmentedImageWith(

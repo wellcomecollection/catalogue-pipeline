@@ -1,7 +1,7 @@
 ROOT = $(shell git rev-parse --show-toplevel)
 INFRA_BUCKET = wellcomecollection-platform-infra
 
-ifneq ($(TRAVIS),true)
+ifneq ($(CI),true)
 DEV_ROLE_ARN := arn:aws:iam::760097843905:role/platform-developer
 endif
 

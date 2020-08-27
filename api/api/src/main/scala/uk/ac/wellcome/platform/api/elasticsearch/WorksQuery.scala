@@ -47,6 +47,7 @@ case object WorksMultiMatcher {
             ("data.language.label", None),
             ("data.edition", None),
             ("data.notes.content", None),
+            ("data.lettering", None),
             ("data.collectionPath.path", None),
             ("data.collectionPath.label", None),
           ).map(f => FieldWithOptionalBoost(f._1, f._2.map(_.toDouble)))

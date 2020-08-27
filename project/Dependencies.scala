@@ -67,7 +67,7 @@ object WellcomeDependencies {
 
 object ExternalDependencies {
   lazy val versions = new {
-    val akka = "2.6.4"
+    val akka = "2.6.8"
     val akkaHttp = "10.1.11"
     val akkaHttpCirce = "1.32.0"
     val akkaStreamAlpakka = "1.1.2"

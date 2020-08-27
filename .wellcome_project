@@ -73,6 +73,9 @@ catalogue_pipeline:
     - id: feature_inferrer
       services:
         - id: image-inferrer
+    - id: palette_inferrer
+      services:
+        - id: image-inferrer
     - id: matcher
       services:
         - id: matcher

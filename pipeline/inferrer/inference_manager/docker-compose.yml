@@ -3,7 +3,7 @@ sqs:
   ports:
     - "9324:9324"
 
-inferrer:
+feature_inferrer:
   image: feature_inferrer
   ports:
     - "3141:80"
@@ -12,7 +12,15 @@ inferrer:
   volumes:
     - ../test_data:/app/data
     - $ROOT:$ROOT
+  links:
+    - "image_server:image_server"
 
+palette_inferrer:
+  image: palette_inferrer
+  ports:
+    - "3142:80"
+  volumes:
+    - $ROOT:$ROOT
   links:
     - "image_server:image_server"
 
