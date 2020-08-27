@@ -8,7 +8,7 @@ locals {
   shared_storage_name      = "shared_storage"
   shared_storage_path      = "/data"
 
-  total_cpu    = 3584
+  total_cpu    = 7680
   total_memory = 7000
 }
 
@@ -62,8 +62,8 @@ module "image_inferrer" {
   apps = {
     feature_inferrer = {
       image  = local.feature_inferrer_image
-      cpu    = floor(0.75 * local.total_cpu)
-      memory = floor(0.75 * local.total_memory)
+      cpu    = floor(0.5 * local.total_cpu)
+      memory = floor(0.5 * local.total_memory)
       env_vars = {
         PORT              = local.feature_inferrer_port
         MODEL_OBJECT_KEY  = data.aws_ssm_parameter.inferrer_lsh_model_key.value
@@ -84,8 +84,8 @@ module "image_inferrer" {
     }
     palette_inferrer = {
       image  = local.palette_inferrer_image
-      cpu    = floor(0.25 * local.total_cpu)
-      memory = floor(0.25 * local.total_memory)
+      cpu    = floor(0.5 * local.total_cpu)
+      memory = floor(0.5 * local.total_memory)
       env_vars = {
         PORT = local.palette_inferrer_port
       }
