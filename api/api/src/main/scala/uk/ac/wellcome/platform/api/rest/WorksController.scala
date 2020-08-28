@@ -11,7 +11,6 @@ import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.models.ApiConfig
 import uk.ac.wellcome.platform.api.services.{
-  CollectionService,
   ElasticsearchService,
   RelatedWorkService,
   WorksService
@@ -68,15 +67,10 @@ class WorksController(
             case Right(Some(work: IdentifiedWork)) =>
               if (includes.anyRelation) {
                 retrieveRelatedWorks(index, work).map { relatedWorks =>
-                  workFound(work, relatedWorks, None, includes)
-                }
-              } else if (includes.collection) {
-                val expandedPaths = params._expandPaths.getOrElse(Nil)
-                retrieveTree(index, work, expandedPaths).map { tree =>
-                  workFound(work, None, tree, includes)
+                  workFound(work, relatedWorks, includes)
                 }
               } else
-                Future.successful(workFound(work, None, None, includes))
+                Future.successful(workFound(work, None, includes))
             case Right(Some(work: IdentifiedRedirectedWork)) =>
               Future.successful(workRedirect(work))
             case Right(Some(_)) =>
@@ -88,25 +82,6 @@ class WorksController(
           }
       }
     }
-
-  private def retrieveTree(
-    index: Index,
-    work: IdentifiedWork,
-    expandedPaths: List[String]): Future[Option[(Collection, List[String])]] =
-    work.data.collectionPath
-      .map {
-        case CollectionPath(path, _, _) =>
-          val allPaths = path :: expandedPaths
-          collectionService.retrieveTree(index, allPaths).map {
-            case Left(err) =>
-              // We just log this here rather than raising so as not to bring down
-              // the work API when tree retrieval fails
-              logger.error("Error retrieving collection tree", err)
-              None
-            case Right(tree) => Some((tree, allPaths))
-          }
-      }
-      .getOrElse(Future.successful(None))
 
   private def retrieveRelatedWorks(
     index: Index,
@@ -130,26 +105,15 @@ class WorksController(
 
   def workFound(work: IdentifiedWork,
                 relatedWorks: Option[RelatedWorks],
-                tree: Option[(Collection, List[String])],
                 includes: WorksIncludes): Route =
     complete(
       ResultResponse(
         context = contextUri,
         result = relatedWorks
           .map(DisplayWork(work, includes, _))
-          .getOrElse(
-            DisplayWork(work, includes).copy(
-              collection = tree.map {
-                case (tree, expandedPaths) =>
-                  DisplayCollection(tree, expandedPaths)
-              }
-            )
-          )
+          .getOrElse(DisplayWork(work, includes))
       )
     )
-
-  private lazy val collectionService =
-    new CollectionService(elasticsearchService)
 
   private lazy val relatedWorkService =
     new RelatedWorkService(elasticsearchService)
