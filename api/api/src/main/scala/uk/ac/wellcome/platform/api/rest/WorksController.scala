@@ -14,7 +14,6 @@ import uk.ac.wellcome.platform.api.services.{
   CollectionService,
   ElasticsearchService,
   RelatedWorkService,
-  RelatedWorks,
   WorksService
 }
 import uk.ac.wellcome.platform.api.Tracing
@@ -136,32 +135,16 @@ class WorksController(
     complete(
       ResultResponse(
         context = contextUri,
-        result = DisplayWork(work, includes).copy(
-          collection = tree.map {
-            case (tree, expandedPaths) =>
-              DisplayCollection(tree, expandedPaths)
-          },
-          parts =
-            if (includes.parts)
-              relatedWorks.map { relatedWorks =>
-                relatedWorks.parts.map(DisplayWork(_))
-              } else None,
-          partOf =
-            if (includes.partOf)
-              relatedWorks.map { relatedWorks =>
-                relatedWorks.partOf.map(DisplayWork(_))
-              } else None,
-          precededBy =
-            if (includes.precededBy)
-              relatedWorks.map { relatedWorks =>
-                relatedWorks.precededBy.map(DisplayWork(_))
-              } else None,
-          succeededBy =
-            if (includes.succeededBy)
-              relatedWorks.map { relatedWorks =>
-                relatedWorks.succeededBy.map(DisplayWork(_))
-              } else None,
-        )
+        result = relatedWorks
+          .map(DisplayWork(work, includes, _))
+          .getOrElse(
+            DisplayWork(work, includes).copy(
+              collection = tree.map {
+                case (tree, expandedPaths) =>
+                  DisplayCollection(tree, expandedPaths)
+              }
+            )
+          )
       )
     )
 
