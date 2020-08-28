@@ -758,18 +758,26 @@ class WorksIncludesTest
               "id": "${workC.canonicalId}",
               "title": "0/a/c",
               "alternativeTitles": [],
-              "partOf": [{
-                "id": "${workA.canonicalId}",
-                "title": "0/a",
-                "alternativeTitles": [],
-                "type": "Work",
-                "partOf": [{
+              "partOf": [
+                {
                   "id": "${work0.canonicalId}",
                   "title": "0",
                   "alternativeTitles": [],
+                  "type": "Work"
+                },
+                {
+                  "id": "${workA.canonicalId}",
+                  "title": "0/a",
+                  "alternativeTitles": [],
                   "type": "Work",
-                  "partOf": []
-                }]
+                  "partOf": [{
+                    "id": "${work0.canonicalId}",
+                    "title": "0",
+                    "alternativeTitles": [],
+                    "type": "Work",
+                    "partOf": []
+                  }
+                ]
               }]
             }
           """

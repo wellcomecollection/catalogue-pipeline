@@ -77,9 +77,18 @@ class RelatedWorkService(elasticsearchService: ElasticsearchService)(
         )
       case Nil => None
     }
+
+    // For backwards compatability we include the unnested ancestors ordered
+    // from root to parent, with the parent additionally containing the nested
+    // data
+    val partOf: List[RelatedWork] = ancestors
+      .sortBy(tokenizePath)
+      .dropRight(1)
+      .map(RelatedWork(_)) ::: parent.toList
+
     RelatedWorks(
       parts = Some(children.sortBy(tokenizePath).map(RelatedWork(_))),
-      partOf = Some(parent.toList),
+      partOf = Some(partOf),
       precededBy = Some(precededBy.map(RelatedWork(_))),
       succeededBy = Some(succeededBy.map(RelatedWork(_)))
     )
