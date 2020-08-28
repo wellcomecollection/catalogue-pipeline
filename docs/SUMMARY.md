@@ -2,6 +2,7 @@
 
 - [Catalogue](README.md)
 - [Search](search/README.md)
+  - [Guide to wellcomecollection.org query development](search/query-development-guide.md)
   - [Hypotheses](search/hypotheses/README.md)
     - [Concepts, subjects](search/hypotheses/concepts-subjects.md)
     - [Contributors](search/hypotheses/contributors.md)
