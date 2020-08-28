@@ -46,7 +46,23 @@ object ImagesRequestBuilder extends ElasticsearchRequestBuilder {
     }
 
   def requestVisuallySimilar(index: Index, id: String, n: Int): SearchRequest =
+    similarityRequest(ImagesSimilarity.visual, index, id, n)
+
+  def requestWithSimilarFeatures(index: Index,
+                                 id: String,
+                                 n: Int): SearchRequest =
+    similarityRequest(ImagesSimilarity.features, index, id, n)
+
+  def requestWithSimilarColors(index: Index,
+                               id: String,
+                               n: Int): SearchRequest =
+    similarityRequest(ImagesSimilarity.color, index, id, n)
+
+  private def similarityRequest(query: (String, Index) => Query,
+                                index: Index,
+                                id: String,
+                                n: Int): SearchRequest =
     search(index)
-      .query(ImagesSimilarity(q = id, index = index))
+      .query(query(id, index))
       .size(n)
 }
