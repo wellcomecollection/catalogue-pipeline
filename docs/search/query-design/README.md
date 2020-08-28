@@ -1,3 +1,5 @@
+# Query design
+
 Search algorithms use different tools or "queries" to return results.  These tools can be combined and ordered in relation to people's expectations and priorities. For ease of reference, below is a glossary of tools used.  Combinations of tools are indicated in the Guide to Collections Queries.  
 
 For clarity, the term, “search” is used to refer to text input by users in the search bar.  Text input can consist of one or more words or “tokens.” “Search result order” refers to the way in which works are listed when displaying results.
