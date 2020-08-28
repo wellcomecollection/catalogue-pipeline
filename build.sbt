@@ -1,6 +1,5 @@
 import java.io.File
-import java.util.UUID
-import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider
+
 def setupProject(
   project: Project,
   folder: String,
@@ -248,10 +247,10 @@ lazy val snapshot_generator = setupProject(
  **/
 //import java.util.UUID
 //import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider
-s3CredentialsProvider := { _ =>
-  val builder = new STSAssumeRoleSessionCredentialsProvider.Builder(
-    "arn:aws:iam::760097843905:role/platform-read_only",
-    UUID.randomUUID().toString
-  )
-  builder.build()
-}
+//s3CredentialsProvider := { _ =>
+//  val builder = new STSAssumeRoleSessionCredentialsProvider.Builder(
+//    "arn:aws:iam::760097843905:role/platform-read_only",
+//    UUID.randomUUID().toString
+//  )
+//  builder.build()
+//}
