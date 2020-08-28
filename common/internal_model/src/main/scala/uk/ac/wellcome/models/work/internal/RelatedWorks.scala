@@ -4,7 +4,7 @@ package uk.ac.wellcome.models.work.internal
   * so related works can in turn hold their relations. An Option[List[_]] is
   * used to represent cases both where the work has no relations and where the
   * relations are not currently known.
-  * 
+  *
   * @param parts Children of the work
   * @param partOf Parents of the work
   * @param precededBy Siblings preceding the work
