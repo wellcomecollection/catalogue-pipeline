@@ -6,8 +6,8 @@ import com.sksamuel.elastic4s.requests.searches._
 import com.sksamuel.elastic4s.requests.searches.queries.Query
 import com.sksamuel.elastic4s.requests.searches.sort._
 import uk.ac.wellcome.platform.api.elasticsearch.{
-  ImagesMultiMatcher,
-  ImagesSimilarity
+  ImageSimilarity,
+  ImagesMultiMatcher
 }
 import uk.ac.wellcome.platform.api.models.{ImageFilter, LicenseFilter}
 
@@ -45,23 +45,19 @@ object ImagesRequestBuilder extends ElasticsearchRequestBuilder {
         termsQuery(field = "location.license.id", values = licenseIds)
     }
 
-  def requestVisuallySimilar(index: Index, id: String, n: Int): SearchRequest =
-    similarityRequest(ImagesSimilarity.visual, index, id, n)
+  def requestWithBlendedSimilarity: (Index, String, Int) => SearchRequest =
+    similarityRequest(ImageSimilarity.blended)
 
-  def requestWithSimilarFeatures(index: Index,
-                                 id: String,
-                                 n: Int): SearchRequest =
-    similarityRequest(ImagesSimilarity.features, index, id, n)
+  def requestWithSimilarFeatures: (Index, String, Int) => SearchRequest =
+    similarityRequest(ImageSimilarity.features)
 
-  def requestWithSimilarColors(index: Index,
-                               id: String,
-                               n: Int): SearchRequest =
-    similarityRequest(ImagesSimilarity.color, index, id, n)
+  def requestWithSimilarColors: (Index, String, Int) => SearchRequest =
+    similarityRequest(ImageSimilarity.color)
 
-  private def similarityRequest(query: (String, Index) => Query,
-                                index: Index,
-                                id: String,
-                                n: Int): SearchRequest =
+  private def similarityRequest(query: (String, Index) => Query)(
+    index: Index,
+    id: String,
+    n: Int): SearchRequest =
     search(index)
       .query(query(id, index))
       .size(n)

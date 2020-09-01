@@ -60,17 +60,23 @@ class ImagesService(searchService: ElasticsearchService)(
       )
       .map { _.map(createResultList) }
 
-  def retrieveSimilarImages(
-    index: Index,
-    image: AugmentedImage): Future[List[AugmentedImage]] =
+  def retrieveSimilarImages(index: Index,
+                            image: AugmentedImage,
+                            similarityMetric: SimilarityMetric =
+                              SimilarityMetric.Blended)
+    : Future[List[AugmentedImage]] =
     searchService
-      .executeSearchRequest(
-        ImagesRequestBuilder.requestVisuallySimilar(
-          index = index,
-          id = image.id.canonicalId,
-          n = nVisuallySimilarImages
-        )
-      )
+      .executeSearchRequest({
+        val requestBuilder = similarityMetric match {
+          case SimilarityMetric.Blended =>
+            ImagesRequestBuilder.requestWithBlendedSimilarity
+          case SimilarityMetric.Features =>
+            ImagesRequestBuilder.requestWithSimilarFeatures
+          case SimilarityMetric.Colors =>
+            ImagesRequestBuilder.requestWithSimilarColors
+        }
+        requestBuilder(index, image.id.canonicalId, nVisuallySimilarImages)
+      })
       .map { result =>
         result
           .map { response =>

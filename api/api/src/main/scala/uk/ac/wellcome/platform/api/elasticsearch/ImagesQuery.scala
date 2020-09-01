@@ -69,8 +69,8 @@ case object ImagesMultiMatcher {
   }
 }
 
-case object ImagesSimilarity {
-  def visual: (String, Index) => Query =
+case object ImageSimilarity {
+  def blended: (String, Index) => Query =
     lshQuery("inferredData.lshEncodedFeatures", "inferredData.palette")
 
   def color: (String, Index) => Query =

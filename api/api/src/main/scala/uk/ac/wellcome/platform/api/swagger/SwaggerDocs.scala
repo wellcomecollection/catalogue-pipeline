@@ -73,7 +73,8 @@ trait SingleImageSwagger {
         in = ParameterIn.QUERY,
         description = "A comma-separated list of extra fields to include",
         schema = new Schema(
-          allowableValues = Array("visuallySimilar")
+          allowableValues =
+            Array("visuallySimilar", "withSimilarFeatures", "withSimilarColors")
         ),
         required = false
       )

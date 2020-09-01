@@ -22,6 +22,8 @@ object SingleImageParams extends QueryParamsUtils {
   implicit val includesDecoder: Decoder[SingleImageIncludes] =
     decodeOneOfCommaSeparated(
       "visuallySimilar" -> ImageInclude.VisuallySimilar,
+      "withSimilarFeatures" -> ImageInclude.WithSimilarFeatures,
+      "withSimilarColors" -> ImageInclude.WithSimilarColors,
     ).emap(values => Right(SingleImageIncludes(values)))
 }
 
