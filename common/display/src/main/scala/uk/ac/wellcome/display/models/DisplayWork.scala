@@ -98,14 +98,6 @@ case class DisplayWork(
     description = "The playing time for audiovisual works, in seconds."
   ) duration: Option[Int] = None,
   @Schema(
-    `type` = "CollectionPath",
-    description = "Where in a collection this work is."
-  ) collectionPath: Option[DisplayCollectionPath] = None,
-  @Schema(
-    `type` = "Collection",
-    description = "The partially expanded collection tree for this work."
-  ) collection: Option[DisplayCollection] = None,
-  @Schema(
     `type` = "List[uk.ac.wellcome.display.models.DisplayImageWorkInclude]",
     description = "Identifiers of images that are sourced from this work"
   ) images: Option[List[DisplayWorkImageInclude]] = None,
@@ -179,10 +171,6 @@ case object DisplayWork {
           Some(DisplayNote.merge(work.data.notes.map(DisplayNote(_))))
         else None,
       duration = work.data.duration,
-      collectionPath =
-        if (includes.collection)
-          work.data.collectionPath.map(DisplayCollectionPath(_))
-        else None,
       images =
         if (includes.images)
           Some(work.data.images.map(DisplayWorkImageInclude(_)))

@@ -10,7 +10,6 @@ import uk.ac.wellcome.models.work.internal.AccessStatus
 
 case class SingleWorkParams(
   include: Option[WorksIncludes],
-  _expandPaths: Option[List[String]],
   _index: Option[String],
 ) extends QueryParams
 
@@ -25,7 +24,6 @@ object SingleWorkParams extends QueryParamsUtils {
     parameter(
       (
         "include".as[WorksIncludes].?,
-        "_expandPaths".as[List[String]].?,
         "_index".as[String].?
       )
     ).tmap((SingleWorkParams.apply _).tupled(_))
@@ -42,7 +40,6 @@ object SingleWorkParams extends QueryParamsUtils {
       "contributors" -> WorkInclude.Contributors,
       "production" -> WorkInclude.Production,
       "notes" -> WorkInclude.Notes,
-      "collection" -> WorkInclude.Collection,
       "images" -> WorkInclude.Images,
       "parts" -> WorkInclude.Parts,
       "partOf" -> WorkInclude.PartOf,
@@ -69,8 +66,6 @@ case class MultipleWorksParams(
   query: Option[String],
   identifiers: Option[IdentifiersFilter],
   `items.locations.accessConditions.status`: Option[AccessStatusFilter],
-  collection: Option[CollectionPathFilter],
-  `collection.depth`: Option[CollectionDepthFilter],
   _queryType: Option[SearchQueryType],
   _index: Option[String],
 ) extends QueryParams
@@ -99,8 +94,6 @@ case class MultipleWorksParams(
       `subjects.label`,
       identifiers,
       `items.locations.accessConditions.status`,
-      collection,
-      `collection.depth`,
       license
     ).flatten
 
@@ -140,8 +133,6 @@ object MultipleWorksParams extends QueryParamsUtils {
         "query".as[String].?,
         "identifiers".as[IdentifiersFilter].?,
         "items.locations.accessConditions.status".as[AccessStatusFilter].?,
-        "collection".as[CollectionPathFilter].?,
-        "collection.depth".as[CollectionDepthFilter].?,
         "_queryType".as[SearchQueryType].?,
         "_index".as[String].?,
       )
@@ -180,12 +171,6 @@ object MultipleWorksParams extends QueryParamsUtils {
     ).emap {
       case (includes, excludes) => Right(AccessStatusFilter(includes, excludes))
     }
-
-  implicit val collectionsPathFilter: Decoder[CollectionPathFilter] =
-    Decoder.decodeString.emap(str => Right(CollectionPathFilter(str)))
-
-  implicit val collectionsDepthFilter: Decoder[CollectionDepthFilter] =
-    decodeInt map CollectionDepthFilter
 
   implicit val aggregationsDecoder: Decoder[List[AggregationRequest]] =
     decodeOneOfCommaSeparated(

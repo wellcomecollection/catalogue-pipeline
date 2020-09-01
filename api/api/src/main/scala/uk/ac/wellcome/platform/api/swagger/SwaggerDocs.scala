@@ -145,15 +145,7 @@ trait SingleWorkSwagger {
             "genres",
             "contributors",
             "production",
-            "notes",
-            "collection")),
-        required = false,
-      ),
-      new Parameter(
-        name = "_expandPaths",
-        in = ParameterIn.QUERY,
-        description =
-          "A comma-separated list of extra paths in the collection hierarchy to expand",
+            "notes")),
         required = false,
       )
     )
@@ -449,18 +441,6 @@ trait MultipleWorksSwagger {
         name = "pageSize",
         in = ParameterIn.QUERY,
         description = "The number of works to return per page (default: 10)",
-        required = false
-      ),
-      new Parameter(
-        name = "collection",
-        in = ParameterIn.QUERY,
-        description = "Testing. Considered Unstable.",
-        required = false
-      ),
-      new Parameter(
-        name = "collection.depth",
-        in = ParameterIn.QUERY,
-        description = "Testing. Considered Unstable.",
         required = false
       ),
       new Parameter(
