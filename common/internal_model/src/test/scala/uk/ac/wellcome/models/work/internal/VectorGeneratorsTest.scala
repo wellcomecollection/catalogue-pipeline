@@ -68,7 +68,7 @@ class VectorGeneratorsTest
     }
 
     it("outputs differing hashes for dissimilar vectors") {
-      val vecA = randomVector(d)
+      val vecA = randomVector(d, maxR = 10.0f)
       val vecB = subspaceSimilarVector(
         vecA,
         similarity = math.cos(Math.PI / 2).toFloat,
@@ -84,7 +84,7 @@ class VectorGeneratorsTest
       val vec = randomVector(d, maxR = 10.0f)
       val direction = randomVector(d)
       val otherVecs = (1 to 9).map { i =>
-        (vec zip direction).map(Function.tupled(_ + i * _ / 10))
+        add(vec, scalarMultiply(i / 10f, direction))
       }
       val hash = simHasher.lsh(vec)
       val otherHashes = otherVecs.map(simHasher.lsh)
@@ -92,6 +92,21 @@ class VectorGeneratorsTest
 
       diffSizes shouldBe sorted
     }
+  }
 
+  describe("VectorOps") {
+    it("can orthonormalise a vector basis using the Gram-Schmidt process") {
+      val basis = Seq(
+        Seq(3f, 1f),
+        Seq(2f, 2f)
+      )
+      val orthonormalBasis = gramSchmidtOrthonormalise(basis)
+
+      val sqrt10 = math.sqrt(10).toFloat
+      orthonormalBasis(0)(0) should be(3f / sqrt10 +- floatPrecision)
+      orthonormalBasis(0)(1) should be(1f / sqrt10 +- floatPrecision)
+      orthonormalBasis(1)(0) should be(-1f / sqrt10 +- floatPrecision)
+      orthonormalBasis(1)(1) should be(3f / sqrt10 +- floatPrecision)
+    }
   }
 }

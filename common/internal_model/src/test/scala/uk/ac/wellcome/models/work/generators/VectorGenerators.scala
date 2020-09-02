@@ -8,10 +8,10 @@ trait VectorGenerators {
   private val defaultSimilarity = math.cos(Math.PI / 64).toFloat
 
   lazy val simHasher4096 = new SimHasher(4096, bins = (256, 256))
-  lazy val simHasher256 = new SimHasher(256, bins = (32, 256))
+  lazy val simHasher512 = new SimHasher(512, bins = (32, 256))
 
   def randomVector(d: Int, maxR: Float = 1.0f): Vec = {
-    val rand = normalize(randomUniform(d))
+    val rand = normalize(randomNormal(d))
     val r = maxR * math.pow(Random.nextFloat(), 1.0 / d).toFloat
     scalarMultiply(r, rand)
   }
@@ -56,8 +56,10 @@ class SimHasher(d: Int, bins: (Int, Int) = (256, 256)) {
 
   private val groupSize = d / bins._1
   private val hashSize = math.ceil(log2(bins._2)).toInt
-  lazy private val projections = createMatrix(hashSize, groupSize)(
-    Random.nextGaussian().toFloat / hashSize
+  lazy private val projections = gramSchmidtOrthonormalise(
+    createMatrix(hashSize, groupSize)(
+      Random.nextGaussian().toFloat / hashSize
+    )
   )
 
   def lsh(vec: Vec): Seq[String] = {
@@ -97,6 +99,9 @@ object VectorOps {
   def add(a: Vec, b: Vec): Vec =
     (a zip b).map(Function.tupled(_ + _))
 
+  def sub(a: Vec, b: Vec): Vec =
+    (a zip b).map(Function.tupled(_ - _))
+
   def createMatrix(m: Int, n: Int)(value: => Float): Seq[Vec] =
     Seq.fill(m)(Seq.fill(n)(value))
 
@@ -109,4 +114,15 @@ object VectorOps {
   def randomNormal(d: Int): Vec = Seq.fill(d)(Random.nextGaussian().toFloat)
 
   def randomUniform(d: Int): Vec = Seq.fill(d)(Random.nextFloat)
+
+  def gramSchmidtOrthonormalise(basis: Seq[Vec]): Seq[Vec] = {
+    basis.tail
+      .foldLeft(Seq(basis.head)) { (prev, vec) =>
+        prev :+ sub(vec, prev.map(proj(_, vec)).reduce(add))
+      }
+      .map(normalize)
+  }
+
+  def proj(a: Vec, b: Vec): Vec =
+    scalarMultiply(dot(a, b) / dot(a, a), a)
 }
