@@ -3,6 +3,7 @@
   "folder" : "pipeline/relation_embedder",
   "dependencyIds" : [
     "internal_model",
-    "elasticsearch"
+    "elasticsearch",
+    "pipeline_storage"
   ]
 }

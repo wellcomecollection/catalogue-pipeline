@@ -18,7 +18,9 @@ object Main extends WellcomeTypesafeApp {
 
     new RelationEmbedderWorkerService(
       sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
-      msgSender = ???
+      msgSender = ???,
+      workRetriever = ???,
+      relatedWorksService = ???
     )
   }
 }
