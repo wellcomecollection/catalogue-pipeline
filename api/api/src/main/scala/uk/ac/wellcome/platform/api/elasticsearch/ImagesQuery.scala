@@ -86,6 +86,7 @@ case object ImageSimilarity {
       .likeDocs(List(documentRef))
       .copy(
         minTermFreq = Some(1),
+        minDocFreq = Some(1),
         maxQueryTerms = Some(1000),
         minShouldMatch = Some("1")
       )

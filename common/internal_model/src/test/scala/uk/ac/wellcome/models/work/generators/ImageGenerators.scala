@@ -70,7 +70,7 @@ trait ImageGenerators
     val features = randomVector(4096)
     val (features1, features2) = features.splitAt(features.size / 2)
     val lshEncodedFeatures = simHasher4096.lsh(features)
-    val palette = simHasher256.lsh(randomVector(256))
+    val palette = simHasher512.lsh(randomVector(512))
     Some(
       InferredData(
         features1 = features1.toList,
@@ -107,14 +107,26 @@ trait ImageGenerators
     )
 
   // Create a set of images with intersecting LSH lists to ensure
-  // that similarity queries will return something
-  def createVisuallySimilarImages(n: Int): Seq[AugmentedImage] = {
-    val baseFeaturesAndPalette = (randomVector(4096), randomVector(256))
-    val similarFeaturesAndPalette = (2 to n).map { _ =>
-      (
-        subspaceSimilarVector(baseFeaturesAndPalette._1),
-        subspaceSimilarVector(baseFeaturesAndPalette._2),
-      )
+  // that similarity queries will return something. Returns them in order
+  // of similarity.
+  def createSimilarImages(n: Int,
+                          similarFeatures: Boolean,
+                          similarPalette: Boolean): Seq[AugmentedImage] = {
+    val baseFeaturesAndPalette = (randomVector(4096), randomVector(512))
+    val similarFeaturesAndPalette = (1 until n).map { n =>
+      val features = if (similarFeatures) {
+        subspaceSimilarVector(
+          baseFeaturesAndPalette._1,
+          similarity = 1f - (n * 0.05f),
+          subspaces = 256)
+      } else { randomVector(4096) }
+      val palette = if (similarPalette) {
+        subspaceSimilarVector(
+          baseFeaturesAndPalette._2,
+          similarity = 1f - (n * 0.05f),
+          subspaces = 32)
+      } else { randomVector(512) }
+      (features, palette)
     }
     (baseFeaturesAndPalette +: similarFeaturesAndPalette).map {
       case (features, palette) =>
@@ -124,7 +136,7 @@ trait ImageGenerators
               features1 = features.slice(0, 2048).toList,
               features2 = features.slice(2048, 4096).toList,
               lshEncodedFeatures = simHasher4096.lsh(features).toList,
-              palette = simHasher256.lsh(palette).toList
+              palette = simHasher512.lsh(palette).toList
             )
           )
         )
