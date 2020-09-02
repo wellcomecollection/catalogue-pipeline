@@ -442,4 +442,65 @@ class DisplayWorkTest
       }
     }
   }
+
+  describe("related works") {
+    val work = createIdentifiedWork
+    val workA = createIdentifiedWork
+    val workB = createIdentifiedWork
+    val workC = createIdentifiedWork
+    val workD = createIdentifiedWork
+    val workE = createIdentifiedWork
+    val workF = createIdentifiedWork
+
+    val relatedWorks = RelatedWorks(
+      partOf = Some(
+        List(
+          RelatedWork(
+            workB,
+            RelatedWorks.partOf(RelatedWork(workA))
+          )
+        )
+      ),
+      parts = Some(List(RelatedWork(workE), RelatedWork(workF))),
+      precededBy = Some(List(RelatedWork(workC))),
+      succeededBy = Some(List(RelatedWork(workD))),
+    )
+
+    it("includes nested partOf") {
+      val displayWork =
+        DisplayWork(work, WorksIncludes(partOf = true), relatedWorks)
+      displayWork.partOf.isEmpty shouldBe false
+      val partOf: List[DisplayWork] = displayWork.partOf.get
+      partOf.map(_.id) shouldBe List(workB.canonicalId)
+      partOf(0).partOf shouldBe Some(List(DisplayWork(workA)))
+    }
+
+    it("includes parts") {
+      val displayWork =
+        DisplayWork(work, WorksIncludes(parts = true), relatedWorks)
+      displayWork.parts shouldBe Some(
+        List(DisplayWork(workE), DisplayWork(workF))
+      )
+    }
+
+    it("includes precededBy") {
+      val displayWork =
+        DisplayWork(work, WorksIncludes(precededBy = true), relatedWorks)
+      displayWork.precededBy shouldBe Some(List(DisplayWork(workC)))
+    }
+
+    it("includes succeededBy") {
+      val displayWork =
+        DisplayWork(work, WorksIncludes(succeededBy = true), relatedWorks)
+      displayWork.succeededBy shouldBe Some(List(DisplayWork(workD)))
+    }
+
+    it("does not include relations when not requested") {
+      val displayWork = DisplayWork(work, WorksIncludes(), relatedWorks)
+      displayWork.parts shouldBe None
+      displayWork.partOf shouldBe None
+      displayWork.precededBy shouldBe None
+      displayWork.succeededBy shouldBe None
+    }
+  }
 }

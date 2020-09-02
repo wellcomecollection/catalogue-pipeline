@@ -2,6 +2,7 @@
 
 - [Catalogue](README.md)
 - [Search](search/README.md)
+  - [Guide to wellcomecollection.org query development](search/query-development-guide.md)
   - [Hypotheses](search/hypotheses/README.md)
     - [Concepts, subjects](search/hypotheses/concepts-subjects.md)
     - [Contributors](search/hypotheses/contributors.md)
@@ -19,6 +20,9 @@
     - [Behaviours](search/hypotheses/behaviours.md)   
     - [Further research and design considerations](search/hypotheses/further-research-and-design-considerations.md)    
   - [Analysis](search/analysis/README.md)
+    - [Less than 3-word searches](search/analysis/less-than-3-word-searches.md)
+    - [Searches with 3 words or more](search/analysis/summary-3-plus-word-searches.md)
+    - [Subsequent searches](search/analysis/subsequent-searches.md)
   - [Query design](search/query-design/README.md)
   - [Intentions & expectations](search/intentions-and-expectations.md)
   - [Relevance tests](search/tests/README.md)

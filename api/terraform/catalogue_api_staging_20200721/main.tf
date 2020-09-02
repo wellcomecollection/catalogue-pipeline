@@ -4,7 +4,7 @@ module "catalogue_api_prod_20200520" {
   environment        = local.environment
   instance           = "20200721"
   listener_port      = 1235
-  desired_task_count = 3
+  desired_task_count = 1
 
   namespace   = local.namespace
   vpc_id      = local.vpc_id
