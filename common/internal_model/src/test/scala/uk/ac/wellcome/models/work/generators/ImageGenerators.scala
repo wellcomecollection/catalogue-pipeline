@@ -2,12 +2,11 @@ package uk.ac.wellcome.models.work.generators
 
 import uk.ac.wellcome.models.work.internal._
 
-import scala.util.Random
-
 trait ImageGenerators
     extends IdentifiersGenerators
     with ItemsGenerators
-    with WorksGenerators {
+    with WorksGenerators
+    with VectorGenerators {
   def createUnmergedImageWith(
     location: DigitalLocation = createDigitalLocation,
     version: Int = 1,
@@ -68,15 +67,18 @@ trait ImageGenerators
         redirectedWork.map(_.toSourceWork)))
 
   def createInferredData = {
-    val features1 = (0 until 2048).map(_ => Random.nextFloat() * 100).toList
-    val features2 = (0 until 2048).map(_ => Random.nextFloat() * 100).toList
-    def randIdx = Random.nextInt(256)
-    val lshEncodedFeatures =
-      (0 until 256)
-        .map(_ => s"$randIdx-$randIdx")
-        .toList
-    val palette = (0 until 25).map(_ => f"$randIdx%03d").toList
-    Some(InferredData(features1, features2, lshEncodedFeatures, palette))
+    val features = randomVector(4096)
+    val (features1, features2) = features.splitAt(features.size / 2)
+    val lshEncodedFeatures = simHasher4096.lsh(features)
+    val palette = simHasher256.lsh(randomVector(256))
+    Some(
+      InferredData(
+        features1 = features1.toList,
+        features2 = features2.toList,
+        lshEncodedFeatures = lshEncodedFeatures.toList,
+        palette = palette.toList
+      )
+    )
   }
 
   def createAugmentedImageWith(
@@ -107,20 +109,25 @@ trait ImageGenerators
   // Create a set of images with intersecting LSH lists to ensure
   // that similarity queries will return something
   def createVisuallySimilarImages(n: Int): Seq[AugmentedImage] = {
-    val baseFeatures = createInferredData.get.lshEncodedFeatures
-    val similarFeatures = (2 to n).map { n =>
-      val mergeIdx = n % baseFeatures.size
-      baseFeatures.drop(mergeIdx) ++
-        createInferredData.get.lshEncodedFeatures.take(mergeIdx)
-    }
-    (similarFeatures :+ baseFeatures).map { features =>
-      createAugmentedImageWith(
-        inferredData = createInferredData.map {
-          _.copy(
-            lshEncodedFeatures = features
-          )
-        }
+    val baseFeaturesAndPalette = (randomVector(4096), randomVector(256))
+    val similarFeaturesAndPalette = (2 to n).map { _ =>
+      (
+        subspaceSimilarVector(baseFeaturesAndPalette._1),
+        subspaceSimilarVector(baseFeaturesAndPalette._2),
       )
+    }
+    (baseFeaturesAndPalette +: similarFeaturesAndPalette).map {
+      case (features, palette) =>
+        createAugmentedImageWith(
+          inferredData = Some(
+            InferredData(
+              features1 = features.slice(0, 2048).toList,
+              features2 = features.slice(2048, 4096).toList,
+              lshEncodedFeatures = simHasher4096.lsh(features).toList,
+              palette = simHasher256.lsh(palette).toList
+            )
+          )
+        )
     }
   }
 
