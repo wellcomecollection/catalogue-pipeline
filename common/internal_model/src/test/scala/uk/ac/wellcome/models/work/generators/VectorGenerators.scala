@@ -3,50 +3,97 @@ package uk.ac.wellcome.models.work.generators
 import scala.util.Random
 
 trait VectorGenerators {
-  def randomVector(d: Int, maxR: Float = 1.0f): Seq[Float] = {
-    val rand = Seq.fill(d)(Random.nextFloat)
-    val r = math.pow(Random.nextFloat() * maxR, 1.0 / d).toFloat
-    val denom = norm(rand)
-    rand.map(r * _ / denom)
+  import VectorOps._
+
+  private val defaultSimilarity = math.cos(Math.PI / 64).toFloat
+
+  def randomVector(d: Int, maxR: Float = 1.0f): Vec = {
+    val rand = normalize(randomUniform(d))
+    val r = maxR * math.pow(Random.nextFloat(), 1.0 / d).toFloat
+    scalarMultiply(r, rand)
   }
 
-  def nearbyVector(a: Seq[Float], epsilon: Float = 0.1f): Seq[Float] =
-    (a zip randomVectorOnBall(a.size, epsilon)).map {
-      case (x, e) => x + e
-    }
+  def subspaceSimilarVector(a: Vec,
+                            similarity: Float = defaultSimilarity,
+                            subspaces: Int = 256): Vec =
+    a.grouped(a.size / subspaces)
+      .flatMap(similarVector(_, similarity))
+      .toSeq
 
-  def norm(vec: Seq[Float]): Float =
-    math.sqrt(vec.fold(0.0f)(_ + math.pow(_, 2).toFloat)).toFloat
+  def similarVector(a: Vec, similarity: Float = defaultSimilarity): Vec = {
+    val r = norm(a)
+    val unitA = normalize(a)
+    val rand = normalize(randomNormal(a.size))
+    val perp = normalize(
+      add(
+        rand,
+        scalarMultiply(-dot(rand, unitA), unitA)
+      )
+    )
+    add(
+      scalarMultiply(r * similarity, unitA),
+      scalarMultiply(r * math.sqrt(1 - (similarity * similarity)).toFloat, perp)
+    )
+  }
+
+  def nearbyVector(a: Vec, epsilon: Float = 0.1f): Vec =
+    add(a, randomVectorOnBall(a.size, epsilon))
 
   class BinHasher(d: Int, bins: (Int, Int) = (256, 256)) {
     private val groupSize = d / bins._1
-    private val hashSize = (math.log(bins._2) / math.log(2.0f)).toInt
-    lazy private val projections =
-      Seq.fill(hashSize)(Seq.fill(groupSize)(Random.nextGaussian() / hashSize))
+    private val hashSize = math.ceil(log2(bins._2)).toInt
+    lazy private val projections = createMatrix(hashSize, groupSize)(
+      Random.nextGaussian().toFloat / hashSize
+    )
 
-    def lsh(vec: Seq[Float]): Seq[String] = {
+    def lsh(vec: Vec): Seq[String] = {
       assert(vec.size == d)
       vec
         .grouped(groupSize)
         .zipWithIndex
         .map {
           case (group, index) =>
-            val bits = projections.foldLeft("") {
-              case (str, row)
-                  if (group zip row).map(Function.tupled(_ * _)).sum >= 0 =>
-                str + "1"
-              case (str, _) => str + "0"
+            val hash = projections.zipWithIndex.foldLeft(0) {
+              case (s, (row, i)) if dot(group, row) >= 0 => s | 1 << i
+              case (s, _)                                => s
             }
-            val hash = Integer.parseInt(bits, 2)
             s"$index-$hash"
         }
         .toSeq
     }
   }
 
-  private def randomVectorOnBall(d: Int, r: Float): Seq[Float] = {
-    val randVec = Seq.fill(d)(Random.nextGaussian().toFloat)
-    val denom = norm(randVec)
-    randVec.map(r * _ / denom)
-  }
+  private def randomVectorOnBall(d: Int, r: Float): Vec =
+    scalarMultiply(r, normalize(randomNormal(d)))
+}
+
+object VectorOps {
+  type Vec = Seq[Float]
+
+  def norm(vec: Vec): Float =
+    math.sqrt(vec.fold(0.0f)((total, i) => total + (i * i))).toFloat
+
+  def normalize(vec: Vec): Vec =
+    scalarMultiply(1 / norm(vec), vec)
+
+  def euclideanDistance(a: Vec, b: Vec): Float =
+    norm(add(a, scalarMultiply(-1, b)))
+
+  def scalarMultiply(a: Float, vec: Vec): Vec = vec.map(_ * a)
+
+  def add(a: Vec, b: Vec): Vec =
+    (a zip b).map(Function.tupled(_ + _))
+
+  def createMatrix(m: Int, n: Int)(value: => Float): Seq[Vec] =
+    Seq.fill(m)(Seq.fill(n)(value))
+
+  def log2(x: Float): Float =
+    (math.log(x) / math.log(2)).toFloat
+
+  def dot(a: Vec, b: Vec): Float =
+    (a zip b).map(Function.tupled(_ * _)).sum
+
+  def randomNormal(d: Int): Vec = Seq.fill(d)(Random.nextGaussian().toFloat)
+
+  def randomUniform(d: Int): Vec = Seq.fill(d)(Random.nextFloat)
 }
