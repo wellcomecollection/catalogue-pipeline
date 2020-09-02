@@ -7,6 +7,8 @@ trait VectorGenerators {
 
   private val defaultSimilarity = math.cos(Math.PI / 64).toFloat
 
+  lazy val simHasher4096 = new SimHasher(4096, bins = (256, 256))
+
   def randomVector(d: Int, maxR: Float = 1.0f): Vec = {
     val rand = normalize(randomUniform(d))
     val r = maxR * math.pow(Random.nextFloat(), 1.0 / d).toFloat
@@ -37,34 +39,41 @@ trait VectorGenerators {
   }
 
   def nearbyVector(a: Vec, epsilon: Float = 0.1f): Vec =
-    add(a, randomVectorOnBall(a.size, epsilon))
+    add(a, scalarMultiply(epsilon, normalize(randomNormal(a.size))))
+}
 
-  class BinHasher(d: Int, bins: (Int, Int) = (256, 256)) {
-    private val groupSize = d / bins._1
-    private val hashSize = math.ceil(log2(bins._2)).toInt
-    lazy private val projections = createMatrix(hashSize, groupSize)(
-      Random.nextGaussian().toFloat / hashSize
-    )
+/*
+ * This implements a modified version of the SimHash algorithm,
+ * splitting vectors into subspaces before applying the hashing
+ * and encoding the resultant signatures into integers.
+ *
+ * The original (unmodified) algorithm was taken from these slides:
+ * http://www.cs.jhu.edu/~vandurme/papers/VanDurmeLallACL10-slides.pdf
+ */
+class SimHasher(d: Int, bins: (Int, Int) = (256, 256)) {
+  import VectorOps._
 
-    def lsh(vec: Vec): Seq[String] = {
-      assert(vec.size == d)
-      vec
-        .grouped(groupSize)
-        .zipWithIndex
-        .map {
-          case (group, index) =>
-            val hash = projections.zipWithIndex.foldLeft(0) {
-              case (s, (row, i)) if dot(group, row) >= 0 => s | 1 << i
-              case (s, _)                                => s
-            }
-            s"$index-$hash"
-        }
-        .toSeq
-    }
+  private val groupSize = d / bins._1
+  private val hashSize = math.ceil(log2(bins._2)).toInt
+  lazy private val projections = createMatrix(hashSize, groupSize)(
+    Random.nextGaussian().toFloat / hashSize
+  )
+
+  def lsh(vec: Vec): Seq[String] = {
+    assert(vec.size == d)
+    vec
+      .grouped(groupSize)
+      .zipWithIndex
+      .map {
+        case (group, index) =>
+          val hash = projections.zipWithIndex.foldLeft(0) {
+            case (s, (row, i)) if dot(group, row) >= 0 => s | 1 << i
+            case (s, _)                                => s
+          }
+          s"$index-$hash"
+      }
+      .toSeq
   }
-
-  private def randomVectorOnBall(d: Int, r: Float): Vec =
-    scalarMultiply(r, normalize(randomNormal(d)))
 }
 
 object VectorOps {
@@ -78,6 +87,9 @@ object VectorOps {
 
   def euclideanDistance(a: Vec, b: Vec): Float =
     norm(add(a, scalarMultiply(-1, b)))
+
+  def cosineSimilarity(a: Vec, b: Vec): Float =
+    dot(a, b) / (norm(a) * norm(b))
 
   def scalarMultiply(a: Float, vec: Vec): Vec = vec.map(_ * a)
 

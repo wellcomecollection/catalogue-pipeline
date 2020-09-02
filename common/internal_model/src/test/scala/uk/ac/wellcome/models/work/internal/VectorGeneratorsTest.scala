@@ -2,7 +2,11 @@ package uk.ac.wellcome.models.work.internal
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.generators.{VectorGenerators, VectorOps}
+import uk.ac.wellcome.models.work.generators.{
+  SimHasher,
+  VectorGenerators,
+  VectorOps
+}
 
 class VectorGeneratorsTest
     extends AnyFunSpec
@@ -34,18 +38,17 @@ class VectorGeneratorsTest
 
     vecB should have length vecA.length
     vecB should not equal vecA
-    val calculatedSimilarity = dot(vecA, vecB) / (norm(vecA) * norm(vecB))
-    similarity should be(calculatedSimilarity +- floatPrecision)
+    similarity should be(cosineSimilarity(vecA, vecB) +- floatPrecision)
   }
 
-  describe("BinHasher") {
+  describe("SimHasher") {
     val d = 4096
-    val binHasher = new BinHasher(d)
+    val simHasher = new SimHasher(d)
 
     it("deterministically hashes vectors") {
       val vec = randomVector(d)
-      val hash1 = binHasher.lsh(vec)
-      val hash2 = binHasher.lsh(vec)
+      val hash1 = simHasher.lsh(vec)
+      val hash2 = simHasher.lsh(vec)
 
       hash1 should equal(hash2)
     }
@@ -57,8 +60,8 @@ class VectorGeneratorsTest
           vecA,
           similarity = math.cos(Math.PI / 64).toFloat,
           subspaces = 256)
-      val hashA = binHasher.lsh(vecA)
-      val hashB = binHasher.lsh(vecB)
+      val hashA = simHasher.lsh(vecA)
+      val hashB = simHasher.lsh(vecB)
 
       val difference = hashA.toSet diff hashB.toSet
       difference.size should be <= (0.25 * hashA.size).toInt
@@ -70,8 +73,8 @@ class VectorGeneratorsTest
         vecA,
         similarity = math.cos(Math.PI / 2).toFloat,
         subspaces = 256)
-      val hashA = binHasher.lsh(vecA)
-      val hashB = binHasher.lsh(vecB)
+      val hashA = simHasher.lsh(vecA)
+      val hashB = simHasher.lsh(vecB)
 
       val difference = hashA diff hashB
       difference.size should be >= (0.75 * hashA.size).toInt
@@ -83,8 +86,8 @@ class VectorGeneratorsTest
       val otherVecs = (1 to 9).map { i =>
         (vec zip direction).map(Function.tupled(_ + i * _ / 10))
       }
-      val hash = binHasher.lsh(vec)
-      val otherHashes = otherVecs.map(binHasher.lsh)
+      val hash = simHasher.lsh(vec)
+      val otherHashes = otherVecs.map(simHasher.lsh)
       val diffSizes = otherHashes.map(_ diff hash).map(_.size)
 
       diffSizes shouldBe sorted
