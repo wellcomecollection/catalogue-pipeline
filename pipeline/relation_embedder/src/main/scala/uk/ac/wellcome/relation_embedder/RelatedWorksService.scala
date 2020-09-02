@@ -6,10 +6,12 @@ import com.sksamuel.elastic4s.{ElasticClient, ElasticError, Index, Response}
 import com.sksamuel.elastic4s.requests.searches.{
   MultiSearchRequest,
   MultiSearchResponse,
-  SearchResponse
+  SearchResponse,
+  SearchRequest
 }
 import com.sksamuel.elastic4s.requests.searches.SearchHit
 import com.sksamuel.elastic4s.ElasticDsl._
+import io.circe.generic.semiauto.deriveDecoder
 
 import uk.ac.wellcome.models.work.internal._
 
@@ -19,23 +21,53 @@ import uk.ac.wellcome.json.JsonUtil.fromJson
 
 trait RelatedWorksService {
 
-  def apply(work: IdentifiedWork): Future[RelatedWorks]
+  /** Given some work, return the IDs of all other works which need to be
+    * denormalised. This should consist of the works siblings, its parent, and
+    * all its descendents.
+    *
+    * @param work The work
+    * @return The IDs of the other works to denormalise
+    */
+  def getOtherAffectedWorks(work: IdentifiedWork): Future[List[SourceIdentifier]]
+
+  /** For a given work return all its relations.
+    *
+    * @param work The work
+    * @return The related works which are embedded into the given work
+    */
+  def getRelations(work: IdentifiedWork): Future[RelatedWorks]
 }
 
 class PathQueryRelatedWorksService(elasticClient: ElasticClient, index: Index)(
   implicit ec: ExecutionContext)
     extends RelatedWorksService {
 
-  type TokenizedPath = List[PathToken]
-  type PathToken = List[PathTokenPart]
-  type PathTokenPart = Either[Int, String]
+  def getOtherAffectedWorks(work: IdentifiedWork): Future[List[SourceIdentifier]] =
+    work.data.collectionPath match {
+      case None => Future.successful(Nil)
+      case Some(CollectionPath(path, _, _)) =>
+        executeSearchRequest(
+          RelatedWorkRequestBuilder(index, path).otherAffectedWorksRequest
+        ).flatMap { result =>
+          val works = result
+            .left
+            .map(_.asException)
+            .flatMap { resp =>
+              resp.hits.hits.toList.map(toAffectedWork).toResult
+            }
+          works match {
+            case Right(works) => Future.successful(works.map(_.sourceIdentifier))
+            case Left(err)    => Future.failed(err)
+          }
+        }
+    }
 
-  def apply(work: IdentifiedWork): Future[RelatedWorks] =
+  def getRelations(work: IdentifiedWork): Future[RelatedWorks] =
     work.data.collectionPath match {
       case None => Future.successful(RelatedWorks.nil)
       case Some(CollectionPath(path, _, _)) =>
         executeMultiSearchRequest(
-          RelatedWorkRequestBuilder(index, path).request
+          RelatedWorkRequestBuilder(index, path).relationsRequest
         ).flatMap { result =>
           val works = result.left
             .map(_.asException)
@@ -60,7 +92,11 @@ class PathQueryRelatedWorksService(elasticClient: ElasticClient, index: Index)(
         }
     }
 
-  def executeMultiSearchRequest(request: MultiSearchRequest)
+  private def executeSearchRequest(
+    request: SearchRequest): Future[Either[ElasticError, SearchResponse]] =
+      elasticClient.execute(request).map(toEither)
+
+  private def executeMultiSearchRequest(request: MultiSearchRequest)
     : Future[Either[ElasticError, List[SearchResponse]]] =
     elasticClient
       .execute(request)
@@ -80,12 +116,19 @@ class PathQueryRelatedWorksService(elasticClient: ElasticClient, index: Index)(
         }
       }
 
-  def toEither[T](response: Response[T]): Either[ElasticError, T] =
+  private def toEither[T](response: Response[T]): Either[ElasticError, T] =
     if (response.isError)
       Left(response.error)
     else
       Right(response.result)
 
-  def toWork(hit: SearchHit): Result[IdentifiedWork] =
+  private def toWork(hit: SearchHit): Result[IdentifiedWork] =
     fromJson[IdentifiedWork](hit.sourceAsString).toEither
+
+  case class AffectedWork(sourceIdentifier: SourceIdentifier)
+
+  implicit val affectedWorkDecoder = deriveDecoder[AffectedWork]
+
+  private def toAffectedWork(hit: SearchHit): Result[AffectedWork] =
+    fromJson[AffectedWork](hit.sourceAsString).toEither
 }

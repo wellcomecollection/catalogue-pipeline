@@ -55,7 +55,7 @@ class RelatedWorksServiceTest
     "Retrieves a related works for the given path with children and siblings sorted correctly") {
     withLocalWorksIndex { index =>
       storeWorks(index)
-      whenReady(service(index)(work2)) { result =>
+      whenReady(service(index).getRelations(work2)) { result =>
         result shouldBe
           RelatedWorks(
             parts = Some(List(RelatedWork(workD), RelatedWork(workE))),
@@ -71,7 +71,7 @@ class RelatedWorksServiceTest
     "Retrieves a related works for the given path with ancestors sorted correctly") {
     withLocalWorksIndex { index =>
       storeWorks(index)
-      whenReady(service(index)(workF)) { relatedWorks =>
+      whenReady(service(index).getRelations(workF)) { relatedWorks =>
         relatedWorks shouldBe
           RelatedWorks(
             parts = Some(Nil),
@@ -104,7 +104,7 @@ class RelatedWorksServiceTest
   it("Retrieves relations correctly from root position") {
     withLocalWorksIndex { index =>
       storeWorks(index)
-      whenReady(service(index)(workA)) { relatedWorks =>
+      whenReady(service(index).getRelations(workA)) { relatedWorks =>
         relatedWorks shouldBe
           RelatedWorks(
             parts = Some(List(
@@ -123,7 +123,7 @@ class RelatedWorksServiceTest
   it("Ignores missing ancestors") {
     withLocalWorksIndex { index =>
       storeWorks(index, List(workA, workB, workC, workD, workE, workF))
-      whenReady(service(index)(workF)) { result =>
+      whenReady(service(index).getRelations(workF)) { result =>
         result shouldBe
           RelatedWorks(
             parts = Some(Nil),
@@ -152,7 +152,7 @@ class RelatedWorksServiceTest
     withLocalWorksIndex { index =>
       val workX = createIdentifiedWork
       storeWorks(index, List(workA, work1, workX))
-      whenReady(service(index)(workX)) { result =>
+      whenReady(service(index).getRelations(workX)) { result =>
         result shouldBe
           RelatedWorks(
             parts = Some(Nil),
@@ -171,7 +171,7 @@ class RelatedWorksServiceTest
       val workB2 = work("a/B2")
       val workB10 = work("a/B10")
       storeWorks(index, List(workA, workB2, workB1, workB10))
-      whenReady(service(index)(workA)) { result =>
+      whenReady(service(index).getRelations(workA)) { result =>
         result shouldBe
           RelatedWorks(
             parts = Some(List(
