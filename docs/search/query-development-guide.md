@@ -1,186 +1,201 @@
-Hypotheses of user expectations and search behaviour are validated by analysis.  Once validated, different query tools are deployed and tested in order to meet these expectations.  
+Hypotheses of user expectations and search behaviour are validated by analysis.  Once validated, different query strategies are deployed and tested in order to meet these expectations.  
 
-In cases where links to analysis or relevance testing are missing, this work is either pending or redundant. In cases where links to query tools are missing, this query type is served by the tools used for Concepts, subjects.
+In cases where links to analysis or relevance testing are missing, this work is either pending or redundant. 
 
 
-# [Concepts, subjects](https://docs.wellcomecollection.org/catalogue/search/hypotheses/concepts-subjects.md)
+# Concepts, subjects
+### [Hypotheses](https://docs.wellcomecollection.org/catalogue/search/hypotheses/concepts-subjects)
 
 ### Analysis conducted
-[Less than 3-word searches](https://docs.wellcomecollection.org/catalogue/search/analysis/less-than-3-word-searches.md)
+[Less than 3-word searches](https://docs.wellcomecollection.org/catalogue/search/analysis/less-than-3-word-searches)
 
-[Searches with 3 words or more](https://docs.wellcomecollection.org/catalogue/search/analysis/summary-3-plus-word-searches.md)
+[Searches with 3 words or more](https://docs.wellcomecollection.org/catalogue/search/analysis/summary-3-plus-word-searches)
 
-### Query tools used
-[Boosting](https://docs.wellcomecollection.org/catalogue/search/query-design.md#boosting) [Compound queries](https://docs.wellcomecollection.org/catalogue/search/query-design.md#compound-queries) 
+### Query strategies used
+[Boosting](https://docs.wellcomecollection.org/catalogue/search/query-design#boosting) [Compound queries](https://docs.wellcomecollection.org/catalogue/search/query-design#compound-queries) 
 
-[And](https://docs.wellcomecollection.org/catalogue/search/query-design.md#and) 
+[And](https://docs.wellcomecollection.org/catalogue/search/query-design#and) 
 
-[Multi match](https://docs.wellcomecollection.org/catalogue/search/query-design.md#multi-match) 
+[Multi match](https://docs.wellcomecollection.org/catalogue/search/query-design#multi-match) 
 
 ### Relevance tests conducted
-[Test 4 – AND or OR](https://docs.wellcomecollection.org/catalogue/search/tests/004_and_or_or.md)
+[Test 4 – AND or OR](https://docs.wellcomecollection.org/catalogue/search/tests/004_and_or_or)
 
-[Test 5 - Scoring Tiers](https://docs.wellcomecollection.org/catalogue/search/tests/005_stacked_queries.md)
+[Test 5 - Scoring Tiers](https://docs.wellcomecollection.org/catalogue/search/tests/005_stacked_queries)
 
-[Test 6 - English tokeniser and Contributors](https://docs.wellcomecollection.org/catalogue/search/tests/006-english-tokeniser-and-contributors.md)
+[Test 6 - English tokeniser and Contributors](https://docs.wellcomecollection.org/catalogue/search/tests/006-english-tokeniser-and-contributors)
 
-[Test 8 – Bool boosted vs Phraser beam](https://docs.wellcomecollection.org/catalogue/search/tests/008-boolboosted-vs-phraserbeam.md)	
+[Test 8 – Bool boosted vs Phraser beam](https://docs.wellcomecollection.org/catalogue/search/tests/008-boolboosted-vs-phraserbeam)	
 
 
-# [Contributors](https://docs.wellcomecollection.org/catalogue/search/hypotheses/contributors.md)
+# Contributors
+### [Hypotheses](https://docs.wellcomecollection.org/catalogue/search/hypotheses/contributors)
 
 ### Analysis conducted
-[Less than 3-word searches](https://docs.wellcomecollection.org/catalogue/search/analysis/less-than-3-word-searches.md)
+[Less than 3-word searches](https://docs.wellcomecollection.org/catalogue/search/analysis/less-than-3-word-searches)
 
-[Searches with 3 words or more](https://docs.wellcomecollection.org/catalogue/search/analysis/summary-3-plus-word-searches.md)
+[Searches with 3 words or more](https://docs.wellcomecollection.org/catalogue/search/analysis/summary-3-plus-word-searches)
 
-### Query tools used
-[Bool boosted](https://docs.wellcomecollection.org/catalogue/search/query-design.md#bool-boosted) 
+### Query strategies used
+[Bool boosted](https://docs.wellcomecollection.org/catalogue/search/query-design#bool-boosted) 
 
-[Boosting](https://docs.wellcomecollection.org/catalogue/search/query-design.md#boosting)
+[Boosting](https://docs.wellcomecollection.org/catalogue/search/query-design#boosting)
 
-[Compound queries](https://docs.wellcomecollection.org/catalogue/search/query-design.md#compound-queries)
+[Compound queries](https://docs.wellcomecollection.org/catalogue/search/query-design#compound-queries)
 
-[And](https://docs.wellcomecollection.org/catalogue/search/query-design.md#and)
+[And](https://docs.wellcomecollection.org/catalogue/search/query-design#and)
 
-[Tiered scoring](https://docs.wellcomecollection.org/catalogue/search/query-design.md#tiered-scoring)
+[Tiered scoring](https://docs.wellcomecollection.org/catalogue/search/query-design#tiered-scoring)
 
-[Multi match](https://docs.wellcomecollection.org/catalogue/search/query-design.md#multi-match)
+[Multi match](https://docs.wellcomecollection.org/catalogue/search/query-design#multi-match)
 
-[Phraser beam](https://docs.wellcomecollection.org/catalogue/search/query-design.md#phraser-beam)
+[Phraser beam](https://docs.wellcomecollection.org/catalogue/search/query-design#phraser-beam)
 
-[Shingling](https://docs.wellcomecollection.org/catalogue/search/query-design.md#shingling) 
+[Shingling](https://docs.wellcomecollection.org/catalogue/search/query-design#shingling) 
 
 ### Relevance tests conducted
-[Test 4 – AND or OR](https://docs.wellcomecollection.org/catalogue/search/tests/004_and_or_or.md)
+[Test 4 – AND or OR](https://docs.wellcomecollection.org/catalogue/search/tests/004_and_or_or)
 
-[Test 5 - Scoring Tiers](https://docs.wellcomecollection.org/catalogue/search/tests/005_stacked_queries.md)
+[Test 5 - Scoring Tiers](https://docs.wellcomecollection.org/catalogue/search/tests/005_stacked_queries)
 
-[Test 6 - English tokeniser and Contributors](https://docs.wellcomecollection.org/catalogue/search/tests/006-english-tokeniser-and-contributors.md)
+[Test 6 - English tokeniser and Contributors](https://docs.wellcomecollection.org/catalogue/search/tests/006-english-tokeniser-and-contributors)
 
-[Test 8 – Bool boosted vs Phraser beam](https://docs.wellcomecollection.org/catalogue/search/tests/008-boolboosted-vs-phraserbeam.md)	
+[Test 8 – Bool boosted vs Phraser beam](https://docs.wellcomecollection.org/catalogue/search/tests/008-boolboosted-vs-phraserbeam)	
 
 
-# [Titles](https://docs.wellcomecollection.org/catalogue/search/hypotheses/titles.md)
+# Titles
+### [Hypotheses](https://docs.wellcomecollection.org/catalogue/search/hypotheses/titles)
 
 ### Analysis conducted
-[Less than 3-word searches](https://docs.wellcomecollection.org/catalogue/search/analysis/less-than-3-word-searches.md)
+[Less than 3-word searches](https://docs.wellcomecollection.org/catalogue/search/analysis/less-than-3-word-searches)
 
-[Searches with 3 words or more](https://docs.wellcomecollection.org/catalogue/search/analysis/summary-3-plus-word-searches.md)
+[Searches with 3 words or more](https://docs.wellcomecollection.org/catalogue/search/analysis/summary-3-plus-word-searches)
 
-### Query tools used
-[Bool boosted](https://docs.wellcomecollection.org/catalogue/search/query-design.md#bool-boosted) 
+### Query strategies used
+[Bool boosted](https://docs.wellcomecollection.org/catalogue/search/query-design#bool-boosted) 
 
-[Boosting](https://docs.wellcomecollection.org/catalogue/search/query-design.md#boosting) 
+[Boosting](https://docs.wellcomecollection.org/catalogue/search/query-design#boosting) 
 
-[Compound queries](https://docs.wellcomecollection.org/catalogue/search/query-design.md#compound-queries) 
+[Compound queries](https://docs.wellcomecollection.org/catalogue/search/query-design#compound-queries) 
 
-[And](https://docs.wellcomecollection.org/catalogue/search/query-design.md#and) 
+[And](https://docs.wellcomecollection.org/catalogue/search/query-design#and) 
 
-[Tiered scoring](https://docs.wellcomecollection.org/catalogue/search/query-design.md#tiered-scoring)
+[Tiered scoring](https://docs.wellcomecollection.org/catalogue/search/query-design#tiered-scoring)
 
-[Multi match](https://docs.wellcomecollection.org/catalogue/search/query-design.md#multi-match)
+[Multi match](https://docs.wellcomecollection.org/catalogue/search/query-design#multi-match)
 
-[Phraser beam](https://docs.wellcomecollection.org/catalogue/search/query-design.md#phraser-beam)
+[Phraser beam](https://docs.wellcomecollection.org/catalogue/search/query-design#phraser-beam)
 
-[Shingling](https://docs.wellcomecollection.org/catalogue/search/query-design.md#shingling) 
+[Shingling](https://docs.wellcomecollection.org/catalogue/search/query-design#shingling) 
 
 ### Relevance tests conducted
-[Test 4 – AND or OR](https://docs.wellcomecollection.org/catalogue/search/tests/004_and_or_or.md)
+[Test 4 – AND or OR](https://docs.wellcomecollection.org/catalogue/search/tests/004_and_or_or)
 
-[Test 5 - Scoring Tiers](https://docs.wellcomecollection.org/catalogue/search/tests/005_stacked_queries.md)
+[Test 5 - Scoring Tiers](https://docs.wellcomecollection.org/catalogue/search/tests/005_stacked_queries)
 
-[Test 6 - English tokeniser and Contributors](https://docs.wellcomecollection.org/catalogue/search/tests/006-english-tokeniser-and-contributors.md)
+[Test 6 - English tokeniser and Contributors](https://docs.wellcomecollection.org/catalogue/search/tests/006-english-tokeniser-and-contributors)
 
-[Test 8 – Bool boosted vs Phraser beam](https://docs.wellcomecollection.org/catalogue/search/tests/008-boolboosted-vs-phraserbeam.md)	
+[Test 8 – Bool boosted vs Phraser beam](https://docs.wellcomecollection.org/catalogue/search/tests/008-boolboosted-vs-phraserbeam)	
 
 
-# [Genres](https://docs.wellcomecollection.org/catalogue/search/hypotheses/genres.md)
-
-### Analysis conducted
-[Less than 3-word searches](https://docs.wellcomecollection.org/catalogue/search/analysis/less-than-3-word-searches.md)
-
-[Searches with 3 words or more](https://docs.wellcomecollection.org/catalogue/search/analysis/summary-3-plus-word-searches.md)
-
-# [Reference numbers](https://docs.wellcomecollection.org/catalogue/search/hypotheses/reference-numbers.md)
+# Genres
+### [Hypotheses](https://docs.wellcomecollection.org/catalogue/search/hypotheses/genres)
 
 ### Analysis conducted
-[Less than 3-word searches](https://docs.wellcomecollection.org/catalogue/search/analysis/less-than-3-word-searches.md)
+[Less than 3-word searches](https://docs.wellcomecollection.org/catalogue/search/analysis/less-than-3-word-searches)
 
-[Searches with 3 words or more](https://docs.wellcomecollection.org/catalogue/search/analysis/summary-3-plus-word-searches.md)
-
-
-# [Synonymous names and subjects](https://docs.wellcomecollection.org/catalogue/search/hypotheses/synonymous-names-and-subjects.md)
-
-### Analysis conducted
-[Subsequent searches](https://docs.wellcomecollection.org/catalogue/search/analysis/subsequent-searches.md)
+[Searches with 3 words or more](https://docs.wellcomecollection.org/catalogue/search/analysis/summary-3-plus-word-searches)
 
 
-# [Mood](https://docs.wellcomecollection.org/catalogue/search/hypotheses/mood.md)
+# Reference numbers
+### [Hypotheses](https://docs.wellcomecollection.org/catalogue/search/hypotheses/reference-numbers)
 
 ### Analysis conducted
-[Less than 3-word searches](https://docs.wellcomecollection.org/catalogue/search/analysis/less-than-3-word-searches.md)
+[Less than 3-word searches](https://docs.wellcomecollection.org/catalogue/search/analysis/less-than-3-word-searches)
 
-[Searches with 3 words or more](https://docs.wellcomecollection.org/catalogue/search/analysis/summary-3-plus-word-searches.md)
+[Searches with 3 words or more](https://docs.wellcomecollection.org/catalogue/search/analysis/summary-3-plus-word-searches)
 
 
-# [Phrases](https://docs.wellcomecollection.org/catalogue/search/hypotheses/phrases.md)
+# Synonymous names and subjects
+### [Hypotheses](https://docs.wellcomecollection.org/catalogue/search/hypotheses/synonymous-names-and-subjects)
 
 ### Analysis conducted
-[Searches with 3 words or more](https://docs.wellcomecollection.org/catalogue/search/analysis/summary-3-plus-word-searches.md)
+[Subsequent searches](https://docs.wellcomecollection.org/catalogue/search/analysis/subsequent-searches)
 
-### Query tools used
-[Boosting](https://docs.wellcomecollection.org/catalogue/search/query-design.md#boosting) 
 
-[Compound queries](https://docs.wellcomecollection.org/catalogue/search/query-design.md#compound-queries) 
+# Mood
+### [Hypotheses](https://docs.wellcomecollection.org/catalogue/search/hypotheses/mood)
 
-[And](https://docs.wellcomecollection.org/catalogue/search/query-design.md#and)
+### Analysis conducted
+[Less than 3-word searches](https://docs.wellcomecollection.org/catalogue/search/analysis/less-than-3-word-searches)
 
-[Multi match](https://docs.wellcomecollection.org/catalogue/search/query-design.md#multi-match)
+[Searches with 3 words or more](https://docs.wellcomecollection.org/catalogue/search/analysis/summary-3-plus-word-searches)
 
-[Phraser beam](https://docs.wellcomecollection.org/catalogue/search/query-design.md#phraser-beam) 
+
+# Phrases
+### [Hypotheses](https://docs.wellcomecollection.org/catalogue/search/hypotheses/phrases)
+
+### Analysis conducted
+[Searches with 3 words or more](https://docs.wellcomecollection.org/catalogue/search/analysis/summary-3-plus-word-searches)
+
+### Query strategies used
+[Boosting](https://docs.wellcomecollection.org/catalogue/search/query-design#boosting) 
+
+[Compound queries](https://docs.wellcomecollection.org/catalogue/search/query-design#compound-queries) 
+
+[And](https://docs.wellcomecollection.org/catalogue/search/query-design#and)
+
+[Multi match](https://docs.wellcomecollection.org/catalogue/search/query-design#multi-match)
+
+[Phraser beam](https://docs.wellcomecollection.org/catalogue/search/query-design#phraser-beam) 
 
 ### Relevance tests conducted
-[Test 4 – AND or OR](https://docs.wellcomecollection.org/catalogue/search/tests/004_and_or_or.md)
+[Test 4 – AND or OR](https://docs.wellcomecollection.org/catalogue/search/tests/004_and_or_or)
 
-[Test 5 - Scoring Tiers](https://docs.wellcomecollection.org/catalogue/search/tests/005_stacked_queries.md)
+[Test 5 - Scoring Tiers](https://docs.wellcomecollection.org/catalogue/search/tests/005_stacked_queries)
 
-[Test 6 - English tokeniser and Contributors](https://docs.wellcomecollection.org/catalogue/search/tests/006-english-tokeniser-and-contributors.md)
+[Test 6 - English tokeniser and Contributors](https://docs.wellcomecollection.org/catalogue/search/tests/006-english-tokeniser-and-contributors)
 
-[Test 8 – Bool boosted vs Phraser beam](https://docs.wellcomecollection.org/catalogue/search/tests/008-boolboosted-vs-phraserbeam.md)	
-
-
-# [Concepts, subjects with other field](https://docs.wellcomecollection.org/catalogue/search/hypotheses/concepts-subjects-with-other-field.md)
-
-### Analysis conducted
-[Searches with 3 words or more](https://docs.wellcomecollection.org/catalogue/search/analysis/summary-3-plus-word-searches.md)
+[Test 8 – Bool boosted vs Phraser beam](https://docs.wellcomecollection.org/catalogue/search/tests/008-boolboosted-vs-phraserbeam)	
 
 
-# [Contributor with other field](https://docs.wellcomecollection.org/catalogue/search/hypotheses/contributor-with-other-field.md)
+# Concepts, subjects with other field
+### [Hypotheses](https://docs.wellcomecollection.org/catalogue/search/hypotheses/concepts-subjects-with-other-field)
 
 ### Analysis conducted
-[Searches with 3 words or more](https://docs.wellcomecollection.org/catalogue/search/analysis/summary-3-plus-word-searches.md)
+[Searches with 3 words or more](https://docs.wellcomecollection.org/catalogue/search/analysis/summary-3-plus-word-searches)
 
 
-# [Title with other field](https://docs.wellcomecollection.org/catalogue/search/hypotheses/title-with-other-field.md)
-
-### Analysis conducted
-[Searches with 3 words or more](https://docs.wellcomecollection.org/catalogue/search/analysis/summary-3-plus-word-searches.md)
-
-
-# [Genre with other field](https://docs.wellcomecollection.org/catalogue/search/hypotheses/genre-with-other-field.md)
+# Contributor with other field
+### [Hypotheses](https://docs.wellcomecollection.org/catalogue/search/hypotheses/contributor-with-other-field)
 
 ### Analysis conducted
-[Searches with 3 words or more](https://docs.wellcomecollection.org/catalogue/search/analysis/summary-3-plus-word-searches.md)
+[Searches with 3 words or more](https://docs.wellcomecollection.org/catalogue/search/analysis/summary-3-plus-word-searches)
 
 
-# [Reference number with other field](https://docs.wellcomecollection.org/catalogue/search/hypotheses/reference-number-with-other-field.md)
+# Title with other field
+### [Hypotheses](https://docs.wellcomecollection.org/catalogue/search/hypotheses/title-with-other-field)
 
 ### Analysis conducted
-[Searches with 3 words or more](https://docs.wellcomecollection.org/catalogue/search/analysis/summary-3-plus-word-searches.md)
+[Searches with 3 words or more](https://docs.wellcomecollection.org/catalogue/search/analysis/summary-3-plus-word-searches)
 
 
-# [Behaviours](https://docs.wellcomecollection.org/catalogue/search/hypotheses/behaviours.md)
+# Genre with other field 
+### [Hypotheses](https://docs.wellcomecollection.org/catalogue/search/hypotheses/genre-with-other-field)
+
+### Analysis conducted
+[Searches with 3 words or more](https://docs.wellcomecollection.org/catalogue/search/analysis/summary-3-plus-word-searches)
 
 
-# [Further research and design considerations](https://docs.wellcomecollection.org/catalogue/search/hypotheses/further-research-and-design-considerations.md)
+# Reference number with other field
+### [Hypotheses](https://docs.wellcomecollection.org/catalogue/search/hypotheses/reference-number-with-other-field)
+
+### Analysis conducted
+[Searches with 3 words or more](https://docs.wellcomecollection.org/catalogue/search/analysis/summary-3-plus-word-searches)
+
+
+# Behaviours
+### [Hypotheses](https://docs.wellcomecollection.org/catalogue/search/hypotheses/behaviours)
+
+
+# [Further research and design considerations](https://docs.wellcomecollection.org/catalogue/search/hypotheses/further-research-and-design-considerations)
