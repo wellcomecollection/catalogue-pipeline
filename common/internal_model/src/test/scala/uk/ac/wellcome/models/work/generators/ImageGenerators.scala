@@ -70,13 +70,13 @@ trait ImageGenerators
     val features = randomVector(4096)
     val (features1, features2) = features.splitAt(features.size / 2)
     val lshEncodedFeatures = simHasher4096.lsh(features)
-    val palette = simHasher512.lsh(randomVector(512))
+    val palette = randomSortedIntegerVector(20, maxComponent = 1000)
     Some(
       InferredData(
         features1 = features1.toList,
         features2 = features2.toList,
         lshEncodedFeatures = lshEncodedFeatures.toList,
-        palette = palette.toList
+        palette = palette.map(_.toString).toList
       )
     )
   }
@@ -112,20 +112,21 @@ trait ImageGenerators
   def createSimilarImages(n: Int,
                           similarFeatures: Boolean,
                           similarPalette: Boolean): Seq[AugmentedImage] = {
-    val baseFeaturesAndPalette = (randomVector(4096), randomVector(512))
+    val baseFeaturesAndPalette =
+      (
+        randomVector(4096, maxR = 10.0f),
+        randomSortedIntegerVector(30, maxComponent = 1000)
+      )
     val similarFeaturesAndPalette = (1 until n).map { n =>
       val features = if (similarFeatures) {
         subspaceSimilarVector(
           baseFeaturesAndPalette._1,
-          similarity = 1f - (n * 0.03f),
+          similarity = 1f - (n * 0.05f),
           subspaces = 256)
       } else { randomVector(4096) }
       val palette = if (similarPalette) {
-        subspaceSimilarVector(
-          baseFeaturesAndPalette._2,
-          similarity = 1f - (n * 0.03f),
-          subspaces = 32)
-      } else { randomVector(512) }
+        similarSortedIntegerVector(baseFeaturesAndPalette._2, n)
+      } else { randomSortedIntegerVector(30, maxComponent = 1000) }
       (features, palette)
     }
     (baseFeaturesAndPalette +: similarFeaturesAndPalette).map {
@@ -136,7 +137,7 @@ trait ImageGenerators
               features1 = features.slice(0, 2048).toList,
               features2 = features.slice(2048, 4096).toList,
               lshEncodedFeatures = simHasher4096.lsh(features).toList,
-              palette = simHasher512.lsh(palette).toList
+              palette = palette.map(_.toString).toList
             )
           )
         )

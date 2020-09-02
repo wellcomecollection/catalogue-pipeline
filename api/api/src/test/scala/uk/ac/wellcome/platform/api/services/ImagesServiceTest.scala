@@ -58,8 +58,7 @@ class ImagesServiceTest
           .retrieveSimilarImages(index, images.head)
           .map { results =>
             results should not be empty
-            results.map(_.id.canonicalId) should contain theSameElementsInOrderAs images
-              .map(_.id.canonicalId)
+            results should contain theSameElementsInOrderAs images.tail
           }
       }
     }
@@ -77,8 +76,9 @@ class ImagesServiceTest
             similarityMetric = SimilarityMetric.Features)
           .map { results =>
             results should not be empty
-            results.map(_.id.canonicalId) should contain theSameElementsInOrderAs images
+            results.map(_.id.canonicalId) should contain theSameElementsInOrderAs images.tail
               .map(_.id.canonicalId)
+            results should contain theSameElementsInOrderAs images.tail
           }
       }
     }
@@ -96,8 +96,7 @@ class ImagesServiceTest
             similarityMetric = SimilarityMetric.Colors)
           .map { results =>
             results should not be empty
-            results.map(_.id.canonicalId) should contain theSameElementsInOrderAs images
-              .map(_.id.canonicalId)
+            results should contain theSameElementsInOrderAs images.tail
           }
       }
     }
@@ -114,9 +113,7 @@ class ImagesServiceTest
             images.head,
             similarityMetric = SimilarityMetric.Colors)
           .map { results =>
-            results should not be empty
-            results.map(_.id.canonicalId) should not contain theSameElementsInOrderAs(
-              images.map(_.id.canonicalId))
+            results should not contain theSameElementsInOrderAs(images.tail)
           }
       }
     }

@@ -7,8 +7,15 @@ trait VectorGenerators {
 
   private val defaultSimilarity = math.cos(Math.PI / 64).toFloat
 
-  lazy val simHasher4096 = new SimHasher(4096, bins = (256, 256))
-  lazy val simHasher512 = new SimHasher(512, bins = (32, 128))
+  lazy val simHasher4096 = new SimHasher(4096, bins = (256, 128))
+
+  def randomSortedIntegerVector(d: Int, maxComponent: Int): Seq[Int] =
+    Seq.fill(d)(Random.nextInt(maxComponent)).sorted
+
+  def similarSortedIntegerVector(a: Seq[Int], distance: Int = 1): Seq[Int] =
+    (a zip Random.shuffle(Seq.fill(a.size - distance)(0).padTo(a.size, 1)))
+      .map(Function.tupled(_ + _))
+      .sorted
 
   def randomVector(d: Int, maxR: Float = 1.0f): Vec = {
     val rand = normalize(randomNormal(d))
