@@ -60,16 +60,16 @@ Searches containing more than one token are matched to fields as phrases represe
 Searches containing more than one token are matched to fields as phrases but the degree to which tokens can be reordered is specified. This is a refinement of multi match. 
 
 
-### Stemming
+# Stemming
 
 To control for variation in queries, prefixes and suffixes are removed so that only the root word is matched against fields (eg removal of endings “ly,” “ed” and “ing.”)
 
 
-### Stripping
+# Stripping
 
 To control for variation in punctuation in queries (eg “gray's anatomy,” vs “grays anatomy”), all punctuation is removed before matching.
 
 
-### Shingling
+# Shingling
 
 Users add words to a search in order make it more specific.  To use this information fully, instead of searching for each word independently of the others and returning the works in common, the minimum and maximum number of search words to be matched can be specified.
