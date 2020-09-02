@@ -43,7 +43,7 @@ class FiltersAndAggregationsBuilder(
     aggregationRequests.map { aggReq =>
       val agg = requestToAggregation(aggReq)
       pairedFilter(aggReq) match {
-        case Some(filter) =>
+        case Some(filter) if !pairedFilters.forall(_ == filter) =>
           agg.subAggregations(
             FilterAggregation(
               "filtered",
