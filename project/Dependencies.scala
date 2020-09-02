@@ -75,7 +75,7 @@ object ExternalDependencies {
     val apacheLogging = "2.8.2"
     val aws = "1.11.504"
     val circe = "0.13.0"
-    val elastic4s = "7.8.1"
+    val elastic4s = "7.9.0"
     val fastparse = "2.1.3"
     val swagger = "2.0.10"
     val mockito = "1.9.5"
