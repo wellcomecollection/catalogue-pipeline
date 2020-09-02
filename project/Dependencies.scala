@@ -2,7 +2,7 @@ import sbt._
 
 object WellcomeDependencies {
 
-  val defaultVersion = "19.5.0"
+  val defaultVersion = "19.5.6"
 
   lazy val versions = new {
     val typesafe = defaultVersion
@@ -67,7 +67,7 @@ object WellcomeDependencies {
 
 object ExternalDependencies {
   lazy val versions = new {
-    val akka = "2.6.4"
+    val akka = "2.6.8"
     val akkaHttp = "10.1.11"
     val akkaHttpCirce = "1.32.0"
     val akkaStreamAlpakka = "1.1.2"
@@ -75,7 +75,7 @@ object ExternalDependencies {
     val apacheLogging = "2.8.2"
     val aws = "1.11.504"
     val circe = "0.13.0"
-    val elastic4s = "7.6.1"
+    val elastic4s = "7.9.0"
     val fastparse = "2.1.3"
     val swagger = "2.0.10"
     val mockito = "1.9.5"
@@ -124,14 +124,11 @@ object ExternalDependencies {
   val elasticsearchDependencies = Seq(
     "org.apache.logging.log4j" % "log4j-core" % versions.apacheLogging,
     "org.apache.logging.log4j" % "log4j-api" % versions.apacheLogging,
-    // This is our version of elastic4s.
-    // Temporarily use it until until https://github.com/sksamuel/elastic4s/pull/2049
-    // gets merged and released.
-    "uk.ac.wellcome.elastic4s" %% "elastic4s-core" % versions.elastic4s,
-    "uk.ac.wellcome.elastic4s" %% "elastic4s-client-esjava" % versions.elastic4s,
-    "uk.ac.wellcome.elastic4s" %% "elastic4s-http-streams" % versions.elastic4s,
-    "uk.ac.wellcome.elastic4s" %% "elastic4s-json-circe" % versions.elastic4s,
-    "uk.ac.wellcome.elastic4s" %% "elastic4s-testkit" % versions.elastic4s % "test"
+    "com.sksamuel.elastic4s" %% "elastic4s-core" % versions.elastic4s,
+    "com.sksamuel.elastic4s" %% "elastic4s-client-esjava" % versions.elastic4s,
+    "com.sksamuel.elastic4s" %% "elastic4s-http-streams" % versions.elastic4s,
+    "com.sksamuel.elastic4s" %% "elastic4s-json-circe" % versions.elastic4s,
+    "com.sksamuel.elastic4s" %% "elastic4s-testkit" % versions.elastic4s % "test"
   )
 
   val mockitoDependencies: Seq[ModuleID] = Seq(

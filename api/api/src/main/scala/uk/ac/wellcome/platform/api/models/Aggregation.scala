@@ -3,7 +3,9 @@ package uk.ac.wellcome.platform.api.models
 import scala.util.{Failure, Success, Try}
 import io.circe.{Decoder, Json}
 import java.time.{Instant, LocalDateTime, ZoneOffset}
-
+import com.sksamuel.elastic4s.requests.searches.aggs.responses.{
+  Aggregations => Elastic4sAggregations
+}
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.models.work.internal._
@@ -77,8 +79,7 @@ object Aggregations extends Logging {
       Subject(label = str, concepts = Nil)
     }
 
-  implicit class EnhancedEsAggregations(
-    aggregations: com.sksamuel.elastic4s.requests.searches.Aggregations) {
+  implicit class EnhancedEsAggregations(aggregations: Elastic4sAggregations) {
 
     def decodeAgg[T: Decoder](
       name: String,

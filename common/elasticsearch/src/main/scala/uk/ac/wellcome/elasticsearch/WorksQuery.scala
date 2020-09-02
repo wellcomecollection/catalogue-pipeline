@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.api.elasticsearch
+package uk.ac.wellcome.elasticsearch
 
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.common.Operator.{AND, OR}
