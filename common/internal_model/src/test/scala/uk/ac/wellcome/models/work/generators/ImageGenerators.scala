@@ -117,13 +117,13 @@ trait ImageGenerators
       val features = if (similarFeatures) {
         subspaceSimilarVector(
           baseFeaturesAndPalette._1,
-          similarity = 1f - (n * 0.05f),
+          similarity = 1f - (n * 0.03f),
           subspaces = 256)
       } else { randomVector(4096) }
       val palette = if (similarPalette) {
         subspaceSimilarVector(
           baseFeaturesAndPalette._2,
-          similarity = 1f - (n * 0.05f),
+          similarity = 1f - (n * 0.03f),
           subspaces = 32)
       } else { randomVector(512) }
       (features, palette)

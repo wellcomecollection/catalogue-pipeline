@@ -8,7 +8,7 @@ trait VectorGenerators {
   private val defaultSimilarity = math.cos(Math.PI / 64).toFloat
 
   lazy val simHasher4096 = new SimHasher(4096, bins = (256, 256))
-  lazy val simHasher512 = new SimHasher(512, bins = (32, 256))
+  lazy val simHasher512 = new SimHasher(512, bins = (32, 128))
 
   def randomVector(d: Int, maxR: Float = 1.0f): Vec = {
     val rand = normalize(randomNormal(d))

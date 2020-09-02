@@ -8,27 +8,86 @@ class ImagesSimilarityTest extends ApiImagesTestBase {
     "includes visually similar images on a single image if we pass ?include=visuallySimilar") {
     withApi {
       case (ElasticConfig(_, imagesIndex), routes) =>
-        val images = createVisuallySimilarImages(6)
+        val images =
+          createSimilarImages(6, similarFeatures = true, similarPalette = true)
         val image = images.head
         insertImagesIntoElasticsearch(imagesIndex, images: _*)
         assertJsonResponse(
           routes,
-          s"/$apiPrefix/images/${images.head.id.canonicalId}?include=visuallySimilar",
+          s"/$apiPrefix/images/${images.head.id.canonicalId}?include=visuallySimilar") {
+          Status.OK ->
+            s"""
+               |{
+               |  $singleImageResult,
+               |  "id": "${image.id.canonicalId}",
+               |  "locations": [${digitalLocation(image.location)}],
+               |  "visuallySimilar": [
+               |    ${images.tail.map(imageResponse).mkString(",")}
+               |  ],
+               |  "source": {
+               |    "id": "${image.source.id.canonicalId}",
+               |    "type": "Work"
+               |  }
+               |}""".stripMargin
+        }
+    }
+  }
+
+  it(
+    "includes images with similar features on a single image if we pass ?include=withSimilarFeatures") {
+    withApi {
+      case (ElasticConfig(_, imagesIndex), routes) =>
+        val images =
+          createSimilarImages(6, similarFeatures = true, similarPalette = false)
+        val image = images.head
+        insertImagesIntoElasticsearch(imagesIndex, images: _*)
+        assertJsonResponse(
+          routes,
+          s"/$apiPrefix/images/${images.head.id.canonicalId}?include=withSimilarFeatures") {
+          Status.OK ->
+            s"""
+               |{
+               |  $singleImageResult,
+               |  "id": "${image.id.canonicalId}",
+               |  "locations": [${digitalLocation(image.location)}],
+               |  "withSimilarFeatures": [
+               |    ${images.tail.map(imageResponse).mkString(",")}
+               |  ],
+               |  "source": {
+               |    "id": "${image.source.id.canonicalId}",
+               |    "type": "Work"
+               |  }
+               |}""".stripMargin
+        }
+    }
+  }
+
+  it(
+    "includes images with similar color palettes on a single image if we pass ?include=withSimilarColors") {
+    withApi {
+      case (ElasticConfig(_, imagesIndex), routes) =>
+        val images =
+          createSimilarImages(6, similarFeatures = false, similarPalette = true)
+        val image = images.head
+        insertImagesIntoElasticsearch(imagesIndex, images: _*)
+        assertJsonResponse(
+          routes,
+          s"/$apiPrefix/images/${images.head.id.canonicalId}?include=withSimilarColors",
           unordered = true) {
           Status.OK ->
             s"""
-           |{
-           |  $singleImageResult,
-           |  "id": "${image.id.canonicalId}",
-           |  "locations": [${digitalLocation(image.location)}],
-           |  "visuallySimilar": [
-           |    ${images.tail.map(imageResponse).mkString(",")}
-           |  ],
-           |  "source": {
-           |    "id": "${image.source.id.canonicalId}",
-           |    "type": "Work"
-           |  }
-           |}""".stripMargin
+               |{
+               |  $singleImageResult,
+               |  "id": "${image.id.canonicalId}",
+               |  "locations": [${digitalLocation(image.location)}],
+               |  "withSimilarColors": [
+               |    ${images.tail.map(imageResponse).mkString(",")}
+               |  ],
+               |  "source": {
+               |    "id": "${image.source.id.canonicalId}",
+               |    "type": "Work"
+               |  }
+               |}""".stripMargin
         }
     }
   }

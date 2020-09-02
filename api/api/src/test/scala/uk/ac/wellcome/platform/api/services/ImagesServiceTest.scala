@@ -5,6 +5,7 @@ import org.scalatest.funspec.AsyncFunSpec
 import org.scalatest.{EitherValues, OptionValues}
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.models.work.generators.ImageGenerators
+import uk.ac.wellcome.platform.api.models.SimilarityMetric
 
 class ImagesServiceTest
     extends AsyncFunSpec
@@ -47,16 +48,75 @@ class ImagesServiceTest
   }
 
   describe("retrieveSimilarImages") {
-    ignore("gets visually similarImages") {
+    it("gets images using a blended similarity metric by default") {
       withLocalImagesIndex { index =>
-        val images = createVisuallySimilarImages(6)
+        val images =
+          createSimilarImages(6, similarFeatures = true, similarPalette = true)
         insertImagesIntoElasticsearch(index, images: _*)
 
         imagesService
           .retrieveSimilarImages(index, images.head)
           .map { results =>
             results should not be empty
-            results should contain theSameElementsAs images.tail
+            results.map(_.id.canonicalId) should contain theSameElementsInOrderAs images
+              .map(_.id.canonicalId)
+          }
+      }
+    }
+
+    it("gets images with similar features") {
+      withLocalImagesIndex { index =>
+        val images =
+          createSimilarImages(6, similarFeatures = true, similarPalette = false)
+        insertImagesIntoElasticsearch(index, images: _*)
+
+        imagesService
+          .retrieveSimilarImages(
+            index,
+            images.head,
+            similarityMetric = SimilarityMetric.Features)
+          .map { results =>
+            results should not be empty
+            results.map(_.id.canonicalId) should contain theSameElementsInOrderAs images
+              .map(_.id.canonicalId)
+          }
+      }
+    }
+
+    it("gets images with similar color palettes") {
+      withLocalImagesIndex { index =>
+        val images =
+          createSimilarImages(6, similarFeatures = false, similarPalette = true)
+        insertImagesIntoElasticsearch(index, images: _*)
+
+        imagesService
+          .retrieveSimilarImages(
+            index,
+            images.head,
+            similarityMetric = SimilarityMetric.Colors)
+          .map { results =>
+            results should not be empty
+            results.map(_.id.canonicalId) should contain theSameElementsInOrderAs images
+              .map(_.id.canonicalId)
+          }
+      }
+    }
+
+    it("does not blend similarity metrics when specific ones are requested") {
+      withLocalImagesIndex { index =>
+        val images =
+          createSimilarImages(6, similarFeatures = true, similarPalette = false)
+        insertImagesIntoElasticsearch(index, images: _*)
+
+        imagesService
+          .retrieveSimilarImages(
+            index,
+            images.head,
+            similarityMetric = SimilarityMetric.Colors)
+          .map { results =>
+            results should not be empty
+            results.map(_.id.canonicalId) should not contain theSameElementsInOrderAs(
+              images.map(_.id.canonicalId))
           }
       }
     }
