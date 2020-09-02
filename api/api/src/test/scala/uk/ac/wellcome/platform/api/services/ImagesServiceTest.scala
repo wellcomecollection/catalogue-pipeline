@@ -47,7 +47,7 @@ class ImagesServiceTest
   }
 
   describe("retrieveSimilarImages") {
-    it("gets visually similarImages") {
+    ignore("gets visually similarImages") {
       withLocalImagesIndex { index =>
         val images = createVisuallySimilarImages(6)
         insertImagesIntoElasticsearch(index, images: _*)
