@@ -51,9 +51,6 @@ class RelatedWorksServiceTest
   val works =
     List(workA, workB, workC, workD, workE, workF, work4, work3, work2, work1)
 
-  def relatedWork(work: IdentifiedWork) =
-    RelatedWork(work.sourceIdentifier.toString)
-
   it(
     "Retrieves a related works for the given path with children and siblings sorted correctly") {
     withLocalWorksIndex { index =>
@@ -61,10 +58,10 @@ class RelatedWorksServiceTest
       whenReady(service(index)(work2)) { result =>
         result shouldBe
           RelatedWorks(
-            parts = List(relatedWork(workD), relatedWork(workE)),
-            partOf = List(relatedWork(workA)),
-            precededBy = List(relatedWork(work1)),
-            succeededBy = List(relatedWork(work3), relatedWork(work4)),
+            parts = Some(List(RelatedWork(workD), RelatedWork(workE))),
+            partOf = Some(List(RelatedWork(workA, RelatedWorks(partOf = Some(Nil))))),
+            precededBy = Some(List(RelatedWork(work1))),
+            succeededBy = Some(List(RelatedWork(work3), RelatedWork(work4))),
           )
       }
     }
@@ -77,11 +74,28 @@ class RelatedWorksServiceTest
       whenReady(service(index)(workF)) { relatedWorks =>
         relatedWorks shouldBe
           RelatedWorks(
-            parts = Nil,
-            partOf =
-              List(relatedWork(workA), relatedWork(work2), relatedWork(workE)),
-            precededBy = Nil,
-            succeededBy = Nil,
+            parts = Some(Nil),
+            partOf = Some(
+              List(
+                RelatedWork(
+                  workE,
+                  RelatedWorks.partOf(
+                    RelatedWork(
+                      work2,
+                      RelatedWorks(
+                        partOf = Some(
+                          List(
+                            RelatedWork(workA, RelatedWorks(partOf = Some(Nil)))
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            ),
+            precededBy = Some(Nil),
+            succeededBy = Some(Nil),
           )
       }
     }
@@ -93,14 +107,14 @@ class RelatedWorksServiceTest
       whenReady(service(index)(workA)) { relatedWorks =>
         relatedWorks shouldBe
           RelatedWorks(
-            parts = List(
-              relatedWork(work1),
-              relatedWork(work2),
-              relatedWork(work3),
-              relatedWork(work4)),
-            partOf = Nil,
-            precededBy = Nil,
-            succeededBy = Nil
+            parts = Some(List(
+              RelatedWork(work1),
+              RelatedWork(work2),
+              RelatedWork(work3),
+              RelatedWork(work4))),
+            partOf = Some(Nil),
+            precededBy = Some(Nil),
+            succeededBy = Some(Nil)
           )
       }
     }
@@ -112,10 +126,23 @@ class RelatedWorksServiceTest
       whenReady(service(index)(workF)) { result =>
         result shouldBe
           RelatedWorks(
-            parts = Nil,
-            partOf = List(relatedWork(workA), relatedWork(workE)),
-            precededBy = Nil,
-            succeededBy = Nil,
+            parts = Some(Nil),
+            partOf = Some(
+              List(
+                RelatedWork(
+                  workE,
+                  RelatedWorks(
+                    partOf = Some(
+                      List(
+                        RelatedWork(workA, RelatedWorks(partOf = Some(Nil)))
+                      )
+                    )
+                  )
+                )
+              )
+            ),
+            precededBy = Some(Nil),
+            succeededBy = Some(Nil),
           )
       }
     }
@@ -128,10 +155,10 @@ class RelatedWorksServiceTest
       whenReady(service(index)(workX)) { result =>
         result shouldBe
           RelatedWorks(
-            parts = Nil,
-            partOf = Nil,
-            precededBy = Nil,
-            succeededBy = Nil
+            parts = Some(Nil),
+            partOf = Some(Nil),
+            precededBy = Some(Nil),
+            succeededBy = Some(Nil)
           )
       }
     }
@@ -147,13 +174,13 @@ class RelatedWorksServiceTest
       whenReady(service(index)(workA)) { result =>
         result shouldBe
           RelatedWorks(
-            parts = List(
-              relatedWork(workB1),
-              relatedWork(workB2),
-              relatedWork(workB10)),
-            partOf = Nil,
-            precededBy = Nil,
-            succeededBy = Nil,
+            parts = Some(List(
+              RelatedWork(workB1),
+              RelatedWork(workB2),
+              RelatedWork(workB10))),
+            partOf = Some(Nil),
+            precededBy = Some(Nil),
+            succeededBy = Some(Nil),
           )
       }
     }

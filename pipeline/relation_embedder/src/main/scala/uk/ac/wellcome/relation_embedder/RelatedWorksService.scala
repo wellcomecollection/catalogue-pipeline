@@ -1,8 +1,6 @@
 package uk.ac.wellcome.relation_embedder
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.annotation.tailrec
-import scala.util.Try
 
 import com.sksamuel.elastic4s.{ElasticClient, ElasticError, Index, Response}
 import com.sksamuel.elastic4s.requests.searches.{
@@ -19,15 +17,6 @@ import uk.ac.wellcome.models.work.internal.result._
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil.fromJson
 
-case class RelatedWork(id: String)
-
-case class RelatedWorks(
-  parts: List[RelatedWork],
-  partOf: List[RelatedWork],
-  precededBy: List[RelatedWork],
-  succeededBy: List[RelatedWork],
-)
-
 trait RelatedWorksService {
 
   def apply(work: IdentifiedWork): Future[RelatedWorks]
@@ -43,7 +32,7 @@ class PathQueryRelatedWorksService(elasticClient: ElasticClient, index: Index)(
 
   def apply(work: IdentifiedWork): Future[RelatedWorks] =
     work.data.collectionPath match {
-      case None => Future.successful(RelatedWorks(Nil, Nil, Nil, Nil))
+      case None => Future.successful(RelatedWorks.nil)
       case Some(CollectionPath(path, _, _)) =>
         executeMultiSearchRequest(
           RelatedWorkRequestBuilder(index, path).request
@@ -57,7 +46,7 @@ class PathQueryRelatedWorksService(elasticClient: ElasticClient, index: Index)(
             }
           val relatedWorks = works.flatMap {
             case List(children, siblings, ancestors) =>
-              Right(toRelatedWorks(path, children, siblings, ancestors))
+              Right(RelatedWorks(path, children, siblings, ancestors))
             case works =>
               Left(
                 new Exception(
@@ -99,93 +88,4 @@ class PathQueryRelatedWorksService(elasticClient: ElasticClient, index: Index)(
 
   def toWork(hit: SearchHit): Result[IdentifiedWork] =
     fromJson[IdentifiedWork](hit.sourceAsString).toEither
-
-  def toRelatedWorks(path: String,
-                     children: List[IdentifiedWork],
-                     siblings: List[IdentifiedWork],
-                     ancestors: List[IdentifiedWork]): RelatedWorks = {
-    val mainPath = tokenizePath(path)
-    val (precededBy, succeededBy) = siblings.sortBy(tokenizePath).partition {
-      work =>
-        tokenizePath(work) match {
-          case None => true
-          case Some(workPath) =>
-            tokenizedPathOrdering.compare(mainPath, workPath) >= 0
-        }
-    }
-    RelatedWorks(
-      parts = children.sortBy(tokenizePath).toRelatedWorks,
-      partOf = ancestors.sortBy(tokenizePath).toRelatedWorks,
-      precededBy = precededBy.toRelatedWorks,
-      succeededBy = succeededBy.toRelatedWorks
-    )
-  }
-
-  private def tokenizePath(path: String): TokenizedPath =
-    path.split("/").toList.map { str =>
-      """\d+|\D+""".r
-        .findAllIn(str)
-        .toList
-        .map { token =>
-          Try(token.toInt).map(Left(_)).getOrElse(Right(token))
-        }
-    }
-
-  private def tokenizePath(work: IdentifiedWork): Option[TokenizedPath] =
-    work.data.collectionPath
-      .map { collectionPath =>
-        tokenizePath(collectionPath.path)
-      }
-
-  implicit val tokenizedPathOrdering: Ordering[TokenizedPath] =
-    new Ordering[TokenizedPath] {
-      @tailrec
-      override def compare(a: TokenizedPath, b: TokenizedPath): Int =
-        (a, b) match {
-          case (Nil, Nil) => 0
-          case (Nil, _)   => -1
-          case (_, Nil)   => 1
-          case (xHead :: xTail, yHead :: yTail) =>
-            if (xHead == yHead)
-              compare(xTail, yTail)
-            else
-              pathTokenOrdering.compare(xHead, yHead)
-        }
-    }
-
-  implicit val pathTokenOrdering: Ordering[PathToken] =
-    new Ordering[PathToken] {
-      @tailrec
-      override def compare(a: PathToken, b: PathToken): Int =
-        (a, b) match {
-          case (Nil, Nil) => 0
-          case (Nil, _)   => 1
-          case (_, Nil)   => -1
-          case (aHead :: aTail, bHead :: bTail) =>
-            val comparison = pathTokenPartOrdering.compare(aHead, bHead)
-            if (comparison == 0)
-              compare(aTail, bTail)
-            else
-              comparison
-        }
-    }
-
-  implicit val pathTokenPartOrdering: Ordering[PathTokenPart] =
-    new Ordering[PathTokenPart] {
-      override def compare(a: PathTokenPart, b: PathTokenPart): Int =
-        (a, b) match {
-          case (Left(a), Left(b))   => a.compareTo(b)
-          case (Right(a), Right(b)) => a.compareTo(b)
-          case (Left(_), _)         => -1
-          case _                    => 1
-        }
-    }
-
-  implicit class WorkListOps(works: List[IdentifiedWork]) {
-
-    def toRelatedWorks: List[RelatedWork] =
-      works.map { work =>
-        RelatedWork(work.sourceIdentifier.toString)
-      }
-  }
 }
