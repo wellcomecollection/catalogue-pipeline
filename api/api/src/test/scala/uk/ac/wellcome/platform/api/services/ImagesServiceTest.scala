@@ -94,7 +94,7 @@ class ImagesServiceTest
             similarityMetric = SimilarityMetric.Colors)
           .map { results =>
             results should not be empty
-            results should contain theSameElementsInOrderAs images.tail
+            results should contain theSameElementsAs images.tail
           }
       }
     }

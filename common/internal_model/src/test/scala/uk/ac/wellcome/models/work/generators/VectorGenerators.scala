@@ -132,14 +132,6 @@ object VectorOps {
 
   def randomUniform(d: Int): Vec = Seq.fill(d)(Random.nextFloat)
 
-  def gramSchmidtOrthonormalise(basis: Seq[Vec]): Seq[Vec] = {
-    basis.tail
-      .foldLeft(Seq(basis.head)) { (prev, vec) =>
-        prev :+ sub(vec, prev.map(proj(_, vec)).reduce(add))
-      }
-      .map(normalize)
-  }
-
   def proj(a: Vec, b: Vec): Vec =
     scalarMultiply(dot(a, b) / dot(a, a), a)
 }

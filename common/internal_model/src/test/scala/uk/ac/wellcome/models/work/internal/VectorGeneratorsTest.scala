@@ -84,20 +84,4 @@ class VectorGeneratorsTest
       diffSizes shouldBe sorted
     }
   }
-
-  describe("VectorOps") {
-    it("can orthonormalise a vector basis using the Gram-Schmidt process") {
-      val basis = Seq(
-        Seq(3f, 1f),
-        Seq(2f, 2f)
-      )
-      val orthonormalBasis = gramSchmidtOrthonormalise(basis)
-
-      val sqrt10 = math.sqrt(10).toFloat
-      orthonormalBasis(0)(0) should be(3f / sqrt10 +- floatPrecision)
-      orthonormalBasis(0)(1) should be(1f / sqrt10 +- floatPrecision)
-      orthonormalBasis(1)(0) should be(-1f / sqrt10 +- floatPrecision)
-      orthonormalBasis(1)(1) should be(3f / sqrt10 +- floatPrecision)
-    }
-  }
 }
