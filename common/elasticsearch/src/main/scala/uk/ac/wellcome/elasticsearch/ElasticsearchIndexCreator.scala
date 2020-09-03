@@ -22,18 +22,15 @@ class ElasticsearchIndexCreator(
   val analysis = config.analysis
   val searchTemplate = config.searchTemplate
 
-  private def exists = elasticClient.execute(indexExists(index.name))
+  private def exists =
+    elasticClient.execute(indexExists(index.name)).map(_.result.isExists)
 
   private def createOrUpdate: Future[Unit] = {
     for {
-      existsResp <- exists
-      createResp <- if (existsResp.result.isExists) {
-        update
-      } else {
-        put
-      }
+      doesExist <- exists
+      createResp <- if (doesExist) update else put
       resp <- searchTemplate
-        .map(template => putSearchTemplate(template))
+        .map(putSearchTemplate)
         .getOrElse(Future.successful(createResp))
     } yield { handleEsError(resp) }
   }
