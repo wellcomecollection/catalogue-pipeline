@@ -14,7 +14,7 @@ case class RelatedWorkRequestBuilder(index: Index,
 
   // To reduce response size and improve Elasticsearch performance we only
   // return core fields
-  val fieldWhitelist = List(
+  val relationsFieldWhitelist = List(
     "canonicalId",
     "version",
     "ontologyType",
@@ -31,48 +31,83 @@ case class RelatedWorkRequestBuilder(index: Index,
     "data.ontologyType",
   )
 
-  lazy val request: MultiSearchRequest =
+  // To reduce response size and improve Elasticsearch performance we only
+  // return core fields
+  val otherAffectedWorksFieldWhitelist = List(
+    "sourceIdentifier.identifierType.id",
+    "sourceIdentifier.identifierType.label",
+    "sourceIdentifier.identifierType.ontologyType",
+    "sourceIdentifier.value",
+    "sourceIdentifier.ontologyType",
+  )
+
+  lazy val relationsRequest: MultiSearchRequest =
     multi(
-      childrenRequest,
-      siblingsRequest,
-      ancestorsRequest
+      relatedWorksRequest(childrenQuery),
+      relatedWorksRequest(siblingsQuery),
+      relatedWorksRequest(ancestorsQuery)
     )
+
+  lazy val otherAffectedWorksRequest: SearchRequest =
+    search(index)
+      .query {
+        should(
+          siblingsQuery,
+          parentQuery,
+          descendentsQuery
+        )
+      }
+      .from(0)
+      .limit(maxRelatedWorks)
+      .sourceInclude(otherAffectedWorksFieldWhitelist)
 
   /**
     * Query all direct children of the node with the given path.
     */
-  lazy val childrenRequest: SearchRequest =
-    relatedWorksRequest(
-      pathQuery(path, depth + 1)
-    )
+  lazy val childrenQuery: Query =
+    pathQuery(path, depth + 1)
 
   /**
     * Query all siblings of the node with the given path.
     */
-  lazy val siblingsRequest: SearchRequest =
-    relatedWorksRequest(
-      ancestors.lastOption match {
-        case Some(parent) =>
-          must(
-            pathQuery(parent, depth),
-            not(termQuery(field = "data.collectionPath.path", value = path))
-          )
-        case None => matchNoneQuery()
-      }
-    )
+  lazy val siblingsQuery: Query =
+    ancestors.lastOption match {
+      case Some(parent) =>
+        must(
+          pathQuery(parent, depth),
+          not(termQuery(field = "data.collectionPath.path", value = path))
+        )
+      case None => matchNoneQuery()
+    }
 
   /**
     * Query all ancestors of the node with the given path.
     */
-  lazy val ancestorsRequest: SearchRequest =
-    relatedWorksRequest(
-      ancestors match {
-        case Nil => matchNoneQuery()
-        case ancestors =>
-          should(
-            ancestors.map(ancestor => pathQuery(ancestor, pathDepth(ancestor)))
-          )
-      }
+  lazy val ancestorsQuery: Query =
+    ancestors match {
+      case Nil => matchNoneQuery()
+      case ancestors =>
+        should(
+          ancestors.map(ancestor => pathQuery(ancestor, pathDepth(ancestor)))
+        )
+    }
+
+  /**
+    * Query the parent of the node with the given path.
+    */
+  lazy val parentQuery: Query =
+    ancestors.lastOption match {
+      case None         => matchNoneQuery()
+      case Some(parent) => pathQuery(parent, depth - 1)
+    }
+
+  /**
+    * Query all descendents of the node with the given path.
+    */
+  lazy val descendentsQuery: Query =
+    must(
+      termQuery(field = "data.collectionPath.path", value = path),
+      not(termQuery(field = "data.collectionPath.depth", value = depth)),
     )
 
   lazy val ancestors: List[String] =
@@ -92,7 +127,7 @@ case class RelatedWorkRequestBuilder(index: Index,
       .query(query)
       .from(0)
       .limit(maxRelatedWorks)
-      .sourceInclude(fieldWhitelist)
+      .sourceInclude(relationsFieldWhitelist)
 
   def pathAncestors(path: String): List[String] =
     tokenize(path) match {

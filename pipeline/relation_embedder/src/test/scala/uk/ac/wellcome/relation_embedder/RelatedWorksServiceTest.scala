@@ -51,110 +51,182 @@ class RelatedWorksServiceTest
   val works =
     List(workA, workB, workC, workD, workE, workF, work4, work3, work2, work1)
 
-  def relatedWork(work: IdentifiedWork) =
-    RelatedWork(work.sourceIdentifier.toString)
-
-  it(
-    "Retrieves a related works for the given path with children and siblings sorted correctly") {
-    withLocalWorksIndex { index =>
-      storeWorks(index)
-      whenReady(service(index)(work2)) { result =>
-        result shouldBe
-          RelatedWorks(
-            parts = List(relatedWork(workD), relatedWork(workE)),
-            partOf = List(relatedWork(workA)),
-            precededBy = List(relatedWork(work1)),
-            succeededBy = List(relatedWork(work3), relatedWork(work4)),
+  describe("getOtherAffectedWorks") {
+    it("Retrieves all affected works") {
+      withLocalWorksIndex { index =>
+        storeWorks(index)
+        whenReady(service(index).getOtherAffectedWorks(workE)) { result =>
+          result should contain theSameElementsAs List(
+            work2.sourceIdentifier,
+            workD.sourceIdentifier,
+            workF.sourceIdentifier,
           )
+        }
+      }
+    }
+
+    it(
+      "Retrieves the whole remaining tree when getting affected works from root position") {
+      withLocalWorksIndex { index =>
+        storeWorks(index)
+        whenReady(service(index).getOtherAffectedWorks(workA)) { result =>
+          result should contain theSameElementsAs
+            works
+              .filter(_.canonicalId != workA.canonicalId)
+              .map(_.sourceIdentifier)
+        }
+      }
+    }
+
+    it("Returns no affected works when work is not part of a collection") {
+      withLocalWorksIndex { index =>
+        val workX = createIdentifiedWork
+        storeWorks(index, List(workA, work1, workX))
+        whenReady(service(index).getOtherAffectedWorks(workX)) { result =>
+          result shouldBe Nil
+        }
       }
     }
   }
 
-  it(
-    "Retrieves a related works for the given path with ancestors sorted correctly") {
-    withLocalWorksIndex { index =>
-      storeWorks(index)
-      whenReady(service(index)(workF)) { relatedWorks =>
-        relatedWorks shouldBe
-          RelatedWorks(
-            parts = Nil,
-            partOf =
-              List(relatedWork(workA), relatedWork(work2), relatedWork(workE)),
-            precededBy = Nil,
-            succeededBy = Nil,
-          )
+  describe("getRelations") {
+    it(
+      "Retrieves a related works for the given path with children and siblings sorted correctly") {
+      withLocalWorksIndex { index =>
+        storeWorks(index)
+        whenReady(service(index).getRelations(work2)) { result =>
+          result shouldBe
+            RelatedWorks(
+              parts = Some(List(RelatedWork(workD), RelatedWork(workE))),
+              partOf = Some(
+                List(RelatedWork(workA, RelatedWorks(partOf = Some(Nil))))),
+              precededBy = Some(List(RelatedWork(work1))),
+              succeededBy = Some(List(RelatedWork(work3), RelatedWork(work4))),
+            )
+        }
       }
     }
-  }
 
-  it("Retrieves relations correctly from root position") {
-    withLocalWorksIndex { index =>
-      storeWorks(index)
-      whenReady(service(index)(workA)) { relatedWorks =>
-        relatedWorks shouldBe
-          RelatedWorks(
-            parts = List(
-              relatedWork(work1),
-              relatedWork(work2),
-              relatedWork(work3),
-              relatedWork(work4)),
-            partOf = Nil,
-            precededBy = Nil,
-            succeededBy = Nil
-          )
+    it(
+      "Retrieves a related works for the given path with ancestors sorted correctly") {
+      withLocalWorksIndex { index =>
+        storeWorks(index)
+        whenReady(service(index).getRelations(workF)) { relatedWorks =>
+          relatedWorks shouldBe
+            RelatedWorks(
+              parts = Some(Nil),
+              partOf = Some(
+                List(
+                  RelatedWork(
+                    workE,
+                    RelatedWorks.partOf(
+                      RelatedWork(
+                        work2,
+                        RelatedWorks(
+                          partOf = Some(
+                            List(
+                              RelatedWork(
+                                workA,
+                                RelatedWorks(partOf = Some(Nil)))
+                            )
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              ),
+              precededBy = Some(Nil),
+              succeededBy = Some(Nil),
+            )
+        }
       }
     }
-  }
 
-  it("Ignores missing ancestors") {
-    withLocalWorksIndex { index =>
-      storeWorks(index, List(workA, workB, workC, workD, workE, workF))
-      whenReady(service(index)(workF)) { result =>
-        result shouldBe
-          RelatedWorks(
-            parts = Nil,
-            partOf = List(relatedWork(workA), relatedWork(workE)),
-            precededBy = Nil,
-            succeededBy = Nil,
-          )
+    it("Retrieves relations correctly from root position") {
+      withLocalWorksIndex { index =>
+        storeWorks(index)
+        whenReady(service(index).getRelations(workA)) { relatedWorks =>
+          relatedWorks shouldBe
+            RelatedWorks(
+              parts = Some(
+                List(
+                  RelatedWork(work1),
+                  RelatedWork(work2),
+                  RelatedWork(work3),
+                  RelatedWork(work4))),
+              partOf = Some(Nil),
+              precededBy = Some(Nil),
+              succeededBy = Some(Nil)
+            )
+        }
       }
     }
-  }
 
-  it("Returns no related works when work is not part of a collection") {
-    withLocalWorksIndex { index =>
-      val workX = createIdentifiedWork
-      storeWorks(index, List(workA, work1, workX))
-      whenReady(service(index)(workX)) { result =>
-        result shouldBe
-          RelatedWorks(
-            parts = Nil,
-            partOf = Nil,
-            precededBy = Nil,
-            succeededBy = Nil
-          )
+    it("Ignores missing ancestors") {
+      withLocalWorksIndex { index =>
+        storeWorks(index, List(workA, workB, workC, workD, workE, workF))
+        whenReady(service(index).getRelations(workF)) { result =>
+          result shouldBe
+            RelatedWorks(
+              parts = Some(Nil),
+              partOf = Some(
+                List(
+                  RelatedWork(
+                    workE,
+                    RelatedWorks(
+                      partOf = Some(
+                        List(
+                          RelatedWork(workA, RelatedWorks(partOf = Some(Nil)))
+                        )
+                      )
+                    )
+                  )
+                )
+              ),
+              precededBy = Some(Nil),
+              succeededBy = Some(Nil),
+            )
+        }
       }
     }
-  }
 
-  it("Sorts works consisting of paths with an alphanumeric mixture of tokens") {
-    withLocalWorksIndex { index =>
-      val workA = work("a")
-      val workB1 = work("a/B1")
-      val workB2 = work("a/B2")
-      val workB10 = work("a/B10")
-      storeWorks(index, List(workA, workB2, workB1, workB10))
-      whenReady(service(index)(workA)) { result =>
-        result shouldBe
-          RelatedWorks(
-            parts = List(
-              relatedWork(workB1),
-              relatedWork(workB2),
-              relatedWork(workB10)),
-            partOf = Nil,
-            precededBy = Nil,
-            succeededBy = Nil,
-          )
+    it("Returns no related works when work is not part of a collection") {
+      withLocalWorksIndex { index =>
+        val workX = createIdentifiedWork
+        storeWorks(index, List(workA, work1, workX))
+        whenReady(service(index).getRelations(workX)) { result =>
+          result shouldBe
+            RelatedWorks(
+              parts = Some(Nil),
+              partOf = Some(Nil),
+              precededBy = Some(Nil),
+              succeededBy = Some(Nil)
+            )
+        }
+      }
+    }
+
+    it("Sorts works consisting of paths with an alphanumeric mixture of tokens") {
+      withLocalWorksIndex { index =>
+        val workA = work("a")
+        val workB1 = work("a/B1")
+        val workB2 = work("a/B2")
+        val workB10 = work("a/B10")
+        storeWorks(index, List(workA, workB2, workB1, workB10))
+        whenReady(service(index).getRelations(workA)) { result =>
+          result shouldBe
+            RelatedWorks(
+              parts = Some(
+                List(
+                  RelatedWork(workB1),
+                  RelatedWork(workB2),
+                  RelatedWork(workB10))),
+              partOf = Some(Nil),
+              precededBy = Some(Nil),
+              succeededBy = Some(Nil),
+            )
+        }
       }
     }
   }
