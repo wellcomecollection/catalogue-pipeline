@@ -65,7 +65,8 @@ class RelatedWorksServiceTest
       }
     }
 
-    it("Retrieves the whole remaining tree when getting affected works from root position") {
+    it(
+      "Retrieves the whole remaining tree when getting affected works from root position") {
       withLocalWorksIndex { index =>
         storeWorks(index)
         whenReady(service(index).getOtherAffectedWorks(workA)) { result =>
@@ -97,7 +98,8 @@ class RelatedWorksServiceTest
           result shouldBe
             RelatedWorks(
               parts = Some(List(RelatedWork(workD), RelatedWork(workE))),
-              partOf = Some(List(RelatedWork(workA, RelatedWorks(partOf = Some(Nil))))),
+              partOf = Some(
+                List(RelatedWork(workA, RelatedWorks(partOf = Some(Nil))))),
               precededBy = Some(List(RelatedWork(work1))),
               succeededBy = Some(List(RelatedWork(work3), RelatedWork(work4))),
             )
@@ -123,7 +125,9 @@ class RelatedWorksServiceTest
                         RelatedWorks(
                           partOf = Some(
                             List(
-                              RelatedWork(workA, RelatedWorks(partOf = Some(Nil)))
+                              RelatedWork(
+                                workA,
+                                RelatedWorks(partOf = Some(Nil)))
                             )
                           )
                         )
@@ -145,11 +149,12 @@ class RelatedWorksServiceTest
         whenReady(service(index).getRelations(workA)) { relatedWorks =>
           relatedWorks shouldBe
             RelatedWorks(
-              parts = Some(List(
-                RelatedWork(work1),
-                RelatedWork(work2),
-                RelatedWork(work3),
-                RelatedWork(work4))),
+              parts = Some(
+                List(
+                  RelatedWork(work1),
+                  RelatedWork(work2),
+                  RelatedWork(work3),
+                  RelatedWork(work4))),
               partOf = Some(Nil),
               precededBy = Some(Nil),
               succeededBy = Some(Nil)
@@ -212,10 +217,11 @@ class RelatedWorksServiceTest
         whenReady(service(index).getRelations(workA)) { result =>
           result shouldBe
             RelatedWorks(
-              parts = Some(List(
-                RelatedWork(workB1),
-                RelatedWork(workB2),
-                RelatedWork(workB10))),
+              parts = Some(
+                List(
+                  RelatedWork(workB1),
+                  RelatedWork(workB2),
+                  RelatedWork(workB10))),
               partOf = Some(Nil),
               precededBy = Some(Nil),
               succeededBy = Some(Nil),

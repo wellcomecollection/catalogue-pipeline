@@ -6,8 +6,8 @@ import com.sksamuel.elastic4s.{ElasticClient, ElasticError, Index, Response}
 import com.sksamuel.elastic4s.requests.searches.{
   MultiSearchRequest,
   MultiSearchResponse,
-  SearchResponse,
-  SearchRequest
+  SearchRequest,
+  SearchResponse
 }
 import com.sksamuel.elastic4s.requests.searches.SearchHit
 import com.sksamuel.elastic4s.ElasticDsl._
@@ -28,7 +28,8 @@ trait RelatedWorksService {
     * @param work The work
     * @return The IDs of the other works to denormalise
     */
-  def getOtherAffectedWorks(work: IdentifiedBaseWork): Future[List[SourceIdentifier]]
+  def getOtherAffectedWorks(
+    work: IdentifiedBaseWork): Future[List[SourceIdentifier]]
 
   /** For a given work return all its relations.
     *
@@ -42,7 +43,8 @@ class PathQueryRelatedWorksService(elasticClient: ElasticClient, index: Index)(
   implicit ec: ExecutionContext)
     extends RelatedWorksService {
 
-  def getOtherAffectedWorks(work: IdentifiedBaseWork): Future[List[SourceIdentifier]] =
+  def getOtherAffectedWorks(
+    work: IdentifiedBaseWork): Future[List[SourceIdentifier]] =
     work match {
       case work: IdentifiedWork =>
         work.data.collectionPath match {
@@ -51,19 +53,19 @@ class PathQueryRelatedWorksService(elasticClient: ElasticClient, index: Index)(
             executeSearchRequest(
               RelatedWorkRequestBuilder(index, path).otherAffectedWorksRequest
             ).flatMap { result =>
-              val works = result
-                .left
+              val works = result.left
                 .map(_.asException)
                 .flatMap { resp =>
                   resp.hits.hits.toList.map(toAffectedWork).toResult
                 }
               works match {
-                case Right(works) => Future.successful(works.map(_.sourceIdentifier))
-                case Left(err)    => Future.failed(err)
+                case Right(works) =>
+                  Future.successful(works.map(_.sourceIdentifier))
+                case Left(err) => Future.failed(err)
               }
             }
         }
-        case _ => Future.successful(Nil)
+      case _ => Future.successful(Nil)
     }
 
   def getRelations(work: IdentifiedBaseWork): Future[RelatedWorks] =
@@ -97,12 +99,12 @@ class PathQueryRelatedWorksService(elasticClient: ElasticClient, index: Index)(
               }
             }
         }
-        case _ => Future.successful(RelatedWorks.nil)
+      case _ => Future.successful(RelatedWorks.nil)
     }
 
   private def executeSearchRequest(
     request: SearchRequest): Future[Either[ElasticError, SearchResponse]] =
-      elasticClient.execute(request).map(toEither)
+    elasticClient.execute(request).map(toEither)
 
   private def executeMultiSearchRequest(request: MultiSearchRequest)
     : Future[Either[ElasticError, List[SearchResponse]]] =

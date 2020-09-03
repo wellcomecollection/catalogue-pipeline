@@ -22,12 +22,14 @@ class RelationEmbedderWorkerService[MsgDestination](
   relatedWorksService: RelatedWorksService,
   batchSize: Int = 20,
   flushInterval: FiniteDuration = 3 seconds
-)(implicit ec: ExecutionContext, materializer: Materializer) extends Runnable { 
+)(implicit ec: ExecutionContext, materializer: Materializer)
+    extends Runnable {
   def run(): Future[Done] =
     sqsStream.foreach(this.getClass.getSimpleName, processMessage)
 
   def processMessage(message: NotificationMessage): Future[Unit] =
-    Source.future(workRetriever(message.body))
+    Source
+      .future(workRetriever(message.body))
       .mapAsync(1) { work =>
         relatedWorksService
           .getOtherAffectedWorks(work)
@@ -38,13 +40,16 @@ class RelationEmbedderWorkerService[MsgDestination](
         workRetriever(sourceIdentifier.toString)
       }
       .mapAsync(3) { work =>
-        relatedWorksService.getRelations(work).map(relations => (work, relations))
+        relatedWorksService
+          .getRelations(work)
+          .map(relations => (work, relations))
       }
-      .map { case (work, relations) =>
-        // TODO: here we should add the relations to the work model for storage.
-        // This requires model changes which have not been made yet
-        val denormalisedWork: IdentifiedBaseWork = ???
-        denormalisedWork
+      .map {
+        case (work, relations) =>
+          // TODO: here we should add the relations to the work model for storage.
+          // This requires model changes which have not been made yet
+          val denormalisedWork: IdentifiedBaseWork = ???
+          denormalisedWork
       }
       .groupedWithin(batchSize, flushInterval)
       .map { works =>

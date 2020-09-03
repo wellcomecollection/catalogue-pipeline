@@ -97,7 +97,7 @@ case class RelatedWorkRequestBuilder(index: Index,
     */
   lazy val parentQuery: Query =
     ancestors.lastOption match {
-      case None => matchNoneQuery()
+      case None         => matchNoneQuery()
       case Some(parent) => pathQuery(parent, depth - 1)
     }
 
