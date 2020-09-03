@@ -78,7 +78,7 @@ class RelatedWorksServiceTest
       }
     }
 
-    it("Returns no affectedd works when work is not part of a collection") {
+    it("Returns no affected works when work is not part of a collection") {
       withLocalWorksIndex { index =>
         val workX = createIdentifiedWork
         storeWorks(index, List(workA, work1, workX))
