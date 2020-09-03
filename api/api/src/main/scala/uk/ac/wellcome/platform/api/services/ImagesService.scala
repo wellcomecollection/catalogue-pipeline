@@ -5,7 +5,7 @@ import scala.util.{Failure, Success}
 
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
-import com.sksamuel.elastic4s.{ElasticError, Index, Hit}
+import com.sksamuel.elastic4s.{ElasticError, Hit, Index}
 import com.sksamuel.elastic4s.circe._
 import io.circe.Decoder
 
@@ -69,7 +69,9 @@ class ImagesService(searchService: ElasticsearchService)(
       .map { result =>
         result
           .map { response =>
-            response.hits.hits.map(hit => deserialize[AugmentedImage](hit)).toList
+            response.hits.hits
+              .map(hit => deserialize[AugmentedImage](hit))
+              .toList
           }
           .getOrElse(Nil)
       }
@@ -89,8 +91,7 @@ class ImagesService(searchService: ElasticsearchService)(
   def createResultList(
     searchResponse: SearchResponse): ResultList[AugmentedImage, Unit] =
     ResultList(
-      results =
-        searchResponse.hits.hits.map(deserialize[AugmentedImage]).toList,
+      results = searchResponse.hits.hits.map(deserialize[AugmentedImage]).toList,
       totalResults = searchResponse.totalHits.toInt,
       aggregations = None
     )

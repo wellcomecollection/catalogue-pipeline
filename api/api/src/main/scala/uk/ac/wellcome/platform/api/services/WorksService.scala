@@ -4,7 +4,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 import io.circe.Decoder
-import com.sksamuel.elastic4s.{Index, Hit}
+import com.sksamuel.elastic4s.{Hit, Index}
 import com.sksamuel.elastic4s.ElasticError
 import com.sksamuel.elastic4s.requests.get.GetResponse
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
