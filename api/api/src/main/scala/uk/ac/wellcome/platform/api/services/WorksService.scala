@@ -2,16 +2,18 @@ package uk.ac.wellcome.platform.api.services
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
+
 import io.circe.Decoder
-import com.sksamuel.elastic4s.Index
+import com.sksamuel.elastic4s.{Index, Hit}
 import com.sksamuel.elastic4s.ElasticError
 import com.sksamuel.elastic4s.requests.get.GetResponse
-import com.sksamuel.elastic4s.requests.searches.{SearchHit, SearchResponse}
+import com.sksamuel.elastic4s.requests.searches.SearchResponse
+import com.sksamuel.elastic4s.circe._
+
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.models.work.internal.{IdentifiedBaseWork, IdentifiedWork}
 import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.platform.api.rest.{
   PaginatedSearchOptions,
   PaginationQuery
@@ -39,7 +41,7 @@ class WorksService(searchService: ElasticsearchService)(
       .map { result: Either[ElasticError, GetResponse] =>
         result.map { response: GetResponse =>
           if (response.exists)
-            Some(jsonTo[IdentifiedBaseWork](response.sourceAsString))
+            Some(deserialize[IdentifiedBaseWork](response))
           else None
         }
       }
@@ -77,8 +79,8 @@ class WorksService(searchService: ElasticsearchService)(
 
   private def searchResponseToWorks(
     searchResponse: SearchResponse): List[IdentifiedWork] =
-    searchResponse.hits.hits.map { h: SearchHit =>
-      jsonTo[IdentifiedWork](h.sourceAsString)
+    searchResponse.hits.hits.map { hit =>
+      deserialize[IdentifiedWork](hit)
     }.toList
 
   private def searchResponseToAggregationResults(
@@ -86,13 +88,12 @@ class WorksService(searchService: ElasticsearchService)(
     Aggregations(searchResponse)
   }
 
-  private def jsonTo[T <: IdentifiedBaseWork](document: String)(
-    implicit decoder: Decoder[T]): T =
-    fromJson[T](document) match {
+  private def deserialize[T](hit: Hit)(implicit decoder: Decoder[T]): T =
+    hit.safeTo[T] match {
       case Success(work) => work
       case Failure(e) =>
         throw new RuntimeException(
-          s"Unable to parse JSON as Work ($e): $document"
+          s"Unable to parse JSON($e): ${hit.sourceAsString}"
         )
     }
 }

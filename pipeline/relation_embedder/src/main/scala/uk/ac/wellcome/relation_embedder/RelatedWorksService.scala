@@ -11,13 +11,13 @@ import com.sksamuel.elastic4s.requests.searches.{
 }
 import com.sksamuel.elastic4s.requests.searches.SearchHit
 import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.circe._
 import io.circe.generic.semiauto.deriveDecoder
 
 import uk.ac.wellcome.models.work.internal._
 
 import uk.ac.wellcome.models.work.internal.result._
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.json.JsonUtil.fromJson
 
 trait RelatedWorksService {
 
@@ -133,12 +133,12 @@ class PathQueryRelatedWorksService(elasticClient: ElasticClient, index: Index)(
       Right(response.result)
 
   private def toWork(hit: SearchHit): Result[IdentifiedWork] =
-    fromJson[IdentifiedWork](hit.sourceAsString).toEither
+    hit.safeTo[IdentifiedWork].toEither
 
   case class AffectedWork(sourceIdentifier: SourceIdentifier)
 
   implicit val affectedWorkDecoder = deriveDecoder[AffectedWork]
 
   private def toAffectedWork(hit: SearchHit): Result[AffectedWork] =
-    fromJson[AffectedWork](hit.sourceAsString).toEither
+    hit.safeTo[AffectedWork].toEither
 }
