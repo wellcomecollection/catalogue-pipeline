@@ -28,68 +28,76 @@ trait RelatedWorksService {
     * @param work The work
     * @return The IDs of the other works to denormalise
     */
-  def getOtherAffectedWorks(work: IdentifiedWork): Future[List[SourceIdentifier]]
+  def getOtherAffectedWorks(work: IdentifiedBaseWork): Future[List[SourceIdentifier]]
 
   /** For a given work return all its relations.
     *
     * @param work The work
     * @return The related works which are embedded into the given work
     */
-  def getRelations(work: IdentifiedWork): Future[RelatedWorks]
+  def getRelations(work: IdentifiedBaseWork): Future[RelatedWorks]
 }
 
 class PathQueryRelatedWorksService(elasticClient: ElasticClient, index: Index)(
   implicit ec: ExecutionContext)
     extends RelatedWorksService {
 
-  def getOtherAffectedWorks(work: IdentifiedWork): Future[List[SourceIdentifier]] =
-    work.data.collectionPath match {
-      case None => Future.successful(Nil)
-      case Some(CollectionPath(path, _, _)) =>
-        executeSearchRequest(
-          RelatedWorkRequestBuilder(index, path).otherAffectedWorksRequest
-        ).flatMap { result =>
-          val works = result
-            .left
-            .map(_.asException)
-            .flatMap { resp =>
-              resp.hits.hits.toList.map(toAffectedWork).toResult
+  def getOtherAffectedWorks(work: IdentifiedBaseWork): Future[List[SourceIdentifier]] =
+    work match {
+      case work: IdentifiedWork =>
+        work.data.collectionPath match {
+          case None => Future.successful(Nil)
+          case Some(CollectionPath(path, _, _)) =>
+            executeSearchRequest(
+              RelatedWorkRequestBuilder(index, path).otherAffectedWorksRequest
+            ).flatMap { result =>
+              val works = result
+                .left
+                .map(_.asException)
+                .flatMap { resp =>
+                  resp.hits.hits.toList.map(toAffectedWork).toResult
+                }
+              works match {
+                case Right(works) => Future.successful(works.map(_.sourceIdentifier))
+                case Left(err)    => Future.failed(err)
+              }
             }
-          works match {
-            case Right(works) => Future.successful(works.map(_.sourceIdentifier))
-            case Left(err)    => Future.failed(err)
-          }
         }
+        case _ => Future.successful(Nil)
     }
 
-  def getRelations(work: IdentifiedWork): Future[RelatedWorks] =
-    work.data.collectionPath match {
-      case None => Future.successful(RelatedWorks.nil)
-      case Some(CollectionPath(path, _, _)) =>
-        executeMultiSearchRequest(
-          RelatedWorkRequestBuilder(index, path).relationsRequest
-        ).flatMap { result =>
-          val works = result.left
-            .map(_.asException)
-            .flatMap { searchResponses =>
-              searchResponses.map { resp =>
-                resp.hits.hits.toList.map(toWork).toResult
-              }.toResult
+  def getRelations(work: IdentifiedBaseWork): Future[RelatedWorks] =
+    work match {
+      case work: IdentifiedWork =>
+        work.data.collectionPath match {
+          case None => Future.successful(RelatedWorks.nil)
+          case Some(CollectionPath(path, _, _)) =>
+            executeMultiSearchRequest(
+              RelatedWorkRequestBuilder(index, path).relationsRequest
+            ).flatMap { result =>
+              val works = result.left
+                .map(_.asException)
+                .flatMap { searchResponses =>
+                  searchResponses.map { resp =>
+                    resp.hits.hits.toList.map(toWork).toResult
+                  }.toResult
+                }
+              val relatedWorks = works.flatMap {
+                case List(children, siblings, ancestors) =>
+                  Right(RelatedWorks(path, children, siblings, ancestors))
+                case works =>
+                  Left(
+                    new Exception(
+                      "Expected multisearch response containing 3 items")
+                  )
+              }
+              relatedWorks match {
+                case Right(relatedWorks) => Future.successful(relatedWorks)
+                case Left(err)           => Future.failed(err)
+              }
             }
-          val relatedWorks = works.flatMap {
-            case List(children, siblings, ancestors) =>
-              Right(RelatedWorks(path, children, siblings, ancestors))
-            case works =>
-              Left(
-                new Exception(
-                  "Expected multisearch response containing 3 items")
-              )
-          }
-          relatedWorks match {
-            case Right(relatedWorks) => Future.successful(relatedWorks)
-            case Left(err)           => Future.failed(err)
-          }
         }
+        case _ => Future.successful(RelatedWorks.nil)
     }
 
   private def executeSearchRequest(

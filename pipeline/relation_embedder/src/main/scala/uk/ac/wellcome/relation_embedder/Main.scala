@@ -20,7 +20,8 @@ object Main extends WellcomeTypesafeApp {
       sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
       msgSender = ???,
       workRetriever = ???,
-      relatedWorksService = ???
+      workIndexer = ???,
+      relatedWorksService = ???,
     )
   }
 }
