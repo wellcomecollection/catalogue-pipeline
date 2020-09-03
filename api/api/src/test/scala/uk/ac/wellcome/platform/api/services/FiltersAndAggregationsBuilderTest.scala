@@ -60,14 +60,15 @@ class FiltersAndAggregationsBuilderTest extends AnyFunSpec with Matchers {
   describe("aggregation-level filtering") {
     it("applies to aggregations with a paired filter") {
       val workTypeFilter = WorkTypeFilter(Seq("bananas"))
+      val languageFilter = LanguageFilter(Seq("en"))
       val sut = new FiltersAndAggregationsBuilder(
-        List(AggregationRequest.WorkType),
-        List(workTypeFilter),
+        List(AggregationRequest.WorkType, AggregationRequest.Language),
+        List(workTypeFilter, languageFilter),
         requestToAggregation,
         filterToQuery
       )
 
-      sut.filteredAggregations should have length 1
+      sut.filteredAggregations should have length 2
       sut.filteredAggregations.head shouldBe a[MockAggregation]
       val agg = sut.filteredAggregations.head.asInstanceOf[MockAggregation]
       agg.subaggs.head shouldBe a[FilterAggregation]
