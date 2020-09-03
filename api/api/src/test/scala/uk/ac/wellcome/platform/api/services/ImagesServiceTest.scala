@@ -58,7 +58,7 @@ class ImagesServiceTest
           .retrieveSimilarImages(index, images.head)
           .map { results =>
             results should not be empty
-            results should contain theSameElementsInOrderAs images.tail
+            results should contain theSameElementsAs images.tail
           }
       }
     }
@@ -76,8 +76,6 @@ class ImagesServiceTest
             similarityMetric = SimilarityMetric.Features)
           .map { results =>
             results should not be empty
-            results.map(_.id.canonicalId) should contain theSameElementsInOrderAs images.tail
-              .map(_.id.canonicalId)
             results should contain theSameElementsInOrderAs images.tail
           }
       }

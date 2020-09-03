@@ -23,14 +23,16 @@ trait VectorGenerators {
     scalarMultiply(r, rand)
   }
 
-  def subspaceSimilarVector(a: Vec,
-                            similarity: Float = defaultSimilarity,
-                            subspaces: Int = 256): Vec =
-    a.grouped(a.size / subspaces)
-      .flatMap(similarVector(_, similarity))
-      .toSeq
+  def similarSortedIntegerVectors(d: Int, n: Int): Seq[Seq[Int]] = {
+    val baseVec = randomSortedIntegerVector(d, maxComponent = n * 100)
+    val otherVecs = (1 until n).map { i =>
+      similarSortedIntegerVector(baseVec, i)
+    }
+    baseVec +: otherVecs
+  }
 
-  def similarVector(a: Vec, similarity: Float = defaultSimilarity): Vec = {
+  def cosineSimilarVector(a: Vec,
+                          similarity: Float = defaultSimilarity): Vec = {
     val r = norm(a)
     val unitA = normalize(a)
     val rand = normalize(randomNormal(a.size))
@@ -48,6 +50,15 @@ trait VectorGenerators {
 
   def nearbyVector(a: Vec, epsilon: Float = 0.1f): Vec =
     add(a, scalarMultiply(epsilon, normalize(randomNormal(a.size))))
+
+  def similarVectors(d: Int, n: Int): Seq[Vec] = {
+    val baseVec = randomVector(d, maxR = n.toFloat)
+    val direction = randomVector(d)
+    val otherVecs = (1 until n).map { i =>
+      add(baseVec, scalarMultiply(i / 10f, direction))
+    }
+    baseVec +: otherVecs
+  }
 }
 
 /*
@@ -58,29 +69,28 @@ trait VectorGenerators {
  * The original (unmodified) algorithm was taken from these slides:
  * http://www.cs.jhu.edu/~vandurme/papers/VanDurmeLallACL10-slides.pdf
  */
-class SimHasher(d: Int, bins: (Int, Int) = (256, 256)) {
+class SimHasher(d: Int, bins: (Int, Int) = (256, 64)) {
   import VectorOps._
 
-  private val groupSize = d / bins._1
-  private val hashSize = math.ceil(log2(bins._2)).toInt
-  lazy private val projections = gramSchmidtOrthonormalise(
-    createMatrix(hashSize, groupSize)(
-      Random.nextGaussian().toFloat / hashSize
-    )
+  private val hashSize = log2(bins._2).toInt * (bins._1 - 1)
+  lazy private val projections = (
+    createMatrix(hashSize, d)(Random.nextGaussian().toFloat)
   )
 
   def lsh(vec: Vec): Seq[String] = {
     assert(vec.size == d)
-    vec
-      .grouped(groupSize)
+    projections.zipWithIndex
+      .foldLeft(BigInt(0)) {
+        case (s, (row, i)) if dot(vec, row) >= 0 => s.setBit(i)
+        case (s, (_, i))                         => s.clearBit(i)
+      }
+      .toString(2)
+      .padTo(hashSize, "0")
+      .mkString
+      .grouped(hashSize / bins._1)
       .zipWithIndex
       .map {
-        case (group, index) =>
-          val hash = projections.zipWithIndex.foldLeft(0) {
-            case (s, (row, i)) if dot(group, row) >= 0 => s | 1 << i
-            case (s, _)                                => s
-          }
-          s"$index-$hash"
+        case (str, i) => s"$i-${BigInt(str, 2).toString(10)}"
       }
       .toSeq
   }

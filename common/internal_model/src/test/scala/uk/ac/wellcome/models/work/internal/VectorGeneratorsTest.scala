@@ -34,7 +34,7 @@ class VectorGeneratorsTest
   it("generates vectors cosine-similar to known vectors") {
     val similarity = math.cos(Math.PI.toFloat / 6).toFloat
     val vecA = randomVector(16)
-    val vecB = similarVector(vecA, similarity)
+    val vecB = cosineSimilarVector(vecA, similarity)
 
     vecB should have length vecA.length
     vecB should not equal vecA
@@ -56,10 +56,7 @@ class VectorGeneratorsTest
     it("outputs similar hashes for similar vectors") {
       val vecA = randomVector(d, maxR = 10.0f)
       val vecB =
-        subspaceSimilarVector(
-          vecA,
-          similarity = math.cos(Math.PI / 64).toFloat,
-          subspaces = 256)
+        cosineSimilarVector(vecA, similarity = math.cos(Math.PI / 64).toFloat)
       val hashA = simHasher.lsh(vecA)
       val hashB = simHasher.lsh(vecB)
 
@@ -69,10 +66,8 @@ class VectorGeneratorsTest
 
     it("outputs differing hashes for dissimilar vectors") {
       val vecA = randomVector(d, maxR = 10.0f)
-      val vecB = subspaceSimilarVector(
-        vecA,
-        similarity = math.cos(Math.PI / 2).toFloat,
-        subspaces = 256)
+      val vecB =
+        cosineSimilarVector(vecA, similarity = math.cos(Math.PI / 2).toFloat)
       val hashA = simHasher.lsh(vecA)
       val hashB = simHasher.lsh(vecB)
 
@@ -81,13 +76,9 @@ class VectorGeneratorsTest
     }
 
     it("preserves ordering of similarities") {
-      val vec = randomVector(d, maxR = 10.0f)
-      val direction = randomVector(d)
-      val otherVecs = (1 to 9).map { i =>
-        add(vec, scalarMultiply(i / 10f, direction))
-      }
-      val hash = simHasher.lsh(vec)
-      val otherHashes = otherVecs.map(simHasher.lsh)
+      val vecs = similarVectors(d, 10)
+      val hash = simHasher.lsh(vecs.head)
+      val otherHashes = vecs.tail.map(simHasher.lsh)
       val diffSizes = otherHashes.map(_ diff hash).map(_.size)
 
       diffSizes shouldBe sorted

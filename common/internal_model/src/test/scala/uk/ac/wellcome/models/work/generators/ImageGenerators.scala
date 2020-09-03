@@ -112,24 +112,15 @@ trait ImageGenerators
   def createSimilarImages(n: Int,
                           similarFeatures: Boolean,
                           similarPalette: Boolean): Seq[AugmentedImage] = {
-    val baseFeaturesAndPalette =
-      (
-        randomVector(4096, maxR = 10.0f),
-        randomSortedIntegerVector(30, maxComponent = 1000)
-      )
-    val similarFeaturesAndPalette = (1 until n).map { n =>
-      val features = if (similarFeatures) {
-        subspaceSimilarVector(
-          baseFeaturesAndPalette._1,
-          similarity = 1f - (n * 0.05f),
-          subspaces = 256)
-      } else { randomVector(4096) }
-      val palette = if (similarPalette) {
-        similarSortedIntegerVector(baseFeaturesAndPalette._2, n)
-      } else { randomSortedIntegerVector(30, maxComponent = 1000) }
-      (features, palette)
+    val features = if (similarFeatures) {
+      similarVectors(4096, n)
+    } else { (1 to n).map(_ => randomVector(4096, maxR = 10.0f)) }
+    val palettes = if (similarPalette) {
+      similarSortedIntegerVectors(30, n)
+    } else {
+      (1 to n).map(_ => randomSortedIntegerVector(30, maxComponent = 1000))
     }
-    (baseFeaturesAndPalette +: similarFeaturesAndPalette).map {
+    (features zip palettes).map {
       case (features, palette) =>
         createAugmentedImageWith(
           inferredData = Some(
