@@ -3,10 +3,22 @@ package uk.ac.wellcome.platform.transformer.miro.transformers
 import uk.ac.wellcome.models.work.internal.{DigitalLocation, LocationType}
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 
-trait MiroLocations
-    extends MiroImage
-    with MiroLicenses
-    with MiroContributorCodes {
+trait MiroLocations extends MiroLicenses with MiroContributorCodes {
+
+  private val imageUriTemplates = Map(
+    "thumbnail" -> "%s/image/%s.jpg/full/300,/0/default.jpg",
+    "info" -> "%s/image/%s.jpg/info.json"
+  )
+
+  def buildImageApiURL(miroId: String, templateName: String): String = {
+    val iiifImageApiBaseUri = "https://iiif.wellcomecollection.org"
+    val imageUriTemplate = imageUriTemplates.getOrElse(
+      templateName,
+      throw new Exception(
+        s"Unrecognised Image API URI template ($templateName)!"))
+
+    imageUriTemplate.format(iiifImageApiBaseUri, miroId)
+  }
 
   def getLocations(miroRecord: MiroRecord): List[DigitalLocation] =
     List(
