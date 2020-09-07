@@ -3,25 +3,35 @@ package uk.ac.wellcome.platform.transformer.miro.transformers
 import uk.ac.wellcome.models.work.internal.{DigitalLocation, LocationType}
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 
-trait MiroLocations
-    extends MiroImage
-    with MiroLicenses
-    with MiroContributorCodes {
+trait MiroLocation extends MiroLicenses with MiroContributorCodes {
 
-  def getLocations(miroRecord: MiroRecord): List[DigitalLocation] =
-    List(
-      DigitalLocation(
-        locationType = LocationType("iiif-image"),
-        url = buildImageApiURL(
+  private val imageUriTemplates = Map(
+    "thumbnail" -> "%s/image/%s.jpg/full/300,/0/default.jpg",
+    "info" -> "%s/image/%s.jpg/info.json"
+  )
+
+  def buildImageApiURL(miroId: String, templateName: String): String = {
+    val iiifImageApiBaseUri = "https://iiif.wellcomecollection.org"
+    val imageUriTemplate = imageUriTemplates.getOrElse(
+      templateName,
+      throw new Exception(
+        s"Unrecognised Image API URI template ($templateName)!"))
+
+    imageUriTemplate.format(iiifImageApiBaseUri, miroId)
+  }
+
+  def getLocation(miroRecord: MiroRecord): DigitalLocation =
+    DigitalLocation(
+      locationType = LocationType("iiif-image"),
+      url = buildImageApiURL(
+        miroId = miroRecord.imageNumber,
+        templateName = "info"
+      ),
+      credit = getCredit(miroRecord),
+      license = Some(
+        chooseLicense(
           miroId = miroRecord.imageNumber,
-          templateName = "info"
-        ),
-        credit = getCredit(miroRecord),
-        license = Some(
-          chooseLicense(
-            miroId = miroRecord.imageNumber,
-            maybeUseRestrictions = miroRecord.useRestrictions
-          )
+          maybeUseRestrictions = miroRecord.useRestrictions
         )
       )
     )

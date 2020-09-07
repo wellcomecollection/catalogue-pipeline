@@ -6,6 +6,7 @@ import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
 import uk.ac.wellcome.models.work.internal.{
   DigitalLocation,
   IdentifierType,
+  License,
   LocationType,
   SourceIdentifier,
   UnmergedImage
@@ -23,7 +24,9 @@ class MiroImageTest
     it("extracts the Miro image") {
       transformer.getImage(
         createMiroRecordWith(
-          imageNumber = "B0011308"
+          imageNumber = "B0011308",
+          useRestrictions = Some("CC-0"),
+          sourceCode = Some("FDN")
         ),
         version = 1
       ) shouldBe UnmergedImage(
@@ -36,7 +39,9 @@ class MiroImageTest
         location = DigitalLocation(
           url =
             "https://iiif.wellcomecollection.org/image/B0011308.jpg/info.json",
-          locationType = LocationType("iiif-image")
+          locationType = LocationType("iiif-image"),
+          license = Some(License.CC0),
+          credit = Some("Ezra Feilden")
         )
       )
     }
