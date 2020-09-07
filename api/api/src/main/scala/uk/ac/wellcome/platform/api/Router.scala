@@ -110,7 +110,7 @@ class Router(elasticClient: ElasticClient,
       WorksMultiMatcher("{{query}}").filter(
         termQuery(field = "type", value = "IdentifiedWork")))
 
-    complete(SearchTemplates(List(searchTemplate)))
+    complete(SearchTemplateResponse(List(searchTemplate)))
   }
 
   def rejectionHandler =
