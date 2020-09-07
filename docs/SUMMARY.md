@@ -24,7 +24,6 @@
     - [Searches with 3 words or more](search/analysis/summary-3-plus-word-searches.md)
     - [Subsequent searches](search/analysis/subsequent-searches.md)
   - [Query design](search/query-design/README.md)
-  - [Intentions & expectations](search/intentions-and-expectations.md)
   - [Relevance tests](search/tests/README.md)
     - [Test 1 - Explicit feedback](search/tests/001_explicit_feedback.md)
     - [Test 2 - Implicit feedback](search/tests/002_implicit_feedback.md)
