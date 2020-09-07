@@ -14,7 +14,7 @@ class ApiSearchTemplatesTest
     checkJson { json =>
       json.isObject shouldBe true
       val templates = getKey(json, "templates")
-      templates.isEmpty shouldBe false
+      templates should not be empty
       templates map { json =>
         getLength(json).get should be > 0
       }
