@@ -105,14 +105,22 @@ class ImagesServiceTest
           createSimilarImages(6, similarFeatures = true, similarPalette = false)
         insertImagesIntoElasticsearch(index, images: _*)
 
-        imagesService
+        val colorResultsFuture = imagesService
           .retrieveSimilarImages(
             index,
             images.head,
             similarityMetric = SimilarityMetric.Colors)
-          .map { results =>
-            results should not contain theSameElementsInOrderAs(images.tail)
-          }
+        val blendedResultsFuture = imagesService
+          .retrieveSimilarImages(
+            index,
+            images.head,
+            similarityMetric = SimilarityMetric.Blended)
+        for {
+          colorResults <- colorResultsFuture
+          blendedResults <- blendedResultsFuture
+        } yield
+          colorResults should not contain
+            theSameElementsInOrderAs(blendedResults)
       }
     }
 
