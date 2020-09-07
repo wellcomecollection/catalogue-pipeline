@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.transformer.miro.transformers
 import uk.ac.wellcome.models.work.internal.{DigitalLocation, LocationType}
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 
-trait MiroLocations extends MiroLicenses with MiroContributorCodes {
+trait MiroLocation extends MiroLicenses with MiroContributorCodes {
 
   private val imageUriTemplates = Map(
     "thumbnail" -> "%s/image/%s.jpg/full/300,/0/default.jpg",
@@ -20,20 +20,18 @@ trait MiroLocations extends MiroLicenses with MiroContributorCodes {
     imageUriTemplate.format(iiifImageApiBaseUri, miroId)
   }
 
-  def getLocations(miroRecord: MiroRecord): List[DigitalLocation] =
-    List(
-      DigitalLocation(
-        locationType = LocationType("iiif-image"),
-        url = buildImageApiURL(
+  def getLocation(miroRecord: MiroRecord): DigitalLocation =
+    DigitalLocation(
+      locationType = LocationType("iiif-image"),
+      url = buildImageApiURL(
+        miroId = miroRecord.imageNumber,
+        templateName = "info"
+      ),
+      credit = getCredit(miroRecord),
+      license = Some(
+        chooseLicense(
           miroId = miroRecord.imageNumber,
-          templateName = "info"
-        ),
-        credit = getCredit(miroRecord),
-        license = Some(
-          chooseLicense(
-            miroId = miroRecord.imageNumber,
-            maybeUseRestrictions = miroRecord.useRestrictions
-          )
+          maybeUseRestrictions = miroRecord.useRestrictions
         )
       )
     )

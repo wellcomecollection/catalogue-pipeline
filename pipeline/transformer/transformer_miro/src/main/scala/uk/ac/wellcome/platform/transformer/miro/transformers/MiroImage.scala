@@ -9,7 +9,7 @@ import uk.ac.wellcome.models.work.internal.{
 }
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 
-trait MiroImage extends MiroLocations {
+trait MiroImage extends MiroLocation {
 
   def getImage(miroRecord: MiroRecord,
                version: Int): UnmergedImage[Identifiable, Unminted] =
@@ -20,6 +20,6 @@ trait MiroImage extends MiroLocations {
         value = miroRecord.imageNumber
       ),
       version = version,
-      location = getLocations(miroRecord).head
+      location = getLocation(miroRecord)
     )
 }
