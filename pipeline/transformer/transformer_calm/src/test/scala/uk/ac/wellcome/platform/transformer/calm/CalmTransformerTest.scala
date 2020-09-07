@@ -341,6 +341,12 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "RefNo" -> "a/b/c",
       "CatalogueStatus" -> "pArtialLy catalogued "
     )
+    val recordF = calmRecord(
+      "Title" -> "abc",
+      "Level" -> "Collection",
+      "RefNo" -> "a/b/c",
+      "CatalogueStatus" -> "Third-party metadata"
+    )
     val suppressibleRecordA = calmRecord(
       "Title" -> "abc",
       "Level" -> "Collection",
@@ -360,6 +366,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       (recordC, false),
       (recordD, false),
       (recordE, false),
+      (recordF, false),
       (suppressibleRecordA, true),
       (suppressibleRecordB, true)
     )
