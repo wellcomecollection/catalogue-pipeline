@@ -5,9 +5,6 @@ import com.sksamuel.elastic4s.{ElasticClient, Index, Response}
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.elasticsearch.elastic4s.searchtemplate.PutSearchTemplateRequest
-import uk.ac.wellcome.elasticsearch.elastic4s.WecoElasticDsl._
-import uk.ac.wellcome.elasticsearch.model.SearchTemplate
 import scala.concurrent.{ExecutionContext, Future}
 
 class ElasticsearchIndexCreator(
@@ -20,7 +17,6 @@ class ElasticsearchIndexCreator(
 
   val mapping = config.mapping
   val analysis = config.analysis
-  val searchTemplate = config.searchTemplate
 
   private def exists =
     elasticClient.execute(indexExists(index.name)).map(_.result.isExists)
@@ -29,10 +25,7 @@ class ElasticsearchIndexCreator(
     for {
       doesExist <- exists
       createResp <- if (doesExist) update else put
-      resp <- searchTemplate
-        .map(putSearchTemplate)
-        .getOrElse(Future.successful(createResp))
-    } yield { handleEsError(resp) }
+    } yield { handleEsError(createResp) }
   }
 
   private def put =
@@ -59,13 +52,6 @@ class ElasticsearchIndexCreator(
           // they end up having more than 1000 fields, so we increase them to 2000
           .settings(Map("mapping.total_fields.limit" -> 2000))
       }
-
-  private def putSearchTemplate(template: SearchTemplate) =
-    elasticClient.execute {
-      // We use an index namespace on templates to know
-      // which index they will work against
-      PutSearchTemplateRequest(s"${index.name}__${template.id}", template.query)
-    }
 
   private def update =
     elasticClient

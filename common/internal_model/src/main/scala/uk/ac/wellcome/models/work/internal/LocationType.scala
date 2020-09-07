@@ -6,6 +6,14 @@ import com.github.tototoshi.csv.CSVReader
 
 import scala.io.Source
 
+sealed trait LocationFormat
+object LocationFormat {
+  case object IIIFPresentation
+  case object IIIFImage
+  case object OpenShelves
+  case object ClosedStores
+}
+
 case class LocationType(
   id: String,
   label: String,
