@@ -7,7 +7,7 @@ import uk.ac.wellcome.display.json.DisplayJsonUtil._
 
 case class SearchTemplates(templates: List[SearchTemplate])
 object SearchTemplates {
-  implicit def encoder: Encoder[SearchTemplates] =
+  implicit val encoder: Encoder[SearchTemplates] =
     deriveConfiguredEncoder
 }
 
@@ -17,6 +17,6 @@ object SearchTemplate {
   def apply(id: String, index: String, query: Query): SearchTemplate =
     SearchTemplate(id, index, QueryBuilderFn(query).string())
 
-  implicit def encoder: Encoder[SearchTemplate] =
+  implicit val encoder: Encoder[SearchTemplate] =
     deriveConfiguredEncoder
 }
