@@ -1,14 +1,18 @@
 package uk.ac.wellcome.platform.api.services
 
 import com.sksamuel.elastic4s.{ElasticError, Index}
-import org.scalatest.funspec.AsyncFunSpec
+import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.{EitherValues, OptionValues}
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.models.work.generators.ImageGenerators
 import uk.ac.wellcome.platform.api.models.SimilarityMetric
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 class ImagesServiceTest
-    extends AsyncFunSpec
+    extends AnyFunSpec
+    with ScalaFutures
     with ElasticsearchFixtures
     with ImageGenerators
     with EitherValues
@@ -26,24 +30,30 @@ class ImagesServiceTest
         val image = createAugmentedImage()
         insertImagesIntoElasticsearch(index, image)
 
-        imagesService
-          .findImageById(id = image.id.canonicalId)(index)
-          .map { _.right.value.value shouldBe image }
+        whenReady(
+          imagesService
+            .findImageById(id = image.id.canonicalId)(index)) {
+          _.right.value.value shouldBe image
+        }
       }
     }
 
     it("returns a None if no image can be found") {
       withLocalImagesIndex { index =>
-        imagesService
-          .findImageById("bananas")(index)
-          .map { _.right.value shouldBe None }
+        whenReady(
+          imagesService
+            .findImageById("bananas")(index)) {
+          _.right.value shouldBe None
+        }
       }
     }
 
     it("returns a Left[ElasticError] if Elasticsearch returns an error") {
-      imagesService
-        .findImageById("potatoes")(Index("parsnips"))
-        .map { _.left.value shouldBe a[ElasticError] }
+      whenReady(
+        imagesService
+          .findImageById("potatoes")(Index("parsnips"))) {
+        _.left.value shouldBe a[ElasticError]
+      }
     }
   }
 
@@ -54,12 +64,12 @@ class ImagesServiceTest
           createSimilarImages(6, similarFeatures = true, similarPalette = true)
         insertImagesIntoElasticsearch(index, images: _*)
 
-        imagesService
-          .retrieveSimilarImages(index, images.head)
-          .map { results =>
-            results should not be empty
-            results should contain theSameElementsAs images.tail
-          }
+        whenReady(
+          imagesService
+            .retrieveSimilarImages(index, images.head)) { results =>
+          results should not be empty
+          results should contain theSameElementsAs images.tail
+        }
       }
     }
 
@@ -69,15 +79,15 @@ class ImagesServiceTest
           createSimilarImages(6, similarFeatures = true, similarPalette = false)
         insertImagesIntoElasticsearch(index, images: _*)
 
-        imagesService
-          .retrieveSimilarImages(
-            index,
-            images.head,
-            similarityMetric = SimilarityMetric.Features)
-          .map { results =>
-            results should not be empty
-            results should contain theSameElementsInOrderAs images.tail
-          }
+        whenReady(
+          imagesService
+            .retrieveSimilarImages(
+              index,
+              images.head,
+              similarityMetric = SimilarityMetric.Features)) { results =>
+          results should not be empty
+          results should contain theSameElementsInOrderAs images.tail
+        }
       }
     }
 
@@ -87,15 +97,15 @@ class ImagesServiceTest
           createSimilarImages(6, similarFeatures = false, similarPalette = true)
         insertImagesIntoElasticsearch(index, images: _*)
 
-        imagesService
-          .retrieveSimilarImages(
-            index,
-            images.head,
-            similarityMetric = SimilarityMetric.Colors)
-          .map { results =>
-            results should not be empty
-            results should contain theSameElementsAs images.tail
-          }
+        whenReady(
+          imagesService
+            .retrieveSimilarImages(
+              index,
+              images.head,
+              similarityMetric = SimilarityMetric.Colors)) { results =>
+          results should not be empty
+          results should contain theSameElementsAs images.tail
+        }
       }
     }
 
@@ -115,12 +125,12 @@ class ImagesServiceTest
             index,
             images.head,
             similarityMetric = SimilarityMetric.Blended)
-        for {
-          colorResults <- colorResultsFuture
-          blendedResults <- blendedResultsFuture
-        } yield
-          colorResults should not contain
-            theSameElementsInOrderAs(blendedResults)
+        whenReady(colorResultsFuture) { colorResults =>
+          whenReady(blendedResultsFuture) { blendedResults =>
+            colorResults should not contain
+              theSameElementsInOrderAs(blendedResults)
+          }
+        }
       }
     }
 
@@ -129,18 +139,20 @@ class ImagesServiceTest
         val image = createAugmentedImage()
         insertImagesIntoElasticsearch(index, image)
 
-        imagesService.retrieveSimilarImages(index, image).map { results =>
-          results shouldBe empty
+        whenReady(imagesService.retrieveSimilarImages(index, image)) {
+          _ shouldBe empty
         }
       }
     }
 
     it("returns Nil when Elasticsearch returns an error") {
-      imagesService
-        .retrieveSimilarImages(Index("doesn't exist"), createAugmentedImage())
-        .map { results =>
-          results shouldBe empty
-        }
+      whenReady(
+        imagesService
+          .retrieveSimilarImages(
+            Index("doesn't exist"),
+            createAugmentedImage())) {
+        _ shouldBe empty
+      }
     }
   }
 }
