@@ -20,11 +20,11 @@ case object LocationType {
   private val csvRows = csvReader.all()
 
   // location-types.csv is a list of 3-tuples, e.g.:
-  //
+  //    LocationType.type,LocationType.id,LocationType.label
   //
   //    ThumbnailImage,thumbnail-image,Thumbnail Image
-  //    2,acqi,Info Service acquisitions
-  //    3,acql,Wellcome Library
+  //    ClosedStores,acqi,Info Service acquisitions
+  //    OpenShelves,acql,Wellcome Library
   //
   private val locationTypeMap: Map[String, LocationType] = csvRows
     .map { row =>

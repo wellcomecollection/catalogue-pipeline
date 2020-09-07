@@ -103,31 +103,31 @@ IIIFPresentation,iiif-presentation,IIIF Presentation API
 101,scmwc,Archives & Mss Well.Coll.
 102,scmwf,Closed stores A&MSS Well.Found.
 103,scons,Conservation
-104,sehuf,Closed stores EPB Hunt.G.O/S
-105,sehun,Closed stores EPB Hunt.
-106,sehup,Closed stores EPB Hunt. pam
-107,sehux,Closed stores EPB Hunt. O/S
+ClosedStores,sehuf,Closed stores EPB Hunt.G.O/S
+ClosedStores,sehun,Closed stores EPB Hunt.
+ClosedStores,sehup,Closed stores EPB Hunt. pam
+ClosedStores,sehux,Closed stores EPB Hunt. O/S
 108,semfc,RESTRICTED
-109,semfm,Closed stores EPB m/film
-110,semsa,Closed stores EPB MSL A
-111,semsb,Closed stores EPB MSL B
-112,semsc,Closed stores EPB MSL C
-113,semsd,Closed stores EPB MSL D
-114,semsf,Closed stores EPB MSL G. O/S
-115,semsl,Closed stores EPB MSL
-116,semss,Closed stores EPB MSL journals
-117,semst,Closed stores EPB MSL tracts
-118,sepaf,Closed stores EPB Amer.G.O/S
-119,sepah,Closed stores EPB Austro-Hung.
-120,sepal,Closed stores EBP Almanac
-121,sepam,Closed stores EPB American
-122,sepax,Closed stores EPB Amer. O/S
-123,sepba,Closed stores EPB / A
-124,sepbb,Closed stores EPB / B
-125,sepbc,Closed stores EPB / C
-126,sepbd,Closed stores EPB / D
-127,sepbf,Closed stores EPB G. O/S
-128,sepbi,Closed stores EPB Biog p.Vol
+ClosedStore,semfm,Closed stores EPB m/film
+ClosedStore,semsa,Closed stores EPB MSL A
+ClosedStore,semsb,Closed stores EPB MSL B
+ClosedStore,semsc,Closed stores EPB MSL C
+ClosedStore,semsd,Closed stores EPB MSL D
+ClosedStore,semsf,Closed stores EPB MSL G. O/S
+ClosedStore,semsl,Closed stores EPB MSL
+ClosedStore,semss,Closed stores EPB MSL journals
+ClosedStore,semst,Closed stores EPB MSL tracts
+ClosedStore,sepaf,Closed stores EPB Amer.G.O/S
+ClosedStore,sepah,Closed stores EPB Austro-Hung.
+ClosedStore,sepal,Closed stores EBP Almanac
+ClosedStore,sepam,Closed stores EPB American
+ClosedStore,sepax,Closed stores EPB Amer. O/S
+ClosedStore,sepba,Closed stores EPB / A
+ClosedStore,sepbb,Closed stores EPB / B
+ClosedStore,sepbc,Closed stores EPB / C
+ClosedStore,sepbd,Closed stores EPB / D
+ClosedStore,sepbf,Closed stores EPB G. O/S
+ClosedStore,sepbi,Closed stores EPB Biog p.Vol
 129,sepbk,Closed stores EPB
 130,sepbl,Closed stores EPB Books for the Blind
 131,sepbn,Closed stores EPB Bindings
