@@ -33,6 +33,15 @@ object CalmTransformer
     ("Arrangement", ArrangementNote(_))
   )
 
+  // As much as it might not look like it, these values mean it should
+  // not be suppressed.
+  val nonSuppressedStatuses = List(
+    "catalogued",
+    "not yet available",
+    "partially catalogued",
+    "third-party metadata"
+  )
+
   def apply(record: CalmRecord, version: Int): Result[TransformedBaseWork] =
     if (shouldSuppress(record)) {
       Right(
@@ -101,14 +110,8 @@ object CalmTransformer
   def catalogueStatusSuppressesRecord(record: CalmRecord): Boolean =
     record
       .get("CatalogueStatus")
-      .forall { value =>
-        value.toLowerCase.trim match {
-          // As much as it might not look like it, these values mean it should
-          // not be suppressed.
-          case "catalogued" | "not yet available" | "partially catalogued" =>
-            false
-          case _ => true
-        }
+      .forall { status =>
+        !nonSuppressedStatuses.contains(status.toLowerCase.trim)
       }
 
   def workData(record: CalmRecord): Result[WorkData[Unminted, Identifiable]] =
