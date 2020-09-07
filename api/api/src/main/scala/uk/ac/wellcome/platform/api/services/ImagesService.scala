@@ -1,10 +1,15 @@
 package uk.ac.wellcome.platform.api.services
 
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
+
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
-import com.sksamuel.elastic4s.{ElasticError, Index}
+import com.sksamuel.elastic4s.{ElasticError, Hit, Index}
+import com.sksamuel.elastic4s.circe._
+import io.circe.Decoder
+
 import uk.ac.wellcome.display.models.SortingOrder
-import uk.ac.wellcome.json.JsonUtil.fromJson
 import uk.ac.wellcome.models.work.internal.AugmentedImage
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.platform.api.Tracing
@@ -13,9 +18,6 @@ import uk.ac.wellcome.platform.api.rest.{
   PaginatedSearchOptions,
   PaginationQuery
 }
-
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
 
 case class ImagesSearchOptions(
   searchQuery: Option[SearchQuery] = None,
@@ -36,17 +38,10 @@ class ImagesService(searchService: ElasticsearchService)(
       .executeGet(id)(index)
       .map {
         _.map { response =>
-          if (response.exists) {
-            Some(fromJson[AugmentedImage](response.sourceAsString) match {
-              case Success(image) => image
-              case Failure(e) =>
-                throw new RuntimeException(
-                  s"Unable to parse JSON as Image ($e): ${response.sourceAsString}"
-                )
-            })
-          } else {
+          if (response.exists)
+            Some(deserialize[AugmentedImage](response))
+          else
             None
-          }
         }
       }
 
@@ -74,7 +69,9 @@ class ImagesService(searchService: ElasticsearchService)(
       .map { result =>
         result
           .map { response =>
-            response.hits.hits.map(hit => jsonTo(hit.sourceAsString)).toList
+            response.hits.hits
+              .map(hit => deserialize[AugmentedImage](hit))
+              .toList
           }
           .getOrElse(Nil)
       }
@@ -94,17 +91,17 @@ class ImagesService(searchService: ElasticsearchService)(
   def createResultList(
     searchResponse: SearchResponse): ResultList[AugmentedImage, Unit] =
     ResultList(
-      results =
-        searchResponse.hits.hits.map(hit => jsonTo(hit.sourceAsString)).toList,
+      results = searchResponse.hits.hits.map(deserialize[AugmentedImage]).toList,
       totalResults = searchResponse.totalHits.toInt,
       aggregations = None
     )
 
-  private def jsonTo(doc: String) = fromJson[AugmentedImage](doc) match {
-    case Success(image) => image
-    case Failure(e) =>
-      throw new RuntimeException(
-        s"Unable to parse JSON as Image ($e): $doc"
-      )
-  }
+  private def deserialize[T](hit: Hit)(implicit decoder: Decoder[T]): T =
+    hit.safeTo[T] match {
+      case Success(work) => work
+      case Failure(e) =>
+        throw new RuntimeException(
+          s"Unable to parse JSON($e): ${hit.sourceAsString}"
+        )
+    }
 }

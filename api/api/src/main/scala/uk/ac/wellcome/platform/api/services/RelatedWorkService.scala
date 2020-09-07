@@ -6,11 +6,11 @@ import scala.annotation.tailrec
 
 import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.requests.searches.SearchHit
+import com.sksamuel.elastic4s.circe._
 
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.internal.result._
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.json.JsonUtil.fromJson
 import uk.ac.wellcome.platform.api.Tracing
 
 class RelatedWorkService(elasticsearchService: ElasticsearchService)(
@@ -52,7 +52,7 @@ class RelatedWorkService(elasticsearchService: ElasticsearchService)(
     }
 
   private def toWork(hit: SearchHit): Result[IdentifiedWork] =
-    fromJson[IdentifiedWork](hit.sourceAsString).toEither
+    hit.safeTo[IdentifiedWork].toEither
 
   private def toRelatedWorks(path: String,
                              children: List[IdentifiedWork],
