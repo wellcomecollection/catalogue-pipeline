@@ -30,7 +30,7 @@ case class MetsData(
           items = List(item),
           mergeCandidates = List(mergeCandidate),
           thumbnail = thumbnail(sourceIdentifier.value, license, accessStatus),
-          images = images(version, accessStatus)
+          images = images(version, license, accessStatus)
         )
       )
 
@@ -52,15 +52,17 @@ case class MetsData(
       url = s"https://wellcomelibrary.org/iiif/$recordIdentifier/manifest",
       locationType = LocationType("iiif-presentation"),
       license = license,
-      accessConditions = (accessStatus, accessConditionUsage) match {
-        case (None, None) => Nil
-        case _ =>
-          List(
-            AccessCondition(
-              status = accessStatus,
-              terms = accessConditionUsage))
-      }
+      accessConditions = accessConditions(accessStatus)
     )
+
+  private def accessConditions(
+    accessStatus: Option[AccessStatus]): List[AccessCondition] =
+    (accessStatus, accessConditionUsage) match {
+      case (None, None) => Nil
+      case _ =>
+        List(
+          AccessCondition(status = accessStatus, terms = accessConditionUsage))
+    }
 
   private def parseLicense: Either[Exception, Option[License]] =
     accessConditionDz.map {
@@ -131,7 +133,9 @@ case class MetsData(
       case _                       => true
     }
 
-  private def images(version: Int, accessStatus: Option[AccessStatus])
+  private def images(version: Int,
+                     license: Option[License],
+                     accessStatus: Option[AccessStatus])
     : List[UnmergedImage[Identifiable, Unminted]] =
     if (accessStatus.forall(shouldCreateDigitalLocation)) {
       fileReferences
@@ -139,12 +143,14 @@ case class MetsData(
         .flatMap { fileReference =>
           ImageUtils.buildImageUrl(recordIdentifier, fileReference).map { url =>
             UnmergedImage(
-              ImageUtils
+              sourceIdentifier = ImageUtils
                 .getImageSourceId(recordIdentifier, fileReference.id),
               version = version,
-              DigitalLocation(
+              location = DigitalLocation(
                 url = url,
-                locationType = LocationType("iiif-image")
+                locationType = LocationType("iiif-image"),
+                license = license,
+                accessConditions = accessConditions(accessStatus)
               )
             )
           }
