@@ -162,17 +162,18 @@ class RelatedWorkServiceTest
         result shouldBe Right(
           RelatedWorks(
             parts = Some(Nil),
-            partOf = Some(List(
-              RelatedWork(
-                workQ.withData(_.copy(notes = Nil)),
-                RelatedWorks.partOf(
-                  RelatedWork(
-                    workP.withData(_.copy(items = Nil)),
-                    RelatedWorks(partOf = Some(Nil))
+            partOf = Some(
+              List(
+                RelatedWork(
+                  workQ.withData(_.copy(notes = Nil)),
+                  RelatedWorks.partOf(
+                    RelatedWork(
+                      workP.withData(_.copy(items = Nil)),
+                      RelatedWorks(partOf = Some(Nil))
+                    )
                   )
-                )
-              ),
-            )),
+                ),
+              )),
             precededBy = Some(Nil),
             succeededBy = Some(Nil),
           )
