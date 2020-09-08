@@ -1,6 +1,5 @@
 package uk.ac.wellcome.platform.api
 
-import scala.reflect.runtime.universe._
 import org.scalatest.matchers.should.Matchers
 import akka.http.scaladsl.model.ContentTypes
 import io.circe.Json
@@ -13,7 +12,7 @@ import uk.ac.wellcome.platform.api.rest.{
 }
 import uk.ac.wellcome.platform.api.works.ApiWorksTestBase
 
-class ApiSwaggerTest extends ApiWorksTestBase with Matchers {
+class ApiSwaggerTest extends ApiWorksTestBase with Matchers with JsonHelpers {
   val worksEndpoint = "/works"
   val workEndpoint = "/works/{id}"
   val imageEndpoint = "/images/{id}"
@@ -179,54 +178,6 @@ class ApiSwaggerTest extends ApiWorksTestBase with Matchers {
         .map(_.name))
     }
   }
-
-  private def getParameter(endpoint: Json, name: String) =
-    getKey(endpoint, "parameters")
-      .flatMap(_.asArray)
-      .flatMap(
-        _.toList.find(getKey(_, "name").flatMap(_.asString).contains(name))
-      )
-
-  private def getEndpoint(json: Json, endpointString: String): Json = {
-    val endpoint = getKey(json, "paths")
-      .flatMap(paths => getKey(paths, endpointString))
-      .flatMap(path => getKey(path, "get"))
-
-    endpoint.isEmpty shouldBe false
-    endpoint.get
-  }
-
-  private def getKeys(json: Json): List[String] =
-    json.arrayOrObject(
-      Nil,
-      _ => Nil,
-      obj => obj.keys.toList
-    )
-
-  private def getKey(json: Json, key: String): Option[Json] =
-    json.arrayOrObject(
-      None,
-      _ => None,
-      obj => obj.toMap.get(key)
-    )
-
-  private def getLength(json: Json): Option[Int] =
-    json.arrayOrObject(
-      None,
-      arr => Some(arr.length),
-      obj => Some(obj.keys.toList.length)
-    )
-
-  private def getNumPublicQueryParams[T: TypeTag]: Int =
-    typeOf[T].members
-      .collect {
-        case m: MethodSymbol if m.isCaseAccessor => m.name.toString
-      }
-      .filterNot {
-        _ == "_index"
-      }
-      .toList
-      .length
 
   private def checkSwaggerJson(f: Json => Unit) =
     withApi {
