@@ -627,12 +627,6 @@ class WorksIncludesTest
               "alternativeTitles": [],
               "partOf": [
                 {
-                  "id": "${work0.canonicalId}",
-                  "title": "0",
-                  "alternativeTitles": [],
-                  "type": "Work"
-                },
-                {
                   "id": "${workA.canonicalId}",
                   "title": "0/a",
                   "alternativeTitles": [],
