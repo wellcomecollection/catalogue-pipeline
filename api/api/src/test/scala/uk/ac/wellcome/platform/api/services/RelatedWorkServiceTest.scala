@@ -77,8 +77,6 @@ class RelatedWorkServiceTest
             parts = Some(Nil),
             partOf = Some(
               List(
-                RelatedWork(workA),
-                RelatedWork(work2),
                 RelatedWork(
                   workE,
                   RelatedWorks.partOf(
@@ -133,7 +131,6 @@ class RelatedWorkServiceTest
             parts = Some(Nil),
             partOf = Some(
               List(
-                RelatedWork(workA),
                 RelatedWork(
                   workE,
                   RelatedWorks.partOf(
@@ -166,7 +163,6 @@ class RelatedWorkServiceTest
           RelatedWorks(
             parts = Some(Nil),
             partOf = Some(List(
-              RelatedWork(workP.withData(_.copy(items = Nil))),
               RelatedWork(
                 workQ.withData(_.copy(notes = Nil)),
                 RelatedWorks.partOf(
