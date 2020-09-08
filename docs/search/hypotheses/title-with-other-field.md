@@ -1,12 +1,14 @@
-# Titles with another field
+# Title with other field
 
-# Expectations:
+## Titles with another field
 
-*	User searches for known title along with {contributor} {keywords} {workType} {genre} {date} {fuzzy date} 
-*	Users expect search text that matches/partially matches well-known titles combined with another search term should improve their search results
-*	Returns matches at top of results
+## Expectations:
 
+* User searches for known title along with {contributor} {keywords} {workType} {genre} {date} {fuzzy date} 
+* Users expect search text that matches/partially matches well-known titles combined with another search term should improve their search results
+* Returns matches at top of results
 
-# Examples: 
+## Examples:
 
-*	charles darwin origin of species (research)
+* charles darwin origin of species \(research\)
+

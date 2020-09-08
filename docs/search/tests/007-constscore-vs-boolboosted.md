@@ -1,4 +1,4 @@
-# Test 6 - `ConstScore` vs `BoolBoosted`
+# Test 7 - BoolBoosted vs ConstScore
 
 ## Candidates
 
@@ -14,22 +14,22 @@ To do this we wrap the tiers in a `bool` query and boost each tier respectively.
 
 ### `ConstScore`
 
-![ConstScore calculation](../../.gitbook/assets/scoring-constscore.png)
+![ConstScore calculation](../../.gitbook/assets/scoring-constscore%20%281%29.png)
 
 ### `BoolBoosted`
 
-![BoolBoosted calculation](../../.gitbook/assets/scoring-boolboosted.png)
+![BoolBoosted calculation](../../.gitbook/assets/scoring-boolboosted%20%281%29.png)
 
 ## Results
 
-![BoolBoosted calculation](../../.gitbook/assets/constscore_boolboosted_distribution.png)
+![BoolBoosted calculation](../../.gitbook/assets/constscore_boolboosted_distribution%20%281%29.png)
 
 ### Click through rate
 
-|                   | ConstScore | BoolBoosted |
-| :---------------- | :--------- | :---------- |
-| first page only   | TBD        | TBD         |
-| beyond first page | TBD        | TBD         |
+|  | ConstScore | BoolBoosted |
+| :--- | :--- | :--- |
+| first page only | TBD | TBD |
+| beyond first page | TBD | TBD |
 
 ### Click distribution
 
@@ -38,3 +38,4 @@ TBD
 ## Conclusions
 
 TBD
+

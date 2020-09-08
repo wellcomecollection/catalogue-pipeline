@@ -4,7 +4,7 @@
 
 A variant of the scoring tiers query introduced in Test 5 was tested. The variant adds an english analyser \(to capture peculiarities of apostrophes in queries like `gray's anatomy`\), and includes contributors in the list of queried fields.
 
-![rough form of a scoring tiers query](../../.gitbook/assets/scoring_tiers_v1.png)
+![rough form of a scoring tiers query](../../.gitbook/assets/scoring_tiers_v1%20%281%29.png)
 
 ## Results
 
@@ -12,10 +12,10 @@ The test ran for three weeks over the Christmas break. It's worth bearing in min
 
 ### Click through rate
 
-|                   | default scoring tiers query | variant |
-| :---------------- | :-------------------------- | :------ |
-| first page only   | 0.238                       | 0.220   |
-| beyond first page | 0.564                       | 0.533   |
+|  | default scoring tiers query | variant |
+| :--- | :--- | :--- |
+| first page only | 0.238 | 0.220 |
+| beyond first page | 0.564 | 0.533 |
 
 ### Click distribution
 
@@ -26,3 +26,4 @@ The test ran for three weeks over the Christmas break. It's worth bearing in min
 The data indicates that the new variant query performs worse than the default, particularly at the top end of the list of results \(where worse performance is indicated by fewer clicks\).
 
 The difference isn't substantial, and both queries seem to perform better than some of our previous candidates. However, we should still step back and evaluate why performance is lower before proposing a new set of changes.
+
