@@ -2,8 +2,12 @@ package uk.ac.wellcome.display.models
 
 import io.circe.generic.extras.semiauto._
 import io.circe.{Decoder, Encoder}
-
 import uk.ac.wellcome.display.json.DisplayJsonUtil._
+import uk.ac.wellcome.display.models.DisplayLocation.{
+  DisplayDigitalResource,
+  DisplayOpenShelves
+}
+import uk.ac.wellcome.models.work.internal.Location.ClosedStores
 
 object Implicits {
 
@@ -23,6 +27,9 @@ object Implicits {
   implicit val _enc10: Encoder[DisplayNote] = deriveConfiguredEncoder
   implicit val _enc11: Encoder[DisplayWork] = deriveConfiguredEncoder
   implicit val _enc12: Encoder[DisplayImage] = deriveConfiguredEncoder
+  implicit val _enc13: Encoder[DisplayOpenShelves] = deriveConfiguredEncoder
+  implicit val _enc14: Encoder[ClosedStores] = deriveConfiguredEncoder
+  implicit val _enc15: Encoder[DisplayDigitalResource] = deriveConfiguredEncoder
 
   implicit val _dec00: Decoder[DisplayAccessCondition] = deriveConfiguredDecoder
   implicit val _dec01: Decoder[DisplayLanguage] = deriveConfiguredDecoder
@@ -37,4 +44,7 @@ object Implicits {
   implicit val _dec10: Decoder[DisplayNote] = deriveConfiguredDecoder
   implicit val _dec11: Decoder[DisplayWork] = deriveConfiguredDecoder
   implicit val _dec12: Decoder[DisplayImage] = deriveConfiguredDecoder
+  implicit val _dec13: Decoder[DisplayOpenShelves] = deriveConfiguredDecoder
+  implicit val _dec14: Decoder[ClosedStores] = deriveConfiguredDecoder
+  implicit val _dec15: Decoder[DisplayDigitalResource] = deriveConfiguredDecoder
 }
