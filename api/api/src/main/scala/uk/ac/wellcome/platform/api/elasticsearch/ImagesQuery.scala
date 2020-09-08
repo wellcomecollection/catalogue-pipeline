@@ -69,15 +69,24 @@ case object ImagesMultiMatcher {
   }
 }
 
-case object ImagesSimilarity {
-  def apply(q: String, index: Index): Query = {
-    val lshFields = List("inferredData.lshEncodedFeatures")
+case object ImageSimilarity {
+  def blended: (String, Index) => Query =
+    lshQuery("inferredData.lshEncodedFeatures", "inferredData.palette")
+
+  def color: (String, Index) => Query =
+    lshQuery("inferredData.palette")
+
+  def features: (String, Index) => Query =
+    lshQuery("inferredData.lshEncodedFeatures")
+
+  private def lshQuery(fields: String*)(q: String, index: Index): Query = {
     val documentRef = DocumentRef(index, q)
 
-    moreLikeThisQuery(lshFields)
+    moreLikeThisQuery(fields)
       .likeDocs(List(documentRef))
       .copy(
         minTermFreq = Some(1),
+        minDocFreq = Some(1),
         maxQueryTerms = Some(1000),
         minShouldMatch = Some("1")
       )

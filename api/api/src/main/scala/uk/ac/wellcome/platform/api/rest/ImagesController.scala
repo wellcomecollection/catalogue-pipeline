@@ -7,11 +7,12 @@ import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.display.models.Implicits._
 import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.platform.api.Tracing
-import uk.ac.wellcome.platform.api.models.ApiConfig
+import uk.ac.wellcome.platform.api.models.{ApiConfig, SimilarityMetric}
 import uk.ac.wellcome.platform.api.services.{
   ElasticsearchService,
   ImagesService
 }
+import cats.implicits._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -33,25 +34,30 @@ class ImagesController(
         imagesService
           .findImageById(id)(index)
           .flatMap {
-            case Right(Some(image))
-                if params.include.exists(_.visuallySimilar) =>
-              imagesService.retrieveSimilarImages(index, image).map {
-                similarImages =>
+            case Right(Some(image)) =>
+              getSimilarityMetrics(params.include)
+                .traverse { metric =>
+                  imagesService
+                    .retrieveSimilarImages(index, image, metric)
+                    .map(metric -> _)
+                }
+                .map(_.toMap)
+                .map { similarImages =>
                   complete(
                     ResultResponse(
                       context = contextUri,
-                      result = DisplayImage(image, similarImages)
+                      result = DisplayImage(
+                        image = image,
+                        visuallySimilar =
+                          similarImages.get(SimilarityMetric.Blended),
+                        withSimilarColors =
+                          similarImages.get(SimilarityMetric.Colors),
+                        withSimilarFeatures =
+                          similarImages.get(SimilarityMetric.Features),
+                      )
                     )
                   )
-              }
-            case Right(Some(image)) =>
-              Future.successful(
-                complete(
-                  ResultResponse(
-                    context = contextUri,
-                    result = DisplayImage(image)
-                  )
-                ))
+                }
             case Right(None) =>
               Future.successful(notFound(s"Image not found for identifier $id"))
             case Left(err) => Future.successful(elasticError(err))
@@ -83,6 +89,16 @@ class ImagesController(
           }
       }
     }
+
+  private def getSimilarityMetrics(
+    includes: Option[SingleImageIncludes]): List[SimilarityMetric] =
+    includes
+      .map(_.includes.collect {
+        case ImageInclude.VisuallySimilar     => SimilarityMetric.Blended
+        case ImageInclude.WithSimilarFeatures => SimilarityMetric.Features
+        case ImageInclude.WithSimilarColors   => SimilarityMetric.Colors
+      })
+      .getOrElse(Nil)
 
   private lazy val imagesService = new ImagesService(elasticsearchService)
 }

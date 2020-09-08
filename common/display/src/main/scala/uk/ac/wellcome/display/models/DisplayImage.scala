@@ -25,6 +25,14 @@ case class DisplayImage(
     `type` = "Image",
     description = "A list of visually similar images"
   ) visuallySimilar: Option[Seq[DisplayImage]],
+  @Schema(
+    `type` = "Image",
+    description = "A list of images with similar color palettes"
+  ) withSimilarColors: Option[Seq[DisplayImage]],
+  @Schema(
+    `type` = "Image",
+    description = "A list of images with similar features"
+  ) withSimilarFeatures: Option[Seq[DisplayImage]],
   @JsonKey("type") @Schema(name = "type") ontologyType: String = "Image"
 )
 
@@ -35,11 +43,18 @@ object DisplayImage {
       id = image.id.canonicalId,
       locations = Seq(DisplayDigitalLocation(image.location)),
       source = DisplayImageSource(image.source),
-      visuallySimilar = None
+      visuallySimilar = None,
+      withSimilarColors = None,
+      withSimilarFeatures = None,
     )
 
-  def apply(image: AugmentedImage, similar: Seq[AugmentedImage]): DisplayImage =
+  def apply(image: AugmentedImage,
+            visuallySimilar: Option[Seq[AugmentedImage]],
+            withSimilarColors: Option[Seq[AugmentedImage]],
+            withSimilarFeatures: Option[Seq[AugmentedImage]]): DisplayImage =
     DisplayImage(image).copy(
-      visuallySimilar = Some(similar.map(DisplayImage.apply))
+      visuallySimilar = visuallySimilar.map(_.map(DisplayImage.apply)),
+      withSimilarColors = withSimilarColors.map(_.map(DisplayImage.apply)),
+      withSimilarFeatures = withSimilarFeatures.map(_.map(DisplayImage.apply)),
     )
 }

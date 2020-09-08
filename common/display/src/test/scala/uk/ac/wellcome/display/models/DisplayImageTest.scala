@@ -15,7 +15,11 @@ class DisplayImageTest
     val image = createAugmentedImage()
     val similarImages = (1 to 3).map(_ => createAugmentedImage()).toSeq
 
-    val displayImage = DisplayImage(image, similar = similarImages)
+    val displayImage = DisplayImage(
+      image,
+      visuallySimilar = Some(similarImages),
+      withSimilarColors = None,
+      withSimilarFeatures = None)
     displayImage.visuallySimilar.value should have length similarImages.size
     displayImage.visuallySimilar.value
       .map(_.id) should contain theSameElementsAs
