@@ -2,11 +2,7 @@
 
 ## Search relevance
 
-Our current setup for enabling discovery of material on wellcomecollection.org/works is pretty basic. Since going live, api.wellcomecollection.org has used the default elasticsearch `simple_query_string` query type, and we haven't made any significant index-time enhancements \(like indexing n-gram tokens\) to the underlying data.
-
-The single point of interaction \(the search box\) and often hundreds of pages of results to sift through leaves users frustrated, feeling a lack of control over the interface and a weakening trust in the system as a whole.
-
-### Baby steps
+When api.wellcomecollection.org went live, we used the default elasticsearch `simple_query_string` query type for enabling discovery of material on wellcomecollection.org/works.
 
 Instead of working for months on a complete overhaul of the search functionality and putting it in front of users it in one enormous, jarring release, we're making changes incrementally and measuring the effect on performance as we go.
 
@@ -20,15 +16,13 @@ We're taking a [data informed](https://stacks.wellcomecollection.org/data-inform
 
 In broad terms, we want to produce a number which tells us whether a candidate change to the search system makes the results more or less relevant to the person searching.
 
-There's a lot of interesting discussion to be had about different search modalities, precision vs serendipity, linked open data & knowledge graphs, and existential questions about what relevance even _is_, dude, but the broad definition above is a useful, concise statement to revert back to.
+There's a lot of interesting discussion to be had about different search modalities, precision vs serendipity, linked open data & knowledge graphs, and existential questions about what relevance even _is_ but the broad definition above is a useful, concise statement to revert back to.
 
 #### Explicit vs implicit measurement
 
 We're collecting data in two distinct ways:
 
-* **Implicit data collection:** users know that their data might be used to understand aggregate user behaviour, but their behaviour on the site is driven by another motive.
-
-The larger of the two major datasets we are using is passively collected while users carry out searches and look through pages of results.
+* **Implicit data collection:** users know that their data might be used to understand aggregate user behaviour, but their behaviour on the site is driven by user search requirements and paging through results.
 
 We track:
 
@@ -43,13 +37,9 @@ We can collect lots of this data \(100,000s of actions logged so far\), but it l
 
 * **Explicit data collection:** users are told that they are part of an experiment, and providing us with information is their primary motive.
 
-Some of the data we've used to measure search relevance is collected in sessions with internal users who know the collection well and the kind of things that people / researchers might be looking for, following a set of instructions to obtain data in a useful format.
+Some of the data we've used to measure search relevance is collected in sessions with internal users who know the collection well and the kind of things that people / researchers might be looking for, following a set of instructions to obtain data in a useful format. This data is small \(20-50 rows per person, per session, with ~10 people taking part\), but can be deeply contextualised by talking to the people who took part.
 
-This data is small \(20-50 rows per person, per session, with ~10 people taking part\), but can be deeply contextualised by talking to the people who took part.
-
-We're now ready to start collecting explicit feedback through an [opt-in mechanism on wellcomecollection.org/works](https://github.com/wellcometrust/wellcomecollection.org/issues/4411), with all users given the option to rate the relevance of individual results in relation to their query.
-
-The resulting data matches the format of the small-scale research described above, but can be collected at a much faster pace with less use of an analyst's time. The increased sample size and breadth of subjects evaluated should also give us more confidence in the 'goodness' of the changes we're making to our search algorithms.
+We've also collected data by diary studies, asking users to provide their real life search queries and apply a ranking to them and by having an opt-in relevance ranker, allowing those who wanted to rank search results could do so.
 
 #### Metrics
 
