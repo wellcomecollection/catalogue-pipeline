@@ -23,7 +23,7 @@
 * Sort by reference number, accession number \(sequential\)
 * Better handling of zero results
 
-## Further feedback from William Schupbach
+## Further feedback
 
 The phrase "by or about" appears a couple of times, but, if we start with persons, at the moment we have three options: find works by X; find works about X; find any mention of X. That's very useful.
 
