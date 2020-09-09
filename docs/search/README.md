@@ -2,7 +2,7 @@
 
 ## Search relevance
 
-When api.wellcomecollection.org went live, we used the default elasticsearch `simple_query_string` query type for enabling discovery of material on wellcomecollection.org/works.
+When [api.wellcomecollection.org](https://api.wellcomecollection.org) went live, we used the default [elasticsearch `simple_query_string`](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html) query type for enabling discovery of material on [wellcomecollection.org/works](https://wellcomecollection.org/works).
 
 Instead of working for months on a complete overhaul of the search functionality and putting it in front of users it in one enormous, jarring release, we're making changes incrementally and measuring the effect on performance as we go.
 
