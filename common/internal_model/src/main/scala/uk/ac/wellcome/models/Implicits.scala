@@ -83,15 +83,14 @@ object Implicits {
     deriveConfiguredDecoder
   implicit val _dec42: Decoder[WorkData[IdState.Minted, IdState.Identified]] =
     deriveConfiguredDecoder
-  implicit val _dec43: Decoder[UnidentifiedWork] = deriveConfiguredDecoder
-  implicit val _dec44: Decoder[UnidentifiedInvisibleWork] =
+  implicit val _dec43: Decoder[Work[WorkState.Unidentified, Id.Identifiable]] =
     deriveConfiguredDecoder
-  implicit val _dec45: Decoder[IdentifiedWork] = deriveConfiguredDecoder
-  implicit val _dec46: Decoder[UnidentifiedRedirectedWork] =
+  implicit val _dec44: Decoder[Work[WorkState.Identified, Id.Identifiable]] =
     deriveConfiguredDecoder
-  implicit val _dec47: Decoder[TransformedBaseWork] = deriveConfiguredDecoder
-  implicit val _dec48: Decoder[IdentifiedBaseWork] = deriveConfiguredDecoder
-  implicit val _dec49: Decoder[BaseWork] = deriveConfiguredDecoder
+  implicit val _dec45: Decoder[Work[WorkState.Unidentified, Id.Identified]] =
+    deriveConfiguredDecoder
+  implicit val _dec46: Decoder[Work[WorkState.Identified, Id.Identified]] =
+    deriveConfiguredDecoder
   implicit val _dec51
     : Decoder[UnmergedImage[IdState.Identifiable, IdState.Unminted]] =
     deriveConfiguredDecoder
@@ -179,15 +178,14 @@ object Implicits {
     deriveConfiguredEncoder
   implicit val _enc42: Encoder[WorkData[IdState.Minted, IdState.Identified]] =
     deriveConfiguredEncoder
-  implicit val _enc43: Encoder[UnidentifiedWork] = deriveConfiguredEncoder
-  implicit val _enc44: Encoder[UnidentifiedInvisibleWork] =
+  implicit val _enc43: Encoder[Work[WorkState.Unidentified, Id.Identifiable]] =
     deriveConfiguredEncoder
-  implicit val _enc45: Encoder[IdentifiedWork] = deriveConfiguredEncoder
-  implicit val _enc46: Encoder[UnidentifiedRedirectedWork] =
+  implicit val _enc44: Encoder[Work[WorkState.Identified, Id.Identifiable]] =
     deriveConfiguredEncoder
-  implicit val _enc47: Encoder[TransformedBaseWork] = deriveConfiguredEncoder
-  implicit val _enc48: Encoder[IdentifiedBaseWork] = deriveConfiguredEncoder
-  implicit val _enc49: Encoder[BaseWork] = deriveConfiguredEncoder
+  implicit val _enc45: Encoder[Work[WorkState.Unidentified, Id.Identified]] =
+    deriveConfiguredEncoder
+  implicit val _enc46: Encoder[Work[WorkState.Identified, Id.Identified]] =
+    deriveConfiguredEncoder
   implicit val _enc51
     : Encoder[UnmergedImage[IdState.Identifiable, IdState.Unminted]] =
     deriveConfiguredEncoder

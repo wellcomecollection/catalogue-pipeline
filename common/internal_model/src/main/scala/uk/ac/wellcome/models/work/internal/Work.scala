@@ -1,36 +1,51 @@
 package uk.ac.wellcome.models.work.internal
 
-sealed trait BaseWork {
-  val version: Int
+/** Work contains the work itself. It is parameterised by its state, meaning
+  * the same type of Work can be in a number of possible states depending on
+  * where in the pipeline it is. This allows us to easily add new types of work
+  * (such as if Collection is decided to be a separate type to StandardWork),
+  * with the state of the work in the pipeline being an orthogonal concern.
+  */
+sealed trait Work[State <: WorkState, ImageId <: IdState.WithSourceIdentifier] {
   val sourceIdentifier: SourceIdentifier
+  val version: Int
+  def maybeData: Option[WorkData[State#DataId, ImageId]]
 }
 
-sealed trait IdentifiedBaseWork extends BaseWork {
-  val canonicalId: String
-}
+object Work {
+  case class Standard[State <: WorkState, ImageId <: IdState.WithSourceIdentifier](
+    sourceIdentifier: SourceIdentifier,
+    version: Int,
+    data: WorkData[State#DataId, ImageId],
+    state: State,
+  ) extends Work[State, ImageId] {
 
-sealed trait TransformedBaseWork
-    extends BaseWork
-    with MultipleSourceIdentifiers {
-  val data: WorkData[IdState.Unminted, IdState.Identifiable]
-  val otherIdentifiers = data.otherIdentifiers
-}
+    def maybeData = Some(data)
+  }
 
-object TransformedBaseWork {
-  implicit class WorkToSourceWork(work: TransformedBaseWork) {
-    def toSourceWork: SourceWork[IdState.Identifiable, IdState.Unminted] =
-      SourceWork[IdState.Identifiable, IdState.Unminted](
-        IdState.Identifiable(work.sourceIdentifier),
-        work.data)
+  case class Redirected[State <: WorkState, ImageId <: IdState.WithSourceIdentifier](
+    sourceIdentifier: SourceIdentifier,
+    version: Int,
+    state: State,
+  ) extends Work[State, ImageId] {
+
+    def maybeData = None
+  }
+
+  case class Invisible[State <: WorkState, ImageId <: IdState.WithSourceIdentifier](
+    sourceIdentifier: SourceIdentifier,
+    version: Int,
+    data: WorkData[State#DataId, ImageId],
+    state: State,
+  ) extends Work[State, ImageId] {
+
+    def maybeData = Some(data)
   }
 }
 
-sealed trait InvisibleWork extends BaseWork
-
-sealed trait RedirectedWork extends BaseWork {
-  val redirect: Redirect
-}
-
+/** WorkData contains data common to all types of works that can exist at any
+  * stage of the pipeline.
+  */
 case class WorkData[DataId <: IdState, ImageId <: IdState.WithSourceIdentifier](
   title: Option[String] = None,
   otherIdentifiers: List[SourceIdentifier] = Nil,
@@ -56,91 +71,57 @@ case class WorkData[DataId <: IdState, ImageId <: IdState.WithSourceIdentifier](
   images: List[UnmergedImage[ImageId, DataId]] = Nil
 )
 
-case class UnidentifiedWork(
-  version: Int,
-  sourceIdentifier: SourceIdentifier,
-  data: WorkData[IdState.Unminted, IdState.Identifiable],
-  ontologyType: String = "Work",
-  identifiedType: String = classOf[IdentifiedWork].getSimpleName
-) extends TransformedBaseWork {
+/** WorkState represents the state of the work in the pipeline, and contains
+  * different data depending on what state it is. This allows us to consider the
+  * Work model as a finite state machine with the following stages corresponding
+  * to stages of the pipeline:
+  *
+  *      |
+  *      | (transformer)
+  *      ▼
+  *   Unmerged
+  *      |
+  *      | (matcher / merger)
+  *      ▼
+  *   Merged
+  *      |
+  *      | (relation embedder)
+  *      ▼
+  * Denormalised
+  *      |
+  *      | (id minter)
+  *      ▼
+  *  Identified
+  *
+  * Each WorkState also has an associated IdentifierState which indicates whether
+  * the corresponding WorkData is pre or post the minter.
+  */
+sealed trait WorkState {
 
-  def withData(
-    f: WorkData[IdState.Unminted, IdState.Identifiable] => WorkData[
-      IdState.Unminted,
-      IdState.Identifiable]) =
-    this.copy(data = f(data))
+  type DataId <: IdState
+
+  val sourceIdentifier: SourceIdentifier
 }
 
-case class IdentifiedWork(
-  canonicalId: String,
-  version: Int,
-  sourceIdentifier: SourceIdentifier,
-  data: WorkData[IdState.Minted, IdState.Identified],
-  ontologyType: String = "Work"
-) extends IdentifiedBaseWork
-    with MultipleSourceIdentifiers {
-  val otherIdentifiers = data.otherIdentifiers
+object WorkState {
 
-  def withData(
-    f: WorkData[IdState.Minted, IdState.Identified] => WorkData[
-      IdState.Minted,
-      IdState.Identified]) =
-    this.copy(data = f(data))
-}
+  // TODO: for now just 2 states, in the end the states will correspond to the
+  // block comment above
 
-object IdentifiedWork {
-  implicit class WorkToSourceWork(work: IdentifiedWork) {
-    def toSourceWork: SourceWork[IdState.Identified, IdState.Minted] =
-      SourceWork[IdState.Identified, IdState.Minted](
-        IdState.Identified(
-          work.canonicalId,
-          work.sourceIdentifier,
-          work.otherIdentifiers),
-        work.data)
+  case class Unidentified(
+    sourceIdentifier: SourceIdentifier,
+    identifiedType: String = classOf[Identified].getSimpleName,
+  ) extends WorkState {
+
+    type DataId = IdState.Unminted
+  }
+
+  case class Identified(
+    sourceIdentifier: SourceIdentifier,
+    canonicalId: String,
+    // relations: Relations[Identified],
+  ) extends WorkState {
+
+    type DataId = IdState.Minted
   }
 }
-
-case class UnidentifiedInvisibleWork(
-  version: Int,
-  sourceIdentifier: SourceIdentifier,
-  data: WorkData[IdState.Unminted, IdState.Identifiable],
-  invisibilityReasons: List[InvisibilityReason] = Nil,
-  identifiedType: String = classOf[IdentifiedInvisibleWork].getSimpleName
-) extends TransformedBaseWork
-    with InvisibleWork {
-  def withData(
-    f: WorkData[IdState.Unminted, IdState.Identifiable] => WorkData[
-      IdState.Unminted,
-      IdState.Identifiable]) =
-    this.copy(data = f(data))
-}
-
-case class IdentifiedInvisibleWork(
-  canonicalId: String,
-  version: Int,
-  sourceIdentifier: SourceIdentifier,
-  data: WorkData[IdState.Minted, IdState.Identified],
-  invisibilityReasons: List[InvisibilityReason] = Nil,
-) extends IdentifiedBaseWork
-    with InvisibleWork {
-  def withData(
-    f: WorkData[IdState.Minted, IdState.Identified] => WorkData[
-      IdState.Minted,
-      IdState.Identified]) =
-    this.copy(data = f(data))
-}
-
-case class UnidentifiedRedirectedWork(
-  sourceIdentifier: SourceIdentifier,
-  version: Int,
-  redirect: IdentifiableRedirect,
-  identifiedType: String = classOf[IdentifiedRedirectedWork].getSimpleName
-) extends RedirectedWork
-
-case class IdentifiedRedirectedWork(
-  canonicalId: String,
-  sourceIdentifier: SourceIdentifier,
-  version: Int,
-  redirect: IdentifiedRedirect
-) extends IdentifiedBaseWork
-    with RedirectedWork

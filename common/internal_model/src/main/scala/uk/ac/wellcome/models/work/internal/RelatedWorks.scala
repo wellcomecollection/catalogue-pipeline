@@ -21,11 +21,14 @@ case class RelatedWorks(
 )
 
 case class RelatedWork(
-  work: IdentifiedWork,
+  work: Work[WorkState.Identified, Id.Identified],
   relatedWorks: RelatedWorks
 )
 
 object RelatedWorks {
+
+  type IdentifiedWork = Work[WorkState.Identified, Id.Identified]
+
   def unknown: RelatedWorks =
     RelatedWorks(
       parts = None,
@@ -105,9 +108,13 @@ object RelatedWorks {
     }
 
   private def tokenizePath(work: IdentifiedWork): Option[TokenizedPath] =
-    work.data.collectionPath
-      .map { collectionPath =>
-        tokenizePath(collectionPath.path)
+    work
+      .maybeData
+      .flatMap { data => 
+        data.collectionPath
+        .map { collectionPath =>
+          tokenizePath(collectionPath.path)
+        }
       }
 
   implicit val tokenizedPathOrdering: Ordering[TokenizedPath] =
@@ -156,6 +163,9 @@ object RelatedWorks {
 }
 
 object RelatedWork {
+
+  type IdentifiedWork = Work[WorkState.Identified, Id.Identified]
+
   def apply(work: IdentifiedWork): RelatedWork =
     RelatedWork(work, RelatedWorks.unknown)
 }
