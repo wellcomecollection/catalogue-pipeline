@@ -22,7 +22,7 @@ There's a lot of interesting discussion to be had about different search modalit
 
 We're collecting data in two distinct ways:
 
-* **Implicit data collection:** users know that their data might be used to understand aggregate user behaviour, but their behaviour on the site is driven by user search requirements and paging through results.
+* **Implicit data collection:** users know that their data might be used to understand aggregate user behaviour, but their behaviour on the site is driven by their own research requirements.
 
 We track:
 
@@ -39,7 +39,7 @@ We can collect lots of this data \(100,000s of actions logged so far\), but it l
 
 Some of the data we've used to measure search relevance is collected in sessions with internal users who know the collection well and the kind of things that people / researchers might be looking for, following a set of instructions to obtain data in a useful format. This data is small \(20-50 rows per person, per session, with ~10 people taking part\), but can be deeply contextualised by talking to the people who took part.
 
-We've also collected data by diary studies, asking users to provide their real life search queries and apply a ranking to them and by having an opt-in relevance ranker, allowing those who wanted to rank search results could do so.
+We've also collected data by diary studies, asking users to provide their real life search queries and apply a ranking to them and by having a staff-only, opt-in relevance ranker, allowing those with indepth knowledge of the Collection to rank search results.
 
 #### Metrics
 
