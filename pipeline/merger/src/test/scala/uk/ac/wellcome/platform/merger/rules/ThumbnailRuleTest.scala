@@ -6,7 +6,7 @@ import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal.{
   AccessCondition,
   AccessStatus,
-  DigitalLocation,
+  DigitalLocationDeprecated,
   License,
   LocationType
 }
@@ -26,7 +26,7 @@ class ThumbnailRuleTest
     sourceIdentifier = createMetsSourceIdentifier,
     items = List(createDigitalItem),
     thumbnail = Some(
-      DigitalLocation(
+      DigitalLocationDeprecated(
         url = "mets.com/thumbnail.jpg",
         locationType = LocationType("thumbnail-image"),
         license = Some(License.CCBY)
@@ -42,7 +42,7 @@ class ThumbnailRuleTest
       createUnidentifiedWorkWith(
         sourceIdentifier = createMiroSourceIdentifierWith(id),
         thumbnail = Some(
-          DigitalLocation(
+          DigitalLocationDeprecated(
             url = s"https://iiif.wellcomecollection.org/$id.jpg",
             locationType = LocationType("thumbnail-image"),
             license = Some(License.CCBY)

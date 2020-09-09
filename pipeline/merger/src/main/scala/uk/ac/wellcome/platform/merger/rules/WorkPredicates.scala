@@ -1,9 +1,9 @@
 package uk.ac.wellcome.platform.merger.rules
 
 import uk.ac.wellcome.models.work.internal.{
-  DigitalLocation,
+  DigitalLocationDeprecated,
   IdentifierType,
-  PhysicalLocation,
+  PhysicalLocationDeprecated,
   SourceIdentifier,
   TransformedBaseWork,
   WorkType
@@ -78,24 +78,24 @@ object WorkPredicates {
   private def physicalLocationExists(work: TransformedBaseWork): Boolean =
     work.data.items.exists { item =>
       item.locations.exists {
-        case _: PhysicalLocation => true
-        case _                   => false
+        case _: PhysicalLocationDeprecated => true
+        case _                             => false
       }
     }
 
   private def allDigitalLocations(work: TransformedBaseWork): Boolean =
     work.data.items.forall { item =>
       item.locations.forall {
-        case _: DigitalLocation => true
-        case _                  => false
+        case _: DigitalLocationDeprecated => true
+        case _                            => false
       }
     }
 
   private def allPhysicalLocations(work: TransformedBaseWork): Boolean =
     work.data.items.forall { item =>
       item.locations.forall {
-        case _: PhysicalLocation => true
-        case _                   => false
+        case _: PhysicalLocationDeprecated => true
+        case _                             => false
       }
     }
 

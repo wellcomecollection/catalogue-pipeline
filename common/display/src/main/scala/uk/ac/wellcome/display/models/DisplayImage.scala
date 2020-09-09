@@ -16,7 +16,7 @@ case class DisplayImage(
   @Schema(
     `type` = "uk.ac.wellcome.Display.models.DisplayDigitalLocation",
     description = "The locations which provide access to the image"
-  ) locations: Seq[DisplayDigitalLocation],
+  ) locations: Seq[DisplayDigitalLocationDeprecated],
   @Schema(
     `type` = "uk.ac.wellcome.Display.models.DisplayImageSource",
     description = "A description of the image's source"
@@ -41,7 +41,7 @@ object DisplayImage {
   def apply(image: AugmentedImage): DisplayImage =
     new DisplayImage(
       id = image.id.canonicalId,
-      locations = Seq(DisplayDigitalLocation(image.location)),
+      locations = Seq(DisplayDigitalLocationDeprecated(image.location)),
       source = DisplayImageSource(image.source),
       visuallySimilar = None,
       withSimilarColors = None,

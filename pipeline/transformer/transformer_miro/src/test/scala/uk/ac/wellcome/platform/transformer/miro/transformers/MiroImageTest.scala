@@ -4,7 +4,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
 import uk.ac.wellcome.models.work.internal.{
-  DigitalLocation,
+  DigitalLocationDeprecated,
   IdentifierType,
   License,
   LocationType,
@@ -36,7 +36,7 @@ class MiroImageTest
           value = "B0011308"
         ),
         version = 1,
-        location = DigitalLocation(
+        location = DigitalLocationDeprecated(
           url =
             "https://iiif.wellcomecollection.org/image/B0011308.jpg/info.json",
           locationType = LocationType("iiif-image"),

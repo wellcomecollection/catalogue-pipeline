@@ -94,7 +94,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     physicalDescription: Option[String] = None,
     lettering: Option[String] = None,
     workType: Option[WorkType] = None,
-    thumbnail: Option[Location] = None,
+    thumbnail: Option[LocationDeprecated] = None,
     contributors: List[Contributor[Unminted]] = Nil,
     production: List[ProductionEvent[Unminted]] = Nil,
     notes: List[Note] = Nil,
@@ -147,7 +147,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     subjects: List[Subject[Minted]] = Nil,
     genres: List[Genre[Minted]] = Nil,
     contributors: List[Contributor[Minted]] = Nil,
-    thumbnail: Option[Location] = None,
+    thumbnail: Option[LocationDeprecated] = None,
     production: List[ProductionEvent[Minted]] = Nil,
     notes: List[Note] = Nil,
     edition: Option[String] = None,
@@ -293,7 +293,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
       sourceIdentifier = sourceIdentifier,
       otherIdentifiers = otherIdentifiers,
       thumbnail = Some(
-        DigitalLocation(
+        DigitalLocationDeprecated(
           url = "https://iiif.wellcomecollection.org/V01234.jpg",
           locationType = LocationType("thumbnail-image"),
           license = Some(License.CCBY)

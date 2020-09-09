@@ -3,13 +3,13 @@ package uk.ac.wellcome.models.work.internal
 sealed trait BaseImage[+Id <: WithSourceIdentifier, DataId <: IdState]
     extends HasIdState[Id] {
   val id: Id
-  val location: DigitalLocation
+  val location: DigitalLocationDeprecated
 }
 
 case class UnmergedImage[Id <: WithSourceIdentifier, DataId <: IdState](
   id: Id,
   version: Int,
-  location: DigitalLocation
+  location: DigitalLocationDeprecated
 ) extends BaseImage[Id, DataId] {
   def mergeWith(
     canonicalWork: SourceWork[Id, DataId],
@@ -25,7 +25,7 @@ case class UnmergedImage[Id <: WithSourceIdentifier, DataId <: IdState](
 case class MergedImage[Id <: WithSourceIdentifier, DataId <: IdState](
   id: Id,
   version: Int,
-  location: DigitalLocation,
+  location: DigitalLocationDeprecated,
   source: ImageSource[Id, DataId]
 ) extends BaseImage[Id, DataId] {
   def toUnmerged: UnmergedImage[Id, DataId] =
@@ -53,7 +53,7 @@ object MergedImage {
 case class AugmentedImage(
   id: Identified,
   version: Int,
-  location: DigitalLocation,
+  location: DigitalLocationDeprecated,
   source: ImageSource[Identified, Minted],
   inferredData: Option[InferredData] = None
 ) extends BaseImage[Identified, Minted]
@@ -74,7 +74,8 @@ object InferredData {
 object UnmergedImage {
   def apply(sourceIdentifier: SourceIdentifier,
             version: Int,
-            location: DigitalLocation): UnmergedImage[Identifiable, Unminted] =
+            location: DigitalLocationDeprecated)
+    : UnmergedImage[Identifiable, Unminted] =
     UnmergedImage(
       id = Identifiable(sourceIdentifier),
       version = version,

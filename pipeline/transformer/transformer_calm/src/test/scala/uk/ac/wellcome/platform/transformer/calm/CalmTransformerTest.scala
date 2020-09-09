@@ -48,7 +48,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
             Item(
               title = None,
               locations = List(
-                PhysicalLocation(
+                PhysicalLocationDeprecated(
                   locationType = LocationType("scmac"),
                   label = "Closed stores Arch. & MSS",
                   accessConditions = Nil
@@ -506,7 +506,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
             Item(
               title = None,
               locations = List(
-                PhysicalLocation(
+                PhysicalLocationDeprecated(
                   locationType = LocationType("scmac"),
                   label = "Closed stores Arch. & MSS",
                   accessConditions = Nil

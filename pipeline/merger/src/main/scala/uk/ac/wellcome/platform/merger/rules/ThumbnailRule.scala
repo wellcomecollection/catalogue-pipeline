@@ -4,7 +4,7 @@ import scala.util.Try
 import cats.data.NonEmptyList
 
 import uk.ac.wellcome.models.work.internal.{
-  Location,
+  LocationDeprecated,
   TransformedBaseWork,
   UnidentifiedWork
 }
@@ -25,7 +25,7 @@ import uk.ac.wellcome.platform.merger.rules.WorkPredicates.{
  * displaying something we are not meant to.
  */
 object ThumbnailRule extends FieldMergeRule with MergerLogging {
-  type FieldData = Option[Location]
+  type FieldData = Option[LocationDeprecated]
 
   override def merge(
     target: UnidentifiedWork,
@@ -40,8 +40,9 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
       }.distinct
     )
 
-  def getThumbnail(target: UnidentifiedWork,
-                   sources: Seq[TransformedBaseWork]): Option[Location] =
+  def getThumbnail(
+    target: UnidentifiedWork,
+    sources: Seq[TransformedBaseWork]): Option[LocationDeprecated] =
     if (shouldSuppressThumbnail(target, sources))
       None
     else

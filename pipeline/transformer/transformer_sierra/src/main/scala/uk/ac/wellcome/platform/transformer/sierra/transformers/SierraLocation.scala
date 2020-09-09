@@ -12,8 +12,9 @@ import uk.ac.wellcome.platform.transformer.sierra.source.sierra.SierraSourceLoca
 
 trait SierraLocation extends SierraQueryOps {
 
-  def getPhysicalLocation(itemData: SierraItemData,
-                          bibData: SierraBibData): Option[PhysicalLocation] =
+  def getPhysicalLocation(
+    itemData: SierraItemData,
+    bibData: SierraBibData): Option[PhysicalLocationDeprecated] =
     itemData.location.flatMap {
       // We've seen records where the "location" field is populated in
       // the JSON, but the code and name are both empty strings or "none".
@@ -22,7 +23,7 @@ trait SierraLocation extends SierraQueryOps {
       case SierraSourceLocation("none", "none") => None
       case SierraSourceLocation(code, name) =>
         Some(
-          PhysicalLocation(
+          PhysicalLocationDeprecated(
             locationType = LocationType(code),
             accessConditions = getAccessConditions(bibData),
             label = name
@@ -30,10 +31,10 @@ trait SierraLocation extends SierraQueryOps {
         )
     }
 
-  def getDigitalLocation(identifier: String): DigitalLocation = {
+  def getDigitalLocation(identifier: String): DigitalLocationDeprecated = {
     // This is a defensive check, it may not be needed since an identifier should always be present.
     if (!identifier.isEmpty) {
-      DigitalLocation(
+      DigitalLocationDeprecated(
         url = s"https://wellcomelibrary.org/iiif/$identifier/manifest",
         license = None,
         locationType = LocationType("iiif-presentation")
