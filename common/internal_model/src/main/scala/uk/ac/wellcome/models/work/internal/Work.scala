@@ -1,5 +1,7 @@
 package uk.ac.wellcome.models.work.internal
 
+import IdState._
+
 sealed trait BaseWork {
   val version: Int
   val sourceIdentifier: SourceIdentifier

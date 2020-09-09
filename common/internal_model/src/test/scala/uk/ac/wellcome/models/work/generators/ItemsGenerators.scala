@@ -1,6 +1,7 @@
 package uk.ac.wellcome.models.work.generators
 
 import uk.ac.wellcome.models.work.internal.{DigitalLocationDeprecated, _}
+import IdState._
 
 trait ItemsGenerators extends IdentifiersGenerators {
 

@@ -1,5 +1,7 @@
 package uk.ac.wellcome.models.work.internal
 
+import IdState._
+
 sealed trait BaseImage[+Id <: WithSourceIdentifier, DataId <: IdState]
     extends HasIdState[Id] {
   val id: Id

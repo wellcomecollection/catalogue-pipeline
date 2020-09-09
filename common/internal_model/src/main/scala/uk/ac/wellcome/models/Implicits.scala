@@ -5,6 +5,7 @@ import io.circe._
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.matcher.MatcherResult
 import uk.ac.wellcome.json.JsonUtil._
+import IdState._
 
 object Implicits {
 

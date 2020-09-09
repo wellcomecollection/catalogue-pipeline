@@ -1,5 +1,7 @@
 package uk.ac.wellcome.models.work.internal
 
+import IdState._
+
 case class Subject[+Id](
   id: Id,
   label: String,

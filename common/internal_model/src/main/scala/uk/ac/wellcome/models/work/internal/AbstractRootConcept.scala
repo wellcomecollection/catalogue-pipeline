@@ -3,6 +3,8 @@ package uk.ac.wellcome.models.work.internal
 import uk.ac.wellcome.models.work.text.TextNormalisation._
 import uk.ac.wellcome.models.parse.parsers.DateParser
 
+import IdState._
+
 sealed trait AbstractRootConcept[+Id] extends HasIdState[Id] {
   val label: String
 }

@@ -1,6 +1,7 @@
 package uk.ac.wellcome.models.parse
 
 import fastparse._, NoWhitespace._
+
 import uk.ac.wellcome.models.work.internal.{Place, Unminted}
 
 /**

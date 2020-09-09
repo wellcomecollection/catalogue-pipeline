@@ -2,6 +2,7 @@ package uk.ac.wellcome.models.work.generators
 
 import uk.ac.wellcome.models.generators.RandomStrings
 import uk.ac.wellcome.models.work.internal._
+import IdState._
 
 trait SubjectGenerators extends RandomStrings {
   def createSubjectWith(label: String = randomAlphanumeric(10),
