@@ -163,7 +163,7 @@ class SierraTransformableTransformerTest
       id = Identifiable(
         sourceIdentifier = expectedSourceIdentifier,
         otherIdentifiers = expectedOtherIdentifiers),
-      locations = List(PhysicalLocation(locationType, locationLabel))
+      locations = List(PhysicalLocationDeprecated(locationType, locationLabel))
     )
   }
 

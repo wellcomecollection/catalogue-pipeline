@@ -21,9 +21,11 @@ object Implicits {
   implicit val _dec03: Decoder[Unminted] = deriveConfiguredDecoder
   implicit val _dec04: Decoder[Minted] = deriveConfiguredDecoder
   implicit val _dec05: Decoder[InstantRange] = deriveConfiguredDecoder
-  implicit val _dec06: Decoder[DigitalLocation] = deriveConfiguredDecoder
-  implicit val _dec07: Decoder[PhysicalLocation] = deriveConfiguredDecoder
-  implicit val _dec08: Decoder[Location] = deriveConfiguredDecoder
+  implicit val _dec06: Decoder[DigitalLocationDeprecated] =
+    deriveConfiguredDecoder
+  implicit val _dec07: Decoder[PhysicalLocationDeprecated] =
+    deriveConfiguredDecoder
+  implicit val _dec08: Decoder[LocationDeprecated] = deriveConfiguredDecoder
   implicit val _dec11: Decoder[MergeCandidate] = deriveConfiguredDecoder
   implicit val _dec12: Decoder[MatcherResult] = deriveConfiguredDecoder
   implicit val _dec13: Decoder[Person[Unminted]] = deriveConfiguredDecoder
@@ -94,9 +96,11 @@ object Implicits {
   implicit val _enc03: Encoder[Unminted] = deriveConfiguredEncoder
   implicit val _enc04: Encoder[Minted] = deriveConfiguredEncoder
   implicit val _enc05: Encoder[InstantRange] = deriveConfiguredEncoder
-  implicit val _enc06: Encoder[DigitalLocation] = deriveConfiguredEncoder
-  implicit val _enc07: Encoder[PhysicalLocation] = deriveConfiguredEncoder
-  implicit val _enc08: Encoder[Location] = deriveConfiguredEncoder
+  implicit val _enc06: Encoder[DigitalLocationDeprecated] =
+    deriveConfiguredEncoder
+  implicit val _enc07: Encoder[PhysicalLocationDeprecated] =
+    deriveConfiguredEncoder
+  implicit val _enc08: Encoder[LocationDeprecated] = deriveConfiguredEncoder
   implicit val _enc11: Encoder[MergeCandidate] = deriveConfiguredEncoder
   implicit val _enc12: Encoder[MatcherResult] = deriveConfiguredEncoder
   implicit val _enc13: Encoder[Person[Unminted]] = deriveConfiguredEncoder

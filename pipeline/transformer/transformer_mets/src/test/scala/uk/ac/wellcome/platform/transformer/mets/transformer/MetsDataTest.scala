@@ -23,7 +23,7 @@ class MetsDataTest
       value = bNumber)
 
     val url = s"https://wellcomelibrary.org/iiif/$bNumber/manifest"
-    val digitalLocation = DigitalLocation(
+    val digitalLocation = DigitalLocationDeprecated(
       url,
       LocationType("iiif-presentation"),
       license = Some(License.CCBYNC))
@@ -61,7 +61,10 @@ class MetsDataTest
 
     val url = s"https://wellcomelibrary.org/iiif/$bNumber/manifest"
     val digitalLocation =
-      DigitalLocation(url, LocationType("iiif-presentation"), license = None)
+      DigitalLocationDeprecated(
+        url,
+        LocationType("iiif-presentation"),
+        license = None)
 
     val unidentifiableItem =
       Item(id = Unidentifiable, locations = List(digitalLocation))
@@ -104,7 +107,7 @@ class MetsDataTest
           Item(
             Unidentifiable,
             _,
-            List(DigitalLocation(_, _, license, _, _, _)),
+            List(DigitalLocationDeprecated(_, _, license, _, _, _)),
             _)) =>
         license shouldBe Some(License.InCopyright)
     }
@@ -120,7 +123,7 @@ class MetsDataTest
           Item(
             Unidentifiable,
             _,
-            List(DigitalLocation(_, _, license, _, _, _)),
+            List(DigitalLocationDeprecated(_, _, license, _, _, _)),
             _)) =>
         license shouldBe Some(License.InCopyright)
     }
@@ -136,7 +139,7 @@ class MetsDataTest
           Item(
             Unidentifiable,
             _,
-            List(DigitalLocation(_, _, license, _, _, _)),
+            List(DigitalLocationDeprecated(_, _, license, _, _, _)),
             _)) =>
         license shouldBe Some(License.InCopyright)
     }
@@ -153,7 +156,7 @@ class MetsDataTest
           Item(
             Unidentifiable,
             _,
-            List(DigitalLocation(_, _, license, _, _, _)),
+            List(DigitalLocationDeprecated(_, _, license, _, _, _)),
             _)) =>
         license shouldBe Some(License.InCopyright)
     }
@@ -172,7 +175,7 @@ class MetsDataTest
           Item(
             Unidentifiable,
             _,
-            List(DigitalLocation(_, _, license, _, _, _)),
+            List(DigitalLocationDeprecated(_, _, license, _, _, _)),
             _)) =>
         license shouldBe Some(License.InCopyright)
     }
@@ -190,7 +193,7 @@ class MetsDataTest
           Item(
             Unidentifiable,
             _,
-            List(DigitalLocation(_, _, license, _, _, _)),
+            List(DigitalLocationDeprecated(_, _, license, _, _, _)),
             _)) =>
         license shouldBe Some(License.InCopyright)
     }
@@ -207,7 +210,7 @@ class MetsDataTest
     val result = metsData.toWork(1)
     result shouldBe a[Right[_, _]]
     result.right.get.data.thumbnail shouldBe Some(
-      DigitalLocation(
+      DigitalLocationDeprecated(
         s"https://dlcs.io/thumbs/wellcome/5/location.jp2/full/!200,200/0/default.jpg",
         LocationType("thumbnail-image"),
         license = Some(License.CCBYNC)
@@ -228,7 +231,7 @@ class MetsDataTest
     val result = metsData.toWork(1)
     result shouldBe a[Right[_, _]]
     result.right.get.data.thumbnail shouldBe Some(
-      DigitalLocation(
+      DigitalLocationDeprecated(
         s"https://dlcs.io/thumbs/wellcome/5/title.jp2/full/!200,200/0/default.jpg",
         LocationType("thumbnail-image"),
         license = Some(License.CCBYNC)
@@ -263,7 +266,7 @@ class MetsDataTest
     val result = metsData.toWork(1)
     result shouldBe a[Right[_, _]]
     result.right.get.data.thumbnail shouldBe Some(
-      DigitalLocation(
+      DigitalLocationDeprecated(
         s"https://wellcomelibrary.org/pdfthumbs/${bnumber}/0/${assetId}.jpg",
         LocationType("thumbnail-image"),
         license = Some(License.CCBYNC)
@@ -307,7 +310,7 @@ class MetsDataTest
     )
     val result = metsData.toWork(1)
     result shouldBe a[Right[_, _]]
-    result.right.get.data.images.head.location shouldBe DigitalLocation(
+    result.right.get.data.images.head.location shouldBe DigitalLocationDeprecated(
       url = s"https://dlcs.io/iiif-img/wellcome/5/location.jp2/info.json",
       locationType = LocationType("iiif-image"),
       license = Some(License.CCBYNC)
@@ -321,7 +324,7 @@ class MetsDataTest
     ).toWork(1)
     result shouldBe a[Right[_, _]]
     inside(result.right.get.data.items.head.locations.head) {
-      case DigitalLocation(_, _, _, _, accessConditions, _) =>
+      case DigitalLocationDeprecated(_, _, _, _, accessConditions, _) =>
         accessConditions shouldBe List(
           AccessCondition(
             status = Some(AccessStatus.OpenWithAdvisory)
@@ -374,7 +377,7 @@ class MetsDataTest
     ).toWork(1)
     result shouldBe a[Right[_, _]]
     inside(result.right.get.data.items.head.locations.head) {
-      case DigitalLocation(_, _, _, _, accessConditions, _) =>
+      case DigitalLocationDeprecated(_, _, _, _, accessConditions, _) =>
         accessConditions shouldBe List(
           AccessCondition(
             status = Some(AccessStatus.Restricted),
@@ -391,7 +394,7 @@ class MetsDataTest
     ).toWork(1)
     result shouldBe a[Right[_, _]]
     inside(result.right.get.data.items.head.locations.head) {
-      case DigitalLocation(_, _, _, _, accessConditions, _) =>
+      case DigitalLocationDeprecated(_, _, _, _, accessConditions, _) =>
         accessConditions shouldBe List()
     }
   }
@@ -403,7 +406,7 @@ class MetsDataTest
     ).toWork(1)
     result shouldBe a[Right[_, _]]
     inside(result.right.get.data.items.head.locations.head) {
-      case DigitalLocation(_, _, _, _, accessConditions, _) =>
+      case DigitalLocationDeprecated(_, _, _, _, accessConditions, _) =>
         accessConditions shouldBe
           List(
             AccessCondition(

@@ -4,8 +4,8 @@ import org.scalatest.Inspectors
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal.{
-  DigitalLocation,
-  PhysicalLocation,
+  DigitalLocationDeprecated,
+  PhysicalLocationDeprecated,
   TransformedBaseWork,
   WorkType
 }
@@ -70,7 +70,7 @@ class WorkPredicatesTest
     forAll(filtered) { work =>
       work.sourceIdentifier.identifierType.id shouldBe "mets"
       work.data.items should have size 1
-      work.data.items.head.locations.head shouldBe a[DigitalLocation]
+      work.data.items.head.locations.head shouldBe a[DigitalLocationDeprecated]
     }
   }
 
@@ -80,7 +80,7 @@ class WorkPredicatesTest
     forAll(filtered) { work =>
       work.sourceIdentifier.identifierType.id shouldBe "miro-image-number"
       work.data.items should have size 1
-      work.data.items.head.locations.head shouldBe a[DigitalLocation]
+      work.data.items.head.locations.head shouldBe a[DigitalLocationDeprecated]
     }
   }
 
@@ -99,7 +99,7 @@ class WorkPredicatesTest
     forAll(filtered) { work =>
       work.sourceIdentifier.identifierType.id shouldBe "sierra-system-number"
       atLeast(1, work.data.items.flatMap(_.locations)) should matchPattern {
-        case _: PhysicalLocation =>
+        case _: PhysicalLocationDeprecated =>
       }
     }
   }

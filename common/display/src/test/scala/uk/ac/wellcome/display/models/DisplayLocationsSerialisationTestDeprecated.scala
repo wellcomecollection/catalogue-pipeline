@@ -7,14 +7,14 @@ import uk.ac.wellcome.display.test.util.JsonMapperTestUtil
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
 
-class DisplayLocationsSerialisationTest
+class DisplayLocationsSerialisationTestDeprecated
     extends AnyFunSpec
     with DisplaySerialisationTestBase
     with JsonMapperTestUtil
     with WorksGenerators {
 
   it("serialises a physical location") {
-    val physicalLocation = PhysicalLocation(
+    val physicalLocation = PhysicalLocationDeprecated(
       locationType = LocationType("sgmed"),
       label = "a stack of slick slimes"
     )
@@ -37,7 +37,7 @@ class DisplayLocationsSerialisationTest
   }
 
   it("serialises a digital location") {
-    val digitalLocation = DigitalLocation(
+    val digitalLocation = DigitalLocationDeprecated(
       url = "https://wellcomelibrary.org/iiif/b22015085/manifest",
       locationType = LocationType("iiif-image"),
     )
@@ -60,7 +60,7 @@ class DisplayLocationsSerialisationTest
   }
 
   it("serialises a digital location with a license") {
-    val digitalLocation = DigitalLocation(
+    val digitalLocation = DigitalLocationDeprecated(
       url = "https://wellcomelibrary.org/iiif/b22015085/manifest",
       locationType = LocationType("iiif-image"),
       license = Some(License.CC0)
@@ -84,7 +84,7 @@ class DisplayLocationsSerialisationTest
   }
 
   it("serialises a digital location with an access condition") {
-    val digitalLocation = DigitalLocation(
+    val digitalLocation = DigitalLocationDeprecated(
       url = "https://wellcomelibrary.org/iiif/b22015085/manifest",
       locationType = LocationType("iiif-image"),
       accessConditions = List(

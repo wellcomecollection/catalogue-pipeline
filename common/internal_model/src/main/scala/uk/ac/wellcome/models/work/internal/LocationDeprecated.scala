@@ -1,6 +1,6 @@
 package uk.ac.wellcome.models.work.internal
 
-sealed trait Location {
+sealed trait LocationDeprecated {
   val locationType: LocationType
   val accessConditions: List[AccessCondition]
 
@@ -14,18 +14,18 @@ sealed trait Location {
     }
 }
 
-case class DigitalLocation(
+case class DigitalLocationDeprecated(
   url: String,
   locationType: LocationType,
   license: Option[License] = None,
   credit: Option[String] = None,
   accessConditions: List[AccessCondition] = Nil,
   ontologyType: String = "DigitalLocation"
-) extends Location
+) extends LocationDeprecated
 
-case class PhysicalLocation(
+case class PhysicalLocationDeprecated(
   locationType: LocationType,
   label: String,
   accessConditions: List[AccessCondition] = Nil,
   ontologyType: String = "PhysicalLocation"
-) extends Location
+) extends LocationDeprecated

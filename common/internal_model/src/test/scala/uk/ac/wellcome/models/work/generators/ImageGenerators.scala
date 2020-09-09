@@ -8,7 +8,7 @@ trait ImageGenerators
     with WorksGenerators
     with VectorGenerators {
   def createUnmergedImageWith(
-    location: DigitalLocation = createDigitalLocation,
+    location: DigitalLocationDeprecated = createDigitalLocation,
     version: Int = 1,
     identifierValue: String = randomAlphanumeric(10),
     identifierType: IdentifierType = IdentifierType("miro-image-number")
@@ -24,7 +24,7 @@ trait ImageGenerators
     createUnmergedImageWith()
 
   def createUnmergedMiroImage = createUnmergedImageWith(
-    location = DigitalLocation(
+    location = DigitalLocationDeprecated(
       url = "https://iiif.wellcomecollection.org/V01234.jpg",
       locationType = LocationType("iiif-image"),
       license = Some(License.CCBY)
@@ -37,7 +37,7 @@ trait ImageGenerators
   )
 
   def createMergedImageWith(
-    location: DigitalLocation = createDigitalLocation,
+    location: DigitalLocationDeprecated = createDigitalLocation,
     version: Int = 1,
     identifierType: IdentifierType = IdentifierType("miro-image-number"),
     parentWork: UnidentifiedWork = createUnidentifiedSierraWorkWith(),
@@ -53,7 +53,7 @@ trait ImageGenerators
 
   def createIdentifiedMergedImageWith(
     imageId: Identified = Identified(createCanonicalId, createSourceIdentifier),
-    location: DigitalLocation = createDigitalLocation,
+    location: DigitalLocationDeprecated = createDigitalLocation,
     version: Int = 1,
     parentWork: IdentifiedWork = createIdentifiedSierraWorkWith(),
     redirectedWork: Option[IdentifiedWork] = Some(
@@ -88,7 +88,7 @@ trait ImageGenerators
     parentWork: IdentifiedWork = createIdentifiedSierraWorkWith(),
     redirectedWork: Option[IdentifiedWork] = Some(createIdentifiedWork),
     inferredData: Option[InferredData] = createInferredData,
-    location: DigitalLocation = createDigitalLocation,
+    location: DigitalLocationDeprecated = createDigitalLocation,
     version: Int = 1,
   ) =
     createIdentifiedMergedImageWith(

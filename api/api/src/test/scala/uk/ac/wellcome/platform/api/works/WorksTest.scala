@@ -219,7 +219,7 @@ class WorksTest extends ApiWorksTestBase {
       case (ElasticConfig(worksIndex, _), routes) =>
         val work = createIdentifiedWorkWith(
           thumbnail = Some(
-            DigitalLocation(
+            DigitalLocationDeprecated(
               locationType = LocationType("thumbnail-image"),
               url = "https://iiif.example.org/1234/default.jpg",
               license = Some(License.CCBY)

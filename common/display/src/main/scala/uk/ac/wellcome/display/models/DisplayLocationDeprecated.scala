@@ -3,34 +3,36 @@ package uk.ac.wellcome.display.models
 import io.circe.generic.extras.JsonKey
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.ac.wellcome.models.work.internal.{
-  DigitalLocation,
-  Location,
-  PhysicalLocation
+  DigitalLocationDeprecated,
+  LocationDeprecated,
+  PhysicalLocationDeprecated
 }
 
 @Schema(
   name = "Location",
   description = "A location that provides access to an item",
   discriminatorProperty = "type",
-  allOf =
-    Array(classOf[DisplayDigitalLocation], classOf[DisplayPhysicalLocation])
+  allOf = Array(
+    classOf[DisplayDigitalLocationDeprecated],
+    classOf[DisplayPhysicalLocationDeprecated])
 )
-sealed trait DisplayLocation
+sealed trait DisplayLocationDeprecated
 
-object DisplayLocation {
-  def apply(location: Location): DisplayLocation = location match {
-    case digitalLocation: DigitalLocation =>
-      DisplayDigitalLocation(digitalLocation)
-    case physicalLocation: PhysicalLocation =>
-      DisplayPhysicalLocation(physicalLocation)
-  }
+object DisplayLocationDeprecated {
+  def apply(location: LocationDeprecated): DisplayLocationDeprecated =
+    location match {
+      case digitalLocation: DigitalLocationDeprecated =>
+        DisplayDigitalLocationDeprecated(digitalLocation)
+      case physicalLocation: PhysicalLocationDeprecated =>
+        DisplayPhysicalLocationDeprecated(physicalLocation)
+    }
 }
 
 @Schema(
   name = "DigitalLocation",
   description = "A digital location that provides access to an item"
 )
-case class DisplayDigitalLocation(
+case class DisplayDigitalLocationDeprecated(
   @Schema(
     description = "The type of location that an item is accessible from.",
     allowableValues = Array("thumbnail-image", "iiif-image")
@@ -52,11 +54,12 @@ case class DisplayDigitalLocation(
   ) accessConditions: List[DisplayAccessCondition] = Nil,
   @JsonKey("type") @Schema(name = "type") ontologyType: String =
     "DigitalLocation"
-) extends DisplayLocation
+) extends DisplayLocationDeprecated
 
-object DisplayDigitalLocation {
-  def apply(location: DigitalLocation): DisplayDigitalLocation =
-    DisplayDigitalLocation(
+object DisplayDigitalLocationDeprecated {
+  def apply(
+    location: DigitalLocationDeprecated): DisplayDigitalLocationDeprecated =
+    DisplayDigitalLocationDeprecated(
       locationType = DisplayLocationType(location.locationType),
       url = location.url,
       credit = location.credit,
@@ -70,7 +73,7 @@ object DisplayDigitalLocation {
   name = "PhysicalLocation",
   description = "A physical location that provides access to an item"
 )
-case class DisplayPhysicalLocation(
+case class DisplayPhysicalLocationDeprecated(
   @Schema(
     description = "The type of location that an item is accessible from.",
   ) locationType: DisplayLocationType,
@@ -83,11 +86,12 @@ case class DisplayPhysicalLocation(
   ) accessConditions: List[DisplayAccessCondition] = Nil,
   @JsonKey("type") @Schema(name = "type") ontologyType: String =
     "PhysicalLocation"
-) extends DisplayLocation
+) extends DisplayLocationDeprecated
 
-object DisplayPhysicalLocation {
-  def apply(location: PhysicalLocation): DisplayPhysicalLocation =
-    DisplayPhysicalLocation(
+object DisplayPhysicalLocationDeprecated {
+  def apply(
+    location: PhysicalLocationDeprecated): DisplayPhysicalLocationDeprecated =
+    DisplayPhysicalLocationDeprecated(
       locationType = DisplayLocationType(location.locationType),
       label = location.label,
       accessConditions =

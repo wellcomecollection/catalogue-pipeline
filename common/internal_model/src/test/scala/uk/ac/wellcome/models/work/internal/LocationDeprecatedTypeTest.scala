@@ -3,7 +3,7 @@ package uk.ac.wellcome.models.work.internal
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class LocationTypeTest extends AnyFunSpec with Matchers {
+class LocationDeprecatedTypeTest extends AnyFunSpec with Matchers {
   it("looks up a location type") {
     LocationType("arch") shouldBe LocationType(
       id = "arch",

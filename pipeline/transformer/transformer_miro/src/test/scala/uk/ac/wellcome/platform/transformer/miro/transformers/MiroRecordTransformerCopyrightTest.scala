@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.transformer.miro.transformers
 import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.internal.DigitalLocation
+import uk.ac.wellcome.models.work.internal.DigitalLocationDeprecated
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 
@@ -82,7 +82,9 @@ class MiroRecordTransformerCopyrightTest
   ): Assertion = {
     val transformedWork = transformWork(miroRecord)
     val location = transformedWork.data.items.head.locations.head
-    location shouldBe a[DigitalLocation]
-    location.asInstanceOf[DigitalLocation].credit shouldBe expectedCredit
+    location shouldBe a[DigitalLocationDeprecated]
+    location
+      .asInstanceOf[DigitalLocationDeprecated]
+      .credit shouldBe expectedCredit
   }
 }

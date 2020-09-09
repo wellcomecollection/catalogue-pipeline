@@ -54,7 +54,7 @@ class PlatformMergerTest
     ).withData { data =>
       data.copy(
         thumbnail = Some(
-          DigitalLocation(
+          DigitalLocationDeprecated(
             url = "https://path.to/thumbnail.jpg",
             locationType = LocationType("thumbnail-image"),
             license = Some(License.CCBY)

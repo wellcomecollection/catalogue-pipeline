@@ -5,9 +5,9 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal.{
   AccessCondition,
   AccessStatus,
-  DigitalLocation,
+  DigitalLocationDeprecated,
   LocationType,
-  PhysicalLocation
+  PhysicalLocationDeprecated
 }
 import uk.ac.wellcome.platform.transformer.sierra.exceptions.SierraTransformerException
 import uk.ac.wellcome.platform.transformer.sierra.source.sierra.SierraSourceLocation
@@ -17,7 +17,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
 }
 import uk.ac.wellcome.platform.transformer.sierra.generators.SierraDataGenerators
 
-class SierraLocationTest
+class SierraLocationDeprecatedTest
     extends AnyFunSpec
     with Matchers
     with SierraDataGenerators {
@@ -35,7 +35,7 @@ class SierraLocationTest
     )
 
     it("extracts location from item data") {
-      val expectedLocation = PhysicalLocation(locationType, label)
+      val expectedLocation = PhysicalLocationDeprecated(locationType, label)
       transformer.getPhysicalLocation(itemData, bibData) shouldBe Some(
         expectedLocation)
     }
@@ -77,7 +77,7 @@ class SierraLocationTest
         )
       )
       transformer.getPhysicalLocation(itemData, bibData) shouldBe Some(
-        PhysicalLocation(
+        PhysicalLocationDeprecated(
           locationType = locationType,
           label = label,
           accessConditions = List(
@@ -98,7 +98,7 @@ class SierraLocationTest
         )
       )
       transformer.getPhysicalLocation(itemData, bibData) shouldBe Some(
-        PhysicalLocation(
+        PhysicalLocationDeprecated(
           locationType = locationType,
           label = label,
           accessConditions = List(AccessCondition(Some(AccessStatus.Open)))
@@ -119,7 +119,7 @@ class SierraLocationTest
         )
       )
       transformer.getPhysicalLocation(itemData, bibData) shouldBe Some(
-        PhysicalLocation(
+        PhysicalLocationDeprecated(
           locationType = locationType,
           label = label,
           accessConditions = List(
@@ -146,7 +146,7 @@ class SierraLocationTest
         )
       )
       transformer.getPhysicalLocation(itemData, bibData) shouldBe Some(
-        PhysicalLocation(
+        PhysicalLocationDeprecated(
           locationType = locationType,
           label = label,
           accessConditions = List()
@@ -159,7 +159,7 @@ class SierraLocationTest
   describe("Digital locations") {
     it("returns a digital location based on the id") {
       val id = "b2201508"
-      val expectedLocation = DigitalLocation(
+      val expectedLocation = DigitalLocationDeprecated(
         url = "https://wellcomelibrary.org/iiif/b2201508/manifest",
         license = None,
         locationType = LocationType("iiif-presentation")

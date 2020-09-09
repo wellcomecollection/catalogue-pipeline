@@ -1,6 +1,6 @@
 package uk.ac.wellcome.models.work.generators
 
-import uk.ac.wellcome.models.work.internal.{DigitalLocation, _}
+import uk.ac.wellcome.models.work.internal.{DigitalLocationDeprecated, _}
 
 trait ItemsGenerators extends IdentifiersGenerators {
 
@@ -8,7 +8,7 @@ trait ItemsGenerators extends IdentifiersGenerators {
     canonicalId: String = createCanonicalId,
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     otherIdentifiers: List[SourceIdentifier] = Nil,
-    locations: List[Location] = List(defaultLocation),
+    locations: List[LocationDeprecated] = List(defaultLocation),
     title: Option[String] = None,
   ): Item[Id] =
     Item(
@@ -30,7 +30,7 @@ trait ItemsGenerators extends IdentifiersGenerators {
 
   def createIdentifiableItemWith[Id >: Identifiable](
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    locations: List[Location] = List(defaultLocation)
+    locations: List[LocationDeprecated] = List(defaultLocation)
   ): Item[Id] =
     Item(
       id = Identifiable(sourceIdentifier),
@@ -38,7 +38,7 @@ trait ItemsGenerators extends IdentifiersGenerators {
     )
 
   def createUnidentifiableItemWith[Id >: Unidentifiable.type](
-    locations: List[Location] = List(defaultLocation)): Item[Id] =
+    locations: List[LocationDeprecated] = List(defaultLocation)): Item[Id] =
     Item(id = Unidentifiable, locations = locations)
 
   def createPhysicalLocation = createPhysicalLocationWith()
@@ -46,7 +46,7 @@ trait ItemsGenerators extends IdentifiersGenerators {
   def createPhysicalLocationWith(locationType: LocationType =
                                    createStoresLocationType,
                                  label: String = "locationLabel") =
-    PhysicalLocation(locationType, label)
+    PhysicalLocationDeprecated(locationType, label)
 
   def createDigitalLocation = createDigitalLocationWith()
 
@@ -54,7 +54,7 @@ trait ItemsGenerators extends IdentifiersGenerators {
     locationType: LocationType = createPresentationLocationType,
     url: String = defaultLocationUrl,
     license: Option[License] = Some(License.CCBY),
-    accessConditions: List[AccessCondition] = Nil) = DigitalLocation(
+    accessConditions: List[AccessCondition] = Nil) = DigitalLocationDeprecated(
     locationType = locationType,
     url = url,
     license = license,
@@ -73,7 +73,7 @@ trait ItemsGenerators extends IdentifiersGenerators {
   def createDigitalItem =
     createUnidentifiableItemWith(locations = List(createDigitalLocation))
 
-  def createDigitalItemWith(locations: List[Location]) =
+  def createDigitalItemWith(locations: List[LocationDeprecated]) =
     createUnidentifiableItemWith(locations = locations)
 
   def createDigitalItemWith(license: Option[License]) =

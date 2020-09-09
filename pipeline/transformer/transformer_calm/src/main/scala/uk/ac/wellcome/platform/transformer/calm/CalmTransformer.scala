@@ -224,9 +224,10 @@ object CalmTransformer
       )
     )
 
-  def physicalLocation(record: CalmRecord,
-                       status: Option[AccessStatus]): PhysicalLocation =
-    PhysicalLocation(
+  def physicalLocation(
+    record: CalmRecord,
+    status: Option[AccessStatus]): PhysicalLocationDeprecated =
+    PhysicalLocationDeprecated(
       locationType = LocationType("scmac"),
       label = "Closed stores Arch. & MSS",
       accessConditions = accessCondition(record, status).filterEmpty.toList
