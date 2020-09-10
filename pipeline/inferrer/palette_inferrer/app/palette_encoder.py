@@ -9,32 +9,33 @@ class PaletteEncoder:
         self.precision_levels = precision_levels
         self.delayed_process_image = delayed(self.process_image)
 
-    def get_significant_colours(self, image, p=0.5):
+    @staticmethod
+    def get_significant_colours(image, n, p=0.5):
         """
         extract n significant colours from the image pixels by taking the
         centres of n kmeans clusters of the image's pixels arranged in colour
-        space.
-        The biggest cluster is counted n^p times, the second largest (n-1)^p
-        times, ..., and the smallest cluster counted once.
+        space. Returns tuples of (colour, weight) where the weights are integers.
+        The biggest cluster is weighted at n^p, the second largest (n-1)^p
+        times, ..., and the smallest has weight 1.
         """
         pixels = np.array(image).reshape(-1, 3)
-        clusterer = KMeans(n_clusters=self.palette_size).fit(pixels)
-        colours = clusterer.cluster_centers_[::-1]
-        significant_colours = []
-        for val, colour in enumerate(colours):
-            significant_colours.extend([colour] * int(val ** p))
+        clusters = KMeans(n_clusters=n).fit(pixels)
+        cluster_labels, cluster_cardinalities = np.unique(
+            clusters.labels_, return_counts=True
+        )
+        labels_by_size = cluster_labels[np.argsort(cluster_cardinalities)]
 
-        return np.stack(significant_colours)
+        # Unfortunately we need to make sure that the labels correspond to the centroids
+        # because that behaviour is not guaranteed by sklearn.
+        # https://github.com/scikit-learn/scikit-learn/blob/0fb307bf3/sklearn/cluster/_kmeans.py#L851
+        centroid_labels = clusters.predict(clusters.cluster_centers_)
+        consistently_indexed_centroids = clusters.cluster_centers_[
+            np.argsort(centroid_labels)
+        ]
+        sorted_centroids = consistently_indexed_centroids[labels_by_size]
 
-    def get_colour_histogram(self, colours, precision):
-        """
-        get the bins in which the images' significant colours are found at a
-        specified level of precision
-        """
-        bins = np.linspace(0, 256, precision + 1)
-        histogram, _ = np.histogramdd(sample=colours, bins=[bins, bins, bins])
-        bin_counts = histogram.reshape(-1)
-        return bin_counts
+        weights = [int((i + 1) ** p) for i in range(n)]
+        return list(zip(sorted_centroids, weights))
 
     def encode_for_elasticsearch(self, flat_values):
         """
