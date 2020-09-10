@@ -1,19 +1,21 @@
 package uk.ac.wellcome.models.work.internal
 
-sealed trait BaseImage[+ImageId <: IdState.WithSourceIdentifier, DataId <: IdState]
+sealed trait BaseImage[
+  +ImageId <: IdState.WithSourceIdentifier, DataId <: IdState]
     extends HasId[ImageId] {
   val id: ImageId
   val location: DigitalLocationDeprecated
 }
 
-case class UnmergedImage[ImageId <: IdState.WithSourceIdentifier, DataId <: IdState](
+case class UnmergedImage[ImageId <: IdState.WithSourceIdentifier,
+                         DataId <: IdState](
   id: ImageId,
   version: Int,
   location: DigitalLocationDeprecated
 ) extends BaseImage[ImageId, DataId] {
-  def mergeWith(
-    canonicalWork: SourceWork[ImageId, DataId],
-    redirectedWork: Option[SourceWork[ImageId, DataId]]): MergedImage[ImageId, DataId] =
+  def mergeWith(canonicalWork: SourceWork[ImageId, DataId],
+                redirectedWork: Option[SourceWork[ImageId, DataId]])
+    : MergedImage[ImageId, DataId] =
     MergedImage[ImageId, DataId](
       id = id,
       version = version,
@@ -22,7 +24,8 @@ case class UnmergedImage[ImageId <: IdState.WithSourceIdentifier, DataId <: IdSt
     )
 }
 
-case class MergedImage[ImageId <: IdState.WithSourceIdentifier, DataId <: IdState](
+case class MergedImage[ImageId <: IdState.WithSourceIdentifier,
+                       DataId <: IdState](
   id: ImageId,
   version: Int,
   location: DigitalLocationDeprecated,

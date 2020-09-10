@@ -263,22 +263,25 @@ object SierraProduction extends SierraTransformer with SierraQueryOps {
   private def labelFromSubFields(varfield: VarField): String =
     varfield.subfieldContents.mkString(" ")
 
-  private def placesFromSubfields(varfield: VarField,
-                                  subfieldTag: String): List[Place[IdState.Unminted]] =
+  private def placesFromSubfields(
+    varfield: VarField,
+    subfieldTag: String): List[Place[IdState.Unminted]] =
     varfield
       .subfieldsWithTag(subfieldTag)
       .contents
       .map(Place.normalised)
 
-  private def agentsFromSubfields(varfield: VarField,
-                                  subfieldTag: String): List[Agent[IdState.Unminted]] =
+  private def agentsFromSubfields(
+    varfield: VarField,
+    subfieldTag: String): List[Agent[IdState.Unminted]] =
     varfield
       .subfieldsWithTag(subfieldTag)
       .contents
       .map(Agent.normalised)
 
-  private def datesFromSubfields(varfield: VarField,
-                                 subfieldTag: String): List[Period[IdState.Unminted]] =
+  private def datesFromSubfields(
+    varfield: VarField,
+    subfieldTag: String): List[Period[IdState.Unminted]] =
     varfield
       .subfieldsWithTag(subfieldTag)
       .contents

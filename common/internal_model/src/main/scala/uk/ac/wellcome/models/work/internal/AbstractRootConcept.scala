@@ -15,7 +15,8 @@ case class Concept[+State](
 ) extends AbstractConcept[State]
 
 object Concept {
-  def apply[State >: IdState.Unidentifiable.type](label: String): Concept[State] =
+  def apply[State >: IdState.Unidentifiable.type](
+    label: String): Concept[State] =
     Concept(IdState.Unidentifiable, label)
 
   def normalised[State](id: State, label: String): Concept[State] =
@@ -34,9 +35,13 @@ object Period {
     range: Option[InstantRange]): Period[State] =
     Period(IdState.Unidentifiable, label, range)
 
-  def apply[State >: IdState.Unidentifiable.type](label: String): Period[State] = {
+  def apply[State >: IdState.Unidentifiable.type](
+    label: String): Period[State] = {
     val normalisedLabel = trimTrailing(label, '.')
-    Period(IdState.Unidentifiable, normalisedLabel, InstantRange.parse(normalisedLabel))
+    Period(
+      IdState.Unidentifiable,
+      normalisedLabel,
+      InstantRange.parse(normalisedLabel))
   }
 }
 
@@ -49,7 +54,8 @@ object Place {
   def apply[State >: IdState.Unidentifiable.type](label: String): Place[State] =
     Place(IdState.Unidentifiable, label)
 
-  def normalised[State >: IdState.Unidentifiable.type](label: String): Place[State] =
+  def normalised[State >: IdState.Unidentifiable.type](
+    label: String): Place[State] =
     Place(trimTrailing(label, ':'))
 }
 
@@ -64,7 +70,8 @@ object Agent {
   def apply[State >: IdState.Unidentifiable.type](label: String): Agent[State] =
     Agent(IdState.Unidentifiable, label)
 
-  def normalised[State >: IdState.Unidentifiable.type](label: String): Agent[State] = {
+  def normalised[State >: IdState.Unidentifiable.type](
+    label: String): Agent[State] = {
     Agent(trimTrailing(label, ','))
   }
 }
@@ -75,10 +82,12 @@ case class Organisation[+State](
 ) extends AbstractAgent[State]
 
 object Organisation {
-  def apply[State >: IdState.Unidentifiable.type](label: String): Organisation[State] =
+  def apply[State >: IdState.Unidentifiable.type](
+    label: String): Organisation[State] =
     Organisation(IdState.Unidentifiable, label)
 
-  def normalised[State >: IdState.Unidentifiable.type](label: String): Organisation[State] =
+  def normalised[State >: IdState.Unidentifiable.type](
+    label: String): Organisation[State] =
     Organisation(trimTrailing(label, ','))
 }
 
@@ -90,7 +99,8 @@ case class Person[+State](
 ) extends AbstractAgent[State]
 
 object Person {
-  def apply[State >: IdState.Unidentifiable.type](label: String): Person[State] =
+  def apply[State >: IdState.Unidentifiable.type](
+    label: String): Person[State] =
     Person(IdState.Unidentifiable, label)
 
   def normalised[State >: IdState.Unidentifiable.type](
@@ -111,9 +121,11 @@ case class Meeting[+State](
 ) extends AbstractAgent[State]
 
 object Meeting {
-  def apply[State >: IdState.Unidentifiable.type](label: String): Meeting[State] =
+  def apply[State >: IdState.Unidentifiable.type](
+    label: String): Meeting[State] =
     Meeting(IdState.Unidentifiable, label)
 
-  def normalised[State >: IdState.Unidentifiable.type](label: String): Meeting[State] =
+  def normalised[State >: IdState.Unidentifiable.type](
+    label: String): Meeting[State] =
     Meeting(trimTrailing(label, ','))
 }

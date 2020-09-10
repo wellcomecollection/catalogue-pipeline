@@ -291,7 +291,7 @@ class SierraConceptSubjectsTest
       .map(_.id)
       .map {
         case IdState.Identifiable(sourceIdentifier, _, _) => sourceIdentifier
-        case other                                => assert(false, other)
+        case other                                        => assert(false, other)
       }
 
     expectedSourceIdentifiers shouldBe actualSourceIdentifiers

@@ -2,7 +2,7 @@ package uk.ac.wellcome.models.parse
 
 import fastparse._, NoWhitespace._
 
-import uk.ac.wellcome.models.work.internal.{Period, ProductionEvent, IdState}
+import uk.ac.wellcome.models.work.internal.{IdState, Period, ProductionEvent}
 
 /**
   *  Parses Marc 008 fields into ProductionEvent

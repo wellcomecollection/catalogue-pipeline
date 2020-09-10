@@ -65,7 +65,9 @@ case class UnidentifiedWork(
 ) extends TransformedBaseWork {
 
   def withData(
-    f: WorkData[IdState.Unminted, IdState.Identifiable] => WorkData[IdState.Unminted, IdState.Identifiable]) =
+    f: WorkData[IdState.Unminted, IdState.Identifiable] => WorkData[
+      IdState.Unminted,
+      IdState.Identifiable]) =
     this.copy(data = f(data))
 }
 
@@ -80,7 +82,9 @@ case class IdentifiedWork(
   val otherIdentifiers = data.otherIdentifiers
 
   def withData(
-    f: WorkData[IdState.Minted, IdState.Identified] => WorkData[IdState.Minted, IdState.Identified]) =
+    f: WorkData[IdState.Minted, IdState.Identified] => WorkData[
+      IdState.Minted,
+      IdState.Identified]) =
     this.copy(data = f(data))
 }
 
@@ -105,7 +109,9 @@ case class UnidentifiedInvisibleWork(
 ) extends TransformedBaseWork
     with InvisibleWork {
   def withData(
-    f: WorkData[IdState.Unminted, IdState.Identifiable] => WorkData[IdState.Unminted, IdState.Identifiable]) =
+    f: WorkData[IdState.Unminted, IdState.Identifiable] => WorkData[
+      IdState.Unminted,
+      IdState.Identifiable]) =
     this.copy(data = f(data))
 }
 
@@ -118,7 +124,9 @@ case class IdentifiedInvisibleWork(
 ) extends IdentifiedBaseWork
     with InvisibleWork {
   def withData(
-    f: WorkData[IdState.Minted, IdState.Identified] => WorkData[IdState.Minted, IdState.Identified]) =
+    f: WorkData[IdState.Minted, IdState.Identified] => WorkData[
+      IdState.Minted,
+      IdState.Identified]) =
     this.copy(data = f(data))
 }
 

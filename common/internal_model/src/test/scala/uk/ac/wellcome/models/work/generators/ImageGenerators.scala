@@ -20,7 +20,8 @@ trait ImageGenerators
     location = location
   )
 
-  def createUnmergedImage: UnmergedImage[IdState.Identifiable, IdState.Unminted] =
+  def createUnmergedImage
+    : UnmergedImage[IdState.Identifiable, IdState.Unminted] =
     createUnmergedImageWith()
 
   def createUnmergedMiroImage = createUnmergedImageWith(
@@ -52,12 +53,14 @@ trait ImageGenerators
     createMergedImageWith()
 
   def createIdentifiedMergedImageWith(
-    imageId: IdState.Identified = IdState.Identified(createCanonicalId, createSourceIdentifier),
+    imageId: IdState.Identified =
+      IdState.Identified(createCanonicalId, createSourceIdentifier),
     location: DigitalLocationDeprecated = createDigitalLocation,
     version: Int = 1,
     parentWork: IdentifiedWork = createIdentifiedSierraWorkWith(),
     redirectedWork: Option[IdentifiedWork] = Some(
-      createIdentifiedSierraWorkWith())): MergedImage[IdState.Identified, IdState.Minted] =
+      createIdentifiedSierraWorkWith()))
+    : MergedImage[IdState.Identified, IdState.Minted] =
     MergedImage[IdState.Identified, IdState.Minted](
       imageId,
       version,
@@ -137,8 +140,8 @@ trait ImageGenerators
 
   implicit class UnmergedImageIdOps(
     val image: UnmergedImage[IdState.Identifiable, IdState.Unminted]) {
-    def toIdentifiedWith(
-      id: String = createCanonicalId): UnmergedImage[IdState.Identified, IdState.Minted] =
+    def toIdentifiedWith(id: String = createCanonicalId)
+      : UnmergedImage[IdState.Identified, IdState.Minted] =
       UnmergedImage(
         id = IdState.Identified(
           canonicalId = id,
@@ -148,6 +151,7 @@ trait ImageGenerators
         location = image.location
       )
 
-    val toIdentified: UnmergedImage[IdState.Identified, IdState.Minted] = toIdentifiedWith()
+    val toIdentified: UnmergedImage[IdState.Identified, IdState.Minted] =
+      toIdentifiedWith()
   }
 }

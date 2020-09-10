@@ -262,12 +262,11 @@ class DisplayWorkTest
     val work = createIdentifiedWorkWith(
       contributors = List(
         Contributor(
-          agent =
-            Agent(
-              label = "Bond",
-              id =
-                IdState.Identified(createCanonicalId, contributorAgentSourceIdentifier),
-            ),
+          agent = Agent(
+            label = "Bond",
+            id = IdState
+              .Identified(createCanonicalId, contributorAgentSourceIdentifier),
+          ),
           roles = Nil
         ),
         Contributor(
@@ -282,8 +281,8 @@ class DisplayWorkTest
         Contributor(
           agent = Person(
             label = "Blue Blaise",
-            id =
-              IdState.Identified(createCanonicalId, contributorPersonSourceIdentifier),
+            id = IdState
+              .Identified(createCanonicalId, contributorPersonSourceIdentifier),
           ),
           roles = Nil
         )
@@ -296,7 +295,8 @@ class DisplayWorkTest
           concepts = List(
             Concept(
               label = "Bonding",
-              id = IdState.Identified(createCanonicalId, conceptSourceIdentifier),
+              id =
+                IdState.Identified(createCanonicalId, conceptSourceIdentifier),
             ),
             Period(
               label = "Before",
@@ -316,7 +316,8 @@ class DisplayWorkTest
           concepts = List(
             Concept(
               label = "Colours",
-              id = IdState.Identified(createCanonicalId, conceptSourceIdentifier)
+              id =
+                IdState.Identified(createCanonicalId, conceptSourceIdentifier)
             )
           )
         )
@@ -396,7 +397,8 @@ class DisplayWorkTest
           work,
           includes = WorksIncludes(identifiers = true, items = true))
         val item: DisplayItem = displayWork.items.get.head
-        val identifiedItem = work.data.items.head.asInstanceOf[Item[IdState.Identified]]
+        val identifiedItem =
+          work.data.items.head.asInstanceOf[Item[IdState.Identified]]
         item.identifiers shouldBe Some(
           List(DisplayIdentifier(identifiedItem.id.sourceIdentifier)))
       }

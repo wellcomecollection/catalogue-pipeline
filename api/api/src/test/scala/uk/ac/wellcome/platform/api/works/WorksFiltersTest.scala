@@ -39,7 +39,8 @@ class WorksFiltersTest extends ApiWorksTestBase {
   }
 
   describe("filtering works by item LocationType") {
-    def createItemWithLocationType(locationType: LocationType): Item[IdState.Minted] =
+    def createItemWithLocationType(
+      locationType: LocationType): Item[IdState.Minted] =
       createIdentifiedItemWith(
         locations = List(
           // This test really shouldn't be affected by physical/digital locations;

@@ -5,9 +5,9 @@ import uk.ac.wellcome.models.work.internal._
 
 trait GenreGenerators extends RandomStrings {
 
-  def createGenreWith(
-    label: String = randomAlphanumeric(10),
-    concepts: List[AbstractConcept[IdState.Minted]] = createConcepts): Genre[IdState.Minted] =
+  def createGenreWith(label: String = randomAlphanumeric(10),
+                      concepts: List[AbstractConcept[IdState.Minted]] =
+                        createConcepts): Genre[IdState.Minted] =
     Genre(label = label, concepts = concepts)
 
   def createGenre: Genre[IdState.Minted] =

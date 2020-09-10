@@ -2,7 +2,7 @@ package uk.ac.wellcome.models.parse
 
 import fastparse._, NoWhitespace._
 
-import uk.ac.wellcome.models.work.internal.{Place, IdState}
+import uk.ac.wellcome.models.work.internal.{IdState, Place}
 
 /**
   *  Parses Marc country information

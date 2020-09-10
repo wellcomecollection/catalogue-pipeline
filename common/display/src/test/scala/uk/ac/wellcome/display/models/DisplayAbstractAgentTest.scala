@@ -17,7 +17,8 @@ class DisplayAbstractAgentTest
   }.toList
   val canonicalId: String = createCanonicalId
 
-  val identified = IdState.Identified(canonicalId, sourceIdentifier, otherIdentifiers)
+  val identified =
+    IdState.Identified(canonicalId, sourceIdentifier, otherIdentifiers)
 
   describe("Agent") {
     val unidentifiedAgent = Agent(label = label, id = IdState.Unidentifiable)
@@ -181,7 +182,8 @@ class DisplayAbstractAgentTest
   }
 
   describe("Meeting") {
-    val unidentifiedMeeting = Meeting(label = label, id = IdState.Unidentifiable)
+    val unidentifiedMeeting =
+      Meeting(label = label, id = IdState.Unidentifiable)
 
     val identifiedMeeting = Meeting(label = label, id = identified)
 

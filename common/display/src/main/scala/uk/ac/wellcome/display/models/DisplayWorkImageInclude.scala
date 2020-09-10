@@ -14,6 +14,7 @@ case class DisplayWorkImageInclude(
 )
 
 object DisplayWorkImageInclude {
-  def apply(image: UnmergedImage[IdState.Identified, IdState.Minted]): DisplayWorkImageInclude =
+  def apply(image: UnmergedImage[IdState.Identified, IdState.Minted])
+    : DisplayWorkImageInclude =
     new DisplayWorkImageInclude(id = image.id.canonicalId)
 }

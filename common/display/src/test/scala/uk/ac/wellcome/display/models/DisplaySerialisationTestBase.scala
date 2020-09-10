@@ -161,7 +161,8 @@ trait DisplaySerialisationTestBase {
       "label": "${concept.label}"
     }"""
 
-  def abstractRootConcept(abstractRootConcept: AbstractRootConcept[IdState.Minted]) =
+  def abstractRootConcept(
+    abstractRootConcept: AbstractRootConcept[IdState.Minted]) =
     abstractRootConcept match {
       case c: Concept[IdState.Minted]      => concept(c)
       case p: Place[IdState.Minted]        => place(p)
@@ -215,7 +216,8 @@ trait DisplaySerialisationTestBase {
   def production(production: List[ProductionEvent[IdState.Minted]]) =
     production.map(productionEvent).mkString(",")
 
-  def workImageInclude(image: UnmergedImage[IdState.Identified, IdState.Minted]) =
+  def workImageInclude(
+    image: UnmergedImage[IdState.Identified, IdState.Minted]) =
     s"""
        {
          "id": "${image.id.canonicalId}",
@@ -223,7 +225,8 @@ trait DisplaySerialisationTestBase {
        }
     """.stripMargin
 
-  def workImageIncludes(images: List[UnmergedImage[IdState.Identified, IdState.Minted]]) =
+  def workImageIncludes(
+    images: List[UnmergedImage[IdState.Identified, IdState.Minted]]) =
     images.map(workImageInclude).mkString(",")
 
   def productionEvent(event: ProductionEvent[IdState.Minted]): String =

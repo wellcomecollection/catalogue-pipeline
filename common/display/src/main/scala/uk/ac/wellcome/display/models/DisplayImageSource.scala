@@ -20,7 +20,8 @@ case class DisplayImageSource(
 
 object DisplayImageSource {
 
-  def apply(imageSource: ImageSource[IdState.Identified, IdState.Minted]): DisplayImageSource =
+  def apply(imageSource: ImageSource[IdState.Identified, IdState.Minted])
+    : DisplayImageSource =
     new DisplayImageSource(
       id = imageSource.id.canonicalId,
       ontologyType = imageSource.ontologyType

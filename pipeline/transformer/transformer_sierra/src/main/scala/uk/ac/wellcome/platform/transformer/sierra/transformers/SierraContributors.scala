@@ -83,7 +83,8 @@ object SierraContributors
       .contents
       .map(ContributionRole(_))
 
-  private def withId(agent: AbstractAgent[IdState.Unminted], id: IdState.Unminted) =
+  private def withId(agent: AbstractAgent[IdState.Unminted],
+                     id: IdState.Unminted) =
     agent match {
       case a: Agent[IdState.Unminted]        => a.copy(id = id)
       case p: Person[IdState.Unminted]       => p.copy(id = id)

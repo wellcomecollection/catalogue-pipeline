@@ -463,7 +463,9 @@ class SierraContributorsTest
 
       val expectedContributors = List(
         Contributor(
-          Organisation(label = name, id = IdState.Identifiable(sourceIdentifier)),
+          Organisation(
+            label = name,
+            id = IdState.Identifiable(sourceIdentifier)),
           roles = Nil)
       )
 
@@ -499,7 +501,9 @@ class SierraContributorsTest
 
       val expectedContributors = List(
         Contributor(
-          Organisation(label = name, id = IdState.Identifiable(sourceIdentifier)),
+          Organisation(
+            label = name,
+            id = IdState.Identifiable(sourceIdentifier)),
           roles = Nil)
       )
 

@@ -16,7 +16,8 @@ case class DisplayGenre(
 )
 
 object DisplayGenre {
-  def apply(genre: Genre[IdState.Minted], includesIdentifiers: Boolean): DisplayGenre =
+  def apply(genre: Genre[IdState.Minted],
+            includesIdentifiers: Boolean): DisplayGenre =
     DisplayGenre(label = genre.label, concepts = genre.concepts.map {
       DisplayAbstractConcept(_, includesIdentifiers = includesIdentifiers)
     }, ontologyType = genre.ontologyType)

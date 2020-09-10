@@ -22,9 +22,10 @@ object DateAggregationMerger extends DateHelpers {
     *  is no greater than maxBuckets, or we reach the broadest aggregation
     *  granularity (i.e. centuries)
     */
-  def apply(agg: Aggregation[Period[IdState.Minted]],
-            maxBuckets: Int = 20,
-            range: DateBucketRange = Decade): Aggregation[Period[IdState.Minted]] =
+  def apply(
+    agg: Aggregation[Period[IdState.Minted]],
+    maxBuckets: Int = 20,
+    range: DateBucketRange = Decade): Aggregation[Period[IdState.Minted]] =
     if (agg.buckets.length > maxBuckets)
       range match {
         case Decade =>

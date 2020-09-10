@@ -32,7 +32,8 @@ class ImagesRuleTest
       result.head.location should be(miroWork.data.images.head.location)
       val source = result.head.source
       source shouldBe a[SourceWorks[_, _]]
-      val sourceWorks = source.asInstanceOf[SourceWorks[IdState.Identifiable, IdState.Unminted]]
+      val sourceWorks =
+        source.asInstanceOf[SourceWorks[IdState.Identifiable, IdState.Unminted]]
       sourceWorks.canonicalWork.id.sourceIdentifier should be(
         miroWork.sourceIdentifier)
       sourceWorks.redirectedWork should be(None)
@@ -51,7 +52,8 @@ class ImagesRuleTest
 
       result.foreach { image =>
         val imageSource =
-          image.source.asInstanceOf[SourceWorks[IdState.Identifiable, IdState.Unminted]]
+          image.source
+            .asInstanceOf[SourceWorks[IdState.Identifiable, IdState.Unminted]]
         val identifier = imageSource.canonicalWork.id.sourceIdentifier
         identifier shouldBe sierraWork.sourceIdentifier
         imageSource.redirectedWork shouldBe defined

@@ -29,8 +29,8 @@ object Aggregations extends Logging {
         Aggregations(
           workType = e4sAggregations.decodeAgg[WorkType]("workType"),
           genres = e4sAggregations.decodeAgg[Genre[IdState.Minted]]("genres"),
-          productionDates =
-            e4sAggregations.decodeAgg[Period[IdState.Minted]]("productionDates"),
+          productionDates = e4sAggregations
+            .decodeAgg[Period[IdState.Minted]]("productionDates"),
           language = e4sAggregations
             .decodeAgg[Language]("language", Some("data.language")),
           subjects = e4sAggregations

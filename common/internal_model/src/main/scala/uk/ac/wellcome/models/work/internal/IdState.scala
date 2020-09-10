@@ -1,15 +1,15 @@
 package uk.ac.wellcome.models.work.internal
 
 /** Represents an ID that is attached to individual pieces of work data.
- *  The ID can be in 3 possible states:
- *
- *  * Identifiable: contains a sourceIdentifier but does not have a canonicalId
- *    yet (i.e. pre minter)
- *  * Identified: contains a sourceIdentifier and a canonicalId (i.e. post
- *    minter)
- *  * Unidentifiable: a piece of data that does not have a sourceIdentifier, and
- *    thus can never have a canonicalId attached
- *  */
+  *  The ID can be in 3 possible states:
+  *
+  *  * Identifiable: contains a sourceIdentifier but does not have a canonicalId
+  *    yet (i.e. pre minter)
+  *  * Identified: contains a sourceIdentifier and a canonicalId (i.e. post
+  *    minter)
+  *  * Unidentifiable: a piece of data that does not have a sourceIdentifier, and
+  *    thus can never have a canonicalId attached
+  *  */
 sealed trait IdState {
   def maybeCanonicalId: Option[String]
   def allSourceIdentifiers: List[SourceIdentifier]

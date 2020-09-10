@@ -6,7 +6,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraQueryOps,
   VarField
 }
-import uk.ac.wellcome.models.work.internal.{Subject, IdState}
+import uk.ac.wellcome.models.work.internal.{IdState, Subject}
 import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 
 trait SierraSubjectsTransformer extends SierraTransformer with SierraQueryOps {

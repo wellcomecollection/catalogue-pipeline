@@ -45,9 +45,10 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
       }
       .toList
 
-  private def transformItemData(itemId: SierraItemNumber,
-                                itemData: SierraItemData,
-                                bibData: SierraBibData): Item[IdState.Unminted] = {
+  private def transformItemData(
+    itemId: SierraItemNumber,
+    itemData: SierraItemData,
+    bibData: SierraBibData): Item[IdState.Unminted] = {
     debug(s"Attempting to transform $itemId")
     Item(
       title = getItemTitle(itemData),

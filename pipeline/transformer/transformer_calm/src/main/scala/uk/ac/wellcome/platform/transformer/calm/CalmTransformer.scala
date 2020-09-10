@@ -114,7 +114,8 @@ object CalmTransformer
         !nonSuppressedStatuses.contains(status.toLowerCase.trim)
       }
 
-  def workData(record: CalmRecord): Result[WorkData[IdState.Unminted, IdState.Identifiable]] =
+  def workData(record: CalmRecord)
+    : Result[WorkData[IdState.Unminted, IdState.Identifiable]] =
     for {
       accessStatus <- accessStatus(record)
       title <- title(record)
@@ -260,7 +261,8 @@ object CalmTransformer
       case strs => Some(NormaliseText(strs.mkString(" ")))
     }
 
-  def production(record: CalmRecord): List[ProductionEvent[IdState.Unminted]] = {
+  def production(
+    record: CalmRecord): List[ProductionEvent[IdState.Unminted]] = {
     record.getList("Date") match {
       case Nil => Nil
       case dates =>

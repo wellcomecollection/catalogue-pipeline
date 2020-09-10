@@ -19,7 +19,8 @@ trait ProductionEventGenerators extends RandomStrings {
   def createProductionEvent: ProductionEvent[IdState.Minted] =
     createProductionEventWith()
 
-  def createProductionEventList(count: Int = 1): List[ProductionEvent[IdState.Minted]] =
+  def createProductionEventList(
+    count: Int = 1): List[ProductionEvent[IdState.Minted]] =
     (1 to count).map { _ =>
       createProductionEvent
     }.toList

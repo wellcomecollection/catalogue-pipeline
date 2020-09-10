@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
-import uk.ac.wellcome.models.work.internal.{Subject, IdState}
+import uk.ac.wellcome.models.work.internal.{IdState, Subject}
 import uk.ac.wellcome.platform.transformer.sierra.source.SierraBibData
 import uk.ac.wellcome.platform.transformer.sierra.transformers.subjects.{
   SierraBrandNameSubjects,

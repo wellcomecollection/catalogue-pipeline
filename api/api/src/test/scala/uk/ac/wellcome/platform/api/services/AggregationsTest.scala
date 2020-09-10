@@ -137,7 +137,7 @@ class AggregationsTest
         insertIntoElasticsearch(index, works: _*)
         val subjectQuery = subjects.head match {
           case Subject(IdState.Unidentifiable, label, _, _) => label
-          case _                                    => "bilberry"
+          case _                                            => "bilberry"
         }
         val searchOptions = WorksSearchOptions(
           aggregations =
@@ -161,7 +161,7 @@ class AggregationsTest
         insertIntoElasticsearch(index, works: _*)
         val subjectQuery = subjects.head match {
           case Subject(IdState.Unidentifiable, label, _, _) => label
-          case _                                    => "passionfruit"
+          case _                                            => "passionfruit"
         }
         val searchOptions = WorksSearchOptions(
           aggregations =
