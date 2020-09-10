@@ -72,16 +72,16 @@ object SierraPersonSubjects
       }
   }
 
-  private def getPersonSubjectLabel(person: Person[Unminted],
+  private def getPersonSubjectLabel(person: Person[IdState.Unminted],
                                     roles: List[String],
                                     dates: Option[String],
                                     generalSubdivisions: List[String]): String =
     (List(person.label) ++ roles ++ generalSubdivisions)
       .mkString(" ")
 
-  private def getConcepts(
-    person: Person[Unminted],
-    generalSubdivisions: List[String]): List[AbstractRootConcept[Unminted]] =
+  private def getConcepts(person: Person[IdState.Unminted],
+                          generalSubdivisions: List[String])
+    : List[AbstractRootConcept[IdState.Unminted]] =
     person +: generalSubdivisions.map(Concept(_))
 
   private def getRoles(secondarySubfields: List[MarcSubfield]) =

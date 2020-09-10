@@ -7,7 +7,7 @@ import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.models.work.internal.{Identified, MergedImage, Minted}
+import uk.ac.wellcome.models.work.internal.{IdState, MergedImage}
 import uk.ac.wellcome.platform.inference_manager.adapters.InferrerAdapter
 import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
 import uk.ac.wellcome.platform.inference_manager.services.{
@@ -35,22 +35,22 @@ trait InferenceManagerWorkerServiceFixture
     testWith: TestWith[InferenceManagerWorkerService[String], R])(
     implicit decoder: Decoder[MergedIdentifiedImage]): R =
     withActorSystem { implicit actorSystem =>
-      withBigMessageStream[MergedImage[Identified, Minted], R](queue) {
-        msgStream =>
-          val workerService = new InferenceManagerWorkerService(
-            msgStream = msgStream,
-            messageSender = messageSender,
-            inferrerAdapters = adapters,
-            imageDownloader = new ImageDownloader(
-              root = fileRoot,
-              fileWriter = fileWriter,
-              requestPool = imageRequestPool),
-            requestPool = inferrerRequestPool
-          )
+      withBigMessageStream[MergedImage[IdState.Identified, IdState.Minted], R](
+        queue) { msgStream =>
+        val workerService = new InferenceManagerWorkerService(
+          msgStream = msgStream,
+          messageSender = messageSender,
+          inferrerAdapters = adapters,
+          imageDownloader = new ImageDownloader(
+            root = fileRoot,
+            fileWriter = fileWriter,
+            requestPool = imageRequestPool),
+          requestPool = inferrerRequestPool
+        )
 
-          workerService.run()
+        workerService.run()
 
-          testWith(workerService)
+        testWith(workerService)
       }
     }
 

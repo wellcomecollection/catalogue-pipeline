@@ -8,7 +8,7 @@ import uk.ac.wellcome.json.utils.JsonAssertions
 
 class ConceptTest extends AnyFunSpec with Matchers with JsonAssertions {
 
-  val concept = Concept[Minted](label = "Woodwork")
+  val concept = Concept[IdState.Minted](label = "Woodwork")
   val expectedJson =
     s"""{
         "id": {"type": "Unidentifiable"},
@@ -21,7 +21,7 @@ class ConceptTest extends AnyFunSpec with Matchers with JsonAssertions {
   }
 
   it("deserialises JSON as Concepts") {
-    val parsedConcept = fromJson[Concept[Minted]](expectedJson).get
+    val parsedConcept = fromJson[Concept[IdState.Minted]](expectedJson).get
     parsedConcept shouldBe concept
   }
 }

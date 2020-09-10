@@ -4,15 +4,15 @@ import uk.ac.wellcome.models.work.internal.{DigitalLocationDeprecated, _}
 
 trait ItemsGenerators extends IdentifiersGenerators {
 
-  def createIdentifiedItemWith[Id >: Identified](
+  def createIdentifiedItemWith[I >: IdState.Identified](
     canonicalId: String = createCanonicalId,
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     otherIdentifiers: List[SourceIdentifier] = Nil,
     locations: List[LocationDeprecated] = List(defaultLocation),
     title: Option[String] = None,
-  ): Item[Id] =
+  ): Item[I] =
     Item(
-      id = Identified(
+      id = IdState.Identified(
         canonicalId = canonicalId,
         sourceIdentifier = sourceIdentifier,
         otherIdentifiers = otherIdentifiers,
@@ -28,18 +28,18 @@ trait ItemsGenerators extends IdentifiersGenerators {
       createIdentifiedItem
     }.toList
 
-  def createIdentifiableItemWith[Id >: Identifiable](
+  def createIdentifiableItemWith[I >: IdState.Identifiable](
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     locations: List[LocationDeprecated] = List(defaultLocation)
-  ): Item[Id] =
+  ): Item[I] =
     Item(
-      id = Identifiable(sourceIdentifier),
+      id = IdState.Identifiable(sourceIdentifier),
       locations = locations
     )
 
-  def createUnidentifiableItemWith[Id >: Unidentifiable.type](
-    locations: List[LocationDeprecated] = List(defaultLocation)): Item[Id] =
-    Item(id = Unidentifiable, locations = locations)
+  def createUnidentifiableItemWith[I >: IdState.Unidentifiable.type](
+    locations: List[LocationDeprecated] = List(defaultLocation)): Item[I] =
+    Item(id = IdState.Unidentifiable, locations = locations)
 
   def createPhysicalLocation = createPhysicalLocationWith()
 

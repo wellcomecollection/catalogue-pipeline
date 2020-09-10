@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.api.images
 
 import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
-import uk.ac.wellcome.models.work.internal.Identified
+import uk.ac.wellcome.models.work.internal._
 
 class ImagesTest extends ApiImagesTestBase with ElasticsearchFixtures {
 
@@ -70,17 +70,17 @@ class ImagesTest extends ApiImagesTestBase with ElasticsearchFixtures {
     withApi {
       case (ElasticConfig(_, imagesIndex), routes) =>
         val baguetteImage = createAugmentedImageWith(
-          imageId = Identified("a", createSourceIdentifier),
+          imageId = IdState.Identified("a", createSourceIdentifier),
           parentWork = createIdentifiedWorkWith(
             title = Some("Baguette is a French bread style"))
         )
         val focacciaImage = createAugmentedImageWith(
-          imageId = Identified("b", createSourceIdentifier),
+          imageId = IdState.Identified("b", createSourceIdentifier),
           parentWork = createIdentifiedWorkWith(
             title = Some("A Ligurian style of bread, Focaccia"))
         )
         val mantouImage = createAugmentedImageWith(
-          imageId = Identified("c", createSourceIdentifier),
+          imageId = IdState.Identified("c", createSourceIdentifier),
           parentWork = createIdentifiedWorkWith(
             title =
               Some("Mantou is a steamed bread associated with Northern China"))
@@ -106,17 +106,17 @@ class ImagesTest extends ApiImagesTestBase with ElasticsearchFixtures {
     withApi {
       case (ElasticConfig(_, imagesIndex), routes) =>
         val baguetteImage = createAugmentedImageWith(
-          imageId = Identified("a", createSourceIdentifier),
+          imageId = IdState.Identified("a", createSourceIdentifier),
           parentWork = createIdentifiedWorkWith(
             title = Some("Baguette is a French bread style"))
         )
         val focacciaImage = createAugmentedImageWith(
-          imageId = Identified("b", createSourceIdentifier),
+          imageId = IdState.Identified("b", createSourceIdentifier),
           parentWork = createIdentifiedWorkWith(
             title = Some("A Ligurian style of bread, Focaccia"))
         )
         val schiacciataImage = createAugmentedImageWith(
-          imageId = Identified("c", createSourceIdentifier),
+          imageId = IdState.Identified("c", createSourceIdentifier),
           parentWork = createIdentifiedWorkWith(
             title = Some("Schiacciata is a Tuscan focaccia")),
           redirectedWork =

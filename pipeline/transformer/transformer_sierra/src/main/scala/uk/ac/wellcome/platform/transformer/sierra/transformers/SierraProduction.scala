@@ -13,7 +13,7 @@ import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 
 object SierraProduction extends SierraTransformer with SierraQueryOps {
 
-  type Output = List[ProductionEvent[Unminted]]
+  type Output = List[ProductionEvent[IdState.Unminted]]
 
   // Populate wwork:production.
   //
@@ -240,7 +240,7 @@ object SierraProduction extends SierraTransformer with SierraQueryOps {
   }
 
   def getProductionFrom008(
-    bibData: SierraBibData): List[ProductionEvent[Unminted]] =
+    bibData: SierraBibData): List[ProductionEvent[IdState.Unminted]] =
     bibData
       .varfieldsWithTag("008")
       .contents
@@ -263,22 +263,25 @@ object SierraProduction extends SierraTransformer with SierraQueryOps {
   private def labelFromSubFields(varfield: VarField): String =
     varfield.subfieldContents.mkString(" ")
 
-  private def placesFromSubfields(varfield: VarField,
-                                  subfieldTag: String): List[Place[Unminted]] =
+  private def placesFromSubfields(
+    varfield: VarField,
+    subfieldTag: String): List[Place[IdState.Unminted]] =
     varfield
       .subfieldsWithTag(subfieldTag)
       .contents
       .map(Place.normalised)
 
-  private def agentsFromSubfields(varfield: VarField,
-                                  subfieldTag: String): List[Agent[Unminted]] =
+  private def agentsFromSubfields(
+    varfield: VarField,
+    subfieldTag: String): List[Agent[IdState.Unminted]] =
     varfield
       .subfieldsWithTag(subfieldTag)
       .contents
       .map(Agent.normalised)
 
-  private def datesFromSubfields(varfield: VarField,
-                                 subfieldTag: String): List[Period[Unminted]] =
+  private def datesFromSubfields(
+    varfield: VarField,
+    subfieldTag: String): List[Period[IdState.Unminted]] =
     varfield
       .subfieldsWithTag(subfieldTag)
       .contents

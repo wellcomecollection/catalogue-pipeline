@@ -4,10 +4,9 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{Inspectors, OptionValues, PrivateMethodTester}
 import uk.ac.wellcome.models.work.internal.{
-  Identifiable,
+  IdState,
   SourceWorks,
   UnidentifiedInvisibleWork,
-  Unminted,
   WorkType
 }
 import uk.ac.wellcome.platform.merger.generators.WorksWithImagesGenerators
@@ -33,7 +32,8 @@ class ImagesRuleTest
       result.head.location should be(miroWork.data.images.head.location)
       val source = result.head.source
       source shouldBe a[SourceWorks[_, _]]
-      val sourceWorks = source.asInstanceOf[SourceWorks[Identifiable, Unminted]]
+      val sourceWorks =
+        source.asInstanceOf[SourceWorks[IdState.Identifiable, IdState.Unminted]]
       sourceWorks.canonicalWork.id.sourceIdentifier should be(
         miroWork.sourceIdentifier)
       sourceWorks.redirectedWork should be(None)
@@ -52,7 +52,8 @@ class ImagesRuleTest
 
       result.foreach { image =>
         val imageSource =
-          image.source.asInstanceOf[SourceWorks[Identifiable, Unminted]]
+          image.source
+            .asInstanceOf[SourceWorks[IdState.Identifiable, IdState.Unminted]]
         val identifier = imageSource.canonicalWork.id.sourceIdentifier
         identifier shouldBe sierraWork.sourceIdentifier
         imageSource.redirectedWork shouldBe defined
@@ -76,7 +77,7 @@ class ImagesRuleTest
         metsWork.data.images.map(_.location)
       result.map { image =>
         image.source
-          .asInstanceOf[SourceWorks[Identifiable, Unminted]]
+          .asInstanceOf[SourceWorks[IdState.Identifiable, IdState.Unminted]]
           .canonicalWork
           .id
           .sourceIdentifier
@@ -100,7 +101,7 @@ class ImagesRuleTest
           miroWorks.map(_.data.images.head.location)
       result.map { image =>
         image.source
-          .asInstanceOf[SourceWorks[Identifiable, Unminted]]
+          .asInstanceOf[SourceWorks[IdState.Identifiable, IdState.Unminted]]
           .canonicalWork
           .id
           .sourceIdentifier
@@ -120,7 +121,7 @@ class ImagesRuleTest
         miroWorks.map(_.data.images.head.location)
       result.map { image =>
         image.source
-          .asInstanceOf[SourceWorks[Identifiable, Unminted]]
+          .asInstanceOf[SourceWorks[IdState.Identifiable, IdState.Unminted]]
           .canonicalWork
           .id
           .sourceIdentifier
@@ -145,7 +146,7 @@ class ImagesRuleTest
       val sources = (1 to 5).map(_ => createMiroWork)
       forAll(testRule.apply(target, sources).get) {
         _.source
-          .asInstanceOf[SourceWorks[Identifiable, Unminted]]
+          .asInstanceOf[SourceWorks[IdState.Identifiable, IdState.Unminted]]
           .canonicalWork
           .id
           .sourceIdentifier should be(target.sourceIdentifier)

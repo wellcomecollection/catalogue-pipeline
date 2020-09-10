@@ -1,12 +1,13 @@
 package uk.ac.wellcome.platform.transformer.miro.transformers
 
-import uk.ac.wellcome.models.work.internal.{Agent, Contributor, Unminted}
+import uk.ac.wellcome.models.work.internal.{Agent, Contributor, IdState}
 import uk.ac.wellcome.platform.transformer.miro.exceptions.MiroTransformerException
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 
 trait MiroContributors extends MiroContributorCodes {
   /* Populate wwork:contributors.  We use the <image_creator> tag from the Miro XML. */
-  def getContributors(miroRecord: MiroRecord): List[Contributor[Unminted]] = {
+  def getContributors(
+    miroRecord: MiroRecord): List[Contributor[IdState.Unminted]] = {
     val primaryCreators = miroRecord.creator match {
       case Some(maybeCreators) =>
         maybeCreators.collect {

@@ -22,7 +22,7 @@ class MiroItemsTest
           imageNumber = "B0011308"
         )) shouldBe List(
         Item(
-          id = Unidentifiable,
+          id = IdState.Unidentifiable,
           locations = List(DigitalLocationDeprecated(
             "https://iiif.wellcomecollection.org/image/B0011308.jpg/info.json",
             LocationType("iiif-image"),

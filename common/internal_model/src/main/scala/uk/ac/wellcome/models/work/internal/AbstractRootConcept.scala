@@ -3,117 +3,129 @@ package uk.ac.wellcome.models.work.internal
 import uk.ac.wellcome.models.work.text.TextNormalisation._
 import uk.ac.wellcome.models.parse.parsers.DateParser
 
-sealed trait AbstractRootConcept[+Id] extends HasIdState[Id] {
+sealed trait AbstractRootConcept[+State] extends HasId[State] {
   val label: String
 }
 
-sealed trait AbstractConcept[+Id] extends AbstractRootConcept[Id]
+sealed trait AbstractConcept[+State] extends AbstractRootConcept[State]
 
-case class Concept[+Id](
-  id: Id,
+case class Concept[+State](
+  id: State,
   label: String,
-) extends AbstractConcept[Id]
+) extends AbstractConcept[State]
 
 object Concept {
-  def apply[Id >: Unidentifiable.type](label: String): Concept[Id] =
-    Concept(Unidentifiable, label)
+  def apply[State >: IdState.Unidentifiable.type](
+    label: String): Concept[State] =
+    Concept(IdState.Unidentifiable, label)
 
-  def normalised[Id](id: Id, label: String): Concept[Id] =
+  def normalised[State](id: State, label: String): Concept[State] =
     Concept(id, trimTrailing(label, '.'))
 }
 
-case class Period[+Id](
-  id: Id,
+case class Period[+State](
+  id: State,
   label: String,
   range: Option[InstantRange],
-) extends AbstractConcept[Id]
+) extends AbstractConcept[State]
 
 object Period {
-  def apply[Id >: Unidentifiable.type](
+  def apply[State >: IdState.Unidentifiable.type](
     label: String,
-    range: Option[InstantRange]): Period[Id] =
-    Period(Unidentifiable, label, range)
+    range: Option[InstantRange]): Period[State] =
+    Period(IdState.Unidentifiable, label, range)
 
-  def apply[Id >: Unidentifiable.type](label: String): Period[Id] = {
+  def apply[State >: IdState.Unidentifiable.type](
+    label: String): Period[State] = {
     val normalisedLabel = trimTrailing(label, '.')
-    Period(Unidentifiable, normalisedLabel, InstantRange.parse(normalisedLabel))
+    Period(
+      IdState.Unidentifiable,
+      normalisedLabel,
+      InstantRange.parse(normalisedLabel))
   }
 }
 
-case class Place[+Id](
-  id: Id,
+case class Place[+State](
+  id: State,
   label: String,
-) extends AbstractConcept[Id]
+) extends AbstractConcept[State]
 
 object Place {
-  def apply[Id >: Unidentifiable.type](label: String): Place[Id] =
-    Place(Unidentifiable, label)
+  def apply[State >: IdState.Unidentifiable.type](label: String): Place[State] =
+    Place(IdState.Unidentifiable, label)
 
-  def normalised[Id >: Unidentifiable.type](label: String): Place[Id] =
+  def normalised[State >: IdState.Unidentifiable.type](
+    label: String): Place[State] =
     Place(trimTrailing(label, ':'))
 }
 
-sealed trait AbstractAgent[+Id] extends AbstractRootConcept[Id]
+sealed trait AbstractAgent[+State] extends AbstractRootConcept[State]
 
-case class Agent[+Id](
-  id: Id,
+case class Agent[+State](
+  id: State,
   label: String,
-) extends AbstractAgent[Id]
+) extends AbstractAgent[State]
 
 object Agent {
-  def apply[Id >: Unidentifiable.type](label: String): Agent[Id] =
-    Agent(Unidentifiable, label)
+  def apply[State >: IdState.Unidentifiable.type](label: String): Agent[State] =
+    Agent(IdState.Unidentifiable, label)
 
-  def normalised[Id >: Unidentifiable.type](label: String): Agent[Id] = {
+  def normalised[State >: IdState.Unidentifiable.type](
+    label: String): Agent[State] = {
     Agent(trimTrailing(label, ','))
   }
 }
 
-case class Organisation[+Id](
-  id: Id,
+case class Organisation[+State](
+  id: State,
   label: String,
-) extends AbstractAgent[Id]
+) extends AbstractAgent[State]
 
 object Organisation {
-  def apply[Id >: Unidentifiable.type](label: String): Organisation[Id] =
-    Organisation(Unidentifiable, label)
+  def apply[State >: IdState.Unidentifiable.type](
+    label: String): Organisation[State] =
+    Organisation(IdState.Unidentifiable, label)
 
-  def normalised[Id >: Unidentifiable.type](label: String): Organisation[Id] =
+  def normalised[State >: IdState.Unidentifiable.type](
+    label: String): Organisation[State] =
     Organisation(trimTrailing(label, ','))
 }
 
-case class Person[+Id](
-  id: Id,
+case class Person[+State](
+  id: State,
   label: String,
   prefix: Option[String] = None,
   numeration: Option[String] = None
-) extends AbstractAgent[Id]
+) extends AbstractAgent[State]
 
 object Person {
-  def apply[Id >: Unidentifiable.type](label: String): Person[Id] =
-    Person(Unidentifiable, label)
+  def apply[State >: IdState.Unidentifiable.type](
+    label: String): Person[State] =
+    Person(IdState.Unidentifiable, label)
 
-  def normalised[Id >: Unidentifiable.type](
+  def normalised[State >: IdState.Unidentifiable.type](
     label: String,
     prefix: Option[String] = None,
     numeration: Option[String] = None
-  ): Person[Id] =
+  ): Person[State] =
     Person(
-      id = Unidentifiable,
+      id = IdState.Unidentifiable,
       label = trimTrailing(label, ','),
       prefix = prefix,
       numeration = numeration)
 }
 
-case class Meeting[+Id](
-  id: Id,
+case class Meeting[+State](
+  id: State,
   label: String
-) extends AbstractAgent[Id]
+) extends AbstractAgent[State]
 
 object Meeting {
-  def apply[Id >: Unidentifiable.type](label: String): Meeting[Id] =
-    Meeting(Unidentifiable, label)
+  def apply[State >: IdState.Unidentifiable.type](
+    label: String): Meeting[State] =
+    Meeting(IdState.Unidentifiable, label)
 
-  def normalised[Id >: Unidentifiable.type](label: String): Meeting[Id] =
+  def normalised[State >: IdState.Unidentifiable.type](
+    label: String): Meeting[State] =
     Meeting(trimTrailing(label, ','))
 }

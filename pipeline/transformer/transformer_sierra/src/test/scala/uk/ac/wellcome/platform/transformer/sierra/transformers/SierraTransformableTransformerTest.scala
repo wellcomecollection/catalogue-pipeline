@@ -55,7 +55,7 @@ class SierraTransformableTransformerTest
       .asInstanceOf[UnidentifiedWork]
       .data
       .items
-      .map { _.id.asInstanceOf[Identifiable].sourceIdentifier }
+      .map { _.id.asInstanceOf[IdState.Identifiable].sourceIdentifier }
 
     actualIdentifiers should contain theSameElementsAs expectedIdentifiers
   }
@@ -160,7 +160,7 @@ class SierraTransformableTransformerTest
     )
 
     unidentifiedWork.data.items.head shouldBe Item(
-      id = Identifiable(
+      id = IdState.Identifiable(
         sourceIdentifier = expectedSourceIdentifier,
         otherIdentifiers = expectedOtherIdentifiers),
       locations = List(PhysicalLocationDeprecated(locationType, locationLabel))

@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
-import uk.ac.wellcome.models.work.internal.{Subject, Unminted}
+import uk.ac.wellcome.models.work.internal.{IdState, Subject}
 import uk.ac.wellcome.platform.transformer.sierra.source.SierraBibData
 import uk.ac.wellcome.platform.transformer.sierra.transformers.subjects.{
   SierraBrandNameSubjects,
@@ -13,7 +13,7 @@ import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 
 object SierraSubjects extends SierraTransformer {
 
-  type Output = List[Subject[Unminted]]
+  type Output = List[Subject[IdState.Unminted]]
 
   val subjectsTransformers = List(
     SierraConceptSubjects,

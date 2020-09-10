@@ -63,7 +63,7 @@ class DisplayAbstractConceptSerialisationTest
   it("constructs a DisplayConcept from an identified Concept") {
     val concept = Concept(
       label = "conceptLabel",
-      id = Identified(
+      id = IdState.Identified(
         canonicalId = "uq4bt5us",
         sourceIdentifier = createSourceIdentifierWith(
           ontologyType = "Concept"

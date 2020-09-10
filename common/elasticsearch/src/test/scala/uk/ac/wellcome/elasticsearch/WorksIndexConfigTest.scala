@@ -67,11 +67,11 @@ class WorksIndexConfigTest
       val sampleWork = createIdentifiedWorkWith(
         subjects = List(
           Subject(
-            id = Unidentifiable,
+            id = IdState.Unidentifiable,
             label = "Daredevil",
             concepts = List(
               Person(
-                id = Unidentifiable,
+                id = IdState.Unidentifiable,
                 label = "Daredevil",
                 prefix = Some("Superhero"),
                 numeration = Some("I")

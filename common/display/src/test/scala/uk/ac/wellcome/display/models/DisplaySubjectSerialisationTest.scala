@@ -21,7 +21,7 @@ class DisplaySubjectSerialisationTest
     val concept1 = Period(label = "periodLabel")
     val concept2 = Place(
       label = "placeLabel",
-      id = Identified(
+      id = IdState.Identified(
         canonicalId = "ABC",
         sourceIdentifier = createSourceIdentifierWith(
           ontologyType = "Place"

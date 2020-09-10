@@ -18,7 +18,7 @@ case class DisplaySubject(
 )
 
 object DisplaySubject extends GetIdentifiers {
-  def apply(subject: Subject[Minted],
+  def apply(subject: Subject[IdState.Minted],
             includesIdentifiers: Boolean): DisplaySubject =
     subject match {
       case Subject(id, label, concepts, _) =>

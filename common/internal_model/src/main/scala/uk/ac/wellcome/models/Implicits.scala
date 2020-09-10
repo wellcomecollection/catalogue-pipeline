@@ -18,8 +18,8 @@ object Implicits {
   implicit val _dec00: Decoder[AccessCondition] = deriveConfiguredDecoder
   implicit val _dec01: Decoder[Note] = deriveConfiguredDecoder
   implicit val _dec02: Decoder[SourceIdentifier] = deriveConfiguredDecoder
-  implicit val _dec03: Decoder[Unminted] = deriveConfiguredDecoder
-  implicit val _dec04: Decoder[Minted] = deriveConfiguredDecoder
+  implicit val _dec03: Decoder[IdState.Unminted] = deriveConfiguredDecoder
+  implicit val _dec04: Decoder[IdState.Minted] = deriveConfiguredDecoder
   implicit val _dec05: Decoder[InstantRange] = deriveConfiguredDecoder
   implicit val _dec06: Decoder[DigitalLocationDeprecated] =
     deriveConfiguredDecoder
@@ -28,44 +28,60 @@ object Implicits {
   implicit val _dec08: Decoder[LocationDeprecated] = deriveConfiguredDecoder
   implicit val _dec11: Decoder[MergeCandidate] = deriveConfiguredDecoder
   implicit val _dec12: Decoder[MatcherResult] = deriveConfiguredDecoder
-  implicit val _dec13: Decoder[Person[Unminted]] = deriveConfiguredDecoder
-  implicit val _dec14: Decoder[Person[Minted]] = deriveConfiguredDecoder
-  implicit val _dec15: Decoder[Meeting[Unminted]] = deriveConfiguredDecoder
-  implicit val _dec16: Decoder[Meeting[Minted]] = deriveConfiguredDecoder
-  implicit val _dec17: Decoder[Organisation[Unminted]] = deriveConfiguredDecoder
-  implicit val _dec18: Decoder[Organisation[Minted]] = deriveConfiguredDecoder
-  implicit val _dec19: Decoder[Agent[Unminted]] = deriveConfiguredDecoder
-  implicit val _dec20: Decoder[Agent[Minted]] = deriveConfiguredDecoder
-  implicit val _dec21: Decoder[AbstractAgent[Unminted]] =
+  implicit val _dec13: Decoder[Person[IdState.Unminted]] =
     deriveConfiguredDecoder
-  implicit val _dec22: Decoder[AbstractAgent[Minted]] = deriveConfiguredDecoder
-  implicit val _dec23: Decoder[Place[Unminted]] = deriveConfiguredDecoder
-  implicit val _dec24: Decoder[Period[Minted]] = deriveConfiguredDecoder
-  implicit val _dec25: Decoder[Concept[Unminted]] = deriveConfiguredDecoder
-  implicit val _dec26: Decoder[Concept[Minted]] = deriveConfiguredDecoder
-  implicit val _dec27: Decoder[AbstractConcept[Unminted]] =
+  implicit val _dec14: Decoder[Person[IdState.Minted]] = deriveConfiguredDecoder
+  implicit val _dec15: Decoder[Meeting[IdState.Unminted]] =
     deriveConfiguredDecoder
-  implicit val _dec28: Decoder[AbstractConcept[Minted]] =
+  implicit val _dec16: Decoder[Meeting[IdState.Minted]] =
     deriveConfiguredDecoder
-  implicit val _dec29: Decoder[AbstractRootConcept[Unminted]] =
+  implicit val _dec17: Decoder[Organisation[IdState.Unminted]] =
     deriveConfiguredDecoder
-  implicit val _dec30: Decoder[AbstractRootConcept[Minted]] =
+  implicit val _dec18: Decoder[Organisation[IdState.Minted]] =
     deriveConfiguredDecoder
-  implicit val _dec31: Decoder[Genre[Unminted]] = deriveConfiguredDecoder
-  implicit val _dec32: Decoder[Genre[Minted]] = deriveConfiguredDecoder
-  implicit val _dec33: Decoder[Subject[Unminted]] = deriveConfiguredDecoder
-  implicit val _dec34: Decoder[Subject[Minted]] = deriveConfiguredDecoder
-  implicit val _dec35: Decoder[ProductionEvent[Unminted]] =
+  implicit val _dec19: Decoder[Agent[IdState.Unminted]] =
     deriveConfiguredDecoder
-  implicit val _dec36: Decoder[ProductionEvent[Minted]] =
+  implicit val _dec20: Decoder[Agent[IdState.Minted]] = deriveConfiguredDecoder
+  implicit val _dec21: Decoder[AbstractAgent[IdState.Unminted]] =
     deriveConfiguredDecoder
-  implicit val _dec37: Decoder[Item[Unminted]] = deriveConfiguredDecoder
-  implicit val _dec38: Decoder[Item[Minted]] = deriveConfiguredDecoder
-  implicit val _dec39: Decoder[Contributor[Unminted]] = deriveConfiguredDecoder
-  implicit val _dec40: Decoder[Contributor[Minted]] = deriveConfiguredDecoder
-  implicit val _dec41: Decoder[WorkData[Unminted, Identifiable]] =
+  implicit val _dec22: Decoder[AbstractAgent[IdState.Minted]] =
     deriveConfiguredDecoder
-  implicit val _dec42: Decoder[WorkData[Minted, Identified]] =
+  implicit val _dec23: Decoder[Place[IdState.Unminted]] =
+    deriveConfiguredDecoder
+  implicit val _dec24: Decoder[Period[IdState.Minted]] = deriveConfiguredDecoder
+  implicit val _dec25: Decoder[Concept[IdState.Unminted]] =
+    deriveConfiguredDecoder
+  implicit val _dec26: Decoder[Concept[IdState.Minted]] =
+    deriveConfiguredDecoder
+  implicit val _dec27: Decoder[AbstractConcept[IdState.Unminted]] =
+    deriveConfiguredDecoder
+  implicit val _dec28: Decoder[AbstractConcept[IdState.Minted]] =
+    deriveConfiguredDecoder
+  implicit val _dec29: Decoder[AbstractRootConcept[IdState.Unminted]] =
+    deriveConfiguredDecoder
+  implicit val _dec30: Decoder[AbstractRootConcept[IdState.Minted]] =
+    deriveConfiguredDecoder
+  implicit val _dec31: Decoder[Genre[IdState.Unminted]] =
+    deriveConfiguredDecoder
+  implicit val _dec32: Decoder[Genre[IdState.Minted]] = deriveConfiguredDecoder
+  implicit val _dec33: Decoder[Subject[IdState.Unminted]] =
+    deriveConfiguredDecoder
+  implicit val _dec34: Decoder[Subject[IdState.Minted]] =
+    deriveConfiguredDecoder
+  implicit val _dec35: Decoder[ProductionEvent[IdState.Unminted]] =
+    deriveConfiguredDecoder
+  implicit val _dec36: Decoder[ProductionEvent[IdState.Minted]] =
+    deriveConfiguredDecoder
+  implicit val _dec37: Decoder[Item[IdState.Unminted]] = deriveConfiguredDecoder
+  implicit val _dec38: Decoder[Item[IdState.Minted]] = deriveConfiguredDecoder
+  implicit val _dec39: Decoder[Contributor[IdState.Unminted]] =
+    deriveConfiguredDecoder
+  implicit val _dec40: Decoder[Contributor[IdState.Minted]] =
+    deriveConfiguredDecoder
+  implicit val _dec41
+    : Decoder[WorkData[IdState.Unminted, IdState.Identifiable]] =
+    deriveConfiguredDecoder
+  implicit val _dec42: Decoder[WorkData[IdState.Minted, IdState.Identified]] =
     deriveConfiguredDecoder
   implicit val _dec43: Decoder[UnidentifiedWork] = deriveConfiguredDecoder
   implicit val _dec44: Decoder[UnidentifiedInvisibleWork] =
@@ -76,25 +92,30 @@ object Implicits {
   implicit val _dec47: Decoder[TransformedBaseWork] = deriveConfiguredDecoder
   implicit val _dec48: Decoder[IdentifiedBaseWork] = deriveConfiguredDecoder
   implicit val _dec49: Decoder[BaseWork] = deriveConfiguredDecoder
-  implicit val _dec51: Decoder[UnmergedImage[Identifiable, Unminted]] =
+  implicit val _dec51
+    : Decoder[UnmergedImage[IdState.Identifiable, IdState.Unminted]] =
     deriveConfiguredDecoder
-  implicit val _dec52: Decoder[UnmergedImage[Identified, Minted]] =
+  implicit val _dec52
+    : Decoder[UnmergedImage[IdState.Identified, IdState.Minted]] =
     deriveConfiguredDecoder
-  implicit val _dec53: Decoder[MergedImage[Identifiable, Unminted]] =
+  implicit val _dec53
+    : Decoder[MergedImage[IdState.Identifiable, IdState.Unminted]] =
     deriveConfiguredDecoder
-  implicit val _dec54: Decoder[MergedImage[Identified, Minted]] =
+  implicit val _dec54
+    : Decoder[MergedImage[IdState.Identified, IdState.Minted]] =
     deriveConfiguredDecoder
-  implicit val _dec55: Decoder[BaseImage[Identifiable, Unminted]] =
+  implicit val _dec55
+    : Decoder[BaseImage[IdState.Identifiable, IdState.Unminted]] =
     deriveConfiguredDecoder
-  implicit val _dec56: Decoder[BaseImage[Identified, Minted]] =
+  implicit val _dec56: Decoder[BaseImage[IdState.Identified, IdState.Minted]] =
     deriveConfiguredDecoder
   implicit val _dec57: Decoder[AugmentedImage] = deriveConfiguredDecoder
 
   implicit val _enc00: Encoder[AccessCondition] = deriveConfiguredEncoder
   implicit val _enc01: Encoder[Note] = deriveConfiguredEncoder
   implicit val _enc02: Encoder[SourceIdentifier] = deriveConfiguredEncoder
-  implicit val _enc03: Encoder[Unminted] = deriveConfiguredEncoder
-  implicit val _enc04: Encoder[Minted] = deriveConfiguredEncoder
+  implicit val _enc03: Encoder[IdState.Unminted] = deriveConfiguredEncoder
+  implicit val _enc04: Encoder[IdState.Minted] = deriveConfiguredEncoder
   implicit val _enc05: Encoder[InstantRange] = deriveConfiguredEncoder
   implicit val _enc06: Encoder[DigitalLocationDeprecated] =
     deriveConfiguredEncoder
@@ -103,44 +124,60 @@ object Implicits {
   implicit val _enc08: Encoder[LocationDeprecated] = deriveConfiguredEncoder
   implicit val _enc11: Encoder[MergeCandidate] = deriveConfiguredEncoder
   implicit val _enc12: Encoder[MatcherResult] = deriveConfiguredEncoder
-  implicit val _enc13: Encoder[Person[Unminted]] = deriveConfiguredEncoder
-  implicit val _enc14: Encoder[Person[Minted]] = deriveConfiguredEncoder
-  implicit val _enc15: Encoder[Meeting[Unminted]] = deriveConfiguredEncoder
-  implicit val _enc16: Encoder[Meeting[Minted]] = deriveConfiguredEncoder
-  implicit val _enc17: Encoder[Organisation[Unminted]] = deriveConfiguredEncoder
-  implicit val _enc18: Encoder[Organisation[Minted]] = deriveConfiguredEncoder
-  implicit val _enc19: Encoder[Agent[Unminted]] = deriveConfiguredEncoder
-  implicit val _enc20: Encoder[Agent[Minted]] = deriveConfiguredEncoder
-  implicit val _enc21: Encoder[AbstractAgent[Unminted]] =
+  implicit val _enc13: Encoder[Person[IdState.Unminted]] =
     deriveConfiguredEncoder
-  implicit val _enc22: Encoder[AbstractAgent[Minted]] = deriveConfiguredEncoder
-  implicit val _enc23: Encoder[Place[Unminted]] = deriveConfiguredEncoder
-  implicit val _enc24: Encoder[Period[Minted]] = deriveConfiguredEncoder
-  implicit val _enc25: Encoder[Concept[Unminted]] = deriveConfiguredEncoder
-  implicit val _enc26: Encoder[Concept[Minted]] = deriveConfiguredEncoder
-  implicit val _enc27: Encoder[AbstractConcept[Unminted]] =
+  implicit val _enc14: Encoder[Person[IdState.Minted]] = deriveConfiguredEncoder
+  implicit val _enc15: Encoder[Meeting[IdState.Unminted]] =
     deriveConfiguredEncoder
-  implicit val _enc28: Encoder[AbstractConcept[Minted]] =
+  implicit val _enc16: Encoder[Meeting[IdState.Minted]] =
     deriveConfiguredEncoder
-  implicit val _enc29: Encoder[AbstractRootConcept[Unminted]] =
+  implicit val _enc17: Encoder[Organisation[IdState.Unminted]] =
     deriveConfiguredEncoder
-  implicit val _enc30: Encoder[AbstractRootConcept[Minted]] =
+  implicit val _enc18: Encoder[Organisation[IdState.Minted]] =
     deriveConfiguredEncoder
-  implicit val _enc31: Encoder[Genre[Unminted]] = deriveConfiguredEncoder
-  implicit val _enc32: Encoder[Genre[Minted]] = deriveConfiguredEncoder
-  implicit val _enc33: Encoder[Subject[Unminted]] = deriveConfiguredEncoder
-  implicit val _enc34: Encoder[Subject[Minted]] = deriveConfiguredEncoder
-  implicit val _enc35: Encoder[ProductionEvent[Unminted]] =
+  implicit val _enc19: Encoder[Agent[IdState.Unminted]] =
     deriveConfiguredEncoder
-  implicit val _enc36: Encoder[ProductionEvent[Minted]] =
+  implicit val _enc20: Encoder[Agent[IdState.Minted]] = deriveConfiguredEncoder
+  implicit val _enc21: Encoder[AbstractAgent[IdState.Unminted]] =
     deriveConfiguredEncoder
-  implicit val _enc37: Encoder[Item[Unminted]] = deriveConfiguredEncoder
-  implicit val _enc38: Encoder[Item[Minted]] = deriveConfiguredEncoder
-  implicit val _enc39: Encoder[Contributor[Unminted]] = deriveConfiguredEncoder
-  implicit val _enc40: Encoder[Contributor[Minted]] = deriveConfiguredEncoder
-  implicit val _enc41: Encoder[WorkData[Unminted, Identifiable]] =
+  implicit val _enc22: Encoder[AbstractAgent[IdState.Minted]] =
     deriveConfiguredEncoder
-  implicit val _enc42: Encoder[WorkData[Minted, Identified]] =
+  implicit val _enc23: Encoder[Place[IdState.Unminted]] =
+    deriveConfiguredEncoder
+  implicit val _enc24: Encoder[Period[IdState.Minted]] = deriveConfiguredEncoder
+  implicit val _enc25: Encoder[Concept[IdState.Unminted]] =
+    deriveConfiguredEncoder
+  implicit val _enc26: Encoder[Concept[IdState.Minted]] =
+    deriveConfiguredEncoder
+  implicit val _enc27: Encoder[AbstractConcept[IdState.Unminted]] =
+    deriveConfiguredEncoder
+  implicit val _enc28: Encoder[AbstractConcept[IdState.Minted]] =
+    deriveConfiguredEncoder
+  implicit val _enc29: Encoder[AbstractRootConcept[IdState.Unminted]] =
+    deriveConfiguredEncoder
+  implicit val _enc30: Encoder[AbstractRootConcept[IdState.Minted]] =
+    deriveConfiguredEncoder
+  implicit val _enc31: Encoder[Genre[IdState.Unminted]] =
+    deriveConfiguredEncoder
+  implicit val _enc32: Encoder[Genre[IdState.Minted]] = deriveConfiguredEncoder
+  implicit val _enc33: Encoder[Subject[IdState.Unminted]] =
+    deriveConfiguredEncoder
+  implicit val _enc34: Encoder[Subject[IdState.Minted]] =
+    deriveConfiguredEncoder
+  implicit val _enc35: Encoder[ProductionEvent[IdState.Unminted]] =
+    deriveConfiguredEncoder
+  implicit val _enc36: Encoder[ProductionEvent[IdState.Minted]] =
+    deriveConfiguredEncoder
+  implicit val _enc37: Encoder[Item[IdState.Unminted]] = deriveConfiguredEncoder
+  implicit val _enc38: Encoder[Item[IdState.Minted]] = deriveConfiguredEncoder
+  implicit val _enc39: Encoder[Contributor[IdState.Unminted]] =
+    deriveConfiguredEncoder
+  implicit val _enc40: Encoder[Contributor[IdState.Minted]] =
+    deriveConfiguredEncoder
+  implicit val _enc41
+    : Encoder[WorkData[IdState.Unminted, IdState.Identifiable]] =
+    deriveConfiguredEncoder
+  implicit val _enc42: Encoder[WorkData[IdState.Minted, IdState.Identified]] =
     deriveConfiguredEncoder
   implicit val _enc43: Encoder[UnidentifiedWork] = deriveConfiguredEncoder
   implicit val _enc44: Encoder[UnidentifiedInvisibleWork] =
@@ -151,17 +188,22 @@ object Implicits {
   implicit val _enc47: Encoder[TransformedBaseWork] = deriveConfiguredEncoder
   implicit val _enc48: Encoder[IdentifiedBaseWork] = deriveConfiguredEncoder
   implicit val _enc49: Encoder[BaseWork] = deriveConfiguredEncoder
-  implicit val _enc51: Encoder[UnmergedImage[Identifiable, Unminted]] =
+  implicit val _enc51
+    : Encoder[UnmergedImage[IdState.Identifiable, IdState.Unminted]] =
     deriveConfiguredEncoder
-  implicit val _enc52: Encoder[UnmergedImage[Identified, Minted]] =
+  implicit val _enc52
+    : Encoder[UnmergedImage[IdState.Identified, IdState.Minted]] =
     deriveConfiguredEncoder
-  implicit val _enc53: Encoder[MergedImage[Identifiable, Unminted]] =
+  implicit val _enc53
+    : Encoder[MergedImage[IdState.Identifiable, IdState.Unminted]] =
     deriveConfiguredEncoder
-  implicit val _enc54: Encoder[MergedImage[Identified, Minted]] =
+  implicit val _enc54
+    : Encoder[MergedImage[IdState.Identified, IdState.Minted]] =
     deriveConfiguredEncoder
-  implicit val _enc55: Encoder[BaseImage[Identifiable, Unminted]] =
+  implicit val _enc55
+    : Encoder[BaseImage[IdState.Identifiable, IdState.Unminted]] =
     deriveConfiguredEncoder
-  implicit val _enc56: Encoder[BaseImage[Identified, Minted]] =
+  implicit val _enc56: Encoder[BaseImage[IdState.Identified, IdState.Minted]] =
     deriveConfiguredEncoder
   implicit val _enc57: Encoder[AugmentedImage] = deriveConfiguredEncoder
 }

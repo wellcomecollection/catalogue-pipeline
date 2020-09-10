@@ -15,7 +15,7 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
     with SierraLocation
     with SierraQueryOps {
 
-  type Output = List[Item[Unminted]]
+  type Output = List[Item[IdState.Unminted]]
 
   /** We don't get the digital items from Sierra.
     * The `dlnk` was previously used, but we now use the METS source.
@@ -27,14 +27,14 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
     getPhysicalItems(itemDataMap, bibData)
       .sortBy { item =>
         item.id match {
-          case Unidentifiable          => None
-          case Identifiable(_, ids, _) => ids.headOption.map(_.value)
+          case IdState.Unidentifiable          => None
+          case IdState.Identifiable(_, ids, _) => ids.headOption.map(_.value)
         }
       }
 
   private def getPhysicalItems(
     sierraItemDataMap: Map[SierraItemNumber, SierraItemData],
-    bibData: SierraBibData): List[Item[Unminted]] =
+    bibData: SierraBibData): List[Item[IdState.Unminted]] =
     sierraItemDataMap
       .filterNot {
         case (_: SierraItemNumber, itemData: SierraItemData) => itemData.deleted
@@ -45,14 +45,15 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
       }
       .toList
 
-  private def transformItemData(itemId: SierraItemNumber,
-                                itemData: SierraItemData,
-                                bibData: SierraBibData): Item[Unminted] = {
+  private def transformItemData(
+    itemId: SierraItemNumber,
+    itemData: SierraItemData,
+    bibData: SierraBibData): Item[IdState.Unminted] = {
     debug(s"Attempting to transform $itemId")
     Item(
       title = getItemTitle(itemData),
       locations = getPhysicalLocation(itemData, bibData).toList,
-      id = Identifiable(
+      id = IdState.Identifiable(
         sourceIdentifier = SourceIdentifier(
           identifierType = IdentifierType("sierra-system-number"),
           ontologyType = "Item",

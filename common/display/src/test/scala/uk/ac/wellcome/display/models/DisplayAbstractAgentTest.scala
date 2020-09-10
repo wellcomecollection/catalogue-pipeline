@@ -17,10 +17,11 @@ class DisplayAbstractAgentTest
   }.toList
   val canonicalId: String = createCanonicalId
 
-  val identified = Identified(canonicalId, sourceIdentifier, otherIdentifiers)
+  val identified =
+    IdState.Identified(canonicalId, sourceIdentifier, otherIdentifiers)
 
   describe("Agent") {
-    val unidentifiedAgent = Agent(label = label, id = Unidentifiable)
+    val unidentifiedAgent = Agent(label = label, id = IdState.Unidentifiable)
 
     val identifiedAgent = Agent(label = label, id = identified)
 
@@ -70,7 +71,7 @@ class DisplayAbstractAgentTest
     val numeration = randomAlphanumeric(length = 3)
 
     val unidentifiedPerson = Person(
-      id = Unidentifiable,
+      id = IdState.Unidentifiable,
       label = label,
       prefix = Some(prefix),
       numeration = Some(numeration)
@@ -132,7 +133,7 @@ class DisplayAbstractAgentTest
 
   describe("Organisation") {
     val unidentifiedOrganisation =
-      Organisation(label = label, id = Unidentifiable)
+      Organisation(label = label, id = IdState.Unidentifiable)
 
     val identifiedOrganisation = Organisation(label = label, id = identified)
 
@@ -181,7 +182,8 @@ class DisplayAbstractAgentTest
   }
 
   describe("Meeting") {
-    val unidentifiedMeeting = Meeting(label = label, id = Unidentifiable)
+    val unidentifiedMeeting =
+      Meeting(label = label, id = IdState.Unidentifiable)
 
     val identifiedMeeting = Meeting(label = label, id = identified)
 

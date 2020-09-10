@@ -18,7 +18,7 @@ class DisplayGenreSerialisationTest
     val concept2 = Period(
       label = "periodLabel",
       range = None,
-      id = Identified(
+      id = IdState.Identified(
         canonicalId = createCanonicalId,
         sourceIdentifier = createSourceIdentifierWith(
           ontologyType = "Period"
