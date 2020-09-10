@@ -33,12 +33,12 @@ object DisplayItem extends GetIdentifiers {
 
   def apply(item: Item[Minted], includesIdentifiers: Boolean): DisplayItem =
     item match {
-      case Item(id, title, locations, _) =>
+      case Item(id, title, locationsDeprecated, _) =>
         DisplayItem(
           id = id.maybeCanonicalId,
           identifiers = getIdentifiers(id, includesIdentifiers),
           title = title,
-          locations = locations.map(DisplayLocationDeprecated(_))
+          locations = locationsDeprecated.map(DisplayLocationDeprecated(_))
         )
     }
 }

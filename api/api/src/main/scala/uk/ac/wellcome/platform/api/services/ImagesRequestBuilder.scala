@@ -42,7 +42,7 @@ object ImagesRequestBuilder extends ElasticsearchRequestBuilder {
   def buildImageFilterQuery(imageFilter: ImageFilter): Query =
     imageFilter match {
       case LicenseFilter(licenseIds) =>
-        termsQuery(field = "location.license.id", values = licenseIds)
+        termsQuery(field = "locationDeprecated.license.id", values = licenseIds)
     }
 
   def requestWithBlendedSimilarity: (Index, String, Int) => SearchRequest =

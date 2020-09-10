@@ -44,7 +44,7 @@ case class WorkData[Id <: IdState, ImageId <: WithSourceIdentifier](
   subjects: List[Subject[Id]] = Nil,
   genres: List[Genre[Id]] = Nil,
   contributors: List[Contributor[Id]] = Nil,
-  thumbnail: Option[LocationDeprecated] = None,
+  thumbnailDeprecated: Option[LocationDeprecated] = None,
   production: List[ProductionEvent[Id]] = Nil,
   language: Option[Language] = None,
   edition: Option[String] = None,

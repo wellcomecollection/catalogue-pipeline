@@ -21,7 +21,7 @@ trait ApiImagesTestBase
        |  {
        |    "type": "Image",
        |    "id": "${image.id.canonicalId}",
-       |    "locations": [${location(image.location)}],
+       |    "locations": [${location(image.locationDeprecated)}],
        |    "source": {
        |      "id": "${image.source.id.canonicalId}",
        |      "type": "Work"

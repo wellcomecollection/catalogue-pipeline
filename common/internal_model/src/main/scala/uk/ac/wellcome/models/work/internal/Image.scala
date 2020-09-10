@@ -3,13 +3,13 @@ package uk.ac.wellcome.models.work.internal
 sealed trait BaseImage[+Id <: WithSourceIdentifier, DataId <: IdState]
     extends HasIdState[Id] {
   val id: Id
-  val location: DigitalLocationDeprecated
+  val locationDeprecated: DigitalLocationDeprecated
 }
 
 case class UnmergedImage[Id <: WithSourceIdentifier, DataId <: IdState](
   id: Id,
   version: Int,
-  location: DigitalLocationDeprecated
+  locationDeprecated: DigitalLocationDeprecated
 ) extends BaseImage[Id, DataId] {
   def mergeWith(
     canonicalWork: SourceWork[Id, DataId],
@@ -17,7 +17,7 @@ case class UnmergedImage[Id <: WithSourceIdentifier, DataId <: IdState](
     MergedImage[Id, DataId](
       id = id,
       version = version,
-      location = location,
+      locationDeprecated = locationDeprecated,
       source = SourceWorks[Id, DataId](canonicalWork, redirectedWork)
     )
 }
@@ -25,14 +25,14 @@ case class UnmergedImage[Id <: WithSourceIdentifier, DataId <: IdState](
 case class MergedImage[Id <: WithSourceIdentifier, DataId <: IdState](
   id: Id,
   version: Int,
-  location: DigitalLocationDeprecated,
+  locationDeprecated: DigitalLocationDeprecated,
   source: ImageSource[Id, DataId]
 ) extends BaseImage[Id, DataId] {
   def toUnmerged: UnmergedImage[Id, DataId] =
     UnmergedImage[Id, DataId](
       id = id,
       version = version,
-      location = location
+      locationDeprecated = locationDeprecated
     )
 }
 
@@ -43,7 +43,7 @@ object MergedImage {
       AugmentedImage(
         id = mergedImage.id,
         version = mergedImage.version,
-        location = mergedImage.location,
+        locationDeprecated = mergedImage.locationDeprecated,
         source = mergedImage.source,
         inferredData = inferredData
       )
@@ -53,7 +53,7 @@ object MergedImage {
 case class AugmentedImage(
   id: Identified,
   version: Int,
-  location: DigitalLocationDeprecated,
+  locationDeprecated: DigitalLocationDeprecated,
   source: ImageSource[Identified, Minted],
   inferredData: Option[InferredData] = None
 ) extends BaseImage[Identified, Minted]

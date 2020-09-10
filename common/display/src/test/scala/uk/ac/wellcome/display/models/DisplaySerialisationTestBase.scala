@@ -34,15 +34,19 @@ trait DisplaySerialisationTestBase {
   def items(items: List[Item[Minted]]) =
     items.map(item).mkString(",")
 
-  def item(item: Item[Minted]) =
-    s"""
+  def item(item: Item[Minted]) = {
+    val s = s"""
      {
        ${identifiers(item)}
        "type": "${item.ontologyType}",
        ${optionalString("title", item.title)}
-       "locations": [${locations(item.locations)}]
+       "locations": [${locations(item.locationsDeprecated)}]
      }
     """
+
+    println(s)
+    s
+  }
 
   def locations(locations: List[LocationDeprecated]) =
     locations.map(location).mkString(",")

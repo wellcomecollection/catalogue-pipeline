@@ -129,7 +129,7 @@ object PlatformMerger extends Merger {
           mergedTarget = target withData { data =>
             data.copy(
               items = items,
-              thumbnail = thumbnail,
+              thumbnailDeprecated = thumbnail,
               otherIdentifiers = otherIdentifiers,
               images = images.map(_.toUnmerged),
               merged = true

@@ -271,7 +271,8 @@ class MiroRecordTransformerTest
       credit = Some("Ezra Feilden"),
       locationType = LocationType("iiif-image")
     )
-    work.data.items.head.locations shouldBe List(expectedDigitalLocation)
+    work.data.items.head.locationsDeprecated shouldBe List(
+      expectedDigitalLocation)
   }
 
   it("extracts both identifiable and unidentifiable items") {
@@ -286,7 +287,7 @@ class MiroRecordTransformerTest
       None
     )
     work.data.items shouldBe List(
-      Item(id = Unidentifiable, locations = List(expectedLocation))
+      Item(id = Unidentifiable, locationsDeprecated = List(expectedLocation))
     )
   }
 
@@ -302,7 +303,7 @@ class MiroRecordTransformerTest
       createMiroRecordWith(imageNumber = miroId)
     )
 
-    work.data.thumbnail shouldBe Some(
+    work.data.thumbnailDeprecated shouldBe Some(
       DigitalLocationDeprecated(
         url =
           s"https://iiif.wellcomecollection.org/image/$miroId.jpg/full/300,/0/default.jpg",

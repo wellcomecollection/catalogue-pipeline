@@ -145,7 +145,7 @@ trait ImageGenerators
           sourceIdentifier = image.id.allSourceIdentifiers.head
         ),
         version = image.version,
-        location = image.location
+        locationDeprecated = image.locationDeprecated
       )
 
     val toIdentified: UnmergedImage[Identified, Minted] = toIdentifiedWith()

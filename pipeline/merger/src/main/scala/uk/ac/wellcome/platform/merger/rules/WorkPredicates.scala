@@ -77,7 +77,7 @@ object WorkPredicates {
 
   private def physicalLocationExists(work: TransformedBaseWork): Boolean =
     work.data.items.exists { item =>
-      item.locations.exists {
+      item.locationsDeprecated.exists {
         case _: PhysicalLocationDeprecated => true
         case _                             => false
       }
@@ -85,7 +85,7 @@ object WorkPredicates {
 
   private def allDigitalLocations(work: TransformedBaseWork): Boolean =
     work.data.items.forall { item =>
-      item.locations.forall {
+      item.locationsDeprecated.forall {
         case _: DigitalLocationDeprecated => true
         case _                            => false
       }
@@ -93,7 +93,7 @@ object WorkPredicates {
 
   private def allPhysicalLocations(work: TransformedBaseWork): Boolean =
     work.data.items.forall { item =>
-      item.locations.forall {
+      item.locationsDeprecated.forall {
         case _: PhysicalLocationDeprecated => true
         case _                             => false
       }
@@ -101,7 +101,7 @@ object WorkPredicates {
 
   private def singleLocation(work: TransformedBaseWork): Boolean =
     work.data.items.forall { item =>
-      item.locations.size == 1
+      item.locationsDeprecated.size == 1
     }
 
   private def sourceIdentifierSatisfies(pred: String => Boolean)(

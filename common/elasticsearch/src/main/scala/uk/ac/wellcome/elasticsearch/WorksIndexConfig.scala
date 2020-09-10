@@ -98,7 +98,7 @@ case object WorksIndexConfig extends IndexConfig {
 
   def items(fieldName: String) = objectField(fieldName).fields(
     id(),
-    location(),
+    locationDeprecated("locationsDeprecated"),
     title,
     keywordField("ontologyType")
   )
@@ -135,7 +135,7 @@ case object WorksIndexConfig extends IndexConfig {
 
   val images = objectField("images").fields(
     id(),
-    location("location"),
+    locationDeprecated("locationDeprecated"),
     version
   )
 
@@ -161,7 +161,7 @@ case object WorksIndexConfig extends IndexConfig {
       items("items"),
       production,
       language,
-      location("thumbnail"),
+      locationDeprecated("thumbnailDeprecated"),
       textField("edition"),
       notes,
       intField("duration"),

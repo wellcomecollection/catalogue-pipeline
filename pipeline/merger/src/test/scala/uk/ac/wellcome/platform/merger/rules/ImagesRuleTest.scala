@@ -30,7 +30,8 @@ class ImagesRuleTest
       val result = ImagesRule.merge(miroWork).data
 
       result should have length 1
-      result.head.location should be(miroWork.data.images.head.location)
+      result.head.locationDeprecated should be(
+        miroWork.data.images.head.locationDeprecated)
       val source = result.head.source
       source shouldBe a[SourceWorks[_, _]]
       val sourceWorks = source.asInstanceOf[SourceWorks[Identifiable, Unminted]]
@@ -58,7 +59,7 @@ class ImagesRuleTest
         imageSource.redirectedWork shouldBe defined
         val redirectedSource = imageSource.redirectedWork.get
         val miroWork = miroWorks(redirectedSource.id.sourceIdentifier)
-        image.location shouldBe miroWork.data.images.head.location
+        image.locationDeprecated shouldBe miroWork.data.images.head.locationDeprecated
         redirectedSource.data shouldBe miroWork.data
       }
     }
@@ -72,8 +73,8 @@ class ImagesRuleTest
       val result = ImagesRule.merge(sierraPictureWork, List(metsWork)).data
 
       result should have length n
-      result.map(_.location) should contain theSameElementsAs
-        metsWork.data.images.map(_.location)
+      result.map(_.locationDeprecated) should contain theSameElementsAs
+        metsWork.data.images.map(_.locationDeprecated)
       result.map { image =>
         image.source
           .asInstanceOf[SourceWorks[Identifiable, Unminted]]
@@ -95,9 +96,9 @@ class ImagesRuleTest
         ImagesRule.merge(sierraPictureWork, miroWorks :+ metsWork).data
 
       result should have length n + m
-      result.map(_.location) should contain theSameElementsAs
-        metsWork.data.images.map(_.location) ++
-          miroWorks.map(_.data.images.head.location)
+      result.map(_.locationDeprecated) should contain theSameElementsAs
+        metsWork.data.images.map(_.locationDeprecated) ++
+          miroWorks.map(_.data.images.head.locationDeprecated)
       result.map { image =>
         image.source
           .asInstanceOf[SourceWorks[Identifiable, Unminted]]
@@ -116,8 +117,8 @@ class ImagesRuleTest
       val result = ImagesRule.merge(sierraWork, miroWorks :+ metsWork).data
 
       result should have length n
-      result.map(_.location) should contain theSameElementsAs
-        miroWorks.map(_.data.images.head.location)
+      result.map(_.locationDeprecated) should contain theSameElementsAs
+        miroWorks.map(_.data.images.head.locationDeprecated)
       result.map { image =>
         image.source
           .asInstanceOf[SourceWorks[Identifiable, Unminted]]

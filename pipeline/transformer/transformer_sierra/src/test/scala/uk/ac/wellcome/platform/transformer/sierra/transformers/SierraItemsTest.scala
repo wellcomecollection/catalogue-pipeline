@@ -108,7 +108,7 @@ class SierraItemsTest
     val itemDataMap = Map(createSierraItemNumber -> itemData)
 
     val item = getTransformedItems(itemDataMap = itemDataMap).head
-    item.locations shouldBe List(
+    item.locationsDeprecated shouldBe List(
       PhysicalLocationDeprecated(
         locationType = LocationType(sierraLocation.code),
         label = sierraLocation.name
@@ -135,7 +135,7 @@ class SierraItemsTest
     val results =
       getTransformedItems(bibData = bibData, itemDataMap = itemDataMap)
 
-    results.head.locations should be(
+    results.head.locationsDeprecated should be(
       List(
         PhysicalLocationDeprecated(
           locationType = LocationType(sierraPhysicalLocation1.code),

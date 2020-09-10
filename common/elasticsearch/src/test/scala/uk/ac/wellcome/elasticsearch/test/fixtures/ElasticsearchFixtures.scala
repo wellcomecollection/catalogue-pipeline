@@ -19,9 +19,10 @@ import org.scalatest.{Assertion, Suite}
 import uk.ac.wellcome.elasticsearch._
 import uk.ac.wellcome.elasticsearch.model.CanonicalId
 import uk.ac.wellcome.fixtures._
-import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.json.JsonUtil.toJson
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.work.internal.{AugmentedImage, IdentifiedBaseWork}
+import uk.ac.wellcome.models.Implicits._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -249,7 +250,8 @@ trait ElasticsearchFixtures
   private def assertInserted[T](result: Future[Response[BulkResponse]],
                                 docs: Seq[T],
                                 index: Index): Assertion =
-    whenReady(result) { _ =>
+    whenReady(result) { bulkResponse =>
+      bulkResponse.isError shouldBe false
       eventually {
         val response: Response[SearchResponse] = elasticClient.execute {
           search(index.name).matchAllQuery().trackTotalHits(true)

@@ -61,7 +61,7 @@ trait IndexConfig {
       objectField("otherIdentifiers").fields(sourceIdentifierFields)
     )
 
-  def location(fieldName: String = "locations") =
+  def locationDeprecated(fieldName: String) =
     objectField(fieldName).fields(
       keywordField("type"),
       keywordField("ontologyType"),

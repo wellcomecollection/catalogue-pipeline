@@ -81,7 +81,7 @@ class MiroRecordTransformerCopyrightTest
     expectedCredit: Option[String]
   ): Assertion = {
     val transformedWork = transformWork(miroRecord)
-    val location = transformedWork.data.items.head.locations.head
+    val location = transformedWork.data.items.head.locationsDeprecated.head
     location shouldBe a[DigitalLocationDeprecated]
     location
       .asInstanceOf[DigitalLocationDeprecated]

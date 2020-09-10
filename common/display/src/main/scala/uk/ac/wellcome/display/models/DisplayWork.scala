@@ -152,7 +152,9 @@ case object DisplayWork {
           Some(work.identifiers.map { DisplayIdentifier(_) })
         else None,
       workType = work.data.workType.map { DisplayWorkType(_) },
-      thumbnail = work.data.thumbnail.map { DisplayLocationDeprecated(_) },
+      thumbnail = work.data.thumbnailDeprecated.map {
+        DisplayLocationDeprecated(_)
+      },
       items =
         if (includes.items)
           Some(work.data.items.map {

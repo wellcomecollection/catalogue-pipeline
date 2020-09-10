@@ -49,7 +49,7 @@ class ImageDownloaderTest
             whenReady(result) { _ =>
               requestPool.requests should have size 1
               requestPool.requests.keys.head.uri.toString should be(
-                image.location.url)
+                image.locationDeprecated.url)
             }
         }
       }

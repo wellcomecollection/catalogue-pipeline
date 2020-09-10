@@ -29,7 +29,7 @@ class MetsDataTest
       license = Some(License.CCBYNC))
 
     val unidentifiableItem =
-      Item(id = Unidentifiable, locations = List(digitalLocation))
+      Item(id = Unidentifiable, locationsDeprecated = List(digitalLocation))
     metsData.toWork(version).right.get shouldBe UnidentifiedInvisibleWork(
       version = version,
       sourceIdentifier = expectedSourceIdentifier,
@@ -67,7 +67,7 @@ class MetsDataTest
         license = None)
 
     val unidentifiableItem =
-      Item(id = Unidentifiable, locations = List(digitalLocation))
+      Item(id = Unidentifiable, locationsDeprecated = List(digitalLocation))
     metsData.toWork(version).right.get shouldBe UnidentifiedInvisibleWork(
       version = version,
       sourceIdentifier = expectedSourceIdentifier,
@@ -209,7 +209,7 @@ class MetsDataTest
     )
     val result = metsData.toWork(1)
     result shouldBe a[Right[_, _]]
-    result.right.get.data.thumbnail shouldBe Some(
+    result.right.get.data.thumbnailDeprecated shouldBe Some(
       DigitalLocationDeprecated(
         s"https://dlcs.io/thumbs/wellcome/5/location.jp2/full/!200,200/0/default.jpg",
         LocationType("thumbnail-image"),
@@ -230,7 +230,7 @@ class MetsDataTest
     )
     val result = metsData.toWork(1)
     result shouldBe a[Right[_, _]]
-    result.right.get.data.thumbnail shouldBe Some(
+    result.right.get.data.thumbnailDeprecated shouldBe Some(
       DigitalLocationDeprecated(
         s"https://dlcs.io/thumbs/wellcome/5/title.jp2/full/!200,200/0/default.jpg",
         LocationType("thumbnail-image"),
@@ -250,7 +250,7 @@ class MetsDataTest
     )
     val result = metsData.toWork(1)
     result shouldBe a[Right[_, _]]
-    result.right.get.data.thumbnail shouldBe None
+    result.right.get.data.thumbnailDeprecated shouldBe None
   }
 
   it("serves the thumbnail from wellcomelibrary for PDFs") {
@@ -265,7 +265,7 @@ class MetsDataTest
     )
     val result = metsData.toWork(1)
     result shouldBe a[Right[_, _]]
-    result.right.get.data.thumbnail shouldBe Some(
+    result.right.get.data.thumbnailDeprecated shouldBe Some(
       DigitalLocationDeprecated(
         s"https://wellcomelibrary.org/pdfthumbs/${bnumber}/0/${assetId}.jpg",
         LocationType("thumbnail-image"),
@@ -284,7 +284,7 @@ class MetsDataTest
     )
     val result = metsData.toWork(1)
     result shouldBe a[Right[_, _]]
-    result.right.get.data.thumbnail shouldBe None
+    result.right.get.data.thumbnailDeprecated shouldBe None
   }
 
   it("does not add a thumbnail if the file is an audio") {
@@ -297,7 +297,7 @@ class MetsDataTest
     )
     val result = metsData.toWork(1)
     result shouldBe a[Right[_, _]]
-    result.right.get.data.thumbnail shouldBe None
+    result.right.get.data.thumbnailDeprecated shouldBe None
   }
 
   it("uses the IIIF info.json for image URLs") {
@@ -310,7 +310,7 @@ class MetsDataTest
     )
     val result = metsData.toWork(1)
     result shouldBe a[Right[_, _]]
-    result.right.get.data.images.head.location shouldBe DigitalLocationDeprecated(
+    result.right.get.data.images.head.locationDeprecated shouldBe DigitalLocationDeprecated(
       url = s"https://dlcs.io/iiif-img/wellcome/5/location.jp2/info.json",
       locationType = LocationType("iiif-image"),
       license = Some(License.CCBYNC)
@@ -323,7 +323,7 @@ class MetsDataTest
       accessConditionStatus = Some("Requires registration"),
     ).toWork(1)
     result shouldBe a[Right[_, _]]
-    inside(result.right.get.data.items.head.locations.head) {
+    inside(result.right.get.data.items.head.locationsDeprecated.head) {
       case DigitalLocationDeprecated(_, _, _, _, accessConditions, _) =>
         accessConditions shouldBe List(
           AccessCondition(
@@ -376,7 +376,7 @@ class MetsDataTest
       accessConditionUsage = Some("Please ask nicely")
     ).toWork(1)
     result shouldBe a[Right[_, _]]
-    inside(result.right.get.data.items.head.locations.head) {
+    inside(result.right.get.data.items.head.locationsDeprecated.head) {
       case DigitalLocationDeprecated(_, _, _, _, accessConditions, _) =>
         accessConditions shouldBe List(
           AccessCondition(
@@ -393,7 +393,7 @@ class MetsDataTest
       accessConditionUsage = None
     ).toWork(1)
     result shouldBe a[Right[_, _]]
-    inside(result.right.get.data.items.head.locations.head) {
+    inside(result.right.get.data.items.head.locationsDeprecated.head) {
       case DigitalLocationDeprecated(_, _, _, _, accessConditions, _) =>
         accessConditions shouldBe List()
     }
@@ -405,7 +405,7 @@ class MetsDataTest
       accessConditionStatus = Some("Restricted files")
     ).toWork(1)
     result shouldBe a[Right[_, _]]
-    inside(result.right.get.data.items.head.locations.head) {
+    inside(result.right.get.data.items.head.locationsDeprecated.head) {
       case DigitalLocationDeprecated(_, _, _, _, accessConditions, _) =>
         accessConditions shouldBe
           List(
