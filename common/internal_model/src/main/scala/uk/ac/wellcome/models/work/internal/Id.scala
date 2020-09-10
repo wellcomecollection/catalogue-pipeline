@@ -1,19 +1,20 @@
 package uk.ac.wellcome.models.work.internal
 
 /** The root trait for all possible ID types. */
-sealed trait IdState {
+sealed trait Id {
   def maybeCanonicalId: Option[String]
   def allSourceIdentifiers: List[SourceIdentifier]
 }
-sealed trait WithSourceIdentifier extends IdState
 
-/** Parent trait for an ID of an object that is pre minter. */
-sealed trait Unminted extends IdState
+object Id {
 
-/** Parent trait for an ID of an object that is post minter. */
-sealed trait Minted extends IdState
+  sealed trait WithSourceIdentifier extends Id
 
-object IdState {
+  /** Parent trait for an ID of an object that is pre minter. */
+  sealed trait Unminted extends Id
+
+  /** Parent trait for an ID of an object that is post minter. */
+  sealed trait Minted extends Id
 
   /** Represents an ID that has been successfully minted, and thus has a
     *  canonicalId assigned. */
@@ -49,6 +50,6 @@ object IdState {
 }
 
 /** A trait assigned to all objects that contain some ID value. */
-trait HasIdState[+Id] {
-  val id: Id
+trait HasId[+T] {
+  val id: T
 }

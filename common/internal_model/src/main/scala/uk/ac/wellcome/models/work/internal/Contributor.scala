@@ -1,18 +1,16 @@
 package uk.ac.wellcome.models.work.internal
 
-import IdState._
-
-case class Contributor[+Id](
-  id: Id,
-  agent: AbstractAgent[Id],
+case class Contributor[+DataId](
+  id: DataId,
+  agent: AbstractAgent[DataId],
   roles: List[ContributionRole] = Nil,
   ontologyType: String = "Contributor"
-) extends HasIdState[Id]
+) extends HasId[DataId]
 
 object Contributor {
 
-  def apply[Id >: Unidentifiable.type](
-    agent: AbstractAgent[Id],
-    roles: List[ContributionRole]): Contributor[Id] =
-    Contributor(Unidentifiable, agent, roles)
+  def apply[DataId >: Id.Unidentifiable.type](
+    agent: AbstractAgent[DataId],
+    roles: List[ContributionRole]): Contributor[DataId] =
+    Contributor(Id.Unidentifiable, agent, roles)
 }

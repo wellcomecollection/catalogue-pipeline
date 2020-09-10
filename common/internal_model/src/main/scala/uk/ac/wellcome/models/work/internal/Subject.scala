@@ -1,21 +1,19 @@
 package uk.ac.wellcome.models.work.internal
 
-import IdState._
-
-case class Subject[+Id](
-  id: Id,
+case class Subject[+DataId](
+  id: DataId,
   label: String,
-  concepts: List[AbstractRootConcept[Id]] = Nil,
+  concepts: List[AbstractRootConcept[DataId]] = Nil,
   ontologyType: String = "Subject"
-) extends HasIdState[Id]
+) extends HasId[DataId]
 
 object Subject {
 
-  def apply[Id >: Unidentifiable.type](
+  def apply[DataId >: Id.Unidentifiable.type](
     label: String,
-    concepts: List[AbstractRootConcept[Id]]): Subject[Id] =
+    concepts: List[AbstractRootConcept[DataId]]): Subject[DataId] =
     Subject(
-      id = Unidentifiable,
+      id = Id.Unidentifiable,
       label = label,
       concepts = concepts
     )

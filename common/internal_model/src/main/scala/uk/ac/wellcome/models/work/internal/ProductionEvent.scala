@@ -1,10 +1,10 @@
 package uk.ac.wellcome.models.work.internal
 
-case class ProductionEvent[+Id](
+case class ProductionEvent[+DataId](
   label: String,
-  places: List[Place[Id]],
-  agents: List[AbstractAgent[Id]],
-  dates: List[Period[Id]],
-  function: Option[Concept[Id]],
+  places: List[Place[DataId]],
+  agents: List[AbstractAgent[DataId]],
+  dates: List[Period[DataId]],
+  function: Option[Concept[DataId]],
   ontologyType: String = "ProductionEvent"
 )
