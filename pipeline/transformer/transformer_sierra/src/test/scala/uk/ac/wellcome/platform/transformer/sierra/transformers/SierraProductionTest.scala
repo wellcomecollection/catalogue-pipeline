@@ -679,7 +679,7 @@ class SierraProductionTest
   }
 
   private def transformToProduction(
-    varFields: List[VarField]): List[ProductionEvent[Id.Unminted]] = {
+    varFields: List[VarField]): List[ProductionEvent[IdState.Unminted]] = {
     val bibData = createSierraBibDataWith(varFields = varFields)
     SierraProduction(createSierraBibNumber, bibData)
   }

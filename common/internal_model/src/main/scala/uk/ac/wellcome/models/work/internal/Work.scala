@@ -12,15 +12,15 @@ sealed trait IdentifiedBaseWork extends BaseWork {
 sealed trait TransformedBaseWork
     extends BaseWork
     with MultipleSourceIdentifiers {
-  val data: WorkData[Id.Unminted, Id.Identifiable]
+  val data: WorkData[IdState.Unminted, IdState.Identifiable]
   val otherIdentifiers = data.otherIdentifiers
 }
 
 object TransformedBaseWork {
   implicit class WorkToSourceWork(work: TransformedBaseWork) {
-    def toSourceWork: SourceWork[Id.Identifiable, Id.Unminted] =
-      SourceWork[Id.Identifiable, Id.Unminted](
-        Id.Identifiable(work.sourceIdentifier),
+    def toSourceWork: SourceWork[IdState.Identifiable, IdState.Unminted] =
+      SourceWork[IdState.Identifiable, IdState.Unminted](
+        IdState.Identifiable(work.sourceIdentifier),
         work.data)
   }
 }
@@ -31,7 +31,7 @@ sealed trait RedirectedWork extends BaseWork {
   val redirect: Redirect
 }
 
-case class WorkData[DataId <: Id, ImageId <: Id.WithSourceIdentifier](
+case class WorkData[DataId <: IdState, ImageId <: IdState.WithSourceIdentifier](
   title: Option[String] = None,
   otherIdentifiers: List[SourceIdentifier] = Nil,
   mergeCandidates: List[MergeCandidate] = Nil,
@@ -59,13 +59,13 @@ case class WorkData[DataId <: Id, ImageId <: Id.WithSourceIdentifier](
 case class UnidentifiedWork(
   version: Int,
   sourceIdentifier: SourceIdentifier,
-  data: WorkData[Id.Unminted, Id.Identifiable],
+  data: WorkData[IdState.Unminted, IdState.Identifiable],
   ontologyType: String = "Work",
   identifiedType: String = classOf[IdentifiedWork].getSimpleName
 ) extends TransformedBaseWork {
 
   def withData(
-    f: WorkData[Id.Unminted, Id.Identifiable] => WorkData[Id.Unminted, Id.Identifiable]) =
+    f: WorkData[IdState.Unminted, IdState.Identifiable] => WorkData[IdState.Unminted, IdState.Identifiable]) =
     this.copy(data = f(data))
 }
 
@@ -73,22 +73,22 @@ case class IdentifiedWork(
   canonicalId: String,
   version: Int,
   sourceIdentifier: SourceIdentifier,
-  data: WorkData[Id.Minted, Id.Identified],
+  data: WorkData[IdState.Minted, IdState.Identified],
   ontologyType: String = "Work"
 ) extends IdentifiedBaseWork
     with MultipleSourceIdentifiers {
   val otherIdentifiers = data.otherIdentifiers
 
   def withData(
-    f: WorkData[Id.Minted, Id.Identified] => WorkData[Id.Minted, Id.Identified]) =
+    f: WorkData[IdState.Minted, IdState.Identified] => WorkData[IdState.Minted, IdState.Identified]) =
     this.copy(data = f(data))
 }
 
 object IdentifiedWork {
   implicit class WorkToSourceWork(work: IdentifiedWork) {
-    def toSourceWork: SourceWork[Id.Identified, Id.Minted] =
-      SourceWork[Id.Identified, Id.Minted](
-        Id.Identified(
+    def toSourceWork: SourceWork[IdState.Identified, IdState.Minted] =
+      SourceWork[IdState.Identified, IdState.Minted](
+        IdState.Identified(
           work.canonicalId,
           work.sourceIdentifier,
           work.otherIdentifiers),
@@ -99,13 +99,13 @@ object IdentifiedWork {
 case class UnidentifiedInvisibleWork(
   version: Int,
   sourceIdentifier: SourceIdentifier,
-  data: WorkData[Id.Unminted, Id.Identifiable],
+  data: WorkData[IdState.Unminted, IdState.Identifiable],
   invisibilityReasons: List[InvisibilityReason] = Nil,
   identifiedType: String = classOf[IdentifiedInvisibleWork].getSimpleName
 ) extends TransformedBaseWork
     with InvisibleWork {
   def withData(
-    f: WorkData[Id.Unminted, Id.Identifiable] => WorkData[Id.Unminted, Id.Identifiable]) =
+    f: WorkData[IdState.Unminted, IdState.Identifiable] => WorkData[IdState.Unminted, IdState.Identifiable]) =
     this.copy(data = f(data))
 }
 
@@ -113,12 +113,12 @@ case class IdentifiedInvisibleWork(
   canonicalId: String,
   version: Int,
   sourceIdentifier: SourceIdentifier,
-  data: WorkData[Id.Minted, Id.Identified],
+  data: WorkData[IdState.Minted, IdState.Identified],
   invisibilityReasons: List[InvisibilityReason] = Nil,
 ) extends IdentifiedBaseWork
     with InvisibleWork {
   def withData(
-    f: WorkData[Id.Minted, Id.Identified] => WorkData[Id.Minted, Id.Identified]) =
+    f: WorkData[IdState.Minted, IdState.Identified] => WorkData[IdState.Minted, IdState.Identified]) =
     this.copy(data = f(data))
 }
 

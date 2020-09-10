@@ -30,7 +30,7 @@ class SierraConceptsTest extends AnyFunSpec with Matchers with MarcGenerators {
       ontologyType = "Concept"
     )
 
-    maybeIdentifiedConcept shouldBe Id.Identifiable(sourceIdentifier)
+    maybeIdentifiedConcept shouldBe IdState.Identifiable(sourceIdentifier)
   }
 
   it("normalises and deduplicates identifiers in subfield 0") {
@@ -65,7 +65,7 @@ class SierraConceptsTest extends AnyFunSpec with Matchers with MarcGenerators {
       ontologyType = "Concept"
     )
 
-    maybeIdentifiedConcept shouldBe Id.Identifiable(sourceIdentifier)
+    maybeIdentifiedConcept shouldBe IdState.Identifiable(sourceIdentifier)
   }
 
   it("ignores multiple instances of subfield 0 in the otherIdentifiers") {
@@ -83,7 +83,7 @@ class SierraConceptsTest extends AnyFunSpec with Matchers with MarcGenerators {
       )
     )
 
-    maybeIdentifiedConcept shouldBe Id.Unidentifiable
+    maybeIdentifiedConcept shouldBe IdState.Unidentifiable
   }
 
   val transformer = new SierraConcepts {}

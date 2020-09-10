@@ -2,7 +2,7 @@ package uk.ac.wellcome.display.models
 
 import io.circe.generic.extras.JsonKey
 import io.swagger.v3.oas.annotations.media.Schema
-import uk.ac.wellcome.models.work.internal.{Id, UnmergedImage}
+import uk.ac.wellcome.models.work.internal.{IdState, UnmergedImage}
 
 @Schema(
   name = "Image",
@@ -14,6 +14,6 @@ case class DisplayWorkImageInclude(
 )
 
 object DisplayWorkImageInclude {
-  def apply(image: UnmergedImage[Id.Identified, Id.Minted]): DisplayWorkImageInclude =
+  def apply(image: UnmergedImage[IdState.Identified, IdState.Minted]): DisplayWorkImageInclude =
     new DisplayWorkImageInclude(id = image.id.canonicalId)
 }

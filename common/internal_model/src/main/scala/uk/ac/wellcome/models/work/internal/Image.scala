@@ -1,12 +1,12 @@
 package uk.ac.wellcome.models.work.internal
 
-sealed trait BaseImage[+ImageId <: Id.WithSourceIdentifier, DataId <: Id]
+sealed trait BaseImage[+ImageId <: IdState.WithSourceIdentifier, DataId <: IdState]
     extends HasId[ImageId] {
   val id: ImageId
   val location: DigitalLocationDeprecated
 }
 
-case class UnmergedImage[ImageId <: Id.WithSourceIdentifier, DataId <: Id](
+case class UnmergedImage[ImageId <: IdState.WithSourceIdentifier, DataId <: IdState](
   id: ImageId,
   version: Int,
   location: DigitalLocationDeprecated
@@ -22,7 +22,7 @@ case class UnmergedImage[ImageId <: Id.WithSourceIdentifier, DataId <: Id](
     )
 }
 
-case class MergedImage[ImageId <: Id.WithSourceIdentifier, DataId <: Id](
+case class MergedImage[ImageId <: IdState.WithSourceIdentifier, DataId <: IdState](
   id: ImageId,
   version: Int,
   location: DigitalLocationDeprecated,
@@ -38,7 +38,7 @@ case class MergedImage[ImageId <: Id.WithSourceIdentifier, DataId <: Id](
 
 object MergedImage {
   implicit class IdentifiedMergedImageOps(
-    mergedImage: MergedImage[Id.Identified, Id.Minted]) {
+    mergedImage: MergedImage[IdState.Identified, IdState.Minted]) {
     def augment(inferredData: => Option[InferredData]): AugmentedImage =
       AugmentedImage(
         id = mergedImage.id,
@@ -51,12 +51,12 @@ object MergedImage {
 }
 
 case class AugmentedImage(
-  id: Id.Identified,
+  id: IdState.Identified,
   version: Int,
   location: DigitalLocationDeprecated,
-  source: ImageSource[Id.Identified, Id.Minted],
+  source: ImageSource[IdState.Identified, IdState.Minted],
   inferredData: Option[InferredData] = None
-) extends BaseImage[Id.Identified, Id.Minted]
+) extends BaseImage[IdState.Identified, IdState.Minted]
 
 case class InferredData(
   // We split the feature vector so that it can fit into
@@ -75,9 +75,9 @@ object UnmergedImage {
   def apply(sourceIdentifier: SourceIdentifier,
             version: Int,
             location: DigitalLocationDeprecated)
-    : UnmergedImage[Id.Identifiable, Id.Unminted] =
+    : UnmergedImage[IdState.Identifiable, IdState.Unminted] =
     UnmergedImage(
-      id = Id.Identifiable(sourceIdentifier),
+      id = IdState.Identifiable(sourceIdentifier),
       version = version,
       location
     )

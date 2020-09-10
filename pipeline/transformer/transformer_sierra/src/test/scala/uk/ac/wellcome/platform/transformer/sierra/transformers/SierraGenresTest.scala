@@ -255,7 +255,7 @@ class SierraGenresTest
     val actualSourceIdentifiers = SierraGenres(createSierraBibNumber, bibData)
       .map { _.concepts.head.id }
       .map {
-        case Id.Identifiable(sourceIdentifier, _, _) =>
+        case IdState.Identifiable(sourceIdentifier, _, _) =>
           sourceIdentifier
         case other => assert(false, other)
       }
@@ -264,7 +264,7 @@ class SierraGenresTest
   }
 
   private def assertExtractsGenres(bibData: SierraBibData,
-                                   expected: List[Genre[Id.Unminted]]) = {
+                                   expected: List[Genre[IdState.Unminted]]) = {
     SierraGenres(createSierraBibNumber, bibData) shouldBe expected
   }
 }

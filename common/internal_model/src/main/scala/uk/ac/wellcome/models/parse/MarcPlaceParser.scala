@@ -2,14 +2,14 @@ package uk.ac.wellcome.models.parse
 
 import fastparse._, NoWhitespace._
 
-import uk.ac.wellcome.models.work.internal.{Place, Id}
+import uk.ac.wellcome.models.work.internal.{Place, IdState}
 
 /**
   *  Parses Marc country information
   *
   *  https://www.loc.gov/marc/countries/countries_code.html
   */
-object MarcPlaceParser extends Parser[Place[Id.Unminted]] {
+object MarcPlaceParser extends Parser[Place[IdState.Unminted]] {
 
   def parser[_: P] =
     AnyChar

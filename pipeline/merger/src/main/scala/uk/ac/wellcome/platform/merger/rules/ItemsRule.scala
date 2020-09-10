@@ -18,7 +18,7 @@ import cats.data.NonEmptyList
 object ItemsRule extends FieldMergeRule with MergerLogging {
   import WorkPredicates._
 
-  type FieldData = List[Item[Id.Unminted]]
+  type FieldData = List[Item[IdState.Unminted]]
 
   override def merge(
     target: UnidentifiedWork,
@@ -136,7 +136,7 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
       List(
         calmItem.copy(
           locations = calmItem.locations ++ metsDigitalLocations,
-          id = sierraItemId.getOrElse(Id.Unidentifiable)
+          id = sierraItemId.getOrElse(IdState.Unidentifiable)
         ))
     }
   }

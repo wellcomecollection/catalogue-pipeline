@@ -114,7 +114,7 @@ object CalmTransformer
         !nonSuppressedStatuses.contains(status.toLowerCase.trim)
       }
 
-  def workData(record: CalmRecord): Result[WorkData[Id.Unminted, Id.Identifiable]] =
+  def workData(record: CalmRecord): Result[WorkData[IdState.Unminted, IdState.Identifiable]] =
     for {
       accessStatus <- accessStatus(record)
       title <- title(record)
@@ -216,7 +216,7 @@ object CalmTransformer
       .getOrElse(Left(LevelMissing))
 
   def items(record: CalmRecord,
-            status: Option[AccessStatus]): List[Item[Id.Unminted]] =
+            status: Option[AccessStatus]): List[Item[IdState.Unminted]] =
     List(
       Item(
         title = None,
@@ -260,7 +260,7 @@ object CalmTransformer
       case strs => Some(NormaliseText(strs.mkString(" ")))
     }
 
-  def production(record: CalmRecord): List[ProductionEvent[Id.Unminted]] = {
+  def production(record: CalmRecord): List[ProductionEvent[IdState.Unminted]] = {
     record.getList("Date") match {
       case Nil => Nil
       case dates =>
@@ -274,7 +274,7 @@ object CalmTransformer
     }
   }
 
-  def subjects(record: CalmRecord): List[Subject[Id.Unminted]] =
+  def subjects(record: CalmRecord): List[Subject[IdState.Unminted]] =
     record
       .getList("Subject")
       .map { label =>
@@ -292,7 +292,7 @@ object CalmTransformer
       .map(Language.fromLabel)
       .toResult
 
-  def contributors(record: CalmRecord): List[Contributor[Id.Unminted]] =
+  def contributors(record: CalmRecord): List[Contributor[IdState.Unminted]] =
     record.getList("CreatorName").map { name =>
       Contributor(Agent(name), Nil)
     }

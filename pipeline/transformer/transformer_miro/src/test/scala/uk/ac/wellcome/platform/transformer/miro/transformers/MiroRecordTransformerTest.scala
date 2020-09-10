@@ -286,7 +286,7 @@ class MiroRecordTransformerTest
       None
     )
     work.data.items shouldBe List(
-      Item(id = Id.Unidentifiable, locations = List(expectedLocation))
+      Item(id = IdState.Unidentifiable, locations = List(expectedLocation))
     )
   }
 

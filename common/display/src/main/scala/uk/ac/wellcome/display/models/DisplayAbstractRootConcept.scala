@@ -14,12 +14,12 @@ sealed trait DisplayAbstractRootConcept {
 }
 
 object DisplayAbstractRootConcept {
-  def apply(abstractConcept: AbstractRootConcept[Id.Minted],
+  def apply(abstractConcept: AbstractRootConcept[IdState.Minted],
             includesIdentifiers: Boolean): DisplayAbstractRootConcept =
     abstractConcept match {
-      case agent: AbstractAgent[Id.Minted] =>
+      case agent: AbstractAgent[IdState.Minted] =>
         DisplayAbstractAgent(agent, includesIdentifiers)
-      case concept: AbstractConcept[Id.Minted] =>
+      case concept: AbstractConcept[IdState.Minted] =>
         DisplayAbstractConcept(concept, includesIdentifiers)
     }
 }
@@ -31,7 +31,7 @@ sealed trait DisplayAbstractConcept extends DisplayAbstractRootConcept
 
 case object DisplayAbstractConcept extends GetIdentifiers {
 
-  def apply(abstractConcept: AbstractConcept[Id.Minted],
+  def apply(abstractConcept: AbstractConcept[IdState.Minted],
             includesIdentifiers: Boolean): DisplayAbstractConcept =
     abstractConcept match {
       case Concept(id, label) =>
@@ -96,7 +96,7 @@ case class DisplayPeriod(
 ) extends DisplayAbstractConcept
 
 case object DisplayPeriod {
-  def apply(period: Period[Id.Minted]): DisplayPeriod = DisplayPeriod(
+  def apply(period: Period[IdState.Minted]): DisplayPeriod = DisplayPeriod(
     label = period.label
   )
 }
@@ -122,7 +122,7 @@ case class DisplayPlace(
 ) extends DisplayAbstractConcept
 
 case object DisplayPlace {
-  def apply(place: Place[Id.Minted]): DisplayPlace = DisplayPlace(
+  def apply(place: Place[IdState.Minted]): DisplayPlace = DisplayPlace(
     label = place.label
   )
 }
@@ -134,7 +134,7 @@ sealed trait DisplayAbstractAgent extends DisplayAbstractRootConcept
 
 case object DisplayAbstractAgent extends GetIdentifiers {
 
-  def apply(agent: AbstractAgent[Id.Minted],
+  def apply(agent: AbstractAgent[IdState.Minted],
             includesIdentifiers: Boolean): DisplayAbstractAgent =
     agent match {
       case Agent(id, label) =>
@@ -245,7 +245,7 @@ case class DisplayMeeting(
 
 trait GetIdentifiers {
 
-  protected def getIdentifiers(id: Id, includesIdentifiers: Boolean) =
+  protected def getIdentifiers(id: IdState, includesIdentifiers: Boolean) =
     if (includesIdentifiers)
       Option(id.allSourceIdentifiers.map(DisplayIdentifier(_)))
         .filter(_.nonEmpty)

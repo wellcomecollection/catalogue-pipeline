@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.merger.rules
 import scala.Function.const
 import cats.data.NonEmptyList
 import uk.ac.wellcome.models.work.internal.{
-  Id,
+  IdState,
   MergedImage,
   TransformedBaseWork,
   UnidentifiedWork,
@@ -13,7 +13,7 @@ import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 object ImagesRule extends FieldMergeRule {
   import WorkPredicates._
 
-  type FieldData = List[MergedImage[Id.Identifiable, Id.Unminted]]
+  type FieldData = List[MergedImage[IdState.Identifiable, IdState.Unminted]]
 
   override def merge(
     target: UnidentifiedWork,
@@ -59,7 +59,7 @@ object ImagesRule extends FieldMergeRule {
   trait FlatImageMergeRule extends PartialRule {
     final override def rule(target: UnidentifiedWork,
                             sources: NonEmptyList[TransformedBaseWork])
-      : List[MergedImage[Id.Identifiable, Id.Unminted]] = {
+      : List[MergedImage[IdState.Identifiable, IdState.Unminted]] = {
       val works = sources.prepend(target).toList
       works flatMap {
         _.data.images.map {

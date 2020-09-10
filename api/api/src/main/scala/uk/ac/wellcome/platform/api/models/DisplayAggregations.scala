@@ -69,11 +69,11 @@ object DisplayAggregations {
       workType = displayAggregation(aggs.workType, DisplayWorkType.apply),
       productionDates =
         displayAggregation(aggs.productionDates, DisplayPeriod.apply),
-      genres = displayAggregation[Genre[Id.Minted], DisplayGenre](
+      genres = displayAggregation[Genre[IdState.Minted], DisplayGenre](
         aggs.genres,
         DisplayGenre(_, false)),
       language = displayAggregation(aggs.language, DisplayLanguage.apply),
-      subjects = displayAggregation[Subject[Id.Minted], DisplaySubject](
+      subjects = displayAggregation[Subject[IdState.Minted], DisplaySubject](
         aggs.subjects,
         subject => DisplaySubject(subject, false)
       ),

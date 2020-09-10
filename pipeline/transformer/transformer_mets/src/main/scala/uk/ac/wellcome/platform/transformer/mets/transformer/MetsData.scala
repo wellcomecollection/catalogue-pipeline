@@ -20,7 +20,7 @@ case class MetsData(
       license <- parseLicense
       accessStatus <- parseAccessStatus
       item = Item(
-        id = Id.Unidentifiable,
+        id = IdState.Unidentifiable,
         locations = List(digitalLocation(license, accessStatus)))
     } yield
       UnidentifiedInvisibleWork(
@@ -136,7 +136,7 @@ case class MetsData(
   private def images(version: Int,
                      license: Option[License],
                      accessStatus: Option[AccessStatus])
-    : List[UnmergedImage[Id.Identifiable, Id.Unminted]] =
+    : List[UnmergedImage[IdState.Identifiable, IdState.Unminted]] =
     if (accessStatus.forall(shouldCreateDigitalLocation)) {
       fileReferences
         .filter(ImageUtils.isImage)

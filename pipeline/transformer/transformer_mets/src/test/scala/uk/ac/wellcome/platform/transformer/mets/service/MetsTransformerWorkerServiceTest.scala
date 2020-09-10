@@ -109,7 +109,7 @@ class MetsTransformerWorkerServiceTest
       LocationType("iiif-presentation"),
       license = Some(License.CCBYNC))
     val expectedItem =
-      Item(id = Id.Unidentifiable, locations = List(expectedDigitalLocation))
+      Item(id = IdState.Unidentifiable, locations = List(expectedDigitalLocation))
 
     val expectedWork = UnidentifiedInvisibleWork(
       version = version,

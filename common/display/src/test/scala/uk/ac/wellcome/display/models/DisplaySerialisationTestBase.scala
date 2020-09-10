@@ -31,10 +31,10 @@ trait DisplaySerialisationTestBase {
          """
     }
 
-  def items(items: List[Item[Id.Minted]]) =
+  def items(items: List[Item[IdState.Minted]]) =
     items.map(item).mkString(",")
 
-  def item(item: Item[Id.Minted]) =
+  def item(item: Item[IdState.Minted]) =
     s"""
      {
        ${identifiers(item)}
@@ -94,23 +94,23 @@ trait DisplaySerialisationTestBase {
       }
     """
   }
-  def identifiers(obj: HasId[Id.Minted]) =
+  def identifiers(obj: HasId[IdState.Minted]) =
     obj.id match {
-      case Id.Identified(canonicalId, _, _) => s"""
+      case IdState.Identified(canonicalId, _, _) => s"""
         "id": "$canonicalId",
       """
-      case Id.Unidentifiable                => ""
+      case IdState.Unidentifiable                => ""
     }
 
-  def abstractAgent(ag: AbstractAgent[Id.Minted]) =
+  def abstractAgent(ag: AbstractAgent[IdState.Minted]) =
     ag match {
-      case a: Agent[Id.Minted]        => agent(a)
-      case o: Organisation[Id.Minted] => organisation(o)
-      case p: Person[Id.Minted]       => person(p)
-      case m: Meeting[Id.Minted]      => meeting(m)
+      case a: Agent[IdState.Minted]        => agent(a)
+      case o: Organisation[IdState.Minted] => organisation(o)
+      case p: Person[IdState.Minted]       => person(p)
+      case m: Meeting[IdState.Minted]      => meeting(m)
     }
 
-  def person(person: Person[Id.Minted]) =
+  def person(person: Person[IdState.Minted]) =
     s"""{
        ${identifiers(person)}
         "type": "Person",
@@ -119,63 +119,63 @@ trait DisplaySerialisationTestBase {
         "label": "${person.label}"
       }"""
 
-  def organisation(organisation: Organisation[Id.Minted]) =
+  def organisation(organisation: Organisation[IdState.Minted]) =
     s"""{
        ${identifiers(organisation)}
         "type": "Organisation",
         "label": "${organisation.label}"
       }"""
 
-  def meeting(meeting: Meeting[Id.Minted]) =
+  def meeting(meeting: Meeting[IdState.Minted]) =
     s"""{
        ${identifiers(meeting)}
         "type": "Meeting",
         "label": "${meeting.label}"
       }"""
 
-  def agent(agent: Agent[Id.Minted]) =
+  def agent(agent: Agent[IdState.Minted]) =
     s"""{
        ${identifiers(agent)}
         "type": "Agent",
         "label": "${agent.label}"
       }"""
 
-  def period(period: Period[Id.Minted]) =
+  def period(period: Period[IdState.Minted]) =
     s"""{
        ${identifiers(period)}
       "type": "Period",
       "label": "${period.label}"
     }"""
 
-  def place(place: Place[Id.Minted]) =
+  def place(place: Place[IdState.Minted]) =
     s"""{
        ${identifiers(place)}
       "type": "Place",
       "label": "${place.label}"
     }"""
 
-  def concept(concept: Concept[Id.Minted]) =
+  def concept(concept: Concept[IdState.Minted]) =
     s"""{
        ${identifiers(concept)}
       "type": "Concept",
       "label": "${concept.label}"
     }"""
 
-  def abstractRootConcept(abstractRootConcept: AbstractRootConcept[Id.Minted]) =
+  def abstractRootConcept(abstractRootConcept: AbstractRootConcept[IdState.Minted]) =
     abstractRootConcept match {
-      case c: Concept[Id.Minted]      => concept(c)
-      case p: Place[Id.Minted]        => place(p)
-      case p: Period[Id.Minted]       => period(p)
-      case a: Agent[Id.Minted]        => agent(a)
-      case o: Organisation[Id.Minted] => organisation(o)
-      case p: Person[Id.Minted]       => person(p)
-      case m: Meeting[Id.Minted]      => meeting(m)
+      case c: Concept[IdState.Minted]      => concept(c)
+      case p: Place[IdState.Minted]        => place(p)
+      case p: Period[IdState.Minted]       => period(p)
+      case a: Agent[IdState.Minted]        => agent(a)
+      case o: Organisation[IdState.Minted] => organisation(o)
+      case p: Person[IdState.Minted]       => person(p)
+      case m: Meeting[IdState.Minted]      => meeting(m)
     }
 
-  def concepts(concepts: List[AbstractRootConcept[Id.Minted]]) =
+  def concepts(concepts: List[AbstractRootConcept[IdState.Minted]]) =
     concepts.map(abstractRootConcept).mkString(",")
 
-  def subject(s: Subject[Id.Minted]): String =
+  def subject(s: Subject[IdState.Minted]): String =
     s"""
     {
       "label": "${s.label}",
@@ -184,10 +184,10 @@ trait DisplaySerialisationTestBase {
     }
     """
 
-  def subjects(subjects: List[Subject[Id.Minted]]): String =
+  def subjects(subjects: List[Subject[IdState.Minted]]): String =
     subjects.map(subject).mkString(",")
 
-  def genre(genre: Genre[Id.Minted]) =
+  def genre(genre: Genre[IdState.Minted]) =
     s"""
     {
       "label": "${genre.label}",
@@ -196,10 +196,10 @@ trait DisplaySerialisationTestBase {
     }
     """
 
-  def genres(genres: List[Genre[Id.Minted]]) =
+  def genres(genres: List[Genre[IdState.Minted]]) =
     genres.map(genre).mkString(",")
 
-  def contributor(contributor: Contributor[Id.Minted]) =
+  def contributor(contributor: Contributor[IdState.Minted]) =
     s"""
       {
         ${identifiers(contributor)}
@@ -209,13 +209,13 @@ trait DisplaySerialisationTestBase {
       }
     """.stripMargin
 
-  def contributors(contributors: List[Contributor[Id.Minted]]) =
+  def contributors(contributors: List[Contributor[IdState.Minted]]) =
     contributors.map(contributor).mkString(",")
 
-  def production(production: List[ProductionEvent[Id.Minted]]) =
+  def production(production: List[ProductionEvent[IdState.Minted]]) =
     production.map(productionEvent).mkString(",")
 
-  def workImageInclude(image: UnmergedImage[Id.Identified, Id.Minted]) =
+  def workImageInclude(image: UnmergedImage[IdState.Identified, IdState.Minted]) =
     s"""
        {
          "id": "${image.id.canonicalId}",
@@ -223,10 +223,10 @@ trait DisplaySerialisationTestBase {
        }
     """.stripMargin
 
-  def workImageIncludes(images: List[UnmergedImage[Id.Identified, Id.Minted]]) =
+  def workImageIncludes(images: List[UnmergedImage[IdState.Identified, IdState.Minted]]) =
     images.map(workImageInclude).mkString(",")
 
-  def productionEvent(event: ProductionEvent[Id.Minted]): String =
+  def productionEvent(event: ProductionEvent[IdState.Minted]): String =
     s"""
       {
         "label": "${event.label}",

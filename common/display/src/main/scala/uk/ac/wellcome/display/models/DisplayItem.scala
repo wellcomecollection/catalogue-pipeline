@@ -31,7 +31,7 @@ case class DisplayItem(
 
 object DisplayItem extends GetIdentifiers {
 
-  def apply(item: Item[Id.Minted], includesIdentifiers: Boolean): DisplayItem =
+  def apply(item: Item[IdState.Minted], includesIdentifiers: Boolean): DisplayItem =
     item match {
       case Item(id, title, locations, _) =>
         DisplayItem(

@@ -5,9 +5,9 @@ import uk.ac.wellcome.models.work.internal._
 
 trait ProductionEventGenerators extends RandomStrings {
   def createProductionEventWith(
-    function: Option[Concept[Id.Minted]] = None,
+    function: Option[Concept[IdState.Minted]] = None,
     dateLabel: Option[String] = None
-  ): ProductionEvent[Id.Minted] =
+  ): ProductionEvent[IdState.Minted] =
     ProductionEvent(
       label = randomAlphanumeric(25),
       places = List(Place(randomAlphanumeric(10))),
@@ -16,10 +16,10 @@ trait ProductionEventGenerators extends RandomStrings {
       function = function
     )
 
-  def createProductionEvent: ProductionEvent[Id.Minted] =
+  def createProductionEvent: ProductionEvent[IdState.Minted] =
     createProductionEventWith()
 
-  def createProductionEventList(count: Int = 1): List[ProductionEvent[Id.Minted]] =
+  def createProductionEventList(count: Int = 1): List[ProductionEvent[IdState.Minted]] =
     (1 to count).map { _ =>
       createProductionEvent
     }.toList

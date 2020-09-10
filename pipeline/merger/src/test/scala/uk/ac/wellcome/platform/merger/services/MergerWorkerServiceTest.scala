@@ -235,7 +235,7 @@ class MergerWorkerServiceTest
 
           val imagesSent =
             senders.images
-              .getMessages[MergedImage[Id.Identifiable, Id.Unminted]]
+              .getMessages[MergedImage[IdState.Identifiable, IdState.Unminted]]
               .distinct
           imagesSent should have size 1
 

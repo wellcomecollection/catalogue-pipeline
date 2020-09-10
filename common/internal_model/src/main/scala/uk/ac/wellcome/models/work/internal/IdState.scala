@@ -10,21 +10,21 @@ package uk.ac.wellcome.models.work.internal
  *  * Unidentifiable: a piece of data that does not have a sourceIdentifier, and
  *    thus can never have a canonicalId attached
  *  */
-sealed trait Id {
+sealed trait IdState {
   def maybeCanonicalId: Option[String]
   def allSourceIdentifiers: List[SourceIdentifier]
 }
 
-object Id {
+object IdState {
 
   /* Parent trait for all IDs that contain a sourceIdentifier */
-  sealed trait WithSourceIdentifier extends Id
+  sealed trait WithSourceIdentifier extends IdState
 
   /* Parent trait for an ID of an object that is pre minter. */
-  sealed trait Unminted extends Id
+  sealed trait Unminted extends IdState
 
   /* Parent trait for an ID of an object that is post minter. */
-  sealed trait Minted extends Id
+  sealed trait Minted extends IdState
 
   /** Represents an ID that has been successfully minted, and thus has a
     *  canonicalId assigned. */

@@ -1,10 +1,10 @@
 package uk.ac.wellcome.platform.transformer.miro.transformers
 
-import uk.ac.wellcome.models.work.internal.{Period, Id}
+import uk.ac.wellcome.models.work.internal.{Period, IdState}
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 
 trait MiroCreatedDate {
-  def getCreatedDate(miroRecord: MiroRecord): Option[Period[Id.Unminted]] =
+  def getCreatedDate(miroRecord: MiroRecord): Option[Period[IdState.Unminted]] =
     if (collectionIsV(miroRecord.imageNumber))
       miroRecord.artworkDate.map(Period(_))
     else

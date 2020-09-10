@@ -1,17 +1,17 @@
 package uk.ac.wellcome.models.work.internal
 
-case class Item[+DataId](
-  id: DataId,
+case class Item[+State](
+  id: State,
   title: Option[String] = None,
   locations: List[LocationDeprecated] = Nil,
   ontologyType: String = "Item"
-) extends HasId[DataId]
+) extends HasId[State]
 
 object Item {
 
-  def apply[DataId >: Id.Unidentifiable.type](
+  def apply[State >: IdState.Unidentifiable.type](
     title: Option[String],
     locations: List[LocationDeprecated]
-  ): Item[DataId] =
-    Item(Id.Unidentifiable, title, locations)
+  ): Item[State] =
+    Item(IdState.Unidentifiable, title, locations)
 }

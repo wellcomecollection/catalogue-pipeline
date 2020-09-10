@@ -2,7 +2,7 @@ package uk.ac.wellcome.display.models
 
 import io.circe.generic.extras.JsonKey
 import io.swagger.v3.oas.annotations.media.Schema
-import uk.ac.wellcome.models.work.internal.{Contributor, Id}
+import uk.ac.wellcome.models.work.internal.{Contributor, IdState}
 
 @Schema(
   name = "Contributor",
@@ -16,7 +16,7 @@ case class DisplayContributor(
 )
 
 object DisplayContributor {
-  def apply(contributor: Contributor[Id.Minted],
+  def apply(contributor: Contributor[IdState.Minted],
             includesIdentifiers: Boolean): DisplayContributor =
     DisplayContributor(
       agent = DisplayAbstractAgent(

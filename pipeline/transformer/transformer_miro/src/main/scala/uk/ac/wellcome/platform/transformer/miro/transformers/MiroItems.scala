@@ -5,6 +5,6 @@ import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 
 trait MiroItems extends MiroLocation {
 
-  def getItems(miroRecord: MiroRecord): List[Item[Id.Unminted]] =
-    List(Item(id = Id.Unidentifiable, locations = List(getLocation(miroRecord))))
+  def getItems(miroRecord: MiroRecord): List[Item[IdState.Unminted]] =
+    List(Item(id = IdState.Unidentifiable, locations = List(getLocation(miroRecord))))
 }

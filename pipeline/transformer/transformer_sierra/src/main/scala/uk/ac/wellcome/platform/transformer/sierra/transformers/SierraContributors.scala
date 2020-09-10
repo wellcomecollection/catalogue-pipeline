@@ -35,7 +35,7 @@ object SierraContributors
     with SierraQueryOps
     with SierraAgents {
 
-  type Output = List[Contributor[Id.Unminted]]
+  type Output = List[Contributor[IdState.Unminted]]
 
   val contributorFields = List(
     ("100", getPersonContributors _, "e"),
@@ -83,11 +83,11 @@ object SierraContributors
       .contents
       .map(ContributionRole(_))
 
-  private def withId(agent: AbstractAgent[Id.Unminted], id: Id.Unminted) =
+  private def withId(agent: AbstractAgent[IdState.Unminted], id: IdState.Unminted) =
     agent match {
-      case a: Agent[Id.Unminted]        => a.copy(id = id)
-      case p: Person[Id.Unminted]       => p.copy(id = id)
-      case o: Organisation[Id.Unminted] => o.copy(id = id)
-      case m: Meeting[Id.Unminted]      => m.copy(id = id)
+      case a: Agent[IdState.Unminted]        => a.copy(id = id)
+      case p: Person[IdState.Unminted]       => p.copy(id = id)
+      case o: Organisation[IdState.Unminted] => o.copy(id = id)
+      case m: Meeting[IdState.Unminted]      => m.copy(id = id)
     }
 }

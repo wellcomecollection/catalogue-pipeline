@@ -66,7 +66,7 @@ object SierraConceptSubjects
       }
 
       val label = getLabel(primarySubfields, subdivisionSubfields)
-      val concepts: List[AbstractConcept[Id.Unminted]] = getPrimaryConcept(
+      val concepts: List[AbstractConcept[IdState.Unminted]] = getPrimaryConcept(
         primarySubfields,
         varField = varfield) ++ getSubdivisions(subdivisionSubfields)
 
@@ -81,7 +81,7 @@ object SierraConceptSubjects
 
   private def getPrimaryConcept(
     primarySubfields: List[MarcSubfield],
-    varField: VarField): List[AbstractConcept[Id.Unminted]] =
+    varField: VarField): List[AbstractConcept[IdState.Unminted]] =
     primarySubfields.map { subfield =>
       varField.marcTag.get match {
         case "650" => Concept(label = subfield.content)

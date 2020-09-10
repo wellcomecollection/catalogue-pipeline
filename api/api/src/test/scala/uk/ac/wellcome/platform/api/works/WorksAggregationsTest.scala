@@ -94,7 +94,7 @@ class WorksAggregationsTest extends ApiWorksTestBase {
         val concept0 = Concept("conceptLabel")
         val concept1 = Place("placeLabel")
         val concept2 = Period(
-          id = Id.Identified(
+          id = IdState.Identified(
             canonicalId = createCanonicalId,
             sourceIdentifier = createSourceIdentifierWith(
               ontologyType = "Period"

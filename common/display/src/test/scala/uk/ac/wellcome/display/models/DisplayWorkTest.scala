@@ -160,7 +160,7 @@ class DisplayWorkTest
         Contributor(
           agent = Person(
             label = "Vlad the Vanquished",
-            id = Id.Identified(
+            id = IdState.Identified(
               canonicalId = canonicalId,
               sourceIdentifier = sourceIdentifier
             )
@@ -266,14 +266,14 @@ class DisplayWorkTest
             Agent(
               label = "Bond",
               id =
-                Id.Identified(createCanonicalId, contributorAgentSourceIdentifier),
+                IdState.Identified(createCanonicalId, contributorAgentSourceIdentifier),
             ),
           roles = Nil
         ),
         Contributor(
           agent = Organisation(
             label = "Big Business",
-            id = Id.Identified(
+            id = IdState.Identified(
               createCanonicalId,
               contributorOrganisationSourceIdentifier),
           ),
@@ -283,7 +283,7 @@ class DisplayWorkTest
           agent = Person(
             label = "Blue Blaise",
             id =
-              Id.Identified(createCanonicalId, contributorPersonSourceIdentifier),
+              IdState.Identified(createCanonicalId, contributorPersonSourceIdentifier),
           ),
           roles = Nil
         )
@@ -292,20 +292,20 @@ class DisplayWorkTest
       subjects = List(
         Subject(
           label = "Beryllium-Boron Bonding",
-          id = Id.Identified(createCanonicalId, subjectSourceIdentifier),
+          id = IdState.Identified(createCanonicalId, subjectSourceIdentifier),
           concepts = List(
             Concept(
               label = "Bonding",
-              id = Id.Identified(createCanonicalId, conceptSourceIdentifier),
+              id = IdState.Identified(createCanonicalId, conceptSourceIdentifier),
             ),
             Period(
               label = "Before",
-              id = Id.Identified(createCanonicalId, periodSourceIdentifier),
+              id = IdState.Identified(createCanonicalId, periodSourceIdentifier),
               range = None,
             ),
             Place(
               label = "Bulgaria",
-              id = Id.Identified(createCanonicalId, placeSourceIdentifier),
+              id = IdState.Identified(createCanonicalId, placeSourceIdentifier),
             )
           )
         ),
@@ -316,7 +316,7 @@ class DisplayWorkTest
           concepts = List(
             Concept(
               label = "Colours",
-              id = Id.Identified(createCanonicalId, conceptSourceIdentifier)
+              id = IdState.Identified(createCanonicalId, conceptSourceIdentifier)
             )
           )
         )
@@ -396,7 +396,7 @@ class DisplayWorkTest
           work,
           includes = WorksIncludes(identifiers = true, items = true))
         val item: DisplayItem = displayWork.items.get.head
-        val identifiedItem = work.data.items.head.asInstanceOf[Item[Id.Identified]]
+        val identifiedItem = work.data.items.head.asInstanceOf[Item[IdState.Identified]]
         item.identifiers shouldBe Some(
           List(DisplayIdentifier(identifiedItem.id.sourceIdentifier)))
       }

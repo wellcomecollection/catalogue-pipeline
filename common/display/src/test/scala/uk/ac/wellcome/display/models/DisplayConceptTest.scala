@@ -51,7 +51,7 @@ class DisplayConceptTest
     assertDisplayConceptIsCorrect(
       concept = Concept(
         label = "darkness",
-        id = Id.Identified("dj4kndg5", sourceIdentifier)
+        id = IdState.Identified("dj4kndg5", sourceIdentifier)
       ),
       expectedDisplayConcept = DisplayConcept(
         id = Some("dj4kndg5"),
@@ -70,7 +70,7 @@ class DisplayConceptTest
       concept = Period(
         label = "never",
         range = None,
-        id = Id.Identified("nrzbm3ah", sourceIdentifier)
+        id = IdState.Identified("nrzbm3ah", sourceIdentifier)
       ),
       expectedDisplayConcept = DisplayPeriod(
         id = Some("nrzbm3ah"),
@@ -88,7 +88,7 @@ class DisplayConceptTest
     assertDisplayConceptIsCorrect(
       concept = Place(
         label = "anywhere",
-        id = Id.Identified("axtswq4z", sourceIdentifier)
+        id = IdState.Identified("axtswq4z", sourceIdentifier)
       ),
       expectedDisplayConcept = DisplayPlace(
         id = Some("axtswq4z"),
@@ -99,7 +99,7 @@ class DisplayConceptTest
   }
 
   private def assertDisplayConceptIsCorrect(
-    concept: AbstractConcept[Id.Minted],
+    concept: AbstractConcept[IdState.Minted],
     expectedDisplayConcept: DisplayAbstractConcept
   ) = {
     val displayConcept =

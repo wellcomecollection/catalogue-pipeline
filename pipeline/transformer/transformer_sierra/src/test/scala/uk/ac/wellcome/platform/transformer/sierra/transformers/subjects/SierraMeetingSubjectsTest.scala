@@ -86,7 +86,7 @@ class SierraMeetingSubjectsTest
     )
     SierraPersonSubjects(bibId, data) shouldBe List(
       Subject(
-        id = Id.Identifiable(sourceIdentifier),
+        id = IdState.Identifiable(sourceIdentifier),
         label = "Content",
         concepts = List(Person(label = "Content"))
       )

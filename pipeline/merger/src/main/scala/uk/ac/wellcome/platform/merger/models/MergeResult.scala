@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.merger.models
 
 import uk.ac.wellcome.models.work.internal.{
-  Id,
+  IdState,
   MergedImage,
   TransformedBaseWork,
 }
@@ -11,4 +11,4 @@ import uk.ac.wellcome.models.work.internal.{
  * and the images that were created in the process
  */
 case class MergeResult(mergedTarget: TransformedBaseWork,
-                       images: Seq[MergedImage[Id.Identifiable, Id.Unminted]])
+                       images: Seq[MergedImage[IdState.Identifiable, IdState.Unminted]])

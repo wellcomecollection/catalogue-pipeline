@@ -16,7 +16,7 @@ trait MiroSubjects {
    *  e.g. where keywords were pulled directly from Sierra -- but we don't
    *  have enough information in Miro to determine which ones those are.
    */
-  def getSubjects(miroRecord: MiroRecord): List[Subject[Id.Unminted]] = {
+  def getSubjects(miroRecord: MiroRecord): List[Subject[IdState.Unminted]] = {
     val keywords: List[String] = miroRecord.keywords.getOrElse(List())
 
     val keywordsUnauth: List[String] =

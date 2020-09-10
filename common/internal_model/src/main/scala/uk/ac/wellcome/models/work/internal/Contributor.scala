@@ -1,16 +1,16 @@
 package uk.ac.wellcome.models.work.internal
 
-case class Contributor[+DataId](
-  id: DataId,
-  agent: AbstractAgent[DataId],
+case class Contributor[+State](
+  id: State,
+  agent: AbstractAgent[State],
   roles: List[ContributionRole] = Nil,
   ontologyType: String = "Contributor"
-) extends HasId[DataId]
+) extends HasId[State]
 
 object Contributor {
 
-  def apply[DataId >: Id.Unidentifiable.type](
-    agent: AbstractAgent[DataId],
-    roles: List[ContributionRole]): Contributor[DataId] =
-    Contributor(Id.Unidentifiable, agent, roles)
+  def apply[State >: IdState.Unidentifiable.type](
+    agent: AbstractAgent[State],
+    roles: List[ContributionRole]): Contributor[State] =
+    Contributor(IdState.Unidentifiable, agent, roles)
 }

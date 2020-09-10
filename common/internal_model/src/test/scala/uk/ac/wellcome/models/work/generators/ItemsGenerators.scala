@@ -4,7 +4,7 @@ import uk.ac.wellcome.models.work.internal.{DigitalLocationDeprecated, _}
 
 trait ItemsGenerators extends IdentifiersGenerators {
 
-  def createIdentifiedItemWith[I >: Id.Identified](
+  def createIdentifiedItemWith[I >: IdState.Identified](
     canonicalId: String = createCanonicalId,
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     otherIdentifiers: List[SourceIdentifier] = Nil,
@@ -12,7 +12,7 @@ trait ItemsGenerators extends IdentifiersGenerators {
     title: Option[String] = None,
   ): Item[I] =
     Item(
-      id = Id.Identified(
+      id = IdState.Identified(
         canonicalId = canonicalId,
         sourceIdentifier = sourceIdentifier,
         otherIdentifiers = otherIdentifiers,
@@ -28,18 +28,18 @@ trait ItemsGenerators extends IdentifiersGenerators {
       createIdentifiedItem
     }.toList
 
-  def createIdentifiableItemWith[I >: Id.Identifiable](
+  def createIdentifiableItemWith[I >: IdState.Identifiable](
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     locations: List[LocationDeprecated] = List(defaultLocation)
   ): Item[I] =
     Item(
-      id = Id.Identifiable(sourceIdentifier),
+      id = IdState.Identifiable(sourceIdentifier),
       locations = locations
     )
 
-  def createUnidentifiableItemWith[I >: Id.Unidentifiable.type](
+  def createUnidentifiableItemWith[I >: IdState.Unidentifiable.type](
     locations: List[LocationDeprecated] = List(defaultLocation)): Item[I] =
-    Item(id = Id.Unidentifiable, locations = locations)
+    Item(id = IdState.Unidentifiable, locations = locations)
 
   def createPhysicalLocation = createPhysicalLocationWith()
 
