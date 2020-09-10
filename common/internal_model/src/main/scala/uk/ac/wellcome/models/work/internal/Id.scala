@@ -1,6 +1,15 @@
 package uk.ac.wellcome.models.work.internal
 
-/** The root trait for all possible ID types. */
+/** Represents an ID that is attached to individual pieces of work data.
+ *  The ID can be in 3 possible states:
+ *
+ *  * Identifiable: contains a sourceIdentifier but does not have a canonicalId
+ *    yet (i.e. pre minter)
+ *  * Identified: contains a sourceIdentifier and a canonicalId (i.e. post
+ *    minter)
+ *  * Unidentifiable: a piece of data that does not have a sourceIdentifier, and
+ *    thus can never have a canonicalId attached
+ *  */
 sealed trait Id {
   def maybeCanonicalId: Option[String]
   def allSourceIdentifiers: List[SourceIdentifier]
@@ -8,12 +17,13 @@ sealed trait Id {
 
 object Id {
 
+  /* Parent trait for all IDs that contain a sourceIdentifier */
   sealed trait WithSourceIdentifier extends Id
 
-  /** Parent trait for an ID of an object that is pre minter. */
+  /* Parent trait for an ID of an object that is pre minter. */
   sealed trait Unminted extends Id
 
-  /** Parent trait for an ID of an object that is post minter. */
+  /* Parent trait for an ID of an object that is post minter. */
   sealed trait Minted extends Id
 
   /** Represents an ID that has been successfully minted, and thus has a
