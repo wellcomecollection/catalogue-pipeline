@@ -5,8 +5,7 @@ import cats.data.NonEmptyList
 import uk.ac.wellcome.models.work.internal.{
   BaseImage,
   BaseWork,
-  Identifiable,
-  Unminted
+  Id
 }
 
 trait MergerLogging extends Logging {
@@ -19,10 +18,10 @@ trait MergerLogging extends Logging {
   def describeWorks(works: NonEmptyList[BaseWork]): String =
     describeWorks(works.toList)
 
-  def describeImage(image: BaseImage[Identifiable, Unminted]): String =
+  def describeImage(image: BaseImage[Id.Identifiable, Id.Unminted]): String =
     s"(id=${image.id})"
 
-  def describeImages(images: Seq[BaseImage[Identifiable, Unminted]]): String =
+  def describeImages(images: Seq[BaseImage[Id.Identifiable, Id.Unminted]]): String =
     s"[${images.map(describeImage).mkString(",")}]"
 
   def describeMergeSet(target: BaseWork, sources: Seq[BaseWork]): String =

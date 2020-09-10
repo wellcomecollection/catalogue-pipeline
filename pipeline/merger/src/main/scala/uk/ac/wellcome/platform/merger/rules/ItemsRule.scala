@@ -18,7 +18,7 @@ import cats.data.NonEmptyList
 object ItemsRule extends FieldMergeRule with MergerLogging {
   import WorkPredicates._
 
-  type FieldData = List[Item[Unminted]]
+  type FieldData = List[Item[Id.Unminted]]
 
   override def merge(
     target: UnidentifiedWork,

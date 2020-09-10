@@ -20,7 +20,7 @@ class MergerTest
     (0 to 3).map(_ => createSierraSystemSourceIdentifier).toList
 
   object TestItemsRule extends FieldMergeRule {
-    type FieldData = List[Item[Unminted]]
+    type FieldData = List[Item[Id.Unminted]]
 
     override def merge(
       target: UnidentifiedWork,
