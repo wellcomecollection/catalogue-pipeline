@@ -290,7 +290,7 @@ class SierraConceptSubjectsTest
     val actualSourceIdentifiers = SierraConceptSubjects(bibId, bibData)
       .map(_.id)
       .map {
-        case Identifiable(sourceIdentifier, _, _) => sourceIdentifier
+        case Id.Identifiable(sourceIdentifier, _, _) => sourceIdentifier
         case other                                => assert(false, other)
       }
 
@@ -330,7 +330,7 @@ class SierraConceptSubjectsTest
       Subject(
         label = "abolition",
         concepts = List(Concept("abolition")),
-        id = Identifiable(sourceIdentifier)
+        id = Id.Identifiable(sourceIdentifier)
       )
     )
   }

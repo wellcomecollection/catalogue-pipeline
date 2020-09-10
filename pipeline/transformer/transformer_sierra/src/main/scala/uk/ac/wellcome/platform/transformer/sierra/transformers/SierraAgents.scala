@@ -14,7 +14,7 @@ trait SierraAgents extends SierraQueryOps {
   //  - subfield $c populates the person prefixes
   //
   def getPerson(subfields: List[MarcSubfield],
-                normalisePerson: Boolean = false): Option[Person[Unminted]] =
+                normalisePerson: Boolean = false): Option[Person[Id.Unminted]] =
     getLabel(subfields).map { label =>
       // The rule is to only normalise the 'Person' label when a contributor.  Strictly a 'Person' within
       // 'Subjects' (sourced from Marc 600) should not be normalised -- however, as these labels
@@ -29,7 +29,7 @@ trait SierraAgents extends SierraQueryOps {
         )
       else
         Person(
-          id = Unidentifiable,
+          id = Id.Unidentifiable,
           label = label,
           prefix = None,
           numeration = None
@@ -42,12 +42,12 @@ trait SierraAgents extends SierraQueryOps {
   //  - Subfield $0 is used to populate "identifiers". The identifier scheme is lc-names.
   //
   def getOrganisation(
-    subfields: List[MarcSubfield]): Option[Organisation[Unminted]] =
+    subfields: List[MarcSubfield]): Option[Organisation[Id.Unminted]] =
     getLabel(subfields).map { label =>
       Organisation.normalised(label = label)
     }
 
-  def getMeeting(subfields: List[MarcSubfield]): Option[Meeting[Unminted]] =
+  def getMeeting(subfields: List[MarcSubfield]): Option[Meeting[Id.Unminted]] =
     getLabel(subfields.withTags("a", "c", "d", "j", "t", "0"))
       .map { label =>
         Meeting.normalised(label = label)
@@ -60,7 +60,7 @@ trait SierraAgents extends SierraQueryOps {
    * as appropriate.
    */
   def identify(subfields: List[MarcSubfield],
-               ontologyType: String): Unminted = {
+               ontologyType: String): Id.Unminted = {
 
     // We take the contents of subfield $0.  They may contain inconsistent
     // spacing and punctuation, such as:
@@ -82,14 +82,14 @@ trait SierraAgents extends SierraQueryOps {
     // field in the MARC spec).
     codes.distinct match {
       case Seq(code) =>
-        Identifiable(
+        Id.Identifiable(
           SourceIdentifier(
             identifierType = IdentifierType("lc-names"),
             value = code,
             ontologyType = ontologyType
           )
         )
-      case _ => Unidentifiable
+      case _ => Id.Unidentifiable
     }
   }
 

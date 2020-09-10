@@ -13,10 +13,10 @@ import uk.ac.wellcome.json.JsonUtil._
 
 case class Aggregations(
   workType: Option[Aggregation[WorkType]] = None,
-  genres: Option[Aggregation[Genre[Minted]]] = None,
-  productionDates: Option[Aggregation[Period[Minted]]] = None,
+  genres: Option[Aggregation[Genre[Id.Minted]]] = None,
+  productionDates: Option[Aggregation[Period[Id.Minted]]] = None,
   language: Option[Aggregation[Language]] = None,
-  subjects: Option[Aggregation[Subject[Minted]]] = None,
+  subjects: Option[Aggregation[Subject[Id.Minted]]] = None,
   license: Option[Aggregation[License]] = None,
 )
 
@@ -28,13 +28,13 @@ object Aggregations extends Logging {
       Some(
         Aggregations(
           workType = e4sAggregations.decodeAgg[WorkType]("workType"),
-          genres = e4sAggregations.decodeAgg[Genre[Minted]]("genres"),
+          genres = e4sAggregations.decodeAgg[Genre[Id.Minted]]("genres"),
           productionDates =
-            e4sAggregations.decodeAgg[Period[Minted]]("productionDates"),
+            e4sAggregations.decodeAgg[Period[Id.Minted]]("productionDates"),
           language = e4sAggregations
             .decodeAgg[Language]("language", Some("data.language")),
           subjects = e4sAggregations
-            .decodeAgg[Subject[Minted]]("subjects"),
+            .decodeAgg[Subject[Id.Minted]]("subjects"),
           license = e4sAggregations.decodeAgg[License]("license")
         ))
     } else {
@@ -43,7 +43,7 @@ object Aggregations extends Logging {
   }
 
   // Elasticsearch encodes the date key as milliseconds since the epoch
-  implicit val decodePeriod: Decoder[Period[Minted]] =
+  implicit val decodePeriod: Decoder[Period[Id.Minted]] =
     Decoder.decodeLong.emap { epochMilli =>
       Try { Instant.ofEpochMilli(epochMilli) }
         .map { instant =>
@@ -69,12 +69,12 @@ object Aggregations extends Logging {
       }
     }
 
-  implicit val decodeGenreFromLabel: Decoder[Genre[Minted]] =
+  implicit val decodeGenreFromLabel: Decoder[Genre[Id.Minted]] =
     Decoder.decodeString.map { str =>
       Genre(label = str)
     }
 
-  implicit val decodeSubjectFromLabel: Decoder[Subject[Minted]] =
+  implicit val decodeSubjectFromLabel: Decoder[Subject[Id.Minted]] =
     Decoder.decodeString.map { str =>
       Subject(label = str, concepts = Nil)
     }

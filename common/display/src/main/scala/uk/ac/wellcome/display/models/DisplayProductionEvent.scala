@@ -22,7 +22,7 @@ case class DisplayProductionEvent(
 )
 
 object DisplayProductionEvent {
-  def apply(productionEvent: ProductionEvent[Minted],
+  def apply(productionEvent: ProductionEvent[Id.Minted],
             includesIdentifiers: Boolean): DisplayProductionEvent = {
     DisplayProductionEvent(
       label = productionEvent.label,

@@ -53,7 +53,7 @@ class SierraItemsTest
     ).head
 
     transformedItem.id
-      .asInstanceOf[Identifiable]
+      .asInstanceOf[Id.Identifiable]
       .sourceIdentifier shouldBe sourceIdentifier
   }
 
@@ -152,7 +152,7 @@ class SierraItemsTest
       SierraItemNumber("0000003") -> createSierraItemData,
     )
     getTransformedItems(itemDataMap = itemData)
-      .map(_.id.asInstanceOf[Identifiable].otherIdentifiers.head.value) shouldBe
+      .map(_.id.asInstanceOf[Id.Identifiable].otherIdentifiers.head.value) shouldBe
       List(
         "0000001",
         "0000002",
@@ -165,6 +165,6 @@ class SierraItemsTest
     bibId: SierraBibNumber = createSierraBibNumber,
     bibData: SierraBibData = createSierraBibData,
     itemDataMap: Map[SierraItemNumber, SierraItemData] = Map())
-    : List[Item[Unminted]] =
+    : List[Item[Id.Unminted]] =
     SierraItems(itemDataMap)(bibId, bibData)
 }

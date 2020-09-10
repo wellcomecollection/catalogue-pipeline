@@ -71,7 +71,7 @@ class SierraOrganisationSubjectsTest
       concepts should have size 1
 
       val unmintedOrganisation = concepts.head
-      unmintedOrganisation.id shouldBe Unidentifiable
+      unmintedOrganisation.id shouldBe Id.Unidentifiable
     }
 
     it("uses subfields a and b for the Organisation label") {
@@ -103,7 +103,7 @@ class SierraOrganisationSubjectsTest
 
       val subject = subjects.head
 
-      subject.id shouldBe Identifiable(
+      subject.id shouldBe Id.Identifiable(
         SourceIdentifier(
           identifierType = IdentifierType("lc-names"),
           ontologyType = "Subject",
@@ -127,7 +127,7 @@ class SierraOrganisationSubjectsTest
 
       val subject = subjects.head
 
-      subject.id shouldBe Identifiable(
+      subject.id shouldBe Id.Identifiable(
         SourceIdentifier(
           identifierType = IdentifierType("lc-names"),
           ontologyType = "Subject",
@@ -149,7 +149,7 @@ class SierraOrganisationSubjectsTest
       val subjects = getOrganisationSubjects(bibData)
       val concepts = subjects.head.concepts
       val unmintedOrganisation = concepts.head
-      unmintedOrganisation.id shouldBe Unidentifiable
+      unmintedOrganisation.id shouldBe Id.Unidentifiable
     }
 
     it("skips adding an identifier if the 2nd indicator is not '0'") {
@@ -164,7 +164,7 @@ class SierraOrganisationSubjectsTest
       val subjects = getOrganisationSubjects(bibData)
       val concepts = subjects.head.concepts
       val unmintedOrganisation = concepts.head
-      unmintedOrganisation.id shouldBe Unidentifiable
+      unmintedOrganisation.id shouldBe Id.Unidentifiable
     }
   }
 

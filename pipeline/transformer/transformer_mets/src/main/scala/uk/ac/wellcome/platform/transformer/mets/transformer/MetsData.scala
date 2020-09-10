@@ -20,7 +20,7 @@ case class MetsData(
       license <- parseLicense
       accessStatus <- parseAccessStatus
       item = Item(
-        id = Unidentifiable,
+        id = Id.Unidentifiable,
         locations = List(digitalLocation(license, accessStatus)))
     } yield
       UnidentifiedInvisibleWork(

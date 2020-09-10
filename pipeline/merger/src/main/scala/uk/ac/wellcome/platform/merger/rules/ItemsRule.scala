@@ -136,7 +136,7 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
       List(
         calmItem.copy(
           locations = calmItem.locations ++ metsDigitalLocations,
-          id = sierraItemId.getOrElse(Unidentifiable)
+          id = sierraItemId.getOrElse(Id.Unidentifiable)
         ))
     }
   }

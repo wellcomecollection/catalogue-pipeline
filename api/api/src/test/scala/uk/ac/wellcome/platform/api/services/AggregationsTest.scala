@@ -136,7 +136,7 @@ class AggregationsTest
       withLocalWorksIndex { index =>
         insertIntoElasticsearch(index, works: _*)
         val subjectQuery = subjects.head match {
-          case Subject(Unidentifiable, label, _, _) => label
+          case Subject(Id.Unidentifiable, label, _, _) => label
           case _                                    => "bilberry"
         }
         val searchOptions = WorksSearchOptions(
@@ -160,7 +160,7 @@ class AggregationsTest
       withLocalWorksIndex { index =>
         insertIntoElasticsearch(index, works: _*)
         val subjectQuery = subjects.head match {
-          case Subject(Unidentifiable, label, _, _) => label
+          case Subject(Id.Unidentifiable, label, _, _) => label
           case _                                    => "passionfruit"
         }
         val searchOptions = WorksSearchOptions(

@@ -218,7 +218,7 @@ class SierraPersonSubjectsTest
 
     SierraPersonSubjects(bibId, bibData) shouldBe List(
       Subject(
-        id = Identifiable(sourceIdentifier),
+        id = Id.Identifiable(sourceIdentifier),
         label = "Gerry the Garlic",
         concepts = List(Person(label = "Gerry the Garlic"))
       )

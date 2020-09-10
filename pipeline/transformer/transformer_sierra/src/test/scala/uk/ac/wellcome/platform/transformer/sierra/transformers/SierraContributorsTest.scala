@@ -223,7 +223,7 @@ class SierraContributorsTest
 
       val expectedContributors = List(
         Contributor(
-          Person(label = name, id = Identifiable(sourceIdentifier)),
+          Person(label = name, id = Id.Identifiable(sourceIdentifier)),
           roles = Nil)
       )
 
@@ -264,7 +264,7 @@ class SierraContributorsTest
 
       val expectedContributors = List(
         Contributor(
-          Person(label = name, id = Identifiable(sourceIdentifier)),
+          Person(label = name, id = Id.Identifiable(sourceIdentifier)),
           roles = Nil)
       )
 
@@ -463,7 +463,7 @@ class SierraContributorsTest
 
       val expectedContributors = List(
         Contributor(
-          Organisation(label = name, id = Identifiable(sourceIdentifier)),
+          Organisation(label = name, id = Id.Identifiable(sourceIdentifier)),
           roles = Nil)
       )
 
@@ -499,7 +499,7 @@ class SierraContributorsTest
 
       val expectedContributors = List(
         Contributor(
-          Organisation(label = name, id = Identifiable(sourceIdentifier)),
+          Organisation(label = name, id = Id.Identifiable(sourceIdentifier)),
           roles = Nil)
       )
 
@@ -639,7 +639,7 @@ class SierraContributorsTest
         value = "456"
       )
       val contributor = Contributor(
-        Meeting(label = "label", id = Identifiable(sourceIdentifier)),
+        Meeting(label = "label", id = Id.Identifiable(sourceIdentifier)),
         roles = Nil
       )
       transformAndCheckContributors(List(varField), List(contributor))
@@ -648,7 +648,7 @@ class SierraContributorsTest
 
   private def transformAndCheckContributors(
     varFields: List[VarField],
-    expectedContributors: List[Contributor[Unminted]]
+    expectedContributors: List[Contributor[Id.Unminted]]
   ) = {
     val bibId = createSierraBibNumber
     val bibData = createSierraBibDataWith(varFields = varFields)

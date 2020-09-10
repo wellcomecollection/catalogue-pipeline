@@ -13,7 +13,7 @@ import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 
 object SierraProduction extends SierraTransformer with SierraQueryOps {
 
-  type Output = List[ProductionEvent[Unminted]]
+  type Output = List[ProductionEvent[Id.Unminted]]
 
   // Populate wwork:production.
   //
@@ -240,7 +240,7 @@ object SierraProduction extends SierraTransformer with SierraQueryOps {
   }
 
   def getProductionFrom008(
-    bibData: SierraBibData): List[ProductionEvent[Unminted]] =
+    bibData: SierraBibData): List[ProductionEvent[Id.Unminted]] =
     bibData
       .varfieldsWithTag("008")
       .contents
@@ -264,21 +264,21 @@ object SierraProduction extends SierraTransformer with SierraQueryOps {
     varfield.subfieldContents.mkString(" ")
 
   private def placesFromSubfields(varfield: VarField,
-                                  subfieldTag: String): List[Place[Unminted]] =
+                                  subfieldTag: String): List[Place[Id.Unminted]] =
     varfield
       .subfieldsWithTag(subfieldTag)
       .contents
       .map(Place.normalised)
 
   private def agentsFromSubfields(varfield: VarField,
-                                  subfieldTag: String): List[Agent[Unminted]] =
+                                  subfieldTag: String): List[Agent[Id.Unminted]] =
     varfield
       .subfieldsWithTag(subfieldTag)
       .contents
       .map(Agent.normalised)
 
   private def datesFromSubfields(varfield: VarField,
-                                 subfieldTag: String): List[Period[Unminted]] =
+                                 subfieldTag: String): List[Period[Id.Unminted]] =
     varfield
       .subfieldsWithTag(subfieldTag)
       .contents

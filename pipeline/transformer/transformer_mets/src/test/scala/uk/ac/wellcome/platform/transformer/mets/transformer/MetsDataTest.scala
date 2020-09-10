@@ -29,7 +29,7 @@ class MetsDataTest
       license = Some(License.CCBYNC))
 
     val unidentifiableItem =
-      Item(id = Unidentifiable, locations = List(digitalLocation))
+      Item(id = Id.Unidentifiable, locations = List(digitalLocation))
     metsData.toWork(version).right.get shouldBe UnidentifiedInvisibleWork(
       version = version,
       sourceIdentifier = expectedSourceIdentifier,
@@ -67,7 +67,7 @@ class MetsDataTest
         license = None)
 
     val unidentifiableItem =
-      Item(id = Unidentifiable, locations = List(digitalLocation))
+      Item(id = Id.Unidentifiable, locations = List(digitalLocation))
     metsData.toWork(version).right.get shouldBe UnidentifiedInvisibleWork(
       version = version,
       sourceIdentifier = expectedSourceIdentifier,
@@ -105,7 +105,7 @@ class MetsDataTest
     inside(metsData.toWork(1).right.get.data.items) {
       case List(
           Item(
-            Unidentifiable,
+            Id.Unidentifiable,
             _,
             List(DigitalLocationDeprecated(_, _, license, _, _, _)),
             _)) =>
@@ -121,7 +121,7 @@ class MetsDataTest
     inside(metsData.toWork(1).right.get.data.items) {
       case List(
           Item(
-            Unidentifiable,
+            Id.Unidentifiable,
             _,
             List(DigitalLocationDeprecated(_, _, license, _, _, _)),
             _)) =>
@@ -137,7 +137,7 @@ class MetsDataTest
     inside(metsData.toWork(1).right.get.data.items) {
       case List(
           Item(
-            Unidentifiable,
+            Id.Unidentifiable,
             _,
             List(DigitalLocationDeprecated(_, _, license, _, _, _)),
             _)) =>
@@ -154,7 +154,7 @@ class MetsDataTest
     inside(result.right.get.data.items) {
       case List(
           Item(
-            Unidentifiable,
+            Id.Unidentifiable,
             _,
             List(DigitalLocationDeprecated(_, _, license, _, _, _)),
             _)) =>
@@ -173,7 +173,7 @@ class MetsDataTest
     inside(result.right.get.data.items) {
       case List(
           Item(
-            Unidentifiable,
+            Id.Unidentifiable,
             _,
             List(DigitalLocationDeprecated(_, _, license, _, _, _)),
             _)) =>
@@ -191,7 +191,7 @@ class MetsDataTest
     inside(result.right.get.data.items) {
       case List(
           Item(
-            Unidentifiable,
+            Id.Unidentifiable,
             _,
             List(DigitalLocationDeprecated(_, _, license, _, _, _)),
             _)) =>

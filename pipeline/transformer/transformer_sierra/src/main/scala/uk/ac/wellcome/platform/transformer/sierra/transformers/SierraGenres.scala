@@ -4,7 +4,7 @@ import uk.ac.wellcome.models.work.internal.{
   AbstractConcept,
   Concept,
   Genre,
-  Unminted
+  Id
 }
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
@@ -49,7 +49,7 @@ object SierraGenres
     with SierraQueryOps
     with SierraConcepts {
 
-  type Output = List[Genre[Unminted]]
+  type Output = List[Genre[Id.Unminted]]
 
   def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
     bibData
@@ -71,7 +71,7 @@ object SierraGenres
   // only concept which might be identified.
   private def getPrimaryConcept(
     primarySubfields: List[MarcSubfield],
-    varField: VarField): List[AbstractConcept[Unminted]] =
+    varField: VarField): List[AbstractConcept[Id.Unminted]] =
     primarySubfields.map { subfield =>
       val concept = Concept(label = subfield.content)
       concept.copy(id = identifyConcept(concept, varField))

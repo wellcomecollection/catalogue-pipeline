@@ -49,7 +49,7 @@ object SierraOrganisationSubjects
     }
 
   private def createOrganisation(bibId: SierraBibNumber,
-                                 varField: VarField): Organisation[Unminted] = {
+                                 varField: VarField): Organisation[Id.Unminted] = {
     val label = createLabel(varField, subfieldTags = List("a", "b"))
 
     // @@AWLC: I'm not sure if this can happen in practice -- but we don't have

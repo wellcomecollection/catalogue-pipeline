@@ -4,6 +4,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
 import uk.ac.wellcome.models.work.internal._
+import Id._
 
 class DisplayAbstractAgentTest
     extends AnyFunSpec
@@ -20,7 +21,7 @@ class DisplayAbstractAgentTest
   val identified = Identified(canonicalId, sourceIdentifier, otherIdentifiers)
 
   describe("Agent") {
-    val unidentifiedAgent = Agent(label = label, id = Unidentifiable)
+    val unidentifiedAgent = Agent(label = label, id = Id.Unidentifiable)
 
     val identifiedAgent = Agent(label = label, id = identified)
 
@@ -70,7 +71,7 @@ class DisplayAbstractAgentTest
     val numeration = randomAlphanumeric(length = 3)
 
     val unidentifiedPerson = Person(
-      id = Unidentifiable,
+      id = Id.Unidentifiable,
       label = label,
       prefix = Some(prefix),
       numeration = Some(numeration)
@@ -132,7 +133,7 @@ class DisplayAbstractAgentTest
 
   describe("Organisation") {
     val unidentifiedOrganisation =
-      Organisation(label = label, id = Unidentifiable)
+      Organisation(label = label, id = Id.Unidentifiable)
 
     val identifiedOrganisation = Organisation(label = label, id = identified)
 
@@ -181,7 +182,7 @@ class DisplayAbstractAgentTest
   }
 
   describe("Meeting") {
-    val unidentifiedMeeting = Meeting(label = label, id = Unidentifiable)
+    val unidentifiedMeeting = Meeting(label = label, id = Id.Unidentifiable)
 
     val identifiedMeeting = Meeting(label = label, id = identified)
 

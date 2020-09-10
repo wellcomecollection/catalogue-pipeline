@@ -57,7 +57,7 @@ trait SierraConcepts extends SierraQueryOps {
   //
   // Note that some identifiers have an identifier scheme in
   // indicator 2, but no ID.  In this case, we just ignore it.
-  def identifyConcept[T](concept: T, varField: VarField): Unminted =
+  def identifyConcept[T](concept: T, varField: VarField): Id.Unminted =
     getIdentifierSubfieldContents(varField) match {
       case Seq(subfieldContent) =>
         maybeAddIdentifier[T](
@@ -65,7 +65,7 @@ trait SierraConcepts extends SierraQueryOps {
           varField = varField,
           identifierSubfieldContent = subfieldContent
         )
-      case _ => Unidentifiable
+      case _ => Id.Unidentifiable
     }
 
   // If there's exactly one subfield $0 on the VarField, add an identifier
@@ -73,20 +73,20 @@ trait SierraConcepts extends SierraQueryOps {
   private def maybeAddIdentifier[T](
     concept: T,
     varField: VarField,
-    identifierSubfieldContent: String): Unminted =
+    identifierSubfieldContent: String): Id.Unminted =
     SierraConceptIdentifier
       .maybeFindIdentifier(
         varField = varField,
         identifierSubfieldContent = identifierSubfieldContent,
         ontologyType = concept.getClass.getSimpleName
       )
-      .map(Identifiable(_))
-      .getOrElse(Unidentifiable)
+      .map(Id.Identifiable(_))
+      .getOrElse(Id.Unidentifiable)
 
   // Extract the subdivisions, which come from everything except subfield $a.
   // These are never identified.  We preserve the order from MARC.
   protected def getSubdivisions(
-    subdivisionSubfields: List[MarcSubfield]): List[AbstractConcept[Unminted]] =
+    subdivisionSubfields: List[MarcSubfield]): List[AbstractConcept[Id.Unminted]] =
     subdivisionSubfields.map { subfield =>
       subfield.tag match {
         case "v" | "x" => Concept(label = subfield.content)
