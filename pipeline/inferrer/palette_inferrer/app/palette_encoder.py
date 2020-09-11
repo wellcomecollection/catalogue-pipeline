@@ -6,6 +6,11 @@ from joblib import Parallel, delayed
 
 class PaletteEncoder:
     def __init__(self, palette_size, palette_weights, bin_sizes):
+        """
+        Instantiate a palette encoder that looks for palette_size colours,
+        weighted by palette_weights in descending order of cluster cardinality,
+        and quantises the resultant colors across bin_sizes bins, respectively.
+        """
         assert len(palette_weights) == palette_size
         self.palette_size = palette_size
         self.palette_weights = palette_weights
@@ -17,18 +22,13 @@ class PaletteEncoder:
         """
         extract n significant colours from the image pixels by taking the
         centres of n kmeans clusters of the image's pixels arranged in colour
-        space. Returns tuples of (colour, weight) where the weights are integers.
-        The biggest cluster is weighted at n^p, the second largest (n-1)^p
-        times, ..., and the smallest has weight 1.
+        space. Returns colours in descending order of cluster cardinality.
         """
         pixels = np.array(image).reshape(-1, 3)
-        print(np.array(image).shape)
-        print(pixels.shape)
 
         # Only cluster distinct colours but weight them by their frequency
         # As per https://arxiv.org/pdf/1101.0395.pdf
         distinct_colours, distinct_colour_freqs = np.unique(pixels, axis=0, return_counts=True)
-        print(len(distinct_colours))
         clusters = KMeans(n_clusters=n).fit(distinct_colours, sample_weight=distinct_colour_freqs)
 
         # Sort clusters by the sum of the weights they contain
