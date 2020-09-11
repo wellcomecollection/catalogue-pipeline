@@ -1,20 +1,27 @@
 package uk.ac.wellcome.models.work.internal
 
-/** Work contains the work itself. It is parameterised by its state, meaning
-  * the same type of Work can be in a number of possible states depending on
-  * where in the pipeline it is. This allows us to easily add new types of work
-  * (such as if Collection is decided to be a separate type to StandardWork),
-  * with the state of the work in the pipeline being an orthogonal concern.
+/** Work is the core model in the pipeline / API.
+  *
+  * It is parameterised by State, meaning the same type of Work can be in a
+  * number of possible states depending on where in the pipeline it is.
   */
 sealed trait Work[State <: WorkState] {
-  val sourceIdentifier: SourceIdentifier
+
   val version: Int
+
+  val state: State 
+
   def maybeData: Option[WorkData[State, State#ImageId]]
+
+  def sourceIdentifier: SourceIdentifier =
+    state match {
+      case WorkState.Unidentified(sourceIdentifier, _) => sourceIdentifier
+      case WorkState.Identified(sourceIdentifier, _) => sourceIdentifier
+    }
 }
 
 object Work {
   case class Standard[State <: WorkState](
-    sourceIdentifier: SourceIdentifier,
     version: Int,
     data: WorkData[State, State#ImageId],
     state: State,
@@ -24,8 +31,8 @@ object Work {
   }
 
   case class Redirected[State <: WorkState](
-    sourceIdentifier: SourceIdentifier,
     version: Int,
+    redirect: State#DataId,
     state: State,
   ) extends Work[State] {
 
@@ -33,7 +40,6 @@ object Work {
   }
 
   case class Invisible[State <: WorkState](
-    sourceIdentifier: SourceIdentifier,
     version: Int,
     data: WorkData[State, State#ImageId],
     state: State,
