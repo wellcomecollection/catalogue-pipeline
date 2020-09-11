@@ -28,8 +28,12 @@ class PaletteEncoder:
 
         # Only cluster distinct colours but weight them by their frequency
         # As per https://arxiv.org/pdf/1101.0395.pdf
-        distinct_colours, distinct_colour_freqs = np.unique(pixels, axis=0, return_counts=True)
-        clusters = KMeans(n_clusters=n).fit(distinct_colours, sample_weight=distinct_colour_freqs)
+        distinct_colours, distinct_colour_freqs = np.unique(
+            pixels, axis=0, return_counts=True
+        )
+        clusters = KMeans(n_clusters=n).fit(
+            distinct_colours, sample_weight=distinct_colour_freqs
+        )
 
         # Sort clusters by the sum of the weights they contain
         label_weights = Counter()
