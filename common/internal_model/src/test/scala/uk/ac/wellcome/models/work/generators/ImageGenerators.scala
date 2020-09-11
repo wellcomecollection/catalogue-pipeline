@@ -1,6 +1,7 @@
 package uk.ac.wellcome.models.work.generators
 
 import uk.ac.wellcome.models.work.internal._
+import SourceWork._
 
 trait ImageGenerators
     extends IdentifiersGenerators
@@ -88,8 +89,8 @@ trait ImageGenerators
     imageId: IdState.Identified = IdState.Identified(
       createCanonicalId,
       createSourceIdentifierWith(IdentifierType("miro-image-number"))),
-    parentWork: IdentifiedWork = createIdentifiedSierraWorkWith(),
-    redirectedWork: Option[IdentifiedWork] = Some(createIdentifiedWork),
+    parentWork: Work.Standard[WorkState.Identified] = createIdentifiedSierraWorkWith(),
+    redirectedWork: Option[Work.Standard[WorkState.Identified]] = Some(createIdentifiedWork),
     inferredData: Option[InferredData] = createInferredData,
     location: DigitalLocationDeprecated = createDigitalLocation,
     version: Int = 1,
@@ -141,7 +142,7 @@ trait ImageGenerators
   implicit class UnmergedImageIdOps(
     val image: UnmergedImage[IdState.Identifiable, WorkState.Unidentified]) {
     def toIdentifiedWith(id: String = createCanonicalId)
-      : UnmergedImage[IdState.Identified, IdState.Minted] =
+      : UnmergedImage[IdState.Identified, WorkState.Identified] =
       UnmergedImage(
         id = IdState.Identified(
           canonicalId = id,
@@ -151,7 +152,7 @@ trait ImageGenerators
         location = image.location
       )
 
-    val toIdentified: UnmergedImage[IdState.Identified, IdState.Minted] =
+    val toIdentified: UnmergedImage[IdState.Identified, WorkState.Identified] =
       toIdentifiedWith()
   }
 }

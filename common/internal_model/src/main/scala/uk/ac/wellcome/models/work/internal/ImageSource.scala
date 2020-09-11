@@ -21,3 +21,27 @@ case class SourceWork[ImageId <: IdState.WithSourceIdentifier,
   data: WorkData[State, ImageId],
   ontologyType: String = "Work",
 )
+
+object SourceWork {
+
+  implicit class UnidentifiedWorkToSourceWork(work: Work[WorkState.Unidentified]) {
+
+    def toSourceWork: SourceWork[IdState.Identifiable, WorkState.Unidentified] =
+      SourceWork(
+        id = IdState.Identifiable(work.state.sourceIdentifier),
+        data = work.maybeData.getOrElse(WorkData())
+      )
+  }
+
+  implicit class IdentifiedWorkToSourceWork(work: Work[WorkState.Identified]) {
+
+    def toSourceWork: SourceWork[IdState.Identified, WorkState.Identified] =
+      SourceWork(
+        id = IdState.Identified(
+          sourceIdentifier = work.state.sourceIdentifier,
+          canonicalId = work.state.canonicalId
+        ),
+        data = work.maybeData.getOrElse(WorkData())
+      )
+  }
+}
