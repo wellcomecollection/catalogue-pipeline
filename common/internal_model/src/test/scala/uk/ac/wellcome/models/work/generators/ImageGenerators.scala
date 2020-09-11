@@ -12,7 +12,7 @@ trait ImageGenerators
     version: Int = 1,
     identifierValue: String = randomAlphanumeric(10),
     identifierType: IdentifierType = IdentifierType("miro-image-number")
-  ): UnmergedImage[IdState.Identifiable, IdState.Unminted] = UnmergedImage(
+  ): UnmergedImage[IdState.Identifiable, WorkState.Unidentified] = UnmergedImage(
     sourceIdentifier = createSourceIdentifierWith(
       identifierType = identifierType,
       value = identifierValue),
@@ -21,7 +21,7 @@ trait ImageGenerators
   )
 
   def createUnmergedImage
-    : UnmergedImage[IdState.Identifiable, IdState.Unminted] =
+    : UnmergedImage[IdState.Identifiable, WorkState.Unidentified] =
     createUnmergedImageWith()
 
   def createUnmergedMiroImage = createUnmergedImageWith(
@@ -41,15 +41,15 @@ trait ImageGenerators
     location: DigitalLocationDeprecated = createDigitalLocation,
     version: Int = 1,
     identifierType: IdentifierType = IdentifierType("miro-image-number"),
-    parentWork: UnidentifiedWork = createUnidentifiedSierraWorkWith(),
-    redirectedWork: Option[TransformedBaseWork] = Some(createMiroWorkWith(Nil)))
-    : MergedImage[IdState.Identifiable, IdState.Unminted] =
+    parentWork: Work.Standard[WorkState.Unidentified] = createUnidentifiedSierraWorkWith(),
+    redirectedWork: Option[Work[WorkState.Unidentified]] = Some(createMiroWorkWith(Nil)))
+    : MergedImage[IdState.Identifiable, WorkState.Unidentified] =
     createUnmergedImageWith(location, version, identifierType = identifierType) mergeWith (
       parentWork.toSourceWork,
       redirectedWork.map(_.toSourceWork)
     )
 
-  def createMergedImage: MergedImage[IdState.Identifiable, IdState.Unminted] =
+  def createMergedImage: MergedImage[IdState.Identifiable, WorkState.Unidentified] =
     createMergedImageWith()
 
   def createIdentifiedMergedImageWith(
@@ -57,15 +57,15 @@ trait ImageGenerators
       IdState.Identified(createCanonicalId, createSourceIdentifier),
     location: DigitalLocationDeprecated = createDigitalLocation,
     version: Int = 1,
-    parentWork: IdentifiedWork = createIdentifiedSierraWorkWith(),
-    redirectedWork: Option[IdentifiedWork] = Some(
+    parentWork: Work.Standard[WorkState.Identified] = createIdentifiedSierraWorkWith(),
+    redirectedWork: Option[Work[WorkState.Identified]] = Some(
       createIdentifiedSierraWorkWith()))
-    : MergedImage[IdState.Identified, IdState.Minted] =
-    MergedImage[IdState.Identified, IdState.Minted](
+    : MergedImage[IdState.Identified, WorkState.Identified] =
+    MergedImage(
       imageId,
       version,
       location,
-      SourceWorks[IdState.Identified, IdState.Minted](
+      SourceWorks(
         parentWork.toSourceWork,
         redirectedWork.map(_.toSourceWork)))
 
@@ -139,7 +139,7 @@ trait ImageGenerators
   }
 
   implicit class UnmergedImageIdOps(
-    val image: UnmergedImage[IdState.Identifiable, IdState.Unminted]) {
+    val image: UnmergedImage[IdState.Identifiable, WorkState.Unidentified]) {
     def toIdentifiedWith(id: String = createCanonicalId)
       : UnmergedImage[IdState.Identified, IdState.Minted] =
       UnmergedImage(

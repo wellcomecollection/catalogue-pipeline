@@ -4,56 +4,59 @@ import uk.ac.wellcome.models.work.internal._
 
 trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
 
+  import WorkState._
+
   private def createTitle: String = randomAlphanumeric(length = 100)
 
-  def createUnidentifiedRedirectedWork: UnidentifiedRedirectedWork =
-    UnidentifiedRedirectedWork(
-      sourceIdentifier = createSourceIdentifier,
+  def createUnidentifiedRedirectedWork: Work.Redirected[Unidentified] =
+    Work.Redirected(
+      state = Unidentified(createSourceIdentifier),
       version = 1,
-      redirect = IdentifiableRedirect(
-        sourceIdentifier = createSourceIdentifier
-      )
+      redirect = IdState.Identifiable(createSourceIdentifier)
     )
 
-  def createUnidentifiedRedirectedWork(
-    source: TransformedBaseWork,
-    target: UnidentifiedWork): UnidentifiedRedirectedWork =
-    UnidentifiedRedirectedWork(
-      sourceIdentifier = source.sourceIdentifier,
+  def createRedirectedWork[State <: WorkState](
+    source: Work[State],
+    target: Work[State]): Work.Redirected[State] =
+    Work.Redirected(
+      state = source.state,
       version = source.version,
-      redirect = IdentifiableRedirect(target.sourceIdentifier)
+      redirect = IdState.Identifiable(target.sourceIdentifier)
     )
 
   def createUnidentifiedRedirectedWorkWith(
-    redirect: IdentifiableRedirect): UnidentifiedRedirectedWork =
-    UnidentifiedRedirectedWork(
-      sourceIdentifier = createSourceIdentifier,
+    redirect: IdState.Identifiable): Work.Redirected[Unidentified] =
+    Work.Redirected(
+      state = Unidentified(createSourceIdentifier),
       version = 1,
       redirect = redirect
     )
 
-  def createIdentifiedRedirectedWork: IdentifiedRedirectedWork =
+  def createIdentifiedRedirectedWork: Work.Redirected[Identified] =
     createIdentifiedRedirectedWorkWith()
 
   def createIdentifiedRedirectedWorkWith(
     canonicalId: String = createCanonicalId,
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     version: Int = 1,
-  ): IdentifiedRedirectedWork =
-    IdentifiedRedirectedWork(
-      canonicalId = canonicalId,
-      sourceIdentifier = sourceIdentifier,
+  ): Work.Redirected[Identified] =
+    Work.Redirected(
+      state = Identified(
+        canonicalId = canonicalId,
+        sourceIdentifier = sourceIdentifier,
+      ),
       version = version,
-      redirect = IdentifiedRedirect(
-        canonicalId = createCanonicalId
+      redirect = IdState.Identified(
+        canonicalId = createCanonicalId,
+        sourceIdentifier = createSourceIdentifier
       )
     )
 
   def createUnidentifiedInvisibleWorkWith(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     items: List[Item[IdState.Unminted]] = Nil,
-    images: List[UnmergedImage[IdState.Identifiable, IdState.Unminted]] = Nil,
-  ): UnidentifiedInvisibleWork =
+    images: List[UnmergedImage[IdState.Identifiable, WorkState.Unidentified]] = Nil,
+  ): Work.Invisible[Unidentified] =
     UnidentifiedInvisibleWork(
       sourceIdentifier = sourceIdentifier,
       data = WorkData(items = items, images = images),
