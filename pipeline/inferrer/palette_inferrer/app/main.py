@@ -51,6 +51,6 @@ def on_startup():
 
 
 @app.on_event("shutdown")
-def on_shutdown():
-    http.close_persistent_client_session()
+async def on_shutdown():
+    await http.close_persistent_client_session()
     batch_inferrer_queue.stop_worker()
