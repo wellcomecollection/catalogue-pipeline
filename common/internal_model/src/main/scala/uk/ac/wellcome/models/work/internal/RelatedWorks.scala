@@ -21,13 +21,13 @@ case class RelatedWorks(
 )
 
 case class RelatedWork(
-  work: Work[WorkState.Identified, Id.Identified],
+  work: Work[WorkState.Identified, IdState.Identified],
   relatedWorks: RelatedWorks
 )
 
 object RelatedWorks {
 
-  type IdentifiedWork = Work[WorkState.Identified, Id.Identified]
+  type IdentifiedWork = Work[WorkState.Identified, IdState.Identified]
 
   def unknown: RelatedWorks =
     RelatedWorks(
@@ -164,7 +164,7 @@ object RelatedWorks {
 
 object RelatedWork {
 
-  type IdentifiedWork = Work[WorkState.Identified, Id.Identified]
+  type IdentifiedWork = Work[WorkState.Identified, IdState.Identified]
 
   def apply(work: IdentifiedWork): RelatedWork =
     RelatedWork(work, RelatedWorks.unknown)

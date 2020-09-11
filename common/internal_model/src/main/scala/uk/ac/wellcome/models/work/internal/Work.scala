@@ -9,14 +9,14 @@ package uk.ac.wellcome.models.work.internal
 sealed trait Work[State <: WorkState, ImageId <: IdState.WithSourceIdentifier] {
   val sourceIdentifier: SourceIdentifier
   val version: Int
-  def maybeData: Option[WorkData[State#DataId, ImageId]]
+  def maybeData: Option[WorkData[State, ImageId]]
 }
 
 object Work {
   case class Standard[State <: WorkState, ImageId <: IdState.WithSourceIdentifier](
     sourceIdentifier: SourceIdentifier,
     version: Int,
-    data: WorkData[State#DataId, ImageId],
+    data: WorkData[State, ImageId],
     state: State,
   ) extends Work[State, ImageId] {
 
@@ -35,7 +35,7 @@ object Work {
   case class Invisible[State <: WorkState, ImageId <: IdState.WithSourceIdentifier](
     sourceIdentifier: SourceIdentifier,
     version: Int,
-    data: WorkData[State#DataId, ImageId],
+    data: WorkData[State, ImageId],
     state: State,
   ) extends Work[State, ImageId] {
 
@@ -46,7 +46,7 @@ object Work {
 /** WorkData contains data common to all types of works that can exist at any
   * stage of the pipeline.
   */
-case class WorkData[DataId <: IdState, ImageId <: IdState.WithSourceIdentifier](
+case class WorkData[State <: WorkState, ImageId <: IdState.WithSourceIdentifier](
   title: Option[String] = None,
   otherIdentifiers: List[SourceIdentifier] = Nil,
   mergeCandidates: List[MergeCandidate] = Nil,
@@ -55,20 +55,20 @@ case class WorkData[DataId <: IdState, ImageId <: IdState.WithSourceIdentifier](
   description: Option[String] = None,
   physicalDescription: Option[String] = None,
   lettering: Option[String] = None,
-  createdDate: Option[Period[DataId]] = None,
-  subjects: List[Subject[DataId]] = Nil,
-  genres: List[Genre[DataId]] = Nil,
-  contributors: List[Contributor[DataId]] = Nil,
+  createdDate: Option[Period[State#DataId]] = None,
+  subjects: List[Subject[State#DataId]] = Nil,
+  genres: List[Genre[State#DataId]] = Nil,
+  contributors: List[Contributor[State#DataId]] = Nil,
   thumbnail: Option[LocationDeprecated] = None,
-  production: List[ProductionEvent[DataId]] = Nil,
+  production: List[ProductionEvent[State#DataId]] = Nil,
   language: Option[Language] = None,
   edition: Option[String] = None,
   notes: List[Note] = Nil,
   duration: Option[Int] = None,
-  items: List[Item[DataId]] = Nil,
+  items: List[Item[State#DataId]] = Nil,
   merged: Boolean = false,
   collectionPath: Option[CollectionPath] = None,
-  images: List[UnmergedImage[ImageId, DataId]] = Nil
+  images: List[UnmergedImage[ImageId, State]] = Nil
 )
 
 /** WorkState represents the state of the work in the pipeline, and contains

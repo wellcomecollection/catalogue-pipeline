@@ -1,23 +1,23 @@
 package uk.ac.wellcome.models.work.internal
 
 sealed trait ImageSource[
-  ImageId <: IdState.WithSourceIdentifier, DataId <: IdState] {
+  ImageId <: IdState.WithSourceIdentifier, State <: WorkState] {
   val id: ImageId
   val ontologyType: String
 }
 
 case class SourceWorks[ImageId <: IdState.WithSourceIdentifier,
-                       DataId <: IdState](
-  canonicalWork: SourceWork[ImageId, DataId],
-  redirectedWork: Option[SourceWork[ImageId, DataId]]
-) extends ImageSource[ImageId, DataId] {
+                       State <: WorkState](
+  canonicalWork: SourceWork[ImageId, State],
+  redirectedWork: Option[SourceWork[ImageId, State]]
+) extends ImageSource[ImageId, State] {
   override val id = canonicalWork.id
   override val ontologyType: String = canonicalWork.ontologyType
 }
 
 case class SourceWork[ImageId <: IdState.WithSourceIdentifier,
-                      DataId <: IdState](
+                      State <: WorkState](
   id: ImageId,
-  data: WorkData[DataId, ImageId],
+  data: WorkData[State, ImageId],
   ontologyType: String = "Work",
 )
