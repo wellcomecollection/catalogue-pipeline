@@ -22,7 +22,7 @@ steps:
   - command: .buildkite/scripts/run_job.py reindex_worker
     label: "reindex worker"
   - command: .buildkite/scripts/run_job.py ingestor_works
-    label: "ingestor (works)
+    label: "ingestor (works)"
   - command: .buildkite/scripts/run_job.py ingestor_images
     label: "ingestor (images)"
   - command: .buildkite/scripts/run_job.py id_minter
@@ -50,7 +50,7 @@ steps:
   - command: .buildkite/scripts/run_job.py sierra_items_to_dynamo
     label: "Sierra items to Dynamo"
   - command: .buildkite/scripts/run_job.py mets_adapter
-    label: "METS adatper"
+    label: "METS adapter"
   - command: .buildkite/scripts/run_job.py calm_adapter
     label: "Calm adapter"
   - command: .buildkite/scripts/run_job.py inference_manager
