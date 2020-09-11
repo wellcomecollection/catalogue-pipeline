@@ -1,16 +1,19 @@
+from collections import Counter
 import numpy as np
 from sklearn.cluster import KMeans
 from joblib import Parallel, delayed
 
 
 class PaletteEncoder:
-    def __init__(self, palette_size, bin_sizes):
+    def __init__(self, palette_size, palette_weights, bin_sizes):
+        assert len(palette_weights) == palette_size
         self.palette_size = palette_size
+        self.palette_weights = palette_weights
         self.bin_sizes = bin_sizes
         self.delayed_process_image = delayed(self.process_image)
 
     @staticmethod
-    def get_significant_colours(image, n, p=0.5):
+    def get_significant_colours(image, n):
         """
         extract n significant colours from the image pixels by taking the
         centres of n kmeans clusters of the image's pixels arranged in colour
@@ -19,11 +22,20 @@ class PaletteEncoder:
         times, ..., and the smallest has weight 1.
         """
         pixels = np.array(image).reshape(-1, 3)
-        clusters = KMeans(n_clusters=n).fit(pixels)
-        cluster_labels, cluster_cardinalities = np.unique(
-            clusters.labels_, return_counts=True
-        )
-        labels_by_size = cluster_labels[np.argsort(cluster_cardinalities)]
+        print(np.array(image).shape)
+        print(pixels.shape)
+
+        # Only cluster distinct colours but weight them by their frequency
+        # As per https://arxiv.org/pdf/1101.0395.pdf
+        distinct_colours, distinct_colour_freqs = np.unique(pixels, axis=0, return_counts=True)
+        print(len(distinct_colours))
+        clusters = KMeans(n_clusters=n).fit(distinct_colours, sample_weight=distinct_colour_freqs)
+
+        # Sort clusters by the sum of the weights they contain
+        label_weights = Counter()
+        for label, weight in zip(clusters.labels_, distinct_colour_freqs):
+            label_weights[label] += weight
+        labels_by_weight = [label for label, _ in label_weights.most_common()]
 
         # Unfortunately we need to make sure that the labels correspond to the centroids
         # because that behaviour is not guaranteed by sklearn.
@@ -32,10 +44,8 @@ class PaletteEncoder:
         consistently_indexed_centroids = clusters.cluster_centers_[
             np.argsort(centroid_labels)
         ]
-        sorted_centroids = consistently_indexed_centroids[labels_by_size]
 
-        weights = [int((i + 1) ** p) for i in range(n)]
-        return list(zip(sorted_centroids, weights))
+        return consistently_indexed_centroids[labels_by_weight]
 
     @staticmethod
     def get_bin_index(colour, n_bins):
@@ -63,7 +73,7 @@ class PaletteEncoder:
         combined_results = [
             (self.get_bin_index(colour, n), n, weight)
             for n in self.bin_sizes
-            for colour, weight in colours
+            for colour, weight in zip(colours, self.palette_weights)
         ]
 
         return self.encode_for_elasticsearch(combined_results)
