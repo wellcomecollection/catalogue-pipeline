@@ -6,38 +6,38 @@ package uk.ac.wellcome.models.work.internal
   * (such as if Collection is decided to be a separate type to StandardWork),
   * with the state of the work in the pipeline being an orthogonal concern.
   */
-sealed trait Work[State <: WorkState, ImageId <: IdState.WithSourceIdentifier] {
+sealed trait Work[State <: WorkState] {
   val sourceIdentifier: SourceIdentifier
   val version: Int
-  def maybeData: Option[WorkData[State, ImageId]]
+  def maybeData: Option[WorkData[State, State#ImageId]]
 }
 
 object Work {
-  case class Standard[State <: WorkState, ImageId <: IdState.WithSourceIdentifier](
+  case class Standard[State <: WorkState](
     sourceIdentifier: SourceIdentifier,
     version: Int,
-    data: WorkData[State, ImageId],
+    data: WorkData[State, State#ImageId],
     state: State,
-  ) extends Work[State, ImageId] {
+  ) extends Work[State] {
 
     def maybeData = Some(data)
   }
 
-  case class Redirected[State <: WorkState, ImageId <: IdState.WithSourceIdentifier](
+  case class Redirected[State <: WorkState](
     sourceIdentifier: SourceIdentifier,
     version: Int,
     state: State,
-  ) extends Work[State, ImageId] {
+  ) extends Work[State] {
 
     def maybeData = None
   }
 
-  case class Invisible[State <: WorkState, ImageId <: IdState.WithSourceIdentifier](
+  case class Invisible[State <: WorkState](
     sourceIdentifier: SourceIdentifier,
     version: Int,
-    data: WorkData[State, ImageId],
+    data: WorkData[State, State#ImageId],
     state: State,
-  ) extends Work[State, ImageId] {
+  ) extends Work[State] {
 
     def maybeData = Some(data)
   }
@@ -100,6 +100,8 @@ sealed trait WorkState {
 
   type DataId <: IdState
 
+  type ImageId <: IdState.WithSourceIdentifier
+
   val sourceIdentifier: SourceIdentifier
 }
 
@@ -114,6 +116,8 @@ object WorkState {
   ) extends WorkState {
 
     type DataId = IdState.Unminted
+
+    type ImageId = IdState.Identifiable
   }
 
   case class Identified(
@@ -123,5 +127,7 @@ object WorkState {
   ) extends WorkState {
 
     type DataId = IdState.Minted
+
+    type ImageId = IdState.Identified
   }
 }

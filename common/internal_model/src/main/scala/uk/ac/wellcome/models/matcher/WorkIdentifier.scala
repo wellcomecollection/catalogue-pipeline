@@ -8,7 +8,7 @@ object WorkIdentifier {
   def apply(work: WorkNode): WorkIdentifier =
     WorkIdentifier(work.id, work.version)
 
-  def apply(work: Work[_, _]): WorkIdentifier =
+  def apply(work: Work[_]): WorkIdentifier =
     WorkIdentifier(
       identifier = work.sourceIdentifier.toString,
       version = Some(work.version)
