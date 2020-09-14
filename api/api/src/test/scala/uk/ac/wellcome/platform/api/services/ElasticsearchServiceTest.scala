@@ -386,7 +386,7 @@ class ElasticsearchServiceTest
       )
     )
 
-  private def populateElasticsearch(index: Index): List[IdentifiedWork] = {
+  private def populateElasticsearch(index: Index): List[Work.Standard[Identified]] = {
     val works = createIdentifiedWorks(count = 10)
 
     insertIntoElasticsearch(index, works: _*)
@@ -406,17 +406,17 @@ class ElasticsearchServiceTest
   private def assertResultsAreCorrect(index: Index,
                                       queryOptions: ElasticsearchQueryOptions =
                                         createElasticsearchQueryOptions,
-                                      expectedWorks: List[IdentifiedWork],
+                                      expectedWorks: List[Work.Standard[Identified]],
                                       scored: Option[Boolean] = None) = {
     searchResults(index, queryOptions) should contain theSameElementsAs expectedWorks
   }
 
   private def searchResponseToWorks(
-    response: Either[ElasticError, SearchResponse]): List[Work[Identified]]] =
+    response: Either[ElasticError, SearchResponse]): List[Work[Identified]] =
     response.right.get.hits.hits.map { searchHit: SearchHit =>
       jsonToWork(searchHit.sourceAsString)
     }.toList
 
-  private def jsonToWork(document: String): Work[Identified]] =
-    fromJson[Work[Identified]]](document).get
+  private def jsonToWork(document: String): Work[Identified] =
+    fromJson[Work[Identified]](document).get
 }

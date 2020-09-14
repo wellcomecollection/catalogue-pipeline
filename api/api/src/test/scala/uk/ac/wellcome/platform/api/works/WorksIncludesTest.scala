@@ -143,14 +143,14 @@ class WorksIncludesTest
                 "results": [
                  {
                    "type": "Work",
-                   "id": "${work0.canonicalId}",
+                   "id": "${work0.state.canonicalId}",
                    "title": "${work0.data.title.get}",
                    "alternativeTitles": [],
                    "subjects": [ ${subjects(subjects1)}]
                  },
                  {
                    "type": "Work",
-                   "id": "${work1.canonicalId}",
+                   "id": "${work1.state.canonicalId}",
                    "title": "${work1.data.title.get}",
                    "alternativeTitles": [],
                    "subjects": [ ${subjects(subjects2)}]
@@ -209,14 +209,14 @@ class WorksIncludesTest
                 "results": [
                  {
                    "type": "Work",
-                   "id": "${work0.canonicalId}",
+                   "id": "${work0.state.canonicalId}",
                    "title": "${work0.data.title.get}",
                    "alternativeTitles": [],
                    "genres": [ ${genres(genres1)}]
                  },
                  {
                    "type": "Work",
-                   "id": "${work1.canonicalId}",
+                   "id": "${work1.state.canonicalId}",
                    "title": "${work1.data.title.get}",
                    "alternativeTitles": [],
                    "genres": [ ${genres(genres2)}]
@@ -279,14 +279,14 @@ class WorksIncludesTest
                 "results": [
                  {
                    "type": "Work",
-                   "id": "${work0.canonicalId}",
+                   "id": "${work0.state.canonicalId}",
                    "title": "${work0.data.title.get}",
                    "alternativeTitles": [],
                    "contributors": [ ${contributors(contributors1)}]
                  },
                  {
                    "type": "Work",
-                   "id": "${work1.canonicalId}",
+                   "id": "${work1.state.canonicalId}",
                    "title": "${work1.data.title.get}",
                    "alternativeTitles": [],
                    "contributors": [ ${contributors(contributors2)}]
@@ -348,14 +348,14 @@ class WorksIncludesTest
                 "results": [
                  {
                    "type": "Work",
-                   "id": "${work0.canonicalId}",
+                   "id": "${work0.state.canonicalId}",
                    "title": "${work0.data.title.get}",
                    "alternativeTitles": [],
                    "production": [ ${production(productionEvents1)}]
                  },
                  {
                    "type": "Work",
-                   "id": "${work1.canonicalId}",
+                   "id": "${work1.state.canonicalId}",
                    "title": "${work1.data.title.get}",
                    "alternativeTitles": [],
                    "production": [ ${production(productionEvents2)}]
@@ -415,7 +415,7 @@ class WorksIncludesTest
                 "results": [
                    {
                      "type": "Work",
-                     "id": "${works(0).canonicalId}",
+                     "id": "${works(0).state.canonicalId}",
                      "title": "${works(0).data.title.get}",
                      "alternativeTitles": [],
                      "notes": [
@@ -441,7 +441,7 @@ class WorksIncludesTest
                    },
                    {
                      "type": "Work",
-                     "id": "${works(1).canonicalId}",
+                     "id": "${works(1).state.canonicalId}",
                      "title": "${works(1).data.title.get}",
                      "alternativeTitles": [],
                      "notes": [
@@ -523,14 +523,14 @@ class WorksIncludesTest
                 "results": [
                   {
                     "type": "Work",
-                    "id": "${works.head.canonicalId}",
+                    "id": "${works.head.state.canonicalId}",
                     "title": "${works.head.data.title.get}",
                     "alternativeTitles": [],
                     "images": [${workImageIncludes(works.head.data.images)}]
                   },
                   {
                     "type": "Work",
-                    "id": "${works(1).canonicalId}",
+                    "id": "${works(1).state.canonicalId}",
                     "title": "${works(1).data.title.get}",
                     "alternativeTitles": [],
                     "images": [${workImageIncludes(works(1).data.images)}]
@@ -593,15 +593,15 @@ class WorksIncludesTest
           storeWorks(index)
           assertJsonResponse(
             routes,
-            s"/$apiPrefix/works/${workC.canonicalId}?include=parts") {
+            s"/$apiPrefix/works/${workC.state.canonicalId}?include=parts") {
             Status.OK -> s"""
             {
               ${singleWorkResult(apiPrefix)},
-              "id": "${workC.canonicalId}",
+              "id": "${workC.state.canonicalId}",
               "title": "0/a/c",
               "alternativeTitles": [],
               "parts": [{
-                "id": "${workE.canonicalId}",
+                "id": "${workE.state.canonicalId}",
                 "title": "0/a/c/e",
                 "alternativeTitles": [],
                 "type": "Work"
@@ -618,21 +618,21 @@ class WorksIncludesTest
           storeWorks(index)
           assertJsonResponse(
             routes,
-            s"/$apiPrefix/works/${workC.canonicalId}?include=partOf") {
+            s"/$apiPrefix/works/${workC.state.canonicalId}?include=partOf") {
             Status.OK -> s"""
             {
               ${singleWorkResult(apiPrefix)},
-              "id": "${workC.canonicalId}",
+              "id": "${workC.state.canonicalId}",
               "title": "0/a/c",
               "alternativeTitles": [],
               "partOf": [
                 {
-                  "id": "${workA.canonicalId}",
+                  "id": "${workA.state.canonicalId}",
                   "title": "0/a",
                   "alternativeTitles": [],
                   "type": "Work",
                   "partOf": [{
-                    "id": "${work0.canonicalId}",
+                    "id": "${work0.state.canonicalId}",
                     "title": "0",
                     "alternativeTitles": [],
                     "type": "Work",
@@ -652,15 +652,15 @@ class WorksIncludesTest
           storeWorks(index)
           assertJsonResponse(
             routes,
-            s"/$apiPrefix/works/${workC.canonicalId}?include=precededBy") {
+            s"/$apiPrefix/works/${workC.state.canonicalId}?include=precededBy") {
             Status.OK -> s"""
             {
               ${singleWorkResult(apiPrefix)},
-              "id": "${workC.canonicalId}",
+              "id": "${workC.state.canonicalId}",
               "title": "0/a/c",
               "alternativeTitles": [],
               "precededBy": [{
-                "id": "${workB.canonicalId}",
+                "id": "${workB.state.canonicalId}",
                 "title": "0/a/b",
                 "alternativeTitles": [],
                 "type": "Work"
@@ -677,15 +677,15 @@ class WorksIncludesTest
           storeWorks(index)
           assertJsonResponse(
             routes,
-            s"/$apiPrefix/works/${workC.canonicalId}?include=succeededBy") {
+            s"/$apiPrefix/works/${workC.state.canonicalId}?include=succeededBy") {
             Status.OK -> s"""
             {
               ${singleWorkResult(apiPrefix)},
-              "id": "${workC.canonicalId}",
+              "id": "${workC.state.canonicalId}",
               "title": "0/a/c",
               "alternativeTitles": [],
               "succeededBy": [{
-                "id": "${workD.canonicalId}",
+                "id": "${workD.state.canonicalId}",
                 "title": "0/a/d",
                 "alternativeTitles": [],
                 "type": "Work"

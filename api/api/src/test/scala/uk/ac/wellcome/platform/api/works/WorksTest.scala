@@ -65,7 +65,7 @@ class WorksTest extends ApiWorksTestBase {
     "returns the requested page of results when requested with page & pageSize") {
     withApi {
       case (ElasticConfig(worksIndex, _), routes) =>
-        val works = createIdentifiedWorks(count = 3).sortBy { _.canonicalId }
+        val works = createIdentifiedWorks(count = 3).sortBy { _.state.canonicalId }
 
         insertIntoElasticsearch(worksIndex, works: _*)
 

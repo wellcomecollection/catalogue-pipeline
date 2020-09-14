@@ -132,7 +132,6 @@ object WorkState {
   case class Identified(
     sourceIdentifier: SourceIdentifier,
     canonicalId: String,
-    // relations: Relations[Identified],
   ) extends WorkState {
 
     type DataId = IdState.Minted

@@ -86,7 +86,7 @@ class WorksQueryTest
           canonicalId = "123abc",
           otherIdentifiers = List(createSourceIdentifierWith())
         )
-        val query = work.otherIdentifiers.head.value
+        val query = work.data.otherIdentifiers.head.value
 
         insertIntoElasticsearch(index, work, workNotMatching)
 

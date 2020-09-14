@@ -35,7 +35,7 @@ class RelatedWorkServiceTest
       sourceIdentifier = createSourceIdentifierWith(value = path)
     )
 
-  def storeWorks(index: Index, works: List[Work.Standard[Identified]] = works) =
+  def storeWorks(index: Index, works: List[Work[Identified]] = works) =
     insertIntoElasticsearch(index, works: _*)
 
   val workA = work("a", CollectionLevel.Collection)
@@ -154,10 +154,12 @@ class RelatedWorkServiceTest
 
   it("Only returns core fields on related works") {
     withLocalWorksIndex { index =>
-      val workP = work("p", CollectionLevel.Collection) withData (_.copy(
-        items = List(createIdentifiedItem)))
-      val workQ = work("p/q", CollectionLevel.Series) withData (_.copy(
-        notes = List(GeneralNote("hi"))))
+      val workP = work("p", CollectionLevel.Collection) withData (
+        _.copy[Identified, IdState.Identified](items = List(createIdentifiedItem))
+      )
+      val workQ = work("p/q", CollectionLevel.Series) withData (
+        _.copy[Identified, IdState.Identified](notes = List(GeneralNote("hi")))
+      )
       val workR = work("p/q/r", CollectionLevel.Item)
       storeWorks(index, List(workP, workQ, workR))
       whenReady(service.retrieveRelatedWorks(index, workR)) { result =>
