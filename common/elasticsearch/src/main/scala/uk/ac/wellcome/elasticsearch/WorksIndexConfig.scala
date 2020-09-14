@@ -183,7 +183,7 @@ case object WorksIndexConfig extends IndexConfig {
       ),
       version,
       objectField("redirect")
-        .fields(sourceIdentifier, canonicalId),
+        .fields(sourceIdentifier, canonicalId, otherIdentifiers),
       keywordField("type"),
       data(analyzedPath),
       objectField("invisibilityReasons").fields(

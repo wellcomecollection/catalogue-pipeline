@@ -10,8 +10,10 @@ import org.scalatest.concurrent.{Eventually, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+import io.circe.Encoder
+import io.circe.generic.semiauto.deriveEncoder
+
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
-import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.{ImageGenerators, WorksGenerators}
@@ -49,6 +51,8 @@ class WorksIndexConfigTest
       }
     }
   }
+
+  implicit val badObjectEncoder: Encoder[BadTestObject] = deriveEncoder
 
   it("puts a valid work") {
     forAll { sampleWork: Work[Identified] =>

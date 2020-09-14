@@ -10,7 +10,7 @@ import com.sksamuel.elastic4s.requests.indexes.admin.IndexExistsResponse
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import com.sksamuel.elastic4s.{ElasticClient, Index, Response}
 import grizzled.slf4j.Logging
-import io.circe.Encoder
+import io.circe.{Decoder, Encoder}
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.should.Matchers
@@ -19,9 +19,10 @@ import org.scalatest.{Assertion, Suite}
 import uk.ac.wellcome.elasticsearch._
 import uk.ac.wellcome.elasticsearch.model.CanonicalId
 import uk.ac.wellcome.fixtures._
-import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.json.JsonUtil.{toJson, fromJson}
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.work.internal._
+import uk.ac.wellcome.models.Implicits._
 import WorkState.Identified
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -145,7 +146,7 @@ trait ElasticsearchFixtures
     }
 
   def assertObjectIndexed[T](index: Index, t: T)(
-    implicit encoder: Encoder[T]): Assertion =
+    implicit decoder: Decoder[T]): Assertion =
     // Elasticsearch is eventually consistent so, when the future completes,
     // the documents won't appear in the search until after a refresh
     eventually {
@@ -156,7 +157,7 @@ trait ElasticsearchFixtures
       val hits = response.result.hits.hits
 
       hits should have size 1
-      assertJsonStringsAreEqual(hits.head.sourceAsString, toJson(t).get)
+      fromJson[T](hits.head.sourceAsString).get shouldEqual t
     }
 
   def assertElasticsearchEmpty[T](index: Index): Assertion =
