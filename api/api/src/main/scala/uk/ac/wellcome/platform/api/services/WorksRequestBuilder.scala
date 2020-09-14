@@ -14,7 +14,7 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
 
   import ElasticsearchRequestBuilder._
 
-  val idSort: FieldSort = fieldSort("canonicalId").order(SortOrder.ASC)
+  val idSort: FieldSort = fieldSort("state.canonicalId").order(SortOrder.ASC)
 
   def request(queryOptions: ElasticsearchQueryOptions,
               index: Index,
@@ -151,7 +151,7 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
           values = licenseIds)
       case IdentifiersFilter(identifiers) =>
         should(
-          termsQuery(field = "sourceIdentifier.value", values = identifiers),
+          termsQuery(field = "state.sourceIdentifier.value", values = identifiers),
           termsQuery(
             field = "data.otherIdentifiers.value",
             values = identifiers)

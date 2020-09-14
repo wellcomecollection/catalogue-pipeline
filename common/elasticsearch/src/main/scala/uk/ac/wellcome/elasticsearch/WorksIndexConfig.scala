@@ -177,10 +177,11 @@ case object WorksIndexConfig extends IndexConfig {
 
   val fields: Seq[FieldDefinition with Product with Serializable] =
     Seq(
-      canonicalId,
-      keywordField("ontologyType"),
+      objectField("state").fields(
+        canonicalId,
+        sourceIdentifier,
+      ),
       version,
-      sourceIdentifier,
       objectField("redirect")
         .fields(sourceIdentifier, canonicalId),
       keywordField("type"),
