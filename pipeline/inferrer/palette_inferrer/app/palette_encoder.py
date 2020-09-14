@@ -5,14 +5,13 @@ from joblib import Parallel, delayed
 
 
 class PaletteEncoder:
-    def __init__(self, palette_size, palette_weights, bin_sizes):
+    def __init__(self, palette_weights, bin_sizes):
         """
-        Instantiate a palette encoder that looks for palette_size colours,
+        Instantiate a palette encoder that looks for len(palette_weights) colours,
         weighted by palette_weights in descending order of cluster cardinality,
         and quantises the resultant colors across bin_sizes bins, respectively.
         """
-        assert len(palette_weights) == palette_size
-        self.palette_size = palette_size
+        self.palette_size = len(palette_weights)
         self.palette_weights = palette_weights
         self.bin_sizes = bin_sizes
         self.delayed_process_image = delayed(self.process_image)
