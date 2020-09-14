@@ -25,7 +25,8 @@ class MatcherFeatureTest
     with MatcherFixtures
     with WorksGenerators {
 
-  it("processes a message with a simple Work.Standard[Unidentified] with no linked works") {
+  it(
+    "processes a message with a simple Work.Standard[Unidentified] with no linked works") {
     val messageSender = new MemoryMessageSender()
 
     withLocalSqsQueue() { queue =>

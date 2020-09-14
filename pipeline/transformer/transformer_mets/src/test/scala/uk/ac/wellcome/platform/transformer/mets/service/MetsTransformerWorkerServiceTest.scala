@@ -103,7 +103,8 @@ class MetsTransformerWorkerServiceTest
     }
   }
 
-  private def expectedWork(identifier: String, version: Int): Work.Invisible[Unidentified] = {
+  private def expectedWork(identifier: String,
+                           version: Int): Work.Invisible[Unidentified] = {
     val expectedUrl =
       s"https://wellcomelibrary.org/iiif/$identifier/manifest"
     val expectedDigitalLocation = DigitalLocationDeprecated(

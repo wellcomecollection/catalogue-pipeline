@@ -11,7 +11,8 @@ import SourceWork._
 object ImagesRule extends FieldMergeRule {
   import WorkPredicates._
 
-  type FieldData = List[MergedImage[IdState.Identifiable, WorkState.Unidentified]]
+  type FieldData =
+    List[MergedImage[IdState.Identifiable, WorkState.Unidentified]]
 
   override def merge(
     target: Work.Standard[Unidentified],

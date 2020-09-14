@@ -12,8 +12,7 @@ class MergerManager(mergerRules: Merger) {
     * If we got an incomplete list of results from VHS (for example,
     * wrong versions), we skip the merge and return the original works.
     */
-  def applyMerge(
-    maybeWorks: Seq[Option[Work[Unidentified]]]): MergerOutcome = {
+  def applyMerge(maybeWorks: Seq[Option[Work[Unidentified]]]): MergerOutcome = {
     val works = maybeWorks.flatten
 
     if (works.size == maybeWorks.size)

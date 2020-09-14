@@ -967,7 +967,7 @@ class SierraTransformableTransformerTest
 
     triedMaybeWork.get shouldBe Work.Invisible[Unidentified](
       state = Unidentified(
-          createSierraSystemSourceIdentifierWith(
+        createSierraSystemSourceIdentifierWith(
           value = id.withCheckDigit
         ),
       ),

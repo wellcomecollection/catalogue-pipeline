@@ -73,7 +73,8 @@ class MiroVHSRecordReceiverTest
 
       works.map { actualWork =>
         actualWork shouldBe a[Work.Standard[_]]
-        val unidentifiedWork = actualWork.asInstanceOf[Work.Standard[Unidentified]]
+        val unidentifiedWork =
+          actualWork.asInstanceOf[Work.Standard[Unidentified]]
         unidentifiedWork.version shouldBe version
       }
     }

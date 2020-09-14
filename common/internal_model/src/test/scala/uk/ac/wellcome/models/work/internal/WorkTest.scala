@@ -2,7 +2,7 @@ package uk.ac.wellcome.models.work.internal
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.json.JsonUtil.{toJson, fromJson}
+import uk.ac.wellcome.json.JsonUtil.{fromJson, toJson}
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.exceptions.JsonDecodingError
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators

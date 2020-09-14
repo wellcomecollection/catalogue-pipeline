@@ -66,8 +66,7 @@ class SierraTransformableTransformer(sierraTransformable: SierraTransformable,
           throw e
       }
 
-  def workFromBibRecord(
-    bibRecord: SierraBibRecord): Try[Work[Unidentified]] = {
+  def workFromBibRecord(bibRecord: SierraBibRecord): Try[Work[Unidentified]] = {
     fromJson[SierraBibData](bibRecord.data)
       .map { bibData =>
         if (bibData.deleted || bibData.suppressed) {

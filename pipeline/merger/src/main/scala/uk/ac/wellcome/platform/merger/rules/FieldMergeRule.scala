@@ -26,7 +26,8 @@ import WorkState.Unidentified
  * like `orElse` and `andThen` for free.
  */
 trait FieldMergeRule {
-  protected final type Params = (Work.Standard[Unidentified], Seq[Work[Unidentified]])
+  protected final type Params =
+    (Work.Standard[Unidentified], Seq[Work[Unidentified]])
   protected type FieldData
   protected type MergeState = State[Set[Work[Unidentified]], FieldData]
 

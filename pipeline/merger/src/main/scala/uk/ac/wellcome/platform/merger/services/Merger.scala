@@ -30,7 +30,8 @@ trait Merger extends MergerLogging {
   protected def getTargetAndSources(works: Seq[Work[Unidentified]])
     : Option[(Work.Standard[Unidentified], Seq[Work[Unidentified]])] =
     works match {
-      case List(unmatchedWork: Work.Standard[Unidentified]) => Some((unmatchedWork, Nil))
+      case List(unmatchedWork: Work.Standard[Unidentified]) =>
+        Some((unmatchedWork, Nil))
       case matchedWorks =>
         findTarget(matchedWorks).map { target =>
           (
@@ -101,12 +102,11 @@ object PlatformMerger extends Merger {
       .orElse(works.find(WorkPredicates.physicalSierra))
       .orElse(works.find(WorkPredicates.sierraWork)) match {
       case Some(target: Work.Standard[Unidentified]) => Some(target)
-      case _                              => None
+      case _                                         => None
     }
 
-  override def createMergeResult(
-    target: Work.Standard[Unidentified],
-    sources: Seq[Work[Unidentified]]): MergeState =
+  override def createMergeResult(target: Work.Standard[Unidentified],
+                                 sources: Seq[Work[Unidentified]]): MergeState =
     if (sources.isEmpty)
       State.pure(
         MergeResult(

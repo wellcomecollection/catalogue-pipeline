@@ -137,10 +137,9 @@ class WorkIndexerTest
   }
 
   private def ingestWorkPairInOrder(
-    workIndexer: ElasticIndexer[Work[Identified]])(
-    firstWork: Work[Identified],
-    secondWork: Work[Identified],
-    index: Index) =
+    workIndexer: ElasticIndexer[Work[Identified]])(firstWork: Work[Identified],
+                                                   secondWork: Work[Identified],
+                                                   index: Index) =
     for {
       _ <- workIndexer.index(documents = List(firstWork))
       result <- workIndexer.index(documents = List(secondWork))

@@ -29,11 +29,14 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorksGenerators {
     result.works.head shouldBe work
 
     result.works.tail.zip(otherWorks).map {
-      case (baseWork: Work[Unidentified], unmergedWork: Work.Standard[Unidentified]) =>
+      case (
+          baseWork: Work[Unidentified],
+          unmergedWork: Work.Standard[Unidentified]) =>
         baseWork.sourceIdentifier shouldBe unmergedWork.sourceIdentifier
 
         val redirect = baseWork.asInstanceOf[Work.Redirected[Unidentified]]
-        val redirectTarget = result.works.head.asInstanceOf[Work.Standard[Unidentified]]
+        val redirectTarget =
+          result.works.head.asInstanceOf[Work.Standard[Unidentified]]
         redirect.redirect.sourceIdentifier shouldBe redirectTarget.sourceIdentifier
     }
   }

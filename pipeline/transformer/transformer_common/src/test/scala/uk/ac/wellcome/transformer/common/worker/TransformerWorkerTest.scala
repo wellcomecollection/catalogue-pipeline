@@ -23,7 +23,8 @@ case object ValidTestData extends TestData
 case object InvalidTestData extends TestData
 
 object TestTransformer extends Transformer[TestData] with WorksGenerators {
-  def apply(data: TestData, version: Int): Either[Exception, Work.Standard[Unidentified]] =
+  def apply(data: TestData,
+            version: Int): Either[Exception, Work.Standard[Unidentified]] =
     data match {
       case ValidTestData   => Right(createUnidentifiedWork)
       case InvalidTestData => Left(new Exception("No No No"))

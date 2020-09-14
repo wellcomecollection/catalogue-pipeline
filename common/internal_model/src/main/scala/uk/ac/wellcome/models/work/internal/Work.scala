@@ -8,7 +8,7 @@ package uk.ac.wellcome.models.work.internal
 sealed trait Work[State <: WorkState] {
 
   val version: Int
-  val state: State 
+  val state: State
   val data: WorkData[State, State#ImageId]
 
   def sourceIdentifier: SourceIdentifier = state.sourceIdentifier
@@ -16,8 +16,9 @@ sealed trait Work[State <: WorkState] {
   def identifiers: List[SourceIdentifier] =
     sourceIdentifier :: data.otherIdentifiers
 
-  def withData(f: WorkData[State, State#ImageId] 
-      => WorkData[State, State#ImageId]): Work[State] =
+  def withData(
+    f: WorkData[State, State#ImageId] => WorkData[State, State#ImageId])
+    : Work[State] =
     this match {
       case Work.Standard(version, data, state) =>
         Work.Standard[State](version, f(data), state)

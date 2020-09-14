@@ -151,7 +151,9 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
           values = licenseIds)
       case IdentifiersFilter(identifiers) =>
         should(
-          termsQuery(field = "state.sourceIdentifier.value", values = identifiers),
+          termsQuery(
+            field = "state.sourceIdentifier.value",
+            values = identifiers),
           termsQuery(
             field = "data.otherIdentifiers.value",
             values = identifiers)

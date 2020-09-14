@@ -42,7 +42,7 @@ trait WorkerServiceFixture
   }
 
   def assertWorkNotStored[T <: Work[Unidentified]](vhs: VHS,
-                                                    work: T): Assertion = {
+                                                   work: T): Assertion = {
     val id = work.sourceIdentifier.toString
     vhs.getLatest(id) shouldBe a[Left[_, _]]
   }

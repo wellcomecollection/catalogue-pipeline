@@ -24,7 +24,8 @@ case class SourceWork[ImageId <: IdState.WithSourceIdentifier,
 
 object SourceWork {
 
-  implicit class UnidentifiedWorkToSourceWork(work: Work[WorkState.Unidentified]) {
+  implicit class UnidentifiedWorkToSourceWork(
+    work: Work[WorkState.Unidentified]) {
 
     def toSourceWork: SourceWork[IdState.Identifiable, WorkState.Unidentified] =
       SourceWork(

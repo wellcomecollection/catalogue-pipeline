@@ -30,8 +30,7 @@ class RecorderWorkerService[MsgDestination](
       } yield ()
     }
 
-  private def storeWork(
-    work: Work[Unidentified]): Try[Version[String, Int]] = {
+  private def storeWork(work: Work[Unidentified]): Try[Version[String, Int]] = {
     val result =
       store.upsert(work.sourceIdentifier.toString)(work) {
         case existingWork =>

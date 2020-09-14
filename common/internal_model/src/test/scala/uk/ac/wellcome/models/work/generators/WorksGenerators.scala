@@ -46,7 +46,8 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
   def createUnidentifiedInvisibleWorkWith(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     items: List[Item[Unidentified#DataId]] = Nil,
-    images: List[UnmergedImage[IdState.Identifiable, WorkState.Unidentified]] = Nil,
+    images: List[UnmergedImage[IdState.Identifiable, WorkState.Unidentified]] =
+      Nil,
   ): Work.Invisible[Unidentified] =
     Work.Invisible[Unidentified](
       state = Unidentified(sourceIdentifier),
@@ -77,7 +78,8 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
   def createIdentifiedInvisibleWork: Work.Invisible[Identified] =
     createIdentifiedInvisibleWorkWith()
 
-  def createIdentifiedInvisibleWorks(count: Int): Seq[Work.Invisible[Identified]] =
+  def createIdentifiedInvisibleWorks(
+    count: Int): Seq[Work.Invisible[Identified]] =
     (1 to count).map { _ =>
       createIdentifiedInvisibleWork
     }
@@ -125,7 +127,8 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
       )
     )
 
-  def createUnidentifiedWork: Work.Standard[Unidentified] = createUnidentifiedWorkWith()
+  def createUnidentifiedWork: Work.Standard[Unidentified] =
+    createUnidentifiedWorkWith()
 
   def createUnidentifiedWorks(count: Int): Seq[Work.Standard[Unidentified]] =
     (1 to count).map { _ =>

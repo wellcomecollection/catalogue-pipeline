@@ -8,7 +8,9 @@ class WorksTest extends ApiWorksTestBase {
   it("returns a list of works") {
     withApi {
       case (ElasticConfig(worksIndex, _), routes) =>
-        val works = createIdentifiedWorks(count = 3).sortBy { _.state.canonicalId }
+        val works = createIdentifiedWorks(count = 3).sortBy {
+          _.state.canonicalId
+        }
 
         insertIntoElasticsearch(worksIndex, works: _*)
 
@@ -25,7 +27,9 @@ class WorksTest extends ApiWorksTestBase {
 
         insertIntoElasticsearch(worksIndex, work)
 
-        assertJsonResponse(routes, s"/$apiPrefix/works/${work.state.canonicalId}") {
+        assertJsonResponse(
+          routes,
+          s"/$apiPrefix/works/${work.state.canonicalId}") {
           Status.OK -> s"""
             {
              ${singleWorkResult(apiPrefix)},
@@ -46,7 +50,9 @@ class WorksTest extends ApiWorksTestBase {
           edition = Some("Special edition"),
         )
         insertIntoElasticsearch(worksIndex, work)
-        assertJsonResponse(routes, s"/$apiPrefix/works/${work.state.canonicalId}") {
+        assertJsonResponse(
+          routes,
+          s"/$apiPrefix/works/${work.state.canonicalId}") {
           Status.OK -> s"""
             {
              ${singleWorkResult(apiPrefix)},
@@ -65,7 +71,9 @@ class WorksTest extends ApiWorksTestBase {
     "returns the requested page of results when requested with page & pageSize") {
     withApi {
       case (ElasticConfig(worksIndex, _), routes) =>
-        val works = createIdentifiedWorks(count = 3).sortBy { _.state.canonicalId }
+        val works = createIdentifiedWorks(count = 3).sortBy {
+          _.state.canonicalId
+        }
 
         insertIntoElasticsearch(worksIndex, works: _*)
 
@@ -160,7 +168,9 @@ class WorksTest extends ApiWorksTestBase {
           val altWork = createIdentifiedWork
           insertIntoElasticsearch(index = altIndex, altWork)
 
-          assertJsonResponse(routes, s"/$apiPrefix/works/${work.state.canonicalId}") {
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works/${work.state.canonicalId}") {
             Status.OK -> s"""
               {
                ${singleWorkResult(apiPrefix)},

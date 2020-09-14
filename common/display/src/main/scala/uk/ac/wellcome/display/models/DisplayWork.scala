@@ -124,7 +124,8 @@ case class DisplayWork(
 
 case object DisplayWork {
 
-  def apply(work: Work.Standard[Identified], includes: WorksIncludes): DisplayWork =
+  def apply(work: Work.Standard[Identified],
+            includes: WorksIncludes): DisplayWork =
     DisplayWork(
       id = work.state.canonicalId,
       title = work.data.title,

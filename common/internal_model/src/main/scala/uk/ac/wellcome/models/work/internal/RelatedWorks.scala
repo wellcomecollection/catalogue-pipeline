@@ -107,9 +107,7 @@ object RelatedWorks {
     }
 
   private def tokenizePath(work: Work[Identified]): Option[TokenizedPath] =
-    work
-      .data
-      .collectionPath
+    work.data.collectionPath
       .map { collectionPath =>
         tokenizePath(collectionPath.path)
       }

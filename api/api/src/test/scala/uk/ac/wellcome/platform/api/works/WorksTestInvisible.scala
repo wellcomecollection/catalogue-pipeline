@@ -22,7 +22,9 @@ class WorksTestInvisible extends ApiWorksTestBase {
   it("excludes works with visible=false from list results") {
     withApi {
       case (ElasticConfig(worksIndex, _), routes) =>
-        val works = createIdentifiedWorks(count = 2).sortBy { _.state.canonicalId }
+        val works = createIdentifiedWorks(count = 2).sortBy {
+          _.state.canonicalId
+        }
 
         val worksToIndex = Seq[Work[Identified]](deletedWork) ++ works
         insertIntoElasticsearch(worksIndex, worksToIndex: _*)

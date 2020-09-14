@@ -47,8 +47,9 @@ class WorksService(searchService: ElasticsearchService)(
         }
       }
 
-  def listOrSearchWorks(index: Index, searchOptions: WorksSearchOptions)
-    : Future[Either[ElasticError, ResultList[Work.Standard[Identified], Aggregations]]] =
+  def listOrSearchWorks(index: Index,
+                        searchOptions: WorksSearchOptions): Future[
+    Either[ElasticError, ResultList[Work.Standard[Identified], Aggregations]]] =
     searchService
       .executeSearch(
         queryOptions = toElasticsearchQueryOptions(searchOptions),

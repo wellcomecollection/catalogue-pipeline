@@ -378,13 +378,12 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
     forAll(examples) { (record, suppressed) =>
       CalmTransformer(record, version).right.get match {
         case _: Work.Invisible[Unidentified] => suppressed shouldBe true
-        case _ => suppressed shouldBe false
+        case _                               => suppressed shouldBe false
       }
     }
   }
 
-  it(
-    "Returns Work.Invisible[Unidentified] when missing required source fields") {
+  it("Returns Work.Invisible[Unidentified] when missing required source fields") {
     val noTitle = calmRecord(
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
@@ -402,8 +401,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
     )
 
     List(noTitle, noLevel, noRefNo) map { record =>
-      CalmTransformer(record, version).right.get shouldBe a[
-        Work.Invisible[_]]
+      CalmTransformer(record, version).right.get shouldBe a[Work.Invisible[_]]
     }
   }
 
@@ -416,8 +414,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "AccessStatus" -> "AAH",
       "CatalogueStatus" -> "Catalogued"
     )
-    CalmTransformer(record, version).right.get shouldBe a[
-      Work.Invisible[_]]
+    CalmTransformer(record, version).right.get shouldBe a[Work.Invisible[_]]
   }
 
   it("returns a Work.Invisible[Unidentified] if no title") {
@@ -427,8 +424,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "AltRefNo" -> "a.b.c",
       "CatalogueStatus" -> "Catalogued"
     )
-    CalmTransformer(record, version).right.get shouldBe a[
-      Work.Invisible[_]]
+    CalmTransformer(record, version).right.get shouldBe a[Work.Invisible[_]]
   }
 
   it("returns a Work.Invisible[Unidentified] if no workType") {
@@ -438,8 +434,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "AltRefNo" -> "a.b.c",
       "CatalogueStatus" -> "Catalogued"
     )
-    CalmTransformer(record, version).right.get shouldBe a[
-      Work.Invisible[_]]
+    CalmTransformer(record, version).right.get shouldBe a[Work.Invisible[_]]
   }
 
   it("returns a Work.Invisible[Unidentified] if invalid workType") {
@@ -450,8 +445,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "AltRefNo" -> "a.b.c",
       "CatalogueStatus" -> "Catalogued"
     )
-    CalmTransformer(record, version).right.get shouldBe a[
-      Work.Invisible[_]]
+    CalmTransformer(record, version).right.get shouldBe a[Work.Invisible[_]]
   }
 
   it("returns a Work.Invisible[Unidentified] if no RefNo") {
@@ -461,8 +455,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "AltRefNo" -> "a.b.c",
       "CatalogueStatus" -> "Catalogued"
     )
-    CalmTransformer(record, version).right.get shouldBe a[
-      Work.Invisible[_]]
+    CalmTransformer(record, version).right.get shouldBe a[Work.Invisible[_]]
   }
 
   it("does not add language code if language not recognised") {
