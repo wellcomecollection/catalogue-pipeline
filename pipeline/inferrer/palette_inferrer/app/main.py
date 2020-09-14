@@ -10,7 +10,7 @@ logger = get_logger(__name__)
 
 # Initialise encoder
 logger.info("Initialising PaletteEncoder model")
-palette_encoder = PaletteEncoder(palette_size=5, precision_levels=[4, 6, 8])
+palette_encoder = PaletteEncoder(palette_weights=[2, 2, 1, 1, 1], bin_sizes=[4, 6, 8])
 
 # initialise API
 logger.info("Starting API")
@@ -47,6 +47,6 @@ def on_startup():
 
 
 @app.on_event("shutdown")
-def on_shutdown():
-    http.close_persistent_client_session()
+async def on_shutdown():
+    await http.close_persistent_client_session()
     batch_inferrer_queue.stop_worker()

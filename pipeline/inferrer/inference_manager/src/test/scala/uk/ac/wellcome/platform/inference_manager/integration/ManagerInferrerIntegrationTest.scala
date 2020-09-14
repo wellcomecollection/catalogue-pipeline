@@ -78,7 +78,7 @@ class ManagerInferrerIntegrationTest
                   features2 should have length 2048
                   forAll(features1 ++ features2) { _.isNaN shouldBe false }
                   every(lshEncodedFeatures) should fullyMatch regex """(\d+)-(\d+)"""
-                  every(palette) should fullyMatch regex """\d+"""
+                  every(palette) should fullyMatch regex """\d+/\d+"""
               }
           }
         }

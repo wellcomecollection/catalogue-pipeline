@@ -27,7 +27,7 @@ h11==0.9.0                # via uvicorn
 httptools==0.1.1          # via uvicorn
 idna==2.9                 # via requests, yarl
 jmespath==0.9.5           # via boto3, botocore
-joblib==0.16.0            # via -r requirements.in
+joblib==0.16.0            # via -r requirements.in, scikit-learn
 multidict==4.7.5          # via aiohttp, yarl
 numpy==1.18.1             # via -r requirements.in, scikit-learn, scipy
 piffle==0.3.0             # via weco-datascience
@@ -38,15 +38,16 @@ pydantic==1.4             # via fastapi
 python-dateutil==2.8.1    # via botocore
 requests==2.23.0          # via piffle
 s3transfer==0.3.3         # via boto3
-scikit-learn[alldeps]==0.19.2  # via -r requirements.in
+scikit-learn[alldeps]==0.23.2  # via -r requirements.in
 scipy==1.5.2              # via scikit-learn
 six==1.14.0               # via piffle, python-dateutil
 starlette==0.13.2         # via fastapi
+threadpoolctl==2.1.0      # via scikit-learn
 urllib3==1.25.8           # via botocore, requests
 uvicorn==0.11.7           # via -r requirements.in
 uvloop==0.14.0            # via uvicorn
 websockets==8.1           # via uvicorn
-weco-datascience==0.1.3   # via -r requirements.in
+weco-datascience==0.1.4   # via -r requirements.in
 yarl==1.4.2               # via aiohttp
 
 # The following packages are considered to be unsafe in a requirements file:

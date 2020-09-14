@@ -1,64 +1,83 @@
+from collections import Counter
 import numpy as np
 from sklearn.cluster import KMeans
 from joblib import Parallel, delayed
 
 
 class PaletteEncoder:
-    def __init__(self, palette_size, precision_levels):
-        self.palette_size = palette_size
-        self.precision_levels = precision_levels
+    def __init__(self, palette_weights, bin_sizes):
+        """
+        Instantiate a palette encoder that looks for len(palette_weights) colours,
+        weighted by palette_weights in descending order of cluster cardinality,
+        and quantises the resultant colors across bin_sizes bins, respectively.
+        """
+        self.palette_size = len(palette_weights)
+        self.palette_weights = palette_weights
+        self.bin_sizes = bin_sizes
         self.delayed_process_image = delayed(self.process_image)
 
-    def get_significant_colours(self, image, p=0.5):
+    @staticmethod
+    def get_significant_colours(image, n):
         """
         extract n significant colours from the image pixels by taking the
         centres of n kmeans clusters of the image's pixels arranged in colour
-        space.
-        The biggest cluster is counted n^p times, the second largest (n-1)^p
-        times, ..., and the smallest cluster counted once.
+        space. Returns colours in descending order of cluster cardinality.
         """
         pixels = np.array(image).reshape(-1, 3)
-        clusterer = KMeans(n_clusters=self.palette_size).fit(pixels)
-        colours = clusterer.cluster_centers_[::-1]
-        significant_colours = []
-        for val, colour in enumerate(colours):
-            significant_colours.extend([colour] * int(val ** p))
 
-        return np.stack(significant_colours)
+        # Only cluster distinct colours but weight them by their frequency
+        # As per https://arxiv.org/pdf/1101.0395.pdf
+        distinct_colours, distinct_colour_freqs = np.unique(
+            pixels, axis=0, return_counts=True
+        )
+        clusters = KMeans(n_clusters=n).fit(
+            distinct_colours, sample_weight=distinct_colour_freqs
+        )
 
-    def get_colour_histogram(self, colours, precision):
-        """
-        get the bins in which the images' significant colours are found at a
-        specified level of precision
-        """
-        bins = np.linspace(0, 256, precision + 1)
-        histogram, _ = np.histogramdd(sample=colours, bins=[bins, bins, bins])
-        bin_counts = histogram.reshape(-1)
-        return bin_counts
+        # Sort clusters by the sum of the weights they contain
+        label_weights = Counter()
+        for label, weight in zip(clusters.labels_, distinct_colour_freqs):
+            label_weights[label] += weight
+        labels_by_weight = [label for label, _ in label_weights.most_common()]
 
-    def encode_for_elasticsearch(self, flat_values):
+        # Unfortunately we need to make sure that the labels correspond to the centroids
+        # because that behaviour is not guaranteed by sklearn.
+        # https://github.com/scikit-learn/scikit-learn/blob/0fb307bf3/sklearn/cluster/_kmeans.py#L851
+        centroid_labels = clusters.predict(clusters.cluster_centers_)
+        consistently_indexed_centroids = clusters.cluster_centers_[
+            np.argsort(centroid_labels)
+        ]
+
+        return consistently_indexed_centroids[labels_by_weight]
+
+    @staticmethod
+    def get_bin_index(colour, n_bins):
+        indices = np.floor(n_bins * colour / 256).astype(int)
+        d = n_bins - 1
+        return indices[0] + d * indices[1] + d * d * indices[2]
+
+    @staticmethod
+    def encode_for_elasticsearch(values):
         """
-        turn a list of bin counts into a list of strings for elasticsearch
+        turn a list of bin indices into a list of strings for elasticsearch.
+        weighting is performed by repeating elements `weight` times
         """
-        encoded_list = []
-        for index, value in enumerate(flat_values):
-            encoded_list.extend([str(index)] * int(value))
-        return encoded_list
+        return [
+            f"{index}/{n_bins}"
+            for index, n_bins, weight in values
+            for _ in range(weight)
+        ]
 
     def process_image(self, image):
         """
         extract presence of colour in the image at multiple precision levels
         """
-        colours = self.get_significant_colours(image)
-        combined_results = np.array(
-            [
-                bin_count
-                for precision in self.precision_levels
-                for bin_count in self.get_colour_histogram(
-                    colours=colours, precision=precision
-                )
-            ]
-        )
+        colours = self.get_significant_colours(image, self.palette_size)
+        combined_results = [
+            (self.get_bin_index(colour, n), n, weight)
+            for n in self.bin_sizes
+            for colour, weight in zip(colours, self.palette_weights)
+        ]
 
         return self.encode_for_elasticsearch(combined_results)
 
