@@ -17,6 +17,7 @@ import uk.ac.wellcome.platform.merger.fixtures.{
   WorkerServiceFixture
 }
 import uk.ac.wellcome.platform.merger.generators.WorksWithImagesGenerators
+import WorkState.Unidentified
 
 class MergerWorkerServiceTest
     extends AnyFunSpec
@@ -51,7 +52,7 @@ class MergerWorkerServiceTest
           assertQueueEmpty(dlq)
 
           senders.works
-            .getMessages[BaseWork] should contain only (work1, work2, work3)
+            .getMessages[Work[Unidentified]] should contain only (work1, work2, work3)
 
           metrics.incrementedCounts.length should be >= 1
           metrics.incrementedCounts.last should endWith("_success")
@@ -77,7 +78,7 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          senders.works.getMessages[BaseWork] should contain only work
+          senders.works.getMessages[Work[Unidentified]] should contain only work
 
           metrics.incrementedCounts.length shouldBe 1
           metrics.incrementedCounts.last should endWith("_success")
@@ -128,7 +129,7 @@ class MergerWorkerServiceTest
         eventually {
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
-          val worksSent = senders.works.getMessages[BaseWork]
+          val worksSent = senders.works.getMessages[Work[Unidentified]]
           worksSent should contain only work
         }
     }
@@ -154,7 +155,7 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          val worksSent = senders.works.getMessages[BaseWork]
+          val worksSent = senders.works.getMessages[Work[Unidentified]]
           worksSent should contain only work
 
           metrics.incrementedCounts.length shouldBe 1
@@ -185,7 +186,7 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          val worksSent = senders.works.getMessages[BaseWork].distinct
+          val worksSent = senders.works.getMessages[Work[Unidentified]].distinct
           worksSent should have size 2
 
           val redirectedWorks = worksSent.collect {
@@ -197,7 +198,7 @@ class MergerWorkerServiceTest
 
           redirectedWorks should have size 1
           redirectedWorks.head.sourceIdentifier shouldBe sierraWorkMergeCandidate.sourceIdentifier
-          redirectedWorks.head.redirect shouldBe IdentifiableRedirect(
+          redirectedWorks.head.redirect shouldBe IdState.Identifiable(
             sierraWorkWithMergeCandidate.sourceIdentifier)
 
           mergedWorks should have size 1
@@ -230,7 +231,7 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          val worksSent = senders.works.getMessages[BaseWork].distinct
+          val worksSent = senders.works.getMessages[Work[Unidentified]].distinct
           worksSent should have size 3
 
           val imagesSent =
@@ -250,7 +251,7 @@ class MergerWorkerServiceTest
           redirectedWorks.map(_.sourceIdentifier) should contain only
             (sierraWorkMergeCandidate.sourceIdentifier, miroWork.sourceIdentifier)
           redirectedWorks.map(_.redirect) should contain only
-            IdentifiableRedirect(sierraWorkWithMergeCandidate.sourceIdentifier)
+            IdState.Identifiable(sierraWorkWithMergeCandidate.sourceIdentifier)
 
           mergedWorks should have size 1
           mergedWorks.head.sourceIdentifier shouldBe sierraWorkWithMergeCandidate.sourceIdentifier
@@ -287,7 +288,7 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          val worksSent = senders.works.getMessages[BaseWork]
+          val worksSent = senders.works.getMessages[Work[Unidentified]]
           worksSent should have size 4
 
           val redirectedWorks = worksSent.collect {

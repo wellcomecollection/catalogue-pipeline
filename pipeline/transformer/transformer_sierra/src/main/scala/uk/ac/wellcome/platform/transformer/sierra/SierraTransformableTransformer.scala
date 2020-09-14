@@ -76,7 +76,11 @@ class SierraTransformableTransformer(sierraTransformable: SierraTransformable,
           )
         }
         val data = workDataFromBibData(bibId, bibData)
-        Work.Standard[Unidentified](version, sourceIdentifier, data)
+        Work.Standard[Unidentified](
+          version = version,
+          state = Unidentified(sourceIdentifier),
+          data = data
+        )
       }
       .recover {
         case e: JsonDecodingError =>

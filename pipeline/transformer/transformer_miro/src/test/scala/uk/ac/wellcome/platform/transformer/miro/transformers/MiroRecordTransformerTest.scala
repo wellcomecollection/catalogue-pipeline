@@ -9,6 +9,7 @@ import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
+import WorkState.Unidentified
 
 class MiroRecordTransformerTest
     extends AnyFunSpec

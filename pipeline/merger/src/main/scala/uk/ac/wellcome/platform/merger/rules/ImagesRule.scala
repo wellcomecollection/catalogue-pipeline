@@ -2,9 +2,11 @@ package uk.ac.wellcome.platform.merger.rules
 
 import scala.Function.const
 import cats.data.NonEmptyList
+
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import WorkState.Unidentified
+import SourceWork._
 
 object ImagesRule extends FieldMergeRule {
   import WorkPredicates._

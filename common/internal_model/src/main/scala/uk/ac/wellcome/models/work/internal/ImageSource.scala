@@ -29,7 +29,7 @@ object SourceWork {
     def toSourceWork: SourceWork[IdState.Identifiable, WorkState.Unidentified] =
       SourceWork(
         id = IdState.Identifiable(work.state.sourceIdentifier),
-        data = work.maybeData.getOrElse(WorkData())
+        data = work.data
       )
   }
 
@@ -41,7 +41,7 @@ object SourceWork {
           sourceIdentifier = work.state.sourceIdentifier,
           canonicalId = work.state.canonicalId
         ),
-        data = work.maybeData.getOrElse(WorkData())
+        data = work.data
       )
   }
 }

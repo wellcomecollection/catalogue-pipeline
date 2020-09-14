@@ -103,7 +103,7 @@ class MetsTransformerWorkerServiceTest
     }
   }
 
-  private def expectedWork(identifier: String, version: Int): InvisibleWork = {
+  private def expectedWork(identifier: String, version: Int): Work.Invisible[Unidentified] = {
     val expectedUrl =
       s"https://wellcomelibrary.org/iiif/$identifier/manifest"
     val expectedDigitalLocation = DigitalLocationDeprecated(
@@ -124,7 +124,7 @@ class MetsTransformerWorkerServiceTest
           value = identifier
         )
       ),
-      data = WorkData(
+      data = WorkData[Unidentified, IdState.Identifiable](
         items = List(expectedItem),
         mergeCandidates = List(
           MergeCandidate(

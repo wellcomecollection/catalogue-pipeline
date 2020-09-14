@@ -50,7 +50,8 @@ object CalmTransformer
         Work.Invisible[Unidentified](
           state = Unidentified(sourceIdentifier(record)),
           version = version,
-          data = workData(record).getOrElse(WorkData()),
+          data = workData(record)
+            .getOrElse(WorkData[Unidentified, IdState.Identifiable]()),
           invisibilityReasons = List(SuppressedFromSource("Calm"))
         )
       )
@@ -117,7 +118,7 @@ object CalmTransformer
       }
 
   def workData(record: CalmRecord)
-    : Result[WorkData[IdState.Unminted, IdState.Identifiable]] =
+    : Result[WorkData[Unidentified, IdState.Identifiable]] =
     for {
       accessStatus <- accessStatus(record)
       title <- title(record)
@@ -125,7 +126,7 @@ object CalmTransformer
       collectionPath <- collectionPath(record, collectionLevel)
       language <- language(record)
     } yield
-      WorkData(
+      WorkData[Unidentified, IdState.Identifiable](
         title = Some(title),
         otherIdentifiers = otherIdentifiers(record),
         workType = Some(workType(collectionLevel)),

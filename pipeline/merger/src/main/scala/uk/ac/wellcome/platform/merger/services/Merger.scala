@@ -67,7 +67,7 @@ trait Merger extends MergerLogging {
     Work.Redirected[Unidentified](
       version = source.version,
       state = Unidentified(source.sourceIdentifier),
-      redirect = IdentifiableRedirect(target.sourceIdentifier)
+      redirect = IdState.Identifiable(target.sourceIdentifier)
     )
 
   private def logIntentions(target: Work.Standard[Unidentified],
@@ -122,13 +122,13 @@ object PlatformMerger extends Merger {
         images <- ImagesRule(target, sources)
       } yield
         MergeResult(
-          mergedTarget = target withData { data =>
-            data.copy(
+          mergedTarget = target.withData { data =>
+            data.copy[Unidentified, IdState.Identifiable](
+              merged = true,
               items = items,
               thumbnail = thumbnail,
               otherIdentifiers = otherIdentifiers,
-              images = images.map(_.toUnmerged),
-              merged = true
+              images = images.map(_.toUnmerged)
             )
           },
           images = images

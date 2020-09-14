@@ -86,7 +86,11 @@ class MiroRecordTransformer
         images = List(getImage(miroRecord, version))
       )
 
-      Work.Standard[Unidentified](version, Unidentified(sourceIdentifier), data)
+      Work.Standard[Unidentified](
+        version = version,
+        state = Unidentified(sourceIdentifier),
+        data = data
+      )
     }.recover {
       case e: ShouldNotTransformException =>
         debug(s"Should not transform: ${e.getMessage}")

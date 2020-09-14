@@ -2,31 +2,32 @@ package uk.ac.wellcome.platform.merger.logging
 
 import grizzled.slf4j.Logging
 import cats.data.NonEmptyList
-import uk.ac.wellcome.models.work.internal.{BaseImage, BaseWork, IdState}
+import uk.ac.wellcome.models.work.internal._
+import WorkState.Unidentified
 
 trait MergerLogging extends Logging {
-  def describeWork(work: BaseWork): String =
+  def describeWork(work: Work[Unidentified]): String =
     s"(id=${work.sourceIdentifier.value})"
 
-  def describeWorks(works: Seq[BaseWork]): String =
+  def describeWorks(works: Seq[Work[Unidentified]]): String =
     s"[${works.map(describeWork).mkString(",")}]"
 
-  def describeWorks(works: NonEmptyList[BaseWork]): String =
+  def describeWorks(works: NonEmptyList[Work[Unidentified]]): String =
     describeWorks(works.toList)
 
   def describeImage(
-    image: BaseImage[IdState.Identifiable, WorkState.Unidentified]): String =
+    image: BaseImage[IdState.Identifiable, Unidentified]): String =
     s"(id=${image.id})"
 
   def describeImages(
     images: Seq[BaseImage[IdState.Identifiable, WorkState.Unidentified]]): String =
     s"[${images.map(describeImage).mkString(",")}]"
 
-  def describeMergeSet(target: BaseWork, sources: Seq[BaseWork]): String =
+  def describeMergeSet(target: Work[Unidentified], sources: Seq[Work[Unidentified]]): String =
     s"target${describeWork(target)} with sources${describeWorks(sources)}"
 
-  def describeMergeOutcome(target: BaseWork,
-                           redirected: Seq[BaseWork],
-                           remaining: Seq[BaseWork]): String =
+  def describeMergeOutcome(target: Work[Unidentified],
+                           redirected: Seq[Work[Unidentified]],
+                           remaining: Seq[Work[Unidentified]]): String =
     s"target${describeWork(target)} with redirected${describeWorks(redirected)} and remaining${describeWorks(remaining)}"
 }

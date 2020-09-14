@@ -8,15 +8,24 @@ package uk.ac.wellcome.models.work.internal
 sealed trait Work[State <: WorkState] {
 
   val version: Int
-
   val state: State 
-
-  def maybeData: Option[WorkData[State, State#ImageId]]
+  val data: WorkData[State, State#ImageId]
 
   def sourceIdentifier: SourceIdentifier = state.sourceIdentifier
 
   def identifiers: List[SourceIdentifier] =
-    sourceIdentifier :: maybeData.map(_.otherIdentifiers).getOrElse(Nil)
+    sourceIdentifier :: data.otherIdentifiers
+
+  def withData(f: WorkData[State, State#ImageId] 
+      => WorkData[State, State#ImageId]): Work[State] =
+    this match {
+      case Work.Standard(version, data, state) =>
+        Work.Standard[State](version, f(data), state)
+      case Work.Invisible(version, data, state, reasons) =>
+        Work.Invisible[State](version, f(data), state, reasons)
+      case Work.Redirected(version, redirect, state) =>
+        Work.Redirected[State](version, redirect, state)
+    }
 }
 
 object Work {
@@ -24,18 +33,15 @@ object Work {
     version: Int,
     data: WorkData[State, State#ImageId],
     state: State,
-  ) extends Work[State] {
-
-    def maybeData = Some(data)
-  }
+  ) extends Work[State]
 
   case class Redirected[State <: WorkState](
     version: Int,
-    redirect: State#DataId,
+    redirect: State#ImageId,
     state: State,
   ) extends Work[State] {
 
-    def maybeData = None
+    val data = WorkData[State, State#ImageId]()
   }
 
   case class Invisible[State <: WorkState](
@@ -43,10 +49,7 @@ object Work {
     data: WorkData[State, State#ImageId],
     state: State,
     invisibilityReasons: List[InvisibilityReason] = Nil,
-  ) extends Work[State] {
-
-    def maybeData = Some(data)
-  }
+  ) extends Work[State]
 }
 
 /** WorkData contains data common to all types of works that can exist at any

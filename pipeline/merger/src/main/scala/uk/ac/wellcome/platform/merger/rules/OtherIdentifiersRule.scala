@@ -31,7 +31,7 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
         mergeIntoCalmTarget(target, sources)
           .orElse(
             mergeSingleMiroIntoSingleOrZeroItemSierraTarget(target, sources))
-    ).getOrElse(target.otherIdentifiers).distinct
+    ).getOrElse(target.data.otherIdentifiers).distinct
 
     val mergedSources = (
       List(
@@ -59,7 +59,7 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
 
       def rule(target: Work.Standard[Unidentified],
                sources: NonEmptyList[Work[Unidentified]]): FieldData =
-        target.otherIdentifiers ++ sources.toList.map(_.sourceIdentifier)
+        target.data.otherIdentifiers ++ sources.toList.map(_.sourceIdentifier)
     }
 
   private val mergeIntoCalmTarget = new PartialRule {
@@ -69,7 +69,7 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
 
     def rule(target: Work.Standard[Unidentified],
              sources: NonEmptyList[Work[Unidentified]]): FieldData =
-      target.otherIdentifiers ++ sources.toList.map(_.sourceIdentifier)
+      target.data.otherIdentifiers ++ sources.toList.map(_.sourceIdentifier)
   }
 
   private val mergeDigitalIntoPhysicalSierraTarget = new PartialRule {
@@ -79,7 +79,7 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
     def rule(target: Work.Standard[Unidentified],
              sources: NonEmptyList[Work[Unidentified]]): FieldData =
       findFirstLinkedDigitisedSierraWorkFor(target, sources.toList)
-        .map(target.otherIdentifiers ++ _.identifiers)
+        .map(target.data.otherIdentifiers ++ _.identifiers)
         .getOrElse(Nil)
   }
 }

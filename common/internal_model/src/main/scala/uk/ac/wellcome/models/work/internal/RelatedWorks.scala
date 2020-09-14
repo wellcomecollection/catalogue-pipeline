@@ -108,12 +108,10 @@ object RelatedWorks {
 
   private def tokenizePath(work: Work[Identified]): Option[TokenizedPath] =
     work
-      .maybeData
-      .flatMap { data => 
-        data.collectionPath
-        .map { collectionPath =>
-          tokenizePath(collectionPath.path)
-        }
+      .data
+      .collectionPath
+      .map { collectionPath =>
+        tokenizePath(collectionPath.path)
       }
 
   implicit val tokenizedPathOrdering: Ordering[TokenizedPath] =

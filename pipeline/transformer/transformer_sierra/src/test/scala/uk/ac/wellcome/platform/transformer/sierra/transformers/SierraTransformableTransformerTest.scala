@@ -50,10 +50,10 @@ class SierraTransformableTransformerTest
 
     val work = transformToWork(sierraTransformable)
 
-    work shouldBe a[Work.Standard[Unidentified]]
+    work shouldBe a[Work.Standard[_]]
 
     val actualIdentifiers = work
-      .asInstanceOf[Work.Standard[Unidentified]]
+      .asInstanceOf[Work.Standard[_]]
       .data
       .items
       .map { _.id.asInstanceOf[IdState.Identifiable].sourceIdentifier }
@@ -78,7 +78,7 @@ class SierraTransformableTransformerTest
     val work = transformToWork(sierraTransformable)
 
     val language = work
-      .asInstanceOf[Work.Invisible[Unidentified]]
+      .asInstanceOf[Work.Invisible[_]]
       .data
       .language
 
@@ -107,7 +107,7 @@ class SierraTransformableTransformerTest
       1)
     triedWork.isSuccess shouldBe true
 
-    triedWork.get.asInstanceOf[Work.Standard[Unidentified]].data.workType shouldBe Some(
+    triedWork.get.asInstanceOf[Work.Standard[_]].data.workType shouldBe Some(
       expectedWorkType)
   }
 
@@ -144,8 +144,8 @@ class SierraTransformableTransformerTest
     )
 
     val work = transformToWork(transformable)
-    work shouldBe a[Work.Standard[Unidentified]]
-    val unidentifiedWork = work.asInstanceOf[Work.Standard[Unidentified]]
+    work shouldBe a[Work.Standard[_]]
+    val unidentifiedWork = work.asInstanceOf[Work.Standard[_]]
     unidentifiedWork.data.items should have size 1
 
     val expectedSourceIdentifier = createSierraSystemSourceIdentifierWith(
@@ -318,7 +318,7 @@ class SierraTransformableTransformerTest
         """.stripMargin
 
     val work = transformDataToWork(id = id, data = data)
-    work shouldBe a[Work.Invisible[Unidentified]]
+    work shouldBe a[Work.Invisible[_]]
   }
 
   it("makes suppressed works invisible") {
@@ -335,7 +335,7 @@ class SierraTransformableTransformerTest
         """.stripMargin
 
     val work = transformDataToWork(id = id, data = data)
-    work shouldBe a[Work.Invisible[Unidentified]]
+    work shouldBe a[Work.Invisible[_]]
   }
 
   it("transforms bib records that don't have a title") {
@@ -356,7 +356,7 @@ class SierraTransformableTransformerTest
         """.stripMargin
 
     val work = transformDataToWork(id = id, data = data)
-    work shouldBe a[Work.Invisible[Unidentified]]
+    work shouldBe a[Work.Invisible[_]]
   }
 
   it("includes the physical description, if present") {
@@ -850,8 +850,8 @@ class SierraTransformableTransformerTest
        """.stripMargin
 
     val work = transformDataToWork(id = id, data = bibData)
-    work shouldBe a[UnidentifiedWork]
-    work.asInstanceOf[UnidentifiedWork].data.workType shouldBe Some(
+    work shouldBe a[Work.Standard[_]]
+    work.asInstanceOf[Work.Standard[Unidentified]].data.workType shouldBe Some(
       Pictures
     )
   }
@@ -966,8 +966,10 @@ class SierraTransformableTransformerTest
     triedMaybeWork.isSuccess shouldBe true
 
     triedMaybeWork.get shouldBe Work.Invisible[Unidentified](
-      sourceIdentifier = createSierraSystemSourceIdentifierWith(
-        value = id.withCheckDigit
+      state = Unidentified(
+          createSierraSystemSourceIdentifierWith(
+          value = id.withCheckDigit
+        ),
       ),
       version = 1,
       data = WorkData()
@@ -976,10 +978,10 @@ class SierraTransformableTransformerTest
 
   private def transformDataToUnidentifiedWork(
     id: SierraBibNumber,
-    data: String): UnidentifiedWork = {
+    data: String): Work.Standard[Unidentified] = {
 
     val work = transformDataToWork(id = id, data = data)
-    work shouldBe a[UnidentifiedWork]
-    work.asInstanceOf[UnidentifiedWork]
+    work shouldBe a[Work.Standard[_]]
+    work.asInstanceOf[Work.Standard[Unidentified]]
   }
 }

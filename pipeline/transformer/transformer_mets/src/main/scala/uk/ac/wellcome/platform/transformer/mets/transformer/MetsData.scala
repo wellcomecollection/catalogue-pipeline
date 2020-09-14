@@ -21,14 +21,14 @@ case class MetsData(
     for {
       license <- parseLicense
       accessStatus <- parseAccessStatus
-      item = Item(
+      item = Item[IdState.Unminted](
         id = IdState.Unidentifiable,
         locations = List(digitalLocation(license, accessStatus)))
     } yield
       Work.Invisible[Unidentified](
         version = version,
         state = Unidentified(sourceIdentifier),
-        data = WorkData(
+        data = WorkData[Unidentified, IdState.Identifiable](
           items = List(item),
           mergeCandidates = List(mergeCandidate),
           thumbnail = thumbnail(sourceIdentifier.value, license, accessStatus),

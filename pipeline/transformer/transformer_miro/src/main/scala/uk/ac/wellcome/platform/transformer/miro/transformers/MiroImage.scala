@@ -5,6 +5,7 @@ import uk.ac.wellcome.models.work.internal.{
   IdentifierType,
   SourceIdentifier,
   UnmergedImage,
+  WorkState
 }
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 

@@ -420,9 +420,9 @@ class WorksQueryTest
   private def searchResponseToWorks(
     response: Either[ElasticError, SearchResponse]): List[Work[Identified]] =
     response.right.get.hits.hits.map { searchHit: SearchHit =>
-      jsonToIdentifiedBaseWork(searchHit.sourceAsString)
+      jsonToWork(searchHit.sourceAsString)
     }.toList
 
-  private def jsonToIdentifiedBaseWork(document: String): Work[Identified] =
+  private def jsonToWork(document: String): Work[Identified] =
     fromJson[Work[Identified]](document).get
 }

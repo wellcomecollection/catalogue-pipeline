@@ -30,7 +30,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
             identifierType = CalmIdentifierTypes.recordId
           )
         ),
-        data = WorkData(
+        data = WorkData[Unidentified, IdState.Identifiable](
           title = Some("abc"),
           workType = Some(WorkType.ArchiveCollection),
           collectionPath = Some(
@@ -378,7 +378,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
     forAll(examples) { (record, suppressed) =>
       CalmTransformer(record, version).right.get match {
         case _: Work.Invisible[Unidentified] => suppressed shouldBe true
-        case _: Work.Standard[Unidentified]  => suppressed shouldBe false
+        case _ => suppressed shouldBe false
       }
     }
   }
@@ -403,7 +403,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
 
     List(noTitle, noLevel, noRefNo) map { record =>
       CalmTransformer(record, version).right.get shouldBe a[
-        Work.Invisible[Unidentified]]
+        Work.Invisible[_]]
     }
   }
 
@@ -417,7 +417,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(record, version).right.get shouldBe a[
-      Work.Invisible[Unidentified]]
+      Work.Invisible[_]]
   }
 
   it("returns a Work.Invisible[Unidentified] if no title") {
@@ -428,7 +428,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(record, version).right.get shouldBe a[
-      Work.Invisible[Unidentified]]
+      Work.Invisible[_]]
   }
 
   it("returns a Work.Invisible[Unidentified] if no workType") {
@@ -439,7 +439,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(record, version).right.get shouldBe a[
-      Work.Invisible[Unidentified]]
+      Work.Invisible[_]]
   }
 
   it("returns a Work.Invisible[Unidentified] if invalid workType") {
@@ -451,7 +451,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(record, version).right.get shouldBe a[
-      Work.Invisible[Unidentified]]
+      Work.Invisible[_]]
   }
 
   it("returns a Work.Invisible[Unidentified] if no RefNo") {
@@ -462,7 +462,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(record, version).right.get shouldBe a[
-      Work.Invisible[Unidentified]]
+      Work.Invisible[_]]
   }
 
   it("does not add language code if language not recognised") {
@@ -495,7 +495,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
           )
         ),
         version = version,
-        data = WorkData(
+        data = WorkData[Unidentified, IdState.Identifiable](
           title = Some("Should suppress"),
           workType = Some(WorkType.ArchiveSection),
           collectionPath = Some(
