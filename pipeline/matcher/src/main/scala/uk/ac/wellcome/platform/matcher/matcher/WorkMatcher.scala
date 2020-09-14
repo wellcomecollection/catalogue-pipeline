@@ -1,14 +1,16 @@
 package uk.ac.wellcome.platform.matcher.matcher
 
+import scala.concurrent.{ExecutionContext, Future}
 import cats.implicits._
 import grizzled.slf4j.Logging
+
 import uk.ac.wellcome.models.matcher.{
   MatchedIdentifiers,
   MatcherResult,
   WorkIdentifier,
   WorkNode
 }
-import uk.ac.wellcome.models.work.internal.TransformedBaseWork
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.models._
 import uk.ac.wellcome.platform.matcher.storage.WorkGraphStore
@@ -19,8 +21,7 @@ import uk.ac.wellcome.storage.locking.{
   FailedProcess,
   FailedUnlock
 }
-
-import scala.concurrent.{ExecutionContext, Future}
+import WorkState.Unidentified
 
 class WorkMatcher(
   workGraphStore: WorkGraphStore,
@@ -30,10 +31,10 @@ class WorkMatcher(
 
   type Out = Set[MatchedIdentifiers]
 
-  def matchWork(work: TransformedBaseWork): Future[MatcherResult] =
+  def matchWork(work: Work[Unidentified]): Future[MatcherResult] =
     doMatch(work).map(MatcherResult)
 
-  private def doMatch(work: TransformedBaseWork): Future[Out] = {
+  private def doMatch(work: Work[Unidentified]): Future[Out] = {
     val update = WorkUpdate(work)
     withLocks(update, update.ids) {
       for {

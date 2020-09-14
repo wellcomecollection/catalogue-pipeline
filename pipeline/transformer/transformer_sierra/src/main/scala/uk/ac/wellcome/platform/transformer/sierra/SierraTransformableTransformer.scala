@@ -22,11 +22,12 @@ import uk.ac.wellcome.sierra_adapter.model.{
   SierraTransformable
 }
 import scala.util.{Failure, Success, Try}
+import WorkState.Unidentified
 
 object SierraTransformableTransformer {
 
   def apply(transformable: SierraTransformable,
-            version: Int): Try[TransformedBaseWork] =
+            version: Int): Try[Work[Unidentified]] =
     new SierraTransformableTransformer(transformable, version).transform
 }
 
@@ -34,7 +35,7 @@ class SierraTransformableTransformer(sierraTransformable: SierraTransformable,
                                      version: Int)
     extends Logging {
 
-  def transform: Try[TransformedBaseWork] =
+  def transform: Try[Work[Unidentified]] =
     sierraTransformable.maybeBibRecord
       .map { bibRecord =>
         debug(s"Attempting to transform ${bibRecord.id}")
@@ -46,8 +47,8 @@ class SierraTransformableTransformer(sierraTransformable: SierraTransformable,
         // in the API, so we return an InvisibleWork.
         debug(s"No bib data for ${sierraTransformable.sierraId}, so skipping")
         Success(
-          UnidentifiedInvisibleWork(
-            sourceIdentifier = sourceIdentifier,
+          Work.Invisible[Unidentified](
+            state = Unidentified(sourceIdentifier),
             version = version,
             data = WorkData()
           )
@@ -66,7 +67,7 @@ class SierraTransformableTransformer(sierraTransformable: SierraTransformable,
       }
 
   def workFromBibRecord(
-    bibRecord: SierraBibRecord): Try[TransformedBaseWork] = {
+    bibRecord: SierraBibRecord): Try[Work[Unidentified]] = {
     fromJson[SierraBibData](bibRecord.data)
       .map { bibData =>
         if (bibData.deleted || bibData.suppressed) {
@@ -75,7 +76,7 @@ class SierraTransformableTransformer(sierraTransformable: SierraTransformable,
           )
         }
         val data = workDataFromBibData(bibId, bibData)
-        UnidentifiedWork(version, sourceIdentifier, data)
+        Work.Standard[Unidentified](version, sourceIdentifier, data)
       }
       .recover {
         case e: JsonDecodingError =>
@@ -84,8 +85,8 @@ class SierraTransformableTransformer(sierraTransformable: SierraTransformable,
           )
         case e: ShouldNotTransformException =>
           debug(s"Should not transform $bibId: ${e.getMessage}")
-          UnidentifiedInvisibleWork(
-            sourceIdentifier = sourceIdentifier,
+          Work.Invisible[Unidentified](
+            state = Unidentified(sourceIdentifier),
             version = version,
             data = WorkData()
           )
@@ -93,7 +94,7 @@ class SierraTransformableTransformer(sierraTransformable: SierraTransformable,
   }
 
   def workDataFromBibData(bibId: SierraBibNumber, bibData: SierraBibData) =
-    WorkData[IdState.Unminted, IdState.Identifiable](
+    WorkData[WorkState.Unidentified, IdState.Identifiable](
       otherIdentifiers = SierraIdentifiers(bibId, bibData),
       mergeCandidates = SierraMergeCandidates(bibId, bibData),
       title = SierraTitle(bibId, bibData),

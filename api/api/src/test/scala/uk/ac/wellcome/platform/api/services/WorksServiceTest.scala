@@ -1,5 +1,7 @@
 package uk.ac.wellcome.platform.api.services
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -8,13 +10,14 @@ import org.scalatest.Assertion
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+
 import uk.ac.wellcome.display.models.AggregationRequest
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.models.work.generators.{
   ProductionEventGenerators,
   WorksGenerators
 }
-import uk.ac.wellcome.models.work.internal.{IdentifiedBaseWork, IdentifiedWork}
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.internal.WorkType.{
   ArchivesAndManuscripts,
   Audio,
@@ -24,9 +27,7 @@ import uk.ac.wellcome.models.work.internal.WorkType.{
 }
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
 import uk.ac.wellcome.platform.api.models._
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import WorkState.Identified
 
 class WorksServiceTest
     extends AnyFunSpec
@@ -317,7 +318,7 @@ class WorksServiceTest
         insertIntoElasticsearch(index, work)
 
         val future =
-          worksService.findWorkById(canonicalId = work.canonicalId)(index)
+          worksService.findWorkById(canonicalId = work.state.canonicalId)(index)
 
         whenReady(future) { response =>
           response.isRight shouldBe true
@@ -357,8 +358,8 @@ class WorksServiceTest
   }
 
   private def assertListOrSearchResultIsCorrect(
-    allWorks: Seq[IdentifiedBaseWork],
-    expectedWorks: Seq[IdentifiedBaseWork],
+    allWorks: Seq[Work[Identified]],
+    expectedWorks: Seq[Work[Identified]],
     expectedTotalResults: Int,
     expectedAggregations: Option[Aggregations] = None,
     worksSearchOptions: WorksSearchOptions = createWorksSearchOptions
@@ -374,10 +375,10 @@ class WorksServiceTest
 
   private def assertResultIsCorrect(
     partialSearchFunction: (Index, WorksSearchOptions) => Future[
-      Either[ElasticError, ResultList[IdentifiedWork, Aggregations]]]
+      Either[ElasticError, ResultList[Work.Standard[Identified], Aggregations]]]
   )(
-    allWorks: Seq[IdentifiedBaseWork],
-    expectedWorks: Seq[IdentifiedBaseWork],
+    allWorks: Seq[Work[Identified]],
+    expectedWorks: Seq[Work[Identified]],
     expectedTotalResults: Int,
     expectedAggregations: Option[Aggregations],
     worksSearchOptions: WorksSearchOptions

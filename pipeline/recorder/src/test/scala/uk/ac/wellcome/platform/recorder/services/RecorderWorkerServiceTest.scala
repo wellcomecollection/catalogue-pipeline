@@ -3,6 +3,7 @@ package uk.ac.wellcome.platform.recorder.services
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.messaging.fixtures.SQS
@@ -12,6 +13,7 @@ import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.recorder.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.storage.{StoreReadError, StoreWriteError, Version}
+import WorkState.Unidentified
 
 class RecorderWorkerServiceTest
     extends AnyFunSpec
@@ -27,7 +29,7 @@ class RecorderWorkerServiceTest
       withVHS { vhs =>
         withWorkerService(queue, vhs) { _ =>
           val work = createUnidentifiedWork
-          sendMessage[TransformedBaseWork](queue = queue, obj = work)
+          sendMessage[Work[Unidentified]](queue = queue, obj = work)
           eventually {
             assertWorkStored(vhs, work)
           }
@@ -41,7 +43,7 @@ class RecorderWorkerServiceTest
       withVHS { vhs =>
         withWorkerService(queue, vhs) { _ =>
           val invisibleWork = createUnidentifiedInvisibleWork
-          sendMessage[TransformedBaseWork](queue = queue, invisibleWork)
+          sendMessage[Work[Unidentified]](queue = queue, invisibleWork)
           eventually {
             assertWorkStored(vhs, invisibleWork)
           }
@@ -58,9 +60,9 @@ class RecorderWorkerServiceTest
           val newerWork = olderWork
             .copy(version = 10)
             .withData(data => data.copy(title = Some("A nice new thing")))
-          sendMessage[TransformedBaseWork](queue = queue, newerWork)
+          sendMessage[Work[Unidentified]](queue = queue, newerWork)
           eventually { assertWorkStored(vhs, newerWork) }
-          sendMessage[TransformedBaseWork](queue = queue, obj = olderWork)
+          sendMessage[Work[Unidentified]](queue = queue, obj = olderWork)
           eventually { assertQueueEmpty(queue) }
           assertWorkStored(vhs, newerWork, 1)
         }
@@ -76,10 +78,10 @@ class RecorderWorkerServiceTest
           val newerWork = olderWork
             .copy(version = 10)
             .withData(data => data.copy(title = Some("A nice new thing")))
-          sendMessage[TransformedBaseWork](queue = queue, obj = olderWork)
+          sendMessage[Work[Unidentified]](queue = queue, obj = olderWork)
           eventually {
             assertWorkStored(vhs, olderWork)
-            sendMessage[TransformedBaseWork](queue = queue, obj = newerWork)
+            sendMessage[Work[Unidentified]](queue = queue, obj = newerWork)
             eventually {
               assertWorkStored(vhs, newerWork, expectedVhsVersion = 1)
             }
@@ -94,7 +96,7 @@ class RecorderWorkerServiceTest
 
     class BrokenMemoryVHS extends MemoryVHS() {
       override def put(id: Version[String, Int])(
-        item: TransformedBaseWork): WriteEither =
+        item: Work[Unidentified]): WriteEither =
         Left(StoreWriteError(new Error("BOOM!")))
 
       override def get(id: Version[String, Int]): ReadEither =
@@ -107,7 +109,7 @@ class RecorderWorkerServiceTest
       case SQS.QueuePair(queue, dlq) =>
         withWorkerService(queue, brokenVhs, messageSender) { _ =>
           val work = createUnidentifiedWork
-          sendMessage[TransformedBaseWork](queue = queue, obj = work)
+          sendMessage[Work[Unidentified]](queue = queue, obj = work)
           eventually {
             assertQueueEmpty(queue)
             assertQueueHasSize(dlq, size = 1)
@@ -127,7 +129,7 @@ class RecorderWorkerServiceTest
       withVHS { vhs =>
         withWorkerService(queue, vhs, messageSender) { _ =>
           val work = createUnidentifiedWork
-          sendMessage[TransformedBaseWork](queue = queue, obj = work)
+          sendMessage[Work[Unidentified]](queue = queue, obj = work)
           eventually {
             val id = work.sourceIdentifier.toString
 

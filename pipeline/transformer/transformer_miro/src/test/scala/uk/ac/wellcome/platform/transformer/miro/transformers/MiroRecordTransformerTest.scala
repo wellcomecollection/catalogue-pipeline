@@ -324,9 +324,11 @@ class MiroRecordTransformerTest
 
     triedMaybeWork.isSuccess shouldBe true
 
-    triedMaybeWork.get shouldBe UnidentifiedInvisibleWork(
-      sourceIdentifier = createMiroSourceIdentifierWith(
-        value = miroRecord.imageNumber
+    triedMaybeWork.get shouldBe Work.Invisible[Unidentified](
+      state = Unidentified(
+        createMiroSourceIdentifierWith(
+          value = miroRecord.imageNumber
+        )
       ),
       version = 1,
       data = WorkData()

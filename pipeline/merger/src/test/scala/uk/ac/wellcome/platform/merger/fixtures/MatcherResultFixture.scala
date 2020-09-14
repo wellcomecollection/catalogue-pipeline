@@ -5,10 +5,11 @@ import uk.ac.wellcome.models.matcher.{
   MatcherResult,
   WorkIdentifier
 }
-import uk.ac.wellcome.models.work.internal.TransformedBaseWork
+import uk.ac.wellcome.models.work.internal._
+import WorkState.Unidentified
 
 trait MatcherResultFixture {
-  def matcherResultWith(matchedEntries: Set[Set[TransformedBaseWork]]) =
+  def matcherResultWith(matchedEntries: Set[Set[Work[Unidentified]]]) =
     MatcherResult(
       matchedEntries.map { works =>
         MatchedIdentifiers(worksToWorkIdentifiers(works))
@@ -16,11 +17,11 @@ trait MatcherResultFixture {
     )
 
   def worksToWorkIdentifiers(
-    works: Seq[TransformedBaseWork]): Set[WorkIdentifier] =
+    works: Seq[Work[Unidentified]]): Set[WorkIdentifier] =
     worksToWorkIdentifiers(works.toSet)
 
   def worksToWorkIdentifiers(
-    works: Set[TransformedBaseWork]): Set[WorkIdentifier] =
+    works: Set[Work[Unidentified]]): Set[WorkIdentifier] =
     works
       .map { work =>
         WorkIdentifier(work)

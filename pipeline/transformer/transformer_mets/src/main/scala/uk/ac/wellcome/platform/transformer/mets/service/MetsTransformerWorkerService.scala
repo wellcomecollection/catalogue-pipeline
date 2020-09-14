@@ -1,20 +1,21 @@
 package uk.ac.wellcome.platform.transformer.mets.service
 
+import scala.concurrent.Future
 import akka.Done
 import grizzled.slf4j.Logging
+
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.mets_adapter.models.MetsLocation
-import uk.ac.wellcome.models.work.internal.TransformedBaseWork
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.mets.transformer.MetsXmlTransformer
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.{Readable, VersionedStore}
 import uk.ac.wellcome.storage.{Identified, Version}
 import uk.ac.wellcome.typesafe.Runnable
-
-import scala.concurrent.Future
+import WorkState.Unidentified
 
 class MetsTransformerWorkerService[Destination](
   msgStream: SQSStream[NotificationMessage],
@@ -52,7 +53,7 @@ class MetsTransformerWorkerService[Destination](
       work <- metsData.toWork(key.version)
       // We send the generic type param to `sendT` so it serialises uses the
       // discriminator `type` when read by the recorder.
-      _ <- messageSender.sendT[TransformedBaseWork](work).toEither
+      _ <- messageSender.sendT[Work[Unidentified]](work).toEither
     } yield ()
 
   private def getMetsLocation(key: Version[String, Int]): Result[MetsLocation] =

@@ -39,7 +39,7 @@ class WorksIncludesTest
                 "results": [
                  {
                    "type": "Work",
-                   "id": "${work0.canonicalId}",
+                   "id": "${work0.state.canonicalId}",
                    "title": "${work0.data.title.get}",
                    "alternativeTitles": [],
                    "identifiers": [
@@ -49,7 +49,7 @@ class WorksIncludesTest
                  },
                  {
                    "type": "Work",
-                   "id": "${work1.canonicalId}",
+                   "id": "${work1.state.canonicalId}",
                    "title": "${work1.data.title.get}",
                    "alternativeTitles": [],
                    "identifiers": [
@@ -76,11 +76,11 @@ class WorksIncludesTest
 
           assertJsonResponse(
             routes,
-            s"/$apiPrefix/works/${work.canonicalId}?include=identifiers") {
+            s"/$apiPrefix/works/${work.state.canonicalId}?include=identifiers") {
             Status.OK -> s"""
               {
                 ${singleWorkResult(apiPrefix)},
-                "id": "${work.canonicalId}",
+                "id": "${work.state.canonicalId}",
                 "title": "${work.data.title.get}",
                 "alternativeTitles": [],
                 "identifiers": [
@@ -108,11 +108,11 @@ class WorksIncludesTest
 
         assertJsonResponse(
           routes,
-          s"/$apiPrefix/works/${work.canonicalId}?include=items") {
+          s"/$apiPrefix/works/${work.state.canonicalId}?include=items") {
           Status.OK -> s"""
             {
               ${singleWorkResult(apiPrefix)},
-              "id": "${work.canonicalId}",
+              "id": "${work.state.canonicalId}",
               "title": "${work.data.title.get}",
               "alternativeTitles": [],
               "items": [ ${items(work.data.items)} ]
@@ -173,11 +173,11 @@ class WorksIncludesTest
 
           assertJsonResponse(
             routes,
-            s"/$apiPrefix/works/${work.canonicalId}?include=subjects") {
+            s"/$apiPrefix/works/${work.state.canonicalId}?include=subjects") {
             Status.OK -> s"""
               {
                 ${singleWorkResult(apiPrefix)},
-                "id": "${work.canonicalId}",
+                "id": "${work.state.canonicalId}",
                 "title": "${work.data.title.get}",
                 "alternativeTitles": [],
                 "subjects": [ ${subjects(subject)}]
@@ -239,11 +239,11 @@ class WorksIncludesTest
 
           assertJsonResponse(
             routes,
-            s"/$apiPrefix/works/${work.canonicalId}?include=genres") {
+            s"/$apiPrefix/works/${work.state.canonicalId}?include=genres") {
             Status.OK -> s"""
               {
                 ${singleWorkResult(apiPrefix)},
-                "id": "${work.canonicalId}",
+                "id": "${work.state.canonicalId}",
                 "title": "${work.data.title.get}",
                 "alternativeTitles": [],
                 "genres": [ ${genres(genre)}]
@@ -310,11 +310,11 @@ class WorksIncludesTest
 
           assertJsonResponse(
             routes,
-            s"/$apiPrefix/works/${work.canonicalId}?include=contributors") {
+            s"/$apiPrefix/works/${work.state.canonicalId}?include=contributors") {
             Status.OK -> s"""
               {
                 ${singleWorkResult(apiPrefix)},
-                "id": "${work.canonicalId}",
+                "id": "${work.state.canonicalId}",
                 "title": "${work.data.title.get}",
                 "alternativeTitles": [],
                 "contributors": [ ${contributors(contributor)}]
@@ -380,11 +380,11 @@ class WorksIncludesTest
 
           assertJsonResponse(
             routes,
-            s"/$apiPrefix/works/${work.canonicalId}?include=production") {
+            s"/$apiPrefix/works/${work.state.canonicalId}?include=production") {
             Status.OK -> s"""
               {
                 ${singleWorkResult(apiPrefix)},
-                "id": "${work.canonicalId}",
+                "id": "${work.state.canonicalId}",
                 "title": "${work.data.title.get}",
                 "alternativeTitles": [],
                 "production": [ ${production(productionEventList)}]
@@ -471,11 +471,11 @@ class WorksIncludesTest
           insertIntoElasticsearch(worksIndex, work)
           assertJsonResponse(
             routes,
-            s"/$apiPrefix/works/${work.canonicalId}?include=notes") {
+            s"/$apiPrefix/works/${work.state.canonicalId}?include=notes") {
             Status.OK -> s"""
               {
                 ${singleWorkResult(apiPrefix)},
-                "id": "${work.canonicalId}",
+                "id": "${work.state.canonicalId}",
                 "title": "${work.data.title.get}",
                 "alternativeTitles": [],
                 "notes": [
@@ -554,11 +554,11 @@ class WorksIncludesTest
 
           assertJsonResponse(
             routes,
-            s"/$apiPrefix/works/${work.canonicalId}?include=images") {
+            s"/$apiPrefix/works/${work.state.canonicalId}?include=images") {
             Status.OK -> s"""
               {
                 ${singleWorkResult(apiPrefix)},
-                "id": "${work.canonicalId}",
+                "id": "${work.state.canonicalId}",
                 "title": "${work.data.title.get}",
                 "alternativeTitles": [],
                 "images": [${workImageIncludes(images)}]

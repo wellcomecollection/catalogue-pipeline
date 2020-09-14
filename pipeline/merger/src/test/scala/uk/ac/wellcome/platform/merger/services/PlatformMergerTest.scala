@@ -5,6 +5,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.generators.WorksWithImagesGenerators
+import WorkState.Unidentified
 
 class PlatformMergerTest
     extends AnyFunSpec
@@ -87,8 +88,8 @@ class PlatformMergerTest
     )
 
     forAll(examples) {
-      (works: Seq[TransformedBaseWork],
-       target: Option[UnidentifiedWork],
+      (works: Seq[Work[Unidentified]],
+       target: Option[Work.Standard[Unidentified]],
        clue: String) =>
         withClue(clue) {
           merger.findTarget(works) should be(target)
@@ -122,8 +123,8 @@ class PlatformMergerTest
     }
 
     val expectedRedirectedWork =
-      UnidentifiedRedirectedWork(
-        sourceIdentifier = miroWork.sourceIdentifier,
+      Work.Redirected[Unidentified](
+        state = Unidentified(miroWork.sourceIdentifier),
         version = miroWork.version,
         redirect = IdentifiableRedirect(sierraPhysicalWork.sourceIdentifier))
 
@@ -157,8 +158,8 @@ class PlatformMergerTest
       )
     }
     val expectedRedirectedWork =
-      UnidentifiedRedirectedWork(
-        sourceIdentifier = miroWork.sourceIdentifier,
+      Work.Redirected[Unidentified](
+        state = Unidentified(miroWork.sourceIdentifier),
         version = miroWork.version,
         redirect = IdentifiableRedirect(zeroItemSierraWork.sourceIdentifier)
       )
@@ -202,7 +203,7 @@ class PlatformMergerTest
     }
 
     val expectedRedirectedWork =
-      UnidentifiedRedirectedWork(
+      Work.Redirected[Unidentified](
         sourceIdentifier = miroWork.sourceIdentifier,
         version = miroWork.version,
         redirect = IdentifiableRedirect(sierraDigitalWork.sourceIdentifier))
@@ -262,7 +263,7 @@ class PlatformMergerTest
     }
 
     val expectedRedirectedWork =
-      UnidentifiedRedirectedWork(
+      Work.Redirected[Unidentified](
         sourceIdentifier = metsWork.sourceIdentifier,
         version = metsWork.version,
         redirect = IdentifiableRedirect(sierraPhysicalWork.sourceIdentifier)
@@ -298,7 +299,7 @@ class PlatformMergerTest
     }
 
     val expectedRedirectedWork =
-      UnidentifiedRedirectedWork(
+      Work.Redirected[Unidentified](
         sourceIdentifier = metsWork.sourceIdentifier,
         version = metsWork.version,
         redirect = IdentifiableRedirect(sierraPictureWork.sourceIdentifier)
@@ -343,20 +344,20 @@ class PlatformMergerTest
     }
 
     val expectedRedirectedDigitalWork =
-      UnidentifiedRedirectedWork(
+      Work.Redirected[Unidentified](
         sourceIdentifier = sierraDigitised.sourceIdentifier,
         version = sierraDigitised.version,
         redirect = IdentifiableRedirect(sierraPhysicalWork.sourceIdentifier)
       )
 
     val expectedMiroRedirectedWork =
-      UnidentifiedRedirectedWork(
+      Work.Redirected[Unidentified](
         sourceIdentifier = miroWork.sourceIdentifier,
         version = miroWork.version,
         redirect = IdentifiableRedirect(sierraPhysicalWork.sourceIdentifier))
 
     val expectedMetsRedirectedWork =
-      UnidentifiedRedirectedWork(
+      Work.Redirected[Unidentified](
         sourceIdentifier = metsWork.sourceIdentifier,
         version = metsWork.version,
         redirect = IdentifiableRedirect(sierraPhysicalWork.sourceIdentifier))
@@ -396,7 +397,7 @@ class PlatformMergerTest
     }
 
     val expectedMetsRedirectedWork =
-      UnidentifiedRedirectedWork(
+      Work.Redirected[Unidentified](
         sourceIdentifier = metsWork.sourceIdentifier,
         version = metsWork.version,
         redirect =
@@ -429,7 +430,7 @@ class PlatformMergerTest
     }
 
     val expectedRedirectedDigitalWork =
-      UnidentifiedRedirectedWork(
+      Work.Redirected[Unidentified](
         sourceIdentifier = sierraDigitised.sourceIdentifier,
         version = sierraDigitised.version,
         redirect =
@@ -437,7 +438,7 @@ class PlatformMergerTest
       )
 
     val expectedMetsRedirectedWork =
-      UnidentifiedRedirectedWork(
+      Work.Redirected[Unidentified](
         sourceIdentifier = metsWork.sourceIdentifier,
         version = metsWork.version,
         redirect =

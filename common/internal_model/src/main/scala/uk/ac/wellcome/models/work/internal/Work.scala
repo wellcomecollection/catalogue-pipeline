@@ -13,11 +13,10 @@ sealed trait Work[State <: WorkState] {
 
   def maybeData: Option[WorkData[State, State#ImageId]]
 
-  def sourceIdentifier: SourceIdentifier =
-    state match {
-      case WorkState.Unidentified(sourceIdentifier, _) => sourceIdentifier
-      case WorkState.Identified(sourceIdentifier, _) => sourceIdentifier
-    }
+  def sourceIdentifier: SourceIdentifier = state.sourceIdentifier
+
+  def identifiers: List[SourceIdentifier] =
+    sourceIdentifier :: maybeData.map(_.otherIdentifiers).getOrElse(Nil)
 }
 
 object Work {
@@ -43,6 +42,7 @@ object Work {
     version: Int,
     data: WorkData[State, State#ImageId],
     state: State,
+    invisibilityReasons: List[InvisibilityReason] = Nil,
   ) extends Work[State] {
 
     def maybeData = Some(data)

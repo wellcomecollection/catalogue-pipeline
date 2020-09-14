@@ -5,15 +5,16 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.bigmessaging.fixtures.VHSFixture
 import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.models.work.internal.TransformedBaseWork
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.models.VersionExpectedConflictException
 import uk.ac.wellcome.storage.Version
+import WorkState.Unidentified
 
 class WorkStoreTest
     extends AnyFunSpec
     with Matchers
-    with VHSFixture[TransformedBaseWork]
+    with VHSFixture[Work[Unidentified]]
     with WorksGenerators
     with Inside {
   it("gets a work from vhs") {

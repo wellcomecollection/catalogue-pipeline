@@ -21,7 +21,8 @@ import uk.ac.wellcome.elasticsearch.model.CanonicalId
 import uk.ac.wellcome.fixtures._
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.utils.JsonAssertions
-import uk.ac.wellcome.models.work.internal.{AugmentedImage, IdentifiedBaseWork}
+import uk.ac.wellcome.models.work.internal._
+import WorkState.Identified
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -118,9 +119,9 @@ trait ElasticsearchFixtures
 
   def assertElasticsearchEventuallyHasWork(
     index: Index,
-    works: IdentifiedBaseWork*): Seq[Assertion] = {
-    implicit val id: CanonicalId[IdentifiedBaseWork] =
-      (t: IdentifiedBaseWork) => t.canonicalId
+    works: Work[Identified]*): Seq[Assertion] = {
+    implicit val id: CanonicalId[Work[Identified]] =
+      (t: Work[Identified]) => t.state.canonicalId
     assertElasticsearchEventuallyHas(index, works: _*)
   }
 
@@ -172,9 +173,9 @@ trait ElasticsearchFixtures
     }
 
   def assertElasticsearchNeverHasWork(index: Index,
-                                      works: IdentifiedBaseWork*): Unit = {
-    implicit val id: CanonicalId[IdentifiedBaseWork] =
-      (t: IdentifiedBaseWork) => t.canonicalId
+                                      works: Work[Identified]*): Unit = {
+    implicit val id: CanonicalId[Work[Identified]] =
+      (t: Work[Identified]) => t.state.canonicalId
     assertElasticsearchNeverHas(index, works: _*)
   }
 
@@ -211,7 +212,7 @@ trait ElasticsearchFixtures
   }
 
   def insertIntoElasticsearch(index: Index,
-                              works: IdentifiedBaseWork*): Assertion = {
+                              works: Work[Identified]*): Assertion = {
     val result = elasticClient.execute(
       bulk(
         works.map { work =>
@@ -220,7 +221,7 @@ trait ElasticsearchFixtures
           indexInto(index.name)
             .version(work.version)
             .versionType(ExternalGte)
-            .id(work.canonicalId)
+            .id(work.state.canonicalId)
             .doc(jsonDoc)
         }
       )

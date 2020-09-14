@@ -1,5 +1,7 @@
 package uk.ac.wellcome.platform.api.rest
 
+import scala.concurrent.{ExecutionContext, Future}
+
 import akka.http.scaladsl.model.StatusCodes.Found
 import akka.http.scaladsl.server.Route
 import com.sksamuel.elastic4s.Index
@@ -16,8 +18,7 @@ import uk.ac.wellcome.platform.api.services.{
   WorksService
 }
 import uk.ac.wellcome.platform.api.Tracing
-
-import scala.concurrent.{ExecutionContext, Future}
+import WorkState.Identified
 
 class WorksController(
   elasticsearchService: ElasticsearchService,
@@ -64,16 +65,16 @@ class WorksController(
         worksService
           .findWorkById(id)(index)
           .flatMap {
-            case Right(Some(work: IdentifiedWork)) =>
+            case Right(Some(work: Work.Standard[Identified])) =>
               if (includes.anyRelation) {
                 retrieveRelatedWorks(index, work).map { relatedWorks =>
                   workFound(work, relatedWorks, includes)
                 }
               } else
                 Future.successful(workFound(work, None, includes))
-            case Right(Some(work: IdentifiedRedirectedWork)) =>
+            case Right(Some(work: Work.Redirected[Identified])) =>
               Future.successful(workRedirect(work))
-            case Right(Some(_)) =>
+            case Right(Some(work: Work.Invisible[Identified])) =>
               Future.successful(gone("This work has been deleted"))
             case Right(None) =>
               Future.successful(
@@ -85,7 +86,7 @@ class WorksController(
 
   private def retrieveRelatedWorks(
     index: Index,
-    work: IdentifiedWork): Future[Option[RelatedWorks]] =
+    work: Work.Standard[Identified]): Future[Option[RelatedWorks]] =
     relatedWorkService
       .retrieveRelatedWorks(index, work)
       .map {
@@ -97,13 +98,13 @@ class WorksController(
         case Right(relatedWorks) => Some(relatedWorks)
       }
 
-  def workRedirect(work: IdentifiedRedirectedWork): Route =
+  def workRedirect(work: Work.Redirected[Identified]): Route =
     extractPublicUri { uri =>
       val newPath = (work.redirect.canonicalId :: uri.path.reverse.tail).reverse
       redirect(uri.withPath(newPath), Found)
     }
 
-  def workFound(work: IdentifiedWork,
+  def workFound(work: Work.Standard[Identified],
                 relatedWorks: Option[RelatedWorks],
                 includes: WorksIncludes): Route =
     complete(

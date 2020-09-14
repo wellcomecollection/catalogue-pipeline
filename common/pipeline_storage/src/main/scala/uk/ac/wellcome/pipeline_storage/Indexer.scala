@@ -4,6 +4,7 @@ import scala.concurrent.Future
 import scala.language.implicitConversions
 
 import uk.ac.wellcome.models.work.internal._
+import WorkState.Identified
 
 abstract class Indexer[T: Indexable] {
 
@@ -34,11 +35,11 @@ object Indexable {
         image.version
     }
 
-  implicit val workIndexable: Indexable[IdentifiedBaseWork] =
-    new Indexable[IdentifiedBaseWork] {
+  implicit val workIndexable: Indexable[Work[Identified]] =
+    new Indexable[Work[Identified]] {
 
-      def id(work: IdentifiedBaseWork) =
-        work.canonicalId
+      def id(work: Work[Identified]) =
+        work.state.canonicalId
 
       /**
         * When the merger makes the decision to merge some works, it modifies
@@ -63,11 +64,11 @@ object Indexable {
         * wins over other works with the same version, by adding one to
         * work.version * 10.
         */
-      def version(work: IdentifiedBaseWork) =
+      def version(work: Work[Identified]) =
         work match {
-          case w: IdentifiedWork           => (w.version * 10) + w.data.merged
-          case w: IdentifiedRedirectedWork => (w.version * 10) + 1
-          case w: IdentifiedInvisibleWork  => w.version * 10
+          case Work.Standard(version, data, _) => (version * 10) + data.merged
+          case Work.Redirected(version, _, _) => (version * 10) + 1
+          case Work.Invisible(version, _, _) => version * 10
         }
 
       implicit private def toInteger(bool: Boolean): Int = if (bool) 1 else 0

@@ -68,10 +68,10 @@ class SnapshotGeneratorFeatureTest
           val actualJsonLines: List[String] =
             readGzipFile(downloadFile.getPath).split("\n").toList
 
-          val expectedJsonLines = works.sortBy { _.canonicalId }.map { work =>
+          val expectedJsonLines = works.sortBy { _.state.canonicalId }.map { work =>
             s"""
               |{
-              |  "id": "${work.canonicalId}",
+              |  "id": "${work.state.canonicalId}",
               |  "title": "${work.data.title.get}",
               |  "identifiers": [ ${identifier(work.sourceIdentifier)} ],
               |  "contributors": [ ],

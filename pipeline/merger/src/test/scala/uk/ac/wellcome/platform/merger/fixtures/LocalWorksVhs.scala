@@ -2,12 +2,14 @@ package uk.ac.wellcome.platform.merger.fixtures
 
 import org.scalatest.Assertion
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.bigmessaging.fixtures.VHSFixture
-import uk.ac.wellcome.models.work.internal.TransformedBaseWork
-import uk.ac.wellcome.storage.Identified
 
-trait LocalWorksVhs extends VHSFixture[TransformedBaseWork] with Matchers {
-  def givenStoredInVhs(vhs: VHS, works: TransformedBaseWork*): Seq[Assertion] =
+import uk.ac.wellcome.bigmessaging.fixtures.VHSFixture
+import uk.ac.wellcome.models.work.internal._
+import uk.ac.wellcome.storage.Identified
+import WorkState.Unidentified
+
+trait LocalWorksVhs extends VHSFixture[Work[Unidentified]] with Matchers {
+  def givenStoredInVhs(vhs: VHS, works: Work[Unidentified]*): Seq[Assertion] =
     works.map { work =>
       vhs.init(work.sourceIdentifier.toString)(work)
 

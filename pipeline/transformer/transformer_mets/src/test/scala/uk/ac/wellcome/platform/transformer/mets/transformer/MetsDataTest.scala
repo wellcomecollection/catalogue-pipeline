@@ -30,9 +30,9 @@ class MetsDataTest
 
     val unidentifiableItem =
       Item(id = IdState.Unidentifiable, locations = List(digitalLocation))
-    metsData.toWork(version).right.get shouldBe UnidentifiedInvisibleWork(
+    metsData.toWork(version).right.get shouldBe Work.Invisible[Unidentified](
       version = version,
-      sourceIdentifier = expectedSourceIdentifier,
+      state = Unidentified(expectedSourceIdentifier),
       WorkData(
         items = List(unidentifiableItem),
         mergeCandidates = List(
@@ -68,9 +68,9 @@ class MetsDataTest
 
     val unidentifiableItem =
       Item(id = IdState.Unidentifiable, locations = List(digitalLocation))
-    metsData.toWork(version).right.get shouldBe UnidentifiedInvisibleWork(
+    metsData.toWork(version).right.get shouldBe Work.Invisible[Unidentified](
       version = version,
-      sourceIdentifier = expectedSourceIdentifier,
+      state = Unidentified(expectedSourceIdentifier),
       WorkData(
         items = List(unidentifiableItem),
         mergeCandidates = List(

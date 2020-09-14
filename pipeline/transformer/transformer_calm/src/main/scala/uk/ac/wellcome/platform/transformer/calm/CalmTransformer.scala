@@ -1,12 +1,14 @@
 package uk.ac.wellcome.platform.transformer.calm
 
 import grizzled.slf4j.Logging
+
 import uk.ac.wellcome.models.work.internal.InvisibilityReason._
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.internal.result._
 import uk.ac.wellcome.platform.transformer.calm.models.CalmTransformerException
 import uk.ac.wellcome.platform.transformer.calm.models.CalmTransformerException._
 import uk.ac.wellcome.transformer.common.worker.Transformer
+import WorkState.Unidentified
 
 object CalmTransformer
     extends Transformer[CalmRecord]
@@ -42,11 +44,11 @@ object CalmTransformer
     "third-party metadata"
   )
 
-  def apply(record: CalmRecord, version: Int): Result[TransformedBaseWork] =
+  def apply(record: CalmRecord, version: Int): Result[Work[Unidentified]] =
     if (shouldSuppress(record)) {
       Right(
-        UnidentifiedInvisibleWork(
-          sourceIdentifier = sourceIdentifier(record),
+        Work.Invisible[Unidentified](
+          state = Unidentified(sourceIdentifier(record)),
           version = version,
           data = workData(record).getOrElse(WorkData()),
           invisibilityReasons = List(SuppressedFromSource("Calm"))
@@ -56,8 +58,8 @@ object CalmTransformer
       workData(record) match {
         case Right(data) =>
           Right(
-            UnidentifiedWork(
-              sourceIdentifier = sourceIdentifier(record),
+            Work.Standard[Unidentified](
+              state = Unidentified(sourceIdentifier(record)),
               version = version,
               data = data
             ))
@@ -66,16 +68,16 @@ object CalmTransformer
           err match {
             case knownErr: CalmTransformerException =>
               Right(
-                UnidentifiedInvisibleWork(
-                  sourceIdentifier = sourceIdentifier(record),
+                Work.Invisible[Unidentified](
+                  state = Unidentified(sourceIdentifier(record)),
                   version = version,
                   data = WorkData(),
                   invisibilityReasons =
                     List(knownErrToUntransformableReason(knownErr))))
             case unknownStatus: UnknownAccessStatus =>
               Right(
-                UnidentifiedInvisibleWork(
-                  sourceIdentifier = sourceIdentifier(record),
+                Work.Invisible[Unidentified](
+                  state = Unidentified(sourceIdentifier(record)),
                   version = version,
                   data = WorkData(),
                   invisibilityReasons =

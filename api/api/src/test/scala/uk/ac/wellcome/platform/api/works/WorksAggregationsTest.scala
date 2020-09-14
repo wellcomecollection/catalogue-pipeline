@@ -168,7 +168,7 @@ class WorksAggregationsTest extends ApiWorksTestBase {
       case (ElasticConfig(worksIndex, _), routes) =>
         val works = List("1st May 1970", "1970", "1976", "1970-1979")
           .map(label => createDatedWork(dateLabel = label))
-          .sortBy(_.canonicalId)
+          .sortBy(_.state.canonicalId)
         insertIntoElasticsearch(worksIndex, works: _*)
         assertJsonResponse(
           routes,

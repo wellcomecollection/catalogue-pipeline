@@ -1,14 +1,13 @@
 package uk.ac.wellcome.platform.transformer.miro.services
 
+import scala.util.{Failure, Try}
+
 import io.circe.Encoder
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.models.work.internal.{
-  TransformedBaseWork,
-  UnidentifiedWork
-}
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.miro.exceptions.MiroTransformerException
 import uk.ac.wellcome.platform.transformer.miro.fixtures.MiroVHSRecordReceiverFixture
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
@@ -17,8 +16,7 @@ import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-
-import scala.util.{Failure, Try}
+import WorkState.Unidentified
 
 class MiroVHSRecordReceiverTest
     extends AnyFunSpec
@@ -50,11 +48,11 @@ class MiroVHSRecordReceiverTest
     val future = recordReceiver.receiveMessage(message, transformToWork)
 
     whenReady(future) { _ =>
-      val works = messageSender.getMessages[TransformedBaseWork]
+      val works = messageSender.getMessages[Work[Unidentified]]
       works.size should be >= 1
 
       works.map { work =>
-        work shouldBe a[UnidentifiedWork]
+        work shouldBe a[Work.Standard[Unidentified]]
       }
     }
   }
@@ -70,12 +68,12 @@ class MiroVHSRecordReceiverTest
     val future = recordReceiver.receiveMessage(message, transformToWork)
 
     whenReady(future) { _ =>
-      val works = messageSender.getMessages[TransformedBaseWork]
+      val works = messageSender.getMessages[Work[Unidentified]]
       works.size should be >= 1
 
       works.map { actualWork =>
-        actualWork shouldBe a[UnidentifiedWork]
-        val unidentifiedWork = actualWork.asInstanceOf[UnidentifiedWork]
+        actualWork shouldBe a[Work.Standard[Unidentified]]
+        val unidentifiedWork = actualWork.asInstanceOf[Work.Standard[Unidentified]]
         unidentifiedWork.version shouldBe version
       }
     }

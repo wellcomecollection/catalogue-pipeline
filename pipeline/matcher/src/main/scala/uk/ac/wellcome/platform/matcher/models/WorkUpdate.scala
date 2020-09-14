@@ -1,6 +1,7 @@
 package uk.ac.wellcome.platform.matcher.models
 
-import uk.ac.wellcome.models.work.internal.TransformedBaseWork
+import uk.ac.wellcome.models.work.internal._
+import WorkState.Unidentified
 
 case class WorkUpdate(workId: String,
                       version: Int,
@@ -9,7 +10,7 @@ case class WorkUpdate(workId: String,
 }
 
 case object WorkUpdate {
-  def apply(work: TransformedBaseWork): WorkUpdate = {
+  def apply(work: Work[Unidentified]): WorkUpdate = {
     val id = work.sourceIdentifier.toString
     val referencedWorkIds = work.data.mergeCandidates
       .map { mergeCandidate =>

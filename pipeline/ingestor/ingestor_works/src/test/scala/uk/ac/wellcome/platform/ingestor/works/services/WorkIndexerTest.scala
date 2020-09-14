@@ -10,10 +10,11 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.models.work.internal.IdentifiedBaseWork
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.pipeline_storage.ElasticIndexer
 import uk.ac.wellcome.pipeline_storage.Indexable.workIndexable
 import uk.ac.wellcome.models.Implicits._
+import WorkState.Identified
 
 class WorkIndexerTest
     extends AnyFunSpec
@@ -71,7 +72,7 @@ class WorkIndexerTest
       "doesn't override a identified Work with redirected work with lower version") {
       val identifiedNewWork = createIdentifiedWorkWith(version = 4)
       val redirectedOldWork = createIdentifiedRedirectedWorkWith(
-        canonicalId = identifiedNewWork.canonicalId,
+        canonicalId = identifiedNewWork.state.canonicalId,
         version = 3)
 
       withWorksIndexAndIndexer {
@@ -93,7 +94,7 @@ class WorkIndexerTest
     it("doesn't override a redirected Work with identified work same version") {
       val redirectedWork = createIdentifiedRedirectedWorkWith(version = 3)
       val identifiedWork = createIdentifiedWorkWith(
-        canonicalId = redirectedWork.canonicalId,
+        canonicalId = redirectedWork.state.canonicalId,
         version = 3)
 
       withWorksIndexAndIndexer {
@@ -115,7 +116,7 @@ class WorkIndexerTest
     it("overrides a identified Work with invisible work with higher version") {
       val work = createIdentifiedWorkWith(version = 3)
       val invisibleWork = createIdentifiedInvisibleWorkWith(
-        canonicalId = work.canonicalId,
+        canonicalId = work.state.canonicalId,
         version = 4)
 
       withWorksIndexAndIndexer {
@@ -136,9 +137,9 @@ class WorkIndexerTest
   }
 
   private def ingestWorkPairInOrder(
-    workIndexer: ElasticIndexer[IdentifiedBaseWork])(
-    firstWork: IdentifiedBaseWork,
-    secondWork: IdentifiedBaseWork,
+    workIndexer: ElasticIndexer[Work[Identified]])(
+    firstWork: Work[Identified],
+    secondWork: Work[Identified],
     index: Index) =
     for {
       _ <- workIndexer.index(documents = List(firstWork))
@@ -146,15 +147,15 @@ class WorkIndexerTest
     } yield result
 
   private def assertIngestedWorkIs(
-    result: Either[Seq[IdentifiedBaseWork], Seq[IdentifiedBaseWork]],
-    ingestedWork: IdentifiedBaseWork,
+    result: Either[Seq[Work[Identified]], Seq[Work[Identified]]],
+    ingestedWork: Work[Identified],
     index: Index): Seq[Assertion] = {
     result.isRight shouldBe true
     assertElasticsearchEventuallyHasWork(index = index, ingestedWork)
   }
 
   def withWorksIndexAndIndexer[R](
-    testWith: TestWith[(Index, ElasticIndexer[IdentifiedBaseWork]), R]) = {
+    testWith: TestWith[(Index, ElasticIndexer[Work[Identified]]), R]) = {
     withLocalWorksIndex { index =>
       val indexer = new ElasticIndexer(elasticClient, index)
       testWith((index, indexer))

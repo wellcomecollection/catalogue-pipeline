@@ -1,13 +1,14 @@
 package uk.ac.wellcome.platform.merger.services
 
-import grizzled.slf4j.Logging
-import uk.ac.wellcome.models.matcher.WorkIdentifier
-import uk.ac.wellcome.models.work.internal.TransformedBaseWork
+import scala.concurrent.{ExecutionContext, Future}
 
+import grizzled.slf4j.Logging
+
+import uk.ac.wellcome.models.matcher.WorkIdentifier
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.storage.{Identified, NoVersionExistsError}
 import uk.ac.wellcome.storage.store.VersionedStore
-
-import scala.concurrent.{ExecutionContext, Future}
+import WorkState.Unidentified
 
 /** Before the matcher/merger, the recorder stores a copy of every
   * transformed work in an instance of the VHS.
@@ -17,7 +18,7 @@ import scala.concurrent.{ExecutionContext, Future}
   *
   */
 class RecorderPlaybackService(
-  vhs: VersionedStore[String, Int, TransformedBaseWork])(
+  vhs: VersionedStore[String, Int, Work[Unidentified]])(
   implicit ec: ExecutionContext)
     extends Logging {
 
@@ -25,7 +26,7 @@ class RecorderPlaybackService(
     * corresponding works from VHS.
     */
   def fetchAllWorks(workIdentifiers: Seq[WorkIdentifier])
-    : Future[Seq[Option[TransformedBaseWork]]] = {
+    : Future[Seq[Option[Work[Unidentified]]]] = {
     Future.sequence(
       workIdentifiers.map(id => Future { getWorkForIdentifier(id) })
     )
@@ -39,7 +40,7 @@ class RecorderPlaybackService(
     * If the work is missing from VHS, it throws [[NoSuchElementException]].
     */
   private def getWorkForIdentifier(
-    workIdentifier: WorkIdentifier): Option[TransformedBaseWork] =
+    workIdentifier: WorkIdentifier): Option[Work[Unidentified]] =
     workIdentifier match {
       case WorkIdentifier(id, Some(version)) =>
         vhs.getLatest(workIdentifier.identifier) match {

@@ -12,7 +12,7 @@ import com.sksamuel.elastic4s.ElasticClient
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.display.models.{DisplayWork, _}
 import uk.ac.wellcome.elasticsearch.ElasticConfig
-import uk.ac.wellcome.models.work.internal.IdentifiedWork
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.snapshot_generator.flow.{
   DisplayWorkToJsonStringFlow,
   IdentifiedWorkToVisibleDisplayWork,
@@ -69,7 +69,7 @@ class SnapshotService(akkaS3Settings: S3Settings,
   private def runStream(publicBucketName: String,
                         publicObjectKey: String,
                         index: Index,
-                        toDisplayWork: IdentifiedWork => DisplayWork)
+                        toDisplayWork: Work.Standard[WorkState.Identified] => DisplayWork)
     : Future[MultipartUploadResult] = {
 
     // This source outputs DisplayWorks in the elasticsearch index.

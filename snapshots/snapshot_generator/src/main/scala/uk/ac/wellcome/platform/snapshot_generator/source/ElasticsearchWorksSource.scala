@@ -11,12 +11,12 @@ import com.sksamuel.elastic4s.streams.ReactiveElastic._
 import grizzled.slf4j.Logging
 
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.models.work.internal.IdentifiedWork
+import uk.ac.wellcome.models.work.internal._
 
 object ElasticsearchWorksSource extends Logging {
   def apply(elasticClient: ElasticClient, index: Index)(
-    implicit actorSystem: ActorSystem): Source[IdentifiedWork, NotUsed] = {
-    val loggingSink = Flow[IdentifiedWork]
+    implicit actorSystem: ActorSystem): Source[Work[WorkState.Identified], NotUsed] = {
+    val loggingSink = Flow[Work[WorkState.Identified]]
       .grouped(10000)
       .map(works => {
         logger.info(s"Received ${works.length} works from $index")
@@ -34,7 +34,7 @@ object ElasticsearchWorksSource extends Logging {
             .size(1000))
       )
       .map { searchHit: SearchHit =>
-        fromJson[IdentifiedWork](searchHit.sourceAsString).get
+        fromJson[Work[WorkState.Identified]](searchHit.sourceAsString).get
       }
       .alsoTo(loggingSink)
   }

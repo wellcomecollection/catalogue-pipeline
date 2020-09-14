@@ -7,8 +7,9 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.matcher.WorkIdentifier
 import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.models.work.internal.TransformedBaseWork
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.fixtures.LocalWorksVhs
+import WorkState.Unidentified
 
 class RecorderPlaybackServiceTest
     extends AnyFunSpec
@@ -96,7 +97,7 @@ class RecorderPlaybackServiceTest
 
   private def fetchAllWorks(
     vhs: VHS,
-    works: TransformedBaseWork*): Future[Seq[Option[TransformedBaseWork]]] = {
+    works: Work[Unidentified]*): Future[Seq[Option[Work[Unidentified]]]] = {
     val service = new RecorderPlaybackService(vhs)
 
     val workIdentifiers = works

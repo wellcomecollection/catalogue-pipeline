@@ -9,12 +9,13 @@ import uk.ac.wellcome.platform.transformer.miro.fixtures.MiroVHSRecordReceiverFi
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 import uk.ac.wellcome.platform.transformer.miro.transformers.MiroTransformableWrapper
 import uk.ac.wellcome.platform.transformer.miro.services.MiroTransformerWorkerService
-import uk.ac.wellcome.models.work.internal.UnidentifiedWork
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
+import WorkState.Unidentified
 
 class MiroTransformerFeatureTest
     extends AnyFunSpec
@@ -42,7 +43,7 @@ class MiroTransformerFeatureTest
 
       withWorkerService(messageSender, queue) { _ =>
         eventually {
-          val works = messageSender.getMessages[UnidentifiedWork]
+          val works = messageSender.getMessages[Work.Standard[Unidentified]]
           works.length shouldBe >=(1)
 
           works.map { actualWork =>
@@ -93,7 +94,7 @@ class MiroTransformerFeatureTest
 
         eventually {
           messageSender
-            .getMessages[UnidentifiedWork]
+            .getMessages[Work.Standard[Unidentified]]
             .distinct should have size 2
         }
       }

@@ -189,10 +189,10 @@ class MergerWorkerServiceTest
           worksSent should have size 2
 
           val redirectedWorks = worksSent.collect {
-            case work: UnidentifiedRedirectedWork => work
+            case work: Work.Redirected[Unidentified] => work
           }
           val mergedWorks = worksSent.collect {
-            case work: UnidentifiedWork => work
+            case work: Work.Standard[Unidentified] => work
           }
 
           redirectedWorks should have size 1
@@ -235,15 +235,15 @@ class MergerWorkerServiceTest
 
           val imagesSent =
             senders.images
-              .getMessages[MergedImage[IdState.Identifiable, IdState.Unminted]]
+              .getMessages[MergedImage[IdState.Identifiable, WorkState.Unidentified]]
               .distinct
           imagesSent should have size 1
 
           val redirectedWorks = worksSent.collect {
-            case work: UnidentifiedRedirectedWork => work
+            case work: Work.Redirected[Unidentified] => work
           }
           val mergedWorks = worksSent.collect {
-            case work: UnidentifiedWork => work
+            case work: Work.Standard[Unidentified] => work
           }
 
           redirectedWorks should have size 2
@@ -291,10 +291,10 @@ class MergerWorkerServiceTest
           worksSent should have size 4
 
           val redirectedWorks = worksSent.collect {
-            case work: UnidentifiedRedirectedWork => work
+            case work: Work.Redirected[Unidentified] => work
           }
           val mergedWorks = worksSent.collect {
-            case work: UnidentifiedWork => work
+            case work: Work.Standard[Unidentified] => work
           }
 
           redirectedWorks should have size 2

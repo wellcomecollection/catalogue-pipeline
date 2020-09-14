@@ -3,20 +3,16 @@ package uk.ac.wellcome.platform.merger.rules
 import org.scalatest.Inspectors
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.internal.{
-  DigitalLocationDeprecated,
-  PhysicalLocationDeprecated,
-  TransformedBaseWork,
-  WorkType
-}
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.generators.WorksWithImagesGenerators
+import WorkState.Unidentified
 
 class WorkPredicatesTest
     extends AnyFunSpec
     with WorksWithImagesGenerators
     with Matchers
     with Inspectors {
-  val works: Seq[TransformedBaseWork] = List(
+  val works: Seq[Work[Unidentified]] = List(
     createUnidentifiedSierraWork,
     createMiroWorkWith(
       sourceIdentifier = createNonHistoricalLibraryMiroSourceIdentifier,

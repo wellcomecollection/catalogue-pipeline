@@ -34,7 +34,7 @@ class RelatedWorksServiceTest
       sourceIdentifier = createSourceIdentifierWith(value = path)
     )
 
-  def storeWorks(index: Index, works: List[IdentifiedWork] = works) =
+  def storeWorks(index: Index, works: List[Work.Standard[WorkState.Identified]] = works) =
     insertIntoElasticsearch(index, works: _*)
 
   val workA = work("a")
@@ -72,7 +72,7 @@ class RelatedWorksServiceTest
         whenReady(service(index).getOtherAffectedWorks(workA)) { result =>
           result should contain theSameElementsAs
             works
-              .filter(_.canonicalId != workA.canonicalId)
+              .filter(_.state.canonicalId != workA.state.canonicalId)
               .map(_.sourceIdentifier)
         }
       }

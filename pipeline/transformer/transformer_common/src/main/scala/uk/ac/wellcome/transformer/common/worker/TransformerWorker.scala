@@ -1,5 +1,6 @@
 package uk.ac.wellcome.transformer.common.worker
 
+import scala.concurrent.Future
 import akka.Done
 import grizzled.slf4j.Logging
 import software.amazon.awssdk.services.sqs.model.Message
@@ -7,11 +8,10 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
-import uk.ac.wellcome.models.work.internal.TransformedBaseWork
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.{Identified, Version}
-
-import scala.concurrent.Future
+import WorkState.Unidentified
 
 sealed abstract class TransformerWorkerError(msg: String) extends Exception(msg)
 case class DecodeKeyError[T](msg: String, message: NotificationMessage)
@@ -21,7 +21,7 @@ case class StoreReadError[T](msg: String, key: T)
 case class TransformerError[In, Key](msg: String, sourceData: In, key: Key)
     extends TransformerWorkerError(msg)
 case class MessageSendError[T, Key](msg: String,
-                                    work: TransformedBaseWork,
+                                    work: Work[Unidentified],
                                     key: Key)
     extends TransformerWorkerError(msg)
 
@@ -29,7 +29,7 @@ case class MessageSendError[T, Key](msg: String,
   * A TransformerWorker:
   * - Takes an SQS stream that emits VHS keys
   * - Gets the record of type `In`
-  * - Runs it through a transformer and transforms the `In` to `TransformedBaseWork`
+  * - Runs it through a transformer and transforms the `In` to `Work[Unidentified]`
   * - Emits the message via `BigMessageSender` to an SNS topic
   */
 trait TransformerWorker[In, SenderDest] extends Logging {
@@ -45,7 +45,7 @@ trait TransformerWorker[In, SenderDest] extends Logging {
   val concurrentTransformations: Int = 2
 
   def process(
-    message: NotificationMessage): Result[(TransformedBaseWork, StoreKey)] = {
+    message: NotificationMessage): Result[(Work[Unidentified], StoreKey)] = {
     for {
       key <- decodeKey(message)
       recordAndKey <- getRecord(key)
@@ -54,14 +54,14 @@ trait TransformerWorker[In, SenderDest] extends Logging {
     } yield done
   }
 
-  private def work(sourceData: In, key: StoreKey): Result[TransformedBaseWork] =
+  private def work(sourceData: In, key: StoreKey): Result[Work[Unidentified]] =
     transformer(sourceData, key.version) match {
       case Left(err)     => Left(TransformerError(err.toString, sourceData, key))
       case Right(result) => Right(result)
     }
 
-  private def done(work: TransformedBaseWork,
-                   key: StoreKey): Result[(TransformedBaseWork, StoreKey)] =
+  private def done(work: Work[Unidentified],
+                   key: StoreKey): Result[(Work[Unidentified], StoreKey)] =
     sender.sendT(work) toEither match {
       case Left(err) => Left(MessageSendError(err.toString, work, key))
       case Right(_)  => Right((work, key))

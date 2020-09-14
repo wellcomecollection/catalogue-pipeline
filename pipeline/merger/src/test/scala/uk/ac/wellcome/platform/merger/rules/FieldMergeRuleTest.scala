@@ -4,12 +4,10 @@ import org.scalatest.matchers.should.Matchers
 import cats.data.NonEmptyList
 import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.models.work.internal.{
-  TransformedBaseWork,
-  UnidentifiedWork
-}
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
+import WorkState.Unidentified
 
 class FieldMergeRuleTest
     extends AnyFunSpec
@@ -23,8 +21,8 @@ class FieldMergeRuleTest
       work => work.data.title.contains("A")
     override val isDefinedForSource: WorkPredicate = _ => true
 
-    override def rule(target: UnidentifiedWork,
-                      sources: NonEmptyList[TransformedBaseWork]): FieldData =
+    override def rule(target: Work.Standard[Unidentified],
+                      sources: NonEmptyList[Work[Unidentified]]): FieldData =
       ()
   }
   val sourceTitleIsA = new PartialRule {
@@ -32,8 +30,8 @@ class FieldMergeRuleTest
     override val isDefinedForSource: WorkPredicate =
       work => work.data.title.contains("A")
 
-    override def rule(target: UnidentifiedWork,
-                      sources: NonEmptyList[TransformedBaseWork]): FieldData =
+    override def rule(target: Work.Standard[Unidentified],
+                      sources: NonEmptyList[Work[Unidentified]]): FieldData =
       ()
   }
 
@@ -61,8 +59,8 @@ class FieldMergeRuleTest
           work => work.data.title.contains("A")
 
         override def rule(
-          target: UnidentifiedWork,
-          sources: NonEmptyList[TransformedBaseWork]): FieldData = {
+          target: Work.Standard[Unidentified],
+          sources: NonEmptyList[Work[Unidentified]]): FieldData = {
           sources.toList should contain(workWithTitleA)
           sources.toList should not contain workWithTitleB
           None
@@ -76,7 +74,7 @@ class FieldMergeRuleTest
   // This is here because we are extending ComposedFieldMergeRule
   // to access the private PartialRule trait
   override def merge(
-    target: UnidentifiedWork,
-    sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData] =
+    target: Work.Standard[Unidentified],
+    sources: Seq[Work[Unidentified]]): FieldMergeResult[FieldData] =
     throw new NotImplementedError()
 }

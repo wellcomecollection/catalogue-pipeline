@@ -15,6 +15,7 @@ import uk.ac.wellcome.models.work.generators.{
 }
 import uk.ac.wellcome.models.work.internal.WorkType.Videos
 import uk.ac.wellcome.models.work.internal._
+import WorkState.Identified
 
 class DisplayWorkTest
     extends AnyFunSpec
@@ -217,7 +218,7 @@ class DisplayWorkTest
   }
 
   it("does not extract includes set to false") {
-    forAll { work: IdentifiedWork =>
+    forAll { work: Work.Standard[Identified] =>
       val displayWork =
         DisplayWork(work, includes = WorksIncludes())
 
@@ -473,7 +474,7 @@ class DisplayWorkTest
         DisplayWork(work, WorksIncludes(partOf = true), relatedWorks)
       displayWork.partOf.isEmpty shouldBe false
       val partOf: List[DisplayWork] = displayWork.partOf.get
-      partOf.map(_.id) shouldBe List(workB.canonicalId)
+      partOf.map(_.id) shouldBe List(workB.state.canonicalId)
       partOf(0).partOf shouldBe Some(List(DisplayWork(workA)))
     }
 

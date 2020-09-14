@@ -5,6 +5,7 @@ import com.amazonaws.services.s3.AmazonS3
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import software.amazon.awssdk.services.sqs.model.SendMessageResponse
+
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
@@ -29,6 +30,7 @@ import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.{Identified, Version}
+import WorkState.Unidentified
 
 class MetsTransformerWorkerServiceTest
     extends AnyFunSpec
@@ -60,7 +62,7 @@ class MetsTransformerWorkerServiceTest
       case (QueuePair(queue, _), metsBucket, messageSender, dynamoStore) =>
         sendWork(str, "mets.xml", dynamoStore, metsBucket, queue, version)
         eventually {
-          val works = messageSender.getMessages[UnidentifiedInvisibleWork]
+          val works = messageSender.getMessages[Work.Invisible[Unidentified]]
           works.head shouldBe expectedWork(identifier, version)
 
           assertQueueEmpty(queue)
@@ -77,7 +79,7 @@ class MetsTransformerWorkerServiceTest
       case (QueuePair(queue, dlq), metsBucket, messageSender, vhs) =>
         sendWork(value1, "mets.xml", vhs, metsBucket, queue, version)
         eventually {
-          messageSender.getMessages[UnidentifiedInvisibleWork] shouldBe empty
+          messageSender.getMessages[Work.Invisible[Unidentified]] shouldBe empty
 
           assertQueueEmpty(queue)
           assertQueueHasSize(dlq, size = 1)
@@ -85,7 +87,7 @@ class MetsTransformerWorkerServiceTest
     }
   }
 
-  it("sends messages that can be decoded as a TransformedBaseWork") {
+  it("sends messages that can be decoded as a Work[Unidentified]") {
 
     val identifier = randomAlphanumeric(10)
     val version = randomInt(1, 10)
@@ -95,7 +97,7 @@ class MetsTransformerWorkerServiceTest
       case (QueuePair(queue, _), metsBucket, messageSender, dynamoStore) =>
         sendWork(str, "mets.xml", dynamoStore, metsBucket, queue, version)
         eventually {
-          val works = messageSender.getMessages[TransformedBaseWork]
+          val works = messageSender.getMessages[Work[Unidentified]]
           works.head shouldBe expectedWork(identifier, version)
         }
     }
@@ -113,12 +115,15 @@ class MetsTransformerWorkerServiceTest
         id = IdState.Unidentifiable,
         locations = List(expectedDigitalLocation))
 
-    val expectedWork = UnidentifiedInvisibleWork(
+    val expectedWork = Work.Invisible[Unidentified](
       version = version,
-      sourceIdentifier = SourceIdentifier(
-        identifierType = IdentifierType("mets", "METS"),
-        ontologyType = "Work",
-        value = identifier),
+      state = Unidentified(
+        SourceIdentifier(
+          identifierType = IdentifierType("mets", "METS"),
+          ontologyType = "Work",
+          value = identifier
+        )
+      ),
       data = WorkData(
         items = List(expectedItem),
         mergeCandidates = List(

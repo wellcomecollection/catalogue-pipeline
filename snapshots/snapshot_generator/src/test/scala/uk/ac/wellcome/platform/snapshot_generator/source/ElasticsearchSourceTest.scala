@@ -11,7 +11,7 @@ import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.models.work.internal.IdentifiedWork
+import uk.ac.wellcome.models.work.internal._
 
 class ElasticsearchSourceTest
     extends AnyFunSpec
@@ -60,7 +60,7 @@ class ElasticsearchSourceTest
   }
 
   private def withSource[R](index: Index)(
-    testWith: TestWith[Source[IdentifiedWork, NotUsed], R])(
+    testWith: TestWith[Source[Work[WorkState.Identified], NotUsed], R])(
     implicit actorSystem: ActorSystem): R = {
     val source = ElasticsearchWorksSource(
       elasticClient = elasticClient,

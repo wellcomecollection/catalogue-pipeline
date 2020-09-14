@@ -10,6 +10,7 @@ import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.platform.idminter.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.models.Implicits._
+import WorkState.Identified
 
 class IdMinterFeatureTest
     extends AnyFunSpec
@@ -35,16 +36,16 @@ class IdMinterFeatureTest
           }
 
           eventually {
-            val works = messageSender.getMessages[IdentifiedBaseWork]
+            val works = messageSender.getMessages[Work[Identified]]
             works.length shouldBe >=(messageCount)
 
-            works.map(_.canonicalId).distinct should have size 1
+            works.map(_.state.canonicalId).distinct should have size 1
             works.foreach { receivedWork =>
               receivedWork
-                .asInstanceOf[IdentifiedWork]
+                .asInstanceOf[Work.Standard[Identified]]
                 .sourceIdentifier shouldBe work.sourceIdentifier
               receivedWork
-                .asInstanceOf[IdentifiedWork]
+                .asInstanceOf[Work.Standard[Identified]]
                 .data
                 .title shouldBe work.data.title
             }
@@ -66,21 +67,21 @@ class IdMinterFeatureTest
           sendMessage(queue = queue, obj = work)
 
           eventually {
-            val works = messageSender.getMessages[IdentifiedBaseWork]
+            val works = messageSender.getMessages[Work[Identified]]
             works.length shouldBe >=(1)
 
             val receivedWork = works.head
             val invisibleWork =
-              receivedWork.asInstanceOf[IdentifiedInvisibleWork]
+              receivedWork.asInstanceOf[Work.Invisible[Identified]]
             invisibleWork.sourceIdentifier shouldBe work.sourceIdentifier
-            invisibleWork.canonicalId shouldNot be(empty)
+            invisibleWork.state.canonicalId shouldNot be(empty)
           }
         }
       }
     }
   }
 
-  it("mints an identifier for a UnidentifiedRedirectedWork") {
+  it("mints an identifier for a Work.Redirected[Unidentified]") {
     val messageSender = new MemoryMessageSender()
 
     withLocalSqsQueue() { queue =>
@@ -93,14 +94,14 @@ class IdMinterFeatureTest
           sendMessage(queue = queue, obj = work)
 
           eventually {
-            val works = messageSender.getMessages[IdentifiedBaseWork]
+            val works = messageSender.getMessages[Work[Identified]]
             works.length shouldBe >=(1)
 
             val receivedWork = works.head
             val redirectedWork =
-              receivedWork.asInstanceOf[IdentifiedRedirectedWork]
+              receivedWork.asInstanceOf[Work.Redirected[Identified]]
             redirectedWork.sourceIdentifier shouldBe work.sourceIdentifier
-            redirectedWork.canonicalId shouldNot be(empty)
+            redirectedWork.state.canonicalId shouldNot be(empty)
             redirectedWork.redirect.canonicalId shouldNot be(empty)
           }
         }
