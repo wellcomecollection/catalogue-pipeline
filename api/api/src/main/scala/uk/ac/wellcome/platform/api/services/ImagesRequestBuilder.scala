@@ -5,15 +5,27 @@ import com.sksamuel.elastic4s._
 import com.sksamuel.elastic4s.requests.searches._
 import com.sksamuel.elastic4s.requests.searches.queries.Query
 import com.sksamuel.elastic4s.requests.searches.sort._
+import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 import uk.ac.wellcome.platform.api.elasticsearch.{
+  ColorQuery,
   ImageSimilarity,
   ImagesMultiMatcher
 }
-import uk.ac.wellcome.platform.api.models.{ImageFilter, LicenseFilter}
+import uk.ac.wellcome.platform.api.models.{
+  ColorFilter,
+  ImageFilter,
+  LicenseFilter,
+  QueryConfig
+}
 
-object ImagesRequestBuilder extends ElasticsearchRequestBuilder {
+class ImagesRequestBuilder(queryConfig: QueryConfig)
+    extends ElasticsearchRequestBuilder {
 
   val idSort: FieldSort = fieldSort("id.canonicalId").order(SortOrder.ASC)
+
+  lazy val colorQuery = new ColorQuery(
+    binSizes = queryConfig.paletteBinSizes
+  )
 
   def request(queryOptions: ElasticsearchQueryOptions,
               index: Index,
@@ -43,6 +55,8 @@ object ImagesRequestBuilder extends ElasticsearchRequestBuilder {
     imageFilter match {
       case LicenseFilter(licenseIds) =>
         termsQuery(field = "location.license.id", values = licenseIds)
+      case ColorFilter(hexColors) =>
+        colorQuery(field = "inferredData.palette", hexColors)
     }
 
   def requestWithBlendedSimilarity: (Index, String, Int) => SearchRequest =

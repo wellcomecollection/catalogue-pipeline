@@ -32,6 +32,7 @@ case class MultipleImagesParams(
   pageSize: Option[Int],
   query: Option[String],
   license: Option[LicenseFilter],
+  colors: Option[ColorFilter],
   _index: Option[String]
 ) extends QueryParams
     with Paginated {
@@ -58,10 +59,14 @@ object MultipleImagesParams extends QueryParamsUtils {
         "pageSize".as[Int].?,
         "query".as[String].?,
         "locations.license".as[LicenseFilter].?,
+        "colors".as[ColorFilter].?,
         "_index".as[String].?
       )
     ).tflatMap { args =>
       val params = (MultipleImagesParams.apply _).tupled(args)
       validated(params.paginationErrors, params)
     }
+
+  implicit val colorFilter: Decoder[ColorFilter] =
+    decodeCommaSeparated.emap(strs => Right(ColorFilter(strs)))
 }
