@@ -1,13 +1,16 @@
 package uk.ac.wellcome.platform.inference_manager.fixtures
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 import io.circe.Decoder
 import software.amazon.awssdk.services.sqs.model.Message
+
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.models.work.internal.{IdState, MergedImage}
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.inference_manager.adapters.InferrerAdapter
 import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
 import uk.ac.wellcome.platform.inference_manager.services.{
@@ -17,8 +20,6 @@ import uk.ac.wellcome.platform.inference_manager.services.{
   MergedIdentifiedImage,
   RequestPoolFlow
 }
-
-import scala.concurrent.ExecutionContext.Implicits.global
 
 trait InferenceManagerWorkerServiceFixture
     extends BigMessagingFixture
