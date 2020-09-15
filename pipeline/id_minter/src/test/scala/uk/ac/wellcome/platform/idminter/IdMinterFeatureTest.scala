@@ -10,7 +10,7 @@ import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.platform.idminter.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.models.Implicits._
-import WorkState.Identified
+import WorkState.{Identified, Unidentified}
 
 class IdMinterFeatureTest
     extends AnyFunSpec
@@ -27,7 +27,7 @@ class IdMinterFeatureTest
       withIdentifiersDatabase { identifiersTableConfig =>
         withWorkerService(messageSender, queue, identifiersTableConfig) { _ =>
           eventuallyTableExists(identifiersTableConfig)
-          val work = createUnidentifiedWork
+          val work: Work[Unidentified] = createUnidentifiedWork
 
           val messageCount = 5
 
@@ -62,7 +62,7 @@ class IdMinterFeatureTest
       withIdentifiersDatabase { identifiersTableConfig =>
         withWorkerService(messageSender, queue, identifiersTableConfig) { _ =>
           eventuallyTableExists(identifiersTableConfig)
-          val work = createUnidentifiedInvisibleWork
+          val work: Work[Unidentified] = createUnidentifiedInvisibleWork
 
           sendMessage(queue = queue, obj = work)
 
@@ -89,7 +89,7 @@ class IdMinterFeatureTest
         withWorkerService(messageSender, queue, identifiersTableConfig) { _ =>
           eventuallyTableExists(identifiersTableConfig)
 
-          val work = createUnidentifiedRedirectedWork
+          val work: Work[Unidentified] = createUnidentifiedRedirectedWork
 
           sendMessage(queue = queue, obj = work)
 
@@ -117,7 +117,7 @@ class IdMinterFeatureTest
         withWorkerService(messageSender, queue, identifiersTableConfig) { _ =>
           sendInvalidJSONto(queue)
 
-          val work = createUnidentifiedWork
+          val work: Work[Unidentified] = createUnidentifiedWork
 
           sendMessage(queue = queue, obj = work)
 
