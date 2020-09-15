@@ -3,12 +3,10 @@ package uk.ac.wellcome.platform.merger.rules
 import scala.Function.const
 import cats.data.{NonEmptyList, State}
 
-import uk.ac.wellcome.models.work.internal.{
-  TransformedBaseWork,
-  UnidentifiedWork
-}
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
+import WorkState.Unidentified
 
 /*
  * A trait to extend in order to merge fields of the type member `Field`
@@ -28,40 +26,41 @@ import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
  * like `orElse` and `andThen` for free.
  */
 trait FieldMergeRule {
-  protected final type Params = (UnidentifiedWork, Seq[TransformedBaseWork])
+  protected final type Params =
+    (Work.Standard[Unidentified], Seq[Work[Unidentified]])
   protected type FieldData
-  protected type MergeState = State[Set[TransformedBaseWork], FieldData]
+  protected type MergeState = State[Set[Work[Unidentified]], FieldData]
 
-  def apply(target: UnidentifiedWork,
-            sources: Seq[TransformedBaseWork]): MergeState =
+  def apply(target: Work.Standard[Unidentified],
+            sources: Seq[Work[Unidentified]]): MergeState =
     merge(target, sources) match {
       case FieldMergeResult(field, mergedSources) =>
         State(existingMergedSources =>
           (existingMergedSources ++ mergedSources.toSet, field))
     }
 
-  def merge(target: UnidentifiedWork,
-            sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData]
+  def merge(target: Work.Standard[Unidentified],
+            sources: Seq[Work[Unidentified]]): FieldMergeResult[FieldData]
 
   protected trait PartialRule {
     val isDefinedForTarget: WorkPredicate
     val isDefinedForSource: WorkPredicate
-    val isDefinedForSourceList: Seq[TransformedBaseWork] => Boolean =
+    val isDefinedForSourceList: Seq[Work[Unidentified]] => Boolean =
       const(true)
 
-    protected def rule(target: UnidentifiedWork,
-                       sources: NonEmptyList[TransformedBaseWork]): FieldData
+    protected def rule(target: Work.Standard[Unidentified],
+                       sources: NonEmptyList[Work[Unidentified]]): FieldData
 
-    def apply(target: UnidentifiedWork,
-              sources: Seq[TransformedBaseWork]): Option[FieldData] =
+    def apply(target: Work.Standard[Unidentified],
+              sources: Seq[Work[Unidentified]]): Option[FieldData] =
       mergedSources(target, sources) match {
         case head +: tail =>
           Some(rule(target, NonEmptyList(head, tail.toList)))
         case _ => None
       }
 
-    def apply(target: UnidentifiedWork,
-              source: TransformedBaseWork): Option[FieldData] =
+    def apply(target: Work.Standard[Unidentified],
+              source: Work[Unidentified]): Option[FieldData] =
       apply(target, List(source))
 
     /*
@@ -74,8 +73,8 @@ trait FieldMergeRule {
      * - `isDefinedForSource(source)` is `true` for at least one element of `sources`
      */
     def mergedSources(
-      target: UnidentifiedWork,
-      sources: Seq[TransformedBaseWork]): Seq[TransformedBaseWork] =
+      target: Work.Standard[Unidentified],
+      sources: Seq[Work[Unidentified]]): Seq[Work[Unidentified]] =
       if (isDefinedForSourceList(sources) && isDefinedForTarget(target)) {
         sources.filter(isDefinedForSource)
       } else {

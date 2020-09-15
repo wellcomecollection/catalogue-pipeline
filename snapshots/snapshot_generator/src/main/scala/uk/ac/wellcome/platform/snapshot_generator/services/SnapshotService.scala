@@ -1,6 +1,7 @@
 package uk.ac.wellcome.platform.snapshot_generator.services
 
 import scala.concurrent.{ExecutionContext, Future}
+
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.Uri
 import akka.stream.alpakka.s3.{MultipartUploadResult, S3Attributes, S3Settings}
@@ -10,9 +11,10 @@ import akka.util.ByteString
 import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.ElasticClient
 import grizzled.slf4j.Logging
+
 import uk.ac.wellcome.display.models.{DisplayWork, _}
 import uk.ac.wellcome.elasticsearch.ElasticConfig
-import uk.ac.wellcome.models.work.internal.IdentifiedWork
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.snapshot_generator.flow.{
   DisplayWorkToJsonStringFlow,
   IdentifiedWorkToVisibleDisplayWork,
@@ -23,6 +25,7 @@ import uk.ac.wellcome.platform.snapshot_generator.models.{
   SnapshotJob
 }
 import uk.ac.wellcome.platform.snapshot_generator.source.ElasticsearchWorksSource
+import WorkState.Identified
 
 class SnapshotService(akkaS3Settings: S3Settings,
                       elasticClient: ElasticClient,
@@ -49,7 +52,7 @@ class SnapshotService(akkaS3Settings: S3Settings,
           publicBucketName = publicBucketName,
           publicObjectKey = publicObjectKey,
           index = elasticConfig.worksIndex,
-          toDisplayWork = DisplayWork.apply(_, WorksIncludes.includeAll())
+          toDisplayWork = DisplayWork(_, WorksIncludes.includeAll())
         )
     }
 
@@ -69,7 +72,7 @@ class SnapshotService(akkaS3Settings: S3Settings,
   private def runStream(publicBucketName: String,
                         publicObjectKey: String,
                         index: Index,
-                        toDisplayWork: IdentifiedWork => DisplayWork)
+                        toDisplayWork: Work.Standard[Identified] => DisplayWork)
     : Future[MultipartUploadResult] = {
 
     // This source outputs DisplayWorks in the elasticsearch index.

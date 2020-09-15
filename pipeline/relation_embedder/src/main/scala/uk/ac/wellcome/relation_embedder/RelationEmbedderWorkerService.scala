@@ -13,12 +13,13 @@ import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.pipeline_storage.{Indexer, Retriever}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.json.JsonUtil._
+import WorkState.Identified
 
 class RelationEmbedderWorkerService[MsgDestination](
   sqsStream: SQSStream[NotificationMessage],
   msgSender: MessageSender[MsgDestination],
-  workRetriever: Retriever[IdentifiedBaseWork],
-  workIndexer: Indexer[IdentifiedBaseWork],
+  workRetriever: Retriever[Work[Identified]],
+  workIndexer: Indexer[Work[Identified]],
   relatedWorksService: RelatedWorksService,
   batchSize: Int = 20,
   flushInterval: FiniteDuration = 3 seconds
@@ -48,7 +49,7 @@ class RelationEmbedderWorkerService[MsgDestination](
         case (work, relations) =>
           // TODO: here we should add the relations to the work model for storage.
           // This requires model changes which have not been made yet
-          val denormalisedWork: IdentifiedBaseWork = ???
+          val denormalisedWork: Work[Identified] = ???
           denormalisedWork
       }
       .groupedWithin(batchSize, flushInterval)

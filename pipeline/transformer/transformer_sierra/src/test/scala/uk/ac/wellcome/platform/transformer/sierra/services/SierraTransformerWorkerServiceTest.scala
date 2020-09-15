@@ -1,6 +1,9 @@
 package uk.ac.wellcome.platform.transformer.sierra.services
 
+import scala.util.{Failure, Try}
+
 import io.circe.Encoder
+
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -10,10 +13,7 @@ import uk.ac.wellcome.messaging.fixtures.SQS.{Queue, QueuePair}
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
-import uk.ac.wellcome.models.work.internal.{
-  TransformedBaseWork,
-  UnidentifiedWork
-}
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.transformer.common.worker.Transformer
 import uk.ac.wellcome.sierra_adapter.model.{
   SierraGenerators,
@@ -27,8 +27,7 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.storage.generators.RandomThings
-
-import scala.util.{Failure, Try}
+import WorkState.Unidentified
 
 class SierraTransformerWorkerServiceTest
     extends AnyFunSpec
@@ -75,7 +74,7 @@ class SierraTransformerWorkerServiceTest
               value = id.withoutCheckDigit
             )
 
-          val works = sender.getMessages[UnidentifiedWork]
+          val works = sender.getMessages[Work.Standard[Unidentified]]
           works.length shouldBe >=(1)
 
           works.map { actualWork =>
@@ -101,12 +100,13 @@ class SierraTransformerWorkerServiceTest
 
       withWorkerService(store, sender, queue) { _ =>
         eventually {
-          val works = sender.getMessages[TransformedBaseWork]
+          val works = sender.getMessages[Work[Unidentified]]
           works.size should be >= 1
 
           works.map { actualWork =>
-            actualWork shouldBe a[UnidentifiedWork]
-            val unidentifiedWork = actualWork.asInstanceOf[UnidentifiedWork]
+            actualWork shouldBe a[Work.Standard[_]]
+            val unidentifiedWork =
+              actualWork.asInstanceOf[Work.Standard[Unidentified]]
             unidentifiedWork.version shouldBe version
           }
         }

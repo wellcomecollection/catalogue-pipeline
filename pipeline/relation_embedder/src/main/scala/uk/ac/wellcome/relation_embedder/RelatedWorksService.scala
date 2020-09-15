@@ -15,9 +15,9 @@ import com.sksamuel.elastic4s.circe._
 import io.circe.generic.semiauto.deriveDecoder
 
 import uk.ac.wellcome.models.work.internal._
-
 import uk.ac.wellcome.models.work.internal.result._
 import uk.ac.wellcome.models.Implicits._
+import WorkState.Identified
 
 trait RelatedWorksService {
 
@@ -29,14 +29,14 @@ trait RelatedWorksService {
     * @return The IDs of the other works to denormalise
     */
   def getOtherAffectedWorks(
-    work: IdentifiedBaseWork): Future[List[SourceIdentifier]]
+    work: Work[Identified]): Future[List[SourceIdentifier]]
 
   /** For a given work return all its relations.
     *
     * @param work The work
     * @return The related works which are embedded into the given work
     */
-  def getRelations(work: IdentifiedBaseWork): Future[RelatedWorks]
+  def getRelations(work: Work[Identified]): Future[RelatedWorks]
 }
 
 class PathQueryRelatedWorksService(elasticClient: ElasticClient, index: Index)(
@@ -44,9 +44,9 @@ class PathQueryRelatedWorksService(elasticClient: ElasticClient, index: Index)(
     extends RelatedWorksService {
 
   def getOtherAffectedWorks(
-    work: IdentifiedBaseWork): Future[List[SourceIdentifier]] =
+    work: Work[Identified]): Future[List[SourceIdentifier]] =
     work match {
-      case work: IdentifiedWork =>
+      case work: Work.Standard[Identified] =>
         work.data.collectionPath match {
           case None => Future.successful(Nil)
           case Some(CollectionPath(path, _, _)) =>
@@ -68,9 +68,9 @@ class PathQueryRelatedWorksService(elasticClient: ElasticClient, index: Index)(
       case _ => Future.successful(Nil)
     }
 
-  def getRelations(work: IdentifiedBaseWork): Future[RelatedWorks] =
+  def getRelations(work: Work[Identified]): Future[RelatedWorks] =
     work match {
-      case work: IdentifiedWork =>
+      case work: Work.Standard[Identified] =>
         work.data.collectionPath match {
           case None => Future.successful(RelatedWorks.nil)
           case Some(CollectionPath(path, _, _)) =>
@@ -132,8 +132,8 @@ class PathQueryRelatedWorksService(elasticClient: ElasticClient, index: Index)(
     else
       Right(response.result)
 
-  private def toWork(hit: SearchHit): Result[IdentifiedWork] =
-    hit.safeTo[IdentifiedWork].toEither
+  private def toWork(hit: SearchHit): Result[Work.Standard[Identified]] =
+    hit.safeTo[Work.Standard[Identified]].toEither
 
   case class AffectedWork(sourceIdentifier: SourceIdentifier)
 

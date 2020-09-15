@@ -2,12 +2,13 @@ package uk.ac.wellcome.platform.inference_manager
 
 import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
 import akka.stream.scaladsl.{Flow, FlowWithContext}
-import uk.ac.wellcome.models.work.internal.{IdState, MergedImage}
+import uk.ac.wellcome.models.work.internal._
 
 import scala.util.Try
 
 package object services {
-  type MergedIdentifiedImage = MergedImage[IdState.Identified, IdState.Minted]
+  type MergedIdentifiedImage =
+    MergedImage[IdState.Identified, WorkState.Identified]
 
   // Because request pool flows cannot be FlowWithContexts, we have to manually
   // attach both the "usual" context object (the RequestCtx) and the context from

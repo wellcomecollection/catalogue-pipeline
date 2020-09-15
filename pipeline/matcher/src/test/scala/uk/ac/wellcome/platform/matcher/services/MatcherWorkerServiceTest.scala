@@ -16,6 +16,7 @@ import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
 import uk.ac.wellcome.models.Implicits._
+import WorkState.Unidentified
 
 class MatcherWorkerServiceTest
     extends AnyFunSpec
@@ -378,7 +379,7 @@ class MatcherWorkerServiceTest
     }
   }
 
-  private def processAndAssertMatchedWorkIs(workToMatch: TransformedBaseWork,
+  private def processAndAssertMatchedWorkIs(workToMatch: Work[Unidentified],
                                             expectedResult: MatcherResult)(
     implicit
     vhs: VHS,

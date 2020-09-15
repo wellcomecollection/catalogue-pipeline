@@ -1,14 +1,16 @@
 package uk.ac.wellcome.platform.transformer.miro
 
+import scala.util.Try
+
 import grizzled.slf4j.Logging
+
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.miro.exceptions.ShouldNotTransformException
 import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 import uk.ac.wellcome.platform.transformer.miro.transformers._
-
-import scala.util.Try
+import WorkState.Unidentified
 
 class MiroRecordTransformer
     extends MiroContributors
@@ -25,7 +27,7 @@ class MiroRecordTransformer
 
   def transform(miroRecord: MiroRecord,
                 miroMetadata: MiroMetadata,
-                version: Int): Try[TransformedBaseWork] =
+                version: Int): Try[Work[Unidentified]] =
     doTransform(miroRecord, miroMetadata, version) map { transformed =>
       debug(s"Transformed record to $transformed")
       transformed
@@ -37,7 +39,7 @@ class MiroRecordTransformer
 
   private def doTransform(originalMiroRecord: MiroRecord,
                           miroMetadata: MiroMetadata,
-                          version: Int): Try[TransformedBaseWork] = {
+                          version: Int): Try[Work[Unidentified]] = {
     val sourceIdentifier = SourceIdentifier(
       identifierType = IdentifierType("miro-image-number"),
       ontologyType = "Work",
@@ -69,7 +71,7 @@ class MiroRecordTransformer
 
       val (title, description) = getTitleAndDescription(miroRecord)
 
-      val data = WorkData[IdState.Unminted, IdState.Identifiable](
+      val data = WorkData[WorkState.Unidentified, IdState.Identifiable](
         otherIdentifiers = getOtherIdentifiers(miroRecord),
         title = Some(title),
         workType = getWorkType,
@@ -84,12 +86,16 @@ class MiroRecordTransformer
         images = List(getImage(miroRecord, version))
       )
 
-      UnidentifiedWork(version, sourceIdentifier, data)
+      Work.Standard[Unidentified](
+        version = version,
+        state = Unidentified(sourceIdentifier),
+        data = data
+      )
     }.recover {
       case e: ShouldNotTransformException =>
         debug(s"Should not transform: ${e.getMessage}")
-        UnidentifiedInvisibleWork(
-          sourceIdentifier = sourceIdentifier,
+        Work.Invisible[Unidentified](
+          state = Unidentified(sourceIdentifier),
           version = version,
           data = WorkData()
         )

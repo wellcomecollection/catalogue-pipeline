@@ -11,13 +11,14 @@ import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import com.sksamuel.elastic4s.circe._
 
 import uk.ac.wellcome.display.models._
-import uk.ac.wellcome.models.work.internal.{IdentifiedBaseWork, IdentifiedWork}
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.platform.api.rest.{
   PaginatedSearchOptions,
   PaginationQuery
 }
+import WorkState.Identified
 
 case class WorksSearchOptions(
   filters: List[WorkFilter] = Nil,
@@ -35,19 +36,20 @@ class WorksService(searchService: ElasticsearchService)(
   implicit ec: ExecutionContext) {
 
   def findWorkById(canonicalId: String)(
-    index: Index): Future[Either[ElasticError, Option[IdentifiedBaseWork]]] =
+    index: Index): Future[Either[ElasticError, Option[Work[Identified]]]] =
     searchService
       .executeGet(canonicalId)(index)
       .map { result: Either[ElasticError, GetResponse] =>
         result.map { response: GetResponse =>
           if (response.exists)
-            Some(deserialize[IdentifiedBaseWork](response))
+            Some(deserialize[Work[Identified]](response))
           else None
         }
       }
 
-  def listOrSearchWorks(index: Index, searchOptions: WorksSearchOptions)
-    : Future[Either[ElasticError, ResultList[IdentifiedWork, Aggregations]]] =
+  def listOrSearchWorks(index: Index,
+                        searchOptions: WorksSearchOptions): Future[
+    Either[ElasticError, ResultList[Work.Standard[Identified], Aggregations]]] =
     searchService
       .executeSearch(
         queryOptions = toElasticsearchQueryOptions(searchOptions),
@@ -69,7 +71,7 @@ class WorksService(searchService: ElasticsearchService)(
     )
 
   private def createResultList(searchResponse: SearchResponse)
-    : ResultList[IdentifiedWork, Aggregations] = {
+    : ResultList[Work.Standard[Identified], Aggregations] = {
     ResultList(
       results = searchResponseToWorks(searchResponse),
       totalResults = searchResponse.totalHits.toInt,
@@ -78,9 +80,9 @@ class WorksService(searchService: ElasticsearchService)(
   }
 
   private def searchResponseToWorks(
-    searchResponse: SearchResponse): List[IdentifiedWork] =
+    searchResponse: SearchResponse): List[Work.Standard[Identified]] =
     searchResponse.hits.hits.map { hit =>
-      deserialize[IdentifiedWork](hit)
+      deserialize[Work.Standard[Identified]](hit)
     }.toList
 
   private def searchResponseToAggregationResults(

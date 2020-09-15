@@ -1,14 +1,12 @@
 package uk.ac.wellcome.platform.merger.models
 
-import uk.ac.wellcome.models.work.internal.{
-  TransformedBaseWork,
-  UnidentifiedWork
-}
+import uk.ac.wellcome.models.work.internal._
+import WorkState.Unidentified
 
 object Sources {
   def findFirstLinkedDigitisedSierraWorkFor(
-    target: UnidentifiedWork,
-    sources: Seq[TransformedBaseWork]): Option[TransformedBaseWork] = {
+    target: Work.Standard[Unidentified],
+    sources: Seq[Work[Unidentified]]): Option[Work[Unidentified]] = {
 
     val digitisedLinkedIds = target.data.mergeCandidates
       .filter(_.reason.contains("Physical/digitised Sierra work"))

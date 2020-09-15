@@ -1,10 +1,14 @@
 package uk.ac.wellcome.platform.api.services
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.Random
+
 import com.sksamuel.elastic4s.{ElasticError, Index}
 import com.sksamuel.elastic4s.requests.searches.{SearchHit, SearchResponse}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.Implicits._
@@ -26,9 +30,7 @@ import uk.ac.wellcome.platform.api.models.{
   SearchQuery,
   WorkTypeFilter
 }
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.Random
+import WorkState.Identified
 
 class ElasticsearchServiceTest
     extends AnyFunSpec
@@ -54,11 +56,11 @@ class ElasticsearchServiceTest
         insertIntoElasticsearch(index, work)
 
         val searchResultFuture =
-          searchService.executeGet(canonicalId = work.canonicalId)(index)
+          searchService.executeGet(canonicalId = work.state.canonicalId)(index)
 
         whenReady(searchResultFuture) { result =>
           val returnedWork =
-            jsonToIdentifiedBaseWork(result.right.get.sourceAsString)
+            jsonToWork(result.right.get.sourceAsString)
           returnedWork shouldBe work
         }
       }
@@ -168,7 +170,7 @@ class ElasticsearchServiceTest
           .map { _ =>
             createIdentifiedWorkWith(title = Some(title))
           }
-          .sortBy(_.canonicalId)
+          .sortBy(_.state.canonicalId)
 
         insertIntoElasticsearch(index, works: _*)
 
@@ -384,12 +386,13 @@ class ElasticsearchServiceTest
       )
     )
 
-  private def populateElasticsearch(index: Index): List[IdentifiedWork] = {
+  private def populateElasticsearch(
+    index: Index): List[Work.Standard[Identified]] = {
     val works = createIdentifiedWorks(count = 10)
 
     insertIntoElasticsearch(index, works: _*)
 
-    works.sortBy(_.canonicalId).toList
+    works.sortBy(_.state.canonicalId).toList
   }
 
   private def searchResults(index: Index,
@@ -401,20 +404,20 @@ class ElasticsearchServiceTest
     }
   }
 
-  private def assertResultsAreCorrect(index: Index,
-                                      queryOptions: ElasticsearchQueryOptions =
-                                        createElasticsearchQueryOptions,
-                                      expectedWorks: List[IdentifiedWork],
-                                      scored: Option[Boolean] = None) = {
+  private def assertResultsAreCorrect(
+    index: Index,
+    queryOptions: ElasticsearchQueryOptions = createElasticsearchQueryOptions,
+    expectedWorks: List[Work.Standard[Identified]],
+    scored: Option[Boolean] = None) = {
     searchResults(index, queryOptions) should contain theSameElementsAs expectedWorks
   }
 
   private def searchResponseToWorks(
-    response: Either[ElasticError, SearchResponse]): List[IdentifiedBaseWork] =
+    response: Either[ElasticError, SearchResponse]): List[Work[Identified]] =
     response.right.get.hits.hits.map { searchHit: SearchHit =>
-      jsonToIdentifiedBaseWork(searchHit.sourceAsString)
+      jsonToWork(searchHit.sourceAsString)
     }.toList
 
-  private def jsonToIdentifiedBaseWork(document: String): IdentifiedBaseWork =
-    fromJson[IdentifiedBaseWork](document).get
+  private def jsonToWork(document: String): Work[Identified] =
+    fromJson[Work[Identified]](document).get
 }

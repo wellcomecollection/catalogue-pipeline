@@ -53,7 +53,7 @@ class ImagesTest extends ApiImagesTestBase with ElasticsearchFixtures {
         insertImagesIntoElasticsearch(imagesIndex, otherImage :: workImages: _*)
         assertJsonResponse(
           routes,
-          s"/$apiPrefix/images?query=${parentWork.canonicalId}",
+          s"/$apiPrefix/images?query=${parentWork.state.canonicalId}",
           unordered = true) {
           Status.OK -> imagesListResponse(workImages)
         }

@@ -13,7 +13,7 @@ import org.scanamo.time.JavaTimeFormats._
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.models.work.internal.TransformedBaseWork
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher
 import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, WorkNode}
 import uk.ac.wellcome.platform.matcher.services.MatcherWorkerService
@@ -34,13 +34,14 @@ import uk.ac.wellcome.storage.locking.dynamo.{
   ExpiringLock
 }
 import uk.ac.wellcome.storage.Identified
+import WorkState.Unidentified
 
 trait MatcherFixtures
     extends SQS
     with Akka
     with DynamoLockDaoFixtures
     with LocalWorkGraphDynamoDb
-    with VHSFixture[TransformedBaseWork] {
+    with VHSFixture[Work[Unidentified]] {
 
   implicit val workNodeFormat: DynamoFormat[WorkNode] = deriveDynamoFormat
   implicit val lockFormat: DynamoFormat[ExpiringLock] = deriveDynamoFormat
@@ -124,7 +125,7 @@ trait MatcherFixtures
     testWith(workNodeDao)
   }
 
-  def sendWork(work: TransformedBaseWork, vhs: VHS, queue: SQS.Queue): Any = {
+  def sendWork(work: Work[Unidentified], vhs: VHS, queue: SQS.Queue): Any = {
     val id = work.sourceIdentifier.toString
     val key = vhs.putLatest(id)(work) match {
       case Left(err)                 => throw new Exception(s"Failed storing work in VHS: $err")

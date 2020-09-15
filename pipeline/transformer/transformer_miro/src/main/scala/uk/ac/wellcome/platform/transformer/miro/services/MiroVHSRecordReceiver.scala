@@ -3,8 +3,9 @@ package uk.ac.wellcome.platform.transformer.miro.services
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 import grizzled.slf4j.Logging
+
 import uk.ac.wellcome.json.exceptions.JsonDecodingError
-import uk.ac.wellcome.models.work.internal.TransformedBaseWork
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.miro.exceptions.MiroTransformerException
 import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
@@ -14,6 +15,7 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.Store
 import uk.ac.wellcome.storage.Identified
+import WorkState.Unidentified
 
 // In future we should just receive the ID and version from the adapter as the
 // S3 specific `location` field is an implementation detail we should not be
@@ -33,7 +35,7 @@ class MiroVHSRecordReceiver[MsgDestination](
                      transformToWork: (
                        MiroRecord,
                        MiroMetadata,
-                       Int) => Try[TransformedBaseWork]): Future[Unit] = {
+                       Int) => Try[Work[Unidentified]]): Future[Unit] = {
     debug(s"Starting to process message $message")
 
     val msgNotification = Future.fromTry {

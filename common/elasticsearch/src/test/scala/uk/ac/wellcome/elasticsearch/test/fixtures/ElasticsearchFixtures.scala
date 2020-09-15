@@ -1,5 +1,9 @@
 package uk.ac.wellcome.elasticsearch.test.fixtures
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.util.Random
+
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.bulk.BulkResponse
 import com.sksamuel.elastic4s.requests.cluster.ClusterHealthResponse
@@ -10,22 +14,21 @@ import com.sksamuel.elastic4s.requests.indexes.admin.IndexExistsResponse
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import com.sksamuel.elastic4s.{ElasticClient, Index, Response}
 import grizzled.slf4j.Logging
-import io.circe.Encoder
+import io.circe.{Decoder, Encoder}
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.time.{Seconds, Span}
 import org.scalatest.{Assertion, Suite}
+
 import uk.ac.wellcome.elasticsearch._
 import uk.ac.wellcome.elasticsearch.model.CanonicalId
 import uk.ac.wellcome.fixtures._
-import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.json.JsonUtil.{fromJson, toJson}
 import uk.ac.wellcome.json.utils.JsonAssertions
-import uk.ac.wellcome.models.work.internal.{AugmentedImage, IdentifiedBaseWork}
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scala.util.Random
+import uk.ac.wellcome.models.work.internal._
+import uk.ac.wellcome.models.Implicits._
+import WorkState.Identified
 
 trait ElasticsearchFixtures
     extends Eventually
@@ -118,9 +121,9 @@ trait ElasticsearchFixtures
 
   def assertElasticsearchEventuallyHasWork(
     index: Index,
-    works: IdentifiedBaseWork*): Seq[Assertion] = {
-    implicit val id: CanonicalId[IdentifiedBaseWork] =
-      (t: IdentifiedBaseWork) => t.canonicalId
+    works: Work[Identified]*): Seq[Assertion] = {
+    implicit val id: CanonicalId[Work[Identified]] =
+      (t: Work[Identified]) => t.state.canonicalId
     assertElasticsearchEventuallyHas(index, works: _*)
   }
 
@@ -144,7 +147,7 @@ trait ElasticsearchFixtures
     }
 
   def assertObjectIndexed[T](index: Index, t: T)(
-    implicit encoder: Encoder[T]): Assertion =
+    implicit decoder: Decoder[T]): Assertion =
     // Elasticsearch is eventually consistent so, when the future completes,
     // the documents won't appear in the search until after a refresh
     eventually {
@@ -155,7 +158,7 @@ trait ElasticsearchFixtures
       val hits = response.result.hits.hits
 
       hits should have size 1
-      assertJsonStringsAreEqual(hits.head.sourceAsString, toJson(t).get)
+      fromJson[T](hits.head.sourceAsString).get shouldEqual t
     }
 
   def assertElasticsearchEmpty[T](index: Index): Assertion =
@@ -172,9 +175,9 @@ trait ElasticsearchFixtures
     }
 
   def assertElasticsearchNeverHasWork(index: Index,
-                                      works: IdentifiedBaseWork*): Unit = {
-    implicit val id: CanonicalId[IdentifiedBaseWork] =
-      (t: IdentifiedBaseWork) => t.canonicalId
+                                      works: Work[Identified]*): Unit = {
+    implicit val id: CanonicalId[Work[Identified]] =
+      (t: Work[Identified]) => t.state.canonicalId
     assertElasticsearchNeverHas(index, works: _*)
   }
 
@@ -211,7 +214,7 @@ trait ElasticsearchFixtures
   }
 
   def insertIntoElasticsearch(index: Index,
-                              works: IdentifiedBaseWork*): Assertion = {
+                              works: Work[Identified]*): Assertion = {
     val result = elasticClient.execute(
       bulk(
         works.map { work =>
@@ -220,7 +223,7 @@ trait ElasticsearchFixtures
           indexInto(index.name)
             .version(work.version)
             .versionType(ExternalGte)
-            .id(work.canonicalId)
+            .id(work.state.canonicalId)
             .doc(jsonDoc)
         }
       )

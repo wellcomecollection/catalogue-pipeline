@@ -4,81 +4,82 @@ import uk.ac.wellcome.models.work.internal._
 
 trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
 
+  import WorkState._
+
   private def createTitle: String = randomAlphanumeric(length = 100)
 
-  def createUnidentifiedRedirectedWork: UnidentifiedRedirectedWork =
-    UnidentifiedRedirectedWork(
-      sourceIdentifier = createSourceIdentifier,
+  def createUnidentifiedRedirectedWork: Work.Redirected[Unidentified] =
+    Work.Redirected[Unidentified](
+      state = Unidentified(createSourceIdentifier),
       version = 1,
-      redirect = IdentifiableRedirect(
-        sourceIdentifier = createSourceIdentifier
-      )
-    )
-
-  def createUnidentifiedRedirectedWork(
-    source: TransformedBaseWork,
-    target: UnidentifiedWork): UnidentifiedRedirectedWork =
-    UnidentifiedRedirectedWork(
-      sourceIdentifier = source.sourceIdentifier,
-      version = source.version,
-      redirect = IdentifiableRedirect(target.sourceIdentifier)
+      redirect = IdState.Identifiable(createSourceIdentifier)
     )
 
   def createUnidentifiedRedirectedWorkWith(
-    redirect: IdentifiableRedirect): UnidentifiedRedirectedWork =
-    UnidentifiedRedirectedWork(
-      sourceIdentifier = createSourceIdentifier,
+    redirect: IdState.Identifiable): Work.Redirected[Unidentified] =
+    Work.Redirected[Unidentified](
+      state = Unidentified(createSourceIdentifier),
       version = 1,
       redirect = redirect
     )
 
-  def createIdentifiedRedirectedWork: IdentifiedRedirectedWork =
+  def createIdentifiedRedirectedWork: Work.Redirected[Identified] =
     createIdentifiedRedirectedWorkWith()
 
   def createIdentifiedRedirectedWorkWith(
     canonicalId: String = createCanonicalId,
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     version: Int = 1,
-  ): IdentifiedRedirectedWork =
-    IdentifiedRedirectedWork(
-      canonicalId = canonicalId,
-      sourceIdentifier = sourceIdentifier,
+  ): Work.Redirected[Identified] =
+    Work.Redirected[Identified](
+      state = Identified(
+        canonicalId = canonicalId,
+        sourceIdentifier = sourceIdentifier,
+      ),
       version = version,
-      redirect = IdentifiedRedirect(
-        canonicalId = createCanonicalId
+      redirect = IdState.Identified(
+        canonicalId = createCanonicalId,
+        sourceIdentifier = createSourceIdentifier
       )
     )
 
   def createUnidentifiedInvisibleWorkWith(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    items: List[Item[IdState.Unminted]] = Nil,
-    images: List[UnmergedImage[IdState.Identifiable, IdState.Unminted]] = Nil,
-  ): UnidentifiedInvisibleWork =
-    UnidentifiedInvisibleWork(
-      sourceIdentifier = sourceIdentifier,
-      data = WorkData(items = items, images = images),
+    items: List[Item[Unidentified#DataId]] = Nil,
+    images: List[UnmergedImage[IdState.Identifiable, WorkState.Unidentified]] =
+      Nil,
+  ): Work.Invisible[Unidentified] =
+    Work.Invisible[Unidentified](
+      state = Unidentified(sourceIdentifier),
+      data = WorkData[Unidentified, IdState.Identifiable](
+        items = items,
+        images = images,
+      ),
       version = 1
     )
 
-  def createUnidentifiedInvisibleWork: UnidentifiedInvisibleWork =
+  def createUnidentifiedInvisibleWork: Work.Invisible[Unidentified] =
     createUnidentifiedInvisibleWorkWith()
 
   def createIdentifiedInvisibleWorkWith(
     canonicalId: String = createCanonicalId,
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     version: Int = 1
-  ): IdentifiedInvisibleWork =
-    IdentifiedInvisibleWork(
-      sourceIdentifier = sourceIdentifier,
+  ): Work.Invisible[Identified] =
+    Work.Invisible(
+      state = Identified(
+        sourceIdentifier = sourceIdentifier,
+        canonicalId = canonicalId,
+      ),
       version = version,
-      canonicalId = canonicalId,
       data = WorkData()
     )
 
-  def createIdentifiedInvisibleWork: IdentifiedInvisibleWork =
+  def createIdentifiedInvisibleWork: Work.Invisible[Identified] =
     createIdentifiedInvisibleWorkWith()
 
-  def createIdentifiedInvisibleWorks(count: Int): Seq[IdentifiedInvisibleWork] =
+  def createIdentifiedInvisibleWorks(
+    count: Int): Seq[Work.Invisible[Identified]] =
     (1 to count).map { _ =>
       createIdentifiedInvisibleWork
     }
@@ -101,12 +102,12 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     edition: Option[String] = None,
     duration: Option[Int] = None,
     items: List[Item[IdState.Unminted]] = Nil,
-    images: List[UnmergedImage[IdState.Identifiable, IdState.Unminted]] = Nil)
-    : UnidentifiedWork =
-    UnidentifiedWork(
-      sourceIdentifier = sourceIdentifier,
+    images: List[UnmergedImage[IdState.Identifiable, Unidentified]] = Nil)
+    : Work.Standard[Unidentified] =
+    Work.Standard[Unidentified](
+      state = Unidentified(sourceIdentifier),
       version = version,
-      data = WorkData(
+      data = WorkData[Unidentified, IdState.Identifiable](
         otherIdentifiers = otherIdentifiers,
         mergeCandidates = mergeCandidates,
         title = title,
@@ -126,9 +127,10 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
       )
     )
 
-  def createUnidentifiedWork: UnidentifiedWork = createUnidentifiedWorkWith()
+  def createUnidentifiedWork: Work.Standard[Unidentified] =
+    createUnidentifiedWorkWith()
 
-  def createUnidentifiedWorks(count: Int): Seq[UnidentifiedWork] =
+  def createUnidentifiedWorks(count: Int): Seq[Work.Standard[Unidentified]] =
     (1 to count).map { _ =>
       createUnidentifiedWork
     }
@@ -154,17 +156,19 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     language: Option[Language] = None,
     duration: Option[Int] = None,
     items: List[Item[IdState.Minted]] = Nil,
-    images: List[UnmergedImage[IdState.Identified, IdState.Minted]] = Nil,
+    images: List[UnmergedImage[IdState.Identified, Identified]] = Nil,
     version: Int = 1,
     merged: Boolean = false,
     collectionPath: Option[CollectionPath] = None,
     mergeCandidates: List[MergeCandidate] = Nil
-  ): IdentifiedWork =
-    IdentifiedWork(
-      canonicalId = canonicalId,
-      sourceIdentifier = sourceIdentifier,
+  ): Work.Standard[Identified] =
+    Work.Standard[Identified](
+      state = Identified(
+        canonicalId = canonicalId,
+        sourceIdentifier = sourceIdentifier,
+      ),
       version = version,
-      data = WorkData(
+      data = WorkData[Identified, IdState.Identified](
         otherIdentifiers = otherIdentifiers,
         mergeCandidates = mergeCandidates,
         title = title,
@@ -190,9 +194,10 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
       )
     )
 
-  def createIdentifiedWork: IdentifiedWork = createIdentifiedWorkWith()
+  def createIdentifiedWork: Work.Standard[Identified] =
+    createIdentifiedWorkWith()
 
-  def createIdentifiedWorks(count: Int): Seq[IdentifiedWork] =
+  def createIdentifiedWorks(count: Int): Seq[Work.Standard[Identified]] =
     (1 to count).map { _ =>
       createIdentifiedWork
     }
@@ -201,7 +206,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     workType: Option[WorkType] = None,
     items: List[Item[IdState.Unminted]] = Nil,
     mergeCandidates: List[MergeCandidate] = Nil,
-  ): UnidentifiedWork =
+  ): Work.Standard[Unidentified] =
     createUnidentifiedWorkWith(
       sourceIdentifier = createSierraSystemSourceIdentifier,
       workType = workType,
@@ -214,7 +219,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     workType: Option[WorkType] = None,
     items: List[Item[IdState.Minted]] = Nil,
     mergeCandidates: List[MergeCandidate] = Nil,
-  ): IdentifiedWork =
+  ): Work.Standard[Identified] =
     createIdentifiedWorkWith(
       sourceIdentifier = createSierraSystemSourceIdentifier,
       workType = workType,
@@ -224,15 +229,18 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     )
 
   def createUnidentifiedCalmWorkWith(
-    data: WorkData[IdState.Unminted, IdState.Identifiable] = WorkData(
-      items = List(createCalmItem)
-    ),
+    data: WorkData[Unidentified, IdState.Identifiable] =
+      WorkData[Unidentified, IdState.Identifiable](
+        items = List(createCalmItem)
+      ),
     id: String = randomAlphanumeric(6),
-    version: Int = 0) =
-    UnidentifiedWork(
-      sourceIdentifier = SourceIdentifier(
-        value = id,
-        identifierType = IdentifierType("calm-record-id"),
+    version: Int = 0): Work.Standard[Unidentified] =
+    Work.Standard[Unidentified](
+      state = Unidentified(
+        sourceIdentifier = SourceIdentifier(
+          value = id,
+          identifierType = IdentifierType("calm-record-id"),
+        ),
       ),
       version = version,
       data = data,
@@ -243,18 +251,18 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
   def createUnidentifiedInvisibleMetsWorkWith(
     sourceIdentifier: SourceIdentifier = createMetsSourceIdentifier,
     items: List[Item[IdState.Unminted]] = List(createDigitalItem),
-    images: List[UnmergedImage[IdState.Identifiable, IdState.Unminted]])
-    : UnidentifiedInvisibleWork =
+    images: List[UnmergedImage[IdState.Identifiable, Unidentified]])
+    : Work.Invisible[Unidentified] =
     createUnidentifiedInvisibleWorkWith(
       sourceIdentifier = sourceIdentifier,
       items = items,
       images = images
     )
 
-  def createUnidentifiedSierraWork: UnidentifiedWork =
+  def createUnidentifiedSierraWork: Work.Standard[Unidentified] =
     createUnidentifiedSierraWorkWith()
 
-  def createSierraPhysicalWork: UnidentifiedWork =
+  def createSierraPhysicalWork: Work.Standard[Unidentified] =
     createUnidentifiedSierraWorkWith(items = List(createPhysicalItem))
 
   def createSierraWorkWithDigitisedMergeCandidate = {
@@ -271,7 +279,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     (physicalSierraWorkWithMergeCandidate, digitisedCopyOfSierraWork)
   }
 
-  def createSierraDigitalWork: UnidentifiedWork =
+  def createSierraDigitalWork: Work.Standard[Unidentified] =
     createSierraDigitalWorkWith()
 
   def createSierraWorkWithTwoPhysicalItems =
@@ -282,14 +290,14 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
   def createSierraDigitalWorkWith(
     items: List[Item[IdState.Unminted]] = List(
       createUnidentifiableItemWith(locations = List(createDigitalLocation))))
-    : UnidentifiedWork =
+    : Work.Standard[Unidentified] =
     createUnidentifiedSierraWorkWith(items = items)
 
   def createMiroWorkWith(
-    images: List[UnmergedImage[IdState.Identifiable, IdState.Unminted]],
+    images: List[UnmergedImage[IdState.Identifiable, Unidentified]],
     otherIdentifiers: List[SourceIdentifier] = Nil,
     sourceIdentifier: SourceIdentifier = createMiroSourceIdentifier)
-    : UnidentifiedWork =
+    : Work.Standard[Unidentified] =
     createUnidentifiedWorkWith(
       sourceIdentifier = sourceIdentifier,
       otherIdentifiers = otherIdentifiers,
@@ -305,25 +313,25 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
       images = images
     )
 
-  def createIsbnWork: UnidentifiedWork =
+  def createIsbnWork: Work.Standard[Unidentified] =
     createUnidentifiedWorkWith(
       sourceIdentifier = createIsbnSourceIdentifier,
     )
 
-  def createIsbnWorks(count: Int): List[UnidentifiedWork] =
+  def createIsbnWorks(count: Int): List[Work.Standard[Unidentified]] =
     List.fill(count)(createIsbnWork)
 
   def createDatedWork(
     dateLabel: String,
     canonicalId: String = createCanonicalId
-  ): IdentifiedWork =
+  ): Work.Standard[Identified] =
     createIdentifiedWorkWith(
       canonicalId = canonicalId,
       production = List(createProductionEventWith(dateLabel = Some(dateLabel)))
     )
 
   def createLicensedWork(canonicalId: String,
-                         licenses: List[License]): IdentifiedWork =
+                         licenses: List[License]): Work.Standard[Identified] =
     createIdentifiedWorkWith(
       canonicalId = canonicalId,
       items = licenses.map { license =>

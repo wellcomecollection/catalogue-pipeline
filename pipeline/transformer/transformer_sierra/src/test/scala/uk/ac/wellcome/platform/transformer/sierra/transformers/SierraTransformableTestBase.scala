@@ -1,18 +1,19 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
+import scala.util.Try
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.internal.TransformedBaseWork
+
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.sierra.SierraTransformableTransformer
 import uk.ac.wellcome.platform.transformer.sierra.exceptions.SierraTransformerException
 import uk.ac.wellcome.sierra_adapter.model.SierraTransformable
-
-import scala.util.Try
+import WorkState.Unidentified
 
 trait SierraTransformableTestBase extends Matchers {
 
   def transformToWork(
-    transformable: SierraTransformable): TransformedBaseWork = {
-    val triedWork: Try[TransformedBaseWork] =
+    transformable: SierraTransformable): Work[Unidentified] = {
+    val triedWork: Try[Work[Unidentified]] =
       SierraTransformableTransformer(transformable, version = 1)
 
     if (triedWork.isFailure) {

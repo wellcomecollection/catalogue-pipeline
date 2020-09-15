@@ -1,5 +1,7 @@
 package uk.ac.wellcome.platform.ingestor.works
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
@@ -8,13 +10,12 @@ import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.models.work.internal.IdentifiedBaseWork
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.ingestor.common.fixtures.IngestorFixtures
 import uk.ac.wellcome.pipeline_storage.ElasticIndexer
 import uk.ac.wellcome.pipeline_storage.Indexable.workIndexable
 import uk.ac.wellcome.models.Implicits._
-
-import scala.concurrent.ExecutionContext.Implicits.global
+import WorkState.Identified
 
 class IngestorFeatureTest
     extends AnyFunSpec
@@ -29,13 +30,13 @@ class IngestorFeatureTest
     val work = createIdentifiedWork
 
     withLocalSqsQueue() { queue =>
-      sendMessage[IdentifiedBaseWork](queue = queue, obj = work)
+      sendMessage[Work[Identified]](queue = queue, obj = work)
       withLocalWorksIndex { index =>
         withWorkerService(
           queue,
           index,
           WorksIndexConfig,
-          new ElasticIndexer[IdentifiedBaseWork](elasticClient, index)) { _ =>
+          new ElasticIndexer[Work[Identified]](elasticClient, index)) { _ =>
           assertElasticsearchEventuallyHasWork(index, work)
         }
       }
@@ -48,13 +49,13 @@ class IngestorFeatureTest
     )
 
     withLocalSqsQueue() { queue =>
-      sendMessage[IdentifiedBaseWork](queue = queue, obj = work)
+      sendMessage[Work[Identified]](queue = queue, obj = work)
       withLocalWorksIndex { index =>
         withWorkerService(
           queue,
           index,
           WorksIndexConfig,
-          new ElasticIndexer[IdentifiedBaseWork](elasticClient, index)) { _ =>
+          new ElasticIndexer[Work[Identified]](elasticClient, index)) { _ =>
           assertElasticsearchEventuallyHasWork(index, work)
         }
       }

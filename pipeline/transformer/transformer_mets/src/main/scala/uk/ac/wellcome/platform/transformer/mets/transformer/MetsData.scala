@@ -4,7 +4,9 @@ import cats.syntax.traverse._
 import cats.instances.either._
 import cats.instances.option._
 import org.apache.commons.lang3.StringUtils.equalsIgnoreCase
+
 import uk.ac.wellcome.models.work.internal._
+import WorkState.Unidentified
 
 case class MetsData(
   recordIdentifier: String,
@@ -15,18 +17,18 @@ case class MetsData(
   titlePageId: Option[String] = None
 ) {
 
-  def toWork(version: Int): Either[Throwable, UnidentifiedInvisibleWork] =
+  def toWork(version: Int): Either[Throwable, Work.Invisible[Unidentified]] =
     for {
       license <- parseLicense
       accessStatus <- parseAccessStatus
-      item = Item(
+      item = Item[IdState.Unminted](
         id = IdState.Unidentifiable,
         locations = List(digitalLocation(license, accessStatus)))
     } yield
-      UnidentifiedInvisibleWork(
+      Work.Invisible[Unidentified](
         version = version,
-        sourceIdentifier = sourceIdentifier,
-        data = WorkData(
+        state = Unidentified(sourceIdentifier),
+        data = WorkData[Unidentified, IdState.Identifiable](
           items = List(item),
           mergeCandidates = List(mergeCandidate),
           thumbnail = thumbnail(sourceIdentifier.value, license, accessStatus),
@@ -136,7 +138,7 @@ case class MetsData(
   private def images(version: Int,
                      license: Option[License],
                      accessStatus: Option[AccessStatus])
-    : List[UnmergedImage[IdState.Identifiable, IdState.Unminted]] =
+    : List[UnmergedImage[IdState.Identifiable, WorkState.Unidentified]] =
     if (accessStatus.forall(shouldCreateDigitalLocation)) {
       fileReferences
         .filter(ImageUtils.isImage)

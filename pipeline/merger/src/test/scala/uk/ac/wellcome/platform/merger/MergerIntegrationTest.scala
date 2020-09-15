@@ -6,11 +6,12 @@ import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.models.work.internal.TransformedBaseWork
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.fixtures.{
   MatcherResultFixture,
   WorkerServiceFixture
 }
+import WorkState.Unidentified
 
 class MergerIntegrationTest
     extends AnyFunSpec
@@ -39,7 +40,7 @@ class MergerIntegrationTest
               assertQueueEmpty(dlq)
 
               workSender
-                .getMessages[TransformedBaseWork] should contain only work
+                .getMessages[Work[Unidentified]] should contain only work
             }
           }
       }

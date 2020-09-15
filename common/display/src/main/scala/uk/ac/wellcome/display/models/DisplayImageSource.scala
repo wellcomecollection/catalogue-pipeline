@@ -2,7 +2,7 @@ package uk.ac.wellcome.display.models
 
 import io.circe.generic.extras.JsonKey
 import io.swagger.v3.oas.annotations.media.Schema
-import uk.ac.wellcome.models.work.internal.{IdState, ImageSource}
+import uk.ac.wellcome.models.work.internal.{IdState, ImageSource, WorkState}
 
 @Schema(
   name = "ImageSource",
@@ -20,7 +20,7 @@ case class DisplayImageSource(
 
 object DisplayImageSource {
 
-  def apply(imageSource: ImageSource[IdState.Identified, IdState.Minted])
+  def apply(imageSource: ImageSource[IdState.Identified, WorkState.Identified])
     : DisplayImageSource =
     new DisplayImageSource(
       id = imageSource.id.canonicalId,

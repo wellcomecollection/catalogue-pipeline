@@ -7,12 +7,13 @@ import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.internal.TransformedBaseWork
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.recorder.services.RecorderWorkerService
 import uk.ac.wellcome.storage.{Identified, Version}
+import WorkState.Unidentified
 
 trait WorkerServiceFixture
-    extends VHSFixture[TransformedBaseWork]
+    extends VHSFixture[Work[Unidentified]]
     with BigMessagingFixture
     with Akka {
   def withWorkerService[R](queue: Queue,
@@ -21,7 +22,7 @@ trait WorkerServiceFixture
                              new MemoryMessageSender())(
     testWith: TestWith[RecorderWorkerService[String], R]): R =
     withActorSystem { implicit actorSystem =>
-      withBigMessageStream[TransformedBaseWork, R](queue = queue) { msgStream =>
+      withBigMessageStream[Work[Unidentified], R](queue = queue) { msgStream =>
         val workerService =
           new RecorderWorkerService(vhs, msgStream, messageSender)
         workerService.run()
@@ -29,7 +30,7 @@ trait WorkerServiceFixture
       }
     }
 
-  def assertWorkStored[T <: TransformedBaseWork](
+  def assertWorkStored[T <: Work[Unidentified]](
     vhs: VHS,
     work: T,
     expectedVhsVersion: Int = 0): Version[String, Int] = {
@@ -40,8 +41,8 @@ trait WorkerServiceFixture
     Version(id, expectedVhsVersion)
   }
 
-  def assertWorkNotStored[T <: TransformedBaseWork](vhs: VHS,
-                                                    work: T): Assertion = {
+  def assertWorkNotStored[T <: Work[Unidentified]](vhs: VHS,
+                                                   work: T): Assertion = {
     val id = work.sourceIdentifier.toString
     vhs.getLatest(id) shouldBe a[Left[_, _]]
   }

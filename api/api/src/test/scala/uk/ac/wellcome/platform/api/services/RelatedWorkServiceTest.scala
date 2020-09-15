@@ -5,6 +5,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.concurrent.ScalaFutures
 import com.sksamuel.elastic4s.Index
 import org.scalatest.funspec.AnyFunSpec
+
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.models.work.generators.{
@@ -12,6 +13,7 @@ import uk.ac.wellcome.models.work.generators.{
   ItemsGenerators,
   WorksGenerators
 }
+import WorkState.Identified
 
 class RelatedWorkServiceTest
     extends AnyFunSpec
@@ -33,7 +35,7 @@ class RelatedWorkServiceTest
       sourceIdentifier = createSourceIdentifierWith(value = path)
     )
 
-  def storeWorks(index: Index, works: List[IdentifiedWork] = works) =
+  def storeWorks(index: Index, works: List[Work[Identified]] = works) =
     insertIntoElasticsearch(index, works: _*)
 
   val workA = work("a", CollectionLevel.Collection)
@@ -152,10 +154,13 @@ class RelatedWorkServiceTest
 
   it("Only returns core fields on related works") {
     withLocalWorksIndex { index =>
-      val workP = work("p", CollectionLevel.Collection) withData (_.copy(
-        items = List(createIdentifiedItem)))
-      val workQ = work("p/q", CollectionLevel.Series) withData (_.copy(
-        notes = List(GeneralNote("hi"))))
+      val workP = work("p", CollectionLevel.Collection) withData (
+        _.copy[Identified, IdState.Identified](
+          items = List(createIdentifiedItem))
+      )
+      val workQ = work("p/q", CollectionLevel.Series) withData (
+        _.copy[Identified, IdState.Identified](notes = List(GeneralNote("hi")))
+      )
       val workR = work("p/q/r", CollectionLevel.Item)
       storeWorks(index, List(workP, workQ, workR))
       whenReady(service.retrieveRelatedWorks(index, workR)) { result =>

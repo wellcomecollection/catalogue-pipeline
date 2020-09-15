@@ -6,6 +6,7 @@ import uk.ac.wellcome.display.json.DisplayJsonUtil._
 import uk.ac.wellcome.display.test.util.JsonMapperTestUtil
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
+import WorkState.Identified
 
 class DisplayLocationsSerialisationTestDeprecated
     extends AnyFunSpec
@@ -26,7 +27,7 @@ class DisplayLocationsSerialisationTestDeprecated
     val expectedJson = s"""
       |{
       | "type": "Work",
-      | "id": "${work.canonicalId}",
+      | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "items": [ ${items(work.data.items)} ]
@@ -49,7 +50,7 @@ class DisplayLocationsSerialisationTestDeprecated
     val expectedJson = s"""
       |{
       | "type": "Work",
-      | "id": "${work.canonicalId}",
+      | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "items": [ ${items(work.data.items)} ]
@@ -73,7 +74,7 @@ class DisplayLocationsSerialisationTestDeprecated
     val expectedJson = s"""
       |{
       | "type": "Work",
-      | "id": "${work.canonicalId}",
+      | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "items": [ ${items(work.data.items)} ]
@@ -103,7 +104,7 @@ class DisplayLocationsSerialisationTestDeprecated
     val expectedJson = s"""
       |{
       | "type": "Work",
-      | "id": "${work.canonicalId}",
+      | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "items": [ ${items(work.data.items)} ]
@@ -114,7 +115,7 @@ class DisplayLocationsSerialisationTestDeprecated
   }
 
   private def assertWorkMapsToJson(
-    work: IdentifiedWork,
+    work: Work.Standard[Identified],
     expectedJson: String
   ): Assertion =
     assertObjectMapsToJson(

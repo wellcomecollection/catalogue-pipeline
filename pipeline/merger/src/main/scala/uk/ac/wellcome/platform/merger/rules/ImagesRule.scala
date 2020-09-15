@@ -2,22 +2,21 @@ package uk.ac.wellcome.platform.merger.rules
 
 import scala.Function.const
 import cats.data.NonEmptyList
-import uk.ac.wellcome.models.work.internal.{
-  IdState,
-  MergedImage,
-  TransformedBaseWork,
-  UnidentifiedWork,
-}
+
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
+import WorkState.Unidentified
+import SourceWork._
 
 object ImagesRule extends FieldMergeRule {
   import WorkPredicates._
 
-  type FieldData = List[MergedImage[IdState.Identifiable, IdState.Unminted]]
+  type FieldData =
+    List[MergedImage[IdState.Identifiable, WorkState.Unidentified]]
 
   override def merge(
-    target: UnidentifiedWork,
-    sources: Seq[TransformedBaseWork] = Nil): FieldMergeResult[FieldData] =
+    target: Work.Standard[Unidentified],
+    sources: Seq[Work[Unidentified]] = Nil): FieldMergeResult[FieldData] =
     sources match {
       case Nil =>
         FieldMergeResult(
@@ -35,7 +34,7 @@ object ImagesRule extends FieldMergeRule {
     }
 
   private lazy val getSingleMiroImage
-    : PartialFunction[UnidentifiedWork, FieldData] = {
+    : PartialFunction[Work.Standard[Unidentified], FieldData] = {
     case target if singleDigitalItemMiroWork(target) =>
       target.data.images.map {
         _.mergeWith(
@@ -57,9 +56,9 @@ object ImagesRule extends FieldMergeRule {
   }
 
   trait FlatImageMergeRule extends PartialRule {
-    final override def rule(target: UnidentifiedWork,
-                            sources: NonEmptyList[TransformedBaseWork])
-      : List[MergedImage[IdState.Identifiable, IdState.Unminted]] = {
+    final override def rule(target: Work.Standard[Unidentified],
+                            sources: NonEmptyList[Work[Unidentified]])
+      : List[MergedImage[IdState.Identifiable, WorkState.Unidentified]] = {
       val works = sources.prepend(target).toList
       works flatMap {
         _.data.images.map {

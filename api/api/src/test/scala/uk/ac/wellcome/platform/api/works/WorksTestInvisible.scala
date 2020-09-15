@@ -1,7 +1,8 @@
 package uk.ac.wellcome.platform.api.works
 
 import uk.ac.wellcome.elasticsearch.ElasticConfig
-import uk.ac.wellcome.models.work.internal.IdentifiedBaseWork
+import uk.ac.wellcome.models.work.internal._
+import WorkState.Identified
 
 class WorksTestInvisible extends ApiWorksTestBase {
 
@@ -11,7 +12,7 @@ class WorksTestInvisible extends ApiWorksTestBase {
     withApi {
       case (ElasticConfig(worksIndex, _), routes) =>
         insertIntoElasticsearch(worksIndex, deletedWork)
-        val path = s"/$apiPrefix/works/${deletedWork.canonicalId}"
+        val path = s"/$apiPrefix/works/${deletedWork.state.canonicalId}"
         assertJsonResponse(routes, path) {
           Status.Gone -> deleted(apiPrefix)
         }
@@ -21,9 +22,11 @@ class WorksTestInvisible extends ApiWorksTestBase {
   it("excludes works with visible=false from list results") {
     withApi {
       case (ElasticConfig(worksIndex, _), routes) =>
-        val works = createIdentifiedWorks(count = 2).sortBy { _.canonicalId }
+        val works = createIdentifiedWorks(count = 2).sortBy {
+          _.state.canonicalId
+        }
 
-        val worksToIndex = Seq[IdentifiedBaseWork](deletedWork) ++ works
+        val worksToIndex = Seq[Work[Identified]](deletedWork) ++ works
         insertIntoElasticsearch(worksIndex, worksToIndex: _*)
 
         assertJsonResponse(routes, s"/$apiPrefix/works") {

@@ -20,8 +20,8 @@ case object WorksMultiMatcher {
           operator = Some(OR),
           analyzer = Some(whitespaceAnalyzer.name),
           fields = Seq(
-            ("canonicalId", Some(1000)),
-            ("sourceIdentifier.value", Some(1000)),
+            ("state.canonicalId", Some(1000)),
+            ("state.sourceIdentifier.value", Some(1000)),
             ("data.otherIdentifiers.value", Some(1000)),
             ("data.items.id.canonicalId", Some(1000)),
             ("data.items.id.sourceIdentifier.value", Some(1000)),

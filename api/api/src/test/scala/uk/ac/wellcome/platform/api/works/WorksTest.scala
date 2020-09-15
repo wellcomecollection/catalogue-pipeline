@@ -8,7 +8,9 @@ class WorksTest extends ApiWorksTestBase {
   it("returns a list of works") {
     withApi {
       case (ElasticConfig(worksIndex, _), routes) =>
-        val works = createIdentifiedWorks(count = 3).sortBy { _.canonicalId }
+        val works = createIdentifiedWorks(count = 3).sortBy {
+          _.state.canonicalId
+        }
 
         insertIntoElasticsearch(worksIndex, works: _*)
 
@@ -25,11 +27,13 @@ class WorksTest extends ApiWorksTestBase {
 
         insertIntoElasticsearch(worksIndex, work)
 
-        assertJsonResponse(routes, s"/$apiPrefix/works/${work.canonicalId}") {
+        assertJsonResponse(
+          routes,
+          s"/$apiPrefix/works/${work.state.canonicalId}") {
           Status.OK -> s"""
             {
              ${singleWorkResult(apiPrefix)},
-             "id": "${work.canonicalId}",
+             "id": "${work.state.canonicalId}",
              "title": "${work.data.title.get}",
              "alternativeTitles": []
             }
@@ -46,11 +50,13 @@ class WorksTest extends ApiWorksTestBase {
           edition = Some("Special edition"),
         )
         insertIntoElasticsearch(worksIndex, work)
-        assertJsonResponse(routes, s"/$apiPrefix/works/${work.canonicalId}") {
+        assertJsonResponse(
+          routes,
+          s"/$apiPrefix/works/${work.state.canonicalId}") {
           Status.OK -> s"""
             {
              ${singleWorkResult(apiPrefix)},
-             "id": "${work.canonicalId}",
+             "id": "${work.state.canonicalId}",
              "title": "${work.data.title.get}",
              "alternativeTitles": [],
              "edition": "Special edition",
@@ -65,7 +71,9 @@ class WorksTest extends ApiWorksTestBase {
     "returns the requested page of results when requested with page & pageSize") {
     withApi {
       case (ElasticConfig(worksIndex, _), routes) =>
-        val works = createIdentifiedWorks(count = 3).sortBy { _.canonicalId }
+        val works = createIdentifiedWorks(count = 3).sortBy {
+          _.state.canonicalId
+        }
 
         insertIntoElasticsearch(worksIndex, works: _*)
 
@@ -160,11 +168,13 @@ class WorksTest extends ApiWorksTestBase {
           val altWork = createIdentifiedWork
           insertIntoElasticsearch(index = altIndex, altWork)
 
-          assertJsonResponse(routes, s"/$apiPrefix/works/${work.canonicalId}") {
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works/${work.state.canonicalId}") {
             Status.OK -> s"""
               {
                ${singleWorkResult(apiPrefix)},
-               "id": "${work.canonicalId}",
+               "id": "${work.state.canonicalId}",
                "title": "${work.data.title.get}",
                "alternativeTitles": []
               }
@@ -173,11 +183,11 @@ class WorksTest extends ApiWorksTestBase {
 
           assertJsonResponse(
             routes,
-            s"/$apiPrefix/works/${altWork.canonicalId}?_index=${altIndex.name}") {
+            s"/$apiPrefix/works/${altWork.state.canonicalId}?_index=${altIndex.name}") {
             Status.OK -> s"""
               {
                ${singleWorkResult(apiPrefix)},
-               "id": "${altWork.canonicalId}",
+               "id": "${altWork.state.canonicalId}",
                "title": "${altWork.data.title.get}",
                "alternativeTitles": []
               }
@@ -234,7 +244,7 @@ class WorksTest extends ApiWorksTestBase {
               "results": [
                {
                  "type": "Work",
-                 "id": "${work.canonicalId}",
+                 "id": "${work.state.canonicalId}",
                  "title": "${work.data.title.get}",
                  "alternativeTitles": [],
                  "thumbnail": ${location(work.data.thumbnail.get)}

@@ -1,16 +1,18 @@
 package uk.ac.wellcome.platform.matcher.storage
 
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.models.work.internal.TransformedBaseWork
+
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.models.VersionExpectedConflictException
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.{Identified, Version}
+import WorkState.Unidentified
 
-class WorkStore(store: VersionedStore[String, Int, TransformedBaseWork])
+class WorkStore(store: VersionedStore[String, Int, Work[Unidentified]])
     extends Logging {
   def getWork(
-    key: Version[String, Int]): Either[Throwable, TransformedBaseWork] =
+    key: Version[String, Int]): Either[Throwable, Work[Unidentified]] =
     store.getLatest(key.id) match {
       case Left(err) =>
         error(s"Error fetching $key from VHS")

@@ -5,6 +5,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.concurrent.ScalaFutures
 import com.sksamuel.elastic4s.Index
 import org.scalatest.funspec.AnyFunSpec
+
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.models.work.generators.{
@@ -12,6 +13,7 @@ import uk.ac.wellcome.models.work.generators.{
   ItemsGenerators,
   WorksGenerators
 }
+import WorkState.Identified
 
 class RelatedWorksServiceTest
     extends AnyFunSpec
@@ -34,7 +36,7 @@ class RelatedWorksServiceTest
       sourceIdentifier = createSourceIdentifierWith(value = path)
     )
 
-  def storeWorks(index: Index, works: List[IdentifiedWork] = works) =
+  def storeWorks(index: Index, works: List[Work.Standard[Identified]] = works) =
     insertIntoElasticsearch(index, works: _*)
 
   val workA = work("a")
@@ -72,7 +74,7 @@ class RelatedWorksServiceTest
         whenReady(service(index).getOtherAffectedWorks(workA)) { result =>
           result should contain theSameElementsAs
             works
-              .filter(_.canonicalId != workA.canonicalId)
+              .filter(_.state.canonicalId != workA.state.canonicalId)
               .map(_.sourceIdentifier)
         }
       }

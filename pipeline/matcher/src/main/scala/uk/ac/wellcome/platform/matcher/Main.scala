@@ -1,11 +1,13 @@
 package uk.ac.wellcome.platform.matcher
 
 import java.time.Duration
+import scala.concurrent.ExecutionContext
 
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
+
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.models.work.internal.TransformedBaseWork
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher
 import uk.ac.wellcome.platform.matcher.services.MatcherWorkerService
 import uk.ac.wellcome.platform.matcher.storage.{
@@ -25,8 +27,7 @@ import uk.ac.wellcome.storage.locking.dynamo.{
 }
 import uk.ac.wellcome.storage.typesafe.DynamoBuilder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
-
-import scala.concurrent.ExecutionContext
+import WorkState.Unidentified
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
@@ -60,7 +61,7 @@ object Main extends WellcomeTypesafeApp {
     val workMatcher = new WorkMatcher(workGraphStore, new DynamoLockingService)
 
     new MatcherWorkerService(
-      store = new WorkStore(VHSBuilder.build[TransformedBaseWork](config)),
+      store = new WorkStore(VHSBuilder.build[Work[Unidentified]](config)),
       msgStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
       msgSender = SNSBuilder
         .buildSNSMessageSender(config, subject = "Sent from the matcher"),

@@ -1,10 +1,13 @@
 package uk.ac.wellcome.platform.api.elasticsearch
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 import com.sksamuel.elastic4s.{ElasticError, Index}
 import com.sksamuel.elastic4s.requests.searches.{SearchHit, SearchResponse}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
+
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.json.JsonUtil.fromJson
 import uk.ac.wellcome.models.work.generators.{
@@ -14,7 +17,7 @@ import uk.ac.wellcome.models.work.generators.{
   SubjectGenerators,
   WorksGenerators
 }
-import uk.ac.wellcome.models.work.internal.{CollectionPath, IdentifiedBaseWork}
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
 import uk.ac.wellcome.platform.api.models.{SearchQuery, SearchQueryType}
 import uk.ac.wellcome.models.Implicits._
@@ -23,8 +26,7 @@ import uk.ac.wellcome.platform.api.services.{
   ElasticsearchService,
   WorksRequestBuilder
 }
-
-import scala.concurrent.ExecutionContext.Implicits.global
+import WorkState.Identified
 
 class WorksQueryTest
     extends AnyFunSpec
@@ -84,7 +86,7 @@ class WorksQueryTest
           canonicalId = "123abc",
           otherIdentifiers = List(createSourceIdentifierWith())
         )
-        val query = work.otherIdentifiers.head.value
+        val query = work.data.otherIdentifiers.head.value
 
         insertIntoElasticsearch(index, work, workNotMatching)
 
@@ -391,7 +393,7 @@ class WorksQueryTest
   private def assertResultsMatchForAllowedQueryTypes(
     index: Index,
     query: String,
-    matches: List[IdentifiedBaseWork]) = {
+    matches: List[Work[Identified]]) = {
 
     SearchQueryType.allowed map { queryType =>
       val results = searchResults(
@@ -416,11 +418,11 @@ class WorksQueryTest
   }
 
   private def searchResponseToWorks(
-    response: Either[ElasticError, SearchResponse]): List[IdentifiedBaseWork] =
+    response: Either[ElasticError, SearchResponse]): List[Work[Identified]] =
     response.right.get.hits.hits.map { searchHit: SearchHit =>
-      jsonToIdentifiedBaseWork(searchHit.sourceAsString)
+      jsonToWork(searchHit.sourceAsString)
     }.toList
 
-  private def jsonToIdentifiedBaseWork(document: String): IdentifiedBaseWork =
-    fromJson[IdentifiedBaseWork](document).get
+  private def jsonToWork(document: String): Work[Identified] =
+    fromJson[Work[Identified]](document).get
 }

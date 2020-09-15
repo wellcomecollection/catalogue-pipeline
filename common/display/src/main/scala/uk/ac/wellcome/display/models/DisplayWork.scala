@@ -3,10 +3,12 @@ package uk.ac.wellcome.display.models
 import io.circe.generic.extras.JsonKey
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.ac.wellcome.models.work.internal.{
-  IdentifiedWork,
   RelatedWork,
-  RelatedWorks
+  RelatedWorks,
+  Work,
+  WorkState,
 }
+import WorkState.Identified
 
 @Schema(
   name = "Work",
@@ -122,9 +124,10 @@ case class DisplayWork(
 
 case object DisplayWork {
 
-  def apply(work: IdentifiedWork, includes: WorksIncludes): DisplayWork =
+  def apply(work: Work.Standard[Identified],
+            includes: WorksIncludes): DisplayWork =
     DisplayWork(
-      id = work.canonicalId,
+      id = work.state.canonicalId,
       title = work.data.title,
       alternativeTitles = work.data.alternativeTitles,
       referenceNumber = work.data.collectionPath.flatMap(_.label),
@@ -177,42 +180,42 @@ case object DisplayWork {
         else None
     )
 
-  def apply(work: IdentifiedWork): DisplayWork =
+  def apply(work: Work.Standard[Identified]): DisplayWork =
     DisplayWork(work = work, includes = WorksIncludes())
 
-  def apply(work: IdentifiedWork,
+  def apply(work: Work.Standard[Identified],
             includes: WorksIncludes,
             relatedWorks: RelatedWorks): DisplayWork =
     DisplayWork(work, includes).copy(
       parts =
         if (includes.parts)
           relatedWorks.parts.map { parts =>
-            parts.map {
-              case RelatedWork(work, related) =>
+            parts.collect {
+              case RelatedWork(work: Work.Standard[Identified], related) =>
                 DisplayWork(work, includes, related)
             }
           } else None,
       partOf =
         if (includes.partOf)
           relatedWorks.partOf.map { partOf =>
-            partOf.map {
-              case RelatedWork(work, related) =>
+            partOf.collect {
+              case RelatedWork(work: Work.Standard[Identified], related) =>
                 DisplayWork(work, includes, related)
             }
           } else None,
       precededBy =
         if (includes.precededBy)
           relatedWorks.precededBy.map { precededBy =>
-            precededBy.map {
-              case RelatedWork(work, related) =>
+            precededBy.collect {
+              case RelatedWork(work: Work.Standard[Identified], related) =>
                 DisplayWork(work, includes, related)
             }
           } else None,
       succeededBy =
         if (includes.succeededBy)
           relatedWorks.succeededBy.map { succeededBy =>
-            succeededBy.map {
-              case RelatedWork(work, related) =>
+            succeededBy.collect {
+              case RelatedWork(work: Work.Standard[Identified], related) =>
                 DisplayWork(work, includes, related)
             }
           } else None,

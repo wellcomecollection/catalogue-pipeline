@@ -8,9 +8,10 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.models.work.internal.TransformedBaseWork
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.recorder.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.storage.Version
+import WorkState.Unidentified
 
 class RecorderIntegrationTest
     extends AnyFunSpec
@@ -18,7 +19,7 @@ class RecorderIntegrationTest
     with Eventually
     with IntegrationPatience
     with WorkerServiceFixture
-    with VHSFixture[TransformedBaseWork]
+    with VHSFixture[Work[Unidentified]]
     with WorksGenerators {
 
   it("saves received works to VHS, and puts the VHS key on the queue") {
@@ -29,7 +30,7 @@ class RecorderIntegrationTest
 
       withWorkerService(queue, vhs, messageSender) { _ =>
         val work = createUnidentifiedWork
-        sendMessage[TransformedBaseWork](queue = queue, obj = work)
+        sendMessage[Work[Unidentified]](queue = queue, obj = work)
         eventually {
           val key = assertWorkStored(vhs, work)
 

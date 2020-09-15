@@ -1,17 +1,18 @@
 package uk.ac.wellcome.platform.merger
 
+import scala.concurrent.ExecutionContext
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
+
 import uk.ac.wellcome.bigmessaging.typesafe.{BigMessagingBuilder, VHSBuilder}
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.SQSBuilder
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.internal.TransformedBaseWork
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.services._
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
-
-import scala.concurrent.ExecutionContext
+import WorkState.Unidentified
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
@@ -21,7 +22,7 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildExecutionContext()
 
     val playbackService = new RecorderPlaybackService(
-      vhs = VHSBuilder.build[TransformedBaseWork](config)
+      vhs = VHSBuilder.build[Work[Unidentified]](config)
     )
     val mergerManager = new MergerManager(
       mergerRules = PlatformMerger

@@ -94,14 +94,14 @@ class WorksFiltersTest extends ApiWorksTestBase {
               "results": [
                 {
                   "type": "Work",
-                  "id": "${work1.canonicalId}",
+                  "id": "${work1.state.canonicalId}",
                   "title": "${work1.data.title.get}",
                   "alternativeTitles": [],
                   "items": [${items(work1.data.items)}]
                 },
                 {
                   "type": "Work",
-                  "id": "${work2.canonicalId}",
+                  "id": "${work2.state.canonicalId}",
                   "title": "${work2.data.title.get}",
                   "alternativeTitles": [],
                   "items": [${items(work2.data.items)}]
@@ -127,7 +127,7 @@ class WorksFiltersTest extends ApiWorksTestBase {
               "results": [
                 {
                   "type": "Work",
-                  "id": "${work2.canonicalId}",
+                  "id": "${work2.state.canonicalId}",
                   "title": "${work2.data.title.get}",
                   "alternativeTitles": [],
                   "items": [${items(work2.data.items)}]
@@ -472,7 +472,7 @@ class WorksFiltersTest extends ApiWorksTestBase {
             s"/$apiPrefix/works?identifiers=${work.sourceIdentifier.value}") {
             Status.OK -> worksListResponse(
               apiPrefix = apiPrefix,
-              works = Seq(work).sortBy(_.canonicalId)
+              works = Seq(work).sortBy(_.state.canonicalId)
             )
           }
       }
@@ -493,7 +493,7 @@ class WorksFiltersTest extends ApiWorksTestBase {
             s"/$apiPrefix/works?identifiers=${work1.sourceIdentifier.value},${work2.sourceIdentifier.value}") {
             Status.OK -> worksListResponse(
               apiPrefix = apiPrefix,
-              works = Seq(work1, work2).sortBy(_.canonicalId)
+              works = Seq(work1, work2).sortBy(_.state.canonicalId)
             )
           }
       }
@@ -508,10 +508,10 @@ class WorksFiltersTest extends ApiWorksTestBase {
           insertIntoElasticsearch(worksIndex, unknownWork, work)
           assertJsonResponse(
             routes,
-            s"/$apiPrefix/works?identifiers=${work.otherIdentifiers.head.value}") {
+            s"/$apiPrefix/works?identifiers=${work.data.otherIdentifiers.head.value}") {
             Status.OK -> worksListResponse(
               apiPrefix = apiPrefix,
-              works = Seq(work).sortBy(_.canonicalId)
+              works = Seq(work).sortBy(_.state.canonicalId)
             )
           }
       }
@@ -531,10 +531,10 @@ class WorksFiltersTest extends ApiWorksTestBase {
           insertIntoElasticsearch(worksIndex, unknownWork, work1, work2)
           assertJsonResponse(
             routes,
-            s"/$apiPrefix/works?identifiers=${work1.otherIdentifiers.head.value},${work2.otherIdentifiers.head.value}") {
+            s"/$apiPrefix/works?identifiers=${work1.data.otherIdentifiers.head.value},${work2.data.otherIdentifiers.head.value}") {
             Status.OK -> worksListResponse(
               apiPrefix = apiPrefix,
-              works = Seq(work1, work2).sortBy(_.canonicalId)
+              works = Seq(work1, work2).sortBy(_.state.canonicalId)
             )
           }
       }
@@ -553,10 +553,10 @@ class WorksFiltersTest extends ApiWorksTestBase {
           insertIntoElasticsearch(worksIndex, unknownWork, work1, work2)
           assertJsonResponse(
             routes,
-            s"/$apiPrefix/works?identifiers=${work1.sourceIdentifier.value},${work2.otherIdentifiers.head.value}") {
+            s"/$apiPrefix/works?identifiers=${work1.sourceIdentifier.value},${work2.data.otherIdentifiers.head.value}") {
             Status.OK -> worksListResponse(
               apiPrefix = apiPrefix,
-              works = Seq(work1, work2).sortBy(_.canonicalId)
+              works = Seq(work1, work2).sortBy(_.state.canonicalId)
             )
           }
       }
@@ -597,7 +597,7 @@ class WorksFiltersTest extends ApiWorksTestBase {
             s"/$apiPrefix/works?items.locations.accessConditions.status=restricted,closed") {
             Status.OK -> worksListResponse(
               apiPrefix = apiPrefix,
-              works = Seq(workA, workB, workC).sortBy(_.canonicalId)
+              works = Seq(workA, workB, workC).sortBy(_.state.canonicalId)
             )
           }
       }
@@ -612,7 +612,7 @@ class WorksFiltersTest extends ApiWorksTestBase {
             s"/$apiPrefix/works?items.locations.accessConditions.status=!restricted,!closed") {
             Status.OK -> worksListResponse(
               apiPrefix = apiPrefix,
-              works = Seq(workD, workE).sortBy(_.canonicalId)
+              works = Seq(workD, workE).sortBy(_.state.canonicalId)
             )
           }
       }

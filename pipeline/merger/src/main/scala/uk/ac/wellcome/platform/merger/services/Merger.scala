@@ -1,15 +1,11 @@
 package uk.ac.wellcome.platform.merger.services
 
 import cats.data.State
-import uk.ac.wellcome.models.work.internal.{
-  IdentifiableRedirect,
-  TransformedBaseWork,
-  UnidentifiedRedirectedWork,
-  UnidentifiedWork
-}
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.rules._
 import uk.ac.wellcome.platform.merger.logging.MergerLogging
 import uk.ac.wellcome.platform.merger.models.{MergeResult, MergerOutcome}
+import WorkState.Unidentified
 
 /*
  * The implementor of a Merger must provide:
@@ -23,18 +19,19 @@ import uk.ac.wellcome.platform.merger.models.{MergeResult, MergerOutcome}
  * - any other works untouched
  */
 trait Merger extends MergerLogging {
-  type MergeState = State[Set[TransformedBaseWork], MergeResult]
+  type MergeState = State[Set[Work[Unidentified]], MergeResult]
 
   protected def findTarget(
-    works: Seq[TransformedBaseWork]): Option[UnidentifiedWork]
+    works: Seq[Work[Unidentified]]): Option[Work.Standard[Unidentified]]
 
-  protected def createMergeResult(target: UnidentifiedWork,
-                                  sources: Seq[TransformedBaseWork]): MergeState
+  protected def createMergeResult(target: Work.Standard[Unidentified],
+                                  sources: Seq[Work[Unidentified]]): MergeState
 
-  protected def getTargetAndSources(works: Seq[TransformedBaseWork])
-    : Option[(UnidentifiedWork, Seq[TransformedBaseWork])] =
+  protected def getTargetAndSources(works: Seq[Work[Unidentified]])
+    : Option[(Work.Standard[Unidentified], Seq[Work[Unidentified]])] =
     works match {
-      case List(unmatchedWork: UnidentifiedWork) => Some((unmatchedWork, Nil))
+      case List(unmatchedWork: Work.Standard[Unidentified]) =>
+        Some((unmatchedWork, Nil))
       case matchedWorks =>
         findTarget(matchedWorks).map { target =>
           (
@@ -46,7 +43,7 @@ trait Merger extends MergerLogging {
         }
     }
 
-  def merge(works: Seq[TransformedBaseWork]): MergerOutcome =
+  def merge(works: Seq[Work[Unidentified]]): MergerOutcome =
     getTargetAndSources(works)
       .map {
         case (target, sources) =>
@@ -66,16 +63,16 @@ trait Merger extends MergerLogging {
       }
       .getOrElse(MergerOutcome(works, Nil))
 
-  private def redirectSourceToTarget(target: UnidentifiedWork)(
-    source: TransformedBaseWork): UnidentifiedRedirectedWork =
-    UnidentifiedRedirectedWork(
+  private def redirectSourceToTarget(target: Work.Standard[Unidentified])(
+    source: Work[Unidentified]): Work.Redirected[Unidentified] =
+    Work.Redirected[Unidentified](
       version = source.version,
-      sourceIdentifier = source.sourceIdentifier,
-      redirect = IdentifiableRedirect(target.sourceIdentifier)
+      state = Unidentified(source.sourceIdentifier),
+      redirect = IdState.Identifiable(target.sourceIdentifier)
     )
 
-  private def logIntentions(target: UnidentifiedWork,
-                            sources: Seq[TransformedBaseWork]): Unit =
+  private def logIntentions(target: Work.Standard[Unidentified],
+                            sources: Seq[Work[Unidentified]]): Unit =
     sources match {
       case Nil =>
         info(s"Processing ${describeWork(target)}")
@@ -84,8 +81,8 @@ trait Merger extends MergerLogging {
     }
 
   private def logResult(result: MergeResult,
-                        redirects: Seq[UnidentifiedRedirectedWork],
-                        remaining: Seq[TransformedBaseWork]): Unit = {
+                        redirects: Seq[Work.Redirected[Unidentified]],
+                        remaining: Seq[Work[Unidentified]]): Unit = {
     if (redirects.nonEmpty) {
       info(
         s"Merged ${describeMergeOutcome(result.mergedTarget, redirects, remaining)}")
@@ -99,18 +96,17 @@ trait Merger extends MergerLogging {
 
 object PlatformMerger extends Merger {
   override def findTarget(
-    works: Seq[TransformedBaseWork]): Option[UnidentifiedWork] =
+    works: Seq[Work[Unidentified]]): Option[Work.Standard[Unidentified]] =
     works
       .find(WorkPredicates.singlePhysicalItemCalmWork)
       .orElse(works.find(WorkPredicates.physicalSierra))
       .orElse(works.find(WorkPredicates.sierraWork)) match {
-      case Some(target: UnidentifiedWork) => Some(target)
-      case _                              => None
+      case Some(target: Work.Standard[Unidentified]) => Some(target)
+      case _                                         => None
     }
 
-  override def createMergeResult(
-    target: UnidentifiedWork,
-    sources: Seq[TransformedBaseWork]): MergeState =
+  override def createMergeResult(target: Work.Standard[Unidentified],
+                                 sources: Seq[Work[Unidentified]]): MergeState =
     if (sources.isEmpty)
       State.pure(
         MergeResult(
@@ -126,13 +122,13 @@ object PlatformMerger extends Merger {
         images <- ImagesRule(target, sources)
       } yield
         MergeResult(
-          mergedTarget = target withData { data =>
-            data.copy(
+          mergedTarget = target.withData { data =>
+            data.copy[Unidentified, IdState.Identifiable](
+              merged = true,
               items = items,
               thumbnail = thumbnail,
               otherIdentifiers = otherIdentifiers,
-              images = images.map(_.toUnmerged),
-              merged = true
+              images = images.map(_.toUnmerged)
             )
           },
           images = images

@@ -19,13 +19,13 @@ class FiltersAndAggregationsBuilderTest extends AnyFunSpec with Matchers {
       val languageFilter = LanguageFilter(Seq("en"))
       val sut = new FiltersAndAggregationsBuilder(
         List(AggregationRequest.WorkType, AggregationRequest.License),
-        List(workTypeFilter, languageFilter, IdentifiedWorkFilter),
+        List(workTypeFilter, languageFilter, StandardWorkFilter),
         requestToAggregation,
         filterToQuery
       )
 
       sut.pairedFilters should contain only workTypeFilter
-      sut.unpairedFilters should contain only (languageFilter, IdentifiedWorkFilter)
+      sut.unpairedFilters should contain only (languageFilter, StandardWorkFilter)
     }
 
     it("handles the case where all filters are unpaired") {
@@ -33,13 +33,13 @@ class FiltersAndAggregationsBuilderTest extends AnyFunSpec with Matchers {
       val languageFilter = LanguageFilter(Seq("en"))
       val sut = new FiltersAndAggregationsBuilder(
         List(AggregationRequest.License),
-        List(workTypeFilter, languageFilter, IdentifiedWorkFilter),
+        List(workTypeFilter, languageFilter, StandardWorkFilter),
         requestToAggregation,
         filterToQuery
       )
 
       sut.pairedFilters should have length 0
-      sut.unpairedFilters should contain only (languageFilter, workTypeFilter, IdentifiedWorkFilter)
+      sut.unpairedFilters should contain only (languageFilter, workTypeFilter, StandardWorkFilter)
     }
 
     it("handles the case where all filters are paired") {

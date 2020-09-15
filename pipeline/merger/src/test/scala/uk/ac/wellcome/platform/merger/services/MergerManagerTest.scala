@@ -4,14 +4,9 @@ import cats.data.State
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.models.work.internal.{
-  BaseWork,
-  IdentifiableRedirect,
-  TransformedBaseWork,
-  UnidentifiedRedirectedWork,
-  UnidentifiedWork
-}
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.models.{MergeResult, MergerOutcome}
+import WorkState.Unidentified
 
 class MergerManagerTest extends AnyFunSpec with Matchers with WorksGenerators {
 
@@ -34,11 +29,14 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorksGenerators {
     result.works.head shouldBe work
 
     result.works.tail.zip(otherWorks).map {
-      case (baseWork: BaseWork, unmergedWork: UnidentifiedWork) =>
+      case (
+          baseWork: Work[Unidentified],
+          unmergedWork: Work.Standard[Unidentified]) =>
         baseWork.sourceIdentifier shouldBe unmergedWork.sourceIdentifier
 
-        val redirect = baseWork.asInstanceOf[UnidentifiedRedirectedWork]
-        val redirectTarget = result.works.head.asInstanceOf[UnidentifiedWork]
+        val redirect = baseWork.asInstanceOf[Work.Redirected[Unidentified]]
+        val redirectTarget =
+          result.works.head.asInstanceOf[Work.Standard[Unidentified]]
         redirect.redirect.sourceIdentifier shouldBe redirectTarget.sourceIdentifier
     }
   }
@@ -58,25 +56,25 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorksGenerators {
     /** Make every work a redirect to the first work in the list, and leave
       * the first work intact.
       */
-    override def merge(works: Seq[TransformedBaseWork]): MergerOutcome =
+    override def merge(works: Seq[Work[Unidentified]]): MergerOutcome =
       MergerOutcome(
         works = works.head +: works.tail.map { work =>
-          UnidentifiedRedirectedWork(
-            sourceIdentifier = work.sourceIdentifier,
+          Work.Redirected[Unidentified](
+            state = Unidentified(work.sourceIdentifier),
             version = work.version,
-            redirect = IdentifiableRedirect(works.head.sourceIdentifier)
+            redirect = IdState.Identifiable(works.head.sourceIdentifier)
           )
         },
         images = Nil
       )
 
     override def findTarget(
-      works: Seq[TransformedBaseWork]): Option[UnidentifiedWork] =
-      works.headOption.map(_.asInstanceOf[UnidentifiedWork])
+      works: Seq[Work[Unidentified]]): Option[Work.Standard[Unidentified]] =
+      works.headOption.map(_.asInstanceOf[Work.Standard[Unidentified]])
 
     override protected def createMergeResult(
-      target: UnidentifiedWork,
-      sources: Seq[TransformedBaseWork]): MergeState =
+      target: Work.Standard[Unidentified],
+      sources: Seq[Work[Unidentified]]): MergeState =
       State(_ => (sources.toSet, MergeResult(target, Nil)))
   }
 

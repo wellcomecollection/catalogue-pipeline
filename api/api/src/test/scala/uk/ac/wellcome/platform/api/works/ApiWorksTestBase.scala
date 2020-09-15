@@ -6,6 +6,7 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.generators._
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.ApiTestBase
+import WorkState.Identified
 
 trait ApiWorksTestBase
     extends ApiTestBase
@@ -14,8 +15,9 @@ trait ApiWorksTestBase
     with GenreGenerators
     with SubjectGenerators {
 
-  implicit object IdentifiedWorkIndexable extends Indexable[IdentifiedWork] {
-    override def json(t: IdentifiedWork): String =
+  implicit object IdentifiedWorkIndexable
+      extends Indexable[Work.Standard[Identified]] {
+    override def json(t: Work.Standard[Identified]): String =
       toJson(t).get
   }
 
@@ -25,11 +27,11 @@ trait ApiWorksTestBase
         "type": "Work"
      """.stripMargin
 
-  def workResponse(work: IdentifiedWork): String =
+  def workResponse(work: Work.Standard[Identified]): String =
     s"""
       | {
       |   "type": "Work",
-      |   "id": "${work.canonicalId}",
+      |   "id": "${work.state.canonicalId}",
       |   "title": "${work.data.title.get}",
       |   ${work.data.workType.map(workTypeResponse).getOrElse("")}
       |   ${work.data.language.map(languageResponse).getOrElse("")}
@@ -37,7 +39,8 @@ trait ApiWorksTestBase
       | }
     """.stripMargin
 
-  def worksListResponse(apiPrefix: String, works: Seq[IdentifiedWork]): String =
+  def worksListResponse(apiPrefix: String,
+                        works: Seq[Work.Standard[Identified]]): String =
     s"""
        |{
        |  ${resultList(apiPrefix, totalResults = works.size)},

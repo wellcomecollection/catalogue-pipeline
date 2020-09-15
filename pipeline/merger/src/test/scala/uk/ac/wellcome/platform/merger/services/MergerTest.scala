@@ -6,6 +6,7 @@ import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.generators.WorksWithImagesGenerators
 import uk.ac.wellcome.platform.merger.models.{FieldMergeResult, MergeResult}
 import uk.ac.wellcome.platform.merger.rules.FieldMergeRule
+import WorkState.Unidentified
 
 class MergerTest
     extends AnyFunSpec
@@ -23,8 +24,8 @@ class MergerTest
     type FieldData = List[Item[IdState.Unminted]]
 
     override def merge(
-      target: UnidentifiedWork,
-      sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData] =
+      target: Work.Standard[Unidentified],
+      sources: Seq[Work[Unidentified]]): FieldMergeResult[FieldData] =
       FieldMergeResult(
         data = mergedTargetItems,
         sources = List(sources.tail.head)
@@ -35,8 +36,8 @@ class MergerTest
     type FieldData = List[SourceIdentifier]
 
     override def merge(
-      target: UnidentifiedWork,
-      sources: Seq[TransformedBaseWork]): FieldMergeResult[FieldData] =
+      target: Work.Standard[Unidentified],
+      sources: Seq[Work[Unidentified]]): FieldMergeResult[FieldData] =
       FieldMergeResult(
         data = mergedOtherIdentifiers,
         sources = sources.tail.tail)
@@ -44,19 +45,19 @@ class MergerTest
 
   object TestMerger extends Merger {
     override protected def findTarget(
-      works: Seq[TransformedBaseWork]): Option[UnidentifiedWork] =
-      works.headOption.map(_.asInstanceOf[UnidentifiedWork])
+      works: Seq[Work[Unidentified]]): Option[Work.Standard[Unidentified]] =
+      works.headOption.map(_.asInstanceOf[Work.Standard[Unidentified]])
 
     override protected def createMergeResult(
-      target: UnidentifiedWork,
-      sources: Seq[TransformedBaseWork]): MergeState =
+      target: Work.Standard[Unidentified],
+      sources: Seq[Work[Unidentified]]): MergeState =
       for {
         items <- TestItemsRule(target, sources)
         otherIdentifiers <- TestOtherIdentifiersRule(target, sources)
       } yield
         MergeResult(
           mergedTarget = target withData { data =>
-            data.copy(
+            data.copy[Unidentified, IdState.Identifiable](
               items = items,
               otherIdentifiers = otherIdentifiers
             )
@@ -69,11 +70,12 @@ class MergerTest
 
   it("returns a single target work as specified") {
     mergedWorks.works should contain(
-      inputWorks.head.asInstanceOf[UnidentifiedWork] withData { data =>
-        data.copy(
-          items = mergedTargetItems,
-          otherIdentifiers = mergedOtherIdentifiers
-        )
+      inputWorks.head.asInstanceOf[Work.Standard[Unidentified]] withData {
+        data =>
+          data.copy[Unidentified, IdState.Identifiable](
+            items = mergedTargetItems,
+            otherIdentifiers = mergedOtherIdentifiers
+          )
       }
     )
   }
@@ -81,7 +83,7 @@ class MergerTest
   it(
     "returns redirects for all sources that were marked as such by any field rule") {
     mergedWorks.works.collect {
-      case redirect: UnidentifiedRedirectedWork => redirect.sourceIdentifier
+      case redirect: Work.Redirected[Unidentified] => redirect.sourceIdentifier
     } should contain theSameElementsAs
       inputWorks.tail.tail.map(_.sourceIdentifier)
   }

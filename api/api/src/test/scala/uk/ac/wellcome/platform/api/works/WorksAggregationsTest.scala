@@ -168,7 +168,7 @@ class WorksAggregationsTest extends ApiWorksTestBase {
       case (ElasticConfig(worksIndex, _), routes) =>
         val works = List("1st May 1970", "1970", "1976", "1970-1979")
           .map(label => createDatedWork(dateLabel = label))
-          .sortBy(_.canonicalId)
+          .sortBy(_.state.canonicalId)
         insertIntoElasticsearch(worksIndex, works: _*)
         assertJsonResponse(
           routes,
@@ -219,7 +219,7 @@ class WorksAggregationsTest extends ApiWorksTestBase {
         language = Some(Language("German", Some("ger")))
       ),
       createIdentifiedWorkWith(language = None)
-    ).sortBy(_.canonicalId)
+    ).sortBy(_.state.canonicalId)
     withApi {
       case (ElasticConfig(worksIndex, _), routes) =>
         insertIntoElasticsearch(worksIndex, works: _*)
@@ -279,7 +279,7 @@ class WorksAggregationsTest extends ApiWorksTestBase {
         subjects = List(paeleoNeuroBiology, realAnalysis)
       ),
       createIdentifiedWorkWith(subjects = Nil)
-    ).sortBy(_.canonicalId)
+    ).sortBy(_.state.canonicalId)
     withApi {
       case (ElasticConfig(worksIndex, _), routes) =>
         insertIntoElasticsearch(worksIndex, works: _*)

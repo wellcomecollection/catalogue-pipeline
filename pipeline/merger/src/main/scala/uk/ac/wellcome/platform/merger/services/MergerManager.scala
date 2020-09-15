@@ -1,7 +1,8 @@
 package uk.ac.wellcome.platform.merger.services
 
-import uk.ac.wellcome.models.work.internal.TransformedBaseWork
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.models.MergerOutcome
+import WorkState.Unidentified
 
 class MergerManager(mergerRules: Merger) {
 
@@ -11,18 +12,12 @@ class MergerManager(mergerRules: Merger) {
     * If we got an incomplete list of results from VHS (for example,
     * wrong versions), we skip the merge and return the original works.
     */
-  def applyMerge(
-    maybeWorks: Seq[Option[TransformedBaseWork]]): MergerOutcome = {
-    val transformedBaseWorks = maybeWorks
-      .collect {
-        case Some(transformedBaseWork: TransformedBaseWork) =>
-          transformedBaseWork
-      }
+  def applyMerge(maybeWorks: Seq[Option[Work[Unidentified]]]): MergerOutcome = {
+    val works = maybeWorks.flatten
 
-    if (transformedBaseWorks.size == maybeWorks.size) {
-      mergerRules.merge(transformedBaseWorks)
-    } else {
-      MergerOutcome(maybeWorks.flatten, Nil)
-    }
+    if (works.size == maybeWorks.size)
+      mergerRules.merge(works)
+    else
+      MergerOutcome(works, Nil)
   }
 }

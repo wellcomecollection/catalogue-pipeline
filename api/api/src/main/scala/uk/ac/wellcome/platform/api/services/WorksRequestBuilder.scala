@@ -14,7 +14,7 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
 
   import ElasticsearchRequestBuilder._
 
-  val idSort: FieldSort = fieldSort("canonicalId").order(SortOrder.ASC)
+  val idSort: FieldSort = fieldSort("state.canonicalId").order(SortOrder.ASC)
 
   def request(queryOptions: ElasticsearchQueryOptions,
               index: Index,
@@ -117,14 +117,14 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
       }
       .getOrElse { boolQuery }
       .filter {
-        (IdentifiedWorkFilter :: filteredAggregationBuilder.unpairedFilters)
+        (StandardWorkFilter :: filteredAggregationBuilder.unpairedFilters)
           .map(buildWorkFilterQuery)
       }
 
   private def buildWorkFilterQuery(workFilter: WorkFilter): Query =
     workFilter match {
-      case IdentifiedWorkFilter =>
-        termQuery(field = "type", value = "IdentifiedWork")
+      case StandardWorkFilter =>
+        termQuery(field = "type", value = "Standard")
       case ItemLocationTypeFilter(itemLocationTypeIds) =>
         termsQuery(
           field = "data.items.locations.locationType.id",
@@ -151,7 +151,9 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
           values = licenseIds)
       case IdentifiersFilter(identifiers) =>
         should(
-          termsQuery(field = "sourceIdentifier.value", values = identifiers),
+          termsQuery(
+            field = "state.sourceIdentifier.value",
+            values = identifiers),
           termsQuery(
             field = "data.otherIdentifiers.value",
             values = identifiers)

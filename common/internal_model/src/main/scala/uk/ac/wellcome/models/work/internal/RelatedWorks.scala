@@ -2,6 +2,7 @@ package uk.ac.wellcome.models.work.internal
 
 import scala.util.Try
 import scala.annotation.tailrec
+import WorkState.Identified
 
 /** Holds relations for a particular work. This is a recursive data structure,
   * so related works can in turn hold their relations. An Option[List[_]] is
@@ -21,11 +22,12 @@ case class RelatedWorks(
 )
 
 case class RelatedWork(
-  work: IdentifiedWork,
+  work: Work[Identified],
   relatedWorks: RelatedWorks
 )
 
 object RelatedWorks {
+
   def unknown: RelatedWorks =
     RelatedWorks(
       parts = None,
@@ -63,9 +65,9 @@ object RelatedWorks {
     * @param ancestors Ancestors of the work
     */
   def apply(path: String,
-            children: List[IdentifiedWork],
-            siblings: List[IdentifiedWork],
-            ancestors: List[IdentifiedWork]): RelatedWorks = {
+            children: List[Work[Identified]],
+            siblings: List[Work[Identified]],
+            ancestors: List[Work[Identified]]): RelatedWorks = {
     val mainPath = tokenizePath(path)
     val (precededBy, succeededBy) = siblings.sortBy(tokenizePath).partition {
       work =>
@@ -104,7 +106,7 @@ object RelatedWorks {
         }
     }
 
-  private def tokenizePath(work: IdentifiedWork): Option[TokenizedPath] =
+  private def tokenizePath(work: Work[Identified]): Option[TokenizedPath] =
     work.data.collectionPath
       .map { collectionPath =>
         tokenizePath(collectionPath.path)
@@ -156,6 +158,7 @@ object RelatedWorks {
 }
 
 object RelatedWork {
-  def apply(work: IdentifiedWork): RelatedWork =
+
+  def apply(work: Work[Identified]): RelatedWork =
     RelatedWork(work, RelatedWorks.unknown)
 }

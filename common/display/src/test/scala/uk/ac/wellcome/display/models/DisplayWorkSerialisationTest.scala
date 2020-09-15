@@ -32,7 +32,7 @@ class DisplayWorkSerialisationTest
     val expectedJson = s"""
       |{
       | "type": "Work",
-      | "id": "${work.canonicalId}",
+      | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
       | "description": "${work.data.description.get}",
       | "workType" : ${workType(work.data.workType.get)},
@@ -53,7 +53,7 @@ class DisplayWorkSerialisationTest
     val expectedJson = s"""
       |{
       | "type": "Work",
-      | "id": "${work.canonicalId}",
+      | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "items": [ ${items(work.data.items)} ]
@@ -74,7 +74,7 @@ class DisplayWorkSerialisationTest
     val expectedJson = s"""
       |{
       | "type": "Work",
-      | "id": "${work.canonicalId}",
+      | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "items": [ ]
@@ -102,7 +102,7 @@ class DisplayWorkSerialisationTest
     val expectedJson = s"""
       |{
       | "type": "Work",
-      | "id": "${workWithCopyright.canonicalId}",
+      | "id": "${workWithCopyright.state.canonicalId}",
       | "title": "${workWithCopyright.data.title.get}",
       | "alternativeTitles": [],
       | "items": [
@@ -144,7 +144,7 @@ class DisplayWorkSerialisationTest
     val expectedJson = s"""
       |{
       | "type": "Work",
-      | "id": "${workWithSubjects.canonicalId}",
+      | "id": "${workWithSubjects.state.canonicalId}",
       | "title": "${workWithSubjects.data.title.get}",
       | "alternativeTitles": [],
       | "subjects": [${subjects(workWithSubjects.data.subjects)}]
@@ -169,7 +169,7 @@ class DisplayWorkSerialisationTest
     val expectedJson = s"""
       |{
       | "type": "Work",
-      | "id": "${workWithProduction.canonicalId}",
+      | "id": "${workWithProduction.state.canonicalId}",
       | "title": "${workWithProduction.data.title.get}",
       | "alternativeTitles": [],
       | "production": [${production(workWithProduction.data.production)}]
@@ -200,7 +200,7 @@ class DisplayWorkSerialisationTest
     val expectedJson = s"""
       |{
       | "type": "Work",
-      | "id": "${work.canonicalId}",
+      | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
       | "description": "${work.data.description.get}",
       | "alternativeTitles": [],
@@ -231,7 +231,7 @@ class DisplayWorkSerialisationTest
     val expectedJson = s"""
       |{
       | "type": "Work",
-      | "id": "${work.canonicalId}",
+      | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "genres": [ ${genres(work.data.genres)} ]
@@ -253,7 +253,7 @@ class DisplayWorkSerialisationTest
     val expectedJson = s"""
       |{
       | "type": "Work",
-      | "id": "${work.canonicalId}",
+      | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "notes": [
@@ -294,7 +294,7 @@ class DisplayWorkSerialisationTest
     val expectedJson = s"""
       |{
       | "type": "Work",
-      | "id": "${work.canonicalId}",
+      | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "identifiers": [
@@ -318,7 +318,7 @@ class DisplayWorkSerialisationTest
     val expectedJson = s"""
       |{
       | "type": "Work",
-      | "id": "${work.canonicalId}",
+      | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "identifiers": [ ${identifier(work.sourceIdentifier)} ]
@@ -339,7 +339,7 @@ class DisplayWorkSerialisationTest
     val expectedJson = s"""
       |{
       | "type": "Work",
-      | "id": "${work.canonicalId}",
+      | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "images": [${workImageIncludes(work.data.images)}]
@@ -365,7 +365,7 @@ class DisplayWorkSerialisationTest
     val expectedJson = s"""
       |{
       | "type": "Work",
-      | "id": "${work.canonicalId}",
+      | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "thumbnail": ${location(work.data.thumbnail.get)}
