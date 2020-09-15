@@ -121,8 +121,7 @@ object WorkState {
   // block comment above
 
   case class Unidentified(
-    sourceIdentifier: SourceIdentifier,
-    identifiedType: String = classOf[Identified].getSimpleName,
+    sourceIdentifier: SourceIdentifier
   ) extends WorkState {
 
     type DataId = IdState.Unminted
