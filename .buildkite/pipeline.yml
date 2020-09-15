@@ -1,35 +1,66 @@
 steps:
   - command: .buildkite/scripts/run_autoformat.py
+    label: "autoformat"
   - wait
   - command: .buildkite/scripts/run_job.py internal_model
+    label: "internal model"
   - command: .buildkite/scripts/run_job.py display
+    label: "display"
   - command: .buildkite/scripts/run_job.py elasticsearch
+    label: "elasticsearch"
   - command: .buildkite/scripts/run_job.py big_messaging
+    label: "big messaging"
   - command: .buildkite/scripts/run_job.py pipeline_storage
+    label: "pipeline storage"
   - command: .buildkite/scripts/run_job.py ingestor_common
+    label: "ingestor common"
   - command: .buildkite/scripts/run_job.py transformer_common
+    label: "transformer common"
   - wait
   - command: .buildkite/scripts/run_job.py api
+    label: "API"
   - command: .buildkite/scripts/run_job.py reindex_worker
+    label: "reindex worker"
   - command: .buildkite/scripts/run_job.py ingestor_works
+    label: "ingestor (works)"
   - command: .buildkite/scripts/run_job.py ingestor_images
+    label: "ingestor (images)"
   - command: .buildkite/scripts/run_job.py id_minter
+    label: "ID minter"
   - command: .buildkite/scripts/run_job.py matcher
+    label: "matcher"
   - command: .buildkite/scripts/run_job.py merger
+    label: "merger"
   - command: .buildkite/scripts/run_job.py recorder
+    label: "recorder"
   - command: .buildkite/scripts/run_job.py transformer_miro
+    label: "transformer (Miro)"
   - command: .buildkite/scripts/run_job.py transformer_sierra
+    label: "transformer (Sierra)"
   - command: .buildkite/scripts/run_job.py transformer_mets
+    label: "transformer (METS)"
   - command: .buildkite/scripts/run_job.py transformer_calm
+    label: "transformer (Calm)"
   - command: .buildkite/scripts/run_job.py sierra_reader
+    label: "Sierra reader"
   - command: .buildkite/scripts/run_job.py sierra_bib_merger
+    label: "Sierra bib merger"
   - command: .buildkite/scripts/run_job.py sierra_item_merger
+    label: "Sierra item merger"
   - command: .buildkite/scripts/run_job.py sierra_items_to_dynamo
+    label: "Sierra items to Dynamo"
   - command: .buildkite/scripts/run_job.py mets_adapter
+    label: "METS adapter"
   - command: .buildkite/scripts/run_job.py calm_adapter
+    label: "Calm adapter"
   - command: .buildkite/scripts/run_job.py inference_manager
+    label: "inference manager"
   - command: .buildkite/scripts/run_job.py feature_inferrer --changes-in pipeline/inferrer/feature_inferrer
+    label: "feature inferrer"
   - command: .buildkite/scripts/run_job.py palette_inferrer --changes-in pipeline/inferrer/palette_inferrer
+    label: "palette inferrer"
   - command: .buildkite/scripts/run_job.py snapshot_generator
+    label: "snapshot generator"
   - wait
   - command: .buildkite/scripts/complete_build.py
+    label: "complete build"
