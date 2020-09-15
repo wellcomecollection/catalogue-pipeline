@@ -17,8 +17,7 @@ import uk.ac.wellcome.models.Implicits._
 
 object ElasticsearchWorksSource extends Logging {
   def apply(elasticClient: ElasticClient, index: Index)(
-    implicit actorSystem: ActorSystem)
-    : Source[Work[Identified], NotUsed] = {
+    implicit actorSystem: ActorSystem): Source[Work[Identified], NotUsed] = {
     val loggingSink = Flow[Work[Identified]]
       .grouped(10000)
       .map(works => {

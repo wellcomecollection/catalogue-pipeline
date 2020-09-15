@@ -36,8 +36,7 @@ class RelatedWorksServiceTest
       sourceIdentifier = createSourceIdentifierWith(value = path)
     )
 
-  def storeWorks(index: Index,
-                 works: List[Work.Standard[Identified]] = works) =
+  def storeWorks(index: Index, works: List[Work.Standard[Identified]] = works) =
     insertIntoElasticsearch(index, works: _*)
 
   val workA = work("a")
