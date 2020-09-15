@@ -4,10 +4,12 @@ import akka.NotUsed
 import akka.stream.scaladsl.Flow
 import uk.ac.wellcome.display.models.DisplayWork
 import uk.ac.wellcome.models.work.internal._
+import WorkState.Identified
 
 object IdentifiedWorkToVisibleDisplayWork {
-  def apply[T <: DisplayWork](
-    toDisplayWork: IdentifiedWork => T): Flow[IdentifiedWork, T, NotUsed] =
-    Flow[IdentifiedWork]
+  def apply(
+    toDisplayWork: Work.Standard[Identified] => DisplayWork): Flow[Work[Identified], DisplayWork, NotUsed] =
+    Flow[Work[Identified]]
+      .collect { case work: Work.Standard[Identified] => work }
       .map { toDisplayWork(_) }
 }

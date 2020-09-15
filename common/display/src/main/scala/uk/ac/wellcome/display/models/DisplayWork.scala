@@ -8,7 +8,7 @@ import uk.ac.wellcome.models.work.internal.{
   Work,
   WorkState,
 }
-import WorkState._
+import WorkState.Identified
 
 @Schema(
   name = "Work",

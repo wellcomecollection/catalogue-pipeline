@@ -1,5 +1,9 @@
 package uk.ac.wellcome.elasticsearch.test.fixtures
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.util.Random
+
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.bulk.BulkResponse
 import com.sksamuel.elastic4s.requests.cluster.ClusterHealthResponse
@@ -16,6 +20,7 @@ import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.time.{Seconds, Span}
 import org.scalatest.{Assertion, Suite}
+
 import uk.ac.wellcome.elasticsearch._
 import uk.ac.wellcome.elasticsearch.model.CanonicalId
 import uk.ac.wellcome.fixtures._
@@ -24,10 +29,6 @@ import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
 import WorkState.Identified
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scala.util.Random
 
 trait ElasticsearchFixtures
     extends Eventually

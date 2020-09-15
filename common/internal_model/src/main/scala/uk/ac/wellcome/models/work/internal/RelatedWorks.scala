@@ -2,7 +2,7 @@ package uk.ac.wellcome.models.work.internal
 
 import scala.util.Try
 import scala.annotation.tailrec
-import WorkState._
+import WorkState.Identified
 
 /** Holds relations for a particular work. This is a recursive data structure,
   * so related works can in turn hold their relations. An Option[List[_]] is
@@ -22,7 +22,7 @@ case class RelatedWorks(
 )
 
 case class RelatedWork(
-  work: Work[WorkState.Identified],
+  work: Work[Identified],
   relatedWorks: RelatedWorks
 )
 

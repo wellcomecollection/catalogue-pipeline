@@ -15,7 +15,7 @@ import uk.ac.wellcome.platform.ingestor.common.fixtures.IngestorFixtures
 import uk.ac.wellcome.pipeline_storage.ElasticIndexer
 import uk.ac.wellcome.pipeline_storage.Indexable.workIndexable
 import uk.ac.wellcome.models.Implicits._
-import WorkState._
+import WorkState.Identified
 
 class IngestorFeatureTest
     extends AnyFunSpec

@@ -30,6 +30,7 @@ sealed trait Work[State <: WorkState] {
 }
 
 object Work {
+
   case class Standard[State <: WorkState](
     version: Int,
     data: WorkData[State, State#ImageId],

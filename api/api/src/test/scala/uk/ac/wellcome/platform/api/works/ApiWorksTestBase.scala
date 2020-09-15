@@ -6,7 +6,7 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.generators._
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.ApiTestBase
-import WorkState._
+import WorkState.Identified
 
 trait ApiWorksTestBase
     extends ApiTestBase
