@@ -19,7 +19,7 @@ import org.scalatest.{Assertion, Suite}
 import uk.ac.wellcome.elasticsearch._
 import uk.ac.wellcome.elasticsearch.model.CanonicalId
 import uk.ac.wellcome.fixtures._
-import uk.ac.wellcome.json.JsonUtil.{toJson, fromJson}
+import uk.ac.wellcome.json.JsonUtil.{fromJson, toJson}
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
