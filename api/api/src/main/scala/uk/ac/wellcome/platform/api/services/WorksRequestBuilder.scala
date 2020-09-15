@@ -117,14 +117,14 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
       }
       .getOrElse { boolQuery }
       .filter {
-        (IdentifiedWorkFilter :: filteredAggregationBuilder.unpairedFilters)
+        (StandardWorkFilter :: filteredAggregationBuilder.unpairedFilters)
           .map(buildWorkFilterQuery)
       }
 
   private def buildWorkFilterQuery(workFilter: WorkFilter): Query =
     workFilter match {
-      case IdentifiedWorkFilter =>
-        termQuery(field = "type", value = "IdentifiedWork")
+      case StandardWorkFilter =>
+        termQuery(field = "type", value = "Standard")
       case ItemLocationTypeFilter(itemLocationTypeIds) =>
         termsQuery(
           field = "data.items.locations.locationType.id",
