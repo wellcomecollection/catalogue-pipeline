@@ -1,12 +1,12 @@
 package uk.ac.wellcome.models.work.internal
 
-sealed trait BaseImage[+State <: MinterState]
+sealed trait BaseImage[+State <: DataState]
     extends HasId[State#Id] {
   val id: State#Id
   val location: DigitalLocationDeprecated
 }
 
-case class UnmergedImage[State <: MinterState](
+case class UnmergedImage[State <: DataState](
   id: State#Id,
   version: Int,
   location: DigitalLocationDeprecated
@@ -22,7 +22,7 @@ case class UnmergedImage[State <: MinterState](
     )
 }
 
-case class MergedImage[State <: MinterState](
+case class MergedImage[State <: DataState](
   id: State#Id,
   version: Int,
   location: DigitalLocationDeprecated,
@@ -38,7 +38,7 @@ case class MergedImage[State <: MinterState](
 
 object MergedImage {
   implicit class IdentifiedMergedImageOps(
-    mergedImage: MergedImage[MinterState.Minted]) {
+    mergedImage: MergedImage[DataState.Identified]) {
     def augment(inferredData: => Option[InferredData]): AugmentedImage =
       AugmentedImage(
         id = mergedImage.id,
@@ -54,9 +54,9 @@ case class AugmentedImage(
   id: IdState.Identified,
   version: Int,
   location: DigitalLocationDeprecated,
-  source: ImageSource[MinterState.Minted],
+  source: ImageSource[DataState.Identified],
   inferredData: Option[InferredData] = None
-) extends BaseImage[MinterState.Minted]
+) extends BaseImage[DataState.Identified]
 
 case class InferredData(
   // We split the feature vector so that it can fit into
@@ -75,8 +75,8 @@ object UnmergedImage {
   def apply(sourceIdentifier: SourceIdentifier,
             version: Int,
             location: DigitalLocationDeprecated)
-    : UnmergedImage[MinterState.Unminted] =
-    UnmergedImage[MinterState.Unminted](
+    : UnmergedImage[DataState.Unidentified] =
+    UnmergedImage[DataState.Unidentified](
       id = IdState.Identifiable(sourceIdentifier),
       version = version,
       location

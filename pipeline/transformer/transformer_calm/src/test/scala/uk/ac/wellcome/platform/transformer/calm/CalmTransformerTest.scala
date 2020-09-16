@@ -30,7 +30,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
             identifierType = CalmIdentifierTypes.recordId
           )
         ),
-        data = WorkData[Unidentified, IdState.Identifiable](
+        data = WorkData[DataState.Unidentified](
           title = Some("abc"),
           workType = Some(WorkType.ArchiveCollection),
           collectionPath = Some(
@@ -488,7 +488,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
           )
         ),
         version = version,
-        data = WorkData[Unidentified, IdState.Identifiable](
+        data = WorkData[DataState.Unidentified](
           title = Some("Should suppress"),
           workType = Some(WorkType.ArchiveSection),
           collectionPath = Some(

@@ -17,9 +17,6 @@ sealed trait IdState {
 
 object IdState {
 
-  /* Parent trait for all IDs that contain a sourceIdentifier */
-  sealed trait WithSourceIdentifier extends IdState
-
   /* Parent trait for an ID of an object that is pre minter. */
   sealed trait Unminted extends IdState
 
@@ -32,8 +29,7 @@ object IdState {
     canonicalId: String,
     sourceIdentifier: SourceIdentifier,
     otherIdentifiers: List[SourceIdentifier] = Nil,
-  ) extends Minted
-      with WithSourceIdentifier {
+  ) extends Minted {
     def maybeCanonicalId = Some(canonicalId)
     def allSourceIdentifiers = sourceIdentifier +: otherIdentifiers
   }
@@ -44,8 +40,7 @@ object IdState {
     sourceIdentifier: SourceIdentifier,
     otherIdentifiers: List[SourceIdentifier] = Nil,
     identifiedType: String = classOf[Identified].getSimpleName,
-  ) extends Unminted
-      with WithSourceIdentifier {
+  ) extends Unminted {
     def maybeCanonicalId = None
     def allSourceIdentifiers = sourceIdentifier +: otherIdentifiers
   }
@@ -56,27 +51,6 @@ object IdState {
   case object Unidentifiable extends Unminted with Minted {
     def maybeCanonicalId = None
     def allSourceIdentifiers = Nil
-  }
-}
-
-/* Container type for IdState types with two associated types:
- * * Id (references an ID type, always with a source identifier)
- * * MaybeId (references an ID type, potentially with a source identifier)
- */
-sealed trait MinterState {
-  type Id <: IdState.WithSourceIdentifier
-  type MaybeId <: IdState
-}
-
-object MinterState {
-  case class Unminted() extends MinterState {
-    type Id = IdState.Identifiable
-    type MaybeId = IdState.Unminted
-  }
-
-  case class Minted() extends MinterState {
-    type Id = IdState.Identified
-    type MaybeId = IdState.Minted
   }
 }
 

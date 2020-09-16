@@ -125,7 +125,7 @@ class MetsTransformerWorkerServiceTest
           value = identifier
         )
       ),
-      data = WorkData[Unidentified, IdState.Identifiable](
+      data = WorkData[DataState.Unidentified](
         items = List(expectedItem),
         mergeCandidates = List(
           MergeCandidate(

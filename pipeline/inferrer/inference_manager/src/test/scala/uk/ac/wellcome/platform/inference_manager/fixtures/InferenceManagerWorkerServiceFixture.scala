@@ -37,7 +37,7 @@ trait InferenceManagerWorkerServiceFixture
     implicit decoder: Decoder[MergedIdentifiedImage]): R =
     withActorSystem { implicit actorSystem =>
       withBigMessageStream[
-        MergedImage[IdState.Identified, WorkState.Identified],
+        MergedImage[DataState.Identified],
         R](queue) { msgStream =>
         val workerService = new InferenceManagerWorkerService(
           msgStream = msgStream,

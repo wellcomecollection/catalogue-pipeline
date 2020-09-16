@@ -28,7 +28,7 @@ case class MetsData(
       Work.Invisible[Unidentified](
         version = version,
         state = Unidentified(sourceIdentifier),
-        data = WorkData[Unidentified, IdState.Identifiable](
+        data = WorkData[DataState.Unidentified](
           items = List(item),
           mergeCandidates = List(mergeCandidate),
           thumbnail = thumbnail(sourceIdentifier.value, license, accessStatus),
@@ -138,7 +138,7 @@ case class MetsData(
   private def images(version: Int,
                      license: Option[License],
                      accessStatus: Option[AccessStatus])
-    : List[UnmergedImage[IdState.Identifiable, WorkState.Unidentified]] =
+    : List[UnmergedImage[DataState.Unidentified]] =
     if (accessStatus.forall(shouldCreateDigitalLocation)) {
       fileReferences
         .filter(ImageUtils.isImage)

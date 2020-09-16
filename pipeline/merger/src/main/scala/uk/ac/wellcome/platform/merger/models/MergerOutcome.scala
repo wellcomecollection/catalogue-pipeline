@@ -9,4 +9,4 @@ import WorkState.Unidentified
  */
 case class MergerOutcome(
   works: Seq[Work[Unidentified]],
-  images: Seq[MergedImage[IdState.Identifiable, Unidentified]])
+  images: Seq[MergedImage[DataState.Unidentified]])

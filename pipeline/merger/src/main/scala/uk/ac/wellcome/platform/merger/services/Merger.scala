@@ -123,7 +123,7 @@ object PlatformMerger extends Merger {
       } yield
         MergeResult(
           mergedTarget = target.withData { data =>
-            data.copy[Unidentified, IdState.Identifiable](
+            data.copy[DataState.Unidentified](
               merged = true,
               items = items,
               thumbnail = thumbnail,

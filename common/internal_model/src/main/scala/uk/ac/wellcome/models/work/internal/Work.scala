@@ -9,7 +9,7 @@ sealed trait Work[State <: WorkState] {
 
   val version: Int
   val state: State
-  val data: WorkData[State#MintState]
+  val data: WorkData[State#WorkDataState]
 
   def sourceIdentifier: SourceIdentifier = state.sourceIdentifier
 
@@ -17,7 +17,7 @@ sealed trait Work[State <: WorkState] {
     sourceIdentifier :: data.otherIdentifiers
 
   def withData(
-    f: WorkData[State#MintState] => WorkData[State#MintState])
+    f: WorkData[State#WorkDataState] => WorkData[State#WorkDataState])
     : Work[State] =
     this match {
       case Work.Standard(version, data, state) =>
@@ -33,22 +33,21 @@ object Work {
 
   case class Standard[State <: WorkState](
     version: Int,
-    data: WorkData[State#MintState],
+    data: WorkData[State#WorkDataState],
     state: State,
   ) extends Work[State]
 
   case class Redirected[State <: WorkState](
     version: Int,
-    redirect: State#MintState#Id,
+    redirect: State#WorkDataState#Id,
     state: State,
   ) extends Work[State] {
-
-    val data = WorkData[State#MintState]()
+    val data = WorkData[State#WorkDataState]()
   }
 
   case class Invisible[State <: WorkState](
     version: Int,
-    data: WorkData[State#MintState],
+    data: WorkData[State#WorkDataState],
     state: State,
     invisibilityReasons: List[InvisibilityReason] = Nil,
   ) extends Work[State]
@@ -57,7 +56,7 @@ object Work {
 /** WorkData contains data common to all types of works that can exist at any
   * stage of the pipeline.
   */
-case class WorkData[State <: MinterState](
+case class WorkData[State <: DataState](
   title: Option[String] = None,
   otherIdentifiers: List[SourceIdentifier] = Nil,
   mergeCandidates: List[MergeCandidate] = Nil,
@@ -79,7 +78,7 @@ case class WorkData[State <: MinterState](
   items: List[Item[State#MaybeId]] = Nil,
   merged: Boolean = false,
   collectionPath: Option[CollectionPath] = None,
-  images: List[UnmergedImage[State]] = Nil
+  images: List[UnmergedImage[State]] = Nil,
 )
 
 /** WorkState represents the state of the work in the pipeline, and contains
@@ -103,15 +102,10 @@ case class WorkData[State <: MinterState](
   *      | (id minter)
   *      ▼
   *  Identified
-  *
-  * Each WorkState also has two associated ID types: MaybeId is used for data
-  * that potentially is identifiable / identified, and Id is used for data that
-  * is either identifiable or identified. The value of these types are 
-  * the corresponding WorkData is pre or post the minter.
   */
 sealed trait WorkState {
 
-  type MintState <: MinterState
+  type WorkDataState <: DataState
 
   val sourceIdentifier: SourceIdentifier
 }
@@ -125,7 +119,7 @@ object WorkState {
     sourceIdentifier: SourceIdentifier
   ) extends WorkState {
 
-    type MintState = MinterState.Unminted
+    type WorkDataState = DataState.Unidentified
   }
 
   case class Identified(
@@ -133,6 +127,6 @@ object WorkState {
     canonicalId: String,
   ) extends WorkState {
 
-    type MintState = MinterState.Minted
+    type WorkDataState = DataState.Identified
   }
 }

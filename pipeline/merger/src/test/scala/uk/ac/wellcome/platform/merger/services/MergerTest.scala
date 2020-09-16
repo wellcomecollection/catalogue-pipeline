@@ -57,7 +57,7 @@ class MergerTest
       } yield
         MergeResult(
           mergedTarget = target withData { data =>
-            data.copy[Unidentified, IdState.Identifiable](
+            data.copy[DataState.Unidentified](
               items = items,
               otherIdentifiers = otherIdentifiers
             )
@@ -72,7 +72,7 @@ class MergerTest
     mergedWorks.works should contain(
       inputWorks.head.asInstanceOf[Work.Standard[Unidentified]] withData {
         data =>
-          data.copy[Unidentified, IdState.Identifiable](
+          data.copy[DataState.Unidentified](
             items = mergedTargetItems,
             otherIdentifiers = mergedOtherIdentifiers
           )

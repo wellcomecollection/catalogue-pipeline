@@ -83,16 +83,16 @@ object Implicits {
   implicit val _dec40: Decoder[Contributor[IdState.Minted]] =
     deriveConfiguredDecoder
   implicit val _dec41
-    : Decoder[UnmergedImage[MinterState.Unminted]] =
+    : Decoder[UnmergedImage[DataState.Unidentified]] =
     deriveConfiguredDecoder
   implicit val _dec42
-    : Decoder[UnmergedImage[MinterState.Minted]] =
+    : Decoder[UnmergedImage[DataState.Identified]] =
     deriveConfiguredDecoder
   implicit val _dec43
-    : Decoder[WorkData[MinterState.Unminted]] =
+    : Decoder[WorkData[DataState.Unidentified]] =
     deriveConfiguredDecoder
   implicit val _dec44
-    : Decoder[WorkData[MinterState.Minted]] =
+    : Decoder[WorkData[DataState.Identified]] =
     deriveConfiguredDecoder
   implicit val _dec45: Decoder[Work.Standard[WorkState.Unidentified]] =
     deriveConfiguredDecoder
@@ -111,17 +111,17 @@ object Implicits {
   implicit val _dec52: Decoder[Work[WorkState.Identified]] =
     deriveConfiguredDecoder
   implicit val _dec53
-    : Decoder[MergedImage[MinterState.Unminted]] =
+    : Decoder[MergedImage[DataState.Unidentified]] =
     deriveConfiguredDecoder
   implicit val _dec54
-    : Decoder[MergedImage[MinterState.Minted]] =
+    : Decoder[MergedImage[DataState.Identified]] =
     deriveConfiguredDecoder
   implicit val _dec55: Decoder[AugmentedImage] = deriveConfiguredDecoder
   implicit val _dec56
-    : Decoder[BaseImage[MinterState.Unminted]] =
+    : Decoder[BaseImage[DataState.Unidentified]] =
     deriveConfiguredDecoder
   implicit val _dec57
-    : Decoder[BaseImage[MinterState.Minted]] =
+    : Decoder[BaseImage[DataState.Identified]] =
     deriveConfiguredDecoder
 
   implicit val _enc00: Encoder[AccessCondition] = deriveConfiguredEncoder
@@ -188,16 +188,16 @@ object Implicits {
   implicit val _enc40: Encoder[Contributor[IdState.Minted]] =
     deriveConfiguredEncoder
   implicit val _enc41
-    : Encoder[UnmergedImage[MinterState.Unminted]] =
+    : Encoder[UnmergedImage[DataState.Unidentified]] =
     deriveConfiguredEncoder
   implicit val _enc42
-    : Encoder[UnmergedImage[MinterState.Minted]] =
+    : Encoder[UnmergedImage[DataState.Identified]] =
     deriveConfiguredEncoder
   implicit val _enc43
-    : Encoder[WorkData[MinterState.Unminted]] =
+    : Encoder[WorkData[DataState.Unidentified]] =
     deriveConfiguredEncoder
   implicit val _enc44
-    : Encoder[WorkData[MinterState.Minted]] =
+    : Encoder[WorkData[DataState.Identified]] =
     deriveConfiguredEncoder
   implicit val _enc45: Encoder[Work.Standard[WorkState.Unidentified]] =
     deriveConfiguredEncoder
@@ -216,16 +216,16 @@ object Implicits {
   implicit val _enc52: Encoder[Work[WorkState.Identified]] =
     deriveConfiguredEncoder
   implicit val _enc53
-    : Encoder[MergedImage[MinterState.Unminted]] =
+    : Encoder[MergedImage[DataState.Unidentified]] =
     deriveConfiguredEncoder
   implicit val _enc54
-    : Encoder[MergedImage[MinterState.Minted]] =
+    : Encoder[MergedImage[DataState.Identified]] =
     deriveConfiguredEncoder
   implicit val _enc55: Encoder[AugmentedImage] = deriveConfiguredEncoder
   implicit val _enc56
-    : Encoder[BaseImage[MinterState.Unminted]] =
+    : Encoder[BaseImage[DataState.Unidentified]] =
     deriveConfiguredEncoder
   implicit val _enc57
-    : Encoder[BaseImage[MinterState.Minted]] =
+    : Encoder[BaseImage[DataState.Identified]] =
     deriveConfiguredEncoder
 }
