@@ -1,38 +1,35 @@
 package uk.ac.wellcome.models.work.internal
 
-sealed trait BaseImage[
-  +ImageId <: IdState.WithSourceIdentifier, MaybeId <: IdState]
-    extends HasId[ImageId] {
-  val id: ImageId
+sealed trait BaseImage[+State <: MinterState]
+    extends HasId[State#Id] {
+  val id: State#Id
   val location: DigitalLocationDeprecated
 }
 
-case class UnmergedImage[ImageId <: IdState.WithSourceIdentifier,
-                         MaybeId <: IdState](
-  id: ImageId,
+case class UnmergedImage[State <: MinterState](
+  id: State#Id,
   version: Int,
   location: DigitalLocationDeprecated
-) extends BaseImage[ImageId, MaybeId] {
-  def mergeWith(canonicalWork: SourceWork[ImageId, MaybeId],
-                redirectedWork: Option[SourceWork[ImageId, MaybeId]])
-    : MergedImage[ImageId, MaybeId] =
-    MergedImage[ImageId, MaybeId](
+) extends BaseImage[State] {
+  def mergeWith(canonicalWork: SourceWork[State],
+                redirectedWork: Option[SourceWork[State]])
+    : MergedImage[State] =
+    MergedImage[State](
       id = id,
       version = version,
       location = location,
-      source = SourceWorks[ImageId, MaybeId](canonicalWork, redirectedWork)
+      source = SourceWorks[State](canonicalWork, redirectedWork)
     )
 }
 
-case class MergedImage[ImageId <: IdState.WithSourceIdentifier,
-                       MaybeId <: IdState](
-  id: ImageId,
+case class MergedImage[State <: MinterState](
+  id: State#Id,
   version: Int,
   location: DigitalLocationDeprecated,
-  source: ImageSource[ImageId, MaybeId]
-) extends BaseImage[ImageId, MaybeId] {
-  def toUnmerged: UnmergedImage[ImageId, MaybeId] =
-    UnmergedImage[ImageId, MaybeId](
+  source: ImageSource[State]
+) extends BaseImage[State] {
+  def toUnmerged: UnmergedImage[State] =
+    UnmergedImage[State](
       id = id,
       version = version,
       location = location
@@ -41,7 +38,7 @@ case class MergedImage[ImageId <: IdState.WithSourceIdentifier,
 
 object MergedImage {
   implicit class IdentifiedMergedImageOps(
-    mergedImage: MergedImage[IdState.Identified, IdState.Identified]) {
+    mergedImage: MergedImage[MinterState.Minted]) {
     def augment(inferredData: => Option[InferredData]): AugmentedImage =
       AugmentedImage(
         id = mergedImage.id,
@@ -57,9 +54,9 @@ case class AugmentedImage(
   id: IdState.Identified,
   version: Int,
   location: DigitalLocationDeprecated,
-  source: ImageSource[IdState.Identified, IdState.Identified],
+  source: ImageSource[MinterState.Minted],
   inferredData: Option[InferredData] = None
-) extends BaseImage[IdState.Identified, IdState.Identified]
+) extends BaseImage[MinterState.Minted]
 
 case class InferredData(
   // We split the feature vector so that it can fit into
@@ -78,8 +75,8 @@ object UnmergedImage {
   def apply(sourceIdentifier: SourceIdentifier,
             version: Int,
             location: DigitalLocationDeprecated)
-    : UnmergedImage[IdState.Identifiable, IdState.Unminted] =
-    UnmergedImage(
+    : UnmergedImage[MinterState.Unminted] =
+    UnmergedImage[MinterState.Unminted](
       id = IdState.Identifiable(sourceIdentifier),
       version = version,
       location

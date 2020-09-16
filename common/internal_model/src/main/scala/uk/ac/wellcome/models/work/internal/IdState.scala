@@ -59,6 +59,27 @@ object IdState {
   }
 }
 
+/* Container type for IdState types with two associated types:
+ * * Id (references an ID type, always with a source identifier)
+ * * MaybeId (references an ID type, potentially with a source identifier)
+ */
+sealed trait MinterState {
+  type Id <: IdState.WithSourceIdentifier
+  type MaybeId <: IdState
+}
+
+object MinterState {
+  case class Unminted() extends MinterState {
+    type Id = IdState.Identifiable
+    type MaybeId = IdState.Unminted
+  }
+
+  case class Minted() extends MinterState {
+    type Id = IdState.Identified
+    type MaybeId = IdState.Minted
+  }
+}
+
 /** A trait assigned to all objects that contain some ID value. */
 trait HasId[+T] {
   val id: T
