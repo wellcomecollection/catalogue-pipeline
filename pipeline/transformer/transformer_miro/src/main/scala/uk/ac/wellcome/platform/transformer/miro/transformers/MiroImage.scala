@@ -5,9 +5,8 @@ import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 
 trait MiroImage extends MiroLocation {
 
-  def getImage(
-    miroRecord: MiroRecord,
-    version: Int): UnmergedImage[DataState.Unidentified] =
+  def getImage(miroRecord: MiroRecord,
+               version: Int): UnmergedImage[DataState.Unidentified] =
     UnmergedImage(
       sourceIdentifier = SourceIdentifier(
         identifierType = IdentifierType("miro-image-number"),

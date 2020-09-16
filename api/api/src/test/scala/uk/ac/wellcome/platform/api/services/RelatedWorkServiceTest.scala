@@ -155,8 +155,7 @@ class RelatedWorkServiceTest
   it("Only returns core fields on related works") {
     withLocalWorksIndex { index =>
       val workP = work("p", CollectionLevel.Collection) withData (
-        _.copy[DataState.Identified](
-          items = List(createIdentifiedItem))
+        _.copy[DataState.Identified](items = List(createIdentifiedItem))
       )
       val workQ = work("p/q", CollectionLevel.Series) withData (
         _.copy[DataState.Identified](notes = List(GeneralNote("hi")))

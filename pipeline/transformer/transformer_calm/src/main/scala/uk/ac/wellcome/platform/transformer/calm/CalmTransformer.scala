@@ -117,8 +117,7 @@ object CalmTransformer
         !nonSuppressedStatuses.contains(status.toLowerCase.trim)
       }
 
-  def workData(
-    record: CalmRecord): Result[WorkData[DataState.Unidentified]] =
+  def workData(record: CalmRecord): Result[WorkData[DataState.Unidentified]] =
     for {
       accessStatus <- accessStatus(record)
       title <- title(record)

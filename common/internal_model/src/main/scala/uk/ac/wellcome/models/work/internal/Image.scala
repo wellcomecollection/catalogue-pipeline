@@ -1,7 +1,6 @@
 package uk.ac.wellcome.models.work.internal
 
-sealed trait BaseImage[+State <: DataState]
-    extends HasId[State#Id] {
+sealed trait BaseImage[+State <: DataState] extends HasId[State#Id] {
   val id: State#Id
   val location: DigitalLocationDeprecated
 }
@@ -12,8 +11,7 @@ case class UnmergedImage[State <: DataState](
   location: DigitalLocationDeprecated
 ) extends BaseImage[State] {
   def mergeWith(canonicalWork: SourceWork[State],
-                redirectedWork: Option[SourceWork[State]])
-    : MergedImage[State] =
+                redirectedWork: Option[SourceWork[State]]): MergedImage[State] =
     MergedImage[State](
       id = id,
       version = version,

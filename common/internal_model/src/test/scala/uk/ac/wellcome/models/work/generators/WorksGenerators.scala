@@ -46,8 +46,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
   def createUnidentifiedInvisibleWorkWith(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     items: List[Item[IdState.Unminted]] = Nil,
-    images: List[UnmergedImage[DataState.Unidentified]] =
-      Nil,
+    images: List[UnmergedImage[DataState.Unidentified]] = Nil,
   ): Work.Invisible[Unidentified] =
     Work.Invisible[Unidentified](
       state = Unidentified(sourceIdentifier),
@@ -166,7 +165,8 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
       state = Identified(
         canonicalId = canonicalId,
         sourceIdentifier = sourceIdentifier,
-      ), version = version,
+      ),
+      version = version,
       data = WorkData[DataState.Identified](
         otherIdentifiers = otherIdentifiers,
         mergeCandidates = mergeCandidates,
@@ -228,10 +228,9 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     )
 
   def createUnidentifiedCalmWorkWith(
-    data: WorkData[DataState.Unidentified] =
-      WorkData[DataState.Unidentified](
-        items = List(createCalmItem)
-      ),
+    data: WorkData[DataState.Unidentified] = WorkData[DataState.Unidentified](
+      items = List(createCalmItem)
+    ),
     id: String = randomAlphanumeric(6),
     version: Int = 0): Work.Standard[Unidentified] =
     Work.Standard[Unidentified](
@@ -292,10 +291,10 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     : Work.Standard[Unidentified] =
     createUnidentifiedSierraWorkWith(items = items)
 
-  def createMiroWorkWith(
-    images: List[UnmergedImage[DataState.Unidentified]],
-    otherIdentifiers: List[SourceIdentifier] = Nil,
-    sourceIdentifier: SourceIdentifier = createMiroSourceIdentifier)
+  def createMiroWorkWith(images: List[UnmergedImage[DataState.Unidentified]],
+                         otherIdentifiers: List[SourceIdentifier] = Nil,
+                         sourceIdentifier: SourceIdentifier =
+                           createMiroSourceIdentifier)
     : Work.Standard[Unidentified] =
     createUnidentifiedWorkWith(
       sourceIdentifier = sourceIdentifier,

@@ -45,8 +45,7 @@ trait ImageGenerators
     parentWork: Work.Standard[WorkState.Unidentified] =
       createUnidentifiedSierraWorkWith(),
     redirectedWork: Option[Work[WorkState.Unidentified]] = Some(
-      createMiroWorkWith(Nil)))
-    : MergedImage[DataState.Unidentified] =
+      createMiroWorkWith(Nil))): MergedImage[DataState.Unidentified] =
     createUnmergedImageWith(location, version, identifierType = identifierType) mergeWith (
       parentWork.toSourceWork,
       redirectedWork.map(_.toSourceWork)
@@ -63,8 +62,7 @@ trait ImageGenerators
     parentWork: Work.Standard[WorkState.Identified] =
       createIdentifiedSierraWorkWith(),
     redirectedWork: Option[Work[WorkState.Identified]] = Some(
-      createIdentifiedSierraWorkWith()))
-    : MergedImage[DataState.Identified] =
+      createIdentifiedSierraWorkWith())): MergedImage[DataState.Identified] =
     MergedImage[DataState.Identified](
       imageId,
       version,
@@ -144,8 +142,8 @@ trait ImageGenerators
 
   implicit class UnmergedImageIdOps(
     val image: UnmergedImage[DataState.Unidentified]) {
-    def toIdentifiedWith(id: String = createCanonicalId)
-      : UnmergedImage[DataState.Identified] =
+    def toIdentifiedWith(
+      id: String = createCanonicalId): UnmergedImage[DataState.Identified] =
       UnmergedImage[DataState.Identified](
         id = IdState.Identified(
           canonicalId = id,
