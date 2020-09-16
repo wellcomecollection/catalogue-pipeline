@@ -45,7 +45,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
 
   def createUnidentifiedInvisibleWorkWith(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    items: List[Item[Unidentified#DataId]] = Nil,
+    items: List[Item[Unidentified#MaybeId]] = Nil,
     images: List[UnmergedImage[IdState.Identifiable, WorkState.Unidentified]] =
       Nil,
   ): Work.Invisible[Unidentified] =
