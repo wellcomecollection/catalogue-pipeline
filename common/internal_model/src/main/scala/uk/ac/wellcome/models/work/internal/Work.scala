@@ -9,7 +9,7 @@ sealed trait Work[State <: WorkState] {
 
   val version: Int
   val state: State
-  val data: WorkData[State, State#Id]
+  val data: WorkData[State#MaybeId, State#Id]
 
   def sourceIdentifier: SourceIdentifier = state.sourceIdentifier
 
@@ -17,7 +17,7 @@ sealed trait Work[State <: WorkState] {
     sourceIdentifier :: data.otherIdentifiers
 
   def withData(
-    f: WorkData[State, State#Id] => WorkData[State, State#Id])
+    f: WorkData[State#MaybeId, State#Id] => WorkData[State#MaybeId, State#Id])
     : Work[State] =
     this match {
       case Work.Standard(version, data, state) =>
@@ -33,7 +33,7 @@ object Work {
 
   case class Standard[State <: WorkState](
     version: Int,
-    data: WorkData[State, State#Id],
+    data: WorkData[State#MaybeId, State#Id],
     state: State,
   ) extends Work[State]
 
@@ -43,12 +43,12 @@ object Work {
     state: State,
   ) extends Work[State] {
 
-    val data = WorkData[State, State#Id]()
+    val data = WorkData[State#MaybeId, State#Id]()
   }
 
   case class Invisible[State <: WorkState](
     version: Int,
-    data: WorkData[State, State#Id],
+    data: WorkData[State#MaybeId, State#Id],
     state: State,
     invisibilityReasons: List[InvisibilityReason] = Nil,
   ) extends Work[State]
@@ -57,7 +57,7 @@ object Work {
 /** WorkData contains data common to all types of works that can exist at any
   * stage of the pipeline.
   */
-case class WorkData[State <: WorkState, Id <: IdState.WithSourceIdentifier](
+case class WorkData[MaybeId <: IdState, Id <: IdState.WithSourceIdentifier](
   title: Option[String] = None,
   otherIdentifiers: List[SourceIdentifier] = Nil,
   mergeCandidates: List[MergeCandidate] = Nil,
@@ -66,20 +66,20 @@ case class WorkData[State <: WorkState, Id <: IdState.WithSourceIdentifier](
   description: Option[String] = None,
   physicalDescription: Option[String] = None,
   lettering: Option[String] = None,
-  createdDate: Option[Period[State#MaybeId]] = None,
-  subjects: List[Subject[State#MaybeId]] = Nil,
-  genres: List[Genre[State#MaybeId]] = Nil,
-  contributors: List[Contributor[State#MaybeId]] = Nil,
+  createdDate: Option[Period[MaybeId]] = None,
+  subjects: List[Subject[MaybeId]] = Nil,
+  genres: List[Genre[MaybeId]] = Nil,
+  contributors: List[Contributor[MaybeId]] = Nil,
   thumbnail: Option[LocationDeprecated] = None,
-  production: List[ProductionEvent[State#MaybeId]] = Nil,
+  production: List[ProductionEvent[MaybeId]] = Nil,
   language: Option[Language] = None,
   edition: Option[String] = None,
   notes: List[Note] = Nil,
   duration: Option[Int] = None,
-  items: List[Item[State#MaybeId]] = Nil,
+  items: List[Item[MaybeId]] = Nil,
   merged: Boolean = false,
   collectionPath: Option[CollectionPath] = None,
-  images: List[UnmergedImage[Id, State]] = Nil
+  images: List[UnmergedImage[Id, MaybeId]] = Nil
 )
 
 /** WorkState represents the state of the work in the pipeline, and contains
