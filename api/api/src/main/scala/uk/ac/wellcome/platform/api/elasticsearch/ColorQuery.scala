@@ -18,18 +18,15 @@ class ColorQuery(binSizes: Seq[Int]) {
 
   private def getColorsSignature(colors: Seq[ColorQuery.Rgb]): Seq[String] =
     binSizes
-      .flatMap { nBins =>
-        val idx = componentIndex(nBins) _
-        val colorIndices = colors.map { color =>
-          (idx(color._1), idx(color._2), idx(color._3))
-        }
-        val d = nBins - 1
-        colorIndices.map { indices =>
-          (indices._1 + d * indices._2 + d * d * indices._3, nBins)
+      .flatMap { d =>
+        val idx = componentIndex(d) _
+        colors.map { color =>
+          val indices = (idx(color._1), idx(color._2), idx(color._3))
+          (indices._1 + d * indices._2 + d * d * indices._3, d)
         }
       }
       .map {
-        case (index, nBins) => s"$index/$nBins"
+        case (index, d) => s"$index/$d"
       }
 
   private def componentIndex(nBins: Int)(i: Int): Int =
