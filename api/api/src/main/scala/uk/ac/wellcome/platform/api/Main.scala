@@ -43,14 +43,8 @@ object Main extends WellcomeTypesafeApp {
           .getOrElse("context.json"),
       )
 
-    val queryConfig = QueryConfig(
-      paletteBinSizes = config
-        .getStringOption("images.palette.bin-sizes")
-        .map { commaSeparated =>
-          commaSeparated.split(",").toSeq.map(_.toInt)
-        }
-        .getOrElse(Seq(4, 6, 8))
-    )
+    val queryConfig =
+      QueryConfig.fetchFromIndex(elasticClient, elasticConfig.imagesIndex)
 
     val router =
       new Router(elasticClient, elasticConfig, queryConfig, apiConfig)
