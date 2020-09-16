@@ -70,13 +70,13 @@ trait ImageGenerators
     val features = randomVector(4096)
     val (features1, features2) = features.splitAt(features.size / 2)
     val lshEncodedFeatures = simHasher4096.lsh(features)
-    val palette = randomSortedIntegerVector(20, maxComponent = 1000)
+    val palette = randomColorVector()
     Some(
       InferredData(
         features1 = features1.toList,
         features2 = features2.toList,
         lshEncodedFeatures = lshEncodedFeatures.toList,
-        palette = palette.map(_.toString).toList
+        palette = palette.toList
       )
     )
   }
@@ -116,9 +116,9 @@ trait ImageGenerators
       similarVectors(4096, n)
     } else { (1 to n).map(_ => randomVector(4096, maxR = 10.0f)) }
     val palettes = if (similarPalette) {
-      similarSortedIntegerVectors(30, n)
+      similarColorVectors(n)
     } else {
-      (1 to n).map(_ => randomSortedIntegerVector(30, maxComponent = 1000))
+      (1 to n).map(_ => randomColorVector())
     }
     (features zip palettes).map {
       case (features, palette) =>

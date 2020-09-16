@@ -6,7 +6,6 @@ import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import com.sksamuel.elastic4s.{ElasticError, Hit, Index}
 import com.sksamuel.elastic4s.circe._
-import com.typesafe.config.Config
 import io.circe.Decoder
 import uk.ac.wellcome.display.models.SortingOrder
 import uk.ac.wellcome.models.work.internal.AugmentedImage

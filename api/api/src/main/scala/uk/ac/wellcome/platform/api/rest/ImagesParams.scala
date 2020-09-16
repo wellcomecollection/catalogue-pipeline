@@ -46,7 +46,10 @@ case class MultipleImagesParams(
     )
 
   private def filters: List[ImageFilter] =
-    license.toList
+    List(
+      license,
+      colors
+    ).flatten
 }
 
 object MultipleImagesParams extends QueryParamsUtils {

@@ -5,7 +5,6 @@ import com.sksamuel.elastic4s._
 import com.sksamuel.elastic4s.requests.searches._
 import com.sksamuel.elastic4s.requests.searches.queries.Query
 import com.sksamuel.elastic4s.requests.searches.sort._
-import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 import uk.ac.wellcome.platform.api.elasticsearch.{
   ColorQuery,
   ImageSimilarity,
