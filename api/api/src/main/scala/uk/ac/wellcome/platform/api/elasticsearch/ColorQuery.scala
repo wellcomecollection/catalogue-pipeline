@@ -6,9 +6,11 @@ import uk.ac.wellcome.platform.api.elasticsearch.ColorQuery.hexToRgb
 
 class ColorQuery(binSizes: Seq[Int]) {
 
-  def apply(field: String, hexColors: Seq[String]): MoreLikeThisQuery =
+  def apply(field: String,
+            hexColors: Seq[String],
+            binIndices: Seq[Int] = binSizes.indices): MoreLikeThisQuery =
     moreLikeThisQuery(field)
-      .likeTexts(getColorsSignature(hexColors.map(hexToRgb)))
+      .likeTexts(getColorsSignature(hexColors.map(hexToRgb), binIndices))
       .copy(
         minTermFreq = Some(1),
         minDocFreq = Some(1),
@@ -16,8 +18,10 @@ class ColorQuery(binSizes: Seq[Int]) {
         minShouldMatch = Some("1")
       )
 
-  private def getColorsSignature(colors: Seq[ColorQuery.Rgb]): Seq[String] =
-    binSizes
+  private def getColorsSignature(colors: Seq[ColorQuery.Rgb],
+                                 binIndices: Seq[Int]): Seq[String] =
+    binIndices
+      .map(binSizes)
       .flatMap { d =>
         val idx = componentIndex(d) _
         colors.map { color =>

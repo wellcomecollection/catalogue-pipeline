@@ -30,6 +30,14 @@ class ColorQueryTest extends AnyFunSpec with Matchers {
     )
   }
 
+  it("creates queries for signatures with only some bins used") {
+    val hexCode = "ffff00"
+    val q = colorQuery("colorField", Seq(hexCode), binIndices = Seq(2))
+
+    q.fields should contain only "colorField"
+    q.likeTexts shouldBe Seq("63/8")
+  }
+
   it("creates queries for multiple colors") {
     val hexCodes = Seq("ff0000", "00ff00", "0000ff")
     val q = colorQuery("colorField", hexCodes)
