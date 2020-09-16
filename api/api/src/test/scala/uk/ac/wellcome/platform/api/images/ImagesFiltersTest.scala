@@ -79,7 +79,7 @@ class ImagesFiltersTest extends ApiImagesTestBase {
       withApi {
         case (ElasticConfig(_, imagesIndex), routes) =>
           insertImagesIntoElasticsearch(imagesIndex, redImage, blueImage)
-          assertJsonResponse(routes, f"/$apiPrefix/images?colors=ff0000") {
+          assertJsonResponse(routes, f"/$apiPrefix/images?color=ff0000") {
             Status.OK -> imagesListResponse(
               images = Seq(redImage)
             )
@@ -93,7 +93,7 @@ class ImagesFiltersTest extends ApiImagesTestBase {
           insertImagesIntoElasticsearch(imagesIndex, redImage, blueImage)
           assertJsonResponse(
             routes,
-            f"/$apiPrefix/images?colors=ff0000,0000ff",
+            f"/$apiPrefix/images?color=ff0000,0000ff",
             unordered = true) {
             Status.OK -> imagesListResponse(
               images = Seq(blueImage, redImage)

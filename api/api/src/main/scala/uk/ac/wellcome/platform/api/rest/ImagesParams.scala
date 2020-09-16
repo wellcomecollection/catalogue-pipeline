@@ -32,7 +32,7 @@ case class MultipleImagesParams(
   pageSize: Option[Int],
   query: Option[String],
   license: Option[LicenseFilter],
-  colors: Option[ColorFilter],
+  color: Option[ColorFilter],
   _index: Option[String]
 ) extends QueryParams
     with Paginated {
@@ -48,7 +48,7 @@ case class MultipleImagesParams(
   private def filters: List[ImageFilter] =
     List(
       license,
-      colors
+      color
     ).flatten
 }
 
@@ -62,7 +62,7 @@ object MultipleImagesParams extends QueryParamsUtils {
         "pageSize".as[Int].?,
         "query".as[String].?,
         "locations.license".as[LicenseFilter].?,
-        "colors".as[ColorFilter].?,
+        "color".as[ColorFilter].?,
         "_index".as[String].?
       )
     ).tflatMap { args =>
