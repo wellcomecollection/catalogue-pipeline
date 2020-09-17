@@ -16,8 +16,8 @@ trait ApiWorksTestBase
     with SubjectGenerators {
 
   implicit object IdentifiedWorkIndexable
-      extends Indexable[Work.Standard[Identified]] {
-    override def json(t: Work.Standard[Identified]): String =
+      extends Indexable[Work.Visible[Identified]] {
+    override def json(t: Work.Visible[Identified]): String =
       toJson(t).get
   }
 
@@ -27,7 +27,7 @@ trait ApiWorksTestBase
         "type": "Work"
      """.stripMargin
 
-  def workResponse(work: Work.Standard[Identified]): String =
+  def workResponse(work: Work.Visible[Identified]): String =
     s"""
       | {
       |   "type": "Work",
@@ -40,7 +40,7 @@ trait ApiWorksTestBase
     """.stripMargin
 
   def worksListResponse(apiPrefix: String,
-                        works: Seq[Work.Standard[Identified]]): String =
+                        works: Seq[Work.Visible[Identified]]): String =
     s"""
        |{
        |  ${resultList(apiPrefix, totalResults = works.size)},

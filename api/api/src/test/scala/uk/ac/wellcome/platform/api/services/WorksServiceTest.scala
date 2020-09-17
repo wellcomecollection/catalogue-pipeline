@@ -375,7 +375,7 @@ class WorksServiceTest
 
   private def assertResultIsCorrect(
     partialSearchFunction: (Index, WorksSearchOptions) => Future[
-      Either[ElasticError, ResultList[Work.Standard[Identified], Aggregations]]]
+      Either[ElasticError, ResultList[Work.Visible[Identified], Aggregations]]]
   )(
     allWorks: Seq[Work[Identified]],
     expectedWorks: Seq[Work[Identified]],

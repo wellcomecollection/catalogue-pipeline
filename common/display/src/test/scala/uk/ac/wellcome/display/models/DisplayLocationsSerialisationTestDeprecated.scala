@@ -115,7 +115,7 @@ class DisplayLocationsSerialisationTestDeprecated
   }
 
   private def assertWorkMapsToJson(
-    work: Work.Standard[Identified],
+    work: Work.Visible[Identified],
     expectedJson: String
   ): Assertion =
     assertObjectMapsToJson(

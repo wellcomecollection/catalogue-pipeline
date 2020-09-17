@@ -42,10 +42,10 @@ class IdMinterFeatureTest
             works.map(_.state.canonicalId).distinct should have size 1
             works.foreach { receivedWork =>
               receivedWork
-                .asInstanceOf[Work.Standard[Identified]]
+                .asInstanceOf[Work.Visible[Identified]]
                 .sourceIdentifier shouldBe work.sourceIdentifier
               receivedWork
-                .asInstanceOf[Work.Standard[Identified]]
+                .asInstanceOf[Work.Visible[Identified]]
                 .data
                 .title shouldBe work.data.title
             }

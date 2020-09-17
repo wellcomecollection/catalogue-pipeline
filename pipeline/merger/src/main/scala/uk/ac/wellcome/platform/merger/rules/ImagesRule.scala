@@ -15,7 +15,7 @@ object ImagesRule extends FieldMergeRule {
     List[MergedImage[DataState.Unidentified]]
 
   override def merge(
-    target: Work.Standard[Unidentified],
+    target: Work.Visible[Unidentified],
     sources: Seq[Work[Unidentified]] = Nil): FieldMergeResult[FieldData] =
     sources match {
       case Nil =>
@@ -34,7 +34,7 @@ object ImagesRule extends FieldMergeRule {
     }
 
   private lazy val getSingleMiroImage
-    : PartialFunction[Work.Standard[Unidentified], FieldData] = {
+    : PartialFunction[Work.Visible[Unidentified], FieldData] = {
     case target if singleDigitalItemMiroWork(target) =>
       target.data.images.map {
         _.mergeWith(
@@ -56,7 +56,7 @@ object ImagesRule extends FieldMergeRule {
   }
 
   trait FlatImageMergeRule extends PartialRule {
-    final override def rule(target: Work.Standard[Unidentified],
+    final override def rule(target: Work.Visible[Unidentified],
                             sources: NonEmptyList[Work[Unidentified]])
       : List[MergedImage[DataState.Unidentified]] = {
       val works = sources.prepend(target).toList

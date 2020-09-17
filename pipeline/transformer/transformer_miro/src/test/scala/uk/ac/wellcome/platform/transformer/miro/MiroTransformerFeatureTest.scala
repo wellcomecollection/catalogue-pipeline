@@ -43,7 +43,7 @@ class MiroTransformerFeatureTest
 
       withWorkerService(messageSender, queue) { _ =>
         eventually {
-          val works = messageSender.getMessages[Work.Standard[Unidentified]]
+          val works = messageSender.getMessages[Work.Visible[Unidentified]]
           works.length shouldBe >=(1)
 
           works.map { actualWork =>
@@ -94,7 +94,7 @@ class MiroTransformerFeatureTest
 
         eventually {
           messageSender
-            .getMessages[Work.Standard[Unidentified]]
+            .getMessages[Work.Visible[Unidentified]]
             .distinct should have size 2
         }
       }

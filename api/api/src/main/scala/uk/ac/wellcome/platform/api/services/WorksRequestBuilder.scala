@@ -124,7 +124,7 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
   private def buildWorkFilterQuery(workFilter: WorkFilter): Query =
     workFilter match {
       case VisibleWorkFilter =>
-        termQuery(field = "type", value = "Standard")
+        termQuery(field = "type", value = "Visible")
       case ItemLocationTypeFilter(itemLocationTypeIds) =>
         termsQuery(
           field = "data.items.locations.locationType.id",

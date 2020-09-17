@@ -52,7 +52,7 @@ class MiroVHSRecordReceiverTest
       works.size should be >= 1
 
       works.map { work =>
-        work shouldBe a[Work.Standard[_]]
+        work shouldBe a[Work.Visible[_]]
       }
     }
   }
@@ -72,9 +72,9 @@ class MiroVHSRecordReceiverTest
       works.size should be >= 1
 
       works.map { actualWork =>
-        actualWork shouldBe a[Work.Standard[_]]
+        actualWork shouldBe a[Work.Visible[_]]
         val unidentifiedWork =
-          actualWork.asInstanceOf[Work.Standard[Unidentified]]
+          actualWork.asInstanceOf[Work.Visible[Unidentified]]
         unidentifiedWork.version shouldBe version
       }
     }

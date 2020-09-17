@@ -66,7 +66,7 @@ object Indexable {
         */
       def version(work: Work[Identified]) =
         work match {
-          case Work.Standard(version, data, _)  => (version * 10) + data.merged
+          case Work.Visible(version, data, _)  => (version * 10) + data.merged
           case Work.Redirected(version, _, _)   => (version * 10) + 1
           case Work.Invisible(version, _, _, _) => version * 10
         }

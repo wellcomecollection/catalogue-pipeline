@@ -7,9 +7,9 @@ import uk.ac.wellcome.models.work.internal._
 import WorkState.Identified
 
 object IdentifiedWorkToVisibleDisplayWork {
-  def apply(toDisplayWork: Work.Standard[Identified] => DisplayWork)
+  def apply(toDisplayWork: Work.Visible[Identified] => DisplayWork)
     : Flow[Work[Identified], DisplayWork, NotUsed] =
     Flow[Work[Identified]]
-      .collect { case work: Work.Standard[Identified] => work }
+      .collect { case work: Work.Visible[Identified] => work }
       .map { toDisplayWork(_) }
 }

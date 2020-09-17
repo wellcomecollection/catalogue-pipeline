@@ -24,7 +24,7 @@ class MergerTest
     type FieldData = List[Item[IdState.Unminted]]
 
     override def merge(
-      target: Work.Standard[Unidentified],
+      target: Work.Visible[Unidentified],
       sources: Seq[Work[Unidentified]]): FieldMergeResult[FieldData] =
       FieldMergeResult(
         data = mergedTargetItems,
@@ -36,7 +36,7 @@ class MergerTest
     type FieldData = List[SourceIdentifier]
 
     override def merge(
-      target: Work.Standard[Unidentified],
+      target: Work.Visible[Unidentified],
       sources: Seq[Work[Unidentified]]): FieldMergeResult[FieldData] =
       FieldMergeResult(
         data = mergedOtherIdentifiers,
@@ -45,11 +45,11 @@ class MergerTest
 
   object TestMerger extends Merger {
     override protected def findTarget(
-      works: Seq[Work[Unidentified]]): Option[Work.Standard[Unidentified]] =
-      works.headOption.map(_.asInstanceOf[Work.Standard[Unidentified]])
+      works: Seq[Work[Unidentified]]): Option[Work.Visible[Unidentified]] =
+      works.headOption.map(_.asInstanceOf[Work.Visible[Unidentified]])
 
     override protected def createMergeResult(
-      target: Work.Standard[Unidentified],
+      target: Work.Visible[Unidentified],
       sources: Seq[Work[Unidentified]]): MergeState =
       for {
         items <- TestItemsRule(target, sources)
@@ -70,7 +70,7 @@ class MergerTest
 
   it("returns a single target work as specified") {
     mergedWorks.works should contain(
-      inputWorks.head.asInstanceOf[Work.Standard[Unidentified]] withData {
+      inputWorks.head.asInstanceOf[Work.Visible[Unidentified]] withData {
         data =>
           data.copy[DataState.Unidentified](
             items = mergedTargetItems,
