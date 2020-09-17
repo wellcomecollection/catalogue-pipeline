@@ -17,7 +17,7 @@ case class DateRangeFilter(fromDate: Option[LocalDate],
                            toDate: Option[LocalDate])
     extends WorkFilter
 
-case object StandardWorkFilter extends WorkFilter
+case object VisibleWorkFilter extends WorkFilter
 
 case class LanguageFilter(languageIds: Seq[String]) extends WorkFilter
 

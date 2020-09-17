@@ -82,7 +82,7 @@ class FiltersAndAggregationsBuilder(
     case _: ItemLocationTypeFilter => None
     case _: WorkTypeFilter         => Some(AggregationRequest.WorkType)
     case _: DateRangeFilter        => None
-    case StandardWorkFilter        => None
+    case VisibleWorkFilter         => None
     case _: LanguageFilter         => Some(AggregationRequest.Language)
     case _: GenreFilter            => Some(AggregationRequest.Genre)
     case _: SubjectFilter          => Some(AggregationRequest.Subject)

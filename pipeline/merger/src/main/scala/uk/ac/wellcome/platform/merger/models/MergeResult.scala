@@ -7,6 +7,5 @@ import WorkState.Unidentified
  * MergeResult holds the resultant target after all fields have been merged,
  * and the images that were created in the process
  */
-case class MergeResult(
-  mergedTarget: Work[Unidentified],
-  images: Seq[MergedImage[IdState.Identifiable, Unidentified]])
+case class MergeResult(mergedTarget: Work[Unidentified],
+                       images: Seq[MergedImage[DataState.Unidentified]])

@@ -15,13 +15,10 @@ trait MergerLogging extends Logging {
   def describeWorks(works: NonEmptyList[Work[Unidentified]]): String =
     describeWorks(works.toList)
 
-  def describeImage(
-    image: BaseImage[IdState.Identifiable, Unidentified]): String =
+  def describeImage(image: BaseImage[DataState.Unidentified]): String =
     s"(id=${image.id})"
 
-  def describeImages(
-    images: Seq[BaseImage[IdState.Identifiable, WorkState.Unidentified]])
-    : String =
+  def describeImages(images: Seq[BaseImage[DataState.Unidentified]]): String =
     s"[${images.map(describeImage).mkString(",")}]"
 
   def describeMergeSet(target: Work[Unidentified],

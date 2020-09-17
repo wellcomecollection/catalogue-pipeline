@@ -51,7 +51,7 @@ object CalmTransformer
           state = Unidentified(sourceIdentifier(record)),
           version = version,
           data = workData(record)
-            .getOrElse(WorkData[Unidentified, IdState.Identifiable]()),
+            .getOrElse(WorkData[DataState.Unidentified]()),
           invisibilityReasons = List(SuppressedFromSource("Calm"))
         )
       )
@@ -117,8 +117,7 @@ object CalmTransformer
         !nonSuppressedStatuses.contains(status.toLowerCase.trim)
       }
 
-  def workData(
-    record: CalmRecord): Result[WorkData[Unidentified, IdState.Identifiable]] =
+  def workData(record: CalmRecord): Result[WorkData[DataState.Unidentified]] =
     for {
       accessStatus <- accessStatus(record)
       title <- title(record)
@@ -126,7 +125,7 @@ object CalmTransformer
       collectionPath <- collectionPath(record, collectionLevel)
       language <- language(record)
     } yield
-      WorkData[Unidentified, IdState.Identifiable](
+      WorkData[DataState.Unidentified](
         title = Some(title),
         otherIdentifiers = otherIdentifiers(record),
         workType = Some(workType(collectionLevel)),

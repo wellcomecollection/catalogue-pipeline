@@ -216,8 +216,7 @@ trait DisplaySerialisationTestBase {
   def production(production: List[ProductionEvent[IdState.Minted]]) =
     production.map(productionEvent).mkString(",")
 
-  def workImageInclude(
-    image: UnmergedImage[IdState.Identified, WorkState.Identified]) =
+  def workImageInclude(image: UnmergedImage[DataState.Identified]) =
     s"""
        {
          "id": "${image.id.canonicalId}",
@@ -225,8 +224,7 @@ trait DisplaySerialisationTestBase {
        }
     """.stripMargin
 
-  def workImageIncludes(
-    images: List[UnmergedImage[IdState.Identified, WorkState.Identified]]) =
+  def workImageIncludes(images: List[UnmergedImage[DataState.Identified]]) =
     images.map(workImageInclude).mkString(",")
 
   def productionEvent(event: ProductionEvent[IdState.Minted]): String =

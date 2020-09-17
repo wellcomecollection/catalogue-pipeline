@@ -34,7 +34,7 @@ class MetsDataTest
     metsData.toWork(version).right.get shouldBe Work.Invisible[Unidentified](
       version = version,
       state = Unidentified(expectedSourceIdentifier),
-      data = WorkData[Unidentified, IdState.Identifiable](
+      data = WorkData[DataState.Unidentified](
         items = List(unidentifiableItem),
         mergeCandidates = List(
           MergeCandidate(
@@ -72,7 +72,7 @@ class MetsDataTest
     metsData.toWork(version).right.get shouldBe Work.Invisible[Unidentified](
       version = version,
       state = Unidentified(expectedSourceIdentifier),
-      data = WorkData[Unidentified, IdState.Identifiable](
+      data = WorkData[DataState.Unidentified](
         items = List(unidentifiableItem),
         mergeCandidates = List(
           MergeCandidate(

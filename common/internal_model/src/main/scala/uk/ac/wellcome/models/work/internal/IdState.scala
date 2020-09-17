@@ -17,9 +17,6 @@ sealed trait IdState {
 
 object IdState {
 
-  /* Parent trait for all IDs that contain a sourceIdentifier */
-  sealed trait WithSourceIdentifier extends IdState
-
   /* Parent trait for an ID of an object that is pre minter. */
   sealed trait Unminted extends IdState
 
@@ -32,8 +29,7 @@ object IdState {
     canonicalId: String,
     sourceIdentifier: SourceIdentifier,
     otherIdentifiers: List[SourceIdentifier] = Nil,
-  ) extends Minted
-      with WithSourceIdentifier {
+  ) extends Minted {
     def maybeCanonicalId = Some(canonicalId)
     def allSourceIdentifiers = sourceIdentifier +: otherIdentifiers
   }
@@ -44,8 +40,7 @@ object IdState {
     sourceIdentifier: SourceIdentifier,
     otherIdentifiers: List[SourceIdentifier] = Nil,
     identifiedType: String = classOf[Identified].getSimpleName,
-  ) extends Unminted
-      with WithSourceIdentifier {
+  ) extends Unminted {
     def maybeCanonicalId = None
     def allSourceIdentifiers = sourceIdentifier +: otherIdentifiers
   }
