@@ -19,7 +19,7 @@ case object WorksIndexConfig extends IndexConfig {
   val otherIdentifiers = objectField("otherIdentifiers")
     .fields(sourceIdentifierFields)
 
-  val workType = objectField("workType")
+  val format = objectField("format")
     .fields(
       label,
       keywordField("ontologyType"),
@@ -148,7 +148,7 @@ case object WorksIndexConfig extends IndexConfig {
     objectField("data").fields(
       otherIdentifiers,
       mergeCandidates,
-      workType,
+      format,
       title,
       englishTextKeywordField("alternativeTitles"),
       englishTextField("description"),

@@ -76,7 +76,7 @@ class SwaggerScalaModelConverter extends AbstractModelConverter(Json.mapper()) {
   private def getAggregationClassName(annotatedType: AnnotatedType): String = {
     val cls = getClass(getContentType(annotatedType))
     if (cls == classOf[DisplayGenre]) "Genre"
-    else if (cls == classOf[DisplayWorkType]) "WorkType"
+    else if (cls == classOf[DisplayFormat]) "Format"
     else if (cls == classOf[DisplayPeriod]) "Period"
     else if (cls == classOf[DisplaySubject]) "Subject"
     else if (cls == classOf[DisplayLanguage]) "Language"

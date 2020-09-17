@@ -17,8 +17,8 @@
     "Work" : {
       "@id" : "wwork:Work"
     },
-    "WorkType" : {
-      "@id" : "wwork:WorkType"
+    "Format" : {
+      "@id" : "wwork:Format"
     },
     "Identifier" : {
       "@id" : "wcore:Identifier"

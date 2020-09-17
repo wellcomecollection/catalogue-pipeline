@@ -32,7 +32,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
         ),
         data = WorkData[DataState.Unidentified](
           title = Some("abc"),
-          workType = Some(WorkType.ArchiveCollection),
+          format = Some(Format.ArchiveCollection),
           collectionPath = Some(
             CollectionPath(
               path = "a/b/c",
@@ -427,7 +427,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
     CalmTransformer(record, version).right.get shouldBe a[Work.Invisible[_]]
   }
 
-  it("returns a Work.Invisible[Unidentified] if no workType") {
+  it("returns a Work.Invisible[Unidentified] if no format") {
     val record = calmRecord(
       "Title" -> "abc",
       "RefNo" -> "a/b/c",
@@ -437,7 +437,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
     CalmTransformer(record, version).right.get shouldBe a[Work.Invisible[_]]
   }
 
-  it("returns a Work.Invisible[Unidentified] if invalid workType") {
+  it("returns a Work.Invisible[Unidentified] if invalid format") {
     val record = calmRecord(
       "Title" -> "abc",
       "Level" -> "TopLevel",
@@ -490,7 +490,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
         version = version,
         data = WorkData[DataState.Unidentified](
           title = Some("Should suppress"),
-          workType = Some(WorkType.ArchiveSection),
+          format = Some(Format.ArchiveSection),
           collectionPath = Some(
             CollectionPath(
               path = "AMSG/X/Y",

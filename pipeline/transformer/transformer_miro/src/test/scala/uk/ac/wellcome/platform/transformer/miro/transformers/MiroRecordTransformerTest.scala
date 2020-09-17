@@ -291,10 +291,10 @@ class MiroRecordTransformerTest
     )
   }
 
-  it("sets the WorkType as 'Digital Images'") {
+  it("sets the Format as 'Digital Images'") {
     val work = transformWork(createMiroRecord)
-    work.data.workType.isDefined shouldBe true
-    work.data.workType.get.label shouldBe "Digital Images"
+    work.data.format.isDefined shouldBe true
+    work.data.format.get.label shouldBe "Digital Images"
   }
 
   it("sets the thumbnail with the IIIF Image URL") {

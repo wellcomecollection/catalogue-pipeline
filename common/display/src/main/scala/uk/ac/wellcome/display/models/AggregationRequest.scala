@@ -4,7 +4,7 @@ sealed trait AggregationRequest
 
 object AggregationRequest {
 
-  case object WorkType extends AggregationRequest
+  case object Format extends AggregationRequest
 
   case object ProductionDate extends AggregationRequest
 

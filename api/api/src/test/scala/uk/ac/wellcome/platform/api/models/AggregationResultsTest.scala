@@ -8,8 +8,8 @@ import com.sksamuel.elastic4s.requests.searches.{
 }
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.internal.WorkType
-import uk.ac.wellcome.models.work.internal.WorkType.{
+import uk.ac.wellcome.models.work.internal.Format
+import uk.ac.wellcome.models.work.internal.Format.{
   Books,
   ManuscriptsAsian,
   Music
@@ -50,8 +50,8 @@ class AggregationResultsTest extends AnyFunSpec with Matchers {
       )
     )
     val singleAgg = Aggregations(searchResponse)
-    singleAgg.get.workType shouldBe Some(
-      Aggregation[WorkType](
+    singleAgg.get.format shouldBe Some(
+      Aggregation[Format](
         List(
           AggregationBucket(data = Books, count = 393145),
           AggregationBucket(data = ManuscriptsAsian, count = 5696),
@@ -88,8 +88,7 @@ class AggregationResultsTest extends AnyFunSpec with Matchers {
       )
     )
     val singleAgg = Aggregations(searchResponse)
-    singleAgg.get.workType shouldBe Some(
-      Aggregation[WorkType](
-        List(AggregationBucket(data = Books, count = 1234))))
+    singleAgg.get.format shouldBe Some(
+      Aggregation[Format](List(AggregationBucket(data = Books, count = 1234))))
   }
 }

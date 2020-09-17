@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.merger.rules
 import org.scalatest.Inside
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.internal.WorkType
+import uk.ac.wellcome.models.work.internal.Format
 import uk.ac.wellcome.platform.merger.generators.WorksWithImagesGenerators
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 
@@ -14,17 +14,17 @@ class ItemsRuleTest
     with Inside {
   val physicalPictureSierra = createSierraPhysicalWork.copy(
     data = createSierraPhysicalWork.data.copy(
-      workType = Some(WorkType.Pictures)
+      format = Some(Format.Pictures)
     )
   )
   val physicalMapsSierra = physicalPictureSierra.copy(
     data = physicalPictureSierra.data.copy(
-      workType = Some(WorkType.Maps)
+      format = Some(Format.Maps)
     )
   )
   val zeroItemPhysicalSierra = createUnidentifiedSierraWork.copy(
     data = createUnidentifiedSierraWork.data.copy(
-      workType = Some(WorkType.Pictures)
+      format = Some(Format.Pictures)
     )
   )
   val multiItemPhysicalSierra = createSierraWorkWithTwoPhysicalItems
@@ -101,7 +101,7 @@ class ItemsRuleTest
   }
 
   it(
-    "does not merge a Miro source into a Sierra work with workType != picture/digital image/3D object") {
+    "does not merge a Miro source into a Sierra work with format != picture/digital image/3D object") {
     inside(ItemsRule.merge(physicalMapsSierra, List(miroWork))) {
       case FieldMergeResult(items, mergedSources) =>
         items shouldEqual physicalMapsSierra.data.items

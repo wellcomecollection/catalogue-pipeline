@@ -42,9 +42,9 @@ case class DisplayWork(
       "A description of specific physical characteristics of the work."
   ) physicalDescription: Option[String] = None,
   @Schema(
-    `type` = "uk.ac.wellcome.display.models.DisplayWorkType",
+    `type` = "uk.ac.wellcome.display.models.DisplayFormat",
     description = "The type of work."
-  ) workType: Option[DisplayWorkType] = None,
+  ) workType: Option[DisplayFormat] = None,
   @Schema(
     `type` = "String",
     description = "Recording written text on a (usually visual) work."
@@ -154,7 +154,7 @@ case object DisplayWork {
         if (includes.identifiers)
           Some(work.identifiers.map { DisplayIdentifier(_) })
         else None,
-      workType = work.data.workType.map { DisplayWorkType(_) },
+      workType = work.data.format.map { DisplayFormat(_) },
       thumbnail = work.data.thumbnail.map { DisplayLocationDeprecated(_) },
       items =
         if (includes.items)

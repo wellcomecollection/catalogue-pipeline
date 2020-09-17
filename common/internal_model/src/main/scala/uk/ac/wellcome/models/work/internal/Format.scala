@@ -3,39 +3,39 @@ package uk.ac.wellcome.models.work.internal
 import enumeratum.{Enum, EnumEntry}
 import io.circe.{Decoder, Encoder, Json}
 
-sealed trait WorkType extends EnumEntry {
+sealed trait Format extends EnumEntry {
   val id: String
   val label: String
 }
 
-object WorkType extends Enum[WorkType] {
+object Format extends Enum[Format] {
   val values = findValues
 
-  implicit val workTypeEncoder: Encoder[WorkType] = Encoder.instance[WorkType] {
-    workType =>
+  implicit val formatEncoder: Encoder[Format] = Encoder.instance[Format] {
+    format =>
       Json.obj(
-        ("id", Json.fromString(workType.id)),
-        ("ontologyType", Json.fromString("WorkType")),
-        ("label", Json.fromString(workType.label))
+        ("id", Json.fromString(format.id)),
+        ("ontologyType", Json.fromString("Format")),
+        ("label", Json.fromString(format.label))
       )
   }
 
-  implicit val workTypeDecoder: Decoder[WorkType] =
+  implicit val formatDecoder: Decoder[Format] =
     Decoder.decodeJsonObject.emap { json =>
-      val maybeWorkType = for {
+      val maybeFormat = for {
         idJson <- json("id")
         id <- idJson.asString
-        workType <- fromCode(id)
-      } yield workType
-      maybeWorkType.toRight(s"Invalid WorkType json $json")
+        format <- fromCode(id)
+      } yield format
+      maybeFormat.toRight(s"Invalid Format json $json")
     }
 
-  def fromCode(id: String): Option[WorkType] = {
-    values.find(workType => workType.id == id)
+  def fromCode(id: String): Option[Format] = {
+    values.find(format => format.id == id)
   }
 
-  sealed trait Unlinked extends WorkType
-  sealed trait Linked extends WorkType {
+  sealed trait Unlinked extends Format
+  sealed trait Linked extends Format {
     val linksTo: Unlinked
   }
 

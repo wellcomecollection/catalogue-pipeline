@@ -1,24 +1,24 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
-import uk.ac.wellcome.models.work.internal.WorkType
+import uk.ac.wellcome.models.work.internal.Format
 import uk.ac.wellcome.platform.transformer.sierra.data.SierraMaterialTypes
 import uk.ac.wellcome.platform.transformer.sierra.source.SierraBibData
 import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 
-object SierraWorkType extends SierraTransformer {
+object SierraFormat extends SierraTransformer {
 
-  type Output = Option[WorkType]
+  type Output = Option[Format]
 
-  /* Populate wwork:workType. Rules:
+  /* Populate wwork:format. Rules:
    *
    * 1. For all bibliographic records use "materialType"
    * 2. Platform "id" is populated from "code"
    * 3. Platform "label" is populated from "value"
    *
    * Example:
-   *  "workType": {
+   *  "format": {
    *     "id": "e-book",
-   *     "type": "WorkType",
+   *     "type": "Format",
    *     "label": "E-books"
    *     },
    *

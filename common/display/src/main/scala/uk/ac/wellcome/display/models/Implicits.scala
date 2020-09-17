@@ -12,7 +12,7 @@ object Implicits {
 
   implicit val _enc00: Encoder[DisplayAccessCondition] = deriveConfiguredEncoder
   implicit val _enc01: Encoder[DisplayLanguage] = deriveConfiguredEncoder
-  implicit val _enc02: Encoder[DisplayWorkType] = deriveConfiguredEncoder
+  implicit val _enc02: Encoder[DisplayFormat] = deriveConfiguredEncoder
   implicit val _enc03: Encoder[DisplayPeriod] = deriveConfiguredEncoder
   implicit val _enc04: Encoder[DisplayContributor] = deriveConfiguredEncoder
   implicit val _enc05: Encoder[DisplayIdentifier] = deriveConfiguredEncoder
@@ -26,7 +26,7 @@ object Implicits {
 
   implicit val _dec00: Decoder[DisplayAccessCondition] = deriveConfiguredDecoder
   implicit val _dec01: Decoder[DisplayLanguage] = deriveConfiguredDecoder
-  implicit val _dec02: Decoder[DisplayWorkType] = deriveConfiguredDecoder
+  implicit val _dec02: Decoder[DisplayFormat] = deriveConfiguredDecoder
   implicit val _dec03: Decoder[DisplayPeriod] = deriveConfiguredDecoder
   implicit val _dec04: Decoder[DisplayContributor] = deriveConfiguredDecoder
   implicit val _dec05: Decoder[DisplayIdentifier] = deriveConfiguredDecoder

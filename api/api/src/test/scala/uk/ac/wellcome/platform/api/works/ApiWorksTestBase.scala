@@ -33,7 +33,7 @@ trait ApiWorksTestBase
       |   "type": "Work",
       |   "id": "${work.state.canonicalId}",
       |   "title": "${work.data.title.get}",
-      |   ${work.data.workType.map(workTypeResponse).getOrElse("")}
+      |   ${work.data.format.map(formatResponse).getOrElse("")}
       |   ${work.data.language.map(languageResponse).getOrElse("")}
       |   "alternativeTitles": []
       | }
@@ -50,12 +50,12 @@ trait ApiWorksTestBase
        |}
       """.stripMargin
 
-  def workTypeResponse(workType: WorkType): String =
+  def formatResponse(format: Format): String =
     s"""
       | "workType": {
-      |   "id": "${workType.id}",
-      |   "label": "${workType.label}",
-      |   "type": "WorkType"
+      |   "id": "${format.id}",
+      |   "label": "${format.label}",
+      |   "type": "Format"
       | },
     """.stripMargin
 

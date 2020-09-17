@@ -1,38 +1,38 @@
 package uk.ac.wellcome.platform.api.works
 
 import uk.ac.wellcome.elasticsearch.ElasticConfig
-import uk.ac.wellcome.models.work.internal.WorkType.{Books, Journals, Pictures}
+import uk.ac.wellcome.models.work.internal.Format.{Books, Journals, Pictures}
 import uk.ac.wellcome.models.work.internal._
 
 class WorksAggregationsTest extends ApiWorksTestBase {
 
-  it("supports fetching the workType aggregation") {
+  it("supports fetching the format aggregation") {
     withApi {
       case (ElasticConfig(worksIndex, _), routes) =>
         val work1 = createIdentifiedWorkWith(
           canonicalId = "1",
           title = Some("Working with wombats"),
-          workType = Some(Books)
+          format = Some(Books)
         )
         val work2 = createIdentifiedWorkWith(
           canonicalId = "2",
           title = Some("Working with wombats"),
-          workType = Some(Books)
+          format = Some(Books)
         )
         val work3 = createIdentifiedWorkWith(
           canonicalId = "3",
           title = Some("Working with wombats"),
-          workType = Some(Pictures)
+          format = Some(Pictures)
         )
         val work4 = createIdentifiedWorkWith(
           canonicalId = "4",
           title = Some("Working with wombats"),
-          workType = Some(Pictures)
+          format = Some(Pictures)
         )
         val work5 = createIdentifiedWorkWith(
           canonicalId = "5",
           title = Some("Working with wombats"),
-          workType = Some(Journals)
+          format = Some(Journals)
         )
         insertIntoElasticsearch(worksIndex, work1, work2, work3, work4, work5)
 
@@ -49,7 +49,7 @@ class WorksAggregationsTest extends ApiWorksTestBase {
                       "data" : {
                         "id" : "a",
                         "label" : "Books",
-                        "type" : "WorkType"
+                        "type" : "Format"
                       },
                       "count" : 2,
                       "type" : "AggregationBucket"
@@ -58,7 +58,7 @@ class WorksAggregationsTest extends ApiWorksTestBase {
                       "data" : {
                         "id" : "k",
                         "label" : "Pictures",
-                        "type" : "WorkType"
+                        "type" : "Format"
                       },
                       "count" : 2,
                       "type" : "AggregationBucket"
@@ -67,7 +67,7 @@ class WorksAggregationsTest extends ApiWorksTestBase {
                       "data" : {
                         "id" : "d",
                         "label" : "Journals",
-                        "type" : "WorkType"
+                        "type" : "Format"
                       },
                       "count" : 1,
                       "type" : "AggregationBucket"

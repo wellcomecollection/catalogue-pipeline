@@ -30,7 +30,7 @@ class WorkTest extends AnyFunSpec with Matchers with IdentifiersGenerators {
         |  "otherIdentifiers": [],
         |  "mergeCandidates": [],
         |  "title": "${randomAlphanumeric(length = 10)}",
-        |  "workType": null,
+        |  "format": null,
         |  "description": null,
         |  "physicalDescription": null,
         |  "lettering": null,

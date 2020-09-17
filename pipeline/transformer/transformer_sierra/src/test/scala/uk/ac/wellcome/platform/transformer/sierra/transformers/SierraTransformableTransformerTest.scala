@@ -11,7 +11,7 @@ import uk.ac.wellcome.platform.transformer.sierra.exceptions.SierraTransformerEx
 import uk.ac.wellcome.platform.transformer.sierra.generators.MarcGenerators
 import uk.ac.wellcome.platform.transformer.sierra.source.MarcSubfield
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.models.work.internal.WorkType.{Books, Pictures}
+import uk.ac.wellcome.models.work.internal.Format.{Books, Pictures}
 import uk.ac.wellcome.sierra_adapter.model.{
   SierraBibNumber,
   SierraBibRecord,
@@ -100,15 +100,15 @@ class SierraTransformableTransformerTest
 
     val bibRecord = createSierraBibRecordWith(id = id, data = data)
 
-    val expectedWorkType = Pictures
+    val expectedFormat = Pictures
 
     val triedWork = SierraTransformableTransformer(
       createSierraTransformableWith(id, Some(bibRecord)),
       1)
     triedWork.isSuccess shouldBe true
 
-    triedWork.get.asInstanceOf[Work.Standard[_]].data.workType shouldBe Some(
-      expectedWorkType)
+    triedWork.get.asInstanceOf[Work.Standard[_]].data.format shouldBe Some(
+      expectedFormat)
   }
 
   it("extracts information from items") {
@@ -391,10 +391,10 @@ class SierraTransformableTransformerTest
 
   it("includes the work type, if present") {
     val id = createSierraBibNumber
-    val workTypeId = "a"
-    val workTypeValue = "Books"
+    val formatId = "a"
+    val formatValue = "Books"
 
-    val expectedWorkType = Books
+    val expectedFormat = Books
 
     val data =
       s"""
@@ -402,15 +402,15 @@ class SierraTransformableTransformerTest
          |   "id": "$id",
          |   "title": "Doddering dinosaurs are daring in dance",
          |    "materialType": {
-         |      "code": "$workTypeId",
-         |      "value": "$workTypeValue"
+         |      "code": "$formatId",
+         |      "value": "$formatValue"
          |    },
          |   "varFields": []
          | }
       """.stripMargin
 
     val work = transformDataToUnidentifiedWork(id = id, data = data)
-    work.data.workType shouldBe Some(expectedWorkType)
+    work.data.format shouldBe Some(expectedFormat)
   }
 
   it("includes the alternative title, if present") {
@@ -834,9 +834,9 @@ class SierraTransformableTransformerTest
   }
 
   // This is based on a real failure -- our initial implementation of
-  // workType for Sierra was unable to find these workTypes.
+  // format for Sierra was unable to find these formats.
   //
-  it("finds the WorkType if the materialType field only contains a code") {
+  it("finds the Format if the materialType field only contains a code") {
     val id = createSierraBibNumber
     val bibData =
       s"""
@@ -851,7 +851,7 @@ class SierraTransformableTransformerTest
 
     val work = transformDataToWork(id = id, data = bibData)
     work shouldBe a[Work.Standard[_]]
-    work.asInstanceOf[Work.Standard[Unidentified]].data.workType shouldBe Some(
+    work.asInstanceOf[Work.Standard[Unidentified]].data.format shouldBe Some(
       Pictures
     )
   }

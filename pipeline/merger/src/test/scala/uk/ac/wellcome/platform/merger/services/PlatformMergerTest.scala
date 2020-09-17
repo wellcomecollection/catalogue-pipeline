@@ -23,11 +23,11 @@ class PlatformMergerTest
         MergeCandidate(
           sierraDigitised.sourceIdentifier,
           Some("Physical/digitised Sierra work"))),
-      workType = Some(WorkType.`3DObjects`)
+      format = Some(Format.`3DObjects`)
     ))
   val zeroItemSierraWork = createUnidentifiedSierraWorkWith(
     items = Nil,
-    workType = Some(WorkType.Pictures)
+    format = Some(Format.Pictures)
   )
   private val multipleItemsSierraWork =
     createSierraWorkWithTwoPhysicalItems.copy(
@@ -39,11 +39,11 @@ class PlatformMergerTest
       ))
   private val sierraDigitalWork = createUnidentifiedSierraWorkWith(
     items = List(createDigitalItemWith(List(digitalLocationNoLicense))),
-    workType = Some(WorkType.DigitalImages)
+    format = Some(Format.DigitalImages)
   )
   private val sierraPictureWork = createUnidentifiedSierraWorkWith(
     items = List(createPhysicalItem),
-    workType = Some(WorkType.Pictures)
+    format = Some(Format.Pictures)
   )
   private val miroWork = createMiroWorkWith(
     sourceIdentifier = createNonHistoricalLibraryMiroSourceIdentifier,

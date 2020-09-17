@@ -51,7 +51,7 @@ object SingleWorkParams extends QueryParamsUtils {
 case class MultipleWorksParams(
   page: Option[Int],
   pageSize: Option[Int],
-  workType: Option[WorkTypeFilter],
+  workType: Option[FormatFilter],
   `items.locations.locationType`: Option[ItemLocationTypeFilter],
   `production.dates.from`: Option[LocalDate],
   `production.dates.to`: Option[LocalDate],
@@ -118,7 +118,7 @@ object MultipleWorksParams extends QueryParamsUtils {
       (
         "page".as[Int].?,
         "pageSize".as[Int].?,
-        "workType".as[WorkTypeFilter] ?,
+        "workType".as[FormatFilter] ?,
         "items.locations.locationType".as[ItemLocationTypeFilter].?,
         "production.dates.from".as[LocalDate].?,
         "production.dates.to".as[LocalDate].?,
@@ -141,8 +141,8 @@ object MultipleWorksParams extends QueryParamsUtils {
       validated(params.paginationErrors, params)
     }
 
-  implicit val workTypeFilter: Decoder[WorkTypeFilter] =
-    decodeCommaSeparated.emap(strs => Right(WorkTypeFilter(strs)))
+  implicit val formatFilter: Decoder[FormatFilter] =
+    decodeCommaSeparated.emap(strs => Right(FormatFilter(strs)))
 
   implicit val itemLocationTypeFilter: Decoder[ItemLocationTypeFilter] =
     decodeCommaSeparated.emap(strs => Right(ItemLocationTypeFilter(strs)))
@@ -174,7 +174,7 @@ object MultipleWorksParams extends QueryParamsUtils {
 
   implicit val aggregationsDecoder: Decoder[List[AggregationRequest]] =
     decodeOneOfCommaSeparated(
-      "workType" -> AggregationRequest.WorkType,
+      "workType" -> AggregationRequest.Format,
       "genres" -> AggregationRequest.Genre,
       "production.dates" -> AggregationRequest.ProductionDate,
       "subjects" -> AggregationRequest.Subject,
