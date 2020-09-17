@@ -102,7 +102,7 @@ object PlatformMerger extends Merger {
       .orElse(works.find(WorkPredicates.physicalSierra))
       .orElse(works.find(WorkPredicates.sierraWork)) match {
       case Some(target: Work.Visible[Unidentified]) => Some(target)
-      case _                                         => None
+      case _                                        => None
     }
 
   override def createMergeResult(target: Work.Visible[Unidentified],
