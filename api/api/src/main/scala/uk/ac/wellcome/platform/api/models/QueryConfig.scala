@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.api.models
 
-import com.sksamuel.elastic4s.ElasticApi.search
+import com.sksamuel.elastic4s.ElasticApi.{existsQuery, search}
 import com.sksamuel.elastic4s.ElasticDsl.SearchHandler
 import com.sksamuel.elastic4s.circe._
 import com.sksamuel.elastic4s.{ElasticClient, Index}
@@ -34,7 +34,9 @@ object QueryConfig {
     index: Index)(implicit ec: ExecutionContext): Future[Seq[Int]] =
     elasticClient
       .execute(
-        search(index).matchAllQuery().size(1)
+        search(index).query(
+          existsQuery("inferredData.palette")
+        )
       )
       .flatMap { result =>
         Future.fromTry {
