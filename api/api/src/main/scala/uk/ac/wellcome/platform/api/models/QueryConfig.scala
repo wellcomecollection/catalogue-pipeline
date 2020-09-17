@@ -9,7 +9,7 @@ import uk.ac.wellcome.models.Implicits._
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 case class QueryConfig(
   paletteBinSizes: Seq[Int]
@@ -54,11 +54,14 @@ object QueryConfig {
             .left
             .map(_.asException)
             .toTry
-            .map {
-              case Some(bins) => bins
+            .flatMap {
+              case Some(bins) => Success(bins)
               case None =>
-                throw new RuntimeException(
-                  "Could not extract palette parameters from data in index")
+                Failure(
+                  new RuntimeException(
+                    "Could not extract palette parameters from data in index"
+                  )
+                )
             }
         }
       }
