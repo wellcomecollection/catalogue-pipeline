@@ -9,26 +9,43 @@ trait VectorGenerators {
 
   lazy val simHasher4096 = new SimHasher(4096, bins = (256, 128))
 
-  def randomSortedIntegerVector(d: Int, maxComponent: Int): Seq[Int] =
-    Seq.fill(d)(Random.nextInt(maxComponent)).sorted
+  def randomColorVector(binSizes: Seq[Int] = Seq(4, 6, 8),
+                        weights: Seq[Int] = Seq(2, 2, 1, 1, 1)): Seq[String] =
+    binSizes.flatMap { binSize =>
+      weights.flatMap { weight =>
+        val maxIndex = (math.pow(binSize, 3) - 1).toInt
+        val c = Random.nextInt(maxIndex)
+        Seq.fill(weight)(s"$c/$binSize")
+      }
+    }
 
-  def similarSortedIntegerVector(a: Seq[Int], distance: Int = 1): Seq[Int] =
-    (a zip Random.shuffle(Seq.fill(a.size - distance)(0).padTo(a.size, 1)))
-      .map(Function.tupled(_ + _))
-      .sorted
+  def similarColorVectors(
+    n: Int,
+    binSizes: Seq[Int] = Seq(4, 6, 8),
+    weights: Seq[Int] = Seq(2, 2, 1, 1, 1)): Seq[Seq[String]] = {
+    val baseIndices = binSizes.flatMap { binSize =>
+      val maxIndex = (math.pow(binSize, 3) - 1).toInt
+      weights.flatMap { weight =>
+        Seq.fill(weight)((Random.nextInt(maxIndex), maxIndex, binSize))
+      }
+    }
+    val nElements = binSizes.size * weights.sum
+    (0 until n)
+      .map { i =>
+        Random.shuffle(Seq.fill(nElements - i)(0).padTo(nElements, 1))
+      }
+      .map { offsets =>
+        (baseIndices zip offsets).map {
+          case ((base, max, binSize), offset) =>
+            s"${(base + offset) % max}/$binSize"
+        }
+      }
+  }
 
   def randomVector(d: Int, maxR: Float = 1.0f): Vec = {
     val rand = normalize(randomNormal(d))
     val r = maxR * math.pow(Random.nextFloat(), 1.0 / d).toFloat
     scalarMultiply(r, rand)
-  }
-
-  def similarSortedIntegerVectors(d: Int, n: Int): Seq[Seq[Int]] = {
-    val baseVec = randomSortedIntegerVector(d, maxComponent = n * 100)
-    val otherVecs = (1 until n).map { i =>
-      similarSortedIntegerVector(baseVec, i)
-    }
-    baseVec +: otherVecs
   }
 
   def cosineSimilarVector(a: Vec,

@@ -6,7 +6,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.{EitherValues, OptionValues}
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.models.work.generators.ImageGenerators
-import uk.ac.wellcome.platform.api.models.SimilarityMetric
+import uk.ac.wellcome.platform.api.models.{QueryConfig, SimilarityMetric}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -21,7 +21,8 @@ class ImagesServiceTest
   val elasticsearchService = new ElasticsearchService(elasticClient)
 
   val imagesService = new ImagesService(
-    elasticsearchService
+    elasticsearchService,
+    QueryConfig(paletteBinSizes = Seq(4, 6, 8))
   )
 
   describe("findImageById") {

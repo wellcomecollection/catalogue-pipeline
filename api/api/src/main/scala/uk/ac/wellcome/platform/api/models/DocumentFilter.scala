@@ -38,3 +38,5 @@ case class CollectionDepthFilter(depth: Int) extends WorkFilter
 case class AccessStatusFilter(includes: List[AccessStatus],
                               excludes: List[AccessStatus])
     extends WorkFilter
+
+case class ColorFilter(hexColors: Seq[String]) extends ImageFilter

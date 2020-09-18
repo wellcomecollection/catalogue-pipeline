@@ -11,7 +11,7 @@ import com.sksamuel.elastic4s.requests.searches.{
   SearchRequest,
   SearchResponse
 }
-import com.sksamuel.elastic4s.{ElasticClient, ElasticError, Index, Response}
+import com.sksamuel.elastic4s.{ElasticClient, ElasticError, Index}
 import grizzled.slf4j.Logging
 
 import uk.ac.wellcome.display.models._
@@ -35,7 +35,7 @@ class ElasticsearchService(elasticClient: ElasticClient)(
     index: Index): Future[Either[ElasticError, GetResponse]] =
     withActiveTrace(elasticClient.execute {
       get(index, canonicalId)
-    }).map { toEither }
+    }).map { _.toEither }
 
   /** Given a set of query options, build a SearchDefinition for Elasticsearch
     * using the elastic4s query DSL, then execute the search.
@@ -66,7 +66,7 @@ class ElasticsearchService(elasticClient: ElasticClient)(
       debug(s"Sending ES request: ${request.show}")
       val transaction = Tracing.currentTransaction
       withActiveTrace(elasticClient.execute(request))
-        .map(toEither)
+        .map(_.toEither)
         .map { responseOrError =>
           responseOrError.map { res =>
             transaction.addLabel("elasticTook", res.took)
@@ -86,7 +86,7 @@ class ElasticsearchService(elasticClient: ElasticClient)(
       debug(s"Sending ES multirequest: ${request.show}")
       val transaction = Tracing.currentTransaction
       withActiveTrace(elasticClient.execute(request))
-        .map(toEither)
+        .map(_.toEither)
         .map { response =>
           response.right.flatMap {
             case MultiSearchResponse(items) =>
@@ -102,13 +102,6 @@ class ElasticsearchService(elasticClient: ElasticClient)(
               }
           }
         }
-    }
-
-  private def toEither[T](response: Response[T]): Either[ElasticError, T] =
-    if (response.isError) {
-      Left(response.error)
-    } else {
-      Right(response.result)
     }
 
   implicit class EnhancedTransaction(transaction: Transaction) {
