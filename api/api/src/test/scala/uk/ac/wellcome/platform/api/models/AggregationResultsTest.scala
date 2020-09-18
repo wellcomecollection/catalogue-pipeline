@@ -29,7 +29,7 @@ class AggregationResultsTest extends AnyFunSpec with Matchers {
         maxScore = 0.0,
         hits = Array()),
       _aggregationsAsMap = Map(
-        "workType" -> Map(
+        "format" -> Map(
           "doc_count_error_upper_bound" -> 0,
           "sum_other_doc_count" -> 0,
           "buckets" -> List(
@@ -72,7 +72,7 @@ class AggregationResultsTest extends AnyFunSpec with Matchers {
         maxScore = 0.0,
         hits = Array()),
       _aggregationsAsMap = Map(
-        "workType" -> Map(
+        "format" -> Map(
           "doc_count_error_upper_bound" -> 0,
           "sum_other_doc_count" -> 0,
           "buckets" -> List(
