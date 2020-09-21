@@ -65,7 +65,7 @@ class ImagesRuleTest
       val n = 5
       val metsWork = createUnidentifiedInvisibleMetsWorkWith(numImages = n)
       val sierraPictureWork =
-        createUnidentifiedSierraWorkWith(workType = Some(WorkType.Pictures))
+        createUnidentifiedSierraWorkWith(format = Some(Format.Pictures))
       val result = ImagesRule.merge(sierraPictureWork, List(metsWork)).data
 
       result should have length n
@@ -87,7 +87,7 @@ class ImagesRuleTest
       val miroWorks = (1 to m).map(_ => createMiroWork).toList
       val metsWork = createUnidentifiedInvisibleMetsWorkWith(numImages = n)
       val sierraPictureWork =
-        createUnidentifiedSierraWorkWith(workType = Some(WorkType.Pictures))
+        createUnidentifiedSierraWorkWith(format = Some(Format.Pictures))
       val result =
         ImagesRule.merge(sierraPictureWork, miroWorks :+ metsWork).data
 

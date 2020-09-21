@@ -93,7 +93,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     description: Option[String] = None,
     physicalDescription: Option[String] = None,
     lettering: Option[String] = None,
-    workType: Option[WorkType] = None,
+    format: Option[Format] = None,
     thumbnail: Option[LocationDeprecated] = None,
     contributors: List[Contributor[IdState.Unminted]] = Nil,
     production: List[ProductionEvent[IdState.Unminted]] = Nil,
@@ -111,7 +111,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
         mergeCandidates = mergeCandidates,
         title = title,
         alternativeTitles = alternativeTitles,
-        workType = workType,
+        format = format,
         description = description,
         physicalDescription = physicalDescription,
         lettering = lettering,
@@ -140,7 +140,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     otherIdentifiers: List[SourceIdentifier] = List(),
     title: Option[String] = Some(createTitle),
     alternativeTitles: List[String] = Nil,
-    workType: Option[WorkType] = None,
+    format: Option[Format] = None,
     description: Option[String] = None,
     physicalDescription: Option[String] = None,
     lettering: Option[String] = None,
@@ -172,7 +172,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
         mergeCandidates = mergeCandidates,
         title = title,
         alternativeTitles = alternativeTitles,
-        workType = workType,
+        format = format,
         description = description,
         physicalDescription = physicalDescription,
         lettering = lettering,
@@ -202,26 +202,26 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     }
 
   def createUnidentifiedSierraWorkWith(
-    workType: Option[WorkType] = None,
+    format: Option[Format] = None,
     items: List[Item[IdState.Unminted]] = Nil,
     mergeCandidates: List[MergeCandidate] = Nil,
   ): Work.Visible[Unidentified] =
     createUnidentifiedWorkWith(
       sourceIdentifier = createSierraSystemSourceIdentifier,
-      workType = workType,
+      format = format,
       otherIdentifiers = List(createSierraSystemSourceIdentifier),
       items = items,
       mergeCandidates = mergeCandidates
     )
 
   def createIdentifiedSierraWorkWith(
-    workType: Option[WorkType] = None,
+    format: Option[Format] = None,
     items: List[Item[IdState.Minted]] = Nil,
     mergeCandidates: List[MergeCandidate] = Nil,
   ): Work.Visible[Identified] =
     createIdentifiedWorkWith(
       sourceIdentifier = createSierraSystemSourceIdentifier,
-      workType = workType,
+      format = format,
       otherIdentifiers = List(createSierraSystemSourceIdentifier),
       items = items,
       mergeCandidates = mergeCandidates

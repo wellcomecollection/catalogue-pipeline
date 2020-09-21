@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.api.works
 
 import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.models.work.internal.Language
-import uk.ac.wellcome.models.work.internal.WorkType._
+import uk.ac.wellcome.models.work.internal.Format._
 
 class WorksFilteredAggregationsTest extends ApiWorksTestBase {
 
@@ -21,11 +21,11 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
           (Journals, Language("Quack", Some("ducks"))),
           (Audio, Language("Croak", Some("frogs")))
         ).zipWithIndex.map {
-          case ((workType, language), i) =>
+          case ((format, language), i) =>
             createIdentifiedWorkWith(
               title = Some("Robust rambutan"),
               canonicalId = i.toString,
-              workType = Some(workType),
+              format = Some(format),
               language = Some(language)
             )
         }
@@ -39,7 +39,7 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
               ${resultList(
                             apiPrefix,
                             totalResults =
-                              works.count(_.data.workType.get == Books))},
+                              works.count(_.data.format.get == Books))},
               "aggregations": {
                 "type" : "Aggregations",
                 "language": {
@@ -67,7 +67,7 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
                 }
               },
               "results": [${works
-                            .filter(_.data.workType.get == Books)
+                            .filter(_.data.format.get == Books)
                             .map(workResponse)
                             .mkString(",")}]
             }
@@ -91,11 +91,11 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
           (Journals, Language("Quack", Some("ducks"))),
           (Audio, Language("Croak", Some("frogs")))
         ).zipWithIndex.map {
-          case ((workType, language), i) =>
+          case ((format, language), i) =>
             createIdentifiedWorkWith(
               title = Some("Robust rambutan"),
               canonicalId = i.toString,
-              workType = Some(workType),
+              format = Some(format),
               language = Some(language)
             )
         }
@@ -109,7 +109,7 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
               ${resultList(
                             apiPrefix,
                             totalResults =
-                              works.count(_.data.workType.get == Books))},
+                              works.count(_.data.format.get == Books))},
               "aggregations": {
                 "type" : "Aggregations",
                 "workType": {
@@ -120,7 +120,7 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
                       "data" : {
                         "id" : "a",
                         "label" : "Books",
-                        "type" : "WorkType"
+                        "type" : "Format"
                       },
                       "type" : "AggregationBucket"
                     },
@@ -129,7 +129,7 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
                       "data" : {
                         "id" : "d",
                         "label" : "Journals",
-                        "type" : "WorkType"
+                        "type" : "Format"
                       },
                       "type" : "AggregationBucket"
                     },
@@ -138,7 +138,7 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
                       "data" : {
                         "id" : "i",
                         "label" : "Audio",
-                        "type" : "WorkType"
+                        "type" : "Format"
                       },
                       "type" : "AggregationBucket"
                     },
@@ -147,7 +147,7 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
                       "data" : {
                         "id" : "k",
                         "label" : "Pictures",
-                        "type" : "WorkType"
+                        "type" : "Format"
                       },
                       "type" : "AggregationBucket"
                     }
@@ -155,7 +155,7 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
                 }
               },
               "results": [${works
-                            .filter(_.data.workType.get == Books)
+                            .filter(_.data.format.get == Books)
                             .map(workResponse)
                             .mkString(",")}]
             }

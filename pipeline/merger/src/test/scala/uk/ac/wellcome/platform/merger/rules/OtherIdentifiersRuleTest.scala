@@ -22,15 +22,15 @@ class OtherIdentifiersRuleTest
   val metsWorks = (0 to 3).map(_ => createUnidentifiedInvisibleMetsWork).toList
   val physicalSierra = createUnidentifiedSierraWorkWith(
     items = List(createPhysicalItem),
-    workType = Some(WorkType.Pictures)
+    format = Some(Format.Pictures)
   )
   val zeroItemPhysicalSierra = createUnidentifiedSierraWorkWith(
     items = Nil,
-    workType = Some(WorkType.Pictures)
+    format = Some(Format.Pictures)
   )
   val physicalMapsSierra = physicalSierra.copy(
     data = physicalSierra.data.copy(
-      workType = Some(WorkType.Maps)
+      format = Some(Format.Maps)
     )
   )
   val sierraWorkWithTwoPhysicalItems = createSierraWorkWithTwoPhysicalItems
@@ -96,7 +96,7 @@ class OtherIdentifiersRuleTest
   }
 
   it(
-    "does not merge any Miro source IDs into Sierra works with workType != picture/digital image/3D object") {
+    "does not merge any Miro source IDs into Sierra works with format != picture/digital image/3D object") {
     inside(
       OtherIdentifiersRule
         .merge(physicalMapsSierra, List(nothingWork, miroWork))) {

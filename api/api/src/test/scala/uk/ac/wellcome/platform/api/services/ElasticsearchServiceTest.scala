@@ -18,7 +18,7 @@ import uk.ac.wellcome.models.work.generators.{
   SubjectGenerators,
   WorksGenerators
 }
-import uk.ac.wellcome.models.work.internal.WorkType.{
+import uk.ac.wellcome.models.work.internal.Format.{
   Books,
   CDRoms,
   ManuscriptsAsian
@@ -26,9 +26,9 @@ import uk.ac.wellcome.models.work.internal.WorkType.{
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
 import uk.ac.wellcome.platform.api.models.{
+  FormatFilter,
   ItemLocationTypeFilter,
-  SearchQuery,
-  WorkTypeFilter
+  SearchQuery
 }
 import WorkState.Identified
 
@@ -227,22 +227,22 @@ class ElasticsearchServiceTest
       }
     }
 
-    it("filters list results by workType") {
+    it("filters list results by format") {
       withLocalWorksIndex { index =>
         val work1 = createIdentifiedWorkWith(
-          workType = Some(ManuscriptsAsian)
+          format = Some(ManuscriptsAsian)
         )
         val work2 = createIdentifiedWorkWith(
-          workType = Some(ManuscriptsAsian)
+          format = Some(ManuscriptsAsian)
         )
-        val workWithWrongWorkType = createIdentifiedWorkWith(
-          workType = Some(CDRoms)
+        val workWithWrongFormat = createIdentifiedWorkWith(
+          format = Some(CDRoms)
         )
 
-        insertIntoElasticsearch(index, work1, work2, workWithWrongWorkType)
+        insertIntoElasticsearch(index, work1, work2, workWithWrongFormat)
 
         val queryOptions = createElasticsearchQueryOptionsWith(
-          filters = List(WorkTypeFilter(Seq("b")))
+          filters = List(FormatFilter(Seq("b")))
         )
 
         assertResultsAreCorrect(
@@ -253,30 +253,25 @@ class ElasticsearchServiceTest
       }
     }
 
-    it("filters list results with multiple workTypes") {
+    it("filters list results with multiple formats") {
       withLocalWorksIndex { index =>
         val work1 = createIdentifiedWorkWith(
-          workType = Some(ManuscriptsAsian)
+          format = Some(ManuscriptsAsian)
         )
         val work2 = createIdentifiedWorkWith(
-          workType = Some(ManuscriptsAsian)
+          format = Some(ManuscriptsAsian)
         )
         val work3 = createIdentifiedWorkWith(
-          workType = Some(Books)
+          format = Some(Books)
         )
-        val workWithWrongWorkType = createIdentifiedWorkWith(
-          workType = Some(CDRoms)
+        val workWithWrongFormat = createIdentifiedWorkWith(
+          format = Some(CDRoms)
         )
 
-        insertIntoElasticsearch(
-          index,
-          work1,
-          work2,
-          work3,
-          workWithWrongWorkType)
+        insertIntoElasticsearch(index, work1, work2, work3, workWithWrongFormat)
 
         val queryOptions = createElasticsearchQueryOptionsWith(
-          filters = List(WorkTypeFilter(List("b", "a")))
+          filters = List(FormatFilter(List("b", "a")))
         )
 
         assertResultsAreCorrect(

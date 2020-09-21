@@ -30,21 +30,21 @@ class AggregationsTest
     searchService = new ElasticsearchService(elasticClient)
   )
 
-  it("returns more than 10 workType aggregations") {
-    val workTypes = WorkType.values
-    val works = workTypes.flatMap { workType =>
-      (0 to 4).map(_ => createIdentifiedWorkWith(workType = Some(workType)))
+  it("returns more than 10 format aggregations") {
+    val formats = Format.values
+    val works = formats.flatMap { format =>
+      (0 to 4).map(_ => createIdentifiedWorkWith(format = Some(format)))
     }
     withLocalWorksIndex { index =>
       insertIntoElasticsearch(index, works: _*)
       val searchOptions = WorksSearchOptions(
-        aggregations = List(AggregationRequest.WorkType)
+        aggregations = List(AggregationRequest.Format)
       )
       whenReady(aggregationQuery(index, searchOptions)) { aggs =>
-        aggs.workType should not be empty
-        val buckets = aggs.workType.get.buckets
-        buckets.length shouldBe workTypes.length
-        buckets.map(_.data.label) should contain theSameElementsAs workTypes
+        aggs.format should not be empty
+        val buckets = aggs.format.get.buckets
+        buckets.length shouldBe formats.length
+        buckets.map(_.data.label) should contain theSameElementsAs formats
           .map(_.label)
       }
     }
@@ -81,21 +81,21 @@ class AggregationsTest
   }
 
   it("returns empty buckets if they exist") {
-    val workTypes = WorkType.values
-    val works = workTypes.flatMap { workType =>
-      (0 to 4).map(_ => createIdentifiedWorkWith(workType = Some(workType)))
+    val formats = Format.values
+    val works = formats.flatMap { format =>
+      (0 to 4).map(_ => createIdentifiedWorkWith(format = Some(format)))
     }
     withLocalWorksIndex { index =>
       insertIntoElasticsearch(index, works: _*)
       val searchOptions = WorksSearchOptions(
         searchQuery = Some(SearchQuery("anything will give zero results")),
-        aggregations = List(AggregationRequest.WorkType)
+        aggregations = List(AggregationRequest.Format)
       )
       whenReady(aggregationQuery(index, searchOptions)) { aggs =>
-        aggs.workType should not be empty
-        val buckets = aggs.workType.get.buckets
-        buckets.length shouldBe workTypes.length
-        buckets.map(_.data.label) should contain theSameElementsAs workTypes
+        aggs.format should not be empty
+        val buckets = aggs.format.get.buckets
+        buckets.length shouldBe formats.length
+        buckets.map(_.data.label) should contain theSameElementsAs formats
           .map(_.label)
         buckets.map(_.count) should contain only 0
       }
@@ -103,12 +103,12 @@ class AggregationsTest
   }
 
   describe("aggregations with filters") {
-    val workTypes = WorkType.values
+    val formats = Format.values
     val subjects = (0 to 5).map(_ => createSubject)
-    val works = workTypes.zipWithIndex.map {
-      case (workType, i) =>
+    val works = formats.zipWithIndex.map {
+      case (format, i) =>
         createIdentifiedWorkWith(
-          workType = Some(workType),
+          format = Some(format),
           subjects = List(subjects(i / subjects.size))
         )
     }
@@ -118,16 +118,16 @@ class AggregationsTest
         insertIntoElasticsearch(index, works: _*)
         val searchOptions = WorksSearchOptions(
           aggregations =
-            List(AggregationRequest.WorkType, AggregationRequest.Subject),
+            List(AggregationRequest.Format, AggregationRequest.Subject),
           filters = List(
-            WorkTypeFilter(List(WorkType.Books.id)),
+            FormatFilter(List(Format.Books.id)),
           )
         )
         whenReady(aggregationQuery(index, searchOptions)) { aggs =>
-          aggs.workType should not be empty
-          val buckets = aggs.workType.get.buckets
-          buckets.length shouldBe workTypes.length
-          buckets.map(_.data) should contain theSameElementsAs workTypes
+          aggs.format should not be empty
+          val buckets = aggs.format.get.buckets
+          buckets.length shouldBe formats.length
+          buckets.map(_.data) should contain theSameElementsAs formats
         }
       }
     }
@@ -141,17 +141,17 @@ class AggregationsTest
         }
         val searchOptions = WorksSearchOptions(
           aggregations =
-            List(AggregationRequest.WorkType, AggregationRequest.Subject),
+            List(AggregationRequest.Format, AggregationRequest.Subject),
           filters = List(
-            WorkTypeFilter(List(WorkType.Books.id)),
+            FormatFilter(List(Format.Books.id)),
             SubjectFilter(subjectQuery)
           )
         )
         whenReady(aggregationQuery(index, searchOptions)) { aggs =>
-          val buckets = aggs.workType.get.buckets
-          val expectedWorkTypes = works.map { _.data.workType.get }
-          buckets.length shouldBe expectedWorkTypes.length
-          buckets.map(_.data) should contain theSameElementsAs expectedWorkTypes
+          val buckets = aggs.format.get.buckets
+          val expectedFormats = works.map { _.data.format.get }
+          buckets.length shouldBe expectedFormats.length
+          buckets.map(_.data) should contain theSameElementsAs expectedFormats
         }
       }
     }
@@ -165,15 +165,15 @@ class AggregationsTest
         }
         val searchOptions = WorksSearchOptions(
           aggregations =
-            List(AggregationRequest.WorkType, AggregationRequest.Subject),
+            List(AggregationRequest.Format, AggregationRequest.Subject),
           filters = List(
-            WorkTypeFilter(List(WorkType.Books.id)),
+            FormatFilter(List(Format.Books.id)),
             SubjectFilter(subjectQuery)
           )
         )
         whenReady(worksService.listOrSearchWorks(index, searchOptions)) { res =>
           val results = res.right.get.results
-          results.map(_.data.workType.get) should contain only WorkType.Books
+          results.map(_.data.format.get) should contain only Format.Books
           results.map(_.data.subjects.head.label) should contain only subjectQuery
         }
       }

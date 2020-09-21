@@ -26,7 +26,7 @@ Examples of the data we store for these are
     "production.dates.from": "1900",
     "production.dates.to": "1950",
     "query": "Zodiac sign gemini",
-    "workType": ["books", "manuscripts", "images"]
+    "format": ["books", "manuscripts", "images"]
   }
 }
 
@@ -42,7 +42,7 @@ Examples of the data we store for these are
     "production.dates.from": "2000",
     "production.dates.to": "2010",
     "query": "Nurse",
-    "workType": ["journals"]
+    "format": ["journals"]
   },
   "data": { // Extra data about the interaction and work that was selected
     "id": "mruzf9kx",
@@ -54,7 +54,7 @@ Examples of the data we store for these are
     "resultSubjects": [
       "Nurse"
     ],
-    "resultWorkType": "Digital Images",
+    "resultFormat": "Digital Images",
   }
 }
 ```

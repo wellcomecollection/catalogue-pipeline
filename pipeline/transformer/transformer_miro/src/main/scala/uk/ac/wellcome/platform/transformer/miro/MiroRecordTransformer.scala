@@ -22,7 +22,7 @@ class MiroRecordTransformer
     with MiroSubjects
     with MiroThumbnail
     with MiroTitleAndDescription
-    with MiroWorkType
+    with MiroFormat
     with Logging {
 
   def transform(miroRecord: MiroRecord,
@@ -74,7 +74,7 @@ class MiroRecordTransformer
       val data = WorkData[DataState.Unidentified](
         otherIdentifiers = getOtherIdentifiers(miroRecord),
         title = Some(title),
-        workType = getWorkType,
+        format = getFormat,
         description = description,
         lettering = miroRecord.suppLettering,
         createdDate = getCreatedDate(miroRecord),

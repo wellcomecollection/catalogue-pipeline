@@ -18,7 +18,7 @@ import uk.ac.wellcome.models.work.generators.{
   WorksGenerators
 }
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.models.work.internal.WorkType.{
+import uk.ac.wellcome.models.work.internal.Format.{
   ArchivesAndManuscripts,
   Audio,
   Books,
@@ -86,47 +86,47 @@ class WorksServiceTest
       )
     }
 
-    it("filters records by workType") {
+    it("filters records by format") {
       val work1 = createIdentifiedWorkWith(
-        workType = Some(ManuscriptsAsian)
+        format = Some(ManuscriptsAsian)
       )
       val work2 = createIdentifiedWorkWith(
-        workType = Some(ManuscriptsAsian)
+        format = Some(ManuscriptsAsian)
       )
-      val workWithWrongWorkType = createIdentifiedWorkWith(
-        workType = Some(CDRoms)
+      val workWithWrongFormat = createIdentifiedWorkWith(
+        format = Some(CDRoms)
       )
 
       assertListOrSearchResultIsCorrect(
-        allWorks = Seq(work1, work2, workWithWrongWorkType),
+        allWorks = Seq(work1, work2, workWithWrongFormat),
         expectedWorks = Seq(work1, work2),
         expectedTotalResults = 2,
         worksSearchOptions = createWorksSearchOptionsWith(
-          filters = List(WorkTypeFilter(Seq("b")))
+          filters = List(FormatFilter(Seq("b")))
         )
       )
     }
 
-    it("filters records by multiple workTypes") {
+    it("filters records by multiple formats") {
       val work1 = createIdentifiedWorkWith(
-        workType = Some(ManuscriptsAsian)
+        format = Some(ManuscriptsAsian)
       )
       val work2 = createIdentifiedWorkWith(
-        workType = Some(ManuscriptsAsian)
+        format = Some(ManuscriptsAsian)
       )
       val work3 = createIdentifiedWorkWith(
-        workType = Some(Books)
+        format = Some(Books)
       )
-      val workWithWrongWorkType = createIdentifiedWorkWith(
-        workType = Some(CDRoms)
+      val workWithWrongFormat = createIdentifiedWorkWith(
+        format = Some(CDRoms)
       )
 
       assertListOrSearchResultIsCorrect(
-        allWorks = Seq(work1, work2, work3, workWithWrongWorkType),
+        allWorks = Seq(work1, work2, work3, workWithWrongFormat),
         expectedWorks = Seq(work1, work2, work3),
         expectedTotalResults = 3,
         worksSearchOptions = createWorksSearchOptionsWith(
-          filters = List(WorkTypeFilter(List("b", "a")))
+          filters = List(FormatFilter(List("b", "a")))
         )
       )
     }
@@ -217,24 +217,24 @@ class WorksServiceTest
       )
     }
 
-    it("aggregates workTypes") {
+    it("aggregates formats") {
       withLocalWorksIndex { index =>
         val work1 = createIdentifiedWorkWith(
-          workType = Some(Books)
+          format = Some(Books)
         )
         val work2 = createIdentifiedWorkWith(
-          workType = Some(Books)
+          format = Some(Books)
         )
         val work3 = createIdentifiedWorkWith(
-          workType = Some(Audio)
+          format = Some(Audio)
         )
         val work4 = createIdentifiedWorkWith(
-          workType = Some(ArchivesAndManuscripts)
+          format = Some(ArchivesAndManuscripts)
         )
 
         val worksSearchOptions =
           createWorksSearchOptionsWith(
-            aggregations = List(AggregationRequest.WorkType))
+            aggregations = List(AggregationRequest.Format))
 
         val expectedAggregations = Aggregations(
           Some(

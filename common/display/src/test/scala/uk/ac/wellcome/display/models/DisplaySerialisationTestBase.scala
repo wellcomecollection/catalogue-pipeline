@@ -238,12 +238,12 @@ trait DisplaySerialisationTestBase {
       }
     """.stripMargin
 
-  def workType(w: WorkType) =
+  def format(w: Format) =
     s"""
       {
         "id": "${w.id}",
         "label": "${w.label}",
-        "type": "WorkType"
+        "type": "Format"
       }
     """.stripMargin
 

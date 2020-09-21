@@ -11,7 +11,7 @@ sealed trait ImageFilter extends DocumentFilter
 case class ItemLocationTypeFilter(locationTypeIds: Seq[String])
     extends WorkFilter
 
-case class WorkTypeFilter(workTypeIds: Seq[String]) extends WorkFilter
+case class FormatFilter(formatIds: Seq[String]) extends WorkFilter
 
 case class DateRangeFilter(fromDate: Option[LocalDate],
                            toDate: Option[LocalDate])

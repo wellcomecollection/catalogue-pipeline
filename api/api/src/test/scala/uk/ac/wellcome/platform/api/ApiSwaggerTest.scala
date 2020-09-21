@@ -148,12 +148,12 @@ class ApiSwaggerTest extends ApiWorksTestBase with Matchers with JsonHelpers {
       schemas.isEmpty shouldBe false
       schemas.get should contain allOf (
         "GenreAggregation",
-        "WorkTypeAggregation",
+        "FormatAggregation",
         "PeriodAggregation",
         "SubjectAggregation",
         "LanguageAggregation",
         "GenreAggregationBucket",
-        "WorkTypeAggregationBucket",
+        "FormatAggregationBucket",
         "PeriodAggregationBucket",
         "SubjectAggregationBucket",
         "LanguageAggregationBucket",

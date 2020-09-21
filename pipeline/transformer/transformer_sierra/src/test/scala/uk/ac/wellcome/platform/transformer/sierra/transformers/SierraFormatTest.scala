@@ -2,27 +2,27 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.internal.WorkType.Books
+import uk.ac.wellcome.models.work.internal.Format.Books
 import uk.ac.wellcome.platform.transformer.sierra.generators.SierraDataGenerators
 import uk.ac.wellcome.platform.transformer.sierra.source.SierraMaterialType
 
-class SierraWorkTypeTest
+class SierraFormatTest
     extends AnyFunSpec
     with Matchers
     with SierraDataGenerators {
 
-  it("extracts WorkType from bib records") {
-    val workTypeId = "a"
+  it("extracts Format from bib records") {
+    val formatId = "a"
     val bibId = createSierraBibNumber
 
     val bibData = createSierraBibDataWith(
       materialType = Some(
-        SierraMaterialType(code = workTypeId)
+        SierraMaterialType(code = formatId)
       )
     )
 
-    val expectedWorkType = Books
+    val expectedFormat = Books
 
-    SierraWorkType(bibId, bibData) shouldBe Some(expectedWorkType)
+    SierraFormat(bibId, bibData) shouldBe Some(expectedFormat)
   }
 }

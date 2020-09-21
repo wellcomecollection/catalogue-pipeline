@@ -45,10 +45,10 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
     )
 
   private def toAggregation(aggReq: AggregationRequest) = aggReq match {
-    case AggregationRequest.WorkType =>
-      TermsAggregation("workType")
+    case AggregationRequest.Format =>
+      TermsAggregation("format")
         .size(100)
-        .field("data.workType.id")
+        .field("data.format.id")
         .minDocCount(0)
 
     case AggregationRequest.ProductionDate =>
@@ -129,8 +129,8 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
         termsQuery(
           field = "data.items.locations.locationType.id",
           values = itemLocationTypeIds)
-      case WorkTypeFilter(workTypeIds) =>
-        termsQuery(field = "data.workType.id", values = workTypeIds)
+      case FormatFilter(formatIds) =>
+        termsQuery(field = "data.format.id", values = formatIds)
       case DateRangeFilter(fromDate, toDate) =>
         val (gte, lte) =
           (fromDate map ElasticDate.apply, toDate map ElasticDate.apply)

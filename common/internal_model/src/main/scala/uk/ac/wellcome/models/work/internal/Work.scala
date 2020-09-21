@@ -61,7 +61,7 @@ case class WorkData[State <: DataState](
   otherIdentifiers: List[SourceIdentifier] = Nil,
   mergeCandidates: List[MergeCandidate] = Nil,
   alternativeTitles: List[String] = Nil,
-  workType: Option[WorkType] = None,
+  format: Option[Format] = None,
   description: Option[String] = None,
   physicalDescription: Option[String] = None,
   lettering: Option[String] = None,

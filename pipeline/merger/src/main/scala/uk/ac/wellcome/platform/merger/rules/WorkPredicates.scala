@@ -50,14 +50,14 @@ object WorkPredicates {
     satisfiesAll(sierraWork, physicalLocationExists)
 
   val sierraPicture: WorkPredicate =
-    satisfiesAll(sierraWork, workType(WorkType.Pictures))
+    satisfiesAll(sierraWork, format(Format.Pictures))
 
   val sierraPictureDigitalImageOr3DObject: WorkPredicate =
     satisfiesAll(
       sierraWork,
-      workType(WorkType.DigitalImages) _ or
-        workType(WorkType.`3DObjects`) or
-        workType(WorkType.Pictures)
+      format(Format.DigitalImages) _ or
+        format(Format.`3DObjects`) or
+        format(Format.Pictures)
     )
 
   val historicalLibraryMiro: WorkPredicate = singleDigitalItemMiroWork and
@@ -104,8 +104,8 @@ object WorkPredicates {
   private def identifierTypeId(id: String)(work: Work[Unidentified]): Boolean =
     work.sourceIdentifier.identifierType == IdentifierType(id)
 
-  private def workType(workType: WorkType)(work: Work[Unidentified]): Boolean =
-    work.data.workType.contains(workType)
+  private def format(format: Format)(work: Work[Unidentified]): Boolean =
+    work.data.format.contains(format)
 
   private def satisfiesAll(predicates: (Work[Unidentified] => Boolean)*)(
     work: Work[Unidentified]): Boolean = predicates.forall(_(work))

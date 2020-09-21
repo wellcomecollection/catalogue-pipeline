@@ -39,16 +39,16 @@ class WorkPredicatesTest
     createSierraPhysicalWork,
     createSierraDigitalWork,
     createUnidentifiedSierraWorkWith(
-      workType = Some(WorkType.`3DObjects`)
+      format = Some(Format.`3DObjects`)
     ),
     createUnidentifiedSierraWorkWith(
-      workType = Some(WorkType.DigitalImages)
+      format = Some(Format.DigitalImages)
     ),
     createUnidentifiedSierraWorkWith(
-      workType = Some(WorkType.Pictures)
+      format = Some(Format.Pictures)
     ),
     createUnidentifiedSierraWorkWith(
-      workType = Some(WorkType.Music)
+      format = Some(Format.Music)
     )
   )
 
@@ -113,10 +113,10 @@ class WorkPredicatesTest
       works.filter(WorkPredicates.sierraPictureDigitalImageOr3DObject)
     filtered should not be empty
     forAll(filtered) { work =>
-      work.data.workType should contain oneOf
-        (WorkType.Pictures,
-        WorkType.DigitalImages,
-        WorkType.`3DObjects`)
+      work.data.format should contain oneOf
+        (Format.Pictures,
+        Format.DigitalImages,
+        Format.`3DObjects`)
     }
   }
 }

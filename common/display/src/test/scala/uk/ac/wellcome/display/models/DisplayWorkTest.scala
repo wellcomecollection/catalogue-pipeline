@@ -13,7 +13,7 @@ import uk.ac.wellcome.models.work.generators.{
   ProductionEventGenerators,
   WorksGenerators
 }
-import uk.ac.wellcome.models.work.internal.WorkType.Videos
+import uk.ac.wellcome.models.work.internal.Format.Videos
 import uk.ac.wellcome.models.work.internal._
 import WorkState.Identified
 
@@ -118,16 +118,16 @@ class DisplayWorkTest
     displayWork.physicalDescription shouldBe Some(physicalDescription)
   }
 
-  it("gets the workType from a Work") {
-    val workType = Videos
+  it("gets the format from a Work") {
+    val format = Videos
 
-    val expectedDisplayWork = DisplayWorkType(
-      id = workType.id,
-      label = workType.label
+    val expectedDisplayWork = DisplayFormat(
+      id = format.id,
+      label = format.label
     )
 
     val work = createIdentifiedWorkWith(
-      workType = Some(workType)
+      format = Some(format)
     )
 
     val displayWork = DisplayWork(work)

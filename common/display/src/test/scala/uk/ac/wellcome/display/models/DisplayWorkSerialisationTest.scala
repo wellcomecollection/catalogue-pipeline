@@ -8,7 +8,7 @@ import uk.ac.wellcome.models.work.generators.{
   SubjectGenerators,
   WorksGenerators
 }
-import uk.ac.wellcome.models.work.internal.WorkType.{Books, EBooks}
+import uk.ac.wellcome.models.work.internal.Format.{Books, EBooks}
 import uk.ac.wellcome.models.work.internal._
 import Implicits._
 
@@ -23,7 +23,7 @@ class DisplayWorkSerialisationTest
 
   it("serialises a DisplayWork") {
     val work = createIdentifiedWorkWith(
-      workType = Some(Books),
+      format = Some(Books),
       description = Some(randomAlphanumeric(100)),
       lettering = Some(randomAlphanumeric(100)),
       createdDate = Some(Period("1901"))
@@ -35,7 +35,7 @@ class DisplayWorkSerialisationTest
       | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
       | "description": "${work.data.description.get}",
-      | "workType" : ${workType(work.data.workType.get)},
+      | "workType" : ${format(work.data.format.get)},
       | "lettering": "${work.data.lettering.get}",
       | "alternativeTitles": [],
       | "createdDate": ${period(work.data.createdDate.get)}
@@ -188,7 +188,7 @@ class DisplayWorkSerialisationTest
   it(
     "includes the contributors in DisplayWork serialisation with the contribuotrs include") {
     val work = createIdentifiedWorkWith(
-      workType = Some(EBooks),
+      format = Some(EBooks),
       description = Some(randomAlphanumeric(100)),
       lettering = Some(randomAlphanumeric(100)),
       createdDate = Some(Period("1901")),
@@ -204,7 +204,7 @@ class DisplayWorkSerialisationTest
       | "title": "${work.data.title.get}",
       | "description": "${work.data.description.get}",
       | "alternativeTitles": [],
-      | "workType" : ${workType(work.data.workType.get)},
+      | "workType" : ${format(work.data.format.get)},
       | "lettering": "${work.data.lettering.get}",
       | "createdDate": ${period(work.data.createdDate.get)},
       | "contributors": [${contributor(work.data.contributors.head)}]

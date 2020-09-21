@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.api.works
 
 import uk.ac.wellcome.elasticsearch.ElasticConfig
-import uk.ac.wellcome.models.work.internal.WorkType.{
+import uk.ac.wellcome.models.work.internal.Format.{
   Books,
   CDRoms,
   ManuscriptsAsian
@@ -140,29 +140,29 @@ class WorksFiltersTest extends ApiWorksTestBase {
     }
   }
 
-  describe("filtering works by WorkType") {
-    val noWorkTypeWorks = (1 to 3).map { _ =>
-      createIdentifiedWorkWith(workType = None)
+  describe("filtering works by Format") {
+    val noFormatWorks = (1 to 3).map { _ =>
+      createIdentifiedWorkWith(format = None)
     }
 
     // We assign explicit canonical IDs to ensure stable ordering when listing
     val bookWork = createIdentifiedWorkWith(
       title = Some("apple apple apple"),
       canonicalId = "book1",
-      workType = Some(Books)
+      format = Some(Books)
     )
     val cdRomWork = createIdentifiedWorkWith(
       title = Some("apple apple"),
       canonicalId = "cdrom1",
-      workType = Some(CDRoms)
+      format = Some(CDRoms)
     )
     val manuscriptWork = createIdentifiedWorkWith(
       title = Some("apple"),
       canonicalId = "manuscript1",
-      workType = Some(ManuscriptsAsian)
+      format = Some(ManuscriptsAsian)
     )
 
-    val works = noWorkTypeWorks ++ Seq(bookWork, cdRomWork, manuscriptWork)
+    val works = noFormatWorks ++ Seq(bookWork, cdRomWork, manuscriptWork)
 
     it("when listing works") {
       withApi {
@@ -179,7 +179,7 @@ class WorksFiltersTest extends ApiWorksTestBase {
       }
     }
 
-    it("filters by multiple workTypes") {
+    it("filters by multiple formats") {
       withApi {
         case (ElasticConfig(worksIndex, _), routes) =>
           insertIntoElasticsearch(worksIndex, works: _*)

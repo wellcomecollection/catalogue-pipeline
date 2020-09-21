@@ -14,7 +14,7 @@ import scala.collection.immutable._
 
 /** This class governs the way in which we wish to combine the filters and aggregations
   * that are specified for a search. We have a concept of "pairing" a filter and an aggregation:
-  * for example, an aggregation on workType is paired with a filter of a specific workType.
+  * for example, an aggregation on format is paired with a filter of a specific format.
   * If a search includes an aggregation and its paired filter, the filter is *not* applied to that
   * aggregation, but is still applied to results and to all other aggregations.
   *
@@ -80,7 +80,7 @@ class FiltersAndAggregationsBuilder(
   private def pairedAggregationRequest(
     filter: WorkFilter): Option[AggregationRequest] = filter match {
     case _: ItemLocationTypeFilter => None
-    case _: WorkTypeFilter         => Some(AggregationRequest.WorkType)
+    case _: FormatFilter           => Some(AggregationRequest.Format)
     case _: DateRangeFilter        => None
     case VisibleWorkFilter         => None
     case _: LanguageFilter         => Some(AggregationRequest.Language)

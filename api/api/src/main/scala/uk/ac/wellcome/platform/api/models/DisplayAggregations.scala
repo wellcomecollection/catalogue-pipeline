@@ -14,8 +14,8 @@ import uk.ac.wellcome.models.work.internal._
 )
 case class DisplayAggregations(
   @Schema(
-    description = "WorkType aggregation on a set of results."
-  ) workType: Option[DisplayAggregation[DisplayWorkType]],
+    description = "Format aggregation on a set of results."
+  ) workType: Option[DisplayAggregation[DisplayFormat]],
   @Schema(
     description = "Date aggregation on a set of results."
   ) @JsonKey("production.dates") productionDates: Option[
@@ -66,7 +66,7 @@ object DisplayAggregations {
 
   def apply(aggs: Aggregations): DisplayAggregations =
     DisplayAggregations(
-      workType = displayAggregation(aggs.workType, DisplayWorkType.apply),
+      workType = displayAggregation(aggs.format, DisplayFormat.apply),
       productionDates =
         displayAggregation(aggs.productionDates, DisplayPeriod.apply),
       genres = displayAggregation[Genre[IdState.Minted], DisplayGenre](

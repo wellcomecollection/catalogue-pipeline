@@ -12,7 +12,7 @@ import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.json.JsonUtil._
 
 case class Aggregations(
-  workType: Option[Aggregation[WorkType]] = None,
+  format: Option[Aggregation[Format]] = None,
   genres: Option[Aggregation[Genre[IdState.Minted]]] = None,
   productionDates: Option[Aggregation[Period[IdState.Minted]]] = None,
   language: Option[Aggregation[Language]] = None,
@@ -27,7 +27,7 @@ object Aggregations extends Logging {
     if (e4sAggregations.data.nonEmpty) {
       Some(
         Aggregations(
-          workType = e4sAggregations.decodeAgg[WorkType]("workType"),
+          format = e4sAggregations.decodeAgg[Format]("format"),
           genres = e4sAggregations.decodeAgg[Genre[IdState.Minted]]("genres"),
           productionDates = e4sAggregations
             .decodeAgg[Period[IdState.Minted]]("productionDates"),
@@ -61,11 +61,11 @@ object Aggregations extends Logging {
         .map(err => err.getMessage)
     }
 
-  implicit val decodeWorkType: Decoder[WorkType] =
+  implicit val decodeFormat: Decoder[Format] =
     Decoder.decodeString.emap { str =>
-      WorkType.fromCode(str) match {
-        case Some(workType) => Right(workType)
-        case None           => Left(s"couldn't find workType for code '$str'")
+      Format.fromCode(str) match {
+        case Some(format) => Right(format)
+        case None         => Left(s"couldn't find format for code '$str'")
       }
     }
 
@@ -112,8 +112,8 @@ object Aggregations extends Logging {
 //
 // ## Key-only vs sample document
 // For some aggregation types `T` (in `Aggregation[T]`) we can decode `T`
-// directly from the bucket key - for example with WorkType, we can use
-// `fromCode` to get the label of the WorkType given its id.
+// directly from the bucket key - for example with Format, we can use
+// `fromCode` to get the label of the Format given its id.
 //
 // However, sometimes
 // we need more information from the index, which is achieved using a top hits

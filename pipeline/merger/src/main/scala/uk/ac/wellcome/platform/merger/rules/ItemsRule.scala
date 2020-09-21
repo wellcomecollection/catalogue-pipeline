@@ -12,7 +12,7 @@ import WorkState.Unidentified
   *
   * * Sierra - Single items or zero items
   *   * METS works
-  *   * Single Miro works, only if the Sierra work has workType Picture/Digital Image/3D Object
+  *   * Single Miro works, only if the Sierra work has format Picture/Digital Image/3D Object
   * * Sierra - Multi item
   *   * METS works
   */

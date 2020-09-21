@@ -323,7 +323,7 @@ trait MultipleWorksSwagger {
       new Parameter(
         name = "workType",
         in = ParameterIn.QUERY,
-        description = "Filter by the workType of the searched works",
+        description = "Filter by the format of the searched works",
         required = false
       ),
       new Parameter(
