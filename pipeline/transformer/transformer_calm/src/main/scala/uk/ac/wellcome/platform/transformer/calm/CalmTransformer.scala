@@ -128,7 +128,7 @@ object CalmTransformer
       WorkData[DataState.Unidentified](
         title = Some(title),
         otherIdentifiers = otherIdentifiers(record),
-        format = Some(format(collectionLevel)),
+        format = Some(Format.ArchivesAndManuscripts),
         collectionPath = Some(collectionPath),
         subjects = subjects(record),
         language = language,
@@ -175,14 +175,6 @@ object CalmTransformer
       .map(NormaliseText(_, whitelist = NormaliseText.onlyItalics))
       .map(Right(_))
       .getOrElse(Left(TitleMissing))
-
-  def format(level: CollectionLevel): Format =
-    level match {
-      case CollectionLevel.Collection => Format.ArchiveCollection
-      case CollectionLevel.Section    => Format.ArchiveSection
-      case CollectionLevel.Series     => Format.ArchiveSeries
-      case CollectionLevel.Item       => Format.ArchiveItem
-    }
 
   def collectionPath(record: CalmRecord,
                      level: CollectionLevel): Result[CollectionPath] =

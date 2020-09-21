@@ -159,23 +159,4 @@ object Format extends Enum[Format] {
     override val linksTo: Unlinked = ManuscriptsAsian
   }
 
-  case object ArchiveCollection extends Unlinked {
-    override val id: String = "archive-collection"
-    override val label: String = "Archive collection"
-  }
-
-  case object ArchiveSection extends Unlinked {
-    override val id: String = "archive-section"
-    override val label: String = "Archive section"
-  }
-
-  case object ArchiveSeries extends Unlinked {
-    override val id: String = "archive-series"
-    override val label: String = "Archive series"
-  }
-
-  case object ArchiveItem extends Unlinked {
-    override val id: String = "archive-item"
-    override val label: String = "Archive item"
-  }
 }
