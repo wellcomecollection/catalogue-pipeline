@@ -59,7 +59,8 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
                 )
               )
             )
-          )
+          ),
+          `type` = WorkType.Collection
         )
       )
     )
@@ -513,7 +514,8 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
                 )
               )
             )
-          )
+          ),
+          `type` = WorkType.Section
         ),
         invisibilityReasons = List(SuppressedFromSource("Calm"))
       )
