@@ -22,15 +22,15 @@ trait Merger extends MergerLogging {
   type MergeState = State[Set[Work[Unidentified]], MergeResult]
 
   protected def findTarget(
-    works: Seq[Work[Unidentified]]): Option[Work.Standard[Unidentified]]
+    works: Seq[Work[Unidentified]]): Option[Work.Visible[Unidentified]]
 
-  protected def createMergeResult(target: Work.Standard[Unidentified],
+  protected def createMergeResult(target: Work.Visible[Unidentified],
                                   sources: Seq[Work[Unidentified]]): MergeState
 
   protected def getTargetAndSources(works: Seq[Work[Unidentified]])
-    : Option[(Work.Standard[Unidentified], Seq[Work[Unidentified]])] =
+    : Option[(Work.Visible[Unidentified], Seq[Work[Unidentified]])] =
     works match {
-      case List(unmatchedWork: Work.Standard[Unidentified]) =>
+      case List(unmatchedWork: Work.Visible[Unidentified]) =>
         Some((unmatchedWork, Nil))
       case matchedWorks =>
         findTarget(matchedWorks).map { target =>
@@ -63,7 +63,7 @@ trait Merger extends MergerLogging {
       }
       .getOrElse(MergerOutcome(works, Nil))
 
-  private def redirectSourceToTarget(target: Work.Standard[Unidentified])(
+  private def redirectSourceToTarget(target: Work.Visible[Unidentified])(
     source: Work[Unidentified]): Work.Redirected[Unidentified] =
     Work.Redirected[Unidentified](
       version = source.version,
@@ -71,7 +71,7 @@ trait Merger extends MergerLogging {
       redirect = IdState.Identifiable(target.sourceIdentifier)
     )
 
-  private def logIntentions(target: Work.Standard[Unidentified],
+  private def logIntentions(target: Work.Visible[Unidentified],
                             sources: Seq[Work[Unidentified]]): Unit =
     sources match {
       case Nil =>
@@ -96,16 +96,16 @@ trait Merger extends MergerLogging {
 
 object PlatformMerger extends Merger {
   override def findTarget(
-    works: Seq[Work[Unidentified]]): Option[Work.Standard[Unidentified]] =
+    works: Seq[Work[Unidentified]]): Option[Work.Visible[Unidentified]] =
     works
       .find(WorkPredicates.singlePhysicalItemCalmWork)
       .orElse(works.find(WorkPredicates.physicalSierra))
       .orElse(works.find(WorkPredicates.sierraWork)) match {
-      case Some(target: Work.Standard[Unidentified]) => Some(target)
-      case _                                         => None
+      case Some(target: Work.Visible[Unidentified]) => Some(target)
+      case _                                        => None
     }
 
-  override def createMergeResult(target: Work.Standard[Unidentified],
+  override def createMergeResult(target: Work.Visible[Unidentified],
                                  sources: Seq[Work[Unidentified]]): MergeState =
     if (sources.isEmpty)
       State.pure(

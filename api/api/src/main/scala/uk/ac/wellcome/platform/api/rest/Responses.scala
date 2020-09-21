@@ -59,7 +59,7 @@ object DisplayResultList {
     : Encoder[DisplayResultList[R, A]] = deriveConfiguredEncoder
 
   def apply(
-    resultList: ResultList[Work.Standard[Identified], Aggregations],
+    resultList: ResultList[Work.Visible[Identified], Aggregations],
     searchOptions: WorksSearchOptions,
     includes: WorksIncludes,
     requestUri: Uri,

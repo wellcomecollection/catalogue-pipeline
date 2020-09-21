@@ -51,9 +51,8 @@ class PaletteEncoder:
         return consistently_indexed_centroids[labels_by_weight]
 
     @staticmethod
-    def get_bin_index(colour, n_bins):
-        indices = np.floor(n_bins * colour / 256).astype(int)
-        d = n_bins - 1
+    def get_bin_index(colour, d):
+        indices = np.floor(d * colour / 256).astype(int)
         return indices[0] + d * indices[1] + d * d * indices[2]
 
     @staticmethod

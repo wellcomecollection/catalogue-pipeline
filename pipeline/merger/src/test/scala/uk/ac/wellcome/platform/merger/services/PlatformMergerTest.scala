@@ -90,7 +90,7 @@ class PlatformMergerTest
 
     forAll(examples) {
       (works: Seq[Work[Unidentified]],
-       target: Option[Work.Standard[Unidentified]],
+       target: Option[Work.Visible[Unidentified]],
        clue: String) =>
         withClue(clue) {
           merger.findTarget(works) should be(target)

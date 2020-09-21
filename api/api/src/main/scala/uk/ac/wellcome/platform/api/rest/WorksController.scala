@@ -65,7 +65,7 @@ class WorksController(
         worksService
           .findWorkById(id)(index)
           .flatMap {
-            case Right(Some(work: Work.Standard[Identified])) =>
+            case Right(Some(work: Work.Visible[Identified])) =>
               if (includes.anyRelation) {
                 retrieveRelatedWorks(index, work).map { relatedWorks =>
                   workFound(work, relatedWorks, includes)
@@ -86,7 +86,7 @@ class WorksController(
 
   private def retrieveRelatedWorks(
     index: Index,
-    work: Work.Standard[Identified]): Future[Option[RelatedWorks]] =
+    work: Work.Visible[Identified]): Future[Option[RelatedWorks]] =
     relatedWorkService
       .retrieveRelatedWorks(index, work)
       .map {
@@ -104,7 +104,7 @@ class WorksController(
       redirect(uri.withPath(newPath), Found)
     }
 
-  def workFound(work: Work.Standard[Identified],
+  def workFound(work: Work.Visible[Identified],
                 relatedWorks: Option[RelatedWorks],
                 includes: WorksIncludes): Route =
     complete(

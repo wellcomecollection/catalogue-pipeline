@@ -11,7 +11,7 @@ import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.platform.api.Router
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
-import uk.ac.wellcome.platform.api.models.ApiConfig
+import uk.ac.wellcome.platform.api.models.{ApiConfig, QueryConfig}
 
 trait ApiFixture
     extends AnyFunSpec
@@ -34,13 +34,14 @@ trait ApiFixture
       val router = new Router(
         elasticClient,
         elasticConfig,
+        QueryConfig(paletteBinSizes = Seq(4, 6, 8)),
         ApiConfig(
           host = apiHost,
           scheme = apiScheme,
           defaultPageSize = 10,
           pathPrefix = apiName,
           contextSuffix = "context.json"
-        )
+        ),
       )
       testWith((elasticConfig, router.routes))
     }

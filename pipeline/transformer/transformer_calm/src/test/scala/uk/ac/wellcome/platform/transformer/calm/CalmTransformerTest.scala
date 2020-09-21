@@ -22,7 +22,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(record, version) shouldBe Right(
-      Work.Standard[Unidentified](
+      Work.Visible[Unidentified](
         version = version,
         state = Unidentified(
           SourceIdentifier(

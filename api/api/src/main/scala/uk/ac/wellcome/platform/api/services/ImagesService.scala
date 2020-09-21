@@ -2,13 +2,11 @@ package uk.ac.wellcome.platform.api.services
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
-
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import com.sksamuel.elastic4s.{ElasticError, Hit, Index}
 import com.sksamuel.elastic4s.circe._
 import io.circe.Decoder
-
 import uk.ac.wellcome.display.models.SortingOrder
 import uk.ac.wellcome.models.work.internal.AugmentedImage
 import uk.ac.wellcome.models.Implicits._
@@ -26,11 +24,12 @@ case class ImagesSearchOptions(
   pageNumber: Int = 1
 ) extends PaginatedSearchOptions
 
-class ImagesService(searchService: ElasticsearchService)(
-  implicit ec: ExecutionContext)
+class ImagesService(searchService: ElasticsearchService,
+                    queryConfig: QueryConfig)(implicit ec: ExecutionContext)
     extends Tracing {
 
   private val nVisuallySimilarImages = 5
+  private val imagesRequestBuilder = new ImagesRequestBuilder(queryConfig)
 
   def findImageById(id: String)(
     index: Index): Future[Either[ElasticError, Option[AugmentedImage]]] =
@@ -50,7 +49,7 @@ class ImagesService(searchService: ElasticsearchService)(
     searchService
       .executeSearch(
         queryOptions = toElasticsearchQueryOptions(searchOptions),
-        requestBuilder = ImagesRequestBuilder,
+        requestBuilder = imagesRequestBuilder,
         index = index
       )
       .map { _.map(createResultList) }
@@ -64,11 +63,11 @@ class ImagesService(searchService: ElasticsearchService)(
       .executeSearchRequest({
         val requestBuilder = similarityMetric match {
           case SimilarityMetric.Blended =>
-            ImagesRequestBuilder.requestWithBlendedSimilarity
+            imagesRequestBuilder.requestWithBlendedSimilarity
           case SimilarityMetric.Features =>
-            ImagesRequestBuilder.requestWithSimilarFeatures
+            imagesRequestBuilder.requestWithSimilarFeatures
           case SimilarityMetric.Colors =>
-            ImagesRequestBuilder.requestWithSimilarColors
+            imagesRequestBuilder.requestWithSimilarColors
         }
         requestBuilder(index, image.id.canonicalId, nVisuallySimilarImages)
       })

@@ -29,7 +29,7 @@ object ElasticsearchWorksSource extends Logging {
       .fromPublisher(
         elasticClient.publisher(
           search(index)
-            .query(termQuery("type", "Standard"))
+            .query(termQuery("type", "Visible"))
             .scroll(keepAlive = "5m")
             // Increasing the size of each request from the
             // default 100 to 1000 as it makes it go significantly faster

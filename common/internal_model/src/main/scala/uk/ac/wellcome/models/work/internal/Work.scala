@@ -20,8 +20,8 @@ sealed trait Work[State <: WorkState] {
     f: WorkData[State#WorkDataState] => WorkData[State#WorkDataState])
     : Work[State] =
     this match {
-      case Work.Standard(version, data, state) =>
-        Work.Standard[State](version, f(data), state)
+      case Work.Visible(version, data, state) =>
+        Work.Visible[State](version, f(data), state)
       case Work.Invisible(version, data, state, reasons) =>
         Work.Invisible[State](version, f(data), state, reasons)
       case Work.Redirected(version, redirect, state) =>
@@ -31,7 +31,7 @@ sealed trait Work[State <: WorkState] {
 
 object Work {
 
-  case class Standard[State <: WorkState](
+  case class Visible[State <: WorkState](
     version: Int,
     data: WorkData[State#WorkDataState],
     state: State,

@@ -7,7 +7,11 @@ import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.display.models.Implicits._
 import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.platform.api.Tracing
-import uk.ac.wellcome.platform.api.models.{ApiConfig, SimilarityMetric}
+import uk.ac.wellcome.platform.api.models.{
+  ApiConfig,
+  QueryConfig,
+  SimilarityMetric
+}
 import uk.ac.wellcome.platform.api.services.{
   ElasticsearchService,
   ImagesService
@@ -16,10 +20,10 @@ import cats.implicits._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class ImagesController(
-  elasticsearchService: ElasticsearchService,
-  implicit val apiConfig: ApiConfig,
-  elasticConfig: ElasticConfig)(implicit ec: ExecutionContext)
+class ImagesController(elasticsearchService: ElasticsearchService,
+                       implicit val apiConfig: ApiConfig,
+                       elasticConfig: ElasticConfig,
+                       queryConfig: QueryConfig)(implicit ec: ExecutionContext)
     extends CustomDirectives
     with Tracing
     with FailFastCirceSupport {
@@ -100,5 +104,6 @@ class ImagesController(
       })
       .getOrElse(Nil)
 
-  private lazy val imagesService = new ImagesService(elasticsearchService)
+  private lazy val imagesService =
+    new ImagesService(elasticsearchService, queryConfig)
 }

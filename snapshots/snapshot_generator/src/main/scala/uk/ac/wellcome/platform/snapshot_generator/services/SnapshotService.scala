@@ -72,7 +72,7 @@ class SnapshotService(akkaS3Settings: S3Settings,
   private def runStream(publicBucketName: String,
                         publicObjectKey: String,
                         index: Index,
-                        toDisplayWork: Work.Standard[Identified] => DisplayWork)
+                        toDisplayWork: Work.Visible[Identified] => DisplayWork)
     : Future[MultipartUploadResult] = {
 
     // This source outputs DisplayWorks in the elasticsearch index.

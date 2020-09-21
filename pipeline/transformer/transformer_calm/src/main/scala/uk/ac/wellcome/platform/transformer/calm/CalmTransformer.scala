@@ -59,7 +59,7 @@ object CalmTransformer
       workData(record) match {
         case Right(data) =>
           Right(
-            Work.Standard[Unidentified](
+            Work.Visible[Unidentified](
               state = Unidentified(sourceIdentifier(record)),
               version = version,
               data = data

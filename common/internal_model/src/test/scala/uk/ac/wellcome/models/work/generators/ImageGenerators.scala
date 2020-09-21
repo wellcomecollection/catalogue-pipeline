@@ -42,7 +42,7 @@ trait ImageGenerators
     location: DigitalLocationDeprecated = createDigitalLocation,
     version: Int = 1,
     identifierType: IdentifierType = IdentifierType("miro-image-number"),
-    parentWork: Work.Standard[WorkState.Unidentified] =
+    parentWork: Work.Visible[WorkState.Unidentified] =
       createUnidentifiedSierraWorkWith(),
     redirectedWork: Option[Work[WorkState.Unidentified]] = Some(
       createMiroWorkWith(Nil))): MergedImage[DataState.Unidentified] =
@@ -59,7 +59,7 @@ trait ImageGenerators
       IdState.Identified(createCanonicalId, createSourceIdentifier),
     location: DigitalLocationDeprecated = createDigitalLocation,
     version: Int = 1,
-    parentWork: Work.Standard[WorkState.Identified] =
+    parentWork: Work.Visible[WorkState.Identified] =
       createIdentifiedSierraWorkWith(),
     redirectedWork: Option[Work[WorkState.Identified]] = Some(
       createIdentifiedSierraWorkWith())): MergedImage[DataState.Identified] =
@@ -73,13 +73,13 @@ trait ImageGenerators
     val features = randomVector(4096)
     val (features1, features2) = features.splitAt(features.size / 2)
     val lshEncodedFeatures = simHasher4096.lsh(features)
-    val palette = randomSortedIntegerVector(20, maxComponent = 1000)
+    val palette = randomColorVector()
     Some(
       InferredData(
         features1 = features1.toList,
         features2 = features2.toList,
         lshEncodedFeatures = lshEncodedFeatures.toList,
-        palette = palette.map(_.toString).toList
+        palette = palette.toList
       )
     )
   }
@@ -88,9 +88,9 @@ trait ImageGenerators
     imageId: IdState.Identified = IdState.Identified(
       createCanonicalId,
       createSourceIdentifierWith(IdentifierType("miro-image-number"))),
-    parentWork: Work.Standard[WorkState.Identified] =
+    parentWork: Work.Visible[WorkState.Identified] =
       createIdentifiedSierraWorkWith(),
-    redirectedWork: Option[Work.Standard[WorkState.Identified]] = Some(
+    redirectedWork: Option[Work.Visible[WorkState.Identified]] = Some(
       createIdentifiedWork),
     inferredData: Option[InferredData] = createInferredData,
     location: DigitalLocationDeprecated = createDigitalLocation,
@@ -121,9 +121,9 @@ trait ImageGenerators
       similarVectors(4096, n)
     } else { (1 to n).map(_ => randomVector(4096, maxR = 10.0f)) }
     val palettes = if (similarPalette) {
-      similarSortedIntegerVectors(30, n)
+      similarColorVectors(n)
     } else {
-      (1 to n).map(_ => randomSortedIntegerVector(30, maxComponent = 1000))
+      (1 to n).map(_ => randomColorVector())
     }
     (features zip palettes).map {
       case (features, palette) =>

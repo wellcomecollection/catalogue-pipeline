@@ -50,10 +50,10 @@ class SierraTransformableTransformerTest
 
     val work = transformToWork(sierraTransformable)
 
-    work shouldBe a[Work.Standard[_]]
+    work shouldBe a[Work.Visible[_]]
 
     val actualIdentifiers = work
-      .asInstanceOf[Work.Standard[_]]
+      .asInstanceOf[Work.Visible[_]]
       .data
       .items
       .map { _.id.asInstanceOf[IdState.Identifiable].sourceIdentifier }
@@ -107,8 +107,8 @@ class SierraTransformableTransformerTest
       1)
     triedWork.isSuccess shouldBe true
 
-    triedWork.get.asInstanceOf[Work.Standard[_]].data.format shouldBe Some(
-      expectedFormat)
+    triedWork.get.asInstanceOf[Work.Visible[_]].data.workType shouldBe Some(
+      expectedWorkType)
   }
 
   it("extracts information from items") {
@@ -144,8 +144,8 @@ class SierraTransformableTransformerTest
     )
 
     val work = transformToWork(transformable)
-    work shouldBe a[Work.Standard[_]]
-    val unidentifiedWork = work.asInstanceOf[Work.Standard[_]]
+    work shouldBe a[Work.Visible[_]]
+    val unidentifiedWork = work.asInstanceOf[Work.Visible[_]]
     unidentifiedWork.data.items should have size 1
 
     val expectedSourceIdentifier = createSierraSystemSourceIdentifierWith(
@@ -207,7 +207,7 @@ class SierraTransformableTransformerTest
     )
 
     val unidentifiedWork =
-      transformToWork(transformable).asInstanceOf[Work.Standard[Unidentified]]
+      transformToWork(transformable).asInstanceOf[Work.Visible[Unidentified]]
 
     unidentifiedWork.data.items.head.title shouldBe Some("Envelope")
   }
@@ -850,8 +850,8 @@ class SierraTransformableTransformerTest
        """.stripMargin
 
     val work = transformDataToWork(id = id, data = bibData)
-    work shouldBe a[Work.Standard[_]]
-    work.asInstanceOf[Work.Standard[Unidentified]].data.format shouldBe Some(
+    work shouldBe a[Work.Visible[_]]
+    work.asInstanceOf[Work.Visible[Unidentified]].data.workType shouldBe Some(
       Pictures
     )
   }
@@ -978,10 +978,10 @@ class SierraTransformableTransformerTest
 
   private def transformDataToUnidentifiedWork(
     id: SierraBibNumber,
-    data: String): Work.Standard[Unidentified] = {
+    data: String): Work.Visible[Unidentified] = {
 
     val work = transformDataToWork(id = id, data = data)
-    work shouldBe a[Work.Standard[_]]
-    work.asInstanceOf[Work.Standard[Unidentified]]
+    work shouldBe a[Work.Visible[_]]
+    work.asInstanceOf[Work.Visible[Unidentified]]
   }
 }

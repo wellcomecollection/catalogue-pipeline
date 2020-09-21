@@ -218,7 +218,7 @@ class DisplayWorkTest
   }
 
   it("does not extract includes set to false") {
-    forAll { work: Work.Standard[Identified] =>
+    forAll { work: Work.Visible[Identified] =>
       val displayWork =
         DisplayWork(work, includes = WorksIncludes())
 

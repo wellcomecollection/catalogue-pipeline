@@ -193,7 +193,7 @@ class MergerWorkerServiceTest
             case work: Work.Redirected[Unidentified] => work
           }
           val mergedWorks = worksSent.collect {
-            case work: Work.Standard[Unidentified] => work
+            case work: Work.Visible[Unidentified] => work
           }
 
           redirectedWorks should have size 1
@@ -244,7 +244,7 @@ class MergerWorkerServiceTest
             case work: Work.Redirected[Unidentified] => work
           }
           val mergedWorks = worksSent.collect {
-            case work: Work.Standard[Unidentified] => work
+            case work: Work.Visible[Unidentified] => work
           }
 
           redirectedWorks should have size 2
@@ -295,7 +295,7 @@ class MergerWorkerServiceTest
             case work: Work.Redirected[Unidentified] => work
           }
           val mergedWorks = worksSent.collect {
-            case work: Work.Standard[Unidentified] => work
+            case work: Work.Visible[Unidentified] => work
           }
 
           redirectedWorks should have size 2

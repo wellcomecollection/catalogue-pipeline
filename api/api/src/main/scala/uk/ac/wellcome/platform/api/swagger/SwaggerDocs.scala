@@ -218,6 +218,12 @@ trait MultipleImagesSwagger {
         required = false
       ),
       new Parameter(
+        name = "colors",
+        in = ParameterIn.QUERY,
+        description = "Filter the images by colors.",
+        required = false
+      ),
+      new Parameter(
         name = "page",
         in = ParameterIn.QUERY,
         description = "The page to return from the result list",

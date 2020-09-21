@@ -6,7 +6,7 @@ import akka.http.scaladsl.Http
 import com.typesafe.config.Config
 import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
-import uk.ac.wellcome.platform.api.models.ApiConfig
+import uk.ac.wellcome.platform.api.models.{ApiConfig, QueryConfig}
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
@@ -43,7 +43,11 @@ object Main extends WellcomeTypesafeApp {
           .getOrElse("context.json"),
       )
 
-    val router = new Router(elasticClient, elasticConfig, apiConfig)
+    val queryConfig =
+      QueryConfig.fetchFromIndex(elasticClient, elasticConfig.imagesIndex)
+
+    val router =
+      new Router(elasticClient, elasticConfig, queryConfig, apiConfig)
 
     () =>
       Http()

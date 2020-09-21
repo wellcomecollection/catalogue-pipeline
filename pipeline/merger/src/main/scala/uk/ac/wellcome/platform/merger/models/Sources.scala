@@ -5,7 +5,7 @@ import WorkState.Unidentified
 
 object Sources {
   def findFirstLinkedDigitisedSierraWorkFor(
-    target: Work.Standard[Unidentified],
+    target: Work.Visible[Unidentified],
     sources: Seq[Work[Unidentified]]): Option[Work[Unidentified]] = {
 
     val digitisedLinkedIds = target.data.mergeCandidates

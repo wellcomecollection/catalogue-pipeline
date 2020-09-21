@@ -49,7 +49,7 @@ class WorksService(searchService: ElasticsearchService)(
 
   def listOrSearchWorks(index: Index,
                         searchOptions: WorksSearchOptions): Future[
-    Either[ElasticError, ResultList[Work.Standard[Identified], Aggregations]]] =
+    Either[ElasticError, ResultList[Work.Visible[Identified], Aggregations]]] =
     searchService
       .executeSearch(
         queryOptions = toElasticsearchQueryOptions(searchOptions),
@@ -71,7 +71,7 @@ class WorksService(searchService: ElasticsearchService)(
     )
 
   private def createResultList(searchResponse: SearchResponse)
-    : ResultList[Work.Standard[Identified], Aggregations] = {
+    : ResultList[Work.Visible[Identified], Aggregations] = {
     ResultList(
       results = searchResponseToWorks(searchResponse),
       totalResults = searchResponse.totalHits.toInt,
@@ -80,9 +80,9 @@ class WorksService(searchService: ElasticsearchService)(
   }
 
   private def searchResponseToWorks(
-    searchResponse: SearchResponse): List[Work.Standard[Identified]] =
+    searchResponse: SearchResponse): List[Work.Visible[Identified]] =
     searchResponse.hits.hits.map { hit =>
-      deserialize[Work.Standard[Identified]](hit)
+      deserialize[Work.Visible[Identified]](hit)
     }.toList
 
   private def searchResponseToAggregationResults(
