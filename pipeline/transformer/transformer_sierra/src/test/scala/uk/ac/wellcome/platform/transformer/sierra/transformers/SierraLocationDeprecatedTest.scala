@@ -36,7 +36,7 @@ class SierraLocationDeprecatedTest
 
     it("extracts location from item data") {
       val expectedLocation = PhysicalLocationDeprecated(locationType, label)
-      transformer.getPhysicalLocation(itemData, bibData) shouldBe Some(
+      transformer.getPhysicalLocationDeprecated(itemData, bibData) shouldBe Some(
         expectedLocation)
     }
 
@@ -45,14 +45,14 @@ class SierraLocationDeprecatedTest
         location = Some(SierraSourceLocation("", ""))
       )
 
-      transformer.getPhysicalLocation(itemData, bibData) shouldBe None
+      transformer.getPhysicalLocationDeprecated(itemData, bibData) shouldBe None
     }
 
     it("returns None if the location field only contains the string 'none'") {
       val itemData = createSierraItemDataWith(
         location = Some(SierraSourceLocation("none", "none"))
       )
-      transformer.getPhysicalLocation(itemData, bibData) shouldBe None
+      transformer.getPhysicalLocationDeprecated(itemData, bibData) shouldBe None
     }
 
     it("returns None if there is no location in the item data") {
@@ -60,7 +60,7 @@ class SierraLocationDeprecatedTest
         location = None
       )
 
-      transformer.getPhysicalLocation(itemData, bibData) shouldBe None
+      transformer.getPhysicalLocationDeprecated(itemData, bibData) shouldBe None
     }
 
     it("adds access condition to the location if present") {
@@ -76,7 +76,7 @@ class SierraLocationDeprecatedTest
           )
         )
       )
-      transformer.getPhysicalLocation(itemData, bibData) shouldBe Some(
+      transformer.getPhysicalLocationDeprecated(itemData, bibData) shouldBe Some(
         PhysicalLocationDeprecated(
           locationType = locationType,
           label = label,
@@ -97,7 +97,7 @@ class SierraLocationDeprecatedTest
           VarField(marcTag = Some("506"), indicator1 = Some("0"))
         )
       )
-      transformer.getPhysicalLocation(itemData, bibData) shouldBe Some(
+      transformer.getPhysicalLocationDeprecated(itemData, bibData) shouldBe Some(
         PhysicalLocationDeprecated(
           locationType = locationType,
           label = label,
@@ -118,7 +118,7 @@ class SierraLocationDeprecatedTest
           )
         )
       )
-      transformer.getPhysicalLocation(itemData, bibData) shouldBe Some(
+      transformer.getPhysicalLocationDeprecated(itemData, bibData) shouldBe Some(
         PhysicalLocationDeprecated(
           locationType = locationType,
           label = label,
@@ -145,7 +145,7 @@ class SierraLocationDeprecatedTest
           )
         )
       )
-      transformer.getPhysicalLocation(itemData, bibData) shouldBe Some(
+      transformer.getPhysicalLocationDeprecated(itemData, bibData) shouldBe Some(
         PhysicalLocationDeprecated(
           locationType = locationType,
           label = label,
@@ -164,12 +164,12 @@ class SierraLocationDeprecatedTest
         license = None,
         locationType = LocationType("iiif-presentation")
       )
-      transformer.getDigitalLocation(id) shouldBe expectedLocation
+      transformer.getDigitalLocationDeprecated(id) shouldBe expectedLocation
     }
 
     it("throws an exception if no resource identifier is supplied") {
       val caught = intercept[SierraTransformerException] {
-        transformer.getDigitalLocation(identifier = "")
+        transformer.getDigitalLocationDeprecated(identifier = "")
       }
       caught.e.getMessage shouldEqual "id required by DigitalLocation has not been provided"
     }

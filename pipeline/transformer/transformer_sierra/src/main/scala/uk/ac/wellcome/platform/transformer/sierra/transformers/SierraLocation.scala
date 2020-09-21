@@ -12,7 +12,40 @@ import uk.ac.wellcome.platform.transformer.sierra.source.sierra.SierraSourceLoca
 
 trait SierraLocation extends SierraQueryOps {
 
-  def getPhysicalLocation(
+  def getLocation(itemData: SierraItemData, bibData: SierraBibData) =
+    bibData.locations.flatMap(_.collectFirst {
+      case x if x.code == "whml" =>
+        Location.OpenShelves(
+          accessConditions = Nil,
+          shelfmark = "",
+          shelfLocation = "")
+
+      case x if x.code == "stax" =>
+        Location.ClosedStores(accessConditions = Nil)
+
+      case x if x.code == "arch" =>
+        Location.ClosedStores(accessConditions = Nil)
+
+      case x if x.code == "elro" =>
+        Location.DigitalResource(
+          accessConditions = Nil,
+          url = "",
+          license = None,
+          credit = None,
+          format = None
+        )
+
+      case x if x.code == "digi" =>
+        Location.DigitalResource(
+          accessConditions = Nil,
+          url = "",
+          license = None,
+          credit = None,
+          format = None
+        )
+    })
+
+  def getPhysicalLocationDeprecated(
     itemData: SierraItemData,
     bibData: SierraBibData): Option[PhysicalLocationDeprecated] =
     itemData.location.flatMap {
@@ -31,7 +64,8 @@ trait SierraLocation extends SierraQueryOps {
         )
     }
 
-  def getDigitalLocation(identifier: String): DigitalLocationDeprecated = {
+  def getDigitalLocationDeprecated(
+    identifier: String): DigitalLocationDeprecated = {
     // This is a defensive check, it may not be needed since an identifier should always be present.
     if (!identifier.isEmpty) {
       DigitalLocationDeprecated(

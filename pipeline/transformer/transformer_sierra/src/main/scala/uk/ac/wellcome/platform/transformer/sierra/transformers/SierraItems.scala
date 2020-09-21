@@ -52,7 +52,7 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
     debug(s"Attempting to transform $itemId")
     Item(
       title = getItemTitle(itemData),
-      locations = getPhysicalLocation(itemData, bibData).toList,
+      locations = getPhysicalLocationDeprecated(itemData, bibData).toList,
       id = IdState.Identifiable(
         sourceIdentifier = SourceIdentifier(
           identifierType = IdentifierType("sierra-system-number"),
