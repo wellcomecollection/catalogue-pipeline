@@ -179,7 +179,7 @@ case object DisplayWork {
         if (includes.images)
           Some(work.data.images.map(DisplayWorkImageInclude(_)))
         else None,
-      ontologyType = displayWorkType(work.data.`type`),
+      ontologyType = displayWorkType(work.data.workType),
     )
 
   def apply(work: Work.Visible[Identified]): DisplayWork =

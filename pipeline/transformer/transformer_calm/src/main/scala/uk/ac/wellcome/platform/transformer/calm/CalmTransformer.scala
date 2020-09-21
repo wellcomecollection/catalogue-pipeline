@@ -139,7 +139,7 @@ object CalmTransformer
         physicalDescription = physicalDescription(record),
         production = production(record),
         notes = notes(record),
-        `type` = workType(collectionLevel)
+        workType = workType(collectionLevel)
       )
 
   def sourceIdentifier(record: CalmRecord): SourceIdentifier =
