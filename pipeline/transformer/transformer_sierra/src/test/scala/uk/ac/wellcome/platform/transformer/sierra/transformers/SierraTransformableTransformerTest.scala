@@ -107,8 +107,8 @@ class SierraTransformableTransformerTest
       1)
     triedWork.isSuccess shouldBe true
 
-    triedWork.get.asInstanceOf[Work.Visible[_]].data.workType shouldBe Some(
-      expectedWorkType)
+    triedWork.get.asInstanceOf[Work.Visible[_]].data.format shouldBe Some(
+      expectedFormat)
   }
 
   it("extracts information from items") {
@@ -851,7 +851,7 @@ class SierraTransformableTransformerTest
 
     val work = transformDataToWork(id = id, data = bibData)
     work shouldBe a[Work.Visible[_]]
-    work.asInstanceOf[Work.Visible[Unidentified]].data.workType shouldBe Some(
+    work.asInstanceOf[Work.Visible[Unidentified]].data.format shouldBe Some(
       Pictures
     )
   }
