@@ -9,5 +9,5 @@ trait MiroItems extends MiroLocation {
     List(
       Item(
         id = IdState.Unidentifiable,
-        locations = List(getLocation(miroRecord))))
+        locationsDeprecated = List(getLocation(miroRecord))))
 }

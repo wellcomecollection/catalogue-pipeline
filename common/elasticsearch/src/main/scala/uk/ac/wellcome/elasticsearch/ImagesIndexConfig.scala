@@ -31,7 +31,7 @@ case object ImagesIndexConfig extends IndexConfig {
   override val mapping: MappingDefinition = properties(
     id(),
     version,
-    location("location"),
+    locationDeprecated("locationDeprecated"),
     source,
     inferredData
   ).dynamic(DynamicMapping.Strict)

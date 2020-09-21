@@ -45,7 +45,7 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
     else
       getMetsThumbnail(target, sources)
         .orElse(getMinMiroThumbnail(target, sources))
-        .getOrElse(target.data.thumbnail)
+        .getOrElse(target.data.thumbnailDeprecated)
 
   val getMetsThumbnail =
     new PartialRule {
@@ -56,7 +56,7 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
       def rule(target: Work.Visible[Unidentified],
                sources: NonEmptyList[Work[Unidentified]]): FieldData = {
         debug(s"Choosing METS thumbnail from ${describeWork(sources.head)}")
-        sources.head.data.thumbnail
+        sources.head.data.thumbnailDeprecated
       }
     }
 
@@ -73,7 +73,7 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
         minMiroSource.foreach { source =>
           debug(s"Choosing Miro thumbnail from ${describeWork(source)}")
         }
-        minMiroSource.flatMap(_.data.thumbnail)
+        minMiroSource.flatMap(_.data.thumbnailDeprecated)
       }
 
       object MiroIdOrdering extends Ordering[Work[Unidentified]] {
@@ -92,7 +92,7 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
                               sources: Seq[Work[Unidentified]]) =
     (target :: sources.toList).exists { work =>
       work.data.items.exists { item =>
-        item.locations.exists(_.isRestrictedOrClosed)
+        item.locationsDeprecated.exists(_.isRestrictedOrClosed)
       }
     }
 }

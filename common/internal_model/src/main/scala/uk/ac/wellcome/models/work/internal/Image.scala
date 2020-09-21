@@ -2,20 +2,20 @@ package uk.ac.wellcome.models.work.internal
 
 sealed trait BaseImage[+State <: DataState] extends HasId[State#Id] {
   val id: State#Id
-  val location: DigitalLocationDeprecated
+  val locationDeprecated: DigitalLocationDeprecated
 }
 
 case class UnmergedImage[State <: DataState](
   id: State#Id,
   version: Int,
-  location: DigitalLocationDeprecated
+  locationDeprecated: DigitalLocationDeprecated
 ) extends BaseImage[State] {
   def mergeWith(canonicalWork: SourceWork[State],
                 redirectedWork: Option[SourceWork[State]]): MergedImage[State] =
     MergedImage[State](
       id = id,
       version = version,
-      location = location,
+      locationDeprecated = locationDeprecated,
       source = SourceWorks[State](canonicalWork, redirectedWork)
     )
 }
@@ -23,14 +23,14 @@ case class UnmergedImage[State <: DataState](
 case class MergedImage[State <: DataState](
   id: State#Id,
   version: Int,
-  location: DigitalLocationDeprecated,
+  locationDeprecated: DigitalLocationDeprecated,
   source: ImageSource[State]
 ) extends BaseImage[State] {
   def toUnmerged: UnmergedImage[State] =
     UnmergedImage[State](
       id = id,
       version = version,
-      location = location
+      locationDeprecated = locationDeprecated
     )
 }
 
@@ -41,7 +41,7 @@ object MergedImage {
       AugmentedImage(
         id = mergedImage.id,
         version = mergedImage.version,
-        location = mergedImage.location,
+        locationDeprecated = mergedImage.locationDeprecated,
         source = mergedImage.source,
         inferredData = inferredData
       )
@@ -51,7 +51,7 @@ object MergedImage {
 case class AugmentedImage(
   id: IdState.Identified,
   version: Int,
-  location: DigitalLocationDeprecated,
+  locationDeprecated: DigitalLocationDeprecated,
   source: ImageSource[DataState.Identified],
   inferredData: Option[InferredData] = None
 ) extends BaseImage[DataState.Identified]

@@ -17,7 +17,7 @@ trait ItemsGenerators extends IdentifiersGenerators {
         sourceIdentifier = sourceIdentifier,
         otherIdentifiers = otherIdentifiers,
       ),
-      locations = locations,
+      locationsDeprecated = locations,
       title = title,
     )
 
@@ -34,12 +34,12 @@ trait ItemsGenerators extends IdentifiersGenerators {
   ): Item[I] =
     Item(
       id = IdState.Identifiable(sourceIdentifier),
-      locations = locations
+      locationsDeprecated = locations
     )
 
   def createUnidentifiableItemWith[I >: IdState.Unidentifiable.type](
     locations: List[LocationDeprecated] = List(defaultLocation)): Item[I] =
-    Item(id = IdState.Unidentifiable, locations = locations)
+    Item(id = IdState.Unidentifiable, locationsDeprecated = locations)
 
   def createPhysicalLocation = createPhysicalLocationWith()
 

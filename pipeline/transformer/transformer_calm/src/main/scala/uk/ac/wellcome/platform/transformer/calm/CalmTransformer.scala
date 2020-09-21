@@ -223,7 +223,7 @@ object CalmTransformer
     List(
       Item(
         title = None,
-        locations = List(physicalLocation(record, status))
+        locationsDeprecated = List(physicalLocation(record, status))
       )
     )
 

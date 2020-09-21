@@ -51,7 +51,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
           items = List(
             Item(
               title = None,
-              locations = List(
+              locationsDeprecated = List(
                 PhysicalLocationDeprecated(
                   locationType = LocationType("scmac"),
                   label = "Closed stores Arch. & MSS",
@@ -121,7 +121,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "CatalogueStatus" -> "Catalogued"
     )
     val item = CalmTransformer(record, version).right.get.data.items.head
-    item.locations.head.accessConditions shouldBe List(
+    item.locationsDeprecated.head.accessConditions shouldBe List(
       AccessCondition(
         status = Some(AccessStatus.Restricted),
         terms = Some("nope. nope."),
@@ -505,7 +505,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
           items = List(
             Item(
               title = None,
-              locations = List(
+              locationsDeprecated = List(
                 PhysicalLocationDeprecated(
                   locationType = LocationType("scmac"),
                   label = "Closed stores Arch. & MSS",

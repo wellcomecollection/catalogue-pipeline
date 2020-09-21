@@ -114,7 +114,7 @@ class MetsTransformerWorkerServiceTest
     val expectedItem =
       Item(
         id = IdState.Unidentifiable,
-        locations = List(expectedDigitalLocation))
+        locationsDeprecated = List(expectedDigitalLocation))
 
     val expectedWork = Work.Invisible[Unidentified](
       version = version,

@@ -55,7 +55,7 @@ class PlatformMergerTest
       images = List(createUnmergedMetsImage)
     ).withData { data =>
       data.copy(
-        thumbnail = Some(
+        thumbnailDeprecated = Some(
           DigitalLocationDeprecated(
             url = "https://path.to/thumbnail.jpg",
             locationType = LocationType("thumbnail-image"),
@@ -112,10 +112,10 @@ class PlatformMergerTest
     val expectedMergedWork = sierraPhysicalWork.withData { data =>
       data.copy(
         otherIdentifiers = sierraPhysicalWork.data.otherIdentifiers ++ miroWork.identifiers,
-        thumbnail = miroWork.data.thumbnail,
+        thumbnailDeprecated = miroWork.data.thumbnailDeprecated,
         items = List(
           sierraItem.copy(
-            locations = sierraItem.locations ++ miroItem.locations
+            locationsDeprecated = sierraItem.locationsDeprecated ++ miroItem.locationsDeprecated
           )
         ),
         images = miroWork.data.images,
@@ -152,7 +152,7 @@ class PlatformMergerTest
     val expectedMergedWork = zeroItemSierraWork.withData { data =>
       data.copy(
         otherIdentifiers = data.otherIdentifiers ++ miroWork.identifiers,
-        thumbnail = miroWork.data.thumbnail,
+        thumbnailDeprecated = miroWork.data.thumbnailDeprecated,
         items = miroWork.data.items,
         images = miroWork.data.images,
         merged = true
@@ -192,10 +192,10 @@ class PlatformMergerTest
     val expectedMergedWork = sierraDigitalWork.withData { data =>
       data.copy(
         otherIdentifiers = sierraDigitalWork.data.otherIdentifiers ++ miroWork.identifiers,
-        thumbnail = miroWork.data.thumbnail,
+        thumbnailDeprecated = miroWork.data.thumbnailDeprecated,
         items = List(
           sierraItem.copy(
-            locations = sierraItem.locations ++ miroItem.locations
+            locationsDeprecated = sierraItem.locationsDeprecated ++ miroItem.locationsDeprecated
           )
         ),
         images = miroWork.data.images,
@@ -256,10 +256,10 @@ class PlatformMergerTest
         merged = true,
         items = List(
           physicalItem.copy(
-            locations = physicalItem.locations ++ digitalItem.locations
+            locationsDeprecated = physicalItem.locationsDeprecated ++ digitalItem.locationsDeprecated
           )
         ),
-        thumbnail = metsWork.data.thumbnail,
+        thumbnailDeprecated = metsWork.data.thumbnailDeprecated,
       )
     }
 
@@ -291,11 +291,11 @@ class PlatformMergerTest
         merged = true,
         items = List(
           physicalItem.copy(
-            locations = physicalItem.locations ++ digitalItem.locations
+            locationsDeprecated = physicalItem.locationsDeprecated ++ digitalItem.locationsDeprecated
           )
         ),
         images = metsWork.data.images,
-        thumbnail = metsWork.data.thumbnail,
+        thumbnailDeprecated = metsWork.data.thumbnailDeprecated,
       )
     }
 
@@ -333,10 +333,10 @@ class PlatformMergerTest
     val expectedMergedWork = sierraPhysicalWork.withData { data =>
       data.copy(
         otherIdentifiers = sierraPhysicalWork.data.otherIdentifiers ++ sierraDigitised.identifiers ++ miroWork.identifiers,
-        thumbnail = metsWork.data.thumbnail,
+        thumbnailDeprecated = metsWork.data.thumbnailDeprecated,
         items = List(
           sierraItem.copy(
-            locations = sierraItem.locations ++ metsItem.locations
+            locationsDeprecated = sierraItem.locationsDeprecated ++ metsItem.locationsDeprecated
           )
         ),
         images = miroWork.data.images,
@@ -391,7 +391,7 @@ class PlatformMergerTest
 
     val expectedMergedWork = multipleItemsSierraWork.withData { data =>
       data.copy(
-        thumbnail = metsWork.data.thumbnail,
+        thumbnailDeprecated = metsWork.data.thumbnailDeprecated,
         items = sierraItems :+ metsItem,
         merged = true
       )
@@ -424,7 +424,7 @@ class PlatformMergerTest
     val expectedMergedWork = multipleItemsSierraWork.withData { data =>
       data.copy(
         otherIdentifiers = multipleItemsSierraWork.data.otherIdentifiers ++ sierraDigitised.identifiers,
-        thumbnail = metsWork.data.thumbnail,
+        thumbnailDeprecated = metsWork.data.thumbnailDeprecated,
         items = sierraItems :+ metsItem,
         merged = true
       )

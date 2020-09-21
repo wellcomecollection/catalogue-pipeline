@@ -63,9 +63,9 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
         case List(sierraItem) =>
           List(
             sierraItem.copy(
-              locations = sierraItem.locations ++ sources.toList
+              locationsDeprecated = sierraItem.locationsDeprecated ++ sources.toList
                 .flatMap(_.data.items)
-                .flatMap(_.locations)
+                .flatMap(_.locationsDeprecated)
             )
           )
         case _ => target.data.items ++ sources.toList.flatMap(_.data.items)
@@ -99,9 +99,9 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
           case List(sierraItem) =>
             List(
               sierraItem.copy(
-                locations = sierraItem.locations ++ sources.toList
+                locationsDeprecated = sierraItem.locationsDeprecated ++ sources.toList
                   .flatMap(_.data.items)
-                  .flatMap(_.locations)
+                  .flatMap(_.locationsDeprecated)
               )
             )
           case _ => sources.toList.flatMap(_.data.items)
@@ -128,7 +128,7 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
 
       val metsSources = sources.filter(singleDigitalItemMetsWork)
       val metsDigitalLocations =
-        metsSources.flatMap(_.data.items.flatMap(_.locations))
+        metsSources.flatMap(_.data.items.flatMap(_.locationsDeprecated))
 
       val sierraSources = sources.filter(sierraWork)
       val sierraItemId =
@@ -136,7 +136,7 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
 
       List(
         calmItem.copy(
-          locations = calmItem.locations ++ metsDigitalLocations,
+          locationsDeprecated = calmItem.locationsDeprecated ++ metsDigitalLocations,
           id = sierraItemId.getOrElse(IdState.Unidentifiable)
         ))
     }

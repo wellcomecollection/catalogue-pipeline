@@ -30,7 +30,7 @@ class WorkPredicatesTest
     createUnidentifiedWorkWith(
       sourceIdentifier = createMiroSourceIdentifier,
       otherIdentifiers = List(),
-      thumbnail = createMiroWork.data.thumbnail,
+      thumbnail = createMiroWork.data.thumbnailDeprecated,
       items = (0 to 3).flatMap(_ => createMiroWork.data.items).toList
     ),
     createSierraDigitalWorkWith(
@@ -66,7 +66,8 @@ class WorkPredicatesTest
     forAll(filtered) { work =>
       work.sourceIdentifier.identifierType.id shouldBe "mets"
       work.data.items should have size 1
-      work.data.items.head.locations.head shouldBe a[DigitalLocationDeprecated]
+      work.data.items.head.locationsDeprecated.head shouldBe a[
+        DigitalLocationDeprecated]
     }
   }
 
@@ -76,7 +77,8 @@ class WorkPredicatesTest
     forAll(filtered) { work =>
       work.sourceIdentifier.identifierType.id shouldBe "miro-image-number"
       work.data.items should have size 1
-      work.data.items.head.locations.head shouldBe a[DigitalLocationDeprecated]
+      work.data.items.head.locationsDeprecated.head shouldBe a[
+        DigitalLocationDeprecated]
     }
   }
 
@@ -94,7 +96,7 @@ class WorkPredicatesTest
     filtered should not be empty
     forAll(filtered) { work =>
       work.sourceIdentifier.identifierType.id shouldBe "sierra-system-number"
-      atLeast(1, work.data.items.flatMap(_.locations)) should matchPattern {
+      atLeast(1, work.data.items.flatMap(_.locationsDeprecated)) should matchPattern {
         case _: PhysicalLocationDeprecated =>
       }
     }

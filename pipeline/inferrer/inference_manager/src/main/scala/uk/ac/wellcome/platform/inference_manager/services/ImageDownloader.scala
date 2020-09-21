@@ -57,7 +57,7 @@ class ImageDownloader[Ctx](
 
   private def createImageFileRequest(
     image: MergedIdentifiedImage): (HttpRequest, MergedIdentifiedImage) = {
-    val uri = getImageUri(image.location.url)
+    val uri = getImageUri(image.locationDeprecated.url)
     (HttpRequest(method = HttpMethods.GET, uri = uri), image)
   }
 

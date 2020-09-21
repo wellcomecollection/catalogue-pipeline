@@ -81,7 +81,7 @@ class MiroRecordTransformer
         subjects = getSubjects(miroRecord),
         genres = getGenres(miroRecord),
         contributors = getContributors(miroRecord),
-        thumbnail = Some(getThumbnail(miroRecord)),
+        thumbnailDeprecated = Some(getThumbnail(miroRecord)),
         items = getItems(miroRecord),
         images = List(getImage(miroRecord, version))
       )

@@ -72,8 +72,8 @@ class ItemsRuleTest
     inside(ItemsRule.merge(physicalPictureSierra, List(miroWork))) {
       case FieldMergeResult(items, mergedSources) =>
         items should have size 1
-        items.head.locations should contain theSameElementsAs
-          physicalPictureSierra.data.items.head.locations ++ miroWork.data.items.head.locations
+        items.head.locationsDeprecated should contain theSameElementsAs
+          physicalPictureSierra.data.items.head.locationsDeprecated ++ miroWork.data.items.head.locationsDeprecated
 
         mergedSources should be(Seq(miroWork))
     }
@@ -83,9 +83,9 @@ class ItemsRuleTest
     inside(ItemsRule.merge(physicalPictureSierra, List(metsWork))) {
       case FieldMergeResult(items, mergedSources) =>
         items should have size 1
-        items.head.locations shouldBe
-          physicalPictureSierra.data.items.head.locations ++
-            metsWork.data.items.head.locations
+        items.head.locationsDeprecated shouldBe
+          physicalPictureSierra.data.items.head.locationsDeprecated ++
+            metsWork.data.items.head.locationsDeprecated
 
         mergedSources should be(Seq(metsWork))
     }
@@ -114,9 +114,9 @@ class ItemsRuleTest
     inside(ItemsRule.merge(physicalPictureSierra, List(miroWork, metsWork))) {
       case FieldMergeResult(items, mergedSources) =>
         items should have size 1
-        items.head.locations shouldBe
-          physicalPictureSierra.data.items.head.locations ++
-            metsWork.data.items.head.locations
+        items.head.locationsDeprecated shouldBe
+          physicalPictureSierra.data.items.head.locationsDeprecated ++
+            metsWork.data.items.head.locationsDeprecated
 
         mergedSources should contain theSameElementsAs (Seq(metsWork, miroWork))
     }
@@ -155,7 +155,7 @@ class ItemsRuleTest
     inside(ItemsRule.merge(calmWork, List(metsWork))) {
       case FieldMergeResult(items, mergedSources) =>
         items should have size 1
-        items.head.locations should contain theSameElementsAs (calmWork.data.items.head.locations ++ metsWork.data.items.head.locations)
+        items.head.locationsDeprecated should contain theSameElementsAs (calmWork.data.items.head.locationsDeprecated ++ metsWork.data.items.head.locationsDeprecated)
 
         mergedSources should be(Seq(metsWork))
     }
@@ -166,7 +166,7 @@ class ItemsRuleTest
       case FieldMergeResult(items, mergedSources) =>
         items should have size 1
         items.head.id should be(physicalPictureSierra.data.items.head.id)
-        items.head.locations should contain theSameElementsAs (calmWork.data.items.head.locations ++ metsWork.data.items.head.locations)
+        items.head.locationsDeprecated should contain theSameElementsAs (calmWork.data.items.head.locationsDeprecated ++ metsWork.data.items.head.locationsDeprecated)
 
         mergedSources should contain theSameElementsAs Seq(
           metsWork,

@@ -85,7 +85,7 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
     case AggregationRequest.License =>
       TermsAggregation("license")
         .size(100)
-        .field("data.items.locations.license.id")
+        .field("data.items.locationsDeprecated.license.id")
         .minDocCount(0)
   }
 
@@ -127,7 +127,7 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
         termQuery(field = "type", value = "Visible")
       case ItemLocationTypeFilter(itemLocationTypeIds) =>
         termsQuery(
-          field = "data.items.locations.locationType.id",
+          field = "data.items.locationsDeprecated.locationType.id",
           values = itemLocationTypeIds)
       case FormatFilter(formatIds) =>
         termsQuery(field = "data.format.id", values = formatIds)
@@ -147,7 +147,7 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
           .defaultOperator("AND")
       case LicenseFilter(licenseIds) =>
         termsQuery(
-          field = "data.items.locations.license.id",
+          field = "data.items.locationsDeprecated.license.id",
           values = licenseIds)
       case IdentifiersFilter(identifiers) =>
         should(
@@ -160,7 +160,7 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
         )
       case AccessStatusFilter(includes, excludes) =>
         includesExcludesQuery(
-          field = "data.items.locations.accessConditions.status.type",
+          field = "data.items.locationsDeprecated.accessConditions.status.type",
           includes = includes.map(_.name),
           excludes = excludes.map(_.name),
         )

@@ -126,7 +126,7 @@ object PlatformMerger extends Merger {
             data.copy[DataState.Unidentified](
               merged = true,
               items = items,
-              thumbnail = thumbnail,
+              thumbnailDeprecated = thumbnail,
               otherIdentifiers = otherIdentifiers,
               images = images.map(_.toUnmerged)
             )

@@ -82,7 +82,7 @@ class ThumbnailRuleTest
     inside(ThumbnailRule.merge(digitalSierraWork, miroWorks :+ metsWork)) {
       case FieldMergeResult(thumbnail, _) =>
         thumbnail shouldBe defined
-        thumbnail shouldBe metsWork.data.thumbnail
+        thumbnail shouldBe metsWork.data.thumbnailDeprecated
     }
   }
 
@@ -91,7 +91,7 @@ class ThumbnailRuleTest
     inside(ThumbnailRule.merge(digitalSierraWork, miroWorks)) {
       case FieldMergeResult(thumbnail, _) =>
         thumbnail shouldBe defined
-        miroWorks.map(_.data.thumbnail) should contain(thumbnail)
+        miroWorks.map(_.data.thumbnailDeprecated) should contain(thumbnail)
     }
   }
 
@@ -100,7 +100,7 @@ class ThumbnailRuleTest
     inside(ThumbnailRule.merge(physicalSierraWork, miroWorks)) {
       case FieldMergeResult(thumbnail, _) =>
         thumbnail shouldBe defined
-        miroWorks.map(_.data.thumbnail) should contain(thumbnail)
+        miroWorks.map(_.data.thumbnailDeprecated) should contain(thumbnail)
     }
   }
 
@@ -111,7 +111,7 @@ class ThumbnailRuleTest
         thumbnail shouldBe miroWorks
           .minBy(_.sourceIdentifier.value)
           .data
-          .thumbnail
+          .thumbnailDeprecated
     }
   }
 

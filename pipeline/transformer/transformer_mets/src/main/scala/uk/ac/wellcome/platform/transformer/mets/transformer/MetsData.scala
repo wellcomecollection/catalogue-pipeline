@@ -23,7 +23,7 @@ case class MetsData(
       accessStatus <- parseAccessStatus
       item = Item[IdState.Unminted](
         id = IdState.Unidentifiable,
-        locations = List(digitalLocation(license, accessStatus)))
+        locationsDeprecated = List(digitalLocation(license, accessStatus)))
     } yield
       Work.Invisible[Unidentified](
         version = version,
@@ -31,7 +31,8 @@ case class MetsData(
         data = WorkData[DataState.Unidentified](
           items = List(item),
           mergeCandidates = List(mergeCandidate),
-          thumbnail = thumbnail(sourceIdentifier.value, license, accessStatus),
+          thumbnailDeprecated =
+            thumbnail(sourceIdentifier.value, license, accessStatus),
           images = images(version, license, accessStatus)
         )
       )

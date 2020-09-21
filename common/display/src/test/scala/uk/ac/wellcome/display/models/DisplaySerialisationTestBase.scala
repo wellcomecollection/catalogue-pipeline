@@ -40,7 +40,7 @@ trait DisplaySerialisationTestBase {
        ${identifiers(item)}
        "type": "${item.ontologyType}",
        ${optionalString("title", item.title)}
-       "locations": [${locations(item.locations)}]
+       "locations": [${locations(item.locationsDeprecated)}]
      }
     """
 

@@ -368,7 +368,7 @@ class DisplayWorkSerialisationTest
       | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
-      | "thumbnail": ${location(work.data.thumbnail.get)}
+      | "thumbnail": ${location(work.data.thumbnailDeprecated.get)}
       |}
     """.stripMargin
 
