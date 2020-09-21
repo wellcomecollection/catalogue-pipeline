@@ -90,13 +90,13 @@ object Implicits {
     deriveConfiguredDecoder
   implicit val _dec44: Decoder[WorkData[DataState.Identified]] =
     deriveConfiguredDecoder
-  implicit val _dec45: Decoder[Work.Standard[WorkState.Unidentified]] =
+  implicit val _dec45: Decoder[Work.Visible[WorkState.Unidentified]] =
     deriveConfiguredDecoder
   implicit val _dec46: Decoder[Work.Invisible[WorkState.Unidentified]] =
     deriveConfiguredDecoder
   implicit val _dec47: Decoder[Work.Redirected[WorkState.Unidentified]] =
     deriveConfiguredDecoder
-  implicit val _dec48: Decoder[Work.Standard[WorkState.Identified]] =
+  implicit val _dec48: Decoder[Work.Visible[WorkState.Identified]] =
     deriveConfiguredDecoder
   implicit val _dec49: Decoder[Work.Invisible[WorkState.Identified]] =
     deriveConfiguredDecoder
@@ -187,13 +187,13 @@ object Implicits {
     deriveConfiguredEncoder
   implicit val _enc44: Encoder[WorkData[DataState.Identified]] =
     deriveConfiguredEncoder
-  implicit val _enc45: Encoder[Work.Standard[WorkState.Unidentified]] =
+  implicit val _enc45: Encoder[Work.Visible[WorkState.Unidentified]] =
     deriveConfiguredEncoder
   implicit val _enc46: Encoder[Work.Invisible[WorkState.Unidentified]] =
     deriveConfiguredEncoder
   implicit val _enc47: Encoder[Work.Redirected[WorkState.Unidentified]] =
     deriveConfiguredEncoder
-  implicit val _enc48: Encoder[Work.Standard[WorkState.Identified]] =
+  implicit val _enc48: Encoder[Work.Visible[WorkState.Identified]] =
     deriveConfiguredEncoder
   implicit val _enc49: Encoder[Work.Invisible[WorkState.Identified]] =
     deriveConfiguredEncoder

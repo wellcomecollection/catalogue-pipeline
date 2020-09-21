@@ -387,7 +387,7 @@ class ElasticsearchServiceTest
     )
 
   private def populateElasticsearch(
-    index: Index): List[Work.Standard[Identified]] = {
+    index: Index): List[Work.Visible[Identified]] = {
     val works = createIdentifiedWorks(count = 10)
 
     insertIntoElasticsearch(index, works: _*)
@@ -407,7 +407,7 @@ class ElasticsearchServiceTest
   private def assertResultsAreCorrect(
     index: Index,
     queryOptions: ElasticsearchQueryOptions = createElasticsearchQueryOptions,
-    expectedWorks: List[Work.Standard[Identified]],
+    expectedWorks: List[Work.Visible[Identified]],
     scored: Option[Boolean] = None) = {
     searchResults(index, queryOptions) should contain theSameElementsAs expectedWorks
   }

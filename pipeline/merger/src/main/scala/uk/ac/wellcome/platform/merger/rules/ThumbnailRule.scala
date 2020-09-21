@@ -25,7 +25,7 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
   type FieldData = Option[LocationDeprecated]
 
   override def merge(
-    target: Work.Standard[Unidentified],
+    target: Work.Visible[Unidentified],
     sources: Seq[Work[Unidentified]]): FieldMergeResult[FieldData] =
     FieldMergeResult(
       data = getThumbnail(target, sources),
@@ -38,7 +38,7 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
     )
 
   def getThumbnail(
-    target: Work.Standard[Unidentified],
+    target: Work.Visible[Unidentified],
     sources: Seq[Work[Unidentified]]): Option[LocationDeprecated] =
     if (shouldSuppressThumbnail(target, sources))
       None
@@ -53,7 +53,7 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
       val isDefinedForSource: WorkPredicate =
         WorkPredicates.singleDigitalItemMetsWork
 
-      def rule(target: Work.Standard[Unidentified],
+      def rule(target: Work.Visible[Unidentified],
                sources: NonEmptyList[Work[Unidentified]]): FieldData = {
         debug(s"Choosing METS thumbnail from ${describeWork(sources.head)}")
         sources.head.data.thumbnail
@@ -67,7 +67,7 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
       val isDefinedForSource: WorkPredicate =
         WorkPredicates.singleDigitalItemMiroWork
 
-      def rule(target: Work.Standard[Unidentified],
+      def rule(target: Work.Visible[Unidentified],
                sources: NonEmptyList[Work[Unidentified]]): FieldData = {
         val minMiroSource = Try(sources.toList.min(MiroIdOrdering)).toOption
         minMiroSource.foreach { source =>
@@ -88,7 +88,7 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
       }
     }
 
-  def shouldSuppressThumbnail(target: Work.Standard[Unidentified],
+  def shouldSuppressThumbnail(target: Work.Visible[Unidentified],
                               sources: Seq[Work[Unidentified]]) =
     (target :: sources.toList).exists { work =>
       work.data.items.exists { item =>

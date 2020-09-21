@@ -75,7 +75,7 @@ class SierraTransformableTransformer(sierraTransformable: SierraTransformable,
           )
         }
         val data = workDataFromBibData(bibId, bibData)
-        Work.Standard[Unidentified](
+        Work.Visible[Unidentified](
           version = version,
           state = Unidentified(sourceIdentifier),
           data = data

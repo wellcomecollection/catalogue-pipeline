@@ -14,7 +14,7 @@ import scala.util.Try
 trait MiroTransformableWrapper extends Matchers { this: Suite =>
   val transformer = new MiroRecordTransformer
 
-  def transformWork(miroRecord: MiroRecord): Work.Standard[Unidentified] = {
+  def transformWork(miroRecord: MiroRecord): Work.Visible[Unidentified] = {
     val triedWork: Try[Work[Unidentified]] =
       transformer.transform(
         miroRecord = miroRecord,
@@ -32,7 +32,7 @@ trait MiroTransformableWrapper extends Matchers { this: Suite =>
     }
 
     triedWork.isSuccess shouldBe true
-    triedWork.get.asInstanceOf[Work.Standard[Unidentified]]
+    triedWork.get.asInstanceOf[Work.Visible[Unidentified]]
   }
 
   def assertTransformWorkFails(miroRecord: MiroRecord): Assertion =

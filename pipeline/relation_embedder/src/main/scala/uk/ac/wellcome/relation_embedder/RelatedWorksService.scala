@@ -46,7 +46,7 @@ class PathQueryRelatedWorksService(elasticClient: ElasticClient, index: Index)(
   def getOtherAffectedWorks(
     work: Work[Identified]): Future[List[SourceIdentifier]] =
     work match {
-      case work: Work.Standard[Identified] =>
+      case work: Work.Visible[Identified] =>
         work.data.collectionPath match {
           case None => Future.successful(Nil)
           case Some(CollectionPath(path, _, _)) =>
@@ -70,7 +70,7 @@ class PathQueryRelatedWorksService(elasticClient: ElasticClient, index: Index)(
 
   def getRelations(work: Work[Identified]): Future[RelatedWorks] =
     work match {
-      case work: Work.Standard[Identified] =>
+      case work: Work.Visible[Identified] =>
         work.data.collectionPath match {
           case None => Future.successful(RelatedWorks.nil)
           case Some(CollectionPath(path, _, _)) =>
@@ -132,8 +132,8 @@ class PathQueryRelatedWorksService(elasticClient: ElasticClient, index: Index)(
     else
       Right(response.result)
 
-  private def toWork(hit: SearchHit): Result[Work.Standard[Identified]] =
-    hit.safeTo[Work.Standard[Identified]].toEither
+  private def toWork(hit: SearchHit): Result[Work.Visible[Identified]] =
+    hit.safeTo[Work.Visible[Identified]].toEither
 
   case class AffectedWork(sourceIdentifier: SourceIdentifier)
 

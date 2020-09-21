@@ -24,7 +24,7 @@ class RelatedWorkService(elasticsearchService: ElasticsearchService)(
 
   def retrieveRelatedWorks(
     index: Index,
-    work: Work.Standard[Identified]): Future[Result[RelatedWorks]] =
+    work: Work.Visible[Identified]): Future[Result[RelatedWorks]] =
     work.data.collectionPath match {
       case None =>
         Future.successful(Right(RelatedWorks.nil))
@@ -53,14 +53,14 @@ class RelatedWorkService(elasticsearchService: ElasticsearchService)(
           }
     }
 
-  private def toWork(hit: SearchHit): Result[Work.Standard[Identified]] =
-    hit.safeTo[Work.Standard[Identified]].toEither
+  private def toWork(hit: SearchHit): Result[Work.Visible[Identified]] =
+    hit.safeTo[Work.Visible[Identified]].toEither
 
   private def toRelatedWorks(
     path: String,
-    children: List[Work.Standard[Identified]],
-    siblings: List[Work.Standard[Identified]],
-    ancestors: List[Work.Standard[Identified]]): RelatedWorks = {
+    children: List[Work.Visible[Identified]],
+    siblings: List[Work.Visible[Identified]],
+    ancestors: List[Work.Visible[Identified]]): RelatedWorks = {
     val mainPath = tokenizePath(path)
     val (precededBy, succeededBy) = siblings.sortBy(tokenizePath).partition {
       work =>
@@ -100,7 +100,7 @@ class RelatedWorkService(elasticsearchService: ElasticsearchService)(
     }
 
   private def tokenizePath(
-    work: Work.Standard[Identified]): Option[TokenizedPath] =
+    work: Work.Visible[Identified]): Option[TokenizedPath] =
     work.data.collectionPath
       .map { collectionPath =>
         tokenizePath(collectionPath.path)

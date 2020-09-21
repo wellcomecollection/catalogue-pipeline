@@ -22,7 +22,7 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
   type FieldData = List[Item[IdState.Unminted]]
 
   override def merge(
-    target: Work.Standard[Unidentified],
+    target: Work.Visible[Unidentified],
     sources: Seq[Work[Unidentified]]): FieldMergeResult[FieldData] = {
     val items =
       mergeIntoCalmTarget(target, sources)
@@ -57,7 +57,7 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     val isDefinedForTarget: WorkPredicate = sierraWork
     val isDefinedForSource: WorkPredicate = singleDigitalItemMetsWork
 
-    def rule(target: Work.Standard[Unidentified],
+    def rule(target: Work.Visible[Unidentified],
              sources: NonEmptyList[Work[Unidentified]]): FieldData =
       target.data.items match {
         case List(sierraItem) =>
@@ -93,7 +93,7 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
       override val isDefinedForSourceList: Seq[Work[Unidentified]] => Boolean =
         _.count(singleDigitalItemMiroWork) == 1
 
-      def rule(target: Work.Standard[Unidentified],
+      def rule(target: Work.Visible[Unidentified],
                sources: NonEmptyList[Work[Unidentified]]): FieldData =
         target.data.items match {
           case List(sierraItem) =>
@@ -120,7 +120,7 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     val isDefinedForSource
       : WorkPredicate = singleDigitalItemMetsWork or sierraWork
 
-    def rule(target: Work.Standard[Unidentified],
+    def rule(target: Work.Visible[Unidentified],
              sources: NonEmptyList[Work[Unidentified]]): FieldData = {
 
       // The calm Work predicate ensures this is safe

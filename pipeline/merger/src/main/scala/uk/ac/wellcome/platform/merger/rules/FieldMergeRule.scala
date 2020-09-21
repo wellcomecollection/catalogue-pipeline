@@ -27,11 +27,11 @@ import WorkState.Unidentified
  */
 trait FieldMergeRule {
   protected final type Params =
-    (Work.Standard[Unidentified], Seq[Work[Unidentified]])
+    (Work.Visible[Unidentified], Seq[Work[Unidentified]])
   protected type FieldData
   protected type MergeState = State[Set[Work[Unidentified]], FieldData]
 
-  def apply(target: Work.Standard[Unidentified],
+  def apply(target: Work.Visible[Unidentified],
             sources: Seq[Work[Unidentified]]): MergeState =
     merge(target, sources) match {
       case FieldMergeResult(field, mergedSources) =>
@@ -39,7 +39,7 @@ trait FieldMergeRule {
           (existingMergedSources ++ mergedSources.toSet, field))
     }
 
-  def merge(target: Work.Standard[Unidentified],
+  def merge(target: Work.Visible[Unidentified],
             sources: Seq[Work[Unidentified]]): FieldMergeResult[FieldData]
 
   protected trait PartialRule {
@@ -48,10 +48,10 @@ trait FieldMergeRule {
     val isDefinedForSourceList: Seq[Work[Unidentified]] => Boolean =
       const(true)
 
-    protected def rule(target: Work.Standard[Unidentified],
+    protected def rule(target: Work.Visible[Unidentified],
                        sources: NonEmptyList[Work[Unidentified]]): FieldData
 
-    def apply(target: Work.Standard[Unidentified],
+    def apply(target: Work.Visible[Unidentified],
               sources: Seq[Work[Unidentified]]): Option[FieldData] =
       mergedSources(target, sources) match {
         case head +: tail =>
@@ -59,7 +59,7 @@ trait FieldMergeRule {
         case _ => None
       }
 
-    def apply(target: Work.Standard[Unidentified],
+    def apply(target: Work.Visible[Unidentified],
               source: Work[Unidentified]): Option[FieldData] =
       apply(target, List(source))
 
@@ -73,7 +73,7 @@ trait FieldMergeRule {
      * - `isDefinedForSource(source)` is `true` for at least one element of `sources`
      */
     def mergedSources(
-      target: Work.Standard[Unidentified],
+      target: Work.Visible[Unidentified],
       sources: Seq[Work[Unidentified]]): Seq[Work[Unidentified]] =
       if (isDefinedForSourceList(sources) && isDefinedForTarget(target)) {
         sources.filter(isDefinedForSource)

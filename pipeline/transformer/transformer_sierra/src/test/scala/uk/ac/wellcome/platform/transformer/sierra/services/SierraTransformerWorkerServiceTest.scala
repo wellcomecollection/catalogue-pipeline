@@ -74,7 +74,7 @@ class SierraTransformerWorkerServiceTest
               value = id.withoutCheckDigit
             )
 
-          val works = sender.getMessages[Work.Standard[Unidentified]]
+          val works = sender.getMessages[Work.Visible[Unidentified]]
           works.length shouldBe >=(1)
 
           works.map { actualWork =>
@@ -104,9 +104,9 @@ class SierraTransformerWorkerServiceTest
           works.size should be >= 1
 
           works.map { actualWork =>
-            actualWork shouldBe a[Work.Standard[_]]
+            actualWork shouldBe a[Work.Visible[_]]
             val unidentifiedWork =
-              actualWork.asInstanceOf[Work.Standard[Unidentified]]
+              actualWork.asInstanceOf[Work.Visible[Unidentified]]
             unidentifiedWork.version shouldBe version
           }
         }
