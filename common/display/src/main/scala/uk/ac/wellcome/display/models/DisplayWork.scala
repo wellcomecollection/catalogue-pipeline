@@ -7,6 +7,7 @@ import uk.ac.wellcome.models.work.internal.{
   RelatedWorks,
   Work,
   WorkState,
+  WorkType
 }
 import WorkState.Identified
 
@@ -177,7 +178,8 @@ case object DisplayWork {
       images =
         if (includes.images)
           Some(work.data.images.map(DisplayWorkImageInclude(_)))
-        else None
+        else None,
+      ontologyType = displayWorkType(work.data.`type`),
     )
 
   def apply(work: Work.Visible[Identified]): DisplayWork =
@@ -220,4 +222,11 @@ case object DisplayWork {
             }
           } else None,
     )
+
+  def displayWorkType(workType: WorkType): String = workType match {
+    case WorkType.Standard   => "Work"
+    case WorkType.Collection => "Collection"
+    case WorkType.Series     => "Series"
+    case WorkType.Section    => "Section"
+  }
 }
