@@ -138,7 +138,8 @@ object CalmTransformer
         description = description(record),
         physicalDescription = physicalDescription(record),
         production = production(record),
-        notes = notes(record)
+        notes = notes(record),
+        `type` = workType(collectionLevel)
       )
 
   def sourceIdentifier(record: CalmRecord): SourceIdentifier =
@@ -300,5 +301,13 @@ object CalmTransformer
           .getList(key)
           .map(NormaliseText(_))
           .map(createNote)
+    }
+
+  def workType(level: CollectionLevel): WorkType =
+    level match {
+      case CollectionLevel.Collection => WorkType.Collection
+      case CollectionLevel.Section    => WorkType.Section
+      case CollectionLevel.Series     => WorkType.Series
+      case CollectionLevel.Item       => WorkType.Standard
     }
 }
