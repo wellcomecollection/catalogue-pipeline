@@ -32,12 +32,14 @@ case object WorksMultiMatcher {
           ).map(f => FieldWithOptionalBoost(f._1, f._2.map(_.toDouble)))
         ),
         prefixQuery("data.title.keyword", q).boost(1000),
+        nestedQuery("data.contributors.agent").query(
+          matchQuery("data.contributors.agent.label" -> q)
+        ).scoreMode(ScoreMode.Max).boost(1000),
         MultiMatchQuery(
           q,
           `type` = Some(BEST_FIELDS),
           operator = Some(AND),
           fields = Seq(
-            ("data.contributors.agent.label", Some(1000)),
             ("data.title", Some(100)),
             ("data.title.english", Some(100)),
             ("data.title.shingles", Some(100)),
