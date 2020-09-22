@@ -172,7 +172,8 @@ case object WorksIndexConfig extends IndexConfig {
         pathField,
         tokenCountField("depth").analyzer("standard")
       ),
-      images
+      images,
+      keywordField("workType")
     )
 
   val fields: Seq[FieldDefinition with Product with Serializable] =
