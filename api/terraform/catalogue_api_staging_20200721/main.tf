@@ -1,4 +1,4 @@
-module "catalogue_api_prod_20200520" {
+module "catalogue_api_staging_20200520" {
   source = "../modules/stack"
 
   environment        = local.environment
