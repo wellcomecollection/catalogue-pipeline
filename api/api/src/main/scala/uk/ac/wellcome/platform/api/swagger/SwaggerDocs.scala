@@ -332,7 +332,7 @@ trait MultipleWorksSwagger {
         description = "Filter by the type of the searched works",
         required = false,
         schema = new Schema(
-          allowableValues = Array("Work", "Collection", "Series", "Section")
+          allowableValues = Array("Standard", "Collection", "Series", "Section")
         )
       ),
       new Parameter(
