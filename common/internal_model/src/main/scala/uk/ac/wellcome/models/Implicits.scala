@@ -2,9 +2,9 @@ package uk.ac.wellcome.models
 
 import io.circe.generic.extras.semiauto._
 import io.circe._
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.matcher.MatcherResult
 import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.models.work.internal._
 
 object Implicits {
 
