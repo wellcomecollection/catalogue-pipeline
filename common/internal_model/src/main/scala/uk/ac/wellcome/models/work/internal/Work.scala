@@ -79,6 +79,7 @@ case class WorkData[State <: DataState](
   merged: Boolean = false,
   collectionPath: Option[CollectionPath] = None,
   images: List[UnmergedImage[State]] = Nil,
+  workType: WorkType = WorkType.Standard,
 )
 
 /** WorkState represents the state of the work in the pipeline, and contains

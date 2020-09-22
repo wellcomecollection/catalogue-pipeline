@@ -32,7 +32,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
         ),
         data = WorkData[DataState.Unidentified](
           title = Some("abc"),
-          format = Some(Format.ArchiveCollection),
+          format = Some(Format.ArchivesAndManuscripts),
           collectionPath = Some(
             CollectionPath(
               path = "a/b/c",
@@ -59,7 +59,8 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
                 )
               )
             )
-          )
+          ),
+          workType = WorkType.Collection
         )
       )
     )
@@ -490,7 +491,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
         version = version,
         data = WorkData[DataState.Unidentified](
           title = Some("Should suppress"),
-          format = Some(Format.ArchiveSection),
+          format = Some(Format.ArchivesAndManuscripts),
           collectionPath = Some(
             CollectionPath(
               path = "AMSG/X/Y",
@@ -513,7 +514,8 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
                 )
               )
             )
-          )
+          ),
+          workType = WorkType.Section
         ),
         invisibilityReasons = List(SuppressedFromSource("Calm"))
       )

@@ -570,19 +570,20 @@ class WorksIncludesTest
   }
 
   describe("relation includes") {
-    def work(path: String) =
+    def work(path: String, workType: WorkType) =
       createIdentifiedWorkWith(
         collectionPath = Some(CollectionPath(path = path)),
         title = Some(path),
-        sourceIdentifier = createSourceIdentifierWith(value = path)
+        sourceIdentifier = createSourceIdentifierWith(value = path),
+        workType = workType
       )
 
-    val work0 = work("0")
-    val workA = work("0/a")
-    val workB = work("0/a/b")
-    val workC = work("0/a/c")
-    val workD = work("0/a/d")
-    val workE = work("0/a/c/e")
+    val work0 = work("0", WorkType.Collection)
+    val workA = work("0/a", WorkType.Section)
+    val workB = work("0/a/b", WorkType.Standard)
+    val workC = work("0/a/c", WorkType.Series)
+    val workD = work("0/a/d", WorkType.Standard)
+    val workE = work("0/a/c/e", WorkType.Standard)
 
     def storeWorks(index: Index) =
       insertIntoElasticsearch(index, work0, workA, workB, workC, workD, workE)
@@ -596,7 +597,7 @@ class WorksIncludesTest
             s"/$apiPrefix/works/${workC.state.canonicalId}?include=parts") {
             Status.OK -> s"""
             {
-              ${singleWorkResult(apiPrefix)},
+              ${singleWorkResult(apiPrefix, "Series")},
               "id": "${workC.state.canonicalId}",
               "title": "0/a/c",
               "alternativeTitles": [],
@@ -621,7 +622,7 @@ class WorksIncludesTest
             s"/$apiPrefix/works/${workC.state.canonicalId}?include=partOf") {
             Status.OK -> s"""
             {
-              ${singleWorkResult(apiPrefix)},
+              ${singleWorkResult(apiPrefix, "Series")},
               "id": "${workC.state.canonicalId}",
               "title": "0/a/c",
               "alternativeTitles": [],
@@ -655,7 +656,7 @@ class WorksIncludesTest
             s"/$apiPrefix/works/${workC.state.canonicalId}?include=precededBy") {
             Status.OK -> s"""
             {
-              ${singleWorkResult(apiPrefix)},
+              ${singleWorkResult(apiPrefix, "Series")},
               "id": "${workC.state.canonicalId}",
               "title": "0/a/c",
               "alternativeTitles": [],
@@ -680,7 +681,7 @@ class WorksIncludesTest
             s"/$apiPrefix/works/${workC.state.canonicalId}?include=succeededBy") {
             Status.OK -> s"""
             {
-              ${singleWorkResult(apiPrefix)},
+              ${singleWorkResult(apiPrefix, "Series")},
               "id": "${workC.state.canonicalId}",
               "title": "0/a/c",
               "alternativeTitles": [],

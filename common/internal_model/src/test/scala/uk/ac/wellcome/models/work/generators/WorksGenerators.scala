@@ -159,7 +159,8 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     version: Int = 1,
     merged: Boolean = false,
     collectionPath: Option[CollectionPath] = None,
-    mergeCandidates: List[MergeCandidate] = Nil
+    mergeCandidates: List[MergeCandidate] = Nil,
+    workType: WorkType = WorkType.Standard,
   ): Work.Visible[Identified] =
     Work.Visible[Identified](
       state = Identified(
@@ -190,6 +191,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
         images = images,
         merged = merged,
         collectionPath = collectionPath,
+        workType = workType,
       )
     )
 
