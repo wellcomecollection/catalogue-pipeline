@@ -13,6 +13,8 @@ case class ItemLocationTypeFilter(locationTypeIds: Seq[String])
 
 case class FormatFilter(formatIds: Seq[String]) extends WorkFilter
 
+case class WorkTypeFilter(types: Seq[String]) extends WorkFilter
+
 case class DateRangeFilter(fromDate: Option[LocalDate],
                            toDate: Option[LocalDate])
     extends WorkFilter
@@ -29,7 +31,7 @@ case class LicenseFilter(licenseIds: Seq[String])
     extends WorkFilter
     with ImageFilter
 
-case class IdentifiersFilter(values: List[String]) extends WorkFilter
+case class IdentifiersFilter(values: Seq[String]) extends WorkFilter
 
 case class CollectionPathFilter(path: String) extends WorkFilter
 

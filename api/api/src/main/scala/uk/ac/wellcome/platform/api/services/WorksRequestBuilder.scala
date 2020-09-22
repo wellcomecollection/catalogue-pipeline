@@ -131,6 +131,8 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
           values = itemLocationTypeIds)
       case FormatFilter(formatIds) =>
         termsQuery(field = "data.format.id", values = formatIds)
+      case WorkTypeFilter(types) =>
+        termsQuery(field = "data.workType", values = types)
       case DateRangeFilter(fromDate, toDate) =>
         val (gte, lte) =
           (fromDate map ElasticDate.apply, toDate map ElasticDate.apply)
