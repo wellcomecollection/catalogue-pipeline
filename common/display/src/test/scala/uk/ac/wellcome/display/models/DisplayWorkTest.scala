@@ -134,6 +134,15 @@ class DisplayWorkTest
     displayWork.workType shouldBe Some(expectedDisplayWork)
   }
 
+  it("gets the ontologyType from a Work") {
+    val work = createIdentifiedWorkWith(
+      workType = WorkType.Section
+    )
+    val displayWork = DisplayWork(work)
+
+    displayWork.ontologyType shouldBe "Section"
+  }
+
   it("gets the language from a Work") {
     val language = Language(
       id = Some("bsl"),

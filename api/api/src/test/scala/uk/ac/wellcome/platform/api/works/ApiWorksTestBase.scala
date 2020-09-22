@@ -21,16 +21,17 @@ trait ApiWorksTestBase
       toJson(t).get
   }
 
-  def singleWorkResult(apiPrefix: String): String =
+  def singleWorkResult(apiPrefix: String,
+                       ontologyType: String = "Work"): String =
     s"""
         "@context": "${contextUrl(apiPrefix)}",
-        "type": "Work"
+        "type": "$ontologyType"
      """.stripMargin
 
   def workResponse(work: Work.Visible[Identified]): String =
     s"""
       | {
-      |   "type": "Work",
+      |   "type": "${formatOntologyType(work.data.workType)}",
       |   "id": "${work.state.canonicalId}",
       |   "title": "${work.data.title.get}",
       |   ${work.data.format.map(formatResponse).getOrElse("")}
@@ -49,6 +50,14 @@ trait ApiWorksTestBase
        |  ]
        |}
       """.stripMargin
+
+  def formatOntologyType(workType: WorkType): String =
+    workType match {
+      case WorkType.Standard   => "Work"
+      case WorkType.Collection => "Collection"
+      case WorkType.Series     => "Series"
+      case WorkType.Section    => "Section"
+    }
 
   def formatResponse(format: Format): String =
     s"""
