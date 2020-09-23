@@ -159,8 +159,8 @@ object MultipleWorksParams extends QueryParamsUtils {
 
   implicit val itemLocationTypeFilter: Decoder[ItemLocationTypeFilter] =
     decodeOneOfCommaSeparated(
-      "DigitalLocation" -> LocationTypeRequest.DigitalLocation,
-      "PhysicalLocation" -> LocationTypeRequest.PhysicalLocation,
+      "DigitalLocation" -> LocationTypeQuery.DigitalLocation,
+      "PhysicalLocation" -> LocationTypeQuery.PhysicalLocation,
     ) map (ItemLocationTypeFilter)
 
   implicit val itemLocationTypeIdFilter: Decoder[ItemLocationTypeIdFilter] =
