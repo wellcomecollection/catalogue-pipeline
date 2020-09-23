@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.api.models
 
-import uk.ac.wellcome.models.work.internal.AccessStatus
-
+import uk.ac.wellcome.models.work.internal.{AccessStatus, WorkType}
 import java.time.LocalDate
 
 sealed trait DocumentFilter
@@ -13,7 +12,7 @@ case class ItemLocationTypeFilter(locationTypeIds: Seq[String])
 
 case class FormatFilter(formatIds: Seq[String]) extends WorkFilter
 
-case class WorkTypeFilter(types: Seq[String]) extends WorkFilter
+case class WorkTypeFilter(types: List[WorkType]) extends WorkFilter
 
 case class DateRangeFilter(fromDate: Option[LocalDate],
                            toDate: Option[LocalDate])

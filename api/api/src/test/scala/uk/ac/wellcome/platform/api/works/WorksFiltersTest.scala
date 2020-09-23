@@ -211,7 +211,6 @@ class WorksFiltersTest extends ApiWorksTestBase {
   }
 
   describe("filtering works by type") {
-    val standardWork = createIdentifiedWork
     val collectionWork =
       createIdentifiedWorkWith(
         title = Some("rats"),
@@ -223,7 +222,7 @@ class WorksFiltersTest extends ApiWorksTestBase {
       title = Some("rats rats bats"),
       workType = WorkType.Section)
 
-    val works = Seq(standardWork, collectionWork, seriesWork, sectionWork)
+    val works = Seq(collectionWork, seriesWork, sectionWork)
 
     it("when listing works") {
       withApi {
@@ -246,11 +245,11 @@ class WorksFiltersTest extends ApiWorksTestBase {
 
           assertJsonResponse(
             routes,
-            s"/$apiPrefix/works?type=Collection,Standard",
+            s"/$apiPrefix/works?type=Collection,Series",
             unordered = true) {
             Status.OK -> worksListResponse(
               apiPrefix,
-              works = Seq(standardWork, collectionWork)
+              works = Seq(collectionWork, seriesWork)
             )
           }
       }

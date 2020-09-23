@@ -6,7 +6,7 @@ import io.circe.Decoder
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.platform.api.services.WorksSearchOptions
-import uk.ac.wellcome.models.work.internal.AccessStatus
+import uk.ac.wellcome.models.work.internal.{AccessStatus, WorkType}
 
 case class SingleWorkParams(
   include: Option[WorksIncludes],
@@ -148,7 +148,11 @@ object MultipleWorksParams extends QueryParamsUtils {
     stringListFilter(FormatFilter)
 
   implicit val workTypeFilter: Decoder[WorkTypeFilter] =
-    stringListFilter(WorkTypeFilter)
+    decodeOneOfCommaSeparated(
+      "Collection" -> WorkType.Collection,
+      "Series" -> WorkType.Series,
+      "Section" -> WorkType.Section
+    ).emap(values => Right(WorkTypeFilter(values)))
 
   implicit val itemLocationTypeFilter: Decoder[ItemLocationTypeFilter] =
     stringListFilter(ItemLocationTypeFilter)
