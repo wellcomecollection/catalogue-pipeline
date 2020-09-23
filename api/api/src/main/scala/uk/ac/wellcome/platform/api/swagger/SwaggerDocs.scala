@@ -337,6 +337,15 @@ trait MultipleWorksSwagger {
         required = false
       ),
       new Parameter(
+        name = "type",
+        in = ParameterIn.QUERY,
+        description = "Filter by the type of the searched works",
+        required = false,
+        schema = new Schema(
+          allowableValues = Array("Collection", "Series", "Section")
+        )
+      ),
+      new Parameter(
         name = "aggregations",
         in = ParameterIn.QUERY,
         description =

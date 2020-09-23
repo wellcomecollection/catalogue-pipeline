@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.api.models
 
-import uk.ac.wellcome.models.work.internal.AccessStatus
+import uk.ac.wellcome.models.work.internal.{AccessStatus, WorkType}
 import java.time.LocalDate
 
 import uk.ac.wellcome.display.models.LocationTypeRequest
@@ -16,6 +16,8 @@ case class ItemLocationTypeIdFilter(locationTypeIds: Seq[String])
     extends WorkFilter
 
 case class FormatFilter(formatIds: Seq[String]) extends WorkFilter
+
+case class WorkTypeFilter(types: List[WorkType]) extends WorkFilter
 
 case class DateRangeFilter(fromDate: Option[LocalDate],
                            toDate: Option[LocalDate])
@@ -33,7 +35,7 @@ case class LicenseFilter(licenseIds: Seq[String])
     extends WorkFilter
     with ImageFilter
 
-case class IdentifiersFilter(values: List[String]) extends WorkFilter
+case class IdentifiersFilter(values: Seq[String]) extends WorkFilter
 
 case class CollectionPathFilter(path: String) extends WorkFilter
 

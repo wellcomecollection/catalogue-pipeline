@@ -79,6 +79,7 @@ class FiltersAndAggregationsBuilder(
   // This pattern matching defines the pairings of filters <-> aggregations
   private def pairedAggregationRequest(
     filter: WorkFilter): Option[AggregationRequest] = filter match {
+    case _: WorkTypeFilter           => None
     case _: FormatFilter             => Some(AggregationRequest.Format)
     case _: DateRangeFilter          => None
     case VisibleWorkFilter           => None

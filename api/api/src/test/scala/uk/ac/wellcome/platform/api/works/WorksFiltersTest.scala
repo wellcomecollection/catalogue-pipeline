@@ -453,6 +453,69 @@ class WorksFiltersTest extends ApiWorksTestBase {
     }
   }
 
+  describe("filtering works by type") {
+    val collectionWork =
+      createIdentifiedWorkWith(
+        title = Some("rats"),
+        workType = WorkType.Collection)
+    val seriesWork = createIdentifiedWorkWith(
+      title = Some("rats rats"),
+      workType = WorkType.Series)
+    val sectionWork = createIdentifiedWorkWith(
+      title = Some("rats rats bats"),
+      workType = WorkType.Section)
+
+    val works = Seq(collectionWork, seriesWork, sectionWork)
+
+    it("when listing works") {
+      withApi {
+        case (ElasticConfig(worksIndex, _), routes) =>
+          insertIntoElasticsearch(worksIndex, works: _*)
+
+          assertJsonResponse(routes, s"/$apiPrefix/works?type=Collection") {
+            Status.OK -> worksListResponse(
+              apiPrefix,
+              works = Seq(collectionWork)
+            )
+          }
+      }
+    }
+
+    it("filters by multiple types") {
+      withApi {
+        case (ElasticConfig(worksIndex, _), routes) =>
+          insertIntoElasticsearch(worksIndex, works: _*)
+
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works?type=Collection,Series",
+            unordered = true) {
+            Status.OK -> worksListResponse(
+              apiPrefix,
+              works = Seq(collectionWork, seriesWork)
+            )
+          }
+      }
+    }
+
+    it("when searching works") {
+      withApi {
+        case (ElasticConfig(worksIndex, _), routes) =>
+          insertIntoElasticsearch(worksIndex, works: _*)
+
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works?query=rats&type=Series,Section",
+            unordered = true) {
+            Status.OK -> worksListResponse(
+              apiPrefix,
+              works = Seq(seriesWork, sectionWork)
+            )
+          }
+      }
+    }
+  }
+
   describe("filtering works by date range") {
     val (work1, work2, work3) = (
       createDatedWork("1709", canonicalId = "a"),
