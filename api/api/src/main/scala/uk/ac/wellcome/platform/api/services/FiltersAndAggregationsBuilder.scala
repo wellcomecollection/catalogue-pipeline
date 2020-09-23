@@ -81,6 +81,7 @@ class FiltersAndAggregationsBuilder(
     filter: WorkFilter): Option[AggregationRequest] = filter match {
     case _: ItemLocationTypeFilter => None
     case _: FormatFilter           => Some(AggregationRequest.Format)
+    case _: WorkTypeFilter         => None
     case _: DateRangeFilter        => None
     case VisibleWorkFilter         => None
     case _: LanguageFilter         => Some(AggregationRequest.Language)

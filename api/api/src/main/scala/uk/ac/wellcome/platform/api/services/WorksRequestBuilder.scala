@@ -6,9 +6,9 @@ import com.sksamuel.elastic4s.requests.searches._
 import com.sksamuel.elastic4s.requests.searches.aggs._
 import com.sksamuel.elastic4s.requests.searches.queries._
 import com.sksamuel.elastic4s.requests.searches.sort._
-
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.platform.api.models._
+import uk.ac.wellcome.models.work.internal.WorkType
 
 object WorksRequestBuilder extends ElasticsearchRequestBuilder {
 
@@ -131,6 +131,10 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
           values = itemLocationTypeIds)
       case FormatFilter(formatIds) =>
         termsQuery(field = "data.format.id", values = formatIds)
+      case WorkTypeFilter(types) =>
+        termsQuery(
+          field = "data.workType",
+          values = types.map(WorkType.getName))
       case DateRangeFilter(fromDate, toDate) =>
         val (gte, lte) =
           (fromDate map ElasticDate.apply, toDate map ElasticDate.apply)

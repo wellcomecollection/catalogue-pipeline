@@ -1,6 +1,7 @@
 package uk.ac.wellcome.models.work.internal
 
 import io.circe.{Decoder, Encoder}
+import io.circe.syntax._
 import io.circe.generic.extras.semiauto.{
   deriveEnumerationDecoder,
   deriveEnumerationEncoder
@@ -18,4 +19,6 @@ object WorkType {
     deriveEnumerationEncoder[WorkType]
   implicit val workTypeDecoder: Decoder[WorkType] =
     deriveEnumerationDecoder[WorkType]
+
+  def getName(workType: WorkType): String = workType.asJson.asString.get
 }

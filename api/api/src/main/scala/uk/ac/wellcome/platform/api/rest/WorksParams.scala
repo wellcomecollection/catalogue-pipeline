@@ -6,7 +6,7 @@ import io.circe.Decoder
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.platform.api.services.WorksSearchOptions
-import uk.ac.wellcome.models.work.internal.AccessStatus
+import uk.ac.wellcome.models.work.internal.{AccessStatus, WorkType}
 
 case class SingleWorkParams(
   include: Option[WorksIncludes],
@@ -66,6 +66,7 @@ case class MultipleWorksParams(
   query: Option[String],
   identifiers: Option[IdentifiersFilter],
   `items.locations.accessConditions.status`: Option[AccessStatusFilter],
+  `type`: Option[WorkTypeFilter],
   _queryType: Option[SearchQueryType],
   _index: Option[String],
 ) extends QueryParams
@@ -94,7 +95,8 @@ case class MultipleWorksParams(
       `subjects.label`,
       identifiers,
       `items.locations.accessConditions.status`,
-      license
+      license,
+      `type`
     ).flatten
 
   private def dateFilter: Option[DateRangeFilter] =
@@ -133,6 +135,7 @@ object MultipleWorksParams extends QueryParamsUtils {
         "query".as[String].?,
         "identifiers".as[IdentifiersFilter].?,
         "items.locations.accessConditions.status".as[AccessStatusFilter].?,
+        "type".as[WorkTypeFilter].?,
         "_queryType".as[SearchQueryType].?,
         "_index".as[String].?,
       )
@@ -142,13 +145,20 @@ object MultipleWorksParams extends QueryParamsUtils {
     }
 
   implicit val formatFilter: Decoder[FormatFilter] =
-    decodeCommaSeparated.emap(strs => Right(FormatFilter(strs)))
+    stringListFilter(FormatFilter)
+
+  implicit val workTypeFilter: Decoder[WorkTypeFilter] =
+    decodeOneOfCommaSeparated(
+      "Collection" -> WorkType.Collection,
+      "Series" -> WorkType.Series,
+      "Section" -> WorkType.Section
+    ).emap(values => Right(WorkTypeFilter(values)))
 
   implicit val itemLocationTypeFilter: Decoder[ItemLocationTypeFilter] =
-    decodeCommaSeparated.emap(strs => Right(ItemLocationTypeFilter(strs)))
+    stringListFilter(ItemLocationTypeFilter)
 
   implicit val languageFilter: Decoder[LanguageFilter] =
-    decodeCommaSeparated.emap(strs => Right(LanguageFilter(strs)))
+    stringListFilter(LanguageFilter)
 
   implicit val genreFilter: Decoder[GenreFilter] =
     Decoder.decodeString.emap(str => Right(GenreFilter(str)))
@@ -157,7 +167,7 @@ object MultipleWorksParams extends QueryParamsUtils {
     Decoder.decodeString.emap(str => Right(SubjectFilter(str)))
 
   implicit val identifiersFilter: Decoder[IdentifiersFilter] =
-    decodeCommaSeparated.emap(strs => Right(IdentifiersFilter(strs)))
+    stringListFilter(IdentifiersFilter)
 
   implicit val accessStatusFilter: Decoder[AccessStatusFilter] =
     decodeIncludesAndExcludes(
@@ -198,4 +208,7 @@ object MultipleWorksParams extends QueryParamsUtils {
       SearchQueryType.default,
       "MultiMatcher" -> SearchQueryType.MultiMatcher,
     )
+
+  private def stringListFilter[T](applyFilter: Seq[String] => T): Decoder[T] =
+    decodeCommaSeparated.emap(strs => Right(applyFilter(strs)))
 }
