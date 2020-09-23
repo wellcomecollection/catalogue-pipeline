@@ -27,7 +27,7 @@ import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
 import uk.ac.wellcome.platform.api.models.{
   FormatFilter,
-  ItemLocationTypeFilter,
+  ItemLocationTypeIdFilter,
   SearchQuery
 }
 import WorkState.Identified
@@ -305,7 +305,7 @@ class ElasticsearchServiceTest
           index = index,
           queryOptions = createElasticsearchQueryOptionsWith(
             searchQuery = Some(SearchQuery("tangerines")),
-            filters = List(ItemLocationTypeFilter(Seq("iiif-image")))
+            filters = List(ItemLocationTypeIdFilter(Seq("iiif-image")))
           ),
           expectedWorks = List(work)
         )
@@ -343,7 +343,7 @@ class ElasticsearchServiceTest
           queryOptions = createElasticsearchQueryOptionsWith(
             searchQuery = Some(SearchQuery("tangerines")),
             filters = List(
-              ItemLocationTypeFilter(
+              ItemLocationTypeIdFilter(
                 locationTypeIds = List("iiif-image", "digit")))
           ),
           expectedWorks = List(work, work2)

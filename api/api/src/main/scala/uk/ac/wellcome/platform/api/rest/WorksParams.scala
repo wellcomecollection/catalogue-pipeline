@@ -52,7 +52,6 @@ case class MultipleWorksParams(
   page: Option[Int],
   pageSize: Option[Int],
   workType: Option[FormatFilter],
-  `items.locations.locationType`: Option[ItemLocationTypeFilter],
   `production.dates.from`: Option[LocalDate],
   `production.dates.to`: Option[LocalDate],
   language: Option[LanguageFilter],
@@ -65,6 +64,8 @@ case class MultipleWorksParams(
   sortOrder: Option[SortingOrder],
   query: Option[String],
   identifiers: Option[IdentifiersFilter],
+  `items.locations.type`: Option[ItemLocationTypeFilter],
+  `items.locations.locationType`: Option[ItemLocationTypeIdFilter],
   `items.locations.accessConditions.status`: Option[AccessStatusFilter],
   `type`: Option[WorkTypeFilter],
   _queryType: Option[SearchQueryType],
@@ -88,12 +89,13 @@ case class MultipleWorksParams(
   private def filters: List[WorkFilter] =
     List(
       workType,
-      `items.locations.locationType`,
       dateFilter,
       language,
       `genres.label`,
       `subjects.label`,
       identifiers,
+      `items.locations.type`,
+      `items.locations.locationType`,
       `items.locations.accessConditions.status`,
       license,
       `type`
@@ -121,7 +123,6 @@ object MultipleWorksParams extends QueryParamsUtils {
         "page".as[Int].?,
         "pageSize".as[Int].?,
         "workType".as[FormatFilter] ?,
-        "items.locations.locationType".as[ItemLocationTypeFilter].?,
         "production.dates.from".as[LocalDate].?,
         "production.dates.to".as[LocalDate].?,
         "language".as[LanguageFilter].?,
@@ -134,6 +135,8 @@ object MultipleWorksParams extends QueryParamsUtils {
         "sortOrder".as[SortingOrder].?,
         "query".as[String].?,
         "identifiers".as[IdentifiersFilter].?,
+        "items.locations.type".as[ItemLocationTypeFilter].?,
+        "items.locations.locationType".as[ItemLocationTypeIdFilter].?,
         "items.locations.accessConditions.status".as[AccessStatusFilter].?,
         "type".as[WorkTypeFilter].?,
         "_queryType".as[SearchQueryType].?,
@@ -155,7 +158,13 @@ object MultipleWorksParams extends QueryParamsUtils {
     ).emap(values => Right(WorkTypeFilter(values)))
 
   implicit val itemLocationTypeFilter: Decoder[ItemLocationTypeFilter] =
-    stringListFilter(ItemLocationTypeFilter)
+    decodeOneOfCommaSeparated(
+      "DigitalLocation" -> LocationTypeQuery.DigitalLocation,
+      "PhysicalLocation" -> LocationTypeQuery.PhysicalLocation,
+    ) map (ItemLocationTypeFilter)
+
+  implicit val itemLocationTypeIdFilter: Decoder[ItemLocationTypeIdFilter] =
+    decodeCommaSeparated.emap(strs => Right(ItemLocationTypeIdFilter(strs)))
 
   implicit val languageFilter: Decoder[LanguageFilter] =
     stringListFilter(LanguageFilter)

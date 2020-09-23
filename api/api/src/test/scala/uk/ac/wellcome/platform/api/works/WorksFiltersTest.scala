@@ -38,6 +38,249 @@ class WorksFiltersTest extends ApiWorksTestBase {
     }
   }
 
+  describe("filtering by item Location type") {
+    val digitalWork1 = createIdentifiedWorkWith(
+      canonicalId = "1",
+      title = Some("locationtype"),
+      items = List(
+        createIdentifiedItemWith(locations = List(createDigitalLocation))
+      )
+    )
+    val digitalWork2 = createIdentifiedWorkWith(
+      canonicalId = "2",
+      title = Some("locationtype"),
+      items = List(
+        createIdentifiedItemWith(locations = List(createDigitalLocation))
+      )
+    )
+    val physicalWork1 = createIdentifiedWorkWith(
+      canonicalId = "3",
+      title = Some("locationtype"),
+      items = List(
+        createIdentifiedItemWith(locations = List(createPhysicalLocation))
+      )
+    )
+    val physicalWork2 = createIdentifiedWorkWith(
+      canonicalId = "4",
+      title = Some("locationtype"),
+      items = List(
+        createIdentifiedItemWith(locations = List(createPhysicalLocation))
+      )
+    )
+    val comboWork1 = createIdentifiedWorkWith(
+      canonicalId = "5",
+      title = Some("locationtype"),
+      items = List(
+        createIdentifiedItemWith(
+          locations = List(createPhysicalLocation, createDigitalLocation))
+      )
+    )
+    val comboWork2 = createIdentifiedWorkWith(
+      canonicalId = "6",
+      title = Some("locationtype"),
+      items = List(
+        createIdentifiedItemWith(
+          locations = List(createDigitalLocation, createPhysicalLocation))
+      )
+    )
+
+    val works = List(
+      digitalWork1,
+      digitalWork2,
+      physicalWork1,
+      physicalWork2,
+      comboWork1,
+      comboWork2)
+
+    it("filters by PhysicalLocation when listing") {
+      withApi {
+        case (ElasticConfig(worksIndex, _), routes) =>
+          insertIntoElasticsearch(worksIndex, works: _*)
+
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works?items.locations.type=PhysicalLocation&include=items") {
+            Status.OK -> s"""
+            {
+              ${resultList(apiPrefix, totalResults = 4)},
+              "results": [
+                {
+                  "type": "Work",
+                  "id": "${physicalWork1.state.canonicalId}",
+                  "title": "${physicalWork1.data.title.get}",
+                  "alternativeTitles": [],
+                  "items": [${items(physicalWork1.data.items)}]
+                },
+                {
+                  "type": "Work",
+                  "id": "${physicalWork2.state.canonicalId}",
+                  "title": "${physicalWork2.data.title.get}",
+                  "alternativeTitles": [],
+                  "items": [${items(physicalWork2.data.items)}]
+                },
+                {
+                  "type": "Work",
+                  "id": "${comboWork1.state.canonicalId}",
+                  "title": "${comboWork1.data.title.get}",
+                  "alternativeTitles": [],
+                  "items": [${items(comboWork1.data.items)}]
+                },
+                {
+                  "type": "Work",
+                  "id": "${comboWork2.state.canonicalId}",
+                  "title": "${comboWork2.data.title.get}",
+                  "alternativeTitles": [],
+                  "items": [${items(comboWork2.data.items)}]
+                }
+              ]
+            }
+          """
+          }
+      }
+    }
+
+    it("filters by PhysicalLocation when searching") {
+      withApi {
+        case (ElasticConfig(worksIndex, _), routes) =>
+          insertIntoElasticsearch(worksIndex, works: _*)
+
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works?items.locations.type=PhysicalLocation&include=items&query=locationtype") {
+            Status.OK -> s"""
+            {
+              ${resultList(apiPrefix, totalResults = 4)},
+              "results": [
+                {
+                  "type": "Work",
+                  "id": "${physicalWork1.state.canonicalId}",
+                  "title": "${physicalWork1.data.title.get}",
+                  "alternativeTitles": [],
+                  "items": [${items(physicalWork1.data.items)}]
+                },
+                {
+                  "type": "Work",
+                  "id": "${physicalWork2.state.canonicalId}",
+                  "title": "${physicalWork2.data.title.get}",
+                  "alternativeTitles": [],
+                  "items": [${items(physicalWork2.data.items)}]
+                },
+                {
+                  "type": "Work",
+                  "id": "${comboWork1.state.canonicalId}",
+                  "title": "${comboWork1.data.title.get}",
+                  "alternativeTitles": [],
+                  "items": [${items(comboWork1.data.items)}]
+                },
+                {
+                  "type": "Work",
+                  "id": "${comboWork2.state.canonicalId}",
+                  "title": "${comboWork2.data.title.get}",
+                  "alternativeTitles": [],
+                  "items": [${items(comboWork2.data.items)}]
+                }
+              ]
+            }
+          """
+          }
+      }
+    }
+
+    it("filters by DigitalLocation when listing") {
+      withApi {
+        case (ElasticConfig(worksIndex, _), routes) =>
+          insertIntoElasticsearch(worksIndex, works: _*)
+
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works?items.locations.type=DigitalLocation&include=items") {
+            Status.OK -> s"""
+            {
+              ${resultList(apiPrefix, totalResults = 4)},
+              "results": [
+                {
+                  "type": "Work",
+                  "id": "${digitalWork1.state.canonicalId}",
+                  "title": "${digitalWork1.data.title.get}",
+                  "alternativeTitles": [],
+                  "items": [${items(digitalWork1.data.items)}]
+                },
+                {
+                  "type": "Work",
+                  "id": "${digitalWork2.state.canonicalId}",
+                  "title": "${digitalWork2.data.title.get}",
+                  "alternativeTitles": [],
+                  "items": [${items(digitalWork2.data.items)}]
+                },
+                {
+                  "type": "Work",
+                  "id": "${comboWork1.state.canonicalId}",
+                  "title": "${comboWork1.data.title.get}",
+                  "alternativeTitles": [],
+                  "items": [${items(comboWork1.data.items)}]
+                },
+                {
+                  "type": "Work",
+                  "id": "${comboWork2.state.canonicalId}",
+                  "title": "${comboWork2.data.title.get}",
+                  "alternativeTitles": [],
+                  "items": [${items(comboWork2.data.items)}]
+                }
+              ]
+            }
+          """
+          }
+      }
+    }
+    it("filters by DigitalLocation when searching") {
+      withApi {
+        case (ElasticConfig(worksIndex, _), routes) =>
+          insertIntoElasticsearch(worksIndex, works: _*)
+
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works?items.locations.type=DigitalLocation&include=items&query=locationtype") {
+            Status.OK -> s"""
+            {
+              ${resultList(apiPrefix, totalResults = 4)},
+              "results": [
+                {
+                  "type": "Work",
+                  "id": "${digitalWork1.state.canonicalId}",
+                  "title": "${digitalWork1.data.title.get}",
+                  "alternativeTitles": [],
+                  "items": [${items(digitalWork1.data.items)}]
+                },
+                {
+                  "type": "Work",
+                  "id": "${digitalWork2.state.canonicalId}",
+                  "title": "${digitalWork2.data.title.get}",
+                  "alternativeTitles": [],
+                  "items": [${items(digitalWork2.data.items)}]
+                },
+                {
+                  "type": "Work",
+                  "id": "${comboWork1.state.canonicalId}",
+                  "title": "${comboWork1.data.title.get}",
+                  "alternativeTitles": [],
+                  "items": [${items(comboWork1.data.items)}]
+                },
+                {
+                  "type": "Work",
+                  "id": "${comboWork2.state.canonicalId}",
+                  "title": "${comboWork2.data.title.get}",
+                  "alternativeTitles": [],
+                  "items": [${items(comboWork2.data.items)}]
+                }
+              ]
+            }
+          """
+          }
+      }
+    }
+
+  }
+
   describe("filtering works by item LocationType") {
     def createItemWithLocationType(
       locationType: LocationType): Item[IdState.Minted] =
