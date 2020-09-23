@@ -125,10 +125,6 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
     workFilter match {
       case VisibleWorkFilter =>
         termQuery(field = "type", value = "Visible")
-      case ItemLocationTypeFilter(itemLocationTypeIds) =>
-        termsQuery(
-          field = "data.items.locations.locationType.id",
-          values = itemLocationTypeIds)
       case FormatFilter(formatIds) =>
         termsQuery(field = "data.format.id", values = formatIds)
       case DateRangeFilter(fromDate, toDate) =>
@@ -168,7 +164,14 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
         termQuery(field = "data.collectionPath.path", value = path)
       case CollectionDepthFilter(depth) =>
         termQuery(field = "data.collectionPath.depth", value = depth)
-
+      case ItemLocationTypeFilter(locationTypes) =>
+        termsQuery(
+          field = "data.items.locations.ontologyType",
+          values = locationTypes.map(_.name))
+      case ItemLocationTypeIdFilter(itemLocationTypeIds) =>
+        termsQuery(
+          field = "data.items.locations.locationType.id",
+          values = itemLocationTypeIds)
     }
 
   implicit class EnhancedTermsAggregation(agg: TermsAggregation) {

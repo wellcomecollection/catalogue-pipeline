@@ -79,18 +79,19 @@ class FiltersAndAggregationsBuilder(
   // This pattern matching defines the pairings of filters <-> aggregations
   private def pairedAggregationRequest(
     filter: WorkFilter): Option[AggregationRequest] = filter match {
-    case _: ItemLocationTypeFilter => None
-    case _: FormatFilter           => Some(AggregationRequest.Format)
-    case _: DateRangeFilter        => None
-    case VisibleWorkFilter         => None
-    case _: LanguageFilter         => Some(AggregationRequest.Language)
-    case _: GenreFilter            => Some(AggregationRequest.Genre)
-    case _: SubjectFilter          => Some(AggregationRequest.Subject)
-    case _: LicenseFilter          => Some(AggregationRequest.License)
-    case _: IdentifiersFilter      => None
-    case _: CollectionPathFilter   => None
-    case _: CollectionDepthFilter  => None
-    case _: AccessStatusFilter     => None
+    case _: FormatFilter             => Some(AggregationRequest.Format)
+    case _: DateRangeFilter          => None
+    case VisibleWorkFilter           => None
+    case _: LanguageFilter           => Some(AggregationRequest.Language)
+    case _: GenreFilter              => Some(AggregationRequest.Genre)
+    case _: SubjectFilter            => Some(AggregationRequest.Subject)
+    case _: LicenseFilter            => Some(AggregationRequest.License)
+    case _: IdentifiersFilter        => None
+    case _: CollectionPathFilter     => None
+    case _: CollectionDepthFilter    => None
+    case _: AccessStatusFilter       => None
+    case _: ItemLocationTypeFilter   => None
+    case _: ItemLocationTypeIdFilter => None
   }
 
   private sealed trait FilterCategory
