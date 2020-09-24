@@ -30,6 +30,17 @@ class PaletteEncoder:
         distinct_colours, distinct_colour_freqs = np.unique(
             pixels, axis=0, return_counts=True
         )
+
+        # Fewer distinct colours than clusters
+        if len(distinct_colours) <= n:
+            sort_indices = distinct_colour_freqs.argsort()[::-1]
+            sorted_by_freq = distinct_colours[sort_indices]
+            size_diff = n - len(distinct_colours)
+            # pad with the most frequently occurring distinct colour
+            return np.pad(
+                sorted_by_freq, pad_width=((size_diff, 0), (0, 0)), mode="edge"
+            )
+
         clusters = KMeans(n_clusters=n).fit(
             distinct_colours, sample_weight=distinct_colour_freqs
         )
