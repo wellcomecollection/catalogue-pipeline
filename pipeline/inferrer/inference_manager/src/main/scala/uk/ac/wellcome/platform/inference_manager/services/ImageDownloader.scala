@@ -72,11 +72,10 @@ class ImageDownloader[Ctx](
         .map { _ =>
           (image, path)
         }
-    case (Success(failedResponse), _) =>
+    case (Success(failedResponse), image) =>
       failedResponse.discardEntityBytes()
-      Future.failed(
-        throw new RuntimeException(
-          s"Image request failed with status ${failedResponse.status}"))
+      Future.failed(throw new RuntimeException(
+        s"Image request for ${image.location.url} failed with status ${failedResponse.status}"))
     case (Failure(exception), _) => Future.failed(exception)
   }
 
