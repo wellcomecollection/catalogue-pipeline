@@ -91,7 +91,7 @@ class FiltersAndAggregationsBuilder(
     case _: CollectionPathFilter     => None
     case _: CollectionDepthFilter    => None
     case _: AccessStatusFilter       => None
-    case _: ItemLocationTypeFilter   => None
+    case _: ItemLocationTypeFilter   => Some(AggregationRequest.ItemLocationType)
     case _: ItemLocationTypeIdFilter => None
   }
 

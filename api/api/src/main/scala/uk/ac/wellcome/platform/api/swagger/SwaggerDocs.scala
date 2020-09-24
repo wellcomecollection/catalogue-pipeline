@@ -356,7 +356,8 @@ trait MultipleWorksSwagger {
             "genres",
             "production.dates",
             "subjects",
-            "language")),
+            "language",
+            "locationType")),
         required = false
       ),
       new Parameter(

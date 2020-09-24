@@ -29,3 +29,9 @@ case class PhysicalLocationDeprecated(
   accessConditions: List[AccessCondition] = Nil,
   ontologyType: String = "PhysicalLocation"
 ) extends LocationDeprecated
+
+sealed trait LocationTypeAggregation
+object LocationTypeAggregation {
+  case object Digital extends LocationTypeAggregation
+  case object Physical extends LocationTypeAggregation
+}

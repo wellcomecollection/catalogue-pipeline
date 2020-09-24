@@ -369,4 +369,52 @@ class WorksAggregationsTest extends ApiWorksTestBase {
         }
     }
   }
+
+  it("supports aggregating on locationType") {
+
+    val works = List(
+      createPhysicalWork("A"),
+      createPhysicalWork("B"),
+      createDigitalWork("C"),
+      createDigitalWork("D")
+    )
+    withApi {
+      case (ElasticConfig(worksIndex, _), routes) =>
+        insertIntoElasticsearch(worksIndex, works: _*)
+        assertJsonResponse(
+          routes,
+          s"/$apiPrefix/works?aggregations=locationType") {
+          Status.OK -> s"""
+            {
+              ${resultList(apiPrefix, totalResults = 4)},
+              "aggregations" : {
+                "locationType" : {
+                  "buckets" : [
+                    {
+                      "count" : 2,
+                      "data" : {
+                        "label" : "Online",
+                        "type" : "DigitalLocation"
+                      },
+                      "type" : "AggregationBucket"
+                    },
+                    {
+                      "count" : 2,
+                      "data" : {
+                        "label" : "In the library",
+                        "type" : "PhysicalLocation"
+                      },
+                      "type" : "AggregationBucket"
+                    }
+                  ],
+                  "type" : "Aggregation"
+                },
+                "type" : "Aggregations"
+              },
+              "results": [${works.map(workResponse).mkString(",")}]
+            }
+          """.stripMargin
+        }
+    }
+  }
 }

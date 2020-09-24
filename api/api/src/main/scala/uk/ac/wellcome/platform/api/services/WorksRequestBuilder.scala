@@ -87,6 +87,12 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
         .size(100)
         .field("data.items.locations.license.id")
         .minDocCount(0)
+
+    case AggregationRequest.ItemLocationType =>
+      TermsAggregation("locationType")
+        .size(100)
+        .field("data.items.locations.ontologyType")
+        .minDocCount(0)
   }
 
   private def sort(implicit queryOptions: ElasticsearchQueryOptions) =

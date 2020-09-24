@@ -18,6 +18,7 @@ case class Aggregations(
   language: Option[Aggregation[Language]] = None,
   subjects: Option[Aggregation[Subject[IdState.Minted]]] = None,
   license: Option[Aggregation[License]] = None,
+  locationType: Option[Aggregation[LocationTypeAggregation]] = None,
 )
 
 object Aggregations extends Logging {
@@ -35,7 +36,9 @@ object Aggregations extends Logging {
             .decodeAgg[Language]("language", Some("data.language")),
           subjects = e4sAggregations
             .decodeAgg[Subject[IdState.Minted]]("subjects"),
-          license = e4sAggregations.decodeAgg[License]("license")
+          license = e4sAggregations.decodeAgg[License]("license"),
+          locationType =
+            e4sAggregations.decodeAgg[LocationTypeAggregation]("locationType")
         ))
     } else {
       None
@@ -77,6 +80,12 @@ object Aggregations extends Logging {
   implicit val decodeSubjectFromLabel: Decoder[Subject[IdState.Minted]] =
     Decoder.decodeString.map { str =>
       Subject(label = str, concepts = Nil)
+    }
+
+  implicit val decodeLocationTypeFromLabel: Decoder[LocationTypeAggregation] =
+    Decoder.decodeString.map {
+      case "DigitalLocation"  => LocationTypeAggregation.Digital
+      case "PhysicalLocation" => LocationTypeAggregation.Physical
     }
 
   implicit class EnhancedEsAggregations(aggregations: Elastic4sAggregations) {

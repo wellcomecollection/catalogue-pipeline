@@ -32,6 +32,9 @@ case class DisplayAggregations(
   @Schema(
     description = "License aggregation on a set of results."
   ) license: Option[DisplayAggregation[DisplayLicense]],
+  @Schema(
+    description = "Location type aggregation on a set of results."
+  ) locationType: Option[DisplayAggregation[DisplayLocationTypeAggregation]],
   @JsonKey("type") @Schema(name = "type") ontologyType: String = "Aggregations"
 )
 
@@ -78,6 +81,9 @@ object DisplayAggregations {
         subject => DisplaySubject(subject, false)
       ),
       license = displayAggregation(aggs.license, DisplayLicense.apply),
+      locationType = displayAggregation(
+        aggs.locationType,
+        DisplayLocationTypeAggregation.apply)
     )
 
   private def displayAggregation[T, D](

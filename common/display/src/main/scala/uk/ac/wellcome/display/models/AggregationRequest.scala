@@ -15,4 +15,6 @@ object AggregationRequest {
   case object Language extends AggregationRequest
 
   case object License extends AggregationRequest
+
+  case object ItemLocationType extends AggregationRequest
 }
