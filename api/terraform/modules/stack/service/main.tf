@@ -77,7 +77,7 @@ module "service" {
 
   container_name = module.nginx_container.container_name
   container_port = module.nginx_container.container_port
-  
+
   deployment_service = local.deployment_service_name
   deployment_env     = var.deployment_service_env
   deployment_label   = "initial"
