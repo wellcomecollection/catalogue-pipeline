@@ -3,11 +3,13 @@ package uk.ac.wellcome.platform.api.models
 import scala.util.{Failure, Success, Try}
 import io.circe.{Decoder, Json}
 import java.time.{Instant, LocalDateTime, ZoneOffset}
+
 import com.sksamuel.elastic4s.requests.searches.aggs.responses.{
   Aggregations => Elastic4sAggregations
 }
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import grizzled.slf4j.Logging
+import uk.ac.wellcome.display.models.LocationTypeQuery
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.json.JsonUtil._
 
@@ -18,7 +20,7 @@ case class Aggregations(
   language: Option[Aggregation[Language]] = None,
   subjects: Option[Aggregation[Subject[IdState.Minted]]] = None,
   license: Option[Aggregation[License]] = None,
-  locationType: Option[Aggregation[LocationTypeAggregation]] = None,
+  locationType: Option[Aggregation[LocationTypeQuery]] = None,
 )
 
 object Aggregations extends Logging {
@@ -38,7 +40,7 @@ object Aggregations extends Logging {
             .decodeAgg[Subject[IdState.Minted]]("subjects"),
           license = e4sAggregations.decodeAgg[License]("license"),
           locationType =
-            e4sAggregations.decodeAgg[LocationTypeAggregation]("locationType")
+            e4sAggregations.decodeAgg[LocationTypeQuery]("locationType")
         ))
     } else {
       None
@@ -82,10 +84,10 @@ object Aggregations extends Logging {
       Subject(label = str, concepts = Nil)
     }
 
-  implicit val decodeLocationTypeFromLabel: Decoder[LocationTypeAggregation] =
+  implicit val decodeLocationTypeFromLabel: Decoder[LocationTypeQuery] =
     Decoder.decodeString.map {
-      case "DigitalLocation"  => LocationTypeAggregation.Digital
-      case "PhysicalLocation" => LocationTypeAggregation.Physical
+      case "DigitalLocation"  => LocationTypeQuery.DigitalLocation
+      case "PhysicalLocation" => LocationTypeQuery.PhysicalLocation
     }
 
   implicit class EnhancedEsAggregations(aggregations: Elastic4sAggregations) {
