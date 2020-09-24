@@ -5,7 +5,7 @@
 #    pip-compile
 #
 aiodns==2.0.0             # via aiohttp
-aiofile==3.0.0            # via weco-datascience
+aiofile==3.1.0            # via weco-datascience
 aiohttp[speedups]==3.6.2  # via weco-datascience
 async-timeout==3.0.1      # via aiohttp, weco-datascience
 attrs==19.3.0             # via aiohttp
@@ -13,7 +13,7 @@ boto3==1.12.14            # via weco-datascience
 botocore==1.15.14         # via boto3, s3transfer
 brotlipy==0.7.0           # via aiohttp
 cached-property==1.5.1    # via piffle
-caio==0.5.3               # via aiofile
+caio==0.6.1               # via aiofile
 cchardet==2.1.6           # via aiohttp
 certifi==2019.11.28       # via requests
 cffi==1.14.0              # via brotlipy, pycares
@@ -47,7 +47,7 @@ urllib3==1.25.8           # via botocore, requests
 uvicorn==0.11.7           # via -r requirements.in
 uvloop==0.14.0            # via uvicorn
 websockets==8.1           # via uvicorn
-weco-datascience==0.1.4   # via -r requirements.in
+weco-datascience==0.1.5   # via -r requirements.in
 yarl==1.4.2               # via aiohttp
 
 # The following packages are considered to be unsafe in a requirements file:
