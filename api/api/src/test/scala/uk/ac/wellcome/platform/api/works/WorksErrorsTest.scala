@@ -42,7 +42,7 @@ class WorksErrorsTest extends ApiWorksTestBase {
       assertIsBadRequest(
         "/works?aggregations=foo",
         description =
-          "aggregations: 'foo' is not a valid value. Please choose one of: ['workType', 'genres', 'production.dates', 'subjects', 'language', 'license']"
+          "aggregations: 'foo' is not a valid value. Please choose one of: ['workType', 'genres', 'production.dates', 'subjects', 'language', 'license', 'locationType']"
       )
     }
 
@@ -50,7 +50,7 @@ class WorksErrorsTest extends ApiWorksTestBase {
       assertIsBadRequest(
         "/works?aggregations=foo,bar",
         description =
-          "aggregations: 'foo', 'bar' are not valid values. Please choose one of: ['workType', 'genres', 'production.dates', 'subjects', 'language', 'license']"
+          "aggregations: 'foo', 'bar' are not valid values. Please choose one of: ['workType', 'genres', 'production.dates', 'subjects', 'language', 'license', 'locationType']"
       )
     }
 
@@ -66,7 +66,7 @@ class WorksErrorsTest extends ApiWorksTestBase {
       assertIsBadRequest(
         "/works?aggregations=foo,workType,bar",
         description =
-          "aggregations: 'foo', 'bar' are not valid values. Please choose one of: ['workType', 'genres', 'production.dates', 'subjects', 'language', 'license']"
+          "aggregations: 'foo', 'bar' are not valid values. Please choose one of: ['workType', 'genres', 'production.dates', 'subjects', 'language', 'license', 'locationType']"
       )
     }
   }

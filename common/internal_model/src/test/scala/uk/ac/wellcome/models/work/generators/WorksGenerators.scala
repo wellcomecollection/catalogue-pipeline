@@ -338,4 +338,20 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
         createDigitalItemWith(license = Some(license))
       }
     )
+
+  def createPhysicalWork(canonicalId: String = createCanonicalId) =
+    createIdentifiedWorkWith(
+      canonicalId,
+      items = List(
+        createIdentifiedItemWith(locations = List(createPhysicalLocation))
+      )
+    )
+
+  def createDigitalWork(canonicalId: String = createCanonicalId) =
+    createIdentifiedWorkWith(
+      canonicalId,
+      items = List(
+        createIdentifiedItemWith(locations = List(createDigitalLocation))
+      )
+    )
 }
