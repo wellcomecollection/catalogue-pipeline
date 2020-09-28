@@ -9,18 +9,18 @@ import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.models.VersionExpectedConflictException
 import uk.ac.wellcome.storage.Version
-import WorkState.Unidentified
+import WorkState.Source
 
 class WorkStoreTest
     extends AnyFunSpec
     with Matchers
-    with VHSFixture[Work[Unidentified]]
+    with VHSFixture[Work[Source]]
     with WorksGenerators
     with Inside {
   it("gets a work from vhs") {
     withVHS { vhs: VHS =>
       val workStore = new WorkStore(vhs)
-      val expectedWork = createUnidentifiedWork
+      val expectedWork = createSourceWork
       val actualWork = for {
         key <- vhs.put(Version("b12345678", 1))(expectedWork)
         work <- workStore.getWork(key.id)
@@ -43,7 +43,7 @@ class WorkStoreTest
     "returns a VersionExpectedConflictException if the work exists in VHS with a higher version") {
     withVHS { vhs: VHS =>
       val workStore = new WorkStore(vhs)
-      val expectedWork = createUnidentifiedWork
+      val expectedWork = createSourceWork
       val actualWork = for {
         _ <- vhs.put(Version("b12345678", 2))(expectedWork)
         work <- workStore.getWork(Version("b12345678", 1))
@@ -59,7 +59,7 @@ class WorkStoreTest
   it("returns a left if the work is in VHS with a lower version") {
     withVHS { vhs: VHS =>
       val workStore = new WorkStore(vhs)
-      val expectedWork = createUnidentifiedWork
+      val expectedWork = createSourceWork
       val actualWork = for {
         _ <- vhs.put(Version("b12345678", 1))(expectedWork)
         work <- workStore.getWork(Version("b12345678", 2))

@@ -21,7 +21,7 @@ import uk.ac.wellcome.storage.locking.{
   FailedProcess,
   FailedUnlock
 }
-import WorkState.Unidentified
+import WorkState.Source
 
 class WorkMatcher(
   workGraphStore: WorkGraphStore,
@@ -31,10 +31,10 @@ class WorkMatcher(
 
   type Out = Set[MatchedIdentifiers]
 
-  def matchWork(work: Work[Unidentified]): Future[MatcherResult] =
+  def matchWork(work: Work[Source]): Future[MatcherResult] =
     doMatch(work).map(MatcherResult)
 
-  private def doMatch(work: Work[Unidentified]): Future[Out] = {
+  private def doMatch(work: Work[Source]): Future[Out] = {
     val update = WorkUpdate(work)
     withLocks(update, update.ids) {
       for {

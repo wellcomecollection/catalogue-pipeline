@@ -27,7 +27,7 @@ import uk.ac.wellcome.storage.locking.dynamo.{
 }
 import uk.ac.wellcome.storage.typesafe.DynamoBuilder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
-import WorkState.Unidentified
+import WorkState.Source
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
@@ -61,7 +61,7 @@ object Main extends WellcomeTypesafeApp {
     val workMatcher = new WorkMatcher(workGraphStore, new DynamoLockingService)
 
     new MatcherWorkerService(
-      store = new WorkStore(VHSBuilder.build[Work[Unidentified]](config)),
+      store = new WorkStore(VHSBuilder.build[Work[Source]](config)),
       msgStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
       msgSender = SNSBuilder
         .buildSNSMessageSender(config, subject = "Sent from the matcher"),
