@@ -50,7 +50,7 @@ class ElasticsearchService(elasticClient: ElasticClient)(
       .request(
         queryOptions,
         index,
-        scored = queryOptions.searchQuery.isDefined
+        scored = queryOptions.searchQuery.isDefined || queryOptions.scoredFilters.nonEmpty
       )
       .trackTotalHits(true)
     Tracing.currentTransaction.addQueryOptionLabels(queryOptions)
