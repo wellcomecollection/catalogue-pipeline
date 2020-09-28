@@ -5,7 +5,10 @@ import java.time.LocalDate
 
 import uk.ac.wellcome.display.models.LocationTypeQuery
 
-sealed trait DocumentFilter
+sealed trait DocumentFilter {
+  val scored: Boolean = false
+}
+
 sealed trait WorkFilter extends DocumentFilter
 sealed trait ImageFilter extends DocumentFilter
 
@@ -45,4 +48,6 @@ case class AccessStatusFilter(includes: List[AccessStatus],
                               excludes: List[AccessStatus])
     extends WorkFilter
 
-case class ColorFilter(hexColors: Seq[String]) extends ImageFilter
+case class ColorFilter(hexColors: Seq[String]) extends ImageFilter {
+  override val scored: Boolean = true
+}

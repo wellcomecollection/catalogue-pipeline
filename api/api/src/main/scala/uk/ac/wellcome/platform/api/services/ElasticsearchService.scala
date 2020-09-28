@@ -24,7 +24,9 @@ case class ElasticsearchQueryOptions(filters: List[DocumentFilter],
                                      aggregations: List[AggregationRequest],
                                      sortBy: List[SortRequest],
                                      sortOrder: SortingOrder,
-                                     searchQuery: Option[SearchQuery])
+                                     searchQuery: Option[SearchQuery]) {
+  lazy val (scoredFilters, unscoredFilters) = filters.partition(_.scored)
+}
 
 class ElasticsearchService(elasticClient: ElasticClient)(
   implicit ec: ExecutionContext

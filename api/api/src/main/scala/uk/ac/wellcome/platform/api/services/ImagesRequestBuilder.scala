@@ -12,6 +12,7 @@ import uk.ac.wellcome.platform.api.elasticsearch.{
 }
 import uk.ac.wellcome.platform.api.models.{
   ColorFilter,
+  DocumentFilter,
   ImageFilter,
   LicenseFilter,
   QueryConfig
@@ -36,9 +37,12 @@ class ImagesRequestBuilder(queryConfig: QueryConfig)
             ImagesMultiMatcher(q.query)
           }
           .getOrElse(boolQuery)
-          .filter(queryOptions.filters.collect {
-            case filter: ImageFilter => buildImageFilterQuery(filter)
-          })
+          .must(
+            buildImageFilterQuery(queryOptions.scoredFilters)
+          )
+          .filter(
+            buildImageFilterQuery(queryOptions.unscoredFilters)
+          )
       )
       .sortBy {
         if (scored) {
@@ -50,13 +54,17 @@ class ImagesRequestBuilder(queryConfig: QueryConfig)
       .limit(queryOptions.limit)
       .from(queryOptions.from)
 
-  def buildImageFilterQuery(imageFilter: ImageFilter): Query =
-    imageFilter match {
-      case LicenseFilter(licenseIds) =>
-        termsQuery(field = "location.license.id", values = licenseIds)
-      case ColorFilter(hexColors) =>
-        colorQuery(field = "inferredData.palette", hexColors)
-    }
+  def buildImageFilterQuery(filters: Seq[DocumentFilter]): Seq[Query] =
+    filters
+      .collect {
+        case imageFilter: ImageFilter => imageFilter
+      }
+      .map {
+        case LicenseFilter(licenseIds) =>
+          termsQuery(field = "location.license.id", values = licenseIds)
+        case ColorFilter(hexColors) =>
+          colorQuery(field = "inferredData.palette", hexColors)
+      }
 
   def requestWithBlendedSimilarity: (Index, String, Int) => SearchRequest =
     similarityRequest(ImageSimilarity.blended)
