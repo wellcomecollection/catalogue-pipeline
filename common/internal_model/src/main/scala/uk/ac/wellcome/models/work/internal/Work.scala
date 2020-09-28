@@ -90,7 +90,7 @@ case class WorkData[State <: DataState](
   *      |
   *      | (transformer)
   *      ▼
-  *   Unmerged
+  *    Source
   *      |
   *      | (matcher / merger)
   *      ▼
@@ -113,10 +113,22 @@ sealed trait WorkState {
 
 object WorkState {
 
-  // TODO: for now just 2 states, in the end the states will correspond to the
-  // block comment above
+  case class Source(
+    sourceIdentifier: SourceIdentifier
+  ) extends WorkState {
 
-  case class Unidentified(
+    type WorkDataState = DataState.Unidentified
+  }
+
+  case class Merged(
+    sourceIdentifier: SourceIdentifier,
+    isMerged: Boolean
+  ) extends WorkState {
+
+    type WorkDataState = DataState.Unidentified
+  }
+
+  case class Denormalised(
     sourceIdentifier: SourceIdentifier
   ) extends WorkState {
 
@@ -129,5 +141,25 @@ object WorkState {
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
+  }
+}
+
+object WorkFsm {
+
+  import WorkState._
+
+  implicit class SourceWorkFsm(work: Work[Source]) {
+
+    def transitionToMerged(isMerged: Boolean): Work[Merged] = {
+      val state = Merged(work.sourceIdentifier, isMerged)
+      work match {
+        case Work.Visible(version, data, _) =>
+          Work.Visible[Merged](version, data, state)
+        case Work.Invisible(version, data, _, invisibilityReasons) =>
+          Work.Invisible[Merged](version, data, state, invisibilityReasons)
+        case Work.Redirected(version, redirect, _) =>
+          Work.Redirected[Merged](version, redirect, state)
+      }
+    }
   }
 }
