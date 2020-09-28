@@ -6,7 +6,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import uk.ac.wellcome.models.work.internal._
-import WorkState.Unidentified
+import WorkState.Source
 
 class CalmTransformerTest extends AnyFunSpec with Matchers {
 
@@ -22,9 +22,9 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(record, version) shouldBe Right(
-      Work.Visible[Unidentified](
+      Work.Visible[Source](
         version = version,
-        state = Unidentified(
+        state = Source(
           SourceIdentifier(
             value = id,
             identifierType = CalmIdentifierTypes.recordId
@@ -378,13 +378,13 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
 
     forAll(examples) { (record, suppressed) =>
       CalmTransformer(record, version).right.get match {
-        case _: Work.Invisible[Unidentified] => suppressed shouldBe true
-        case _                               => suppressed shouldBe false
+        case _: Work.Invisible[Source] => suppressed shouldBe true
+        case _                         => suppressed shouldBe false
       }
     }
   }
 
-  it("Returns Work.Invisible[Unidentified] when missing required source fields") {
+  it("Returns Work.Invisible[Source] when missing required source fields") {
     val noTitle = calmRecord(
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
@@ -406,7 +406,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
     }
   }
 
-  it("returns a Work.Invisible[Unidentified] if invalid access status") {
+  it("returns a Work.Invisible[Source] if invalid access status") {
     val record = calmRecord(
       "Title" -> "abc",
       "Level" -> "Collection",
@@ -418,7 +418,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
     CalmTransformer(record, version).right.get shouldBe a[Work.Invisible[_]]
   }
 
-  it("returns a Work.Invisible[Unidentified] if no title") {
+  it("returns a Work.Invisible[Source] if no title") {
     val record = calmRecord(
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
@@ -428,7 +428,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
     CalmTransformer(record, version).right.get shouldBe a[Work.Invisible[_]]
   }
 
-  it("returns a Work.Invisible[Unidentified] if no format") {
+  it("returns a Work.Invisible[Source] if no format") {
     val record = calmRecord(
       "Title" -> "abc",
       "RefNo" -> "a/b/c",
@@ -438,7 +438,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
     CalmTransformer(record, version).right.get shouldBe a[Work.Invisible[_]]
   }
 
-  it("returns a Work.Invisible[Unidentified] if invalid format") {
+  it("returns a Work.Invisible[Source] if invalid format") {
     val record = calmRecord(
       "Title" -> "abc",
       "Level" -> "TopLevel",
@@ -449,7 +449,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
     CalmTransformer(record, version).right.get shouldBe a[Work.Invisible[_]]
   }
 
-  it("returns a Work.Invisible[Unidentified] if no RefNo") {
+  it("returns a Work.Invisible[Source] if no RefNo") {
     val record = calmRecord(
       "Title" -> "abc",
       "Level" -> "Collection",
@@ -481,8 +481,8 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(record, version) shouldBe Right(
-      Work.Invisible[Unidentified](
-        state = Unidentified(
+      Work.Invisible[Source](
+        state = Source(
           SourceIdentifier(
             value = id,
             identifierType = CalmIdentifierTypes.recordId

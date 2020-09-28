@@ -29,7 +29,7 @@ import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 //
 // https://www.loc.gov/marc/bibliographic/bd246.html
 //
-object SierraLettering extends SierraTransformer with SierraQueryOps {
+object SierraLettering extends SierraDataTransformer with SierraQueryOps {
 
   type Output = Option[String]
 

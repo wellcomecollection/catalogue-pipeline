@@ -15,7 +15,7 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import WorkState.Unidentified
+import WorkState.Source
 
 class MiroTransformerFeatureTest
     extends AnyFunSpec
@@ -43,7 +43,7 @@ class MiroTransformerFeatureTest
 
       withWorkerService(messageSender, queue) { _ =>
         eventually {
-          val works = messageSender.getMessages[Work.Visible[Unidentified]]
+          val works = messageSender.getMessages[Work.Visible[Source]]
           works.length shouldBe >=(1)
 
           works.map { actualWork =>
@@ -94,7 +94,7 @@ class MiroTransformerFeatureTest
 
         eventually {
           messageSender
-            .getMessages[Work.Visible[Unidentified]]
+            .getMessages[Work.Visible[Source]]
             .distinct should have size 2
         }
       }

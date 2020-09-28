@@ -6,7 +6,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
 }
 import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 
-object SierraDescription extends SierraTransformer {
+object SierraDescription extends SierraDataTransformer {
 
   type Output = Option[String]
 

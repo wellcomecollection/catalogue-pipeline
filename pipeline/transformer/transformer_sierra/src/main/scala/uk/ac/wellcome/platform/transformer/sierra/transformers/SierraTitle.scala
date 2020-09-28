@@ -4,7 +4,7 @@ import uk.ac.wellcome.platform.transformer.sierra.exceptions.ShouldNotTransformE
 import uk.ac.wellcome.platform.transformer.sierra.source.SierraBibData
 import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 
-object SierraTitle extends SierraTransformer {
+object SierraTitle extends SierraDataTransformer {
 
   type Output = Option[String]
 

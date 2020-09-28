@@ -10,7 +10,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
 import uk.ac.wellcome.sierra_adapter.model.{SierraBibNumber, SierraItemNumber}
 
 case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
-    extends SierraTransformer
+    extends SierraDataTransformer
     with Logging
     with SierraLocation
     with SierraQueryOps {

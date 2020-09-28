@@ -8,7 +8,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
 }
 import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 
-object SierraDuration extends SierraTransformer with SierraQueryOps {
+object SierraDuration extends SierraDataTransformer with SierraQueryOps {
 
   type Output = Option[Int]
 

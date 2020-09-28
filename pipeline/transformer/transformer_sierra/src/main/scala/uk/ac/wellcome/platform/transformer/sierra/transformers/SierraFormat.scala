@@ -5,7 +5,7 @@ import uk.ac.wellcome.platform.transformer.sierra.data.SierraMaterialTypes
 import uk.ac.wellcome.platform.transformer.sierra.source.SierraBibData
 import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 
-object SierraFormat extends SierraTransformer {
+object SierraFormat extends SierraDataTransformer {
 
   type Output = Option[Format]
 

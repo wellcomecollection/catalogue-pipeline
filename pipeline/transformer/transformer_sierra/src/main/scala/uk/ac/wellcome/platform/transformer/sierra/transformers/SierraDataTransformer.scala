@@ -6,7 +6,7 @@ import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 /**
   *  Trait for transforming incoming bib data to some output type
   */
-trait SierraTransformer {
+trait SierraDataTransformer {
 
   type Output
 
