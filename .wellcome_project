@@ -120,6 +120,12 @@ catalogue_api:
       services:
         - id: catalogue-api
           role_arn: arn:aws:iam::756629837203:role/catalogue-ci
+    - id: snapshot-generator
+      namespace: uk.ac.wellcome
+      account_id: '760097843905'
+      services:
+        - id: snapshot-generator
+          role_arn: arn:aws:iam::756629837203:role/catalogue-ci
   name: Catalogue API
   role_arn: arn:aws:iam::760097843905:role/platform-ci
   aws_region_name: eu-west-1
