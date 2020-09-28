@@ -1,5 +1,5 @@
 module "stack" {
-  source = "stack"
+  source = "./stack"
 
   aws_region = var.aws_region
 

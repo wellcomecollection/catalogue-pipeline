@@ -1,5 +1,5 @@
 module "snapshot_generator" {
-  source     = "snapshot_generator"
+  source     = "./snapshot_generator"
   aws_region = var.aws_region
 
   cluster_arn  = var.cluster_arn
@@ -17,7 +17,7 @@ module "snapshot_generator" {
 }
 
 module "snapshot_scheduler" {
-  source = "snapshot_scheduler"
+  source = "./snapshot_scheduler"
 
   deployment_service_env = var.deployment_service_env
 
