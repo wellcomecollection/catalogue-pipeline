@@ -5,15 +5,15 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.generators.WorksWithImagesGenerators
-import WorkState.Unidentified
+import WorkState.Source
 
 class WorkPredicatesTest
     extends AnyFunSpec
     with WorksWithImagesGenerators
     with Matchers
     with Inspectors {
-  val works: Seq[Work[Unidentified]] = List(
-    createUnidentifiedSierraWork,
+  val works: Seq[Work[Source]] = List(
+    createSierraSourceWork,
     createMiroWorkWith(
       sourceIdentifier = createNonHistoricalLibraryMiroSourceIdentifier,
       images = List(createUnmergedMiroImage)
@@ -22,12 +22,12 @@ class WorkPredicatesTest
       sourceIdentifier = createHistoricalLibraryMiroSourceIdentifier,
       images = List(createUnmergedMiroImage)
     ),
-    createUnidentifiedInvisibleMetsWork,
-    createUnidentifiedInvisibleMetsWorkWith(
+    createInvisibleMetsSourceWork,
+    createInvisibleMetsSourceWorkWith(
       items = (0 to 3).map(_ => createDigitalItem).toList,
       images = List(createUnmergedMetsImage)
     ),
-    createUnidentifiedWorkWith(
+    createSourceWorkWith(
       sourceIdentifier = createMiroSourceIdentifier,
       otherIdentifiers = List(),
       thumbnail = createMiroWork.data.thumbnail,
@@ -38,16 +38,16 @@ class WorkPredicatesTest
     ),
     createSierraPhysicalWork,
     createSierraDigitalWork,
-    createUnidentifiedSierraWorkWith(
+    createSierraSourceWorkWith(
       format = Some(Format.`3DObjects`)
     ),
-    createUnidentifiedSierraWorkWith(
+    createSierraSourceWorkWith(
       format = Some(Format.DigitalImages)
     ),
-    createUnidentifiedSierraWorkWith(
+    createSierraSourceWorkWith(
       format = Some(Format.Pictures)
     ),
-    createUnidentifiedSierraWorkWith(
+    createSierraSourceWorkWith(
       format = Some(Format.Music)
     )
   )

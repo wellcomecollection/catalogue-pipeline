@@ -9,7 +9,7 @@ import uk.ac.wellcome.models.matcher.WorkIdentifier
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.fixtures.LocalWorksVhs
-import WorkState.Unidentified
+import WorkState.Source
 
 class RecorderPlaybackServiceTest
     extends AnyFunSpec
@@ -19,7 +19,7 @@ class RecorderPlaybackServiceTest
     with WorksGenerators {
 
   it("fetches a single Work") {
-    val work = createUnidentifiedWork
+    val work = createSourceWork
 
     withVHS { vhs =>
       givenStoredInVhs(vhs, work)
@@ -31,7 +31,7 @@ class RecorderPlaybackServiceTest
   }
 
   it("throws an error if asked to fetch a missing entry") {
-    val work = createUnidentifiedWork
+    val work = createSourceWork
 
     withVHS { vhs =>
       whenReady(fetchAllWorks(vhs = vhs, work).failed) { result =>
@@ -42,7 +42,7 @@ class RecorderPlaybackServiceTest
   }
 
   it("returns None if asked to fetch a Work without a version") {
-    val work = createUnidentifiedWorkWith(version = 0)
+    val work = createSourceWorkWith(version = 0)
     val workId = WorkIdentifier(work.sourceIdentifier.toString, None)
 
     withVHS { vhs =>
@@ -54,9 +54,9 @@ class RecorderPlaybackServiceTest
   }
 
   it("returns None if the version in VHS has a higher version") {
-    val work = createUnidentifiedWorkWith(version = 2)
+    val work = createSourceWorkWith(version = 2)
 
-    val workToStore = createUnidentifiedWorkWith(
+    val workToStore = createSourceWorkWith(
       sourceIdentifier = work.sourceIdentifier,
       version = work.version + 1
     )
@@ -72,10 +72,10 @@ class RecorderPlaybackServiceTest
 
   it("gets a mixture of works as appropriate") {
     val unchangedWorks = (1 to 3).map { _ =>
-      createUnidentifiedWork
+      createSourceWork
     }
     val outdatedWorks = (4 to 5).map { _ =>
-      createUnidentifiedWork
+      createSourceWork
     }
     val updatedWorks = outdatedWorks.map { work =>
       work.copy(version = work.version + 1)
@@ -97,7 +97,7 @@ class RecorderPlaybackServiceTest
 
   private def fetchAllWorks(
     vhs: VHS,
-    works: Work[Unidentified]*): Future[Seq[Option[Work[Unidentified]]]] = {
+    works: Work[Source]*): Future[Seq[Option[Work[Source]]]] = {
     val service = new RecorderPlaybackService(vhs)
 
     val workIdentifiers = works

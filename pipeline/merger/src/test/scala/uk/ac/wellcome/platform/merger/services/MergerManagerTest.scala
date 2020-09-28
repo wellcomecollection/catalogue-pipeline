@@ -6,12 +6,13 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.models.{MergeResult, MergerOutcome}
-import WorkState.Unidentified
+import WorkState.{Merged, Source}
+import WorkFsm._
 
 class MergerManagerTest extends AnyFunSpec with Matchers with WorksGenerators {
 
   it("performs a merge with a single work") {
-    val work = createUnidentifiedWork
+    val work = createSourceWork
 
     val result = mergerManager.applyMerge(maybeWorks = List(Some(work)))
 
@@ -19,8 +20,8 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorksGenerators {
   }
 
   it("performs a merge with multiple works") {
-    val work = createUnidentifiedWork
-    val otherWorks = createUnidentifiedWorks(3)
+    val work = createSourceWork
+    val otherWorks = createSourceWorks(3)
 
     val works = (work +: otherWorks).map { Some(_) }.toList
 
@@ -30,19 +31,19 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorksGenerators {
 
     result.works.tail.zip(otherWorks).map {
       case (
-          baseWork: Work[Unidentified],
-          unmergedWork: Work.Visible[Unidentified]) =>
+          baseWork: Work[Merged],
+          unmergedWork: Work.Visible[Source]) =>
         baseWork.sourceIdentifier shouldBe unmergedWork.sourceIdentifier
 
-        val redirect = baseWork.asInstanceOf[Work.Redirected[Unidentified]]
+        val redirect = baseWork.asInstanceOf[Work.Redirected[Merged]]
         val redirectTarget =
-          result.works.head.asInstanceOf[Work.Visible[Unidentified]]
+          result.works.head.asInstanceOf[Work.Visible[Merged]]
         redirect.redirect.sourceIdentifier shouldBe redirectTarget.sourceIdentifier
     }
   }
 
   it("returns the works unmerged if any of the work entries are None") {
-    val expectedWorks = createUnidentifiedWorks(3)
+    val expectedWorks = createSourceWorks(3)
 
     val maybeWorks = expectedWorks.map { Some(_) } ++ List(None)
 
@@ -56,26 +57,28 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorksGenerators {
     /** Make every work a redirect to the first work in the list, and leave
       * the first work intact.
       */
-    override def merge(works: Seq[Work[Unidentified]]): MergerOutcome =
+    override def merge(works: Seq[Work[Source]]): MergerOutcome = {
+      val outputWorks = works.head +: works.tail.map { work =>
+        Work.Redirected[Source](
+          state = Source(work.sourceIdentifier),
+          version = work.version,
+          redirect = IdState.Identifiable(works.head.sourceIdentifier)
+        )
+      }
       MergerOutcome(
-        works = works.head +: works.tail.map { work =>
-          Work.Redirected[Unidentified](
-            state = Unidentified(work.sourceIdentifier),
-            version = work.version,
-            redirect = IdState.Identifiable(works.head.sourceIdentifier)
-          )
-        },
+        works = outputWorks.map(_.transitionToMerged(false)),
         images = Nil
       )
+    }
 
     override def findTarget(
-      works: Seq[Work[Unidentified]]): Option[Work.Visible[Unidentified]] =
-      works.headOption.map(_.asInstanceOf[Work.Visible[Unidentified]])
+      works: Seq[Work[Source]]): Option[Work.Visible[Source]] =
+      works.headOption.map(_.asInstanceOf[Work.Visible[Source]])
 
     override protected def createMergeResult(
-      target: Work.Visible[Unidentified],
-      sources: Seq[Work[Unidentified]]): MergeState =
-      State(_ => (sources.toSet, MergeResult(target, Nil)))
+      target: Work.Visible[Source],
+      sources: Seq[Work[Source]]): MergeState =
+      State(_ => (sources.toSet, MergeResult(target.transitionToMerged(false), Nil)))
   }
 
   val mergerManager = new MergerManager(mergerRules = mergerRules)

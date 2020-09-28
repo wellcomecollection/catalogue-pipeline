@@ -7,7 +7,7 @@ import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.logging.MergerLogging
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import uk.ac.wellcome.platform.merger.models.Sources.findFirstLinkedDigitisedSierraWorkFor
-import WorkState.Unidentified
+import WorkState.Source
 
 /**
   * Identifiers are merged as follows:
@@ -24,8 +24,8 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
   type FieldData = List[SourceIdentifier]
 
   override def merge(
-    target: Work.Visible[Unidentified],
-    sources: Seq[Work[Unidentified]]): FieldMergeResult[FieldData] = {
+    target: Work.Visible[Source],
+    sources: Seq[Work[Source]]): FieldMergeResult[FieldData] = {
     val ids = (
       mergeDigitalIntoPhysicalSierraTarget(target, sources) |+|
         mergeIntoCalmTarget(target, sources)
@@ -54,11 +54,11 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
         (singleItemSierra or zeroItemSierra) and sierraPictureDigitalImageOr3DObject
       val isDefinedForSource: WorkPredicate =
         singleDigitalItemMiroWork
-      override val isDefinedForSourceList: Seq[Work[Unidentified]] => Boolean =
+      override val isDefinedForSourceList: Seq[Work[Source]] => Boolean =
         _.count(singleDigitalItemMiroWork) == 1
 
-      def rule(target: Work.Visible[Unidentified],
-               sources: NonEmptyList[Work[Unidentified]]): FieldData =
+      def rule(target: Work.Visible[Source],
+               sources: NonEmptyList[Work[Source]]): FieldData =
         target.data.otherIdentifiers ++ sources.toList.map(_.sourceIdentifier)
     }
 
@@ -67,8 +67,8 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
     val isDefinedForSource: WorkPredicate =
       singleDigitalItemMetsWork or sierraWork or singleDigitalItemMiroWork
 
-    def rule(target: Work.Visible[Unidentified],
-             sources: NonEmptyList[Work[Unidentified]]): FieldData =
+    def rule(target: Work.Visible[Source],
+             sources: NonEmptyList[Work[Source]]): FieldData =
       target.data.otherIdentifiers ++ sources.toList.map(_.sourceIdentifier)
   }
 
@@ -76,8 +76,8 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
     val isDefinedForTarget: WorkPredicate = physicalSierra
     val isDefinedForSource: WorkPredicate = sierraWork
 
-    def rule(target: Work.Visible[Unidentified],
-             sources: NonEmptyList[Work[Unidentified]]): FieldData =
+    def rule(target: Work.Visible[Source],
+             sources: NonEmptyList[Work[Source]]): FieldData =
       findFirstLinkedDigitisedSierraWorkFor(target, sources.toList)
         .map(target.data.otherIdentifiers ++ _.identifiers)
         .getOrElse(Nil)

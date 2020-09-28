@@ -12,7 +12,7 @@ import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.services._
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
-import WorkState.Unidentified
+import WorkState.Source
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
@@ -22,7 +22,7 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildExecutionContext()
 
     val playbackService = new RecorderPlaybackService(
-      vhs = VHSBuilder.build[Work[Unidentified]](config)
+      vhs = VHSBuilder.build[Work[Source]](config)
     )
     val mergerManager = new MergerManager(
       mergerRules = PlatformMerger

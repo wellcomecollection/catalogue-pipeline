@@ -11,7 +11,7 @@ import uk.ac.wellcome.platform.merger.fixtures.{
   MatcherResultFixture,
   WorkerServiceFixture
 }
-import WorkState.Unidentified
+import WorkState.Merged
 
 class MergerIntegrationTest
     extends AnyFunSpec
@@ -28,7 +28,7 @@ class MergerIntegrationTest
       withLocalSqsQueuePair() {
         case QueuePair(queue, dlq) =>
           withWorkerService(vhs, queue, workSender) { _ =>
-            val work = createUnidentifiedWork
+            val work = createSourceWork
 
             givenStoredInVhs(vhs, work)
 
@@ -40,7 +40,7 @@ class MergerIntegrationTest
               assertQueueEmpty(dlq)
 
               workSender
-                .getMessages[Work[Unidentified]] should contain only work
+                .getMessages[Work[Merged]] should contain only work
             }
           }
       }

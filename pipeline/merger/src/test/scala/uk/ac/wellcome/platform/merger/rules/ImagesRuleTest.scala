@@ -7,7 +7,7 @@ import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.generators.WorksWithImagesGenerators
 import uk.ac.wellcome.platform.merger.rules.ImagesRule.FlatImageMergeRule
 import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
-import WorkState.Unidentified
+import WorkState.Source
 
 class ImagesRuleTest
     extends AnyFunSpec
@@ -63,9 +63,9 @@ class ImagesRuleTest
     it(
       "creates n images from a METS work containing n images, and a single Sierra picture work") {
       val n = 5
-      val metsWork = createUnidentifiedInvisibleMetsWorkWith(numImages = n)
+      val metsWork = createInvisibleMetsSourceWorkWith(numImages = n)
       val sierraPictureWork =
-        createUnidentifiedSierraWorkWith(format = Some(Format.Pictures))
+        createSierraSourceWorkWith(format = Some(Format.Pictures))
       val result = ImagesRule.merge(sierraPictureWork, List(metsWork)).data
 
       result should have length n
@@ -85,9 +85,9 @@ class ImagesRuleTest
       val n = 3
       val m = 4
       val miroWorks = (1 to m).map(_ => createMiroWork).toList
-      val metsWork = createUnidentifiedInvisibleMetsWorkWith(numImages = n)
+      val metsWork = createInvisibleMetsSourceWorkWith(numImages = n)
       val sierraPictureWork =
-        createUnidentifiedSierraWorkWith(format = Some(Format.Pictures))
+        createSierraSourceWorkWith(format = Some(Format.Pictures))
       val result =
         ImagesRule.merge(sierraPictureWork, miroWorks :+ metsWork).data
 
@@ -107,7 +107,7 @@ class ImagesRuleTest
     it(
       "ignores METS images, but uses n Miro images, for a non-picture Sierra work") {
       val n = 3
-      val metsWork = createUnidentifiedInvisibleMetsWorkWith(numImages = 3)
+      val metsWork = createInvisibleMetsSourceWorkWith(numImages = 3)
       val miroWorks = (1 to n).map(_ => createMiroWork).toList
       val sierraWork = createSierraDigitalWork
       val result = ImagesRule.merge(sierraWork, miroWorks :+ metsWork).data
@@ -150,9 +150,9 @@ class ImagesRuleTest
     }
   }
 
-  def createUnidentifiedInvisibleMetsWorkWith(
-    numImages: Int): Work.Invisible[Unidentified] =
-    createUnidentifiedInvisibleMetsWorkWith(images = (1 to numImages).map { _ =>
+  def createInvisibleMetsSourceWorkWith(
+    numImages: Int): Work.Invisible[Source] =
+    createInvisibleMetsSourceWorkWith(images = (1 to numImages).map { _ =>
       createUnmergedMetsImage
     }.toList)
 }
