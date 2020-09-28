@@ -119,7 +119,6 @@ class PlatformMergerTest
           )
         ),
         images = miroWork.data.images,
-        merged = true
       )
     }
 
@@ -155,7 +154,6 @@ class PlatformMergerTest
         thumbnail = miroWork.data.thumbnail,
         items = miroWork.data.items,
         images = miroWork.data.images,
-        merged = true
       )
     }
     val expectedRedirectedWork =
@@ -199,7 +197,6 @@ class PlatformMergerTest
           )
         ),
         images = miroWork.data.images,
-        merged = true
       )
     }
 
@@ -232,7 +229,6 @@ class PlatformMergerTest
     val expectedMergedWork = multipleItemsSierraWork.withData { data =>
       data.copy(
         images = miroWork.data.images,
-        merged = true
       )
     }
 
@@ -253,7 +249,6 @@ class PlatformMergerTest
 
     val expectedMergedWork = sierraPhysicalWork.withData { data =>
       data.copy(
-        merged = true,
         items = List(
           physicalItem.copy(
             locations = physicalItem.locations ++ digitalItem.locations
@@ -288,7 +283,6 @@ class PlatformMergerTest
 
     val expectedMergedWork = sierraPictureWork.withData { data =>
       data.copy(
-        merged = true,
         items = List(
           physicalItem.copy(
             locations = physicalItem.locations ++ digitalItem.locations
@@ -340,7 +334,6 @@ class PlatformMergerTest
           )
         ),
         images = miroWork.data.images,
-        merged = true
       )
     }
 
@@ -393,7 +386,6 @@ class PlatformMergerTest
       data.copy(
         thumbnail = metsWork.data.thumbnail,
         items = sierraItems :+ metsItem,
-        merged = true
       )
     }
 
@@ -426,7 +418,6 @@ class PlatformMergerTest
         otherIdentifiers = multipleItemsSierraWork.data.otherIdentifiers ++ sierraDigitised.identifiers,
         thumbnail = metsWork.data.thumbnail,
         items = sierraItems :+ metsItem,
-        merged = true
       )
     }
 

@@ -27,7 +27,9 @@ class WorkIndexerTest
     it(
       "doesn't override a merged Work with same version but merged flag = false") {
       val mergedWork = createIdentifiedWorkWith(version = 3, merged = true)
-      val unmergedWork = mergedWork.withData(_.copy(merged = false))
+      val unmergedWork = mergedWork.copy(
+        state = mergedWork.state.copy(isMerged = false)
+      )
 
       withWorksIndexAndIndexer {
         case (index, indexer) =>
@@ -49,8 +51,10 @@ class WorkIndexerTest
     it("doesn't overwrite a Work with lower version and merged = true") {
       val unmergedNewWork = createIdentifiedWorkWith(version = 4)
       val mergedOldWork = unmergedNewWork
-        .copy(version = 3)
-        .withData(_.copy(merged = true))
+        .copy(
+          version = 3,
+          state = unmergedNewWork.state.copy(isMerged = true)
+        )
 
       withWorksIndexAndIndexer {
         case (index, indexer) =>

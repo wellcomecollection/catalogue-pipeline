@@ -165,7 +165,6 @@ case object WorksIndexConfig extends IndexConfig {
       textField("edition"),
       notes,
       intField("duration"),
-      booleanField("merged"),
       objectField("collectionPath").fields(
         label,
         objectField("level").fields(keywordField("type")),
@@ -181,6 +180,7 @@ case object WorksIndexConfig extends IndexConfig {
       objectField("state").fields(
         canonicalId,
         sourceIdentifier,
+        booleanField("isMerged"),
       ),
       version,
       objectField("redirect")

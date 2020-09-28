@@ -76,7 +76,6 @@ case class WorkData[State <: DataState](
   notes: List[Note] = Nil,
   duration: Option[Int] = None,
   items: List[Item[State#MaybeId]] = Nil,
-  merged: Boolean = false,
   collectionPath: Option[CollectionPath] = None,
   images: List[UnmergedImage[State]] = Nil,
   workType: WorkType = WorkType.Standard,
@@ -129,7 +128,8 @@ object WorkState {
   }
 
   case class Denormalised(
-    sourceIdentifier: SourceIdentifier
+    sourceIdentifier: SourceIdentifier,
+    isMerged: Boolean = false
   ) extends WorkState {
 
     type WorkDataState = DataState.Unidentified
@@ -138,6 +138,7 @@ object WorkState {
   case class Identified(
     sourceIdentifier: SourceIdentifier,
     canonicalId: String,
+    isMerged: Boolean = false
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
@@ -148,7 +149,7 @@ object WorkFsm {
 
   import WorkState._
 
-  implicit class SourceWorkFsm(work: Work[Source]) {
+  implicit class TransitionSourceWork(work: Work[Source]) {
 
     def transitionToMerged(isMerged: Boolean): Work[Merged] = {
       val state = Merged(work.sourceIdentifier, isMerged)
