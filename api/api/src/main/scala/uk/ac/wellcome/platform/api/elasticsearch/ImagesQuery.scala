@@ -50,22 +50,21 @@ case object ImagesMultiMatcher {
       ))
       .map(FieldWithOptionalBoost(_, None))
 
-    must(
-      should(
-        MultiMatchQuery(
-          text = q,
-          fields = fields,
-          minimumShouldMatch = Some("60%"),
-          `type` = Some(CROSS_FIELDS),
-          operator = Some(AND),
-          boost = Some(2) // Double the OR query
-        ),
-        MultiMatchQuery(
-          fields = idFields,
-          text = q,
-          `type` = Some(CROSS_FIELDS)
-        )
-      ))
+    should(
+      MultiMatchQuery(
+        text = q,
+        fields = fields,
+        minimumShouldMatch = Some("60%"),
+        `type` = Some(CROSS_FIELDS),
+        operator = Some(AND),
+        boost = Some(2) // Double the OR query
+      ),
+      MultiMatchQuery(
+        fields = idFields,
+        text = q,
+        `type` = Some(CROSS_FIELDS)
+      )
+    ).minimumShouldMatch(1)
   }
 }
 

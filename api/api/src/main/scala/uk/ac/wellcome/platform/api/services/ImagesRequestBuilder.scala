@@ -11,11 +11,14 @@ import uk.ac.wellcome.platform.api.elasticsearch.{
   ImagesMultiMatcher
 }
 import uk.ac.wellcome.platform.api.models.{
-  ColorFilter,
+  ColorMustQuery,
   ImageFilter,
+  ImageMustQuery,
   LicenseFilter,
-  QueryConfig
+  QueryConfig,
+  SearchOptions
 }
+import uk.ac.wellcome.platform.api.rest.PaginationQuery
 
 class ImagesRequestBuilder(queryConfig: QueryConfig)
     extends ElasticsearchRequestBuilder {
@@ -26,35 +29,41 @@ class ImagesRequestBuilder(queryConfig: QueryConfig)
     binSizes = queryConfig.paletteBinSizes
   )
 
-  def request(queryOptions: ElasticsearchQueryOptions,
-              index: Index,
-              scored: Boolean): SearchRequest =
+  def request(searchOptions: SearchOptions, index: Index): SearchRequest =
     search(index)
       .query(
-        queryOptions.searchQuery
+        searchOptions.searchQuery
           .map { q =>
             ImagesMultiMatcher(q.query)
           }
           .getOrElse(boolQuery)
-          .filter(queryOptions.filters.collect {
-            case filter: ImageFilter => buildImageFilterQuery(filter)
-          })
+          .must(
+            buildImageMustQuery(searchOptions.safeMustQueries[ImageMustQuery])
+          )
+          .filter(
+            buildImageFilterQuery(searchOptions.safeFilters[ImageFilter])
+          )
       )
-      .sortBy {
-        if (scored) {
-          List(scoreSort(SortOrder.DESC), idSort)
-        } else {
-          List(idSort)
-        }
-      }
-      .limit(queryOptions.limit)
-      .from(queryOptions.from)
+      .sortBy { sortBy(searchOptions) }
+      .limit(searchOptions.pageSize)
+      .from(PaginationQuery.safeGetFrom(searchOptions))
 
-  def buildImageFilterQuery(imageFilter: ImageFilter): Query =
-    imageFilter match {
+  def sortBy(searchOptions: SearchOptions): Seq[Sort] =
+    if (searchOptions.searchQuery.isDefined || searchOptions.mustQueries.nonEmpty) {
+      List(scoreSort(SortOrder.DESC), idSort)
+    } else {
+      List(idSort)
+    }
+
+  def buildImageFilterQuery(filters: Seq[ImageFilter]): Seq[Query] =
+    filters.map {
       case LicenseFilter(licenseIds) =>
         termsQuery(field = "location.license.id", values = licenseIds)
-      case ColorFilter(hexColors) =>
+    }
+
+  def buildImageMustQuery(queries: List[ImageMustQuery]): Seq[Query] =
+    queries.map {
+      case ColorMustQuery(hexColors) =>
         colorQuery(field = "inferredData.palette", hexColors)
     }
 

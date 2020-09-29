@@ -5,7 +5,6 @@ import java.time.LocalDate
 import io.circe.Decoder
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.platform.api.models._
-import uk.ac.wellcome.platform.api.services.WorksSearchOptions
 import uk.ac.wellcome.models.work.internal.{AccessStatus, WorkType}
 
 case class SingleWorkParams(
@@ -73,8 +72,8 @@ case class MultipleWorksParams(
 ) extends QueryParams
     with Paginated {
 
-  def searchOptions(apiConfig: ApiConfig): WorksSearchOptions =
-    WorksSearchOptions(
+  def searchOptions(apiConfig: ApiConfig): SearchOptions =
+    SearchOptions(
       searchQuery = query map { query =>
         SearchQuery(query, _queryType)
       },

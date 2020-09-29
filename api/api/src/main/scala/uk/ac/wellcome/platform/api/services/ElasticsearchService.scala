@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.api.services
 
 import scala.concurrent.{ExecutionContext, Future}
-
 import co.elastic.apm.api.Transaction
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.get.GetResponse
@@ -13,18 +12,8 @@ import com.sksamuel.elastic4s.requests.searches.{
 }
 import com.sksamuel.elastic4s.{ElasticClient, ElasticError, Index}
 import grizzled.slf4j.Logging
-
-import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.platform.api.Tracing
 import uk.ac.wellcome.platform.api.models._
-
-case class ElasticsearchQueryOptions(filters: List[DocumentFilter],
-                                     limit: Int,
-                                     from: Int,
-                                     aggregations: List[AggregationRequest],
-                                     sortBy: List[SortRequest],
-                                     sortOrder: SortingOrder,
-                                     searchQuery: Option[SearchQuery])
 
 class ElasticsearchService(elasticClient: ElasticClient)(
   implicit ec: ExecutionContext
@@ -41,17 +30,13 @@ class ElasticsearchService(elasticClient: ElasticClient)(
     * using the elastic4s query DSL, then execute the search.
     */
   def executeSearch(
-    queryOptions: ElasticsearchQueryOptions,
+    searchOptions: SearchOptions,
     requestBuilder: ElasticsearchRequestBuilder,
     index: Index): Future[Either[ElasticError, SearchResponse]] = {
     val searchRequest = requestBuilder
-      .request(
-        queryOptions,
-        index,
-        scored = queryOptions.searchQuery.isDefined
-      )
+      .request(searchOptions, index)
       .trackTotalHits(true)
-    Tracing.currentTransaction.addQueryOptionLabels(queryOptions)
+    Tracing.currentTransaction.addQueryOptionLabels(searchOptions)
     executeSearchRequest(searchRequest)
   }
 
@@ -105,20 +90,19 @@ class ElasticsearchService(elasticClient: ElasticClient)(
     }
 
   implicit class EnhancedTransaction(transaction: Transaction) {
-    def addQueryOptionLabels(
-      queryOptions: ElasticsearchQueryOptions): Transaction = {
-      transaction.addLabel("limit", queryOptions.limit)
-      transaction.addLabel("from", queryOptions.from)
-      transaction.addLabel("sortOrder", queryOptions.sortOrder.toString)
+    def addQueryOptionLabels(searchOptions: SearchOptions): Transaction = {
+      transaction.addLabel("pageSize", searchOptions.pageSize)
+      transaction.addLabel("pageNumber", searchOptions.pageNumber)
+      transaction.addLabel("sortOrder", searchOptions.sortOrder.toString)
       transaction.addLabel(
         "sortBy",
-        queryOptions.sortBy.map { _.toString }.mkString(","))
+        searchOptions.sortBy.map { _.toString }.mkString(","))
       transaction.addLabel(
         "filters",
-        queryOptions.filters.map { _.toString }.mkString(","))
+        searchOptions.filters.map { _.toString }.mkString(","))
       transaction.addLabel(
         "aggregations",
-        queryOptions.aggregations.map { _.toString }.mkString(","))
+        searchOptions.aggregations.map { _.toString }.mkString(","))
     }
   }
 }
