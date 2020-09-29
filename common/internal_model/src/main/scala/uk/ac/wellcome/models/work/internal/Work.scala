@@ -32,14 +32,14 @@ sealed trait Work[State <: WorkState] {
     implicit transition: WorkFsm.Transition[State, OutState])
     : Work[OutState] = {
     val outState = transition.state(state, args)
-    val outData = transition.data(data, args)
+    val outData = transition.data(data)
     this match {
       case Work.Visible(version, _, _) =>
         Work.Visible(version, outData, outState)
       case Work.Invisible(version, _, _, invisibilityReasons) =>
         Work.Invisible(version, outData, outState, invisibilityReasons)
       case Work.Redirected(version, redirect, _) =>
-        Work.Redirected(version, transition.redirect(redirect, args), outState)
+        Work.Redirected(version, transition.redirect(redirect), outState)
     }
   }
 }
@@ -148,18 +148,18 @@ object WorkState {
   case class Denormalised(
     sourceIdentifier: SourceIdentifier,
     hasMultipleSources: Boolean = false,
-    relations: Relations[Denormalised] = Relations.unknown
+    relations: Relations[DataState.Unidentified] = Relations.none
   ) extends WorkState {
 
     type WorkDataState = DataState.Unidentified
-    type TransitionArgs = Relations[Denormalised]
+    type TransitionArgs = Relations[DataState.Unidentified]
   }
 
   case class Identified(
     sourceIdentifier: SourceIdentifier,
     canonicalId: String,
     hasMultipleSources: Boolean = false,
-    relations: Relations[Identified] = Relations.unknown
+    relations: Relations[DataState.Identified] = Relations.none
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
@@ -180,37 +180,26 @@ object WorkFsm {
 
     def state(state: InState, args: OutState#TransitionArgs): OutState
 
-    def data(data: WorkData[InState#WorkDataState],
-             args: OutState#TransitionArgs): WorkData[OutState#WorkDataState]
+    def data(data: WorkData[InState#WorkDataState]): WorkData[OutState#WorkDataState]
 
-    def redirect(redirect: InState#WorkDataState#Id,
-                 args: OutState#TransitionArgs): OutState#WorkDataState#Id
+    def redirect(redirect: InState#WorkDataState#Id): OutState#WorkDataState#Id
   }
 
   implicit val sourceToMerged = new Transition[Source, Merged] {
     def state(state: Source, hasMultipleSources: Boolean): Merged =
       Merged(state.sourceIdentifier, hasMultipleSources)
 
-    def data(data: WorkData[DataState.Unidentified],
-             hasMultipleSources: Boolean): WorkData[DataState.Unidentified] =
-      data
+    def data(data: WorkData[DataState.Unidentified]) = data
 
-    def redirect(redirect: IdState.Identifiable,
-                 hasMultipleSources: Boolean): IdState.Identifiable =
-      redirect
+    def redirect(redirect: IdState.Identifiable) = redirect
   }
 
   implicit val mergedToDenormalised = new Transition[Merged, Denormalised] {
-    def state(state: Merged, relations: Relations[Denormalised]): Denormalised =
+    def state(state: Merged, relations: Relations[DataState.Unidentified]): Denormalised =
       Denormalised(state.sourceIdentifier, state.hasMultipleSources, relations)
 
-    def data(
-      data: WorkData[DataState.Unidentified],
-      relations: Relations[Denormalised]): WorkData[DataState.Unidentified] =
-      data
+    def data(data: WorkData[DataState.Unidentified]) = data
 
-    def redirect(redirect: IdState.Identifiable,
-                 relations: Relations[Denormalised]): IdState.Identifiable =
-      redirect
+    def redirect(redirect: IdState.Identifiable) = redirect
   }
 }

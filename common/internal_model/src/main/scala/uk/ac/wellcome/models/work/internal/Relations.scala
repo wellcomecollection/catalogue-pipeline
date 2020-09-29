@@ -1,36 +1,38 @@
 package uk.ac.wellcome.models.work.internal
 
-/** Holds relations for a particular work. An Option[List[_]] is used to
-  * represent cases both where the work has no relations and where the
-  * relations are not currently known.
+/** Holds relations for a particular work.
   *
-  * @param parts Children of the work
-  * @param partOf Parents of the work
-  * @param precededBy Siblings preceding the work
-  * @param succeededBy Siblings following the work
+  * @param ancestors Ancestors from root downwards
+  * @param children Children of the work
+  * @param siblingsPreceding Siblings preceding the work
+  * @param siblingsSucceeding Siblings following the work
   */
-case class Relations[State <: WorkState](
-  parts: Option[List[Work[State]]],
-  partOf: Option[List[Work[State]]],
-  precededBy: Option[List[Work[State]]],
-  succeededBy: Option[List[Work[State]]],
+case class Relations[State <: DataState](
+  ancestors: List[Relation[State]],
+  children: List[Relation[State]],
+  siblingsPreceding: List[Relation[State]],
+  siblingsSucceeding: List[Relation[State]],
 )
 
 object Relations {
 
-  def unknown[State <: WorkState]: Relations[State] =
+  def none[State <: DataState]: Relations[State] =
     Relations(
-      parts = None,
-      partOf = None,
-      precededBy = None,
-      succeededBy = None
-    )
-
-  def nil[State <: WorkState]: Relations[State] =
-    Relations(
-      parts = Some(Nil),
-      partOf = Some(Nil),
-      precededBy = Some(Nil),
-      succeededBy = Some(Nil)
+      ancestors = Nil,
+      children = Nil,
+      siblingsPreceding = Nil,
+      siblingsSucceeding = Nil
     )
 }
+
+/** A relation contains a particular related work
+  *
+  * @param data The work data
+  * @param id The ID
+  * @param depth The depth of the relation in the tree
+  */
+case class Relation[State <: DataState](
+  data: WorkData[State],
+  id: State#Id,
+  depth: Int,
+)

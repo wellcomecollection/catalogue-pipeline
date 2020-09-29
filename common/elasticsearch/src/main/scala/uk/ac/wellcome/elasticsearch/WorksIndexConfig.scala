@@ -175,12 +175,26 @@ case object WorksIndexConfig extends IndexConfig {
       keywordField("workType")
     )
 
+  def relation(name: String) = objectField(name).fields(
+    data(textField("path")),
+    id(),
+    intField("depth")
+  )
+
+  val relations = objectField("relations").fields(
+    relation("ancestors"),
+    relation("children"),
+    relation("siblingsPreceding"),
+    relation("siblingsSucceeding"),
+  )
+
   val fields: Seq[FieldDefinition with Product with Serializable] =
     Seq(
       objectField("state").fields(
         canonicalId,
         sourceIdentifier,
         booleanField("hasMultipleSources"),
+        relations
       ),
       version,
       objectField("redirect")
