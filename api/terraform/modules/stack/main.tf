@@ -64,7 +64,7 @@ resource "aws_cloudwatch_metric_alarm" "server_error" {
   insufficient_data_actions = []
 
   dimensions = {
-    Stage = var.environment
+    Stage   = var.environment
     ApiName = "Catalogue API"
   }
 }
