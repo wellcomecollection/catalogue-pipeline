@@ -180,7 +180,7 @@ case object WorksIndexConfig extends IndexConfig {
       objectField("state").fields(
         canonicalId,
         sourceIdentifier,
-        booleanField("isMerged"),
+        booleanField("hasMultipleSources"),
       ),
       version,
       objectField("redirect")

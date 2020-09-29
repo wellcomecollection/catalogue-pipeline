@@ -166,7 +166,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
       state = Identified(
         canonicalId = canonicalId,
         sourceIdentifier = sourceIdentifier,
-        isMerged = merged
+        hasMultipleSources = merged
       ),
       version = version,
       data = WorkData[DataState.Identified](

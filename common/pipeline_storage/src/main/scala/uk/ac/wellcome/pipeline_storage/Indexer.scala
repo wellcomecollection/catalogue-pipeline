@@ -66,9 +66,10 @@ object Indexable {
         */
       def version(work: Work[Identified]) =
         work match {
-          case Work.Visible(version, data, state) => (version * 10) + state.isMerged
-          case Work.Redirected(version, _, _)     => (version * 10) + 1
-          case Work.Invisible(version, _, _, _)   => version * 10
+          case Work.Visible(version, data, state) =>
+            (version * 10) + state.hasMultipleSources
+          case Work.Redirected(version, _, _)   => (version * 10) + 1
+          case Work.Invisible(version, _, _, _) => version * 10
         }
 
       implicit private def toInteger(bool: Boolean): Int = if (bool) 1 else 0

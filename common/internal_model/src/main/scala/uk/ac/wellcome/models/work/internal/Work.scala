@@ -121,7 +121,6 @@ case class WorkData[State <: DataState](
 sealed trait WorkState {
 
   type WorkDataState <: DataState
-
   type TransitionArgs
 
   val sourceIdentifier: SourceIdentifier
@@ -139,7 +138,7 @@ object WorkState {
 
   case class Merged(
     sourceIdentifier: SourceIdentifier,
-    isMerged: Boolean
+    hasMultipleSources: Boolean
   ) extends WorkState {
 
     type WorkDataState = DataState.Unidentified
@@ -148,7 +147,7 @@ object WorkState {
 
   case class Denormalised(
     sourceIdentifier: SourceIdentifier,
-    isMerged: Boolean = false
+    hasMultipleSources: Boolean = false
   ) extends WorkState {
 
     type WorkDataState = DataState.Unidentified
@@ -158,7 +157,7 @@ object WorkState {
   case class Identified(
     sourceIdentifier: SourceIdentifier,
     canonicalId: String,
-    isMerged: Boolean = false
+    hasMultipleSources: Boolean = false
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
@@ -187,15 +186,15 @@ object WorkFsm {
   }
 
   implicit val sourceToMerged = new Transition[Source, Merged] {
-    def state(state: Source, isMerged: Boolean): Merged
-      = Merged(state.sourceIdentifier, isMerged)
+    def state(state: Source, hasMultipleSources: Boolean): Merged
+      = Merged(state.sourceIdentifier, hasMultipleSources)
 
     def data(data: WorkData[DataState.Unidentified],
-             isMerged: Boolean): WorkData[DataState.Unidentified] =
+             hasMultipleSources: Boolean): WorkData[DataState.Unidentified] =
       data
 
     def redirect(redirect: IdState.Identifiable,
-                 isMerged: Boolean): IdState.Identifiable =
+                 hasMultipleSources: Boolean): IdState.Identifiable =
       redirect
   }
 }
