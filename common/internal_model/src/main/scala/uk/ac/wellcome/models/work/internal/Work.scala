@@ -180,7 +180,8 @@ object WorkFsm {
 
     def state(state: InState, args: OutState#TransitionArgs): OutState
 
-    def data(data: WorkData[InState#WorkDataState]): WorkData[OutState#WorkDataState]
+    def data(
+      data: WorkData[InState#WorkDataState]): WorkData[OutState#WorkDataState]
 
     def redirect(redirect: InState#WorkDataState#Id): OutState#WorkDataState#Id
   }
@@ -195,7 +196,8 @@ object WorkFsm {
   }
 
   implicit val mergedToDenormalised = new Transition[Merged, Denormalised] {
-    def state(state: Merged, relations: Relations[DataState.Unidentified]): Denormalised =
+    def state(state: Merged,
+              relations: Relations[DataState.Unidentified]): Denormalised =
       Denormalised(state.sourceIdentifier, state.hasMultipleSources, relations)
 
     def data(data: WorkData[DataState.Unidentified]) = data
