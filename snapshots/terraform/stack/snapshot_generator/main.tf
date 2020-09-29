@@ -1,6 +1,6 @@
 module "snapshot_generator_queue" {
   source     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
-  queue_name = "snapshot_generator"
+  queue_name = "snapshot_generator-${var.deployment_service_env}"
   topic_arns = [var.snapshot_generator_input_topic_arn]
 
   aws_region      = var.aws_region

@@ -17,6 +17,8 @@ module "snapshot_scheduler" {
   }
 
   log_retention_in_days = 30
+
+  handler = "snapshot_scheduler"
 }
 
 resource "aws_lambda_permission" "allow_cloudwatch_trigger" {
