@@ -17,21 +17,13 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
 
   val idSort: FieldSort = fieldSort("state.canonicalId").order(SortOrder.ASC)
 
-  def request(searchOptions: SearchOptions,
-              index: Index,
-              scored: Boolean = false): SearchRequest = {
+  def request(searchOptions: SearchOptions, index: Index): SearchRequest = {
     implicit val s = searchOptions
     search(index)
       .aggs { filteredAggregationBuilder.filteredAggregations }
       .query { filteredQuery }
       .postFilter { postFilterQuery }
-      .sortBy {
-        if (scored) {
-          sort :+ scoreSort(SortOrder.DESC) :+ idSort
-        } else {
-          sort :+ idSort
-        }
-      }
+      .sortBy { sortBy }
       .limit { searchOptions.pageSize }
       .from { PaginationQuery.safeGetFrom(searchOptions) }
   }
@@ -40,7 +32,7 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
     implicit searchOptions: SearchOptions) =
     new FiltersAndAggregationsBuilder(
       searchOptions.aggregations,
-      searchOptions.typedFilters[WorkFilter],
+      searchOptions.safeFilters[WorkFilter],
       toAggregation,
       buildWorkFilterQuery
     )
@@ -95,6 +87,13 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
         .field("data.items.locations.ontologyType")
         .minDocCount(0)
   }
+
+  private def sortBy(implicit searchOptions: SearchOptions) =
+    if (searchOptions.searchQuery.isDefined || searchOptions.mustQueries.nonEmpty) {
+      sort :+ scoreSort(SortOrder.DESC) :+ idSort
+    } else {
+      sort :+ idSort
+    }
 
   private def sort(implicit searchOptions: SearchOptions) =
     searchOptions.sortBy

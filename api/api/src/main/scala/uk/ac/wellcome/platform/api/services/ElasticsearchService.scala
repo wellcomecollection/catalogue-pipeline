@@ -34,11 +34,7 @@ class ElasticsearchService(elasticClient: ElasticClient)(
     requestBuilder: ElasticsearchRequestBuilder,
     index: Index): Future[Either[ElasticError, SearchResponse]] = {
     val searchRequest = requestBuilder
-      .request(
-        searchOptions,
-        index,
-        scored = searchOptions.searchQuery.isDefined
-      )
+      .request(searchOptions, index)
       .trackTotalHits(true)
     Tracing.currentTransaction.addQueryOptionLabels(searchOptions)
     executeSearchRequest(searchRequest)

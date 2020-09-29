@@ -11,8 +11,9 @@ import uk.ac.wellcome.platform.api.elasticsearch.{
   ImagesMultiMatcher
 }
 import uk.ac.wellcome.platform.api.models.{
-  ColorFilter,
+  ColorMustQuery,
   ImageFilter,
+  ImageMustQuery,
   LicenseFilter,
   QueryConfig,
   SearchOptions
@@ -28,9 +29,7 @@ class ImagesRequestBuilder(queryConfig: QueryConfig)
     binSizes = queryConfig.paletteBinSizes
   )
 
-  def request(searchOptions: SearchOptions,
-              index: Index,
-              scored: Boolean): SearchRequest =
+  def request(searchOptions: SearchOptions, index: Index): SearchRequest =
     search(index)
       .query(
         searchOptions.searchQuery
@@ -42,18 +41,19 @@ class ImagesRequestBuilder(queryConfig: QueryConfig)
             buildImageMustQuery(searchOptions.safeMustQueries[ImageMustQuery])
           )
           .filter(
-            buildImageFilterQuery(searchOptions.typedFilters[ImageFilter])
+            buildImageFilterQuery(searchOptions.safeFilters[ImageFilter])
           )
       )
-      .sortBy {
-        if (scored) {
-          List(scoreSort(SortOrder.DESC), idSort)
-        } else {
-          List(idSort)
-        }
-      }
+      .sortBy { sortBy(searchOptions) }
       .limit(searchOptions.pageSize)
       .from(PaginationQuery.safeGetFrom(searchOptions))
+
+  def sortBy(searchOptions: SearchOptions): Seq[Sort] =
+    if (searchOptions.searchQuery.isDefined || searchOptions.mustQueries.nonEmpty) {
+      List(scoreSort(SortOrder.DESC), idSort)
+    } else {
+      List(idSort)
+    }
 
   def buildImageFilterQuery(filters: Seq[ImageFilter]): Seq[Query] =
     filters.map {
