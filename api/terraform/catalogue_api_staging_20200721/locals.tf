@@ -4,8 +4,9 @@ locals {
 
   namespace_hyphen = replace(local.namespace, "_", "-")
 
-  vpc_id                         = data.terraform_remote_state.shared_infra.outputs.catalogue_vpc_id
-  private_subnets                = data.terraform_remote_state.shared_infra.outputs.catalogue_vpc_private_subnets
+  vpc_id          = local.catalogue_vpcs["catalogue_vpc_id"]
+  private_subnets = local.catalogue_vpcs["catalogue_vpc_private_subnets"]
+
   gateway_server_error_alarm_arn = data.terraform_remote_state.shared_infra.outputs.gateway_server_error_alarm_arn
 
   api_gateway_id   = data.terraform_remote_state.catalogue_api_shared.outputs.api_gateway_id
