@@ -21,12 +21,27 @@ sealed trait Work[State <: WorkState] {
     : Work[State] =
     this match {
       case Work.Visible(version, data, state) =>
-        Work.Visible[State](version, f(data), state)
+        Work.Visible(version, f(data), state)
       case Work.Invisible(version, data, state, reasons) =>
-        Work.Invisible[State](version, f(data), state, reasons)
+        Work.Invisible(version, f(data), state, reasons)
       case Work.Redirected(version, redirect, state) =>
-        Work.Redirected[State](version, redirect, state)
+        Work.Redirected(version, redirect, state)
     }
+
+  def transition[OutState <: WorkState](
+    args: OutState#TransitionArgs)(
+    implicit transition: WorkFsm.Transition[State, OutState]): Work[OutState] = {
+    val outState = transition.state(state, args)
+    val outData = transition.data(data, args)
+    this match {
+      case Work.Visible(version, _, _) =>
+        Work.Visible(version, outData, outState)
+      case Work.Invisible(version, _, _, invisibilityReasons) =>
+        Work.Invisible(version, outData, outState, invisibilityReasons)
+      case Work.Redirected(version, redirect, _) =>
+        Work.Redirected(version, transition.redirect(redirect, args), outState)
+    }
+  }
 }
 
 object Work {
@@ -107,6 +122,8 @@ sealed trait WorkState {
 
   type WorkDataState <: DataState
 
+  type TransitionArgs
+
   val sourceIdentifier: SourceIdentifier
 }
 
@@ -117,6 +134,7 @@ object WorkState {
   ) extends WorkState {
 
     type WorkDataState = DataState.Unidentified
+    type TransitionArgs = Unit
   }
 
   case class Merged(
@@ -125,6 +143,7 @@ object WorkState {
   ) extends WorkState {
 
     type WorkDataState = DataState.Unidentified
+    type TransitionArgs = Boolean
   }
 
   case class Denormalised(
@@ -133,6 +152,7 @@ object WorkState {
   ) extends WorkState {
 
     type WorkDataState = DataState.Unidentified
+    type TransitionArgs = Unit
   }
 
   case class Identified(
@@ -142,25 +162,40 @@ object WorkState {
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
+    type TransitionArgs = Unit
   }
 }
 
+/** The WorkFsm contains all possible transitions between work states.
+  *
+  * The `transition` method on `Work` allows invocation of these transitions by
+  * providing the type parameter of the new state and it's respective arguments.
+  */
 object WorkFsm {
 
   import WorkState._
 
-  implicit class TransitionSourceWork(work: Work[Source]) {
+  sealed trait Transition[InState <: WorkState, OutState <: WorkState] {
 
-    def transitionToMerged(isMerged: Boolean): Work[Merged] = {
-      val state = Merged(work.sourceIdentifier, isMerged)
-      work match {
-        case Work.Visible(version, data, _) =>
-          Work.Visible[Merged](version, data, state)
-        case Work.Invisible(version, data, _, invisibilityReasons) =>
-          Work.Invisible[Merged](version, data, state, invisibilityReasons)
-        case Work.Redirected(version, redirect, _) =>
-          Work.Redirected[Merged](version, redirect, state)
-      }
-    }
+    def state(state: InState, args: OutState#TransitionArgs): OutState
+
+    def data(data: WorkData[InState#WorkDataState],
+             args: OutState#TransitionArgs): WorkData[OutState#WorkDataState]
+
+    def redirect(redirect: InState#WorkDataState#Id,
+                 args: OutState#TransitionArgs): OutState#WorkDataState#Id
+  }
+
+  implicit val sourceToMerged = new Transition[Source, Merged] {
+    def state(state: Source, isMerged: Boolean): Merged
+      = Merged(state.sourceIdentifier, isMerged)
+
+    def data(data: WorkData[DataState.Unidentified],
+             isMerged: Boolean): WorkData[DataState.Unidentified] =
+      data
+
+    def redirect(redirect: IdState.Identifiable,
+                 isMerged: Boolean): IdState.Identifiable =
+      redirect
   }
 }

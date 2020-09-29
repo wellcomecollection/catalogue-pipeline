@@ -18,7 +18,7 @@ import uk.ac.wellcome.platform.merger.fixtures.{
 }
 import uk.ac.wellcome.platform.merger.generators.WorksWithImagesGenerators
 import WorkState.Merged
-import WorkFsm.TransitionSourceWork
+import WorkFsm._
 
 class MergerWorkerServiceTest
     extends AnyFunSpec
@@ -54,9 +54,9 @@ class MergerWorkerServiceTest
 
           senders.works
             .getMessages[Work[Merged]] should contain only (
-              work1.transitionToMerged(isMerged = false),
-              work2.transitionToMerged(isMerged = false),
-              work3.transitionToMerged(isMerged = false)
+              work1.transition[Merged](false),
+              work2.transition[Merged](false),
+              work3.transition[Merged](false)
             )
 
           metrics.incrementedCounts.length should be >= 1

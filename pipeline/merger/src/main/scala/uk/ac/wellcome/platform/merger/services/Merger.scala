@@ -6,7 +6,7 @@ import uk.ac.wellcome.platform.merger.rules._
 import uk.ac.wellcome.platform.merger.logging.MergerLogging
 import uk.ac.wellcome.platform.merger.models.{MergeResult, MergerOutcome}
 import WorkState.{Merged, Source}
-import WorkFsm.TransitionSourceWork
+import WorkFsm._
 
 /*
  * The implementor of a Merger must provide:
@@ -54,9 +54,9 @@ trait Merger extends MergerLogging {
             .value
 
           val remaining = (sources.toSet -- mergeResultSources)
-            .map(_.transitionToMerged(isMerged = false))
+            .map(_.transition[Merged](false))
           val redirects = mergeResultSources.map(redirectSourceToTarget(target))
-            .map(_.transitionToMerged(isMerged = false))
+            .map(_.transition[Merged](false))
           logResult(result, redirects.toList, remaining.toList)
 
           MergerOutcome(
@@ -112,7 +112,7 @@ object PlatformMerger extends Merger {
     if (sources.isEmpty)
       State.pure(
         MergeResult(
-          mergedTarget = target.transitionToMerged(isMerged = false),
+          mergedTarget = target.transition[Merged](false),
           images = ImagesRule.merge(target).data
         )
       )
@@ -131,7 +131,7 @@ object PlatformMerger extends Merger {
           )
         }
       } yield MergeResult(
-        mergedTarget = work.transitionToMerged(isMerged = true),
+        mergedTarget = work.transition[Merged](true),
         images = images
       )
 }

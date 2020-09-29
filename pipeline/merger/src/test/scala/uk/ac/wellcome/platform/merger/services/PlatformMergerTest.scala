@@ -6,7 +6,7 @@ import org.scalatest.prop.TableDrivenPropertyChecks._
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.generators.WorksWithImagesGenerators
 import WorkState.{Merged, Source}
-import WorkFsm.TransitionSourceWork
+import WorkFsm._
 import SourceWork._
 
 class PlatformMergerTest
@@ -111,7 +111,7 @@ class PlatformMergerTest
     val miroItem = miroWork.data.items.head
 
     val expectedMergedWork = sierraPhysicalWork
-      .transitionToMerged(isMerged = true)
+      .transition[Merged](true)
       .withData { data =>
         data.copy(
           otherIdentifiers = sierraPhysicalWork.data.otherIdentifiers ++ miroWork.identifiers,
@@ -152,7 +152,7 @@ class PlatformMergerTest
     result.works.size shouldBe 2
 
     val expectedMergedWork = zeroItemSierraWork
-      .transitionToMerged(isMerged = true)
+      .transition[Merged](true)
       .withData { data =>
         data.copy(
           otherIdentifiers = data.otherIdentifiers ++ miroWork.identifiers,
@@ -195,7 +195,7 @@ class PlatformMergerTest
     val miroItem = miroWork.data.items.head
 
     val expectedMergedWork = sierraDigitalWork
-      .transitionToMerged(isMerged = true)
+      .transition[Merged](true)
       .withData { data =>
         data.copy(
           otherIdentifiers = sierraDigitalWork.data.otherIdentifiers ++ miroWork.identifiers,
@@ -236,7 +236,7 @@ class PlatformMergerTest
     result.works.size shouldBe 2
 
     val expectedMergedWork = multipleItemsSierraWork
-      .transitionToMerged(isMerged = true)
+      .transition[Merged](true)
       .withData { data =>
         data.copy(
           images = miroWork.data.images,
@@ -244,7 +244,7 @@ class PlatformMergerTest
       }
 
     result.works should contain theSameElementsAs Seq(
-      miroWork.transitionToMerged(isMerged = false),
+      miroWork.transition[Merged](false),
       expectedMergedWork)
   }
 
@@ -259,7 +259,7 @@ class PlatformMergerTest
     val digitalItem = metsWork.data.items.head
 
     val expectedMergedWork = sierraPhysicalWork
-      .transitionToMerged(isMerged = true)
+      .transition[Merged](true)
       .withData { data =>
         data.copy(
           items = List(
@@ -295,7 +295,7 @@ class PlatformMergerTest
     val digitalItem = metsWork.data.items.head
 
     val expectedMergedWork = sierraPictureWork
-      .transitionToMerged(isMerged = true)
+      .transition[Merged](true)
       .withData { data =>
         data.copy(
           items = List(
@@ -340,7 +340,7 @@ class PlatformMergerTest
     val metsItem = metsWork.data.items.head
 
     val expectedMergedWork = sierraPhysicalWork
-      .transitionToMerged(isMerged = true)
+      .transitionToMerged(true)
       .withData { data =>
         data.copy(
           otherIdentifiers = sierraPhysicalWork.data.otherIdentifiers
@@ -402,7 +402,7 @@ class PlatformMergerTest
     val metsItem = metsWork.data.items.head
 
     val expectedMergedWork = multipleItemsSierraWork
-      .transitionToMerged(isMerged = true)
+      .transition[Merged](true)
       .withData { data =>
         data.copy(
           thumbnail = metsWork.data.thumbnail,
@@ -435,7 +435,7 @@ class PlatformMergerTest
     val metsItem = metsWork.data.items.head
 
     val expectedMergedWork = multipleItemsSierraWork
-      .transitionToMerged(isMerged = true)
+      .transition[Merged](true)
       .withData { data =>
         data.copy(
           otherIdentifiers = multipleItemsSierraWork.data.otherIdentifiers ++ sierraDigitised.identifiers,
@@ -471,7 +471,7 @@ class PlatformMergerTest
     val result = merger.merge(List(miroWork))
 
     result.works should have length 1
-    result.works.head shouldBe miroWork.transitionToMerged(isMerged = false)
+    result.works.head shouldBe miroWork.transition[Merged](false)
     result.images should have length 1
     result.images.head shouldBe miroWork.data.images.head.mergeWith(
       canonicalWork = miroWork.toSourceWork,

@@ -7,7 +7,7 @@ import uk.ac.wellcome.platform.merger.generators.WorksWithImagesGenerators
 import uk.ac.wellcome.platform.merger.models.{FieldMergeResult, MergeResult}
 import uk.ac.wellcome.platform.merger.rules.FieldMergeRule
 import WorkState.{Merged, Source}
-import WorkFsm.TransitionSourceWork
+import WorkFsm._
 
 class MergerTest
     extends AnyFunSpec
@@ -74,7 +74,7 @@ class MergerTest
       inputWorks
         .head
         .asInstanceOf[Work.Visible[Source]]
-        .transitionToMerged(isMerged = true)
+        .transition[Merged](true)
         .withData { data =>
           data.copy[DataState.Unidentified](
             items = mergedTargetItems,
@@ -94,7 +94,7 @@ class MergerTest
 
   it("returns all non-redirected and non-target works untouched") {
     mergedWorks.works should contain(
-      inputWorks.tail.head.transitionToMerged(isMerged = false)
+      inputWorks.tail.head.transition[Merged](false)
     )
   }
 }

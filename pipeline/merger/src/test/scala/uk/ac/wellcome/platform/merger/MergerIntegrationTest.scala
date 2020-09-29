@@ -12,7 +12,7 @@ import uk.ac.wellcome.platform.merger.fixtures.{
   WorkerServiceFixture
 }
 import WorkState.Merged
-import WorkFsm.TransitionSourceWork
+import WorkFsm._
 
 class MergerIntegrationTest
     extends AnyFunSpec
@@ -41,7 +41,7 @@ class MergerIntegrationTest
               assertQueueEmpty(dlq)
 
               workSender.getMessages[Work[Merged]] should contain only
-                work.transitionToMerged(isMerged = false)
+                work.transition[Merged](false)
             }
           }
       }

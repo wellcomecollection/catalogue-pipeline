@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.merger.models
 
 import uk.ac.wellcome.models.work.internal._
 import WorkState.{Source, Merged}
-import WorkFsm.TransitionSourceWork
+import WorkFsm._
 
 /*
  * MergerOutcome is the final output of the merger:
@@ -15,7 +15,7 @@ object MergerOutcome {
 
   def passThrough(works: Seq[Work[Source]]): MergerOutcome =
     MergerOutcome(
-      works = works.map(_.transitionToMerged(isMerged = false)),
+      works = works.map(_.transition[Merged](false)),
       images = Nil
     )
 }
