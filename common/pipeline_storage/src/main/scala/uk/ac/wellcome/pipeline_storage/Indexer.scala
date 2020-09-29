@@ -32,7 +32,7 @@ object Indexable {
       def id(image: AugmentedImage) =
         image.id.canonicalId
       def version(image: AugmentedImage) =
-        image.version
+        image.version + image.source.version
     }
 
   implicit val workIndexable: Indexable[Work[Identified]] =
@@ -66,7 +66,7 @@ object Indexable {
         */
       def version(work: Work[Identified]) =
         work match {
-          case Work.Visible(version, data, state) =>
+          case Work.Visible(version, _, state) =>
             (version * 10) + state.hasMultipleSources
           case Work.Redirected(version, _, _)   => (version * 10) + 1
           case Work.Invisible(version, _, _, _) => version * 10

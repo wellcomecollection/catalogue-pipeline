@@ -20,7 +20,8 @@ case object ImagesIndexConfig extends IndexConfig {
       id("id"),
       WorksIndexConfig.data(textField("path")),
       keywordField("ontologyType"),
-      keywordField("type")
+      keywordField("type"),
+      version
     )
   val source = objectField("source").fields(
     sourceWork("canonicalWork"),
