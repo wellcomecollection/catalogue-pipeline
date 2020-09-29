@@ -3,7 +3,6 @@ package uk.ac.wellcome.platform.api.rest
 import io.circe.Decoder
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.platform.api.models._
-import uk.ac.wellcome.platform.api.services.ImagesSearchOptions
 
 case class SingleImageParams(
   include: Option[SingleImageIncludes],
@@ -37,8 +36,8 @@ case class MultipleImagesParams(
 ) extends QueryParams
     with Paginated {
 
-  def searchOptions(apiConfig: ApiConfig): ImagesSearchOptions =
-    ImagesSearchOptions(
+  def searchOptions(apiConfig: ApiConfig): SearchOptions =
+    SearchOptions(
       searchQuery = query.map(SearchQuery(_)),
       filters = filters,
       pageSize = pageSize.getOrElse(apiConfig.defaultPageSize),

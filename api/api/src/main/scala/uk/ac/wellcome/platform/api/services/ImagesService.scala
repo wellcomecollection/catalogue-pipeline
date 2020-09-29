@@ -2,20 +2,14 @@ package uk.ac.wellcome.platform.api.services
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
-import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import com.sksamuel.elastic4s.{ElasticError, Hit, Index}
 import com.sksamuel.elastic4s.circe._
 import io.circe.Decoder
-import uk.ac.wellcome.display.models.SortingOrder
 import uk.ac.wellcome.models.work.internal.AugmentedImage
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.platform.api.Tracing
 import uk.ac.wellcome.platform.api.models._
-import uk.ac.wellcome.platform.api.rest.{
-  PaginatedSearchOptions,
-  PaginationQuery
-}
 
 class ImagesService(searchService: ElasticsearchService,
                     queryConfig: QueryConfig)(implicit ec: ExecutionContext)
@@ -37,8 +31,7 @@ class ImagesService(searchService: ElasticsearchService,
         }
       }
 
-  def listOrSearchImages(index: Index,
-                         searchOptions: SearchOptions[ImageFilter])
+  def listOrSearchImages(index: Index, searchOptions: SearchOptions)
     : Future[Either[ElasticError, ResultList[AugmentedImage, Unit]]] =
     searchService
       .executeSearch(

@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.api.services
 
 import scala.concurrent.{ExecutionContext, Future}
-
 import co.elastic.apm.api.Transaction
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.get.GetResponse
@@ -13,8 +12,6 @@ import com.sksamuel.elastic4s.requests.searches.{
 }
 import com.sksamuel.elastic4s.{ElasticClient, ElasticError, Index}
 import grizzled.slf4j.Logging
-
-import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.platform.api.Tracing
 import uk.ac.wellcome.platform.api.models._
 
@@ -33,7 +30,7 @@ class ElasticsearchService(elasticClient: ElasticClient)(
     * using the elastic4s query DSL, then execute the search.
     */
   def executeSearch(
-    searchOptions: SearchOptions[_],
+    searchOptions: SearchOptions,
     requestBuilder: ElasticsearchRequestBuilder,
     index: Index): Future[Either[ElasticError, SearchResponse]] = {
     val searchRequest = requestBuilder
@@ -97,7 +94,7 @@ class ElasticsearchService(elasticClient: ElasticClient)(
     }
 
   implicit class EnhancedTransaction(transaction: Transaction) {
-    def addQueryOptionLabels(searchOptions: SearchOptions[_]): Transaction = {
+    def addQueryOptionLabels(searchOptions: SearchOptions): Transaction = {
       transaction.addLabel("pageSize", searchOptions.pageSize)
       transaction.addLabel("pageNumber", searchOptions.pageNumber)
       transaction.addLabel("sortOrder", searchOptions.sortOrder.toString)

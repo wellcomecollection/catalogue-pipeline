@@ -1,13 +1,11 @@
 package uk.ac.wellcome.platform.api.elasticsearch
 
 import scala.concurrent.ExecutionContext.Implicits.global
-
 import com.sksamuel.elastic4s.{ElasticError, Index}
 import com.sksamuel.elastic4s.requests.searches.{SearchHit, SearchResponse}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
-
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.json.JsonUtil.fromJson
 import uk.ac.wellcome.models.work.generators.{
@@ -19,10 +17,13 @@ import uk.ac.wellcome.models.work.generators.{
 }
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
-import uk.ac.wellcome.platform.api.models.{SearchQuery, SearchQueryType}
+import uk.ac.wellcome.platform.api.models.{
+  SearchOptions,
+  SearchQuery,
+  SearchQueryType
+}
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.platform.api.services.{
-  ElasticsearchQueryOptions,
   ElasticsearchService,
   WorksRequestBuilder
 }
@@ -398,7 +399,7 @@ class WorksQueryTest
     SearchQueryType.allowed map { queryType =>
       val results = searchResults(
         index,
-        queryOptions = createElasticsearchQueryOptionsWith(
+        searchOptions = createWorksSearchOptionsWith(
           searchQuery = Some(SearchQuery(query, queryType))))
 
       withClue(s"Using: ${queryType.name}") {
@@ -408,10 +409,9 @@ class WorksQueryTest
     }
   }
 
-  private def searchResults(index: Index,
-                            queryOptions: ElasticsearchQueryOptions) = {
+  private def searchResults(index: Index, searchOptions: SearchOptions) = {
     val searchResponseFuture =
-      searchService.executeSearch(queryOptions, WorksRequestBuilder, index)
+      searchService.executeSearch(searchOptions, WorksRequestBuilder, index)
     whenReady(searchResponseFuture) { response =>
       searchResponseToWorks(response)
     }

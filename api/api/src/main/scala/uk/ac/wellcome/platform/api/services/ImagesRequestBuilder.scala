@@ -22,14 +22,13 @@ import uk.ac.wellcome.platform.api.rest.PaginationQuery
 class ImagesRequestBuilder(queryConfig: QueryConfig)
     extends ElasticsearchRequestBuilder {
 
-  type Filter = ImageFilter
   val idSort: FieldSort = fieldSort("id.canonicalId").order(SortOrder.ASC)
 
   lazy val colorQuery = new ColorQuery(
     binSizes = queryConfig.paletteBinSizes
   )
 
-  def request(searchOptions: SearchOptions[ImageFilter],
+  def request(searchOptions: SearchOptions,
               index: Index,
               scored: Boolean): SearchRequest =
     search(index)
@@ -40,7 +39,7 @@ class ImagesRequestBuilder(queryConfig: QueryConfig)
           }
           .getOrElse(boolQuery)
           .filter(
-            buildImageFilterQuery(searchOptions.filters)
+            buildImageFilterQuery(searchOptions.typedFilters[ImageFilter])
           )
       )
       .sortBy {

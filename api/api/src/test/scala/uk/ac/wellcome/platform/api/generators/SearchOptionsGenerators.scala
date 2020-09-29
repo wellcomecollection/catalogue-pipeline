@@ -5,35 +5,13 @@ import uk.ac.wellcome.display.models.{
   SortRequest,
   SortingOrder
 }
-import uk.ac.wellcome.platform.api.models.{SearchQuery, WorkFilter}
-import uk.ac.wellcome.platform.api.services.{
-  ElasticsearchQueryOptions,
-  WorksSearchOptions
+import uk.ac.wellcome.platform.api.models.{
+  SearchOptions,
+  SearchQuery,
+  WorkFilter
 }
 
 trait SearchOptionsGenerators {
-  def createElasticsearchQueryOptionsWith(
-    filters: List[WorkFilter] = Nil,
-    limit: Int = 10,
-    from: Int = 0,
-    aggregations: List[AggregationRequest] = Nil,
-    sort: List[SortRequest] = Nil,
-    sortOrder: SortingOrder = SortingOrder.Ascending,
-    searchQuery: Option[SearchQuery] = None
-  ): ElasticsearchQueryOptions =
-    ElasticsearchQueryOptions(
-      filters = filters,
-      limit = limit,
-      from = from,
-      aggregations = aggregations,
-      sortBy = sort,
-      sortOrder = sortOrder,
-      searchQuery = searchQuery
-    )
-
-  def createElasticsearchQueryOptions: ElasticsearchQueryOptions =
-    createElasticsearchQueryOptionsWith()
-
   def createWorksSearchOptionsWith(
     filters: List[WorkFilter] = Nil,
     pageSize: Int = 10,
@@ -42,8 +20,8 @@ trait SearchOptionsGenerators {
     sort: List[SortRequest] = Nil,
     sortOrder: SortingOrder = SortingOrder.Ascending,
     searchQuery: Option[SearchQuery] = None
-  ): WorksSearchOptions =
-    WorksSearchOptions(
+  ): SearchOptions =
+    SearchOptions(
       filters = filters,
       pageSize = pageSize,
       pageNumber = pageNumber,
@@ -53,6 +31,6 @@ trait SearchOptionsGenerators {
       searchQuery = searchQuery
     )
 
-  def createWorksSearchOptions: WorksSearchOptions =
+  def createWorksSearchOptions: SearchOptions =
     createWorksSearchOptionsWith()
 }

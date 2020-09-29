@@ -7,14 +7,22 @@ import com.sksamuel.elastic4s.requests.searches.queries.Query
 import com.sksamuel.elastic4s.ElasticDsl._
 import uk.ac.wellcome.platform.api.models.{DocumentFilter, SearchOptions}
 
+import scala.reflect.ClassTag
+
 trait ElasticsearchRequestBuilder {
 
   val idSort: FieldSort
-  type Filter <: DocumentFilter
 
-  def request(searchOptions: SearchOptions[Filter],
+  def request(searchOptions: SearchOptions,
               index: Index,
               scored: Boolean): SearchRequest
+
+  implicit class FilterRefinements(val searchOptions: SearchOptions) {
+    def typedFilters[T <: DocumentFilter: ClassTag]: List[T] =
+      searchOptions.filters.collect {
+        case filter: T => filter
+      }
+  }
 }
 
 object ElasticsearchRequestBuilder {

@@ -9,10 +9,6 @@ import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.display.json.DisplayJsonUtil._
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.models._
-import uk.ac.wellcome.platform.api.services.{
-  ImagesSearchOptions,
-  WorksSearchOptions
-}
 import WorkState.Identified
 
 case class ResultResponse[T: Encoder](
@@ -60,7 +56,7 @@ object DisplayResultList {
 
   def apply(
     resultList: ResultList[Work.Visible[Identified], Aggregations],
-    searchOptions: WorksSearchOptions,
+    searchOptions: SearchOptions,
     includes: WorksIncludes,
     requestUri: Uri,
     contextUri: String): DisplayResultList[DisplayWork, DisplayAggregations] =
@@ -79,7 +75,7 @@ object DisplayResultList {
     }
 
   def apply(resultList: ResultList[AugmentedImage, Unit],
-            searchOptions: ImagesSearchOptions,
+            searchOptions: SearchOptions,
             requestUri: Uri,
             contextUri: String): DisplayResultList[DisplayImage, Unit] =
     PaginationResponse(resultList, searchOptions, requestUri) match {

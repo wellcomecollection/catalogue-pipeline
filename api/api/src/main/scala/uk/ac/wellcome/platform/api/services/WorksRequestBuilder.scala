@@ -15,10 +15,9 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
 
   import ElasticsearchRequestBuilder._
 
-  type Filter = WorkFilter
   val idSort: FieldSort = fieldSort("state.canonicalId").order(SortOrder.ASC)
 
-  def request(searchOptions: SearchOptions[WorkFilter],
+  def request(searchOptions: SearchOptions,
               index: Index,
               scored: Boolean = false): SearchRequest = {
     implicit val s = searchOptions
@@ -38,10 +37,10 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
   }
 
   private def filteredAggregationBuilder(
-    implicit searchOptions: SearchOptions[WorkFilter]) =
+    implicit searchOptions: SearchOptions) =
     new FiltersAndAggregationsBuilder(
       searchOptions.aggregations,
-      searchOptions.filters,
+      searchOptions.typedFilters[WorkFilter],
       toAggregation,
       buildWorkFilterQuery
     )
@@ -97,27 +96,26 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
         .minDocCount(0)
   }
 
-  private def sort(implicit searchOptions: SearchOptions[WorkFilter]) =
+  private def sort(implicit searchOptions: SearchOptions) =
     searchOptions.sortBy
       .map {
         case ProductionDateSortRequest => "data.production.dates.range.from"
       }
       .map { FieldSort(_).order(sortOrder) }
 
-  private def sortOrder(implicit searchOptions: SearchOptions[WorkFilter]) =
+  private def sortOrder(implicit searchOptions: SearchOptions) =
     searchOptions.sortOrder match {
       case SortingOrder.Ascending  => SortOrder.ASC
       case SortingOrder.Descending => SortOrder.DESC
     }
 
   private def postFilterQuery(
-    implicit searchOptions: SearchOptions[WorkFilter]): BoolQuery =
+    implicit searchOptions: SearchOptions): BoolQuery =
     boolQuery.filter {
       filteredAggregationBuilder.pairedFilters.map(buildWorkFilterQuery)
     }
 
-  private def filteredQuery(
-    implicit searchOptions: SearchOptions[WorkFilter]): BoolQuery =
+  private def filteredQuery(implicit searchOptions: SearchOptions): BoolQuery =
     searchOptions.searchQuery
       .map {
         case SearchQuery(query, queryType) =>

@@ -6,9 +6,9 @@ import uk.ac.wellcome.display.models.{
   SortingOrder
 }
 
-case class SearchOptions[Filter <: DocumentFilter](
+case class SearchOptions(
   searchQuery: Option[SearchQuery] = None,
-  filters: List[Filter] = Nil,
+  filters: List[DocumentFilter] = Nil,
   aggregations: List[AggregationRequest] = Nil,
   sortBy: List[SortRequest] = Nil,
   sortOrder: SortingOrder = SortingOrder.Ascending,
