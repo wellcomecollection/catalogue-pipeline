@@ -18,6 +18,7 @@ import uk.ac.wellcome.platform.merger.fixtures.{
 }
 import uk.ac.wellcome.platform.merger.generators.WorksWithImagesGenerators
 import WorkState.Merged
+import WorkFsm.TransitionSourceWork
 
 class MergerWorkerServiceTest
     extends AnyFunSpec
@@ -52,7 +53,11 @@ class MergerWorkerServiceTest
           assertQueueEmpty(dlq)
 
           senders.works
-            .getMessages[Work[Merged]] should contain only (work1, work2, work3)
+            .getMessages[Work[Merged]] should contain only (
+              work1.transitionToMerged(isMerged = false),
+              work2.transitionToMerged(isMerged = false),
+              work3.transitionToMerged(isMerged = false)
+            )
 
           metrics.incrementedCounts.length should be >= 1
           metrics.incrementedCounts.last should endWith("_success")
@@ -78,7 +83,8 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          senders.works.getMessages[Work[Merged]] should contain only work
+          senders.works.getMessages[Work[Merged]] should contain only
+            work.transitionToMerged(isMerged = false)
 
           metrics.incrementedCounts.length shouldBe 1
           metrics.incrementedCounts.last should endWith("_success")
@@ -130,7 +136,8 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
           val worksSent = senders.works.getMessages[Work[Merged]]
-          worksSent should contain only work
+          worksSent should contain only
+            work.transitionToMerged(isMerged = false)
         }
     }
   }
@@ -156,7 +163,8 @@ class MergerWorkerServiceTest
           assertQueueEmpty(dlq)
 
           val worksSent = senders.works.getMessages[Work[Merged]]
-          worksSent should contain only work
+          worksSent should contain only
+            work.transitionToMerged(isMerged = false)
 
           metrics.incrementedCounts.length shouldBe 1
           metrics.incrementedCounts.last should endWith("_success")

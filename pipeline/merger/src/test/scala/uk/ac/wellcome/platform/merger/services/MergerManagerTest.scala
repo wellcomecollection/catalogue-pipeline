@@ -7,7 +7,7 @@ import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.models.{MergeResult, MergerOutcome}
 import WorkState.{Merged, Source}
-import WorkFsm._
+import WorkFsm.TransitionSourceWork
 
 class MergerManagerTest extends AnyFunSpec with Matchers with WorksGenerators {
 
@@ -16,7 +16,7 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorksGenerators {
 
     val result = mergerManager.applyMerge(maybeWorks = List(Some(work)))
 
-    result.works shouldBe List(work)
+    result.works shouldBe List(work.transitionToMerged(isMerged = false))
   }
 
   it("performs a merge with multiple works") {
@@ -27,7 +27,7 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorksGenerators {
 
     val result = mergerManager.applyMerge(maybeWorks = works)
 
-    result.works.head shouldBe work
+    result.works.head shouldBe work.transitionToMerged(isMerged = false)
 
     result.works.tail.zip(otherWorks).map {
       case (
@@ -49,7 +49,8 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorksGenerators {
 
     val result = mergerManager.applyMerge(maybeWorks = maybeWorks.toList)
 
-    result.works should contain theSameElementsAs expectedWorks
+    result.works should contain theSameElementsAs
+      expectedWorks.map(_.transitionToMerged(isMerged = false))
   }
 
   val mergerRules = new Merger {

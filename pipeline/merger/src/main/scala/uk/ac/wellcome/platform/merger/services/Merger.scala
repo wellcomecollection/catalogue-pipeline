@@ -6,7 +6,7 @@ import uk.ac.wellcome.platform.merger.rules._
 import uk.ac.wellcome.platform.merger.logging.MergerLogging
 import uk.ac.wellcome.platform.merger.models.{MergeResult, MergerOutcome}
 import WorkState.{Merged, Source}
-import WorkFsm._
+import WorkFsm.TransitionSourceWork
 
 /*
  * The implementor of a Merger must provide:

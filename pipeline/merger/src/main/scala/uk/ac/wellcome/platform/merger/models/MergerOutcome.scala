@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.merger.models
 
 import uk.ac.wellcome.models.work.internal._
 import WorkState.{Source, Merged}
-import WorkFsm._
+import WorkFsm.TransitionSourceWork
 
 /*
  * MergerOutcome is the final output of the merger:
