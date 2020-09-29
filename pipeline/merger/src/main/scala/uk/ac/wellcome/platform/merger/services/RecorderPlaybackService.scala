@@ -17,16 +17,15 @@ import WorkState.Source
   * so the merger has everything it needs to work with.
   *
   */
-class RecorderPlaybackService(
-  vhs: VersionedStore[String, Int, Work[Source]])(
+class RecorderPlaybackService(vhs: VersionedStore[String, Int, Work[Source]])(
   implicit ec: ExecutionContext)
     extends Logging {
 
   /** Given a collection of matched identifiers, return all the
     * corresponding works from VHS.
     */
-  def fetchAllWorks(workIdentifiers: Seq[WorkIdentifier])
-    : Future[Seq[Option[Work[Source]]]] = {
+  def fetchAllWorks(
+    workIdentifiers: Seq[WorkIdentifier]): Future[Seq[Option[Work[Source]]]] = {
     Future.sequence(
       workIdentifiers.map(id => Future { getWorkForIdentifier(id) })
     )

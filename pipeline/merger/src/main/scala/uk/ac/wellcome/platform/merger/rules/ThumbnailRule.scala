@@ -24,9 +24,8 @@ import WorkState.Source
 object ThumbnailRule extends FieldMergeRule with MergerLogging {
   type FieldData = Option[LocationDeprecated]
 
-  override def merge(
-    target: Work.Visible[Source],
-    sources: Seq[Work[Source]]): FieldMergeResult[FieldData] =
+  override def merge(target: Work.Visible[Source],
+                     sources: Seq[Work[Source]]): FieldMergeResult[FieldData] =
     FieldMergeResult(
       data = getThumbnail(target, sources),
       sources = List(
@@ -37,9 +36,8 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
       }.distinct
     )
 
-  def getThumbnail(
-    target: Work.Visible[Source],
-    sources: Seq[Work[Source]]): Option[LocationDeprecated] =
+  def getThumbnail(target: Work.Visible[Source],
+                   sources: Seq[Work[Source]]): Option[LocationDeprecated] =
     if (shouldSuppressThumbnail(target, sources))
       None
     else

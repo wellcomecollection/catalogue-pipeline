@@ -28,9 +28,9 @@ sealed trait Work[State <: WorkState] {
         Work.Redirected(version, redirect, state)
     }
 
-  def transition[OutState <: WorkState](
-    args: OutState#TransitionArgs)(
-    implicit transition: WorkFsm.Transition[State, OutState]): Work[OutState] = {
+  def transition[OutState <: WorkState](args: OutState#TransitionArgs)(
+    implicit transition: WorkFsm.Transition[State, OutState])
+    : Work[OutState] = {
     val outState = transition.state(state, args)
     val outData = transition.data(data, args)
     this match {
@@ -186,8 +186,8 @@ object WorkFsm {
   }
 
   implicit val sourceToMerged = new Transition[Source, Merged] {
-    def state(state: Source, hasMultipleSources: Boolean): Merged
-      = Merged(state.sourceIdentifier, hasMultipleSources)
+    def state(state: Source, hasMultipleSources: Boolean): Merged =
+      Merged(state.sourceIdentifier, hasMultipleSources)
 
     def data(data: WorkData[DataState.Unidentified],
              hasMultipleSources: Boolean): WorkData[DataState.Unidentified] =

@@ -57,12 +57,14 @@ class MergerTest
         otherIdentifiers <- TestOtherIdentifiersRule(target, sources)
       } yield
         MergeResult(
-          mergedTarget = target.withData { data =>
-            data.copy[DataState.Unidentified](
-              items = items,
-              otherIdentifiers = otherIdentifiers
-            )
-          }.transition[Merged](true),
+          mergedTarget = target
+            .withData { data =>
+              data.copy[DataState.Unidentified](
+                items = items,
+                otherIdentifiers = otherIdentifiers
+              )
+            }
+            .transition[Merged](true),
           images = Nil
         )
   }
@@ -71,8 +73,7 @@ class MergerTest
 
   it("returns a single target work as specified") {
     mergedWorks.works should contain(
-      inputWorks
-        .head
+      inputWorks.head
         .asInstanceOf[Work.Visible[Source]]
         .transition[Merged](true)
         .withData { data =>

@@ -41,8 +41,7 @@ trait WorkerServiceFixture
     Version(id, expectedVhsVersion)
   }
 
-  def assertWorkNotStored[T <: Work[Source]](vhs: VHS,
-                                             work: T): Assertion = {
+  def assertWorkNotStored[T <: Work[Source]](vhs: VHS, work: T): Assertion = {
     val id = work.sourceIdentifier.toString
     vhs.getLatest(id) shouldBe a[Left[_, _]]
   }

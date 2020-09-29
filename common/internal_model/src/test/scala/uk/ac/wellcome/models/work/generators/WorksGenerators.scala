@@ -229,12 +229,12 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
       mergeCandidates = mergeCandidates
     )
 
-  def createCalmSourceWorkWith(
-    data: WorkData[DataState.Unidentified] = WorkData[DataState.Unidentified](
-      items = List(createCalmItem)
-    ),
-    id: String = randomAlphanumeric(6),
-    version: Int = 0): Work.Visible[Source] =
+  def createCalmSourceWorkWith(data: WorkData[DataState.Unidentified] =
+                                 WorkData[DataState.Unidentified](
+                                   items = List(createCalmItem)
+                                 ),
+                               id: String = randomAlphanumeric(6),
+                               version: Int = 0): Work.Visible[Source] =
     Work.Visible[Source](
       state = Source(
         sourceIdentifier = SourceIdentifier(
@@ -296,8 +296,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
   def createMiroWorkWith(images: List[UnmergedImage[DataState.Unidentified]],
                          otherIdentifiers: List[SourceIdentifier] = Nil,
                          sourceIdentifier: SourceIdentifier =
-                           createMiroSourceIdentifier)
-    : Work.Visible[Source] =
+                           createMiroSourceIdentifier): Work.Visible[Source] =
     createSourceWorkWith(
       sourceIdentifier = sourceIdentifier,
       otherIdentifiers = otherIdentifiers,

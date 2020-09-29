@@ -20,9 +20,7 @@ case class StoreReadError[T](msg: String, key: T)
     extends TransformerWorkerError(msg)
 case class TransformerError[In, Key](msg: String, sourceData: In, key: Key)
     extends TransformerWorkerError(msg)
-case class MessageSendError[T, Key](msg: String,
-                                    work: Work[Source],
-                                    key: Key)
+case class MessageSendError[T, Key](msg: String, work: Work[Source], key: Key)
     extends TransformerWorkerError(msg)
 
 /**

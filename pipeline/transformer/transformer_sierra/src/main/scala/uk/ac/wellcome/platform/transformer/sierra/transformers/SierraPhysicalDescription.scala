@@ -26,7 +26,9 @@ import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 //
 // https://www.loc.gov/marc/bibliographic/bd300.html
 //
-object SierraPhysicalDescription extends SierraDataTransformer with SierraQueryOps {
+object SierraPhysicalDescription
+    extends SierraDataTransformer
+    with SierraQueryOps {
 
   type Output = Option[String]
 

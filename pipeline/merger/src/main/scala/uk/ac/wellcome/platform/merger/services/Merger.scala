@@ -55,7 +55,8 @@ trait Merger extends MergerLogging {
 
           val remaining = (sources.toSet -- mergeResultSources)
             .map(_.transition[Merged](false))
-          val redirects = mergeResultSources.map(redirectSourceToTarget(target))
+          val redirects = mergeResultSources
+            .map(redirectSourceToTarget(target))
             .map(_.transition[Merged](false))
           logResult(result, redirects.toList, remaining.toList)
 
@@ -104,7 +105,7 @@ object PlatformMerger extends Merger {
       .orElse(works.find(WorkPredicates.physicalSierra))
       .orElse(works.find(WorkPredicates.sierraWork)) match {
       case Some(target: Work.Visible[Source]) => Some(target)
-      case _                                        => None
+      case _                                  => None
     }
 
   override def createMergeResult(target: Work.Visible[Source],
@@ -130,8 +131,9 @@ object PlatformMerger extends Merger {
             images = images.map(_.toUnmerged)
           )
         }
-      } yield MergeResult(
-        mergedTarget = work.transition[Merged](true),
-        images = images
-      )
+      } yield
+        MergeResult(
+          mergedTarget = work.transition[Merged](true),
+          images = images
+        )
 }

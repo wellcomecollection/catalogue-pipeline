@@ -6,6 +6,5 @@ trait WorksWithImagesGenerators extends ImageGenerators {
   def createMiroWork = createMiroWorkWith(List(createUnmergedMiroImage))
 
   def createInvisibleMetsSourceWork =
-    createInvisibleMetsSourceWorkWith(
-      images = List(createUnmergedMetsImage))
+    createInvisibleMetsSourceWorkWith(images = List(createUnmergedMetsImage))
 }

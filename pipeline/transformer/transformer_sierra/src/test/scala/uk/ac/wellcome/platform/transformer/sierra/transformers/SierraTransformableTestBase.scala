@@ -11,8 +11,7 @@ import WorkState.Source
 
 trait SierraTransformableTestBase extends Matchers {
 
-  def transformToWork(
-    transformable: SierraTransformable): Work[Source] = {
+  def transformToWork(transformable: SierraTransformable): Work[Source] = {
     val triedWork: Try[Work[Source]] =
       SierraTransformer(transformable, version = 1)
 

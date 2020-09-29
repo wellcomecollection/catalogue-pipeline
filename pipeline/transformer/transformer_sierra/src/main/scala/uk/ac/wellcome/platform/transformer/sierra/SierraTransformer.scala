@@ -24,8 +24,8 @@ import uk.ac.wellcome.sierra_adapter.model.{
 import scala.util.{Failure, Success, Try}
 import WorkState.Source
 
-class SierraTransformer(sierraTransformable: SierraTransformable,
-                        version: Int) extends Logging {
+class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
+    extends Logging {
 
   def transform: Try[Work[Source]] =
     sierraTransformable.maybeBibRecord

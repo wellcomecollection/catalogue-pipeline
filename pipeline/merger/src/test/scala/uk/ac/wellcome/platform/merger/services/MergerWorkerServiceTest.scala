@@ -54,10 +54,10 @@ class MergerWorkerServiceTest
 
           senders.works
             .getMessages[Work[Merged]] should contain only (
-              work1.transition[Merged](false),
-              work2.transition[Merged](false),
-              work3.transition[Merged](false)
-            )
+            work1.transition[Merged](false),
+            work2.transition[Merged](false),
+            work3.transition[Merged](false)
+          )
 
           metrics.incrementedCounts.length should be >= 1
           metrics.incrementedCounts.last should endWith("_success")

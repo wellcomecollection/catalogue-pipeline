@@ -19,7 +19,9 @@ import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 //
 // Any $5 subfield with contents `UkLW` is Wellcome Library-specific and
 // should be omitted.
-object SierraAlternativeTitles extends SierraDataTransformer with SierraQueryOps {
+object SierraAlternativeTitles
+    extends SierraDataTransformer
+    with SierraQueryOps {
 
   type Output = List[String]
 

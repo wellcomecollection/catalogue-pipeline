@@ -65,8 +65,7 @@ object WorkPredicates {
 
   def not(pred: WorkPredicate): WorkPredicate = !pred(_)
 
-  def sierraWorkWithId(id: SourceIdentifier)(
-    work: Work[Source]): Boolean =
+  def sierraWorkWithId(id: SourceIdentifier)(work: Work[Source]): Boolean =
     work.sourceIdentifier == id
 
   private def physicalLocationExists(work: Work[Source]): Boolean =

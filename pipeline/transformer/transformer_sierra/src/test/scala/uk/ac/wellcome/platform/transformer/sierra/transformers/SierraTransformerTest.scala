@@ -102,9 +102,8 @@ class SierraTransformerTest
 
     val expectedFormat = Pictures
 
-    val triedWork = SierraTransformer(
-      createSierraTransformableWith(id, Some(bibRecord)),
-      1)
+    val triedWork =
+      SierraTransformer(createSierraTransformableWith(id, Some(bibRecord)), 1)
     triedWork.isSuccess shouldBe true
 
     triedWork.get.asInstanceOf[Work.Visible[_]].data.format shouldBe Some(
@@ -977,9 +976,8 @@ class SierraTransformerTest
     )
   }
 
-  private def transformDataToSourceWork(
-    id: SierraBibNumber,
-    data: String): Work.Visible[Source] = {
+  private def transformDataToSourceWork(id: SierraBibNumber,
+                                        data: String): Work.Visible[Source] = {
 
     val work = transformDataToWork(id = id, data = data)
     work shouldBe a[Work.Visible[_]]

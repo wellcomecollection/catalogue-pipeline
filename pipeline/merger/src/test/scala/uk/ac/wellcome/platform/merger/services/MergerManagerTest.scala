@@ -30,9 +30,7 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorksGenerators {
     result.works.head shouldBe work.transition[Merged](false)
 
     result.works.tail.zip(otherWorks).map {
-      case (
-          baseWork: Work[Merged],
-          unmergedWork: Work.Visible[Source]) =>
+      case (baseWork: Work[Merged], unmergedWork: Work.Visible[Source]) =>
         baseWork.sourceIdentifier shouldBe unmergedWork.sourceIdentifier
 
         val redirect = baseWork.asInstanceOf[Work.Redirected[Merged]]
@@ -79,7 +77,8 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorksGenerators {
     override protected def createMergeResult(
       target: Work.Visible[Source],
       sources: Seq[Work[Source]]): MergeState =
-      State(_ => (sources.toSet, MergeResult(target.transition[Merged](false), Nil)))
+      State(_ =>
+        (sources.toSet, MergeResult(target.transition[Merged](false), Nil)))
   }
 
   val mergerManager = new MergerManager(mergerRules = mergerRules)

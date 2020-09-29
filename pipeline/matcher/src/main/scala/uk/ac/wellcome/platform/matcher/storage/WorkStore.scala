@@ -11,8 +11,7 @@ import WorkState.Source
 
 class WorkStore(store: VersionedStore[String, Int, Work[Source]])
     extends Logging {
-  def getWork(
-    key: Version[String, Int]): Either[Throwable, Work[Source]] =
+  def getWork(key: Version[String, Int]): Either[Throwable, Work[Source]] =
     store.getLatest(key.id) match {
       case Left(err) =>
         error(s"Error fetching $key from VHS")

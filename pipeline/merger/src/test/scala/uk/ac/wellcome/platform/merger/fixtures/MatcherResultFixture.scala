@@ -16,12 +16,10 @@ trait MatcherResultFixture {
       }
     )
 
-  def worksToWorkIdentifiers(
-    works: Seq[Work[Source]]): Set[WorkIdentifier] =
+  def worksToWorkIdentifiers(works: Seq[Work[Source]]): Set[WorkIdentifier] =
     worksToWorkIdentifiers(works.toSet)
 
-  def worksToWorkIdentifiers(
-    works: Set[Work[Source]]): Set[WorkIdentifier] =
+  def worksToWorkIdentifiers(works: Set[Work[Source]]): Set[WorkIdentifier] =
     works
       .map { work =>
         WorkIdentifier(work)

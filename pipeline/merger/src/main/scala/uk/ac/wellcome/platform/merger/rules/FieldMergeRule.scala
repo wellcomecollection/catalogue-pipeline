@@ -72,9 +72,8 @@ trait FieldMergeRule {
      * - `isDefinedForSourceList(sources)` is `true`
      * - `isDefinedForSource(source)` is `true` for at least one element of `sources`
      */
-    def mergedSources(
-      target: Work.Visible[Source],
-      sources: Seq[Work[Source]]): Seq[Work[Source]] =
+    def mergedSources(target: Work.Visible[Source],
+                      sources: Seq[Work[Source]]): Seq[Work[Source]] =
       if (isDefinedForSourceList(sources) && isDefinedForTarget(target)) {
         sources.filter(isDefinedForSource)
       } else {

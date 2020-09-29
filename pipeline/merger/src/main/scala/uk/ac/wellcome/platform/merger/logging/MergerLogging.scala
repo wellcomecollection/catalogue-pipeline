@@ -20,8 +20,7 @@ trait MergerLogging extends Logging {
   def describeImages(images: Seq[BaseImage[DataState.Unidentified]]): String =
     s"[${images.map(describeImage).mkString(",")}]"
 
-  def describeMergeSet(target: Work[_],
-                       sources: Seq[Work[_]]): String =
+  def describeMergeSet(target: Work[_], sources: Seq[Work[_]]): String =
     s"target${describeWork(target)} with sources${describeWorks(sources)}"
 
   def describeMergeOutcome(target: Work[_],

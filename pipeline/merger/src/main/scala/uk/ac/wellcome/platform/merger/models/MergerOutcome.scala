@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.merger.models
 
 import uk.ac.wellcome.models.work.internal._
-import WorkState.{Source, Merged}
+import WorkState.{Merged, Source}
 import WorkFsm._
 
 /*
