@@ -5,9 +5,7 @@ import java.time.LocalDate
 
 import uk.ac.wellcome.display.models.LocationTypeQuery
 
-sealed trait DocumentFilter {
-  val scored: Boolean = false
-}
+sealed trait DocumentFilter
 
 sealed trait WorkFilter extends DocumentFilter
 sealed trait ImageFilter extends DocumentFilter

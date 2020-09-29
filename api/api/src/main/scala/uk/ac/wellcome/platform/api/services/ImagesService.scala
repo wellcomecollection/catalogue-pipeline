@@ -17,13 +17,6 @@ import uk.ac.wellcome.platform.api.rest.{
   PaginationQuery
 }
 
-case class ImagesSearchOptions(
-  searchQuery: Option[SearchQuery] = None,
-  filters: List[ImageFilter] = Nil,
-  pageSize: Int = 10,
-  pageNumber: Int = 1
-) extends PaginatedSearchOptions
-
 class ImagesService(searchService: ElasticsearchService,
                     queryConfig: QueryConfig)(implicit ec: ExecutionContext)
     extends Tracing {
@@ -44,11 +37,12 @@ class ImagesService(searchService: ElasticsearchService,
         }
       }
 
-  def listOrSearchImages(index: Index, searchOptions: ImagesSearchOptions)
+  def listOrSearchImages(index: Index,
+                         searchOptions: SearchOptions[ImageFilter])
     : Future[Either[ElasticError, ResultList[AugmentedImage, Unit]]] =
     searchService
       .executeSearch(
-        queryOptions = toElasticsearchQueryOptions(searchOptions),
+        searchOptions = searchOptions,
         requestBuilder = imagesRequestBuilder,
         index = index
       )
@@ -80,18 +74,6 @@ class ImagesService(searchService: ElasticsearchService,
           }
           .getOrElse(Nil)
       }
-
-  def toElasticsearchQueryOptions(
-    options: ImagesSearchOptions): ElasticsearchQueryOptions =
-    ElasticsearchQueryOptions(
-      searchQuery = options.searchQuery,
-      filters = options.filters,
-      limit = options.pageSize,
-      aggregations = Nil,
-      from = PaginationQuery.safeGetFrom(options),
-      sortBy = Nil,
-      sortOrder = SortingOrder.Ascending
-    )
 
   def createResultList(
     searchResponse: SearchResponse): ResultList[AugmentedImage, Unit] =

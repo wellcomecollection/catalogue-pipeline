@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.api.rest
 
 import akka.http.scaladsl.model.Uri
-import uk.ac.wellcome.platform.api.models.ResultList
+import uk.ac.wellcome.platform.api.models.{ResultList, SearchOptions}
 
 trait Paginated { this: QueryParams =>
   val page: Option[Int]
@@ -70,7 +70,7 @@ object PaginationResponse {
 }
 
 object PaginationQuery {
-  def safeGetFrom(searchOptions: PaginatedSearchOptions): Int = {
+  def safeGetFrom(searchOptions: SearchOptions[_]): Int = {
     // Because we use Int for the pageSize and pageNumber, computing
     //
     //     from = (pageNumber - 1) * pageSize

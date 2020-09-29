@@ -5,12 +5,14 @@ import com.sksamuel.elastic4s.requests.searches.sort.FieldSort
 import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.requests.searches.queries.Query
 import com.sksamuel.elastic4s.ElasticDsl._
+import uk.ac.wellcome.platform.api.models.{DocumentFilter, SearchOptions}
 
 trait ElasticsearchRequestBuilder {
 
   val idSort: FieldSort
+  type Filter <: DocumentFilter
 
-  def request(queryOptions: ElasticsearchQueryOptions,
+  def request(searchOptions: SearchOptions[Filter],
               index: Index,
               scored: Boolean): SearchRequest
 }

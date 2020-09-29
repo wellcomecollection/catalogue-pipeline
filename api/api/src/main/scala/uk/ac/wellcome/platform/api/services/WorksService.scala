@@ -20,16 +20,6 @@ import uk.ac.wellcome.platform.api.rest.{
 }
 import WorkState.Identified
 
-case class WorksSearchOptions(
-  filters: List[WorkFilter] = Nil,
-  pageSize: Int = 10,
-  pageNumber: Int = 1,
-  aggregations: List[AggregationRequest] = Nil,
-  sortBy: List[SortRequest] = Nil,
-  sortOrder: SortingOrder = SortingOrder.Ascending,
-  searchQuery: Option[SearchQuery] = None
-) extends PaginatedSearchOptions
-
 case class WorkQuery(query: String, queryType: SearchQueryType)
 
 class WorksService(searchService: ElasticsearchService)(
@@ -48,27 +38,15 @@ class WorksService(searchService: ElasticsearchService)(
       }
 
   def listOrSearchWorks(index: Index,
-                        searchOptions: WorksSearchOptions): Future[
+                        searchOptions: SearchOptions[WorkFilter]): Future[
     Either[ElasticError, ResultList[Work.Visible[Identified], Aggregations]]] =
     searchService
       .executeSearch(
-        queryOptions = toElasticsearchQueryOptions(searchOptions),
+        searchOptions = searchOptions,
         requestBuilder = WorksRequestBuilder,
         index = index
       )
       .map { _.map(createResultList) }
-
-  private def toElasticsearchQueryOptions(
-    worksSearchOptions: WorksSearchOptions) =
-    ElasticsearchQueryOptions(
-      searchQuery = worksSearchOptions.searchQuery,
-      filters = worksSearchOptions.filters,
-      limit = worksSearchOptions.pageSize,
-      aggregations = worksSearchOptions.aggregations,
-      sortBy = worksSearchOptions.sortBy,
-      sortOrder = worksSearchOptions.sortOrder,
-      from = PaginationQuery.safeGetFrom(worksSearchOptions)
-    )
 
   private def createResultList(searchResponse: SearchResponse)
     : ResultList[Work.Visible[Identified], Aggregations] = {

@@ -18,16 +18,6 @@ import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.platform.api.Tracing
 import uk.ac.wellcome.platform.api.models._
 
-case class ElasticsearchQueryOptions(filters: List[DocumentFilter],
-                                     limit: Int,
-                                     from: Int,
-                                     aggregations: List[AggregationRequest],
-                                     sortBy: List[SortRequest],
-                                     sortOrder: SortingOrder,
-                                     searchQuery: Option[SearchQuery]) {
-  lazy val (scoredFilters, unscoredFilters) = filters.partition(_.scored)
-}
-
 class ElasticsearchService(elasticClient: ElasticClient)(
   implicit ec: ExecutionContext
 ) extends Logging
@@ -43,17 +33,17 @@ class ElasticsearchService(elasticClient: ElasticClient)(
     * using the elastic4s query DSL, then execute the search.
     */
   def executeSearch(
-    queryOptions: ElasticsearchQueryOptions,
+    searchOptions: SearchOptions[_],
     requestBuilder: ElasticsearchRequestBuilder,
     index: Index): Future[Either[ElasticError, SearchResponse]] = {
     val searchRequest = requestBuilder
       .request(
-        queryOptions,
+        searchOptions,
         index,
-        scored = queryOptions.searchQuery.isDefined || queryOptions.scoredFilters.nonEmpty
+        scored = searchOptions.searchQuery.isDefined
       )
       .trackTotalHits(true)
-    Tracing.currentTransaction.addQueryOptionLabels(queryOptions)
+    Tracing.currentTransaction.addQueryOptionLabels(searchOptions)
     executeSearchRequest(searchRequest)
   }
 
@@ -107,20 +97,19 @@ class ElasticsearchService(elasticClient: ElasticClient)(
     }
 
   implicit class EnhancedTransaction(transaction: Transaction) {
-    def addQueryOptionLabels(
-      queryOptions: ElasticsearchQueryOptions): Transaction = {
-      transaction.addLabel("limit", queryOptions.limit)
-      transaction.addLabel("from", queryOptions.from)
-      transaction.addLabel("sortOrder", queryOptions.sortOrder.toString)
+    def addQueryOptionLabels(searchOptions: SearchOptions[_]): Transaction = {
+      transaction.addLabel("pageSize", searchOptions.pageSize)
+      transaction.addLabel("pageNumber", searchOptions.pageNumber)
+      transaction.addLabel("sortOrder", searchOptions.sortOrder.toString)
       transaction.addLabel(
         "sortBy",
-        queryOptions.sortBy.map { _.toString }.mkString(","))
+        searchOptions.sortBy.map { _.toString }.mkString(","))
       transaction.addLabel(
         "filters",
-        queryOptions.filters.map { _.toString }.mkString(","))
+        searchOptions.filters.map { _.toString }.mkString(","))
       transaction.addLabel(
         "aggregations",
-        queryOptions.aggregations.map { _.toString }.mkString(","))
+        searchOptions.aggregations.map { _.toString }.mkString(","))
     }
   }
 }

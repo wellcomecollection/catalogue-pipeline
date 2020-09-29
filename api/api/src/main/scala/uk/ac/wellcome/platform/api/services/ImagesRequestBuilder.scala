@@ -12,36 +12,35 @@ import uk.ac.wellcome.platform.api.elasticsearch.{
 }
 import uk.ac.wellcome.platform.api.models.{
   ColorFilter,
-  DocumentFilter,
   ImageFilter,
   LicenseFilter,
-  QueryConfig
+  QueryConfig,
+  SearchOptions
 }
+import uk.ac.wellcome.platform.api.rest.PaginationQuery
 
 class ImagesRequestBuilder(queryConfig: QueryConfig)
     extends ElasticsearchRequestBuilder {
 
+  type Filter = ImageFilter
   val idSort: FieldSort = fieldSort("id.canonicalId").order(SortOrder.ASC)
 
   lazy val colorQuery = new ColorQuery(
     binSizes = queryConfig.paletteBinSizes
   )
 
-  def request(queryOptions: ElasticsearchQueryOptions,
+  def request(searchOptions: SearchOptions[ImageFilter],
               index: Index,
               scored: Boolean): SearchRequest =
     search(index)
       .query(
-        queryOptions.searchQuery
+        searchOptions.searchQuery
           .map { q =>
             ImagesMultiMatcher(q.query)
           }
           .getOrElse(boolQuery)
-          .must(
-            buildImageFilterQuery(queryOptions.scoredFilters)
-          )
           .filter(
-            buildImageFilterQuery(queryOptions.unscoredFilters)
+            buildImageFilterQuery(searchOptions.filters)
           )
       )
       .sortBy {
@@ -51,20 +50,16 @@ class ImagesRequestBuilder(queryConfig: QueryConfig)
           List(idSort)
         }
       }
-      .limit(queryOptions.limit)
-      .from(queryOptions.from)
+      .limit(searchOptions.pageSize)
+      .from(PaginationQuery.safeGetFrom(searchOptions))
 
-  def buildImageFilterQuery(filters: Seq[DocumentFilter]): Seq[Query] =
-    filters
-      .collect {
-        case imageFilter: ImageFilter => imageFilter
-      }
-      .map {
-        case LicenseFilter(licenseIds) =>
-          termsQuery(field = "location.license.id", values = licenseIds)
-        case ColorFilter(hexColors) =>
-          colorQuery(field = "inferredData.palette", hexColors)
-      }
+  def buildImageFilterQuery(filters: Seq[ImageFilter]): Seq[Query] =
+    filters.map {
+      case LicenseFilter(licenseIds) =>
+        termsQuery(field = "location.license.id", values = licenseIds)
+      case ColorFilter(hexColors) =>
+        colorQuery(field = "inferredData.palette", hexColors)
+    }
 
   def requestWithBlendedSimilarity: (Index, String, Int) => SearchRequest =
     similarityRequest(ImageSimilarity.blended)
