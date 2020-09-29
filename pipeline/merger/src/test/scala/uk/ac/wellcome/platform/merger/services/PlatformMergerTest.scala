@@ -340,7 +340,7 @@ class PlatformMergerTest
     val metsItem = metsWork.data.items.head
 
     val expectedMergedWork = sierraPhysicalWork
-      .transitionToMerged(true)
+      .transition[Merged](true)
       .withData { data =>
         data.copy(
           otherIdentifiers = sierraPhysicalWork.data.otherIdentifiers

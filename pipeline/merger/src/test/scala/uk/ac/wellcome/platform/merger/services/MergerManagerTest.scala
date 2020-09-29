@@ -67,7 +67,7 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorksGenerators {
         )
       }
       MergerOutcome(
-        works = outputWorks.map(_.transitionToMerged(false)),
+        works = outputWorks.map(_.transition[Merged](false)),
         images = Nil
       )
     }
@@ -79,7 +79,7 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorksGenerators {
     override protected def createMergeResult(
       target: Work.Visible[Source],
       sources: Seq[Work[Source]]): MergeState =
-      State(_ => (sources.toSet, MergeResult(target.transitionToMerged(false), Nil)))
+      State(_ => (sources.toSet, MergeResult(target.transition[Merged](false), Nil)))
   }
 
   val mergerManager = new MergerManager(mergerRules = mergerRules)

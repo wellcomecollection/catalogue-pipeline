@@ -62,7 +62,7 @@ class MergerTest
               items = items,
               otherIdentifiers = otherIdentifiers
             )
-          }.transitionToMerged(true),
+          }.transition[Merged](true),
           images = Nil
         )
   }
