@@ -10,6 +10,7 @@ case class SearchOptions(
   searchQuery: Option[SearchQuery] = None,
   filters: List[DocumentFilter] = Nil,
   aggregations: List[AggregationRequest] = Nil,
+  mustQueries: List[MustQuery] = Nil,
   sortBy: List[SortRequest] = Nil,
   sortOrder: SortingOrder = SortingOrder.Ascending,
   pageSize: Int = 10,

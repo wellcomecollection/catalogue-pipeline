@@ -154,7 +154,7 @@ class ImagesFiltersTest extends ApiImagesTestBase {
       }
     }
 
-    ignore("scores by number of color bin matches") {
+    it("scores by number of color bin matches") {
       withApi {
         case (ElasticConfig(_, imagesIndex), routes) =>
           insertImagesIntoElasticsearch(

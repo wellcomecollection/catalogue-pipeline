@@ -38,6 +38,9 @@ class ImagesRequestBuilder(queryConfig: QueryConfig)
             ImagesMultiMatcher(q.query)
           }
           .getOrElse(boolQuery)
+          .must(
+            buildImageMustQuery(searchOptions.safeMustQueries[ImageMustQuery])
+          )
           .filter(
             buildImageFilterQuery(searchOptions.typedFilters[ImageFilter])
           )
@@ -56,7 +59,11 @@ class ImagesRequestBuilder(queryConfig: QueryConfig)
     filters.map {
       case LicenseFilter(licenseIds) =>
         termsQuery(field = "location.license.id", values = licenseIds)
-      case ColorFilter(hexColors) =>
+    }
+
+  def buildImageMustQuery(queries: List[ImageMustQuery]): Seq[Query] =
+    queries.map {
+      case ColorMustQuery(hexColors) =>
         colorQuery(field = "inferredData.palette", hexColors)
     }
 
