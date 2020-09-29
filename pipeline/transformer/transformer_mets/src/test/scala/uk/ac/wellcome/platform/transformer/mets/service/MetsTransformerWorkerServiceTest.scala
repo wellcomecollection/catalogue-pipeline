@@ -30,7 +30,7 @@ import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.{Identified, Version}
-import WorkState.Unidentified
+import WorkState.Source
 
 class MetsTransformerWorkerServiceTest
     extends AnyFunSpec
@@ -62,7 +62,7 @@ class MetsTransformerWorkerServiceTest
       case (QueuePair(queue, _), metsBucket, messageSender, dynamoStore) =>
         sendWork(str, "mets.xml", dynamoStore, metsBucket, queue, version)
         eventually {
-          val works = messageSender.getMessages[Work.Invisible[Unidentified]]
+          val works = messageSender.getMessages[Work.Invisible[Source]]
           works.head shouldBe expectedWork(identifier, version)
 
           assertQueueEmpty(queue)
@@ -79,7 +79,7 @@ class MetsTransformerWorkerServiceTest
       case (QueuePair(queue, dlq), metsBucket, messageSender, vhs) =>
         sendWork(value1, "mets.xml", vhs, metsBucket, queue, version)
         eventually {
-          messageSender.getMessages[Work.Invisible[Unidentified]] shouldBe empty
+          messageSender.getMessages[Work.Invisible[Source]] shouldBe empty
 
           assertQueueEmpty(queue)
           assertQueueHasSize(dlq, size = 1)
@@ -87,7 +87,7 @@ class MetsTransformerWorkerServiceTest
     }
   }
 
-  it("sends messages that can be decoded as a Work[Unidentified]") {
+  it("sends messages that can be decoded as a Work[Source]") {
 
     val identifier = randomAlphanumeric(10)
     val version = randomInt(1, 10)
@@ -97,14 +97,14 @@ class MetsTransformerWorkerServiceTest
       case (QueuePair(queue, _), metsBucket, messageSender, dynamoStore) =>
         sendWork(str, "mets.xml", dynamoStore, metsBucket, queue, version)
         eventually {
-          val works = messageSender.getMessages[Work[Unidentified]]
+          val works = messageSender.getMessages[Work[Source]]
           works.head shouldBe expectedWork(identifier, version)
         }
     }
   }
 
   private def expectedWork(identifier: String,
-                           version: Int): Work.Invisible[Unidentified] = {
+                           version: Int): Work.Invisible[Source] = {
     val expectedUrl =
       s"https://wellcomelibrary.org/iiif/$identifier/manifest"
     val expectedDigitalLocation = DigitalLocationDeprecated(
@@ -116,9 +116,9 @@ class MetsTransformerWorkerServiceTest
         id = IdState.Unidentifiable,
         locations = List(expectedDigitalLocation))
 
-    val expectedWork = Work.Invisible[Unidentified](
+    val expectedWork = Work.Invisible[Source](
       version = version,
-      state = Unidentified(
+      state = Source(
         SourceIdentifier(
           identifierType = IdentifierType("mets", "METS"),
           ontologyType = "Work",

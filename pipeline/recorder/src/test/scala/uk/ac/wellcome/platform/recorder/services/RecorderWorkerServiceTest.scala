@@ -13,7 +13,7 @@ import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.recorder.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.storage.{StoreReadError, StoreWriteError, Version}
-import WorkState.Unidentified
+import WorkState.Source
 
 class RecorderWorkerServiceTest
     extends AnyFunSpec
@@ -24,12 +24,12 @@ class RecorderWorkerServiceTest
     with JsonAssertions
     with WorksGenerators {
 
-  it("records an UnidentifiedWork") {
+  it("records Work.Visible[Source]") {
     withLocalSqsQueue() { queue =>
       withVHS { vhs =>
         withWorkerService(queue, vhs) { _ =>
-          val work = createUnidentifiedWork
-          sendMessage[Work[Unidentified]](queue = queue, obj = work)
+          val work = createSourceWork
+          sendMessage[Work[Source]](queue = queue, obj = work)
           eventually {
             assertWorkStored(vhs, work)
           }
@@ -38,12 +38,12 @@ class RecorderWorkerServiceTest
     }
   }
 
-  it("stores UnidentifiedInvisibleWorks") {
+  it("stores Work.Invisible[Source]") {
     withLocalSqsQueue() { queue =>
       withVHS { vhs =>
         withWorkerService(queue, vhs) { _ =>
-          val invisibleWork = createUnidentifiedInvisibleWork
-          sendMessage[Work[Unidentified]](queue = queue, invisibleWork)
+          val invisibleWork = createInvisibleSourceWork
+          sendMessage[Work[Source]](queue = queue, invisibleWork)
           eventually {
             assertWorkStored(vhs, invisibleWork)
           }
@@ -56,13 +56,13 @@ class RecorderWorkerServiceTest
     withLocalSqsQueue() { queue =>
       withVHS { vhs =>
         withWorkerService(queue, vhs) { _ =>
-          val olderWork = createUnidentifiedWork
+          val olderWork = createSourceWork
           val newerWork = olderWork
             .copy(version = 10)
             .withData(data => data.copy(title = Some("A nice new thing")))
-          sendMessage[Work[Unidentified]](queue = queue, newerWork)
+          sendMessage[Work[Source]](queue = queue, newerWork)
           eventually { assertWorkStored(vhs, newerWork) }
-          sendMessage[Work[Unidentified]](queue = queue, obj = olderWork)
+          sendMessage[Work[Source]](queue = queue, obj = olderWork)
           eventually { assertQueueEmpty(queue) }
           assertWorkStored(vhs, newerWork, 1)
         }
@@ -74,14 +74,14 @@ class RecorderWorkerServiceTest
     withLocalSqsQueue() { queue =>
       withVHS { vhs =>
         withWorkerService(queue, vhs) { _ =>
-          val olderWork = createUnidentifiedWork
+          val olderWork = createSourceWork
           val newerWork = olderWork
             .copy(version = 10)
             .withData(data => data.copy(title = Some("A nice new thing")))
-          sendMessage[Work[Unidentified]](queue = queue, obj = olderWork)
+          sendMessage[Work[Source]](queue = queue, obj = olderWork)
           eventually {
             assertWorkStored(vhs, olderWork)
-            sendMessage[Work[Unidentified]](queue = queue, obj = newerWork)
+            sendMessage[Work[Source]](queue = queue, obj = newerWork)
             eventually {
               assertWorkStored(vhs, newerWork, expectedVhsVersion = 1)
             }
@@ -96,7 +96,7 @@ class RecorderWorkerServiceTest
 
     class BrokenMemoryVHS extends MemoryVHS() {
       override def put(id: Version[String, Int])(
-        item: Work[Unidentified]): WriteEither =
+        item: Work[Source]): WriteEither =
         Left(StoreWriteError(new Error("BOOM!")))
 
       override def get(id: Version[String, Int]): ReadEither =
@@ -108,8 +108,8 @@ class RecorderWorkerServiceTest
     withLocalSqsQueuePair() {
       case SQS.QueuePair(queue, dlq) =>
         withWorkerService(queue, brokenVhs, messageSender) { _ =>
-          val work = createUnidentifiedWork
-          sendMessage[Work[Unidentified]](queue = queue, obj = work)
+          val work = createSourceWork
+          sendMessage[Work[Source]](queue = queue, obj = work)
           eventually {
             assertQueueEmpty(queue)
             assertQueueHasSize(dlq, size = 1)
@@ -128,8 +128,8 @@ class RecorderWorkerServiceTest
     withLocalSqsQueue() { queue =>
       withVHS { vhs =>
         withWorkerService(queue, vhs, messageSender) { _ =>
-          val work = createUnidentifiedWork
-          sendMessage[Work[Unidentified]](queue = queue, obj = work)
+          val work = createSourceWork
+          sendMessage[Work[Source]](queue = queue, obj = work)
           eventually {
             val id = work.sourceIdentifier.toString
 

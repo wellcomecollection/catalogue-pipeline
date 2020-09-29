@@ -31,7 +31,7 @@ import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
  *
  */
 object SierraContributors
-    extends SierraTransformer
+    extends SierraDataTransformer
     with SierraQueryOps
     with SierraAgents {
 

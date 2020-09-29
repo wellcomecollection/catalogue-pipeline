@@ -34,14 +34,14 @@ import uk.ac.wellcome.storage.locking.dynamo.{
   ExpiringLock
 }
 import uk.ac.wellcome.storage.Identified
-import WorkState.Unidentified
+import WorkState.Source
 
 trait MatcherFixtures
     extends SQS
     with Akka
     with DynamoLockDaoFixtures
     with LocalWorkGraphDynamoDb
-    with VHSFixture[Work[Unidentified]] {
+    with VHSFixture[Work[Source]] {
 
   implicit val workNodeFormat: DynamoFormat[WorkNode] = deriveDynamoFormat
   implicit val lockFormat: DynamoFormat[ExpiringLock] = deriveDynamoFormat
@@ -125,7 +125,7 @@ trait MatcherFixtures
     testWith(workNodeDao)
   }
 
-  def sendWork(work: Work[Unidentified], vhs: VHS, queue: SQS.Queue): Any = {
+  def sendWork(work: Work[Source], vhs: VHS, queue: SQS.Queue): Any = {
     val id = work.sourceIdentifier.toString
     val key = vhs.putLatest(id)(work) match {
       case Left(err)                 => throw new Exception(s"Failed storing work in VHS: $err")

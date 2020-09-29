@@ -10,7 +10,7 @@ import uk.ac.wellcome.platform.transformer.miro.exceptions.ShouldNotTransformExc
 import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 import uk.ac.wellcome.platform.transformer.miro.transformers._
-import WorkState.Unidentified
+import WorkState.Source
 
 class MiroRecordTransformer
     extends MiroContributors
@@ -27,7 +27,7 @@ class MiroRecordTransformer
 
   def transform(miroRecord: MiroRecord,
                 miroMetadata: MiroMetadata,
-                version: Int): Try[Work[Unidentified]] =
+                version: Int): Try[Work[Source]] =
     doTransform(miroRecord, miroMetadata, version) map { transformed =>
       debug(s"Transformed record to $transformed")
       transformed
@@ -39,7 +39,7 @@ class MiroRecordTransformer
 
   private def doTransform(originalMiroRecord: MiroRecord,
                           miroMetadata: MiroMetadata,
-                          version: Int): Try[Work[Unidentified]] = {
+                          version: Int): Try[Work[Source]] = {
     val sourceIdentifier = SourceIdentifier(
       identifierType = IdentifierType("miro-image-number"),
       ontologyType = "Work",
@@ -86,16 +86,16 @@ class MiroRecordTransformer
         images = List(getImage(miroRecord, version))
       )
 
-      Work.Visible[Unidentified](
+      Work.Visible[Source](
         version = version,
-        state = Unidentified(sourceIdentifier),
+        state = Source(sourceIdentifier),
         data = data
       )
     }.recover {
       case e: ShouldNotTransformException =>
         debug(s"Should not transform: ${e.getMessage}")
-        Work.Invisible[Unidentified](
-          state = Unidentified(sourceIdentifier),
+        Work.Invisible[Source](
+          state = Source(sourceIdentifier),
           version = version,
           data = WorkData()
         )

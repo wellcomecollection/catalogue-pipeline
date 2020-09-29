@@ -45,7 +45,7 @@ import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 //      else is unidentified.
 //
 object SierraGenres
-    extends SierraTransformer
+    extends SierraDataTransformer
     with SierraQueryOps
     with SierraConcepts {
 

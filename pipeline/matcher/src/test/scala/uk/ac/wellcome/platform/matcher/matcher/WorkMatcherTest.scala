@@ -45,7 +45,7 @@ class WorkMatcherTest
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
           withWorkMatcher(workGraphStore, lockTable) { workMatcher =>
-            val work = createUnidentifiedSierraWork
+            val work = createSierraSourceWork
             val workId = work.sourceIdentifier.toString
 
             whenReady(workMatcher.matchWork(work)) { matcherResult =>
@@ -71,7 +71,7 @@ class WorkMatcherTest
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
           withWorkMatcher(workGraphStore, lockTable) { workMatcher =>
-            val invisibleWork = createUnidentifiedInvisibleWork
+            val invisibleWork = createInvisibleSourceWork
             val workId = invisibleWork.sourceIdentifier.toString
             whenReady(workMatcher.matchWork(invisibleWork)) { matcherResult =>
               matcherResult shouldBe
@@ -93,7 +93,7 @@ class WorkMatcherTest
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
           withWorkMatcher(workGraphStore, lockTable) { workMatcher =>
-            val work = createUnidentifiedWorkWith(
+            val work = createSourceWorkWith(
               sourceIdentifier = identifierA,
               mergeCandidates = List(MergeCandidate(identifierB))
             )
@@ -151,7 +151,7 @@ class WorkMatcherTest
             put(dynamoClient, graphTable.name)(existingWorkB)
             put(dynamoClient, graphTable.name)(existingWorkC)
 
-            val work = createUnidentifiedWorkWith(
+            val work = createSourceWorkWith(
               sourceIdentifier = identifierB,
               version = 2,
               mergeCandidates = List(MergeCandidate(identifierC)))
@@ -201,7 +201,7 @@ class WorkMatcherTest
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
           withLockDao(dynamoClient, lockTable) { implicit lockDao =>
-            val work = createUnidentifiedSierraWork
+            val work = createSierraSourceWork
             val workId = work.sourceIdentifier.toString
             withWorkMatcherAndLockingService(
               workGraphStore,
@@ -241,7 +241,7 @@ class WorkMatcherTest
                     WorkNode(idB, 0, List(idC), componentId),
                     WorkNode(idC, 0, Nil, componentId),
                   )))
-              val work = createUnidentifiedWorkWith(
+              val work = createSourceWorkWith(
                 sourceIdentifier = identifierA,
                 mergeCandidates = List(MergeCandidate(identifierB))
               )
@@ -270,7 +270,7 @@ class WorkMatcherTest
         when(mockWorkGraphStore.put(any[WorkGraph]))
           .thenThrow(expectedException)
 
-        whenReady(workMatcher.matchWork(createUnidentifiedSierraWork).failed) {
+        whenReady(workMatcher.matchWork(createSierraSourceWork).failed) {
           actualException =>
             actualException shouldBe MatcherException(expectedException)
         }

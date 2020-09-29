@@ -21,12 +21,27 @@ sealed trait Work[State <: WorkState] {
     : Work[State] =
     this match {
       case Work.Visible(version, data, state) =>
-        Work.Visible[State](version, f(data), state)
+        Work.Visible(version, f(data), state)
       case Work.Invisible(version, data, state, reasons) =>
-        Work.Invisible[State](version, f(data), state, reasons)
+        Work.Invisible(version, f(data), state, reasons)
       case Work.Redirected(version, redirect, state) =>
-        Work.Redirected[State](version, redirect, state)
+        Work.Redirected(version, redirect, state)
     }
+
+  def transition[OutState <: WorkState](args: OutState#TransitionArgs)(
+    implicit transition: WorkFsm.Transition[State, OutState])
+    : Work[OutState] = {
+    val outState = transition.state(state, args)
+    val outData = transition.data(data, args)
+    this match {
+      case Work.Visible(version, _, _) =>
+        Work.Visible(version, outData, outState)
+      case Work.Invisible(version, _, _, invisibilityReasons) =>
+        Work.Invisible(version, outData, outState, invisibilityReasons)
+      case Work.Redirected(version, redirect, _) =>
+        Work.Redirected(version, transition.redirect(redirect, args), outState)
+    }
+  }
 }
 
 object Work {
@@ -76,7 +91,6 @@ case class WorkData[State <: DataState](
   notes: List[Note] = Nil,
   duration: Option[Int] = None,
   items: List[Item[State#MaybeId]] = Nil,
-  merged: Boolean = false,
   collectionPath: Option[CollectionPath] = None,
   images: List[UnmergedImage[State]] = Nil,
   workType: WorkType = WorkType.Standard,
@@ -90,7 +104,7 @@ case class WorkData[State <: DataState](
   *      |
   *      | (transformer)
   *      ▼
-  *   Unmerged
+  *    Source
   *      |
   *      | (matcher / merger)
   *      ▼
@@ -107,27 +121,80 @@ case class WorkData[State <: DataState](
 sealed trait WorkState {
 
   type WorkDataState <: DataState
+  type TransitionArgs
 
   val sourceIdentifier: SourceIdentifier
 }
 
 object WorkState {
 
-  // TODO: for now just 2 states, in the end the states will correspond to the
-  // block comment above
-
-  case class Unidentified(
+  case class Source(
     sourceIdentifier: SourceIdentifier
   ) extends WorkState {
 
     type WorkDataState = DataState.Unidentified
+    type TransitionArgs = Unit
+  }
+
+  case class Merged(
+    sourceIdentifier: SourceIdentifier,
+    hasMultipleSources: Boolean
+  ) extends WorkState {
+
+    type WorkDataState = DataState.Unidentified
+    type TransitionArgs = Boolean
+  }
+
+  case class Denormalised(
+    sourceIdentifier: SourceIdentifier,
+    hasMultipleSources: Boolean = false
+  ) extends WorkState {
+
+    type WorkDataState = DataState.Unidentified
+    type TransitionArgs = Unit
   }
 
   case class Identified(
     sourceIdentifier: SourceIdentifier,
     canonicalId: String,
+    hasMultipleSources: Boolean = false
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
+    type TransitionArgs = Unit
+  }
+}
+
+/** The WorkFsm contains all possible transitions between work states.
+  *
+  * The `transition` method on `Work` allows invocation of these transitions by
+  * providing the type parameter of the new state and it's respective arguments.
+  */
+object WorkFsm {
+
+  import WorkState._
+
+  sealed trait Transition[InState <: WorkState, OutState <: WorkState] {
+
+    def state(state: InState, args: OutState#TransitionArgs): OutState
+
+    def data(data: WorkData[InState#WorkDataState],
+             args: OutState#TransitionArgs): WorkData[OutState#WorkDataState]
+
+    def redirect(redirect: InState#WorkDataState#Id,
+                 args: OutState#TransitionArgs): OutState#WorkDataState#Id
+  }
+
+  implicit val sourceToMerged = new Transition[Source, Merged] {
+    def state(state: Source, hasMultipleSources: Boolean): Merged =
+      Merged(state.sourceIdentifier, hasMultipleSources)
+
+    def data(data: WorkData[DataState.Unidentified],
+             hasMultipleSources: Boolean): WorkData[DataState.Unidentified] =
+      data
+
+    def redirect(redirect: IdState.Identifiable,
+                 hasMultipleSources: Boolean): IdState.Identifiable =
+      redirect
   }
 }

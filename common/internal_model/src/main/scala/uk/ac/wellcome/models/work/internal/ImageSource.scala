@@ -21,8 +21,7 @@ case class SourceWork[State <: DataState](
 
 object SourceWork {
 
-  implicit class UnidentifiedWorkToSourceWork(
-    work: Work[WorkState.Unidentified]) {
+  implicit class SourceWorkToSourceWork(work: Work[WorkState.Source]) {
 
     def toSourceWork: SourceWork[DataState.Unidentified] =
       SourceWork[DataState.Unidentified](

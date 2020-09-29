@@ -15,7 +15,7 @@ import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.{Readable, VersionedStore}
 import uk.ac.wellcome.storage.{Identified, Version}
 import uk.ac.wellcome.typesafe.Runnable
-import WorkState.Unidentified
+import WorkState.Source
 
 class MetsTransformerWorkerService[Destination](
   msgStream: SQSStream[NotificationMessage],
@@ -53,7 +53,7 @@ class MetsTransformerWorkerService[Destination](
       work <- metsData.toWork(key.version)
       // We send the generic type param to `sendT` so it serialises uses the
       // discriminator `type` when read by the recorder.
-      _ <- messageSender.sendT[Work[Unidentified]](work).toEither
+      _ <- messageSender.sendT[Work[Source]](work).toEither
     } yield ()
 
   private def getMetsLocation(key: Version[String, Int]): Result[MetsLocation] =

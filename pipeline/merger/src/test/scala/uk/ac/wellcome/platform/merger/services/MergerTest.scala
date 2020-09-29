@@ -6,7 +6,8 @@ import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.generators.WorksWithImagesGenerators
 import uk.ac.wellcome.platform.merger.models.{FieldMergeResult, MergeResult}
 import uk.ac.wellcome.platform.merger.rules.FieldMergeRule
-import WorkState.Unidentified
+import WorkState.{Merged, Source}
+import WorkFsm._
 
 class MergerTest
     extends AnyFunSpec
@@ -15,7 +16,7 @@ class MergerTest
   val inputWorks =
     (0 to 5).map(_ => createSierraDigitalWork) ++
       (0 to 5).map(_ => createMiroWork) ++
-      (0 to 5).map(_ => createUnidentifiedInvisibleMetsWork)
+      (0 to 5).map(_ => createInvisibleMetsSourceWork)
   val mergedTargetItems = (0 to 3).map(_ => createDigitalItem).toList
   val mergedOtherIdentifiers =
     (0 to 3).map(_ => createSierraSystemSourceIdentifier).toList
@@ -24,8 +25,8 @@ class MergerTest
     type FieldData = List[Item[IdState.Unminted]]
 
     override def merge(
-      target: Work.Visible[Unidentified],
-      sources: Seq[Work[Unidentified]]): FieldMergeResult[FieldData] =
+      target: Work.Visible[Source],
+      sources: Seq[Work[Source]]): FieldMergeResult[FieldData] =
       FieldMergeResult(
         data = mergedTargetItems,
         sources = List(sources.tail.head)
@@ -36,8 +37,8 @@ class MergerTest
     type FieldData = List[SourceIdentifier]
 
     override def merge(
-      target: Work.Visible[Unidentified],
-      sources: Seq[Work[Unidentified]]): FieldMergeResult[FieldData] =
+      target: Work.Visible[Source],
+      sources: Seq[Work[Source]]): FieldMergeResult[FieldData] =
       FieldMergeResult(
         data = mergedOtherIdentifiers,
         sources = sources.tail.tail)
@@ -45,23 +46,25 @@ class MergerTest
 
   object TestMerger extends Merger {
     override protected def findTarget(
-      works: Seq[Work[Unidentified]]): Option[Work.Visible[Unidentified]] =
-      works.headOption.map(_.asInstanceOf[Work.Visible[Unidentified]])
+      works: Seq[Work[Source]]): Option[Work.Visible[Source]] =
+      works.headOption.map(_.asInstanceOf[Work.Visible[Source]])
 
     override protected def createMergeResult(
-      target: Work.Visible[Unidentified],
-      sources: Seq[Work[Unidentified]]): MergeState =
+      target: Work.Visible[Source],
+      sources: Seq[Work[Source]]): MergeState =
       for {
         items <- TestItemsRule(target, sources)
         otherIdentifiers <- TestOtherIdentifiersRule(target, sources)
       } yield
         MergeResult(
-          mergedTarget = target withData { data =>
-            data.copy[DataState.Unidentified](
-              items = items,
-              otherIdentifiers = otherIdentifiers
-            )
-          },
+          mergedTarget = target
+            .withData { data =>
+              data.copy[DataState.Unidentified](
+                items = items,
+                otherIdentifiers = otherIdentifiers
+              )
+            }
+            .transition[Merged](true),
           images = Nil
         )
   }
@@ -70,25 +73,29 @@ class MergerTest
 
   it("returns a single target work as specified") {
     mergedWorks.works should contain(
-      inputWorks.head.asInstanceOf[Work.Visible[Unidentified]] withData {
-        data =>
+      inputWorks.head
+        .asInstanceOf[Work.Visible[Source]]
+        .transition[Merged](true)
+        .withData { data =>
           data.copy[DataState.Unidentified](
             items = mergedTargetItems,
             otherIdentifiers = mergedOtherIdentifiers
           )
-      }
+        }
     )
   }
 
   it(
     "returns redirects for all sources that were marked as such by any field rule") {
     mergedWorks.works.collect {
-      case redirect: Work.Redirected[Unidentified] => redirect.sourceIdentifier
+      case redirect: Work.Redirected[Merged] => redirect.sourceIdentifier
     } should contain theSameElementsAs
       inputWorks.tail.tail.map(_.sourceIdentifier)
   }
 
   it("returns all non-redirected and non-target works untouched") {
-    mergedWorks.works should contain(inputWorks.tail.head)
+    mergedWorks.works should contain(
+      inputWorks.tail.head.transition[Merged](false)
+    )
   }
 }

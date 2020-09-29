@@ -7,15 +7,15 @@ import uk.ac.wellcome.platform.transformer.miro.MiroRecordTransformer
 import uk.ac.wellcome.platform.transformer.miro.exceptions.MiroTransformerException
 import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
-import WorkState.Unidentified
+import WorkState.Source
 
 import scala.util.Try
 
 trait MiroTransformableWrapper extends Matchers { this: Suite =>
   val transformer = new MiroRecordTransformer
 
-  def transformWork(miroRecord: MiroRecord): Work.Visible[Unidentified] = {
-    val triedWork: Try[Work[Unidentified]] =
+  def transformWork(miroRecord: MiroRecord): Work.Visible[Source] = {
+    val triedWork: Try[Work[Source]] =
       transformer.transform(
         miroRecord = miroRecord,
         miroMetadata = MiroMetadata(isClearedForCatalogueAPI = true),
@@ -32,7 +32,7 @@ trait MiroTransformableWrapper extends Matchers { this: Suite =>
     }
 
     triedWork.isSuccess shouldBe true
-    triedWork.get.asInstanceOf[Work.Visible[Unidentified]]
+    triedWork.get.asInstanceOf[Work.Visible[Source]]
   }
 
   def assertTransformWorkFails(miroRecord: MiroRecord): Assertion =

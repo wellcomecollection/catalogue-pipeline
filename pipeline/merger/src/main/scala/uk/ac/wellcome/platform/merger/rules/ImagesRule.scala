@@ -5,7 +5,7 @@ import cats.data.NonEmptyList
 
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
-import WorkState.Unidentified
+import WorkState.Source
 import SourceWork._
 
 object ImagesRule extends FieldMergeRule {
@@ -15,8 +15,8 @@ object ImagesRule extends FieldMergeRule {
     List[MergedImage[DataState.Unidentified]]
 
   override def merge(
-    target: Work.Visible[Unidentified],
-    sources: Seq[Work[Unidentified]] = Nil): FieldMergeResult[FieldData] =
+    target: Work.Visible[Source],
+    sources: Seq[Work[Source]] = Nil): FieldMergeResult[FieldData] =
     sources match {
       case Nil =>
         FieldMergeResult(
@@ -34,7 +34,7 @@ object ImagesRule extends FieldMergeRule {
     }
 
   private lazy val getSingleMiroImage
-    : PartialFunction[Work.Visible[Unidentified], FieldData] = {
+    : PartialFunction[Work.Visible[Source], FieldData] = {
     case target if singleDigitalItemMiroWork(target) =>
       target.data.images.map {
         _.mergeWith(
@@ -56,8 +56,8 @@ object ImagesRule extends FieldMergeRule {
   }
 
   trait FlatImageMergeRule extends PartialRule {
-    final override def rule(target: Work.Visible[Unidentified],
-                            sources: NonEmptyList[Work[Unidentified]])
+    final override def rule(target: Work.Visible[Source],
+                            sources: NonEmptyList[Work[Source]])
       : List[MergedImage[DataState.Unidentified]] = {
       val works = sources.prepend(target).toList
       works flatMap {

@@ -5,7 +5,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.generators.RandomStrings
 import uk.ac.wellcome.models.work.internal._
-import WorkState.Unidentified
+import WorkState.Source
 
 class MetsDataTest
     extends AnyFunSpec
@@ -31,9 +31,9 @@ class MetsDataTest
 
     val unidentifiableItem =
       Item(id = IdState.Unidentifiable, locations = List(digitalLocation))
-    metsData.toWork(version).right.get shouldBe Work.Invisible[Unidentified](
+    metsData.toWork(version).right.get shouldBe Work.Invisible[Source](
       version = version,
-      state = Unidentified(expectedSourceIdentifier),
+      state = Source(expectedSourceIdentifier),
       data = WorkData[DataState.Unidentified](
         items = List(unidentifiableItem),
         mergeCandidates = List(
@@ -69,9 +69,9 @@ class MetsDataTest
 
     val unidentifiableItem =
       Item(id = IdState.Unidentifiable, locations = List(digitalLocation))
-    metsData.toWork(version).right.get shouldBe Work.Invisible[Unidentified](
+    metsData.toWork(version).right.get shouldBe Work.Invisible[Source](
       version = version,
-      state = Unidentified(expectedSourceIdentifier),
+      state = Source(expectedSourceIdentifier),
       data = WorkData[DataState.Unidentified](
         items = List(unidentifiableItem),
         mergeCandidates = List(

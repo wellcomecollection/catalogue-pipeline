@@ -6,7 +6,7 @@ import cats.instances.option._
 import org.apache.commons.lang3.StringUtils.equalsIgnoreCase
 
 import uk.ac.wellcome.models.work.internal._
-import WorkState.Unidentified
+import WorkState.Source
 
 case class MetsData(
   recordIdentifier: String,
@@ -17,7 +17,7 @@ case class MetsData(
   titlePageId: Option[String] = None
 ) {
 
-  def toWork(version: Int): Either[Throwable, Work.Invisible[Unidentified]] =
+  def toWork(version: Int): Either[Throwable, Work.Invisible[Source]] =
     for {
       license <- parseLicense
       accessStatus <- parseAccessStatus
@@ -25,9 +25,9 @@ case class MetsData(
         id = IdState.Unidentifiable,
         locations = List(digitalLocation(license, accessStatus)))
     } yield
-      Work.Invisible[Unidentified](
+      Work.Invisible[Source](
         version = version,
-        state = Unidentified(sourceIdentifier),
+        state = Source(sourceIdentifier),
         data = WorkData[DataState.Unidentified](
           items = List(item),
           mergeCandidates = List(mergeCandidate),

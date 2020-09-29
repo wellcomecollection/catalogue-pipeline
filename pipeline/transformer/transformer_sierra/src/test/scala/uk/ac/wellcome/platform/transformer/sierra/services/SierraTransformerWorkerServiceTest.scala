@@ -27,7 +27,7 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.storage.generators.RandomThings
-import WorkState.Unidentified
+import WorkState.Source
 
 class SierraTransformerWorkerServiceTest
     extends AnyFunSpec
@@ -74,7 +74,7 @@ class SierraTransformerWorkerServiceTest
               value = id.withoutCheckDigit
             )
 
-          val works = sender.getMessages[Work.Visible[Unidentified]]
+          val works = sender.getMessages[Work.Visible[Source]]
           works.length shouldBe >=(1)
 
           works.map { actualWork =>
@@ -100,13 +100,13 @@ class SierraTransformerWorkerServiceTest
 
       withWorkerService(store, sender, queue) { _ =>
         eventually {
-          val works = sender.getMessages[Work[Unidentified]]
+          val works = sender.getMessages[Work[Source]]
           works.size should be >= 1
 
           works.map { actualWork =>
             actualWork shouldBe a[Work.Visible[_]]
             val unidentifiedWork =
-              actualWork.asInstanceOf[Work.Visible[Unidentified]]
+              actualWork.asInstanceOf[Work.Visible[Source]]
             unidentifiedWork.version shouldBe version
           }
         }

@@ -37,12 +37,12 @@ class WorkMatcherConcurrencyTest
               val identifierB =
                 createSierraSystemSourceIdentifierWith(value = "B")
 
-              val workA = createUnidentifiedWorkWith(
+              val workA = createSourceWorkWith(
                 sourceIdentifier = identifierA,
                 mergeCandidates = List(MergeCandidate(identifierB))
               )
 
-              val workB = createUnidentifiedWorkWith(
+              val workB = createSourceWorkWith(
                 sourceIdentifier = identifierB
               )
 

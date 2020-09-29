@@ -22,7 +22,7 @@ class ThumbnailRuleTest
 
   val digitalSierraWork = createSierraDigitalWork
 
-  val metsWork = createUnidentifiedWorkWith(
+  val metsWork = createSourceWorkWith(
     sourceIdentifier = createMetsSourceIdentifier,
     items = List(createDigitalItem),
     thumbnail = Some(
@@ -39,7 +39,7 @@ class ThumbnailRuleTest
       f"V$i%04d"
     }
     .map { id =>
-      createUnidentifiedWorkWith(
+      createSourceWorkWith(
         sourceIdentifier = createMiroSourceIdentifierWith(id),
         thumbnail = Some(
           DigitalLocationDeprecated(
@@ -61,7 +61,7 @@ class ThumbnailRuleTest
     }
 
   val restrictedDigitalWork =
-    createUnidentifiedSierraWorkWith(
+    createSierraSourceWorkWith(
       items = List(
         createUnidentifiableItemWith(
           locations = List(

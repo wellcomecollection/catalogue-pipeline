@@ -15,7 +15,7 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.Store
 import uk.ac.wellcome.storage.Identified
-import WorkState.Unidentified
+import WorkState.Source
 
 // In future we should just receive the ID and version from the adapter as the
 // S3 specific `location` field is an implementation detail we should not be
@@ -35,7 +35,7 @@ class MiroVHSRecordReceiver[MsgDestination](
                      transformToWork: (
                        MiroRecord,
                        MiroMetadata,
-                       Int) => Try[Work[Unidentified]]): Future[Unit] = {
+                       Int) => Try[Work[Source]]): Future[Unit] = {
     debug(s"Starting to process message $message")
 
     val msgNotification = Future.fromTry {
