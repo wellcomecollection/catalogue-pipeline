@@ -44,7 +44,7 @@ object SingleWorkParams extends QueryParamsUtils {
       "partOf" -> WorkInclude.PartOf,
       "precededBy" -> WorkInclude.PrecededBy,
       "succeededBy" -> WorkInclude.SucceededBy,
-    ).emap(values => Right(WorksIncludes(values)))
+    ).emap(values => Right(WorksIncludes(values: _*)))
 }
 
 case class MultipleWorksParams(
@@ -160,7 +160,7 @@ object MultipleWorksParams extends QueryParamsUtils {
     decodeOneOfCommaSeparated(
       "DigitalLocation" -> LocationTypeQuery.DigitalLocation,
       "PhysicalLocation" -> LocationTypeQuery.PhysicalLocation,
-    ) map (ItemLocationTypeFilter)
+    ) map ItemLocationTypeFilter
 
   implicit val itemLocationTypeIdFilter: Decoder[ItemLocationTypeIdFilter] =
     decodeCommaSeparated.emap(strs => Right(ItemLocationTypeIdFilter(strs)))
