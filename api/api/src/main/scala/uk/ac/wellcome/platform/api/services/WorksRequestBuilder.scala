@@ -84,7 +84,7 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
     case AggregationRequest.ItemLocationType =>
       TermsAggregation("locationType")
         .size(100)
-        .field("data.items.locations.ontologyType")
+        .field("data.items.locations.type")
         .minDocCount(0)
   }
 
@@ -175,7 +175,7 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
         termQuery(field = "data.collectionPath.depth", value = depth)
       case ItemLocationTypeFilter(locationTypes) =>
         termsQuery(
-          field = "data.items.locations.ontologyType",
+          field = "data.items.locations.type",
           values = locationTypes.map(_.name))
       case ItemLocationTypeIdFilter(itemLocationTypeIds) =>
         termsQuery(

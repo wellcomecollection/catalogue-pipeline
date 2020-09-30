@@ -86,8 +86,8 @@ object Aggregations extends Logging {
 
   implicit val decodeLocationTypeFromLabel: Decoder[LocationTypeQuery] =
     Decoder.decodeString.map {
-      case "DigitalLocation"  => LocationTypeQuery.DigitalLocation
-      case "PhysicalLocation" => LocationTypeQuery.PhysicalLocation
+      case "DigitalLocationDeprecated"  => LocationTypeQuery.DigitalLocation
+      case "PhysicalLocationDeprecated" => LocationTypeQuery.PhysicalLocation
     }
 
   implicit class EnhancedEsAggregations(aggregations: Elastic4sAggregations) {
