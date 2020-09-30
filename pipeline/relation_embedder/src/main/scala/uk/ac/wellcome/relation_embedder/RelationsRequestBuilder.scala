@@ -8,9 +8,9 @@ import com.sksamuel.elastic4s.requests.searches.{
 }
 import com.sksamuel.elastic4s.requests.searches.queries.Query
 
-case class RelatedWorkRequestBuilder(index: Index,
-                                     path: String,
-                                     maxRelatedWorks: Int = 1000) {
+case class RelationsRequestBuilder(index: Index,
+                                   path: String,
+                                   maxRelatedWorks: Int = 1000) {
 
   // To reduce response size and improve Elasticsearch performance we only
   // return core fields
