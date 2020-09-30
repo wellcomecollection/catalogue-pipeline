@@ -3,6 +3,9 @@ module "snapshot_generator_queue" {
   queue_name = "snapshot_generator-${var.deployment_service_env}"
   topic_arns = [var.snapshot_generator_input_topic_arn]
 
+  # This should be longer than the time we expect a snapshot to take
+  visibility_timeout_seconds = 60 * 30
+
   aws_region      = var.aws_region
   alarm_topic_arn = var.dlq_alarm_arn
 }
