@@ -13,8 +13,8 @@ data "terraform_remote_state" "catalogue_account" {
   backend = "s3"
 
   config = {
-    bucket         = "wellcomecollection-platform-infra"
-    key            = "terraform/platform-infrastructure/accounts/catalogue.tfstate"
+    bucket = "wellcomecollection-platform-infra"
+    key    = "terraform/platform-infrastructure/accounts/catalogue.tfstate"
 
     role_arn = "arn:aws:iam::760097843905:role/platform-developer"
     region   = "eu-west-1"
@@ -27,9 +27,9 @@ data "terraform_remote_state" "shared" {
   config = {
     role_arn = "arn:aws:iam::760097843905:role/platform-developer"
 
-    bucket         = "wellcomecollection-platform-infra"
-    key            = "terraform/platform-infrastructure/shared.tfstate"
-    region         = "eu-west-1"
+    bucket = "wellcomecollection-platform-infra"
+    key    = "terraform/platform-infrastructure/shared.tfstate"
+    region = "eu-west-1"
   }
 }
 
