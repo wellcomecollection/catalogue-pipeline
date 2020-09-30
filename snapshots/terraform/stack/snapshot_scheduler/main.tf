@@ -1,7 +1,7 @@
-module "snapshot_scheduler_lambda" {
+module "snapshot_scheduler" {
   source = "../../modules/lambda"
 
-  name = "snapshot_scheduler"
+  name = "snapshot_scheduler-${var.deployment_service_env}"
 
   s3_bucket = var.infra_bucket
   s3_key    = "lambdas/data_api/snapshot_scheduler.zip"
@@ -17,16 +17,18 @@ module "snapshot_scheduler_lambda" {
   }
 
   log_retention_in_days = 30
+
+  handler = "snapshot_scheduler"
 }
 
 resource "aws_lambda_permission" "allow_cloudwatch_trigger" {
   action        = "lambda:InvokeFunction"
-  function_name = module.snapshot_scheduler_lambda.function_name
+  function_name = module.snapshot_scheduler.function_name
   principal     = "events.amazonaws.com"
   source_arn    = aws_cloudwatch_event_rule.snapshot_scheduler_rule.arn
 }
 
 resource "aws_cloudwatch_event_target" "event_trigger" {
   rule = aws_cloudwatch_event_rule.snapshot_scheduler_rule.id
-  arn  = module.snapshot_scheduler_lambda.arn
+  arn  = module.snapshot_scheduler.arn
 }

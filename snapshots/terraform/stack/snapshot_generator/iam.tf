@@ -1,10 +1,5 @@
 # Role policies for the snapshot_generator
 
-resource "aws_iam_role_policy" "ecs_snapshot_generator_task_sns" {
-  role   = module.snapshot_generator.task_role_name
-  policy = module.snapshot_complete_topic.publish_policy
-}
-
 resource "aws_iam_role_policy" "ecs_snapshot_generator_task_s3_public" {
   role   = module.snapshot_generator.task_role_name
   policy = data.aws_iam_policy_document.public_data_bucket_full_access_policy.json
@@ -41,7 +36,7 @@ data "aws_iam_policy_document" "public_data_bucket_full_access_policy" {
     ]
 
     resources = [
-      "${aws_s3_bucket.public_data.arn}/catalogue/*",
+      "arn:aws:s3:::${var.public_bucket_name}/catalogue/*",
     ]
   }
 }
