@@ -25,8 +25,8 @@ module "snapshot_generator" {
     metric_namespace = "snapshot_generator-${var.deployment_service_env}"
   }
 
-  cpu    = 1024
-  memory = 4096
+  cpu    = 2048
+  memory = 8192
 
   secret_env_vars = {
     es_host     = "catalogue/api/es_host"

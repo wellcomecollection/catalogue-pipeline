@@ -27,9 +27,9 @@ locals {
 
   snapshot_generator_image = data.aws_ecr_repository.snapshot_generator.repository_url
 
-  lambda_error_alarm_arn = data.terraform_remote_state.shared_infra.outputs.lambda_error_alarm_arn
-  dlq_alarm_arn          = data.terraform_remote_state.shared_infra.outputs.dlq_alarm_arn
+  lambda_error_alarm_arn = data.terraform_remote_state.shared.outputs.lambda_error_alarm_arn
+  dlq_alarm_arn          = data.terraform_remote_state.shared.outputs.dlq_alarm_arn
 
-  vpc_id  = data.terraform_remote_state.shared_infra.outputs.catalogue_vpc_id
-  subnets = data.terraform_remote_state.shared_infra.outputs.catalogue_vpc_private_subnets
+  vpc_id  = data.terraform_remote_state.catalogue_account.outputs.catalogue_vpc_id
+  subnets = data.terraform_remote_state.catalogue_account.outputs.catalogue_vpc_private_subnets
 }

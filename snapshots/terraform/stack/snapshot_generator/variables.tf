@@ -25,3 +25,6 @@ variable "snapshot_generator_image" {
 variable "subnets" {
   type = list(string)
 }
+variable "public_bucket_name" {
+  type = string
+}
