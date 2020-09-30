@@ -119,7 +119,7 @@ class DisplayLocationsSerialisationTestDeprecated
     expectedJson: String
   ): Assertion =
     assertObjectMapsToJson(
-      DisplayWork(work, includes = BetterWorksIncludes(WorkInclude.Items)),
+      DisplayWork(work, includes = WorksIncludes(WorkInclude.Items)),
       expectedJson = expectedJson
     )
 }

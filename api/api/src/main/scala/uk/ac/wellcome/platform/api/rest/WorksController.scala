@@ -46,7 +46,7 @@ class WorksController(
                   DisplayResultList(
                     resultList = resultList,
                     searchOptions = searchOptions,
-                    includes = params.include.getOrElse(BetterWorksIncludes()),
+                    includes = params.include.getOrElse(WorksIncludes()),
                     requestUri = requestUri,
                     contextUri = contextUri
                   )
@@ -61,7 +61,7 @@ class WorksController(
       transactFuture("GET /works/{workId}") {
         val index =
           params._index.map(Index(_)).getOrElse(elasticConfig.worksIndex)
-        val includes = params.include.getOrElse(BetterWorksIncludes())
+        val includes = params.include.getOrElse(WorksIncludes())
         worksService
           .findWorkById(id)(index)
           .flatMap {
@@ -106,7 +106,7 @@ class WorksController(
 
   def workFound(work: Work.Visible[Identified],
                 relatedWorks: Option[RelatedWorks],
-                includes: BetterWorksIncludes): Route =
+                includes: WorksIncludes): Route =
     complete(
       ResultResponse(
         context = contextUri,

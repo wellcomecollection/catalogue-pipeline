@@ -57,7 +57,7 @@ object DisplayResultList {
   def apply(
     resultList: ResultList[Work.Visible[Identified], Aggregations],
     searchOptions: SearchOptions,
-    includes: BetterWorksIncludes,
+    includes: WorksIncludes,
     requestUri: Uri,
     contextUri: String): DisplayResultList[DisplayWork, DisplayAggregations] =
     PaginationResponse(resultList, searchOptions, requestUri) match {

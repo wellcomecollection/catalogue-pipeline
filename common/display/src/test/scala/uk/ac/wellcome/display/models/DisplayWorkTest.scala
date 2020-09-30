@@ -48,7 +48,7 @@ class DisplayWorkTest
 
     val displayWork = DisplayWork(
       work = work,
-      includes = BetterWorksIncludes(WorkInclude.Items)
+      includes = WorksIncludes(WorkInclude.Items)
     )
     displayWork.items shouldBe Some(List())
   }
@@ -61,7 +61,7 @@ class DisplayWorkTest
 
     val displayWork = DisplayWork(
       work = work,
-      includes = BetterWorksIncludes(WorkInclude.Items)
+      includes = WorksIncludes(WorkInclude.Items)
     )
     val displayItem = displayWork.items.get.head
     displayItem.id shouldBe Some(items.head.id.canonicalId)
@@ -74,7 +74,7 @@ class DisplayWorkTest
 
     val displayWork = DisplayWork(
       work = work,
-      includes = BetterWorksIncludes(WorkInclude.Items)
+      includes = WorksIncludes(WorkInclude.Items)
     )
 
     val displayItem = displayWork.items.get.head
@@ -101,7 +101,7 @@ class DisplayWorkTest
 
     val displayWork = DisplayWork(
       work = work,
-      includes = BetterWorksIncludes(WorkInclude.Identifiers)
+      includes = WorksIncludes(WorkInclude.Identifiers)
     )
     displayWork.identifiers shouldBe Some(
       List(DisplayIdentifier(work.sourceIdentifier)))
@@ -189,7 +189,7 @@ class DisplayWorkTest
     val displayWork =
       DisplayWork(
         work,
-        includes = BetterWorksIncludes(WorkInclude.Identifiers, WorkInclude.Contributors))
+        includes = WorksIncludes(WorkInclude.Identifiers, WorkInclude.Contributors))
 
     displayWork.contributors.get shouldBe List(
       DisplayContributor(
@@ -221,14 +221,14 @@ class DisplayWorkTest
     )
 
     val displayWork =
-      DisplayWork(work, includes = BetterWorksIncludes(WorkInclude.Production))
+      DisplayWork(work, includes = WorksIncludes(WorkInclude.Production))
     displayWork.production.get shouldBe List(
       DisplayProductionEvent(productionEvent, includesIdentifiers = false))
   }
 
   it("does not extract includes set to false") {
     forAll { work: Work.Visible[Identified] =>
-      val displayWork = DisplayWork(work, includes = BetterWorksIncludes())
+      val displayWork = DisplayWork(work, includes = WorksIncludes())
 
       displayWork.production shouldNot be(defined)
       displayWork.subjects shouldNot be(defined)
@@ -335,7 +335,7 @@ class DisplayWorkTest
     )
 
     describe("omits identifiers if WorksIncludes.identifiers is false") {
-      val displayWork = DisplayWork(work, includes = BetterWorksIncludes())
+      val displayWork = DisplayWork(work, includes = WorksIncludes())
 
       it("the top-level Work") {
         displayWork.identifiers shouldBe None
@@ -343,7 +343,7 @@ class DisplayWorkTest
 
       it("contributors") {
         val displayWork =
-          DisplayWork(work, includes = BetterWorksIncludes(WorkInclude.Contributors))
+          DisplayWork(work, includes = WorksIncludes(WorkInclude.Contributors))
         val agents: List[DisplayAbstractAgent] =
           displayWork.contributors.get.map { _.agent }
         agents.map { _.identifiers } shouldBe List(None, None, None)
@@ -351,14 +351,14 @@ class DisplayWorkTest
 
       it("items") {
         val displayWork =
-          DisplayWork(work, includes = BetterWorksIncludes(WorkInclude.Items))
+          DisplayWork(work, includes = WorksIncludes(WorkInclude.Items))
         val item: DisplayItem = displayWork.items.get.head
         item.identifiers shouldBe None
       }
 
       it("subjects") {
         val displayWork =
-          DisplayWork(work, includes = BetterWorksIncludes(WorkInclude.Subjects))
+          DisplayWork(work, includes = WorksIncludes(WorkInclude.Subjects))
         val subject = displayWork.subjects.get.head
         subject.identifiers shouldBe None
 
@@ -368,14 +368,14 @@ class DisplayWorkTest
 
       it("genres") {
         val displayWork =
-          DisplayWork(work, includes = BetterWorksIncludes(WorkInclude.Genres))
+          DisplayWork(work, includes = WorksIncludes(WorkInclude.Genres))
         displayWork.genres.get.head.concepts.head.identifiers shouldBe None
       }
     }
 
     describe("includes identifiers if WorksIncludes.identifiers is true") {
       val displayWork =
-        DisplayWork(work, includes = BetterWorksIncludes(WorkInclude.Identifiers))
+        DisplayWork(work, includes = WorksIncludes(WorkInclude.Identifiers))
 
       it("on the top-level Work") {
         displayWork.identifiers shouldBe Some(
@@ -386,7 +386,7 @@ class DisplayWorkTest
         val displayWork =
           DisplayWork(
             work,
-            includes = BetterWorksIncludes(WorkInclude.Contributors, WorkInclude.Identifiers))
+            includes = WorksIncludes(WorkInclude.Contributors, WorkInclude.Identifiers))
 
         val expectedIdentifiers = List(
           contributorAgentSourceIdentifier,
@@ -404,7 +404,7 @@ class DisplayWorkTest
       it("items") {
         val displayWork = DisplayWork(
           work,
-          includes = BetterWorksIncludes(WorkInclude.Identifiers, WorkInclude.Items))
+          includes = WorksIncludes(WorkInclude.Identifiers, WorkInclude.Items))
         val item: DisplayItem = displayWork.items.get.head
         val identifiedItem =
           work.data.items.head.asInstanceOf[Item[IdState.Identified]]
@@ -416,7 +416,7 @@ class DisplayWorkTest
         val displayWork =
           DisplayWork(
             work,
-            includes = BetterWorksIncludes(WorkInclude.Identifiers, WorkInclude.Subjects))
+            includes = WorksIncludes(WorkInclude.Identifiers, WorkInclude.Subjects))
         val expectedIdentifiers = List(
           conceptSourceIdentifier,
           periodSourceIdentifier,
@@ -437,7 +437,7 @@ class DisplayWorkTest
         val displayWork =
           DisplayWork(
             work,
-            includes = BetterWorksIncludes(WorkInclude.Identifiers, WorkInclude.Genres))
+            includes = WorksIncludes(WorkInclude.Identifiers, WorkInclude.Genres))
         displayWork.genres.get.head.concepts.head.identifiers shouldBe Some(
           List(DisplayIdentifier(conceptSourceIdentifier)))
       }
@@ -445,7 +445,7 @@ class DisplayWorkTest
       it("images") {
         val displayWork = DisplayWork(
           work,
-          includes = BetterWorksIncludes(WorkInclude.Images)
+          includes = WorksIncludes(WorkInclude.Images)
         )
         displayWork.images.get
           .map(_.id) should contain theSameElementsAs
@@ -479,7 +479,7 @@ class DisplayWorkTest
 
     it("includes nested partOf") {
       val displayWork =
-        DisplayWork(work, BetterWorksIncludes(WorkInclude.PartOf), relatedWorks)
+        DisplayWork(work, WorksIncludes(WorkInclude.PartOf), relatedWorks)
       displayWork.partOf.isEmpty shouldBe false
       val partOf: List[DisplayWork] = displayWork.partOf.get
       partOf.map(_.id) shouldBe List(workB.state.canonicalId)
@@ -488,7 +488,7 @@ class DisplayWorkTest
 
     it("includes parts") {
       val displayWork =
-        DisplayWork(work, BetterWorksIncludes(WorkInclude.Parts), relatedWorks)
+        DisplayWork(work, WorksIncludes(WorkInclude.Parts), relatedWorks)
       displayWork.parts shouldBe Some(
         List(DisplayWork(workE), DisplayWork(workF))
       )
@@ -496,18 +496,18 @@ class DisplayWorkTest
 
     it("includes precededBy") {
       val displayWork =
-        DisplayWork(work, BetterWorksIncludes(WorkInclude.PrecededBy), relatedWorks)
+        DisplayWork(work, WorksIncludes(WorkInclude.PrecededBy), relatedWorks)
       displayWork.precededBy shouldBe Some(List(DisplayWork(workC)))
     }
 
     it("includes succeededBy") {
       val displayWork =
-        DisplayWork(work, BetterWorksIncludes(WorkInclude.SucceededBy), relatedWorks)
+        DisplayWork(work, WorksIncludes(WorkInclude.SucceededBy), relatedWorks)
       displayWork.succeededBy shouldBe Some(List(DisplayWork(workD)))
     }
 
     it("does not include relations when not requested") {
-      val displayWork = DisplayWork(work, BetterWorksIncludes(), relatedWorks)
+      val displayWork = DisplayWork(work, WorksIncludes(), relatedWorks)
       displayWork.parts shouldBe None
       displayWork.partOf shouldBe None
       displayWork.precededBy shouldBe None
