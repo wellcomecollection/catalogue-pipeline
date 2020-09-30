@@ -35,15 +35,15 @@ class ImagesFiltersTest extends ApiImagesTestBase {
             "30/4",
             "18/4",
             "1/4",
-            "4/6",
-            "4/6",
+            "5/6",
+            "5/6",
             "34/6",
             "34/6",
             "130/6",
             "70/6",
             "2/6",
-            "6/8",
-            "6/8",
+            "7/8",
+            "7/8",
             "69/8",
             "69/8",
             "301/8",
@@ -74,6 +74,58 @@ class ImagesFiltersTest extends ApiImagesTestBase {
         "320/8",
         "128/8"
       ))))
+    val slightlyLessRedImage = createAugmentedImageWith(
+      inferredData = createInferredData.map(
+        _.copy(
+          palette = List(
+            "0/0",
+            "0/0",
+            "6/4",
+            "6/4",
+            "30/4",
+            "18/4",
+            "1/4",
+            "5/6",
+            "5/6",
+            "34/6",
+            "34/6",
+            "130/6",
+            "70/6",
+            "2/6",
+            "7/8",
+            "7/8",
+            "69/8",
+            "69/8",
+            "301/8",
+            "181/8",
+            "2/8"
+          ))))
+    val evenLessRedImage = createAugmentedImageWith(
+      inferredData = createInferredData.map(
+        _.copy(
+          palette = List(
+            "0/0",
+            "0/0",
+            "6/4",
+            "6/4",
+            "30/4",
+            "18/4",
+            "1/4",
+            "0/0",
+            "0/0",
+            "34/6",
+            "34/6",
+            "130/6",
+            "70/6",
+            "2/6",
+            "7/8",
+            "7/8",
+            "69/8",
+            "69/8",
+            "301/8",
+            "181/8",
+            "2/8"
+          ))))
 
     it("filters by color") {
       withApi {
@@ -97,6 +149,24 @@ class ImagesFiltersTest extends ApiImagesTestBase {
             unordered = true) {
             Status.OK -> imagesListResponse(
               images = Seq(blueImage, redImage)
+            )
+          }
+      }
+    }
+
+    it("scores by number of color bin matches") {
+      withApi {
+        case (ElasticConfig(_, imagesIndex), routes) =>
+          insertImagesIntoElasticsearch(
+            imagesIndex,
+            redImage,
+            slightlyLessRedImage,
+            evenLessRedImage,
+            blueImage
+          )
+          assertJsonResponse(routes, f"/$apiPrefix/images?color=ff0000") {
+            Status.OK -> imagesListResponse(
+              images = Seq(redImage, slightlyLessRedImage, evenLessRedImage)
             )
           }
       }

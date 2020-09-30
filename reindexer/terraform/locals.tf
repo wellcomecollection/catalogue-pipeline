@@ -17,8 +17,8 @@ locals {
   calm_reindexer_topic_name                         = module.calm_reindexer_topic.name
   calm_reindexer_topic_arn                          = module.calm_reindexer_topic.arn
 
-  vpc_id          = data.terraform_remote_state.shared_infra.outputs.catalogue_vpc_delta_id
-  private_subnets = data.terraform_remote_state.shared_infra.outputs.catalogue_vpc_delta_private_subnets
+  vpc_id          = local.catalogue_vpcs["catalogue_vpc_delta_id"]
+  private_subnets = local.catalogue_vpcs["catalogue_vpc_delta_private_subnets"]
   dlq_alarm_arn   = data.terraform_remote_state.shared_infra.outputs.dlq_alarm_arn
 
   reindex_worker_image = "${module.ecr_repository_reindex_worker.repository_url}:env.${local.environment}"

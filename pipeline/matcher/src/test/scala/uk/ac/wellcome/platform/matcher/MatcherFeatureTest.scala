@@ -26,13 +26,13 @@ class MatcherFeatureTest
     with WorksGenerators {
 
   it(
-    "processes a message with a simple Work.Visible[Unidentified] with no linked works") {
+    "processes a message with a simple Work.Visible[Source] with no linked works") {
     val messageSender = new MemoryMessageSender()
 
     withLocalSqsQueue() { queue =>
       withVHS { vhs =>
         withWorkerService(vhs, queue, messageSender) { _ =>
-          val work = createUnidentifiedWork
+          val work = createSourceWork
 
           val expectedResult = MatcherResult(
             Set(
@@ -64,7 +64,7 @@ class MatcherFeatureTest
               val existingWorkVersion = 2
               val updatedWorkVersion = 1
 
-              val workAv1 = createUnidentifiedWorkWith(
+              val workAv1 = createSourceWorkWith(
                 version = updatedWorkVersion
               )
 
@@ -98,7 +98,7 @@ class MatcherFeatureTest
         withWorkGraphTable { graphTable =>
           withVHS { vhs: VHS =>
             withWorkerService(vhs, queue, messageSender, graphTable) { _ =>
-              val workv2 = createUnidentifiedWorkWith(version = 2)
+              val workv2 = createSourceWorkWith(version = 2)
 
               val key = vhs.put(
                 Version(workv2.sourceIdentifier.toString, workv2.version))(

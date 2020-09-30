@@ -1,10 +1,10 @@
 package uk.ac.wellcome.platform.merger.rules
 
 import uk.ac.wellcome.models.work.internal._
-import WorkState.Unidentified
+import WorkState.Source
 
 object WorkPredicates {
-  type WorkPredicate = Work[Unidentified] => Boolean
+  type WorkPredicate = Work[Source] => Boolean
 
   private val sierraIdentified: WorkPredicate = identifierTypeId(
     "sierra-system-number")
@@ -65,11 +65,10 @@ object WorkPredicates {
 
   def not(pred: WorkPredicate): WorkPredicate = !pred(_)
 
-  def sierraWorkWithId(id: SourceIdentifier)(
-    work: Work[Unidentified]): Boolean =
+  def sierraWorkWithId(id: SourceIdentifier)(work: Work[Source]): Boolean =
     work.sourceIdentifier == id
 
-  private def physicalLocationExists(work: Work[Unidentified]): Boolean =
+  private def physicalLocationExists(work: Work[Source]): Boolean =
     work.data.items.exists { item =>
       item.locations.exists {
         case _: PhysicalLocationDeprecated => true
@@ -77,7 +76,7 @@ object WorkPredicates {
       }
     }
 
-  private def allDigitalLocations(work: Work[Unidentified]): Boolean =
+  private def allDigitalLocations(work: Work[Source]): Boolean =
     work.data.items.forall { item =>
       item.locations.forall {
         case _: DigitalLocationDeprecated => true
@@ -85,7 +84,7 @@ object WorkPredicates {
       }
     }
 
-  private def allPhysicalLocations(work: Work[Unidentified]): Boolean =
+  private def allPhysicalLocations(work: Work[Source]): Boolean =
     work.data.items.forall { item =>
       item.locations.forall {
         case _: PhysicalLocationDeprecated => true
@@ -93,22 +92,22 @@ object WorkPredicates {
       }
     }
 
-  private def singleLocation(work: Work[Unidentified]): Boolean =
+  private def singleLocation(work: Work[Source]): Boolean =
     work.data.items.forall { item =>
       item.locations.size == 1
     }
 
   private def sourceIdentifierSatisfies(pred: String => Boolean)(
-    work: Work[Unidentified]): Boolean = pred(work.sourceIdentifier.value)
+    work: Work[Source]): Boolean = pred(work.sourceIdentifier.value)
 
-  private def identifierTypeId(id: String)(work: Work[Unidentified]): Boolean =
+  private def identifierTypeId(id: String)(work: Work[Source]): Boolean =
     work.sourceIdentifier.identifierType == IdentifierType(id)
 
-  private def format(format: Format)(work: Work[Unidentified]): Boolean =
+  private def format(format: Format)(work: Work[Source]): Boolean =
     work.data.format.contains(format)
 
-  private def satisfiesAll(predicates: (Work[Unidentified] => Boolean)*)(
-    work: Work[Unidentified]): Boolean = predicates.forall(_(work))
+  private def satisfiesAll(predicates: (Work[Source] => Boolean)*)(
+    work: Work[Source]): Boolean = predicates.forall(_(work))
 
   implicit class WorkPredicateOps(val predA: WorkPredicate) {
     def or(predB: WorkPredicate): WorkPredicate =

@@ -19,7 +19,7 @@ import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 //
 //    Adding other identifiers is out-of-scope for now.
 //
-object SierraIdentifiers extends SierraTransformer with SierraQueryOps {
+object SierraIdentifiers extends SierraDataTransformer with SierraQueryOps {
 
   type Output = List[SourceIdentifier]
 

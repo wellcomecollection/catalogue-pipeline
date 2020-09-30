@@ -10,7 +10,7 @@ import uk.ac.wellcome.platform.merger.rules.WorkPredicates.{
   WorkPredicate,
   WorkPredicateOps
 }
-import WorkState.Unidentified
+import WorkState.Source
 
 /*
  * Thumbnails are chosen preferentially off of METS works, falling back to
@@ -24,9 +24,8 @@ import WorkState.Unidentified
 object ThumbnailRule extends FieldMergeRule with MergerLogging {
   type FieldData = Option[LocationDeprecated]
 
-  override def merge(
-    target: Work.Visible[Unidentified],
-    sources: Seq[Work[Unidentified]]): FieldMergeResult[FieldData] =
+  override def merge(target: Work.Visible[Source],
+                     sources: Seq[Work[Source]]): FieldMergeResult[FieldData] =
     FieldMergeResult(
       data = getThumbnail(target, sources),
       sources = List(
@@ -37,9 +36,8 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
       }.distinct
     )
 
-  def getThumbnail(
-    target: Work.Visible[Unidentified],
-    sources: Seq[Work[Unidentified]]): Option[LocationDeprecated] =
+  def getThumbnail(target: Work.Visible[Source],
+                   sources: Seq[Work[Source]]): Option[LocationDeprecated] =
     if (shouldSuppressThumbnail(target, sources))
       None
     else
@@ -53,8 +51,8 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
       val isDefinedForSource: WorkPredicate =
         WorkPredicates.singleDigitalItemMetsWork
 
-      def rule(target: Work.Visible[Unidentified],
-               sources: NonEmptyList[Work[Unidentified]]): FieldData = {
+      def rule(target: Work.Visible[Source],
+               sources: NonEmptyList[Work[Source]]): FieldData = {
         debug(s"Choosing METS thumbnail from ${describeWork(sources.head)}")
         sources.head.data.thumbnail
       }
@@ -67,8 +65,8 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
       val isDefinedForSource: WorkPredicate =
         WorkPredicates.singleDigitalItemMiroWork
 
-      def rule(target: Work.Visible[Unidentified],
-               sources: NonEmptyList[Work[Unidentified]]): FieldData = {
+      def rule(target: Work.Visible[Source],
+               sources: NonEmptyList[Work[Source]]): FieldData = {
         val minMiroSource = Try(sources.toList.min(MiroIdOrdering)).toOption
         minMiroSource.foreach { source =>
           debug(s"Choosing Miro thumbnail from ${describeWork(source)}")
@@ -76,8 +74,8 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
         minMiroSource.flatMap(_.data.thumbnail)
       }
 
-      object MiroIdOrdering extends Ordering[Work[Unidentified]] {
-        def compare(x: Work[Unidentified], y: Work[Unidentified]): Int =
+      object MiroIdOrdering extends Ordering[Work[Source]] {
+        def compare(x: Work[Source], y: Work[Source]): Int =
           (
             x.sourceIdentifier.identifierType.id,
             y.sourceIdentifier.identifierType.id) match {
@@ -88,8 +86,8 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
       }
     }
 
-  def shouldSuppressThumbnail(target: Work.Visible[Unidentified],
-                              sources: Seq[Work[Unidentified]]) =
+  def shouldSuppressThumbnail(target: Work.Visible[Source],
+                              sources: Seq[Work[Source]]) =
     (target :: sources.toList).exists { work =>
       work.data.items.exists { item =>
         item.locations.exists(_.isRestrictedOrClosed)

@@ -37,7 +37,7 @@ locals {
   infra_bucket                 = data.terraform_remote_state.shared_infra.outputs.infra_bucket
   aws_region                   = "eu-west-1"
   dlq_alarm_arn                = data.terraform_remote_state.shared_infra.outputs.dlq_alarm_arn
-  vpc_id                       = data.terraform_remote_state.shared_infra.outputs.catalogue_vpc_delta_id
-  private_subnets              = data.terraform_remote_state.shared_infra.outputs.catalogue_vpc_delta_private_subnets
+  vpc_id                       = local.catalogue_vpcs["catalogue_vpc_delta_id"]
+  private_subnets              = local.catalogue_vpcs["catalogue_vpc_delta_private_subnets"]
   rds_access_security_group_id = data.terraform_remote_state.catalogue_infra_critical.outputs.rds_access_security_group_id
 }

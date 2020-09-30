@@ -54,7 +54,7 @@ module "snapshot_generator_output_topic" {
   role_names = [module.snapshot_generator.task_role_name]
 }
 
-module "merger_scaling_alarm" {
+module "snapshot_generator_scaling_alarm" {
   source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.3"
   queue_name = module.snapshot_generator_queue.name
 

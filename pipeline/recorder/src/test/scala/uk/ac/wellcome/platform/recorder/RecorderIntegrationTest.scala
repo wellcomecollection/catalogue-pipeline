@@ -11,7 +11,7 @@ import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.recorder.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.storage.Version
-import WorkState.Unidentified
+import WorkState.Source
 
 class RecorderIntegrationTest
     extends AnyFunSpec
@@ -19,7 +19,7 @@ class RecorderIntegrationTest
     with Eventually
     with IntegrationPatience
     with WorkerServiceFixture
-    with VHSFixture[Work[Unidentified]]
+    with VHSFixture[Work[Source]]
     with WorksGenerators {
 
   it("saves received works to VHS, and puts the VHS key on the queue") {
@@ -29,8 +29,8 @@ class RecorderIntegrationTest
       val vhs = new MemoryVHS()
 
       withWorkerService(queue, vhs, messageSender) { _ =>
-        val work = createUnidentifiedWork
-        sendMessage[Work[Unidentified]](queue = queue, obj = work)
+        val work = createSourceWork
+        sendMessage[Work[Source]](queue = queue, obj = work)
         eventually {
           val key = assertWorkStored(vhs, work)
 

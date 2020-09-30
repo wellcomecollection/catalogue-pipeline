@@ -9,7 +9,7 @@ import uk.ac.wellcome.platform.recorder.services.RecorderWorkerService
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.messaging.typesafe.SNSBuilder
 import uk.ac.wellcome.bigmessaging.typesafe.{BigMessagingBuilder, VHSBuilder}
-import WorkState.Unidentified
+import WorkState.Source
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
@@ -17,9 +17,9 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildActorSystem()
 
     new RecorderWorkerService(
-      store = VHSBuilder.build[Work[Unidentified]](config),
+      store = VHSBuilder.build[Work[Source]](config),
       messageStream =
-        BigMessagingBuilder.buildMessageStream[Work[Unidentified]](config),
+        BigMessagingBuilder.buildMessageStream[Work[Source]](config),
       msgSender = SNSBuilder
         .buildSNSMessageSender(config, subject = "Sent from the recorder")
     )

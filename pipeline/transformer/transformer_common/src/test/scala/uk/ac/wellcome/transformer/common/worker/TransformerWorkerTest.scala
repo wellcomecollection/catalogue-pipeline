@@ -16,7 +16,7 @@ import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.storage.Version
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
-import WorkState.Unidentified
+import WorkState.Source
 
 trait TestData
 case object ValidTestData extends TestData
@@ -24,9 +24,9 @@ case object InvalidTestData extends TestData
 
 object TestTransformer extends Transformer[TestData] with WorksGenerators {
   def apply(data: TestData,
-            version: Int): Either[Exception, Work.Visible[Unidentified]] =
+            version: Int): Either[Exception, Work.Visible[Source]] =
     data match {
-      case ValidTestData   => Right(createUnidentifiedWork)
+      case ValidTestData   => Right(createSourceWork)
       case InvalidTestData => Left(new Exception("No No No"))
     }
 }

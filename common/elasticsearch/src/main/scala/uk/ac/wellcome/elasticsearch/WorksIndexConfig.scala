@@ -165,7 +165,6 @@ case object WorksIndexConfig extends IndexConfig {
       textField("edition"),
       notes,
       intField("duration"),
-      booleanField("merged"),
       objectField("collectionPath").fields(
         label,
         objectField("level").fields(keywordField("type")),
@@ -176,11 +175,28 @@ case object WorksIndexConfig extends IndexConfig {
       keywordField("workType")
     )
 
+  def relation(name: String) = objectField(name).fields(
+    // Locally override the strict mapping mode. No data fields are indexed for
+    // now, in the future specific fields can be added as required.
+    objectField("data").dynamic("false"),
+    id(),
+    intField("depth")
+  )
+
+  val relations = objectField("relations").fields(
+    relation("ancestors"),
+    relation("children"),
+    relation("siblingsPreceding"),
+    relation("siblingsSucceeding"),
+  )
+
   val fields: Seq[FieldDefinition with Product with Serializable] =
     Seq(
       objectField("state").fields(
         canonicalId,
         sourceIdentifier,
+        booleanField("hasMultipleSources"),
+        relations
       ),
       version,
       objectField("redirect")

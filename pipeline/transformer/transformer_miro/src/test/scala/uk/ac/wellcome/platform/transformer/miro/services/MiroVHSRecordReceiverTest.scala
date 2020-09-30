@@ -16,7 +16,7 @@ import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import WorkState.Unidentified
+import WorkState.Source
 
 class MiroVHSRecordReceiverTest
     extends AnyFunSpec
@@ -32,7 +32,7 @@ class MiroVHSRecordReceiverTest
   def transformToWork(miroRecord: MiroRecord,
                       metadata: MiroMetadata,
                       version: Int) =
-    Try(createUnidentifiedWorkWith(version = version))
+    Try(createSourceWorkWith(version = version))
 
   def failingTransformToWork(miroRecord: MiroRecord,
                              metadata: MiroMetadata,
@@ -48,7 +48,7 @@ class MiroVHSRecordReceiverTest
     val future = recordReceiver.receiveMessage(message, transformToWork)
 
     whenReady(future) { _ =>
-      val works = messageSender.getMessages[Work[Unidentified]]
+      val works = messageSender.getMessages[Work[Source]]
       works.size should be >= 1
 
       works.map { work =>
@@ -68,13 +68,13 @@ class MiroVHSRecordReceiverTest
     val future = recordReceiver.receiveMessage(message, transformToWork)
 
     whenReady(future) { _ =>
-      val works = messageSender.getMessages[Work[Unidentified]]
+      val works = messageSender.getMessages[Work[Source]]
       works.size should be >= 1
 
       works.map { actualWork =>
         actualWork shouldBe a[Work.Visible[_]]
         val unidentifiedWork =
-          actualWork.asInstanceOf[Work.Visible[Unidentified]]
+          actualWork.asInstanceOf[Work.Visible[Source]]
         unidentifiedWork.version shouldBe version
       }
     }

@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers.subjects
 
-import uk.ac.wellcome.platform.transformer.sierra.transformers.SierraTransformer
+import uk.ac.wellcome.platform.transformer.sierra.transformers.SierraDataTransformer
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData,
   SierraQueryOps,
@@ -9,7 +9,9 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
 import uk.ac.wellcome.models.work.internal.{IdState, Subject}
 import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 
-trait SierraSubjectsTransformer extends SierraTransformer with SierraQueryOps {
+trait SierraSubjectsTransformer
+    extends SierraDataTransformer
+    with SierraQueryOps {
 
   type Output = List[Subject[IdState.Unminted]]
 

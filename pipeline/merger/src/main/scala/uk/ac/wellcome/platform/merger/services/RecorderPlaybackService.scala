@@ -8,7 +8,7 @@ import uk.ac.wellcome.models.matcher.WorkIdentifier
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.storage.{Identified, NoVersionExistsError}
 import uk.ac.wellcome.storage.store.VersionedStore
-import WorkState.Unidentified
+import WorkState.Source
 
 /** Before the matcher/merger, the recorder stores a copy of every
   * transformed work in an instance of the VHS.
@@ -17,16 +17,15 @@ import WorkState.Unidentified
   * so the merger has everything it needs to work with.
   *
   */
-class RecorderPlaybackService(
-  vhs: VersionedStore[String, Int, Work[Unidentified]])(
+class RecorderPlaybackService(vhs: VersionedStore[String, Int, Work[Source]])(
   implicit ec: ExecutionContext)
     extends Logging {
 
   /** Given a collection of matched identifiers, return all the
     * corresponding works from VHS.
     */
-  def fetchAllWorks(workIdentifiers: Seq[WorkIdentifier])
-    : Future[Seq[Option[Work[Unidentified]]]] = {
+  def fetchAllWorks(
+    workIdentifiers: Seq[WorkIdentifier]): Future[Seq[Option[Work[Source]]]] = {
     Future.sequence(
       workIdentifiers.map(id => Future { getWorkForIdentifier(id) })
     )
@@ -40,7 +39,7 @@ class RecorderPlaybackService(
     * If the work is missing from VHS, it throws [[NoSuchElementException]].
     */
   private def getWorkForIdentifier(
-    workIdentifier: WorkIdentifier): Option[Work[Unidentified]] =
+    workIdentifier: WorkIdentifier): Option[Work[Source]] =
     workIdentifier match {
       case WorkIdentifier(id, Some(version)) =>
         vhs.getLatest(workIdentifier.identifier) match {

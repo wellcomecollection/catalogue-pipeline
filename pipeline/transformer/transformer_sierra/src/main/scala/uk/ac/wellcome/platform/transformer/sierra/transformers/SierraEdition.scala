@@ -10,7 +10,7 @@ import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 //
 // Field 250 is used for this. In the very rare case where multiple 250 fields
 // are found, they are concatenated into a single string
-object SierraEdition extends SierraTransformer with SierraQueryOps {
+object SierraEdition extends SierraDataTransformer with SierraQueryOps {
 
   type Output = Option[String]
 

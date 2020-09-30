@@ -16,7 +16,7 @@ import uk.ac.wellcome.models.work.generators.WorksGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
 import uk.ac.wellcome.models.Implicits._
-import WorkState.Unidentified
+import WorkState.Source
 
 class MatcherWorkerServiceTest
     extends AnyFunSpec
@@ -32,7 +32,7 @@ class MatcherWorkerServiceTest
 
   it("creates a work without identifiers") {
     // Work Av1 created without any matched works
-    val updatedWork = createUnidentifiedSierraWork
+    val updatedWork = createSierraSourceWork
     val expectedMatchedWorks =
       MatcherResult(
         Set(
@@ -55,7 +55,7 @@ class MatcherWorkerServiceTest
 
   it(
     "sends an invisible work as a single matched result with no other matched identifiers") {
-    val invisibleWork = createUnidentifiedInvisibleWork
+    val invisibleWork = createInvisibleSourceWork
     val expectedMatchedWorks =
       MatcherResult(
         Set(
@@ -80,7 +80,7 @@ class MatcherWorkerServiceTest
     "work A with one link to B and no existing works returns a single matched work") {
     // Work Av1
     val workAv1 =
-      createUnidentifiedWorkWith(
+      createSourceWorkWith(
         sourceIdentifier = identifierA,
         mergeCandidates = List(MergeCandidate(identifierB)))
 
@@ -115,7 +115,7 @@ class MatcherWorkerServiceTest
     "matches a work with one link then matches the combined work to a new work") {
     // Work Av1
     val workAv1 =
-      createUnidentifiedWorkWith(sourceIdentifier = identifierA)
+      createSourceWorkWith(sourceIdentifier = identifierA)
 
     val expectedMatchedWorksAv1 = MatcherResult(
       Set(
@@ -128,7 +128,7 @@ class MatcherWorkerServiceTest
 
     // Work Bv1
     val workBv1 =
-      createUnidentifiedWorkWith(sourceIdentifier = identifierB)
+      createSourceWorkWith(sourceIdentifier = identifierB)
 
     val expectedMatchedWorksBv1 = MatcherResult(
       Set(
@@ -140,7 +140,7 @@ class MatcherWorkerServiceTest
     )
 
     // Work Av1 matched to B
-    val workAv2 = createUnidentifiedWorkWith(
+    val workAv2 = createSourceWorkWith(
       sourceIdentifier = identifierA,
       version = 2,
       mergeCandidates = List(MergeCandidate(identifierB)))
@@ -158,7 +158,7 @@ class MatcherWorkerServiceTest
 
     // Work Cv1
     val workCv1 =
-      createUnidentifiedWorkWith(sourceIdentifier = identifierC)
+      createSourceWorkWith(sourceIdentifier = identifierC)
 
     val expectedMatcherWorksCv1 =
       MatcherResult(
@@ -171,7 +171,7 @@ class MatcherWorkerServiceTest
       )
 
     // Work Bv2 matched to C
-    val workBv2 = createUnidentifiedWorkWith(
+    val workBv2 = createSourceWorkWith(
       sourceIdentifier = identifierB,
       version = 2,
       mergeCandidates = List(MergeCandidate(identifierC)))
@@ -206,7 +206,7 @@ class MatcherWorkerServiceTest
 
   it("breaks matched works into individual works") {
     // Work Av1
-    val workAv1 = createUnidentifiedWorkWith(
+    val workAv1 = createSourceWorkWith(
       sourceIdentifier = identifierA,
       version = 1
     )
@@ -221,7 +221,7 @@ class MatcherWorkerServiceTest
     )
 
     // Work Bv1
-    val workBv1 = createUnidentifiedWorkWith(
+    val workBv1 = createSourceWorkWith(
       sourceIdentifier = identifierB,
       version = 1
     )
@@ -236,7 +236,7 @@ class MatcherWorkerServiceTest
     )
 
     // Match Work A to Work B
-    val workAv2MatchedToB = createUnidentifiedWorkWith(
+    val workAv2MatchedToB = createSourceWorkWith(
       sourceIdentifier = identifierA,
       version = 2,
       mergeCandidates = List(MergeCandidate(identifierB))
@@ -255,7 +255,7 @@ class MatcherWorkerServiceTest
       )
 
     // A no longer matches B
-    val workAv3WithNoMatchingWorks = createUnidentifiedWorkWith(
+    val workAv3WithNoMatchingWorks = createSourceWorkWith(
       sourceIdentifier = identifierA,
       version = 3
     )
@@ -293,7 +293,7 @@ class MatcherWorkerServiceTest
   }
 
   it("does not match a lower version") {
-    val workAv2 = createUnidentifiedWorkWith(
+    val workAv2 = createSourceWorkWith(
       sourceIdentifier = identifierA,
       version = 2
     )
@@ -318,7 +318,7 @@ class MatcherWorkerServiceTest
             processAndAssertMatchedWorkIs(workAv2, expectedMatchedWorkAv2)
 
             // Work V1 is sent but not matched
-            val workAv1 = createUnidentifiedWorkWith(
+            val workAv1 = createSourceWorkWith(
               sourceIdentifier = identifierA,
               version = 1
             )
@@ -339,7 +339,7 @@ class MatcherWorkerServiceTest
   }
 
   it("does not match an existing version with different information") {
-    val workAv2 = createUnidentifiedWorkWith(
+    val workAv2 = createSourceWorkWith(
       sourceIdentifier = identifierA,
       version = 2
     )
@@ -364,7 +364,7 @@ class MatcherWorkerServiceTest
             processAndAssertMatchedWorkIs(workAv2, expectedMatchedWorkAv2)
 
             // Work V1 is sent but not matched
-            val differentWorkAv2 = createUnidentifiedWorkWith(
+            val differentWorkAv2 = createSourceWorkWith(
               sourceIdentifier = identifierA,
               mergeCandidates = List(MergeCandidate(identifierB)),
               version = 2)
@@ -379,7 +379,7 @@ class MatcherWorkerServiceTest
     }
   }
 
-  private def processAndAssertMatchedWorkIs(workToMatch: Work[Unidentified],
+  private def processAndAssertMatchedWorkIs(workToMatch: Work[Source],
                                             expectedResult: MatcherResult)(
     implicit
     vhs: VHS,

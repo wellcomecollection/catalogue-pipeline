@@ -21,7 +21,7 @@ import scala.util.Try
 import scala.util.matching.Regex
 
 object SierraMergeCandidates
-    extends SierraTransformer
+    extends SierraDataTransformer
     with SierraQueryOps
     with WellcomeImagesURLParser
     with MiroIdParser {

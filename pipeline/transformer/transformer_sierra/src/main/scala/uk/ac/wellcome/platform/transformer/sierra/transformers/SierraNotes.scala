@@ -10,7 +10,7 @@ import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 case class NotesField(createNote: String => Note,
                       supressedSubfields: Set[String] = Set.empty)
 
-object SierraNotes extends SierraTransformer with SierraQueryOps {
+object SierraNotes extends SierraDataTransformer with SierraQueryOps {
 
   type Output = List[Note]
 

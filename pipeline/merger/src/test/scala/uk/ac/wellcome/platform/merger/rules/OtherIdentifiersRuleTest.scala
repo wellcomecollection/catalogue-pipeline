@@ -13,18 +13,18 @@ class OtherIdentifiersRuleTest
     with WorksWithImagesGenerators
     with Inside
     with Inspectors {
-  val nothingWork = createUnidentifiedWorkWith(
+  val nothingWork = createSourceWorkWith(
     sourceIdentifier = SourceIdentifier(
       identifierType = IdentifierType("fake", "fake"),
       value = "fake"
     ))
   val miroWork = createMiroWork
-  val metsWorks = (0 to 3).map(_ => createUnidentifiedInvisibleMetsWork).toList
-  val physicalSierra = createUnidentifiedSierraWorkWith(
+  val metsWorks = (0 to 3).map(_ => createInvisibleMetsSourceWork).toList
+  val physicalSierra = createSierraSourceWorkWith(
     items = List(createPhysicalItem),
     format = Some(Format.Pictures)
   )
-  val zeroItemPhysicalSierra = createUnidentifiedSierraWorkWith(
+  val zeroItemPhysicalSierra = createSierraSourceWorkWith(
     items = Nil,
     format = Some(Format.Pictures)
   )
@@ -35,9 +35,9 @@ class OtherIdentifiersRuleTest
   )
   val sierraWorkWithTwoPhysicalItems = createSierraWorkWithTwoPhysicalItems
   val calmWork =
-    createUnidentifiedCalmWork
+    createCalmSourceWork
 
-  val mergeCandidate = createUnidentifiedSierraWork
+  val mergeCandidate = createSierraSourceWork
   val sierraWithMergeCandidate = physicalSierra.copy(
     data = physicalSierra.data.copy(
       mergeCandidates = List(

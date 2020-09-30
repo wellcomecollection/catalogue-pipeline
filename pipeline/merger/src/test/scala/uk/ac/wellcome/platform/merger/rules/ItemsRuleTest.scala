@@ -22,16 +22,16 @@ class ItemsRuleTest
       format = Some(Format.Maps)
     )
   )
-  val zeroItemPhysicalSierra = createUnidentifiedSierraWork.copy(
-    data = createUnidentifiedSierraWork.data.copy(
+  val zeroItemPhysicalSierra = createSierraSourceWork.copy(
+    data = createSierraSourceWork.data.copy(
       format = Some(Format.Pictures)
     )
   )
   val multiItemPhysicalSierra = createSierraWorkWithTwoPhysicalItems
   val digitalSierra = createSierraDigitalWork
-  val metsWork = createUnidentifiedInvisibleMetsWork
+  val metsWork = createInvisibleMetsSourceWork
   val miroWork = createMiroWork
-  val calmWork = createUnidentifiedCalmWork
+  val calmWork = createCalmSourceWork
   val (sierraWorkWithMergeCandidate, sierraWorkMergeCandidate) =
     createSierraWorkWithDigitisedMergeCandidate
 

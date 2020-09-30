@@ -5,7 +5,6 @@ import uk.ac.wellcome.models.work.generators.ImageGenerators
 trait WorksWithImagesGenerators extends ImageGenerators {
   def createMiroWork = createMiroWorkWith(List(createUnmergedMiroImage))
 
-  def createUnidentifiedInvisibleMetsWork =
-    createUnidentifiedInvisibleMetsWorkWith(
-      images = List(createUnmergedMetsImage))
+  def createInvisibleMetsSourceWork =
+    createInvisibleMetsSourceWorkWith(images = List(createUnmergedMetsImage))
 }

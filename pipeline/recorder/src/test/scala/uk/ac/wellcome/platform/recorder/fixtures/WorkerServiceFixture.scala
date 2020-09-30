@@ -10,10 +10,10 @@ import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.recorder.services.RecorderWorkerService
 import uk.ac.wellcome.storage.{Identified, Version}
-import WorkState.Unidentified
+import WorkState.Source
 
 trait WorkerServiceFixture
-    extends VHSFixture[Work[Unidentified]]
+    extends VHSFixture[Work[Source]]
     with BigMessagingFixture
     with Akka {
   def withWorkerService[R](queue: Queue,
@@ -22,7 +22,7 @@ trait WorkerServiceFixture
                              new MemoryMessageSender())(
     testWith: TestWith[RecorderWorkerService[String], R]): R =
     withActorSystem { implicit actorSystem =>
-      withBigMessageStream[Work[Unidentified], R](queue = queue) { msgStream =>
+      withBigMessageStream[Work[Source], R](queue = queue) { msgStream =>
         val workerService =
           new RecorderWorkerService(vhs, msgStream, messageSender)
         workerService.run()
@@ -30,7 +30,7 @@ trait WorkerServiceFixture
       }
     }
 
-  def assertWorkStored[T <: Work[Unidentified]](
+  def assertWorkStored[T <: Work[Source]](
     vhs: VHS,
     work: T,
     expectedVhsVersion: Int = 0): Version[String, Int] = {
@@ -41,8 +41,7 @@ trait WorkerServiceFixture
     Version(id, expectedVhsVersion)
   }
 
-  def assertWorkNotStored[T <: Work[Unidentified]](vhs: VHS,
-                                                   work: T): Assertion = {
+  def assertWorkNotStored[T <: Work[Source]](vhs: VHS, work: T): Assertion = {
     val id = work.sourceIdentifier.toString
     vhs.getLatest(id) shouldBe a[Left[_, _]]
   }

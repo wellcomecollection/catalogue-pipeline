@@ -9,7 +9,7 @@ import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
-import WorkState.Unidentified
+import WorkState.Source
 
 class MiroRecordTransformerTest
     extends AnyFunSpec
@@ -325,8 +325,8 @@ class MiroRecordTransformerTest
 
     triedMaybeWork.isSuccess shouldBe true
 
-    triedMaybeWork.get shouldBe Work.Invisible[Unidentified](
-      state = Unidentified(
+    triedMaybeWork.get shouldBe Work.Invisible[Source](
+      state = Source(
         createMiroSourceIdentifierWith(
           value = miroRecord.imageNumber
         )

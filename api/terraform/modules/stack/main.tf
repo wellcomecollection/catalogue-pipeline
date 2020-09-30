@@ -62,6 +62,11 @@ resource "aws_cloudwatch_metric_alarm" "server_error" {
   alarm_description         = "This metric monitors 500s from the Catalogue API (${var.environment})"
   alarm_actions             = [aws_sns_topic.server_error_alarm.arn]
   insufficient_data_actions = []
+
+  dimensions = {
+    Stage   = var.environment
+    ApiName = "Catalogue API"
+  }
 }
 
 resource "aws_sns_topic" "server_error_alarm" {
