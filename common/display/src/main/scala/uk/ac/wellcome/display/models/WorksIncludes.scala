@@ -68,6 +68,17 @@ object WorksIncludes {
   )
 
   def includeAll(): WorksIncludes = WorksIncludes(
-    true, true, true, true, true, true, true, true, true, true, true, true
+    identifiers = true,
+    items = true,
+    subjects = true,
+    genres = true,
+    contributors = true,
+    production = true,
+    notes = true,
+    images = true,
+    parts = true,
+    partOf = true,
+    precededBy = true,
+    succeededBy = true
   )
 }
