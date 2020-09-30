@@ -176,7 +176,9 @@ case object WorksIndexConfig extends IndexConfig {
     )
 
   def relation(name: String) = objectField(name).fields(
-    data(textField("path")),
+    // Locally override the strict mapping mode. No data fields are indexed for
+    // now, in the future specific fields can be added as required.
+    objectField("data").dynamic("false"),
     id(),
     intField("depth")
   )
