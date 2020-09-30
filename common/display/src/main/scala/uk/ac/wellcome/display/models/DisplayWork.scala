@@ -2,13 +2,7 @@ package uk.ac.wellcome.display.models
 
 import io.circe.generic.extras.JsonKey
 import io.swagger.v3.oas.annotations.media.Schema
-import uk.ac.wellcome.models.work.internal.{
-  RelatedWork,
-  RelatedWorks,
-  Work,
-  WorkState,
-  WorkType
-}
+import uk.ac.wellcome.models.work.internal._
 import WorkState.Identified
 
 @Schema(
@@ -179,7 +173,7 @@ case object DisplayWork {
         if (includes.images)
           Some(work.data.images.map(DisplayWorkImageInclude(_)))
         else None,
-      ontologyType = displayWorkType(work.data.workType),
+      ontologyType = DisplayWorkType(work.data.workType),
     )
 
   def apply(work: Work.Visible[Identified]): DisplayWork =
@@ -222,11 +216,4 @@ case object DisplayWork {
             }
           } else None,
     )
-
-  def displayWorkType(workType: WorkType): String = workType match {
-    case WorkType.Standard   => "Work"
-    case WorkType.Collection => "Collection"
-    case WorkType.Series     => "Series"
-    case WorkType.Section    => "Section"
-  }
 }

@@ -46,13 +46,11 @@ class WorkTest extends AnyFunSpec with Matchers with IdentifiersGenerators {
         |      "canonicalId": "$createCanonicalId",
         |      "sourceIdentifier": ${toJson(createSourceIdentifier).get},
         |      "otherIdentifiers": [],
-        |      "locations": [],
-        |      "ontologyType": "Item"
+        |      "locations": []
         |    }
         |  ],
         |  "version": 1,
-        |  "visible": true,
-        |  "ontologyType": "Work"
+        |  "visible": true
         |}
       """.stripMargin
 

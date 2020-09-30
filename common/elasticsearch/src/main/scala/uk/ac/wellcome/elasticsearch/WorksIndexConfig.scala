@@ -22,7 +22,6 @@ case object WorksIndexConfig extends IndexConfig {
   val format = objectField("format")
     .fields(
       label,
-      keywordField("ontologyType"),
       keywordField("id")
     )
 
@@ -42,7 +41,6 @@ case object WorksIndexConfig extends IndexConfig {
   val period = Seq(
     label,
     id(),
-    keywordField("ontologyType"),
     objectField("range").fields(
       label,
       dateField("from"),
@@ -59,7 +57,6 @@ case object WorksIndexConfig extends IndexConfig {
   val concept = Seq(
     label,
     id(),
-    keywordField("ontologyType"),
     keywordField("type")
   )
 
@@ -68,8 +65,7 @@ case object WorksIndexConfig extends IndexConfig {
     id(),
     keywordField("type"),
     keywordField("prefix"),
-    keywordField("numeration"),
-    keywordField("ontologyType")
+    keywordField("numeration")
   )
 
   val rootConcept = concept ++ agent ++ period
@@ -77,7 +73,6 @@ case object WorksIndexConfig extends IndexConfig {
   val subject: Seq[FieldDefinition] = Seq(
     id(),
     label,
-    keywordField("ontologyType"),
     objectField("concepts").fields(rootConcept)
   )
 
@@ -85,13 +80,11 @@ case object WorksIndexConfig extends IndexConfig {
 
   def genre(fieldName: String) = objectField(fieldName).fields(
     label,
-    keywordField("ontologyType"),
     objectField("concepts").fields(rootConcept)
   )
 
   def labelledTextField(fieldName: String) = objectField(fieldName).fields(
-    label,
-    keywordField("ontologyType")
+    label
   )
 
   def period(fieldName: String) = labelledTextField(fieldName)
@@ -99,24 +92,18 @@ case object WorksIndexConfig extends IndexConfig {
   def items(fieldName: String) = objectField(fieldName).fields(
     id(),
     location(),
-    title,
-    keywordField("ontologyType")
+    title
   )
 
   val language = objectField("language").fields(
     label,
-    keywordField("id"),
-    keywordField("ontologyType")
+    keywordField("id")
   )
 
   val contributors = objectField("contributors").fields(
     id(),
     objectField("agent").fields(agent),
-    objectField("roles").fields(
-      label,
-      keywordField("ontologyType")
-    ),
-    keywordField("ontologyType")
+    objectField("roles").fields(label),
   )
 
   val production: ObjectField = objectField("production").fields(
@@ -124,8 +111,7 @@ case object WorksIndexConfig extends IndexConfig {
     objectField("places").fields(place),
     objectField("agents").fields(agent),
     objectField("dates").fields(period),
-    objectField("function").fields(concept),
-    keywordField("ontologyType")
+    objectField("function").fields(concept)
   )
 
   val mergeCandidates = objectField("mergeCandidates").fields(

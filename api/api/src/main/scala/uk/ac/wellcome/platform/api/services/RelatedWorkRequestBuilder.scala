@@ -20,7 +20,6 @@ case class RelatedWorkRequestBuilder(index: Index,
     "state.canonicalId",
     "state.sourceIdentifier.identifierType.id",
     "state.sourceIdentifier.identifierType.label",
-    "state.sourceIdentifier.identifierType.ontologyType",
     "state.sourceIdentifier.value",
     "state.sourceIdentifier.ontologyType",
     "data.title",
@@ -28,7 +27,6 @@ case class RelatedWorkRequestBuilder(index: Index,
     "data.collectionPath.path",
     "data.collectionPath.level.type",
     "data.collectionPath.label",
-    "data.ontologyType",
   )
 
   lazy val request: MultiSearchRequest =

@@ -29,7 +29,6 @@ class FormatTest
   def formatJson(id: String, label: String) =
     s"""{
         "id": "$id",
-        "label": "$label",
-        "ontologyType": "Format"
+        "label": "$label"
       }"""
 }

@@ -24,6 +24,8 @@ object DisplayImageSource {
     imageSource: ImageSource[DataState.Identified]): DisplayImageSource =
     new DisplayImageSource(
       id = imageSource.id.canonicalId,
-      ontologyType = imageSource.ontologyType
+      ontologyType = imageSource match {
+        case SourceWorks(work, _) => DisplayWorkType(work.data.workType)
+      }
     )
 }

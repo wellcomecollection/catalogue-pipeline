@@ -21,7 +21,7 @@ object DisplaySubject extends GetIdentifiers {
   def apply(subject: Subject[IdState.Minted],
             includesIdentifiers: Boolean): DisplaySubject =
     subject match {
-      case Subject(id, label, concepts, _) =>
+      case Subject(id, label, concepts) =>
         DisplaySubject(
           id = id.maybeCanonicalId,
           identifiers = getIdentifiers(id, includesIdentifiers),

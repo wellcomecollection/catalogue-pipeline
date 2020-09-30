@@ -34,7 +34,7 @@ object DisplayItem extends GetIdentifiers {
   def apply(item: Item[IdState.Minted],
             includesIdentifiers: Boolean): DisplayItem =
     item match {
-      case Item(id, title, locations, _) =>
+      case Item(id, title, locations) =>
         DisplayItem(
           id = id.maybeCanonicalId,
           identifiers = getIdentifiers(id, includesIdentifiers),
