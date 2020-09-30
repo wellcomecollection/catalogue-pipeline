@@ -3,8 +3,7 @@ package uk.ac.wellcome.models.work.internal
 case class Subject[+State](
   id: State,
   label: String,
-  concepts: List[AbstractRootConcept[State]] = Nil,
-  ontologyType: String = "Subject"
+  concepts: List[AbstractRootConcept[State]] = Nil
 ) extends HasId[State]
 
 object Subject {

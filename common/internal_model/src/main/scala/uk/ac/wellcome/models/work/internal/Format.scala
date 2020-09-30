@@ -15,7 +15,6 @@ object Format extends Enum[Format] {
     format =>
       Json.obj(
         ("id", Json.fromString(format.id)),
-        ("ontologyType", Json.fromString("Format")),
         ("label", Json.fromString(format.label))
       )
   }

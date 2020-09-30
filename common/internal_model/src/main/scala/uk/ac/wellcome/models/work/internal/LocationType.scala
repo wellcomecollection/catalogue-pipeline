@@ -8,8 +8,7 @@ import scala.io.Source
 
 case class LocationType(
   id: String,
-  label: String,
-  ontologyType: String = "LocationType"
+  label: String
 )
 
 case object LocationType {

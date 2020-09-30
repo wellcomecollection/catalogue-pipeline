@@ -19,13 +19,11 @@ case class DigitalLocationDeprecated(
   locationType: LocationType,
   license: Option[License] = None,
   credit: Option[String] = None,
-  accessConditions: List[AccessCondition] = Nil,
-  ontologyType: String = "DigitalLocation"
+  accessConditions: List[AccessCondition] = Nil
 ) extends LocationDeprecated
 
 case class PhysicalLocationDeprecated(
   locationType: LocationType,
   label: String,
-  accessConditions: List[AccessCondition] = Nil,
-  ontologyType: String = "PhysicalLocation"
+  accessConditions: List[AccessCondition] = Nil
 ) extends LocationDeprecated

@@ -108,8 +108,7 @@ class MetsDataTest
           Item(
             IdState.Unidentifiable,
             _,
-            List(DigitalLocationDeprecated(_, _, license, _, _, _)),
-            _)) =>
+            List(DigitalLocationDeprecated(_, _, license, _, _)))) =>
         license shouldBe Some(License.InCopyright)
     }
   }
@@ -124,8 +123,7 @@ class MetsDataTest
           Item(
             IdState.Unidentifiable,
             _,
-            List(DigitalLocationDeprecated(_, _, license, _, _, _)),
-            _)) =>
+            List(DigitalLocationDeprecated(_, _, license, _, _)))) =>
         license shouldBe Some(License.InCopyright)
     }
   }
@@ -140,8 +138,7 @@ class MetsDataTest
           Item(
             IdState.Unidentifiable,
             _,
-            List(DigitalLocationDeprecated(_, _, license, _, _, _)),
-            _)) =>
+            List(DigitalLocationDeprecated(_, _, license, _, _)))) =>
         license shouldBe Some(License.InCopyright)
     }
   }
@@ -157,8 +154,7 @@ class MetsDataTest
           Item(
             IdState.Unidentifiable,
             _,
-            List(DigitalLocationDeprecated(_, _, license, _, _, _)),
-            _)) =>
+            List(DigitalLocationDeprecated(_, _, license, _, _)))) =>
         license shouldBe Some(License.InCopyright)
     }
   }
@@ -176,8 +172,7 @@ class MetsDataTest
           Item(
             IdState.Unidentifiable,
             _,
-            List(DigitalLocationDeprecated(_, _, license, _, _, _)),
-            _)) =>
+            List(DigitalLocationDeprecated(_, _, license, _, _)))) =>
         license shouldBe Some(License.InCopyright)
     }
   }
@@ -194,8 +189,7 @@ class MetsDataTest
           Item(
             IdState.Unidentifiable,
             _,
-            List(DigitalLocationDeprecated(_, _, license, _, _, _)),
-            _)) =>
+            List(DigitalLocationDeprecated(_, _, license, _, _)))) =>
         license shouldBe Some(License.InCopyright)
     }
   }
@@ -325,7 +319,7 @@ class MetsDataTest
     ).toWork(1)
     result shouldBe a[Right[_, _]]
     inside(result.right.get.data.items.head.locations.head) {
-      case DigitalLocationDeprecated(_, _, _, _, accessConditions, _) =>
+      case DigitalLocationDeprecated(_, _, _, _, accessConditions) =>
         accessConditions shouldBe List(
           AccessCondition(
             status = Some(AccessStatus.OpenWithAdvisory)
@@ -378,7 +372,7 @@ class MetsDataTest
     ).toWork(1)
     result shouldBe a[Right[_, _]]
     inside(result.right.get.data.items.head.locations.head) {
-      case DigitalLocationDeprecated(_, _, _, _, accessConditions, _) =>
+      case DigitalLocationDeprecated(_, _, _, _, accessConditions) =>
         accessConditions shouldBe List(
           AccessCondition(
             status = Some(AccessStatus.Restricted),
@@ -395,7 +389,7 @@ class MetsDataTest
     ).toWork(1)
     result shouldBe a[Right[_, _]]
     inside(result.right.get.data.items.head.locations.head) {
-      case DigitalLocationDeprecated(_, _, _, _, accessConditions, _) =>
+      case DigitalLocationDeprecated(_, _, _, _, accessConditions) =>
         accessConditions shouldBe List()
     }
   }
@@ -407,7 +401,7 @@ class MetsDataTest
     ).toWork(1)
     result shouldBe a[Right[_, _]]
     inside(result.right.get.data.items.head.locations.head) {
-      case DigitalLocationDeprecated(_, _, _, _, accessConditions, _) =>
+      case DigitalLocationDeprecated(_, _, _, _, accessConditions) =>
         accessConditions shouldBe
           List(
             AccessCondition(

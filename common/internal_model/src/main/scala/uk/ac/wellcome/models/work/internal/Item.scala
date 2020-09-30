@@ -3,8 +3,7 @@ package uk.ac.wellcome.models.work.internal
 case class Item[+State](
   id: State,
   title: Option[String] = None,
-  locations: List[LocationDeprecated] = Nil,
-  ontologyType: String = "Item"
+  locations: List[LocationDeprecated] = Nil
 ) extends HasId[State]
 
 object Item {

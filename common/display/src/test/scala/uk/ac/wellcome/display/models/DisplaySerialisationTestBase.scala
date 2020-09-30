@@ -38,7 +38,7 @@ trait DisplaySerialisationTestBase {
     s"""
      {
        ${identifiers(item)}
-       "type": "${item.ontologyType}",
+       "type": "Item",
        ${optionalString("title", item.title)}
        "locations": [${locations(item.locations)}]
      }
@@ -55,7 +55,7 @@ trait DisplaySerialisationTestBase {
 
   def digitalLocation(digitalLocation: DigitalLocationDeprecated) =
     s"""{
-      "type": "${digitalLocation.ontologyType}",
+      "type": "DigitalLocation",
       "locationType": ${locationType(digitalLocation.locationType)},
       "url": "${digitalLocation.url}"
       ${optionalObject("license", license, digitalLocation.license)},
@@ -65,7 +65,7 @@ trait DisplaySerialisationTestBase {
   def physicalLocation(loc: PhysicalLocationDeprecated) =
     s"""
        {
-        "type": "${loc.ontologyType}",
+        "type": "PhysicalLocation",
         "locationType": ${locationType(loc.locationType)},
         "label": "${loc.label}",
         "accessConditions": ${accessConditions(loc.accessConditions)}
@@ -180,7 +180,7 @@ trait DisplaySerialisationTestBase {
     s"""
     {
       "label": "${s.label}",
-      "type" : "${s.ontologyType}",
+      "type" : "Subject",
       "concepts": [ ${concepts(s.concepts)} ]
     }
     """
@@ -192,7 +192,7 @@ trait DisplaySerialisationTestBase {
     s"""
     {
       "label": "${genre.label}",
-      "type" : "${genre.ontologyType}",
+      "type" : "Genre",
       "concepts": [ ${concepts(genre.concepts)} ]
     }
     """
@@ -252,7 +252,7 @@ trait DisplaySerialisationTestBase {
       "id": "${license.id}",
       "label": "${license.label}",
       "url": "${license.url}",
-      "type": "${license.ontologyType}"
+      "type": "License"
     }"""
 
   def identifier(identifier: SourceIdentifier) =
@@ -261,7 +261,7 @@ trait DisplaySerialisationTestBase {
       "identifierType": {
         "id": "${identifier.identifierType.id}",
         "label": "${identifier.identifierType.label}",
-        "type": "${identifier.identifierType.ontologyType}"
+        "type": "IdentifierType"
       },
       "value": "${identifier.value}"
     }"""
