@@ -49,7 +49,7 @@ case object WorksIncludes {
       partOf = includes.contains(WorkInclude.PartOf),
       precededBy = includes.contains(WorkInclude.PrecededBy),
       succeededBy = includes.contains(WorkInclude.SucceededBy),
-  )
+    )
 
   def includeAll(): WorksIncludes =
     WorksIncludes(

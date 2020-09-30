@@ -189,7 +189,8 @@ class DisplayWorkTest
     val displayWork =
       DisplayWork(
         work,
-        includes = WorksIncludes(WorkInclude.Identifiers, WorkInclude.Contributors))
+        includes =
+          WorksIncludes(WorkInclude.Identifiers, WorkInclude.Contributors))
 
     displayWork.contributors.get shouldBe List(
       DisplayContributor(
@@ -386,7 +387,8 @@ class DisplayWorkTest
         val displayWork =
           DisplayWork(
             work,
-            includes = WorksIncludes(WorkInclude.Contributors, WorkInclude.Identifiers))
+            includes =
+              WorksIncludes(WorkInclude.Contributors, WorkInclude.Identifiers))
 
         val expectedIdentifiers = List(
           contributorAgentSourceIdentifier,
@@ -416,7 +418,8 @@ class DisplayWorkTest
         val displayWork =
           DisplayWork(
             work,
-            includes = WorksIncludes(WorkInclude.Identifiers, WorkInclude.Subjects))
+            includes =
+              WorksIncludes(WorkInclude.Identifiers, WorkInclude.Subjects))
         val expectedIdentifiers = List(
           conceptSourceIdentifier,
           periodSourceIdentifier,
@@ -437,7 +440,8 @@ class DisplayWorkTest
         val displayWork =
           DisplayWork(
             work,
-            includes = WorksIncludes(WorkInclude.Identifiers, WorkInclude.Genres))
+            includes =
+              WorksIncludes(WorkInclude.Identifiers, WorkInclude.Genres))
         displayWork.genres.get.head.concepts.head.identifiers shouldBe Some(
           List(DisplayIdentifier(conceptSourceIdentifier)))
       }

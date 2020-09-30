@@ -77,8 +77,7 @@ class WorksController(
             case Right(Some(work: Work.Invisible[Identified])) =>
               Future.successful(gone("This work has been deleted"))
             case Right(None) =>
-              Future.successful(
-                notFound(s"Work not found for identifier $id"))
+              Future.successful(notFound(s"Work not found for identifier $id"))
             case Left(err) => Future.successful(elasticError(err))
           }
       }
