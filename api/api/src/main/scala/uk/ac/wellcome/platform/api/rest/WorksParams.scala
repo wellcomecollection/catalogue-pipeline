@@ -8,7 +8,7 @@ import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.models.work.internal.{AccessStatus, WorkType}
 
 case class SingleWorkParams(
-  include: Option[WorksIncludes],
+  include: Option[BetterWorksIncludes],
   _index: Option[String],
 ) extends QueryParams
 
@@ -22,7 +22,7 @@ object SingleWorkParams extends QueryParamsUtils {
   def parse =
     parameter(
       (
-        "include".as[WorksIncludes].?,
+        "include".as[BetterWorksIncludes].?,
         "_index".as[String].?
       )
     ).tmap((SingleWorkParams.apply _).tupled(_))
@@ -30,7 +30,7 @@ object SingleWorkParams extends QueryParamsUtils {
   implicit val decodePaths: Decoder[List[String]] =
     decodeCommaSeparated
 
-  implicit val includesDecoder: Decoder[WorksIncludes] =
+  implicit val includesDecoder: Decoder[BetterWorksIncludes] =
     decodeOneOfCommaSeparated(
       "identifiers" -> WorkInclude.Identifiers,
       "items" -> WorkInclude.Items,
@@ -44,7 +44,7 @@ object SingleWorkParams extends QueryParamsUtils {
       "partOf" -> WorkInclude.PartOf,
       "precededBy" -> WorkInclude.PrecededBy,
       "succeededBy" -> WorkInclude.SucceededBy,
-    ).emap(values => Right(WorksIncludes(values)))
+    ).emap(values => Right(BetterWorksIncludes(values: _*)))
 }
 
 case class MultipleWorksParams(
@@ -57,7 +57,7 @@ case class MultipleWorksParams(
   `genres.label`: Option[GenreFilter],
   `subjects.label`: Option[SubjectFilter],
   license: Option[LicenseFilter],
-  include: Option[WorksIncludes],
+  include: Option[BetterWorksIncludes],
   aggregations: Option[List[AggregationRequest]],
   sort: Option[List[SortRequest]],
   sortOrder: Option[SortingOrder],
@@ -128,7 +128,7 @@ object MultipleWorksParams extends QueryParamsUtils {
         "genres.label".as[GenreFilter].?,
         "subjects.label".as[SubjectFilter].?,
         "license".as[LicenseFilter].?,
-        "include".as[WorksIncludes].?,
+        "include".as[BetterWorksIncludes].?,
         "aggregations".as[List[AggregationRequest]].?,
         "sort".as[List[SortRequest]].?,
         "sortOrder".as[SortingOrder].?,
@@ -160,7 +160,7 @@ object MultipleWorksParams extends QueryParamsUtils {
     decodeOneOfCommaSeparated(
       "DigitalLocation" -> LocationTypeQuery.DigitalLocation,
       "PhysicalLocation" -> LocationTypeQuery.PhysicalLocation,
-    ) map (ItemLocationTypeFilter)
+    ) map ItemLocationTypeFilter
 
   implicit val itemLocationTypeIdFilter: Decoder[ItemLocationTypeIdFilter] =
     decodeCommaSeparated.emap(strs => Right(ItemLocationTypeIdFilter(strs)))

@@ -5,7 +5,7 @@ import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
-import uk.ac.wellcome.display.models.{DisplayWork, WorksIncludes}
+import uk.ac.wellcome.display.models.{BetterWorksIncludes, DisplayWork, WorksIncludes}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 
 class IdentifiedWorkToVisibleDisplayWorkFlowTest
@@ -19,7 +19,7 @@ class IdentifiedWorkToVisibleDisplayWorkFlowTest
   it("creates DisplayWorks from IdentifiedWorks") {
     withMaterializer { implicit materializer =>
       val flow = IdentifiedWorkToVisibleDisplayWork(
-        toDisplayWork = DisplayWork.apply(_, WorksIncludes.includeAll()))
+        toDisplayWork = DisplayWork.apply(_, BetterWorksIncludes.includeAll()))
 
       val works = createIdentifiedWorks(count = 3).toList
 
@@ -29,7 +29,7 @@ class IdentifiedWorkToVisibleDisplayWorkFlowTest
 
       whenReady(eventualDisplayWorks) { displayWorks =>
         val expectedDisplayWorks = works.map {
-          DisplayWork(_, includes = WorksIncludes.includeAll())
+          DisplayWork(_, includes = BetterWorksIncludes.includeAll())
         }
         displayWorks shouldBe expectedDisplayWorks
       }

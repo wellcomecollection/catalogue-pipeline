@@ -126,7 +126,7 @@ case class DisplayWork(
 case object DisplayWork {
 
   def apply(work: Work.Visible[Identified],
-            includes: WorksIncludes): DisplayWork =
+            includes: BetterWorksIncludes): DisplayWork =
     DisplayWork(
       id = work.state.canonicalId,
       title = work.data.title,
@@ -183,10 +183,10 @@ case object DisplayWork {
     )
 
   def apply(work: Work.Visible[Identified]): DisplayWork =
-    DisplayWork(work = work, includes = WorksIncludes())
+    DisplayWork(work = work, includes = BetterWorksIncludes())
 
   def apply(work: Work.Visible[Identified],
-            includes: WorksIncludes,
+            includes: BetterWorksIncludes,
             relatedWorks: RelatedWorks): DisplayWork =
     DisplayWork(work, includes).copy(
       parts =

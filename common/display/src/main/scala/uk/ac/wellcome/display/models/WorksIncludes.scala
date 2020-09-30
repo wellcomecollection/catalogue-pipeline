@@ -35,7 +35,7 @@ case class BetterWorksIncludes(
 }
 
 case object BetterWorksIncludes {
-  def apply(includes: List[WorkInclude]): BetterWorksIncludes =
+  def apply(includes: WorkInclude*): BetterWorksIncludes =
     BetterWorksIncludes(
       identifiers = includes.contains(WorkInclude.Identifiers),
       items = includes.contains(WorkInclude.Items),

@@ -61,7 +61,7 @@ class DisplayWorkSerialisationTest
     """.stripMargin
 
     assertObjectMapsToJson(
-      DisplayWork(work, includes = WorksIncludes(items = true)),
+      DisplayWork(work, includes = BetterWorksIncludes(WorkInclude.Items)),
       expectedJson = expectedJson
     )
   }
@@ -82,7 +82,7 @@ class DisplayWorkSerialisationTest
     """.stripMargin
 
     assertObjectMapsToJson(
-      DisplayWork(work, includes = WorksIncludes(items = true)),
+      DisplayWork(work, includes = BetterWorksIncludes(WorkInclude.Items)),
       expectedJson = expectedJson
     )
   }
@@ -127,7 +127,7 @@ class DisplayWorkSerialisationTest
     assertObjectMapsToJson(
       DisplayWork(
         workWithCopyright,
-        includes = WorksIncludes(items = true)
+        includes = BetterWorksIncludes(WorkInclude.Items)
       ),
       expectedJson = expectedJson
     )
@@ -154,7 +154,7 @@ class DisplayWorkSerialisationTest
     assertObjectMapsToJson(
       DisplayWork(
         workWithSubjects,
-        includes = WorksIncludes(subjects = true)
+        includes = BetterWorksIncludes(WorkInclude.Subjects)
       ),
       expectedJson = expectedJson
     )
@@ -179,7 +179,7 @@ class DisplayWorkSerialisationTest
     assertObjectMapsToJson(
       DisplayWork(
         workWithProduction,
-        includes = WorksIncludes(production = true)
+        includes = BetterWorksIncludes(WorkInclude.Production)
       ),
       expectedJson = expectedJson
     )
@@ -212,7 +212,7 @@ class DisplayWorkSerialisationTest
     """.stripMargin
 
     assertObjectMapsToJson(
-      DisplayWork(work, includes = WorksIncludes(contributors = true)),
+      DisplayWork(work, includes = BetterWorksIncludes(WorkInclude.Contributors)),
       expectedJson = expectedJson
     )
   }
@@ -239,7 +239,7 @@ class DisplayWorkSerialisationTest
     """.stripMargin
 
     assertObjectMapsToJson(
-      DisplayWork(work, includes = WorksIncludes(genres = true)),
+      DisplayWork(work, includes = BetterWorksIncludes(WorkInclude.Genres)),
       expectedJson = expectedJson
     )
   }
@@ -280,7 +280,7 @@ class DisplayWorkSerialisationTest
     """.stripMargin
 
     assertObjectMapsToJson(
-      DisplayWork(work, includes = WorksIncludes(notes = true)),
+      DisplayWork(work, includes = BetterWorksIncludes(WorkInclude.Notes)),
       expectedJson = expectedJson
     )
   }
@@ -305,7 +305,7 @@ class DisplayWorkSerialisationTest
     """.stripMargin
 
     assertObjectMapsToJson(
-      DisplayWork(work, includes = WorksIncludes(identifiers = true)),
+      DisplayWork(work, includes = BetterWorksIncludes(WorkInclude.Identifiers)),
       expectedJson = expectedJson
     )
   }
@@ -326,7 +326,7 @@ class DisplayWorkSerialisationTest
     """.stripMargin
 
     assertObjectMapsToJson(
-      DisplayWork(work, includes = WorksIncludes(identifiers = true)),
+      DisplayWork(work, includes = BetterWorksIncludes(WorkInclude.Identifiers)),
       expectedJson = expectedJson
     )
   }
@@ -347,7 +347,7 @@ class DisplayWorkSerialisationTest
     """.stripMargin
 
     assertObjectMapsToJson(
-      DisplayWork(work, includes = WorksIncludes(images = true)),
+      DisplayWork(work, includes = BetterWorksIncludes(WorkInclude.Images)),
       expectedJson
     )
   }
@@ -373,7 +373,7 @@ class DisplayWorkSerialisationTest
     """.stripMargin
 
     assertObjectMapsToJson(
-      DisplayWork(work, includes = WorksIncludes()),
+      DisplayWork(work, includes = BetterWorksIncludes()),
       expectedJson = expectedJson
     )
   }
