@@ -106,7 +106,7 @@ class WorksController(
 
   def workFound(work: Work.Visible[Identified],
                 relatedWorks: Option[RelatedWorks],
-                includes: WorksIncludes): Route =
+                includes: BetterWorksIncludes): Route =
     complete(
       ResultResponse(
         context = contextUri,
