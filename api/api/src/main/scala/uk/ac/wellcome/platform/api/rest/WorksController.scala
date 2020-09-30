@@ -41,14 +41,14 @@ class WorksController(
           .map {
             case Left(err) => elasticError(err)
             case Right(resultList) =>
-              extractPublicUri { uri =>
+              extractPublicUri { requestUri =>
                 complete(
                   DisplayResultList(
-                    resultList,
-                    searchOptions,
-                    params.include.getOrElse(WorksIncludes()),
-                    uri,
-                    contextUri
+                    resultList = resultList,
+                    searchOptions = searchOptions,
+                    includes = params.include.getOrElse(WorksIncludes()),
+                    requestUri = requestUri,
+                    contextUri = contextUri
                   )
                 )
               }
