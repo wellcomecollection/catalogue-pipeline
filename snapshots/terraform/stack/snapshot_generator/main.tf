@@ -28,7 +28,7 @@ module "snapshot_generator" {
     metric_namespace = "snapshot_generator-${var.deployment_service_env}"
   }
 
-  cpu    = 2048
+  cpu    = 4096
   memory = 8192
 
   secret_env_vars = {
