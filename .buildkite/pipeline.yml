@@ -64,3 +64,12 @@ steps:
   - wait
   - command: .buildkite/scripts/complete_build.py
     label: "complete build"
+  - wait
+  - label: release to stage
+    if: build.branch == "master"
+    plugins:
+      - docker#v3.5.0:
+          image: wellcome/weco-deploy:5.1.1
+          workdir: /repo
+          mount-ssh-agent: true
+          command: ["--project-id", "catalogue_api", "--confirm", "release-deploy", "--from-label", "latest", "--environment-id", "staging", "--description", $BUILDKITE_BUILD_URL]
