@@ -5,7 +5,7 @@ import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
-import uk.ac.wellcome.display.models.{BetterWorksIncludes, DisplayWork, WorksIncludes}
+import uk.ac.wellcome.display.models.{BetterWorksIncludes, DisplayWork}
 import uk.ac.wellcome.models.work.generators.WorksGenerators
 
 class IdentifiedWorkToVisibleDisplayWorkFlowTest
