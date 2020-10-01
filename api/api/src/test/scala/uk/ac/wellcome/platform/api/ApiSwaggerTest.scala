@@ -173,10 +173,13 @@ class ApiSwaggerTest extends ApiWorksTestBase with Matchers with JsonHelpers {
 
         val schema = getKey(pageSizeParam, key = "schema").get
 
-        getNumericKey(schema, key = "minimum") shouldBe Some(PaginationLimits.minSize)
-        getNumericKey(schema, key = "maximum") shouldBe Some(PaginationLimits.maxSize)
+        getNumericKey(schema, key = "minimum") shouldBe Some(
+          PaginationLimits.minSize)
+        getNumericKey(schema, key = "maximum") shouldBe Some(
+          PaginationLimits.maxSize)
         getNumericKey(schema, key = "default") shouldBe Some(10)
-        getKey(schema, key = "type").flatMap { _.asString } shouldBe Some("integer")
+        getKey(schema, key = "type").flatMap { _.asString } shouldBe Some(
+          "integer")
       }
     }
   }
@@ -200,7 +203,8 @@ class ApiSwaggerTest extends ApiWorksTestBase with Matchers with JsonHelpers {
 
         getNumericKey(schema, key = "minimum") shouldBe Some(1)
         getNumericKey(schema, key = "default") shouldBe Some(1)
-        getKey(schema, key = "type").flatMap { _.asString } shouldBe Some("integer")
+        getKey(schema, key = "type").flatMap { _.asString } shouldBe Some(
+          "integer")
       }
     }
   }

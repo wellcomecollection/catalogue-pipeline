@@ -22,7 +22,8 @@ trait Paginated { this: QueryParams =>
           size >= PaginationLimits.minSize &&
           size <= PaginationLimits.maxSize
         }
-        .map(_ => s"pageSize: must be between ${PaginationLimits.minSize} and ${PaginationLimits.maxSize}")
+        .map(_ =>
+          s"pageSize: must be between ${PaginationLimits.minSize} and ${PaginationLimits.maxSize}")
     ).flatten
 
 }
