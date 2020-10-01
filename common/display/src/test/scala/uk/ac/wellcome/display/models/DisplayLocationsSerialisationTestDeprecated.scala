@@ -4,7 +4,7 @@ import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.display.json.DisplayJsonUtil._
 import uk.ac.wellcome.display.test.util.JsonMapperTestUtil
-import uk.ac.wellcome.models.work.generators.LegacyWorkGenerators
+import uk.ac.wellcome.models.work.generators._
 import uk.ac.wellcome.models.work.internal._
 import WorkState.Identified
 
@@ -12,7 +12,8 @@ class DisplayLocationsSerialisationTestDeprecated
     extends AnyFunSpec
     with DisplaySerialisationTestBase
     with JsonMapperTestUtil
-    with LegacyWorkGenerators {
+    with WorkGenerators
+    with ItemsGenerators {
 
   it("serialises a physical location") {
     val physicalLocation = PhysicalLocationDeprecated(
@@ -20,8 +21,8 @@ class DisplayLocationsSerialisationTestDeprecated
       label = "a stack of slick slimes"
     )
 
-    val work = createIdentifiedWorkWith(
-      items = List(createIdentifiedItemWith(locations = List(physicalLocation)))
+    val work = identifiedWork().items(
+      List(createIdentifiedItemWith(locations = List(physicalLocation)))
     )
 
     val expectedJson = s"""
@@ -43,8 +44,8 @@ class DisplayLocationsSerialisationTestDeprecated
       locationType = LocationType("iiif-image"),
     )
 
-    val work = createIdentifiedWorkWith(
-      items = List(createIdentifiedItemWith(locations = List(digitalLocation)))
+    val work = identifiedWork().items(
+      List(createIdentifiedItemWith(locations = List(digitalLocation)))
     )
 
     val expectedJson = s"""
@@ -67,8 +68,8 @@ class DisplayLocationsSerialisationTestDeprecated
       license = Some(License.CC0)
     )
 
-    val work = createIdentifiedWorkWith(
-      items = List(createIdentifiedItemWith(locations = List(digitalLocation)))
+    val work = identifiedWork().items(
+      List(createIdentifiedItemWith(locations = List(digitalLocation)))
     )
 
     val expectedJson = s"""
@@ -97,8 +98,8 @@ class DisplayLocationsSerialisationTestDeprecated
       )
     )
 
-    val work = createIdentifiedWorkWith(
-      items = List(createIdentifiedItemWith(locations = List(digitalLocation)))
+    val work = identifiedWork().items(
+      List(createIdentifiedItemWith(locations = List(digitalLocation)))
     )
 
     val expectedJson = s"""

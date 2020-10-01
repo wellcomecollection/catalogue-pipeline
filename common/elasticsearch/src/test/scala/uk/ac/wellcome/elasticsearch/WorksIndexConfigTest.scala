@@ -16,10 +16,7 @@ import io.circe.generic.semiauto.deriveEncoder
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.generators.{
-  ImageGenerators,
-  LegacyWorkGenerators
-}
+import uk.ac.wellcome.models.work.generators.{ImageGenerators, WorkGenerators}
 import uk.ac.wellcome.models.work.internal._
 import WorkState.Identified
 
@@ -31,7 +28,7 @@ class WorksIndexConfigTest
     with Matchers
     with JsonAssertions
     with ScalaCheckPropertyChecks
-    with LegacyWorkGenerators
+    with WorkGenerators
     with ImageGenerators {
 
   // On failure, scalacheck tries to shrink to the smallest input that causes a failure.
@@ -72,8 +69,8 @@ class WorksIndexConfigTest
   // So let's add a specific one
   it("puts a work with a person subject") {
     withLocalWorksIndex { index =>
-      val sampleWork = createIdentifiedWorkWith(
-        subjects = List(
+      val sampleWork = identifiedWork().subjects(
+        List(
           Subject(
             id = IdState.Unidentifiable,
             label = "Daredevil",
@@ -103,8 +100,8 @@ class WorksIndexConfigTest
       to = Some("2014"))
 
     withLocalWorksIndex { index =>
-      val sampleWork = createIdentifiedWorkWith(
-        items = List(
+      val sampleWork = identifiedWork().items(
+        List(
           createIdentifiedItemWith(locations = List(createDigitalLocationWith(
             accessConditions = List(accessCondition))))))
       whenReady(indexObject(index, sampleWork)) { _ =>
@@ -119,15 +116,13 @@ class WorksIndexConfigTest
   // which would not work as the mapping is strict and `collection`
   // only exists at the `data.collectionPath` level
   it("puts a work with a collection") {
-    val collectionPath =
-      Some(
-        CollectionPath(
-          path = "PATH/FOR/THE/COLLECTION",
-          level = Some(CollectionLevel.Item),
-          label = Some("PATH/FOR/THE/COLLECTION")))
-
+    val collectionPath = CollectionPath(
+        path = "PATH/FOR/THE/COLLECTION",
+        level = Some(CollectionLevel.Item),
+        label = Some("PATH/FOR/THE/COLLECTION")
+    )
     withLocalWorksIndex { index =>
-      val sampleWork = createIdentifiedWorkWith(collectionPath = collectionPath)
+      val sampleWork = identifiedWork().collectionPath(collectionPath)
       whenReady(indexObject(index, sampleWork)) { _ =>
         assertObjectIndexed(index, sampleWork)
       }
@@ -136,8 +131,8 @@ class WorksIndexConfigTest
 
   it("can ingest a work with an image") {
     withLocalWorksIndex { index =>
-      val sampleWork = createIdentifiedWorkWith(
-        images = List(createUnmergedImage.toIdentified)
+      val sampleWork = identifiedWork().images(
+        List(createUnmergedImage.toIdentified)
       )
       whenReady(indexObject(index, sampleWork)) { _ =>
         assertObjectIndexed(index, sampleWork)

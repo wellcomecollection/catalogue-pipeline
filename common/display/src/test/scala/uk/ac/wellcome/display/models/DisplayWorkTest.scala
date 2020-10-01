@@ -10,7 +10,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import uk.ac.wellcome.models.work.generators.{
   ImageGenerators,
-  LegacyWorkGenerators,
+  WorkGenerators,
   ProductionEventGenerators
 }
 import uk.ac.wellcome.models.work.internal.Format.Videos
@@ -21,7 +21,7 @@ class DisplayWorkTest
     extends AnyFunSpec
     with Matchers
     with ProductionEventGenerators
-    with LegacyWorkGenerators
+    with WorkGenerators
     with ImageGenerators
     with ScalaCheckPropertyChecks {
 
@@ -42,9 +42,7 @@ class DisplayWorkTest
     }
 
   it("parses a Work without any items") {
-    val work = createIdentifiedWorkWith(
-      items = List()
-    )
+    val work = identifiedWork().items(Nil)
 
     val displayWork = DisplayWork(
       work = work,
@@ -55,9 +53,7 @@ class DisplayWorkTest
 
   it("parses identified items on a work") {
     val items = createIdentifiedItems(count = 1)
-    val work = createIdentifiedWorkWith(
-      items = items
-    )
+    val work = identifiedWork().items(items)
 
     val displayWork = DisplayWork(
       work = work,
@@ -70,7 +66,7 @@ class DisplayWorkTest
   it("parses unidentified items on a work") {
     val item = createUnidentifiableItemWith()
     val location = item.locations.head.asInstanceOf[DigitalLocationDeprecated]
-    val work = createIdentifiedWorkWith(items = List(item))
+    val work = identifiedWork().items(List(item))
 
     val displayWork = DisplayWork(
       work = work,
@@ -95,9 +91,7 @@ class DisplayWorkTest
   }
 
   it("parses a work without any extra identifiers") {
-    val work = createIdentifiedWorkWith(
-      otherIdentifiers = List()
-    )
+    val work = identifiedWork().otherIdentifiers(Nil)
 
     val displayWork = DisplayWork(
       work = work,
@@ -110,9 +104,7 @@ class DisplayWorkTest
   it("gets the physicalDescription from a Work") {
     val physicalDescription = "A magnificent mural of magpies"
 
-    val work = createIdentifiedWorkWith(
-      physicalDescription = Some(physicalDescription)
-    )
+    val work = identifiedWork().physicalDescription(physicalDescription)
 
     val displayWork = DisplayWork(work)
     displayWork.physicalDescription shouldBe Some(physicalDescription)
@@ -126,18 +118,14 @@ class DisplayWorkTest
       label = format.label
     )
 
-    val work = createIdentifiedWorkWith(
-      format = Some(format)
-    )
+    val work = identifiedWork().format(format)
 
     val displayWork = DisplayWork(work)
     displayWork.workType shouldBe Some(expectedDisplayWork)
   }
 
   it("gets the ontologyType from a Work") {
-    val work = createIdentifiedWorkWith(
-      workType = WorkType.Section
-    )
+    val work = identifiedWork().workType(WorkType.Section)
     val displayWork = DisplayWork(work)
 
     displayWork.ontologyType shouldBe "Section"
@@ -149,9 +137,7 @@ class DisplayWorkTest
       label = "British Sign Language"
     )
 
-    val work = createIdentifiedWorkWith(
-      language = Some(language)
-    )
+    val work = identifiedWork().language(language)
 
     val displayWork = DisplayWork(work)
     val displayLanguage = displayWork.language.get
@@ -165,8 +151,8 @@ class DisplayWorkTest
       ontologyType = "Person"
     )
 
-    val work = createIdentifiedWorkWith(
-      contributors = List(
+    val work = identifiedWork().contributors(
+      List(
         Contributor(
           agent = Person(
             label = "Vlad the Vanquished",
@@ -217,9 +203,7 @@ class DisplayWorkTest
   it("extracts production events from a work with the production include") {
     val productionEvent = createProductionEvent
 
-    val work = createIdentifiedWorkWith(
-      production = List(productionEvent)
-    )
+    val work = identifiedWork().production(List(productionEvent))
 
     val displayWork =
       DisplayWork(work, includes = WorksIncludes(WorkInclude.Production))
@@ -269,71 +253,78 @@ class DisplayWorkTest
       ontologyType = "Concept"
     )
 
-    val work = createIdentifiedWorkWith(
-      contributors = List(
-        Contributor(
-          agent = Agent(
-            label = "Bond",
-            id = IdState
-              .Identified(createCanonicalId, contributorAgentSourceIdentifier),
-          ),
-          roles = Nil
-        ),
-        Contributor(
-          agent = Organisation(
-            label = "Big Business",
-            id = IdState.Identified(
-              createCanonicalId,
-              contributorOrganisationSourceIdentifier),
-          ),
-          roles = Nil
-        ),
-        Contributor(
-          agent = Person(
-            label = "Blue Blaise",
-            id = IdState
-              .Identified(createCanonicalId, contributorPersonSourceIdentifier),
-          ),
-          roles = Nil
-        )
-      ),
-      items = createIdentifiedItems(count = 1),
-      subjects = List(
-        Subject(
-          label = "Beryllium-Boron Bonding",
-          id = IdState.Identified(createCanonicalId, subjectSourceIdentifier),
-          concepts = List(
-            Concept(
-              label = "Bonding",
-              id =
-                IdState.Identified(createCanonicalId, conceptSourceIdentifier),
+    val work = identifiedWork()
+      .contributors(
+        List(
+          Contributor(
+            agent = Agent(
+              label = "Bond",
+              id = IdState
+                .Identified(createCanonicalId, contributorAgentSourceIdentifier),
             ),
-            Period(
-              label = "Before",
-              id = IdState.Identified(createCanonicalId, periodSourceIdentifier),
-              range = None,
+            roles = Nil
+          ),
+          Contributor(
+            agent = Organisation(
+              label = "Big Business",
+              id = IdState.Identified(
+                createCanonicalId,
+                contributorOrganisationSourceIdentifier),
             ),
-            Place(
-              label = "Bulgaria",
-              id = IdState.Identified(createCanonicalId, placeSourceIdentifier),
-            )
-          )
-        ),
-      ),
-      genres = List(
-        Genre(
-          label = "Black, Brown and Blue",
-          concepts = List(
-            Concept(
-              label = "Colours",
-              id =
-                IdState.Identified(createCanonicalId, conceptSourceIdentifier)
-            )
+            roles = Nil
+          ),
+          Contributor(
+            agent = Person(
+              label = "Blue Blaise",
+              id = IdState
+                .Identified(createCanonicalId, contributorPersonSourceIdentifier),
+            ),
+            roles = Nil
           )
         )
-      ),
-      images = (1 to 5).map(_ => createUnmergedImage.toIdentified).toList
-    )
+      )
+      .items(createIdentifiedItems(count = 1))
+      .subjects(
+        List(
+          Subject(
+            label = "Beryllium-Boron Bonding",
+            id = IdState.Identified(createCanonicalId, subjectSourceIdentifier),
+            concepts = List(
+              Concept(
+                label = "Bonding",
+                id =
+                  IdState.Identified(createCanonicalId, conceptSourceIdentifier),
+              ),
+              Period(
+                label = "Before",
+                id = IdState.Identified(createCanonicalId, periodSourceIdentifier),
+                range = None,
+              ),
+              Place(
+                label = "Bulgaria",
+                id = IdState.Identified(createCanonicalId, placeSourceIdentifier),
+              )
+            )
+          ),
+        )
+      )
+      .genres(
+        List(
+          Genre(
+            label = "Black, Brown and Blue",
+            concepts = List(
+              Concept(
+                label = "Colours",
+                id =
+                  IdState.Identified(createCanonicalId, conceptSourceIdentifier)
+              )
+            )
+          )
+        )
+      )
+      .images(
+        (1 to 5).map(_ => createUnmergedImage.toIdentified).toList
+      )
 
     describe("omits identifiers if WorksIncludes.identifiers is false") {
       val displayWork = DisplayWork(work, includes = WorksIncludes())
@@ -459,13 +450,13 @@ class DisplayWorkTest
   }
 
   describe("related works") {
-    val work = createIdentifiedWork
-    val workA = createIdentifiedWork
-    val workB = createIdentifiedWork
-    val workC = createIdentifiedWork
-    val workD = createIdentifiedWork
-    val workE = createIdentifiedWork
-    val workF = createIdentifiedWork
+    val work = identifiedWork()
+    val workA = identifiedWork()
+    val workB = identifiedWork()
+    val workC = identifiedWork()
+    val workD = identifiedWork()
+    val workE = identifiedWork()
+    val workF = identifiedWork()
 
     val relatedWorks = RelatedWorks(
       partOf = Some(

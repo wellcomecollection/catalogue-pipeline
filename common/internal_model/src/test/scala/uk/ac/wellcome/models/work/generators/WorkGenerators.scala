@@ -50,7 +50,7 @@ trait WorkGenerators extends IdentifiersGenerators {
       version = 1
     )
 
-  implicit class WorkOps[State <: WorkState](work: Work[State]) {
+  implicit class WorkOps[State <: WorkState](work: Work.Visible[State]) {
 
     def invisible(invisibilityReasons: List[InvisibilityReason] = Nil)
       : Work.Invisible[State] =
@@ -68,74 +68,76 @@ trait WorkGenerators extends IdentifiersGenerators {
         redirect = redirect
       )
 
-    def version(version: Int): Work[State] =
-      work match {
-        case Work.Visible(_, data, state) =>
-          Work.Visible[State](version, data, state)
-        case Work.Invisible(_, data, state, invisibilityReasons) =>
-          Work.Invisible[State](version, data, state, invisibilityReasons)
-        case Work.Redirected(_, redirect, state) =>
-          Work.Redirected[State](version, redirect, state)
-      }
+    def version(version: Int): Work.Visible[State] =
+      Work.Visible[State](version, work.data, work.state)
 
-    def title(title: String): Work[State] =
-      work.mapData(_.copy(title = Some(title)))
+    def title(title: String): Work.Visible[State] =
+      work.map(_.copy(title = Some(title)))
 
     def otherIdentifiers(
-      otherIdentifiers: List[SourceIdentifier]): Work[State] =
-      work.mapData(_.copy(otherIdentifiers = otherIdentifiers))
+      otherIdentifiers: List[SourceIdentifier]): Work.Visible[State] =
+      work.map(_.copy(otherIdentifiers = otherIdentifiers))
 
-    def mergeCandidates(mergeCandidates: List[MergeCandidate]): Work[State] =
-      work.mapData(_.copy(mergeCandidates = mergeCandidates))
+    def mergeCandidates(mergeCandidates: List[MergeCandidate]): Work.Visible[State] =
+      work.map(_.copy(mergeCandidates = mergeCandidates))
 
-    def format(format: Format): Work[State] =
-      work.mapData(_.copy(format = Some(format)))
+    def format(format: Format): Work.Visible[State] =
+      work.map(_.copy(format = Some(format)))
 
-    def description(description: String): Work[State] =
-      work.mapData(_.copy(description = Some(description)))
+    def description(description: String): Work.Visible[State] =
+      work.map(_.copy(description = Some(description)))
 
-    def physicalDescription(physicalDescription: String): Work[State] =
-      work.mapData(_.copy(physicalDescription = Some(physicalDescription)))
+    def physicalDescription(physicalDescription: String): Work.Visible[State] =
+      work.map(_.copy(physicalDescription = Some(physicalDescription)))
+
+    def lettering(lettering: String): Work.Visible[State] =
+      work.map(_.copy(lettering = Some(lettering)))
+
+    def createdDate(createdDate: Period[State#WorkDataState#MaybeId]): Work.Visible[State] =
+      work.map(_.copy(createdDate = Some(createdDate)))
 
     def subjects(
-      subjects: List[Subject[State#WorkDataState#MaybeId]]): Work[State] =
-      work.mapData(_.copy(subjects = subjects))
+      subjects: List[Subject[State#WorkDataState#MaybeId]]): Work.Visible[State] =
+      work.map(_.copy(subjects = subjects))
 
-    def genres(genres: List[Genre[State#WorkDataState#MaybeId]]): Work[State] =
-      work.mapData(_.copy(genres = genres))
+    def genres(genres: List[Genre[State#WorkDataState#MaybeId]]): Work.Visible[State] =
+      work.map(_.copy(genres = genres))
 
     def contributors(
       contributors: List[Contributor[State#WorkDataState#MaybeId]])
-      : Work[State] =
-      work.mapData(_.copy(contributors = contributors))
+      : Work.Visible[State] =
+      work.map(_.copy(contributors = contributors))
 
-    def thumbnail(thumbnail: LocationDeprecated): Work[State] =
-      work.mapData(_.copy(thumbnail = Some(thumbnail)))
+    def thumbnail(thumbnail: LocationDeprecated): Work.Visible[State] =
+      work.map(_.copy(thumbnail = Some(thumbnail)))
 
     def production(
       production: List[ProductionEvent[State#WorkDataState#MaybeId]])
-      : Work[State] =
-      work.mapData(_.copy(production = production))
+      : Work.Visible[State] =
+      work.map(_.copy(production = production))
 
-    def language(language: Language): Work[State] =
-      work.mapData(_.copy(language = Some(language)))
+    def language(language: Language): Work.Visible[State] =
+      work.map(_.copy(language = Some(language)))
 
-    def edition(edition: String): Work[State] =
-      work.mapData(_.copy(edition = Some(edition)))
+    def edition(edition: String): Work.Visible[State] =
+      work.map(_.copy(edition = Some(edition)))
 
-    def notes(notes: List[Note]): Work[State] =
-      work.mapData(_.copy(notes = notes))
+    def notes(notes: List[Note]): Work.Visible[State] =
+      work.map(_.copy(notes = notes))
 
-    def items(items: List[Item[State#WorkDataState#MaybeId]]): Work[State] =
-      work.mapData(_.copy(items = items))
+    def items(items: List[Item[State#WorkDataState#MaybeId]]): Work.Visible[State] =
+      work.map(_.copy(items = items))
 
-    def collectionPath(collectionPath: CollectionPath): Work[State] =
-      work.mapData(_.copy(collectionPath = Some(collectionPath)))
+    def collectionPath(collectionPath: CollectionPath): Work.Visible[State] =
+      work.map(_.copy(collectionPath = Some(collectionPath)))
 
-    def images(images: List[UnmergedImage[State#WorkDataState]]): Work[State] =
-      work.mapData(_.copy(images = images))
+    def images(images: List[UnmergedImage[State#WorkDataState]]): Work.Visible[State] =
+      work.map(_.copy(images = images))
 
-    def workType(workType: WorkType): Work[State] =
-      work.mapData(_.copy(workType = workType))
+    def workType(workType: WorkType): Work.Visible[State] =
+      work.map(_.copy(workType = workType))
+
+    def map(f: WorkData[State#WorkDataState] => WorkData[State#WorkDataState]): Work.Visible[State] =
+      Work.Visible[State](work.version, f(work.data), work.state)
   }
 }
