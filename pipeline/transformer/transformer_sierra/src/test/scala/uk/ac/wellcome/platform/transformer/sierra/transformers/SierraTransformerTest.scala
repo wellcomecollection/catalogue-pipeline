@@ -4,7 +4,7 @@ import java.time.Instant
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.generators.LegacyWorkGenerators
+import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.sierra.SierraTransformer
 import uk.ac.wellcome.platform.transformer.sierra.exceptions.SierraTransformerException
@@ -28,7 +28,7 @@ class SierraTransformerTest
     with MarcGenerators
     with SierraGenerators
     with SierraTransformableTestBase
-    with LegacyWorkGenerators {
+    with WorkGenerators {
 
   it("performs a transformation on a work with physical items") {
     val itemRecords = List(
@@ -284,23 +284,23 @@ class SierraTransformerTest
 
     val work = transformDataToWork(id = id, data = data)
 
-    work shouldBe createSourceWorkWith(
-      title = Some(title),
-      sourceIdentifier = sourceIdentifier,
-      otherIdentifiers = List(sierraIdentifier),
-      description = Some("A delightful description of a dead daisy."),
-      production = List(
-        ProductionEvent(
-          label = "Peaceful Poetry 1923",
-          places = List(),
-          agents = List(Agent(label = "Peaceful Poetry")),
-          dates = List(Period("1923")),
-          function = None
+    work shouldBe sourceWork(sourceIdentifier)
+      .title(title)
+      .otherIdentifiers(List(sierraIdentifier))
+      .description("A delightful description of a dead daisy.")
+      .production(
+        List(
+          ProductionEvent(
+            label = "Peaceful Poetry 1923",
+            places = List(),
+            agents = List(Agent(label = "Peaceful Poetry")),
+            dates = List(Period("1923")),
+            function = None
+          )
         )
-      ),
-      notes = List(GeneralNote("It's a note")),
-      lettering = Some(lettering)
-    )
+      )
+      .notes(List(GeneralNote("It's a note")))
+      .lettering(lettering)
   }
 
   it("makes deleted works invisible") {

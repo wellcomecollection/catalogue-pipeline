@@ -50,6 +50,18 @@ trait WorkGenerators extends IdentifiersGenerators {
       version = 1
     )
 
+  def sourceWorks(n: Int): List[Work.Visible[Source]] =
+    (1 to n).map(_ => sourceWork()).toList
+
+  def mergedWorks(n: Int): List[Work.Visible[Merged]] =
+    (1 to n).map(_ => mergedWork()).toList
+
+  def denormalisedWorks(n: Int): List[Work.Visible[Denormalised]] =
+    (1 to n).map(_ => denormalisedWork()).toList
+
+  def identifiedWorks(n: Int): List[Work.Visible[Identified]] =
+    (1 to n).map(_ => identifiedWork()).toList
+
   implicit class WorkOps[State <: WorkState](work: Work.Visible[State]) {
 
     def invisible(invisibilityReasons: List[InvisibilityReason] = Nil)
