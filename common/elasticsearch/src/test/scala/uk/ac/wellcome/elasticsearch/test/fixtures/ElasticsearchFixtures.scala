@@ -127,6 +127,14 @@ trait ElasticsearchFixtures
     assertElasticsearchEventuallyHas(index, works: _*)
   }
 
+  def assertElasticsearchEventuallyHasImage(
+    index: Index,
+    images: AugmentedImage*): Seq[Assertion] = {
+    implicit val id: CanonicalId[AugmentedImage] =
+      (t: AugmentedImage) => t.id.canonicalId
+    assertElasticsearchEventuallyHas(index, images: _*)
+  }
+
   def assertElasticsearchEventuallyHas[T](index: Index, documents: T*)(
     implicit id: CanonicalId[T],
     encoder: Encoder[T]): Seq[Assertion] =

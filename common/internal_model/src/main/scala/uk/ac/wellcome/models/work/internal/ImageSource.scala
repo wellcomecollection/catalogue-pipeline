@@ -8,7 +8,8 @@ sealed trait ImageSource[State <: DataState] {
 
 case class SourceWorks[State <: DataState](
   canonicalWork: SourceWork[State],
-  redirectedWork: Option[SourceWork[State]]
+  redirectedWork: Option[SourceWork[State]],
+  nMergedSources: Int = 0
 ) extends ImageSource[State] {
   override val id = canonicalWork.id
   override val ontologyType: String = canonicalWork.ontologyType

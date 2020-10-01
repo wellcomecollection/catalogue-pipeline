@@ -30,8 +30,13 @@ object Indexable {
     new Indexable[AugmentedImage] {
       def id(image: AugmentedImage) =
         image.id.canonicalId
+
       def version(image: AugmentedImage) =
-        image.version + image.source.version
+        10 * (image.version + image.source.version) + (image.source match {
+          case SourceWorks(_, Some(_), nMergedSources) => nMergedSources + 1
+          case SourceWorks(_, None, nMergedSources)    => nMergedSources
+          case _                                       => 0
+        })
     }
 
   implicit val workIndexable: Indexable[Work[Identified]] =

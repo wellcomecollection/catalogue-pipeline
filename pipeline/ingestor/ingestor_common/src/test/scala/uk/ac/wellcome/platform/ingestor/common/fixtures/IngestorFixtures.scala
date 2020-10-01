@@ -34,7 +34,7 @@ trait IngestorFixtures
         withBigMessageStream[T, R](queue) { messageStream =>
           val ingestorConfig = IngestorConfig(
             batchSize = 100,
-            flushInterval = 5 seconds
+            flushInterval = 1 seconds
           )
 
           val workerService = new IngestorWorkerService(
