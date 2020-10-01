@@ -14,7 +14,10 @@ import uk.ac.wellcome.platform.api.elasticsearch.ElasticsearchErrorHandler
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-trait CustomDirectives extends Directives with FailFastCirceSupport with Logging {
+trait CustomDirectives
+    extends Directives
+    with FailFastCirceSupport
+    with Logging {
   import ResultResponse.encoder
 
   implicit val apiConfig: ApiConfig
