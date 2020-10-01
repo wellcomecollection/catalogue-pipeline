@@ -123,7 +123,7 @@ object PlatformMerger extends Merger {
         thumbnail <- ThumbnailRule(target, sources)
         otherIdentifiers <- OtherIdentifiersRule(target, sources)
         images <- ImagesRule(target, sources)
-        work = target.withData { data =>
+        work = target.mapData { data =>
           data.copy[DataState.Unidentified](
             items = items,
             thumbnail = thumbnail,

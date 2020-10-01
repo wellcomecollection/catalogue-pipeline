@@ -13,8 +13,8 @@ import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.generators.{
   GenreGenerators,
-  SubjectGenerators,
-  WorksGenerators
+  LegacyWorkGenerators,
+  SubjectGenerators
 }
 
 class AggregationsTest
@@ -24,7 +24,7 @@ class AggregationsTest
     with ElasticsearchFixtures
     with SubjectGenerators
     with GenreGenerators
-    with WorksGenerators {
+    with LegacyWorkGenerators {
 
   val worksService = new WorksService(
     searchService = new ElasticsearchService(elasticClient)

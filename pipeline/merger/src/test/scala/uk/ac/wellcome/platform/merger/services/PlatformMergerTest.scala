@@ -54,7 +54,7 @@ class PlatformMergerTest
     createInvisibleMetsSourceWorkWith(
       items = List(createDigitalItemWith(List(digitalLocationCCBYNC))),
       images = List(createUnmergedMetsImage)
-    ).withData { data =>
+    ).mapData { data =>
       data.copy(
         thumbnail = Some(
           DigitalLocationDeprecated(
@@ -112,7 +112,7 @@ class PlatformMergerTest
 
     val expectedMergedWork = sierraPhysicalWork
       .transition[Merged](true)
-      .withData { data =>
+      .mapData { data =>
         data.copy(
           otherIdentifiers = sierraPhysicalWork.data.otherIdentifiers ++ miroWork.identifiers,
           thumbnail = miroWork.data.thumbnail,
@@ -153,7 +153,7 @@ class PlatformMergerTest
 
     val expectedMergedWork = zeroItemSierraWork
       .transition[Merged](true)
-      .withData { data =>
+      .mapData { data =>
         data.copy(
           otherIdentifiers = data.otherIdentifiers ++ miroWork.identifiers,
           thumbnail = miroWork.data.thumbnail,
@@ -196,7 +196,7 @@ class PlatformMergerTest
 
     val expectedMergedWork = sierraDigitalWork
       .transition[Merged](true)
-      .withData { data =>
+      .mapData { data =>
         data.copy(
           otherIdentifiers = sierraDigitalWork.data.otherIdentifiers ++ miroWork.identifiers,
           thumbnail = miroWork.data.thumbnail,
@@ -237,7 +237,7 @@ class PlatformMergerTest
 
     val expectedMergedWork = multipleItemsSierraWork
       .transition[Merged](true)
-      .withData { data =>
+      .mapData { data =>
         data.copy(
           images = miroWork.data.images,
         )
@@ -260,7 +260,7 @@ class PlatformMergerTest
 
     val expectedMergedWork = sierraPhysicalWork
       .transition[Merged](true)
-      .withData { data =>
+      .mapData { data =>
         data.copy(
           items = List(
             physicalItem.copy(
@@ -296,7 +296,7 @@ class PlatformMergerTest
 
     val expectedMergedWork = sierraPictureWork
       .transition[Merged](true)
-      .withData { data =>
+      .mapData { data =>
         data.copy(
           items = List(
             physicalItem.copy(
@@ -341,7 +341,7 @@ class PlatformMergerTest
 
     val expectedMergedWork = sierraPhysicalWork
       .transition[Merged](true)
-      .withData { data =>
+      .mapData { data =>
         data.copy(
           otherIdentifiers = sierraPhysicalWork.data.otherIdentifiers
             ++ sierraDigitised.identifiers
@@ -403,7 +403,7 @@ class PlatformMergerTest
 
     val expectedMergedWork = multipleItemsSierraWork
       .transition[Merged](true)
-      .withData { data =>
+      .mapData { data =>
         data.copy(
           thumbnail = metsWork.data.thumbnail,
           items = sierraItems :+ metsItem,
@@ -436,7 +436,7 @@ class PlatformMergerTest
 
     val expectedMergedWork = multipleItemsSierraWork
       .transition[Merged](true)
-      .withData { data =>
+      .mapData { data =>
         data.copy(
           otherIdentifiers = multipleItemsSierraWork.data.otherIdentifiers ++ sierraDigitised.identifiers,
           thumbnail = metsWork.data.thumbnail,

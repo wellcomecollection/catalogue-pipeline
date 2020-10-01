@@ -2,7 +2,9 @@ package uk.ac.wellcome.models.work.generators
 
 import uk.ac.wellcome.models.work.internal._
 
-trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
+trait LegacyWorkGenerators
+    extends ItemsGenerators
+    with ProductionEventGenerators {
 
   import WorkState._
 

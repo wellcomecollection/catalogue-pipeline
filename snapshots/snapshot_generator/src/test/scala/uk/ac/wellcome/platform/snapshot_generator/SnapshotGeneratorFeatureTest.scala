@@ -15,7 +15,7 @@ import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.messaging.fixtures.SNS.Topic
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
-import uk.ac.wellcome.models.work.generators.WorksGenerators
+import uk.ac.wellcome.models.work.generators.LegacyWorkGenerators
 import uk.ac.wellcome.platform.snapshot_generator.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.platform.snapshot_generator.models.{
   CompletedSnapshotJob,
@@ -38,7 +38,7 @@ class SnapshotGeneratorFeatureTest
     with IntegrationPatience
     with DisplaySerialisationTestBase
     with WorkerServiceFixture
-    with WorksGenerators {
+    with LegacyWorkGenerators {
 
   it("completes a snapshot generation") {
     withFixtures {

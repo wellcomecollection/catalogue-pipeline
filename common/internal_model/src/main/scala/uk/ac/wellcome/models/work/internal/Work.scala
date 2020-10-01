@@ -16,8 +16,7 @@ sealed trait Work[State <: WorkState] {
   def identifiers: List[SourceIdentifier] =
     sourceIdentifier :: data.otherIdentifiers
 
-  def withData(
-    f: WorkData[State#WorkDataState] => WorkData[State#WorkDataState])
+  def mapData(f: WorkData[State#WorkDataState] => WorkData[State#WorkDataState])
     : Work[State] =
     this match {
       case Work.Visible(version, data, state) =>

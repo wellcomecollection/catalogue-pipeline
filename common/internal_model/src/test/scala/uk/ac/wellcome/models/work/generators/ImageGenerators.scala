@@ -6,7 +6,7 @@ import SourceWork._
 trait ImageGenerators
     extends IdentifiersGenerators
     with ItemsGenerators
-    with WorksGenerators
+    with LegacyWorkGenerators
     with VectorGenerators {
   def createUnmergedImageWith(
     location: DigitalLocationDeprecated = createDigitalLocation,

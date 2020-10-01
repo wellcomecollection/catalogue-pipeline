@@ -13,8 +13,8 @@ import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.{
   ContributorGenerators,
   GenreGenerators,
-  SubjectGenerators,
-  WorksGenerators
+  LegacyWorkGenerators,
+  SubjectGenerators
 }
 import uk.ac.wellcome.models.work.internal.Format.{
   Books,
@@ -39,7 +39,7 @@ class ElasticsearchServiceTest
     with SearchOptionsGenerators
     with SubjectGenerators
     with GenreGenerators
-    with WorksGenerators
+    with LegacyWorkGenerators
     with ContributorGenerators {
 
   val searchService = new ElasticsearchService(elasticClient)

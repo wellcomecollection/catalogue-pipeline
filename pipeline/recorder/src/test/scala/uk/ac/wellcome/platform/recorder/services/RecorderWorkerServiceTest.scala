@@ -9,7 +9,7 @@ import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.generators.WorksGenerators
+import uk.ac.wellcome.models.work.generators.LegacyWorkGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.recorder.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.storage.{StoreReadError, StoreWriteError, Version}
@@ -22,7 +22,7 @@ class RecorderWorkerServiceTest
     with IntegrationPatience
     with WorkerServiceFixture
     with JsonAssertions
-    with WorksGenerators {
+    with LegacyWorkGenerators {
 
   it("records Work.Visible[Source]") {
     withLocalSqsQueue() { queue =>
@@ -59,7 +59,7 @@ class RecorderWorkerServiceTest
           val olderWork = createSourceWork
           val newerWork = olderWork
             .copy(version = 10)
-            .withData(data => data.copy(title = Some("A nice new thing")))
+            .mapData(data => data.copy(title = Some("A nice new thing")))
           sendMessage[Work[Source]](queue = queue, newerWork)
           eventually { assertWorkStored(vhs, newerWork) }
           sendMessage[Work[Source]](queue = queue, obj = olderWork)
@@ -77,7 +77,7 @@ class RecorderWorkerServiceTest
           val olderWork = createSourceWork
           val newerWork = olderWork
             .copy(version = 10)
-            .withData(data => data.copy(title = Some("A nice new thing")))
+            .mapData(data => data.copy(title = Some("A nice new thing")))
           sendMessage[Work[Source]](queue = queue, obj = olderWork)
           eventually {
             assertWorkStored(vhs, olderWork)

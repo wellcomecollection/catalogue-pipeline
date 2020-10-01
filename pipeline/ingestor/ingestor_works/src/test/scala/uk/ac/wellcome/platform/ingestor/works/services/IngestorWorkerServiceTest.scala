@@ -7,7 +7,7 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.elasticsearch.WorksIndexConfig
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.generators.WorksGenerators
+import uk.ac.wellcome.models.work.generators.LegacyWorkGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.ingestor.common.fixtures.IngestorFixtures
 import uk.ac.wellcome.pipeline_storage.ElasticIndexer
@@ -22,7 +22,7 @@ class IngestorWorkerServiceTest
     with Matchers
     with ScalaFutures
     with IngestorFixtures
-    with WorksGenerators {
+    with LegacyWorkGenerators {
 
   it("indexes a Miro identified Work") {
     val miroSourceIdentifier = createSourceIdentifier

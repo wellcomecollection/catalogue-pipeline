@@ -17,7 +17,7 @@ import uk.ac.wellcome.display.json.DisplayJsonUtil
 import uk.ac.wellcome.display.json.DisplayJsonUtil._
 import uk.ac.wellcome.display.models.{ApiVersions, DisplayWork, WorksIncludes}
 import uk.ac.wellcome.elasticsearch.ElasticClientBuilder
-import uk.ac.wellcome.models.work.generators.WorksGenerators
+import uk.ac.wellcome.models.work.generators.LegacyWorkGenerators
 import uk.ac.wellcome.platform.snapshot_generator.fixtures.{
   AkkaS3,
   SnapshotServiceFixture
@@ -40,7 +40,7 @@ class SnapshotServiceTest
     with GzipUtils
     with IntegrationPatience
     with SnapshotServiceFixture
-    with WorksGenerators {
+    with LegacyWorkGenerators {
 
   def withFixtures[R](
     testWith: TestWith[(SnapshotService, Index, Bucket), R]): R =

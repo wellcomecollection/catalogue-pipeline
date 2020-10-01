@@ -3,16 +3,16 @@ package uk.ac.wellcome.platform.merger.services
 import cats.data.State
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.generators.WorksGenerators
+import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.models.{MergeResult, MergerOutcome}
 import WorkState.{Merged, Source}
 import WorkFsm._
 
-class MergerManagerTest extends AnyFunSpec with Matchers with WorksGenerators {
+class MergerManagerTest extends AnyFunSpec with Matchers with WorkGenerators {
 
   it("performs a merge with a single work") {
-    val work = createSourceWork
+    val work = sourceWork()
 
     val result = mergerManager.applyMerge(maybeWorks = List(Some(work)))
 
@@ -20,8 +20,8 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorksGenerators {
   }
 
   it("performs a merge with multiple works") {
-    val work = createSourceWork
-    val otherWorks = createSourceWorks(3)
+    val work = sourceWork()
+    val otherWorks = sourceWorks(3)
 
     val works = (work +: otherWorks).map { Some(_) }.toList
 
@@ -41,7 +41,7 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorksGenerators {
   }
 
   it("returns the works unmerged if any of the work entries are None") {
-    val expectedWorks = createSourceWorks(3)
+    val expectedWorks = sourceWorks(3)
 
     val maybeWorks = expectedWorks.map { Some(_) } ++ List(None)
 
