@@ -31,7 +31,7 @@ trait WorkerServiceFixture
             val workerService = new SnapshotGeneratorWorkerService(
               snapshotService = snapshotService,
               sqsStream = sqsStream,
-              snsWriter = messageSender
+              messageSender = messageSender
             )
 
             workerService.run()
