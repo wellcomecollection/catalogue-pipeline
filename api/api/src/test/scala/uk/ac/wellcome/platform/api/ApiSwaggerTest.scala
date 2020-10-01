@@ -181,6 +181,30 @@ class ApiSwaggerTest extends ApiWorksTestBase with Matchers with JsonHelpers {
     }
   }
 
+  describe("includes bounds for the page parameter") {
+    it("images endpoint") {
+      checkPageParameter(imagesEndpoint)
+    }
+
+    it("works endpoint") {
+      checkPageParameter(worksEndpoint)
+    }
+
+    def checkPageParameter(endpointString: String): Unit = {
+      checkSwaggerJson { json =>
+        val endpoint = getEndpoint(json, endpointString = endpointString)
+
+        val pageSizeParam = getParameter(endpoint, name = "page").get
+
+        val schema = getKey(pageSizeParam, key = "schema").get
+
+        getNumericKey(schema, key = "minimum") shouldBe Some(1)
+        getNumericKey(schema, key = "default") shouldBe Some(1)
+        getKey(schema, key = "type").flatMap { _.asString } shouldBe Some("integer")
+      }
+    }
+  }
+
   //. We write this test for this specific parameter as it's used by the frontend
   it("should contain `_queryType parameter with valid `allowedValues`") {
     checkSwaggerJson { json =>

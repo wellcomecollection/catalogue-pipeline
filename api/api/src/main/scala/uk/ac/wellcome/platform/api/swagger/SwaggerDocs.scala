@@ -227,7 +227,15 @@ trait MultipleImagesSwagger {
         name = "page",
         in = ParameterIn.QUERY,
         description = "The page to return from the result list",
-        required = false
+        required = false,
+        // Note: these annotations need to be compile-time constants, which is
+        // why they're hard-coded rather than loaded from the Pagination class.
+        // The min/max values are checked in the tests.
+        schema = new Schema(
+          minimum = "1",
+          `type` = "integer",
+          defaultValue = "1"
+        )
       ),
       new Parameter(
         name = "pageSize",
@@ -471,7 +479,15 @@ trait MultipleWorksSwagger {
         name = "page",
         in = ParameterIn.QUERY,
         description = "The page to return from the result list",
-        required = false
+        required = false,
+        // Note: these annotations need to be compile-time constants, which is
+        // why they're hard-coded rather than loaded from the Pagination class.
+        // The min/max values are checked in the tests.
+        schema = new Schema(
+          minimum = "1",
+          `type` = "integer",
+          defaultValue = "1"
+        )
       ),
       new Parameter(
         name = "pageSize",
