@@ -1,42 +1,42 @@
-package uk.ac.wellcome.platform.ingestor.works.services
+package uk.ac.wellcome.pipeline_storage
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import com.sksamuel.elastic4s.Index
 import org.scalatest.Assertion
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.models.work.generators.WorksGenerators
-import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.pipeline_storage.ElasticIndexer
-import uk.ac.wellcome.pipeline_storage.Indexable.workIndexable
 import uk.ac.wellcome.models.Implicits._
-import WorkState.Identified
+import uk.ac.wellcome.models.work.generators.WorksGenerators
+import uk.ac.wellcome.models.work.internal.WorkState.Identified
+import uk.ac.wellcome.models.work.internal._
+import uk.ac.wellcome.pipeline_storage.Indexable.workIndexable
+import uk.ac.wellcome.pipeline_storage.fixtures.ElasticIndexerFixtures
 
-class WorkIndexerTest
+import scala.concurrent.ExecutionContext.Implicits.global
+
+class WorkIndexableTest
     extends AnyFunSpec
     with ScalaFutures
     with Matchers
     with ElasticsearchFixtures
+    with ElasticIndexerFixtures
     with WorksGenerators {
 
   describe("updating merged / redirected works") {
     it(
-      "doesn't override a merged Work with same version but merged flag = false") {
-      val mergedWork = createIdentifiedWorkWith(version = 3, merged = true)
+      "doesn't override a merged Work with the same version but no merged sources") {
+      val mergedWork = createIdentifiedWorkWith(version = 3, nMergedSources = 1)
       val unmergedWork = mergedWork.copy(
-        state = mergedWork.state.copy(hasMultipleSources = false)
+        state = mergedWork.state.copy(nMergedSources = 0)
       )
 
       withWorksIndexAndIndexer {
         case (index, indexer) =>
-          val unmergedWorkInsertFuture = ingestWorkPairInOrder(indexer)(
-            firstWork = mergedWork,
-            secondWork = unmergedWork,
-            index = index
+          val unmergedWorkInsertFuture = ingestInOrder(indexer)(
+            mergedWork,
+            unmergedWork
           )
 
           whenReady(unmergedWorkInsertFuture) { result =>
@@ -48,20 +48,19 @@ class WorkIndexerTest
       }
     }
 
-    it("doesn't overwrite a Work with lower version and merged = true") {
+    it("doesn't overwrite a Work with lower version and multiple sources") {
       val unmergedNewWork = createIdentifiedWorkWith(version = 4)
       val mergedOldWork = unmergedNewWork
         .copy(
           version = 3,
-          state = unmergedNewWork.state.copy(hasMultipleSources = true)
+          state = unmergedNewWork.state.copy(nMergedSources = 1)
         )
 
       withWorksIndexAndIndexer {
         case (index, indexer) =>
-          val mergedWorkInsertFuture = ingestWorkPairInOrder(indexer)(
-            firstWork = unmergedNewWork,
-            secondWork = mergedOldWork,
-            index = index
+          val mergedWorkInsertFuture = ingestInOrder(indexer)(
+            unmergedNewWork,
+            mergedOldWork
           )
           whenReady(mergedWorkInsertFuture) { result =>
             assertIngestedWorkIs(
@@ -81,10 +80,9 @@ class WorkIndexerTest
 
       withWorksIndexAndIndexer {
         case (index, indexer) =>
-          val redirectedWorkInsertFuture = ingestWorkPairInOrder(indexer)(
-            firstWork = identifiedNewWork,
-            secondWork = redirectedOldWork,
-            index = index
+          val redirectedWorkInsertFuture = ingestInOrder(indexer)(
+            identifiedNewWork,
+            redirectedOldWork
           )
           whenReady(redirectedWorkInsertFuture) { result =>
             assertIngestedWorkIs(
@@ -103,16 +101,37 @@ class WorkIndexerTest
 
       withWorksIndexAndIndexer {
         case (index, indexer) =>
-          val identifiedWorkInsertFuture = ingestWorkPairInOrder(indexer)(
-            firstWork = redirectedWork,
-            secondWork = identifiedWork,
-            index = index
+          val identifiedWorkInsertFuture = ingestInOrder(indexer)(
+            redirectedWork,
+            identifiedWork
           )
           whenReady(identifiedWorkInsertFuture) { result =>
             assertIngestedWorkIs(
               result = result,
               ingestedWork = redirectedWork,
               index = index)
+          }
+      }
+    }
+
+    it("overrides a merged work with one that has been merged again") {
+      val mergedWork1 = createIdentifiedWorkWith(nMergedSources = 1)
+      val mergedWork2 = createIdentifiedWorkWith(nMergedSources = 2)
+      val mergedWork3 = createIdentifiedWorkWith(nMergedSources = 3)
+
+      withWorksIndexAndIndexer {
+        case (index, indexer) =>
+          val insertFuture = ingestInOrder(indexer)(
+            mergedWork1,
+            mergedWork3,
+            mergedWork2
+          )
+          whenReady(insertFuture) { result =>
+            assertIngestedWorkIs(
+              result = result,
+              ingestedWork = mergedWork3,
+              index = index
+            )
           }
       }
     }
@@ -125,10 +144,9 @@ class WorkIndexerTest
 
       withWorksIndexAndIndexer {
         case (index, indexer) =>
-          val invisibleWorkInsertFuture = ingestWorkPairInOrder(indexer)(
-            firstWork = work,
-            secondWork = invisibleWork,
-            index = index
+          val invisibleWorkInsertFuture = ingestInOrder(indexer)(
+            work,
+            invisibleWork
           )
           whenReady(invisibleWorkInsertFuture) { result =>
             assertIngestedWorkIs(
@@ -139,15 +157,6 @@ class WorkIndexerTest
       }
     }
   }
-
-  private def ingestWorkPairInOrder(
-    workIndexer: ElasticIndexer[Work[Identified]])(firstWork: Work[Identified],
-                                                   secondWork: Work[Identified],
-                                                   index: Index) =
-    for {
-      _ <- workIndexer.index(documents = List(firstWork))
-      result <- workIndexer.index(documents = List(secondWork))
-    } yield result
 
   private def assertIngestedWorkIs(
     result: Either[Seq[Work[Identified]], Seq[Work[Identified]]],

@@ -41,7 +41,7 @@ class MergerIntegrationTest
               assertQueueEmpty(dlq)
 
               workSender.getMessages[Work[Merged]] should contain only
-                work.transition[Merged](false)
+                work.transition[Merged](0)
             }
           }
       }

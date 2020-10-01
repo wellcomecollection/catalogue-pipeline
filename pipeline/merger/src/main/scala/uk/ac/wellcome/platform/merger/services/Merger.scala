@@ -54,10 +54,10 @@ trait Merger extends MergerLogging {
             .value
 
           val remaining = (sources.toSet -- mergeResultSources)
-            .map(_.transition[Merged](false))
+            .map(_.transition[Merged](0))
           val redirects = mergeResultSources
             .map(redirectSourceToTarget(target))
-            .map(_.transition[Merged](false))
+            .map(_.transition[Merged](0))
           logResult(result, redirects.toList, remaining.toList)
 
           MergerOutcome(
@@ -113,7 +113,7 @@ object PlatformMerger extends Merger {
     if (sources.isEmpty)
       State.pure(
         MergeResult(
-          mergedTarget = target.transition[Merged](false),
+          mergedTarget = target.transition[Merged](0),
           images = ImagesRule.merge(target).data
         )
       )
@@ -123,6 +123,9 @@ object PlatformMerger extends Merger {
         thumbnail <- ThumbnailRule(target, sources)
         otherIdentifiers <- OtherIdentifiersRule(target, sources)
         images <- ImagesRule(target, sources)
+        nSources <- State.inspect[Set[Work[Source]], Int](
+          countUniqueSources(_, images.toSet)
+        )
         work = target.withData { data =>
           data.copy[DataState.Unidentified](
             items = items,
@@ -133,7 +136,18 @@ object PlatformMerger extends Merger {
         }
       } yield
         MergeResult(
-          mergedTarget = work.transition[Merged](true),
+          mergedTarget = work.transition[Merged](nSources),
           images = images
         )
+
+  private def countUniqueSources(
+    works: Set[Work[Source]],
+    images: Set[MergedImage[DataState.Unidentified]]): Int =
+    (images.flatMap {
+      _.source match {
+        case SourceWorks(_, Some(redirected), _) =>
+          Some(redirected.id.sourceIdentifier)
+        case _ => None
+      }
+    } ++ works.map(_.sourceIdentifier)).size
 }

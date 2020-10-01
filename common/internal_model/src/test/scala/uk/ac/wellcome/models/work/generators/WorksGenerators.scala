@@ -157,7 +157,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
     items: List[Item[IdState.Minted]] = Nil,
     images: List[UnmergedImage[DataState.Identified]] = Nil,
     version: Int = 1,
-    merged: Boolean = false,
+    nMergedSources: Int = 0,
     collectionPath: Option[CollectionPath] = None,
     mergeCandidates: List[MergeCandidate] = Nil,
     workType: WorkType = WorkType.Standard,
@@ -166,7 +166,7 @@ trait WorksGenerators extends ItemsGenerators with ProductionEventGenerators {
       state = Identified(
         canonicalId = canonicalId,
         sourceIdentifier = sourceIdentifier,
-        hasMultipleSources = merged
+        nMergedSources = nMergedSources
       ),
       version = version,
       data = WorkData[DataState.Identified](

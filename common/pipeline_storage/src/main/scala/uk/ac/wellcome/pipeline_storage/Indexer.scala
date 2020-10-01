@@ -1,7 +1,6 @@
 package uk.ac.wellcome.pipeline_storage
 
 import scala.concurrent.Future
-import scala.language.implicitConversions
 
 import uk.ac.wellcome.models.work.internal._
 import WorkState.Identified
@@ -67,11 +66,9 @@ object Indexable {
       def version(work: Work[Identified]) =
         work match {
           case Work.Visible(version, _, state) =>
-            (version * 10) + state.hasMultipleSources
+            (version * 10) + state.nMergedSources
           case Work.Redirected(version, _, _)   => (version * 10) + 1
           case Work.Invisible(version, _, _, _) => version * 10
         }
-
-      implicit private def toInteger(bool: Boolean): Int = if (bool) 1 else 0
     }
 }

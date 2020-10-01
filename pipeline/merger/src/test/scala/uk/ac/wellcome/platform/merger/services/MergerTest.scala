@@ -64,7 +64,7 @@ class MergerTest
                 otherIdentifiers = otherIdentifiers
               )
             }
-            .transition[Merged](true),
+            .transition[Merged](1),
           images = Nil
         )
   }
@@ -75,7 +75,7 @@ class MergerTest
     mergedWorks.works should contain(
       inputWorks.head
         .asInstanceOf[Work.Visible[Source]]
-        .transition[Merged](true)
+        .transition[Merged](1)
         .withData { data =>
           data.copy[DataState.Unidentified](
             items = mergedTargetItems,
@@ -95,7 +95,7 @@ class MergerTest
 
   it("returns all non-redirected and non-target works untouched") {
     mergedWorks.works should contain(
-      inputWorks.tail.head.transition[Merged](false)
+      inputWorks.tail.head.transition[Merged](0)
     )
   }
 }
