@@ -13,8 +13,8 @@ import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.generators.{
   GenreGenerators,
-  SubjectGenerators,
-  LegacyWorkGenerators
+  LegacyWorkGenerators,
+  SubjectGenerators
 }
 
 class AggregationsTest

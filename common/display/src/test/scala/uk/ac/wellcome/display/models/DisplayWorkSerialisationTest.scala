@@ -4,9 +4,9 @@ import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.display.test.util.JsonMapperTestUtil
 import uk.ac.wellcome.models.work.generators.{
   ImageGenerators,
+  LegacyWorkGenerators,
   ProductionEventGenerators,
-  SubjectGenerators,
-  LegacyWorkGenerators
+  SubjectGenerators
 }
 import uk.ac.wellcome.models.work.internal.Format.{Books, EBooks}
 import uk.ac.wellcome.models.work.internal._

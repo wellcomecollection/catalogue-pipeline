@@ -16,7 +16,10 @@ import io.circe.generic.semiauto.deriveEncoder
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.generators.{ImageGenerators, LegacyWorkGenerators}
+import uk.ac.wellcome.models.work.generators.{
+  ImageGenerators,
+  LegacyWorkGenerators
+}
 import uk.ac.wellcome.models.work.internal._
 import WorkState.Identified
 

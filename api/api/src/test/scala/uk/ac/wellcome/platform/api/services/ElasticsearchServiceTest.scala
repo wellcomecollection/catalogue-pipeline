@@ -13,8 +13,8 @@ import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.{
   ContributorGenerators,
   GenreGenerators,
-  SubjectGenerators,
-  LegacyWorkGenerators
+  LegacyWorkGenerators,
+  SubjectGenerators
 }
 import uk.ac.wellcome.models.work.internal.Format.{
   Books,

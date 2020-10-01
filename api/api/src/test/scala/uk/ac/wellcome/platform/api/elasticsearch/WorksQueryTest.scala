@@ -12,8 +12,8 @@ import uk.ac.wellcome.models.work.generators.{
   ContributorGenerators,
   GenreGenerators,
   ImageGenerators,
-  SubjectGenerators,
-  LegacyWorkGenerators
+  LegacyWorkGenerators,
+  SubjectGenerators
 }
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators

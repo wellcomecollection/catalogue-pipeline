@@ -10,8 +10,8 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import uk.ac.wellcome.models.work.generators.{
   ImageGenerators,
-  ProductionEventGenerators,
-  LegacyWorkGenerators
+  LegacyWorkGenerators,
+  ProductionEventGenerators
 }
 import uk.ac.wellcome.models.work.internal.Format.Videos
 import uk.ac.wellcome.models.work.internal._
