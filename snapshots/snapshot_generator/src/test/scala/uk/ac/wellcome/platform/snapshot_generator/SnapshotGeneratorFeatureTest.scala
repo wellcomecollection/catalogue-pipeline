@@ -102,7 +102,7 @@ class SnapshotGeneratorFeatureTest
   def withFixtures[R](
     testWith: TestWith[(Queue, MemoryMessageSender, Index, Index, Bucket), R]): R =
     withActorSystem { implicit actorSystem =>
-      withLocalSqsQueue() { queue =>
+      withLocalSqsQueue(visibilityTimeout = 5) { queue =>
         val messageSender = new MemoryMessageSender()
 
         withLocalWorksIndex { worksIndex =>
