@@ -6,7 +6,7 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.matcher.WorkIdentifier
-import uk.ac.wellcome.models.work.generators.WorksGenerators
+import uk.ac.wellcome.models.work.generators.LegacyWorkGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.fixtures.LocalWorksVhs
 import WorkState.Source
@@ -16,7 +16,7 @@ class RecorderPlaybackServiceTest
     with Matchers
     with ScalaFutures
     with LocalWorksVhs
-    with WorksGenerators {
+    with LegacyWorkGenerators {
 
   it("fetches a single Work") {
     val work = createSourceWork

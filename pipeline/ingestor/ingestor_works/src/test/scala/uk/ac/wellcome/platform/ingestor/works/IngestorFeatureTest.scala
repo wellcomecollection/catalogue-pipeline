@@ -9,7 +9,7 @@ import uk.ac.wellcome.elasticsearch.WorksIndexConfig
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.generators.WorksGenerators
+import uk.ac.wellcome.models.work.generators.LegacyWorkGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.ingestor.common.fixtures.IngestorFixtures
 import uk.ac.wellcome.pipeline_storage.ElasticIndexer
@@ -24,7 +24,7 @@ class IngestorFeatureTest
     with ScalaFutures
     with IngestorFixtures
     with ElasticsearchFixtures
-    with WorksGenerators {
+    with LegacyWorkGenerators {
 
   it("ingests a Miro work") {
     val work = createIdentifiedWork

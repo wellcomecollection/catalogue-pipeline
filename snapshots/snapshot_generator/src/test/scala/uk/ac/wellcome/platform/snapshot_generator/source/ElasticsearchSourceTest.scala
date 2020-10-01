@@ -10,7 +10,7 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
-import uk.ac.wellcome.models.work.generators.WorksGenerators
+import uk.ac.wellcome.models.work.generators.LegacyWorkGenerators
 import uk.ac.wellcome.models.work.internal._
 
 class ElasticsearchSourceTest
@@ -20,7 +20,7 @@ class ElasticsearchSourceTest
     with IntegrationPatience
     with Akka
     with ElasticsearchFixtures
-    with WorksGenerators {
+    with LegacyWorkGenerators {
 
   it("outputs the entire content of the index") {
     withActorSystem { implicit actorSystem =>

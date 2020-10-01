@@ -11,7 +11,7 @@ import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import uk.ac.wellcome.models.work.generators.{
   ImageGenerators,
   ProductionEventGenerators,
-  WorksGenerators
+  LegacyWorkGenerators
 }
 import uk.ac.wellcome.models.work.internal.Format.Videos
 import uk.ac.wellcome.models.work.internal._
@@ -21,7 +21,7 @@ class DisplayWorkTest
     extends AnyFunSpec
     with Matchers
     with ProductionEventGenerators
-    with WorksGenerators
+    with LegacyWorkGenerators
     with ImageGenerators
     with ScalaCheckPropertyChecks {
 

@@ -4,7 +4,7 @@ import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.display.json.DisplayJsonUtil._
 import uk.ac.wellcome.display.test.util.JsonMapperTestUtil
-import uk.ac.wellcome.models.work.generators.WorksGenerators
+import uk.ac.wellcome.models.work.generators.LegacyWorkGenerators
 import uk.ac.wellcome.models.work.internal._
 import WorkState.Identified
 
@@ -12,7 +12,7 @@ class DisplayLocationsSerialisationTestDeprecated
     extends AnyFunSpec
     with DisplaySerialisationTestBase
     with JsonMapperTestUtil
-    with WorksGenerators {
+    with LegacyWorkGenerators {
 
   it("serialises a physical location") {
     val physicalLocation = PhysicalLocationDeprecated(

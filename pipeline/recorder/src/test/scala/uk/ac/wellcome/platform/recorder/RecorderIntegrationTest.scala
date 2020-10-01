@@ -7,7 +7,7 @@ import uk.ac.wellcome.bigmessaging.fixtures.VHSFixture
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.generators.WorksGenerators
+import uk.ac.wellcome.models.work.generators.LegacyWorkGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.recorder.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.storage.Version
@@ -20,7 +20,7 @@ class RecorderIntegrationTest
     with IntegrationPatience
     with WorkerServiceFixture
     with VHSFixture[Work[Source]]
-    with WorksGenerators {
+    with LegacyWorkGenerators {
 
   it("saves received works to VHS, and puts the VHS key on the queue") {
     val messageSender = new MemoryMessageSender()

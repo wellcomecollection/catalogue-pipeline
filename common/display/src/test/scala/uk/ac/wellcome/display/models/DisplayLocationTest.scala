@@ -5,7 +5,7 @@ import uk.ac.wellcome.display.json.DisplayJsonUtil._
 import uk.ac.wellcome.display.test.util.JsonMapperTestUtil
 import uk.ac.wellcome.models.work.generators.{
   IdentifiersGenerators,
-  WorksGenerators
+  LegacyWorkGenerators
 }
 import uk.ac.wellcome.models.work.internal._
 
@@ -14,7 +14,7 @@ class DisplayLocationTest
     with DisplaySerialisationTestBase
     with JsonMapperTestUtil
     with IdentifiersGenerators
-    with WorksGenerators {
+    with LegacyWorkGenerators {
   it("Encodes the DisplayLocation ADT correctly") {
     val digitalResource = DisplayLocation(
       Location.DigitalResource(

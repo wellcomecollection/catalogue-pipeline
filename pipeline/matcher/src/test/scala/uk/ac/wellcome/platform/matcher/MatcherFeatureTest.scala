@@ -13,7 +13,7 @@ import uk.ac.wellcome.models.matcher.{
   WorkIdentifier,
   WorkNode
 }
-import uk.ac.wellcome.models.work.generators.WorksGenerators
+import uk.ac.wellcome.models.work.generators.LegacyWorkGenerators
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
 import uk.ac.wellcome.storage.{Identified, Version}
 
@@ -23,7 +23,7 @@ class MatcherFeatureTest
     with Eventually
     with IntegrationPatience
     with MatcherFixtures
-    with WorksGenerators {
+    with LegacyWorkGenerators {
 
   it(
     "processes a message with a simple Work.Visible[Source] with no linked works") {

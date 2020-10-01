@@ -7,7 +7,7 @@ import software.amazon.awssdk.services.sqs.model.QueueAttributeName
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.models.work.generators.WorksGenerators
+import uk.ac.wellcome.models.work.generators.LegacyWorkGenerators
 import uk.ac.wellcome.platform.idminter.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.models.Implicits._
 import WorkState.{Identified, Source}
@@ -18,7 +18,7 @@ class IdMinterFeatureTest
     with IntegrationPatience
     with Eventually
     with WorkerServiceFixture
-    with WorksGenerators {
+    with LegacyWorkGenerators {
 
   it("mints the same IDs where source identifiers match") {
     val messageSender = new MemoryMessageSender()

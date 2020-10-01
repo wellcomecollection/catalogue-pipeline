@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.merger.rules
 import org.scalatest.matchers.should.Matchers
 import cats.data.NonEmptyList
 import org.scalatest.funspec.AnyFunSpec
-import uk.ac.wellcome.models.work.generators.WorksGenerators
+import uk.ac.wellcome.models.work.generators.LegacyWorkGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
@@ -13,7 +13,7 @@ class FieldMergeRuleTest
     extends AnyFunSpec
     with Matchers
     with FieldMergeRule
-    with WorksGenerators {
+    with LegacyWorkGenerators {
   override protected type FieldData = Unit
 
   val targetTitleIsA = new PartialRule {

@@ -15,7 +15,7 @@ import uk.ac.wellcome.display.models.AggregationRequest
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.models.work.generators.{
   ProductionEventGenerators,
-  WorksGenerators
+  LegacyWorkGenerators
 }
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.internal.Format.{
@@ -35,7 +35,7 @@ class WorksServiceTest
     with Matchers
     with ScalaFutures
     with SearchOptionsGenerators
-    with WorksGenerators
+    with LegacyWorkGenerators
     with ProductionEventGenerators {
 
   val elasticsearchService = new ElasticsearchService(elasticClient)

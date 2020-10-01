@@ -11,7 +11,7 @@ import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.models.work.generators.{
   IdentifiersGenerators,
   ItemsGenerators,
-  WorksGenerators
+  LegacyWorkGenerators
 }
 import WorkState.Identified
 
@@ -22,7 +22,7 @@ class RelatedWorkServiceTest
     with ElasticsearchFixtures
     with IdentifiersGenerators
     with ItemsGenerators
-    with WorksGenerators {
+    with LegacyWorkGenerators {
 
   val service = new RelatedWorkService(new ElasticsearchService(elasticClient))
 

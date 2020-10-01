@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.merger.rules
 import org.scalatest.Inside
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.generators.WorksGenerators
+import uk.ac.wellcome.models.work.generators.LegacyWorkGenerators
 import uk.ac.wellcome.models.work.internal.{
   AccessCondition,
   AccessStatus,
@@ -15,7 +15,7 @@ import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 class ThumbnailRuleTest
     extends AnyFunSpec
     with Matchers
-    with WorksGenerators
+    with LegacyWorkGenerators
     with Inside {
 
   val physicalSierraWork = createSierraPhysicalWork

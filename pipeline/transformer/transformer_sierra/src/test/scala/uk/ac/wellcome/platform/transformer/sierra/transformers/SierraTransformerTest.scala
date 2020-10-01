@@ -4,7 +4,7 @@ import java.time.Instant
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.generators.WorksGenerators
+import uk.ac.wellcome.models.work.generators.LegacyWorkGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.sierra.SierraTransformer
 import uk.ac.wellcome.platform.transformer.sierra.exceptions.SierraTransformerException
@@ -28,7 +28,7 @@ class SierraTransformerTest
     with MarcGenerators
     with SierraGenerators
     with SierraTransformableTestBase
-    with WorksGenerators {
+    with LegacyWorkGenerators {
 
   it("performs a transformation on a work with physical items") {
     val itemRecords = List(

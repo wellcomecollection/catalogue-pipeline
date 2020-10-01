@@ -6,7 +6,7 @@ import uk.ac.wellcome.models.work.generators.{
   ImageGenerators,
   ProductionEventGenerators,
   SubjectGenerators,
-  WorksGenerators
+  LegacyWorkGenerators
 }
 import uk.ac.wellcome.models.work.internal.Format.{Books, EBooks}
 import uk.ac.wellcome.models.work.internal._
@@ -18,7 +18,7 @@ class DisplayWorkSerialisationTest
     with JsonMapperTestUtil
     with ProductionEventGenerators
     with SubjectGenerators
-    with WorksGenerators
+    with LegacyWorkGenerators
     with ImageGenerators {
 
   it("serialises a DisplayWork") {

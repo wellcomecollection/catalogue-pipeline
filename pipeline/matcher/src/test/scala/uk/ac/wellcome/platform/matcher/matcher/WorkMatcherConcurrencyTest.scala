@@ -7,7 +7,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.matcher.MatcherResult
-import uk.ac.wellcome.models.work.generators.WorksGenerators
+import uk.ac.wellcome.models.work.generators.LegacyWorkGenerators
 import uk.ac.wellcome.models.work.internal.MergeCandidate
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
@@ -22,7 +22,7 @@ class WorkMatcherConcurrencyTest
     with MatcherFixtures
     with ScalaFutures
     with MockitoSugar
-    with WorksGenerators {
+    with LegacyWorkGenerators {
 
   it("processes one of two conflicting concurrent updates and locks the other") {
     withLockTable { lockTable =>

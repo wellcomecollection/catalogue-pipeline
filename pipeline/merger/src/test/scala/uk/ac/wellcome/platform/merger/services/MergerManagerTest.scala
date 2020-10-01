@@ -3,13 +3,13 @@ package uk.ac.wellcome.platform.merger.services
 import cats.data.State
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.generators.WorksGenerators
+import uk.ac.wellcome.models.work.generators.LegacyWorkGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.models.{MergeResult, MergerOutcome}
 import WorkState.{Merged, Source}
 import WorkFsm._
 
-class MergerManagerTest extends AnyFunSpec with Matchers with WorksGenerators {
+class MergerManagerTest extends AnyFunSpec with Matchers with LegacyWorkGenerators {
 
   it("performs a merge with a single work") {
     val work = createSourceWork
