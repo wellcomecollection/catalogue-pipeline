@@ -5,6 +5,7 @@ import uk.ac.wellcome.platform.api.models._
 import akka.http.scaladsl.server.{Directive, Directives, Route}
 import com.sksamuel.elastic4s.ElasticError
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
+import grizzled.slf4j.Logging
 import io.circe.Printer
 import uk.ac.wellcome.display.json.DisplayJsonUtil
 import uk.ac.wellcome.display.models.ApiVersions
@@ -13,7 +14,7 @@ import uk.ac.wellcome.platform.api.elasticsearch.ElasticsearchErrorHandler
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-trait CustomDirectives extends Directives with FailFastCirceSupport {
+trait CustomDirectives extends Directives with FailFastCirceSupport with Logging {
   import ResultResponse.encoder
 
   implicit val apiConfig: ApiConfig
@@ -38,37 +39,39 @@ trait CustomDirectives extends Directives with FailFastCirceSupport {
     }
 
   def elasticError(err: ElasticError): Route =
-    error(
+    errorRoute(
       ElasticsearchErrorHandler.buildDisplayError(err)
     )
 
   def gone(description: String): Route =
-    error(
+    errorRoute(
       DisplayError(variant = ErrorVariant.http410, description = description)
     )
 
   def notFound(description: String): Route =
-    error(
+    errorRoute(
       DisplayError(variant = ErrorVariant.http404, description = description)
     )
 
   def invalidRequest(description: String): Route =
-    error(
+    errorRoute(
       DisplayError(variant = ErrorVariant.http400, description = description)
     )
+
+  def internalError(err: Throwable): Route = {
+    error(s"Sending HTTP 500: $err", err)
+    errorRoute(DisplayError(variant = ErrorVariant.http500))
+  }
 
   def getWithFuture(future: Future[Route]): Route =
     get {
       onComplete(future) {
         case Success(resp) => resp
-        case Failure(_) =>
-          error(
-            DisplayError(variant = ErrorVariant.http500, description = "Unhandled error.")
-          )
+        case Failure(err)  => internalError(err)
       }
     }
 
-  private def error(err: DisplayError): Route =
+  private def errorRoute(err: DisplayError): Route =
     complete(
       err.httpStatus -> ResultResponse(context = contextUri, result = err)
     )
