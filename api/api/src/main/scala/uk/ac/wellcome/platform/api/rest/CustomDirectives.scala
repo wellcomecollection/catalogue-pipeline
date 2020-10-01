@@ -1,6 +1,5 @@
 package uk.ac.wellcome.platform.api.rest
 
-import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.model.Uri
 import uk.ac.wellcome.platform.api.models._
 import akka.http.scaladsl.server.{Directive, Directives, Route}
@@ -69,16 +68,10 @@ trait CustomDirectives extends Directives with FailFastCirceSupport {
       }
     }
 
-  private def error(err: DisplayError): Route = {
-    val status = err.httpStatus match {
-      case Some(400) => BadRequest
-      case Some(404) => NotFound
-      case Some(410) => Gone
-      case Some(500) => InternalServerError
-      case _         => InternalServerError
-    }
-    complete(status -> ResultResponse(context = contextUri, result = err))
-  }
+  private def error(err: DisplayError): Route =
+    complete(
+      err.httpStatus -> ResultResponse(context = contextUri, result = err)
+    )
 
   implicit val jsonPrinter: Printer = DisplayJsonUtil.printer
 }
