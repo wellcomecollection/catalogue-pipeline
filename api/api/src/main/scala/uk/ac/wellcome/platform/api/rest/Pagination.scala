@@ -3,6 +3,11 @@ package uk.ac.wellcome.platform.api.rest
 import akka.http.scaladsl.model.Uri
 import uk.ac.wellcome.platform.api.models.{ResultList, SearchOptions}
 
+object PaginationLimits {
+  val minSize = 1
+  val maxSize = 100
+}
+
 trait Paginated { this: QueryParams =>
   val page: Option[Int]
   val pageSize: Option[Int]
@@ -13,8 +18,11 @@ trait Paginated { this: QueryParams =>
         .filterNot(_ >= 1)
         .map(_ => "page: must be greater than 1"),
       pageSize
-        .filterNot(size => size >= 1 && size <= 100)
-        .map(_ => "pageSize: must be between 1 and 100")
+        .filterNot { size =>
+          size >= PaginationLimits.minSize &&
+          size <= PaginationLimits.maxSize
+        }
+        .map(_ => s"pageSize: must be between ${PaginationLimits.minSize} and ${PaginationLimits.maxSize}")
     ).flatten
 
 }

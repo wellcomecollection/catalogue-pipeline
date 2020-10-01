@@ -4,12 +4,7 @@ import org.scalatest.matchers.should.Matchers
 import akka.http.scaladsl.model.ContentTypes
 import io.circe.Json
 import uk.ac.wellcome.platform.api.models.SearchQueryType
-import uk.ac.wellcome.platform.api.rest.{
-  MultipleImagesParams,
-  MultipleWorksParams,
-  SingleImageParams,
-  SingleWorkParams
-}
+import uk.ac.wellcome.platform.api.rest._
 import uk.ac.wellcome.platform.api.works.ApiWorksTestBase
 
 class ApiSwaggerTest extends ApiWorksTestBase with Matchers with JsonHelpers {
@@ -158,6 +153,31 @@ class ApiSwaggerTest extends ApiWorksTestBase with Matchers with JsonHelpers {
         "SubjectAggregationBucket",
         "LanguageAggregationBucket",
       )
+    }
+  }
+
+  describe("includes bounds for the pageSize parameter") {
+    it("images endpoint") {
+      checkBoundsOnPagesizeParameters(imagesEndpoint)
+    }
+
+    it("works endpoint") {
+      checkBoundsOnPagesizeParameters(worksEndpoint)
+    }
+
+    def checkBoundsOnPagesizeParameters(endpointString: String): Unit = {
+      checkSwaggerJson { json =>
+        val endpoint = getEndpoint(json, endpointString = endpointString)
+
+        val pageSizeParam = getParameter(endpoint, name = "pageSize").get
+
+        val schema = getKey(pageSizeParam, key = "schema").get
+
+        getNumericKey(schema, key = "minimum") shouldBe Some(PaginationLimits.minSize)
+        getNumericKey(schema, key = "maximum") shouldBe Some(PaginationLimits.maxSize)
+        getNumericKey(schema, key = "default") shouldBe Some(10)
+        getKey(schema, key = "type").flatMap { _.asString } shouldBe Some("integer")
+      }
     }
   }
 
