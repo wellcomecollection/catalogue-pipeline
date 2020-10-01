@@ -5,7 +5,7 @@ import uk.ac.wellcome.platform.api.models._
 import akka.http.scaladsl.server.{Directive, Directives, Route}
 import com.sksamuel.elastic4s.ElasticError
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
-import grizzled.slf4j.Logging
+import grizzled.slf4j.Logger
 import io.circe.Printer
 import uk.ac.wellcome.display.json.DisplayJsonUtil
 import uk.ac.wellcome.display.models.ApiVersions
@@ -14,10 +14,7 @@ import uk.ac.wellcome.platform.api.elasticsearch.ElasticsearchErrorHandler
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-trait CustomDirectives
-    extends Directives
-    with FailFastCirceSupport
-    with Logging {
+trait CustomDirectives extends Directives with FailFastCirceSupport {
   import ResultResponse.encoder
 
   implicit val apiConfig: ApiConfig
@@ -42,28 +39,28 @@ trait CustomDirectives
     }
 
   def elasticError(err: ElasticError): Route =
-    errorRoute(
+    error(
       ElasticsearchErrorHandler.buildDisplayError(err)
     )
 
   def gone(description: String): Route =
-    errorRoute(
+    error(
       DisplayError(variant = ErrorVariant.http410, description = description)
     )
 
   def notFound(description: String): Route =
-    errorRoute(
+    error(
       DisplayError(variant = ErrorVariant.http404, description = description)
     )
 
   def invalidRequest(description: String): Route =
-    errorRoute(
+    error(
       DisplayError(variant = ErrorVariant.http400, description = description)
     )
 
   def internalError(err: Throwable): Route = {
-    error(s"Sending HTTP 500: $err", err)
-    errorRoute(DisplayError(variant = ErrorVariant.http500))
+    logger.error(s"Sending HTTP 500: $err", err)
+    error(DisplayError(variant = ErrorVariant.http500))
   }
 
   def getWithFuture(future: Future[Route]): Route =
@@ -74,10 +71,12 @@ trait CustomDirectives
       }
     }
 
-  private def errorRoute(err: DisplayError): Route =
+  private def error(err: DisplayError): Route =
     complete(
       err.httpStatus -> ResultResponse(context = contextUri, result = err)
     )
 
   implicit val jsonPrinter: Printer = DisplayJsonUtil.printer
+
+  private lazy val logger = Logger(this.getClass.getName)
 }
