@@ -9,10 +9,7 @@ import uk.ac.wellcome.platform.merger.models.{MergeResult, MergerOutcome}
 import WorkState.{Merged, Source}
 import WorkFsm._
 
-class MergerManagerTest
-    extends AnyFunSpec
-    with Matchers
-    with WorkGenerators {
+class MergerManagerTest extends AnyFunSpec with Matchers with WorkGenerators {
 
   it("performs a merge with a single work") {
     val work = sourceWork()

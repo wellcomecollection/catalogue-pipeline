@@ -10,8 +10,8 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import uk.ac.wellcome.models.work.generators.{
   ImageGenerators,
-  WorkGenerators,
-  ProductionEventGenerators
+  ProductionEventGenerators,
+  WorkGenerators
 }
 import uk.ac.wellcome.models.work.internal.Format.Videos
 import uk.ac.wellcome.models.work.internal._
@@ -260,7 +260,9 @@ class DisplayWorkTest
             agent = Agent(
               label = "Bond",
               id = IdState
-                .Identified(createCanonicalId, contributorAgentSourceIdentifier),
+                .Identified(
+                  createCanonicalId,
+                  contributorAgentSourceIdentifier),
             ),
             roles = Nil
           ),
@@ -277,7 +279,9 @@ class DisplayWorkTest
             agent = Person(
               label = "Blue Blaise",
               id = IdState
-                .Identified(createCanonicalId, contributorPersonSourceIdentifier),
+                .Identified(
+                  createCanonicalId,
+                  contributorPersonSourceIdentifier),
             ),
             roles = Nil
           )
@@ -292,17 +296,19 @@ class DisplayWorkTest
             concepts = List(
               Concept(
                 label = "Bonding",
-                id =
-                  IdState.Identified(createCanonicalId, conceptSourceIdentifier),
+                id = IdState
+                  .Identified(createCanonicalId, conceptSourceIdentifier),
               ),
               Period(
                 label = "Before",
-                id = IdState.Identified(createCanonicalId, periodSourceIdentifier),
+                id =
+                  IdState.Identified(createCanonicalId, periodSourceIdentifier),
                 range = None,
               ),
               Place(
                 label = "Bulgaria",
-                id = IdState.Identified(createCanonicalId, placeSourceIdentifier),
+                id =
+                  IdState.Identified(createCanonicalId, placeSourceIdentifier),
               )
             )
           ),

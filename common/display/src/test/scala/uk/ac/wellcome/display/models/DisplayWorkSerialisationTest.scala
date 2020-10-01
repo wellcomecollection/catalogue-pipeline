@@ -4,9 +4,9 @@ import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.display.test.util.JsonMapperTestUtil
 import uk.ac.wellcome.models.work.generators.{
   ImageGenerators,
-  WorkGenerators,
   ProductionEventGenerators,
-  SubjectGenerators
+  SubjectGenerators,
+  WorkGenerators
 }
 import uk.ac.wellcome.models.work.internal.Format.{Books, EBooks}
 import uk.ac.wellcome.models.work.internal._
@@ -343,7 +343,7 @@ class DisplayWorkSerialisationTest
 
   it("shows the thumbnail field if available") {
     val work = identifiedWork().thumbnail(
-    DigitalLocationDeprecated(
+      DigitalLocationDeprecated(
         locationType = LocationType("thumbnail-image"),
         url = "https://iiif.example.org/1234/default.jpg",
         license = Some(License.CCBY)

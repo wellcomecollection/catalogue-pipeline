@@ -5,7 +5,8 @@ import WorkState._
 
 trait WorkGenerators extends IdentifiersGenerators {
 
-  def sourceWork(sourceIdentifier: SourceIdentifier = createSourceIdentifier) : Work.Visible[Source] =
+  def sourceWork(sourceIdentifier: SourceIdentifier = createSourceIdentifier)
+    : Work.Visible[Source] =
     Work.Visible[Source](
       state = Source(sourceIdentifier),
       data = initData,
@@ -89,7 +90,8 @@ trait WorkGenerators extends IdentifiersGenerators {
       otherIdentifiers: List[SourceIdentifier]): Work.Visible[State] =
       work.map(_.copy(otherIdentifiers = otherIdentifiers))
 
-    def mergeCandidates(mergeCandidates: List[MergeCandidate]): Work.Visible[State] =
+    def mergeCandidates(
+      mergeCandidates: List[MergeCandidate]): Work.Visible[State] =
       work.map(_.copy(mergeCandidates = mergeCandidates))
 
     def format(format: Format): Work.Visible[State] =
@@ -104,14 +106,16 @@ trait WorkGenerators extends IdentifiersGenerators {
     def lettering(lettering: String): Work.Visible[State] =
       work.map(_.copy(lettering = Some(lettering)))
 
-    def createdDate(createdDate: Period[State#WorkDataState#MaybeId]): Work.Visible[State] =
+    def createdDate(
+      createdDate: Period[State#WorkDataState#MaybeId]): Work.Visible[State] =
       work.map(_.copy(createdDate = Some(createdDate)))
 
-    def subjects(
-      subjects: List[Subject[State#WorkDataState#MaybeId]]): Work.Visible[State] =
+    def subjects(subjects: List[Subject[State#WorkDataState#MaybeId]])
+      : Work.Visible[State] =
       work.map(_.copy(subjects = subjects))
 
-    def genres(genres: List[Genre[State#WorkDataState#MaybeId]]): Work.Visible[State] =
+    def genres(
+      genres: List[Genre[State#WorkDataState#MaybeId]]): Work.Visible[State] =
       work.map(_.copy(genres = genres))
 
     def contributors(
@@ -136,19 +140,22 @@ trait WorkGenerators extends IdentifiersGenerators {
     def notes(notes: List[Note]): Work.Visible[State] =
       work.map(_.copy(notes = notes))
 
-    def items(items: List[Item[State#WorkDataState#MaybeId]]): Work.Visible[State] =
+    def items(
+      items: List[Item[State#WorkDataState#MaybeId]]): Work.Visible[State] =
       work.map(_.copy(items = items))
 
     def collectionPath(collectionPath: CollectionPath): Work.Visible[State] =
       work.map(_.copy(collectionPath = Some(collectionPath)))
 
-    def images(images: List[UnmergedImage[State#WorkDataState]]): Work.Visible[State] =
+    def images(
+      images: List[UnmergedImage[State#WorkDataState]]): Work.Visible[State] =
       work.map(_.copy(images = images))
 
     def workType(workType: WorkType): Work.Visible[State] =
       work.map(_.copy(workType = workType))
 
-    def map(f: WorkData[State#WorkDataState] => WorkData[State#WorkDataState]): Work.Visible[State] =
+    def map(f: WorkData[State#WorkDataState] => WorkData[State#WorkDataState])
+      : Work.Visible[State] =
       Work.Visible[State](work.version, f(work.data), work.state)
   }
 
