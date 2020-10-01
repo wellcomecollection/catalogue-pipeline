@@ -32,13 +32,16 @@ object DisplayError {
 
   implicit val encoder: Encoder[DisplayError] = deriveConfiguredEncoder
 
-  def apply(error: Error): DisplayError = DisplayError(
+  private def apply(error: Error): DisplayError = DisplayError(
     errorType = error.errorType,
     httpStatus = error.httpStatus,
     label = error.label,
     description = error.description
   )
 
-  def apply(variant: ErrorVariant, description: Option[String]): DisplayError =
-    DisplayError(Error(variant, description))
+  def apply(variant: ErrorVariant): DisplayError =
+    DisplayError(Error(variant, description = None))
+
+  def apply(variant: ErrorVariant, description: String): DisplayError =
+    DisplayError(Error(variant, description = Some(description)))
 }

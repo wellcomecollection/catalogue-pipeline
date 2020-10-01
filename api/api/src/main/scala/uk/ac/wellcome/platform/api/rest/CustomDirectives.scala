@@ -43,26 +43,20 @@ trait CustomDirectives extends Directives with FailFastCirceSupport {
       ElasticsearchErrorHandler.buildDisplayError(err)
     )
 
-  def gone(message: String): Route = error(
-    DisplayError(
-      ErrorVariant.http410,
-      Some(message)
+  def gone(description: String): Route =
+    error(
+      DisplayError(variant = ErrorVariant.http410, description = description)
     )
-  )
 
-  def notFound(message: String): Route = error(
-    DisplayError(
-      ErrorVariant.http404,
-      Some(message)
+  def notFound(description: String): Route =
+    error(
+      DisplayError(variant = ErrorVariant.http404, description = description)
     )
-  )
 
-  def invalidRequest(message: String): Route = error(
-    DisplayError(
-      ErrorVariant.http400,
-      Some(message)
+  def invalidRequest(description: String): Route =
+    error(
+      DisplayError(variant = ErrorVariant.http400, description = description)
     )
-  )
 
   def getWithFuture(future: Future[Route]): Route =
     get {
@@ -70,7 +64,7 @@ trait CustomDirectives extends Directives with FailFastCirceSupport {
         case Success(resp) => resp
         case Failure(_) =>
           error(
-            DisplayError(ErrorVariant.http500, Some("Unhandled error."))
+            DisplayError(variant = ErrorVariant.http500, description = "Unhandled error.")
           )
       }
     }
