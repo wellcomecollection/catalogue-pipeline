@@ -94,13 +94,15 @@ class SnapshotGeneratorFeatureTest
               s"http://localhost:33333/${publicBucket.name}/$publicObjectKey"
           )
 
-          messageSender.getMessages[CompletedSnapshotJob] shouldBe Seq(expectedJob)
+          messageSender.getMessages[CompletedSnapshotJob] shouldBe Seq(
+            expectedJob)
         }
     }
   }
 
   def withFixtures[R](
-    testWith: TestWith[(Queue, MemoryMessageSender, Index, Index, Bucket), R]): R =
+    testWith: TestWith[(Queue, MemoryMessageSender, Index, Index, Bucket), R])
+    : R =
     withActorSystem { implicit actorSystem =>
       withLocalSqsQueue(visibilityTimeout = 5) { queue =>
         val messageSender = new MemoryMessageSender()

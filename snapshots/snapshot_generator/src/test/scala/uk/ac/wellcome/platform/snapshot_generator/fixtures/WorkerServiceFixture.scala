@@ -12,12 +12,12 @@ import uk.ac.wellcome.platform.snapshot_generator.services.SnapshotGeneratorWork
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-trait WorkerServiceFixture
-    extends AkkaS3
-    with SnapshotServiceFixture
-    with SQS { this: Suite =>
-  def withWorkerService[R](queue: Queue, messageSender: MemoryMessageSender, worksIndex: Index)(
-    testWith: TestWith[SnapshotGeneratorWorkerService, R])(
+trait WorkerServiceFixture extends AkkaS3 with SnapshotServiceFixture with SQS {
+  this: Suite =>
+  def withWorkerService[R](
+    queue: Queue,
+    messageSender: MemoryMessageSender,
+    worksIndex: Index)(testWith: TestWith[SnapshotGeneratorWorkerService, R])(
     implicit actorSystem: ActorSystem): R =
     withS3AkkaSettings { s3AkkaClient =>
       withSnapshotService(s3AkkaClient, worksIndex) { snapshotService =>
