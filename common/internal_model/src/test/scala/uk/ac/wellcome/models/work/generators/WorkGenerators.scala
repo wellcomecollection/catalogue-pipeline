@@ -5,11 +5,10 @@ import WorkState._
 
 trait WorkGenerators extends IdentifiersGenerators {
 
-  def sourceWork(sourceIdentifier: SourceIdentifier = createSourceIdentifier)
-    : Work.Visible[Source] =
+  def sourceWork(sourceIdentifier: SourceIdentifier = createSourceIdentifier) : Work.Visible[Source] =
     Work.Visible[Source](
       state = Source(sourceIdentifier),
-      data = WorkData[DataState.Unidentified](),
+      data = initData,
       version = 1
     )
 
@@ -19,7 +18,7 @@ trait WorkGenerators extends IdentifiersGenerators {
   ): Work.Visible[Merged] =
     Work.Visible[Merged](
       state = Merged(sourceIdentifier, hasMultipleSources),
-      data = WorkData[DataState.Unidentified](),
+      data = initData,
       version = 1
     )
 
@@ -30,7 +29,7 @@ trait WorkGenerators extends IdentifiersGenerators {
   ): Work.Visible[Denormalised] =
     Work.Visible[Denormalised](
       state = Denormalised(sourceIdentifier, hasMultipleSources, relations),
-      data = WorkData[DataState.Unidentified](),
+      data = initData,
       version = 1
     )
 
@@ -46,7 +45,7 @@ trait WorkGenerators extends IdentifiersGenerators {
         canonicalId,
         hasMultipleSources,
         relations),
-      data = WorkData[DataState.Identified](),
+      data = initData,
       version = 1
     )
 
@@ -152,4 +151,9 @@ trait WorkGenerators extends IdentifiersGenerators {
     def map(f: WorkData[State#WorkDataState] => WorkData[State#WorkDataState]): Work.Visible[State] =
       Work.Visible[State](work.version, f(work.data), work.state)
   }
+
+  private def initData[State <: DataState]: WorkData[State] =
+    WorkData(
+      title = Some(randomAlphanumeric(length = 10))
+    )
 }
