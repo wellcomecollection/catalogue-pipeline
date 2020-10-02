@@ -13,7 +13,7 @@ import uk.ac.wellcome.models.matcher.{
   WorkIdentifier,
   WorkNode
 }
-import uk.ac.wellcome.models.work.generators.LegacyWorkGenerators
+import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
 import uk.ac.wellcome.storage.{Identified, Version}
 
@@ -23,7 +23,7 @@ class MatcherFeatureTest
     with Eventually
     with IntegrationPatience
     with MatcherFixtures
-    with LegacyWorkGenerators {
+    with WorkGenerators {
 
   it(
     "processes a message with a simple Work.Visible[Source] with no linked works") {
@@ -32,7 +32,7 @@ class MatcherFeatureTest
     withLocalSqsQueue() { queue =>
       withVHS { vhs =>
         withWorkerService(vhs, queue, messageSender) { _ =>
-          val work = createSourceWork
+          val work = sourceWork()
 
           val expectedResult = MatcherResult(
             Set(
@@ -64,7 +64,7 @@ class MatcherFeatureTest
               val existingWorkVersion = 2
               val updatedWorkVersion = 1
 
-              val workAv1 = createSourceWorkWith(
+              val workAv1 = sourceWork(
                 version = updatedWorkVersion
               )
 
@@ -98,7 +98,7 @@ class MatcherFeatureTest
         withWorkGraphTable { graphTable =>
           withVHS { vhs: VHS =>
             withWorkerService(vhs, queue, messageSender, graphTable) { _ =>
-              val workv2 = createSourceWorkWith(version = 2)
+              val workv2 = sourceWork(version = 2)
 
               val key = vhs.put(
                 Version(workv2.sourceIdentifier.toString, workv2.version))(
