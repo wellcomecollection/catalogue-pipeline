@@ -5,12 +5,14 @@ import WorkState._
 
 trait WorkGenerators extends IdentifiersGenerators {
 
-  def sourceWork(sourceIdentifier: SourceIdentifier = createSourceIdentifier)
-    : Work.Visible[Source] =
+  def sourceWork(
+    sourceIdentifier: SourceIdentifier = createSourceIdentifier,
+    version: Int = 1
+  ): Work.Visible[Source] =
     Work.Visible[Source](
       state = Source(sourceIdentifier),
       data = initData,
-      version = 1
+      version = version
     )
 
   def mergedWork(
