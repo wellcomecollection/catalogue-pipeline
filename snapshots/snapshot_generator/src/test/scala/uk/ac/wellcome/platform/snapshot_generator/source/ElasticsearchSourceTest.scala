@@ -25,7 +25,9 @@ class ElasticsearchSourceTest
   it("outputs the entire content of the index") {
     withActorSystem { implicit actorSystem =>
       withLocalWorksIndex { index =>
-        val works = (1 to 10).map { _ => identifiedWork() }
+        val works = (1 to 10).map { _ =>
+          identifiedWork()
+        }
         insertIntoElasticsearch(index, works: _*)
 
         withSource(index) { source =>
@@ -42,8 +44,12 @@ class ElasticsearchSourceTest
   it("filters non visible works") {
     withActorSystem { implicit actorSystem =>
       withLocalWorksIndex { index =>
-        val visibleWorks = (1 to 10).map { _ => identifiedWork() }
-        val invisibleWorks = (1 to 3).map { _ => identifiedWork().invisible() }
+        val visibleWorks = (1 to 10).map { _ =>
+          identifiedWork()
+        }
+        val invisibleWorks = (1 to 3).map { _ =>
+          identifiedWork().invisible()
+        }
 
         val works = visibleWorks ++ invisibleWorks
         insertIntoElasticsearch(index, works: _*)

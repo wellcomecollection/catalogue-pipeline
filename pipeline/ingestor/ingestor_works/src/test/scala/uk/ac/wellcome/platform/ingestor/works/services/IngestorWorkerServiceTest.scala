@@ -40,18 +40,21 @@ class IngestorWorkerServiceTest
   }
 
   it("indexes a Sierra identified invisible Work") {
-    val work = identifiedWork(sourceIdentifier = createSierraSystemSourceIdentifier)
-      .invisible()
+    val work =
+      identifiedWork(sourceIdentifier = createSierraSystemSourceIdentifier)
+        .invisible()
 
     assertWorksIndexedCorrectly(work)
   }
 
   it("indexes a Sierra identified redirected Work") {
-    val work = identifiedWork(sourceIdentifier = createSierraSystemSourceIdentifier)
-      .redirected(IdState.Identified(
-        canonicalId = createCanonicalId,
-        sourceIdentifier = createSourceIdentifier
-      ))
+    val work =
+      identifiedWork(sourceIdentifier = createSierraSystemSourceIdentifier)
+        .redirected(
+          IdState.Identified(
+            canonicalId = createCanonicalId,
+            sourceIdentifier = createSourceIdentifier
+          ))
 
     assertWorksIndexedCorrectly(work)
   }
@@ -103,7 +106,8 @@ class IngestorWorkerServiceTest
     assertWorksIndexedCorrectly(works: _*)
   }
 
-  it("deletes works from the queue, including older versions of already ingested works") {
+  it(
+    "deletes works from the queue, including older versions of already ingested works") {
     val oldSierraWork = identifiedWork(
       sourceIdentifier = createSierraSystemSourceIdentifier
     )

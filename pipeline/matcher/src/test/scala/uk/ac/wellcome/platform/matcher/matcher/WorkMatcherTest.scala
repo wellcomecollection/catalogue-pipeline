@@ -52,8 +52,8 @@ class WorkMatcherTest
 
             whenReady(workMatcher.matchWork(work)) { matcherResult =>
               matcherResult shouldBe
-                MatcherResult(
-                  Set(MatchedIdentifiers(Set(WorkIdentifier(sourceId, version)))))
+                MatcherResult(Set(
+                  MatchedIdentifiers(Set(WorkIdentifier(sourceId, version)))))
 
               val savedLinkedWork =
                 get[WorkNode](dynamoClient, graphTable.name)('id -> sourceId)
@@ -80,8 +80,8 @@ class WorkMatcherTest
 
             whenReady(workMatcher.matchWork(invisibleWork)) { matcherResult =>
               matcherResult shouldBe
-                MatcherResult(
-                  Set(MatchedIdentifiers(Set(WorkIdentifier(sourceId, version)))))
+                MatcherResult(Set(
+                  MatchedIdentifiers(Set(WorkIdentifier(sourceId, version)))))
               get[WorkNode](dynamoClient, graphTable.name)('id -> sourceId)
                 .map(_.right.get) shouldBe Some(
                 WorkNode(sourceId, version, Nil, ciHash(sourceId)))

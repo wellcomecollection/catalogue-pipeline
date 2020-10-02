@@ -303,7 +303,8 @@ class MatcherWorkerServiceTest
             processAndAssertMatchedWorkIs(workAv2, expectedMatchedWorkAv2)
 
             // Work V1 is sent but not matched
-            val workAv1 = sourceWork(sourceIdentifier = identifierA, version = 1)
+            val workAv1 =
+              sourceWork(sourceIdentifier = identifierA, version = 1)
 
             sendWork(workAv1, vhs, queue)
             eventually {
@@ -343,8 +344,9 @@ class MatcherWorkerServiceTest
             processAndAssertMatchedWorkIs(workAv2, expectedMatchedWorkAv2)
 
             // Work V1 is sent but not matched
-            val differentWorkAv2 = sourceWork(sourceIdentifier = identifierA, version = 2)
-              .mergeCandidates(List(MergeCandidate(identifierB)))
+            val differentWorkAv2 =
+              sourceWork(sourceIdentifier = identifierA, version = 2)
+                .mergeCandidates(List(MergeCandidate(identifierB)))
 
             sendWork(differentWorkAv2, vhs, queue)
             eventually {

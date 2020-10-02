@@ -48,7 +48,9 @@ class WorksServiceTest
 
   describe("listOrSearchWorks") {
     it("gets records in Elasticsearch") {
-      val works = (1 to 2).map { _ => identifiedWork() }
+      val works = (1 to 2).map { _ =>
+        identifiedWork()
+      }
 
       assertListOrSearchResultIsCorrect(
         allWorks = works,
@@ -67,7 +69,9 @@ class WorksServiceTest
 
     it("returns an empty result set when asked for a page that does not exist") {
       assertListOrSearchResultIsCorrect(
-        allWorks = (1 to 3).map { _ => identifiedWork() },
+        allWorks = (1 to 3).map { _ =>
+          identifiedWork()
+        },
         expectedWorks = Seq(),
         expectedTotalResults = 3,
         worksSearchOptions = createWorksSearchOptionsWith(pageNumber = 4)
@@ -75,8 +79,12 @@ class WorksServiceTest
     }
 
     it("does not list invisible works") {
-      val visibleWorks = (1 to 3).map { _ => identifiedWork() }
-      val invisibleWorks = (1 to 3).map { _ => identifiedWork().invisible() }
+      val visibleWorks = (1 to 3).map { _ =>
+        identifiedWork()
+      }
+      val invisibleWorks = (1 to 3).map { _ =>
+        identifiedWork().invisible()
+      }
 
       assertListOrSearchResultIsCorrect(
         allWorks = visibleWorks ++ invisibleWorks,
@@ -167,7 +175,8 @@ class WorksServiceTest
   describe("simple query string syntax") {
     it("uses only PHRASE simple query syntax") {
       val work = identifiedWork()
-        .title("+a -title | with (all the simple) query~4 syntax operators in it*")
+        .title(
+          "+a -title | with (all the simple) query~4 syntax operators in it*")
 
       assertListOrSearchResultIsCorrect(
         allWorks = List(work),
@@ -229,7 +238,8 @@ class WorksServiceTest
   describe("filter works by date") {
     def createDatedWork(dateLabel: String): Work.Visible[Identified] =
       identifiedWork()
-        .production(List(createProductionEventWith(dateLabel = Some(dateLabel))))
+        .production(
+          List(createProductionEventWith(dateLabel = Some(dateLabel))))
 
     val work1709 = createDatedWork("1709")
     val work1950 = createDatedWork("1950")

@@ -163,7 +163,9 @@ class ElasticsearchServiceTest
         // Since every work has the same title, we expect them to be returned in
         // ID order when we search for "A".
         val works = (1 to 5)
-          .map { _ => identifiedWork().title(title) }
+          .map { _ =>
+            identifiedWork().title(title)
+          }
           .sortBy(_.state.canonicalId)
 
         insertIntoElasticsearch(index, works: _*)
@@ -367,7 +369,9 @@ class ElasticsearchServiceTest
 
   private def populateElasticsearch(
     index: Index): List[Work.Visible[Identified]] = {
-    val works = (1 to 10).map { _ => identifiedWork() }
+    val works = (1 to 10).map { _ =>
+      identifiedWork()
+    }
 
     insertIntoElasticsearch(index, works: _*)
 

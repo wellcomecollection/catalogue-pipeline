@@ -51,7 +51,8 @@ class WorkIndexerTest
       }
     }
 
-    it("doesn't overwrite a Work with lower version and hasMultipleSources = true") {
+    it(
+      "doesn't overwrite a Work with lower version and hasMultipleSources = true") {
       val unmergedNewWork = identifiedWork()
       val mergedOldWork = identifiedWork(
         sourceIdentifier = unmergedNewWork.sourceIdentifier,
@@ -107,10 +108,11 @@ class WorkIndexerTest
 
     it("doesn't override a redirected Work with identified work same version") {
       val redirectedWork = identifiedWork()
-        .redirected(IdState.Identified(
-          canonicalId = createCanonicalId,
-          sourceIdentifier = createSourceIdentifier
-        ))
+        .redirected(
+          IdState.Identified(
+            canonicalId = createCanonicalId,
+            sourceIdentifier = createSourceIdentifier
+          ))
 
       val identifiedOldWork = identifiedWork(
         canonicalId = redirectedWork.state.canonicalId,

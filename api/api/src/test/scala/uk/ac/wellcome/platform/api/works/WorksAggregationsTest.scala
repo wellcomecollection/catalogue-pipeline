@@ -171,7 +171,8 @@ class WorksAggregationsTest extends ApiWorksTestBase {
         val works = dates
           .map { dateLabel =>
             identifiedWork()
-              .production(List(createProductionEventWith(dateLabel = Some(dateLabel))))
+              .production(
+                List(createProductionEventWith(dateLabel = Some(dateLabel))))
           }
           .sortBy { _.state.canonicalId }
 
@@ -327,11 +328,13 @@ class WorksAggregationsTest extends ApiWorksTestBase {
   }
 
   it("supports aggregating on license") {
-    def createLicensedWork(canonicalId: String, licenses: Seq[License]): Work.Visible[WorkState.Identified] = {
+    def createLicensedWork(
+      canonicalId: String,
+      licenses: Seq[License]): Work.Visible[WorkState.Identified] = {
       val items =
-        licenses
-          .map { license => createDigitalItemWith(license = Some(license)) }
-          .toList
+        licenses.map { license =>
+          createDigitalItemWith(license = Some(license))
+        }.toList
 
       identifiedWork(canonicalId = canonicalId).items(items)
     }

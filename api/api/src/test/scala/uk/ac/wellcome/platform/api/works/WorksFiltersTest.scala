@@ -517,9 +517,11 @@ class WorksFiltersTest extends ApiWorksTestBase {
   }
 
   describe("filtering works by date range") {
-    def createDatedWork(canonicalId: String, dateLabel: String): Work.Visible[WorkState.Identified] =
+    def createDatedWork(canonicalId: String,
+                        dateLabel: String): Work.Visible[WorkState.Identified] =
       identifiedWork(canonicalId = canonicalId)
-        .production(List(createProductionEventWith(dateLabel = Some(dateLabel))))
+        .production(
+          List(createProductionEventWith(dateLabel = Some(dateLabel))))
 
     val work1 = createDatedWork(canonicalId = "1", dateLabel = "1709")
     val work2 = createDatedWork(canonicalId = "2", dateLabel = "1950")
@@ -728,11 +730,13 @@ class WorksFiltersTest extends ApiWorksTestBase {
   }
 
   describe("filtering works by license") {
-    def createLicensedWork(canonicalId: String, licenses: Seq[License]): Work.Visible[WorkState.Identified] = {
+    def createLicensedWork(
+      canonicalId: String,
+      licenses: Seq[License]): Work.Visible[WorkState.Identified] = {
       val items =
-        licenses
-          .map { license => createDigitalItemWith(license = Some(license)) }
-          .toList
+        licenses.map { license =>
+          createDigitalItemWith(license = Some(license))
+        }.toList
 
       identifiedWork(canonicalId = canonicalId).items(items)
     }
