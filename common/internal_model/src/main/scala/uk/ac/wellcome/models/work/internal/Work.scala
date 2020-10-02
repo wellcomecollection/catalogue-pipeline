@@ -124,7 +124,7 @@ sealed trait WorkState {
 
   val sourceIdentifier: SourceIdentifier
 
-  def id: String
+  def id: String = sourceIdentifier.toString
 }
 
 object WorkState {
@@ -135,8 +135,6 @@ object WorkState {
 
     type WorkDataState = DataState.Unidentified
     type TransitionArgs = Unit
-
-    def id = sourceIdentifier.toString
   }
 
   case class Merged(
@@ -146,8 +144,6 @@ object WorkState {
 
     type WorkDataState = DataState.Unidentified
     type TransitionArgs = Boolean
-
-    def id = sourceIdentifier.toString
   }
 
   case class Denormalised(
@@ -158,8 +154,6 @@ object WorkState {
 
     type WorkDataState = DataState.Unidentified
     type TransitionArgs = Relations[DataState.Unidentified]
-
-    def id = sourceIdentifier.toString
   }
 
   case class Identified(
@@ -172,7 +166,7 @@ object WorkState {
     type WorkDataState = DataState.Identified
     type TransitionArgs = Unit
 
-    def id = canonicalId
+    override def id = canonicalId
   }
 }
 
