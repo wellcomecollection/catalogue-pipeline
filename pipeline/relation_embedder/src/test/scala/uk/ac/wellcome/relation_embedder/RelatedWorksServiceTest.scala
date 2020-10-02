@@ -7,6 +7,7 @@ import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import WorkState.Identified
+import org.scalatest.Assertion
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 
 class RelatedWorksServiceTest
@@ -15,15 +16,15 @@ class RelatedWorksServiceTest
     with ElasticsearchFixtures
     with WorkGenerators {
 
-  def service(index: Index) =
+  def service(index: Index): PathQueryRelatedWorksService =
     new PathQueryRelatedWorksService(elasticClient, index)
 
-  def work(path: String) =
+  def work(path: String): Work.Visible[Identified] =
     identifiedWork(sourceIdentifier = createSourceIdentifierWith(value = path))
       .title(path)
       .collectionPath(CollectionPath(path = path))
 
-  def storeWorks(index: Index, works: List[Work.Visible[Identified]] = works) =
+  def storeWorks(index: Index, works: List[Work.Visible[Identified]] = works): Assertion =
     insertIntoElasticsearch(index, works: _*)
 
   val workA = work("a")
