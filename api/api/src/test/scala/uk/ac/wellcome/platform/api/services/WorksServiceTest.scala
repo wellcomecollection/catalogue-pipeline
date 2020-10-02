@@ -24,6 +24,7 @@ import uk.ac.wellcome.models.work.internal.Format.{
   CDRoms,
   ManuscriptsAsian
 }
+import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
 import uk.ac.wellcome.platform.api.models._
 import WorkState.Identified
