@@ -105,10 +105,8 @@ class RelatedWorksServiceTest
         storeWorks(index)
         whenReady(service(index).getRelations(workF)) { relations =>
           relations shouldBe Relations(
-            ancestors = List(
-              Relation(workA, 0),
-              Relation(work2, 1),
-              Relation(workE, 2)),
+            ancestors =
+              List(Relation(workA, 0), Relation(work2, 1), Relation(workE, 2)),
             children = Nil,
             siblingsPreceding = Nil,
             siblingsSucceeding = Nil
@@ -178,7 +176,9 @@ class RelatedWorksServiceTest
           relations shouldBe Relations(
             ancestors = Nil,
             children = List(
-              Relation(workB1, 1), Relation(workB2, 1), Relation(workB10, 1)
+              Relation(workB1, 1),
+              Relation(workB2, 1),
+              Relation(workB10, 1)
             ),
             siblingsPreceding = Nil,
             siblingsSucceeding = Nil

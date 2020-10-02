@@ -35,8 +35,10 @@ object Main extends WellcomeTypesafeApp {
     new IngestorWorkerService(
       ingestorConfig = IngestorConfigBuilder.buildIngestorConfig(config),
       documentIndexer = new ElasticIndexer(elasticClient, index),
-      indexCreator =
-        new ElasticsearchIndexCreator(elasticClient, index, IdentifiedWorkIndexConfig),
+      indexCreator = new ElasticsearchIndexCreator(
+        elasticClient,
+        index,
+        IdentifiedWorkIndexConfig),
       messageStream =
         BigMessagingBuilder.buildMessageStream[Work[Identified]](config)
     )

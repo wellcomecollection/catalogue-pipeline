@@ -67,8 +67,9 @@ trait ElasticsearchFixtures
     }
 
   def withLocalWorksIndex[R](testWith: TestWith[Index, R]): R =
-    withLocalElasticsearchIndex[R](config = IdentifiedWorkIndexConfig) { index =>
-      testWith(index)
+    withLocalElasticsearchIndex[R](config = IdentifiedWorkIndexConfig) {
+      index =>
+        testWith(index)
     }
 
   def withLocalSourceWorksIndex[R](testWith: TestWith[Index, R]): R =
@@ -82,8 +83,9 @@ trait ElasticsearchFixtures
     }
 
   def withLocalDenormalisedWorksIndex[R](testWith: TestWith[Index, R]): R =
-    withLocalElasticsearchIndex[R](config = DenormalisedWorkIndexConfig) { index =>
-      testWith(index)
+    withLocalElasticsearchIndex[R](config = DenormalisedWorkIndexConfig) {
+      index =>
+        testWith(index)
     }
 
   def withLocalImagesIndex[R](testWith: TestWith[Index, R]): R =
@@ -229,8 +231,8 @@ trait ElasticsearchFixtures
   }
 
   def insertIntoElasticsearch[State <: WorkState](
-    index: Index, works: Work[State]*)(
-    implicit encoder: Encoder[Work[State]]): Assertion = {
+    index: Index,
+    works: Work[State]*)(implicit encoder: Encoder[Work[State]]): Assertion = {
     val result = elasticClient.execute(
       bulk(
         works.map { work =>
