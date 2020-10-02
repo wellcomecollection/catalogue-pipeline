@@ -1,11 +1,11 @@
 package uk.ac.wellcome.platform.api.rest
 
-import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.model.Uri
 import uk.ac.wellcome.platform.api.models._
 import akka.http.scaladsl.server.{Directive, Directives, Route}
 import com.sksamuel.elastic4s.ElasticError
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
+import grizzled.slf4j.Logger
 import io.circe.Printer
 import uk.ac.wellcome.display.json.DisplayJsonUtil
 import uk.ac.wellcome.display.models.ApiVersions
@@ -43,48 +43,42 @@ trait CustomDirectives extends Directives with FailFastCirceSupport {
       ElasticsearchErrorHandler.buildDisplayError(err)
     )
 
-  def gone(message: String): Route = error(
-    DisplayError(
-      ErrorVariant.http410,
-      Some(message)
+  def gone(description: String): Route =
+    error(
+      DisplayError(variant = ErrorVariant.http410, description = description)
     )
-  )
 
-  def notFound(message: String): Route = error(
-    DisplayError(
-      ErrorVariant.http404,
-      Some(message)
+  def notFound(description: String): Route =
+    error(
+      DisplayError(variant = ErrorVariant.http404, description = description)
     )
-  )
 
-  def invalidRequest(message: String): Route = error(
-    DisplayError(
-      ErrorVariant.http400,
-      Some(message)
+  def invalidRequest(description: String): Route =
+    error(
+      DisplayError(variant = ErrorVariant.http400, description = description)
     )
-  )
+
+  def internalError(err: Throwable): Route = {
+    logger.error(s"Sending HTTP 500: $err", err)
+    error(DisplayError(variant = ErrorVariant.http500))
+  }
 
   def getWithFuture(future: Future[Route]): Route =
     get {
       onComplete(future) {
         case Success(resp) => resp
-        case Failure(_) =>
-          error(
-            DisplayError(ErrorVariant.http500, Some("Unhandled error."))
-          )
+        case Failure(err)  => internalError(err)
       }
     }
 
   private def error(err: DisplayError): Route = {
-    val status = err.httpStatus match {
-      case Some(400) => BadRequest
-      case Some(404) => NotFound
-      case Some(410) => Gone
-      case Some(500) => InternalServerError
-      case _         => InternalServerError
-    }
-    complete(status -> ResultResponse(context = contextUri, result = err))
+    val status = err.httpStatus.getOrElse(500)
+    complete(
+      status -> ResultResponse(context = contextUri, result = err)
+    )
   }
 
   implicit val jsonPrinter: Printer = DisplayJsonUtil.printer
+
+  private lazy val logger = Logger(this.getClass.getName)
 }
