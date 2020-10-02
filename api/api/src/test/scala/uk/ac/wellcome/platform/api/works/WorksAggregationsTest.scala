@@ -321,12 +321,20 @@ class WorksAggregationsTest extends ApiWorksTestBase {
   }
 
   it("supports aggregating on license") {
+    def createLicensedWork(canonicalId: String, licenses: Seq[License]): Work.Visible[WorkState.Identified] = {
+      val items =
+        licenses
+          .map { license => createDigitalItemWith(license = Some(license)) }
+          .toList
+
+      identifiedWork(canonicalId = canonicalId).items(items)
+    }
 
     val works = List(
-      createLicensedWork("A", List(License.CCBY)),
-      createLicensedWork("B", List(License.CCBYNC)),
-      createLicensedWork("C", List(License.CCBY, License.CCBYNC)),
-      createLicensedWork("D", Nil)
+      createLicensedWork("A", licenses = List(License.CCBY)),
+      createLicensedWork("B", licenses = List(License.CCBYNC)),
+      createLicensedWork("C", licenses = List(License.CCBY, License.CCBYNC)),
+      createLicensedWork("D", licenses = List.empty)
     )
     withApi {
       case (ElasticConfig(worksIndex, _), routes) =>

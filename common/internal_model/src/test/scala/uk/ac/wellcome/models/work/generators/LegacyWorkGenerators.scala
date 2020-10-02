@@ -295,13 +295,4 @@ trait LegacyWorkGenerators
       canonicalId = canonicalId,
       production = List(createProductionEventWith(dateLabel = Some(dateLabel)))
     )
-
-  def createLicensedWork(canonicalId: String,
-                         licenses: List[License]): Work.Visible[Identified] =
-    createIdentifiedWorkWith(
-      canonicalId = canonicalId,
-      items = licenses.map { license =>
-        createDigitalItemWith(license = Some(license))
-      }
-    )
 }
