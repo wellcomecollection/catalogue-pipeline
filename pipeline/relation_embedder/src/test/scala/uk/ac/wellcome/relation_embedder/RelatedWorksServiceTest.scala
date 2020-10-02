@@ -2,26 +2,17 @@ package uk.ac.wellcome.relation_embedder
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalatest.matchers.should.Matchers
-import org.scalatest.concurrent.ScalaFutures
 import com.sksamuel.elastic4s.Index
 import org.scalatest.funspec.AnyFunSpec
-
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
-import uk.ac.wellcome.models.work.generators.{
-  IdentifiersGenerators,
-  ItemsGenerators,
-  WorkGenerators
-}
+import uk.ac.wellcome.models.work.generators.WorkGenerators
 import WorkState.Identified
+import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 
 class RelatedWorksServiceTest
     extends AnyFunSpec
     with Matchers
-    with ScalaFutures
     with ElasticsearchFixtures
-    with IdentifiersGenerators
-    with ItemsGenerators
     with WorkGenerators {
 
   def service(index: Index) =
