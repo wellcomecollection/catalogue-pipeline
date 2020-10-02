@@ -3,7 +3,6 @@ package uk.ac.wellcome.platform.recorder
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.bigmessaging.fixtures.VHSFixture
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.Implicits._
@@ -19,7 +18,6 @@ class RecorderIntegrationTest
     with Eventually
     with IntegrationPatience
     with WorkerServiceFixture
-    with VHSFixture[Work[Source]]
     with LegacyWorkGenerators {
 
   it("saves received works to VHS, and puts the VHS key on the queue") {
