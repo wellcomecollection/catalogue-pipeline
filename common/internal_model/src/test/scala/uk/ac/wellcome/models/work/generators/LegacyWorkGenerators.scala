@@ -73,11 +73,6 @@ trait LegacyWorkGenerators
   def createSourceWork: Work.Visible[Source] =
     createSourceWorkWith()
 
-  def createSourceWorks(count: Int): Seq[Work.Visible[Source]] =
-    (1 to count).map { _ =>
-      createSourceWork
-    }
-
   def createIdentifiedWorkWith(
     canonicalId: String = createCanonicalId,
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
