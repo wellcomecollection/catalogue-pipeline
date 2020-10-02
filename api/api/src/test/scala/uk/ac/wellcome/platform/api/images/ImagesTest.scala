@@ -118,10 +118,9 @@ class ImagesTest extends ApiImagesTestBase with SierraWorkGenerators {
           imageId = IdState.Identified("c", createSourceIdentifier),
           parentWork = identifiedWork()
             .title("Schiacciata is a Tuscan focaccia"),
-          redirectedWork =
-            Some(
-              identifiedWork().title("A Tusdan bread")
-            )
+          redirectedWork = Some(
+            identifiedWork().title("A Tusdan bread")
+          )
         )
         insertImagesIntoElasticsearch(
           imagesIndex,

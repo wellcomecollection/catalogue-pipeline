@@ -59,8 +59,7 @@ trait ImageGenerators
       IdState.Identified(createCanonicalId, createSourceIdentifier),
     location: DigitalLocationDeprecated = createDigitalLocation,
     version: Int = 1,
-    parentWork: Work.Visible[WorkState.Identified] =
-      sierraIdentifiedWork(),
+    parentWork: Work.Visible[WorkState.Identified] = sierraIdentifiedWork(),
     redirectedWork: Option[Work[WorkState.Identified]] = Some(
       sierraIdentifiedWork())): MergedImage[DataState.Identified] =
     MergedImage[DataState.Identified](
@@ -88,8 +87,7 @@ trait ImageGenerators
     imageId: IdState.Identified = IdState.Identified(
       createCanonicalId,
       createSourceIdentifierWith(IdentifierType("miro-image-number"))),
-    parentWork: Work.Visible[WorkState.Identified] =
-      sierraIdentifiedWork(),
+    parentWork: Work.Visible[WorkState.Identified] = sierraIdentifiedWork(),
     redirectedWork: Option[Work.Visible[WorkState.Identified]] = Some(
       identifiedWork()),
     inferredData: Option[InferredData] = createInferredData,
