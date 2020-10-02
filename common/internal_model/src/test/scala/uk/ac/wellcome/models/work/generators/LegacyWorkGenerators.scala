@@ -10,21 +10,6 @@ trait LegacyWorkGenerators
 
   private def createTitle: String = randomAlphanumeric(length = 100)
 
-  def createRedirectedSourceWork: Work.Redirected[Source] =
-    Work.Redirected[Source](
-      state = Source(createSourceIdentifier),
-      version = 1,
-      redirect = IdState.Identifiable(createSourceIdentifier)
-    )
-
-  def createRedirectedSourceWorkWith(
-    redirect: IdState.Identifiable): Work.Redirected[Source] =
-    Work.Redirected[Source](
-      state = Source(createSourceIdentifier),
-      version = 1,
-      redirect = redirect
-    )
-
   def createIdentifiedRedirectedWork: Work.Redirected[Identified] =
     createIdentifiedRedirectedWorkWith()
 
