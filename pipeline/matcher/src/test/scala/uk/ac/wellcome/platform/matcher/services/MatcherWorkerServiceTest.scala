@@ -91,8 +91,8 @@ class MatcherWorkerServiceTest
       Set(
         MatchedIdentifiers(
           identifiers = Set(
-            WorkIdentifier("sierra-system-number/A", version = Some(1)),
-            WorkIdentifier("sierra-system-number/B", version = None)
+            WorkIdentifier(identifierA.toString, version = Some(1)),
+            WorkIdentifier(identifierB.toString, version = None)
           )
         )
       )
@@ -120,7 +120,7 @@ class MatcherWorkerServiceTest
       Set(
         MatchedIdentifiers(
           identifiers =
-            Set(WorkIdentifier("sierra-system-number/A", version = 1))
+            Set(WorkIdentifier(identifierA.toString, version = 1))
         )
       )
     )
@@ -132,7 +132,7 @@ class MatcherWorkerServiceTest
       Set(
         MatchedIdentifiers(
           identifiers =
-            Set(WorkIdentifier("sierra-system-number/B", version = 1))
+            Set(WorkIdentifier(identifierB.toString, version = 1))
         )
       )
     )
@@ -146,8 +146,8 @@ class MatcherWorkerServiceTest
       Set(
         MatchedIdentifiers(
           identifiers = Set(
-            WorkIdentifier("sierra-system-number/A", version = 2),
-            WorkIdentifier("sierra-system-number/B", version = 1)
+            WorkIdentifier(identifierA.toString, version = 2),
+            WorkIdentifier(identifierB.toString, version = 1)
           )
         )
       )
@@ -162,7 +162,7 @@ class MatcherWorkerServiceTest
         Set(
           MatchedIdentifiers(
             identifiers =
-              Set(WorkIdentifier("sierra-system-number/C", version = 1))
+              Set(WorkIdentifier(identifierC.toString, version = 1))
           )
         )
       )
@@ -177,9 +177,9 @@ class MatcherWorkerServiceTest
         Set(
           MatchedIdentifiers(
             identifiers = Set(
-              WorkIdentifier("sierra-system-number/A", version = 2),
-              WorkIdentifier("sierra-system-number/B", version = 2),
-              WorkIdentifier("sierra-system-number/C", version = 1)
+              WorkIdentifier(identifierA.toString, version = 2),
+              WorkIdentifier(identifierB.toString, version = 2),
+              WorkIdentifier(identifierC.toString, version = 1)
             )
           )
         )
@@ -208,7 +208,7 @@ class MatcherWorkerServiceTest
       Set(
         MatchedIdentifiers(
           identifiers =
-            Set(WorkIdentifier("sierra-system-number/A", version = 1))
+            Set(WorkIdentifier(identifierA.toString, version = 1))
         )
       )
     )
@@ -220,7 +220,7 @@ class MatcherWorkerServiceTest
       Set(
         MatchedIdentifiers(
           identifiers =
-            Set(WorkIdentifier("sierra-system-number/B", version = 1))
+            Set(WorkIdentifier(identifierB.toString, version = 1))
         )
       )
     )
@@ -236,8 +236,8 @@ class MatcherWorkerServiceTest
         Set(
           MatchedIdentifiers(
             identifiers = Set(
-              WorkIdentifier("sierra-system-number/A", version = 2),
-              WorkIdentifier("sierra-system-number/B", version = 1)
+              WorkIdentifier(identifierA.toString, version = 2),
+              WorkIdentifier(identifierB.toString, version = 1)
             )
           )
         )
@@ -252,11 +252,11 @@ class MatcherWorkerServiceTest
         Set(
           MatchedIdentifiers(
             identifiers =
-              Set(WorkIdentifier("sierra-system-number/A", version = 3))
+              Set(WorkIdentifier(identifierA.toString, version = 3))
           ),
           MatchedIdentifiers(
             identifiers =
-              Set(WorkIdentifier("sierra-system-number/B", version = 1))
+              Set(WorkIdentifier(identifierB.toString, version = 1))
           )
         )
       )
@@ -286,7 +286,7 @@ class MatcherWorkerServiceTest
       Set(
         MatchedIdentifiers(
           identifiers =
-            Set(WorkIdentifier("sierra-system-number/A", version = 2))
+            Set(WorkIdentifier(identifierA.toString, version = 2))
         )
       )
     )
@@ -327,7 +327,7 @@ class MatcherWorkerServiceTest
       Set(
         MatchedIdentifiers(
           identifiers =
-            Set(WorkIdentifier("sierra-system-number/A", version = 2))
+            Set(WorkIdentifier(identifierA.toString, version = 2))
         )
       )
     )
