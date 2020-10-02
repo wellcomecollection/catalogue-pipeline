@@ -4,11 +4,10 @@ import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.models.work.internal._
 
 class WorksTest extends ApiWorksTestBase {
-
   it("returns a list of works") {
     withApi {
       case (ElasticConfig(worksIndex, _), routes) =>
-        val works = createIdentifiedWorks(count = 3).sortBy {
+        val works = identifiedWorks(count = 3).sortBy {
           _.state.canonicalId
         }
 
@@ -23,7 +22,7 @@ class WorksTest extends ApiWorksTestBase {
   it("returns a single work when requested with id") {
     withApi {
       case (ElasticConfig(worksIndex, _), routes) =>
-        val work = createIdentifiedWork
+        val work = identifiedWork()
 
         insertIntoElasticsearch(worksIndex, work)
 
@@ -45,10 +44,10 @@ class WorksTest extends ApiWorksTestBase {
   it("returns optional fields when they exist") {
     withApi {
       case (ElasticConfig(worksIndex, _), routes) =>
-        val work = createIdentifiedWorkWith(
-          duration = Some(3600),
-          edition = Some("Special edition"),
-        )
+        val work = identifiedWork()
+          .duration(3600)
+          .edition("Special edition")
+
         insertIntoElasticsearch(worksIndex, work)
         assertJsonResponse(
           routes,
@@ -71,7 +70,7 @@ class WorksTest extends ApiWorksTestBase {
     "returns the requested page of results when requested with page & pageSize") {
     withApi {
       case (ElasticConfig(worksIndex, _), routes) =>
-        val works = createIdentifiedWorks(count = 3).sortBy {
+        val works = identifiedWorks(count = 3).sortBy {
           _.state.canonicalId
         }
 
@@ -140,12 +139,8 @@ class WorksTest extends ApiWorksTestBase {
   it("returns matching results if doing a full-text search") {
     withApi {
       case (ElasticConfig(worksIndex, _), routes) =>
-        val workDodo = createIdentifiedWorkWith(
-          title = Some("A drawing of a dodo")
-        )
-        val workMouse = createIdentifiedWorkWith(
-          title = Some("A mezzotint of a mouse")
-        )
+        val workDodo = identifiedWork().title("A drawing of a dodo")
+        val workMouse = identifiedWork().title("A mezzotint of a mouse")
         insertIntoElasticsearch(worksIndex, workDodo, workMouse)
 
         assertJsonResponse(routes, s"/$apiPrefix/works?query=cat") {
@@ -162,10 +157,10 @@ class WorksTest extends ApiWorksTestBase {
     withApi {
       case (ElasticConfig(worksIndex, _), routes) =>
         withLocalWorksIndex { altIndex =>
-          val work = createIdentifiedWork
+          val work = identifiedWork()
           insertIntoElasticsearch(worksIndex, work)
 
-          val altWork = createIdentifiedWork
+          val altWork = identifiedWork()
           insertIntoElasticsearch(index = altIndex, altWork)
 
           assertJsonResponse(
@@ -201,14 +196,10 @@ class WorksTest extends ApiWorksTestBase {
     withApi {
       case (ElasticConfig(worksIndex, _), routes) =>
         withLocalWorksIndex { altIndex =>
-          val work = createIdentifiedWorkWith(
-            title = Some("Playing with pangolins")
-          )
+          val work = identifiedWork().title("Playing with pangolins")
           insertIntoElasticsearch(worksIndex, work)
 
-          val altWork = createIdentifiedWorkWith(
-            title = Some("Playing with pangolins")
-          )
+          val altWork = identifiedWork().title("Playing with pangolins")
           insertIntoElasticsearch(index = altIndex, altWork)
 
           assertJsonResponse(routes, s"/$apiPrefix/works?query=pangolins") {
@@ -227,14 +218,14 @@ class WorksTest extends ApiWorksTestBase {
   it("shows the thumbnail field if available") {
     withApi {
       case (ElasticConfig(worksIndex, _), routes) =>
-        val work = createIdentifiedWorkWith(
-          thumbnail = Some(
+        val work = identifiedWork()
+          .thumbnail(
             DigitalLocationDeprecated(
               locationType = LocationType("thumbnail-image"),
               url = "https://iiif.example.org/1234/default.jpg",
               license = Some(License.CCBY)
-            ))
-        )
+            )
+          )
         insertIntoElasticsearch(worksIndex, work)
 
         assertJsonResponse(routes, s"/$apiPrefix/works") {
