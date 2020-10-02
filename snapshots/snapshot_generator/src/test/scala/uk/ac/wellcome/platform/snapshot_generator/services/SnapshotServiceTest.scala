@@ -17,7 +17,7 @@ import uk.ac.wellcome.display.json.DisplayJsonUtil
 import uk.ac.wellcome.display.json.DisplayJsonUtil._
 import uk.ac.wellcome.display.models.{ApiVersions, DisplayWork, WorksIncludes}
 import uk.ac.wellcome.elasticsearch.ElasticClientBuilder
-import uk.ac.wellcome.models.work.generators.LegacyWorkGenerators
+import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.platform.snapshot_generator.fixtures.{
   AkkaS3,
   SnapshotServiceFixture
@@ -38,7 +38,7 @@ class SnapshotServiceTest
     with GzipUtils
     with IntegrationPatience
     with SnapshotServiceFixture
-    with LegacyWorkGenerators {
+    with WorkGenerators {
 
   def withFixtures[R](
     testWith: TestWith[(SnapshotService, Index, Bucket), R]): R =
@@ -57,8 +57,8 @@ class SnapshotServiceTest
   it("completes a snapshot generation") {
     withFixtures {
       case (snapshotService: SnapshotService, worksIndex, publicBucket) =>
-        val visibleWorks = createIdentifiedWorks(count = 4)
-        val notVisibleWorks = createIdentifiedInvisibleWorks(count = 2)
+        val visibleWorks = (1 to 4).map { _ => identifiedWork() }
+        val notVisibleWorks = (1 to 2).map { _ => identifiedWork().invisible() }
 
         val works = visibleWorks ++ notVisibleWorks
 
@@ -106,10 +106,9 @@ class SnapshotServiceTest
   it("completes a snapshot generation of an index with more than 10000 items") {
     withFixtures {
       case (snapshotService: SnapshotService, worksIndex, publicBucket) =>
-        val works = (1 to 11000).map { id =>
-          createIdentifiedWorkWith(
-            title = Some(randomAlphanumeric(length = 1500))
-          )
+        val works = (1 to 11000).map { _ =>
+          identifiedWork()
+            .title(randomAlphanumeric(length = 1500))
         }
 
         insertIntoElasticsearch(worksIndex, works: _*)
@@ -154,7 +153,7 @@ class SnapshotServiceTest
   it("returns a failed future if the S3 upload fails") {
     withFixtures {
       case (snapshotService: SnapshotService, worksIndex, _) =>
-        val works = createIdentifiedWorks(count = 3)
+        val works = (1 to 3).map { _ => identifiedWork() }
 
         insertIntoElasticsearch(worksIndex, works: _*)
 

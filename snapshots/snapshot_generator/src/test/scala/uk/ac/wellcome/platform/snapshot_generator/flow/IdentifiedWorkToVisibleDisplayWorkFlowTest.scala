@@ -6,7 +6,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.display.models.{DisplayWork, WorksIncludes}
-import uk.ac.wellcome.models.work.generators.LegacyWorkGenerators
+import uk.ac.wellcome.models.work.generators.WorkGenerators
 
 class IdentifiedWorkToVisibleDisplayWorkFlowTest
     extends AnyFunSpec
@@ -14,14 +14,14 @@ class IdentifiedWorkToVisibleDisplayWorkFlowTest
     with Akka
     with ScalaFutures
     with IntegrationPatience
-    with LegacyWorkGenerators {
+    with WorkGenerators {
 
   it("creates DisplayWorks from IdentifiedWorks") {
     withMaterializer { implicit materializer =>
       val flow = IdentifiedWorkToVisibleDisplayWork(
         toDisplayWork = DisplayWork.apply(_, WorksIncludes.includeAll()))
 
-      val works = createIdentifiedWorks(count = 3).toList
+      val works = (1 to 3).map { _ => identifiedWork() }
 
       val eventualDisplayWorks = Source(works)
         .via(flow)
