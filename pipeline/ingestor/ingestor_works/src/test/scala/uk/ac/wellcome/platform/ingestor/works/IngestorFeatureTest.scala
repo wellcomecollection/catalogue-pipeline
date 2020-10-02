@@ -3,10 +3,8 @@ package uk.ac.wellcome.platform.ingestor.works
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import org.scalatest.matchers.should.Matchers
-import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.elasticsearch.WorksIndexConfig
-import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal._
@@ -20,9 +18,7 @@ class IngestorFeatureTest
     extends AnyFunSpec
     with Matchers
     with JsonAssertions
-    with ScalaFutures
     with IngestorFixtures
-    with ElasticsearchFixtures
     with WorkGenerators {
 
   it("ingests a Miro work") {
@@ -62,5 +58,4 @@ class IngestorFeatureTest
       }
     }
   }
-
 }

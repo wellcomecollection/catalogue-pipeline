@@ -3,7 +3,6 @@ package uk.ac.wellcome.platform.ingestor.works.services
 import scala.concurrent.ExecutionContext.Implicits.global
 import com.sksamuel.elastic4s.Index
 import org.scalatest.Assertion
-import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -18,7 +17,6 @@ import WorkState.Identified
 
 class WorkIndexerTest
     extends AnyFunSpec
-    with ScalaFutures
     with Matchers
     with ElasticsearchFixtures
     with WorkGenerators {
@@ -174,7 +172,7 @@ class WorkIndexerTest
   }
 
   def withWorksIndexAndIndexer[R](
-    testWith: TestWith[(Index, ElasticIndexer[Work[Identified]]), R]) = {
+    testWith: TestWith[(Index, ElasticIndexer[Work[Identified]]), R]): R = {
     withLocalWorksIndex { index =>
       val indexer = new ElasticIndexer(elasticClient, index)
       testWith((index, indexer))
