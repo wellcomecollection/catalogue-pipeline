@@ -3,11 +3,15 @@ package uk.ac.wellcome.models.work.generators
 import uk.ac.wellcome.models.work.internal._
 import WorkState._
 
+import scala.util.Random
+
 trait WorkGenerators extends IdentifiersGenerators {
+  private def createVersion: Int =
+    Random.nextInt(100) + 1
 
   def sourceWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    version: Int = 1
+    version: Int = createVersion
   ): Work.Visible[Source] =
     Work.Visible[Source](
       state = Source(sourceIdentifier),
