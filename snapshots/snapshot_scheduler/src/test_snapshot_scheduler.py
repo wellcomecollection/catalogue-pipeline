@@ -27,7 +27,7 @@ def test_writes_message_to_sqs(sns_client, topic_arn):
     snapshot_job = json.loads(messages[0][":message"])
     assert snapshot_job["s3Location"] == {
         "bucket": public_bucket_name,
-        "key": public_object_key_v2
+        "key": public_object_key_v2,
     }
     assert snapshot_job["apiVersion"] == "v2"
 

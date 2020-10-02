@@ -48,11 +48,10 @@ def main(event=None, _ctxt=None, sns_client=None):
     for (api_version, public_object_key) in [("v2", public_object_key_v2)]:
         snapshot_job = SnapshotJob(
             s3Location=S3ObjectLocation(
-                bucket=public_bucket_name,
-                key=public_object_key_v2,
+                bucket=public_bucket_name, key=public_object_key_v2
             ),
             apiVersion=api_version,
-            requestedAt=datetime.datetime.utcnow()
+            requestedAt=datetime.datetime.utcnow(),
         )
 
         json_string = json.dumps(attr.asdict(snapshot_job), cls=DatetimeEncoder)

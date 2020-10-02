@@ -195,7 +195,8 @@ class SnapshotServiceTest
 
       withFixtures {
         case (snapshotService: SnapshotService, _, _) =>
-          snapshotService.buildLocation(location) shouldBe Uri(s"http://localhost:33333/${location.bucket}/${location.key}")
+          snapshotService.buildLocation(location) shouldBe Uri(
+            s"http://localhost:33333/${location.bucket}/${location.key}")
       }
     }
 
@@ -205,7 +206,8 @@ class SnapshotServiceTest
       withActorSystem { implicit actorSystem =>
         withS3AkkaSettings(endpoint = "") { s3Settings =>
           withSnapshotService(s3Settings) {
-            _.buildLocation(location) shouldBe Uri(s"s3://${location.bucket}/${location.key}")
+            _.buildLocation(location) shouldBe Uri(
+              s"s3://${location.bucket}/${location.key}")
           }
         }
       }
