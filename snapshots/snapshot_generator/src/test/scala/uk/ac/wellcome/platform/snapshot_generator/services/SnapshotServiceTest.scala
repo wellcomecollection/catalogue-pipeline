@@ -1,6 +1,7 @@
 package uk.ac.wellcome.platform.snapshot_generator.services
 
 import java.io.File
+import java.time.Instant
 
 import akka.http.scaladsl.model.Uri
 import akka.stream.alpakka.s3.S3Exception
@@ -18,16 +19,12 @@ import uk.ac.wellcome.display.json.DisplayJsonUtil._
 import uk.ac.wellcome.display.models.{ApiVersions, DisplayWork, WorksIncludes}
 import uk.ac.wellcome.elasticsearch.ElasticClientBuilder
 import uk.ac.wellcome.models.work.generators.WorkGenerators
-import uk.ac.wellcome.platform.snapshot_generator.fixtures.{
-  AkkaS3,
-  SnapshotServiceFixture
-}
-import uk.ac.wellcome.platform.snapshot_generator.models.{
-  CompletedSnapshotJob,
-  SnapshotJob
-}
+import uk.ac.wellcome.models.work.internal.Work
+import uk.ac.wellcome.platform.snapshot_generator.fixtures.{AkkaS3, SnapshotServiceFixture}
+import uk.ac.wellcome.platform.snapshot_generator.models.SnapshotJob
 import uk.ac.wellcome.platform.snapshot_generator.test.utils.GzipUtils
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
+import uk.ac.wellcome.storage.s3.S3ObjectLocation
 
 class SnapshotServiceTest
     extends AnyFunSpec
@@ -66,9 +63,14 @@ class SnapshotServiceTest
 
         val publicObjectKey = "target.txt.gz"
 
+        val s3Location = S3ObjectLocation(
+          bucket = publicBucket.name,
+          key = publicObjectKey
+        )
+
         val snapshotJob = SnapshotJob(
-          publicBucketName = publicBucket.name,
-          publicObjectKey = publicObjectKey,
+          s3Location = s3Location,
+          requestedAt = Instant.now,
           apiVersion = ApiVersions.v2
         )
 
@@ -77,9 +79,15 @@ class SnapshotServiceTest
         whenReady(future) { result =>
           val downloadFile =
             File.createTempFile("snapshotServiceTest", ".txt.gz")
+
           s3Client.getObject(
             new GetObjectRequest(publicBucket.name, publicObjectKey),
             downloadFile)
+
+          val objectMetadata = s3Client.getObjectMetadata(publicBucket.name, publicObjectKey)
+
+          val s3Etag = objectMetadata.getETag
+          val s3Size = objectMetadata.getContentLength
 
           val contents = readGzipFile(downloadFile.getPath)
           val expectedContents = visibleWorks
@@ -93,11 +101,15 @@ class SnapshotServiceTest
 
           contents shouldBe expectedContents
 
-          result shouldBe CompletedSnapshotJob(
-            snapshotJob = snapshotJob,
-            targetLocation =
-              s"http://localhost:33333/${publicBucket.name}/$publicObjectKey"
-          )
+          result.snapshotJob shouldBe snapshotJob
+          result.snapshotResult.indexName shouldBe worksIndex.name
+          result.snapshotResult.documentCount shouldBe visibleWorks.length
+          result.snapshotResult.displayModel shouldBe Work.getClass.getCanonicalName
+          result.snapshotResult.startedAt shouldBe>(result.snapshotJob.requestedAt)
+          result.snapshotResult.finishedAt shouldBe>(result.snapshotResult.startedAt)
+          result.snapshotResult.s3Etag shouldBe s3Etag
+          result.snapshotResult.s3Size shouldBe s3Size
+          result.snapshotResult.s3Location shouldBe s3Location
         }
     }
 
@@ -112,9 +124,15 @@ class SnapshotServiceTest
         insertIntoElasticsearch(worksIndex, works: _*)
 
         val publicObjectKey = "target.txt.gz"
+
+        val s3Location = S3ObjectLocation(
+          bucket = publicBucket.name,
+          key = publicObjectKey
+        )
+
         val snapshotJob = SnapshotJob(
-          publicBucketName = publicBucket.name,
-          publicObjectKey = publicObjectKey,
+          s3Location = s3Location,
+          requestedAt = Instant.now,
           apiVersion = ApiVersions.v2
         )
 
@@ -126,6 +144,11 @@ class SnapshotServiceTest
           s3Client.getObject(
             new GetObjectRequest(publicBucket.name, publicObjectKey),
             downloadFile)
+
+          val objectMetadata = s3Client.getObjectMetadata(publicBucket.name, publicObjectKey)
+
+          val s3Etag = objectMetadata.getETag
+          val s3Size = objectMetadata.getContentLength
 
           val contents = readGzipFile(downloadFile.getPath)
           val expectedContents = works
@@ -139,11 +162,15 @@ class SnapshotServiceTest
 
           contents shouldBe expectedContents
 
-          result shouldBe CompletedSnapshotJob(
-            snapshotJob = snapshotJob,
-            targetLocation =
-              s"http://localhost:33333/${publicBucket.name}/$publicObjectKey"
-          )
+          result.snapshotJob shouldBe snapshotJob
+          result.snapshotResult.indexName shouldBe worksIndex.name
+          result.snapshotResult.documentCount shouldBe works.length
+          result.snapshotResult.displayModel shouldBe Work.getClass.getCanonicalName
+          result.snapshotResult.startedAt shouldBe>(result.snapshotJob.requestedAt)
+          result.snapshotResult.finishedAt shouldBe>(result.snapshotResult.startedAt)
+          result.snapshotResult.s3Etag shouldBe s3Etag
+          result.snapshotResult.s3Size shouldBe s3Size
+          result.snapshotResult.s3Location shouldBe s3Location
         }
     }
   }
@@ -155,9 +182,14 @@ class SnapshotServiceTest
 
         insertIntoElasticsearch(worksIndex, works: _*)
 
+        val s3Location = S3ObjectLocation(
+          bucket = "wrongBukkit",
+          key = "target.json.gz"
+        )
+
         val snapshotJob = SnapshotJob(
-          publicBucketName = "wrongBukkit",
-          publicObjectKey = "target.json.gz",
+          s3Location = s3Location,
+          requestedAt = Instant.now,
           apiVersion = ApiVersions.v2
         )
 
@@ -184,9 +216,15 @@ class SnapshotServiceTest
           s3Settings,
           worksIndex = "wrong-index",
           elasticClient = brokenElasticClient) { brokenSnapshotService =>
+
+          val s3Location = S3ObjectLocation(
+            bucket = "bukkit",
+            key = "target.json.gz"
+          )
+
           val snapshotJob = SnapshotJob(
-            publicBucketName = "bukkit",
-            publicObjectKey = "target.json.gz",
+            s3Location = s3Location,
+            requestedAt = Instant.now,
             apiVersion = ApiVersions.v2
           )
 
