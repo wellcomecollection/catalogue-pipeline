@@ -1,48 +1,25 @@
 package uk.ac.wellcome.platform.merger.rules
 
-import scala.Function.const
 import cats.data.NonEmptyList
 
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import WorkState.Source
-import SourceWork._
 
 object ImagesRule extends FieldMergeRule {
   import WorkPredicates._
 
-  type FieldData =
-    List[MergedImage[DataState.Unidentified]]
+  type FieldData = List[UnmergedImage[DataState.Unidentified]]
 
   override def merge(
     target: Work.Visible[Source],
     sources: Seq[Work[Source]] = Nil): FieldMergeResult[FieldData] =
-    sources match {
-      case Nil =>
-        FieldMergeResult(
-          data = getSingleMiroImage.applyOrElse(target, const(Nil)),
-          sources = Nil)
-      case _ :: _ =>
-        FieldMergeResult(
-          data = getPictureImages(target, sources).getOrElse(Nil) ++
-            getPairedMiroImages(target, sources).getOrElse(Nil),
-          // The images rule here is the exception where we don't want to redirect works as they have
-          // not technically been merged. This rule might change as the rules about merging items
-          // loosens up.
-          sources = List()
-        )
-    }
-
-  private lazy val getSingleMiroImage
-    : PartialFunction[Work.Visible[Source], FieldData] = {
-    case target if singleDigitalItemMiroWork(target) =>
-      target.data.images.map {
-        _.mergeWith(
-          target.toSourceWork,
-          None
-        )
-      }
-  }
+    FieldMergeResult(
+      data = getPictureImages(target, sources).getOrElse(Nil) ++
+        getPairedMiroImages(target, sources).getOrElse(Nil),
+      sources = List(getPictureImages, getPairedMiroImages)
+        .flatMap(_.mergedSources(target, sources))
+    )
 
   private lazy val getPictureImages = new FlatImageMergeRule {
     val isDefinedForTarget: WorkPredicate = sierraPicture
@@ -58,17 +35,8 @@ object ImagesRule extends FieldMergeRule {
   trait FlatImageMergeRule extends PartialRule {
     final override def rule(target: Work.Visible[Source],
                             sources: NonEmptyList[Work[Source]])
-      : List[MergedImage[DataState.Unidentified]] = {
-      val works = sources.prepend(target).toList
-      works flatMap {
-        _.data.images.map {
-          _.mergeWith(
-            target.toSourceWork,
-            Some(sources.head.toSourceWork)
-          )
-        }
-      }
-    }
+      : List[UnmergedImage[DataState.Unidentified]] =
+      (target :: sources).toList.flatMap(_.data.images)
   }
 
 }

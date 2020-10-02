@@ -36,6 +36,16 @@ object SourceWork {
       )
   }
 
+  implicit class MergedWorkToSourceWork(work: Work[WorkState.Merged]) {
+
+    def toSourceWork: SourceWork[DataState.Unidentified] =
+      SourceWork[DataState.Unidentified](
+        id = IdState.Identifiable(work.state.sourceIdentifier),
+        data = work.data,
+        version = work.version
+      )
+  }
+
   implicit class IdentifiedWorkToSourceWork(work: Work[WorkState.Identified]) {
 
     def toSourceWork: SourceWork[DataState.Identified] =

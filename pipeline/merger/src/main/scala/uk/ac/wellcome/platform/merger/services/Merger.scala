@@ -4,7 +4,11 @@ import cats.data.State
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.rules._
 import uk.ac.wellcome.platform.merger.logging.MergerLogging
-import uk.ac.wellcome.platform.merger.models.{MergeResult, MergerOutcome}
+import uk.ac.wellcome.platform.merger.models.{
+  FieldMergeResult,
+  MergeResult,
+  MergerOutcome
+}
 import WorkState.{Merged, Source}
 import WorkFsm._
 
@@ -20,13 +24,14 @@ import WorkFsm._
  * - any other works untouched
  */
 trait Merger extends MergerLogging {
-  type MergeState = State[Set[Work[Source]], MergeResult]
+  type MergeState = Map[Work[Source], Boolean]
 
   protected def findTarget(
     works: Seq[Work[Source]]): Option[Work.Visible[Source]]
 
-  protected def createMergeResult(target: Work.Visible[Source],
-                                  sources: Seq[Work[Source]]): MergeState
+  protected def createMergeResult(
+    target: Work.Visible[Source],
+    sources: Seq[Work[Source]]): State[MergeState, MergeResult]
 
   protected def getTargetAndSources(works: Seq[Work[Source]])
     : Option[(Work.Visible[Source], Seq[Work[Source]])] =
@@ -44,18 +49,35 @@ trait Merger extends MergerLogging {
         }
     }
 
+  implicit class MergeResultAccumulation[T](val result: FieldMergeResult[T]) {
+    def redirect: State[MergeState, T] = shouldRedirect(true)
+    def noRedirect: State[MergeState, T] = shouldRedirect(false)
+
+    private def shouldRedirect(redirect: Boolean): State[MergeState, T] =
+      State { prevState =>
+        val nextState = result.sources.foldLeft(prevState) {
+          case (state, source) if state.contains(source) => state
+          case (state, source)                           => state + (source -> redirect)
+        }
+        (nextState, result.data)
+      }
+  }
+
   def merge(works: Seq[Work[Source]]): MergerOutcome =
     getTargetAndSources(works)
       .map {
         case (target, sources) =>
           logIntentions(target, sources)
           val (mergeResultSources, result) = createMergeResult(target, sources)
-            .run(Set.empty)
+            .run(Map.empty)
             .value
+          val redirectedSources = mergeResultSources.collect {
+            case (source, true) => source
+          }
 
-          val remaining = (sources.toSet -- mergeResultSources)
+          val remaining = (sources.toSet -- redirectedSources)
             .map(_.transition[Merged](0))
-          val redirects = mergeResultSources
+          val redirects = redirectedSources
             .map(redirectSourceToTarget(target))
             .map(_.transition[Merged](0))
           logResult(result, redirects.toList, remaining.toList)
@@ -98,6 +120,8 @@ trait Merger extends MergerLogging {
 }
 
 object PlatformMerger extends Merger {
+  import SourceWork._
+
   override def findTarget(
     works: Seq[Work[Source]]): Option[Work.Visible[Source]] =
     works
@@ -108,46 +132,53 @@ object PlatformMerger extends Merger {
       case _                                  => None
     }
 
-  override def createMergeResult(target: Work.Visible[Source],
-                                 sources: Seq[Work[Source]]): MergeState =
+  override def createMergeResult(
+    target: Work.Visible[Source],
+    sources: Seq[Work[Source]]): State[MergeState, MergeResult] =
     if (sources.isEmpty)
       State.pure(
         MergeResult(
           mergedTarget = target.transition[Merged](0),
-          images = ImagesRule.merge(target).data
+          images = standaloneImages(target).map {
+            _ mergeWith (
+              canonicalWork = target.toSourceWork,
+              redirectedWork = None,
+              nMergedSources = 0
+            )
+          }
         )
       )
     else
       for {
-        items <- ItemsRule(target, sources)
-        thumbnail <- ThumbnailRule(target, sources)
-        otherIdentifiers <- OtherIdentifiersRule(target, sources)
-        images <- ImagesRule(target, sources)
-        nSources <- State.inspect[Set[Work[Source]], Int](
-          countUniqueSources(_, images.toSet)
-        )
+        items <- ItemsRule(target, sources).redirect
+        thumbnail <- ThumbnailRule(target, sources).redirect
+        otherIdentifiers <- OtherIdentifiersRule(target, sources).redirect
+        unmergedImages <- ImagesRule(target, sources).noRedirect
         work = target.withData { data =>
           data.copy[DataState.Unidentified](
             items = items,
             thumbnail = thumbnail,
             otherIdentifiers = otherIdentifiers,
-            images = images.map(_.toUnmerged)
+            images = unmergedImages
           )
         }
+        nSources <- State.inspect[MergeState, Int](_.size)
       } yield
         MergeResult(
           mergedTarget = work.transition[Merged](nSources),
-          images = images
+          images = unmergedImages.map { image =>
+            image mergeWith (
+              canonicalWork = work.toSourceWork,
+              redirectedWork = sources
+                .find { _.data.images.contains(image) }
+                .map(_.toSourceWork),
+              nMergedSources = nSources
+            )
+          }
         )
 
-  private def countUniqueSources(
-    works: Set[Work[Source]],
-    images: Set[MergedImage[DataState.Unidentified]]): Int =
-    (images.flatMap {
-      _.source match {
-        case SourceWorks(_, Some(redirected), _) =>
-          Some(redirected.id.sourceIdentifier)
-        case _ => None
-      }
-    } ++ works.map(_.sourceIdentifier)).size
+  private def standaloneImages(
+    target: Work.Visible[Source]): List[UnmergedImage[DataState.Unidentified]] =
+    if (WorkPredicates.singleDigitalItemMiroWork(target)) target.data.images
+    else Nil
 }
