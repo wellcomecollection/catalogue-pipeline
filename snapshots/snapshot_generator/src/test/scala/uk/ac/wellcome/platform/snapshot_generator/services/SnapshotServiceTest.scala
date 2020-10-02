@@ -1,6 +1,7 @@
 package uk.ac.wellcome.platform.snapshot_generator.services
 
 import java.io.File
+import java.time.Instant
 
 import akka.http.scaladsl.model.Uri
 import akka.stream.alpakka.s3.S3Exception
@@ -28,6 +29,7 @@ import uk.ac.wellcome.platform.snapshot_generator.models.{
 }
 import uk.ac.wellcome.platform.snapshot_generator.test.utils.GzipUtils
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
+import uk.ac.wellcome.storage.s3.S3ObjectLocation
 
 class SnapshotServiceTest
     extends AnyFunSpec
@@ -56,7 +58,7 @@ class SnapshotServiceTest
 
   it("completes a snapshot generation") {
     withFixtures {
-      case (snapshotService: SnapshotService, worksIndex, publicBucket) =>
+      case (snapshotService: SnapshotService, worksIndex, bucket) =>
         val visibleWorks = identifiedWorks(count = 3)
         val notVisibleWorks = identifiedWorks(count = 2).map { _.invisible() }
 
@@ -64,12 +66,11 @@ class SnapshotServiceTest
 
         insertIntoElasticsearch(worksIndex, works: _*)
 
-        val publicObjectKey = "target.txt.gz"
-
+        val s3Location = S3ObjectLocation(bucket.name, key = "target.txt.gz")
         val snapshotJob = SnapshotJob(
-          publicBucketName = publicBucket.name,
-          publicObjectKey = publicObjectKey,
-          apiVersion = ApiVersions.v2
+          s3Location = s3Location,
+          apiVersion = ApiVersions.v2,
+          requestedAt = Instant.now()
         )
 
         val future = snapshotService.generateSnapshot(snapshotJob)
@@ -78,7 +79,7 @@ class SnapshotServiceTest
           val downloadFile =
             File.createTempFile("snapshotServiceTest", ".txt.gz")
           s3Client.getObject(
-            new GetObjectRequest(publicBucket.name, publicObjectKey),
+            new GetObjectRequest(s3Location.bucket, s3Location.key),
             downloadFile)
 
           val contents = readGzipFile(downloadFile.getPath)
@@ -96,7 +97,7 @@ class SnapshotServiceTest
           result shouldBe CompletedSnapshotJob(
             snapshotJob = snapshotJob,
             targetLocation =
-              s"http://localhost:33333/${publicBucket.name}/$publicObjectKey"
+              s"http://localhost:33333/${s3Location.bucket}/${s3Location.key}"
           )
         }
     }
@@ -105,17 +106,17 @@ class SnapshotServiceTest
 
   it("completes a snapshot generation of an index with more than 10000 items") {
     withFixtures {
-      case (snapshotService: SnapshotService, worksIndex, publicBucket) =>
+      case (snapshotService: SnapshotService, worksIndex, bucket) =>
         val works = identifiedWorks(count = 11000)
           .map { _.title(randomAlphanumeric(length = 1500)) }
 
         insertIntoElasticsearch(worksIndex, works: _*)
 
-        val publicObjectKey = "target.txt.gz"
+        val s3Location = S3ObjectLocation(bucket.name, key = "target.txt.gz")
         val snapshotJob = SnapshotJob(
-          publicBucketName = publicBucket.name,
-          publicObjectKey = publicObjectKey,
-          apiVersion = ApiVersions.v2
+          s3Location = s3Location,
+          apiVersion = ApiVersions.v2,
+          requestedAt = Instant.now()
         )
 
         val future = snapshotService.generateSnapshot(snapshotJob)
@@ -124,7 +125,7 @@ class SnapshotServiceTest
           val downloadFile =
             File.createTempFile("snapshotServiceTest", ".txt.gz")
           s3Client.getObject(
-            new GetObjectRequest(publicBucket.name, publicObjectKey),
+            new GetObjectRequest(s3Location.bucket, s3Location.key),
             downloadFile)
 
           val contents = readGzipFile(downloadFile.getPath)
@@ -142,7 +143,7 @@ class SnapshotServiceTest
           result shouldBe CompletedSnapshotJob(
             snapshotJob = snapshotJob,
             targetLocation =
-              s"http://localhost:33333/${publicBucket.name}/$publicObjectKey"
+              s"http://localhost:33333/${s3Location.bucket}/${s3Location.key}"
           )
         }
     }
@@ -156,9 +157,9 @@ class SnapshotServiceTest
         insertIntoElasticsearch(worksIndex, works: _*)
 
         val snapshotJob = SnapshotJob(
-          publicBucketName = "wrongBukkit",
-          publicObjectKey = "target.json.gz",
-          apiVersion = ApiVersions.v2
+          s3Location = createS3ObjectLocation,
+          apiVersion = ApiVersions.v2,
+          requestedAt = Instant.now
         )
 
         val future = snapshotService.generateSnapshot(snapshotJob)
@@ -185,9 +186,9 @@ class SnapshotServiceTest
           worksIndex = "wrong-index",
           elasticClient = brokenElasticClient) { brokenSnapshotService =>
           val snapshotJob = SnapshotJob(
-            publicBucketName = "bukkit",
-            publicObjectKey = "target.json.gz",
-            apiVersion = ApiVersions.v2
+            s3Location = createS3ObjectLocation,
+            apiVersion = ApiVersions.v2,
+            requestedAt = Instant.now()
           )
 
           val future = brokenSnapshotService.generateSnapshot(snapshotJob)
@@ -202,24 +203,21 @@ class SnapshotServiceTest
 
   describe("buildLocation") {
     it("creates the correct object location in tests") {
+      val location = createS3ObjectLocation
+
       withFixtures {
         case (snapshotService: SnapshotService, _, _) =>
-          snapshotService.buildLocation(
-            bucketName = "bukkit",
-            objectKey = "snapshot.json.gz"
-          ) shouldBe Uri("http://localhost:33333/bukkit/snapshot.json.gz")
+          snapshotService.buildLocation(location) shouldBe Uri(s"http://localhost:33333/${location.bucket}/${location.key}")
       }
     }
 
     it("creates the correct object location with the default S3 endpoint") {
+      val location = createS3ObjectLocation
+
       withActorSystem { implicit actorSystem =>
         withS3AkkaSettings(endpoint = "") { s3Settings =>
-          withSnapshotService(s3Settings, worksIndex = "worksIndex") {
-            snapshotService =>
-              snapshotService.buildLocation(
-                bucketName = "bukkit",
-                objectKey = "snapshot.json.gz"
-              ) shouldBe Uri("s3://bukkit/snapshot.json.gz")
+          withSnapshotService(s3Settings) {
+            _.buildLocation(location) shouldBe Uri(s"s3://${location.bucket}/${location.key}")
           }
         }
       }

@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.snapshot_generator.services
 
 import scala.concurrent.{ExecutionContext, Future}
-
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.Uri
 import akka.stream.alpakka.s3.{MultipartUploadResult, S3Attributes, S3Settings}
@@ -11,7 +10,6 @@ import akka.util.ByteString
 import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.ElasticClient
 import grizzled.slf4j.Logging
-
 import uk.ac.wellcome.display.models.{DisplayWork, _}
 import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.models.work.internal._
@@ -26,6 +24,7 @@ import uk.ac.wellcome.platform.snapshot_generator.models.{
 }
 import uk.ac.wellcome.platform.snapshot_generator.source.ElasticsearchWorksSource
 import WorkState.Identified
+import uk.ac.wellcome.storage.s3.S3ObjectLocation
 
 class SnapshotService(akkaS3Settings: S3Settings,
                       elasticClient: ElasticClient,
@@ -36,31 +35,24 @@ class SnapshotService(akkaS3Settings: S3Settings,
 
   val s3Endpoint = akkaS3Settings.endpointUrl.getOrElse("s3:/")
 
-  def buildLocation(bucketName: String, objectKey: String): Uri =
-    Uri(s"$s3Endpoint/$bucketName/$objectKey")
+  def buildLocation(s3Location: S3ObjectLocation): Uri =
+    Uri(s"$s3Endpoint/${s3Location.bucket}/${s3Location.key}")
 
   def generateSnapshot(
     snapshotJob: SnapshotJob): Future[CompletedSnapshotJob] = {
     info(s"ConvertorService running $snapshotJob")
 
-    val publicBucketName = snapshotJob.publicBucketName
-    val publicObjectKey = snapshotJob.publicObjectKey
-
     val uploadResult = snapshotJob.apiVersion match {
       case ApiVersions.v2 =>
         runStream(
-          publicBucketName = publicBucketName,
-          publicObjectKey = publicObjectKey,
+          s3Location = snapshotJob.s3Location,
           index = elasticConfig.worksIndex,
           toDisplayWork = DisplayWork(_, WorksIncludes.includeAll())
         )
     }
 
     uploadResult.map { _ =>
-      val targetLocation = buildLocation(
-        bucketName = publicBucketName,
-        objectKey = publicObjectKey
-      )
+      val targetLocation = buildLocation(snapshotJob.s3Location)
 
       CompletedSnapshotJob(
         snapshotJob = snapshotJob,
@@ -69,8 +61,7 @@ class SnapshotService(akkaS3Settings: S3Settings,
     }
   }
 
-  private def runStream(publicBucketName: String,
-                        publicObjectKey: String,
+  private def runStream(s3Location: S3ObjectLocation,
                         index: Index,
                         toDisplayWork: Work.Visible[Identified] => DisplayWork)
     : Future[MultipartUploadResult] = {
@@ -92,8 +83,8 @@ class SnapshotService(akkaS3Settings: S3Settings,
 
     val s3Sink: Sink[ByteString, Future[MultipartUploadResult]] =
       S3.multipartUpload(
-          bucket = publicBucketName,
-          key = publicObjectKey
+          bucket = s3Location.bucket,
+          key = s3Location.key
         )
         .withAttributes(S3Attributes.settings(akkaS3Settings))
 

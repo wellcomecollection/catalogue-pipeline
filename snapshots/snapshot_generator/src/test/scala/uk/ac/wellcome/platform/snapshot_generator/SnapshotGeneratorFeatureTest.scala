@@ -1,6 +1,7 @@
 package uk.ac.wellcome.platform.snapshot_generator
 
 import java.io.File
+import java.time.Instant
 
 import com.amazonaws.services.s3.model.GetObjectRequest
 import com.sksamuel.elastic4s.Index
@@ -22,6 +23,7 @@ import uk.ac.wellcome.platform.snapshot_generator.models.{
 }
 import uk.ac.wellcome.platform.snapshot_generator.test.utils.GzipUtils
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
+import uk.ac.wellcome.storage.s3.S3ObjectLocation
 
 class SnapshotGeneratorFeatureTest
     extends AnyFunSpec
@@ -37,17 +39,17 @@ class SnapshotGeneratorFeatureTest
 
   it("completes a snapshot generation") {
     withFixtures {
-      case (queue, messageSender, worksIndex, _, publicBucket: Bucket) =>
+      case (queue, messageSender, worksIndex, _, bucket) =>
         val works = identifiedWorks(count = 3)
 
         insertIntoElasticsearch(worksIndex, works: _*)
 
-        val publicObjectKey = "target.txt.gz"
+        val s3Location = S3ObjectLocation(bucket.name, key = "target.tar.gz")
 
         val snapshotJob = SnapshotJob(
-          publicBucketName = publicBucket.name,
-          publicObjectKey = publicObjectKey,
-          apiVersion = ApiVersions.v2
+          s3Location = s3Location,
+          apiVersion = ApiVersions.v2,
+          requestedAt = Instant.now()
         )
 
         sendNotificationToSQS(queue = queue, message = snapshotJob)
@@ -57,7 +59,7 @@ class SnapshotGeneratorFeatureTest
             File.createTempFile("snapshotGeneratorFeatureTest", ".txt.gz")
 
           s3Client.getObject(
-            new GetObjectRequest(publicBucket.name, publicObjectKey),
+            new GetObjectRequest(s3Location.bucket, s3Location.key),
             downloadFile)
 
           val actualJsonLines: List[String] =
@@ -91,7 +93,7 @@ class SnapshotGeneratorFeatureTest
           val expectedJob = CompletedSnapshotJob(
             snapshotJob = snapshotJob,
             targetLocation =
-              s"http://localhost:33333/${publicBucket.name}/$publicObjectKey"
+              s"http://localhost:33333/${s3Location.bucket}/${s3Location.key}"
           )
 
           messageSender.getMessages[CompletedSnapshotJob] shouldBe Seq(
