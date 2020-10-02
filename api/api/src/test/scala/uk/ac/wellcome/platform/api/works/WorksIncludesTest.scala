@@ -94,10 +94,11 @@ class WorksIncludesTest
     withApi {
       case (ElasticConfig(worksIndex, _), routes) =>
         val work = identifiedWork()
-          .items(List(
-            createIdentifiedItemWith(title = Some("item title")),
-            createUnidentifiableItemWith()
-          ))
+          .items(
+            List(
+              createIdentifiedItemWith(title = Some("item title")),
+              createUnidentifiableItemWith()
+            ))
 
         insertIntoElasticsearch(worksIndex, work)
 
@@ -222,7 +223,8 @@ class WorksIncludesTest
       "includes a list of genres on a single work endpoint if we pass ?include=genres") {
       withApi {
         case (ElasticConfig(worksIndex, _), routes) =>
-          val work = identifiedWork().genres(List(Genre("ornithology", List(Concept("ornithology")))))
+          val work = identifiedWork().genres(
+            List(Genre("ornithology", List(Concept("ornithology")))))
 
           insertIntoElasticsearch(worksIndex, work)
 
@@ -252,8 +254,10 @@ class WorksIncludesTest
             List(Contributor(Person("Ginger Rogers"), roles = Nil))
           val contributors2 =
             List(Contributor(Person("Fred Astair"), roles = Nil))
-          val work1 = identifiedWork(canonicalId = "1").contributors(contributors1)
-          val work2 = identifiedWork(canonicalId = "2").contributors(contributors2)
+          val work1 =
+            identifiedWork(canonicalId = "1").contributors(contributors1)
+          val work2 =
+            identifiedWork(canonicalId = "2").contributors(contributors2)
 
           insertIntoElasticsearch(worksIndex, work1, work2)
 
@@ -288,7 +292,8 @@ class WorksIncludesTest
       withApi {
         case (ElasticConfig(worksIndex, _), routes) =>
           val work = identifiedWork()
-            .contributors(List(Contributor(Person("Ginger Rogers"), roles = Nil)))
+            .contributors(
+              List(Contributor(Person("Ginger Rogers"), roles = Nil)))
 
           insertIntoElasticsearch(worksIndex, work)
 
@@ -316,8 +321,10 @@ class WorksIncludesTest
         case (ElasticConfig(worksIndex, _), routes) =>
           val productionEvents1 = createProductionEventList()
           val productionEvents2 = createProductionEventList()
-          val work1 = identifiedWork(canonicalId = "1").production(productionEvents1)
-          val work2 = identifiedWork(canonicalId = "2").production(productionEvents2)
+          val work1 =
+            identifiedWork(canonicalId = "1").production(productionEvents1)
+          val work2 =
+            identifiedWork(canonicalId = "2").production(productionEvents2)
 
           insertIntoElasticsearch(worksIndex, work1, work2)
 
@@ -440,7 +447,8 @@ class WorksIncludesTest
     it("includes notes on the single work endpoint if we pass ?include=notes") {
       withApi {
         case (ElasticConfig(worksIndex, _), routes) =>
-          val work = identifiedWork().notes(List(GeneralNote("A"), GeneralNote("B")))
+          val work =
+            identifiedWork().notes(List(GeneralNote("A"), GeneralNote("B")))
           insertIntoElasticsearch(worksIndex, work)
           assertJsonResponse(
             routes,
@@ -476,9 +484,11 @@ class WorksIncludesTest
         case (ElasticConfig(worksIndex, _), routes) =>
           val works = List(
             identifiedWork()
-              .images((1 to 3).map(_ => createUnmergedImage.toIdentified).toList),
+              .images(
+                (1 to 3).map(_ => createUnmergedImage.toIdentified).toList),
             identifiedWork()
-              .images((1 to 3).map(_ => createUnmergedImage.toIdentified).toList)
+              .images(
+                (1 to 3).map(_ => createUnmergedImage.toIdentified).toList)
           ).sortBy { _.state.canonicalId }
 
           insertIntoElasticsearch(worksIndex, works: _*)
@@ -537,8 +547,10 @@ class WorksIncludesTest
   }
 
   describe("relation includes") {
-    def work(path: String, workType: WorkType): Work.Visible[WorkState.Identified] =
-      identifiedWork(sourceIdentifier = createSourceIdentifierWith(value = path))
+    def work(path: String,
+             workType: WorkType): Work.Visible[WorkState.Identified] =
+      identifiedWork(
+        sourceIdentifier = createSourceIdentifierWith(value = path))
         .collectionPath(CollectionPath(path = path))
         .title(path)
         .workType(workType)

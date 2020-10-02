@@ -62,7 +62,10 @@ class WorksAggregationsTest extends ApiWorksTestBase {
                 }
               },
               "results": [
-                ${works.sortBy { _.state.canonicalId }.map(workResponse).mkString(",")}
+                ${works
+            .sortBy { _.state.canonicalId }
+            .map(workResponse)
+            .mkString(",")}
               ]
             }
           """
@@ -234,7 +237,10 @@ class WorksAggregationsTest extends ApiWorksTestBase {
                   ]
                 }
               },
-              "results": [${works.sortBy { _.state.canonicalId }.map(workResponse).mkString(",")}]
+              "results": [${works
+            .sortBy { _.state.canonicalId }
+            .map(workResponse)
+            .mkString(",")}]
             }
           """
         }
@@ -289,7 +295,10 @@ class WorksAggregationsTest extends ApiWorksTestBase {
                   ]
                 }
               },
-              "results": [${works.sortBy { _.state.canonicalId }.map(workResponse).mkString(",")}]
+              "results": [${works
+                            .sortBy { _.state.canonicalId }
+                            .map(workResponse)
+                            .mkString(",")}]
             }
           """.stripMargin
         }
@@ -297,7 +306,8 @@ class WorksAggregationsTest extends ApiWorksTestBase {
   }
 
   it("supports aggregating on license") {
-    def createLicensedWork(licenses: Seq[License]): Work.Visible[WorkState.Identified] = {
+    def createLicensedWork(
+      licenses: Seq[License]): Work.Visible[WorkState.Identified] = {
       val items =
         licenses.map { license =>
           createDigitalItemWith(license = Some(license))
@@ -351,7 +361,10 @@ class WorksAggregationsTest extends ApiWorksTestBase {
                   ]
                 }
               },
-              "results": [${works.sortBy { _.state.canonicalId }.map(workResponse).mkString(",")}]
+              "results": [${works
+                            .sortBy { _.state.canonicalId }
+                            .map(workResponse)
+                            .mkString(",")}]
             }
           """.stripMargin
         }
@@ -405,7 +418,10 @@ class WorksAggregationsTest extends ApiWorksTestBase {
                 },
                 "type" : "Aggregations"
               },
-              "results": [${works.sortBy { _.state.canonicalId }.map(workResponse).mkString(",")}]
+              "results": [${works
+                            .sortBy { _.state.canonicalId }
+                            .map(workResponse)
+                            .mkString(",")}]
             }
           """.stripMargin
         }

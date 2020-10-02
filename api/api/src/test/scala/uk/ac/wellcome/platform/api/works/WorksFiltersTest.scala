@@ -8,7 +8,6 @@ import uk.ac.wellcome.models.work.internal.Format.{
 }
 import uk.ac.wellcome.models.work.internal._
 
-
 class WorksFiltersTest extends ApiWorksTestBase {
   it("combines multiple filters") {
     val work1 = identifiedWork()
@@ -39,7 +38,8 @@ class WorksFiltersTest extends ApiWorksTestBase {
       identifiedWork()
         .title("An example digital work")
         .items(
-          List(createIdentifiedItemWith(locations = List(createDigitalLocation)))
+          List(
+            createIdentifiedItemWith(locations = List(createDigitalLocation)))
         )
     }
 
@@ -47,7 +47,8 @@ class WorksFiltersTest extends ApiWorksTestBase {
       identifiedWork()
         .title("An example physical work")
         .items(
-          List(createIdentifiedItemWith(locations = List(createPhysicalLocation)))
+          List(
+            createIdentifiedItemWith(locations = List(createPhysicalLocation)))
         )
     }
 
@@ -55,7 +56,9 @@ class WorksFiltersTest extends ApiWorksTestBase {
       identifiedWork()
         .title("An example combo work")
         .items(
-          List(createIdentifiedItemWith(locations = List(createPhysicalLocation, createDigitalLocation)))
+          List(
+            createIdentifiedItemWith(
+              locations = List(createPhysicalLocation, createDigitalLocation)))
         )
     }
 
@@ -150,20 +153,23 @@ class WorksFiltersTest extends ApiWorksTestBase {
 
     val work1 = identifiedWork()
       .title("Crumbling carrots")
-      .items(List(
-        createItemWithLocationType(LocationType("iiif-image"))
-      ))
+      .items(
+        List(
+          createItemWithLocationType(LocationType("iiif-image"))
+        ))
     val work2 = identifiedWork()
       .title("Crumbling carrots")
-      .items(List(
-        createItemWithLocationType(LocationType("digit")),
-        createItemWithLocationType(LocationType("dimgs"))
-      ))
+      .items(
+        List(
+          createItemWithLocationType(LocationType("digit")),
+          createItemWithLocationType(LocationType("dimgs"))
+        ))
     val work3 = identifiedWork()
       .title("Crumbling carrots")
-      .items(List(
-        createItemWithLocationType(LocationType("dpoaa"))
-      ))
+      .items(
+        List(
+          createItemWithLocationType(LocationType("dpoaa"))
+        ))
 
     val works = worksWithNoItem ++ Seq(work1, work2, work3)
 
@@ -244,7 +250,9 @@ class WorksFiltersTest extends ApiWorksTestBase {
             s"/$apiPrefix/works?workType=${ManuscriptsAsian.id},${CDRoms.id}") {
             Status.OK -> worksListResponse(
               apiPrefix,
-              works = Seq(cdRomWork, manuscriptWork).sortBy { _.state.canonicalId }
+              works = Seq(cdRomWork, manuscriptWork).sortBy {
+                _.state.canonicalId
+              }
             )
           }
       }
@@ -260,7 +268,9 @@ class WorksFiltersTest extends ApiWorksTestBase {
             s"/$apiPrefix/works?query=apple&workType=${ManuscriptsAsian.id},${CDRoms.id}") {
             Status.OK -> worksListResponse(
               apiPrefix,
-              works = Seq(cdRomWork, manuscriptWork).sortBy { _.state.canonicalId }
+              works = Seq(cdRomWork, manuscriptWork).sortBy {
+                _.state.canonicalId
+              }
             )
           }
       }
@@ -302,7 +312,9 @@ class WorksFiltersTest extends ApiWorksTestBase {
             unordered = true) {
             Status.OK -> worksListResponse(
               apiPrefix,
-              works = Seq(collectionWork, seriesWork).sortBy { _.state.canonicalId }
+              works = Seq(collectionWork, seriesWork).sortBy {
+                _.state.canonicalId
+              }
             )
           }
       }
@@ -319,7 +331,9 @@ class WorksFiltersTest extends ApiWorksTestBase {
             unordered = true) {
             Status.OK -> worksListResponse(
               apiPrefix,
-              works = Seq(seriesWork, sectionWork).sortBy { _.state.canonicalId }
+              works = Seq(seriesWork, sectionWork).sortBy {
+                _.state.canonicalId
+              }
             )
           }
       }
@@ -372,7 +386,7 @@ class WorksFiltersTest extends ApiWorksTestBase {
             s"/$apiPrefix/works?production.dates.to=1960-01-01") {
             Status.OK -> worksListResponse(
               apiPrefix,
-              works = Seq(work1709, work1950).sortBy { _.state.canonicalId}
+              works = Seq(work1709, work1950).sortBy { _.state.canonicalId }
             )
           }
       }
@@ -396,7 +410,8 @@ class WorksFiltersTest extends ApiWorksTestBase {
   }
 
   describe("filtering works by language") {
-    val englishWork = identifiedWork().language(Language("English", Some("eng")))
+    val englishWork =
+      identifiedWork().language(Language("English", Some("eng")))
     val germanWork = identifiedWork().language(Language("German", Some("ger")))
     val noLanguageWork = identifiedWork()
 
@@ -419,7 +434,9 @@ class WorksFiltersTest extends ApiWorksTestBase {
           assertJsonResponse(routes, s"/$apiPrefix/works?language=eng,ger") {
             Status.OK -> worksListResponse(
               apiPrefix,
-              works = Seq(englishWork, germanWork).sortBy { _.state.canonicalId }
+              works = Seq(englishWork, germanWork).sortBy {
+                _.state.canonicalId
+              }
             )
           }
       }
@@ -444,7 +461,9 @@ class WorksFiltersTest extends ApiWorksTestBase {
           assertJsonResponse(routes, s"/$apiPrefix/works?genres.label=horrible") {
             Status.OK -> worksListResponse(
               apiPrefix,
-              works = Seq(horrorWork, romcomHorrorWork).sortBy { _.state.canonicalId }
+              works = Seq(horrorWork, romcomHorrorWork).sortBy {
+                _.state.canonicalId
+              }
             )
           }
       }
@@ -469,9 +488,11 @@ class WorksFiltersTest extends ApiWorksTestBase {
     val nineteenthCentury = createSubjectWith("19th Century")
     val paris = createSubjectWith("Paris")
 
-    val nineteenthCenturyWork = identifiedWork().subjects(List(nineteenthCentury))
+    val nineteenthCenturyWork =
+      identifiedWork().subjects(List(nineteenthCentury))
     val parisWork = identifiedWork().subjects(List(paris))
-    val nineteenthCenturyParisWork = identifiedWork().subjects(List(nineteenthCentury, paris))
+    val nineteenthCenturyParisWork =
+      identifiedWork().subjects(List(nineteenthCentury, paris))
     val noSubjectWork = identifiedWork()
 
     val works = List(
@@ -487,7 +508,9 @@ class WorksFiltersTest extends ApiWorksTestBase {
           assertJsonResponse(routes, s"/$apiPrefix/works?subjects.label=paris") {
             Status.OK -> worksListResponse(
               apiPrefix,
-              works = Seq(parisWork, nineteenthCenturyParisWork).sortBy { _.state.canonicalId }
+              works = Seq(parisWork, nineteenthCenturyParisWork).sortBy {
+                _.state.canonicalId
+              }
             )
           }
       }
@@ -535,7 +558,9 @@ class WorksFiltersTest extends ApiWorksTestBase {
           assertJsonResponse(routes, s"/$apiPrefix/works?license=cc-by") {
             Status.OK -> worksListResponse(
               apiPrefix = apiPrefix,
-              works = Seq(ccByWork, bothLicenseWork).sortBy { _.state.canonicalId }
+              works = Seq(ccByWork, bothLicenseWork).sortBy {
+                _.state.canonicalId
+              }
             )
           }
       }
@@ -550,7 +575,9 @@ class WorksFiltersTest extends ApiWorksTestBase {
             s"/$apiPrefix/works?license=cc-by,cc-by-nc") {
             Status.OK -> worksListResponse(
               apiPrefix = apiPrefix,
-              works = Seq(ccByWork, ccByNcWork, bothLicenseWork).sortBy { _.state.canonicalId }
+              works = Seq(ccByWork, ccByNcWork, bothLicenseWork).sortBy {
+                _.state.canonicalId
+              }
             )
           }
       }
@@ -599,7 +626,8 @@ class WorksFiltersTest extends ApiWorksTestBase {
     it("filters by an otherIdentifier") {
       withApi {
         case (ElasticConfig(worksIndex, _), routes) =>
-          val work = identifiedWork().otherIdentifiers(List(createSourceIdentifier))
+          val work =
+            identifiedWork().otherIdentifiers(List(createSourceIdentifier))
           insertIntoElasticsearch(worksIndex, unknownWork, work)
           assertJsonResponse(
             routes,
@@ -615,8 +643,10 @@ class WorksFiltersTest extends ApiWorksTestBase {
     it("filters by multiple otherIdentifiers") {
       withApi {
         case (ElasticConfig(worksIndex, _), routes) =>
-          val work1 = identifiedWork().otherIdentifiers(List(createSourceIdentifier))
-          val work2 = identifiedWork().otherIdentifiers(List(createSourceIdentifier))
+          val work1 =
+            identifiedWork().otherIdentifiers(List(createSourceIdentifier))
+          val work2 =
+            identifiedWork().otherIdentifiers(List(createSourceIdentifier))
 
           insertIntoElasticsearch(worksIndex, unknownWork, work1, work2)
           assertJsonResponse(
@@ -634,7 +664,8 @@ class WorksFiltersTest extends ApiWorksTestBase {
       withApi {
         case (ElasticConfig(worksIndex, _), routes) =>
           val work1 = identifiedWork()
-          val work2 = identifiedWork().otherIdentifiers(List(createSourceIdentifier))
+          val work2 =
+            identifiedWork().otherIdentifiers(List(createSourceIdentifier))
 
           insertIntoElasticsearch(worksIndex, unknownWork, work1, work2)
           assertJsonResponse(

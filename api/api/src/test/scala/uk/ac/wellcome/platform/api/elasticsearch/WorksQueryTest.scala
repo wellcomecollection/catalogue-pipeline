@@ -122,8 +122,10 @@ class WorksQueryTest
 
     it("searches the items.otherIdentifiers") {
       withLocalWorksIndex { index =>
-        val item1 = createIdentifiedItemWith(otherIdentifiers = List(createSourceIdentifier))
-        val item2 = createIdentifiedItemWith(otherIdentifiers = List(createSourceIdentifier))
+        val item1 = createIdentifiedItemWith(
+          otherIdentifiers = List(createSourceIdentifier))
+        val item2 = createIdentifiedItemWith(
+          otherIdentifiers = List(createSourceIdentifier))
 
         val work1 = identifiedWork().items(List(item1))
         val work2 = identifiedWork().items(List(item2))
@@ -239,13 +241,15 @@ class WorksQueryTest
         val work2 = identifiedWork()
 
         // We've put spaces in this as some Miro IDs are sentences
-        val work3 = createIdentifiedWorkWith(canonicalId = "Oxford English Dictionary")
+        val work3 =
+          createIdentifiedWorkWith(canonicalId = "Oxford English Dictionary")
 
         insertIntoElasticsearch(index, work1, work2, work3)
 
         assertResultsMatchForAllowedQueryTypes(
           index,
-          query = s"${work1.state.canonicalId} ${work2.state.canonicalId} Oxford",
+          query =
+            s"${work1.state.canonicalId} ${work2.state.canonicalId} Oxford",
           matches = List(work1, work2)
         )
       }
@@ -299,7 +303,8 @@ class WorksQueryTest
     it("Searches lettering") {
       withLocalWorksIndex { index =>
         val matchingWork = identifiedWork()
-          .lettering("Old Mughal minaret near Shahjahanabad (Delhi), Ghulam Ali Khan, early XIX century")
+          .lettering(
+            "Old Mughal minaret near Shahjahanabad (Delhi), Ghulam Ali Khan, early XIX century")
         val notMatchingWork = identifiedWork()
           .lettering("Not matching")
 
@@ -352,7 +357,9 @@ class WorksQueryTest
       }
     }
 
-  private def searchResults(index: Index, searchOptions: SearchOptions): List[Work[Identified]] = {
+  private def searchResults(
+    index: Index,
+    searchOptions: SearchOptions): List[Work[Identified]] = {
     val searchResponseFuture =
       searchService.executeSearch(searchOptions, WorksRequestBuilder, index)
     whenReady(searchResponseFuture) { response =>
