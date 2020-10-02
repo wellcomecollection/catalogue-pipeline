@@ -2,10 +2,8 @@ package uk.ac.wellcome.platform.api.services
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalatest.matchers.should.Matchers
-import org.scalatest.concurrent.ScalaFutures
 import com.sksamuel.elastic4s.Index
 import org.scalatest.funspec.AnyFunSpec
-
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.models.work.generators.{
@@ -14,11 +12,11 @@ import uk.ac.wellcome.models.work.generators.{
   WorkGenerators
 }
 import WorkState.Identified
+import org.scalatest.Assertion
 
 class RelatedWorkServiceTest
     extends AnyFunSpec
     with Matchers
-    with ScalaFutures
     with ElasticsearchFixtures
     with IdentifiersGenerators
     with ItemsGenerators
@@ -33,7 +31,7 @@ class RelatedWorkServiceTest
       .title(path)
       .collectionPath(CollectionPath(path = path, level = Some(level)))
 
-  def storeWorks(index: Index, works: List[Work[Identified]] = works) =
+  def storeWorks(index: Index, works: List[Work[Identified]] = works): Assertion =
     insertIntoElasticsearch(index, works: _*)
 
   val workA = work("a", CollectionLevel.Collection)
