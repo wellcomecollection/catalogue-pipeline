@@ -5,8 +5,7 @@ import uk.ac.wellcome.models.work.internal._
 import WorkState.Identified
 
 class WorksTestInvisible extends ApiWorksTestBase {
-
-  val deletedWork = createIdentifiedInvisibleWork
+  val deletedWork: Work.Invisible[Identified] = identifiedWork().invisible()
 
   it("returns an HTTP 410 Gone if looking up a work with visible = false") {
     withApi {
