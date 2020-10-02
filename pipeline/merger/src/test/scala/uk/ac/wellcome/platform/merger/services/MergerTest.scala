@@ -54,8 +54,8 @@ class MergerTest
       target: Work.Visible[Source],
       sources: Seq[Work[Source]]): State[MergeState, MergeResult] =
       for {
-        items <- TestItemsRule(target, sources).redirect
-        otherIdentifiers <- TestOtherIdentifiersRule(target, sources).redirect
+        items <- TestItemsRule(target, sources).redirectSources
+        otherIdentifiers <- TestOtherIdentifiersRule(target, sources).redirectSources
       } yield
         MergeResult(
           mergedTarget = target

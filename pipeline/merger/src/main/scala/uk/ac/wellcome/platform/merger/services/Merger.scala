@@ -15,8 +15,9 @@ import WorkFsm._
 /*
  * The implementor of a Merger must provide:
  * - `findTarget`, which finds the target from the input works
- * - `createMergeResult`, a recipe for creating a merged target and a complete
- *    list of works that should be redirected as a result of any merged fields.
+ * - `createMergeResult`, a recipe for creating a merged target and a
+ *   map with keys of works used in the merge and values of whether they
+ *   should be redirected
  *
  * Calling `merge` with a list of works will return a new list of works including:
  * - the target work with all fields merged
@@ -50,9 +51,11 @@ trait Merger extends MergerLogging {
     }
 
   implicit class MergeResultAccumulation[T](val result: FieldMergeResult[T]) {
-    def redirect: State[MergeState, T] = shouldRedirect(true)
-    def noRedirect: State[MergeState, T] = shouldRedirect(false)
+    def redirectSources: State[MergeState, T] = shouldRedirect(true)
+    def retainSources: State[MergeState, T] = shouldRedirect(false)
 
+    // If the state already contains a source, then don't change the existing `redirect` value
+    // Otherwise, add the source with the current value.
     private def shouldRedirect(redirect: Boolean): State[MergeState, T] =
       State { prevState =>
         val nextState = result.sources.foldLeft(prevState) {
@@ -150,10 +153,10 @@ object PlatformMerger extends Merger {
       )
     else
       for {
-        items <- ItemsRule(target, sources).redirect
-        thumbnail <- ThumbnailRule(target, sources).redirect
-        otherIdentifiers <- OtherIdentifiersRule(target, sources).redirect
-        unmergedImages <- ImagesRule(target, sources).noRedirect
+        items <- ItemsRule(target, sources).redirectSources
+        thumbnail <- ThumbnailRule(target, sources).redirectSources
+        otherIdentifiers <- OtherIdentifiersRule(target, sources).redirectSources
+        unmergedImages <- ImagesRule(target, sources).retainSources
         work = target.mapData { data =>
           data.copy[DataState.Unidentified](
             items = items,
