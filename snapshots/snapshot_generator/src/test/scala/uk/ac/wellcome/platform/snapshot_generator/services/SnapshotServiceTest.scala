@@ -27,7 +27,6 @@ import uk.ac.wellcome.platform.snapshot_generator.models.{
   SnapshotJob
 }
 import uk.ac.wellcome.platform.snapshot_generator.test.utils.GzipUtils
-import uk.ac.wellcome.storage.fixtures.S3Fixtures
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 
 class SnapshotServiceTest
@@ -36,7 +35,6 @@ class SnapshotServiceTest
     with Matchers
     with Akka
     with AkkaS3
-    with S3Fixtures
     with GzipUtils
     with IntegrationPatience
     with SnapshotServiceFixture

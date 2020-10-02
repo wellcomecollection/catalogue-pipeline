@@ -8,15 +8,12 @@ import uk.ac.wellcome.display.json.DisplayJsonUtil
 import uk.ac.wellcome.display.models.Implicits._
 
 object DisplayWorkToJsonStringFlow extends Logging {
-
   def flow: Flow[DisplayWork, String, NotUsed] =
     Flow[DisplayWork]
-      .map { obj =>
-        obj match {
-          case work: DisplayWork => DisplayJsonUtil.toJson(work)
-          case _ =>
-            throw new IllegalArgumentException(
-              s"Unrecognised object: ${obj.getClass}")
-        }
+      .map {
+        case work: DisplayWork => DisplayJsonUtil.toJson(work)
+        case obj =>
+          throw new IllegalArgumentException(
+            s"Unrecognised object: ${obj.getClass}")
       }
 }
