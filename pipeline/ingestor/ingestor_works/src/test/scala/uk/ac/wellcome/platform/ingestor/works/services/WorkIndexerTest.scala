@@ -111,7 +111,9 @@ class WorkIndexerTest
           ))
 
       val identifiedOldWork =
-        identifiedWork(hasMultipleSources = false, canonicalId = redirectedWork.state.canonicalId)
+        identifiedWork(
+          hasMultipleSources = false,
+          canonicalId = redirectedWork.state.canonicalId)
           .withVersion(redirectedWork.version)
 
       withWorksIndexAndIndexer {
