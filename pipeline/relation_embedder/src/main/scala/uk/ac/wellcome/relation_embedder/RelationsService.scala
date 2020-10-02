@@ -12,7 +12,6 @@ import com.sksamuel.elastic4s.requests.searches.{
 import com.sksamuel.elastic4s.requests.searches.SearchHit
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.circe._
-import io.circe.generic.semiauto.deriveDecoder
 
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.internal.result._
@@ -56,11 +55,11 @@ class PathQueryRelationsService(elasticClient: ElasticClient, index: Index)(
               val works = result.left
                 .map(_.asException)
                 .flatMap { resp =>
-                  resp.hits.hits.toList.map(toAffectedWork).toResult
+                  resp.hits.hits.toList.map(toWork).toResult
                 }
               works match {
                 case Right(works) =>
-                  Future.successful(works.map(_.sourceIdentifier))
+                  Future.successful(works.map(_.state.sourceIdentifier))
                 case Left(err) => Future.failed(err)
               }
             }
@@ -137,11 +136,4 @@ class PathQueryRelationsService(elasticClient: ElasticClient, index: Index)(
 
   private def toWork(hit: SearchHit): Result[Work.Visible[Merged]] =
     hit.safeTo[Work.Visible[Merged]].toEither
-
-  case class AffectedWork(sourceIdentifier: SourceIdentifier)
-
-  implicit val affectedWorkDecoder = deriveDecoder[AffectedWork]
-
-  private def toAffectedWork(hit: SearchHit): Result[AffectedWork] =
-    hit.safeTo[AffectedWork].toEither
 }
