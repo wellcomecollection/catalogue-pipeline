@@ -302,7 +302,8 @@ class MatcherWorkerServiceTest
             processAndAssertMatchedWorkIs(workAv2, expectedMatchedWorkAv2)
 
             // Work V1 is sent but not matched
-            val workAv1 = sourceWork(sourceIdentifier = identifierA).withVersion(1)
+            val workAv1 =
+              sourceWork(sourceIdentifier = identifierA).withVersion(1)
 
             sendWork(workAv1, vhs, queue)
             eventually {

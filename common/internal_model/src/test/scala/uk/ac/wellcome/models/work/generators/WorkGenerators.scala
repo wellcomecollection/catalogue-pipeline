@@ -90,7 +90,8 @@ trait WorkGenerators extends IdentifiersGenerators {
       )
 
     def withVersion(version: Int): Work.Visible[State] =
-      Work.Visible[State](version = version, data = work.data, state = work.state)
+      Work
+        .Visible[State](version = version, data = work.data, state = work.state)
 
     def title(title: String): Work.Visible[State] =
       work.map(_.copy(title = Some(title)))

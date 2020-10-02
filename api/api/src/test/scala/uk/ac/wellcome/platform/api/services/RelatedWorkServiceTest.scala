@@ -27,7 +27,9 @@ class RelatedWorkServiceTest
   val service = new RelatedWorkService(new ElasticsearchService(elasticClient))
 
   def work(path: String, level: CollectionLevel): Work.Visible[Identified] =
-    identifiedWork(sourceIdentifier = createSourceIdentifierWith(value = path), hasMultipleSources = false)
+    identifiedWork(
+      sourceIdentifier = createSourceIdentifierWith(value = path),
+      hasMultipleSources = false)
       .title(path)
       .collectionPath(CollectionPath(path = path, level = Some(level)))
 

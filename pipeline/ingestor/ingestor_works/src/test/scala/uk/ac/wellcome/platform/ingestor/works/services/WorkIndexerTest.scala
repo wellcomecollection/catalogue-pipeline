@@ -78,14 +78,15 @@ class WorkIndexerTest
       "doesn't override a identified Work with redirected work with lower version") {
       val identifiedNewWork = identifiedWork()
 
-      val redirectedOldWork = identifiedWork(canonicalId = identifiedNewWork.state.canonicalId)
-        .withVersion(identifiedNewWork.version - 1)
-        .redirected(
-          IdState.Identified(
-            canonicalId = createCanonicalId,
-            sourceIdentifier = createSourceIdentifier
+      val redirectedOldWork =
+        identifiedWork(canonicalId = identifiedNewWork.state.canonicalId)
+          .withVersion(identifiedNewWork.version - 1)
+          .redirected(
+            IdState.Identified(
+              canonicalId = createCanonicalId,
+              sourceIdentifier = createSourceIdentifier
+            )
           )
-        )
 
       withWorksIndexAndIndexer {
         case (index, indexer) =>
