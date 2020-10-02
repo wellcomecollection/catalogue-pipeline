@@ -11,7 +11,7 @@ import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
-import uk.ac.wellcome.models.work.generators.LegacyWorkGenerators
+import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.storage.Version
 import uk.ac.wellcome.storage.store.VersionedStore
@@ -22,11 +22,11 @@ trait TestData
 case object ValidTestData extends TestData
 case object InvalidTestData extends TestData
 
-object TestTransformer extends Transformer[TestData] with LegacyWorkGenerators {
+object TestTransformer extends Transformer[TestData] with WorkGenerators {
   def apply(data: TestData,
             version: Int): Either[Exception, Work.Visible[Source]] =
     data match {
-      case ValidTestData   => Right(createSourceWork)
+      case ValidTestData   => Right(sourceWork())
       case InvalidTestData => Left(new Exception("No No No"))
     }
 }

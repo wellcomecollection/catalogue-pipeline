@@ -4,7 +4,7 @@ import org.scalatest.Inside
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.bigmessaging.fixtures.VHSFixture
-import uk.ac.wellcome.models.work.generators.LegacyWorkGenerators
+import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.models.VersionExpectedConflictException
@@ -15,12 +15,12 @@ class WorkStoreTest
     extends AnyFunSpec
     with Matchers
     with VHSFixture[Work[Source]]
-    with LegacyWorkGenerators
+    with WorkGenerators
     with Inside {
   it("gets a work from vhs") {
     withVHS { vhs: VHS =>
       val workStore = new WorkStore(vhs)
-      val expectedWork = createSourceWork
+      val expectedWork = sourceWork()
       val actualWork = for {
         key <- vhs.put(Version("b12345678", 1))(expectedWork)
         work <- workStore.getWork(key.id)
@@ -43,7 +43,7 @@ class WorkStoreTest
     "returns a VersionExpectedConflictException if the work exists in VHS with a higher version") {
     withVHS { vhs: VHS =>
       val workStore = new WorkStore(vhs)
-      val expectedWork = createSourceWork
+      val expectedWork = sourceWork()
       val actualWork = for {
         _ <- vhs.put(Version("b12345678", 2))(expectedWork)
         work <- workStore.getWork(Version("b12345678", 1))
@@ -59,7 +59,7 @@ class WorkStoreTest
   it("returns a left if the work is in VHS with a lower version") {
     withVHS { vhs: VHS =>
       val workStore = new WorkStore(vhs)
-      val expectedWork = createSourceWork
+      val expectedWork = sourceWork()
       val actualWork = for {
         _ <- vhs.put(Version("b12345678", 1))(expectedWork)
         work <- workStore.getWork(Version("b12345678", 2))

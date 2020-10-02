@@ -9,7 +9,7 @@ import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.generators.LegacyWorkGenerators
+import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.recorder.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.storage.{StoreReadError, StoreWriteError, Version}
@@ -22,13 +22,13 @@ class RecorderWorkerServiceTest
     with IntegrationPatience
     with WorkerServiceFixture
     with JsonAssertions
-    with LegacyWorkGenerators {
+    with WorkGenerators {
 
   it("records Work.Visible[Source]") {
     withLocalSqsQueue() { queue =>
       withVHS { vhs =>
         withWorkerService(queue, vhs) { _ =>
-          val work = createSourceWork
+          val work = sourceWork()
           sendMessage[Work[Source]](queue = queue, obj = work)
           eventually {
             assertWorkStored(vhs, work)
@@ -42,7 +42,7 @@ class RecorderWorkerServiceTest
     withLocalSqsQueue() { queue =>
       withVHS { vhs =>
         withWorkerService(queue, vhs) { _ =>
-          val invisibleWork = createInvisibleSourceWork
+          val invisibleWork = sourceWork().invisible()
           sendMessage[Work[Source]](queue = queue, invisibleWork)
           eventually {
             assertWorkStored(vhs, invisibleWork)
@@ -56,10 +56,11 @@ class RecorderWorkerServiceTest
     withLocalSqsQueue() { queue =>
       withVHS { vhs =>
         withWorkerService(queue, vhs) { _ =>
-          val olderWork = createSourceWork
-          val newerWork = olderWork
-            .copy(version = 10)
-            .mapData(data => data.copy(title = Some("A nice new thing")))
+          val olderWork = sourceWork()
+          val newerWork =
+            sourceWork(sourceIdentifier = olderWork.sourceIdentifier)
+              .withVersion(olderWork.version + 1)
+              .title("A nice new thing")
           sendMessage[Work[Source]](queue = queue, newerWork)
           eventually { assertWorkStored(vhs, newerWork) }
           sendMessage[Work[Source]](queue = queue, obj = olderWork)
@@ -74,10 +75,11 @@ class RecorderWorkerServiceTest
     withLocalSqsQueue() { queue =>
       withVHS { vhs =>
         withWorkerService(queue, vhs) { _ =>
-          val olderWork = createSourceWork
-          val newerWork = olderWork
-            .copy(version = 10)
-            .mapData(data => data.copy(title = Some("A nice new thing")))
+          val olderWork = sourceWork()
+          val newerWork =
+            sourceWork(sourceIdentifier = olderWork.sourceIdentifier)
+              .withVersion(olderWork.version + 1)
+              .title("A nice new thing")
           sendMessage[Work[Source]](queue = queue, obj = olderWork)
           eventually {
             assertWorkStored(vhs, olderWork)
@@ -108,7 +110,7 @@ class RecorderWorkerServiceTest
     withLocalSqsQueuePair() {
       case SQS.QueuePair(queue, dlq) =>
         withWorkerService(queue, brokenVhs, messageSender) { _ =>
-          val work = createSourceWork
+          val work = sourceWork()
           sendMessage[Work[Source]](queue = queue, obj = work)
           eventually {
             assertQueueEmpty(queue)
@@ -128,7 +130,7 @@ class RecorderWorkerServiceTest
     withLocalSqsQueue() { queue =>
       withVHS { vhs =>
         withWorkerService(queue, vhs, messageSender) { _ =>
-          val work = createSourceWork
+          val work = sourceWork()
           sendMessage[Work[Source]](queue = queue, obj = work)
           eventually {
             val id = work.sourceIdentifier.toString

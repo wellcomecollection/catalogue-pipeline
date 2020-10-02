@@ -10,41 +10,6 @@ trait LegacyWorkGenerators
 
   private def createTitle: String = randomAlphanumeric(length = 100)
 
-  def createRedirectedSourceWork: Work.Redirected[Source] =
-    Work.Redirected[Source](
-      state = Source(createSourceIdentifier),
-      version = 1,
-      redirect = IdState.Identifiable(createSourceIdentifier)
-    )
-
-  def createRedirectedSourceWorkWith(
-    redirect: IdState.Identifiable): Work.Redirected[Source] =
-    Work.Redirected[Source](
-      state = Source(createSourceIdentifier),
-      version = 1,
-      redirect = redirect
-    )
-
-  def createIdentifiedRedirectedWork: Work.Redirected[Identified] =
-    createIdentifiedRedirectedWorkWith()
-
-  def createIdentifiedRedirectedWorkWith(
-    canonicalId: String = createCanonicalId,
-    sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    version: Int = 1,
-  ): Work.Redirected[Identified] =
-    Work.Redirected[Identified](
-      state = Identified(
-        canonicalId = canonicalId,
-        sourceIdentifier = sourceIdentifier,
-      ),
-      version = version,
-      redirect = IdState.Identified(
-        canonicalId = createCanonicalId,
-        sourceIdentifier = createSourceIdentifier
-      )
-    )
-
   def createInvisibleSourceWorkWith(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     items: List[Item[IdState.Unminted]] = Nil,
@@ -312,47 +277,5 @@ trait LegacyWorkGenerators
         createUnidentifiableItemWith(locations = List(
           createDigitalLocationWith(locationType = createImageLocationType)))),
       images = images
-    )
-
-  def createIsbnWork: Work.Visible[Source] =
-    createSourceWorkWith(
-      sourceIdentifier = createIsbnSourceIdentifier,
-    )
-
-  def createIsbnWorks(count: Int): List[Work.Visible[Source]] =
-    List.fill(count)(createIsbnWork)
-
-  def createDatedWork(
-    dateLabel: String,
-    canonicalId: String = createCanonicalId
-  ): Work.Visible[Identified] =
-    createIdentifiedWorkWith(
-      canonicalId = canonicalId,
-      production = List(createProductionEventWith(dateLabel = Some(dateLabel)))
-    )
-
-  def createLicensedWork(canonicalId: String,
-                         licenses: List[License]): Work.Visible[Identified] =
-    createIdentifiedWorkWith(
-      canonicalId = canonicalId,
-      items = licenses.map { license =>
-        createDigitalItemWith(license = Some(license))
-      }
-    )
-
-  def createPhysicalWork(canonicalId: String = createCanonicalId) =
-    createIdentifiedWorkWith(
-      canonicalId,
-      items = List(
-        createIdentifiedItemWith(locations = List(createPhysicalLocation))
-      )
-    )
-
-  def createDigitalWork(canonicalId: String = createCanonicalId) =
-    createIdentifiedWorkWith(
-      canonicalId,
-      items = List(
-        createIdentifiedItemWith(locations = List(createDigitalLocation))
-      )
     )
 }

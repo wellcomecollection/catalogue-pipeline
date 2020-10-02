@@ -10,7 +10,7 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
-import uk.ac.wellcome.models.work.generators.LegacyWorkGenerators
+import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal._
 
 class ElasticsearchSourceTest
@@ -20,12 +20,12 @@ class ElasticsearchSourceTest
     with IntegrationPatience
     with Akka
     with ElasticsearchFixtures
-    with LegacyWorkGenerators {
+    with WorkGenerators {
 
   it("outputs the entire content of the index") {
     withActorSystem { implicit actorSystem =>
       withLocalWorksIndex { index =>
-        val works = createIdentifiedWorks(count = 10)
+        val works = identifiedWorks(count = 10)
         insertIntoElasticsearch(index, works: _*)
 
         withSource(index) { source =>
@@ -42,8 +42,8 @@ class ElasticsearchSourceTest
   it("filters non visible works") {
     withActorSystem { implicit actorSystem =>
       withLocalWorksIndex { index =>
-        val visibleWorks = createIdentifiedWorks(count = 10)
-        val invisibleWorks = createIdentifiedInvisibleWorks(count = 3)
+        val visibleWorks = identifiedWorks(count = 10)
+        val invisibleWorks = identifiedWorks(count = 3).map { _.invisible() }
 
         val works = visibleWorks ++ invisibleWorks
         insertIntoElasticsearch(index, works: _*)

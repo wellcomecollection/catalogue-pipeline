@@ -9,7 +9,7 @@ import org.scalatest.matchers.should.Matchers
 
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.models.work.generators.LegacyWorkGenerators
+import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.pipeline_storage.ElasticIndexer
 import uk.ac.wellcome.pipeline_storage.Indexable.workIndexable
@@ -21,15 +21,17 @@ class WorkIndexerTest
     with ScalaFutures
     with Matchers
     with ElasticsearchFixtures
-    with LegacyWorkGenerators {
+    with WorkGenerators {
 
   describe("updating merged / redirected works") {
     it(
-      "doesn't override a merged Work with same version but merged flag = false") {
-      val mergedWork = createIdentifiedWorkWith(version = 3, merged = true)
-      val unmergedWork = mergedWork.copy(
-        state = mergedWork.state.copy(hasMultipleSources = false)
-      )
+      "doesn't override a merged Work with same version but hasMultipleSources = false") {
+      val mergedWork = identifiedWork(hasMultipleSources = true).withVersion(3)
+
+      val unmergedWork = identifiedWork(
+        sourceIdentifier = mergedWork.sourceIdentifier,
+        hasMultipleSources = false
+      ).withVersion(mergedWork.version)
 
       withWorksIndexAndIndexer {
         case (index, indexer) =>
@@ -48,13 +50,13 @@ class WorkIndexerTest
       }
     }
 
-    it("doesn't overwrite a Work with lower version and merged = true") {
-      val unmergedNewWork = createIdentifiedWorkWith(version = 4)
-      val mergedOldWork = unmergedNewWork
-        .copy(
-          version = 3,
-          state = unmergedNewWork.state.copy(hasMultipleSources = true)
-        )
+    it(
+      "doesn't overwrite a Work with lower version and hasMultipleSources = true") {
+      val unmergedNewWork = identifiedWork()
+      val mergedOldWork = identifiedWork(
+        sourceIdentifier = unmergedNewWork.sourceIdentifier,
+        hasMultipleSources = true
+      ).withVersion(unmergedNewWork.version - 1)
 
       withWorksIndexAndIndexer {
         case (index, indexer) =>
@@ -74,10 +76,17 @@ class WorkIndexerTest
 
     it(
       "doesn't override a identified Work with redirected work with lower version") {
-      val identifiedNewWork = createIdentifiedWorkWith(version = 4)
-      val redirectedOldWork = createIdentifiedRedirectedWorkWith(
-        canonicalId = identifiedNewWork.state.canonicalId,
-        version = 3)
+      val identifiedNewWork = identifiedWork()
+
+      val redirectedOldWork =
+        identifiedWork(canonicalId = identifiedNewWork.state.canonicalId)
+          .withVersion(identifiedNewWork.version - 1)
+          .redirected(
+            IdState.Identified(
+              canonicalId = createCanonicalId,
+              sourceIdentifier = createSourceIdentifier
+            )
+          )
 
       withWorksIndexAndIndexer {
         case (index, indexer) =>
@@ -96,16 +105,22 @@ class WorkIndexerTest
     }
 
     it("doesn't override a redirected Work with identified work same version") {
-      val redirectedWork = createIdentifiedRedirectedWorkWith(version = 3)
-      val identifiedWork = createIdentifiedWorkWith(
-        canonicalId = redirectedWork.state.canonicalId,
-        version = 3)
+      val redirectedWork = identifiedWork()
+        .redirected(
+          IdState.Identified(
+            canonicalId = createCanonicalId,
+            sourceIdentifier = createSourceIdentifier
+          ))
+
+      val identifiedOldWork =
+        identifiedWork(canonicalId = redirectedWork.state.canonicalId)
+          .withVersion(redirectedWork.version)
 
       withWorksIndexAndIndexer {
         case (index, indexer) =>
           val identifiedWorkInsertFuture = ingestWorkPairInOrder(indexer)(
             firstWork = redirectedWork,
-            secondWork = identifiedWork,
+            secondWork = identifiedOldWork,
             index = index
           )
           whenReady(identifiedWorkInsertFuture) { result =>
@@ -118,10 +133,11 @@ class WorkIndexerTest
     }
 
     it("overrides a identified Work with invisible work with higher version") {
-      val work = createIdentifiedWorkWith(version = 3)
-      val invisibleWork = createIdentifiedInvisibleWorkWith(
-        canonicalId = work.state.canonicalId,
-        version = 4)
+      val work = identifiedWork()
+      val invisibleWork =
+        identifiedWork(canonicalId = work.state.canonicalId)
+          .withVersion(work.version + 1)
+          .invisible()
 
       withWorksIndexAndIndexer {
         case (index, indexer) =>

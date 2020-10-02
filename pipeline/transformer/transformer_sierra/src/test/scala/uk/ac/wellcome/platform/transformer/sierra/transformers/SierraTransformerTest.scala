@@ -285,6 +285,7 @@ class SierraTransformerTest
     val work = transformDataToWork(id = id, data = data)
 
     work shouldBe sourceWork(sourceIdentifier)
+      .withVersion(1)
       .title(title)
       .otherIdentifiers(List(sierraIdentifier))
       .description("A delightful description of a dead daisy.")

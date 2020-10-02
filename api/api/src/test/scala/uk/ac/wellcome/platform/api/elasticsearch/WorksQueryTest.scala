@@ -12,8 +12,8 @@ import uk.ac.wellcome.models.work.generators.{
   ContributorGenerators,
   GenreGenerators,
   ImageGenerators,
-  LegacyWorkGenerators,
-  SubjectGenerators
+  SubjectGenerators,
+  WorkGenerators
 }
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
@@ -37,7 +37,7 @@ class WorksQueryTest
     with SearchOptionsGenerators
     with SubjectGenerators
     with GenreGenerators
-    with LegacyWorkGenerators
+    with WorkGenerators
     with ImageGenerators
     with ContributorGenerators {
 

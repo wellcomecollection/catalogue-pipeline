@@ -166,9 +166,16 @@ class WorksAggregationsTest extends ApiWorksTestBase {
   it("supports aggregating on dates by from year") {
     withApi {
       case (ElasticConfig(worksIndex, _), routes) =>
-        val works = List("1st May 1970", "1970", "1976", "1970-1979")
-          .map(label => createDatedWork(dateLabel = label))
-          .sortBy(_.state.canonicalId)
+        val dates = List("1st May 1970", "1970", "1976", "1970-1979")
+
+        val works = dates
+          .map { dateLabel =>
+            identifiedWork()
+              .production(
+                List(createProductionEventWith(dateLabel = Some(dateLabel))))
+          }
+          .sortBy { _.state.canonicalId }
+
         insertIntoElasticsearch(worksIndex, works: _*)
         assertJsonResponse(
           routes,
@@ -321,12 +328,22 @@ class WorksAggregationsTest extends ApiWorksTestBase {
   }
 
   it("supports aggregating on license") {
+    def createLicensedWork(
+      canonicalId: String,
+      licenses: Seq[License]): Work.Visible[WorkState.Identified] = {
+      val items =
+        licenses.map { license =>
+          createDigitalItemWith(license = Some(license))
+        }.toList
+
+      identifiedWork(canonicalId = canonicalId).items(items)
+    }
 
     val works = List(
-      createLicensedWork("A", List(License.CCBY)),
-      createLicensedWork("B", List(License.CCBYNC)),
-      createLicensedWork("C", List(License.CCBY, License.CCBYNC)),
-      createLicensedWork("D", Nil)
+      createLicensedWork("A", licenses = List(License.CCBY)),
+      createLicensedWork("B", licenses = List(License.CCBYNC)),
+      createLicensedWork("C", licenses = List(License.CCBY, License.CCBYNC)),
+      createLicensedWork("D", licenses = List.empty)
     )
     withApi {
       case (ElasticConfig(worksIndex, _), routes) =>
@@ -371,13 +388,21 @@ class WorksAggregationsTest extends ApiWorksTestBase {
   }
 
   it("supports aggregating on locationType") {
-
     val works = List(
-      createPhysicalWork("A"),
-      createPhysicalWork("B"),
-      createDigitalWork("C"),
-      createDigitalWork("D")
+      identifiedWork(canonicalId = "A").items(
+        List(createIdentifiedItemWith(locations = List(createPhysicalLocation)))
+      ),
+      identifiedWork(canonicalId = "B").items(
+        List(createIdentifiedItemWith(locations = List(createPhysicalLocation)))
+      ),
+      identifiedWork(canonicalId = "C").items(
+        List(createIdentifiedItemWith(locations = List(createDigitalLocation)))
+      ),
+      identifiedWork(canonicalId = "D").items(
+        List(createIdentifiedItemWith(locations = List(createDigitalLocation)))
+      )
     )
+
     withApi {
       case (ElasticConfig(worksIndex, _), routes) =>
         insertIntoElasticsearch(worksIndex, works: _*)

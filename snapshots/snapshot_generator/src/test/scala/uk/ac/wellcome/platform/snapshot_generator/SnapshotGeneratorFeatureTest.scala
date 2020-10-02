@@ -14,7 +14,7 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.models.work.generators.LegacyWorkGenerators
+import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.platform.snapshot_generator.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.platform.snapshot_generator.models.{
   CompletedSnapshotJob,
@@ -33,12 +33,12 @@ class SnapshotGeneratorFeatureTest
     with IntegrationPatience
     with DisplaySerialisationTestBase
     with WorkerServiceFixture
-    with LegacyWorkGenerators {
+    with WorkGenerators {
 
   it("completes a snapshot generation") {
     withFixtures {
       case (queue, messageSender, worksIndex, _, publicBucket: Bucket) =>
-        val works = createIdentifiedWorks(count = 3)
+        val works = identifiedWorks(count = 3)
 
         insertIntoElasticsearch(worksIndex, works: _*)
 

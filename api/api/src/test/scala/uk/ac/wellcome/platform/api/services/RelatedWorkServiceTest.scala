@@ -11,7 +11,7 @@ import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.models.work.generators.{
   IdentifiersGenerators,
   ItemsGenerators,
-  LegacyWorkGenerators
+  WorkGenerators
 }
 import WorkState.Identified
 
@@ -22,18 +22,16 @@ class RelatedWorkServiceTest
     with ElasticsearchFixtures
     with IdentifiersGenerators
     with ItemsGenerators
-    with LegacyWorkGenerators {
+    with WorkGenerators {
 
   val service = new RelatedWorkService(new ElasticsearchService(elasticClient))
 
-  def work(path: String, level: CollectionLevel) =
-    createIdentifiedWorkWith(
-      collectionPath = Some(
-        CollectionPath(path = path, level = Some(level))
-      ),
-      title = Some(path),
-      sourceIdentifier = createSourceIdentifierWith(value = path)
-    )
+  def work(path: String, level: CollectionLevel): Work.Visible[Identified] =
+    identifiedWork(
+      sourceIdentifier = createSourceIdentifierWith(value = path),
+      hasMultipleSources = false)
+      .title(path)
+      .collectionPath(CollectionPath(path = path, level = Some(level)))
 
   def storeWorks(index: Index, works: List[Work[Identified]] = works) =
     insertIntoElasticsearch(index, works: _*)
@@ -188,7 +186,7 @@ class RelatedWorkServiceTest
 
   it("Returns no related works when work is not part of a collection") {
     withLocalWorksIndex { index =>
-      val workX = createIdentifiedWork
+      val workX = identifiedWork()
       storeWorks(index, List(workA, work1, workX))
       whenReady(service.retrieveRelatedWorks(index, workX)) { result =>
         result shouldBe Right(RelatedWorks.nil)

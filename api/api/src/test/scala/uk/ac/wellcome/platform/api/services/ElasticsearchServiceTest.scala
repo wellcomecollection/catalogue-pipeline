@@ -10,12 +10,7 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.generators.{
-  ContributorGenerators,
-  GenreGenerators,
-  LegacyWorkGenerators,
-  SubjectGenerators
-}
+import uk.ac.wellcome.models.work.generators._
 import uk.ac.wellcome.models.work.internal.Format.{
   Books,
   CDRoms,
@@ -37,9 +32,10 @@ class ElasticsearchServiceTest
     with ElasticsearchFixtures
     with ScalaFutures
     with SearchOptionsGenerators
+    with ItemsGenerators
     with SubjectGenerators
     with GenreGenerators
-    with LegacyWorkGenerators
+    with WorkGenerators
     with ContributorGenerators {
 
   val searchService = new ElasticsearchService(elasticClient)
@@ -50,7 +46,7 @@ class ElasticsearchServiceTest
   describe("findResultById") {
     it("finds a result by ID") {
       withLocalWorksIndex { index =>
-        val work = createIdentifiedWork
+        val work = identifiedWork()
 
         insertIntoElasticsearch(index, work)
 
@@ -168,7 +164,7 @@ class ElasticsearchServiceTest
         // ID order when we search for "A".
         val works = (1 to 5)
           .map { _ =>
-            createIdentifiedWorkWith(title = Some(title))
+            identifiedWork().title(title)
           }
           .sortBy(_.state.canonicalId)
 
@@ -191,9 +187,9 @@ class ElasticsearchServiceTest
 
     it("sorts by canonicalId when scored = false") {
       withLocalWorksIndex { index =>
-        val work1 = createIdentifiedWorkWith(canonicalId = "000Z")
-        val work2 = createIdentifiedWorkWith(canonicalId = "000Y")
-        val work3 = createIdentifiedWorkWith(canonicalId = "000X")
+        val work1 = identifiedWork(canonicalId = "000Z")
+        val work2 = identifiedWork(canonicalId = "000Y")
+        val work3 = identifiedWork(canonicalId = "000X")
 
         insertIntoElasticsearch(index, work1, work2, work3)
 
@@ -207,13 +203,9 @@ class ElasticsearchServiceTest
 
     it("sorts by score then canonicalId when scored = true") {
       withLocalWorksIndex { index =>
-        val work1 =
-          createIdentifiedWorkWith(canonicalId = "000Z", title = Some("match"))
-        val work2 = createIdentifiedWorkWith(
-          canonicalId = "000Y",
-          title = Some("match stick"))
-        val work3 =
-          createIdentifiedWorkWith(canonicalId = "000X", title = Some("match"))
+        val work1 = identifiedWork(canonicalId = "000Z").title("match")
+        val work2 = identifiedWork(canonicalId = "000Y").title("match stick")
+        val work3 = identifiedWork(canonicalId = "000X").title("match")
 
         insertIntoElasticsearch(index, work1, work2, work3)
 
@@ -229,15 +221,9 @@ class ElasticsearchServiceTest
 
     it("filters list results by format") {
       withLocalWorksIndex { index =>
-        val work1 = createIdentifiedWorkWith(
-          format = Some(ManuscriptsAsian)
-        )
-        val work2 = createIdentifiedWorkWith(
-          format = Some(ManuscriptsAsian)
-        )
-        val workWithWrongFormat = createIdentifiedWorkWith(
-          format = Some(CDRoms)
-        )
+        val work1 = identifiedWork().format(ManuscriptsAsian)
+        val work2 = identifiedWork().format(ManuscriptsAsian)
+        val workWithWrongFormat = identifiedWork().format(CDRoms)
 
         insertIntoElasticsearch(index, work1, work2, workWithWrongFormat)
 
@@ -255,18 +241,10 @@ class ElasticsearchServiceTest
 
     it("filters list results with multiple formats") {
       withLocalWorksIndex { index =>
-        val work1 = createIdentifiedWorkWith(
-          format = Some(ManuscriptsAsian)
-        )
-        val work2 = createIdentifiedWorkWith(
-          format = Some(ManuscriptsAsian)
-        )
-        val work3 = createIdentifiedWorkWith(
-          format = Some(Books)
-        )
-        val workWithWrongFormat = createIdentifiedWorkWith(
-          format = Some(CDRoms)
-        )
+        val work1 = identifiedWork().format(ManuscriptsAsian)
+        val work2 = identifiedWork().format(ManuscriptsAsian)
+        val work3 = identifiedWork().format(Books)
+        val workWithWrongFormat = identifiedWork().format(CDRoms)
 
         insertIntoElasticsearch(index, work1, work2, work3, workWithWrongFormat)
 
@@ -284,20 +262,22 @@ class ElasticsearchServiceTest
 
     it("filters results by item locationType") {
       withLocalWorksIndex { index =>
-        val work = createIdentifiedWorkWith(
-          title = Some("Tumbling tangerines"),
-          items = List(
-            createItemWithLocationType(LocationType("iiif-image")),
-            createItemWithLocationType(LocationType("acqi"))
+        val work = identifiedWork()
+          .title("Tumbling tangerines")
+          .items(
+            List(
+              createItemWithLocationType(LocationType("iiif-image")),
+              createItemWithLocationType(LocationType("acqi"))
+            )
           )
-        )
 
-        val notMatchingWork = createIdentifiedWorkWith(
-          title = Some("Tumbling tangerines"),
-          items = List(
-            createItemWithLocationType(LocationType("acqi"))
+        val notMatchingWork = identifiedWork()
+          .title("Tumbling tangerines")
+          .items(
+            List(
+              createItemWithLocationType(LocationType("acqi"))
+            )
           )
-        )
 
         insertIntoElasticsearch(index, work, notMatchingWork)
 
@@ -314,27 +294,33 @@ class ElasticsearchServiceTest
 
     it("filters results by multiple item locationTypes") {
       withLocalWorksIndex { index =>
-        val work = createIdentifiedWorkWith(
-          title = Some("Tumbling tangerines"),
-          items = List(
-            createItemWithLocationType(LocationType("iiif-image")),
-            createItemWithLocationType(LocationType("acqi"))
-          )
-        )
+        val work =
+          identifiedWork()
+            .title("Tumbling tangerines")
+            .items(
+              List(
+                createItemWithLocationType(LocationType("iiif-image")),
+                createItemWithLocationType(LocationType("acqi"))
+              )
+            )
 
-        val notMatchingWork = createIdentifiedWorkWith(
-          title = Some("Tumbling tangerines"),
-          items = List(
-            createItemWithLocationType(LocationType("acqi"))
-          )
-        )
+        val notMatchingWork =
+          identifiedWork()
+            .title("Tumbling tangerines")
+            .items(
+              List(
+                createItemWithLocationType(LocationType("acqi"))
+              )
+            )
 
-        val work2 = createIdentifiedWorkWith(
-          title = Some("Tumbling tangerines"),
-          items = List(
-            createItemWithLocationType(LocationType("digit"))
-          )
-        )
+        val work2 =
+          identifiedWork()
+            .title("Tumbling tangerines")
+            .items(
+              List(
+                createItemWithLocationType(LocationType("digit"))
+              )
+            )
 
         insertIntoElasticsearch(index, work, notMatchingWork, work2)
 
@@ -383,7 +369,7 @@ class ElasticsearchServiceTest
 
   private def populateElasticsearch(
     index: Index): List[Work.Visible[Identified]] = {
-    val works = createIdentifiedWorks(count = 10)
+    val works = identifiedWorks(count = 10)
 
     insertIntoElasticsearch(index, works: _*)
 

@@ -8,8 +8,7 @@ import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.elasticsearch.WorksIndexConfig
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.json.utils.JsonAssertions
-import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.generators.LegacyWorkGenerators
+import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.ingestor.common.fixtures.IngestorFixtures
 import uk.ac.wellcome.pipeline_storage.ElasticIndexer
@@ -24,10 +23,12 @@ class IngestorFeatureTest
     with ScalaFutures
     with IngestorFixtures
     with ElasticsearchFixtures
-    with LegacyWorkGenerators {
+    with WorkGenerators {
 
   it("ingests a Miro work") {
-    val work = createIdentifiedWork
+    val work = identifiedWork(
+      sourceIdentifier = createMiroSourceIdentifier
+    )
 
     withLocalSqsQueue() { queue =>
       sendMessage[Work[Identified]](queue = queue, obj = work)
@@ -44,7 +45,7 @@ class IngestorFeatureTest
   }
 
   it("ingests a Sierra work") {
-    val work = createIdentifiedWorkWith(
+    val work = identifiedWork(
       sourceIdentifier = createSierraSystemSourceIdentifier
     )
 

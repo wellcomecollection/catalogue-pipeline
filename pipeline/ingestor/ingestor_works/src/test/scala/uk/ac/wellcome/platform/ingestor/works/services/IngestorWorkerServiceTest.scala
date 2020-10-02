@@ -6,8 +6,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.elasticsearch.WorksIndexConfig
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
-import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.generators.LegacyWorkGenerators
+import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.ingestor.common.fixtures.IngestorFixtures
 import uk.ac.wellcome.pipeline_storage.ElasticIndexer
@@ -22,18 +21,18 @@ class IngestorWorkerServiceTest
     with Matchers
     with ScalaFutures
     with IngestorFixtures
-    with LegacyWorkGenerators {
+    with WorkGenerators {
 
   it("indexes a Miro identified Work") {
     val miroSourceIdentifier = createSourceIdentifier
 
-    val work = createIdentifiedWorkWith(sourceIdentifier = miroSourceIdentifier)
+    val work = identifiedWork(sourceIdentifier = miroSourceIdentifier)
 
     assertWorksIndexedCorrectly(work)
   }
 
   it("indexes a Sierra identified Work") {
-    val work = createIdentifiedWorkWith(
+    val work = identifiedWork(
       sourceIdentifier = createSierraSystemSourceIdentifier
     )
 
@@ -41,32 +40,36 @@ class IngestorWorkerServiceTest
   }
 
   it("indexes a Sierra identified invisible Work") {
-    val work = createIdentifiedInvisibleWorkWith(
-      sourceIdentifier = createSierraSystemSourceIdentifier
-    )
+    val work =
+      identifiedWork(sourceIdentifier = createSierraSystemSourceIdentifier)
+        .invisible()
 
     assertWorksIndexedCorrectly(work)
   }
 
   it("indexes a Sierra identified redirected Work") {
-    val work = createIdentifiedRedirectedWorkWith(
-      sourceIdentifier = createSierraSystemSourceIdentifier
-    )
+    val work =
+      identifiedWork(sourceIdentifier = createSierraSystemSourceIdentifier)
+        .redirected(
+          IdState.Identified(
+            canonicalId = createCanonicalId,
+            sourceIdentifier = createSourceIdentifier
+          ))
 
     assertWorksIndexedCorrectly(work)
   }
 
   it("indexes a mixture of Miro and Sierra works") {
-    val miroWork1 = createIdentifiedWorkWith(
+    val miroWork1 = identifiedWork(
       sourceIdentifier = createMiroSourceIdentifier
     )
-    val miroWork2 = createIdentifiedWorkWith(
+    val miroWork2 = identifiedWork(
       sourceIdentifier = createMiroSourceIdentifier
     )
-    val sierraWork1 = createIdentifiedWorkWith(
+    val sierraWork1 = identifiedWork(
       sourceIdentifier = createSierraSystemSourceIdentifier
     )
-    val sierraWork2 = createIdentifiedWorkWith(
+    val sierraWork2 = identifiedWork(
       sourceIdentifier = createSierraSystemSourceIdentifier
     )
 
@@ -76,7 +79,7 @@ class IngestorWorkerServiceTest
   }
 
   it("inserts a non Sierra- or Miro- identified work") {
-    val work = createIdentifiedWorkWith(
+    val work = identifiedWork(
       sourceIdentifier = createSourceIdentifierWith(
         identifierType = IdentifierType("calm-altref-no")
       )
@@ -86,13 +89,13 @@ class IngestorWorkerServiceTest
   }
 
   it("indexes a mixture of Miro and Sierra, and otherly-identified Works") {
-    val miroWork = createIdentifiedWorkWith(
+    val miroWork = identifiedWork(
       sourceIdentifier = createMiroSourceIdentifier
     )
-    val sierraWork = createIdentifiedWorkWith(
+    val sierraWork = identifiedWork(
       sourceIdentifier = createSierraSystemSourceIdentifier
     )
-    val otherWork = createIdentifiedWorkWith(
+    val otherWork = identifiedWork(
       sourceIdentifier = createSourceIdentifierWith(
         identifierType = IdentifierType("calm-altref-no")
       )
@@ -104,17 +107,16 @@ class IngestorWorkerServiceTest
   }
 
   it(
-    "deletes successfully ingested works from the queue, including older versions of already ingested works") {
-    val sierraWork = createIdentifiedWorkWith(
+    "deletes works from the queue, including older versions of already ingested works") {
+    val oldSierraWork = identifiedWork(
       sourceIdentifier = createSierraSystemSourceIdentifier
     )
-    val newSierraWork = createIdentifiedWorkWith(
-      sourceIdentifier = createSierraSystemSourceIdentifier,
-      version = 2
-    )
-    val oldSierraWork = newSierraWork.copy(version = 1)
 
-    val works = List(sierraWork, oldSierraWork)
+    val newSierraWork =
+      identifiedWork(sourceIdentifier = oldSierraWork.sourceIdentifier)
+        .withVersion(oldSierraWork.version + 1)
+
+    val works = List(newSierraWork, oldSierraWork)
 
     assertWorksIndexedCorrectly(works: _*)
   }
