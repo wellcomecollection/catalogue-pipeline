@@ -1,10 +1,10 @@
 package uk.ac.wellcome.platform.api.images
 
 import uk.ac.wellcome.elasticsearch.ElasticConfig
-import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
+import uk.ac.wellcome.models.work.generators.SierraWorkGenerators
 import uk.ac.wellcome.models.work.internal._
 
-class ImagesTest extends ApiImagesTestBase with ElasticsearchFixtures {
+class ImagesTest extends ApiImagesTestBase with SierraWorkGenerators {
 
   it("returns a list of images") {
     withApi {
@@ -44,7 +44,7 @@ class ImagesTest extends ApiImagesTestBase with ElasticsearchFixtures {
   it("returns only linked images when a source work ID is requested") {
     withApi {
       case (ElasticConfig(_, imagesIndex), routes) =>
-        val parentWork = createIdentifiedSierraWorkWith()
+        val parentWork = sierraIdentifiedWork()
         val workImages =
           (0 to 3)
             .map(_ => createAugmentedImageWith(parentWork = parentWork))
