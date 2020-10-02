@@ -76,9 +76,13 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorksGenerators {
 
     override protected def createMergeResult(
       target: Work.Visible[Source],
-      sources: Seq[Work[Source]]): MergeState =
+      sources: Seq[Work[Source]]): State[MergeState, MergeResult] =
       State(
-        _ => (sources.toSet, MergeResult(target.transition[Merged](0), Nil)))
+        _ =>
+          (
+            sources zip Stream.continually(true) toMap,
+            MergeResult(target.transition[Merged](0), Nil))
+      )
   }
 
   val mergerManager = new MergerManager(mergerRules = mergerRules)

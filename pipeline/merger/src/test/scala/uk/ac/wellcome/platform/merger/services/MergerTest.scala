@@ -8,6 +8,7 @@ import uk.ac.wellcome.platform.merger.models.{FieldMergeResult, MergeResult}
 import uk.ac.wellcome.platform.merger.rules.FieldMergeRule
 import WorkState.{Merged, Source}
 import WorkFsm._
+import cats.data.State
 
 class MergerTest
     extends AnyFunSpec
@@ -51,10 +52,10 @@ class MergerTest
 
     override protected def createMergeResult(
       target: Work.Visible[Source],
-      sources: Seq[Work[Source]]): MergeState =
+      sources: Seq[Work[Source]]): State[MergeState, MergeResult] =
       for {
-        items <- TestItemsRule(target, sources)
-        otherIdentifiers <- TestOtherIdentifiersRule(target, sources)
+        items <- TestItemsRule(target, sources).redirect
+        otherIdentifiers <- TestOtherIdentifiersRule(target, sources).redirect
       } yield
         MergeResult(
           mergedTarget = target

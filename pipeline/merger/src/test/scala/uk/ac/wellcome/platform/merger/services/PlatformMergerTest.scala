@@ -132,8 +132,9 @@ class PlatformMergerTest
         redirect = IdState.Identifiable(sierraPhysicalWork.sourceIdentifier))
 
     val expectedImage = miroWork.data.images.head mergeWith (
-      canonicalWork = sierraPhysicalWork.toSourceWork,
-      redirectedWork = Some(miroWork.toSourceWork)
+      canonicalWork = expectedMergedWork.toSourceWork,
+      redirectedWork = Some(miroWork.toSourceWork),
+      nMergedSources = 1
     )
 
     result.works should contain theSameElementsAs List(
@@ -170,8 +171,9 @@ class PlatformMergerTest
       )
 
     val expectedImage = miroWork.data.images.head mergeWith (
-      canonicalWork = zeroItemSierraWork.toSourceWork,
-      redirectedWork = Some(miroWork.toSourceWork)
+      canonicalWork = expectedMergedWork.toSourceWork,
+      redirectedWork = Some(miroWork.toSourceWork),
+      nMergedSources = 1
     )
 
     result.works should contain theSameElementsAs List(
@@ -216,8 +218,9 @@ class PlatformMergerTest
         redirect = IdState.Identifiable(sierraDigitalWork.sourceIdentifier))
 
     val expectedImage = miroWork.data.images.head mergeWith (
-      canonicalWork = sierraDigitalWork.toSourceWork,
-      redirectedWork = Some(miroWork.toSourceWork)
+      canonicalWork = expectedMergedWork.toSourceWork,
+      redirectedWork = Some(miroWork.toSourceWork),
+      nMergedSources = 1
     )
 
     result.works should contain theSameElementsAs List(
@@ -316,8 +319,9 @@ class PlatformMergerTest
       )
 
     val expectedImage = metsWork.data.images.head mergeWith (
-      canonicalWork = sierraPictureWork.toSourceWork,
-      redirectedWork = Some(metsWork.toSourceWork)
+      canonicalWork = expectedMergedWork.toSourceWork,
+      redirectedWork = Some(metsWork.toSourceWork),
+      nMergedSources = 1
     )
 
     result.works should contain theSameElementsAs List(
@@ -376,8 +380,9 @@ class PlatformMergerTest
         redirect = IdState.Identifiable(sierraPhysicalWork.sourceIdentifier))
 
     val expectedImage = miroWork.data.images.head mergeWith (
-      canonicalWork = sierraPhysicalWork.toSourceWork,
-      redirectedWork = Some(miroWork.toSourceWork)
+      canonicalWork = expectedMergedWork.toSourceWork,
+      redirectedWork = Some(miroWork.toSourceWork),
+      nMergedSources = 3
     )
 
     result.works should contain theSameElementsAs List(
@@ -475,7 +480,8 @@ class PlatformMergerTest
     result.images should have length 1
     result.images.head shouldBe miroWork.data.images.head.mergeWith(
       canonicalWork = miroWork.toSourceWork,
-      redirectedWork = None
+      redirectedWork = None,
+      nMergedSources = 0
     )
   }
 }
