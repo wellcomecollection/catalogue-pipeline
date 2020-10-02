@@ -32,7 +32,7 @@ class MiroVHSRecordReceiverTest
   def transformToWork(miroRecord: MiroRecord,
                       metadata: MiroMetadata,
                       version: Int) =
-    Try(sourceWork(version = version))
+    Try(sourceWork().withVersion(version))
 
   def failingTransformToWork(miroRecord: MiroRecord,
                              metadata: MiroMetadata,

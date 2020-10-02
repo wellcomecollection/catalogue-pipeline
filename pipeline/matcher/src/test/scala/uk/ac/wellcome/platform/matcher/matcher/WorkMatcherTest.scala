@@ -98,7 +98,8 @@ class WorkMatcherTest
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
           withWorkMatcher(workGraphStore, lockTable) { workMatcher =>
-            val work = sourceWork(sourceIdentifier = identifierA, version = 1)
+            val work = sourceWork(sourceIdentifier = identifierA)
+              .withVersion(1)
               .mergeCandidates(List(MergeCandidate(identifierB)))
 
             whenReady(workMatcher.matchWork(work)) { identifiersList =>
@@ -156,10 +157,9 @@ class WorkMatcherTest
             put(dynamoClient, graphTable.name)(existingWorkC)
 
             val work =
-              sourceWork(
-                sourceIdentifier = identifierB,
-                version = 2
-              ).mergeCandidates(List(MergeCandidate(identifierC)))
+              sourceWork(sourceIdentifier = identifierB)
+                .withVersion(2)
+                .mergeCandidates(List(MergeCandidate(identifierC)))
 
             whenReady(workMatcher.matchWork(work)) { identifiersList =>
               identifiersList shouldBe

@@ -42,7 +42,7 @@ class RecorderPlaybackServiceTest
   }
 
   it("returns None if asked to fetch a Work without a version") {
-    val work = sourceWork().version(0)
+    val work = sourceWork().withVersion(0)
     val workId = WorkIdentifier(work.sourceIdentifier.toString, None)
 
     withVHS { vhs =>
@@ -54,9 +54,9 @@ class RecorderPlaybackServiceTest
   }
 
   it("returns None if the version in VHS has a higher version") {
-    val work = sourceWork().version(2)
+    val work = sourceWork().withVersion(2)
 
-    val workToStore = sourceWork(work.sourceIdentifier).version(3)
+    val workToStore = sourceWork(work.sourceIdentifier).withVersion(3)
 
     withVHS { vhs =>
       givenStoredInVhs(vhs, workToStore)
@@ -71,7 +71,7 @@ class RecorderPlaybackServiceTest
     val unchangedWorks = sourceWorks(count = 3)
     val outdatedWorks = sourceWorks(count = 2)
     val updatedWorks = outdatedWorks.map { work =>
-      work.version(work.version + 1)
+      work.withVersion(work.version + 1)
     }
 
     val lookupWorks = (unchangedWorks ++ outdatedWorks).toList

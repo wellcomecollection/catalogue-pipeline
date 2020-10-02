@@ -80,7 +80,8 @@ class MatcherWorkerServiceTest
     "work A with one link to B and no existing works returns a single matched work") {
     // Work Av1
     val workAv1 =
-      sourceWork(sourceIdentifier = identifierA, version = 1)
+      sourceWork(sourceIdentifier = identifierA)
+        .withVersion(1)
         .mergeCandidates(List(MergeCandidate(identifierB)))
 
     // Work Av1 matched to B (before B exists hence version is None)
@@ -113,7 +114,7 @@ class MatcherWorkerServiceTest
   it(
     "matches a work with one link then matches the combined work to a new work") {
     // Work Av1
-    val workAv1 = sourceWork(sourceIdentifier = identifierA, version = 1)
+    val workAv1 = sourceWork(sourceIdentifier = identifierA).withVersion(1)
 
     val expectedMatchedWorksAv1 = MatcherResult(
       Set(
@@ -125,7 +126,7 @@ class MatcherWorkerServiceTest
     )
 
     // Work Bv1
-    val workBv1 = sourceWork(sourceIdentifier = identifierB, version = 1)
+    val workBv1 = sourceWork(sourceIdentifier = identifierB).withVersion(1)
 
     val expectedMatchedWorksBv1 = MatcherResult(
       Set(
@@ -137,10 +138,9 @@ class MatcherWorkerServiceTest
     )
 
     // Work Av1 matched to B
-    val workAv2 = sourceWork(
-      sourceIdentifier = identifierA,
-      version = 2
-    ).mergeCandidates(List(MergeCandidate(identifierB)))
+    val workAv2 = sourceWork(sourceIdentifier = identifierA)
+      .withVersion(2)
+      .mergeCandidates(List(MergeCandidate(identifierB)))
 
     val expectedMatchedWorksAv2 = MatcherResult(
       Set(
@@ -154,7 +154,8 @@ class MatcherWorkerServiceTest
     )
 
     // Work Cv1
-    val workCv1 = sourceWork(sourceIdentifier = identifierC, version = 1)
+    val workCv1 = sourceWork(sourceIdentifier = identifierC)
+      .withVersion(1)
 
     val expectedMatcherWorksCv1 =
       MatcherResult(
@@ -167,10 +168,9 @@ class MatcherWorkerServiceTest
       )
 
     // Work Bv2 matched to C
-    val workBv2 = sourceWork(
-      sourceIdentifier = identifierB,
-      version = 2
-    ).mergeCandidates(List(MergeCandidate(identifierC)))
+    val workBv2 = sourceWork(sourceIdentifier = identifierB)
+      .withVersion(2)
+      .mergeCandidates(List(MergeCandidate(identifierC)))
 
     val expectedMatchedWorksBv2 =
       MatcherResult(
@@ -202,8 +202,7 @@ class MatcherWorkerServiceTest
 
   it("breaks matched works into individual works") {
     // Work Av1
-    val workAv1 =
-      sourceWork(sourceIdentifier = identifierA, version = 1)
+    val workAv1 = sourceWork(sourceIdentifier = identifierA).withVersion(1)
 
     val expectedMatchedWorksAv1 = MatcherResult(
       Set(
@@ -215,8 +214,7 @@ class MatcherWorkerServiceTest
     )
 
     // Work Bv1
-    val workBv1 =
-      sourceWork(sourceIdentifier = identifierB, version = 1)
+    val workBv1 = sourceWork(sourceIdentifier = identifierB).withVersion(1)
 
     val expectedMatchedWorksBv1 = MatcherResult(
       Set(
@@ -229,7 +227,8 @@ class MatcherWorkerServiceTest
 
     // Match Work A to Work B
     val workAv2MatchedToB =
-      sourceWork(sourceIdentifier = identifierA, version = 2)
+      sourceWork(sourceIdentifier = identifierA)
+        .withVersion(2)
         .mergeCandidates(List(MergeCandidate(identifierB)))
 
     val expectedMatchedWorksAv2MatchedToB =
@@ -246,7 +245,7 @@ class MatcherWorkerServiceTest
 
     // A no longer matches B
     val workAv3WithNoMatchingWorks =
-      sourceWork(sourceIdentifier = identifierA, version = 3)
+      sourceWork(sourceIdentifier = identifierA).withVersion(3)
 
     val expectedMatchedWorksAv3 =
       MatcherResult(
@@ -281,7 +280,7 @@ class MatcherWorkerServiceTest
   }
 
   it("does not match a lower version") {
-    val workAv2 = sourceWork(sourceIdentifier = identifierA, version = 2)
+    val workAv2 = sourceWork(sourceIdentifier = identifierA).withVersion(2)
 
     val expectedMatchedWorkAv2 = MatcherResult(
       Set(
@@ -303,8 +302,7 @@ class MatcherWorkerServiceTest
             processAndAssertMatchedWorkIs(workAv2, expectedMatchedWorkAv2)
 
             // Work V1 is sent but not matched
-            val workAv1 =
-              sourceWork(sourceIdentifier = identifierA, version = 1)
+            val workAv1 = sourceWork(sourceIdentifier = identifierA).withVersion(1)
 
             sendWork(workAv1, vhs, queue)
             eventually {
@@ -322,7 +320,7 @@ class MatcherWorkerServiceTest
   }
 
   it("does not match an existing version with different information") {
-    val workAv2 = sourceWork(sourceIdentifier = identifierA, version = 2)
+    val workAv2 = sourceWork(sourceIdentifier = identifierA).withVersion(2)
 
     val expectedMatchedWorkAv2 = MatcherResult(
       Set(
@@ -345,7 +343,8 @@ class MatcherWorkerServiceTest
 
             // Work V1 is sent but not matched
             val differentWorkAv2 =
-              sourceWork(sourceIdentifier = identifierA, version = 2)
+              sourceWork(sourceIdentifier = identifierA)
+                .withVersion(2)
                 .mergeCandidates(List(MergeCandidate(identifierB)))
 
             sendWork(differentWorkAv2, vhs, queue)

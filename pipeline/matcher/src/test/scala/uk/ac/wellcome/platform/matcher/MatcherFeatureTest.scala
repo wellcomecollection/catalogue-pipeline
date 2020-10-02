@@ -64,9 +64,7 @@ class MatcherFeatureTest
               val existingWorkVersion = 2
               val updatedWorkVersion = 1
 
-              val workAv1 = sourceWork(
-                version = updatedWorkVersion
-              )
+              val workAv1 = sourceWork().withVersion(updatedWorkVersion)
 
               val existingWorkAv2 = WorkNode(
                 id = workAv1.sourceIdentifier.toString,
@@ -98,7 +96,7 @@ class MatcherFeatureTest
         withWorkGraphTable { graphTable =>
           withVHS { vhs: VHS =>
             withWorkerService(vhs, queue, messageSender, graphTable) { _ =>
-              val workv2 = sourceWork(version = 2)
+              val workv2 = sourceWork().withVersion(2)
 
               val key = vhs.put(
                 Version(workv2.sourceIdentifier.toString, workv2.version))(

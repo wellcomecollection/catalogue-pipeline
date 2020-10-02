@@ -13,13 +13,12 @@ trait WorkGenerators extends IdentifiersGenerators {
     seq(Random.nextInt(seq.size))
 
   def sourceWork(
-    sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    version: Int = createVersion
+    sourceIdentifier: SourceIdentifier = createSourceIdentifier
   ): Work.Visible[Source] =
     Work.Visible[Source](
       state = Source(sourceIdentifier),
       data = initData,
-      version = version
+      version = createVersion
     )
 
   def mergedWork(
@@ -29,7 +28,7 @@ trait WorkGenerators extends IdentifiersGenerators {
     Work.Visible[Merged](
       state = Merged(sourceIdentifier, hasMultipleSources),
       data = initData,
-      version = 1
+      version = createVersion
     )
 
   def denormalisedWork(
@@ -40,15 +39,14 @@ trait WorkGenerators extends IdentifiersGenerators {
     Work.Visible[Denormalised](
       state = Denormalised(sourceIdentifier, hasMultipleSources, relations),
       data = initData,
-      version = 1
+      version = createVersion
     )
 
   def identifiedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     canonicalId: String = createCanonicalId,
     hasMultipleSources: Boolean = chooseFrom(true, false),
-    relations: Relations[DataState.Identified] = Relations.none,
-    version: Int = createVersion
+    relations: Relations[DataState.Identified] = Relations.none
   ): Work.Visible[Identified] =
     Work.Visible[Identified](
       state = Identified(
@@ -58,7 +56,7 @@ trait WorkGenerators extends IdentifiersGenerators {
         relations = relations
       ),
       data = initData,
-      version = version
+      version = createVersion
     )
 
   def sourceWorks(count: Int): List[Work.Visible[Source]] =
@@ -91,8 +89,8 @@ trait WorkGenerators extends IdentifiersGenerators {
         redirect = redirect
       )
 
-    def version(version: Int): Work.Visible[State] =
-      Work.Visible[State](version, work.data, work.state)
+    def withVersion(version: Int): Work.Visible[State] =
+      Work.Visible[State](version = version, data = work.data, state = work.state)
 
     def title(title: String): Work.Visible[State] =
       work.map(_.copy(title = Some(title)))

@@ -57,10 +57,9 @@ class RecorderWorkerServiceTest
       withVHS { vhs =>
         withWorkerService(queue, vhs) { _ =>
           val olderWork = sourceWork()
-          val newerWork = sourceWork(
-            sourceIdentifier = olderWork.sourceIdentifier,
-            version = olderWork.version + 1
-          ).title("A nice new thing")
+          val newerWork = sourceWork(sourceIdentifier = olderWork.sourceIdentifier)
+            .withVersion(olderWork.version + 1)
+            .title("A nice new thing")
           sendMessage[Work[Source]](queue = queue, newerWork)
           eventually { assertWorkStored(vhs, newerWork) }
           sendMessage[Work[Source]](queue = queue, obj = olderWork)
@@ -76,10 +75,9 @@ class RecorderWorkerServiceTest
       withVHS { vhs =>
         withWorkerService(queue, vhs) { _ =>
           val olderWork = sourceWork()
-          val newerWork = sourceWork(
-            sourceIdentifier = olderWork.sourceIdentifier,
-            version = olderWork.version + 1
-          ).title("A nice new thing")
+          val newerWork = sourceWork(sourceIdentifier = olderWork.sourceIdentifier)
+            .withVersion(olderWork.version + 1)
+            .title("A nice new thing")
           sendMessage[Work[Source]](queue = queue, obj = olderWork)
           eventually {
             assertWorkStored(vhs, olderWork)
