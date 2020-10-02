@@ -155,19 +155,6 @@ trait LegacyWorkGenerators
       mergeCandidates = mergeCandidates
     )
 
-  def createIdentifiedSierraWorkWith(
-    format: Option[Format] = None,
-    items: List[Item[IdState.Minted]] = Nil,
-    mergeCandidates: List[MergeCandidate] = Nil,
-  ): Work.Visible[Identified] =
-    createIdentifiedWorkWith(
-      sourceIdentifier = createSierraSystemSourceIdentifier,
-      format = format,
-      otherIdentifiers = List(createSierraSystemSourceIdentifier),
-      items = items,
-      mergeCandidates = mergeCandidates
-    )
-
   def createCalmSourceWorkWith(data: WorkData[DataState.Unidentified] =
                                  WorkData[DataState.Unidentified](
                                    items = List(createCalmItem)
