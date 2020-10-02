@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.merger.rules
 import org.scalatest.Inside
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.generators.WorksGenerators
+import uk.ac.wellcome.models.work.generators.SierraWorkGenerators
 import uk.ac.wellcome.models.work.internal.{
   AccessCondition,
   AccessStatus,
@@ -15,54 +15,52 @@ import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 class ThumbnailRuleTest
     extends AnyFunSpec
     with Matchers
-    with WorksGenerators
+    with SierraWorkGenerators
     with Inside {
 
-  val physicalSierraWork = createSierraPhysicalWork
+  val physicalSierraWork = sierraPhysicalSourceWork()
 
-  val digitalSierraWork = createSierraDigitalWork
+  val digitalSierraWork = sierraDigitalSourceWork()
 
-  val metsWork = createSourceWorkWith(
-    sourceIdentifier = createMetsSourceIdentifier,
-    items = List(createDigitalItem),
-    thumbnail = Some(
+  val metsWork = sourceWork(createMetsSourceIdentifier)
+    .items(List(createDigitalItem))
+    .thumbnail(
       DigitalLocationDeprecated(
         url = "mets.com/thumbnail.jpg",
         locationType = LocationType("thumbnail-image"),
         license = Some(License.CCBY)
       )
     )
-  )
 
   val miroWorks = (0 to 3)
     .map { i =>
       f"V$i%04d"
     }
     .map { id =>
-      createSourceWorkWith(
-        sourceIdentifier = createMiroSourceIdentifierWith(id),
-        thumbnail = Some(
+      sourceWork(createMiroSourceIdentifierWith(id))
+        .thumbnail(
           DigitalLocationDeprecated(
             url = s"https://iiif.wellcomecollection.org/$id.jpg",
             locationType = LocationType("thumbnail-image"),
             license = Some(License.CCBY)
           )
-        ),
-        items = List(
-          createUnidentifiableItemWith(
-            locations = List(
-              createDigitalLocationWith(
-                locationType = createImageLocationType
+        )
+        .items(
+          List(
+            createUnidentifiableItemWith(
+              locations = List(
+                createDigitalLocationWith(
+                  locationType = createImageLocationType
+                )
               )
             )
           )
         )
-      )
     }
 
   val restrictedDigitalWork =
-    createSierraSourceWorkWith(
-      items = List(
+    sierraSourceWork().items(
+      List(
         createUnidentifiableItemWith(
           locations = List(
             createDigitalLocationWith(

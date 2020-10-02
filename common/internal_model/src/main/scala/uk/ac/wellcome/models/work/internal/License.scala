@@ -8,7 +8,6 @@ sealed trait License extends EnumEntry {
   val id: String
   val label: String
   val url: String
-  val ontologyType: String = "License"
 }
 
 object License extends Enum[License] {

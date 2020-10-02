@@ -18,7 +18,7 @@ import uk.ac.wellcome.models.matcher.{
   WorkIdentifier,
   WorkNode
 }
-import uk.ac.wellcome.models.work.generators.WorksGenerators
+import uk.ac.wellcome.models.work.generators.SierraWorkGenerators
 import uk.ac.wellcome.models.work.internal.MergeCandidate
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
@@ -32,7 +32,7 @@ class WorkMatcherTest
     with MatcherFixtures
     with ScalaFutures
     with MockitoSugar
-    with WorksGenerators
+    with SierraWorkGenerators
     with EitherValues {
 
   private val identifierA = createSierraSystemSourceIdentifierWith(value = "A")
@@ -45,20 +45,22 @@ class WorkMatcherTest
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
           withWorkMatcher(workGraphStore, lockTable) { workMatcher =>
-            val work = createSierraSourceWork
-            val workId = work.sourceIdentifier.toString
+            val work = sourceWork()
+
+            val sourceId = work.sourceIdentifier.toString
+            val version = work.version
 
             whenReady(workMatcher.matchWork(work)) { matcherResult =>
               matcherResult shouldBe
-                MatcherResult(
-                  Set(MatchedIdentifiers(Set(WorkIdentifier(workId, 1)))))
+                MatcherResult(Set(
+                  MatchedIdentifiers(Set(WorkIdentifier(sourceId, version)))))
 
               val savedLinkedWork =
-                get[WorkNode](dynamoClient, graphTable.name)('id -> workId)
+                get[WorkNode](dynamoClient, graphTable.name)('id -> sourceId)
                   .map(_.right.value)
 
               savedLinkedWork shouldBe Some(
-                WorkNode(workId, 1, Nil, ciHash(workId)))
+                WorkNode(sourceId, version, Nil, ciHash(sourceId)))
             }
           }
         }
@@ -71,15 +73,18 @@ class WorkMatcherTest
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
           withWorkMatcher(workGraphStore, lockTable) { workMatcher =>
-            val invisibleWork = createInvisibleSourceWork
-            val workId = invisibleWork.sourceIdentifier.toString
+            val invisibleWork = sourceWork().invisible()
+
+            val sourceId = invisibleWork.sourceIdentifier.toString
+            val version = invisibleWork.version
+
             whenReady(workMatcher.matchWork(invisibleWork)) { matcherResult =>
               matcherResult shouldBe
-                MatcherResult(
-                  Set(MatchedIdentifiers(Set(WorkIdentifier(workId, 1)))))
-              get[WorkNode](dynamoClient, graphTable.name)('id -> workId)
+                MatcherResult(Set(
+                  MatchedIdentifiers(Set(WorkIdentifier(sourceId, version)))))
+              get[WorkNode](dynamoClient, graphTable.name)('id -> sourceId)
                 .map(_.right.get) shouldBe Some(
-                WorkNode(workId, 1, Nil, ciHash(workId)))
+                WorkNode(sourceId, version, Nil, ciHash(sourceId)))
             }
           }
         }
@@ -93,10 +98,10 @@ class WorkMatcherTest
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
           withWorkMatcher(workGraphStore, lockTable) { workMatcher =>
-            val work = createSourceWorkWith(
-              sourceIdentifier = identifierA,
-              mergeCandidates = List(MergeCandidate(identifierB))
-            )
+            val work = sourceWork(sourceIdentifier = identifierA)
+              .withVersion(1)
+              .mergeCandidates(List(MergeCandidate(identifierB)))
+
             whenReady(workMatcher.matchWork(work)) { identifiersList =>
               identifiersList shouldBe
                 MatcherResult(
@@ -151,10 +156,10 @@ class WorkMatcherTest
             put(dynamoClient, graphTable.name)(existingWorkB)
             put(dynamoClient, graphTable.name)(existingWorkC)
 
-            val work = createSourceWorkWith(
-              sourceIdentifier = identifierB,
-              version = 2,
-              mergeCandidates = List(MergeCandidate(identifierC)))
+            val work =
+              sourceWork(sourceIdentifier = identifierB)
+                .withVersion(2)
+                .mergeCandidates(List(MergeCandidate(identifierC)))
 
             whenReady(workMatcher.matchWork(work)) { identifiersList =>
               identifiersList shouldBe
@@ -201,7 +206,7 @@ class WorkMatcherTest
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
           withLockDao(dynamoClient, lockTable) { implicit lockDao =>
-            val work = createSierraSourceWork
+            val work = sierraSourceWork()
             val workId = work.sourceIdentifier.toString
             withWorkMatcherAndLockingService(
               workGraphStore,
@@ -241,10 +246,10 @@ class WorkMatcherTest
                     WorkNode(idB, 0, List(idC), componentId),
                     WorkNode(idC, 0, Nil, componentId),
                   )))
-              val work = createSourceWorkWith(
-                sourceIdentifier = identifierA,
-                mergeCandidates = List(MergeCandidate(identifierB))
-              )
+
+              val work = sourceWork(sourceIdentifier = identifierA)
+                .mergeCandidates(List(MergeCandidate(identifierB)))
+
               val failedLock = for {
                 _ <- Future.successful(
                   lockDao.lock(componentId, UUID.randomUUID))
@@ -270,7 +275,7 @@ class WorkMatcherTest
         when(mockWorkGraphStore.put(any[WorkGraph]))
           .thenThrow(expectedException)
 
-        whenReady(workMatcher.matchWork(createSierraSourceWork).failed) {
+        whenReady(workMatcher.matchWork(sierraSourceWork()).failed) {
           actualException =>
             actualException shouldBe MatcherException(expectedException)
         }

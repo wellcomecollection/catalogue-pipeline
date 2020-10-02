@@ -47,8 +47,7 @@ trait IndexConfig {
     keywordField("ontologyType"),
     objectField("identifierType").fields(
       label,
-      keywordField("id"),
-      keywordField("ontologyType")
+      keywordField("id")
     ),
     sourceIdentifierValue
   )
@@ -64,11 +63,9 @@ trait IndexConfig {
   def location(fieldName: String = "locations") =
     objectField(fieldName).fields(
       keywordField("type"),
-      keywordField("ontologyType"),
       objectField("locationType").fields(
         label,
-        keywordField("id"),
-        keywordField("ontologyType")
+        keywordField("id")
       ),
       label,
       textField("url"),

@@ -6,8 +6,7 @@ import scala.io.Source
 
 case class IdentifierType(
   id: String,
-  label: String,
-  ontologyType: String = "IdentifierType"
+  label: String
 )
 
 case object IdentifierType {

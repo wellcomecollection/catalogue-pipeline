@@ -154,7 +154,7 @@ object PlatformMerger extends Merger {
         thumbnail <- ThumbnailRule(target, sources).redirect
         otherIdentifiers <- OtherIdentifiersRule(target, sources).redirect
         unmergedImages <- ImagesRule(target, sources).noRedirect
-        work = target.withData { data =>
+        work = target.mapData { data =>
           data.copy[DataState.Unidentified](
             items = items,
             thumbnail = thumbnail,

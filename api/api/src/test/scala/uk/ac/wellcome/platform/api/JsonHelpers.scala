@@ -5,7 +5,7 @@ import io.circe.Json
 import uk.ac.wellcome.platform.api.works.ApiWorksTestBase
 
 trait JsonHelpers extends ApiWorksTestBase {
-  protected def getParameter(endpoint: Json, name: String) =
+  protected def getParameter(endpoint: Json, name: String): Option[Json] =
     getKey(endpoint, "parameters")
       .flatMap(_.asArray)
       .flatMap(
@@ -41,6 +41,11 @@ trait JsonHelpers extends ApiWorksTestBase {
       arr => Some(arr.length),
       obj => Some(obj.keys.toList.length)
     )
+
+  protected def getNumericKey(json: Json, key: String): Option[Int] =
+    getKey(json, key = key)
+      .flatMap { _.asNumber }
+      .flatMap { _.toInt }
 
   protected def getNumPublicQueryParams[T: TypeTag]: Int =
     typeOf[T].members

@@ -3,8 +3,7 @@ package uk.ac.wellcome.models.work.internal
 case class Contributor[+State](
   id: State,
   agent: AbstractAgent[State],
-  roles: List[ContributionRole] = Nil,
-  ontologyType: String = "Contributor"
+  roles: List[ContributionRole] = Nil
 ) extends HasId[State]
 
 object Contributor {

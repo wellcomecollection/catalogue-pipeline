@@ -19,7 +19,6 @@ case object ImagesIndexConfig extends IndexConfig {
     objectField(canonicalWork).fields(
       id("id"),
       WorksIndexConfig.data(textField("path")),
-      keywordField("ontologyType"),
       keywordField("type"),
       version
     )

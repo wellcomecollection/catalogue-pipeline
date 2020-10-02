@@ -6,7 +6,7 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.matcher.WorkIdentifier
-import uk.ac.wellcome.models.work.generators.WorksGenerators
+import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.fixtures.LocalWorksVhs
 import WorkState.Source
@@ -16,10 +16,10 @@ class RecorderPlaybackServiceTest
     with Matchers
     with ScalaFutures
     with LocalWorksVhs
-    with WorksGenerators {
+    with WorkGenerators {
 
   it("fetches a single Work") {
-    val work = createSourceWork
+    val work = sourceWork()
 
     withVHS { vhs =>
       givenStoredInVhs(vhs, work)
@@ -31,7 +31,7 @@ class RecorderPlaybackServiceTest
   }
 
   it("throws an error if asked to fetch a missing entry") {
-    val work = createSourceWork
+    val work = sourceWork()
 
     withVHS { vhs =>
       whenReady(fetchAllWorks(vhs = vhs, work).failed) { result =>
@@ -42,7 +42,7 @@ class RecorderPlaybackServiceTest
   }
 
   it("returns None if asked to fetch a Work without a version") {
-    val work = createSourceWorkWith(version = 0)
+    val work = sourceWork().withVersion(0)
     val workId = WorkIdentifier(work.sourceIdentifier.toString, None)
 
     withVHS { vhs =>
@@ -54,12 +54,9 @@ class RecorderPlaybackServiceTest
   }
 
   it("returns None if the version in VHS has a higher version") {
-    val work = createSourceWorkWith(version = 2)
+    val work = sourceWork().withVersion(2)
 
-    val workToStore = createSourceWorkWith(
-      sourceIdentifier = work.sourceIdentifier,
-      version = work.version + 1
-    )
+    val workToStore = sourceWork(work.sourceIdentifier).withVersion(3)
 
     withVHS { vhs =>
       givenStoredInVhs(vhs, workToStore)
@@ -71,14 +68,10 @@ class RecorderPlaybackServiceTest
   }
 
   it("gets a mixture of works as appropriate") {
-    val unchangedWorks = (1 to 3).map { _ =>
-      createSourceWork
-    }
-    val outdatedWorks = (4 to 5).map { _ =>
-      createSourceWork
-    }
+    val unchangedWorks = sourceWorks(count = 3)
+    val outdatedWorks = sourceWorks(count = 2)
     val updatedWorks = outdatedWorks.map { work =>
-      work.copy(version = work.version + 1)
+      work.withVersion(work.version + 1)
     }
 
     val lookupWorks = (unchangedWorks ++ outdatedWorks).toList

@@ -517,11 +517,15 @@ class WorksFiltersTest extends ApiWorksTestBase {
   }
 
   describe("filtering works by date range") {
-    val (work1, work2, work3) = (
-      createDatedWork("1709", canonicalId = "a"),
-      createDatedWork("1950", canonicalId = "b"),
-      createDatedWork("2000", canonicalId = "c")
-    )
+    def createDatedWork(canonicalId: String,
+                        dateLabel: String): Work.Visible[WorkState.Identified] =
+      identifiedWork(canonicalId = canonicalId)
+        .production(
+          List(createProductionEventWith(dateLabel = Some(dateLabel))))
+
+    val work1 = createDatedWork(canonicalId = "1", dateLabel = "1709")
+    val work2 = createDatedWork(canonicalId = "2", dateLabel = "1950")
+    val work3 = createDatedWork(canonicalId = "3", dateLabel = "2000")
 
     it("filters by date range") {
       withApi {
@@ -726,11 +730,22 @@ class WorksFiltersTest extends ApiWorksTestBase {
   }
 
   describe("filtering works by license") {
-    val ccByWork = createLicensedWork("A", List(License.CCBY))
-    val ccByNcWork = createLicensedWork("B", List(License.CCBYNC))
+    def createLicensedWork(
+      canonicalId: String,
+      licenses: Seq[License]): Work.Visible[WorkState.Identified] = {
+      val items =
+        licenses.map { license =>
+          createDigitalItemWith(license = Some(license))
+        }.toList
+
+      identifiedWork(canonicalId = canonicalId).items(items)
+    }
+
+    val ccByWork = createLicensedWork("A", licenses = List(License.CCBY))
+    val ccByNcWork = createLicensedWork("B", licenses = List(License.CCBYNC))
     val bothLicenseWork =
-      createLicensedWork("C", List(License.CCBY, License.CCBYNC))
-    val noLicenseWork = createLicensedWork("D", Nil)
+      createLicensedWork("C", licenses = List(License.CCBY, License.CCBYNC))
+    val noLicenseWork = createLicensedWork("D", licenses = List.empty)
 
     val works = List(ccByWork, ccByNcWork, bothLicenseWork, noLicenseWork)
 

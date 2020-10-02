@@ -11,7 +11,8 @@ import WorkState.Identified
 trait ApiWorksTestBase
     extends ApiTestBase
     with DisplaySerialisationTestBase
-    with WorksGenerators
+    with LegacyWorkGenerators
+    with WorkGenerators
     with GenreGenerators
     with SubjectGenerators {
 

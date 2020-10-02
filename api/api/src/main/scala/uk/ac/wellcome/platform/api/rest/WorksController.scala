@@ -41,14 +41,14 @@ class WorksController(
           .map {
             case Left(err) => elasticError(err)
             case Right(resultList) =>
-              extractPublicUri { uri =>
+              extractPublicUri { requestUri =>
                 complete(
                   DisplayResultList(
-                    resultList,
-                    searchOptions,
-                    params.include.getOrElse(WorksIncludes()),
-                    uri,
-                    contextUri
+                    resultList = resultList,
+                    searchOptions = searchOptions,
+                    includes = params.include.getOrElse(WorksIncludes()),
+                    requestUri = requestUri,
+                    contextUri = contextUri
                   )
                 )
               }
@@ -77,8 +77,7 @@ class WorksController(
             case Right(Some(work: Work.Invisible[Identified])) =>
               Future.successful(gone("This work has been deleted"))
             case Right(None) =>
-              Future.successful(
-                notFound(s"Work not found for identifier ${id}"))
+              Future.successful(notFound(s"Work not found for identifier $id"))
             case Left(err) => Future.successful(elasticError(err))
           }
       }

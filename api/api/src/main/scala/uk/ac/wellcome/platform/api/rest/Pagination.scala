@@ -1,7 +1,12 @@
 package uk.ac.wellcome.platform.api.rest
 
 import akka.http.scaladsl.model.Uri
-import uk.ac.wellcome.platform.api.models.ResultList
+import uk.ac.wellcome.platform.api.models.{ResultList, SearchOptions}
+
+object PaginationLimits {
+  val minSize = 1
+  val maxSize = 100
+}
 
 trait Paginated { this: QueryParams =>
   val page: Option[Int]
@@ -13,15 +18,14 @@ trait Paginated { this: QueryParams =>
         .filterNot(_ >= 1)
         .map(_ => "page: must be greater than 1"),
       pageSize
-        .filterNot(size => size >= 1 && size <= 100)
-        .map(_ => "pageSize: must be between 1 and 100")
+        .filterNot { size =>
+          size >= PaginationLimits.minSize &&
+          size <= PaginationLimits.maxSize
+        }
+        .map(_ =>
+          s"pageSize: must be between ${PaginationLimits.minSize} and ${PaginationLimits.maxSize}")
     ).flatten
 
-}
-
-trait PaginatedSearchOptions {
-  val pageSize: Int
-  val pageNumber: Int
 }
 
 case class PaginationResponse(
@@ -32,7 +36,7 @@ case class PaginationResponse(
 
 object PaginationResponse {
   def apply(resultList: ResultList[_, _],
-            searchOptions: PaginatedSearchOptions,
+            searchOptions: SearchOptions,
             requestUri: Uri): PaginationResponse = {
     val totalPages =
       getTotalPages(resultList.totalResults, searchOptions.pageSize)
@@ -70,7 +74,7 @@ object PaginationResponse {
 }
 
 object PaginationQuery {
-  def safeGetFrom(searchOptions: PaginatedSearchOptions): Int = {
+  def safeGetFrom(searchOptions: SearchOptions): Int = {
     // Because we use Int for the pageSize and pageNumber, computing
     //
     //     from = (pageNumber - 1) * pageSize

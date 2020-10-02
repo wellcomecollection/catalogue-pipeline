@@ -9,6 +9,7 @@ import com.sksamuel.elastic4s.requests.searches.sort._
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.models.work.internal.WorkType
+import uk.ac.wellcome.platform.api.rest.PaginationQuery
 
 object WorksRequestBuilder extends ElasticsearchRequestBuilder {
 
@@ -16,30 +17,22 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
 
   val idSort: FieldSort = fieldSort("state.canonicalId").order(SortOrder.ASC)
 
-  def request(queryOptions: ElasticsearchQueryOptions,
-              index: Index,
-              scored: Boolean = false): SearchRequest = {
-    implicit val q = queryOptions
+  def request(searchOptions: SearchOptions, index: Index): SearchRequest = {
+    implicit val s = searchOptions
     search(index)
       .aggs { filteredAggregationBuilder.filteredAggregations }
       .query { filteredQuery }
       .postFilter { postFilterQuery }
-      .sortBy {
-        if (scored) {
-          sort :+ scoreSort(SortOrder.DESC) :+ idSort
-        } else {
-          sort :+ idSort
-        }
-      }
-      .limit { queryOptions.limit }
-      .from { queryOptions.from }
+      .sortBy { sortBy }
+      .limit { searchOptions.pageSize }
+      .from { PaginationQuery.safeGetFrom(searchOptions) }
   }
 
   private def filteredAggregationBuilder(
-    implicit queryOptions: ElasticsearchQueryOptions) =
+    implicit searchOptions: SearchOptions) =
     new FiltersAndAggregationsBuilder(
-      queryOptions.aggregations,
-      queryOptions.filters.collect { case filter: WorkFilter => filter },
+      searchOptions.aggregations,
+      searchOptions.safeFilters[WorkFilter],
       toAggregation,
       buildWorkFilterQuery
     )
@@ -91,32 +84,38 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
     case AggregationRequest.ItemLocationType =>
       TermsAggregation("locationType")
         .size(100)
-        .field("data.items.locations.ontologyType")
+        .field("data.items.locations.type")
         .minDocCount(0)
   }
 
-  private def sort(implicit queryOptions: ElasticsearchQueryOptions) =
-    queryOptions.sortBy
+  private def sortBy(implicit searchOptions: SearchOptions) =
+    if (searchOptions.searchQuery.isDefined || searchOptions.mustQueries.nonEmpty) {
+      sort :+ scoreSort(SortOrder.DESC) :+ idSort
+    } else {
+      sort :+ idSort
+    }
+
+  private def sort(implicit searchOptions: SearchOptions) =
+    searchOptions.sortBy
       .map {
         case ProductionDateSortRequest => "data.production.dates.range.from"
       }
       .map { FieldSort(_).order(sortOrder) }
 
-  private def sortOrder(implicit queryOptions: ElasticsearchQueryOptions) =
-    queryOptions.sortOrder match {
+  private def sortOrder(implicit searchOptions: SearchOptions) =
+    searchOptions.sortOrder match {
       case SortingOrder.Ascending  => SortOrder.ASC
       case SortingOrder.Descending => SortOrder.DESC
     }
 
   private def postFilterQuery(
-    implicit queryOptions: ElasticsearchQueryOptions): BoolQuery =
+    implicit searchOptions: SearchOptions): BoolQuery =
     boolQuery.filter {
       filteredAggregationBuilder.pairedFilters.map(buildWorkFilterQuery)
     }
 
-  private def filteredQuery(
-    implicit queryOptions: ElasticsearchQueryOptions): BoolQuery =
-    queryOptions.searchQuery
+  private def filteredQuery(implicit searchOptions: SearchOptions): BoolQuery =
+    searchOptions.searchQuery
       .map {
         case SearchQuery(query, queryType) =>
           queryType.toEsQuery(query)
@@ -176,7 +175,7 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
         termQuery(field = "data.collectionPath.depth", value = depth)
       case ItemLocationTypeFilter(locationTypes) =>
         termsQuery(
-          field = "data.items.locations.ontologyType",
+          field = "data.items.locations.type",
           values = locationTypes.map(_.name))
       case ItemLocationTypeIdFilter(itemLocationTypeIds) =>
         termsQuery(

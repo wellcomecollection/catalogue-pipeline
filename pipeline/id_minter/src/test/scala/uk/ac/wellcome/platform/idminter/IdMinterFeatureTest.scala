@@ -7,7 +7,7 @@ import software.amazon.awssdk.services.sqs.model.QueueAttributeName
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.models.work.generators.WorksGenerators
+import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.platform.idminter.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.models.Implicits._
 import WorkState.{Identified, Source}
@@ -18,7 +18,7 @@ class IdMinterFeatureTest
     with IntegrationPatience
     with Eventually
     with WorkerServiceFixture
-    with WorksGenerators {
+    with WorkGenerators {
 
   it("mints the same IDs where source identifiers match") {
     val messageSender = new MemoryMessageSender()
@@ -27,7 +27,7 @@ class IdMinterFeatureTest
       withIdentifiersDatabase { identifiersTableConfig =>
         withWorkerService(messageSender, queue, identifiersTableConfig) { _ =>
           eventuallyTableExists(identifiersTableConfig)
-          val work: Work[Source] = createSourceWork
+          val work: Work[Source] = sourceWork()
 
           val messageCount = 5
 
@@ -62,7 +62,7 @@ class IdMinterFeatureTest
       withIdentifiersDatabase { identifiersTableConfig =>
         withWorkerService(messageSender, queue, identifiersTableConfig) { _ =>
           eventuallyTableExists(identifiersTableConfig)
-          val work: Work[Source] = createInvisibleSourceWork
+          val work: Work[Source] = sourceWork().invisible()
 
           sendMessage(queue = queue, obj = work)
 
@@ -89,7 +89,8 @@ class IdMinterFeatureTest
         withWorkerService(messageSender, queue, identifiersTableConfig) { _ =>
           eventuallyTableExists(identifiersTableConfig)
 
-          val work: Work[Source] = createRedirectedSourceWork
+          val work: Work[Source] = sourceWork()
+            .redirected(redirect = IdState.Identifiable(createSourceIdentifier))
 
           sendMessage(queue = queue, obj = work)
 
@@ -117,7 +118,7 @@ class IdMinterFeatureTest
         withWorkerService(messageSender, queue, identifiersTableConfig) { _ =>
           sendInvalidJSONto(queue)
 
-          val work: Work[Source] = createSourceWork
+          val work: Work[Source] = sourceWork()
 
           sendMessage(queue = queue, obj = work)
 

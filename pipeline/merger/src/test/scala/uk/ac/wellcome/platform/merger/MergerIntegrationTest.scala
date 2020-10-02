@@ -5,7 +5,7 @@ import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.generators.WorksGenerators
+import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.fixtures.{
   MatcherResultFixture,
@@ -20,7 +20,7 @@ class MergerIntegrationTest
     with IntegrationPatience
     with MatcherResultFixture
     with WorkerServiceFixture
-    with WorksGenerators {
+    with WorkGenerators {
 
   it("reads matcher result messages off a queue and deletes them") {
     val workSender = new MemoryMessageSender()
@@ -29,7 +29,7 @@ class MergerIntegrationTest
       withLocalSqsQueuePair() {
         case QueuePair(queue, dlq) =>
           withWorkerService(vhs, queue, workSender) { _ =>
-            val work = createSourceWork
+            val work = sourceWork()
 
             givenStoredInVhs(vhs, work)
 

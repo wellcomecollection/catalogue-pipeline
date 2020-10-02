@@ -13,8 +13,9 @@ import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.generators.{
   GenreGenerators,
+  ProductionEventGenerators,
   SubjectGenerators,
-  WorksGenerators
+  WorkGenerators
 }
 
 class AggregationsTest
@@ -24,7 +25,8 @@ class AggregationsTest
     with ElasticsearchFixtures
     with SubjectGenerators
     with GenreGenerators
-    with WorksGenerators {
+    with ProductionEventGenerators
+    with WorkGenerators {
 
   val worksService = new WorksService(
     searchService = new ElasticsearchService(elasticClient)
@@ -33,11 +35,11 @@ class AggregationsTest
   it("returns more than 10 format aggregations") {
     val formats = Format.values
     val works = formats.flatMap { format =>
-      (0 to 4).map(_ => createIdentifiedWorkWith(format = Some(format)))
+      (0 to 4).map(_ => identifiedWork().format(format))
     }
     withLocalWorksIndex { index =>
       insertIntoElasticsearch(index, works: _*)
-      val searchOptions = WorksSearchOptions(
+      val searchOptions = SearchOptions(
         aggregations = List(AggregationRequest.Format)
       )
       whenReady(aggregationQuery(index, searchOptions)) { aggs =>
@@ -51,17 +53,25 @@ class AggregationsTest
   }
 
   it("aggregate over filtered dates, using only 'from' date") {
-    val works = List(
-      createDatedWork("1850"),
-      createDatedWork("1850-2000"),
-      createDatedWork("1860-1960"),
-      createDatedWork("1960"),
-      createDatedWork("1960-1964"),
-      createDatedWork("1962"),
+    val dates = Seq(
+      "1850",
+      "1850-2000",
+      "1860-1960",
+      "1960",
+      "1960-1964",
+      "1962"
     )
+
+    val works = dates.map { dateLabel =>
+      identifiedWork()
+        .production(
+          List(createProductionEventWith(dateLabel = Some(dateLabel)))
+        )
+    }
+
     withLocalWorksIndex { index =>
       insertIntoElasticsearch(index, works: _*)
-      val searchOptions = WorksSearchOptions(
+      val searchOptions = SearchOptions(
         aggregations = List(AggregationRequest.ProductionDate),
         filters = List(
           DateRangeFilter(Some(LocalDate.of(1960, 1, 1)), None)
@@ -83,11 +93,11 @@ class AggregationsTest
   it("returns empty buckets if they exist") {
     val formats = Format.values
     val works = formats.flatMap { format =>
-      (0 to 4).map(_ => createIdentifiedWorkWith(format = Some(format)))
+      (0 to 4).map(_ => identifiedWork().format(format))
     }
     withLocalWorksIndex { index =>
       insertIntoElasticsearch(index, works: _*)
-      val searchOptions = WorksSearchOptions(
+      val searchOptions = SearchOptions(
         searchQuery = Some(SearchQuery("anything will give zero results")),
         aggregations = List(AggregationRequest.Format)
       )
@@ -107,16 +117,15 @@ class AggregationsTest
     val subjects = (0 to 5).map(_ => createSubject)
     val works = formats.zipWithIndex.map {
       case (format, i) =>
-        createIdentifiedWorkWith(
-          format = Some(format),
-          subjects = List(subjects(i / subjects.size))
-        )
+        identifiedWork()
+          .format(format)
+          .subjects(List(subjects(i / subjects.size)))
     }
 
     it("applies filters to their related aggregations") {
       withLocalWorksIndex { index =>
         insertIntoElasticsearch(index, works: _*)
-        val searchOptions = WorksSearchOptions(
+        val searchOptions = SearchOptions(
           aggregations =
             List(AggregationRequest.Format, AggregationRequest.Subject),
           filters = List(
@@ -136,10 +145,10 @@ class AggregationsTest
       withLocalWorksIndex { index =>
         insertIntoElasticsearch(index, works: _*)
         val subjectQuery = subjects.head match {
-          case Subject(IdState.Unidentifiable, label, _, _) => label
-          case _                                            => "bilberry"
+          case Subject(IdState.Unidentifiable, label, _) => label
+          case _                                         => "bilberry"
         }
-        val searchOptions = WorksSearchOptions(
+        val searchOptions = SearchOptions(
           aggregations =
             List(AggregationRequest.Format, AggregationRequest.Subject),
           filters = List(
@@ -160,10 +169,10 @@ class AggregationsTest
       withLocalWorksIndex { index =>
         insertIntoElasticsearch(index, works: _*)
         val subjectQuery = subjects.head match {
-          case Subject(IdState.Unidentifiable, label, _, _) => label
-          case _                                            => "passionfruit"
+          case Subject(IdState.Unidentifiable, label, _) => label
+          case _                                         => "passionfruit"
         }
-        val searchOptions = WorksSearchOptions(
+        val searchOptions = SearchOptions(
           aggregations =
             List(AggregationRequest.Format, AggregationRequest.Subject),
           filters = List(
@@ -180,8 +189,7 @@ class AggregationsTest
     }
   }
 
-  private def aggregationQuery(index: Index,
-                               searchOptions: WorksSearchOptions) =
+  private def aggregationQuery(index: Index, searchOptions: SearchOptions) =
     worksService
       .listOrSearchWorks(index, searchOptions)
       .map(_.right.get.aggregations.get)

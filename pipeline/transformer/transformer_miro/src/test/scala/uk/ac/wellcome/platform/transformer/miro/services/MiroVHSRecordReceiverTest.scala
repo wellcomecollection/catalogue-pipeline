@@ -6,7 +6,7 @@ import io.circe.Encoder
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.generators.WorksGenerators
+import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.miro.exceptions.MiroTransformerException
 import uk.ac.wellcome.platform.transformer.miro.fixtures.MiroVHSRecordReceiverFixture
@@ -25,14 +25,14 @@ class MiroVHSRecordReceiverTest
     with ScalaFutures
     with IntegrationPatience
     with MiroRecordGenerators
-    with WorksGenerators {
+    with WorkGenerators {
 
   case class TestException(message: String) extends Exception(message)
 
   def transformToWork(miroRecord: MiroRecord,
                       metadata: MiroMetadata,
                       version: Int) =
-    Try(createSourceWorkWith(version = version))
+    Try(sourceWork().withVersion(version))
 
   def failingTransformToWork(miroRecord: MiroRecord,
                              metadata: MiroMetadata,

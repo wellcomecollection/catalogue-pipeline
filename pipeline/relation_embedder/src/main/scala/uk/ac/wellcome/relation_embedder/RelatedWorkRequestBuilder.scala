@@ -17,10 +17,8 @@ case class RelatedWorkRequestBuilder(index: Index,
   val relationsFieldWhitelist = List(
     "canonicalId",
     "version",
-    "ontologyType",
     "sourceIdentifier.identifierType.id",
     "sourceIdentifier.identifierType.label",
-    "sourceIdentifier.identifierType.ontologyType",
     "sourceIdentifier.value",
     "sourceIdentifier.ontologyType",
     "data.title",
@@ -28,7 +26,6 @@ case class RelatedWorkRequestBuilder(index: Index,
     "data.collectionPath.path",
     "data.collectionPath.level.type",
     "data.collectionPath.label",
-    "data.ontologyType",
   )
 
   // To reduce response size and improve Elasticsearch performance we only
@@ -36,7 +33,6 @@ case class RelatedWorkRequestBuilder(index: Index,
   val otherAffectedWorksFieldWhitelist = List(
     "sourceIdentifier.identifierType.id",
     "sourceIdentifier.identifierType.label",
-    "sourceIdentifier.identifierType.ontologyType",
     "sourceIdentifier.value",
     "sourceIdentifier.ontologyType",
   )

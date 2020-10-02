@@ -17,57 +17,53 @@ object WorkInclude {
   case object SucceededBy extends WorkInclude
 }
 
-case class WorksIncludes(includes: List[WorkInclude]) {
-  def identifiers = includes.contains(WorkInclude.Identifiers)
-  def items = includes.contains(WorkInclude.Items)
-  def subjects = includes.contains(WorkInclude.Subjects)
-  def genres = includes.contains(WorkInclude.Genres)
-  def contributors = includes.contains(WorkInclude.Contributors)
-  def production = includes.contains(WorkInclude.Production)
-  def notes = includes.contains(WorkInclude.Notes)
-  def images = includes.contains(WorkInclude.Images)
-  def parts = includes.contains(WorkInclude.Parts)
-  def partOf = includes.contains(WorkInclude.PartOf)
-  def precededBy = includes.contains(WorkInclude.PrecededBy)
-  def succeededBy = includes.contains(WorkInclude.SucceededBy)
-  def anyRelation = parts || partOf || precededBy || succeededBy
+case class WorksIncludes(
+  identifiers: Boolean,
+  items: Boolean,
+  subjects: Boolean,
+  genres: Boolean,
+  contributors: Boolean,
+  production: Boolean,
+  notes: Boolean,
+  images: Boolean,
+  parts: Boolean,
+  partOf: Boolean,
+  precededBy: Boolean,
+  succeededBy: Boolean
+) {
+  def anyRelation: Boolean = parts || partOf || precededBy || succeededBy
 }
 
-object WorksIncludes {
+case object WorksIncludes {
+  def apply(includes: WorkInclude*): WorksIncludes =
+    WorksIncludes(
+      identifiers = includes.contains(WorkInclude.Identifiers),
+      items = includes.contains(WorkInclude.Items),
+      subjects = includes.contains(WorkInclude.Subjects),
+      genres = includes.contains(WorkInclude.Genres),
+      contributors = includes.contains(WorkInclude.Contributors),
+      production = includes.contains(WorkInclude.Production),
+      notes = includes.contains(WorkInclude.Notes),
+      images = includes.contains(WorkInclude.Images),
+      parts = includes.contains(WorkInclude.Parts),
+      partOf = includes.contains(WorkInclude.PartOf),
+      precededBy = includes.contains(WorkInclude.PrecededBy),
+      succeededBy = includes.contains(WorkInclude.SucceededBy),
+    )
 
-  import WorkInclude._
-
-  def apply(
-    identifiers: Boolean = false,
-    items: Boolean = false,
-    subjects: Boolean = false,
-    genres: Boolean = false,
-    contributors: Boolean = false,
-    production: Boolean = false,
-    notes: Boolean = false,
-    images: Boolean = false,
-    parts: Boolean = false,
-    partOf: Boolean = false,
-    precededBy: Boolean = false,
-    succeededBy: Boolean = false,
-  ): WorksIncludes = WorksIncludes(
-    List(
-      if (identifiers) Some(Identifiers) else None,
-      if (items) Some(Items) else None,
-      if (subjects) Some(Subjects) else None,
-      if (genres) Some(Genres) else None,
-      if (contributors) Some(Contributors) else None,
-      if (production) Some(Production) else None,
-      if (notes) Some(Notes) else None,
-      if (images) Some(Images) else None,
-      if (parts) Some(Parts) else None,
-      if (partOf) Some(PartOf) else None,
-      if (precededBy) Some(PrecededBy) else None,
-      if (succeededBy) Some(SucceededBy) else None,
-    ).flatten
-  )
-
-  def includeAll(): WorksIncludes = WorksIncludes(
-    true, true, true, true, true, true, true, true, true, true, true, true
-  )
+  def includeAll(): WorksIncludes =
+    WorksIncludes(
+      identifiers = true,
+      items = true,
+      subjects = true,
+      genres = true,
+      contributors = true,
+      production = true,
+      notes = true,
+      images = true,
+      parts = true,
+      partOf = true,
+      precededBy = true,
+      succeededBy = true
+    )
 }
