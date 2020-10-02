@@ -134,14 +134,6 @@ trait LegacyWorkGenerators
       )
     )
 
-  def createIdentifiedWork: Work.Visible[Identified] =
-    createIdentifiedWorkWith()
-
-  def createIdentifiedWorks(count: Int): Seq[Work.Visible[Identified]] =
-    (1 to count).map { _ =>
-      createIdentifiedWork
-    }
-
   def createSierraSourceWorkWith(
     format: Option[Format] = None,
     items: List[Item[IdState.Unminted]] = Nil,

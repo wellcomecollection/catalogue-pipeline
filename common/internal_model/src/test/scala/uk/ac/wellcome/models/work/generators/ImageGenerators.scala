@@ -91,7 +91,7 @@ trait ImageGenerators
     parentWork: Work.Visible[WorkState.Identified] =
       sierraIdentifiedWork(),
     redirectedWork: Option[Work.Visible[WorkState.Identified]] = Some(
-      createIdentifiedWork),
+      identifiedWork()),
     inferredData: Option[InferredData] = createInferredData,
     location: DigitalLocationDeprecated = createDigitalLocation,
     version: Int = 1,
