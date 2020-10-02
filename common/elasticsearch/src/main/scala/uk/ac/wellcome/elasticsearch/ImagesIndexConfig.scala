@@ -25,7 +25,8 @@ case object ImagesIndexConfig extends IndexConfig {
   val source = objectField("source").fields(
     sourceWork("canonicalWork"),
     sourceWork("redirectedWork"),
-    keywordField("type")
+    keywordField("type"),
+    intField("nMergedSources")
   )
 
   override val mapping: MappingDefinition = properties(

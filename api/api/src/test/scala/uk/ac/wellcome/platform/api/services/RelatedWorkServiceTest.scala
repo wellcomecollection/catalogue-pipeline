@@ -29,7 +29,7 @@ class RelatedWorkServiceTest
   def work(path: String, level: CollectionLevel): Work.Visible[Identified] =
     identifiedWork(
       sourceIdentifier = createSourceIdentifierWith(value = path),
-      hasMultipleSources = false)
+      nMergedSources = 0)
       .title(path)
       .collectionPath(CollectionPath(path = path, level = Some(level)))
 

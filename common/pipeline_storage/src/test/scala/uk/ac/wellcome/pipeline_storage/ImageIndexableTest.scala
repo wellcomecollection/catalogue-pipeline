@@ -8,7 +8,7 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.generators.{ImageGenerators, WorksGenerators}
+import uk.ac.wellcome.models.work.generators.{ImageGenerators, WorkGenerators}
 import uk.ac.wellcome.models.work.internal
 import uk.ac.wellcome.models.work.internal.{AugmentedImage, SourceWorks}
 import uk.ac.wellcome.models.work.internal.SourceWork._
@@ -24,7 +24,7 @@ class ImageIndexableTest
     with ElasticsearchFixtures
     with ElasticIndexerFixtures
     with ImageGenerators
-    with WorksGenerators {
+    with WorkGenerators {
 
   describe("updating images with merged / redirected sources") {
     it("overrides an image with the same version if source version is higher") {
