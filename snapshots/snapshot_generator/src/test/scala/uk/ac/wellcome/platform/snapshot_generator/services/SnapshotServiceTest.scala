@@ -20,7 +20,10 @@ import uk.ac.wellcome.display.models.{ApiVersions, DisplayWork, WorksIncludes}
 import uk.ac.wellcome.elasticsearch.ElasticClientBuilder
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal.Work
-import uk.ac.wellcome.platform.snapshot_generator.fixtures.{AkkaS3, SnapshotServiceFixture}
+import uk.ac.wellcome.platform.snapshot_generator.fixtures.{
+  AkkaS3,
+  SnapshotServiceFixture
+}
 import uk.ac.wellcome.platform.snapshot_generator.models.SnapshotJob
 import uk.ac.wellcome.platform.snapshot_generator.test.utils.GzipUtils
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
@@ -84,7 +87,8 @@ class SnapshotServiceTest
             new GetObjectRequest(publicBucket.name, publicObjectKey),
             downloadFile)
 
-          val objectMetadata = s3Client.getObjectMetadata(publicBucket.name, publicObjectKey)
+          val objectMetadata =
+            s3Client.getObjectMetadata(publicBucket.name, publicObjectKey)
 
           val s3Etag = objectMetadata.getETag
           val s3Size = objectMetadata.getContentLength
@@ -105,8 +109,10 @@ class SnapshotServiceTest
           result.snapshotResult.indexName shouldBe worksIndex.name
           result.snapshotResult.documentCount shouldBe visibleWorks.length
           result.snapshotResult.displayModel shouldBe Work.getClass.getCanonicalName
-          result.snapshotResult.startedAt shouldBe>(result.snapshotJob.requestedAt)
-          result.snapshotResult.finishedAt shouldBe>(result.snapshotResult.startedAt)
+          result.snapshotResult.startedAt shouldBe >(
+            result.snapshotJob.requestedAt)
+          result.snapshotResult.finishedAt shouldBe >(
+            result.snapshotResult.startedAt)
           result.snapshotResult.s3Etag shouldBe s3Etag
           result.snapshotResult.s3Size shouldBe s3Size
           result.snapshotResult.s3Location shouldBe s3Location
@@ -145,7 +151,8 @@ class SnapshotServiceTest
             new GetObjectRequest(publicBucket.name, publicObjectKey),
             downloadFile)
 
-          val objectMetadata = s3Client.getObjectMetadata(publicBucket.name, publicObjectKey)
+          val objectMetadata =
+            s3Client.getObjectMetadata(publicBucket.name, publicObjectKey)
 
           val s3Etag = objectMetadata.getETag
           val s3Size = objectMetadata.getContentLength
@@ -166,8 +173,10 @@ class SnapshotServiceTest
           result.snapshotResult.indexName shouldBe worksIndex.name
           result.snapshotResult.documentCount shouldBe works.length
           result.snapshotResult.displayModel shouldBe Work.getClass.getCanonicalName
-          result.snapshotResult.startedAt shouldBe>(result.snapshotJob.requestedAt)
-          result.snapshotResult.finishedAt shouldBe>(result.snapshotResult.startedAt)
+          result.snapshotResult.startedAt shouldBe >(
+            result.snapshotJob.requestedAt)
+          result.snapshotResult.finishedAt shouldBe >(
+            result.snapshotResult.startedAt)
           result.snapshotResult.s3Etag shouldBe s3Etag
           result.snapshotResult.s3Size shouldBe s3Size
           result.snapshotResult.s3Location shouldBe s3Location
@@ -216,7 +225,6 @@ class SnapshotServiceTest
           s3Settings,
           worksIndex = "wrong-index",
           elasticClient = brokenElasticClient) { brokenSnapshotService =>
-
           val s3Location = S3ObjectLocation(
             bucket = "bukkit",
             key = "target.json.gz"
