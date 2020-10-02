@@ -1,11 +1,9 @@
 package uk.ac.wellcome.platform.snapshot_generator.services
 
-import java.io.File
 import java.time.Instant
 
 import akka.http.scaladsl.model.Uri
 import akka.stream.alpakka.s3.S3Exception
-import com.amazonaws.services.s3.model.GetObjectRequest
 import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.ElasticClient
 import com.sksamuel.elastic4s.http.JavaClientExceptionWrapper
@@ -27,7 +25,7 @@ import uk.ac.wellcome.platform.snapshot_generator.models.{
   CompletedSnapshotJob,
   SnapshotJob
 }
-import uk.ac.wellcome.platform.snapshot_generator.test.utils.GzipUtils
+import uk.ac.wellcome.platform.snapshot_generator.test.utils.S3GzipUtils
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 
@@ -37,7 +35,7 @@ class SnapshotServiceTest
     with Matchers
     with Akka
     with AkkaS3
-    with GzipUtils
+    with S3GzipUtils
     with IntegrationPatience
     with SnapshotServiceFixture
     with WorkGenerators {
@@ -76,13 +74,8 @@ class SnapshotServiceTest
         val future = snapshotService.generateSnapshot(snapshotJob)
 
         whenReady(future) { result =>
-          val downloadFile =
-            File.createTempFile("snapshotServiceTest", ".txt.gz")
-          s3Client.getObject(
-            new GetObjectRequest(s3Location.bucket, s3Location.key),
-            downloadFile)
+          val contents = getGzipObjectFromS3(s3Location)
 
-          val contents = readGzipFile(downloadFile.getPath)
           val expectedContents = visibleWorks
             .map {
               DisplayWork(_, includes = WorksIncludes.includeAll())
@@ -122,13 +115,8 @@ class SnapshotServiceTest
         val future = snapshotService.generateSnapshot(snapshotJob)
 
         whenReady(future) { result =>
-          val downloadFile =
-            File.createTempFile("snapshotServiceTest", ".txt.gz")
-          s3Client.getObject(
-            new GetObjectRequest(s3Location.bucket, s3Location.key),
-            downloadFile)
+          val contents = getGzipObjectFromS3(s3Location)
 
-          val contents = readGzipFile(downloadFile.getPath)
           val expectedContents = works
             .map {
               DisplayWork(_, includes = WorksIncludes.includeAll())
