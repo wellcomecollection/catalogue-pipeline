@@ -15,28 +15,26 @@ class WorksRedirectsTest extends ApiWorksTestBase {
 
   it("returns a TemporaryRedirect if looking up a redirected work") {
     withApi {
-      case (ElasticConfig(worksIndex, _), routes) => {
+      case (ElasticConfig(worksIndex, _), routes) =>
         insertIntoElasticsearch(worksIndex, redirectedWork)
         val path = s"/$apiPrefix/works/${redirectedWork.state.canonicalId}"
         assertRedirectResponse(routes, path) {
           Status.Found ->
-            s"$apiScheme://$apiHost/$apiPrefix/works/${redirectId}"
+            s"$apiScheme://$apiHost/$apiPrefix/works/$redirectId"
         }
-      }
     }
   }
 
   it("preserves query parameters on a 302 Redirect") {
     withApi {
-      case (ElasticConfig(worksIndex, _), routes) => {
+      case (ElasticConfig(worksIndex, _), routes) =>
         insertIntoElasticsearch(worksIndex, redirectedWork)
         val path =
           s"/$apiPrefix/works/${redirectedWork.state.canonicalId}?include=identifiers"
         assertRedirectResponse(routes, path) {
           Status.Found ->
-            s"$apiScheme://$apiHost/$apiPrefix/works/${redirectId}?include=identifiers"
+            s"$apiScheme://$apiHost/$apiPrefix/works/$redirectId?include=identifiers"
         }
-      }
     }
   }
 }

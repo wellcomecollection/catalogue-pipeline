@@ -4,7 +4,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Random
 import com.sksamuel.elastic4s.{ElasticError, Index}
 import com.sksamuel.elastic4s.requests.searches.{SearchHit, SearchResponse}
-import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
@@ -30,7 +29,6 @@ class ElasticsearchServiceTest
     extends AnyFunSpec
     with Matchers
     with ElasticsearchFixtures
-    with ScalaFutures
     with SearchOptionsGenerators
     with ItemsGenerators
     with SubjectGenerators

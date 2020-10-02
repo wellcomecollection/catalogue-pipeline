@@ -85,8 +85,7 @@ class MiroVHSRecordReceiverTest
   ignore("returns a failed future if there's no MiroMetadata") {
     val incompleteMessage = createHybridRecordNotification
 
-    val messageSender = new MemoryMessageSender()
-    val recordReceiver = createRecordReceiverWith(messageSender)
+    val recordReceiver = createRecordReceiver
 
     val future =
       recordReceiver.receiveMessage(incompleteMessage, transformToWork)
@@ -101,8 +100,7 @@ class MiroVHSRecordReceiverTest
       message = MiroMetadata(isClearedForCatalogueAPI = false)
     )
 
-    val messageSender = new MemoryMessageSender()
-    val recordReceiver = createRecordReceiverWith(messageSender)
+    val recordReceiver = createRecordReceiver
 
     val future =
       recordReceiver.receiveMessage(incompleteMessage, transformToWork)
@@ -115,8 +113,7 @@ class MiroVHSRecordReceiverTest
   it("fails if it's unable to perform a transformation") {
     val message = createHybridRecordNotification
 
-    val messageSender = new MemoryMessageSender()
-    val recordReceiver = createRecordReceiverWith(messageSender)
+    val recordReceiver = createRecordReceiver
 
     val future = recordReceiver.receiveMessage(message, failingTransformToWork)
 

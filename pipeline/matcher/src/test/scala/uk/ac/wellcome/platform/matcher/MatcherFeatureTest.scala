@@ -98,12 +98,12 @@ class MatcherFeatureTest
             withWorkerService(vhs, queue, messageSender, graphTable) { _ =>
               val workv2 = sourceWork().withVersion(2)
 
-              val key = vhs.put(
-                Version(workv2.sourceIdentifier.toString, workv2.version))(
-                workv2) match {
+              val id = Version(workv2.sourceIdentifier.toString, workv2.version)
+
+              val key = vhs.put(id)(workv2) match {
                 case Left(err) =>
                   throw new Exception(s"Failed storing work in VHS: $err")
-                case Right(Identified(key, _)) => key
+                case Right(Identified(k, _)) => k
               }
               sendNotificationToSQS(queue, Version(key.id, 1))
 

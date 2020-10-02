@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.ingestor.works.services
 
 import org.scalatest.Assertion
-import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.elasticsearch.WorksIndexConfig
@@ -19,7 +18,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class IngestorWorkerServiceTest
     extends AnyFunSpec
     with Matchers
-    with ScalaFutures
     with IngestorFixtures
     with WorkGenerators {
 

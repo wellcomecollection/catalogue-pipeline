@@ -2,37 +2,30 @@ package uk.ac.wellcome.relation_embedder
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalatest.matchers.should.Matchers
-import org.scalatest.concurrent.ScalaFutures
 import com.sksamuel.elastic4s.Index
 import org.scalatest.funspec.AnyFunSpec
-
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
-import uk.ac.wellcome.models.work.generators.{
-  IdentifiersGenerators,
-  ItemsGenerators,
-  WorkGenerators
-}
+import uk.ac.wellcome.models.work.generators.WorkGenerators
 import WorkState.Identified
+import org.scalatest.Assertion
+import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 
 class RelatedWorksServiceTest
     extends AnyFunSpec
     with Matchers
-    with ScalaFutures
     with ElasticsearchFixtures
-    with IdentifiersGenerators
-    with ItemsGenerators
     with WorkGenerators {
 
-  def service(index: Index) =
+  def service(index: Index): PathQueryRelatedWorksService =
     new PathQueryRelatedWorksService(elasticClient, index)
 
-  def work(path: String) =
+  def work(path: String): Work.Visible[Identified] =
     identifiedWork(sourceIdentifier = createSourceIdentifierWith(value = path))
       .title(path)
       .collectionPath(CollectionPath(path = path))
 
-  def storeWorks(index: Index, works: List[Work.Visible[Identified]] = works) =
+  def storeWorks(index: Index,
+                 works: List[Work.Visible[Identified]] = works): Assertion =
     insertIntoElasticsearch(index, works: _*)
 
   val workA = work("a")
