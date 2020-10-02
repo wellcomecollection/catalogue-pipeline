@@ -7,7 +7,7 @@ import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.elasticsearch.{
   ElasticsearchIndexCreator,
-  WorksIndexConfig
+  IdentifiedWorkIndexConfig
 }
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal._
@@ -36,7 +36,7 @@ object Main extends WellcomeTypesafeApp {
       ingestorConfig = IngestorConfigBuilder.buildIngestorConfig(config),
       documentIndexer = new ElasticIndexer(elasticClient, index),
       indexCreator =
-        new ElasticsearchIndexCreator(elasticClient, index, WorksIndexConfig),
+        new ElasticsearchIndexCreator(elasticClient, index, IdentifiedWorkIndexConfig),
       messageStream =
         BigMessagingBuilder.buildMessageStream[Work[Identified]](config)
     )

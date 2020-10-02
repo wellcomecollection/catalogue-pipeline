@@ -67,7 +67,22 @@ trait ElasticsearchFixtures
     }
 
   def withLocalWorksIndex[R](testWith: TestWith[Index, R]): R =
-    withLocalElasticsearchIndex[R](config = WorksIndexConfig) { index =>
+    withLocalElasticsearchIndex[R](config = IdentifiedWorkIndexConfig) { index =>
+      testWith(index)
+    }
+
+  def withLocalSourceWorksIndex[R](testWith: TestWith[Index, R]): R =
+    withLocalElasticsearchIndex[R](config = SourceWorkIndexConfig) { index =>
+      testWith(index)
+    }
+
+  def withLocalMergedWorksIndex[R](testWith: TestWith[Index, R]): R =
+    withLocalElasticsearchIndex[R](config = MergedWorkIndexConfig) { index =>
+      testWith(index)
+    }
+
+  def withLocalDenormalisedWorksIndex[R](testWith: TestWith[Index, R]): R =
+    withLocalElasticsearchIndex[R](config = DenormalisedWorkIndexConfig) { index =>
       testWith(index)
     }
 
@@ -213,17 +228,17 @@ trait ElasticsearchFixtures
 
   }
 
-  def insertIntoElasticsearch(index: Index,
-                              works: Work[Identified]*): Assertion = {
+  def insertIntoElasticsearch[State <: WorkState](
+    index: Index, works: Work[State]*)(
+    implicit encoder: Encoder[Work[State]]): Assertion = {
     val result = elasticClient.execute(
       bulk(
         works.map { work =>
           val jsonDoc = toJson(work).get
-
           indexInto(index.name)
             .version(work.version)
             .versionType(ExternalGte)
-            .id(work.state.canonicalId)
+            .id(work.state.id)
             .doc(jsonDoc)
         }
       )
