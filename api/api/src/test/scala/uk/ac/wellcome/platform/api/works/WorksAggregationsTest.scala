@@ -371,13 +371,21 @@ class WorksAggregationsTest extends ApiWorksTestBase {
   }
 
   it("supports aggregating on locationType") {
-
     val works = List(
-      createPhysicalWork("A"),
-      createPhysicalWork("B"),
-      createDigitalWork("C"),
-      createDigitalWork("D")
+      identifiedWork(canonicalId = "A").items(
+        List(createIdentifiedItemWith(locations = List(createPhysicalLocation)))
+      ),
+      identifiedWork(canonicalId = "B").items(
+        List(createIdentifiedItemWith(locations = List(createPhysicalLocation)))
+      ),
+      identifiedWork(canonicalId = "C").items(
+        List(createIdentifiedItemWith(locations = List(createDigitalLocation)))
+      ),
+      identifiedWork(canonicalId = "D").items(
+        List(createIdentifiedItemWith(locations = List(createDigitalLocation)))
+      )
     )
+
     withApi {
       case (ElasticConfig(worksIndex, _), routes) =>
         insertIntoElasticsearch(worksIndex, works: _*)
