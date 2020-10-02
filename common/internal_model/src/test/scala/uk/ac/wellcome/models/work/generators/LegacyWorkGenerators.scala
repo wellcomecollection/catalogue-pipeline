@@ -286,13 +286,4 @@ trait LegacyWorkGenerators
 
   def createIsbnWorks(count: Int): List[Work.Visible[Source]] =
     List.fill(count)(createIsbnWork)
-
-  def createDatedWork(
-    dateLabel: String,
-    canonicalId: String = createCanonicalId
-  ): Work.Visible[Identified] =
-    createIdentifiedWorkWith(
-      canonicalId = canonicalId,
-      production = List(createProductionEventWith(dateLabel = Some(dateLabel)))
-    )
 }

@@ -166,9 +166,15 @@ class WorksAggregationsTest extends ApiWorksTestBase {
   it("supports aggregating on dates by from year") {
     withApi {
       case (ElasticConfig(worksIndex, _), routes) =>
-        val works = List("1st May 1970", "1970", "1976", "1970-1979")
-          .map(label => createDatedWork(dateLabel = label))
-          .sortBy(_.state.canonicalId)
+        val dates = List("1st May 1970", "1970", "1976", "1970-1979")
+
+        val works = dates
+          .map { dateLabel =>
+            identifiedWork()
+              .production(List(createProductionEventWith(dateLabel = Some(dateLabel))))
+          }
+          .sortBy { _.state.canonicalId }
+
         insertIntoElasticsearch(worksIndex, works: _*)
         assertJsonResponse(
           routes,

@@ -256,28 +256,18 @@ class WorksTest extends ApiWorksTestBase {
     }
   }
 
-  it("supports production date sorting") {
+  def createDatedWork(canonicalId: String, dateLabel: String): Work.Visible[WorkState.Identified] =
+    identifiedWork(canonicalId = canonicalId)
+      .production(List(createProductionEventWith(dateLabel = Some(dateLabel))))
+
+  it("supports sorting by production date") {
     withApi {
       case (ElasticConfig(worksIndex, _), routes) =>
-        val work1 = createDatedWork(
-          canonicalId = "1",
-          dateLabel = "1900"
-        )
-        val work2 = createDatedWork(
-          canonicalId = "2",
-          dateLabel = "1976"
-        )
-        val work3 = createDatedWork(
-          canonicalId = "3",
-          dateLabel = "1904"
-        )
-        val work4 = createDatedWork(
-          canonicalId = "4",
-          dateLabel = "2020"
-        )
-        val work5 = createDatedWork(
-          canonicalId = "5",
-          dateLabel = "1098"
+        val work1 = createDatedWork(canonicalId = "1", dateLabel = "1900")
+        val work2 = createDatedWork(canonicalId = "2", dateLabel = "1976")
+        val work3 = createDatedWork(canonicalId = "3", dateLabel = "1904")
+        val work4 = createDatedWork(canonicalId = "4", dateLabel = "2020")
+        val work5 = createDatedWork(canonicalId = "5", dateLabel = "1098"
         )
         insertIntoElasticsearch(worksIndex, work1, work2, work3, work4, work5)
 
@@ -293,18 +283,9 @@ class WorksTest extends ApiWorksTestBase {
   it("supports sorting of dates in descending order") {
     withApi {
       case (ElasticConfig(worksIndex, _), routes) =>
-        val work1 = createDatedWork(
-          canonicalId = "1",
-          dateLabel = "1900"
-        )
-        val work2 = createDatedWork(
-          canonicalId = "2",
-          dateLabel = "1976"
-        )
-        val work3 = createDatedWork(
-          canonicalId = "3",
-          dateLabel = "1904"
-        )
+        val work1 = createDatedWork(canonicalId = "1", dateLabel = "1900")
+        val work2 = createDatedWork(canonicalId = "2", dateLabel = "1976")
+        val work3 = createDatedWork(canonicalId = "3", dateLabel = "1904")
         insertIntoElasticsearch(worksIndex, work1, work2, work3)
 
         assertJsonResponse(

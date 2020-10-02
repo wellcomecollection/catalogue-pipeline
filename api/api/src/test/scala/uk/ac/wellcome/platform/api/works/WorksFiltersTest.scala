@@ -517,11 +517,13 @@ class WorksFiltersTest extends ApiWorksTestBase {
   }
 
   describe("filtering works by date range") {
-    val (work1, work2, work3) = (
-      createDatedWork("1709", canonicalId = "a"),
-      createDatedWork("1950", canonicalId = "b"),
-      createDatedWork("2000", canonicalId = "c")
-    )
+    def createDatedWork(canonicalId: String, dateLabel: String): Work.Visible[WorkState.Identified] =
+      identifiedWork(canonicalId = canonicalId)
+        .production(List(createProductionEventWith(dateLabel = Some(dateLabel))))
+
+    val work1 = createDatedWork(canonicalId = "1", dateLabel = "1709")
+    val work2 = createDatedWork(canonicalId = "2", dateLabel = "1950")
+    val work3 = createDatedWork(canonicalId = "3", dateLabel = "2000")
 
     it("filters by date range") {
       withApi {
