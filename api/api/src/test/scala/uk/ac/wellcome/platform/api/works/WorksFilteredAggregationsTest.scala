@@ -20,20 +20,17 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
           (Books, Language("Meow", Some("cats"))),
           (Journals, Language("Quack", Some("ducks"))),
           (Audio, Language("Croak", Some("frogs")))
-        ).zipWithIndex.map {
-          case ((format, language), i) =>
-            createIdentifiedWorkWith(
-              title = Some("Robust rambutan"),
-              canonicalId = i.toString,
-              format = Some(format),
-              language = Some(language)
-            )
+        ).map {
+          case (format, language) =>
+            identifiedWork()
+              .format(format)
+              .language(language)
         }
 
         insertIntoElasticsearch(worksIndex, works: _*)
         assertJsonResponse(
           routes,
-          s"/$apiPrefix/works?query=rambutan&workType=a&aggregations=language") {
+          s"/$apiPrefix/works?workType=a&aggregations=language") {
           Status.OK -> s"""
             {
               ${resultList(
@@ -68,6 +65,7 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
               },
               "results": [${works
                             .filter(_.data.format.get == Books)
+                            .sortBy { _.state.canonicalId }
                             .map(workResponse)
                             .mkString(",")}]
             }
@@ -90,20 +88,17 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
           (Books, Language("Meow", Some("cats"))),
           (Journals, Language("Quack", Some("ducks"))),
           (Audio, Language("Croak", Some("frogs")))
-        ).zipWithIndex.map {
-          case ((format, language), i) =>
-            createIdentifiedWorkWith(
-              title = Some("Robust rambutan"),
-              canonicalId = i.toString,
-              format = Some(format),
-              language = Some(language)
-            )
+        ).map {
+          case (format, language) =>
+            identifiedWork()
+              .format(format)
+              .language(language)
         }
 
         insertIntoElasticsearch(worksIndex, works: _*)
         assertJsonResponse(
           routes,
-          s"/$apiPrefix/works?query=rambutan&workType=a&aggregations=workType") {
+          s"/$apiPrefix/works?workType=a&aggregations=workType") {
           Status.OK -> s"""
             {
               ${resultList(
@@ -156,6 +151,7 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
               },
               "results": [${works
                             .filter(_.data.format.get == Books)
+                            .sortBy { _.state.canonicalId }
                             .map(workResponse)
                             .mkString(",")}]
             }

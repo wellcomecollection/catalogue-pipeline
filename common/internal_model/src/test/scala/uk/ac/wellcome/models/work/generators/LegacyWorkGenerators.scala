@@ -27,29 +27,6 @@ trait LegacyWorkGenerators
   def createInvisibleSourceWork: Work.Invisible[Source] =
     createInvisibleSourceWorkWith()
 
-  def createIdentifiedInvisibleWorkWith(
-    canonicalId: String = createCanonicalId,
-    sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    version: Int = 1
-  ): Work.Invisible[Identified] =
-    Work.Invisible(
-      state = Identified(
-        sourceIdentifier = sourceIdentifier,
-        canonicalId = canonicalId,
-      ),
-      version = version,
-      data = WorkData()
-    )
-
-  def createIdentifiedInvisibleWork: Work.Invisible[Identified] =
-    createIdentifiedInvisibleWorkWith()
-
-  def createIdentifiedInvisibleWorks(
-    count: Int): Seq[Work.Invisible[Identified]] =
-    (1 to count).map { _ =>
-      createIdentifiedInvisibleWork
-    }
-
   def createSourceWorkWith(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     version: Int = 1,
@@ -95,11 +72,6 @@ trait LegacyWorkGenerators
 
   def createSourceWork: Work.Visible[Source] =
     createSourceWorkWith()
-
-  def createSourceWorks(count: Int): Seq[Work.Visible[Source]] =
-    (1 to count).map { _ =>
-      createSourceWork
-    }
 
   def createIdentifiedWorkWith(
     canonicalId: String = createCanonicalId,

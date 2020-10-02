@@ -8,22 +8,17 @@ import uk.ac.wellcome.models.work.internal.Format.{
 }
 import uk.ac.wellcome.models.work.internal._
 
-import scala.util.Random
-
 class WorksFiltersTest extends ApiWorksTestBase {
   it("combines multiple filters") {
-    val work1 = createIdentifiedWorkWith(
-      genres = List(createGenreWith(label = "horror")),
-      subjects = List(createSubjectWith(label = "france"))
-    )
-    val work2 = createIdentifiedWorkWith(
-      genres = List(createGenreWith(label = "horror")),
-      subjects = List(createSubjectWith(label = "england"))
-    )
-    val work3 = createIdentifiedWorkWith(
-      genres = List(createGenreWith(label = "fantasy")),
-      subjects = List(createSubjectWith(label = "england"))
-    )
+    val work1 = identifiedWork()
+      .genres(List(createGenreWith(label = "horror")))
+      .subjects(List(createSubjectWith(label = "france")))
+    val work2 = identifiedWork()
+      .genres(List(createGenreWith(label = "horror")))
+      .subjects(List(createSubjectWith(label = "england")))
+    val work3 = identifiedWork()
+      .genres(List(createGenreWith(label = "fantasy")))
+      .subjects(List(createSubjectWith(label = "england")))
 
     val works = Seq(work1, work2, work3)
 
@@ -39,102 +34,50 @@ class WorksFiltersTest extends ApiWorksTestBase {
   }
 
   describe("filtering by item Location type") {
-    val digitalWork1 = createIdentifiedWorkWith(
-      canonicalId = "1",
-      title = Some("locationtype"),
-      items = List(
-        createIdentifiedItemWith(locations = List(createDigitalLocation))
-      )
-    )
-    val digitalWork2 = createIdentifiedWorkWith(
-      canonicalId = "2",
-      title = Some("locationtype"),
-      items = List(
-        createIdentifiedItemWith(locations = List(createDigitalLocation))
-      )
-    )
-    val physicalWork1 = createIdentifiedWorkWith(
-      canonicalId = "3",
-      title = Some("locationtype"),
-      items = List(
-        createIdentifiedItemWith(locations = List(createPhysicalLocation))
-      )
-    )
-    val physicalWork2 = createIdentifiedWorkWith(
-      canonicalId = "4",
-      title = Some("locationtype"),
-      items = List(
-        createIdentifiedItemWith(locations = List(createPhysicalLocation))
-      )
-    )
-    val comboWork1 = createIdentifiedWorkWith(
-      canonicalId = "5",
-      title = Some("locationtype"),
-      items = List(
-        createIdentifiedItemWith(
-          locations = List(createPhysicalLocation, createDigitalLocation))
-      )
-    )
-    val comboWork2 = createIdentifiedWorkWith(
-      canonicalId = "6",
-      title = Some("locationtype"),
-      items = List(
-        createIdentifiedItemWith(
-          locations = List(createDigitalLocation, createPhysicalLocation))
-      )
-    )
+    val digitalWorks = (1 to 2).map { _ =>
+      identifiedWork()
+        .title("An example digital work")
+        .items(
+          List(
+            createIdentifiedItemWith(locations = List(createDigitalLocation)))
+        )
+    }
 
-    val works = List(
-      digitalWork1,
-      digitalWork2,
-      physicalWork1,
-      physicalWork2,
-      comboWork1,
-      comboWork2)
+    val physicalWorks = (1 to 2).map { _ =>
+      identifiedWork()
+        .title("An example physical work")
+        .items(
+          List(
+            createIdentifiedItemWith(locations = List(createPhysicalLocation)))
+        )
+    }
+
+    val comboWorks = (1 to 2).map { _ =>
+      identifiedWork()
+        .title("An example combo work")
+        .items(
+          List(
+            createIdentifiedItemWith(
+              locations = List(createPhysicalLocation, createDigitalLocation)))
+        )
+    }
+
+    val works = digitalWorks ++ physicalWorks ++ comboWorks
 
     it("filters by PhysicalLocation when listing") {
       withApi {
         case (ElasticConfig(worksIndex, _), routes) =>
           insertIntoElasticsearch(worksIndex, works: _*)
 
+          val matchingWorks = physicalWorks ++ comboWorks
+
           assertJsonResponse(
             routes,
-            s"/$apiPrefix/works?items.locations.type=PhysicalLocation&include=items") {
-            Status.OK -> s"""
-            {
-              ${resultList(apiPrefix, totalResults = 4)},
-              "results": [
-                {
-                  "type": "Work",
-                  "id": "${physicalWork1.state.canonicalId}",
-                  "title": "${physicalWork1.data.title.get}",
-                  "alternativeTitles": [],
-                  "items": [${items(physicalWork1.data.items)}]
-                },
-                {
-                  "type": "Work",
-                  "id": "${physicalWork2.state.canonicalId}",
-                  "title": "${physicalWork2.data.title.get}",
-                  "alternativeTitles": [],
-                  "items": [${items(physicalWork2.data.items)}]
-                },
-                {
-                  "type": "Work",
-                  "id": "${comboWork1.state.canonicalId}",
-                  "title": "${comboWork1.data.title.get}",
-                  "alternativeTitles": [],
-                  "items": [${items(comboWork1.data.items)}]
-                },
-                {
-                  "type": "Work",
-                  "id": "${comboWork2.state.canonicalId}",
-                  "title": "${comboWork2.data.title.get}",
-                  "alternativeTitles": [],
-                  "items": [${items(comboWork2.data.items)}]
-                }
-              ]
-            }
-          """
+            s"/$apiPrefix/works?items.locations.type=PhysicalLocation") {
+            Status.OK -> worksListResponse(
+              apiPrefix,
+              works = matchingWorks.sortBy { _.state.canonicalId }
+            )
           }
       }
     }
@@ -144,44 +87,15 @@ class WorksFiltersTest extends ApiWorksTestBase {
         case (ElasticConfig(worksIndex, _), routes) =>
           insertIntoElasticsearch(worksIndex, works: _*)
 
+          val matchingWorks = physicalWorks ++ comboWorks
+
           assertJsonResponse(
             routes,
-            s"/$apiPrefix/works?items.locations.type=PhysicalLocation&include=items&query=locationtype") {
-            Status.OK -> s"""
-            {
-              ${resultList(apiPrefix, totalResults = 4)},
-              "results": [
-                {
-                  "type": "Work",
-                  "id": "${physicalWork1.state.canonicalId}",
-                  "title": "${physicalWork1.data.title.get}",
-                  "alternativeTitles": [],
-                  "items": [${items(physicalWork1.data.items)}]
-                },
-                {
-                  "type": "Work",
-                  "id": "${physicalWork2.state.canonicalId}",
-                  "title": "${physicalWork2.data.title.get}",
-                  "alternativeTitles": [],
-                  "items": [${items(physicalWork2.data.items)}]
-                },
-                {
-                  "type": "Work",
-                  "id": "${comboWork1.state.canonicalId}",
-                  "title": "${comboWork1.data.title.get}",
-                  "alternativeTitles": [],
-                  "items": [${items(comboWork1.data.items)}]
-                },
-                {
-                  "type": "Work",
-                  "id": "${comboWork2.state.canonicalId}",
-                  "title": "${comboWork2.data.title.get}",
-                  "alternativeTitles": [],
-                  "items": [${items(comboWork2.data.items)}]
-                }
-              ]
-            }
-          """
+            s"/$apiPrefix/works?items.locations.type=PhysicalLocation&query=example") {
+            Status.OK -> worksListResponse(
+              apiPrefix,
+              works = matchingWorks.sortBy { _.state.canonicalId }
+            )
           }
       }
     }
@@ -191,94 +105,36 @@ class WorksFiltersTest extends ApiWorksTestBase {
         case (ElasticConfig(worksIndex, _), routes) =>
           insertIntoElasticsearch(worksIndex, works: _*)
 
+          val matchingWorks = digitalWorks ++ comboWorks
+
           assertJsonResponse(
             routes,
-            s"/$apiPrefix/works?items.locations.type=DigitalLocation&include=items") {
-            Status.OK -> s"""
-            {
-              ${resultList(apiPrefix, totalResults = 4)},
-              "results": [
-                {
-                  "type": "Work",
-                  "id": "${digitalWork1.state.canonicalId}",
-                  "title": "${digitalWork1.data.title.get}",
-                  "alternativeTitles": [],
-                  "items": [${items(digitalWork1.data.items)}]
-                },
-                {
-                  "type": "Work",
-                  "id": "${digitalWork2.state.canonicalId}",
-                  "title": "${digitalWork2.data.title.get}",
-                  "alternativeTitles": [],
-                  "items": [${items(digitalWork2.data.items)}]
-                },
-                {
-                  "type": "Work",
-                  "id": "${comboWork1.state.canonicalId}",
-                  "title": "${comboWork1.data.title.get}",
-                  "alternativeTitles": [],
-                  "items": [${items(comboWork1.data.items)}]
-                },
-                {
-                  "type": "Work",
-                  "id": "${comboWork2.state.canonicalId}",
-                  "title": "${comboWork2.data.title.get}",
-                  "alternativeTitles": [],
-                  "items": [${items(comboWork2.data.items)}]
-                }
-              ]
-            }
-          """
+            s"/$apiPrefix/works?items.locations.type=DigitalLocation") {
+            Status.OK -> worksListResponse(
+              apiPrefix,
+              works = matchingWorks.sortBy { _.state.canonicalId }
+            )
           }
       }
     }
+
     it("filters by DigitalLocation when searching") {
       withApi {
         case (ElasticConfig(worksIndex, _), routes) =>
           insertIntoElasticsearch(worksIndex, works: _*)
 
+          val matchingWorks = digitalWorks ++ comboWorks
+
           assertJsonResponse(
             routes,
-            s"/$apiPrefix/works?items.locations.type=DigitalLocation&include=items&query=locationtype") {
-            Status.OK -> s"""
-            {
-              ${resultList(apiPrefix, totalResults = 4)},
-              "results": [
-                {
-                  "type": "Work",
-                  "id": "${digitalWork1.state.canonicalId}",
-                  "title": "${digitalWork1.data.title.get}",
-                  "alternativeTitles": [],
-                  "items": [${items(digitalWork1.data.items)}]
-                },
-                {
-                  "type": "Work",
-                  "id": "${digitalWork2.state.canonicalId}",
-                  "title": "${digitalWork2.data.title.get}",
-                  "alternativeTitles": [],
-                  "items": [${items(digitalWork2.data.items)}]
-                },
-                {
-                  "type": "Work",
-                  "id": "${comboWork1.state.canonicalId}",
-                  "title": "${comboWork1.data.title.get}",
-                  "alternativeTitles": [],
-                  "items": [${items(comboWork1.data.items)}]
-                },
-                {
-                  "type": "Work",
-                  "id": "${comboWork2.state.canonicalId}",
-                  "title": "${comboWork2.data.title.get}",
-                  "alternativeTitles": [],
-                  "items": [${items(comboWork2.data.items)}]
-                }
-              ]
-            }
-          """
+            s"/$apiPrefix/works?items.locations.type=DigitalLocation&query=example") {
+            Status.OK -> worksListResponse(
+              apiPrefix,
+              works = matchingWorks.sortBy { _.state.canonicalId }
+            )
           }
       }
     }
-
   }
 
   describe("filtering works by item LocationType") {
@@ -286,40 +142,34 @@ class WorksFiltersTest extends ApiWorksTestBase {
       locationType: LocationType): Item[IdState.Minted] =
       createIdentifiedItemWith(
         locations = List(
-          // This test really shouldn't be affected by physical/digital locations;
-          // we just pick randomly here to ensure we get a good mixture.
-          Random
-            .shuffle(
-              List(
-                createPhysicalLocationWith(locationType = locationType),
-                createDigitalLocationWith(locationType = locationType)
-              ))
-            .head
+          chooseFrom(
+            createPhysicalLocationWith(locationType = locationType),
+            createDigitalLocationWith(locationType = locationType)
+          )
         )
       )
 
-    val worksWithNoItem = createIdentifiedWorks(count = 3)
+    val worksWithNoItem = identifiedWorks(count = 3)
 
-    val work1 = createIdentifiedWorkWith(
-      canonicalId = "1",
-      title = Some("Crumbling carrots"),
-      items = List(
-        createItemWithLocationType(LocationType("iiif-image"))
-      )
-    )
-    val work2 = createIdentifiedWorkWith(
-      canonicalId = "2",
-      title = Some("Crumbling carrots"),
-      items = List(
-        createItemWithLocationType(LocationType("digit")),
-        createItemWithLocationType(LocationType("dimgs"))
-      )
-    )
-    val work3 = createIdentifiedWorkWith(
-      items = List(
-        createItemWithLocationType(LocationType("dpoaa"))
-      )
-    )
+    val work1 = identifiedWork()
+      .title("Crumbling carrots")
+      .items(
+        List(
+          createItemWithLocationType(LocationType("iiif-image"))
+        ))
+    val work2 = identifiedWork()
+      .title("Crumbling carrots")
+      .items(
+        List(
+          createItemWithLocationType(LocationType("digit")),
+          createItemWithLocationType(LocationType("dimgs"))
+        ))
+    val work3 = identifiedWork()
+      .title("Crumbling carrots")
+      .items(
+        List(
+          createItemWithLocationType(LocationType("dpoaa"))
+        ))
 
     val works = worksWithNoItem ++ Seq(work1, work2, work3)
 
@@ -328,30 +178,15 @@ class WorksFiltersTest extends ApiWorksTestBase {
         case (ElasticConfig(worksIndex, _), routes) =>
           insertIntoElasticsearch(worksIndex, works: _*)
 
+          val matchingWorks = Seq(work1, work2)
+
           assertJsonResponse(
             routes,
-            s"/$apiPrefix/works?items.locations.locationType=iiif-image,digit&include=items") {
-            Status.OK -> s"""
-            {
-              ${resultList(apiPrefix, totalResults = 2)},
-              "results": [
-                {
-                  "type": "Work",
-                  "id": "${work1.state.canonicalId}",
-                  "title": "${work1.data.title.get}",
-                  "alternativeTitles": [],
-                  "items": [${items(work1.data.items)}]
-                },
-                {
-                  "type": "Work",
-                  "id": "${work2.state.canonicalId}",
-                  "title": "${work2.data.title.get}",
-                  "alternativeTitles": [],
-                  "items": [${items(work2.data.items)}]
-                }
-              ]
-            }
-          """
+            s"/$apiPrefix/works?items.locations.locationType=iiif-image,digit") {
+            Status.OK -> worksListResponse(
+              apiPrefix,
+              works = matchingWorks.sortBy { _.state.canonicalId }
+            )
           }
       }
     }
@@ -361,49 +196,32 @@ class WorksFiltersTest extends ApiWorksTestBase {
         case (ElasticConfig(worksIndex, _), routes) =>
           insertIntoElasticsearch(worksIndex, works: _*)
 
+          val matchingWorks = Seq(work2)
+
           assertJsonResponse(
             routes,
-            s"/$apiPrefix/works?query=carrots&items.locations.locationType=digit&include=items") {
-            Status.OK -> s"""
-            {
-              ${resultList(apiPrefix, totalResults = 1)},
-              "results": [
-                {
-                  "type": "Work",
-                  "id": "${work2.state.canonicalId}",
-                  "title": "${work2.data.title.get}",
-                  "alternativeTitles": [],
-                  "items": [${items(work2.data.items)}]
-                }
-              ]
-            }
-          """
+            s"/$apiPrefix/works?query=carrots&items.locations.locationType=digit") {
+            Status.OK -> worksListResponse(
+              apiPrefix,
+              works = matchingWorks.sortBy { _.state.canonicalId }
+            )
           }
       }
     }
   }
 
   describe("filtering works by Format") {
-    val noFormatWorks = (1 to 3).map { _ =>
-      createIdentifiedWorkWith(format = None)
-    }
+    val noFormatWorks = identifiedWorks(count = 3)
 
-    // We assign explicit canonical IDs to ensure stable ordering when listing
-    val bookWork = createIdentifiedWorkWith(
-      title = Some("apple apple apple"),
-      canonicalId = "book1",
-      format = Some(Books)
-    )
-    val cdRomWork = createIdentifiedWorkWith(
-      title = Some("apple apple"),
-      canonicalId = "cdrom1",
-      format = Some(CDRoms)
-    )
-    val manuscriptWork = createIdentifiedWorkWith(
-      title = Some("apple"),
-      canonicalId = "manuscript1",
-      format = Some(ManuscriptsAsian)
-    )
+    val bookWork = identifiedWork()
+      .title("apple")
+      .format(Books)
+    val cdRomWork = identifiedWork()
+      .title("apple")
+      .format(CDRoms)
+    val manuscriptWork = identifiedWork()
+      .title("apple")
+      .format(ManuscriptsAsian)
 
     val works = noFormatWorks ++ Seq(bookWork, cdRomWork, manuscriptWork)
 
@@ -432,7 +250,10 @@ class WorksFiltersTest extends ApiWorksTestBase {
             s"/$apiPrefix/works?workType=${ManuscriptsAsian.id},${CDRoms.id}") {
             Status.OK -> worksListResponse(
               apiPrefix,
-              works = Seq(cdRomWork, manuscriptWork))
+              works = Seq(cdRomWork, manuscriptWork).sortBy {
+                _.state.canonicalId
+              }
+            )
           }
       }
     }
@@ -447,7 +268,10 @@ class WorksFiltersTest extends ApiWorksTestBase {
             s"/$apiPrefix/works?query=apple&workType=${ManuscriptsAsian.id},${CDRoms.id}") {
             Status.OK -> worksListResponse(
               apiPrefix,
-              works = Seq(cdRomWork, manuscriptWork))
+              works = Seq(cdRomWork, manuscriptWork).sortBy {
+                _.state.canonicalId
+              }
+            )
           }
       }
     }
@@ -455,15 +279,11 @@ class WorksFiltersTest extends ApiWorksTestBase {
 
   describe("filtering works by type") {
     val collectionWork =
-      createIdentifiedWorkWith(
-        title = Some("rats"),
-        workType = WorkType.Collection)
-    val seriesWork = createIdentifiedWorkWith(
-      title = Some("rats rats"),
-      workType = WorkType.Series)
-    val sectionWork = createIdentifiedWorkWith(
-      title = Some("rats rats bats"),
-      workType = WorkType.Section)
+      identifiedWork().title("rats").workType(WorkType.Collection)
+    val seriesWork =
+      identifiedWork().title("rats").workType(WorkType.Series)
+    val sectionWork =
+      identifiedWork().title("rats").workType(WorkType.Section)
 
     val works = Seq(collectionWork, seriesWork, sectionWork)
 
@@ -492,7 +312,9 @@ class WorksFiltersTest extends ApiWorksTestBase {
             unordered = true) {
             Status.OK -> worksListResponse(
               apiPrefix,
-              works = Seq(collectionWork, seriesWork)
+              works = Seq(collectionWork, seriesWork).sortBy {
+                _.state.canonicalId
+              }
             )
           }
       }
@@ -509,7 +331,9 @@ class WorksFiltersTest extends ApiWorksTestBase {
             unordered = true) {
             Status.OK -> worksListResponse(
               apiPrefix,
-              works = Seq(seriesWork, sectionWork)
+              works = Seq(seriesWork, sectionWork).sortBy {
+                _.state.canonicalId
+              }
             )
           }
       }
@@ -517,24 +341,23 @@ class WorksFiltersTest extends ApiWorksTestBase {
   }
 
   describe("filtering works by date range") {
-    def createDatedWork(canonicalId: String,
-                        dateLabel: String): Work.Visible[WorkState.Identified] =
-      identifiedWork(canonicalId = canonicalId)
+    def createDatedWork(dateLabel: String): Work.Visible[WorkState.Identified] =
+      identifiedWork()
         .production(
           List(createProductionEventWith(dateLabel = Some(dateLabel))))
 
-    val work1 = createDatedWork(canonicalId = "1", dateLabel = "1709")
-    val work2 = createDatedWork(canonicalId = "2", dateLabel = "1950")
-    val work3 = createDatedWork(canonicalId = "3", dateLabel = "2000")
+    val work1709 = createDatedWork(dateLabel = "1709")
+    val work1950 = createDatedWork(dateLabel = "1950")
+    val work2000 = createDatedWork(dateLabel = "2000")
 
     it("filters by date range") {
       withApi {
         case (ElasticConfig(worksIndex, _), routes) =>
-          insertIntoElasticsearch(worksIndex, work1, work2, work3)
+          insertIntoElasticsearch(worksIndex, work1709, work1950, work2000)
           assertJsonResponse(
             routes,
             s"/$apiPrefix/works?production.dates.from=1900-01-01&production.dates.to=1960-01-01") {
-            Status.OK -> worksListResponse(apiPrefix, works = Seq(work2))
+            Status.OK -> worksListResponse(apiPrefix, works = Seq(work1950))
           }
       }
     }
@@ -542,11 +365,14 @@ class WorksFiltersTest extends ApiWorksTestBase {
     it("filters by from date") {
       withApi {
         case (ElasticConfig(worksIndex, _), routes) =>
-          insertIntoElasticsearch(worksIndex, work1, work2, work3)
+          insertIntoElasticsearch(worksIndex, work1709, work1950, work2000)
           assertJsonResponse(
             routes,
             s"/$apiPrefix/works?production.dates.from=1900-01-01") {
-            Status.OK -> worksListResponse(apiPrefix, works = Seq(work2, work3))
+            Status.OK -> worksListResponse(
+              apiPrefix,
+              works = Seq(work1950, work2000).sortBy { _.state.canonicalId }
+            )
           }
       }
     }
@@ -554,11 +380,14 @@ class WorksFiltersTest extends ApiWorksTestBase {
     it("filters by to date") {
       withApi {
         case (ElasticConfig(worksIndex, _), routes) =>
-          insertIntoElasticsearch(worksIndex, work1, work2, work3)
+          insertIntoElasticsearch(worksIndex, work1709, work1950, work2000)
           assertJsonResponse(
             routes,
             s"/$apiPrefix/works?production.dates.to=1960-01-01") {
-            Status.OK -> worksListResponse(apiPrefix, works = Seq(work1, work2))
+            Status.OK -> worksListResponse(
+              apiPrefix,
+              works = Seq(work1709, work1950).sortBy { _.state.canonicalId }
+            )
           }
       }
     }
@@ -566,7 +395,7 @@ class WorksFiltersTest extends ApiWorksTestBase {
     it("errors on invalid date") {
       withApi {
         case (ElasticConfig(worksIndex, _), routes) =>
-          insertIntoElasticsearch(worksIndex, work1, work2, work3)
+          insertIntoElasticsearch(worksIndex, work1709, work1950, work2000)
           assertJsonResponse(
             routes,
             s"/$apiPrefix/works?production.dates.from=1900-01-01&production.dates.to=INVALID") {
@@ -581,17 +410,11 @@ class WorksFiltersTest extends ApiWorksTestBase {
   }
 
   describe("filtering works by language") {
-    val englishWork = createIdentifiedWorkWith(
-      canonicalId = "1",
-      title = Some("Caterpiller"),
-      language = Some(Language("English", Some("eng")))
-    )
-    val germanWork = createIdentifiedWorkWith(
-      canonicalId = "2",
-      title = Some("Ubergang"),
-      language = Some(Language("German", Some("ger")))
-    )
-    val noLanguageWork = createIdentifiedWorkWith(title = Some("£@@!&$"))
+    val englishWork =
+      identifiedWork().language(Language("English", Some("eng")))
+    val germanWork = identifiedWork().language(Language("German", Some("ger")))
+    val noLanguageWork = identifiedWork()
+
     val works = List(englishWork, germanWork, noLanguageWork)
 
     it("filters by language") {
@@ -611,7 +434,10 @@ class WorksFiltersTest extends ApiWorksTestBase {
           assertJsonResponse(routes, s"/$apiPrefix/works?language=eng,ger") {
             Status.OK -> worksListResponse(
               apiPrefix,
-              works = Seq(englishWork, germanWork))
+              works = Seq(englishWork, germanWork).sortBy {
+                _.state.canonicalId
+              }
+            )
           }
       }
     }
@@ -621,25 +447,10 @@ class WorksFiltersTest extends ApiWorksTestBase {
     val horror = createGenreWith("horrible stuff")
     val romcom = createGenreWith("heartwarming stuff")
 
-    val horrorWork = createIdentifiedWorkWith(
-      title = Some("horror"),
-      canonicalId = "1",
-      genres = List(horror)
-    )
-    val romcomWork = createIdentifiedWorkWith(
-      title = Some("romcom"),
-      canonicalId = "2",
-      genres = List(romcom)
-    )
-    val romcomHorrorWork = createIdentifiedWorkWith(
-      title = Some("romcom horror"),
-      canonicalId = "3",
-      genres = List(romcom, horror)
-    )
-    val noGenreWork = createIdentifiedWorkWith(
-      title = Some("no genre"),
-      canonicalId = "4"
-    )
+    val horrorWork = identifiedWork().genres(List(horror))
+    val romcomWork = identifiedWork().genres(List(romcom))
+    val romcomHorrorWork = identifiedWork().genres(List(romcom, horror))
+    val noGenreWork = identifiedWork()
 
     val works = List(horrorWork, romcomWork, romcomHorrorWork, noGenreWork)
 
@@ -650,7 +461,10 @@ class WorksFiltersTest extends ApiWorksTestBase {
           assertJsonResponse(routes, s"/$apiPrefix/works?genres.label=horrible") {
             Status.OK -> worksListResponse(
               apiPrefix,
-              works = Seq(horrorWork, romcomHorrorWork))
+              works = Seq(horrorWork, romcomHorrorWork).sortBy {
+                _.state.canonicalId
+              }
+            )
           }
       }
     }
@@ -674,25 +488,12 @@ class WorksFiltersTest extends ApiWorksTestBase {
     val nineteenthCentury = createSubjectWith("19th Century")
     val paris = createSubjectWith("Paris")
 
-    val nineteenthCenturyWork = createIdentifiedWorkWith(
-      title = Some("19th century"),
-      canonicalId = "1",
-      subjects = List(nineteenthCentury)
-    )
-    val parisWork = createIdentifiedWorkWith(
-      title = Some("paris"),
-      canonicalId = "2",
-      subjects = List(paris)
-    )
-    val nineteenthCenturyParisWork = createIdentifiedWorkWith(
-      title = Some("19th century paris"),
-      canonicalId = "3",
-      subjects = List(nineteenthCentury, paris)
-    )
-    val noSubjectWork = createIdentifiedWorkWith(
-      title = Some("no subject"),
-      canonicalId = "4"
-    )
+    val nineteenthCenturyWork =
+      identifiedWork().subjects(List(nineteenthCentury))
+    val parisWork = identifiedWork().subjects(List(paris))
+    val nineteenthCenturyParisWork =
+      identifiedWork().subjects(List(nineteenthCentury, paris))
+    val noSubjectWork = identifiedWork()
 
     val works = List(
       nineteenthCenturyWork,
@@ -707,7 +508,9 @@ class WorksFiltersTest extends ApiWorksTestBase {
           assertJsonResponse(routes, s"/$apiPrefix/works?subjects.label=paris") {
             Status.OK -> worksListResponse(
               apiPrefix,
-              works = Seq(parisWork, nineteenthCenturyParisWork)
+              works = Seq(parisWork, nineteenthCenturyParisWork).sortBy {
+                _.state.canonicalId
+              }
             )
           }
       }
@@ -731,21 +534,20 @@ class WorksFiltersTest extends ApiWorksTestBase {
 
   describe("filtering works by license") {
     def createLicensedWork(
-      canonicalId: String,
       licenses: Seq[License]): Work.Visible[WorkState.Identified] = {
       val items =
         licenses.map { license =>
           createDigitalItemWith(license = Some(license))
         }.toList
 
-      identifiedWork(canonicalId = canonicalId).items(items)
+      identifiedWork().items(items)
     }
 
-    val ccByWork = createLicensedWork("A", licenses = List(License.CCBY))
-    val ccByNcWork = createLicensedWork("B", licenses = List(License.CCBYNC))
+    val ccByWork = createLicensedWork(licenses = List(License.CCBY))
+    val ccByNcWork = createLicensedWork(licenses = List(License.CCBYNC))
     val bothLicenseWork =
-      createLicensedWork("C", licenses = List(License.CCBY, License.CCBYNC))
-    val noLicenseWork = createLicensedWork("D", licenses = List.empty)
+      createLicensedWork(licenses = List(License.CCBY, License.CCBYNC))
+    val noLicenseWork = createLicensedWork(licenses = List.empty)
 
     val works = List(ccByWork, ccByNcWork, bothLicenseWork, noLicenseWork)
 
@@ -756,7 +558,9 @@ class WorksFiltersTest extends ApiWorksTestBase {
           assertJsonResponse(routes, s"/$apiPrefix/works?license=cc-by") {
             Status.OK -> worksListResponse(
               apiPrefix = apiPrefix,
-              works = Seq(ccByWork, bothLicenseWork)
+              works = Seq(ccByWork, bothLicenseWork).sortBy {
+                _.state.canonicalId
+              }
             )
           }
       }
@@ -771,7 +575,9 @@ class WorksFiltersTest extends ApiWorksTestBase {
             s"/$apiPrefix/works?license=cc-by,cc-by-nc") {
             Status.OK -> worksListResponse(
               apiPrefix = apiPrefix,
-              works = Seq(ccByWork, ccByNcWork, bothLicenseWork)
+              works = Seq(ccByWork, ccByNcWork, bothLicenseWork).sortBy {
+                _.state.canonicalId
+              }
             )
           }
       }
@@ -779,13 +585,12 @@ class WorksFiltersTest extends ApiWorksTestBase {
   }
 
   describe("Identifiers filter") {
-    val unknownWork = createIdentifiedWork
+    val unknownWork = identifiedWork()
 
     it("filters by a sourceIdentifier") {
       withApi {
         case (ElasticConfig(worksIndex, _), routes) =>
-          val work =
-            createIdentifiedWorkWith(sourceIdentifier = createSourceIdentifier)
+          val work = identifiedWork()
           insertIntoElasticsearch(worksIndex, unknownWork, work)
 
           assertJsonResponse(
@@ -793,7 +598,7 @@ class WorksFiltersTest extends ApiWorksTestBase {
             s"/$apiPrefix/works?identifiers=${work.sourceIdentifier.value}") {
             Status.OK -> worksListResponse(
               apiPrefix = apiPrefix,
-              works = Seq(work).sortBy(_.state.canonicalId)
+              works = Seq(work)
             )
           }
       }
@@ -802,10 +607,8 @@ class WorksFiltersTest extends ApiWorksTestBase {
     it("filters by multiple sourceIdentifiers") {
       withApi {
         case (ElasticConfig(worksIndex, _), routes) =>
-          val work1 =
-            createIdentifiedWorkWith(sourceIdentifier = createSourceIdentifier)
-          val work2 =
-            createIdentifiedWorkWith(sourceIdentifier = createSourceIdentifier)
+          val work1 = identifiedWork()
+          val work2 = identifiedWork()
 
           insertIntoElasticsearch(worksIndex, unknownWork, work1, work2)
 
@@ -824,15 +627,14 @@ class WorksFiltersTest extends ApiWorksTestBase {
       withApi {
         case (ElasticConfig(worksIndex, _), routes) =>
           val work =
-            createIdentifiedWorkWith(
-              otherIdentifiers = List(createSourceIdentifier))
+            identifiedWork().otherIdentifiers(List(createSourceIdentifier))
           insertIntoElasticsearch(worksIndex, unknownWork, work)
           assertJsonResponse(
             routes,
             s"/$apiPrefix/works?identifiers=${work.data.otherIdentifiers.head.value}") {
             Status.OK -> worksListResponse(
               apiPrefix = apiPrefix,
-              works = Seq(work).sortBy(_.state.canonicalId)
+              works = Seq(work)
             )
           }
       }
@@ -842,12 +644,9 @@ class WorksFiltersTest extends ApiWorksTestBase {
       withApi {
         case (ElasticConfig(worksIndex, _), routes) =>
           val work1 =
-            createIdentifiedWorkWith(
-              otherIdentifiers = List(createSourceIdentifier))
-
+            identifiedWork().otherIdentifiers(List(createSourceIdentifier))
           val work2 =
-            createIdentifiedWorkWith(
-              otherIdentifiers = List(createSourceIdentifier))
+            identifiedWork().otherIdentifiers(List(createSourceIdentifier))
 
           insertIntoElasticsearch(worksIndex, unknownWork, work1, work2)
           assertJsonResponse(
@@ -864,12 +663,9 @@ class WorksFiltersTest extends ApiWorksTestBase {
     it("filters by mixed identifiers") {
       withApi {
         case (ElasticConfig(worksIndex, _), routes) =>
-          val work1 =
-            createIdentifiedWork
-
+          val work1 = identifiedWork()
           val work2 =
-            createIdentifiedWorkWith(
-              otherIdentifiers = List(createSourceIdentifier))
+            identifiedWork().otherIdentifiers(List(createSourceIdentifier))
 
           insertIntoElasticsearch(worksIndex, unknownWork, work1, work2)
           assertJsonResponse(
@@ -885,23 +681,23 @@ class WorksFiltersTest extends ApiWorksTestBase {
   }
 
   describe("Access status filter") {
-
-    def work(status: AccessStatus) =
-      createIdentifiedWorkWith(
-        items = List(
-          createIdentifiedItemWith(
-            locations = List(
-              createDigitalLocationWith(
-                accessConditions = List(
-                  AccessCondition(
-                    status = Some(status)
+    def work(status: AccessStatus): Work.Visible[WorkState.Identified] =
+      identifiedWork()
+        .items(
+          List(
+            createIdentifiedItemWith(
+              locations = List(
+                createDigitalLocationWith(
+                  accessConditions = List(
+                    AccessCondition(
+                      status = Some(status)
+                    )
                   )
                 )
               )
             )
           )
         )
-      )
 
     val workA = work(AccessStatus.Restricted)
     val workB = work(AccessStatus.Restricted)
