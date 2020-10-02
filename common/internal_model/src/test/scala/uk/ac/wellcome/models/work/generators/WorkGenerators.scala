@@ -9,7 +9,7 @@ trait WorkGenerators extends IdentifiersGenerators {
   private def createVersion: Int =
     Random.nextInt(100) + 1
 
-  private def chooseFrom[T](seq: T*): T =
+  def chooseFrom[T](seq: T*): T =
     seq(Random.nextInt(seq.size))
 
   def sourceWork(
