@@ -9,6 +9,9 @@ trait WorkGenerators extends IdentifiersGenerators {
   private def createVersion: Int =
     Random.nextInt(100) + 1
 
+  private def chooseFrom[T](seq: T*): T =
+    seq(Random.nextInt(seq.size))
+
   def sourceWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     version: Int = createVersion
@@ -43,17 +46,19 @@ trait WorkGenerators extends IdentifiersGenerators {
   def identifiedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     canonicalId: String = createCanonicalId,
-    hasMultipleSources: Boolean = false,
-    relations: Relations[DataState.Identified] = Relations.none
+    hasMultipleSources: Boolean = chooseFrom(true, false),
+    relations: Relations[DataState.Identified] = Relations.none,
+    version: Int = createVersion
   ): Work.Visible[Identified] =
     Work.Visible[Identified](
       state = Identified(
-        sourceIdentifier,
-        canonicalId,
-        hasMultipleSources,
-        relations),
+        sourceIdentifier = sourceIdentifier,
+        canonicalId = canonicalId,
+        hasMultipleSources = hasMultipleSources,
+        relations = relations
+      ),
       data = initData,
-      version = 1
+      version = version
     )
 
   def sourceWorks(n: Int): List[Work.Visible[Source]] =
